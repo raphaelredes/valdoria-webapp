@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mockups — Contratação de Aventureiros</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&display=swap">
+<style>
+  :root{
+    --v-bg:#2a2420;--v-bg-raised:#332a22;--v-bg-deep:#1a1510;--v-bg-card:#2e2520;
+    --v-gold:#c4953a;--v-gold-dim:#9a7530;--v-gold-light:#dbb668;
+    --v-gold-03:rgba(196,149,58,0.03);--v-gold-04:rgba(196,149,58,0.04);
+    --v-gold-05:rgba(196,149,58,0.05);--v-gold-08:rgba(196,149,58,0.08);
+    --v-gold-10:rgba(196,149,58,0.10);--v-gold-15:rgba(196,149,58,0.15);
+    --v-gold-20:rgba(196,149,58,0.2);--v-gold-25:rgba(196,149,58,0.25);
+    --v-gold-30:rgba(196,149,58,0.3);--v-gold-40:rgba(196,149,58,0.4);
+    --v-gold-50:rgba(196,149,58,0.5);--v-gold-60:rgba(196,149,58,0.6);
+    --v-crimson:#7b2020;--v-crimson-light:#a03030;--v-crimson-glow:rgba(123,32,32,0.35);
+    --v-text:#d4c8b0;--v-text-dim:#a09484;--v-text-faint:#8a7a68;--v-text-bright:#e8dcc8;
+    --v-success:#4caf50;--v-success-light:#66dd88;
+    --v-info:#5b9bd5;--v-warning:#f39c12;--v-danger:#e74c3c;
+    --v-border:#4a3828;--v-border-gold:rgba(196,149,58,0.3);
+    --v-radius-xs:4px;--v-radius-sm:6px;--v-radius:10px;
+    --v-radius-lg:14px;--v-radius-pill:20px;
+    --v-font:'MedievalSharp','Cinzel',serif;--v-font-display:'Cinzel',serif;
+    --v-shadow-md:0 4px 16px rgba(0,0,0,0.5);
+    --v-shadow-gold:0 0 12px rgba(196,149,58,0.25);
+    --v-transition-base:0.3s ease;--v-transition-slow:0.5s;
+    --v-space-xs:2px;--v-space-sm:4px;--v-space-md:8px;--v-space-lg:12px;
+    --v-space-xl:16px;--v-space-2xl:24px;
+    --v-font-xs:10px;--v-font-sm:12px;--v-font-base:13px;--v-font-body:14px;
+    --v-font-lg:15px;--v-font-xl:16px;--v-font-2xl:18px;
+    --v-bar-track:#1e1810;
+    --v-cls-clerigo:#e0c060;--v-cls-mago:#6b8ae8;--v-cls-guerreiro:#c54040;
+    --v-cls-ladrao:#5a9a5a;--v-cls-feiticeiro:#9a5ac0;
+  }
+  /* Valdoria v-coin (ABSOLUTE RULE) */
+  .vi{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+  .vi-coin{width:14px;height:14px;background:radial-gradient(circle at 40% 35%,#e8c44a,#c4953a 60%,#8a6a20 100%);border-radius:50%;border:1.5px solid #a07828;box-shadow:inset 0 -1px 2px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,220,120,0.3);position:relative}
+  .vi-coin::after{content:'V';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#5a3a10;font-family:var(--v-font,'Georgia',serif);text-shadow:0 0.5px 0 rgba(255,220,120,0.4)}
+  .vi-coin.sm{width:12px;height:12px;border-width:1px}
+  .vi-coin.sm::after{font-size:7px}
+  .vi-coin.lg{width:18px;height:18px;border-width:2px}
+  .vi-coin.lg::after{font-size:10px}
+  .vi-coin.xl{width:26px;height:26px;border-width:2px}
+  .vi-coin.xl::after{font-size:14px}
+
+  html,body{max-width:none;background:var(--v-bg-deep);margin:0;padding:0}
+  body{font-family:var(--v-font);color:var(--v-text)}
+  .shell{padding:var(--v-space-2xl);max-width:2400px;margin:0 auto}
+  .page-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:32px;font-weight:700;letter-spacing:3px;text-align:center;margin:0 0 var(--v-space-md);text-transform:uppercase}
+  .page-sub{font-family:var(--v-font);color:var(--v-text-dim);text-align:center;font-size:var(--v-font-body);margin:0 0 var(--v-space-2xl)}
+  .screen-block{margin-bottom:48px}
+  .screen-block-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;letter-spacing:2px;text-align:center;padding:var(--v-space-lg);background:linear-gradient(90deg,transparent,var(--v-gold-10),transparent);border-top:1px solid var(--v-border-gold);border-bottom:1px solid var(--v-border-gold);margin-bottom:var(--v-space-lg);text-transform:uppercase}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:var(--v-space-2xl)}
+  .frame{display:flex;flex-direction:column;gap:var(--v-space-md)}
+  .frame-label{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;letter-spacing:2px;text-align:center;text-transform:uppercase;padding:var(--v-space-md);border:1px solid var(--v-border-gold);background:var(--v-gold-05);border-radius:var(--v-radius)}
+  .frame-note{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);text-align:center;line-height:1.4;padding:0 var(--v-space-md)}
+  .phone{width:430px;min-height:900px;margin:0 auto;background:var(--v-bg);border:1px solid var(--v-border);border-radius:var(--v-radius-lg);overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:var(--v-shadow-md)}
+
+  /* ===== SHARED HEADER ===== */
+  .a-header{display:flex;align-items:center;gap:var(--v-space-lg);padding:var(--v-space-lg) var(--v-space-xl);background:linear-gradient(180deg,var(--v-gold-10),transparent);border-bottom:1px solid var(--v-border-gold)}
+  .a-header-back{color:var(--v-text);font-size:var(--v-font-xl);cursor:pointer}
+  .a-header-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:1px;flex:1;text-align:center}
+  .a-header-res{display:flex;align-items:center;gap:var(--v-space-xs);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700}
+
+  /* ================================================================
+   * SCREEN 1: FICHA DO AVENTUREIRO (detail)
+   * ================================================================ */
+
+  /* V1 — Hero Portrait */
+  .s1v1-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .s1v1-hero{height:180px;background:
+    radial-gradient(ellipse at center top,var(--v-gold-25),transparent 60%),
+    linear-gradient(180deg,#1a1208,var(--v-bg) 90%);
+    position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:var(--v-space-lg)}
+  .s1v1-avatar{width:92px;height:92px;border-radius:50%;background:linear-gradient(135deg,var(--v-cls-clerigo),#a08030);border:3px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:0 0 28px var(--v-gold-40),0 6px 16px rgba(0,0,0,0.6)}
+  .s1v1-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:24px;font-weight:700;letter-spacing:2px;margin-top:var(--v-space-md);text-shadow:0 2px 4px rgba(0,0,0,0.8)}
+  .s1v1-class{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase}
+  .s1v1-chips{display:flex;gap:var(--v-space-sm);justify-content:center;margin-top:var(--v-space-sm)}
+  .s1v1-chip{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);padding:2px 10px;font-size:var(--v-font-xs);color:var(--v-gold-light);font-family:var(--v-font-display);letter-spacing:1px}
+  .s1v1-content{padding:var(--v-space-xl)}
+  .s1v1-section-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin:0 0 var(--v-space-sm)}
+  .s1v1-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-sm);margin-bottom:var(--v-space-lg)}
+  .s1v1-stat{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius-sm);padding:var(--v-space-sm);text-align:center}
+  .s1v1-stat-name{font-family:var(--v-font);color:var(--v-text-dim);font-size:9px;letter-spacing:1px;text-transform:uppercase}
+  .s1v1-stat-val{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-lg);font-weight:700}
+  .s1v1-stat-mod{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs)}
+  .s1v1-bars{display:flex;flex-direction:column;gap:var(--v-space-sm);background:var(--v-bg-card);padding:var(--v-space-md);border-radius:var(--v-radius);border:1px solid var(--v-border);margin-bottom:var(--v-space-lg)}
+  .s1v1-bar-row{display:flex;align-items:center;gap:var(--v-space-sm);font-family:var(--v-font);font-size:var(--v-font-xs)}
+  .s1v1-bar-lbl{width:30px;color:var(--v-text-dim);letter-spacing:1px}
+  .s1v1-bar-track{flex:1;height:6px;background:var(--v-bar-track);border-radius:3px;overflow:hidden}
+  .s1v1-bar-fill{height:100%;border-radius:3px}
+  .s1v1-bar-fill.hp{background:linear-gradient(90deg,#2d8f2d,#4caf50)}
+  .s1v1-bar-fill.mp{background:linear-gradient(90deg,#1565c0,#42a5f5)}
+  .s1v1-bar-val{color:var(--v-text);font-weight:700;min-width:45px;text-align:right}
+  .s1v1-spells{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s1v1-spell{display:flex;align-items:center;gap:var(--v-space-sm);padding:var(--v-space-xs) 0;font-family:var(--v-font);font-size:var(--v-font-sm)}
+  .s1v1-spell-ic{color:var(--v-gold)}
+  .s1v1-lore{padding:var(--v-space-md);background:var(--v-gold-03);border-left:3px solid var(--v-gold);border-radius:var(--v-radius-sm);font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);line-height:1.5;font-style:italic;margin-bottom:var(--v-space-lg)}
+  .s1v1-cta{padding:var(--v-space-lg);background:linear-gradient(180deg,transparent,var(--v-bg));border-top:1px solid var(--v-border)}
+  .s1v1-price-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--v-space-md)}
+  .s1v1-price-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .s1v1-price-val{display:flex;align-items:center;gap:var(--v-space-xs);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700}
+  .s1v1-btn{width:100%;padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4),inset 0 1px 0 var(--v-gold-light)}
+
+  /* V2 — Info Cards */
+  .s1v2-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:var(--v-bg)}
+  .s1v2-top{display:flex;gap:var(--v-space-lg);align-items:center;padding:var(--v-space-lg);background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);margin-bottom:var(--v-space-md)}
+  .s1v2-av{width:72px;height:72px;border-radius:var(--v-radius-sm);background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);border:2px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0}
+  .s1v2-info{flex:1;min-width:0}
+  .s1v2-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-2xl);font-weight:700;letter-spacing:1px}
+  .s1v2-meta{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);margin-top:2px}
+  .s1v2-tag-row{display:flex;gap:var(--v-space-xs);margin-top:var(--v-space-sm);flex-wrap:wrap}
+  .s1v2-tag{background:var(--v-gold-10);border:1px solid var(--v-gold-30);color:var(--v-gold);padding:2px 8px;border-radius:var(--v-radius-pill);font-size:9px;font-family:var(--v-font-display);letter-spacing:1px;text-transform:uppercase}
+  .s1v2-card{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-md)}
+  .s1v2-card-hdr{display:flex;align-items:center;gap:var(--v-space-sm);margin-bottom:var(--v-space-sm);padding-bottom:var(--v-space-xs);border-bottom:1px dashed var(--v-border-gold);font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  .s1v2-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-sm)}
+  .s1v2-attr{text-align:center}
+  .s1v2-attr-name{font-family:var(--v-font);color:var(--v-text-dim);font-size:9px;letter-spacing:1px;text-transform:uppercase}
+  .s1v2-attr-val{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-xl);font-weight:700}
+  .s1v2-attr-mod{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);font-weight:700}
+  .s1v2-bar-wrap{margin-top:var(--v-space-sm)}
+  .s1v2-bar-row{display:flex;align-items:center;gap:var(--v-space-sm);font-family:var(--v-font);font-size:var(--v-font-xs);margin-bottom:var(--v-space-xs)}
+  .s1v2-bar-row:last-child{margin-bottom:0}
+  .s1v2-bar-lbl{width:20px;color:var(--v-text-dim)}
+  .s1v2-bar-track{flex:1;height:6px;background:var(--v-bar-track);border-radius:3px;overflow:hidden}
+  .s1v2-bar-fill{height:100%;border-radius:3px}
+  .s1v2-bar-fill.hp{background:linear-gradient(90deg,#2d8f2d,#4caf50)}
+  .s1v2-bar-fill.mp{background:linear-gradient(90deg,#1565c0,#42a5f5)}
+  .s1v2-bar-val{color:var(--v-text);font-weight:700;min-width:40px;text-align:right}
+  .s1v2-spell-row{display:flex;gap:var(--v-space-sm);align-items:center;padding:var(--v-space-xs) 0}
+  .s1v2-spell-ic{color:var(--v-gold);width:18px;text-align:center}
+  .s1v2-spell-name{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm)}
+  .s1v2-lore{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);line-height:1.4;font-style:italic}
+  .s1v2-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border)}
+  .s1v2-price-card{background:linear-gradient(135deg,var(--v-gold-15),transparent 80%);border:1px solid var(--v-gold);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-md);display:flex;justify-content:space-between;align-items:center}
+  .s1v2-price-lbl{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase}
+  .s1v2-price-val{display:flex;align-items:center;gap:var(--v-space-xs);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;font-weight:700}
+  .s1v2-btns{display:grid;grid-template-columns:1fr 2fr;gap:var(--v-space-sm)}
+  .s1v2-btn-back{padding:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);color:var(--v-text);font-family:var(--v-font);border-radius:var(--v-radius-sm);cursor:pointer}
+  .s1v2-btn-hire{padding:var(--v-space-md);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius-sm);font-family:var(--v-font-display);font-weight:700;letter-spacing:1px;cursor:pointer}
+
+  /* V3 — Parchment CV */
+  .s1v3-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:
+    radial-gradient(ellipse at top,var(--v-gold-05),transparent 70%),
+    var(--v-bg)}
+  .s1v3-scroll{background:linear-gradient(180deg,var(--v-gold-04),rgba(245,240,224,0.015));border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-2xl) var(--v-space-xl);position:relative}
+  .s1v3-scroll::before,.s1v3-scroll::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:85%;height:2px;background:linear-gradient(90deg,transparent,var(--v-gold-50),transparent)}
+  .s1v3-scroll::before{top:10px}
+  .s1v3-scroll::after{bottom:10px}
+  .s1v3-seal{position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:50px;height:50px;background:radial-gradient(circle,var(--v-crimson),#5a1515);border:2px solid var(--v-gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--v-shadow-gold)}
+  .s1v3-name{text-align:center;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:var(--v-space-md) 0 var(--v-space-xs);text-shadow:0 0 16px var(--v-gold-30)}
+  .s1v3-subtitle{text-align:center;font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-lg)}
+  .s1v3-subtitle::before,.s1v3-subtitle::after{content:"◆";color:var(--v-gold-dim);margin:0 var(--v-space-md)}
+  .s1v3-desc{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);line-height:1.6;font-style:italic;text-align:center;margin:0 var(--v-space-md) var(--v-space-lg);position:relative}
+  .s1v3-desc::before{content:"“";position:absolute;left:-6px;top:-14px;font-size:36px;color:var(--v-gold-30);font-family:var(--v-font-display)}
+  .s1v3-divider{display:flex;align-items:center;gap:var(--v-space-md);margin:var(--v-space-lg) 0}
+  .s1v3-divider::before,.s1v3-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30),transparent)}
+  .s1v3-divider-ic{color:var(--v-gold);font-size:12px}
+  .s1v3-sect{text-align:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm)}
+  .s1v3-attrs{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--v-space-xs);margin-bottom:var(--v-space-md)}
+  .s1v3-attr{text-align:center;background:var(--v-gold-05);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-xs);padding:var(--v-space-xs) 0}
+  .s1v3-attr-lbl{font-family:var(--v-font);color:var(--v-gold);font-size:8px;letter-spacing:1px;text-transform:uppercase}
+  .s1v3-attr-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:700}
+  .s1v3-bars{display:flex;justify-content:space-around;margin-bottom:var(--v-space-md);font-family:var(--v-font);font-size:var(--v-font-sm)}
+  .s1v3-bar{text-align:center}
+  .s1v3-bar-lbl{color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s1v3-bar-val{color:var(--v-gold-light);font-weight:700;font-family:var(--v-font-display);font-size:var(--v-font-lg)}
+  .s1v3-spells-list{background:var(--v-bg-card);border:1px dashed var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-md)}
+  .s1v3-spell{display:flex;align-items:center;gap:var(--v-space-sm);padding:var(--v-space-xs) 0;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm)}
+  .s1v3-spell::before{content:"◆";color:var(--v-gold);font-size:10px}
+  .s1v3-price-block{text-align:center;padding:var(--v-space-md);background:var(--v-gold-08);border:1px solid var(--v-gold);border-radius:var(--v-radius);margin-top:var(--v-space-md)}
+  .s1v3-price-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;margin-bottom:var(--v-space-xs)}
+  .s1v3-price-big{display:flex;align-items:center;justify-content:center;gap:var(--v-space-sm);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:28px;font-weight:700}
+  .s1v3-seal-stamp{text-align:center;margin-top:var(--v-space-md);font-family:var(--v-font);color:var(--v-text-faint);font-size:var(--v-font-xs);font-style:italic;letter-spacing:1px}
+  .s1v3-cta{padding:var(--v-space-lg);background:var(--v-bg)}
+  .s1v3-btn{width:100%;padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+
+  /* V4 — Tactical Sheet */
+  .s1v4-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .s1v4-top{background:linear-gradient(180deg,var(--v-gold-10),transparent);padding:var(--v-space-xl);border-bottom:1px solid var(--v-border-gold);display:flex;gap:var(--v-space-lg);align-items:center}
+  .s1v4-badge{width:80px;height:80px;border-radius:50%;background:var(--v-bg-card);border:2px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0;box-shadow:0 0 20px var(--v-gold-30)}
+  .s1v4-head{flex:1;min-width:0}
+  .s1v4-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;font-weight:700;letter-spacing:1px}
+  .s1v4-role{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase}
+  .s1v4-levelbar{display:flex;align-items:center;gap:var(--v-space-sm);margin-top:var(--v-space-sm);font-family:var(--v-font-display);font-size:var(--v-font-sm)}
+  .s1v4-lvl-pill{background:var(--v-gold);color:var(--v-bg-deep);padding:2px 10px;border-radius:var(--v-radius-pill);font-weight:700;letter-spacing:1px}
+  .s1v4-race{color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s1v4-main{padding:var(--v-space-xl)}
+  .s1v4-hp-mp{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s1v4-res{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center}
+  .s1v4-res-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .s1v4-res-val{font-family:var(--v-font-display);font-size:26px;font-weight:700;margin:4px 0}
+  .s1v4-res-val.hp{color:#4caf50}
+  .s1v4-res-val.mp{color:#42a5f5}
+  .s1v4-res-bar{height:4px;background:var(--v-bar-track);border-radius:2px;overflow:hidden}
+  .s1v4-res-bar-fill{height:100%;border-radius:2px}
+  .s1v4-res-bar-fill.hp{background:#4caf50}
+  .s1v4-res-bar-fill.mp{background:#42a5f5}
+  .s1v4-attrs-horiz{display:flex;justify-content:space-between;background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s1v4-attr-cell{text-align:center}
+  .s1v4-attr-name{font-family:var(--v-font);color:var(--v-text-dim);font-size:9px;letter-spacing:1px;text-transform:uppercase}
+  .s1v4-attr-val{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-lg);font-weight:700}
+  .s1v4-attr-mod{color:var(--v-gold);font-size:var(--v-font-xs);font-weight:700;display:block}
+  .s1v4-panel{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-md)}
+  .s1v4-panel-hd{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm);padding-bottom:4px;border-bottom:1px solid var(--v-border-gold)}
+  .s1v4-spell-pill{display:inline-flex;align-items:center;gap:4px;background:var(--v-gold-08);border:1px solid var(--v-gold-30);color:var(--v-gold-light);padding:2px 10px;border-radius:var(--v-radius-pill);font-family:var(--v-font);font-size:var(--v-font-xs);margin:2px}
+  .s1v4-bio{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);line-height:1.5;font-style:italic}
+  .s1v4-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border);display:flex;gap:var(--v-space-md);align-items:center}
+  .s1v4-cta-price{flex:1;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;display:flex;align-items:center;gap:var(--v-space-xs)}
+  .s1v4-btn{padding:var(--v-space-md) var(--v-space-xl);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-base);font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+
+  /* V5 — Trading Card */
+  .s1v5-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:
+    radial-gradient(ellipse at top,var(--v-gold-10),transparent 70%),
+    var(--v-bg)}
+  .s1v5-card{background:linear-gradient(180deg,var(--v-bg-card),var(--v-bg));border:2px solid var(--v-gold);border-radius:var(--v-radius-lg);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.6),0 0 40px var(--v-gold-30)}
+  .s1v5-card-head{background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);padding:var(--v-space-md) var(--v-space-lg);display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--v-gold)}
+  .s1v5-card-name{font-family:var(--v-font-display);color:#1a1510;font-size:var(--v-font-lg);font-weight:700;letter-spacing:1px;text-shadow:0 1px 0 rgba(255,220,120,0.4)}
+  .s1v5-card-cost{display:flex;align-items:center;gap:4px;background:#1a1510;padding:4px 10px;border-radius:var(--v-radius-pill);border:1px solid var(--v-gold);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700}
+  .s1v5-card-art{height:180px;background:
+    radial-gradient(ellipse at center,var(--v-gold-20),transparent 60%),
+    linear-gradient(180deg,#2a1a08,#1a1510);display:flex;align-items:center;justify-content:center;font-size:80px;border-bottom:2px solid var(--v-gold);position:relative}
+  .s1v5-card-art::before{content:"";position:absolute;inset:8px;border:1px solid var(--v-gold-30);border-radius:var(--v-radius-sm);pointer-events:none}
+  .s1v5-card-type{padding:var(--v-space-sm) var(--v-space-lg);background:var(--v-bg-deep);border-bottom:1px solid var(--v-border-gold);font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;text-align:center}
+  .s1v5-card-body{padding:var(--v-space-lg);background:var(--v-bg-card)}
+  .s1v5-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-sm);margin-bottom:var(--v-space-md);padding:var(--v-space-sm);background:var(--v-bg-deep);border-radius:var(--v-radius-sm);border:1px solid var(--v-border)}
+  .s1v5-card-stat{text-align:center}
+  .s1v5-card-stat-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700}
+  .s1v5-card-stat-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:9px;letter-spacing:1px;text-transform:uppercase}
+  .s1v5-card-text{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);line-height:1.5;padding:var(--v-space-sm) 0;border-top:1px solid var(--v-border-gold);border-bottom:1px solid var(--v-border-gold);margin-bottom:var(--v-space-md)}
+  .s1v5-card-text b{color:var(--v-gold-light);font-weight:700}
+  .s1v5-card-flavor{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);line-height:1.4;font-style:italic;text-align:center;padding-top:var(--v-space-xs)}
+  .s1v5-card-bot{display:flex;justify-content:space-between;align-items:center;padding:var(--v-space-sm) var(--v-space-lg);background:var(--v-bg-deep);border-top:2px solid var(--v-gold);font-family:var(--v-font);font-size:var(--v-font-xs);color:var(--v-text-dim)}
+  .s1v5-card-hp{color:#66dd88;font-weight:700}
+  .s1v5-cta{padding:var(--v-space-lg)}
+  .s1v5-btn{width:100%;padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:var(--v-space-sm)}
+
+  /* ================================================================
+   * SCREEN 2: CONFIRMAÇÃO DE CONTRATAÇÃO (hire confirm)
+   * ================================================================ */
+
+  /* V1 — Contract Scroll */
+  .s2v1-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:var(--v-bg)}
+  .s2v1-scroll{background:var(--v-gold-05);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-xl);position:relative}
+  .s2v1-seal{position:absolute;top:-18px;right:30px;width:40px;height:40px;background:radial-gradient(circle,var(--v-crimson),#5a1515);border:2px solid var(--v-gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .s2v1-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:18px;font-weight:700;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:var(--v-space-xs)}
+  .s2v1-subtitle{text-align:center;font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:2px;margin-bottom:var(--v-space-lg)}
+  .s2v1-parties{display:flex;gap:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s2v1-party{flex:1;background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center}
+  .s2v1-party-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;margin-bottom:var(--v-space-xs)}
+  .s2v1-party-av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));border:2px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto var(--v-space-xs)}
+  .s2v1-party-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700}
+  .s2v1-vs{align-self:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700}
+  .s2v1-terms{background:var(--v-bg-card);border:1px dashed var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-lg);margin-bottom:var(--v-space-lg)}
+  .s2v1-terms-hd{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:var(--v-space-md)}
+  .s2v1-term{display:flex;justify-content:space-between;padding:var(--v-space-xs) 0;font-family:var(--v-font);font-size:var(--v-font-sm);border-bottom:1px dashed var(--v-border-gold)}
+  .s2v1-term:last-child{border-bottom:none}
+  .s2v1-term-lbl{color:var(--v-text-dim)}
+  .s2v1-term-val{color:var(--v-text-bright);font-weight:700;display:flex;align-items:center;gap:4px}
+  .s2v1-signature{text-align:center;font-family:var(--v-font);color:var(--v-text-faint);font-size:var(--v-font-xs);font-style:italic;margin-top:var(--v-space-md)}
+  .s2v1-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border);display:flex;gap:var(--v-space-md)}
+  .s2v1-btn-no{flex:1;padding:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);color:var(--v-text);font-family:var(--v-font);border-radius:var(--v-radius-sm);cursor:pointer}
+  .s2v1-btn-yes{flex:2;padding:var(--v-space-md);background:linear-gradient(180deg,var(--v-success),#2e7d32);color:#fff;border:1px solid var(--v-success-light);border-radius:var(--v-radius-sm);font-family:var(--v-font-display);font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:var(--v-space-xs)}
+
+  /* V2 — Quick Confirm */
+  .s2v2-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:var(--v-space-xl);background:var(--v-bg)}
+  .s2v2-card{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-xl);box-shadow:var(--v-shadow-md)}
+  .s2v2-icon{width:60px;height:60px;border-radius:50%;background:var(--v-gold-15);border:2px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto var(--v-space-md)}
+  .s2v2-q{text-align:center;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;margin-bottom:var(--v-space-sm)}
+  .s2v2-target{text-align:center;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.5;margin-bottom:var(--v-space-lg)}
+  .s2v2-target b{color:var(--v-gold-light);font-weight:700}
+  .s2v2-balance{background:var(--v-bg-deep);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s2v2-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--v-font);font-size:var(--v-font-sm);padding:var(--v-space-xs) 0}
+  .s2v2-row-lbl{color:var(--v-text-dim);letter-spacing:1px;text-transform:uppercase;font-size:var(--v-font-xs)}
+  .s2v2-row-val{color:var(--v-text);font-weight:700;display:flex;align-items:center;gap:4px}
+  .s2v2-row-val.cost{color:var(--v-danger)}
+  .s2v2-row-val.after{color:var(--v-success-light)}
+  .s2v2-divider{height:1px;background:var(--v-border-gold);margin:var(--v-space-xs) 0}
+  .s2v2-btns{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md)}
+  .s2v2-btn{padding:var(--v-space-md);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-base);font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+  .s2v2-btn-no{background:var(--v-bg-raised);border:1px solid var(--v-border);color:var(--v-text-dim)}
+  .s2v2-btn-yes{background:linear-gradient(180deg,var(--v-success),#2e7d32);border:1px solid var(--v-success-light);color:#fff}
+
+  /* V3 — Handshake Dialogue */
+  .s2v3-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .s2v3-scene{height:180px;background:
+    radial-gradient(ellipse at center top,var(--v-gold-15),transparent 60%),
+    linear-gradient(180deg,#1a1510,var(--v-bg));display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:var(--v-space-lg);position:relative}
+  .s2v3-avs{display:flex;gap:var(--v-space-xl);align-items:center;margin-bottom:var(--v-space-md)}
+  .s2v3-av{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));border:2px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 20px var(--v-gold-30)}
+  .s2v3-hand{font-size:30px;color:var(--v-gold-light)}
+  .s2v3-dlg{padding:var(--v-space-xl)}
+  .s2v3-speech{position:relative;background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-lg);margin-bottom:var(--v-space-lg)}
+  .s2v3-speech-npc{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;margin-bottom:var(--v-space-xs)}
+  .s2v3-speech-text{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);line-height:1.5;font-style:italic}
+  .s2v3-cost-row{display:flex;align-items:center;justify-content:center;gap:var(--v-space-sm);padding:var(--v-space-md);background:var(--v-gold-08);border:1px solid var(--v-gold);border-radius:var(--v-radius);margin-bottom:var(--v-space-md);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700}
+  .s2v3-meta{display:flex;justify-content:space-around;font-family:var(--v-font);font-size:var(--v-font-xs);color:var(--v-text-dim);margin-bottom:var(--v-space-lg)}
+  .s2v3-meta-item{text-align:center}
+  .s2v3-meta-val{color:var(--v-gold-light);font-weight:700;font-family:var(--v-font-display);font-size:var(--v-font-base);display:block}
+  .s2v3-choices{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .s2v3-choice{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:left;font-family:var(--v-font);color:var(--v-text-bright);font-size:var(--v-font-sm);cursor:pointer;position:relative;display:flex;align-items:center;gap:var(--v-space-sm)}
+  .s2v3-choice::before{content:"▸";color:var(--v-gold)}
+  .s2v3-choice.yes{border-color:var(--v-success);background:rgba(76,175,80,0.08)}
+  .s2v3-choice.no{color:var(--v-text-dim)}
+
+  /* V4 — Receipt */
+  .s2v4-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:var(--v-bg-deep)}
+  .s2v4-receipt{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);overflow:hidden}
+  .s2v4-top{padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold-10),transparent);border-bottom:2px dashed var(--v-border-gold)}
+  .s2v4-merchant{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;text-align:center}
+  .s2v4-receipt-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:18px;font-weight:700;letter-spacing:2px;text-align:center;text-transform:uppercase;margin-top:4px}
+  .s2v4-number{font-family:var(--v-font);color:var(--v-text-dim);font-size:9px;text-align:center;letter-spacing:1px;margin-top:var(--v-space-xs)}
+  .s2v4-item{padding:var(--v-space-lg);border-bottom:2px dashed var(--v-border-gold)}
+  .s2v4-item-top{display:flex;align-items:center;gap:var(--v-space-md);margin-bottom:var(--v-space-sm)}
+  .s2v4-item-av{width:40px;height:40px;border-radius:var(--v-radius-sm);background:var(--v-bg);border:1px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .s2v4-item-info{flex:1}
+  .s2v4-item-name{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-base);font-weight:700}
+  .s2v4-item-desc{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s2v4-item-qty{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm)}
+  .s2v4-totals{padding:var(--v-space-lg);background:var(--v-bg)}
+  .s2v4-total-row{display:flex;justify-content:space-between;font-family:var(--v-font);font-size:var(--v-font-sm);padding:var(--v-space-xs) 0}
+  .s2v4-total-row.grand{border-top:2px solid var(--v-gold);margin-top:var(--v-space-sm);padding-top:var(--v-space-sm);font-family:var(--v-font-display);font-size:var(--v-font-base);font-weight:700;color:var(--v-gold-light)}
+  .s2v4-total-lbl{color:var(--v-text-dim);letter-spacing:1px;text-transform:uppercase;font-size:var(--v-font-xs)}
+  .s2v4-total-val{color:var(--v-text);font-weight:700;display:flex;align-items:center;gap:4px}
+  .s2v4-barcode{padding:var(--v-space-md) var(--v-space-lg);background:var(--v-bg);text-align:center;border-top:2px dashed var(--v-border-gold);font-family:monospace;color:var(--v-text-faint);font-size:9px;letter-spacing:2px}
+  .s2v4-cta{padding:var(--v-space-lg);display:flex;gap:var(--v-space-md)}
+  .s2v4-btn-cancel{flex:1;padding:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);color:var(--v-text-dim);border-radius:var(--v-radius-sm);font-family:var(--v-font);cursor:pointer}
+  .s2v4-btn-confirm{flex:2;padding:var(--v-space-md);background:linear-gradient(180deg,var(--v-success),#2e7d32);color:#fff;border:1px solid var(--v-success-light);border-radius:var(--v-radius-sm);font-family:var(--v-font-display);font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+
+  /* V5 — Warrior's Oath */
+  .s2v5-body{flex:1;overflow-y:auto;background:
+    radial-gradient(ellipse at top,var(--v-crimson-glow),transparent 50%),
+    var(--v-bg)}
+  .s2v5-crest{padding:var(--v-space-2xl) var(--v-space-xl) var(--v-space-lg);text-align:center}
+  .s2v5-emblem{width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,var(--v-crimson),#3a0a0a);border:3px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto var(--v-space-md);box-shadow:0 0 30px rgba(123,32,32,0.5),0 0 60px var(--v-gold-20)}
+  .s2v5-oath-lbl{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:4px;text-transform:uppercase;margin-bottom:var(--v-space-xs)}
+  .s2v5-oath-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:24px;font-weight:700;letter-spacing:2px;text-shadow:0 0 16px var(--v-gold-40)}
+  .s2v5-oath-body{padding:0 var(--v-space-xl) var(--v-space-xl)}
+  .s2v5-oath-text{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-lg);font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.7;font-style:italic;text-align:center;margin-bottom:var(--v-space-lg);position:relative}
+  .s2v5-oath-text b{color:var(--v-gold-light);font-weight:700;font-style:normal}
+  .s2v5-oath-text::before,.s2v5-oath-text::after{content:"";position:absolute;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30),transparent)}
+  .s2v5-oath-text::before{top:6px}
+  .s2v5-oath-text::after{bottom:6px}
+  .s2v5-tribute{display:flex;align-items:center;justify-content:center;gap:var(--v-space-md);padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold-10),var(--v-gold-05));border:1px solid var(--v-gold);border-radius:var(--v-radius);margin-bottom:var(--v-space-lg)}
+  .s2v5-tribute-lbl{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:2px;text-transform:uppercase}
+  .s2v5-tribute-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:28px;font-weight:700;display:flex;align-items:center;gap:var(--v-space-xs)}
+  .s2v5-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border-gold);display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .s2v5-btn-oath{padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer}
+  .s2v5-btn-refuse{padding:var(--v-space-sm);background:transparent;border:none;color:var(--v-text-dim);font-family:var(--v-font);font-size:var(--v-font-sm);cursor:pointer;font-style:italic}
+
+  /* ================================================================
+   * SCREEN 3: CONTRATAÇÃO REALIZADA (success)
+   * ================================================================ */
+
+  /* V1 — Welcome Party */
+  .s3v1-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:
+    radial-gradient(ellipse at top,var(--v-gold-15),transparent 70%),
+    var(--v-bg)}
+  .s3v1-hero{text-align:center;padding:var(--v-space-lg) 0 var(--v-space-xl)}
+  .s3v1-check{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--v-success),#2e7d32);border:3px solid var(--v-success-light);display:flex;align-items:center;justify-content:center;font-size:50px;color:#fff;margin:0 auto var(--v-space-md);box-shadow:0 0 30px rgba(76,175,80,0.5)}
+  .s3v1-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;font-weight:700;letter-spacing:2px;text-shadow:0 0 16px var(--v-gold-40)}
+  .s3v1-sub{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);margin-top:var(--v-space-xs)}
+  .s3v1-ally-card{background:linear-gradient(135deg,var(--v-gold-10),transparent 80%);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-lg);margin-bottom:var(--v-space-lg);display:flex;gap:var(--v-space-lg);align-items:center}
+  .s3v1-ally-av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);border:2px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+  .s3v1-ally-info{flex:1}
+  .s3v1-ally-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700}
+  .s3v1-ally-sub{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s3v1-ally-status{display:inline-block;margin-top:var(--v-space-xs);background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);color:var(--v-success-light);padding:2px 8px;border-radius:var(--v-radius-pill);font-size:9px;font-family:var(--v-font-display);letter-spacing:1px;text-transform:uppercase}
+  .s3v1-stats-box{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-md)}
+  .s3v1-stats-hd{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:var(--v-space-sm)}
+  .s3v1-stats-row{display:flex;justify-content:space-between;font-family:var(--v-font);font-size:var(--v-font-sm);padding:var(--v-space-xs) 0;border-bottom:1px dashed var(--v-border-gold)}
+  .s3v1-stats-row:last-child{border-bottom:none}
+  .s3v1-stats-lbl{color:var(--v-text-dim)}
+  .s3v1-stats-val{color:var(--v-text);font-weight:700;display:flex;align-items:center;gap:4px}
+  .s3v1-stats-val.neg{color:var(--v-danger)}
+  .s3v1-stats-val.pos{color:var(--v-success-light)}
+  .s3v1-party-progress{padding:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);margin-bottom:var(--v-space-lg)}
+  .s3v1-pp-label{display:flex;justify-content:space-between;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;margin-bottom:var(--v-space-sm)}
+  .s3v1-pp-bar{height:10px;background:var(--v-bar-track);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);overflow:hidden}
+  .s3v1-pp-fill{height:100%;width:33%;background:linear-gradient(90deg,var(--v-gold-dim),var(--v-gold));border-radius:var(--v-radius-pill);box-shadow:0 0 8px var(--v-gold-40)}
+  .s3v1-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border);display:flex;gap:var(--v-space-md)}
+  .s3v1-btn{flex:1;padding:var(--v-space-md);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-sm);font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+  .s3v1-btn-more{background:var(--v-bg-card);border:1px solid var(--v-border-gold);color:var(--v-gold)}
+  .s3v1-btn-view{background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));border:1px solid var(--v-gold-light);color:var(--v-bg-deep)}
+
+  /* V2 — NPC Welcome Dialogue */
+  .s3v2-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .s3v2-scene{height:200px;background:
+    radial-gradient(ellipse at center top,var(--v-gold-20),transparent 60%),
+    radial-gradient(ellipse at center bottom,rgba(76,175,80,0.2),transparent 60%),
+    #1a1510;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:var(--v-space-lg);position:relative}
+  .s3v2-confetti{position:absolute;inset:0;background:
+    radial-gradient(circle 3px at 20% 30%,var(--v-gold),transparent),
+    radial-gradient(circle 2px at 80% 25%,var(--v-gold-light),transparent),
+    radial-gradient(circle 4px at 40% 15%,var(--v-success-light),transparent),
+    radial-gradient(circle 3px at 60% 35%,var(--v-gold),transparent),
+    radial-gradient(circle 2px at 25% 50%,var(--v-success-light),transparent)}
+  .s3v2-npc-av{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);border:3px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:0 0 28px var(--v-gold-40),0 6px 16px rgba(0,0,0,0.5);position:relative}
+  .s3v2-npc-wave{position:absolute;top:-8px;right:-8px;font-size:24px}
+  .s3v2-npc-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;letter-spacing:1px;margin-top:var(--v-space-sm);text-shadow:0 2px 4px rgba(0,0,0,0.8)}
+  .s3v2-content{padding:var(--v-space-xl)}
+  .s3v2-speech{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-lg);margin-bottom:var(--v-space-lg);position:relative}
+  .s3v2-speech::before{content:"";position:absolute;top:-10px;left:40px;width:20px;height:20px;background:var(--v-bg-card);border-left:1px solid var(--v-border-gold);border-top:1px solid var(--v-border-gold);transform:rotate(45deg)}
+  .s3v2-speech-text{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.6;font-style:italic}
+  .s3v2-speech-text b{color:var(--v-gold-light);font-weight:700}
+  .s3v2-tx{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .s3v2-tx-hd{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm);padding-bottom:var(--v-space-xs);border-bottom:1px solid var(--v-border-gold)}
+  .s3v2-tx-row{display:flex;justify-content:space-between;font-family:var(--v-font);font-size:var(--v-font-sm);padding:var(--v-space-xs) 0}
+  .s3v2-tx-lbl{color:var(--v-text-dim)}
+  .s3v2-tx-val{color:var(--v-text);font-weight:700;display:flex;align-items:center;gap:4px}
+  .s3v2-tx-val.loss{color:var(--v-danger)}
+  .s3v2-choices{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .s3v2-choice{background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:left;font-family:var(--v-font);color:var(--v-text-bright);font-size:var(--v-font-sm);cursor:pointer;display:flex;align-items:center;gap:var(--v-space-sm)}
+  .s3v2-choice::before{content:"▸";color:var(--v-gold)}
+
+  /* V3 — Party Roster Update */
+  .s3v3-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:var(--v-bg)}
+  .s3v3-banner{background:linear-gradient(90deg,rgba(76,175,80,0.15),transparent 80%);border:1px solid var(--v-success);border-left:4px solid var(--v-success);border-radius:var(--v-radius);padding:var(--v-space-md) var(--v-space-lg);margin-bottom:var(--v-space-xl);display:flex;align-items:center;gap:var(--v-space-md)}
+  .s3v3-banner-ic{font-size:32px;color:var(--v-success-light)}
+  .s3v3-banner-text{flex:1}
+  .s3v3-banner-title{font-family:var(--v-font-display);color:var(--v-success-light);font-size:var(--v-font-base);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .s3v3-banner-sub{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s3v3-rlbl{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm);display:flex;align-items:center;gap:var(--v-space-sm)}
+  .s3v3-rlbl-count{margin-left:auto;background:var(--v-gold-15);border:1px solid var(--v-gold);border-radius:var(--v-radius-pill);padding:2px 10px;color:var(--v-gold-light);font-weight:700}
+  .s3v3-roster{display:flex;flex-direction:column;gap:var(--v-space-sm);margin-bottom:var(--v-space-lg)}
+  .s3v3-member{display:flex;align-items:center;gap:var(--v-space-md);padding:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);position:relative}
+  .s3v3-member.new{border-color:var(--v-success);background:rgba(76,175,80,0.08)}
+  .s3v3-member.empty{border-style:dashed;opacity:0.5}
+  .s3v3-member-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid var(--v-border)}
+  .s3v3-member.new .s3v3-member-av{background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);border-color:var(--v-success)}
+  .s3v3-member-info{flex:1;min-width:0}
+  .s3v3-member-name{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-base);font-weight:700}
+  .s3v3-member-cls{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs)}
+  .s3v3-member-hp{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-xs)}
+  .s3v3-new-badge{position:absolute;top:-6px;right:8px;background:var(--v-success);color:#fff;padding:1px 8px;border-radius:var(--v-radius-pill);font-size:9px;font-family:var(--v-font-display);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  .s3v3-cost-line{padding:var(--v-space-md);background:var(--v-bg-deep);border:1px solid var(--v-border);border-radius:var(--v-radius);display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--v-space-lg);font-family:var(--v-font);font-size:var(--v-font-sm)}
+  .s3v3-cost-lbl{color:var(--v-text-dim);letter-spacing:1px;text-transform:uppercase;font-size:var(--v-font-xs)}
+  .s3v3-cost-val{color:var(--v-gold-light);font-weight:700;font-family:var(--v-font-display);display:flex;align-items:center;gap:4px}
+  .s3v3-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border);display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md)}
+  .s3v3-btn{padding:var(--v-space-md);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-sm);font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+  .s3v3-btn-more{background:var(--v-bg-card);border:1px solid var(--v-border-gold);color:var(--v-gold)}
+  .s3v3-btn-close{background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));border:1px solid var(--v-gold-light);color:var(--v-bg-deep)}
+
+  /* V4 — Unboxing Celebration */
+  .s3v4-body{flex:1;overflow-y:auto;background:
+    radial-gradient(ellipse at top,var(--v-gold-20),transparent 60%),
+    var(--v-bg)}
+  .s3v4-burst{padding:var(--v-space-2xl) var(--v-space-xl);text-align:center;position:relative}
+  .s3v4-burst::before,.s3v4-burst::after{content:"";position:absolute;left:50%;top:50%;width:200px;height:200px;background:conic-gradient(from 0deg,var(--v-gold-20),transparent 30%,var(--v-gold-10) 60%,transparent 90%,var(--v-gold-20));transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+  .s3v4-burst-av{position:relative;width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--v-cls-clerigo),#806020);border:4px solid var(--v-gold-light);display:flex;align-items:center;justify-content:center;font-size:60px;margin:0 auto var(--v-space-md);box-shadow:0 0 60px var(--v-gold-40),0 8px 24px rgba(0,0,0,0.6)}
+  .s3v4-burst-title{position:relative;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:26px;font-weight:700;letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 24px var(--v-gold-50);margin-bottom:var(--v-space-xs)}
+  .s3v4-burst-sub{position:relative;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);font-style:italic}
+  .s3v4-burst-sub b{color:var(--v-gold-light);font-weight:700}
+  .s3v4-rarity-bar{margin:var(--v-space-lg) var(--v-space-xl);padding:var(--v-space-sm);background:linear-gradient(90deg,var(--v-gold-10),var(--v-gold-20),var(--v-gold-10));border:1px solid var(--v-gold);border-radius:var(--v-radius-pill);text-align:center;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .s3v4-ability-grid{padding:0 var(--v-space-xl);margin-bottom:var(--v-space-lg)}
+  .s3v4-ab-title{text-align:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-sm)}
+  .s3v4-ab-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--v-space-xs)}
+  .s3v4-ab-card{background:var(--v-bg-card);border:1px solid var(--v-gold-30);border-radius:var(--v-radius-sm);padding:var(--v-space-sm);text-align:center}
+  .s3v4-ab-ic{font-size:20px}
+  .s3v4-ab-name{font-family:var(--v-font);color:var(--v-gold-light);font-size:9px;font-weight:700;margin-top:2px}
+  .s3v4-meta{padding:0 var(--v-space-xl) var(--v-space-lg);display:flex;justify-content:space-around;font-family:var(--v-font);font-size:var(--v-font-xs);color:var(--v-text-dim)}
+  .s3v4-meta-it{text-align:center}
+  .s3v4-meta-val{color:var(--v-gold-light);font-weight:700;font-family:var(--v-font-display);font-size:var(--v-font-base);display:block;margin-top:2px}
+  .s3v4-cta{padding:var(--v-space-lg);background:var(--v-bg-deep);border-top:1px solid var(--v-border-gold)}
+  .s3v4-btn{width:100%;padding:var(--v-space-lg);background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));color:var(--v-bg-deep);border:1px solid var(--v-gold-light);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+
+  /* V5 — Minimalist Success */
+  .s3v5-body{flex:1;display:flex;flex-direction:column;background:var(--v-bg);padding:var(--v-space-xl)}
+  .s3v5-check-wrap{text-align:center;padding:var(--v-space-xl) 0 var(--v-space-lg)}
+  .s3v5-check{width:64px;height:64px;border-radius:50%;background:rgba(76,175,80,0.15);border:2px solid var(--v-success);display:inline-flex;align-items:center;justify-content:center;font-size:32px;color:var(--v-success-light)}
+  .s3v5-title{text-align:center;font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-2xl);font-weight:700;letter-spacing:1px;margin-bottom:var(--v-space-xs)}
+  .s3v5-sub{text-align:center;font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);margin-bottom:var(--v-space-xl);line-height:1.4}
+  .s3v5-sub b{color:var(--v-gold-light);font-weight:700}
+  .s3v5-row{display:flex;align-items:center;justify-content:space-between;padding:var(--v-space-md) 0;border-bottom:1px solid var(--v-border);font-family:var(--v-font);font-size:var(--v-font-sm)}
+  .s3v5-row:last-child{border-bottom:none}
+  .s3v5-row-lbl{color:var(--v-text-dim);letter-spacing:1px;text-transform:uppercase;font-size:var(--v-font-xs)}
+  .s3v5-row-val{color:var(--v-text-bright);font-weight:700;display:flex;align-items:center;gap:4px;font-family:var(--v-font-display)}
+  .s3v5-row-val.loss{color:var(--v-danger)}
+  .s3v5-row-val.gain{color:var(--v-success-light)}
+  .s3v5-cta{padding-top:var(--v-space-xl);display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md)}
+  .s3v5-btn{padding:var(--v-space-md);border-radius:var(--v-radius);font-family:var(--v-font-display);font-size:var(--v-font-sm);font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+  .s3v5-btn-more{background:transparent;border:1px solid var(--v-border-gold);color:var(--v-gold)}
+  .s3v5-btn-ok{background:linear-gradient(180deg,var(--v-gold),var(--v-gold-dim));border:1px solid var(--v-gold-light);color:var(--v-bg-deep)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1 class="page-title">◆ Mockups — Contratação de Aventureiros ◆</h1>
+  <p class="page-sub">3 telas × 5 variantes = 15 mockups. Viewport 430×900 smartphone. Moeda sempre v-coin, nunca emoji.</p>
+
+  <!-- ============ SCREEN 1: FICHA ============ -->
+  <div class="screen-block">
+    <h2 class="screen-block-title">◆ Tela 1 — Ficha do Aventureiro ◆</h2>
+    <div class="grid">
+
+      <div class="frame">
+        <div class="frame-label">1-V1 — Hero Portrait</div>
+        <div class="frame-note">Hero scene 180px com avatar circular brilhando, chips de status, stats grid 3×3 + bars HP/MP, magias em lista, lore itálico, CTA com preço prominente.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s1v1-body">
+            <div class="s1v1-hero">
+              <div class="s1v1-avatar">⚕️</div>
+              <div class="s1v1-name">Sia Sunfire</div>
+              <div class="s1v1-class">✧ Clériga ✧</div>
+              <div class="s1v1-chips"><span class="s1v1-chip">Nv. 2</span><span class="s1v1-chip">Elfa</span><span class="s1v1-chip">Neutra Boa</span></div>
+            </div>
+            <div class="s1v1-content">
+              <div class="s1v1-section-title">Atributos</div>
+              <div class="s1v1-stats-grid">
+                <div class="s1v1-stat"><div class="s1v1-stat-name">FOR</div><div class="s1v1-stat-val">13</div><div class="s1v1-stat-mod">+1</div></div>
+                <div class="s1v1-stat"><div class="s1v1-stat-name">DES</div><div class="s1v1-stat-val">8</div><div class="s1v1-stat-mod">−1</div></div>
+                <div class="s1v1-stat"><div class="s1v1-stat-name">CON</div><div class="s1v1-stat-val">14</div><div class="s1v1-stat-mod">+2</div></div>
+                <div class="s1v1-stat"><div class="s1v1-stat-name">INT</div><div class="s1v1-stat-val">10</div><div class="s1v1-stat-mod">+0</div></div>
+                <div class="s1v1-stat"><div class="s1v1-stat-name">SAB</div><div class="s1v1-stat-val">15</div><div class="s1v1-stat-mod">+2</div></div>
+                <div class="s1v1-stat"><div class="s1v1-stat-name">CAR</div><div class="s1v1-stat-val">12</div><div class="s1v1-stat-mod">+1</div></div>
+              </div>
+              <div class="s1v1-bars">
+                <div class="s1v1-bar-row"><span class="s1v1-bar-lbl">HP</span><div class="s1v1-bar-track"><div class="s1v1-bar-fill hp" style="width:100%"></div></div><span class="s1v1-bar-val">20 / 20</span></div>
+                <div class="s1v1-bar-row"><span class="s1v1-bar-lbl">MP</span><div class="s1v1-bar-track"><div class="s1v1-bar-fill mp" style="width:100%"></div></div><span class="s1v1-bar-val">8 / 8</span></div>
+              </div>
+              <div class="s1v1-section-title">Magias Conhecidas</div>
+              <div class="s1v1-spells">
+                <div class="s1v1-spell"><span class="s1v1-spell-ic">◆</span> Curar Ferimentos</div>
+                <div class="s1v1-spell"><span class="s1v1-spell-ic">◆</span> Palavra Curativa</div>
+                <div class="s1v1-spell"><span class="s1v1-spell-ic">◆</span> Bênção</div>
+              </div>
+              <div class="s1v1-section-title">História</div>
+              <div class="s1v1-lore">"Aprendeu a lutar nos becos da capital. O que lhe falta em técnica, sobra em malícia e instinto."</div>
+            </div>
+          </div>
+          <div class="s1v1-cta">
+            <div class="s1v1-price-row">
+              <span class="s1v1-price-lbl">Custo de Contratação</span>
+              <span class="s1v1-price-val"><span class="vi vi-coin lg"></span> 200</span>
+            </div>
+            <button class="s1v1-btn">◆ Contratar Sia</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">1-V2 — Info Cards</div>
+        <div class="frame-note">Layout denso com cards separados: header compacto com tags, atributos, HP/MP, magias, bio. CTA embaixo com price-card destacado.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s1v2-body">
+            <div class="s1v2-top">
+              <div class="s1v2-av">⚕️</div>
+              <div class="s1v2-info">
+                <div class="s1v2-name">Sia Sunfire</div>
+                <div class="s1v2-meta">Clériga • Elfa • Neutra Boa</div>
+                <div class="s1v2-tag-row">
+                  <span class="s1v2-tag">Nv. 2</span>
+                  <span class="s1v2-tag">Curadora</span>
+                  <span class="s1v2-tag">Suporte</span>
+                </div>
+              </div>
+            </div>
+            <div class="s1v2-card">
+              <div class="s1v2-card-hdr">✦ Atributos</div>
+              <div class="s1v2-grid-3">
+                <div class="s1v2-attr"><div class="s1v2-attr-name">FOR</div><div class="s1v2-attr-val">13</div><div class="s1v2-attr-mod">+1</div></div>
+                <div class="s1v2-attr"><div class="s1v2-attr-name">DES</div><div class="s1v2-attr-val">8</div><div class="s1v2-attr-mod">−1</div></div>
+                <div class="s1v2-attr"><div class="s1v2-attr-name">CON</div><div class="s1v2-attr-val">14</div><div class="s1v2-attr-mod">+2</div></div>
+                <div class="s1v2-attr"><div class="s1v2-attr-name">INT</div><div class="s1v2-attr-val">10</div><div class="s1v2-attr-mod">+0</div></div>
+                <div class="s1v2-attr"><div class="s1v2-attr-name">SAB</div><div class="s1v2-attr-val">15</div><div class="s1v2-attr-mod">+2</div></div>
+                <div class="s1v2-attr"><div class="s1v2-attr-name">CAR</div><div class="s1v2-attr-val">12</div><div class="s1v2-attr-mod">+1</div></div>
+              </div>
+            </div>
+            <div class="s1v2-card">
+              <div class="s1v2-card-hdr">✦ Vitalidade</div>
+              <div class="s1v2-bar-wrap">
+                <div class="s1v2-bar-row"><span class="s1v2-bar-lbl">HP</span><div class="s1v2-bar-track"><div class="s1v2-bar-fill hp" style="width:100%"></div></div><span class="s1v2-bar-val">20 / 20</span></div>
+                <div class="s1v2-bar-row"><span class="s1v2-bar-lbl">MP</span><div class="s1v2-bar-track"><div class="s1v2-bar-fill mp" style="width:100%"></div></div><span class="s1v2-bar-val">8 / 8</span></div>
+              </div>
+            </div>
+            <div class="s1v2-card">
+              <div class="s1v2-card-hdr">✦ Magias Conhecidas</div>
+              <div class="s1v2-spell-row"><span class="s1v2-spell-ic">◆</span><span class="s1v2-spell-name">Curar Ferimentos</span></div>
+              <div class="s1v2-spell-row"><span class="s1v2-spell-ic">◆</span><span class="s1v2-spell-name">Palavra Curativa</span></div>
+              <div class="s1v2-spell-row"><span class="s1v2-spell-ic">◆</span><span class="s1v2-spell-name">Bênção</span></div>
+            </div>
+            <div class="s1v2-card">
+              <div class="s1v2-card-hdr">✦ História</div>
+              <div class="s1v2-lore">"Aprendeu a lutar nos becos da capital. O que lhe falta em técnica, sobra em malícia e instinto."</div>
+            </div>
+          </div>
+          <div class="s1v2-cta">
+            <div class="s1v2-price-card">
+              <span class="s1v2-price-lbl">Custo</span>
+              <span class="s1v2-price-val"><span class="vi vi-coin lg"></span> 200 Valdoritas</span>
+            </div>
+            <div class="s1v2-btns">
+              <button class="s1v2-btn-back">Voltar</button>
+              <button class="s1v2-btn-hire">Contratar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">1-V3 — Parchment CV</div>
+        <div class="frame-note">Pergaminho formal com selo de cera, nome centralizado, atributos em grid 6 compacto, bars horizontais, spell list com diamante, price-block central.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s1v3-body">
+            <div class="s1v3-scroll">
+              <div class="s1v3-seal">✧</div>
+              <div class="s1v3-name">Sia Sunfire</div>
+              <div class="s1v3-subtitle">Clériga Elfa • Nv 2</div>
+              <div class="s1v3-desc">Aprendeu a lutar nos becos da capital. O que lhe falta em técnica, sobra em malícia e instinto.</div>
+              <div class="s1v3-divider"><span class="s1v3-divider-ic">◆</span></div>
+              <div class="s1v3-sect">Atributos</div>
+              <div class="s1v3-attrs">
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">FOR</div><div class="s1v3-attr-val">13</div></div>
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">DES</div><div class="s1v3-attr-val">8</div></div>
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">CON</div><div class="s1v3-attr-val">14</div></div>
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">INT</div><div class="s1v3-attr-val">10</div></div>
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">SAB</div><div class="s1v3-attr-val">15</div></div>
+                <div class="s1v3-attr"><div class="s1v3-attr-lbl">CAR</div><div class="s1v3-attr-val">12</div></div>
+              </div>
+              <div class="s1v3-bars">
+                <div class="s1v3-bar"><div class="s1v3-bar-lbl">HP</div><div class="s1v3-bar-val">20</div></div>
+                <div class="s1v3-bar"><div class="s1v3-bar-lbl">MP</div><div class="s1v3-bar-val">8</div></div>
+                <div class="s1v3-bar"><div class="s1v3-bar-lbl">CA</div><div class="s1v3-bar-val">14</div></div>
+              </div>
+              <div class="s1v3-divider"><span class="s1v3-divider-ic">◆</span></div>
+              <div class="s1v3-sect">Magias Conhecidas</div>
+              <div class="s1v3-spells-list">
+                <div class="s1v3-spell">Curar Ferimentos</div>
+                <div class="s1v3-spell">Palavra Curativa</div>
+                <div class="s1v3-spell">Bênção</div>
+              </div>
+              <div class="s1v3-price-block">
+                <div class="s1v3-price-lbl">Soldo Exigido</div>
+                <div class="s1v3-price-big"><span class="vi vi-coin xl"></span> 200</div>
+              </div>
+              <div class="s1v3-seal-stamp">— Registrado na Ordem de Valdoria —</div>
+            </div>
+          </div>
+          <div class="s1v3-cta"><button class="s1v3-btn">◆ Selar Contrato</button></div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">1-V4 — Tactical Sheet</div>
+        <div class="frame-note">Formato compacto orientado a combate: avatar quadrado, level-pill, HP/MP em 2 colunas grandes, atributos horizontal, magias como pills, CTA inline.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s1v4-body">
+            <div class="s1v4-top">
+              <div class="s1v4-badge">⚕️</div>
+              <div class="s1v4-head">
+                <div class="s1v4-name">Sia Sunfire</div>
+                <div class="s1v4-role">Clériga Curadora</div>
+                <div class="s1v4-levelbar">
+                  <span class="s1v4-lvl-pill">Nv. 2</span>
+                  <span class="s1v4-race">Elfa • Neutra Boa</span>
+                </div>
+              </div>
+            </div>
+            <div class="s1v4-main">
+              <div class="s1v4-hp-mp">
+                <div class="s1v4-res"><div class="s1v4-res-lbl">Vida</div><div class="s1v4-res-val hp">20</div><div class="s1v4-res-bar"><div class="s1v4-res-bar-fill hp" style="width:100%"></div></div></div>
+                <div class="s1v4-res"><div class="s1v4-res-lbl">Mana</div><div class="s1v4-res-val mp">8</div><div class="s1v4-res-bar"><div class="s1v4-res-bar-fill mp" style="width:100%"></div></div></div>
+              </div>
+              <div class="s1v4-attrs-horiz">
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">FOR</div><div class="s1v4-attr-val">13</div><span class="s1v4-attr-mod">+1</span></div>
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">DES</div><div class="s1v4-attr-val">8</div><span class="s1v4-attr-mod">−1</span></div>
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">CON</div><div class="s1v4-attr-val">14</div><span class="s1v4-attr-mod">+2</span></div>
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">INT</div><div class="s1v4-attr-val">10</div><span class="s1v4-attr-mod">+0</span></div>
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">SAB</div><div class="s1v4-attr-val">15</div><span class="s1v4-attr-mod">+2</span></div>
+                <div class="s1v4-attr-cell"><div class="s1v4-attr-name">CAR</div><div class="s1v4-attr-val">12</div><span class="s1v4-attr-mod">+1</span></div>
+              </div>
+              <div class="s1v4-panel">
+                <div class="s1v4-panel-hd">Magias</div>
+                <span class="s1v4-spell-pill">◆ Curar Ferimentos</span>
+                <span class="s1v4-spell-pill">◆ Palavra Curativa</span>
+                <span class="s1v4-spell-pill">◆ Bênção</span>
+              </div>
+              <div class="s1v4-panel">
+                <div class="s1v4-panel-hd">Histórico</div>
+                <div class="s1v4-bio">"Aprendeu a lutar nos becos da capital. O que lhe falta em técnica, sobra em malícia e instinto."</div>
+              </div>
+            </div>
+          </div>
+          <div class="s1v4-cta">
+            <div class="s1v4-cta-price"><span class="vi vi-coin lg"></span> 200</div>
+            <button class="s1v4-btn">Contratar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">1-V5 — Trading Card</div>
+        <div class="frame-note">Estilo card de TCG: banner de classe colorido, art frame grande, stats compactos, text box com ability, flavor bottom, HP no rodapé.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s1v5-body">
+            <div class="s1v5-card">
+              <div class="s1v5-card-head">
+                <div class="s1v5-card-name">Sia Sunfire</div>
+                <div class="s1v5-card-cost"><span class="vi vi-coin sm"></span> 200</div>
+              </div>
+              <div class="s1v5-card-art">⚕️</div>
+              <div class="s1v5-card-type">Aliada • Clériga Elfa • Nv 2</div>
+              <div class="s1v5-card-body">
+                <div class="s1v5-card-stats">
+                  <div class="s1v5-card-stat"><div class="s1v5-card-stat-val">+2</div><div class="s1v5-card-stat-lbl">Sab</div></div>
+                  <div class="s1v5-card-stat"><div class="s1v5-card-stat-val">14</div><div class="s1v5-card-stat-lbl">CA</div></div>
+                  <div class="s1v5-card-stat"><div class="s1v5-card-stat-val">8</div><div class="s1v5-card-stat-lbl">MP</div></div>
+                </div>
+                <div class="s1v5-card-text">
+                  <b>Curadora Divina:</b> uma vez por rodada, Sia pode curar 1d8+2 HP em um aliado adjacente. Conhece <b>Palavra Curativa</b> e <b>Bênção</b>.
+                </div>
+                <div class="s1v5-card-flavor">"Aprendeu a lutar nos becos da capital. O que lhe falta em técnica, sobra em malícia e instinto."</div>
+              </div>
+              <div class="s1v5-card-bot">
+                <span>Ordem de Valdoria</span>
+                <span class="s1v5-card-hp">❤ 20 HP</span>
+              </div>
+            </div>
+          </div>
+          <div class="s1v5-cta"><button class="s1v5-btn"><span class="vi vi-coin"></span> Contratar por 200 Valdoritas</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 2: CONFIRMAÇÃO ============ -->
+  <div class="screen-block">
+    <h2 class="screen-block-title">◆ Tela 2 — Confirmação de Contratação ◆</h2>
+    <div class="grid">
+
+      <div class="frame">
+        <div class="frame-label">2-V1 — Contract Scroll</div>
+        <div class="frame-note">Pergaminho formal de contrato. Duas partes visuais (você ↔ aventureiro), lista de termos com valores, assinatura estilizada.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">CONTRATO</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s2v1-body">
+            <div class="s2v1-scroll">
+              <div class="s2v1-seal">✧</div>
+              <div class="s2v1-title">Contrato de Serviço</div>
+              <div class="s2v1-subtitle">◆ Ordem de Valdoria ◆</div>
+              <div class="s2v1-parties">
+                <div class="s2v1-party">
+                  <div class="s2v1-party-lbl">Contratante</div>
+                  <div class="s2v1-party-av">🗡</div>
+                  <div class="s2v1-party-name">Ryalael</div>
+                </div>
+                <div class="s2v1-vs">⚔</div>
+                <div class="s2v1-party">
+                  <div class="s2v1-party-lbl">Aventureira</div>
+                  <div class="s2v1-party-av">⚕️</div>
+                  <div class="s2v1-party-name">Sia Sunfire</div>
+                </div>
+              </div>
+              <div class="s2v1-terms">
+                <div class="s2v1-terms-hd">Termos do Acordo</div>
+                <div class="s2v1-term"><span class="s2v1-term-lbl">Classe</span><span class="s2v1-term-val">Clériga Nv 2</span></div>
+                <div class="s2v1-term"><span class="s2v1-term-lbl">Vitalidade</span><span class="s2v1-term-val">20 HP • 8 MP</span></div>
+                <div class="s2v1-term"><span class="s2v1-term-lbl">Duração</span><span class="s2v1-term-val">Permanente</span></div>
+                <div class="s2v1-term"><span class="s2v1-term-lbl">Soldo</span><span class="s2v1-term-val"><span class="vi vi-coin sm"></span> 200 Valdoritas</span></div>
+              </div>
+              <div class="s2v1-signature">— Assinado por ambas as partes perante a Guilda —</div>
+            </div>
+          </div>
+          <div class="s2v1-cta">
+            <button class="s2v1-btn-no">✕ Cancelar</button>
+            <button class="s2v1-btn-yes">✓ Selar Contrato</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">2-V2 — Quick Confirm</div>
+        <div class="frame-note">Modal central compacto, foco total na decisão. Saldo antes/depois em painel, botões grandes de ação.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s2v2-body">
+            <div class="s2v2-card">
+              <div class="s2v2-icon">⚕️</div>
+              <div class="s2v2-q">Contratar?</div>
+              <div class="s2v2-target">Você deseja contratar <b>Sia Sunfire</b>, Clériga Elfa de Nível 2?</div>
+              <div class="s2v2-balance">
+                <div class="s2v2-row"><span class="s2v2-row-lbl">Saldo atual</span><span class="s2v2-row-val"><span class="vi vi-coin sm"></span> 947</span></div>
+                <div class="s2v2-row"><span class="s2v2-row-lbl">Custo</span><span class="s2v2-row-val cost">− <span class="vi vi-coin sm"></span> 200</span></div>
+                <div class="s2v2-divider"></div>
+                <div class="s2v2-row"><span class="s2v2-row-lbl">Após contratar</span><span class="s2v2-row-val after"><span class="vi vi-coin sm"></span> 747</span></div>
+              </div>
+              <div class="s2v2-btns">
+                <button class="s2v2-btn s2v2-btn-no">Cancelar</button>
+                <button class="s2v2-btn s2v2-btn-yes">Confirmar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">2-V3 — Handshake Dialogue</div>
+        <div class="frame-note">Dois avatares se encarando com aperto de mãos, Sia fala uma linha de aceitação, stats compactos, choices estilo diálogo RPG.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s2v3-body">
+            <div class="s2v3-scene">
+              <div class="s2v3-avs">
+                <div class="s2v3-av">🗡</div>
+                <div class="s2v3-hand">🤝</div>
+                <div class="s2v3-av">⚕️</div>
+              </div>
+            </div>
+            <div class="s2v3-dlg">
+              <div class="s2v3-speech">
+                <div class="s2v3-speech-npc">Sia Sunfire</div>
+                <div class="s2v3-speech-text">"Aceito o contrato. Minha lâmina e meus conjuros a seu serviço, aventureiro. Quando partimos?"</div>
+              </div>
+              <div class="s2v3-cost-row"><span class="vi vi-coin lg"></span> 200 Valdoritas</div>
+              <div class="s2v3-meta">
+                <div class="s2v3-meta-item"><span class="s2v3-meta-val">Nv 2</span>Nível</div>
+                <div class="s2v3-meta-item"><span class="s2v3-meta-val">20 HP</span>Vitalidade</div>
+                <div class="s2v3-meta-item"><span class="s2v3-meta-val">Clériga</span>Classe</div>
+              </div>
+              <div class="s2v3-choices">
+                <button class="s2v3-choice yes">Firmar o contrato</button>
+                <button class="s2v3-choice no">Preciso pensar melhor</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">2-V4 — Receipt</div>
+        <div class="frame-note">Estilo nota fiscal medieval, com merchant header, item linha única, subtotal/total, código de barras rúnico no rodapé.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s2v4-body">
+            <div class="s2v4-receipt">
+              <div class="s2v4-top">
+                <div class="s2v4-merchant">◆ Guilda dos Aventureiros ◆</div>
+                <div class="s2v4-receipt-title">Recibo de Contratação</div>
+                <div class="s2v4-number">Nº 0847 • 8 Nevefunda, Ano 855</div>
+              </div>
+              <div class="s2v4-item">
+                <div class="s2v4-item-top">
+                  <div class="s2v4-item-av">⚕️</div>
+                  <div class="s2v4-item-info">
+                    <div class="s2v4-item-name">Sia Sunfire</div>
+                    <div class="s2v4-item-desc">Clériga Elfa • Nv 2 • 20 HP</div>
+                  </div>
+                  <div class="s2v4-item-qty">×1</div>
+                </div>
+              </div>
+              <div class="s2v4-totals">
+                <div class="s2v4-total-row"><span class="s2v4-total-lbl">Subtotal</span><span class="s2v4-total-val"><span class="vi vi-coin sm"></span> 200</span></div>
+                <div class="s2v4-total-row"><span class="s2v4-total-lbl">Taxa Guilda</span><span class="s2v4-total-val"><span class="vi vi-coin sm"></span> 0</span></div>
+                <div class="s2v4-total-row grand"><span class="s2v4-total-lbl">Total</span><span class="s2v4-total-val"><span class="vi vi-coin sm"></span> 200 Valdoritas</span></div>
+              </div>
+              <div class="s2v4-barcode">◆ ✧ ◆ ✦ ◆ ✧ ◆ ✦ ◆</div>
+            </div>
+          </div>
+          <div class="s2v4-cta">
+            <button class="s2v4-btn-cancel">Rasgar</button>
+            <button class="s2v4-btn-confirm">✓ Selar Recibo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">2-V5 — Warrior's Oath</div>
+        <div class="frame-note">Juramento cerimonial. Emblema carmesim, texto ritualístico centralizado, tributo destacado, botão "Jurar" épico.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">JURAMENTO</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 947</div></div>
+          <div class="s2v5-body">
+            <div class="s2v5-crest">
+              <div class="s2v5-emblem">⚔</div>
+              <div class="s2v5-oath-lbl">Juramento Solene</div>
+              <div class="s2v5-oath-title">Sia Sunfire</div>
+            </div>
+            <div class="s2v5-oath-body">
+              <div class="s2v5-oath-text">"Por <b>honra</b> e <b>sangue</b>, eu aceito o chamado.<br><br>Seguirei <b>Ryalael</b> pelos campos e pelas tormentas, com lâmina e fé, até que a morte nos separe ou o contrato se rompa.<br><br>Que os deuses testemunhem."</div>
+              <div class="s2v5-tribute">
+                <div class="s2v5-tribute-lbl">Tributo</div>
+                <div class="s2v5-tribute-val"><span class="vi vi-coin xl"></span> 200</div>
+              </div>
+            </div>
+          </div>
+          <div class="s2v5-cta">
+            <button class="s2v5-btn-oath">◆ Selar o Juramento ◆</button>
+            <button class="s2v5-btn-refuse">Recusar o chamado</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 3: SUCESSO ============ -->
+  <div class="screen-block">
+    <h2 class="screen-block-title">◆ Tela 3 — Contratação Realizada ◆</h2>
+    <div class="grid">
+
+      <div class="frame">
+        <div class="frame-label">3-V1 — Welcome Party</div>
+        <div class="frame-note">Celebração com grande checkmark, ally card com status "NO GRUPO", stats do recruta, progress bar de party 1/3→2/3.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 747</div></div>
+          <div class="s3v1-body">
+            <div class="s3v1-hero">
+              <div class="s3v1-check">✓</div>
+              <div class="s3v1-title">Novo Aliado!</div>
+              <div class="s3v1-sub">Sia Sunfire se juntou ao seu grupo</div>
+            </div>
+            <div class="s3v1-ally-card">
+              <div class="s3v1-ally-av">⚕️</div>
+              <div class="s3v1-ally-info">
+                <div class="s3v1-ally-name">Sia Sunfire</div>
+                <div class="s3v1-ally-sub">Clériga Elfa • Nv. 2</div>
+                <div class="s3v1-ally-status">✓ No grupo</div>
+              </div>
+            </div>
+            <div class="s3v1-stats-box">
+              <div class="s3v1-stats-hd">Transação</div>
+              <div class="s3v1-stats-row"><span class="s3v1-stats-lbl">Custo</span><span class="s3v1-stats-val neg">− <span class="vi vi-coin sm"></span> 200</span></div>
+              <div class="s3v1-stats-row"><span class="s3v1-stats-lbl">Saldo Restante</span><span class="s3v1-stats-val"><span class="vi vi-coin sm"></span> 747 Valdoritas</span></div>
+              <div class="s3v1-stats-row"><span class="s3v1-stats-lbl">Contrato</span><span class="s3v1-stats-val">Permanente</span></div>
+            </div>
+            <div class="s3v1-party-progress">
+              <div class="s3v1-pp-label"><span>Grupo</span><span>1 / 3</span></div>
+              <div class="s3v1-pp-bar"><div class="s3v1-pp-fill"></div></div>
+            </div>
+          </div>
+          <div class="s3v1-cta">
+            <button class="s3v1-btn s3v1-btn-more">Contratar Mais</button>
+            <button class="s3v1-btn s3v1-btn-view">Ver Grupo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">3-V2 — NPC Welcome</div>
+        <div class="frame-note">Sia aparece em cena com wave 👋, fala uma linha de boas-vindas, transação em painel, próximas ações como choices.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 747</div></div>
+          <div class="s3v2-body">
+            <div class="s3v2-scene">
+              <div class="s3v2-confetti"></div>
+              <div class="s3v2-npc-av">⚕️<span class="s3v2-npc-wave">👋</span></div>
+              <div class="s3v2-npc-name">Sia Sunfire</div>
+            </div>
+            <div class="s3v2-content">
+              <div class="s3v2-speech">
+                <div class="s3v2-speech-text">"É uma honra me juntar ao teu grupo, <b>Ryalael</b>. Meus conjuros de cura e bênçãos estarão à tua disposição. Que a luz divina nos guie pelas jornadas que virão!"</div>
+              </div>
+              <div class="s3v2-tx">
+                <div class="s3v2-tx-hd">Resumo</div>
+                <div class="s3v2-tx-row"><span class="s3v2-tx-lbl">Aliada contratada</span><span class="s3v2-tx-val">Sia</span></div>
+                <div class="s3v2-tx-row"><span class="s3v2-tx-lbl">Custo</span><span class="s3v2-tx-val loss">− <span class="vi vi-coin sm"></span> 200</span></div>
+                <div class="s3v2-tx-row"><span class="s3v2-tx-lbl">Grupo</span><span class="s3v2-tx-val">1 / 3</span></div>
+              </div>
+              <div class="s3v2-choices">
+                <button class="s3v2-choice">Continuar no quadro de aventureiros</button>
+                <button class="s3v2-choice">Voltar à Guilda</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">3-V3 — Party Roster Update</div>
+        <div class="frame-note">Banner verde de sucesso no topo, lista completa do grupo atual (3 slots) com Sia destacada como "NOVO", custo no rodapé.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 747</div></div>
+          <div class="s3v3-body">
+            <div class="s3v3-banner">
+              <div class="s3v3-banner-ic">✓</div>
+              <div class="s3v3-banner-text">
+                <div class="s3v3-banner-title">Novo aliado recrutado</div>
+                <div class="s3v3-banner-sub">Sia Sunfire se juntou ao teu grupo</div>
+              </div>
+            </div>
+            <div class="s3v3-rlbl">
+              <span>◆ Seu Grupo</span>
+              <span class="s3v3-rlbl-count">1 / 3</span>
+            </div>
+            <div class="s3v3-roster">
+              <div class="s3v3-member new">
+                <div class="s3v3-new-badge">Novo</div>
+                <div class="s3v3-member-av">⚕️</div>
+                <div class="s3v3-member-info">
+                  <div class="s3v3-member-name">Sia Sunfire</div>
+                  <div class="s3v3-member-cls">Clériga Elfa • Nv 2</div>
+                  <div class="s3v3-member-hp">❤ 20 / 20 · ✦ 8 / 8</div>
+                </div>
+              </div>
+              <div class="s3v3-member empty">
+                <div class="s3v3-member-av">+</div>
+                <div class="s3v3-member-info">
+                  <div class="s3v3-member-name">Vaga disponível</div>
+                  <div class="s3v3-member-cls">Contratar aventureiro</div>
+                </div>
+              </div>
+              <div class="s3v3-member empty">
+                <div class="s3v3-member-av">+</div>
+                <div class="s3v3-member-info">
+                  <div class="s3v3-member-name">Vaga disponível</div>
+                  <div class="s3v3-member-cls">Contratar aventureiro</div>
+                </div>
+              </div>
+            </div>
+            <div class="s3v3-cost-line">
+              <span class="s3v3-cost-lbl">Pago</span>
+              <span class="s3v3-cost-val"><span class="vi vi-coin sm"></span> 200 Valdoritas</span>
+            </div>
+          </div>
+          <div class="s3v3-cta">
+            <button class="s3v3-btn s3v3-btn-more">+ Mais Um</button>
+            <button class="s3v3-btn s3v3-btn-close">Continuar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">3-V4 — Unboxing</div>
+        <div class="frame-note">Celebração épica com burst radial, avatar 120px brilhando, raridade bar, habilidades em grid 3, meta no rodapé.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 747</div></div>
+          <div class="s3v4-body">
+            <div class="s3v4-burst">
+              <div class="s3v4-burst-av">⚕️</div>
+              <div class="s3v4-burst-title">Sia Sunfire</div>
+              <div class="s3v4-burst-sub">Agora faz parte do grupo de <b>Ryalael</b>!</div>
+            </div>
+            <div class="s3v4-rarity-bar">◆ Clériga Elfa • Nível 2 ◆</div>
+            <div class="s3v4-ability-grid">
+              <div class="s3v4-ab-title">Habilidades Desbloqueadas</div>
+              <div class="s3v4-ab-cards">
+                <div class="s3v4-ab-card"><div class="s3v4-ab-ic">✨</div><div class="s3v4-ab-name">Curar Ferimentos</div></div>
+                <div class="s3v4-ab-card"><div class="s3v4-ab-ic">◆</div><div class="s3v4-ab-name">Palavra Curativa</div></div>
+                <div class="s3v4-ab-card"><div class="s3v4-ab-ic">☀</div><div class="s3v4-ab-name">Bênção</div></div>
+              </div>
+            </div>
+            <div class="s3v4-meta">
+              <div class="s3v4-meta-it">Custo<span class="s3v4-meta-val">200</span></div>
+              <div class="s3v4-meta-it">Vida<span class="s3v4-meta-val">20</span></div>
+              <div class="s3v4-meta-it">Grupo<span class="s3v4-meta-val">1/3</span></div>
+            </div>
+          </div>
+          <div class="s3v4-cta"><button class="s3v4-btn">◆ Continuar Jornada ◆</button></div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-label">3-V5 — Minimalist Success</div>
+        <div class="frame-note">Limpo e direto. Check verde, título, resumo em rows simples, CTA 2-col. Para quem odeia popup exagerado.</div>
+        <div class="phone">
+          <div class="a-header"><div class="a-header-back">◀</div><div class="a-header-title">GUILDA</div><div class="a-header-res"><span class="vi vi-coin sm"></span> 747</div></div>
+          <div class="s3v5-body">
+            <div class="s3v5-check-wrap">
+              <span class="s3v5-check">✓</span>
+            </div>
+            <div class="s3v5-title">Contratação Confirmada</div>
+            <div class="s3v5-sub"><b>Sia Sunfire</b> agora faz parte do teu grupo. Clériga Elfa de Nível 2.</div>
+            <div class="s3v5-row"><span class="s3v5-row-lbl">Aliada</span><span class="s3v5-row-val">Sia Sunfire</span></div>
+            <div class="s3v5-row"><span class="s3v5-row-lbl">Custo</span><span class="s3v5-row-val loss">− <span class="vi vi-coin sm"></span> 200</span></div>
+            <div class="s3v5-row"><span class="s3v5-row-lbl">Saldo</span><span class="s3v5-row-val"><span class="vi vi-coin sm"></span> 747</span></div>
+            <div class="s3v5-row"><span class="s3v5-row-lbl">Grupo</span><span class="s3v5-row-val gain">1 / 3</span></div>
+            <div class="s3v5-cta">
+              <button class="s3v5-btn s3v5-btn-more">Contratar Mais</button>
+              <button class="s3v5-btn s3v5-btn-ok">Concluído</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
