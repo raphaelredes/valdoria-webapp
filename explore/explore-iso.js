@@ -8,8 +8,19 @@ function _pointInPoly(px,py,verts){var inside=false;for(var i=0,j=verts.length-1
 function screenToHex(sx,sy,grid,rows,cols){/* Distance-to-center detection (Civ VI pattern) — more robust than polygon check
  * for isometric hex maps with varying tile heights. Checks ±3 neighborhood and
  * picks the hex whose top-face center is closest to the click point.
- * The Y distance is weighted 1.4x to account for the hex aspect ratio. */
-var approxRow=Math.round((sy-MAP_OFFSET_Y-HEX_H/2)/ROW_STEP);var offset=(approxRow%2===1)?HEX_W/2:0;var approxCol=Math.round((sx-MAP_OFFSET_X-HEX_W/2-offset)/HEX_W);var bestDist=Infinity,bestCol=-1,bestRow=-1;var yWeight=1.4;for(var dr=-3;dr<=3;dr++){for(var dc=-3;dc<=3;dc++){var r=approxRow+dr;var c=approxCol+dc;if(c<0||c>=cols||r<0||r>=rows)continue;var center=hexToScreen(c,r);var tile=grid[r]&&grid[r][c]?grid[r][c]:".";var h=(TILE_HEIGHT[tile]||1)*UNIT_PX;var dx=sx-center.x;var dy=(sy-(center.y-h))*yWeight;var dist=dx*dx+dy*dy;if(dist<bestDist){bestDist=dist;bestCol=c;bestRow=r;}}}
+ * The Y distance is weighted 1.4x to account for the hex aspect ratio.
+ *
+ * #19 (hexmap audit BUG-7): clamp approxCol/approxRow to the grid range
+ * BEFORE the ±3 scan so edge cells (col=0 / col=COLS-1 / row=0 / row=ROWS-1)
+ * always have a full 6x6 neighborhood to search. Without this clamp, a tap
+ * slightly outside the grid bounds could miss the nearest-edge hex when
+ * approxRow/approxCol lands in the OOB area. */
+var approxRow=Math.round((sy-MAP_OFFSET_Y-HEX_H/2)/ROW_STEP);var offset=(approxRow%2===1)?HEX_W/2:0;var approxCol=Math.round((sx-MAP_OFFSET_X-HEX_W/2-offset)/HEX_W);
+/* #19: clamp approxRow/approxCol so the neighborhood scan always lands
+ * on-grid even when the pointer is slightly outside the canvas. */
+if(approxRow<0)approxRow=0;else if(approxRow>=rows)approxRow=rows-1;
+if(approxCol<0)approxCol=0;else if(approxCol>=cols)approxCol=cols-1;
+var bestDist=Infinity,bestCol=-1,bestRow=-1;var yWeight=1.4;for(var dr=-3;dr<=3;dr++){for(var dc=-3;dc<=3;dc++){var r=approxRow+dr;var c=approxCol+dc;if(c<0||c>=cols||r<0||r>=rows)continue;var center=hexToScreen(c,r);var tile=grid[r]&&grid[r][c]?grid[r][c]:".";var h=(TILE_HEIGHT[tile]||1)*UNIT_PX;var dx=sx-center.x;var dy=(sy-(center.y-h))*yWeight;var dist=dx*dx+dy*dy;if(dist<bestDist){bestDist=dist;bestCol=c;bestRow=r;}}}
 return{col:bestCol,row:bestRow};}
 
 function fillPoly(ctx,verts,color){ctx.beginPath();ctx.moveTo(verts[0].x,verts[0].y);for(let i=1;i<verts.length;i++){ctx.lineTo(verts[i].x,verts[i].y);}
