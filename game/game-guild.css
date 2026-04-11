@@ -1,4 +1,230 @@
-/* game-guild.css — Guild styles */
+/* game-guild.css — Guild V4 NPC Dialog layout (2026-04-11)
+ * Immersive RPG dialog with Tavira (Mestra da Guilda): hero scene,
+ * speech bubble, dialogue choices, and status bar.
+ * Uses .vi.vi-coin for all money display — NEVER money-bag emoji. */
+
+.gld-hub-v4 {
+  display: flex;
+  flex-direction: column;
+  margin: calc(-1 * var(--v-space-lg, 12px));
+  background: var(--v-bg, #2a2420);
+}
+
+/* ===== SCENE: hero NPC portrait ===== */
+.gld-scene {
+  height: 200px;
+  background:
+    radial-gradient(ellipse at center top, var(--v-gold-20, rgba(196,149,58,0.2)), transparent 60%),
+    radial-gradient(ellipse at center bottom, var(--v-crimson-glow, rgba(123,32,32,0.35)), transparent 60%),
+    #1a1510;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--v-space-lg, 12px);
+  border-bottom: 1px solid var(--v-gold-dim, #9a7530);
+}
+.gld-scene::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-50, rgba(196,149,58,0.5)), transparent);
+}
+.gld-scene-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-sm, 12px);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.gld-npc-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5a3a20, #8a5a30);
+  border: 3px solid var(--v-gold, #c4953a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  margin-bottom: var(--v-space-md, 8px);
+  box-shadow: 0 0 30px var(--v-gold-40, rgba(196,149,58,0.4));
+}
+.gld-npc-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  color: var(--v-gold-light, #dbb668);
+  font-size: var(--v-font-xl, 16px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+.gld-npc-title {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: var(--v-text-dim, #a09484);
+  font-size: var(--v-font-xs, 10px);
+  font-style: italic;
+}
+
+/* ===== DIALOGUE AREA ===== */
+.gld-dlg {
+  padding: var(--v-space-xl, 16px);
+  background: linear-gradient(180deg, var(--v-bg-card, #2e2520), transparent);
+  flex: 1;
+}
+.gld-dlg-speech {
+  position: relative;
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
+  border-radius: var(--v-radius-lg, 14px);
+  padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
+  margin-bottom: var(--v-space-lg, 12px);
+}
+.gld-dlg-speech::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 40px;
+  width: 20px;
+  height: 20px;
+  background: var(--v-bg-card, #2e2520);
+  border-left: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
+  border-top: 1px solid var(--v-border-gold, rgba(196, 149, 58, 0.3));
+  transform: rotate(45deg);
+}
+.gld-dlg-text {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: var(--v-text, #d4c8b0);
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Fallen allies warning */
+.gld-fallen-warn {
+  background: rgba(123, 32, 32, 0.15);
+  border: 1px dashed var(--v-crimson-light, #a03030);
+  border-radius: var(--v-radius, 10px);
+  padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: #e07070;
+  font-size: var(--v-font-sm, 12px);
+  text-align: center;
+  margin-bottom: var(--v-space-md, 8px);
+}
+
+/* ===== CHOICES ===== */
+.gld-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 4px);
+}
+.gld-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  background: var(--v-bg-card, #2e2520);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 10px);
+  cursor: pointer;
+  transition: all var(--v-transition-base, 0.3s ease);
+  position: relative;
+  text-align: left;
+  width: 100%;
+  font-family: var(--v-font, 'MedievalSharp', serif);
+}
+.gld-choice::before {
+  content: "▸";
+  color: var(--v-gold, #c4953a);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.gld-choice:hover {
+  border-color: var(--v-gold, #c4953a);
+  background: var(--v-gold-05, rgba(196, 149, 58, 0.05));
+  transform: translateX(4px);
+}
+.gld-choice:active {
+  transform: translateX(2px) scale(0.98);
+}
+.gld-choice-ic {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.gld-choice-text {
+  flex: 1;
+  min-width: 0;
+}
+.gld-choice-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  color: var(--v-text-bright, #e8dcc8);
+  font-size: var(--v-font-base, 13px);
+  font-weight: 700;
+}
+.gld-choice-desc {
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  color: var(--v-text-dim, #a09484);
+  font-size: var(--v-font-xs, 10px);
+  margin-top: 2px;
+}
+.gld-choice-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: var(--v-crimson, #7b2020);
+  color: var(--v-gold-light, #dbb668);
+  padding: 1px 8px;
+  border-radius: var(--v-radius-pill, 20px);
+  font-size: var(--v-font-xs, 10px);
+  font-weight: 700;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  border: 1px solid var(--v-gold-dim, #9a7530);
+}
+
+/* ===== STATUS BAR (bottom) ===== */
+.gld-status-bar {
+  display: flex;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
+  background: var(--v-bg-deep, #1a1510);
+  border-top: 1px solid var(--v-border, #4a3828);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-sm, 12px);
+}
+.gld-status-item {
+  flex: 1;
+  text-align: center;
+}
+.gld-status-lbl {
+  color: var(--v-text-dim, #a09484);
+  font-size: var(--v-font-xs, 10px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.gld-status-val {
+  color: var(--v-gold-light, #dbb668);
+  font-weight: 700;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+}
+.gld-status-gold {
+  color: var(--v-gold-light, #dbb668);
+}
+
+/* Legacy (keep for backwards compat with any code still using .gld-flavor) */
 .gld-hub { display: flex; flex-direction: column; gap: var(--v-space-md, 8px); }
 .gld-flavor {
   font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484);
