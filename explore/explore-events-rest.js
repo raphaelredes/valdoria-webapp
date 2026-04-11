@@ -1063,7 +1063,10 @@ function doCampRest(food) {
 
   var hdType = (S.charData && S.charData.hdt) || '1d8';
   var hitDie = rollDiceFormula(hdType);
-  var conMod = getAbilityMod('cn');
+  /* BUG FIX 2026-04-11: getAbilityMod('cn') returned NaN because 'cn' is the */
+  /* CLASS NAME key (e.g. "Guerreiro"), not the CON ability key. CON is 'co'. */
+  /* Math.floor((strVal - 10) / 2) = NaN → broke short rest healing entirely. */
+  var conMod = getAbilityMod('co');
   var baseHeal = Math.max(1, hitDie + conMod);
   S._hdUsed = (S._hdUsed || 0) + 1;
 
