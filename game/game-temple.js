@@ -18,17 +18,26 @@ function renderTempleHub(container, data) {
   }
 
   /* Pay Debt button — render ONLY special action buttons (fix 2026-04-11) */
-  /* Backend sends data.buttons with all interactions (services + pay debt). */
-  /* Services are already rendered by serviceGrid, so filter to special ones */
-  /* (temple_confirm_debt, temple_pay_*) that don't have service cards. */
+  /* Backend sends data.buttons as array-of-arrays (InlineKeyboardMarkup rows). */
+  /* Flatten first, then filter to whitelist of special callbacks. */
   if (data.buttons && Array.isArray(data.buttons) && data.buttons.length > 0) {
     var _SPECIAL_CBS = {
       'temple_confirm_debt': true,
       'temple_pay_debt': true,
     };
+    /* Flatten array-of-arrays (InlineKeyboardMarkup format from backend) */
+    var flatBtns = [];
+    for (var ri = 0; ri < data.buttons.length; ri++) {
+      var row = data.buttons[ri];
+      if (Array.isArray(row)) {
+        for (var ci = 0; ci < row.length; ci++) flatBtns.push(row[ci]);
+      } else if (row && typeof row === 'object') {
+        flatBtns.push(row);
+      }
+    }
     var btnRow = null;
-    for (var bi = 0; bi < data.buttons.length; bi++) {
-      var b = data.buttons[bi];
+    for (var bi = 0; bi < flatBtns.length; bi++) {
+      var b = flatBtns[bi];
       if (!b || !b.cb) continue;
       if (!_SPECIAL_CBS[b.cb]) continue; /* skip service interactions */
       if (!btnRow) btnRow = vCity.el('div', 'tmp-pay-debt-row');
