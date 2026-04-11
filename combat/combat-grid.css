@@ -98,6 +98,33 @@
     }
 }
 
+/* #5 (combat audit 7.4): Grid range visual — cells highlighted when the
+ * skill/attack target picker is open. Tells the player WHICH cells are
+ * valid targets (vs the existing text-only overlay list).
+ * Gold pulse for in-range, red pulse for selected-attacker (player cell). */
+.cell.in-range {
+    border-color: var(--v-gold-55);
+    box-shadow: 0 0 10px var(--v-gold-35), inset 0 0 8px var(--v-gold-15);
+    animation: cellInRangePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cellInRangePulse {
+    0%, 100% {
+        box-shadow: 0 0 6px var(--v-gold-35), inset 0 0 6px var(--v-gold-15);
+    }
+    50% {
+        box-shadow: 0 0 14px var(--v-gold-55), inset 0 0 10px var(--v-gold-25);
+    }
+}
+
+/* Performance: disable pulse on lite devices */
+body.perf-lite .cell.in-range { animation: none; }
+
+/* Accessibility: respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .cell.in-range { animation: none; }
+}
+
 /* ── Unit icon row (icon + status pips on sides) ── */
 .unit-row {
     display: flex;
