@@ -833,6 +833,31 @@ var _GOOGLE_CLIENT_ID = '717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.goog
 
 function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
+
+    /* BUG (2026-04-11): When ?env=dev is present but nodevpanel=1 is NOT,
+     * this page will be taken over by dev-debug-panel.js and turned into
+     * a host shell that embeds a real /web/?env=dev&nodevpanel=1 iframe.
+     * The iframe is the one that should drive authentication. If we let
+     * the TOP window also run checkExistingSession() and redirectToGame(),
+     * a successful auto-login navigates the entire tab away to /app.html
+     * BEFORE dev-debug-panel.js has a chance to wipe the body and inject
+     * the iframe + log panes — the user never sees the dev portal.
+     *
+     * Fix: when the dev portal host mode is detected, do not run
+     * checkExistingSession here. dev-debug-panel.js will clear the body
+     * and create the iframe; the iframe loads /web/?env=dev&nodevpanel=1,
+     * its own copy of web-auth.js runs, and that iframe handles the
+     * auto-login flow. */
+    var _params = new URLSearchParams(window.location.search);
+    var _isDevEnv = _params.get('env') === 'dev';
+    var _isIframe = _params.get('nodevpanel') === '1';
+    var _isDevPortalHost = _isDevEnv && !_isIframe;
+    if (_isDevPortalHost) {
+        console.info('[WEB-AUTH] Dev portal host mode — deferring checkExistingSession to iframe');
+        loadTelegramWidget();
+        return;
+    }
+
     loadTelegramWidget();
     checkExistingSession();
 }
