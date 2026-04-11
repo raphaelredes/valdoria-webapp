@@ -182,7 +182,7 @@ body {
     letter-spacing: 1px;
 }
 .cover-subtitle.dim {
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     opacity: 0.6;
 }
 
@@ -313,7 +313,7 @@ body {
 }
 .index-section-count {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-text-dim, #a09484);
     opacity: 0.6;
 }
@@ -338,7 +338,7 @@ body {
 }
 .index-item-num {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-gold, #c4953a);
     min-width: 20px;
     opacity: 0.5;
@@ -385,7 +385,7 @@ body {
 }
 .fragment-type {
     font-family: var(--v-font-display, 'Cinzel', serif);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-gold, #c4953a);
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -797,7 +797,7 @@ body {
 }
 .lore-tooltip-refs {
     margin-top: var(--v-space-sm, 4px);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-text-dim, #a09484);
     opacity: 0.7;
 }

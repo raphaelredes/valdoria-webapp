@@ -19,7 +19,7 @@
 
 /* ── Section Label ── */
 .inn-section-label {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -83,7 +83,7 @@
   line-height: 1.4;
 }
 .inn-detail-check {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   flex-shrink: 0;
   width: 14px;
   text-align: center;
@@ -132,7 +132,7 @@
   flex: 1;
 }
 .inn-player-class {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-muted, #7a6a5a);
 }
 
@@ -144,7 +144,7 @@
   margin-bottom: var(--v-space-xs, 2px);
 }
 .inn-bar-label {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   font-weight: bold;
   width: 22px;
   flex-shrink: 0;
@@ -168,7 +168,7 @@
 .inn-bar-fill.hp-low { background: var(--v-hp-crit-flat, #ef4444); }
 .inn-bar-fill.mp-fill { background: var(--v-mp-flat, #42a5f5); }
 .inn-bar-value {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   width: 42px;
   text-align: right;
@@ -185,7 +185,7 @@
   border-top: 1px solid var(--v-border-dim, rgba(74, 56, 40, 0.15));
 }
 .inn-ex-label {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   flex-shrink: 0;
 }
@@ -310,7 +310,7 @@
   border-radius: 2px;
 }
 .inn-ally-cost {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-gold, #c4953a);
   flex-shrink: 0;
   font-weight: bold;
@@ -330,7 +330,7 @@
   justify-content: space-between;
 }
 .inn-cost-label {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
 }
 .inn-cost-breakdown {
@@ -376,7 +376,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--v-space-xs, 2px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   padding: var(--v-space-xs, 2px) var(--v-space-sm, 4px);
 }
 .inn-gold-label {
@@ -408,7 +408,7 @@
   letter-spacing: 1px;
 }
 .inn-hub-time {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   margin-top: var(--v-space-xs, 2px);
 }
@@ -440,7 +440,7 @@
   font-weight: bold;
 }
 .inn-npc-mood {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   font-style: italic;
 }
@@ -494,7 +494,7 @@
   text-align: center;
 }
 .inn-room-tile-price {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-gold, #c4953a);
   display: flex;
   align-items: center;
@@ -523,7 +523,7 @@
   border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
   border-radius: var(--v-radius-xs, 4px);
   padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   font-family: var(--v-font, 'Georgia', serif);
   cursor: pointer;
   min-width: 60px;
@@ -639,7 +639,7 @@
   display: flex;
   justify-content: space-between;
   gap: var(--v-space-md, 8px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   padding: 0 var(--v-space-sm, 4px);
 }
@@ -703,7 +703,7 @@
   font-weight: bold;
 }
 .inn-meal-card-desc {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.4;
   margin-top: var(--v-space-xs, 2px);
@@ -727,7 +727,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--v-space-xs, 2px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-gold, #c4953a);
   font-weight: bold;
   margin-top: var(--v-space-sm, 4px);
@@ -736,7 +736,7 @@
   color: var(--v-badge-ok-text, #7aaa7a);
 }
 .inn-meal-rep {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   text-align: center;
   font-style: italic;
@@ -785,7 +785,7 @@
 }
 .inn-result-sym {
   flex-shrink: 0;
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
 }
 .inn-result-sym.good {
   color: var(--v-badge-ok-text, #7aaa7a);

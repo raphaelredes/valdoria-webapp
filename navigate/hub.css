@@ -52,7 +52,7 @@ body {
 .player-bar .v-bar { gap: var(--v-space-xs, 2px); padding: 0 }
 .player-bar .v-bar-icon { font-size: var(--v-font-xs, 10px); width: 14px }
 .player-bar .v-bar-track { height: var(--v-bar-height-mini, 4px) }
-.player-bar .v-bar-label { font-size: var(--v-font-sm, 11px); min-width: 36px }
+.player-bar .v-bar-label { font-size: var(--v-font-sm, 12px); min-width: 36px }
 
 /* ===== FILTER BAR ===== */
 .filter-bar {
@@ -76,12 +76,12 @@ body {
   border-color: var(--v-gold-40, rgba(196,149,58,0.4));
 }
 .filter-trigger-icon {
-  font-size: var(--v-font-sm, 11px); color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-sm, 12px); color: var(--v-gold, #c4953a);
   transition: transform var(--v-transition-base, 0.2s ease);
 }
 .filter-trigger.open .filter-trigger-icon { transform: rotate(180deg) }
 .filter-active-badge {
-  font-size: var(--v-font-sm, 11px); color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-sm, 12px); color: var(--v-gold, #c4953a);
   background: var(--v-gold-10, rgba(196,149,58,0.1));
   padding: 2px var(--v-space-md, 8px); border-radius: var(--v-radius-pill, 20px);
   border: 1px solid var(--v-gold-20, rgba(196,149,58,0.2));
@@ -229,7 +229,7 @@ body {
   transition: width var(--v-transition-slow, 0.4s) ease;
 }
 .prog-text {
-  font-size: var(--v-font-sm, 11px); color: var(--v-text-dim, #a09484); margin-top: 2px;
+  font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); margin-top: 2px;
 }
 
 /* Expanded detail */
@@ -298,7 +298,7 @@ body {
   border-color: var(--v-gold-30, rgba(196,149,58,0.3));
 }
 .bottom-btn-icon { font-size: var(--v-font-xl, 16px) }
-.bottom-btn-label { font-size: var(--v-font-sm, 11px) }
+.bottom-btn-label { font-size: var(--v-font-sm, 12px) }
 
 /* ===== SUB-SCREENS ===== */
 .sub-screen {
@@ -343,7 +343,7 @@ body {
   background: var(--v-bg-deep-card, #241e18);
 }
 .hub-party-hint {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   text-align: center;
   margin: 0 0 var(--v-space-md, 8px);
@@ -447,7 +447,7 @@ body {
 }
 .loc-card-arrow { color: var(--v-gold-25, rgba(196,149,58,0.25)); font-size: var(--v-font-xl, 16px) }
 .loc-card-badge {
-  font-size: var(--v-font-sm, 11px); color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-sm, 12px); color: var(--v-gold, #c4953a);
   background: var(--v-gold-10, rgba(196,149,58,0.1));
   padding: 1px 6px; border-radius: var(--v-radius-pill, 20px);
   border: 1px solid var(--v-gold-20, rgba(196,149,58,0.2));

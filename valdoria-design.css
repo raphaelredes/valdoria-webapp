@@ -117,8 +117,12 @@
     --v-space-2xl: 24px;
     /* Área mínima tocável (Apple ~44pt, WCAG AAA 44px, web.dev ~48px) — usar com .v-hit-min */
     --v-touch-min: 44px;
+    /* #58: Typography readability on mobile. --v-font-sm bumped from 11px
+     * to 12px to match the design system minimum for readable text.
+     * --v-font-xs stays at 10px but should only be used for tiny badges
+     * (it's flagged in the preflight check_webapp_hardcoded_font_sizes). */
     --v-font-xs: 10px;
-    --v-font-sm: 11px;
+    --v-font-sm: 12px;
     --v-font-md: 12px;
     --v-font-base: 13px;
     --v-font-body: 14px;
@@ -1199,7 +1203,7 @@
     display: inline-block;
     padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
     border-radius: var(--v-radius-pill, 20px);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     font-family: var(--v-font, "MedievalSharp", serif);
     margin: var(--v-space-md-lg, 10px) auto 0;
     animation: v-fadeIn 0.3s ease;
@@ -1298,7 +1302,7 @@
   }
   .v-err-auto-report {
     padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
-    font-size: var(--v-font-sm, 11px);
+    font-size: var(--v-font-sm, 12px);
     color: var(--v-text-dim, #a09484);
     font-family: var(--v-font, "MedievalSharp", serif);
     text-align: center;

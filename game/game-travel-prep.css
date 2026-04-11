@@ -48,7 +48,7 @@
 .prep-warn-chip {
   display: inline-block;
   padding: var(--v-space-xs, 4px) var(--v-space-md, 8px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   font-family: var(--v-font, 'MedievalSharp', serif);
   color: #e0a060;
   background: rgba(180, 100, 30, 0.15);
@@ -62,7 +62,7 @@
 .prep-biome-tip {
   margin-top: var(--v-space-md, 8px);
   padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   font-style: italic;
   font-family: var(--v-font, 'MedievalSharp', serif);
   color: var(--v-text-dim, #a09484);
@@ -145,7 +145,7 @@
 }
 
 .prep-shortfall-tip {
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
   font-family: var(--v-font, 'MedievalSharp', serif);
   color: var(--v-text-dim, #a09484);
   font-style: italic;
@@ -199,7 +199,7 @@
 
 .prep-gear-relevant {
   flex-shrink: 0;
-  font-size: var(--v-font-sm, 11px);
+  font-size: var(--v-font-sm, 12px);
 }
 
 /* ===== Recover HP options (nested detail popup) ===== */
