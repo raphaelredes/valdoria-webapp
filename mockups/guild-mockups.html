@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mockups — Guilda dos Aventureiros</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&display=swap">
+<style>
+  /* Inline tokens copied from valdoria-design.css (do not import the
+   * external file because @layer valdoria { html { max-width: 430px;
+   * overflow: hidden } } traps the grid). */
+  :root{
+    --v-bg:#2a2420;--v-bg-raised:#332a22;--v-bg-deep:#1a1510;--v-bg-card:#2e2520;
+    --v-gold:#c4953a;--v-gold-dim:#9a7530;--v-gold-light:#dbb668;
+    --v-gold-03:rgba(196,149,58,0.03);--v-gold-04:rgba(196,149,58,0.04);
+    --v-gold-05:rgba(196,149,58,0.05);--v-gold-08:rgba(196,149,58,0.08);
+    --v-gold-10:rgba(196,149,58,0.10);--v-gold-15:rgba(196,149,58,0.15);
+    --v-gold-20:rgba(196,149,58,0.2);--v-gold-25:rgba(196,149,58,0.25);
+    --v-gold-30:rgba(196,149,58,0.3);--v-gold-40:rgba(196,149,58,0.4);
+    --v-gold-50:rgba(196,149,58,0.5);--v-gold-60:rgba(196,149,58,0.6);
+    --v-crimson:#7b2020;--v-crimson-light:#a03030;--v-crimson-glow:rgba(123,32,32,0.35);
+    --v-text:#d4c8b0;--v-text-dim:#a09484;--v-text-faint:#8a7a68;--v-text-bright:#e8dcc8;
+    --v-success:#4caf50;--v-success-light:#66dd88;
+    --v-info:#5b9bd5;--v-warning:#f39c12;--v-danger:#e74c3c;
+    --v-border:#4a3828;--v-border-gold:rgba(196,149,58,0.3);
+    --v-radius-xs:4px;--v-radius-sm:6px;--v-radius:10px;
+    --v-radius-lg:14px;--v-radius-pill:20px;
+    --v-font:'MedievalSharp','Cinzel',serif;--v-font-display:'Cinzel',serif;
+    --v-shadow-md:0 4px 16px rgba(0,0,0,0.5);
+    --v-shadow-gold:0 0 12px rgba(196,149,58,0.25);
+    --v-transition-base:0.3s ease;--v-transition-slow:0.5s;
+    --v-space-xs:2px;--v-space-sm:4px;--v-space-md:8px;--v-space-lg:12px;
+    --v-space-xl:16px;--v-space-2xl:24px;
+    --v-font-xs:10px;--v-font-sm:12px;--v-font-base:13px;--v-font-body:14px;
+    --v-font-lg:15px;--v-font-xl:16px;--v-font-2xl:18px;
+    --v-bar-track:#1e1810;
+  }
+  /* Valdoria Coin — copied from shared/coin-icon.css. RULE: ALWAYS use
+   * .vi.vi-coin for money representation. NEVER use other emoji. */
+  .vi{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+  .vi-coin{width:14px;height:14px;background:radial-gradient(circle at 40% 35%,#e8c44a,#c4953a 60%,#8a6a20 100%);border-radius:50%;border:1.5px solid #a07828;box-shadow:inset 0 -1px 2px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,220,120,0.3);position:relative}
+  .vi-coin::after{content:'V';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#5a3a10;font-family:var(--v-font,'Georgia',serif);text-shadow:0 0.5px 0 rgba(255,220,120,0.4)}
+  .vi-coin.sm{width:12px;height:12px;border-width:1px}
+  .vi-coin.sm::after{font-size:7px}
+  .vi-coin.lg{width:18px;height:18px;border-width:2px}
+  .vi-coin.lg::after{font-size:10px}
+  :root{
+    /* Class colors */
+    --v-cls-guerreiro:#c54040;
+    --v-cls-ladrao:#5a9a5a;
+    --v-cls-mago:#6b8ae8;
+    --v-cls-clerigo:#e0c060;
+    --v-cls-ranger:#7a9a4a;
+    --v-cls-barbaro:#c06030;
+    --v-cls-feiticeiro:#9a5ac0;
+    --v-cls-bruxo:#6a3a8a;
+  }
+  html,body{max-width:none;background:var(--v-bg-deep);margin:0;padding:0}
+  body{font-family:var(--v-font);color:var(--v-text)}
+  .mockups-shell{padding:var(--v-space-2xl);max-width:2200px;margin:0 auto}
+  .mockups-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:32px;font-weight:700;letter-spacing:3px;text-align:center;margin:0 0 var(--v-space-md);text-transform:uppercase}
+  .mockups-sub{font-family:var(--v-font);color:var(--v-text-dim);text-align:center;font-size:var(--v-font-body);margin:0 0 var(--v-space-2xl)}
+  .mockups-intro{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-xl);margin:0 auto var(--v-space-2xl);max-width:900px;color:var(--v-text);font-size:var(--v-font-body);line-height:1.6}
+  .mockups-intro b{color:var(--v-gold-light)}
+  .mockups-intro ul{margin:var(--v-space-sm) 0;padding-left:var(--v-space-xl)}
+  .mockups-intro li{margin-bottom:var(--v-space-xs)}
+  .mockups-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:var(--v-space-2xl)}
+  .mockup-frame{display:flex;flex-direction:column;gap:var(--v-space-md)}
+  .mockup-label{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;letter-spacing:2px;text-align:center;text-transform:uppercase;padding:var(--v-space-md);border:1px solid var(--v-border-gold);background:var(--v-gold-05);border-radius:var(--v-radius)}
+  .mockup-note{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-sm);text-align:center;line-height:1.4;padding:0 var(--v-space-md)}
+  .phone{width:430px;min-height:900px;margin:0 auto;background:var(--v-bg);border:1px solid var(--v-border);border-radius:var(--v-radius-lg);overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:var(--v-shadow-md)}
+
+  /* ============ SHARED HEADER ============ */
+  .g-header{display:flex;align-items:center;gap:var(--v-space-lg);padding:var(--v-space-lg) var(--v-space-xl);background:linear-gradient(180deg,var(--v-gold-10),transparent);border-bottom:1px solid var(--v-border-gold)}
+  .g-header-back{color:var(--v-text);font-size:var(--v-font-xl);cursor:pointer}
+  .g-header-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:1px;flex:1;text-align:center}
+  .g-header-res{display:flex;align-items:center;gap:var(--v-space-xs);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700}
+
+  /* ============ VARIANT 1 — HALL CENTRAL ============ */
+  .v1-body{flex:1;padding:var(--v-space-xl);overflow-y:auto;background:
+    radial-gradient(ellipse at top,var(--v-gold-10),transparent 70%),
+    var(--v-bg)}
+  .v1-hero{text-align:center;padding:var(--v-space-lg) 0 var(--v-space-xl)}
+  .v1-hero-subtitle{font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:3px;text-transform:uppercase;margin-bottom:var(--v-space-sm)}
+  .v1-hero-title{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:26px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 24px var(--v-gold-40);margin-bottom:var(--v-space-lg)}
+  .v1-party-ring{width:160px;height:160px;margin:0 auto;position:relative}
+  .v1-party-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .v1-ring-bg{fill:none;stroke:var(--v-bar-track);stroke-width:6}
+  .v1-ring-fill{fill:none;stroke:url(#v1grad);stroke-width:6;stroke-linecap:round;stroke-dasharray:150 450}
+  .v1-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .v1-ring-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:42px;font-weight:700;line-height:1;text-shadow:0 0 16px var(--v-gold-50)}
+  .v1-ring-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-top:var(--v-space-xs)}
+  .v1-ring-max{font-family:var(--v-font-display);color:var(--v-text-faint);font-size:var(--v-font-sm)}
+  .v1-party-slots{display:flex;gap:var(--v-space-md);justify-content:center;margin-top:var(--v-space-lg)}
+  .v1-slot{width:44px;height:44px;border-radius:50%;border:2px dashed var(--v-border-gold);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--v-text-faint);background:var(--v-bg-card)}
+  .v1-slot.filled{border:2px solid var(--v-gold);background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));color:var(--v-bg-deep);font-weight:700;box-shadow:0 0 12px var(--v-gold-40)}
+  .v1-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md);margin-top:var(--v-space-xl)}
+  .v1-action{background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-lg);text-align:center;cursor:pointer;position:relative;transition:all var(--v-transition-base)}
+  .v1-action:hover{background:var(--v-gold-05);transform:translateY(-2px);box-shadow:var(--v-shadow-gold)}
+  .v1-action-hero{grid-column:span 2;background:linear-gradient(135deg,var(--v-gold-20),var(--v-gold-05));border:1px solid var(--v-gold)}
+  .v1-action-ic{font-size:28px;display:block;margin-bottom:var(--v-space-xs)}
+  .v1-action-label{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .v1-action-sub{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);margin-top:2px}
+  .v1-action-badge{position:absolute;top:-6px;right:-6px;background:var(--v-crimson);color:var(--v-gold-light);padding:2px 8px;border-radius:var(--v-radius-pill);font-size:var(--v-font-xs);font-weight:700;border:1px solid var(--v-gold);font-family:var(--v-font-display)}
+  .v1-section-head{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:3px;text-transform:uppercase;text-align:center;margin:var(--v-space-2xl) 0 var(--v-space-md);position:relative}
+  .v1-section-head::before,.v1-section-head::after{content:"";position:absolute;top:50%;width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30))}
+  .v1-section-head::before{left:0}
+  .v1-section-head::after{right:0;background:linear-gradient(270deg,transparent,var(--v-gold-30))}
+  .v1-featured{display:flex;gap:var(--v-space-md);overflow-x:auto;padding-bottom:var(--v-space-sm)}
+  .v1-featured-card{flex:0 0 160px;background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center}
+  .v1-fc-avatar{width:56px;height:56px;border-radius:50%;margin:0 auto var(--v-space-sm);display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid var(--v-gold)}
+  .v1-fc-avatar.guerreiro{background:linear-gradient(135deg,var(--v-cls-guerreiro),#7a2020)}
+  .v1-fc-avatar.ladrao{background:linear-gradient(135deg,var(--v-cls-ladrao),#2a5a2a)}
+  .v1-fc-avatar.mago{background:linear-gradient(135deg,var(--v-cls-mago),#2a3a6a)}
+  .v1-fc-name{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-sm);font-weight:700}
+  .v1-fc-class{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);margin-top:2px}
+  .v1-fc-level{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-xs);margin-top:var(--v-space-xs)}
+  .v1-fc-price{display:flex;align-items:center;justify-content:center;gap:var(--v-space-xs);margin-top:var(--v-space-sm);padding-top:var(--v-space-sm);border-top:1px dashed var(--v-border-gold);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-sm);font-weight:700}
+
+  /* ============ VARIANT 2 — CORK BOARD ============ */
+  .v2-body{flex:1;overflow-y:auto;padding:var(--v-space-xl);background:
+    radial-gradient(circle at 25% 25%,rgba(96,60,20,0.15),transparent 40%),
+    radial-gradient(circle at 75% 75%,rgba(96,60,20,0.15),transparent 40%),
+    linear-gradient(180deg,#3a2820,#2a1e18)}
+  .v2-stats{display:flex;gap:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .v2-stat{flex:1;background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center}
+  .v2-stat-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v2-stat-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;margin-top:2px}
+  .v2-board-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:var(--v-space-md)}
+  .v2-notes{display:grid;grid-template-columns:1fr 1fr;gap:var(--v-space-md)}
+  .v2-note{background:linear-gradient(135deg,#f5e8c8,#e8d9a8);border:1px solid #8a7050;border-radius:var(--v-radius-sm);padding:var(--v-space-md) var(--v-space-sm);position:relative;color:#3a2810;box-shadow:0 4px 12px rgba(0,0,0,0.5),inset 0 0 20px rgba(0,0,0,0.05);transform:rotate(-1deg);min-height:120px}
+  .v2-note:nth-child(2){transform:rotate(1deg)}
+  .v2-note:nth-child(3){transform:rotate(0.5deg)}
+  .v2-note:nth-child(4){transform:rotate(-1.5deg)}
+  .v2-note::before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);width:12px;height:12px;background:radial-gradient(circle,#c04040,#5a1515);border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.6),inset -1px -1px 2px rgba(0,0,0,0.5)}
+  .v2-note-top{padding-top:var(--v-space-xl);text-align:center}
+  .v2-note-name{font-family:var(--v-font-display);color:#3a2810;font-size:var(--v-font-base);font-weight:700;letter-spacing:1px}
+  .v2-note-class{font-family:var(--v-font);color:#6a4a20;font-size:var(--v-font-xs);font-style:italic}
+  .v2-note-level{display:inline-block;background:#c4953a;color:#1a1510;padding:1px 8px;border-radius:var(--v-radius-pill);font-size:var(--v-font-xs);font-weight:700;margin-top:var(--v-space-xs);font-family:var(--v-font-display)}
+  .v2-note-stats{display:flex;justify-content:space-around;margin-top:var(--v-space-sm);padding-top:var(--v-space-xs);border-top:1px dashed #8a7050;font-size:var(--v-font-xs);color:#6a4a20;font-family:var(--v-font)}
+  .v2-note-price{text-align:center;margin-top:var(--v-space-sm);padding-top:var(--v-space-sm);border-top:1px dashed #8a7050;font-family:var(--v-font-display);color:#8a5a10;font-size:var(--v-font-sm);font-weight:700}
+  .v2-tabs{display:flex;gap:var(--v-space-sm);margin-bottom:var(--v-space-lg);padding:var(--v-space-xs);background:rgba(0,0,0,0.3);border-radius:var(--v-radius-sm);border:1px solid var(--v-border)}
+  .v2-tab{flex:1;padding:var(--v-space-sm);background:transparent;border:none;color:var(--v-text-dim);font-family:var(--v-font);font-size:var(--v-font-sm);cursor:pointer;border-radius:var(--v-radius-xs)}
+  .v2-tab.active{background:var(--v-gold-15);color:var(--v-gold);font-weight:700}
+
+  /* ============ VARIANT 3 — TABS MODERN ============ */
+  .v3-body{flex:1;overflow-y:auto;background:var(--v-bg)}
+  .v3-topbar{padding:var(--v-space-xl);background:linear-gradient(180deg,var(--v-gold-10),transparent);border-bottom:1px solid var(--v-border-gold)}
+  .v3-topbar-row{display:flex;gap:var(--v-space-md);align-items:center;margin-bottom:var(--v-space-md)}
+  .v3-party-pill{display:flex;align-items:center;gap:var(--v-space-sm);background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-pill);padding:var(--v-space-sm) var(--v-space-md);flex:1}
+  .v3-pp-ic{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--v-bg-deep);font-weight:700;flex-shrink:0}
+  .v3-pp-txt{flex:1;min-width:0}
+  .v3-pp-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v3-pp-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:700}
+  .v3-gold-pill{display:flex;align-items:center;gap:var(--v-space-sm);background:var(--v-gold-15);border:1px solid var(--v-gold);border-radius:var(--v-radius-pill);padding:var(--v-space-sm) var(--v-space-lg);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700}
+  .v3-tabs{display:flex;gap:var(--v-space-xs);padding:var(--v-space-sm);background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius)}
+  .v3-tab{flex:1;padding:var(--v-space-sm);background:transparent;border:none;color:var(--v-text-dim);font-family:var(--v-font);font-size:var(--v-font-sm);cursor:pointer;border-radius:var(--v-radius-xs);font-weight:600}
+  .v3-tab.active{background:var(--v-gold-15);color:var(--v-gold)}
+  .v3-tab-content{padding:var(--v-space-xl)}
+  .v3-filters{display:flex;gap:var(--v-space-sm);overflow-x:auto;padding-bottom:var(--v-space-sm);margin-bottom:var(--v-space-lg)}
+  .v3-filter{flex-shrink:0;padding:4px 12px;background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius-pill);color:var(--v-text-dim);font-family:var(--v-font);font-size:var(--v-font-xs);cursor:pointer}
+  .v3-filter.active{background:var(--v-gold-15);border-color:var(--v-gold);color:var(--v-gold);font-weight:700}
+  .v3-adv-grid{display:flex;flex-direction:column;gap:var(--v-space-md)}
+  .v3-adv-card{display:flex;gap:var(--v-space-md);background:var(--v-bg-card);border:1px solid var(--v-border);border-left:3px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);transition:all var(--v-transition-base);cursor:pointer}
+  .v3-adv-card:hover{border-left-color:var(--v-gold);box-shadow:var(--v-shadow-gold)}
+  .v3-adv-card.guerreiro{border-left-color:var(--v-cls-guerreiro)}
+  .v3-adv-card.mago{border-left-color:var(--v-cls-mago)}
+  .v3-adv-card.clerigo{border-left-color:var(--v-cls-clerigo)}
+  .v3-adv-av{width:48px;height:48px;border-radius:var(--v-radius-sm);background:var(--v-bg);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--v-border-gold)}
+  .v3-adv-info{flex:1;min-width:0}
+  .v3-adv-name{display:flex;align-items:center;gap:var(--v-space-sm);font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-base);font-weight:700}
+  .v3-adv-lvl{background:var(--v-gold-15);color:var(--v-gold);padding:1px 6px;border-radius:var(--v-radius-pill);font-size:var(--v-font-xs);font-weight:700}
+  .v3-adv-cls{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);margin-top:2px}
+  .v3-adv-stats{display:flex;gap:var(--v-space-md);margin-top:var(--v-space-xs);font-family:var(--v-font);font-size:var(--v-font-xs)}
+  .v3-adv-stat{color:var(--v-text-dim)}
+  .v3-adv-stat b{color:var(--v-text);font-weight:700}
+  .v3-adv-price{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:var(--v-space-xs);flex-shrink:0}
+  .v3-adv-price-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700}
+  .v3-adv-hire-btn{background:var(--v-gold);color:var(--v-bg-deep);border:none;border-radius:var(--v-radius-sm);padding:4px 12px;font-family:var(--v-font-display);font-size:var(--v-font-xs);font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+
+  /* ============ VARIANT 4 — GUILDA CON NPC ============ */
+  .v4-body{flex:1;overflow-y:auto;background:
+    linear-gradient(180deg,#1a1208 0%,var(--v-bg) 40%)}
+  .v4-scene{height:200px;background:
+    radial-gradient(ellipse at center top,var(--v-gold-20),transparent 60%),
+    radial-gradient(ellipse at center bottom,var(--v-crimson-glow),transparent 60%),
+    #1a1510;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:var(--v-space-lg);border-bottom:1px solid var(--v-gold-dim)}
+  .v4-scene::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:80%;height:2px;background:linear-gradient(90deg,transparent,var(--v-gold-50),transparent)}
+  .v4-scene-banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-sm);letter-spacing:3px;text-transform:uppercase}
+  .v4-npc{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#5a3a20,#8a5a30);border:3px solid var(--v-gold);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:var(--v-space-md);box-shadow:0 0 30px var(--v-gold-40)}
+  .v4-npc-name{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.8)}
+  .v4-npc-title{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);font-style:italic}
+  .v4-dlg{padding:var(--v-space-xl);background:linear-gradient(180deg,var(--v-bg-card),transparent)}
+  .v4-dlg-speech{position:relative;background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-lg) var(--v-space-xl);margin-bottom:var(--v-space-lg)}
+  .v4-dlg-speech::before{content:"";position:absolute;top:-10px;left:40px;width:20px;height:20px;background:var(--v-bg-card);border-left:1px solid var(--v-border-gold);border-top:1px solid var(--v-border-gold);transform:rotate(45deg)}
+  .v4-dlg-text{font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-body);line-height:1.5;font-style:italic}
+  .v4-dlg-text b{color:var(--v-gold-light);font-weight:700}
+  .v4-choices{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .v4-choice{display:flex;align-items:center;gap:var(--v-space-md);padding:var(--v-space-md) var(--v-space-lg);background:var(--v-bg-card);border:1px solid var(--v-border);border-radius:var(--v-radius);cursor:pointer;transition:all var(--v-transition-base);position:relative;text-align:left}
+  .v4-choice:hover{border-color:var(--v-gold);background:var(--v-gold-05);transform:translateX(4px)}
+  .v4-choice::before{content:"▸";color:var(--v-gold);font-size:18px;flex-shrink:0}
+  .v4-choice-ic{font-size:22px;flex-shrink:0}
+  .v4-choice-text{flex:1}
+  .v4-choice-lbl{font-family:var(--v-font-display);color:var(--v-text-bright);font-size:var(--v-font-base);font-weight:700}
+  .v4-choice-desc{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);margin-top:2px}
+  .v4-choice-badge{position:absolute;top:8px;right:12px;background:var(--v-crimson);color:var(--v-gold-light);padding:1px 8px;border-radius:var(--v-radius-pill);font-size:var(--v-font-xs);font-weight:700;font-family:var(--v-font-display)}
+  .v4-status-bar{display:flex;gap:var(--v-space-md);padding:var(--v-space-md) var(--v-space-xl);background:var(--v-bg-deep);border-top:1px solid var(--v-border);font-family:var(--v-font-display);font-size:var(--v-font-sm)}
+  .v4-status-item{flex:1;text-align:center}
+  .v4-status-item-lbl{color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase}
+  .v4-status-item-val{color:var(--v-gold-light);font-weight:700;margin-top:2px}
+
+  /* ============ VARIANT 5 — EPIC SCROLL ============ */
+  .v5-body{flex:1;overflow-y:auto;background:var(--v-bg);padding:var(--v-space-xl)}
+  .v5-scroll{background:linear-gradient(180deg,var(--v-gold-05),rgba(245,240,224,0.02));border:1px solid var(--v-border-gold);border-radius:var(--v-radius-lg);padding:var(--v-space-2xl) var(--v-space-xl);position:relative}
+  .v5-scroll::before,.v5-scroll::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:85%;height:2px;background:linear-gradient(90deg,transparent,var(--v-gold-50),transparent)}
+  .v5-scroll::before{top:12px}
+  .v5-scroll::after{bottom:12px}
+  .v5-crest{position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:56px;height:56px;background:radial-gradient(circle,var(--v-crimson),#5a1515);border:2px solid var(--v-gold-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:var(--v-shadow-gold)}
+  .v5-s-title{text-align:center;font-family:var(--v-font-display);color:var(--v-gold-light);font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:var(--v-space-md) 0 var(--v-space-xs);text-shadow:0 0 16px var(--v-gold-30)}
+  .v5-s-sub{text-align:center;font-family:var(--v-font);color:var(--v-gold);font-size:var(--v-font-xs);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--v-space-lg)}
+  .v5-s-sub::before,.v5-s-sub::after{content:"◆";color:var(--v-gold-dim);margin:0 var(--v-space-md)}
+  .v5-s-info{display:flex;justify-content:space-around;background:var(--v-bg-card);border:1px solid var(--v-border-gold);border-radius:var(--v-radius);padding:var(--v-space-md);margin-bottom:var(--v-space-lg)}
+  .v5-s-info-cell{text-align:center}
+  .v5-s-info-val{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-xl);font-weight:700}
+  .v5-s-info-lbl{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+  .v5-sec-head{text-align:center;font-family:var(--v-font-display);color:var(--v-gold);font-size:var(--v-font-lg);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin:var(--v-space-xl) 0 var(--v-space-md)}
+  .v5-sec-divider{display:flex;align-items:center;gap:var(--v-space-md);margin:var(--v-space-lg) 0}
+  .v5-sec-divider::before,.v5-sec-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-30),transparent)}
+  .v5-sec-divider-ic{color:var(--v-gold);font-size:14px}
+  .v5-adv-list{display:flex;flex-direction:column;gap:var(--v-space-sm)}
+  .v5-adv-row{display:flex;align-items:center;gap:var(--v-space-md);background:var(--v-gold-04);border:1px solid var(--v-border);border-radius:var(--v-radius);padding:var(--v-space-md);cursor:pointer;transition:all var(--v-transition-base)}
+  .v5-adv-row:hover{border-color:var(--v-gold-light);background:var(--v-gold-08)}
+  .v5-adv-seal{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid var(--v-gold-light);background:linear-gradient(135deg,var(--v-gold-dim),var(--v-gold));color:var(--v-bg-deep);font-weight:700;font-family:var(--v-font-display)}
+  .v5-adv-body{flex:1;min-width:0}
+  .v5-adv-title{display:flex;align-items:center;gap:var(--v-space-sm);font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-base);font-weight:700}
+  .v5-adv-class{font-family:var(--v-font);color:var(--v-text-dim);font-size:var(--v-font-xs);font-style:italic;margin-top:2px}
+  .v5-adv-coins{display:flex;flex-direction:column;align-items:flex-end;gap:var(--v-space-xs);flex-shrink:0}
+  .v5-adv-amount{font-family:var(--v-font-display);color:var(--v-gold-light);font-size:var(--v-font-lg);font-weight:700}
+  .v5-adv-unit{font-family:var(--v-font);color:var(--v-text-faint);font-size:var(--v-font-xs);font-style:italic}
+  .v5-quest-note{background:rgba(123,32,32,0.08);border:1px dashed var(--v-crimson-light);border-radius:var(--v-radius);padding:var(--v-space-md);text-align:center;font-family:var(--v-font);color:var(--v-text);font-size:var(--v-font-sm);font-style:italic}
+  .v5-footer{text-align:center;margin-top:var(--v-space-xl);font-family:var(--v-font);color:var(--v-text-faint);font-size:var(--v-font-xs);font-style:italic;letter-spacing:1px}
+  .v5-footer b{color:var(--v-gold);font-weight:700;font-style:normal}
+</style>
+</head>
+<body>
+<div class="mockups-shell">
+  <h1 class="mockups-title">◆ Mockups — Guilda dos Aventureiros ◆</h1>
+  <p class="mockups-sub">5 propostas de redesign da tela principal da Guilda. Todas em viewport 430×900 (smartphone).</p>
+
+  <div class="mockups-intro">
+    <p><b>◆ Análise do que é importante ter na Guilda:</b></p>
+    <ul>
+      <li><b>Status do grupo</b> — X/3 aliados, quem já está contratado</li>
+      <li><b>Ouro disponível</b> — sempre visível para calcular contratações</li>
+      <li><b>Aventureiros disponíveis</b> — lista com avatar, classe, level, stats relevantes, preço, disponibilidade</li>
+      <li><b>Ação principal destacada</b> — Contratar é a ação mais comum da Guilda</li>
+      <li><b>Quadro de Missões</b> — missões específicas da guilda</li>
+      <li><b>NPCs especiais</b> — Tavira (treinamento), Braun (o Marcado), mestres</li>
+      <li><b>Treinamento / Biblioteca</b> — secundárias mas presentes</li>
+      <li><b>Rotação de aventureiros</b> — "rotação a cada 12h" é info crítica</li>
+    </ul>
+    <p><b>◆ Problemas do design atual:</b> tela é um menu de botões genérico; cards de aventureiros são só texto <i>"Sia (Lv2) 200g"</i> sem avatar/classe/stats; hub + lista de aventureiros em telas separadas sem contexto; filtros de classe numa barra horizontal pequena.</p>
+  </div>
+
+  <div class="mockups-grid">
+
+    <!-- ============ V1 — HALL CENTRAL ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V1 — Hall Central</div>
+      <div class="mockup-note">Ring circular mostra grupo 1/3 com slots visuais, ação principal "Recrutar" em destaque, aventureiros em carousel horizontal.</div>
+      <div class="phone">
+        <div class="g-header">
+          <div class="g-header-back">◀</div>
+          <div class="g-header-title">GUILDA</div>
+          <div class="g-header-res"><span class="vi vi-coin sm"></span> 947</div>
+        </div>
+        <div class="v1-body">
+          <div class="v1-hero">
+            <div class="v1-hero-subtitle">✦ Salão dos Aventureiros ✦</div>
+            <div class="v1-hero-title">Guilda</div>
+            <div class="v1-party-ring">
+              <svg viewBox="0 0 160 160">
+                <defs><linearGradient id="v1grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#9a7530"/>
+                  <stop offset="100%" stop-color="#dbb668"/>
+                </linearGradient></defs>
+                <circle class="v1-ring-bg" cx="80" cy="80" r="72"/>
+                <circle class="v1-ring-fill" cx="80" cy="80" r="72"/>
+              </svg>
+              <div class="v1-ring-center">
+                <div class="v1-ring-val">1</div>
+                <div class="v1-ring-lbl">Grupo</div>
+                <div class="v1-ring-max">de 3</div>
+              </div>
+            </div>
+            <div class="v1-party-slots">
+              <div class="v1-slot filled">R</div>
+              <div class="v1-slot">+</div>
+              <div class="v1-slot">+</div>
+            </div>
+          </div>
+          <div class="v1-actions">
+            <div class="v1-action v1-action-hero">
+              <span class="v1-action-ic">⚔</span>
+              <div class="v1-action-label">Contratar Aventureiros</div>
+              <div class="v1-action-sub">15 disponíveis • rotação em 12h</div>
+            </div>
+            <div class="v1-action">
+              <span class="v1-action-ic">📜</span>
+              <div class="v1-action-label">Missões</div>
+              <div class="v1-action-badge">3</div>
+            </div>
+            <div class="v1-action">
+              <span class="v1-action-ic">👥</span>
+              <div class="v1-action-label">Gerenciar</div>
+              <div class="v1-action-sub">1 / 3</div>
+            </div>
+            <div class="v1-action">
+              <span class="v1-action-ic">⚒</span>
+              <div class="v1-action-label">Treinamento</div>
+            </div>
+            <div class="v1-action">
+              <span class="v1-action-ic">📚</span>
+              <div class="v1-action-label">Biblioteca</div>
+            </div>
+          </div>
+          <div class="v1-section-head">Destaques</div>
+          <div class="v1-featured">
+            <div class="v1-featured-card">
+              <div class="v1-fc-avatar guerreiro">🗡</div>
+              <div class="v1-fc-name">Sia</div>
+              <div class="v1-fc-class">Guerreira</div>
+              <div class="v1-fc-level">Nível 2</div>
+              <div class="v1-fc-price"><span class="vi vi-coin sm"></span> 200</div>
+            </div>
+            <div class="v1-featured-card">
+              <div class="v1-fc-avatar mago">🔮</div>
+              <div class="v1-fc-name">Kaelen</div>
+              <div class="v1-fc-class">Mago</div>
+              <div class="v1-fc-level">Nível 3</div>
+              <div class="v1-fc-price"><span class="vi vi-coin sm"></span> 300</div>
+            </div>
+            <div class="v1-featured-card">
+              <div class="v1-fc-avatar ladrao">🗝</div>
+              <div class="v1-fc-name">Gwen</div>
+              <div class="v1-fc-class">Ladina</div>
+              <div class="v1-fc-level">Nível 5</div>
+              <div class="v1-fc-price"><span class="vi vi-coin sm"></span> 500</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ V2 — CORK BOARD ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V2 — Quadro de Avisos</div>
+      <div class="mockup-note">Tabuleiro de cortiça medieval. Cada aventureiro é uma nota pregada com percevejo vermelho, papel amarelado com stats rabiscados.</div>
+      <div class="phone">
+        <div class="g-header">
+          <div class="g-header-back">◀</div>
+          <div class="g-header-title">GUILDA</div>
+          <div class="g-header-res"><span class="vi vi-coin sm"></span> 947</div>
+        </div>
+        <div class="v2-body">
+          <div class="v2-stats">
+            <div class="v2-stat">
+              <div class="v2-stat-lbl">Grupo</div>
+              <div class="v2-stat-val">1 / 3</div>
+            </div>
+            <div class="v2-stat">
+              <div class="v2-stat-lbl">Disponíveis</div>
+              <div class="v2-stat-val">15 / 15</div>
+            </div>
+            <div class="v2-stat">
+              <div class="v2-stat-lbl">Rotação</div>
+              <div class="v2-stat-val">12h</div>
+            </div>
+          </div>
+          <div class="v2-tabs">
+            <button class="v2-tab active">Recrutar</button>
+            <button class="v2-tab">Missões</button>
+            <button class="v2-tab">Treino</button>
+            <button class="v2-tab">Lore</button>
+          </div>
+          <div class="v2-board-title">Aventureiros Disponíveis</div>
+          <div class="v2-notes">
+            <div class="v2-note">
+              <div class="v2-note-top">
+                <div class="v2-note-name">Sia</div>
+                <div class="v2-note-class">Guerreira</div>
+                <div class="v2-note-level">Nv. 2</div>
+              </div>
+              <div class="v2-note-stats">
+                <span>HP 18</span>
+                <span>ATK +4</span>
+              </div>
+              <div class="v2-note-price"><span class="vi vi-coin sm"></span> 200</div>
+            </div>
+            <div class="v2-note">
+              <div class="v2-note-top">
+                <div class="v2-note-name">Kaelen</div>
+                <div class="v2-note-class">Mago</div>
+                <div class="v2-note-level">Nv. 3</div>
+              </div>
+              <div class="v2-note-stats">
+                <span>MP 22</span>
+                <span>INT +5</span>
+              </div>
+              <div class="v2-note-price"><span class="vi vi-coin sm"></span> 300</div>
+            </div>
+            <div class="v2-note">
+              <div class="v2-note-top">
+                <div class="v2-note-name">Gwen</div>
+                <div class="v2-note-class">Ladina</div>
+                <div class="v2-note-level">Nv. 5</div>
+              </div>
+              <div class="v2-note-stats">
+                <span>DEX +6</span>
+                <span>STL +4</span>
+              </div>
+              <div class="v2-note-price"><span class="vi vi-coin sm"></span> 500</div>
+            </div>
+            <div class="v2-note">
+              <div class="v2-note-top">
+                <div class="v2-note-name">Joel</div>
+                <div class="v2-note-class">Clérigo</div>
+                <div class="v2-note-level">Nv. 3</div>
+              </div>
+              <div class="v2-note-stats">
+                <span>WIS +5</span>
+                <span>CURA +3</span>
+              </div>
+              <div class="v2-note-price"><span class="vi vi-coin sm"></span> 300</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ V3 — TABS MODERN ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V3 — Tabs Modern</div>
+      <div class="mockup-note">Compacto e data-rich. Tabs no topo, cards horizontais com avatar colorido por classe, stats inline, botão "Contratar" direto — pega muita informação em pouco espaço.</div>
+      <div class="phone">
+        <div class="g-header">
+          <div class="g-header-back">◀</div>
+          <div class="g-header-title">GUILDA</div>
+          <div class="g-header-res"><span class="vi vi-coin sm"></span> 947</div>
+        </div>
+        <div class="v3-body">
+          <div class="v3-topbar">
+            <div class="v3-topbar-row">
+              <div class="v3-party-pill">
+                <div class="v3-pp-ic">R</div>
+                <div class="v3-pp-txt">
+                  <div class="v3-pp-lbl">Grupo</div>
+                  <div class="v3-pp-val">1 de 3</div>
+                </div>
+              </div>
+              <div class="v3-gold-pill"><span class="vi vi-coin"></span> 947</div>
+            </div>
+            <div class="v3-tabs">
+              <button class="v3-tab active">⚔ Recrutar</button>
+              <button class="v3-tab">📜 Missões</button>
+              <button class="v3-tab">⚒ Treino</button>
+              <button class="v3-tab">📚 Lore</button>
+            </div>
+          </div>
+          <div class="v3-tab-content">
+            <div class="v3-filters">
+              <span class="v3-filter active">Todos (15)</span>
+              <span class="v3-filter">⚔ Guerr</span>
+              <span class="v3-filter">🔮 Mago</span>
+              <span class="v3-filter">🗝 Ladino</span>
+              <span class="v3-filter">✨ Cléri</span>
+              <span class="v3-filter">🏹 Ranger</span>
+            </div>
+            <div class="v3-adv-grid">
+              <div class="v3-adv-card guerreiro">
+                <div class="v3-adv-av">🗡</div>
+                <div class="v3-adv-info">
+                  <div class="v3-adv-name">Sia <span class="v3-adv-lvl">Nv 2</span></div>
+                  <div class="v3-adv-cls">Guerreira • Humana</div>
+                  <div class="v3-adv-stats">
+                    <span class="v3-adv-stat">HP <b>18</b></span>
+                    <span class="v3-adv-stat">ATK <b>+4</b></span>
+                    <span class="v3-adv-stat">AC <b>16</b></span>
+                  </div>
+                </div>
+                <div class="v3-adv-price">
+                  <div class="v3-adv-price-val">200</div>
+                  <button class="v3-adv-hire-btn">Contratar</button>
+                </div>
+              </div>
+              <div class="v3-adv-card mago">
+                <div class="v3-adv-av">🔮</div>
+                <div class="v3-adv-info">
+                  <div class="v3-adv-name">Kaelen <span class="v3-adv-lvl">Nv 3</span></div>
+                  <div class="v3-adv-cls">Mago • Elfo</div>
+                  <div class="v3-adv-stats">
+                    <span class="v3-adv-stat">MP <b>22</b></span>
+                    <span class="v3-adv-stat">INT <b>+5</b></span>
+                    <span class="v3-adv-stat">DC <b>14</b></span>
+                  </div>
+                </div>
+                <div class="v3-adv-price">
+                  <div class="v3-adv-price-val">300</div>
+                  <button class="v3-adv-hire-btn">Contratar</button>
+                </div>
+              </div>
+              <div class="v3-adv-card clerigo">
+                <div class="v3-adv-av">✨</div>
+                <div class="v3-adv-info">
+                  <div class="v3-adv-name">Joel <span class="v3-adv-lvl">Nv 3</span></div>
+                  <div class="v3-adv-cls">Clérigo • Anão</div>
+                  <div class="v3-adv-stats">
+                    <span class="v3-adv-stat">WIS <b>+5</b></span>
+                    <span class="v3-adv-stat">HP <b>24</b></span>
+                    <span class="v3-adv-stat">CURA</span>
+                  </div>
+                </div>
+                <div class="v3-adv-price">
+                  <div class="v3-adv-price-val">300</div>
+                  <button class="v3-adv-hire-btn">Contratar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ V4 — GUILDA NPC DIALOG ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V4 — NPC Dialog</div>
+      <div class="mockup-note">Imersivo RPG: a mestra da Guilda (Tavira) te recebe e fala contigo. Ações são escolhas de diálogo. Menos "menu", mais "aventura".</div>
+      <div class="phone">
+        <div class="g-header">
+          <div class="g-header-back">◀</div>
+          <div class="g-header-title">GUILDA</div>
+          <div class="g-header-res"><span class="vi vi-coin sm"></span> 947</div>
+        </div>
+        <div class="v4-body">
+          <div class="v4-scene">
+            <div class="v4-scene-banner">✦ Salão dos Aventureiros ✦</div>
+            <div class="v4-npc">🧙‍♀️</div>
+            <div class="v4-npc-name">Tavira, a Mestra</div>
+            <div class="v4-npc-title">Guardiã da Guilda</div>
+          </div>
+          <div class="v4-dlg">
+            <div class="v4-dlg-speech">
+              <div class="v4-dlg-text">
+                "Bem-vindo de volta, aventureiro. Vejo que teu grupo ainda tem <b>2 vagas</b>. Temos <b>15 aventureiros</b> dispostos hoje — a lista se renova em <b>12 horas</b>. Em que posso te ajudar?"
+              </div>
+            </div>
+            <div class="v4-choices">
+              <button class="v4-choice">
+                <span class="v4-choice-ic">⚔</span>
+                <div class="v4-choice-text">
+                  <div class="v4-choice-lbl">Ver aventureiros disponíveis</div>
+                  <div class="v4-choice-desc">15 recrutas prontos para aventura</div>
+                </div>
+              </button>
+              <button class="v4-choice">
+                <span class="v4-choice-ic">📜</span>
+                <div class="v4-choice-text">
+                  <div class="v4-choice-lbl">Quadro de missões</div>
+                  <div class="v4-choice-desc">Contratos ativos da Guilda</div>
+                </div>
+                <span class="v4-choice-badge">3</span>
+              </button>
+              <button class="v4-choice">
+                <span class="v4-choice-ic">👥</span>
+                <div class="v4-choice-text">
+                  <div class="v4-choice-lbl">Gerenciar meu grupo</div>
+                  <div class="v4-choice-desc">Ryalael está contigo</div>
+                </div>
+              </button>
+              <button class="v4-choice">
+                <span class="v4-choice-ic">⚒</span>
+                <div class="v4-choice-text">
+                  <div class="v4-choice-lbl">Treinar com Braun, o Marcado</div>
+                  <div class="v4-choice-desc">Mestre de armas</div>
+                </div>
+              </button>
+              <button class="v4-choice">
+                <span class="v4-choice-ic">📚</span>
+                <div class="v4-choice-text">
+                  <div class="v4-choice-lbl">Consultar a Biblioteca</div>
+                  <div class="v4-choice-desc">Lore e crônicas antigas</div>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div class="v4-status-bar">
+            <div class="v4-status-item">
+              <div class="v4-status-item-lbl">Grupo</div>
+              <div class="v4-status-item-val">1 / 3</div>
+            </div>
+            <div class="v4-status-item">
+              <div class="v4-status-item-lbl">Ouro</div>
+              <div class="v4-status-item-val">947</div>
+            </div>
+            <div class="v4-status-item">
+              <div class="v4-status-item-lbl">Rotação</div>
+              <div class="v4-status-item-val">12h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ V5 — EPIC SCROLL ============ -->
+    <div class="mockup-frame">
+      <div class="mockup-label">V5 — Pergaminho Épico</div>
+      <div class="mockup-note">Design como pergaminho medieval ornamentado. Selo da Guilda, seções com headers decorados, aventureiros em linha única com selo circular.</div>
+      <div class="phone">
+        <div class="g-header">
+          <div class="g-header-back">◀</div>
+          <div class="g-header-title">GUILDA</div>
+          <div class="g-header-res"><span class="vi vi-coin sm"></span> 947</div>
+        </div>
+        <div class="v5-body">
+          <div class="v5-scroll">
+            <div class="v5-crest">✦</div>
+            <h2 class="v5-s-title">Guilda dos Aventureiros</h2>
+            <div class="v5-s-sub">Registro Oficial</div>
+            <div class="v5-s-info">
+              <div class="v5-s-info-cell">
+                <div class="v5-s-info-val">1 / 3</div>
+                <div class="v5-s-info-lbl">Grupo</div>
+              </div>
+              <div class="v5-s-info-cell">
+                <div class="v5-s-info-val">15</div>
+                <div class="v5-s-info-lbl">Disponíveis</div>
+              </div>
+              <div class="v5-s-info-cell">
+                <div class="v5-s-info-val">12h</div>
+                <div class="v5-s-info-lbl">Rotação</div>
+              </div>
+            </div>
+            <div class="v5-sec-divider"><span class="v5-sec-divider-ic">◆</span></div>
+            <div class="v5-sec-head">Aventureiros à Disposição</div>
+            <div class="v5-adv-list">
+              <div class="v5-adv-row">
+                <div class="v5-adv-seal">S</div>
+                <div class="v5-adv-body">
+                  <div class="v5-adv-title">Sia, a Guerreira</div>
+                  <div class="v5-adv-class">Humana • Nível 2 • HP 18 • ATK +4</div>
+                </div>
+                <div class="v5-adv-coins">
+                  <span class="v5-adv-amount">200</span>
+                  <span class="v5-adv-unit">Valdoritas</span>
+                </div>
+              </div>
+              <div class="v5-adv-row">
+                <div class="v5-adv-seal">K</div>
+                <div class="v5-adv-body">
+                  <div class="v5-adv-title">Kaelen, o Mago</div>
+                  <div class="v5-adv-class">Elfo • Nível 3 • MP 22 • INT +5</div>
+                </div>
+                <div class="v5-adv-coins">
+                  <span class="v5-adv-amount">300</span>
+                  <span class="v5-adv-unit">Valdoritas</span>
+                </div>
+              </div>
+              <div class="v5-adv-row">
+                <div class="v5-adv-seal">G</div>
+                <div class="v5-adv-body">
+                  <div class="v5-adv-title">Gwen, a Ladina</div>
+                  <div class="v5-adv-class">Meio-Elfa • Nível 5 • DEX +6</div>
+                </div>
+                <div class="v5-adv-coins">
+                  <span class="v5-adv-amount">500</span>
+                  <span class="v5-adv-unit">Valdoritas</span>
+                </div>
+              </div>
+              <div class="v5-adv-row">
+                <div class="v5-adv-seal">J</div>
+                <div class="v5-adv-body">
+                  <div class="v5-adv-title">Joel, o Clérigo</div>
+                  <div class="v5-adv-class">Anão • Nível 3 • WIS +5 • CURA</div>
+                </div>
+                <div class="v5-adv-coins">
+                  <span class="v5-adv-amount">300</span>
+                  <span class="v5-adv-unit">Valdoritas</span>
+                </div>
+              </div>
+            </div>
+            <div class="v5-sec-divider"><span class="v5-sec-divider-ic">◆</span></div>
+            <div class="v5-sec-head">Contratos Pendentes</div>
+            <div class="v5-quest-note">"3 contratos aguardam bravos aventureiros no quadro de missões"</div>
+            <div class="v5-footer">— Selado pela <b>Ordem de Valdoria</b> —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

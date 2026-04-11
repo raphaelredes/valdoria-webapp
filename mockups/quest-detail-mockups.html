@@ -5,10 +5,49 @@
 <title>Mockups — Tela de Missao</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<link rel="stylesheet" href="../valdoria-design.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&display=swap">
 <style>
-  html,body{max-width:none!important;background:var(--v-bg-deep,#1a1510)!important;height:auto!important;overflow:auto!important;margin:0;padding:0}
+  /* Inline tokens (copied from valdoria-design.css — not importing the
+   * external CSS because @layer valdoria forces html{max-width:430px;
+   * overflow:hidden} which hides the mockups grid). */
+  :root{
+    --v-bg:#2a2420;--v-bg-raised:#332a22;--v-bg-deep:#1a1510;--v-bg-card:#2e2520;
+    --v-gold:#c4953a;--v-gold-dim:#9a7530;--v-gold-light:#dbb668;
+    --v-gold-03:rgba(196,149,58,0.03);--v-gold-04:rgba(196,149,58,0.04);
+    --v-gold-05:rgba(196,149,58,0.05);--v-gold-08:rgba(196,149,58,0.08);
+    --v-gold-10:rgba(196,149,58,0.10);--v-gold-15:rgba(196,149,58,0.15);
+    --v-gold-25:rgba(196,149,58,0.25);--v-gold-30:rgba(196,149,58,0.3);
+    --v-gold-40:rgba(196,149,58,0.4);--v-gold-50:rgba(196,149,58,0.5);
+    --v-gold-60:rgba(196,149,58,0.6);
+    --v-crimson:#7b2020;--v-crimson-light:#a03030;
+    --v-crimson-glow:rgba(123,32,32,0.35);
+    --v-text:#d4c8b0;--v-text-dim:#a09484;--v-text-faint:#8a7a68;--v-text-bright:#e8dcc8;
+    --v-success:#4caf50;
+    --v-border:#4a3828;--v-border-gold:rgba(196,149,58,0.3);
+    --v-radius-xs:4px;--v-radius-sm:6px;--v-radius:10px;
+    --v-radius-lg:14px;--v-radius-pill:20px;
+    --v-font:'MedievalSharp','Cinzel',serif;
+    --v-font-display:'Cinzel',serif;
+    --v-shadow-sm:0 2px 8px rgba(0,0,0,0.4);
+    --v-shadow-md:0 4px 16px rgba(0,0,0,0.5);
+    --v-shadow-gold:0 0 12px rgba(196,149,58,0.25);
+    --v-transition:0.2s ease;--v-transition-base:0.3s ease;--v-transition-slow:0.5s;
+    --v-space-xs:2px;--v-space-sm:4px;--v-space-md:8px;--v-space-lg:12px;
+    --v-space-xl:16px;--v-space-2xl:24px;
+    --v-font-xs:10px;--v-font-sm:12px;--v-font-base:13px;--v-font-body:14px;
+    --v-font-lg:15px;--v-font-xl:16px;--v-font-2xl:18px;
+    --v-bar-track:#1e1810;
+  }
+  /* Valdoria Coin — copied from shared/coin-icon.css. RULE: ALWAYS use
+   * .vi.vi-coin for money representation. NEVER use other emoji. */
+  .vi{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+  .vi-coin{width:14px;height:14px;background:radial-gradient(circle at 40% 35%,#e8c44a,#c4953a 60%,#8a6a20 100%);border-radius:50%;border:1.5px solid #a07828;box-shadow:inset 0 -1px 2px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,220,120,0.3);position:relative}
+  .vi-coin::after{content:'V';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#5a3a10;font-family:var(--v-font,'Georgia',serif);text-shadow:0 0.5px 0 rgba(255,220,120,0.4)}
+  .vi-coin.sm{width:12px;height:12px;border-width:1px}
+  .vi-coin.sm::after{font-size:7px}
+  .vi-coin.lg{width:18px;height:18px;border-width:2px}
+  .vi-coin.lg::after{font-size:10px}
+  html,body{max-width:none;background:var(--v-bg-deep);height:auto;overflow:auto;margin:0;padding:0}
   body{font-family:var(--v-font);color:var(--v-text)}
   .mockups-shell{padding:var(--v-space-2xl);max-width:1800px;margin:0 auto}
   .mockups-title{font-family:var(--v-font-display);color:var(--v-gold);font-size:32px;font-weight:700;letter-spacing:3px;text-align:center;margin:0 0 var(--v-space-md);text-transform:uppercase}
@@ -280,7 +319,7 @@
                 <div class="v1-reward-label">XP</div>
               </div>
               <div class="v1-reward-card">
-                <span class="v1-reward-icon">💰</span>
+                <span class="v1-reward-icon"><span class="vi vi-coin lg"></span></span>
                 <div class="v1-reward-value">50</div>
                 <div class="v1-reward-label">Valdoritas</div>
               </div>
@@ -355,9 +394,9 @@
                 <span class="v2-reward-label">XP</span>
               </div>
               <div class="v2-reward">
-                <span class="v2-reward-ic">💰</span>
+                <span class="v2-reward-ic"><span class="vi vi-coin"></span></span>
                 <span class="v2-reward-val">+50</span>
-                <span class="v2-reward-label">Ouro</span>
+                <span class="v2-reward-label">Valdoritas</span>
               </div>
               <div class="v2-reward">
                 <span class="v2-reward-ic">🗝️</span>
@@ -420,7 +459,7 @@
                   <span class="v3-reward-row-val">150</span>
                 </div>
                 <div class="v3-reward-row">
-                  <span class="v3-reward-row-ic">💰</span>
+                  <span class="v3-reward-row-ic"><span class="vi vi-coin"></span></span>
                   <span class="v3-reward-row-name">Valdoritas</span>
                   <span class="v3-reward-row-val">50</span>
                 </div>
@@ -491,7 +530,7 @@
               <div class="v4-label">◆ Recompensas Prometidas</div>
               <div class="v4-rewards-strip">
                 <div class="v4-reward-pill"><span class="v4-r-ic">✨</span><span class="v4-r-val">150 XP</span></div>
-                <div class="v4-reward-pill"><span class="v4-r-ic">💰</span><span class="v4-r-val">50</span></div>
+                <div class="v4-reward-pill"><span class="v4-r-ic"><span class="vi vi-coin sm"></span></span><span class="v4-r-val">50</span></div>
                 <div class="v4-reward-pill"><span class="v4-r-ic">🗝️</span><span class="v4-r-val">Chave</span></div>
               </div>
               <div class="v4-giver-row">
@@ -547,7 +586,7 @@
                   <span class="v5-tres-lbl">Experiência</span>
                 </div>
                 <div class="v5-tres-cell">
-                  <span class="v5-tres-ic">💰</span>
+                  <span class="v5-tres-ic"><span class="vi vi-coin lg"></span></span>
                   <span class="v5-tres-val">+50</span>
                   <span class="v5-tres-lbl">Valdoritas</span>
                 </div>
