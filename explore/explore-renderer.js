@@ -50,7 +50,65 @@ var _lastClickTime = 0;var EVENT_SPRITE_TYPES={npc:{draw:'_drawNPCSprite',color:
 function clearEventSprite(col,row){_eventSprites=_eventSprites.filter(s=>!(s.col===col&&s.row===row));scheduleRender();}
 var _floatingTexts=[];function spawnFloatingText(col,row,text,color,type){if(_floatingTexts.length>50){console.warn('[EXPLORE] floating_texts_culled count=%d',_floatingTexts.length);_floatingTexts=_floatingTexts.slice(-25);}const center=hexToScreen(col,row);const tile=S.grid[row]&&S.grid[row][col]?S.grid[row][col]:'.';const baseTile=tile.match(/[0-9@EC]/)?'.':tile;const h=(TILE_HEIGHT[baseTile]||1)*UNIT_PX;_floatingTexts.push({x:center.x+(Math.random()-0.5)*10,y:center.y-h-8,text:text,color:color||CV_TEXT,type:type||'flavor',birth:performance.now(),duration:3000,vy:-0.4,});scheduleRender();}
 function _drawFloatingTexts(ctx,timestamp){const now=performance.now();_floatingTexts=_floatingTexts.filter(ft=>(now-ft.birth)<ft.duration);for(const ft of _floatingTexts){const age=now-ft.birth;const t=age/ft.duration;const yOff=ft.vy*age*(1-t*0.5);const alpha=t<0.15?t/0.15:t<0.5?1.0:1.0-((t-0.5)/0.5)*((t-0.5)/0.5);const scale=1+t*0.15;ctx.save();ctx.globalAlpha=alpha*0.85;ctx.translate(ft.x,ft.y+yOff);ctx.scale(scale,scale);ctx.font=ft.type==='damage'?'bold 13px MedievalSharp, serif':ft.type==='big'?'bold 14px MedievalSharp, serif':'13px MedievalSharp, serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText(ft.text,0.5,0.5);ctx.fillStyle=ft.color;ctx.fillText(ft.text,0,0);ctx.restore();}}
-function initRenderer(){_canvas=document.getElementById('iso-map');if(!_canvas){console.error('[EXPLORE] iso-map canvas not found');return;}_ctx=_canvas.getContext('2d');if(!_ctx){console.error('[EXPLORE] Canvas 2d context unavailable');return;}_dpr=Math.min(window.devicePixelRatio||1,2);const viewport=document.getElementById('map-viewport');if(!viewport)console.warn('[EXPLORE] map-viewport not found, using defaults');const vpW=viewport?viewport.clientWidth:390;const vpH=viewport?viewport.clientHeight:700;const size=calcHexSizeForViewport(vpW,vpH,COLS,ROWS);_canvasLogicalW=size.w;_canvasLogicalH=size.h;_canvas.width=Math.round(size.w*_dpr);_canvas.height=Math.round(size.h*_dpr);_canvas.style.width=size.w+'px';_canvas.style.height=size.h+'px';_ctx.scale(_dpr,_dpr);_staticCanvas=document.createElement('canvas');_staticCanvas.width=_canvas.width;_staticCanvas.height=_canvas.height;_staticCtx=_staticCanvas.getContext('2d');_staticCtx.scale(_dpr,_dpr);_staticDirty=true;initFog(_canvas.width,_canvas.height);initMinimap();initTerrainTooltip();if(!_canvas._vListeners){_canvas._vListeners=true;_canvas.addEventListener('click',handleCanvasClick);}scheduleRender();}
+/* #4 (hexmap FRICÇÃO-1): Read the real mobile viewport.
+ * Telegram.WebApp.viewportStableHeight is more accurate than clientHeight on
+ * mobile — it excludes the keyboard area and accounts for safe-area insets.
+ * Falls back to DOM measurement when Telegram is unavailable (web portal). */
+function _getVpDimensions(viewport){
+  var vpW=viewport?viewport.clientWidth:390;
+  var vpH=viewport?viewport.clientHeight:700;
+  try{
+    if(window.Telegram&&Telegram.WebApp){
+      var tg=Telegram.WebApp;
+      /* Use stable height to avoid resize jitter when keyboard opens */
+      var tgH=tg.viewportStableHeight||tg.viewportHeight||0;
+      if(tgH>0&&tgH<vpH+50){vpH=tgH;}
+      /* Telegram doesn't report width directly — innerWidth is the next best */
+      var tgW=window.innerWidth||0;
+      if(tgW>0&&tgW<vpW+50){vpW=tgW;}
+    }
+  }catch(_e){console.warn('[EXPLORE] tg viewport read failed:',_e);}
+  return{w:vpW,h:vpH};}
+
+function initRenderer(){_canvas=document.getElementById('iso-map');if(!_canvas){console.error('[EXPLORE] iso-map canvas not found');return;}_ctx=_canvas.getContext('2d');if(!_ctx){console.error('[EXPLORE] Canvas 2d context unavailable');return;}_dpr=Math.min(window.devicePixelRatio||1,2);const viewport=document.getElementById('map-viewport');if(!viewport)console.warn('[EXPLORE] map-viewport not found, using defaults');const vp=_getVpDimensions(viewport);const size=calcHexSizeForViewport(vp.w,vp.h,COLS,ROWS);console.info('[EXPLORE:RENDER] initRenderer vp=%dx%d grid=%dx%d hex=%dx%d canvas=%dx%d',vp.w,vp.h,COLS,ROWS,HEX_W,HEX_H,size.w,size.h);_canvasLogicalW=size.w;_canvasLogicalH=size.h;_canvas.width=Math.round(size.w*_dpr);_canvas.height=Math.round(size.h*_dpr);_canvas.style.width=size.w+'px';_canvas.style.height=size.h+'px';_ctx.scale(_dpr,_dpr);_staticCanvas=document.createElement('canvas');_staticCanvas.width=_canvas.width;_staticCanvas.height=_canvas.height;_staticCtx=_staticCanvas.getContext('2d');_staticCtx.scale(_dpr,_dpr);_staticDirty=true;initFog(_canvas.width,_canvas.height);initMinimap();initTerrainTooltip();if(!_canvas._vListeners){_canvas._vListeners=true;_canvas.addEventListener('click',handleCanvasClick);}_attachResizeHandler();scheduleRender();}
+
+/* #4 (hexmap FRICÇÃO-1): Re-size canvas on viewport changes (rotation, keyboard,
+ * Telegram viewport resize events). Debounced to 200ms so rapid resize events
+ * don't thrash the canvas/fog init. */
+var _resizeDebounce=null;
+function _handleViewportResize(){
+  if(_resizeDebounce){clearTimeout(_resizeDebounce);}
+  _resizeDebounce=setTimeout(function(){
+    _resizeDebounce=null;
+    if(!_canvas)return;
+    var viewport=document.getElementById('map-viewport');
+    var vp=_getVpDimensions(viewport);
+    var size=calcHexSizeForViewport(vp.w,vp.h,COLS,ROWS);
+    /* Only resize if dimensions actually changed */
+    if(Math.abs(size.w-_canvasLogicalW)<2&&Math.abs(size.h-_canvasLogicalH)<2)return;
+    console.info('[EXPLORE:RENDER] viewport_resize vp=%dx%d hex=%dx%d canvas=%dx%d',vp.w,vp.h,HEX_W,HEX_H,size.w,size.h);
+    _canvasLogicalW=size.w;_canvasLogicalH=size.h;
+    _canvas.width=Math.round(size.w*_dpr);_canvas.height=Math.round(size.h*_dpr);
+    _canvas.style.width=size.w+'px';_canvas.style.height=size.h+'px';
+    _ctx.scale(_dpr,_dpr);
+    _staticCanvas.width=_canvas.width;_staticCanvas.height=_canvas.height;
+    _staticCtx.scale(_dpr,_dpr);
+    _staticDirty=true;
+    /* Re-init fog + minimap with new dimensions */
+    if(typeof initFog==='function')initFog(_canvas.width,_canvas.height);
+    if(typeof initMinimap==='function')initMinimap();
+    scheduleRender();
+  },200);}
+function _attachResizeHandler(){
+  if(window._exploreResizeAttached)return;
+  window._exploreResizeAttached=true;
+  window.addEventListener('resize',_handleViewportResize);
+  window.addEventListener('orientationchange',_handleViewportResize);
+  try{
+    if(window.Telegram&&Telegram.WebApp&&typeof Telegram.WebApp.onEvent==='function'){
+      Telegram.WebApp.onEvent('viewportChanged',_handleViewportResize);
+    }
+  }catch(_e){console.warn('[EXPLORE] tg viewport event bind failed:',_e);}}
 var _pageHidden=false;window.addEventListener('pagehide',function(){_pageHidden=true;if(_rafId){cancelAnimationFrame(_rafId);_rafId=null;}});
 function scheduleRender(){_needsRender=true;if(!_rafId&&!_pageHidden){_rafId=requestAnimationFrame(renderLoop);}}
 function renderLoop(timestamp){if(_pageHidden){_rafId=null;return;}const dt=Math.min(0.05,(timestamp-_lastTimestamp)/1000);_lastTimestamp=timestamp;const movingActive=updateMovement(timestamp);const effectsActive=updateEffects(dt);const fogActive=updateFogAnimations(dt);const particlesActive=typeof updateParticles==='function'?updateParticles(dt):false;const weatherActive=typeof updateWeatherParticles==='function'?updateWeatherParticles(dt):false;const shakeActive=_updateShake(dt);const flashActive=_hexFlashes.length>0;const hasAnimations=movingActive||effectsActive||fogActive||particlesActive||flashActive||shakeActive;renderFrame(timestamp);_applyShakeTransform();_needsRender=false;var _idleAnims=!S.inEvent&&!S.lockMovement;if(hasAnimations||weatherActive||_idleAnims){_rafId=requestAnimationFrame(renderLoop);}else{_rafId=null;}}
