@@ -85,13 +85,23 @@ console.info('[COMBAT:API] response phase=%s hasLR=%s hasPLR=%s hasFeed=%s',resu
 const payload={action:'combat_action',token:token,...actionData,};window.__valdoria_transitioning=true;tg.sendData(JSON.stringify(payload)); /* pflt-suppress: fetch via api.sendAction() above */setTimeout(()=>{try{tg.close();}catch(e){console.warn('[COMBAT] tg.close() failed',e);}},1000);}}
 /* #5 (combat audit 7.4): Grid range visual helpers — adds/removes .in-range
  * to battlefield cells matching the enemies passed to the target picker.
- * Tells the player WHICH cells are valid targets, not just a popup list. */
+ * Tells the player WHICH cells are valid targets, not just a popup list.
+ *
+ * #6 (combat audit 7.11): Respects reachability hint from backend.
+ * currentState.p.rch is an array of enemy indices that the player can
+ * currently reach (based on melee/ranged + rank position). When present,
+ * only those cells get the highlight. When absent (older servers or
+ * fallback), all live enemies are highlighted.
+ */
 function _markCellsInRange(enemies){
     if(!enemies||!enemies.length)return;
     _clearCellsInRange();
+    var reach=(currentState&&currentState.p&&Array.isArray(currentState.p.rch))?currentState.p.rch:null;
     for(var i=0;i<enemies.length;i++){
         /* Skip dead enemies — they aren't targetable */
         if(enemies[i]&&enemies[i].hp<=0)continue;
+        /* Skip unreachable enemies when reach hint is available */
+        if(reach&&reach.indexOf(i)===-1)continue;
         var sel='.cell[data-unit-id="enemy_'+i+'"]';
         var el=document.querySelector(sel);
         if(el)el.classList.add('in-range');
