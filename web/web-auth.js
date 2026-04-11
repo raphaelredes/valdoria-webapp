@@ -91,54 +91,118 @@ function loadTelegramWidget() {
     _checkGoogleOAuthReturn();
 }
 
+/* BUG #51 follow-up: when web-auth.js runs inside the DEV panel iframe,
+ * the OAuth return hash lands on the top-level window (because the redirect
+ * is navigated via topWin.location), not on the iframe. Read the hash from
+ * the top-level window when same-origin access is possible, falling back
+ * to the iframe's own hash for standalone mode. */
+function _getOAuthReturnHash() {
+    var hashCandidates = [];
+    try {
+        if (window.top && window.top !== window) {
+            /* Same-origin iframe: top-level hash is accessible */
+            var topHash = window.top.location.hash || '';
+            if (topHash) hashCandidates.push({ win: window.top, hash: topHash });
+        }
+    } catch (e) {
+        /* cross-origin: can't read top — fall through to own hash */
+    }
+    var ownHash = window.location.hash || '';
+    if (ownHash) hashCandidates.push({ win: window, hash: ownHash });
+    return hashCandidates;
+}
+
+function _clearOAuthHash(winObj) {
+    try {
+        var newUrl = winObj.location.pathname + winObj.location.search;
+        if (winObj === window) {
+            history.replaceState(null, '', newUrl);
+        } else {
+            /* Top-level: can't use history.replaceState across frame boundary
+             * reliably on all browsers, so just reassign hash to empty. */
+            winObj.history.replaceState(null, '', newUrl);
+        }
+    } catch (e) {
+        console.warn('[WEB-AUTH] Failed to clear OAuth hash:', e);
+    }
+}
+
 function _checkTelegramOAuthReturn() {
     /* Telegram OAuth redirect returns with hash fragment:
      * #tgAuthResult=<base64 JSON> */
-    var hash = window.location.hash || '';
-    if (hash.indexOf('tgAuthResult=') === -1) return;
-
-    console.info('[WEB-AUTH] Telegram OAuth redirect detected');
-    try {
-        var encoded = hash.split('tgAuthResult=')[1];
-        var jsonStr = atob(encoded);
-        var user = JSON.parse(jsonStr);
-        console.info('[WEB-AUTH] Telegram OAuth user: %s id=%s', user.first_name, user.id);
-        /* Clear the hash to avoid re-processing on reload */
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-        /* Trigger the same auth callback as the widget */
-        window.onTelegramAuth(user);
-    } catch (e) {
-        console.error('[WEB-AUTH] Failed to parse Telegram OAuth result:', e);
+    var candidates = _getOAuthReturnHash();
+    for (var i = 0; i < candidates.length; i++) {
+        var c = candidates[i];
+        if (c.hash.indexOf('tgAuthResult=') === -1) continue;
+        console.info('[WEB-AUTH] Telegram OAuth redirect detected (source=%s)',
+            c.win === window ? 'self' : 'top');
+        try {
+            var encoded = c.hash.split('tgAuthResult=')[1];
+            /* Strip trailing hash params (e.g. &other=x) */
+            if (encoded.indexOf('&') !== -1) encoded = encoded.split('&')[0];
+            var jsonStr = atob(encoded);
+            var user = JSON.parse(jsonStr);
+            console.info('[WEB-AUTH] Telegram OAuth user: %s id=%s', user.first_name, user.id);
+            _clearOAuthHash(c.win);
+            window.onTelegramAuth(user);
+            return;
+        } catch (e) {
+            console.error('[WEB-AUTH] Failed to parse Telegram OAuth result:', e);
+        }
     }
 }
 
 function _checkGoogleOAuthReturn() {
     /* Google OAuth implicit flow returns with hash fragment:
      * #id_token=<JWT>&... */
-    var hash = window.location.hash || '';
-    if (hash.indexOf('id_token=') === -1) return;
-
-    console.info('[WEB-AUTH] Google OAuth redirect detected');
-    try {
-        var params = new URLSearchParams(hash.substring(1));
-        var idToken = params.get('id_token');
-        if (!idToken) return;
-        /* Clear hash to avoid re-processing */
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-        /* Use same auth callback as GSI — id_token IS the credential */
-        window.onGoogleAuth({ credential: idToken });
-    } catch (e) {
-        console.error('[WEB-AUTH] Failed to parse Google OAuth result:', e);
-        showAuthError('Erro ao processar resposta do Google.');
+    var candidates = _getOAuthReturnHash();
+    for (var i = 0; i < candidates.length; i++) {
+        var c = candidates[i];
+        if (c.hash.indexOf('id_token=') === -1) continue;
+        console.info('[WEB-AUTH] Google OAuth redirect detected (source=%s)',
+            c.win === window ? 'self' : 'top');
+        try {
+            var params = new URLSearchParams(c.hash.substring(1));
+            var idToken = params.get('id_token');
+            if (!idToken) continue;
+            _clearOAuthHash(c.win);
+            window.onGoogleAuth({ credential: idToken });
+            return;
+        } catch (e) {
+            console.error('[WEB-AUTH] Failed to parse Google OAuth result:', e);
+            showAuthError('Erro ao processar resposta do Google.');
+        }
     }
 }
 
 /* ----- Custom Social Button Handlers ----- */
 
+/* BUG #51 follow-up (2026-04-11): OAuth redirects MUST go to the top-level
+ * window, not the current frame. When the portal is hosted inside the DEV
+ * panel iframe (dev-debug-panel.js wraps the game in a 430px iframe), using
+ * window.location navigates only the iframe — which then tries to load
+ * oauth.telegram.org inside the frame, is blocked by X-Frame-Options:DENY,
+ * and the iframe renders blank. _topWindow() returns window.top when the
+ * portal is inside any iframe, falling back to window when standalone. */
+function _topWindow() {
+    try {
+        if (window.top && window.top !== window) {
+            return window.top;
+        }
+    } catch (e) {
+        /* cross-origin access error means there IS a top window we can't
+         * read, so navigation via window.top should still work */
+    }
+    return window;
+}
+
 window.onTelegramClick = function() {
     /* Redirect to Telegram OAuth page — clean, no iframe, no widget */
-    var origin = encodeURIComponent(window.location.origin);
-    var returnTo = encodeURIComponent(window.location.href);
+    var topWin = _topWindow();
+    /* Return path must land on the same top URL that hosts the portal,
+     * otherwise after Telegram OAuth the user ends up on a different page. */
+    var origin = encodeURIComponent(topWin.location.origin);
+    var returnTo = encodeURIComponent(topWin.location.href);
     /* bot_id must be numeric — map username to ID */
     var botIds = { 'LendasDeValdoriaBOT': '8511215729', 'ValdoriaDevBot': '8074658054' };
     var botId = botIds[BOT_USERNAME] || BOT_USERNAME;
@@ -146,16 +210,18 @@ window.onTelegramClick = function() {
         + '&origin=' + origin
         + '&return_to=' + returnTo
         + '&request_access=write';
-    console.info('[WEB-AUTH] Redirecting to Telegram OAuth bot_id=%s', botId);
-    window.location.href = authUrl;
+    console.info('[WEB-AUTH] Redirecting to Telegram OAuth bot_id=%s topWindow=%s',
+        botId, topWin === window ? 'self' : 'parent');
+    topWin.location.href = authUrl;
 };
 
 window.onGoogleClick = function() {
     /* Google OAuth 2.0 implicit flow — redirect, no popup.
      * Returns id_token directly in URL hash fragment. */
+    var topWin = _topWindow();
     var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
     sessionStorage.setItem('google_nonce', nonce);
-    var redirectUri = window.location.origin + '/web/';
+    var redirectUri = topWin.location.origin + '/web/';
     var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
         + '?client_id=' + encodeURIComponent(_GOOGLE_CLIENT_ID)
         + '&redirect_uri=' + encodeURIComponent(redirectUri)
@@ -163,8 +229,9 @@ window.onGoogleClick = function() {
         + '&scope=' + encodeURIComponent('openid email profile')
         + '&nonce=' + nonce
         + '&prompt=select_account';
-    console.info('[WEB-AUTH] Redirecting to Google OAuth (implicit flow)');
-    window.location.href = authUrl;
+    console.info('[WEB-AUTH] Redirecting to Google OAuth (implicit flow) topWindow=%s',
+        topWin === window ? 'self' : 'parent');
+    topWin.location.href = authUrl;
 };
 
 /* ----- Friendly Error Messages ----- */
