@@ -974,7 +974,7 @@ body.perf-medium .explore-panel {
 }
 
 /* === Floating HUD (replaces bottom panel) === */
-.hud-float{position:fixed;z-index:50}
+.hud-float{position:fixed;z-index:var(--ez-hud,50)}
 .hud-float-tl{top:40px;left:8px;display:flex;flex-direction:column;gap:3px}
 .hud-float-tr{top:40px;right:8px;background:rgba(0,0,0,0.55);padding:4px 10px;border-radius:8px;font-size:var(--v-font-sm,11px);color:#c4953a;font-family:'Cinzel',serif;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
 .hud-float-bar{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,0.55);padding:4px 8px;border-radius:8px;font-size:var(--v-font-sm,11px)}
@@ -987,7 +987,7 @@ body.perf-medium .explore-panel {
 .hud-float-val.mp{color:#60a0d0}
 /* Audio button: reposition to sit above quick actions */
 .va-float{bottom:180px!important;right:10px!important}
-.hud-float-quick{position:fixed;bottom:12px;right:10px;z-index:50;display:flex;flex-direction:column;gap:6px}
+.hud-float-quick{position:fixed;bottom:12px;right:10px;z-index:var(--ez-hud,50);display:flex;flex-direction:column;gap:6px}
 /* Hide minimap — map is fullscreen, minimap overlaps HUD */
 #minimap{display:none!important}
 /* Hide watch badge — clock clutters the fullscreen map */
@@ -1004,7 +1004,7 @@ body.perf-medium .explore-panel {
 .explore-top-bar~#minimap{top:42px!important}
 
 /* === Top Bar (Biome + Weather + Danger) === */
-.explore-top-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;flex-shrink:0;z-index:50;background:linear-gradient(180deg,var(--v-bg-raised,#332a22) 0%,var(--v-bg-card,#2e2520) 100%);border-bottom:2px solid var(--v-gold-20)}
+.explore-top-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;flex-shrink:0;z-index:var(--ez-hud,50);background:linear-gradient(180deg,var(--v-bg-raised,#332a22) 0%,var(--v-bg-card,#2e2520) 100%);border-bottom:2px solid var(--v-gold-20)}
 .top-biome{font-size:var(--v-font-body,14px);color:#c4953a;font-family:'Cinzel',serif;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
 .top-weather{font-size:var(--v-font-label,12px);color:#c0b8a0;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
 .top-danger{font-size:var(--v-font-md,13px);text-shadow:0 1px 2px rgba(0,0,0,0.4)}
