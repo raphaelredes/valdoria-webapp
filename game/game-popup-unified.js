@@ -265,6 +265,16 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Quest detail redesign (V3 — Grimório Dual)
+    if (data.quest_detail && typeof renderQuestDetail === 'function') {
+        try {
+            renderQuestDetail(el, data.quest_detail);
+            return el;
+        } catch (e) {
+            console.error('[POPUP] renderQuestDetail error:', e);
+        }
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');

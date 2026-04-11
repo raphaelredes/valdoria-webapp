@@ -29,22 +29,125 @@ hdr.innerHTML='<span class="quest-npc-icon">'+npcIcon+'</span>'
 if(q.obj){var objEl=document.createElement('div');objEl.className='quest-objective';objEl.innerHTML='<em>'+vEsc(q.obj)+'</em>';card.appendChild(objEl);}
 if(q.npc){var npcEl=document.createElement('div');npcEl.className='quest-card-npc';npcEl.textContent=q.npc;card.appendChild(npcEl);}
 return card;}
-function renderQuestDetail(container,q){container.innerHTML='';var wrap=document.createElement('div');wrap.className='quest-detail';if(q.ready){var readyBanner=document.createElement('div');readyBanner.className='quest-ready-banner';readyBanner.textContent='✅ Pronta para entrega';wrap.appendChild(readyBanner);}if(q.chain){var chainEl=document.createElement('div');chainEl.className='quest-chain-indicator';chainEl.innerHTML='\ud83d\udd17 <span>Cap\u00edtulo '+q.chain.part+' de '+q.chain.total+'</span>';if(q.chain.next_title){chainEl.innerHTML+='<span class="quest-chain-next">\u2192 Pr\u00f3ximo: '+vEsc(q.chain.next_title)+'</span>';}
-wrap.appendChild(chainEl);}
-if(q.desc){var descEl=document.createElement('div');descEl.className='quest-detail-desc';descEl.textContent=q.desc;wrap.appendChild(descEl);}
-if(q.obj&&q.status==='active'){var objBlock=document.createElement('div');objBlock.className='quest-detail-objective';if(q.ready){objBlock.innerHTML='<div class="quest-detail-obj-label">\ud83d\udcdc O que voc\u00ea sabe</div>'
-+'<div class="quest-detail-obj-text"><em>A miss\u00e3o est\u00e1 cumprida. Resta apenas reportar o feito.</em></div>';}else{objBlock.innerHTML='<div class="quest-detail-obj-label">\ud83d\udcdc O que voc\u00ea sabe</div>'
-+'<div class="quest-detail-obj-text"><em>'+vEsc(q.obj)+'</em></div>';}
-wrap.appendChild(objBlock);}
-if(q.objectives&&q.objectives.length>0){var hasCompleted=false;for(var ci=0;ci<q.objectives.length;ci++){if(q.objectives[ci].state==='done'){hasCompleted=true;break;}}
-if(hasCompleted){var timeline=document.createElement('div');timeline.className='quest-timeline';var tlHdr=document.createElement('div');tlHdr.className='quest-timeline-header';tlHdr.textContent='\ud83d\udcd6 Sua Jornada At\u00e9 Aqui';timeline.appendChild(tlHdr);for(var i=0;i<q.objectives.length;i++){var o=q.objectives[i];if(o.state==='future')continue;var step=document.createElement('div');step.className='quest-step quest-step--'+o.state;var marker=o.state==='done'?'\u2705':'\u25b8';step.innerHTML='<span class="quest-step-marker">'+marker+'</span>'
-+'<span class="quest-step-text"><em>'+vEsc(o.text)+'</em></span>';timeline.appendChild(step);}
-wrap.appendChild(timeline);}}
-if(q.hint){var hintEl=document.createElement('div');hintEl.className='quest-detail-hint';hintEl.innerHTML='\ud83d\udcd6 <em>'+vEsc(q.hint)+'</em>';wrap.appendChild(hintEl);}
-if(q.npc){var npcBlock=document.createElement('div');npcBlock.className='quest-detail-npc';var npcIc=q.npc_icon||'\ud83d\udc64';npcBlock.innerHTML=npcIc+' '+vEsc(q.npc);wrap.appendChild(npcBlock);}
-var rewBlock=document.createElement('div');rewBlock.className='quest-detail-rewards';rewBlock.innerHTML='<div class="quest-detail-rewards-label">\ud83d\udc8e Recompensas Prometidas</div>';var rewList=document.createElement('div');rewList.className='quest-detail-rewards-list';var _rewHtml='';if(q.xp)_rewHtml+='<span class="quest-reward-item">\u2728 '+q.xp+' XP</span>';if(q.gold)_rewHtml+='<span class="quest-reward-item">\ud83d\udcb0 '+q.gold+' Valdoritas</span>';if(q.items&&q.items.length>0){for(var ii=0;ii<q.items.length;ii++){_rewHtml+='<span class="quest-reward-item">\ud83c\udf81 '+vEsc(q.items[ii])+'</span>';}}
-rewList.innerHTML=_rewHtml;rewBlock.appendChild(rewList);wrap.appendChild(rewBlock);
-container.appendChild(wrap);}
+/* Quest detail — V3 Grimorio Dual layout (2026-04-11)
+ * Renders the quest as a 2-column grid (Etapas left, Recompensas right)
+ * with a category banner, narrative card, progress bar, and contractor
+ * panel. Used by game-popup-unified.js when data.quest_detail is present.
+ * Uses createElement/textContent throughout — no innerHTML — to avoid
+ * XSS vectors with user-controlled quest text. */
+function _qdMakeEl(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text;
+    return el;
+}
+function _qdMakePanelHead(iconText, titleText, countText) {
+    var head = _qdMakeEl('div', 'v3-panel-head');
+    head.appendChild(_qdMakeEl('span', 'v3-panel-ic', iconText));
+    head.appendChild(_qdMakeEl('span', 'v3-panel-title', titleText));
+    if (countText != null) head.appendChild(_qdMakeEl('span', 'v3-panel-count', countText));
+    return head;
+}
+function _qdMakeRewardRow(iconText, nameText, valText) {
+    var row = _qdMakeEl('div', 'v3-reward-row');
+    row.appendChild(_qdMakeEl('span', 'v3-reward-row-ic', iconText));
+    row.appendChild(_qdMakeEl('span', 'v3-reward-row-name', nameText));
+    row.appendChild(_qdMakeEl('span', 'v3-reward-row-val', valText));
+    return row;
+}
+function renderQuestDetail(container, q) {
+    container.innerHTML = '';
+    var wrap = _qdMakeEl('div', 'quest-detail quest-detail-v3');
+
+    /* Banner with category badge, icon and title */
+    var banner = _qdMakeEl('div', 'v3-banner');
+    var catText = '';
+    if (q.cat === 'story') catText = 'História';
+    else if (q.cat === 'daily') catText = 'Diária';
+    else if (q.cat === 'side') catText = 'Secundária';
+    else if (q.cat === 'bounty') catText = 'Recompensa';
+    if (catText) banner.appendChild(_qdMakeEl('div', 'v3-cat-badge', catText));
+    if (q.ready) banner.appendChild(_qdMakeEl('div', 'v3-ready-badge', '✅ Pronta para entrega'));
+    var bannerRow = _qdMakeEl('div', 'v3-banner-row');
+    bannerRow.appendChild(_qdMakeEl('div', 'v3-banner-ic', q.npc_icon || '📜'));
+    var bannerText = _qdMakeEl('div', 'v3-banner-text');
+    bannerText.appendChild(_qdMakeEl('div', 'v3-banner-title', q.title || 'Missão'));
+    var subParts = [];
+    if (q.chain) subParts.push('Capítulo ' + q.chain.part + ' de ' + q.chain.total);
+    if (q.status === 'active') subParts.push('Em andamento');
+    else if (q.status === 'completed') subParts.push('Concluída');
+    else if (q.status === 'failed') subParts.push('Falhada');
+    bannerText.appendChild(_qdMakeEl('div', 'v3-banner-sub', subParts.join(' • ')));
+    bannerRow.appendChild(bannerText);
+    banner.appendChild(bannerRow);
+    wrap.appendChild(banner);
+
+    /* Narrative card with description */
+    if (q.desc) wrap.appendChild(_qdMakeEl('div', 'v3-narrative', q.desc));
+
+    /* Progress bar (only for active quests with multiple stages) */
+    if (q.status === 'active' && q.total && q.total > 1) {
+        var progWrap = _qdMakeEl('div', 'v3-progress-wrap');
+        var progTop = _qdMakeEl('div', 'v3-progress-top');
+        progTop.appendChild(_qdMakeEl('span', null, 'Progresso'));
+        progTop.appendChild(_qdMakeEl('span', null, (q.stage || 0) + ' / ' + q.total));
+        progWrap.appendChild(progTop);
+        var progBar = _qdMakeEl('div', 'v3-progress-bar');
+        var progFill = _qdMakeEl('div', 'v3-progress-fill');
+        var pct = q.pct != null ? q.pct : Math.round(((q.stage || 0) / q.total) * 100);
+        progFill.style.width = pct + '%';
+        progBar.appendChild(progFill);
+        progWrap.appendChild(progBar);
+        wrap.appendChild(progWrap);
+    }
+
+    /* 2-column grid: Etapas | Recompensas */
+    var hasObjectives = q.objectives && q.objectives.length > 0;
+    var hasRewards = q.xp || q.gold || (q.items && q.items.length > 0);
+    if (hasObjectives || hasRewards) {
+        var grid = _qdMakeEl('div', 'v3-grid');
+        if (hasObjectives) {
+            var stepsPanel = _qdMakeEl('div', 'v3-panel');
+            stepsPanel.appendChild(_qdMakePanelHead('⚔', 'Etapas',
+                (q.stage || 0) + '/' + (q.total || q.objectives.length)));
+            for (var i = 0; i < q.objectives.length; i++) {
+                var o = q.objectives[i];
+                var obj = _qdMakeEl('div', 'v3-obj v3-obj--' + o.state);
+                var icon = o.state === 'done' ? '✓' : (o.state === 'current' ? '●' : '○');
+                obj.appendChild(_qdMakeEl('span', 'v3-obj-ic', icon));
+                obj.appendChild(_qdMakeEl('span', 'v3-obj-text', o.text));
+                stepsPanel.appendChild(obj);
+            }
+            grid.appendChild(stepsPanel);
+        }
+        if (hasRewards) {
+            var rewPanel = _qdMakeEl('div', 'v3-panel');
+            rewPanel.appendChild(_qdMakePanelHead('💎', 'Recompensas'));
+            var rewList = _qdMakeEl('div', 'v3-reward-list');
+            if (q.xp) rewList.appendChild(_qdMakeRewardRow('✨', 'Experiência', String(q.xp)));
+            if (q.gold) rewList.appendChild(_qdMakeRewardRow('💰', 'Valdoritas', String(q.gold)));
+            if (q.items && q.items.length > 0) {
+                for (var ii = 0; ii < q.items.length; ii++) {
+                    rewList.appendChild(_qdMakeRewardRow('🎁', q.items[ii], '+1'));
+                }
+            }
+            rewPanel.appendChild(rewList);
+            grid.appendChild(rewPanel);
+        }
+        wrap.appendChild(grid);
+    }
+
+    /* Contractor panel with quote and name */
+    if (q.npc || q.hint) {
+        var giverPanel = _qdMakeEl('div', 'v3-panel v3-giver-panel');
+        giverPanel.appendChild(_qdMakePanelHead(q.npc_icon || '🧙', 'Contratante'));
+        if (q.hint) giverPanel.appendChild(_qdMakeEl('div', 'v3-giver-quote', '"' + q.hint + '"'));
+        if (q.npc) giverPanel.appendChild(_qdMakeEl('div', 'v3-giver-name', '— ' + q.npc));
+        wrap.appendChild(giverPanel);
+    }
+
+    container.appendChild(wrap);
+}
 function renderQuestTurnin(container,data){container.innerHTML='';var wrap=document.createElement('div');wrap.className='quest-turnin';if(data.npc){var npcEl=document.createElement('div');npcEl.className='quest-turnin-npc';npcEl.innerHTML='\ud83d\udc64 <b>'+vEsc(data.npc)+'</b>';wrap.appendChild(npcEl);}
 if(data.dialogue){var dlg=document.createElement('div');dlg.className='quest-turnin-dialogue';dlg.innerHTML='\ud83d\udcac <em>\u201c'+vEsc(data.dialogue)+'\u201d</em>';wrap.appendChild(dlg);}
 if(data.quests&&data.quests.length>0){var qList=document.createElement('div');qList.className='quest-turnin-list';for(var i=0;i<data.quests.length;i++){var qItem=document.createElement('div');qItem.className='quest-turnin-item';qItem.style.animationDelay=(i*0.15)+'s';qItem.innerHTML='\u2705 <b>'+vEsc(data.quests[i].title)+'</b>';if(data.quests[i].narrative){qItem.innerHTML+='<div class="quest-turnin-narrative">'+_safeQ(data.quests[i].narrative)+'</div>';}
