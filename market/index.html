@@ -1085,7 +1085,7 @@
             gEl.appendChild(coin);
             gEl.appendChild(document.createTextNode(` ${localGold} Valdoritas`));
             const lvl = document.getElementById('headerLevel');
-            if (D && D.p.n) lvl.textContent = `${esc(D.p.n)} (Nv.${D.p.l})`;
+            if (D && D.p.n) lvl.textContent = `${D.p.n} (Nv.${D.p.l})`;
         }
 
         // ── Tabs ──
@@ -1307,7 +1307,7 @@
                     <span class="sr-emoji">${inv.img ? '<img class="sr-thumb" src="' + inv.img + '" alt="" onerror="this.style.display=\\'none\\';this.nextElementSibling.style.display=\\'\\';">' + '<span style="display:none">' + (inv.e || '📦') + '</span>' : (inv.e || '📦')}</span>
                     <div class="sr-info">
                         <div class="sr-name">${esc(inv.n)} ${inv.q > 1 ? '<span class="sr-qty-badge">x' + inv.q + '</span>' : ''}</div>
-                        <div class="sr-price">${npcBuys ? sellPrice + ' GP' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' GP total</span>' : '') : '❌ NPC não compra'}</div>
+                        <div class="sr-price">${npcBuys ? sellPrice + ' Valdoritas' + (selected && qty > 0 ? ' · <span class="sr-total">' + (sellPrice * qty) + ' Valdoritas total</span>' : '') : '❌ NPC não compra'}</div>
                     </div>
                 </div>
                 ${selected && inv.q > 1 ? `<div class="sr-qty-row" onclick="event.stopPropagation()">
@@ -1376,7 +1376,6 @@
         function sellAllVisible() {
             const sellNpc = D.npcs.find(n => n.k === sellNpcKey);
             const buyTags = new Set(sellNpc ? sellNpc.buys : []);
-            const mul = sellNpc ? sellNpc.mul : 0.8;
             const items = getFilteredSellItems();
 
             let added = 0;
@@ -1384,7 +1383,7 @@
                 if (sellCart[inv.id]) return; // already in cart
                 const npcBuys = buyTags.has('all') || (inv.t || []).some(t => buyTags.has(t));
                 if (!npcBuys) return;
-                const sellPrice = Math.floor(inv.v * mul);
+                const sellPrice = Math.max(1, Math.floor(inv.v * getCategoryMul(inv.t)));
                 sellCart[inv.id] = { npc: sellNpcKey, item: inv.n, qty: inv.q, maxQty: inv.q, unitPrice: sellPrice };
                 added++;
             });
@@ -1437,15 +1436,15 @@
             }
             if (npc.pm && npc.pm !== 0) {
                 const baseP = Math.round(item.p / (1 + npc.pm / 100));
-                html += dRow('Preço', `<s style="color:var(--v-text-dim)">${baseP}</s> ${item.p} GP <span style="color:${npc.pm < 0 ? 'var(--v-hp-high)' : 'var(--v-hp-crit)'}">(${npc.pm > 0 ? + : }${npc.pm}%)</span>`);
+                html += dRow('Preço', `<s style="color:var(--v-text-dim)">${baseP}</s> ${item.p} Valdoritas <span style="color:${npc.pm < 0 ? 'var(--v-hp-high)' : 'var(--v-hp-crit)'}">(${npc.pm > 0 ? '+' : ''}${npc.pm}%)</span>`);
             } else {
-                html += dRow('Preço', `${item.p} GP`);
+                html += dRow('Preço', `${item.p} Valdoritas`);
             }
             html += dRow('Estoque', `${stock}/${item.mx}`);
             html += getComparisonHtml(item);
 
             // Quantity selector
-            const maxBuy = Math.min(stock, item.p > 0 ? Math.floor(localGold / item.p) : 0);
+            const maxBuy = Math.min(stock, item.p > 0 ? Math.floor(localGold / item.p) : stock);
             let modalQty = Math.max(1, Math.min(cartQty || 1, maxBuy));
 
             html += `<div class="qty-row">
@@ -1454,7 +1453,7 @@
             <button class="qty-btn-lg" aria-label="Aumentar quantidade" onclick="adjModalQty(1)">+</button>
         </div>`;
             html += `<div style="text-align:center;font-size:13px;color:var(--v-gold);" id="modalTotal">
-            Total: ${modalQty * item.p} GP
+            Total: ${modalQty * item.p} Valdoritas
         </div>`;
 
             // Store modal context
@@ -1468,7 +1467,7 @@
             } else if (stock <= 0) {
                 html += `<button class="btn-disabled" disabled>Esgotado</button>`;
             } else {
-                html += `<button class="btn-disabled" disabled>Ouro insuficiente</button>`;
+                html += `<button class="btn-disabled" disabled>Valdoritas insuficientes</button>`;
             }
             html += '</div>';
 
@@ -1488,7 +1487,7 @@
             if (!ctx) return;
             ctx.qty = Math.max(1, Math.min(ctx.maxBuy, ctx.qty + delta));
             document.getElementById('modalQty').textContent = ctx.qty;
-            document.getElementById('modalTotal').textContent = `Total: ${ctx.qty * ctx.item.p} GP`;
+            document.getElementById('modalTotal').textContent = `Total: ${ctx.qty * ctx.item.p} Valdoritas`;
         }
 
         function addToCart() {
@@ -1529,29 +1528,33 @@
             const buyTotal = Object.values(buyCart).reduce((a, b) => a + b.cost, 0);
             const sellCount = Object.values(sellCart).reduce((a, b) => a + b.qty, 0);
             const sellTotal = Object.values(sellCart).reduce((a, b) => a + b.qty * b.unitPrice, 0);
-            const balance = D.p.g - buyTotal + sellTotal;
+            const bbCount = buybackOps ? buybackOps.length : 0;
+            const bbTotal = buybackOps ? buybackOps.reduce((a, b) => a + (b.cost || 0), 0) : 0;
+            const balance = D.p.g - buyTotal - bbTotal + sellTotal;
 
             const summary = document.getElementById('cartSummary');
             const btn = document.getElementById('confirmBtn');
             let parts = [];
             if (buyCount > 0) parts.push(`<span class="cs-buy">🛒 ${buyCount} compra(s): -${buyTotal} <span class="vi vi-coin sm"></span></span>`);
             if (sellCount > 0) parts.push(`<span class="cs-sell">🏪 ${sellCount} venda(s): +${sellTotal} <span class="vi vi-coin sm"></span></span>`);
-            if (buyCount > 0 || sellCount > 0) {
+            if (bbCount > 0) parts.push(`<span class="cs-buy">🔄 ${bbCount} recompra(s): -${bbTotal} <span class="vi vi-coin sm"></span></span>`);
+            if (buyCount > 0 || sellCount > 0 || bbCount > 0) {
                 parts.push(`<span class="cs-balance">Saldo: ${balance} <span class="vi vi-coin sm"></span></span>`);
             }
 
             summary.innerHTML = parts.join('<br>');
 
-            if (buyCount > 0 || sellCount > 0) {
+            const totalOps = buyCount + sellCount + bbCount;
+            if (totalOps > 0) {
                 btn.classList.remove('hidden');
                 if (balance < 0) {
                     btn.classList.add('disabled');
                     btn.disabled = true;
-                    btn.textContent = '❌ Ouro insuficiente';
+                    btn.textContent = '❌ Valdoritas insuficientes';
                 } else {
                     btn.classList.remove('disabled');
                     btn.disabled = false;
-                    btn.textContent = `✅ Confirmar (${buyCount + sellCount} ops)`;
+                    btn.textContent = `✅ Confirmar (${totalOps} ops)`;
                 }
             } else {
                 btn.classList.add('hidden');
@@ -1582,7 +1585,7 @@
                 html += '<div class="section-title">🏪 Vendas</div>';
                 sellOps.forEach(op => {
                     html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
-                    ${esc(op.name)} x${op.qty}: <span style="color:var(--v-success)">+${op.earn} GP</span>
+                    ${esc(op.name)} x${op.qty}: <span style="color:var(--v-success)">+${op.earn} Valdoritas</span>
                 </div>`;
                 });
             }
@@ -1590,14 +1593,26 @@
                 html += '<div class="section-title">🛒 Compras</div>';
                 buyOps.forEach(op => {
                     html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
-                    ${esc(op.name)} x${op.qty}: <span style="color:var(--v-danger)">-${op.cost} GP</span>
+                    ${esc(op.name)} x${op.qty}: <span style="color:var(--v-danger)">-${op.cost} Valdoritas</span>
                 </div>`;
                 });
             }
 
-            const finalBalance = D.p.g - buyTotal + sellTotal;
+            // Buyback section
+            let bbTotal = 0;
+            if (buybackOps && buybackOps.length) {
+                html += '<div class="section-title">🔄 Recompras</div>';
+                buybackOps.forEach(op => {
+                    html += `<div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--v-border);">
+                    ${esc(op.name)} x${op.qty}: <span style="color:var(--v-danger)">-${op.cost} Valdoritas</span>
+                </div>`;
+                    bbTotal += op.cost;
+                });
+            }
+
+            const finalBalance = D.p.g - buyTotal - bbTotal + sellTotal;
             html += `<div style="text-align:center;margin-top:12px;font-size:14px;">
-            <span style="color:var(--v-gold);font-weight:700;">Saldo final: ${finalBalance} GP</span>
+            <span style="color:var(--v-gold);font-weight:700;">Saldo final: ${finalBalance} Valdoritas</span>
         </div>`;
 
             html += `<div class="detail-actions" style="margin-top:12px;">
@@ -1663,6 +1678,7 @@
                         window.__valdoria_transitioning=true;setTimeout(() => { try { tg?.close(); } catch (e) { } }, 300);
                         return;
                     }
+                    _txSending = false;
                     console.warn('[MARKET] API returned', resp.status, '— falling back to sendData');
                 } catch (e) {
                     console.warn('[MARKET] API fetch failed — falling back to sendData', e);
@@ -1713,7 +1729,7 @@
 
         function esc(s) {
             return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                .replace(/'/g, '&#39;').replace(/"/g, '&quot;');
         }
 
         // ── Item Image Popup ──
@@ -1744,7 +1760,7 @@
             const _apiBase = _urlApi;
             const _apiUid = _urlUid;
             if (!_apiBase || !token || !_apiUid) {
-                toast('Sessão expirada', 'error');
+                toast('Sessão expirada', 'err');
                 return;
             }
             try {
@@ -1754,12 +1770,12 @@
                     method: 'POST', headers: h,
                     body: JSON.stringify({ user_id: parseInt(_apiUid), token: token, npc_key: npcKey })
                 });
-                if (!resp.ok) { toast('Erro ao pechinchar', 'error'); return; }
+                if (!resp.ok) { toast('Erro ao pechinchar', 'err'); return; }
                 const r = await resp.json();
                 showHaggleResult(npcKey, r);
             } catch (e) {
                 console.error('[MARKET] Haggle failed:', e);
-                toast('Erro de conexão', 'error');
+                toast('Erro de conexão', 'err');
             }
         }
 
@@ -1778,13 +1794,29 @@
             html += '</div>';
             if (r.success && r.discount > 0) {
                 npc.items.forEach(function(it) {
+                    var oldP = it.p;
                     it.p = Math.max(1, Math.round(it.p * (1 - r.discount / 100)));
+                    // Update cart entries that reference this item's old price
+                    var ce = buyCart[it.id];
+                    if (ce && ce.npc === npcKey) {
+                        localGold += ce.cost;
+                        ce.cost = it.p * ce.qty;
+                        localGold -= ce.cost;
+                    }
                 });
             } else if (r.discount < 0) {
                 npc.items.forEach(function(it) {
+                    var oldP = it.p;
                     it.p = Math.round(it.p * (1 + Math.abs(r.discount) / 100));
+                    var ce = buyCart[it.id];
+                    if (ce && ce.npc === npcKey) {
+                        localGold += ce.cost;
+                        ce.cost = it.p * ce.qty;
+                        localGold -= ce.cost;
+                    }
                 });
             }
+            updateHeader();
             html += '<div class="detail-actions" style="margin-top:12px;">';
             html += '<button class="btn-buy" onclick="closeModal();renderTab();">Continuar</button>';
             html += '</div>';
@@ -1810,7 +1842,7 @@
                 html += '<div class="bb-row">';
                 html += '<span class="bb-emoji">' + (entry.e || '📦') + '</span>';
                 html += '<span class="bb-name">' + esc(entry.n) + (entry.q > 1 ? ' x' + entry.q : '') + '</span>';
-                html += '<span class="bb-price">' + entry.p + ' GP</span>';
+                html += '<span class="bb-price">' + entry.p + ' Valdoritas</span>';
                 html += '<button class="bb-btn" onclick="addBuyback(' + idx + ',' + entry.p + ')">Recomprar</button>';
                 html += '</div>';
             });
@@ -1820,8 +1852,9 @@
 
         var buybackOps = [];
         function addBuyback(idx, cost) {
-            if (localGold < cost) { toast('Ouro insuficiente', 'error'); return; }
-            buybackOps.push({ t: 'buyback', idx: idx });
+            if (localGold < cost) { toast('Valdoritas insuficientes', 'err'); return; }
+            var entry = D.bb[idx];
+            buybackOps.push({ t: 'buyback', idx: idx, cost: cost, name: entry ? entry.n : '?', qty: entry ? (entry.q || 1) : 1 });
             localGold -= cost;
             D.bb.splice(idx, 1);
             toast('🔄 Item adicionado para recompra', 'ok');
@@ -1843,7 +1876,8 @@
             }
             if (equipped) {
                 html += cmpRow('CA', item.d.ac, equipped.ac);
-                html += cmpRow('Dano', item.d.b, equipped.b);
+                var newDmg = (item.d.b || 0); var oldDmg = (equipped.b || 0);
+                if (item.d.dd || equipped.dd) html += cmpRow('Dano Bonus', newDmg, oldDmg);
                 html += cmpRow('HP', item.d.hb, equipped.hb);
                 html += cmpRow('MP', item.d.mb, equipped.mb);
             } else {
