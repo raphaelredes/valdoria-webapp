@@ -75,14 +75,16 @@ var EnvStorage = (function() {
     /**
      * Legacy key mapping: old unsuffixed keys → new prefixed keys.
      * Used by migrateLegacy() to move data from pre-fix format.
+     *
+     * IMPORTANT: Only includes keys managed by game-core.js.
+     * web_token, web_user_id, api_base, dev_device are managed by
+     * web-auth.js which has its OWN migration logic (key_{env} format).
+     * Do NOT migrate those here — EnvStorage uses v_{env}_{key} format
+     * which is INCOMPATIBLE with web-auth.js's {key}_{env} format.
      */
     var _LEGACY_KEYS = [
         'valdoria_session',
         'valdoria_game_screen',
-        'valdoria_web_token',
-        'valdoria_web_user_id',
-        'valdoria_api_base',
-        'valdoria_dev_device',
         'valdoria_init_crash',
     ];
 
@@ -149,6 +151,9 @@ var EnvStorage = (function() {
                 /* Legacy unsuffixed keys (pre-fix format) */
                 var legacyExact = ['valdoria_session', 'valdoria_game_screen'];
 
+                /* Old-format auth keys use {key}_{env} suffix (written by web-auth.js) */
+                var otherSuffix = '_' + other;
+
                 var toPurge = [];
                 for (var i = 0; i < localStorage.length; i++) {
                     var k = localStorage.key(i);
@@ -158,6 +163,11 @@ var EnvStorage = (function() {
                     /* Old-format other env: valdoria_session_dev_*, valdoria_game_screen_dev_* */
                     if (k.indexOf(otherSessionPrefix) === 0) { toPurge.push(k); continue; }
                     if (k.indexOf(otherScreenPrefix) === 0) { toPurge.push(k); continue; }
+                    /* Old-format auth keys: valdoria_web_token_prod, valdoria_api_base_prod, etc. */
+                    if (k.indexOf('valdoria_') === 0 && k.length > otherSuffix.length &&
+                        k.substring(k.length - otherSuffix.length) === otherSuffix) {
+                        toPurge.push(k); continue;
+                    }
                     /* Legacy unsuffixed: valdoria_session, valdoria_game_screen (exact match) */
                     for (var li = 0; li < legacyExact.length; li++) {
                         if (k === legacyExact[li]) { toPurge.push(k); break; }
