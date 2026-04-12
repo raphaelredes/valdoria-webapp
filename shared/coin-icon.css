@@ -42,7 +42,7 @@
   border-width: 1px;
 }
 .vi-coin.sm::after {
-  font-size: 7px;
+  font-size: 8px; /* HARDCODED: V inside 12px coin icon — must fit inside circle */
 }
 
 /* Large — totals, highlights */

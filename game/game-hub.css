@@ -412,6 +412,26 @@
   letter-spacing: 0.5px;
 }
 
+/* Ally level badge */
+.hub-ally .ha-lvl {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-muted, #7a6a5a);
+  margin-left: 2px;
+}
+
+/* Daily Challenge badge (below progress strip) */
+.hub-dc-badge {
+  text-align: center;
+  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-gold, #c4953a);
+  padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  background: var(--v-bg-card, #2e2520);
+  margin: var(--v-space-xs, 2px) 0;
+}
+
 
 /* ----------------------------------------------------------
    10. DM Narration Tip

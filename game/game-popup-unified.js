@@ -186,8 +186,8 @@ function _buildPopupBody(data) {
     }
 
     // Arena redesign
-    if (data.arena_screen && typeof renderArenaScreen === 'function') {
-        renderArenaScreen(el, data.arena_screen);
+    if (data._arena_screen && typeof renderArenaScreen === 'function') {
+        renderArenaScreen(el, data._arena_screen);
         return el;
     }
 

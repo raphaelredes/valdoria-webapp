@@ -53,8 +53,8 @@ var _LOC_MAP = {
     'arena_main':       { ico: '\u2694\uFE0F',        nm: 'Arena' },
     'market':           { ico: '\uD83C\uDFEA',        nm: 'Mercado' },
     'mercado':          { ico: '\uD83C\uDFEA',        nm: 'Mercado' },
-    'city_locations':   { ico: '\uD83C\uDFEA',        nm: 'Mercado' },
-    'action_city_locations': { ico: '\uD83C\uDFEA',   nm: 'Locais' },
+    'city_locations':   { ico: '\uD83C\uDFD8\uFE0F',   nm: 'Cidade' },
+    'action_city_locations': { ico: '\uD83C\uDFD8\uFE0F', nm: 'Cidade' },
     'guild':            { ico: '\uD83C\uDFDB\uFE0F',  nm: 'Guilda' },
     'guilda':           { ico: '\uD83C\uDFDB\uFE0F',  nm: 'Guilda' },
     'temple':           { ico: '\u26EA',               nm: 'Templo' },
@@ -75,7 +75,7 @@ var _LOC_MAP = {
     'druid':            { ico: '\uD83C\uDF32',         nm: 'Druida' },
     'festival':         { ico: '\uD83C\uDF89',         nm: 'Festival' },
     'guard_':           { ico: '\uD83D\uDEE1\uFE0F', nm: 'Guarda' },
-    'help_':            { ico: '\u2753',               nm: 'Ajuda' },
+    /* help_ removed — meta-action, not a location (would leak footer buttons into grid) */
     'league_':          { ico: '\uD83C\uDFC6',         nm: 'Liga' },
     'manage_':          { ico: '\uD83D\uDC65',         nm: 'Contas' },
     'mural_':           { ico: '\uD83D\uDDBC\uFE0F', nm: 'Mural' },
@@ -91,20 +91,32 @@ var _LOC_MAP = {
     'trade_':           { ico: '\uD83E\uDEA3',         nm: 'Troca' },
     'wnpc_':            { ico: '\uD83E\uDDE4',         nm: 'NPC' },
     'workshop_':        { ico: '\uD83D\uDD28',         nm: 'Oficina' },
-    /* Fallbacks por prefixo (por ultimo: _matchLocation usa primeira substring que bate) */
-    'action_':          { ico: '\uD83C\uDFD9\uFE0F', nm: 'Cidade' },
+    /* Prefixos especificos (sem fallback generico 'action_' — muito amplo, captura back/settings/toggle) */
+    'action_social':    { ico: '\uD83E\uDD1D',         nm: 'Social' },
     'ach_':             { ico: '\uD83C\uDFC6',         nm: 'Conquistas' },
     'stl_':             { ico: '\u26CF\uFE0F',         nm: 'Assentamento' }
 };
 
-/** Classifica um callback de botao como localizacao conhecida */
+/** Classifica um callback de botao como localizacao conhecida.
+ *  Exact match first, then substring — prevents greedy substring
+ *  from shadowing more-specific keys (e.g. 'city_locations' matching
+ *  before 'action_city_locations'). */
 function _matchLocation(cb) {
     if (!cb) return null;
     var lower = cb.toLowerCase();
+    /* 1. Exact match (highest priority) */
+    if (_LOC_MAP.hasOwnProperty(lower)) return _LOC_MAP[lower];
+    /* 2. Longest substring match — iterate by key length descending
+       so 'action_city_locations' beats 'city_locations' beats 'action_' */
+    var bestKey = null;
+    var bestLen = 0;
     for (var key in _LOC_MAP) {
-        if (lower.indexOf(key) >= 0) return _LOC_MAP[key];
+        if (key.length > bestLen && lower.indexOf(key) >= 0) {
+            bestKey = key;
+            bestLen = key.length;
+        }
     }
-    return null;
+    return bestKey ? _LOC_MAP[bestKey] : null;
 }
 
 /** Extrai badge numerico do texto do botao, ex: "Missoes (3)" -> 3 */
@@ -233,11 +245,18 @@ function renderHubScreen(el, screen) {
     /* ── 6. Location Grid (4 colunas) ────────────────────────── */
     var locGrid = _hubDiv('hub-loc-grid');
     var locCount = 0;
+    var _seenCb = {}; /* Deduplicate by callback — prevents duplicate entries from shortcuts + action_btns */
+    /* Skip non-location callbacks that leak from footer/nav into allBtns */
+    var _skipCb = {'action_universal_back':1,'action_settings':1,'action_toggle_footer':1,'main_menu':1,
+        'action_inventory':1,'action_status':1,'action_explore_party':1,'action_inventory_popup':1};
     for (var li = 0; li < allBtns.length; li++) {
         var btn = allBtns[li];
         if (_isCTA(btn)) continue; /* CTA ja renderizado acima */
+        if (_skipCb[btn.cb] || btn.is_back) continue; /* Non-location button */
+        if (_seenCb[btn.cb]) continue; /* Duplicate callback — skip */
         var loc = _matchLocation(btn.cb);
         if (!loc) continue;
+        _seenCb[btn.cb] = true;
         locGrid.appendChild(_buildLocCell(loc.ico, loc.nm, btn));
         locCount++;
     }
@@ -291,7 +310,7 @@ function renderHubScreen(el, screen) {
             progRow.appendChild(achCard);
         }
 
-        /* Kill streak (from _player_stats) */
+        /* Combat stats (from _player_stats) */
         if (pStats && pStats.kills > 0) {
             var killCard = _hubDiv('hub-prog-card');
             var killVal = _hubDiv('hp-val');
@@ -302,8 +321,31 @@ function renderHubScreen(el, screen) {
             killCard.appendChild(killLbl);
             progRow.appendChild(killCard);
         }
+        if (pStats && pStats.streak > 0) {
+            var streakCard = _hubDiv('hub-prog-card');
+            var streakVal = _hubDiv('hp-val');
+            streakVal.textContent = '\uD83D\uDD25 ' + pStats.streak;
+            streakCard.appendChild(streakVal);
+            var streakLbl = _hubDiv('hp-lbl');
+            streakLbl.textContent = 'Sequência';
+            streakCard.appendChild(streakLbl);
+            progRow.appendChild(streakCard);
+        }
 
         frag.appendChild(progRow);
+    }
+
+    /* ── 8b. Daily Challenge Badge ──────────────────────────── */
+    var dcb = screen.daily_challenge_badge;
+    if (dcb && !dcb.completed && dcb.dungeon_name) {
+        var dcEl = _hubDiv('hub-dc-badge');
+        dcEl.style.cursor = 'pointer';
+        dcEl.addEventListener('click', function () {
+            if (typeof haptic === 'function') haptic('light');
+            if (typeof doAction === 'function') doAction('daily_challenge_main');
+        });
+        dcEl.textContent = '\uD83D\uDC3A Desafio: ' + dcb.dungeon_name;
+        frag.appendChild(dcEl);
     }
 
     /* ── 9. DM Tip ───────────────────────────────────────────── */
@@ -343,9 +385,13 @@ function _buildHubAlly(a) {
     /* Info column: name + bars */
     var info = _hubDiv('ha-info');
 
-    /* Name */
+    /* Name + Level */
     var nameEl = _hubDiv('ha-name');
     nameEl.textContent = a.n || '';
+    if (a.l > 0) {
+        var lvlEl = _hubSpan('ha-lvl', ' Nv' + a.l);
+        nameEl.appendChild(lvlEl);
+    }
     info.appendChild(nameEl);
 
     /* HP bar (3px) */

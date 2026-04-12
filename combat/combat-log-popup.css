@@ -26,7 +26,7 @@
 .log-round-sep {
     text-align: center;
     font-size: var(--v-font-xs, 10px);
-    font-family: 'Cinzel', serif;
+    font-family: var(--v-font-display, 'Cinzel', serif);
     color: #b0a488;
     padding: 8px 0 4px;
     display: flex;

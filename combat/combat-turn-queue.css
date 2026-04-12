@@ -40,7 +40,7 @@
 }
 
 .tl-nm {
-  font-size: 8px;
+  font-size: var(--v-font-xs, 10px);
   color: var(--v-text-dim, #a09484);
   margin-top: 2px;
   white-space: nowrap;
@@ -109,7 +109,7 @@
 
 /* ── Round badge ── */
 .tl-round {
-  font-size: 9px;
+  font-size: var(--v-font-xs, 10px);
   font-weight: 700;
   color: var(--v-gold, #c4953a);
   padding: 2px 6px;

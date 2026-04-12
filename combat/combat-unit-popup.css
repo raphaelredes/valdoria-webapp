@@ -55,7 +55,7 @@
 }
 
 .ud-name {
-    font-family: 'Cinzel', serif;
+    font-family: var(--v-font-display, 'Cinzel', serif);
     font-weight: bold;
     font-size: var(--v-font-2xl, 18px);
     color: var(--v-text);
@@ -132,7 +132,7 @@
 /* Reuse fill-hp-high / fill-hp-mid / fill-hp-low / fill-mp from combat-grid.css */
 
 .ud-bar-val {
-    font-family: 'Cinzel', serif;
+    font-family: var(--v-font-display, 'Cinzel', serif);
     font-weight: bold;
     font-size: var(--v-font-body, 14px);
     color: var(--v-text);
@@ -163,7 +163,7 @@
 }
 
 .ud-stat-val {
-    font-family: 'Cinzel', serif;
+    font-family: var(--v-font-display, 'Cinzel', serif);
     font-weight: bold;
     color: #c4953a;
     text-shadow: 0 1px 3px rgba(0,0,0,0.6);
