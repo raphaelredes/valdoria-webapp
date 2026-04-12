@@ -26,10 +26,11 @@
 
     function init() {
         try {
-            // Parse URL params
+            // Parse URL params (standalone) or SPA route params
+            var spaP = window.__spaRouteParams || {};
             var params = new URLSearchParams(window.location.search);
-            _token = params.get('token') || '';
-            _apiBase = params.get('api') || '';
+            _token = spaP.token || params.get('token') || '';
+            _apiBase = spaP.api || params.get('api') || '';
 
             if (!_apiBase || !_token) {
                 // Try payload from hash
