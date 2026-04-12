@@ -689,8 +689,8 @@ function _tryWebTokenSession() {
      * but the legacy keys exist, migrate them transparently so the player
      * keeps their session instead of being forced back to the login screen. */
     if (!token || !uid) {
-        var legacyToken = localStorage.getItem('valdoria_web_token');
-        var legacyUid = localStorage.getItem('valdoria_web_user_id');
+        var legacyToken = localStorage.getItem('valdoria_web_token'); // noqa: preflight (legacy migration)
+        var legacyUid = localStorage.getItem('valdoria_web_user_id'); // noqa: preflight (legacy migration)
         if (legacyToken && legacyUid) {
             console.info('[WEB-AUTH] Migrating legacy session keys -> env-suffixed keys (env=%s)', _envId);
             token = legacyToken;
@@ -703,8 +703,8 @@ function _tryWebTokenSession() {
                 localStorage.setItem(WEB_USER_KEY, uid);
                 if (api) localStorage.setItem(WEB_API_KEY, api);
                 /* Remove legacy keys so this migration runs only once */
-                localStorage.removeItem('valdoria_web_token');
-                localStorage.removeItem('valdoria_web_user_id');
+                localStorage.removeItem('valdoria_web_token'); // noqa: preflight (legacy cleanup)
+                localStorage.removeItem('valdoria_web_user_id'); // noqa: preflight (legacy cleanup)
             } catch (e) {
                 console.warn('[WEB-AUTH] Legacy migration partial failure', e);
             }
