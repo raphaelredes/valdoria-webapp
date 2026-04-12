@@ -236,7 +236,7 @@
   border-radius: var(--v-radius-sm, 6px);
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
   font-size: var(--v-font-xs, 10px);
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
   min-height: 32px;
 }
 
@@ -407,7 +407,7 @@
 .hub-prog-card .hp-lbl {
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
   font-size: var(--v-font-xs, 10px);
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -415,7 +415,7 @@
 /* Ally level badge */
 .hub-ally .ha-lvl {
   font-size: var(--v-font-xs, 10px);
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
   margin-left: 2px;
 }
 
@@ -561,7 +561,7 @@
   font-size: var(--v-font-xs, 10px);
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
   padding: 0 var(--v-space-md, 8px);
 }
 

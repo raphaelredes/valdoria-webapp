@@ -92,13 +92,13 @@
   color: var(--v-badge-ok-text, #7aaa7a);
 }
 .inn-detail-check.no {
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
 }
 .inn-detail-text {
   color: var(--v-text, #d4c8b0);
 }
 .inn-detail-text.dim {
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
 }
 
 /* ── Warning (stable risks) ── */
@@ -133,7 +133,7 @@
 }
 .inn-player-class {
   font-size: var(--v-font-sm, 12px);
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
 }
 
 /* ── Bars (HP/MP) ── */
@@ -335,7 +335,7 @@
 }
 .inn-cost-breakdown {
   font-size: var(--v-font-xs, 10px);
-  color: var(--v-text-muted, #7a6a5a);
+  color: var(--v-text-muted, #a08050);
 }
 .inn-cost-total {
   font-size: var(--v-font-xl, 16px);

@@ -68,7 +68,7 @@
     --v-z-modal: 5000;
     --v-z-critical: 10000;
     --v-border: #4a3828;
-    --v-border-gold: rgba(196, 149, 58, 0.25);
+    --v-border-gold: rgba(196, 149, 58, 0.3);
     --v-radius-xs: 4px;
     --v-radius-sm: 6px;
     --v-radius: 10px;
@@ -88,13 +88,12 @@
     --v-transition-slow: 0.5s;
     --v-bg-overlay: var(--v-border-12);
     --v-border-dim: var(--v-border-15);
-    --v-border-gold: rgba(196, 149, 58, 0.3);
-    --v-bar-bg: rgba(0, 0, 0, 0.3) ease-out;
+    --v-bar-bg: rgba(0, 0, 0, 0.3);
     --v-transition-enter: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --v-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --v-ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
     --v-ease-dramatic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --v-text-muted: #7a6a5a;
+    --v-text-muted: #a08050;
     --v-bg-sel: #3a2e1a;
     --v-hp-label: #7aaa7a;
     --v-mp-label: #6a8aaa;
@@ -217,7 +216,6 @@
     --v-warning-dim: #cc9944;
     --v-danger-dim: #cc6666;
     --v-danger-warm: #aa5a3a;
-    --v-text-muted: #a08050;
     --v-danger-pip-1: #6aaa3a;
     --v-danger-pip-2: #caaa3a;
     --v-danger-pip-3: #cc8a2a;
