@@ -332,7 +332,7 @@ function renderRegionCards() {
 
 function _buildRegionCard(key, reg, meta) {
   var isCurrent = _findBiome(state.currentLoc) === key;
-  var discoveredPct = Math.round(reg.discovered.length / reg.locs.length * 100);
+  var discoveredPct = reg.locs.length > 0 ? Math.round(reg.discovered.length / reg.locs.length * 100) : 0;
   var maxDanger = 0, minDanger = 99;
   for (var j = 0; j < reg.locs.length; j++) {
     if (reg.locs[j].d > maxDanger) maxDanger = reg.locs[j].d;
