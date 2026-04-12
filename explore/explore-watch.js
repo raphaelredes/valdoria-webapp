@@ -280,13 +280,13 @@ function getVeerTarget(fromCol, fromRow, toCol, toRow) {
 
 /* == 4. Social Encounters (Alexandrian: encounter != combat) == */
 
-var _lastSocialStep = -99;
+/* _lastSocialStep migrated to S._lastSocialStep for snapshot persistence */
 
 function checkSocialEncounter() {
-  if (!S._stepCount || S._stepCount - _lastSocialStep < 8) return null;
+  if (!S._stepCount || S._stepCount - S._lastSocialStep < 8) return null;
   var chance = 0.12 + (S.dangerLevel || 1) * 0.02;
   if (Math.random() > chance) return null;
-  _lastSocialStep = S._stepCount;
+  S._lastSocialStep = S._stepCount;
   var pool = SOCIAL_ENCOUNTER_POOL;
   if (!pool || pool.length === 0) return null;
   var enc = pool[Math.floor(Math.random() * pool.length)];

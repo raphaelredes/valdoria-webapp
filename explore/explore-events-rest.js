@@ -2001,7 +2001,8 @@ function _resolveSecondWind(overlay, formulaEl, resultEl, roll, success) {
 
   if (success) {
     var _swHp = Math.max(0, S.charData?.hp || 0);
-    S.hpChange = -(_swHp - 1);
+    var _currentHp = Math.max(0, _swHp + S.hpChange);
+    S.hpChange += (1 - _currentHp);
     updateHP(1, S.charData.mh);
     addExhaustion(2, 'F\u00f4lego');
     resultEl.innerHTML = '<div style="color:#4a8;font-size:16px;font-weight:700">\u2705 F\u00f4lego!</div>' /* noqa: innerHTML — second wind success, safe static content */
@@ -2101,7 +2102,8 @@ function showDeathSaves() {
             _done = true;
             if (typeof disposeDice3D === 'function') disposeDice3D();
             overlay.classList.remove('active');
-            S.hpChange = -(S.charData.hp - 1);
+            var _dsHp20 = Math.max(0, (S.charData?.hp || 0) + S.hpChange);
+            S.hpChange += (1 - _dsHp20);
             updateHP(1, S.charData.mh);
             saveState();
           }, 2500);
@@ -2139,7 +2141,8 @@ function showDeathSaves() {
             if (_done) return;
             _done = true;
             overlay.classList.remove('active');
-            S.hpChange = -(S.charData.hp - 1);
+            var _dsHpOk = Math.max(0, (S.charData?.hp || 0) + S.hpChange);
+            S.hpChange += (1 - _dsHpOk);
             updateHP(1, S.charData.mh);
             saveState();
             showTerrainToast('Voce se estabiliza. A escuridao recua.', 'ranger');
