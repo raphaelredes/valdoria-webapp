@@ -221,7 +221,7 @@ function handleLocationTap(locId) {
         if (locQuests.length > 0) {
             const shown = locQuests.slice(0, 3);
             const extra = locQuests.length - shown.length;
-            let qHtml = '📜 <b>Missões:</b> ' + shown.map(q => `<span>${q.t}</span>`).join(', ');
+            let qHtml = '📜 <b>Missões:</b> ' + shown.map(q => `<span>${(q.t||'').replace(/</g,'&lt;')}</span>`).join(', ');
             if (extra > 0) qHtml += ` <span style="opacity:0.6">... +${extra} mais</span>`;
             questsEl.innerHTML = qHtml;
             questsEl.style.display = '';
@@ -229,12 +229,12 @@ function handleLocationTap(locId) {
             questsEl.style.display = 'none';
         }
 
-        const locDungeons = S.dungeons[locId] || [];
+        const locDungeons = (S.dungeons||{})[locId] || [];
         if (locDungeons.length > 0) {
             const shown = locDungeons.slice(0, 3);
             const extra = locDungeons.length - shown.length;
             let dHtml = '🏰 <b>Masmorras:</b> ' + shown.map(d =>
-                `<span>${d.done ? '✅' : '⭐'} ${d.n}</span>`
+                `<span>${d.done ? '✅' : '⭐'} ${(d.n||'').replace(/</g,'&lt;')}</span>`
             ).join(', ');
             if (extra > 0) dHtml += ` <span style="opacity:0.6">... +${extra} mais</span>`;
             dungeonsEl.innerHTML = dHtml;
@@ -682,6 +682,7 @@ function setupLongPress() {
         const locId = loc.getAttribute('data-loc');
         if (!locId || locId === S.currentLoc) return;
         _lpStartX = e.clientX; _lpStartY = e.clientY;
+        if (_lpTimer) clearTimeout(_lpTimer);
         _lpTimer = setTimeout(() => {
             _showQuickTooltip(locId, e.clientX, e.clientY);
             _haptic('tap');

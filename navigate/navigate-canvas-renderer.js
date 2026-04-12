@@ -193,11 +193,13 @@ function _cvRenderFrame(now) {
     if (_cvDetail >= 1) _cvUpdateParticles(dt);
     if (_cvDetail >= 1) _cvUpdateWeather(dt);
 
-    // Update reveal fade-ins
+    // Update reveal fade-ins (delete completed entries to prevent unbounded growth)
     for (var rid in _cvRevealAlpha) {
         if (_cvRevealAlpha[rid] < 1) {
             _cvRevealAlpha[rid] = Math.min(1, _cvRevealAlpha[rid] + dt * 1.5);
             _dirtyStatic = true;
+        } else {
+            delete _cvRevealAlpha[rid];
         }
     }
 

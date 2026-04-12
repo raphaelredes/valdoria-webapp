@@ -741,7 +741,7 @@ function _getAvgPxPerTurn() {
         const pa = hexToPixel(ca.col, ca.row), pb = hexToPixel(cb.col, cb.row);
         const pxDist = Math.sqrt((pa.x - pb.x) ** 2 + (pa.y - pb.y) ** 2);
         const turns = getConnectionDistance(aId, bId);
-        totalPxPerTurn += pxDist / turns;
+        if (turns > 0) totalPxPerTurn += pxDist / turns; else continue;
         count++;
     }
     _cachedPxPerTurn = count > 0 ? totalPxPerTurn / count : HEX_RADIUS * 2;
