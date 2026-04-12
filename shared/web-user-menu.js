@@ -76,5 +76,12 @@
     }
 
     var _observer = new MutationObserver(_syncVisibility);
-    _observer.observe(document.body, { childList: true, subtree: true });
+    var _target = document.body || document.documentElement;
+    if (_target) {
+        _observer.observe(_target, { childList: true, subtree: true });
+    } else {
+        document.addEventListener('DOMContentLoaded', function() {
+            _observer.observe(document.body, { childList: true, subtree: true });
+        });
+    }
 })();

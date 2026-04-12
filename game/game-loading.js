@@ -331,6 +331,8 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
     window.forceHideLoading = function forceHideLoading() {
         console.warn('[GAME-LOADING] forceHideLoading()');
         _dataReady = true;
+        /* Resolve any pending hideLoadingWithDelay() Promise (prevents startGame deadlock) */
+        if (_pendingHideCb) { _pendingHideCb(); _pendingHideCb = null; }
         _stopReactive();
         if (window.vProcessing && vProcessing.isActive()) vProcessing.hide();
         if (!_ctrl) {
