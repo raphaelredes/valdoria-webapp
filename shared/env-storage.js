@@ -163,8 +163,11 @@ var EnvStorage = (function() {
                     /* Old-format other env: valdoria_session_dev_*, valdoria_game_screen_dev_* */
                     if (k.indexOf(otherSessionPrefix) === 0) { toPurge.push(k); continue; }
                     if (k.indexOf(otherScreenPrefix) === 0) { toPurge.push(k); continue; }
-                    /* Old-format auth keys: valdoria_web_token_prod, valdoria_api_base_prod, etc. */
-                    if (k.indexOf('valdoria_') === 0 && k.length > otherSuffix.length &&
+                    /* Old-format auth keys: valdoria_web_token_prod, valdoria_api_base_prod, etc.
+                     * Guard: skip shared keys to avoid false-positive on hypothetical
+                     * shared keys that might end with _dev or _prod. */
+                    if (k.indexOf('valdoria_') === 0 && !_SHARED_KEYS[k] &&
+                        k.length > otherSuffix.length &&
                         k.substring(k.length - otherSuffix.length) === otherSuffix) {
                         toPurge.push(k); continue;
                     }
