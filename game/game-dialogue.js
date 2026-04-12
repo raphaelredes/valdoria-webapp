@@ -1,7 +1,7 @@
 /* game-dialogue.js -- Shared mood constants and ambient functions */
 /* Inline renderDialogue() REMOVED -- popup is mandatory (game-dialogue-popup.js) */
 
-var MOOD_ICONS={happy:'\u{1F60A}',angry:'\u{1F620}',sad:'\u{1F614}',busy:'\u{1F610}',neutral:'\u{1F5E3}'};
+var MOOD_ICONS={happy:'\u2728',angry:'\u2694\uFE0F',sad:'\u{1F56F}\uFE0F',busy:'\u{1F4DC}',neutral:'\u{1F5E3}'};
 var MOOD_LABELS={happy:'Amig\u00e1vel',angry:'Irritado',sad:'Melanc\u00f3lico',busy:'Ocupado',neutral:''};
 var MOOD_GRADIENTS={happy:'radial-gradient(ellipse at 50% 0%, #3a3225 0%, var(--v-bg) 70%)',angry:'radial-gradient(ellipse at 50% 0%, #4a2818 0%, var(--v-bg) 70%)',sad:'radial-gradient(ellipse at 50% 0%, #2e2a24 0%, var(--v-bg) 70%)',busy:'radial-gradient(ellipse at 50% 0%, #342e26 0%, var(--v-bg) 70%)',neutral:'radial-gradient(ellipse at 50% 0%, #3a3028 0%, var(--v-bg) 70%)'};
 
