@@ -39,7 +39,7 @@ function getRelativeDifficulty(danger, playerLv) {
 
 var TERRAIN_LABELS = {
   plains: 'Normal', forest: 'Dificil', swamp: 'Dificil',
-  mountain: 'Normal', desert: 'Dificil', snow: 'Dificil',
+  mountain: 'Dificil', desert: 'Dificil', snow: 'Dificil',
   cave: 'Dificil', volcanic: 'Dificil', graveyard: 'Normal'
 };
 
