@@ -54,7 +54,7 @@ function _fetchSettings() {
                 localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_token'));
                 localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id'));
                 localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_api_base'));
-                localStorage.removeItem('valdoria_dev_device'); // noqa: preflight (legacy cleanup)
+                localStorage.removeItem('valdoria_dev_device'); /* noqa: preflight — legacy cleanup */
                 window.location.href = window.location.origin + '/web/';
             };
             contentEl.appendChild(logoutBtn);
