@@ -189,15 +189,22 @@ var EnvStorage = (function() {
         },
 
         /**
-         * Migrate legacy unsuffixed keys to new env-prefixed format.
-         * Reads old key, writes to new prefixed key, removes old key.
+         * Migrate legacy unsuffixed keys to the format their readers expect.
+         *
+         * IMPORTANT: game-core.js reads SESSION_KEY = 'valdoria_session_<env>'
+         * and SCREEN_CACHE_KEY = 'valdoria_game_screen_<env>'. So the migration
+         * target MUST be oldKey + '_' + env (e.g., 'valdoria_session_prod'),
+         * NOT _key(oldKey) which produces 'v_prod_valdoria_session' — a key
+         * that nobody reads. This mismatch was Bug #1 from the first audit.
+         *
          * Safe to call multiple times (idempotent).
          */
         migrateLegacy: function() {
             var migrated = 0;
             for (var mi = 0; mi < _LEGACY_KEYS.length; mi++) {
                 var oldKey = _LEGACY_KEYS[mi];
-                var newKey = _key(oldKey);
+                /* Use the SAME key format that game-core.js readers expect */
+                var newKey = oldKey + '_' + _env;
                 try {
                     var val = localStorage.getItem(oldKey);
                     if (val !== null && localStorage.getItem(newKey) === null) {
