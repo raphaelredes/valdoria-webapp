@@ -100,8 +100,12 @@ function _render() {
     });
 
     var bodyEl = card.querySelector('.dlg-popup-body');
+    /* City dialogues: instant text (no typewriter animation).
+       Typewriter only for explore/combat contexts where immersion matters. */
+    var _isCity = window.S && window.S.currentScreen &&
+        (window.S.currentScreen.screen_id || '').indexOf('city') >= 0;
     if (textEl && dialogueText) {
-        if (window.vTypewriter) {
+        if (window.vTypewriter && !_isCity) {
             vTypewriter.write(textEl, dialogueText, {
                 cursorClass: 'dlg-cursor',
                 onDone: function () {
