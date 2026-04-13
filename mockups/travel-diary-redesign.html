@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#2a2420">
+<title>Di&aacute;rio de Viagem &mdash; Redesign Mockup v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&display=swap');
+  :root {
+    --v-bg:#2a2420; --v-bg-deep:#1a1510; --v-bg-raised:#332a22; --v-bg-card:#2e2520;
+    --v-text:#d4c8b0; --v-text-dim:#a09484; --v-gold:#c4953a; --v-gold-light:#dbb668;
+    --v-border:#4a3828; --v-font:'MedievalSharp','Cinzel',serif; --v-font-display:'Cinzel',serif;
+    --v-radius:10px; --v-radius-sm:6px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { max-width:430px; height:100dvh; margin:0 auto; overflow:hidden; background:#1a1510; }
+  body { height:100%; font-family:var(--v-font); color:var(--v-text); background:var(--v-bg); overflow:hidden; }
+
+  /* ═══ FULL-SCREEN OVERLAY (fixed viewport) ═══ */
+  .diary-overlay {
+    position:fixed; top:0; left:0; right:0; bottom:0; z-index:100;
+    background:radial-gradient(ellipse at 50% 18%, rgba(58,46,28,.97) 0%, rgba(30,24,16,.985) 50%, rgba(14,11,8,.995) 100%);
+    display:flex; flex-direction:column; max-width:430px; margin:0 auto;
+    overflow:hidden; /* NO SCROLL — content fits viewport */
+  }
+
+  /* ═══ HEADER (compact) ═══ */
+  .diary-header {
+    text-align:center; padding:12px 16px 6px; flex-shrink:0;
+  }
+  .diary-header .ornament {
+    font-size:7px; letter-spacing:3px; color:rgba(196,149,58,.2); margin-bottom:2px; font-family:serif;
+  }
+  .diary-header h1 {
+    font-family:var(--v-font-display); font-size:clamp(16px,4.5vw,20px); font-weight:900;
+    letter-spacing:3px; text-transform:uppercase; color:var(--v-gold-light);
+    text-shadow:0 0 20px rgba(196,149,58,.3), 0 0 40px rgba(196,149,58,.1);
+  }
+  .diary-header .sep {
+    height:1px; max-width:140px; margin:4px auto 0;
+    background:linear-gradient(90deg, transparent, rgba(196,149,58,.35) 20%, rgba(196,149,58,.6) 50%, rgba(196,149,58,.35) 80%, transparent);
+  }
+
+  /* ═══ PROGRESS ═══ */
+  .diary-progress { padding:4px 16px 2px; flex-shrink:0; }
+  .diary-progress-bar { height:3px; background:rgba(196,149,58,.12); border-radius:2px; overflow:hidden; }
+  .diary-progress-fill { height:100%; background:linear-gradient(90deg, var(--v-gold), var(--v-gold-light)); border-radius:2px; transition:width 0.6s ease; width:0%; }
+  .diary-progress-label { font-size:9px; color:var(--v-text-dim); text-align:center; margin-top:1px; font-family:var(--v-font-display); letter-spacing:1px; }
+
+  /* ═══ PAGE AREA — fixed height, one "page" at a time ═══ */
+  .diary-page {
+    flex:1; display:flex; flex-direction:column; justify-content:flex-start;
+    padding:8px 14px; overflow:hidden; position:relative;
+  }
+
+  /* ═══ EVENT ENTRY ═══ */
+  .diary-entry {
+    display:flex; gap:8px; margin-bottom:6px;
+    opacity:0; transform:translateY(10px); animation:entryIn .35s ease forwards;
+  }
+  @keyframes entryIn { to{opacity:1;transform:translateY(0)} }
+
+  .diary-dot {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; border:1px solid var(--v-border); background:var(--v-bg-card);
+  }
+  .diary-card {
+    flex:1; background:var(--v-bg-card); border:1px solid var(--v-border);
+    border-radius:var(--v-radius-sm); padding:6px 10px; min-width:0;
+  }
+  .diary-card-title { font-size:12px; color:var(--v-text); line-height:1.35; }
+  .diary-card-detail { font-size:10px; color:var(--v-text-dim); margin-top:2px; line-height:1.3; font-style:italic; }
+
+  .diary-entry--compact .diary-card { background:none; border:none; padding:2px 0; }
+  .diary-entry--compact .diary-card-title { font-size:10px; color:var(--v-text-dim); }
+  .diary-entry--compact .diary-dot { width:22px; height:22px; font-size:9px; border-color:rgba(74,56,40,.4); }
+
+  .diary-dot--encounter { border-color:rgba(220,60,60,.4); background:rgba(220,60,60,.08); }
+  .diary-dot--hazard_dice { border-color:rgba(220,160,40,.4); background:rgba(220,160,40,.08); }
+  .diary-dot--discovery { border-color:rgba(100,180,220,.4); background:rgba(100,180,220,.08); }
+  .diary-dot--weather { border-color:rgba(140,160,180,.3); }
+  .diary-dot--arrival { border-color:rgba(100,200,100,.4); background:rgba(100,200,100,.08); }
+
+  /* ═══ LOADING INDICATOR ═══ */
+  .diary-loading {
+    display:flex; align-items:center; gap:8px; padding:4px 0;
+    opacity:0; animation:loadIn .3s ease forwards;
+  }
+  @keyframes loadIn { to{opacity:1} }
+  .diary-loading-dot {
+    width:22px; height:22px; border-radius:50%; border:1px solid var(--v-border);
+    background:var(--v-bg-card); display:flex; align-items:center; justify-content:center;
+  }
+  .diary-loading-dot::after {
+    content:''; width:8px; height:8px; border:2px solid transparent;
+    border-top-color:var(--v-gold); border-radius:50%; animation:spin .8s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .diary-loading-text { font-size:10px; color:var(--v-text-dim); font-style:italic; animation:pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+  /* ═══ DICE EVENT (takes full page) ═══ */
+  .diary-dice-page {
+    flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:8px 14px; text-align:center; opacity:0; animation:entryIn .4s ease forwards;
+  }
+  .diary-dice-narration {
+    font-size:13px; color:var(--v-text); line-height:1.5; font-style:italic;
+    margin-bottom:10px; max-width:360px;
+  }
+  .diary-dice-formula {
+    font-family:var(--v-font-display); font-size:14px; color:var(--v-gold);
+    letter-spacing:1px; margin-bottom:6px;
+    opacity:0; animation:formulaIn .5s ease .5s forwards;
+  }
+  @keyframes formulaIn { to{opacity:1} }
+  .diary-dice-canvas-wrap { margin:6px 0; }
+  .diary-dice-canvas {
+    width:120px; height:120px;
+    border-radius:var(--v-radius-sm); border:1px solid var(--v-border);
+    background:radial-gradient(circle at center, rgba(40,32,24,.9), rgba(20,16,12,.95));
+  }
+  .diary-dice-result {
+    font-family:var(--v-font-display); font-size:18px; font-weight:700;
+    letter-spacing:1px; margin-top:8px;
+    opacity:0; animation:resultIn .4s ease forwards;
+  }
+  @keyframes resultIn { to{opacity:1} }
+  .diary-dice-result--success { color:#7ec87e; text-shadow:0 0 12px rgba(100,200,100,.3); }
+  .diary-dice-result--fail { color:#dc6060; text-shadow:0 0 12px rgba(220,60,60,.3); }
+  .diary-dice-resolution {
+    font-size:12px; color:var(--v-text-dim); margin-top:6px; line-height:1.4; max-width:340px;
+    opacity:0; animation:resultIn .4s ease .3s forwards;
+  }
+
+  /* ═══ CHOICE EVENT (takes full page) ═══ */
+  .diary-choice-page {
+    flex:1; display:flex; flex-direction:column; padding:8px 14px;
+    opacity:0; animation:entryIn .4s ease forwards;
+  }
+  .diary-choice-narration { font-size:13px; color:var(--v-text); line-height:1.5; margin-bottom:12px; }
+  .diary-choice-options { display:flex; flex-direction:column; gap:6px; }
+  .diary-choice-btn {
+    display:flex; align-items:center; gap:8px; padding:10px 12px;
+    background:linear-gradient(180deg, #3a3028 0%, var(--v-bg) 60%, #1e1a16 100%);
+    border:1px solid rgba(196,149,58,.25); border-radius:var(--v-radius-sm);
+    color:var(--v-text); font-family:var(--v-font); font-size:13px;
+    cursor:pointer; transition:all .15s; text-align:left;
+  }
+  .diary-choice-btn:active { background:linear-gradient(180deg, var(--v-bg) 0%, #1e1a16 100%); transform:scale(.98); }
+  .diary-choice-btn .choice-icon { font-size:16px; flex-shrink:0; }
+  .diary-choice-btn .choice-label { flex:1; }
+  .diary-choice-btn .choice-check { font-size:10px; color:var(--v-gold); font-family:var(--v-font-display); opacity:.7; }
+  .diary-choice-btn--selected { border-color:var(--v-gold); box-shadow:0 0 12px rgba(196,149,58,.15); }
+  .diary-choice-btn--disabled { opacity:.4; pointer-events:none; }
+
+  /* ═══ REWARD BADGES ═══ */
+  .diary-reward {
+    display:inline-flex; align-items:center; gap:3px; padding:2px 8px;
+    background:rgba(196,149,58,.08); border:1px solid rgba(196,149,58,.15);
+    border-radius:10px; font-size:10px; color:var(--v-gold); margin:4px 4px 0 0;
+    font-family:var(--v-font-display);
+  }
+  .diary-reward--hp { color:#dc6060; border-color:rgba(220,60,60,.15); background:rgba(220,60,60,.05); }
+  .diary-reward--xp { color:#7ec87e; border-color:rgba(100,200,100,.15); background:rgba(100,200,100,.05); }
+
+  /* ═══ FOOTER (always at bottom) ═══ */
+  .diary-footer {
+    flex-shrink:0; padding:8px 16px 12px;
+    background:linear-gradient(transparent 0%, rgba(14,11,8,.6) 40%);
+  }
+  .diary-stats { display:flex; justify-content:center; gap:14px; margin-bottom:6px; }
+  .diary-stat { text-align:center; }
+  .diary-stat-val { font-family:var(--v-font-display); font-size:14px; font-weight:700; color:var(--v-gold); }
+  .diary-stat-val--xp { color:#7ec87e; }
+  .diary-stat-val--hp { color:#dc6060; }
+  .diary-stat-label { font-size:8px; color:var(--v-text-dim); text-transform:uppercase; letter-spacing:1px; font-family:var(--v-font-display); }
+  .diary-action-btn {
+    width:100%; padding:11px; border:1px solid rgba(196,149,58,.3); border-radius:4px;
+    background:linear-gradient(180deg, #3a3028 0%, var(--v-bg) 60%, #1e1a16 100%);
+    color:var(--v-text); font-family:var(--v-font-display); font-size:13px;
+    font-weight:700; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 2px 8px rgba(0,0,0,.5);
+    transition:all .15s;
+  }
+  .diary-action-btn:active { background:linear-gradient(180deg, var(--v-bg) 0%, #1e1a16 100%); transform:scale(.98); }
+
+  /* ═══ PAGE TRANSITION ═══ */
+  .diary-page-exit { animation:pageOut .25s ease forwards; }
+  @keyframes pageOut { to{opacity:0;transform:translateX(-20px)} }
+
+  /* ═══ SUMMARY PAGE ═══ */
+  .diary-summary-page {
+    flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:16px; text-align:center; opacity:0; animation:entryIn .5s ease forwards;
+  }
+  .diary-summary-title {
+    font-family:var(--v-font-display); font-size:18px; font-weight:900;
+    color:var(--v-gold-light); letter-spacing:2px; text-transform:uppercase; margin-bottom:16px;
+    text-shadow:0 0 15px rgba(196,149,58,.3);
+  }
+  .diary-summary-stats { display:flex; gap:20px; margin-bottom:20px; }
+  .diary-summary-stat { text-align:center; }
+  .diary-summary-stat-val { font-family:var(--v-font-display); font-size:22px; font-weight:700; color:var(--v-gold); }
+  .diary-summary-stat-val--xp { color:#7ec87e; }
+  .diary-summary-stat-val--hp { color:#dc6060; }
+  .diary-summary-stat-label { font-size:10px; color:var(--v-text-dim); text-transform:uppercase; letter-spacing:1px; font-family:var(--v-font-display); margin-top:2px; }
+
+  /* ═══ DEMO CONTROLS ═══ */
+  .demo-bar {
+    position:fixed; top:0; left:0; right:0; max-width:430px; margin:0 auto;
+    background:rgba(0,0,0,.9); padding:4px 10px; z-index:200;
+    display:flex; gap:6px; align-items:center;
+  }
+  .demo-bar button {
+    padding:3px 8px; font-size:10px; border:1px solid var(--v-border);
+    background:var(--v-bg-card); color:var(--v-text); border-radius:4px;
+    cursor:pointer; font-family:var(--v-font);
+  }
+  .demo-bar .demo-label { font-size:9px; color:var(--v-text-dim); font-family:var(--v-font-display); letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <span class="demo-label">MOCKUP v2</span>
+  <button id="btnReset">Reset</button>
+  <button id="btnPlay">Viagem</button>
+  <button id="btnDice">Dado 3D</button>
+  <button id="btnChoice">Escolha</button>
+</div>
+
+<div class="diary-overlay" id="diary">
+  <div class="diary-header">
+    <div class="ornament">&#9670; &#9472;&#9472; &#9670; &#9472;&#9472; &#9670;</div>
+    <h1>&#128220; Di&aacute;rio de Viagem</h1>
+    <div class="sep"></div>
+  </div>
+  <div class="diary-progress">
+    <div class="diary-progress-bar"><div class="diary-progress-fill" id="progressFill"></div></div>
+    <div class="diary-progress-label" id="progressLabel">Plan&iacute;cie Dourada &rarr; Vila do Riacho</div>
+  </div>
+
+  <!-- Dynamic content area — replaced per "page" -->
+  <div class="diary-page" id="pageArea"></div>
+
+  <div class="diary-footer" id="footerArea" style="display:none"></div>
+</div>
+
+<script>
+/* ═══ 3D DICE — load real dice-3d.js from shared ═══ */
+var _dice3dReady = false, _dice3dInstance = null;
+(function loadDice3D() {
+  var s = document.createElement('script');
+  s.src = '../shared/dice-3d.js?v=' + Date.now();
+  s.onload = function() {
+    _dice3dReady = true;
+    console.info('[DIARY-MOCKUP] dice-3d.js loaded');
+  };
+  s.onerror = function() {
+    console.warn('[DIARY-MOCKUP] dice-3d.js failed to load — will use fallback');
+  };
+  document.head.appendChild(s);
+})();
+
+function _getDice(canvas) {
+  if (!_dice3dReady || typeof Dice3D === 'undefined') return null;
+  try {
+    return new Dice3D(canvas);
+  } catch(e) {
+    console.warn('[DIARY-MOCKUP] Dice3D init error:', e);
+    return null;
+  }
+}
+
+/* ═══ DATA ═══ */
+var EVENTS = [
+  { type:'departure', icon:'\u{1F3F0}', text:'Voc\u00ea parte de Plan\u00edcie Dourada ao amanhecer.' },
+  { type:'weather', icon:'\u{1F324}\uFE0F', text:'C\u00e9u limpo, brisa suave do leste.' },
+  { type:'safe', icon:'\u2714\uFE0F', text:'3 l\u00e9guas sem incidentes', compact:true },
+  { type:'discovery', icon:'\u{1F5FA}\uFE0F', text:'Ru\u00ednas de uma torre de vigia avistadas ao norte.', detail:'+15 XP pela descoberta', xp:15 },
+  { type:'_loading', text:'Avan\u00e7ando pela trilha...' },
+  { type:'hazard_dice', icon:'\u26A0\uFE0F',
+    narration:'Uma ponte de cordas balan\u00e7a sobre um desfiladeiro profundo. As t\u00e1buas est\u00e3o podres e rangem a cada passo.',
+    formula:'d20 + DEX (+2) vs DC 13',
+    roll:16, mod:2, dc:13,
+    successText:'Voc\u00ea cruza com agilidade, pisando apenas nas t\u00e1buas firmes.',
+    failText:'Uma t\u00e1bua cede sob seus p\u00e9s \u2014 voc\u00ea agarra a corda a tempo, mas machuca o ombro.',
+    failDmg:4 },
+  { type:'safe', icon:'\u2714\uFE0F', text:'2 l\u00e9guas de estrada tranquila', compact:true },
+  { type:'weather', icon:'\u{1F327}\uFE0F', text:'Chuva fina come\u00e7a a cair. Visibilidade reduzida.' },
+  { type:'_loading', text:'Seguindo pela floresta...' },
+  { type:'encounter_choice', icon:'\u{1F465}',
+    narration:'Tr\u00eas figuras encapuzadas bloqueiam a estrada. Uma delas ergue a m\u00e3o e diz: \u201cPed\u00e1gio. 10 Valdoritas ou d\u00ea meia-volta.\u201d',
+    choices:[
+      { icon:'\u{1F5E3}\uFE0F', label:'Intimidar', check:'CHA DC 14' },
+      { icon:'\u{1FA99}', label:'Pagar o ped\u00e1gio', check:'\u221210 Valdoritas' },
+      { icon:'\u2694\uFE0F', label:'Lutar', check:'Combate' },
+    ] },
+  { type:'safe', icon:'\u2714\uFE0F', text:'1 l\u00e9gua sem incidentes', compact:true },
+  { type:'arrival', icon:'\u{1F3D8}\uFE0F', text:'Voc\u00ea avista os telhados da Vila do Riacho ao entardecer.' },
+];
+
+/* ═══ STATE ═══ */
+var pageArea, footerArea, progressFill;
+var idx = 0, totalXp = 0, totalHp = 0, _running = false;
+var MAX_SIMPLE_PER_PAGE = 5; /* max simple events before auto-paging */
+
+function _el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text) e.textContent = text;
+  return e;
+}
+
+function clearPage(cb) {
+  pageArea.classList.add('diary-page-exit');
+  setTimeout(function() {
+    while (pageArea.firstChild) pageArea.removeChild(pageArea.firstChild);
+    pageArea.classList.remove('diary-page-exit');
+    if (cb) cb();
+  }, 250);
+}
+
+function updateProgress() {
+  progressFill.style.width = Math.min(100, (idx / EVENTS.length * 100)) + '%';
+}
+
+/* ═══ INIT ═══ */
+function init() {
+  pageArea = document.getElementById('pageArea');
+  footerArea = document.getElementById('footerArea');
+  progressFill = document.getElementById('progressFill');
+}
+
+function resetDemo() {
+  init();
+  while (pageArea.firstChild) pageArea.removeChild(pageArea.firstChild);
+  while (footerArea.firstChild) footerArea.removeChild(footerArea.firstChild);
+  footerArea.style.display = 'none';
+  progressFill.style.width = '0%';
+  idx = 0; totalXp = 0; totalHp = 0; _running = false;
+}
+
+/* ═══ MAIN LOOP ═══ */
+function playDemo() {
+  resetDemo(); _running = true;
+  showSimpleBatch();
+}
+
+function showSimpleBatch() {
+  if (!_running || idx >= EVENTS.length) { showSummary(); return; }
+  clearPage(function() { fillSimpleBatch(); });
+}
+
+function fillSimpleBatch() {
+  var count = 0;
+  function next() {
+    if (!_running || idx >= EVENTS.length) { showFooterNext(showSummary); return; }
+    var ev = EVENTS[idx];
+    updateProgress();
+
+    if (ev.type === 'hazard_dice') {
+      // Pause — show "next" button, then dice page
+      showFooterNext(function() { showDicePage(ev); });
+      return;
+    }
+    if (ev.type === 'encounter_choice') {
+      showFooterNext(function() { showChoicePage(ev); });
+      return;
+    }
+    if (ev.type === '_loading') {
+      idx++;
+      var el = _el('div', 'diary-loading');
+      var ldot = _el('div', 'diary-loading-dot');
+      var ltxt = _el('div', 'diary-loading-text', ev.text);
+      el.appendChild(ldot); el.appendChild(ltxt);
+      pageArea.appendChild(el);
+      setTimeout(function() {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        next();
+      }, 900);
+      return;
+    }
+
+    // Simple event
+    if (ev.xp) totalXp += ev.xp;
+    addSimpleEntry(ev);
+    idx++; count++;
+
+    if (count >= MAX_SIMPLE_PER_PAGE && idx < EVENTS.length && EVENTS[idx].type !== '_loading') {
+      // Page full — show "next" to advance
+      showFooterNext(showSimpleBatch);
+      return;
+    }
+
+    setTimeout(next, ev.compact ? 250 : 450);
+  }
+  next();
+}
+
+function addSimpleEntry(ev) {
+  var entry = _el('div', 'diary-entry' + (ev.compact ? ' diary-entry--compact' : ''));
+  var dot = _el('div', 'diary-dot diary-dot--' + ev.type);
+  dot.textContent = ev.icon;
+  var card = _el('div', 'diary-card');
+  card.appendChild(_el('div', 'diary-card-title', ev.text));
+  if (ev.detail) card.appendChild(_el('div', 'diary-card-detail', ev.detail));
+  if (ev.xp) card.appendChild(_el('span', 'diary-reward diary-reward--xp', '+' + ev.xp + ' XP'));
+  entry.appendChild(dot); entry.appendChild(card);
+  pageArea.appendChild(entry);
+}
+
+/* ═══ FOOTER BUTTON ═══ */
+function showFooterNext(cb) {
+  while (footerArea.firstChild) footerArea.removeChild(footerArea.firstChild);
+  var btn = _el('button', 'diary-action-btn', 'Prosseguir \u25B8');
+  btn.addEventListener('click', function() {
+    footerArea.style.display = 'none';
+    if (cb) cb();
+  });
+  footerArea.appendChild(btn);
+  footerArea.style.display = 'block';
+}
+
+/* ═══ DICE PAGE (full-page immersive) ═══ */
+function showDicePage(ev) {
+  idx++;
+  clearPage(function() {
+    var page = _el('div', 'diary-dice-page');
+
+    /* Step 1: Narration */
+    page.appendChild(_el('div', 'diary-dice-narration', ev.narration));
+
+    /* Step 2: Formula */
+    page.appendChild(_el('div', 'diary-dice-formula', ev.formula));
+
+    /* Step 3: 3D Dice canvas */
+    var cw = _el('div', 'diary-dice-canvas-wrap');
+    var canvas = document.createElement('canvas');
+    canvas.className = 'diary-dice-canvas';
+    canvas.width = 120; canvas.height = 120;
+    cw.appendChild(canvas);
+    page.appendChild(cw);
+
+    /* Placeholder for result (filled after roll) */
+    var resultEl = _el('div', 'diary-dice-result');
+    resultEl.style.opacity = '0';
+    page.appendChild(resultEl);
+
+    var resolEl = _el('div', 'diary-dice-resolution');
+    resolEl.style.opacity = '0';
+    page.appendChild(resolEl);
+
+    pageArea.appendChild(page);
+    updateProgress();
+
+    /* Roll the 3D dice */
+    var rollValue = ev.roll;
+    var total = ev.roll + ev.mod;
+    var isSuccess = total >= ev.dc;
+
+    setTimeout(function() {
+      var dice = _getDice(canvas);
+      if (dice) {
+        dice.roll(rollValue, function() {
+          showDiceResult(resultEl, resolEl, ev, isSuccess, total);
+        });
+      } else {
+        /* Fallback: animated number */
+        var ctx = canvas.getContext('2d');
+        var _frames = 0, _maxFrames = 12;
+        var _anim = setInterval(function() {
+          ctx.clearRect(0, 0, 120, 120);
+          ctx.fillStyle = 'rgba(20,16,12,0.95)';
+          ctx.fillRect(0, 0, 120, 120);
+          ctx.font = '900 36px Cinzel, serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#dbb668';
+          var rnd = Math.floor(Math.random() * 20) + 1;
+          ctx.fillText(String(rnd), 60, 60);
+          _frames++;
+          if (_frames >= _maxFrames) {
+            clearInterval(_anim);
+            ctx.clearRect(0, 0, 120, 120);
+            ctx.fillStyle = 'rgba(20,16,12,0.95)';
+            ctx.fillRect(0, 0, 120, 120);
+            ctx.font = '900 36px Cinzel, serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#dbb668';
+            ctx.fillText(String(rollValue), 60, 60);
+            showDiceResult(resultEl, resolEl, ev, isSuccess, total);
+          }
+        }, 80);
+      }
+    }, 600);
+  });
+}
+
+function showDiceResult(resultEl, resolEl, ev, isSuccess, total) {
+  resultEl.className = 'diary-dice-result ' + (isSuccess ? 'diary-dice-result--success' : 'diary-dice-result--fail');
+  resultEl.textContent = (isSuccess ? '\u2713 Sucesso' : '\u2717 Falha') + ' (' + total + ' vs DC ' + ev.dc + ')';
+  resultEl.style.opacity = '';
+
+  resolEl.textContent = isSuccess ? ev.successText : ev.failText;
+  resolEl.style.opacity = '';
+
+  if (!isSuccess && ev.failDmg) {
+    totalHp += ev.failDmg;
+    var dmg = _el('span', 'diary-reward diary-reward--hp', '-' + ev.failDmg + ' HP');
+    dmg.style.cssText = 'display:block;text-align:center;margin-top:6px';
+    resolEl.parentNode.appendChild(dmg);
+  }
+
+  /* Show continue button after reading time */
+  var words = ((isSuccess ? ev.successText : ev.failText) || '').split(/\s+/).length;
+  var readTime = Math.max(2000, words * 250);
+  setTimeout(function() {
+    showFooterNext(showSimpleBatch);
+  }, readTime);
+}
+
+/* ═══ CHOICE PAGE (full-page) ═══ */
+function showChoicePage(ev) {
+  idx++;
+  clearPage(function() {
+    var page = _el('div', 'diary-choice-page');
+
+    /* Icon + narration */
+    var narr = _el('div', 'diary-choice-narration', ev.narration);
+    page.appendChild(narr);
+
+    /* Choice buttons */
+    var opts = _el('div', 'diary-choice-options');
+    for (var i = 0; i < ev.choices.length; i++) {
+      (function(ci, c) {
+        var btn = _el('button', 'diary-choice-btn');
+        btn.appendChild(_el('span', 'choice-icon', c.icon));
+        btn.appendChild(_el('span', 'choice-label', c.label));
+        btn.appendChild(_el('span', 'choice-check', c.check));
+        btn.addEventListener('click', function() { onChoiceSelected(opts, ci, ev); });
+        opts.appendChild(btn);
+      })(i, ev.choices[i]);
+    }
+    page.appendChild(opts);
+    pageArea.appendChild(page);
+    updateProgress();
+  });
+}
+
+function onChoiceSelected(optsEl, selectedIdx, ev) {
+  var btns = optsEl.querySelectorAll('.diary-choice-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.add(i === selectedIdx ? 'diary-choice-btn--selected' : 'diary-choice-btn--disabled');
+    btns[i].disabled = true;
+  }
+
+  /* Simulate resolution */
+  setTimeout(function() {
+    var resBox = _el('div', 'diary-entry');
+    resBox.style.marginTop = '10px';
+    var rdot = _el('div', 'diary-dot diary-dot--encounter'); rdot.textContent = '\u{1F5E3}\uFE0F';
+    var rcard = _el('div', 'diary-card');
+    rcard.appendChild(_el('div', 'diary-card-title', 'Voc\u00ea se imp\u00f5e com autoridade. Os bandidos recuam, murmurando entre si.'));
+    rcard.appendChild(_el('div', 'diary-card-detail', 'Intimida\u00e7\u00e3o bem-sucedida. O caminho est\u00e1 livre.'));
+    rcard.appendChild(_el('span', 'diary-reward diary-reward--xp', '+25 XP'));
+    resBox.appendChild(rdot); resBox.appendChild(rcard);
+    pageArea.appendChild(resBox);
+    totalXp += 25;
+
+    setTimeout(function() { showFooterNext(showSimpleBatch); }, 1200);
+  }, 700);
+}
+
+/* ═══ SUMMARY PAGE ═══ */
+function showSummary() {
+  _running = false;
+  progressFill.style.width = '100%';
+  clearPage(function() {
+    var page = _el('div', 'diary-summary-page');
+    page.appendChild(_el('div', 'diary-summary-title', 'Viagem Conclu\u00edda'));
+
+    var stats = _el('div', 'diary-summary-stats');
+    function addStat(val, label, cls) {
+      var s = _el('div', 'diary-summary-stat');
+      s.appendChild(_el('div', 'diary-summary-stat-val' + (cls || ''), String(val)));
+      s.appendChild(_el('div', 'diary-summary-stat-label', label));
+      stats.appendChild(s);
+    }
+    addStat(EVENTS.filter(function(e){return e.type[0]!=='_';}).length, 'Eventos');
+    if (totalXp) addStat('+' + totalXp, 'XP', ' diary-summary-stat-val--xp');
+    if (totalHp) addStat('-' + totalHp, 'HP', ' diary-summary-stat-val--hp');
+    page.appendChild(stats);
+    pageArea.appendChild(page);
+
+    /* Final button */
+    while (footerArea.firstChild) footerArea.removeChild(footerArea.firstChild);
+    var btn = _el('button', 'diary-action-btn', 'Continuar Viagem \u27A1');
+    btn.addEventListener('click', function() { alert('Viagem conclu\u00edda! (Demo)'); });
+    footerArea.appendChild(btn);
+    footerArea.style.display = 'block';
+  });
+}
+
+/* ═══ SHORTCUT BUTTONS ═══ */
+function skipToDice() {
+  resetDemo(); _running = true; idx = 0;
+  /* Show a few simple events, then jump to dice */
+  while (pageArea.firstChild) pageArea.removeChild(pageArea.firstChild);
+  for (var i = 0; i < 3; i++) { addSimpleEntry(EVENTS[i]); if (EVENTS[i].xp) totalXp += EVENTS[i].xp; }
+  progressFill.style.width = '30%';
+  idx = 5;
+  setTimeout(function() { showDicePage(EVENTS[5]); }, 600);
+}
+
+function skipToChoice() {
+  resetDemo(); _running = true; idx = 0;
+  while (pageArea.firstChild) pageArea.removeChild(pageArea.firstChild);
+  progressFill.style.width = '50%';
+  idx = 9;
+  showChoicePage(EVENTS[9]);
+}
+
+/* ═══ BOOT ═══ */
+init();
+document.getElementById('btnReset').addEventListener('click', resetDemo);
+document.getElementById('btnPlay').addEventListener('click', playDemo);
+document.getElementById('btnDice').addEventListener('click', skipToDice);
+document.getElementById('btnChoice').addEventListener('click', skipToChoice);
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#2a2420"><title>V5 — Espada Cravada</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:#0f0d0a}
+body{height:100%;font-family:'MedievalSharp','Cinzel',serif;color:#d4c8b0;background:linear-gradient(180deg,#1a1510 0%,#2a2420 40%,#2a2420 60%,#1a1510 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0;text-align:center;overflow-y:auto}
+/* V5: Espada vertical como eixo central — recompensas nas laterais */
+.hero-zone{width:100%;padding:36px 20px 20px;background:radial-gradient(ellipse at 50% 60%,rgba(196,149,58,0.18),transparent 50%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.sword{font-size:52px;transform:rotate(0deg);filter:drop-shadow(0 0 24px rgba(196,149,58,0.5));animation:swordDrop 0.8s ease-out}
+@keyframes swordDrop{from{transform:translateY(-30px) rotate(-15deg);opacity:0}to{transform:translateY(0) rotate(0deg);opacity:1}}
+.title{font-family:'Cinzel',serif;font-size:34px;font-weight:900;letter-spacing:6px;text-transform:uppercase;background:linear-gradient(180deg,#fff5d4,#f5d478,#c4953a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.enemy-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 16px;background:rgba(196,149,58,0.08);border:1px solid rgba(196,149,58,0.2);border-radius:20px;font-size:13px;color:#d4c8b0}
+.enemy-badge-icon{font-size:16px}
+.mid-section{width:100%;padding:20px;flex:1;display:flex;flex-direction:column;gap:12px}
+.reward-strip{display:flex;gap:10px;width:100%}
+.r-card{flex:1;padding:18px 10px;background:linear-gradient(160deg,rgba(196,149,58,0.08),transparent);border:1px solid rgba(196,149,58,0.2);border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;overflow:hidden}
+.r-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent)}
+.r-icon{font-size:28px}
+.r-value{font-size:17px;font-weight:800;color:#f5d478;font-family:'Cinzel',serif}
+.r-label{font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#8a7a68;font-weight:700}
+.bottom-actions{width:100%;padding:8px 20px 28px;display:flex;flex-direction:column;gap:8px}
+.btn-hero{width:100%;padding:16px;font-family:'Cinzel',serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a1510;background:linear-gradient(180deg,#e8c45a 0%,#c4953a 40%,#8b6420 100%);border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 20px rgba(196,149,58,0.4),0 1px 0 rgba(255,255,255,0.2) inset;position:relative;overflow:hidden}
+.btn-hero::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,0.1) 50%,transparent 60%);animation:btnShine 3s ease-in-out infinite}
+@keyframes btnShine{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+.btn-hero:active{transform:scale(0.97)}
+.btn-log{width:100%;padding:11px;font-family:'MedievalSharp',serif;font-size:13px;color:#8a7a68;background:none;border:1px solid #4a3828;border-radius:10px;cursor:pointer}
+</style></head><body>
+<div class="hero-zone">
+  <div class="sword">⚔️</div>
+  <div class="title">Vitoria</div>
+  <div class="enemy-badge"><span class="enemy-badge-icon">💀</span> Cocatrice derrotado</div>
+</div>
+<div class="mid-section">
+  <div class="reward-strip">
+    <div class="r-card"><span class="r-icon">✨</span><span class="r-value">+100 XP</span><span class="r-label">Experiencia</span></div>
+    <div class="r-card"><span class="r-icon">💎</span><span class="r-value">Cristal Bruto</span><span class="r-label">Item</span></div>
+  </div>
+</div>
+<div class="bottom-actions">
+  <button class="btn-hero">⛰️ Continuar aventura</button>
+  <button class="btn-log">📜 Log de Batalha</button>
+</div>
+</body></html>

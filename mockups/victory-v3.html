@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#2a2420"><title>V3 — Cinematic Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:#0f0d0a}
+body{height:100%;font-family:'MedievalSharp','Cinzel',serif;color:#d4c8b0;background:radial-gradient(ellipse at 50% 30%,rgba(196,149,58,0.15),transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(40,30,20,0.8),transparent 60%),#0f0d0a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;text-align:center}
+/* V3: Cinematic — fundo escuro, tipografia dramática, luz central */
+.scene{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.emblem{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(196,149,58,0.3),rgba(196,149,58,0.05));border:2px solid rgba(196,149,58,0.4);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 0 40px rgba(196,149,58,0.2),0 0 80px rgba(196,149,58,0.08);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(196,149,58,0.2),0 0 80px rgba(196,149,58,0.08)}50%{box-shadow:0 0 50px rgba(196,149,58,0.35),0 0 100px rgba(196,149,58,0.12)}}
+.title-group{display:flex;flex-direction:column;gap:4px}
+.title{font-family:'Cinzel',serif;font-size:36px;font-weight:900;letter-spacing:8px;text-transform:uppercase;color:#f5d478;text-shadow:0 0 40px rgba(196,149,58,0.5),0 0 80px rgba(196,149,58,0.2)}
+.subtitle{font-size:13px;color:#8a7a68;letter-spacing:2px;text-transform:uppercase}
+.line{width:120px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.6),transparent)}
+.rewards{display:flex;flex-direction:column;gap:8px;width:100%}
+.reward{display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:10px;background:rgba(255,255,255,0.03);border-left:3px solid rgba(196,149,58,0.5)}
+.reward-icon{font-size:24px;min-width:28px}
+.reward-text{text-align:left}
+.reward-main{font-size:16px;font-weight:700;color:#f5d478}
+.reward-sub{font-size:11px;color:#8a7a68;text-transform:uppercase;letter-spacing:0.08em}
+.btn{width:100%;padding:16px;font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#f5d478;background:transparent;border:2px solid rgba(196,149,58,0.5);border-radius:10px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;box-shadow:0 0 20px rgba(196,149,58,0.1)}
+.btn:active{background:rgba(196,149,58,0.15);box-shadow:0 0 30px rgba(196,149,58,0.2)}
+.btn-dim{border-color:rgba(196,149,58,0.15);color:#8a7a68;font-size:12px;padding:10px;letter-spacing:1px;box-shadow:none}
+</style></head><body>
+<div class="scene">
+  <div class="emblem">🏆</div>
+  <div class="title-group">
+    <div class="title">Vitoria</div>
+    <div class="subtitle">Cocatrice derrotado</div>
+  </div>
+  <div class="line"></div>
+  <div class="rewards">
+    <div class="reward"><span class="reward-icon">✨</span><div class="reward-text"><div class="reward-main">+100 XP</div><div class="reward-sub">Experiencia</div></div></div>
+    <div class="reward"><span class="reward-icon">💎</span><div class="reward-text"><div class="reward-main">Cristal Bruto</div><div class="reward-sub">Item obtido</div></div></div>
+  </div>
+  <div class="line"></div>
+  <button class="btn">Continuar aventura</button>
+  <button class="btn btn-dim">Log de Batalha</button>
+</div>
+</body></html>

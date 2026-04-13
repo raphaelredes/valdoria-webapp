@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#2a2420"><title>V1 — Pergaminho Dourado</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:#1a1510}
+body{height:100%;font-family:'MedievalSharp','Cinzel',serif;color:#d4c8b0;background:radial-gradient(ellipse at 50% 15%,rgba(196,149,58,0.12),transparent 55%),#2a2420;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;text-align:center}
+/* V1: Pergaminho com bordas ornamentais */
+.card{width:100%;max-width:380px;padding:32px 20px 28px;background:linear-gradient(180deg,rgba(196,149,58,0.08) 0%,#2e2520 25%,#2e2520 75%,rgba(196,149,58,0.05) 100%);border:2px solid rgba(196,149,58,0.35);border-radius:14px;box-shadow:0 12px 50px rgba(0,0,0,0.6),0 0 80px rgba(196,149,58,0.06),inset 0 1px 0 rgba(196,149,58,0.15);position:relative}
+.card::before,.card::after{content:'◆';position:absolute;color:rgba(196,149,58,0.4);font-size:12px}
+.card::before{top:8px;left:50%;transform:translateX(-50%)}
+.card::after{bottom:8px;left:50%;transform:translateX(-50%)}
+.trophy{font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(196,149,58,0.4));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.title{font-family:'Cinzel',serif;font-size:28px;font-weight:900;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(90deg,#a08050,#f5d478,#fff5d4,#f5d478,#a08050);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite;margin-bottom:4px}
+@keyframes shimmer{from{background-position:200% center}to{background-position:-200% center}}
+.enemy{font-size:14px;color:#a09484;font-style:italic;margin-bottom:20px;letter-spacing:0.5px}
+.divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent);margin:0 auto 16px}
+.rewards{display:flex;flex-direction:column;gap:10px;width:100%;margin-bottom:20px}
+.reward{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(196,149,58,0.05);border:1px solid rgba(196,149,58,0.15);border-radius:10px}
+.reward-icon{font-size:22px;min-width:32px;text-align:center}
+.reward-body{text-align:left}
+.reward-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#8a7a68;font-weight:700}
+.reward-value{font-size:15px;color:#f5d478;font-weight:700}
+.btn{width:100%;padding:14px;font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#1a1510;background:linear-gradient(180deg,#c4953a 0%,#a07828 100%);border:none;border-radius:10px;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 16px rgba(196,149,58,0.3)}
+.btn:active{transform:scale(0.98)}
+.btn-secondary{margin-top:8px;background:transparent;color:#a09484;border:1px solid rgba(196,149,58,0.2);font-size:13px;padding:10px}
+</style></head><body>
+<div class="card">
+  <div class="trophy">🏆</div>
+  <div class="title">Vitoria</div>
+  <div class="enemy">Cocatrice derrotado</div>
+  <div class="divider"></div>
+  <div class="rewards">
+    <div class="reward"><span class="reward-icon">✨</span><div class="reward-body"><div class="reward-label">Experiencia</div><div class="reward-value">+100 XP</div></div></div>
+    <div class="reward"><span class="reward-icon">🎁</span><div class="reward-body"><div class="reward-label">Item</div><div class="reward-value">Cristal Bruto</div></div></div>
+  </div>
+  <button class="btn">⛰️ Continuar aventura</button>
+  <button class="btn btn-secondary">📜 Log de Batalha</button>
+</div>
+</body></html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#2a2420"><title>V4 — Selo Medieval</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:#1a1510}
+body{height:100%;font-family:'MedievalSharp','Cinzel',serif;color:#d4c8b0;background:repeating-linear-gradient(0deg,transparent,transparent 98%,rgba(196,149,58,0.03) 100%),#2a2420;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;text-align:center}
+/* V4: Selo/stamp medieval — ornamental, pergaminho */
+.seal{width:100%;max-width:370px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.stamp{width:100px;height:100px;border-radius:50%;border:3px solid rgba(196,149,58,0.6);background:radial-gradient(circle at 40% 35%,rgba(196,149,58,0.2),transparent 60%),#2e2520;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;box-shadow:0 0 0 6px #2a2420,0 0 0 8px rgba(196,149,58,0.3),0 8px 30px rgba(0,0,0,0.5)}
+.stamp::before{content:'';position:absolute;inset:-12px;border-radius:50%;border:1px dashed rgba(196,149,58,0.25)}
+.header{display:flex;flex-direction:column;gap:2px}
+.header-pre{font-size:11px;color:#8a7a68;letter-spacing:3px;text-transform:uppercase}
+.title{font-family:'Cinzel',serif;font-size:30px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#f5d478;text-shadow:0 2px 8px rgba(196,149,58,0.3)}
+.header-sub{font-size:14px;color:#d4c8b0;font-style:italic}
+.ornament{display:flex;align-items:center;gap:8px;color:rgba(196,149,58,0.4);font-size:10px;letter-spacing:4px}
+.ornament-line{width:40px;height:1px;background:rgba(196,149,58,0.3)}
+.loot-scroll{width:100%;background:#2e2520;border:1px solid #4a3828;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.loot-title{font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#8a7a68;font-weight:700;margin-bottom:2px}
+.loot-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(74,56,40,0.5)}
+.loot-row:last-child{border-bottom:none}
+.loot-icon{font-size:20px;min-width:28px;text-align:center}
+.loot-info{text-align:left;flex:1}
+.loot-name{font-size:14px;font-weight:700;color:#f5d478}
+.loot-type{font-size:10px;color:#8a7a68;text-transform:uppercase;letter-spacing:0.08em}
+.actions{width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.btn{width:100%;padding:15px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#1a1510;background:linear-gradient(180deg,#c4953a,#8b6420);border:none;border-radius:10px;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 16px rgba(196,149,58,0.25),inset 0 1px 0 rgba(255,255,255,0.1)}
+.btn:active{transform:scale(0.98)}
+.btn-outline{background:none;color:#a09484;border:1px solid #4a3828;box-shadow:none;font-size:12px;padding:11px}
+</style></head><body>
+<div class="seal">
+  <div class="stamp">🏆</div>
+  <div class="header">
+    <div class="header-pre">Combate encerrado</div>
+    <div class="title">Vitoria</div>
+    <div class="header-sub">Cocatrice derrotado</div>
+  </div>
+  <div class="ornament"><span class="ornament-line"></span>◆ ◆ ◆<span class="ornament-line"></span></div>
+  <div class="loot-scroll">
+    <div class="loot-title">Recompensas</div>
+    <div class="loot-row"><span class="loot-icon">✨</span><div class="loot-info"><div class="loot-name">+100 XP</div><div class="loot-type">Experiencia</div></div></div>
+    <div class="loot-row"><span class="loot-icon">💎</span><div class="loot-info"><div class="loot-name">Cristal Bruto</div><div class="loot-type">Item obtido</div></div></div>
+  </div>
+  <div class="actions">
+    <button class="btn">⛰️ Continuar aventura</button>
+    <button class="btn btn-outline">📜 Log de Batalha</button>
+  </div>
+</div>
+</body></html>
