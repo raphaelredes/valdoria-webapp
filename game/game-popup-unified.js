@@ -191,6 +191,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Rune Scribe redesign
+    if (data._rune_scribe_screen && typeof renderRuneScribe === 'function') {
+        renderRuneScribe(el, data._rune_scribe_screen);
+        return el;
+    }
+
     // Workshop/Crafting redesign
     if (data._workshop_screen && typeof renderWorkshopHub === 'function') {
         renderWorkshopHub(el, data._workshop_screen);

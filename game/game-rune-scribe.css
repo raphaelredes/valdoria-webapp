@@ -1,0 +1,160 @@
+/* game-rune-scribe.css — Rune Scribe screen styles */
+/* Namespace: rns- */
+
+.rns-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+/* NPC header */
+.rns-npc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-md, 8px);
+}
+
+.rns-npc-icon { font-size: 32px; }
+
+.rns-npc-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 16px);
+  font-weight: 700;
+  color: #b0a0e0;
+}
+
+.rns-npc-role {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text-dim, #a09484);
+}
+
+/* Recipe info */
+.rns-recipe {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  background: var(--v-border-15, rgba(74, 56, 40, 0.15));
+  border-radius: var(--v-radius-sm, 6px);
+}
+
+/* Tier cards */
+.rns-tier-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: linear-gradient(165deg, #2a2240 0%, #1a1830 100%);
+  border: 1px solid rgba(100, 80, 180, 0.25);
+  border-radius: var(--v-radius, 8px);
+}
+
+.rns-tier-header {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 6px);
+}
+
+.rns-tier-emoji { font-size: 18px; }
+
+.rns-tier-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--v-text, #d4c8b0);
+  font-size: var(--v-font-body, 14px);
+}
+
+.rns-tier-badge {
+  font-size: var(--v-font-xs, 10px);
+  color: #b0a0e0;
+  padding: 1px 6px;
+  border: 1px solid rgba(100, 80, 180, 0.3);
+  border-radius: var(--v-radius-pill, 20px);
+}
+
+/* Fragment progress */
+.rns-tier-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 6px);
+}
+
+.rns-tier-count {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text, #d4c8b0);
+  font-weight: 600;
+  min-width: 28px;
+}
+
+.rns-progress-wrap {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--v-radius-xs, 3px);
+  overflow: hidden;
+}
+
+.rns-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6050a0, #8070c0);
+  border-radius: var(--v-radius-xs, 3px);
+  transition: width var(--v-transition-base, 0.3s) ease;
+}
+
+.rns-progress-fill.rns-ready {
+  background: linear-gradient(90deg, #50a060, #70c080);
+}
+
+/* Craft buttons */
+.rns-craft-btn {
+  width: 100%;
+  padding: var(--v-space-md, 8px);
+  border: 1px solid rgba(100, 80, 180, 0.3);
+  border-radius: var(--v-radius-sm, 6px);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-base, 13px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  background: rgba(100, 80, 180, 0.1);
+  color: var(--v-text, #d4c8b0);
+}
+
+.rns-craft-btn:active { transform: scale(0.97); }
+
+.rns-craft-ready {
+  background: linear-gradient(165deg, #2a4a2a 0%, #1a3a1a 100%);
+  border-color: rgba(80, 180, 80, 0.3);
+  color: #b0e0b0;
+  font-weight: 600;
+}
+
+.rns-craft-locked {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Actions row */
+.rns-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-sm, 6px);
+}
+
+.rns-action-btn {
+  padding: var(--v-space-md, 8px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-base, 13px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.rns-action-btn:active { transform: scale(0.97); background: var(--v-gold-08); }
