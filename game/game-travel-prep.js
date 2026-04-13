@@ -17,23 +17,58 @@
     return 'crit';
   }
 
-  /* ------ Main popup body: compact vitals + warnings + biome tip ------ */
+  /* ------ Item info data for mini popup ------ */
+  var _ITEM_INFO = {
+    rations: { icon: '\uD83C\uDF56', title: 'Rac\u00f5es de Viagem', body: 'Cada trecho da jornada consome <b>1 ra\u00e7\u00e3o por membro</b> do grupo. Sem ra\u00e7\u00f5es, o grupo sofre <b>1 n\u00edvel de exaust\u00e3o</b> por trecho sem alimento.' },
+    tent: { icon: '\u26FA\uFE0F', title: 'Barraca', body: 'Permite <b>Descanso Longo</b> durante a explora\u00e7\u00e3o, recuperando <b>HP total e recursos</b>. Sem barraca, descanso longo \u00e9 imposs\u00edvel no campo.' },
+    potions: { icon: '\uD83E\uDDEA', title: 'Po\u00e7\u00f5es de Cura', body: 'Cura <b>2d4+2 HP</b> instantaneamente. Podem ser usadas em combate (a\u00e7\u00e3o b\u00f4nus) ou durante descanso.' },
+    hp: { icon: '\u2764\uFE0F', title: 'Pontos de Vida', body: 'Partir com <b>HP abaixo de 60%</b> aumenta o risco de derrota no primeiro encontro. Considere descansar na Estalagem ou usar po\u00e7\u00f5es.' },
+    rope: { icon: '\uD83E\uDDF6', title: 'Corda de C\u00e2nhamo', body: 'Concede <b>+2 em testes de FOR e DES</b> contra perigos como abismos, quedas e armadilhas.' },
+    lighter: { icon: '\uD83D\uDD25', title: 'Isqueiro', body: 'Concede <b>+2 SAB em cavernas</b> (contra escurid\u00e3o) e <b>+2 CON no frio</b> (contra congelamento).' },
+    sleeping: { icon: '\uD83D\uDECF\uFE0F', title: 'Saco de Dormir', body: 'Concede <b>+1 HP extra</b> ao realizar Descanso Curto. Acumula com dados de vida.' },
+    canteen: { icon: '\uD83D\uDCA7', title: 'Cantil de Couro', body: 'Concede <b>+2 CON contra calor</b>. Essencial em desertos e regi\u00f5es vulc\u00e2nicas.' }
+  };
+
+  function _showItemInfo(key) {
+    var info = _ITEM_INFO[key];
+    if (!info || typeof vPopup === 'undefined') return;
+    vPopup.show({
+      id: 'travel-prep-detail-overlay',
+      size: 'mini',
+      header: info.icon + ' ' + info.title,
+      body: info.body,
+      actions: [{ label: 'Entendi', action: 'cancel', cls: 'v-popup-btn' }],
+      closeOnOutside: true
+    });
+  }
+
+  /* ------ Main popup body: Design B — readiness + bars + checklist ------ */
   function _renderMainBody(d) {
     var h = '';
     var warnings = d.warnings || [];
+    var warnCount = warnings.length;
 
-    h += '<div class="prep-vitals">';
+    /* Readiness meter */
+    var readiness = Math.max(0, Math.round(100 - warnCount * 12.5));
+    var readCls = readiness >= 80 ? 'high' : readiness >= 50 ? 'mid' : 'low';
+    var readColor = readiness >= 80 ? 'var(--v-success)' : readiness >= 50 ? 'var(--v-warning)' : 'var(--v-danger)';
+    h += '<div class="prep-readiness">';
+    h += '<div class="prep-readiness-label">Prontid\u00e3o: <b style="color:' + readColor + '">' + readiness + '%</b></div>';
+    h += '<div class="prep-readiness-bar"><div class="prep-readiness-fill prep-readiness-fill--' + readCls + '" style="width:' + readiness + '%"></div></div>';
+    if (warnCount > 0) h += '<div class="prep-readiness-text">' + warnCount + ' alerta' + (warnCount > 1 ? 's' : '') + ' ativo' + (warnCount > 1 ? 's' : '') + '</div>';
+    h += '</div>';
 
-    /* HP row */
+    /* HP bar */
     var hpPct = d.hp.pct || 0;
     var hpSt = _pctStatus(hpPct, 60, 30);
+    h += '<div class="prep-vitals">';
     h += '<div class="prep-vital-row">';
     h += '<span class="prep-vital-label"><span class="' + _dotCls(hpSt) + '"></span>HP</span>';
     h += '<span class="prep-vital-value">' + d.hp.current + ' / ' + d.hp.max + '</span>';
     h += '</div>';
     h += '<div class="v-popup-bar-wrap"><div class="v-popup-bar-fill v-popup-bar--hp" style="width:' + hpPct + '%"></div></div>';
 
-    /* MP row (optional) */
+    /* MP bar (optional) */
     if (d.mp) {
       var mpPct = d.mp.pct || 0;
       var mpSt = _pctStatus(mpPct, 50, 20);
@@ -43,36 +78,67 @@
       h += '</div>';
       h += '<div class="v-popup-bar-wrap"><div class="v-popup-bar-fill v-popup-bar--mp" style="width:' + mpPct + '%"></div></div>';
     }
+    h += '</div>';
 
-    h += '</div>'; /* end prep-vitals */
+    h += '<div class="prep-sep"></div>';
 
-    /* Warning chips — max 4 inline, trimmed */
-    if (warnings.length > 0) {
-      var warnMap = {
-        low_hp: '\u2764\ufe0f HP baixo',
-        no_food: '\ud83c\udf56 Sem rações',
-        low_food: '\ud83c\udf56 Poucas rações',
-        no_tent: '\u26fa Sem barraca',
-        no_potions: '\ud83e\uddea Sem poções',
-        exhaustion: '\ud83d\udca4 Exausto',
-        high_exhaustion: '\ud83d\udca4 Exausto!'
-      };
-      h += '<div class="prep-warn-chip-row">';
-      for (var w = 0; w < warnings.length && w < 4; w++) {
-        var msg = warnMap[warnings[w]] || warnings[w];
-        h += '<span class="prep-warn-chip">' + msg + '</span>';
-      }
-      h += '</div>';
+    /* Checklist grid 2-col */
+    var foodOk = d.food.count >= d.food.recommended;
+    var gear = d.field_gear || [];
+    var gearMap = {};
+    for (var gi = 0; gi < gear.length; gi++) gearMap[gear[gi].name] = gear[gi];
+
+    h += '<div class="prep-checklist-grid">';
+    h += _checkItem(foodOk, 'Ra\u00e7\u00f5es (' + d.food.count + '/' + d.food.recommended + ')', 'rations');
+    h += _checkItem(d.tent, 'Barraca', 'tent');
+    h += _checkItem(d.potions > 0, 'Po\u00e7\u00f5es (' + d.potions + ')', 'potions');
+    h += _checkItem(hpPct >= 60, 'HP ' + (hpPct >= 60 ? '\u2265' : '<') + ' 60%', 'hp');
+    /* Field gear items */
+    var gearKeys = [
+      { name: 'Corda de C\u00e2nhamo (15m)', label: 'Corda', key: 'rope' },
+      { name: 'Isqueiro', label: 'Isqueiro', key: 'lighter' },
+      { name: 'Saco de Dormir', label: 'Saco de Dormir', key: 'sleeping' },
+      { name: 'Cantil de Couro', label: 'Cantil', key: 'canteen' }
+    ];
+    for (var gk = 0; gk < gearKeys.length; gk++) {
+      var gd = gearMap[gearKeys[gk].name];
+      var has = gd ? gd.has : false;
+      h += _checkItem(has, gearKeys[gk].label, gearKeys[gk].key);
     }
+    h += '</div>';
 
-    /* Biome tip (single discreet line) */
+    h += '<div class="prep-sep"></div>';
+
+    /* Gold row with v-coin */
+    h += '<div class="prep-gold-row">';
+    h += '<span class="vi vi-coin"></span>';
+    h += '<span class="prep-gold-val">' + (d.gold || 0) + '</span>';
+    h += '</div>';
+
+    /* Biome tip */
     if (d.biome_tip) {
       var tipEmoji = d.biome_tip.emoji || '';
       var tipText = d.biome_tip.text || d.biome_tip;
       h += '<div class="prep-biome-tip">' + tipEmoji + ' ' + tipText + '</div>';
     }
 
+    /* Quick buy card */
+    var qe = d.quick_equip || {};
+    if (qe.available && qe.items && qe.items.length > 0) {
+      var firstItem = qe.items[0];
+      h += '<div class="prep-quickbuy" data-action="prep_show_supplies">';
+      h += 'Compra r\u00e1pida: ' + firstItem.name + ' por <span class="vi vi-coin sm"></span> <b style="color:var(--v-gold)">' + firstItem.cost + '</b>';
+      h += '</div>';
+    }
+
     return h;
+  }
+
+  function _checkItem(ok, label, infoKey) {
+    var dotCls = ok ? 'prep-check-dot prep-check-dot--ok' : 'prep-check-dot prep-check-dot--miss';
+    return '<div class="prep-check-item" data-info="' + infoKey + '">' +
+      '<span class="' + dotCls + '"></span>' + label +
+      '<span class="prep-check-hint">\u2139</span></div>';
   }
 
   /* ------ Supplies detail popup body (nested) ------ */
@@ -226,10 +292,10 @@
       cls: 'v-popup-btn v-popup-btn--primary'
     });
 
-    /* Cancel */
+    /* Cancel — just close popup, player is already in Eldoria */
     actions.push({
-      label: 'Voltar para Eldória',
-      action: 'action_city_entry',
+      label: 'Fechar',
+      action: 'cancel',
       cls: 'v-popup-btn v-popup-btn--cancel'
     });
 
@@ -451,6 +517,24 @@
         var actionsEl = overlay.querySelector('.v-popup-actions');
         if (actionsEl) {
           _bindActions(actionsEl, _onMainAction);
+        }
+        /* Bind checklist item info clicks */
+        var items = overlay.querySelectorAll('.prep-check-item[data-info]');
+        for (var ci = 0; ci < items.length; ci++) {
+          (function (el) {
+            el.addEventListener('click', function () {
+              if (typeof haptic === 'function') haptic('light');
+              _showItemInfo(el.getAttribute('data-info'));
+            });
+          })(items[ci]);
+        }
+        /* Bind quick buy card click */
+        var qb = overlay.querySelector('.prep-quickbuy[data-action]');
+        if (qb) {
+          qb.addEventListener('click', function () {
+            if (typeof haptic === 'function') haptic('light');
+            _openSuppliesPopup();
+          });
         }
       }
     });
