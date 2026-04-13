@@ -67,9 +67,9 @@
     grid-template-columns: 1fr;
 }
 
-/* Override popup body max-height for unified popups (more content space) */
+/* Unified popup body — flex:1 + min-height:0 from popup.css handles sizing;
+   overflow-y:auto ensures scroll when content exceeds card budget */
 #unified-popup-overlay .v-popup-body {
-    max-height: 65vh;
     overflow-y: auto;
 }
 
