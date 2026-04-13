@@ -43,7 +43,7 @@ function renderWorkshopHub(container, data) {
   var goldRow = vCity.el('div', 'wks-gold-row');
   goldRow.appendChild(vCity.coin('sm'));
   var goldVal = vCity.el('span', 'wks-gold-value');
-  goldVal.textContent = ' ' + String(data.gold || 0) + ' Valdoritas';
+  goldVal.textContent = ' ' + String(data.gold || 0);
   goldRow.appendChild(goldVal);
   root.appendChild(goldRow);
 

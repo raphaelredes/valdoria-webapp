@@ -161,9 +161,7 @@ function _renderArenaMain(el, d) {
     var r1Range = document.createElement('strong');
     r1Range.textContent = ' ' + goldRange + ' ';
     r1.appendChild(r1Range);
-    var r1Suffix = document.createElement('span');
-    r1Suffix.textContent = 'Valdoritas';
-    r1.appendChild(r1Suffix);
+    /* v-coin icon already present — no "Valdoritas" text needed */
     rewardRow.appendChild(r1);
     var r2 = _div('reward-item reward-xp');
     r2.textContent = '\u2728 ' + (reward.xp || 0) + ' XP';
@@ -178,9 +176,7 @@ function _renderArenaMain(el, d) {
     var feeAmount = document.createElement('strong');
     feeAmount.textContent = ' ' + (d.fee || 0) + ' ';
     fee.appendChild(feeAmount);
-    var feeUnit = document.createElement('span');
-    feeUnit.textContent = 'Valdoritas';
-    fee.appendChild(feeUnit);
+    /* v-coin icon already present — no "Valdoritas" text needed */
     rewardScroll.appendChild(fee);
     frag.appendChild(rewardScroll);
 
@@ -358,7 +354,7 @@ function _renderArenaResult(el, d) {
         goldCard.appendChild(goldIcon);
         var goldText = _div('reward-text');
         var goldMain = document.createElement('strong');
-        goldMain.textContent = '+' + (rewards.gold || 0) + ' Valdoritas';
+        goldMain.textContent = '+' + (rewards.gold || 0);
         goldText.appendChild(goldMain);
         if (rewards.streak_bonus_gold > 0) {
             var bonus = document.createElement('span');

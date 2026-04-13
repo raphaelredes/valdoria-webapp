@@ -33,7 +33,7 @@ function renderFestivalHub(container, data) {
   var goldRow = vCity.el('div', 'fst-gold-row');
   goldRow.appendChild(vCity.coin('sm'));
   var goldVal = vCity.el('span', 'fst-gold-value');
-  goldVal.textContent = ' ' + String(data.gold || 0) + ' Valdoritas';
+  goldVal.textContent = ' ' + String(data.gold || 0);
   goldRow.appendChild(goldVal);
   root.appendChild(goldRow);
 
