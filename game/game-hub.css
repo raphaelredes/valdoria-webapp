@@ -147,7 +147,7 @@
   border: 1px solid rgba(183, 28, 28, 0.25);
   border-radius: var(--v-radius-sm, 6px);
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: var(--v-font-xs, 10px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-danger-light, #e08080);
 }
 
@@ -193,10 +193,10 @@
   flex: 1;
 }
 
-/* name — readable size, truncated (#58 fix) */
+/* name — readable size, truncated (#58 fix: xs→sm for readability) */
 .hub-ally .ha-name {
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: var(--v-font-xs, 10px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -235,7 +235,7 @@
   border: 1px dashed var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: var(--v-font-xs, 10px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-muted, #a08050);
   min-height: 32px;
 }
@@ -442,7 +442,7 @@
   background: rgba(0, 0, 0, 0.15);
   border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
   font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: var(--v-font-xs, 10px);
+  font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.5;
   font-style: italic;
@@ -558,7 +558,7 @@
    ---------------------------------------------------------- */
 .hub-section-label {
   font-family: var(--v-font-display, "Cinzel", serif);
-  font-size: var(--v-font-xs, 10px);
+  font-size: var(--v-font-sm, 12px);
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--v-text-muted, #a08050);
