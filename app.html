@@ -15,11 +15,12 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="shared/fonts.css">
     <script>
-        /* Force-clear ALL browser caches on first load per session */
+        /* Force reload when code version changes — nuclear cache bust */
         (function(){
-            var _cacheCleared = sessionStorage.getItem('_v_cache_cleared');
-            if (!_cacheCleared) {
-                sessionStorage.setItem('_v_cache_cleared', '1');
+            var _CODE_VERSION = '2026041321';
+            var _stored = localStorage.getItem('_v_code_ver');
+            if (_stored !== _CODE_VERSION) {
+                localStorage.setItem('_v_code_ver', _CODE_VERSION);
                 /* Unregister stale service workers */
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -29,9 +30,15 @@
                 /* Delete all Cache API caches */
                 if (window.caches) {
                     caches.keys().then(function(keys) {
-                        keys.forEach(function(k) { caches.delete(k); });
+                        return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                    }).then(function() {
+                        /* Force hard reload after cache clear */
+                        location.reload(true);
                     });
+                } else {
+                    location.reload(true);
                 }
+                return;
             }
         })();
         var v = Date.now();
