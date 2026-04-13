@@ -1,0 +1,150 @@
+/* game-codex.css — Compêndio popup styles (Layout 5: Combinado) */
+/* Namespace: cdx- */
+
+.cdx-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+}
+
+/* Progress bar row */
+.cdx-prog-row {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+}
+
+.cdx-prog-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--v-radius-pill, 20px);
+  overflow: hidden;
+}
+
+.cdx-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--v-gold-dim, #9a7530), var(--v-gold, #c4953a));
+  border-radius: var(--v-radius-pill, 20px);
+  transition: width var(--v-transition-base, 0.3s) ease;
+}
+
+.cdx-prog-pct {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Category tabs */
+.cdx-tabs {
+  display: flex;
+  gap: var(--v-space-xs, 2px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+  padding: var(--v-space-xs, 2px) 0;
+}
+
+.cdx-tabs::-webkit-scrollbar { display: none; }
+
+.cdx-tab {
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  background: transparent;
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-pill, 20px);
+  color: var(--v-text-dim, #a09484);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-xs, 10px);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cdx-tab--active {
+  background: rgba(196, 149, 58, 0.1);
+  border-color: var(--v-gold, #c4953a);
+  color: var(--v-gold, #c4953a);
+}
+
+.cdx-tab:active { transform: scale(0.95); }
+
+/* Search */
+.cdx-search { flex-shrink: 0; }
+
+.cdx-search-input {
+  width: 100%;
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  background: var(--v-bg, #2a2420);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-sm, 12px);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.cdx-search-input:focus {
+  border-color: var(--v-gold, #c4953a);
+}
+
+/* Entries list */
+.cdx-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
+}
+
+.cdx-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-left: 3px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+}
+
+.cdx-entry--locked {
+  opacity: 0.4;
+}
+
+.cdx-entry-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+}
+
+.cdx-entry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cdx-entry-name {
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdx-entry-meta {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdx-entry--locked .cdx-entry-name {
+  color: var(--v-text-dim, #a09484);
+}

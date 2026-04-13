@@ -191,6 +191,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Codex / Compêndio popup
+    if (data._codex_screen && typeof renderCodexScreen === 'function') {
+        renderCodexScreen(el, data._codex_screen);
+        return el;
+    }
+
     // Festival hub
     if (data._festival_screen && typeof renderFestivalHub === 'function') {
         renderFestivalHub(el, data._festival_screen);
