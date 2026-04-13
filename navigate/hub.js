@@ -217,6 +217,20 @@ function _onDataReady() {
   if (!state.currentLoc) state.currentLoc = state.cl || 'city_gates';
   if (!state.charData) state.charData = state.c || {};
   if (!state.regions) state.regions = state.rg || {};
+  /* Build regions from flat lo dict when backend sends lo instead of rg */
+  if (Object.keys(state.regions).length === 0 && state.lo) {
+    var _dl = state.dl || [];
+    var _dlSet = {};
+    for (var _di = 0; _di < _dl.length; _di++) _dlSet[_dl[_di]] = true;
+    for (var _lid in state.lo) {
+      var _loc = state.lo[_lid];
+      var _b = _loc.b || 'plains';
+      if (!state.regions[_b]) state.regions[_b] = { locs: [], discovered: [], quests: 0, dungeons: 0, settlements: [], hm: state.hm || 0 };
+      state.regions[_b].locs.push({ id: _lid, n: _loc.n, i: _loc.i, d: _loc.d, ds: _loc.ds || '', s: _loc.s || 0 });
+      if (_dlSet[_lid]) state.regions[_b].discovered.push(_lid);
+    }
+    console.warn('[HUB] Built %s regions from %s locations (lo→rg)', Object.keys(state.regions).length, Object.keys(state.lo).length);
+  }
   if (!state.weather) state.weather = state.wt || {};
   /* Party roster: compact key pt — same schema as guild _compact_npc */
   if (!state.partyMembers) state.partyMembers = Array.isArray(state.pt) ? state.pt : [];
