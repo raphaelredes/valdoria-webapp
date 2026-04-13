@@ -102,6 +102,14 @@ function _showTravelJournal(log,redirectUrl){
   document.body.appendChild(overlay);
 
   /* ── Wire DiaryEngine ── */
+  if(typeof DiaryEngine==='undefined'){
+    console.error('[TRAVEL-JOURNAL] DiaryEngine not loaded — skipping journal');
+    if(overlay.parentNode)overlay.parentNode.removeChild(overlay);
+    window.__valdoria_transitioning=true;
+    if(typeof redirectUrl==='function'){redirectUrl();}
+    else if(redirectUrl){window.location.replace(redirectUrl);}
+    return;
+  }
   var diary=new DiaryEngine(pageArea,footerArea,progFill);
 
   /* Choice handler for interactive choices (calls backend API) */
