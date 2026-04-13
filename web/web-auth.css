@@ -8,27 +8,26 @@
  * No navegador desktop isso deixava a coluna colada ao topo.
  * Preenchemos a altura real da janela e centralizamos o card verticalmente.
  */
+/* Viewport lock — same constraints as all game screens (valdoria-design.css) */
 html.wa-portal {
-  min-height: 100vh;
-  min-height: 100dvh;
+  max-width: min(100vw, 430px);
   height: 100vh;
-  height: 100dvh;
-  max-height: none;
-  /* Viewport lock: same 430px constraint as all game screens */
-  max-width: 430px;
+  height: min(100dvh, 932px);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  background: #2a2420;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  border-left: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.3));
+  border-right: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.3));
 }
 
 body.wa-portal {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: none;
-  height: auto;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  /* design system usa contain:size no body — impede o flex de preencher 100dvh no portal */
   contain: layout;
 }
 
@@ -36,9 +35,7 @@ body.wa-portal {
 
 .wa-screen {
     display: none;
-    min-height: 100vh;
-    min-height: 100dvh;
-    max-height: min(100dvh, 932px);
+    height: 100%;
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -53,11 +50,10 @@ body.wa-portal {
     display: flex;
 }
 
-/* Dentro do portal: a tela ocupa o corpo flex e centraliza o card no espaço disponível */
+/* Portal screen fills available height within the viewport-locked body */
 .wa-portal .wa-screen {
     flex: 1 1 auto;
     min-height: 0;
-    max-height: none;
 }
 
 /* Dark edge vignette */
