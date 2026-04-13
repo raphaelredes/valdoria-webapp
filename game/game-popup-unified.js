@@ -360,7 +360,17 @@ function _buildPopupBody(data) {
             wip.className = 'unified-popup-wip';
             var wipIcon = document.createElement('div');
             wipIcon.className = 'wip-icon';
-            wipIcon.textContent = '\uD83C\uDFD7\uFE0F';
+            /* Medieval scroll+quill SVG — safe static content, no user input */
+            wipIcon.innerHTML = '<svg viewBox="0 0 64 64" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<rect x="16" y="8" width="32" height="48" rx="3" fill="#3a2a1a" stroke="#8a6a3a" stroke-width="1.5"/>' +
+                '<rect x="20" y="14" width="24" height="36" rx="1" fill="#2a1e14" stroke="#6a5030" stroke-width="0.8"/>' +
+                '<line x1="22" y1="22" x2="42" y2="22" stroke="#5a4a30" stroke-width="0.8" stroke-dasharray="2 2"/>' +
+                '<line x1="22" y1="28" x2="38" y2="28" stroke="#5a4a30" stroke-width="0.8" stroke-dasharray="2 2"/>' +
+                '<line x1="22" y1="34" x2="40" y2="34" stroke="#5a4a30" stroke-width="0.8" stroke-dasharray="2 2"/>' +
+                '<circle cx="44" cy="44" r="12" fill="#2a2018" stroke="#8a6a3a" stroke-width="1.2"/>' +
+                '<path d="M44 36 L44 44 L48 48" stroke="#c4953a" stroke-width="1.5" stroke-linecap="round" fill="none"/>' +
+                '<path d="M40 40 L48 48 M48 40 L40 48" stroke="#c4953a" stroke-width="1" stroke-linecap="round" opacity="0.4"/>' +
+                '</svg>';
             wip.appendChild(wipIcon);
             var wipTitle = document.createElement('div');
             wipTitle.className = 'wip-title';

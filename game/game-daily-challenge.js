@@ -77,8 +77,25 @@ function _buildAvailable(body, d, t) {
     body.appendChild(_divider());
 
     body.appendChild(_section(t.rewards_section || 'Recompensas Estimadas'));
-    body.appendChild(_row('✨ ' + (t.xp_label || 'XP'), '~' + (d.xp_est || 0)));
-    body.appendChild(_row('<span class="vi vi-coin sm"></span> ' + (t.gold_label || 'Ouro'), '~' + (d.gold_est || 0) + ' <span class="vi vi-coin sm"></span>'));
+    body.appendChild(_row('\u2728 ' + (t.xp_label || 'XP'), '~' + (d.xp_est || 0)));
+    /* Gold row — use DOM coin icon instead of HTML string */
+    var goldRow = document.createElement('div');
+    goldRow.className = 'v-popup-row';
+    var goldLbl = document.createElement('span');
+    goldLbl.className = 'v-popup-label';
+    goldLbl.textContent = (t.gold_label || 'Ouro') + ' ';
+    var goldCoin = document.createElement('span');
+    goldCoin.className = 'vi vi-coin sm';
+    goldLbl.appendChild(goldCoin);
+    goldRow.appendChild(goldLbl);
+    var goldVal = document.createElement('span');
+    goldVal.className = 'v-popup-value';
+    goldVal.textContent = '~' + (d.gold_est || 0) + ' ';
+    var goldCoin2 = document.createElement('span');
+    goldCoin2.className = 'vi vi-coin sm';
+    goldVal.appendChild(goldCoin2);
+    goldRow.appendChild(goldVal);
+    body.appendChild(goldRow);
 
     body.appendChild(_divider());
 
