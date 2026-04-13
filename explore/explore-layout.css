@@ -21,6 +21,13 @@
 
 /* --- Reset + Body --- */
 *:not(html) { box-sizing: border-box; margin: 0; padding: 0; }
+/* Disable valdoria-design.css body::before (noise overlay with mix-blend-mode:overlay)
+   in explore — interacts with hex tile canvas colors creating visible artifacts.
+   body::after vignette is re-purposed by fatigue states below, so only disable ::before. */
+body::before { display: none !important; }
+/* Override the default body::after vignette from valdoria-design.css — explore uses
+   its own fog/vignette system in canvas. Only fatigue-N classes re-enable ::after. */
+body:not(.fatigue-1):not(.fatigue-2):not(.fatigue-3)::after { display: none !important; }
 body {
     overflow: hidden;
     display: flex;

@@ -17,6 +17,17 @@
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
     <script>
+        /* Explore manages its own loading — bypass FOUC safety that re-shows
+           #loading after 10s (loading-guard.js). Also define forceHideLoading
+           so loadMapData can call it in standalone mode (not just SPA). */
+        window._loadingGuardBypass = true;
+        if (typeof forceHideLoading !== 'function') {
+            window.forceHideLoading = function() {
+                var lo = document.getElementById('loading');
+                if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; }
+                if (window.vProcessing) vProcessing.hide();
+            };
+        }
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
