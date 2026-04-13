@@ -284,12 +284,23 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
 }
 .camp-continue {
   text-align: center;
-  padding: 6px 0;
-  font-size: var(--v-font-sm, 12px);
-  color: var(--v-text-dim, #a09484);
-  opacity: 0.6;
+  padding: 12px 20px;
+  margin: var(--v-space-md, 8px) auto 0;
+  font-size: var(--v-font-body, 14px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  background: var(--v-gold-10, rgba(196,149,58,0.1));
+  border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+  border-radius: var(--v-radius, 10px);
   cursor: pointer;
-  font-family: var(--v-font);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  letter-spacing: 1px;
+  transition: all var(--v-transition, 0.2s);
+  max-width: 280px;
+}
+.camp-continue:active {
+  transform: scale(0.97);
+  background: var(--v-gold-20, rgba(196,149,58,0.2));
 }
 .camp-footer-status {
   display: flex;
