@@ -21,11 +21,15 @@
            #loading after 10s (loading-guard.js). Also define forceHideLoading
            so loadMapData can call it in standalone mode (not just SPA). */
         window._loadingGuardBypass = true;
+        /* Override MIN_LOAD_MS for explore — map ready = hide immediately */
+        window.VALDORIA_MIN_LOAD_MS = 0;
         if (typeof forceHideLoading !== 'function') {
             window.forceHideLoading = function() {
                 var lo = document.getElementById('loading');
                 if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; }
                 if (window.vProcessing) vProcessing.hide();
+                /* Also force loading-controller to stop cinematic exit */
+                if (window._loadingCtrl && _loadingCtrl.forceHide) _loadingCtrl.forceHide();
             };
         }
         var v = Date.now();
@@ -120,7 +124,7 @@
       <div class="hud-quick-btn" id="btn-camp-float" onclick="if(typeof showCampOverlay==='function')showCampOverlay();" title="Acampar">🏕️</div>
       <div class="hud-quick-btn" id="btn-inventory-float" onclick="if(typeof transitionToInventory==='function')transitionToInventory();" title="Mochila">🎒</div>
       <div class="hud-quick-btn" id="btn-torch" onclick="if(typeof toggleTorch==='function')toggleTorch();" title="Tocha">🔥</div>
-      <div class="hud-quick-btn" id="btn-return-float" onclick="if(typeof showExitRiskAssessment==='function')showExitRiskAssessment();" title="Retornar à cidade">🏠</div>
+      <!-- btn-return-float removed: Retornar available in bottom bar -->
     </div>
 
     <!-- Minimap -->
