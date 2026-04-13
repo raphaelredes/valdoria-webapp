@@ -302,13 +302,34 @@ function _buildPopupBody(data) {
         el.appendChild(img);
     }
 
-    // Text content
+    // Text content — detect legacy inline format and show "Em Construção"
     if (data.text) {
-        var textDiv = document.createElement('div');
-        textDiv.className = 'unified-popup-text';
-        textDiv.style.whiteSpace = 'pre-wrap';
-        textDiv.innerHTML = data.text;
-        el.appendChild(textDiv);
+        var _rawText = data.text;
+        var _isLegacy = /━|✦|═|◆.*◆.*◆/.test(_rawText);
+        if (_isLegacy && data._is_popup) {
+            console.info('[POPUP] Legacy inline detected — showing WIP for', data._popup_title || '?');
+            var wip = document.createElement('div');
+            wip.className = 'unified-popup-wip';
+            var wipIcon = document.createElement('div');
+            wipIcon.className = 'wip-icon';
+            wipIcon.textContent = '\uD83C\uDFD7\uFE0F';
+            wip.appendChild(wipIcon);
+            var wipTitle = document.createElement('div');
+            wipTitle.className = 'wip-title';
+            wipTitle.textContent = 'Em Constru\u00e7\u00e3o';
+            wip.appendChild(wipTitle);
+            var wipDesc = document.createElement('div');
+            wipDesc.className = 'wip-desc';
+            wipDesc.textContent = 'Esta tela est\u00e1 sendo redesenhada para uma experi\u00eancia melhor. Em breve estar\u00e1 dispon\u00edvel com o novo visual!';
+            wip.appendChild(wipDesc);
+            el.appendChild(wip);
+        } else {
+            var textDiv = document.createElement('div');
+            textDiv.className = 'unified-popup-text';
+            textDiv.style.whiteSpace = 'pre-wrap';
+            textDiv.innerHTML = data.text; /* noqa: preflight — server-rendered HTML */
+            el.appendChild(textDiv);
+        }
     }
 
     // Toast inside popup

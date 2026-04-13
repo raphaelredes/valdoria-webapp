@@ -90,3 +90,33 @@
     text-align: left;
     padding-left: var(--v-space-xl, 16px);
 }
+
+/* "Em Construção" placeholder for screens without dedicated renderer */
+.unified-popup-wip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--v-space-2xl, 24px) var(--v-space-lg, 16px);
+    text-align: center;
+    min-height: 200px;
+}
+.wip-icon {
+    font-size: 48px;
+    margin-bottom: var(--v-space-lg, 16px);
+    opacity: 0.7;
+}
+.wip-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xl, 16px);
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    margin-bottom: var(--v-space-md, 8px);
+    letter-spacing: 1px;
+}
+.wip-desc {
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.6;
+    max-width: 300px;
+}
