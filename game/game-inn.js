@@ -474,8 +474,9 @@ function _renderResult(ct, d) {
     for (var i = 0; i < d.effects.length; i++) {
       var e = d.effects[i];
       var row = _el('div', 'inn-result-effect');
-      var sym = _el('span', 'inn-result-sym ' + (e.good ? 'good' : 'bad'));
-      sym.textContent = e.good ? '\u2713' : '\u26A0\uFE0F';
+      var isGood = e.good || e.icon === '\u2713' || e.icon === '\u2728' || e.icon === '\uD83D\uDE0C';
+      var sym = _el('span', 'inn-result-sym ' + (isGood ? 'good' : 'bad'));
+      sym.textContent = e.icon || (isGood ? '\u2713' : '\u26A0\uFE0F');
       row.appendChild(sym);
       var txt = _el('span', '');
       txt.textContent = e.text || '';
