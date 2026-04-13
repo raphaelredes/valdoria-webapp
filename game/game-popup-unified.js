@@ -185,6 +185,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Bank sub-screens (insurance, loans, investments)
+    if (data._bank_sub_screen && typeof renderBankSub === 'function') {
+        renderBankSub(el, data._bank_sub_screen);
+        return el;
+    }
+
     // Workshop/Crafting redesign
     if (data._workshop_screen && typeof renderWorkshopHub === 'function') {
         renderWorkshopHub(el, data._workshop_screen);

@@ -1,0 +1,216 @@
+/* game-bank-sub.css — Bank sub-screen styles (insurance, loans, investments) */
+/* Namespace: bsb- */
+
+.bsb-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+/* Status card (insurance active, loan active) */
+.bsb-status-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-sm, 6px);
+  padding: var(--v-space-md-lg, 12px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  text-align: center;
+}
+
+.bsb-status-icon { font-size: 28px; line-height: 1; }
+
+.bsb-status-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 16px);
+  font-weight: 700;
+  color: var(--v-gold-light, #dbb668);
+}
+
+.bsb-status-title.bsb-danger { color: #e07070; }
+
+.bsb-status-detail {
+  font-size: var(--v-font-base, 13px);
+  color: var(--v-text, #d4c8b0);
+}
+
+.bsb-status-sub {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text-dim, #a09484);
+}
+
+/* Progress bar */
+.bsb-progress-wrap {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--v-radius-xs, 3px);
+  overflow: hidden;
+}
+
+.bsb-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--v-gold, #c4953a), var(--v-gold-light, #dbb668));
+  border-radius: var(--v-radius-xs, 3px);
+  transition: width var(--v-transition-base, 0.3s) ease;
+}
+
+/* Info block */
+.bsb-info-block {
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-border-15, rgba(74, 56, 40, 0.15));
+  border-radius: var(--v-radius-sm, 6px);
+  border-left: 2px solid var(--v-gold-dim, rgba(196, 149, 58, 0.2));
+}
+
+.bsb-info-item {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.6;
+}
+
+/* Balance row */
+.bsb-balance-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-sm, 6px);
+}
+
+.bsb-balance-card {
+  display: flex;
+  align-items: center;
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  font-size: var(--v-font-sm, 12px);
+}
+
+.bsb-balance-icon { flex-shrink: 0; }
+.bsb-balance-label { color: var(--v-text-dim, #a09484); }
+.bsb-balance-value {
+  color: var(--v-gold, #c4953a);
+  font-weight: 600;
+}
+
+/* Action button */
+.bsb-action-btn {
+  width: 100%;
+  padding: var(--v-space-md-lg, 12px);
+  background: linear-gradient(165deg, var(--v-bg-accent, #5a2a2a) 0%, #3a1515 100%);
+  border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  border-radius: var(--v-radius, 8px);
+  color: var(--v-gold-light, #dbb668);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bsb-action-btn:active { transform: scale(0.97); opacity: 0.9; }
+.bsb-action-btn.bsb-disabled { opacity: 0.5; pointer-events: none; }
+
+/* Detail grid (loan details) */
+.bsb-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+  width: 100%;
+  text-align: left;
+}
+
+.bsb-detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--v-font-sm, 12px);
+}
+
+.bsb-detail-label { color: var(--v-text-dim, #a09484); }
+.bsb-detail-value { color: var(--v-text, #d4c8b0); font-weight: 600; }
+
+/* Tier cards (loans/investments) */
+.bsb-tier-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
+  width: 100%;
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+
+.bsb-tier-card:active { transform: scale(0.97); background: var(--v-gold-08); }
+
+.bsb-tier-header {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 6px);
+}
+
+.bsb-tier-emoji { font-size: 18px; }
+.bsb-tier-name {
+  font-weight: 600;
+  color: var(--v-text, #d4c8b0);
+  font-size: var(--v-font-body, 14px);
+}
+
+.bsb-tier-details {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  padding-left: 28px;
+}
+
+/* Slots indicator */
+.bsb-slots {
+  text-align: center;
+  font-size: var(--v-font-base, 13px);
+  color: var(--v-text, #d4c8b0);
+  font-weight: 600;
+}
+
+/* Investment cards */
+.bsb-invest-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
+  width: 100%;
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+
+.bsb-invest-card:active { transform: scale(0.97); background: var(--v-gold-08); }
+
+.bsb-invest-mature {
+  border-color: rgba(80, 180, 80, 0.3);
+  background: linear-gradient(165deg, #2a3a2a 0%, #1a2a1a 100%);
+}
+
+.bsb-invest-header {
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  font-weight: 600;
+}
+
+.bsb-invest-detail {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+}
+
+.bsb-invest-mature .bsb-invest-detail {
+  color: #7cd47c;
+}
