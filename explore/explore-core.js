@@ -1,5 +1,8 @@
 // MIN_LOAD_MS enforced by loading-guard.js
 var COLS=11,ROWS=13;var IMPASSABLE=new Set(['W','M','L','#','D']);var EVEN_OFFSETS=[[-1,-1],[0,-1],[-1,0],[1,0],[-1,1],[0,1]];var ODD_OFFSETS=[[0,-1],[1,-1],[-1,0],[1,0],[0,1],[1,1]];var STAT_NAMES={str:'Força',dex:'Destreza',con:'Constituição',int:'Inteligência',wis:'Sabedoria',cha:'Carisma',atl:'Atletismo',acr:'Acrobacia',slh:'Prestidigitação',stl:'Furtividade',arc:'Arcanismo',his:'História',inv:'Investigação',nat:'Natureza',rel:'Religião',anh:'Lid. Animais',ins:'Intuição',med:'Medicina',per:'Percepção',sur:'Sobrevivência',dec:'Enganação',itm:'Intimidação',prf:'Atuação',prs:'Persuasão',};var STAT_SHORT={str:'FOR',dex:'DES',con:'CON',int:'INT',wis:'SAB',cha:'CAR',atl:'ATL',acr:'ACR',slh:'PRE',stl:'FUR',arc:'ARC',his:'HIS',inv:'INV',nat:'NAT',rel:'REL',anh:'ANI',ins:'ITU',med:'MED',per:'PER',sur:'SOB',dec:'ENG',itm:'ITM',prf:'ATU',prs:'PRS',};var POI_TYPE_LABELS={dis:'Descoberta',sea:'Busca',dan:'Perigo',mys:'Mistério',npc:'Encontro'};var _POI_TYPE_ICONS={dis:'\ud83d\udddd\ufe0f',sea:'\ud83d\udd0d',dan:'\u26a0\ufe0f',mys:'\u2728',npc:'\ud83d\udde3\ufe0f',soc:'\ud83e\udd1d',loot:'\ud83d\udcb0',trap:'\u26a1',discovery:'\ud83d\udddd\ufe0f',danger:'\u26a0\ufe0f',mystery:'\u2728',combat:'\u2694\ufe0f',search:'\ud83d\udd0d',enc:'\u2694\ufe0f'};var _ENC_TYPE_ICONS={amb:'\u2694\ufe0f',trp:'\u26a1',trap:'\u26a1',hid:'\ud83d\udddd\ufe0f',hidden:'\ud83d\udddd\ufe0f',snd:'\ud83d\udc41\ufe0f',sound:'\ud83d\udc41\ufe0f',wth:'\ud83c\udf29\ufe0f'};var S={grid:[],pois:[],biome:'forest',playerCol:0,playerRow:0,exitCol:0,exitRow:0,visibility:3,visited:new Set(),fogState:{},xpEarned:0,goldEarned:0,hpChange:0,itemsFound:[],poisResolved:new Set(),checksPerformed:[],combatTrigger:null,charData:null,token:'',dmIntro:'',dangerLevel:1,randomEncounters:[],conditions:[],exhaustion:0,_stepsWithoutRest:0,_stepsForRation:0,_fatigue:0,_fatiguePeriods:0,_secondWindUsed:false,_healingSpringUsed:false,_longRestCount:0,mpChange:0,_hdUsed:0,_longRestAmbushSafe:false,_hazardsTriggered:new Set(),_watchUsed:false,_flavorSteps:0,travelPace:'normal',travelActivity:null,interactedHexes:new Set(),moveLog:[],_stepCount:0,inventory:[],inventoryUsed:[],_lowHPAlertShown:false,};
+/* Safe haptic — Telegram WebApp v6.0 has HapticFeedback obj but methods throw */
+var _tgVer=(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.version)?parseFloat(Telegram.WebApp.version):0;
+var _safeHaptic={impact:function(t){try{if(_tgVer>=6.1&&Telegram.WebApp.HapticFeedback)Telegram.WebApp.HapticFeedback.impactOccurred(t||'light');else if(navigator.vibrate)navigator.vibrate(8);}catch(_){}},notify:function(t){try{if(_tgVer>=6.1&&Telegram.WebApp.HapticFeedback)Telegram.WebApp.HapticFeedback.notificationOccurred(t||'success');}catch(_){}},select:function(){try{if(_tgVer>=6.1&&Telegram.WebApp.HapticFeedback)Telegram.WebApp.HapticFeedback.selectionChanged();}catch(_){}}};
 /* Hex directional navigation — terrain display */
 var HEX_DIR_ARROWS=['\u2196','\u2197','\u2190','\u2192','\u2199','\u2198'];
 var TERRAIN_EMOJI={'.':'\ud83c\udf3f','g':'\ud83c\udf3e','f':'\ud83c\udf32','~':'\ud83d\udca7','m':'\ud83d\udfe4','r':'\ud83e\udea8','H':'\u26f0\ufe0f','s':'\ud83c\udfdc\ufe0f','i':'\u2744\ufe0f','L':'\ud83c\udf0b','W':'\ud83c\udf0a','#':'\ud83e\uddf1','D':'\ud83d\udeaa','C':'\u2728','@':'\ud83d\udccd','E':'\ud83d\udccd','S':'\ud83c\udf3f','R':'\ud83c\udfda\ufe0f','w':'\ud83d\udca7'};
@@ -60,7 +63,7 @@ function _hexNavLongPressFire(btn,col,row,terrainText){
   if(btn)btn.classList.add('peeking');
   console.info('[EXPLORE:HEXNAV] long_press_peek dir target=(%d,%d) terrain=%s',col,row,terrainText);
   /* Light haptic + non-blocking toast */
-  try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback){Telegram.WebApp.HapticFeedback.impactOccurred('light');}else if(navigator.vibrate){navigator.vibrate(8);}}catch(_e){console.warn('[EXPLORE:HEXNAV] haptic',_e);}
+  if(typeof _safeHaptic!=='undefined')_safeHaptic.impact('light');
   if(typeof showTerrainToast==='function'){showTerrainToast(terrainText,'flavor');}
 }
 function updateHexNav(){
@@ -339,7 +342,7 @@ function initHexNavCenter(){
     _hexNavRangeShown=!_hexNavRangeShown;
     btn.classList.toggle('active',_hexNavRangeShown);
     console.info('[EXPLORE:HEXNAV] center_toggle range_shown=%s',_hexNavRangeShown);
-    try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback){Telegram.WebApp.HapticFeedback.impactOccurred('light');}else if(navigator.vibrate){navigator.vibrate(8);}}catch(_e){console.warn('[EXPLORE:HEXNAV] haptic',_e);}
+    if(typeof _safeHaptic!=='undefined')_safeHaptic.impact('light');
     if(_hexNavRangeShown){
       if(typeof findReachable==='function'&&typeof setReachableHighlight==='function'){
         var reachable=findReachable(S.playerCol,S.playerRow,6);
