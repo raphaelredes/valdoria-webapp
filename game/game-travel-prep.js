@@ -437,18 +437,19 @@
     var bodyHtml = _renderMainBody(data);
     var actionsList = _renderMainActions(data);
 
+    var actionsHtml = _mainActionsToHtml(actionsList);
+
     vPopup.show({
       id: 'travel-prep-overlay',
       header: 'Preparação de Viagem',
       headerClass: warnings.length > 0 ? 'v-popup-header--warning' : '',
       body: bodyHtml,
-      actions: '', /* we render actions manually in onReady to support raw html row */
+      actions: actionsHtml,
       onAction: _onMainAction,
       closeOnOutside: false,
       onReady: function (overlay) {
         var actionsEl = overlay.querySelector('.v-popup-actions');
         if (actionsEl) {
-          actionsEl.innerHTML = _mainActionsToHtml(actionsList);
           _bindActions(actionsEl, _onMainAction);
         }
       }
