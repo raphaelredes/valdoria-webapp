@@ -12,7 +12,9 @@
  */
 function renderInnConfirm(container, data) {
   if (!container || !data) return;
-  container.innerHTML = ''; /* noqa: preflight */
+  console.info('[INN] render type=%s', data.type || 'confirm');
+  /* Reset container (trusted backend data only) */
+  container.textContent = ''; /* noqa: preflight */
 
   switch (data.type) {
     case 'hub':     return _renderHub(container, data);
@@ -447,6 +449,8 @@ function _buildMealCard(m) {
    TYPE: result — Generic result screen
    ================================================================ */
 function _renderResult(ct, d) {
+  var restType = d.rest_type || (d.title || 'result');
+  console.info('[INN] rest_complete type=%s', restType);
   var root = _el('div', 'inn-result');
 
   /* Icon + Title */

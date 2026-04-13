@@ -30,6 +30,7 @@
   };
 
   function _showItemInfo(key) {
+    console.info('[TRAVEL-PREP] item_info key=%s', key);
     var info = _ITEM_INFO[key];
     if (!info || typeof vPopup === 'undefined') return;
     vPopup.show({
@@ -50,6 +51,7 @@
 
     /* Readiness meter */
     var readiness = Math.max(0, Math.round(100 - warnCount * 12.5));
+    console.info('[TRAVEL-PREP] readiness=%d warnings=%d', readiness, warnCount);
     var readCls = readiness >= 80 ? 'high' : readiness >= 50 ? 'mid' : 'low';
     var readColor = readiness >= 80 ? 'var(--v-success)' : readiness >= 50 ? 'var(--v-warning)' : 'var(--v-danger)';
     h += '<div class="prep-readiness">';
