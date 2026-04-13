@@ -203,15 +203,15 @@ body.perf-lite .cell.in-range { animation: none; }
 
 /* HP fill variants */
 .fill-hp-high {
-    background: linear-gradient(90deg, #3a7a2a, #5a8a3c);
+    background: var(--v-hp-high);
 }
 
 .fill-hp-mid {
-    background: linear-gradient(90deg, #a07020, #b88a2a);
+    background: var(--v-hp-warn);
 }
 
 .fill-hp-low {
-    background: linear-gradient(90deg, #8a2a2a, #a63a2a);
+    background: var(--v-hp-crit);
 }
 
 /* MP fill */

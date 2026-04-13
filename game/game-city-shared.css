@@ -162,9 +162,9 @@
   border-radius: 3px;
   transition: width var(--v-transition, 0.2s) ease;
 }
-.vc-bar-fill.hp-high { background: linear-gradient(90deg, #2a6a2a, #50b450); }
-.vc-bar-fill.hp-mid { background: linear-gradient(90deg, #8a6a20, #d4a020); }
-.vc-bar-fill.hp-low { background: linear-gradient(90deg, #8a2020, #d04040); }
+.vc-bar-fill.hp-high { background: var(--v-hp-high); }
+.vc-bar-fill.hp-mid { background: var(--v-hp-warn); }
+.vc-bar-fill.hp-low { background: var(--v-hp-crit); }
 .vc-bar-fill.mp-fill { background: linear-gradient(90deg, #2a4a8a, #5080d0); }
 .vc-bar-value {
   font-size: var(--v-font-xs, 10px);

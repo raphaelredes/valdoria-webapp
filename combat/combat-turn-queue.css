@@ -106,9 +106,9 @@
   border-radius: 2px;
   transition: width var(--v-transition-base, 0.3s) ease;
 }
-.tl-hp-high { background: linear-gradient(90deg, #3a7a2a, #5a8a3c); }
-.tl-hp-mid { background: linear-gradient(90deg, #a07020, #b88a2a); }
-.tl-hp-low { background: linear-gradient(90deg, #8a2a2a, #a63a2a); }
+.tl-hp-high { background: var(--v-hp-high); }
+.tl-hp-mid { background: var(--v-hp-warn); }
+.tl-hp-low { background: var(--v-hp-crit); }
 
 /* ── Round badge ── */
 .tl-round {

@@ -136,12 +136,28 @@
     --v-bar-height-mini: 4px;
     --v-font-micro: 10px;
     --v-font-label: 12px;
+    /* HP bar colors — CANONICAL (use ONLY these, never hardcode)
+     * Thresholds: >60% = high (green), >25% = warn (orange), ≤25% = crit (red)
+     * Aliases: hp-mid = hp-warn, hp-low = hp-crit (for legacy compat) */
     --v-hp-high: linear-gradient(90deg, #2d8f2d, #4caf50);
     --v-hp-warn: linear-gradient(90deg, #c2410c, #f97316);
     --v-hp-crit: linear-gradient(90deg, #b91c1c, #ef4444);
+    --v-hp-mid: var(--v-hp-warn);
+    --v-hp-low: var(--v-hp-crit);
     --v-hp-high-flat: #4caf50;
     --v-hp-warn-flat: #f97316;
     --v-hp-crit-flat: #ef4444;
+    --v-hp-mid-flat: var(--v-hp-warn-flat);
+    --v-hp-low-flat: var(--v-hp-crit-flat);
+    /* HP bar glow (warn/crit get subtle glow for urgency) */
+    --v-hp-warn-glow: 0 0 4px rgba(249, 115, 22, 0.3);
+    --v-hp-crit-glow: 0 0 6px rgba(239, 68, 68, 0.35);
+    /* Bar dimensions — minimum for smartphone readability */
+    --v-bar-height: 8px;
+    --v-bar-height-sm: 6px;
+    --v-bar-height-mini: 4px;
+    --v-bar-height-lg: 12px;
+    --v-bar-min-width: 80px;
     --v-mp: linear-gradient(90deg, #1565c0, #42a5f5);
     --v-mp-flat: #42a5f5;
     --v-xp: linear-gradient(90deg, #7b1fa2, #ab47bc);

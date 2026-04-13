@@ -1057,12 +1057,12 @@
 }
 
 .arena-hp-bar-fill.hp-crit {
-    background: linear-gradient(90deg, #b33 0%, var(--v-danger, #e74c3c) 100%);
+    background: var(--v-hp-crit);
     animation: arenaHpCritPulse 1.5s ease-in-out infinite;
 }
 
 .arena-hp-bar-fill.hp-warn {
-    background: linear-gradient(90deg, #cc7700 0%, var(--arena-cooldown) 100%);
+    background: var(--v-hp-warn);
 }
 
 .arena-hp-text {

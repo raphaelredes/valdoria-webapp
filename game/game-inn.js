@@ -633,7 +633,7 @@ function _buildPlayerBlock(p) {
 
   var hpPct = p.max_hp > 0 ? (p.hp / p.max_hp * 100) : 0;
   var mpPct = p.max_mp > 0 ? (p.mp / p.max_mp * 100) : 0;
-  var hpClass = hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+  var hpClass = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
 
   /* Head: name + class */
   var head = _el('div', 'inn-player-head');
@@ -690,7 +690,7 @@ function _buildMiniBar(label, type, cur, max) {
 
   var track = _el('div', 'inn-ally-bar-track');
   var pct = max > 0 ? (cur / max * 100) : 0;
-  var fillClass = type === 'mp' ? 'mp-fill' : (pct > 50 ? 'hp-high' : (pct > 25 ? 'hp-mid' : 'hp-low'));
+  var fillClass = type === 'mp' ? 'mp-fill' : (pct > 60 ? 'hp-high' : (pct > 25 ? 'hp-mid' : 'hp-low'));
   var fill = _el('div', 'inn-ally-bar-fill ' + fillClass);
   fill.style.width = pct.toFixed(0) + '%';
   track.appendChild(fill);
@@ -756,7 +756,7 @@ function _buildAllyRow(a) {
 
   var hpPct = a.max_hp > 0 ? (a.hp / a.max_hp * 100) : 0;
   var mpPct = a.max_mp > 0 ? (a.mp / a.max_mp * 100) : 0;
-  var hpClass = hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+  var hpClass = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
   var statusClass = hpPct < 30 ? 'warn' : 'ok';
   var statusText = hpPct < 30 ? 'HP baixo' : 'OK';
 

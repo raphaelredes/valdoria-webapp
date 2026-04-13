@@ -16,9 +16,9 @@
 .bf-token-name{overflow:hidden;text-overflow:ellipsis;color:var(--v-text,#d4c8b0);font-size:var(--v-font-micro,9px)}
 .bf-token-hp{width:20px;height:3px;background:rgba(0,0,0,0.3);border-radius:2px;flex-shrink:0}
 .bf-token-hp-fill{height:100%;border-radius:2px;transition:width var(--v-transition,0.2s)}
-.bf-token-hp-fill.hp-high{background:var(--v-hp-high,#27ae60)}
-.bf-token-hp-fill.hp-mid{background:var(--v-hp-mid,#f39c12)}
-.bf-token-hp-fill.hp-low{background:var(--v-hp-low,#c0392b)}
+.bf-token-hp-fill.hp-high{background:var(--v-hp-high-flat,#4caf50)}
+.bf-token-hp-fill.hp-mid{background:var(--v-hp-warn-flat,#f97316)}
+.bf-token-hp-fill.hp-low{background:var(--v-hp-crit-flat,#ef4444)}
 .bf-move-row{display:flex;gap:var(--v-space-xs,2px);justify-content:center;margin-top:2px}
 .bf-move-btn{font-size:var(--v-font-micro,9px);padding:1px 6px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);background:var(--v-bg-raised,#332a22);color:var(--v-text-dim,#a09484);cursor:pointer;white-space:nowrap}
 .bf-move-btn:active{background:var(--v-gold,#c4952a);color:var(--v-bg,#2a2420)}
