@@ -34,7 +34,8 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: var(--v-bg, #2a2420);
+    background: #2a2420 !important;
+    background-image: none !important;
     color: var(--v-text, #d4c8b0);
     font-family: var(--v-font, serif);
 }
