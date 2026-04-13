@@ -269,12 +269,12 @@
     /* Return action objects; we render them via _mainActionsToHtml */
     var actions = [];
 
-    /* Row with two detail buttons (rendered as raw html in single row) */
-    var detailRow = '<div class="v-popup-btn-row">';
-    detailRow += '<button class="v-popup-btn v-popup-btn--dim" data-action="prep_show_supplies">\ud83c\udf92 Suprimentos</button>';
-    detailRow += '<button class="v-popup-btn v-popup-btn--dim" data-action="prep_show_gear">\u2699 Equipamento</button>';
-    detailRow += '</div>';
-    actions.push({ html: detailRow });
+    /* Supplies detail button (gear is already in the checklist grid) */
+    actions.push({
+      label: '\ud83c\udf92 Suprimentos',
+      action: 'prep_show_supplies',
+      cls: 'v-popup-btn v-popup-btn--dim'
+    });
 
     /* Low HP recovery shortcut */
     if (warnings.indexOf('low_hp') !== -1) {
@@ -380,6 +380,10 @@
 
   /* ------ Action handlers ------ */
   function _onMainAction(action, el) {
+    if (action === 'cancel' || action === 'dismiss') {
+      if (typeof vPopup !== 'undefined') vPopup.hide();
+      return true;
+    }
     if (action === 'prep_show_supplies') { _openSuppliesPopup(); return true; }
     if (action === 'prep_show_gear') { _openGearPopup(); return true; }
     if (action === 'prep_show_recover') { _openRecoverPopup(); return true; }
