@@ -14,6 +14,9 @@ html.wa-portal {
   height: 100vh;
   height: 100dvh;
   max-height: none;
+  /* Viewport lock: same 430px constraint as all game screens */
+  max-width: 430px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
