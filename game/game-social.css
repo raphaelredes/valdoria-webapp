@@ -283,6 +283,12 @@
     background: var(--v-text-dim);
     opacity: 0.5;
 }
+/* Smaller status dot inside chat message names */
+.social-msg-name .social-status-dot {
+    width: 6px;
+    height: 6px;
+    margin-right: 3px;
+}
 .social-player-icon {
     font-size: var(--v-font-2xl);
     flex-shrink: 0;

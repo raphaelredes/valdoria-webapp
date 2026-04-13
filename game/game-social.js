@@ -107,6 +107,14 @@ function _renderBody() {
     return h;
 }
 
+function _getPlayerStatus(uid) {
+    var players = (_cachedData && _cachedData.online) || [];
+    for (var i = 0; i < players.length; i++) {
+        if (players[i].user_id == uid) return players[i].status || 'online';
+    }
+    return 'offline';
+}
+
 function _renderChat() {
     var h = '<div class="social-chat-area" id="social-chat-area" role="log" aria-live="polite">' + _buildChatMessages() + '</div>';
     if (_emoteGridOpen) {
@@ -146,7 +154,11 @@ function _buildChatMessages() {
             h += '<span class="social-msg-meta">';
             if (m.time) h += '[' + vEsc(m.time) + '] ';
             if (m.icon) h += vEsc(m.icon) + ' ';
-            if (m.uid) h += '<span class="social-msg-name" data-uid="' + m.uid + '">' + vEsc(m.name) + '</span>';
+            if (m.uid) {
+                var _st = _getPlayerStatus(m.uid);
+                var _dotCls = _st === 'online' ? 'social-status-dot--online' : (_st === 'idle' ? 'social-status-dot--idle' : 'social-status-dot--offline');
+                h += '<span class="social-msg-name" data-uid="' + m.uid + '"><span class="social-status-dot ' + _dotCls + '"></span>' + vEsc(m.name) + '</span>';
+            }
             else h += vEsc(m.name);
             if (m.level) h += ' Nv' + m.level;
             h += '</span> ';
@@ -303,6 +315,8 @@ function _showMiniProfile(uid, anchorEl) {
     card.id = "social-mini-profile";
     var ch = '<div style="font-weight:700;color:var(--v-gold-light)">';
     if (info) {
+        var _mpDot = (info.status === 'idle') ? 'social-status-dot--idle' : 'social-status-dot--online';
+        ch += '<span class="social-status-dot ' + _mpDot + '"></span>';
         ch += (info.class_icon || '') + ' ' + vEsc(info.name) + '</div>';
         ch += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim)">Nv.' + (info.level || '?') + '</div>';
         if (info.location) ch += '<div style="font-size:var(--v-font-xs);color:var(--v-text-dim)">' + vEsc(info.location) + '</div>';
@@ -311,8 +325,9 @@ function _showMiniProfile(uid, anchorEl) {
         ch += '<button class="social-mp-action social-mp-tab-btn" data-mp-tab="online">\ud83c\udf10 Ver Online</button>';
         ch += '</div>';
     } else {
+        ch += '<span class="social-status-dot social-status-dot--offline"></span>';
         ch += 'Jogador #' + uid + '</div>';
-        ch += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim)">Offline ou desconhecido</div>';
+        ch += '<div style="font-size:var(--v-font-sm);color:var(--v-text-dim)">Offline</div>';
     }
     card.innerHTML = ch;
     if (anchorEl) {
