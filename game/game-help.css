@@ -1,0 +1,29 @@
+/* game-help.css — Help screen styles */
+/* Namespace: hlp- */
+
+.hlp-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+.hlp-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 16px);
+  font-weight: 700;
+  color: var(--v-gold-light, #dbb668);
+}
+
+.hlp-header-icon { font-size: 20px; }
+
+.hlp-paragraph {
+  font-size: var(--v-font-base, 13px);
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  padding: var(--v-space-xs, 2px) 0;
+}

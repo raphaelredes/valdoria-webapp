@@ -191,6 +191,24 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Festival hub
+    if (data._festival_screen && typeof renderFestivalHub === 'function') {
+        renderFestivalHub(el, data._festival_screen);
+        return el;
+    }
+
+    // Guard dialogue
+    if (data._guard_screen && typeof renderGuardScreen === 'function') {
+        renderGuardScreen(el, data._guard_screen);
+        return el;
+    }
+
+    // Help screen
+    if (data._help_screen && typeof renderHelpScreen === 'function') {
+        renderHelpScreen(el, data._help_screen);
+        return el;
+    }
+
     // Wandering NPC encounter
     if (data._wandering_npc_screen && typeof renderWanderingNpc === 'function') {
         renderWanderingNpc(el, data._wandering_npc_screen);

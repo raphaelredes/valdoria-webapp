@@ -1,0 +1,62 @@
+/* game-guard.css — City Guard dialogue styles */
+/* Namespace: grd- */
+
+.grd-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+.grd-npc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-md, 8px);
+}
+
+.grd-npc-icon { font-size: 32px; }
+
+.grd-npc-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 16px);
+  font-weight: 700;
+  color: var(--v-gold-light, #dbb668);
+}
+
+.grd-npc-role {
+  font-size: var(--v-font-sm, 12px);
+  color: var(--v-text-dim, #a09484);
+}
+
+.grd-dialogue {
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.6;
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-border-15, rgba(74, 56, 40, 0.15));
+  border-radius: var(--v-radius-sm, 6px);
+  white-space: pre-wrap;
+}
+
+.grd-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-sm, 6px);
+}
+
+.grd-action-btn {
+  padding: var(--v-space-md, 8px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-base, 13px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.grd-action-btn:active { transform: scale(0.97); background: var(--v-gold-08); }
