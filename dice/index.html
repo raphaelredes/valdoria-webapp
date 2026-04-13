@@ -648,6 +648,24 @@
         //  LENDAS DE VALDORIA — THREE.JS 3D DICE
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+        /* Guard: if THREE.js CDN failed and local fallback is still loading,
+           wait up to 5s for it. If unavailable, show error. */
+        if (typeof THREE === 'undefined') {
+            (function _waitThree(attempts) {
+                if (typeof THREE !== 'undefined') { _initDice3D(); return; }
+                if (attempts > 50) {
+                    console.error('[DICE] THREE.js unavailable after 5s');
+                    var el = document.getElementById('result');
+                    if (el) el.textContent = 'Erro: biblioteca 3D indisponivel. Recarregue a pagina.';
+                    return;
+                }
+                setTimeout(function() { _waitThree(attempts + 1); }, 100);
+            })(0);
+        } else {
+            _initDice3D();
+        }
+        function _initDice3D() {
+
         const tg = window.Telegram && window.Telegram.WebApp;
         const _vBg = getComputedStyle(document.documentElement).getPropertyValue('--v-bg').trim() || '#2a2420';
         if (tg) {
@@ -1793,6 +1811,7 @@
                 }, remaining);
             }
         }
+        } /* close _initDice3D */
     </script>
 <script>
 document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
