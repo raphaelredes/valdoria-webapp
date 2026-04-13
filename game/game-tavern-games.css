@@ -36,17 +36,17 @@
 .tg-outcome--loss{background:linear-gradient(135deg,rgba(139,0,0,0.2),rgba(180,60,60,0.08));border:1px solid rgba(180,60,60,0.25)}
 .tg-outcome--draw{background:var(--v-border-20);border:1px solid var(--v-gold-15)}
 .tg-outcome-title{font-family:var(--v-font-display,'Cinzel',serif);font-size:var(--v-font-lg,16px);font-weight:700;letter-spacing:0.5px}
-.tg-outcome--win .tg-outcome-title{color:#7cd47c}
-.tg-outcome--loss .tg-outcome-title{color:#e07070}
+.tg-outcome--win .tg-outcome-title{color:var(--v-heal,#7cd47c)}
+.tg-outcome--loss .tg-outcome-title{color:var(--v-danger-light,#e07070)}
 .tg-outcome--draw .tg-outcome-title{color:var(--v-gold,#c4953a)}
 .tg-outcome-detail{font-size:var(--v-font-md,13px);color:var(--v-text-dim,#a09484);margin-top:var(--v-space-xs,2px)}
 
 /* -- Payout / Gold Line -- */
 .tg-payout{display:flex;align-items:center;justify-content:center;gap:var(--v-space-md,8px);font-size:var(--v-font-base,13px);color:var(--v-text,#d4c8b0);padding:var(--v-space-xs,2px) 0}
-.tg-payout-gain{color:#7cd47c;font-weight:700}
-.tg-payout-loss{color:#e07070;font-weight:700}
+.tg-payout-gain{color:var(--v-heal,#7cd47c);font-weight:700}
+.tg-payout-loss{color:var(--v-danger-light,#e07070);font-weight:700}
 .tg-payout-neutral{color:var(--v-gold,#c4953a)}
-.tg-injury{color:#e07070;font-size:var(--v-font-sm,12px)}
+.tg-injury{color:var(--v-danger-light,#e07070);font-size:var(--v-font-sm,12px)}
 .tg-rep{color:var(--v-gold,#c4953a);font-size:var(--v-font-sm,12px)}
 
 /* -- Bet Grid -- */
@@ -70,8 +70,8 @@
 .tg-roll-box{display:flex;flex-direction:column;align-items:center;gap:var(--v-space-xs,2px)}
 .tg-roll-label{font-size:var(--v-font-xs,10px);color:var(--v-text-dim,#a09484);text-transform:uppercase}
 .tg-roll-value{font-size:var(--v-font-2xl,18px);font-weight:700;font-family:var(--v-font-display,'Cinzel',serif);width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--v-radius-sm,6px);border:2px solid var(--v-border,#4a3828);background:rgba(0,0,0,0.3)}
-.tg-roll-value--win{border-color:rgba(80,180,80,0.5);color:#7cd47c}
-.tg-roll-value--loss{border-color:rgba(180,60,60,0.4);color:#e07070}
+.tg-roll-value--win{border-color:rgba(80,180,80,0.5);color:var(--v-heal,#7cd47c)}
+.tg-roll-value--loss{border-color:rgba(180,60,60,0.4);color:var(--v-danger-light,#e07070)}
 .tg-vs-text{font-size:var(--v-font-base,13px);color:var(--v-text-dim,#a09484);font-family:var(--v-font-display,'Cinzel',serif)}
 
 /* -- Phase Indicator (Bones, Drinking) -- */
@@ -85,7 +85,7 @@
 .tg-dice-row{display:flex;justify-content:center;gap:var(--v-space-md,8px);padding:var(--v-space-md,8px) 0}
 .tg-die{width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:var(--v-font-2xl,18px);font-weight:700;font-family:var(--v-font-display,'Cinzel',serif);border-radius:var(--v-radius-sm,6px);border:2px solid var(--v-border,#4a3828);background:rgba(0,0,0,0.3);color:var(--v-text,#d4c8b0);cursor:pointer;transition:all var(--v-transition-fast,0.15s) ease}
 .tg-die--held{border-color:var(--v-gold,#c4953a);background:var(--v-gold-15);color:var(--v-gold-light,#dbb668)}
-.tg-die--bust{border-color:rgba(180,60,60,0.4);color:#e07070;opacity:0.6}
+.tg-die--bust{border-color:rgba(180,60,60,0.4);color:var(--v-danger-light,#e07070);opacity:0.6}
 
 /* -- Cooldown -- */
 .tg-cooldown{text-align:center;padding:var(--v-space-lg,12px) 0;color:var(--v-text-dim,#a09484);font-size:var(--v-font-body,14px)}

@@ -266,11 +266,11 @@
     vertical-align: middle;
 }
 .social-status-dot--online {
-    background: #50b450;
+    background: var(--v-success,#50b450);
     box-shadow: 0 0 4px rgba(80,180,80,0.5);
 }
 .social-status-dot--idle {
-    background: #d4a020;
+    background: var(--v-ch-mid,#d4a020);
     box-shadow: 0 0 4px rgba(212,160,32,0.3);
 }
 .social-status-dot--offline {

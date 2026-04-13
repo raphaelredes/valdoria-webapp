@@ -116,12 +116,12 @@
 .vc-alert--warn {
   border-left-color: var(--v-warning, #f39c12);
   background: rgba(243, 156, 18, 0.08);
-  color: #e0a060;
+  color: var(--v-warning,#e0a060);
 }
 .vc-alert--danger {
   border-left-color: var(--v-danger, #e74c3c);
   background: rgba(231, 76, 60, 0.08);
-  color: #e07070;
+  color: var(--v-danger-light,#e07070);
 }
 
 /* ── Player Block (compact HP/MP) ── */
@@ -193,8 +193,8 @@
   border: 1px solid rgba(255,255,255,0.15);
 }
 .vc-ex-pip.on {
-  background: #d04040;
-  border-color: #e06060;
+  background: var(--v-danger,#d04040);
+  border-color: var(--v-danger-light,#e06060);
   box-shadow: 0 0 4px rgba(208, 64, 64, 0.4);
 }
 
@@ -256,7 +256,7 @@
   box-shadow: 0 0 4px var(--v-gold-50);
 }
 .vc-badge--new { color: var(--v-gold, var(--v-gold, #c4953a)); background: transparent; }
-.vc-badge--danger { background: rgba(231, 76, 60, 0.2); color: #e07070; }
+.vc-badge--danger { background: rgba(231, 76, 60, 0.2); color: var(--v-danger-light,#e07070); }
 
 /* ── Performance ── */
 body.perf-lite .vc-service-card,

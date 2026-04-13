@@ -20,7 +20,7 @@
   text-align: center;
 }
 
-.bsb-status-icon { font-size: 28px; line-height: 1; }
+.bsb-status-icon { font-size: var(--v-font-icon, 28px); line-height: 1; }
 
 .bsb-status-title {
   font-family: var(--v-font-display, 'Cinzel', serif);
@@ -156,7 +156,7 @@
   gap: var(--v-space-sm, 6px);
 }
 
-.bsb-tier-emoji { font-size: 18px; }
+.bsb-tier-emoji { font-size: var(--v-font-2xl, 18px); }
 .bsb-tier-name {
   font-weight: 600;
   color: var(--v-text, #d4c8b0);

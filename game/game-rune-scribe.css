@@ -16,7 +16,7 @@
   padding: var(--v-space-md, 8px);
 }
 
-.rns-npc-icon { font-size: 32px; }
+.rns-npc-icon { font-size: var(--v-font-icon-lg, 32px); }
 
 .rns-npc-name {
   font-family: var(--v-font-display, 'Cinzel', serif);
@@ -57,7 +57,7 @@
   gap: var(--v-space-sm, 6px);
 }
 
-.rns-tier-emoji { font-size: 18px; }
+.rns-tier-emoji { font-size: var(--v-font-2xl, 18px); }
 
 .rns-tier-name {
   flex: 1;

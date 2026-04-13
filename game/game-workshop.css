@@ -26,7 +26,7 @@
   text-align: center;
 }
 
-.wks-stat-icon { font-size: 18px; line-height: 1; }
+.wks-stat-icon { font-size: var(--v-font-2xl, 18px); line-height: 1; }
 .wks-stat-value {
   font-size: var(--v-font-body, 14px);
   color: var(--v-text, #d4c8b0);

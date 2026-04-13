@@ -14,8 +14,8 @@
 .dice-formula-vs{font-size:var(--v-font-sm);color:var(--v-text-dim,#a09484);letter-spacing:0.15em;text-transform:uppercase;margin:var(--v-space-xs) 0}
 .dice-result{font-family:var(--v-font-display,'Cinzel',serif);font-size:clamp(18px,5vw,22px);font-weight:700;min-height:28px;margin-bottom:var(--v-space-md);animation:diceResultIn 0.35s var(--v-ease-spring) forwards}
 @keyframes diceResultIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
-.dice-result.success{color:#4ade80;text-shadow:0 0 12px rgba(74,222,128,0.4)}
-.dice-result.failure{color:#f87171;text-shadow:0 0 12px rgba(248,113,113,0.4)}
+.dice-result.success{color:var(--v-success-light,#4ade80);text-shadow:0 0 12px rgba(74,222,128,0.4)}
+.dice-result.failure{color:var(--v-danger-light,#f87171);text-shadow:0 0 12px rgba(248,113,113,0.4)}
 .dice-skip-pill{display:inline-block;padding:var(--v-space-md) var(--v-space-2xl);font-family:var(--v-font,'MedievalSharp',serif);font-size:var(--v-font-base);color:var(--v-text-dim,#a09484);background:var(--v-gold-08);border:1px solid var(--v-gold-20);border-radius:var(--v-radius-pill);cursor:pointer;opacity:0;transition:opacity var(--v-transition-base) ease;-webkit-tap-highlight-color:transparent;margin-top:var(--v-space-sm)}
 .dice-skip-pill.visible{opacity:1}
 .dice-skip-pill:active{transform:scale(0.95);background:var(--v-gold-15)}
