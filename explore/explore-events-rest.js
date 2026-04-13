@@ -2497,7 +2497,18 @@ function showReturnJourneyStep() {
     playTravelAnimation(biome, '', function() { _renderReturnStep(); }, { duration: 2000 });
     return;
   }
-  _renderReturnStep();
+  // Fade transition between return journey steps using diary-page-exit
+  var returnCard = document.querySelector('.return-journey-card');
+  if (returnCard && returnCard.children.length > 0) {
+    console.log('[EXPLORE] return journey step fade transition');
+    returnCard.classList.add('diary-page-exit');
+    setTimeout(function() {
+      returnCard.classList.remove('diary-page-exit');
+      _renderReturnStep();
+    }, 250);
+  } else {
+    _renderReturnStep();
+  }
 }
 
 function _renderReturnStep() {
@@ -2621,43 +2632,54 @@ function _resolveReturnHazard(hazard, choice, roll, mod, total, success, r1, r2,
   var proficient = S.charData && S.charData.sp && S.charData.sp.includes(choice.k.s);
   var profMark = proficient ? '\u2605' : '';
 
+  // Show formula immediately after dice roll
   checkEl.innerHTML = buildFormula(roll, mod, statName, profMark, choice.k.dc, total, r1, r2, mode) /* noqa: innerHTML — return hazard formula, safe computed content */
     + '<div style="margin-top:6px;font-size:15px;font-weight:700;color:' + (success ? '#4a8' : '#c44') + '">'
     + (success ? 'Sucesso!' : 'Falha!') + '</div>';
 
-  if (success) {
-    narrEl.innerHTML = '<div class="return-step-badge safe">' + hazard.title + ' \u2014 Superado!</div>' /* noqa: innerHTML — return hazard success, safe computed content */
-      + '<div>' + choice.sNarr + '</div>';
-  } else {
-    var dmg = choice.fDmg || 3;
-    S.hpChange -= dmg;
-    if (S.charData) {
-      var newHP = Math.max(0, S.charData.hp + S.hpChange);
-      updateHP(newHP, S.charData.mh);
-    }
-    _renderReturnHP(hpEl);
-    narrEl.innerHTML = '<div class="return-step-badge danger">' + hazard.title + ' \u2014 Falha!</div>' /* noqa: innerHTML — return hazard fail, safe computed content */
-      + '<div>' + choice.fNarr + '</div>'
-      + '<div style="margin-top:6px;color:#c44;font-size:13px">-' + dmg + ' HP</div>';
-  }
-
-  if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
-  var remaining = _returnJourney ? _returnJourney.totalSteps - _returnJourney.currentStep : 0;
+  // 300ms after result → show resolution narration
   setTimeout(function() {
-    _disposeReturnDice();
-    document.getElementById('return-journey-dice').classList.remove('active');
-    if (getCurrentHP() <= 0) {
-      actionsEl.innerHTML = ''; /* noqa: innerHTML — clearing actions for death */
-      _addReturnBtn(actionsEl, '', 'Voc\u00ea sucumbiu...', 'Seus ferimentos foram fatais', '#c44', function() {
-        overlay.classList.remove('active');
-        _returnJourney = null;
-        _returningToCity = false;
-        showDeathSaves();
-      });
-      return;
+    if (success) {
+      narrEl.innerHTML = '<div class="return-step-badge safe">' + hazard.title + ' \u2014 Superado!</div>' /* noqa: innerHTML — return hazard success, safe computed content */
+        + '<div>' + choice.sNarr + '</div>';
+    } else {
+      var dmg = choice.fDmg || 3;
+      S.hpChange -= dmg;
+      if (S.charData) {
+        var newHP = Math.max(0, S.charData.hp + S.hpChange);
+        updateHP(newHP, S.charData.mh);
+      }
+      _renderReturnHP(hpEl);
+      narrEl.innerHTML = '<div class="return-step-badge danger">' + hazard.title + ' \u2014 Falha!</div>' /* noqa: innerHTML — return hazard fail, safe computed content */
+        + '<div>' + choice.fNarr + '</div>'
+        + '<div style="margin-top:6px;color:#c44;font-size:13px">-' + dmg + ' HP</div>';
     }
-    _addReturnActions(actionsEl, overlay, remaining);
-  }, 1200);
+
+    if (window.vHaptic) vHaptic.notify(success ? 'success' : 'error');
+
+    // Calculate reading time for resolution text then show continue button
+    var resolText = success ? choice.sNarr : choice.fNarr;
+    var resolWords = resolText ? resolText.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length : 0;
+    var readingDelay = Math.max(2000, resolWords * 250);
+    console.log('[EXPLORE] return hazard resolve: success=%s words=%d readingDelay=%d', success, resolWords, readingDelay);
+
+    var remaining = _returnJourney ? _returnJourney.totalSteps - _returnJourney.currentStep : 0;
+    setTimeout(function() {
+      _disposeReturnDice();
+      document.getElementById('return-journey-dice').classList.remove('active');
+      if (getCurrentHP() <= 0) {
+        actionsEl.innerHTML = ''; /* noqa: innerHTML — clearing actions for death */
+        _addReturnBtn(actionsEl, '', 'Voc\u00ea sucumbiu...', 'Seus ferimentos foram fatais', '#c44', function() {
+          overlay.classList.remove('active');
+          _returnJourney = null;
+          _returningToCity = false;
+          showDeathSaves();
+        });
+        return;
+      }
+      _addReturnActions(actionsEl, overlay, remaining);
+    }, readingDelay);
+  }, 300);
 }
 
 function _addReturnActions(actionsEl, overlay, remaining) {
