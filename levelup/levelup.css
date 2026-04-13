@@ -69,11 +69,11 @@
         }
 
         .lvl-gain.hp {
-            color: #e45;
+            color: var(--v-hp-crit-flat, #ef4444);
         }
 
         .lvl-gain.mp {
-            color: #4af;
+            color: var(--v-mp-flat, #42a5f5);
         }
 
         /* ─── Pending choices summary ─── */
@@ -115,7 +115,7 @@
 
         .pending-badge {
             background: var(--v-gold);
-            color: #1a1a1a;
+            color: var(--v-bg, #2a2420);
             font-size: var(--v-font-sm);
             font-weight: 700;
             padding: var(--v-space-xs) 7px;
@@ -218,8 +218,8 @@
         }
 
         .asi-btn.minus {
-            border-color: #e45;
-            color: #e45;
+            border-color: var(--v-hp-crit-flat, #ef4444);
+            color: var(--v-hp-crit-flat, #ef4444);
         }
 
         .asi-btn.minus:disabled {
@@ -265,12 +265,12 @@
 
         .mode-toggle-btn.active {
             background: var(--v-gold);
-            color: #1a1a1a;
+            color: var(--v-bg, #2a2420);
         }
 
         /* ─── Compact choice cards ─── */
         .choice-card {
-            background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+            background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-deep-card, #241e18) 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
             padding: var(--v-space-md) 10px;
@@ -318,7 +318,7 @@
 
         .badge-cost {
             background: rgba(68, 170, 255, 0.15);
-            color: #4af;
+            color: var(--v-mp-flat, #42a5f5);
         }
 
         .badge-level {
@@ -368,7 +368,7 @@
         .choice-card.selected .choice-card-check {
             border-color: var(--v-gold);
             background: var(--v-gold);
-            color: #1a1a1a;
+            color: var(--v-bg, #2a2420);
         }
 
         /* ─── Detail link ─── */
@@ -448,7 +448,7 @@
         .skill-compact.selected .skill-compact-check {
             border-color: var(--v-gold);
             background: var(--v-gold);
-            color: #1a1a1a;
+            color: var(--v-bg, #2a2420);
         }
 
         .skill-compact-icon {

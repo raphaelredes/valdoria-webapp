@@ -456,7 +456,7 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   color: var(--v-text-dim, #a09484);
   padding: 2px 7px;
   background: rgba(0,0,0,0.2);
-  border-radius: 5px;
+  border-radius: var(--v-radius-sm, 6px);
 }
 .camp-food-check {
   font-size: var(--v-font-xl, 16px);
@@ -554,7 +554,7 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   font-size: var(--v-font-xs, 10px);
   display: inline-block;
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--v-radius-xs, 4px);
   margin-top: 3px;
   margin-right: 3px;
 }

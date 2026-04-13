@@ -459,7 +459,7 @@
     letter-spacing: 0.5px;
   }
   .v-card {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-deep-card, #241e18) 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 12px;
@@ -594,7 +594,7 @@
     gap: 6px;
   }
   .v-toggle-item {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-deep-card, #241e18) 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     padding: 10px 12px;
@@ -751,7 +751,7 @@
     box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
   }
   .v-summary {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-deep-card, #241e18) 100%);
     border: 1px solid var(--v-border-gold);
     border-radius: var(--v-radius);
     padding: 14px;
@@ -1057,7 +1057,7 @@
     gap: 8px;
   }
   .v-accordion-section {
-    background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+    background: linear-gradient(165deg, var(--v-bg-card) 0%, var(--v-bg-deep-card, #241e18) 100%);
     border: 1px solid var(--v-border);
     border-radius: var(--v-radius);
     overflow: hidden;

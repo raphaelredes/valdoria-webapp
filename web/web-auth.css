@@ -478,7 +478,7 @@ body.wa-portal {
     display: flex;
     align-items: center;
     gap: var(--v-space-lg, 12px);
-    background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
+    background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, var(--v-bg-deep-card, #241e18) 100%);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
     padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
