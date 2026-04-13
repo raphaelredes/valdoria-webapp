@@ -94,6 +94,12 @@ function _renderArenaMain(el, d) {
     statsRow.appendChild(_statBadgeEl(stats.losses || 0, 'Derrotas', 'stat-losses'));
     statsRow.appendChild(_statBadgeEl(stats.streak || 0, 'Sequ\u00eancia', 'stat-streak'));
     tablet.appendChild(statsRow);
+    /* Best streak badge (if > 0) */
+    if (stats.best_streak > 0) {
+        var bestRow = _div('arena-best-streak');
+        bestRow.textContent = '\uD83C\uDFC6 Melhor sequ\u00eancia: ' + stats.best_streak;
+        tablet.appendChild(bestRow);
+    }
     var daily = _div('arena-daily-wins');
     var dailyPrefix = document.createElement('span');
     dailyPrefix.textContent = '\uD83D\uDCDC Vit\u00f3rias hoje: ';
@@ -115,6 +121,9 @@ function _renderArenaMain(el, d) {
 
     var portraitWrap = _div('arena-challenger-portrait');
     var portraitFrame = _div('arena-portrait-frame');
+    /* Set class-based data attribute for CSS differentiation */
+    var chCls = (ch.cls || '').toLowerCase().replace(/\s+/g, '-');
+    if (chCls) portraitFrame.setAttribute('data-class', chCls);
     var icon = _div('arena-challenger-icon');
     icon.textContent = ch.icon || '\u2694\uFE0F';
     portraitFrame.appendChild(icon);
@@ -179,15 +188,27 @@ function _renderArenaMain(el, d) {
     var actions = _div('arena-actions');
     if (d.cooldown > 0) {
         var cd = _div('arena-cooldown');
+        var cdIcon = _div('arena-cooldown-icon');
+        cdIcon.textContent = '\u23F3';
+        cd.appendChild(cdIcon);
+        var cdText = _div('arena-cooldown-text');
         var cdIntro = document.createElement('span');
-        cdIntro.textContent = '\u23F3 Pr\u00f3ximo combate em ';
-        cd.appendChild(cdIntro);
+        cdIntro.textContent = 'Pr\u00f3ximo combate em ';
+        cdText.appendChild(cdIntro);
         var cdTurns = document.createElement('strong');
         cdTurns.textContent = String(d.cooldown);
-        cd.appendChild(cdTurns);
+        cdText.appendChild(cdTurns);
         var cdSuffix = document.createElement('span');
         cdSuffix.textContent = ' turno(s)';
-        cd.appendChild(cdSuffix);
+        cdText.appendChild(cdSuffix);
+        cd.appendChild(cdText);
+        /* Visual progress bar for cooldown */
+        var cdBar = _div('arena-cooldown-bar');
+        var cdFill = _div('arena-cooldown-fill');
+        var maxCd = 3; /* typical arena cooldown max */
+        cdFill.style.width = Math.min(100, Math.max(0, ((maxCd - d.cooldown) / maxCd) * 100)) + '%';
+        cdBar.appendChild(cdFill);
+        cd.appendChild(cdBar);
         actions.appendChild(cd);
     } else if (!d.can_afford) {
         var ins = _div('arena-insufficient');

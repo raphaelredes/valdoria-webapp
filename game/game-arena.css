@@ -562,6 +562,14 @@
     font-weight: 700;
 }
 
+/* Best streak line */
+.arena-best-streak {
+    font-size: var(--v-font-xs, 10px);
+    color: var(--arena-streak);
+    margin-top: var(--v-space-xs, 2px);
+    font-weight: 600;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
    CHALLENGER CARD — Portrait frame with ornate border
@@ -656,6 +664,20 @@
     padding: 0 var(--v-space-xs, 2px);
     line-height: 1;
 }
+
+/* Class-based portrait frame tint */
+.arena-portrait-frame[data-class="guerreiro"]  { border-color: #8a3030; }
+.arena-portrait-frame[data-class="barbaro"]    { border-color: #8a4020; }
+.arena-portrait-frame[data-class="paladino"]   { border-color: var(--v-gold, #c4953a); }
+.arena-portrait-frame[data-class="ladino"]     { border-color: #4a6a4a; }
+.arena-portrait-frame[data-class="ranger"]     { border-color: #3a6a3a; }
+.arena-portrait-frame[data-class="mago"]       { border-color: #4a4a8a; }
+.arena-portrait-frame[data-class="feiticeiro"] { border-color: #6a3a8a; }
+.arena-portrait-frame[data-class="clerigo"]    { border-color: #8a8a3a; }
+.arena-portrait-frame[data-class="druida"]     { border-color: #3a7a3a; }
+.arena-portrait-frame[data-class="monge"]      { border-color: #7a6a3a; }
+.arena-portrait-frame[data-class="bardo"]      { border-color: #7a3a6a; }
+.arena-portrait-frame[data-class="bruxo"]      { border-color: #5a3a7a; }
 
 .arena-challenger-icon {
     font-size: 44px; /* HARDCODED: ornamental portrait icon, no token */
@@ -917,22 +939,40 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .arena-cooldown {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: var(--v-space-xs, 2px);
-    padding: var(--v-space-sm, 4px) var(--v-space-lg, 12px);
+    gap: var(--v-space-sm, 6px);
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
     background: rgba(255, 152, 0, 0.08);
     border: 1px solid rgba(255, 152, 0, 0.22);
-    border-radius: var(--v-radius-pill, 20px);
+    border-radius: var(--v-radius, 8px);
     color: var(--arena-cooldown);
     font-size: var(--v-font-sm, 12px);
-    letter-spacing: 0.3px;
 }
+
+.arena-cooldown-icon { font-size: 24px; line-height: 1; }
+
+.arena-cooldown-text { letter-spacing: 0.3px; }
 
 .arena-cooldown strong {
     color: var(--v-gold-light, #dbb668);
     margin: 0 2px;
+}
+
+.arena-cooldown-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--v-radius-xs, 3px);
+    overflow: hidden;
+}
+
+.arena-cooldown-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--arena-cooldown), var(--v-gold-light, #dbb668));
+    border-radius: var(--v-radius-xs, 3px);
+    transition: width var(--v-transition-base, 0.3s) ease;
 }
 
 .arena-insufficient {
