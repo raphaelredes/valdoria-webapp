@@ -24,7 +24,7 @@ function renderDailyReward(screen) {
     }
     var bodyHtml = '<div class="daily-popup">' + streakText + '<div class="daily-cycle">' + dayDots + '</div>' + '<div class="daily-gold"><span class="vi vi-coin sm"></span> ' + r.gold + ' Valdoritas</div>' + itemsHtml + multiplierHtml + recordHtml + '</div>';
     if (window.vPopup) {
-        vPopup.show({ header: '\uD83C\uDF81 Recompensa Di\u00E1ria', headerClass: 'daily-header', body: bodyHtml, actions: '<button class="v-popup-btn" data-action="claim_daily">Coletar!</button>' });
+        vPopup.show({ header: '\uD83C\uDF81 Recompensa Di\u00E1ria', headerClass: 'daily-header', body: bodyHtml, actions: '<button class="v-popup-btn v-popup-btn--primary" data-action="claim_daily">Coletar!</button>', size: 'mini' });
     }
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_reward');
 }
