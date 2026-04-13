@@ -224,7 +224,19 @@
 .prep-readiness-fill--low { background: var(--v-danger, #e74c3c); }
 .prep-readiness-text { font-size: 11px; color: var(--v-text-dim, #a09484); }
 
-/* ===== Design B: Checklist Grid 2-col ===== */
+/* ===== Design B: Two-column layout (Suprimentos | Equipamento) ===== */
+.prep-two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-md, 8px);
+}
+.prep-col-title {
+  font-size: 11px; color: var(--v-gold, #c4953a);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: var(--v-space-xs, 2px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+}
+
+/* ===== Design B: Checklist Grid 2-col (legacy compat) ===== */
 .prep-checklist-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: var(--v-space-xs, 2px) var(--v-space-md, 8px);

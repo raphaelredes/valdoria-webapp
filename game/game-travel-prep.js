@@ -88,23 +88,35 @@
     var gearMap = {};
     for (var gi = 0; gi < gear.length; gi++) gearMap[gear[gi].name] = gear[gi];
 
-    h += '<div class="prep-checklist-grid">';
-    h += _checkItem(foodOk, 'Ra\u00e7\u00f5es (' + d.food.count + '/' + d.food.recommended + ')', 'rations');
-    h += _checkItem(d.tent, 'Barraca', 'tent');
-    h += _checkItem(d.potions > 0, 'Po\u00e7\u00f5es (' + d.potions + ')', 'potions');
-    h += _checkItem(hpPct >= 60, 'HP ' + (hpPct >= 60 ? '\u2265' : '<') + ' 60%', 'hp');
-    /* Field gear items */
+    /* Two-column checklist: Suprimentos (left) | Equipamento (right) */
     var gearKeys = [
       { name: 'Corda de C\u00e2nhamo (15m)', label: 'Corda', key: 'rope' },
       { name: 'Isqueiro', label: 'Isqueiro', key: 'lighter' },
       { name: 'Saco de Dormir', label: 'Saco de Dormir', key: 'sleeping' },
       { name: 'Cantil de Couro', label: 'Cantil', key: 'canteen' }
     ];
+
+    h += '<div class="prep-two-col">';
+
+    /* Left column: Suprimentos */
+    h += '<div class="prep-col">';
+    h += '<div class="prep-col-title">\uD83C\uDF92 Suprimentos</div>';
+    h += _checkItem(foodOk, 'Ra\u00e7\u00f5es (' + d.food.count + '/' + d.food.recommended + ')', 'rations');
+    h += _checkItem(d.tent, 'Barraca', 'tent');
+    h += _checkItem(d.potions > 0, 'Po\u00e7\u00f5es (' + d.potions + ')', 'potions');
+    h += _checkItem(hpPct >= 60, 'HP ' + (hpPct >= 60 ? '\u2265' : '<') + ' 60%', 'hp');
+    h += '</div>';
+
+    /* Right column: Equipamento */
+    h += '<div class="prep-col">';
+    h += '<div class="prep-col-title">\u2699\uFE0F Equipamento</div>';
     for (var gk = 0; gk < gearKeys.length; gk++) {
       var gd = gearMap[gearKeys[gk].name];
       var has = gd ? gd.has : false;
       h += _checkItem(has, gearKeys[gk].label, gearKeys[gk].key);
     }
+    h += '</div>';
+
     h += '</div>';
 
     h += '<div class="prep-sep"></div>';
@@ -268,13 +280,6 @@
     var warnings = d.warnings || [];
     /* Return action objects; we render them via _mainActionsToHtml */
     var actions = [];
-
-    /* Supplies detail button (gear is already in the checklist grid) */
-    actions.push({
-      label: '\ud83c\udf92 Suprimentos',
-      action: 'prep_show_supplies',
-      cls: 'v-popup-btn v-popup-btn--dim'
-    });
 
     /* Low HP recovery shortcut */
     if (warnings.indexOf('low_hp') !== -1) {
