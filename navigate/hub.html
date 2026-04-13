@@ -28,9 +28,20 @@ var v = Date.now();
 <script>document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');</script>
 <!-- Diary engine for travel journal (DiaryEngine + 3D dice) -->
 <script>document.write('<link rel="stylesheet" href="../shared/diary.css?v=' + v + '">');</script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script>document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');</script>
-<script>document.write('<script src="../shared/diary-engine.js?v=' + v + '"><\/script>');</script>
+<!-- THREE + dice-3d + diary-engine: robust loader with onload/onerror chain + CDN fallback -->
+<script>document.write('<script src="../shared/script-loader.js?v=' + v + '"><\/script>');</script>
+<script>
+window._diaryReady = false;
+vLoadScripts([
+  { src: 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+    id: 'three', optional: true, fallback: '../shared/three.min.js', timeout: 6000 },
+  { src: '../shared/dice-3d.js', id: 'dice3d', optional: true },
+  { src: '../shared/diary-engine.js', id: 'diary', optional: true },
+], function(r) {
+  window._diaryReady = true;
+  console.info('[SCRIPT-LOADER] diary chain: three=' + r.three + ' dice3d=' + r.dice3d + ' diary=' + r.diary);
+});
+</script>
 </head>
 <body>
 <!-- ===== PLAYER BAR ===== -->

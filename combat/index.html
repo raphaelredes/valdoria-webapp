@@ -18,7 +18,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
@@ -109,7 +108,21 @@
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-roller.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-utils.js?v=' + v + '"><\/script>');
-        document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/script-loader.js?v=' + v + '"><\/script>');
+    </script>
+    <script>
+    /* THREE.js + dice-3d: robust loader with CDN fallback + onerror */
+    window._diceReady = false;
+    vLoadScripts([
+      { src: 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+        id: 'three', optional: true, fallback: '../shared/three.min.js', timeout: 6000 },
+      { src: '../shared/dice-3d.js', id: 'dice3d', optional: true },
+    ], function(r) {
+      window._diceReady = true;
+      console.info('[SCRIPT-LOADER] combat dice: three=' + r.three + ' dice3d=' + r.dice3d);
+    });
+    </script>
+    <script>
         document.write('<script src="../shared/combat-vfx.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/text-timing.js?v=' + v + '"><\/script>');
         document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
