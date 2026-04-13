@@ -1,0 +1,172 @@
+/* game-workshop.css — Workshop/Crafting screen styles */
+/* Namespace: wks- */
+
+.wks-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+/* Stats summary row — 3 compact cards */
+.wks-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--v-space-sm, 6px);
+}
+
+.wks-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-sm, 6px) var(--v-space-xs, 2px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  text-align: center;
+}
+
+.wks-stat-icon { font-size: 18px; line-height: 1; }
+.wks-stat-value {
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-text, #d4c8b0);
+  font-weight: 600;
+}
+.wks-stat-label {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Gold display */
+.wks-gold-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-sm, 6px) 0;
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-gold, #c4953a);
+  font-weight: 600;
+}
+
+/* Tools grid — full-width buttons */
+.wks-tools-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 6px);
+}
+
+.wks-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  width: 100%;
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius, 8px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+
+.wks-tool-btn:active {
+  transform: scale(0.97);
+  background: var(--v-gold-08);
+}
+
+.wks-tool-icon { font-size: 22px; flex-shrink: 0; }
+
+.wks-tool-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.wks-tool-name {
+  font-weight: 600;
+  color: var(--v-text, #d4c8b0);
+}
+
+.wks-tool-count {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+}
+
+/* Scribe button */
+.wks-scribe-btn {
+  width: 100%;
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 12px);
+  background: linear-gradient(165deg, #2a2a4a 0%, #1a1a30 100%);
+  border: 1px solid rgba(100, 80, 180, 0.3);
+  border-radius: var(--v-radius, 8px);
+  color: #b0a0e0;
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-body, 14px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wks-scribe-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* Quick action row */
+.wks-quick-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--v-space-sm, 6px);
+}
+
+.wks-quick-btn {
+  padding: var(--v-space-md, 8px);
+  background: var(--v-bg-raised, #332a22);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-base, 13px);
+  cursor: pointer;
+  transition: all var(--v-transition-fast, 0.15s) ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.wks-quick-btn:active {
+  transform: scale(0.97);
+  background: var(--v-gold-08);
+}
+
+/* Empty state */
+.wks-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-xl, 20px) var(--v-space-lg, 16px);
+  text-align: center;
+}
+
+.wks-empty-icon { font-size: 36px; opacity: 0.6; }
+
+.wks-empty-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-lg, 16px);
+  font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+}
+
+.wks-empty-desc {
+  font-size: var(--v-font-base, 13px);
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.5;
+}

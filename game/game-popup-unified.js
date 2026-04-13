@@ -185,6 +185,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Workshop/Crafting redesign
+    if (data._workshop_screen && typeof renderWorkshopHub === 'function') {
+        renderWorkshopHub(el, data._workshop_screen);
+        return el;
+    }
+
     // Arena redesign
     if (data._arena_screen && typeof renderArenaScreen === 'function') {
         renderArenaScreen(el, data._arena_screen);
