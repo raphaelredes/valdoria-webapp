@@ -15,6 +15,25 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="shared/fonts.css">
     <script>
+        /* Force-clear ALL browser caches on first load per session */
+        (function(){
+            var _cacheCleared = sessionStorage.getItem('_v_cache_cleared');
+            if (!_cacheCleared) {
+                sessionStorage.setItem('_v_cache_cleared', '1');
+                /* Unregister stale service workers */
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.getRegistrations().then(function(regs) {
+                        regs.forEach(function(r) { r.unregister(); });
+                    });
+                }
+                /* Delete all Cache API caches */
+                if (window.caches) {
+                    caches.keys().then(function(keys) {
+                        keys.forEach(function(k) { caches.delete(k); });
+                    });
+                }
+            }
+        })();
         var v = Date.now();
         document.write('<link rel="stylesheet" href="valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="shared/audio-manager.css?v=' + v + '">');
