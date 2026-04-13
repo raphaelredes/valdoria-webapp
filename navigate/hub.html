@@ -26,6 +26,11 @@ var v = Date.now();
 <script>document.write('<script src="../shared/orientation-gate.js?v=' + v + '"><\/script>');</script>
 <!-- #51: popup.js required by navigate-journal-fn.js for travel diary rendering -->
 <script>document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');</script>
+<!-- Diary engine for travel journal (DiaryEngine + 3D dice) -->
+<script>document.write('<link rel="stylesheet" href="../shared/diary.css?v=' + v + '">');</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');</script>
+<script>document.write('<script src="../shared/diary-engine.js?v=' + v + '"><\/script>');</script>
 </head>
 <body>
 <!-- ===== PLAYER BAR ===== -->
