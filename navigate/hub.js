@@ -1128,8 +1128,11 @@ function bindBottomNav() {
   var btnReturn = document.getElementById('btn-return');
   if (btnReturn) {
     btnReturn.addEventListener('click', function() {
+      console.warn('[HUB] btn-return clicked, api=%s token=%s loc=%s', !!S.api, !!S.token, state.currentLoc);
       _executeAction('return');
     });
+  } else {
+    console.warn('[HUB] btn-return NOT FOUND in DOM');
   }
 }
 
