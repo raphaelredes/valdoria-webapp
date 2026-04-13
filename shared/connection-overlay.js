@@ -33,15 +33,17 @@ function _log(msg) {
     }
 }
 
-var _RUNE_SVG = '<svg class="v-conn-rune" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">'
-  + '<circle cx="32" cy="32" r="28" fill="none" stroke="var(--v-gold-25,rgba(196,149,58,0.25))" stroke-width="2"/>'
-  + '<circle cx="32" cy="32" r="28" fill="none" stroke="var(--v-gold,#c4953a)" stroke-width="2" stroke-dasharray="20 156" stroke-linecap="round"/>'
-  + '</svg>';
-
 function _buildHTML() {
     return '<div id="v-conn-overlay" class="v-conn-overlay">'
       + '<div class="v-conn-content">'
-      + '<div class="v-conn-icon">' + _RUNE_SVG + '<div class="v-conn-orb"><div class="v-conn-orb-core"></div></div></div>'
+      + '<div class="v-conn-icon">'
+      + '<div class="v-conn-ring-outer"></div>'
+      + '<div class="v-conn-ring-mid"></div>'
+      + '<div class="v-conn-ring-inner"></div>'
+      + '<div class="v-conn-orb"><div class="v-conn-orb-core"></div></div>'
+      + '<div class="v-conn-spark"></div><div class="v-conn-spark"></div>'
+      + '<div class="v-conn-spark"></div><div class="v-conn-spark"></div>'
+      + '</div>'
       + '<div class="v-conn-status" id="v-conn-status">Reconectando...</div>'
       + '<div class="v-conn-detail" id="v-conn-detail"></div>'
       + '<div class="v-conn-progress"><div class="v-conn-progress-fill" id="v-conn-fill"></div></div>'

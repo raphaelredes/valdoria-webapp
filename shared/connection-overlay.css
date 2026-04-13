@@ -12,16 +12,59 @@
 /* -- Content card -- */
 .v-conn-content{display:flex;flex-direction:column;align-items:center;padding:var(--v-space-xl,16px) var(--v-space-2xl,24px);max-width:300px;text-align:center}
 
-/* -- Rune ring (reuses vProcSpin from processing-overlay) -- */
-.v-conn-icon{position:relative;width:64px;height:64px;margin-bottom:var(--v-space-lg,12px)}
-.v-conn-rune{width:64px;height:64px;animation:vProcSpin 6s linear infinite}
-/* Orb of Valdoria mini (replaces diamond gem) */
-.v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff4d0,#e8c45a 30%,#c4953a 60%,#8b6420 85%,#5a3e10);box-shadow:0 0 12px var(--v-gold-60,rgba(196,149,58,0.6)),0 0 24px var(--v-gold-30,rgba(196,149,58,0.3)),inset 0 -3px 6px rgba(90,62,16,0.5),inset 0 2px 4px rgba(255,244,208,0.4);animation:vConnOrbPulse 3s ease-in-out infinite}
-.v-conn-orb-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,208,0.9),rgba(232,196,90,0.4));filter:blur(1px);animation:vConnCorePulse 2s ease-in-out infinite}
-@keyframes vConnOrbPulse{0%,100%{box-shadow:0 0 12px var(--v-gold-50,rgba(196,149,58,0.5)),0 0 20px var(--v-gold-20,rgba(196,149,58,0.2))}50%{box-shadow:0 0 18px var(--v-gold-70,rgba(196,149,58,0.7)),0 0 30px var(--v-gold-35,rgba(196,149,58,0.35))}}
-@keyframes vConnCorePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+/* -- Orb of Valdoria 3D with concentric rings -- */
+.v-conn-icon{position:relative;width:100px;height:100px;margin-bottom:var(--v-space-lg,12px)}
+
+/* Outer ring — slow rotation, dashed */
+.v-conn-ring-outer{position:absolute;inset:0;border:2px solid transparent;border-top-color:var(--v-gold,#c4953a);border-right-color:rgba(196,149,58,0.3);border-radius:50%;animation:vConnRingOuter 4s linear infinite}
+
+/* Middle ring — counter-rotation, dotted */
+.v-conn-ring-mid{position:absolute;inset:8px;border:1.5px dotted rgba(196,149,58,0.2);border-top-color:var(--v-gold-light,#dbb668);border-left-color:rgba(219,182,104,0.4);border-radius:50%;animation:vConnRingMid 3s linear infinite reverse}
+
+/* Inner ring — fast rotation */
+.v-conn-ring-inner{position:absolute;inset:16px;border:1px solid transparent;border-top-color:rgba(196,149,58,0.5);border-bottom-color:rgba(196,149,58,0.15);border-radius:50%;animation:vConnRingInner 2s linear infinite}
+
+/* Orb of Valdoria 3D — centered, glass shell + golden nebula */
+.v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:
+  radial-gradient(circle at 30% 25%, rgba(255,244,208,0.6) 0%, transparent 40%),
+  radial-gradient(circle at 55% 55%, #c4953a 0%, #8b6420 50%, #5a3e10 80%, #3a2810 100%);
+box-shadow:
+  0 0 16px var(--v-gold-60,rgba(196,149,58,0.6)),
+  0 0 32px var(--v-gold-30,rgba(196,149,58,0.3)),
+  0 0 48px rgba(196,149,58,0.15),
+  inset 0 -4px 8px rgba(90,62,16,0.6),
+  inset 0 3px 6px rgba(255,244,208,0.35);
+animation:vConnOrbPulse 3s ease-in-out infinite}
+
+/* Core glow — pulsating inner light */
+.v-conn-orb-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,208,0.95),rgba(232,196,90,0.5) 60%,transparent);filter:blur(2px);animation:vConnCorePulse 2s ease-in-out infinite}
+
+/* Fresnel rim highlight */
+.v-conn-orb::after{content:'';position:absolute;inset:1px;border-radius:50%;border:1px solid transparent;border-top-color:rgba(255,244,208,0.3);border-left-color:rgba(255,244,208,0.15)}
+
+/* Ambient glow particles (4 orbiting sparks) */
+.v-conn-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--v-gold-light,#dbb668);box-shadow:0 0 6px var(--v-gold,#c4953a);opacity:0}
+.v-conn-spark:nth-child(1){animation:vConnSpark1 4s ease-in-out infinite}
+.v-conn-spark:nth-child(2){animation:vConnSpark2 4s ease-in-out 1s infinite}
+.v-conn-spark:nth-child(3){animation:vConnSpark3 4s ease-in-out 2s infinite}
+.v-conn-spark:nth-child(4){animation:vConnSpark4 4s ease-in-out 3s infinite}
+
+@keyframes vConnRingOuter{to{transform:rotate(360deg)}}
+@keyframes vConnRingMid{to{transform:rotate(360deg)}}
+@keyframes vConnRingInner{to{transform:rotate(360deg)}}
+@keyframes vConnOrbPulse{
+  0%,100%{box-shadow:0 0 16px var(--v-gold-50),0 0 28px var(--v-gold-20),0 0 48px rgba(196,149,58,0.1),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.35)}
+  50%{box-shadow:0 0 22px var(--v-gold-70),0 0 40px var(--v-gold-35),0 0 60px rgba(196,149,58,0.2),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.4)}}
+@keyframes vConnCorePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes vConnSpark1{0%,100%{opacity:0;top:50%;left:0}25%{opacity:0.8;top:0;left:50%}50%{opacity:0;top:50%;left:100%}}
+@keyframes vConnSpark2{0%,100%{opacity:0;top:0;left:50%}25%{opacity:0.7;top:50%;left:100%}50%{opacity:0;top:100%;left:50%}}
+@keyframes vConnSpark3{0%,100%{opacity:0;top:100%;left:50%}25%{opacity:0.8;top:50%;left:0}50%{opacity:0;top:0;left:50%}}
+@keyframes vConnSpark4{0%,100%{opacity:0;top:50%;left:100%}25%{opacity:0.6;top:100%;left:50%}50%{opacity:0;top:50%;left:0}}
+
+body.perf-lite .v-conn-ring-outer,body.perf-lite .v-conn-ring-mid,body.perf-lite .v-conn-ring-inner{animation:none!important}
 body.perf-lite .v-conn-orb,body.perf-lite .v-conn-orb-core{animation:none!important}
-@media(prefers-reduced-motion:reduce){.v-conn-orb,.v-conn-orb-core{animation:none!important}}
+body.perf-lite .v-conn-spark{display:none}
+@media(prefers-reduced-motion:reduce){.v-conn-ring-outer,.v-conn-ring-mid,.v-conn-ring-inner,.v-conn-orb,.v-conn-orb-core,.v-conn-spark{animation:none!important}}
 
 /* -- Status text -- */
 .v-conn-status{font-family:var(--v-font,"MedievalSharp",serif);font-size:var(--v-font-body,14px);color:var(--v-text,#d4c8b0);text-align:center;line-height:1.5;margin-bottom:var(--v-space-sm,4px)}
