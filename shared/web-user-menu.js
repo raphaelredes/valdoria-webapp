@@ -67,12 +67,16 @@
         _init();
     }
 
-    /* Hide floating button when game footer is active (game has Settings → Sair da Conta) */
+    /* Hide floating button when game footer is active OR when in explore/combat/navigate */
     function _syncVisibility() {
         if (!_el) return;
         var quick = document.getElementById('footer-quick');
         var isGameFooterActive = quick && quick.style.display !== 'none' && quick.children.length > 0;
-        _el.classList.toggle('wum-hidden', !!isGameFooterActive);
+        /* Also hide in explore (has canvas), combat, navigate — these have their own exit flows */
+        var isFullscreenWebApp = !!document.getElementById('explore-canvas') ||
+            !!document.getElementById('combat-app') ||
+            !!document.getElementById('map-viewport');
+        _el.classList.toggle('wum-hidden', !!(isGameFooterActive || isFullscreenWebApp));
     }
 
     var _observer = new MutationObserver(_syncVisibility);
