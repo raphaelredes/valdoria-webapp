@@ -291,12 +291,27 @@ for(const key of(S._secretsRevealed||[])){const[c,r]=key.split(',').map(Number);
 for(const key of S.visited){const[c,r]=key.split(',').map(Number);revealFogAt(c,r,S.visibility,S.fogState,S.grid,false);}}else{S.visited.add(`${S.playerCol},${S.playerRow}`);revealFogAt(S.playerCol,S.playerRow,S.visibility,S.fogState,S.grid,false);}
 if(restored&&S.conditions.length){updateConditionHUD();}
 updateXPBar();initRenderer();updateHexNav();if(typeof initWatchSystem==='function')initWatchSystem();if(typeof initRumors==='function')initRumors();if(typeof initPursuer==='function')initPursuer();initPlayerPosition(S.playerCol,S.playerRow);initBottomBar();if(typeof _updateActivityBadge==='function')_updateActivityBadge();if(typeof updateExhaustionHUD==='function')updateExhaustionHUD();if(typeof updateCampButtonHint==='function')updateCampButtonHint();if(typeof updateCompass==='function')updateCompass();if(typeof updateQuestCompass==='function')updateQuestCompass();if(typeof updateAtmosphere==='function')updateAtmosphere();updateLocationInfo();if(typeof initBiomeParticles==='function')initBiomeParticles(S.biome);if(typeof ValdoriaAudio!=='undefined'&&S.biome){ValdoriaAudio.playBiome(S.biome);/* Ensure audio starts on first user interaction (browser autoplay policy) */if(ValdoriaAudio._warmUp)ValdoriaAudio._warmUp();var _audioStarted=false;function _forceAudioOnTouch(){if(_audioStarted)return;_audioStarted=true;document.removeEventListener('click',_forceAudioOnTouch,true);document.removeEventListener('touchstart',_forceAudioOnTouch,true);if(ValdoriaAudio._warmUp)ValdoriaAudio._warmUp();if(typeof ValdoriaAudio.play==='function'&&S.biome)ValdoriaAudio.playBiome(S.biome);console.info('[EXPLORE] audio forced on first touch biome=%s',S.biome);}document.addEventListener('click',_forceAudioOnTouch,{capture:true,once:true});document.addEventListener('touchstart',_forceAudioOnTouch,{capture:true,once:true});}
-setTimeout(()=>scrollCanvasToPlayer(),100);/* Force-hide ALL loading overlays immediately — map is ready */if(typeof forceHideLoading==='function')forceHideLoading();var _shellLd=document.getElementById('loading');if(_shellLd){_shellLd.classList.add('hidden');_shellLd.style.display='none';}if(window.vProcessing)vProcessing.hide();/* Kill body pseudo-elements that cause yellow stripe (noise texture + vignette from valdoria-design.css) */
-try{var _bs=document.body.style;_bs.setProperty('--_no-pseudo','1');var _killPseudo=document.createElement('style');_killPseudo.textContent='body::before,body::after{display:none!important;content:none!important}';document.head.appendChild(_killPseudo);}catch(e){console.warn('[EXPLORE] kill pseudo:',e);}
-console.info('[EXPLORE] all loading force-hidden — map ready');const _lc=window._loadingCtrl;if(_lc&&_lc.forceHide)_lc.forceHide();if(_lc&&!restored){_lc.setProgress(100);_lc.hideLoading(()=>{if(S.dmIntro)showDMIntro(S.dmIntro);if(!S.travelActivity&&typeof showActivitySelection==='function'){const actDelay=S.dmIntro?4000:800;setTimeout(()=>{if(!S.travelActivity&&!_tutorialActive)showActivitySelection();},actDelay);}
-if(S._hiddenDetected>0){const delay=S.dmIntro?2000:600;setTimeout(()=>{if(typeof showTerrainToast==='function'){showTerrainToast(`Percepção Passiva (${S._passivePerception})`,'ranger');}},delay);}});}else{if(_lc)_lc.hideQuick();else{var _ldEl=document.getElementById('loading');if(_ldEl)_ldEl.classList.add('hidden');}if(S.dmIntro&&!restored){setTimeout(()=>showDMIntro(S.dmIntro),400);}
-if(!restored&&!S.travelActivity&&typeof showActivitySelection==='function'){const actDelay=S.dmIntro?4000:800;setTimeout(()=>{if(!S.travelActivity&&!_tutorialActive)showActivitySelection();},actDelay);}
-if(S._hiddenDetected>0&&!restored){const delay=S.dmIntro?2000:600;setTimeout(()=>{if(typeof showTerrainToast==='function'){showTerrainToast(`Percepção Passiva (${S._passivePerception})`,'ranger');}},delay);}}
+setTimeout(()=>scrollCanvasToPlayer(),100);
+/* ══ INSTANT MAP READY: kill ALL loading + artifacts ══ */
+(function _mapReady(){
+/* 1. Remove btn-return-float ("Sair") if it exists */
+var _exitBtn=document.getElementById('btn-return-float');if(_exitBtn&&_exitBtn.parentNode)_exitBtn.parentNode.removeChild(_exitBtn);
+/* 2. Kill body::before/::after (noise texture + vignette — causes yellow stripe) */
+var _s=document.getElementById('_explore-kill-pseudo');if(!_s){_s=document.createElement('style');_s.id='_explore-kill-pseudo';_s.textContent='body::before,body::after{display:none!important;content:none!important;opacity:0!important}';document.head.appendChild(_s);}
+/* 3. Force-hide ALL loading overlays without waiting MIN_LOAD_MS */
+var _lo=document.getElementById('loading');if(_lo){_lo.style.display='none';_lo.classList.add('hidden');}
+if(window.vProcessing&&vProcessing.isActive())vProcessing.hide();
+if(typeof forceHideLoading==='function')forceHideLoading();
+var _lc2=window._loadingCtrl;if(_lc2){if(_lc2.forceHide)_lc2.forceHide();else if(_lc2.hideQuick)_lc2.hideQuick();}
+/* 4. Also nuke any loading overlay by class */
+var _los=document.querySelectorAll('.loading-overlay');for(var _li=0;_li<_los.length;_li++){_los[_li].style.display='none';_los[_li].classList.add('hidden');}
+console.info('[EXPLORE] _mapReady: all loading hidden, pseudo killed, exit btn removed');
+})();
+const _lc=window._loadingCtrl;
+/* Post-load: DM intro + activity selection */
+var _postLoad=function(){if(S.dmIntro)showDMIntro(S.dmIntro);if(!S.travelActivity&&typeof showActivitySelection==='function'){var actDelay=S.dmIntro?4000:800;setTimeout(function(){if(!S.travelActivity&&!_tutorialActive)showActivitySelection();},actDelay);}
+if(S._hiddenDetected>0){var delay=S.dmIntro?2000:600;setTimeout(function(){if(typeof showTerrainToast==='function')showTerrainToast('Percep\u00e7\u00e3o Passiva ('+S._passivePerception+')','ranger');},delay);}};
+if(!restored){setTimeout(_postLoad,200);}else{if(S.dmIntro){setTimeout(function(){showDMIntro(S.dmIntro);},400);}}
 if(typeof checkServerTutorialFlag==='function')checkServerTutorialFlag(S.charData);if(typeof autoShowTutorial==='function')autoShowTutorial();}
 /* Update top bar with biome, weather, danger */
 function updateTopBar() {
