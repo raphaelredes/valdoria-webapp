@@ -35,8 +35,8 @@ function renderTurnQueue(turnOrder, activeIdx) {
     /* Icon */
     var ico = escHtml(entry.ico || '?');
 
-    /* Name: truncate to 6 chars */
-    var name = escHtml((entry.n || '').substring(0, 6));
+    /* Name: truncate to 9 chars */
+    var name = escHtml((entry.n || '').substring(0, 9));
 
     /* HP mini bar (if HP data available) */
     var hpHtml = '';
