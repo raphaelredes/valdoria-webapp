@@ -1,0 +1,27 @@
+/* game-trade-board.css — Trade Board hub styles */
+/* Namespace: trb- */
+
+.trb-hub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-md, 8px);
+}
+
+.trb-rules {
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  text-align: center;
+  padding: var(--v-space-sm, 6px);
+  background: var(--v-border-15, rgba(74, 56, 40, 0.15));
+  border-radius: var(--v-radius-sm, 6px);
+}
+
+.trb-gold-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-gold, #c4953a);
+  font-weight: 600;
+}

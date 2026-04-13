@@ -191,6 +191,18 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Wandering NPC encounter
+    if (data._wandering_npc_screen && typeof renderWanderingNpc === 'function') {
+        renderWanderingNpc(el, data._wandering_npc_screen);
+        return el;
+    }
+
+    // Trade Board hub
+    if (data._trade_board_screen && typeof renderTradeBoard === 'function') {
+        renderTradeBoard(el, data._trade_board_screen);
+        return el;
+    }
+
     // Rune Scribe redesign
     if (data._rune_scribe_screen && typeof renderRuneScribe === 'function') {
         renderRuneScribe(el, data._rune_scribe_screen);
