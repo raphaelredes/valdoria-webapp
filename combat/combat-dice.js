@@ -7,10 +7,86 @@ document.body.appendChild(fb);
 requestAnimationFrame(function(){fb.style.opacity='1';});
 setTimeout(function(){fb.style.opacity='0';setTimeout(function(){if(fb.parentNode)fb.parentNode.removeChild(fb);if(typeof onDone==='function')onDone();},ValdoriaMotion.duration(200,0));},ValdoriaMotion.duration(delayMs,Math.round(delayMs/2)));
 }
-function _ensureDiceOverlay(){if(document.getElementById('dmgDice3dOverlay'))return;const overlay=document.createElement('div');overlay.className='dmg-dice3d-overlay';overlay.id='dmgDice3dOverlay';overlay.style.display='none';overlay.innerHTML='<div class="dmg-dice3d-particles" id="dmgDice3dParticles"></div>'
-+'<div class="dmg-dice3d-canvas" id="dmgDice3dCanvas"></div>'
-+'<div class="dmg-dice3d-label" id="dmgDice3dLabel"></div>'
-+'<button class="dmg-dice3d-skip" id="dmgDice3dSkip">Pular</button>';document.body.appendChild(overlay);}
+function _ensureDiceOverlay(){if(document.getElementById('dmgDice3dOverlay'))return;var overlay=document.createElement('div');overlay.className='dmg-dice3d-overlay';overlay.id='dmgDice3dOverlay';overlay.style.display='none';
+/* Banner Narrado — shows WHO attacks WHOM and WHAT is rolled */
+var banner=document.createElement('div');banner.className='dice-banner';banner.id='diceBanner';
+var bWho=document.createElement('div');bWho.className='dice-banner-who';bWho.id='diceBannerWho';
+var bAction=document.createElement('div');bAction.className='dice-banner-action';bAction.id='diceBannerAction';
+var bInfo=document.createElement('div');bInfo.className='dice-banner-info';bInfo.id='diceBannerInfo';
+banner.appendChild(bWho);banner.appendChild(bAction);banner.appendChild(bInfo);overlay.appendChild(banner);
+var particles=document.createElement('div');particles.className='dmg-dice3d-particles';particles.id='dmgDice3dParticles';overlay.appendChild(particles);
+var canvas=document.createElement('div');canvas.className='dmg-dice3d-canvas';canvas.id='dmgDice3dCanvas';overlay.appendChild(canvas);
+var label=document.createElement('div');label.className='dmg-dice3d-label';label.id='dmgDice3dLabel';overlay.appendChild(label);
+var skip=document.createElement('button');skip.className='dmg-dice3d-skip';skip.id='dmgDice3dSkip';skip.textContent='Pular';overlay.appendChild(skip);
+document.body.appendChild(overlay);}
+/* ── Damage type labels PT-BR ── */
+var _DT_LABELS={slashing:'cortante',piercing:'perfurante',bludgeoning:'contundente',fire:'de fogo',cold:'de gelo',lightning:'el\u00e9trico',thunder:'trov\u00e3o',acid:'\u00e1cido',poison:'veneno',necrotic:'necr\u00f3tico',radiant:'radiante',force:'de for\u00e7a',psychic:'ps\u00edquico'};
+/* ── Banner Narrado — populate before dice roll ── */
+function _populateBanner(lr){
+var bWho=document.getElementById('diceBannerWho');
+var bAction=document.getElementById('diceBannerAction');
+var bInfo=document.getElementById('diceBannerInfo');
+if(!bWho)return;
+var s=window.currentState;if(!s){bWho.textContent='';bAction.textContent='';bInfo.textContent='';return;}
+var turn=s.to&&s.to.length?s.to[0]:null;
+var isPlayer=turn&&turn.t==='p';
+var isAlly=turn&&turn.t==='a';
+var attackerName=turn?turn.n:(s.p?s.p.name:'???');
+var attackerType=turn?turn.t:'p';
+var attackerIco=turn?turn.ico:(isPlayer?'\u2694\uFE0F':'\uD83D\uDC79');
+/* Determine target */
+var targetName='';var targetAc=lr.ac||0;
+if(isPlayer||isAlly){
+  var tIdx=window._lastActionTarget||0;
+  var enemy=s.e&&s.e[tIdx]?s.e[tIdx]:(s.e&&s.e[0]?s.e[0]:null);
+  targetName=enemy?enemy.n:'Inimigo';
+  if(!targetAc&&enemy)targetAc=enemy.ac||0;
+}else{
+  targetName=s.p?s.p.name:'Jogador';
+  if(!targetAc&&s.p)targetAc=s.p.ac||0;
+}
+/* Set banner class for color */
+bWho.className='dice-banner-who type-'+attackerType;
+var rollType=lr.t||'attack';
+if(rollType==='attack'||rollType==='skill'){
+  bWho.textContent=attackerIco+' '+attackerName+' ataca';
+  bAction.textContent=(lr.sn||'Ataque')+' \u2192 '+targetName;
+  bInfo.textContent='CA do alvo: '+targetAc;
+  if(!isPlayer&&!isAlly)bInfo.textContent='Sua CA: '+targetAc;
+}else if(rollType==='save'){
+  bWho.textContent=attackerIco+' '+targetName+' resiste';
+  bAction.textContent='Salvaguarda'+(lr.sn?' de '+lr.sn:'');
+  bInfo.textContent='CD: '+(lr.dc||12);
+}else if(rollType==='death_save'){
+  bWho.textContent='\uD83D\uDC80 '+attackerName+' luta pela vida';
+  bAction.textContent='Teste contra a Morte';
+  bInfo.textContent='CD 10';
+}else if(rollType==='heal'||rollType==='util'){
+  bWho.textContent=attackerIco+' '+attackerName+(rollType==='heal'?' cura':' usa');
+  bAction.textContent=lr.sn||'Habilidade';
+  bInfo.textContent='';
+}else if(rollType==='auto_hit'||rollType==='aoe'){
+  bWho.textContent=attackerIco+' '+attackerName+' lan\u00e7a';
+  bAction.textContent=lr.sn||'Ataque';
+  bInfo.textContent=lr.hits?lr.hits+' alvo'+(lr.hits>1?'s':''):'';
+}else{
+  bWho.textContent=attackerIco+' '+attackerName;
+  bAction.textContent=lr.sn||'';
+  bInfo.textContent='';
+}}
+function _updateBannerForDamage(lr){
+var bWho=document.getElementById('diceBannerWho');
+var bAction=document.getElementById('diceBannerAction');
+var bInfo=document.getElementById('diceBannerInfo');
+if(!bWho)return;
+var s=window.currentState;
+var turn=s&&s.to&&s.to.length?s.to[0]:null;
+var attackerName=turn?turn.n:(s&&s.p?s.p.name:'???');
+var attackerIco=turn?turn.ico:'\u2694\uFE0F';
+var dtLabel=_DT_LABELS[lr.dt]||lr.dt||'';
+bWho.textContent=attackerIco+' '+attackerName+' causa dano';
+bAction.textContent=(lr.sn||'Ataque')+(lr.df?' ('+lr.df+(dtLabel?' '+dtLabel:'')+')':'');
+bInfo.textContent='';}
 function _formatBreakdown(lr){if(!lr.bk||!lr.bk.length)return'';var parts=lr.bk.map(function(p){return(p.v>=0?'+':'')+p.v+' '+p.l;}).join(' ');var vs=lr.ac?' vs CA '+lr.ac:'';return'd20('+(lr.r||'?')+') '+parts+' = '+(lr.total||lr.r)+vs;}
 function initDice(lr){if(!lr)return;const rollType=lr.t||'attack';if(currentState&&currentState.vm==='simple')return;const sig=`${rollType}-${lr.r||0}-${lr.d||0}-${lr.crit||0}-${lr.miss||0}-${lr.dc||0}-${lr.adv||0}-${lr.ac||0}-${(lr.dr||[]).join(',')}`;if(sig===_lastAnimatedRoll)return;_lastAnimatedRoll=sig;_diceAnimating=true;if(rollType==='save'){_initDiceSave(lr);return;}
 if(rollType==='death_save'){_initDiceDeathSave(lr);return;}
@@ -19,7 +95,7 @@ if(rollType==='heal'||rollType==='util'){_initDiceEffect(lr);return;}
 if(!lr.r)return;_initDiceAttackOverlay(lr);}
 function _initDiceAttackOverlay(lr){const overlay=document.getElementById('dmgDice3dOverlay');const canvas=document.getElementById('dmgDice3dCanvas');const particles=document.getElementById('dmgDice3dParticles');const label3d=document.getElementById('dmgDice3dLabel');const skipBtn=document.getElementById('dmgDice3dSkip');if(!overlay||!canvas||typeof Dice3D==='undefined'){console.warn('[COMBAT] Dice3D unavailable, text fallback');_dice3dTextFallback(lr.r,'d20',function(){if(lr.d>0&&lr.df){_dice3dTextFallback(lr.d,(lr.df||'')+' dano');}});return;}
 if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
-canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';const hasAdvDis=lr.d20s&&lr.d20s.length===2;if(label3d){label3d.textContent=hasAdvDis?(lr.adv?'Vantagem':'Desvantagem'):'d20';label3d.className='dmg-dice3d-label rolling';}
+canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';_populateBanner(lr);const hasAdvDis=lr.d20s&&lr.d20s.length===2;if(label3d){label3d.textContent=hasAdvDis?(lr.adv?'Vantagem':'Desvantagem'):'Teste de Ataque (d20)';label3d.className='dmg-dice3d-label rolling';}
 if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 vHaptic.tap();sfxDiceRoll();let _done=false;let _pendingVfx=null;const finishAll=()=>{if(_done)return;_done=true;_diceAnimating=false;if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
@@ -34,7 +110,7 @@ function _finishAttackResult(lr,label3d,overlay,canvas,particles,skipBtn,finishA
 _showMissFloat('.entity.enemy');if(window._combatVfx){const _pEl=document.querySelector('.entity.player');if(_pEl&&dodgeTarget)window._combatVfx.miss(_pEl,dodgeTarget,lr.dt||'slashing');}}else if(lr.d>0&&window._combatVfx){const _pEl=document.querySelector('.entity.player');const _eEl=document.querySelector('.entity.enemy');if(_pEl&&_eEl)window._combatVfx.projectile(_pEl,_eEl,lr.dt||'slashing',{crit:!!isCrit});}});if(isMiss||lr.d<=0){setTimeout(()=>{if(skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishAll;}},500);setTimeout(finishAll,ValdoriaMotion.duration(2400,1200));return;}
 setTimeout(()=>{_initDamagePhase(lr,overlay,canvas,particles,label3d,skipBtn,finishAll,markDone);},ValdoriaMotion.duration(800,400));}
 function _initDiceSave(lr){const overlay=document.getElementById('dmgDice3dOverlay');const canvas=document.getElementById('dmgDice3dCanvas');const particles=document.getElementById('dmgDice3dParticles');const label3d=document.getElementById('dmgDice3dLabel');const skipBtn=document.getElementById('dmgDice3dSkip');if(!overlay||!canvas||typeof Dice3D==='undefined'){console.warn('[COMBAT] Dice3D unavailable for save, text fallback');_dice3dTextFallback(lr.r,'Salvaguarda vs CD '+(lr.dc||12));return;}if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
-canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';if(label3d){const _dc=(lr.dc&&lr.dc>0)?lr.dc:12;label3d.textContent='Salvaguarda vs CD '+_dc;label3d.className='dmg-dice3d-label rolling';}
+canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';_populateBanner(lr);if(label3d){const _dc=(lr.dc&&lr.dc>0)?lr.dc:12;label3d.textContent='Salvaguarda vs CD '+_dc;label3d.className='dmg-dice3d-label rolling';}
 if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 vHaptic.tap();sfxDiceRoll();let _done=false;let _pendingVfx=null;const finishAll=()=>{if(_done)return;_done=true;_diceAnimating=false;if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
@@ -42,13 +118,13 @@ if(_pendingVfx){setTimeout(_pendingVfx,50);_pendingVfx=null;}};try{_dmgDice3d=ne
 _pendingVfx=()=>{if(lr.saved&&!lr.half){if(window._combatVfx){const _pEl=document.querySelector('.entity.player');const _eEl=document.querySelector('.entity.enemy');if(_pEl&&_eEl)window._combatVfx.miss(_pEl,_eEl,lr.dt||'fire');}}else if(lr.d>0&&window._combatVfx){const _pEl=document.querySelector('.entity.player');const _eEl=document.querySelector('.entity.enemy');if(_pEl&&_eEl)window._combatVfx.projectile(_pEl,_eEl,lr.dt||'fire',{crit:false});}};if(lr.saved&&!lr.half){setTimeout(()=>{if(!_done&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishAll;}},500);setTimeout(finishAll,ValdoriaMotion.duration(2000,1000));return;}
 if(lr.d>0&&lr.df){setTimeout(()=>{if(_done)return;_initDamagePhase(lr,overlay,canvas,particles,label3d,skipBtn,finishAll,()=>{_done=true;});},ValdoriaMotion.duration(800,400));}else{setTimeout(()=>{if(!_done&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishAll;}},500);setTimeout(finishAll,ValdoriaMotion.duration(2000,1000));}});}catch(e){console.warn('[COMBAT] Save overlay Dice3D failed:',e);overlay.style.display='none';_dice3dTextFallback(lr.r,'Salvaguarda vs CD '+(lr.dc||12),function(){finishAll();});}}
 function _initDiceDamageOnly(lr){if(lr.d>0&&lr.df){const overlay=document.getElementById('dmgDice3dOverlay');const canvas=document.getElementById('dmgDice3dCanvas');const particles=document.getElementById('dmgDice3dParticles');const label3d=document.getElementById('dmgDice3dLabel');const skipBtn=document.getElementById('dmgDice3dSkip');if(!overlay||!canvas||typeof Dice3D==='undefined'){console.warn('[COMBAT] Dice3D unavailable for damage-only, text fallback');_dice3dTextFallback(lr.d,(lr.df||'')+' dano');return;}if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
-canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';let infoText;if(lr.t==='aoe'&&lr.hits){const killsText=lr.kills>0?` · ${lr.kills} abatido${lr.kills > 1 ? 's' : ''}`:'';infoText=`${lr.sn || 'AOE'} — ${lr.hits} alvo${lr.hits > 1 ? 's' : ''}${killsText}`;}else{infoText=lr.sn||'Acerto automático!';}
+canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';_populateBanner(lr);let infoText;if(lr.t==='aoe'&&lr.hits){const killsText=lr.kills>0?` · ${lr.kills} abatido${lr.kills > 1 ? 's' : ''}`:'';infoText=`${lr.sn || 'AOE'} — ${lr.hits} alvo${lr.hits > 1 ? 's' : ''}${killsText}`;}else{infoText=lr.sn||'Acerto automático!';}
 if(label3d){label3d.textContent=infoText;label3d.className='dmg-dice3d-label rolling';}
 if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 vHaptic.medium();let _done=false;const finishAll=()=>{if(_done)return;_done=true;_diceAnimating=false;if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
 if(window._combatVfx){setTimeout(()=>{const _pEl=document.querySelector('.entity.player');const _eEl=document.querySelector('.entity.enemy');if(_pEl&&_eEl)window._combatVfx.projectile(_pEl,_eEl,lr.dt||'force',{crit:false});},50);}};setTimeout(()=>{if(_done)return;_initDamagePhase(lr,overlay,canvas,particles,label3d,skipBtn,finishAll,()=>{_done=true;});},ValdoriaMotion.duration(300,150));}}
-function _initDamagePhase(lr,overlay,canvas,particles,label3d,skipBtn,finishCallback,markDone){const DMG_ROLL_MS=(typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.DAMAGE_ROLL_MS:1500);const DMG_FUSION_HOLD=(typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.FUSION_HOLD:600);const DMG_RESULT_HOLD=2000;if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
+function _initDamagePhase(lr,overlay,canvas,particles,label3d,skipBtn,finishCallback,markDone){_updateBannerForDamage(lr);const DMG_ROLL_MS=(typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.DAMAGE_ROLL_MS:1500);const DMG_FUSION_HOLD=(typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.FUSION_HOLD:600);const DMG_RESULT_HOLD=2000;if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
 const parsed=_parseDiceFormula(lr.df);const dieType=parsed.type;const dieCount=parsed.count;let individualResults;if(lr.dr&&lr.dr.length>=dieCount)individualResults=lr.dr.slice(0,dieCount);else individualResults=_distributeTotal(Math.max(1,lr.d-parsed.modifier),dieCount,parsed.sides);canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(dieCount>=5)canvas.classList.add('multi','multi-5');else if(dieCount>=4)canvas.classList.add('multi','multi-4');else if(dieCount>=3)canvas.classList.add('multi','multi-3');else if(dieCount>=2)canvas.classList.add('multi');if(label3d){label3d.textContent=lr.df||'dano';label3d.className='dmg-dice3d-label rolling';}
 let _phaseDone=false;const finishPhase=()=>{if(_phaseDone)return;_phaseDone=true;_diceAnimating=false;markDone();if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
@@ -58,11 +134,11 @@ if(window._combatVfx){window._combatVfx.impact(enemies[i],lr.dt||'slashing',{cri
 if(!window._combatVfx){spawnParticles(lr.crit,lr.dt||'slashing');}
 if(lr.kill){const killName=(currentState?.e&&currentState.e[0]?.n)||'O inimigo';showNarration(_pick(_NARR_KILL).replace('{name}',killName),'crit');if(typeof announce==='function')announce(killName+' foi abatido!');}};try{const canvasSize=typeof ValdoriaDice!=='undefined'?(ValdoriaDice.CANVAS_SIZES[dieCount]||180):(dieCount>=5?370:dieCount>=4?340:dieCount>=3?300:dieCount>=2?260:180);_dmgDice3d=new Dice3D(canvas,{size:canvasSize,dieType:dieType,duration:DMG_ROLL_MS,particlesContainer:particles});if(dieCount>=2){const configs=individualResults.map(v=>({value:v}));_dmgDice3d.rollMultiple(configs,()=>{if(_phaseDone)return;if(label3d){const modText=parsed.modifier?` + ${parsed.modifier}`:'';label3d.textContent=individualResults.join(' + ')+modText;label3d.className='dmg-dice3d-label hit';}
 setTimeout(()=>{if(_phaseDone)return;if(label3d){label3d.textContent='';label3d.className='dmg-dice3d-label rolling';}
-_dmgDice3d.fusionTo(lr.d,()=>{if(label3d){label3d.textContent=lr.d+' dano';label3d.className='dmg-dice3d-label '+(lr.crit?'crit':'hit');}
-setTimeout(()=>{if(!_phaseDone&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishPhase;}},500);setTimeout(finishPhase,ValdoriaMotion.duration(DMG_RESULT_HOLD,Math.round(DMG_RESULT_HOLD/2)));});},DMG_FUSION_HOLD);});}else{const faceValue=individualResults[0]||1;_dmgDice3d.roll(faceValue,()=>{if(label3d){label3d.textContent=lr.d+' dano';label3d.className='dmg-dice3d-label '+(lr.crit?'crit':'hit');}
+_dmgDice3d.fusionTo(lr.d,()=>{if(label3d){label3d.textContent=lr.d+' de dano '+(_DT_LABELS[lr.dt]||lr.dt||'');label3d.className='dmg-dice3d-label '+(lr.crit?'crit':'hit');}
+setTimeout(()=>{if(!_phaseDone&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishPhase;}},500);setTimeout(finishPhase,ValdoriaMotion.duration(DMG_RESULT_HOLD,Math.round(DMG_RESULT_HOLD/2)));});},DMG_FUSION_HOLD);});}else{const faceValue=individualResults[0]||1;_dmgDice3d.roll(faceValue,()=>{if(label3d){label3d.textContent=lr.d+' de dano '+(_DT_LABELS[lr.dt]||lr.dt||'');label3d.className='dmg-dice3d-label '+(lr.crit?'crit':'hit');}
 setTimeout(()=>{if(!_phaseDone&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishPhase;}},500);setTimeout(finishPhase,ValdoriaMotion.duration(DMG_RESULT_HOLD,Math.round(DMG_RESULT_HOLD/2)));});}}catch(e){console.warn('[COMBAT] Damage phase Dice3D failed:',e);overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');_dice3dTextFallback(lr.d,(lr.df||'')+' dano',function(){finishPhase();});}}
 function _initDiceDeathSave(lr){const overlay=document.getElementById('dmgDice3dOverlay');const canvas=document.getElementById('dmgDice3dCanvas');const particles=document.getElementById('dmgDice3dParticles');const label3d=document.getElementById('dmgDice3dLabel');const skipBtn=document.getElementById('dmgDice3dSkip');if(!overlay||!canvas||typeof Dice3D==='undefined'){console.warn('[COMBAT] Dice3D unavailable for death save, text fallback');_dice3dTextFallback(lr.r,'Teste contra a Morte');return;}if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
-canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';if(label3d){label3d.textContent='💀 Teste contra a Morte';label3d.className='dmg-dice3d-label rolling death-save-roll';}
+canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';_populateBanner(lr);if(label3d){label3d.textContent='\uD83D\uDC80 Teste contra a Morte';label3d.className='dmg-dice3d-label rolling death-save-roll';}
 if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 vHaptic.medium();sfxDiceRoll();overlay.classList.add('death-save-overlay');let _dsDone=false;let _pendingDsVfx=null;const finishDs=()=>{if(_dsDone)return;_dsDone=true;_diceAnimating=false;if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';overlay.classList.remove('death-save-overlay');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
@@ -71,7 +147,7 @@ _pendingDsVfx=()=>{if(isCrit){if(window._combatVfx){const pEl=document.querySele
 _shakeApp('heavy');}else if(isCritFail){if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.4)',500);_shakeApp('light');}else if(!isSuccess){if(window._combatVfx)window._combatVfx.flash('rgba(200,30,30,0.25)',350);}};}
 setTimeout(()=>{if(!_dsDone&&skipBtn){skipBtn.classList.add('visible');skipBtn.onclick=finishDs;}},300);setTimeout(finishDs,ValdoriaMotion.duration(2200,1100));});}catch(e){console.warn('[COMBAT] Death save Dice3D failed:',e);overlay.style.display='none';finishDs();}}
 function _initDiceEffect(lr){const isHeal=lr.t==='heal';if(lr.d>0&&lr.df){const overlay=document.getElementById('dmgDice3dOverlay');const canvas=document.getElementById('dmgDice3dCanvas');const particles=document.getElementById('dmgDice3dParticles');const label3d=document.getElementById('dmgDice3dLabel');const skipBtn=document.getElementById('dmgDice3dSkip');if(!overlay||!canvas||typeof Dice3D==='undefined'){console.warn('[COMBAT] Dice3D unavailable for effect, text fallback');var _effLbl=lr.t==='heal'?'+'+lr.d+' cura':lr.d+' efeito';_dice3dTextFallback(lr.d,_effLbl);return;}if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
-const parsed=_parseDiceFormula(lr.df);canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(parsed.count>=5)canvas.classList.add('multi','multi-5');else if(parsed.count>=4)canvas.classList.add('multi','multi-4');else if(parsed.count>=3)canvas.classList.add('multi','multi-3');else if(parsed.count>=2)canvas.classList.add('multi');else canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';if(label3d){label3d.textContent=lr.df||'efeito';label3d.className='dmg-dice3d-label rolling';}
+const parsed=_parseDiceFormula(lr.df);canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(parsed.count>=5)canvas.classList.add('multi','multi-5');else if(parsed.count>=4)canvas.classList.add('multi','multi-4');else if(parsed.count>=3)canvas.classList.add('multi','multi-3');else if(parsed.count>=2)canvas.classList.add('multi');else canvas.classList.remove('multi','multi-3','multi-4','multi-5');overlay.style.display='flex';_populateBanner(lr);if(label3d){label3d.textContent=lr.df||'efeito';label3d.className='dmg-dice3d-label rolling';}
 if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 vHaptic.tap();sfxDiceRoll();let _efDone=false;const finishEf=()=>{if(_efDone)return;_efDone=true;_diceAnimating=false;if(skipBtn){skipBtn.classList.remove('visible');skipBtn.onclick=null;}
 overlay.style.display='none';canvas.classList.remove('multi','multi-3','multi-4','multi-5');if(_dmgDice3d){_dmgDice3d.dispose();_dmgDice3d=null;}
