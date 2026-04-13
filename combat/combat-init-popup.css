@@ -9,7 +9,7 @@
   inset: 0;
   max-width: min(100vw, 430px);
   margin: 0 auto;
-  z-index: var(--v-z-modal, 5000);
+  z-index: 5100; /* Above old initiativeOrderOverlay (5000) */
   display: flex;
   align-items: center;
   justify-content: center;
