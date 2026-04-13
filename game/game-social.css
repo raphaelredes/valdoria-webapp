@@ -1,10 +1,16 @@
 /* -- Social Popup -- */
 
-/* 0. Popup body override: flex column, no scroll on body itself */
+/* 0. Social popup: force full viewport height */
+#social-popup-overlay .v-popup-card {
+    height: 92vh;
+    max-height: 92vh;
+}
 #social-popup-overlay .v-popup-body {
     overflow-y: hidden;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 /* 1. Social Tabs (compact override for 4 tabs) */

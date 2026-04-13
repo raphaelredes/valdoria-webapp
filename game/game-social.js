@@ -53,7 +53,7 @@ function _fetchSocial(body) {if(window._dbg)console.debug('[SOCIAL-DBG] _fetchSo
         body: JSON.stringify(Object.assign({ user_id: S.uid }, body)),
         signal: _acS.signal,
     }).then(function(r) { clearTimeout(_tidS);if(window._dbg)console.debug('[SOCIAL-DBG] fetch resp status=' + r.status + ' ok=' + r.ok);if(r.status===401||r.status===403){console.warn('[SOCIAL] Auth error:',r.status);if(typeof vToast==='function')vToast('Sess\u00e3o expirada. Feche esta janela e reabra o jogo.','warn',3000);return null;} if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).catch(function(e) {
-        clearTimeout(_tidS);console.error('[SOCIAL]', e); return null;
+        clearTimeout(_tidS);console.error('[SOCIAL] fetch failed:', e.name || 'unknown', e.message || ''); return null;
     });
 }
 
