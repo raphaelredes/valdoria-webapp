@@ -1319,9 +1319,6 @@ function doLongRest() {
   S.dangerLevel = Math.min(5, (S.dangerLevel || 1) + 0.5);
   if (typeof updateDangerPips === 'function') updateDangerPips();
 
-  /* Flag for closeCampResult to initiate return journey after long rest */
-  S._pendingLongRestReturn = true;
-
   logMoveEvent([{ type: 'long_rest', restCount: S._longRestCount }]);
   saveState();
   if (typeof updateCampButtonHint === 'function') updateCampButtonHint();
@@ -1735,20 +1732,6 @@ function closeCampResult() {
   }
 
   S._longRestAmbushSafe = false;
-
-  /* Long rest ends exploration — initiate return journey to city */
-  if (S._pendingLongRestReturn) {
-    S._pendingLongRestReturn = false;
-    console.info('[CAMP] longRest_return initiating return journey to city');
-    /* Close the camp screen itself before starting the return journey */
-    closeCampOverlay();
-    setTimeout(function() {
-      /* Risk is reduced after long rest (rested and alert) */
-      var riskChance = 10;
-      attemptReturnToCity(riskChance);
-    }, 400);
-    return;
-  }
 
   if (_returningToCity && _returnJourney) {
     setTimeout(function() {
