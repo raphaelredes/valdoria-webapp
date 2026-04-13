@@ -5,6 +5,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--v-space-sm, 6px);
+  height: 100%;
+  min-height: 0;
+}
+
+/* Entries scrollable area */
+.cdx-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--v-border, #4a3828) transparent;
 }
 
 /* Progress bar row */
@@ -93,12 +107,7 @@
   border-color: var(--v-gold, #c4953a);
 }
 
-/* Entries list */
-.cdx-entries {
-  display: flex;
-  flex-direction: column;
-  gap: var(--v-space-xs, 2px);
-}
+/* Entries list — merged into .cdx-entries above */
 
 .cdx-entry {
   display: flex;
@@ -112,7 +121,7 @@
 }
 
 .cdx-entry--locked {
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .cdx-entry-icon {
