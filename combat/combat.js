@@ -15,6 +15,12 @@ async getState(){const r=await fetchT(`${this.base}/api/combat/state`,{method:'P
 const err=new Error(body.error||`API ${r.status}`);err.status=r.status;_attachRetryAfter(err,r,body);throw err;}
 return r.json();}
 async checkHealth(){try{return await fetchJSON(`${this.base}/api/combat/health`,{method:'GET'});}catch(e){return{status:'unreachable'};}}
+async sendTick(data){/* Phase 2 refactor 2026-04-14: atomic single-actor tick.
+ * data vazio = tick NPC (servidor resolve active actor).
+ * data com action = player turn. Response sempre tem phase explicito. */
+const h=this._baseHeaders();h['X-Idempotency-Key']=crypto.randomUUID();var _t0=Date.now();var _has=data&&data.action?data.action:'(empty)';console.info('[COMBAT][TICK] start action='+_has);var _body_req={user_id:this.userId};if(data){Object.assign(_body_req,data);}var _abortSignal=window._actionAbort?window._actionAbort.signal:undefined;const r=await fetchT(`${this.base}/api/combat/tick`,{method:'POST',headers:h,body:JSON.stringify(_body_req),signal:_abortSignal},60000);var _dt=Date.now()-_t0;if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
+const err=new Error(body.error||`API ${r.status}`);err.status=r.status;_attachRetryAfter(err,r,body);console.warn('[COMBAT][TICK] error status='+r.status+' ms='+_dt);throw err;}
+var _body=await r.json();console.info('[COMBAT][TICK] ok phase='+(_body.phase||'?')+' ms='+_dt);return _body;}
 async sendAction(data){const h=this._baseHeaders();h['X-Idempotency-Key']=crypto.randomUUID();var _t0=Date.now();console.info('[COMBAT][NET] sendAction_start type='+(data.type||'?')+' target='+(data.target!=null?data.target:'-'));/* 60s timeout: NPC turn processing can take 20-40s with multi-ally/multi-enemy animations. Default 15s was the source of "stuck turn" false positives. */const _abortSignal=window._actionAbort?window._actionAbort.signal:undefined;const r=await fetchT(`${this.base}/api/combat/action`,{method:'POST',headers:h,body:JSON.stringify({user_id:this.userId,...data}),signal:_abortSignal},60000);var _dt=Date.now()-_t0;if(!r.ok){const body=await r.json().catch(()=>({}));if(body.status==='displaced'&&window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(body.device||'');throw new Error('displaced');}
 const err=new Error(body.error||`API ${r.status}`);err.status=r.status;_attachRetryAfter(err,r,body);console.warn('[COMBAT][NET] sendAction_error type='+(data.type||'?')+' status='+r.status+' elapsed_ms='+_dt);throw err;}
 var _body=await r.json();console.info('[COMBAT][NET] sendAction_ok type='+(data.type||'?')+' elapsed_ms='+_dt+' ph='+(_body.ph||_body.phase||'?')+' tc='+(_body.tc||0));return _body;}}
@@ -249,3 +255,46 @@ showInitiativePrompt(function(){sendAction({type:'initiative'});});
 function _showProceedBar(){const bar=document.getElementById('init-proceed-bar');if(bar){bar.style.display='';const pb=bar.querySelector('.action-btn');if(pb)pb.classList.remove('disabled');}var sk=document.getElementById('initiativeOrderSkip');if(sk){sk.style.display='none';sk.onclick=null;}}
 function _showBattleLog(){var feed=window._resolutionFeed||[];if(!feed.length){console.warn('[COMBAT] no feed data for battle log');return;}var bodyHtml='<div class="battle-log-list">';feed.forEach(function(entry,i){if(!entry)return;var cleaned=entry.replace(/<[^>]*>/g,'').trim();if(!cleaned)return;var isRound=/^[─═━▬]|Rodada\s+\d|ROUND/i.test(cleaned);if(isRound){bodyHtml+='<div class="battle-log-round">'+escHtml(cleaned)+'</div>';}else{bodyHtml+='<div class="battle-log-entry">'+escHtml(cleaned)+'</div>';}});bodyHtml+='</div>';if(typeof vPopup!=='undefined'){vPopup.show({title:'📜 Log de Batalha',body:bodyHtml,actions:[{label:'Fechar',primary:true,action:function(){vPopup.hide();}}]});}}
 var _DMG_FLASH_TYPES=new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);var _origShowError=window.showError;var _showErrorDepth=0;window.showError=function(msg,err){if(_showErrorDepth>2){console.error('[COMBAT] showError recursion aborted depth='+_showErrorDepth,msg);return;}_showErrorDepth++;try{_actionSent=false;_timerExpiredPending=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));if(_origShowError)_origShowError(msg,err);}finally{_showErrorDepth--;}};
+/* ===== Combat Tick Model (Fase 2 refactor 2026-04-14) =====
+ * Feature flag opt-in. Client-driven loop: 1 request = 1 ator.
+ * Uso manual de testes: window.USE_TICK_MODEL=true; runTickLoop();
+ * Fase 3 vai conectar isto ao fluxo de sendAction/proceed/init.
+ * Plano completo: project_combat_tick_refactor.md */
+if (typeof window.USE_TICK_MODEL === 'undefined') window.USE_TICK_MODEL = false;
+window.runTickLoop = async function runTickLoop(opts) {
+    if (!api) { console.warn('[TICK] no api'); return; }
+    opts = opts || {};
+    var maxIters = opts.maxIters || 20;
+    var iter = 0;
+    var body = opts.initial || {};
+    while (iter < maxIters) {
+        iter++;
+        var res;
+        try { res = await api.sendTick(body); }
+        catch (e) { console.warn('[TICK] err iter=' + iter, e.message); return { error: e.message, iter: iter }; }
+        var phase = res && res.phase;
+        console.info('[TICK] iter=' + iter + ' phase=' + phase);
+        if (phase === 'player_input') {
+            currentState = res.state || currentState;
+            if (currentState) renderArena(currentState);
+            return { ok: true, phase: phase, iter: iter };
+        }
+        if (phase === 'resolution') {
+            currentState = res.state || currentState;
+            if (currentState) renderResolution(currentState);
+            return { ok: true, phase: phase, iter: iter };
+        }
+        if (phase === 'no_combat' || phase === 'error') {
+            console.warn('[TICK] stop phase=' + phase);
+            return { error: phase, iter: iter };
+        }
+        /* phase === 'npc_pending' or 'skipped': play cinematic then tick again */
+        if (res.state) { currentState = res.state; renderArena(currentState); }
+        /* Minimal cinematic delay based on last_roll presence */
+        var delay = res.last_roll ? 1200 : 300;
+        await new Promise(function (r) { setTimeout(r, delay); });
+        body = {};  /* next iter: empty body so server advances NPC */
+    }
+    console.warn('[TICK] max iterations reached');
+    return { error: 'max_iters', iter: iter };
+};
