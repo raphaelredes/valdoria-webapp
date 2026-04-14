@@ -290,3 +290,21 @@ body.perf-lite .init-popup-row { animation: none !important; }
   .init-popup-row,
   .init-popup-overlay { animation: none !important; transition: none !important; }
 }
+
+/* ===== Prompt variant (Combate Iminente screen) ===== */
+.init-prompt-card .init-popup-dice-canvas {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--v-radius-lg, 14px);
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(42, 36, 32, 0.6), rgba(20, 16, 14, 0.95));
+  border: 1px solid var(--v-gold-15, rgba(196, 149, 58, 0.15));
+  box-shadow: 0 0 24px var(--v-gold-10, rgba(196, 149, 58, 0.1)),
+              inset 0 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.init-prompt-card .init-popup-dice-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}

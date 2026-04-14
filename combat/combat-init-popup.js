@@ -33,8 +33,8 @@ function _parseMod(f) {
     return m && m[1] ? parseInt(m[1], 10) : 0;
 }
 
-/* Prompt overlay — player sees "Rolar Iniciativa" button inside the popup.
- * Clicking sends the action to server; on response, transitions to dice animation. */
+/* Prompt overlay — immersive "Combate Iminente" with 3D idle dice.
+ * Player clicks "Rolar Iniciativa" → server resolves → transitions to results popup. */
 window.showInitiativePrompt = function(onRoll, onProceed) {
     if (_active) return;
     _active = true;
@@ -43,41 +43,66 @@ window.showInitiativePrompt = function(onRoll, onProceed) {
     _overlay.setAttribute('aria-modal', 'true');
 
     var card = _el('div', 'init-popup-card');
+    card.classList.add('init-prompt-card');
 
+    /* Header with ornament */
     var header = _el('div', 'init-popup-header');
     header.textContent = '\u2694\uFE0F Combate Iminente';
     card.appendChild(header);
+
+    var orn = _el('div', 'init-popup-sub');
+    orn.style.cssText = 'color:rgba(196,149,58,0.3);font-size:10px;letter-spacing:6px;text-align:center;padding:4px 0';
+    orn.textContent = '\u25C6 \u2500\u2500\u2500 \u25C6 \u2500\u2500\u2500 \u25C6';
+    card.appendChild(orn);
 
     var sub = _el('div', 'init-popup-sub');
     sub.textContent = 'Rolagem de iniciativa determina a ordem dos turnos.';
     card.appendChild(sub);
 
+    /* 3D Dice area — real Dice3D spinning idle */
     var diceArea = _el('div', 'init-popup-dice-area');
-    var diceIcon = _el('div', 'init-popup-dice-icon');
-    diceIcon.textContent = '\uD83C\uDFB2';
-    diceIcon.style.cssText = 'font-size:48px;text-align:center;margin:16px 0';
-    diceArea.appendChild(diceIcon);
+    var diceCanvas = _el('div', 'init-popup-dice-canvas');
+    diceCanvas.id = 'init-prompt-dice-canvas';
+    diceArea.appendChild(diceCanvas);
     card.appendChild(diceArea);
 
-    var rollBtn = _el('button', 'init-popup-proceed-btn');
+    /* Flavor text */
+    var flavor = _el('div', 'init-popup-sub');
+    flavor.style.cssText = 'font-style:italic;padding:0 20px 12px;text-align:center';
+    flavor.textContent = 'O destino aguarda o lan\u00e7ar dos dados...';
+    card.appendChild(flavor);
+
+    /* Footer with button */
+    var footer = _el('div', 'init-popup-footer');
+    var rollBtn = _el('button', 'init-popup-proceed');
     rollBtn.textContent = '\uD83C\uDFB2 Rolar Iniciativa';
-    rollBtn.style.cssText = 'margin-top:12px';
+
     var _rolling = false;
+    var _promptDice = null;
+
     rollBtn.addEventListener('click', function() {
         if (_rolling) return;
         _rolling = true;
         rollBtn.disabled = true;
+        rollBtn.style.opacity = '0.6';
         rollBtn.textContent = 'Rolando...';
-        try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+        try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('medium'); } catch(e) { /* noop */ }
+
+        /* Roll the 3D die to a random value for visual feedback */
+        var previewVal = Math.floor(Math.random() * 20) + 1;
+        if (_promptDice) {
+            try { _promptDice.roll(previewVal, function() {}); } catch(e) { /* noop */ }
+        }
 
         onRoll(function(resp) {
+            /* Dispose prompt dice */
+            if (_promptDice) { try { _promptDice.dispose(); } catch(e) { /* noop */ } _promptDice = null; }
             /* Remove prompt overlay */
             if (_overlay && _overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
             _overlay = null;
             _active = false;
 
             if (resp && resp.to && resp.to.length > 0) {
-                /* Show the full dice animation popup */
                 window.showInitiativePopup(resp.to, resp.initiative || {}, function() {
                     onProceed(resp);
                 });
@@ -86,12 +111,27 @@ window.showInitiativePrompt = function(onRoll, onProceed) {
             }
         });
     });
-    card.appendChild(rollBtn);
+
+    footer.appendChild(rollBtn);
+    card.appendChild(footer);
 
     _overlay.appendChild(card);
     document.body.appendChild(_overlay);
     void _overlay.offsetWidth;
     _overlay.classList.add('active');
+
+    /* Initialize 3D dice after DOM is in place */
+    setTimeout(function() {
+        var canvasEl = document.getElementById('init-prompt-dice-canvas');
+        if (canvasEl && typeof Dice3D !== 'undefined') {
+            try {
+                _promptDice = new Dice3D(canvasEl, { size: 160 });
+                console.info('[INIT-POPUP] 3D dice initialized for prompt');
+            } catch(e) {
+                console.warn('[INIT-POPUP] Dice3D init failed:', e);
+            }
+        }
+    }, 100);
 };
 
 window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
