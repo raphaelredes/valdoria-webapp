@@ -27,6 +27,8 @@ function renderActionsButton() {
 function toggleActionsPopup() {
     var popup = document.getElementById('actionsPopup');
     if (!popup) return;
+    var _wasOpen = !popup.classList.contains('hidden');
+    console.info('[COMBAT:UI_CLICK] kind=toggle_actions_popup will_open=' + (!_wasOpen));
 
     var s = (typeof currentState !== 'undefined') ? currentState : null;
     var sp = (s && s.sub_phase) ? s.sub_phase : '';
@@ -225,8 +227,20 @@ function _makeActBtn(ico, label, chance, actType, primary) {
  * Mirrors the logic in bindActions (combat-ui.js) but for .ap-btn elements.
  */
 function _dispatchAction(actType) {
-    if (typeof _actionSent !== 'undefined' && _actionSent) return;
-    if (typeof _cinematicInProgress !== 'undefined' && _cinematicInProgress) return;
+    var _s_dbg = (typeof currentState !== 'undefined' && currentState) ? currentState : {};
+    console.info('[COMBAT:UI_CLICK] kind=action_button type=' + actType
+        + ' tc=' + (_s_dbg.tc || '?')
+        + ' sub_phase=' + (_s_dbg.sub_phase || '-')
+        + ' actionSent=' + (typeof _actionSent !== 'undefined' ? _actionSent : '?')
+        + ' cinematic=' + (typeof _cinematicInProgress !== 'undefined' ? _cinematicInProgress : '?'));
+    if (typeof _actionSent !== 'undefined' && _actionSent) {
+        console.warn('[COMBAT:UI_BLOCKED] action=' + actType + ' reason=actionSent');
+        return;
+    }
+    if (typeof _cinematicInProgress !== 'undefined' && _cinematicInProgress) {
+        console.warn('[COMBAT:UI_BLOCKED] action=' + actType + ' reason=cinematic');
+        return;
+    }
     if (typeof vHaptic !== 'undefined') vHaptic.select();
 
     var s = (typeof currentState !== 'undefined') ? currentState : null;
