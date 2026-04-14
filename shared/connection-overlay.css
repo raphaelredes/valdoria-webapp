@@ -16,13 +16,13 @@
 .v-conn-icon{position:relative;width:100px;height:100px;margin-bottom:var(--v-space-lg,12px)}
 
 /* Outer ring — slow rotation, dashed */
-.v-conn-ring-outer{position:absolute;inset:0;border:2px solid transparent;border-top-color:var(--v-gold,#c4953a);border-right-color:rgba(196,149,58,0.3);border-radius:50%;animation:vConnRingOuter 4s linear infinite}
+.v-conn-ring-outer{position:absolute;inset:0;border:2px solid transparent;border-top-color:var(--v-gold,#c4953a);border-right-color:var(--v-gold-30);border-radius:50%;animation:vConnRingOuter 4s linear infinite}
 
 /* Middle ring — counter-rotation, dotted */
-.v-conn-ring-mid{position:absolute;inset:8px;border:1.5px dotted rgba(196,149,58,0.2);border-top-color:var(--v-gold-light,#dbb668);border-left-color:rgba(219,182,104,0.4);border-radius:50%;animation:vConnRingMid 3s linear infinite reverse}
+.v-conn-ring-mid{position:absolute;inset:8px;border:1.5px dotted var(--v-gold-20);border-top-color:var(--v-gold-light,#dbb668);border-left-color:rgba(219,182,104,0.4);border-radius:50%;animation:vConnRingMid 3s linear infinite reverse}
 
 /* Inner ring — fast rotation */
-.v-conn-ring-inner{position:absolute;inset:16px;border:1px solid transparent;border-top-color:rgba(196,149,58,0.5);border-bottom-color:rgba(196,149,58,0.15);border-radius:50%;animation:vConnRingInner 2s linear infinite}
+.v-conn-ring-inner{position:absolute;inset:16px;border:1px solid transparent;border-top-color:var(--v-gold-50);border-bottom-color:var(--v-gold-15);border-radius:50%;animation:vConnRingInner 2s linear infinite}
 
 /* Orb of Valdoria 3D — centered, glass shell + golden nebula */
 .v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:
@@ -30,8 +30,8 @@
   radial-gradient(circle at 55% 55%, #c4953a 0%, #8b6420 50%, #5a3e10 80%, #3a2810 100%);
 box-shadow:
   0 0 16px var(--v-gold-60,rgba(196,149,58,0.6)),
-  0 0 32px var(--v-gold-30,rgba(196,149,58,0.3)),
-  0 0 48px rgba(196,149,58,0.15),
+  0 0 32px var(--v-gold-30),
+  0 0 48px var(--v-gold-15),
   inset 0 -4px 8px rgba(90,62,16,0.6),
   inset 0 3px 6px rgba(255,244,208,0.35);
 animation:vConnOrbPulse 3s ease-in-out infinite}
@@ -53,8 +53,8 @@ animation:vConnOrbPulse 3s ease-in-out infinite}
 @keyframes vConnRingMid{to{transform:rotate(360deg)}}
 @keyframes vConnRingInner{to{transform:rotate(360deg)}}
 @keyframes vConnOrbPulse{
-  0%,100%{box-shadow:0 0 16px var(--v-gold-50),0 0 28px var(--v-gold-20),0 0 48px rgba(196,149,58,0.1),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.35)}
-  50%{box-shadow:0 0 22px var(--v-gold-70),0 0 40px var(--v-gold-35),0 0 60px rgba(196,149,58,0.2),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.4)}}
+  0%,100%{box-shadow:0 0 16px var(--v-gold-50),0 0 28px var(--v-gold-20),0 0 48px var(--v-gold-10),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.35)}
+  50%{box-shadow:0 0 22px var(--v-gold-70),0 0 40px var(--v-gold-35),0 0 60px var(--v-gold-20),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.4)}}
 @keyframes vConnCorePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
 @keyframes vConnSpark1{0%,100%{opacity:0;top:50%;left:0}25%{opacity:0.8;top:0;left:50%}50%{opacity:0;top:50%;left:100%}}
 @keyframes vConnSpark2{0%,100%{opacity:0;top:0;left:50%}25%{opacity:0.7;top:50%;left:100%}50%{opacity:0;top:100%;left:50%}}

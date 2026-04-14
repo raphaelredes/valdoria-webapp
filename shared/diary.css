@@ -66,7 +66,7 @@
   content: '';
   position: absolute; top: 18%; left: 50%;
   width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(196, 149, 58, .12) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--v-gold-12) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   animation: diaryGlow 6s ease-in-out infinite;
@@ -84,7 +84,7 @@
 .diary-header .ornament {
   font-size: 7px;
   letter-spacing: 3px;
-  color: rgba(196, 149, 58, .2);
+  color: var(--v-gold-20);
   margin-bottom: var(--v-space-xs, 2px);
   font-family: serif;
 }
@@ -96,7 +96,7 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--v-gold-light, #dbb668);
-  text-shadow: 0 0 20px rgba(196, 149, 58, .3), 0 0 40px rgba(196, 149, 58, .1);
+  text-shadow: 0 0 20px var(--v-gold-30), 0 0 40px var(--v-gold-10);
 }
 
 .diary-header .sep {
@@ -105,9 +105,9 @@
   margin: var(--v-space-xs, 4px) auto 0;
   background: linear-gradient(90deg,
     transparent,
-    rgba(196, 149, 58, .35) 20%,
-    rgba(196, 149, 58, .6) 50%,
-    rgba(196, 149, 58, .35) 80%,
+    var(--v-gold-35) 20%,
+    var(--v-gold-60) 50%,
+    var(--v-gold-35) 80%,
     transparent
   );
 }
@@ -122,7 +122,7 @@
 
 .diary-progress-bar {
   height: 3px;
-  background: rgba(196, 149, 58, .12);
+  background: var(--v-gold-12);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -377,7 +377,7 @@
   gap: var(--v-space-md, 8px);
   padding: var(--v-space-md, 10px) var(--v-space-lg, 12px);
   background: linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 60%, #1e1a16 100%);
-  border: 1px solid rgba(196, 149, 58, .25);
+  border: 1px solid var(--v-gold-25);
   border-radius: var(--v-radius-sm, 6px);
   color: var(--v-text, #d4c8b0);
   font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
@@ -403,7 +403,7 @@
 
 .diary-choice-btn--selected {
   border-color: var(--v-gold, #c4953a);
-  box-shadow: 0 0 12px rgba(196, 149, 58, .15);
+  box-shadow: 0 0 12px var(--v-gold-15);
 }
 
 .diary-choice-btn--disabled {
@@ -419,8 +419,8 @@
   align-items: center;
   gap: 3px;
   padding: 2px var(--v-space-md, 8px);
-  background: rgba(196, 149, 58, .08);
-  border: 1px solid rgba(196, 149, 58, .15);
+  background: var(--v-gold-08);
+  border: 1px solid var(--v-gold-15);
   border-radius: 10px;
   font-size: var(--v-font-xs, 10px);
   color: var(--v-gold, #c4953a);
@@ -461,7 +461,7 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: var(--v-space-xl, 16px);
-  text-shadow: 0 0 15px rgba(196, 149, 58, .3);
+  text-shadow: 0 0 15px var(--v-gold-30);
 }
 
 .diary-summary-stats {
@@ -533,7 +533,7 @@
 .diary-action-btn {
   width: 100%;
   padding: 11px;
-  border: 1px solid rgba(196, 149, 58, .3);
+  border: 1px solid var(--v-gold-30);
   border-radius: 4px;
   background: linear-gradient(180deg, #3a3028 0%, var(--v-bg, #2a2420) 60%, #1e1a16 100%);
   color: var(--v-text, #d4c8b0);

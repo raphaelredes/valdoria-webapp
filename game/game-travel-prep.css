@@ -212,7 +212,7 @@
 
 /* ===== Design B: Readiness Meter ===== */
 .prep-readiness { text-align: center; margin-bottom: var(--v-space-md, 8px); }
-.prep-readiness-label { font-size: 13px; color: var(--v-text, #d4c8b0); }
+.prep-readiness-label { font-size: var(--v-font-sm, 13px); color: var(--v-text, #d4c8b0); }
 .prep-readiness-label b { font-weight: 700; }
 .prep-readiness-bar {
   height: 6px; background: var(--v-bar-track, #1e1810);
@@ -222,7 +222,7 @@
 .prep-readiness-fill--high { background: var(--v-success, #4caf50); }
 .prep-readiness-fill--mid { background: var(--v-warning, #f39c12); }
 .prep-readiness-fill--low { background: var(--v-danger, #e74c3c); }
-.prep-readiness-text { font-size: 11px; color: var(--v-text-dim, #a09484); }
+.prep-readiness-text { font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); }
 
 /* ===== Design B: Two-column layout (Suprimentos | Equipamento) ===== */
 .prep-two-col {
@@ -230,7 +230,7 @@
   gap: var(--v-space-md, 8px);
 }
 .prep-col-title {
-  font-size: 11px; color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a);
   text-transform: uppercase; letter-spacing: 1px;
   margin-bottom: var(--v-space-xs, 2px);
   font-family: var(--v-font-display, 'Cinzel', serif);
@@ -245,7 +245,7 @@
   display: flex; align-items: center; gap: var(--v-space-sm, 4px);
   padding: var(--v-space-sm, 4px) var(--v-space-sm, 4px);
   border-radius: var(--v-radius-sm, 6px); cursor: pointer;
-  font-size: 13px; font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: var(--v-font-sm, 13px); font-family: var(--v-font, 'MedievalSharp', serif);
   color: var(--v-text, #d4c8b0);
   transition: background var(--v-transition, 0.2s);
 }
@@ -256,7 +256,7 @@
 .prep-check-dot--ok { background: var(--v-success, #4caf50); }
 .prep-check-dot--miss { background: var(--v-danger, #e74c3c); opacity: 0.5; }
 .prep-check-hint {
-  margin-left: auto; font-size: 10px;
+  margin-left: auto; font-size: var(--v-font-xs, 10px);
   color: var(--v-text-faint, #8a7a68); opacity: 0.5; flex-shrink: 0;
 }
 
@@ -266,7 +266,7 @@
   gap: var(--v-space-sm, 4px); margin: var(--v-space-md, 8px) 0;
 }
 .prep-gold-val {
-  font-size: 18px; font-weight: 700; color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-lg, 18px); font-weight: 700; color: var(--v-gold, #c4953a);
 }
 
 /* ===== Design B: Quick buy compact ===== */
@@ -275,7 +275,7 @@
   background: var(--v-gold-10, rgba(196,149,58,0.1));
   border: 1px solid var(--v-gold-20, rgba(196,149,58,0.2));
   border-radius: var(--v-radius-sm, 6px);
-  font-size: 13px; text-align: center;
+  font-size: var(--v-font-sm, 13px); text-align: center;
   color: var(--v-text-dim, #a09484); cursor: pointer;
   transition: background var(--v-transition, 0.2s);
 }
