@@ -1,0 +1,299 @@
+/* combat-grid.css — 4x4 Tactical Battlefield Grid */
+
+/* ── Battlefield container ── */
+.battlefield {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px 8px;
+    gap: 2px;
+    z-index: 1;
+    flex: 1;
+}
+
+/* ── Row label (retaguarda / frente) — color-coded by zone ── */
+.row-label {
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-text-dim, #a09484);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    width: 100%;
+    margin-bottom: 1px;
+    padding: 1px 0;
+}
+/* Enemy zone labels — subtle red tint */
+.row-label.enemy-zone {
+    color: rgba(229,115,115,0.6);
+}
+/* Ally zone labels — subtle blue tint */
+.row-label.ally-zone {
+    color: rgba(100,181,246,0.6);
+}
+
+/* ── Battlefield row — 4-column grid ── */
+.bf-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    width: 100%;
+}
+
+/* ── Individual cell ── */
+.cell {
+    position: relative;
+    min-height: clamp(64px, 16vw, 80px);
+    border-radius: var(--v-radius-sm, 6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--v-border-15);
+    background: rgba(0,0,0,0.06);
+    padding: 4px 3px 3px;
+    gap: 2px;
+    box-sizing: border-box;
+    cursor: default;
+    transition: box-shadow var(--v-transition, 0.2s) ease,
+                border-color var(--v-transition, 0.2s) ease,
+                background var(--v-transition, 0.2s) ease;
+}
+
+/* Occupied cell */
+.cell.occupied {
+    background: rgba(0,0,0,0.18);
+    cursor: pointer;
+}
+
+/* Enemy cell */
+.cell.enemy {
+    border-color: rgba(123,32,32,0.3);
+}
+
+/* Player cell */
+.cell.player {
+    border-color: var(--v-gold-35);
+}
+
+/* Ally cell */
+.cell.ally {
+    border-color: rgba(100,140,180,0.3);
+}
+
+/* Active turn cell */
+.cell.active-turn {
+    box-shadow: 0 0 12px var(--v-gold-35);
+    border-color: var(--v-gold-50);
+    animation: cellGlow 2s infinite;
+}
+
+@keyframes cellGlow {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--v-gold-35);
+    }
+    50% {
+        box-shadow: 0 0 16px var(--v-gold-55);
+    }
+}
+
+/* #5 (combat audit 7.4): Grid range visual — cells highlighted when the
+ * skill/attack target picker is open. Tells the player WHICH cells are
+ * valid targets (vs the existing text-only overlay list).
+ * Gold pulse for in-range, red pulse for selected-attacker (player cell). */
+.cell.in-range {
+    border-color: var(--v-gold-55);
+    box-shadow: 0 0 10px var(--v-gold-35), inset 0 0 8px var(--v-gold-15);
+    animation: cellInRangePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cellInRangePulse {
+    0%, 100% {
+        box-shadow: 0 0 6px var(--v-gold-35), inset 0 0 6px var(--v-gold-15);
+    }
+    50% {
+        box-shadow: 0 0 14px var(--v-gold-55), inset 0 0 10px var(--v-gold-25);
+    }
+}
+
+/* Performance: disable pulse on lite devices */
+body.perf-lite .cell.in-range { animation: none; }
+
+/* Accessibility: respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .cell.in-range { animation: none; }
+}
+
+/* ── Unit icon row (icon + status pips on sides) ── */
+.unit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+}
+
+.unit-ico {
+    width: 26px;
+    height: 26px;
+    font-size: 22px; /* noqa: preflight — emoji icon size, no design token */
+    line-height: 1;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+    text-align: center;
+}
+
+/* Status pip columns (left/right of icon) */
+.unit-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 14px;
+}
+
+.unit-side.left {
+    align-items: flex-end;
+}
+
+.unit-side.right {
+    align-items: flex-start;
+}
+
+/* Individual status pip */
+.s-pip {
+    font-size: var(--v-font-xs, 10px);
+    background: rgba(0,0,0,0.4);
+    padding: 1px 3px;
+    border-radius: 3px;
+    color: var(--v-text);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* ── HP / MP mini bars ── */
+.cell-bars {
+    width: 92%;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 1px;
+}
+
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.mini-bar {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.35);
+    overflow: hidden;
+}
+
+.mini-bar .fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width var(--v-transition, 0.2s) ease;
+}
+
+/* HP fill variants */
+.fill-hp-high {
+    background: var(--v-hp-high);
+}
+
+.fill-hp-mid {
+    background: var(--v-hp-warn);
+}
+
+.fill-hp-low {
+    background: var(--v-hp-crit);
+}
+
+/* MP fill */
+.fill-mp {
+    background: linear-gradient(90deg, #2a5a8a, #4080b0);
+}
+
+/* Bar number labels */
+.bar-num {
+    font-size: var(--v-font-xs, 10px);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 14px;
+    text-align: right;
+}
+
+.bar-num.hp-high { color: #7ec060; }
+.bar-num.hp-mid  { color: #e0b040; }
+.bar-num.hp-low  { color: #e06050; }
+.bar-num.mp      { color: #60a0d0; }
+
+/* ── Enemy intent badge (top-right) — Into the Breach style ── */
+.intent {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: var(--v-font-xs, 10px);
+    background: rgba(140,30,30,0.8);
+    padding: 2px 5px;
+    border-radius: var(--v-radius-sm, 6px);
+    color: #ff8a80;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: bold;
+    border: 1px solid rgba(180,50,50,0.5);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    line-height: 1.2;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 52px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── AC badge (top-left) ── */
+.cell-ac {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: var(--v-font-xs, 10px);
+    color: #c0b090;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    line-height: 1.3;
+    pointer-events: none;
+}
+
+/* ── Level badge (bottom-left, opposite corner from intent) ── */
+.cell-level {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-gold);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    line-height: 1.2;
+    pointer-events: none;
+}
+
+/* ── Divider between enemy and ally rows ── */
+.bf-divider {
+    height: 2px;
+    width: calc(100% - 32px);
+    margin: 3px auto;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--v-gold-25),
+        transparent
+    );
+    flex-shrink: 0;
+}

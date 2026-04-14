@@ -1,0 +1,142 @@
+/* combat-log-popup.css — Combat Log Popup styles (content inside vPopup body) */
+
+.log-timer-info {
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--v-border-15);
+    font-size: var(--v-font-xs, 11px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.log-badge-paused {
+    color: #7ec060;
+    font-weight: 700;
+}
+
+.log-badge-running {
+    color: #e0b040;
+    font-weight: 700;
+}
+
+.log-entries {
+    padding: 4px 0;
+}
+
+.log-round-sep {
+    text-align: center;
+    font-size: var(--v-font-xs, 10px);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    color: #b0a488;
+    padding: 8px 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.log-round-sep::before,
+.log-round-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--v-border-30);
+}
+
+.log-entry {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: var(--v-radius-sm, 6px);
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 3px solid transparent;
+    font-size: var(--v-font-xs, 11px);
+    line-height: 1.6;
+}
+
+.log-entry.player-action {
+    border-left-color: #c4953a;
+}
+
+.log-entry.enemy-action {
+    border-left-color: #7b2020;
+}
+
+.log-entry.ally-action {
+    border-left-color: #6a8ab0;
+}
+
+.log-action {
+    font-weight: 700;
+    font-size: var(--v-font-xs, 11px);
+    color: var(--v-text);
+    display: block;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.log-roll {
+    font-size: var(--v-font-xs, 10px);
+    color: #c0b8a0;
+    font-family: monospace;
+    display: block;
+    margin-top: 2px;
+}
+
+.log-hit {
+    color: #7ec060;
+}
+
+.log-miss {
+    color: #c06050;
+}
+
+.log-crit {
+    color: #c4953a;
+    font-weight: 700;
+}
+
+.log-dmg {
+    font-size: var(--v-font-xs, 10px);
+    display: block;
+    margin-top: 1px;
+    /* color set inline by damage type */
+}
+
+.log-extra {
+    font-size: var(--v-font-xs, 10px);
+    color: #b0a488;
+    font-style: italic;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Dica de turno — texto centralizado, sem caixa tipo botão desativado */
+.log-turn-hint {
+    margin-top: var(--v-space-md);
+    padding: var(--v-space-sm) var(--v-space-md);
+    text-align: center;
+    font-size: var(--v-font-xs, 11px);
+    font-style: normal;
+    line-height: 1.5;
+    color: var(--v-text-dim, #a09484);
+    border-top: 1px solid var(--v-gold-12);
+}
+
+.log-turn-hint-text {
+    display: block;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.log-turn-hint-text strong {
+    color: var(--v-gold, #c4953a);
+    font-weight: 700;
+}
+
+/* legado: entradas antigas .log-current */
+.log-entry.log-current {
+    border-left-color: var(--v-border);
+    opacity: 0.85;
+    text-align: center;
+    font-style: italic;
+    color: var(--v-text-dim, #a09484);
+}

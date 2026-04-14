@@ -1,0 +1,410 @@
+/* Iniciativa / ordem de combate — alinhado a shared/popup.css + valdoria-design tokens */
+
+.initiative-order-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--v-z-modal, 5000);
+    display: none;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    padding: max(var(--v-space-md), env(safe-area-inset-top, 0px))
+        max(var(--v-space-md), env(safe-area-inset-right, 0px))
+        max(var(--v-space-md), env(safe-area-inset-bottom, 0px))
+        max(var(--v-space-md), env(safe-area-inset-left, 0px));
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: rgba(15, 12, 8, 0.88);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--v-transition-base, 0.2s) ease;
+}
+
+.initiative-order-overlay.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Cartão = mesma linguagem que .v-popup-card */
+.initiative-order-card {
+    width: min(calc(100% - 28px), 390px);
+    max-width: 390px;
+    max-height: min(92vh, 800px);
+    margin: 0 auto;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-gold-25);
+    border-radius: var(--v-radius-lg, 14px);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 var(--v-gold-08);
+    overflow: hidden;
+    animation: initiativeOrderCardIn 0.38s var(--v-ease-snap, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+@keyframes initiativeOrderCardIn {
+    from {
+        opacity: 0;
+        transform: scale(0.88) translateY(20px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.01) translateY(-2px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Cabeçalho = .v-popup-header + ornamento ◆ */
+.initiative-order-head {
+    flex-shrink: 0;
+    padding: var(--v-space-lg) var(--v-space-xl) var(--v-space-md-lg);
+    text-align: center;
+    border-bottom: 1px solid var(--v-gold-15);
+    background: linear-gradient(180deg, var(--v-border-42) 0%, transparent 100%);
+}
+
+.initiative-order-head::after {
+    content: '◆';
+    display: block;
+    text-align: center;
+    color: var(--v-gold-30);
+    font-size: var(--v-font-xs, 10px);
+    letter-spacing: var(--v-space-md);
+    margin-top: var(--v-space-sm);
+    opacity: 0.55;
+}
+
+.initiative-order-divider {
+    width: min(100%, 260px);
+    height: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--v-gold-25) 0,
+        var(--v-gold-25) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    opacity: 0.7;
+    position: relative;
+}
+
+.initiative-order-divider--top {
+    margin-bottom: var(--v-space-md);
+}
+
+.initiative-order-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--v-space-sm);
+    border-radius: var(--v-radius, 10px);
+    background: linear-gradient(165deg, var(--v-gold-08) 0%, rgba(42, 36, 32, 0.6) 100%);
+    border: 1px solid var(--v-gold-15);
+    box-shadow: inset 0 1px 0 var(--v-gold-06);
+}
+
+.initiative-order-icon {
+    font-size: clamp(28px, 8vw, 34px);
+    line-height: 1;
+    filter: drop-shadow(0 2px 8px var(--v-gold-20, rgba(196, 149, 58, 0.25)));
+}
+
+.initiative-order-kicker {
+    margin: 0;
+    padding: 0;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: clamp(22px, 6.5vw, 28px);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--v-gold-light, #dbb668);
+    text-shadow: 0 0 20px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+    line-height: 1.15;
+}
+
+.initiative-order-badge {
+    margin: var(--v-space-sm) auto 0;
+    padding: var(--v-space-xs) var(--v-space-lg);
+    display: inline-block;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--v-text-bright, #e8dcc8);
+    background: linear-gradient(180deg, rgba(110, 32, 32, 0.92) 0%, rgba(55, 14, 14, 0.98) 100%);
+    border: 1px solid rgba(180, 70, 70, 0.4);
+    border-radius: var(--v-radius-pill, 20px);
+    box-shadow: inset 0 1px 0 rgba(255, 210, 210, 0.1);
+}
+
+.initiative-order-lead {
+    flex-shrink: 0;
+    margin: 0;
+    padding: var(--v-space-md) var(--v-space-xl) var(--v-space-md);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-md, 13px);
+    color: var(--v-text-dim, #a09484);
+    text-align: center;
+    line-height: 1.55;
+}
+
+.initiative-order-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: var(--v-space-md) var(--v-space-xl);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    scrollbar-width: thin;
+    scrollbar-color: var(--v-border) transparent;
+}
+
+.initiative-order-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.initiative-order-body::-webkit-scrollbar-thumb {
+    background: var(--v-border);
+    border-radius: 2px;
+}
+
+/* Palco do dado 3D — painel elevado (sem círculo) */
+.initiative-order-body .init-dice3d-wrap {
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: var(--v-radius-lg, 14px);
+    background: var(--v-bg-raised, #332a22);
+    border: 1px solid var(--v-gold-12);
+    box-shadow:
+        inset 0 1px 0 var(--v-gold-08),
+        0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.initiative-order-body .init-hero-area {
+    gap: var(--v-space-md);
+    padding: var(--v-space-md) 0 var(--v-space-sm);
+    min-height: 0;
+}
+
+.initiative-order-body .init-hero-btn {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    font-size: var(--v-font-lg, 15px);
+    padding: var(--v-space-md-lg) var(--v-space-2xl);
+}
+
+.initiative-order-body .init-hero-subtitle {
+    font-style: normal;
+    font-size: var(--v-font-md, 12px);
+    color: var(--v-text-dim, #a09484);
+    opacity: 0.95;
+    max-width: 280px;
+    margin: 0 auto;
+    line-height: 1.45;
+    text-align: center;
+}
+
+/* Quando visível: JS remove display:none inline; flex centra o dado e o botão */
+.initiative-order-body .init-intro-slot {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: center;
+}
+
+.init-intro-slot .init-restore-bar {
+    margin-top: var(--v-space-md);
+}
+
+.init-dice-area {
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.initiative-order-body .dr-container {
+    padding-top: var(--v-space-xs);
+}
+
+/* Ordem de combate (DiceRoller .dr-*): textos centralizados neste overlay */
+.initiative-order-overlay .dr-container {
+    align-items: center;
+}
+
+.initiative-order-overlay .dr-title {
+    width: 100%;
+    text-align: center;
+}
+
+.initiative-order-overlay .dr-entry {
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+}
+
+.initiative-order-overlay .dr-name {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+}
+
+.initiative-order-overlay .dr-dice-box {
+    justify-content: center;
+}
+
+/* Fallback quando não há DiceRoller (_showInitiativeStatic) */
+.init-order-static {
+    padding: var(--v-space-xs) var(--v-space-md);
+    font-size: var(--v-font-xs, 11px);
+    color: var(--v-text-dim, #a09484);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.init-order-static-title {
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    font-size: var(--v-font-sm, 12px);
+    margin-bottom: var(--v-space-xs);
+    text-align: center;
+}
+
+.init-order-static-row {
+    padding: var(--v-space-xs) 0;
+    text-align: center;
+    line-height: 1.45;
+}
+
+.init-order-static-row--player {
+    color: var(--v-gold, #c4953a);
+}
+
+.init-order-static-row--ally {
+    color: var(--v-silver);
+}
+
+.init-order-static-row--enemy {
+    color: var(--v-crimson, #c05050);
+}
+
+.init-surprise-wrap {
+    margin-top: var(--v-space-sm);
+    text-align: center;
+    width: 100%;
+}
+
+.init-surprise-msg {
+    margin-top: var(--v-space-xs);
+    font-size: var(--v-font-xs, 11px);
+    line-height: 1.4;
+    text-align: center;
+}
+
+.init-surprise-msg--player {
+    color: var(--v-crimson, #c62828);
+}
+
+.init-surprise-msg--enemy {
+    color: var(--v-gold, #c4953a);
+}
+
+.init-waiting-msg {
+    display: none;
+    text-align: center;
+    padding: var(--v-space-lg) var(--v-space-sm);
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.5;
+}
+
+.initiative-order-actions {
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--v-space-md) var(--v-space-xl) var(--v-space-lg);
+    border-top: 1px solid var(--v-gold-12);
+    background: rgba(30, 24, 18, 0.45);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.initiative-order-actions .action-bar {
+    margin: 0;
+    padding: 0;
+}
+
+.initiative-order-proceed-btn {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-body, 14px) !important;
+    padding: var(--v-space-md-lg) var(--v-space-lg) !important;
+    min-height: 48px;
+}
+
+/* Tabuleiro oculto por completo durante o modal */
+body.combat-init-order-active #app,
+body.combat-init-order-active #vfxCanvas {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity var(--v-transition-base, 0.2s) ease;
+}
+
+.initiative-order-overlay .initiative-order-skip {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 2;
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--v-space-sm) var(--v-space-xl);
+    font-family: var(--v-font, serif);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    background: rgba(42, 36, 32, 0.92);
+    border: 1px solid var(--v-gold-25);
+    border-radius: var(--v-radius-sm, 6px);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.perf-lite .initiative-order-card {
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .initiative-order-overlay {
+        transition: none;
+    }
+
+    .initiative-order-card {
+        animation: none;
+    }
+}

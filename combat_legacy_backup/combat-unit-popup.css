@@ -1,0 +1,219 @@
+/* combat-unit-popup.css — Unit detail popup (click grid cell) */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.ud-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--v-z-overlay, 500);
+    background: rgba(15,12,8,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+}
+
+.ud-overlay.hidden {
+    display: none;
+}
+
+.ud-card {
+    background: var(--v-bg-card);
+    border: 1.5px solid var(--v-border-60); /* overridden per-role by JS */
+    border-radius: var(--v-radius-lg, 14px);
+    padding: 18px 20px;
+    width: 340px;
+    max-width: min(92vw, calc(100% - 20px));
+    box-shadow: 0 6px 30px rgba(0,0,0,0.7);
+}
+
+/* ── Header ─────────────────────────────────────── */
+.ud-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.ud-ico {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    flex-shrink: 0;
+}
+
+.ud-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ud-name {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: bold;
+    font-size: var(--v-font-2xl, 18px);
+    color: var(--v-text);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ud-type {
+    font-size: var(--v-font-label, 12px);
+    color: #c0b8a0;
+    margin-top: 2px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.ud-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--v-border-30);
+    background: rgba(0,0,0,0.3);
+    color: #c0b8a0;
+    font-size: var(--v-font-body, 14px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--v-transition, 0.2s);
+}
+
+.ud-close:hover {
+    background: var(--v-border-40);
+}
+
+/* ── Resource bars ───────────────────────────────── */
+.ud-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.ud-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ud-bar-label {
+    font-size: var(--v-font-md, 13px);
+    color: #c0b8a0;
+    width: 24px;
+    text-align: right;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+.ud-bar {
+    flex: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.35);
+    overflow: hidden;
+}
+
+.ud-bar .fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width var(--v-transition, 0.2s) ease;
+}
+
+/* Reuse fill-hp-high / fill-hp-mid / fill-hp-low / fill-mp from combat-grid.css */
+
+.ud-bar-val {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: bold;
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    min-width: 48px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ── Stats grid ──────────────────────────────────── */
+.ud-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ud-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--v-font-md, 13px);
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.18);
+    border-radius: var(--v-radius, 10px);
+    color: #c0b8a0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.ud-stat-val {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: bold;
+    color: #c4953a;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+/* ── Status effects ──────────────────────────────── */
+.ud-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ud-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: rgba(123,32,32,0.15);
+    border: 1px solid rgba(123,32,32,0.25);
+    border-radius: var(--v-radius, 10px);
+    font-size: var(--v-font-label, 12px);
+    color: var(--v-text);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.ud-no-effect {
+    font-style: italic;
+    font-size: var(--v-font-label, 12px);
+    color: #b0a488;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* ── Enemy intent row ────────────────────────────── */
+.ud-intent-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-top: 10px;
+    background: rgba(123,32,32,0.1);
+    border: 1px solid rgba(123,32,32,0.25);
+    border-radius: var(--v-radius, 10px);
+    font-size: var(--v-font-md, 13px);
+    color: var(--v-text);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.ud-intent-label {
+    color: #c0b8a0;
+    font-size: var(--v-font-label, 12px);
+    flex-shrink: 0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
