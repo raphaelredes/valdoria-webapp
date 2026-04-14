@@ -201,7 +201,8 @@ function _rollSequence(turnOrder, initiative) {
                             diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v + ' (d20=' + rollVal + ' +' + mod + ')';
                         }
                         idx++;
-                        setTimeout(rollNext, 600);
+                        /* Pausa de 2s para o jogador ler o resultado antes do próximo rolar */
+                        setTimeout(rollNext, 2000);
                     });
                 } catch(e) {
                     console.warn('[INIT-POPUP] Dice3D roll failed', e);
