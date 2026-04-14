@@ -1,0 +1,36 @@
+#!/bin/bash
+# Pre-commit hook: block commits with JS syntax or brace errors
+# Install: git config core.hooksPath .githooks
+
+JS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$' | grep -v 'three.min.js' | grep -v 'node_modules' | grep -v 'scripts/')
+if [ -z "$JS_FILES" ]; then exit 0; fi
+
+ERRORS=0
+
+# Check 1: Node syntax validation
+for f in $JS_FILES; do
+    if [ ! -f "$f" ]; then continue; fi
+    result=$(node -c "$f" 2>&1)
+    if [ $? -ne 0 ]; then
+        ERRORS=$((ERRORS + 1))
+        echo "ERROR: JS syntax error in $f"
+        echo "$result" | head -3
+        echo ""
+    fi
+done
+
+# Check 2: Brace/bracket matching
+if command -v node &>/dev/null && [ -f "scripts/validate-braces.js" ]; then
+    node scripts/validate-braces.js $JS_FILES
+    if [ $? -ne 0 ]; then
+        ERRORS=$((ERRORS + 1))
+    fi
+fi
+
+if [ $ERRORS -gt 0 ]; then
+    echo ""
+    echo "Commit blocked: $ERRORS JS file(s) with syntax errors."
+    echo "Fix the errors above and try again."
+    exit 1
+fi
+exit 0
