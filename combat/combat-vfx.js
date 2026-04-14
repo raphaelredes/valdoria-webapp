@@ -18,11 +18,15 @@ let baseDelay;if(_rt==='death_save')baseDelay=3800;else if(_rt==='heal'||_rt==='
 if(isBossKill){_shakeApp('heavy');}},baseDelay);}
 setTimeout(()=>{clearTimeout(_cinematicSafetyTimer);clearTimeout(_cinematicWarnTimer);
 /* Check if there's an NPC action to animate from the same response */
-if(_npcLr&&!isResolution&&!_timerExpiredPending){
+if(_npcLr&&!_timerExpiredPending){
     /* Play NPC cinematic, then render final state */
     _playNpcCinematicFromResponse(_npcLr,result,function(){
         _cinematicInProgress=false;currentState=result;
-        if(result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'){renderResolution(result);}
+        var _resPh=result.phase||result.ph||'';
+        if(_resPh==='ended'){showCombatEnded();}
+        else if(_resPh==='victory'||_resPh==='defeat'||_resPh==='fled'){
+            if(_resPh==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}
+            else{renderResolution(result);}}
         else{renderArena(result);}
     });
 }else{
