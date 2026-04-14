@@ -261,12 +261,11 @@ var _DMG_FLASH_TYPES=new Set(['fire','cold','lightning','necrotic','radiant','po
  * Fase 3 vai conectar isto ao fluxo de sendAction/proceed/init.
  * Plano completo: project_combat_tick_refactor.md */
 if (typeof window.USE_TICK_MODEL === 'undefined') {
-    /* Default: on em DEV (env=dev na URL), off em PROD — valida em campo
-     * sem risco de regressao. URL param ?tick=1 ou ?tick=0 override explicito. */
+    /* TICK MODEL DESATIVADO (2026-04-14). Causou inconsistencia entre
+     * tick.phase e state.active_turn (indice diferente do serializer).
+     * Fluxo unico via /api/combat/action legacy. Override so explicito. */
     var _tickParam = params.get('tick');
-    if (_tickParam === '1' || _tickParam === 'true') window.USE_TICK_MODEL = true;
-    else if (_tickParam === '0' || _tickParam === 'false') window.USE_TICK_MODEL = false;
-    else window.USE_TICK_MODEL = (envId === 'dev');
+    window.USE_TICK_MODEL = (_tickParam === '1' || _tickParam === 'true');
     console.info('[COMBAT] USE_TICK_MODEL=' + window.USE_TICK_MODEL + ' (env=' + envId + ' param=' + (_tickParam || 'none') + ')');
 }
 window.runTickLoop = async function runTickLoop(opts) {
