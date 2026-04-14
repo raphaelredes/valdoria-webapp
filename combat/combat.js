@@ -188,7 +188,10 @@ function _startReactionCountdown(){if(_reactionCountdownInterval)clearInterval(_
 async function _pollForTimerResult(){if(!isApiMode||!api)return;stopPolling();const maxRetries=5;const interval=2000;for(let i=0;i<maxRetries;i++){try{const state=await api.getState();if(!state||state.error){if(state&&(state.error==='no_combat'||state.phase==='ended')){showCombatEnded();return;}
 await new Promise(r=>setTimeout(r,interval));continue;}
 const newPh=state.ph||state.phase||'';const newTc=state.tc||0;const oldTc=currentState?(currentState.tc||0):0;if(newTc!==oldTc||newPh==='victory'||newPh==='defeat'||newPh==='ended'){currentState=state;if(newPh==='victory'||newPh==='defeat'||newPh==='ended'){renderResolution(state);}else{renderArena(state);}
-return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);await new Promise(r=>setTimeout(r,_combatBackoffMs(e)||interval));continue;}
+return;}}catch(e){console.warn('[COMBAT] Timer poll retry',i,e.message);
+/* Stop retrying on auth failures — session is gone, no point hammering the server */
+if(e.status===401||e.status===403){console.warn('[COMBAT] Timer poll ABORT on auth failure — stopping retries');return;}
+await new Promise(r=>setTimeout(r,_combatBackoffMs(e)||interval));continue;}
 await new Promise(r=>setTimeout(r,interval));}
 startPolling();}
 /* Request-response model: NPC turns are processed synchronously by the backend
@@ -245,4 +248,4 @@ showInitiativePrompt(function(){sendAction({type:'initiative'});});
 }}}else{slot.textContent='';slot.style.display='none';}}
 function _showProceedBar(){const bar=document.getElementById('init-proceed-bar');if(bar){bar.style.display='';const pb=bar.querySelector('.action-btn');if(pb)pb.classList.remove('disabled');}var sk=document.getElementById('initiativeOrderSkip');if(sk){sk.style.display='none';sk.onclick=null;}}
 function _showBattleLog(){var feed=window._resolutionFeed||[];if(!feed.length){console.warn('[COMBAT] no feed data for battle log');return;}var bodyHtml='<div class="battle-log-list">';feed.forEach(function(entry,i){if(!entry)return;var cleaned=entry.replace(/<[^>]*>/g,'').trim();if(!cleaned)return;var isRound=/^[─═━▬]|Rodada\s+\d|ROUND/i.test(cleaned);if(isRound){bodyHtml+='<div class="battle-log-round">'+escHtml(cleaned)+'</div>';}else{bodyHtml+='<div class="battle-log-entry">'+escHtml(cleaned)+'</div>';}});bodyHtml+='</div>';if(typeof vPopup!=='undefined'){vPopup.show({title:'📜 Log de Batalha',body:bodyHtml,actions:[{label:'Fechar',primary:true,action:function(){vPopup.hide();}}]});}}
-var _DMG_FLASH_TYPES=new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);var _origShowError=window.showError;window.showError=function(msg,err){_actionSent=false;_timerExpiredPending=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));if(_origShowError)_origShowError(msg,err);};
+var _DMG_FLASH_TYPES=new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);var _origShowError=window.showError;var _showErrorDepth=0;window.showError=function(msg,err){if(_showErrorDepth>2){console.error('[COMBAT] showError recursion aborted depth='+_showErrorDepth,msg);return;}_showErrorDepth++;try{_actionSent=false;_timerExpiredPending=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));if(_origShowError)_origShowError(msg,err);}finally{_showErrorDepth--;}};
