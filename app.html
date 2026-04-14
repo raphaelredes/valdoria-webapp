@@ -84,6 +84,8 @@
     document.write('<script src="shared/env-utils.js?v=' + v + '"><\/script>');
     /* EnvStorage: env-namespaced localStorage — loaded AFTER env-utils.js which provides ValdoriaEnv.id */
     document.write('<script src="shared/env-storage.js?v=' + v + '"><\/script>');
+    /* SessionStore: game session helper — AFTER env-storage (delegates to it) */
+    (function(){ var s=document.createElement('script'); s.src='shared/session-store.js?v='+v; s.async=false; document.head.appendChild(s); })();
     document.write('<script src="shared/telegram-compat.js?v=' + v + '"><\/script>');
     document.write('<link rel="stylesheet" href="shared/web-user-menu.css?v=' + v + '">');
     document.write('<script src="shared/web-user-menu.js?v=' + v + '"><\/script>');
