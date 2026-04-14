@@ -80,7 +80,7 @@ function _showActionLoading(show){let el=document.getElementById('actionLoading'
 el.style.display='flex';}else if(el){el.remove();}}
 var ACTION_SAFETY_TIMEOUT_MS=45000; /* fallback se a API nao responder; nao e o timer de turno (60s fetch timeout) */
 var RATE_LIMIT_RETRY_MS=5000; /* delay para reabilitar acoes apos HTTP 429 */
-var _actionSent=false;var _actionSentTimer=null;var _actionAbort=null;async function sendAction(actionData){window._lastActionTarget=actionData.target||0;console.info('[COMBAT:ACTION] sendAction type=%s target=%s skill=%s item=%s',actionData.type,actionData.target,actionData.skill_id||'-',actionData.item_key||'-');/* Fase 3b refactor 2026-04-14: rota 'proceed' pelo tick loop quando opt-in.
+var _actionSent=false;var _actionSentTimer=null;var _actionAbort=null;async function sendAction(actionData){window._lastActionTarget=actionData.target||0;var _stateNow=(typeof currentState!=='undefined')?currentState:null;console.info('[COMBAT:ACTION] sendAction type=%s target=%s skill=%s item=%s tc=%s activeType=%s enemyHP=%s playerHP=%s',actionData.type,actionData.target,actionData.skill_id||'-',actionData.item_key||'-',(_stateNow&&_stateNow.tc)||'?',(_stateNow&&_stateNow.active_turn&&_stateNow.active_turn.t)||'?',(_stateNow&&_stateNow.e&&_stateNow.e[actionData.target||0]&&_stateNow.e[actionData.target||0].hp)||'?',(_stateNow&&_stateNow.p&&_stateNow.p.hp)||'?');/* Fase 3b refactor 2026-04-14: rota 'proceed' pelo tick loop quando opt-in.
  * 'proceed' eh onde ocorre o pre_player loop — fonte historica do bug stuck
  * on enemy turn. Tick processa 1 ator por iteracao, recupera de crashes
  * individuais. Outras actions continuam no caminho legado ate Fase 4. */
