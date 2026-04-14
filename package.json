@@ -1,0 +1,30 @@
+{
+  "name": "valdoria-webapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:errors": "eslint . --quiet",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raphaelredes/valdoria-webapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/raphaelredes/valdoria-webapp/issues"
+  },
+  "homepage": "https://github.com/raphaelredes/valdoria-webapp#readme",
+  "devDependencies": {
+    "eslint": "^10.2.0"
+  }
+}
