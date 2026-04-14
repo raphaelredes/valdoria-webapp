@@ -1,5 +1,12 @@
-function _playCinematicResult(result,actionType){/* Use player's action roll (plr) for cinematic when available — _last_roll
-gets overwritten by enemy turns that happen in the same turn cycle */if(result.plr){result.lr=result.plr;delete result.plr;}
+function _playCinematicResult(result,actionType){/* Request-response model: backend processes ALL NPC turns synchronously.
+ * The response contains both plr (player roll) and lr (NPC roll).
+ * We play player cinematic from plr, then NPC cinematic from saved lr,
+ * then render the final state. No polling needed for NPC turns. */
+var _npcLr=null;
+if(result.plr){
+    /* Save NPC's last roll before overwriting with player's roll */
+    if(result.lr&&result.lr.r&&result.lr!==result.plr){_npcLr=Object.assign({},result.lr);}
+    result.lr=result.plr;delete result.plr;}
 const isResolution=result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'||result.phase==='fled';const hasRoll=result.lr&&(result.lr.r||result.lr.d||result.lr.t==='death_save');const isNonCombatAction=actionType==='initiative'||actionType==='proceed'||actionType==='restore';const oldPhase=currentState?.ph||currentState?.phase||'';if(!hasRoll||isNonCombatAction||oldPhase!=='active'){currentState=result;if(result.phase==='ended'){showCombatEnded();}
 else if(isResolution){if(result.phase==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}else{renderResolution(result);}}
 else{renderArena(result);}
@@ -9,9 +16,67 @@ _showAnticipation(anticipationText);setTimeout(()=>{window._lastActionTargetIdx=
 if(_isDmgType&&result.lr.miss){const _missDelay=TIMING.BASE_MISS;setTimeout(()=>{_showMissFloat('.cell[data-unit-id^="enemy_"]');const enemyCard=document.querySelector('.cell[data-unit-id^="enemy_"]');if(enemyCard){enemyCard.classList.add('miss-deflect');setTimeout(()=>enemyCard.classList.remove('miss-deflect'),ValdoriaMotion.duration(400,0));}},_missDelay);}
 let baseDelay;if(_rt==='death_save')baseDelay=3800;else if(_rt==='heal'||_rt==='util')baseDelay=2800;else if(_rt==='auto_hit'||_rt==='aoe')baseDelay=3600;else if(_rt==='save')baseDelay=(result.lr.saved&&!result.lr.half)?2600:5200;else baseDelay=(result.lr.miss||result.lr.d<=0)?2600:5200;const hasKill=result.lr.kill;const totalDelay=hasKill?baseDelay+TIMING.KILL_EXTENSION:baseDelay;const isBossKill=hasKill&&currentState?.e?.some(e=>e.leg&&e.hp>0);if(hasKill){setTimeout(()=>{const enemyCards=document.querySelectorAll('.cell[data-unit-id^="enemy_"]');enemyCards.forEach(card=>card.classList.add('death-anim'));vHaptic.burst('kill');if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.playSFX('sfx_enemy_death');if(window._combatVfx){enemyCards.forEach(card=>window._combatVfx.kill(card,result.lr.dt||'slashing'));if(isBossKill){window._combatVfx.flash('rgba(255,215,0,0.4)',600);setTimeout(()=>{enemyCards.forEach(card=>window._combatVfx.kill(card,'radiant'));},300);}}
 if(isBossKill){_shakeApp('heavy');}},baseDelay);}
-setTimeout(()=>{clearTimeout(_cinematicSafetyTimer);clearTimeout(_cinematicWarnTimer);_cinematicInProgress=false;if(_pendingPollState){var _pp=_pendingPollState;_pendingPollState=null;currentState=_pp;result=_pp;}else{currentState=result;}if(_timerExpiredPending){_timerExpiredPending=false;_pollForTimerResult();return;}if(result.phase==='ended'){showCombatEnded();}
-else if(isResolution){if(result.phase==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}else{renderResolution(result);}}
-else{renderArena(result);}},totalDelay);},TIMING.ANTICIPATION);}catch(e){console.error('[COMBAT] Cinematic exception — force reset',e);clearTimeout(_cinematicSafetyTimer);clearTimeout(_cinematicWarnTimer);_cinematicInProgress=false;_pendingPollState=null;currentState=result;renderArena(result);}}
+setTimeout(()=>{clearTimeout(_cinematicSafetyTimer);clearTimeout(_cinematicWarnTimer);
+/* Check if there's an NPC action to animate from the same response */
+if(_npcLr&&!isResolution&&!_timerExpiredPending){
+    /* Play NPC cinematic, then render final state */
+    _playNpcCinematicFromResponse(_npcLr,result,function(){
+        _cinematicInProgress=false;currentState=result;
+        if(result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'){renderResolution(result);}
+        else{renderArena(result);}
+    });
+}else{
+    _cinematicInProgress=false;if(_pendingPollState){var _pp=_pendingPollState;_pendingPollState=null;currentState=_pp;result=_pp;}else{currentState=result;}if(_timerExpiredPending){_timerExpiredPending=false;_pollForTimerResult();return;}if(result.phase==='ended'){showCombatEnded();}
+    else if(isResolution){if(result.phase==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}else{renderResolution(result);}}
+    else{renderArena(result);}}},totalDelay);},TIMING.ANTICIPATION);}catch(e){console.error('[COMBAT] Cinematic exception — force reset',e);clearTimeout(_cinematicSafetyTimer);clearTimeout(_cinematicWarnTimer);_cinematicInProgress=false;_pendingPollState=null;currentState=result;renderArena(result);}}
+/** NPC cinematic from sendAction response — replaces poll-based NPC animation.
+ * Plays enemy/ally attack dice, damage float, miss float, VFX, narration.
+ * Called after player cinematic completes when response contains NPC roll data. */
+function _playNpcCinematicFromResponse(npcLr,state,onComplete){
+    if(!npcLr||(!npcLr.r&&!npcLr.d)){onComplete();return;}
+    /* Determine NPC identity from turn order */
+    var to=state.to||[];var activeTurn=null;
+    if(to.length>0){
+        /* The active turn in the response is the NEXT actor (player again).
+         * The NPC that just acted is the one before the player in order.
+         * Use the NPC name from npcLr if available. */
+        for(var i=0;i<to.length;i++){
+            if((to[i].t==='e'||to[i].t==='a')&&to[i].n){activeTurn=to[i];break;}
+        }
+    }
+    var npcName=(npcLr.sn_src||npcLr.en||(activeTurn?activeTurn.n:null)||'Inimigo');
+    var isAlly=activeTurn&&activeTurn.t==='a';
+    console.info('[COMBAT:NPC_CINEMATIC] name=%s miss=%s dmg=%s crit=%s isAlly=%s',
+        npcName,!!npcLr.miss,npcLr.d||0,!!npcLr.crit,isAlly);
+    /* Update damage type tracking */
+    if(!isAlly&&npcLr.dt)_lastEnemyDmgType=npcLr.dt;
+    /* D20 dice display */
+    initDice(npcLr);
+    /* Miss or hit VFX */
+    if(npcLr.miss||npcLr.d<=0){
+        setTimeout(function(){
+            var dodgeTarget=isAlly?document.querySelector('.entity.enemy'):document.querySelector('.entity.player');
+            if(dodgeTarget){dodgeTarget.classList.remove('dodge-flash');void dodgeTarget.offsetWidth;dodgeTarget.classList.add('dodge-flash');setTimeout(function(){dodgeTarget.classList.remove('dodge-flash');},400);}
+            _showMissFloat(isAlly?'.entity.enemy':'.entity.player');
+            if(window._combatVfx){var fromEl=isAlly?(document.querySelector('.entity.ally')||document.querySelector('.entity.player')):document.querySelector('.entity.enemy');if(fromEl&&dodgeTarget)window._combatVfx.miss(fromEl,dodgeTarget,npcLr.dt||'slashing');}
+            showNarration(_pick(isAlly?_NARR_ALLY_MISS:_NARR_ENEMY_MISS).replace('{name}',npcName),'miss');
+            if(isAlly)vHaptic.burst('miss');
+        },1800);
+    }else{
+        var dmgTarget=isAlly?'.entity.enemy':'.entity.player';
+        setTimeout(function(){_showDamageFloat(npcLr.d,npcLr.dt,dmgTarget,!!npcLr.crit);},TIMING.ENEMY_DMG_DELAY);
+        if(!isAlly&&window._combatVfx){setTimeout(function(){var enemyEl=document.querySelector('.entity.enemy');var playerEl=document.querySelector('.entity.player');if(enemyEl&&playerEl)window._combatVfx.projectile(enemyEl,playerEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
+        if(isAlly&&window._combatVfx){setTimeout(function(){var allyEl=document.querySelector('.entity.ally')||document.querySelector('.entity.player');var enemyEl=document.querySelector('.entity.enemy');if(allyEl&&enemyEl)window._combatVfx.projectile(allyEl,enemyEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
+        setTimeout(function(){
+            if(isAlly&&npcLr.crit){showNarration(_pick(_NARR_ALLY_CRIT).replace('{name}',npcName),'crit');_shakeApp('heavy');vHaptic.burst('crit');}
+            else if(isAlly){showNarration(_pick(_NARR_ALLY_HIT).replace('{name}',npcName),'');vHaptic.medium();}
+            else if(npcLr.crit){showNarration(_pick(_NARR_ENEMY_CRIT),'crit');_shakeApp('heavy');vHaptic.heavy();vHaptic.error();}
+            else{showNarration(_pick(_NARR_ENEMY_HIT),'');}
+        },2200);
+    }
+    var npcDelay=(npcLr.miss||npcLr.d<=0)?TIMING.ENEMY_RESOLVE_MISS:TIMING.ENEMY_RESOLVE_HIT;
+    setTimeout(onComplete,npcDelay);
+}
 /* Turn/round banners removed per user rule: "nada referente aos turnos deve
  * continuar na tela de combates, exceto a sequência dos turnos no topo".
  * The turn queue at the top of the combat screen is the SINGLE source of
