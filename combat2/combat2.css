@@ -1,0 +1,24 @@
+/* Combat2 — UI minimalista. Usa tokens do valdoria-design.css. */
+body { font-family: var(--v-font); color: var(--v-text); background: var(--v-bg); margin: 0; }
+#app { padding: var(--v-space-md); display: flex; flex-direction: column; gap: var(--v-space-md); }
+.c2-phase { text-align: center; font-size: var(--v-font-sm); color: var(--v-text-dim); text-transform: uppercase; letter-spacing: 2px; }
+.c2-round { text-align: center; font-size: var(--v-font-md); color: var(--v-gold); }
+.c2-banner { text-align: center; padding: var(--v-space-sm); background: var(--v-bg-card); border: 1px solid var(--v-border); border-radius: var(--v-radius); }
+.c2-unit { display: flex; justify-content: space-between; align-items: center; padding: var(--v-space-sm); background: var(--v-bg-raised); border-radius: var(--v-radius-sm); border: 1px solid var(--v-border); }
+.c2-unit.dead { opacity: 0.4; text-decoration: line-through; }
+.c2-unit.active { border-color: var(--v-gold); box-shadow: 0 0 8px rgba(196,149,58,0.4); }
+.c2-hp { font-size: var(--v-font-sm); color: var(--v-text-dim); }
+.c2-hp-bar { height: var(--v-bar-height); background: var(--v-bg); border-radius: var(--v-radius-sm); overflow: hidden; margin-top: 4px; }
+.c2-hp-bar-fill { height: 100%; background: linear-gradient(90deg, #5a8a3e, #8ab04e); transition: width 0.3s ease; }
+.c2-hp-bar-fill.low { background: linear-gradient(90deg, #a04a2a, #c06a3a); }
+.c2-log { max-height: 200px; overflow-y: auto; padding: var(--v-space-sm); background: var(--v-bg-card); border-radius: var(--v-radius-sm); font-size: var(--v-font-sm); border: 1px solid var(--v-border); }
+.c2-log-line { padding: 2px 0; border-bottom: 1px solid rgba(74,56,40,0.3); }
+.c2-log-line:last-child { border-bottom: none; color: var(--v-gold); }
+.c2-actions { display: flex; flex-wrap: wrap; gap: var(--v-space-sm); }
+.c2-btn { flex: 1 1 calc(50% - var(--v-space-sm)); min-width: 0; padding: var(--v-space-md); background: var(--v-bg-raised); border: 1px solid var(--v-border); color: var(--v-text); border-radius: var(--v-radius-sm); cursor: pointer; font-family: inherit; font-size: var(--v-font-body); }
+.c2-btn:hover { border-color: var(--v-gold); }
+.c2-btn.primary { background: linear-gradient(180deg, rgba(196,149,58,0.3), rgba(139,100,32,0.3)); border-color: var(--v-gold); color: var(--v-gold); font-weight: 600; }
+.c2-end { text-align: center; padding: var(--v-space-lg); font-size: var(--v-font-xl); }
+.c2-end.victory { color: #8ab04e; }
+.c2-end.defeat { color: #c06a3a; }
+.c2-end.fled { color: var(--v-text-dim); }
