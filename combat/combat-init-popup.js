@@ -190,22 +190,28 @@ function _rollSequence(turnOrder, initiative) {
             diceLabel.style.color = _typeColor(entry.t);
         }
 
-        if (typeof DiceRoller !== 'undefined' && canvasEl) {
+        if (typeof Dice3D !== 'undefined' && canvasEl) {
             canvasEl.style.display = '';
-            if (!_initPopupDice) {
-                try { _initPopupDice = new DiceRoller(canvasEl, { size: 140 }); } catch(e) { /* fallback */ }
-            }
-            if (_initPopupDice) try {
-                _initPopupDice.roll(rollVal, function() {
-                    if (diceLabel) {
-                        diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v + ' (d20=' + rollVal + ' +' + mod + ')';
-                    }
+            if (_initPopupDice) { try { _initPopupDice.dispose(); } catch(e) {} _initPopupDice = null; }
+            try { _initPopupDice = new Dice3D(canvasEl, { size: 140 }); } catch(e) { console.warn('[INIT-POPUP] Dice3D init failed', e); }
+            if (_initPopupDice) {
+                try {
+                    _initPopupDice.roll(rollVal, function() {
+                        if (diceLabel) {
+                            diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v + ' (d20=' + rollVal + ' +' + mod + ')';
+                        }
+                        idx++;
+                        setTimeout(rollNext, 600);
+                    });
+                } catch(e) {
+                    console.warn('[INIT-POPUP] Dice3D roll failed', e);
                     idx++;
-                    setTimeout(rollNext, 600);
-                });
-            } catch(e) {
+                    setTimeout(rollNext, 400);
+                }
+            } else {
+                if (diceLabel) diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v;
                 idx++;
-                setTimeout(rollNext, 400);
+                setTimeout(rollNext, 500);
             }
         } else {
             if (diceLabel) diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v;
