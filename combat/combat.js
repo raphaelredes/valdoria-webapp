@@ -240,19 +240,30 @@ if(typeof showInitiativePopup==='function'&&!_initDiceAnimated){_initDiceAnimate
 /* No fallback — showInitiativePopup MUST be loaded. Show error if missing. */
 console.error('[COMBAT] FATAL: showInitiativePopup not loaded — combat-init-popup.js missing from SPA route');
 if(typeof showError==='function')showError('Erro ao carregar tela de iniciativa. Feche e reabra o jogo.');}
-function _updateInitiativeOrderOverlay(ph,isApiMode){var ov=document.getElementById('initiativeOrderOverlay');var waitEl=document.getElementById('init-waiting-msg');var diceEl=document.getElementById('init-dice-area');var introSlot=document.getElementById('init-intro-slot');if(!ov)return;if(ph==='init'||ph==='intro'){document.body.classList.add('combat-init-order-active');ov.style.display='';ov.classList.add('active');ov.setAttribute('aria-hidden','false');if(ph==='intro'){if(waitEl)waitEl.style.display='none';if(diceEl){diceEl.innerHTML='';diceEl.style.display='none';}if(introSlot)introSlot.style.display='';var barIntro=document.getElementById('init-proceed-bar');if(barIntro)barIntro.style.display='none';}else{if(introSlot){introSlot.innerHTML='';introSlot.style.display='none';}if(waitEl)waitEl.style.display=isApiMode?'none':'block';if(diceEl)diceEl.style.display=isApiMode?'':'none';}}else{document.body.classList.remove('combat-init-order-active');ov.classList.remove('active');ov.style.display='none';ov.setAttribute('aria-hidden','true');if(waitEl)waitEl.style.display='none';if(diceEl){diceEl.innerHTML='';diceEl.style.display='';}if(introSlot){introSlot.innerHTML='';introSlot.style.display='none';}var bar2=document.getElementById('init-proceed-bar');if(bar2)bar2.style.display='none';var sk=document.getElementById('initiativeOrderSkip');if(sk){sk.style.display='none';sk.onclick=null;}}}function _mountIntroInitiativeUI(ph,s){var slot=document.getElementById('init-intro-slot');if(!slot)return;if(ph==='intro'){slot.style.display='';/* Restore button for interrupted combats */if(s&&s.can_restore&&isApiMode){var restoreBtn=document.createElement('div');restoreBtn.className='action-bar init-restore-bar';var btn=document.createElement('button');btn.type='button';btn.className='action-btn primary full-width';btn.setAttribute('data-action','restore');btn.style.cssText='font-size:14px;padding:12px';btn.textContent='\u21bb Restaurar Combate';restoreBtn.appendChild(btn);slot.textContent='';slot.appendChild(restoreBtn);}else{/* Auto-roll initiative — no button needed, WebApp handles everything */
+function _updateInitiativeOrderOverlay(ph,isApiMode){var ov=document.getElementById('initiativeOrderOverlay');var waitEl=document.getElementById('init-waiting-msg');var diceEl=document.getElementById('init-dice-area');var introSlot=document.getElementById('init-intro-slot');if(!ov)return;if(ph==='init'||ph==='intro'){document.body.classList.add('combat-init-order-active');ov.style.display='';ov.classList.add('active');ov.setAttribute('aria-hidden','false');if(ph==='intro'){if(waitEl)waitEl.style.display='none';if(diceEl){diceEl.innerHTML='';diceEl.style.display='none';}if(introSlot)introSlot.style.display='';var barIntro=document.getElementById('init-proceed-bar');if(barIntro)barIntro.style.display='none';}else{if(introSlot){introSlot.innerHTML='';introSlot.style.display='none';}if(waitEl)waitEl.style.display=isApiMode?'none':'block';if(diceEl)diceEl.style.display=isApiMode?'':'none';}}else{document.body.classList.remove('combat-init-order-active');ov.classList.remove('active');ov.style.display='none';ov.setAttribute('aria-hidden','true');if(waitEl)waitEl.style.display='none';if(diceEl){diceEl.innerHTML='';diceEl.style.display='';}if(introSlot){introSlot.innerHTML='';introSlot.style.display='none';}var bar2=document.getElementById('init-proceed-bar');if(bar2)bar2.style.display='none';var sk=document.getElementById('initiativeOrderSkip');if(sk){sk.style.display='none';sk.onclick=null;}}}function _mountIntroInitiativeUI(ph,s){var slot=document.getElementById('init-intro-slot');if(!slot)return;if(ph==='intro'){slot.style.display='';/* Restore button for interrupted combats */if(s&&s.can_restore&&isApiMode){var restoreBtn=document.createElement('div');restoreBtn.className='action-bar init-restore-bar';var btn=document.createElement('button');btn.type='button';btn.className='action-btn primary full-width';btn.setAttribute('data-action','restore');btn.style.cssText='font-size:14px;padding:12px';btn.textContent='\u21bb Restaurar Combate';restoreBtn.appendChild(btn);slot.textContent='';slot.appendChild(restoreBtn);}else{/* Show initiative prompt inside the popup overlay — player must click to roll */
 slot.style.display='none';
-if(!window._autoInitSent){window._autoInitSent=true;
-console.info('[COMBAT] auto-rolling initiative (no button — WebApp-first)');
-sendAction({type:'initiative'}).then(function(resp){
-if(resp&&resp.to&&resp.to.length>0&&typeof showInitiativePopup==='function'&&!_initDiceAnimated){
-_initDiceAnimated=true;_initAnimationInProgress=true;
+if(typeof showInitiativePrompt==='function'&&!window._initPromptShown){
+window._initPromptShown=true;
 _updateInitiativeOrderOverlay('ended',false);
-showInitiativePopup(resp.to,resp.initiative||{},function(){
-_initAnimationInProgress=false;currentState=resp;renderArena(resp);});
-}else if(resp){currentState=resp;renderArena(resp);}
-}).catch(function(e){console.error('[COMBAT] auto-initiative failed:',e);
-window._autoInitSent=false;});}}}else{slot.textContent='';slot.style.display='none';}}
+showInitiativePrompt(function _onRoll(onResult){
+console.info('[COMBAT] player clicked Roll Initiative in popup');
+sendAction({type:'initiative'}).then(function(resp){
+onResult(resp);
+}).catch(function(e){
+console.error('[COMBAT] initiative action failed:',e);
+onResult(null);
+});
+},function _onProceed(resp){
+_initAnimationInProgress=false;
+if(resp){currentState=resp;renderArena(resp);}
+});
+}else if(!window._initPromptShown){
+/* Fallback: showInitiativePrompt not loaded — send directly */
+window._initPromptShown=true;
+sendAction({type:'initiative'}).then(function(resp){
+if(resp){currentState=resp;renderArena(resp);}
+}).catch(function(e){console.error('[COMBAT] initiative fallback failed:',e);});
+}}}else{slot.textContent='';slot.style.display='none';}}
 function _showProceedBar(){const bar=document.getElementById('init-proceed-bar');if(bar){bar.style.display='';const pb=bar.querySelector('.action-btn');if(pb)pb.classList.remove('disabled');}var sk=document.getElementById('initiativeOrderSkip');if(sk){sk.style.display='none';sk.onclick=null;}}
 function _showBattleLog(){var feed=window._resolutionFeed||[];if(!feed.length){console.warn('[COMBAT] no feed data for battle log');return;}var bodyHtml='<div class="battle-log-list">';feed.forEach(function(entry,i){if(!entry)return;var cleaned=entry.replace(/<[^>]*>/g,'').trim();if(!cleaned)return;var isRound=/^[─═━▬]|Rodada\s+\d|ROUND/i.test(cleaned);if(isRound){bodyHtml+='<div class="battle-log-round">'+escHtml(cleaned)+'</div>';}else{bodyHtml+='<div class="battle-log-entry">'+escHtml(cleaned)+'</div>';}});bodyHtml+='</div>';if(typeof vPopup!=='undefined'){vPopup.show({title:'📜 Log de Batalha',body:bodyHtml,actions:[{label:'Fechar',primary:true,action:function(){vPopup.hide();}}]});}}
 var _DMG_FLASH_TYPES=new Set(['fire','cold','lightning','necrotic','radiant','poison','acid','psychic','thunder']);var _origShowError=window.showError;window.showError=function(msg,err){_actionSent=false;_timerExpiredPending=false;document.querySelectorAll('#app .action-btn').forEach(b=>b.classList.remove('disabled'));if(_origShowError)_origShowError(msg,err);};

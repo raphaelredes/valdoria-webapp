@@ -33,6 +33,67 @@ function _parseMod(f) {
     return m && m[1] ? parseInt(m[1], 10) : 0;
 }
 
+/* Prompt overlay — player sees "Rolar Iniciativa" button inside the popup.
+ * Clicking sends the action to server; on response, transitions to dice animation. */
+window.showInitiativePrompt = function(onRoll, onProceed) {
+    if (_active) return;
+    _active = true;
+
+    _overlay = _el('div', 'init-popup-overlay');
+    _overlay.setAttribute('aria-modal', 'true');
+
+    var card = _el('div', 'init-popup-card');
+
+    var header = _el('div', 'init-popup-header');
+    header.textContent = '\u2694\uFE0F Combate Iminente';
+    card.appendChild(header);
+
+    var sub = _el('div', 'init-popup-sub');
+    sub.textContent = 'Rolagem de iniciativa determina a ordem dos turnos.';
+    card.appendChild(sub);
+
+    var diceArea = _el('div', 'init-popup-dice-area');
+    var diceIcon = _el('div', 'init-popup-dice-icon');
+    diceIcon.textContent = '\uD83C\uDFB2';
+    diceIcon.style.cssText = 'font-size:48px;text-align:center;margin:16px 0';
+    diceArea.appendChild(diceIcon);
+    card.appendChild(diceArea);
+
+    var rollBtn = _el('button', 'init-popup-proceed-btn');
+    rollBtn.textContent = '\uD83C\uDFB2 Rolar Iniciativa';
+    rollBtn.style.cssText = 'margin-top:12px';
+    var _rolling = false;
+    rollBtn.addEventListener('click', function() {
+        if (_rolling) return;
+        _rolling = true;
+        rollBtn.disabled = true;
+        rollBtn.textContent = 'Rolando...';
+        try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('medium'); } catch(e) {}
+
+        onRoll(function(resp) {
+            /* Remove prompt overlay */
+            if (_overlay && _overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
+            _overlay = null;
+            _active = false;
+
+            if (resp && resp.to && resp.to.length > 0) {
+                /* Show the full dice animation popup */
+                window.showInitiativePopup(resp.to, resp.initiative || {}, function() {
+                    onProceed(resp);
+                });
+            } else {
+                onProceed(resp);
+            }
+        });
+    });
+    card.appendChild(rollBtn);
+
+    _overlay.appendChild(card);
+    document.body.appendChild(_overlay);
+    void _overlay.offsetWidth;
+    _overlay.classList.add('active');
+};
+
 window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
     if (_active) return;
     _active = true;
