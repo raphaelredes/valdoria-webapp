@@ -143,10 +143,10 @@ window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
     if (initiative && (initiative.player_surprised || initiative.enemies_surprised)) {
         var surpriseEl = _el('div', 'init-popup-surprise');
         if (initiative.enemies_surprised) {
-            surpriseEl.textContent = '\u26A1 Inimigos surpreendidos! Seu grupo age primeiro.';
+            surpriseEl.textContent = '\u26A1 Emboscada! Inimigos surpreendidos \u2014 perdem o primeiro turno.';
             surpriseEl.classList.add('init-surprise-good');
         } else {
-            surpriseEl.textContent = '\u26A0\uFE0F Voc\u00ea foi surpreendido! Inimigos agem primeiro.';
+            surpriseEl.textContent = '\u26A0\uFE0F Emboscada! Voc\u00ea foi surpreendido \u2014 perde o primeiro turno.';
             surpriseEl.classList.add('init-surprise-bad');
         }
         footer.appendChild(surpriseEl);
