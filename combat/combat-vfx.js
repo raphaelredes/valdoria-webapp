@@ -5,7 +5,7 @@ function _playCinematicResult(result,actionType){/* Request-response model: back
 var _npcLr=null;
 if(result.plr){
     /* Save NPC's last roll before overwriting with player's roll */
-    if(result.lr&&result.lr.r&&result.lr!==result.plr){_npcLr=Object.assign({},result.lr);}
+    if(result.lr&&result.lr!==result.plr&&(result.lr.r||result.lr.d||result.lr.t)){_npcLr=Object.assign({},result.lr);}
     result.lr=result.plr;delete result.plr;}
 const isResolution=result.phase==='victory'||result.phase==='defeat'||result.phase==='ended'||result.phase==='fled';const hasRoll=result.lr&&(result.lr.r||result.lr.d||result.lr.t==='death_save');const isNonCombatAction=actionType==='initiative'||actionType==='proceed'||actionType==='restore';const oldPhase=currentState?.ph||currentState?.phase||'';if(!hasRoll||isNonCombatAction||oldPhase!=='active'){currentState=result;if(result.phase==='ended'){showCombatEnded();}
 else if(isResolution){if(result.phase==='defeat'&&result.ds_history&&result.ds_history.length>0){renderDeathSaveReplay(result,function(){renderResolution(result);});}else{renderResolution(result);}}
@@ -37,27 +37,25 @@ if(_npcLr&&!_timerExpiredPending){
  * Plays enemy/ally attack dice, damage float, miss float, VFX, narration.
  * Called after player cinematic completes when response contains NPC roll data. */
 function _playNpcCinematicFromResponse(npcLr,state,onComplete){
-    if(!npcLr||(!npcLr.r&&!npcLr.d)){onComplete();return;}
-    /* Determine NPC identity from turn order */
-    var to=state.to||[];var activeTurn=null;
-    if(to.length>0){
-        /* The active turn in the response is the NEXT actor (player again).
-         * The NPC that just acted is the one before the player in order.
-         * Use the NPC name from npcLr if available. */
-        for(var i=0;i<to.length;i++){
-            if((to[i].t==='e'||to[i].t==='a')&&to[i].n){activeTurn=to[i];break;}
+    if(!npcLr||(!npcLr.r&&!npcLr.d&&!npcLr.t)){onComplete();return;}
+    /* Determine NPC identity from roll data (not turn order — turn order
+     * reflects post-action state, not the NPC that just acted). */
+    var npcName=npcLr.sn_src||npcLr.en||'Inimigo';
+    /* isAlly: check if the attacker name matches an ally in state.a[] */
+    var isAlly=false;
+    if(npcName&&state.a&&state.a.length>0){
+        for(var ai=0;ai<state.a.length;ai++){
+            if(state.a[ai].n===npcName){isAlly=true;break;}
         }
     }
-    var npcName=(npcLr.sn_src||npcLr.en||(activeTurn?activeTurn.n:null)||'Inimigo');
-    var isAlly=activeTurn&&activeTurn.t==='a';
     console.info('[COMBAT:NPC_CINEMATIC] name=%s miss=%s dmg=%s crit=%s isAlly=%s',
         npcName,!!npcLr.miss,npcLr.d||0,!!npcLr.crit,isAlly);
     /* Update damage type tracking */
     if(!isAlly&&npcLr.dt)_lastEnemyDmgType=npcLr.dt;
     /* D20 dice display */
     initDice(npcLr);
-    /* Miss or hit VFX */
-    if(npcLr.miss||npcLr.d<=0){
+    /* Miss or hit VFX — use explicit miss flag, not d<=0 (d=0 is valid for buffs/utils) */
+    if(npcLr.miss){
         setTimeout(function(){
             var dodgeTarget=isAlly?document.querySelector('.entity.enemy'):document.querySelector('.entity.player');
             if(dodgeTarget){dodgeTarget.classList.remove('dodge-flash');void dodgeTarget.offsetWidth;dodgeTarget.classList.add('dodge-flash');setTimeout(function(){dodgeTarget.classList.remove('dodge-flash');},400);}

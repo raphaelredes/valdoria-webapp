@@ -12,6 +12,7 @@
 
 var _overlay = null;
 var _active = false;
+var _initPopupDice = null;
 
 function _el(tag, cls) {
     var e = document.createElement(tag);
@@ -189,13 +190,13 @@ function _rollSequence(turnOrder, initiative) {
             diceLabel.style.color = _typeColor(entry.t);
         }
 
-        if (typeof dice !== 'undefined' && dice.roll && canvasEl) {
+        if (typeof DiceRoller !== 'undefined' && canvasEl) {
             canvasEl.style.display = '';
-            if (!canvasEl.querySelector('canvas')) {
-                try { dice = new DiceRoller(canvasEl, { size: 140 }); } catch(e) { /* fallback */ }
+            if (!_initPopupDice) {
+                try { _initPopupDice = new DiceRoller(canvasEl, { size: 140 }); } catch(e) { /* fallback */ }
             }
-            try {
-                dice.roll(rollVal, function() {
+            if (_initPopupDice) try {
+                _initPopupDice.roll(rollVal, function() {
                     if (diceLabel) {
                         diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v + ' (d20=' + rollVal + ' +' + mod + ')';
                     }
@@ -265,6 +266,7 @@ function _buildResultsList(container, sorted, initiative) {
 
 function _hide() {
     _active = false;
+    if (_initPopupDice) { try { _initPopupDice.dispose(); } catch(e) {} _initPopupDice = null; }
     if (_overlay) {
         _overlay.classList.remove('active');
         _overlay.classList.add('hiding');
