@@ -57,18 +57,18 @@ function _playNpcCinematicFromResponse(npcLr,state,onComplete){
     /* Miss or hit VFX — use explicit miss flag, not d<=0 (d=0 is valid for buffs/utils) */
     if(npcLr.miss){
         setTimeout(function(){
-            var dodgeTarget=isAlly?document.querySelector('.entity.enemy'):document.querySelector('.entity.player');
+            var dodgeTarget=isAlly?document.querySelector('.cell[data-unit-id^="enemy_"]'):document.querySelector('.cell[data-unit-id="player"]');
             if(dodgeTarget){dodgeTarget.classList.remove('dodge-flash');void dodgeTarget.offsetWidth;dodgeTarget.classList.add('dodge-flash');setTimeout(function(){dodgeTarget.classList.remove('dodge-flash');},400);}
-            _showMissFloat(isAlly?'.entity.enemy':'.entity.player');
-            if(window._combatVfx){var fromEl=isAlly?(document.querySelector('.entity.ally')||document.querySelector('.entity.player')):document.querySelector('.entity.enemy');if(fromEl&&dodgeTarget)window._combatVfx.miss(fromEl,dodgeTarget,npcLr.dt||'slashing');}
+            _showMissFloat(isAlly?'.cell[data-unit-id^="enemy_"]':'.cell[data-unit-id="player"]');
+            if(window._combatVfx){var fromEl=isAlly?(document.querySelector('.cell[data-unit-id^="ally_"]')||document.querySelector('.cell[data-unit-id="player"]')):document.querySelector('.cell[data-unit-id^="enemy_"]');if(fromEl&&dodgeTarget)window._combatVfx.miss(fromEl,dodgeTarget,npcLr.dt||'slashing');}
             showNarration(_pick(isAlly?_NARR_ALLY_MISS:_NARR_ENEMY_MISS).replace('{name}',npcName),'miss');
             if(isAlly)vHaptic.burst('miss');
         },1800);
     }else{
-        var dmgTarget=isAlly?'.entity.enemy':'.entity.player';
+        var dmgTarget=isAlly?'.cell[data-unit-id^="enemy_"]':'.cell[data-unit-id="player"]';
         setTimeout(function(){_showDamageFloat(npcLr.d,npcLr.dt,dmgTarget,!!npcLr.crit);},TIMING.ENEMY_DMG_DELAY);
-        if(!isAlly&&window._combatVfx){setTimeout(function(){var enemyEl=document.querySelector('.entity.enemy');var playerEl=document.querySelector('.entity.player');if(enemyEl&&playerEl)window._combatVfx.projectile(enemyEl,playerEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
-        if(isAlly&&window._combatVfx){setTimeout(function(){var allyEl=document.querySelector('.entity.ally')||document.querySelector('.entity.player');var enemyEl=document.querySelector('.entity.enemy');if(allyEl&&enemyEl)window._combatVfx.projectile(allyEl,enemyEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
+        if(!isAlly&&window._combatVfx){setTimeout(function(){var enemyEl=document.querySelector('.cell[data-unit-id^="enemy_"]');var playerEl=document.querySelector('.cell[data-unit-id="player"]');if(enemyEl&&playerEl)window._combatVfx.projectile(enemyEl,playerEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
+        if(isAlly&&window._combatVfx){setTimeout(function(){var allyEl=document.querySelector('.cell[data-unit-id^="ally_"]')||document.querySelector('.cell[data-unit-id="player"]');var enemyEl=document.querySelector('.cell[data-unit-id^="enemy_"]');if(allyEl&&enemyEl)window._combatVfx.projectile(allyEl,enemyEl,npcLr.dt||'slashing',{crit:!!npcLr.crit});},1600);}
         setTimeout(function(){
             if(isAlly&&npcLr.crit){showNarration(_pick(_NARR_ALLY_CRIT).replace('{name}',npcName),'crit');_shakeApp('heavy');vHaptic.burst('crit');}
             else if(isAlly){showNarration(_pick(_NARR_ALLY_HIT).replace('{name}',npcName),'');vHaptic.medium();}
