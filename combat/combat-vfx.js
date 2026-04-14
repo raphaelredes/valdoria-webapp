@@ -40,14 +40,17 @@ function _playNpcCinematicFromResponse(npcLr,state,onComplete){
     if(!npcLr||(!npcLr.r&&!npcLr.d&&!npcLr.t)){onComplete();return;}
     /* Determine NPC identity from roll data (not turn order — turn order
      * reflects post-action state, not the NPC that just acted). */
-    var npcName=npcLr.sn_src||npcLr.en||'Inimigo';
-    /* isAlly: check if the attacker name matches an ally in state.a[] */
+    var npcRealName=npcLr.sn_src||npcLr.en||null;
+    /* isAlly: check if the attacker name matches an ally in state.a[].
+     * Only attempt match when we have a real name — the fallback 'Inimigo'
+     * literal must NOT be compared against state.a entries. */
     var isAlly=false;
-    if(npcName&&state.a&&state.a.length>0){
+    if(npcRealName&&state.a&&state.a.length>0){
         for(var ai=0;ai<state.a.length;ai++){
-            if(state.a[ai].n===npcName){isAlly=true;break;}
+            if(state.a[ai].n===npcRealName){isAlly=true;break;}
         }
     }
+    var npcName=npcRealName||'Inimigo';
     console.info('[COMBAT:NPC_CINEMATIC] name=%s miss=%s dmg=%s crit=%s isAlly=%s',
         npcName,!!npcLr.miss,npcLr.d||0,!!npcLr.crit,isAlly);
     /* Update damage type tracking */
