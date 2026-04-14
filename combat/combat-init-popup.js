@@ -75,12 +75,13 @@ window.showInitiativePrompt = function(onRollClick) {
         try { if (window.Telegram && Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('medium'); } catch(e) { /* noop */ }
         if (_promptDice) { try { _promptDice.roll(Math.floor(Math.random()*20)+1, function(){}); } catch(e) { /* noop */ } }
         onRollClick();
-        /* Don't remove overlay — poll will detect phase='init' and showInitiativePopup will replace us */
-        setTimeout(function() {
-            if (_promptDice) { try { _promptDice.dispose(); } catch(e) { /* noop */ } _promptDice = null; }
-            if (_overlay && _overlay.parentNode) { _overlay.parentNode.removeChild(_overlay); }
-            _overlay = null; _active = false;
-        }, 2000);
+        /* Clean up immediately so showInitiativePopup can take over when
+         * the sendAction response arrives (request-response model). The old
+         * 2s delay caused a race: _active was still true when the response
+         * came back, blocking showInitiativePopup from showing. */
+        if (_promptDice) { try { _promptDice.dispose(); } catch(e) { /* noop */ } _promptDice = null; }
+        if (_overlay && _overlay.parentNode) { _overlay.parentNode.removeChild(_overlay); }
+        _overlay = null; _active = false;
     });
     footer.appendChild(rollBtn);
     card.appendChild(footer);
