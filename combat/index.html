@@ -79,31 +79,10 @@
     <div class="skill-overlay item-overlay" id="itemOverlay">
         <div class="skill-panel" id="itemPanel"></div>
     </div>
-    <!-- Ordem de combate / iniciativa — overlay alinhado ao popup unificado (shared/popup.css) -->
-    <div id="initiativeOrderOverlay" class="initiative-order-overlay" aria-hidden="true">
-        <div class="initiative-order-card" role="dialog" aria-modal="true" aria-labelledby="initiativeOrderTitle">
-            <header class="initiative-order-head">
-                <div class="initiative-order-divider initiative-order-divider--top" aria-hidden="true"></div>
-                <div class="initiative-order-icon-wrap" aria-hidden="true">
-                    <span class="initiative-order-icon">⚔️</span>
-                </div>
-                <h2 class="initiative-order-kicker" id="initiativeOrderTitle">Iniciativa</h2>
-                <p class="initiative-order-badge" role="text">Combate</p>
-            </header>
-            <p class="initiative-order-lead">Rolagens de iniciativa e ordem dos turnos nesta rodada.</p>
-            <div class="initiative-order-body">
-                <div id="init-intro-slot" class="init-intro-slot" style="display:none"></div>
-                <div id="init-waiting-msg" class="init-waiting-msg">Aguardando início do combate…</div>
-                <div id="init-dice-area" class="init-dice-area"></div>
-            </div>
-            <footer class="initiative-order-actions">
-                <div class="action-bar" id="init-proceed-bar" style="display:none">
-                    <button type="button" class="action-btn primary full-width initiative-order-proceed-btn" data-action="proceed">Prosseguir para o combate</button>
-                </div>
-            </footer>
-        </div>
-        <button type="button" id="initiativeOrderSkip" class="initiative-order-skip" style="display:none" aria-label="Pular animação da iniciativa">Pular ▸</button>
-    </div>
+    <!-- Initiative overlay removed — replaced by showInitiativePrompt/showInitiativePopup
+         in combat-init-popup.js (2026-04-14). Legacy overlay caused "Iniciativa / Combate /
+         Rolagens de iniciativa..." text to appear as raw text on screen. -->
+    <div id="init-intro-slot" style="display:none"></div>
     <script>
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-roller.js?v=' + v + '"><\/script>');
