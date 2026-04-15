@@ -1,43 +1,57 @@
 <!DOCTYPE html>
+<!--
+  Combat2 WebApp — frontend real do combate reescrito.
+  Consume /api/combat2 do backend. Render copiado do simulador
+  (simuladores/combate.html). Mantido em sync manualmente por ora.
+-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#2a2420">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Combate</title>
-<link rel="stylesheet" href="../valdoria-design.css">
-<style>
-body { font-family: var(--v-font); color: var(--v-text); background: var(--v-bg); margin: 0; padding: 12px; }
-.c2 { display: flex; flex-direction: column; gap: 10px; }
-.row { display: flex; justify-content: space-between; padding: 8px 12px; background: var(--v-bg-raised); border: 1px solid var(--v-border); border-radius: 6px; }
-.row.active { border-color: var(--v-gold); box-shadow: 0 0 6px rgba(196,149,58,0.4); }
-.row.dead { opacity: 0.4; text-decoration: line-through; }
-.bar { height: 6px; background: var(--v-bg); border-radius: 3px; overflow: hidden; margin-top: -6px; }
-.fill { height: 100%; background: linear-gradient(90deg, #5a8a3e, #8ab04e); transition: width .3s; }
-.fill.low { background: linear-gradient(90deg, #a04a2a, #c06a3a); }
-.log { max-height: 160px; overflow-y: auto; padding: 8px; background: var(--v-bg-card); border: 1px solid var(--v-border); border-radius: 6px; font-size: 13px; }
-.log div { padding: 2px 0; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn { flex: 1; padding: 12px; background: var(--v-bg-raised); border: 1px solid var(--v-border); color: var(--v-text); border-radius: 6px; font: inherit; cursor: pointer; }
-.btn.primary { background: linear-gradient(180deg, rgba(196,149,58,.3), rgba(139,100,32,.3)); border-color: var(--v-gold); color: var(--v-gold); font-weight: 600; }
-.end { text-align: center; padding: 24px; font-size: 22px; }
-.end.victory { color: #8ab04e; }
-.end.defeat { color: #c06a3a; }
-.end.fled { color: var(--v-text-dim); }
-.dice-wrap { display: flex; justify-content: center; padding: 8px 0; }
-#dice-canvas { width: 140px; height: 140px; }
-.phase { text-align: center; color: var(--v-text-dim); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
-</style>
-</head>
-<body>
-<div id="app"><div class="phase">Carregando...</div></div>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Combate — Valdoria</title>
+<style>html{background:#2a2420}</style>
 <script>
 var v = Date.now();
-function L(src){var s=document.createElement('script');s.src=src+'?v='+v;s.async=false;document.body.appendChild(s);}
-L('../shared/api-discovery.js');
-L('../shared/dice-3d.js');
-L('combat2.js');
+var BASE = 'https://jogo.lendasdevaldoria.com.br';
+function loadCSS(href) {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = BASE + href + '?v=' + v;
+    document.head.appendChild(l);
+}
+loadCSS('/shared/fonts.css');
+loadCSS('/valdoria-design.css');
+loadCSS('/shared/coin-icon.css');
+loadCSS('/shared/status-bars.css');
+loadCSS('/shared/animations.css');
+loadCSS('/combat/combat.css');
+loadCSS('/combat/combat-battlefield.css');
+loadCSS('/combat/combat-turn-queue.css');
+loadCSS('/combat/combat-grid.css');
+loadCSS('/combat/combat-actions-popup.css');
+loadCSS('/combat/combat-init-overlay.css');
+loadCSS('/combat/combat-init-popup.css');
+loadCSS('/combat/combat-dice-banner.css');
+loadCSS('/combat/combat-effects.css');
+loadCSS('/combat/combat-entities.css');
+loadCSS('/combat/combat-layout.css');
+loadCSS('/combat/combat-polish.css');
+loadCSS('/combat/combat-screens.css');
+loadCSS('/combat/combat-themes.css');
+loadCSS('/combat/combat-vfx.css');
 </script>
+<link rel="stylesheet" href="combat2.css">
+</head>
+<body class="biome-forest">
+<canvas id="vfxCanvas"></canvas>
+<div id="app">
+    <div class="loading-msg">Carregando combate...</div>
+</div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="combat2.js"></script>
 </body>
 </html>
