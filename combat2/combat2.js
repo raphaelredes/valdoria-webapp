@@ -11,8 +11,9 @@
     'use strict';
 
     var BASE = 'https://jogo.lendasdevaldoria.com.br';
-    var TOKEN = new URLSearchParams(location.search).get('token') || '';
-    var API_BASE = ''; // same-origin (Cloudflare Worker ou bot serve /api/combat2)
+    var _qs = new URLSearchParams(location.search);
+    var TOKEN = _qs.get('token') || '';
+    var API_BASE = (_qs.get('api') || '').replace(/\/+$/, '');
 
     var currentState = null;
     var _selectingTarget = false;
