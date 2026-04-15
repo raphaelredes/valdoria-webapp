@@ -11,6 +11,31 @@ html, body { height: 100vh; overflow: hidden; }
 .hit-particle.crit { background: #ff3333; box-shadow: 0 0 10px #ff6666; width: 8px; height: 8px; }
 @keyframes pFly { to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
 
+/* Feedback no card do alvo — espelha combat-vfx.css (.entity.*) para .cell do combat2 */
+.cell.dmg-flash-fire { --dmg-color: rgba(255,96,32,0.5); --dmg-shadow: rgba(255,96,32,0.4); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-cold { --dmg-color: rgba(80,160,255,0.45); --dmg-shadow: rgba(80,160,255,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-lightning { --dmg-color: rgba(255,224,64,0.5); --dmg-shadow: rgba(255,224,64,0.5); --dmg-spread: 20px; animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-necrotic { --dmg-color: rgba(144,64,192,0.45); --dmg-shadow: rgba(144,64,192,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-radiant { --dmg-color: rgba(255,224,128,0.5); --dmg-shadow: rgba(255,224,128,0.45); --dmg-spread: 20px; animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-poison { --dmg-color: rgba(96,192,64,0.45); --dmg-shadow: rgba(96,192,64,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-acid { --dmg-color: rgba(96,208,64,0.5); --dmg-shadow: rgba(96,208,64,0.4); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-psychic { --dmg-color: rgba(200,100,220,0.45); --dmg-shadow: rgba(200,100,220,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-thunder { --dmg-color: rgba(100,140,220,0.5); --dmg-shadow: rgba(100,140,220,0.4); --dmg-spread: 18px; animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-force { --dmg-color: rgba(96,192,255,0.45); --dmg-shadow: rgba(96,192,255,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-slashing { --dmg-color: rgba(200,200,200,0.45); --dmg-shadow: rgba(200,200,200,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-piercing { --dmg-color: rgba(200,200,200,0.45); --dmg-shadow: rgba(200,200,200,0.35); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash-bludgeoning { --dmg-color: rgba(200,180,140,0.5); --dmg-shadow: rgba(180,160,120,0.4); animation: dmgFlash 0.4s ease-out; }
+.cell.dmg-flash { --dmg-color: rgba(229,57,53,0.5); --dmg-shadow: rgba(229,57,53,0.4); animation: dmgFlash 0.4s ease-out; }
+@keyframes cellDmgShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+.cell.dmg-shake { animation: cellDmgShake 0.45s ease-out; }
+.cell.enemy-hit-heavy { animation: enemyHitHeavy 0.55s ease-out; }
+
 /* Banner epico intro */
 .epic-banner { padding: 22px 16px 16px; text-align: center; border-bottom: 1px solid rgba(196,149,58,.3); background: radial-gradient(ellipse at center, rgba(196,149,58,.1), transparent); }
 .epic-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: clamp(18px, 5.2vw, 24px); letter-spacing: 4px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-shadow: 0 0 14px rgba(196,149,58,.5), 0 0 28px rgba(196,149,58,.25), 0 1px 3px rgba(0,0,0,.8); animation: epicPulse 1.8s ease-in-out infinite; line-height: 1.2; }

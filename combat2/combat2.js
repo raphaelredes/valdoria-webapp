@@ -315,7 +315,7 @@
                 html += '<div class="rr-xp-meta">Nível ' + r.oldLvl + ' · ' + r.newXp + ' / ' + r.threshold + ' XP</div>';
                 html += '</div>';
                 if (r.levelUp) html += '<div class="rr-levelup">⭐ NÍVEL ' + r.newLvl + ' ALCANÇADO ⭐</div>';
-                html += '<div class="rr-loot-row gold"><span class="rr-ico">🪙</span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
+                html += '<div class="rr-loot-row gold"><span class="rr-ico"><span class="vi vi-coin sm" aria-hidden="true"></span></span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
                 (r.items || []).forEach(function (it, i) {
                     html += '<div class="rr-loot-row" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + escHtml(it.ico || '🎁') + '</span><span class="rr-name">' + escHtml(it.n) + '</span><span class="rr-qty rare-' + escHtml(it.rare || 'comum') + '">' + escHtml(it.rare || 'comum') + '</span></div>';
                 });
@@ -427,7 +427,20 @@
         if (act === 'cancel-target') { _selectingTarget = false; _pendingSkill = null; render(currentState); return; }
         if (act === 'skills') { openSkillsPanel(); return; }
         if (act === 'bag') { openBagPanel(); return; }
-        if (act === 'attack') { _selectingTarget = true; _pendingSkill = null; render(currentState); return; }
+        if (act === 'attack') {
+            _pendingSkill = null;
+            var aliveIdxs = [];
+            if (currentState && currentState.order) {
+                for (var ai = 0; ai < currentState.order.length; ai++) {
+                    var oc = currentState.order[ai];
+                    if (oc && oc.t === 'e' && oc.alive) aliveIdxs.push(ai);
+                }
+            }
+            if (aliveIdxs.length === 1) { showTargetConfirm(aliveIdxs[0]); return; }
+            _selectingTarget = true;
+            render(currentState);
+            return;
+        }
         if (act === 'next') { await remoteAction({ type: 'next' }); animInitFromBackend(); return; }
         if (act === 'skip-init') { /* sem backend — visual only */ finishInit(); return; }
         if (act === 'start') { closeInitiativeOrderPopup(); await remoteAction({ type: 'start' }); return; }
@@ -503,7 +516,7 @@
         target.alive = ev.newHp > 0;
         render(currentState);
         var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-        playHitVFX(uid, ev.crit);
+        playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'));
         await sleep(200);
     }
 
@@ -820,13 +833,95 @@
     }
 
     /* ============================================================
-     * VFX
+     * VFX — canvas CombatVFX (shared/combat-vfx.js) + flash no card
+     * (espelha combat.js / combat-vfx.js do combate anterior).
      * ============================================================ */
-    function playHitVFX(uid, crit) {
+    function ensureCombatVfxRuntime() {
+        if (window._combatVfx || typeof CombatVFX === 'undefined') return;
+        var c = document.getElementById('vfxCanvas');
+        if (c) {
+            try {
+                window._combatVfx = new CombatVFX('vfxCanvas');
+            } catch (e) {
+                console.warn('[COMBAT2]', 'CombatVFX_init_failed', e || '');
+            }
+        }
+    }
+
+    function _shakeAppCombat2(intensity) {
+        var app = document.getElementById('app');
+        if (!app) return;
+        var cls = intensity === 'heavy' ? 'shake-heavy' : 'shake-light';
+        var dur = intensity === 'heavy' ? 450 : 300;
+        app.classList.remove('shake-light', 'shake-heavy');
+        void app.offsetWidth;
+        app.classList.add(cls);
+        var ms = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+            ? ValdoriaMotion.duration(dur, 0) : dur;
+        setTimeout(function () { app.classList.remove(cls); }, ms);
+    }
+
+    function _showImpactFlashC2(targetEl, isCrit) {
+        if (!targetEl) return;
+        var rect = targetEl.getBoundingClientRect();
+        var flash = document.createElement('div');
+        flash.className = 'impact-flash' + (isCrit ? ' crit' : '');
+        flash.style.left = (rect.left + rect.width / 2 - (isCrit ? 35 : 25)) + 'px';
+        flash.style.top = (rect.top + rect.height / 2 - (isCrit ? 35 : 25)) + 'px';
+        flash.style.position = 'fixed';
+        document.body.appendChild(flash);
+        flash.addEventListener('animationend', function () { flash.remove(); });
+    }
+
+    function _dmgFlashClassForCell(dt) {
+        var allowed = {
+            fire: 1, cold: 1, lightning: 1, necrotic: 1, radiant: 1, poison: 1, acid: 1,
+            psychic: 1, thunder: 1, force: 1, slashing: 1, piercing: 1, bludgeoning: 1
+        };
+        return (dt && allowed[dt]) ? 'dmg-flash-' + dt : 'dmg-flash';
+    }
+
+    function _stripCellFlashClasses(el) {
+        var rm = [
+            'dmg-flash', 'dmg-flash-fire', 'dmg-flash-cold', 'dmg-flash-lightning', 'dmg-flash-necrotic',
+            'dmg-flash-radiant', 'dmg-flash-poison', 'dmg-flash-acid', 'dmg-flash-psychic', 'dmg-flash-thunder',
+            'dmg-flash-force', 'dmg-flash-slashing', 'dmg-flash-piercing', 'dmg-flash-bludgeoning',
+            'dmg-shake', 'enemy-hit-heavy'
+        ];
+        rm.forEach(function (c) { el.classList.remove(c); });
+    }
+
+    function flashTargetCell(el, damageType, isCrit) {
+        if (!el || !document.body.contains(el)) return;
+        var flashCls = _dmgFlashClassForCell(damageType || 'slashing');
+        _stripCellFlashClasses(el);
+        void el.offsetWidth;
+        el.classList.add(flashCls);
+        var rmFlash = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+            ? ValdoriaMotion.duration(400, 0) : 400;
+        setTimeout(function () { el.classList.remove(flashCls); }, rmFlash);
+        var shakeCls = isCrit ? 'enemy-hit-heavy' : 'dmg-shake';
+        el.classList.add(shakeCls);
+        var rmShake = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+            ? ValdoriaMotion.duration(isCrit ? 600 : 500, 0) : (isCrit ? 600 : 500);
+        setTimeout(function () { el.classList.remove(shakeCls); }, rmShake);
+        _showImpactFlashC2(el, !!isCrit);
+        if (isCrit) { _shakeAppCombat2('heavy'); } else { _shakeAppCombat2('light'); }
+    }
+
+    function playHitVFX(uid, crit, dmgType) {
         var el = document.querySelector('[data-unit-id="' + uid + '"]');
         if (!el) return;
-        el.classList.add('hit-shake');
-        setTimeout(function () { el.classList.remove('hit-shake'); }, 400);
+        dmgType = dmgType || 'slashing';
+        ensureCombatVfxRuntime();
+        flashTargetCell(el, dmgType, !!crit);
+        if (window._combatVfx) {
+            try {
+                window._combatVfx.impact(el, dmgType, { crit: !!crit });
+            } catch (e) {
+                console.warn('[COMBAT2]', 'vfx_impact_failed', e || '');
+            }
+        }
         var rect = el.getBoundingClientRect();
         for (var i = 0; i < (crit ? 10 : 6); i++) {
             var p = document.createElement('div');
@@ -984,6 +1079,7 @@
                         return;
                     }
                     currentState = resp.state || resp;
+                    ensureCombatVfxRuntime();
                     render(currentState);
                 } catch (e) {
                     console.error('[COMBAT2]', 'init_failed', {

@@ -52,6 +52,15 @@ loadCSS('/combat/combat-vfx.css');
     <div class="loading-msg">Carregando combate...</div>
 </div>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* Mesmo pipeline do combate legado (combat/index.html): motion + canvas VFX */
+(function () {
+    var v = Date.now();
+    var B = 'https://jogo.lendasdevaldoria.com.br';
+    document.write('<script src="' + B + '/shared/motion.js?v=' + v + '"><\/script>');
+    document.write('<script src="' + B + '/shared/combat-vfx.js?v=' + v + '"><\/script>');
+})();
+</script>
 <script src="combat2.js"></script>
 </body>
 </html>
