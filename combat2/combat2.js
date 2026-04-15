@@ -375,9 +375,15 @@
             } else {
                 html += '<div class="action-bar"><div class="action-btns-grid">';
                 html += '<button class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
-                html += '<button class="action-btn" data-act="skills">🎯 Habilidades</button>';
+                html += '<button class="action-btn" data-act="skills">✨ Habilidades</button>';
                 html += '<button class="action-btn" data-act="bag">🎒 Mochila</button>';
                 html += '<button class="action-btn" data-act="flee">🏃 Fugir</button>';
+                html += '</div>';
+                html += '<div class="action-btns-grid action-btns-sub">';
+                html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="disengage">➡️ Desengajar</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Pular</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
                 html += '</div></div>';
             }
         }
@@ -445,6 +451,10 @@
         if (act === 'skip-init') { /* sem backend — visual only */ finishInit(); return; }
         if (act === 'start') { closeInitiativeOrderPopup(); await remoteAction({ type: 'start' }); return; }
         if (act === 'flee') { await remoteAction({ type: 'flee' }); return; }
+        if (act === 'pass') { await remoteAction({ type: 'pass' }); return; }
+        if (act === 'dodge') { await remoteAction({ type: 'dodge' }); return; }
+        if (act === 'disengage') { await remoteAction({ type: 'disengage' }); return; }
+        if (act === 'log') { openCombatLog(); return; }
     }
 
     async function confirmAndAttack(tgtIdx) {
@@ -1010,21 +1020,41 @@
     }
 
     function openSkillsPanel() {
-        /* Stub: backend ainda nao suporta usar skills. Mostra a lista read-only. */
         var p = currentState.order[currentState.p_idx];
         if (!p || !p.skills || !p.skills.length) return;
         var ov = document.createElement('div');
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card';
-        var html = '<div class="lp-title">🎯 Habilidades</div>';
-        html += '<div class="lp-sub">' + (p.res ? p.res.ico + ' ' + p.res.value + '/' + p.res.max + ' ' + p.res.name : '') + '</div>';
+        var html = '<div class="lp-title">✨ Habilidades</div>';
+        html += '<div class="lp-sub">' + (p.res ? escHtml(p.res.ico) + ' ' + p.res.value + '/' + p.res.max + ' ' + escHtml(p.res.name) : '') + '</div>';
+        html += '<div class="lp-sub lp-hint">Uso em combate: em integração com a API (cada classe será validada no simulador).</div>';
         html += '<div class="lp-list">';
         p.skills.forEach(function (sk) {
             var skName = typeof sk === 'string' ? sk : sk.n;
-            html += '<button class="lp-item disabled" disabled><div class="lp-item-ico">✨</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(skName) + '</div><div class="lp-item-desc">em breve</div></div></button>';
+            html += '<button type="button" class="lp-item disabled" disabled><div class="lp-item-ico">✨</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(skName) + '</div><div class="lp-item-desc">em breve</div></div></button>';
         });
-        html += '</div><button class="lp-close" data-close="1">Fechar</button>';
+        html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
+        setHTML(card, html);
+        ov.appendChild(card);
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
+    }
+
+    function openCombatLog() {
+        if (!currentState) return;
+        var s = currentState;
+        var ov = document.createElement('div');
+        ov.className = 'list-panel-overlay';
+        var card = document.createElement('div');
+        card.className = 'list-panel-card list-panel-card--log';
+        var lines = (s.log || []).slice().reverse();
+        var html = '<div class="lp-title">📜 Log do combate</div><div class="lp-sub">Últimas entradas</div>';
+        html += '<div class="lp-log-scroll">';
+        if (!lines.length) html += '<div class="lp-empty">Sem entradas ainda.</div>';
+        else lines.forEach(function (ln) { html += '<div class="lp-log-line">' + escHtml(ln) + '</div>'; });
+        html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
         document.body.appendChild(ov);
@@ -1033,20 +1063,43 @@
     }
 
     function openBagPanel() {
-        /* Stub: backend ainda nao popula bag com items reais. */
         var p = currentState.order[currentState.p_idx];
+        if (!p) return;
+        var bag = p.bag || [];
         var ov = document.createElement('div');
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card';
-        var html = '<div class="lp-title">🎒 Mochila</div><div class="lp-sub">— vazia —</div>';
-        html += '<div class="lp-empty">Integração de inventário em breve</div>';
-        html += '<button class="lp-close" data-close="1">Fechar</button>';
+        var html = '<div class="lp-title">🎒 Mochila</div>';
+        html += '<div class="lp-sub">' + bag.length + ' tipo(s) de item</div>';
+        html += '<div class="lp-list">';
+        if (!bag.length) html += '<div class="lp-empty">Mochila vazia</div>';
+        bag.forEach(function (it, i) {
+            var canUse = (it.qty || 0) > 0;
+            html += '<button type="button" class="lp-item' + (canUse ? '' : ' disabled') + '" data-item="' + i + '"' + (canUse ? '' : ' disabled') + '>';
+            html += '<div class="lp-item-ico">' + escHtml(it.ico || '') + '</div>';
+            html += '<div class="lp-item-body"><div class="lp-item-name">' + escHtml(it.n || '') + '</div>';
+            html += '<div class="lp-item-desc">' + escHtml(it.desc || '') + '</div></div>';
+            html += '<div class="lp-item-cost qty">x' + (it.qty || 0) + '</div></button>';
+        });
+        html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
+        card.querySelectorAll('[data-item]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                if (btn.hasAttribute('disabled')) return;
+                var idx = parseInt(btn.getAttribute('data-item'), 10);
+                ov.remove();
+                try {
+                    await remoteAction({ type: 'use_item', slot: idx });
+                } catch (e2) {
+                    console.error('[COMBAT2]', 'use_item failed', e2 || '');
+                }
+            });
+        });
     }
 
     /* ============================================================

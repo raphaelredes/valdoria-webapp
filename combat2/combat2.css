@@ -225,6 +225,8 @@ html, body { height: 100vh; overflow: hidden; }
 .action-btns-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
 .action-btns-grid .action-btn { padding: 12px 8px; font-size: 13px; }
 .action-btns-grid .action-btn.primary { grid-column: 1 / -1; }
+.action-btns-sub { padding-top: 0; margin-top: 2px; border-top: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.45)); }
+.action-btns-sub .action-btn { padding: 9px 6px; font-size: var(--v-font-sm, 12px); }
 
 /* Popup de lista (Habilidades / Mochila) */
 .list-panel-overlay { position: fixed; inset: 0; background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; animation: udcFadeIn .2s ease; }
@@ -244,6 +246,9 @@ html, body { height: 100vh; overflow: hidden; }
 .lp-item-cost.cant { color: #e06050; border-color: rgba(224,96,80,.3); }
 .lp-item-cost.qty { color: var(--v-gold, #c4953a); border-color: rgba(196,149,58,.3); }
 .lp-close { margin-top: 6px; padding: 10px; background: var(--v-bg-card, #2e2520); border: 1px solid var(--v-border, #4a3828); color: var(--v-text, #d4c8b0); border-radius: 8px; font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.lp-hint { font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 4px); line-height: 1.4; text-align: center; text-transform: none; letter-spacing: 0.4px; border-bottom: none; padding-bottom: 0; }
+.lp-log-scroll { max-height: min(52vh, 420px); overflow-y: auto; text-align: left; margin-top: var(--v-space-sm, 8px); }
+.lp-log-line { font-size: var(--v-font-sm, 12px); padding: var(--v-space-sm, 8px) var(--v-space-md, 10px); border-bottom: 1px solid var(--v-border-15, rgba(74, 56, 40, 0.35)); color: var(--v-text-dim, #a09484); line-height: 1.45; }
 
 /* Init order popup */
 .iop-overlay { position: fixed; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; pointer-events: none; z-index: 9990; }
