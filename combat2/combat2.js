@@ -32,8 +32,46 @@
             opts.headers['Content-Type'] = 'application/json';
             opts.body = JSON.stringify(body);
         }
-        var r = await fetch(API_BASE + '/api/combat2', opts);
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var url = API_BASE + '/api/combat2';
+        var r;
+        try {
+            r = await fetch(url, opts);
+        } catch (netErr) {
+            console.error('[COMBAT2]', 'fetch_network', {
+                method: method,
+                apiHost: (function () {
+                    try { return new URL(API_BASE || location.origin).host; } catch (e) { return ''; }
+                })(),
+                message: netErr && netErr.message
+            }, netErr || '');
+            throw netErr;
+        }
+        if (!r.ok) {
+            var errDetail = '';
+            var errObj = null;
+            var rawText = '';
+            try {
+                rawText = await r.clone().text();
+                errObj = JSON.parse(rawText);
+                errDetail = (errObj.detail || errObj.error || errObj.hint || '').toString();
+            } catch (parseEx) {
+                errDetail = (rawText || r.statusText || '').slice(0, 200);
+            }
+            console.error('[COMBAT2]', 'api_http_error', {
+                method: method,
+                status: r.status,
+                statusText: r.statusText,
+                urlPath: '/api/combat2',
+                apiBaseLen: (API_BASE || '').length,
+                bodyError: errObj && errObj.error,
+                bodyDetail: errObj && errObj.detail,
+                bodyHint: errObj && errObj.hint
+            });
+            var human = 'HTTP ' + r.status;
+            if (errDetail) human += ' — ' + errDetail;
+            if (r.status === 503 && errObj && errObj.hint) human += ' (' + errObj.hint + ')';
+            throw new Error(human);
+        }
         return await r.json();
     }
 
@@ -878,8 +916,14 @@
                     currentState = resp.state || resp;
                     render(currentState);
                 } catch (e) {
-                    console.error('[C2] init failed', e);
-                    document.getElementById('app').innerHTML = '<div class="loading-msg" style="color:#c06a3a">Erro ao carregar combate: ' + e.message + '</div>';
+                    console.error('[COMBAT2]', 'init_failed', {
+                        tokenLen: (TOKEN || '').length,
+                        apiBaseLen: (API_BASE || '').length,
+                        apiHost: (function () {
+                            try { return new URL(API_BASE || location.origin).host; } catch (e2) { return ''; }
+                        })()
+                    }, e || '');
+                    document.getElementById('app').innerHTML = '<div class="loading-msg" style="color:#c06a3a">Erro ao carregar combate: ' + (e && e.message ? e.message : String(e)) + '</div>';
                 }
             });
         });
