@@ -14,11 +14,81 @@
     var _qs = new URLSearchParams(location.search);
     var TOKEN = _qs.get('token') || '';
     var API_BASE = (_qs.get('api') || '').replace(/\/+$/, '');
+    var ORIGIN_APP = (_qs.get('origin') || '').trim();
+    if (!ORIGIN_APP && API_BASE) {
+        ORIGIN_APP = 'game';
+    }
+    var USER_ID = parseInt(_qs.get('uid') || '0', 10);
 
     var currentState = null;
     var _selectingTarget = false;
     var _pendingSkill = null;
     var _activeDiceClose = null;
+    var _leavingCombat = false;
+
+    /* ============================================================
+     * Sair do combate: mesma rota que combat.js (transition -> URL)
+     * ============================================================ */
+    async function leaveCombatToOrigin() {
+        if (_leavingCombat) return;
+        _leavingCombat = true;
+        var tg = window.Telegram && window.Telegram.WebApp;
+        var ph = (currentState && currentState.ph) || 'victory';
+        var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
+        var origin = ORIGIN_APP || (API_BASE ? 'game' : '');
+        if (!API_BASE || !TOKEN || !origin || USER_ID <= 0) {
+            console.warn('[COMBAT2]', 'leaveCombat_missing_params', {
+                hasApi: !!API_BASE,
+                hasToken: !!TOKEN,
+                origin: origin,
+                uid: USER_ID
+            });
+            try { if (tg) tg.close(); } catch (e0) {}
+            return;
+        }
+        var headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + TOKEN
+        };
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+            headers['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+        }
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            headers['X-Idempotency-Key'] = window.crypto.randomUUID();
+        }
+        var url = API_BASE + '/api/webapp/transition';
+        var body = JSON.stringify({
+            from: 'combat',
+            to: origin,
+            user_id: USER_ID,
+            payload: { result: result }
+        });
+        try {
+            var resp = await fetch(url, { method: 'POST', headers: headers, body: body });
+            var data = {};
+            try { data = await resp.json(); } catch (eJson) {}
+            if (data.url) {
+                try {
+                    if (data.toast) {
+                        localStorage.setItem('valdoria_pending_toast', data.toast);
+                    }
+                } catch (eLs) {}
+                window.__valdoria_transitioning = true;
+                window.location.replace(data.url);
+                return;
+            }
+            if (data.fallback === 'close') {
+                window.__valdoria_transitioning = true;
+                try { if (tg) tg.close(); } catch (e1) {}
+                return;
+            }
+            console.error('[COMBAT2]', 'leaveCombat_unexpected', resp.status, data);
+        } catch (eNet) {
+            console.error('[COMBAT2]', 'leaveCombat_fetch', eNet);
+        }
+        window.__valdoria_transitioning = true;
+        try { if (tg) tg.close(); } catch (e2) {}
+    }
 
     /* ============================================================
      * API CLIENT
@@ -256,7 +326,7 @@
                 (s.log || []).slice(-8).forEach(function (line) { html += '<div>' + escHtml(line) + '</div>'; });
                 html += '</div>';
             }
-            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close">✓ Fechar</button></div>';
+            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close">✓ Continuar</button></div>';
             html += '</div>';
             setHTML(app, html);
             bindActions();
@@ -351,7 +421,7 @@
         var b = ev.currentTarget;
         var act = b.dataset.act;
         if (act === 'close') {
-            try { if (window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.close(); } catch (e) {}
+            await leaveCombatToOrigin();
             return;
         }
         if (act === 'cancel-target') { _selectingTarget = false; _pendingSkill = null; render(currentState); return; }
