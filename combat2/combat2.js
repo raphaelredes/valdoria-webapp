@@ -194,13 +194,38 @@
             var narr = { victory: 'Todos os inimigos caíram por suas mãos.', defeat: 'Você cai inconsciente no chão...', fled: 'Você escapa para longe da ameaça.' }[ph];
             html = '<div class="resolution ' + ph + '"><div class="res-title">' + title + '</div>';
             html += '<div class="res-narr">' + narr + '</div>';
-            html += '<div class="res-log">';
-            (s.log || []).slice(-8).forEach(function (line) { html += '<div>' + escHtml(line) + '</div>'; });
-            html += '</div>';
+            /* Bloco de recompensas — apenas em vitoria */
+            if (ph === 'victory' && s.rewards) {
+                var r = s.rewards;
+                var xpPct = Math.min(100, Math.round((r.newXp / r.threshold) * 100));
+                html += '<div class="res-rewards">';
+                html += '<div class="rr-section-title">Recompensas</div>';
+                html += '<div class="rr-xp"><div class="rr-xp-row">';
+                html += '<span class="rr-xp-lbl">Experiência</span><span class="rr-xp-val">+' + r.xp + ' XP</span>';
+                html += '</div><div class="rr-xp-bar"><div class="rr-xp-fill" data-to="' + xpPct + '" style="width:0%"></div></div>';
+                html += '<div class="rr-xp-meta">Nível ' + r.oldLvl + ' · ' + r.newXp + ' / ' + r.threshold + ' XP</div>';
+                html += '</div>';
+                if (r.levelUp) html += '<div class="rr-levelup">⭐ NÍVEL ' + r.newLvl + ' ALCANÇADO ⭐</div>';
+                html += '<div class="rr-loot-row gold"><span class="rr-ico">🪙</span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
+                (r.items || []).forEach(function (it, i) {
+                    html += '<div class="rr-loot-row" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + escHtml(it.ico || '🎁') + '</span><span class="rr-name">' + escHtml(it.n) + '</span><span class="rr-qty rare-' + escHtml(it.rare || 'comum') + '">' + escHtml(it.rare || 'comum') + '</span></div>';
+                });
+                if (!(r.items || []).length) html += '<div class="rr-loot-empty">Nenhum item caiu desta vez.</div>';
+                html += '</div>';
+            } else {
+                html += '<div class="res-log">';
+                (s.log || []).slice(-8).forEach(function (line) { html += '<div>' + escHtml(line) + '</div>'; });
+                html += '</div>';
+            }
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close">✓ Fechar</button></div>';
             html += '</div>';
             setHTML(app, html);
             bindActions();
+            /* Anima a barra de XP */
+            if (ph === 'victory' && s.rewards) {
+                var xpFill = document.querySelector('.rr-xp-fill');
+                if (xpFill) setTimeout(function () { xpFill.style.width = xpFill.getAttribute('data-to') + '%'; }, 700);
+            }
             return;
         }
 
