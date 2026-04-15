@@ -24,6 +24,7 @@
     var _selectingTarget = false;
     var _pendingSkill = null;
     var _activeDiceClose = null;
+    var _skipInit = false;
     var _leavingCombat = false;
 
     /* ============================================================
@@ -448,7 +449,11 @@
             return;
         }
         if (act === 'next') { await remoteAction({ type: 'next' }); animInitFromBackend(); return; }
-        if (act === 'skip-init') { /* sem backend — visual only */ finishInit(); return; }
+        if (act === 'skip-init') {
+            _skipInit = true;
+            if (_activeDiceClose) _activeDiceClose();
+            return;
+        }
         if (act === 'start') { closeInitiativeOrderPopup(); await remoteAction({ type: 'start' }); return; }
         if (act === 'flee') { await remoteAction({ type: 'flee' }); return; }
         if (act === 'pass') { await remoteAction({ type: 'pass' }); return; }
@@ -547,20 +552,24 @@
     async function animInitFromBackend() {
         var s = currentState;
         s.ph = 'init';
+        _skipInit = false;
         /* Marca todos como nao revelados inicialmente */
         s.order.forEach(function (c) { c.initRevealed = false; c.initRolling = false; });
         render(s);
         for (var i = 0; i < s.order.length; i++) {
+            if (_skipInit) break;
             var c = s.order[i];
             c.initRolling = true;
             render(s);
             await sleep(i === 0 ? 600 : 2000);
+            if (_skipInit) { c.initRolling = false; break; }
             var d20 = c.init - Math.floor((c.dex - 10) / 2);
             if (d20 < 1) d20 = 1; if (d20 > 20) d20 = 20;
-            await new Promise(function (r) { showDice(d20, r, c, 'Iniciativa'); });
-            var oldRects = captureQueueRects();
+            await new Promise(function (r) { showDice(d20, r, c, 'Iniciativa', { initiativeSequence: true }); });
             c.initRolling = false;
             c.initRevealed = true;
+            if (_skipInit) break;
+            var oldRects = captureQueueRects();
             render(s);
             animateQueueTransition(oldRects);
         }
@@ -614,7 +623,9 @@
         opts = opts || {};
         if (!window.Dice3D) { cb && cb(); return; }
         var isPlayer = actor && actor.t === 'p';
-        var duration = isPlayer ? 5000 : (1500 + Math.floor(Math.random() * 1500));
+        var initiativeSequence = !!(opts && opts.initiativeSequence);
+        var manualPlayerDice = isPlayer && !initiativeSequence;
+        var duration = manualPlayerDice ? 5000 : (1500 + Math.floor(Math.random() * 1500));
         var INTERACT_MAX = 0.70;
         var ov = document.createElement('div');
         ov.className = 'dice-overlay';
@@ -631,7 +642,7 @@
             ov.appendChild(hdr);
         }
         var container = document.createElement('div');
-        container.className = 'dice-canvas-holder' + (isPlayer ? ' clickable pulse-idle' : '');
+        container.className = 'dice-canvas-holder' + (manualPlayerDice ? ' clickable pulse-idle' : '');
         ov.appendChild(container);
         var resultEl = document.createElement('div');
         resultEl.className = 'dice-result-label';
@@ -660,7 +671,7 @@
             if (started || !d) return;
             started = true;
             container.classList.remove('pulse-idle');
-            hint.textContent = isPlayer ? '⚡ Toque no dado para acelerar o giro' : '';
+            hint.textContent = manualPlayerDice ? '⚡ Toque no dado para acelerar o giro' : '';
             d.roll(value, function () {
                 container.classList.remove('clickable', 'locked');
                 if (lockTimer) { clearInterval(lockTimer); lockTimer = null; }
@@ -685,7 +696,7 @@
                 hint.textContent = '';
                 continueBtn.style.display = '';
             });
-            if (isPlayer) {
+            if (manualPlayerDice) {
                 lockTimer = setInterval(function () {
                     if (!d || !d._rolling) { clearInterval(lockTimer); lockTimer = null; return; }
                     var elapsed = performance.now() - d._rollStart;
@@ -700,7 +711,7 @@
         }
         try {
             d = new Dice3D(container, { size: 180, dieType: 'd20', duration: duration });
-            if (isPlayer) {
+            if (manualPlayerDice) {
                 hint.textContent = '🎲 Toque no dado para começar a rolar';
                 container.addEventListener('click', function () {
                     if (!started) { startRoll(); return; }
