@@ -115,7 +115,8 @@ html, body { height: 100vh; overflow: hidden; }
 
 .c2-batch-summary-overlay { position: fixed; inset: 0; z-index: var(--v-z-modal, 5000); background: rgba(10, 8, 6, 0.78); display: flex; align-items: center; justify-content: center; padding: var(--v-space-md, 12px); animation: diceOvIn var(--v-transition-base, 0.2s) ease; }
 .c2-batch-summary-card { width: 100%; max-width: 320px; max-height: 78vh; overflow-y: auto; background: var(--v-bg-raised, #332a22); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius, 10px); padding: var(--v-space-md, 12px) var(--v-space-md, 12px) var(--v-space-sm, 8px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45); }
-.c2-sum-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-lg, 15px); color: var(--v-gold, #c4953a); text-align: center; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--v-space-md, 12px); }
+.c2-sum-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-lg, 15px); color: var(--v-gold, #c4953a); text-align: center; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--v-space-xs, 4px); }
+.c2-sum-subtitle { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); text-align: center; line-height: 1.4; margin-bottom: var(--v-space-md, 12px); padding: 0 var(--v-space-sm, 8px); }
 .c2-sum-list { display: flex; flex-direction: column; gap: var(--v-space-sm, 8px); }
 .c2-sum-row { display: flex; gap: var(--v-space-sm, 8px); align-items: flex-start; padding: var(--v-space-sm, 8px); border-radius: var(--v-radius-sm, 6px); background: var(--v-bg-card, #2e2520); border: 1px solid var(--v-border, #4a3828); }
 .c2-sum-row.hit { border-color: var(--v-gold-30, rgba(196, 149, 58, 0.3)); }

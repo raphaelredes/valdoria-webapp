@@ -224,6 +224,46 @@
         return !!(currentState && currentState.order && currentState.order.length > 4 && currentState.ph === 'active');
     }
 
+    /** Só inimigos/aliados — nunca o personagem do jogador (ev.aIdx === p_idx). */
+    function isEventFromOtherCombatant(ev) {
+        if (!currentState || !ev || currentState.p_idx == null) return false;
+        var k = ev.kind;
+        if (k === 'attack' || k === 'oa' || k === 'heal' || k === 'buff') {
+            return ev.aIdx !== currentState.p_idx;
+        }
+        return false;
+    }
+
+    /** Botão "pular" só em overlays de outros combatentes; glob = shouldOfferBatchSkip(). */
+    function offerAnimSkipForEvent(ev, offerSkipGlob) {
+        return !!offerSkipGlob && isEventFromOtherCombatant(ev);
+    }
+
+    function dmgTypeLabel(dt) {
+        var m = {
+            slashing: 'Cortante', piercing: 'Perfurante', bludgeoning: 'Concussão',
+            fire: 'Fogo', cold: 'Frio', lightning: 'Relâmpago', necrotic: 'Necrótico',
+            radiant: 'Radiante', poison: 'Veneno', acid: 'Ácido', psychic: 'Psíquico',
+            thunder: 'Trovão', force: 'Força'
+        };
+        return m[dt] || dt || '';
+    }
+
+    function shouldFastForwardAttack(ev) {
+        return !!_skipReplayBatch && isEventFromOtherCombatant(ev);
+    }
+
+    function syncHealOutcomeFromEvent(ev) {
+        if (!currentState || !ev) return;
+        var target = currentState.order[ev.tIdx];
+        if (!target) return;
+        if (ev.newHp != null) {
+            target.hp = ev.newHp;
+            target.alive = target.hp > 0;
+        }
+        render(currentState);
+    }
+
     function syncAttackOutcomeFromEvent(ev) {
         if (!currentState || !ev) return;
         var target = currentState.order[ev.tIdx];
@@ -240,7 +280,7 @@
     }
 
     function buildBatchSummaryHtml(events) {
-        var parts = ['<div class="c2-sum-title">Resumo da sequência</div><div class="c2-sum-list">'];
+        var parts = ['<div class="c2-sum-title">Resumo das rolagens</div><div class="c2-sum-subtitle">Atalho: animações dos outros combatentes foram resumidas</div><div class="c2-sum-list">'];
         var any = false;
         for (var i = 0; i < events.length; i++) {
             var ev = events[i];
@@ -251,21 +291,25 @@
                 var an = escHtml(ev.actorName || '');
                 var tn = escHtml(ev.targetName || '');
                 if (!ev.hit) {
-                    var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Não acertou';
+                    var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Defesa (CA): total inferior à CA';
+                    var rollLn = 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?');
                     parts.push('<div class="c2-sum-row miss"><span class="c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                         (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-sub">' + escHtml(why) +
-                        ' · d20+' + (ev.atk != null ? ev.atk : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + '</div></div></div>');
+                        ' · ' + escHtml(rollLn) + '</div></div></div>');
                 } else {
                     var dmg = ev.dmgTotal != null ? ev.dmgTotal : '?';
                     var dead = ev.newHp != null && ev.newHp <= 0;
                     var tags = [];
                     if (ev.crit) tags.push('Crítico');
                     if (dead) tags.push('Eliminado');
-                    var skLine = ev.skillName ? (' · ' + escHtml(ev.skillName)) : '';
+                    var dtLab = dmgTypeLabel(ev.dmgType || '');
+                    var rollHit = 'Acerto: d20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?');
+                    var dmgPlain = '−' + dmg + ' PV' + (dtLab ? ' · ' + dtLab : '') + (ev.skillName ? (' · ' + String(ev.skillName)) : '') +
+                        (tags.length ? (' · ' + tags.join(' · ')) : '') +
+                        (ev.oldHp != null && ev.newHp != null ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '');
                     parts.push('<div class="c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="c2-sum-ico">' + (dead ? '💀' : '⚔') +
                         '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
-                        '</div><div class="c2-sum-sub">−' + dmg + ' PV' + skLine + (tags.length ? ' · ' + escHtml(tags.join(' · ')) : '') +
-                        (ev.oldHp != null && ev.newHp != null ? ' · PV ' + ev.oldHp + ' → ' + ev.newHp : '') + '</div></div></div>');
+                        '</div><div class="c2-sum-sub">' + escHtml(rollHit) + ' · ' + escHtml(dmgPlain) + '</div></div></div>');
                 }
             } else if (ev.kind === 'flee') {
                 any = true;
@@ -278,13 +322,15 @@
                     escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
             } else if (ev.kind === 'heal') {
                 any = true;
+                var hpLn = (ev.oldHp != null && ev.newHp != null) ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '';
                 parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">❤</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                     escHtml(ev.skillName || 'Cura') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' → ' + escHtml(ev.targetName || '') +
-                    ' · +' + (ev.healGained != null ? ev.healGained : '?') + ' PV</div></div></div>');
+                    ' · +' + (ev.healGained != null ? ev.healGained : '?') + ' PV' + hpLn + '</div></div></div>');
             } else if (ev.kind === 'buff') {
                 any = true;
+                var turnsB = ev.turnsLeft != null ? (ev.turnsLeft + ' turno(s) · efeito tático no estado') : 'efeito tático';
                 parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">✨</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                    escHtml(ev.skillName || 'Buff') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + '</div></div></div>');
+                    escHtml(ev.skillName || 'Buff') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' · ' + escHtml(turnsB) + '</div></div></div>');
             } else if (ev.kind === 'resource') {
                 any = true;
                 parts.push('<div class="c2-sum-row"><span class="c2-sum-ico">⚡</span><div class="c2-sum-body"><div class="c2-sum-line">Recurso</div><div class="c2-sum-sub">' +
@@ -679,12 +725,13 @@
         } catch (e) { console.error('[C2] action failed', e); }
     }
 
-    async function playEvent(ev, offerSkip) {
-        if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev, offerSkip);
-        if (ev.kind === 'heal') return animateHealEvent(ev, offerSkip);
-        if (ev.kind === 'buff') return animateBuffEvent(ev, offerSkip);
-        if (ev.kind === 'resource') return animateResourceEvent(ev, offerSkip);
-        if (ev.kind === 'flee') return animateFleeEvent(ev, offerSkip);
+    async function playEvent(ev, offerSkipGlob) {
+        var oSkin = offerAnimSkipForEvent(ev, offerSkipGlob);
+        if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev, oSkin);
+        if (ev.kind === 'heal') return animateHealEvent(ev, oSkin);
+        if (ev.kind === 'buff') return animateBuffEvent(ev, oSkin);
+        if (ev.kind === 'resource') return animateResourceEvent(ev, oSkin);
+        if (ev.kind === 'flee') return animateFleeEvent(ev, oSkin);
         if (ev.kind === 'round') {
             currentState.rn = ev.rn;
             render(currentState);
@@ -694,7 +741,7 @@
     }
 
     async function animateAttackEvent(ev, offerSkip) {
-        if (_skipReplayBatch) {
+        if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
             return;
         }
@@ -704,12 +751,12 @@
         /* Ajusta HP local para o antes-do-evento (backend ja aplicou no state final) */
         if (ev.hit) target.hp = ev.oldHp;
         render(currentState);
-        if (_skipReplayBatch) {
+        if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
             return;
         }
         await sleep(200);
-        if (_skipReplayBatch) {
+        if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
             return;
         }
@@ -741,7 +788,7 @@
             });
         });
 
-        if (_skipReplayBatch) {
+        if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
             return;
         }
@@ -755,7 +802,7 @@
             dmgType: ev.dmgType || 'slashing'
         });
 
-        if (_skipReplayBatch) {
+        if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
             return;
         }
@@ -769,7 +816,10 @@
     }
 
     async function animateHealEvent(ev, offerSkip) {
-        if (_skipReplayBatch) return;
+        if (_skipReplayBatch && isEventFromOtherCombatant(ev)) {
+            syncHealOutcomeFromEvent(ev);
+            return;
+        }
         var target = currentState.order[ev.tIdx];
         var actor = currentState.order[ev.aIdx];
         if (!target || !actor) return;
@@ -785,7 +835,7 @@
     }
 
     async function animateBuffEvent(ev, offerSkip) {
-        if (_skipReplayBatch) return;
+        if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
         var sub = (ev.actorName || '') + ' · ' + (ev.turnsLeft | 0) + ' turno(s) (efeito no estado).';
         await showMessage('\u2728 ' + (ev.skillName || 'Buff'), 'hit', sub, { offerBatchSkip: !!offerSkip });
     }
@@ -936,7 +986,7 @@
             var skipAllBtn = document.createElement('button');
             skipAllBtn.type = 'button';
             skipAllBtn.className = 'dice-skip-batch-btn';
-            skipAllBtn.textContent = 'Pular animações restantes';
+            skipAllBtn.textContent = 'Pular animações dos inimigos';
             skipAllBtn.addEventListener('click', function (evClick) {
                 evClick.stopPropagation();
                 _skipReplayBatch = true;
@@ -1062,7 +1112,7 @@
                 var skipB = document.createElement('button');
                 skipB.type = 'button';
                 skipB.className = 'dice-skip-batch-btn dice-skip-batch-btn--in-card';
-                skipB.textContent = 'Pular animações restantes';
+                skipB.textContent = 'Pular animações dos inimigos';
                 skipB.addEventListener('click', function () {
                     _skipReplayBatch = true;
                     ov.remove();
@@ -1114,7 +1164,7 @@
                 var skipDmg = document.createElement('button');
                 skipDmg.type = 'button';
                 skipDmg.className = 'dice-skip-batch-btn';
-                skipDmg.textContent = 'Pular animações restantes';
+                skipDmg.textContent = 'Pular animações dos inimigos';
                 skipDmg.addEventListener('click', function (evClick) {
                     evClick.stopPropagation();
                     _skipReplayBatch = true;
