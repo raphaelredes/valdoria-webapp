@@ -217,6 +217,73 @@
         });
     }
 
+    /**
+     * Conteúdo informativo escaneável (rótulo + intro + linhas-chave + lista curta + nota).
+     * Boas práticas: hierarquia clara, frases curtas, poucos pontos por tela (UX writing / modais).
+     * spec: string | { kicker?, intro?, rows?: {l,v}[], bullets?, note? }
+     */
+    function c2AppendInfoStack(container, spec) {
+        if (spec == null || spec === '') return;
+        if (typeof spec === 'string') {
+            var p0 = document.createElement('p');
+            p0.className = 'c2-msg-lead';
+            p0.textContent = spec;
+            container.appendChild(p0);
+            return;
+        }
+        if (typeof spec !== 'object' || Array.isArray(spec)) return;
+        var wrap = document.createElement('div');
+        wrap.className = 'c2-info-stack';
+        if (spec.kicker) {
+            var k0 = document.createElement('div');
+            k0.className = 'c2-info-kicker';
+            k0.textContent = spec.kicker;
+            wrap.appendChild(k0);
+        }
+        if (spec.intro) {
+            var intro0 = document.createElement('p');
+            intro0.className = 'c2-info-intro';
+            intro0.textContent = spec.intro;
+            wrap.appendChild(intro0);
+        }
+        if (spec.rows && spec.rows.length) {
+            var grid = document.createElement('div');
+            grid.className = 'c2-info-rows';
+            spec.rows.forEach(function (row) {
+                if (!row) return;
+                var r0 = document.createElement('div');
+                r0.className = 'c2-info-kv';
+                var l0 = document.createElement('span');
+                l0.className = 'c2-info-kv-l';
+                l0.textContent = row.l != null ? String(row.l) : '';
+                var v0 = document.createElement('span');
+                v0.className = 'c2-info-kv-v';
+                v0.textContent = row.v != null ? String(row.v) : '';
+                r0.appendChild(l0);
+                r0.appendChild(v0);
+                grid.appendChild(r0);
+            });
+            wrap.appendChild(grid);
+        }
+        if (spec.bullets && spec.bullets.length) {
+            var ul0 = document.createElement('ul');
+            ul0.className = 'c2-info-bullets';
+            spec.bullets.forEach(function (b) {
+                var li0 = document.createElement('li');
+                li0.textContent = b;
+                ul0.appendChild(li0);
+            });
+            wrap.appendChild(ul0);
+        }
+        if (spec.note) {
+            var note0 = document.createElement('p');
+            note0.className = 'c2-info-note';
+            note0.textContent = spec.note;
+            wrap.appendChild(note0);
+        }
+        container.appendChild(wrap);
+    }
+
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
     /** Combate com 5+ participantes: oferece pular animações do lote de eventos (vários inimigos). */
@@ -280,7 +347,13 @@
     }
 
     function buildBatchSummaryHtml(events) {
-        var parts = ['<div class="c2-sum-title">Resumo das rolagens</div><div class="c2-sum-subtitle">Atalho: dados de inimigos e aliados foram resumidos; só o personagem do jogador manteve animação 3D</div><div class="c2-sum-list">'];
+        var parts = [
+            '<div class="c2-sum-title">Resumo das rolagens</div>',
+            '<div class="c2-sum-hero"><span class="c2-sum-hero-kicker">Modo resumido</span>',
+            '<p class="c2-sum-hero-text">Rolagens de dados de outros combatentes foram condensadas nesta lista. ',
+            'As animações 3D do personagem que você controla permanecem como no fluxo normal.</p></div>',
+            '<div class="c2-sum-list">'
+        ];
         var any = false;
         for (var i = 0; i < events.length; i++) {
             var ev = events[i];
@@ -294,8 +367,8 @@
                     var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Defesa (CA): total inferior à CA';
                     var rollLn = 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?');
                     parts.push('<div class="c2-sum-row miss"><span class="c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                        (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-sub">' + escHtml(why) +
-                        ' · ' + escHtml(rollLn) + '</div></div></div>');
+                        (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--miss">Sem acerto</span></div>' +
+                        '<div class="c2-sum-roll">' + escHtml(rollLn) + '</div><div class="c2-sum-why">' + escHtml(why) + '</div></div></div>');
                 } else {
                     var dmg = ev.dmgTotal != null ? ev.dmgTotal : '?';
                     var dead = ev.newHp != null && ev.newHp <= 0;
@@ -307,16 +380,20 @@
                     var dmgPlain = '−' + dmg + ' PV' + (dtLab ? ' · ' + dtLab : '') + (ev.skillName ? (' · ' + String(ev.skillName)) : '') +
                         (tags.length ? (' · ' + tags.join(' · ')) : '') +
                         (ev.oldHp != null && ev.newHp != null ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '');
+                    var pillHit = ev.crit ? 'Crítico' : 'Acerto';
                     parts.push('<div class="c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="c2-sum-ico">' + (dead ? '💀' : '⚔') +
                         '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
-                        '</div><div class="c2-sum-sub">' + escHtml(rollHit) + ' · ' + escHtml(dmgPlain) + '</div></div></div>');
+                        '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--hit">' + escHtml(pillHit) + '</span></div>' +
+                        '<div class="c2-sum-roll">' + escHtml(rollHit) + '</div><div class="c2-sum-why">' + escHtml(dmgPlain) + '</div></div></div>');
                 }
             } else if (ev.kind === 'flee') {
                 any = true;
+                var fleeRoll = (ev.d20 != null ? 'd20=' + ev.d20 : '') + (ev.mod != null ? ' + ' + ev.mod : '') +
+                    (ev.total != null ? ' = ' + ev.total : '') + ' vs CD ' + (ev.dc != null ? ev.dc : '');
                 parts.push('<div class="c2-sum-row flee"><span class="c2-sum-ico">🏃</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                    (ev.success ? 'Fuga bem-sucedida' : 'Falha na fuga') + '</div><div class="c2-sum-sub">Teste ' +
-                    (ev.d20 != null ? 'd20=' + ev.d20 : '') + (ev.mod != null ? ' + ' + ev.mod : '') +
-                    (ev.total != null ? ' = ' + ev.total : '') + ' vs DC ' + (ev.dc != null ? ev.dc : '') + '</div></div></div>');
+                    (ev.success ? 'Fuga bem-sucedida' : 'Falha na fuga') + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--flee">' +
+                    (ev.success ? 'Passou' : 'Não passou') + '</span></div><div class="c2-sum-roll">' + escHtml(fleeRoll) + '</div>' +
+                    '<div class="c2-sum-why">Acrobacia (Des) · CD do teste</div></div></div>');
             } else if (ev.kind === 'round') {
                 parts.push('<div class="c2-sum-row round"><span class="c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
                     escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
@@ -354,6 +431,7 @@
         ov.className = 'c2-batch-summary-overlay';
         ov.setAttribute('role', 'dialog');
         ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-label', 'Resumo das rolagens do lote');
         var card = document.createElement('div');
         card.className = 'c2-batch-summary-card';
         setHTML(card, buildBatchSummaryHtml(events));
@@ -509,8 +587,9 @@
         if (ph === 'victory' || ph === 'defeat' || ph === 'fled') {
             var title = { victory: 'VITÓRIA', defeat: 'DERROTA', fled: 'FUGIU' }[ph];
             var narr = { victory: 'Todos os inimigos caíram por suas mãos.', defeat: 'Você cai inconsciente no chão...', fled: 'Você escapa para longe da ameaça.' }[ph];
+            var narrK = { victory: 'Resultado', defeat: 'Desfecho', fled: 'Epílogo' }[ph];
             html = '<div class="resolution ' + ph + '"><div class="res-title">' + title + '</div>';
-            html += '<div class="res-narr">' + narr + '</div>';
+            html += '<div class="res-narr-block"><span class="res-narr-kicker">' + escHtml(narrK) + '</span><p class="res-narr">' + escHtml(narr) + '</p></div>';
             /* Bloco de recompensas — apenas em vitoria */
             if (ph === 'victory' && s.rewards) {
                 var r = s.rewards;
@@ -548,7 +627,7 @@
 
         if (ph === 'intro' || ph === 'init' || ph === 'init_done') {
             if (ph === 'intro') {
-                html += '<div class="epic-banner"><div class="epic-title">⚔ COMBATE INICIADO ⚔</div><div class="epic-sub">Prepare-se para a batalha</div></div>';
+                html += '<div class="epic-banner"><div class="epic-title">⚔ COMBATE INICIADO ⚔</div><div class="epic-sub">Iniciativa em seguida — posições fixas nesta arena</div></div>';
             } else { html += buildTurnQueue(s); }
             html += '<div class="arena-header compact-header"><div class="arena-subtitle">' +
                 (ph === 'intro' ? 'Posicionamento' : ph === 'init' ? 'Rolando Iniciativa...' : 'Ordem de Combate') +
@@ -769,10 +848,54 @@
             showDice(ev.d20, x, actor, actionLabel, {
                 offerBatchSkip: !!offerSkip,
                 postResult: function () {
-                    if (ev.crit) return { title: '⚡ ACERTO CRÍTICO', sub: 'd20 = 20 — dano em dobro', cls: 'crit' };
-                    if (ev.hit) return { title: '✅ ACERTOU', sub: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total + ' ≥ CA ' + ev.ac, cls: 'hit' };
-                    if (ev.miss_reason === 'falha_critica') return { title: '⚠ FALHA CRÍTICA', sub: 'd20 = 1 — escapa do alvo', cls: 'miss' };
-                    return { title: '🛡 ' + target.n.toUpperCase() + ' DEFENDEU', sub: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total + ' < CA ' + ev.ac, cls: 'miss' };
+                    if (ev.crit) {
+                        return {
+                            title: 'Acerto crítico',
+                            cls: 'crit',
+                            subStructured: {
+                                kicker: 'Natural 20 no d20',
+                                intro: 'Dados de dano em dobro antes de somar o modificador de atributo (uma vez), conforme PHB.',
+                                rows: [{ l: 'Jogada de ataque', v: '20 + ' + ev.atk + ' = ' + ev.total }]
+                            }
+                        };
+                    }
+                    if (ev.hit) {
+                        return {
+                            title: 'Acertou',
+                            cls: 'hit',
+                            subStructured: {
+                                kicker: 'Confronto com a CA',
+                                rows: [
+                                    { l: 'Total do ataque', v: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total },
+                                    { l: 'Classe de Armadura', v: String(ev.ac) }
+                                ],
+                                note: 'Total igual ou superior à CA do alvo.'
+                            }
+                        };
+                    }
+                    if (ev.miss_reason === 'falha_critica') {
+                        return {
+                            title: 'Falha automática',
+                            cls: 'miss',
+                            subStructured: {
+                                kicker: 'Natural 1 no d20',
+                                intro: 'O ataque erra, sem comparar com a Classe de Armadura.',
+                                rows: [{ l: 'Face do d20', v: '1' }]
+                            }
+                        };
+                    }
+                    return {
+                        title: 'Ataque não atinge',
+                        cls: 'miss',
+                        subStructured: {
+                            kicker: 'Alvo: ' + target.n,
+                            rows: [
+                                { l: 'Total do ataque', v: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total },
+                                { l: 'Classe de Armadura', v: String(ev.ac) }
+                            ],
+                            note: 'Total inferior à CA — o golpe não causa dano.'
+                        }
+                    };
                 },
                 onAttackRollResolved: function () {
                     try {
@@ -825,8 +948,16 @@
         if (!target || !actor) return;
         if (ev.oldHp != null) target.hp = ev.oldHp;
         render(currentState);
-        var sub = (ev.skillName || 'Cura') + ': rolagem ' + (ev.healRolled != null ? ev.healRolled : '?') + ' → +' + (ev.healGained | 0) + ' PV';
-        await showMessage('\u2764 Cura', 'hit', sub, { offerBatchSkip: !!offerSkip });
+        var subHeal = {
+            kicker: 'Cura aplicada',
+            intro: (ev.skillName || 'Cura') + ': ' + (ev.actorName || '') + ' → ' + (ev.targetName || ''),
+            rows: [
+                { l: 'PV recuperados', v: '+' + (ev.healGained | 0) },
+                { l: 'Total rolado', v: (ev.healRolled != null ? String(ev.healRolled) : '—') }
+            ],
+            note: 'Valores efetivos podem ser limitados pelo PV máximo do alvo.'
+        };
+        await showMessage('Cura', 'hit', subHeal, { offerBatchSkip: !!offerSkip });
         if (ev.newHp != null) {
             target.hp = ev.newHp;
             target.alive = target.hp > 0;
@@ -836,8 +967,13 @@
 
     async function animateBuffEvent(ev, offerSkip) {
         if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
-        var sub = (ev.actorName || '') + ' · ' + (ev.turnsLeft | 0) + ' turno(s) (efeito no estado).';
-        await showMessage('\u2728 ' + (ev.skillName || 'Buff'), 'hit', sub, { offerBatchSkip: !!offerSkip });
+        var subBuff = {
+            kicker: 'Efeito em estado',
+            intro: (ev.skillName || 'Buff tático') + ' em ' + (ev.actorName || 'combatente'),
+            rows: [{ l: 'Duração restante', v: (ev.turnsLeft | 0) + ' turno(s)' }],
+            note: 'O efeito segue ativo até expirar ou ser removido pelo combate.'
+        };
+        await showMessage(ev.skillName || 'Buff tático', 'hit', subBuff, { offerBatchSkip: !!offerSkip });
     }
 
     async function animateResourceEvent(ev, offerSkip) {
@@ -848,9 +984,31 @@
     async function animateFleeEvent(ev, offerSkip) {
         if (_skipReplayBatch) return;
         var p = currentState.order[currentState.p_idx];
-        await showMessage('🏃 TENTANDO FUGIR', 'pre-npc', 'Teste de Acrobacia (DEX) DC ' + ev.dc, { offerBatchSkip: !!offerSkip });
+        await showMessage('Tentativa de fuga', 'pre-npc', {
+            kicker: 'Teste de habilidade',
+            intro: 'Acrobacia (Des) para sair do alcance dos hostis presentes na cena.',
+            rows: [{ l: 'Classe de dificuldade', v: String(ev.dc) }],
+            note: 'Regra adaptada ao fluxo do combate: CD fixa neste modo.'
+        }, { offerBatchSkip: !!offerSkip });
         if (_skipReplayBatch) return;
-        await new Promise(function (x) { showDice(ev.d20, x, p, 'Fuga · DC ' + ev.dc, { offerBatchSkip: !!offerSkip }); });
+        await new Promise(function (x) {
+            showDice(ev.d20, x, p, 'Fuga · Acrobacia', {
+                offerBatchSkip: !!offerSkip,
+                postResult: function () {
+                    return {
+                        title: ev.success ? 'Passou no teste' : 'Não passou',
+                        cls: ev.success ? 'hit' : 'miss',
+                        subStructured: {
+                            kicker: 'Acrobacia (Des) · CD ' + ev.dc,
+                            rows: [{ l: 'Resultado', v: ev.d20 + ' + ' + ev.mod + ' = ' + ev.total }],
+                            note: ev.success
+                                ? 'Você pode sair sem provocar ataques de oportunidade por este movimento.'
+                                : 'A seguir, inimigos hostis podem realizar ataques de oportunidade, se a regra do encontro permitir.'
+                        }
+                    };
+                }
+            });
+        });
         if (_skipReplayBatch) return;
         if (ev.success) {
             try {
@@ -858,7 +1016,14 @@
                     ValdoriaAudio.playSFX('sfx_success');
                 }
             } catch (eOk) {}
-            await showMessage('💨 ESCAPOU!', 'hit', 'Total ' + ev.total + ' ≥ DC ' + ev.dc, { offerBatchSkip: !!offerSkip });
+            await showMessage('Fuga bem-sucedida', 'hit', {
+                kicker: 'Resultado',
+                rows: [
+                    { l: 'Total na Acrobacia', v: String(ev.total) },
+                    { l: 'CD', v: String(ev.dc) }
+                ],
+                note: 'Você deixa o combate.'
+            }, { offerBatchSkip: !!offerSkip });
         } else {
             try {
                 if (typeof sfxMiss === 'function') {
@@ -867,7 +1032,14 @@
                     ValdoriaAudio.playSFX('sfx_miss');
                 }
             } catch (eMs) {}
-            await showMessage('⚠ FALHOU', 'miss', 'Ataques de oportunidade dos inimigos!', { offerBatchSkip: !!offerSkip });
+            await showMessage('Falha no teste', 'miss', {
+                kicker: 'Consequência',
+                intro: 'Total na Acrobacia abaixo da CD — a saída fica exposta.',
+                bullets: [
+                    'Cada inimigo hostil vivo pode realizar um ataque de oportunidade.',
+                    'Depois disso, o estado do combate segue conforme o narrador do encontro.'
+                ]
+            }, { offerBatchSkip: !!offerSkip });
         }
     }
 
@@ -918,8 +1090,10 @@
         ov.className = 'iop-overlay';
         var card = document.createElement('div');
         card.className = 'iop-card';
-        var html = '<div class="iop-title">⚔ Ordem de Iniciativa</div>';
-        html += '<div class="iop-sub">Combate começa pelo topo</div>';
+        var html = '<div class="iop-title">Ordem de iniciativa</div>';
+        html += '<div class="iop-lead"><span class="c2-info-kicker">Leitura rápida</span>';
+        html += '<p class="iop-lead-text">Quem aparece primeiro na lista age primeiro. Na sua vez, use os botões na base da tela (atacar, habilidades, itens ou passar).</p></div>';
+        html += '<div class="iop-sub">Topo = primeiro turno neste combate</div>';
         html += '<div class="iop-list">';
         currentState.order.forEach(function (c, i) {
             var isPlayer = c.t === 'p';
@@ -1030,7 +1204,12 @@
                     big.className = 'drl-big';
                     big.textContent = info.title;
                     resultEl.appendChild(big);
-                    if (info.sub) {
+                    if (info.subStructured) {
+                        var panelSr = document.createElement('div');
+                        panelSr.className = 'drl-info-panel';
+                        c2AppendInfoStack(panelSr, info.subStructured);
+                        resultEl.appendChild(panelSr);
+                    } else if (info.sub) {
                         var sub = document.createElement('div');
                         sub.className = 'drl-sub';
                         sub.textContent = info.sub;
@@ -1092,17 +1271,25 @@
         return new Promise(function (resolve) {
             var ov = document.createElement('div');
             ov.className = 'combat-msg-overlay';
+            ov.setAttribute('role', 'dialog');
+            ov.setAttribute('aria-modal', 'true');
             var card = document.createElement('div');
             card.className = 'combat-msg-card ' + (cls || '');
             var txt = document.createElement('div');
             txt.className = 'combat-msg-text';
+            txt.id = 'c2-msg-title-' + String(Date.now());
             txt.textContent = text;
+            ov.setAttribute('aria-labelledby', txt.id);
             card.appendChild(txt);
             if (sub) {
-                var s = document.createElement('div');
-                s.className = 'combat-msg-sub';
-                s.textContent = sub;
-                card.appendChild(s);
+                if (typeof sub === 'object' && !Array.isArray(sub)) {
+                    c2AppendInfoStack(card, sub);
+                } else {
+                    var s = document.createElement('div');
+                    s.className = 'combat-msg-sub c2-msg-plain';
+                    s.textContent = sub;
+                    card.appendChild(s);
+                }
             }
             var btn = document.createElement('button');
             btn.className = 'dice-continue-btn';
@@ -1192,10 +1379,16 @@
                         big.className = 'drl-big';
                         big.textContent = '−' + total + ' PV' + (crit ? ' · Crítico' : '');
                         resultEl.appendChild(big);
-                        var sub = document.createElement('div');
-                        sub.className = 'drl-sub';
-                        sub.textContent = target.ico + ' ' + target.n + ' · PV ' + oldHp + ' → ' + newHp;
-                        resultEl.appendChild(sub);
+                        var panelDmg = document.createElement('div');
+                        panelDmg.className = 'drl-info-panel';
+                        c2AppendInfoStack(panelDmg, {
+                            kicker: 'Alvo',
+                            rows: [
+                                { l: target.ico + ' ' + target.n, v: 'PV ' + oldHp + ' → ' + newHp }
+                            ],
+                            note: 'O dano já foi aplicado ao estado do combate; a arena mostra o impacto.'
+                        });
+                        resultEl.appendChild(panelDmg);
                         try {
                             if (typeof sfxDamageType === 'function') {
                                 sfxDamageType((dmgOpts && dmgOpts.dmgType) || 'slashing');
@@ -1406,6 +1599,9 @@
             html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">2d' + die + modStr + ' (' + (2 + mod) + '–' + (2 * die + mod) + ')</span></div>';
         }
         html += '</div>';
+        html += '<div class="tcc-hint-block"><span class="c2-info-kicker">Antes de confirmar</span>';
+        html += '<ul class="c2-info-bullets c2-info-bullets--compact"><li>CA e PV mostrados são do momento deste clique.</li>';
+        html += '<li>Em acerto crítico (natural 20), some um dado de dano à rolagem antes do modificador (PHB).</li></ul></div>';
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">⚔ Confirmar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
@@ -1430,6 +1626,8 @@
         var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
         var html = '<div class="tcc-title">' + escHtml(skn) + ' em ' + escHtml(u.n) + '?</div>';
         html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats"><span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' PV</span></div></div></div>';
+        html += '<div class="tcc-hint-block"><span class="c2-info-kicker">Cura</span>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">O custo em recurso já foi reservado; confirme se este é o alvo desejado.</p></div>';
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">✓ Confirmar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
@@ -1484,9 +1682,11 @@
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card';
-        var html = '<div class="lp-title">✨ Habilidades</div>';
+        var html = '<div class="lp-title">Habilidades</div>';
         html += '<div class="lp-sub">' + (p.res ? escHtml(p.res.ico) + ' ' + p.res.value + '/' + p.res.max + ' ' + escHtml(p.res.name) : '') + '</div>';
-        html += '<div class="lp-sub lp-hint">Escolha uma habilidade. Custo em recurso da classe; alvo no tabuleiro quando pedido.</div>';
+        html += '<div class="lp-lead-block"><span class="c2-info-kicker">Como usar</span>';
+        html += '<ul class="c2-info-bullets c2-info-bullets--compact"><li>Cada linha mostra o custo no recurso da classe.</li>';
+        html += '<li>Se pedir alvo, toque no combatente certo na arena após escolher a habilidade.</li></ul></div>';
         html += '<div class="lp-list">';
         p.skills.forEach(function (sk, idx) {
             var row = typeof sk === 'string' ? { n: sk, cost: 0, kind: 'attack', ico: '✨' } : sk;
@@ -1554,7 +1754,9 @@
         var card = document.createElement('div');
         card.className = 'list-panel-card list-panel-card--log';
         var lines = (s.log || []).slice().reverse();
-        var html = '<div class="lp-title">📜 Log do combate</div><div class="lp-sub">Últimas entradas</div>';
+        var html = '<div class="lp-title">Log do combate</div><div class="lp-sub">Últimas entradas</div>';
+        html += '<div class="lp-lead-block lp-lead-block--dim"><span class="c2-info-kicker">Referência</span>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">Linhas em ordem da mais recente para a mais antiga; texto espelha o registro do servidor.</p></div>';
         html += '<div class="lp-log-scroll">';
         if (!lines.length) html += '<div class="lp-empty">Sem entradas ainda.</div>';
         else lines.forEach(function (ln) { html += '<div class="lp-log-line">' + escHtml(ln) + '</div>'; });
@@ -1574,8 +1776,10 @@
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card';
-        var html = '<div class="lp-title">🎒 Mochila</div>';
+        var html = '<div class="lp-title">Mochila</div>';
         html += '<div class="lp-sub">' + bag.length + ' tipo(s) de item</div>';
+        html += '<div class="lp-lead-block lp-lead-block--dim"><span class="c2-info-kicker">Uso</span>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">Toque num item para consumir conforme as regras do encontro; quantidade aparece à direita.</p></div>';
         html += '<div class="lp-list">';
         if (!bag.length) html += '<div class="lp-empty">Mochila vazia</div>';
         bag.forEach(function (it, i) {
