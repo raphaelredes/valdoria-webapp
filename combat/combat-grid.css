@@ -9,6 +9,8 @@
     gap: 2px;
     z-index: 1;
     flex: 1;
+    /* Altura fixa por celula: teste de morte / chips nao redimensionam o card */
+    --cell-arena-h: clamp(96px, 22.5vw, 112px);
 }
 
 /* ── Row label (retaguarda / frente) — color-coded by zone ── */
@@ -44,12 +46,14 @@
 /* ── Individual cell ── */
 .cell {
     position: relative;
-    min-height: clamp(64px, 16vw, 80px);
+    min-height: var(--cell-arena-h, clamp(96px, 22.5vw, 112px));
+    height: var(--cell-arena-h, clamp(96px, 22.5vw, 112px));
+    max-height: var(--cell-arena-h, clamp(96px, 22.5vw, 112px));
     border-radius: var(--v-radius-sm, 6px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     border: 1px solid var(--v-border-15);
     background: rgba(0,0,0,0.06);
     padding: 4px 3px 3px;
@@ -235,6 +239,13 @@ body.perf-lite .cell.in-range { animation: none; }
 .bar-num.hp-mid  { color: #e0b040; }
 .bar-num.hp-low  { color: #e06050; }
 .bar-num.mp      { color: #60a0d0; }
+
+/* Mini-card no cabeçalho do overlay de dado — fora da arena; não usar altura fixa da célula */
+.dice-init-cell-scene .cell {
+    min-height: 0;
+    height: auto;
+    max-height: none;
+}
 
 /* ── Enemy intent badge (top-right) — Into the Breach style ── */
 .intent {
