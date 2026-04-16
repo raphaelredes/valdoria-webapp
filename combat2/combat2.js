@@ -286,6 +286,57 @@
 
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
+    /** Marcador de rodada no log (backend `combat2.py` — `::C2_ROUND::N`). */
+    var C2_ROUND_RE = /^::C2_ROUND::(\d+)$/;
+
+    /**
+     * Agrupa linhas do log por rodada para exibição (telas finais, painel de log).
+     * @param {string[]} logLines ordem cronológica
+     * @param {{ reverseRounds?: boolean }} opts se true, rodadas mais recentes primeiro (painel)
+     */
+    function formatCombat2LogByRounds(logLines, opts) {
+        opts = opts || {};
+        var lines = logLines || [];
+        var chunks = [];
+        var curRn = null;
+        var curBuf = [];
+        function pushChunk(rn) {
+            if (!curBuf.length && rn == null) return;
+            chunks.push({ rn: rn, lines: curBuf.slice() });
+            curBuf = [];
+        }
+        for (var i = 0; i < lines.length; i++) {
+            var ln = lines[i];
+            var m = typeof ln === 'string' ? ln.match(C2_ROUND_RE) : null;
+            if (m) {
+                pushChunk(curRn);
+                curRn = m[1];
+                continue;
+            }
+            curBuf.push(ln);
+        }
+        pushChunk(curRn);
+        if (!chunks.length) {
+            chunks.push({ rn: null, lines: lines.slice() });
+        }
+        if (opts.reverseRounds && chunks.length > 1) {
+            chunks = chunks.slice().reverse();
+        }
+        var parts = [];
+        chunks.forEach(function (ch) {
+            var head = ch.rn != null ? ('Rodada ' + escHtml(String(ch.rn))) : 'Registro';
+            parts.push('<div class="c2-log-round">');
+            parts.push('<div class="c2-log-round-head">' + head + '</div>');
+            parts.push('<div class="c2-log-round-body">');
+            ch.lines.forEach(function (line) {
+                parts.push('<div class="c2-log-line">' + escHtml(line) + '</div>');
+            });
+            parts.push('</div></div>');
+        });
+        return parts.join('');
+    }
+
+
     /** Combate com 5+ participantes: oferece pular animações do lote de eventos (vários inimigos). */
     function shouldOfferBatchSkip() {
         return !!(currentState && currentState.order && currentState.order.length > 4 && currentState.ph === 'active');
@@ -588,9 +639,11 @@
             var title = { victory: 'VITÓRIA', defeat: 'DERROTA', fled: 'FUGIU' }[ph];
             var narr = { victory: 'Todos os inimigos caíram por suas mãos.', defeat: 'Você cai inconsciente no chão...', fled: 'Você escapa para longe da ameaça.' }[ph];
             var narrK = { victory: 'Resultado', defeat: 'Desfecho', fled: 'Epílogo' }[ph];
-            html = '<div class="resolution ' + ph + '"><div class="res-title">' + title + '</div>';
-            html += '<div class="res-narr-block"><span class="res-narr-kicker">' + escHtml(narrK) + '</span><p class="res-narr">' + escHtml(narr) + '</p></div>';
-            /* Bloco de recompensas — apenas em vitoria */
+            var logBody = formatCombat2LogByRounds(s.log || [], { reverseRounds: false });
+            html = '<div class="resolution ' + ph + '">';
+            html += '<div class="res-stack">';
+            html += '<div class="res-top"><div class="res-title">' + title + '</div>';
+            html += '<div class="res-narr-block"><span class="res-narr-kicker">' + escHtml(narrK) + '</span><p class="res-narr">' + escHtml(narr) + '</p></div></div>';
             if (ph === 'victory' && s.rewards) {
                 var r = s.rewards;
                 var xpPct = Math.min(100, Math.round((r.newXp / r.threshold) * 100));
@@ -608,11 +661,10 @@
                 });
                 if (!(r.items || []).length) html += '<div class="rr-loot-empty">Nenhum item caiu desta vez.</div>';
                 html += '</div>';
-            } else {
-                html += '<div class="res-log">';
-                (s.log || []).slice(-8).forEach(function (line) { html += '<div>' + escHtml(line) + '</div>'; });
-                html += '</div>';
             }
+            html += '<div class="res-log-section"><div class="res-log-heading">Registro do combate</div>';
+            html += '<div class="res-log">' + logBody + '</div></div>';
+            html += '</div>';
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close">✓ Continuar</button></div>';
             html += '</div>';
             setHTML(app, html);
@@ -1753,13 +1805,12 @@
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card list-panel-card--log';
-        var lines = (s.log || []).slice().reverse();
-        var html = '<div class="lp-title">Log do combate</div><div class="lp-sub">Últimas entradas</div>';
+        var html = '<div class="lp-title">Log do combate</div><div class="lp-sub">Por rodada</div>';
         html += '<div class="lp-lead-block lp-lead-block--dim"><span class="c2-info-kicker">Referência</span>';
-        html += '<p class="c2-info-intro c2-info-intro--inline">Linhas em ordem da mais recente para a mais antiga; texto espelha o registro do servidor.</p></div>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">Rodadas mais recentes no topo; dentro de cada rodada, ordem cronológica. Mesmo registro do servidor.</p></div>';
         html += '<div class="lp-log-scroll">';
-        if (!lines.length) html += '<div class="lp-empty">Sem entradas ainda.</div>';
-        else lines.forEach(function (ln) { html += '<div class="lp-log-line">' + escHtml(ln) + '</div>'; });
+        if (!(s.log || []).length) html += '<div class="lp-empty">Sem entradas ainda.</div>';
+        else html += formatCombat2LogByRounds(s.log || [], { reverseRounds: true });
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
