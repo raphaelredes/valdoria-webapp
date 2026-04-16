@@ -1587,7 +1587,7 @@
         var modStr = mod > 0 ? ' + ' + mod + attr : '';
         var title = (skObj && skObj.n) ? ('Usar ' + escHtml(skObj.n) + '?') : 'Atacar este alvo?';
         var html = '<div class="tcc-title">' + title + '</div>';
-        html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats">CA ' + u.ac + ' · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' HP</span></div></div></div>';
+        html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats">CA ' + u.ac + ' · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' PV</span></div></div></div>';
         html += '<div class="tcc-dmg">';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val">d20 + ' + p.atk + ' vs CA ' + u.ac + '</span></div>';
         if (skObj && skObj.kind === 'attack') {
