@@ -26,6 +26,8 @@
     var _pendingSkill = null;
     /** Indice em order[p_idx].skills ao usar habilidade de ataque/cura com alvo. */
     var _pendingSkillSlot = null;
+    /** Ataque com arma: Ataque Poderoso (Guerreiro) na confirmacao. */
+    var _pendingPowerAttack = false;
     var _activeDiceClose = null;
     var _skipInit = false;
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
@@ -494,6 +496,9 @@
                 any = true;
                 pushRow('\u26a1', (ev.who || '') + ' \u00b7 ' + (ev.resName || 'recurso'),
                     String(ev.before != null ? ev.before : '?') + ' \u2192 ' + String(ev.after != null ? ev.after : '?'));
+            } else if (ev.kind === 'reaction_prompt') {
+                any = true;
+                pushRow('\u2728', 'Reação (Escudo)', (ev.actorName || '') + ' \u2192 ' + (ev.targetName || ''));
             }
         }
         if (!any) {
@@ -893,6 +898,7 @@
             _selectHealTarget = false;
             _pendingSkill = null;
             _pendingSkillSlot = null;
+            _pendingPowerAttack = false;
             render(currentState);
             return;
         }
@@ -901,6 +907,7 @@
         if (act === 'attack') {
             _pendingSkill = null;
             _pendingSkillSlot = null;
+            _pendingPowerAttack = false;
             var aliveIdxs = [];
             if (currentState && currentState.order) {
                 for (var ai = 0; ai < currentState.order.length; ai++) {
@@ -959,19 +966,76 @@
         _selectingTarget = false;
         _selectHealTarget = false;
         var slot = _pendingSkillSlot;
+        var pa = _pendingPowerAttack;
         _pendingSkillSlot = null;
         _pendingSkill = null;
+        _pendingPowerAttack = false;
         render(currentState);
         if (slot != null && slot >= 0) {
             await remoteAction({ type: 'skill', slot: slot, target: tgtIdx });
         } else {
-            await remoteAction({ type: 'attack', target: tgtIdx });
+            await remoteAction({ type: 'attack', target: tgtIdx, powerAttack: !!pa });
         }
     }
 
     /* ============================================================
      * ACTIONS: POST /api/combat2 + replay events
      * ============================================================ */
+    function promptShieldReaction(ev) {
+        return new Promise(function (resolve) {
+            var ov = document.createElement('div');
+            ov.className = 'target-confirm-overlay';
+            var card = document.createElement('div');
+            card.className = 'target-confirm-card';
+            var nm = ev.actorName || 'Inimigo';
+            var tot = (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?');
+            var html = '<div class="tcc-title">Reação — Escudo Arcano</div>';
+            html += '<p class="c2-info-intro c2-info-intro--inline"><strong>' + escHtml(nm) + '</strong> acerta em você (' + escHtml(tot) + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + ').</p>';
+            html += '<p class="c2-info-intro c2-info-intro--inline">Gastar <strong>' + (ev.shieldCost | 0) + '</strong> de mana para somar +5 à CA contra este ataque (PHB)?</p>';
+            html += '<div class="tcc-actions"><button type="button" class="action-btn" data-rs="0">Não usar</button>';
+            html += '<button type="button" class="action-btn primary" data-rs="1">Usar Escudo</button></div>';
+            setHTML(card, html);
+            ov.appendChild(card);
+            document.body.appendChild(ov);
+            function done(v) {
+                try { ov.remove(); } catch (eR) {}
+                resolve(!!v);
+            }
+            ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
+            card.querySelector('[data-rs="0"]').addEventListener('click', function () { done(false); });
+            card.querySelector('[data-rs="1"]').addEventListener('click', function () { done(true); });
+        });
+    }
+
+    async function drainCombatEventQueue(initialEvs, offerSkip) {
+        var originalBatch = (initialEvs || []).slice();
+        var queue = originalBatch.slice();
+        while (queue.length) {
+            var ev = queue.shift();
+            if (!ev) continue;
+            if (ev.kind === 'reaction_prompt' && ev.subtype === 'shield') {
+                var use = await promptShieldReaction(ev);
+                var r2 = await dispatchAction({ type: 'reaction_resolve', useShield: use });
+                if (r2.error) {
+                    console.warn('[C2] reaction_resolve', r2.error);
+                    return;
+                }
+                currentState = r2.state;
+                render(currentState);
+                if (r2.events && r2.events.length) {
+                    queue = r2.events.concat(queue);
+                }
+                continue;
+            }
+            if (_skipReplayBatch) {
+                showBatchSummaryPopup(originalBatch);
+                _skipReplayBatch = false;
+                return;
+            }
+            await playEvent(ev, offerSkip);
+        }
+    }
+
     async function remoteAction(action) {
         try {
             var resp = await dispatchAction(action);
@@ -979,25 +1043,18 @@
             var evs = resp.events || [];
             var offerSkip = shouldOfferBatchSkip();
             _skipReplayBatch = false;
-            if (evs.length) {
-                for (var i = 0; i < evs.length; i++) {
-                    if (_skipReplayBatch) {
-                        currentState = resp.state;
-                        render(currentState);
-                        showBatchSummaryPopup(evs);
-                        _skipReplayBatch = false;
-                        break;
-                    }
-                    await playEvent(evs[i], offerSkip);
-                }
-            }
             currentState = resp.state;
+            render(currentState);
+            if (evs.length) {
+                await drainCombatEventQueue(evs, offerSkip);
+            }
             render(currentState);
             if (currentState.ph === 'init_done') showInitiativeOrderPopup();
         } catch (e) { console.error('[C2] action failed', e); }
     }
 
     async function playEvent(ev, offerSkipGlob) {
+        if (ev && ev.kind === 'reaction_prompt') return;
         var oSkin = offerAnimSkipForEvent(ev, offerSkipGlob);
         if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev, oSkin);
         if (ev.kind === 'heal') return animateHealEvent(ev, oSkin);
@@ -1039,17 +1096,8 @@
         var dmgCritUi = !!(ev.crit && !ev.autoHit && ev.saveDc == null);
 
         if (ev.autoHit) {
-            await showMessage(
-                (ev.skillName || 'Magia') + ' — acerto automático',
-                'hit',
-                {
-                    kicker: 'SRD / PHB',
-                    intro: 'Esta magia não usa rolagem de ataque contra a Classe de Armadura.',
-                    rows: [{ l: 'Alvo', v: target.n }],
-                    note: 'Rolagem de dano a seguir.'
-                },
-                { offerBatchSkip: !!offerSkip }
-            );
+            /* 1A: Mísseis e similares — só dano + VFX, sem overlay extra de “acerto automático”. */
+            await sleep(140);
         } else if (ev.saveDc != null) {
             var saveAb = (ev.saveAbility || 'dex').toLowerCase() === 'con' ? 'Constituição' : 'Destreza';
             await new Promise(function (x) {
@@ -1991,13 +2039,57 @@
         html += '<div class="tcc-hint-block"><span class="c2-info-kicker">Antes de confirmar</span>';
         html += '<ul class="c2-info-bullets c2-info-bullets--compact"><li>CA e PV mostrados são do momento deste clique.</li>';
         html += '<li>Em acerto crítico (natural 20), some um dado de dano à rolagem antes do modificador (PHB).</li></ul></div>';
+        if (!skObj && p.cls === 'Guerreiro') {
+            html += '<label class="c2-pa-row"><input type="checkbox" id="c2-power-atk"/> Ataque Poderoso (−5 no ataque, +10 no dano, PHB)</label>';
+        }
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">⚔ Confirmar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); });
-        card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmPendingAction(tgtIdx); });
+        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); _pendingPowerAttack = false; });
+        card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
+            var paCb = card.querySelector('#c2-power-atk');
+            _pendingPowerAttack = !!(paCb && paCb.checked);
+            ov.remove();
+            confirmPendingAction(tgtIdx);
+        });
+    }
+
+    function showAoESaveTargetChecklist(skillSlot, aliveIdxs) {
+        var s = currentState;
+        var p = s.order[s.p_idx];
+        var sk = p.skills && p.skills[skillSlot];
+        var row = sk && typeof sk === 'object' ? sk : {};
+        var ov = document.createElement('div');
+        ov.className = 'target-confirm-overlay';
+        var card = document.createElement('div');
+        card.className = 'target-confirm-card';
+        var html = '<div class="tcc-title">' + escHtml(row.n || 'Magia') + ' — alvos</div>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">Marque os inimigos (uma rolagem de dano; teste de resistência por alvo).</p>';
+        aliveIdxs.forEach(function (idx) {
+            var u = s.order[idx];
+            var id = 'c2aoe-' + idx;
+            html += '<label class="c2-pa-row"><input type="checkbox" id="' + id + '" data-idx="' + idx + '" checked/> ' + escHtml(u.n) + '</label>';
+        });
+        html += '<div class="tcc-actions"><button type="button" class="action-btn" data-ac="0">Cancelar</button>';
+        html += '<button type="button" class="action-btn primary" data-ac="1">Lançar</button></div>';
+        setHTML(card, html);
+        ov.appendChild(card);
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        card.querySelector('[data-ac="0"]').addEventListener('click', function () { ov.remove(); });
+        card.querySelector('[data-ac="1"]').addEventListener('click', async function () {
+            var chosen = [];
+            card.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                if (cb.checked) chosen.push(parseInt(cb.getAttribute('data-idx'), 10));
+            });
+            if (!chosen.length) return;
+            ov.remove();
+            try {
+                await remoteAction({ type: 'skill', slot: skillSlot, targets: chosen });
+            } catch (eA) { console.error('[COMBAT2]', 'aoe_skill', eA || ''); }
+        });
     }
 
     function showHealTargetConfirm(tgtIdx) {
@@ -2118,6 +2210,17 @@
                     return;
                 }
                 if (row.kind === 'attack') {
+                    if (row.multiTarget && row.save) {
+                        var aliveIdxs2 = [];
+                        for (var aj = 0; aj < currentState.order.length; aj++) {
+                            var oc2 = currentState.order[aj];
+                            if (oc2 && oc2.t === 'e' && oc2.alive) aliveIdxs2.push(aj);
+                        }
+                        if (aliveIdxs2.length > 1) {
+                            showAoESaveTargetChecklist(idx, aliveIdxs2);
+                            return;
+                        }
+                    }
                     _pendingSkillSlot = idx;
                     var aliveIdxs = [];
                     for (var ai = 0; ai < currentState.order.length; ai++) {

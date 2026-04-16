@@ -913,3 +913,22 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
     flex: 1;
     min-height: 44px;
 }
+
+/* Toggle Ataque Poderoso / checklist multi-alvo (magias com TR em área) */
+.c2-pa-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--v-space-sm, 8px);
+    margin: var(--v-space-md, 12px) 0 0;
+    padding: var(--v-space-sm, 8px) var(--v-space-md, 12px);
+    border-radius: var(--v-radius-sm, 6px);
+    background: var(--v-bg-raised, #332a22);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-sm, 12px);
+    line-height: 1.45;
+    color: var(--v-text, #d4c8b0);
+}
+.c2-pa-row input {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
