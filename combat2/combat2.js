@@ -411,8 +411,18 @@
     function buildBatchSummaryHtml(events, state) {
         state = state || currentState;
         var parts = [
-            '<div class="iop-title">\u2694 Ataque \u2014 rolagens puladas</div>',
-            '<div class="iop-sub">Resumo num\u00e9rico \u00b7 anima\u00e7\u00e3o omitida neste lote</div>',
+            '<header class="iop-head-batch" aria-labelledby="c2-batch-summary-title">',
+            '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
+            '<div class="iop-head-batch__text">',
+            '<p class="iop-head-batch__kicker">Resumo do lote</p>',
+            '<h2 class="iop-head-batch__title" id="c2-batch-summary-title">',
+            '<span class="iop-head-batch__line1">Ataque</span>',
+            '<span class="iop-head-batch__line2">Rolagens puladas</span>',
+            '</h2>',
+            '<p class="iop-head-batch__sub">Resultados j\u00e1 calculados no servidor. As anima\u00e7\u00f5es de dados foram omitidas nesta sequ\u00eancia.</p>',
+            '</div>',
+            '</header>',
+            '<div class="iop-head-batch__rule" role="presentation"></div>',
             '<div class="iop-list">'
         ];
         var rowNum = 0;
@@ -492,7 +502,7 @@
         ov.className = 'iop-overlay iop-overlay--batch';
         ov.setAttribute('role', 'dialog');
         ov.setAttribute('aria-modal', 'true');
-        ov.setAttribute('aria-label', 'Ataque — resumo com rolagens puladas');
+        ov.setAttribute('aria-labelledby', 'c2-batch-summary-title');
         var card = document.createElement('div');
         card.className = 'iop-card iop-card--batch-summary';
         setHTML(card, buildBatchSummaryHtml(events, currentState));
