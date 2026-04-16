@@ -398,12 +398,14 @@
     }
 
     function buildBatchSummaryHtml(events) {
+        /* Mesma hierarquia visual do popup "Ordem de iniciativa" (.iop-title / .iop-lead / .iop-sub / .iop-list). */
         var parts = [
-            '<div class="c2-sum-title">Resumo das rolagens</div>',
-            '<div class="c2-sum-hero"><span class="c2-sum-hero-kicker">Modo resumido</span>',
-            '<p class="c2-sum-hero-text">Rolagens de dados de outros combatentes foram condensadas nesta lista. ',
-            'As animações 3D do personagem que você controla permanecem como no fluxo normal.</p></div>',
-            '<div class="c2-sum-list">'
+            '<div class="iop-title">Ataque — rolagens puladas</div>',
+            '<div class="iop-lead"><span class="c2-info-kicker">Leitura rápida</span>',
+            '<p class="iop-lead-text">Rolagens de dados de outros combatentes foram condensadas nesta lista. ',
+            'As animações 3D do seu personagem permanecem como no fluxo normal.</p></div>',
+            '<div class="iop-sub">Ordem deste lote (como no registro do servidor)</div>',
+            '<div class="iop-list">'
         ];
         var any = false;
         for (var i = 0; i < events.length; i++) {
@@ -417,7 +419,7 @@
                 if (!ev.hit) {
                     var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Defesa (CA): total inferior à CA';
                     var rollLn = 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?');
-                    parts.push('<div class="c2-sum-row miss"><span class="c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                    parts.push('<div class="iop-row c2-sum-row miss"><span class="iop-ico c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                         (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--miss">Sem acerto</span></div>' +
                         '<div class="c2-sum-roll">' + escHtml(rollLn) + '</div><div class="c2-sum-why">' + escHtml(why) + '</div></div></div>');
                 } else {
@@ -432,7 +434,7 @@
                         (tags.length ? (' · ' + tags.join(' · ')) : '') +
                         (ev.oldHp != null && ev.newHp != null ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '');
                     var pillHit = ev.crit ? 'Crítico' : 'Acerto';
-                    parts.push('<div class="c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="c2-sum-ico">' + (dead ? '💀' : '⚔') +
+                    parts.push('<div class="iop-row c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="iop-ico c2-sum-ico">' + (dead ? '💀' : '⚔') +
                         '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
                         '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--hit">' + escHtml(pillHit) + '</span></div>' +
                         '<div class="c2-sum-roll">' + escHtml(rollHit) + '</div><div class="c2-sum-why">' + escHtml(dmgPlain) + '</div></div></div>');
@@ -441,27 +443,27 @@
                 any = true;
                 var fleeRoll = (ev.d20 != null ? 'd20=' + ev.d20 : '') + (ev.mod != null ? ' + ' + ev.mod : '') +
                     (ev.total != null ? ' = ' + ev.total : '') + ' vs CD ' + (ev.dc != null ? ev.dc : '');
-                parts.push('<div class="c2-sum-row flee"><span class="c2-sum-ico">🏃</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                parts.push('<div class="iop-row c2-sum-row flee"><span class="iop-ico c2-sum-ico">🏃</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                     (ev.success ? 'Fuga bem-sucedida' : 'Falha na fuga') + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--flee">' +
                     (ev.success ? 'Passou' : 'Não passou') + '</span></div><div class="c2-sum-roll">' + escHtml(fleeRoll) + '</div>' +
                     '<div class="c2-sum-why">Acrobacia (Des) · CD do teste</div></div></div>');
             } else if (ev.kind === 'round') {
-                parts.push('<div class="c2-sum-row round"><span class="c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
+                parts.push('<div class="iop-row c2-sum-row round"><span class="iop-ico c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
                     escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
             } else if (ev.kind === 'heal') {
                 any = true;
                 var hpLn = (ev.oldHp != null && ev.newHp != null) ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '';
-                parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">❤</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                parts.push('<div class="iop-row c2-sum-row hit"><span class="iop-ico c2-sum-ico">❤</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                     escHtml(ev.skillName || 'Cura') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' → ' + escHtml(ev.targetName || '') +
                     ' · +' + (ev.healGained != null ? ev.healGained : '?') + ' PV' + hpLn + '</div></div></div>');
             } else if (ev.kind === 'buff') {
                 any = true;
                 var turnsB = ev.turnsLeft != null ? (ev.turnsLeft + ' turno(s) · efeito tático no estado') : 'efeito tático';
-                parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">✨</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                parts.push('<div class="iop-row c2-sum-row hit"><span class="iop-ico c2-sum-ico">✨</span><div class="c2-sum-body"><div class="c2-sum-line">' +
                     escHtml(ev.skillName || 'Buff') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' · ' + escHtml(turnsB) + '</div></div></div>');
             } else if (ev.kind === 'resource') {
                 any = true;
-                parts.push('<div class="c2-sum-row"><span class="c2-sum-ico">⚡</span><div class="c2-sum-body"><div class="c2-sum-line">Recurso</div><div class="c2-sum-sub">' +
+                parts.push('<div class="iop-row c2-sum-row"><span class="iop-ico c2-sum-ico">⚡</span><div class="c2-sum-body"><div class="c2-sum-line">Recurso</div><div class="c2-sum-sub">' +
                     escHtml(ev.who || '') + ' · ' + escHtml(ev.resName || 'recurso') + ' ' +
                     (ev.before != null ? ev.before : '?') + ' → ' + (ev.after != null ? ev.after : '?') + '</div></div></div>');
             }
@@ -479,18 +481,18 @@
         if (existing) existing.remove();
         var ov = document.createElement('div');
         ov.id = 'c2-batch-summary';
-        ov.className = 'c2-batch-summary-overlay';
+        ov.className = 'iop-overlay iop-overlay--batch';
         ov.setAttribute('role', 'dialog');
         ov.setAttribute('aria-modal', 'true');
-        ov.setAttribute('aria-label', 'Resumo das rolagens do lote');
+        ov.setAttribute('aria-label', 'Ataque — resumo com rolagens puladas');
         var card = document.createElement('div');
-        card.className = 'c2-batch-summary-card';
+        card.className = 'iop-card iop-card--batch-summary';
         setHTML(card, buildBatchSummaryHtml(events));
         var foot = document.createElement('div');
-        foot.className = 'c2-batch-summary-foot';
+        foot.className = 'iop-foot iop-foot--batch';
         var ok = document.createElement('button');
         ok.type = 'button';
-        ok.className = 'c2-batch-summary-ok';
+        ok.className = 'dice-continue-btn';
         ok.textContent = 'Entendi';
         ok.addEventListener('click', function () { ov.remove(); });
         foot.appendChild(ok);
