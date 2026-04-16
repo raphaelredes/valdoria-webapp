@@ -22,7 +22,10 @@
 
     var currentState = null;
     var _selectingTarget = false;
+    var _selectHealTarget = false;
     var _pendingSkill = null;
+    /** Indice em order[p_idx].skills ao usar habilidade de ataque/cura com alvo. */
+    var _pendingSkillSlot = null;
     var _activeDiceClose = null;
     var _skipInit = false;
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
@@ -258,9 +261,10 @@
                     var tags = [];
                     if (ev.crit) tags.push('Crítico');
                     if (dead) tags.push('Eliminado');
+                    var skLine = ev.skillName ? (' · ' + escHtml(ev.skillName)) : '';
                     parts.push('<div class="c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="c2-sum-ico">' + (dead ? '💀' : '⚔') +
                         '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
-                        '</div><div class="c2-sum-sub">−' + dmg + ' PV' + (tags.length ? ' · ' + escHtml(tags.join(' · ')) : '') +
+                        '</div><div class="c2-sum-sub">−' + dmg + ' PV' + skLine + (tags.length ? ' · ' + escHtml(tags.join(' · ')) : '') +
                         (ev.oldHp != null && ev.newHp != null ? ' · PV ' + ev.oldHp + ' → ' + ev.newHp : '') + '</div></div></div>');
                 }
             } else if (ev.kind === 'flee') {
@@ -272,6 +276,20 @@
             } else if (ev.kind === 'round') {
                 parts.push('<div class="c2-sum-row round"><span class="c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
                     escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
+            } else if (ev.kind === 'heal') {
+                any = true;
+                parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">❤</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                    escHtml(ev.skillName || 'Cura') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' → ' + escHtml(ev.targetName || '') +
+                    ' · +' + (ev.healGained != null ? ev.healGained : '?') + ' PV</div></div></div>');
+            } else if (ev.kind === 'buff') {
+                any = true;
+                parts.push('<div class="c2-sum-row hit"><span class="c2-sum-ico">✨</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                    escHtml(ev.skillName || 'Buff') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + '</div></div></div>');
+            } else if (ev.kind === 'resource') {
+                any = true;
+                parts.push('<div class="c2-sum-row"><span class="c2-sum-ico">⚡</span><div class="c2-sum-body"><div class="c2-sum-line">Recurso</div><div class="c2-sum-sub">' +
+                    escHtml(ev.who || '') + ' · ' + escHtml(ev.resName || 'recurso') + ' ' +
+                    (ev.before != null ? ev.before : '?') + ' → ' + (ev.after != null ? ev.after : '?') + '</div></div></div>');
             }
         }
         if (!any) {
@@ -405,6 +423,7 @@
         if (u.initRolling) classes += ' init-rolling';
         if (!u.alive) classes += ' dead';
         if (_selectingTarget && utype === 'enemy' && u.alive) classes += ' selectable';
+        if (_selectHealTarget && utype === 'player' && (u.alive || (u.hp != null && u.hp <= 0))) classes += ' selectable-heal';
 
         var inner = '';
         var showInitBadge = currentState && (currentState.ph === 'intro' || currentState.ph === 'init' || currentState.ph === 'init_done');
@@ -513,8 +532,8 @@
         html += buildBattlefield(s);
 
         if (isPlayerTurn) {
-            if (_selectingTarget) {
-                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">✕ Cancelar Ataque</button></div></div>';
+            if (_selectingTarget || _selectHealTarget) {
+                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">✕ Cancelar</button></div></div>';
             } else {
                 html += '<div class="action-bar"><div class="action-btns-grid">';
                 html += '<button class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
@@ -549,6 +568,10 @@
                     showTargetConfirm(parseInt(uid.slice(6), 10));
                     return;
                 }
+                if (_selectHealTarget && uid === 'player') {
+                    showHealTargetConfirm(currentState.p_idx);
+                    return;
+                }
                 openUnitDetail(uid);
             });
         });
@@ -575,11 +598,19 @@
             await leaveCombatToOrigin();
             return;
         }
-        if (act === 'cancel-target') { _selectingTarget = false; _pendingSkill = null; render(currentState); return; }
+        if (act === 'cancel-target') {
+            _selectingTarget = false;
+            _selectHealTarget = false;
+            _pendingSkill = null;
+            _pendingSkillSlot = null;
+            render(currentState);
+            return;
+        }
         if (act === 'skills') { openSkillsPanel(); return; }
         if (act === 'bag') { openBagPanel(); return; }
         if (act === 'attack') {
             _pendingSkill = null;
+            _pendingSkillSlot = null;
             var aliveIdxs = [];
             if (currentState && currentState.order) {
                 for (var ai = 0; ai < currentState.order.length; ai++) {
@@ -606,11 +637,18 @@
         if (act === 'log') { openCombatLog(); return; }
     }
 
-    async function confirmAndAttack(tgtIdx) {
+    async function confirmPendingAction(tgtIdx) {
         _selectingTarget = false;
+        _selectHealTarget = false;
+        var slot = _pendingSkillSlot;
+        _pendingSkillSlot = null;
         _pendingSkill = null;
         render(currentState);
-        await remoteAction({ type: 'attack', target: tgtIdx });
+        if (slot != null && slot >= 0) {
+            await remoteAction({ type: 'skill', slot: slot, target: tgtIdx });
+        } else {
+            await remoteAction({ type: 'attack', target: tgtIdx });
+        }
     }
 
     /* ============================================================
@@ -643,6 +681,9 @@
 
     async function playEvent(ev, offerSkip) {
         if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev, offerSkip);
+        if (ev.kind === 'heal') return animateHealEvent(ev, offerSkip);
+        if (ev.kind === 'buff') return animateBuffEvent(ev, offerSkip);
+        if (ev.kind === 'resource') return animateResourceEvent(ev, offerSkip);
         if (ev.kind === 'flee') return animateFleeEvent(ev, offerSkip);
         if (ev.kind === 'round') {
             currentState.rn = ev.rn;
@@ -672,7 +713,9 @@
             syncAttackOutcomeFromEvent(ev);
             return;
         }
-        var actionLabel = ev.kind === 'oa' ? 'Ataque de oportunidade → ' + target.n : 'Ataca ' + target.n + ' (CA ' + target.ac + ')';
+        var actionLabel = ev.kind === 'oa'
+            ? 'Ataque de oportunidade → ' + target.n
+            : (ev.skillName ? (ev.skillName + ' → ' + target.n) : ('Ataca ' + target.n + ' (CA ' + target.ac + ')'));
 
         /* Overlay 1: d20 */
         await new Promise(function (x) {
@@ -705,7 +748,9 @@
         if (!ev.hit) return;
 
         /* Overlay 2: dado de dano + card animado */
-        await showDamageDice(ev.dmgRolls, actor.die, ev.crit, actor, target, ev.oldHp, ev.newHp, ev.dmgMod, {
+        var dmgDie = ev.dmgDie != null ? ev.dmgDie : actor.die;
+        var dmgModUi = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
+        await showDamageDice(ev.dmgRolls, dmgDie, ev.crit, actor, target, ev.oldHp, ev.newHp, dmgModUi, {
             offerBatchSkip: !!offerSkip,
             dmgType: ev.dmgType || 'slashing'
         });
@@ -720,6 +765,33 @@
         render(currentState);
         var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
         arenaStrikeFromEvent(ev);
+        await sleep(120);
+    }
+
+    async function animateHealEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
+        var target = currentState.order[ev.tIdx];
+        var actor = currentState.order[ev.aIdx];
+        if (!target || !actor) return;
+        if (ev.oldHp != null) target.hp = ev.oldHp;
+        render(currentState);
+        var sub = (ev.skillName || 'Cura') + ': rolagem ' + (ev.healRolled != null ? ev.healRolled : '?') + ' → +' + (ev.healGained | 0) + ' PV';
+        await showMessage('\u2764 Cura', 'hit', sub, { offerBatchSkip: !!offerSkip });
+        if (ev.newHp != null) {
+            target.hp = ev.newHp;
+            target.alive = target.hp > 0;
+        }
+        render(currentState);
+    }
+
+    async function animateBuffEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
+        var sub = (ev.actorName || '') + ' · ' + (ev.turnsLeft | 0) + ' turno(s) (efeito no estado).';
+        await showMessage('\u2728 ' + (ev.skillName || 'Buff'), 'hit', sub, { offerBatchSkip: !!offerSkip });
+    }
+
+    async function animateResourceEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
         await sleep(120);
     }
 
@@ -1223,28 +1295,63 @@
 
     /* ============================================================
      * POPUPS (target confirm, unit detail, skills, bag)
-     * Reduzidos ao essencial — detalhes completos copiados do simulador
-     * quando o backend suportar skills/bag reais.
      * ============================================================ */
+    function c2PreviewAttackDmg(p, sk) {
+        var mod = p.dmgMod | 0;
+        var spec = sk && sk.damageSpec;
+        var n = 1;
+        var die = p.die || 8;
+        if (spec && spec.n != null && spec.d != null) {
+            n = Math.max(1, spec.n | 0);
+            die = Math.max(2, spec.d | 0);
+        }
+        var flat = (spec && spec.flat != null) ? (spec.flat | 0) : 0;
+        var attr = p.attr ? ' (' + p.attr + ')' : '';
+        var flatStr = flat ? (' + ' + flat + ' (hab.)') : '';
+        var modStr = mod > 0 ? (' + ' + mod + attr) : (mod < 0 ? (' ' + mod + attr) : '');
+        var dmgF = n + 'd' + die + flatStr + modStr;
+        var critN = n + 1;
+        var critF = critN + 'd' + die + flatStr + modStr;
+        return {
+            dmgF: dmgF,
+            critF: critF,
+            minD: n + flat + mod,
+            maxD: n * die + flat + mod,
+            critMin: critN + flat + mod,
+            critMax: critN * die + flat + mod
+        };
+    }
+
     function showTargetConfirm(tgtIdx) {
         var s = currentState;
         var p = s.order[s.p_idx];
         var u = s.order[tgtIdx];
         if (!u || !u.alive) return;
+        var sk = (_pendingSkillSlot != null && p.skills && p.skills[_pendingSkillSlot]) ? p.skills[_pendingSkillSlot] : null;
+        var skObj = sk && typeof sk === 'object' ? sk : null;
         var ov = document.createElement('div');
         ov.className = 'target-confirm-overlay';
         var card = document.createElement('div');
         card.className = 'target-confirm-card';
         var hpPct = Math.round((u.hp / u.mhp) * 100);
         var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
-        var die = p.die, mod = p.dmgMod || 0, attr = p.attr ? ' (' + p.attr + ')' : '';
+        var die = p.die;
+        var mod = p.dmgMod || 0;
+        var attr = p.attr ? ' (' + p.attr + ')' : '';
         var modStr = mod > 0 ? ' + ' + mod + attr : '';
-        var html = '<div class="tcc-title">Atacar este alvo?</div>';
+        var title = (skObj && skObj.n) ? ('Usar ' + escHtml(skObj.n) + '?') : 'Atacar este alvo?';
+        var html = '<div class="tcc-title">' + title + '</div>';
         html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats">CA ' + u.ac + ' · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' HP</span></div></div></div>';
         html += '<div class="tcc-dmg">';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val">d20 + ' + p.atk + ' vs CA ' + u.ac + '</span></div>';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">1d' + die + modStr + ' (' + (1 + mod) + '–' + (die + mod) + ')</span></div>';
-        html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">2d' + die + modStr + ' (' + (2 + mod) + '–' + (2 * die + mod) + ')</span></div>';
+        if (skObj && skObj.kind === 'attack') {
+            var pr = c2PreviewAttackDmg(p, skObj);
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + escHtml(pr.dmgF) + ' (' + pr.minD + '–' + pr.maxD + ')</span></div>';
+            html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + escHtml(pr.critF) + ' (' + pr.critMin + '–' + pr.critMax + ')</span></div>';
+        } else {
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">1d' + die + modStr + ' (' + (1 + mod) + '–' + (die + mod) + ')</span></div>';
+            html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">2d' + die + modStr + ' (' + (2 + mod) + '–' + (2 * die + mod) + ')</span></div>';
+        }
         html += '</div>';
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">⚔ Confirmar</button></div>';
         setHTML(card, html);
@@ -1252,7 +1359,31 @@
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); });
-        card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmAndAttack(tgtIdx); });
+        card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmPendingAction(tgtIdx); });
+    }
+
+    function showHealTargetConfirm(tgtIdx) {
+        var s = currentState;
+        var p = s.order[s.p_idx];
+        var u = s.order[tgtIdx];
+        if (!u || u.t !== 'p') return;
+        var sk = (_pendingSkillSlot != null && p.skills) ? p.skills[_pendingSkillSlot] : null;
+        var skn = sk && typeof sk === 'object' ? sk.n : 'Cura';
+        var ov = document.createElement('div');
+        ov.className = 'target-confirm-overlay';
+        var card = document.createElement('div');
+        card.className = 'target-confirm-card';
+        var hpPct = Math.round((u.hp / u.mhp) * 100);
+        var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+        var html = '<div class="tcc-title">' + escHtml(skn) + ' em ' + escHtml(u.n) + '?</div>';
+        html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats"><span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' PV</span></div></div></div>';
+        html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">✓ Confirmar</button></div>';
+        setHTML(card, html);
+        ov.appendChild(card);
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); });
+        card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmPendingAction(tgtIdx); });
     }
 
     function openUnitDetail(uid) {
@@ -1302,11 +1433,18 @@
         card.className = 'list-panel-card';
         var html = '<div class="lp-title">✨ Habilidades</div>';
         html += '<div class="lp-sub">' + (p.res ? escHtml(p.res.ico) + ' ' + p.res.value + '/' + p.res.max + ' ' + escHtml(p.res.name) : '') + '</div>';
-        html += '<div class="lp-sub lp-hint">Uso em combate: em integração com a API (cada classe será validada no simulador).</div>';
+        html += '<div class="lp-sub lp-hint">Escolha uma habilidade. Custo em recurso da classe; alvo no tabuleiro quando pedido.</div>';
         html += '<div class="lp-list">';
-        p.skills.forEach(function (sk) {
-            var skName = typeof sk === 'string' ? sk : sk.n;
-            html += '<button type="button" class="lp-item disabled" disabled><div class="lp-item-ico">✨</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(skName) + '</div><div class="lp-item-desc">em breve</div></div></button>';
+        p.skills.forEach(function (sk, idx) {
+            var row = typeof sk === 'string' ? { n: sk, cost: 0, kind: 'attack', ico: '✨' } : sk;
+            var cost = parseInt(row.cost, 10) || 0;
+            var rv = p.res ? (parseInt(p.res.value, 10) || 0) : 999;
+            var canPay = !p.res || !p.res.max || rv >= cost;
+            var dis = canPay ? '' : ' disabled';
+            var kindLbl = row.kind === 'attack' ? 'Ataque' : (row.kind === 'heal' ? 'Cura' : 'Bônus');
+            html += '<button type="button" class="lp-item' + dis + '" data-skill-idx="' + idx + '"' + dis + '>';
+            html += '<div class="lp-item-ico">' + escHtml(row.ico || '✨') + '</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(row.n) + '</div>';
+            html += '<div class="lp-item-desc">' + escHtml(kindLbl) + ' · custo ' + cost + '</div></div></button>';
         });
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
@@ -1314,6 +1452,45 @@
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
+        card.querySelectorAll('[data-skill-idx]').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                if (btn.hasAttribute('disabled')) return;
+                var idx = parseInt(btn.getAttribute('data-skill-idx'), 10);
+                var sk = p.skills[idx];
+                var row = typeof sk === 'string' ? { n: sk, kind: 'attack', cost: 0 } : sk;
+                ov.remove();
+                if (row.kind === 'buff') {
+                    try { await remoteAction({ type: 'skill', slot: idx }); } catch (e3) { console.error('[COMBAT2]', 'skill_buff', e3 || ''); }
+                    return;
+                }
+                if (row.kind === 'heal') {
+                    if (row.healTargets === 'self') {
+                        try {
+                            await remoteAction({ type: 'skill', slot: idx, target: currentState.p_idx });
+                        } catch (e4) { console.error('[COMBAT2]', 'skill_heal_self', e4 || ''); }
+                        return;
+                    }
+                    _pendingSkillSlot = idx;
+                    _selectHealTarget = true;
+                    render(currentState);
+                    return;
+                }
+                if (row.kind === 'attack') {
+                    _pendingSkillSlot = idx;
+                    var aliveIdxs = [];
+                    for (var ai = 0; ai < currentState.order.length; ai++) {
+                        var oc = currentState.order[ai];
+                        if (oc && oc.t === 'e' && oc.alive) aliveIdxs.push(ai);
+                    }
+                    if (aliveIdxs.length === 1) {
+                        showTargetConfirm(aliveIdxs[0]);
+                    } else {
+                        _selectingTarget = true;
+                        render(currentState);
+                    }
+                }
+            });
+        });
     }
 
     function openCombatLog() {
