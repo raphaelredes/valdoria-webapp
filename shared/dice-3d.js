@@ -1,10 +1,10 @@
 /**
  * Dice3D — dados poliédricos para WebApps (Three.js + CanvasTexture nas faces).
  *
- * Regra visual: corpos sempre mais escuros + superfície mais áspera (bump forte,
- * roughness alto). bumpMap procedural partilhado, sheen leve no Physical, sem transmissão.
- * Arestas (EdgesGeometry) só em perf “lite”; full/medium = só luz + bump.
- * 10 variações aleatórias por instância / rolagem.
+ * Regra visual: corpos das faces escuros + números em branco (#fff) com contorno escuro;
+ * superfície áspera (bump forte, roughness alto). bumpMap procedural partilhado, sheen leve
+ * no Physical, sem transmissão. Arestas (EdgesGeometry) só em perf “lite”.
+ * 10 variações aleatórias por instância / rolagem (matizes distintos, mesma lógica de contraste).
  */
 var Dice3D = (function () {
     'use strict';
@@ -25,27 +25,30 @@ var Dice3D = (function () {
      * 10 tons de resina/acrílico (matiz); o corpo final é escurecido em createBodyMaterial.
      * Campos: roughness base, clearcoat, clearcoatRough, opacity, envMapI.
      */
+    /** Números sempre brancos; traços escuros para contraste em faces escuras (corpo do dado). */
+    var DICE_LABEL_LIGHT = { fill: '#ffffff', stroke: '#0c0a08', stroke2: 'rgba(18,14,12,0.72)' };
+
     var DICE_STYLE_VARIATIONS = [
-        { key: 'mel_fosco', color: 0xd4a848, edge: 0xf0d060, roughness: 0.74, clearcoat: 0.12, clearcoatRough: 0.82, opacity: 1, envMapI: 0.22, emissive: 0x4a3208, emiInt: 0.07,
-            label: { fill: '#1a1208', stroke: '#c4953a', stroke2: 'rgba(240,208,120,0.5)' } },
-        { key: 'ambra_opaca', color: 0xc07038, edge: 0xe8b868, roughness: 0.68, clearcoat: 0.18, clearcoatRough: 0.72, opacity: 0.97, envMapI: 0.26, emissive: 0x502008, emiInt: 0.06,
-            label: { fill: '#fff4e0', stroke: '#2a1408', stroke2: 'rgba(200,120,60,0.45)' } },
-        { key: 'vinho_resina', color: 0x842838, edge: 0xd4a050, roughness: 0.78, clearcoat: 0.08, clearcoatRough: 0.88, opacity: 1, envMapI: 0.2, emissive: 0x280810, emiInt: 0.08,
-            label: { fill: '#f8e8e0', stroke: '#1a0808', stroke2: 'rgba(212,160,80,0.5)' } },
-        { key: 'musgo_acrilico', color: 0x4a6838, edge: 0xa88840, roughness: 0.71, clearcoat: 0.14, clearcoatRough: 0.8, opacity: 1, envMapI: 0.24, emissive: 0x182010, emiInt: 0.06,
-            label: { fill: '#f0f0d8', stroke: '#1a2010', stroke2: 'rgba(180,200,140,0.4)' } },
-        { key: 'pergaminho_asp', color: 0x9a8870, edge: 0xc8a868, roughness: 0.82, clearcoat: 0.06, clearcoatRough: 0.9, opacity: 0.96, envMapI: 0.18, emissive: 0x302820, emiInt: 0.05,
-            label: { fill: '#1a1510', stroke: '#e8dcc8', stroke2: 'rgba(90,72,56,0.55)' } },
-        { key: 'azul_noite', color: 0x304878, edge: 0xd4b060, roughness: 0.69, clearcoat: 0.16, clearcoatRough: 0.76, opacity: 1, envMapI: 0.28, emissive: 0x101828, emiInt: 0.07,
-            label: { fill: '#f0f4ff', stroke: '#c4953a', stroke2: 'rgba(48,72,120,0.5)' } },
-        { key: 'cobre_fosco', color: 0xb06040, edge: 0xe0c878, roughness: 0.76, clearcoat: 0.1, clearcoatRough: 0.85, opacity: 1, envMapI: 0.23, emissive: 0x401808, emiInt: 0.06,
-            label: { fill: '#1a0c08', stroke: '#f0dcc8', stroke2: 'rgba(176,96,64,0.45)' } },
-        { key: 'pedra_quente', color: 0x6a5840, edge: 0xc4953a, roughness: 0.85, clearcoat: 0.05, clearcoatRough: 0.92, opacity: 0.94, envMapI: 0.16, emissive: 0x201810, emiInt: 0.05,
-            label: { fill: '#f6eedc', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.42)' } },
-        { key: 'verde_mata', color: 0x2a6850, edge: 0xc0d888, roughness: 0.72, clearcoat: 0.14, clearcoatRough: 0.78, opacity: 1, envMapI: 0.25, emissive: 0x082018, emiInt: 0.07,
-            label: { fill: '#e8fff0', stroke: '#143028', stroke2: 'rgba(160,216,180,0.45)' } },
-        { key: 'carvao_opaco', color: 0x3a3430, edge: 0xd8b868, roughness: 0.8, clearcoat: 0.09, clearcoatRough: 0.86, opacity: 0.98, envMapI: 0.19, emissive: 0x181410, emiInt: 0.06,
-            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(50,44,40,0.55)' } },
+        { key: 'mel_fosco', color: 0x8a6028, edge: 0xb89048, roughness: 0.74, clearcoat: 0.12, clearcoatRough: 0.82, opacity: 1, envMapI: 0.2, emissive: 0x2a1c08, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'ambra_opaca', color: 0x784018, edge: 0xa87838, roughness: 0.68, clearcoat: 0.18, clearcoatRough: 0.72, opacity: 0.97, envMapI: 0.22, emissive: 0x381808, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'vinho_resina', color: 0x581820, edge: 0x986030, roughness: 0.78, clearcoat: 0.08, clearcoatRough: 0.88, opacity: 1, envMapI: 0.18, emissive: 0x180608, emiInt: 0.07,
+            label: DICE_LABEL_LIGHT },
+        { key: 'musgo_acrilico', color: 0x304020, edge: 0x786828, roughness: 0.71, clearcoat: 0.14, clearcoatRough: 0.8, opacity: 1, envMapI: 0.2, emissive: 0x101808, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'pergaminho_asp', color: 0x5a5040, edge: 0x887848, roughness: 0.82, clearcoat: 0.06, clearcoatRough: 0.9, opacity: 0.96, envMapI: 0.16, emissive: 0x201810, emiInt: 0.05,
+            label: DICE_LABEL_LIGHT },
+        { key: 'azul_noite', color: 0x203058, edge: 0x887038, roughness: 0.69, clearcoat: 0.16, clearcoatRough: 0.76, opacity: 1, envMapI: 0.24, emissive: 0x0c1018, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'cobre_fosco', color: 0x704018, edge: 0xa08040, roughness: 0.76, clearcoat: 0.1, clearcoatRough: 0.85, opacity: 1, envMapI: 0.2, emissive: 0x281008, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'pedra_quente', color: 0x403428, edge: 0x907040, roughness: 0.85, clearcoat: 0.05, clearcoatRough: 0.92, opacity: 0.94, envMapI: 0.14, emissive: 0x181008, emiInt: 0.05,
+            label: DICE_LABEL_LIGHT },
+        { key: 'verde_mata', color: 0x184030, edge: 0x688050, roughness: 0.72, clearcoat: 0.14, clearcoatRough: 0.78, opacity: 1, envMapI: 0.22, emissive: 0x061410, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
+        { key: 'carvao_opaco', color: 0x242018, edge: 0x786038, roughness: 0.8, clearcoat: 0.09, clearcoatRough: 0.86, opacity: 0.98, envMapI: 0.16, emissive: 0x0c0a08, emiInt: 0.06,
+            label: DICE_LABEL_LIGHT },
     ];
 
     var EDGE_COLOR = 0xc4953a;
@@ -67,16 +70,16 @@ var Dice3D = (function () {
 
     /**
      * Textura de face: numero centrado, sem shadowBlur (legivel em “vidro”).
-     * Cores por variacao (DICE_STYLE_VARIATIONS) — alto contraste (WCAG-inspired).
+     * Números em branco + contorno escuro (faces do corpo já escuras em createBodyMaterial).
      */
     function makeLabelTexture(num, size, varIdx) {
         size = size || _labelRes;
         var vi = (varIdx | 0) % DICE_STYLE_VARIATIONS.length;
         var st = DICE_STYLE_VARIATIONS[vi];
         var lb = st.label || {};
-        var fill = lb.fill || '#f6eedc';
-        var strokeOuter = lb.stroke || '#1a1510';
-        var strokeMid = lb.stroke2 || 'rgba(196,149,58,0.45)';
+        var fill = lb.fill || '#ffffff';
+        var strokeOuter = lb.stroke || '#0c0a08';
+        var strokeMid = lb.stroke2 || 'rgba(18,14,12,0.72)';
         var _tk = num + '_' + size + '_v' + vi;
         if (_texCache[_tk]) return _texCache[_tk];
 
@@ -89,13 +92,13 @@ var Dice3D = (function () {
         var cy = size / 2;
         /* Grão fino na face (acrílico/resina fosca), sem brilho de “adesivo liso”. */
         var g0 = ctx.createRadialGradient(cx * 0.3, cy * 0.25, 0, cx, cy, size * 0.72);
-        g0.addColorStop(0, 'rgba(48,40,32,0.07)');
-        g0.addColorStop(0.45, 'rgba(26,21,16,0.04)');
-        g0.addColorStop(1, 'rgba(36,30,24,0.09)');
+        g0.addColorStop(0, 'rgba(22,18,14,0.18)');
+        g0.addColorStop(0.45, 'rgba(10,8,6,0.1)');
+        g0.addColorStop(1, 'rgba(18,14,12,0.2)');
         ctx.fillStyle = g0;
         ctx.fillRect(0, 0, size, size);
         for (var gi = 0; gi < Math.round(size * size * 0.00055); gi++) {
-            ctx.fillStyle = 'rgba(0,0,0,' + (0.028 + Math.random() * 0.045) + ')';
+            ctx.fillStyle = 'rgba(0,0,0,' + (0.04 + Math.random() * 0.06) + ')';
             ctx.fillRect((Math.random() * size) | 0, (Math.random() * size) | 0, 1, 1);
         }
 
@@ -152,9 +155,9 @@ var Dice3D = (function () {
         return DICE_STYLE_VARIATIONS[(varIdx | 0) % DICE_STYLE_VARIATIONS.length];
     }
 
-    /** Corpo do dado: sempre mais escuro (regra de produto — evita dados “claros demais”). */
+    /** Corpo do dado: escurece a face base (dados sempre visualmente escuros). */
     function dieBodyColorHex(hex) {
-        var mul = 0.7;
+        var mul = 0.56;
         var r = Math.max(8, Math.min(255, (((hex >> 16) & 255) * mul) | 0));
         var g = Math.max(8, Math.min(255, (((hex >> 8) & 255) * mul) | 0));
         var b = Math.max(8, Math.min(255, ((hex & 255) * mul) | 0));
