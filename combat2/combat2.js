@@ -230,7 +230,7 @@
             target.alive = ev.newHp > 0;
             render(currentState);
             var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-            playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'), ev.newHp);
+            arenaStrikeFromEvent(ev);
         } else {
             render(currentState);
         }
@@ -719,8 +719,8 @@
         target.alive = ev.newHp > 0;
         render(currentState);
         var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-        playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'), ev.newHp);
-        await sleep(200);
+        arenaStrikeFromEvent(ev);
+        await sleep(120);
     }
 
     async function animateFleeEvent(ev, offerSkip) {
@@ -1060,46 +1060,23 @@
                 d = new Dice3D(container, { size: 180, dieType: dieType, duration: 1800 });
                 function rollOne(i) {
                     if (i >= rolls.length) {
-                        /* Card animado do alvo */
+                        /* Resumo numerico apenas — barra HP e impacto ficam na arena (ver arenaStrikeFromEvent). */
                         while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                         resultEl.className = 'dice-result-label visible';
-                        var card = document.createElement('div');
-                        card.className = 'dmg-target-card' + (crit ? ' crit' : '') + (newHp <= 0 ? ' defeated' : '');
-                        var hdr2 = document.createElement('div'); hdr2.className = 'dtc-header';
-                        var ic = document.createElement('span'); ic.className = 'dtc-ico'; ic.textContent = target.ico;
-                        var nm = document.createElement('span'); nm.className = 'dtc-name'; nm.textContent = target.n;
-                        var dmgBadge = document.createElement('span'); dmgBadge.className = 'dtc-dmg';
-                        dmgBadge.textContent = '-' + total + (crit ? ' CRIT' : '');
-                        hdr2.appendChild(ic); hdr2.appendChild(nm); hdr2.appendChild(dmgBadge);
-                        card.appendChild(hdr2);
-                        var oldPct = Math.max(0, Math.min(100, Math.round((oldHp / target.mhp) * 100)));
-                        var newPct = Math.max(0, Math.min(100, Math.round((newHp / target.mhp) * 100)));
-                        var endFillCls = newPct > 60 ? 'fill-hp-high' : (newPct > 25 ? 'fill-hp-mid' : 'fill-hp-low');
-                        var bar = document.createElement('div'); bar.className = 'dtc-bar';
-                        var fill = document.createElement('div'); fill.className = 'dtc-bar-fill ' + endFillCls;
-                        fill.style.width = oldPct + '%';
-                        bar.appendChild(fill);
-                        card.appendChild(bar);
-                        var hpTxt = document.createElement('div'); hpTxt.className = 'dtc-hp';
-                        hpTxt.textContent = oldHp + ' / ' + target.mhp + ' HP';
-                        card.appendChild(hpTxt);
-                        resultEl.appendChild(card);
+                        var big = document.createElement('div');
+                        big.className = 'drl-big';
+                        big.textContent = '−' + total + ' PV' + (crit ? ' · Crítico' : '');
+                        resultEl.appendChild(big);
+                        var sub = document.createElement('div');
+                        sub.className = 'drl-sub';
+                        sub.textContent = target.ico + ' ' + target.n + ' · PV ' + oldHp + ' → ' + newHp;
+                        resultEl.appendChild(sub);
                         try {
                             if (typeof sfxDamageType === 'function') {
                                 sfxDamageType((dmgOpts && dmgOpts.dmgType) || 'slashing');
                             }
                         } catch (eDt) {}
-                        setTimeout(function () {
-                            fill.style.width = newPct + '%';
-                            var startMs = performance.now(), dur = 800;
-                            (function tick(t) {
-                                var p = Math.min(1, (t - startMs) / dur);
-                                hpTxt.textContent = Math.round(oldHp - (oldHp - newHp) * p) + ' / ' + target.mhp + ' HP';
-                                if (p < 1) requestAnimationFrame(tick);
-                                else if (newHp <= 0) hpTxt.classList.add('fallen');
-                            })(performance.now());
-                        }, 200);
-                        setTimeout(function () { continueBtn.style.display = ''; }, 1100);
+                        setTimeout(function () { continueBtn.style.display = ''; }, 550);
                         return;
                     }
                     try {
@@ -1199,39 +1176,49 @@
         if (isCrit) { _shakeAppCombat2('heavy'); } else { _shakeAppCombat2('light'); }
     }
 
-    function playHitVFX(uid, crit, dmgType, newHp) {
-        var el = document.querySelector('[data-unit-id="' + uid + '"]');
-        if (!el) return;
-        dmgType = dmgType || 'slashing';
+    /**
+     * Dano aplicado na arena: projétil do atacante ao alvo (canvas), depois flash na célula.
+     * Ver docs/sistemas/combat2-vfx-pipeline.md (fases B/C/D: transicao, AoE, buffs).
+     */
+    function arenaStrikeFromEvent(ev) {
+        if (!currentState || !ev) return;
+        var dt = ev.dmgType || 'slashing';
+        var fromUid = ev.aIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.aIdx;
+        var toUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+        var fromEl = document.querySelector('[data-unit-id="' + fromUid + '"]');
+        var toEl = document.querySelector('[data-unit-id="' + toUid + '"]');
         ensureCombatVfxRuntime();
-        flashTargetCell(el, dmgType, !!crit);
-        if (window._combatVfx) {
+        if (window._combatVfx && fromEl && toEl) {
             try {
-                window._combatVfx.impact(el, dmgType, { crit: !!crit });
-            } catch (e) {
-                console.warn('[COMBAT2]', 'vfx_impact_failed', e || '');
+                window._combatVfx.projectile(fromEl, toEl, dt, { crit: !!ev.crit });
+            } catch (eProj) {
+                console.warn('[COMBAT2]', 'vfx_projectile_failed', eProj || '');
+            }
+        } else if (window._combatVfx && toEl) {
+            try {
+                window._combatVfx.impact(toEl, dt, { crit: !!ev.crit });
+            } catch (eImp) {
+                console.warn('[COMBAT2]', 'vfx_impact_fallback_failed', eImp || '');
             }
         }
-        if (newHp != null && newHp <= 0 && uid && uid.indexOf('enemy_') === 0) {
-            try {
-                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
-                    ValdoriaAudio.playSFX('sfx_enemy_death');
+        var impactDelay = ev.crit ? 380 : 440;
+        setTimeout(function () {
+            if (toEl && document.body.contains(toEl)) {
+                flashTargetCell(toEl, dt, !!ev.crit);
+            }
+            if (ev.newHp != null && ev.newHp <= 0 && toUid.indexOf('enemy_') === 0) {
+                try {
+                    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                        ValdoriaAudio.playSFX('sfx_enemy_death');
+                    }
+                } catch (eS) {}
+                if (window._combatVfx && toEl) {
+                    try {
+                        window._combatVfx.kill(toEl, dt);
+                    } catch (eK) {}
                 }
-            } catch (eDeath) {}
-        }
-        var rect = el.getBoundingClientRect();
-        for (var i = 0; i < (crit ? 10 : 6); i++) {
-            var p = document.createElement('div');
-            p.className = 'hit-particle' + (crit ? ' crit' : '');
-            p.style.left = (rect.left + rect.width / 2) + 'px';
-            p.style.top = (rect.top + rect.height / 2) + 'px';
-            var ang = Math.random() * Math.PI * 2;
-            var dist = 25 + Math.random() * 30;
-            p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
-            p.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
-            document.body.appendChild(p);
-            setTimeout((function (e) { return function () { e.remove(); }; })(p), 700);
-        }
+            }
+        }, impactDelay);
     }
 
     /* ============================================================
