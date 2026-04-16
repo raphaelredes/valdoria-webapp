@@ -1,0 +1,114 @@
+/* Tela dedicada: Testes contra a Morte sem arena (solo / sem aliados vivos) */
+.ds-fs-screen {
+  min-height: 100dvh;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--v-space-lg, 16px) var(--v-space-md, 12px) calc(var(--v-space-2xl, 24px) + env(safe-area-inset-bottom, 0));
+  box-sizing: border-box;
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 45%);
+  text-align: center;
+  overflow-y: auto;
+}
+
+.ds-fs-kicker {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xs, 11px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin-bottom: var(--v-space-sm, 8px);
+}
+
+.ds-fs-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xl, 18px);
+  font-weight: 700;
+  color: var(--v-text, #d4c8b0);
+  margin: 0 0 var(--v-space-sm, 8px);
+  line-height: 1.25;
+}
+
+.ds-fs-lead {
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.55;
+  color: var(--v-text-dim, #a09484);
+  max-width: 22rem;
+  margin: 0 auto var(--v-space-lg, 16px);
+}
+
+.ds-fs-round {
+  display: inline-block;
+  padding: var(--v-space-xs, 4px) var(--v-space-md, 10px);
+  border-radius: var(--v-radius-pill, 20px);
+  border: 1px solid var(--v-border, #4a3828);
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-text-dim, #a09484);
+  margin-bottom: var(--v-space-md, 12px);
+}
+
+.ds-fs-track-wrap {
+  width: 100%;
+  max-width: 20rem;
+  margin: 0 auto var(--v-space-lg, 16px);
+  padding: var(--v-space-md, 12px);
+  border-radius: var(--v-radius, 10px);
+  border: 1px solid var(--v-border, #4a3828);
+  background: var(--v-bg-card, #2e2520);
+}
+
+.ds-fs-tracker .ds-row {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-sm, 8px);
+  margin-bottom: var(--v-space-sm, 8px);
+}
+
+.ds-fs-tracker .ds-row:last-child {
+  margin-bottom: 0;
+}
+
+.ds-fs-tracker .ds-row-label {
+  width: 1.25rem;
+  text-align: center;
+  font-size: var(--v-font-secondary, 13px);
+}
+
+.ds-fs-tracker .ds-dot {
+  flex: 1;
+  height: var(--v-space-lg, 14px);
+  border-radius: var(--v-radius-sm, 6px);
+  border: 1px solid var(--v-border, #4a3828);
+  background: var(--v-bg-deep, #1a1510);
+}
+
+.ds-fs-tracker .success-slot.filled {
+  background: rgba(68, 170, 136, 0.35);
+  border-color: rgba(68, 170, 136, 0.55);
+}
+
+.ds-fs-tracker .failure-slot.filled {
+  background: rgba(180, 60, 50, 0.35);
+  border-color: rgba(200, 80, 70, 0.55);
+}
+
+.ds-fs-stable {
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-text, #d4c8b0);
+  margin-bottom: var(--v-space-md, 12px);
+}
+
+.ds-fs-actions {
+  width: 100%;
+  max-width: 20rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-sm, 8px);
+  margin-top: auto;
+}
+
+.ds-fs-actions .action-btn {
+  width: 100%;
+}
