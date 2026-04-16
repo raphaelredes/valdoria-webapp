@@ -397,79 +397,87 @@
         }
     }
 
-    function buildBatchSummaryHtml(events) {
-        /* Mesma hierarquia visual do popup "Ordem de iniciativa" (.iop-title / .iop-lead / .iop-sub / .iop-list). */
+    /** Ícone do combatente na ordem (mesma grelha que «Ordem de iniciativa»). */
+    function batchActorIco(state, aIdx) {
+        if (!state || !state.order || aIdx == null) return '\u2694';
+        var u = state.order[aIdx];
+        return (u && u.ico) ? u.ico : '\u2694';
+    }
+
+    /**
+     * Resumo do lote com rolagens puladas: mesmas colunas que ordem de iniciativa
+     * (iop-pos · iop-ico · iop-name · iop-roll), uma linha por passo legível.
+     */
+    function buildBatchSummaryHtml(events, state) {
+        state = state || currentState;
         var parts = [
-            '<div class="iop-title">Ataque — rolagens puladas</div>',
-            '<div class="iop-lead"><span class="c2-info-kicker">Leitura rápida</span>',
-            '<p class="iop-lead-text">Rolagens de dados de outros combatentes foram condensadas nesta lista. ',
-            'As animações 3D do seu personagem permanecem como no fluxo normal.</p></div>',
-            '<div class="iop-sub">Ordem deste lote (como no registro do servidor)</div>',
+            '<div class="iop-title">\u2694 Ataque \u2014 rolagens puladas</div>',
+            '<div class="iop-sub">Resumo num\u00e9rico \u00b7 anima\u00e7\u00e3o omitida neste lote</div>',
             '<div class="iop-list">'
         ];
+        var rowNum = 0;
+        function pushRow(ico, name, roll, longName) {
+            rowNum++;
+            var cls = 'iop-row' + (longName ? ' iop-row--long-name' : '');
+            parts.push('<div class="' + cls + '"><span class="iop-pos">' + rowNum + '</span><span class="iop-ico">' + ico +
+                '</span><span class="iop-name">' + escHtml(name) + '</span><span class="iop-roll">' + escHtml(roll) + '</span></div>');
+        }
         var any = false;
-        for (var i = 0; i < events.length; i++) {
+        for (var i = 0; i < (events || []).length; i++) {
             var ev = events[i];
             if (!ev) continue;
             if (ev.kind === 'attack' || ev.kind === 'oa') {
                 any = true;
                 var oa = ev.kind === 'oa';
-                var an = escHtml(ev.actorName || '');
-                var tn = escHtml(ev.targetName || '');
+                var an = ev.actorName || '';
+                var tn = ev.targetName || '';
+                var lbl = (oa ? 'Oportunidade: ' : '') + an + ' \u2192 ' + tn;
+                var icoA = batchActorIco(state, ev.aIdx);
                 if (!ev.hit) {
-                    var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Defesa (CA): total inferior à CA';
-                    var rollLn = 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?');
-                    parts.push('<div class="iop-row c2-sum-row miss"><span class="iop-ico c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                        (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--miss">Sem acerto</span></div>' +
-                        '<div class="c2-sum-roll">' + escHtml(rollLn) + '</div><div class="c2-sum-why">' + escHtml(why) + '</div></div></div>');
+                    var rollLn = (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' +
+                        (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?');
+                    pushRow(icoA, lbl, 'Sem acerto');
+                    pushRow('\ud83c\udfb2', 'Teste vs CA', rollLn);
                 } else {
                     var dmg = ev.dmgTotal != null ? ev.dmgTotal : '?';
-                    var dead = ev.newHp != null && ev.newHp <= 0;
-                    var tags = [];
-                    if (ev.crit) tags.push('Crítico');
-                    if (dead) tags.push('Eliminado');
-                    var dtLab = dmgTypeLabel(ev.dmgType || '');
-                    var rollHit = 'Acerto: d20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') + '=' + (ev.total != null ? ev.total : '?');
-                    var dmgPlain = '−' + dmg + ' PV' + (dtLab ? ' · ' + dtLab : '') + (ev.skillName ? (' · ' + String(ev.skillName)) : '') +
-                        (tags.length ? (' · ' + tags.join(' · ')) : '') +
-                        (ev.oldHp != null && ev.newHp != null ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '');
-                    var pillHit = ev.crit ? 'Crítico' : 'Acerto';
-                    parts.push('<div class="iop-row c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="iop-ico c2-sum-ico">' + (dead ? '💀' : '⚔') +
-                        '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
-                        '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--hit">' + escHtml(pillHit) + '</span></div>' +
-                        '<div class="c2-sum-roll">' + escHtml(rollHit) + '</div><div class="c2-sum-why">' + escHtml(dmgPlain) + '</div></div></div>');
+                    var dr = ev.dmgRolls || [];
+                    var die = ev.dmgDie != null ? ev.dmgDie : 8;
+                    var sumD = dr.length ? dr.reduce(function (a, b) { return a + b; }, 0) : 0;
+                    var dmgLine = dr.length ? (dr.length + 'd' + die + ': [' + dr.join(', ') + '] = ' + sumD) : ('Dano');
+                    if (ev.dmgMod) dmgLine += ' +' + ev.dmgMod + ' mod';
+                    if (ev.dmgSpecFlat) dmgLine += ' +' + ev.dmgSpecFlat + ' fixo';
+                    var pillHit = ev.crit ? 'Cr\u00edtico' : 'Acerto';
+                    pushRow(icoA, lbl, pillHit);
+                    pushRow('\ud83c\udfb2', 'Teste vs CA', 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') +
+                        '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?'));
+                    pushRow('\u2694', dmgLine, String(dmg) + ' PV', true);
+                    if (ev.oldHp != null && ev.newHp != null) pushRow('\u2764', 'PV ' + tn, ev.oldHp + ' \u2192 ' + ev.newHp);
                 }
             } else if (ev.kind === 'flee') {
                 any = true;
                 var fleeRoll = (ev.d20 != null ? 'd20=' + ev.d20 : '') + (ev.mod != null ? ' + ' + ev.mod : '') +
                     (ev.total != null ? ' = ' + ev.total : '') + ' vs CD ' + (ev.dc != null ? ev.dc : '');
-                parts.push('<div class="iop-row c2-sum-row flee"><span class="iop-ico c2-sum-ico">🏃</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                    (ev.success ? 'Fuga bem-sucedida' : 'Falha na fuga') + '</div><div class="c2-sum-meta"><span class="c2-sum-pill c2-sum-pill--flee">' +
-                    (ev.success ? 'Passou' : 'Não passou') + '</span></div><div class="c2-sum-roll">' + escHtml(fleeRoll) + '</div>' +
-                    '<div class="c2-sum-why">Acrobacia (Des) · CD do teste</div></div></div>');
+                pushRow('\ud83c\udfc3', ev.success ? 'Fuga' : 'Falha na fuga', ev.success ? 'Passou' : 'N\u00e3o passou');
+                pushRow('\ud83c\udfb2', 'Acrobacia (Des)', fleeRoll);
             } else if (ev.kind === 'round') {
-                parts.push('<div class="iop-row c2-sum-row round"><span class="iop-ico c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
-                    escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
+                pushRow('\ud83d\udd04', 'Rodada', String(ev.rn != null ? ev.rn : ''));
             } else if (ev.kind === 'heal') {
                 any = true;
-                var hpLn = (ev.oldHp != null && ev.newHp != null) ? (' · PV ' + ev.oldHp + ' → ' + ev.newHp) : '';
-                parts.push('<div class="iop-row c2-sum-row hit"><span class="iop-ico c2-sum-ico">❤</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                    escHtml(ev.skillName || 'Cura') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' → ' + escHtml(ev.targetName || '') +
-                    ' · +' + (ev.healGained != null ? ev.healGained : '?') + ' PV' + hpLn + '</div></div></div>');
+                var hActor = batchActorIco(state, ev.aIdx);
+                pushRow(hActor, (ev.actorName || '') + ' \u2192 ' + (ev.targetName || ''), '+' + (ev.healGained != null ? ev.healGained : '?') + ' PV');
+                if (ev.oldHp != null && ev.newHp != null) pushRow('\u2764', 'PV ' + (ev.targetName || ''), ev.oldHp + ' \u2192 ' + ev.newHp);
             } else if (ev.kind === 'buff') {
                 any = true;
-                var turnsB = ev.turnsLeft != null ? (ev.turnsLeft + ' turno(s) · efeito tático no estado') : 'efeito tático';
-                parts.push('<div class="iop-row c2-sum-row hit"><span class="iop-ico c2-sum-ico">✨</span><div class="c2-sum-body"><div class="c2-sum-line">' +
-                    escHtml(ev.skillName || 'Buff') + '</div><div class="c2-sum-sub">' + escHtml(ev.actorName || '') + ' · ' + escHtml(turnsB) + '</div></div></div>');
+                var turnsB = ev.turnsLeft != null ? (ev.turnsLeft + ' turno(s)') : 'ativo';
+                pushRow('\u2728', ev.skillName || 'Buff', (ev.actorName || '') + ' \u00b7 ' + turnsB);
             } else if (ev.kind === 'resource') {
                 any = true;
-                parts.push('<div class="iop-row c2-sum-row"><span class="iop-ico c2-sum-ico">⚡</span><div class="c2-sum-body"><div class="c2-sum-line">Recurso</div><div class="c2-sum-sub">' +
-                    escHtml(ev.who || '') + ' · ' + escHtml(ev.resName || 'recurso') + ' ' +
-                    (ev.before != null ? ev.before : '?') + ' → ' + (ev.after != null ? ev.after : '?') + '</div></div></div>');
+                pushRow('\u26a1', (ev.who || '') + ' \u00b7 ' + (ev.resName || 'recurso'),
+                    String(ev.before != null ? ev.before : '?') + ' \u2192 ' + String(ev.after != null ? ev.after : '?'));
             }
         }
         if (!any) {
-            parts.push('<div class="c2-sum-empty">Nenhum ataque nesta ação — apenas atualização de estado.</div>');
+            pushRow('\u2014', 'Nenhum ataque nesta a\u00e7\u00e3o', 'Estado apenas');
         }
         parts.push('</div>');
         return parts.join('');
@@ -487,15 +495,11 @@
         ov.setAttribute('aria-label', 'Ataque — resumo com rolagens puladas');
         var card = document.createElement('div');
         card.className = 'iop-card iop-card--batch-summary';
-        setHTML(card, buildBatchSummaryHtml(events));
+        setHTML(card, buildBatchSummaryHtml(events, currentState));
         var foot = document.createElement('div');
-        foot.className = 'iop-foot iop-foot--batch';
-        var ok = document.createElement('button');
-        ok.type = 'button';
-        ok.className = 'dice-continue-btn';
-        ok.textContent = 'Entendi';
-        ok.addEventListener('click', function () { ov.remove(); });
-        foot.appendChild(ok);
+        foot.className = 'iop-start-wrap';
+        foot.innerHTML = '<button type="button" class="epic-cta-btn" id="c2-batch-summary-ok"><span class="epic-cta-icon">\u2713</span><span class="epic-cta-text">Entendi</span></button>';
+        foot.querySelector('#c2-batch-summary-ok').addEventListener('click', function () { ov.remove(); });
         card.appendChild(foot);
         ov.appendChild(card);
         document.body.appendChild(ov);
@@ -691,9 +695,8 @@
                 html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="next"><div class="epic-cta-d3d" id="ctaDiceMount"></div><span class="epic-cta-text">Começar Rolagens<br/>de Iniciativa</span></button></div>';
             } else if (ph === 'init') {
                 html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="skip-init"><span class="epic-cta-icon">⏭️</span><span class="epic-cta-text">Pular<br/>Rolagens</span></button></div>';
-            } else {
-                html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="start"><span class="epic-cta-icon">⚔️</span><span class="epic-cta-text">Começar<br/>Combate</span></button></div>';
             }
+            /* init_done: CTA «Começar combate» fica dentro do popup de ordem (iop-card), como no simulador */
             setHTML(app, html);
             bindActions();
             return;
@@ -1144,24 +1147,30 @@
         ov.className = 'iop-overlay';
         var card = document.createElement('div');
         card.className = 'iop-card';
-        var html = '<div class="iop-title">Ordem de iniciativa</div>';
-        html += '<div class="iop-lead"><span class="c2-info-kicker">Leitura rápida</span>';
-        html += '<p class="iop-lead-text">Quem aparece primeiro na lista age primeiro. Na sua vez, use os botões na base da tela (atacar, habilidades, itens ou passar).</p></div>';
-        html += '<div class="iop-sub">Topo = primeiro turno neste combate</div>';
+        var html = '<div class="iop-title">\u2694 Ordem de iniciativa</div>';
+        html += '<div class="iop-sub">Combate come\u00e7a pelo topo</div>';
         html += '<div class="iop-list">';
         currentState.order.forEach(function (c, i) {
-            var isPlayer = c.t === 'p';
-            html += '<div class="iop-row' + (isPlayer ? ' player' : '') + '">';
+            var isSide = c.t === 'p' || c.t === 'a';
+            html += '<div class="iop-row' + (isSide ? ' player' : '') + '">';
             html += '<span class="iop-pos">' + (i + 1) + '</span>';
             html += '<span class="iop-ico">' + c.ico + '</span>';
             html += '<span class="iop-name">' + escHtml(c.n) + '</span>';
-            html += '<span class="iop-roll">🎲 ' + c.init + '</span>';
+            html += '<span class="iop-roll">\ud83c\udfb2 ' + c.init + '</span>';
             html += '</div>';
         });
         html += '</div>';
+        html += '<div class="iop-start-wrap"><button type="button" class="epic-cta-btn" id="iop-start-combat-btn"><span class="epic-cta-icon">\u2694</span><span class="epic-cta-text">Come\u00e7ar<br/>Combate</span></button></div>';
         setHTML(card, html);
         ov.appendChild(card);
         document.body.appendChild(ov);
+        var startBtn = document.getElementById('iop-start-combat-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', function () {
+                closeInitiativeOrderPopup();
+                remoteAction({ type: 'start' }).catch(function (e) { console.error('[C2] start failed', e); });
+            });
+        }
     }
 
     function closeInitiativeOrderPopup() {

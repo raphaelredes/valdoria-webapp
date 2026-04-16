@@ -118,6 +118,10 @@ html, body { height: 100vh; overflow: hidden; }
 .iop-overlay--batch {
     pointer-events: auto;
     z-index: 10060;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding: var(--v-space-md, 12px);
 }
 .iop-card--batch-summary {
     pointer-events: auto;
@@ -317,9 +321,11 @@ html, body { height: 100vh; overflow: hidden; }
 .list-panel-card--log .lp-log-scroll { max-height: none; }
 .lp-log-line { font-size: var(--v-font-sm, 12px); padding: var(--v-space-sm, 8px) var(--v-space-md, 10px); border-bottom: 1px solid var(--v-border-15, rgba(74, 56, 40, 0.35)); color: var(--v-text-dim, #a09484); line-height: 1.45; }
 
-/* Init order popup */
-.iop-overlay { position: fixed; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; pointer-events: none; z-index: 9990; }
-.iop-card { pointer-events: none; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid var(--v-border, #4a3828); border-radius: 12px; padding: 14px 16px; min-width: 240px; max-width: 320px; box-shadow: 0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04); animation: udcPop .4s cubic-bezier(.34,1.56,.64,1); }
+/* Init order popup + resumo de lote (mesmo overlay que simulador: bloqueia cliques por baixo) */
+.iop-overlay { position: fixed; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; pointer-events: auto; z-index: 9990; background: rgba(8, 6, 4, 0.82); box-sizing: border-box; animation: udcFadeIn 0.28s ease; }
+.iop-card { pointer-events: auto; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid var(--v-border, #4a3828); border-radius: 12px; padding: 14px 16px; min-width: 240px; max-width: 320px; box-shadow: 0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04); animation: udcPop .4s cubic-bezier(.34,1.56,.64,1); }
+.iop-card .iop-start-wrap { margin-top: var(--v-space-md, 12px); padding-top: var(--v-space-md, 12px); border-top: 1px solid var(--v-border, #4a3828); display: flex; justify-content: center; }
+.iop-card .iop-start-wrap .epic-cta-btn { margin: 0; animation: epicCtaFloat 2.8s ease-in-out infinite, epicCtaEntry 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both; }
 .iop-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 13px; color: var(--v-text, #d4c8b0); letter-spacing: 2.5px; text-transform: uppercase; text-align: center; }
 .iop-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 10px; color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-top: 3px; padding-bottom: 8px; border-bottom: 1px solid var(--v-border, #4a3828); }
 .iop-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
@@ -331,6 +337,14 @@ html, body { height: 100vh; overflow: hidden; }
 .iop-name { flex: 1; font-size: 12px; color: var(--v-text, #d4c8b0); letter-spacing: .5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .iop-roll { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 11px; color: var(--v-text-dim, #a09484); letter-spacing: 1px; padding: 2px 6px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 10px; }
 .iop-row.player .iop-roll { color: var(--v-text, #d4c8b0); }
+.iop-row--long-name { align-items: flex-start; }
+.iop-row--long-name .iop-name {
+    white-space: normal;
+    line-height: 1.45;
+    font-size: var(--v-font-sm, 12px);
+    color: var(--v-text, #d4c8b0);
+    text-align: left;
+}
 
 /* Shake + tela final */
 .hit-shake { animation: hitShake .4s ease; }
