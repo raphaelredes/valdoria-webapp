@@ -457,9 +457,19 @@
                     if (ev.dmgMod) dmgLine += ' +' + ev.dmgMod + ' mod';
                     if (ev.dmgSpecFlat) dmgLine += ' +' + ev.dmgSpecFlat + ' fixo';
                     var pillHit = ev.crit ? 'Cr\u00edtico' : 'Acerto';
-                    pushRow(icoA, lbl, pillHit);
-                    pushRow('\ud83c\udfb2', 'Teste vs CA', 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') +
-                        '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?'));
+                    if (ev.autoHit) {
+                        pushRow(icoA, lbl, 'Acerto automático');
+                        pushRow('\ud83c\udfb2', 'Magia (SRD)', 'Sem rolagem vs CA');
+                    } else if (ev.saveDc != null) {
+                        pushRow(icoA, lbl, ev.saveSuccess ? 'TR (metade)' : 'TR (total)');
+                        pushRow('\ud83c\udfb2', 'Teste de resistência',
+                            'd20=' + (ev.saveD20 != null ? ev.saveD20 : '?') + '+' + (ev.saveMod != null ? ev.saveMod : '?') +
+                            '=' + (ev.saveTotal != null ? ev.saveTotal : '?') + ' vs CD ' + (ev.saveDc != null ? ev.saveDc : '?'));
+                    } else {
+                        pushRow(icoA, lbl, pillHit);
+                        pushRow('\ud83c\udfb2', 'Teste vs CA', 'd20=' + (ev.d20 != null ? ev.d20 : '?') + '+' + (ev.atk != null ? ev.atk : '?') +
+                            '=' + (ev.total != null ? ev.total : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?'));
+                    }
                     pushRow('\u2694', dmgLine, String(dmg) + ' PV', true);
                     if (ev.oldHp != null && ev.newHp != null) pushRow('\u2764', 'PV ' + tn, ev.oldHp + ' \u2192 ' + ev.newHp);
                 }
@@ -1026,73 +1036,122 @@
             ? 'Ataque de oportunidade → ' + target.n
             : (ev.skillName ? (ev.skillName + ' → ' + target.n) : ('Ataca ' + target.n + ' (CA ' + target.ac + ')'));
 
-        /* Overlay 1: d20 */
-        await new Promise(function (x) {
-            showDice(ev.d20, x, actor, actionLabel, {
-                offerBatchSkip: !!offerSkip,
-                postResult: function () {
-                    if (ev.crit) {
+        var dmgCritUi = !!(ev.crit && !ev.autoHit && ev.saveDc == null);
+
+        if (ev.autoHit) {
+            await showMessage(
+                (ev.skillName || 'Magia') + ' — acerto automático',
+                'hit',
+                {
+                    kicker: 'SRD / PHB',
+                    intro: 'Esta magia não usa rolagem de ataque contra a Classe de Armadura.',
+                    rows: [{ l: 'Alvo', v: target.n }],
+                    note: 'Rolagem de dano a seguir.'
+                },
+                { offerBatchSkip: !!offerSkip }
+            );
+        } else if (ev.saveDc != null) {
+            var saveAb = (ev.saveAbility || 'dex').toLowerCase() === 'con' ? 'Constituição' : 'Destreza';
+            await new Promise(function (x) {
+                showDice(ev.saveD20, x, target, (ev.skillName || 'Magia') + ' — TR ' + saveAb + ' vs CD ' + ev.saveDc, {
+                    combatTarget: actor,
+                    offerBatchSkip: !!offerSkip,
+                    postResult: function () {
                         return {
-                            title: 'Acerto crítico',
-                            cls: 'crit',
+                            title: ev.saveSuccess ? 'Passou na resistência' : 'Falhou na resistência',
+                            cls: ev.saveSuccess ? 'miss' : 'hit',
                             subStructured: {
-                                kicker: 'Natural 20 no d20',
-                                intro: 'Dados de dano em dobro antes de somar o modificador de atributo (uma vez), conforme PHB.',
-                                rows: [{ l: 'Jogada de ataque', v: '20 + ' + ev.atk + ' = ' + ev.total }]
+                                kicker: 'Teste de resistência',
+                                rows: [
+                                    { l: 'Total', v: (ev.saveD20 != null ? ev.saveD20 : '?') + ' + ' + (ev.saveMod != null ? ev.saveMod : '?') + ' = ' + (ev.saveTotal != null ? ev.saveTotal : '?') },
+                                    { l: 'Classe de dificuldade', v: String(ev.saveDc) }
+                                ],
+                                note: ev.saveSuccess
+                                    ? 'Metade do dano (ex.: Bola de Fogo, PHB).'
+                                    : 'Dano integral.'
                             }
                         };
+                    },
+                    onAttackRollResolved: function () {
+                        try {
+                            if (ev.saveSuccess && typeof sfxMiss === 'function') {
+                                sfxMiss();
+                            } else if (typeof sfxHit === 'function') {
+                                sfxHit();
+                            }
+                        } catch (eSfx0) {}
                     }
-                    if (ev.hit) {
+                });
+            });
+        } else {
+            /* Overlay 1: d20 vs CA */
+            await new Promise(function (x) {
+                showDice(ev.d20, x, actor, actionLabel, {
+                    offerBatchSkip: !!offerSkip,
+                    postResult: function () {
+                        if (ev.crit) {
+                            return {
+                                title: 'Acerto crítico',
+                                cls: 'crit',
+                                subStructured: {
+                                    kicker: 'Natural 20 no d20',
+                                    intro: 'Dados de dano em dobro antes de somar o modificador de atributo (uma vez), conforme PHB.',
+                                    rows: [{ l: 'Jogada de ataque', v: '20 + ' + ev.atk + ' = ' + ev.total }]
+                                }
+                            };
+                        }
+                        if (ev.hit) {
+                            return {
+                                title: 'Acertou',
+                                cls: 'hit',
+                                subStructured: {
+                                    kicker: 'Confronto com a CA',
+                                    rows: [
+                                        { l: 'Total do ataque', v: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total },
+                                        { l: 'Classe de Armadura', v: String(ev.ac) }
+                                    ],
+                                    note: 'Total igual ou superior à CA do alvo.'
+                                }
+                            };
+                        }
+                        if (ev.miss_reason === 'falha_critica') {
+                            return {
+                                title: 'Falha automática',
+                                cls: 'miss',
+                                subStructured: {
+                                    kicker: 'Natural 1 no d20',
+                                    intro: 'O ataque erra, sem comparar com a Classe de Armadura.',
+                                    rows: [{ l: 'Face do d20', v: '1' }]
+                                }
+                            };
+                        }
                         return {
-                            title: 'Acertou',
-                            cls: 'hit',
+                            title: 'Ataque não atinge',
+                            cls: 'miss',
                             subStructured: {
-                                kicker: 'Confronto com a CA',
+                                kicker: 'Alvo: ' + target.n,
                                 rows: [
                                     { l: 'Total do ataque', v: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total },
                                     { l: 'Classe de Armadura', v: String(ev.ac) }
                                 ],
-                                note: 'Total igual ou superior à CA do alvo.'
+                                note: 'Total inferior à CA — o golpe não causa dano.'
                             }
                         };
-                    }
-                    if (ev.miss_reason === 'falha_critica') {
-                        return {
-                            title: 'Falha automática',
-                            cls: 'miss',
-                            subStructured: {
-                                kicker: 'Natural 1 no d20',
-                                intro: 'O ataque erra, sem comparar com a Classe de Armadura.',
-                                rows: [{ l: 'Face do d20', v: '1' }]
+                    },
+                    onAttackRollResolved: function () {
+                        try {
+                            if (ev.crit && typeof sfxCrit === 'function') {
+                                sfxCrit();
+                            } else if (ev.hit && typeof sfxHit === 'function') {
+                                sfxHit();
+                            } else if (typeof sfxMiss === 'function') {
+                                sfxMiss();
                             }
-                        };
+                        } catch (eSfx) {}
                     }
-                    return {
-                        title: 'Ataque não atinge',
-                        cls: 'miss',
-                        subStructured: {
-                            kicker: 'Alvo: ' + target.n,
-                            rows: [
-                                { l: 'Total do ataque', v: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total },
-                                { l: 'Classe de Armadura', v: String(ev.ac) }
-                            ],
-                            note: 'Total inferior à CA — o golpe não causa dano.'
-                        }
-                    };
-                },
-                onAttackRollResolved: function () {
-                    try {
-                        if (ev.crit && typeof sfxCrit === 'function') {
-                            sfxCrit();
-                        } else if (ev.hit && typeof sfxHit === 'function') {
-                            sfxHit();
-                        } else if (typeof sfxMiss === 'function') {
-                            sfxMiss();
-                        }
-                    } catch (eSfx) {}
-                }
+                });
             });
-        });
+        }
 
         if (shouldFastForwardAttack(ev)) {
             syncAttackOutcomeFromEvent(ev);
@@ -1103,7 +1162,7 @@
         /* Overlay 2: dado de dano + card animado */
         var dmgDie = ev.dmgDie != null ? ev.dmgDie : actor.die;
         var dmgModUi = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
-        await showDamageDice(ev.dmgRolls, dmgDie, ev.crit, actor, target, ev.oldHp, ev.newHp, dmgModUi, {
+        await showDamageDice(ev.dmgRolls, dmgDie, dmgCritUi, actor, target, ev.oldHp, ev.newHp, dmgModUi, {
             offerBatchSkip: !!offerSkip,
             dmgType: ev.dmgType || 'slashing'
         });
