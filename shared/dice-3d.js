@@ -1,11 +1,12 @@
 /**
  * Dice3D — dados poliédricos para WebApps (Three.js + CanvasTexture nas faces).
  *
- * Paleta alinhada a valdoria-design.css (--v-bg, --v-gold, --v-text, etc.).
- * Referências de mercado: dados “frosted / gemstone” com corpo saturado (não cinza
- * cimento), numeracao alto contraste; transmissão moderada para evitar leitura
- * esbatida sem HDRI dedicado.
- * 10 variações de acabamento escolhidas aleatoriamente por instância / rolagem.
+ * Acabamento estilo dados de mesa reais (acrílico/resina fosco, superfície áspera):
+ * PBR com MeshPhysicalMaterial — rugosidade alta, clearcoat difuso, sem transmissão
+ * (evita reflexos espelhados tipo “vidro”). Referência técnica: three.js
+ * MeshStandardMaterial / MeshPhysicalMaterial (roughness ≈ micro-relevo difuso;
+ * clearcoatRoughness para verniz mate). Cores saturadas ou corpos mais opacos.
+ * 10 variações aleatórias por instância / rolagem.
  */
 var Dice3D = (function () {
     'use strict';
@@ -22,28 +23,31 @@ var Dice3D = (function () {
     var _texCacheOrder = [];
     var _TEX_CACHE_MAX = 48;
 
-    /** 10 acabamentos (cores tokens Valdoria + bordas + rótulo legível). */
+    /**
+     * 10 acabamentos “acrílico fosco / resina” (rugosos, cores vivas ou corpos opacos).
+     * Campos: roughness, clearcoat, clearcoatRough, opacity, envMapI (sem HDRI — só modula brilho especular mínimo).
+     */
     var DICE_STYLE_VARIATIONS = [
-        { key: 'ouro_mel', color: 0xc9a060, edge: 0xdbb668, transmission: 0.34, roughness: 0.2, emissive: 0x4a3010, emiInt: 0.11, clearcoat: 0.75, attenColor: 0xf0d8a8,
-            label: { fill: '#1a1510', stroke: '#c4953a', stroke2: 'rgba(232,220,200,0.45)' } },
-        { key: 'ambra', color: 0xb87840, edge: 0xe8c45a, transmission: 0.3, roughness: 0.22, emissive: 0x5a2810, emiInt: 0.1, clearcoat: 0.7, attenColor: 0xf5dcc0,
-            label: { fill: '#f8ecd0', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.5)' } },
-        { key: 'vinho', color: 0x6b3038, edge: 0xc4953a, transmission: 0.26, roughness: 0.24, emissive: 0x3a1018, emiInt: 0.14, clearcoat: 0.68, attenColor: 0xd8a090,
-            label: { fill: '#f6eedc', stroke: '#1a0c10', stroke2: 'rgba(219,182,104,0.55)' } },
-        { key: 'musgo', color: 0x4d5a38, edge: 0x9a7530, transmission: 0.28, roughness: 0.23, emissive: 0x203018, emiInt: 0.12, clearcoat: 0.72, attenColor: 0xc8d0a8,
-            label: { fill: '#f5e6c8', stroke: '#1a1510', stroke2: 'rgba(200,208,168,0.4)' } },
-        { key: 'pergaminho', color: 0x8a7860, edge: 0xdbb668, transmission: 0.32, roughness: 0.21, emissive: 0x3a3020, emiInt: 0.09, clearcoat: 0.74, attenColor: 0xe8dcc8,
-            label: { fill: '#1a1510', stroke: '#e8dcc8', stroke2: 'rgba(74,56,40,0.55)' } },
-        { key: 'noite', color: 0x3a3540, edge: 0xc4953a, transmission: 0.24, roughness: 0.26, emissive: 0x1a1028, emiInt: 0.15, clearcoat: 0.65, attenColor: 0xb8a8c8,
-            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(26,16,40,0.65)' } },
-        { key: 'cobre', color: 0x9a6040, edge: 0xdbb668, transmission: 0.3, roughness: 0.22, emissive: 0x4a2010, emiInt: 0.1, clearcoat: 0.7, attenColor: 0xf0c8a8,
-            label: { fill: '#1a1008', stroke: '#f5dcc8', stroke2: 'rgba(154,96,64,0.45)' } },
-        { key: 'avela', color: 0x7a6248, edge: 0xc4953a, transmission: 0.31, roughness: 0.21, emissive: 0x302010, emiInt: 0.1, clearcoat: 0.73, attenColor: 0xdcc8a8,
-            label: { fill: '#f6eedc', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.4)' } },
-        { key: 'esmeralda_suave', color: 0x3a6050, edge: 0xdbb668, transmission: 0.29, roughness: 0.22, emissive: 0x103028, emiInt: 0.13, clearcoat: 0.76, attenColor: 0xa8d8c8,
-            label: { fill: '#f8f8e8', stroke: '#1a2820', stroke2: 'rgba(168,216,200,0.45)' } },
-        { key: 'carvao_dourado', color: 0x4a4038, edge: 0xe8c45a, transmission: 0.27, roughness: 0.25, emissive: 0x2a1810, emiInt: 0.12, clearcoat: 0.66, attenColor: 0xd8c8a0,
-            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(42,36,32,0.5)' } },
+        { key: 'mel_fosco', color: 0xd4a848, edge: 0xf0d060, roughness: 0.74, clearcoat: 0.12, clearcoatRough: 0.82, opacity: 1, envMapI: 0.22, emissive: 0x4a3208, emiInt: 0.07,
+            label: { fill: '#1a1208', stroke: '#c4953a', stroke2: 'rgba(240,208,120,0.5)' } },
+        { key: 'ambra_opaca', color: 0xc07038, edge: 0xe8b868, roughness: 0.68, clearcoat: 0.18, clearcoatRough: 0.72, opacity: 0.97, envMapI: 0.26, emissive: 0x502008, emiInt: 0.06,
+            label: { fill: '#fff4e0', stroke: '#2a1408', stroke2: 'rgba(200,120,60,0.45)' } },
+        { key: 'vinho_resina', color: 0x842838, edge: 0xd4a050, roughness: 0.78, clearcoat: 0.08, clearcoatRough: 0.88, opacity: 1, envMapI: 0.2, emissive: 0x280810, emiInt: 0.08,
+            label: { fill: '#f8e8e0', stroke: '#1a0808', stroke2: 'rgba(212,160,80,0.5)' } },
+        { key: 'musgo_acrilico', color: 0x4a6838, edge: 0xa88840, roughness: 0.71, clearcoat: 0.14, clearcoatRough: 0.8, opacity: 1, envMapI: 0.24, emissive: 0x182010, emiInt: 0.06,
+            label: { fill: '#f0f0d8', stroke: '#1a2010', stroke2: 'rgba(180,200,140,0.4)' } },
+        { key: 'pergaminho_asp', color: 0x9a8870, edge: 0xc8a868, roughness: 0.82, clearcoat: 0.06, clearcoatRough: 0.9, opacity: 0.96, envMapI: 0.18, emissive: 0x302820, emiInt: 0.05,
+            label: { fill: '#1a1510', stroke: '#e8dcc8', stroke2: 'rgba(90,72,56,0.55)' } },
+        { key: 'azul_noite', color: 0x304878, edge: 0xd4b060, roughness: 0.69, clearcoat: 0.16, clearcoatRough: 0.76, opacity: 1, envMapI: 0.28, emissive: 0x101828, emiInt: 0.07,
+            label: { fill: '#f0f4ff', stroke: '#c4953a', stroke2: 'rgba(48,72,120,0.5)' } },
+        { key: 'cobre_fosco', color: 0xb06040, edge: 0xe0c878, roughness: 0.76, clearcoat: 0.1, clearcoatRough: 0.85, opacity: 1, envMapI: 0.23, emissive: 0x401808, emiInt: 0.06,
+            label: { fill: '#1a0c08', stroke: '#f0dcc8', stroke2: 'rgba(176,96,64,0.45)' } },
+        { key: 'pedra_quente', color: 0x6a5840, edge: 0xc4953a, roughness: 0.85, clearcoat: 0.05, clearcoatRough: 0.92, opacity: 0.94, envMapI: 0.16, emissive: 0x201810, emiInt: 0.05,
+            label: { fill: '#f6eedc', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.42)' } },
+        { key: 'verde_mata', color: 0x2a6850, edge: 0xc0d888, roughness: 0.72, clearcoat: 0.14, clearcoatRough: 0.78, opacity: 1, envMapI: 0.25, emissive: 0x082018, emiInt: 0.07,
+            label: { fill: '#e8fff0', stroke: '#143028', stroke2: 'rgba(160,216,180,0.45)' } },
+        { key: 'carvao_opaco', color: 0x3a3430, edge: 0xd8b868, roughness: 0.8, clearcoat: 0.09, clearcoatRough: 0.86, opacity: 0.98, envMapI: 0.19, emissive: 0x181410, emiInt: 0.06,
+            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(50,44,40,0.55)' } },
     ];
 
     var EDGE_COLOR = 0xc4953a;
@@ -139,41 +143,49 @@ var Dice3D = (function () {
 
     function createBodyMaterial(varIdx) {
         var st = _styleAt(varIdx);
-        var trans = st.transmission;
-        if (_isMedium) trans *= 0.9;
+        var op = st.opacity != null ? st.opacity : 1;
+        var rough = st.roughness != null ? st.roughness : 0.75;
+        var cc = st.clearcoat != null ? st.clearcoat : 0.1;
+        var ccr = st.clearcoatRough != null ? st.clearcoatRough : 0.82;
+        var envI = st.envMapI != null ? st.envMapI : 0.24;
         if (_isLite) {
             var m0 = new THREE.MeshStandardMaterial({
                 color: st.color,
-                metalness: 0.16,
-                roughness: Math.min(0.46, st.roughness + 0.14),
-                transparent: true,
-                opacity: 0.98,
+                metalness: 0.02,
+                roughness: Math.min(0.92, rough + 0.06),
+                transparent: op < 0.999,
+                opacity: op,
                 emissive: st.emissive,
-                emissiveIntensity: Math.min(0.24, (st.emiInt || 0.1) * 1.45),
-                envMapIntensity: 0.56,
-                flatShading: true,
+                emissiveIntensity: Math.min(0.14, (st.emiInt || 0.06) * 1.2),
+                envMapIntensity: envI * 0.85,
+                flatShading: false,
+                side: THREE.FrontSide,
             });
             if (m0.roughness != null) m0.userData._d3dRoughBase = m0.roughness;
             return m0;
         }
+        if (_isMedium) {
+            rough = Math.min(0.94, rough + 0.04);
+            envI *= 0.9;
+            cc *= 0.85;
+        }
         var m1 = new THREE.MeshPhysicalMaterial({
             color: st.color,
             metalness: 0,
-            roughness: st.roughness,
-            transmission: trans,
-            thickness: 0.54,
-            ior: 1.48,
-            transparent: true,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            envMapIntensity: _isMedium ? 0.88 : 0.98,
-            clearcoat: st.clearcoat != null ? st.clearcoat : 0.7,
-            clearcoatRoughness: 0.1,
-            attenuationDistance: 0.88,
-            attenuationColor: st.attenColor || st.color,
+            roughness: rough,
+            transmission: 0,
+            thickness: 0.2,
+            ior: 1.5,
+            transparent: op < 0.999,
+            opacity: op,
+            side: THREE.FrontSide,
+            envMapIntensity: envI,
+            clearcoat: cc,
+            clearcoatRoughness: ccr,
+            specularIntensity: 0.35,
             emissive: st.emissive,
-            emissiveIntensity: st.emiInt || 0.1,
-            flatShading: true,
+            emissiveIntensity: st.emiInt != null ? st.emiInt : 0.06,
+            flatShading: false,
         });
         if (m1.roughness != null) m1.userData._d3dRoughBase = m1.roughness;
         return m1;
@@ -187,7 +199,7 @@ var Dice3D = (function () {
             if (!m || m.map) continue;
             if (typeof m.roughness === 'number') {
                 if (m.userData._d3dRoughBase == null) m.userData._d3dRoughBase = m.roughness;
-                m.roughness = Math.min(0.52, m.userData._d3dRoughBase + speed01 * 0.16);
+                m.roughness = Math.min(0.96, m.userData._d3dRoughBase + speed01 * 0.1);
             }
             if (typeof m.shininess === 'number') {
                 if (m.userData._d3dShineBase == null) m.userData._d3dShineBase = m.shininess;
@@ -674,7 +686,8 @@ var Dice3D = (function () {
         this._renderer.setPixelRatio(_isLite ? 1 : Math.min(window.devicePixelRatio, 2));
         this._renderer.shadowMap.enabled = false;
         this._renderer.toneMapping = _isLite ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
-        this._renderer.toneMappingExposure = 1.02;
+        /* Exposição moderada — dados foscos sem “queimar” highlights (discourse threejs PBR). */
+        this._renderer.toneMappingExposure = _isLite ? 1 : 0.88;
         container.appendChild(this._renderer.domElement);
         try {
             this._renderer.domElement.style.background = 'transparent';
