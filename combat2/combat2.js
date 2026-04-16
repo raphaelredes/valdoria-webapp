@@ -280,7 +280,7 @@
     }
 
     function buildBatchSummaryHtml(events) {
-        var parts = ['<div class="c2-sum-title">Resumo das rolagens</div><div class="c2-sum-subtitle">Atalho: animações dos outros combatentes foram resumidas</div><div class="c2-sum-list">'];
+        var parts = ['<div class="c2-sum-title">Resumo das rolagens</div><div class="c2-sum-subtitle">Atalho: dados de inimigos e aliados foram resumidos; só o personagem do jogador manteve animação 3D</div><div class="c2-sum-list">'];
         var any = false;
         for (var i = 0; i < events.length; i++) {
             var ev = events[i];
@@ -986,7 +986,8 @@
             var skipAllBtn = document.createElement('button');
             skipAllBtn.type = 'button';
             skipAllBtn.className = 'dice-skip-batch-btn';
-            skipAllBtn.textContent = 'Pular animações dos inimigos';
+            skipAllBtn.textContent = 'Pular rolagens de dado dos outros combatentes';
+            skipAllBtn.setAttribute('aria-label', 'Pular animações de dado de inimigos e aliados; só o personagem do jogador mantém dados 3D neste lote');
             skipAllBtn.addEventListener('click', function (evClick) {
                 evClick.stopPropagation();
                 _skipReplayBatch = true;
@@ -1112,7 +1113,8 @@
                 var skipB = document.createElement('button');
                 skipB.type = 'button';
                 skipB.className = 'dice-skip-batch-btn dice-skip-batch-btn--in-card';
-                skipB.textContent = 'Pular animações dos inimigos';
+                skipB.textContent = 'Pular rolagens de dado dos outros combatentes';
+                skipB.setAttribute('aria-label', 'Pular animações de dado dos outros combatentes neste lote');
                 skipB.addEventListener('click', function () {
                     _skipReplayBatch = true;
                     ov.remove();
@@ -1164,7 +1166,8 @@
                 var skipDmg = document.createElement('button');
                 skipDmg.type = 'button';
                 skipDmg.className = 'dice-skip-batch-btn';
-                skipDmg.textContent = 'Pular animações dos inimigos';
+                skipDmg.textContent = 'Pular rolagens de dado dos outros combatentes';
+                skipDmg.setAttribute('aria-label', 'Pular animações de dado dos outros combatentes neste lote');
                 skipDmg.addEventListener('click', function (evClick) {
                     evClick.stopPropagation();
                     _skipReplayBatch = true;
