@@ -1,9 +1,9 @@
 /**
  * Dice3D — dados poliédricos para WebApps (Three.js + CanvasTexture nas faces).
  *
- * Acabamento dados de mesa (acrílico/resina fosca): bumpMap procedural partilhado
- * (micro-relevo), sheen leve no Physical, rugosidade/clearcoat altos, sem transmissão.
- * Arestas a lápis (EdgesGeometry) só em perf “lite”; full/medium = só luz + bump.
+ * Regra visual: corpos sempre mais escuros + superfície mais áspera (bump forte,
+ * roughness alto). bumpMap procedural partilhado, sheen leve no Physical, sem transmissão.
+ * Arestas (EdgesGeometry) só em perf “lite”; full/medium = só luz + bump.
  * 10 variações aleatórias por instância / rolagem.
  */
 var Dice3D = (function () {
@@ -22,8 +22,8 @@ var Dice3D = (function () {
     var _TEX_CACHE_MAX = 48;
 
     /**
-     * 10 acabamentos “acrílico fosco / resina” (rugosos, cores vivas ou corpos opacos).
-     * Campos: roughness, clearcoat, clearcoatRough, opacity, envMapI (sem HDRI — só modula brilho especular mínimo).
+     * 10 tons de resina/acrílico (matiz); o corpo final é escurecido em createBodyMaterial.
+     * Campos: roughness base, clearcoat, clearcoatRough, opacity, envMapI.
      */
     var DICE_STYLE_VARIATIONS = [
         { key: 'mel_fosco', color: 0xd4a848, edge: 0xf0d060, roughness: 0.74, clearcoat: 0.12, clearcoatRough: 0.82, opacity: 1, envMapI: 0.22, emissive: 0x4a3208, emiInt: 0.07,
@@ -94,8 +94,8 @@ var Dice3D = (function () {
         g0.addColorStop(1, 'rgba(36,30,24,0.09)');
         ctx.fillStyle = g0;
         ctx.fillRect(0, 0, size, size);
-        for (var gi = 0; gi < Math.round(size * size * 0.00035); gi++) {
-            ctx.fillStyle = 'rgba(0,0,0,' + (0.02 + Math.random() * 0.035) + ')';
+        for (var gi = 0; gi < Math.round(size * size * 0.00055); gi++) {
+            ctx.fillStyle = 'rgba(0,0,0,' + (0.028 + Math.random() * 0.045) + ')';
             ctx.fillRect((Math.random() * size) | 0, (Math.random() * size) | 0, 1, 1);
         }
 
@@ -152,6 +152,15 @@ var Dice3D = (function () {
         return DICE_STYLE_VARIATIONS[(varIdx | 0) % DICE_STYLE_VARIATIONS.length];
     }
 
+    /** Corpo do dado: sempre mais escuro (regra de produto — evita dados “claros demais”). */
+    function dieBodyColorHex(hex) {
+        var mul = 0.7;
+        var r = Math.max(8, Math.min(255, (((hex >> 16) & 255) * mul) | 0));
+        var g = Math.max(8, Math.min(255, (((hex >> 8) & 255) * mul) | 0));
+        var b = Math.max(8, Math.min(255, ((hex & 255) * mul) | 0));
+        return (r << 16) | (g << 8) | b;
+    }
+
     /** Ruído procedural (cinzento) para bumpMap — relevo microscópico tipo resina/acrílico fosco. */
     function getDieMicroBumpTexture() {
         if (_dieMicroBumpTex) return _dieMicroBumpTex;
@@ -170,8 +179,8 @@ var Dice3D = (function () {
         for (var y = 0; y < sz; y++) {
             for (var x = 0; x < sz; x++) {
                 var i = (y * sz + x) * 4;
-                var v = 108 + rnd() * 52 + Math.sin(x * 0.41) * 14 + Math.cos(y * 0.37) * 12;
-                v = Math.max(68, Math.min(200, v));
+                var v = 92 + rnd() * 68 + Math.sin(x * 0.41) * 22 + Math.cos(y * 0.37) * 20;
+                v = Math.max(52, Math.min(218, v));
                 d[i] = d[i + 1] = d[i + 2] = (v | 0);
                 d[i + 3] = 255;
             }
@@ -179,22 +188,22 @@ var Dice3D = (function () {
         ctx.putImageData(img, 0, 0);
         var tex = new THREE.CanvasTexture(c);
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(5, 5);
+        tex.repeat.set(6, 6);
         if (THREE.NoColorSpace !== undefined) tex.colorSpace = THREE.NoColorSpace;
         tex.userData._d3dSharedDieBump = true;
         _dieMicroBumpTex = tex;
         return tex;
     }
 
-    /** Superfície menos “plástico liso”: bump + sheen (Physical). */
+    /** Superfície áspera (bump forte) + sheen mate no Physical. */
     function attachDieBodyMicroRelief(mat) {
         if (!mat) return;
         mat.bumpMap = getDieMicroBumpTexture();
-        mat.bumpScale = _isLite ? 0.02 : (_isMedium ? 0.036 : 0.054);
+        mat.bumpScale = _isLite ? 0.032 : (_isMedium ? 0.055 : 0.082);
         if (mat.isMeshPhysicalMaterial) {
-            mat.sheen = 0.09;
-            mat.sheenRoughness = 0.9;
-            mat.sheenColor = new THREE.Color(0xe8dcc8);
+            mat.sheen = 0.07;
+            mat.sheenRoughness = 0.94;
+            mat.sheenColor = new THREE.Color(0xd4c8b0);
         }
     }
 
@@ -205,11 +214,13 @@ var Dice3D = (function () {
         var cc = st.clearcoat != null ? st.clearcoat : 0.1;
         var ccr = st.clearcoatRough != null ? st.clearcoatRough : 0.82;
         var envI = st.envMapI != null ? st.envMapI : 0.24;
+        envI *= 0.88;
+        var bodyHex = dieBodyColorHex(st.color);
         if (_isLite) {
             var m0 = new THREE.MeshStandardMaterial({
-                color: st.color,
+                color: bodyHex,
                 metalness: 0.02,
-                roughness: Math.min(0.92, rough + 0.06),
+                roughness: Math.min(0.96, rough + 0.12),
                 transparent: op < 0.999,
                 opacity: op,
                 emissive: st.emissive,
@@ -223,13 +234,13 @@ var Dice3D = (function () {
             return m0;
         }
         if (_isMedium) {
-            rough = Math.min(0.94, rough + 0.04);
+            rough = Math.min(0.96, rough + 0.06);
             envI *= 0.9;
-            cc *= 0.85;
+            cc *= 0.8;
         }
-        rough = Math.min(0.96, rough + (_isMedium ? 0.02 : 0.05));
+        rough = Math.min(0.98, rough + (_isMedium ? 0.04 : 0.08));
         var m1 = new THREE.MeshPhysicalMaterial({
-            color: st.color,
+            color: bodyHex,
             metalness: 0,
             roughness: rough,
             transmission: 0,
@@ -238,10 +249,10 @@ var Dice3D = (function () {
             transparent: op < 0.999,
             opacity: op,
             side: THREE.FrontSide,
-            envMapIntensity: envI * (_isMedium ? 1 : 0.92),
-            clearcoat: cc * (_isMedium ? 1 : 0.82),
-            clearcoatRoughness: Math.min(0.96, ccr + 0.04),
-            specularIntensity: _isMedium ? 0.26 : 0.2,
+            envMapIntensity: envI * (_isMedium ? 0.95 : 0.85),
+            clearcoat: cc * (_isMedium ? 0.88 : 0.72),
+            clearcoatRoughness: Math.min(0.98, ccr + 0.08),
+            specularIntensity: _isMedium ? 0.22 : 0.16,
             emissive: st.emissive,
             emissiveIntensity: st.emiInt != null ? st.emiInt : 0.06,
             flatShading: false,
