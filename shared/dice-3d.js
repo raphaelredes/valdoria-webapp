@@ -1,11 +1,9 @@
 /**
  * Dice3D — dados poliédricos para WebApps (Three.js + CanvasTexture nas faces).
  *
- * Acabamento estilo dados de mesa reais (acrílico/resina fosco, superfície áspera):
- * PBR com MeshPhysicalMaterial — rugosidade alta, clearcoat difuso, sem transmissão
- * (evita reflexos espelhados tipo “vidro”). Referência técnica: three.js
- * MeshStandardMaterial / MeshPhysicalMaterial (roughness ≈ micro-relevo difuso;
- * clearcoatRoughness para verniz mate). Cores saturadas ou corpos mais opacos.
+ * Acabamento dados de mesa (acrílico/resina fosca): bumpMap procedural partilhado
+ * (micro-relevo), sheen leve no Physical, rugosidade/clearcoat altos, sem transmissão.
+ * Arestas a lápis (EdgesGeometry) só em perf “lite”; full/medium = só luz + bump.
  * 10 variações aleatórias por instância / rolagem.
  */
 var Dice3D = (function () {
@@ -51,6 +49,8 @@ var Dice3D = (function () {
     ];
 
     var EDGE_COLOR = 0xc4953a;
+    /** Bump partilhado (não libertar em Material.dispose — ver disposeMesh). */
+    var _dieMicroBumpTex = null;
     var V_GOLD_HEX = '#c4953a';
     var V_SUCCESS_HEX = '#4caf50';
     var V_DANGER_HEX = '#e74c3c';
@@ -85,6 +85,19 @@ var Dice3D = (function () {
         c.height = size;
         var ctx = c.getContext('2d');
         ctx.clearRect(0, 0, size, size);
+        var cx = size / 2;
+        var cy = size / 2;
+        /* Grão fino na face (acrílico/resina fosca), sem brilho de “adesivo liso”. */
+        var g0 = ctx.createRadialGradient(cx * 0.3, cy * 0.25, 0, cx, cy, size * 0.72);
+        g0.addColorStop(0, 'rgba(48,40,32,0.07)');
+        g0.addColorStop(0.45, 'rgba(26,21,16,0.04)');
+        g0.addColorStop(1, 'rgba(36,30,24,0.09)');
+        ctx.fillStyle = g0;
+        ctx.fillRect(0, 0, size, size);
+        for (var gi = 0; gi < Math.round(size * size * 0.00035); gi++) {
+            ctx.fillStyle = 'rgba(0,0,0,' + (0.02 + Math.random() * 0.035) + ')';
+            ctx.fillRect((Math.random() * size) | 0, (Math.random() * size) | 0, 1, 1);
+        }
 
         var text = String(num);
         var fontSize = text.length > 1 ? Math.round(size * 0.56) : Math.round(size * 0.68);
@@ -96,8 +109,6 @@ var Dice3D = (function () {
         ctx.shadowOffsetY = 0;
         ctx.shadowColor = 'transparent';
 
-        var cx = size / 2;
-        var cy = size / 2;
         var strokeW = Math.max(2, Math.round(size * 0.05));
         ctx.lineJoin = 'round';
         ctx.miterLimit = 2;
@@ -141,6 +152,52 @@ var Dice3D = (function () {
         return DICE_STYLE_VARIATIONS[(varIdx | 0) % DICE_STYLE_VARIATIONS.length];
     }
 
+    /** Ruído procedural (cinzento) para bumpMap — relevo microscópico tipo resina/acrílico fosco. */
+    function getDieMicroBumpTexture() {
+        if (_dieMicroBumpTex) return _dieMicroBumpTex;
+        var sz = 128;
+        var c = document.createElement('canvas');
+        c.width = sz;
+        c.height = sz;
+        var ctx = c.getContext('2d');
+        var img = ctx.createImageData(sz, sz);
+        var d = img.data;
+        var seed = 90210;
+        function rnd() {
+            seed = (seed * 48271) % 2147483647;
+            return seed / 2147483647;
+        }
+        for (var y = 0; y < sz; y++) {
+            for (var x = 0; x < sz; x++) {
+                var i = (y * sz + x) * 4;
+                var v = 108 + rnd() * 52 + Math.sin(x * 0.41) * 14 + Math.cos(y * 0.37) * 12;
+                v = Math.max(68, Math.min(200, v));
+                d[i] = d[i + 1] = d[i + 2] = (v | 0);
+                d[i + 3] = 255;
+            }
+        }
+        ctx.putImageData(img, 0, 0);
+        var tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(5, 5);
+        if (THREE.NoColorSpace !== undefined) tex.colorSpace = THREE.NoColorSpace;
+        tex.userData._d3dSharedDieBump = true;
+        _dieMicroBumpTex = tex;
+        return tex;
+    }
+
+    /** Superfície menos “plástico liso”: bump + sheen (Physical). */
+    function attachDieBodyMicroRelief(mat) {
+        if (!mat) return;
+        mat.bumpMap = getDieMicroBumpTexture();
+        mat.bumpScale = _isLite ? 0.02 : (_isMedium ? 0.036 : 0.054);
+        if (mat.isMeshPhysicalMaterial) {
+            mat.sheen = 0.09;
+            mat.sheenRoughness = 0.9;
+            mat.sheenColor = new THREE.Color(0xe8dcc8);
+        }
+    }
+
     function createBodyMaterial(varIdx) {
         var st = _styleAt(varIdx);
         var op = st.opacity != null ? st.opacity : 1;
@@ -162,6 +219,7 @@ var Dice3D = (function () {
                 side: THREE.FrontSide,
             });
             if (m0.roughness != null) m0.userData._d3dRoughBase = m0.roughness;
+            attachDieBodyMicroRelief(m0);
             return m0;
         }
         if (_isMedium) {
@@ -169,25 +227,27 @@ var Dice3D = (function () {
             envI *= 0.9;
             cc *= 0.85;
         }
+        rough = Math.min(0.96, rough + (_isMedium ? 0.02 : 0.05));
         var m1 = new THREE.MeshPhysicalMaterial({
             color: st.color,
             metalness: 0,
             roughness: rough,
             transmission: 0,
             thickness: 0.2,
-            ior: 1.5,
+            ior: 1.48,
             transparent: op < 0.999,
             opacity: op,
             side: THREE.FrontSide,
-            envMapIntensity: envI,
-            clearcoat: cc,
-            clearcoatRoughness: ccr,
-            specularIntensity: 0.35,
+            envMapIntensity: envI * (_isMedium ? 1 : 0.92),
+            clearcoat: cc * (_isMedium ? 1 : 0.82),
+            clearcoatRoughness: Math.min(0.96, ccr + 0.04),
+            specularIntensity: _isMedium ? 0.26 : 0.2,
             emissive: st.emissive,
             emissiveIntensity: st.emiInt != null ? st.emiInt : 0.06,
             flatShading: false,
         });
         if (m1.roughness != null) m1.userData._d3dRoughBase = m1.roughness;
+        attachDieBodyMicroRelief(m1);
         return m1;
     }
 
@@ -219,14 +279,18 @@ var Dice3D = (function () {
         }
     }
 
+    /** Arestas desenhadas: só em perf “lite” (poucas linhas, quase invisíveis). Full/medium = volume só com luz + bump. */
     function addEdgeWire(mesh, geo, threshold, edgeHex) {
-        var edges = new THREE.EdgesGeometry(geo, threshold || 15);
-        var op = _isLite ? 0.24 : 0.36;
-        var ec = edgeHex != null ? edgeHex : EDGE_COLOR;
+        if (!_isLite) return;
+        var th = Math.max(threshold || 15, 44);
+        var edges = new THREE.EdgesGeometry(geo, th);
+        var bodyHex = mesh.material && mesh.material.color ? mesh.material.color.getHex() : 0x5a4a38;
+        var lineCol = new THREE.Color(edgeHex != null ? edgeHex : EDGE_COLOR);
+        lineCol.lerp(new THREE.Color(bodyHex), 0.68);
         mesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-            color: ec,
+            color: lineCol.getHex(),
             transparent: true,
-            opacity: op,
+            opacity: 0.078,
         })));
     }
 
@@ -477,12 +541,7 @@ var Dice3D = (function () {
         prepareGlassGeometry(geo);
         var faces = facesFromTris(geo, 20);
         var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
-        var edgeGeo = new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(R * 1.003, 0));
-        mesh.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
-            color: st.edge,
-            transparent: true,
-            opacity: _isLite ? 0.28 : 0.38,
-        })));
+        addEdgeWire(mesh, baseGeo, 48, st.edge);
         var numbers = [];
         for (var j = 1; j <= 20; j++) numbers.push(j);
         mesh.userData = { type: 'd20', numbers: numbers, normals: faces.normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
@@ -702,7 +761,7 @@ var Dice3D = (function () {
         var fillLight = new THREE.DirectionalLight(0xffebd4, 0.38);
         fillLight.position.set(-3.5, -0.5, 3.2);
         this._scene.add(fillLight);
-        var rimLight = new THREE.DirectionalLight(0xd8c4a8, 0.24);
+        var rimLight = new THREE.DirectionalLight(0xd8c4a8, _isLite ? 0.24 : (_isMedium ? 0.32 : 0.38));
         rimLight.position.set(0, -3.5, -2.8);
         this._scene.add(rimLight);
         this._orbitLight = new THREE.PointLight(0xe8d4b8, 0, 6);
@@ -1328,6 +1387,9 @@ var Dice3D = (function () {
                         var md = matsD[di];
                         if (!md) continue;
                         if (md.map && !md.map.userData.cached) md.map.dispose();
+                        if (md.bumpMap && md.bumpMap.userData && md.bumpMap.userData._d3dSharedDieBump) {
+                            md.bumpMap = null;
+                        }
                         md.dispose();
                     }
                 }
