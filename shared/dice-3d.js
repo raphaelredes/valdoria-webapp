@@ -1,10 +1,11 @@
 /**
  * Dice3D — dados poliédricos para WebApps (Three.js + CanvasTexture nas faces).
  *
- * Direção visual (2026): referência a dados de RPG em vidro fosco K9 / “sea glass”
- * (numeracao contrastante, superficie difusa sem sombras pesadas) e práticas Three.js
- * (MeshPhysicalMaterial + transmission moderada; ver documentacao transmission/ior).
- * Todos os tipos (d4–d20) partilham o mesmo corpo e o mesmo estilo de etiqueta.
+ * Paleta alinhada a valdoria-design.css (--v-bg, --v-gold, --v-text, etc.).
+ * Referências de mercado: dados “frosted / gemstone” com corpo saturado (não cinza
+ * cimento), numeracao alto contraste; transmissão moderada para evitar leitura
+ * esbatida sem HDRI dedicado.
+ * 10 variações de acabamento escolhidas aleatoriamente por instância / rolagem.
  */
 var Dice3D = (function () {
     'use strict';
@@ -19,8 +20,31 @@ var Dice3D = (function () {
     var _labelRes = _isLite ? 160 : 256;
     var _texCache = {};
     var _texCacheOrder = [];
-    var _TEX_CACHE_MAX = 20;
-    var _sharedBodyMat = null;
+    var _TEX_CACHE_MAX = 48;
+
+    /** 10 acabamentos (cores tokens Valdoria + bordas + rótulo legível). */
+    var DICE_STYLE_VARIATIONS = [
+        { key: 'ouro_mel', color: 0xc9a060, edge: 0xdbb668, transmission: 0.34, roughness: 0.2, emissive: 0x4a3010, emiInt: 0.11, clearcoat: 0.75, attenColor: 0xf0d8a8,
+            label: { fill: '#1a1510', stroke: '#c4953a', stroke2: 'rgba(232,220,200,0.45)' } },
+        { key: 'ambra', color: 0xb87840, edge: 0xe8c45a, transmission: 0.3, roughness: 0.22, emissive: 0x5a2810, emiInt: 0.1, clearcoat: 0.7, attenColor: 0xf5dcc0,
+            label: { fill: '#f8ecd0', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.5)' } },
+        { key: 'vinho', color: 0x6b3038, edge: 0xc4953a, transmission: 0.26, roughness: 0.24, emissive: 0x3a1018, emiInt: 0.14, clearcoat: 0.68, attenColor: 0xd8a090,
+            label: { fill: '#f6eedc', stroke: '#1a0c10', stroke2: 'rgba(219,182,104,0.55)' } },
+        { key: 'musgo', color: 0x4d5a38, edge: 0x9a7530, transmission: 0.28, roughness: 0.23, emissive: 0x203018, emiInt: 0.12, clearcoat: 0.72, attenColor: 0xc8d0a8,
+            label: { fill: '#f5e6c8', stroke: '#1a1510', stroke2: 'rgba(200,208,168,0.4)' } },
+        { key: 'pergaminho', color: 0x8a7860, edge: 0xdbb668, transmission: 0.32, roughness: 0.21, emissive: 0x3a3020, emiInt: 0.09, clearcoat: 0.74, attenColor: 0xe8dcc8,
+            label: { fill: '#1a1510', stroke: '#e8dcc8', stroke2: 'rgba(74,56,40,0.55)' } },
+        { key: 'noite', color: 0x3a3540, edge: 0xc4953a, transmission: 0.24, roughness: 0.26, emissive: 0x1a1028, emiInt: 0.15, clearcoat: 0.65, attenColor: 0xb8a8c8,
+            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(26,16,40,0.65)' } },
+        { key: 'cobre', color: 0x9a6040, edge: 0xdbb668, transmission: 0.3, roughness: 0.22, emissive: 0x4a2010, emiInt: 0.1, clearcoat: 0.7, attenColor: 0xf0c8a8,
+            label: { fill: '#1a1008', stroke: '#f5dcc8', stroke2: 'rgba(154,96,64,0.45)' } },
+        { key: 'avela', color: 0x7a6248, edge: 0xc4953a, transmission: 0.31, roughness: 0.21, emissive: 0x302010, emiInt: 0.1, clearcoat: 0.73, attenColor: 0xdcc8a8,
+            label: { fill: '#f6eedc', stroke: '#2a1810', stroke2: 'rgba(196,149,58,0.4)' } },
+        { key: 'esmeralda_suave', color: 0x3a6050, edge: 0xdbb668, transmission: 0.29, roughness: 0.22, emissive: 0x103028, emiInt: 0.13, clearcoat: 0.76, attenColor: 0xa8d8c8,
+            label: { fill: '#f8f8e8', stroke: '#1a2820', stroke2: 'rgba(168,216,200,0.45)' } },
+        { key: 'carvao_dourado', color: 0x4a4038, edge: 0xe8c45a, transmission: 0.27, roughness: 0.25, emissive: 0x2a1810, emiInt: 0.12, clearcoat: 0.66, attenColor: 0xd8c8a0,
+            label: { fill: '#f8ecd0', stroke: '#c4953a', stroke2: 'rgba(42,36,32,0.5)' } },
+    ];
 
     var EDGE_COLOR = 0xc4953a;
     var V_GOLD_HEX = '#c4953a';
@@ -39,12 +63,17 @@ var Dice3D = (function () {
 
     /**
      * Textura de face: numero centrado, sem shadowBlur (legivel em “vidro”).
-     * Inspiracao: dados foscos com pintura/opacidade alta (legibilidade em lojas
-     * especializadas em glass / frosted RPG dice).
+     * Cores por variacao (DICE_STYLE_VARIATIONS) — alto contraste (WCAG-inspired).
      */
-    function makeLabelTexture(num, size) {
+    function makeLabelTexture(num, size, varIdx) {
         size = size || _labelRes;
-        var _tk = num + '_' + size;
+        var vi = (varIdx | 0) % DICE_STYLE_VARIATIONS.length;
+        var st = DICE_STYLE_VARIATIONS[vi];
+        var lb = st.label || {};
+        var fill = lb.fill || '#f6eedc';
+        var strokeOuter = lb.stroke || '#1a1510';
+        var strokeMid = lb.stroke2 || 'rgba(196,149,58,0.45)';
+        var _tk = num + '_' + size + '_v' + vi;
         if (_texCache[_tk]) return _texCache[_tk];
 
         var c = document.createElement('canvas');
@@ -65,21 +94,21 @@ var Dice3D = (function () {
 
         var cx = size / 2;
         var cy = size / 2;
-        var strokeW = Math.max(2, Math.round(size * 0.048));
+        var strokeW = Math.max(2, Math.round(size * 0.05));
         ctx.lineJoin = 'round';
         ctx.miterLimit = 2;
         ctx.lineWidth = strokeW;
-        ctx.strokeStyle = 'rgba(12, 8, 6, 0.92)';
+        ctx.strokeStyle = strokeOuter;
         ctx.strokeText(text, cx, cy);
         ctx.lineWidth = Math.max(1, strokeW - 2);
-        ctx.strokeStyle = 'rgba(255, 248, 235, 0.22)';
+        ctx.strokeStyle = strokeMid;
         ctx.strokeText(text, cx, cy);
-        ctx.fillStyle = '#f6eedc';
+        ctx.fillStyle = fill;
         ctx.fillText(text, cx, cy);
 
         if (num === 6 || num === 9) {
             var w = ctx.measureText(text).width;
-            ctx.fillStyle = 'rgba(12, 8, 6, 0.88)';
+            ctx.fillStyle = strokeOuter.indexOf('#') === 0 ? strokeOuter : 'rgba(26,21,16,0.92)';
             ctx.fillRect(cx - w / 2, cy + fontSize * 0.34, w, Math.max(2, fontSize * 0.08));
         }
 
@@ -104,63 +133,50 @@ var Dice3D = (function () {
         if (geo.getAttribute('color')) geo.deleteAttribute('color');
     }
 
-    function makeBodyMat() {
-        if (_sharedBodyMat) return _sharedBodyMat;
+    function _styleAt(varIdx) {
+        return DICE_STYLE_VARIATIONS[(varIdx | 0) % DICE_STYLE_VARIATIONS.length];
+    }
 
+    function createBodyMaterial(varIdx) {
+        var st = _styleAt(varIdx);
+        var trans = st.transmission;
+        if (_isMedium) trans *= 0.9;
         if (_isLite) {
-            _sharedBodyMat = new THREE.MeshStandardMaterial({
-                color: 0xefe8dc,
-                metalness: 0.1,
-                roughness: 0.44,
+            var m0 = new THREE.MeshStandardMaterial({
+                color: st.color,
+                metalness: 0.16,
+                roughness: Math.min(0.46, st.roughness + 0.14),
                 transparent: true,
-                opacity: 0.95,
-                envMapIntensity: 0.5,
+                opacity: 0.98,
+                emissive: st.emissive,
+                emissiveIntensity: Math.min(0.24, (st.emiInt || 0.1) * 1.45),
+                envMapIntensity: 0.56,
                 flatShading: true,
             });
-        } else if (_isMedium) {
-            _sharedBodyMat = new THREE.MeshPhysicalMaterial({
-                color: 0xf2ebe0,
-                metalness: 0,
-                roughness: 0.26,
-                transmission: 0.58,
-                thickness: 0.62,
-                ior: 1.48,
-                transparent: true,
-                opacity: 1,
-                side: THREE.DoubleSide,
-                envMapIntensity: 0.85,
-                clearcoat: 0.65,
-                clearcoatRoughness: 0.1,
-                attenuationDistance: 1.2,
-                attenuationColor: 0xffffff,
-                flatShading: true,
-            });
-        } else {
-            _sharedBodyMat = new THREE.MeshPhysicalMaterial({
-                color: 0xf5efe4,
-                metalness: 0,
-                roughness: 0.2,
-                transmission: 0.72,
-                thickness: 0.78,
-                ior: 1.5,
-                transparent: true,
-                opacity: 1,
-                side: THREE.DoubleSide,
-                envMapIntensity: 1,
-                clearcoat: 0.78,
-                clearcoatRoughness: 0.08,
-                attenuationDistance: 1.35,
-                attenuationColor: 0xffffff,
-                flatShading: true,
-            });
+            if (m0.roughness != null) m0.userData._d3dRoughBase = m0.roughness;
+            return m0;
         }
-        if (_sharedBodyMat && _sharedBodyMat.roughness != null) {
-            _sharedBodyMat.userData._d3dRoughBase = _sharedBodyMat.roughness;
-        }
-        if (_sharedBodyMat && typeof _sharedBodyMat.shininess === 'number') {
-            _sharedBodyMat.userData._d3dShineBase = _sharedBodyMat.shininess;
-        }
-        return _sharedBodyMat;
+        var m1 = new THREE.MeshPhysicalMaterial({
+            color: st.color,
+            metalness: 0,
+            roughness: st.roughness,
+            transmission: trans,
+            thickness: 0.54,
+            ior: 1.48,
+            transparent: true,
+            opacity: 1,
+            side: THREE.DoubleSide,
+            envMapIntensity: _isMedium ? 0.88 : 0.98,
+            clearcoat: st.clearcoat != null ? st.clearcoat : 0.7,
+            clearcoatRoughness: 0.1,
+            attenuationDistance: 0.88,
+            attenuationColor: st.attenColor || st.color,
+            emissive: st.emissive,
+            emissiveIntensity: st.emiInt || 0.1,
+            flatShading: true,
+        });
+        if (m1.roughness != null) m1.userData._d3dRoughBase = m1.roughness;
+        return m1;
     }
 
     function pulseDieBodyMaterial(meshRoot, speed01) {
@@ -191,11 +207,12 @@ var Dice3D = (function () {
         }
     }
 
-    function addEdgeWire(mesh, geo, threshold) {
+    function addEdgeWire(mesh, geo, threshold, edgeHex) {
         var edges = new THREE.EdgesGeometry(geo, threshold || 15);
-        var op = _isLite ? 0.22 : 0.32;
+        var op = _isLite ? 0.24 : 0.36;
+        var ec = edgeHex != null ? edgeHex : EDGE_COLOR;
         mesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-            color: EDGE_COLOR,
+            color: ec,
             transparent: true,
             opacity: op,
         })));
@@ -210,10 +227,10 @@ var Dice3D = (function () {
         return faceUp.normalize();
     }
 
-    function addLabels(mesh, numbers, centers, normals, labelSize) {
+    function addLabels(mesh, numbers, centers, normals, labelSize, varIdx) {
         var labelUps = [];
         for (var i = 0; i < numbers.length; i++) {
-            var tex = makeLabelTexture(numbers[i], _labelRes);
+            var tex = makeLabelTexture(numbers[i], _labelRes, varIdx);
             var mat = new THREE.MeshBasicMaterial({
                 map: tex,
                 transparent: true,
@@ -292,26 +309,28 @@ var Dice3D = (function () {
         return { centers: centers, normals: normals };
     }
 
-    function buildD4() {
+    function buildD4(varIdx) {
+        var st = _styleAt(varIdx);
         var base = new THREE.TetrahedronGeometry(1.1);
         var geo = base.toNonIndexed();
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, base);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
+        addEdgeWire(mesh, base, 15, st.edge);
         var numbers = [1, 2, 3, 4];
         var faces = facesFromTris(geo, 4);
-        mesh.userData = { type: 'd4', numbers: numbers, normals: faces.normals };
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.85);
+        mesh.userData = { type: 'd4', numbers: numbers, normals: faces.normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.85, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildD6() {
+    function buildD6(varIdx) {
+        var st = _styleAt(varIdx);
         var base = new THREE.BoxGeometry(1.2, 1.2, 1.2);
         var geo = base.toNonIndexed();
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, base);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
+        addEdgeWire(mesh, base, 15, st.edge);
         var D6_NUMS = [3, 4, 1, 6, 2, 5];
         var pos = geo.attributes.position;
         var centers = [];
@@ -329,27 +348,29 @@ var Dice3D = (function () {
             centers.push(center);
             normals.push(n);
         }
-        mesh.userData = { type: 'd6', numbers: D6_NUMS, normals: normals };
-        addLabels(mesh, D6_NUMS, centers, normals, 0.92);
+        mesh.userData = { type: 'd6', numbers: D6_NUMS, normals: normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, D6_NUMS, centers, normals, 0.92, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildD8() {
+    function buildD8(varIdx) {
+        var st = _styleAt(varIdx);
         var base = new THREE.OctahedronGeometry(1.05);
         var geo = base.toNonIndexed();
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, base);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
+        addEdgeWire(mesh, base, 15, st.edge);
         var numbers = [1, 2, 3, 4, 5, 6, 7, 8];
         var faces = facesFromTris(geo, 8);
-        mesh.userData = { type: 'd8', numbers: numbers, normals: faces.normals };
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.55);
+        mesh.userData = { type: 'd8', numbers: numbers, normals: faces.normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.55, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildD10() {
+    function buildD10(varIdx) {
+        var st = _styleAt(varIdx);
         var scale = 1.15;
         var step = Math.PI * 2 / 10;
         var hOff = 0.105;
@@ -412,53 +433,56 @@ var Dice3D = (function () {
         geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         geo.setAttribute('normal', new THREE.Float32BufferAttribute(normArr, 3));
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, geo, 20);
-        mesh.userData = { type: 'd10', numbers: faceNumbers, normals: faceNormals };
-        addLabels(mesh, faceNumbers, faceCenters, faceNormals, 0.52);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
+        addEdgeWire(mesh, geo, 20, st.edge);
+        mesh.userData = { type: 'd10', numbers: faceNumbers, normals: faceNormals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, faceNumbers, faceCenters, faceNormals, 0.52, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildD12() {
+    function buildD12(varIdx) {
+        var st = _styleAt(varIdx);
         var base = new THREE.DodecahedronGeometry(1.0);
         var geo = base.toNonIndexed();
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, base);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
+        addEdgeWire(mesh, base, 15, st.edge);
         var faces = facesFromClusters(geo);
         var numbers = [];
         for (var i = 1; i <= faces.centers.length; i++) numbers.push(i);
-        mesh.userData = { type: 'd12', numbers: numbers, normals: faces.normals };
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.62);
+        mesh.userData = { type: 'd12', numbers: numbers, normals: faces.normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.62, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildD20() {
+    function buildD20(varIdx) {
+        var st = _styleAt(varIdx);
         var R = 1.0;
         var baseGeo = new THREE.IcosahedronGeometry(R, 0);
         var geo = baseGeo.toNonIndexed();
         prepareGlassGeometry(geo);
         var faces = facesFromTris(geo, 20);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(varIdx));
         var edgeGeo = new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(R * 1.003, 0));
         mesh.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
-            color: EDGE_COLOR,
+            color: st.edge,
             transparent: true,
-            opacity: 0.32,
+            opacity: _isLite ? 0.28 : 0.38,
         })));
         var numbers = [];
         for (var j = 1; j <= 20; j++) numbers.push(j);
-        mesh.userData = { type: 'd20', numbers: numbers, normals: faces.normals };
-        addLabels(mesh, numbers, faces.centers, faces.normals, 0.56);
+        mesh.userData = { type: 'd20', numbers: numbers, normals: faces.normals, _d3dVarIdx: (varIdx | 0) % DICE_STYLE_VARIATIONS.length };
+        addLabels(mesh, numbers, faces.centers, faces.normals, 0.56, varIdx);
         mesh.castShadow = false;
         return mesh;
     }
 
-    function buildResultDie(total, dieType) {
+    function buildResultDie(total, dieType, varIdx) {
+        var v = (varIdx | 0) % DICE_STYLE_VARIATIONS.length;
         if (dieType === 'd10') {
-            var baseMesh = buildD10();
+            var baseMesh = buildD10(v);
             var labelsToRemove = [];
             baseMesh.traverse(function (child) {
                 if (child !== baseMesh && child.isMesh && child.material && child.material.map && child.material.transparent) {
@@ -504,13 +528,14 @@ var Dice3D = (function () {
                 }
                 origCenters.push(bestCenter);
             }
-            addLabels(baseMesh, nums, origCenters, origNormals, 0.52);
+            addLabels(baseMesh, nums, origCenters, origNormals, 0.52, v);
             baseMesh.userData = {
                 type: 'result',
                 shape: 'd10',
                 numbers: nums,
                 normals: origNormals,
                 labelUps: baseMesh.userData.labelUps,
+                _d3dVarIdx: v,
             };
             return baseMesh;
         }
@@ -524,11 +549,12 @@ var Dice3D = (function () {
         };
         var cfg = dieType ? RESULT_CONFIGS[dieType] : null;
         if (!cfg) cfg = RESULT_CONFIGS.d6;
+        var st2 = _styleAt(v);
         var base = cfg.build();
         var geo = base.toNonIndexed();
         prepareGlassGeometry(geo);
-        var mesh = new THREE.Mesh(geo, makeBodyMat());
-        addEdgeWire(mesh, base);
+        var mesh = new THREE.Mesh(geo, createBodyMaterial(v));
+        addEdgeWire(mesh, base, 15, st2.edge);
         var faces;
         if (cfg.faceFn === 'box') {
             var pos2 = geo.attributes.position;
@@ -556,8 +582,8 @@ var Dice3D = (function () {
         var fCount2 = faces.centers.length;
         var nums2 = [];
         for (var k = 0; k < fCount2; k++) nums2.push(total);
-        mesh.userData = { type: 'result', shape: dieType || 'd6', numbers: nums2, normals: faces.normals };
-        addLabels(mesh, nums2, faces.centers, faces.normals, cfg.labelSize);
+        mesh.userData = { type: 'result', shape: dieType || 'd6', numbers: nums2, normals: faces.normals, _d3dVarIdx: v };
+        addLabels(mesh, nums2, faces.centers, faces.normals, cfg.labelSize, v);
         mesh.castShadow = false;
         return mesh;
     }
@@ -629,22 +655,30 @@ var Dice3D = (function () {
         this._fusionCallback = null;
         this._fusionMesh = null;
         this._epicResult = null;
+        this._variationIndex = 0;
+        this._epicDieFxGroup = null;
+        this._fusionStyleIdx = 0;
+        this._pendingEpicShake = false;
 
         var W = this._size;
         var H = this._size;
         this._scene = new THREE.Scene();
-        this._scene.background = new THREE.Color(0x12100e);
+        this._scene.background = null;
 
         this._camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
         this._camera.position.set(0, 0, 4.5);
 
         this._renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !_isLite, powerPreference: 'default' });
         this._renderer.setSize(W, H);
+        this._renderer.setClearColor(0x000000, 0);
         this._renderer.setPixelRatio(_isLite ? 1 : Math.min(window.devicePixelRatio, 2));
         this._renderer.shadowMap.enabled = false;
         this._renderer.toneMapping = _isLite ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
         this._renderer.toneMappingExposure = 1.02;
         container.appendChild(this._renderer.domElement);
+        try {
+            this._renderer.domElement.style.background = 'transparent';
+        } catch (_dbe) { /* ignore */ }
 
         this._ambient = new THREE.AmbientLight(0xfff6ec, 0.92);
         this._scene.add(this._ambient);
@@ -699,15 +733,22 @@ var Dice3D = (function () {
             this._dieMesh.traverse(function (child) {
                 if (child.geometry) child.geometry.dispose();
                 if (child.material) {
-                    if (child.material.map && !child.material.map.userData.cached) child.material.map.dispose();
-                    if (child.material !== _sharedBodyMat) child.material.dispose();
+                    var mats = Array.isArray(child.material) ? child.material : [child.material];
+                    for (var mi = 0; mi < mats.length; mi++) {
+                        var mat = mats[mi];
+                        if (!mat) continue;
+                        if (mat.map && !mat.map.userData.cached) mat.map.dispose();
+                        mat.dispose();
+                    }
                 }
             });
             this._scene.remove(this._dieMesh);
             this._dieMesh = null;
         }
+        this._epicDieFxGroup = null;
+        this._variationIndex = Math.floor(Math.random() * DICE_STYLE_VARIATIONS.length);
         var builder = BUILDERS[this._dieType] || BUILDERS.d20;
-        this._dieMesh = builder();
+        this._dieMesh = builder(this._variationIndex);
         this._dieMesh.position.set(0, 0, 0);
         this._scene.add(this._dieMesh);
     };
@@ -743,6 +784,17 @@ var Dice3D = (function () {
                 var sp = this._epicResult ? 3.1 : 2.0;
                 var s = 1.0 + amp * Math.sin(this._resultTime * sp);
                 target.scale.setScalar(s);
+            }
+            var efx = this._epicDieFxGroup;
+            if (efx && (this._epicResult === 'crit' || this._epicResult === 'fail')) {
+                efx.rotation.z += 0.048;
+                var baseOp = 0.26 + 0.38 * Math.sin(this._resultTime * 3.75);
+                for (var ex = 0; ex < efx.children.length; ex++) {
+                    var chx = efx.children[ex];
+                    if (chx.material && typeof chx.material.opacity === 'number') {
+                        chx.material.opacity = Math.min(0.58, baseOp + ex * 0.045);
+                    }
+                }
             }
             if (this._multiMode && this._multiMeshes.length > 0) {
                 for (var i = 0; i < this._multiMeshes.length; i++) {
@@ -799,7 +851,7 @@ var Dice3D = (function () {
                 if (self._dieMesh) self._dieMesh.scale.setScalar(1.0);
             }, 120);
             var el = self._container;
-            if (el) {
+            if (el && !self._pendingEpicShake) {
                 el.style.transition = 'transform 0.06s ease-out';
                 el.style.transform = 'translate(' + (Math.random() - 0.5) * 4 + 'px,' + (Math.random() - 0.5) * 4 + 'px)';
                 self._trackTimeout(function () {
@@ -818,34 +870,61 @@ var Dice3D = (function () {
         }
     };
 
-    Dice3DInstance.prototype._epicVignette = function (isCrit) {
-        if (this._disposed) return;
-        var root = this._container && this._container.parentElement;
-        if (!root) return;
-        if (!document.querySelector('style[data-dice3d-epic]')) {
-            var st = document.createElement('style');
-            st.setAttribute('data-dice3d-epic', '1');
-            st.textContent = '@keyframes dice3dEpicVignette{0%{opacity:0;filter:brightness(1) saturate(1)}18%{opacity:1;filter:brightness(1.35) saturate(1.25)}100%{opacity:0;filter:brightness(1) saturate(1)}}@keyframes dice3dEpicShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-12px,5px)}40%{transform:translate(10px,-8px)}60%{transform:translate(-8px,-5px)}80%{transform:translate(6px,4px)}}';
-            document.head.appendChild(st);
+    Dice3DInstance.prototype._detachEpicDieFx = function () {
+        var g = this._epicDieFxGroup;
+        this._epicDieFxGroup = null;
+        if (!g) return;
+        if (this._dieMesh) this._dieMesh.remove(g);
+        g.traverse(function (ch) {
+            if (ch.geometry) ch.geometry.dispose();
+            if (ch.material) {
+                var ms = Array.isArray(ch.material) ? ch.material : [ch.material];
+                for (var q = 0; q < ms.length; q++) {
+                    if (ms[q]) ms[q].dispose();
+                }
+            }
+        });
+    };
+
+    /** Halo 3D no proprio dado (critico max / falha) — sem vignette no layout da pagina. */
+    Dice3DInstance.prototype._attachEpicDieFx = function (isCrit) {
+        var mesh = this._dieMesh;
+        if (!mesh || this._disposed) return;
+        this._detachEpicDieFx();
+        var col = isCrit ? 0x55ffcc : 0xff5538;
+        var colCore = isCrit ? 0x228866 : 0xaa2218;
+        var g = new THREE.Group();
+        g.name = 'd3d-epic-fx';
+        var ringCount = _isLite ? 2 : 4;
+        for (var r = 0; r < ringCount; r++) {
+            var tor = new THREE.Mesh(
+                new THREE.TorusGeometry(0.52 + r * 0.11, 0.03, 10, 40),
+                new THREE.MeshBasicMaterial({
+                    color: col,
+                    transparent: true,
+                    opacity: 0.42 - r * 0.07,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending,
+                })
+            );
+            tor.rotation.x = Math.PI / 2;
+            tor.rotation.z = r * 0.62;
+            g.add(tor);
         }
-        var v = document.createElement('div');
-        v.setAttribute('data-dice3d-epic-overlay', '1');
-        var g = isCrit
-            ? 'radial-gradient(ellipse 72% 58% at 50% 40%,rgba(255,250,200,0.82) 0%,rgba(120,220,140,0.62) 30%,rgba(30,90,45,0.42) 56%,transparent 74%)'
-            : 'radial-gradient(ellipse 68% 52% at 50% 42%,rgba(255,150,120,0.82) 0%,rgba(200,50,40,0.58) 34%,rgba(50,10,8,0.52) 60%,transparent 76%)';
-        v.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:40;background:' + g + ';animation:dice3dEpicVignette 0.82s ease-out forwards;mix-blend-mode:screen';
-        if (!root.style.position) root.style.position = 'relative';
-        root.appendChild(v);
-        setTimeout(function () {
-            if (v.parentNode) v.parentNode.removeChild(v);
-        }, 900);
-        var holder = this._container;
-        if (holder) {
-            holder.style.animation = 'dice3dEpicShake 0.42s ease-out';
-            setTimeout(function () {
-                holder.style.animation = '';
-            }, 430);
-        }
+        var shell = new THREE.Mesh(
+            new THREE.SphereGeometry(0.62, 22, 16),
+            new THREE.MeshBasicMaterial({
+                color: colCore,
+                transparent: true,
+                opacity: isCrit ? 0.11 : 0.15,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide,
+            })
+        );
+        g.add(shell);
+        mesh.add(g);
+        this._epicDieFxGroup = g;
     };
 
     Dice3DInstance.prototype._spawnRing = function (color) {
@@ -862,8 +941,8 @@ var Dice3D = (function () {
                 ring.style.cssText = 'position:absolute;left:' + cx + 'px;top:' + cy + 'px;width:' + ringSize + 'px;height:' + ringSize + 'px;margin:' + (-ringSize / 2) + 'px 0 0 ' + (-ringSize / 2) + 'px;border-radius:50%;border:' + thick + 'px solid ' + color + ';opacity:0.92;pointer-events:none;z-index:36;will-change:transform,opacity';
                 var delay = rr * 95;
                 ring.animate(
-                    [{ transform: 'scale(0.12)', opacity: 0.95 }, { transform: 'scale(16)', opacity: 0 }],
-                    { duration: 820 + rr * 90, easing: 'cubic-bezier(0.12,0.88,0.2,1)', delay: delay, fill: 'forwards' }
+                    [{ transform: 'scale(0.35)', opacity: 0.9 }, { transform: 'scale(2.1)', opacity: 0 }],
+                    { duration: 620 + rr * 70, easing: 'cubic-bezier(0.12,0.88,0.2,1)', delay: delay, fill: 'forwards' }
                 );
                 mount.appendChild(ring);
                 setTimeout(function () {
@@ -888,7 +967,7 @@ var Dice3D = (function () {
             var s = epic ? (4 + Math.random() * 11) : (2 + Math.random() * 5);
             p.style.cssText = 'position:absolute;border-radius:50%;background:' + color + ';opacity:0;width:' + s + 'px;height:' + s + 'px;left:' + cx + 'px;top:' + cy + 'px';
             var a = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.85;
-            var dist = epic ? (90 + Math.random() * 170) : (40 + Math.random() * 100);
+            var dist = epic ? (22 + Math.random() * 38) : (40 + Math.random() * 100);
             var dx = Math.cos(a) * dist;
             var dy = Math.sin(a) * dist;
             var dur = epic ? (500 + Math.random() * 480) : (450 + Math.random() * 550);
@@ -931,21 +1010,23 @@ var Dice3D = (function () {
         var minVal = dieType === 'd10' ? 0 : 1;
         var isCrit = resultValue === maxVal;
         var isFail = resultValue === minVal;
+        this._pendingEpicShake = !!(isCrit || isFail);
         this._rollDuration = this._rollMs;
         this._rollStart = performance.now();
         this._rolling = true;
         this._rollCallback = function () {
+            self._pendingEpicShake = false;
             self._epicResult = isCrit ? 'crit' : (isFail ? 'fail' : null);
             if (isCrit || isFail) {
                 haptic('heavy');
                 try {
-                    self._epicVignette(isCrit);
+                    self._attachEpicDieFx(isCrit);
                 } catch (_ev) { /* ignore */ }
                 self._spawnRing(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX);
-                var pc = isCrit ? 88 : 82;
+                var pc = isCrit ? 28 : 26;
                 self._spawnParticles(isCrit ? V_SUCCESS_HEX : V_DANGER_HEX, pc, true);
                 self._trackTimeout(function () {
-                    self._spawnParticles(isCrit ? '#fff8c4' : '#ff9e8a', isCrit ? 40 : 36, true);
+                    self._spawnParticles(isCrit ? '#fff8c4' : '#ff9e8a', isCrit ? 16 : 14, true);
                 }, 240);
                 if (self._dieMesh) {
                     var glowColor = parseInt((isCrit ? V_SUCCESS_HEX : V_DANGER_HEX).replace('#', ''), 16);
@@ -993,14 +1074,20 @@ var Dice3D = (function () {
             _mm.traverse(function (child) {
                 if (child.geometry) child.geometry.dispose();
                 if (child.material) {
-                    if (child.material.map && !child.material.map.userData.cached) child.material.map.dispose();
-                    if (child.material !== _sharedBodyMat) child.material.dispose();
+                    var matsM = Array.isArray(child.material) ? child.material : [child.material];
+                    for (var mk = 0; mk < matsM.length; mk++) {
+                        var mm = matsM[mk];
+                        if (!mm) continue;
+                        if (mm.map && !mm.map.userData.cached) mm.map.dispose();
+                        mm.dispose();
+                    }
                 }
             });
             this._scene.remove(_mm);
         }
         this._multiMeshes = [];
         this._multiStates = [];
+        this._fusionStyleIdx = Math.floor(Math.random() * DICE_STYLE_VARIATIONS.length);
         var layouts = {
             2: [[-0.8, 0], [0.8, 0]],
             3: [[-0.9, -0.45], [0.9, -0.45], [0, 0.6]],
@@ -1013,7 +1100,7 @@ var Dice3D = (function () {
         var builder = BUILDERS[this._dieType] || BUILDERS.d20;
         var staggerMs = 80;
         for (var i = 0; i < count; i++) {
-            var mesh = builder();
+            var mesh = builder(this._fusionStyleIdx);
             var pos = positions[i] || [0, 0];
             mesh.position.set(pos[0], pos[1], 0);
             mesh.scale.setScalar(baseScale);
@@ -1161,7 +1248,7 @@ var Dice3D = (function () {
             this._multiMeshes = [];
             this._multiStates = [];
             this._multiMode = false;
-            this._fusionMesh = buildResultDie(this._fusionTotal, this._dieType);
+            this._fusionMesh = buildResultDie(this._fusionTotal, this._dieType, this._fusionStyleIdx);
             this._fusionMesh.position.set(0, 0, 0);
             this._fusionMesh.scale.setScalar(0.01);
             var normals = this._fusionMesh.userData.normals;
@@ -1223,8 +1310,13 @@ var Dice3D = (function () {
             mesh.traverse(function (child) {
                 if (child.geometry) child.geometry.dispose();
                 if (child.material) {
-                    if (child.material.map && !child.material.map.userData.cached) child.material.map.dispose();
-                    if (child.material !== _sharedBodyMat) child.material.dispose();
+                    var matsD = Array.isArray(child.material) ? child.material : [child.material];
+                    for (var di = 0; di < matsD.length; di++) {
+                        var md = matsD[di];
+                        if (!md) continue;
+                        if (md.map && !md.map.userData.cached) md.map.dispose();
+                        md.dispose();
+                    }
                 }
             });
         }
