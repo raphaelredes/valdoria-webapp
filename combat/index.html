@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<!--
+  MAPA_IA — valdoria-webapp/combat/index.html (combate legado WebApp D&D 5e + cinematics)
+  (Regra: CLAUDE.md "WebApp index.html — MAPA_IA". Atualizar este mapa se a estrutura mudar.)
+  Ordem vertical do ficheiro (sem números de linha — evita drift; recontar se necessário):
+
+  A. <head> — meta charset, CSP, viewport, theme-color, cache no-store (3), style html bg, preload font, description, favicon, fonts.css, title.
+  B. <head> — telegram-web-app.js, env-utils.js, telegram-compat.js.
+  C. <head> — script v=Date.now + document.write: CSS design system, shared (coin, status, anim, toast, popup, dice-roller), combat/*.css (arena, grid, popups, init, loading, processing).
+  D. <head> — segundo script document.write: JS shared (orientation-gate, font-apply, bounce-back, haptic, toast, popup, webapp-init, log-relay, exit-confirm, audio-manager, loading-*, processing, loading-controller, status-bars, motion).
+  E. <body> — combat-loading.js (document.write); comentário processing overlay.
+  F. <body> — canvas#vfxCanvas, #app, #diceNarration, overlays skill/target/item (painéis).
+  G. <body> — init-intro-slot (hidden); nota initiative overlay removido (2026-04).
+  H. <body> — fetch-utils, dice-roller, dice-utils, script-loader.
+  I. <body> — vLoadScripts THREE + dice-3d (CDN + fallback).
+  J. <body> — combat-vfx shared, text-timing, connection-overlay+CSS, console-collector, error-reporter, api-discovery, device-id, session-heartbeat, combat-audio, narrations-data, combat-data, combat-vfx.js local, combat-dice, image-popup, combat-battlefield/turn-queue/grid/actions/unit/log/ui, combat-init-popup, combat.js.
+  K. <body> — v-popup-overlay (unificado), combatAnnouncer sr-only, unitPopup, ValdoriaErrors.init("COMBAT").
+-->
 <html lang="pt-BR">
 
 <head>

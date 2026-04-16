@@ -1,8 +1,19 @@
 <!DOCTYPE html>
 <!--
-  Combat2 WebApp — frontend real do combate reescrito.
-  Consume /api/combat2 do backend. Render copiado do simulador
-  (simuladores/combate.html). Mantido em sync manualmente por ora.
+  MAPA_IA — valdoria-webapp/combat2/index.html
+  (Regra: CLAUDE.md "WebApp index.html — MAPA_IA". Atualizar este mapa se a estrutura mudar.)
+  Ordem vertical do ficheiro:
+
+  1. WebApp combat2: estado GET/POST /api/combat2; lógica em combat2.js; CSS reutiliza combat/*.css + combat2.css.
+  2. <head> — meta UTF-8, viewport, theme-color, cache no-store (3 meta), title.
+  3. <head> — style inline html{background} (anti-FOUC; nunca opacity:0 no html).
+  4. <head> — script: var v=Date.now(), BASE GitHub Pages, loadCSS() → fonts, valdoria-design, coin, status-bars,
+     animations, cadeia CSS combat/* (battlefield, queue, grid, actions, init, dice, effects, entities, layout, polish, screens, themes, vfx), link combat2.css.
+  5. <body> — class biome-*, canvas#vfxCanvas (CombatVFX), #app + mensagem loading inicial.
+  6. Script externo — telegram-web-app.js.
+  7. IIFE document.write — motion.js, combat-vfx.js, audio-manager.js, combat/combat-audio.js, console-collector.js,
+     error-reporter.js (ordem preflight / error-reporter após collector).
+  8. combat2.js — boot: THREE → dice-3d → fetch estado → render (detalhe no .js).
 -->
 <html lang="pt-BR">
 <head>
