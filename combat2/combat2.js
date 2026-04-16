@@ -28,6 +28,52 @@
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
     var _skipReplayBatch = false;
     var _leavingCombat = false;
+    /** Ultima faixa BGM pedida (evita reiniciar combat em todo render). */
+    var _combat2MusicKey = '';
+
+    function tryValdoriaAudioInit() {
+        try {
+            if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.init) {
+                ValdoriaAudio.init();
+            }
+        } catch (e) {}
+    }
+
+    function unlockCombat2OscFallback() {
+        try {
+            window._audioUnlocked = true;
+        } catch (e) {}
+    }
+
+    function syncCombat2Music(s) {
+        if (!s || typeof ValdoriaAudio === 'undefined' || !ValdoriaAudio.play) {
+            return;
+        }
+        var ph = s.ph || '';
+        if (ph === 'victory' || ph === 'defeat') {
+            var k = ph === 'victory' ? 'victory' : 'defeat';
+            if (_combat2MusicKey !== k) {
+                _combat2MusicKey = k;
+                ValdoriaAudio.play(k);
+            }
+            return;
+        }
+        if (ph === 'fled') {
+            if (_combat2MusicKey !== 'fled') {
+                _combat2MusicKey = 'fled';
+                try {
+                    ValdoriaAudio.playSFX('sfx_success');
+                } catch (eF) {}
+            }
+            return;
+        }
+        if (ph === 'intro' || ph === 'init' || ph === 'init_done' || ph === 'active') {
+            if (_combat2MusicKey !== 'combat') {
+                _combat2MusicKey = 'combat';
+                ValdoriaAudio.play('combat');
+            }
+        }
+    }
 
     /* ============================================================
      * Sair do combate: mesma rota que combat.js (transition -> URL)
@@ -184,7 +230,7 @@
             target.alive = ev.newHp > 0;
             render(currentState);
             var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-            playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'));
+            playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'), ev.newHp);
         } else {
             render(currentState);
         }
@@ -388,6 +434,9 @@
 
     function render(s) {
         currentState = s;
+        try {
+            syncCombat2Music(s);
+        } catch (eM) {}
         var app = document.getElementById('app');
         var ph = s.ph;
         var html = '';
@@ -518,6 +567,8 @@
     }
 
     async function onBtnClick(ev) {
+        tryValdoriaAudioInit();
+        unlockCombat2OscFallback();
         var b = ev.currentTarget;
         var act = b.dataset.act;
         if (act === 'close') {
@@ -632,6 +683,17 @@
                     if (ev.hit) return { title: '✅ ACERTOU', sub: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total + ' ≥ CA ' + ev.ac, cls: 'hit' };
                     if (ev.miss_reason === 'falha_critica') return { title: '⚠ FALHA CRÍTICA', sub: 'd20 = 1 — escapa do alvo', cls: 'miss' };
                     return { title: '🛡 ' + target.n.toUpperCase() + ' DEFENDEU', sub: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total + ' < CA ' + ev.ac, cls: 'miss' };
+                },
+                onAttackRollResolved: function () {
+                    try {
+                        if (ev.crit && typeof sfxCrit === 'function') {
+                            sfxCrit();
+                        } else if (ev.hit && typeof sfxHit === 'function') {
+                            sfxHit();
+                        } else if (typeof sfxMiss === 'function') {
+                            sfxMiss();
+                        }
+                    } catch (eSfx) {}
                 }
             });
         });
@@ -643,7 +705,10 @@
         if (!ev.hit) return;
 
         /* Overlay 2: dado de dano + card animado */
-        await showDamageDice(ev.dmgRolls, actor.die, ev.crit, actor, target, ev.oldHp, ev.newHp, ev.dmgMod, { offerBatchSkip: !!offerSkip });
+        await showDamageDice(ev.dmgRolls, actor.die, ev.crit, actor, target, ev.oldHp, ev.newHp, ev.dmgMod, {
+            offerBatchSkip: !!offerSkip,
+            dmgType: ev.dmgType || 'slashing'
+        });
 
         if (_skipReplayBatch) {
             syncAttackOutcomeFromEvent(ev);
@@ -654,7 +719,7 @@
         target.alive = ev.newHp > 0;
         render(currentState);
         var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-        playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'));
+        playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'), ev.newHp);
         await sleep(200);
     }
 
@@ -666,8 +731,20 @@
         await new Promise(function (x) { showDice(ev.d20, x, p, 'Fuga · DC ' + ev.dc, { offerBatchSkip: !!offerSkip }); });
         if (_skipReplayBatch) return;
         if (ev.success) {
+            try {
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                    ValdoriaAudio.playSFX('sfx_success');
+                }
+            } catch (eOk) {}
             await showMessage('💨 ESCAPOU!', 'hit', 'Total ' + ev.total + ' ≥ DC ' + ev.dc, { offerBatchSkip: !!offerSkip });
         } else {
+            try {
+                if (typeof sfxMiss === 'function') {
+                    sfxMiss();
+                } else if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                    ValdoriaAudio.playSFX('sfx_miss');
+                }
+            } catch (eMs) {}
             await showMessage('⚠ FALHOU', 'miss', 'Ataques de oportunidade dos inimigos!', { offerBatchSkip: !!offerSkip });
         }
     }
@@ -811,6 +888,13 @@
         function startRoll() {
             if (started || !d) return;
             started = true;
+            tryValdoriaAudioInit();
+            unlockCombat2OscFallback();
+            try {
+                if (typeof sfxDiceRoll === 'function') {
+                    sfxDiceRoll();
+                }
+            } catch (eDice) {}
             container.classList.remove('pulse-idle');
             hint.textContent = manualPlayerDice ? '⚡ Toque no dado para acelerar o giro' : '';
             d.roll(value, function () {
@@ -833,6 +917,11 @@
                 } else {
                     resultEl.textContent = 'd20 = ' + value;
                     resultEl.classList.add('visible');
+                }
+                if (opts.onAttackRollResolved && typeof opts.onAttackRollResolved === 'function') {
+                    try {
+                        opts.onAttackRollResolved(value, info);
+                    } catch (eAr) {}
                 }
                 hint.textContent = '';
                 continueBtn.style.display = '';
@@ -995,6 +1084,11 @@
                         hpTxt.textContent = oldHp + ' / ' + target.mhp + ' HP';
                         card.appendChild(hpTxt);
                         resultEl.appendChild(card);
+                        try {
+                            if (typeof sfxDamageType === 'function') {
+                                sfxDamageType((dmgOpts && dmgOpts.dmgType) || 'slashing');
+                            }
+                        } catch (eDt) {}
                         setTimeout(function () {
                             fill.style.width = newPct + '%';
                             var startMs = performance.now(), dur = 800;
@@ -1008,6 +1102,11 @@
                         setTimeout(function () { continueBtn.style.display = ''; }, 1100);
                         return;
                     }
+                    try {
+                        if (typeof sfxDiceRoll === 'function') {
+                            sfxDiceRoll();
+                        }
+                    } catch (eDr) {}
                     d.roll(rolls[i], function () {
                         if (rolls.length > 1 || dmgMod > 0) {
                             var partial = rolls.slice(0, i + 1).join(' + ');
@@ -1100,7 +1199,7 @@
         if (isCrit) { _shakeAppCombat2('heavy'); } else { _shakeAppCombat2('light'); }
     }
 
-    function playHitVFX(uid, crit, dmgType) {
+    function playHitVFX(uid, crit, dmgType, newHp) {
         var el = document.querySelector('[data-unit-id="' + uid + '"]');
         if (!el) return;
         dmgType = dmgType || 'slashing';
@@ -1112,6 +1211,13 @@
             } catch (e) {
                 console.warn('[COMBAT2]', 'vfx_impact_failed', e || '');
             }
+        }
+        if (newHp != null && newHp <= 0 && uid && uid.indexOf('enemy_') === 0) {
+            try {
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                    ValdoriaAudio.playSFX('sfx_enemy_death');
+                }
+            } catch (eDeath) {}
         }
         var rect = el.getBoundingClientRect();
         for (var i = 0; i < (crit ? 10 : 6); i++) {
@@ -1304,6 +1410,7 @@
                 window.Telegram.WebApp.expand();
             }
         } catch (e) {}
+        tryValdoriaAudioInit();
         loadScript('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js', function () {
             loadScript(BASE + '/shared/dice-3d.js?v=' + Date.now(), async function () {
                 try {
