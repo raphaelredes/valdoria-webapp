@@ -407,8 +407,8 @@
     }
 
     /**
-     * Resumo do lote com rolagens puladas: mesmas colunas que ordem de iniciativa
-     * (iop-pos · iop-ico · iop-name · iop-roll), uma linha por passo legível.
+     * Resumo do lote com animacoes puladas: mesmas colunas que ordem de iniciativa
+     * (iop-pos · iop-ico · iop-name · iop-roll), uma linha por passo legivel.
      */
     function buildBatchSummaryHtml(events, state) {
         state = state || currentState;
@@ -418,7 +418,7 @@
             '<div class="iop-head-batch__text">',
             '<h2 class="iop-head-batch__title" id="c2-batch-summary-title">',
             '<span class="iop-head-batch__line1">Ataque</span>',
-            '<span class="iop-head-batch__line2">Rolagens puladas</span>',
+            '<span class="iop-head-batch__line2">Anima\u00e7\u00f5es puladas</span>',
             '</h2>',
             '</div>',
             '</header>',
@@ -1166,24 +1166,38 @@
         if (document.getElementById('init-order-popup')) return;
         var ov = document.createElement('div');
         ov.id = 'init-order-popup';
-        ov.className = 'iop-overlay';
+        ov.className = 'iop-overlay iop-overlay--batch';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-labelledby', 'c2-init-order-title');
         var card = document.createElement('div');
-        card.className = 'iop-card';
-        var html = '<div class="iop-title">\u2694 Ordem de iniciativa</div>';
-        html += '<div class="iop-sub">Combate come\u00e7a pelo topo</div>';
-        html += '<div class="iop-list">';
+        card.className = 'iop-card iop-card--batch-summary';
+        var parts = [
+            '<header class="iop-head-batch" aria-labelledby="c2-init-order-title">',
+            '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
+            '<div class="iop-head-batch__text">',
+            '<h2 class="iop-head-batch__title" id="c2-init-order-title">',
+            '<span class="iop-head-batch__line1">Ordem de iniciativa</span>',
+            '<span class="iop-head-batch__line2">Combate come\u00e7a pelo topo</span>',
+            '</h2>',
+            '</div>',
+            '</header>',
+            '<div class="iop-head-batch__rule" role="presentation"></div>',
+            '<div class="iop-list">'
+        ];
         currentState.order.forEach(function (c, i) {
             var isSide = c.t === 'p' || c.t === 'a';
-            html += '<div class="iop-row' + (isSide ? ' player' : '') + '">';
-            html += '<span class="iop-pos">' + (i + 1) + '</span>';
-            html += '<span class="iop-ico">' + c.ico + '</span>';
-            html += '<span class="iop-name">' + escHtml(c.n) + '</span>';
-            html += '<span class="iop-roll">\ud83c\udfb2 ' + c.init + '</span>';
-            html += '</div>';
+            parts.push('<div class="iop-row' + (isSide ? ' player' : '') + '">');
+            parts.push('<span class="iop-pos">' + (i + 1) + '</span>');
+            parts.push('<span class="iop-ico">' + c.ico + '</span>');
+            parts.push('<span class="iop-name">' + escHtml(c.n) + '</span>');
+            parts.push('<span class="iop-roll">\ud83c\udfb2 ' + c.init + '</span>');
+            parts.push('</div>');
         });
-        html += '</div>';
-        html += '<div class="iop-start-wrap"><button type="button" class="epic-cta-btn" id="iop-start-combat-btn"><span class="epic-cta-icon">\u2694</span><span class="epic-cta-text">Come\u00e7ar<br/>Combate</span></button></div>';
-        setHTML(card, html);
+        parts.push('</div>');
+        parts.push('<div class="iop-start-wrap"><button type="button" class="epic-cta-btn" id="iop-start-combat-btn">' +
+            '<span class="epic-cta-text">Come\u00e7ar combate \u2192</span></button></div>');
+        setHTML(card, parts.join(''));
         ov.appendChild(card);
         document.body.appendChild(ov);
         var startBtn = document.getElementById('iop-start-combat-btn');
@@ -1579,7 +1593,7 @@
         if (isCrit) { _shakeAppCombat2('heavy'); } else { _shakeAppCombat2('light'); }
     }
 
-    /** Feedback visual curto no alvo quando o ataque erra (apos resumo Rolagens puladas). */
+    /** Feedback visual curto no alvo quando o ataque erra (apos resumo Animações puladas). */
     function flashMissTargetCell(el) {
         if (!el || !document.body.contains(el)) return;
         el.classList.remove('c2-miss-flash');
@@ -1671,7 +1685,7 @@
     }
 
     /**
-     * Apos fechar o resumo Rolagens puladas: barra de PV, impacto/miss na arena, cura, buffs/recursos.
+     * Apos fechar o resumo Animações puladas: barra de PV, impacto/miss na arena, cura, buffs/recursos.
      * Estado final ja esta em currentState; aqui so animamos leitura visual.
      */
     async function playPostBatchSummaryVfx(events) {

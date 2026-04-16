@@ -134,7 +134,7 @@ html, body { height: 100vh; overflow: hidden; }
     align-items: flex-start;
 }
 
-/* Cabeçalho «Ataque — rolagens puladas»: kicker + título em duas linhas + subtítulo + divisor */
+/* Cabecalho estilo lote (Ataque / Animacoes puladas ou Ordem de iniciativa): ornamento + titulo em duas linhas + divisor */
 .iop-head-batch {
     display: flex;
     flex-direction: row;
@@ -825,7 +825,7 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
     animation: resFadeIn 0.6s ease 0.4s both;
 }
 
-/* Pos-resumo "Rolagens puladas": barra de PV mais legivel; flashes em celula */
+/* Pos-resumo "Animacoes puladas": barra de PV mais legivel; flashes em celula */
 #app.c2-hp-replay .mini-bar .fill {
     transition: width 0.72s cubic-bezier(0.4, 0, 0.2, 1);
 }
