@@ -25,6 +25,8 @@
     var _pendingSkill = null;
     var _activeDiceClose = null;
     var _skipInit = false;
+    /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
+    var _skipReplayBatch = false;
     var _leavingCombat = false;
 
     /* ============================================================
@@ -167,6 +169,97 @@
     }
 
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+    /** Combate com 5+ participantes: oferece pular animações do lote de eventos (vários inimigos). */
+    function shouldOfferBatchSkip() {
+        return !!(currentState && currentState.order && currentState.order.length > 4 && currentState.ph === 'active');
+    }
+
+    function syncAttackOutcomeFromEvent(ev) {
+        if (!currentState || !ev) return;
+        var target = currentState.order[ev.tIdx];
+        if (!target) return;
+        if (ev.hit && ev.newHp != null) {
+            target.hp = ev.newHp;
+            target.alive = ev.newHp > 0;
+            render(currentState);
+            var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+            playHitVFX(uid, ev.crit, (ev.dmgType || 'slashing'));
+        } else {
+            render(currentState);
+        }
+    }
+
+    function buildBatchSummaryHtml(events) {
+        var parts = ['<div class="c2-sum-title">Resumo da sequência</div><div class="c2-sum-list">'];
+        var any = false;
+        for (var i = 0; i < events.length; i++) {
+            var ev = events[i];
+            if (!ev) continue;
+            if (ev.kind === 'attack' || ev.kind === 'oa') {
+                any = true;
+                var oa = ev.kind === 'oa';
+                var an = escHtml(ev.actorName || '');
+                var tn = escHtml(ev.targetName || '');
+                if (!ev.hit) {
+                    var why = ev.miss_reason === 'falha_critica' ? 'Falha crítica (1 natural)' : 'Não acertou';
+                    parts.push('<div class="c2-sum-row miss"><span class="c2-sum-ico">🛡</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                        (oa ? 'Ataque de oportunidade: ' : '') + an + ' → ' + tn + '</div><div class="c2-sum-sub">' + escHtml(why) +
+                        ' · d20+' + (ev.atk != null ? ev.atk : '?') + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + '</div></div></div>');
+                } else {
+                    var dmg = ev.dmgTotal != null ? ev.dmgTotal : '?';
+                    var dead = ev.newHp != null && ev.newHp <= 0;
+                    var tags = [];
+                    if (ev.crit) tags.push('Crítico');
+                    if (dead) tags.push('Eliminado');
+                    parts.push('<div class="c2-sum-row hit' + (dead ? ' fallen' : '') + '"><span class="c2-sum-ico">' + (dead ? '💀' : '⚔') +
+                        '</span><div class="c2-sum-body"><div class="c2-sum-line">' + (oa ? 'Oportunidade: ' : '') + an + ' → ' + tn +
+                        '</div><div class="c2-sum-sub">−' + dmg + ' PV' + (tags.length ? ' · ' + escHtml(tags.join(' · ')) : '') +
+                        (ev.oldHp != null && ev.newHp != null ? ' · PV ' + ev.oldHp + ' → ' + ev.newHp : '') + '</div></div></div>');
+                }
+            } else if (ev.kind === 'flee') {
+                any = true;
+                parts.push('<div class="c2-sum-row flee"><span class="c2-sum-ico">🏃</span><div class="c2-sum-body"><div class="c2-sum-line">' +
+                    (ev.success ? 'Fuga bem-sucedida' : 'Falha na fuga') + '</div><div class="c2-sum-sub">Teste ' +
+                    (ev.d20 != null ? 'd20=' + ev.d20 : '') + (ev.mod != null ? ' + ' + ev.mod : '') +
+                    (ev.total != null ? ' = ' + ev.total : '') + ' vs DC ' + (ev.dc != null ? ev.dc : '') + '</div></div></div>');
+            } else if (ev.kind === 'round') {
+                parts.push('<div class="c2-sum-row round"><span class="c2-sum-ico">🔄</span><div class="c2-sum-body"><div class="c2-sum-line">Rodada ' +
+                    escHtml(String(ev.rn != null ? ev.rn : '')) + '</div></div></div>');
+            }
+        }
+        if (!any) {
+            parts.push('<div class="c2-sum-empty">Nenhum ataque nesta ação — apenas atualização de estado.</div>');
+        }
+        parts.push('</div>');
+        return parts.join('');
+    }
+
+    function showBatchSummaryPopup(events) {
+        if (!events || !events.length) return;
+        var existing = document.getElementById('c2-batch-summary');
+        if (existing) existing.remove();
+        var ov = document.createElement('div');
+        ov.id = 'c2-batch-summary';
+        ov.className = 'c2-batch-summary-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        var card = document.createElement('div');
+        card.className = 'c2-batch-summary-card';
+        setHTML(card, buildBatchSummaryHtml(events));
+        var foot = document.createElement('div');
+        foot.className = 'c2-batch-summary-foot';
+        var ok = document.createElement('button');
+        ok.type = 'button';
+        ok.className = 'c2-batch-summary-ok';
+        ok.textContent = 'Entendi';
+        ok.addEventListener('click', function () { ov.remove(); });
+        foot.appendChild(ok);
+        card.appendChild(foot);
+        ov.appendChild(card);
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+    }
 
     /* ============================================================
      * RENDER (copiado do simulador, tudo via currentState do backend)
@@ -476,42 +569,64 @@
         try {
             var resp = await dispatchAction(action);
             if (resp.error) { console.warn('[C2]', resp.error); return; }
-            /* Replay events (mutando currentState local para animar HPs intermedios) */
-            if (resp.events && resp.events.length) {
-                for (var i = 0; i < resp.events.length; i++) {
-                    await playEvent(resp.events[i]);
+            var evs = resp.events || [];
+            var offerSkip = shouldOfferBatchSkip();
+            _skipReplayBatch = false;
+            if (evs.length) {
+                for (var i = 0; i < evs.length; i++) {
+                    if (_skipReplayBatch) {
+                        currentState = resp.state;
+                        render(currentState);
+                        showBatchSummaryPopup(evs);
+                        _skipReplayBatch = false;
+                        break;
+                    }
+                    await playEvent(evs[i], offerSkip);
                 }
             }
-            /* Sync autoritativo com o state final do backend */
             currentState = resp.state;
             render(currentState);
             if (currentState.ph === 'init_done') showInitiativeOrderPopup();
         } catch (e) { console.error('[C2] action failed', e); }
     }
 
-    async function playEvent(ev) {
-        if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev);
-        if (ev.kind === 'flee') return animateFleeEvent(ev);
+    async function playEvent(ev, offerSkip) {
+        if (ev.kind === 'attack' || ev.kind === 'oa') return animateAttackEvent(ev, offerSkip);
+        if (ev.kind === 'flee') return animateFleeEvent(ev, offerSkip);
         if (ev.kind === 'round') {
             currentState.rn = ev.rn;
             render(currentState);
+            if (_skipReplayBatch) return;
             await sleep(400);
         }
     }
 
-    async function animateAttackEvent(ev) {
+    async function animateAttackEvent(ev, offerSkip) {
+        if (_skipReplayBatch) {
+            syncAttackOutcomeFromEvent(ev);
+            return;
+        }
         var actor = currentState.order[ev.aIdx];
         var target = currentState.order[ev.tIdx];
         if (!actor || !target) return;
         /* Ajusta HP local para o antes-do-evento (backend ja aplicou no state final) */
         if (ev.hit) target.hp = ev.oldHp;
         render(currentState);
+        if (_skipReplayBatch) {
+            syncAttackOutcomeFromEvent(ev);
+            return;
+        }
         await sleep(200);
+        if (_skipReplayBatch) {
+            syncAttackOutcomeFromEvent(ev);
+            return;
+        }
         var actionLabel = ev.kind === 'oa' ? 'Ataque de oportunidade → ' + target.n : 'Ataca ' + target.n + ' (CA ' + target.ac + ')';
 
         /* Overlay 1: d20 */
         await new Promise(function (x) {
             showDice(ev.d20, x, actor, actionLabel, {
+                offerBatchSkip: !!offerSkip,
                 postResult: function () {
                     if (ev.crit) return { title: '⚡ ACERTO CRÍTICO', sub: 'd20 = 20 — dano em dobro', cls: 'crit' };
                     if (ev.hit) return { title: '✅ ACERTOU', sub: ev.d20 + ' + ' + ev.atk + ' = ' + ev.total + ' ≥ CA ' + ev.ac, cls: 'hit' };
@@ -521,11 +636,19 @@
             });
         });
 
+        if (_skipReplayBatch) {
+            syncAttackOutcomeFromEvent(ev);
+            return;
+        }
         if (!ev.hit) return;
 
         /* Overlay 2: dado de dano + card animado */
-        await showDamageDice(ev.dmgRolls, actor.die, ev.crit, actor, target, ev.oldHp, ev.newHp, ev.dmgMod);
+        await showDamageDice(ev.dmgRolls, actor.die, ev.crit, actor, target, ev.oldHp, ev.newHp, ev.dmgMod, { offerBatchSkip: !!offerSkip });
 
+        if (_skipReplayBatch) {
+            syncAttackOutcomeFromEvent(ev);
+            return;
+        }
         /* Sincroniza HP local para o depois-do-evento */
         target.hp = ev.newHp;
         target.alive = ev.newHp > 0;
@@ -535,14 +658,17 @@
         await sleep(200);
     }
 
-    async function animateFleeEvent(ev) {
+    async function animateFleeEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
         var p = currentState.order[currentState.p_idx];
-        await showMessage('🏃 TENTANDO FUGIR', 'pre-npc', 'Teste de Acrobacia (DEX) DC ' + ev.dc);
-        await new Promise(function (x) { showDice(ev.d20, x, p, 'Fuga · DC ' + ev.dc); });
+        await showMessage('🏃 TENTANDO FUGIR', 'pre-npc', 'Teste de Acrobacia (DEX) DC ' + ev.dc, { offerBatchSkip: !!offerSkip });
+        if (_skipReplayBatch) return;
+        await new Promise(function (x) { showDice(ev.d20, x, p, 'Fuga · DC ' + ev.dc, { offerBatchSkip: !!offerSkip }); });
+        if (_skipReplayBatch) return;
         if (ev.success) {
-            await showMessage('💨 ESCAPOU!', 'hit', 'Total ' + ev.total + ' ≥ DC ' + ev.dc);
+            await showMessage('💨 ESCAPOU!', 'hit', 'Total ' + ev.total + ' ≥ DC ' + ev.dc, { offerBatchSkip: !!offerSkip });
         } else {
-            await showMessage('⚠ FALHOU', 'miss', 'Ataques de oportunidade dos inimigos!');
+            await showMessage('⚠ FALHOU', 'miss', 'Ataques de oportunidade dos inimigos!', { offerBatchSkip: !!offerSkip });
         }
     }
 
@@ -654,7 +780,22 @@
         continueBtn.className = 'dice-continue-btn';
         continueBtn.textContent = 'Continuar →';
         continueBtn.style.display = 'none';
-        ov.appendChild(continueBtn);
+        var actionsWrap = document.createElement('div');
+        actionsWrap.className = 'dice-actions-stack';
+        actionsWrap.appendChild(continueBtn);
+        if (opts.offerBatchSkip && shouldOfferBatchSkip()) {
+            var skipAllBtn = document.createElement('button');
+            skipAllBtn.type = 'button';
+            skipAllBtn.className = 'dice-skip-batch-btn';
+            skipAllBtn.textContent = 'Pular animações restantes';
+            skipAllBtn.addEventListener('click', function (evClick) {
+                evClick.stopPropagation();
+                _skipReplayBatch = true;
+                close();
+            });
+            actionsWrap.appendChild(skipAllBtn);
+        }
+        ov.appendChild(actionsWrap);
         document.body.appendChild(ov);
         var d, closed = false, started = false, lockTimer = null;
         function close() {
@@ -734,7 +875,8 @@
         } catch (e) { close(); }
     }
 
-    function showMessage(text, cls, sub) {
+    function showMessage(text, cls, sub, msgOpts) {
+        msgOpts = msgOpts || {};
         return new Promise(function (resolve) {
             var ov = document.createElement('div');
             ov.className = 'combat-msg-overlay';
@@ -755,6 +897,18 @@
             btn.textContent = 'Continuar →';
             btn.style.display = 'none';
             card.appendChild(btn);
+            if (msgOpts.offerBatchSkip && shouldOfferBatchSkip()) {
+                var skipB = document.createElement('button');
+                skipB.type = 'button';
+                skipB.className = 'dice-skip-batch-btn dice-skip-batch-btn--in-card';
+                skipB.textContent = 'Pular animações restantes';
+                skipB.addEventListener('click', function () {
+                    _skipReplayBatch = true;
+                    ov.remove();
+                    resolve();
+                });
+                card.appendChild(skipB);
+            }
             ov.appendChild(card);
             document.body.appendChild(ov);
             setTimeout(function () { btn.style.display = ''; }, 1000);
@@ -762,7 +916,8 @@
         });
     }
 
-    function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod) {
+    function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, dmgOpts) {
+        dmgOpts = dmgOpts || {};
         dmgMod = dmgMod || 0;
         return new Promise(function (resolve) {
             if (!window.Dice3D) { resolve(); return; }
@@ -791,7 +946,22 @@
             continueBtn.className = 'dice-continue-btn';
             continueBtn.textContent = 'Continuar →';
             continueBtn.style.display = 'none';
-            ov.appendChild(continueBtn);
+            var dmgActionsWrap = document.createElement('div');
+            dmgActionsWrap.className = 'dice-actions-stack';
+            dmgActionsWrap.appendChild(continueBtn);
+            if (dmgOpts.offerBatchSkip && shouldOfferBatchSkip()) {
+                var skipDmg = document.createElement('button');
+                skipDmg.type = 'button';
+                skipDmg.className = 'dice-skip-batch-btn';
+                skipDmg.textContent = 'Pular animações restantes';
+                skipDmg.addEventListener('click', function (evClick) {
+                    evClick.stopPropagation();
+                    _skipReplayBatch = true;
+                    close();
+                });
+                dmgActionsWrap.appendChild(skipDmg);
+            }
+            ov.appendChild(dmgActionsWrap);
             document.body.appendChild(ov);
             var d;
             function close() { try { d && d.dispose(); } catch (e) {} ov.remove(); if (_activeDiceClose === close) _activeDiceClose = null; resolve(); }
