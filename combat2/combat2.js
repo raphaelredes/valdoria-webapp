@@ -204,6 +204,36 @@
     async function fetchState() { return apiCall('GET'); }
     async function dispatchAction(action) { return apiCall('POST', action); }
 
+    /**
+     * GET /api/combat2 — estado autoritativo apos falha de POST (ex.: reaction_resolve).
+     * @param {string} logTag tag para console.error se sync falhar
+     * @returns {Promise<boolean>}
+     */
+    async function resyncCombat2State(logTag) {
+        try {
+            var snap = await fetchState();
+            if (snap && snap.state) {
+                currentState = snap.state;
+                render(currentState);
+                return true;
+            }
+        } catch (eSync) {
+            console.error('[COMBAT2]', logTag || 'resyncCombat2State', eSync || '');
+        }
+        return false;
+    }
+
+    /** Aviso raro (falha de reacao + sync); Telegram.showAlert se disponivel. */
+    function c2NotifyReactionRecover(msg) {
+        console.error('[COMBAT2]', 'reaction_recover', msg || '');
+        try {
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg && typeof tg.showAlert === 'function') {
+                tg.showAlert(msg);
+            }
+        } catch (eA) { /* noop */ }
+    }
+
     /* ============================================================
      * HTML HELPERS
      * ============================================================ */
@@ -1015,9 +1045,35 @@
             if (!ev) continue;
             if (ev.kind === 'reaction_prompt' && ev.subtype === 'shield') {
                 var use = await promptShieldReaction(ev);
-                var r2 = await dispatchAction({ type: 'reaction_resolve', useShield: use });
-                if (r2.error) {
-                    console.warn('[C2] reaction_resolve', r2.error);
+                var r2 = null;
+                var reactFail = '';
+                for (var ri = 0; ri < 2; ri++) {
+                    try {
+                        r2 = await dispatchAction({ type: 'reaction_resolve', useShield: use });
+                        if (r2 && r2.error) {
+                            reactFail = String(r2.error);
+                            r2 = null;
+                        } else if (r2 && r2.state) {
+                            reactFail = '';
+                            break;
+                        } else {
+                            reactFail = 'invalid_response';
+                            r2 = null;
+                        }
+                    } catch (ePost) {
+                        reactFail = (ePost && ePost.message) ? String(ePost.message) : 'network';
+                        r2 = null;
+                    }
+                    if (ri < 1) await sleep(380);
+                }
+                if (!r2 || !r2.state) {
+                    console.error('[COMBAT2]', 'reaction_resolve_failed', reactFail || '');
+                    var synced = await resyncCombat2State('reaction_resolve_resync');
+                    c2NotifyReactionRecover(
+                        synced
+                            ? 'Nao foi possivel confirmar o Escudo Arcano; o estado foi atualizado. Se algo parecer errado, feche e reabra o combate pelo bot.'
+                            : 'Nao foi possivel confirmar o Escudo Arcano nem sincronizar. Verifique a conexao e tente de novo.'
+                    );
                     return;
                 }
                 currentState = r2.state;
