@@ -1,7 +1,7 @@
 /* Combat2 WebApp — frontend real.
  *
- * Render copiado de simuladores/combate.html (mesma UI/animacoes).
- * Diferenca: em vez de logica mock JS, consome /api/combat2 do backend.
+ * UI alinhada ao fluxo de combate WebApp (arena, iniciativa, popups).
+ * Consome /api/combat2 do backend.
  * Backend retorna {state, events} — frontend anima events em sequencia
  * e sincroniza com state autoritativo ao final.
  *
@@ -528,8 +528,84 @@
         ov.addEventListener('click', function (e) { if (e.target === ov) onDismiss(); });
     }
 
+    /**
+     * Confirmação de ação (Esquivar, Desengajar): mesmo cabeçalho que resumo de lote + lista curta.
+     * cfg: { line1, line2, bullets: string[], note?: string }
+     */
+    function showMetaActionConfirm(cfg) {
+        return new Promise(function (resolve) {
+            if (!cfg) {
+                resolve(false);
+                return;
+            }
+            var dup = document.getElementById('c2-meta-action-confirm');
+            if (dup) dup.remove();
+            var ov = document.createElement('div');
+            ov.id = 'c2-meta-action-confirm';
+            ov.className = 'iop-overlay iop-overlay--batch';
+            ov.setAttribute('role', 'dialog');
+            ov.setAttribute('aria-modal', 'true');
+            ov.setAttribute('aria-labelledby', 'c2-meta-confirm-title');
+            var card = document.createElement('div');
+            card.className = 'iop-card iop-card--batch-summary c2-meta-confirm-card';
+            var parts = [
+                '<header class="iop-head-batch" aria-labelledby="c2-meta-confirm-title">',
+                '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
+                '<div class="iop-head-batch__text">',
+                '<h2 class="iop-head-batch__title" id="c2-meta-confirm-title">',
+                '<span class="iop-head-batch__line1">' + escHtml(cfg.line1 || '') + '</span>',
+                '<span class="iop-head-batch__line2">' + escHtml(cfg.line2 || '') + '</span>',
+                '</h2></div></header>',
+                '<div class="iop-head-batch__rule" role="presentation"></div>',
+                '<div class="c2-meta-confirm-body">'
+            ];
+            var bullets = cfg.bullets || [];
+            if (bullets.length) {
+                parts.push('<ul class="c2-meta-confirm-bullets">');
+                for (var bi = 0; bi < bullets.length; bi++) {
+                    parts.push('<li>' + escHtml(bullets[bi]) + '</li>');
+                }
+                parts.push('</ul>');
+            }
+            if (cfg.note) {
+                parts.push('<p class="c2-meta-confirm-note">' + escHtml(cfg.note) + '</p>');
+            }
+            parts.push('</div>');
+            parts.push('<div class="c2-meta-confirm-actions">');
+            parts.push('<button type="button" class="action-btn" data-c2mac="0">' + escHtml(cfg.cancelLabel || 'Cancelar') + '</button>');
+            parts.push('<button type="button" class="action-btn primary" data-c2mac="1">' + escHtml(cfg.confirmLabel || 'Confirmar') + '</button>');
+            parts.push('</div>');
+            setHTML(card, parts.join(''));
+            function finish(ok) {
+                try {
+                    document.removeEventListener('keydown', onKey);
+                } catch (eK) {}
+                try {
+                    ov.remove();
+                } catch (eR) {}
+                resolve(!!ok);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') finish(false);
+            }
+            document.addEventListener('keydown', onKey);
+            ov.addEventListener('click', function (e) {
+                if (e.target === ov) finish(false);
+            });
+            card.addEventListener('click', function (e) {
+                var t = e.target;
+                if (!t || !t.getAttribute) return;
+                var v = t.getAttribute('data-c2mac');
+                if (v === '0') finish(false);
+                if (v === '1') finish(true);
+            });
+            ov.appendChild(card);
+            document.body.appendChild(ov);
+        });
+    }
+
     /* ============================================================
-     * RENDER (copiado do simulador, tudo via currentState do backend)
+     * RENDER (estado via currentState do backend)
      * ============================================================ */
     function buildTurnQueue(s) {
         if (!s.order || !s.order.length) return '';
@@ -718,7 +794,7 @@
             } else if (ph === 'init') {
                 html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="skip-init"><span class="epic-cta-icon">⏭️</span><span class="epic-cta-text">Pular<br/>Rolagens</span></button></div>';
             }
-            /* init_done: CTA «Começar combate» fica dentro do popup de ordem (iop-card), como no simulador */
+            /* init_done: CTA «Começar combate» dentro do popup de ordem (iop-card) */
             setHTML(app, html);
             bindActions();
             return;
@@ -836,8 +912,36 @@
         if (act === 'start') { closeInitiativeOrderPopup(); await remoteAction({ type: 'start' }); return; }
         if (act === 'flee') { await remoteAction({ type: 'flee' }); return; }
         if (act === 'pass') { await remoteAction({ type: 'pass' }); return; }
-        if (act === 'dodge') { await remoteAction({ type: 'dodge' }); return; }
-        if (act === 'disengage') { await remoteAction({ type: 'disengage' }); return; }
+        if (act === 'dodge') {
+            var okDodge = await showMetaActionConfirm({
+                line1: 'Esquivar',
+                line2: 'Ação (PHB)',
+                bullets: [
+                    'Ataques contra você têm desvantagem se você enxergar o atacante — até o início do seu próximo turno.',
+                    'Testes de TR de Destreza com vantagem no mesmo período.',
+                    'Gasta sua ação agora.'
+                ],
+                note: '',
+                confirmLabel: 'Usar ação',
+                cancelLabel: 'Cancelar'
+            });
+            if (okDodge) await remoteAction({ type: 'dodge' });
+            return;
+        }
+        if (act === 'disengage') {
+            var okDis = await showMetaActionConfirm({
+                line1: 'Desengajar',
+                line2: 'Ação (PHB)',
+                bullets: [
+                    'Seu deslocamento não provoca ataques de oportunidade neste turno.',
+                    'Gasta sua ação agora.'
+                ],
+                confirmLabel: 'Usar ação',
+                cancelLabel: 'Cancelar'
+            });
+            if (okDis) await remoteAction({ type: 'disengage' });
+            return;
+        }
         if (act === 'log') { openCombatLog(); return; }
     }
 
@@ -1215,7 +1319,7 @@
     }
 
     /* ============================================================
-     * DICE OVERLAYS (copiado do simulador)
+     * DICE OVERLAYS (Dice3D + overlays de resultado)
      * ============================================================ */
     function showDice(value, cb, actor, context, opts) {
         opts = opts || {};

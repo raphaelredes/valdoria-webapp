@@ -1,6 +1,4 @@
-/* Combat2 WebApp — estilos copiados do simulador em simuladores/combate.html.
-   Mantidos em sync manualmente. Design system tokens (--v-*) vem do
-   valdoria-design.css carregado via CDN. */
+/* Combat2 WebApp — estilos do fluxo de combate (tokens --v-* em valdoria-design.css). */
 
 body { font-family: var(--v-font); color: var(--v-text); background: var(--v-bg); margin: 0; padding: 0; }
 html, body { height: 100vh; overflow: hidden; }
@@ -422,7 +420,7 @@ html, body { height: 100vh; overflow: hidden; }
 .list-panel-card--log .lp-log-scroll { max-height: none; }
 .lp-log-line { font-size: var(--v-font-sm, 12px); padding: var(--v-space-sm, 8px) var(--v-space-md, 10px); border-bottom: 1px solid var(--v-border-15, rgba(74, 56, 40, 0.35)); color: var(--v-text-dim, #a09484); line-height: 1.45; }
 
-/* Init order popup + resumo de lote (mesmo overlay que simulador: bloqueia cliques por baixo) */
+/* Init order popup + resumo de lote (overlay bloqueia cliques por baixo) */
 .iop-overlay { position: fixed; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; pointer-events: auto; z-index: 9990; background: rgba(8, 6, 4, 0.82); box-sizing: border-box; animation: udcFadeIn 0.28s ease; }
 .iop-card { pointer-events: auto; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid var(--v-border, #4a3828); border-radius: 12px; padding: 14px 16px; min-width: 240px; max-width: 320px; box-shadow: 0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04); animation: udcPop .4s cubic-bezier(.34,1.56,.64,1); }
 .iop-card .iop-start-wrap { margin-top: var(--v-space-md, 12px); padding-top: var(--v-space-md, 12px); border-top: 1px solid var(--v-border, #4a3828); display: flex; justify-content: center; }
@@ -867,4 +865,51 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
 }
 .c2-res-pulse {
     animation: c2-res-pulse-kf 0.36s ease-in-out 1;
+}
+
+/* Confirmação Esquivar / Desengajar (cabeçalho lote + corpo enxuto) */
+.c2-meta-confirm-card {
+    max-width: min(100%, 340px);
+    border-radius: var(--v-radius-lg, 14px);
+    box-shadow: 0 var(--v-space-lg, 18px) 40px rgba(0, 0, 0, 0.72), 0 0 var(--v-space-lg, 18px) var(--v-gold-15, rgba(196, 149, 58, 0.12));
+    border: 1px solid var(--v-gold-40, rgba(196, 149, 58, 0.35));
+}
+.c2-meta-confirm-body {
+    padding: var(--v-space-sm, 8px) var(--v-space-md, 12px) var(--v-space-sm, 8px);
+    text-align: left;
+}
+.c2-meta-confirm-bullets {
+    margin: 0;
+    padding-left: var(--v-space-lg, 18px);
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-sm, 12px);
+    line-height: 1.55;
+    color: var(--v-text, #d4c8b0);
+}
+.c2-meta-confirm-bullets li {
+    margin-bottom: var(--v-space-sm, 8px);
+}
+.c2-meta-confirm-bullets li:last-child {
+    margin-bottom: 0;
+}
+.c2-meta-confirm-note {
+    margin: var(--v-space-md, 12px) 0 0;
+    padding-top: var(--v-space-sm, 8px);
+    border-top: 1px dashed var(--v-border-15, rgba(74, 56, 40, 0.45));
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-xs, 11px);
+    line-height: 1.45;
+    color: var(--v-text-dim, #a09484);
+}
+.c2-meta-confirm-actions {
+    display: flex;
+    flex-direction: row;
+    gap: var(--v-space-sm, 8px);
+    margin-top: var(--v-space-md, 12px);
+    padding-top: var(--v-space-md, 12px);
+    border-top: 1px solid var(--v-border, #4a3828);
+}
+.c2-meta-confirm-actions .action-btn {
+    flex: 1;
+    min-height: 44px;
 }
