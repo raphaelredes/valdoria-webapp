@@ -30,6 +30,8 @@
     var _skipInit = false;
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
     var _skipReplayBatch = false;
+    /** Evita duplo disparo do fluxo pos-resumo do lote (Continuar / clique no overlay). */
+    var _postBatchVfxRunning = false;
     var _leavingCombat = false;
     /** Ultima faixa BGM pedida (evita reiniciar combat em todo render). */
     var _combat2MusicKey = '';
@@ -414,12 +416,10 @@
             '<header class="iop-head-batch" aria-labelledby="c2-batch-summary-title">',
             '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
             '<div class="iop-head-batch__text">',
-            '<p class="iop-head-batch__kicker">Resumo do lote</p>',
             '<h2 class="iop-head-batch__title" id="c2-batch-summary-title">',
             '<span class="iop-head-batch__line1">Ataque</span>',
             '<span class="iop-head-batch__line2">Rolagens puladas</span>',
             '</h2>',
-            '<p class="iop-head-batch__sub">Resultados j\u00e1 calculados no servidor. As anima\u00e7\u00f5es de dados foram omitidas nesta sequ\u00eancia.</p>',
             '</div>',
             '</header>',
             '<div class="iop-head-batch__rule" role="presentation"></div>',
@@ -508,12 +508,24 @@
         setHTML(card, buildBatchSummaryHtml(events, currentState));
         var foot = document.createElement('div');
         foot.className = 'iop-start-wrap';
-        foot.innerHTML = '<button type="button" class="epic-cta-btn" id="c2-batch-summary-ok"><span class="epic-cta-icon">\u2713</span><span class="epic-cta-text">Entendi</span></button>';
-        foot.querySelector('#c2-batch-summary-ok').addEventListener('click', function () { ov.remove(); });
+        foot.innerHTML = '<button type="button" class="epic-cta-btn" id="c2-batch-summary-ok"><span class="epic-cta-text">Continuar \u2192</span></button>';
+        async function onDismiss() {
+            if (_postBatchVfxRunning) return;
+            _postBatchVfxRunning = true;
+            try {
+                if (ov.parentNode) ov.remove();
+                await playPostBatchSummaryVfx(events);
+            } catch (eV) {
+                console.warn('[COMBAT2]', 'batch_summary_dismiss_vfx', eV || '');
+            } finally {
+                _postBatchVfxRunning = false;
+            }
+        }
+        foot.querySelector('#c2-batch-summary-ok').addEventListener('click', function () { onDismiss(); });
         card.appendChild(foot);
         ov.appendChild(card);
         document.body.appendChild(ov);
-        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        ov.addEventListener('click', function (e) { if (e.target === ov) onDismiss(); });
     }
 
     /* ============================================================
@@ -1565,6 +1577,133 @@
         setTimeout(function () { el.classList.remove(shakeCls); }, rmShake);
         _showImpactFlashC2(el, !!isCrit);
         if (isCrit) { _shakeAppCombat2('heavy'); } else { _shakeAppCombat2('light'); }
+    }
+
+    /** Feedback visual curto no alvo quando o ataque erra (apos resumo Rolagens puladas). */
+    function flashMissTargetCell(el) {
+        if (!el || !document.body.contains(el)) return;
+        el.classList.remove('c2-miss-flash');
+        void el.offsetWidth;
+        el.classList.add('c2-miss-flash');
+        var ms = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+            ? ValdoriaMotion.duration(480, 0) : 480;
+        setTimeout(function () {
+            if (el && document.body.contains(el)) el.classList.remove('c2-miss-flash');
+        }, ms);
+    }
+
+    function flashHealTargetCell(el) {
+        if (!el || !document.body.contains(el)) return;
+        el.classList.remove('c2-heal-flash');
+        void el.offsetWidth;
+        el.classList.add('c2-heal-flash');
+        var ms = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+            ? ValdoriaMotion.duration(520, 0) : 520;
+        setTimeout(function () {
+            if (el && document.body.contains(el)) el.classList.remove('c2-heal-flash');
+        }, ms);
+    }
+
+    async function playPostBatchAttackVfx(ev) {
+        if (!currentState || !ev) return;
+        var target = currentState.order[ev.tIdx];
+        var actor = currentState.order[ev.aIdx];
+        if (!target || !actor) return;
+        var toUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+        var toEl = document.querySelector('[data-unit-id="' + toUid + '"]');
+        if (!ev.hit) {
+            try {
+                if (typeof sfxMiss === 'function') {
+                    sfxMiss();
+                }
+            } catch (eS) {}
+            flashMissTargetCell(toEl);
+            await sleep(460);
+            return;
+        }
+        if (ev.oldHp != null && ev.newHp != null) {
+            target.hp = ev.oldHp;
+            target.alive = ev.oldHp > 0;
+            render(currentState);
+            await sleep(90);
+            target.hp = ev.newHp;
+            target.alive = ev.newHp > 0;
+            render(currentState);
+        }
+        arenaStrikeFromEvent(ev);
+        await sleep(ev.crit ? 520 : 580);
+    }
+
+    async function playPostBatchHealVfx(ev) {
+        if (!currentState || !ev) return;
+        var target = currentState.order[ev.tIdx];
+        if (!target || ev.oldHp == null || ev.newHp == null) return;
+        target.hp = ev.oldHp;
+        target.alive = ev.oldHp > 0;
+        render(currentState);
+        await sleep(90);
+        target.hp = ev.newHp;
+        target.alive = ev.newHp > 0;
+        render(currentState);
+        var toUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+        flashHealTargetCell(document.querySelector('[data-unit-id="' + toUid + '"]'));
+        try {
+            if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                ValdoriaAudio.playSFX('sfx_success');
+            }
+        } catch (eH) {}
+        await sleep(420);
+    }
+
+    async function playPostBatchResourceVfx(ev) {
+        if (!currentState || !ev || ev.aIdx == null) return;
+        var uid = ev.aIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.aIdx;
+        var el = document.querySelector('[data-unit-id="' + uid + '"]');
+        if (el) {
+            el.classList.add('c2-res-pulse');
+            var ms = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
+                ? ValdoriaMotion.duration(380, 0) : 380;
+            setTimeout(function () {
+                if (el && document.body.contains(el)) el.classList.remove('c2-res-pulse');
+            }, ms);
+        }
+        await sleep(320);
+    }
+
+    /**
+     * Apos fechar o resumo Rolagens puladas: barra de PV, impacto/miss na arena, cura, buffs/recursos.
+     * Estado final ja esta em currentState; aqui so animamos leitura visual.
+     */
+    async function playPostBatchSummaryVfx(events) {
+        if (!events || !events.length || !currentState) return;
+        var app = document.getElementById('app');
+        if (app) app.classList.add('c2-hp-replay');
+        try {
+            for (var i = 0; i < events.length; i++) {
+                var ev = events[i];
+                if (!ev) continue;
+                if (ev.kind === 'attack' || ev.kind === 'oa') {
+                    await playPostBatchAttackVfx(ev);
+                } else if (ev.kind === 'heal') {
+                    await playPostBatchHealVfx(ev);
+                } else if (ev.kind === 'buff') {
+                    await animateBuffEvent(ev, false);
+                } else if (ev.kind === 'resource') {
+                    await playPostBatchResourceVfx(ev);
+                } else if (ev.kind === 'round') {
+                    currentState.rn = ev.rn;
+                    render(currentState);
+                    await sleep(280);
+                } else if (ev.kind === 'flee') {
+                    await sleep(220);
+                }
+            }
+            render(currentState);
+        } catch (eAll) {
+            console.warn('[COMBAT2]', 'post_batch_summary_vfx', eAll || '');
+        } finally {
+            if (app) app.classList.remove('c2-hp-replay');
+        }
     }
 
     /**
