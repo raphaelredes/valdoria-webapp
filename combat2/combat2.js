@@ -36,6 +36,8 @@
     var _skipInit = false;
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
     var _skipReplayBatch = false;
+    /** Estado ja e vitoria/derrota/fuga mas ainda ha eventos a animar — nao pintar a tela terminal ate o fim da fila. */
+    var _suppressTerminalDuringReplay = false;
     /** Evita duplo disparo do fluxo pos-resumo do lote (Continuar / clique no overlay). */
     var _postBatchVfxRunning = false;
     var _leavingCombat = false;
@@ -935,6 +937,9 @@
         } catch (eM) {}
         var app = document.getElementById('app');
         var ph = s.ph;
+        if (_suppressTerminalDuringReplay && (ph === 'victory' || ph === 'defeat' || ph === 'fled')) {
+            ph = 'active';
+        }
         var html = '';
 
         if (ph === 'victory' || ph === 'defeat' || ph === 'fled') {
@@ -1333,6 +1338,15 @@
     async function drainCombatEventQueue(initialEvs, offerSkip) {
         var originalBatch = (initialEvs || []).slice();
         var queue = originalBatch.slice();
+        var terminalReplay =
+            currentState &&
+            (currentState.ph === 'victory' || currentState.ph === 'defeat' || currentState.ph === 'fled') &&
+            queue.length > 0;
+        var prevSuppress = _suppressTerminalDuringReplay;
+        if (terminalReplay) {
+            _suppressTerminalDuringReplay = true;
+        }
+        try {
         while (queue.length) {
             var ev = queue.shift();
             if (!ev) continue;
@@ -1383,6 +1397,11 @@
             }
             await playEvent(ev, offerSkip);
         }
+        } finally {
+            if (terminalReplay) {
+                _suppressTerminalDuringReplay = prevSuppress;
+            }
+        }
     }
 
     async function remoteAction(action) {
@@ -1393,7 +1412,12 @@
             var offerSkip = shouldOfferBatchSkip();
             _skipReplayBatch = false;
             currentState = resp.state;
-            render(currentState);
+            var phNow = currentState && currentState.ph;
+            var isTerminal = phNow === 'victory' || phNow === 'defeat' || phNow === 'fled';
+            var skipPrematureTerminal = !!(isTerminal && evs.length);
+            if (!skipPrematureTerminal) {
+                render(currentState);
+            }
             if (evs.length) {
                 await drainCombatEventQueue(evs, offerSkip);
             }
