@@ -842,7 +842,9 @@
         var activeId = null;
         var active = s.order[s.active_idx];
         if (active && active.alive) activeId = unitUidForOrderIndex(s, s.active_idx);
-        var html = '<div class="battlefield">';
+        var html = '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Área de combate — arraste para mover, pinça ou roda do mouse para zoom">';
+        html += '<div class="bf-pan-stage" data-bf-pan-stage>';
+        html += '<div class="battlefield">';
         for (var row = 0; row < 4; row++) {
             var zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
             html += '<div class="row-label' + zoneClass + '">' + escHtml(ROW_LABELS[row]) + '</div>';
@@ -851,7 +853,7 @@
             html += '</div>';
             if (row === 1) html += '<div class="bf-divider"></div>';
         }
-        html += '</div>';
+        html += '</div></div></div>';
         return html;
     }
 
@@ -1098,6 +1100,17 @@
     /* ============================================================
      * BINDING
      * ============================================================ */
+    var _bfPanZoomTeardown = null;
+    function mountBattlefieldPanZoom() {
+        if (_bfPanZoomTeardown) {
+            try { _bfPanZoomTeardown(); } catch (ePz) {}
+            _bfPanZoomTeardown = null;
+        }
+        var vp = document.querySelector('[data-bf-pan-viewport]');
+        if (!vp || !window.ValdoriaBattlefieldPanZoom) return;
+        _bfPanZoomTeardown = ValdoriaBattlefieldPanZoom.attach(vp);
+    }
+
     function bindActions() {
         document.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', onBtnClick); });
         /* Cards clicaveis */
@@ -1133,6 +1146,7 @@
                 })();
             } catch (e) { console.warn('[C2] CTA dice failed', e); }
         }
+        mountBattlefieldPanZoom();
     }
 
     async function onBtnClick(ev) {
