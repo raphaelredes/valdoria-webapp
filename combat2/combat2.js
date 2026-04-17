@@ -479,6 +479,9 @@
         if (k === 'sanctuary_save') {
             return ev.aIdx != null && ev.aIdx !== currentState.p_idx;
         }
+        if (k === 'concentration_save' || k === 'concentration_lost') {
+            return ev.tIdx != null && ev.tIdx !== currentState.p_idx;
+        }
         return false;
     }
 
@@ -1491,6 +1494,8 @@
         if (ev.kind === 'buff') return animateBuffEvent(ev, oSkin);
         if (ev.kind === 'resource') return animateResourceEvent(ev, oSkin);
         if (ev.kind === 'item_use') return animateItemUseEvent(ev, oSkin);
+        if (ev.kind === 'concentration_save') return animateConcentrationSaveEvent(ev, oSkin);
+        if (ev.kind === 'concentration_lost') return animateConcentrationLostEvent(ev, oSkin);
         if (ev.kind === 'flee') return animateFleeEvent(ev, oSkin);
         if (ev.kind === 'death_save') {
             var whoDs = currentState.order[ev.tIdx];
@@ -1937,6 +1942,62 @@
         await showMessage((ev.itemIco || '🎒') + ' ' + (ev.itemName || 'Item'), 'hit', sub, { offerBatchSkip: !!offerSkip });
         // ≥1s de respiro pós-VFX.
         await sleep(1000);
+    }
+
+    async function animateConcentrationSaveEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
+        try {
+            ensureCombatVfxRuntime();
+            var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+            if (window._combatVfx && el) window._combatVfx.concentrationSave(el);
+        } catch (e) { console.warn('[COMBAT2]', 'concentration_save_vfx_failed', e || ''); }
+        var who = currentState.order[ev.tIdx];
+        await new Promise(function (resolve) {
+            showDice(ev.saveRoll, resolve, who, 'Concentração — TR Constituição (PHB)', {
+                offerBatchSkip: !!offerSkip,
+                postResult: function () {
+                    return {
+                        title: ev.saveSuccess ? 'Concentração MANTIDA' : 'Concentração ROMPIDA',
+                        cls: ev.saveSuccess ? 'hit' : 'miss',
+                        subStructured: {
+                            kicker: 'CON save vs CD ' + ev.saveDc + ' (dano ' + (ev.damage || '?') + ')',
+                            rows: [
+                                { l: 'Total', v: (ev.saveRoll != null ? ev.saveRoll : '?') + ' + ' + (ev.saveMod || 0) + ' = ' + (ev.saveTotal != null ? ev.saveTotal : '?') },
+                                { l: 'CD', v: String(ev.saveDc) }
+                            ],
+                            note: ev.saveSuccess
+                                ? 'PHB: magia de concentração mantida.'
+                                : 'PHB: magia termina; buff removido no próximo evento.'
+                        }
+                    };
+                }
+            });
+        });
+        await sleep(800);
+    }
+
+    async function animateConcentrationLostEvent(ev, offerSkip) {
+        if (_skipReplayBatch) return;
+        try {
+            ensureCombatVfxRuntime();
+            var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+            if (window._combatVfx && el) window._combatVfx.concentrationLost(el);
+        } catch (e) { console.warn('[COMBAT2]', 'concentration_lost_vfx_failed', e || ''); }
+        var lostNames = (ev.lostIds || []).map(function (id) {
+            return id === 'benção' ? 'Bênção' :
+                id === 'marca_cacador' ? 'Marca do Caçador' :
+                id;
+        });
+        var sub = {
+            kicker: 'PHB — Concentração perdida',
+            intro: (ev.targetName || 'Conjurador') + ' perdeu concentração.',
+            rows: [{ l: 'Efeitos removidos', v: lostNames.join(', ') || '—' }],
+            note: 'Buffs dependentes de concentração terminam juntos.'
+        };
+        await showMessage('⚡ Concentração rompida', 'miss', sub, { offerBatchSkip: !!offerSkip });
+        await sleep(800);
     }
 
     async function animateFleeEvent(ev, offerSkip) {
