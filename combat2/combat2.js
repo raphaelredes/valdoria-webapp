@@ -1852,6 +1852,12 @@
             if (ev.skillName === 'Raio Gélido' && fromEl && toEl) {
                 window._combatVfx.rayOfFrost(fromEl, toEl, { crit: !!ev.crit }); return;
             }
+            if (ev.skillName === 'Disparo Rápido' && fromEl && toEl) {
+                window._combatVfx.arrowVolley(fromEl, toEl, 2, dt, { crit: !!ev.crit }); return;
+            }
+            if (ev.skillName === 'Rajada de Flechas' && fromEl && toEl) {
+                window._combatVfx.arrowVolley(fromEl, toEl, 3, dt, { crit: !!ev.crit }); return;
+            }
             // 2) ranged genérico → projectile com arco
             if (_isRangedEv(ev) && fromEl && toEl) {
                 window._combatVfx.projectile(fromEl, toEl, dt, { crit: !!ev.crit }); return;
@@ -2511,13 +2517,29 @@
         target.alive = ev.newHp > 0;
         render(currentState);
         var toUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
-        flashHealTargetCell(document.querySelector('[data-unit-id="' + toUid + '"]'));
+        var toEl = document.querySelector('[data-unit-id="' + toUid + '"]');
+        flashHealTargetCell(toEl);
+        // VFX canvas específico: heal em si mesmo (raios verticais) vs aliado
+        // (campo de partículas); mão de paladino/clérigo têm healSelf dedicado.
+        try {
+            if (window._combatVfx && toEl) {
+                ensureCombatVfxRuntime();
+                var isSelf = ev.aIdx === ev.tIdx;
+                if (isSelf) window._combatVfx.healSelf(toEl);
+                else window._combatVfx.heal(toEl);
+                // Cura crítica (healGained alto): burst verde adicional.
+                if (ev.healGained != null && ev.healGained >= 10) {
+                    setTimeout(function () { try { window._combatVfx.healBurst(toEl); } catch (e) {} }, 200);
+                }
+            }
+        } catch (eHV) { console.warn('[COMBAT2]', 'heal_vfx_failed', eHV || ''); }
         try {
             if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
                 ValdoriaAudio.playSFX('sfx_success');
             }
         } catch (eH) {}
-        await sleep(420);
+        // ≥1s desde o final do VFX de cura (healSelf/heal duram ~800-900ms).
+        await sleep(1400);
     }
 
     async function playPostBatchResourceVfx(ev) {
