@@ -527,6 +527,24 @@
             arenaStrikeFromEvent(ev);
         } else {
             render(currentState);
+            // PHB miss feedback: garante VFX no card mesmo com animações puladas.
+            try {
+                var missUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+                var missEl = document.querySelector('[data-unit-id="' + missUid + '"]');
+                if (missEl) {
+                    flashMissTargetCell(missEl);
+                    ensureCombatVfxRuntime();
+                    if (window._combatVfx) {
+                        try { window._combatVfx.missFlash(missEl); } catch (eM) {}
+                        var hasDodge = target.se && target.se.some(function (x) {
+                            return x && (x.id === 'esquiva' || x.attackAdvantage);
+                        });
+                        if (hasDodge) {
+                            try { window._combatVfx.dodgeEvade(missEl); } catch (eD) {}
+                        }
+                    }
+                }
+            } catch (eSyncMiss) { console.warn('[COMBAT2]', 'skip_miss_vfx_failed', eSyncMiss || ''); }
         }
     }
 
