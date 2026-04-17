@@ -81,9 +81,10 @@
     --v-z-combat2-modals: 9999;
     --v-z-combat2-dice: 10050;
     --v-z-combat2-dice-top: 10060;
-    --v-z-combat2-sim-backdrop: 92000;
-    --v-z-combat2-sim-sheet: 92100;
-    --v-z-combat2-sim-dock: 92200;
+    /* Folha «Agir»: ABAIXO de dice-overlay (10050) e de .combat-msg-overlay — nunca por cima das rolagens */
+    --v-z-combat2-sim-backdrop: 600;
+    --v-z-combat2-sim-sheet: 610;
+    --v-z-combat2-sim-dock: 620;
     --v-border: #4a3828;
     --v-border-gold: rgba(196, 149, 58, 0.3);
     --v-radius-xs: 4px;
