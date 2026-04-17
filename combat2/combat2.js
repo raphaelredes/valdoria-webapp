@@ -2567,6 +2567,44 @@
         setTimeout(function () {
             if (el && document.body.contains(el)) el.classList.remove('c2-miss-flash');
         }, ms);
+        // Label "Errou" flutuando pra cima com glow branco (paleta dos cards).
+        spawnMissFloatLabel(el);
+    }
+
+    /** Injeta texto "Errou" animado subindo com glow branco no card do alvo. */
+    function spawnMissFloatLabel(el) {
+        if (!el || !document.body.contains(el)) return;
+        var lbl = document.createElement('div');
+        lbl.className = 'c2-miss-float-label';
+        lbl.textContent = 'Errou';
+        // Inline styles (tokens do próprio ecossistema) — não depende de combat2.css.
+        lbl.style.cssText = [
+            'position:absolute', 'left:50%', 'top:22%',
+            'transform:translate(-50%,0)',
+            'z-index:14', 'pointer-events:none',
+            "font-family:var(--v-font-display,'Cinzel'),serif",
+            'font-weight:800', 'font-size:20px', 'letter-spacing:3px',
+            'text-transform:uppercase', 'color:#f5f7ff',
+            'text-shadow:0 0 6px rgba(255,255,255,.95),0 0 14px rgba(230,240,255,.75),0 0 26px rgba(200,220,255,.45),0 2px 4px rgba(0,0,0,.95)',
+            'animation:c2MissFloatUp 1.25s cubic-bezier(.22,.68,.32,1.2) forwards'
+        ].join(';');
+        // Garante keyframes globais — injeta uma vez por sessão.
+        if (!document.getElementById('c2-miss-float-kf')) {
+            var st = document.createElement('style');
+            st.id = 'c2-miss-float-kf';
+            st.textContent =
+                '@keyframes c2MissFloatUp {' +
+                '0%{opacity:0;transform:translate(-50%,16px) scale(.55);filter:blur(2px);}' +
+                '18%{opacity:1;transform:translate(-50%,4px) scale(1.16);filter:blur(0);}' +
+                '45%{opacity:1;transform:translate(-50%,-10px) scale(1.02);}' +
+                '100%{opacity:0;transform:translate(-50%,-42px) scale(.92);filter:blur(1px);}' +
+                '}';
+            document.head.appendChild(st);
+        }
+        // Garante que o ancestor tem position:relative; cells/cards costumam ter.
+        if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+        el.appendChild(lbl);
+        setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1300);
     }
 
     function flashHealTargetCell(el) {
