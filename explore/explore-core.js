@@ -299,12 +299,12 @@ var _exitBtn=document.getElementById('btn-return-float');if(_exitBtn&&_exitBtn.p
 /* 2. Kill body::before/::after (noise texture + vignette — causes yellow stripe) */
 var _s=document.getElementById('_explore-kill-pseudo');if(!_s){_s=document.createElement('style');_s.id='_explore-kill-pseudo';_s.textContent='body::before,body::after{display:none!important;content:none!important;opacity:0!important}';document.head.appendChild(_s);}
 /* 3. Force-hide ALL loading overlays without waiting MIN_LOAD_MS */
-var _lo=document.getElementById('loading');if(_lo){_lo.style.display='none';_lo.classList.add('hidden');}
+var _lo=document.getElementById('loading');if(_lo){_lo.style.display='none';_lo.style.visibility='';_lo.style.opacity='';_lo.classList.add('hidden');}
 if(window.vProcessing&&vProcessing.isActive())vProcessing.hide();
 if(typeof forceHideLoading==='function')forceHideLoading();
 var _lc2=window._loadingCtrl;if(_lc2){if(_lc2.forceHide)_lc2.forceHide();else if(_lc2.hideQuick)_lc2.hideQuick();}
 /* 4. Also nuke any loading overlay by class */
-var _los=document.querySelectorAll('.loading-overlay');for(var _li=0;_li<_los.length;_li++){_los[_li].style.display='none';_los[_li].classList.add('hidden');}
+var _los=document.querySelectorAll('.loading-overlay');for(var _li=0;_li<_los.length;_li++){_los[_li].style.display='none';_los[_li].style.visibility='';_los[_li].style.opacity='';_los[_li].classList.add('hidden');}
 console.info('[EXPLORE] _mapReady: all loading hidden, pseudo killed, exit btn removed');
 })();
 const _lc=window._loadingCtrl;

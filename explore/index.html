@@ -26,7 +26,7 @@
         if (typeof forceHideLoading !== 'function') {
             window.forceHideLoading = function() {
                 var lo = document.getElementById('loading');
-                if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; }
+                if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; lo.style.visibility = ''; lo.style.opacity = ''; }
                 if (window.vProcessing) vProcessing.hide();
                 /* Also force loading-controller to stop cinematic exit */
                 if (window._loadingCtrl && _loadingCtrl.forceHide) _loadingCtrl.forceHide();
