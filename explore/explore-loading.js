@@ -3,7 +3,8 @@
 if(window._loadDbgSetApp)_loadDbgSetApp('EXPLORE');
 (function(){
 var _defaultText = 'Gerando mapa...';
-var _contentSelector = '#explore-canvas';
+/* #explore-canvas nunca existiu no DOM — o mapa hex é #iso-map dentro de #map-viewport */
+var _contentSelector = '#map-viewport';
 function _hideShellLoading() {
     var lo = document.getElementById('loading');
     if (lo && !lo.classList.contains('hidden')) {

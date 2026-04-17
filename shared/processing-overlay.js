@@ -191,6 +191,42 @@ function _clearTimers() {
     }
 }
 
+/**
+ * True when the element (or a visible canvas/img/svg inside it) occupies space.
+ * Collapsed wrappers (e.g. #map-wrapper with only position:absolute children) have
+ * offsetHeight 0 even while the map is fully painted — we fall back to descendants.
+ */
+function _elementContentReady(el) {
+    if (!el) return false;
+    try {
+        var cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    if (el.offsetHeight > 0 || el.offsetWidth > 0) return true;
+    try {
+        var rect = el.getBoundingClientRect();
+        if (rect.width >= 2 && rect.height >= 2) return true;
+    } catch (e2) { /* intentionally silent */ }
+    var scoped = el.querySelectorAll('canvas, img, picture > img, svg');
+    for (var i = 0; i < scoped.length; i++) {
+        var node = scoped[i];
+        try {
+            var ncs = getComputedStyle(node);
+            if (ncs.display === 'none' || ncs.visibility === 'hidden') continue;
+        } catch (e3) { continue; }
+        if (node.offsetHeight > 0 && node.offsetWidth > 0) return true;
+        try {
+            var nr = node.getBoundingClientRect();
+            if (nr.width >= 2 && nr.height >= 2) return true;
+        } catch (e4) { /* intentionally silent */ }
+    }
+    return false;
+}
+
 function _captureDOMState(selector, timeoutMs) {
     try {
         var el = typeof selector === 'string' ? document.querySelector(selector) : null;
@@ -199,7 +235,7 @@ function _captureDOMState(selector, timeoutMs) {
             exists: !!el,
             display: el ? getComputedStyle(el).display : 'N/A',
             height: el ? el.offsetHeight : 0,
-            visible: el ? (el.offsetHeight > 0 && getComputedStyle(el).visibility !== 'hidden') : false,
+            visible: el ? _elementContentReady(el) : false,
         };
         // Capture top-level visible elements for context
         var bodyChildren = [];
@@ -262,10 +298,11 @@ function show(opts) {
             ? opts.contentCheck
             : function() {
                 var el = document.querySelector(opts.contentCheck);
-                return el && el.offsetHeight > 0;
+                return _elementContentReady(el);
             };
         var _pollCount = 0;
-        _timers.content = setInterval(function() {
+        var _pollMs = 100;
+        function _contentPollTick() {
             _pollCount++;
             try {
                 if (_checkFn()) {
@@ -276,7 +313,9 @@ function show(opts) {
             } catch (e) {
                 _log('error', 'contentCheck error: ' + e.message);
             }
-        }, 300);
+        }
+        _contentPollTick();
+        _timers.content = setInterval(_contentPollTick, _pollMs);
     }
 
     // Slow connection warning at 12s
