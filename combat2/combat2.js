@@ -1774,14 +1774,17 @@
 
     async function animateBuffEvent(ev, offerSkip) {
         if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
-        // VFX profissional: cúpula dourada + runas quando Santuário é conjurado.
-        if (ev && ev.skillName === 'Santuário') {
+        // VFX profissional por habilidade: Santuário (cúpula) e Fúria (aura vermelha).
+        if (ev && (ev.skillName === 'Santuário' || ev.skillName === 'Fúria')) {
             try {
                 ensureCombatVfxRuntime();
                 var actorUid = ev.aIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.aIdx;
                 var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
-                if (window._combatVfx && actorEl) window._combatVfx.sanctuary(actorEl);
-            } catch (eVfxS) { console.warn('[COMBAT2]', 'vfx_sanctuary_failed', eVfxS || ''); }
+                if (window._combatVfx && actorEl) {
+                    if (ev.skillName === 'Santuário') window._combatVfx.sanctuary(actorEl);
+                    else if (ev.skillName === 'Fúria') window._combatVfx.buffRage(actorEl);
+                }
+            } catch (eVfxS) { console.warn('[COMBAT2]', 'vfx_buff_specific_failed', eVfxS || ''); }
         }
         var subBuff = {
             kicker: 'Efeito em estado',
@@ -1790,6 +1793,71 @@
             note: 'O efeito segue ativo até expirar ou ser removido pelo combate.'
         };
         await showMessage(ev.skillName || 'Buff tático', 'hit', subBuff, { offerBatchSkip: !!offerSkip });
+    }
+
+    /* ============================================================
+     * VFX DISPATCHER — escolhe o VFX certo por skill / dmg type / flags
+     * Regras de decisão (D&D 5e + projeto):
+     *  - Skill específica > tipo físico/mágico > fallback projétil
+     *  - Habilidades marcadas `ranged:true` → arrow/projectile com arco
+     *  - Slashing/bludgeoning sem `ranged` → slash arc (corpo-a-corpo)
+     *  - Piercing sem `ranged` → thrust (ainda usa projectile curto)
+     * ============================================================ */
+    function _skillByName(aIdx, name) {
+        try {
+            var u = currentState && currentState.order && currentState.order[aIdx];
+            if (!u || !u.skills) return null;
+            for (var i = 0; i < u.skills.length; i++) {
+                if (u.skills[i] && u.skills[i].n === name) return u.skills[i];
+            }
+        } catch (e) {}
+        return null;
+    }
+    function _isRangedEv(ev) {
+        if (!ev) return false;
+        var sk = ev.skillName ? _skillByName(ev.aIdx, ev.skillName) : null;
+        if (sk && sk.ranged) return true;
+        // heurística: tipos mágicos distantes
+        var dt = ev.dmgType || '';
+        if (['fire', 'cold', 'lightning', 'force', 'radiant', 'necrotic', 'psychic', 'thunder', 'acid', 'poison'].indexOf(dt) >= 0) return true;
+        return false;
+    }
+    function dispatchAttackVfx(ev, fromEl, toEl, dt) {
+        if (!window._combatVfx) return;
+        try {
+            // 1) habilidades icônicas dedicadas
+            if (ev.skillName === 'Mísseis Mágicos' && fromEl && toEl) {
+                window._combatVfx.magicMissiles(fromEl, toEl, 3); return;
+            }
+            if (ev.skillName === 'Bola de Fogo' && toEl) {
+                window._combatVfx.fireballAoE(toEl); return;
+            }
+            if (ev.skillName === 'Raio Gélido' && fromEl && toEl) {
+                window._combatVfx.rayOfFrost(fromEl, toEl, { crit: !!ev.crit }); return;
+            }
+            // 2) ranged genérico → projectile com arco
+            if (_isRangedEv(ev) && fromEl && toEl) {
+                window._combatVfx.projectile(fromEl, toEl, dt, { crit: !!ev.crit }); return;
+            }
+            // 3) melee físico → slash arc no alvo
+            if (['slashing', 'bludgeoning', 'piercing'].indexOf(dt) >= 0 && fromEl && toEl) {
+                window._combatVfx.meleeSlash(fromEl, toEl, dt, { crit: !!ev.crit }); return;
+            }
+            // 4) fallback
+            if (fromEl && toEl) window._combatVfx.projectile(fromEl, toEl, dt, { crit: !!ev.crit });
+            else if (toEl) window._combatVfx.impact(toEl, dt, { crit: !!ev.crit });
+        } catch (eD) {
+            console.warn('[COMBAT2]', 'vfx_dispatch_failed', eD || '');
+        }
+    }
+
+    function playDodgeVfx(tIdx) {
+        try {
+            ensureCombatVfxRuntime();
+            var uid = tIdx === currentState.p_idx ? 'player' : 'enemy_' + tIdx;
+            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+            if (window._combatVfx && el) window._combatVfx.dodgeEvade(el);
+        } catch (e) { console.warn('[COMBAT2]', 'vfx_dodge_failed', e || ''); }
     }
 
     function playSanctuaryBlockVfx(tIdx) {
@@ -2387,6 +2455,13 @@
                 }
             } catch (eS) {}
             flashMissTargetCell(toEl);
+            // Se o alvo tem Esquiva ativa, mostra esquiva deliberada em vez de miss simples.
+            try {
+                var hasDodge = target && target.se && target.se.some(function (x) {
+                    return x && (x.id === 'esquiva' || x.attackAdvantage);
+                });
+                if (hasDodge) playDodgeVfx(ev.tIdx);
+            } catch (eDg) {}
             await sleep(460);
             return;
         }
@@ -2487,20 +2562,20 @@
         var fromEl = document.querySelector('[data-unit-id="' + fromUid + '"]');
         var toEl = document.querySelector('[data-unit-id="' + toUid + '"]');
         ensureCombatVfxRuntime();
-        if (window._combatVfx && fromEl && toEl) {
-            try {
-                window._combatVfx.projectile(fromEl, toEl, dt, { crit: !!ev.crit });
-            } catch (eProj) {
-                console.warn('[COMBAT2]', 'vfx_projectile_failed', eProj || '');
-            }
-        } else if (window._combatVfx && toEl) {
-            try {
-                window._combatVfx.impact(toEl, dt, { crit: !!ev.crit });
-            } catch (eImp) {
-                console.warn('[COMBAT2]', 'vfx_impact_fallback_failed', eImp || '');
-            }
-        }
+        dispatchAttackVfx(ev, fromEl, toEl, dt);
         var impactDelay = ev.crit ? 380 : 440;
+        // Ataque furtivo (Ladino): swirl sombrio ANTES do impacto.
+        if (ev.sneakAttack && window._combatVfx && toEl) {
+            try { window._combatVfx.shadowStrike(toEl); } catch (eSh) {}
+        }
+        // Crítico: burst dourado APÓS o impacto (realça visual).
+        if (ev.crit && window._combatVfx && toEl) {
+            setTimeout(function () { try { window._combatVfx.critBurst(toEl, dt); } catch (eC) {} }, impactDelay + 60);
+        }
+        // Radiante: coluna de luz sobreposta ao impacto (divino).
+        if (dt === 'radiant' && window._combatVfx && toEl) {
+            setTimeout(function () { try { window._combatVfx.radiantBurst(toEl); } catch (eR) {} }, impactDelay + 20);
+        }
         if (ev.sanctuaryBroken) {
             setTimeout(function () { playSanctuaryBreakVfx(ev.aIdx); }, impactDelay + 180);
         }
