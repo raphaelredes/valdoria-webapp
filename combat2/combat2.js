@@ -94,6 +94,7 @@
     async function leaveCombatToOrigin() {
         if (_leavingCombat) return;
         _leavingCombat = true;
+        try { if (window.vProcessing) vProcessing.show({ text: 'Carregando...' }); } catch (eVp) {}
         var tg = window.Telegram && window.Telegram.WebApp;
         var ph = (currentState && currentState.ph) || 'victory';
         var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
@@ -2791,6 +2792,7 @@
             document.getElementById('app').innerHTML = '<div class="loading-msg" style="color:#c06a3a">Token ausente. Abra via bot.</div>';
             return;
         }
+        try { if (window.vProcessing) vProcessing.show({ text: 'Carregando...' }); } catch (eVp2) {}
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
@@ -2809,6 +2811,7 @@
                     currentState = resp.state || resp;
                     ensureCombatVfxRuntime();
                     render(currentState);
+                    try { if (window.vProcessing) vProcessing.hide(); } catch (eVh) {}
                 } catch (e) {
                     console.error('[COMBAT2]', 'init_failed', {
                         tokenLen: (TOKEN || '').length,

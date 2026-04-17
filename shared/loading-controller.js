@@ -21,6 +21,19 @@ setInterval(function(){if(_api&&_q.length)_flush();},3000);
 window.ValdoriaLoadingController = function(config) {
     'use strict';
 
+    // Cold boot gate:
+    // Loading controller (cinematic) should only be used on the FIRST load
+    // after the player opens the game in this browser/webview session.
+    // All internal transitions should use the lightweight vProcessing overlay.
+    var _isColdBoot = true;
+    try {
+        _isColdBoot = (sessionStorage.getItem('valdoria_booted') !== '1');
+        if (_isColdBoot) sessionStorage.setItem('valdoria_booted', '1');
+    } catch (eBoot) {
+        _isColdBoot = true; // safest fallback: allow cinematic
+    }
+    window.__valdoriaColdBoot = _isColdBoot;
+
     var _state = 'loading';
     window._loadingGuardBypass = true;
     var tips = config.tips || [];
@@ -39,6 +52,32 @@ window.ValdoriaLoadingController = function(config) {
     var AUTO_RETRY_MAX = config.autoRetryMax !== undefined ? config.autoRetryMax : 0;
     var onRetry = config.onRetry || function() { location.reload(); };
     var onTimeout = config.onTimeout || null;
+
+    // Default behavior: cinematic controller is disabled on non-cold boots.
+    // Pages can explicitly opt-in with allowOnRevisit: true (rare).
+    if (!_isColdBoot && !config.allowOnRevisit) {
+        try {
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('exit-cinematic');
+                overlay.style.display = 'none';
+            }
+        } catch (eHide) {}
+        return {
+            setProgress: function() {},
+            hideLoading: function(cb) { if (cb) cb(); },
+            hideQuick: function() {},
+            cleanup: function() {},
+            forceHide: function() {
+                try {
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.style.display = 'none';
+                    }
+                } catch (eF) {}
+            }
+        };
+    }
 
     var _autoRetryCount = 0;
     var tipIndex = Math.floor(Math.random() * tips.length);
