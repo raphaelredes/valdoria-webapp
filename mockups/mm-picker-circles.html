@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Mísseis Mágicos — 6 formatos de círculos</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+:root {
+  --v-bg: #1a1510;
+  --v-text: #d4c8b0;
+  --v-gold: #c4953a;
+  --v-font: 'Georgia', serif;
+  --v-font-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: radial-gradient(ellipse at center, #221a2e 0%, #0f0a1c 85%);
+  color: var(--v-text);
+  font-family: var(--v-font);
+  min-height: 100vh;
+}
+header {
+  text-align: center;
+  padding: 24px 16px 8px;
+  border-bottom: 1px solid rgba(196,149,58,0.25);
+  background: rgba(0,0,0,0.3);
+}
+h1 {
+  font-family: var(--v-font-display);
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--v-gold);
+  text-shadow: 0 0 14px rgba(196,149,58,0.4);
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+.sub {
+  font-size: 13px;
+  color: #a09484;
+  letter-spacing: 1.2px;
+}
+.grid {
+  max-width: 960px;
+  margin: 18px auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 0 14px;
+}
+.variant {
+  background: linear-gradient(180deg, rgba(30,20,40,0.92), rgba(15,10,25,0.92));
+  border: 1px solid rgba(140,110,180,0.35);
+  border-radius: 14px;
+  padding: 18px 16px 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.variant-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(196,149,58,0.2);
+}
+.variant-title {
+  font-family: var(--v-font-display);
+  font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
+  color: #e0b0ff;
+  margin: 0;
+}
+.variant-num {
+  font-family: var(--v-font-display);
+  color: var(--v-gold);
+  font-size: 15px; font-weight: 700;
+}
+.variant-desc {
+  font-size: 12px; color: #c0b4a8; line-height: 1.5;
+  min-height: 36px;
+}
+.state-row {
+  display: flex; justify-content: center; gap: 10px;
+  padding: 18px 6px 8px;
+  background: radial-gradient(ellipse at center, rgba(120,60,180,0.1), transparent 70%);
+  border-radius: 10px;
+}
+.state-label-row { display: flex; justify-content: space-around; font-size: 10px; color: #8a7a90; letter-spacing: 1px; text-transform: uppercase; }
+.state-label-row span { width: 32%; text-align: center; }
+
+/* ============================================================
+   VARIANTE 1 — Clássico (atual): gradiente radial roxo escuro
+   ============================================================ */
+.v1-dot { width: 32px; height: 32px; border-radius: 50%; background: transparent; border: 2px solid rgba(200,140,255,0.65); box-shadow: inset 0 0 6px rgba(200,140,255,0.15); transition: all 0.3s ease; }
+.v1-dot.half { background: radial-gradient(circle at 30% 28%, rgba(138,60,207,0.55), rgba(58,21,96,0.55) 85%); border-color: rgba(200,140,255,0.75); }
+.v1-dot.filled { background: radial-gradient(circle at 30% 28%, #8a3ccf, #3a1560 85%); border-color: rgba(225,170,255,0.95); box-shadow: 0 0 12px rgba(160,80,220,0.85), inset 0 0 10px rgba(255,200,255,0.45); }
+
+/* ============================================================
+   VARIANTE 2 — Orbe com halo: aro externo luminoso pulsante
+   ============================================================ */
+.v2-dot { position: relative; width: 32px; height: 32px; border-radius: 50%; background: rgba(30,15,50,0.5); border: 2px solid rgba(180,130,220,0.4); transition: all 0.3s ease; }
+.v2-dot::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(200,150,255,0); transition: all 0.3s ease; }
+.v2-dot.filled { background: radial-gradient(circle at 40% 35%, #c080ff, #4a1090 75%); border-color: rgba(255,200,255,0.95); box-shadow: inset 0 2px 6px rgba(255,220,255,0.55); }
+.v2-dot.filled::after { border-color: rgba(200,150,255,0.8); box-shadow: 0 0 14px rgba(200,120,255,0.7), inset 0 0 8px rgba(200,120,255,0.3); animation: v2halo 1.4s ease-in-out infinite; }
+@keyframes v2halo { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.08); opacity: 0.55; } }
+.v2-dot.half { background: radial-gradient(circle at 40% 35%, rgba(192,128,255,0.55), rgba(74,16,144,0.55) 75%); }
+
+/* ============================================================
+   VARIANTE 3 — Diamante (losango): quadrado rotacionado 45°
+   ============================================================ */
+.v3-dot { width: 28px; height: 28px; transform: rotate(45deg); background: transparent; border: 2px solid rgba(200,140,255,0.55); border-radius: 3px; transition: all 0.3s ease; margin: 2px 0; }
+.v3-dot.half { background: linear-gradient(135deg, rgba(170,100,230,0.55), rgba(60,20,110,0.55)); }
+.v3-dot.filled { background: linear-gradient(135deg, #b068e6, #3f1480 70%); border-color: rgba(230,180,255,0.95); box-shadow: 0 0 10px rgba(180,100,240,0.85); }
+
+/* ============================================================
+   VARIANTE 4 — Runa arcana: círculo com glyph no centro
+   ============================================================ */
+.v4-dot { position: relative; width: 34px; height: 34px; border-radius: 50%; background: transparent; border: 2px solid rgba(200,140,255,0.55); display: flex; align-items: center; justify-content: center; font-family: 'Georgia', serif; font-weight: 700; font-size: 18px; color: rgba(230,200,255,0); transition: all 0.3s ease; }
+.v4-dot::after { content: '✦'; transition: all 0.3s ease; }
+.v4-dot.filled { background: radial-gradient(circle at 35% 30%, #6020a0, #1a0638 90%); border-color: rgba(230,180,255,0.95); color: #f5daff; box-shadow: 0 0 14px rgba(180,80,230,0.75), inset 0 0 8px rgba(200,150,255,0.35); text-shadow: 0 0 8px rgba(255,220,255,0.9); }
+.v4-dot.half { background: radial-gradient(circle at 35% 30%, rgba(96,32,160,0.5), rgba(26,6,56,0.5)); color: rgba(230,180,255,0.55); }
+
+/* ============================================================
+   VARIANTE 5 — Hexágono arcano (geometria ritual)
+   ============================================================ */
+.v5-dot { width: 36px; height: 32px; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); background: transparent; border: 0; position: relative; transition: all 0.3s ease; }
+.v5-dot::before { content: ''; position: absolute; inset: 0; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); background: rgba(200,140,255,0.5); }
+.v5-dot::after { content: ''; position: absolute; inset: 2px; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); background: rgba(15,10,25,1); transition: all 0.3s ease; }
+.v5-dot.half::after { background: linear-gradient(180deg, rgba(120,50,180,0.65), rgba(40,15,80,0.85)); }
+.v5-dot.filled::before { background: rgba(230,170,255,0.95); box-shadow: 0 0 14px rgba(180,80,230,0.8); }
+.v5-dot.filled::after { background: linear-gradient(180deg, #8a3cd0, #2a0a55 85%); }
+
+/* ============================================================
+   VARIANTE 6 — Chama estelar (brilho em estrela de 4 pontas)
+   ============================================================ */
+.v6-dot { position: relative; width: 32px; height: 32px; border-radius: 50%; background: transparent; border: 2px solid rgba(200,140,255,0.55); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+.v6-dot.half { background: radial-gradient(circle at 40% 35%, rgba(170,100,230,0.55), rgba(60,20,110,0.55) 75%); }
+.v6-dot.filled { background: radial-gradient(circle at 40% 35%, #9b4fd8, #3a0d78 80%); border-color: rgba(230,180,255,0.95); box-shadow: 0 0 12px rgba(170,80,230,0.75); }
+.v6-spark { position: absolute; width: 0; height: 0; transform: scale(0); transition: transform 0.35s ease; }
+.v6-dot.filled .v6-spark { transform: scale(1); width: 44px; height: 44px; top: 50%; left: 50%; margin-top: -22px; margin-left: -22px; background:
+  radial-gradient(circle, rgba(255,230,255,0.95) 0%, rgba(255,230,255,0) 55%),
+  conic-gradient(from 0deg, transparent 0deg, rgba(255,220,255,0.6) 10deg, transparent 20deg,
+    transparent 80deg, rgba(255,220,255,0.6) 100deg, transparent 110deg,
+    transparent 170deg, rgba(255,220,255,0.6) 190deg, transparent 200deg,
+    transparent 260deg, rgba(255,220,255,0.6) 280deg, transparent 290deg);
+  animation: v6spin 2s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+@keyframes v6spin { to { transform: scale(1) rotate(360deg); } }
+
+/* Footer help */
+.legend {
+  text-align: center;
+  padding: 16px 14px 34px;
+  color: #8a7a90;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+.legend strong { color: #c0a8e0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>✨ Mísseis Mágicos — 6 formatos</h1>
+  <div class="sub">Cada card mostra os 3 estados: vazio · meio · preenchido</div>
+</header>
+
+<div class="grid">
+
+  <!-- VARIANTE 1 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Clássico (atual)</div>
+      <div class="variant-num">1</div>
+    </div>
+    <div class="variant-desc">Gradiente radial roxo escuro, borda luminosa. Simples e limpo — é o que está no simulador hoje.</div>
+    <div class="state-row">
+      <div class="v1-dot"></div>
+      <div class="v1-dot half"></div>
+      <div class="v1-dot filled"></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+  <!-- VARIANTE 2 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Orbe com halo</div>
+      <div class="variant-num">2</div>
+    </div>
+    <div class="variant-desc">Orbe com aro externo luminoso pulsante quando ativo. Evoca energia arcana contida.</div>
+    <div class="state-row">
+      <div class="v2-dot"></div>
+      <div class="v2-dot half"></div>
+      <div class="v2-dot filled"></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+  <!-- VARIANTE 3 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Diamante</div>
+      <div class="variant-num">3</div>
+    </div>
+    <div class="variant-desc">Losango rotacionado 45°. Evoca cristal/gema mágica. Mais geométrico e afiado.</div>
+    <div class="state-row" style="padding: 22px 6px 12px;">
+      <div class="v3-dot"></div>
+      <div class="v3-dot half"></div>
+      <div class="v3-dot filled"></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+  <!-- VARIANTE 4 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Runa arcana</div>
+      <div class="variant-num">4</div>
+    </div>
+    <div class="variant-desc">Círculo com glyph ✦ que aparece só quando preenchido. Mais narrativo, evoca ritual.</div>
+    <div class="state-row">
+      <div class="v4-dot"></div>
+      <div class="v4-dot half"></div>
+      <div class="v4-dot filled"></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+  <!-- VARIANTE 5 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Hexágono ritual</div>
+      <div class="variant-num">5</div>
+    </div>
+    <div class="variant-desc">Hexágono com borda + miolo escuro. Evoca selo de invocação arcana. Mais místico.</div>
+    <div class="state-row">
+      <div class="v5-dot"></div>
+      <div class="v5-dot half"></div>
+      <div class="v5-dot filled"></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+  <!-- VARIANTE 6 -->
+  <div class="variant">
+    <div class="variant-head">
+      <div class="variant-title">Chama estelar</div>
+      <div class="variant-num">6</div>
+    </div>
+    <div class="variant-desc">Orbe com estrela de 4 pontas girando quando ativo. Mais dinâmico, chama atenção.</div>
+    <div class="state-row">
+      <div class="v6-dot"></div>
+      <div class="v6-dot half"></div>
+      <div class="v6-dot filled"><span class="v6-spark"></span></div>
+    </div>
+    <div class="state-label-row"><span>vazio</span><span>preview</span><span>ativo</span></div>
+  </div>
+
+</div>
+
+<div class="legend">
+  Clique no número para me dizer qual quer: <strong>1</strong>, <strong>2</strong>, <strong>3</strong>, <strong>4</strong>, <strong>5</strong> ou <strong>6</strong>.<br>
+  Posso misturar (ex.: "variante 2 com glyph da 4"). Ajuste cores/tamanhos no feedback.
+</div>
+
+</body>
+</html>
