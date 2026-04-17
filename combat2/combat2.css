@@ -396,6 +396,7 @@ html, body { height: 100vh; overflow: hidden; }
 .lp-item-body { flex: 1; min-width: 0; }
 .lp-item-name { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 13px; color: var(--v-text, #d4c8b0); letter-spacing: 1px; line-height: 1.2; }
 .lp-item-desc { font-size: 11px; color: var(--v-text-dim, #a09484); line-height: 1.35; margin-top: 2px; }
+.lp-item-desc--meta { font-size: var(--v-font-xs, 10px); margin-top: 4px; opacity: 0.92; }
 .lp-item-cost { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 12px; font-weight: 700; color: #80b0e0; letter-spacing: 1px; padding: 4px 8px; background: rgba(15,12,8,.5); border: 1px solid rgba(128,176,224,.3); border-radius: 14px; flex-shrink: 0; }
 .lp-item-cost.cant { color: #e06050; border-color: rgba(224,96,80,.3); }
 .lp-item-cost.qty { color: var(--v-gold, #c4953a); border-color: rgba(196,149,58,.3); }

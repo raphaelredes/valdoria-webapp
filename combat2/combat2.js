@@ -2232,9 +2232,14 @@
             var canPay = !p.res || !p.res.max || rv >= cost;
             var dis = canPay ? '' : ' disabled';
             var kindLbl = row.kind === 'attack' ? 'Ataque' : (row.kind === 'heal' ? 'Cura' : 'Bônus');
+            var line2 = kindLbl + ' · custo ' + cost;
+            var descHtml = row.desc
+                ? ('<div class="lp-item-desc">' + escHtml(row.desc) + '</div>' +
+                    '<div class="lp-item-desc lp-item-desc--meta">' + escHtml(line2) + '</div>')
+                : ('<div class="lp-item-desc">' + escHtml(line2) + '</div>');
             html += '<button type="button" class="lp-item' + dis + '" data-skill-idx="' + idx + '"' + dis + '>';
             html += '<div class="lp-item-ico">' + escHtml(row.ico || '✨') + '</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(row.n) + '</div>';
-            html += '<div class="lp-item-desc">' + escHtml(kindLbl) + ' · custo ' + cost + '</div></div></button>';
+            html += descHtml + '</div></button>';
         });
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
