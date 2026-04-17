@@ -1558,6 +1558,10 @@
             var attacker = currentState.order[ev.aIdx];
             var tgt = currentState.order[ev.tIdx];
             var ttlSan = 'Santuário \u2014 TR Sabedoria (PHB)';
+            // Em falha do atacante, toca VFX de bloqueio dourado na cúpula do alvo.
+            if (ev.saveSuccess === false) {
+                setTimeout(function () { playSanctuaryBlockVfx(ev.tIdx); }, 350);
+            }
             await new Promise(function (resolve) {
                 showDice(ev.saveRoll, resolve, attacker, ttlSan + ' vs CD ' + ev.saveDc, {
                     offerBatchSkip: !!oSkSan,
@@ -1770,6 +1774,15 @@
 
     async function animateBuffEvent(ev, offerSkip) {
         if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
+        // VFX profissional: cúpula dourada + runas quando Santuário é conjurado.
+        if (ev && ev.skillName === 'Santuário') {
+            try {
+                ensureCombatVfxRuntime();
+                var actorUid = ev.aIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.aIdx;
+                var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
+                if (window._combatVfx && actorEl) window._combatVfx.sanctuary(actorEl);
+            } catch (eVfxS) { console.warn('[COMBAT2]', 'vfx_sanctuary_failed', eVfxS || ''); }
+        }
         var subBuff = {
             kicker: 'Efeito em estado',
             intro: (ev.skillName || 'Buff tático') + ' em ' + (ev.actorName || 'combatente'),
@@ -1777,6 +1790,24 @@
             note: 'O efeito segue ativo até expirar ou ser removido pelo combate.'
         };
         await showMessage(ev.skillName || 'Buff tático', 'hit', subBuff, { offerBatchSkip: !!offerSkip });
+    }
+
+    function playSanctuaryBlockVfx(tIdx) {
+        try {
+            ensureCombatVfxRuntime();
+            var uid = tIdx === currentState.p_idx ? 'player' : 'enemy_' + tIdx;
+            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+            if (window._combatVfx && el) window._combatVfx.sanctuaryBlock(el);
+        } catch (e) { console.warn('[COMBAT2]', 'vfx_sanctuary_block_failed', e || ''); }
+    }
+
+    function playSanctuaryBreakVfx(aIdx) {
+        try {
+            ensureCombatVfxRuntime();
+            var uid = aIdx === currentState.p_idx ? 'player' : 'enemy_' + aIdx;
+            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+            if (window._combatVfx && el) window._combatVfx.sanctuaryBreak(el);
+        } catch (e) { console.warn('[COMBAT2]', 'vfx_sanctuary_break_failed', e || ''); }
     }
 
     async function animateResourceEvent(ev, offerSkip) {
@@ -2470,6 +2501,9 @@
             }
         }
         var impactDelay = ev.crit ? 380 : 440;
+        if (ev.sanctuaryBroken) {
+            setTimeout(function () { playSanctuaryBreakVfx(ev.aIdx); }, impactDelay + 180);
+        }
         setTimeout(function () {
             if (toEl && document.body.contains(toEl)) {
                 flashTargetCell(toEl, dt, !!ev.crit);
