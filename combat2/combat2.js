@@ -473,6 +473,12 @@
         if (k === 'attack' || k === 'oa' || k === 'heal' || k === 'buff') {
             return ev.aIdx !== currentState.p_idx;
         }
+        if (k === 'condition_save' || k === 'condition_expire') {
+            return ev.tIdx != null && ev.tIdx !== currentState.p_idx;
+        }
+        if (k === 'sanctuary_save') {
+            return ev.aIdx != null && ev.aIdx !== currentState.p_idx;
+        }
         return false;
     }
 
@@ -619,6 +625,18 @@
             } else if (ev.kind === 'reaction_prompt') {
                 any = true;
                 pushRow('\u2728', 'Reação (Escudo)', (ev.actorName || '') + ' \u2192 ' + (ev.targetName || ''));
+            } else if (ev.kind === 'condition_save') {
+                any = true;
+                var ab2 = (ev.saveAbility || 'dex').toLowerCase();
+                var abLab = ab2 === 'str' ? 'For' : ab2 === 'con' ? 'Con' : ab2 === 'int' ? 'Int' : ab2 === 'wis' ? 'Sab' : ab2 === 'cha' ? 'Car' : 'Des';
+                var cRoll = 'TR ' + abLab + ' d20=' + (ev.saveD20 != null ? ev.saveD20 : '?') + '+' +
+                    (ev.saveMod != null ? ev.saveMod : '?') + '=' + (ev.saveTotal != null ? ev.saveTotal : '?') +
+                    ' vs CD ' + (ev.saveDc != null ? ev.saveDc : '?');
+                pushRow('\ud83c\udfb2', (ev.targetName || '') + ' \u00b7 fim do turno', ev.saveSuccess ? 'Dissipa efeito' : 'Mantém efeito');
+                pushRow('\u2694', ev.conditionName || 'Condição', cRoll);
+            } else if (ev.kind === 'condition_expire') {
+                any = true;
+                pushRow('\u23f1', 'Duração', (ev.targetName || '') + ' \u00b7 ' + (ev.conditionName || ''));
             }
         }
         if (!any) {
@@ -816,6 +834,29 @@
         return null;
     }
 
+    /** Ícones de efeitos em `se[]`: rótulo 5e + turnos restantes + indicador de TR no fim do turno. */
+    function buildStatusEffectChips(u) {
+        var se = u && u.se;
+        if (!se || !se.length) return '';
+        var h = '<div class="cell-se" role="list" aria-label="Efeitos ativos">';
+        se.forEach(function (st) {
+            if (!st || typeof st !== 'object') return;
+            var label = st.dndCondition ? st.dndCondition : (st.n || st.id || '');
+            var ico = st.ico || '\u2022';
+            var tl = st.turnsLeft;
+            var tlStr = '';
+            if (tl != null && tl !== '') tlStr = '<span class="se-turns" title="Turnos até dissipar (duração)">' + tl + '</span>';
+            else if (st.repeatSave || st.saveDc != null)
+                tlStr = '<span class="se-turns se-turns--save" title="PHB: TR repetido no fim do cada turno teu">\u221e</span>';
+            var kindCls = st.kind === 'buff' ? ' se-chip--buff' : ' se-chip--debuff';
+            h += '<span class="se-chip' + kindCls + '" role="listitem">' +
+                '<span class="se-ico" aria-hidden="true">' + escHtml(ico) + '</span>' +
+                '<span class="se-lbl">' + escHtml(label) + '</span>' + tlStr + '</span>';
+        });
+        h += '</div>';
+        return h;
+    }
+
     function buildBattlefield(s) {
         var ROW_LABELS = ['retaguarda inimiga', 'frente inimiga', 'frente aliada', 'retaguarda aliada'];
         var grid = [[null, null, null, null], [null, null, null, null], [null, null, null, null], [null, null, null, null]];
@@ -904,6 +945,7 @@
             inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + rCls + '" style="width:' + rPct + '%"></div></div><div class="bar-num res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + '/' + u.res.max + '</div></div>';
         }
         inner += '</div>';
+        inner += buildStatusEffectChips(u);
         if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.dying && !u.stable && !u.isDead) {
             ensureDeathSaves(u);
             var ds = u.deathSaves;
@@ -1475,6 +1517,68 @@
             render(currentState);
             if (_skipReplayBatch) return;
             await sleep(400);
+            return;
+        }
+        if (ev.kind === 'condition_save') {
+            var oSkinCs = offerAnimSkipForEvent(ev, offerSkipGlob);
+            var whoCs = currentState.order[ev.tIdx];
+            var abCs = (ev.saveAbility || 'dex').toLowerCase();
+            var abLong = abCs === 'str' ? 'Força' : abCs === 'con' ? 'Constituição' : abCs === 'int' ? 'Inteligência' :
+                abCs === 'wis' ? 'Sabedoria' : abCs === 'cha' ? 'Carisma' : 'Destreza';
+            var ttlCs = (ev.conditionName || 'Condição') + ' \u2014 TR ' + abLong + ' (fim do turno, PHB)';
+            await new Promise(function (resolve) {
+                showDice(ev.saveD20, resolve, whoCs, ttlCs + ' vs CD ' + ev.saveDc, {
+                    offerBatchSkip: !!oSkinCs,
+                    postResult: function () {
+                        return {
+                            title: ev.saveSuccess ? 'Efeito termina' : 'Efeito mantém-se',
+                            cls: ev.saveSuccess ? 'hit' : 'miss',
+                            subStructured: {
+                                kicker: 'Teste de resistência',
+                                rows: [
+                                    { l: 'Total', v: (ev.saveD20 != null ? ev.saveD20 : '?') + ' + ' + (ev.saveMod != null ? ev.saveMod : '?') + ' = ' + (ev.saveTotal != null ? ev.saveTotal : '?') },
+                                    { l: 'CD', v: String(ev.saveDc) }
+                                ],
+                                note: ev.saveSuccess ? 'Sucesso: a condição termina (SRD/PHB).' : 'Falha: dura enquanto a magia indicar.'
+                            }
+                        };
+                    }
+                });
+            });
+            render(currentState);
+            return;
+        }
+        if (ev.kind === 'condition_expire') {
+            if (_skipReplayBatch) return;
+            await sleep(220);
+            return;
+        }
+        if (ev.kind === 'sanctuary_save') {
+            var oSkSan = offerAnimSkipForEvent(ev, offerSkipGlob);
+            var attacker = currentState.order[ev.aIdx];
+            var tgt = currentState.order[ev.tIdx];
+            var ttlSan = 'Santuário \u2014 TR Sabedoria (PHB)';
+            await new Promise(function (resolve) {
+                showDice(ev.saveRoll, resolve, attacker, ttlSan + ' vs CD ' + ev.saveDc, {
+                    offerBatchSkip: !!oSkSan,
+                    postResult: function () {
+                        return {
+                            title: ev.saveSuccess ? 'Passou \u2014 ataca normalmente' : 'Falhou \u2014 ataque anulado',
+                            cls: ev.saveSuccess ? 'hit' : 'miss',
+                            subStructured: {
+                                kicker: (attacker && attacker.n ? attacker.n : 'Atacante') + ' vs ' + (tgt && tgt.n ? tgt.n : 'alvo') + ' (Santuário)',
+                                rows: [
+                                    { l: 'Total', v: (ev.saveRoll != null ? ev.saveRoll : '?') + ' + ' + (ev.saveMod != null ? ev.saveMod : '?') + ' = ' + (ev.saveTotal != null ? ev.saveTotal : '?') },
+                                    { l: 'CD', v: String(ev.saveDc) }
+                                ],
+                                note: ev.saveSuccess ? 'Sucesso: pode atacar o alvo protegido.' : 'Falha: ataque anulado (PHB — Santuário).'
+                            }
+                        };
+                    }
+                });
+            });
+            render(currentState);
+            return;
         }
     }
 
