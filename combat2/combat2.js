@@ -1774,15 +1774,26 @@
 
     async function animateBuffEvent(ev, offerSkip) {
         if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
-        // VFX profissional por habilidade: Santuário (cúpula) e Fúria (aura vermelha).
-        if (ev && (ev.skillName === 'Santuário' || ev.skillName === 'Fúria')) {
+        // VFX profissional por habilidade: cada buff D&D 5e tem seu próprio visual.
+        if (ev) {
             try {
                 ensureCombatVfxRuntime();
                 var actorUid = ev.aIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.aIdx;
                 var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
                 if (window._combatVfx && actorEl) {
-                    if (ev.skillName === 'Santuário') window._combatVfx.sanctuary(actorEl);
-                    else if (ev.skillName === 'Fúria') window._combatVfx.buffRage(actorEl);
+                    var snm = ev.skillName;
+                    if (snm === 'Santuário') window._combatVfx.sanctuary(actorEl);
+                    else if (snm === 'Fúria') window._combatVfx.buffRage(actorEl);
+                    else if (snm === 'Escudo Arcano') window._combatVfx.buffArcaneShield(actorEl);
+                    else if (snm === 'Postura Defensiva' || snm === 'Aura de Proteção') {
+                        window._combatVfx.buffDefense(actorEl);
+                    }
+                    else if (snm === 'Bênção' || snm === 'Inspiração' || snm === 'Marca do Caçador') {
+                        window._combatVfx.buffBless(actorEl);
+                    }
+                    else if (snm === 'Esquiva' || snm === 'Passos Silenciosos') {
+                        window._combatVfx.buffStealth(actorEl);
+                    }
                 }
             } catch (eVfxS) { console.warn('[COMBAT2]', 'vfx_buff_specific_failed', eVfxS || ''); }
         }
@@ -1793,9 +1804,11 @@
             note: 'O efeito segue ativo até expirar ou ser removido pelo combate.'
         };
         await showMessage(ev.skillName || 'Buff tático', 'hit', subBuff, { offerBatchSkip: !!offerSkip });
-        // ≥1s desde o fim do VFX específico (sanctuary 1,4s, buffRage 0,9s).
-        if (ev && (ev.skillName === 'Santuário' || ev.skillName === 'Fúria')) {
-            await sleep(1000);
+        // ≥1s desde o fim do VFX específico (cada buff tem duração diferente).
+        if (ev && ev.skillName) {
+            var longCasts = ['Santuário', 'Fúria', 'Escudo Arcano', 'Postura Defensiva', 'Aura de Proteção',
+                             'Bênção', 'Inspiração', 'Marca do Caçador', 'Esquiva', 'Passos Silenciosos'];
+            if (longCasts.indexOf(ev.skillName) >= 0) await sleep(1000);
         }
     }
 
