@@ -30,6 +30,8 @@
     var _pendingSkillSlot = null;
     /** Ataque com arma: Ataque Poderoso (Guerreiro) na confirmacao. */
     var _pendingPowerAttack = false;
+    /** Poção de cura: após escolher item na mochila, escolher alvo (slot no .bagIdx). */
+    var _pendingHealItem = null;
     var _activeDiceClose = null;
     var _skipInit = false;
     /** Quando true, interrompe replays de eventos do lote atual e aplica state final + resumo. */
@@ -788,6 +790,29 @@
         });
     }
 
+    function partyHasConsciousAllyForMedicine(s) {
+        if (!s || !s.order) return false;
+        for (var i = 0; i < s.order.length; i++) {
+            var u = s.order[i];
+            if (u && u.t === 'a' && (u.hp || 0) > 0 && u.alive && !u.isDead) return true;
+        }
+        return false;
+    }
+
+    function ensureDeathSaves(u) {
+        if (!u) return;
+        if (!u.deathSaves || typeof u.deathSaves !== 'object') u.deathSaves = { s: 0, f: 0 };
+    }
+
+    function unitUidForOrderIndex(s, idx) {
+        var u = s.order[idx];
+        if (!u) return null;
+        if (u.t === 'p') return 'player';
+        if (u.t === 'a') return 'ally_' + idx;
+        if (u.t === 'e') return 'enemy_' + idx;
+        return null;
+    }
+
     function buildBattlefield(s) {
         var ROW_LABELS = ['retaguarda inimiga', 'frente inimiga', 'frente aliada', 'retaguarda aliada'];
         var grid = [[null, null, null, null], [null, null, null, null], [null, null, null, null], [null, null, null, null]];
@@ -797,17 +822,23 @@
             return -1;
         }
         s.order.forEach(function (c, idx) {
-            if (c.t === 'e') {
-                var col = findCol(1);
-                if (col !== -1) grid[1][col] = { uid: 'enemy_' + idx, utype: 'enemy', u: c };
-            }
+            if (c.t !== 'e') return;
+            var row = findCol(1) !== -1 ? 1 : 0;
+            var col = findCol(row);
+            if (col !== -1) grid[row][col] = { uid: 'enemy_' + idx, utype: 'enemy', u: c };
         });
         var p = s.order[s.p_idx];
         var pcol = findCol(2);
         if (pcol !== -1) grid[2][pcol] = { uid: 'player', utype: 'player', u: p };
+        s.order.forEach(function (c, idx) {
+            if (c.t !== 'a') return;
+            var rowA = findCol(2) !== -1 ? 2 : 3;
+            var colA = findCol(rowA);
+            if (colA !== -1) grid[rowA][colA] = { uid: 'ally_' + idx, utype: 'ally', u: c };
+        });
         var activeId = null;
         var active = s.order[s.active_idx];
-        if (active) activeId = active.t === 'p' ? 'player' : 'enemy_' + s.active_idx;
+        if (active && active.alive) activeId = unitUidForOrderIndex(s, s.active_idx);
         var html = '<div class="battlefield">';
         for (var row = 0; row < 4; row++) {
             var zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
@@ -831,8 +862,14 @@
         }
         if (u.initRolling) classes += ' init-rolling';
         if (!u.alive) classes += ' dead';
+        if (u.stable && (u.hp || 0) <= 0 && !u.isDead) classes += ' cell--stable';
+        if (u.isDead) classes += ' cell--dead-perm';
         if (_selectingTarget && utype === 'enemy' && u.alive) classes += ' selectable';
-        if (_selectHealTarget && utype === 'player' && (u.alive || (u.hp != null && u.hp <= 0))) classes += ' selectable-heal';
+        var healPick = _selectHealTarget || _pendingHealItem;
+        if (healPick && (utype === 'player' || utype === 'ally') && !u.isDead &&
+                ((u.alive && u.hp < u.mhp) || (u.hp != null && u.hp <= 0))) {
+            classes += ' selectable-heal';
+        }
 
         var inner = '';
         var showInitBadge = currentState && (currentState.ph === 'intro' || currentState.ph === 'init' || currentState.ph === 'init_done');
@@ -845,9 +882,14 @@
             var it = (u.it.ic || '') + (u.it.lb ? ' ' + u.it.lb : '');
             inner += '<div class="intent">' + escHtml(it) + '</div>';
         }
+        if (utype === 'ally' && u.it) {
+            var ita = (u.it.ic || '') + (u.it.lb ? ' ' + u.it.lb : '');
+            inner += '<div class="intent">' + escHtml(ita) + '</div>';
+        }
         inner += '<div class="unit-row"><div class="unit-side left"></div><div class="unit-ico">' + escHtml(u.ico) + '</div><div class="unit-side right"></div></div>';
         inner += '<div class="cell-bars">';
-        var hpPct = Math.max(0, Math.min(100, Math.round((u.hp / u.mhp) * 100)));
+        var mhpSafe = (u.mhp | 0) || 1;
+        var hpPct = Math.max(0, Math.min(100, Math.round(((u.hp | 0) / mhpSafe) * 100)));
         var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
         var fillCls = hpPct > 60 ? 'fill-hp-high' : (hpPct > 25 ? 'fill-hp-mid' : 'fill-hp-low');
         inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + u.hp + '/' + u.mhp + '</div></div>';
@@ -857,12 +899,30 @@
             inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + rCls + '" style="width:' + rPct + '%"></div></div><div class="bar-num res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + '/' + u.res.max + '</div></div>';
         }
         inner += '</div>';
+        if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.dying && !u.stable && !u.isDead) {
+            ensureDeathSaves(u);
+            var ds = u.deathSaves;
+            var si;
+            inner += '<div class="cell-death-saves" role="status" aria-live="polite">';
+            inner += '<span class="cds-skull" aria-hidden="true">\u2620</span>';
+            inner += '<div class="cds-tracks">';
+            inner += '<div class="cds-track" aria-label="Sucessos no teste de morte"><span class="cds-track-lbl" aria-hidden="true">S</span><span class="cds-pips">';
+            for (si = 0; si < 3; si++) inner += '<span class="cds-pip' + (si < (ds.s | 0) ? ' cds-pip--ok' : '') + '"></span>';
+            inner += '</span></div>';
+            inner += '<div class="cds-track" aria-label="Falhas no teste de morte"><span class="cds-track-lbl" aria-hidden="true">F</span><span class="cds-pips">';
+            for (si = 0; si < 3; si++) inner += '<span class="cds-pip' + (si < (ds.f | 0) ? ' cds-pip--bad' : '') + '"></span>';
+            inner += '</span></div></div></div>';
+        } else if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.stable && !u.isDead) {
+            inner += '<div class="cell-stable-tag">Estável · 0 PV</div>';
+        } else if ((utype === 'player' || utype === 'ally') && u.isDead) {
+            inner += '<div class="cell-dead-tag">Morto</div>';
+        }
         return '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1">' + inner + '</div>';
     }
 
     function render(s) {
         currentState = s;
-        if (s && s.ph === 'active' && (_selectingTarget || _selectHealTarget)) {
+        if (s && s.ph === 'active' && (_selectingTarget || _selectHealTarget || _pendingHealItem)) {
             _actionSheetOpen = false;
         }
         try {
@@ -923,6 +983,7 @@
         if (ph === 'intro' || ph === 'init' || ph === 'init_done') {
             if (ph === 'intro') {
                 html += '<div class="epic-banner"><div class="epic-title">COMBATE INICIADO</div><div class="epic-sub">Prepare-se para a batalha</div></div>';
+                html += '<div class="sim-setup-bar"><a href="' + escHtml(BASE + '/simuladores/combate-setup-frontend-testes.html') + '" target="_blank" rel="noopener">Cenário de testes (frontend)</a></div>';
             } else { html += buildTurnQueue(s); }
             html += '<div class="arena-header compact-header"><div class="arena-subtitle">' +
                 (ph === 'intro' ? 'Posicionamento' : ph === 'init' ? 'Rolando Iniciativa...' : 'Ordem de Combate') +
@@ -951,45 +1012,76 @@
             escHtml(formatCombat2Biome(s.biome)) + ' <span class="weather-badge w-clear">☀️ Limpo</span></div></div>';
         html += buildBattlefield(s);
 
-        if (isPlayerTurn && (_selectingTarget || _selectHealTarget)) {
-            if (_selectHealTarget) {
-                html += '<div class="target-hint target-hint--heal">Toque no aliado a curar (inclui inconscientes a 0 PV)</div>';
+        if (isPlayerTurn && (_selectingTarget || _selectHealTarget || _pendingHealItem)) {
+            if (_selectHealTarget || _pendingHealItem) {
+                html += '<div class="target-hint target-hint--heal">' +
+                    (_pendingHealItem ? 'Toque no aliado ou em si para usar a poção' : 'Toque no aliado a curar (inclui inconscientes a 0 PV)') +
+                    '</div>';
             } else {
                 html += '<div class="target-hint">Toque no inimigo para atacar</div>';
             }
         }
 
         if (isPlayerTurn) {
-            if (_selectingTarget || _selectHealTarget) {
-                var cancelLbl = _selectHealTarget ? '✕ Cancelar cura' : '✕ Cancelar Ataque';
-                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">' + cancelLbl + '</button></div></div>';
+            if (_selectingTarget || _selectHealTarget || _pendingHealItem) {
+                var cancelLbl2 = (_selectHealTarget || _pendingHealItem) ? '✕ Cancelar cura' : '✕ Cancelar Ataque';
+                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">' + cancelLbl2 + '</button></div></div>';
             } else {
-                html += '<div class="action-bar action-bar--player-dock">';
-                if (_actionSheetOpen) {
-                    html += '<div class="sim-action-backdrop" data-act="close-action-sheet" aria-hidden="true"></div>';
-                }
-                html += '<div class="sim-action-sheet' + (_actionSheetOpen ? ' open' : '') + '">';
-                html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
-                html += '<div class="sim-action-sheet-sub">Sem grade de posição: Deslocar-se e Desengajar não são botões separados. <strong>Fugir</strong> resume a intenção de sair do combate (teste + risco de OA — ver popup).</div>';
-                html += '<div class="sim-action-sheet-grids">';
-                html += '<div class="action-btns-grid action-btns-grid--main">';
-                html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
-                html += '<button type="button" class="action-btn" data-act="skills">✨ Habilidades</button>';
-                html += '<button type="button" class="action-btn" data-act="bag">🎒 Mochila</button>';
-                html += '</div>';
-                html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
-                html += '<div class="action-btns-grid action-btns-grid--secondary">';
-                html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
-                html += '</div></div></div>';
-                if (_actionSheetOpen) {
-                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
+                var pCur = s.order[s.p_idx];
+                if (pCur && pCur.hp <= 0 && pCur.dying && !pCur.stable && !pCur.isDead) {
+                    ensureDeathSaves(pCur);
+                    html += '<div class="action-bar action-bar--death-save">';
+                    html += '<div class="sim-death-save-banner">';
+                    html += '<div class="sds-title-row"><span class="sds-skull" aria-hidden="true">\u2620</span><h2 class="sds-title">Teste de morte</h2></div>';
+                    html += '<p class="sds-lead">A 0 PV, no seu turno role 1d20. Os resultados acumulam sucessos ou falhas até ficar estável ou morrer (PHB).</p>';
+                    html += '<ul class="sds-rules">';
+                    html += '<li><strong>20 natural:</strong> recupera 1 PV e deixa de estar morrendo.</li>';
+                    html += '<li><strong>10 ou mais:</strong> um sucesso. Três sucessos: inconsciente estável (0 PV).</li>';
+                    html += '<li><strong>9 ou menos:</strong> uma falha. <strong>1 natural:</strong> conta como duas falhas.</li>';
+                    html += partyHasConsciousAllyForMedicine(s)
+                        ? '<li><strong>Três falhas:</strong> morte. Com <strong>aliado de pé</strong> no grupo, ele pode usar <strong>ação</strong> e teste de <strong>Sabedoria (Medicina) CD 10</strong> (PHB) para estabilizar você.</li>'
+                        : '<li><strong>Três falhas:</strong> morte. Sem <strong>aliado consciente</strong> no grupo, não há quem faça Medicina no seu turno (PHB: ação de outro combatente adjacente).</li>';
+                    html += '</ul></div>';
+                    html += '<div class="sds-actions">';
+                    html += '<button type="button" class="action-btn primary" data-act="death-save">🎲 Rolar teste de morte</button>';
+                    if (partyHasConsciousAllyForMedicine(s)) {
+                        html += '<button type="button" class="action-btn secondary" data-act="stabilize-med">🩹 Aliado: Medicina CD 10</button>';
+                    }
+                    html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
+                    html += '</div></div>';
+                } else if (pCur && (pCur.isDead || (pCur.hp <= 0 && pCur.stable && !pCur.dying))) {
+                    html += '<div class="action-bar action-bar--pass-down">';
+                    html += '<p class="sim-down-banner">Sem ações (morto ou inconsciente estável a 0 PV).</p>';
+                    html += '<div class="action-btns-row"><button type="button" class="action-btn primary" data-act="pass-down">⏭ Avançar turno</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button></div></div>';
                 } else {
-                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">⚔ Agir</button></div>';
+                    html += '<div class="action-bar action-bar--player-dock">';
+                    if (_actionSheetOpen) {
+                        html += '<div class="sim-action-backdrop" data-act="close-action-sheet" aria-hidden="true"></div>';
+                    }
+                    html += '<div class="sim-action-sheet' + (_actionSheetOpen ? ' open' : '') + '">';
+                    html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
+                    html += '<div class="sim-action-sheet-sub">Sem grade de posição: Deslocar-se e Desengajar não são botões separados. <strong>Fugir</strong> resume a intenção de sair do combate (teste + risco de OA — ver popup).</div>';
+                    html += '<div class="sim-action-sheet-grids">';
+                    html += '<div class="action-btns-grid action-btns-grid--main">';
+                    html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
+                    html += '<button type="button" class="action-btn" data-act="skills">✨ Habilidades</button>';
+                    html += '<button type="button" class="action-btn" data-act="bag">🎒 Mochila</button>';
+                    html += '</div>';
+                    html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
+                    html += '<div class="action-btns-grid action-btns-grid--secondary">';
+                    html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
+                    html += '</div></div></div>';
+                    if (_actionSheetOpen) {
+                        html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
+                    } else {
+                        html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">⚔ Agir</button></div>';
+                    }
+                    html += '</div>';
                 }
-                html += '</div>';
             }
         }
 
@@ -1011,8 +1103,13 @@
                     showTargetConfirm(parseInt(uid.slice(6), 10));
                     return;
                 }
-                if (_selectHealTarget && uid === 'player') {
+                if ((_selectHealTarget || _pendingHealItem) && uid === 'player') {
                     showHealTargetConfirm(currentState.p_idx);
+                    return;
+                }
+                if ((_selectHealTarget || _pendingHealItem) && uid && uid.indexOf('ally_') === 0) {
+                    var aixH = parseInt(uid.slice(5), 10);
+                    if (!isNaN(aixH)) showHealTargetConfirm(aixH);
                     return;
                 }
                 openUnitDetail(uid);
@@ -1044,6 +1141,7 @@
         if (act === 'cancel-target') {
             _selectingTarget = false;
             _selectHealTarget = false;
+            _pendingHealItem = null;
             _pendingSkill = null;
             _pendingSkillSlot = null;
             _pendingPowerAttack = false;
@@ -1075,6 +1173,7 @@
         }
         if (act === 'attack') {
             _actionSheetOpen = false;
+            _pendingHealItem = null;
             _pendingSkill = null;
             _pendingSkillSlot = null;
             _pendingPowerAttack = false;
@@ -1111,6 +1210,33 @@
             _actionSheetOpen = false;
             render(currentState);
             await remoteAction({ type: 'pass' });
+            return;
+        }
+        if (act === 'death-save') {
+            _actionSheetOpen = false;
+            render(currentState);
+            await remoteAction({ type: 'death_save' });
+            return;
+        }
+        if (act === 'stabilize-med') {
+            _actionSheetOpen = false;
+            render(currentState);
+            var okMed = await showMetaActionConfirm({
+                line1: 'Medicina (aliado)',
+                line2: 'Sabedoria CD 10 (PHB)',
+                bullets: [
+                    'Um aliado consciente gasta a ação para tentar estabilizar você a 0 PV.',
+                    'Rolagem: 1d20 + modificador de Sabedoria do aliado; CD 10.'
+                ],
+                note: '',
+                confirmLabel: 'Rolar',
+                cancelLabel: 'Cancelar'
+            });
+            if (okMed) await remoteAction({ type: 'stabilize_med' });
+            return;
+        }
+        if (act === 'pass-down') {
+            await remoteAction({ type: 'pass_down' });
             return;
         }
         if (act === 'dodge') {
@@ -1158,10 +1284,16 @@
         _selectHealTarget = false;
         var slot = _pendingSkillSlot;
         var pa = _pendingPowerAttack;
+        var bagHeal = _pendingHealItem;
         _pendingSkillSlot = null;
         _pendingSkill = null;
         _pendingPowerAttack = false;
+        _pendingHealItem = null;
         render(currentState);
+        if (bagHeal && bagHeal.bagIdx != null) {
+            await remoteAction({ type: 'use_item', slot: bagHeal.bagIdx, target: tgtIdx });
+            return;
+        }
         if (slot != null && slot >= 0) {
             await remoteAction({ type: 'skill', slot: slot, target: tgtIdx });
         } else {
@@ -1278,6 +1410,27 @@
         if (ev.kind === 'buff') return animateBuffEvent(ev, oSkin);
         if (ev.kind === 'resource') return animateResourceEvent(ev, oSkin);
         if (ev.kind === 'flee') return animateFleeEvent(ev, oSkin);
+        if (ev.kind === 'death_save') {
+            var whoDs = currentState.order[ev.tIdx];
+            await new Promise(function (resolve) {
+                showDice(ev.d20, resolve, whoDs, 'Teste de morte', {
+                    offerBatchSkip: !!offerSkipGlob,
+                    postResult: function () {
+                        return {
+                            title: 'Teste de morte',
+                            cls: 'hit',
+                            subStructured: {
+                                kicker: '1d20',
+                                rows: [{ l: 'Resultado', v: String(ev.d20) }],
+                                note: 'PHB: acumula sucessos (10+) ou falhas (9-); 1 natural = duas falhas; 20 natural = 1 PV.'
+                            }
+                        };
+                    }
+                });
+            });
+            render(currentState);
+            return;
+        }
         if (ev.kind === 'round') {
             currentState.rn = ev.rn;
             render(currentState);
@@ -2306,6 +2459,7 @@
             _pendingPowerAttack = false;
             _pendingSkillSlot = null;
             _pendingSkill = null;
+            _pendingHealItem = null;
             _selectingTarget = false;
             _selectHealTarget = false;
             dismissOverlay();
@@ -2360,9 +2514,11 @@
         var s = currentState;
         var p = s.order[s.p_idx];
         var u = s.order[tgtIdx];
-        if (!u || u.t !== 'p') return;
+        if (!u || (u.t !== 'p' && u.t !== 'a')) return;
         var sk = (_pendingSkillSlot != null && p.skills) ? p.skills[_pendingSkillSlot] : null;
-        var skn = sk && typeof sk === 'object' ? sk.n : 'Cura';
+        var skn = (_pendingHealItem && p.bag && p.bag[_pendingHealItem.bagIdx])
+            ? p.bag[_pendingHealItem.bagIdx].n
+            : (sk && typeof sk === 'object' ? sk.n : 'Cura');
         var ov = document.createElement('div');
         ov.className = 'target-confirm-overlay';
         var card = document.createElement('div');
@@ -2378,7 +2534,12 @@
         ov.appendChild(card);
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); });
+        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () {
+            _pendingHealItem = null;
+            _selectHealTarget = false;
+            ov.remove();
+            render(currentState);
+        });
         card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmPendingAction(tgtIdx); });
     }
 
@@ -2387,6 +2548,7 @@
         var u = null;
         if (uid === 'player') u = currentState.order[currentState.p_idx];
         else if (uid && uid.indexOf('enemy_') === 0) u = currentState.order[parseInt(uid.slice(6), 10)];
+        else if (uid && uid.indexOf('ally_') === 0) u = currentState.order[parseInt(uid.slice(5), 10)];
         if (!u) return;
         var ov = document.createElement('div');
         ov.className = 'unit-detail-overlay';
@@ -2570,7 +2732,17 @@
             btn.addEventListener('click', async function () {
                 if (btn.hasAttribute('disabled')) return;
                 var idx = parseInt(btn.getAttribute('data-item'), 10);
+                var it = bag[idx];
+                var eff = it && it.effect;
                 ov.remove();
+                if (eff && eff.hp) {
+                    _pendingHealItem = { bagIdx: idx };
+                    _selectHealTarget = true;
+                    _selectingTarget = false;
+                    _actionSheetOpen = false;
+                    render(currentState);
+                    return;
+                }
                 try {
                     await remoteAction({ type: 'use_item', slot: idx });
                 } catch (e2) {
