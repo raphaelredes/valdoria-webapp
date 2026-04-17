@@ -251,6 +251,89 @@
         });
     }
 
+    /** Chaves de bioma vindas do servidor (inglês) → rótulo PT-BR na arena. */
+    var C2_BIOME_PT = {
+        plains: 'Planície',
+        grassland: 'Planície',
+        forest: 'Floresta',
+        hill: 'Colinas',
+        hills: 'Colinas',
+        mountain: 'Montanha',
+        mountains: 'Montanha',
+        swamp: 'Pântano',
+        desert: 'Deserto',
+        arctic: 'Ártico',
+        coast: 'Costa',
+        underdark: 'Underdark',
+        urban: 'Urbano',
+        sea: 'Mar',
+        jungle: 'Selva',
+        tundra: 'Tundra',
+        cave: 'Caverna',
+        arena: 'Arena'
+    };
+
+    function formatCombat2Biome(b) {
+        if (b == null || b === '') return 'Arena';
+        var k = String(b).toLowerCase().trim();
+        if (C2_BIOME_PT[k]) return C2_BIOME_PT[k];
+        return String(b);
+    }
+
+    /** Mini-popup D&D 5e sobre o cartão de habilidades (paridade com simuladores/combate.html). */
+    function openSkillHelpMini(cardEl, row) {
+        if (!cardEl || !row || cardEl.querySelector('.lp-help-overlay')) return;
+        var layer = document.createElement('div');
+        layer.className = 'lp-help-overlay';
+        var mini = document.createElement('div');
+        mini.className = 'lp-help-card';
+        var tag = document.createElement('div');
+        tag.className = 'lp-help-tag';
+        tag.textContent = 'Referência D&D 5e';
+        var title = document.createElement('div');
+        title.className = 'lp-help-title';
+        title.textContent = row.n ? String(row.n) : 'Habilidade';
+        var body = document.createElement('div');
+        body.className = 'lp-help-body';
+        var raw = row.helpDnd5e;
+        if (!raw || !String(raw).trim()) {
+            raw = row.desc
+                ? 'Resumo: ' + row.desc + '\n\nConsulte o PHB/SRD 5.1 para a regra completa.'
+                : 'Sem texto técnico extra; consulte o PHB/SRD 5.1.';
+        }
+        String(raw).split('\n').forEach(function (line) {
+            if (!line.trim()) return;
+            var pr = document.createElement('p');
+            pr.className = 'lp-help-p';
+            pr.textContent = line;
+            body.appendChild(pr);
+        });
+        var foot = document.createElement('p');
+        foot.className = 'lp-help-p lp-help-foot';
+        foot.textContent =
+            'O motor do jogo pode resumir efeitos de mesa (posição, concentração, reações, condições). Em dúvida, use o texto oficial do PHB/SRD.';
+        body.appendChild(foot);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lp-help-btn';
+        btn.textContent = 'Entendido';
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            layer.remove();
+        });
+        mini.appendChild(tag);
+        mini.appendChild(title);
+        mini.appendChild(body);
+        mini.appendChild(btn);
+        layer.appendChild(mini);
+        layer.addEventListener('click', function (e) {
+            if (e.target === layer) layer.remove();
+        });
+        mini.addEventListener('click', function (e) { e.stopPropagation(); });
+        cardEl.appendChild(layer);
+    }
+
     /**
      * Conteúdo informativo escaneável (rótulo + intro + linhas-chave + lista curta + nota).
      * Boas práticas: hierarquia clara, frases curtas, poucos pontos por tela (UX writing / modais).
@@ -853,7 +936,7 @@
             if (isPlayerTurn) html += '<div class="current-turn player-turn"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>';
             else html += '<div class="current-turn"><span class="ct-ico">' + escHtml(activeNow.ico) + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
         }
-        html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">R' + s.rn + '</span> ' + (s.biome || 'Arena') + '</div></div>';
+        html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">R' + s.rn + '</span> ' + escHtml(formatCombat2Biome(s.biome)) + '</div></div>';
         html += buildBattlefield(s);
 
         if (isPlayerTurn) {
@@ -2219,11 +2302,8 @@
         ov.className = 'list-panel-overlay';
         var card = document.createElement('div');
         card.className = 'list-panel-card';
-        var html = '<div class="lp-title">Habilidades</div>';
+        var html = '<div class="lp-title">🎯 Habilidades</div>';
         html += '<div class="lp-sub">' + (p.res ? escHtml(p.res.ico) + ' ' + p.res.value + '/' + p.res.max + ' ' + escHtml(p.res.name) : '') + '</div>';
-        html += '<div class="lp-lead-block"><span class="c2-info-kicker">Como usar</span>';
-        html += '<ul class="c2-info-bullets c2-info-bullets--compact"><li>Cada linha mostra o custo no recurso da classe.</li>';
-        html += '<li>Se pedir alvo, toque no combatente certo na arena após escolher a habilidade.</li></ul></div>';
         html += '<div class="lp-list">';
         p.skills.forEach(function (sk, idx) {
             var row = typeof sk === 'string' ? { n: sk, cost: 0, kind: 'attack', ico: '✨' } : sk;
@@ -2231,15 +2311,16 @@
             var rv = p.res ? (parseInt(p.res.value, 10) || 0) : 999;
             var canPay = !p.res || !p.res.max || rv >= cost;
             var dis = canPay ? '' : ' disabled';
-            var kindLbl = row.kind === 'attack' ? 'Ataque' : (row.kind === 'heal' ? 'Cura' : 'Bônus');
-            var line2 = kindLbl + ' · custo ' + cost;
-            var descHtml = row.desc
-                ? ('<div class="lp-item-desc">' + escHtml(row.desc) + '</div>' +
-                    '<div class="lp-item-desc lp-item-desc--meta">' + escHtml(line2) + '</div>')
-                : ('<div class="lp-item-desc">' + escHtml(line2) + '</div>');
+            var resIco = p.res && p.res.ico != null ? escHtml(p.res.ico) : '';
+            var costCls = 'lp-item-cost' + (canPay ? ' qty' : ' cant');
+            html += '<div class="lp-item-wrap">';
             html += '<button type="button" class="lp-item' + dis + '" data-skill-idx="' + idx + '"' + dis + '>';
-            html += '<div class="lp-item-ico">' + escHtml(row.ico || '✨') + '</div><div class="lp-item-body"><div class="lp-item-name">' + escHtml(row.n) + '</div>';
-            html += descHtml + '</div></button>';
+            html += '<div class="lp-item-ico">' + escHtml(row.ico || '✨') + '</div><div class="lp-item-body">';
+            html += '<div class="lp-item-name">' + escHtml(row.n) + '</div>';
+            if (row.desc) html += '<div class="lp-item-desc">' + escHtml(row.desc) + '</div>';
+            html += '</div><div class="' + costCls + '">' + resIco + (resIco ? ' ' : '') + cost + '</div></button>';
+            html += '<button type="button" class="lp-item-help" data-skill-help="' + idx + '" title="Detalhes D&D 5e" aria-label="Detalhes técnicos D&D 5e">?</button>';
+            html += '</div>';
         });
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
@@ -2247,6 +2328,18 @@
         document.body.appendChild(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
+        card.querySelectorAll('[data-skill-help]').forEach(function (hb) {
+            hb.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var hi = parseInt(hb.getAttribute('data-skill-help'), 10);
+                if (!isNaN(hi) && p.skills[hi]) {
+                    var skH = p.skills[hi];
+                    var rowH = typeof skH === 'string' ? { n: skH, desc: '' } : skH;
+                    openSkillHelpMini(card, rowH);
+                }
+            });
+        });
         card.querySelectorAll('[data-skill-idx]').forEach(function (btn) {
             btn.addEventListener('click', async function () {
                 if (btn.hasAttribute('disabled')) return;
