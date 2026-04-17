@@ -656,7 +656,7 @@
         foot.querySelector('#c2-batch-summary-ok').addEventListener('click', function () { onDismiss(); });
         card.appendChild(foot);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) onDismiss(); });
     }
 
@@ -732,7 +732,7 @@
                 if (v === '1') finish(true);
             });
             ov.appendChild(card);
-            document.body.appendChild(ov);
+            vOverlay.add(ov);
         });
     }
 
@@ -1319,7 +1319,7 @@
             html += '<button type="button" class="action-btn primary" data-rs="1">Usar Escudo</button></div>';
             setHTML(card, html);
             ov.appendChild(card);
-            document.body.appendChild(ov);
+            vOverlay.add(ov);
             function done(v) {
                 try { ov.remove(); } catch (eR) {}
                 resolve(!!v);
@@ -1780,7 +1780,7 @@
             '<span class="epic-cta-text">Come\u00e7ar combate \u2192</span></button></div>');
         setHTML(card, parts.join(''));
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         var startBtn = document.getElementById('iop-start-combat-btn');
         if (startBtn) {
             startBtn.addEventListener('click', function () {
@@ -1850,7 +1850,7 @@
             actionsWrap.appendChild(skipAllBtn);
         }
         ov.appendChild(actionsWrap);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         var d, closed = false, started = false, lockTimer = null;
         function close() {
             if (closed) return; closed = true;
@@ -1990,7 +1990,7 @@
                 card.appendChild(skipB);
             }
             ov.appendChild(card);
-            document.body.appendChild(ov);
+            vOverlay.add(ov);
             setTimeout(function () { btn.style.display = ''; }, 1000);
             btn.addEventListener('click', function () { ov.remove(); resolve(); });
         });
@@ -2043,7 +2043,7 @@
                 dmgActionsWrap.appendChild(skipDmg);
             }
             ov.appendChild(dmgActionsWrap);
-            document.body.appendChild(ov);
+            vOverlay.add(ov);
             var d;
             function close() { try { d && d.dispose(); } catch (e) {} ov.remove(); if (_activeDiceClose === close) _activeDiceClose = null; resolve(); }
             _activeDiceClose = close;
@@ -2134,7 +2134,7 @@
         flash.style.left = (rect.left + rect.width / 2 - (isCrit ? 35 : 25)) + 'px';
         flash.style.top = (rect.top + rect.height / 2 - (isCrit ? 35 : 25)) + 'px';
         flash.style.position = 'fixed';
-        document.body.appendChild(flash);
+        vOverlay.add(flash);
         flash.addEventListener('animationend', function () { flash.remove(); });
     }
 
@@ -2451,7 +2451,7 @@
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">⚔ Confirmar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         function dismissOverlay() {
             try { ov.remove(); } catch (eR) {}
         }
@@ -2494,7 +2494,7 @@
         html += '<button type="button" class="action-btn primary" data-ac="1">Lançar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-ac="0"]').addEventListener('click', function () { ov.remove(); });
         card.querySelector('[data-ac="1"]').addEventListener('click', async function () {
@@ -2532,7 +2532,7 @@
         html += '<div class="tcc-actions"><button class="action-btn" data-tcc="cancel">✕ Cancelar</button><button class="action-btn primary" data-tcc="confirm">✓ Confirmar</button></div>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () {
             _pendingHealItem = null;
@@ -2579,7 +2579,7 @@
         setHTML(card, html);
         card.querySelector('.udc-close').addEventListener('click', function () { ov.remove(); });
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
     }
 
     function openSkillsPanel() {
@@ -2612,7 +2612,7 @@
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
         card.querySelectorAll('[data-skill-help]').forEach(function (hb) {
@@ -2695,7 +2695,7 @@
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
     }
@@ -2725,7 +2725,7 @@
         html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
         setHTML(card, html);
         ov.appendChild(card);
-        document.body.appendChild(ov);
+        vOverlay.add(ov);
         ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
         card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
         card.querySelectorAll('[data-item]').forEach(function (btn) {
@@ -2759,7 +2759,7 @@
         var s = document.createElement('script');
         s.src = src; s.async = false;
         s.onload = cb; s.onerror = cb;
-        document.body.appendChild(s);
+        vOverlay.add(s);
     }
 
     async function init() {

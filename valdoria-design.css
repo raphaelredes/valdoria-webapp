@@ -23,11 +23,19 @@
     --v-gold-07: rgba(196, 149, 58, 0.07);
     --v-gold-08: rgba(196, 149, 58, 0.08);
     --v-gold-12: rgba(196, 149, 58, 0.12);
+    --v-gold-16: rgba(196, 149, 58, 0.16);
+    --v-gold-22: rgba(196, 149, 58, 0.22);
+    --v-gold-28: rgba(196, 149, 58, 0.28);
+    --v-gold-45: rgba(196, 149, 58, 0.45);
     --v-gold-35: rgba(196, 149, 58, 0.35);
     --v-gold-50: rgba(196, 149, 58, 0.5);
     --v-gold-55: rgba(196, 149, 58, 0.55);
     --v-gold-60: rgba(196, 149, 58, 0.6);
     --v-gold-70: rgba(196, 149, 58, 0.7);
+    --v-gold-65: rgba(196, 149, 58, 0.65);
+    --v-gold-80: rgba(196, 149, 58, 0.8);
+    --v-gold-90: rgba(196, 149, 58, 0.9);
+    --v-gold-95: rgba(196, 149, 58, 0.95);
     --v-crimson: #7b2020;
     --v-crimson-light: #a03030;
     --v-crimson-glow: rgba(123, 32, 32, 0.35);
@@ -67,6 +75,15 @@
     --v-z-error: 1100;
     --v-z-modal: 5000;
     --v-z-critical: 10000;
+    /* Combat2 WebApp: empilhamento local (tokens usados em combat2/combat2.css) */
+    --v-z-combat2-cell-badge: 20;
+    --v-z-combat2-floor: 9990;
+    --v-z-combat2-modals: 9999;
+    --v-z-combat2-dice: 10050;
+    --v-z-combat2-dice-top: 10060;
+    --v-z-combat2-sim-backdrop: 92000;
+    --v-z-combat2-sim-sheet: 92100;
+    --v-z-combat2-sim-dock: 92200;
     --v-border: #4a3828;
     --v-border-gold: rgba(196, 149, 58, 0.3);
     --v-radius-xs: 4px;
