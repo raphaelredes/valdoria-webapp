@@ -1793,6 +1793,10 @@
             note: 'O efeito segue ativo até expirar ou ser removido pelo combate.'
         };
         await showMessage(ev.skillName || 'Buff tático', 'hit', subBuff, { offerBatchSkip: !!offerSkip });
+        // ≥1s desde o fim do VFX específico (sanctuary 1,4s, buffRage 0,9s).
+        if (ev && (ev.skillName === 'Santuário' || ev.skillName === 'Fúria')) {
+            await sleep(1000);
+        }
     }
 
     /* ============================================================
@@ -2462,7 +2466,8 @@
                 });
                 if (hasDodge) playDodgeVfx(ev.tIdx);
             } catch (eDg) {}
-            await sleep(460);
+            // ≥1s desde o fim do VFX de miss/dodge (dodge anima ~400ms + 1000ms dwell).
+            await sleep(1400);
             return;
         }
         if (ev.oldHp != null && ev.newHp != null) {
@@ -2475,7 +2480,10 @@
             render(currentState);
         }
         arenaStrikeFromEvent(ev);
-        await sleep(ev.crit ? 520 : 580);
+        // ≥1s desde o fim do impacto/crit/radiant/sanctuary overlays. Ataques
+        // terminam ~500-850ms após o call; padding dá 1s+ de dwell antes da
+        // próxima rolagem ou avanço de turno.
+        await sleep(ev.crit ? 1650 : 1550);
     }
 
     async function playPostBatchHealVfx(ev) {
