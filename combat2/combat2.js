@@ -23,6 +23,8 @@
     var currentState = null;
     var _selectingTarget = false;
     var _selectHealTarget = false;
+    /** Folha inferior de acoes (paridade com simuladores/combate.html). */
+    var _actionSheetOpen = false;
     var _pendingSkill = null;
     /** Indice em order[p_idx].skills ao usar habilidade de ataque/cura com alvo. */
     var _pendingSkillSlot = null;
@@ -860,6 +862,14 @@
 
     function render(s) {
         currentState = s;
+        if (s && s.ph === 'active' && (_selectingTarget || _selectHealTarget)) {
+            _actionSheetOpen = false;
+        }
+        try {
+            var bKey = String((s && s.biome) || 'forest').toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'forest';
+            document.body.className = (document.body.className || '').replace(/\bbiome-\S+/g, '').trim();
+            document.body.classList.add('biome-' + bKey);
+        } catch (eBio) {}
         try {
             syncCombat2Music(s);
         } catch (eM) {}
@@ -869,13 +879,15 @@
 
         if (ph === 'victory' || ph === 'defeat' || ph === 'fled') {
             var title = { victory: 'VITÓRIA', defeat: 'DERROTA', fled: 'FUGIU' }[ph];
-            var narr = { victory: 'Todos os inimigos caíram por suas mãos.', defeat: 'Você cai inconsciente no chão...', fled: 'Você escapa para longe da ameaça.' }[ph];
-            var narrK = { victory: 'Resultado', defeat: 'Desfecho', fled: 'Epílogo' }[ph];
+            var narr = {
+                victory: 'Todos os inimigos caíram por suas mãos.',
+                defeat: 'Todos os aventureiros da party caem — não resta ninguém de pé para continuar o combate.',
+                fled: 'Você escapa para longe da ameaça.'
+            }[ph];
             var logBody = formatCombat2LogByRounds(s.log || [], { reverseRounds: false });
             html = '<div class="resolution ' + ph + '">';
-            html += '<div class="res-stack">';
-            html += '<div class="res-top"><div class="res-title">' + title + '</div>';
-            html += '<div class="res-narr-block"><span class="res-narr-kicker">' + escHtml(narrK) + '</span><p class="res-narr">' + escHtml(narr) + '</p></div></div>';
+            html += '<div class="res-title">' + escHtml(title) + '</div>';
+            html += '<div class="res-narr">' + escHtml(narr) + '</div>';
             if (ph === 'victory' && s.rewards) {
                 var r = s.rewards;
                 var xpPct = Math.min(100, Math.round((r.newXp / r.threshold) * 100));
@@ -894,9 +906,8 @@
                 if (!(r.items || []).length) html += '<div class="rr-loot-empty">Nenhum item caiu desta vez.</div>';
                 html += '</div>';
             }
-            html += '<div class="res-log-section"><div class="res-log-heading">Registro do combate</div>';
-            html += '<div class="res-log">' + logBody + '</div></div>';
-            html += '</div>';
+            html += '<div class="res-log res-log-full"><div class="res-log-title">Log do combate</div>';
+            html += '<div class="lp-log-scroll res-log-scroll">' + logBody + '</div></div>';
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close">✓ Continuar</button></div>';
             html += '</div>';
             setHTML(app, html);
@@ -911,7 +922,7 @@
 
         if (ph === 'intro' || ph === 'init' || ph === 'init_done') {
             if (ph === 'intro') {
-                html += '<div class="epic-banner"><div class="epic-title">⚔ COMBATE INICIADO ⚔</div><div class="epic-sub">Iniciativa em seguida — posições fixas nesta arena</div></div>';
+                html += '<div class="epic-banner"><div class="epic-title">COMBATE INICIADO</div><div class="epic-sub">Prepare-se para a batalha</div></div>';
             } else { html += buildTurnQueue(s); }
             html += '<div class="arena-header compact-header"><div class="arena-subtitle">' +
                 (ph === 'intro' ? 'Posicionamento' : ph === 'init' ? 'Rolando Iniciativa...' : 'Ordem de Combate') +
@@ -936,25 +947,49 @@
             if (isPlayerTurn) html += '<div class="current-turn player-turn"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>';
             else html += '<div class="current-turn"><span class="ct-ico">' + escHtml(activeNow.ico) + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
         }
-        html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">R' + s.rn + '</span> ' + escHtml(formatCombat2Biome(s.biome)) + '</div></div>';
+        html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> ' +
+            escHtml(formatCombat2Biome(s.biome)) + ' <span class="weather-badge w-clear">☀️ Limpo</span></div></div>';
         html += buildBattlefield(s);
+
+        if (isPlayerTurn && (_selectingTarget || _selectHealTarget)) {
+            if (_selectHealTarget) {
+                html += '<div class="target-hint target-hint--heal">Toque no aliado a curar (inclui inconscientes a 0 PV)</div>';
+            } else {
+                html += '<div class="target-hint">Toque no inimigo para atacar</div>';
+            }
+        }
 
         if (isPlayerTurn) {
             if (_selectingTarget || _selectHealTarget) {
-                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">✕ Cancelar</button></div></div>';
+                var cancelLbl = _selectHealTarget ? '✕ Cancelar cura' : '✕ Cancelar Ataque';
+                html += '<div class="action-bar"><div class="action-btns-row"><button class="action-btn" data-act="cancel-target">' + cancelLbl + '</button></div></div>';
             } else {
-                html += '<div class="action-bar"><div class="action-btns-grid">';
-                html += '<button class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
-                html += '<button class="action-btn" data-act="skills">✨ Habilidades</button>';
-                html += '<button class="action-btn" data-act="bag">🎒 Mochila</button>';
-                html += '<button class="action-btn" data-act="flee">🏃 Fugir</button>';
+                html += '<div class="action-bar action-bar--player-dock">';
+                if (_actionSheetOpen) {
+                    html += '<div class="sim-action-backdrop" data-act="close-action-sheet" aria-hidden="true"></div>';
+                }
+                html += '<div class="sim-action-sheet' + (_actionSheetOpen ? ' open' : '') + '">';
+                html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
+                html += '<div class="sim-action-sheet-sub">Sem grade de posição: Deslocar-se e Desengajar não são botões separados. <strong>Fugir</strong> resume a intenção de sair do combate (teste + risco de OA — ver popup).</div>';
+                html += '<div class="sim-action-sheet-grids">';
+                html += '<div class="action-btns-grid action-btns-grid--main">';
+                html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
+                html += '<button type="button" class="action-btn" data-act="skills">✨ Habilidades</button>';
+                html += '<button type="button" class="action-btn" data-act="bag">🎒 Mochila</button>';
                 html += '</div>';
-                html += '<div class="action-btns-grid action-btns-sub">';
+                html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
+                html += '<div class="action-btns-grid action-btns-grid--secondary">';
                 html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="disengage">➡️ Desengajar</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Pular</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
-                html += '</div></div>';
+                html += '</div></div></div>';
+                if (_actionSheetOpen) {
+                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
+                } else {
+                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">⚔ Agir</button></div>';
+                }
+                html += '</div>';
             }
         }
 
@@ -1012,12 +1047,34 @@
             _pendingSkill = null;
             _pendingSkillSlot = null;
             _pendingPowerAttack = false;
+            _actionSheetOpen = false;
             render(currentState);
             return;
         }
-        if (act === 'skills') { openSkillsPanel(); return; }
-        if (act === 'bag') { openBagPanel(); return; }
+        if (act === 'toggle-actions') {
+            _actionSheetOpen = !_actionSheetOpen;
+            render(currentState);
+            return;
+        }
+        if (act === 'close-action-sheet') {
+            _actionSheetOpen = false;
+            render(currentState);
+            return;
+        }
+        if (act === 'skills') {
+            _actionSheetOpen = false;
+            render(currentState);
+            openSkillsPanel();
+            return;
+        }
+        if (act === 'bag') {
+            _actionSheetOpen = false;
+            render(currentState);
+            openBagPanel();
+            return;
+        }
         if (act === 'attack') {
+            _actionSheetOpen = false;
             _pendingSkill = null;
             _pendingSkillSlot = null;
             _pendingPowerAttack = false;
@@ -1028,7 +1085,11 @@
                     if (oc && oc.t === 'e' && oc.alive) aliveIdxs.push(ai);
                 }
             }
-            if (aliveIdxs.length === 1) { showTargetConfirm(aliveIdxs[0]); return; }
+            if (aliveIdxs.length === 1) {
+                render(currentState);
+                showTargetConfirm(aliveIdxs[0]);
+                return;
+            }
             _selectingTarget = true;
             render(currentState);
             return;
@@ -1040,9 +1101,21 @@
             return;
         }
         if (act === 'start') { closeInitiativeOrderPopup(); await remoteAction({ type: 'start' }); return; }
-        if (act === 'flee') { await remoteAction({ type: 'flee' }); return; }
-        if (act === 'pass') { await remoteAction({ type: 'pass' }); return; }
+        if (act === 'flee') {
+            _actionSheetOpen = false;
+            render(currentState);
+            await remoteAction({ type: 'flee' });
+            return;
+        }
+        if (act === 'pass') {
+            _actionSheetOpen = false;
+            render(currentState);
+            await remoteAction({ type: 'pass' });
+            return;
+        }
         if (act === 'dodge') {
+            _actionSheetOpen = false;
+            render(currentState);
             var okDodge = await showMetaActionConfirm({
                 line1: 'Esquivar',
                 line2: 'Ação (PHB)',
@@ -1072,7 +1145,12 @@
             if (okDis) await remoteAction({ type: 'disengage' });
             return;
         }
-        if (act === 'log') { openCombatLog(); return; }
+        if (act === 'log') {
+            _actionSheetOpen = false;
+            render(currentState);
+            openCombatLog();
+            return;
+        }
     }
 
     async function confirmPendingAction(tgtIdx) {
@@ -2151,33 +2229,69 @@
         if (!u || !u.alive) return;
         var sk = (_pendingSkillSlot != null && p.skills && p.skills[_pendingSkillSlot]) ? p.skills[_pendingSkillSlot] : null;
         var skObj = sk && typeof sk === 'object' ? sk : null;
+        var atkSkill = (skObj && skObj.kind === 'attack') ? skObj : null;
+        var reductions = u.resistances || [];
+        var immunities = u.immunities || [];
         var ov = document.createElement('div');
         ov.className = 'target-confirm-overlay';
         var card = document.createElement('div');
         card.className = 'target-confirm-card';
         var hpPct = Math.round((u.hp / u.mhp) * 100);
         var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
-        var die = p.die;
+        var die = (p.die | 0) || 8;
         var mod = p.dmgMod || 0;
-        var attr = p.attr ? ' (' + p.attr + ')' : '';
-        var modStr = mod > 0 ? ' + ' + mod + attr : '';
-        var title = (skObj && skObj.n) ? ('Usar ' + escHtml(skObj.n) + '?') : 'Atacar este alvo?';
-        var html = '<div class="tcc-title">' + title + '</div>';
-        html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info"><div class="tcc-name">' + escHtml(u.n) + '</div><div class="tcc-stats">CA ' + u.ac + ' · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' PV</span></div></div></div>';
-        html += '<div class="tcc-dmg">';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val">d20 + ' + p.atk + ' vs CA ' + u.ac + '</span></div>';
-        if (skObj && skObj.kind === 'attack') {
-            var pr = c2PreviewAttackDmg(p, skObj);
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + escHtml(pr.dmgF) + ' (' + pr.minD + '–' + pr.maxD + ')</span></div>';
-            html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + escHtml(pr.critF) + ' (' + pr.critMin + '–' + pr.critMax + ')</span></div>';
+        var attrLbl = p.attr ? ' (' + p.attr + ')' : '';
+        var dmgFormula;
+        var critFormula;
+        var minDmg;
+        var maxDmg;
+        var critMin;
+        var critMax;
+        if (atkSkill) {
+            var pr = c2PreviewAttackDmg(p, atkSkill);
+            dmgFormula = pr.dmgF;
+            critFormula = pr.critF;
+            minDmg = pr.minD;
+            maxDmg = pr.maxD;
+            critMin = pr.critMin;
+            critMax = pr.critMax;
         } else {
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">1d' + die + modStr + ' (' + (1 + mod) + '–' + (die + mod) + ')</span></div>';
-            html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">2d' + die + modStr + ' (' + (2 + mod) + '–' + (2 * die + mod) + ')</span></div>';
+            var modStrW = mod > 0 ? (' + ' + mod + attrLbl) : (mod < 0 ? (' ' + mod + attrLbl) : '');
+            dmgFormula = '1d' + die + modStrW;
+            critFormula = '2d' + die + modStrW;
+            minDmg = 1 + mod;
+            maxDmg = die + mod;
+            critMin = 2 + mod;
+            critMax = 2 * die + mod;
+        }
+        var titleHtml = atkSkill
+            ? ('🎯 Usar ' + escHtml(atkSkill.n))
+            : 'Atacar este alvo?';
+        var html = '<div class="tcc-title">' + titleHtml + '</div>';
+        html += '<div class="tcc-preview"><div class="tcc-ico">' + escHtml(u.ico) + '</div><div class="tcc-info">';
+        html += '<div class="tcc-name">' + escHtml(u.n) + '</div>';
+        html += '<div class="tcc-stats"><span class="tcc-n-ca">CA ' + u.ac + '</span> · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' PV</span></div>';
+        html += '</div></div>';
+        html += '<div class="tcc-dmg">';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val">';
+        html += '<span class="tcc-n-muted">d20</span> + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span>';
+        html += '</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + escHtml(dmgFormula) +
+            ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
+        html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + escHtml(critFormula) +
+            ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+        if (reductions.length) {
+            html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">🛡 Resistente</span><span class="tcc-dmg-val">' +
+                escHtml(reductions.join(', ')) + ' (½ dano)</span></div>';
+        }
+        if (immunities.length) {
+            html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' +
+                escHtml(immunities.join(', ')) + ' (0 dano)</span></div>';
+        }
+        if (!reductions.length && !immunities.length) {
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
         }
         html += '</div>';
-        html += '<div class="tcc-hint-block"><span class="c2-info-kicker">Antes de confirmar</span>';
-        html += '<ul class="c2-info-bullets c2-info-bullets--compact"><li>CA e PV mostrados são do momento deste clique.</li>';
-        html += '<li>Em acerto crítico (natural 20), some um dado de dano à rolagem antes do modificador (PHB).</li></ul></div>';
         if (!skObj && p.cls === 'Guerreiro') {
             html += '<label class="c2-pa-row"><input type="checkbox" id="c2-power-atk"/> Ataque Poderoso (−5 no ataque, +10 no dano, PHB)</label>';
         }
@@ -2185,12 +2299,23 @@
         setHTML(card, html);
         ov.appendChild(card);
         document.body.appendChild(ov);
-        ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { ov.remove(); _pendingPowerAttack = false; });
+        function dismissOverlay() {
+            try { ov.remove(); } catch (eR) {}
+        }
+        function cancelTarget() {
+            _pendingPowerAttack = false;
+            _pendingSkillSlot = null;
+            _pendingSkill = null;
+            _selectingTarget = false;
+            _selectHealTarget = false;
+            dismissOverlay();
+        }
+        ov.addEventListener('click', function (e) { if (e.target === ov) cancelTarget(); });
+        card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { cancelTarget(); });
         card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
             var paCb = card.querySelector('#c2-power-atk');
             _pendingPowerAttack = !!(paCb && paCb.checked);
-            ov.remove();
+            dismissOverlay();
             confirmPendingAction(tgtIdx);
         });
     }
