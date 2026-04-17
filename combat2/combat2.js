@@ -1730,6 +1730,9 @@
         }
         if (!ev.hit) return;
 
+        /* Pausa curta entre overlay de d20 e overlay de dano — olho reorienta. */
+        await sleep(350);
+
         /* Overlay 2: dado de dano + card animado */
         var dmgDie = ev.dmgDie != null ? ev.dmgDie : actor.die;
         var dmgModUi = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
@@ -1747,6 +1750,8 @@
         target.alive = ev.newHp > 0;
         render(currentState);
         var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+        /* Pausa curta entre overlay de dano e impacto VFX na arena — ritmo narrativo. */
+        await sleep(400);
         arenaStrikeFromEvent(ev);
         await sleep(120);
     }
