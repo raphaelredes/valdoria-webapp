@@ -5,8 +5,21 @@
    ============================================= */
 
 // Allow portal-level override (window._envOverride) or URL ?env=dev to force mode
+function _looksLikeProdHost(hostname) {
+    hostname = String(hostname || '').toLowerCase();
+    if (hostname === 'jogo.lendasdevaldoria.com.br') return true;
+    if (hostname === 'prod.lendasdevaldoria.com.br') return true;
+    if (hostname.endsWith('.lendasdevaldoria.com.br') && !hostname.startsWith('dev.')) return true;
+    return false;
+}
+var _hostProd = _looksLikeProdHost(window.location.hostname);
 var _envOverride = window._envOverride || new URLSearchParams(window.location.search).get('env');
-var _isProd = _envOverride ? (_envOverride === 'prod') : (window.location.hostname === 'jogo.lendasdevaldoria.com.br');
+// Hard guard: on PROD host we NEVER allow forcing env=dev via query param.
+if (_hostProd && _envOverride === 'dev') {
+    console.warn('[WEB-AUTH] Ignoring env=dev override on PROD host:', window.location.hostname);
+    _envOverride = null;
+}
+var _isProd = _envOverride ? (_envOverride === 'prod') : _hostProd;
 var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'ValdoriaDevBot';
 var _envId = _isProd ? 'prod' : 'dev';
 if (_envOverride) console.info('[WEB-AUTH] environment FORCED to %s (isProd=%s)', _envId, _isProd);

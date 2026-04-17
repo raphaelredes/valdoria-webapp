@@ -170,9 +170,14 @@
 
     // Redirect to login if no valid session (web-standalone only)
     if (!_token && window.location.pathname.indexOf('/web/') < 0) {
-        var isDev = window.location.search.indexOf('env=dev') >= 0 || window.location.hash.indexOf('env=dev') >= 0 || (window.ValdoriaEnv && ValdoriaEnv.getEnv() === 'dev');
-        var loginBase = '/web/';
-        if (isDev) loginBase = '/web/dev';
+        var isDev = false;
+        try {
+            // Never call a non-existent method; ValdoriaEnv exposes .id ('dev'|'prod')
+            isDev = (window.ValdoriaEnv && ValdoriaEnv.id === 'dev');
+            // Hard guard: on PROD host we NEVER send user to /web/dev (which redirects to ?env=dev).
+            if (window.ValdoriaEnv && ValdoriaEnv.isProd) isDev = false;
+        } catch (e) { isDev = false; }
+        var loginBase = isDev ? '/web/dev' : '/web/';
 
         console.warn('[COMPAT] No session token — redirecting to login portal: ' + loginBase);
         window.location.replace(loginBase);
