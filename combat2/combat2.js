@@ -1490,6 +1490,7 @@
         if (ev.kind === 'heal') return animateHealEvent(ev, oSkin);
         if (ev.kind === 'buff') return animateBuffEvent(ev, oSkin);
         if (ev.kind === 'resource') return animateResourceEvent(ev, oSkin);
+        if (ev.kind === 'item_use') return animateItemUseEvent(ev, oSkin);
         if (ev.kind === 'flee') return animateFleeEvent(ev, oSkin);
         if (ev.kind === 'death_save') {
             var whoDs = currentState.order[ev.tIdx];
@@ -1904,6 +1905,38 @@
     async function animateResourceEvent(ev, offerSkip) {
         if (_skipReplayBatch) return;
         await sleep(120);
+    }
+
+    async function animateItemUseEvent(ev, offerSkip) {
+        if (_skipReplayBatch && isEventFromOtherCombatant(ev)) return;
+        try {
+            ensureCombatVfxRuntime();
+            var tUid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
+            var el = document.querySelector('[data-unit-id="' + tUid + '"]');
+            if (window._combatVfx && el) {
+                if (ev.subtype === 'heal') {
+                    window._combatVfx.healSelf(el);
+                    if (ev.healGained != null && ev.healGained >= 8) {
+                        setTimeout(function () { try { window._combatVfx.healBurst(el); } catch (e) {} }, 200);
+                    }
+                } else if (ev.subtype === 'resource') {
+                    window._combatVfx.potionMana(el);
+                }
+            }
+        } catch (eI) { console.warn('[COMBAT2]', 'item_use_vfx_failed', eI || ''); }
+        var sub = { kicker: ev.itemName || 'Item' };
+        if (ev.subtype === 'heal') {
+            sub.intro = 'Cura: 2d4+2 (poção padrão)';
+            sub.rows = [{ l: 'PV recuperado', v: '+' + (ev.healGained || 0) }];
+        } else if (ev.subtype === 'resource') {
+            sub.intro = 'Restaura ' + (ev.resName || 'recurso') + '.';
+            sub.rows = [{ l: (ev.resName || 'Recurso'), v: '+' + (ev.resGained || 0) }];
+        } else {
+            sub.intro = 'Consumo de item.';
+        }
+        await showMessage((ev.itemIco || '🎒') + ' ' + (ev.itemName || 'Item'), 'hit', sub, { offerBatchSkip: !!offerSkip });
+        // ≥1s de respiro pós-VFX.
+        await sleep(1000);
     }
 
     async function animateFleeEvent(ev, offerSkip) {
