@@ -715,8 +715,10 @@ html, body { height: 100vh; overflow: hidden; }
     margin-bottom: var(--v-space-xs, 4px);
 }
 .resolution .res-log-full .res-log-scroll {
-    /* Expand log area when there is vertical space (end-of-combat screen). */
-    max-height: min(44vh, 420px);
+    /* Ocupa TODO o espaço vertical restante (sem cap). Flex:1 + min-height:0
+       + parent (.res-log-full) também flex:1 garantem growth através do
+       .resolution flex column. */
+    max-height: none;
     overflow-y: auto;
     padding: var(--v-space-sm, 8px) var(--v-space-md, 10px);
     background: rgba(15, 12, 8, 0.6);
@@ -728,9 +730,8 @@ html, body { height: 100vh; overflow: hidden; }
     -webkit-overflow-scrolling: touch;
     animation: resFadeIn 0.6s ease 0.45s both;
 }
-.resolution.victory .res-log-full .res-log-scroll {
-    max-height: min(44vh, 420px);
-}
+/* Override (vitória): também sem cap — o log preenche toda a área livre. */
+.resolution.victory .res-log-full .res-log-scroll { max-height: none; }
 .res-log-section {
     flex: 1 1 auto;
     min-height: 0;
@@ -1383,6 +1384,58 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
 .sim-setup-bar a:hover {
     color: var(--v-gold, #c4953a);
     border-bottom-color: var(--v-gold, #c4953a);
+}
+
+/* Condições / buffs em order[].se — número = turnos até expirar; ∞ = TR repetido no fim do turno */
+.cell-se {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 4px;
+    justify-content: center;
+    padding: 2px 2px 4px;
+    max-width: 100%;
+}
+.se-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    max-width: 100%;
+    padding: 1px 5px 2px;
+    border-radius: 6px;
+    font-size: 9px;
+    line-height: 1.25;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+}
+.se-chip--buff {
+    background: rgba(80, 140, 90, 0.35);
+    border: 1px solid rgba(120, 200, 130, 0.45);
+    color: var(--v-text, #d4c8b0);
+}
+.se-chip--debuff {
+    background: rgba(160, 70, 70, 0.35);
+    border: 1px solid rgba(220, 120, 120, 0.4);
+    color: var(--v-text, #d4c8b0);
+}
+.se-chip .se-ico { flex: 0 0 auto; font-size: 10px; }
+.se-chip .se-lbl {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 72px;
+}
+.se-turns {
+    flex: 0 0 auto;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--v-gold, #c4953a);
+    margin-left: 1px;
+}
+.se-turns--save {
+    font-size: 8px;
+    font-weight: 600;
+    opacity: 0.95;
 }
 
 /* --- Pan / zoom na arena (mouse + toque) — viewport clip + stage com transform --- */
