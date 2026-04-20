@@ -2212,3 +2212,95 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
    Fase 7 (VFX): dispatchAttackVfx, miss/dodge/crit
    Fase 8 (skill flow): target picker multi-target Fireball/MM
    ============================================================================= */
+
+/* =============================================================================
+   DICE OVERLAY THEMES (Fase 6 port simulador 683-762)
+   V1 Invocações Phase 4 (2026-04-19, b) — cores por TIPO DE HABILIDADE no dice popup.
+   Aplicado via .dice-overlay.dice-overlay--{theme}. Cada tema sobrescreve apenas
+   acentos (border + glow + total color), preservando estrutura/leiaute.
+
+   8 temas: holy/fire/ice/force/radiant/arcane/steel/lightning.
+   Auto-detectado via _skillThemeOf(sk) em combat2.js.
+   ============================================================================= */
+.dice-overlay--holy {
+    background: radial-gradient(ellipse at center, rgba(20,50,30,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--holy .dice-result-label .drl-num--total {
+    color: #bff0a8; border-color: rgba(138,176,78,.65); text-shadow: 0 0 10px rgba(138,176,78,.55);
+}
+.dice-overlay--holy .dice-round-badge {
+    color: #c0e8a0; border-color: rgba(140,200,110,.6); text-shadow: 0 0 6px rgba(140,200,110,.4);
+}
+.dice-overlay--fire {
+    background: radial-gradient(ellipse at center, rgba(60,15,8,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--fire .dice-result-label .drl-num--total {
+    color: #ffb060; border-color: rgba(255,140,80,.65); text-shadow: 0 0 10px rgba(255,140,80,.55);
+}
+.dice-overlay--fire .dice-round-badge {
+    color: #ffb888; border-color: rgba(255,140,80,.55); text-shadow: 0 0 6px rgba(255,140,80,.4);
+}
+.dice-overlay--ice {
+    background: radial-gradient(ellipse at center, rgba(8,28,50,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--ice .dice-result-label .drl-num--total {
+    color: #a0e0ff; border-color: rgba(130,200,255,.65); text-shadow: 0 0 10px rgba(130,200,255,.55);
+}
+.dice-overlay--ice .dice-round-badge {
+    color: #b0d8ff; border-color: rgba(130,200,255,.55); text-shadow: 0 0 6px rgba(130,200,255,.4);
+}
+.dice-overlay--force {
+    background: radial-gradient(ellipse at center, rgba(35,15,55,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--force .dice-result-label .drl-num--total {
+    color: #d8a8ff; border-color: rgba(200,140,255,.65); text-shadow: 0 0 10px rgba(200,140,255,.55);
+}
+.dice-overlay--force .dice-round-badge {
+    color: #c8a0f0; border-color: rgba(200,140,255,.55); text-shadow: 0 0 6px rgba(200,140,255,.4);
+}
+.dice-overlay--radiant {
+    background: radial-gradient(ellipse at center, rgba(50,40,15,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--radiant .dice-result-label .drl-num--total {
+    color: #ffe080; border-color: rgba(255,224,128,.7); text-shadow: 0 0 12px rgba(255,224,128,.65);
+}
+.dice-overlay--radiant .dice-round-badge {
+    color: #ffe080; border-color: rgba(255,224,128,.6); text-shadow: 0 0 6px rgba(255,224,128,.45);
+}
+.dice-overlay--arcane {
+    background: radial-gradient(ellipse at center, rgba(15,30,55,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--arcane .dice-result-label .drl-num--total {
+    color: #80c0ff; border-color: rgba(80,160,220,.65); text-shadow: 0 0 10px rgba(80,160,220,.55);
+}
+.dice-overlay--arcane .dice-round-badge {
+    color: #80c0ff; border-color: rgba(80,160,220,.55); text-shadow: 0 0 6px rgba(80,160,220,.4);
+}
+.dice-overlay--steel {
+    background: radial-gradient(ellipse at center, rgba(40,40,40,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--steel .dice-result-label .drl-num--total {
+    color: #d0d0d0; border-color: rgba(180,180,180,.65); text-shadow: 0 0 10px rgba(180,180,180,.4);
+}
+.dice-overlay--lightning {
+    background: radial-gradient(ellipse at center, rgba(40,30,15,.85), rgba(0,0,0,.92));
+}
+.dice-overlay--lightning .dice-result-label .drl-num--total {
+    color: #ffe040; border-color: rgba(255,224,64,.7); text-shadow: 0 0 12px rgba(255,224,64,.65);
+}
+
+/* Popup de dano de summons attached (Arma Espiritual) herda cor heráldica do conjurador */
+.dice-result-label.summon-cls-clerigo .drl-num--total { color: #ffe6a0; border-color: rgba(255,224,144,.7); text-shadow: 0 0 10px rgba(224,192,112,.5); }
+.dice-result-label.summon-cls-clerigo .dmg-sum-em { color: #ffe6a0; }
+.dice-result-label.summon-cls-mago .drl-num--total { color: #80c0ff; border-color: rgba(64,128,192,.7); text-shadow: 0 0 10px rgba(40,80,160,.5); }
+.dice-result-label.summon-cls-mago .dmg-sum-em { color: #80c0ff; }
+.dice-result-label.summon-cls-paladino .drl-num--total { color: #f8b8d0; border-color: rgba(240,144,184,.7); text-shadow: 0 0 10px rgba(180,80,128,.5); }
+.dice-result-label.summon-cls-paladino .dmg-sum-em { color: #f8b8d0; }
+.dice-result-label.summon-cls-bardo .drl-num--total { color: #c898f0; border-color: rgba(160,96,208,.7); text-shadow: 0 0 10px rgba(96,40,160,.5); }
+.dice-result-label.summon-cls-bardo .dmg-sum-em { color: #c898f0; }
+
+/* =============================================================================
+   FIM DICE OVERLAY THEMES — _skillThemeOf em combat2.js mapeia skill -> tema.
+   Hooks em showDice/showDamageDice/showHealDice aceitam opts.theme ou opts.skill.
+   Quando não há tema, dice-overlay usa visual padrão (fundo escuro gold).
+   ============================================================================= */

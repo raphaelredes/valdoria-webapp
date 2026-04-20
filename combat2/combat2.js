@@ -1406,6 +1406,9 @@
         }
         html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> ' +
             escHtml(formatCombat2Biome(s.biome)) + ' <span class="weather-badge w-clear">☀️ Limpo</span></div></div>';
+        /* HUD recursos D&D (Fase 5 port). Player turn: 3 pílulas. NPC turn: só ⬢ Reação. */
+        var _hudP = s.order[s.p_idx];
+        if (_hudP) { html += _buildDndResourcesBarHtml(s, _hudP, { compactReaction: !isPlayerTurn }); }
         html += buildBattlefield(s);
 
         if (isPlayerTurn && (_selectingTarget || _selectHealTarget || _pendingHealItem)) {
@@ -1459,16 +1462,18 @@
                     html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
                     html += '<div class="sim-action-sheet-sub">Sem grade de posição: Deslocar-se e Desengajar não são botões separados. <strong>Fugir</strong> resume a intenção de sair do combate (teste + risco de OA — ver popup).</div>';
                     html += '<div class="sim-action-sheet-grids">';
+                    /* Mini-badge ◆ (Fase 5 port) — indica que botão consome Ação principal. Log é livre. */
+                    var _actionGlyph = '<span class="action-btn-res-icon res-action" aria-hidden="true">◆</span>';
                     html += '<div class="action-btns-grid action-btns-grid--main">';
-                    html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar</button>';
-                    html += '<button type="button" class="action-btn" data-act="skills">✨ Habilidades</button>';
-                    html += '<button type="button" class="action-btn" data-act="bag">🎒 Mochila</button>';
+                    html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar' + _actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn" data-act="skills">✨ Habilidades' + _actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn" data-act="bag">🎒 Mochila' + _actionGlyph + '</button>';
                     html += '</div>';
                     html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
                     html += '<div class="action-btns-grid action-btns-grid--secondary">';
-                    html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar</button>';
-                    html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir</button>';
-                    html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar' + _actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir' + _actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno' + _actionGlyph + '</button>';
                     html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
                     html += '</div>';
                     /* V1 Invocações Phase 1+ (Fase 4 port, 2026-04-20) — BÔNUS grid + Focar Familiar + Encerrar Turno.
@@ -1501,6 +1506,82 @@
        Mostra "Focar Familiar" quando passive summon (Familiar/Sprite/Wolf/Steed) vivo.
 
        Próximas fases adicionam (10-11): Command Companion / Mount Toggle buttons. */
+    /* ============================================================
+       HUD RECURSOS D&D 5e + DICE THEMES (Fases 5+6 port simulador).
+       Glyphs: ◆ Ação  ▲ Bônus  ⬢ Reação
+       Temas: holy, fire, ice, force, radiant, arcane, steel, lightning
+       ============================================================ */
+    function _resourceGlyphFor(kind) {
+        if (kind === 'action') return '◆';
+        if (kind === 'bonus') return '▲';
+        if (kind === 'reaction') return '⬢';
+        return '';
+    }
+
+    function _skillResourceKind(sk) {
+        if (!sk) return 'action';
+        if (sk.bonus) return 'bonus';
+        if (sk.reaction) return 'reaction';
+        if (sk.shieldSpell && (sk.n === 'Escudo Arcano' || sk.n === 'Contramágica')) return 'reaction';
+        return 'action';
+    }
+
+    /* Fase 6 — mapeia skill → tema do dice overlay. */
+    function _skillThemeOf(sk) {
+        if (!sk) return 'default';
+        if (sk.fireball) return 'fire';
+        if (sk.rayOfFrost) return 'ice';
+        if (sk.magicMissiles) return 'force';
+        if (sk.healSpell) return 'holy';
+        if (sk.blessSpell) return 'radiant';
+        if (sk.shieldSpell) return 'arcane';
+        if (sk.kind === 'heal') return 'holy';
+        if (sk.kind === 'attack') {
+            var t = (sk.dmgType || '').toLowerCase();
+            if (t === 'fire') return 'fire';
+            if (t === 'cold') return 'ice';
+            if (t === 'force') return 'force';
+            if (t === 'radiant') return 'radiant';
+            if (t === 'lightning' || t === 'thunder') return 'lightning';
+            if (t === 'necrotic' || t === 'psychic') return 'arcane';
+            return 'steel';
+        }
+        if (sk.kind === 'buff') {
+            var sim = sk.buffSim || {};
+            if (sim.acBonus || sim.sanctuary || sim.rageResistance) return 'arcane';
+            if (sim.dmgBonusDie || sim.atkBonusDie || sim.rollApply ||
+                    sim.bardicInspiration || sim.rageDmg) return 'radiant';
+            return 'arcane';
+        }
+        return 'default';
+    }
+
+    function _buildDndResourcesBarHtml(s, p, opts) {
+        if (!p) return '';
+        opts = opts || {};
+        var compactReaction = !!opts.compactReaction;
+        var actionUsed = !!p.actionSpent;
+        var baUsed = !!p.bonusActionSpent;
+        var reactionUsed = !!p.reactionSpent;
+        var baWasSpell = !!p.bonusActionWasSpell;
+        var html = '<div class="dnd-resources-bar' + (compactReaction ? ' dnd-resources-bar--compact-reaction' : '') + '" aria-label="Recursos D&D 5e">';
+        if (!compactReaction) {
+            html += '<button type="button" class="dnd-res-pill dnd-res-action ' + (actionUsed ? 'spent' : 'available') + '" data-act="dnd-res-info" data-res="action" aria-label="Ação">';
+            html += '<span class="dnd-res-glyph" aria-hidden="true">◆</span><span class="dnd-res-label">Ação</span><span class="dnd-res-state">' + (actionUsed ? '✗' : '✓') + '</span>';
+            if (baWasSpell && !actionUsed) {
+                html += '<span class="dnd-res-chip" title="PHB p.202: BA spell restringe magias leveled">✨ magia: só truque</span>';
+            }
+            html += '</button>';
+            html += '<button type="button" class="dnd-res-pill dnd-res-bonus ' + (baUsed ? 'spent' : 'available') + '" data-act="dnd-res-info" data-res="bonus" aria-label="Ação Bônus">';
+            html += '<span class="dnd-res-glyph" aria-hidden="true">▲</span><span class="dnd-res-label">Bônus</span><span class="dnd-res-state">' + (baUsed ? '✗' : '✓') + '</span></button>';
+        }
+        var reactionLabel = compactReaction ? 'Reação (off-turn)' : 'Reação';
+        html += '<button type="button" class="dnd-res-pill dnd-res-reaction ' + (reactionUsed ? 'spent' : 'available') + '" data-act="dnd-res-info" data-res="reaction" aria-label="Reação">';
+        html += '<span class="dnd-res-glyph" aria-hidden="true">⬢</span><span class="dnd-res-label">' + reactionLabel + '</span><span class="dnd-res-state">' + (reactionUsed ? '✗' : '✓') + '</span></button>';
+        html += '</div>';
+        return html;
+    }
+
     function _updateActionSheetState(s) {
         if (!s || !s.order || s.p_idx == null) return;
         var p = s.order[s.p_idx];
