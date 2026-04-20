@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:56:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:56:59Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -7566,7 +7566,13 @@ window.__COMBAT_USER_ID = (function () {
     try { return parseInt(new URLSearchParams(location.search).get('uid'), 10) || 0; } catch (e) { return 0; }
 })();
 window.__COMBAT_ORIGIN_APP = (function () {
-    try { return new URLSearchParams(location.search).get('o') || ''; } catch (e) { return ''; }
+    try {
+        var qs = new URLSearchParams(location.search);
+        /* Server envia `origin=navigate` (navigate_api_routes.py:370) OU `o=` (legacy).
+           FIX 2026-04-20: aceita ambos — antes só `o=` fazia "Continuar" voltar ao
+           Game Hub por default em vez do mapa hex de onde veio. */
+        return qs.get('origin') || qs.get('o') || '';
+    } catch (e) { return ''; }
 })();
 window.__COMBAT_ENV = (function () {
     try { return new URLSearchParams(location.search).get('env') || 'dev'; } catch (e) { return 'dev'; }
