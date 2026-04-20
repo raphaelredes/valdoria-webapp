@@ -1,6 +1,7 @@
 (function(){"use strict";function bootstrap(){var params=new URLSearchParams(window.location.search);var route=params.get("route")||"game";var routeParams={};params.forEach(function(val,key){if(key!=="route")routeParams[key]=val;});
-/* Session guard: if navigating to game without session params AND not inside Telegram, redirect to web portal */
-var _hasTg=!!(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData);if(route==="game"&&!_hasTg&&!routeParams.token&&!routeParams.uid){var _env=routeParams.env||"dev";var _webUrl="/web/"+(_env==="prod"?"":"?env="+_env);console.warn("[SPA] No session params for game route — redirecting to web portal:",_webUrl);window.__valdoria_transitioning=true;window.location.replace(_webUrl);return;}
+/* Session guard: if navigating to game without session params AND not inside Telegram, redirect to web portal.
+   FIX (2026-04-20): preservar location.hash (#tgWebAppData) pra Telegram SDK poder re-inicializar initData no destino. */
+var _hasTg=!!(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData);if(route==="game"&&!_hasTg&&!routeParams.token&&!routeParams.uid){var _env=routeParams.env||"dev";var _tgHash=(location.hash&&location.hash.indexOf("tgWebApp")>=0)?location.hash:"";var _webUrl="/web/"+(_env==="prod"?"":"?env="+_env)+_tgHash;console.warn("[SPA] No session params for game route — redirecting to web portal:",_webUrl,"hashPreserved="+!!_tgHash);window.__valdoria_transitioning=true;window.location.replace(_webUrl);return;}
 /* Skip title screen + loading overlay for non-game routes (e.g. character_creator from web login) */
 if(route!=="game"){if(window.__introTitle){try{window.__introTitle.hide();}catch(e){}}var _ts=document.getElementById("title-screen");if(_ts)_ts.remove();var _lo=document.getElementById("loading");if(_lo)_lo.style.display="none";}
 SpaRouter.navigate(route,routeParams);}

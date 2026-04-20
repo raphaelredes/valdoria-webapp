@@ -37,14 +37,15 @@
         }
     } catch (e) {}
 })();
-/* Redirect para combate.html preservando query params (token, api, uid, o, env, _cb).
-   O combate.html detecta __COMBAT_MODE=remote via `token+api`. */
+/* Redirect para combate.html preservando query params (token, api, uid, o, env, _cb)
+   E location.hash (tgWebAppData do Telegram SDK, necessario pra silent auth). */
 (function () {
     var qs = location.search || '';
     /* Cache-bust adicional por seguranca. */
     var sep = qs.indexOf('?') === 0 ? '&' : '?';
     var cb = sep + '_rv=' + Date.now();
-    location.replace('./combate.html' + qs + cb);
+    var hash = location.hash || '';
+    location.replace('./combate.html' + qs + cb + hash);
 })();
 </script>
 </head>
