@@ -2304,3 +2304,210 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
    Hooks em showDice/showDamageDice/showHealDice aceitam opts.theme ou opts.skill.
    Quando não há tema, dice-overlay usa visual padrão (fundo escuro gold).
    ============================================================================= */
+
+/* =============================================================================
+   FCT + CONDITION POPUP (Fase 13 port simulador 1294-1627 + FCT CSS)
+   FCT: Floating Combat Text — número de dano/cura que sobe sobre o card.
+   Condition popup: v8-cond-popup-* — overlay quando clica em .c-cond-chip.
+   ============================================================================= */
+
+/* Floating Combat Text */
+.floating-dmg {
+    position: fixed;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: #ff8080;
+    text-shadow: 0 0 6px rgba(200, 60, 40, .7), 0 2px 3px rgba(0, 0, 0, .85);
+    pointer-events: none;
+    z-index: var(--v-z-combat2-modals, 9999);
+    transform: translate(-50%, 0);
+    animation: fctFloat 1.4s cubic-bezier(.2, .5, .2, 1) forwards;
+    letter-spacing: 0.04em;
+}
+.floating-dmg.is-crit {
+    font-size: 28px;
+    color: #ffcc40;
+    text-shadow: 0 0 10px rgba(255, 200, 80, .85), 0 2px 3px rgba(0, 0, 0, .9);
+}
+.floating-dmg.is-heal {
+    color: #8ad068;
+    text-shadow: 0 0 6px rgba(140, 200, 110, .7), 0 2px 3px rgba(0, 0, 0, .85);
+}
+.floating-dmg.is-half {
+    font-size: 18px;
+    opacity: 0.85;
+}
+@keyframes fctFloat {
+    0%   { opacity: 0; transform: translate(-50%, 10px); }
+    15%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -60px); }
+}
+/* Variantes por classe de conjurador (summons herdam cor heráldica) */
+.floating-dmg.cls-clerigo  { color: #ffe6a0; text-shadow: 0 0 6px rgba(255, 224, 144, .75), 0 2px 3px rgba(0,0,0,.9); }
+.floating-dmg.cls-mago     { color: #80c0ff; text-shadow: 0 0 6px rgba(128, 192, 255, .75), 0 2px 3px rgba(0,0,0,.9); }
+.floating-dmg.cls-paladino { color: #f8b8d0; text-shadow: 0 0 6px rgba(248, 184, 208, .75), 0 2px 3px rgba(0,0,0,.9); }
+.floating-dmg.cls-bardo    { color: #c898f0; text-shadow: 0 0 6px rgba(200, 152, 240, .75), 0 2px 3px rgba(0,0,0,.9); }
+.floating-dmg.cls-druida   { color: #8ed08a; text-shadow: 0 0 6px rgba(142, 208, 138, .75), 0 2px 3px rgba(0,0,0,.9); }
+.floating-dmg.cls-feiticeiro { color: #f080a8; text-shadow: 0 0 6px rgba(240, 128, 168, .75), 0 2px 3px rgba(0,0,0,.9); }
+
+/* Condition popup (overlay ao clicar .c-cond-chip) */
+.v8-cond-popup-overlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88));
+    display: flex; align-items: center; justify-content: center;
+    z-index: var(--v-z-combat2-modals, 9800);
+    animation: v8CondOvIn 0.22s ease-out;
+    padding: 20px;
+}
+@keyframes v8CondOvIn { from { opacity: 0; } to { opacity: 1; } }
+.v8-cond-popup-card {
+    width: min(92vw, 340px);
+    padding: 16px 18px 14px;
+    background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014));
+    border: 2px solid var(--v-gold, #c4953a);
+    border-radius: 14px;
+    box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75);
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    animation: v8CondCardIn 0.3s ease-out;
+    position: relative;
+}
+@keyframes v8CondCardIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.v8-cond-popup-card.cond-buff { border-color: #8ab04e; box-shadow: 0 0 30px rgba(138,176,78,0.45), 0 10px 24px rgba(0,0,0,0.75); }
+.v8-cond-popup-card.cond-debuff { border-color: #c85050; box-shadow: 0 0 30px rgba(200,80,80,0.45), 0 10px 24px rgba(0,0,0,0.75); }
+.v8-cond-popup-tag {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--v-gold-light, #ffd680);
+    text-align: center;
+    margin-bottom: 6px;
+    opacity: 0.85;
+}
+.v8-cond-popup-card.cond-buff .v8-cond-popup-tag { color: #b8d898; }
+.v8-cond-popup-card.cond-debuff .v8-cond-popup-tag { color: #e0a0a0; }
+.v8-cond-popup-title {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 10px rgba(196,149,58,0.35), 0 2px 3px rgba(0,0,0,0.85);
+    margin-bottom: 10px;
+    line-height: 1.15;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.v8-cond-popup-card.cond-buff .v8-cond-popup-title { color: #c8e8a8; }
+.v8-cond-popup-card.cond-debuff .v8-cond-popup-title { color: #ffa0a0; }
+.v8-cond-popup-ico { font-size: 24px; line-height: 1; }
+.v8-cond-popup-dur {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 11px;
+    text-align: center;
+    color: var(--v-text-dim, #a09484);
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(196,149,58,0.3);
+    border-radius: 8px;
+    padding: 5px 8px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+.v8-cond-popup-desc {
+    font-size: 13px; line-height: 1.5;
+    color: var(--v-text, #d4c8b0);
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(196,149,58,0.22);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+}
+.v8-cond-popup-rule-head {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--v-gold, #c4953a);
+    margin: 10px 0 4px;
+    text-align: center;
+}
+.v8-cond-popup-rule {
+    font-size: 12px; line-height: 1.5;
+    color: var(--v-text-dim, #a09484);
+    background: rgba(0,0,0,0.4);
+    border-left: 2px solid var(--v-gold, #c4953a);
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    font-style: italic;
+}
+.v8-cond-popup-btn {
+    display: block; width: 100%;
+    padding: 8px 12px;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700; font-size: 12px;
+    letter-spacing: 2px; text-transform: uppercase;
+    background: linear-gradient(180deg, #c4953a, #8b6420);
+    border: 1px solid rgba(255,220,140,0.9);
+    border-radius: 8px;
+    color: #1a1510;
+    cursor: pointer;
+    text-shadow: 0 1px 0 rgba(255,240,200,0.35);
+}
+.v8-cond-popup-btn:hover { filter: brightness(1.15); }
+
+/* Summon attached chip + focus marker (Fase 3 port já) - visual extras aqui */
+.summon-attached-chip {
+    position: absolute;
+    top: -10px; right: 50%;
+    transform: translateX(50%);
+    background: rgba(15,12,8,0.92);
+    border: 1px solid var(--card-accent, #c4953a);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--card-accent, #c4953a);
+    white-space: nowrap;
+    z-index: var(--v-z-combat2-cell-badge, 20);
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(0,0,0,0.6);
+}
+.summon-attached-chip .sa-chip-item { display: inline-block; }
+.summon-attached-chip .sa-chip-item + .sa-chip-item { margin-left: 6px; }
+
+.summon-focus-marker {
+    position: absolute;
+    top: 4px; left: 6px;
+    font-size: 16px;
+    z-index: var(--v-z-combat2-cell-badge, 20);
+    pointer-events: none;
+    animation: focusMarkerPulse 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 180, 80, .75));
+}
+@keyframes focusMarkerPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.15); opacity: 1; }
+}
+
+/* Summon dying fade-out animation */
+.cell.cell--summon-dying {
+    animation: summonDyingFade 700ms ease-out forwards;
+}
+@keyframes summonDyingFade {
+    0%   { opacity: 1; transform: scale(1); filter: none; }
+    50%  { opacity: 0.6; filter: brightness(1.5) saturate(0.4); }
+    100% { opacity: 0; transform: scale(0.85); filter: brightness(0.5) saturate(0); }
+}
+
+/* =============================================================================
+   FIM FCT + CONDITION POPUP + SUMMON CHIPS — Fase 13 port completo.
+   Handler JS openConditionPopup + click delegation em combat2.js pendente.
+   Refs simulador: 9896 (openConditionPopup), 9970 (click delegation).
+   ============================================================================= */

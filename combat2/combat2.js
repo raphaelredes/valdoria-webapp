@@ -1507,6 +1507,94 @@
 
        Próximas fases adicionam (10-11): Command Companion / Mount Toggle buttons. */
     /* ============================================================
+       CONDITION POPUP (Fase 13 port simulador 9896-9983).
+       Click em .c-cond-chip abre popup com detalhes da condição/buff/debuff.
+       ============================================================ */
+    function openConditionPopup(payload) {
+        if (!payload) return;
+        var existing = document.querySelector('.v8-cond-popup-overlay');
+        if (existing) existing.remove();
+        var overlay = document.createElement('div');
+        overlay.className = 'v8-cond-popup-overlay';
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) overlay.remove();
+        });
+        var card = document.createElement('div');
+        card.className = 'v8-cond-popup-card cond-' + (payload.kind === 'debuff' ? 'debuff' : 'buff');
+        card.addEventListener('click', function (e) { e.stopPropagation(); });
+        var tag = document.createElement('div');
+        tag.className = 'v8-cond-popup-tag';
+        tag.textContent = payload.kind === 'debuff' ? 'Debuff · Condição D&D 5e' : 'Buff · Benefício D&D 5e';
+        card.appendChild(tag);
+        var title = document.createElement('div');
+        title.className = 'v8-cond-popup-title';
+        var titleIco = document.createElement('span');
+        titleIco.className = 'v8-cond-popup-ico';
+        titleIco.textContent = payload.ico || '\u2022';
+        var titleName = document.createElement('span');
+        titleName.textContent = payload.name || 'Condição';
+        title.appendChild(titleIco);
+        title.appendChild(titleName);
+        card.appendChild(title);
+        var dur = document.createElement('div');
+        dur.className = 'v8-cond-popup-dur';
+        if (payload.turnsLeft && (payload.turnsLeft | 0) > 0) {
+            dur.textContent = 'Duração: ' + payload.turnsLeft + ' turno' + (payload.turnsLeft > 1 ? 's' : '') + ' restante' + (payload.turnsLeft > 1 ? 's' : '');
+        } else if (payload.saveDc) {
+            var ab = (payload.saveAbility || '').toUpperCase() || 'atributo';
+            dur.textContent = 'Até passar em Teste de Resistência ' + ab + ' CD ' + payload.saveDc + ' (fim de cada turno)';
+        } else {
+            dur.textContent = 'Duração: até resolução narrativa';
+        }
+        card.appendChild(dur);
+        if (payload.desc && String(payload.desc).trim()) {
+            var desc = document.createElement('div');
+            desc.className = 'v8-cond-popup-desc';
+            desc.textContent = payload.desc;
+            card.appendChild(desc);
+        }
+        if (payload.rule && String(payload.rule).trim()) {
+            var ruleHead = document.createElement('div');
+            ruleHead.className = 'v8-cond-popup-rule-head';
+            ruleHead.textContent = '◆ Regra PHB / SRD 5.1 ◆';
+            card.appendChild(ruleHead);
+            var rule = document.createElement('div');
+            rule.className = 'v8-cond-popup-rule';
+            rule.textContent = payload.rule;
+            card.appendChild(rule);
+        }
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'v8-cond-popup-btn';
+        btn.textContent = 'Entendido';
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            overlay.remove();
+        });
+        card.appendChild(btn);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+    }
+
+    /* Click delegation pra .c-cond-chip — capture phase intercepta antes
+       do handler da .cell (que seleciona alvo/ataca). Instala uma vez no boot. */
+    document.addEventListener('click', function (e) {
+        var chip = e.target && e.target.closest && e.target.closest('.c-cond-chip');
+        if (!chip) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var payloadAttr = chip.getAttribute('data-cond-payload');
+        if (!payloadAttr) return;
+        try {
+            var payload = JSON.parse(payloadAttr);
+            openConditionPopup(payload);
+        } catch (err) {
+            console.warn('[COMBAT2] cond_payload_parse_failed', err || '');
+        }
+    }, true);
+
+    /* ============================================================
        VFX DISPATCHER (Fase 7 port simulador 14045-14111 playHitVFX).
        Consome window._combatVfx (shared/combat-vfx.js já loaded no index.html).
        Mapeia skill/dmgType/ranged para métodos VFX específicos.
@@ -2177,6 +2265,12 @@
         if (ev.kind === 'item_use') return animateItemUseEvent(ev, oSkin);
         if (ev.kind === 'concentration_save') return animateConcentrationSaveEvent(ev, oSkin);
         if (ev.kind === 'concentration_lost') return animateConcentrationLostEvent(ev, oSkin);
+        /* V1 Invocações + W2 Conjurar Animais — summon events (Fases 9-12 port). */
+        if (ev.kind === 'summon_cast') return animateSummonCastEvent(ev, oSkin);
+        if (ev.kind === 'summon_attack') return animateSummonAttackEvent(ev, oSkin);
+        if (ev.kind === 'summon_expire') return animateSummonExpireEvent(ev, oSkin);
+        if (ev.kind === 'summon_pack_cast') return animateSummonPackCastEvent(ev, oSkin);
+        if (ev.kind === 'bonus_action_used') return animateBonusActionUsedEvent(ev, oSkin);
         if (ev.kind === 'flee') return animateFleeEvent(ev, oSkin);
         if (ev.kind === 'death_save') {
             var whoDs = currentState.order[ev.tIdx];
@@ -2684,6 +2778,113 @@
         };
         await showMessage('⚡ Concentração rompida', 'miss', sub, { offerBatchSkip: !!offerSkip });
         await sleep(800);
+    }
+
+    /* ============================================================
+       SUMMON EVENT HANDLERS (Fases 9-12 port simulador).
+       V1 Invocações Phase 3 + V1-Visual Phase 4 + W2 Conjurar Animais.
+
+       Eventos esperados do motor Python (combat2.py step()):
+         summon_cast        — Arma Espiritual cast (BA) [Fase 9]
+         summon_attack      — Arma Espiritual ataca [Fase 9]
+         summon_expire      — summon expira (duracao zero ou HP zero) [Fase 9-12]
+         summon_pack_cast   — Conjurar Animais cast 4 lobos (W2) [Fase 12]
+         bonus_action_used  — BA consumida (qualquer skill bonus:true) [Fase 9]
+       ============================================================ */
+
+    async function animateSummonCastEvent(ev, offerSkip) {
+        /* Arma Espiritual cast — BA, cria entry em state.attachedSummons.
+           Visual: toast + render pra aparecer o chip "⚔️ Xr" sobre conjurador. */
+        var actorName = ev.casterName || 'Conjurador';
+        var summonName = ev.summonName || 'Arma';
+        if (typeof showMessage === 'function') {
+            showMessage(actorName + ' conjura ' + summonName, 'info',
+                (ev.summonIco || '⚔️') + ' Duração: ' + (ev.duration || 10) + ' rodadas');
+        }
+        render(currentState);
+        await sleep(800);
+    }
+
+    async function animateSummonAttackEvent(ev, offerSkip) {
+        /* Arma Espiritual ataca — dispatch de dice + impact VFX.
+           Reusa shared/combat-vfx.js impact() via dispatchAttackVfx.
+           Fase 9 (V1 Invocações) — full flight VFX pendente refactor mais profundo. */
+        var target = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
+        if (ev.d20 != null && target) {
+            await new Promise(function (resolve) {
+                showDice(ev.d20, resolve, { n: ev.summonName || 'Arma', ico: '⚔️' },
+                    (ev.hit ? 'Acerto' : 'Erro') + ' vs CA ' + ev.ac,
+                    { offerBatchSkip: !!offerSkip });
+            });
+        }
+        if (ev.hit && target) {
+            var targetEl = document.querySelector('[data-unit-id="enemy_' + ev.tIdx + '"]');
+            if (targetEl) {
+                dispatchAttackVfx(targetEl, {
+                    dmgType: ev.dmgType || 'force',
+                    crit: !!ev.crit,
+                    skill: { n: ev.summonName, ranged: true }
+                });
+            }
+        }
+        render(currentState);
+        await sleep(600);
+    }
+
+    async function animateSummonExpireEvent(ev, offerSkip) {
+        /* Summon expira (duração zero OU HP zero). Visual: fade-out do card.
+           W2 (Conjurar Animais): reason='duration'; V1 Arma Espiritual: reason='duration' também. */
+        var name = ev.summonName || 'Invocação';
+        if (typeof showMessage === 'function') {
+            showMessage(name + ' se dissipa', 'info',
+                ev.reason === 'duration' ? '(duração esgotada)' : '');
+        }
+        /* CSS cell--summon-dying é adicionada por render() se summon.dying=true,
+           mas motor Python remove direto do order. Então só re-renderiza. */
+        render(currentState);
+        await sleep(500);
+    }
+
+    async function animateSummonPackCastEvent(ev, offerSkip) {
+        /* W2 Conjurar Animais — cast spawna N lobos (default 4).
+           Visual: toast + render pra os 4 novos cards aparecerem no battlefield. */
+        var caster = ev.casterName || 'Conjurador';
+        var count = ev.count || 4;
+        var name = ev.summonName || 'bestas';
+        if (typeof showMessage === 'function') {
+            showMessage(caster + ' conjura ' + count + ' ' + name, 'info',
+                (ev.summonIco || '🐾') + ' Duração: ' + (ev.durTurns || 5) + ' rodadas');
+        }
+        render(currentState);
+        await sleep(800);
+    }
+
+    async function animateBonusActionUsedEvent(ev, offerSkip) {
+        /* BA consumida. Sem visual pesado — render atualiza HUD pílula ▲ → spent. */
+        render(currentState);
+        await sleep(200);
+    }
+
+    /* ============================================================
+       FCT — FLOATING COMBAT TEXT (Fase 13 port simulador _spawnFloatingDmgNumber).
+       Spawna número de dano/cura flutuante sobre o card do alvo.
+       Usado por animateAttackEvent/animateHealEvent (wiring opcional).
+       ============================================================ */
+    function _spawnFloatingDmgNumber(targetUid, amount, opts) {
+        opts = opts || {};
+        var el = document.querySelector('[data-unit-id="' + targetUid + '"]');
+        if (!el) return;
+        var rect = el.getBoundingClientRect();
+        var fct = document.createElement('div');
+        fct.className = 'floating-dmg' + (opts.crit ? ' is-crit' : '') + (opts.heal ? ' is-heal' : '') + (opts.half ? ' is-half' : '');
+        if (opts.casterCls) fct.classList.add('cls-' + opts.casterCls);
+        fct.textContent = (opts.heal ? '+' : '-') + String(amount);
+        fct.style.left = (rect.left + rect.width / 2) + 'px';
+        fct.style.top = (rect.top + rect.height / 3) + 'px';
+        document.body.appendChild(fct);
+        setTimeout(function () {
+            try { fct.remove(); } catch (e) {}
+        }, 1400);
     }
 
     async function animateFleeEvent(ev, offerSkip) {
