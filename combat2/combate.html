@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T21:44:43Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T22:42:21Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -18004,11 +18004,41 @@ async function __combatApplyEvents(events) {
 async function __combatAnimateOneEvent(ev) {
     var kind = ev.kind;
     if (kind === 'attack' || kind === 'oa') {
-        /* Flash card alvo + FCT dano. */
+        /* Mostra o d20 do ataque (dice 3D se disponível), depois flash + FCT. */
         var tUid = 'enemy_' + ev.tIdx;
         var tU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
         if (tU && tU.t === 'p') tUid = 'player';
         else if (tU && tU.t === 'a') tUid = 'ally_' + ev.tIdx;
+        var aUid = 'enemy_' + ev.aIdx;
+        var aU = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
+        if (aU && aU.t === 'p') aUid = 'player';
+        else if (aU && aU.t === 'a') aUid = 'ally_' + ev.aIdx;
+        /* D20 animation se temos o valor. Pula em OAs (rapid-fire). */
+        if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
+            var d20Title = (ev.actorName || '?') + ' → ' + (ev.targetName || '?');
+            await new Promise(function (rD) {
+                try {
+                    showDice(ev.d20, rD, aU || { n: ev.actorName }, d20Title, {
+                        postResult: function () {
+                            return {
+                                title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
+                                cls: ev.hit ? (ev.crit ? 'crit' : 'hit') : 'miss',
+                                subStructured: {
+                                    kicker: 'd20',
+                                    rows: [
+                                        { l: 'Rolagem', v: String(ev.d20) },
+                                        { l: 'Ataque', v: '+' + (ev.atk || 0) },
+                                        { l: 'Total', v: String(ev.total || ev.d20 + (ev.atk || 0)) },
+                                        { l: 'CA alvo', v: String(ev.ac || '?') }
+                                    ],
+                                    note: ev.hit ? ('Dano: ' + (ev.dmgTotal | 0)) : 'Não alcançou a CA.'
+                                }
+                            };
+                        }
+                    });
+                } catch (eDi) { rD(); }
+            });
+        }
         var elT = document.querySelector('[data-unit-id="' + tUid + '"]');
         if (ev.hit === false) {
             if (elT) elT.classList.add('dodged');
@@ -18025,7 +18055,7 @@ async function __combatAnimateOneEvent(ev) {
             }
         }
         render(currentState);
-        await new Promise(function (r) { setTimeout(r, 520); });
+        await new Promise(function (r) { setTimeout(r, 420); });
         return;
     }
     if (kind === 'heal') {
@@ -18073,6 +18103,64 @@ async function __combatAnimateOneEvent(ev) {
         /* Marcador de rodada — pequena pausa. */
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 320); });
+        return;
+    }
+    if (kind === 'init_roll') {
+        /* Iniciativa: mostra dado para cada combatente (player/ally com UI, NPCs simples). */
+        if (typeof showDice === 'function' && ev.d20 != null) {
+            var actor = currentState.order[ev.aIdx] || { n: ev.actorName || '?' };
+            await new Promise(function (rI) {
+                try {
+                    showDice(ev.d20, rI, actor, 'Iniciativa', {
+                        postResult: function () {
+                            return {
+                                title: actor.n,
+                                cls: 'hit',
+                                subStructured: {
+                                    kicker: 'd20 + DES',
+                                    rows: [
+                                        { l: 'd20', v: String(ev.d20) },
+                                        { l: 'Total', v: String(ev.total || ev.d20) }
+                                    ]
+                                }
+                            };
+                        }
+                    });
+                } catch (eI) { rI(); }
+            });
+        } else {
+            await new Promise(function (r) { setTimeout(r, 120); });
+        }
+        render(currentState);
+        return;
+    }
+    if (kind === 'reaction_prompt') {
+        /* Escudo Arcano — combate.html tem showShieldReactionPrompt se disponível,
+           senão deixa o server resolver sem reação. Por hora, skip (user perde 1x). */
+        console.info('[COMBAT-REMOTE] reaction_prompt ignorado (Fase 2 futuro — show prompt)');
+        await new Promise(function (r) { setTimeout(r, 250); });
+        return;
+    }
+    if (kind === 'fled' || kind === 'flee') {
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 600); });
+        return;
+    }
+    if (kind === 'concentration_save' || kind === 'concentration_lost') {
+        /* Flash caster + pausa curta. */
+        var ccUid = 'player';
+        if (ev.tIdx != null && currentState && currentState.order) {
+            var ccU = currentState.order[ev.tIdx];
+            if (ccU && ccU.t === 'a') ccUid = 'ally_' + ev.tIdx;
+            else if (ccU && ccU.t === 'e') ccUid = 'enemy_' + ev.tIdx;
+        }
+        var ccEl = document.querySelector('[data-unit-id="' + ccUid + '"]');
+        if (ccEl) ccEl.classList.add(kind === 'concentration_lost' ? 'dodged' : 'buff-flash');
+        setTimeout(function () {
+            if (ccEl) ccEl.classList.remove('dodged', 'buff-flash');
+        }, 420);
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 360); });
         return;
     }
     /* Default: render + pequena pausa. */
