@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:27:29Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:45:37Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -4151,10 +4151,28 @@ html.sim-combat-root .bf-pan-stage .battlefield {
 }
 @keyframes continueEntry { 0% { opacity: 0; transform: scale(.6) translateY(14px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-/* Turn queue: apenas icones, sem texto. Animacoes FLIP + entrada epica */
+/* Turn queue: apenas icones, sem texto. Animacoes FLIP + entrada epica
+   FIX 2026-04-20: tl-ico SVG (heráldico) precisa width/height fixos —
+   sem isso o SVG inline default zera (0px) e o ícone some/fica minúsculo. */
 #turn-queue .tl-node { transition: transform .55s cubic-bezier(.34,1.56,.64,1), filter .4s ease, opacity .4s ease; }
 #turn-queue .tl-node .tl-name { display: none; }
-#turn-queue .tl-node .tl-ico { font-size: 22px; line-height: 1; }
+#turn-queue .tl-node .tl-ico { font-size: 22px; line-height: 1; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+#turn-queue .tl-node .tl-ico svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+/* Por classe: a cor do ícone segue o slug heráldico (cls-mago, cls-druida, etc). */
+#turn-queue .tl-node.cls-guerreiro .tl-ico { color: #b06040; }
+#turn-queue .tl-node.cls-mago .tl-ico { color: #6a82c8; }
+#turn-queue .tl-node.cls-ladino .tl-ico { color: #8a8068; }
+#turn-queue .tl-node.cls-clerigo .tl-ico { color: #d8b860; }
+#turn-queue .tl-node.cls-paladino .tl-ico { color: #e8d490; }
+#turn-queue .tl-node.cls-barbaro .tl-ico { color: #b04050; }
+#turn-queue .tl-node.cls-patrulheiro .tl-ico { color: #6a8a4a; }
+#turn-queue .tl-node.cls-bardo .tl-ico { color: #b878b0; }
+#turn-queue .tl-node.cls-druida .tl-ico { color: #5a8068; }
+#turn-queue .tl-node.cls-monge .tl-ico { color: #c0a080; }
+#turn-queue .tl-node.cls-feiticeiro .tl-ico { color: #c46060; }
+#turn-queue .tl-node.cls-inimigo .tl-ico { color: #c06a3a; }
+#turn-queue .tl-node.cls-boss .tl-ico { color: #a040a0; }
+#turn-queue .tl-node.cls-aliado .tl-ico { color: #6b9a6b; }
 /* Forecast: proximos turnos em cinza, podem mudar com habilidades/eventos */
 #turn-queue .tl-node.forecast { filter: grayscale(.85) brightness(.7); opacity: .5; }
 #turn-queue .tl-node.forecast:hover { opacity: .8; filter: grayscale(.5) brightness(.85); }
@@ -10085,7 +10103,13 @@ function _heraldicIconOf(u, utype) {
         return 'ic-familiar';
     }
     if (u.summonKind) return 'ic-summon';
-    return CLASS_ICON_MAP[u.cls] || null;
+    var byCls = CLASS_ICON_MAP[u.cls];
+    if (byCls) return byCls;
+    /* fix-ally-fallback-v8 (PORT_LOG #14) — Ally NPC sem cls mapeada usa ic-inimigo
+       (que existe na biblioteca heraldic) + cls-aliado (verde-aço). Garante que
+       TODO ally renderiza com card V8 mesmo sem classe identificada. */
+    if (utype === 'ally' || (u.t === 'a')) return 'ic-inimigo';
+    return null;
 }
 function _heraldicClsSlugOf(u, utype) {
     if (!u) return '';
@@ -10098,7 +10122,12 @@ function _heraldicClsSlugOf(u, utype) {
             return CLASS_SLUG_MAP[caster.cls];
         }
     }
-    return CLASS_SLUG_MAP[u.cls] || '';
+    var bySlug = CLASS_SLUG_MAP[u.cls];
+    if (bySlug) return bySlug;
+    /* fix-ally-fallback-v8 (PORT_LOG #14) — Ally NPC sem cls mapeada usa cls-aliado
+       (verde-aço, definido em combat2.css) em vez de fallback vazio. */
+    if (utype === 'ally' || (u.t === 'a')) return 'cls-aliado';
+    return '';
 }
 
 /** Abre o popup de detalhes de uma condição (buff/debuff) — padrão lp-help-overlay. */
@@ -12397,7 +12426,9 @@ function bindActions() {
 
 /* [C-REM:ACTION] Unified remote action helper.
    Dispatch pra server + aplica state + drena events.
-   Logs: action type, state transitions, events count, error. */
+   Logs: action type, state transitions, events count, error.
+   FIX 2026-04-20: ao final, se virou turno do player (active_idx === p_idx),
+   reseta _actionTaken=false pra Agir reaparecer (bug "Agir some no turno 2"). */
 async function __combatRemoteAction(action) {
     var actionType = (action && action.type) || 'unknown';
     var phBefore = currentState && currentState.ph;
@@ -12426,6 +12457,22 @@ async function __combatRemoteAction(action) {
             console.info('[C-REM:ACTION] draining ' + resp.events.length + ' events');
             await __combatApplyEvents(resp.events);
             render(currentState);
+        }
+        /* CRÍTICO: se voltou pro turno do player, reseta _actionTaken pra Agir
+           reaparecer. No simulator local, runNpcsUntilPlayer faz isso; em remote
+           o server-driven flow precisa do reset explícito aqui. */
+        if (currentState && currentState.active_idx === currentState.p_idx
+                && currentState.ph === 'active') {
+            if (typeof _actionTaken !== 'undefined' && _actionTaken) {
+                console.info('[C-REM:ACTION] new_player_turn — reset _actionTaken=false (Agir reaparece)');
+                _actionTaken = false;
+                /* Reseta também flags de skill pendente caso tenham sobrado. */
+                _pendingSkill = null;
+                if (typeof _pendingSkillSlot !== 'undefined') _pendingSkillSlot = null;
+                if (typeof _pendingPowerAttack !== 'undefined') _pendingPowerAttack = false;
+                _selectingTarget = false;
+                render(currentState);
+            }
         }
         console.info('[C-REM:ACTION] complete type=' + actionType + ' final_ph=' + currentState.ph);
     } catch (e) {
@@ -13601,9 +13648,12 @@ function openSkillsPanel() {
     /* BUGFIX 2026-04-19 (c): pageSize=5 cortava o último item (Relâmpago) no
        Mago — necessitava scroll. Reduzido pra 4 garantindo cabimento sem scroll
        considerando o aumento de altura dos itens (badge ◆/▲/⬢ + chip de razão
-       quando bloqueado). 4 itens × ~95px + header + filtros + paginação ≈ 600px
-       (cabe folgado em viewport 932px com header de 80px e paginação de 50px). */
-    var PAGE_SIZE = 4;
+       quando bloqueado).
+
+       FIX 2026-04-20: 4 ainda overflowa em Telegram WebApp viewport (~430x700-750
+       depois de chrome+ teclado virtual). Reduzido pra 3 — cabe sem scroll em
+       qualquer mobile, paginação aparece pra qualquer classe com 4+ skills. */
+    var PAGE_SIZE = 3;
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
@@ -16824,6 +16874,11 @@ function showDice(value, cb, actor, context, opts) {
 
 /* Mostra mensagem no centro: 1s de leitura + botao Continuar ->.
    Resolve a Promise no clique. NPC tem mesmo tratamento para consistencia. */
+/* showMessage(text, cls, sub) — popup informativo simples.
+   FIX 2026-04-20: `sub` pode conter HTML (br, strong, em, p, ul, li) — usa
+   setHTML em vez de textContent. Bug visível: popup ✦ Ação mostrava literal
+   "<br><strong>Status:</strong>" em vez de quebra de linha + negrito.
+   `text` (título) continua textContent (tags ali não fazem sentido). */
 function showMessage(text, cls, sub) {
     return new Promise(function (resolve) {
         var ov = document.createElement('div');
@@ -16832,12 +16887,14 @@ function showMessage(text, cls, sub) {
         card.className = 'combat-msg-card ' + (cls || '');
         var txt = document.createElement('div');
         txt.className = 'combat-msg-text';
-        txt.textContent = text;
+        txt.textContent = text;  /* título sem HTML */
         card.appendChild(txt);
         if (sub) {
             var s = document.createElement('div');
             s.className = 'combat-msg-sub';
-            s.textContent = sub;
+            /* sub renderiza HTML — todos callers internos, zero user input.
+               Tags suportadas: <br> <strong> <em> <p> <ul> <li> <span style>. */
+            setHTML(s, String(sub));
             card.appendChild(s);
         }
         var btn = document.createElement('button');
