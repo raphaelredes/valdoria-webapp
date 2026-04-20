@@ -1715,6 +1715,40 @@
         return '';
     }
 
+    /* Refinamento Fase 4 — gating de skill por motivo PHB.
+       Retorna {usable:bool, reason?:string}. Reason é mostrado em chip
+       embaixo do .lp-item quando bloqueado. */
+    function _simSkillUsable(p, sk) {
+        if (!sk || !p) return { usable: true };
+        var cost = parseInt(sk.cost, 10) || 0;
+        var rv = p.res ? (parseInt(p.res.value, 10) || 0) : 999;
+        var resName = (p.res && p.res.name) || 'recurso';
+        if (cost > rv) {
+            return { usable: false, reason: 'Sem ' + resName + ' (precisa ' + cost + ', tem ' + rv + ')' };
+        }
+        if (sk.bonus && p.bonusActionSpent) {
+            return { usable: false, reason: 'Ação Bônus já gasta neste turno' };
+        }
+        if (!sk.bonus && p.actionSpent) {
+            return { usable: false, reason: 'Ação principal já gasta' };
+        }
+        /* PHB p.202: BA spell castada limita ação a cantrip. Aplica APENAS a magias leveled. */
+        if (!sk.bonus && p.bonusActionWasSpell) {
+            var isLeveledSpell = (sk.kind === 'attack' || sk.kind === 'heal' || sk.kind === 'buff') && !sk.cantrip;
+            if (isLeveledSpell && (sk.fireball || sk.healSpell || sk.blessSpell || sk.shieldSpell || sk.magicMissiles)) {
+                return { usable: false, reason: 'PHB p.202: BA spell já castada — só truque' };
+            }
+        }
+        if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+            return { usable: false, reason: 'Requer nível ' + sk.minLevel };
+        }
+        if (sk.requiresBuff) {
+            var hasBuff = (p.se || []).some(function (st) { return st && st.id === sk.requiresBuff; });
+            if (!hasBuff) return { usable: false, reason: 'Requer ' + sk.requiresBuff + ' ativo' };
+        }
+        return { usable: true };
+    }
+
     function _skillResourceKind(sk) {
         if (!sk) return 'action';
         if (sk.bonus) return 'bonus';
@@ -4001,16 +4035,25 @@
         p.skills.forEach(function (sk, idx) {
             var row = typeof sk === 'string' ? { n: sk, cost: 0, kind: 'attack', ico: '✨' } : sk;
             var cost = parseInt(row.cost, 10) || 0;
-            var rv = p.res ? (parseInt(p.res.value, 10) || 0) : 999;
-            var canPay = !p.res || !p.res.max || rv >= cost;
-            var dis = canPay ? '' : ' disabled';
+            /* Refinamento Fase 4 — gating completo PHB (não só MP). */
+            var usability = _simSkillUsable(p, row);
+            var canUse = usability.usable;
+            var dis = canUse ? '' : ' disabled';
             var resIco = p.res && p.res.ico != null ? escHtml(p.res.ico) : '';
-            var costCls = 'lp-item-cost' + (canPay ? ' qty' : ' cant');
+            var costCls = 'lp-item-cost' + (canUse ? ' qty' : ' cant');
+            /* Refinamento Fase 5 — mini-badge de recurso (◆ ação / ▲ bônus / ⬢ reação). */
+            var resKind = (typeof _skillResourceKind === 'function') ? _skillResourceKind(row) : 'action';
+            var resGlyph = (typeof _resourceGlyphFor === 'function') ? _resourceGlyphFor(resKind) : '';
+            var resBadge = resGlyph ? ' <span class="lp-item-res-badge res-' + resKind + '" aria-hidden="true">' + resGlyph + '</span>' : '';
             html += '<div class="lp-item-wrap">';
             html += '<button type="button" class="lp-item' + dis + '" data-skill-idx="' + idx + '"' + dis + '>';
             html += '<div class="lp-item-ico">' + escHtml(row.ico || '✨') + '</div><div class="lp-item-body">';
-            html += '<div class="lp-item-name">' + escHtml(row.n) + '</div>';
+            html += '<div class="lp-item-name">' + escHtml(row.n) + resBadge + '</div>';
             if (row.desc) html += '<div class="lp-item-desc">' + escHtml(row.desc) + '</div>';
+            /* Chip explicativo embaixo quando skill bloqueada — UX direta sem popup de erro. */
+            if (!canUse && usability.reason) {
+                html += '<div class="lp-item-block-chip" title="' + escHtml(usability.reason) + '">⊘ ' + escHtml(usability.reason) + '</div>';
+            }
             html += '</div><div class="' + costCls + '">' + resIco + (resIco ? ' ' : '') + cost + '</div></button>';
             html += '<button type="button" class="lp-item-help" data-skill-help="' + idx + '" title="Detalhes D&D 5e" aria-label="Detalhes técnicos D&D 5e">?</button>';
             html += '</div>';
