@@ -1203,18 +1203,65 @@
        Fase 13 (polish): popup condição .v8-cond-popup-* + click handler (.c-cond-chip)
        ============================================================ */
 
+    /* buildCell — Fase 3 port simulador linha 10297. Emite .cell.v8-card.<cls-slug>
+       com markup interno via buildCellInnerHTML (Fase 2). Preserva todas as classes
+       de VFX/status effects/summon/select existentes. */
     function buildCell(cell, activeId) {
         if (!cell) return '<div class="cell"></div>';
         var u = cell.u, utype = cell.utype, uid = cell.uid;
         var classes = 'cell occupied ' + utype;
+
+        /* V8 heraldic: identidade da classe (cor + moldura dourada + SVG crest). */
+        var _heraldicSlug = _heraldicClsSlugOf(u, utype);
+        if (_heraldicSlug) classes += ' v8-card ' + _heraldicSlug;
+
         if (uid === activeId) {
             classes += ' active-turn';
             if (utype === 'player' && currentState && currentState.ph === 'active') classes += ' player-turn-active';
         }
         if (u.initRolling) classes += ' init-rolling';
-        if (!u.alive) classes += ' dead';
-        if (u.stable && (u.hp || 0) <= 0 && !u.isDead) classes += ' cell--stable';
-        if (u.isDead) classes += ' cell--dead-perm';
+        /* Estados mortos/dying (ordem do simulador linha 10312-10317) */
+        if (utype === 'enemy' && !u.alive) classes += ' dead';
+        else if (utype === 'player' || utype === 'ally') {
+            if (u.isDead) classes += ' dead cell--dead-perm';
+            else if ((u.hp | 0) <= 0 && u.dying && !u.stable) classes += ' cell--dying';
+            else if ((u.hp | 0) <= 0 && u.stable) classes += ' cell--stable';
+        } else if (!u.alive) classes += ' dead';
+
+        /* Condições visuais distintas por status effect (port simulador linha 10328-10359).
+           Debuffs: Amedrontado/Sono/Prostrado/Zombado → classes card-*.
+           Buffs persistentes: atkAdv/dmgBonus/acBonus/halfDmg → classes unit-buffed-*. */
+        if (u.alive && u.se && u.se.length) {
+            var hasFrightened = false, hasSleep = false, hasProstrate = false, hasMock = false;
+            var hasOffenseBuff = false, hasDefenseBuff = false, hasIntimidating = false;
+            u.se.forEach(function (st) {
+                if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
+                var cond = (st.dndCondition || '') + ' ' + (st.n || '');
+                if (/Amedrontad|Medo|Frightened/i.test(cond)) hasFrightened = true;
+                else if (/Sono|Adormecid|Inconscient|Sleep|Stun/i.test(cond)) hasSleep = true;
+                else if (/Prostrad|Caíd|Prone/i.test(cond)) hasProstrate = true;
+                else if (/Zombad|Mock/i.test(cond)) hasMock = true;
+                else if (st.skipTurn) hasSleep = true;
+                if (st.atkAdvantage || st.dmgBonusDie || st.bardicInspiration ||
+                        st.atkBonusDie || st.rageDmg || st.sneakAttack || st.rollApply) {
+                    hasOffenseBuff = true;
+                }
+                if (st.acBonus || st.halfDmg || st.sanctuary || st.rageResistance ||
+                        st.magicSaveAdvantage) {
+                    hasDefenseBuff = true;
+                }
+                if (st.enemyAtkDisadvantage) hasIntimidating = true;
+            });
+            if (hasFrightened) classes += ' card-frightened';
+            else if (hasSleep) classes += ' card-sleeping';
+            if (hasProstrate) classes += ' card-prostrate';
+            if (hasMock) classes += ' card-mocked';
+            if (hasIntimidating) classes += ' unit-intimidating';
+            else if (hasOffenseBuff) classes += ' unit-buffed-offense';
+            if (hasDefenseBuff) classes += ' unit-buffed-defense';
+        }
+
+        /* Selectable (target de ataque/cura) — preservado do buildCell original. */
         if (_selectingTarget && utype === 'enemy' && u.alive) classes += ' selectable';
         var healPick = _selectHealTarget || _pendingHealItem;
         if (healPick && (utype === 'player' || utype === 'ally') && !u.isDead &&
@@ -1222,54 +1269,48 @@
             classes += ' selectable-heal';
         }
 
-        var inner = '';
-        var showInitBadge = currentState && (currentState.ph === 'intro' || currentState.ph === 'init' || currentState.ph === 'init_done');
-        if (showInitBadge) {
-            if (u.initRevealed) inner += '<div class="cell-init">🎲' + u.init + '</div>';
-            else if (u.init !== undefined) inner += '<div class="cell-init pending">?</div>';
+        /* V1 Invocações Phase 4 V1-Visual (2026-04-19) — diferenciadores visuais pra summons.
+           cell--is-summon: borda dashed cor heráldica do conjurador.
+           cell--summon-attached: noTarget+spectral (Arma Espiritual) → borda ethereal extra.
+           cell--summon-focused-by: marcador 🎯 quando inimigo é focusTarget de algum familiar. */
+        if (u.summonKind) {
+            classes += ' cell--is-summon';
+            if (u.noTarget) classes += ' cell--summon-attached';
         }
-        if (u.ac !== undefined) inner += '<div class="cell-ac">' + escHtml(u.ac) + '</div>';
-        if (utype === 'enemy' && u.it) {
-            var it = (u.it.ic || '') + (u.it.lb ? ' ' + u.it.lb : '');
-            inner += '<div class="intent">' + escHtml(it) + '</div>';
+        var isFocusedByFamiliar = false;
+        if (utype === 'enemy' && currentState && currentState.order) {
+            for (var fi = 0; fi < currentState.order.length; fi++) {
+                var fc = currentState.order[fi];
+                if (fc && fc.summonKind === 'familiar' && fc.alive && fc.focusTarget != null) {
+                    var ft = currentState.order[fc.focusTarget];
+                    if (ft === u) { isFocusedByFamiliar = true; break; }
+                }
+            }
         }
-        if (utype === 'ally' && u.it) {
-            var ita = (u.it.ic || '') + (u.it.lb ? ' ' + u.it.lb : '');
-            inner += '<div class="intent">' + escHtml(ita) + '</div>';
+        if (isFocusedByFamiliar) classes += ' cell--summon-focused-by';
+
+        /* Markup interno via buildCellInnerHTML (Fase 2). Handles heraldic V8 + fallback legado. */
+        var inner = buildCellInnerHTML(u, utype, {}, uid);
+
+        /* Focus marker visual (inimigo focado pelo Familiar). */
+        var focusMarkerHtml = isFocusedByFamiliar
+            ? '<div class="summon-focus-marker" aria-label="Foco do Familiar">🎯</div>'
+            : '';
+
+        /* Chip flutuante acima do CONJURADOR com summons attached (Arma Espiritual).
+           Mostra ícone + duração restante (ex.: ⚔️ 7r). */
+        var attachedChipHtml = '';
+        if (u.t === 'p' && currentState && currentState.attachedSummons) {
+            var pAttached = currentState.attachedSummons[currentState.p_idx] || [];
+            if (pAttached.length && currentState.order && currentState.order[currentState.p_idx] === u) {
+                var chipParts = pAttached.map(function (sw) {
+                    return '<span class="sa-chip-item">' + escHtml(sw.ico || '⚔️') + ' <strong>' + (sw.durLeft | 0) + 'r</strong></span>';
+                }).join('');
+                attachedChipHtml = '<div class="summon-attached-chip" aria-label="Summon ativo">' + chipParts + '</div>';
+            }
         }
-        inner += '<div class="unit-row"><div class="unit-side left"></div><div class="unit-ico">' + escHtml(u.ico) + '</div><div class="unit-side right"></div></div>';
-        inner += '<div class="cell-bars">';
-        var mhpSafe = (u.mhp | 0) || 1;
-        var hpPct = Math.max(0, Math.min(100, Math.round(((u.hp | 0) / mhpSafe) * 100)));
-        var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
-        var fillCls = hpPct > 60 ? 'fill-hp-high' : (hpPct > 25 ? 'fill-hp-mid' : 'fill-hp-low');
-        inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + u.hp + '/' + u.mhp + '</div></div>';
-        if (u.res && u.res.max > 0) {
-            var rPct = Math.max(0, Math.min(100, Math.round((u.res.value / u.res.max) * 100)));
-            var rCls = u.res.type === 'mp' ? 'fill-res-mp' : (u.res.type === 'energia' ? 'fill-res-energia' : 'fill-res-vigor');
-            inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + rCls + '" style="width:' + rPct + '%"></div></div><div class="bar-num res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + '/' + u.res.max + '</div></div>';
-        }
-        inner += '</div>';
-        inner += buildStatusEffectChips(u);
-        if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.dying && !u.stable && !u.isDead) {
-            ensureDeathSaves(u);
-            var ds = u.deathSaves;
-            var si;
-            inner += '<div class="cell-death-saves" role="status" aria-live="polite">';
-            inner += '<span class="cds-skull" aria-hidden="true">\u2620</span>';
-            inner += '<div class="cds-tracks">';
-            inner += '<div class="cds-track" aria-label="Sucessos no teste de morte"><span class="cds-track-lbl" aria-hidden="true">S</span><span class="cds-pips">';
-            for (si = 0; si < 3; si++) inner += '<span class="cds-pip' + (si < (ds.s | 0) ? ' cds-pip--ok' : '') + '"></span>';
-            inner += '</span></div>';
-            inner += '<div class="cds-track" aria-label="Falhas no teste de morte"><span class="cds-track-lbl" aria-hidden="true">F</span><span class="cds-pips">';
-            for (si = 0; si < 3; si++) inner += '<span class="cds-pip' + (si < (ds.f | 0) ? ' cds-pip--bad' : '') + '"></span>';
-            inner += '</span></div></div></div>';
-        } else if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.stable && !u.isDead) {
-            inner += '<div class="cell-stable-tag">Estável · 0 PV</div>';
-        } else if ((utype === 'player' || utype === 'ally') && u.isDead) {
-            inner += '<div class="cell-dead-tag">Morto</div>';
-        }
-        return '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1">' + inner + '</div>';
+
+        return '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1">' + inner + focusMarkerHtml + attachedChipHtml + '</div>';
     }
 
     function render(s) {

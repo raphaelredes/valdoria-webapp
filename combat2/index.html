@@ -93,6 +93,10 @@ document.write('<link rel="stylesheet" href="combat2.css?v=' + v + '">');
     document.write('<script src="' + B + '/shared/error-reporter.js?v=' + v + '"><\/script>');
     document.write('<script src="' + B + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
     document.write('<script src="' + B + '/shared/combat-battlefield-pan-zoom.js?v=' + v + '"><\/script>');
+    /* V8 heraldic crests (Fase 0 port simulador -> DEV, commit a792a049).
+       Injeta <svg><defs>13 ic-* symbols</defs></svg> no body uma vez so.
+       Referenciado por buildCellInnerHTML via <use href="#ic-*">. */
+    document.write('<script src="' + B + '/shared/heraldic-icons.js?v=' + v + '"><\/script>');
 })();
 </script>
 <script src="combat2.js"></script>
