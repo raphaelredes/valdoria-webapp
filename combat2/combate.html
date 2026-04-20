@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T22:53:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:04:12Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -7533,6 +7533,88 @@ window.__COMBAT_ORIGIN_APP = (function () {
 })();
 window.__COMBAT_ENV = (function () {
     try { return new URLSearchParams(location.search).get('env') || 'dev'; } catch (e) { return 'dev'; }
+})();
+
+/* [C-REM:LOG-RELAY] Inline log relay (port de shared/log-relay.js).
+   Wrap console.info/warn/error: se msg começa com [TAG], queue + POST
+   /api/game/log a cada 3s OU 30 msgs. Server loga como [WEBAPP] [TAG] msg
+   em bot.log — agente IA pode grep-ar "\[C-REM:" environments/dev/logs/bot.log
+   pra diagnosticar sem precisar do DevTools do browser.
+   SKIP em local mode (sem apiBase). Carregado INLINE pra wrappar console
+   ANTES de qualquer console.info rodar. */
+(function () {
+    if (window.__COMBAT_MODE !== 'remote' || !window.__COMBAT_API_BASE) {
+        return;  /* local mode — no relay */
+    }
+    if (console.log && console.log._valdoriaWrapped) return;  /* já wrapped */
+
+    var _qRel = [];
+    var _flushTimerRel = null;
+    var _FLUSH_MS = 3000;
+    var _MAX_Q = 30;
+    var _TAG_RE = /^\[([A-Z][A-Z0-9_:-]*)\]/;
+
+    function _queueMsg(level, args) {
+        var msg;
+        try {
+            msg = Array.from(args).map(function (a) {
+                if (a instanceof Error) return a.message + (a.stack ? ' ' + a.stack.slice(0, 200) : '');
+                if (typeof a === 'object') {
+                    try { return JSON.stringify(a).slice(0, 200); } catch (e) { return String(a); }
+                }
+                return String(a);
+            }).join(' ');
+        } catch (eM) { return; }
+        if (!_TAG_RE.test(msg)) return;  /* só tagged */
+        _qRel.push({ level: level, msg: msg.slice(0, 500) });
+        if (_qRel.length >= _MAX_Q) _flushRel();
+    }
+
+    function _flushRel() {
+        if (!_qRel.length) return;
+        if (document.visibilityState === 'hidden' && _qRel.length < _MAX_Q) return;
+        var entries = _qRel.splice(0, _MAX_Q);
+        fetch(window.__COMBAT_API_BASE + '/api/game/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entries: entries, uid: window.__COMBAT_USER_ID || 0 })
+        }).catch(function () {
+            if (_qRel.length < _MAX_Q * 2) _qRel.unshift.apply(_qRel, entries);
+        });
+    }
+
+    var _oLog = console.log.bind(console);
+    var _oInfo = console.info.bind(console);
+    var _oWarn = console.warn.bind(console);
+    var _oError = console.error.bind(console);
+    console.log = function () { _oLog.apply(console, arguments); _queueMsg('info', arguments); };
+    console.log._valdoriaWrapped = true;
+    console.info = function () { _oInfo.apply(console, arguments); _queueMsg('info', arguments); };
+    console.info._valdoriaWrapped = true;
+    console.warn = function () { _oWarn.apply(console, arguments); _queueMsg('warn', arguments); };
+    console.warn._valdoriaWrapped = true;
+    console.error = function () { _oError.apply(console, arguments); _queueMsg('error', arguments); };
+    console.error._valdoriaWrapped = true;
+
+    _flushTimerRel = setInterval(_flushRel, _FLUSH_MS);
+
+    /* Reliable flush on page unload */
+    window.addEventListener('pagehide', function () {
+        if (!_qRel.length) return;
+        var entries = _qRel.splice(0, _MAX_Q);
+        try {
+            navigator.sendBeacon(
+                window.__COMBAT_API_BASE + '/api/game/log',
+                new Blob([JSON.stringify({
+                    entries: entries,
+                    uid: window.__COMBAT_USER_ID || 0
+                })], { type: 'application/json' })
+            );
+        } catch (eB) { /* no sendBeacon */ }
+    });
+
+    window.__combatLogRelay = { flush: _flushRel };
+    console.info('[C-REM:LOG-RELAY] wrapped console (all [TAG] logs forwarded to /api/game/log)');
 })();
 
 console.info('[COMBAT-MODE] __COMBAT_MODE=' + window.__COMBAT_MODE

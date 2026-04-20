@@ -20,8 +20,9 @@ var _FLUSH_INTERVAL = 3000;
 var _MAX_QUEUE = 30;
 var _apiBase = '';
 
-// Matches [TAG] at start: [PROCESSING], [EXPLORE], [GAME], [COMBAT], etc.
-var _TAG_RE = /^\[([A-Z][A-Z0-9_-]*)\]/;
+// Matches [TAG] at start: [PROCESSING], [EXPLORE], [GAME], [COMBAT], [C-REM:HTTP], etc.
+// Colon allowed for sub-tags (ex: [C-REM:ACTION], [C-REM:HTTP], [COMBAT:ATTACK]).
+var _TAG_RE = /^\[([A-Z][A-Z0-9_:-]*)\]/;
 
 function _getApiBase() {
     if (_apiBase) return _apiBase;
