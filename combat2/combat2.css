@@ -1961,3 +1961,254 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
    Fase 9 (V1 Invocações): popula bonus grid com "Comandar Arma Espiritual"
    Fase 10 (V1.5): .command-companion-btn, .mount-toggle-btn
    ============================================================================= */
+
+/* =============================================================================
+   HUD RECURSOS D&D 5e (Fase 5 port simulador 1634-1852)
+   V1 Invocações Phase 4 V1-Visual (2026-04-19, c) — 3 pílulas geométricas no topo
+   indicando Ação / Bônus / Reação (PHB p.189-190).
+
+   Símbolos distintos:
+     · Ação    = ◆ (losango âmbar)
+     · Bônus   = ▲ (triângulo roxo)
+     · Reação  = ⬢ (hexágono ciano)
+
+   Modos:
+     · default (player turn): 3 pílulas completas
+     · compactReaction (NPC turn): só Reação compactada "off-turn"
+   ============================================================================= */
+
+.dnd-resources-bar {
+    display: flex;
+    gap: var(--v-space-sm, 6px);
+    padding: 6px 8px 8px;
+    background: linear-gradient(180deg, rgba(15,12,8,.78), rgba(15,12,8,.4));
+    border-top: 1px solid rgba(196,149,58,.25);
+    border-bottom: 1px solid rgba(196,149,58,.35);
+    align-items: stretch;
+    justify-content: stretch;
+    margin: 0;
+}
+.dnd-res-pill {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 9px;
+    background: rgba(15,12,8,.6);
+    border: 1.5px solid rgba(196,149,58,.4);
+    border-radius: var(--v-radius-sm, 6px);
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--v-text, #d4c8b0);
+    cursor: pointer;
+    transition: border-color var(--v-transition-base, .2s),
+                background var(--v-transition-base, .2s),
+                opacity var(--v-transition-base, .2s),
+                transform var(--v-transition-base, .2s);
+    position: relative;
+    min-height: 38px;
+}
+.dnd-res-pill:hover {
+    border-color: var(--v-gold, #c4953a);
+    background: rgba(74,56,40,.55);
+    transform: translateY(-1px);
+}
+.dnd-res-pill:active { transform: translateY(0); }
+
+.dnd-res-pill .dnd-res-glyph {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    text-align: center;
+}
+.dnd-res-pill .dnd-res-label {
+    flex: 1;
+    text-align: left;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.dnd-res-pill .dnd-res-state {
+    flex-shrink: 0;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dnd-res-pill.dnd-res-action.available .dnd-res-glyph {
+    color: #ffe080;
+    text-shadow: 0 0 8px rgba(255, 224, 128, .7);
+}
+.dnd-res-pill.dnd-res-bonus.available .dnd-res-glyph {
+    color: #c898f0;
+    text-shadow: 0 0 8px rgba(160, 100, 220, .65);
+}
+.dnd-res-pill.dnd-res-reaction.available .dnd-res-glyph {
+    color: #80d0ff;
+    text-shadow: 0 0 8px rgba(80, 160, 220, .65);
+}
+
+.dnd-res-pill.available {
+    border-color: rgba(140, 200, 110, .65);
+    box-shadow: 0 0 8px rgba(140, 200, 110, .22);
+}
+.dnd-res-pill.available .dnd-res-state {
+    color: #8dd068;
+    text-shadow: 0 0 6px rgba(140, 200, 110, .6);
+}
+.dnd-res-pill.available .dnd-res-label { color: #d8e8c8; }
+.dnd-res-pill.available:hover {
+    border-color: rgba(160, 220, 130, .95);
+    box-shadow: 0 0 14px rgba(140, 200, 110, .45);
+}
+
+.dnd-res-pill.spent {
+    opacity: 0.5;
+    filter: grayscale(0.85);
+    border-color: rgba(120, 100, 70, .4);
+}
+.dnd-res-pill.spent .dnd-res-state { color: #e85a5a; }
+.dnd-res-pill.spent .dnd-res-label { color: #908070; }
+.dnd-res-pill.spent:hover {
+    opacity: 0.75;
+    filter: grayscale(0.5);
+    border-color: rgba(160, 130, 90, .65);
+}
+
+/* Mini-badge ao lado dos botões de ação */
+.action-btn-res-icon {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+    opacity: 0.85;
+}
+.action-btn-res-icon.res-action {
+    color: #ffe080;
+    text-shadow: 0 0 4px rgba(255, 224, 128, .6);
+}
+.action-btn-res-icon.res-bonus {
+    color: #c898f0;
+    text-shadow: 0 0 4px rgba(160, 100, 220, .55);
+}
+.action-btn-res-icon.res-reaction {
+    color: #80d0ff;
+    text-shadow: 0 0 4px rgba(80, 160, 220, .55);
+}
+.action-btn.spent .action-btn-res-icon {
+    opacity: 0.35;
+    filter: grayscale(0.7);
+    text-shadow: none;
+}
+
+/* Badge na lista de skills */
+.lp-item-res-badge {
+    display: inline-block;
+    margin-left: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+}
+.lp-item-res-badge.res-action {
+    color: #ffe080;
+    text-shadow: 0 0 4px rgba(255, 224, 128, .6);
+}
+.lp-item-res-badge.res-bonus {
+    color: #c898f0;
+    text-shadow: 0 0 4px rgba(160, 100, 220, .55);
+}
+.lp-item-res-badge.res-reaction {
+    color: #80d0ff;
+    text-shadow: 0 0 4px rgba(80, 160, 220, .55);
+}
+.lp-item.disabled .lp-item-res-badge {
+    opacity: 0.4;
+    filter: grayscale(0.7);
+}
+
+/* Sub-chip embaixo do botão Habilidades (PHB p.202 BA Spell Rule) */
+.action-btn .action-btn-sub-chip {
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1px 7px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(74, 56, 28, .92);
+    border: 1px solid rgba(255, 224, 144, .7);
+    border-radius: 8px;
+    color: #ffe080;
+    white-space: nowrap;
+    text-shadow: 0 0 4px rgba(196, 149, 58, .6);
+    pointer-events: none;
+    z-index: 2;
+    box-shadow: 0 0 6px rgba(196, 149, 58, .35);
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+}
+/* Botão precisa de position:relative pra ancorar sub-chip absoluto */
+.sim-action-sheet .action-btn { position: relative; }
+
+/* HUD compactReaction (NPC turn): discreto, só Reação */
+.dnd-resources-bar.dnd-resources-bar--compact-reaction {
+    padding: 4px 8px 4px;
+    background: linear-gradient(180deg, rgba(15,12,8,.55), rgba(15,12,8,.25));
+    border-top: 1px solid rgba(196,149,58,.15);
+    border-bottom: 1px solid rgba(196,149,58,.18);
+    justify-content: center;
+}
+.dnd-resources-bar.dnd-resources-bar--compact-reaction .dnd-res-pill {
+    flex: 0 1 auto;
+    min-width: 180px;
+    max-width: 280px;
+    min-height: 30px;
+    padding: 4px 10px;
+    font-size: 10px;
+}
+.dnd-resources-bar.dnd-resources-bar--compact-reaction .dnd-res-pill .dnd-res-glyph {
+    font-size: 15px;
+}
+.dnd-resources-bar.dnd-resources-bar--compact-reaction .dnd-res-pill .dnd-res-state {
+    font-size: 13px;
+}
+
+/* Chip "só truque" embaixo da pílula Ação quando bonusActionWasSpell */
+.dnd-res-pill .dnd-res-chip {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 6px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(74, 56, 28, .92);
+    border: 1px solid rgba(255, 224, 144, .7);
+    border-radius: 8px;
+    color: #ffe080;
+    white-space: nowrap;
+    text-shadow: 0 0 4px rgba(196, 149, 58, .6);
+    pointer-events: none;
+    z-index: 2;
+    box-shadow: 0 0 8px rgba(196, 149, 58, .35);
+}
+
+/* =============================================================================
+   FIM HUD RECURSOS D&D — próximas fases:
+   Fase 6 (dice overlays): cores por tema (holy/fire/ice/force/radiant/arcane/...)
+   Fase 7 (VFX): dispatchAttackVfx, miss/dodge/crit
+   Fase 8 (skill flow): target picker multi-target Fireball/MM
+   ============================================================================= */

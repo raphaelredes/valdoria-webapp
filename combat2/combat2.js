@@ -1714,6 +1714,55 @@
             await remoteAction({ type: 'pass' });
             return;
         }
+        /* V1 Invocações Phase 4 V1-Visual (Fase 5 port, 2026-04-20) — click em pílula
+           do HUD recursos abre popup com regra PHB detalhada + status atual. */
+        if (act === 'dnd-res-info') {
+            var resKind = b.dataset.res;
+            var pDr = currentState && currentState.order ? currentState.order[currentState.p_idx] : null;
+            var info = null;
+            if (resKind === 'action') {
+                var phbBlock = (pDr && pDr.bonusActionWasSpell)
+                    ? '<p style="color:#ffe080"><strong>✨ PHB p.202 (BA Spell Rule):</strong></p>' +
+                      '<p style="color:#ffe080">Você castou uma magia com tempo de Ação Bônus neste turno. Como sua ação principal:</p>' +
+                      '<p style="color:#a0e8a0">✅ <strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou castar um <strong>TRUQUE</strong> (cantrip).</p>' +
+                      '<p style="color:#e0a0a0">❌ <strong>Bloqueado:</strong> Castar qualquer outra magia leveled (Cura, Bola de Fogo, Bênção, etc.).</p>' +
+                      '<p style="color:#a09484; font-size:0.95em">A restrição reseta no início do seu próximo turno.</p>'
+                    : '';
+                info = {
+                    title: '◆ Ação',
+                    rule: 'PHB p.189-190 — Cada criatura tem 1 ação por turno: Atacar, Lançar Magia, Esquivar, Disparar, Ajudar, Esconder, Pressionar, Procurar, Usar Objeto, ou ações de classe.',
+                    state: (pDr && pDr.actionSpent) ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
+                    extra: phbBlock
+                };
+            } else if (resKind === 'bonus') {
+                info = {
+                    title: '▲ Ação Bônus',
+                    rule: 'PHB p.189 — Apenas se você tiver uma habilidade de classe ou magia que conceda. Ex.: Atacar com arma secundária (Two-Weapon Fighting), Bardic Inspiration, Comandar Arma Espiritual (PHB p.278), Cunning Action do Ladino, etc.',
+                    state: (pDr && pDr.bonusActionSpent) ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
+                    extra: (pDr && pDr.bonusActionWasSpell) ? '<p>Esta BA foi um <strong>cast de magia BA</strong> (aciona regra PHB p.202).</p>' : ''
+                };
+            } else if (resKind === 'reaction') {
+                info = {
+                    title: '⬢ Reação',
+                    rule: 'PHB p.190 — Resposta INSTANTÂNEA a um trigger; pode ocorrer no SEU turno OU no de OUTRO combatente.<br><br>' +
+                          '<strong>Regras:</strong><br>' +
+                          '· 1 reação por RODADA (não por turno).<br>' +
+                          '· Reseta no INÍCIO do seu próximo turno.<br>' +
+                          '· Se interrompe outra criatura, ela continua o turno após a reação.<br><br>' +
+                          '<strong>Triggers comuns:</strong><br>' +
+                          '· Ataque de Oportunidade: inimigo se afasta da sua zona de ameaça.<br>' +
+                          '· Escudo Arcano (PHB p.275): você é alvo de ataque ou Mísseis Mágicos → +5 CA até início do próximo turno.<br>' +
+                          '· Contramágica (PHB p.237): outro conjurador casta uma magia que você vê.<br>' +
+                          '· Castigo Divino (Paladino): pode usar Smite após ataque que acerta.',
+                    state: (pDr && pDr.reactionSpent) ? 'GASTA nesta rodada (reseta no início do seu próximo turno).' : 'DISPONÍVEL — pode ser triggered agora.',
+                    extra: ''
+                };
+            }
+            if (info && typeof showMessage === 'function') {
+                showMessage(info.title, 'info', info.rule + '<br><br><strong>Status:</strong> ' + info.state + (info.extra || ''));
+            }
+            return;
+        }
         /* V1 Invocações Phase 1 (Fase 4 port, 2026-04-20) — PHB p.190: jogador pode
            encerrar o turno explicitamente quando tem BA pendente e quer pular.
            Força avanço via action 'end_turn' (motor força _advance_after_player_turn
