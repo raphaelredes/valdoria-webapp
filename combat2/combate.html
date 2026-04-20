@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T21:40:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T21:44:43Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -17976,18 +17976,108 @@ async function startCombatRemote() {
     }
 }
 
-/* Aplica events do server. Fase 1 PoC: render após cada event SEM animação
-   detalhada. Fase 2 portará animate*Event do combat2.js. */
+/* Aplica events do server em remote mode.
+   Fase 1/2 PoC: animação MÍNIMA reutilizando helpers do simulador:
+   - attack/oa: flash card alvo + FCT dano
+   - heal: flash card alvo + FCT cura
+   - death_save: showDice
+   - buff/resource/item_use: flash caster
+   - round: pequena pausa
+   Fase 3 (futuro): portar animate*Event completo do combat2.js. */
 async function __combatApplyEvents(events) {
     for (var i = 0; i < events.length; i++) {
         var ev = events[i];
-        console.info('[COMBAT-REMOTE] event[' + i + '] kind=' + ev.kind
-            + ' actor=' + (ev.actorName || '?')
-            + ' target=' + (ev.targetName || '?'));
-        /* State pode ter sido alterado pelo server antes do event.
-           Para PoC, só renderiza state atual. Animações virão depois. */
-        await new Promise(function (res) { setTimeout(res, 180); });
+        if (!ev || !ev.kind) continue;
+        console.info('[COMBAT-REMOTE] ev[' + i + '/' + events.length + '] '
+            + ev.kind + ' a=' + (ev.actorName || '?')
+            + ' t=' + (ev.targetName || '?')
+            + ' dmg=' + (ev.dmgTotal != null ? ev.dmgTotal : '?')
+            + ' hit=' + (ev.hit != null ? ev.hit : '?'));
+        try {
+            await __combatAnimateOneEvent(ev);
+        } catch (eA) {
+            console.warn('[COMBAT-REMOTE] animate fail', ev.kind, eA);
+        }
     }
+}
+
+async function __combatAnimateOneEvent(ev) {
+    var kind = ev.kind;
+    if (kind === 'attack' || kind === 'oa') {
+        /* Flash card alvo + FCT dano. */
+        var tUid = 'enemy_' + ev.tIdx;
+        var tU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
+        if (tU && tU.t === 'p') tUid = 'player';
+        else if (tU && tU.t === 'a') tUid = 'ally_' + ev.tIdx;
+        var elT = document.querySelector('[data-unit-id="' + tUid + '"]');
+        if (ev.hit === false) {
+            if (elT) elT.classList.add('dodged');
+            setTimeout(function () { if (elT) elT.classList.remove('dodged'); }, 520);
+            if (typeof _spawnFloatingDmgNumber === 'function') {
+                try { _spawnFloatingDmgNumber(tUid, 'ERROU', 'miss'); } catch (eS) {}
+            }
+        } else {
+            if (elT) elT.classList.add('hit-flash');
+            setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
+            if (typeof _spawnFloatingDmgNumber === 'function') {
+                var dtxt = (ev.crit ? 'CRIT ' : '-') + (ev.dmgTotal | 0);
+                try { _spawnFloatingDmgNumber(tUid, dtxt, ev.crit ? 'crit' : 'dmg'); } catch (eS) {}
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 520); });
+        return;
+    }
+    if (kind === 'heal') {
+        var hUid = 'ally_' + ev.tIdx;
+        var hU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
+        if (hU && hU.t === 'p') hUid = 'player';
+        var elH = document.querySelector('[data-unit-id="' + hUid + '"]');
+        if (elH) elH.classList.add('heal-flash');
+        setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
+        if (typeof _spawnFloatingDmgNumber === 'function') {
+            try { _spawnFloatingDmgNumber(hUid, '+' + (ev.healGained | 0), 'heal'); } catch (eS) {}
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 620); });
+        return;
+    }
+    if (kind === 'death_save') {
+        render(currentState);
+        if (typeof showDice === 'function' && ev.d20 != null) {
+            await new Promise(function (resD) {
+                try {
+                    showDice(ev.d20, resD, currentState.order[ev.tIdx], 'Teste de morte', {});
+                } catch (eD) { resD(); }
+            });
+        } else {
+            await new Promise(function (r) { setTimeout(r, 500); });
+        }
+        return;
+    }
+    if (kind === 'buff' || kind === 'resource' || kind === 'item_use') {
+        var actorUid = 'player';
+        if (ev.aIdx != null && currentState && currentState.order) {
+            var aU = currentState.order[ev.aIdx];
+            if (aU && aU.t === 'a') actorUid = 'ally_' + ev.aIdx;
+            else if (aU && aU.t === 'e') actorUid = 'enemy_' + ev.aIdx;
+        }
+        var elA = document.querySelector('[data-unit-id="' + actorUid + '"]');
+        if (elA) elA.classList.add('buff-flash');
+        setTimeout(function () { if (elA) elA.classList.remove('buff-flash'); }, 520);
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 420); });
+        return;
+    }
+    if (kind === 'round') {
+        /* Marcador de rodada — pequena pausa. */
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 320); });
+        return;
+    }
+    /* Default: render + pequena pausa. */
+    render(currentState);
+    await new Promise(function (r) { setTimeout(r, 200); });
 }
 function loadDice3dUrl(url, ondone) {
     loadScript(url, function (err) {

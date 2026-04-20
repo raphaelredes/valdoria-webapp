@@ -1,10 +1,20 @@
-/* Combat2 WebApp — frontend real.
+/* ⚠️ DEPRECATED (Fase 1 PoC canonical — 2026-04-20) ⚠️
  *
+ * Este arquivo NÃO é mais carregado pelo combat2/index.html.
+ * combat2/index.html virou SHIM que redireciona pra combat2/combate.html
+ * (que é sync do simuladores/combate.html via scripts/sync_combate_to_webapp.py).
+ *
+ * Mantido temporariamente pra rollback rápido caso a Fase 1 quebre. Após
+ * validação em prod, deletar este arquivo na Fase 3 do plano canonical.
+ *
+ * Proposta: docs/sistemas/combat2-arch-canonical-proposal.md
+ *
+ * ---- Histórico (legado): ----
+ * Combat2 WebApp — frontend real.
  * UI alinhada ao fluxo de combate WebApp (arena, iniciativa, popups).
  * Consome /api/combat2 do backend.
  * Backend retorna {state, events} — frontend anima events em sequencia
  * e sincroniza com state autoritativo ao final.
- *
  * Boot: carrega THREE -> dice-3d -> GET /api/combat2 -> render(state).
  */
 (function () {
