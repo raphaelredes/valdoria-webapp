@@ -1528,6 +1528,22 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
 .cell.cls-inimigo     { --card-accent: var(--enemy-red);         --card-accent-dark: var(--enemy-red-dark); }
 .cell.cls-boss        { --card-accent: var(--enemy-red);         --card-accent-dark: #5a0a0a; }
 .cell.cls-summon      { --card-accent: var(--summon-arcane);     --card-accent-dark: var(--summon-arcane-dark); }
+/* FIX (2026-04-20): aliado generico sem classe mapeada (brawler, mercenary,
+   NPC guest). Cor verde-aco (steel) distinta de inimigos vermelhos e summons
+   arcano. Garante que TODO ally tenha visual V8 consistente. */
+.cell.cls-aliado      { --card-accent: #6b9a6b;                  --card-accent-dark: #2e4a2e; }
+
+/* V8 heraldic para ally genérico: verde-aco padronizado. */
+.cell.v8-card.cls-aliado { background: #2e4a2e !important; }
+.cell.v8-card.cls-aliado .c-name { background: linear-gradient(180deg, #1e3320 0%, #0a1a0a 100%); color: color-mix(in srgb, #6b9a6b 40%, #fff 60%); border-bottom-color: #6b9a6b; }
+.cell.v8-card.cls-aliado .c-class-tag { color: #8abf8a; border-color: rgba(107, 154, 107, 0.6); background: rgba(15, 30, 15, 0.5); }
+.cell.v8-card.cls-aliado .c-portrait { color: color-mix(in srgb, #6b9a6b 40%, #fff 60%); }
+.cell.v8-card.cls-aliado .c-portrait svg { filter: drop-shadow(0 0 3px rgba(107, 154, 107, 0.6)) drop-shadow(0 1px 2px rgba(0,0,0,0.85)); }
+.cell.v8-card.cls-aliado .c-stats { background: #142018; }
+.cell.v8-card.cls-aliado .c-stat-label { color: color-mix(in srgb, #6b9a6b 30%, #fff 70%); }
+
+/* Turn queue: aliado generico em verde-aco. */
+#turn-queue .tl-node.cls-aliado .tl-ico { color: #8abf8a; }
 
 /* Turn queue summon: aplica cor arcano via SVG currentColor. */
 #turn-queue .tl-node.cls-summon .tl-ico { color: var(--summon-arcane); }

@@ -62,29 +62,33 @@
         if (!s || typeof ValdoriaAudio === 'undefined' || !ValdoriaAudio.play) {
             return;
         }
+        /* FIX (2026-04-20): sync robusto pra evitar cortes de musica em
+           popups/overlays/animacoes dentro do combate. Estrategia:
+           - Guard por _combat2MusicKey: so re-dispara ao mudar de track
+           - NAO depende de _audio.paused (pode ser suspend temporario do
+             WebView que o audio-manager auto-retoma via unlock events)
+           - Detecta mudancas de fase real (intro → init → active → victory). */
         var ph = s.ph || '';
+        var targetKey = null;
         if (ph === 'victory' || ph === 'defeat') {
-            var k = ph === 'victory' ? 'victory' : 'defeat';
-            if (_combat2MusicKey !== k) {
-                _combat2MusicKey = k;
-                ValdoriaAudio.play(k);
-            }
-            return;
-        }
-        if (ph === 'fled') {
+            targetKey = ph;
+        } else if (ph === 'fled') {
+            /* Fled nao tem musica persistente, apenas SFX 1x. */
             if (_combat2MusicKey !== 'fled') {
                 _combat2MusicKey = 'fled';
-                try {
-                    ValdoriaAudio.playSFX('sfx_success');
-                } catch (eF) {}
+                try { ValdoriaAudio.playSFX('sfx_success'); } catch (eF) {}
             }
             return;
+        } else if (ph === 'intro' || ph === 'init' || ph === 'init_done' || ph === 'active') {
+            targetKey = 'combat';
         }
-        if (ph === 'intro' || ph === 'init' || ph === 'init_done' || ph === 'active') {
-            if (_combat2MusicKey !== 'combat') {
-                _combat2MusicKey = 'combat';
-                ValdoriaAudio.play('combat');
-            }
+        if (!targetKey) return;
+        /* Re-dispara APENAS se a track conceitual mudou (ex: combat → victory).
+           Dentro da mesma track (ex: varios renders em fase 'active' todas
+           em 'combat'), nao faz nada — audio-manager continua tocando. */
+        if (_combat2MusicKey !== targetKey) {
+            _combat2MusicKey = targetKey;
+            try { ValdoriaAudio.play(targetKey); } catch (eP) {}
         }
     }
 
@@ -805,18 +809,31 @@
             list.sort(function (a, b) { return b.init - a.init || (a.t === 'p' ? -1 : 1); });
         } else { list = s.order.slice(); }
         var parts = ['<div class="turn-queue" id="turn-queue">'];
-        parts.push('<span class="tl-round">R' + s.rn + '</span>');
+        parts.push('<span class="tl-round">Turno ' + s.rn + '</span>');
         for (var i = 0; i < list.length; i++) {
             var entry = list[i];
             var origIdx = s.order.indexOf(entry);
+            var utypeQ = entry.t === 'p' ? 'player' : (entry.t === 'a' ? 'ally' : 'enemy');
             var cls = 'tl-node';
             if (entry.t === 'e') cls += ' t-enemy';
             else if (entry.t === 'a') cls += ' t-ally';
+            /* FIX (2026-04-20 — port simulator combate.html): adicionar cls-XXX
+               no node da turn queue para aplicar cor heráldica de classe. */
+            var slugQ = _heraldicClsSlugOf(entry, utypeQ);
+            if (slugQ) cls += ' ' + slugQ;
             if (origIdx === s.active_idx && s.ph === 'active') cls += ' active';
             else if (s.ph === 'active') cls += ' forecast';
             if (!entry.alive) cls += ' dead';
             var id = 'tq-' + entry.n.replace(/[^a-zA-Z0-9]/g, '_');
-            parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + '"><div class="tl-ico">' + escHtml(entry.ico) + '</div></div>');
+            /* FIX (2026-04-20): ícone heráldico SVG em vez de emoji genérico.
+               Simulator linhas 9712-9740 do combate.html — usa _heraldicIconOf
+               e renderiza <svg><use href="#ic-XXX"/></svg>. Fallback emoji apenas
+               quando não há ícone heráldico mapeado (summons exóticos, etc). */
+            var iconIdQ = _heraldicIconOf(entry, utypeQ);
+            var icoHtml = iconIdQ
+                ? '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconIdQ + '"/></svg>'
+                : escHtml(entry.ico || '?');
+            parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + '"><div class="tl-ico">' + icoHtml + '</div></div>');
         }
         parts.push('</div>');
         return parts.join('');
@@ -971,22 +988,43 @@
         'Feiticeiro':   'cls-feiticeiro'
     };
 
-    /* Resolve unit -> id do SVG heráldico (ic-XXX). Summons têm ícones específicos. */
+    /* Resolve unit -> id do SVG heráldico (ic-XXX). Summons têm ícones específicos.
+     *
+     * Icones disponiveis em heraldic-icons.js (auditado 2026-04-20):
+     *   11 classes: ic-mago, ic-clerigo, ic-barbaro, ic-druida, ic-bardo,
+     *               ic-ladino, ic-guerreiro, ic-monge, ic-patrulheiro,
+     *               ic-paladino, ic-feiticeiro
+     *   2 NPC:      ic-inimigo, ic-boss
+     *
+     * NAO existem: ic-aliado, ic-summon, ic-familiar, ic-sprite,
+     *              ic-spiritual-weapon, ic-find_steed, ic-animal_companion
+     *
+     * Para esses casos, usamos fallback heraldico do caster/classe ou
+     * ic-inimigo (silueta neutra, apenas cor muda conforme cls-XXX).
+     */
     function _heraldicIconOf(u, utype) {
         if (!u) return null;
         if (utype === 'enemy') return u.isBoss ? 'ic-boss' : 'ic-inimigo';
-        /* V1.6 PHB-fiel (2026-04-19) — summons usam ícones específicos por tipo. */
-        if (u.iconHeraldic) return u.iconHeraldic;
-        if (u.summonKind === 'spiritual_weapon') return 'ic-spiritual-weapon';
-        if (u.summonKind === 'find_steed') return 'ic-find_steed';
-        if (u.summonKind === 'animal_companion') return 'ic-animal_companion';
-        if (u.summonKind === 'familiar') {
-            /* Distingue Mago (Pseudodragon) vs Bardo (Sprite) pelo nome. */
-            if (u.n === 'Sprite') return 'ic-sprite';
-            return 'ic-familiar';
+        /* Player: usa icone da sua classe diretamente. */
+        if (utype === 'player') {
+            return CLASS_ICON_MAP[u.cls] || 'ic-guerreiro';
         }
-        if (u.summonKind) return 'ic-summon';
-        return CLASS_ICON_MAP[u.cls] || null;
+        /* Ally: summons herdam icone do conjurador quando possivel,
+           senao fallback generico. iconHeraldic explicito tem prioridade. */
+        if (u.iconHeraldic && CLASS_ICON_MAP[u.iconHeraldic]) return u.iconHeraldic;
+        /* Summon com caster identificado: usar icone do caster. */
+        if (u.summonKind && u.summonedBy != null && currentState && currentState.order) {
+            var caster = currentState.order[u.summonedBy];
+            if (caster && caster.cls && CLASS_ICON_MAP[caster.cls]) {
+                return CLASS_ICON_MAP[caster.cls];
+            }
+        }
+        /* Ally com cls mapeada (NPC guerreiro, mago, etc). */
+        var mapped = CLASS_ICON_MAP[u.cls];
+        if (mapped) return mapped;
+        /* Fallback para ally generico (brawler, mercenary, NPC sem cls):
+           usa ic-inimigo (silueta neutra) mas cor vem de cls-aliado (verde). */
+        return 'ic-inimigo';
     }
 
     /* Resolve unit -> classe slug (cls-xxx). Summons herdam cor do caster. */
@@ -1001,7 +1039,14 @@
                 return CLASS_SLUG_MAP[caster.cls];
             }
         }
-        return CLASS_SLUG_MAP[u.cls] || '';
+        /* FIX (2026-04-20): aliados NPC sem classe mapeada usam cls-aliado
+           (token CSS genérico de aliado). Sem esse fallback o card nao virava
+           V8 e aparecia como cardzinho pequeno sem padronização. */
+        var mapped = CLASS_SLUG_MAP[u.cls];
+        if (mapped) return mapped;
+        if (utype === 'ally') return 'cls-aliado';
+        if (utype === 'player') return 'cls-guerreiro';  /* fallback rarissimo */
+        return '';
     }
 
     /* Subtítulo da classe no card V8 (class_tag). Inclui nível quando > 0. */
@@ -1952,21 +1997,34 @@
         /* Cards clicaveis */
         document.querySelectorAll('[data-clickable="1"]').forEach(function (c) {
             c.addEventListener('click', function (ev) {
-                if (ev.target.closest('button')) return;
                 var uid = this.getAttribute('data-unit-id');
+                /* FIX (2026-04-20): quando em modo de seleção de alvo,
+                   qualquer click no card inimigo/aliado deve confirmar.
+                   O guard closest('button') antes impedia click porque
+                   .c-cond-chip (condições buff/debuff) é <button> e capturava
+                   cliques. Agora só bloqueamos botões REAIS de ação (data-act). */
+                var clickedBtn = ev.target.closest('button');
+                var isActionBtn = clickedBtn && clickedBtn.hasAttribute('data-act');
                 if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
+                    if (isActionBtn) return;  // só bloqueia botão real de ação
+                    console.info('[C2] target select enemy', uid);
                     showTargetConfirm(parseInt(uid.slice(6), 10));
                     return;
                 }
                 if ((_selectHealTarget || _pendingHealItem) && uid === 'player') {
+                    if (isActionBtn) return;
                     showHealTargetConfirm(currentState.p_idx);
                     return;
                 }
                 if ((_selectHealTarget || _pendingHealItem) && uid && uid.indexOf('ally_') === 0) {
+                    if (isActionBtn) return;
                     var aixH = parseInt(uid.slice(5), 10);
                     if (!isNaN(aixH)) showHealTargetConfirm(aixH);
                     return;
                 }
+                /* Fora do modo de seleção: clicar em botão dentro do card
+                   (ex: chip de condição) NÃO deve abrir o detalhe do unit. */
+                if (clickedBtn) return;
                 openUnitDetail(uid);
             });
         });
