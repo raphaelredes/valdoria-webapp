@@ -932,6 +932,34 @@ async function _tryTelegramInitAuth() {
 async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
 
+    /* ── AUTO-LOGIN VIA TELEGRAM MINI APP (deve rodar ANTES do dev portal) ─
+     * Quando a pagina abre de dentro do Telegram (bot Menu Button ou link
+     * de WebApp), `window.Telegram.WebApp.initData` contem autenticacao
+     * HMAC pronta. Trocamos silenciosamente por um token de sessao via
+     * /api/game/init-session e redirecionamos direto para o jogo — sem
+     * exibir botoes de login.
+     *
+     * CRITICO: este check PRECISA rodar antes do "dev portal host mode"
+     * abaixo, porque Telegram.WebApp.initData so existe no TOP window
+     * (nao propaga para iframes). Se o dev-debug-panel tomar conta antes,
+     * o initData se perde e o auto-login nunca roda. */
+    if (_isInsideTelegram()) {
+        console.info('[WEB-AUTH] Telegram context detected — running silent auth BEFORE dev panel');
+        /* Oculta imediatamente a tela de login enquanto tentamos silent auth,
+         * evitando flash dos botoes antes do redirect. */
+        try {
+            var _loginScreen = document.getElementById('screen-login');
+            if (_loginScreen) _loginScreen.style.visibility = 'hidden';
+        } catch (_) { /* noqa: preflight */ }
+        var silentOk = await _tryTelegramInitAuth();
+        if (silentOk) return;
+        /* Fallback: restaura a tela de login se o silent auth falhou. */
+        try {
+            var _lsRestore = document.getElementById('screen-login');
+            if (_lsRestore) _lsRestore.style.visibility = '';
+        } catch (_) { /* noqa: preflight */ }
+    }
+
     /* BUG (2026-04-11): When ?env=dev is present but nodevpanel=1 is NOT,
      * this page will be taken over by dev-debug-panel.js and turned into
      * a host shell that embeds a real /web/?env=dev&nodevpanel=1 iframe.
@@ -953,28 +981,6 @@ async function _initWebAuth() {
     if (_isDevPortalHost) {
         console.info('[WEB-AUTH] Dev portal host mode — deferring all auth (checkExistingSession + OAuth return) to iframe');
         return;
-    }
-
-    /* ── AUTO-LOGIN VIA TELEGRAM MINI APP ───────────────────────────
-     * Quando a pagina abre de dentro do Telegram (bot Menu Button ou
-     * link de WebApp), `window.Telegram.WebApp.initData` contem a
-     * autenticacao pronta. Trocamos silenciosamente por um token de
-     * sessao via /api/game/init-session e redirecionamos direto para
-     * o jogo — sem exibir os botoes de login. */
-    if (_isInsideTelegram()) {
-        /* Oculta imediatamente a tela de login enquanto tentamos silent auth,
-         * evitando flash dos botoes antes do redirect. */
-        try {
-            var _loginScreen = document.getElementById('screen-login');
-            if (_loginScreen) _loginScreen.style.visibility = 'hidden';
-        } catch (_) { /* noqa: preflight */ }
-        var silentOk = await _tryTelegramInitAuth();
-        if (silentOk) return;
-        /* Fallback: restaura a tela de login se o silent auth falhou. */
-        try {
-            var _lsRestore = document.getElementById('screen-login');
-            if (_lsRestore) _lsRestore.style.visibility = '';
-        } catch (_) { /* noqa: preflight */ }
     }
 
     loadTelegramWidget();
