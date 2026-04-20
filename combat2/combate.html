@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:45:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:54:13Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -3716,12 +3716,14 @@ html.sim-combat-root .bf-pan-stage .battlefield {
 @keyframes lpListInRight  { from { transform: translateX(30px);  opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes lpListInLeft   { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .lp-empty { padding: 20px; text-align: center; color: var(--v-text-dim, #a09484); font-style: italic; font-size: 12px; }
-.lp-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; cursor: pointer; text-align: left; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text, #d4c8b0); transition: all .15s ease; }
+/* FIX 2026-04-20 v2: itens mais compactos pra caber 2 em Telegram DESKTOP
+   viewport baseline 430x700. Padding 10→7, gap 10→8, ico 26→22/28. */
+.lp-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; cursor: pointer; text-align: left; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text, #d4c8b0); transition: all .15s ease; }
 .lp-item:hover:not(.disabled) { border-color: rgba(212,200,176,.5); background: rgba(74,56,40,.4); transform: translateX(2px); }
 .lp-item:active:not(.disabled) { transform: scale(.98); }
 .lp-item.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.7); }
 .lp-item.disabled:hover { transform: none; border-color: var(--v-border, #4a3828); background: rgba(15,12,8,.5); }
-.lp-item-ico { font-size: 26px; flex-shrink: 0; width: 34px; text-align: center; }
+.lp-item-ico { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
 .lp-item-body { flex: 1; min-width: 0; }
 /* V1 Invocações Phase 4 (2026-04-19) — chip de razão por que skill está bloqueada.
    Aparece embaixo da descrição em itens .lp-item.disabled. UX: o jogador entende
@@ -13652,8 +13654,14 @@ function openSkillsPanel() {
 
        FIX 2026-04-20: 4 ainda overflowa em Telegram WebApp viewport (~430x700-750
        depois de chrome+ teclado virtual). Reduzido pra 3 — cabe sem scroll em
-       qualquer mobile, paginação aparece pra qualquer classe com 4+ skills. */
-    var PAGE_SIZE = 3;
+       qualquer mobile.
+
+       FIX 2026-04-20 v2: 3 AINDA overflowa em Telegram DESKTOP (viewport real
+       ~430x580-600 — mais baixo que mobile por causa do chrome do Telegram
+       Desktop + header bot). BASELINE NOVA: Telegram DESKTOP 430x700 é o target
+       mais restritivo. Com PAGE_SIZE=2, 2 skills × 95px + header 80px + filter
+       55px + pagination 40px + close 50px = ~430px — cabe com folga. */
+    var PAGE_SIZE = 2;
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
@@ -16674,7 +16682,11 @@ function showDice(value, cb, actor, context, opts) {
     var isPlayer = actor && actor.t === 'p';
     /* Iniciativa: todos rolam em sequencia automatica (evita travar a espera de clique + CTA "Pular"). */
     var initiativeSequence = !!(opts && opts.initiativeSequence);
-    var manualPlayerDice = isPlayer && !initiativeSequence;
+    /* FIX 2026-04-20: remote mode NÃO permite manual roll (servidor já rolou).
+       Só engine LOCAL do simulator deve ter tap-to-roll do player.
+       Fora disso (remote bot OU iniciativa): animação automática. */
+    var remoteMode = (window.__COMBAT_MODE === 'remote');
+    var manualPlayerDice = isPlayer && !initiativeSequence && !remoteMode;
     /* Player em combate: 5s, comeca no clique. NPC / iniciativa: auto. */
     var duration = manualPlayerDice ? 5000 : (1500 + Math.floor(Math.random() * 1500));
     /* Janela de interacao: clique do jogador so afeta enquanto t < 70%.
@@ -18262,10 +18274,15 @@ async function __combatAnimateOneEvent(ev) {
         else if (aU && aU.t === 'a') aUid = 'ally_' + ev.aIdx;
         /* D20 animation se temos o valor. Pula em OAs (rapid-fire). */
         if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
-            var d20Title = (ev.actorName || '?') + ' → ' + (ev.targetName || '?');
+            var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
+            var targetForDice = tU || { n: ev.targetName };
+            /* Passa combatTarget=targetForDice pra ativar layout VS (2 combatant
+               blocks lado-a-lado). Evita "WILZE..." truncado + meta em coluna
+               vertical em viewport baixo (Telegram WebApp desktop). */
             await new Promise(function (rD) {
                 try {
-                    showDice(ev.d20, rD, aU || { n: ev.actorName }, d20Title, {
+                    showDice(ev.d20, rD, actorForDice, ev.skillName || null, {
+                        combatTarget: targetForDice,
                         postResult: function () {
                             return {
                                 title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
@@ -18293,13 +18310,42 @@ async function __combatAnimateOneEvent(ev) {
             if (typeof _spawnFloatingDmgNumber === 'function') {
                 try { _spawnFloatingDmgNumber(tUid, 'ERROU', 'miss'); } catch (eS) {}
             }
-        } else {
-            if (elT) elT.classList.add('hit-flash');
-            setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
-            if (typeof _spawnFloatingDmgNumber === 'function') {
-                var dtxt = (ev.crit ? 'CRIT ' : '-') + (ev.dmgTotal | 0);
-                try { _spawnFloatingDmgNumber(tUid, dtxt, ev.crit ? 'crit' : 'dmg'); } catch (eS) {}
+            render(currentState);
+            await new Promise(function (r) { setTimeout(r, 420); });
+            return;
+        }
+        /* Hit: mostra DAMAGE dice antes do flash. Usa showDamageDice do simulator
+           com dados já resolvidos pelo server (ev.dmgRolls + ev.dmgDie + ev.dmgMod). */
+        if (typeof showDamageDice === 'function' && ev.dmgRolls && ev.dmgRolls.length) {
+            var aUnit = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
+            var tUnit = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
+            var dmgModCombined = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
+            var dmgDieSize = (ev.dmgDie | 0) || 6;
+            console.info('[C-REM:DMG] showDamageDice rolls=' + JSON.stringify(ev.dmgRolls)
+                + ' die=' + dmgDieSize
+                + ' crit=' + !!ev.crit
+                + ' mod=' + dmgModCombined
+                + ' total=' + ev.dmgTotal);
+            try {
+                await showDamageDice(
+                    ev.dmgRolls,
+                    dmgDieSize,
+                    !!ev.crit,
+                    aUnit || { n: ev.actorName, atk: ev.atk },
+                    tUnit || { n: ev.targetName, hp: ev.oldHp, ac: ev.ac },
+                    ev.oldHp | 0,
+                    ev.newHp | 0,
+                    dmgModCombined
+                );
+            } catch (eDmg) {
+                console.warn('[C-REM:DMG] showDamageDice falhou', eDmg && eDmg.message);
             }
+        }
+        if (elT) elT.classList.add('hit-flash');
+        setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
+        if (typeof _spawnFloatingDmgNumber === 'function') {
+            var dtxt = (ev.crit ? 'CRIT ' : '-') + (ev.dmgTotal | 0);
+            try { _spawnFloatingDmgNumber(tUid, dtxt, ev.crit ? 'crit' : 'dmg'); } catch (eS) {}
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 420); });
