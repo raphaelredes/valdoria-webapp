@@ -568,6 +568,13 @@ html, body { height: 100vh; overflow: hidden; }
 }
 .sim-btn-agir { min-width: 200px; font-weight: 700; letter-spacing: 2px; text-transform: none; }
 
+/* FIX (2026-04-20): volume button (.va-float) fica sobreposto pelo dock da
+   Agir em combate (dock bottom:0 com altura ~70-84px). Sobe o --va-bottom-offset
+   pra que o botão fique acima do dock quando em combate. */
+body.combat2-has-dock .va-float {
+    --va-bottom-offset: 96px;
+}
+
 /* Action bar grid 2x2 */
 .action-btns-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
 .action-btns-grid .action-btn { padding: 12px 8px; font-size: var(--v-font-base, 13px); }

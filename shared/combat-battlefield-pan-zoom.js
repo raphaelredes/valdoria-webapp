@@ -29,9 +29,11 @@
         var scale = 1;
         var tx = 0;
         var ty = 0;
-        var MIN = 0.55;
+        var MIN = 0.40;
         var MAX = 2.45;
+        /* Threshold gordo pra touch (dedo wobbla no toque). Mouse usa o antigo. */
         var PAN_THRESH = 10;
+        var TOUCH_PAN_THRESH = 24;
         var lastPanTs = 0;
 
         var mouseActive = null;
@@ -40,6 +42,29 @@
 
         function apply() {
             stage.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0) scale(' + scale + ')';
+        }
+
+        /* Fit stage into viewport (height-limited): calcula scale que cabe
+           todas as 4 linhas da arena sem cortar retaguarda aliada.
+           Telegram WebApp em mobile força viewport estreito e alto; cells
+           usam clamp(96px,22.5vw,112px) → 4 rows excedem altura disponível. */
+        function computeFitScale() {
+            var vpW = viewport.clientWidth || 0;
+            var vpH = viewport.clientHeight || 0;
+            var stW = stage.scrollWidth || stage.offsetWidth || vpW;
+            var stH = stage.scrollHeight || stage.offsetHeight || vpH;
+            if (vpW <= 0 || vpH <= 0 || stH <= 0) return 1;
+            var sW = vpW / stW;
+            var sH = vpH / stH;
+            var s = Math.min(sW, sH, 1);
+            return clamp(s, MIN, 1);
+        }
+
+        function applyFit() {
+            scale = computeFitScale();
+            tx = 0;
+            ty = 0;
+            apply();
         }
 
         function clampPanSoft() {
@@ -123,7 +148,11 @@
             zoomAtViewport(mx, my, dir);
         }
 
-        /* ---------- Toque: pan 1 dedo + pinça 2 dedos ---------- */
+        /* ---------- Toque: pan 1 dedo + pinça 2 dedos ----------
+           FIX (2026-04-20): quando o toque inicial cai em .cell/[data-clickable]
+           ou em um <button>, NAO inicia pan. Previne bug onde dedo wobbla
+           ~10-20px no toque em card de inimigo e o panzoom rouba o click,
+           bloqueando seleção de alvo. Pinça 2 dedos continua permitida. */
         function onTouchStart(e) {
             if (e.touches.length === 2) {
                 touchPan = null;
@@ -143,6 +172,15 @@
             if (e.touches.length === 1) {
                 pinch = null;
                 var tt = e.touches[0];
+                /* Nao inicia pan se o toque é em elemento clicavel (card, botao). */
+                if (e.target && e.target.closest && (
+                        e.target.closest('[data-clickable="1"]') ||
+                        e.target.closest('button') ||
+                        e.target.closest('a') ||
+                        e.target.closest('[data-act]'))) {
+                    touchPan = null;
+                    return;
+                }
                 touchPan = {
                     sx: tt.clientX,
                     sy: tt.clientY,
@@ -172,7 +210,8 @@
                 var t = e.touches[0];
                 var dx = t.clientX - touchPan.sx;
                 var dy = t.clientY - touchPan.sy;
-                if (!touchPan.didPan && dist(0, 0, dx, dy) > PAN_THRESH) touchPan.didPan = true;
+                /* Threshold maior pra touch (dedo wobbla). */
+                if (!touchPan.didPan && dist(0, 0, dx, dy) > TOUCH_PAN_THRESH) touchPan.didPan = true;
                 if (touchPan.didPan) {
                     e.preventDefault();
                     tx = touchPan.stx + dx;
@@ -191,7 +230,17 @@
             }
         }
 
-        apply();
+        /* Apply fit-scale on mount — 2 passes (DOM may not be laid out yet on first frame).
+           Sem fit inicial, 4 rows da arena (RETAGUARDA aliada) ficam cortadas em viewports
+           mobile estreitos (Telegram WebApp ~430x700). */
+        applyFit();
+        requestAnimationFrame(applyFit);
+        setTimeout(applyFit, 80);
+
+        /* Re-fit em resize / orientationchange. */
+        function onResize() { applyFit(); }
+        window.addEventListener('resize', onResize);
+        window.addEventListener('orientationchange', onResize);
 
         viewport.addEventListener('pointerdown', onPointerDown);
         viewport.addEventListener('pointermove', onPointerMove);
@@ -216,6 +265,8 @@
             viewport.removeEventListener('touchend', onTouchEnd);
             viewport.removeEventListener('touchcancel', onTouchEnd);
             window.removeEventListener('click', onWinClickCapture, true);
+            window.removeEventListener('resize', onResize);
+            window.removeEventListener('orientationchange', onResize);
             stage.style.transform = '';
         };
     }

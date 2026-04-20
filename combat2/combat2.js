@@ -51,7 +51,12 @@
         { id: 'fix-attack-click-guard',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:8367,11912',  desc: 'Click no card inimigo em modo selectingTarget: guard closest(button) refinado (só data-act bloqueia)' },
         { id: 'fix-turn-queue-heraldic',  phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:9708-9745',   desc: 'buildTurnQueue usa SVG heraldic + cls-slug (era emoji genérico)' },
         { id: 'fix-ally-fallback-v8',     phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:9862-9880',   desc: 'Ally NPC sem cls mapeada usa ic-inimigo + cls-aliado (verde-aço) em vez de cair no fallback legado' },
-        { id: 'fix-music-sync-robust',    phase: 'V1-BugFix',    date: '2026-04-20', ref: 'audio-manager.js',        desc: 'syncCombat2Music com targetKey unificada; só re-dispara em mudança de track conceitual' }
+        { id: 'fix-music-sync-robust',    phase: 'V1-BugFix',    date: '2026-04-20', ref: 'audio-manager.js',        desc: 'syncCombat2Music com targetKey unificada; só re-dispara em mudança de track conceitual' },
+        /* 2026-04-20 rev2 — 4 correções de UX mobile após print user. */
+        { id: 'fix-arena-auto-fit',       phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:viewport',   desc: 'Pan-zoom aplica scale inicial fit-to-viewport — 4 rows (retaguarda aliada) sempre visíveis no mobile' },
+        { id: 'fix-panzoom-no-card-pan',  phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:8367',       desc: 'Pan-zoom NÃO inicia em [data-clickable]/button: dedo wobbla em card inimigo não rouba click de target' },
+        { id: 'fix-music-keep-current',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'audio-manager.js',        desc: 'syncCombat2Music usa ValdoriaAudio.getCurrentTrack(): re-dispara só se AM perdeu track (previne corte Agir→Habilidades)' },
+        { id: 'fix-volume-btn-overlap',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:volume',     desc: '.va-float com --va-bottom-offset:96px quando body.combat2-has-dock: botão de volume sobe acima do dock Agir' }
     ];
 
     /* Loga PORT_LOG UMA vez no boot para rastreio pela GUI (filtro [COMBAT2:). */
@@ -106,11 +111,12 @@
         if (!s || typeof ValdoriaAudio === 'undefined' || !ValdoriaAudio.play) {
             return;
         }
-        /* FIX (2026-04-20): sync robusto pra evitar cortes de musica em
+        /* FIX (2026-04-20 v2): sync robusto pra evitar cortes de musica em
            popups/overlays/animacoes dentro do combate. Estrategia:
            - Guard por _combat2MusicKey: so re-dispara ao mudar de track
-           - NAO depende de _audio.paused (pode ser suspend temporario do
-             WebView que o audio-manager auto-retoma via unlock events)
+             conceitual (intro/init/active → combat, victory/defeat).
+           - MAS: se current track ja e 'combat' e audio-manager reporta
+             track diferente (viewport changes, outro WebApp), re-dispara.
            - Detecta mudancas de fase real (intro → init → active → victory). */
         var ph = s.ph || '';
         var targetKey = null;
@@ -127,13 +133,24 @@
             targetKey = 'combat';
         }
         if (!targetKey) return;
-        /* Re-dispara APENAS se a track conceitual mudou (ex: combat → victory).
-           Dentro da mesma track (ex: varios renders em fase 'active' todas
-           em 'combat'), nao faz nada — audio-manager continua tocando. */
-        if (_combat2MusicKey !== targetKey) {
+        /* Guard 1: audio-manager ja sabe qual track esta tocando.
+           Se for a mesma do target, nao faz nada (audio-manager.play tambem
+           tem seu proprio guard em linha 19, mas evitamos chamar a API). */
+        var amCurrentTrack = null;
+        try {
+            if (typeof ValdoriaAudio.getCurrentTrack === 'function') {
+                amCurrentTrack = ValdoriaAudio.getCurrentTrack();
+            }
+        } catch (eG) {}
+        if (amCurrentTrack === targetKey) {
+            /* Audio-manager ja esta na track certa. So atualizar nosso key. */
             _combat2MusicKey = targetKey;
-            try { ValdoriaAudio.play(targetKey); } catch (eP) {}
+            return;
         }
+        /* Re-dispara se (a) primeira vez ou (b) mudou track conceitual ou
+           (c) audio-manager perdeu track (ex: veio de outra WebApp ou viewport). */
+        _combat2MusicKey = targetKey;
+        try { ValdoriaAudio.play(targetKey); } catch (eP) {}
     }
 
     /* ============================================================
@@ -1603,6 +1620,12 @@
 
         setHTML(app, html);
         bindActions();
+        /* FIX (2026-04-20): toggle body class pra CSS do volume button subir
+           quando o dock da Agir está visível (evita overlap). */
+        try {
+            var hasDock = !!document.querySelector('.sim-action-dock');
+            document.body.classList.toggle('combat2-has-dock', hasDock);
+        } catch (eDk) {}
         /* V1 Invocações Phase 1 (Fase 4 port, 2026-04-20) — atualiza visibilidade
            do bonus grid, focus familiar link e Encerrar Turno conforme estado do player. */
         _updateActionSheetState(s);
