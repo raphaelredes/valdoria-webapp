@@ -56,7 +56,11 @@
         { id: 'fix-arena-auto-fit',       phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:viewport',   desc: 'Pan-zoom aplica scale inicial fit-to-viewport — 4 rows (retaguarda aliada) sempre visíveis no mobile' },
         { id: 'fix-panzoom-no-card-pan',  phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:8367',       desc: 'Pan-zoom NÃO inicia em [data-clickable]/button: dedo wobbla em card inimigo não rouba click de target' },
         { id: 'fix-music-keep-current',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'audio-manager.js',        desc: 'syncCombat2Music usa ValdoriaAudio.getCurrentTrack(): re-dispara só se AM perdeu track (previne corte Agir→Habilidades)' },
-        { id: 'fix-volume-btn-overlap',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:volume',     desc: '.va-float com --va-bottom-offset:96px quando body.combat2-has-dock: botão de volume sobe acima do dock Agir' }
+        { id: 'fix-volume-btn-overlap',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:volume',     desc: '.va-float com --va-bottom-offset:96px quando body.combat2-has-dock: botão de volume sobe acima do dock Agir' },
+        /* 2026-04-20 rev3 — paridade exata combate.html + responsividade total dos popups. */
+        { id: 'fix-card-click-parity',    phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:12086-12200',desc: 'bindActions click handler idêntico a combate.html: ev.target.closest(button) simples (antes tinha guard especial que divergia)' },
+        { id: 'fix-popups-responsive',    phase: 'V1-Polish',    date: '2026-04-20', ref: 'combate.html:list-panel', desc: 'list-panel/target-confirm/unit-detail/lp-help/v8-cond-popup todos em max-height:92vh + lp-list scroll interno' },
+        { id: 'add-target-click-logs',    phase: 'V1-DevOps',    date: '2026-04-20', ref: 'combate.html:debug',      desc: 'Console [C2:CLICK]/[C2:TARGET]/[C2:CONFIRM] com timestamps pra rastrear flow de seleção de alvo' }
     ];
 
     /* Loga PORT_LOG UMA vez no boot para rastreio pela GUI (filtro [COMBAT2:). */
@@ -2061,37 +2065,35 @@
 
     function bindActions() {
         document.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', onBtnClick); });
-        /* Cards clicaveis */
+        /* Cards clicaveis — PARIDADE combate.html:12086-12200 (fonte canônica).
+           Handler simples: se tap em qualquer <button> filho, deixa o botão tratar.
+           Senão, rota por uid (enemy_/ally_/player) + estado (_selectingTarget/_selectHealTarget/_pendingHealItem). */
         document.querySelectorAll('[data-clickable="1"]').forEach(function (c) {
             c.addEventListener('click', function (ev) {
+                /* Paridade combate.html:12093: se hit em qualquer <button>, NÃO trata card. */
+                if (ev.target.closest('button')) {
+                    console.info('[C2:CLICK] card_click_ignored target=button');
+                    return;
+                }
                 var uid = this.getAttribute('data-unit-id');
-                /* FIX (2026-04-20): quando em modo de seleção de alvo,
-                   qualquer click no card inimigo/aliado deve confirmar.
-                   O guard closest('button') antes impedia click porque
-                   .c-cond-chip (condições buff/debuff) é <button> e capturava
-                   cliques. Agora só bloqueamos botões REAIS de ação (data-act). */
-                var clickedBtn = ev.target.closest('button');
-                var isActionBtn = clickedBtn && clickedBtn.hasAttribute('data-act');
+                console.info('[C2:CLICK] card uid=' + uid
+                    + ' selectingTarget=' + _selectingTarget
+                    + ' healTarget=' + _selectHealTarget
+                    + ' pendingHealItem=' + (_pendingHealItem ? 'y' : 'n'));
                 if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
-                    if (isActionBtn) return;  // só bloqueia botão real de ação
-                    console.info('[C2] target select enemy', uid);
                     showTargetConfirm(parseInt(uid.slice(6), 10));
                     return;
                 }
                 if ((_selectHealTarget || _pendingHealItem) && uid === 'player') {
-                    if (isActionBtn) return;
                     showHealTargetConfirm(currentState.p_idx);
                     return;
                 }
                 if ((_selectHealTarget || _pendingHealItem) && uid && uid.indexOf('ally_') === 0) {
-                    if (isActionBtn) return;
                     var aixH = parseInt(uid.slice(5), 10);
                     if (!isNaN(aixH)) showHealTargetConfirm(aixH);
                     return;
                 }
-                /* Fora do modo de seleção: clicar em botão dentro do card
-                   (ex: chip de condição) NÃO deve abrir o detalhe do unit. */
-                if (clickedBtn) return;
+                /* Fora do modo de seleção: abre detalhe do unit. */
                 openUnitDetail(uid);
             });
         });
@@ -2362,6 +2364,9 @@
         _pendingPowerAttack = false;
         _pendingHealItem = null;
         render(currentState);
+        console.info('[C2:CONFIRM] confirmPendingAction tgtIdx=' + tgtIdx
+            + ' slot=' + slot + ' powerAttack=' + pa
+            + ' bagHealBagIdx=' + (bagHeal && bagHeal.bagIdx));
         if (bagHeal && bagHeal.bagIdx != null) {
             await remoteAction({ type: 'use_item', slot: bagHeal.bagIdx, target: tgtIdx });
             return;
@@ -3944,7 +3949,13 @@
         var s = currentState;
         var p = s.order[s.p_idx];
         var u = s.order[tgtIdx];
-        if (!u || !u.alive) return;
+        console.info('[C2:TARGET] showTargetConfirm tgtIdx=' + tgtIdx
+            + ' alive=' + (u && u.alive)
+            + ' name=' + (u && u.n));
+        if (!u || !u.alive) {
+            console.warn('[C2:TARGET] aborted — target not valid');
+            return;
+        }
         var sk = (_pendingSkillSlot != null && p.skills && p.skills[_pendingSkillSlot]) ? p.skills[_pendingSkillSlot] : null;
         var skObj = sk && typeof sk === 'object' ? sk : null;
         var atkSkill = (skObj && skObj.kind === 'attack') ? skObj : null;
