@@ -976,8 +976,9 @@ async function _initWebAuth() {
      * auto-login flow. */
     var _params = new URLSearchParams(window.location.search);
     var _isDevEnv = _params.get('env') === 'dev';
+    var _wantsDevPanel = _params.get('devpanel') === '1';  // opt-in explicito no subdominio dev.*
     var _isIframe = _params.get('nodevpanel') === '1';
-    var _isDevPortalHost = _isDevEnv && !_isIframe;
+    var _isDevPortalHost = (_isDevEnv || _wantsDevPanel) && !_isIframe;
     if (_isDevPortalHost) {
         console.info('[WEB-AUTH] Dev portal host mode — deferring all auth (checkExistingSession + OAuth return) to iframe');
         return;
