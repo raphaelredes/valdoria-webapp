@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T21:37:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T21:40:23Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -11933,7 +11933,12 @@ function render(s) {
         }
         html += '<div class="res-log res-log-full"><div class="res-log-title">Log do combate</div>';
         html += '<div class="lp-log-scroll res-log-scroll">' + simBuildCombatLogHtml(s) + '</div></div>';
-        html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="restart">🔄 Novo Combate</button></div>';
+        /* REMOTE MODE: botão retorna ao Game Hub via transition API; local mantém 'restart'. */
+        if (window.__COMBAT_MODE === 'remote') {
+            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close-remote">✓ Continuar</button></div>';
+        } else {
+            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="restart">🔄 Novo Combate</button></div>';
+        }
         html += '</div>';
         setHTML(app, html);
         bindActions();
@@ -12287,6 +12292,64 @@ async function __combatRemoteAction(action) {
     }
 }
 
+/* Leave combat remote → transition API. Paridade combat2.js leaveCombatToOrigin. */
+async function __combatLeaveRemoteToOrigin() {
+    var ph = (currentState && currentState.ph) || 'victory';
+    var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
+    var origin = window.__COMBAT_ORIGIN_APP || 'game';
+    try { window.__valdoria_transitioning = true; } catch (eT) {}
+    console.info('[COMBAT-REMOTE] leaveToOrigin result=' + result + ' origin=' + origin);
+    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.close();
+            }
+        } catch (eC) {}
+        return;
+    }
+    var url = window.__COMBAT_API_BASE + '/api/webapp/transition';
+    try {
+        var headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.__COMBAT_TOKEN
+        };
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+            headers['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
+        }
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            headers['X-Idempotency-Key'] = window.crypto.randomUUID();
+        }
+        var r = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                from: 'combat2',
+                to: origin,
+                result: result,
+                uid: window.__COMBAT_USER_ID
+            })
+        });
+        var data = await r.json();
+        if (data && data.url) {
+            location.replace(data.url);
+        } else {
+            console.warn('[COMBAT-REMOTE] transition sem URL — fechando webapp', data);
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.close();
+                }
+            } catch (eC2) {}
+        }
+    } catch (e) {
+        console.error('[COMBAT-REMOTE] transition failed', e);
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.close();
+            }
+        } catch (eC3) {}
+    }
+}
+
 function onBtnClick(ev) {
     var b = ev.currentTarget;
     var act = b.dataset.act;
@@ -12382,6 +12445,11 @@ function onBtnClick(ev) {
         } else if (act === 'restart') {
             /* Não faz sentido em remote — bot gerencia via close. Ignora. */
             console.info('[COMBAT-REMOTE] act=restart — ignorado em remote mode');
+            return;
+        } else if (act === 'close-remote') {
+            /* Fim de combate: chama POST /api/webapp/transition pra voltar ao Game Hub.
+               Paridade com combat2.js leaveCombatToOrigin. */
+            void __combatLeaveRemoteToOrigin();
             return;
         }
         /* Falhou nos ramos acima mas chegou aqui = é UI_ONLY, fallthrough local. */
