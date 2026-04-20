@@ -919,6 +919,290 @@
         return html;
     }
 
+    /* ============================================================
+       V8 HERALDIC helpers — port simulador (linhas 9836-10189 do combate.html)
+       Fase 2/14 do port. NÃO chamado ainda — Fase 3 fará wiring via buildCell.
+       Plano completo em docs/sistemas/combat2-port-simulador-dev.md
+       ============================================================ */
+
+    /* Mapeamento classe PT-BR -> ic-XXX (SVG symbol injetado por shared/heraldic-icons.js) */
+    var CLASS_ICON_MAP = {
+        'Guerreiro':    'ic-guerreiro',
+        'Mago':         'ic-mago',
+        'Ladino':       'ic-ladino',
+        'Clérigo':      'ic-clerigo',
+        'Paladino':     'ic-paladino',
+        'Bárbaro':      'ic-barbaro',
+        'Patrulheiro':  'ic-patrulheiro',
+        'Bardo':        'ic-bardo',
+        'Druida':       'ic-druida',
+        'Monge':        'ic-monge',
+        'Feiticeiro':   'ic-feiticeiro'
+    };
+
+    /* Mapeamento classe PT-BR -> cls-XXX (ativa token CSS --card-accent em combat2.css) */
+    var CLASS_SLUG_MAP = {
+        'Guerreiro':    'cls-guerreiro',
+        'Mago':         'cls-mago',
+        'Ladino':       'cls-ladino',
+        'Clérigo':      'cls-clerigo',
+        'Paladino':     'cls-paladino',
+        'Bárbaro':      'cls-barbaro',
+        'Patrulheiro':  'cls-patrulheiro',
+        'Bardo':        'cls-bardo',
+        'Druida':       'cls-druida',
+        'Monge':        'cls-monge',
+        'Feiticeiro':   'cls-feiticeiro'
+    };
+
+    /* Resolve unit -> id do SVG heráldico (ic-XXX). Summons têm ícones específicos. */
+    function _heraldicIconOf(u, utype) {
+        if (!u) return null;
+        if (utype === 'enemy') return u.isBoss ? 'ic-boss' : 'ic-inimigo';
+        /* V1.6 PHB-fiel (2026-04-19) — summons usam ícones específicos por tipo. */
+        if (u.iconHeraldic) return u.iconHeraldic;
+        if (u.summonKind === 'spiritual_weapon') return 'ic-spiritual-weapon';
+        if (u.summonKind === 'find_steed') return 'ic-find_steed';
+        if (u.summonKind === 'animal_companion') return 'ic-animal_companion';
+        if (u.summonKind === 'familiar') {
+            /* Distingue Mago (Pseudodragon) vs Bardo (Sprite) pelo nome. */
+            if (u.n === 'Sprite') return 'ic-sprite';
+            return 'ic-familiar';
+        }
+        if (u.summonKind) return 'ic-summon';
+        return CLASS_ICON_MAP[u.cls] || null;
+    }
+
+    /* Resolve unit -> classe slug (cls-xxx). Summons herdam cor do caster. */
+    function _heraldicClsSlugOf(u, utype) {
+        if (!u) return '';
+        if (utype === 'enemy') return u.isBoss ? 'cls-boss' : 'cls-inimigo';
+        /* V1 Invocações Phase 3 (2026-04-18) — summons herdam cor do conjurador
+           (Arma Espiritual de Clérigo = cls-clerigo amarelo dourado, etc.). */
+        if (u.summonKind && u.summonedBy != null && currentState && currentState.order) {
+            var caster = currentState.order[u.summonedBy];
+            if (caster && caster.cls && CLASS_SLUG_MAP[caster.cls]) {
+                return CLASS_SLUG_MAP[caster.cls];
+            }
+        }
+        return CLASS_SLUG_MAP[u.cls] || '';
+    }
+
+    /* Subtítulo da classe no card V8 (class_tag). Inclui nível quando > 0. */
+    function _v8ClassTagOf(u, utype) {
+        if (utype === 'enemy') {
+            var baseE = u.isBoss ? 'Chefe' : 'Inimigo';
+            var lvlE = (u && u.lvl != null) ? (u.lvl | 0) : 0;
+            return lvlE > 0 ? baseE + ' · Nv ' + lvlE : baseE;
+        }
+        /* V1.6 PHB-fiel — summons ganham label específico por tipo. */
+        if (u && u.summonKind) {
+            var SUMMON_TAG_MAP = {
+                'familiar': 'Familiar',
+                'find_steed': 'Montaria',
+                'animal_companion': 'Companheiro',
+                'spiritual_weapon': 'Arma Espectral'
+            };
+            return SUMMON_TAG_MAP[u.summonKind] || 'Invocação';
+        }
+        var base = (u && u.cls) || 'Aliado';
+        var lvl = (u && u.lvl != null) ? (u.lvl | 0) : 0;
+        if (lvl > 0) return base + ' · Nv ' + lvl;
+        return base;
+    }
+
+    /* Label curto (3-4 chars) do tipo de recurso pra stats-row. */
+    function _v8ResLabelOf(type) {
+        var map = { mp: 'MP', vigor: 'VIG', furia: 'FÚR', energia: 'ENE', ki: 'KI', foco: 'FOC' };
+        var k = String(type || '').toLowerCase();
+        return map[k] || (k ? k.slice(0, 4).toUpperCase() : 'REC');
+    }
+
+    /* Rastreamento do estado anterior das barras (HP/recurso) pra flash-dmg/heal/res.
+       Keyed por uid da célula. Populado por buildCellInnerHTML(uid). */
+    var _lastBarState = {};
+
+    /* Emite markup V8 LITERAL do mockup card-icons-heraldic.html.
+       Markup interno: .c-name + .c-portrait (SVG) + .c-class-tag + .c-stats + .c-conditions.
+       Fallback legado (unit-row + ico emoji) para classes não mapeadas.
+       Chamado por buildCell (Fase 3, wiring).
+
+       Args:
+         u        unit do state.order
+         utype    'player' | 'ally' | 'enemy'
+         opt      { displayHp?:num, forceHideInit?:bool }
+         uid      id único da célula (necessário pra flash tracking) */
+    function buildCellInnerHTML(u, utype, opt, uid) {
+        opt = opt || {};
+        var inner = '';
+        var iconId = _heraldicIconOf(u, utype);
+        var isHeraldic = !!iconId;
+
+        /* Badges de canto (init e AC) — antes dos blocos V8. */
+        var showInitBadge = !opt.forceHideInit && currentState && currentState.ph === 'intro';
+        if (showInitBadge) {
+            if (u.initRevealed) inner += '<div class="cell-init">🎲' + u.init + '</div>';
+            else if (u.init !== undefined) inner += '<div class="cell-init pending">?</div>';
+        }
+        if (u.ac !== undefined && !isHeraldic) inner += '<div class="cell-ac">' + escHtml(String(u.ac)) + '</div>';
+
+        if (isHeraldic) {
+            /* V8 heráldico: c-name → c-portrait (SVG crest) → c-class-tag (borda dourada). */
+            inner += '<div class="c-name">' + escHtml(u.n || u.cls || '—') + '</div>';
+            inner += '<div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconId + '"/></svg></div>';
+            inner += '<div class="c-class-tag">' + escHtml(_v8ClassTagOf(u, utype)) + '</div>';
+        } else {
+            /* Fallback legado (unidades sem classe mapeada). */
+            inner += '<div class="unit-row">';
+            inner += '<div class="unit-side left"></div>';
+            inner += '<div class="unit-ico">' + escHtml(u.ico) + '</div>';
+            inner += '<div class="unit-side right"></div>';
+            inner += '</div>';
+        }
+
+        /* Barras HP + recurso legadas (CSS .v8-card .cell-bars { display: none }). */
+        inner += '<div class="cell-bars">';
+        var hpVal = opt.displayHp != null ? opt.displayHp : u.hp;
+        var hpPct = Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100)));
+        var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+        var fillCls = hpPct > 60 ? 'fill-hp-high' : (hpPct > 25 ? 'fill-hp-mid' : 'fill-hp-low');
+        inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + hpVal + '/' + u.mhp + '</div></div>';
+        if (u.res && u.res.max > 0) {
+            var rPct = Math.max(0, Math.min(100, Math.round((u.res.value / u.res.max) * 100)));
+            var rCls = u.res.type === 'mp' ? 'fill-res-mp' : (u.res.type === 'energia' ? 'fill-res-energia' : (u.res.type === 'vigor' ? 'fill-res-vigor' : 'fill-res-furia'));
+            inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + rCls + '" style="width:' + rPct + '%"></div></div><div class="bar-num res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + '/' + u.res.max + '</div></div>';
+        }
+        inner += '</div>';
+
+        /* V8 stats grid: PV (topo-esq) + recurso (baixo-esq) + CA (direita span rows).
+           Markup LITERAL do card-icons-heraldic.html. */
+        if (isHeraldic) {
+            var hpPctStat = u.mhp > 0 ? Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100))) : 0;
+            var hpThr = hpPctStat > 60 ? 'high' : (hpPctStat > 25 ? 'mid' : 'low');
+            /* Captura estado anterior pra animar from→to (flash-dmg/heal/res). */
+            var _prevBar = (uid != null ? _lastBarState[uid] : null) || {};
+            var _hpFlashCls = '';
+            if (_prevBar.hp != null && _prevBar.hp !== hpPctStat) {
+                _hpFlashCls = (hpPctStat < _prevBar.hp) ? ' flash-dmg' : ' flash-heal';
+            }
+            var _hpInitPct = (_prevBar.hp != null) ? _prevBar.hp : hpPctStat;
+            inner += '<div class="c-stats">';
+            if (!u.noTarget) {
+                /* V1 Invocações Phase 2 — summons noTarget (Arma Espiritual) SEM HP/CA. */
+                inner += '<div class="c-stat c-stat--hp' + _hpFlashCls + '" style="--bar-pct:' + _hpInitPct + '%" data-bar-target="' + hpPctStat + '">';
+                inner += '<div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>';
+                inner += '<span class="c-stat-label">PV</span><span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + hpVal + '/' + u.mhp + '</span>';
+                inner += '</div>';
+            } else if (u.durLeft != null) {
+                /* Mostra duração restante no lugar do HP (rounds). */
+                inner += '<div class="c-stat c-stat--summon-dur">';
+                inner += '<span class="c-stat-label">DUR</span><span class="c-stat-val c-stat-val--summon-dur">' + u.durLeft + 'r</span>';
+                inner += '</div>';
+            }
+            var _curResPct = null;
+            if (u.res && u.res.max > 0) {
+                var resLbl = _v8ResLabelOf(u.res.type);
+                var resType = String(u.res.type || '').toLowerCase();
+                _curResPct = Math.max(0, Math.min(100, Math.round((u.res.value / u.res.max) * 100)));
+                var _resFlashCls = '';
+                if (_prevBar.res != null && _prevBar.res !== _curResPct) {
+                    _resFlashCls = ' flash-res';
+                }
+                var _resInitPct = (_prevBar.res != null) ? _prevBar.res : _curResPct;
+                inner += '<div class="c-stat c-stat--' + resType + _resFlashCls + '" style="--bar-pct:' + _resInitPct + '%" data-bar-target="' + _curResPct + '">';
+                inner += '<div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resType + '"></span></div>';
+                inner += '<span class="c-stat-label">' + resLbl + '</span><span class="c-stat-val c-stat-val--' + resType + '">' + u.res.value + '/' + u.res.max + '</span>';
+                inner += '</div>';
+            }
+            if (u.ac !== undefined && !u.noTarget) {
+                inner += '<div class="c-stat c-stat--ca"><span class="c-stat-label">CA</span><span class="c-stat-val c-stat-val--ca">' + escHtml(String(u.ac)) + '</span></div>';
+            }
+            inner += '</div>';
+            if (uid != null) _lastBarState[uid] = { hp: hpPctStat, res: _curResPct };
+        }
+
+        /* Conditions strip (chips buff/debuff clicáveis — .c-cond-chip com payload JSON). */
+        if (isHeraldic) {
+            var visibleEffects = (u.se || []).filter(function (st) {
+                if (!st) return false;
+                if (st.decOn && !st.tickCombat2 && !(st.turnsLeft | 0)) return false;
+                return true;
+            });
+            if (visibleEffects.length) {
+                inner += '<div class="c-conditions" role="list" aria-label="Condições ativas">';
+                visibleEffects.forEach(function (st) {
+                    var kindCls = st.kind === 'debuff' ? 'debuff' : 'buff';
+                    var tl = st.turnsLeft;
+                    var tlStr = '';
+                    if (tl != null && (tl | 0) > 0) tlStr = '<span class="c-cond-tl">' + tl + '</span>';
+                    else if (st.repeatSave && st.saveDc != null) tlStr = '<span class="c-cond-tl c-cond-tl--save">\u221e</span>';
+                    var label = st.dndCondition || st.condName || st.n || st.id || '';
+                    var popPayload = {
+                        id: st.id || '', ico: st.ico || '\u2022', kind: kindCls,
+                        name: label, desc: st.desc || '', rule: st.condRule || '',
+                        turnsLeft: (tl | 0) || null,
+                        saveDc: st.saveDc || null, saveAbility: st.saveAbility || ''
+                    };
+                    var payloadAttr = escHtml(JSON.stringify(popPayload));
+                    inner += '<button type="button" class="c-cond-chip ' + kindCls + '"' +
+                             ' data-cond-payload="' + payloadAttr + '"' +
+                             ' aria-label="' + escHtml(label) + '"' +
+                             ' title="' + escHtml(label) + ' — clique para detalhes">' +
+                             escHtml(st.ico || '\u2022') +
+                             tlStr + '</button>';
+                });
+                inner += '</div>';
+            }
+        }
+        /* Death saves / stable / dead tags. */
+        if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.dying && !u.stable && !u.isDead) {
+            ensureDeathSaves(u);
+            var ds = u.deathSaves;
+            var si, pi = '';
+            pi += '<div class="cell-death-saves" role="status" aria-live="polite">';
+            pi += '<span class="cds-skull" aria-hidden="true">☠</span>';
+            pi += '<div class="cds-tracks">';
+            pi += '<div class="cds-track" aria-label="Sucessos no teste de morte"><span class="cds-track-lbl" aria-hidden="true">S</span><span class="cds-pips">';
+            for (si = 0; si < 3; si++) pi += '<span class="cds-pip' + (si < (ds.s | 0) ? ' cds-pip--ok' : '') + '"></span>';
+            pi += '</span></div>';
+            pi += '<div class="cds-track" aria-label="Falhas no teste de morte"><span class="cds-track-lbl" aria-hidden="true">F</span><span class="cds-pips">';
+            for (si = 0; si < 3; si++) pi += '<span class="cds-pip' + (si < (ds.f | 0) ? ' cds-pip--bad' : '') + '"></span>';
+            pi += '</span></div></div></div>';
+            inner += pi;
+        } else if ((utype === 'player' || utype === 'ally') && u.hp <= 0 && u.stable && !u.isDead) {
+            inner += '<div class="cell-stable-tag">Estável · 0 PV</div>';
+        } else if ((utype === 'player' || utype === 'ally') && u.isDead) {
+            inner += '<div class="cell-dead-tag">MORTO</div>';
+        }
+        /* Status chips legado (cells NÃO heráldicas — heráldicas usam .c-conditions). */
+        if (!isHeraldic && u.se && u.se.length) {
+            inner += '<div class="cell-status-chips cell-se" role="list" aria-label="Efeitos ativos">';
+            u.se.forEach(function (st) {
+                if (!st) return;
+                if (st.decOn && !st.tickCombat2) {
+                    if (!st.turnsLeft) return;
+                }
+                var label = st.dndCondition ? st.dndCondition : (st.n || st.id || '');
+                var k = st.kind === 'debuff' ? 'debuff' : 'buff';
+                var tl = st.turnsLeft;
+                var tlStr = '';
+                if (tl != null && tl !== '' && (tl | 0) > 0) tlStr = '<span class="se-turns">' + tl + '</span>';
+                else if (st.repeatSave && st.saveDc != null) tlStr = '<span class="se-turns se-turns--save" title="TR no fim do turno">\u221e</span>';
+                inner += '<span class="cell-status-chip se-chip ' + k + '" role="listitem" title="' + escHtml(label) + '">' +
+                    '<span class="se-ico">' + escHtml(st.ico || '\u2022') + '</span> ' +
+                    '<span class="se-lbl">' + escHtml((label || '').slice(0, 40)) + '</span>' + tlStr + '</span>';
+            });
+            inner += '</div>';
+        }
+        return inner;
+    }
+
+    /* ============================================================
+       FIM V8 HERALDIC helpers — próximas fases:
+       Fase 3 (render refactor): buildCell chama _heraldicClsSlugOf + buildCellInnerHTML
+       Fase 13 (polish): popup condição .v8-cond-popup-* + click handler (.c-cond-chip)
+       ============================================================ */
+
     function buildCell(cell, activeId) {
         if (!cell) return '<div class="cell"></div>';
         var u = cell.u, utype = cell.utype, uid = cell.uid;
@@ -2471,7 +2755,16 @@
                             resultEl.textContent = partial;
                             resultEl.classList.add('visible');
                         }
-                        setTimeout(function () { resultEl.classList.remove('visible'); rollOne(i + 1); }, 500);
+                        /* 2026-04-19 v2: pausa em DUAS FASES pra troca-de-dados nao parecer
+                           abrupta (reclamado pelo usuario em Misseis Magicos 3d4):
+                             Fase A (1200ms): label com parcial ("3", "3 + 2", ...) visivel pra ler
+                             Fase B (+800ms): label fade-out + face do dado atual ainda visivel
+                                              ("breathing room") antes do proximo dado ser criado
+                           Total 2000ms entre pouso do dado N e inicio do giro do dado N+1.
+                           Antes era um unico setTimeout(1100) que fazia label-hide + rollOne
+                           no mesmo frame → swap instantaneo. */
+                        setTimeout(function () { resultEl.classList.remove('visible'); }, 1200);
+                        setTimeout(function () { rollOne(i + 1); }, 2000);
                     });
                 }
                 rollOne(0);
