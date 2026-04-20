@@ -1,23 +1,40 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:04:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:27:29Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
   SIMULADOR DE COMBATE — INDICE RAPIDO (para agentes/IA navegarem o arquivo)
 =================================================================================
 
-  Ambiente standalone: zero backend/token/bot. Logica JS mock para prototipar
-  UX (animacoes, layout, fluxo). NAO e contrato canonico com o motor real.
+  ✅ FONTE CANONICA do frontend combat2 (Fase 1 ativa desde 2026-04-20).
+
+  MODE DUAL:
+   - LOCAL  (file:// ou sem ?token=): engine JS mock deste arquivo
+   - REMOTE (URL com ?token=X&api=Y): POST /api/combat2 (server Python)
+     Detectado em window.__COMBAT_MODE; setup em ~linha 7494.
+
+  O bot DEV serve este arquivo via valdoria-webapp/combat2/combate.html
+  (cópia mantida pelo script scripts\sync_combate_to_webapp.py).
+
+  WORKFLOW para mudanças:
+   1. Editar AQUI (file://, mode=local)
+   2. Validar visualmente
+   3. Rodar scripts\sync_combate_to_webapp.py
+   4. cd valdoria-webapp && git commit + push
+   5. Validar no bot DEV (mode=remote)
+
+  DEBUG remote (sem DevTools): logs [C-REM:*] viram [WEBAPP] em
+  environments/dev/logs/bot.log via log-relay inline.
+  Agente IA: grep "\[C-REM:" environments/dev/logs/bot.log
 
   LEIA PRIMEIRO: simuladores/AGENTS.md (guia da pasta)
 
-  Fonte da verdade (mecanica + contrato API): src/game/combat2.py +
-  valdoria-webapp/combat2/ + GET/POST /api/combat2 + test_combat2.py.
+  Docs:
+   - docs/sistemas/combat2-arch-canonical-proposal.md (proposta + estado)
+   - docs/sistemas/combat2-debug-via-bot-log.md (workflow debug)
 
-  Regra de fluxo (frontend / QA): validar PRIMEIRO neste simulador (UX, chips,
-  eventos visiveis, fim de turno). O mesmo contrato deve existir no motor; o
-  combate real no servidor DEV segue o backend — o simulador deve manter-se
-  alinhado para testes locais sem bot.
+  Fonte da verdade (mecanica + contrato API): src/game/combat2.py +
+  GET/POST /api/combat2 + test_combat2.py.
 
 =================================================================================
   REFERENCIAS EXTERNAS (arquivos relacionados do projeto):
