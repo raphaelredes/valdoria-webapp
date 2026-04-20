@@ -1496,6 +1496,10 @@
                        Containers default display:none via CSS; _updateActionSheetState torna visíveis quando aplicável. */
                     html += '<div class="action-btns-grid action-btns-grid--bonus" id="bonus-action-grid"></div>';
                     html += '<button type="button" class="focus-familiar-link" id="focus-familiar-btn" data-act="focus-familiar">🎯 Focar Familiar</button>';
+                    /* V1.5 F1 (Patrulheiro Beast Master) — Comandar Companheiro consome ação principal. */
+                    html += '<button type="button" class="command-companion-btn" id="command-companion-btn" data-act="command-companion">🐺 Comandar Companheiro <span class="action-btn-res-icon res-action" aria-hidden="true">◆</span></button>';
+                    /* V1.5 E2 (Paladino) — Mount/Dismount free 1×/turno. */
+                    html += '<button type="button" class="mount-toggle-btn" id="mount-toggle-btn" data-act="mount-toggle">🐴 Montar</button>';
                     html += '<button type="button" class="end-turn-btn" id="end-turn-btn" data-act="end-turn">Encerrar turno</button>';
                     html += '</div></div>';
                     if (_actionSheetOpen) {
@@ -1851,6 +1855,48 @@
                 focusBtn.textContent = '🎯 Focar ' + passiveName;
             }
         }
+        /* V1.5 F1 — Comandar Companheiro só visível pra Patrulheiro Beast Master
+           com Wolf vivo (animal_companion). Spent quando ação principal já gasta. */
+        var cmdBtn = document.getElementById('command-companion-btn');
+        if (cmdBtn) {
+            var wolfAlive = false;
+            if (s.order) {
+                for (var wi = 0; wi < s.order.length; wi++) {
+                    var u = s.order[wi];
+                    if (u && u.summonKind === 'animal_companion' && u.summonedBy === s.p_idx && u.alive) {
+                        wolfAlive = true; break;
+                    }
+                }
+            }
+            cmdBtn.style.display = wolfAlive ? 'block' : 'none';
+            if (wolfAlive) cmdBtn.classList.toggle('spent', !!p.actionSpent);
+        }
+        /* V1.5 E2 — Mount/Dismount só visível pra Paladino com Steed vivo (find_steed).
+           Toggle muda label baseado em p.mounted; free 1×/turno via p.mountedThisTurn. */
+        var mountBtn = document.getElementById('mount-toggle-btn');
+        if (mountBtn) {
+            var steedAlive = false;
+            if (s.order) {
+                for (var msi = 0; msi < s.order.length; msi++) {
+                    var us = s.order[msi];
+                    if (us && us.summonKind === 'find_steed' && us.summonedBy === s.p_idx && us.alive) {
+                        steedAlive = true; break;
+                    }
+                }
+            }
+            if (steedAlive) {
+                mountBtn.style.display = 'block';
+                mountBtn.textContent = p.mounted ? '🚶 Desmontar' : '🐴 Montar';
+                mountBtn.classList.toggle('spent', !!p.mountedThisTurn);
+                if (p.mountedThisTurn) {
+                    mountBtn.title = 'Já montou/desmontou neste turno (PHB: 1×)';
+                } else {
+                    mountBtn.removeAttribute('title');
+                }
+            } else {
+                mountBtn.style.display = 'none';
+            }
+        }
     }
 
     /* ============================================================
@@ -2054,12 +2100,29 @@
             console.log('[COMBAT2] focus-familiar clicked — target picker pending Fase 9');
             return;
         }
-        /* Comandar Arma Espiritual: análogo ao focus — target picker virá com Fase 9.
+        /* Comandar Arma Espiritual: análogo ao focus — target picker virá com Fase 8 completa.
            Quando implementado: seleciona inimigo, envia {type: 'attack_summon',
            summonAttachedIdx, target}. */
         if (act === 'command-summon') {
-            console.log('[COMBAT2] command-summon clicked — target picker pending Fase 9',
-                b.dataset.attachedIdx);
+            console.log('[COMBAT2] command-summon clicked — target picker pending', b.dataset.attachedIdx);
+            return;
+        }
+        /* V1.5 F1 — Comandar Companheiro (Patrulheiro Beast Master).
+           Consome Ação principal; abre target picker; envia attack_summon (animal_companion). */
+        if (act === 'command-companion') {
+            console.log('[COMBAT2] command-companion clicked — target picker pending');
+            return;
+        }
+        /* V1.5 E2 — Mount/Dismount (Paladino) free 1×/turno.
+           Envia mount_toggle pro motor (handler Python pendente). */
+        if (act === 'mount-toggle') {
+            _actionSheetOpen = false;
+            render(currentState);
+            try {
+                await remoteAction({ type: 'mount_toggle' });
+            } catch (e) {
+                console.warn('[COMBAT2] mount_toggle handler may not be implemented yet', e);
+            }
             return;
         }
         if (act === 'death-save') {

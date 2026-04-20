@@ -1931,6 +1931,46 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
     border-color: var(--v-gold-50, rgba(196,149,58,0.5));
 }
 
+/* V1.5 F1 (Patrulheiro Beast Master) — Comandar Companheiro CONSOME ação principal (PHB p.93). */
+.sim-action-sheet .command-companion-btn {
+    display: none;
+    margin: var(--v-space-md, 10px) 0 0 0;
+    width: 100%;
+    padding: var(--v-space-sm, 8px) var(--v-space-md, 10px);
+    background: linear-gradient(180deg, rgba(80, 160, 80, 0.25), rgba(40, 90, 40, 0.4));
+    border: 1px solid rgba(160, 220, 130, 0.55);
+    border-radius: var(--v-radius-sm, 6px);
+    color: #d8f0c0;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: border-color var(--v-transition-base, .2s), background var(--v-transition-base, .2s);
+}
+.sim-action-sheet .command-companion-btn:hover { border-color: rgba(180, 240, 140, 0.95); }
+.sim-action-sheet .command-companion-btn.spent { opacity: 0.35; pointer-events: none; filter: grayscale(0.85); }
+
+/* V1.5 E2 (Paladino) — Mount/Dismount free 1×/turno (PHB p.198). */
+.sim-action-sheet .mount-toggle-btn {
+    display: none;
+    margin: var(--v-space-sm, 6px) 0 0 0;
+    width: 100%;
+    padding: var(--v-space-sm, 8px) var(--v-space-md, 10px);
+    background: linear-gradient(180deg, rgba(180, 130, 60, 0.3), rgba(110, 80, 30, 0.45));
+    border: 1px solid rgba(255, 200, 100, 0.55);
+    border-radius: var(--v-radius-sm, 6px);
+    color: #ffe0a0;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: border-color var(--v-transition-base, .2s), background var(--v-transition-base, .2s);
+}
+.sim-action-sheet .mount-toggle-btn:hover { border-color: rgba(255, 220, 130, 0.95); }
+.sim-action-sheet .mount-toggle-btn.spent { opacity: 0.35; pointer-events: none; filter: grayscale(0.7); }
+
 /* Encerrar Turno: botão dourado destacado (PHB p.190 — skip BA pendente). */
 .sim-action-sheet .end-turn-btn {
     display: none;
