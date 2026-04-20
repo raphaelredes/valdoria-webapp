@@ -1471,10 +1471,11 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
     width: 100%;
     max-width: 100%;
 }
-@media (min-width: 520px) {
-    .bf-pan-viewport {
-        min-height: 220px;
-    }
+/* Smartphone-Only Layout (CLAUDE.md regra IMUTAVEL): viewport sempre <=430px.
+   Removido o @media(min-width:520px) que viola a regra. Se precisar de
+   min-height ajustada, aplicar incondicionalmente baseado no viewport lock. */
+.bf-pan-viewport {
+    min-height: 200px;
 }
 
 /* =============================================================================
@@ -1716,7 +1717,7 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
 @keyframes hpLowBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.75; } }
 .cell.v8-card .c-stat-val--ca {
     color: #ffd688;
-    text-shadow: 0 0 5px rgba(196,149,58,0.5), 0 1px 2px rgba(0,0,0,0.95);
+    text-shadow: 0 0 5px var(--v-gold-50, rgba(196,149,58,0.5)), 0 1px 2px rgba(0,0,0,0.95);
 }
 .cell.v8-card.cls-boss .c-stat-val {
     color: var(--boss-gold);
@@ -1806,14 +1807,16 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
     width: 24px; height: 24px;
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer; position: relative;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    transition: transform var(--v-transition, 0.2s),
+                border-color var(--v-transition, 0.2s),
+                box-shadow var(--v-transition, 0.2s);
     font-size: 13px; padding: 0; line-height: 1;
     flex-shrink: 0;
 }
 .cell.v8-card .c-cond-chip:hover {
     transform: scale(1.15);
     border-color: var(--v-gold, #c4953a);
-    box-shadow: 0 0 6px rgba(196,149,58,0.5);
+    box-shadow: 0 0 6px var(--v-gold-50, rgba(196,149,58,0.5));
     z-index: 4;
 }
 .cell.v8-card .c-cond-chip.buff {
