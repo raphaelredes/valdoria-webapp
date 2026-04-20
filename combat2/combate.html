@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T22:42:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T22:53:13Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -7541,13 +7541,17 @@ console.info('[COMBAT-MODE] __COMBAT_MODE=' + window.__COMBAT_MODE
     + ' origin=' + (window.__COMBAT_ORIGIN_APP || '(none)')
     + ' env=' + window.__COMBAT_ENV);
 
-/* Chama /api/combat2 (GET fetch state ou POST action). Usado SOMENTE em remote mode.
-   Em local mode é inerte — se alguém chamar sem estar em remote, avisa no console. */
+/* [C-REM:HTTP] Chama /api/combat2 (GET fetch state ou POST action).
+   Usado SOMENTE em remote mode; em local mode é inerte.
+   Logs: método, action type, body size, status, latência, eventos count. */
 async function __combatServerCall(method, body) {
     if (window.__COMBAT_MODE !== 'remote') {
-        console.warn('[COMBAT-REMOTE] __combatServerCall chamado em modo local — ignorando');
+        console.warn('[C-REM:HTTP] call_in_local_mode — ignorando');
         return null;
     }
+    var t0 = (performance && performance.now) ? performance.now() : Date.now();
+    var actionType = (body && body.type) || 'GET';
+    var bodyStr = body ? JSON.stringify(body) : '';
     var url = window.__COMBAT_API_BASE + '/api/combat2';
     var opts = {
         method: method,
@@ -7556,22 +7560,40 @@ async function __combatServerCall(method, body) {
             'Authorization': 'Bearer ' + window.__COMBAT_TOKEN
         }
     };
-    if (body) opts.body = JSON.stringify(body);
+    if (body) opts.body = bodyStr;
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
         opts.headers['X-Idempotency-Key'] = window.crypto.randomUUID();
     }
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
         opts.headers['X-Telegram-Init-Data'] = window.Telegram.WebApp.initData;
     }
-    console.info('[COMBAT-REMOTE] ' + method + ' /api/combat2 body=' + JSON.stringify(body || {}).slice(0, 200));
-    var r = await fetch(url, opts);
+    console.info('[C-REM:HTTP] >> ' + method + ' ' + actionType
+        + ' bodyBytes=' + bodyStr.length
+        + ' preview=' + bodyStr.slice(0, 120));
+    var r;
+    try {
+        r = await fetch(url, opts);
+    } catch (netErr) {
+        var dt0 = Math.round(((performance && performance.now) ? performance.now() : Date.now()) - t0);
+        console.error('[C-REM:HTTP] NET_ERR ' + method + ' ' + actionType
+            + ' ms=' + dt0 + ' msg=' + (netErr && netErr.message));
+        throw netErr;
+    }
+    var dt = Math.round(((performance && performance.now) ? performance.now() : Date.now()) - t0);
     if (!r.ok) {
         var txt = '';
         try { txt = await r.text(); } catch (eT) {}
-        console.error('[COMBAT-REMOTE] HTTP ' + r.status + ' body=' + txt.slice(0, 300));
+        console.error('[C-REM:HTTP] << ' + r.status + ' ' + method + ' ' + actionType
+            + ' ms=' + dt + ' body=' + txt.slice(0, 300));
         throw new Error('HTTP ' + r.status + ' ' + txt.slice(0, 100));
     }
-    return await r.json();
+    var resp = await r.json();
+    var evCount = (resp && resp.events) ? resp.events.length : 0;
+    var phState = resp && resp.state ? resp.state.ph : '?';
+    console.info('[C-REM:HTTP] << 200 ' + method + ' ' + actionType
+        + ' ms=' + dt + ' state.ph=' + phState + ' events=' + evCount
+        + (resp && resp.error ? (' err=' + resp.error) : ''));
+    return resp;
 }
 
 /* Estado pendente de boot remote: nome do container #app + flag.
@@ -12274,32 +12296,95 @@ function bindActions() {
     mountBattlefieldPanZoom();
 }
 
-/* REMOTE MODE (Fase 1 PoC 2026-04-20) — unified remote action helper.
-   Dispatch pra server com o action object correto. Usado por onBtnClick em remote. */
+/* [C-REM:ACTION] Unified remote action helper.
+   Dispatch pra server + aplica state + drena events.
+   Logs: action type, state transitions, events count, error. */
 async function __combatRemoteAction(action) {
+    var actionType = (action && action.type) || 'unknown';
+    var phBefore = currentState && currentState.ph;
+    var activeBefore = currentState && currentState.active_idx;
+    console.info('[C-REM:ACTION] enter type=' + actionType
+        + ' ph=' + phBefore + ' active=' + activeBefore
+        + ' payload=' + JSON.stringify(action).slice(0, 160));
     try {
         var resp = await __combatServerCall('POST', action);
-        if (!resp) return;
-        if (resp.error) { console.warn('[COMBAT-REMOTE] action error:', resp.error); return; }
+        if (!resp) {
+            console.warn('[C-REM:ACTION] no_response type=' + actionType);
+            return;
+        }
+        if (resp.error) {
+            console.warn('[C-REM:ACTION] server_error type=' + actionType + ' err=' + resp.error);
+            return;
+        }
         currentState = resp.state;
+        var phAfter = currentState && currentState.ph;
+        var activeAfter = currentState && currentState.active_idx;
+        console.info('[C-REM:ACTION] state_applied type=' + actionType
+            + ' ph=' + phBefore + '->' + phAfter
+            + ' active=' + activeBefore + '->' + activeAfter);
         render(currentState);
         if (resp.events && resp.events.length) {
+            console.info('[C-REM:ACTION] draining ' + resp.events.length + ' events');
             await __combatApplyEvents(resp.events);
             render(currentState);
         }
+        console.info('[C-REM:ACTION] complete type=' + actionType + ' final_ph=' + currentState.ph);
     } catch (e) {
-        console.error('[COMBAT-REMOTE] action failed', e);
+        console.error('[C-REM:ACTION] exception type=' + actionType, e && e.message, e);
     }
 }
 
-/* Leave combat remote → transition API. Paridade combat2.js leaveCombatToOrigin. */
+/* [C-REM:REACTION] Shield reaction prompt — port direto de combat2.js:2394.
+   Retorna Promise<bool> indicando se player quer gastar MP pra +5 CA neste ataque. */
+function __combatShowShieldPrompt(ev) {
+    return new Promise(function (resolve) {
+        var ov = document.createElement('div');
+        ov.className = 'target-confirm-overlay';
+        var card = document.createElement('div');
+        card.className = 'target-confirm-card';
+        var nm = ev.actorName || 'Inimigo';
+        var tot = (ev.d20 != null ? ev.d20 : '?')
+            + '+' + (ev.atk != null ? ev.atk : '?')
+            + '=' + (ev.total != null ? ev.total : '?');
+        var esc = (typeof escHtml === 'function') ? escHtml : function (s) { return String(s); };
+        var html = '<div class="tcc-title">Reação — Escudo Arcano</div>';
+        html += '<p class="c2-info-intro c2-info-intro--inline"><strong>'
+            + esc(nm) + '</strong> acerta em você (' + esc(tot)
+            + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + ').</p>';
+        html += '<p class="c2-info-intro c2-info-intro--inline">Gastar <strong>'
+            + (ev.shieldCost | 0) + '</strong> de mana para somar +5 à CA contra este ataque (PHB)?</p>';
+        html += '<div class="tcc-actions">';
+        html += '<button type="button" class="action-btn" data-rs="0">Não usar</button>';
+        html += '<button type="button" class="action-btn primary" data-rs="1">Usar Escudo</button>';
+        html += '</div>';
+        setHTML(card, html);
+        ov.appendChild(card);
+        /* vOverlay.add se disponível, senão body append. */
+        if (typeof vOverlay !== 'undefined' && vOverlay.add) {
+            vOverlay.add(ov);
+        } else {
+            document.body.appendChild(ov);
+        }
+        function done(v) {
+            try { ov.remove(); } catch (eR) {}
+            resolve(!!v);
+        }
+        ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
+        card.querySelector('[data-rs="0"]').addEventListener('click', function () { done(false); });
+        card.querySelector('[data-rs="1"]').addEventListener('click', function () { done(true); });
+    });
+}
+
+/* [C-REM:LEAVE] Leave combat remote → transition API.
+   Paridade combat2.js leaveCombatToOrigin. Logs: ph, result, origin, transition URL. */
 async function __combatLeaveRemoteToOrigin() {
     var ph = (currentState && currentState.ph) || 'victory';
     var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
     var origin = window.__COMBAT_ORIGIN_APP || 'game';
     try { window.__valdoria_transitioning = true; } catch (eT) {}
-    console.info('[COMBAT-REMOTE] leaveToOrigin result=' + result + ' origin=' + origin);
+    console.info('[C-REM:LEAVE] enter ph=' + ph + ' result=' + result + ' origin=' + origin);
     if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
+        console.warn('[C-REM:LEAVE] no_api_or_token — fallback tg.close()');
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.close();
@@ -12308,6 +12393,7 @@ async function __combatLeaveRemoteToOrigin() {
         return;
     }
     var url = window.__COMBAT_API_BASE + '/api/webapp/transition';
+    var t0 = (performance && performance.now) ? performance.now() : Date.now();
     try {
         var headers = {
             'Content-Type': 'application/json',
@@ -12319,21 +12405,27 @@ async function __combatLeaveRemoteToOrigin() {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
             headers['X-Idempotency-Key'] = window.crypto.randomUUID();
         }
+        var payload = {
+            from: 'combat2',
+            to: origin,
+            result: result,
+            uid: window.__COMBAT_USER_ID
+        };
+        console.info('[C-REM:LEAVE] POST /api/webapp/transition payload=' + JSON.stringify(payload));
         var r = await fetch(url, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({
-                from: 'combat2',
-                to: origin,
-                result: result,
-                uid: window.__COMBAT_USER_ID
-            })
+            body: JSON.stringify(payload)
         });
+        var dt = Math.round(((performance && performance.now) ? performance.now() : Date.now()) - t0);
         var data = await r.json();
+        console.info('[C-REM:LEAVE] response ms=' + dt + ' status=' + r.status
+            + ' hasUrl=' + !!(data && data.url));
         if (data && data.url) {
+            console.info('[C-REM:LEAVE] redirecting to ' + data.url);
             location.replace(data.url);
         } else {
-            console.warn('[COMBAT-REMOTE] transition sem URL — fechando webapp', data);
+            console.warn('[C-REM:LEAVE] no_url — closing webapp', data);
             try {
                 if (window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.close();
@@ -12341,7 +12433,7 @@ async function __combatLeaveRemoteToOrigin() {
             } catch (eC2) {}
         }
     } catch (e) {
-        console.error('[COMBAT-REMOTE] transition failed', e);
+        console.error('[C-REM:LEAVE] exception', e && e.message, e);
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.close();
@@ -12353,18 +12445,18 @@ async function __combatLeaveRemoteToOrigin() {
 function onBtnClick(ev) {
     var b = ev.currentTarget;
     var act = b.dataset.act;
-    /* REMOTE MODE (Fase 1 PoC 2026-04-20): actions simples (pass/dodge/flee/next/start/
-       death-save/stabilize-med/pass-down/disengage) viram POST direto pro server.
-       Actions complexas (attack/skills/bag) caem no caminho normal — elas já têm
-       gate próprio em confirmAndAttack/useSkill/etc. */
+    /* [C-REM:BTN] REMOTE MODE: actions meta viram POST /api/combat2.
+       UI-only actions (toggle/close-sheet/log) fallthrough pro handler local. */
     if (window.__COMBAT_MODE === 'remote') {
         /* UI-only actions ficam locais (toggle-actions, cancel-target, close-*-sheet, log, info). */
         var UI_ONLY = ['toggle-actions', 'close-action-sheet', 'cancel-target',
             'close', 'log', 'dnd-res-info', 'toggle-skip-dice', 'skip-init',
             'skills', 'bag'];
         if (UI_ONLY.indexOf(act) !== -1) {
+            console.info('[C-REM:BTN] ui_only act=' + act + ' (local handler)');
             /* Fallthrough pro handler local (UI pura, não mexe state). */
         } else if (act === 'next') {
+            console.info('[C-REM:BTN] act=next (initiative start)');
             _actionSheetOpen = false;
             render(currentState);
             void __combatRemoteAction({ type: 'next' });
@@ -12909,34 +13001,21 @@ async function confirmAndAttack(tgtIdx) {
     _selectingTarget = false;
     var skill = _pendingSkill;
     _pendingSkill = null;
-    /* REMOTE MODE (Fase 1 PoC 2026-04-20): troca engine local por POST /api/combat2.
-       O server retorna { state, events } que substituem currentState e drivea render.
-       Fase 2 portará animate*Event — por hora, render simples após resposta. */
+    /* [C-REM:ATTACK] REMOTE MODE: troca engine local por POST /api/combat2.
+       Reusa __combatRemoteAction pra logging + state apply + events drain. */
     if (window.__COMBAT_MODE === 'remote') {
         var slot = (typeof _pendingSkillSlot !== 'undefined') ? _pendingSkillSlot : null;
         var pa = !!(typeof _pendingPowerAttack !== 'undefined' && _pendingPowerAttack);
         if (typeof _pendingSkillSlot !== 'undefined') _pendingSkillSlot = null;
         if (typeof _pendingPowerAttack !== 'undefined') _pendingPowerAttack = false;
+        console.info('[C-REM:ATTACK] dispatch tgtIdx=' + tgtIdx
+            + ' slot=' + slot + ' powerAttack=' + pa
+            + ' skill=' + (skill ? skill.n : '(none)'));
         render(currentState);
         var action = (slot != null && slot >= 0)
             ? { type: 'skill', slot: slot, target: tgtIdx }
             : { type: 'attack', target: tgtIdx, powerAttack: pa };
-        try {
-            var resp = await __combatServerCall('POST', action);
-            if (!resp) return;
-            if (resp.error) {
-                console.warn('[COMBAT-REMOTE] attack error:', resp.error);
-                return;
-            }
-            currentState = resp.state;
-            render(currentState);
-            if (resp.events && resp.events.length) {
-                await __combatApplyEvents(resp.events);
-                render(currentState);
-            }
-        } catch (e) {
-            console.error('[COMBAT-REMOTE] attack failed', e);
-        }
+        await __combatRemoteAction(action);
         return;
     }
     // PHB Magic Missile multi-alvo: tgtIdx pode ser {__mmTargets: [idx,...]}.
@@ -13008,30 +13087,23 @@ async function confirmAndHealUnified(tgtIdx) {
     _pendingHealItem = null;
     if (typeof _pendingSkillSlot !== 'undefined') _pendingSkillSlot = null;
     render(currentState);
-    /* REMOTE MODE (Fase 1 PoC 2026-04-20): POST para server (heal skill ou use_item). */
+    /* [C-REM:HEAL] REMOTE MODE: heal skill OU use_item. */
     if (window.__COMBAT_MODE === 'remote') {
-        try {
-            var action;
-            if (bagHeal && bagHeal.bagIdx != null) {
-                action = { type: 'use_item', slot: bagHeal.bagIdx, target: tgtIdx };
-            } else if (slot != null && slot >= 0) {
-                action = { type: 'skill', slot: slot, target: tgtIdx };
-            } else {
-                console.warn('[COMBAT-REMOTE] confirmAndHealUnified: slot e bagIdx ambos null');
-                return;
-            }
-            var resp = await __combatServerCall('POST', action);
-            if (!resp) return;
-            if (resp.error) { console.warn('[COMBAT-REMOTE] heal error:', resp.error); return; }
-            currentState = resp.state;
-            render(currentState);
-            if (resp.events && resp.events.length) {
-                await __combatApplyEvents(resp.events);
-                render(currentState);
-            }
-        } catch (e) {
-            console.error('[COMBAT-REMOTE] heal failed', e);
+        var actionH;
+        if (bagHeal && bagHeal.bagIdx != null) {
+            actionH = { type: 'use_item', slot: bagHeal.bagIdx, target: tgtIdx };
+            console.info('[C-REM:HEAL] dispatch use_item bagIdx=' + bagHeal.bagIdx
+                + ' tgtIdx=' + tgtIdx);
+        } else if (slot != null && slot >= 0) {
+            actionH = { type: 'skill', slot: slot, target: tgtIdx };
+            console.info('[C-REM:HEAL] dispatch skill slot=' + slot
+                + ' tgtIdx=' + tgtIdx
+                + ' skill=' + (skill ? skill.n : '?'));
+        } else {
+            console.warn('[C-REM:HEAL] aborted slot e bagIdx ambos null');
+            return;
         }
+        await __combatRemoteAction(actionH);
         return;
     }
     if (bagHeal) {
@@ -13605,9 +13677,7 @@ function showSkillUseConfirmPopup(skill) {
 async function useSkill(skill, opts) {
     opts = opts || {};
     var p = currentState.order[currentState.p_idx];
-    /* REMOTE MODE (Fase 1 PoC 2026-04-20): resolve slot por referência/nome, setup
-       pending state se precisa target, ou POST direto se self/no-target.
-       Server é fonte de verdade — UI só orquestra target picker + display. */
+    /* [C-REM:SKILL] REMOTE MODE: resolve slot + setup pending (se target) OU POST direto. */
     if (window.__COMBAT_MODE === 'remote') {
         /* Resolve slot index a partir do skill object. */
         var slot = -1;
@@ -13618,7 +13688,18 @@ async function useSkill(skill, opts) {
                 if (sitem && typeof sitem === 'object' && skill && sitem.n === skill.n) { slot = si; break; }
             }
         }
-        if (slot < 0) { console.warn('[COMBAT-REMOTE] useSkill: slot não encontrado'); return; }
+        console.info('[C-REM:SKILL] enter name=' + (skill && skill.n)
+            + ' kind=' + (skill && skill.kind)
+            + ' slot=' + slot
+            + ' targetAlly=' + !!(skill && skill.targetAlly)
+            + ' healTargets=' + (skill && skill.healTargets)
+            + ' magicMissiles=' + !!(skill && skill.magicMissiles)
+            + ' fireball=' + !!(skill && skill.fireball)
+            + ' rayOfFrost=' + !!(skill && skill.rayOfFrost));
+        if (slot < 0) {
+            console.warn('[C-REM:SKILL] aborted slot_not_found name=' + (skill && skill.n));
+            return;
+        }
         /* Precisa target? (attack ou heal com targetAlly ou buff targetAlly) */
         var needsTarget = skill.kind === 'attack' || skill.kind === 'heal' || skill.targetAlly;
         if (needsTarget && skill.healTargets === 'self') { needsTarget = false; }
@@ -13627,27 +13708,18 @@ async function useSkill(skill, opts) {
             if (typeof _pendingSkillSlot !== 'undefined') window._pendingSkillSlot = slot;
             _pendingSkillSlot = slot;
             _selectingTarget = true;
+            console.info('[C-REM:SKILL] picker_mode slot=' + slot + ' waiting_target');
             render(currentState);
             return;
         }
         /* Self/no-target: POST direto. */
-        try {
-            var targetSelf = currentState.p_idx;
-            var action = (skill.kind === 'heal' && skill.healTargets === 'self')
-                ? { type: 'skill', slot: slot, target: targetSelf }
-                : { type: 'skill', slot: slot };
-            var resp = await __combatServerCall('POST', action);
-            if (!resp) return;
-            if (resp.error) { console.warn('[COMBAT-REMOTE] skill error:', resp.error); return; }
-            currentState = resp.state;
-            render(currentState);
-            if (resp.events && resp.events.length) {
-                await __combatApplyEvents(resp.events);
-                render(currentState);
-            }
-        } catch (e) {
-            console.error('[COMBAT-REMOTE] skill failed', e);
-        }
+        var targetSelf = currentState.p_idx;
+        var actionSk = (skill.kind === 'heal' && skill.healTargets === 'self')
+            ? { type: 'skill', slot: slot, target: targetSelf }
+            : { type: 'skill', slot: slot };
+        console.info('[C-REM:SKILL] dispatch_direct slot=' + slot
+            + ' target=' + (actionSk.target != null ? actionSk.target : '(none)'));
+        await __combatRemoteAction(actionSk);
         return;
     }
     /* V1 Invocações Phase 4 (2026-04-19) — gating UNIFICADO via _simIsSkillUsable.
@@ -17952,53 +18024,72 @@ function startSimAfterDiceBoot() {
     render(currentState);
 }
 
-/* Remote mode boot: GET /api/combat2 → state inicial. */
+/* [C-REM:BOOT] Remote mode boot: GET /api/combat2 → state inicial.
+   Logs: entrada, resposta, state.ph, p_idx, order.len, events count. */
 async function startCombatRemote() {
-    console.info('[COMBAT-REMOTE] bootstrapping — GET /api/combat2');
+    console.info('[C-REM:BOOT] enter — fetching initial state');
     try {
         var resp = await __combatServerCall('GET', null);
         if (!resp || !resp.state) {
-            console.error('[COMBAT-REMOTE] boot failed — resp sem state', resp);
+            console.error('[C-REM:BOOT] failed — resp sem state', resp);
             return;
         }
         currentState = resp.state;
         window.__combatRemoteReady = true;
-        console.info('[COMBAT-REMOTE] boot ok — state.ph=' + currentState.ph
-            + ' order.len=' + (currentState.order || []).length);
+        var s = currentState;
+        var orderSummary = (s.order || []).map(function (u, i) {
+            return i + ':' + (u.t || '?') + '/' + (u.n || '?') + '/hp=' + (u.hp || 0);
+        }).join(' ');
+        console.info('[C-REM:BOOT] ok ph=' + s.ph
+            + ' rn=' + (s.rn || 0)
+            + ' p_idx=' + (s.p_idx || 0)
+            + ' active_idx=' + (s.active_idx || 0)
+            + ' order.len=' + (s.order || []).length);
+        console.info('[C-REM:BOOT] order=[' + orderSummary + ']');
         render(currentState);
         /* Se já vem com events (ex: NPCs rolando iniciativa), aplica em sequência. */
         if (resp.events && resp.events.length) {
+            console.info('[C-REM:BOOT] draining ' + resp.events.length + ' initial events');
             await __combatApplyEvents(resp.events);
             render(currentState);
         }
+        console.info('[C-REM:BOOT] complete — remoteReady=true');
     } catch (e) {
-        console.error('[COMBAT-REMOTE] boot exception', e);
+        console.error('[C-REM:BOOT] exception', e && e.message, e);
     }
 }
 
-/* Aplica events do server em remote mode.
-   Fase 1/2 PoC: animação MÍNIMA reutilizando helpers do simulador:
-   - attack/oa: flash card alvo + FCT dano
-   - heal: flash card alvo + FCT cura
-   - death_save: showDice
-   - buff/resource/item_use: flash caster
-   - round: pequena pausa
-   Fase 3 (futuro): portar animate*Event completo do combat2.js. */
+/* [C-REM:EV] Aplica events do server em remote mode.
+   Cada event logged com: index/total, kind, actor, target, dmg, hit, crit, extra. */
 async function __combatApplyEvents(events) {
+    var total = events.length;
     for (var i = 0; i < events.length; i++) {
         var ev = events[i];
-        if (!ev || !ev.kind) continue;
-        console.info('[COMBAT-REMOTE] ev[' + i + '/' + events.length + '] '
-            + ev.kind + ' a=' + (ev.actorName || '?')
-            + ' t=' + (ev.targetName || '?')
-            + ' dmg=' + (ev.dmgTotal != null ? ev.dmgTotal : '?')
-            + ' hit=' + (ev.hit != null ? ev.hit : '?'));
+        if (!ev || !ev.kind) {
+            console.warn('[C-REM:EV] skip[' + i + '] no_kind');
+            continue;
+        }
+        var extra = '';
+        if (ev.dmgTotal != null) extra += ' dmg=' + ev.dmgTotal;
+        if (ev.hit != null) extra += ' hit=' + ev.hit;
+        if (ev.crit) extra += ' crit=Y';
+        if (ev.d20 != null) extra += ' d20=' + ev.d20;
+        if (ev.miss_reason) extra += ' miss=' + ev.miss_reason;
+        if (ev.healGained != null) extra += ' heal=' + ev.healGained;
+        if (ev.saveSuccess != null) extra += ' save=' + (ev.saveSuccess ? 'OK' : 'FAIL');
+        if (ev.skillName) extra += ' skill=' + ev.skillName;
+        console.info('[C-REM:EV] [' + (i + 1) + '/' + total + '] ' + ev.kind
+            + ' a=' + (ev.actorName || ev.aIdx || '?')
+            + ' t=' + (ev.targetName || ev.tIdx || '?')
+            + extra);
         try {
             await __combatAnimateOneEvent(ev);
         } catch (eA) {
-            console.warn('[COMBAT-REMOTE] animate fail', ev.kind, eA);
+            console.warn('[C-REM:EV] animate_fail kind=' + ev.kind
+                + ' err=' + (eA && eA.message));
         }
     }
+    console.info('[C-REM:EV] drain_complete total=' + total);
 }
 
 async function __combatAnimateOneEvent(ev) {
@@ -18134,16 +18225,88 @@ async function __combatAnimateOneEvent(ev) {
         render(currentState);
         return;
     }
+    if (kind === 'reaction_prompt' && ev.subtype === 'shield') {
+        /* [C-REM:REACTION] Escudo Arcano — pergunta ao jogador se quer gastar MP
+           pra +5 CA no ataque. Envia reaction_resolve pra server. Paridade
+           combat2.js promptShieldReaction. */
+        console.info('[C-REM:REACTION] shield_prompt actor=' + ev.actorName
+            + ' d20=' + ev.d20 + ' total=' + ev.total + ' ac=' + ev.ac
+            + ' cost=' + ev.shieldCost);
+        var useShield = await __combatShowShieldPrompt(ev);
+        console.info('[C-REM:REACTION] user_choice useShield=' + useShield
+            + ' — dispatching reaction_resolve');
+        /* Envia decisão ao server — retorna novos events (hit/miss atualizado). */
+        try {
+            var resp = await __combatServerCall('POST', {
+                type: 'reaction_resolve',
+                useShield: !!useShield
+            });
+            if (resp && !resp.error) {
+                currentState = resp.state;
+                render(currentState);
+                if (resp.events && resp.events.length) {
+                    console.info('[C-REM:REACTION] draining ' + resp.events.length + ' post-reaction events');
+                    await __combatApplyEvents(resp.events);
+                    render(currentState);
+                }
+            } else if (resp && resp.error) {
+                console.warn('[C-REM:REACTION] reaction_resolve error:', resp.error);
+            }
+        } catch (eR) {
+            console.error('[C-REM:REACTION] exception', eR && eR.message);
+        }
+        return;
+    }
     if (kind === 'reaction_prompt') {
-        /* Escudo Arcano — combate.html tem showShieldReactionPrompt se disponível,
-           senão deixa o server resolver sem reação. Por hora, skip (user perde 1x). */
-        console.info('[COMBAT-REMOTE] reaction_prompt ignorado (Fase 2 futuro — show prompt)');
+        /* Outros tipos de reaction não-shield: skip por hora. */
+        console.info('[C-REM:REACTION] unsupported_subtype=' + ev.subtype + ' — skip');
         await new Promise(function (r) { setTimeout(r, 250); });
         return;
     }
     if (kind === 'fled' || kind === 'flee') {
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 600); });
+        return;
+    }
+    if (kind === 'summon_cast' || kind === 'summon_pack_cast'
+            || kind === 'summon_attack' || kind === 'summon_expire') {
+        /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
+           do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */
+        var scUid = 'player';
+        if (ev.aIdx != null && currentState && currentState.order) {
+            var scU = currentState.order[ev.aIdx];
+            if (scU && scU.t === 'a') scUid = 'ally_' + ev.aIdx;
+            else if (scU && scU.t === 'e') scUid = 'enemy_' + ev.aIdx;
+        }
+        var scEl = document.querySelector('[data-unit-id="' + scUid + '"]');
+        if (scEl) scEl.classList.add('buff-flash');
+        setTimeout(function () { if (scEl) scEl.classList.remove('buff-flash'); }, 520);
+        console.info('[C-REM:SUMMON] kind=' + kind
+            + ' caster=' + (ev.actorName || '?')
+            + ' summonKind=' + (ev.summonKind || '?'));
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 480); });
+        return;
+    }
+    if (kind === 'bonus_action_used') {
+        /* [C-REM:BA] Bonus action marker — só re-render. */
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 150); });
+        return;
+    }
+    if (kind === 'condition_save') {
+        /* [C-REM:COND_SAVE] Condition save — flash alvo. */
+        var csUid = 'enemy_' + ev.tIdx;
+        var csU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
+        if (csU && csU.t === 'p') csUid = 'player';
+        else if (csU && csU.t === 'a') csUid = 'ally_' + ev.tIdx;
+        var csEl = document.querySelector('[data-unit-id="' + csUid + '"]');
+        if (csEl) csEl.classList.add(ev.saveSuccess ? 'buff-flash' : 'dodged');
+        setTimeout(function () {
+            if (csEl) csEl.classList.remove('buff-flash', 'dodged');
+        }, 420);
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 360); });
         return;
     }
     if (kind === 'concentration_save' || kind === 'concentration_lost') {
