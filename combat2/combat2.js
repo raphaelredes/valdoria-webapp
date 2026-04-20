@@ -508,11 +508,18 @@
         if (!currentState || !ev) return;
         var target = currentState.order[ev.tIdx];
         if (!target) return;
+        var oldHp = target.hp;
         if (ev.newHp != null) {
             target.hp = ev.newHp;
             target.alive = target.hp > 0;
         }
         render(currentState);
+        /* Refinamento Fase 13: FCT (+N HP verde) sobre alvo curado. */
+        var healed = (ev.newHp != null) ? Math.max(0, ev.newHp - oldHp) : (ev.healGained | 0);
+        if (healed > 0 && typeof _spawnFloatingDmgNumber === 'function') {
+            var huid = ev.tIdx === currentState.p_idx ? 'player' : 'ally_' + ev.tIdx;
+            _spawnFloatingDmgNumber(huid, healed, { heal: true });
+        }
     }
 
     function syncAttackOutcomeFromEvent(ev) {
@@ -520,11 +527,20 @@
         var target = currentState.order[ev.tIdx];
         if (!target) return;
         if (ev.hit && ev.newHp != null) {
+            var oldHp = target.hp;
             target.hp = ev.newHp;
             target.alive = ev.newHp > 0;
             render(currentState);
             var uid = ev.tIdx === currentState.p_idx ? 'player' : 'enemy_' + ev.tIdx;
             arenaStrikeFromEvent(ev);
+            /* Refinamento Fase 13: FCT (-N vermelho/dourado se crit) sobre alvo. */
+            var dmgApplied = Math.max(0, oldHp - ev.newHp);
+            if (dmgApplied > 0 && typeof _spawnFloatingDmgNumber === 'function') {
+                _spawnFloatingDmgNumber(uid, dmgApplied, {
+                    crit: !!ev.crit,
+                    half: !!(ev.saveSuccess || ev.halfDmg || ev.rageResisted)
+                });
+            }
         } else {
             render(currentState);
             // PHB miss feedback: garante VFX no card mesmo com animações puladas.
@@ -3053,7 +3069,9 @@
         var duration = manualPlayerDice ? 5000 : (1500 + Math.floor(Math.random() * 1500));
         var INTERACT_MAX = 0.70;
         var ov = document.createElement('div');
-        ov.className = 'dice-overlay';
+        /* Refinamento Fase 6: tema dice baseado em opts.theme ou opts.skill (auto-detect). */
+        var diceTheme = opts.theme || (opts.skill && _skillThemeOf ? _skillThemeOf(opts.skill) : null);
+        ov.className = 'dice-overlay' + (diceTheme && diceTheme !== 'default' ? ' dice-overlay--' + diceTheme : '');
         if (currentState && currentState.ph === 'active' && currentState.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
@@ -3251,7 +3269,9 @@
             var diceSum = rolls.reduce(function (a, b) { return a + b; }, 0);
             var total = Math.max(1, diceSum + dmgMod);
             var ov = document.createElement('div');
-            ov.className = 'dice-overlay';
+            /* Refinamento Fase 6: tema dice via dmgOpts.theme ou dmgOpts.skill. */
+            var dmgTheme = dmgOpts.theme || (dmgOpts.skill && _skillThemeOf ? _skillThemeOf(dmgOpts.skill) : null);
+            ov.className = 'dice-overlay' + (dmgTheme && dmgTheme !== 'default' ? ' dice-overlay--' + dmgTheme : '');
             if (currentState && currentState.rn) {
                 var rb = document.createElement('div');
                 rb.className = 'dice-round-badge';
