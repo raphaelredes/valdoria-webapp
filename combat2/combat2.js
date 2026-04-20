@@ -1507,6 +1507,95 @@
 
        Próximas fases adicionam (10-11): Command Companion / Mount Toggle buttons. */
     /* ============================================================
+       VFX DISPATCHER (Fase 7 port simulador 14045-14111 playHitVFX).
+       Consome window._combatVfx (shared/combat-vfx.js já loaded no index.html).
+       Mapeia skill/dmgType/ranged para métodos VFX específicos.
+
+       Uso:
+         dispatchAttackVfx(targetEl, {skill, fromEl, dmgType, crit, sneakAttack});
+
+       Métodos disponíveis em _combatVfx:
+       magicMissiles, fireballAoE, rayOfFrost, arrowVolley, projectile,
+       meleeSlash, impact, shadowStrike, radiantBurst, critBurst,
+       missFlash, dodgeEvade, potionMana, healSelf, healBurst,
+       buffDefense, buffArcaneShield, buffBless, buffStealth, buffRage,
+       sanctuary, sanctuaryBlock, sanctuaryBreak,
+       concentrationSave, concentrationLost
+       ============================================================ */
+    function dispatchAttackVfx(targetEl, opts) {
+        opts = opts || {};
+        if (!targetEl || !window._combatVfx) return;
+        var skill = opts.skill || null;
+        var fromEl = opts.fromEl || null;
+        var dmgType = opts.dmgType || 'slashing';
+        var crit = !!opts.crit;
+        var ranged = !!(skill && skill.ranged);
+        /* Heurística: tipos mágicos distantes sem bandeira explícita */
+        var magicDt = ['fire', 'cold', 'lightning', 'force', 'radiant', 'necrotic', 'psychic', 'thunder', 'acid', 'poison'];
+        if (!ranged && magicDt.indexOf(dmgType) >= 0) ranged = true;
+        try {
+            var skName = (skill && skill.n) || '';
+            /* 1) habilidades icônicas dedicadas */
+            if (skName === 'Mísseis Mágicos' && fromEl) {
+                window._combatVfx.magicMissiles(fromEl, targetEl, 3);
+            } else if (skName === 'Bola de Fogo') {
+                window._combatVfx.fireballAoE(targetEl);
+            } else if (skName === 'Raio Gélido' && fromEl) {
+                window._combatVfx.rayOfFrost(fromEl, targetEl, { crit: crit });
+            } else if (skName === 'Disparo Rápido' && fromEl) {
+                window._combatVfx.arrowVolley(fromEl, targetEl, 2, dmgType, { crit: crit });
+            } else if (skName === 'Rajada de Flechas' && fromEl) {
+                window._combatVfx.arrowVolley(fromEl, targetEl, 3, dmgType, { crit: crit });
+            } else if (ranged && fromEl) {
+                window._combatVfx.projectile(fromEl, targetEl, dmgType, { crit: crit });
+            } else if (['slashing', 'bludgeoning', 'piercing'].indexOf(dmgType) >= 0 && fromEl) {
+                window._combatVfx.meleeSlash(fromEl, targetEl, dmgType, { crit: crit });
+            } else {
+                window._combatVfx.impact(targetEl, dmgType, { crit: crit });
+            }
+            /* 2) overlays pós-impacto */
+            if (opts.sneakAttack) {
+                try { window._combatVfx.shadowStrike(targetEl); } catch (e0) {}
+            }
+            if (dmgType === 'radiant') {
+                setTimeout(function () {
+                    try { window._combatVfx.radiantBurst(targetEl); } catch (e1) {}
+                }, 80);
+            }
+            if (crit) {
+                setTimeout(function () {
+                    try { window._combatVfx.critBurst(targetEl, dmgType); } catch (e2) {}
+                }, 180);
+            }
+        } catch (e) {
+            console.warn('[COMBAT2] vfx_dispatch_failed', e || '');
+        }
+    }
+
+    /* Dispatcher de VFX de skill cast (Santuário, Fúria, Escudo Arcano, Bênção, etc.).
+       Consome opts.skillName pra despachar pro método correto em _combatVfx. */
+    function dispatchSkillCastVfx(targetEl, skillName) {
+        if (!targetEl || !window._combatVfx || !skillName) return;
+        try {
+            if (skillName === 'Postura Defensiva' || skillName === 'Aura de Proteção') {
+                window._combatVfx.buffDefense && window._combatVfx.buffDefense(targetEl);
+            } else if (skillName === 'Escudo Arcano') {
+                window._combatVfx.buffArcaneShield && window._combatVfx.buffArcaneShield(targetEl);
+            } else if (skillName === 'Bênção' || skillName === 'Inspiração' || skillName === 'Marca do Caçador') {
+                window._combatVfx.buffBless && window._combatVfx.buffBless(targetEl);
+            } else if (skillName === 'Esquiva' || skillName === 'Passos Silenciosos') {
+                window._combatVfx.buffStealth && window._combatVfx.buffStealth(targetEl);
+            } else if (skillName === 'Fúria') {
+                window._combatVfx.buffRage && window._combatVfx.buffRage(targetEl);
+            } else if (skillName === 'Santuário') {
+                window._combatVfx.sanctuary && window._combatVfx.sanctuary(targetEl);
+            }
+        } catch (e) {
+            console.warn('[COMBAT2] skill_cast_vfx_failed', skillName, e || '');
+        }
+    }
+
+    /* ============================================================
        HUD RECURSOS D&D 5e + DICE THEMES (Fases 5+6 port simulador).
        Glyphs: ◆ Ação  ▲ Bônus  ⬢ Reação
        Temas: holy, fire, ice, force, radiant, arcane, steel, lightning
