@@ -1860,3 +1860,104 @@ body { max-width: 430px; margin: 0 auto; min-height: 100vh; }
    Fase 3 (render): buildCell emite .cell.v8-card.cls-XXX + markup .c-*
    Fase 13 (polish): popup condição (.v8-cond-popup-*) do simulador linhas 1294-1627
    ============================================================================= */
+
+/* =============================================================================
+   ACTION SHEET — BA System UI (Fase 4 port simulador 2747-2860)
+   V1 Invocações Phase 1 (2026-04-18) — adiciona seção BÔNUS + Encerrar Turno
+   + Focar Familiar ao action sheet existente.
+
+   Elementos novos (todos default display:none até JS tornar visível):
+   - .action-btns-grid--bonus: grid separado pra Ações Bônus (Comandar SW)
+   - .action-btn.spent: estilo disabled-após-uso (ação já gasta no turno)
+   - .focus-familiar-link: link pra entrar em modo "escolher alvo do Familiar"
+   - .end-turn-btn: "Encerrar turno" (PHB p.190 — skip BA pendente)
+
+   Próximas fases adicionam (10-11): .command-companion-btn / .mount-toggle-btn
+   ============================================================================= */
+
+/* Grid BÔNUS: só aparece quando player tem attached summon ativo (classe .has-bonus). */
+.sim-action-sheet .action-btns-grid--bonus {
+    margin-top: var(--v-space-xs, 4px);
+    padding: var(--v-space-md, 10px) 0 0 0;
+    border-top: 1px dashed var(--v-border, #4a3828);
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    gap: var(--v-space-md, 10px);
+}
+.sim-action-sheet .action-btns-grid--bonus.has-bonus { display: grid; }
+.sim-action-sheet .action-btns-grid--bonus::before {
+    content: 'BÔNUS';
+    grid-column: 1 / -1;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: var(--v-font-xs, 10px);
+    color: var(--v-text-dim, #a09484);
+    letter-spacing: 2.5px;
+    text-align: center;
+    margin-bottom: 2px;
+}
+.sim-action-sheet .action-btns-grid--bonus .action-btn {
+    font-size: var(--v-font-sm, 12px);
+    min-height: 44px;
+    padding: var(--v-space-sm, 8px) var(--v-space-xs, 6px);
+}
+
+/* Botão .spent = ação já consumida neste turno (grayscale + opacity). */
+.sim-action-sheet .action-btn.spent {
+    opacity: 0.35;
+    pointer-events: none;
+    filter: grayscale(0.85);
+}
+
+/* Focar Familiar: link discreto igual aos secondary buttons (sem dourado). */
+.sim-action-sheet .focus-familiar-link {
+    display: none;
+    margin: var(--v-space-md, 10px) 0 0 0;
+    width: 100%;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: var(--v-font-sm, 12px);
+    min-height: 44px;
+    padding: var(--v-space-sm, 8px) var(--v-space-xs, 6px);
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    color: var(--v-text, #d4c8b0);
+    cursor: pointer;
+    transition: background var(--v-transition, 0.2s) ease,
+                border-color var(--v-transition, 0.2s) ease;
+}
+.sim-action-sheet .focus-familiar-link:hover {
+    background: rgba(196,149,58,0.08);
+    border-color: var(--v-gold-50, rgba(196,149,58,0.5));
+}
+
+/* Encerrar Turno: botão dourado destacado (PHB p.190 — skip BA pendente). */
+.sim-action-sheet .end-turn-btn {
+    display: none;
+    margin-top: var(--v-space-md, 10px);
+    padding: var(--v-space-md, 10px) var(--v-space-md, 12px);
+    width: 100%;
+    min-height: 48px;
+    background: linear-gradient(180deg, rgba(196,149,58,0.16), rgba(110,75,20,0.08));
+    border: 1px solid var(--v-gold-50, rgba(196,149,58,0.5));
+    border-radius: var(--v-radius, 10px);
+    color: var(--v-gold, #c4953a);
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: var(--v-font-sm, 12px);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--v-transition, 0.2s) ease;
+}
+.sim-action-sheet .end-turn-btn.visible { display: block; }
+.sim-action-sheet .end-turn-btn:hover {
+    background: rgba(196,149,58,0.22);
+}
+
+/* =============================================================================
+   FIM ACTION SHEET BA UI — próximas fases:
+   Fase 5 (HUD recursos): badges ◆/▲/⬢ nos botões + pílulas no topo
+   Fase 9 (V1 Invocações): popula bonus grid com "Comandar Arma Espiritual"
+   Fase 10 (V1.5): .command-companion-btn, .mount-toggle-btn
+   ============================================================================= */

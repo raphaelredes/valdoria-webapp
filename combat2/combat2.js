@@ -1470,7 +1470,13 @@
                     html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir</button>';
                     html += '<button type="button" class="action-btn secondary" data-act="pass">⏭ Passar turno</button>';
                     html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
-                    html += '</div></div></div>';
+                    html += '</div>';
+                    /* V1 Invocações Phase 1+ (Fase 4 port, 2026-04-20) — BÔNUS grid + Focar Familiar + Encerrar Turno.
+                       Containers default display:none via CSS; _updateActionSheetState torna visíveis quando aplicável. */
+                    html += '<div class="action-btns-grid action-btns-grid--bonus" id="bonus-action-grid"></div>';
+                    html += '<button type="button" class="focus-familiar-link" id="focus-familiar-btn" data-act="focus-familiar">🎯 Focar Familiar</button>';
+                    html += '<button type="button" class="end-turn-btn" id="end-turn-btn" data-act="end-turn">Encerrar turno</button>';
+                    html += '</div></div>';
                     if (_actionSheetOpen) {
                         html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
                     } else {
@@ -1483,6 +1489,94 @@
 
         setHTML(app, html);
         bindActions();
+        /* V1 Invocações Phase 1 (Fase 4 port, 2026-04-20) — atualiza visibilidade
+           do bonus grid, focus familiar link e Encerrar Turno conforme estado do player. */
+        _updateActionSheetState(s);
+    }
+
+    /* _updateActionSheetState — port simulador linha 11400-11530.
+       Aplica .spent aos botões principais/secundários quando `actionSpent`=true.
+       Mostra "Encerrar turno" quando `actionSpent || bonusActionSpent` (PHB p.190).
+       Popula o BÔNUS grid (Comandar Arma Espiritual) quando `attachedSummons` ativo.
+       Mostra "Focar Familiar" quando passive summon (Familiar/Sprite/Wolf/Steed) vivo.
+
+       Próximas fases adicionam (10-11): Command Companion / Mount Toggle buttons. */
+    function _updateActionSheetState(s) {
+        if (!s || !s.order || s.p_idx == null) return;
+        var p = s.order[s.p_idx];
+        if (!p) return;
+        /* Spent class nos botões de ação principal/secundários. */
+        var mainBtns = document.querySelectorAll('.action-btns-grid--main .action-btn, .action-btns-grid--secondary .action-btn');
+        for (var bi = 0; bi < mainBtns.length; bi++) {
+            var btnEl = mainBtns[bi];
+            var actName = btnEl.getAttribute('data-act') || '';
+            /* log é livre (não consome ação). Demais botões ficam spent se actionSpent. */
+            if (actName === 'log') {
+                btnEl.classList.remove('spent');
+            } else {
+                btnEl.classList.toggle('spent', !!p.actionSpent);
+            }
+        }
+        /* BÔNUS grid: populado com botões "Comandar Arma" quando player tem
+           attached summons. Fase 9 (V1 Invocações) completará o fluxo de target
+           picker + dispatch attack_summon. Por enquanto deixa grid vazio + escondido
+           quando não tem summon. */
+        var bonusGrid = document.getElementById('bonus-action-grid');
+        if (bonusGrid) {
+            var attached = (s.attachedSummons || {})[s.p_idx] || [];
+            var hasAttached = attached.length > 0;
+            bonusGrid.classList.toggle('has-bonus', hasAttached);
+            /* Limpa conteúdo atual. */
+            while (bonusGrid.firstChild) bonusGrid.removeChild(bonusGrid.firstChild);
+            if (hasAttached) {
+                for (var ai = 0; ai < attached.length; ai++) {
+                    var sw = attached[ai];
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'action-btn';
+                    btn.dataset.act = 'command-summon';
+                    btn.dataset.attachedIdx = String(ai);
+                    if (p.bonusActionSpent) {
+                        btn.classList.add('spent');
+                        btn.setAttribute('aria-disabled', 'true');
+                        btn.setAttribute('title', 'Ação Bônus já gasta neste turno');
+                    }
+                    btn.textContent = (sw.ico || '⚔️') + ' Comandar ' + (sw.name || 'Arma') + ' (' + (sw.durLeft | 0) + 'r)';
+                    bonusGrid.appendChild(btn);
+                    /* Re-bind (botão criado dinamicamente não passa por bindActions) */
+                    btn.addEventListener('click', onBtnClick);
+                }
+            }
+        }
+        /* Encerrar Turno: visível quando player já consumiu pelo menos uma ação. */
+        var endBtn = document.getElementById('end-turn-btn');
+        if (endBtn) {
+            endBtn.classList.toggle('visible', !!(p.actionSpent || p.bonusActionSpent));
+        }
+        /* Focar Familiar: visível quando passive summon vivo existe (Familiar, Sprite,
+           Wolf, Warhorse). Fase 9/10 completa o fluxo de target picker + set_focus. */
+        var focusBtn = document.getElementById('focus-familiar-btn');
+        if (focusBtn) {
+            var passiveAlive = false;
+            var passiveName = '';
+            if (s.order) {
+                for (var pi = 0; pi < s.order.length; pi++) {
+                    var u = s.order[pi];
+                    if (u && u.summonedBy === s.p_idx && u.alive &&
+                            (u.summonKind === 'familiar' ||
+                             u.summonKind === 'animal_companion' ||
+                             u.summonKind === 'find_steed')) {
+                        passiveAlive = true;
+                        passiveName = u.n || 'Aliado';
+                        break;
+                    }
+                }
+            }
+            focusBtn.style.display = passiveAlive ? 'block' : 'none';
+            if (passiveAlive) {
+                focusBtn.textContent = '🎯 Focar ' + passiveName;
+            }
+        }
     }
 
     /* ============================================================
@@ -1618,6 +1712,31 @@
             _actionSheetOpen = false;
             render(currentState);
             await remoteAction({ type: 'pass' });
+            return;
+        }
+        /* V1 Invocações Phase 1 (Fase 4 port, 2026-04-20) — PHB p.190: jogador pode
+           encerrar o turno explicitamente quando tem BA pendente e quer pular.
+           Força avanço via action 'end_turn' (motor força _advance_after_player_turn
+           com force=True, independente de BA pendente). */
+        if (act === 'end-turn') {
+            _actionSheetOpen = false;
+            render(currentState);
+            await remoteAction({ type: 'end_turn' });
+            return;
+        }
+        /* Focar Familiar: por enquanto só loga — target picker virá com Fase 9/10.
+           Quando implementado: entra em modo _selectingTarget e ao clicar inimigo
+           envia {type: 'set_focus', summonIdx, targetIdx}. */
+        if (act === 'focus-familiar') {
+            console.log('[COMBAT2] focus-familiar clicked — target picker pending Fase 9');
+            return;
+        }
+        /* Comandar Arma Espiritual: análogo ao focus — target picker virá com Fase 9.
+           Quando implementado: seleciona inimigo, envia {type: 'attack_summon',
+           summonAttachedIdx, target}. */
+        if (act === 'command-summon') {
+            console.log('[COMBAT2] command-summon clicked — target picker pending Fase 9',
+                b.dataset.attachedIdx);
             return;
         }
         if (act === 'death-save') {
