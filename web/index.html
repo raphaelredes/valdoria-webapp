@@ -195,11 +195,8 @@
     _loadScript('../shared/console-collector.js');
     _loadScript('../shared/error-reporter.js');
     _loadScript('web-auth.js');
-    /* DEV debug panel — carrega se:
-       - ?env=dev (legado, host jogo.lendasdevaldoria.com.br)
-       - ?devpanel=1 (opt-in explicito no subdominio dev.*) */
-    var _qp = new URLSearchParams(window.location.search);
-    if (_qp.get('env') === 'dev' || _qp.get('devpanel') === '1') {
+    /* DEV debug panel */
+    if (new URLSearchParams(window.location.search).get('env') === 'dev') {
         _loadCssBody('../shared/dev-debug-panel.css');
         _loadScript('../shared/dev-debug-panel.js');
     }
