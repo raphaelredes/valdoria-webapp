@@ -171,6 +171,10 @@
         </div>
     </div>
 
+    <!-- Telegram WebApp SDK (preenche window.Telegram.WebApp.initData quando
+         aberto de dentro do Telegram). DEVE ser carregado ANTES de telegram-compat
+         para o polyfill saber se esta em contexto real do Telegram. -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
     <script>

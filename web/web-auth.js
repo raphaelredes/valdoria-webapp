@@ -20,7 +20,7 @@ if (_hostProd && _envOverride === 'dev') {
     _envOverride = null;
 }
 var _isProd = _envOverride ? (_envOverride === 'prod') : _hostProd;
-var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'ValdoriaDevBot';
+var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'DevValdoriaBot';
 var _envId = _isProd ? 'prod' : 'dev';
 if (_envOverride) console.info('[WEB-AUTH] environment FORCED to %s (isProd=%s)', _envId, _isProd);
 
@@ -208,7 +208,7 @@ window.onTelegramClick = function() {
     var origin = encodeURIComponent(topWin.location.origin);
     var returnTo = encodeURIComponent(topWin.location.href);
     /* bot_id must be numeric — map username to ID */
-    var botIds = { 'LendasDeValdoriaBOT': '8511215729', 'ValdoriaDevBot': '8074658054' };
+    var botIds = { 'LendasDeValdoriaBOT': '8511215729', 'DevValdoriaBot': '8544608824' };
     var botId = botIds[BOT_USERNAME] || BOT_USERNAME;
     var authUrl = 'https://oauth.telegram.org/auth?bot_id=' + botId
         + '&origin=' + origin
@@ -844,9 +844,92 @@ var _GOOGLE_CLIENT_ID = '717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.goog
 
 /* Google GSI not needed — using OAuth redirect flow instead */
 
+/* ----- Telegram Mini App auto-login via initData ----- */
+
+/* True quando a pagina esta sendo aberta de DENTRO do Telegram (Mini App).
+ * Em contexto Telegram real, o SDK (telegram-web-app.js) popula `initData`.
+ * O polyfill `telegram-compat.js` NUNCA preenche initData — garantia que
+ * este flag so da true em contexto real. */
+function _isInsideTelegram() {
+    try {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        return !!(tg && typeof tg.initData === 'string' && tg.initData.length > 0);
+    } catch (_) { return false; }
+}
+
+/* Silent auth via initData. Se sucesso: salva token/user_id e redireciona
+ * direto para /app.html?route=game. Caso contrario: retorna false para
+ * deixar o fluxo de login manual seguir. */
+async function _tryTelegramInitAuth() {
+    if (!_isInsideTelegram()) return false;
+    var initData = window.Telegram.WebApp.initData;
+    console.info('[WEB-AUTH] Telegram Mini App detected — attempting silent auth (initData len=%d)', initData.length);
+
+    /* Garante que temos a base da API antes de POST */
+    try {
+        var ok = await discoverApiBase();
+        if (!ok) {
+            console.warn('[WEB-AUTH] Silent auth: no API base discovered — fallback to login UI');
+            return false;
+        }
+    } catch (e) {
+        console.warn('[WEB-AUTH] Silent auth: API discovery failed', e);
+        return false;
+    }
+
+    try {
+        /* Expande o WebApp para ocupar toda a viewport (melhor UX antes do redirect). */
+        try { window.Telegram.WebApp.ready(); } catch (_) { /* noqa: preflight */ }
+        try { window.Telegram.WebApp.expand(); } catch (_) { /* noqa: preflight */ }
+
+        var resp = await fetch(_apiBase + '/api/game/init-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Telegram-Init-Data': initData,
+            },
+            body: JSON.stringify({ init_data: initData }),
+        });
+
+        if (!resp.ok) {
+            console.warn('[WEB-AUTH] Silent auth: server returned %d — fallback to login UI', resp.status);
+            return false;
+        }
+        var data = await resp.json();
+        if (!data || !data.token || !data.user_id) {
+            console.warn('[WEB-AUTH] Silent auth: invalid response — fallback to login UI');
+            return false;
+        }
+
+        /* Persiste estado (mesmas chaves que o fluxo manual, para coerencia). */
+        _authToken = data.token;
+        _userId = Number(data.user_id);
+        _apiBase = (data.api || _apiBase || '').replace(/\/$/, '');
+        if (_apiBase) localStorage.setItem(WEB_API_KEY, _apiBase);
+        localStorage.setItem(WEB_TOKEN_KEY, _authToken);
+        localStorage.setItem(WEB_USER_KEY, String(_userId));
+
+        var charId = data.char_id || '';
+        console.info('[WEB-AUTH] Silent auth OK — uid=%s char=%s env=%s', _userId, charId || '(none)', data.env || '?');
+
+        if (charId) {
+            /* Ja tem personagem ativo — direto para o jogo. */
+            redirectToGame(charId, false, _authToken);
+        } else {
+            /* Sem personagem: manda para criacao. O backend cria o personagem
+             * e o proximo load volta ao fluxo normal. */
+            redirectToGame('', true, _authToken);
+        }
+        return true;
+    } catch (e) {
+        console.error('[WEB-AUTH] Silent auth failed — fallback to login UI', e);
+        return false;
+    }
+}
+
 /* ----- Init ----- */
 
-function _initWebAuth() {
+async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
 
     /* BUG (2026-04-11): When ?env=dev is present but nodevpanel=1 is NOT,
@@ -868,19 +951,30 @@ function _initWebAuth() {
     var _isIframe = _params.get('nodevpanel') === '1';
     var _isDevPortalHost = _isDevEnv && !_isIframe;
     if (_isDevPortalHost) {
-        /* Defer EVERYTHING to the iframe: no checkExistingSession AND no
-         * loadTelegramWidget. loadTelegramWidget() calls
-         * _checkTelegramOAuthReturn() which, if an #tgAuthResult hash is
-         * present, fires onTelegramAuth -> handleLoginSuccess ->
-         * redirectToGame -> window.location.href = '/app.html?...'.
-         * That navigation happens on the TOP window and wipes the
-         * tab away from the dev portal before dev-debug-panel.js can
-         * build the host shell. The iframe (nodevpanel=1) runs the
-         * same code and _getOAuthReturnHash() explicitly looks at
-         * window.top.location.hash, so OAuth returns land inside the
-         * iframe without us duplicating the work here. */
         console.info('[WEB-AUTH] Dev portal host mode — deferring all auth (checkExistingSession + OAuth return) to iframe');
         return;
+    }
+
+    /* ── AUTO-LOGIN VIA TELEGRAM MINI APP ───────────────────────────
+     * Quando a pagina abre de dentro do Telegram (bot Menu Button ou
+     * link de WebApp), `window.Telegram.WebApp.initData` contem a
+     * autenticacao pronta. Trocamos silenciosamente por um token de
+     * sessao via /api/game/init-session e redirecionamos direto para
+     * o jogo — sem exibir os botoes de login. */
+    if (_isInsideTelegram()) {
+        /* Oculta imediatamente a tela de login enquanto tentamos silent auth,
+         * evitando flash dos botoes antes do redirect. */
+        try {
+            var _loginScreen = document.getElementById('screen-login');
+            if (_loginScreen) _loginScreen.style.visibility = 'hidden';
+        } catch (_) { /* noqa: preflight */ }
+        var silentOk = await _tryTelegramInitAuth();
+        if (silentOk) return;
+        /* Fallback: restaura a tela de login se o silent auth falhou. */
+        try {
+            var _lsRestore = document.getElementById('screen-login');
+            if (_lsRestore) _lsRestore.style.visibility = '';
+        } catch (_) { /* noqa: preflight */ }
     }
 
     loadTelegramWidget();
