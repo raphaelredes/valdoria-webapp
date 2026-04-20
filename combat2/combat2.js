@@ -21,6 +21,50 @@
     var USER_ID = parseInt(_qs.get('uid') || '0', 10);
 
     var currentState = null;
+
+    /* ═════════════════════════════════════════════════════════════
+     * PORT_LOG — rastreabilidade de features portadas do simulador
+     * (simuladores/combate.html, fonte canônica) para o WebApp DEV.
+     *
+     * Regra IMMUTABLE (CLAUDE.md § Log [COMBAT2:PORT]): toda alteração
+     * trazida do simulador DEVE adicionar entry aqui. Boot do WebApp
+     * loga um [COMBAT2:PORT] summary rastreável pela aba Combate da GUI.
+     * ═════════════════════════════════════════════════════════════ */
+    var PORT_LOG = [
+        /* Fase 2 (2026-04-18) — ícones heráldicos + markup V8 card. */
+        { id: 'v8-heraldic-card',         phase: 'V1-Visual',    date: '2026-04-18', ref: 'combate.html:10019-10189', desc: 'Card V8 com SVG heraldic + c-name/c-portrait/c-class-tag' },
+        { id: 'heraldic-icon-map',        phase: 'V1-Visual',    date: '2026-04-18', ref: 'combate.html:9862-9880',   desc: '_heraldicIconOf: resolve unit → ic-XXX' },
+        { id: 'class-slug-map',           phase: 'V1-Visual',    date: '2026-04-18', ref: 'combate.html:9862-9880',   desc: '_heraldicClsSlugOf: resolve unit → cls-XXX' },
+        /* Fase 3 (2026-04-18) — wiring heraldic em buildCell. */
+        { id: 'buildcell-v8-wiring',      phase: 'V1-Visual',    date: '2026-04-18', ref: 'combate.html:10312-10320', desc: 'buildCell aplica v8-card + cls-slug automaticamente' },
+        /* Fase 4 (2026-04-19) — summons invocações (spiritual_weapon, familiar, etc). */
+        { id: 'summons-phb-icons',        phase: 'V1.6-PHB',     date: '2026-04-19', ref: 'combate.html:9882-9920',   desc: 'Invocações PHB-fiel: ic-spiritual-weapon, ic-familiar, ic-sprite' },
+        { id: 'summons-caster-color',    phase: 'V1-Invocações', date: '2026-04-18', ref: 'combate.html:9900-9935',   desc: 'Summons herdam cor do caster (cls-clerigo, cls-mago)' },
+        { id: 'summon-attached-chip',    phase: 'V1-Invocações', date: '2026-04-18', ref: 'combate.html:10152-10168', desc: 'Chip flutuante de Arma Espiritual sobre conjurador' },
+        { id: 'summon-focus-marker',     phase: 'V1-Invocações', date: '2026-04-19', ref: 'combate.html:10139-10151', desc: 'Marcador 🎯 em inimigo focado por Familiar' },
+        /* Fase 5 (2026-04-19) — HUD recursos D&D + action sheet. */
+        { id: 'dnd-resources-bar',        phase: 'V1-HUD',       date: '2026-04-19', ref: 'combate.html:11200-11395', desc: 'Barra HUD pílulas reação/movimento/recursos' },
+        { id: 'action-sheet-bottom',      phase: 'V1-HUD',       date: '2026-04-19', ref: 'combate.html:11400-11530', desc: 'Sheet inferior de ações (agir/reagir/mover)' },
+        /* Fase 13 (polish) — popup condição .v8-cond-popup + chip clicável */
+        { id: 'condition-chip-popup',     phase: 'V1-Polish',    date: '2026-04-19', ref: 'combate.html:1229+',       desc: 'Chip .c-cond-chip clicável abre popup detalhe' },
+        /* 2026-04-20 — 4 correções de alinhamento simulador ↔ DEV. */
+        { id: 'fix-attack-click-guard',   phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:8367,11912',  desc: 'Click no card inimigo em modo selectingTarget: guard closest(button) refinado (só data-act bloqueia)' },
+        { id: 'fix-turn-queue-heraldic',  phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:9708-9745',   desc: 'buildTurnQueue usa SVG heraldic + cls-slug (era emoji genérico)' },
+        { id: 'fix-ally-fallback-v8',     phase: 'V1-BugFix',    date: '2026-04-20', ref: 'combate.html:9862-9880',   desc: 'Ally NPC sem cls mapeada usa ic-inimigo + cls-aliado (verde-aço) em vez de cair no fallback legado' },
+        { id: 'fix-music-sync-robust',    phase: 'V1-BugFix',    date: '2026-04-20', ref: 'audio-manager.js',        desc: 'syncCombat2Music com targetKey unificada; só re-dispara em mudança de track conceitual' }
+    ];
+
+    /* Loga PORT_LOG UMA vez no boot para rastreio pela GUI (filtro [COMBAT2:). */
+    try {
+        if (!window.__combat2PortLogged) {
+            window.__combat2PortLogged = true;
+            console.info('[COMBAT2:PORT] ' + PORT_LOG.length + ' features portadas do simulador combate.html');
+            PORT_LOG.forEach(function (e) {
+                console.info('[COMBAT2:PORT] ' + e.id + ' phase=' + e.phase + ' date=' + e.date + ' ref=' + e.ref + ' — ' + e.desc);
+            });
+        }
+    } catch (e) { /* silencioso */ }
+
     var _selectingTarget = false;
     var _selectHealTarget = false;
     /** Folha inferior de acoes (paridade com simuladores/combate.html). */
