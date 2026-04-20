@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <!--
-  MAPA_IA — valdoria-webapp/combat2/index.html
-  (Regra: CLAUDE.md "WebApp index.html — MAPA_IA". Atualizar este mapa se a estrutura mudar.)
-  Ordem vertical do ficheiro:
+  MAPA_IA - valdoria-webapp/combat2/index.html
+  (FASE 1 PoC 2026-04-20: combate.html virou fonte canonica.)
 
-  1. WebApp combat2: estado GET/POST /api/combat2; lógica em combat2.js; CSS reutiliza combat/*.css + combat2.css.
-  2. <head> — meta UTF-8, viewport, theme-color, cache no-store (3 meta), title.
-  3. <head> — style inline html{background} (anti-FOUC; nunca opacity:0 no html).
-  4. <head> — script: var v=Date.now(), BASE GitHub Pages, loadCSS() → fonts, valdoria-design, coin, status-bars,
-     animations, cadeia CSS combat/* (...), combat2.css via document.write com ?v= (cache bust).
-  5. <body> — class biome-*, canvas#vfxCanvas (CombatVFX), #app + mensagem loading inicial.
-  6. Script externo — telegram-web-app.js.
-  7. IIFE document.write — motion.js, combat-vfx.js, combat-battlefield-pan-zoom.js (pan/zoom arena),
-     audio-manager.js, combat/combat-audio.js, console-collector.js, error-reporter.js (ordem preflight / error-reporter após collector).
-  8. combat2.js — boot: THREE → dice-3d → fetch estado → render (detalhe no .js).
+  Este index.html vira um SHIM que redireciona para combate.html preservando
+  a query string (token/api/uid/o/env/_cb). O engine/UI vive 100% em
+  combate.html - que detecta window.__COMBAT_MODE=remote quando `token+api`
+  estao presentes e substitui o motor local por POST /api/combat2.
+
+  Proposta completa: docs/sistemas/combat2-arch-canonical-proposal.md
+  Sync tool: scripts/sync_combate_to_webapp.py
 -->
 <html lang="pt-BR">
 <head>
@@ -23,8 +19,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Combate — Valdoria</title>
-<!-- DEV/PROD: evita WebApp antigo por SW/cache do browser (não substitui deploy do backend). -->
+<title>Combate - Valdoria</title>
+<style>html,body{background:#1a1510;color:#d4c8b0;margin:0;padding:0;height:100dvh;font-family:serif}
+.loading-shim{display:flex;align-items:center;justify-content:center;height:100dvh;letter-spacing:2px;opacity:.8}</style>
 <script>
 (function () {
     try {
@@ -38,67 +35,20 @@
                 keys.forEach(function (k) { caches.delete(k); });
             });
         }
-    } catch (e) { /* intentionally silent */ }
+    } catch (e) {}
 })();
-</script>
-<style>html{background:#2a2420}</style>
-<script>
-var v = Date.now();
-var BASE = 'https://jogo.lendasdevaldoria.com.br';
-function loadCSS(href) {
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = BASE + href + '?v=' + v;
-    document.head.appendChild(l);
-}
-loadCSS('/shared/fonts.css');
-loadCSS('/valdoria-design.css');
-loadCSS('/shared/coin-icon.css');
-loadCSS('/shared/status-bars.css');
-loadCSS('/shared/animations.css');
-loadCSS('/combat/combat.css');
-loadCSS('/combat/combat-battlefield.css');
-loadCSS('/combat/combat-turn-queue.css');
-loadCSS('/combat/combat-grid.css');
-loadCSS('/combat/combat-actions-popup.css');
-loadCSS('/combat/combat-init-overlay.css');
-loadCSS('/combat/combat-init-popup.css');
-loadCSS('/combat/combat-dice-banner.css');
-loadCSS('/combat/combat-effects.css');
-loadCSS('/combat/combat-entities.css');
-loadCSS('/combat/combat-layout.css');
-loadCSS('/combat/combat-polish.css');
-loadCSS('/combat/combat-screens.css');
-loadCSS('/combat/combat-themes.css');
-loadCSS('/combat/combat-vfx.css');
-document.write('<link rel="stylesheet" href="combat2.css?v=' + v + '">');
+/* Redirect para combate.html preservando query params (token, api, uid, o, env, _cb).
+   O combate.html detecta __COMBAT_MODE=remote via `token+api`. */
+(function () {
+    var qs = location.search || '';
+    /* Cache-bust adicional por seguranca. */
+    var sep = qs.indexOf('?') === 0 ? '&' : '?';
+    var cb = sep + '_rv=' + Date.now();
+    location.replace('./combate.html' + qs + cb);
+})();
 </script>
 </head>
-<body class="biome-forest">
-<canvas id="vfxCanvas"></canvas>
-<div id="app">
-    <div class="loading-msg">Carregando combate...</div>
-</div>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-/* Mesmo pipeline do combate legado (combat/index.html): motion + canvas VFX */
-(function () {
-    var v = Date.now();
-    var B = 'https://jogo.lendasdevaldoria.com.br';
-    document.write('<script src="' + B + '/shared/motion.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/combat-vfx.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/audio-manager.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/combat/combat-audio.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/console-collector.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/error-reporter.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + B + '/shared/combat-battlefield-pan-zoom.js?v=' + v + '"><\/script>');
-    /* V8 heraldic crests (Fase 0 port simulador -> DEV, commit a792a049).
-       Injeta <svg><defs>13 ic-* symbols</defs></svg> no body uma vez so.
-       Referenciado por buildCellInnerHTML via <use href="#ic-*">. */
-    document.write('<script src="' + B + '/shared/heraldic-icons.js?v=' + v + '"><\/script>');
-})();
-</script>
-<script src="combat2.js"></script>
+<body>
+<div class="loading-shim">Carregando combate...</div>
 </body>
 </html>
