@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:26:17Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:37:02Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12682,6 +12682,25 @@ async function __combatLeaveRemoteToOrigin() {
     var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
     var origin = window.__COMBAT_ORIGIN_APP || 'game';
     try { window.__valdoria_transitioning = true; } catch (eT) {}
+    /* [C-REM:LEAVE-XHR-ENTRY] (2026-04-21) sync XHR ao entrar — garante ao menos
+       1 log arrival mesmo se keepalive/sendBeacon falharem em Telegram Desktop. */
+    try {
+        if (window.__COMBAT_API_BASE && window.__COMBAT_USER_ID) {
+            var _xhrEntry = new XMLHttpRequest();
+            _xhrEntry.open('POST', window.__COMBAT_API_BASE + '/api/game/log', false);
+            _xhrEntry.setRequestHeader('Content-Type', 'application/json');
+            _xhrEntry.send(JSON.stringify({
+                entries: [{
+                    level: 'info',
+                    msg: '[C-REM:LEAVE-XHR-ENTRY] sync_diag ph=' + ph + ' result=' + result + ' origin=' + origin
+                        + ' token=' + !!window.__COMBAT_TOKEN + ' api=' + !!window.__COMBAT_API_BASE
+                        + ' uid=' + window.__COMBAT_USER_ID
+                        + ' hasTg=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData)
+                }],
+                uid: window.__COMBAT_USER_ID
+            }));
+        }
+    } catch (_eXe) {}
     console.info('[C-REM:LEAVE] enter ph=' + ph + ' result=' + result + ' origin=' + origin
         + ' tokenPresent=' + !!window.__COMBAT_TOKEN
         + ' apiBasePresent=' + !!window.__COMBAT_API_BASE
@@ -12833,6 +12852,25 @@ async function __combatLeaveRemoteToOrigin() {
             }
         } catch (_eBk) {}
         console.info('[C-REM:LEAVE] calling_location_replace targetUrlLen=' + targetUrl.length);
+        /* [C-REM:LEAVE-XHR-REPLACE] (2026-04-21) sync XHR final — garante logar o
+           targetUrl exato que será chamado no replace. Se este arrival também
+           falhar, sabemos que o problema é de rede no Telegram Desktop. */
+        try {
+            if (window.__COMBAT_API_BASE && window.__COMBAT_USER_ID) {
+                var _xhrRep = new XMLHttpRequest();
+                _xhrRep.open('POST', window.__COMBAT_API_BASE + '/api/game/log', false);
+                _xhrRep.setRequestHeader('Content-Type', 'application/json');
+                _xhrRep.send(JSON.stringify({
+                    entries: [{
+                        level: 'info',
+                        msg: '[C-REM:LEAVE-XHR-REPLACE] sync_final targetUrlLen=' + targetUrl.length
+                            + ' targetUrlHead=' + targetUrl.substring(0, 200)
+                            + ' hashPreserved=' + _hashPreserved
+                    }],
+                    uid: window.__COMBAT_USER_ID
+                }));
+            }
+        } catch (_eXr) {}
         location.replace(targetUrl);
     } catch (e) {
         var eMsg = (e && e.message) || String(e);
@@ -12847,6 +12885,13 @@ async function __combatLeaveRemoteToOrigin() {
 function onBtnClick(ev) {
     var b = ev.currentTarget;
     var act = b.dataset.act;
+    /* [C-REM:BTN-ENTRY] (2026-04-21) log TODO click no onBtnClick pra diagnosticar
+       path do Continue pós-vitória. Em TODAS as rotas (remote/local). */
+    try {
+        console.info('[C-REM:BTN-ENTRY] onBtnClick act=' + act
+            + ' mode=' + (window.__COMBAT_MODE || 'unknown')
+            + ' ph=' + ((currentState && currentState.ph) || '?'));
+    } catch (_eBe) {}
     /* [C-REM:BTN] REMOTE MODE: actions meta viram POST /api/combat2.
        UI-only actions (toggle/close-sheet/log) fallthrough pro handler local. */
     if (window.__COMBAT_MODE === 'remote') {
@@ -12972,6 +13017,27 @@ function onBtnClick(ev) {
         } else if (act === 'close-remote') {
             /* Fim de combate: chama POST /api/webapp/transition pra voltar ao Game Hub.
                Paridade com combat2.js leaveCombatToOrigin. */
+            /* [C-REM:BTN-CLOSE-REMOTE] (2026-04-21) marca que branch foi alcançado.
+               Redundância: sync XHR + console.info — garante arrival no bot.log. */
+            console.info('[C-REM:BTN-CLOSE-REMOTE] branch_reached dispatching __combatLeaveRemoteToOrigin'
+                + ' uid=' + window.__COMBAT_USER_ID
+                + ' ph=' + ((currentState && currentState.ph) || '?'));
+            /* Sync XHR: bloqueia até resposta, garante arrival mesmo se Telegram
+               Desktop bloqueia sendBeacon/keepalive em unload. Deprecated mas
+               intencional como DIAGNÓSTICO — remover quando bug resolvido. */
+            try {
+                if (window.__COMBAT_API_BASE && window.__COMBAT_USER_ID) {
+                    var _xhrDiag = new XMLHttpRequest();
+                    _xhrDiag.open('POST', window.__COMBAT_API_BASE + '/api/game/log', false);
+                    _xhrDiag.setRequestHeader('Content-Type', 'application/json');
+                    _xhrDiag.send(JSON.stringify({
+                        entries: [{ level: 'info', msg: '[C-REM:BTN-CLOSE-REMOTE-XHR] sync_diag_arrived hrefLen=' + location.href.length + ' hashLen=' + (location.hash || '').length }],
+                        uid: window.__COMBAT_USER_ID
+                    }));
+                }
+            } catch (_eSx) {
+                console.warn('[C-REM:BTN-CLOSE-REMOTE] sync_xhr_failed ' + (_eSx && _eSx.message));
+            }
             void __combatLeaveRemoteToOrigin();
             return;
         }
