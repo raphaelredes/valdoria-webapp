@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:46:10Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:53:34Z — do not edit directly, edit source -->
 
 
 <!--
@@ -19421,7 +19421,7 @@ loadScript(_THREE_SRC, function (errThree) {
         }
     } catch (e0) { /* ignore */ }
     /* Quando rodando via file:// prioriza LOCAL (pra edições em dice-3d.js aplicarem no dev).
-       Fallback pro remote se o local falhar. Caso contrário (http://, https://), usa remote normal. */
+       Fallback pro remote se o local falhar. Caso contrário (proto http ou https), usa remote normal. */
     var firstUrl = (isFile && diceLocal) ? diceLocal : diceRemote;
     var secondUrl = (isFile && diceLocal && diceLocal !== diceRemote) ? diceRemote : (diceLocal || '');
     loadDice3dUrl(firstUrl, function (errFirst) {
