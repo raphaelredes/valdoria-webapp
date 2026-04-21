@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:25:50Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:33:56Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12216,8 +12216,13 @@ function render(s) {
         html += '<div class="action-bar action-bar--resolution-log">';
         html += '<button type="button" class="action-btn secondary full-width" data-act="log">📜 Ver log do combate</button>';
         html += '</div>';
-        /* REMOTE MODE: botão retorna ao Game Hub via transition API; local mantém 'restart'. */
-        if (window.__COMBAT_MODE === 'remote') {
+        /* [PIVOT 2026-04-21] IS_REMOTE_SESSION: botão "Continuar" dispara POST
+           /api/combat2/complete que aplica HP/MP/rewards ao Player DB + redireciona
+           pro origin (explore/game/navigate). LOCAL test mode (file://): "Novo
+           Combate" restart.
+           Check mudou de __COMBAT_MODE==='remote' pra __COMBAT_IS_REMOTE_SESSION
+           porque o pivot força mode='local' durante o combate. */
+        if (window.__COMBAT_IS_REMOTE_SESSION) {
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="close-remote">✓ Continuar</button></div>';
         } else {
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="restart">🔄 Novo Combate</button></div>';
@@ -13225,6 +13230,16 @@ function onBtnClick(ev) {
         }
         currentState = newCombat();
         render(currentState);
+        return;
+    }
+    /* [PIVOT 2026-04-21] close-remote: botão Continuar da tela de vitória em
+       REMOTE session. Não está dentro do bloco __COMBAT_MODE==='remote' (que
+       está inerte pós-pivot) porque precisa funcionar quando mode foi forçado
+       pra 'local'. Dispara __combatLeaveRemoteToOrigin → se IS_REMOTE_SESSION,
+       cai em __combatCompleteCanonical (POST /api/combat2/complete). */
+    if (act === 'close-remote') {
+        console.info('[C-REM:BTN-CLOSE-REMOTE] pivot path — calling __combatLeaveRemoteToOrigin');
+        void __combatLeaveRemoteToOrigin();
         return;
     }
     if (act === 'next') { animInit(); return; }
