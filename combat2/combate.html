@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:22:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:28:38Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -950,6 +950,10 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .cell.cls-feiticeiro  { --card-accent: var(--class-feiticeiro);  --card-accent-dark: var(--class-feiticeiro-dark); }
 .cell.cls-inimigo     { --card-accent: var(--enemy-red);         --card-accent-dark: var(--enemy-red-dark); }
 .cell.cls-boss        { --card-accent: var(--enemy-red);         --card-accent-dark: #5a0a0a; }
+/* fix-ally-fallback-v8 (2026-04-20) — ally NPC SEM cls mapeada usa verde-aço
+   pra distinguir VISUALMENTE de inimigos (cls-inimigo é vermelho). Antes do
+   fix, ally sem cls caía em fallback legado (ou pior: ic-inimigo vermelho). */
+.cell.cls-aliado      { --card-accent: #6b9a6b;                  --card-accent-dark: #2e4a2e; }
 /* V1 Invocações Phase 3 (2026-04-18) — summon: azul-arcano roxo (distingue de aliado normal). */
 .cell.cls-summon      { --card-accent: var(--summon-arcane);     --card-accent-dark: var(--summon-arcane-dark); }
 /* Turn queue summon: aplica filter dourado-arcano via SVG. */
@@ -1001,6 +1005,11 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .cell.v8-card.cls-inimigo {
   background: var(--enemy-red) !important;
 }
+/* fix-ally-fallback-v8 (2026-04-20) — verde-aço distinto pra allies sem cls.
+   Igual a combat2.css:1580-1583 (paridade bot DEV ↔ simulador). */
+.cell.v8-card.cls-aliado {
+  background: #2e4a2e !important;
+}
 
 /* ---- c-name (banner topo, nome protagonista).
    Reduzido de 15px→12px pra caber nomes maiores sem truncar ("Esqueleto", "Aranha Gigante"). */
@@ -1023,6 +1032,25 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .cell.v8-card.cls-inimigo .c-name {
   background: color-mix(in srgb, var(--enemy-red-dark, #401010) 70%, #000);
   color: color-mix(in srgb, var(--enemy-red, #a03020) 20%, #fff 80%);
+}
+/* fix-ally-fallback-v8 (2026-04-20) — c-name verde-aço pra allies. */
+.cell.v8-card.cls-aliado .c-name {
+  background: linear-gradient(180deg, #1e3320 0%, #0a1a0a 100%);
+  color: color-mix(in srgb, #6b9a6b 40%, #fff 60%);
+  border-bottom-color: #6b9a6b;
+}
+.cell.v8-card.cls-aliado .c-class-tag {
+  color: #8abf8a;
+  border-color: rgba(107, 154, 107, 0.6);
+  background: rgba(15, 30, 15, 0.5);
+}
+.cell.v8-card.cls-aliado .c-portrait {
+  color: color-mix(in srgb, #6b9a6b 40%, #fff 60%);
+}
+.cell.v8-card.cls-aliado .c-portrait svg {
+  fill: currentColor;
+  stroke: currentColor;
+  opacity: 0.85;
 }
 .cell.v8-card.cls-boss .c-name {
   background: #2a1008;
@@ -12700,8 +12728,12 @@ function onBtnClick(ev) {
        UI-only actions (toggle/close-sheet/log) fallthrough pro handler local. */
     if (window.__COMBAT_MODE === 'remote') {
         /* UI-only actions ficam locais (toggle-actions, cancel-target, close-*-sheet, log, info). */
+        /* FIX 2026-04-20: skip-init REMOVIDO de UI_ONLY — em remote mode, o
+           servidor controla fase (intro→init→active). Antes: user clicava
+           Pular, UI ignorava, phase ficava intro, skills eram rejeitadas
+           pelo servidor ("ph != active" → return sem ação). */
         var UI_ONLY = ['toggle-actions', 'close-action-sheet', 'cancel-target',
-            'close', 'log', 'dnd-res-info', 'toggle-skip-dice', 'skip-init',
+            'close', 'log', 'dnd-res-info', 'toggle-skip-dice',
             'skills', 'bag'];
         if (UI_ONLY.indexOf(act) !== -1) {
             console.info('[C-REM:BTN] ui_only act=' + act + ' (local handler)');
@@ -12711,6 +12743,31 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             render(currentState);
             void __combatRemoteAction({ type: 'next' });
+            return;
+        } else if (act === 'skip-init') {
+            /* FIX 2026-04-20: em remote, skip-init avança fase no servidor.
+               Chain: intro→next→init→start→active. Server retorna events e
+               state final ao final. Cliente NÃO anima iniciativa (pular). */
+            console.info('[C-REM:BTN] act=skip-init (chain next→start remote)');
+            _actionSheetOpen = false;
+            _skipInit = true;  /* marca localmente pra skip animação se vier */
+            _simSkipNonPlayerDice = true;
+            render(currentState);
+            (async function () {
+                try {
+                    /* Passo 1: intro → init */
+                    if (currentState && currentState.ph === 'intro') {
+                        await __combatRemoteAction({ type: 'next' });
+                    }
+                    /* Passo 2: init → active */
+                    if (currentState && (currentState.ph === 'init' || currentState.ph === 'init_done')) {
+                        await __combatRemoteAction({ type: 'start' });
+                    }
+                    console.info('[C-REM:BTN] skip-init chain complete ph=' + (currentState && currentState.ph));
+                } catch (eSi) {
+                    console.error('[C-REM:BTN] skip-init chain failed', eSi && eSi.message);
+                }
+            })();
             return;
         } else if (act === 'start') {
             closeInitiativeOrderPopup();
