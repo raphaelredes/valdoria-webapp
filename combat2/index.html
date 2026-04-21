@@ -3,13 +3,24 @@
   MAPA_IA - valdoria-webapp/combat2/index.html
   (FASE 1 PoC 2026-04-20: combate.html virou fonte canonica.)
 
-  Este index.html vira um SHIM que redireciona para combate.html preservando
-  a query string (token/api/uid/o/env/_cb). O engine/UI vive 100% em
-  combate.html - que detecta window.__COMBAT_MODE=remote quando `token+api`
-  estao presentes e substitui o motor local por POST /api/combat2.
+  AGENTE IA: LEIA PRIMEIRO docs/sistemas/combat2-master-index.md (entry point
+  unico). Contem indice de funcoes, 15 fixes, workflow diagnostico e FAQs.
 
-  Proposta completa: docs/sistemas/combat2-arch-canonical-proposal.md
-  Sync tool: scripts/sync_combate_to_webapp.py
+  Este index.html vira um SHIM que redireciona para combate.html preservando
+  a query string (token/api/uid/o/env/_cb) E location.hash (#tgWebAppData).
+  O engine/UI vive 100% em combate.html - que detecta window.__COMBAT_MODE=
+  remote quando `token+api` estao presentes e substitui o motor local por
+  POST /api/combat2.
+
+  NUNCA edite valdoria-webapp/combat2/combate.html manualmente — e cópia
+  sincronizada do master via scripts/sync_combate_to_webapp.py. Edite
+  simuladores/combate.html, rode sync, commit webapp.
+
+  Docs canonical (ordem de leitura):
+    docs/sistemas/combat2-master-index.md          ← ENTRY POINT
+    docs/sistemas/combat2-arch-canonical-proposal.md
+    docs/sistemas/combat2-canonical-changelog.md
+    docs/sistemas/combat2-debug-via-bot-log.md
 -->
 <html lang="pt-BR">
 <head>
