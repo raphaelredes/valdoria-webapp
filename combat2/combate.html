@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:14:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:22:02Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -12545,21 +12545,76 @@ function __combatShowShieldPrompt(ev) {
     });
 }
 
-/* [C-REM:LEAVE] Leave combat remote → transition API.
-   Paridade combat2.js leaveCombatToOrigin. Logs: ph, result, origin, transition URL. */
-async function __combatLeaveRemoteToOrigin() {
-    var ph = (currentState && currentState.ph) || 'victory';
-    var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
-    var origin = window.__COMBAT_ORIGIN_APP || 'game';
-    try { window.__valdoria_transitioning = true; } catch (eT) {}
-    console.info('[C-REM:LEAVE] enter ph=' + ph + ' result=' + result + ' origin=' + origin);
-    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
-        console.warn('[C-REM:LEAVE] no_api_or_token — fallback tg.close()');
+/* [C-REM:LEAVE-ERR] Error overlay — mostra tela de erro + registra log em vez
+   de tg.close() silencioso que derrubava user na tela de auth sem explicação.
+   User (2026-04-20): "melhor mostrar tela de erro e ser registrado log do
+   que isso acontecer". */
+function __combatShowErrorOverlay(title, detailsHtml) {
+    console.error('[C-REM:LEAVE-ERR] ' + title + ' details=' + String(detailsHtml).replace(/<[^>]+>/g, ' ').slice(0, 300));
+    try {
+        var ov = document.createElement('div');
+        ov.className = 'combat-msg-overlay';
+        ov.style.zIndex = '102000';
+        var card = document.createElement('div');
+        card.className = 'combat-msg-card miss';
+        var txt = document.createElement('div');
+        txt.className = 'combat-msg-text';
+        txt.textContent = '\u26A0\uFE0F ' + title;
+        card.appendChild(txt);
+        var s = document.createElement('div');
+        s.className = 'combat-msg-sub';
+        s.style.maxWidth = '340px';
+        s.style.margin = '0 auto';
+        /* setHTML existe no escopo — safe: detailsHtml é montado por nós (não user input). */
+        setHTML(s, detailsHtml + '<br><br><em style="opacity:.7">Erro registrado no servidor. Agente IA pode grep [C-REM:LEAVE-ERR] em bot.log.</em>');
+        card.appendChild(s);
+        var btn = document.createElement('button');
+        btn.className = 'dice-continue-btn';
+        btn.textContent = 'Fechar combate \u2192';
+        card.appendChild(btn);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
+        btn.addEventListener('click', function () {
+            try { ov.remove(); } catch (eR) {}
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.close();
+                }
+            } catch (eC) {}
+        });
+    } catch (eOv) {
+        console.error('[C-REM:LEAVE-ERR] overlay_failed \u2014 fallback close', eOv);
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.close();
             }
         } catch (eC) {}
+    }
+}
+
+/* [C-REM:LEAVE] Leave combat remote \u2192 transition API.
+   Paridade combat2.js leaveCombatToOrigin.
+
+   FALLBACK (2026-04-20): QUALQUER erro (rede, 4xx/5xx, no_url, JSON parse)
+   \u2192 __combatShowErrorOverlay em vez de tg.close() silencioso. NUNCA
+   redireciona pra /web/ \u2014 era root cause do "caiu na tela de auth". */
+async function __combatLeaveRemoteToOrigin() {
+    var ph = (currentState && currentState.ph) || 'victory';
+    var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
+    var origin = window.__COMBAT_ORIGIN_APP || 'game';
+    try { window.__valdoria_transitioning = true; } catch (eT) {}
+    console.info('[C-REM:LEAVE] enter ph=' + ph + ' result=' + result + ' origin=' + origin
+        + ' tokenPresent=' + !!window.__COMBAT_TOKEN
+        + ' apiBasePresent=' + !!window.__COMBAT_API_BASE
+        + ' uid=' + window.__COMBAT_USER_ID);
+    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
+        __combatShowErrorOverlay(
+            'Sess\u00e3o incompleta',
+            'N\u00e3o foi poss\u00edvel retornar: token ou URL da API ausente.' +
+            '<br>api=' + !!window.__COMBAT_API_BASE +
+            ' token=' + !!window.__COMBAT_TOKEN +
+            ' uid=' + window.__COMBAT_USER_ID
+        );
         return;
     }
     var url = window.__COMBAT_API_BASE + '/api/webapp/transition';
@@ -12575,9 +12630,8 @@ async function __combatLeaveRemoteToOrigin() {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
             headers['X-Idempotency-Key'] = window.crypto.randomUUID();
         }
-        /* FIX 2026-04-20: payload precisa de `user_id` (não `uid`) e from='combat'
-           (transition map webapp_transition.py:38 usa 'combat', não 'combat2').
-           Sem isso, transition API retorna 400 missing_auth + 400 invalid_transition. */
+        /* FIX 2026-04-20: payload precisa de `user_id` (n\u00e3o `uid`) e from='combat'
+           (transition map webapp_transition.py:38 usa 'combat', n\u00e3o 'combat2'). */
         var payload = {
             from: 'combat',
             to: origin,
@@ -12591,27 +12645,51 @@ async function __combatLeaveRemoteToOrigin() {
             body: JSON.stringify(payload)
         });
         var dt = Math.round(((performance && performance.now) ? performance.now() : Date.now()) - t0);
-        var data = await r.json();
+        var rawBody = '';
+        try { rawBody = await r.text(); } catch (eT2) {}
+        var data = null;
+        try { data = JSON.parse(rawBody); } catch (eJ) {}
         console.info('[C-REM:LEAVE] response ms=' + dt + ' status=' + r.status
-            + ' hasUrl=' + !!(data && data.url));
-        if (data && data.url) {
-            console.info('[C-REM:LEAVE] redirecting to ' + data.url);
-            location.replace(data.url);
-        } else {
-            console.warn('[C-REM:LEAVE] no_url — closing webapp', data);
-            try {
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.close();
-                }
-            } catch (eC2) {}
+            + ' hasUrl=' + !!(data && data.url)
+            + ' error=' + (data && data.error)
+            + ' bodyPreview=' + String(rawBody || '').slice(0, 200));
+        if (!r.ok) {
+            __combatShowErrorOverlay(
+                'Erro ao retornar (HTTP ' + r.status + ')',
+                'Servidor recusou a transi\u00e7\u00e3o.' +
+                '<br>from=combat \u2192 to=' + origin + ' result=' + result +
+                '<br>resposta: ' + ((data && data.error) || String(rawBody).slice(0, 120) || '(vazia)')
+            );
+            return;
         }
-    } catch (e) {
-        console.error('[C-REM:LEAVE] exception', e && e.message, e);
+        if (!data || !data.url) {
+            __combatShowErrorOverlay(
+                'Resposta sem destino',
+                'Servidor aceitou mas n\u00e3o retornou URL pra voltar.' +
+                '<br>status=' + r.status +
+                '<br>corpo: ' + String(rawBody).slice(0, 150)
+            );
+            return;
+        }
+        console.info('[C-REM:LEAVE] redirecting to ' + data.url);
+        /* Preserva hash tgWebAppData quando existe \u2014 evita Telegram SDK perder
+           initData na nova p\u00e1gina (se algo l\u00e1 depender disso). */
+        var targetUrl = data.url;
         try {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.close();
+            var curHash = location.hash || '';
+            if (curHash.indexOf('tgWebApp') >= 0 && targetUrl.indexOf('#') < 0) {
+                targetUrl += curHash;
+                console.info('[C-REM:LEAVE] hash preserved in target URL');
             }
-        } catch (eC3) {}
+        } catch (eH) {}
+        location.replace(targetUrl);
+    } catch (e) {
+        var eMsg = (e && e.message) || String(e);
+        console.error('[C-REM:LEAVE] exception', eMsg, e);
+        __combatShowErrorOverlay(
+            'Erro de rede',
+            'Falha ao conectar ao servidor.<br>' + eMsg
+        );
     }
 }
 
