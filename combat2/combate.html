@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T01:56:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:12:47Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12725,13 +12725,60 @@ async function __combatLeaveRemoteToOrigin() {
         /* Preserva hash tgWebAppData quando existe \u2014 evita Telegram SDK perder
            initData na nova p\u00e1gina (se algo l\u00e1 depender disso). */
         var targetUrl = data.url;
+        var _hashPreserved = false;
         try {
             var curHash = location.hash || '';
             if (curHash.indexOf('tgWebApp') >= 0 && targetUrl.indexOf('#') < 0) {
                 targetUrl += curHash;
+                _hashPreserved = true;
                 console.info('[C-REM:LEAVE] hash preserved in target URL');
             }
         } catch (eH) {}
+        /* [C-REM:LEAVE-DIAG] (2026-04-21) sendBeacon sync pra bot.log com URL final
+           antes de location.replace — captura se token/uid/api est\u00e3o presentes na
+           URL entregue ao browser. Sobrevive ao redirect. */
+        try {
+            if (window.__COMBAT_API_BASE) {
+                var _ldCurParams;
+                try { _ldCurParams = new URL(targetUrl); } catch (ePU) { _ldCurParams = null; }
+                var _ldQp = _ldCurParams ? _ldCurParams.searchParams : null;
+                var _ldDiag = {
+                    targetUrlLen: targetUrl.length,
+                    targetUrlHead: targetUrl.substring(0, 150),
+                    targetHasRoute: _ldQp ? _ldQp.has('route') : null,
+                    targetRoute: _ldQp ? _ldQp.get('route') : null,
+                    targetHasToken: _ldQp ? _ldQp.has('token') : null,
+                    targetTokenPrefix: (_ldQp && _ldQp.has('token')) ? (_ldQp.get('token').substring(0, 10) + '…') : null,
+                    targetHasUid: _ldQp ? _ldQp.has('uid') : null,
+                    targetUid: _ldQp ? _ldQp.get('uid') : null,
+                    targetHasApi: _ldQp ? _ldQp.has('api') : null,
+                    targetApiVal: _ldQp ? _ldQp.get('api') : null,
+                    hashPreserved: _hashPreserved,
+                    curHashLen: (location.hash || '').length,
+                    curHashHead: (location.hash || '').substring(0, 60),
+                    hasTgSdk: !!(window.Telegram && window.Telegram.WebApp),
+                    hasInitData: !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData),
+                    initDataLen: (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp.initData.length : 0,
+                    ts: Date.now()
+                };
+                var _ldMsg = '[C-REM:LEAVE-DIAG] pre_replace ' + JSON.stringify(_ldDiag);
+                var _ldPayload = {
+                    entries: [{ level: 'info', msg: _ldMsg }],
+                    uid: window.__COMBAT_USER_ID || 0
+                };
+                var _ldBlob = new Blob([JSON.stringify(_ldPayload)], { type: 'application/json' });
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(window.__COMBAT_API_BASE + '/api/game/log', _ldBlob);
+                } else {
+                    fetch(window.__COMBAT_API_BASE + '/api/game/log', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(_ldPayload),
+                        keepalive: true
+                    }).catch(function () {});
+                }
+            }
+        } catch (_eLd) {}
         location.replace(targetUrl);
     } catch (e) {
         var eMsg = (e && e.message) || String(e);
