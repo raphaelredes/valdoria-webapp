@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:00:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:04:27Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -9756,6 +9756,14 @@ function simBuildLogEntryHtml(ln) {
     var mRound = /^::SIM_ROUND::(\d+)$/.exec(ln);
     if (mRound) {
         return '<div class="lp-log-round" role="separator"><div class="lp-log-round-inner">Rodada <span class="lp-num">' + mRound[1] + '</span></div></div>';
+    }
+    /* FIX 2026-04-20: servidor Python (combat2_constants.LOG_ROUND_MARK)
+       envia "::C2_ROUND::N" em state.log. Antes do fix, esse marcador caía
+       no fallback e mostrava raw "::C2_ROUND:: 1" no popup Log do combate.
+       Agora renderizado como mesmo "Rodada N" separator do local mode. */
+    var mC2Round = /^::C2_ROUND::(\d+)$/.exec(ln);
+    if (mC2Round) {
+        return '<div class="lp-log-round" role="separator"><div class="lp-log-round-inner">Rodada <span class="lp-num">' + mC2Round[1] + '</span></div></div>';
     }
     var mTurn = /^::SIM_TURN::(\d+)\|(.+)$/.exec(ln);
     if (mTurn) {
