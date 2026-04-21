@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:53:38Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:01:59Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12907,10 +12907,34 @@ function onBtnClick(ev) {
             console.info('[C-REM:BTN] ui_only act=' + act + ' (local handler)');
             /* Fallthrough pro handler local (UI pura, não mexe state). */
         } else if (act === 'next') {
-            console.info('[C-REM:BTN] act=next (initiative start)');
+            /* FIX 2026-04-21 (PARIDADE REMOTE = LOCAL): em LOCAL, act='next'
+               chama animInit() que anima cada d20 de iniciativa 1-por-1 + ordena
+               a fila + mostra showInitiativeOrderPopup. Antes REMOTE apenas
+               transitionava a fase no server, sem animação nem popup.
+
+               Novo fluxo REMOTE:
+                 1. POST next (intro→init no server; order já tem init rolled
+                    desde new_combat)
+                 2. Call animInit() localmente — usa ev.init existentes, anima
+                    d20 pra cada combatante, sort ordem, ph='init_done',
+                    showInitiativeOrderPopup
+                 3. User clica "Começar Combate" (act='start') → dispara start
+                    → server transita init→active */
+            console.info('[C-REM:BTN] act=next (will animate initiative locally after server transition)');
             _actionSheetOpen = false;
             render(currentState);
-            void __combatRemoteAction({ type: 'next' });
+            (async function () {
+                try {
+                    await __combatRemoteAction({ type: 'next' });
+                    if (currentState && currentState.ph === 'init' && typeof animInit === 'function') {
+                        console.info('[C-REM:BTN] act=next running animInit (paridade LOCAL)');
+                        await animInit();
+                        console.info('[C-REM:BTN] act=next animInit complete ph=' + (currentState && currentState.ph));
+                    }
+                } catch (eN) {
+                    console.error('[C-REM:BTN] next chain failed', eN && eN.message);
+                }
+            })();
             return;
         } else if (act === 'skip-init') {
             /* FIX 2026-04-21 (PARIDADE REMOTE = LOCAL): em LOCAL, skip-init pula
