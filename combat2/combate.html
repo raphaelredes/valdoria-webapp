@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:01:59Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:12:54Z — do not edit directly, edit source -->
 
 
 <!--
@@ -18616,6 +18616,21 @@ async function startCombatRemote() {
             console.info('[C-REM:BOOT] draining ' + resp.events.length + ' initial events');
             await __combatApplyEvents(resp.events);
             render(currentState);
+        }
+        /* [C-REM:BOOT-INIT-RESUME] (2026-04-21) PARIDADE LOCAL: quando state é
+           restaurado em ph='init' (ex: após close/reopen, ou após POST next sem
+           animação concluída), a tela fica estática em "Rolando Iniciativa..."
+           sem dados nem botão Começar. Fix: detectar ph='init' e disparar
+           animInit automaticamente, igual LOCAL faria ao clicar "Iniciar Combate".
+           Idempotente: animInit termina em ph='init_done' + popup. */
+        if (currentState && currentState.ph === 'init' && typeof animInit === 'function') {
+            console.info('[C-REM:BOOT-INIT-RESUME] state restored at ph=init, running animInit');
+            try {
+                await animInit();
+                console.info('[C-REM:BOOT-INIT-RESUME] animInit complete ph=' + (currentState && currentState.ph));
+            } catch (eAi) {
+                console.error('[C-REM:BOOT-INIT-RESUME] animInit failed', eAi && eAi.message);
+            }
         }
         console.info('[C-REM:BOOT] complete — remoteReady=true');
     } catch (e) {
