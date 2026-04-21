@@ -17,6 +17,28 @@
     var _userId = parseInt(localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id')) || "0", 10);
     var _apiBase = localStorage.getItem(ValdoriaEnv.getEnvKey('valdoria_api_base')) || "";
 
+    /* [FIX 2026-04-21] FALLBACK pra URL params quando localStorage vazio.
+       ROOT CAUSE do bug "caiu na tela de auth pós-vitória": após combate, o
+       server redireciona pra `/app.html?route=explore&token=X&uid=Y&api=Z`.
+       Telegram Desktop perde initData no location.replace, então telegram-compat
+       entra em cena. Mas localStorage estava vazio (WebApp abre via URL, não
+       persiste token) → _token falsy → redirect pra /web/.
+       Fix: usa URL params como fallback. Se URL tem token válido, pula redirect
+       e confia no handshake downstream (SPA/explore/game core lê mesma URL).
+       Diagnóstico completo em commits anteriores com tags [C-REM:LEAVE*]. */
+    if (!_token) {
+        try {
+            var _urlParams = new URLSearchParams(window.location.search);
+            var _urlToken = _urlParams.get('token');
+            if (_urlToken) {
+                _token = _urlToken;
+                console.info('[COMPAT] token from URL params (no localStorage) uid=' + (_urlParams.get('uid') || '?'));
+                if (!_userId) _userId = parseInt(_urlParams.get('uid') || '0', 10);
+                if (!_apiBase) _apiBase = _urlParams.get('api') || '';
+            }
+        } catch (_eUp) { /* URLSearchParams not supported — tolera */ }
+    }
+
     // Haptic feedback fallback
     function _vibrate(ms) {
         try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { console.warn('[COMPAT]', e.message || e); }
@@ -179,6 +201,31 @@
         } catch (e) { isDev = false; }
         var loginBase = isDev ? '/web/dev' : '/web/';
 
+        /* [COMPAT:DIAG] (2026-04-21) sync XHR pra capturar ROOT CAUSE do redirect
+           pra auth screen. Mesmo após o fix de URL fallback, logar se o branch é
+           alcançado significa que algo ainda quebrou o handshake. */
+        try {
+            var _compatApi = _apiBase || (new URLSearchParams(window.location.search).get('api')) || '';
+            var _compatUid = _userId || parseInt((new URLSearchParams(window.location.search).get('uid')) || '0', 10);
+            if (_compatApi) {
+                var _xhrC = new XMLHttpRequest();
+                _xhrC.open('POST', _compatApi + '/api/game/log', false);
+                _xhrC.setRequestHeader('Content-Type', 'application/json');
+                _xhrC.send(JSON.stringify({
+                    entries: [{
+                        level: 'warn',
+                        msg: '[COMPAT:DIAG] redirecting_to_web reason=no_token hrefHead=' + location.href.substring(0, 140)
+                            + ' hashHead=' + (location.hash || '').substring(0, 40)
+                            + ' lsKeys=' + (function () { try { var k = []; for (var i = 0; i < localStorage.length; i++) { var x = localStorage.key(i); if (x && x.indexOf('valdoria_') === 0) k.push(x); } return k.join(','); } catch (e) { return '(err)'; } })()
+                            + ' urlHasToken=' + (new URLSearchParams(location.search).has('token'))
+                            + ' urlHasUid=' + (new URLSearchParams(location.search).has('uid'))
+                            + ' urlHasApi=' + (new URLSearchParams(location.search).has('api'))
+                            + ' pathname=' + location.pathname
+                    }],
+                    uid: _compatUid
+                }));
+            }
+        } catch (_eXc) {}
         console.warn('[COMPAT] No session token — redirecting to login portal: ' + loginBase);
         window.location.replace(loginBase);
     }
