@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:37:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:48:01Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12913,25 +12913,48 @@ function onBtnClick(ev) {
             void __combatRemoteAction({ type: 'next' });
             return;
         } else if (act === 'skip-init') {
-            /* FIX 2026-04-20: em remote, skip-init avança fase no servidor.
-               Chain: intro→next→init→start→active. Server retorna events e
-               state final ao final. Cliente NÃO anima iniciativa (pular). */
-            console.info('[C-REM:BTN] act=skip-init (chain next→start remote)');
+            /* FIX 2026-04-21 (PARIDADE REMOTE = LOCAL): em LOCAL, skip-init pula
+               as animações mas AINDA mostra o popup `showInitiativeOrderPopup`
+               com a ordem de iniciativa, onde user clica "Começar Combate" pra
+               iniciar a fase active. Antes, REMOTE chainava next→start auto,
+               PULANDO o popup — quebra de paridade.
+
+               Novo fluxo REMOTE:
+                 1. intro → next → init (server rola iniciativa em new_combat)
+                 2. mark init_done LOCALMENTE + mostra popup (igual LOCAL animInit
+                    linhas 17882-17895)
+                 3. user clica "Começar Combate" (act='start') → REMOTE dispara
+                    start → server (ph ainda 'init' no backend) aceita → active. */
+            console.info('[C-REM:BTN] act=skip-init (fetch init state, show popup)');
             _actionSheetOpen = false;
-            _skipInit = true;  /* marca localmente pra skip animação se vier */
+            _skipInit = true;
             _simSkipNonPlayerDice = true;
             render(currentState);
             (async function () {
                 try {
-                    /* Passo 1: intro → init */
+                    /* Passo 1: intro → init (servidor confirma fase + devolve order com init) */
                     if (currentState && currentState.ph === 'intro') {
                         await __combatRemoteAction({ type: 'next' });
                     }
-                    /* Passo 2: init → active */
-                    if (currentState && (currentState.ph === 'init' || currentState.ph === 'init_done')) {
-                        await __combatRemoteAction({ type: 'start' });
+                    /* Passo 2: marca init_done LOCALMENTE + mostra popup.
+                       Server stays at 'init' — 'start' act dispara transição
+                       após click em "Começar Combate". */
+                    if (currentState && currentState.ph === 'init') {
+                        currentState.order.forEach(function (c) {
+                            c.initRevealed = true;
+                            c.initRolling = false;
+                        });
+                        currentState.ph = 'init_done';
+                        render(currentState);
+                        if (typeof showInitiativeOrderPopup === 'function') {
+                            showInitiativeOrderPopup();
+                            console.info('[C-REM:BTN] skip-init popup_shown order.len='
+                                + (currentState.order || []).length);
+                        } else {
+                            console.warn('[C-REM:BTN] skip-init: showInitiativeOrderPopup absent, falling back to start');
+                            await __combatRemoteAction({ type: 'start' });
+                        }
                     }
-                    console.info('[C-REM:BTN] skip-init chain complete ph=' + (currentState && currentState.ph));
                 } catch (eSi) {
                     console.error('[C-REM:BTN] skip-init chain failed', eSi && eSi.message);
                 }
