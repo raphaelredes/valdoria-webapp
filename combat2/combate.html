@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:12:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:26:17Z — do not edit directly, edit source -->
 
 
 <!--
@@ -7647,12 +7647,16 @@ window.__COMBAT_ENV = (function () {
 
     function _flushRel() {
         if (!_qRel.length) return;
-        if (document.visibilityState === 'hidden' && _qRel.length < _MAX_Q) return;
         var entries = _qRel.splice(0, _MAX_Q);
+        /* [FIX 2026-04-21] keepalive=true pra sobreviver a location.replace.
+           Antes, fetch sem keepalive era cancelado durante unload → logs do
+           [C-REM:LEAVE] perdidos ao redirecionar pós-vitória. Remove também
+           o check de visibility hidden que bloqueava flush em unload. */
         fetch(window.__COMBAT_API_BASE + '/api/game/log', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ entries: entries, uid: window.__COMBAT_USER_ID || 0 })
+            body: JSON.stringify({ entries: entries, uid: window.__COMBAT_USER_ID || 0 }),
+            keepalive: true
         }).catch(function () {
             if (_qRel.length < _MAX_Q * 2) _qRel.unshift.apply(_qRel, entries);
         });
@@ -7688,7 +7692,32 @@ window.__COMBAT_ENV = (function () {
         } catch (eB) { /* no sendBeacon */ }
     });
 
-    window.__combatLogRelay = { flush: _flushRel };
+    window.__combatLogRelay = {
+        flush: _flushRel,
+        /* Força flush SYNC via sendBeacon pra queima-rápida em unload. Usa antes
+           de location.replace pra garantir logs chegam. Funciona paralelo ao
+           fetch keepalive (que também já sobrevive unload). Dupla garantia. */
+        forceFlushBeacon: function () {
+            if (!_qRel.length) return false;
+            try {
+                var entries = _qRel.splice(0, _MAX_Q);
+                var payload = { entries: entries, uid: window.__COMBAT_USER_ID || 0 };
+                if (navigator.sendBeacon) {
+                    return navigator.sendBeacon(
+                        window.__COMBAT_API_BASE + '/api/game/log',
+                        new Blob([JSON.stringify(payload)], { type: 'application/json' })
+                    );
+                }
+                fetch(window.__COMBAT_API_BASE + '/api/game/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    keepalive: true
+                }).catch(function () {});
+                return true;
+            } catch (_eFF) { return false; }
+        }
+    };
     console.info('[C-REM:LOG-RELAY] wrapped console (all [TAG] logs forwarded to /api/game/log)');
 })();
 
@@ -12656,7 +12685,11 @@ async function __combatLeaveRemoteToOrigin() {
     console.info('[C-REM:LEAVE] enter ph=' + ph + ' result=' + result + ' origin=' + origin
         + ' tokenPresent=' + !!window.__COMBAT_TOKEN
         + ' apiBasePresent=' + !!window.__COMBAT_API_BASE
-        + ' uid=' + window.__COMBAT_USER_ID);
+        + ' uid=' + window.__COMBAT_USER_ID
+        + ' hasTgSdk=' + !!(window.Telegram && window.Telegram.WebApp)
+        + ' hasInitData=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData)
+        + ' curHashLen=' + (location.hash || '').length
+        + ' curHrefLen=' + location.href.length);
     if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
         __combatShowErrorOverlay(
             'Sess\u00e3o incompleta',
@@ -12734,41 +12767,61 @@ async function __combatLeaveRemoteToOrigin() {
                 console.info('[C-REM:LEAVE] hash preserved in target URL');
             }
         } catch (eH) {}
-        /* [C-REM:LEAVE-DIAG] (2026-04-21) sendBeacon sync pra bot.log com URL final
-           antes de location.replace — captura se token/uid/api est\u00e3o presentes na
-           URL entregue ao browser. Sobrevive ao redirect. */
+        /* [C-REM:LEAVE-DIAG] (2026-04-21) diag pré-redirect: console.info (queue)
+           + sendBeacon DIRETO (backup pra sobreviver unload). Captura se token/
+           uid/api chegam na URL que o browser carrega. */
+        var _ldDiag = null;
         try {
-            if (window.__COMBAT_API_BASE) {
-                var _ldCurParams;
-                try { _ldCurParams = new URL(targetUrl); } catch (ePU) { _ldCurParams = null; }
-                var _ldQp = _ldCurParams ? _ldCurParams.searchParams : null;
-                var _ldDiag = {
-                    targetUrlLen: targetUrl.length,
-                    targetUrlHead: targetUrl.substring(0, 150),
-                    targetHasRoute: _ldQp ? _ldQp.has('route') : null,
-                    targetRoute: _ldQp ? _ldQp.get('route') : null,
-                    targetHasToken: _ldQp ? _ldQp.has('token') : null,
-                    targetTokenPrefix: (_ldQp && _ldQp.has('token')) ? (_ldQp.get('token').substring(0, 10) + '…') : null,
-                    targetHasUid: _ldQp ? _ldQp.has('uid') : null,
-                    targetUid: _ldQp ? _ldQp.get('uid') : null,
-                    targetHasApi: _ldQp ? _ldQp.has('api') : null,
-                    targetApiVal: _ldQp ? _ldQp.get('api') : null,
-                    hashPreserved: _hashPreserved,
-                    curHashLen: (location.hash || '').length,
-                    curHashHead: (location.hash || '').substring(0, 60),
-                    hasTgSdk: !!(window.Telegram && window.Telegram.WebApp),
-                    hasInitData: !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData),
-                    initDataLen: (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp.initData.length : 0,
-                    ts: Date.now()
-                };
-                var _ldMsg = '[C-REM:LEAVE-DIAG] pre_replace ' + JSON.stringify(_ldDiag);
+            var _ldCurParams;
+            try { _ldCurParams = new URL(targetUrl); } catch (ePU) { _ldCurParams = null; }
+            var _ldQp = _ldCurParams ? _ldCurParams.searchParams : null;
+            _ldDiag = {
+                targetUrlLen: targetUrl.length,
+                targetUrlHead: targetUrl.substring(0, 150),
+                targetHasRoute: _ldQp ? _ldQp.has('route') : null,
+                targetRoute: _ldQp ? _ldQp.get('route') : null,
+                targetHasToken: _ldQp ? _ldQp.has('token') : null,
+                targetTokenPrefix: (_ldQp && _ldQp.has('token')) ? (_ldQp.get('token').substring(0, 10) + '…') : null,
+                targetHasUid: _ldQp ? _ldQp.has('uid') : null,
+                targetUid: _ldQp ? _ldQp.get('uid') : null,
+                targetHasApi: _ldQp ? _ldQp.has('api') : null,
+                targetApiVal: _ldQp ? _ldQp.get('api') : null,
+                targetHasHash: targetUrl.indexOf('#') >= 0,
+                hashPreserved: _hashPreserved,
+                curHashLen: (location.hash || '').length,
+                curHashHead: (location.hash || '').substring(0, 60),
+                hasTgSdk: !!(window.Telegram && window.Telegram.WebApp),
+                hasInitData: !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData),
+                initDataLen: (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp.initData.length : 0,
+                tgVersion: (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp.version : null,
+                tgPlatform: (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp.platform : null,
+                ts: Date.now()
+            };
+            /* Log via console.info: queued pelo log-relay (fetch keepalive → sobrevive unload). */
+            console.info('[C-REM:LEAVE-DIAG] pre_replace ' + JSON.stringify(_ldDiag));
+        } catch (_eLd) {
+            console.warn('[C-REM:LEAVE-DIAG] diag_build_failed err=' + (_eLd && _eLd.message));
+        }
+        /* Força flush IMEDIATO via sendBeacon (double insurance antes de navigate). */
+        try {
+            if (window.__combatLogRelay && window.__combatLogRelay.forceFlushBeacon) {
+                var _flushed = window.__combatLogRelay.forceFlushBeacon();
+                console.info('[C-REM:LEAVE-DIAG] force_flush beacon_sent=' + _flushed);
+            }
+        } catch (_eFF) {}
+        /* Backup redundante: sendBeacon direto com o diag (garante pelo menos o
+           diag ter 2 caminhos até o servidor). */
+        try {
+            if (window.__COMBAT_API_BASE && _ldDiag) {
                 var _ldPayload = {
-                    entries: [{ level: 'info', msg: _ldMsg }],
+                    entries: [{ level: 'info', msg: '[C-REM:LEAVE-DIAG-BEACON] pre_replace ' + JSON.stringify(_ldDiag) }],
                     uid: window.__COMBAT_USER_ID || 0
                 };
-                var _ldBlob = new Blob([JSON.stringify(_ldPayload)], { type: 'application/json' });
                 if (navigator.sendBeacon) {
-                    navigator.sendBeacon(window.__COMBAT_API_BASE + '/api/game/log', _ldBlob);
+                    navigator.sendBeacon(
+                        window.__COMBAT_API_BASE + '/api/game/log',
+                        new Blob([JSON.stringify(_ldPayload)], { type: 'application/json' })
+                    );
                 } else {
                     fetch(window.__COMBAT_API_BASE + '/api/game/log', {
                         method: 'POST',
@@ -12778,7 +12831,8 @@ async function __combatLeaveRemoteToOrigin() {
                     }).catch(function () {});
                 }
             }
-        } catch (_eLd) {}
+        } catch (_eBk) {}
+        console.info('[C-REM:LEAVE] calling_location_replace targetUrlLen=' + targetUrl.length);
         location.replace(targetUrl);
     } catch (e) {
         var eMsg = (e && e.message) || String(e);

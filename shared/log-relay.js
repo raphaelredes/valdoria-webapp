@@ -57,15 +57,19 @@ function _flush() {
     if (!_queue.length) return;
     var base = _getApiBase();
     if (!base) return;
-    // Skip flush if page hidden (save bandwidth) unless queue is large
-    if (document.visibilityState === 'hidden' && _queue.length < _MAX_QUEUE) return;
 
     var entries = _queue.splice(0, _MAX_QUEUE);
     var _uid = (window.S && window.S.uid) ? window.S.uid : 0;
+    /* [FIX 2026-04-21] keepalive=true pra sobreviver a location.replace/unload.
+       Antes, fetch sem keepalive era cancelado pelo browser durante navigate →
+       logs com tags [SPA:*] / [GAME:*] logados imediatamente antes de redirect
+       nunca chegavam ao server. Removido também o early-return por visibility
+       hidden que bloqueava flush durante unload. */
     fetch(base + '/api/game/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries: entries, uid: _uid })
+        body: JSON.stringify({ entries: entries, uid: _uid }),
+        keepalive: true
     }).catch(function() {
         // Put entries back if fetch failed (will retry next interval)
         if (_queue.length < _MAX_QUEUE * 2) {
