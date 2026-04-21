@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T01:13:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T01:56:34Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12499,6 +12499,22 @@ async function __combatRemoteAction(action) {
             console.warn('[C-REM:ACTION] server_error type=' + actionType + ' err=' + resp.error);
             return;
         }
+        /* [C-REM:PHASE-DEFER] (2026-04-21 REMOTE-only, opção B aprovada pelo autor)
+           Se response traz ph terminal (victory/defeat/fled) + events pra animar,
+           o primeiro render mostra VITORIA/DERROTA antes da animação terminar.
+           Mitigação: segura ph em 'active' até events drenarem, commit ph real no
+           fim. LOCAL mode não é afetado (guard __COMBAT_MODE === 'remote'). */
+        var _deferPh = null;
+        if (window.__COMBAT_MODE === 'remote'
+                && resp.events && resp.events.length > 0
+                && resp.state) {
+            var _finalPh = resp.state.ph;
+            if (_finalPh === 'victory' || _finalPh === 'defeat' || _finalPh === 'fled') {
+                _deferPh = _finalPh;
+                resp.state.ph = 'active';
+                console.info('[C-REM:ACTION] defer_ph=' + _deferPh + ' until events drain');
+            }
+        }
         currentState = resp.state;
         var phAfter = currentState && currentState.ph;
         var activeAfter = currentState && currentState.active_idx;
@@ -12509,6 +12525,11 @@ async function __combatRemoteAction(action) {
         if (resp.events && resp.events.length) {
             console.info('[C-REM:ACTION] draining ' + resp.events.length + ' events');
             await __combatApplyEvents(resp.events);
+            render(currentState);
+        }
+        if (_deferPh) {
+            console.info('[C-REM:ACTION] commit_deferred_ph=' + _deferPh);
+            currentState.ph = _deferPh;
             render(currentState);
         }
         /* CRÍTICO: se voltou pro turno do player, reseta _actionTaken pra Agir
@@ -18433,6 +18454,17 @@ async function __combatAnimateOneEvent(ev) {
         var aU = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
         if (aU && aU.t === 'p') aUid = 'player';
         else if (aU && aU.t === 'a') aUid = 'ally_' + ev.aIdx;
+        /* [C-REM:HP-REWIND] (2026-04-21 REMOTE-only, opção B aprovada pelo autor)
+           Antes da animação do d20 + damage dice, volta u.hp pra oldHp pra barra
+           do card renderizar o estado PRE-ataque. Após damage dice, commita newHp
+           (próximo bloco). LOCAL mode: guard pula tudo — state já tem hp pré-ani
+           (comportamento intacto). */
+        var _remoteMode = window.__COMBAT_MODE === 'remote';
+        if (_remoteMode && tU && ev.hit !== false && ev.oldHp != null) {
+            tU.hp = ev.oldHp | 0;
+            tU.alive = tU.hp > 0;
+            render(currentState);
+        }
         /* D20 animation se temos o valor. Pula em OAs (rapid-fire). */
         if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
             var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
@@ -18501,6 +18533,12 @@ async function __combatAnimateOneEvent(ev) {
             } catch (eDmg) {
                 console.warn('[C-REM:DMG] showDamageDice falhou', eDmg && eDmg.message);
             }
+        }
+        /* [C-REM:HP-COMMIT] (2026-04-21 REMOTE-only, opção B) barra cai pra newHp
+           junto com flash/FCT abaixo. Só muta se houve rewind (ev.hit !== false). */
+        if (_remoteMode && tU && ev.hit !== false && ev.newHp != null) {
+            tU.hp = ev.newHp | 0;
+            tU.alive = tU.hp > 0;
         }
         if (elT) elT.classList.add('hit-flash');
         setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
