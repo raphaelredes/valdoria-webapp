@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:48:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T02:53:38Z — do not edit directly, edit source -->
 
 
 <!--
@@ -18744,7 +18744,52 @@ async function __combatAnimateOneEvent(ev) {
         var hUid = 'ally_' + ev.tIdx;
         var hU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
         if (hU && hU.t === 'p') hUid = 'player';
+        else if (hU && hU.t === 'a') hUid = 'ally_' + ev.tIdx;
         var elH = document.querySelector('[data-unit-id="' + hUid + '"]');
+        /* [C-REM:HEAL-REWIND] (2026-04-21 REMOTE-only, paridade LOCAL animSkillHeal)
+           rewind u.hp pra oldHp antes de showHealDice, commit newHp após.
+           Também handle o clearDownedMeta (dying/stable/isDead) quando revive. */
+        var _remoteMode_h = window.__COMBAT_MODE === 'remote';
+        if (_remoteMode_h && hU && ev.oldHp != null) {
+            hU.hp = ev.oldHp | 0;
+            hU.alive = hU.hp > 0;
+            render(currentState);
+        }
+        /* Show heal dice (paridade com LOCAL showHealDice) — só remoto + rolls presente. */
+        if (_remoteMode_h && typeof showHealDice === 'function' && ev.healRolls && ev.healRolls.length) {
+            var aUnit_h = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
+            var wasDown_h = (ev.oldHp | 0) <= 0;
+            console.info('[C-REM:HEAL] showHealDice rolls=' + JSON.stringify(ev.healRolls)
+                + ' die=' + (ev.healDie | 0) + ' mod=' + (ev.healMod | 0)
+                + ' old=' + (ev.oldHp | 0) + ' new=' + (ev.newHp | 0) + ' gained=' + (ev.healGained | 0));
+            try {
+                await showHealDice(
+                    ev.healRolls,
+                    (ev.healDie | 0) || 8,
+                    ev.healMod | 0,
+                    aUnit_h || { n: ev.actorName },
+                    hU || { n: ev.targetName, hp: ev.oldHp | 0, mhp: (hU && hU.mhp) || ev.newHp | 0 },
+                    ev.oldHp | 0,
+                    ev.newHp | 0,
+                    ev.healRolled | 0,
+                    ev.skillName || 'Cura',
+                    wasDown_h
+                );
+            } catch (eH) {
+                console.warn('[C-REM:HEAL] showHealDice falhou', eH && eH.message);
+            }
+        }
+        /* Commit newHp + clear downed meta (paridade clearDownedMeta LOCAL). */
+        if (_remoteMode_h && hU && ev.newHp != null) {
+            hU.hp = ev.newHp | 0;
+            hU.alive = hU.hp > 0;
+            if (hU.alive) {
+                hU.dying = false;
+                hU.stable = false;
+                hU.isDead = false;
+                if (hU.deathSaves) { hU.deathSaves.s = 0; hU.deathSaves.f = 0; }
+            }
+        }
         if (elH) elH.classList.add('heal-flash');
         setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
         if (typeof _spawnFloatingDmgNumber === 'function') {
@@ -18775,8 +18820,73 @@ async function __combatAnimateOneEvent(ev) {
             else if (aU && aU.t === 'e') actorUid = 'enemy_' + ev.aIdx;
         }
         var elA = document.querySelector('[data-unit-id="' + actorUid + '"]');
+        /* [C-REM:BUFF-REWIND] (2026-04-21 REMOTE-only) rewind HP/MP quando event
+           carrega mudança de estado. item_use subtype=heal muda hp, subtype=resource
+           muda res.value. buff pode mudar ambos. Paridade com LOCAL:
+             - LOCAL muta u.hp/u.res.value APÓS animação (showHealDice, etc.)
+             - REMOTE: server já mutou antes do evento chegar, precisamos rewind
+               → animar → commit. */
+        var _remoteMode_b = window.__COMBAT_MODE === 'remote';
+        var _tgtIdx = ev.tIdx != null ? ev.tIdx : ev.aIdx;
+        var _tU = (_remoteMode_b && currentState && currentState.order) ? currentState.order[_tgtIdx] : null;
+        if (_remoteMode_b && _tU) {
+            /* HP rewind: item_use subtype=heal envia oldHp/newHp. */
+            if (kind === 'item_use' && ev.oldHp != null && ev.newHp != null) {
+                _tU.hp = ev.oldHp | 0;
+                _tU.alive = _tU.hp > 0;
+            }
+            /* MP/resource rewind: subtype=resource ou buff com resGained. */
+            if ((ev.subtype === 'resource' || ev.resGained != null) && _tU.res && ev.resGained != null) {
+                var _resOld = Math.max(0, (_tU.res.value | 0) - (ev.resGained | 0));
+                _tU.res.value = _resOld;
+            }
+            render(currentState);
+        }
+        /* Se item_use subtype=heal com rolls disponíveis, anima dice como heal. */
+        if (_remoteMode_b && kind === 'item_use' && ev.subtype === 'heal'
+                && typeof showHealDice === 'function' && ev.rolls && ev.rolls.length) {
+            console.info('[C-REM:ITEM-HEAL] showHealDice rolls=' + JSON.stringify(ev.rolls)
+                + ' old=' + ev.oldHp + ' new=' + ev.newHp);
+            try {
+                await showHealDice(
+                    ev.rolls,
+                    4, /* poção default d4+2 */
+                    2,
+                    { n: ev.actorName || '?' },
+                    _tU || { n: '?', hp: ev.oldHp | 0 },
+                    ev.oldHp | 0,
+                    ev.newHp | 0,
+                    (ev.oldHp | 0) + (ev.healGained | 0),
+                    ev.itemName || 'Poção de Cura',
+                    (ev.oldHp | 0) <= 0
+                );
+            } catch (eI) {
+                console.warn('[C-REM:ITEM-HEAL] showHealDice falhou', eI && eI.message);
+            }
+        }
+        /* Commit newHp/newRes. */
+        if (_remoteMode_b && _tU) {
+            if (kind === 'item_use' && ev.newHp != null) {
+                _tU.hp = ev.newHp | 0;
+                _tU.alive = _tU.hp > 0;
+                if (_tU.alive) {
+                    _tU.dying = false;
+                    _tU.stable = false;
+                    _tU.isDead = false;
+                    if (_tU.deathSaves) { _tU.deathSaves.s = 0; _tU.deathSaves.f = 0; }
+                }
+            }
+            if ((ev.subtype === 'resource' || ev.resGained != null) && _tU.res && ev.resGained != null) {
+                _tU.res.value = Math.min(_tU.res.max, (_tU.res.value | 0) + (ev.resGained | 0));
+            }
+        }
         if (elA) elA.classList.add('buff-flash');
         setTimeout(function () { if (elA) elA.classList.remove('buff-flash'); }, 520);
+        if (_remoteMode_b && kind === 'item_use' && ev.healGained && typeof _spawnFloatingDmgNumber === 'function') {
+            var _tUid = 'player';
+            if (_tU && _tU.t === 'a') _tUid = 'ally_' + _tgtIdx;
+            try { _spawnFloatingDmgNumber(_tUid, '+' + (ev.healGained | 0), 'heal'); } catch (eS) {}
+        }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 420); });
         return;
