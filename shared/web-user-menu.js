@@ -8,6 +8,19 @@
     /* Skip entirely if running inside Telegram */
     if (!document.documentElement.classList.contains('web-standalone')) return;
 
+    /* [FIX 2026-04-21] Mesmo com web-standalone class (telegram-compat polyfill
+       ativo), se URL tem `?token=X&uid=Y` a sessão veio do Telegram (via combat
+       complete ou outra transition que perde initData no location.replace).
+       NÃO mostrar botão Sair nesse caso — user é autenticado via Telegram,
+       não browser. */
+    try {
+        var _params = new URLSearchParams(window.location.search);
+        if (_params.get('token') && _params.get('uid')) {
+            console.info('[WEB-USER-MENU] url has token+uid — skipping Sair button (Telegram session)');
+            return;
+        }
+    } catch (_eU) { /* URLSearchParams indisponível — deixar passar */ }
+
     var _el = null;
 
     function _doLogout() {
