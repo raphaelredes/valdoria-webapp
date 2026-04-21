@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:40:38Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:46:10Z — do not edit directly, edit source -->
 
 
 <!--
@@ -7559,6 +7559,12 @@ html.sim-combat-root .bf-pan-stage .battlefield {
 (function () {
     document.write('<script src="' + BASE + '/shared/motion.js?v=' + v + '"><\/script>');
     document.write('<script src="' + BASE + '/shared/combat-vfx.js?v=' + v + '"><\/script>');
+    /* [MELHORIA 2026-04-21] Áudio: música de combate + SFX (hit/miss/crit/
+       damageType/heal/dice/enemy_death). ValdoriaAudio é window-global,
+       arquivos em /shared/audio/ (sfx_hit.mp3, sfx_crit.mp3, sfx_miss.mp3,
+       sfx_fire.mp3, sfx_cold.mp3, etc.). Chamadas: ValdoriaAudio.play('combat')
+       pra música; ValdoriaAudio.playSFX('sfx_hit') pra effects. */
+    document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
     /* Pan/zoom: cópia local (shared/) — setPointerCapture tardio para não roubar click das .cell */
     document.write('<script src="./shared/combat-battlefield-pan-zoom.js?v=' + v + '"><\/script>');
 })();
@@ -12174,6 +12180,12 @@ function render(s) {
     var html = '';
 
     if (ph === 'victory' || ph === 'defeat' || ph === 'fled') {
+        /* [SFX 2026-04-21] Música de vitória/derrota. fled usa defeat (melancólico). */
+        if (!s._simEndMusicPlayed) {
+            s._simEndMusicPlayed = true;
+            if (ph === 'victory' && typeof sfxPlayMusicVictory === 'function') sfxPlayMusicVictory();
+            else if ((ph === 'defeat' || ph === 'fled') && typeof sfxPlayMusicDefeat === 'function') sfxPlayMusicDefeat();
+        }
         var title = { victory: 'VITÓRIA', defeat: 'DERROTA', fled: 'FUGIU' }[ph];
         var narr = {
             victory: 'Todos os inimigos caíram por suas mãos.',
@@ -18938,6 +18950,44 @@ async function __combatApplyEvents(events) {
     console.info('[C-REM:EV] drain_complete total=' + total);
 }
 
+/* [SFX 2026-04-21] Helpers de som pro combate.
+   Usam window.ValdoriaAudio quando disponível. Fallback silencioso se não
+   carregou (nunca quebra gameplay). Trackkeys em shared/audio-manager.js TRACKS. */
+function _vaPlaySFX(key) {
+    try {
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+            ValdoriaAudio.playSFX(key);
+        }
+    } catch (_eA) { /* silent */ }
+}
+function _vaPlayMusic(track) {
+    try {
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+            ValdoriaAudio.play(track);
+        }
+    } catch (_eA) { /* silent */ }
+}
+function sfxDiceRoll() { _vaPlaySFX('sfx_dice'); }
+function sfxHit() { _vaPlaySFX('sfx_hit'); }
+function sfxCrit() { _vaPlaySFX('sfx_crit'); }
+function sfxMiss() { _vaPlaySFX('sfx_miss'); }
+function sfxHeal() { _vaPlaySFX('sfx_heal'); }
+function sfxEnemyDeath() { _vaPlaySFX('sfx_enemy_death'); }
+function sfxDamageType(dt) {
+    /* Mapeia tipo de dano → SFX correspondente. Fallback pra sfx_hit se não
+       tiver track específica pro tipo. */
+    var map = {
+        fire: 'sfx_fire', cold: 'sfx_cold', lightning: 'sfx_lightning',
+        thunder: 'sfx_thunder', necrotic: 'sfx_necrotic', radiant: 'sfx_radiant',
+        poison: 'sfx_poison', acid: 'sfx_poison', psychic: 'sfx_psychic',
+        force: 'sfx_hit'
+    };
+    _vaPlaySFX(map[dt] || 'sfx_hit');
+}
+function sfxPlayMusicVictory() { _vaPlayMusic('victory'); }
+function sfxPlayMusicDefeat() { _vaPlayMusic('defeat'); }
+function sfxPlayMusicCombat() { _vaPlayMusic('combat'); }
+
 async function __combatAnimateOneEvent(ev) {
     var kind = ev.kind;
     if (kind === 'attack' || kind === 'oa') {
@@ -18994,6 +19044,8 @@ async function __combatAnimateOneEvent(ev) {
         }
         var elT = document.querySelector('[data-unit-id="' + tUid + '"]');
         if (ev.hit === false) {
+            /* [SFX 2026-04-21] miss */
+            if (typeof sfxMiss === 'function') sfxMiss();
             if (elT) elT.classList.add('dodged');
             setTimeout(function () { if (elT) elT.classList.remove('dodged'); }, 520);
             if (typeof _spawnFloatingDmgNumber === 'function') {
@@ -19036,11 +19088,19 @@ async function __combatAnimateOneEvent(ev) {
             tU.hp = ev.newHp | 0;
             tU.alive = tU.hp > 0;
         }
+        /* [SFX 2026-04-21] hit / crit / damage-by-type */
+        if (ev.crit && typeof sfxCrit === 'function') sfxCrit();
+        else if (typeof sfxHit === 'function') sfxHit();
+        if (ev.dmgType && typeof sfxDamageType === 'function') sfxDamageType(ev.dmgType);
         if (elT) elT.classList.add('hit-flash');
         setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
         if (typeof _spawnFloatingDmgNumber === 'function') {
             var dtxt = (ev.crit ? 'CRIT ' : '-') + (ev.dmgTotal | 0);
             try { _spawnFloatingDmgNumber(tUid, dtxt, ev.crit ? 'crit' : 'dmg'); } catch (eS) {}
+        }
+        /* [SFX] enemy death: se newHp == 0 e target é inimigo */
+        if (tU && tU.t === 'e' && (ev.newHp | 0) <= 0 && typeof sfxEnemyDeath === 'function') {
+            sfxEnemyDeath();
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 420); });
