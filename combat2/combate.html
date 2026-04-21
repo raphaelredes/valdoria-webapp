@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:12:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:25:50Z — do not edit directly, edit source -->
 
 
 <!--
@@ -7610,6 +7610,22 @@ window.__COMBAT_ENV = (function () {
     try { return new URLSearchParams(location.search).get('env') || 'dev'; } catch (e) { return 'dev'; }
 })();
 
+/* [PIVOT 2026-04-21] SIMULATOR-FIRST: engine LOCAL roda em ambos modes.
+   __COMBAT_IS_REMOTE_SESSION: true se URL tem token+api (server vai fornecer
+     dados via /api/combat2/prepare e receber resultado em /api/combat2/complete).
+   __COMBAT_MODE: FICA 'local' pra que todo o fluxo de combate (rolls, animações,
+     popups, gates) execute como no simulador file://. REMOTE e LOCAL são
+     idênticos durante o combate — única diferença é prepare (boot) e complete
+     (Continuar). Zero sync per-action. Zero dual-engine bugs. */
+window.__COMBAT_IS_REMOTE_SESSION = !!(window.__COMBAT_TOKEN && window.__COMBAT_API_BASE);
+if (window.__COMBAT_IS_REMOTE_SESSION) {
+    console.info('[C-REM:PIVOT] remote session detected — engine runs LOCAL, server provides prepare/complete only');
+    /* Override: força engine LOCAL. __COMBAT_MODE = 'remote' foi usado pra
+       roteamento per-action (__combatServerCall/__combatRemoteAction) — já não
+       é mais necessário. */
+    window.__COMBAT_MODE = 'local';
+}
+
 /* [C-REM:LOG-RELAY] Inline log relay (port de shared/log-relay.js).
    Wrap console.info/warn/error: se msg começa com [TAG], queue + POST
    /api/game/log a cada 3s OU 30 msgs. Server loga como [WEBAPP] [TAG] msg
@@ -7618,8 +7634,11 @@ window.__COMBAT_ENV = (function () {
    SKIP em local mode (sem apiBase). Carregado INLINE pra wrappar console
    ANTES de qualquer console.info rodar. */
 (function () {
-    if (window.__COMBAT_MODE !== 'remote' || !window.__COMBAT_API_BASE) {
-        return;  /* local mode — no relay */
+    /* [PIVOT 2026-04-21] log-relay ativo quando IS_REMOTE_SESSION (tem token+api).
+       __COMBAT_MODE foi forçado pra 'local' pro engine rodar local — mas queremos
+       relay ativo pra agente IA grepar bot.log. */
+    if (!window.__COMBAT_IS_REMOTE_SESSION || !window.__COMBAT_API_BASE) {
+        return;  /* sem remote session — no relay (file:// local test) */
     }
     if (console.log && console.log._valdoriaWrapped) return;  /* já wrapped */
 
@@ -8531,8 +8550,20 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     spec = spec || {};
     var cdef = useRandom ? pick(CHAR_CLASSES) : getClassDefByName(spec.cls || 'Guerreiro');
     var lvl = useRandom ? rng(2, 5) : Math.min(20, Math.max(1, parseInt(spec.lvl, 10) || 3));
-    var hp = rng(cdef.hp[0], cdef.hp[1]);
-    hp = Math.max(8, Math.round(hp + (lvl - 3) * 2));
+    /* [MELHORIA 2026-04-21] spec.*_exact permite REMOTE mode passar valores
+       exatos do DB Player (hp, mhp, ac, atk, dex, etc.) em vez de rng. Se
+       ausente, mantém random (LOCAL test mode intacto).
+       Essa melhoria permite que o simulador seja fonte ÚNICA da engine pra
+       LOCAL e REMOTE — server só fornece DATA (prepare) + recebe RESULT
+       (complete). Sem dual-engine, sem sync per-event. */
+    var hp;
+    if (spec.hp_exact != null) {
+        hp = Math.max(1, parseInt(spec.hp_exact, 10) || 1);
+    } else {
+        hp = rng(cdef.hp[0], cdef.hp[1]);
+        hp = Math.max(8, Math.round(hp + (lvl - 3) * 2));
+    }
+    var mhp = (spec.mhp_exact != null) ? Math.max(hp, parseInt(spec.mhp_exact, 10) || hp) : hp;
     var race = useRandom ? pick(CHAR_RACES) : (spec.race && String(spec.race).trim()) || 'Humano';
     var n = useRandom ? pick(CHAR_NAMES) : (String(spec.name || '').trim() || pick(CHAR_NAMES));
     // Cópia rasa completa — preserva todos os campos PHB (magicMissiles, smite,
@@ -8562,20 +8593,28 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         });
     }
     var summonsInvokedFinal = Object.assign(summonsInvokedDefault, summonsInvokedFromSetup || {});
+    /* [MELHORIA 2026-04-21] Overrides *_exact aplicados quando presentes. */
+    var ac = (spec.ac_exact != null) ? parseInt(spec.ac_exact, 10) : rng(cdef.ac[0], cdef.ac[1]);
+    var atk = (spec.atk_exact != null) ? parseInt(spec.atk_exact, 10) : rng(cdef.atk[0], cdef.atk[1]);
+    var dex = (spec.dex_exact != null) ? parseInt(spec.dex_exact, 10) : rng(cdef.dex[0], cdef.dex[1]);
+    var wis = (spec.wis_exact != null) ? parseInt(spec.wis_exact, 10) : rng(10, 16);
+    var intSc = (spec.int_exact != null) ? parseInt(spec.int_exact, 10) : (cdef.cls === 'Mago' ? rng(14, 18) : rng(8, 14));
+    var resMax = (spec.mp_max_exact != null) ? Math.max(0, parseInt(spec.mp_max_exact, 10) || 0) : cdef.res.max;
+    var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
         summonsInvoked: summonsInvokedFinal,
         race: race, ico: cdef.ico,
-        hp: hp, mhp: hp, ac: rng(cdef.ac[0], cdef.ac[1]), atk: rng(cdef.atk[0], cdef.atk[1]), die: cdef.die,
+        hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
-        dex: rng(cdef.dex[0], cdef.dex[1]), wis: rng(10, 16), intScore: cdef.cls === 'Mago' ? rng(14, 18) : rng(8, 14),
+        dex: dex, wis: wis, intScore: intSc,
         prof: (function (lv) { lv = Math.max(1, lv | 0); return 2 + Math.floor((lv - 1) / 4); })(lvl),
-        alive: true, se: [],
-        dying: false, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
+        alive: hp > 0, se: [],
+        dying: hp <= 0, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
         lvl: lvl,
-        res: { type: cdef.res.type, name: cdef.res.name, ico: cdef.res.ico, value: cdef.res.max, max: cdef.res.max },
+        res: { type: cdef.res.type, name: cdef.res.name, ico: cdef.res.ico, value: resCur, max: resMax },
         skills: skillsCopy,
-        bag: randomBagForChar(),
+        bag: (spec.bag && Array.isArray(spec.bag)) ? spec.bag : randomBagForChar(),
         /* V1 Invocações Phase 1 — Bonus Action System (2026-04-18, só importam quando t==='p'). */
         actionSpent: false,
         bonusActionSpent: false
@@ -8604,14 +8643,26 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
     var sc = scaleEnemyTemplate(b, diff);
     var sugLvl = Math.max(1, Math.round((b.hp + (b.ac - 10) * 2 + b.atk) / 10));
     var suffix = totalEnemies > 1 ? (' ' + (labelIdx + 1)) : '';
+    /* [MELHORIA 2026-04-21] Overrides *_exact pra REMOTE mode: enemies vêm do
+       EncounterManager server-side com HP/AC/ATK já calculados.
+       spec.n_exact: nome custom (ex: "Orc Feroz")
+       spec.hp_exact, mhp_exact, ac_exact, atk_exact: stats exatos. */
+    var n = (spec.n_exact) ? String(spec.n_exact) : (sc.n + suffix);
+    var hp = (spec.hp_exact != null) ? Math.max(1, parseInt(spec.hp_exact, 10) || 1) : sc.hp;
+    var mhp = (spec.mhp_exact != null) ? Math.max(hp, parseInt(spec.mhp_exact, 10) || hp) : hp;
+    var ac = (spec.ac_exact != null) ? parseInt(spec.ac_exact, 10) : sc.ac;
+    var atk = (spec.atk_exact != null) ? parseInt(spec.atk_exact, 10) : sc.atk;
+    var die = (spec.die_exact != null) ? parseInt(spec.die_exact, 10) : sc.die;
     return {
-        t: 'e', n: sc.n + suffix, hp: sc.hp, mhp: sc.hp, ac: sc.ac, atk: sc.atk, die: sc.die,
-        dmgMod: sc.dmgMod, attr: sc.attr, dex: sc.dex, con: sc.con,
+        t: 'e', n: n, hp: hp, mhp: mhp, ac: ac, atk: atk, die: die,
+        dmgMod: (spec.dmgMod_exact != null) ? parseInt(spec.dmgMod_exact, 10) : sc.dmgMod,
+        attr: sc.attr, dex: sc.dex, con: sc.con,
         wis: sc.wis != null ? sc.wis : 10, str: sc.str != null ? sc.str : 10, int: sc.int != null ? sc.int : 10, cha: sc.cha != null ? sc.cha : 10,
-        ico: sc.ico, alive: true, se: [],
+        ico: spec.ico_exact || sc.ico, alive: hp > 0, se: [],
         // PHB Monster Manual Multiattack: padrão 1; bestiário pode setar valor maior.
-        multiAttack: Math.max(1, sc.multiAttack | 0 || b.multiAttack | 0 || 1),
-        sugLvl: sugLvl, species: b.n, simDiff: diff,
+        multiAttack: Math.max(1, (spec.multiAttack_exact | 0) || (sc.multiAttack | 0) || (b.multiAttack | 0) || 1),
+        sugLvl: (spec.sugLvl_exact != null) ? parseInt(spec.sugLvl_exact, 10) : sugLvl,
+        species: spec.species_exact || b.n, simDiff: diff,
         it: { ic: '⚔️', lb: 'ataca' }
     };
 }
@@ -12671,6 +12722,71 @@ function __combatShowErrorOverlay(title, detailsHtml) {
     }
 }
 
+/* [PIVOT 2026-04-21] POST /api/combat2/complete — aplica resultado final ao
+   Player DB (HP, MP, XP, gold, loot) + retorna URL de redirect. Engine LOCAL
+   já computou tudo; server só persiste. */
+async function __combatCompleteCanonical(result, origin) {
+    console.info('[C-REM:PIVOT-COMPLETE] enter result=' + result + ' origin=' + origin);
+    var s = currentState || {};
+    var p = (s.order && s.p_idx != null) ? s.order[s.p_idx] : null;
+    var rewards = (s.rewards && typeof s.rewards === 'object') ? {
+        xp: (s.rewards.xp | 0),
+        gold: (s.rewards.gold | 0),
+        items: Array.isArray(s.rewards.items) ? s.rewards.items.slice(0, 10) : []
+    } : null;
+    var payload = {
+        result: result,
+        origin: origin,
+        player_hp_final: p ? (p.hp | 0) : null,
+        player_mp_final: (p && p.res) ? (p.res.value | 0) : null,
+        rewards: rewards
+    };
+    try {
+        var url = window.__COMBAT_API_BASE + '/api/combat2/complete';
+        console.info('[C-REM:PIVOT-COMPLETE] POST payload=' + JSON.stringify(payload).slice(0, 200));
+        var r = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + window.__COMBAT_TOKEN
+            },
+            body: JSON.stringify(payload)
+        });
+        if (!r.ok) {
+            console.error('[C-REM:PIVOT-COMPLETE] status=' + r.status);
+            __combatShowErrorOverlay(
+                'Falha ao salvar resultado',
+                'Servidor retornou ' + r.status + '.<br>Tente novamente.'
+            );
+            return;
+        }
+        var data = await r.json();
+        if (!data || !data.url) {
+            __combatShowErrorOverlay(
+                'Resposta sem destino',
+                'Servidor aceitou mas não retornou URL pra voltar.'
+            );
+            return;
+        }
+        var targetUrl = data.url;
+        /* Preserva hash tgWebAppData se presente (Telegram SDK initData). */
+        try {
+            var curHash = location.hash || '';
+            if (curHash.indexOf('tgWebApp') >= 0 && targetUrl.indexOf('#') < 0) {
+                targetUrl += curHash;
+            }
+        } catch (_eH) {}
+        console.info('[C-REM:PIVOT-COMPLETE] redirecting to ' + targetUrl.slice(0, 100));
+        location.replace(targetUrl);
+    } catch (e) {
+        console.error('[C-REM:PIVOT-COMPLETE] exception', e && e.message);
+        __combatShowErrorOverlay(
+            'Erro de rede',
+            'Falha ao conectar ao servidor.<br>' + (e && e.message || e)
+        );
+    }
+}
+
 /* [C-REM:LEAVE] Leave combat remote \u2192 transition API.
    Paridade combat2.js leaveCombatToOrigin.
 
@@ -12680,8 +12796,15 @@ function __combatShowErrorOverlay(title, detailsHtml) {
 async function __combatLeaveRemoteToOrigin() {
     var ph = (currentState && currentState.ph) || 'victory';
     var result = ph === 'defeat' ? 'defeat' : (ph === 'fled' ? 'fled' : 'victory');
-    var origin = window.__COMBAT_ORIGIN_APP || 'game';
+    var origin = window.__COMBAT_PIVOT_ORIGIN || window.__COMBAT_ORIGIN_APP || 'game';
     try { window.__valdoria_transitioning = true; } catch (eT) {}
+
+    /* [PIVOT 2026-04-21] Nova rota: POST /api/combat2/complete com HP/MP final
+       + rewards computados LOCAL (pelo próprio simulator via _compute_rewards
+       no render de vitória). Server aplica ao DB + retorna URL de redirect. */
+    if (window.__COMBAT_IS_REMOTE_SESSION) {
+        return __combatCompleteCanonical(result, origin);
+    }
     /* [C-REM:LEAVE-XHR-ENTRY] (2026-04-21) sync XHR ao entrar — garante ao menos
        1 log arrival mesmo se keepalive/sendBeacon falharem em Telegram Desktop. */
     try {
@@ -18576,16 +18699,71 @@ function startSimAfterDiceBoot() {
       'skin=', document.documentElement.classList.contains('sim-combat-root'),
       'skinLast=', !!document.getElementById('sim-combat-skin-last'));
     ensureCombatVfxRuntime();
-    /* REMOTE MODE (Fase 1 PoC 2026-04-20): skippa newCombat local e fetcha
-       state inicial do server Python. Engine local fica 100% desligado. */
-    if (window.__COMBAT_MODE === 'remote') {
-        startCombatRemote();
+    /* [PIVOT 2026-04-21] REMOTE session: GET /api/combat2/prepare → setup →
+       newCombatFromSetup(setup). A partir daí, engine LOCAL idêntica ao
+       simulator file://. Zero diferença durante o combate. */
+    if (window.__COMBAT_IS_REMOTE_SESSION) {
+        startCombatRemoteCanonical();
         return;
     }
     var setup = tryConsumeCombatSetup();
     resetSimDiceSkipForNewCombat();
     currentState = setup ? newCombatFromSetup(setup) : newCombat();
     render(currentState);
+}
+
+/* [PIVOT 2026-04-21] Boot REMOTE: fetch setup do server, monta state com
+   newCombatFromSetup (engine LOCAL), renderiza. Nenhuma outra diferença vs
+   simulator file://. */
+async function startCombatRemoteCanonical() {
+    console.info('[C-REM:PIVOT-BOOT] fetching /api/combat2/prepare');
+    resetSimDiceSkipForNewCombat();
+    try {
+        var url = window.__COMBAT_API_BASE + '/api/combat2/prepare';
+        var r = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + window.__COMBAT_TOKEN,
+                'Accept': 'application/json'
+            }
+        });
+        if (!r.ok) {
+            console.error('[C-REM:PIVOT-BOOT] prepare_failed status=' + r.status);
+            __combatShowErrorOverlay(
+                'Falha ao carregar combate',
+                'Servidor retornou status ' + r.status + '.<br>Tente reabrir o combate.'
+            );
+            return;
+        }
+        var data = await r.json();
+        if (!data || !data.setup) {
+            console.error('[C-REM:PIVOT-BOOT] prepare_no_setup');
+            __combatShowErrorOverlay(
+                'Resposta inválida',
+                'Servidor aceitou mas não retornou setup.'
+            );
+            return;
+        }
+        /* Salva origin pra o Continuar depois saber onde voltar. */
+        window.__COMBAT_PIVOT_ORIGIN = data.origin || 'game';
+        console.info('[C-REM:PIVOT-BOOT] setup loaded: player=' + (data.setup.player && data.setup.player.name)
+            + ' cls=' + (data.setup.player && data.setup.player.cls)
+            + ' allies=' + (data.setup.allies || []).length
+            + ' enemies=' + (data.setup.enemies || []).length
+            + ' biome=' + data.setup.biome
+            + ' origin=' + window.__COMBAT_PIVOT_ORIGIN);
+        /* Engine LOCAL assume daqui em diante — idêntico ao simulator file://. */
+        currentState = newCombatFromSetup(data.setup);
+        if (data.setup.biome) currentState.bio = data.setup.biome;
+        render(currentState);
+        console.info('[C-REM:PIVOT-BOOT] complete — LOCAL engine running');
+    } catch (e) {
+        console.error('[C-REM:PIVOT-BOOT] exception', e && e.message);
+        __combatShowErrorOverlay(
+            'Erro de rede',
+            'Falha ao conectar ao servidor.<br>' + (e && e.message || e)
+        );
+    }
 }
 
 /* [C-REM:BOOT] Remote mode boot: GET /api/combat2 → state inicial.
