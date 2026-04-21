@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:53:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T04:51:55Z — do not edit directly, edit source -->
 
 
 <!--
@@ -370,6 +370,208 @@ loadCSS('/combat/combat-themes.css');
 loadCSS('/combat/combat-vfx.css');
 </script>
 <style>
+/* [COMBAT 2026-04-21] Overrides específicos do simulador de combate.
+   =================================================================== */
+
+/* 1. Botão de áudio/música: mover pra top-right em vez de bottom-right
+      pra não atrapalhar a action bar de combate.
+      display: flex !important + visibility + z-index — anula seletores de
+      audio-manager.js que escondem durante overlays (.loading, .dm-overlay,
+      .outcome-overlay) pois no simulador não há controle ativo desses. */
+.va-float {
+    bottom: auto !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    max-width: none !important;
+    width: auto !important;
+    justify-content: flex-end !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1500 !important;
+    pointer-events: auto !important;
+}
+.va-float-btn {
+    width: 34px !important;
+    height: 34px !important;
+    opacity: 0.85;
+    pointer-events: auto !important;
+}
+.va-float-btn:hover { opacity: 1; }
+/* Também cobrir o caso em que audio-manager embeda em footer com va-footer-btn */
+.va-footer-btn { z-index: 1500; }
+
+/* 2. Popup "Combate Iniciado" (showIntroChoicePopup) — Opção 3 aprovada:
+      ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor ❦ +
+      botão primary alto (com tag "Ação Padrão") + secundário tracejado. */
+#intro-choice-popup {
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+#intro-choice-popup .iop-card {
+    /* Overriding default iop-card — Opção 3 palette */
+    background: radial-gradient(ellipse at top, rgba(196,149,58,0.12) 0%, #2a2118 50%, #1a1510 100%) !important;
+    border: 1px solid rgba(196,149,58,0.4) !important;
+    border-radius: 16px 16px 24px 24px !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(196,149,58,0.12) !important;
+    padding: 44px 24px 26px !important;
+    max-width: 340px !important;
+    width: calc(100vw - 40px);
+    position: relative;
+    overflow: visible !important;
+    animation: introPopupInBras 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes introPopupInBras {
+    0% { opacity: 0; transform: scale(0.85) translateY(-14px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* ESCUDO HERÁLDICO emergindo do topo */
+#intro-choice-popup .iop-card::before {
+    content: '⚔';
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 72px;
+    clip-path: polygon(50% 0%, 100% 20%, 100% 70%, 50% 100%, 0% 70%, 0% 20%);
+    background: linear-gradient(180deg, #c4953a 0%, #7a5620 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1005;
+    font-size: 26px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    z-index: 2;
+}
+/* Header: título + subtítulo (sem ornamento extra) */
+#intro-choice-popup .iop-head-batch {
+    padding: 6px 0 0 !important;
+    text-align: center;
+    background: none !important;
+    border: none !important;
+}
+#intro-choice-popup .iop-head-batch__orn {
+    display: none !important;  /* Removido — o brasão já está no ::before do card */
+}
+#intro-choice-popup .iop-head-batch__title {
+    font-family: 'Cinzel', serif !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+#intro-choice-popup .iop-head-batch__line1 {
+    display: block !important;
+    font-family: 'Cinzel', serif;
+    font-size: 22px !important;
+    color: var(--v-gold, #c4953a) !important;
+    text-align: center;
+    letter-spacing: 4px !important;
+    margin: 8px 0 4px !important;
+    text-shadow: 0 0 20px rgba(196,149,58,0.4);
+    text-transform: uppercase;
+}
+#intro-choice-popup .iop-head-batch__line2 {
+    display: block !important;
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    color: var(--v-text-dim, #a09484) !important;
+    font-size: 11px !important;
+    letter-spacing: 6px !important;
+    text-transform: uppercase !important;
+    font-weight: 400 !important;
+}
+/* DIVISOR com ❦ (substitui iop-head-batch__rule) */
+#intro-choice-popup .iop-head-batch__rule {
+    height: 1px !important;
+    margin: 22px auto !important;
+    width: 60% !important;
+    background: linear-gradient(90deg, transparent, var(--v-gold, #c4953a), transparent) !important;
+    position: relative !important;
+    border: none !important;
+}
+#intro-choice-popup .iop-head-batch__rule::after {
+    content: '❦';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #2a2118 0%, #1a1510 100%);
+    padding: 0 8px;
+    color: var(--v-gold, #c4953a);
+    font-size: 14px;
+}
+/* Container dos CTAs */
+#intro-choice-popup .iop-start-wrap {
+    display: block !important;
+    padding: 0 !important;
+    gap: 0 !important;
+}
+/* Botão PRIMÁRIO — gold destacado com tag "Ação Padrão" */
+#intro-choice-popup .epic-cta-btn[data-act="next"] {
+    display: block !important;
+    width: 100% !important;
+    padding: 20px !important;
+    background: linear-gradient(180deg, rgba(196,149,58,0.3) 0%, rgba(196,149,58,0.15) 100%) !important;
+    border: 2px solid rgba(196,149,58,0.6) !important;
+    border-radius: 10px !important;
+    color: var(--v-gold-soft, #e8c45a) !important;
+    font-family: 'Cinzel', serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    margin: 0 0 12px !important;
+    text-align: center !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    box-shadow: 0 4px 16px rgba(196,149,58,0.2), inset 0 1px 0 rgba(196,149,58,0.3) !important;
+    transition: all 0.3s ease !important;
+}
+#intro-choice-popup .epic-cta-btn[data-act="next"]:hover {
+    background: linear-gradient(180deg, rgba(196,149,58,0.42) 0%, rgba(196,149,58,0.22) 100%) !important;
+    border-color: rgba(196,149,58,0.85) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(196,149,58,0.4), inset 0 1px 0 rgba(196,149,58,0.4) !important;
+}
+#intro-choice-popup .epic-cta-btn[data-act="next"] .epic-cta-tag {
+    display: block;
+    font-size: 9px;
+    color: var(--v-text-dim, #a09484);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+/* dice3d mount — escondido (não cabe no layout novo) */
+#intro-choice-popup .epic-cta-btn[data-act="next"] .epic-cta-d3d { display: none !important; }
+/* Botão SECUNDÁRIO — tracejado discreto */
+#intro-choice-popup .epic-cta-btn[data-act="skip-init"] {
+    display: block !important;
+    width: 100% !important;
+    padding: 12px !important;
+    background: transparent !important;
+    border: 1px dashed rgba(160,148,132,0.4) !important;
+    border-radius: 8px !important;
+    color: var(--v-text-faint, #8a7a68) !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 11px !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    margin: 0 !important;
+    transition: all 0.2s ease !important;
+}
+#intro-choice-popup .epic-cta-btn[data-act="skip-init"]:hover {
+    border-color: rgba(160,148,132,0.65) !important;
+    color: var(--v-text-dim, #a09484) !important;
+    background: rgba(42, 33, 24, 0.3) !important;
+}
+/* Ícone skip-init — removido (design 3 é texto limpo) */
+#intro-choice-popup .epic-cta-btn[data-act="skip-init"] .epic-cta-icon { display: none !important; }
+
 /* Mesmo viewport lock que valdoria-design (telefone / WebApp Telegram), nao altura total do desktop */
 :root {
   --sim-frame-w: min(100vw, 430px);
@@ -17235,6 +17437,11 @@ function appendDiceCombatHeader(parent, actor, combatTarget, singleMetaLine, pai
 
 function showDice(value, cb, actor, context, opts) {
     opts = opts || {};
+    /* [SFX 2026-04-21] Som de dado rolando no início. Só d20 — não é per-dado
+       do showDamageDice (que já tem seu próprio sfxDiceRoll). */
+    if (typeof sfxDiceRoll === 'function') {
+        try { sfxDiceRoll(); } catch (_eS) {}
+    }
     if (!window.Dice3D) { console.warn('[SIM] Dice3D indisponível — sem animação'); cb && cb(); return; }
     var isPlayer = actor && actor.t === 'p';
     /* Iniciativa: todos rolam em sequencia automatica (evita travar a espera de clique + CTA "Pular"). */
@@ -17599,6 +17806,10 @@ function showSkippedRollsSummaryPaginated(opts) {
 function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, opts) {
     dmgMod = dmgMod || 0;
     opts = opts || {};
+    /* [SFX 2026-04-21] Som de dado rolando no início de qualquer showDamageDice
+       (tanto LOCAL quanto REMOTE — showDamageDice é chamada nos 2 paths).
+       Som hit/crit/damageType é tocado no FIM (quando resultado é aplicado). */
+    if (typeof sfxDiceRoll === 'function') sfxDiceRoll();
     return new Promise(function (resolve) {
         if (!window.Dice3D) { resolve(rolls.reduce(function (a, b) { return a + b; }, 0) + dmgMod); return; }
         var dieType = 'd' + die;
@@ -17642,7 +17853,24 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
         ov.style.zIndex = '101000';
         mountInGameFrame(ov); // regra: overlays dentro do frame #app
         var d;
-        function close() { try { d && d.dispose(); } catch (e) {} ov.remove(); if (_activeDiceClose === close) _activeDiceClose = null; resolve(total); }
+        function close() {
+            try { d && d.dispose(); } catch (e) {}
+            ov.remove();
+            if (_activeDiceClose === close) _activeDiceClose = null;
+            /* [SFX 2026-04-21] Hit/crit/damageType quando resolve. Crit prioriza
+               som de crit. damageType toca em paralelo se houver tema específico. */
+            if (crit && typeof sfxCrit === 'function') sfxCrit();
+            else if (typeof sfxHit === 'function') sfxHit();
+            if (opts && opts.theme && typeof sfxDamageType === 'function') {
+                try { sfxDamageType(opts.theme); } catch (_eS) {}
+            }
+            /* Enemy death se newHp <= 0 e target é inimigo. */
+            if (target && target.t === 'e' && (newHp | 0) <= 0
+                    && typeof sfxEnemyDeath === 'function') {
+                setTimeout(function () { sfxEnemyDeath(); }, 200);
+            }
+            resolve(total);
+        }
         _activeDiceClose = close;
         continueBtn.addEventListener('click', close);
         function mountDmgDice() {
@@ -17770,6 +17998,13 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
 /** Rolagem 3D de cura (cada dado em sequencia) + card do alvo com PV subindo. */
 function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal, skillName, showReviveLine) {
     mod = mod || 0;
+    /* [SFX 2026-04-21] Dice roll + heal sound ao iniciar a cura. */
+    if (typeof sfxDiceRoll === 'function') {
+        try { sfxDiceRoll(); } catch (_eS) {}
+    }
+    if (typeof sfxHeal === 'function') {
+        try { sfxHeal(); } catch (_eS) {}
+    }
     return new Promise(function (resolve) {
         var diceSum = rolls.reduce(function (a, b) { return a + b; }, 0);
         var totalRolled = diceSum + mod;
@@ -18192,28 +18427,27 @@ function showIntroChoicePopup() {
     ov.setAttribute('aria-labelledby', 'c2-intro-choice-title');
     var card = document.createElement('div');
     card.className = 'iop-card iop-card--batch-summary';
+    /* [MOCKUP OPÇÃO 3 aprovada 2026-04-21] ESCUDO BRASONADO:
+       brasão emerge do topo (via CSS ::before do card), título grande gold,
+       subtítulo espaçado, divisor ❦, botão primary com tag "Ação Padrão",
+       botão secundário tracejado discreto. CSS em style do <head>. */
     var parts = [
         '<header class="iop-head-batch" aria-labelledby="c2-intro-choice-title">',
-        '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
-        '<div class="iop-head-batch__text">',
         '<h2 class="iop-head-batch__title" id="c2-intro-choice-title">',
         '<span class="iop-head-batch__line1">Combate Iniciado</span>',
-        '<span class="iop-head-batch__line2">Prepare-se para a batalha</span>',
+        '<span class="iop-head-batch__line2">Prepare-se</span>',
         '</h2>',
-        '</div>',
         '</header>',
         '<div class="iop-head-batch__rule" role="presentation"></div>',
-        /* Container dos 2 CTAs — layout vertical empilhado pra smartphone */
-        '<div class="iop-start-wrap" style="display:flex;flex-direction:column;gap:14px;padding:14px 18px 22px;">',
-        /* Começar Rolagens */
-        '<button type="button" class="epic-cta-btn" data-act="next" style="width:100%;">',
-        '<div class="epic-cta-d3d" id="ctaDiceMountPopup" aria-hidden="true"></div>',
-        '<span class="epic-cta-text">Come\u00e7ar Rolagens<br/>de Iniciativa</span>',
+        '<div class="iop-start-wrap">',
+        /* PRIMÁRIO: Começar Rolagens (com tag "Ação Padrão") */
+        '<button type="button" class="epic-cta-btn" data-act="next">',
+        '<span class="epic-cta-tag">A\u00e7\u00e3o Padr\u00e3o</span>',
+        '<span class="epic-cta-text">Come\u00e7ar Rolagens</span>',
         '</button>',
-        /* Pular Todas */
-        '<button type="button" class="epic-cta-btn epic-cta-btn--skip" data-act="skip-init" style="width:100%;">',
-        '<span class="epic-cta-icon">\u23ed\ufe0f</span>',
-        '<span class="epic-cta-text">Pular Todas<br/>as Rolagens</span>',
+        /* SECUNDÁRIO: Pular Todas */
+        '<button type="button" class="epic-cta-btn epic-cta-btn--skip" data-act="skip-init">',
+        'Pular Todas',
         '</button>',
         '</div>'
     ];
@@ -18498,6 +18732,8 @@ async function playTurn(aIdx, tIdx, opts) {
 
     /* Erro: log e fim (sem dano) — apenas ataque vs CA */
     if (!hitRes.hit) {
+        /* [SFX 2026-04-21] miss sound */
+        if (typeof sfxMiss === 'function') { try { sfxMiss(); } catch (_eS) {} }
         var logAtk = r + '+' + actor.atk + (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total;
         s.log.push(actor.n + ' erra ' + target.n + ' (' + logAtk + ' vs CA ' + effAc + (effAc !== target.ac ? ' incl. bônus' : '') + ').');
         s.last = { a: actor.n, t: target.n, r: r, hit: false, tIdx: tIdx };
@@ -18800,6 +19036,24 @@ function startSimAfterDiceBoot() {
       'skin=', document.documentElement.classList.contains('sim-combat-root'),
       'skinLast=', !!document.getElementById('sim-combat-skin-last'));
     ensureCombatVfxRuntime();
+    /* [SFX 2026-04-21] Música de combate (ValdoriaAudio auto-random de
+       combat_tense_*.mp3). Tocar uma vez no boot. Fallback silencioso se
+       ValdoriaAudio não carregou. */
+    if (typeof sfxPlayMusicCombat === 'function') {
+        try { sfxPlayMusicCombat(); } catch (_eM) { /* silent */ }
+    }
+    /* [SFX 2026-04-21] Força criação IMEDIATA do botão flutuante de volume
+       (bypassa o timeout de 3s do MutationObserver do audio-manager que
+       espera por #footer-quick — combate.html não tem esse element). */
+    try {
+        if (typeof ValdoriaAudio !== 'undefined' && !document.getElementById('va-btn')) {
+            setTimeout(function () {
+                if (document.getElementById('va-btn')) return;
+                /* Dispara play() se ainda não disparou — init() cria o UI */
+                try { ValdoriaAudio.play('combat'); } catch (_eP) {}
+            }, 50);
+        }
+    } catch (_eFB) { /* silent */ }
     /* [PIVOT 2026-04-21] REMOTE session: GET /api/combat2/prepare → setup →
        newCombatFromSetup(setup). A partir daí, engine LOCAL idêntica ao
        simulator file://. Zero diferença durante o combate. */
@@ -18967,7 +19221,13 @@ function _vaPlayMusic(track) {
         }
     } catch (_eA) { /* silent */ }
 }
-function sfxDiceRoll() { _vaPlaySFX('sfx_dice'); }
+/* [SFX DICE ROLL 2026-04-21] Som de dado rolando: arquivo royalty-free
+   (Pixabay/Freesound) fornecido pelo user em sfx_dice_roll.mp3 + variação
+   sfx_dice_roll_2.mp3. ValdoriaAudio.playSFX randomiza entre os 2.
+   Fallback silencioso se track ainda não está disponível. */
+function sfxDiceRoll() {
+    _vaPlaySFX('sfx_dice_roll');
+}
 function sfxHit() { _vaPlaySFX('sfx_hit'); }
 function sfxCrit() { _vaPlaySFX('sfx_crit'); }
 function sfxMiss() { _vaPlaySFX('sfx_miss'); }
