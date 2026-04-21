@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-20T23:56:59Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T00:00:08Z — do not edit directly, edit source -->
 
 <!--
 =================================================================================
@@ -12564,11 +12564,14 @@ async function __combatLeaveRemoteToOrigin() {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
             headers['X-Idempotency-Key'] = window.crypto.randomUUID();
         }
+        /* FIX 2026-04-20: payload precisa de `user_id` (não `uid`) e from='combat'
+           (transition map webapp_transition.py:38 usa 'combat', não 'combat2').
+           Sem isso, transition API retorna 400 missing_auth + 400 invalid_transition. */
         var payload = {
-            from: 'combat2',
+            from: 'combat',
             to: origin,
             result: result,
-            uid: window.__COMBAT_USER_ID
+            user_id: window.__COMBAT_USER_ID
         };
         console.info('[C-REM:LEAVE] POST /api/webapp/transition payload=' + JSON.stringify(payload));
         var r = await fetch(url, {
