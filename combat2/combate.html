@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:33:56Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-21T03:40:38Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12251,14 +12251,25 @@ function render(s) {
                 '</div></div>';
         html += buildBattlefield(s);
         if (ph === 'intro') {
-            html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="next"><div class="epic-cta-d3d" id="ctaDiceMount"></div><span class="epic-cta-text">Começar Rolagens<br/>de Iniciativa</span></button>' +
-                '<button class="epic-cta-btn epic-cta-btn--skip" data-act="skip-init"><span class="epic-cta-icon">⏭️</span><span class="epic-cta-text">Pular Todas<br/>as Rolagens</span></button></div>';
+            /* [MELHORIA 2026-04-21] CTAs movidos pra popup modal showIntroChoicePopup()
+               em vez de inline overlay. Melhor UX em smartphone (cards ficam
+               visíveis acima; popup centralizado). */
         } else if (ph === 'init') {
             html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="skip-init"><span class="epic-cta-icon">⏭️</span><span class="epic-cta-text">Pular Todas<br/>as Rolagens</span></button></div>';
         }
         /* ph === 'init_done': escurecimento + ordem + CTA no popup showInitiativeOrderPopup() */
         setHTML(app, html);
         bindActions();
+        /* [MELHORIA 2026-04-21] ph='intro' mostra popup modal com as 2 opções
+           (Começar Rolagens / Pular Todas). Melhor UX em smartphone —
+           substituiu overlay inline no bottom. */
+        if (ph === 'intro' && typeof showIntroChoicePopup === 'function') {
+            showIntroChoicePopup();
+        } else if (ph !== 'intro' && typeof closeIntroChoicePopup === 'function') {
+            /* Transição intro → init fecha o popup se ainda aberto (ex: skip-init
+               chain, animInit arrancando). */
+            closeIntroChoicePopup();
+        }
         return;
     }
 
@@ -18149,6 +18160,69 @@ function showInitiativeOrderPopup() {
 
 function closeInitiativeOrderPopup() {
     var el = document.getElementById('init-order-popup');
+    if (el) el.remove();
+}
+
+/**
+ * Popup modal de intro: apresenta as 2 opções (Começar Rolagens / Pular Todas)
+ * como dialog. Substitui os botões inline na parte de baixo da tela de intro.
+ * Mesmo visual dos outros popups (iop-overlay + iop-card).
+ * Callback: buttons têm data-act="next" e data-act="skip-init" — bindActions
+ * (chamada por render) anexa onBtnClick automaticamente.
+ */
+function showIntroChoicePopup() {
+    if (document.getElementById('intro-choice-popup')) return;
+    var ov = document.createElement('div');
+    ov.id = 'intro-choice-popup';
+    ov.className = 'iop-overlay iop-overlay--batch';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-labelledby', 'c2-intro-choice-title');
+    var card = document.createElement('div');
+    card.className = 'iop-card iop-card--batch-summary';
+    var parts = [
+        '<header class="iop-head-batch" aria-labelledby="c2-intro-choice-title">',
+        '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
+        '<div class="iop-head-batch__text">',
+        '<h2 class="iop-head-batch__title" id="c2-intro-choice-title">',
+        '<span class="iop-head-batch__line1">Combate Iniciado</span>',
+        '<span class="iop-head-batch__line2">Prepare-se para a batalha</span>',
+        '</h2>',
+        '</div>',
+        '</header>',
+        '<div class="iop-head-batch__rule" role="presentation"></div>',
+        /* Container dos 2 CTAs — layout vertical empilhado pra smartphone */
+        '<div class="iop-start-wrap" style="display:flex;flex-direction:column;gap:14px;padding:14px 18px 22px;">',
+        /* Começar Rolagens */
+        '<button type="button" class="epic-cta-btn" data-act="next" style="width:100%;">',
+        '<div class="epic-cta-d3d" id="ctaDiceMountPopup" aria-hidden="true"></div>',
+        '<span class="epic-cta-text">Come\u00e7ar Rolagens<br/>de Iniciativa</span>',
+        '</button>',
+        /* Pular Todas */
+        '<button type="button" class="epic-cta-btn epic-cta-btn--skip" data-act="skip-init" style="width:100%;">',
+        '<span class="epic-cta-icon">\u23ed\ufe0f</span>',
+        '<span class="epic-cta-text">Pular Todas<br/>as Rolagens</span>',
+        '</button>',
+        '</div>'
+    ];
+    setHTML(card, parts.join(''));
+    ov.appendChild(card);
+    mountInGameFrame(ov);
+    /* bindActions já rodou ANTES desta chamada (render → bindActions → popup).
+       Chamamos novamente pra os botões do popup serem escutados. Idempotente:
+       addEventListener em elementos já listados é no-op se mesmo handler. */
+    if (typeof bindActions === 'function') bindActions();
+    /* Mount dice3d no ícone do botão "Começar" se disponível (efeito visual). */
+    try {
+        var ctaMount = document.getElementById('ctaDiceMountPopup');
+        if (ctaMount && window.Dice3D && !ctaMount._d3d && typeof window.Dice3D.createDiceForDom === 'function') {
+            ctaMount._d3d = window.Dice3D.createDiceForDom(ctaMount, { dieType: 'd20' });
+        }
+    } catch (_eD) { /* sem dice3d — OK, botão funciona sem animação */ }
+}
+
+function closeIntroChoicePopup() {
+    var el = document.getElementById('intro-choice-popup');
     if (el) el.remove();
 }
 
