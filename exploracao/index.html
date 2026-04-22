@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!--
+  MAPA_IA - valdoria-webapp/exploracao/index.html
+  (FASE 1 planejada 2026-04-22: exploracao.html e fonte canonica do simulador
+   de exploracao hex autonomous.)
+
+  AGENTE IA: LEIA PRIMEIRO docs/sistemas/exploracao-master-index.md (entry
+  point unico). Contem indice de funcoes do simulador, contrato sim<->servidor,
+  6 invariantes obrigatorias e FAQs.
+
+  Este index.html e um SHIM que redireciona para exploracao.html preservando
+  a query string (token/api/uid/map_id/o/snap/_cb) E location.hash
+  (#tgWebAppData). O engine/UI vive 100% em exploracao.html - que detecta
+  window.__EXPLORE_MODE=remote quando `token+api` estao presentes e hidrata
+  state via URL param `snap=b64(zlib(perfil))` sem nenhuma chamada HTTP de
+  boot.
+
+  NUNCA edite valdoria-webapp/exploracao/exploracao.html manualmente - e copia
+  sincronizada do master via scripts/sync_exploracao_to_webapp.py. Edite
+  simuladores/exploracao.html, valide em file://, rode sync, commit webapp.
+
+  Docs canonical (ordem de leitura):
+    docs/sistemas/exploracao-master-index.md      ← ENTRY POINT
+    docs/sistemas/exploracao-canonical.md         ← proposta + contrato
+    docs/sistemas/exploracao.md                   ← sistema legado (coexiste)
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2a2420">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Exploracao - Valdoria</title>
+<style>html,body{background:#1a1510;color:#d4c8b0;margin:0;padding:0;height:100dvh;font-family:serif}
+.loading-shim{display:flex;align-items:center;justify-content:center;height:100dvh;letter-spacing:2px;opacity:.8}</style>
+<script>
+(function () {
+    /* Unregister any stale service workers + caches (regra Zero Cache SUPREME
+       RULE #0). SW legado de build antigo pode estar cacheando — desativar. */
+    try {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (rs) {
+                rs.forEach(function (reg) { reg.unregister(); });
+            });
+        }
+        if (window.caches && caches.keys) {
+            caches.keys().then(function (keys) {
+                keys.forEach(function (k) { caches.delete(k); });
+            });
+        }
+    } catch (e) {}
+})();
+/* Redirect para exploracao.html preservando query params (token, api, uid,
+   map_id, o, snap, delta, _cb) E location.hash (tgWebAppData do Telegram SDK,
+   necessario pra silent auth). */
+(function () {
+    var qs = location.search || '';
+    /* Cache-bust adicional por seguranca. */
+    var sep = qs.indexOf('?') === 0 ? '&' : '?';
+    var cb = sep + '_rv=' + Date.now();
+    var hash = location.hash || '';
+    location.replace('./exploracao.html' + qs + cb + hash);
+})();
+</script>
+</head>
+<body>
+<div class="loading-shim">Carregando exploracao...</div>
+</body>
+</html>
