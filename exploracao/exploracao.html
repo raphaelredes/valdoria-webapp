@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:59:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T02:05:05Z - do not edit directly, edit source -->
 
 
 <!--
@@ -3094,7 +3094,30 @@ const CLASSES = {
   clerigo: { name: 'Clérigo', letter: 'C', color: '#b8a06a',
     hp: 11, mp: 8, hd: 2, mhd: 2,
     mods: { str: 1, dex: 0, con: 2, int: 1, wis: 3, cha: 1 },
-    prof: ['wis', 'cha'] }
+    prof: ['wis', 'cha'] },
+  // [FASE 3 2026-04-22] +5 classes PHB (bárbaro/paladino/patrulheiro/bardo/monge)
+  // Adicionadas pra o simulador suportar qualquer classe real do perfil do
+  // jogador (via snap hidratação). Normalização remove acentos no cls_key.
+  barbaro: { name: 'Bárbaro', letter: 'B', color: '#8b2a1e',
+    hp: 14, mp: 0, hd: 2, mhd: 2,
+    mods: { str: 3, dex: 2, con: 3, int: 0, wis: 1, cha: 1 },
+    prof: ['str', 'con'] },
+  paladino: { name: 'Paladino', letter: 'P', color: '#d4af37',
+    hp: 12, mp: 5, hd: 2, mhd: 2,
+    mods: { str: 3, dex: 0, con: 2, int: 0, wis: 1, cha: 2 },
+    prof: ['wis', 'cha'] },
+  patrulheiro: { name: 'Patrulheiro', letter: 'R', color: '#3e6a3a',
+    hp: 11, mp: 4, hd: 2, mhd: 2,
+    mods: { str: 1, dex: 3, con: 2, int: 1, wis: 2, cha: 0 },
+    prof: ['str', 'dex'] },
+  bardo: { name: 'Bardo', letter: 'D', color: '#8b4a8f',
+    hp: 9, mp: 8, hd: 2, mhd: 2,
+    mods: { str: 0, dex: 2, con: 1, int: 1, wis: 1, cha: 3 },
+    prof: ['dex', 'cha'] },
+  monge: { name: 'Monge', letter: 'K', color: '#4a6a8f',
+    hp: 9, mp: 4, hd: 2, mhd: 2,
+    mods: { str: 0, dex: 3, con: 2, int: 1, wis: 3, cha: 0 },
+    prof: ['str', 'dex'] }
 };
 
 // V2.6: BACKGROUNDS — PHB Ch.4. Cada um gera escolhas únicas em eventos e flavor
