@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:53:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T10:32:54Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2870,10 +2870,27 @@ window.__applyExploreSnap = function(S, snap) {
   }
   // Gold (só pra UI — o delta é acumulado em __exploreRewards.gold_gained)
   if (typeof snap.gold === 'number') S.gold = snap.gold;
+  // [R2 2026-04-23] Histórico de eventos persistente (cooldown cross-session)
+  if (Array.isArray(snap.event_history)) {
+    S.persistedEventHistory = snap.event_history.slice(-30);
+    console.info('[E-REM:BOOT] persisted event history: ' + S.persistedEventHistory.length + ' entries');
+  } else {
+    S.persistedEventHistory = [];
+  }
+  // [R3 2026-04-23] Familiarity counts de sessões anteriores (NPC lembra do player)
+  if (snap.events_met && typeof snap.events_met === 'object') {
+    if (typeof eventMetCount !== 'undefined') {
+      Object.assign(eventMetCount, snap.events_met);
+    }
+    console.info('[E-REM:BOOT] events_met loaded: ' + Object.keys(snap.events_met).length + ' events');
+  }
+  // Gera sessionId único pra esta sessão (usado em event_history entries)
+  S._sessionId = Date.now();
   console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' hp=' + p.hp + '/' + p.mhp
     + ' mp=' + p.mp + '/' + p.mmp + ' gold=' + S.gold
     + ' inv=' + ((S.inventory && S.inventory.length) || 0)
-    + ' quests=' + ((S.activeQuests && S.activeQuests.length) || 0));
+    + ' quests=' + ((S.activeQuests && S.activeQuests.length) || 0)
+    + ' session=' + S._sessionId);
 };
 
 // Helper: aplica delta de combate (HP/MP/conditions) em S.player. Chamado no
@@ -2933,7 +2950,15 @@ window.__buildRewardsDelta = function() {
     steps_taken: (window.S && window.S.steps) || R.steps_taken || 0,
     dayphase_end: (window.S && window.S.dayPhase) || null,
     biome: (window.S && window.S.biome) || null,
-    map_id: (window.S && window.S.mapId) || window.__EXPLORE_MAP_ID || null
+    map_id: (window.S && window.S.mapId) || window.__EXPLORE_MAP_ID || null,
+    // [R2 2026-04-23] History de eventos da sessão (server persiste pra
+    // cooldown cross-session). Cap 30 entradas.
+    event_history_new: (typeof sessionEventHistory !== 'undefined')
+      ? sessionEventHistory.slice(-30) : [],
+    // [R3 2026-04-23] Familiarity counts incrementados nesta sessão
+    // (server merge com player.metadata['explore_events_met']).
+    events_met_delta: (typeof eventMetCount !== 'undefined')
+      ? Object.assign({}, eventMetCount) : {}
   };
 };
 
@@ -4779,7 +4804,19 @@ var canvasW = 0, canvasH = 0;
 var playerAnim = null;
 var _animTime = 0;
 var _zoom = DEFAULT_ZOOM;
+// [R2 2026-04-23] Ring buffer expandido de 3 → 5 eventos pra evitar repetição
+// imediata. Combinado com history persistente (event_history_delta enviado em
+// __buildRewardsDelta), server aplica em player.metadata['explore_event_history']
+// (cap 30 entradas, pop oldest). Simulador filtra em maybeRollEvent.
 var recentEventIds = [];
+// [R3 2026-04-23] Familiarity per-event (key = event.id, value = count).
+// Hidratado do snap.events_met ao bootar em remote mode. Cada rolagem incrementa.
+// Usado pra selecionar variante de texto (first/returning/familiar) em
+// openEventModal via pickFamiliarityVariant().
+var eventMetCount = {};
+// [R2 2026-04-23] Histórico completo da sessão atual (eventos rolados + outcome)
+// pra enviar no delta. Limite 30 pra cap URL size.
+var sessionEventHistory = [];
 
 // ============================================================================
 // LOG SYSTEM (V2.3 — full verbose instrumentation + persistence)
@@ -9076,11 +9113,69 @@ function maybeRollEvent() {
   const ids = Object.keys(EVENTS_POOL).filter(id => EVENTS_POOL[id].biome === S.biome);
   LOG('EVENT', 'maybeRollEvent biome=' + S.biome + ' totalPool=' + ids.length + ' recent=' + recentEventIds.join(','));
   if (ids.length === 0) { LOGW('EVENT', 'biome ' + S.biome + ' has no events in pool'); return false; }
-  const pool = ids.filter(id => !recentEventIds.includes(id));
-  const evId = pickRandom(pool.length ? pool : ids);
+
+  // [R2 2026-04-23] Cooldown inteligente em 2 camadas:
+  //   1. Ring buffer (5 últimos IDs) — nunca repete em rajada
+  //   2. Histórico persistido (player.metadata['explore_event_history'])
+  //      — evento rolado nos últimos COOLDOWN_STEPS evita sair de novo
+  // Prioriza eventos NUNCA rolados. Se todo pool já saiu, relaxa filtros.
+  const COOLDOWN_STEPS = 30;  // eventos dos últimos 30 steps em cooldown
+  const currentStep = S.steps || 0;
+  const history = (S.persistedEventHistory || []);
+
+  function isInCooldown(id) {
+    // Ring buffer curto (5 últimos desta sessão)
+    if (recentEventIds.includes(id)) return true;
+    // Histórico persistido: algum entry deste id nos últimos COOLDOWN_STEPS?
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i] && history[i].id === id) {
+        // Se entry é da sessão atual, compara step; se antiga, sempre em cd
+        const entryStep = history[i].step || 0;
+        const sessionId = history[i].session || 0;
+        if (sessionId === S._sessionId && currentStep - entryStep < COOLDOWN_STEPS) {
+          return true;
+        }
+        if (sessionId !== S._sessionId) {
+          // Evento de sessão anterior: cooldown suave baseado em idade (h)
+          const ageHours = (Date.now() - (history[i].ts || 0)) / 3600000;
+          if (ageHours < 1) return true;  // últimas 1h = em cooldown
+        }
+        break;  // só olha entry mais recente por id
+      }
+    }
+    return false;
+  }
+
+  // Fresh pool: eventos sem cooldown. Fallback: ids original se vazio
+  const pool = ids.filter(id => !isInCooldown(id));
+  let evId;
+  if (pool.length > 0) {
+    // [R3] Prefere eventos NUNCA rolados (count=0) pra feel de descoberta
+    const neverSeen = pool.filter(id => !eventMetCount[id]);
+    evId = pickRandom(neverSeen.length ? neverSeen : pool);
+    LOG('EVENT', 'pick from pool fresh=' + pool.length + ' unseen=' + neverSeen.length + ' chose=' + evId);
+  } else {
+    // Todo pool em cooldown — aceita repetir mas ao menos rotaciona
+    evId = pickRandom(ids);
+    LOG('EVENT', 'pool exhausted (all ' + ids.length + ' in cooldown) — rotating chose=' + evId);
+  }
   if (!evId) return false;
   recentEventIds.push(evId);
-  while (recentEventIds.length > 3) recentEventIds.shift();
+  while (recentEventIds.length > 5) recentEventIds.shift();
+  // [R3] Incrementa familiarity count pro evento escolhido
+  eventMetCount[evId] = (eventMetCount[evId] || 0) + 1;
+  // [R2] Registra em session history (enviado no delta pra server persistir)
+  sessionEventHistory.push({
+    id: evId,
+    step: currentStep,
+    ts: Date.now(),
+    session: S._sessionId || 0,
+    map_id: S.mapId || '',
+    count_before: eventMetCount[evId] - 1
+  });
+  while (sessionEventHistory.length > 30) sessionEventHistory.shift();
+  console.info('[E-REM:EVENT] rolled id=' + evId + ' familiarity=' + eventMetCount[evId]
+    + ' step=' + currentStep + ' biome=' + S.biome);
 
   const ev = EVENTS_POOL[evId];
   LOG('EVENT', 'ROLL id=' + evId + ' title=' + (ev.title || ev.title_variants && ev.title_variants[0]) + ' choices=' + (ev.choices || []).length);
@@ -9234,10 +9329,11 @@ function openEventModal() {
   const modal = document.getElementById('event-modal');
   const ev = S.event;
   LOG('EVENT', 'openEventModal id=' + ev.id + ' biome=' + S.biome + ' mapId=' + S.mapId + ' choices=' + (ev.choices || []).length);
-  // Pick + cache variantes (não re-rola no mesmo evento)
-  ev._pickedText = ev._pickedText || pickVariant(ev, 'text');
+  // [R3] Variantes sensíveis a familiaridade (NPC reconhece player em retornos).
+  // Pick + cache — não re-rola no mesmo evento.
+  ev._pickedText = ev._pickedText || pickFamiliarityVariant(ev, 'text');
   ev._pickedFlavor = ev._pickedFlavor !== undefined ? ev._pickedFlavor : (ev.flavor_variants ? pickVariant(ev, 'flavor') : (ev.flavor || null));
-  ev._pickedTitle = ev._pickedTitle || pickVariant(ev, 'title');
+  ev._pickedTitle = ev._pickedTitle || pickFamiliarityVariant(ev, 'title');
 
   document.getElementById('event-title').textContent = ev._pickedTitle;
   document.getElementById('event-text').textContent = ev._pickedText;
@@ -9993,6 +10089,49 @@ function pickVariant(obj, fieldName) {
   const variants = obj[fieldName + '_variants'];
   if (variants && variants.length > 0) return pickRandom(variants);
   return obj[fieldName];
+}
+
+// [R3 2026-04-23] pickFamiliarityVariant: escolhe variante baseado em
+// count de encontros com o evento. Primeira vez usa index 0 (narrativa
+// de introdução). Retornos usam outras variantes OU prefixa texto com
+// marker de familiaridade.
+//
+// count=0  → first_variants[0] OR variants[0]            (introdução)
+// count=1  → variants[1] OR returning_variants[0] OR prefix "De novo..."
+// count>=2 → variants random OR familiar_variants        (você já conhece)
+//
+// Textos default têm prefixos automáticos se count > 0 e o evento NÃO
+// declara variantes específicas pra retorno. Mantém coesão sem obrigar
+// cada evento a ter 3 conjuntos de variantes.
+function pickFamiliarityVariant(ev, fieldName) {
+  const baseField = fieldName;
+  const count = (typeof eventMetCount !== 'undefined' && eventMetCount[ev.id]) || 0;
+  // Prioridade: variantes específicas por familiaridade, depois fallback
+  if (count === 0) {
+    // Primeiro encontro — narrativa completa
+    const firstVar = ev[baseField + '_first_variants'] || ev[baseField + '_variants'];
+    if (firstVar && firstVar.length) return firstVar[0];
+    return ev[baseField];
+  }
+  if (count === 1) {
+    // Segundo encontro
+    const returningVar = ev[baseField + '_returning_variants'];
+    if (returningVar && returningVar.length) return pickRandom(returningVar);
+    // Fallback: variante aleatória + prefixo sutil
+    const base = pickVariant(ev, baseField);
+    if (baseField === 'text') {
+      return '*(De novo aquele encontro...)*\n\n' + base;
+    }
+    return base;
+  }
+  // count >= 2: familiar
+  const familiarVar = ev[baseField + '_familiar_variants'];
+  if (familiarVar && familiarVar.length) return pickRandom(familiarVar);
+  const base = pickVariant(ev, baseField);
+  if (baseField === 'text') {
+    return '*(Você já conhece bem esta cena.)*\n\n' + base;
+  }
+  return base;
 }
 
 // V2.6: filtro estendido — class + background + alignment + ally-class.
