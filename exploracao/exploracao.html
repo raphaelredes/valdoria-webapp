@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-22T22:45:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T00:53:28Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1733,6 +1733,12 @@ body {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(196, 149, 58, 0.15);
 }
 #setup-overlay.visible { display: flex; }
+
+/* [FASE 2 2026-04-22] Em remote mode (bot DEV via Telegram WebApp),
+   overlays de QA local (setup, debug HUD) NUNCA aparecem. Perfil do
+   jogador vem via URL param ?snap=b64(JSON). Ver exploracao-master-index.md */
+body.remote-mode #setup-overlay,
+body.remote-mode #debug-hud { display: none !important; }
 .setup-card {
   background: transparent;
   border: none;
@@ -11439,6 +11445,46 @@ function boot() {
 document.addEventListener('DOMContentLoaded', () => {
   LOG('BOOT', 'DOMContentLoaded fired');
   try {
+    // [FASE 2 REMOTE] Em remote mode (bot DEV via Telegram):
+    // - Esconde overlays de QA local (setup, debug HUD) via body.remote-mode
+    // - Preenche setupChoices a partir do snap do perfil (map_id, cls, bg, align)
+    // - Chama boot() DIRETO, pulando o setup overlay
+    // Em LOCAL mode (file://): fluxo normal — loadGame + initSetupOverlay.
+    if (window.__EXPLORE_MODE === 'remote') {
+      document.body.classList.add('remote-mode');
+      var snap = null;
+      try {
+        snap = window.__decodeExploreSnap && window.__decodeExploreSnap();
+      } catch (eSnap) {
+        console.error('[E-REM:BOOT] DOMContentLoaded snap decode failed', eSnap);
+      }
+      // Preenche setupChoices a partir do snap (ou defaults se snap faltar)
+      if (snap) {
+        setupChoices.map = snap.map_id || window.__EXPLORE_MAP_ID || 'city_gates';
+        setupChoices.background = snap.bg || setupChoices.background;
+        setupChoices.alignment = snap.align || setupChoices.alignment;
+        // region: derivar do map_id se REGIONS existir
+        if (typeof REGIONS === 'object' && REGIONS) {
+          var targetMap = setupChoices.map;
+          for (var rid in REGIONS) {
+            var r = REGIONS[rid];
+            if (r && r.maps && r.maps.indexOf(targetMap) >= 0) {
+              setupChoices.region = rid;
+              break;
+            }
+          }
+        }
+      } else if (window.__EXPLORE_MAP_ID) {
+        setupChoices.map = window.__EXPLORE_MAP_ID;
+      }
+      console.info('[E-REM:BOOT] remote mode — skipping setup overlay, booting direct with map=' + setupChoices.map
+        + ' region=' + setupChoices.region + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
+      boot();
+      LOG('BOOT', 'remote mode boot started (no setup overlay)');
+      return;
+    }
+
+    // LOCAL mode: fluxo original (setup overlay + loadGame)
     loadGame();   // Carrega progresso persistido (se houver) ANTES do setup
     initSetupOverlay();
     LOG('BOOT', 'setup overlay inicializado — aguardando "Partir em Aventura"');
