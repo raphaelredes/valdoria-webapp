@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:38:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:59:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9602,13 +9602,42 @@ async function triggerReturnToCity(opts) {
     }
   }
 
-  // LOCAL mode ou fallback: overlay inline de conclusão
-  // (o overlay específico depende do design atual — pode não existir ainda)
-  var overlayEl = document.getElementById('return-overlay') || document.getElementById('defeat-overlay');
+  // [FIX 2026-04-22] Em REMOTE mode, se transition falhou (sem url), NAO caia
+  // no defeat-overlay (era o que acontecia antes — user via "Voce pereceu"
+  // por erro). Mostre mensagem de erro + deixa user tentar de novo.
+  if (window.__EXPLORE_MODE === 'remote') {
+    LOGE('RETURN', 'remote transition failed — showing error toast (NOT defeat)');
+    // Toast de erro (se vToast disponivel via shared) OU alert inline
+    var msg = 'Falha ao retornar. Tente de novo ou feche o app.';
+    if (typeof vToast === 'function') {
+      try { vToast(msg, 'err', 4000); } catch (_) {}
+    } else {
+      // Fallback visual: adiciona overlay simples de erro (nao defeat)
+      var errEl = document.createElement('div');
+      errEl.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);'
+        + 'background:rgba(74,20,20,0.95);color:#ffdddd;padding:20px 30px;border-radius:10px;'
+        + 'border:2px solid #a14538;font-family:serif;z-index:99999;text-align:center;max-width:320px;';
+      errEl.textContent = msg;
+      document.body.appendChild(errEl);
+      setTimeout(function(){ try { errEl.remove(); } catch(_){} }, 4000);
+    }
+    // Reset phase pra idle pra user poder continuar
+    S.ph = 'idle';
+    // Permite retry: reset _sent flag pra poder tentar de novo
+    if (window.__exploreRewards) window.__exploreRewards._sent = false;
+    return;
+  }
+
+  // LOCAL mode: overlay inline de conclusão (sem defeat)
+  var overlayEl = document.getElementById('return-overlay');
   if (overlayEl) {
-    var reasonEl = document.getElementById('return-reason') || document.getElementById('defeat-reason');
+    var reasonEl = document.getElementById('return-reason');
     if (reasonEl) reasonEl.textContent = 'Retorno à cidade concluído.';
     overlayEl.classList.add('visible');
+  } else {
+    // No return-overlay — fallback textual (sem defeat-overlay pra nao confundir)
+    dmNarrate({ text: 'Retorno à cidade concluído.', type: 'event' });
+    S.ph = 'idle';
   }
 }
 
