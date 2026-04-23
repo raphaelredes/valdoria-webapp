@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:05:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:38:22Z - do not edit directly, edit source -->
 
 
 <!--
@@ -450,7 +450,7 @@
 (function() {
   var v = Date.now();
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
-  ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css'].forEach(function(h) {
+  ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css'].forEach(function(h) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';
     l.href = cdn + h + '?v=' + v;
@@ -2732,18 +2732,33 @@ body.remote-mode #debug-hud { display: none !important; }
 // pra manter decoder síncrono e sem deps. Backend (exploracao_snap_builder.py)
 // já aplica stripping progressivo pra caber em <1800 chars.
 window.__decodeExploreSnap = function() {
-  if (!window.__EXPLORE_SNAP_B64) return null;
+  if (!window.__EXPLORE_SNAP_B64) {
+    console.info('[E-REM:BOOT] snap missing — url has no ?snap= param');
+    return null;
+  }
   try {
     var b64 = window.__EXPLORE_SNAP_B64.replace(/-/g, '+').replace(/_/g, '/');
     while (b64.length % 4) b64 += '=';
-    var snap = JSON.parse(atob(b64));
+    // UTF-8 safe decode: atob -> bytes -> TextDecoder -> string
+    // Crítico: sem isso, acentos ("Bárbaro") ficam latin1-corrompidos.
+    var raw = atob(b64);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    var jsonStr = (typeof TextDecoder !== 'undefined')
+      ? new TextDecoder('utf-8').decode(bytes)
+      : raw;  // fallback (acentos corrompidos em browsers antigos)
+    var snap = JSON.parse(jsonStr);
     console.info('[E-REM:BOOT] snap decoded cls=' + snap.cls + ' lvl=' + snap.lvl
+      + ' hp=' + snap.hp + '/' + snap.mhp
+      + ' mp=' + snap.mp + '/' + snap.mmp
+      + ' gold=' + snap.gold
       + ' map_id=' + snap.map_id
       + ' inv=' + ((snap.inv && snap.inv.length) || 0)
       + ' quests=' + ((snap.quests_active && snap.quests_active.length) || 0));
     return snap;
   } catch (e) {
-    console.error('[E-REM:BOOT] snap_decode_failed', (e && e.message) || e);
+    console.error('[E-REM:BOOT] snap_decode_failed', (e && e.message) || e,
+      'b64_len=' + (window.__EXPLORE_SNAP_B64 || '').length);
     return null;
   }
 };
@@ -2806,13 +2821,19 @@ window.__rewardsCaptureStart = function(player) {
 window.__applyExploreSnap = function(S, snap) {
   if (!S || !S.player || !snap) return;
   var p = S.player;
-  var clsKey = (snap.cls || '').toLowerCase();
+  // Normaliza cls: remove acentos (ex: "bárbaro" -> "barbaro", "clérigo" -> "clerigo")
+  // pra mapear corretamente nas chaves de CLASSES (sem acento).
+  var clsKey = (snap.cls || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   var C = (typeof CLASSES !== 'undefined' && CLASSES[clsKey]) || null;
   if (C) {
     p.cls_key = clsKey;
     p.cls = C.name;
     p.ico = C.letter;
     p.color = C.color;
+    console.info('[E-REM:BOOT] cls matched: ' + clsKey + ' (' + C.name + ')');
+  } else {
+    console.warn('[E-REM:BOOT] cls_key not in CLASSES dict: ' + clsKey + ' (from snap.cls=' + snap.cls + ')');
   }
   // Ability mods (snap.ab é {s,d,c,i,w,h} com SCORES; convertemos pra mods D&D 5e)
   if (snap.ab) {
@@ -2850,7 +2871,8 @@ window.__applyExploreSnap = function(S, snap) {
   // Gold (só pra UI — o delta é acumulado em __exploreRewards.gold_gained)
   if (typeof snap.gold === 'number') S.gold = snap.gold;
   console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' hp=' + p.hp + '/' + p.mhp
-    + ' mp=' + p.mp + '/' + p.mmp + ' inv=' + ((S.inventory && S.inventory.length) || 0)
+    + ' mp=' + p.mp + '/' + p.mmp + ' gold=' + S.gold
+    + ' inv=' + ((S.inventory && S.inventory.length) || 0)
     + ' quests=' + ((S.activeQuests && S.activeQuests.length) || 0));
 };
 
@@ -9655,6 +9677,18 @@ function confirmEdgeTransition() {
   S._pendingEdge = null;
   document.getElementById('dungeon-overlay').classList.remove('visible');
   document.getElementById('dungeon-enter').textContent = 'Entrar';
+  // [FASE 3 REMOTE] Em remote mode, sair da exploração (edge tile) retorna ao
+  // Game Hub via /api/webapp/transition. Navigate decidirá nova região.
+  // Em LOCAL: reboot do simulador no mapa alvo (comportamento original).
+  if (window.__EXPLORE_MODE === 'remote') {
+    const reason = ed && ed.targetMap ? 'travel_' + ed.targetMap : 'exit_edge';
+    LOG('EDGE', 'remote mode — triggerReturnToCity reason=' + reason);
+    if (typeof triggerReturnToCity === 'function') {
+      triggerReturnToCity({ reason: reason });
+      return;
+    }
+    LOGW('EDGE', 'triggerReturnToCity not defined — fallback to local boot');
+  }
   if (ed && ed.targetMap && FIXED_MAPS[ed.targetMap]) {
     setupChoices.map = ed.targetMap;
     dmNarrate({ text: 'Você viaja para ' + FIXED_MAPS[ed.targetMap].name + '.', type: 'action' });
@@ -11483,6 +11517,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (eSnap) {
       console.error('[E-REM:BOOT] DOMContentLoaded snap decode failed', eSnap);
     }
+    // [E-REM:DIAG] diagnóstico detalhado do remote boot pra debug snap
+    var _diagSearchLen = (location.search || '').length;
+    var _diagSnapLen = (window.__EXPLORE_SNAP_B64 || '').length;
+    var _diagTokenLen = (window.__EXPLORE_TOKEN || '').length;
+    var _diagApi = window.__EXPLORE_API_BASE || '(none)';
+    console.info('[E-REM:DIAG] URL search_len=' + _diagSearchLen
+      + ' snap_len=' + _diagSnapLen
+      + ' token_len=' + _diagTokenLen
+      + ' api=' + _diagApi
+      + ' map_id_url=' + (window.__EXPLORE_MAP_ID || '(none)'));
     console.info('[E-REM:BOOT] remote mode — direct boot map=' + setupChoices.map
       + ' region=' + setupChoices.region + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
     boot();
