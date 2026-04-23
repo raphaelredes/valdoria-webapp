@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T02:05:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:41:56Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9118,8 +9118,23 @@ function triggerCombatScreen(cfg) {
     }));
   } catch (_) {}
   LOG('COMBAT', 'redirecting to combate.html enemy=' + cfg.enemyId + ' surprise=' + !!cfg.surprise);
-  // Navega — abre combate.html no mesmo tab (no mesmo contexto file://)
-  window.location.href = 'combate.html?' + params.toString();
+  // [FASE 3 FIX 2026-04-23] URL path absoluto em vez de relativo.
+  // ANTES: 'combate.html?...' → em REMOTE (/exploracao/exploracao.html)
+  //   resolvia pra /exploracao/combate.html → 404 no Cloudflare!
+  // AGORA:
+  //   REMOTE: '/combat2/?...' (shim redireciona pra /combat2/combate.html)
+  //   LOCAL (file://): 'combate.html?...' relativo (mesmo diretório)
+  console.info('[E-REM:COMBAT] redirecting to combate.html enemy=' + cfg.enemyId
+    + ' surprise=' + !!cfg.surprise + ' mode=' + window.__EXPLORE_MODE);
+  // Marca transition pra anti close-beacon
+  window.__valdoria_transitioning = true;
+  if (window.__EXPLORE_MODE === 'remote') {
+    // URL absoluta pro combate2 shim (infra canonical deployada em /combat2/)
+    window.location.href = '/combat2/?' + params.toString();
+  } else {
+    // LOCAL file:// — mesmo diretório pois combate.html está ao lado de exploracao.html
+    window.location.href = 'combate.html?' + params.toString();
+  }
 }
 
 const SKILL_ICONS = { str: '⚔', dex: '🏹', con: '🛡', int: '📖', wis: '✦', cha: '◉' };
