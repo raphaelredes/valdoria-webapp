@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:41:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:43:28Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8904,12 +8904,85 @@ function onMoveEnd(col, row) {
   tickDayPhase();
 
   const rolled = maybeRollEvent();
-  S.ph = rolled ? 'event' : 'idle';
+  // [FASE 3 R1 2026-04-23] Wandering monsters — combate direto sem narrativa.
+  // Roda APENAS se nenhum evento normal rolou nesse step (pra não empilhar).
+  // Independente de EVENTS_POOL — funciona em qualquer bioma com tabela de
+  // inimigos via BIOME_WANDERING_ENCOUNTERS. Gatilho: chance por step escala
+  // com dangerLevel do mapa (2% base + 1.5% por nível de perigo). PHB Ch.8
+  // "Random Encounters" + DMG Ch.3 "Wilderness Encounters".
+  let wandered = false;
+  if (!rolled) {
+    wandered = maybeRollWanderingMonster();
+  }
+  S.ph = (rolled || wandered) ? 'event' : 'idle';
 
   updateHud();
   updateHexNav();
   centerOnPlayer(true);
   scheduleRender();
+}
+
+// [FASE 3 R1 2026-04-23] Tabela de monstros vagantes por bioma + dayPhase.
+// Noite aumenta chance + adiciona criaturas noturnas. Usado por
+// maybeRollWanderingMonster() pra combate direto sem roteiro.
+const BIOME_WANDERING_ENCOUNTERS = {
+  plains:    { day: ['gray_wolf', 'bandit', 'goblin'],
+               night: ['gray_wolf', 'bandit', 'goblin', 'dire_wolf'] },
+  forest:    { day: ['gray_wolf', 'bandit', 'goblin', 'giant_spider'],
+               night: ['gray_wolf', 'dire_wolf', 'giant_spider', 'goblin'] },
+  swamp:     { day: ['goblin', 'giant_spider', 'troll'],
+               night: ['giant_spider', 'troll', 'ghoul'] },
+  cave:      { day: ['goblin', 'giant_spider', 'orc'],
+               night: ['goblin', 'orc', 'ghoul', 'giant_spider'] },
+  mountain:  { day: ['orc', 'bandit', 'troll'],
+               night: ['orc', 'troll', 'dire_wolf'] },
+  desert:    { day: ['bandit', 'giant_spider'],
+               night: ['bandit', 'ghoul'] },
+  snow:      { day: ['dire_wolf', 'orc'],
+               night: ['dire_wolf', 'troll'] },
+  graveyard: { day: ['ghoul', 'goblin'],
+               night: ['ghoul', 'ghoul', 'dire_wolf'] },  // double ghoul = mais provável à noite
+  volcanic:  { day: ['orc', 'troll'],
+               night: ['troll', 'orc'] }
+};
+
+function maybeRollWanderingMonster() {
+  if (S.steps < 3) return false;  // grace period no início do mapa
+  if (S.ph !== 'idle') return false;  // não interrompe evento/combate
+  // Chance base escala com dangerLevel do mapa (2% + 1.5% per level)
+  const dangerLvl = (S.mapDef && S.mapDef.dangerLevel) || S.dangerLevel || 2;
+  const baseChance = 0.02 + (dangerLvl * 0.015);
+  // Noite dobra a chance (criaturas da escuridão)
+  const nightMult = (S.dayPhase === 'night') ? 2.0 : 1.0;
+  // Clima de tempestade/névoa +50%
+  const weatherMult = (S.weather === 't' || S.weather === 'f') ? 1.5 : 1.0;
+  const chance = baseChance * nightMult * weatherMult;
+  if (Math.random() >= chance) return false;
+
+  // Escolhe inimigo do pool do biome+dayPhase
+  const biomeTable = BIOME_WANDERING_ENCOUNTERS[S.biome] || BIOME_WANDERING_ENCOUNTERS.plains;
+  const timeKey = (S.dayPhase === 'night') ? 'night' : 'day';
+  const pool = biomeTable[timeKey] || biomeTable.day;
+  const enemyId = pickRandom(pool);
+  if (!enemyId) return false;
+
+  // Valida que inimigo existe em ENEMIES_DB (fallback pra goblin se não)
+  const enemyExists = (typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[enemyId]);
+  const safeEnemyId = enemyExists ? enemyId : 'goblin';
+
+  LOG('COMBAT', 'wandering_monster biome=' + S.biome + ' dayPhase=' + S.dayPhase
+    + ' dangerLvl=' + dangerLvl + ' chance=' + chance.toFixed(3)
+    + ' enemy=' + safeEnemyId + ' (rolled=' + enemyId + ')');
+  console.info('[E-REM:COMBAT] wandering_monster biome=' + S.biome
+    + ' dayPhase=' + S.dayPhase + ' enemy=' + safeEnemyId);
+
+  triggerCombatScreen({
+    enemyId: safeEnemyId,
+    surprise: true,
+    context: { source: 'wandering', biome: S.biome, dayPhase: S.dayPhase },
+    onLose: () => triggerDefeat('Morto por um(a) ' + safeEnemyId + ' vagante.')
+  });
+  return true;
 }
 
 function updateHexNav() {
