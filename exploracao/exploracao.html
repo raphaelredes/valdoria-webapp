@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T00:53:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T01:05:53Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2356,8 +2356,10 @@ body.remote-mode #debug-hud { display: none !important; }
     <canvas id="map"></canvas>
   </div>
 
-  <!-- V2.4 DEBUG HUD — overlay DOM fixed pra garantir visibilidade mesmo com viewport scroll -->
-  <div id="debug-hud" style="position:fixed;top:2px;left:2px;z-index:99999;background:rgba(0,0,0,0.78);color:#ffeb80;font:10px/1.35 ui-monospace,Consolas,monospace;padding:5px 8px;max-width:360px;border:1px solid #554;border-radius:3px;pointer-events:none;white-space:pre-wrap;user-select:none"></div>
+  <!-- Debug HUD REMOVIDO do jogo (2026-04-22). Agora vive em
+       simuladores/exploracao-setup-frontend-testes.html (toggle opcional
+       via ?ld_debug=1 no URL). As funções _updateHudDomFailsafe/drawDebugHud
+       agora criam o div dinamicamente SE o param ld_debug estiver presente. -->
 
   <div id="top-bar">
     <div class="tb-item tb-biome" id="top-biome">🌲 Floresta</div>
@@ -2485,47 +2487,9 @@ body.remote-mode #debug-hud { display: none !important; }
     <button id="defeat-restart">Recomeçar</button>
   </div>
 
-  <!-- Setup overlay (aparece antes do boot do simulador) -->
-  <div id="setup-overlay" class="visible">
-    <div class="setup-card">
-      <h2 class="setup-title">Iniciar Exploração</h2>
-      <div class="setup-section">
-        <div class="setup-label">Região</div>
-        <div class="setup-chips" id="setup-region"></div>
-      </div>
-      <div class="setup-section">
-        <div class="setup-label">Mapa</div>
-        <div class="setup-chips" id="setup-map"></div>
-      </div>
-      <div class="setup-section">
-        <div class="setup-label">Clima</div>
-        <div class="setup-chips" id="setup-weather">
-          <button class="setup-chip active" data-val="s">☀️ Limpo</button>
-          <button class="setup-chip" data-val="r">🌧️ Chuva</button>
-          <button class="setup-chip" data-val="f">🌫️ Névoa</button>
-          <button class="setup-chip" data-val="t">⛈️ Tempestade</button>
-        </div>
-      </div>
-      <div class="setup-section">
-        <div class="setup-label">Momento do dia</div>
-        <div class="setup-chips" id="setup-phase">
-          <button class="setup-chip" data-val="dawn">🌄 Aurora</button>
-          <button class="setup-chip active" data-val="day">☀️ Dia</button>
-          <button class="setup-chip" data-val="dusk">🌅 Entardecer</button>
-          <button class="setup-chip" data-val="night">🌙 Noite</button>
-        </div>
-      </div>
-      <div class="setup-section">
-        <div class="setup-label">Antecedente <span class="setup-hint">(PHB) — muda opções em eventos</span></div>
-        <div class="setup-chips" id="setup-background"></div>
-      </div>
-      <div class="setup-section">
-        <div class="setup-label">Tendência <span class="setup-hint">(Alinhamento) — muda resultados</span></div>
-        <div class="setup-chips" id="setup-alignment"></div>
-      </div>
-      <button class="setup-start" id="setup-start-btn">Partir em Aventura ⚔</button>
-    </div>
-  </div>
+  <!-- Setup overlay REMOVIDO do jogo (2026-04-22): move pra arquivo separado
+       simuladores/exploracao-setup-frontend-testes.html (launcher QA local).
+       Ver docs/sistemas/exploracao-master-index.md pra arquitetura canonical. -->
 
   <!-- Cartografia: mapa de interligações entre todos os mapas -->
   <div id="cartography-overlay">
@@ -11445,31 +11409,70 @@ function boot() {
 document.addEventListener('DOMContentLoaded', () => {
   LOG('BOOT', 'DOMContentLoaded fired');
   try {
-    // [FASE 2 REMOTE] Em remote mode (bot DEV via Telegram):
-    // - Esconde overlays de QA local (setup, debug HUD) via body.remote-mode
-    // - Preenche setupChoices a partir do snap do perfil (map_id, cls, bg, align)
-    // - Chama boot() DIRETO, pulando o setup overlay
-    // Em LOCAL mode (file://): fluxo normal — loadGame + initSetupOverlay.
-    if (window.__EXPLORE_MODE === 'remote') {
-      document.body.classList.add('remote-mode');
-      var snap = null;
-      try {
-        snap = window.__decodeExploreSnap && window.__decodeExploreSnap();
-      } catch (eSnap) {
-        console.error('[E-REM:BOOT] DOMContentLoaded snap decode failed', eSnap);
+    // [FASE 2 / 2026-04-22] exploracao.html rooda como "engine puro" — zero
+    // setup overlay ou debug HUD. Dois modos de entrada:
+    //
+    // REMOTE (bot DEV via Telegram):
+    //   URL tem ?token+api+uid+snap — hidrata via __hydrateStateFromRemote
+    //   dentro do boot(). Zero setup UI.
+    //
+    // LOCAL (file://) direto em exploracao.html:
+    //   Sem URL params — usa defaults de setupChoices + boot().
+    //
+    // LOCAL via exploracao-setup-frontend-testes.html (launcher QA):
+    //   URL tem ?ld_map=X&ld_weather=Y&ld_phase=Z&ld_cls=W&ld_bg=V&ld_align=U&ld_debug=1
+    //   — preenche setupChoices e opcionalmente cria debug HUD DOM.
+
+    // Local development params (ld_*) — só em LOCAL mode
+    if (window.__EXPLORE_MODE !== 'remote') {
+      var qs = new URLSearchParams(location.search);
+      if (qs.get('ld_map')) setupChoices.map = qs.get('ld_map');
+      if (qs.get('ld_weather')) setupChoices.weather = qs.get('ld_weather');
+      if (qs.get('ld_phase')) setupChoices.phase = qs.get('ld_phase');
+      if (qs.get('ld_bg')) setupChoices.background = qs.get('ld_bg');
+      if (qs.get('ld_align')) setupChoices.alignment = qs.get('ld_align');
+      // ld_cls é usado no initState (escolha de classe)
+      if (qs.get('ld_cls')) window.__LD_CLS = qs.get('ld_cls');
+      // Debug HUD: cria elemento DOM dinamicamente se ld_debug=1
+      if (qs.get('ld_debug') === '1') {
+        var dbg = document.createElement('div');
+        dbg.id = 'debug-hud';
+        dbg.style.cssText = 'position:fixed;top:2px;left:2px;z-index:99999;background:rgba(0,0,0,0.78);color:#ffeb80;font:10px/1.35 ui-monospace,Consolas,monospace;padding:5px 8px;max-width:360px;border:1px solid #554;border-radius:3px;pointer-events:none;white-space:pre-wrap;user-select:none';
+        document.body.appendChild(dbg);
+        LOG('BOOT', 'debug HUD enabled via ld_debug=1');
       }
-      // Preenche setupChoices a partir do snap (ou defaults se snap faltar)
+      // Derive region from map_id
+      if (typeof REGIONS === 'object' && REGIONS) {
+        for (var rid in REGIONS) {
+          var r = REGIONS[rid];
+          if (r && r.maps && r.maps.indexOf(setupChoices.map) >= 0) {
+            setupChoices.region = rid;
+            break;
+          }
+        }
+      }
+      loadGame();  // Carrega save local se houver (localStorage valdoria_explore_v22)
+      LOG('BOOT', 'LOCAL mode booting direct map=' + setupChoices.map
+        + ' weather=' + setupChoices.weather + ' phase=' + setupChoices.phase
+        + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
+      boot();
+      return;
+    }
+
+    // REMOTE mode: body.remote-mode class (para CSS esconder eventuais overlays)
+    document.body.classList.add('remote-mode');
+    // Preencher setupChoices a partir do snap (pra valores que initState não sobrescreve)
+    try {
+      var snap = window.__decodeExploreSnap && window.__decodeExploreSnap();
       if (snap) {
         setupChoices.map = snap.map_id || window.__EXPLORE_MAP_ID || 'city_gates';
         setupChoices.background = snap.bg || setupChoices.background;
         setupChoices.alignment = snap.align || setupChoices.alignment;
-        // region: derivar do map_id se REGIONS existir
         if (typeof REGIONS === 'object' && REGIONS) {
-          var targetMap = setupChoices.map;
-          for (var rid in REGIONS) {
-            var r = REGIONS[rid];
-            if (r && r.maps && r.maps.indexOf(targetMap) >= 0) {
-              setupChoices.region = rid;
+          for (var rid2 in REGIONS) {
+            var r2 = REGIONS[rid2];
+            if (r2 && r2.maps && r2.maps.indexOf(setupChoices.map) >= 0) {
+              setupChoices.region = rid2;
               break;
             }
           }
@@ -11477,18 +11480,12 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (window.__EXPLORE_MAP_ID) {
         setupChoices.map = window.__EXPLORE_MAP_ID;
       }
-      console.info('[E-REM:BOOT] remote mode — skipping setup overlay, booting direct with map=' + setupChoices.map
-        + ' region=' + setupChoices.region + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
-      boot();
-      LOG('BOOT', 'remote mode boot started (no setup overlay)');
-      return;
+    } catch (eSnap) {
+      console.error('[E-REM:BOOT] DOMContentLoaded snap decode failed', eSnap);
     }
-
-    // LOCAL mode: fluxo original (setup overlay + loadGame)
-    loadGame();   // Carrega progresso persistido (se houver) ANTES do setup
-    initSetupOverlay();
-    LOG('BOOT', 'setup overlay inicializado — aguardando "Partir em Aventura"');
-    // Boot é disparado pelo botão "Partir em Aventura" do setup overlay
+    console.info('[E-REM:BOOT] remote mode — direct boot map=' + setupChoices.map
+      + ' region=' + setupChoices.region + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
+    boot();
   } catch (e) {
     LOGE('BOOT', 'DOMContentLoaded handler FAILED:', e.message, e.stack);
   }
