@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:43:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T09:53:08Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9812,23 +9812,80 @@ function triggerEdgeTransition(ed) {
   ov.classList.add('visible');
 }
 
-function confirmEdgeTransition() {
+async function confirmEdgeTransition() {
   const ed = S._pendingEdge;
   S._pendingEdge = null;
   document.getElementById('dungeon-overlay').classList.remove('visible');
   document.getElementById('dungeon-enter').textContent = 'Entrar';
-  // [FASE 3 REMOTE] Em remote mode, sair da exploração (edge tile) retorna ao
-  // Game Hub via /api/webapp/transition. Navigate decidirá nova região.
-  // Em LOCAL: reboot do simulador no mapa alvo (comportamento original).
-  if (window.__EXPLORE_MODE === 'remote') {
-    const reason = ed && ed.targetMap ? 'travel_' + ed.targetMap : 'exit_edge';
-    LOG('EDGE', 'remote mode — triggerReturnToCity reason=' + reason);
+
+  // [FASE 3 R1-B 2026-04-23] Edge travel:
+  // - REMOTE + targetMap válido: POST /api/webapp/transition with
+  //   from='exploracao', to='exploracao', payload.target_map=X. Server remonta
+  //   URL do novo mapa SEM passar pelo Game Hub. User continua no simulador.
+  // - REMOTE + targetMap vazio: saída total -> triggerReturnToCity (Game Hub)
+  // - LOCAL: reboot local no novo mapa (comportamento original)
+  if (window.__EXPLORE_MODE === 'remote' && ed && ed.targetMap) {
+    LOG('EDGE', 'remote edge_travel target=' + ed.targetMap);
+    console.info('[E-REM:EDGE] travel_to_map target=' + ed.targetMap);
+    try {
+      // Flush log-relay + marca transitioning (anti close-beacon)
+      if (window.__exploreLogRelay && window.__exploreLogRelay.forceFlushBeacon) {
+        window.__exploreLogRelay.forceFlushBeacon();
+      }
+      window.__valdoria_transitioning = true;
+      const rewards = (typeof window.__buildRewardsDelta === 'function')
+        ? window.__buildRewardsDelta() : {};
+      const resp = await fetch(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN
+        },
+        body: JSON.stringify({
+          from: 'exploracao',
+          to: 'exploracao',
+          user_id: window.__EXPLORE_USER_ID,
+          token: window.__EXPLORE_TOKEN,
+          payload: {
+            target_map: ed.targetMap,
+            rewards: rewards
+          }
+        }),
+        keepalive: true
+      });
+      const data = await resp.json().catch(() => ({}));
+      console.info('[E-REM:EDGE] transition response code=' + resp.status
+        + ' has_url=' + (data && data.url ? 'yes' : 'no')
+        + ' error=' + (data && data.error || 'none'));
+      if (data && data.url) {
+        LOG('EDGE', 'remote edge_travel OK — redirecting to new map');
+        // Limpa sessão volátil do mapa antigo
+        try { localStorage.removeItem('valdoria_exploracao_session'); } catch (_) {}
+        window.location.replace(data.url);
+        return;
+      }
+      LOGE('EDGE', 'remote edge_travel sem url — tentando fallback return');
+    } catch (e) {
+      LOGE('EDGE', 'remote edge_travel failed', (e && e.message) || e);
+    }
+    // Fallback: se edge travel falhou, retorna à cidade
+    window.__valdoria_transitioning = false;  // reset pra tentativa
     if (typeof triggerReturnToCity === 'function') {
-      triggerReturnToCity({ reason: reason });
+      triggerReturnToCity({ reason: 'edge_travel_fallback' });
       return;
     }
-    LOGW('EDGE', 'triggerReturnToCity not defined — fallback to local boot');
   }
+
+  // REMOTE sem targetMap: saída total (voltar à cidade)
+  if (window.__EXPLORE_MODE === 'remote') {
+    LOG('EDGE', 'remote exit_edge (no target) — triggerReturnToCity');
+    if (typeof triggerReturnToCity === 'function') {
+      triggerReturnToCity({ reason: 'exit_edge' });
+      return;
+    }
+  }
+
+  // LOCAL mode: comportamento original
   if (ed && ed.targetMap && FIXED_MAPS[ed.targetMap]) {
     setupChoices.map = ed.targetMap;
     dmNarrate({ text: 'Você viaja para ' + FIXED_MAPS[ed.targetMap].name + '.', type: 'action' });
