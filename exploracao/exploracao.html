@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T19:03:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T19:14:00Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9108,10 +9108,6 @@ function beginMove(col, row) {
     onMoveEnd(tc, tr);
     // Centraliza no destino final
     try { centerOnPlayer(true); } catch (_) {}
-    // X-6.5.13: processa click queued (se usuário clicou rápido durante o move)
-    // Só dispara se estado voltou pra 'idle' (evento pode ter mudado pra 'event';
-    // queue será descartado nesse caso, cliente espera resolver o evento).
-    try { _processNextQueuedMove(); } catch (_) {}
   }, dur + 10);
 }
 
@@ -9363,42 +9359,21 @@ function updateHexNav() {
   }
 }
 
-// X-6.5.13: single-slot queue pra próximo click de movimento. Quando usuário
-// clica rápido durante animação (S.ph === 'moving'), a segunda intenção fica
-// armazenada aqui e executa automaticamente ao terminar o move atual. Evita
-// "travamento" percebido quando click é simplesmente ignorado. Limite de 1 =
-// zero buildup de fila infinita; clicks adicionais só substituem o pending.
-let _nextMoveDir = null;
-
-function _processNextQueuedMove() {
-  if (_nextMoveDir == null) return;
-  if (S.ph !== 'idle') return;  // só processa se genuinamente idle
-  const dir = _nextMoveDir;
-  _nextMoveDir = null;
-  const btn = document.querySelector('.hex-dir[data-dir="' + dir + '"]');
-  if (!btn) return;
-  if (btn.classList.contains('blocked')) return;
-  const n = getNeighbors(S.player.col, S.player.row);
-  const [c, r] = n[dir];
-  if (!isValidMove(c, r)) return;
-  S.player.facing = dir;
-  beginMove(c, r);
-}
-
+// X-6.5.13 (revisado): clicks durante movimento são SILENCIOSAMENTE IGNORADOS.
+// Sem queue — evita que personagem "ande sozinho" se user clicar rápido. Shake
+// apenas para erros genuínos de direção (impassable/out-of-bounds/event
+// bloqueando). Clicks durante 'moving' não disparam shake (não é erro, só
+// timing — feedback silencioso evita sensação de "botão travado").
 function bindHexNav() {
   for (let i = 0; i < 6; i++) {
     const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
     if (!btn) continue;
     btn.addEventListener('click', () => {
-      // V2.7: shake feedback se direção bloqueada (tile impassable/out-of-bounds)
+      // Shake só para erros reais: direção bloqueada OU estado não-navegável
+      // (evento/transição aberta). Animação em andamento = ignore silencioso.
       if (btn.classList.contains('blocked')) { shakeBlockedDir(btn); return; }
-      // X-6.5.13: se já movendo, QUEUEAR próximo click em vez de ignorar.
-      // Zero buildup — apenas 1 slot. Clicks extras substituem o pending.
-      if (S.ph === 'moving') {
-        _nextMoveDir = i;
-        return;  // sem shake — feedback de "queued" é o próprio move vir depois
-      }
-      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }  // event/transition blocks
+      if (S.ph === 'moving') { return; }  // ignore silencioso, sem shake
+      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }  // event/transition
       const n = getNeighbors(S.player.col, S.player.row);
       const [c, r] = n[i];
       if (!isValidMove(c, r)) { shakeBlockedDir(btn); return; }
