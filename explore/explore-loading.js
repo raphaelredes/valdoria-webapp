@@ -11,19 +11,48 @@
 (function() {
   try {
     if (location.pathname.indexOf('/exploracao/') >= 0) return; // ja esta no novo, nao re-redireciona
+
+    // X-6.5.18c (2026-04-24) FIX CRÍTICO: preserva snap/delta/map_id ao
+    // redirecionar do path legado /explore/ pro /exploracao/. Antes o redirect
+    // descartava esses params → simulador caía em defaults random (Wilzen
+    // nv9 Bárbaro aparecia como Paladino 12/12 HP).
+    //
+    // DUPLA FONTE de params:
+    //  1. window.__spaRouteParams — SPA router (game-transitions.js passa
+    //     params via este objeto, não via URL). É a fonte PRIMÁRIA quando
+    //     chegamos aqui via SPA.
+    //  2. location.search — cold start direto ou fallback.
+    //
+    // Merge: __spaRouteParams sobrescreve URL (SPA tem dado mais fresco).
     var qs = new URLSearchParams(location.search);
-    // Preserva apenas auth params; perfil vai hidratar via defaults
-    // (snap ausente -> simulador usa setupChoices default).
+    var spaP = window.__spaRouteParams || {};
+    function _pick(key) {
+      var v = spaP[key];
+      if (v != null && v !== '') return v;
+      return qs.get(key);
+    }
+
     var params = new URLSearchParams();
-    if (qs.get('token')) params.set('token', qs.get('token'));
-    if (qs.get('api')) params.set('api', qs.get('api'));
-    if (qs.get('uid')) params.set('uid', qs.get('uid'));
-    if (qs.get('char')) params.set('char', qs.get('char'));
-    params.set('o', qs.get('return') || 'navigate');
+    // Auth core (token, api, uid, char) — essencial
+    if (_pick('token')) params.set('token', _pick('token'));
+    if (_pick('api')) params.set('api', _pick('api'));
+    if (_pick('uid')) params.set('uid', _pick('uid'));
+    if (_pick('char')) params.set('char', _pick('char'));
+    // X-6.5.18c: preservar contexto de profile + sessão do server
+    if (_pick('snap')) params.set('snap', _pick('snap'));        // perfil b64
+    if (_pick('delta')) params.set('delta', _pick('delta'));     // retorno combate
+    if (_pick('map_id')) params.set('map_id', _pick('map_id'));  // mapa ativo
+    // Origem da navegação (return = legacy; o = novo)
+    params.set('o', _pick('o') || _pick('return') || 'navigate');
     params.set('_cb', String(Date.now()));
     var newUrl = '/exploracao/?' + params.toString() + (location.hash || '');
-    if (window._loadDbg) _loadDbg('[EXPLORE-LEGACY] redirect -> ' + newUrl);
-    console.info('[EXPLORE-LEGACY] redirecting to /exploracao/ (no snap; defaults)');
+    var _snapLen = (_pick('snap') || '').length;
+    if (window._loadDbg) _loadDbg('[EXPLORE-LEGACY] redirect -> ' + newUrl.slice(0, 120) + '...');
+    console.info('[EXPLORE-LEGACY] redirecting to /exploracao/'
+      + ' snap=' + (_snapLen ? 'yes(' + _snapLen + ')' : 'no')
+      + ' delta=' + (_pick('delta') ? 'yes' : 'no')
+      + ' map=' + (_pick('map_id') || '?')
+      + ' src=' + (spaP.snap ? 'spaRoute' : (qs.get('snap') ? 'urlSearch' : 'none')));
     // location.replace evita entry no browser history (user nao pode voltar pra /explore/)
     location.replace(newUrl);
     // Throw pra interromper execucao do resto do explore-loading.js
