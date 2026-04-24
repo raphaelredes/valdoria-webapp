@@ -1084,12 +1084,15 @@ body {
 /* ====== QUICK ACTIONS ================================================= */
 /* X-6.5.20: hud-quick desceu (bottom menor) pra liberar espaço vertical
    e evitar sobreposição com right-panel (minimap + zoom). Cartografia
-   ganhou margin-top extra pra descer um pouco mais. */
+   ganhou margin-top extra pra descer um pouco mais.
+   X-6.5.27: z-index elevado pra 17 (acima de #right-panel z=16) — em
+   smartphones com viewport curto a mochila estava ficando atrás do
+   minimap (queixa user 2026-04-24). */
 #hud-quick {
   position: absolute;
   right: 10px;
   bottom: 140px;   /* era 160 — baixou 20px */
-  z-index: 15;
+  z-index: 17;
   display: flex; flex-direction: column;
   gap: 8px;
 }
@@ -2267,6 +2270,8 @@ body.remote-mode #debug-hud { display: none !important; }
 }
 
 /* ====== RIGHT PANEL (minimap + coord + zoom, TOPO DIREITO) ========== */
+/* X-6.5.27: padding removido — minimap deve ficar flush com a borda direita
+   da tela quando expandido (queixa do user 2026-04-24). */
 #right-panel {
   position: absolute;
   right: 0;
@@ -2276,34 +2281,29 @@ body.remote-mode #debug-hud { display: none !important; }
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
-  padding: 0 2px;
 }
-/* X-6.5.14/15/20: minimap-block tem o minimap-content + botão toggle
-   absolutamente posicionado à esquerda dele. Antes era flex-row, mas
-   o botão ficava deslocado visualmente. Agora minimap-content é o
-   bloco principal e o botão flutua ao lado. */
+/* X-6.5.27 (2026-04-24): minimap-block como FLEX ROW simples — toggle +
+   content como siblings, flush direito. Antes usava position:absolute +
+   right:100% no toggle que estava sendo posicionado errado em smartphones
+   pequenos (toggle ficava no meio do mapa, longe do minimap). Agora ambos
+   são flex children e respeitam align-items:flex-end do #right-panel.
+
+   Layout esperado:
+   - Expandido: [TOGGLE]+[MINIMAP+COORD] flush direito da tela
+   - Recolhido: minimap-content display:none, só toggle visível flush direito
+*/
 #minimap-block {
-  /* position:relative definido acima (no #btn-minimap-toggle reset) */
-  display: block;
-  margin-right: 20px;   /* reserva espaço pro botão toggle absolute */
-}
-/* X-6.5.20: toggle button posicionado absolutamente pra grudar na borda
-   esquerda do minimap-wrap, centralizado verticalmente. Antes ficava
-   solto no início do flex-row, descolado do minimap visualmente. */
-#minimap-block {
-  position: relative;   /* context pra botão absolute */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;   /* toggle estica vertical p/ acompanhar altura */
+  gap: 0;
+  margin: 0;
 }
 #btn-minimap-toggle {
-  position: absolute;
-  /* Grudar à esquerda do minimap-wrap (que vive no #minimap-content).
-     right: 100% alinha o lado direito do botão com o lado esquerdo do
-     content. top centrado. */
-  top: 50%;
-  right: 100%;
-  transform: translateY(-50%);
-  margin-right: 0;   /* flush com minimap-wrap */
+  position: relative;     /* X-6.5.27: era absolute, agora é flex child normal */
+  align-self: stretch;    /* altura = altura do irmão (minimap-content) */
   width: 20px;
-  height: 48px;
+  min-height: 48px;       /* fallback quando colapsado e não tem irmão */
   padding: 0;
   border-radius: 4px 0 0 4px;
   background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.94));
@@ -2319,6 +2319,7 @@ body.remote-mode #debug-hud { display: none !important; }
   line-height: 1;
   font-family: var(--v-font-display);
   z-index: 2;
+  flex-shrink: 0;
 }
 #btn-minimap-toggle:hover {
   background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
@@ -2326,21 +2327,22 @@ body.remote-mode #debug-hud { display: none !important; }
 }
 #btn-minimap-toggle:active { transform: scale(0.92); }
 
-/* #minimap-content = bloco que EFETIVAMENTE some quando collapsed.
-   Inclui apenas o minimap-wrap + current-coord; o botão toggle fica
-   fora e sempre visível. */
+/* X-6.5.27: minimap-content é o irmão direito do toggle. Com display:flex
+   e align-items:flex-end no parent #right-panel, ele fica flush no canto
+   direito da tela. Quando .collapsed, recolhe pra largura 0 (toggle vira
+   o único filho visível, automaticamente flush direito).
+*/
 #minimap-content {
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: flex-end;
-  transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
+  transition: opacity 0.25s ease, max-width 0.3s ease;
   max-width: 300px;
   overflow: hidden;
 }
 #minimap-content.collapsed {
   opacity: 0;
-  transform: translateX(40px);
   max-width: 0;
   pointer-events: none;
 }
@@ -2386,7 +2388,7 @@ body.remote-mode #debug-hud { display: none !important; }
   display: flex;
   flex-direction: row;   /* X-6.5.13: horizontal */
   gap: 6px;
-  margin-right: 2px;
+  margin-right: 0;       /* X-6.5.27: flush direito */
   margin-bottom: 4px;    /* espaço entre zoom-controls e minimap abaixo */
   justify-content: flex-end;
 }
