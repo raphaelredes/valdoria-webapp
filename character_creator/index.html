@@ -1351,24 +1351,79 @@
         function toggleSection(el) { haptic(); el.closest('.detail-section').classList.toggle('collapsed'); }
 
         // ═══════════════════════════════════════════════
-        // RANDOM CHARACTER
+        // RANDOM CHARACTER (X-6.5.24 — server-authoritative cliente)
         // ═══════════════════════════════════════════════
-        function randomizeCharacter() {
+        // Server-side: POST /api/character/randomize (secrets.randbelow,
+        // D&D 5e Standard Array, class-priority stats). Cliente-side
+        // residuals: subclass, variant_human, halfelf attr pair, tools,
+        // languages, personality (server endpoint não cobre estes ainda;
+        // backlog: expandir endpoint para incluir esses campos).
+        // ═══════════════════════════════════════════════
+        // Mapeamento server (HeroClass enum value PT-BR) → cliente (data.js key)
+        // var (não const) p/ evitar SyntaxError ao re-navegar no SPA (preflight check)
+        var _SERVER_CLASS_TO_CLIENT = {
+            'Guerreiro': 'class_warrior', 'Mago': 'class_mage', 'Ladino': 'class_rogue',
+            'Clérigo': 'class_cleric', 'Paladino': 'class_paladin', 'Patrulheiro': 'class_ranger',
+            'Bárbaro': 'class_barbarian', 'Bardo': 'class_bard', 'Druida': 'class_druid',
+            'Monge': 'class_monk', 'Feiticeiro': 'class_sorcerer', 'Bruxo': 'class_warlock',
+        };
+
+        async function _fetchServerRandomSpec() {
+            if (!apiBase || !token || !userId) return null;
+            try {
+                const r = await fetch(`${apiBase}/api/character/randomize`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'X-Idempotency-Key': `rnd_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        existing_names: existingNames || [],
+                    }),
+                });
+                if (!r.ok) {
+                    console.warn('[CHAR_CREATOR] randomize endpoint returned', r.status);
+                    return null;
+                }
+                const data = await r.json();
+                if (data && data.ok && data.spec) return data.spec;
+                console.warn('[CHAR_CREATOR] randomize response invalid:', data);
+                return null;
+            } catch (e) {
+                console.warn('[CHAR_CREATOR] randomize fetch failed:', e);
+                return null;
+            }
+        }
+
+        async function randomizeCharacter() {
             haptic();
 
-            // 1. Random race
-            const raceKeys = Object.keys(RACES);
-            const raceKey = pick(raceKeys);
+            // X-6.5.24 — fetch server-authoritative spec (primary fields)
+            const serverSpec = await _fetchServerRandomSpec();
+
+            // 1. Race (server-validated; fallback local)
+            let raceKey;
+            if (serverSpec && serverSpec.race && RACES[serverSpec.race]) {
+                raceKey = serverSpec.race;
+            } else {
+                const raceKeys = Object.keys(RACES);
+                raceKey = pick(raceKeys);
+            }
             const race = RACES[raceKey];
             sel.race = raceKey;
 
-            // 2. Random subrace
+            // 2. Subrace
+            //   - Human: server não modela variant (cliente decide 50/50)
+            //   - HalfElf: cliente usa 'attr1_attr2' (server format incompatível)
+            //   - Outras com subrace: usa server se válido, senão local
             sel.subrace = '';
             sel.variantBonuses = [];
             sel.variantSkill = '';
             sel.variantFeat = '';
             if (raceKey === 'Human') {
-                // 50% chance variant
+                // TODO X-6.5.25: server expandir para variant_human (build-cheat vector)
                 if (Math.random() > 0.5) {
                     sel.subrace = 'variant';
                     const attrs = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
@@ -1382,62 +1437,109 @@
                     sel.subrace = 'standard';
                 }
             } else if (race.halfelf) {
-                // Half-Elf: pick 2 different non-charisma attributes
+                // Half-Elf attr pair (semântica diferente do _SUBRACES server)
                 const attrs = ['strength','dexterity','constitution','intelligence','wisdom'];
                 const shuffled = attrs.sort(() => Math.random() - 0.5);
                 sel.subrace = shuffled[0] + '_' + shuffled[1];
             } else if (race.subraces) {
-                const subKeys = Object.keys(race.subraces);
-                sel.subrace = pick(subKeys);
+                if (serverSpec && serverSpec.subrace && race.subraces[serverSpec.subrace]) {
+                    sel.subrace = serverSpec.subrace;
+                } else {
+                    const subKeys = Object.keys(race.subraces);
+                    sel.subrace = pick(subKeys);
+                }
             }
 
-            // 3. Random class
-            const classKeys = Object.keys(CLASSES);
-            const classKey = pick(classKeys);
+            // 3. Class (server PT-BR enum → cliente key)
+            let classKey = null;
+            if (serverSpec && serverSpec.class_key) {
+                const mapped = _SERVER_CLASS_TO_CLIENT[serverSpec.class_key];
+                if (mapped && CLASSES[mapped]) classKey = mapped;
+            }
+            if (!classKey) {
+                const classKeys = Object.keys(CLASSES);
+                classKey = pick(classKeys);
+            }
             const cls = CLASSES[classKey];
             sel.classKey = classKey;
 
-            // 4. Random subclass (if L1 subclass required)
+            // 4. Subclass (server não retorna — local)
             sel.subclass = '';
             if (SUBCLASS_DATA[classKey]) {
                 const subKeys = Object.keys(SUBCLASS_DATA[classKey]);
                 sel.subclass = pick(subKeys);
             }
 
-            // 5. Random fighting style (warrior only)
+            // 5. Fighting style (server retorna para Warrior)
             sel.fightingStyle = '';
             if (classKey === 'class_warrior') {
-                const fsKeys = Object.keys(FIGHTING_STYLES);
-                sel.fightingStyle = pick(fsKeys);
+                if (serverSpec && serverSpec.fighting_style && FIGHTING_STYLES[serverSpec.fighting_style]) {
+                    sel.fightingStyle = serverSpec.fighting_style;
+                } else {
+                    const fsKeys = Object.keys(FIGHTING_STYLES);
+                    sel.fightingStyle = pick(fsKeys);
+                }
             }
 
-            // 6. Random equipment
-            sel.equipmentChoice = Math.random() > 0.5 ? 'A' : 'B';
+            // 6. Equipment choice
+            if (serverSpec && (serverSpec.equipment_choice === 'A' || serverSpec.equipment_choice === 'B')) {
+                sel.equipmentChoice = serverSpec.equipment_choice;
+            } else {
+                sel.equipmentChoice = Math.random() > 0.5 ? 'A' : 'B';
+            }
 
-            // 7. Stats — use class recommended array
-            sel.statAssignment = {
-                strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
-                intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
-            };
+            // 7. Stats — server retorna Standard Array por class priority
+            if (serverSpec && serverSpec.stat_assignment &&
+                typeof serverSpec.stat_assignment.strength === 'number') {
+                sel.statAssignment = serverSpec.stat_assignment;
+            } else {
+                sel.statAssignment = {
+                    strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
+                    intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
+                };
+            }
 
-            // 8. Random background
-            const bgKeys = Object.keys(BACKGROUNDS);
-            sel.bg = pick(bgKeys);
+            // 8. Background
+            if (serverSpec && serverSpec.background && BACKGROUNDS[serverSpec.background]) {
+                sel.bg = serverSpec.background;
+            } else {
+                const bgKeys = Object.keys(BACKGROUNDS);
+                sel.bg = pick(bgKeys);
+            }
             const bg = BACKGROUNDS[sel.bg];
 
-            // 9. Random alignment
-            const alignKeys = Object.keys(ALIGNMENTS);
-            sel.alignment = pick(alignKeys);
+            // 9. Alignment
+            if (serverSpec && serverSpec.alignment && ALIGNMENTS[serverSpec.alignment]) {
+                sel.alignment = serverSpec.alignment;
+            } else {
+                const alignKeys = Object.keys(ALIGNMENTS);
+                sel.alignment = pick(alignKeys);
+            }
 
-            // 10. Random skills (class skills not overlapping background)
+            // 10. Skills (server retorna lista; valida contra opções da classe)
             sel.skillProfs = [];
             const bgSkills = bg ? bg.skills : [];
             const availableSkills = cls.skills.opts.filter(s => !bgSkills.includes(s));
             const needed = Math.min(cls.skills.count, availableSkills.length);
-            const shuffledSkills = availableSkills.sort(() => Math.random() - 0.5);
-            sel.skillProfs = shuffledSkills.slice(0, needed);
+            if (serverSpec && Array.isArray(serverSpec.skill_proficiencies)) {
+                const validServer = serverSpec.skill_proficiencies.filter(s => availableSkills.includes(s));
+                if (validServer.length === needed) {
+                    sel.skillProfs = validServer;
+                } else if (validServer.length > 0 && validServer.length < needed) {
+                    // Top up local
+                    const remaining = availableSkills.filter(s => !validServer.includes(s));
+                    const shuffled = remaining.sort(() => Math.random() - 0.5);
+                    sel.skillProfs = [...validServer, ...shuffled.slice(0, needed - validServer.length)];
+                } else {
+                    const shuffled = availableSkills.sort(() => Math.random() - 0.5);
+                    sel.skillProfs = shuffled.slice(0, needed);
+                }
+            } else {
+                const shuffled = availableSkills.sort(() => Math.random() - 0.5);
+                sel.skillProfs = shuffled.slice(0, needed);
+            }
 
-            // 11. Random tools (if needed)
+            // 11. Tools (server não retorna — local; depende de class+bg+race)
             sel.toolProfs = [];
             let toolCount = 0;
             if (cls.tools.some(t => t.startsWith('_choice'))) toolCount++;
@@ -1453,33 +1555,41 @@
                 sel.toolProfs = shuffledTools.slice(0, toolCount);
             }
 
-            // 12. Random gender
-            sel.gender = pick(GENDERS).key;
-
-            // 13. Random name + surname
-            const pre = pick(NAMES_DATA.pre);
-            const useInfix = Math.random() > 0.5;
-            const inf = useInfix ? pick(NAMES_DATA.inf) : '';
-            const sufArr = (sel.gender === 'Female') ? NAMES_DATA.suf_f : NAMES_DATA.suf;
-            let name = pre + inf + pick(sufArr);
-            name = name.charAt(0).toUpperCase() + name.slice(1);
-            if (name.length > 15) name = name.slice(0, 15);
-            sel.name = name;
-
-            const pre2 = pick(NAMES_DATA.pre);
-            const title = pick(NAMES_DATA.titles);
-            let surname = pre2 + title.replace(/^(o |a |da |do )/, '');
-            if (surname.length > 15) surname = surname.slice(0, 15);
-            sel.surname = surname;
-
-            // Check duplicate name
-            const full = `${sel.name} ${sel.surname}`.trim().toLowerCase();
-            if (existingNames.includes(full)) {
-                sel.surname = pick(NAMES_DATA.pre) + pick(NAMES_DATA.suf);
-                if (sel.surname.length > 15) sel.surname = sel.surname.slice(0, 15);
+            // 12. Gender
+            if (serverSpec && serverSpec.gender && GENDERS.find(g => g.key === serverSpec.gender)) {
+                sel.gender = serverSpec.gender;
+            } else {
+                sel.gender = pick(GENDERS).key;
             }
 
-            // 14. Random languages (if race has +1 choice)
+            // 13. Name + surname
+            if (serverSpec && serverSpec.name && serverSpec.surname) {
+                sel.name = String(serverSpec.name).slice(0, 15);
+                sel.surname = String(serverSpec.surname).slice(0, 15);
+            } else {
+                const pre = pick(NAMES_DATA.pre);
+                const useInfix = Math.random() > 0.5;
+                const inf = useInfix ? pick(NAMES_DATA.inf) : '';
+                const sufArr = (sel.gender === 'Female') ? NAMES_DATA.suf_f : NAMES_DATA.suf;
+                let name = pre + inf + pick(sufArr);
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+                if (name.length > 15) name = name.slice(0, 15);
+                sel.name = name;
+
+                const pre2 = pick(NAMES_DATA.pre);
+                const title = pick(NAMES_DATA.titles);
+                let surname = pre2 + title.replace(/^(o |a |da |do )/, '');
+                if (surname.length > 15) surname = surname.slice(0, 15);
+                sel.surname = surname;
+
+                const full = `${sel.name} ${sel.surname}`.trim().toLowerCase();
+                if (existingNames.includes(full)) {
+                    sel.surname = pick(NAMES_DATA.pre) + pick(NAMES_DATA.suf);
+                    if (sel.surname.length > 15) sel.surname = sel.surname.slice(0, 15);
+                }
+            }
+
+            // 14. Languages (server não retorna — local)
             sel.languages = [];
             const raceLangs = race.langs || [];
             const needsLang = raceLangs.some(l => l.includes('à escolha'));
@@ -1490,7 +1600,7 @@
                 if (available.length > 0) sel.languages = [pick(available).key];
             }
 
-            // 15. Random personality (optional — 50% chance)
+            // 15. Personality (server não retorna — local 50% chance)
             sel.personalityTrait = '';
             sel.ideal = '';
             sel.bond = '';
@@ -1506,8 +1616,10 @@
             // 16. L1 skill — skip (optional, requires API fetch)
             sel.selectedL1Skill = '';
 
-            // Mark as random for re-roll button
+            // Mark as random for re-roll button + telemetria de origem
             sel._wasRandom = true;
+            sel._serverRolled = !!serverSpec;
+            console.info('[CHAR_CREATOR] randomize source:', serverSpec ? 'server' : 'local-fallback');
 
             // Jump to summary
             buildSummary();
