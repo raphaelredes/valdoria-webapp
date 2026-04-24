@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T19:26:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:07:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -847,207 +847,140 @@ body {
 }
 #journal-overlay.visible { display: flex; }
 
-/* ====== CAMP OVERLAY (X-6.5.14) ======================================
-   Tela de acampamento com fogueira animada CSS. Inspirada no look de
-   journal-overlay (pergaminho medieval) mas com tonalidade noturna. */
-#camp-overlay {
+/* ====== INVENTORY OVERLAY (X-6.5.15) =================================
+   Popup dedicado da mochila. Grid de cards com ícone + qty. Click
+   no card abre detail do material (openMaterialDetail já existe). */
+#inv-overlay {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center, rgba(40, 25, 10, 0.92) 0%, rgba(8, 5, 3, 0.96) 70%);
+  background: rgba(10, 8, 5, 0.88);
   display: none;
   align-items: center; justify-content: center;
   padding: 18px;
-  z-index: 265;
+  z-index: 262;
   overflow-y: auto;
 }
-#camp-overlay.visible { display: flex; }
-.camp-card {
+#inv-overlay.visible { display: flex; }
+.inv-card {
   background:
-    linear-gradient(135deg, rgba(90, 55, 25, 0.55) 0%, transparent 25%),
-    linear-gradient(180deg, #3a2818 0%, #1f1510 100%);
-  border: 2px solid var(--v-gold, #c4953a);
-  border-radius: 10px;
-  padding: 22px 20px 18px;
+    linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 20%),
+    linear-gradient(180deg, #e8d4a0 0%, #c8ac78 100%);
+  border: 3px double #5a3e22;
+  border-radius: 8px;
+  padding: 18px 16px 16px;
   width: 100%;
-  max-width: 360px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), inset 0 0 24px rgba(196, 149, 58, 0.12);
-  text-align: center;
-  color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
-}
-.camp-title {
-  font-family: var(--v-font-display);
-  font-size: 18px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--v-gold, #c4953a);
-  margin: 0 0 6px;
-  text-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
-}
-.camp-subtitle {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--v-text-dim, #a09484);
-  margin: 0 0 16px;
-}
-/* Fogueira animada pure-CSS (sem imagem). 3 camadas de chama + brasas. */
-.campfire-wrap {
+  max-width: 400px;
+  max-height: 82vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(100, 70, 40, 0.3);
   position: relative;
-  width: 120px; height: 140px;
-  margin: 4px auto 18px;
-  filter: drop-shadow(0 0 20px rgba(255, 140, 40, 0.55));
 }
-.campfire-logs {
-  position: absolute; bottom: 8px; left: 50%;
-  transform: translateX(-50%);
-  width: 92px; height: 18px;
-}
-.campfire-logs::before,
-.campfire-logs::after {
+.inv-card::before, .inv-card::after {
   content: ''; position: absolute;
-  background: linear-gradient(180deg, #5a3e1e, #2a1a0c);
-  border-radius: 50% 50% 4px 4px / 40% 40% 4px 4px;
-  box-shadow: inset 0 1px 2px rgba(255, 200, 120, 0.2), inset 0 -1px 0 rgba(0,0,0,0.5);
+  width: 14px; height: 14px;
+  background: #5a3e22; border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
 }
-.campfire-logs::before {
-  left: 4px; top: 2px;
-  width: 72px; height: 12px;
-  transform: rotate(-10deg);
+.inv-card::before { top: -7px; left: 20%; }
+.inv-card::after  { top: -7px; right: 20%; }
+.inv-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
 }
-.campfire-logs::after {
-  left: 12px; top: 6px;
-  width: 68px; height: 12px;
-  transform: rotate(8deg);
+.inv-title {
+  font-family: var(--v-font-display);
+  font-size: 18px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: #3a2818; margin: 0;
+  text-shadow: 1px 1px 0 rgba(200, 170, 120, 0.6);
 }
-.campfire-flame {
-  position: absolute;
-  bottom: 20px; left: 50%;
-  transform-origin: 50% 100%;
-  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
-  filter: blur(0.6px);
-  will-change: transform, opacity;
-}
-.flame-outer {
-  width: 54px; height: 72px;
-  margin-left: -27px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255, 120, 20, 0.95) 0%, rgba(255, 60, 10, 0.7) 45%, rgba(180, 30, 0, 0) 75%);
-  animation: campFlameOuter 1.3s ease-in-out infinite;
-  opacity: 0.85;
-}
-.flame-mid {
-  width: 36px; height: 54px;
-  margin-left: -18px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255, 200, 60, 0.95) 0%, rgba(255, 140, 20, 0.8) 50%, rgba(220, 80, 10, 0) 80%);
-  animation: campFlameMid 0.95s ease-in-out infinite;
-}
-.flame-core {
-  width: 18px; height: 32px;
-  margin-left: -9px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255, 250, 200, 1) 0%, rgba(255, 210, 80, 0.95) 55%, rgba(255, 150, 30, 0) 85%);
-  animation: campFlameCore 0.7s ease-in-out infinite;
-}
-@keyframes campFlameOuter {
-  0%, 100% { transform: scale(1, 1) translateX(0) rotate(-2deg); opacity: 0.82; }
-  25%      { transform: scale(1.08, 0.95) translateX(2px) rotate(1deg); opacity: 0.88; }
-  50%      { transform: scale(0.94, 1.1) translateX(-1px) rotate(-1deg); opacity: 0.92; }
-  75%      { transform: scale(1.03, 0.98) translateX(1px) rotate(2deg); opacity: 0.85; }
-}
-@keyframes campFlameMid {
-  0%, 100% { transform: scale(1, 1) translateX(0); opacity: 0.88; }
-  30%      { transform: scale(1.12, 0.92) translateX(-2px); }
-  60%      { transform: scale(0.92, 1.14) translateX(2px); opacity: 0.96; }
-}
-@keyframes campFlameCore {
-  0%, 100% { transform: scale(1, 1); opacity: 0.95; }
-  40%      { transform: scale(1.2, 0.88); opacity: 1; }
-  70%      { transform: scale(0.88, 1.18); opacity: 0.9; }
-}
-/* Brasas flutuantes (3 sparks) */
-.camp-spark {
-  position: absolute;
-  bottom: 48px;
-  width: 3px; height: 3px;
-  background: radial-gradient(circle, #ffe090 0%, #ff8020 60%, transparent 100%);
+.inv-close {
+  width: 28px; height: 28px;
+  background: transparent; border: 1.5px solid #5a3e22;
   border-radius: 50%;
-  will-change: transform, opacity;
-}
-.camp-spark.s1 { left: 52px; animation: sparkRise 2.8s linear infinite; }
-.camp-spark.s2 { left: 62px; animation: sparkRise 3.2s linear infinite 0.9s; }
-.camp-spark.s3 { left: 48px; animation: sparkRise 3.0s linear infinite 1.6s; }
-@keyframes sparkRise {
-  0%   { transform: translateY(0) translateX(0); opacity: 0; }
-  15%  { opacity: 1; }
-  100% { transform: translateY(-90px) translateX(8px); opacity: 0; }
-}
-.camp-text {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--v-text, #d4c8b0);
-  margin: 0 0 14px;
-  font-style: italic;
-}
-.camp-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-.camp-btn {
-  padding: 11px 14px;
-  background: linear-gradient(180deg, rgba(90, 60, 25, 0.35), rgba(45, 30, 15, 0.6));
-  border: 1.5px solid rgba(196, 149, 58, 0.55);
-  border-radius: 6px;
-  color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
-  font-size: 13px;
-  letter-spacing: 1.5px;
-  cursor: pointer;
+  color: #3a2818; font-size: 18px; font-weight: 700;
+  cursor: pointer; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
   transition: all 0.15s ease;
-  text-align: left;
 }
-.camp-btn:hover {
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.25), rgba(139, 100, 32, 0.2));
-  border-color: var(--v-gold, #c4953a);
-  box-shadow: 0 0 12px rgba(196, 149, 58, 0.35);
-}
-.camp-btn:active { transform: scale(0.97); }
-.camp-btn .camp-btn-title {
-  display: block;
-  color: var(--v-gold, #c4953a);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 1.8px;
-  margin-bottom: 2px;
-}
-.camp-btn .camp-btn-desc {
-  display: block;
-  color: var(--v-text-dim, #a09484);
-  font-size: 11px;
-  font-style: italic;
+.inv-close:hover { background: rgba(90, 62, 34, 0.2); transform: rotate(90deg); }
+.inv-subtitle {
+  font-style: italic; font-size: 11px;
+  color: #6a4828;
+  margin: 0 0 12px;
   letter-spacing: 0.5px;
 }
-.camp-btn.cancel {
-  background: transparent;
-  border-color: rgba(160, 148, 132, 0.3);
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.inv-slot {
+  background: rgba(90, 62, 34, 0.12);
+  border: 1.5px solid rgba(90, 62, 34, 0.4);
+  border-radius: 6px;
+  padding: 8px 4px;
   text-align: center;
-  color: var(--v-text-dim, #a09484);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  min-height: 74px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+}
+.inv-slot:hover {
+  background: rgba(90, 62, 34, 0.22);
+  border-color: #5a3e22;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+.inv-slot .inv-slot-ico {
+  font-size: 26px; line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.inv-slot .inv-slot-name {
+  font-size: 10px;
+  color: #3a2818;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.inv-slot .inv-slot-qty {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  min-width: 20px; height: 20px;
+  padding: 0 4px;
+  background: linear-gradient(180deg, #8b6420, #5a3e22);
+  border: 1.5px solid #e8d4a0;
+  border-radius: 10px;
+  color: #fff4d0;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+}
+.inv-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6a4828;
+}
+.inv-empty-ico {
+  font-size: 48px;
+  opacity: 0.5;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
+.inv-empty-text {
   font-size: 12px;
-  padding: 8px;
+  font-style: italic;
+  line-height: 1.55;
 }
-.camp-btn.cancel:hover {
-  background: rgba(160, 148, 132, 0.08);
-  box-shadow: none;
-}
-.camp-result {
-  font-size: 12px;
-  color: var(--v-text, #d4c8b0);
-  padding: 10px;
-  background: rgba(90, 60, 25, 0.18);
-  border-left: 3px solid var(--v-gold, #c4953a);
-  border-radius: 4px;
-  margin-top: 10px;
-  white-space: pre-line;
-  text-align: left;
-}
+
 .journal-card {
   background:
     linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 18%),
@@ -1455,6 +1388,14 @@ body {
   border-color: rgba(180, 70, 60, 0.3);
 }
 .hex-dir.blocked .label::before { content: '⊘ '; color: #c44; }
+/* X-6.5.19: disabled (durante animação de move OU evento aberto) — pure
+   DOM pseudo, click não dispatcha. Cinzento sutil diferenciado de blocked. */
+.hex-dir:disabled {
+  opacity: 0.4;
+  cursor: wait;
+  pointer-events: none;
+  filter: grayscale(0.6);
+}
 /* V2.7: shake de feedback quando bot\u00e3o n\u00e3o pode ser acionado */
 @keyframes hexDirShake {
   0%, 100% { transform: translateX(0); }
@@ -2463,20 +2404,57 @@ body.remote-mode #debug-hud { display: none !important; }
   gap: 5px;
   padding: 0 2px;
 }
-/* X-6.5.14: wrapper dos dois elementos (minimap + coord) pra togglar juntos */
+/* X-6.5.14/15: minimap-block = [toggle button] [minimap + coord].
+   Botão toggle vive colado à esquerda do minimap e NUNCA some — só
+   o minimap-content slida pra direita quando recolhido. Seta aponta
+   pra direção do movimento futuro: → (fechar) / ← (abrir). */
 #minimap-block {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0;
+}
+#btn-minimap-toggle {
+  width: 18px;
+  height: 44px;
+  padding: 0;
+  margin-top: 8px;   /* alinha com topo do minimap */
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.95), rgba(22, 18, 14, 0.92));
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-right: none;
+  color: var(--v-gold, #c4953a);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.5);
+  transition: all 0.15s ease;
+  line-height: 1;
+  font-family: var(--v-font-display);
+}
+#btn-minimap-toggle:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
+  box-shadow: -2px 2px 12px rgba(196, 149, 58, 0.4);
+}
+#btn-minimap-toggle:active { transform: scale(0.92); }
+
+/* #minimap-content = bloco que EFETIVAMENTE some quando collapsed.
+   Inclui apenas o minimap-wrap + current-coord; o botão toggle fica
+   fora e sempre visível. */
+#minimap-content {
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: flex-end;
-  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.3s ease;
-  max-height: 400px;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
+  max-width: 300px;
   overflow: hidden;
 }
-#minimap-block.collapsed {
+#minimap-content.collapsed {
   opacity: 0;
   transform: translateX(40px);
-  max-height: 0;
+  max-width: 0;
   pointer-events: none;
 }
 #minimap-wrap {
@@ -2568,7 +2546,18 @@ body.remote-mode #debug-hud { display: none !important; }
   transition: opacity 0.3s ease;
 }
 #zoom-indicator.visible { opacity: 1; }
+
+/* X-6.5.19: camp-screen começa escondida (display:none). explore-camp.css
+   é o real CSS (portado de valdoria-webapp/explore/). Carregado abaixo. */
+.camp-screen { display: none; }
+.camp-screen.active { display: flex; }
 </style>
+<!-- X-6.5.19: CSS canônico da tela de acampamento (cena noturna, fogueira,
+     cards de descanso). LOCAL file:// usa path relativo; REMOTE (via bot DEV)
+     o webapp deploya o mesmo arquivo em /explore/explore-camp.css. Tentamos
+     ambos — browser ignora o que não existir. -->
+<link rel="stylesheet" href="../valdoria-webapp/explore/explore-camp.css?v=local">
+<link rel="stylesheet" href="/explore/explore-camp.css?v=remote" onerror="this.remove()">
 </head>
 <body>
 
@@ -2630,7 +2619,9 @@ body.remote-mode #debug-hud { display: none !important; }
 
   <div id="hud-quick">
     <button class="quick-btn" id="btn-camp" title="Acampar">🏕️</button>
-    <button class="quick-btn" id="btn-inventory" title="Diário de Missões">🎒</button>
+    <button class="quick-btn" id="btn-inventory" title="Mochila (Inventário)">🎒</button>
+    <!-- X-6.5.19: botão dedicado de Diário de Missões (antes bind de 🎒) -->
+    <button class="quick-btn" id="btn-quest-journal" title="Diário de Missões">📜</button>
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz">🔥</button>
       <div class="light-menu" id="light-menu"></div>
@@ -2652,43 +2643,83 @@ body.remote-mode #debug-hud { display: none !important; }
       <button class="zoom-btn" id="btn-zoom-out" title="Menos zoom">−</button>
       <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem">📍</button>
       <button class="zoom-btn" id="btn-zoom-in" title="Mais zoom">+</button>
-      <button class="zoom-btn" id="btn-minimap-toggle" title="Mostrar/recolher minimapa">🗺</button>
     </div>
+    <!-- X-6.5.15: layout minimap com toggle button COLADO à esquerda.
+         Botão sempre visível; só #minimap-content slida pra direita.
+         Seta aponta pra onde o minimapa vai indo: ▶ fecha, ◀ abre. -->
     <div id="minimap-block">
-      <div id="minimap-wrap">
-        <canvas id="minimap" width="96" height="130"></canvas>
+      <button id="btn-minimap-toggle" title="Recolher minimapa" aria-label="Recolher minimapa">▶</button>
+      <div id="minimap-content">
+        <div id="minimap-wrap">
+          <canvas id="minimap" width="96" height="130"></canvas>
+        </div>
+        <div id="current-coord">—</div>
       </div>
-      <div id="current-coord">—</div>
     </div>
   </div>
 
-  <!-- X-6.5.14: Camp overlay — acampamento com fogueira animada CSS.
-       Permite descanso curto (HD) ou longo (HP/MP + -1 exaustão). -->
-  <div id="camp-overlay">
-    <div class="camp-card">
-      <h2 class="camp-title">Acampamento</h2>
-      <p class="camp-subtitle">Um ponto seguro à beira do caminho</p>
-      <div class="campfire-wrap" aria-hidden="true">
-        <div class="camp-spark s1"></div>
-        <div class="camp-spark s2"></div>
-        <div class="camp-spark s3"></div>
-        <div class="campfire-flame flame-outer"></div>
-        <div class="campfire-flame flame-mid"></div>
-        <div class="campfire-flame flame-core"></div>
-        <div class="campfire-logs"></div>
+  <!-- X-6.5.19: CAMP SCREEN REAL — HTML portado de valdoria-webapp/explore/index.html
+       (tela com cena noturna, fogueira particle canvas, 3 cards e popups).
+       CSS em explore-camp.css (carregado via <link>). Particle fire em
+       explore-camp-fire.js. Handlers adaptados no JS abaixo (openCampOverlay
+       reutiliza #camp-screen em vez do modal custom antigo). -->
+  <div class="camp-screen" id="camp-screen" role="dialog" aria-label="Acampamento">
+    <div class="camp-scene">
+      <div class="camp-hud">
+        <div class="camp-hud-bar"><span class="camp-hud-icon">❤️</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div><span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span></div>
+        <div class="camp-hud-bar"><span class="camp-hud-icon">💧</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div><span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span></div>
       </div>
-      <p class="camp-text" id="camp-text">Você limpa um pequeno círculo no chão e acende a fogueira. A chama cresce e crepita, espantando o frio. O que fazer?</p>
-      <div id="camp-result" class="camp-result" style="display:none"></div>
-      <div class="camp-actions">
-        <button class="camp-btn" id="btn-camp-short">
-          <span class="camp-btn-title">Descanso Curto · 1h</span>
-          <span class="camp-btn-desc">Gasta 1 Hit Die e recupera HP (CON + 1d HD)</span>
-        </button>
-        <button class="camp-btn" id="btn-camp-long">
-          <span class="camp-btn-title">Descanso Longo · 8h</span>
-          <span class="camp-btn-desc">Recupera HP/MP totais, ganha metade dos HD e reduz 1 nível de exaustão</span>
-        </button>
-        <button class="camp-btn cancel" id="btn-camp-cancel">Continuar caminho</button>
+      <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
+      <div class="camp-moon"></div>
+      <div class="camp-fire-area">
+        <div class="camp-ground-glow"></div>
+        <div class="camp-logs"><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log-ember"></div></div>
+        <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="160" height="160"></canvas>
+        <div class="camp-embers"><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span></div>
+      </div>
+      <div class="camp-title-area">
+        <div class="camp-title-text">Acampamento</div>
+        <div class="camp-title-biome" id="camp-biome-text"></div>
+      </div>
+    </div>
+    <div class="camp-cards">
+      <div class="camp-card camp-card-short" id="camp-btn-short">
+        <div class="camp-card-icon">💤</div>
+        <div class="camp-card-info">
+          <div class="camp-card-title camp-card-t-short">Descanso Curto</div>
+          <div class="camp-card-sub">1 hora — Gasta Dados de Vida</div>
+          <div class="camp-card-detail" id="camp-short-detail"></div>
+        </div>
+        <div class="camp-card-arrow camp-card-t-short">›</div>
+      </div>
+      <div class="camp-card camp-card-long" id="camp-btn-long">
+        <div class="camp-card-icon">🌙</div>
+        <div class="camp-card-info">
+          <div class="camp-card-title camp-card-t-long">Descanso Longo</div>
+          <div class="camp-card-sub">8 horas — Recuperação total</div>
+          <div class="camp-card-detail" id="camp-long-detail"></div>
+        </div>
+        <div class="camp-card-arrow camp-card-t-long">›</div>
+      </div>
+      <div class="camp-continue" id="camp-btn-continue">Continuar Explorando ›</div>
+      <div class="camp-footer-status" id="camp-footer-status"></div>
+    </div>
+  </div>
+
+  <!-- X-6.5.15: Inventory overlay — popup dedicado APENAS da mochila.
+       O journal-overlay (missões+inv+rep combinado) continua existindo,
+       mas agora o botão 🎒 abre esta view focada: ícones + nome + qty. -->
+  <div id="inv-overlay">
+    <div class="inv-card">
+      <div class="inv-header">
+        <h2 class="inv-title">Mochila</h2>
+        <button id="inv-close" class="inv-close" aria-label="Fechar">×</button>
+      </div>
+      <p class="inv-subtitle" id="inv-subtitle">Nenhum item</p>
+      <div id="inv-grid" class="inv-grid"></div>
+      <div id="inv-empty" class="inv-empty" style="display:none">
+        <div class="inv-empty-ico">🎒</div>
+        <div class="inv-empty-text">Sua mochila está vazia.<br>Eventos, combates e exploração rendem materiais.</div>
       </div>
     </div>
   </div>
@@ -2848,6 +2879,25 @@ body.remote-mode #debug-hud { display: none !important; }
     s.async = false;
     document.head.appendChild(s);
   });
+})();
+</script>
+
+<!-- X-6.5.19: particle fire canvas system (Canvas 2D additive blending) pro
+     #camp-fire-canvas. LOCAL: carrega sibling path; REMOTE (bot DEV): mesmo
+     arquivo em /explore/. Browser ignora erro do que não existir. -->
+<script>
+(function() {
+  var v = Date.now();
+  var s1 = document.createElement('script');
+  s1.src = '../valdoria-webapp/explore/explore-camp-fire.js?v=' + v;
+  s1.async = false;
+  s1.onerror = function() {
+    var s2 = document.createElement('script');
+    s2.src = '/explore/explore-camp-fire.js?v=' + v;
+    s2.async = false;
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
 })();
 </script>
 
@@ -9351,6 +9401,9 @@ function beginMove(col, row) {
   };
   p._prevFacing = p.facing;
   S.ph = 'moving';
+  // X-6.5.19: desabilita hex-dir buttons durante animação. Click fica
+  // fisicamente bloqueado pelo browser — zero chance de "trava" por race.
+  try { _setHexNavDisabled(true); } catch (_) {}
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
@@ -9362,6 +9415,11 @@ function beginMove(col, row) {
     onMoveEnd(tc, tr);
     // Centraliza no destino final
     try { centerOnPlayer(true); } catch (_) {}
+    // X-6.5.19: reabilita buttons SE o estado voltou pra idle (evento pode
+    // ter mudado pra 'event' — buttons ficam bloqueados pelo updateHexNav).
+    try {
+      if (S.ph === 'idle') _setHexNavDisabled(false);
+    } catch (_) {}
   }, dur + 10);
 }
 
@@ -9611,6 +9669,14 @@ function updateHexNav() {
     if (isTileImpassable(c, r)) btn.classList.add('blocked');
     else btn.classList.remove('blocked');
   }
+  // X-6.5.19: mantém disabled sync com S.ph. Chamado em vários paths
+  // (onMoveEnd, fechar modal, resolveChoice) → reabilita botões sempre
+  // que o estado volta pra 'idle'. Durante 'moving'/'event' permanece
+  // disabled (beginMove seta explicitamente; fim de evento → idle → aqui).
+  try {
+    const shouldDisable = (S.ph !== 'idle');
+    _setHexNavDisabled(shouldDisable);
+  } catch (_) {}
 }
 
 // X-6.5.13 (revisado): clicks durante movimento são SILENCIOSAMENTE IGNORADOS.
@@ -9618,16 +9684,27 @@ function updateHexNav() {
 // apenas para erros genuínos de direção (impassable/out-of-bounds/event
 // bloqueando). Clicks durante 'moving' não disparam shake (não é erro, só
 // timing — feedback silencioso evita sensação de "botão travado").
+// X-6.5.19: disable físico dos hex-dir buttons durante movimento. Substitui
+// o "ignore silencioso" anterior (X-6.5.13) que ainda deixava browser
+// processar clicks e causava sensação de trava. Agora o <button disabled>
+// é pure-DOM: nenhum click dispatch, CSS pode estilar como acinzentado.
+function _setHexNavDisabled(disabled) {
+  for (let i = 0; i < 6; i++) {
+    const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
+    if (btn) btn.disabled = !!disabled;
+  }
+}
+
 function bindHexNav() {
   for (let i = 0; i < 6; i++) {
     const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
     if (!btn) continue;
     btn.addEventListener('click', () => {
-      // Shake só para erros reais: direção bloqueada OU estado não-navegável
-      // (evento/transição aberta). Animação em andamento = ignore silencioso.
+      // Shake só para erros reais: direção bloqueada OU evento/transição aberto
       if (btn.classList.contains('blocked')) { shakeBlockedDir(btn); return; }
-      if (S.ph === 'moving') { return; }  // ignore silencioso, sem shake
-      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }  // event/transition
+      // X-6.5.19: durante moving, botão está disabled (sem click disparando).
+      // Este if é defense-in-depth se animação/estado falhar por algum motivo.
+      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }
       const n = getNeighbors(S.player.col, S.player.row);
       const [c, r] = n[i];
       if (!isValidMove(c, r)) { shakeBlockedDir(btn); return; }
@@ -10949,6 +11026,9 @@ function updateQuestIndicator() {
 function openQuestJournal(opts) {
   opts = opts || {};
   const focus = opts.focus || 'quests';
+  // X-6.5.19: quando aberto pelo botão dedicado 📜, mostra SÓ missões
+  // (sem inventário nem reputação). Mochila 🎒 tem seu próprio popup.
+  const questsOnly = !!opts.questsOnly;
   const ov = document.getElementById('journal-overlay');
   const list = document.getElementById('journal-list');
   clearChildren(list);
@@ -11000,56 +11080,61 @@ function openQuestJournal(opts) {
     });
   }
 
-  // SECÇÃO 2 — INVENTÁRIO
-  const invHead = document.createElement('div');
-  invHead.className = 'journal-section';
-  const invCount = Object.values(playerInventory).reduce((a, b) => a + b, 0);
-  invHead.textContent = 'Inventário (' + invCount + ')';
-  list.appendChild(invHead);
-  const invIds = Object.keys(playerInventory);
-  if (invIds.length === 0) {
-    const e = document.createElement('div');
-    e.className = 'journal-empty';
-    e.textContent = 'Sua mochila está vazia. Eventos e combates rendem materiais.';
-    list.appendChild(e);
-  } else {
-    invIds.forEach(id => {
-      const mat = MATERIALS_DB[id];
-      if (!mat) return;
-      const row = document.createElement('div');
-      row.className = 'inv-row';
-      row.innerHTML = '<span class="inv-ico">' + mat.icon + '</span>'
-        + '<span class="inv-name">' + mat.name + '</span>'
-        + '<span class="inv-count">×' + playerInventory[id] + '</span>';
-      row.addEventListener('click', () => openMaterialDetail(id));
-      list.appendChild(row);
-    });
-  }
+  // X-6.5.19: SECÇÃO 2 e 3 (Inventário + Reputação) só renderizam se
+  // não for questsOnly. Acesso via botão 📜 mostra só missões; botão 🎒
+  // tem inv-overlay dedicado (openInventoryPopup).
+  if (!questsOnly) {
+    // SECÇÃO 2 — INVENTÁRIO
+    const invHead = document.createElement('div');
+    invHead.className = 'journal-section';
+    const invCount = Object.values(playerInventory).reduce((a, b) => a + b, 0);
+    invHead.textContent = 'Inventário (' + invCount + ')';
+    list.appendChild(invHead);
+    const invIds = Object.keys(playerInventory);
+    if (invIds.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'journal-empty';
+      e.textContent = 'Sua mochila está vazia. Eventos e combates rendem materiais.';
+      list.appendChild(e);
+    } else {
+      invIds.forEach(id => {
+        const mat = MATERIALS_DB[id];
+        if (!mat) return;
+        const row = document.createElement('div');
+        row.className = 'inv-row';
+        row.innerHTML = '<span class="inv-ico">' + mat.icon + '</span>'
+          + '<span class="inv-name">' + mat.name + '</span>'
+          + '<span class="inv-count">×' + playerInventory[id] + '</span>';
+        row.addEventListener('click', () => openMaterialDetail(id));
+        list.appendChild(row);
+      });
+    }
 
-  // SECÇÃO 3 — REPUTAÇÃO
-  const repHead = document.createElement('div');
-  repHead.className = 'journal-section';
-  repHead.textContent = 'Reputação';
-  list.appendChild(repHead);
-  const repIds = Object.keys(reputation);
-  if (repIds.length === 0) {
-    const e = document.createElement('div');
-    e.className = 'journal-empty';
-    e.textContent = 'Nenhuma facção te conhece ainda. Teus feitos determinarão a reputação.';
-    list.appendChild(e);
-  } else {
-    repIds.forEach(fid => {
-      const fac = FACTIONS[fid] || { name: fid, icon: '◆' };
-      const val = reputation[fid];
-      const row = document.createElement('div');
-      row.className = 'rep-row ' + (val >= 0 ? 'pos' : 'neg');
-      const label = val >= 20 ? 'Aliada' : val >= 10 ? 'Amiga' : val > 0 ? 'Conhecida' : val >= -10 ? 'Desconfiada' : 'Hostil';
-      row.innerHTML = '<span class="rep-ico">' + fac.icon + '</span>'
-        + '<span class="rep-name">' + fac.name + '</span>'
-        + '<span class="rep-val">' + (val > 0 ? '+' : '') + val + '</span>'
-        + '<span class="rep-label">' + label + '</span>';
-      list.appendChild(row);
-    });
+    // SECÇÃO 3 — REPUTAÇÃO
+    const repHead = document.createElement('div');
+    repHead.className = 'journal-section';
+    repHead.textContent = 'Reputação';
+    list.appendChild(repHead);
+    const repIds = Object.keys(reputation);
+    if (repIds.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'journal-empty';
+      e.textContent = 'Nenhuma facção te conhece ainda. Teus feitos determinarão a reputação.';
+      list.appendChild(e);
+    } else {
+      repIds.forEach(fid => {
+        const fac = FACTIONS[fid] || { name: fid, icon: '◆' };
+        const val = reputation[fid];
+        const row = document.createElement('div');
+        row.className = 'rep-row ' + (val >= 0 ? 'pos' : 'neg');
+        const label = val >= 20 ? 'Aliada' : val >= 10 ? 'Amiga' : val > 0 ? 'Conhecida' : val >= -10 ? 'Desconfiada' : 'Hostil';
+        row.innerHTML = '<span class="rep-ico">' + fac.icon + '</span>'
+          + '<span class="rep-name">' + fac.name + '</span>'
+          + '<span class="rep-val">' + (val > 0 ? '+' : '') + val + '</span>'
+          + '<span class="rep-label">' + label + '</span>';
+        list.appendChild(row);
+      });
+    }
   }
 
   ov.classList.add('visible');
@@ -11077,29 +11162,135 @@ function closeQuestJournal() {
 }
 
 // ============================================================================
-// CAMP (X-6.5.14)
+// INVENTORY POPUP (X-6.5.15)
 // ============================================================================
-// Acampar = descanso D&D 5e PHB p.186. Short rest (1h) gasta Hit Die,
-// recupera HP = 1dHD + CON mod. Long rest (8h) recupera HP total + metade
-// dos HD + reduz 1 nível de exaustão.
+// Popup dedicado da mochila. Renderiza grid de cards (ícone + nome + qty)
+// a partir de playerInventory + MATERIALS_DB. Click no card abre detail.
 
-function openCampOverlay() {
-  const ov = document.getElementById('camp-overlay');
-  if (!ov) return;
-  // Reset do result anterior
-  const res = document.getElementById('camp-result');
-  if (res) { res.style.display = 'none'; res.textContent = ''; }
-  // Re-habilita botões (caso tenham sido desabilitados por um rest anterior)
-  const shortBtn = document.getElementById('btn-camp-short');
-  const longBtn = document.getElementById('btn-camp-long');
-  if (shortBtn) shortBtn.disabled = false;
-  if (longBtn) longBtn.disabled = false;
+function openInventoryPopup() {
+  const ov = document.getElementById('inv-overlay');
+  const grid = document.getElementById('inv-grid');
+  const emptyEl = document.getElementById('inv-empty');
+  const sub = document.getElementById('inv-subtitle');
+  if (!ov || !grid) return;
+  clearChildren(grid);
+
+  const ids = Object.keys(playerInventory || {}).filter(id => (playerInventory[id] || 0) > 0);
+  const total = ids.reduce((acc, id) => acc + (playerInventory[id] || 0), 0);
+
+  if (ids.length === 0) {
+    grid.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (sub) sub.textContent = 'Vazia';
+  } else {
+    grid.style.display = 'grid';
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (sub) sub.textContent = ids.length + ' item' + (ids.length === 1 ? '' : 's') + ' diferentes · ' + total + ' no total';
+
+    // Ordena: raridade desc (se tiver), depois nome alfabético
+    ids.sort((a, b) => {
+      const ma = MATERIALS_DB[a] || {};
+      const mb = MATERIALS_DB[b] || {};
+      const na = ma.name || a;
+      const nb = mb.name || b;
+      return na.localeCompare(nb);
+    });
+
+    ids.forEach(id => {
+      const mat = MATERIALS_DB[id];
+      const slot = document.createElement('div');
+      slot.className = 'inv-slot';
+      const ico = document.createElement('div');
+      ico.className = 'inv-slot-ico';
+      ico.textContent = (mat && mat.icon) || '📦';
+      const name = document.createElement('div');
+      name.className = 'inv-slot-name';
+      name.textContent = (mat && mat.name) || id;
+      const qty = document.createElement('div');
+      qty.className = 'inv-slot-qty';
+      qty.textContent = '×' + playerInventory[id];
+      slot.appendChild(ico);
+      slot.appendChild(name);
+      slot.appendChild(qty);
+      slot.addEventListener('click', () => {
+        if (typeof openMaterialDetail === 'function') openMaterialDetail(id);
+      });
+      grid.appendChild(slot);
+    });
+  }
   ov.classList.add('visible');
 }
 
-function closeCampOverlay() {
-  const ov = document.getElementById('camp-overlay');
+function closeInventoryPopup() {
+  const ov = document.getElementById('inv-overlay');
   if (ov) ov.classList.remove('visible');
+}
+
+// ============================================================================
+// CAMP (X-6.5.19) — usa HTML real portado de explore/index.html + CSS real
+// (explore-camp.css) + particle fire canvas (explore-camp-fire.js).
+// ============================================================================
+// Acampar = descanso D&D 5e PHB p.186. Short rest (1h) gasta Hit Die,
+// recupera HP = 1dHD + CON mod. Long rest (8h) recupera HP total + metade
+// dos HD + reduz 1 nível de exaustão. Cena noturna com lua/estrelas, fogueira
+// particle, 3 cards (curto/longo/continuar).
+
+function _updateCampHud() {
+  const p = S && S.player;
+  if (!p) return;
+  const hpPct = Math.max(0, Math.min(100, (p.hp / (p.mhp || 1)) * 100));
+  const mpPct = (p.mmp > 0) ? Math.max(0, Math.min(100, (p.mp / p.mmp) * 100)) : 0;
+  const hpBar = document.getElementById('camp-hp-bar');
+  const mpBar = document.getElementById('camp-mp-bar');
+  const hpText = document.getElementById('camp-hp-text');
+  const mpText = document.getElementById('camp-mp-text');
+  if (hpBar) hpBar.style.width = hpPct + '%';
+  if (mpBar) mpBar.style.width = mpPct + '%';
+  if (hpText) hpText.textContent = p.hp + '/' + p.mhp;
+  if (mpText) mpText.textContent = p.mp + '/' + (p.mmp || 0);
+}
+
+function _updateCampDetails() {
+  const p = S && S.player;
+  if (!p) return;
+  const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
+  const shortD = document.getElementById('camp-short-detail');
+  const longD = document.getElementById('camp-long-detail');
+  if (shortD) {
+    shortD.textContent = (p.hd || 0) > 0
+      ? 'HD disponível: ' + (p.hd || 0) + '/' + (p.mhd || '?') + ' · Cura ~ 1d8' + (conMod >= 0 ? '+' : '') + conMod
+      : 'Sem HD (use descanso longo)';
+  }
+  if (longD) {
+    longD.textContent = 'HP/MP totais + metade dos HD' + ((p.exh || 0) > 0 ? ' + Exaustão -1' : '');
+  }
+}
+
+function openCampOverlay() {
+  const ov = document.getElementById('camp-screen');
+  if (!ov) return;
+  // Atualizar bioma display
+  const biomeEl = document.getElementById('camp-biome-text');
+  if (biomeEl) {
+    const mapDef = S && S.mapDef;
+    biomeEl.textContent = mapDef && mapDef.name ? mapDef.name : '';
+  }
+  _updateCampHud();
+  _updateCampDetails();
+  ov.classList.add('active');
+  // Particle fire canvas (explore-camp-fire.js carregado no <head>)
+  try {
+    const canvas = document.getElementById('camp-fire-canvas');
+    if (canvas && window.CampFire) window.CampFire.init(canvas);
+  } catch (e) {
+    console.warn('[CAMP] fire init failed:', e);
+  }
+}
+
+function closeCampOverlay() {
+  const ov = document.getElementById('camp-screen');
+  if (ov) ov.classList.remove('active');
+  try { if (window.CampFire) window.CampFire.destroy(); } catch (_) {}
 }
 
 // Helper: dN roll
@@ -11111,12 +11302,10 @@ function doShortRest() {
   const p = S.player;
   if (!p) return;
   if ((p.hd || 0) <= 0) {
-    _showCampResult('Você não tem mais Hit Dice disponíveis.\nApenas o descanso longo vai te recuperar.');
-    document.getElementById('btn-camp-short').disabled = true;
+    const status = document.getElementById('camp-footer-status');
+    if (status) status.textContent = 'Sem Hit Dice. Use descanso longo.';
     return;
   }
-  // Dado do HD: assume d8 default (classes variadas). Poderia ler
-  // CHAR_CLASSES[cls].hitDie mas simulador simplifica.
   const dieSides = 8;
   const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
   const roll = _rollDie(dieSides);
@@ -11125,15 +11314,15 @@ function doShortRest() {
   p.hp = Math.min(p.mhp, p.hp + heal);
   const actual = p.hp - preHp;
   p.hd = Math.max(0, (p.hd || 0) - 1);
-  S.steps_since_combat = Math.max((S.steps_since_combat || 0), 0);  // no-op, mas documenta intenção
-  _showCampResult(
-    '🗡 Descanso Curto (1h)\n' +
-    'Rolou 1d' + dieSides + ' = ' + roll + ' + CON (' + (conMod >= 0 ? '+' : '') + conMod + ') = ' + heal + ' HP\n' +
-    'Recuperou +' + actual + ' HP (agora ' + p.hp + '/' + p.mhp + ')\n' +
-    'HD restantes: ' + p.hd + '/' + (p.mhd || '?')
-  );
+  const status = document.getElementById('camp-footer-status');
+  if (status) {
+    status.textContent = '💤 Descanso Curto: rolou 1d' + dieSides + '=' + roll
+      + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
+      + ' HP. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+  }
+  _updateCampHud();
+  _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
-  document.getElementById('btn-camp-short').disabled = (p.hd || 0) <= 0;
 }
 
 function doLongRest() {
@@ -11146,29 +11335,18 @@ function doLongRest() {
   p.hp = p.mhp;
   p.mp = p.mmp;
   p.exh = Math.max(0, preExh - 1);
-  // Recupera metade dos HD (D&D 5e regra)
   const hdRecover = Math.max(1, Math.floor((p.mhd || 2) / 2));
   p.hd = Math.min((p.mhd || 2), preHd + hdRecover);
   const healHp = p.hp - preHp;
   const healMp = p.mp - preMp;
-  _showCampResult(
-    '🌙 Descanso Longo (8h)\n' +
-    'HP: ' + preHp + ' → ' + p.hp + ' (+' + healHp + ')\n' +
-    'MP: ' + preMp + ' → ' + p.mp + ' (+' + healMp + ')\n' +
-    'HD: ' + preHd + ' → ' + p.hd + ' (+' + (p.hd - preHd) + ')\n' +
-    'Exaustão: ' + preExh + ' → ' + p.exh + (preExh > 0 ? ' (-1)' : '')
-  );
+  const status = document.getElementById('camp-footer-status');
+  if (status) {
+    status.textContent = '🌙 Descanso Longo: HP+' + healHp + ', MP+' + healMp
+      + ', HD+' + (p.hd - preHd) + ', Exaustão ' + (preExh > 0 ? '-1' : 'ok');
+  }
+  _updateCampHud();
+  _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
-  // Descanso longo esgota — sem novo descanso até amanhã lógico
-  document.getElementById('btn-camp-long').disabled = true;
-  document.getElementById('btn-camp-short').disabled = (p.hd || 0) <= 0;
-}
-
-function _showCampResult(text) {
-  const res = document.getElementById('camp-result');
-  if (!res) return;
-  res.textContent = text;
-  res.style.display = 'block';
 }
 
 // ---- INVENTÁRIO + REPUTAÇÃO (V2.2) ----------------------------------
@@ -12395,31 +12573,48 @@ function bindQuickActions() {
     if (S.ph !== 'idle') return;
     openCampOverlay();
   });
-  document.getElementById('btn-camp-short').addEventListener('click', doShortRest);
-  document.getElementById('btn-camp-long').addEventListener('click', doLongRest);
-  document.getElementById('btn-camp-cancel').addEventListener('click', closeCampOverlay);
+  // X-6.5.19: IDs do HTML real portado de explore/index.html
+  var _cbs = document.getElementById('camp-btn-short');
+  var _cbl = document.getElementById('camp-btn-long');
+  var _cbc = document.getElementById('camp-btn-continue');
+  if (_cbs) _cbs.addEventListener('click', doShortRest);
+  if (_cbl) _cbl.addEventListener('click', doLongRest);
+  if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
 
-  // X-6.5.14: mochila abre journal focado em INVENTÁRIO (antes abria
-  // no topo em "Missões" e o user achava que era só popup de missão).
-  document.getElementById('btn-inventory').addEventListener('click', () => {
-    openQuestJournal({ focus: 'inventory' });
-  });
+  // X-6.5.15: mochila abre POPUP DEDICADO de inventário (não o journal
+  // combinado). User pediu: "abrir a tela da mochila em um popup para o
+  // jogador ver a mochila e não o diário de missões".
+  document.getElementById('btn-inventory').addEventListener('click', openInventoryPopup);
+  document.getElementById('inv-close').addEventListener('click', closeInventoryPopup);
 
-  // X-6.5.14: toggle minimap+coord — recolhe/mostra o bloco todo via
-  // localStorage (preferência persistente). Estado default: visível.
+  // X-6.5.19: botão dedicado de Diário de Missões (antes bindado no 🎒).
+  // openQuestJournal agora mostra SÓ missões (opts.questsOnly=true).
+  var btnQuestJournal = document.getElementById('btn-quest-journal');
+  if (btnQuestJournal) {
+    btnQuestJournal.addEventListener('click', () => {
+      openQuestJournal({ questsOnly: true });
+    });
+  }
+
+  // X-6.5.15: toggle minimap+coord — botão colado à esquerda do minimap.
+  // Setas direcionais: ▶ (vai fechar pra direita) quando aberto; ◀ (vai
+  // abrir vindo da esquerda) quando fechado. Preferência salva em
+  // localStorage.
   const minimapToggleBtn = document.getElementById('btn-minimap-toggle');
   if (minimapToggleBtn) {
     const applyMinimapState = (collapsed) => {
-      const block = document.getElementById('minimap-block');
-      if (!block) return;
+      const content = document.getElementById('minimap-content');
+      if (!content) return;
       if (collapsed) {
-        block.classList.add('collapsed');
-        minimapToggleBtn.classList.add('active');
+        content.classList.add('collapsed');
+        minimapToggleBtn.textContent = '◀';
         minimapToggleBtn.title = 'Mostrar minimapa';
+        minimapToggleBtn.setAttribute('aria-label', 'Mostrar minimapa');
       } else {
-        block.classList.remove('collapsed');
-        minimapToggleBtn.classList.remove('active');
+        content.classList.remove('collapsed');
+        minimapToggleBtn.textContent = '▶';
         minimapToggleBtn.title = 'Recolher minimapa';
+        minimapToggleBtn.setAttribute('aria-label', 'Recolher minimapa');
       }
     };
     // Restaura preferência
@@ -12428,9 +12623,9 @@ function bindQuickActions() {
       applyMinimapState(saved === '1');
     } catch (_e) { /* localStorage bloqueado */ }
     minimapToggleBtn.addEventListener('click', () => {
-      const block = document.getElementById('minimap-block');
-      if (!block) return;
-      const willCollapse = !block.classList.contains('collapsed');
+      const content = document.getElementById('minimap-content');
+      if (!content) return;
+      const willCollapse = !content.classList.contains('collapsed');
       applyMinimapState(willCollapse);
       try { localStorage.setItem('valdoria_explore_minimap_collapsed', willCollapse ? '1' : '0'); } catch (_e) {}
     });
