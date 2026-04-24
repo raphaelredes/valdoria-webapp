@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T17:43:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T17:56:20Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12207,7 +12207,33 @@ function boot() {
         window.ExploracaoAPI.init(_initBody).then(function(res) {
           if (res && res.token) {
             LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8)
-              + '... map=' + S.mapId + ' biome=' + _initBody.biome);
+              + '... map=' + S.mapId + ' biome=' + _initBody.biome
+              + ' source=' + (res.source || '?')
+              + ' stale_corrected=' + (res.stale_corrected ? 'yes' : 'no'));
+            // X-6.5.8 (2026-04-24) — SERVER-AUTHORITATIVE reload:
+            // Se o server diz que o state do cliente estava stale (snap
+            // faltando, URL strippada, cache, etc), aplica o state do DB
+            // sobrescrevendo o que veio do snap/defaults. Jogador vê HP/MP
+            // corretos sem precisar fazer NADA (refresh, voltar pra cidade,
+            // nada). Server autoridade; cliente só render.
+            try {
+              if (res.state && S && S.player) {
+                var _ss = res.state;
+                if (typeof _ss.hp === 'number')  S.player.hp  = _ss.hp;
+                if (typeof _ss.mhp === 'number') S.player.mhp = _ss.mhp;
+                if (typeof _ss.mp === 'number')  S.player.mp  = _ss.mp;
+                if (typeof _ss.mmp === 'number') S.player.mmp = _ss.mmp;
+                if (res.stale_corrected || res.source === 'db') {
+                  // Reload visual: atualiza HUD imediatamente. Sem flash, sem
+                  // tela de loading — só o valor certo substitui o errado.
+                  try { if (typeof updateHud === 'function') updateHud(); } catch (_eHud) {}
+                  LOG('API', 'state_reloaded from server hp=' + S.player.hp + '/' + S.player.mhp
+                    + ' mp=' + S.player.mp + '/' + S.player.mmp + ' source=' + res.source);
+                }
+              }
+            } catch (eApply) {
+              LOGE('API', 'motor_init state_apply_err=' + (eApply && eApply.message));
+            }
           } else {
             LOGW('API', 'motor_init failed resp=' + JSON.stringify(res).slice(0, 200));
           }
