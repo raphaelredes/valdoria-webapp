@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-23T10:32:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T04:21:54Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2725,6 +2725,161 @@ body.remote-mode #debug-hud { display: none !important; }
     }
   };
   console.info('[E-REM:LOG-RELAY] wrapped console (tagged logs -> /api/game/log)');
+})();
+
+// ---- EXPLORACAO MOTOR CLIENT (X-4.1 — adapter pra /api/exploracao/*) -----
+// Em REMOTE mode, expõe window.ExploracaoAPI com 5 métodos (init/move/state/
+// finish/event_choice) que batem no motor Python novo (src/game/exploracao/).
+// Em LOCAL mode: NO-OP. ExploracaoAPI = null; chamadas dão erro explícito.
+//
+// Uso esperado (pós wiring gradual em X-4.2+):
+//   await window.ExploracaoAPI.init({map_id, hp, mhp, mp, mmp, ...}) → {token, state}
+//   await window.ExploracaoAPI.move(col, row) → {state, event}
+//   await window.ExploracaoAPI.eventChoice(idx) → {outcome, state, combat_redirect}
+//   await window.ExploracaoAPI.state() → {state}
+//   await window.ExploracaoAPI.finish() → {ok, state, rewards_hint}
+//
+// Token de exploração guardado em window.__EXPLORE_MOTOR_TOKEN (separado do
+// __EXPLORE_TOKEN que é o peek token do combat_api_session — usado como
+// Bearer na chamada /init). Todos os outros endpoints usam o motor_token.
+//
+// Tags de log: [E-REM:API-*] (INIT/MOVE/STATE/FINISH/EVENT_CHOICE/ERROR).
+// ===========================================================================
+(function() {
+  if (window.__EXPLORE_MODE !== 'remote' || !window.__EXPLORE_API_BASE) {
+    window.ExploracaoAPI = null;
+    return;
+  }
+  if (window.ExploracaoAPI && window.ExploracaoAPI._wired) return;
+
+  var API_BASE = window.__EXPLORE_API_BASE;
+  var PEEK_TOKEN = window.__EXPLORE_TOKEN;
+
+  function _bearer() {
+    return { 'Authorization': 'Bearer ' + PEEK_TOKEN, 'Content-Type': 'application/json' };
+  }
+
+  function _motorToken() {
+    return window.__EXPLORE_MOTOR_TOKEN || '';
+  }
+
+  async function _post(path, body, authMode) {
+    var t0 = performance.now();
+    var headers;
+    if (authMode === 'peek') {
+      headers = _bearer();
+    } else {
+      // motor auth: Bearer peek (motor ainda exige peek pra /move/state/finish/event_choice)
+      headers = _bearer();
+    }
+    try {
+      var resp = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body || {}),
+        keepalive: true
+      });
+      var dt = Math.round(performance.now() - t0);
+      var data = null;
+      try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
+      if (!resp.ok) {
+        console.warn('[E-REM:API-ERROR] ' + path + ' status=' + resp.status
+          + ' err=' + ((data && data.error) || '?') + ' ms=' + dt);
+        return { _http_error: resp.status, error: (data && data.error) || 'http_' + resp.status };
+      }
+      console.info('[E-REM:API] ' + path + ' ok ms=' + dt);
+      return data;
+    } catch (eNet) {
+      var dtE = Math.round(performance.now() - t0);
+      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, error: 'network' };
+    }
+  }
+
+  async function _get(path) {
+    var t0 = performance.now();
+    try {
+      var resp = await fetch(API_BASE + path, {
+        method: 'GET',
+        headers: _bearer(),
+        keepalive: true
+      });
+      var dt = Math.round(performance.now() - t0);
+      var data = null;
+      try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
+      if (!resp.ok) {
+        console.warn('[E-REM:API-ERROR] ' + path + ' status=' + resp.status
+          + ' err=' + ((data && data.error) || '?') + ' ms=' + dt);
+        return { _http_error: resp.status, error: (data && data.error) || 'http_' + resp.status };
+      }
+      console.info('[E-REM:API] ' + path + ' ok ms=' + dt);
+      return data;
+    } catch (eNet) {
+      var dtE = Math.round(performance.now() - t0);
+      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, error: 'network' };
+    }
+  }
+
+  window.ExploracaoAPI = {
+    _wired: true,
+
+    // POST /api/exploracao/init — cria sessão no motor. Snap deve ter
+    // hp/mhp/mp/mmp + opcionais (char_class, background, alignment,
+    // abilities, proficiency, weather). Guarda motor_token em window.
+    init: async function(snap) {
+      snap = snap || {};
+      if (!snap.map_id) snap.map_id = window.__EXPLORE_MAP_ID || 'plains_01';
+      console.info('[E-REM:API-INIT] map=' + snap.map_id
+        + ' hp=' + snap.hp + '/' + snap.mhp);
+      var res = await _post('/api/exploracao/init', snap, 'peek');
+      if (res && res.token) {
+        window.__EXPLORE_MOTOR_TOKEN = res.token;
+      }
+      return res;
+    },
+
+    // POST /api/exploracao/move — valida + aplica move. Retorna state + event.
+    move: async function(col, row) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token', hint: 'call init first' };
+      console.info('[E-REM:API-MOVE] col=' + col + ' row=' + row);
+      return await _post('/api/exploracao/move',
+        { token: tok, col: col, row: row });
+    },
+
+    // POST /api/exploracao/event_choice
+    eventChoice: async function(idx) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-EVENT_CHOICE] idx=' + idx);
+      return await _post('/api/exploracao/event_choice',
+        { token: tok, choice_idx: idx });
+    },
+
+    // GET /api/exploracao/state?token=X
+    state: async function() {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      return await _get('/api/exploracao/state?token=' + encodeURIComponent(tok));
+    },
+
+    // POST /api/exploracao/finish
+    finish: async function() {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-FINISH]');
+      var res = await _post('/api/exploracao/finish', { token: tok });
+      // Consome o token localmente mesmo se server retornou erro
+      window.__EXPLORE_MOTOR_TOKEN = '';
+      return res;
+    },
+
+    // Helper diagnóstico (pra console dev): true se motor_token presente.
+    hasToken: function() { return !!_motorToken(); }
+  };
+
+  console.info('[E-REM:API] ExploracaoAPI wired (5 methods: init, move, eventChoice, state, finish)');
 })();
 
 // ---- SNAP DECODER (boot hidratação em remote) -----------------------------
@@ -8940,16 +9095,23 @@ function onMoveEnd(col, row) {
   }
   tickDayPhase();
 
-  const rolled = maybeRollEvent();
-  // [FASE 3 R1 2026-04-23] Wandering monsters — combate direto sem narrativa.
-  // Roda APENAS se nenhum evento normal rolou nesse step (pra não empilhar).
-  // Independente de EVENTS_POOL — funciona em qualquer bioma com tabela de
-  // inimigos via BIOME_WANDERING_ENCOUNTERS. Gatilho: chance por step escala
-  // com dangerLevel do mapa (2% base + 1.5% por nível de perigo). PHB Ch.8
-  // "Random Encounters" + DMG Ch.3 "Wilderness Encounters".
+  // X-4.3/4: em REMOTE (com motor_token ativo), delega event roll pro servidor.
+  // maybeRollEvent + maybeRollWanderingMonster só rodam em LOCAL.
+  var _remoteAuthoritative = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI && window.ExploracaoAPI.hasToken());
+  let rolled = false;
   let wandered = false;
-  if (!rolled) {
-    wandered = maybeRollWanderingMonster();
+  if (!_remoteAuthoritative) {
+    rolled = maybeRollEvent();
+    // [FASE 3 R1 2026-04-23] Wandering monsters — combate direto sem narrativa.
+    // Roda APENAS se nenhum evento normal rolou nesse step (pra não empilhar).
+    // Independente de EVENTS_POOL — funciona em qualquer bioma com tabela de
+    // inimigos via BIOME_WANDERING_ENCOUNTERS. Gatilho: chance por step escala
+    // com dangerLevel do mapa (2% base + 1.5% por nível de perigo). PHB Ch.8
+    // "Random Encounters" + DMG Ch.3 "Wilderness Encounters".
+    if (!rolled) {
+      wandered = maybeRollWanderingMonster();
+    }
   }
   S.ph = (rolled || wandered) ? 'event' : 'idle';
 
@@ -8957,6 +9119,44 @@ function onMoveEnd(col, row) {
   updateHexNav();
   centerOnPlayer(true);
   scheduleRender();
+
+  // X-4.3: em REMOTE, sincroniza com motor server (fire-and-forget).
+  // Server pode: (a) retornar state atualizado (HP/MP/gold/visible),
+  // (b) retornar event rolado → abre modal com o event do servidor.
+  if (_remoteAuthoritative) {
+    window.ExploracaoAPI.move(col, row).then(function(res) {
+      if (!res || res.error) {
+        LOGW('API', 'remote_move err=' + (res && res.error));
+        return;
+      }
+      // Sync state HP/MP/gold/xp + visible do servidor
+      if (res.state) {
+        try {
+          if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+          if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+          if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          if (Array.isArray(res.state.visited)) {
+            for (var i = 0; i < res.state.visited.length; i++) {
+              var pair = res.state.visited[i];
+              if (pair && pair.length === 2) S.visited.add(fogKey(pair[0], pair[1]));
+            }
+          }
+          updateHud();
+        } catch (eS) {
+          LOGE('API', 'state_sync err=' + (eS && eS.message));
+        }
+      }
+      // Event: server rolou → abre modal (sobrepõe local, que não rodou)
+      if (res.event && S.ph !== 'event') {
+        LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
+        S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
+        S.ph = 'event';
+        try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
+      }
+    }).catch(function(e) {
+      LOGE('API', 'remote_move rejected msg=' + (e && e.message));
+    });
+  }
 }
 
 // [FASE 3 R1 2026-04-23] Tabela de monstros vagantes por bioma + dayPhase.
@@ -9500,8 +9700,134 @@ function onConfirmBack() {
 
 function resolveChoice(idx) {
   const ch = S.event.choices[idx];
+
+  // X-4.5: em REMOTE (event veio do servidor), delega resolução pro motor.
+  // Server roda skill check + aplica deltas + devolve outcome + combat_redirect.
+  // LOCAL: fluxo original (rollSkillCheck + applyChoiceOutcome).
+  if (S.event && S.event.__remote && window.__EXPLORE_MODE === 'remote'
+      && window.ExploracaoAPI && window.ExploracaoAPI.hasToken()) {
+    LOG('API', 'remote_event_choice idx=' + idx + ' label=' + (ch.label || '?'));
+    window.ExploracaoAPI.eventChoice(idx).then(function(res) {
+      if (!res || res.error) {
+        LOGW('API', 'event_choice err=' + (res && res.error));
+        if (ch.skill) {
+          rollSkillCheck(ch, function(success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
+        } else {
+          applyChoiceOutcome(ch, true, null, null);
+        }
+        return;
+      }
+      var oc = res.outcome || {};
+      if (res.state) {
+        try {
+          if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+          if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+          if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          updateHud();
+        } catch (eS) { LOGE('API', 'state_sync err=' + (eS && eS.message)); }
+      }
+      if (res.combat_redirect) {
+        oc._combat_redirect = res.combat_redirect;
+      }
+      if (oc.check && ch.skill) {
+        _remoteRenderDiceAndResolve(ch, oc);
+      } else {
+        _remoteShowOutcome(ch, oc);
+      }
+    }).catch(function(e) {
+      LOGE('API', 'event_choice rejected msg=' + (e && e.message));
+      if (ch.skill) {
+        rollSkillCheck(ch, function(success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
+      } else {
+        applyChoiceOutcome(ch, true, null, null);
+      }
+    });
+    return;
+  }
+
   if (ch.skill) rollSkillCheck(ch, (success, total) => applyChoiceOutcome(ch, success, total, ch.dc));
   else applyChoiceOutcome(ch, true, null, null);
+}
+
+// X-4.5: helper — anima dice 3D com valor do servidor, depois resolve outcome.
+function _remoteRenderDiceAndResolve(ch, oc) {
+  var overlay = document.getElementById('dice-overlay');
+  var wrap = document.getElementById('dice-canvas-wrap');
+  var formula = document.getElementById('dice-formula');
+  var result = document.getElementById('dice-result');
+  var skipBtn = document.getElementById('dice-skip-btn');
+  clearChildren(wrap); clearChildren(formula); clearChildren(result);
+  result.className = '';
+  result.style.display = 'none';
+  skipBtn.style.display = 'none';
+  overlay.classList.add('visible');
+  var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
+  var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
+  var advanced = false;
+  function advance() {
+    if (advanced) return;
+    advanced = true;
+    overlay.classList.remove('visible');
+    setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
+  }
+  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance(); };
+  result.onclick = advance;
+  var shown = false;
+  function showResult() {
+    if (shown) return; shown = true;
+    var modStr = (mod >= 0 ? '+' : '') + mod;
+    formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
+    var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
+    formula.appendChild(document.createTextNode(' vs CD ' + dc));
+    result.className = success ? 'success' : 'failure';
+    result.textContent = success ? 'SUCESSO' : 'FALHA';
+    result.style.display = 'inline-block';
+    skipBtn.textContent = 'Continuar \u276f\u276f';
+    skipBtn.style.setProperty('display', 'inline-block', 'important');
+    skipBtn.style.setProperty('visibility', 'visible', 'important');
+  }
+  if (window.Dice3D) {
+    try {
+      var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
+      dice.roll(d20, showResult);
+      return;
+    } catch (e) { /* fall through */ }
+  }
+  setTimeout(showResult, 900);
+}
+
+// X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
+function _remoteShowOutcome(ch, oc) {
+  S.event.resolved = {
+    tier: oc.tier || 'success',
+    text: oc.text || '',
+    reward: (oc.delta && oc.delta.gold) ? ('+' + oc.delta.gold + ' Valdoritas') : null
+  };
+  try {
+    var resolvedEl = document.getElementById('event-resolved');
+    if (resolvedEl) {
+      clearChildren(resolvedEl);
+      var txt = document.createElement('div');
+      txt.className = 'resolved-text ' + (S.event.resolved.tier || 'success');
+      txt.textContent = S.event.resolved.text;
+      resolvedEl.appendChild(txt);
+      resolvedEl.style.display = 'block';
+    }
+    var confirmEl = document.getElementById('confirm-overlay');
+    if (confirmEl) confirmEl.classList.remove('visible');
+  } catch (_) {}
+  updateHud();
+  // Combat redirect (X-3.5): se server disparou combate, navega após leitura.
+  if (oc.combat_trigger) {
+    LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
+    setTimeout(function() {
+      try {
+        var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
+          || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
+        window.location.href = redir;
+      } catch (_) {}
+    }, 2000);
+  }
 }
 
 // Dice overlay estilo check-overlay do combate (formula + result pill + skip btn)
@@ -11727,6 +12053,43 @@ function boot() {
     // de edge travel (que em remote mode são vazios no primeiro boot).
     // Em LOCAL: no-op (função checa window.__EXPLORE_MODE).
     if (window.__hydrateStateFromRemote) window.__hydrateStateFromRemote(S);
+
+    // X-4.2: auto-init no motor Python (REMOTE only, fire-and-forget)
+    // Cria sessão no motor após hidratar state local. Motor token vai pro
+    // window.__EXPLORE_MOTOR_TOKEN pra uso das próximas fases (X-4.3+: move,
+    // event_choice, etc). Em LOCAL: skipped (ExploracaoAPI === null).
+    if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && S && S.player) {
+      try {
+        var _w = S.weather;
+        var _motorWeather = (_w === 's') ? 'clear'
+                          : (_w === 'r') ? 'rain'
+                          : (_w === 'f') ? 'fog'
+                          : (_w === 't') ? 'storm'
+                          : 'clear';
+        window.ExploracaoAPI.init({
+          map_id: S.mapId,
+          hp: S.player.hp, mhp: S.player.mhp,
+          mp: S.player.mp, mmp: S.player.mmp,
+          char_class: S.player.cls_key || '',
+          background: S.player.background || '',
+          alignment: S.player.alignment || '',
+          abilities: S.player.mods || {},
+          proficiency: S.player.prof || [],
+          weather: _motorWeather
+        }).then(function(res) {
+          if (res && res.token) {
+            LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8) + '...');
+          } else {
+            LOGW('API', 'motor_init failed resp=' + JSON.stringify(res).slice(0, 200));
+          }
+        }).catch(function(e) {
+          LOGE('API', 'motor_init rejected msg=' + (e && e.message));
+        });
+      } catch (eInit) {
+        LOGE('API', 'motor_init sync err=' + (eInit && eInit.message));
+      }
+    }
+
     recentEventIds = [];
     _zoom = DEFAULT_ZOOM;
     visitedMapIds.add(S.mapId);   // marca mapa como descoberto
