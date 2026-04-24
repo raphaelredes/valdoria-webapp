@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:07:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:21:51Z - do not edit directly, edit source -->
 
 
 <!--
@@ -847,139 +847,6 @@ body {
 }
 #journal-overlay.visible { display: flex; }
 
-/* ====== INVENTORY OVERLAY (X-6.5.15) =================================
-   Popup dedicado da mochila. Grid de cards com ícone + qty. Click
-   no card abre detail do material (openMaterialDetail já existe). */
-#inv-overlay {
-  position: absolute; inset: 0;
-  background: rgba(10, 8, 5, 0.88);
-  display: none;
-  align-items: center; justify-content: center;
-  padding: 18px;
-  z-index: 262;
-  overflow-y: auto;
-}
-#inv-overlay.visible { display: flex; }
-.inv-card {
-  background:
-    linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 20%),
-    linear-gradient(180deg, #e8d4a0 0%, #c8ac78 100%);
-  border: 3px double #5a3e22;
-  border-radius: 8px;
-  padding: 18px 16px 16px;
-  width: 100%;
-  max-width: 400px;
-  max-height: 82vh;
-  display: flex; flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), inset 0 0 24px rgba(100, 70, 40, 0.3);
-  position: relative;
-}
-.inv-card::before, .inv-card::after {
-  content: ''; position: absolute;
-  width: 14px; height: 14px;
-  background: #5a3e22; border-radius: 50%;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
-}
-.inv-card::before { top: -7px; left: 20%; }
-.inv-card::after  { top: -7px; right: 20%; }
-.inv-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 4px;
-}
-.inv-title {
-  font-family: var(--v-font-display);
-  font-size: 18px; font-weight: 700;
-  letter-spacing: 4px; text-transform: uppercase;
-  color: #3a2818; margin: 0;
-  text-shadow: 1px 1px 0 rgba(200, 170, 120, 0.6);
-}
-.inv-close {
-  width: 28px; height: 28px;
-  background: transparent; border: 1.5px solid #5a3e22;
-  border-radius: 50%;
-  color: #3a2818; font-size: 18px; font-weight: 700;
-  cursor: pointer; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s ease;
-}
-.inv-close:hover { background: rgba(90, 62, 34, 0.2); transform: rotate(90deg); }
-.inv-subtitle {
-  font-style: italic; font-size: 11px;
-  color: #6a4828;
-  margin: 0 0 12px;
-  letter-spacing: 0.5px;
-}
-.inv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
-  overflow-y: auto;
-  padding-right: 2px;
-}
-.inv-slot {
-  background: rgba(90, 62, 34, 0.12);
-  border: 1.5px solid rgba(90, 62, 34, 0.4);
-  border-radius: 6px;
-  padding: 8px 4px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.15s ease;
-  min-height: 74px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px;
-}
-.inv-slot:hover {
-  background: rgba(90, 62, 34, 0.22);
-  border-color: #5a3e22;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-}
-.inv-slot .inv-slot-ico {
-  font-size: 26px; line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-}
-.inv-slot .inv-slot-name {
-  font-size: 10px;
-  color: #3a2818;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  line-height: 1.2;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.inv-slot .inv-slot-qty {
-  position: absolute;
-  bottom: -4px; right: -4px;
-  min-width: 20px; height: 20px;
-  padding: 0 4px;
-  background: linear-gradient(180deg, #8b6420, #5a3e22);
-  border: 1.5px solid #e8d4a0;
-  border-radius: 10px;
-  color: #fff4d0;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.6);
-}
-.inv-empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: #6a4828;
-}
-.inv-empty-ico {
-  font-size: 48px;
-  opacity: 0.5;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
-}
-.inv-empty-text {
-  font-size: 12px;
-  font-style: italic;
-  line-height: 1.55;
-}
 
 .journal-card {
   background:
@@ -1215,13 +1082,20 @@ body {
 }
 
 /* ====== QUICK ACTIONS ================================================= */
+/* X-6.5.20: hud-quick desceu (bottom menor) pra liberar espaço vertical
+   e evitar sobreposição com right-panel (minimap + zoom). Cartografia
+   ganhou margin-top extra pra descer um pouco mais. */
 #hud-quick {
   position: absolute;
   right: 10px;
-  bottom: 160px;
+  bottom: 140px;   /* era 160 — baixou 20px */
   z-index: 15;
   display: flex; flex-direction: column;
   gap: 8px;
+}
+/* Cartografia fica mais separada do resto (um pouco mais baixo) */
+#btn-cartografia {
+  margin-top: 12px;
 }
 .quick-btn {
   width: 42px; height: 42px;
@@ -2404,27 +2278,39 @@ body.remote-mode #debug-hud { display: none !important; }
   gap: 5px;
   padding: 0 2px;
 }
-/* X-6.5.14/15: minimap-block = [toggle button] [minimap + coord].
-   Botão toggle vive colado à esquerda do minimap e NUNCA some — só
-   o minimap-content slida pra direita quando recolhido. Seta aponta
-   pra direção do movimento futuro: → (fechar) / ← (abrir). */
+/* X-6.5.14/15/20: minimap-block tem o minimap-content + botão toggle
+   absolutamente posicionado à esquerda dele. Antes era flex-row, mas
+   o botão ficava deslocado visualmente. Agora minimap-content é o
+   bloco principal e o botão flutua ao lado. */
 #minimap-block {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 0;
+  /* position:relative definido acima (no #btn-minimap-toggle reset) */
+  display: block;
+  margin-right: 20px;   /* reserva espaço pro botão toggle absolute */
+}
+/* X-6.5.20: toggle button posicionado absolutamente pra grudar na borda
+   esquerda do minimap-wrap, centralizado verticalmente. Antes ficava
+   solto no início do flex-row, descolado do minimap visualmente. */
+#minimap-block {
+  position: relative;   /* context pra botão absolute */
 }
 #btn-minimap-toggle {
-  width: 18px;
-  height: 44px;
+  position: absolute;
+  /* Grudar à esquerda do minimap-wrap (que vive no #minimap-content).
+     right: 100% alinha o lado direito do botão com o lado esquerdo do
+     content. top centrado. */
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  margin-right: 0;   /* flush com minimap-wrap */
+  width: 20px;
+  height: 48px;
   padding: 0;
-  margin-top: 8px;   /* alinha com topo do minimap */
   border-radius: 4px 0 0 4px;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.95), rgba(22, 18, 14, 0.92));
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.94));
   border: 1.5px solid var(--v-gold, #c4953a);
   border-right: none;
   color: var(--v-gold, #c4953a);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -2432,6 +2318,7 @@ body.remote-mode #debug-hud { display: none !important; }
   transition: all 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
+  z-index: 2;
 }
 #btn-minimap-toggle:hover {
   background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
@@ -2618,14 +2505,16 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <div id="hud-quick">
-    <button class="quick-btn" id="btn-camp" title="Acampar">🏕️</button>
+    <!-- X-6.5.20: ordem pedida pelo user — 🎒 🔝 mochila (não sobrepõe minimap),
+         📜 diário, 🔥 tocha, 🏕️ acampar (abaixo da tocha, acima cartografia),
+         🗺️ cartografia (mais baixo, sem sobrepor outros HUD). -->
     <button class="quick-btn" id="btn-inventory" title="Mochila (Inventário)">🎒</button>
-    <!-- X-6.5.19: botão dedicado de Diário de Missões (antes bind de 🎒) -->
     <button class="quick-btn" id="btn-quest-journal" title="Diário de Missões">📜</button>
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz">🔥</button>
       <div class="light-menu" id="light-menu"></div>
     </div>
+    <button class="quick-btn" id="btn-camp" title="Acampar">🏕️</button>
     <button class="quick-btn" id="btn-cartografia" title="Cartografia">🗺️</button>
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
          logs/exploracao/ via sink server. Console ainda tem downloadExploracaoLogs(). -->
@@ -9415,11 +9304,15 @@ function beginMove(col, row) {
     onMoveEnd(tc, tr);
     // Centraliza no destino final
     try { centerOnPlayer(true); } catch (_) {}
-    // X-6.5.19: reabilita buttons SE o estado voltou pra idle (evento pode
-    // ter mudado pra 'event' — buttons ficam bloqueados pelo updateHexNav).
-    try {
-      if (S.ph === 'idle') _setHexNavDisabled(false);
-    } catch (_) {}
+    // X-6.5.20: reabilita buttons com BUFFER de 250ms após fim da animação.
+    // User reportou trava mesmo com disable — buffer extra absorve clicks
+    // rápidos residuais do browser. Reabilita só se ph voltou pra idle
+    // (evento pode ter mudado pra 'event' — fica bloqueado via updateHexNav).
+    setTimeout(() => {
+      try {
+        if (S.ph === 'idle') _setHexNavDisabled(false);
+      } catch (_) {}
+    }, 250);
   }, dur + 10);
 }
 
