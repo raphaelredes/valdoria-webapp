@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T19:14:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T19:26:50Z - do not edit directly, edit source -->
 
 
 <!--
@@ -846,6 +846,208 @@ body {
   overflow-y: auto;
 }
 #journal-overlay.visible { display: flex; }
+
+/* ====== CAMP OVERLAY (X-6.5.14) ======================================
+   Tela de acampamento com fogueira animada CSS. Inspirada no look de
+   journal-overlay (pergaminho medieval) mas com tonalidade noturna. */
+#camp-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(40, 25, 10, 0.92) 0%, rgba(8, 5, 3, 0.96) 70%);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 18px;
+  z-index: 265;
+  overflow-y: auto;
+}
+#camp-overlay.visible { display: flex; }
+.camp-card {
+  background:
+    linear-gradient(135deg, rgba(90, 55, 25, 0.55) 0%, transparent 25%),
+    linear-gradient(180deg, #3a2818 0%, #1f1510 100%);
+  border: 2px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 22px 20px 18px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), inset 0 0 24px rgba(196, 149, 58, 0.12);
+  text-align: center;
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+}
+.camp-title {
+  font-family: var(--v-font-display);
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin: 0 0 6px;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
+}
+.camp-subtitle {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--v-text-dim, #a09484);
+  margin: 0 0 16px;
+}
+/* Fogueira animada pure-CSS (sem imagem). 3 camadas de chama + brasas. */
+.campfire-wrap {
+  position: relative;
+  width: 120px; height: 140px;
+  margin: 4px auto 18px;
+  filter: drop-shadow(0 0 20px rgba(255, 140, 40, 0.55));
+}
+.campfire-logs {
+  position: absolute; bottom: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 92px; height: 18px;
+}
+.campfire-logs::before,
+.campfire-logs::after {
+  content: ''; position: absolute;
+  background: linear-gradient(180deg, #5a3e1e, #2a1a0c);
+  border-radius: 50% 50% 4px 4px / 40% 40% 4px 4px;
+  box-shadow: inset 0 1px 2px rgba(255, 200, 120, 0.2), inset 0 -1px 0 rgba(0,0,0,0.5);
+}
+.campfire-logs::before {
+  left: 4px; top: 2px;
+  width: 72px; height: 12px;
+  transform: rotate(-10deg);
+}
+.campfire-logs::after {
+  left: 12px; top: 6px;
+  width: 68px; height: 12px;
+  transform: rotate(8deg);
+}
+.campfire-flame {
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform-origin: 50% 100%;
+  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  filter: blur(0.6px);
+  will-change: transform, opacity;
+}
+.flame-outer {
+  width: 54px; height: 72px;
+  margin-left: -27px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 120, 20, 0.95) 0%, rgba(255, 60, 10, 0.7) 45%, rgba(180, 30, 0, 0) 75%);
+  animation: campFlameOuter 1.3s ease-in-out infinite;
+  opacity: 0.85;
+}
+.flame-mid {
+  width: 36px; height: 54px;
+  margin-left: -18px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 200, 60, 0.95) 0%, rgba(255, 140, 20, 0.8) 50%, rgba(220, 80, 10, 0) 80%);
+  animation: campFlameMid 0.95s ease-in-out infinite;
+}
+.flame-core {
+  width: 18px; height: 32px;
+  margin-left: -9px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 250, 200, 1) 0%, rgba(255, 210, 80, 0.95) 55%, rgba(255, 150, 30, 0) 85%);
+  animation: campFlameCore 0.7s ease-in-out infinite;
+}
+@keyframes campFlameOuter {
+  0%, 100% { transform: scale(1, 1) translateX(0) rotate(-2deg); opacity: 0.82; }
+  25%      { transform: scale(1.08, 0.95) translateX(2px) rotate(1deg); opacity: 0.88; }
+  50%      { transform: scale(0.94, 1.1) translateX(-1px) rotate(-1deg); opacity: 0.92; }
+  75%      { transform: scale(1.03, 0.98) translateX(1px) rotate(2deg); opacity: 0.85; }
+}
+@keyframes campFlameMid {
+  0%, 100% { transform: scale(1, 1) translateX(0); opacity: 0.88; }
+  30%      { transform: scale(1.12, 0.92) translateX(-2px); }
+  60%      { transform: scale(0.92, 1.14) translateX(2px); opacity: 0.96; }
+}
+@keyframes campFlameCore {
+  0%, 100% { transform: scale(1, 1); opacity: 0.95; }
+  40%      { transform: scale(1.2, 0.88); opacity: 1; }
+  70%      { transform: scale(0.88, 1.18); opacity: 0.9; }
+}
+/* Brasas flutuantes (3 sparks) */
+.camp-spark {
+  position: absolute;
+  bottom: 48px;
+  width: 3px; height: 3px;
+  background: radial-gradient(circle, #ffe090 0%, #ff8020 60%, transparent 100%);
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+.camp-spark.s1 { left: 52px; animation: sparkRise 2.8s linear infinite; }
+.camp-spark.s2 { left: 62px; animation: sparkRise 3.2s linear infinite 0.9s; }
+.camp-spark.s3 { left: 48px; animation: sparkRise 3.0s linear infinite 1.6s; }
+@keyframes sparkRise {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translateY(-90px) translateX(8px); opacity: 0; }
+}
+.camp-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--v-text, #d4c8b0);
+  margin: 0 0 14px;
+  font-style: italic;
+}
+.camp-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.camp-btn {
+  padding: 11px 14px;
+  background: linear-gradient(180deg, rgba(90, 60, 25, 0.35), rgba(45, 30, 15, 0.6));
+  border: 1.5px solid rgba(196, 149, 58, 0.55);
+  border-radius: 6px;
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+.camp-btn:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.25), rgba(139, 100, 32, 0.2));
+  border-color: var(--v-gold, #c4953a);
+  box-shadow: 0 0 12px rgba(196, 149, 58, 0.35);
+}
+.camp-btn:active { transform: scale(0.97); }
+.camp-btn .camp-btn-title {
+  display: block;
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1.8px;
+  margin-bottom: 2px;
+}
+.camp-btn .camp-btn-desc {
+  display: block;
+  color: var(--v-text-dim, #a09484);
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+.camp-btn.cancel {
+  background: transparent;
+  border-color: rgba(160, 148, 132, 0.3);
+  text-align: center;
+  color: var(--v-text-dim, #a09484);
+  font-size: 12px;
+  padding: 8px;
+}
+.camp-btn.cancel:hover {
+  background: rgba(160, 148, 132, 0.08);
+  box-shadow: none;
+}
+.camp-result {
+  font-size: 12px;
+  color: var(--v-text, #d4c8b0);
+  padding: 10px;
+  background: rgba(90, 60, 25, 0.18);
+  border-left: 3px solid var(--v-gold, #c4953a);
+  border-radius: 4px;
+  margin-top: 10px;
+  white-space: pre-line;
+  text-align: left;
+}
 .journal-card {
   background:
     linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 18%),
@@ -2261,6 +2463,22 @@ body.remote-mode #debug-hud { display: none !important; }
   gap: 5px;
   padding: 0 2px;
 }
+/* X-6.5.14: wrapper dos dois elementos (minimap + coord) pra togglar juntos */
+#minimap-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.3s ease;
+  max-height: 400px;
+  overflow: hidden;
+}
+#minimap-block.collapsed {
+  opacity: 0;
+  transform: translateX(40px);
+  max-height: 0;
+  pointer-events: none;
+}
 #minimap-wrap {
   background: linear-gradient(180deg, rgba(40, 32, 24, 0.95), rgba(26, 21, 16, 0.95));
   border: 1.5px solid var(--v-gold, #c4953a);
@@ -2427,16 +2645,52 @@ body.remote-mode #debug-hud { display: none !important; }
   <div id="right-panel">
     <!-- X-6.5.13: zoom controls movidos PRA CIMA do minimap + layout horizontal
          pra liberar espaço vertical abaixo pro hud-quick (🏕️🎒🔥🗺️) não
-         sobrepor. Ordem dos botões: zoom-out, pin, zoom-in (left-to-right). -->
+         sobrepor. Ordem dos botões: zoom-out, pin, zoom-in (left-to-right).
+         X-6.5.14: botão toggle entre zoom e minimapa pra recolher/mostrar o
+         minimapa + coord quando obstrui visão. -->
     <div id="zoom-controls">
       <button class="zoom-btn" id="btn-zoom-out" title="Menos zoom">−</button>
       <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem">📍</button>
       <button class="zoom-btn" id="btn-zoom-in" title="Mais zoom">+</button>
+      <button class="zoom-btn" id="btn-minimap-toggle" title="Mostrar/recolher minimapa">🗺</button>
     </div>
-    <div id="minimap-wrap">
-      <canvas id="minimap" width="96" height="130"></canvas>
+    <div id="minimap-block">
+      <div id="minimap-wrap">
+        <canvas id="minimap" width="96" height="130"></canvas>
+      </div>
+      <div id="current-coord">—</div>
     </div>
-    <div id="current-coord">—</div>
+  </div>
+
+  <!-- X-6.5.14: Camp overlay — acampamento com fogueira animada CSS.
+       Permite descanso curto (HD) ou longo (HP/MP + -1 exaustão). -->
+  <div id="camp-overlay">
+    <div class="camp-card">
+      <h2 class="camp-title">Acampamento</h2>
+      <p class="camp-subtitle">Um ponto seguro à beira do caminho</p>
+      <div class="campfire-wrap" aria-hidden="true">
+        <div class="camp-spark s1"></div>
+        <div class="camp-spark s2"></div>
+        <div class="camp-spark s3"></div>
+        <div class="campfire-flame flame-outer"></div>
+        <div class="campfire-flame flame-mid"></div>
+        <div class="campfire-flame flame-core"></div>
+        <div class="campfire-logs"></div>
+      </div>
+      <p class="camp-text" id="camp-text">Você limpa um pequeno círculo no chão e acende a fogueira. A chama cresce e crepita, espantando o frio. O que fazer?</p>
+      <div id="camp-result" class="camp-result" style="display:none"></div>
+      <div class="camp-actions">
+        <button class="camp-btn" id="btn-camp-short">
+          <span class="camp-btn-title">Descanso Curto · 1h</span>
+          <span class="camp-btn-desc">Gasta 1 Hit Die e recupera HP (CON + 1d HD)</span>
+        </button>
+        <button class="camp-btn" id="btn-camp-long">
+          <span class="camp-btn-title">Descanso Longo · 8h</span>
+          <span class="camp-btn-desc">Recupera HP/MP totais, ganha metade dos HD e reduz 1 nível de exaustão</span>
+        </button>
+        <button class="camp-btn cancel" id="btn-camp-cancel">Continuar caminho</button>
+      </div>
+    </div>
   </div>
 
   <div id="hex-nav">
@@ -10688,7 +10942,13 @@ function updateQuestIndicator() {
   }
 }
 
-function openQuestJournal() {
+// X-6.5.14: opts.focus ('inventory' | 'quests' | null) controla qual seção
+// aparece primeiro. Sem opts → comportamento original (missões primeiro).
+// Botão mochila passa {focus:'inventory'} pra evitar a confusão de "parece
+// popup de missão" quando o que o jogador quer é inventário.
+function openQuestJournal(opts) {
+  opts = opts || {};
+  const focus = opts.focus || 'quests';
   const ov = document.getElementById('journal-overlay');
   const list = document.getElementById('journal-list');
   clearChildren(list);
@@ -10793,10 +11053,122 @@ function openQuestJournal() {
   }
 
   ov.classList.add('visible');
+
+  // X-6.5.14: scroll até a seção de foco (inventory/quests) pra o user ver
+  // primeiro o que ele pediu. Roda no próximo frame pra garantir layout
+  // calculado. Procura por .journal-section cujo textContent bate.
+  if (focus === 'inventory') {
+    requestAnimationFrame(() => {
+      try {
+        const sections = list.querySelectorAll('.journal-section');
+        for (let i = 0; i < sections.length; i++) {
+          if (sections[i].textContent.startsWith('Inventário')) {
+            sections[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            break;
+          }
+        }
+      } catch (_e) { /* scrollIntoView não suportado */ }
+    });
+  }
 }
 
 function closeQuestJournal() {
   document.getElementById('journal-overlay').classList.remove('visible');
+}
+
+// ============================================================================
+// CAMP (X-6.5.14)
+// ============================================================================
+// Acampar = descanso D&D 5e PHB p.186. Short rest (1h) gasta Hit Die,
+// recupera HP = 1dHD + CON mod. Long rest (8h) recupera HP total + metade
+// dos HD + reduz 1 nível de exaustão.
+
+function openCampOverlay() {
+  const ov = document.getElementById('camp-overlay');
+  if (!ov) return;
+  // Reset do result anterior
+  const res = document.getElementById('camp-result');
+  if (res) { res.style.display = 'none'; res.textContent = ''; }
+  // Re-habilita botões (caso tenham sido desabilitados por um rest anterior)
+  const shortBtn = document.getElementById('btn-camp-short');
+  const longBtn = document.getElementById('btn-camp-long');
+  if (shortBtn) shortBtn.disabled = false;
+  if (longBtn) longBtn.disabled = false;
+  ov.classList.add('visible');
+}
+
+function closeCampOverlay() {
+  const ov = document.getElementById('camp-overlay');
+  if (ov) ov.classList.remove('visible');
+}
+
+// Helper: dN roll
+function _rollDie(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function doShortRest() {
+  const p = S.player;
+  if (!p) return;
+  if ((p.hd || 0) <= 0) {
+    _showCampResult('Você não tem mais Hit Dice disponíveis.\nApenas o descanso longo vai te recuperar.');
+    document.getElementById('btn-camp-short').disabled = true;
+    return;
+  }
+  // Dado do HD: assume d8 default (classes variadas). Poderia ler
+  // CHAR_CLASSES[cls].hitDie mas simulador simplifica.
+  const dieSides = 8;
+  const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
+  const roll = _rollDie(dieSides);
+  const heal = Math.max(1, roll + conMod);
+  const preHp = p.hp;
+  p.hp = Math.min(p.mhp, p.hp + heal);
+  const actual = p.hp - preHp;
+  p.hd = Math.max(0, (p.hd || 0) - 1);
+  S.steps_since_combat = Math.max((S.steps_since_combat || 0), 0);  // no-op, mas documenta intenção
+  _showCampResult(
+    '🗡 Descanso Curto (1h)\n' +
+    'Rolou 1d' + dieSides + ' = ' + roll + ' + CON (' + (conMod >= 0 ? '+' : '') + conMod + ') = ' + heal + ' HP\n' +
+    'Recuperou +' + actual + ' HP (agora ' + p.hp + '/' + p.mhp + ')\n' +
+    'HD restantes: ' + p.hd + '/' + (p.mhd || '?')
+  );
+  if (typeof updateHud === 'function') updateHud();
+  document.getElementById('btn-camp-short').disabled = (p.hd || 0) <= 0;
+}
+
+function doLongRest() {
+  const p = S.player;
+  if (!p) return;
+  const preHp = p.hp;
+  const preMp = p.mp;
+  const preExh = p.exh || 0;
+  const preHd = p.hd || 0;
+  p.hp = p.mhp;
+  p.mp = p.mmp;
+  p.exh = Math.max(0, preExh - 1);
+  // Recupera metade dos HD (D&D 5e regra)
+  const hdRecover = Math.max(1, Math.floor((p.mhd || 2) / 2));
+  p.hd = Math.min((p.mhd || 2), preHd + hdRecover);
+  const healHp = p.hp - preHp;
+  const healMp = p.mp - preMp;
+  _showCampResult(
+    '🌙 Descanso Longo (8h)\n' +
+    'HP: ' + preHp + ' → ' + p.hp + ' (+' + healHp + ')\n' +
+    'MP: ' + preMp + ' → ' + p.mp + ' (+' + healMp + ')\n' +
+    'HD: ' + preHd + ' → ' + p.hd + ' (+' + (p.hd - preHd) + ')\n' +
+    'Exaustão: ' + preExh + ' → ' + p.exh + (preExh > 0 ? ' (-1)' : '')
+  );
+  if (typeof updateHud === 'function') updateHud();
+  // Descanso longo esgota — sem novo descanso até amanhã lógico
+  document.getElementById('btn-camp-long').disabled = true;
+  document.getElementById('btn-camp-short').disabled = (p.hd || 0) <= 0;
+}
+
+function _showCampResult(text) {
+  const res = document.getElementById('camp-result');
+  if (!res) return;
+  res.textContent = text;
+  res.style.display = 'block';
 }
 
 // ---- INVENTÁRIO + REPUTAÇÃO (V2.2) ----------------------------------
@@ -12018,11 +12390,51 @@ function bindPinchZoom() {
 // ============================================================================
 
 function bindQuickActions() {
+  // X-6.5.14: camp modal (short/long rest) em vez de stub "[V2]"
   document.getElementById('btn-camp').addEventListener('click', () => {
     if (S.ph !== 'idle') return;
-    dmNarrate({ text: 'Você encontra um ponto seguro e monta acampamento. [V2]', type: 'ambient' });
+    openCampOverlay();
   });
-  document.getElementById('btn-inventory').addEventListener('click', openQuestJournal);
+  document.getElementById('btn-camp-short').addEventListener('click', doShortRest);
+  document.getElementById('btn-camp-long').addEventListener('click', doLongRest);
+  document.getElementById('btn-camp-cancel').addEventListener('click', closeCampOverlay);
+
+  // X-6.5.14: mochila abre journal focado em INVENTÁRIO (antes abria
+  // no topo em "Missões" e o user achava que era só popup de missão).
+  document.getElementById('btn-inventory').addEventListener('click', () => {
+    openQuestJournal({ focus: 'inventory' });
+  });
+
+  // X-6.5.14: toggle minimap+coord — recolhe/mostra o bloco todo via
+  // localStorage (preferência persistente). Estado default: visível.
+  const minimapToggleBtn = document.getElementById('btn-minimap-toggle');
+  if (minimapToggleBtn) {
+    const applyMinimapState = (collapsed) => {
+      const block = document.getElementById('minimap-block');
+      if (!block) return;
+      if (collapsed) {
+        block.classList.add('collapsed');
+        minimapToggleBtn.classList.add('active');
+        minimapToggleBtn.title = 'Mostrar minimapa';
+      } else {
+        block.classList.remove('collapsed');
+        minimapToggleBtn.classList.remove('active');
+        minimapToggleBtn.title = 'Recolher minimapa';
+      }
+    };
+    // Restaura preferência
+    try {
+      const saved = localStorage.getItem('valdoria_explore_minimap_collapsed');
+      applyMinimapState(saved === '1');
+    } catch (_e) { /* localStorage bloqueado */ }
+    minimapToggleBtn.addEventListener('click', () => {
+      const block = document.getElementById('minimap-block');
+      if (!block) return;
+      const willCollapse = !block.classList.contains('collapsed');
+      applyMinimapState(willCollapse);
+      try { localStorage.setItem('valdoria_explore_minimap_collapsed', willCollapse ? '1' : '0'); } catch (_e) {}
+    });
+  }
   document.getElementById('btn-cartografia').addEventListener('click', openCartography);
   // V2.7: btn-download-log removido. Console global downloadExploracaoLogs() continua.
   document.getElementById('cart-close-btn').addEventListener('click', closeCartography);
