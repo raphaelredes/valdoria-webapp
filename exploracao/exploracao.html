@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:21:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:25:00Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2595,23 +2595,12 @@ body.remote-mode #debug-hud { display: none !important; }
     </div>
   </div>
 
-  <!-- X-6.5.15: Inventory overlay — popup dedicado APENAS da mochila.
-       O journal-overlay (missões+inv+rep combinado) continua existindo,
-       mas agora o botão 🎒 abre esta view focada: ícones + nome + qty. -->
-  <div id="inv-overlay">
-    <div class="inv-card">
-      <div class="inv-header">
-        <h2 class="inv-title">Mochila</h2>
-        <button id="inv-close" class="inv-close" aria-label="Fechar">×</button>
-      </div>
-      <p class="inv-subtitle" id="inv-subtitle">Nenhum item</p>
-      <div id="inv-grid" class="inv-grid"></div>
-      <div id="inv-empty" class="inv-empty" style="display:none">
-        <div class="inv-empty-ico">🎒</div>
-        <div class="inv-empty-text">Sua mochila está vazia.<br>Eventos, combates e exploração rendem materiais.</div>
-      </div>
-    </div>
-  </div>
+  <!-- X-6.5.20 REMOVIDO: o popup custom #inv-overlay foi substituído pela
+       navegação direta pra tela real do inventário (/inventory/), que já
+       existe como webapp completo em valdoria-webapp/inventory/. User req:
+       "não quero tela nova de mochila, quero o que já existe". Ver
+       bindQuickActions: btn-inventory faz window.location.href pra
+       /inventory/?token=...&return=exploracao. -->
 
   <div id="hex-nav">
     <div id="hex-nav-inner">
@@ -10973,9 +10962,9 @@ function openQuestJournal(opts) {
     });
   }
 
-  // X-6.5.19: SECÇÃO 2 e 3 (Inventário + Reputação) só renderizam se
+  // X-6.5.19/20: SECÇÃO 2 e 3 (Inventário + Reputação) só renderizam se
   // não for questsOnly. Acesso via botão 📜 mostra só missões; botão 🎒
-  // tem inv-overlay dedicado (openInventoryPopup).
+  // navega pra /inventory/ real (sistema completo).
   if (!questsOnly) {
     // SECÇÃO 2 — INVENTÁRIO
     const invHead = document.createElement('div');
@@ -11052,71 +11041,6 @@ function openQuestJournal(opts) {
 
 function closeQuestJournal() {
   document.getElementById('journal-overlay').classList.remove('visible');
-}
-
-// ============================================================================
-// INVENTORY POPUP (X-6.5.15)
-// ============================================================================
-// Popup dedicado da mochila. Renderiza grid de cards (ícone + nome + qty)
-// a partir de playerInventory + MATERIALS_DB. Click no card abre detail.
-
-function openInventoryPopup() {
-  const ov = document.getElementById('inv-overlay');
-  const grid = document.getElementById('inv-grid');
-  const emptyEl = document.getElementById('inv-empty');
-  const sub = document.getElementById('inv-subtitle');
-  if (!ov || !grid) return;
-  clearChildren(grid);
-
-  const ids = Object.keys(playerInventory || {}).filter(id => (playerInventory[id] || 0) > 0);
-  const total = ids.reduce((acc, id) => acc + (playerInventory[id] || 0), 0);
-
-  if (ids.length === 0) {
-    grid.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = 'block';
-    if (sub) sub.textContent = 'Vazia';
-  } else {
-    grid.style.display = 'grid';
-    if (emptyEl) emptyEl.style.display = 'none';
-    if (sub) sub.textContent = ids.length + ' item' + (ids.length === 1 ? '' : 's') + ' diferentes · ' + total + ' no total';
-
-    // Ordena: raridade desc (se tiver), depois nome alfabético
-    ids.sort((a, b) => {
-      const ma = MATERIALS_DB[a] || {};
-      const mb = MATERIALS_DB[b] || {};
-      const na = ma.name || a;
-      const nb = mb.name || b;
-      return na.localeCompare(nb);
-    });
-
-    ids.forEach(id => {
-      const mat = MATERIALS_DB[id];
-      const slot = document.createElement('div');
-      slot.className = 'inv-slot';
-      const ico = document.createElement('div');
-      ico.className = 'inv-slot-ico';
-      ico.textContent = (mat && mat.icon) || '📦';
-      const name = document.createElement('div');
-      name.className = 'inv-slot-name';
-      name.textContent = (mat && mat.name) || id;
-      const qty = document.createElement('div');
-      qty.className = 'inv-slot-qty';
-      qty.textContent = '×' + playerInventory[id];
-      slot.appendChild(ico);
-      slot.appendChild(name);
-      slot.appendChild(qty);
-      slot.addEventListener('click', () => {
-        if (typeof openMaterialDetail === 'function') openMaterialDetail(id);
-      });
-      grid.appendChild(slot);
-    });
-  }
-  ov.classList.add('visible');
-}
-
-function closeInventoryPopup() {
-  const ov = document.getElementById('inv-overlay');
-  if (ov) ov.classList.remove('visible');
 }
 
 // ============================================================================
@@ -12474,11 +12398,36 @@ function bindQuickActions() {
   if (_cbl) _cbl.addEventListener('click', doLongRest);
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
 
-  // X-6.5.15: mochila abre POPUP DEDICADO de inventário (não o journal
-  // combinado). User pediu: "abrir a tela da mochila em um popup para o
-  // jogador ver a mochila e não o diário de missões".
-  document.getElementById('btn-inventory').addEventListener('click', openInventoryPopup);
-  document.getElementById('inv-close').addEventListener('click', closeInventoryPopup);
+  // X-6.5.20: mochila abre a TELA REAL /inventory/ (webapp SPA já existente
+  // com 7 arquivos JS completos em valdoria-webapp/inventory/). User pediu:
+  // "já existe um sistema de inventário completo, implemente ele como popup
+  // ao apertar o botão da mochila". REMOTE: navega mantendo return=exploracao;
+  // LOCAL (file://): toast informando que precisa do jogo real.
+  document.getElementById('btn-inventory').addEventListener('click', function() {
+    if (window.__EXPLORE_MODE === 'remote') {
+      // Preserva contexto de retorno via 'return' param. /inventory/ sabe
+      // voltar pra /exploracao/ quando fechar.
+      var params = new URLSearchParams();
+      if (window.__EXPLORE_TOKEN) params.set('token', window.__EXPLORE_TOKEN);
+      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
+      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
+      params.set('return', 'exploracao');
+      if (S && S.mapId) params.set('return_map', S.mapId);
+      params.set('_cb', String(Date.now()));
+      window.__valdoria_transitioning = true;
+      window.location.href = '/inventory/?' + params.toString();
+    } else {
+      // LOCAL (file://): sistema real requer bot DEV. Mostra narração.
+      if (typeof dmNarrate === 'function') {
+        dmNarrate({
+          text: '📦 A mochila está no acampamento principal. (Disponível no jogo real via Telegram.)',
+          type: 'ambient'
+        });
+      } else {
+        console.info('[INVENTORY] LOCAL mode — use bot DEV para acessar inventário real');
+      }
+    }
+  });
 
   // X-6.5.19: botão dedicado de Diário de Missões (antes bindado no 🎒).
   // openQuestJournal agora mostra SÓ missões (opts.questsOnly=true).
