@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T04:21:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T17:43:24Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2591,6 +2591,65 @@ body.remote-mode #debug-hud { display: none !important; }
 })();
 </script>
 
+<!-- X-6.5.6 cliente thin: carrega dataset canônico do servidor (build Python
+     → JS export). Sibling path funciona em LOCAL (file://) e REMOTE (bot DEV
+     serve de /exploracao/). Carrega síncrono (blocking) para estar pronto
+     ANTES do main script. Sem impacto no LOCAL fallback — EVENTS_POOL continua
+     sendo o source primário. O dataset fica disponível via window.__EXPLORACAO_EVENTS
+     para lookups futuros de enriquecimento (narrativa, text_by_alignment). -->
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = './exploracao_events_data.js?v=' + Date.now();
+  s.async = false;
+  // Error é inócuo (o helper getServerEvent retorna null se dataset ausente).
+  s.onerror = function() {
+    console.warn('[E-REM:DATASET] exploracao_events_data.js failed to load — fallback to EVENTS_POOL');
+  };
+  document.head.appendChild(s);
+})();
+</script>
+
+<script>
+// ---- CLIENTE THIN HELPER (X-6.5.6) ----------------------------------------
+// Expõe window.__getServerEvent(id): lookup no dataset canônico do servidor.
+// Retorna evento completo (com variants, filters, etc) ou null se ausente.
+// Safe em LOCAL E REMOTE: se __EXPLORACAO_EVENTS não carregou, retorna null
+// (caller usa EVENTS_POOL como fallback). Zero impacto no path existente.
+(function() {
+  window.__getServerEvent = function(id) {
+    try {
+      var ds = window.__EXPLORACAO_EVENTS;
+      if (!ds || typeof ds !== 'object') return null;
+      return ds[id] || null;
+    } catch (e) {
+      return null;
+    }
+  };
+  window.__getServerQuest = function(id) {
+    try {
+      var ds = window.__EXPLORACAO_QUESTS;
+      if (!ds || typeof ds !== 'object') return null;
+      return ds[id] || null;
+    } catch (e) {
+      return null;
+    }
+  };
+  // Debug helper para o agente IA: inspeção rápida no console.
+  window.__exploracaoDatasetInfo = function() {
+    var ev = window.__EXPLORACAO_EVENTS || {};
+    var qs = window.__EXPLORACAO_QUESTS || {};
+    var build = window.__EXPLORACAO_BUILD || {};
+    return {
+      events_loaded: Object.keys(ev).length,
+      quests_loaded: Object.keys(qs).length,
+      build: build,
+      mode: window.__EXPLORE_MODE || '(pre-detection)',
+    };
+  };
+})();
+</script>
+
 <script>
 // ============================================================================
 // [FASE 2 - 2026-04-22] MODE DETECTION + LOG-RELAY + SNAP DECODER + REWARDS
@@ -2830,11 +2889,25 @@ body.remote-mode #debug-hud { display: none !important; }
     init: async function(snap) {
       snap = snap || {};
       if (!snap.map_id) snap.map_id = window.__EXPLORE_MAP_ID || 'plains_01';
-      console.info('[E-REM:API-INIT] map=' + snap.map_id
-        + ' hp=' + snap.hp + '/' + snap.mhp);
+      console.info('[E-REM:API-INIT] send map=' + snap.map_id
+        + ' hp=' + snap.hp + '/' + snap.mhp
+        + ' mp=' + snap.mp + '/' + snap.mmp
+        + ' cls=' + (snap.char_class || '-')
+        + ' bg=' + (snap.background || '-')
+        + ' align=' + (snap.alignment || '-')
+        + ' weather=' + (snap.weather || 'clear')
+        + ' abilities_n=' + (snap.abilities ? Object.keys(snap.abilities).length : 0)
+        + ' prof_n=' + (snap.proficiency ? snap.proficiency.length : 0)
+        + ' peek_tok=' + (PEEK_TOKEN ? PEEK_TOKEN.slice(0, 8) + '...' : '(empty)'));
       var res = await _post('/api/exploracao/init', snap, 'peek');
       if (res && res.token) {
         window.__EXPLORE_MOTOR_TOKEN = res.token;
+        console.info('[E-REM:API-INIT] ok motor_token=' + res.token.slice(0, 8) + '...'
+          + ' state_pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
+          + ' visible_n=' + (res.state.visible ? res.state.visible.length : 0)
+          + ' visited_n=' + (res.state.visited ? res.state.visited.length : 0));
+      } else {
+        console.warn('[E-REM:API-INIT] failed resp=' + JSON.stringify(res).slice(0, 200));
       }
       return res;
     },
@@ -2842,25 +2915,52 @@ body.remote-mode #debug-hud { display: none !important; }
     // POST /api/exploracao/move — valida + aplica move. Retorna state + event.
     move: async function(col, row) {
       var tok = _motorToken();
-      if (!tok) return { error: 'no_motor_token', hint: 'call init first' };
-      console.info('[E-REM:API-MOVE] col=' + col + ' row=' + row);
-      return await _post('/api/exploracao/move',
+      if (!tok) {
+        console.warn('[E-REM:API-MOVE] skip no_motor_token col=' + col + ' row=' + row);
+        return { error: 'no_motor_token', hint: 'call init first' };
+      }
+      console.info('[E-REM:API-MOVE] send col=' + col + ' row=' + row
+        + ' motor_tok=' + tok.slice(0, 8) + '...');
+      var res = await _post('/api/exploracao/move',
         { token: tok, col: col, row: row });
+      if (res && res.state) {
+        console.info('[E-REM:API-MOVE] ok pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
+          + ' hp=' + res.state.hp + '/' + res.state.mhp
+          + ' steps=' + res.state.steps
+          + ' event=' + (res.event ? res.event.id : 'none')
+          + ' visible_n=' + (res.state.visible ? res.state.visible.length : 0));
+      }
+      return res;
     },
 
     // POST /api/exploracao/event_choice
     eventChoice: async function(idx) {
       var tok = _motorToken();
-      if (!tok) return { error: 'no_motor_token' };
-      console.info('[E-REM:API-EVENT_CHOICE] idx=' + idx);
-      return await _post('/api/exploracao/event_choice',
+      if (!tok) {
+        console.warn('[E-REM:API-EVENT_CHOICE] skip no_motor_token idx=' + idx);
+        return { error: 'no_motor_token' };
+      }
+      console.info('[E-REM:API-EVENT_CHOICE] send idx=' + idx);
+      var res = await _post('/api/exploracao/event_choice',
         { token: tok, choice_idx: idx });
+      if (res && res.outcome) {
+        var check = res.outcome.check;
+        var delta = res.outcome.delta || {};
+        console.info('[E-REM:API-EVENT_CHOICE] ok tier=' + res.outcome.tier
+          + (check ? ' d20=' + check.d20 + ' total=' + check.total + ' vs_dc=' + check.dc : ' (no_check)')
+          + ' hp_delta=' + (delta.hp || 0)
+          + ' gold_delta=' + (delta.gold || 0)
+          + ' xp_delta=' + (delta.xp || 0)
+          + ' combat_redirect=' + (res.combat_redirect ? 'yes(' + res.combat_redirect.enemy_id + ')' : 'no'));
+      }
+      return res;
     },
 
     // GET /api/exploracao/state?token=X
     state: async function() {
       var tok = _motorToken();
       if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-STATE] send motor_tok=' + tok.slice(0, 8) + '...');
       return await _get('/api/exploracao/state?token=' + encodeURIComponent(tok));
     },
 
@@ -2868,8 +2968,13 @@ body.remote-mode #debug-hud { display: none !important; }
     finish: async function() {
       var tok = _motorToken();
       if (!tok) return { error: 'no_motor_token' };
-      console.info('[E-REM:API-FINISH]');
+      console.info('[E-REM:API-FINISH] send motor_tok=' + tok.slice(0, 8) + '...');
       var res = await _post('/api/exploracao/finish', { token: tok });
+      if (res && res.ok) {
+        console.info('[E-REM:API-FINISH] ok steps=' + (res.state ? res.state.steps : '?')
+          + ' xp=' + (res.rewards_hint ? res.rewards_hint.xp : 0)
+          + ' gold=' + (res.rewards_hint ? res.rewards_hint.gp : 0));
+      }
       // Consome o token localmente mesmo se server retornou erro
       window.__EXPLORE_MOTOR_TOKEN = '';
       return res;
@@ -2879,7 +2984,9 @@ body.remote-mode #debug-hud { display: none !important; }
     hasToken: function() { return !!_motorToken(); }
   };
 
-  console.info('[E-REM:API] ExploracaoAPI wired (5 methods: init, move, eventChoice, state, finish)');
+  console.info('[E-REM:API] ExploracaoAPI wired (5 methods: init, move, eventChoice, state, finish)'
+    + ' peek_tok=' + (PEEK_TOKEN ? PEEK_TOKEN.slice(0, 8) + '...' : '(empty)')
+    + ' api_base=' + API_BASE);
 })();
 
 // ---- SNAP DECODER (boot hidratação em remote) -----------------------------
@@ -12058,6 +12165,11 @@ function boot() {
     // Cria sessão no motor após hidratar state local. Motor token vai pro
     // window.__EXPLORE_MOTOR_TOKEN pra uso das próximas fases (X-4.3+: move,
     // event_choice, etc). Em LOCAL: skipped (ExploracaoAPI === null).
+    //
+    // X-6.5.7 (2026-04-24): envia biome + cols + rows + spawn pro server
+    // auto-registrar mapa sintético se unknown. Destrava server-authoritative
+    // (events, forced combat, quests) em TODOS os 22+ mapas do client sem
+    // precisar hardcoded em world.py. Jogador Mínimo Trabalho.
     if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && S && S.player) {
       try {
         var _w = S.weather;
@@ -12066,7 +12178,8 @@ function boot() {
                           : (_w === 'f') ? 'fog'
                           : (_w === 't') ? 'storm'
                           : 'clear';
-        window.ExploracaoAPI.init({
+        var _mapDef = (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[S.mapId]) || null;
+        var _initBody = {
           map_id: S.mapId,
           hp: S.player.hp, mhp: S.player.mhp,
           mp: S.player.mp, mmp: S.player.mmp,
@@ -12076,9 +12189,25 @@ function boot() {
           abilities: S.player.mods || {},
           proficiency: S.player.prof || [],
           weather: _motorWeather
-        }).then(function(res) {
+        };
+        // X-6.5.7: anexa metadados do mapa pro server sintetizar se unknown
+        if (_mapDef) {
+          _initBody.biome = _mapDef.biome || S.biome || '';
+          _initBody.cols = _mapDef.cols || S.cols || 0;
+          _initBody.rows = _mapDef.rows || S.rows || 0;
+          _initBody.spawn_col = _mapDef.spawnCol || 0;
+          _initBody.spawn_row = _mapDef.spawnRow || 0;
+          _initBody.map_name = _mapDef.name || S.mapId;
+        } else {
+          // Fallback: se não temos mapDef, pelo menos manda biome atual + dims do S
+          _initBody.biome = S.biome || '';
+          _initBody.cols = S.cols || 0;
+          _initBody.rows = S.rows || 0;
+        }
+        window.ExploracaoAPI.init(_initBody).then(function(res) {
           if (res && res.token) {
-            LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8) + '...');
+            LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8)
+              + '... map=' + S.mapId + ' biome=' + _initBody.biome);
           } else {
             LOGW('API', 'motor_init failed resp=' + JSON.stringify(res).slice(0, 200));
           }
