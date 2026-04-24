@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T17:56:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T18:16:08Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12223,12 +12223,18 @@ function boot() {
                 if (typeof _ss.mhp === 'number') S.player.mhp = _ss.mhp;
                 if (typeof _ss.mp === 'number')  S.player.mp  = _ss.mp;
                 if (typeof _ss.mmp === 'number') S.player.mmp = _ss.mmp;
+                // X-6.5.9: gold/xp também vem do DB (Wilzen tem 235 Valdoritas)
+                if (typeof _ss.gold === 'number') S.gold = _ss.gold;
+                if (typeof _ss.xp === 'number' && S.player.xp !== undefined) {
+                  S.player.xp = _ss.xp;
+                }
                 if (res.stale_corrected || res.source === 'db') {
                   // Reload visual: atualiza HUD imediatamente. Sem flash, sem
                   // tela de loading — só o valor certo substitui o errado.
                   try { if (typeof updateHud === 'function') updateHud(); } catch (_eHud) {}
                   LOG('API', 'state_reloaded from server hp=' + S.player.hp + '/' + S.player.mhp
-                    + ' mp=' + S.player.mp + '/' + S.player.mmp + ' source=' + res.source);
+                    + ' mp=' + S.player.mp + '/' + S.player.mmp
+                    + ' gold=' + S.gold + ' source=' + res.source);
                 }
               }
             } catch (eApply) {
