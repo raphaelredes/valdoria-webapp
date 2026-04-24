@@ -10093,7 +10093,13 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   var skipBtn = document.getElementById('dice-skip-btn');
   clearChildren(wrap); clearChildren(formula); clearChildren(result);
   result.className = '';
+  /* X-6.5.28: removeProperty limpa !important deixado por runs anteriores
+     antes de aplicar display:none — caso contrário o reset não esconde
+     se a chamada anterior aplicou setProperty(...,'important'). */
+  result.style.removeProperty('display');
   result.style.display = 'none';
+  skipBtn.style.removeProperty('display');
+  skipBtn.style.removeProperty('visibility');
   skipBtn.style.display = 'none';
   overlay.classList.add('visible');
   var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
@@ -10102,6 +10108,8 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   function advance() {
     if (advanced) return;
     advanced = true;
+    /* X-6.5.28: limpa safety timer ao avançar (evita force-fire pós-advance). */
+    if (typeof safetyTimer !== 'undefined' && safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
     overlay.classList.remove('visible');
     setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
   }
@@ -10110,25 +10118,38 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   var shown = false;
   function showResult() {
     if (shown) return; shown = true;
+    LOG('DICE', 'remote showResult d20=' + d20 + ' total=' + total + ' dc=' + dc + ' success=' + success);
     var modStr = (mod >= 0 ? '+' : '') + mod;
     formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
     var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
     formula.appendChild(document.createTextNode(' vs CD ' + dc));
     result.className = success ? 'success' : 'failure';
     result.textContent = success ? 'SUCESSO' : 'FALHA';
-    result.style.display = 'inline-block';
+    /* X-6.5.28: setProperty(...,'important') — combina com removeProperty
+       no reset pra garantir display correto em re-uso da overlay. */
+    result.style.setProperty('display', 'inline-block', 'important');
     skipBtn.textContent = 'Continuar \u276f\u276f';
     skipBtn.style.setProperty('display', 'inline-block', 'important');
     skipBtn.style.setProperty('visibility', 'visible', 'important');
   }
+  /* X-6.5.28: SAFETY TIMER — força showResult em 3.5s se Dice3D callback
+     nunca disparar (race-condition WebGL/THREE.js no 1º uso). Mirror do
+     safety pattern usado em rollSkillCheck. */
+  var safetyTimer = setTimeout(function() {
+    LOGW('DICE', 'remote safety timeout fired - Dice3D callback never fired?');
+    showResult();
+  }, 3500);
+  var wrappedShow = function() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } showResult(); };
   if (window.Dice3D) {
     try {
       var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
-      dice.roll(d20, showResult);
+      dice.roll(d20, wrappedShow);
       return;
-    } catch (e) { /* fall through */ }
+    } catch (e) { LOGE('DICE', 'remote Dice3D failed: ' + (e && e.message)); /* fall through */ }
+  } else {
+    LOGW('DICE', 'remote: window.Dice3D not loaded');
   }
-  setTimeout(showResult, 900);
+  setTimeout(wrappedShow, 900);
 }
 
 // X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
