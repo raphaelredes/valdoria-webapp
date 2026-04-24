@@ -286,10 +286,15 @@ function _onDataReady() {
     applyFont(savedFont);
   }
 
-  /* Start audio for current biome */
+  /* Start audio for current location.
+     Hubs urbanos (Eldoria/settlements) tocam 'city' explicitamente — biome
+     'plains' do Eldoria não deve cair no playBiome (que é wilderness). */
   if (typeof ValdoriaAudio !== 'undefined') {
+    var _curLoc = _findLoc(state.currentLoc);
     var _curBiome = _findBiome(state.currentLoc);
-    if (_curBiome) ValdoriaAudio.playBiome(_curBiome);
+    var _isCity = state.currentLoc === 'city_gates' || (_curLoc && _curLoc.s === 1);
+    if (_isCity) ValdoriaAudio.play('city');
+    else if (_curBiome) ValdoriaAudio.playBiome(_curBiome);
     else ValdoriaAudio.play('city');
   }
 
