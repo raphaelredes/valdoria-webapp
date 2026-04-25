@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T11:20:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:16:44Z - do not edit directly, edit source -->
 
 
 <!--
@@ -496,29 +496,40 @@ body {
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
 }
 
-/* X-6.5.50 OVERRIDES — elementos que audio-manager.js / vOverlay.js / outros
+/* X-6.5.51b OVERRIDES — elementos que audio-manager.js / vOverlay.js / outros
    shareds appendam ao document.body com position:fixed escapam do #frame.
-   Em produção (Telegram WebApp) o body É o viewport, então funciona.
-   No simulador (file://) o body é maior que o frame → elemento aparece
-   FORA do frame (user reportou audio button no bottom do browser).
 
-   Solucao: limitar `.va-float` (audio btn), `.v-overlay-host` e qualquer
-   outro `position:fixed`-em-body a 384px e ancorar bottom no bottom do frame
-   simulado (não viewport). */
+   X-6.5.51b BUG FIX (2026-04-25): tentativa anterior (X-6.5.50) usava
+   `bottom: calc((100dvh - 694px) / 2 + 8px)` assumindo que `position:fixed`
+   era viewport-relative. Mas valdoria-design.css linha 334
+   `body { contain: layout size }` faz body ser o containing block de fixed
+   children. Body agora e 694px tall (X-6.5.51 viewport global), entao meu
+   bottom:201 ficava 201px acima do body bottom = MEIO do frame, sobrepondo
+   action column.
+
+   Fix: posicionar audio no canto BOTTOM-LEFT do frame (area livre, longe
+   da action column #hud-quick em right:10 + hex-nav em center-bottom).
+   `bottom: 8px` de fato == 8px do bottom do body (= 8px do frame bottom).
+   `left: 8px` mesma logica. */
 html body .va-float {
   position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  margin: 0 auto !important;
-  max-width: 384px !important;
-  width: 384px !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  /* width: auto pra wrap dimensionar pelo conteudo (botao 36px) */
+  width: auto !important;
+  max-width: 44px !important;
+  /* justify-content original era flex-end (botao a direita do wrap).
+     Como wrap agora tem largura do botao, justify nao importa. */
+  justify-content: flex-start !important;
   transform: none !important;
-  /* Bottom: viewport-bottom + (espaço vazio abaixo do frame) + 8px padding.
-     Quando viewport > 694, frame fica centralizado e há espaço empty embaixo;
-     audio button precisa subir esse tanto pra ficar no bottom do frame. */
-  bottom: calc(max(0px, (100dvh - 694px) / 2) + 8px) !important;
 }
-/* Mesmo pattern pra qualquer toast/popup que use position:fixed em body */
+/* Toasts/popups overlay: cobrir o body inteiro (que e 694px tall por X-6.5.51).
+   X-6.5.51b: top: 0 + height: 100% suficiente porque body tem contain:layout
+   (containing block dos fixed children). NAO usar calc((100dvh - 694) / 2) —
+   compensa empty space que ja nao existe. */
 html body .v-toast-host,
 html body .v-popup-host,
 html body .v-overlay-host,
@@ -528,10 +539,8 @@ html body .connection-overlay {
   right: 0 !important;
   margin: 0 auto !important;
   max-width: 384px !important;
-  max-height: min(100dvh, 694px) !important;
-  /* Centralizar tambem verticalmente (overlays cobrem o frame inteiro) */
-  top: max(0px, calc((100dvh - 694px) / 2)) !important;
-  height: min(100dvh, 694px) !important;
+  top: 0 !important;
+  height: 100% !important;
 }
 
 /* ====== MAP VIEWPORT (scrollável + canvas maior que a tela) =========== */
