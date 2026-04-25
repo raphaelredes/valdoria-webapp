@@ -9580,7 +9580,13 @@ function onMoveEnd(col, row) {
       wandered = maybeRollWanderingMonster();
     }
   }
-  S.ph = (rolled || wandered) ? 'event' : 'idle';
+  /* X-6.5.44 (2026-04-24): NAO sobrescrever S.ph='event' se modal remoto ja
+     esta aberto. Bug: response do segundo /move chega DEPOIS do primeiro abrir
+     modal → onMoveEnd resetava S.ph='idle' → segundo response ve 'idle' e
+     sobrescreve modal. Agora preserva 'event' se ja em event. */
+  if (S.ph !== 'event') {
+    S.ph = (rolled || wandered) ? 'event' : 'idle';
+  }
 
   updateHud();
   updateHexNav();
@@ -9625,12 +9631,30 @@ function onMoveEnd(col, row) {
           LOGE('API', 'state_sync err=' + (eS && eS.message));
         }
       }
-      // Event: server rolou → abre modal (sobrepõe local, que não rodou)
-      if (res.event && S.ph !== 'event') {
-        LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
-        S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
-        S.ph = 'event';
-        try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
+      // Event: server rolou → abre modal (sobrepõe local, que não rodou).
+      /* X-6.5.44 (2026-04-24): GUARD ROBUSTO contra sobrescrever evento ja
+         exibido. Bug user 23:22:29-33 (logs):
+           1. Move 7 → server rola orc_raid → response abre modal
+           2. Moves 8/9/10 ja em flight → server rola bandit_ambush no move 10
+           3. Response do move 10 chega → S.ph era 'event' (orc_raid aberto),
+              mas SE algum estado intermediario resetar S.ph→idle (ex:
+              onMoveEnd subsequente), o segundo openEventModal sobrescreve.
+         Fix: alem de S.ph !== 'event', checa se ja existe S.event remoto
+         pendente. Se sim, IGNORA novo event (fica logado pro debug). */
+      if (res.event) {
+        var hasOpenRemoteEvent = !!(S.event && S.event.__remote && !S.event.resolved);
+        var modalEl = document.getElementById('event-modal');
+        var modalVisible = modalEl && modalEl.classList.contains('visible');
+        if (hasOpenRemoteEvent || modalVisible || S.ph === 'event') {
+          LOGW('API', 'motor_event_discarded id=' + res.event.id
+            + ' reason=' + (hasOpenRemoteEvent ? 'open_remote_event' : (modalVisible ? 'modal_visible' : 'ph_event'))
+            + ' current_ev=' + (S.event ? S.event.id : 'null'));
+        } else {
+          LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
+          S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
+          S.ph = 'event';
+          try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
+        }
       }
     }).catch(function(e) {
       /* X-6.5.33: network error — log warn, NAO desfaz movimento. */
