@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:55:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:01:18Z - do not edit directly, edit source -->
 
 
 <!--
@@ -660,7 +660,12 @@ html body .camp-screen {
   image-rendering: -webkit-optimize-contrast;
 }
 
-/* ====== TOP BAR (HUD profissional) =================================== */
+/* ====== TOP BAR (HUD profissional) ===================================
+   X-6.5.51g (2026-04-25): user feedback — "top-bar ficou com design quebrado
+   ao ter palavras muito grandes juntas (FLORESTA, NEVOA, ENTARDECER)".
+   Refator: biome/weather/phase agora ICON-ONLY (com tooltip via title=).
+   Ocupam menos espaco horizontal, nunca quebram. Danger continua "PERIGO ◆◆◇◇◇".
+   gap: aumentado de 5 -> 10 entre items pra balancear. */
 #top-bar {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -668,11 +673,21 @@ html body .camp-screen {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 8px 14px 10px;
   background: linear-gradient(180deg, rgba(20,16,12,0.95) 0%, rgba(26,21,16,0.85) 60%, rgba(26,21,16,0) 100%);
   pointer-events: none;
   border-bottom: 1px solid transparent;
   box-shadow: 0 1px 0 rgba(196, 149, 58, 0.15), inset 0 -1px 0 rgba(196, 149, 58, 0.08);
+  flex-wrap: nowrap;  /* nunca quebra linha */
+}
+/* X-6.5.51g: container pros 3 icons (biome/weather/phase) — fica a esquerda */
+.tb-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;  /* tooltips de title= */
+  flex-shrink: 0;
 }
 .tb-item {
   display: flex; align-items: center; gap: 5px;
@@ -682,19 +697,21 @@ html body .camp-screen {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  flex-shrink: 0;
 }
-.tb-biome {
-  color: var(--v-gold, #c4953a);
-  text-shadow: 0 0 8px rgba(196, 149, 58, 0.35), 0 1px 3px rgba(0, 0, 0, 0.8);
+/* X-6.5.51g: tb-biome / tb-weather / tb-phase agora ICON-ONLY pra economizar
+   espaco e evitar quebra. Tooltip via title= mostra texto completo. */
+.tb-biome, .tb-weather, .tb-phase {
+  font-size: 18px;
+  letter-spacing: 0;
+  filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.3));
+  cursor: help;
 }
-.tb-weather {
-  color: var(--v-text, #d4c8b0);
-  opacity: 0.88;
-}
-/* X-6.5.51d (2026-04-25): user feedback — "top-danger nao esta claro
-   que e o nivel de perigo, sao losangos e nao tem qualquer informacao
-   que indique que e medidor de nivel de perigo".
-   Fix: adicionar label "PERIGO" + icone caveira antes dos pips. */
+.tb-biome { color: var(--v-gold, #c4953a); }
+.tb-weather { color: var(--v-text, #d4c8b0); opacity: 0.95; }
+.tb-phase { color: var(--v-text, #d4c8b0); opacity: 0.95; }
+/* X-6.5.51g (2026-04-25): user feedback — "remova o desenho que tem logo
+   antes de PERIGO". Removido ::before com ☠. Mantido label "Perigo" + pips. */
 .tb-danger {
   display: flex;
   align-items: center;
@@ -703,13 +720,6 @@ html body .camp-screen {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(196, 149, 58, 0.2);
   border-radius: 20px;
-}
-.tb-danger::before {
-  content: '☠';
-  font-size: 11px;
-  color: #c08070;
-  text-shadow: 0 0 4px rgba(192, 80, 60, 0.5);
-  margin-right: 2px;
 }
 .tb-danger-lbl {
   font-family: var(--v-font-display, 'Cinzel', serif);
@@ -2704,12 +2714,15 @@ body.remote-mode #debug-hud { display: none !important; }
        via ?ld_debug=1 no URL). As funções _updateHudDomFailsafe/drawDebugHud
        agora criam o div dinamicamente SE o param ld_debug estiver presente. -->
 
+  <!-- X-6.5.51g: top-bar refatorado pra nao quebrar com palavras grandes.
+       Biome/weather/phase agora ICON-ONLY (tooltip via title=). Danger
+       continua label + pips (sem ☠ icon — user pediu pra remover). -->
   <div id="top-bar">
-    <div class="tb-item tb-biome" id="top-biome">🌲 Floresta</div>
-    <div class="tb-item tb-weather" id="top-weather">☀️ Limpo</div>
-    <!-- X-6.5.51d: user feedback "nao esta claro que e nivel de perigo".
-         Adicionado label "PERIGO" + icone caveira (CSS ::before do .tb-danger).
-         Pips agrupados em .tb-danger-pips pra layout limpo. -->
+    <div class="tb-icons">
+      <div class="tb-item tb-biome" id="top-biome" title="Floresta">🌲</div>
+      <div class="tb-item tb-weather" id="top-weather" title="Limpo">☀️</div>
+      <div class="tb-item tb-phase" id="top-phase" title="Dia">☀</div>
+    </div>
     <div class="tb-item tb-danger" id="top-danger" title="Nível de perigo do mapa">
       <span class="tb-danger-lbl">Perigo</span>
       <div class="tb-danger-pips">
@@ -10349,9 +10362,31 @@ function skillLabelOf(s) {
   return { str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR' }[s] || s.toUpperCase();
 }
 
+/* X-6.5.51g (2026-04-25): helper pra disable/enable TODOS os event-choice buttons.
+   User feedback: "se o jogador clicar muito rapido em alguma das opcoes do
+   evento depois de clicar em confirmar no popup da escolha que fez ele pode
+   escolher mais uma". Race fix: ao abrir o confirm-overlay, todos os botoes
+   ficam disabled. Re-enable so se user cancelar (back). Apos confirmar, ficam
+   disabled ate o evento resolver (applyChoiceOutcome ja faz isso por conta
+   propria depois). */
+function _setEventChoicesDisabled(disabled) {
+  document.querySelectorAll('.event-choice').forEach(b => {
+    b.disabled = !!disabled;
+    if (disabled) {
+      b.style.opacity = '0.4';
+      b.style.pointerEvents = 'none';
+    } else {
+      b.style.opacity = '';
+      b.style.pointerEvents = '';
+    }
+  });
+}
+
 function confirmChoice(idx) {
   const ch = S.event.choices[idx];
   S.pendingChoiceIdx = idx;
+  /* X-6.5.51g: disable ANTES de mostrar overlay — bloqueia race window */
+  _setEventChoicesDisabled(true);
   document.getElementById('confirm-desc').textContent = ch.desc || ch.label;
   const statsEl = document.getElementById('confirm-stats');
   if (ch.skill) {
@@ -10370,13 +10405,21 @@ function onConfirmOk() {
   document.getElementById('confirm-overlay').classList.remove('visible');
   const idx = S.pendingChoiceIdx;
   S.pendingChoiceIdx = null;
-  if (idx === null || idx === undefined) return;
+  if (idx === null || idx === undefined) {
+    /* Sem idx valido — re-enable (caso anomalo) */
+    _setEventChoicesDisabled(false);
+    return;
+  }
+  /* X-6.5.51g: choices ja estao disabled de confirmChoice. resolveChoice e
+     applyChoiceOutcome vao manter disabled ate event resolver. */
   resolveChoice(idx);
 }
 
 function onConfirmBack() {
   document.getElementById('confirm-overlay').classList.remove('visible');
   S.pendingChoiceIdx = null;
+  /* X-6.5.51g: user cancelou — re-enable choices pra escolher outra opcao */
+  _setEventChoicesDisabled(false);
 }
 
 function resolveChoice(idx) {
@@ -12581,14 +12624,36 @@ function updateCurrentCoord() {
 }
 
 function updateTopBar() {
-  const biomes = { forest: '🌲 Floresta', plains: '🌾 Planície', desert: '🏜️ Deserto' };
-  document.getElementById('top-biome').textContent = biomes[S.biome] || S.biome;
-  const wthr = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade' };
-  const wthrIco = { s: '☀️', r: '🌧️', f: '🌫️', t: '⛈️' };
-  const phaseIcon = { day: '☀ Dia', dusk: '🌅 Entardecer', night: '🌙 Noite', dawn: '🌄 Aurora' };
-  const wTxt = (wthrIco[S.weather] || '') + ' ' + (wthr[S.weather] || '');
-  const pTxt = phaseIcon[S.dayPhase] || '';
-  document.getElementById('top-weather').textContent = wTxt + ' · ' + pTxt;
+  /* X-6.5.51g: icon-only pros 3 itens. textContent = icone, title = nome
+     completo (tooltip). Phase agora vive em #top-phase separado. */
+  const biomeIco  = { forest: '🌲', plains: '🌾', desert: '🏜️', cave: '🕳️',
+                       mountain: '⛰️', swamp: '🌫️', graveyard: '🪦', snow: '❄️',
+                       volcanic: '🌋' };
+  const biomeName = { forest: 'Floresta', plains: 'Planície', desert: 'Deserto',
+                       cave: 'Caverna', mountain: 'Montanha', swamp: 'Pântano',
+                       graveyard: 'Cemitério', snow: 'Neve', volcanic: 'Vulcânico' };
+  const biomeEl = document.getElementById('top-biome');
+  if (biomeEl) {
+    biomeEl.textContent = biomeIco[S.biome] || '🗺️';
+    biomeEl.title = biomeName[S.biome] || S.biome;
+  }
+
+  const wthrIco  = { s: '☀️', r: '🌧️', f: '🌫️', t: '⛈️' };
+  const wthrName = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade' };
+  const wthrEl = document.getElementById('top-weather');
+  if (wthrEl) {
+    wthrEl.textContent = wthrIco[S.weather] || '☀️';
+    wthrEl.title = wthrName[S.weather] || S.weather;
+  }
+
+  const phaseIco  = { day: '☀', dusk: '🌅', night: '🌙', dawn: '🌄' };
+  const phaseName = { day: 'Dia', dusk: 'Entardecer', night: 'Noite', dawn: 'Aurora' };
+  const phaseEl = document.getElementById('top-phase');
+  if (phaseEl) {
+    phaseEl.textContent = phaseIco[S.dayPhase] || '☀';
+    phaseEl.title = phaseName[S.dayPhase] || S.dayPhase;
+  }
+
   const pips = document.getElementById('top-danger').querySelectorAll('.danger-pip');
   pips.forEach((pip, i) => { if (i < S.dangerLevel) pip.classList.add('on'); else pip.classList.remove('on'); });
 }
