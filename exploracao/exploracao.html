@@ -9298,9 +9298,11 @@ function beginMove(col, row) {
   };
   p._prevFacing = p.facing;
   S.ph = 'moving';
-  // X-6.5.19: desabilita hex-dir buttons durante animação. Click fica
-  // fisicamente bloqueado pelo browser — zero chance de "trava" por race.
-  try { _setHexNavDisabled(true); } catch (_) {}
+  /* X-6.5.33 (2026-04-24): REMOVIDO _setHexNavDisabled(true) que causava
+     freeze. User reportou trava persistente com X-6.5.19/20 (disable+buffer).
+     Agora cliente AUTORITATIVO 100%: isValidMove() já bloqueia move durante
+     animação via S.ph !== 'idle'. Sem disable de DOM, sem buffer 250ms.
+     Click rápido durante anim simplesmente é ignorado por isValidMove. */
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
@@ -9310,17 +9312,9 @@ function beginMove(col, row) {
     const tr = playerAnim ? playerAnim.targetRow : row;
     playerAnim = null;
     onMoveEnd(tc, tr);
-    // Centraliza no destino final
+    /* Centraliza no destino final. S.ph volta pra idle dentro de onMoveEnd
+       (ou pra 'event' se evento rolou). isValidMove ja respeita isso. */
     try { centerOnPlayer(true); } catch (_) {}
-    // X-6.5.20: reabilita buttons com BUFFER de 250ms após fim da animação.
-    // User reportou trava mesmo com disable — buffer extra absorve clicks
-    // rápidos residuais do browser. Reabilita só se ph voltou pra idle
-    // (evento pode ter mudado pra 'event' — fica bloqueado via updateHexNav).
-    setTimeout(() => {
-      try {
-        if (S.ph === 'idle') _setHexNavDisabled(false);
-      } catch (_) {}
-    }, 250);
   }, dur + 10);
 }
 
@@ -9334,8 +9328,8 @@ function shakeBlockedDir(btn) {
 function onMoveEnd(col, row) {
   const p = S.player;
   LOG('MOVE', 'onMoveEnd from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') steps=' + S.steps + ' tile=' + tileAt(col, row));
-  /* X-6.5.30: snapshot ANTES da mutação pra rollback se server rejeitar. */
-  window.__pendingMoveSnapshot = { col: p.col, row: p.row, steps: S.steps };
+  /* X-6.5.33: REMOVIDO snapshot/rollback. Cliente autoritativo — server é
+     fire-and-forget. Se server rejeitar, log warn mas NAO desfaz movimento. */
   p.col = col;
   p.row = row;
   S.steps += 1;
@@ -9448,32 +9442,15 @@ function onMoveEnd(col, row) {
   centerOnPlayer(true);
   scheduleRender();
 
-  // X-6.5.30: em REMOTE, sincroniza com motor server. Em caso de erro,
-  // ROLLBACK pra posição anterior pra não dessincronizar com server.
-  // Snapshot (prevCol/prevRow) feito ANTES do onMoveEnd alterar S.player.
-  // Antes: erros eram silenciados → cliente movia, server não aplicava,
-  // moves subsequentes eram rejeitados em cascata até user dar refresh.
+  // X-6.5.33: cliente autoritativo — server é fire-and-forget. Se server
+  // rejeitar (out_of_bounds/impassable/unknown_token), apenas LOG WARN.
+  // NAO desfaz movimento (user reportou que rollback travava o jogo).
+  // Server tolera: is_valid_move e permissivo (so rejeita out_of_bounds e
+  // impassable; jumps suspeitos sao logados mas aceitos).
   if (_remoteAuthoritative) {
-    /* prevCol/prevRow capturados em onMoveEnd ANTES do p.col=col; passados via
-       window.__pendingMoveSnapshot pra resolver no .then sem fechar over args. */
-    var _moveSnapshot = window.__pendingMoveSnapshot || null;
     window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
-        LOGW('API', 'remote_move err=' + (res && res.error) + ' — rolling back position');
-        /* ROLLBACK: restaura posição se temos snapshot. Toast pra avisar. */
-        if (_moveSnapshot && typeof _moveSnapshot.col === 'number') {
-          try {
-            S.player.col = _moveSnapshot.col;
-            S.player.row = _moveSnapshot.row;
-            if (typeof _moveSnapshot.steps === 'number') S.steps = _moveSnapshot.steps;
-            updateHud(); updateHexNav(); centerOnPlayer(true); scheduleRender();
-            var _msg = res && res.error === 'out_of_bounds' ? 'Não pode ir além daqui'
-                     : res && res.error === 'impassable' ? 'Caminho intransitável'
-                     : res && res.error === 'unknown_token' ? 'Sessão expirou — recarregue'
-                     : 'Movimento bloqueado';
-            if (typeof vToast === 'function') vToast(_msg, 'warn', 2500);
-          } catch (eR) { LOGE('API', 'rollback err=' + (eR && eR.message)); }
-        }
+        LOGW('API', 'remote_move err=' + (res && res.error) + ' — client-authoritative, no rollback');
         return;
       }
       // Sync state HP/MP/gold/xp + visible do servidor
@@ -9506,21 +9483,9 @@ function onMoveEnd(col, row) {
         S.ph = 'event';
         try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
       }
-      /* X-6.5.30: limpa snapshot após sync bem sucedido */
-      window.__pendingMoveSnapshot = null;
     }).catch(function(e) {
-      LOGE('API', 'remote_move rejected msg=' + (e && e.message) + ' — rolling back');
-      /* X-6.5.30: rollback também em network errors (timeout, abort). */
-      if (_moveSnapshot && typeof _moveSnapshot.col === 'number') {
-        try {
-          S.player.col = _moveSnapshot.col;
-          S.player.row = _moveSnapshot.row;
-          if (typeof _moveSnapshot.steps === 'number') S.steps = _moveSnapshot.steps;
-          updateHud(); updateHexNav(); centerOnPlayer(true); scheduleRender();
-          if (typeof vToast === 'function') vToast('Erro de rede no movimento', 'warn', 2500);
-        } catch (eR) { LOGE('API', 'rollback (catch) err=' + (eR && eR.message)); }
-      }
-      window.__pendingMoveSnapshot = null;
+      /* X-6.5.33: network error — log warn, NAO desfaz movimento. */
+      LOGE('API', 'remote_move rejected msg=' + (e && e.message) + ' — client-authoritative, no rollback');
     });
   }
 }
