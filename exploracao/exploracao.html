@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:01:18Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:09:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -601,14 +601,21 @@ body {
    da action column #hud-quick em right:10 + hex-nav em center-bottom).
    `bottom: 8px` de fato == 8px do bottom do body (= 8px do frame bottom).
    `left: 8px` mesma logica. */
-html body .va-float {
-  position: fixed !important;
+/* X-6.5.51h (2026-04-25): SOLUCAO DEFINITIVA — JS re-parenta .va-float
+   pra dentro de #frame (audio-manager.js cria como child de body, nao
+   atende). Quando dentro do frame (que e position:relative + overflow:hidden),
+   simplesmente position:absolute relativo ao FRAME funciona limpo.
+   Antes (X-6.5.51e/f/g): tentamos calc baseado em (100vw - 384) / 2 mas
+   layout flex-row do body confundia o calc — audio aparecia fora.
+
+   CSS abaixo aplica APOS re-parenting (script no final do <body> faz isso).
+   Selector inclui ambos os casos: enquanto child de body (fallback) E child
+   de #frame (apos re-parenting). */
+html body .va-float,
+html body #frame .va-float {
+  position: absolute !important;
   bottom: 8px !important;
-  /* X-6.5.51e: audio btn no canto BOTTOM-RIGHT do FRAME (padrao de jogos
-     desktop/console). User feedback: "deveria ficar na direita como e padrao
-     em todo jogo". Calc posiciona relativo ao frame centralizado, nao ao
-     viewport do browser. */
-  right: calc(max(0px, (100vw - 384px) / 2) + 8px) !important;
+  right: 8px !important;
   left: auto !important;
   top: auto !important;
   margin: 0 !important;
@@ -1046,17 +1053,28 @@ html body .camp-screen {
 #journal-overlay.visible { display: flex; }
 
 
+/* X-6.5.51h (2026-04-25): journal-card refatorado pra responsividade em
+   Telegram Desktop (384x694). User feedback: "Diario de missoes nao tem
+   responsividade para telas pequenas como a do webapp do telegram desktop,
+   melhore ele profissionalmente, assim como a Cartografia esta bem estruturada".
+   Mudancas:
+   - max-height 92vh -> calc(100% - 24px) (respeita frame)
+   - padding 18 14 14 -> 14 12 (mais compacto)
+   - flex-direction:column + sticky header pra titulo nao some no scroll
+   - width adapta sem max-width fixo */
 .journal-card {
   background:
     linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 18%),
     linear-gradient(180deg, #e8d4a0 0%, #c8ac78 100%);
   border: 3px double #5a3e22;
   border-radius: 6px;
-  padding: 18px 14px 14px;
-  width: 100%;
-  max-width: 400px;
-  max-height: 92vh;
-  overflow-y: auto;
+  padding: 0;  /* padding agora interno, header e body separados */
+  width: calc(100% - 24px);
+  max-width: 360px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(100, 70, 40, 0.3);
   position: relative;
 }
@@ -1065,21 +1083,52 @@ html body .camp-screen {
   width: 14px; height: 14px;
   background: #5a3e22; border-radius: 50%;
   box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+  z-index: 2;
 }
 .journal-card::before { top: -7px; left: 20%; }
 .journal-card::after  { top: -7px; right: 20%; }
+/* Header sticky no topo do card (titulo + subtitle nao somem ao scrollar) */
+.journal-header {
+  flex-shrink: 0;
+  padding: 14px 14px 10px;
+  background: linear-gradient(180deg, #e8d4a0 0%, rgba(232, 212, 160, 0.95) 100%);
+  border-bottom: 1px solid rgba(90, 62, 34, 0.3);
+}
 .journal-title {
   font-family: var(--v-font-display);
-  font-size: 17px; font-weight: 700;
-  letter-spacing: 4px; text-transform: uppercase;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
   color: #3a2818; text-align: center;
-  margin: 0 0 3px 0;
+  margin: 0 0 2px 0;
   text-shadow: 1px 1px 0 rgba(200, 170, 120, 0.6);
 }
 .journal-subtitle {
-  font-style: italic; font-size: 11px;
+  font-style: italic; font-size: 10px;
   text-align: center; color: #6a4828;
-  margin-bottom: 14px; letter-spacing: 1px;
+  margin: 0; letter-spacing: 0.8px;
+}
+/* Body scrollavel — onde fica a lista de quests */
+.journal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 62, 34, 0.5) transparent;
+}
+.journal-body::-webkit-scrollbar { width: 6px; }
+.journal-body::-webkit-scrollbar-thumb {
+  background: rgba(90, 62, 34, 0.5);
+  border-radius: 3px;
+}
+/* Footer sticky com botao close */
+.journal-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, #c8ac78 0%, rgba(200, 172, 120, 0.95) 100%);
+  border-top: 1px solid rgba(90, 62, 34, 0.3);
+  display: flex;
+  justify-content: center;
 }
 #journal-list { display: flex; flex-direction: column; gap: 10px; }
 .journal-empty {
@@ -2997,12 +3046,21 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <!-- Journal overlay (Missões) -->
+  <!-- X-6.5.51h: journal-card refatorado pra layout 3-zonas (header sticky +
+       body scrollavel + footer sticky). Antes title/list/close eram filhos
+       diretos do card e overflow ficava no card todo. -->
   <div id="journal-overlay">
     <div class="journal-card">
-      <h2 class="journal-title">Diário de Missões</h2>
-      <div class="journal-subtitle">Promessas, Dívidas e Juramentos</div>
-      <div id="journal-list"></div>
-      <button class="journal-close" id="journal-close-btn">Fechar</button>
+      <div class="journal-header">
+        <h2 class="journal-title">Diário de Missões</h2>
+        <div class="journal-subtitle">Promessas, Dívidas e Juramentos</div>
+      </div>
+      <div class="journal-body">
+        <div id="journal-list"></div>
+      </div>
+      <div class="journal-footer">
+        <button class="journal-close" id="journal-close-btn">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -3095,6 +3153,45 @@ body.remote-mode #debug-hud { display: none !important; }
   });
 
   _appendLine('info', ['[sim-log-panel] ativo. Console + LOG/LOGW/LOGE capturados.']);
+})();
+
+/* X-6.5.51h (2026-04-25): SOLUCAO DEFINITIVA pro audio button (.va-float)
+   ficar dentro do #frame. audio-manager.js cria como child de body, mas
+   queremos como child de #frame pra herdar overflow:hidden + position:relative.
+   MutationObserver detecta quando .va-float e adicionado e re-parenta. */
+(function() {
+  var frame = document.getElementById('frame');
+  if (!frame) return;
+
+  function _adoptVaFloat() {
+    var vf = document.getElementById('va-float');
+    if (vf && vf.parentElement !== frame) {
+      frame.appendChild(vf);
+      console.info('[sim] va-float re-parented from body to #frame');
+      return true;
+    }
+    return false;
+  }
+
+  /* Tenta imediatamente (caso audio-manager ja tenha rodado) */
+  if (_adoptVaFloat()) return;
+
+  /* Senao, observa body por adicoes */
+  var observer = new MutationObserver(function(mutations) {
+    for (var m of mutations) {
+      for (var node of m.addedNodes) {
+        if (node && node.id === 'va-float') {
+          _adoptVaFloat();
+          observer.disconnect();
+          return;
+        }
+      }
+    }
+  });
+  observer.observe(document.body, { childList: true });
+
+  /* Fallback: para de observar apos 5s pra nao vazar */
+  setTimeout(function() { observer.disconnect(); }, 5000);
 })();
 </script>
 
@@ -12257,29 +12354,123 @@ function renderCartography() {
   }
 }
 
+/* X-6.5.51h (2026-04-25): rosa-dos-ventos REDESENHADA. Antes era circulo
+   simples + 4 linhas — feio. Agora: 8 petalas (cardinal + intercardinal)
+   com gradient claro/escuro pra simular relevo, fleur-de-lis no Norte,
+   anel duplo, marcadores de N/S/L/O em fonte serif elegante.
+   User feedback: "melhore o desenho das rosas do vento pois esta
+   extremamente feio, mal configurado/desenhado". */
 function drawCompassRose(ctx, cx, cy, size) {
   ctx.save();
-  ctx.strokeStyle = '#5a3e22';
-  ctx.fillStyle = '#5a3e22';
-  ctx.lineWidth = 1;
+
+  // Anel externo + interno (double border decorativo)
+  ctx.strokeStyle = 'rgba(58, 38, 22, 0.7)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, size + 3, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 0.8;
   ctx.beginPath();
   ctx.arc(cx, cy, size, 0, Math.PI * 2);
   ctx.stroke();
-  // 4 direções
-  const pts = [[0,-1],[1,0],[0,1],[-1,0]];
-  pts.forEach((p, i) => {
+
+  // Petalas intercardinais (NE/SE/SW/NW) — DEBAIXO, mais finas
+  const interAngles = [Math.PI/4, Math.PI*3/4, Math.PI*5/4, Math.PI*7/4];
+  interAngles.forEach(a => {
+    const tipX = cx + Math.cos(a) * size * 0.78;
+    const tipY = cy + Math.sin(a) * size * 0.78;
+    const baseLeftX = cx + Math.cos(a + 0.18) * size * 0.18;
+    const baseLeftY = cy + Math.sin(a + 0.18) * size * 0.18;
+    const baseRightX = cx + Math.cos(a - 0.18) * size * 0.18;
+    const baseRightY = cy + Math.sin(a - 0.18) * size * 0.18;
+    /* Petala light side (gradient claro) */
+    ctx.fillStyle = 'rgba(216, 188, 122, 0.85)';
     ctx.beginPath();
-    ctx.moveTo(cx + p[0] * size * 0.3, cy + p[1] * size * 0.3);
-    ctx.lineTo(cx + p[0] * size * 0.9, cy + p[1] * size * 0.9);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(baseLeftX, baseLeftY);
+    ctx.lineTo(tipX, tipY);
+    ctx.closePath();
+    ctx.fill();
+    /* Petala dark side (gradient escuro) */
+    ctx.fillStyle = 'rgba(90, 62, 34, 0.7)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(baseRightX, baseRightY);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  // Petalas cardinais (N/S/L/O) — POR CIMA, maiores
+  const cardAngles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
+  cardAngles.forEach(a => {
+    const tipX = cx + Math.cos(a) * size * 0.95;
+    const tipY = cy + Math.sin(a) * size * 0.95;
+    const baseLeftX = cx + Math.cos(a + 0.20) * size * 0.22;
+    const baseLeftY = cy + Math.sin(a + 0.20) * size * 0.22;
+    const baseRightX = cx + Math.cos(a - 0.20) * size * 0.22;
+    const baseRightY = cy + Math.sin(a - 0.20) * size * 0.22;
+    /* Light side */
+    ctx.fillStyle = 'rgba(232, 212, 160, 0.95)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(baseLeftX, baseLeftY);
+    ctx.lineTo(tipX, tipY);
+    ctx.closePath();
+    ctx.fill();
+    /* Dark side */
+    ctx.fillStyle = 'rgba(58, 38, 22, 0.85)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(baseRightX, baseRightY);
+    ctx.closePath();
+    ctx.fill();
+    /* Outline da petala pra contraste */
+    ctx.strokeStyle = 'rgba(58, 38, 22, 0.6)';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(baseLeftX, baseLeftY);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(baseRightX, baseRightY);
+    ctx.closePath();
     ctx.stroke();
   });
-  ctx.font = 'bold 10px serif';
+
+  // Disco central (gem)
+  const gemGrad = ctx.createRadialGradient(cx - 1, cy - 1, 0, cx, cy, size * 0.13);
+  gemGrad.addColorStop(0, '#fbd770');
+  gemGrad.addColorStop(0.5, '#c4953a');
+  gemGrad.addColorStop(1, '#5a3e22');
+  ctx.fillStyle = gemGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, size * 0.13, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(58, 38, 22, 0.9)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+
+  // Fleur-de-lis estilizada acima do N (apenas linhas pra nao competir com letra)
+  const fdlY = cy - size * 1.05;
+  ctx.strokeStyle = 'rgba(58, 38, 22, 0.9)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx - 3, fdlY + 3);
+  ctx.lineTo(cx, fdlY - 2);
+  ctx.lineTo(cx + 3, fdlY + 3);
+  ctx.stroke();
+
+  // Letras N/S/L/O — fora do anel externo pra nao bater nas petalas
+  ctx.fillStyle = '#3a2818';
+  ctx.font = 'bold 11px "Cinzel", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('N', cx, cy - size * 0.68);
-  ctx.fillText('S', cx, cy + size * 0.68);
-  ctx.fillText('L', cx + size * 0.68, cy);
-  ctx.fillText('O', cx - size * 0.68, cy);
+  ctx.fillText('N', cx, cy - size - 14);
+  ctx.fillText('S', cx, cy + size + 14);
+  ctx.fillText('L', cx + size + 12, cy);
+  ctx.fillText('O', cx - size - 12, cy);
+
   ctx.restore();
 }
 
