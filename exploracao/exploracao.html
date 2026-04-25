@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:16:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:21:27Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9621,19 +9621,29 @@ function updateHexNav() {
   } catch (_) {}
 }
 
-// X-6.5.13 (revisado): clicks durante movimento são SILENCIOSAMENTE IGNORADOS.
-// Sem queue — evita que personagem "ande sozinho" se user clicar rápido. Shake
-// apenas para erros genuínos de direção (impassable/out-of-bounds/event
-// bloqueando). Clicks durante 'moving' não disparam shake (não é erro, só
-// timing — feedback silencioso evita sensação de "botão travado").
-// X-6.5.19: disable físico dos hex-dir buttons durante movimento. Substitui
-// o "ignore silencioso" anterior (X-6.5.13) que ainda deixava browser
-// processar clicks e causava sensação de trava. Agora o <button disabled>
-// é pure-DOM: nenhum click dispatch, CSS pode estilar como acinzentado.
-function _setHexNavDisabled(disabled) {
+// X-6.5.51c (2026-04-25): _setHexNavDisabled REMOVIDO (no-op).
+// User feedback: "remova essa funcao de desativar os botoes durante a
+// movimentacao". Bug recorrente: ao fechar modal de evento, botoes ficavam
+// stuck em disabled (S.ph nao voltava pra idle, ou updateHexNav nao era
+// chamado). Solucao = nunca disable botoes; clicks durante movimento sao
+// IGNORADOS via isValidMove guard (S.ph !== 'idle' return false), sem
+// disable visual.
+//
+// Historico:
+//   X-6.5.13: clicks ignorados silenciosamente (sem disable)
+//   X-6.5.19: tentou disable fisico via .disabled DOM (causava stuck-disabled)
+//   X-6.5.51c: REVERSAO — sem disable fisico nunca. Guard logico em isValidMove.
+//
+// Funcao mantida como NO-OP pra nao quebrar 3 callsites existentes
+// (beginMove enable/disable + updateHexNav sync). Agente IA: ao limpar
+// callsites futuramente, esta funcao pode ser deletada inteira.
+function _setHexNavDisabled(_disabled) {
+  // No-op intencional. Botoes hex-nav NUNCA ficam disabled (user req X-6.5.51c).
+  // Forca enable em todos os botoes (caso algum codigo legacy os tenha
+  // disabled antes desta funcao ser chamada).
   for (let i = 0; i < 6; i++) {
     const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
-    if (btn) btn.disabled = !!disabled;
+    if (btn && btn.disabled) btn.disabled = false;
   }
 }
 
