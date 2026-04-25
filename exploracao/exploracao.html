@@ -1681,19 +1681,26 @@ body {
 }
 .v-skip-btn {
   font-family: var(--v-font-display);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--v-gold, #c4953a);
-  background: transparent;
-  border: 1px solid var(--v-gold, #c4953a);
-  padding: 7px 16px;
-  border-radius: 6px;
+  background: rgba(40, 32, 24, 0.85);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  padding: 10px 22px;
+  border-radius: 8px;
   cursor: pointer;
   display: none;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 0 14px rgba(196, 149, 58, 0.35);
+  font-weight: 700;
 }
-.v-skip-btn:hover { background: rgba(196, 149, 58, 0.1); }
+/* X-6.5.35: classe explícita pra mostrar — mais robusto que setProperty
+   inline. !important apenas no display pra sobrescrever .v-skip-btn default. */
+.v-skip-btn.v-skip-btn--shown {
+  display: inline-block !important;
+}
+.v-skip-btn:hover { background: rgba(196, 149, 58, 0.18); }
 .v-skip-btn:active { transform: scale(0.97); }
 
 /* ====== DEFEAT ======================================================== */
@@ -10120,25 +10127,29 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   var formula = document.getElementById('dice-formula');
   var result = document.getElementById('dice-result');
   var skipBtn = document.getElementById('dice-skip-btn');
+  if (!overlay || !skipBtn || !formula || !result || !wrap) {
+    LOGE('DICE', 'remote DOM_MISSING overlay=' + !!overlay + ' skip=' + !!skipBtn);
+    return;
+  }
+  /* X-6.5.35 REFACTOR: reset COMPLETO via cssText='' — limpa TODOS inline
+     styles incluindo !important residuais que poderiam estar bloqueando a
+     visibilidade do botao em runs subsequentes. */
   clearChildren(wrap); clearChildren(formula); clearChildren(result);
   result.className = '';
-  /* X-6.5.28: removeProperty limpa !important deixado por runs anteriores
-     antes de aplicar display:none — caso contrário o reset não esconde
-     se a chamada anterior aplicou setProperty(...,'important'). */
-  result.style.removeProperty('display');
-  result.style.display = 'none';
-  skipBtn.style.removeProperty('display');
-  skipBtn.style.removeProperty('visibility');
-  skipBtn.style.display = 'none';
+  result.style.cssText = '';
+  skipBtn.classList.remove('v-skip-btn--shown');
+  skipBtn.style.cssText = '';
   overlay.classList.add('visible');
   var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
   var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
   var advanced = false;
+  var safetyTimer = null;
+  var watchdogTimer = null;
   function advance() {
     if (advanced) return;
     advanced = true;
-    /* X-6.5.28: limpa safety timer ao avançar (evita force-fire pós-advance). */
-    if (typeof safetyTimer !== 'undefined' && safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+    if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+    if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; }
     overlay.classList.remove('visible');
     setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
   }
@@ -10154,27 +10165,50 @@ function _remoteRenderDiceAndResolve(ch, oc) {
     formula.appendChild(document.createTextNode(' vs CD ' + dc));
     result.className = success ? 'success' : 'failure';
     result.textContent = success ? 'SUCESSO' : 'FALHA';
-    /* X-6.5.28: setProperty(...,'important') — combina com removeProperty
-       no reset pra garantir display correto em re-uso da overlay. */
-    result.style.setProperty('display', 'inline-block', 'important');
-    skipBtn.textContent = 'Continuar \u276f\u276f';
-    skipBtn.style.setProperty('display', 'inline-block', 'important');
-    skipBtn.style.setProperty('visibility', 'visible', 'important');
+    /* X-6.5.35: setAttribute('style', ...) atomica + classe CSS dedicada
+       (.v-skip-btn--shown com !important no display) — dupla garantia. */
+    result.setAttribute('style', 'display: inline-block !important;');
+    skipBtn.textContent = 'Continuar ❯❯';
+    skipBtn.classList.add('v-skip-btn--shown');
+    /* X-6.5.35 WATCHDOG: 500ms apos showResult, verifica se o botao esta
+       REALMENTE visivel (offsetHeight > 0). Se nao, fallback inline e se
+       AINDA nao, auto-advance pra nao deixar usuario travado. */
+    watchdogTimer = setTimeout(function() {
+      try {
+        if (!skipBtn.offsetHeight) {
+          LOGW('DICE', 'WATCHDOG btn invisible after class — applying setAttribute fallback');
+          skipBtn.setAttribute('style',
+            'display: inline-block !important; visibility: visible !important; ' +
+            'opacity: 1 !important; pointer-events: auto !important; position: relative; z-index: 999;');
+          setTimeout(function() {
+            if (!skipBtn.offsetHeight) {
+              LOGE('DICE', 'WATCHDOG FAILED — btn still invisible after fallback. Auto-advance in 2s.');
+              setTimeout(function() { advance(); }, 2000);
+            } else {
+              LOG('DICE', 'WATCHDOG fallback OK h=' + skipBtn.offsetHeight);
+            }
+          }, 200);
+        } else {
+          LOG('DICE', 'WATCHDOG btn visible OK h=' + skipBtn.offsetHeight);
+        }
+      } catch (eW) { LOGE('DICE', 'watchdog err=' + (eW && eW.message)); }
+    }, 500);
   }
-  /* X-6.5.28: SAFETY TIMER — força showResult em 3.5s se Dice3D callback
-     nunca disparar (race-condition WebGL/THREE.js no 1º uso). Mirror do
-     safety pattern usado em rollSkillCheck. */
-  var safetyTimer = setTimeout(function() {
+  /* SAFETY TIMER: forca showResult se Dice3D callback nunca disparar */
+  safetyTimer = setTimeout(function() {
     LOGW('DICE', 'remote safety timeout fired - Dice3D callback never fired?');
     showResult();
   }, 3500);
-  var wrappedShow = function() { if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; } showResult(); };
+  var wrappedShow = function() {
+    if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+    showResult();
+  };
   if (window.Dice3D) {
     try {
       var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
       dice.roll(d20, wrappedShow);
       return;
-    } catch (e) { LOGE('DICE', 'remote Dice3D failed: ' + (e && e.message)); /* fall through */ }
+    } catch (e) { LOGE('DICE', 'remote Dice3D failed: ' + (e && e.message)); }
   } else {
     LOGW('DICE', 'remote: window.Dice3D not loaded');
   }
