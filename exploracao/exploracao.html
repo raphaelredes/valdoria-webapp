@@ -9441,9 +9441,15 @@ function onMoveEnd(col, row) {
       // Sync state HP/MP/gold/xp + visible do servidor
       if (res.state) {
         try {
+          /* X-6.5.29: sync TODOS os campos numéricos (antes faltava
+             mhp/mmp/xp/exhaustion → HUD não refletia max stats nem exaus). */
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+          if (typeof res.state.mhp === 'number') S.player.mhp = res.state.mhp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+          if (typeof res.state.mmp === 'number') S.player.mmp = res.state.mmp;
           if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          if (typeof res.state.xp === 'number' && S.player.xp !== undefined) S.player.xp = res.state.xp;
+          if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
           if (Array.isArray(res.state.visited)) {
             for (var i = 0; i < res.state.visited.length; i++) {
               var pair = res.state.visited[i];
@@ -10055,9 +10061,16 @@ function resolveChoice(idx) {
       var oc = res.outcome || {};
       if (res.state) {
         try {
+          /* X-6.5.29: sync TODOS os campos numéricos pra HUD em tempo real
+             (antes faltava mhp/mmp/xp/exhaustion → bar não atualizava em
+             eventos que mexem em recursos compostos). */
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+          if (typeof res.state.mhp === 'number') S.player.mhp = res.state.mhp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+          if (typeof res.state.mmp === 'number') S.player.mmp = res.state.mmp;
           if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          if (typeof res.state.xp === 'number' && S.player.xp !== undefined) S.player.xp = res.state.xp;
+          if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
           updateHud();
         } catch (eS) { LOGE('API', 'state_sync err=' + (eS && eS.message)); }
       }
@@ -12734,6 +12747,50 @@ function boot() {
       } catch (eInit) {
         LOGE('API', 'motor_init sync err=' + (eInit && eInit.message));
       }
+
+      /* X-6.5.29: re-fetch state quando jogador volta pra explore vindo
+         de combate ou outro webapp. visibilitychange dispara quando aba
+         ganha foco (combat finalizou, transição voltou pro explore).
+         Combat aplica deltas de HP/MP/recursos no servidor; sem essa
+         sync o cliente fica defasado até próximo /move. */
+      var _stateRefreshPending = false;
+      function _refreshExploreState(reason) {
+        if (_stateRefreshPending) return;
+        if (!window.ExploracaoAPI || !window.ExploracaoAPI.state) return;
+        if (!window.ExploracaoAPI.hasToken || !window.ExploracaoAPI.hasToken()) return;
+        _stateRefreshPending = true;
+        LOG('API', 'state_refresh trigger=' + reason);
+        window.ExploracaoAPI.state().then(function(res) {
+          _stateRefreshPending = false;
+          if (!res || res.error || !res.state) {
+            LOGW('API', 'state_refresh skip err=' + (res && res.error));
+            return;
+          }
+          var st = res.state;
+          try {
+            if (typeof st.hp === 'number') S.player.hp = st.hp;
+            if (typeof st.mhp === 'number') S.player.mhp = st.mhp;
+            if (typeof st.mp === 'number') S.player.mp = st.mp;
+            if (typeof st.mmp === 'number') S.player.mmp = st.mmp;
+            if (typeof st.gold === 'number') S.gold = st.gold;
+            if (typeof st.xp === 'number' && S.player.xp !== undefined) S.player.xp = st.xp;
+            if (typeof st.exhaustion === 'number') S.player.exh = st.exhaustion;
+            updateHud();
+            LOG('API', 'state_refresh ok hp=' + S.player.hp + '/' + S.player.mhp
+              + ' mp=' + S.player.mp + '/' + S.player.mmp + ' gold=' + S.gold + ' exh=' + S.player.exh);
+          } catch (eR) { LOGE('API', 'state_refresh apply err=' + (eR && eR.message)); }
+        }).catch(function(e) {
+          _stateRefreshPending = false;
+          LOGE('API', 'state_refresh fetch err=' + (e && e.message));
+        });
+      }
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') _refreshExploreState('visibilitychange');
+      });
+      window.addEventListener('pageshow', function(e) {
+        if (e.persisted) _refreshExploreState('pageshow_persisted');
+      });
+      window.__exploracaoRefreshState = _refreshExploreState;  /* exposto pra debug + chamadas externas */
     }
 
     recentEventIds = [];
