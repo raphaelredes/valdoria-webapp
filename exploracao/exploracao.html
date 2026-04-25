@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:21:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:33:37Z - do not edit directly, edit source -->
 
 
 <!--
@@ -514,15 +514,15 @@ body {
 html body .va-float {
   position: fixed !important;
   bottom: 8px !important;
-  left: 8px !important;
+  /* X-6.5.51d: explorer body e 100vw wide (NAO 384). Frame e centralizado
+     em body via display:flex. left: 8px ficava no canto-esquerdo do BROWSER
+     fora do frame. Calc posiciona no canto-bottom-left do FRAME. */
+  left: calc(max(0px, (100vw - 384px) / 2) + 8px) !important;
   right: auto !important;
   top: auto !important;
   margin: 0 !important;
-  /* width: auto pra wrap dimensionar pelo conteudo (botao 36px) */
   width: auto !important;
   max-width: 44px !important;
-  /* justify-content original era flex-end (botao a direita do wrap).
-     Como wrap agora tem largura do botao, justify nao importa. */
   justify-content: flex-start !important;
   transform: none !important;
 }
@@ -592,13 +592,38 @@ html body .connection-overlay {
   color: var(--v-text, #d4c8b0);
   opacity: 0.88;
 }
+/* X-6.5.51d (2026-04-25): user feedback — "top-danger nao esta claro
+   que e o nivel de perigo, sao losangos e nao tem qualquer informacao
+   que indique que e medidor de nivel de perigo".
+   Fix: adicionar label "PERIGO" + icone caveira antes dos pips. */
 .tb-danger {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 5px;
   padding: 3px 7px;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(196, 149, 58, 0.2);
   border-radius: 20px;
+}
+.tb-danger::before {
+  content: '☠';
+  font-size: 11px;
+  color: #c08070;
+  text-shadow: 0 0 4px rgba(192, 80, 60, 0.5);
+  margin-right: 2px;
+}
+.tb-danger-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--v-text-dim, #a09484);
+  margin-right: 2px;
+}
+.tb-danger-pips {
+  display: flex;
+  gap: 3px;
 }
 .danger-pip {
   width: 6px; height: 6px;
@@ -843,7 +868,10 @@ html body .connection-overlay {
 
 #quest-indicator {
   position: absolute;
-  top: 76px; right: 10px;
+  /* X-6.5.51d: right -> left (era right:10 sobrepondo zoom controls).
+     User feedback: "Missoes ativas" estava abaixo dos botoes
+     "Centralizar" e "Mais zoom" em vez de em outro lugar. */
+  top: 56px; left: 10px;
   z-index: 15;
   background: linear-gradient(180deg, rgba(70, 54, 36, 0.95), rgba(40, 28, 18, 0.95));
   border: 1.5px solid #c4953a;
@@ -873,7 +901,8 @@ html body .connection-overlay {
 
 #ally-indicator {
   position: absolute;
-  top: 108px; right: 10px;
+  /* X-6.5.51d: right -> left (idem #quest-indicator) */
+  top: 88px; left: 10px;
   z-index: 15;
   background: linear-gradient(180deg, rgba(60, 70, 90, 0.95), rgba(30, 38, 50, 0.95));
   border: 1.5px solid #7aa0d8;
@@ -2326,26 +2355,33 @@ body.remote-mode #debug-hud { display: none !important; }
   transition: background 0.25s ease;
 }
 
-/* ====== RIGHT PANEL (minimap + coord + zoom, TOPO DIREITO) ========== */
+/* ====== RIGHT PANEL (minimap + coord + zoom, TOPO DIREITO) ==========
+   X-6.5.51d (2026-04-25):
+   - top 80 -> 56 (mais perto do top-bar)
+   - padding 0 2 -> 0 0 (encostado na borda direita)
+   - User feedback: minimap+pos estavam "um pouco a esquerda, espaço vazio
+     sem sentido" + queria todos mais altos. */
 #right-panel {
   position: absolute;
   right: 0;
-  top: 80px;
+  top: 56px;
   z-index: 16;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
-  padding: 0 2px;
+  padding: 0;
 }
 /* X-6.5.14/15/20: minimap-block tem o minimap-content + botão toggle
    absolutamente posicionado à esquerda dele. Antes era flex-row, mas
    o botão ficava deslocado visualmente. Agora minimap-content é o
    bloco principal e o botão flutua ao lado. */
 #minimap-block {
-  /* position:relative definido acima (no #btn-minimap-toggle reset) */
+  /* position:relative definido acima (no #btn-minimap-toggle reset)
+     X-6.5.51d: margin-right 20 -> 22 (toggle button width) reserva espaco
+     pro botao absolute mas fica grudado na borda direita do frame. */
   display: block;
-  margin-right: 20px;   /* reserva espaço pro botão toggle absolute */
+  margin-right: 22px;
 }
 /* X-6.5.20: toggle button posicionado absolutamente pra grudar na borda
    esquerda do minimap-wrap, centralizado verticalmente. Antes ficava
@@ -2353,36 +2389,36 @@ body.remote-mode #debug-hud { display: none !important; }
 #minimap-block {
   position: relative;   /* context pra botão absolute */
 }
+/* X-6.5.51d (2026-04-25): User pediu "botão Mostrar minimapa para que mostrando
+   somente a seta". Removido fundo/borda/shadow chunky — fica só a seta visivel
+   com hitbox transparente. Aumentou tamanho da seta pra continuar tappable. */
 #btn-minimap-toggle {
   position: absolute;
-  /* Grudar à esquerda do minimap-wrap (que vive no #minimap-content).
-     right: 100% alinha o lado direito do botão com o lado esquerdo do
-     content. top centrado. */
   top: 50%;
   right: 100%;
   transform: translateY(-50%);
-  margin-right: 0;   /* flush com minimap-wrap */
-  width: 20px;
-  height: 48px;
+  margin-right: 0;
+  width: 22px;
+  height: 36px;
   padding: 0;
-  border-radius: 4px 0 0 4px;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.94));
-  border: 1.5px solid var(--v-gold, #c4953a);
-  border-right: none;
+  /* SEM background, border, box-shadow — somente a seta visivel */
+  background: transparent;
+  border: none;
   color: var(--v-gold, #c4953a);
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.5);
+  /* Pequeno glow text-shadow ainda da contraste em fundos claros do mapa */
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6);
   transition: all 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
   z-index: 2;
 }
 #btn-minimap-toggle:hover {
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
-  box-shadow: -2px 2px 12px rgba(196, 149, 58, 0.4);
+  color: #fbd770;
+  text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.8);
 }
 #btn-minimap-toggle:active { transform: scale(0.92); }
 
@@ -2521,12 +2557,18 @@ body.remote-mode #debug-hud { display: none !important; }
   <div id="top-bar">
     <div class="tb-item tb-biome" id="top-biome">🌲 Floresta</div>
     <div class="tb-item tb-weather" id="top-weather">☀️ Limpo</div>
-    <div class="tb-item tb-danger" id="top-danger">
-      <span class="danger-pip"></span>
-      <span class="danger-pip"></span>
-      <span class="danger-pip"></span>
-      <span class="danger-pip"></span>
-      <span class="danger-pip"></span>
+    <!-- X-6.5.51d: user feedback "nao esta claro que e nivel de perigo".
+         Adicionado label "PERIGO" + icone caveira (CSS ::before do .tb-danger).
+         Pips agrupados em .tb-danger-pips pra layout limpo. -->
+    <div class="tb-item tb-danger" id="top-danger" title="Nível de perigo do mapa">
+      <span class="tb-danger-lbl">Perigo</span>
+      <div class="tb-danger-pips">
+        <span class="danger-pip"></span>
+        <span class="danger-pip"></span>
+        <span class="danger-pip"></span>
+        <span class="danger-pip"></span>
+        <span class="danger-pip"></span>
+      </div>
     </div>
   </div>
 
