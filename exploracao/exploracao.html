@@ -3021,13 +3021,21 @@ body.remote-mode #debug-hud { display: none !important; }
       // motor auth: Bearer peek (motor ainda exige peek pra /move/state/finish/event_choice)
       headers = _bearer();
     }
+    /* X-6.5.30: AbortController + timeout 8s pra não pendurar UI quando rede
+       cair. Sem retry automático — server NÃO tem idempotency key, retry
+       poderia dobrar deltas. Cliente decide retry manualmente (caller). */
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timeoutMs = 8000;
+    var timeoutId = controller ? setTimeout(function() { controller.abort(); }, timeoutMs) : null;
     try {
       var resp = await fetch(API_BASE + path, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(body || {}),
-        keepalive: true
+        keepalive: true,
+        signal: controller ? controller.signal : undefined
       });
+      if (timeoutId) clearTimeout(timeoutId);
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
@@ -3039,9 +3047,11 @@ body.remote-mode #debug-hud { display: none !important; }
       console.info('[E-REM:API] ' + path + ' ok ms=' + dt);
       return data;
     } catch (eNet) {
+      if (timeoutId) clearTimeout(timeoutId);
       var dtE = Math.round(performance.now() - t0);
-      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
-      return { _network_error: true, error: 'network' };
+      var isAbort = eNet && eNet.name === 'AbortError';
+      console.error('[E-REM:API-ERROR] ' + path + (isAbort ? ' timeout' : ' network') + ' ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, error: isAbort ? 'timeout' : 'network' };
     }
   }
 
@@ -9317,6 +9327,8 @@ function shakeBlockedDir(btn) {
 function onMoveEnd(col, row) {
   const p = S.player;
   LOG('MOVE', 'onMoveEnd from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') steps=' + S.steps + ' tile=' + tileAt(col, row));
+  /* X-6.5.30: snapshot ANTES da mutação pra rollback se server rejeitar. */
+  window.__pendingMoveSnapshot = { col: p.col, row: p.row, steps: S.steps };
   p.col = col;
   p.row = row;
   S.steps += 1;
@@ -9429,13 +9441,32 @@ function onMoveEnd(col, row) {
   centerOnPlayer(true);
   scheduleRender();
 
-  // X-4.3: em REMOTE, sincroniza com motor server (fire-and-forget).
-  // Server pode: (a) retornar state atualizado (HP/MP/gold/visible),
-  // (b) retornar event rolado → abre modal com o event do servidor.
+  // X-6.5.30: em REMOTE, sincroniza com motor server. Em caso de erro,
+  // ROLLBACK pra posição anterior pra não dessincronizar com server.
+  // Snapshot (prevCol/prevRow) feito ANTES do onMoveEnd alterar S.player.
+  // Antes: erros eram silenciados → cliente movia, server não aplicava,
+  // moves subsequentes eram rejeitados em cascata até user dar refresh.
   if (_remoteAuthoritative) {
+    /* prevCol/prevRow capturados em onMoveEnd ANTES do p.col=col; passados via
+       window.__pendingMoveSnapshot pra resolver no .then sem fechar over args. */
+    var _moveSnapshot = window.__pendingMoveSnapshot || null;
     window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
-        LOGW('API', 'remote_move err=' + (res && res.error));
+        LOGW('API', 'remote_move err=' + (res && res.error) + ' — rolling back position');
+        /* ROLLBACK: restaura posição se temos snapshot. Toast pra avisar. */
+        if (_moveSnapshot && typeof _moveSnapshot.col === 'number') {
+          try {
+            S.player.col = _moveSnapshot.col;
+            S.player.row = _moveSnapshot.row;
+            if (typeof _moveSnapshot.steps === 'number') S.steps = _moveSnapshot.steps;
+            updateHud(); updateHexNav(); centerOnPlayer(true); scheduleRender();
+            var _msg = res && res.error === 'out_of_bounds' ? 'Não pode ir além daqui'
+                     : res && res.error === 'impassable' ? 'Caminho intransitável'
+                     : res && res.error === 'unknown_token' ? 'Sessão expirou — recarregue'
+                     : 'Movimento bloqueado';
+            if (typeof vToast === 'function') vToast(_msg, 'warn', 2500);
+          } catch (eR) { LOGE('API', 'rollback err=' + (eR && eR.message)); }
+        }
         return;
       }
       // Sync state HP/MP/gold/xp + visible do servidor
@@ -9468,8 +9499,21 @@ function onMoveEnd(col, row) {
         S.ph = 'event';
         try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
       }
+      /* X-6.5.30: limpa snapshot após sync bem sucedido */
+      window.__pendingMoveSnapshot = null;
     }).catch(function(e) {
-      LOGE('API', 'remote_move rejected msg=' + (e && e.message));
+      LOGE('API', 'remote_move rejected msg=' + (e && e.message) + ' — rolling back');
+      /* X-6.5.30: rollback também em network errors (timeout, abort). */
+      if (_moveSnapshot && typeof _moveSnapshot.col === 'number') {
+        try {
+          S.player.col = _moveSnapshot.col;
+          S.player.row = _moveSnapshot.row;
+          if (typeof _moveSnapshot.steps === 'number') S.steps = _moveSnapshot.steps;
+          updateHud(); updateHexNav(); centerOnPlayer(true); scheduleRender();
+          if (typeof vToast === 'function') vToast('Erro de rede no movimento', 'warn', 2500);
+        } catch (eR) { LOGE('API', 'rollback (catch) err=' + (eR && eR.message)); }
+      }
+      window.__pendingMoveSnapshot = null;
     });
   }
 }
