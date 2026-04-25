@@ -9324,6 +9324,29 @@ function getMoveDurationFor(toCol, toRow, fromCol, fromRow) {
 /* X-6.5.38: timer global para anim atual — permite cancelar/interromper
    quando user clica novamente durante movimento. */
 var _moveTimer = null;
+/* X-6.5.39: watchdog timestamp pra detectar S.ph travado em 'moving'. */
+var _movingPhStartedAt = 0;
+
+/* X-6.5.39 STATE WATCHDOG: a cada 1s verifica se S.ph === 'moving' por
+   mais de 3s. Se sim, e bug — forca volta pra 'idle' pra desbloquear UI. */
+setInterval(function() {
+  if (S && S.ph === 'moving' && _movingPhStartedAt > 0) {
+    var elapsed = Date.now() - _movingPhStartedAt;
+    if (elapsed > 3000) {
+      LOGE('MOVE', 'STATE_WATCHDOG ph=moving stuck for ' + elapsed + 'ms — forcing idle + cleanup');
+      try {
+        if (_moveTimer) { clearTimeout(_moveTimer); _moveTimer = null; }
+        playerAnim = null;
+        S.ph = 'idle';
+        _movingPhStartedAt = 0;
+        if (typeof updateHexNav === 'function') updateHexNav();
+        if (typeof scheduleRender === 'function') scheduleRender();
+      } catch (e) { LOGE('MOVE', 'state_watchdog_recovery_err msg=' + (e && e.message)); }
+    }
+  } else if (S && S.ph !== 'moving') {
+    _movingPhStartedAt = 0;
+  }
+}, 1000);
 
 function beginMove(col, row) {
   /* X-6.5.38: ANIMACAO INTERRUPTIVEL — se ja ha animacao em curso, completa
@@ -9370,6 +9393,7 @@ function beginMove(col, row) {
   };
   p._prevFacing = p.facing;
   S.ph = 'moving';
+  _movingPhStartedAt = Date.now();  /* X-6.5.39: watchdog rastreia inicio */
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
@@ -9645,12 +9669,13 @@ function updateHexNav() {
     if (isTileImpassable(c, r)) btn.classList.add('blocked');
     else btn.classList.remove('blocked');
   }
-  /* X-6.5.38 (2026-04-24): SO disabled durante 'event'. Antes (X-6.5.19)
-     bloqueava tambem 'moving' o que causava trava de UI. Agora click durante
-     anim e PERMITIDO — beginMove faz interrupt + completa anim antiga. */
+  /* X-6.5.39 (2026-04-24): NUNCA disabilita os botoes. User reportou trava
+     persistente apos X-6.5.33/38. CSS .hex-dir:disabled tem pointer-events:
+     none que silencia clicks. Removendo o disabled fisico, click ALWAYS
+     dispara — isValidMove decide se aceita ou nao (bloqueia 'event' apenas).
+     Visual: botoes ficam sempre clicaveis; clicks invalidos disparam shake. */
   try {
-    const shouldDisable = (S.ph === 'event');
-    _setHexNavDisabled(shouldDisable);
+    _setHexNavDisabled(false);
   } catch (_) {}
 }
 
