@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:48:19Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:55:47Z - do not edit directly, edit source -->
 
 
 <!--
@@ -478,22 +478,112 @@ body {
        Line: botWebViewPanelSize: size(384px, 694px);
        URL:  https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style
      384x694 = janela popup Telegram Desktop pra QUALQUER Mini App.
-     Inclui ~50px do header proprio do Telegram → webview real ~384x644. */
+
+     X-6.5.51f (2026-04-25): layout flex-row pra acomodar #sim-log-panel
+     a direita do #frame (igual valdoria-webapp/shared/dev-debug-panel.js).
+     User feedback: "adicione uma div nova ao lado desse frame para ser
+     exatamente igual dev-log-panel". */
   width: 100vw; height: 100vh; height: 100dvh;
   position: relative;
-  display: flex; justify-content: center; align-items: stretch;
+  display: flex; flex-direction: row; align-items: center;
+  /* Centraliza o frame horizontalmente quando log panel cabe; alinha-left
+     quando log panel ocupa o resto. */
+  justify-content: flex-start;
+  background: #0f0d0a;  /* fundo do dev-log-panel area */
 }
 #frame {
-  width: 100%;
+  width: 384px;
+  min-width: 384px;
   max-width: 384px;
-  height: 100%;
+  height: min(100dvh, 694px);
   max-height: min(100dvh, 694px);
-  margin: 0 auto;
+  /* X-6.5.51f: margin-left auto centraliza frame horizontal quando log
+     panel cabe (>= 600px disponivel); senao panel some via media query. */
+  margin: 0 auto 0 auto;
+  flex-shrink: 0;
   position: relative;
   background: var(--v-bg, #2a2420);
   overflow: hidden;
-  /* Frame visual fora do viewport simulado — delimita o popup Telegram Desktop */
+  border-radius: 12px;
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
+}
+
+/* X-6.5.51f: #sim-log-panel — replica visual do #dev-log-panel do
+   valdoria-webapp/shared/dev-debug-panel.js. Painel a direita do frame
+   pra mostrar logs em real-time (LOG/LOGW/LOGE do simulador).
+   Some em viewport <600px (priorizar frame). */
+#sim-log-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: min(100dvh, 694px);
+  max-height: min(100dvh, 694px);
+  background: #0f0d0a;
+  border-left: 1px solid rgba(196, 149, 58, 0.3);
+  display: flex;
+  flex-direction: column;
+  font-family: ui-monospace, Consolas, 'Courier New', monospace;
+  font-size: 11px;
+  color: #d4c8b0;
+  overflow: hidden;
+  margin-left: 16px;
+}
+#sim-log-panel-header {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#sim-log-panel-clear {
+  background: transparent;
+  border: 1px solid rgba(196, 149, 58, 0.4);
+  color: var(--v-gold, #c4953a);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+}
+#sim-log-panel-clear:hover { background: rgba(196, 149, 58, 0.15); }
+#sim-log-panel-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 6px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+#sim-log-panel-list::-webkit-scrollbar { width: 6px; }
+#sim-log-panel-list::-webkit-scrollbar-thumb {
+  background: rgba(196, 149, 58, 0.4);
+  border-radius: 3px;
+}
+.sim-log-line {
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.05);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+.sim-log-line.log-warn { color: #f9a825; }
+.sim-log-line.log-error { color: #e57373; }
+.sim-log-line.log-info { color: #d4c8b0; }
+.sim-log-time { color: #6a5a48; margin-right: 6px; font-size: 10px; }
+.sim-log-tag { color: var(--v-gold, #c4953a); font-weight: 700; margin-right: 4px; }
+
+/* Em viewports apertados (mobile / Telegram real), esconde o log panel
+   pra deixar apenas o frame */
+@media (max-width: 600px) {
+  body { justify-content: center; }
+  #sim-log-panel { display: none; }
+  #frame { margin: 0 auto; }
 }
 
 /* X-6.5.51b OVERRIDES — elementos que audio-manager.js / vOverlay.js / outros
@@ -530,18 +620,26 @@ html body .va-float {
 /* Toasts/popups overlay: cobrir o body inteiro (que e 694px tall por X-6.5.51).
    X-6.5.51b: top: 0 + height: 100% suficiente porque body tem contain:layout
    (containing block dos fixed children). NAO usar calc((100dvh - 694) / 2) —
-   compensa empty space que ja nao existe. */
+   compensa empty space que ja nao existe.
+
+   X-6.5.51f: ADICIONADO .camp-screen aqui (estava com position:fixed inset:0
+   cobrindo viewport inteiro do browser fora do frame). Mesma logica das outras
+   overlays. User reportou: "apertei no botao acampar e ele ocupou toda tela
+   do navegador horizontalmente". */
 html body .v-toast-host,
 html body .v-popup-host,
 html body .v-overlay-host,
 html body .processing-overlay,
-html body .connection-overlay {
+html body .connection-overlay,
+html body .camp-screen {
   left: 0 !important;
-  right: 0 !important;
-  margin: 0 auto !important;
+  right: auto !important;
+  margin: 0 !important;
   max-width: 384px !important;
+  width: 384px !important;
   top: 0 !important;
   height: 100% !important;
+  max-height: 694px !important;
 }
 
 /* ====== MAP VIEWPORT (scrollável + canvas maior que a tela) =========== */
@@ -2398,22 +2496,22 @@ body.remote-mode #debug-hud { display: none !important; }
 #minimap-block {
   position: relative;   /* context pra botão absolute */
 }
-/* X-6.5.51e (2026-04-25): toggle agora dentro de #minimap-wrap (overlay
-   absolute em borda esquerda, centralizado verticalmente). User feedback:
-   "btn-minimap-toggle pode ficar posicionado um pouco mais centralizado
-   e encostado no minimap-wrap". Click do toggle stops propagation pra
-   nao acionar onclick do minimap-wrap (que abre quest journal). */
+/* X-6.5.51f (2026-04-25): toggle button OUT de #minimap-wrap (estava
+   sumindo quando content.collapsed). Agora vive em #minimap-block
+   (parent) como position:absolute. Posicao depende de class
+   .mm-collapsed no block (toggleada pelo JS no click).
+     - Expanded: right:108px (= width do minimap-content ~96+padding+border
+       + 2px gap) → fica encostado na borda esquerda do minimap-wrap
+     - Collapsed: right:4px → encostado na borda direita do frame
+   Transition smooth via right interpolation. */
+#minimap-block { position: relative; }
 #btn-minimap-toggle {
   position: absolute;
-  top: 50%;
-  /* left:0 dentro de #minimap-wrap (que tem padding 4px) → encostado na
-     borda interna esquerda do mapa */
-  left: -2px;
-  transform: translateY(-50%);
+  top: 12px;  /* alinhado com top do minimap-wrap (4px padding + small gap) */
+  right: 108px;  /* default expanded: encostado borda esquerda do wrap */
   width: 18px;
   height: 32px;
   padding: 0;
-  /* SEM background/border — apenas seta com text-shadow pra contraste */
   background: transparent;
   border: none;
   color: var(--v-gold, #c4953a);
@@ -2422,10 +2520,13 @@ body.remote-mode #debug-hud { display: none !important; }
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
-  transition: all 0.15s ease;
+  transition: right 0.3s ease, color 0.15s ease, text-shadow 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
-  z-index: 4;  /* acima do canvas + badge */
+  z-index: 4;
+}
+#minimap-block.mm-collapsed #btn-minimap-toggle {
+  right: 4px;  /* collapsed: snap pra borda direita */
 }
 #btn-minimap-toggle:hover {
   color: #fbd770;
@@ -2656,11 +2757,11 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <div id="hud-quick">
-    <!-- X-6.5.20: ordem pedida pelo user — 🎒 🔝 mochila (não sobrepõe minimap),
-         📜 diário, 🔥 tocha, 🏕️ acampar (abaixo da tocha, acima cartografia),
-         🗺️ cartografia (mais baixo, sem sobrepor outros HUD). -->
+    <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
+         "remova o botao Diario de missoes". Quest journal agora e acessado
+         clicando no #minimap-wrap inteiro (X-6.5.51e refator).
+         Ordem atual: 🎒 mochila, 🔥 tocha, 🏕️ acampar, 🗺️ cartografia. -->
     <button class="quick-btn" id="btn-inventory" title="Mochila (Inventário)">🎒</button>
-    <button class="quick-btn" id="btn-quest-journal" title="Diário de Missões">📜</button>
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz">🔥</button>
       <div class="light-menu" id="light-menu"></div>
@@ -2684,16 +2785,18 @@ body.remote-mode #debug-hud { display: none !important; }
       <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem">📍</button>
       <button class="zoom-btn" id="btn-zoom-in" title="Mais zoom">+</button>
     </div>
-    <!-- X-6.5.51e: REFATORADO — toggle button DENTRO do #minimap-wrap (overlay
-         left edge centered). Quest indicator agora e BADGE dentro do wrap
-         (#mw-quest-badge bottom-left). #minimap-wrap inteiro e clickable
-         (abre quest journal). User feedback: "tornando esse minimap-wrap um
-         botao, coloque o icone e numero de missoes no canto inferior". -->
+    <!-- X-6.5.51f: btn-minimap-toggle DEVOLVIDO pra fora de #minimap-content
+         (estava dentro em X-6.5.51e mas sumia quando content.collapsed por
+         causa de opacity:0 + max-width:0). Agora toggle e direct child de
+         #minimap-block, position absolute. JS adiciona class .mm-collapsed
+         no block pra reposicionar toggle (right:108 expanded -> right:4 collapsed).
+         Wrap continua clickable (abre quest journal); badge e quest count
+         continuam DENTRO do wrap. -->
     <div id="minimap-block">
+      <button id="btn-minimap-toggle" title="Recolher minimapa" aria-label="Recolher minimapa">▶</button>
       <div id="minimap-content">
         <div id="minimap-wrap" role="button" tabindex="0" title="Diário de Missões (clique pra abrir)">
           <canvas id="minimap" width="96" height="130"></canvas>
-          <button id="btn-minimap-toggle" title="Recolher minimapa" aria-label="Recolher minimapa">▶</button>
           <div id="mw-quest-badge" aria-live="polite">
             <span class="mw-qb-icon">📜</span><span class="mw-qb-count">0</span>
           </div>
@@ -2902,6 +3005,85 @@ body.remote-mode #debug-hud { display: none !important; }
     </div>
   </div>
 </div>
+
+<!-- X-6.5.51f: dev log panel a direita do #frame (replica visual do
+     #dev-log-panel do valdoria-webapp/shared/dev-debug-panel.js).
+     Captura LOG/LOGW/LOGE chamadas via wrapping de console + LOG fn. -->
+<div id="sim-log-panel">
+  <div id="sim-log-panel-header">
+    <span>Logs (Simulator)</span>
+    <button id="sim-log-panel-clear" type="button">Limpar</button>
+  </div>
+  <div id="sim-log-panel-list" aria-live="polite"></div>
+</div>
+
+<script>
+/* X-6.5.51f: capturador de logs do simulador. Intercepta console.log/warn/error
+   + window.LOG/LOGW/LOGE (se existirem) e renderiza no #sim-log-panel-list.
+   Some em viewports < 600px (CSS @media). */
+(function() {
+  var listEl = document.getElementById('sim-log-panel-list');
+  var clearBtn = document.getElementById('sim-log-panel-clear');
+  if (!listEl) return;
+
+  var MAX_LINES = 500;
+
+  function _appendLine(level, args) {
+    try {
+      var line = document.createElement('div');
+      line.className = 'sim-log-line log-' + level;
+      var time = document.createElement('span');
+      time.className = 'sim-log-time';
+      var d = new Date();
+      time.textContent = String(d.getHours()).padStart(2, '0') + ':' +
+                          String(d.getMinutes()).padStart(2, '0') + ':' +
+                          String(d.getSeconds()).padStart(2, '0');
+      line.appendChild(time);
+      var msg = Array.prototype.slice.call(args).map(function(a) {
+        if (a == null) return String(a);
+        if (typeof a === 'string') return a;
+        if (a instanceof Error) return a.message + (a.stack ? '\n  ' + a.stack.slice(0, 200) : '');
+        try { return JSON.stringify(a); } catch (e) { return String(a); }
+      }).join(' ');
+      var msgEl = document.createElement('span');
+      msgEl.textContent = msg;
+      line.appendChild(msgEl);
+      listEl.appendChild(line);
+      while (listEl.children.length > MAX_LINES) {
+        listEl.removeChild(listEl.firstChild);
+      }
+      // Auto-scroll to bottom only if user near bottom
+      var nearBottom = (listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight) < 80;
+      if (nearBottom) listEl.scrollTop = listEl.scrollHeight;
+    } catch (_e) {}
+  }
+
+  /* Wrap console.* */
+  var _origLog = console.log.bind(console);
+  var _origWarn = console.warn.bind(console);
+  var _origError = console.error.bind(console);
+  var _origInfo = console.info ? console.info.bind(console) : _origLog;
+  console.log = function() { _appendLine('info', arguments); _origLog.apply(null, arguments); };
+  console.warn = function() { _appendLine('warn', arguments); _origWarn.apply(null, arguments); };
+  console.error = function() { _appendLine('error', arguments); _origError.apply(null, arguments); };
+  console.info = function() { _appendLine('info', arguments); _origInfo.apply(null, arguments); };
+
+  /* Botao limpar */
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+    });
+  }
+
+  /* Capturar window.onerror */
+  window.addEventListener('error', function(ev) {
+    _appendLine('error', ['[window.error] ' + (ev.message || '?') + ' @ ' +
+                          (ev.filename || '?') + ':' + (ev.lineno || 0)]);
+  });
+
+  _appendLine('info', ['[sim-log-panel] ativo. Console + LOG/LOGW/LOGE capturados.']);
+})();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
@@ -12615,14 +12797,18 @@ function bindQuickActions() {
   if (minimapToggleBtn) {
     const applyMinimapState = (collapsed) => {
       const content = document.getElementById('minimap-content');
-      if (!content) return;
+      const block = document.getElementById('minimap-block');
+      if (!content || !block) return;
       if (collapsed) {
         content.classList.add('collapsed');
+        // X-6.5.51f: tag block tambem (CSS reposiciona toggle pra borda direita)
+        block.classList.add('mm-collapsed');
         minimapToggleBtn.textContent = '◀';
         minimapToggleBtn.title = 'Mostrar minimapa';
         minimapToggleBtn.setAttribute('aria-label', 'Mostrar minimapa');
       } else {
         content.classList.remove('collapsed');
+        block.classList.remove('mm-collapsed');
         minimapToggleBtn.textContent = '▶';
         minimapToggleBtn.title = 'Recolher minimapa';
         minimapToggleBtn.setAttribute('aria-label', 'Recolher minimapa');
@@ -12772,8 +12958,11 @@ function bindQuickActions() {
   // pra evitar dispatch duplo. Keyboard: Enter/Space tambem abre.
   var mwWrap = document.getElementById('minimap-wrap');
   if (mwWrap) {
-    mwWrap.addEventListener('click', function(e) {
-      if (e.target && e.target.id === 'btn-minimap-toggle') return;  // toggle handler trata
+    /* X-6.5.51f: toggle button agora e SIBLING (em #minimap-block), nao
+       descendant. Click handler simplificado — qualquer click direto no
+       wrap abre quest journal. Toggle button tem seu proprio handler com
+       stopPropagation; nao bubble pra ca de qualquer forma. */
+    mwWrap.addEventListener('click', function() {
       openQuestJournal();
     });
     mwWrap.addEventListener('keydown', function(e) {
