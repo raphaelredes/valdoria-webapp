@@ -10449,16 +10449,41 @@ function _remoteShowOutcome(ch, oc) {
       try {
         var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
           || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
-        LOG('COMBAT_BRIDGE', 'navigating url_len=' + redir.length
+        LOG('COMBAT_BRIDGE', 'about_to_navigate url_len=' + redir.length
           + ' has_token=' + (redir.indexOf('token=') > -1)
           + ' has_api=' + (redir.indexOf('api=') > -1)
-          + ' has_origin=' + (redir.indexOf('origin=') > -1));
+          + ' has_origin=' + (redir.indexOf('origin=') > -1)
+          + ' url_preview=' + redir.slice(0, 80));
+        /* X-6.5.42: FORCE FLUSH dos logs ANTES da navegacao. window.location.href
+           muda a pagina IMEDIATAMENTE, JS context destruido, log buffer perdido.
+           Sem isso, logs do bridge nunca chegam ao bot.log → impossivel
+           diagnosticar "Falha ao carregar combate" reportada pelo user.
+           keepalive:true em sendBeacon equivalente pra sobreviver navegacao. */
+        try {
+          if (typeof _flushLogBuffer === 'function') _flushLogBuffer();
+          /* Forca flush sincrono via sendBeacon (sobrevive unload) */
+          if (typeof _LOG_BUFFER !== 'undefined' && _LOG_BUFFER.length > 0
+              && typeof window.__EXPLORE_API_BASE === 'string'
+              && window.__EXPLORE_API_BASE
+              && navigator.sendBeacon) {
+            var payload = JSON.stringify({
+              entries: _LOG_BUFFER.slice(-50).map(function(line) {
+                return { level: 'log', msg: line };
+              }),
+              uid: window.__EXPLORE_USER_ID || 0,
+            });
+            navigator.sendBeacon(
+              window.__EXPLORE_API_BASE + '/api/game/log',
+              new Blob([payload], { type: 'application/json' })
+            );
+          }
+        } catch (eF) { /* silent */ }
         window.__valdoria_transitioning = true;
         window.location.href = redir;
       } catch (e) {
         LOGE('COMBAT_BRIDGE', 'navigate_err msg=' + (e && e.message));
       }
-    }, 2000);
+    }, 1200);  /* X-6.5.42: era 2000, reduzido pra responder mais rapido */
   } else {
     LOG('COMBAT_BRIDGE', 'no_combat_trigger event_id=' + (S.event && S.event.id));
   }
