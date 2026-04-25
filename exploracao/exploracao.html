@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:33:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T17:48:19Z - do not edit directly, edit source -->
 
 
 <!--
@@ -514,11 +514,12 @@ body {
 html body .va-float {
   position: fixed !important;
   bottom: 8px !important;
-  /* X-6.5.51d: explorer body e 100vw wide (NAO 384). Frame e centralizado
-     em body via display:flex. left: 8px ficava no canto-esquerdo do BROWSER
-     fora do frame. Calc posiciona no canto-bottom-left do FRAME. */
-  left: calc(max(0px, (100vw - 384px) / 2) + 8px) !important;
-  right: auto !important;
+  /* X-6.5.51e: audio btn no canto BOTTOM-RIGHT do FRAME (padrao de jogos
+     desktop/console). User feedback: "deveria ficar na direita como e padrao
+     em todo jogo". Calc posiciona relativo ao frame centralizado, nao ao
+     viewport do browser. */
+  right: calc(max(0px, (100vw - 384px) / 2) + 8px) !important;
+  left: auto !important;
   top: auto !important;
   margin: 0 !important;
   width: auto !important;
@@ -1313,8 +1314,12 @@ html body .connection-overlay {
   pointer-events: none;
 }
 #hex-nav-inner {
+  /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
+     pra ficar formato HEXAGONO real, nao quase-quadrado). User feedback:
+     "separando um pouco verticalmente os botoes hex-dir 1 e 2, e 4 e 5
+     entre si, para que fique mais parecido com um hexagono". */
   position: relative;
-  width: 240px; height: 148px;
+  width: 240px; height: 188px;
   pointer-events: auto;
 }
 .hex-dir {
@@ -1374,11 +1379,14 @@ html body .connection-overlay {
  *   [SW 72w]            [SE 72w]
  *   [   S (80w centered bot)    ]
  */
+/* X-6.5.51e: offsets 38 -> 50 + container 148 -> 188.
+   Resultado em 188h: N=0..34, NE/NW=50..84 (gap 16), SE/SW=104..138
+   (gap NE-SE = 20), S=154..188 (gap SE-S = 16). Hexagon shape. */
 .hex-dir[data-dir="0"] { top: 0;       left: 80px; width: 80px; }   /* N  topo-centro */
-.hex-dir[data-dir="5"] { top: 38px;    left: 0;    width: 72px; }   /* NW esquerda-topo */
-.hex-dir[data-dir="1"] { top: 38px;    right: 0;   width: 72px; }   /* NE direita-topo */
-.hex-dir[data-dir="4"] { bottom: 38px; left: 0;    width: 72px; }   /* SW esquerda-fundo */
-.hex-dir[data-dir="2"] { bottom: 38px; right: 0;   width: 72px; }   /* SE direita-fundo */
+.hex-dir[data-dir="5"] { top: 50px;    left: 0;    width: 72px; }   /* NW esquerda-topo */
+.hex-dir[data-dir="1"] { top: 50px;    right: 0;   width: 72px; }   /* NE direita-topo */
+.hex-dir[data-dir="4"] { bottom: 50px; left: 0;    width: 72px; }   /* SW esquerda-fundo */
+.hex-dir[data-dir="2"] { bottom: 50px; right: 0;   width: 72px; }   /* SE direita-fundo */
 .hex-dir[data-dir="3"] { bottom: 0;    left: 80px; width: 80px; }   /* S  fundo-centro */
 .hex-dir .arrow { font-size: 12px; opacity: 0.85; }
 .hex-dir .label { font-size: 9px; opacity: 0.9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 52px; }
@@ -2377,11 +2385,12 @@ body.remote-mode #debug-hud { display: none !important; }
    o botão ficava deslocado visualmente. Agora minimap-content é o
    bloco principal e o botão flutua ao lado. */
 #minimap-block {
-  /* position:relative definido acima (no #btn-minimap-toggle reset)
-     X-6.5.51d: margin-right 20 -> 22 (toggle button width) reserva espaco
-     pro botao absolute mas fica grudado na borda direita do frame. */
+  /* X-6.5.51e (2026-04-25): margin-right REMOVIDO. User feedback: minimap
+     ainda longe da borda direita por causa da margin reservada pro toggle.
+     Agora toggle vive DENTRO do minimap-wrap (overlay absolute left edge
+     centered) — ver #btn-minimap-toggle abaixo. */
   display: block;
-  margin-right: 22px;
+  margin-right: 0;
 }
 /* X-6.5.20: toggle button posicionado absolutamente pra grudar na borda
    esquerda do minimap-wrap, centralizado verticalmente. Antes ficava
@@ -2389,19 +2398,22 @@ body.remote-mode #debug-hud { display: none !important; }
 #minimap-block {
   position: relative;   /* context pra botão absolute */
 }
-/* X-6.5.51d (2026-04-25): User pediu "botão Mostrar minimapa para que mostrando
-   somente a seta". Removido fundo/borda/shadow chunky — fica só a seta visivel
-   com hitbox transparente. Aumentou tamanho da seta pra continuar tappable. */
+/* X-6.5.51e (2026-04-25): toggle agora dentro de #minimap-wrap (overlay
+   absolute em borda esquerda, centralizado verticalmente). User feedback:
+   "btn-minimap-toggle pode ficar posicionado um pouco mais centralizado
+   e encostado no minimap-wrap". Click do toggle stops propagation pra
+   nao acionar onclick do minimap-wrap (que abre quest journal). */
 #btn-minimap-toggle {
   position: absolute;
   top: 50%;
-  right: 100%;
+  /* left:0 dentro de #minimap-wrap (que tem padding 4px) → encostado na
+     borda interna esquerda do mapa */
+  left: -2px;
   transform: translateY(-50%);
-  margin-right: 0;
-  width: 22px;
-  height: 36px;
+  width: 18px;
+  height: 32px;
   padding: 0;
-  /* SEM background, border, box-shadow — somente a seta visivel */
+  /* SEM background/border — apenas seta com text-shadow pra contraste */
   background: transparent;
   border: none;
   color: var(--v-gold, #c4953a);
@@ -2409,16 +2421,15 @@ body.remote-mode #debug-hud { display: none !important; }
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  /* Pequeno glow text-shadow ainda da contraste em fundos claros do mapa */
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
   transition: all 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
-  z-index: 2;
+  z-index: 4;  /* acima do canvas + badge */
 }
 #btn-minimap-toggle:hover {
   color: #fbd770;
-  text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.9);
 }
 #btn-minimap-toggle:active { transform: scale(0.92); }
 
@@ -2441,13 +2452,51 @@ body.remote-mode #debug-hud { display: none !important; }
   pointer-events: none;
 }
 #minimap-wrap {
+  /* X-6.5.51e: relative pra ser containing block do toggle button + quest badge.
+     cursor:pointer indica que e clickable (abre quest journal). */
+  position: relative;
   background: linear-gradient(180deg, rgba(40, 32, 24, 0.95), rgba(26, 21, 16, 0.95));
   border: 1.5px solid var(--v-gold, #c4953a);
   border-right: none;
   border-radius: 8px 0 0 8px;
   padding: 4px;
   box-shadow: -2px 4px 16px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(196, 149, 58, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
+#minimap-wrap:hover {
+  border-color: #fbd770;
+  box-shadow: -2px 4px 20px rgba(196, 149, 58, 0.4), inset 0 0 12px rgba(196, 149, 58, 0.15);
+}
+#minimap-wrap:active { transform: scale(0.99); }
+
+/* X-6.5.51e: quest badge integrado no minimap-wrap (canto inferior esquerdo,
+   dentro do mapa). User feedback: quest standalone tampava hud-float-hp;
+   colocar dentro do minimap-wrap economiza espaco e agrupa visualmente. */
+#mw-quest-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: linear-gradient(180deg, rgba(70, 54, 36, 0.95), rgba(40, 28, 18, 0.95));
+  border: 1px solid #c4953a;
+  border-radius: 12px;
+  padding: 2px 7px;
+  display: none;  /* JS libera quando ha quests ativas */
+  align-items: center;
+  gap: 4px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 10px;
+  font-weight: 700;
+  color: #fbd770;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 6px rgba(196, 149, 58, 0.4);
+  pointer-events: none;  /* click vai pro #minimap-wrap inteiro */
+  z-index: 3;
+  animation: questPulse 2.5s ease-in-out infinite;
+}
+#mw-quest-badge.active { display: flex; }
+.mw-qb-icon { font-size: 11px; }
+.mw-qb-count { color: #fbd770; }
 #minimap {
   display: block;
   border-radius: 4px;
@@ -2635,14 +2684,19 @@ body.remote-mode #debug-hud { display: none !important; }
       <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem">📍</button>
       <button class="zoom-btn" id="btn-zoom-in" title="Mais zoom">+</button>
     </div>
-    <!-- X-6.5.15: layout minimap com toggle button COLADO à esquerda.
-         Botão sempre visível; só #minimap-content slida pra direita.
-         Seta aponta pra onde o minimapa vai indo: ▶ fecha, ◀ abre. -->
+    <!-- X-6.5.51e: REFATORADO — toggle button DENTRO do #minimap-wrap (overlay
+         left edge centered). Quest indicator agora e BADGE dentro do wrap
+         (#mw-quest-badge bottom-left). #minimap-wrap inteiro e clickable
+         (abre quest journal). User feedback: "tornando esse minimap-wrap um
+         botao, coloque o icone e numero de missoes no canto inferior". -->
     <div id="minimap-block">
-      <button id="btn-minimap-toggle" title="Recolher minimapa" aria-label="Recolher minimapa">▶</button>
       <div id="minimap-content">
-        <div id="minimap-wrap">
+        <div id="minimap-wrap" role="button" tabindex="0" title="Diário de Missões (clique pra abrir)">
           <canvas id="minimap" width="96" height="130"></canvas>
+          <button id="btn-minimap-toggle" title="Recolher minimapa" aria-label="Recolher minimapa">▶</button>
+          <div id="mw-quest-badge" aria-live="polite">
+            <span class="mw-qb-icon">📜</span><span class="mw-qb-count">0</span>
+          </div>
         </div>
         <div id="current-coord">—</div>
       </div>
@@ -11002,15 +11056,18 @@ function confirmQuestDelivery() {
 }
 
 function updateQuestIndicator() {
-  const el = document.getElementById('quest-indicator');
-  if (!el) return;
+  // X-6.5.51e: badge agora integrado no #minimap-wrap (#mw-quest-badge).
+  // Indicator standalone legado (#quest-indicator) FORCADO display:none
+  // pra nao reaparecer caso codigo legacy o reescreva.
+  const legacy = document.getElementById('quest-indicator');
+  if (legacy) legacy.style.display = 'none';
+
+  const badge = document.getElementById('mw-quest-badge');
+  if (!badge) return;
   const n = (S && S.activeQuests) ? S.activeQuests.length : 0;
-  if (n > 0) {
-    el.style.display = 'flex';
-    el.querySelector('.qi-count').textContent = n;
-  } else {
-    el.style.display = 'none';
-  }
+  const countEl = badge.querySelector('.mw-qb-count');
+  if (countEl) countEl.textContent = String(n);
+  badge.classList.toggle('active', n > 0);
 }
 
 // X-6.5.14: opts.focus ('inventory' | 'quests' | null) controla qual seção
@@ -12576,7 +12633,9 @@ function bindQuickActions() {
       const saved = localStorage.getItem('valdoria_explore_minimap_collapsed');
       applyMinimapState(saved === '1');
     } catch (_e) { /* localStorage bloqueado */ }
-    minimapToggleBtn.addEventListener('click', () => {
+    minimapToggleBtn.addEventListener('click', (e) => {
+      // X-6.5.51e: stopPropagation pra nao bubble pro #minimap-wrap (que abre quest journal)
+      e.stopPropagation();
       const content = document.getElementById('minimap-content');
       if (!content) return;
       const willCollapse = !content.classList.contains('collapsed');
@@ -12704,7 +12763,23 @@ function bindQuickActions() {
 
   // Journal bindings
   document.getElementById('journal-close-btn').addEventListener('click', closeQuestJournal);
-  document.getElementById('quest-indicator').addEventListener('click', openQuestJournal);
+  // X-6.5.51e: legacy #quest-indicator continua wired (ja nao aparece visualmente
+  // mas mantemos o listener pra nao quebrar caso codigo o re-mostre).
+  var legacyQuest = document.getElementById('quest-indicator');
+  if (legacyQuest) legacyQuest.addEventListener('click', openQuestJournal);
+  // X-6.5.51e: #minimap-wrap inteiro agora abre quest journal (clickable
+  // wrap por user request). Toggle button DENTRO do wrap stop-propagation
+  // pra evitar dispatch duplo. Keyboard: Enter/Space tambem abre.
+  var mwWrap = document.getElementById('minimap-wrap');
+  if (mwWrap) {
+    mwWrap.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'btn-minimap-toggle') return;  // toggle handler trata
+      openQuestJournal();
+    });
+    mwWrap.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openQuestJournal(); }
+    });
+  }
 
   // Location + Detail popups (bestiário/compêndio)
   document.getElementById('loc-close-btn').addEventListener('click', closeLocationPopup);
