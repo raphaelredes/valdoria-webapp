@@ -12478,26 +12478,16 @@ function bindQuickActions() {
   if (_cbl) _cbl.addEventListener('click', doLongRest);
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
 
-  // X-6.5.20: mochila abre a TELA REAL /inventory/ (webapp SPA já existente
-  // com 7 arquivos JS completos em valdoria-webapp/inventory/). User pediu:
-  // "já existe um sistema de inventário completo, implemente ele como popup
-  // ao apertar o botão da mochila". REMOTE: navega mantendo return=exploracao;
-  // LOCAL (file://): toast informando que precisa do jogo real.
-  document.getElementById('btn-inventory').addEventListener('click', function() {
-    if (window.__EXPLORE_MODE === 'remote') {
-      // Preserva contexto de retorno via 'return' param. /inventory/ sabe
-      // voltar pra /exploracao/ quando fechar.
-      var params = new URLSearchParams();
-      if (window.__EXPLORE_TOKEN) params.set('token', window.__EXPLORE_TOKEN);
-      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
-      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
-      params.set('return', 'exploracao');
-      if (S && S.mapId) params.set('return_map', S.mapId);
-      params.set('_cb', String(Date.now()));
-      window.__valdoria_transitioning = true;
-      window.location.href = '/inventory/?' + params.toString();
-    } else {
-      // LOCAL (file://): sistema real requer bot DEV. Mostra narração.
+  // X-6.5.31 (2026-04-24): mochila via TRANSITION canonical.
+  // Antes (X-6.5.20): cliente construía URL /inventory/?token=X&api=Y diretamente.
+  // BUG: o token enviado tinha scope 'explore' (motor exploracao), mas o endpoint
+  // /api/inventory/payload exige scope 'combat'. validate_session retornava None
+  // → 401 → cliente mostrava tela vazia.
+  // Agora: POST /api/webapp/transition com {from:'exploracao', to:'inventory'}
+  // → server valida sessão, cria token combat-scope, pre-stage payload, retorna
+  // URL completa. Cliente apenas navega.
+  document.getElementById('btn-inventory').addEventListener('click', async function() {
+    if (window.__EXPLORE_MODE !== 'remote') {
       if (typeof dmNarrate === 'function') {
         dmNarrate({
           text: '📦 A mochila está no acampamento principal. (Disponível no jogo real via Telegram.)',
@@ -12506,6 +12496,57 @@ function bindQuickActions() {
       } else {
         console.info('[INVENTORY] LOCAL mode — use bot DEV para acessar inventário real');
       }
+      return;
+    }
+    var apiBase = window.__EXPLORE_API_BASE;
+    var token = window.__EXPLORE_TOKEN;
+    var uid = window.__EXPLORE_USER_ID;
+    if (!apiBase || !token || !uid) {
+      LOGE('INV', 'transition_skipped missing apiBase/token/uid');
+      if (typeof vToast === 'function') vToast('Sessão inválida — recarregue', 'err', 3000);
+      return;
+    }
+    if (typeof vProcessing !== 'undefined') vProcessing.show({ text: 'Abrindo mochila...' });
+    try {
+      var headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'X-Idempotency-Key': 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+      };
+      if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
+        headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
+      }
+      var resp = await fetch(apiBase + '/api/webapp/transition', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          from: 'exploracao',
+          to: 'inventory',
+          user_id: uid,
+          payload: { map_data: window.__EXPLORE_SNAP_B64 || '' }
+        }),
+      });
+      if (!resp.ok) {
+        var errBody = await resp.json().catch(function() { return {}; });
+        LOGE('INV', 'transition_http_err status=' + resp.status + ' err=' + (errBody && errBody.error));
+        if (typeof vProcessing !== 'undefined') vProcessing.hide();
+        if (typeof vToast === 'function') vToast('Erro ao abrir mochila: ' + (errBody.error || resp.status), 'err', 3500);
+        return;
+      }
+      var data = await resp.json();
+      if (data && data.url) {
+        LOG('INV', 'transition_ok navigating');
+        window.__valdoria_transitioning = true;
+        window.location.href = data.url;
+      } else {
+        LOGE('INV', 'transition_no_url response=' + JSON.stringify(data).slice(0, 120));
+        if (typeof vProcessing !== 'undefined') vProcessing.hide();
+        if (typeof vToast === 'function') vToast('Resposta inválida do servidor', 'err', 3000);
+      }
+    } catch (e) {
+      LOGE('INV', 'transition_fetch_err msg=' + (e && e.message));
+      if (typeof vProcessing !== 'undefined') vProcessing.hide();
+      if (typeof vToast === 'function') vToast('Erro de rede: ' + (e && e.message), 'err', 3500);
     }
   });
 
