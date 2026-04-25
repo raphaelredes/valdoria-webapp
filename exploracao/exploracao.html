@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:09:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:15:47Z - do not edit directly, edit source -->
 
 
 <!--
@@ -706,17 +706,129 @@ html body .camp-screen {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   flex-shrink: 0;
 }
-/* X-6.5.51g: tb-biome / tb-weather / tb-phase agora ICON-ONLY pra economizar
-   espaco e evitar quebra. Tooltip via title= mostra texto completo. */
+/* X-6.5.51i (2026-04-25): tb-biome/weather/phase clicaveis (smartphones nao
+   tem hover). User feedback: "smartphones nao tem mouse, entao nunca use
+   configuracoes hover apenas; adicione um popup que fornece as informacoes,
+   pode aproveitar e informar o que essas condicoes atuais influenciam na
+   jogabilidade durante a exploracao". */
 .tb-biome, .tb-weather, .tb-phase {
   font-size: 18px;
   letter-spacing: 0;
   filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.3));
-  cursor: help;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease;
+  padding: 2px;
 }
+.tb-biome:active, .tb-weather:active, .tb-phase:active { transform: scale(0.92); }
 .tb-biome { color: var(--v-gold, #c4953a); }
 .tb-weather { color: var(--v-text, #d4c8b0); opacity: 0.95; }
 .tb-phase { color: var(--v-text, #d4c8b0); opacity: 0.95; }
+
+/* X-6.5.51i: popup tip sobre condicao da exploracao (biome/weather/phase).
+   Position absolute dentro do #frame, centralizado. Open/close via class .visible. */
+#tb-condition-popup {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  background: rgba(10, 8, 5, 0.75);
+  padding: 14px;
+}
+#tb-condition-popup.visible { display: flex; }
+.tb-cp-card {
+  width: 100%;
+  max-width: 320px;
+  max-height: calc(100% - 28px);
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  color: var(--v-text, #d4c8b0);
+  overflow: hidden;
+}
+.tb-cp-header {
+  flex-shrink: 0;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tb-cp-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+.tb-cp-titles { flex: 1; min-width: 0; }
+.tb-cp-kind {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9px; font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin: 0;
+}
+.tb-cp-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 16px; font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin: 1px 0 0 0;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4);
+}
+.tb-cp-body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto;
+  padding: 12px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.tb-cp-body::-webkit-scrollbar { width: 5px; }
+.tb-cp-body::-webkit-scrollbar-thumb { background: rgba(196, 149, 58, 0.4); border-radius: 3px; }
+.tb-cp-section { margin-bottom: 10px; }
+.tb-cp-section:last-child { margin-bottom: 0; }
+.tb-cp-section-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 10px; font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin: 0 0 4px 0;
+}
+.tb-cp-section-body {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--v-text, #d4c8b0);
+}
+.tb-cp-section-body ul {
+  margin: 4px 0 0 0; padding-left: 18px;
+}
+.tb-cp-section-body li { margin-bottom: 3px; }
+.tb-cp-footer {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(196, 149, 58, 0.2);
+  display: flex;
+  justify-content: center;
+}
+.tb-cp-close {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.15), rgba(139, 100, 32, 0.1));
+  border: 1px solid var(--v-gold, #c4953a);
+  color: var(--v-gold, #c4953a);
+  padding: 7px 22px;
+  border-radius: 6px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.tb-cp-close:hover, .tb-cp-close:active {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.3), rgba(139, 100, 32, 0.2));
+}
 /* X-6.5.51g (2026-04-25): user feedback — "remova o desenho que tem logo
    antes de PERIGO". Removido ::before com ☠. Mantido label "Perigo" + pips. */
 .tb-danger {
@@ -3046,9 +3158,24 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <!-- Journal overlay (Missões) -->
-  <!-- X-6.5.51h: journal-card refatorado pra layout 3-zonas (header sticky +
-       body scrollavel + footer sticky). Antes title/list/close eram filhos
-       diretos do card e overflow ficava no card todo. -->
+  <!-- X-6.5.51i: popup com info da condicao atual (biome/weather/phase) +
+       como afeta exploracao. Aberto ao tocar nos icones do top-bar. -->
+  <div id="tb-condition-popup" role="dialog" aria-label="Detalhes da condição">
+    <div class="tb-cp-card">
+      <div class="tb-cp-header">
+        <div class="tb-cp-icon" id="tb-cp-icon">🌲</div>
+        <div class="tb-cp-titles">
+          <div class="tb-cp-kind" id="tb-cp-kind">Bioma</div>
+          <div class="tb-cp-name" id="tb-cp-name">Floresta</div>
+        </div>
+      </div>
+      <div class="tb-cp-body" id="tb-cp-body"></div>
+      <div class="tb-cp-footer">
+        <button type="button" class="tb-cp-close" id="tb-cp-close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="journal-overlay">
     <div class="journal-card">
       <div class="journal-header">
@@ -11306,6 +11433,13 @@ function classCanTakeChoice(ch, clsKey, bg, align, allies) {
     const hasAlly = (allies || []).some(a => want.includes(a.cls_key || a.cls));
     if (!hasAlly) return false;
   }
+  // X-6.5.51i (2026-04-25): ally_interaction precisa de PELO MENOS 1 aliado.
+  // Antes (X-6.5.0 era): renderizava como .locked (cinza/disabled). User
+  // feedback: "esconda as opcoes que o jogador atual nao tem". Agora
+  // filtramos completamente — choice nao aparece se sem aliados.
+  if (ch.ally_interaction) {
+    if (!allies || allies.length === 0) return false;
+  }
   // class_tags legado: 'arcane'=mago, 'martial'=guerreiro, 'stealth'=ladino, 'divine'=clerigo
   if (ch.class_tags) {
     const tagMap = { mago: 'arcane', guerreiro: 'martial', ladino: 'stealth', clerigo: 'divine' };
@@ -12849,6 +12983,92 @@ function updateTopBar() {
   pips.forEach((pip, i) => { if (i < S.dangerLevel) pip.classList.add('on'); else pip.classList.remove('on'); });
 }
 
+/* X-6.5.51i (2026-04-25): popup contextual quando usuario toca icone do
+   top-bar (smartphone-friendly, substitui hover). Mostra info da condicao
+   atual + COMO afeta exploracao. User feedback: "smartphones nao tem mouse,
+   entao nunca use configuracoes hover apenas; pode aproveitar e informar
+   o que essas condicoes atuais influenciam na jogabilidade durante a
+   exploracao". */
+const TB_BIOME_INFO = {
+  forest:    { ico: '🌲', name: 'Floresta',   desc: 'Carvalhos antigos, samambaias e vida selvagem por toda parte. Visibilidade limitada pela copa.', effects: ['Encontros de animais e bandidos comuns', 'Forragear (Sobrevivência DC 12) revela ervas e cogumelos', 'Movimento mais lento em mata densa', 'Vigília (Percepção) pra detectar emboscadas'] },
+  plains:    { ico: '🌾', name: 'Planície',   desc: 'Campos abertos sob o céu, com trilhas suaves e fazendas dispersas.', effects: ['Visibilidade ampla — vê POIs distantes', 'Encontros aleatórios menos frequentes', 'Forragear oferece grãos e frutas (DC 10)', 'Sem cobertura — fugir de combate é mais difícil'] },
+  desert:    { ico: '🏜️', name: 'Deserto',    desc: 'Dunas escaldantes de dia, gélidas de noite. Água é vida.', effects: ['Exaustão (CON DC 12) a cada poucos passos sob o sol', 'Forragear (Sobrevivência DC 16) é raríssimo', 'Tempestades de areia reduzem visibilidade ao mínimo', 'Encontros: bandidos e criaturas adaptadas'] },
+  cave:      { ico: '🕳️', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
+  mountain:  { ico: '⛰️', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
+  swamp:     { ico: '🌫️', name: 'Pântano',    desc: 'Atoleiros e mangues onde a névoa nunca dissipa. O chão te puxa.', effects: ['Movimento severamente lento', 'Doenças (CON DC 13) ao beber água parada', 'Visibilidade reduzida pela névoa', 'Encontros: aranhas gigantes, trolls, ghouls'] },
+  graveyard: { ico: '🪦', name: 'Cemitério',  desc: 'Lápides musgosas onde o véu entre mundos é fino.', effects: ['Encontros mortos-vivos frequentes', 'Saves de Sabedoria contra horror (DC 12)', 'Profanar tumbas tem consequências', 'Mais perigoso à noite'] },
+  snow:      { ico: '❄️', name: 'Neve',       desc: 'Gelo e nevascas que nunca acabam. Cada passo conta.', effects: ['Exaustão por frio (CON DC 13) a cada hora', 'Movimento lento na neve profunda', 'Forragear quase impossível (DC 18)', 'Lobos atrozes e ursos polares'] },
+  volcanic:  { ico: '🌋', name: 'Vulcânico',  desc: 'Cinzas no ar, lava no solo. Tudo aqui quer te queimar.', effects: ['Dano de fogo periódico', 'Visibilidade reduzida por fumaça', 'Hazards de magma (DEX DC 14)', 'Encontros: salamandras, dragões menores'] },
+};
+const TB_WEATHER_INFO = {
+  s: { ico: '☀️', name: 'Limpo',      desc: 'Céu aberto, ventos calmos. Condições ideais.', effects: ['Visibilidade total no mapa', 'Sem penalidades de movimento', 'Cura de descanso é eficiente'] },
+  r: { ico: '🌧️', name: 'Chuva',      desc: 'Pingos persistentes encharcam o caminho.', effects: ['Visibilidade reduzida pra POIs distantes', 'Movimento -1 (terreno escorregadio)', 'Fogueira difícil de acender (Sobrevivência DC 13)', 'Rastros são mais fáceis de seguir'] },
+  f: { ico: '🌫️', name: 'Névoa',      desc: 'Branco leitoso engole tudo a poucos metros.', effects: ['Visibilidade severamente reduzida (1-2 hexes)', 'Inimigos podem te surpreender (Percepção desvantagem)', 'Forragear mais difícil (sem ver longe)', 'Lugares secretos podem se revelar'] },
+  t: { ico: '⛈️', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
+};
+const TB_PHASE_INFO = {
+  day:   { ico: '☀',  name: 'Dia',        desc: 'O sol no zênite ilumina tudo. Aventureiros estão em vantagem.', effects: ['Visibilidade total', 'Encontros mortos-vivos raros', 'NPCs amigáveis estão ativos (Persuasão DC normal)', 'Fácil descansar com segurança'] },
+  dusk:  { ico: '🌅', name: 'Entardecer',  desc: 'O sol declina, lançando sombras longas. A transição.', effects: ['Visibilidade começa a cair', 'Encontros aumentam ligeiramente', 'Hora de buscar abrigo', 'Mortos-vivos começam a despertar'] },
+  night: { ico: '🌙', name: 'Noite',       desc: 'A escuridão domina. Caçadores noturnos estão à solta.', effects: ['Visibilidade muito reduzida (sem Tocha/Luz)', 'Encontros mortos-vivos e predadores frequentes', 'Saves de Sabedoria contra medo (DC 12)', 'Descanso requer vigília'] },
+  dawn:  { ico: '🌄', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
+};
+const TB_DANGER_INFO = {
+  ico: '◆', name: 'Nível de Perigo',
+  desc: 'Mede o risco geral deste mapa: monstros, hazards, encontros aleatórios e DC dos testes.',
+  effects: [
+    '◆◇◇◇◇ Tranquilo — encontros raros, NPCs amigáveis',
+    '◆◆◇◇◇ Comum — algum risco, encontros médios',
+    '◆◆◆◇◇ Perigoso — combates frequentes, hazards',
+    '◆◆◆◆◇ Mortal — só pra aventureiros experientes',
+    '◆◆◆◆◆ Lendário — alta chance de morte permanente',
+  ],
+};
+
+function _showTbConditionPopup(kind) {
+  let info = null;
+  let kindLabel = '';
+  if (kind === 'biome')   { info = TB_BIOME_INFO[S.biome] || TB_BIOME_INFO.forest; kindLabel = 'Bioma'; }
+  else if (kind === 'weather') { info = TB_WEATHER_INFO[S.weather] || TB_WEATHER_INFO.s; kindLabel = 'Clima'; }
+  else if (kind === 'phase')   { info = TB_PHASE_INFO[S.dayPhase] || TB_PHASE_INFO.day; kindLabel = 'Fase do Dia'; }
+  else if (kind === 'danger')  {
+    info = TB_DANGER_INFO;
+    kindLabel = 'Indicador';
+    info.name = TB_DANGER_INFO.name + ' (' + (S.dangerLevel || 0) + '/5)';
+  }
+  if (!info) return;
+  document.getElementById('tb-cp-icon').textContent = info.ico;
+  document.getElementById('tb-cp-kind').textContent = kindLabel;
+  document.getElementById('tb-cp-name').textContent = info.name;
+  const body = document.getElementById('tb-cp-body');
+  clearChildren(body);
+  if (info.desc) {
+    const sec = document.createElement('div');
+    sec.className = 'tb-cp-section';
+    const t = document.createElement('div'); t.className = 'tb-cp-section-title'; t.textContent = 'Descrição';
+    const b = document.createElement('div'); b.className = 'tb-cp-section-body'; b.textContent = info.desc;
+    sec.appendChild(t); sec.appendChild(b); body.appendChild(sec);
+  }
+  if (info.effects && info.effects.length) {
+    const sec = document.createElement('div');
+    sec.className = 'tb-cp-section';
+    const t = document.createElement('div'); t.className = 'tb-cp-section-title'; t.textContent = 'Efeitos na Exploração';
+    const b = document.createElement('div'); b.className = 'tb-cp-section-body';
+    const ul = document.createElement('ul');
+    info.effects.forEach(eff => {
+      const li = document.createElement('li');
+      li.textContent = eff;
+      ul.appendChild(li);
+    });
+    b.appendChild(ul);
+    sec.appendChild(t); sec.appendChild(b); body.appendChild(sec);
+  }
+  document.getElementById('tb-condition-popup').classList.add('visible');
+}
+
+function _hideTbConditionPopup() {
+  document.getElementById('tb-condition-popup').classList.remove('visible');
+}
+
 function setBarFill(fillId, valId, cur, max, type) {
   const fill = document.getElementById(fillId);
   const val = document.getElementById(valId);
@@ -13229,6 +13449,23 @@ function bindQuickActions() {
   // Location + Detail popups (bestiário/compêndio)
   document.getElementById('loc-close-btn').addEventListener('click', closeLocationPopup);
   document.getElementById('detail-close-btn').addEventListener('click', closeDetailPopup);
+
+  /* X-6.5.51i: top-bar condition icons → popup contextual (smartphone-friendly,
+     substitui hover). Cada icone abre popup com info + efeitos na exploracao. */
+  var tbBiome = document.getElementById('top-biome');
+  var tbWeather = document.getElementById('top-weather');
+  var tbPhase = document.getElementById('top-phase');
+  var tbDanger = document.getElementById('top-danger');
+  var tbCpClose = document.getElementById('tb-cp-close');
+  var tbCpOverlay = document.getElementById('tb-condition-popup');
+  if (tbBiome)   tbBiome.addEventListener('click', function() { _showTbConditionPopup('biome'); });
+  if (tbWeather) tbWeather.addEventListener('click', function() { _showTbConditionPopup('weather'); });
+  if (tbPhase)   tbPhase.addEventListener('click', function() { _showTbConditionPopup('phase'); });
+  if (tbDanger)  tbDanger.addEventListener('click', function() { _showTbConditionPopup('danger'); });
+  if (tbCpClose) tbCpClose.addEventListener('click', _hideTbConditionPopup);
+  if (tbCpOverlay) tbCpOverlay.addEventListener('click', function(e) {
+    if (e.target === tbCpOverlay) _hideTbConditionPopup();  // click fora do card fecha
+  });
 }
 
 // ============================================================================
