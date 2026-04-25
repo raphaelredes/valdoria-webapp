@@ -1608,23 +1608,39 @@ body {
 
 /* V3.0: DM TOAST removido (user: "n\u00e3o d\u00e1 imersividade, melhor os eventos mesmo") */
 
-/* ====== DICE OVERLAY (padrão check-overlay do combate) =============== */
+/* ====== DICE OVERLAY (padrão check-overlay do combate) ===============
+   X-6.5.46 (2026-04-25) REFATORADO: layout 2-zonas. Top-zone com dado +
+   fórmula + resultado (flex-center). Bottom-zone com botão Continuar
+   ANCORADO via position:absolute ao bottom do overlay — botão NUNCA é
+   empurrado pra fora do viewport (era bug recorrente: 5 reports do user
+   sobre "botão não aparece"). Watchdog mantido como safety net pro
+   relatório console, mas layout absoluto não depende dele. */
 #dice-overlay {
   position: absolute; inset: 0;
   background: rgba(42, 36, 32, 0.96);
   display: none;
-  align-items: center; justify-content: center;
-  flex-direction: column;
-  gap: 18px;
   z-index: 200;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease;
 }
 #dice-overlay.visible {
-  display: flex;
+  display: block;
   opacity: 1;
   pointer-events: auto;
+}
+/* Top-zone: dado + fórmula + resultado, ocupa overlay inteiro menos
+   espaço reservado pro botão no bottom (110px = ~botão 55px + padding). */
+#dice-content-zone {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  bottom: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px;
 }
 #dice-canvas-wrap {
   position: relative;
@@ -1701,6 +1717,20 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   font-weight: 900;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+/* X-6.5.46: dice-skip-btn ESPECIFICAMENTE — anchored ao bottom do overlay
+   via position:absolute. NUNCA é empurrado pra fora do viewport por
+   conteudo expandindo acima dele. */
+#dice-skip-btn {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+}
+#dice-skip-btn.v-skip-btn--shown {
+  /* Mantem position:absolute mesmo quando .v-skip-btn--shown ativa */
+  display: inline-block !important;
 }
 /* X-6.5.35: classe explícita pra mostrar.
    X-6.5.41: animacao de pulso pra chamar atencao do user. */
@@ -2684,9 +2714,13 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <div id="dice-overlay">
-    <div id="dice-canvas-wrap"></div>
-    <div id="dice-formula"></div>
-    <div id="dice-result"></div>
+    <!-- X-6.5.46: top-zone com dado/formula/resultado (flex-center).
+         Bottom-zone (botao) eh anchored via position:absolute em CSS. -->
+    <div id="dice-content-zone">
+      <div id="dice-canvas-wrap"></div>
+      <div id="dice-formula"></div>
+      <div id="dice-result"></div>
+    </div>
     <button class="v-skip-btn" id="dice-skip-btn">Continuar >></button>
   </div>
 
