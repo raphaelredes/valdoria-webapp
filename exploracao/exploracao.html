@@ -10474,26 +10474,119 @@ function _remoteRenderDiceAndResolve(ch, oc) {
 }
 
 // X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
+// X-6.5.47 (2026-04-25) FIX BUG 5x REPORTADO PELO USER: em REMOTE mode,
+// _remoteShowOutcome NAO mostrava o botao #event-continue após o dado
+// fechar. User ficava preso na tela de outcome sem opção de avançar
+// (logs 00:29:51 → 00:30:08: 17s sem nenhum log de close — user tentou
+// clicar em vários lugares e desistiu).
+//
+// applyChoiceOutcome (LOCAL flow) tem `continueEl.classList.remove('hidden')`
+// na linha 10774. _remoteShowOutcome NÃO TINHA. Bug existia desde X-4.5.
+//
+// Logs novos pra diagnostico futuro:
+//   - remote_outcome_entry tier=X has_combat=Y reward=Z
+//   - remote_outcome_continue_shown event=X tier=Y
+//   - remote_outcome_continue_clicked event=X (user fechou modal)
+//   - remote_outcome_combat_redirect_pending (esperando navigate)
 function _remoteShowOutcome(ch, oc) {
+  LOG('EVENT', 'remote_outcome_entry event=' + (S.event && S.event.id || '?')
+    + ' tier=' + (oc.tier || 'success')
+    + ' has_combat=' + !!oc.combat_trigger
+    + ' reward=' + ((oc.delta && oc.delta.gold) ? oc.delta.gold : '0'));
   S.event.resolved = {
     tier: oc.tier || 'success',
     text: oc.text || '',
     reward: (oc.delta && oc.delta.gold) ? ('+' + oc.delta.gold + ' Valdoritas') : null
   };
+  /* X-6.5.47: BUG GROTESCO descoberto na 5a investigação dos logs:
+     codigo antigo escrevia em #event-resolved (que NAO EXISTE no DOM —
+     apenas #event-outcome existe). User nao via nem o resultado nem
+     o botao Continuar — modal ficava 100% em branco apos dado fechar.
+     Fix: replicar render de applyChoiceOutcome (header + paragrafo +
+     consequencias) no #event-outcome real. */
   try {
-    var resolvedEl = document.getElementById('event-resolved');
-    if (resolvedEl) {
-      clearChildren(resolvedEl);
-      var txt = document.createElement('div');
-      txt.className = 'resolved-text ' + (S.event.resolved.tier || 'success');
-      txt.textContent = S.event.resolved.text;
-      resolvedEl.appendChild(txt);
-      resolvedEl.style.display = 'block';
+    var outcomeEl = document.getElementById('event-outcome');
+    if (!outcomeEl) {
+      LOGE('EVENT', 'remote_outcome_DOM_BUG event-outcome not found');
+    } else {
+      outcomeEl.classList.remove('hidden');
+      outcomeEl.className = 'event-outcome ' + (oc.tier || 'success');
+      clearChildren(outcomeEl);
+
+      var hdr = document.createElement('div');
+      hdr.className = 'outcome-header';
+      var tier = oc.tier || 'success';
+      hdr.textContent = tier === 'success' ? '✦ Sucesso'
+                      : tier === 'partial' ? '○ Sucesso Parcial'
+                      : '✗ Falha';
+      outcomeEl.appendChild(hdr);
+
+      var narr = document.createElement('p');
+      narr.style.margin = '6px 0 0 0';
+      narr.textContent = oc.text || '';
+      outcomeEl.appendChild(narr);
+
+      /* Consequências derivadas do delta (server enviou hp/mp/gold/xp). */
+      var consItems = [];
+      if (oc.delta) {
+        if (oc.delta.gold > 0) consItems.push({ kind: 'reward', ico: '✦', text: '+' + oc.delta.gold + ' Valdoritas' });
+        else if (oc.delta.gold < 0) consItems.push({ kind: 'penalty', ico: '✦', text: oc.delta.gold + ' Valdoritas' });
+        if (oc.delta.hp > 0) consItems.push({ kind: 'reward', ico: '♥', text: '+' + oc.delta.hp + ' HP' });
+        else if (oc.delta.hp < 0) consItems.push({ kind: 'penalty', ico: '♥', text: oc.delta.hp + ' HP' });
+        if (oc.delta.mp < 0) consItems.push({ kind: 'penalty', ico: '◆', text: oc.delta.mp + ' MP' });
+        if (oc.delta.xp > 0) consItems.push({ kind: 'reward', ico: '✦', text: '+' + oc.delta.xp + ' XP' });
+      }
+      if (consItems.length) {
+        var cons = document.createElement('div');
+        cons.className = 'outcome-consequences';
+        var lbl = document.createElement('div');
+        lbl.className = 'outcome-consequences-label';
+        lbl.textContent = 'Consequências';
+        cons.appendChild(lbl);
+        for (var ci = 0; ci < consItems.length; ci++) {
+          var item = document.createElement('div');
+          item.className = 'consequence-item ' + consItems[ci].kind;
+          var ico = document.createElement('span');
+          ico.className = 'c-ico'; ico.textContent = consItems[ci].ico;
+          item.appendChild(ico);
+          var ctxt = document.createElement('span');
+          ctxt.className = 'c-text'; ctxt.textContent = consItems[ci].text;
+          item.appendChild(ctxt);
+          cons.appendChild(item);
+        }
+        outcomeEl.appendChild(cons);
+      }
+      LOG('EVENT', 'remote_outcome_rendered tier=' + tier
+        + ' consequences=' + consItems.length
+        + ' hp_delta=' + ((oc.delta && oc.delta.hp) || 0)
+        + ' gold_delta=' + ((oc.delta && oc.delta.gold) || 0));
     }
     var confirmEl = document.getElementById('confirm-overlay');
     if (confirmEl) confirmEl.classList.remove('visible');
-  } catch (_) {}
+  } catch (eRO) {
+    LOGE('EVENT', 'remote_outcome_render_err=' + (eRO && eRO.message));
+  }
   updateHud();
+
+  /* X-6.5.47: ESCONDE choices/labels (já não são clicáveis) e mostra
+     botão Continuar pro user fechar a modal. Mesma lógica da
+     applyChoiceOutcome, agora replicada pro REMOTE path. */
+  try {
+    var choicesEl = document.getElementById('event-choices');
+    var choicesLbl = document.getElementById('event-choices-label');
+    var flavorEl = document.getElementById('event-flavor');
+    if (choicesEl) choicesEl.style.display = 'none';
+    if (choicesLbl) choicesLbl.style.display = 'none';
+    if (flavorEl) flavorEl.style.display = 'none';
+    /* Disable choice buttons (já estavam clicáveis antes do dado) */
+    var choiceBtns = document.querySelectorAll('.event-choice');
+    for (var ci = 0; ci < choiceBtns.length; ci++) {
+      choiceBtns[ci].disabled = true;
+      choiceBtns[ci].style.opacity = '0.4';
+      choiceBtns[ci].style.pointerEvents = 'none';
+    }
+  } catch (eU) { LOGW('EVENT', 'remote_outcome_ui_cleanup_err=' + (eU && eU.message)); }
+
   // Combat redirect (X-3.5): se server disparou combate, navega após leitura.
   // X-6.5.37: logs detalhados do bridge response pra diagnosticar
   // bugs lobo->mimico e player ausente.
@@ -10542,8 +10635,40 @@ function _remoteShowOutcome(ch, oc) {
         LOGE('COMBAT_BRIDGE', 'navigate_err msg=' + (e && e.message));
       }
     }, 1200);  /* X-6.5.42: era 2000, reduzido pra responder mais rapido */
+    LOG('EVENT', 'remote_outcome_combat_redirect_pending delay_ms=1200');
   } else {
     LOG('COMBAT_BRIDGE', 'no_combat_trigger event_id=' + (S.event && S.event.id));
+    /* X-6.5.47: SEM combat — mostra botão Continuar pro user fechar a modal.
+       Esse era o BUG reportado 5x: tela de outcome ficava sem opção de
+       avançar em REMOTE mode. */
+    try {
+      var continueEl = document.getElementById('event-continue');
+      if (!continueEl) {
+        LOGE('EVENT', 'remote_outcome_continue_btn_missing — DOM bug');
+        return;
+      }
+      continueEl.classList.remove('hidden');
+      LOG('EVENT', 'remote_outcome_continue_shown event=' + (S.event && S.event.id || '?')
+        + ' tier=' + (oc.tier || 'success'));
+      var advanced = false;
+      continueEl.onclick = function() {
+        if (advanced) return;
+        advanced = true;
+        LOG('EVENT', 'remote_outcome_continue_clicked event=' + (S.event && S.event.id || '?'));
+        if (typeof closeEventModal === 'function') closeEventModal();
+      };
+      /* Defeat fallback: se HP=0, fecha modal automaticamente após 2.5s
+         (matches LOCAL applyChoiceOutcome behavior). */
+      if (S.player && S.player.hp <= 0) {
+        LOG('EVENT', 'remote_outcome_player_defeated — auto closing in 2.5s');
+        setTimeout(function() {
+          if (typeof closeEventModal === 'function') closeEventModal();
+          if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu.');
+        }, 2500);
+      }
+    } catch (eC) {
+      LOGE('EVENT', 'remote_outcome_continue_err=' + (eC && eC.message));
+    }
   }
 }
 
