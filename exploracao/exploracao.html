@@ -2299,33 +2299,37 @@ body.remote-mode #debug-hud { display: none !important; }
   gap: 0;
   margin: 0;
 }
+/* X-6.5.32 (2026-04-24): toggle minimap MINIMALISTA — só a seta, sem fundo
+   nem efeitos, encostada à esquerda do minimap. User explícito 2026-04-24:
+   "tire o fundo e efeito dele, deixe somente a seta e coloque essa seta
+   encostada ao lado esquerdo do minimapa". */
 #btn-minimap-toggle {
-  position: relative;     /* X-6.5.27: era absolute, agora é flex child normal */
-  align-self: stretch;    /* altura = altura do irmão (minimap-content) */
-  width: 20px;
-  min-height: 48px;       /* fallback quando colapsado e não tem irmão */
+  position: relative;
+  align-self: stretch;
+  width: 18px;
+  min-height: 48px;
   padding: 0;
-  border-radius: 4px 0 0 4px;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.94));
-  border: 1.5px solid var(--v-gold, #c4953a);
-  border-right: none;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   color: var(--v-gold, #c4953a);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.5);
-  transition: all 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
   z-index: 2;
   flex-shrink: 0;
+  /* Sombra sutil só na seta (text-shadow, não box-shadow) — pra leitura
+     contra qualquer fundo do mapa, sem caixa visível. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 4px rgba(0, 0, 0, 0.6);
 }
 #btn-minimap-toggle:hover {
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
-  box-shadow: -2px 2px 12px rgba(196, 149, 58, 0.4);
+  color: #fff4c8;  /* dourado claro no hover, sem fundo */
 }
-#btn-minimap-toggle:active { transform: scale(0.92); }
+#btn-minimap-toggle:active { transform: scale(0.85); }
 
 /* X-6.5.27: minimap-content é o irmão direito do toggle. Com display:flex
    e align-items:flex-end no parent #right-panel, ele fica flush no canto
@@ -5740,7 +5744,9 @@ const FIXED_MAPS = {
     id: 'orc_tribe', region: 'valdoria', biome: 'plains',
     name: 'Acampamento Orc',
     cols: 20, rows: 24, seed: 10003, spawnCol: 10, spawnRow: 12,
-    music: 'plains', danger: 3,
+    /* X-6.5.32: stealth track — acampamento orc hostil, tambores de guerra,
+       tensão de território inimigo. Diferencia auralmente de plains genérico. */
+    music: 'stealth', danger: 3,
     worldPos: { x: 0.02, y: 0.67 },
     weather_pool: ['s', 'r'],
     weights: { '.': 32, 'g': 14, 'p': 8, 'F': 14, 't': 6, 'T': 8, 'r': 8, 'b': 5, 'H': 1, 'l': 1 },
@@ -5765,7 +5771,8 @@ const FIXED_MAPS = {
     id: 'bandit_fortress', region: 'valdoria', biome: 'plains',
     name: 'Fortaleza Bandida',
     cols: 22, rows: 26, seed: 10004, spawnCol: 11, spawnRow: 13,
-    music: 'plains', danger: 5,
+    /* X-6.5.32: stealth track — fortaleza inimiga, infiltração tensa */
+    music: 'stealth', danger: 5,
     worldPos: { x: 0.10, y: 0.92 },
     weather_pool: ['s', 'r', 'f', 't'],
     weights: { '.': 22, 'g': 8, 'p': 10, '#': 18, 'T': 6, 'r': 10, 'R': 8, 'H': 1, 'F': 6, 'b': 4 },
@@ -12184,16 +12191,62 @@ function closeDetailPopup() {
 }
 
 // ---- SOUND / MUSIC --------------------------------------------------
+// X-6.5.32 (2026-04-24): mapDef.music override + audio unlock.
+// Tracks válidos no audio-manager: tavern, city, forest, combat, desert, dungeon,
+// swamp, mountain, snow, victory, defeat, levelup, prologue, boss, inn_rest,
+// festival, combat_ambush, stealth, death, character_creation, guild_hall,
+// ancient_ruins, market, mystery, sacred, ocean, intro.
+var _VALID_MUSIC_TRACKS = ['tavern','city','forest','combat','desert','dungeon',
+  'swamp','mountain','snow','prologue','boss','inn_rest','festival',
+  'combat_ambush','stealth','character_creation','guild_hall',
+  'ancient_ruins','market','mystery','sacred','ocean'];
+
 function applyBiomeMusic() {
   try {
-    if (window.ValdoriaAudio && S.soundOn) {
-      if (typeof ValdoriaAudio.playBiome === 'function') {
-        ValdoriaAudio.playBiome(S.biome);
-      }
-    } else if (window.ValdoriaAudio && !S.soundOn) {
+    if (!window.ValdoriaAudio) return;
+    if (!S.soundOn) {
       if (typeof ValdoriaAudio.stop === 'function') ValdoriaAudio.stop();
+      return;
+    }
+    /* X-6.5.32: per-map override via mapDef.music. Se for um track válido,
+       toca direto; senão (ex: 'plains' que não é track), fallback pra biome. */
+    var mapMusic = S.mapDef && S.mapDef.music;
+    if (mapMusic && _VALID_MUSIC_TRACKS.indexOf(mapMusic) >= 0) {
+      LOG('AUDIO', 'play track=' + mapMusic + ' (mapDef.music override) map=' + S.mapId);
+      ValdoriaAudio.play(mapMusic);
+    } else if (typeof ValdoriaAudio.playBiome === 'function') {
+      LOG('AUDIO', 'playBiome biome=' + S.biome + ' (mapDef.music='
+        + (mapMusic || 'unset') + ' invalid/missing) map=' + S.mapId);
+      ValdoriaAudio.playBiome(S.biome);
     }
   } catch (e) { console.warn('[EXPLORACAO] audio failed:', e); }
+}
+
+/* X-6.5.32: audio unlock listener — Telegram WebView bloqueia autoplay até
+   primeira interação do usuário. Sem isso, applyBiomeMusic() chama play()
+   mas browser silencia. Mirror do legacy explore-renderer.js handleCanvasClick. */
+function _bindAudioUnlock() {
+  if (!window.ValdoriaAudio) return;
+  var unlocked = false;
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    document.removeEventListener('click', unlock, true);
+    document.removeEventListener('touchstart', unlock, true);
+    document.removeEventListener('pointerdown', unlock, true);
+    if (typeof ValdoriaAudio.forceUnlock === 'function') {
+      ValdoriaAudio.forceUnlock();
+    }
+    if (typeof ValdoriaAudio._warmUp === 'function') {
+      ValdoriaAudio._warmUp();
+    }
+    /* Re-aplica music agora que audio está desbloqueado */
+    applyBiomeMusic();
+    LOG('AUDIO', 'unlocked on first user interaction — music reapplied');
+  }
+  document.addEventListener('click', unlock, { capture: true });
+  document.addEventListener('touchstart', unlock, { capture: true });
+  document.addEventListener('pointerdown', unlock, { capture: true });
 }
 
 // ============================================================================
@@ -12899,6 +12952,9 @@ function boot() {
     revealFogAt(S.player.col, S.player.row, getVisionRange());
     LOG('BOOT', 'fog revealed around player vision=' + getVisionRange());
     applyBiomeMusic();
+    /* X-6.5.32: bind audio unlock — Telegram bloqueia autoplay até user
+       interagir; sem isso music silenciado mesmo com play() chamado. */
+    _bindAudioUnlock();
 
     S.dm_log = [];
     ['Você pisa em solo florestal. O caminho à frente é incerto, mas seus passos são firmes.',
