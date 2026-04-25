@@ -45,7 +45,9 @@
             }
 
             if (!_apiBase) {
-                showError('Servidor não configurado');
+                /* X-6.5.45: msg amigavel; "_apiBase missing" fica no log. */
+                console.error('[CODEX] missing_api_base');
+                showError('Compêndio indisponível no momento.');
                 return;
             }
 
@@ -61,8 +63,9 @@
             _fetchEntries(_currentCategory);
 if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
         } catch (e) {
-            console.error('[CODEX]', e);
-            showError('Erro ao inicializar', e);
+            /* X-6.5.45: e fica no console.error; UI clean. */
+            console.error('[CODEX] init_error', e);
+            showError('Compêndio indisponível no momento.');
         }
     }
 
@@ -234,7 +237,8 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
                 if (!r.ok) throw new Error('HTTP ' + r.status);
                 var ct = (r.headers.get('content-type') || '');
                 if (ct.indexOf('application/json') < 0) {
-                    throw new Error('Servidor retornou resposta inesperada (tunnel indisponível?)');
+                    /* X-6.5.45: tag tecnica fica no Error.message (logado em console.error pelo catch). */
+                    throw new Error('content_type_not_json');
                 }
                 return r.json();
             })
@@ -246,8 +250,9 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
                 _hideLoading();
             })
             .catch(function (err) {
+                /* X-6.5.45: err.message fica no console; UI clean. */
                 console.error('[CODEX] fetch list error:', err);
-                showError('Erro ao carregar compêndio', err);
+                showError('Compêndio indisponível. Tente novamente.');
                 _renderProgress({ unlocked: 0, total: 0, pct: 0 });
                 _hideLoading();
             });
@@ -262,7 +267,8 @@ if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('city');
                 if (!r.ok) throw new Error('HTTP ' + r.status);
                 var ct = (r.headers.get('content-type') || '');
                 if (ct.indexOf('application/json') < 0) {
-                    throw new Error('Servidor retornou resposta inesperada (tunnel indisponível?)');
+                    /* X-6.5.45: tag tecnica fica no Error.message (logado em console.error pelo catch). */
+                    throw new Error('content_type_not_json');
                 }
                 return r.json();
             })

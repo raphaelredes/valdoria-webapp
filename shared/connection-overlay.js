@@ -237,7 +237,7 @@ function _checkHealth() {
             if (_bgCount >= _BG_MAX) {
                 _log('bg polling gave up after ' + _bgCount + ' attempts (~' + Math.round(_bgCount * _BG_INTERVAL / 60000) + 'min)');
                 _clearTimers();
-                _statusEl.textContent = 'Servidor indisponível';
+                _statusEl.textContent = 'Sem conexão';
                 _detailEl.textContent = 'Não foi possível reconectar. Feche e reabra o jogo pelo Telegram.';
                 _retryBtn.classList.remove('visible');
                 _closeBtn.classList.add('visible');
@@ -301,7 +301,7 @@ function _startRetryLoop() {
 function _startBgPolling() {
     _bgCount = 0;
     _log('starting bg polling (interval=' + (_BG_INTERVAL/1000) + 's, unlimited)');
-    _statusEl.textContent = 'Servidor indispon\u00edvel';
+    _statusEl.textContent = 'Sem conex\u00e3o';
     _detailEl.textContent = 'Tentando reconectar em segundo plano...';
     _fillEl.style.width = '100%';
     _retryBtn.classList.add('visible');

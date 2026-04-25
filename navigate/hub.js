@@ -788,7 +788,7 @@ async function _executeNavAction(type) {
 
     if (data.error) {
       console.warn('[HUB] nav action error: %s', data.error);
-      if (typeof vToast === 'function') vToast(data.message || data.error, 'err', 3000);
+      /* X-6.5.45: data.message/error fica em console.warn acima; UI clean. */ if (typeof vToast === 'function') vToast('Algo deu errado. Tente novamente.', 'err', 3000);
       return;
     }
     /* Camp overlay — must match _executeAction (bottom nav); detail screen uses _executeNavAction */
@@ -902,7 +902,7 @@ async function _executeTravelApi(locId) {
 
     if (data.error) {
       console.warn('[HUB] travel_error: %s %s', data.error, data.message || '');
-      if (typeof vToast === 'function') vToast('Erro: ' + (data.message || data.error), 'err', 3000);
+      /* X-6.5.45: data.message/error fica em console.warn acima; UI clean. */ if (typeof vToast === 'function') vToast('Algo deu errado. Tente novamente.', 'err', 3000);
       return;
     }
 
@@ -1182,7 +1182,7 @@ async function _executeAction(type) {
 
     var data = await resp.json();
     if (data.error) {
-      if (typeof vToast === 'function') vToast('Erro: ' + (data.message || data.error), 'err', 3000);
+      /* X-6.5.45: data.message/error fica em console.warn acima; UI clean. */ if (typeof vToast === 'function') vToast('Algo deu errado. Tente novamente.', 'err', 3000);
       return;
     }
 

@@ -20,8 +20,8 @@ setTimeout(doClose,1000);});return;}
 try{if(tg?.sendData){window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'webapp_reconnect',webapp:'GAME'}));setTimeout(doClose,1000);return;}}catch(e){console.warn('[GAME] sendData fallback:',e.message);}
 showToast('Sess\u00e3o expirada. Feche esta janela e reabra o jogo.');return;}
 if((resp.status>=500||resp.status===429)&&attempt<MAX_RETRIES){S.transitioning=false;await new Promise(r=>setTimeout(r,1500*(attempt+1)));S.transitioning=true;continue;}
-if(!resp.ok){S.transitioning=false;console.error('[TRANSITION] HTTP error:',resp.status);showError('Erro na transição ('+resp.status+')');return;}let data;try{data=await resp.json();}catch(_){data={};}
+if(!resp.ok){S.transitioning=false;console.error('[TRANSITION] HTTP error:',resp.status);showError('Algo deu errado. Tente novamente.');return;}let data;try{data=await resp.json();}catch(_){data={};}
 if(data.toast&&typeof showToast==='function'){showToast(data.toast);}if(data.url){handleTransition({to:toApp,url:data.url});return;}
-S.transitioning=false;if(data.error){console.error('[GAME] Transition error:',data.error);if(data.fallback==='close'){showToast('Não disponível no momento');}else{showError('Transição falhou: '+(data.error||'erro desconhecido'));}}else{showError('Transição falhou: resposta inesperada do servidor.');}
+S.transitioning=false;if(data.error){console.error('[GAME] Transition error:',data.error);if(data.fallback==='close'){showToast('Não disponível no momento');}else{showError('Transição falhou: '+(data.error||'erro desconhecido'));}}else{showError('Algo deu errado. Tente novamente.');}
 return;}catch(e){if(attempt<MAX_RETRIES){S.transitioning=false;await new Promise(r=>setTimeout(r,1500*(attempt+1)));S.transitioning=true;continue;}
 console.error('[GAME] Transition fetch error:',e);S.transitioning=false;showError(e.name==='AbortError'?'Timeout na transição. Tente novamente.':'Erro de conexão na transição.');}}}

@@ -189,7 +189,7 @@ window.ValdoriaLoadingController = function(config) {
         _state = 'exhausted';
         console.warn('[LOADING] EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries — manual retry only');
         if(window._loadDbg)_loadDbg('state: EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries ('+TIMEOUT_MS+'ms)');
-        if (tipEl) tipEl.textContent = '⚠️ Servidor indisponível. Toque para tentar novamente.';
+        if (tipEl) tipEl.textContent = '⚠️ Sem conexão. Toque para tentar novamente.';
         if (retryBtn) retryBtn.style.display = '';
         // Circuit breaker visual: stop rings, error gem
         if (overlay) {
@@ -201,7 +201,7 @@ window.ValdoriaLoadingController = function(config) {
         if (typeof onTimeout === 'function') onTimeout();
         else {
             // Safety net: show actionable error when no onTimeout handler provided
-            if (tipEl) tipEl.textContent = '⚠️ Servidor indisponível. Toque para tentar novamente.';
+            if (tipEl) tipEl.textContent = '⚠️ Sem conexão. Toque para tentar novamente.';
             if (retryBtn) retryBtn.style.display = '';
         }
     }
