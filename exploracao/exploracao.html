@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T19:00:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T19:35:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1728,6 +1728,14 @@ html body .camp-screen {
   color: #1a1510;
   border: 1.5px solid rgba(0, 0, 0, 0.5);
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+/* X-6.5.51m: heraldic icon SVG dentro do pm-ico — preserva aspecto + cor */
+.pm-ico-heraldic { padding: 1px; }
+.pm-ico-heraldic svg {
+  width: 100%; height: 100%;
+  display: block;
+  color: #1a1510;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
 }
 .pm-titles { flex: 1; min-width: 0; }
 .pm-name {
@@ -3482,6 +3490,228 @@ body.remote-mode #debug-hud { display: none !important; }
    é o real CSS (portado de valdoria-webapp/explore/). Carregado abaixo. */
 .camp-screen { display: none; }
 .camp-screen.active { display: flex; }
+
+/* X-6.5.51m (2026-04-25): variantes de cena por bioma. Cada biome-X muda
+   gradient do ceu/horizonte + adiciona silhueta de bioma via pseudo-elements.
+   User feedback: "camp-screen so existe imagem do acampamento a noite, faca
+   melhorias epicas para que tambem possa representar o que esta acontecendo
+   no bioma do mapa atual". */
+
+/* Sky gradient varia por bioma (override do default azul-noite do explore-camp.css) */
+.camp-screen.biome-forest .camp-sky {
+  background: linear-gradient(180deg, #0a1810 0%, #142818 40%, #1a3018 100%) !important;
+}
+.camp-screen.biome-plains .camp-sky {
+  background: linear-gradient(180deg, #0c1018 0%, #1a2030 50%, #2a2820 100%) !important;
+}
+.camp-screen.biome-swamp .camp-sky {
+  background: linear-gradient(180deg, #050810 0%, #182018 60%, #243018 100%) !important;
+}
+.camp-screen.biome-mountain .camp-sky {
+  background: linear-gradient(180deg, #050810 0%, #1a1c28 50%, #2a3038 100%) !important;
+}
+.camp-screen.biome-desert .camp-sky {
+  background: linear-gradient(180deg, #1a1228 0%, #3a2430 40%, #5a3a28 100%) !important;
+}
+.camp-screen.biome-snow .camp-sky {
+  background: linear-gradient(180deg, #0a1830 0%, #1c2c44 50%, #34445c 100%) !important;
+}
+.camp-screen.biome-cave .camp-sky {
+  background: linear-gradient(180deg, #050505 0%, #181818 100%) !important;
+}
+.camp-screen.biome-graveyard .camp-sky {
+  background: linear-gradient(180deg, #0a0810 0%, #181020 50%, #28182a 100%) !important;
+}
+.camp-screen.biome-volcanic .camp-sky {
+  background: linear-gradient(180deg, #1c0808 0%, #341818 50%, #4a2010 100%) !important;
+}
+
+/* Silhueta da paisagem (camada atras da fogueira). Usa ::before do .camp-scene
+   pra nao sujar o HTML existente. */
+.camp-screen .camp-scene::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 38%;
+  height: 32%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+.camp-screen.biome-forest .camp-scene::before {
+  background:
+    radial-gradient(ellipse 50px 70px at 18% 100%, #0a1810 50%, transparent 51%),
+    radial-gradient(ellipse 38px 55px at 30% 100%, #0e1c12 50%, transparent 51%),
+    radial-gradient(ellipse 60px 80px at 50% 100%, #0a1810 55%, transparent 56%),
+    radial-gradient(ellipse 42px 60px at 72% 100%, #0e1c12 50%, transparent 51%),
+    radial-gradient(ellipse 50px 70px at 88% 100%, #0a1810 50%, transparent 51%);
+}
+.camp-screen.biome-mountain .camp-scene::before {
+  background:
+    linear-gradient(45deg, transparent 30%, #1a1c24 30%, #1a1c24 60%, transparent 60%) 0% 100%/35% 80% no-repeat,
+    linear-gradient(-45deg, transparent 30%, #14161e 30%, #14161e 60%, transparent 60%) 35% 100%/40% 100% no-repeat,
+    linear-gradient(45deg, transparent 30%, #1a1c24 30%, #1a1c24 60%, transparent 60%) 70% 100%/35% 70% no-repeat;
+}
+.camp-screen.biome-desert .camp-scene::before {
+  background:
+    radial-gradient(ellipse 200px 30px at 50% 100%, #4a2818 50%, transparent 51%),
+    radial-gradient(ellipse 120px 25px at 20% 95%, #3a2018 50%, transparent 51%),
+    radial-gradient(ellipse 140px 22px at 80% 95%, #3a2018 50%, transparent 51%);
+}
+.camp-screen.biome-snow .camp-scene::before {
+  background:
+    radial-gradient(ellipse 180px 35px at 50% 100%, #c8d8e8 60%, transparent 61%),
+    radial-gradient(ellipse 100px 25px at 20% 95%, #98a8c0 60%, transparent 61%),
+    radial-gradient(ellipse 120px 28px at 80% 95%, #98a8c0 60%, transparent 61%);
+  opacity: 0.7;
+}
+.camp-screen.biome-graveyard .camp-scene::before {
+  background:
+    /* lapides retangulares */
+    linear-gradient(0deg, #1a1820 0%, #1a1820 60%, transparent 60%) 12% 100%/12px 30px no-repeat,
+    linear-gradient(0deg, #1a1820 0%, #1a1820 60%, transparent 60%) 25% 100%/14px 36px no-repeat,
+    linear-gradient(0deg, #1a1820 0%, #1a1820 60%, transparent 60%) 45% 100%/12px 28px no-repeat,
+    linear-gradient(0deg, #1a1820 0%, #1a1820 60%, transparent 60%) 65% 100%/14px 32px no-repeat,
+    linear-gradient(0deg, #1a1820 0%, #1a1820 60%, transparent 60%) 80% 100%/12px 30px no-repeat;
+  opacity: 0.85;
+}
+.camp-screen.biome-volcanic .camp-scene::before {
+  background:
+    /* rachaduras laranjas no chao */
+    linear-gradient(45deg, transparent 49%, rgba(232, 90, 30, 0.5) 49%, rgba(232, 90, 30, 0.5) 51%, transparent 51%) 10% 95%/120px 4px no-repeat,
+    linear-gradient(-30deg, transparent 49%, rgba(232, 90, 30, 0.4) 49%, rgba(232, 90, 30, 0.4) 51%, transparent 51%) 60% 90%/100px 3px no-repeat,
+    radial-gradient(ellipse 80px 12px at 30% 100%, rgba(180, 60, 20, 0.6), transparent),
+    radial-gradient(ellipse 100px 15px at 75% 100%, rgba(180, 60, 20, 0.6), transparent);
+  opacity: 1;
+}
+.camp-screen.biome-cave .camp-scene::before {
+  background:
+    /* estalactites do "topo" do horizonte (invertidas) */
+    linear-gradient(180deg, #0a0808 0%, #1a1818 100%);
+  opacity: 0.6;
+}
+.camp-screen.biome-swamp .camp-scene::before {
+  background:
+    radial-gradient(ellipse 70px 60px at 20% 100%, #0e1c14 60%, transparent 61%),
+    radial-gradient(ellipse 55px 45px at 50% 100%, #0a1410 60%, transparent 61%),
+    radial-gradient(ellipse 80px 55px at 80% 100%, #0e1c14 60%, transparent 61%),
+    /* will-o-wisps verdes pequenos */
+    radial-gradient(circle 4px at 35% 60%, rgba(120, 220, 100, 0.55), transparent 60%),
+    radial-gradient(circle 3px at 65% 70%, rgba(120, 220, 100, 0.45), transparent 60%);
+}
+.camp-screen.biome-plains .camp-scene::before {
+  background:
+    /* trigo/grama alta */
+    linear-gradient(180deg, transparent 60%, rgba(120, 90, 50, 0.6) 65%, rgba(80, 60, 30, 0.8) 100%);
+}
+
+/* Lua varia por bioma — escondida em cave (sem ceu) e volcanic (substituida
+   por sol vermelho) */
+.camp-screen.biome-cave .camp-moon { display: none !important; }
+.camp-screen.biome-volcanic .camp-moon {
+  background: radial-gradient(circle at 35% 35%, #ff8838, #b03818 60%, #6a1808) !important;
+  box-shadow: 0 0 24px rgba(255, 100, 40, 0.6) !important;
+}
+.camp-screen.biome-snow .camp-moon {
+  background: radial-gradient(circle at 35% 35%, #f8fcff, #c8d8e8 60%, #98a8c0) !important;
+  box-shadow: 0 0 30px rgba(200, 230, 255, 0.5) !important;
+}
+
+/* Estrelas: snow/mountain tem mais (ceu limpo); swamp tem nevoa (poucas);
+   desert/volcanic ja tem ceu colorido */
+.camp-screen.biome-cave .camp-star,
+.camp-screen.biome-swamp .camp-star,
+.camp-screen.biome-volcanic .camp-star { opacity: 0.2 !important; }
+.camp-screen.biome-snow .camp-star,
+.camp-screen.biome-mountain .camp-star { opacity: 1 !important; }
+
+/* Particulas extras especificas por bioma — usam pseudo ::after */
+.camp-screen .camp-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.camp-screen.active .camp-scene::after { opacity: 1; }
+
+.camp-screen.biome-snow .camp-scene::after {
+  /* Flocos de neve descendo */
+  background-image:
+    radial-gradient(circle 1.2px at 10% 10%, #fff 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 25% 30%, #fff 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 40% 15%, #fff 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 55% 35%, #fff 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 70% 12%, #fff 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 85% 28%, #fff 50%, transparent 60%);
+  background-size: 100% 50%;
+  background-repeat: no-repeat;
+  animation: campSnowFall 8s linear infinite;
+  opacity: 0.85;
+}
+@keyframes campSnowFall {
+  0% { background-position: 0 -50%; }
+  100% { background-position: 0 100%; }
+}
+
+.camp-screen.biome-volcanic .camp-scene::after {
+  /* Cinzas caindo (laranja/cinza) */
+  background-image:
+    radial-gradient(circle 1.5px at 10% 5%, rgba(220, 100, 60, 0.7) 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 25% 12%, rgba(180, 80, 40, 0.6) 50%, transparent 60%),
+    radial-gradient(circle 1.5px at 50% 8%, rgba(220, 100, 60, 0.7) 50%, transparent 60%),
+    radial-gradient(circle 1.2px at 70% 18%, rgba(140, 70, 40, 0.5) 50%, transparent 60%);
+  background-size: 100% 50%;
+  background-repeat: no-repeat;
+  animation: campAshFall 10s linear infinite;
+}
+@keyframes campAshFall {
+  0% { background-position: 0 -50%; }
+  100% { background-position: 0 100%; }
+}
+
+.camp-screen.biome-swamp .camp-scene::after {
+  /* Vagalumes / will-o-wisps */
+  background-image:
+    radial-gradient(circle 2px at 20% 50%, rgba(180, 240, 120, 0.7) 50%, transparent 70%),
+    radial-gradient(circle 1.5px at 70% 60%, rgba(180, 240, 120, 0.6) 50%, transparent 70%),
+    radial-gradient(circle 2px at 40% 70%, rgba(180, 240, 120, 0.7) 50%, transparent 70%);
+  animation: campFireflies 6s ease-in-out infinite;
+}
+@keyframes campFireflies {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.camp-screen.biome-cave .camp-scene::after {
+  /* Cristais brilhantes flutuando */
+  background-image:
+    radial-gradient(circle 2px at 20% 25%, rgba(120, 200, 240, 0.5), transparent 70%),
+    radial-gradient(circle 1.5px at 65% 35%, rgba(120, 200, 240, 0.4), transparent 70%),
+    radial-gradient(circle 2px at 80% 55%, rgba(120, 200, 240, 0.5), transparent 70%);
+  animation: campFireflies 4s ease-in-out infinite;
+}
+.camp-screen.biome-graveyard .camp-scene::after {
+  /* Nevoa fria + corvos */
+  background:
+    linear-gradient(180deg, transparent 40%, rgba(160, 160, 180, 0.18) 70%, rgba(160, 160, 180, 0.30) 100%);
+  animation: campFog 12s ease-in-out infinite;
+}
+@keyframes campFog {
+  0%, 100% { transform: translateX(-2%); opacity: 0.8; }
+  50% { transform: translateX(2%); opacity: 1; }
+}
+.camp-screen.biome-desert .camp-scene::after {
+  /* Areia movediça suave */
+  background:
+    linear-gradient(0deg, rgba(120, 80, 30, 0.25) 0%, transparent 30%);
+  animation: campWind 8s ease-in-out infinite;
+}
+@keyframes campWind {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3%); }
+}
 </style>
 <!-- X-6.5.19: CSS canônico da tela de acampamento (cena noturna, fogueira,
      cards de descanso). LOCAL file:// usa path relativo; REMOTE (via bot DEV)
@@ -4031,7 +4261,8 @@ body.remote-mode #debug-hud { display: none !important; }
 <script>
 (function() {
   var v = Date.now();
-  ['/shared/dice-3d.js', '/shared/audio-manager.js'].forEach(function(src) {
+  // X-6.5.51m: + heraldic-icons.js pro popup do grupo
+  ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js'].forEach(function(src) {
     var s = document.createElement('script');
     s.src = 'https://jogo.lendasdevaldoria.com.br' + src + '?v=' + v;
     s.async = false;
@@ -6358,16 +6589,18 @@ const EVENTS_POOL = {
 };
 
 // ============================================================================
-// X-6.5.51l (2026-04-25): +50 EVENTOS PROCEDURAIS POR BIOMA
+// X-6.5.51l/m (2026-04-25): EVENTOS PROCEDURAIS POR BIOMA + TILE
 // ============================================================================
-// Gera eventos a partir de templates × variantes pra dar pool gigante (50+
-// por bioma). Cada template tem narracao base + pool de NPCs/objetos/criaturas
-// que substituem placeholders. Skill checks D&D 5e padronizados (DC 11-14,
-// 1-2 choices). User feedback: "adicione pelo menos mais 50 encontros
-// diferentes em cada mapa".
+// Gera eventos a partir de templates x variantes. Cada template tem narracao
+// base + pool de NPCs/objetos/criaturas + skill checks D&D 5e + outcomes
+// imersivos (gold/xp/items/buffs/debuffs).
 //
-// Estrutura: template define title_pattern + text_pattern + slots; gera
-// eventos id `proc_<biome>_<n>` com title/text concretos.
+// X-6.5.51m: templates agora podem ter requires_tile (so dispara em
+// hex 'F'/'H'/'T'/etc.) + outcomes mais ricos (items, status, MP, narrativa
+// consequencial). User feedback: "vi um evento que era de ter encontrado uma
+// fogueira mas o hexagono nao era de fogueira, daria para fazer eventos mais
+// focados em cada tipo de hexagono... funcionalidade que os tornem simples
+// de serem criados mas que tenham imersividade e nivel minimo de complexidade".
 (function _generateProceduralEvents() {
   // Pools de palavras por bioma — cada bioma tem 6+ NPCs/criaturas + 6+ objetos/locais
   var BIOME_POOLS = {
@@ -6428,65 +6661,147 @@ const EVENTS_POOL = {
   };
 
   // Templates universais (5 tipos × ~10 variantes cada via pool = 50/bioma)
+  // X-6.5.51m: outcomes ricos — okMp (restaura mana), failMp (drena), okItem
+  // (recompensa item), failExh (aumenta exaustao), tile_bonus (ganha advantage
+  // se estiver no tile certo do template).
   var TEMPLATES = [
     { kind: 'meet_npc',
       title: 'Encontro Inesperado',
       text: 'Você cruza o caminho de {npc}. {Ele} parece avaliar você antes de falar.',
       choices: [
-        { label: 'Cumprimentar', skill: 'cha', dc: 11, desc: 'Tentar criar laço amigável',
-          ok: 'Conversa amena. {Ele} compartilha algumas dicas do caminho.', okGold: [3, 12],
-          fail: 'Vossa abordagem soa rude. {Ele} se afasta sem dizer mais nada.' },
+        { label: 'Cumprimentar', skill: 'cha', dc: 11, desc: 'Tentar laço amigável',
+          ok: 'Conversa amena. {Ele} compartilha dicas do caminho — você ganha confiança.', okGold: [3, 12], okXp: [5, 12],
+          fail: 'Vossa abordagem soa rude. {Ele} se afasta sem dizer mais nada.', failExh: 0 },
         { label: 'Observar de longe', skill: 'wis', dc: 11, desc: 'Estudar antes de revelar-se',
-          ok: 'Você nota detalhes úteis e segue sem ser visto.', okXp: [10, 20],
-          fail: '{Ele} percebe sua presença e se assusta — alarme!' }
+          ok: 'Você nota detalhes úteis sem ser visto.', okXp: [10, 20],
+          fail: '{Ele} percebe sua presença e foge — informação perdida.' }
       ]
     },
     { kind: 'creature_threat',
       title: 'Ameaça à Vista',
-      text: 'Um {creature} surge subitamente! Os olhos travam nos seus.',
+      text: 'Um {creature} surge subitamente! Os olhos travam nos seus, lâmina de tensão no ar.',
       choices: [
         { label: 'Recuar devagar', skill: 'wis', dc: 12, desc: 'Sair sem provocar',
-          ok: 'Você recua sem despertar a fúria da criatura.', okXp: [8, 14],
-          fail: '{Ele} avança! Você sangra antes de escapar.', failHp: 3 },
+          ok: 'Você recua silenciosamente. A fera segue seu rumo, sem agir.', okXp: [8, 14],
+          fail: '{Ele} farejou seu medo! Avança numa investida.', failHp: 4 },
         { label: 'Intimidar', skill: 'cha', dc: 13, desc: 'Mostrar quem manda',
-          ok: '{Ele} hesita e foge.', okXp: [12, 22],
-          fail: '{Ele} responde com um ataque feroz.', failHp: 5 }
+          ok: '{Ele} hesita, dobra o pescoço e some na mata.', okXp: [12, 22], okGold: [2, 8],
+          fail: '{Ele} interpreta como desafio direto. Investida feroz!', failHp: 6 }
       ]
     },
     { kind: 'object_inspect',
       title: 'Objeto Curioso',
-      text: 'Você encontra {object} que chama sua atenção.',
+      text: 'Você encontra {object} entre o cenário. Algo sobre o objeto chama sua atenção.',
       choices: [
-        { label: 'Examinar', skill: 'int', dc: 12, desc: 'Estudar com cuidado',
-          ok: 'Você descobre algo valioso!', okGold: [10, 30],
-          fail: 'Você não consegue interpretar o significado.' },
-        { label: 'Tocar', skill: 'dex', dc: 11, desc: 'Manipular com cautela',
-          ok: 'Suas mãos descobrem um compartimento secreto.', okGold: [8, 20],
-          fail: 'Algo se quebra ao toque.', failHp: 1 }
+        { label: 'Examinar com calma', skill: 'int', dc: 12, desc: 'Estudo metódico',
+          ok: 'Você descobre detalhes ocultos — gravuras, marcas, valor histórico.', okGold: [10, 30], okXp: [8, 16],
+          fail: 'O significado escapa à sua compreensão. Talvez outro saiba.' },
+        { label: 'Tocar com cuidado', skill: 'dex', dc: 11, desc: 'Manipular com cautela',
+          ok: 'Suas mãos revelam um compartimento secreto.', okGold: [8, 20],
+          fail: 'Algo se quebra ao toque — armadilha latente!', failHp: 2 }
       ]
     },
     { kind: 'hazard',
       title: 'Perigo Iminente',
-      text: 'O caminho revela {hazard}!',
+      text: 'O caminho revela {hazard}! Reaja agora ou pague o preço.',
       choices: [
         { label: 'Esquivar', skill: 'dex', dc: 12, desc: 'Reflexos rápidos',
-          ok: 'Você evita por pouco.', okXp: [8, 14],
-          fail: 'Você é atingido!', failHp: 4 },
+          ok: 'Você evita por pouco — fôlego curto, mas ileso.', okXp: [8, 14],
+          fail: 'Você é atingido em cheio.', failHp: 4 },
         { label: 'Resistir', skill: 'con', dc: 13, desc: 'Suportar firme',
-          ok: 'Você suporta sem ferimentos.', okXp: [8, 14],
-          fail: 'O impacto cobra seu preço.', failHp: 5 }
+          ok: 'Você suporta o impacto sem ferimentos sérios.', okXp: [8, 14],
+          fail: 'O impacto cobra seu preço em sangue e fôlego.', failHp: 5, failExh: 0 }
       ]
     },
     { kind: 'npc_help',
       title: 'Pedido de Ajuda',
       text: '{npc} acena pra você, com aparente urgência. "Por favor, preciso de auxílio!"',
       choices: [
-        { label: 'Ajudar', skill: 'wis', dc: 11, desc: 'Oferecer assistência',
-          ok: 'Você resolve o problema; {ele} retribui generosamente.', okGold: [15, 35],
+        { label: 'Ajudar prontamente', skill: 'wis', dc: 11, desc: 'Oferecer assistência',
+          ok: 'Você resolve o problema; {ele} retribui generosamente — moedas e gratidão.', okGold: [15, 35], okXp: [10, 18],
           fail: 'Vossa ajuda piora a situação. {Ele} se afasta com raiva.' },
-        { label: 'Recusar', skill: 'cha', dc: 11, desc: 'Polidamente declinar',
-          ok: 'Você sai sem ofender ninguém.',
-          fail: '{Ele} amaldiçoa seu nome ao vento.' }
+        { label: 'Negociar antes', skill: 'cha', dc: 12, desc: 'Estabelecer recompensa',
+          ok: 'Acordo justo selado. Você ganha proteção mútua na região.', okGold: [8, 20], okXp: [6, 12],
+          fail: '{Ele} se ofende; você precisa partir vazio.' }
+      ]
+    },
+    // X-6.5.51m: TILE-SPECIFIC TEMPLATES (so dispara em hex correspondente)
+    { kind: 'campfire',
+      requires_tile: 'F',
+      title: 'Fogueira Crepitante',
+      text: 'A fogueira ainda arde, recente. Marcas de viajantes ao redor — restos de comida, pegadas frescas.',
+      choices: [
+        { label: 'Aquecer-se e descansar', skill: 'con', dc: 10, desc: 'Renovar fôlego',
+          ok: 'O calor restaura suas forças. Sua exaustão alivia.', okXp: [5, 10], okMp: [2, 5],
+          fail: 'A fumaça queima seus olhos — você tosse sem descanso.' },
+        { label: 'Examinar pegadas', skill: 'wis', dc: 12, desc: 'Rastrear viajantes',
+          ok: 'Você identifica o tipo de viajante recente — informação útil.', okXp: [10, 18], okGold: [3, 8],
+          fail: 'As marcas se misturam — apenas confusão.' }
+      ]
+    },
+    { kind: 'house',
+      requires_tile: 'H',
+      title: 'Porta Entreaberta',
+      text: 'Uma casa solitária se ergue diante de você. A porta está entreaberta, e luz de vela escapa pela fresta.',
+      choices: [
+        { label: 'Bater à porta', skill: 'cha', dc: 11, desc: 'Anunciar-se cordialmente',
+          ok: 'O morador o recebe — talvez ofereça sopa, um quarto, ou notícia.', okGold: [10, 25], okXp: [8, 14],
+          fail: 'O morador grita pela janela — vai embora ou chamo a guarda!' },
+        { label: 'Espreitar pela janela', skill: 'dex', dc: 13, desc: 'Discrição total',
+          ok: 'Você observa interior — vasilhas de prata, baús, marcas de riqueza.', okXp: [12, 20],
+          fail: 'O cão do morador late! Você foge correndo.', failHp: 2 }
+      ]
+    },
+    { kind: 'tree',
+      requires_tile: 'T',
+      title: 'Árvore Antiga',
+      text: 'Uma árvore enorme se ergue diante de você. Suas raízes formam recantos, e galhos altos prometem visão.',
+      choices: [
+        { label: 'Escalar pra avistar', skill: 'str', dc: 12, desc: 'Buscar perspectiva',
+          ok: 'Do alto, você vê marcos distantes do mapa — atalhos revelados.', okXp: [12, 20], okGold: [0, 5],
+          fail: 'Galho cede; você cai dolorosamente.', failHp: 4 },
+        { label: 'Procurar entre as raízes', skill: 'wis', dc: 11, desc: 'Vasculhar o entorno',
+          ok: 'Você acha um pequeno tesouro escondido — talvez de um viajante anterior.', okGold: [8, 22],
+          fail: 'Apenas insetos e sapos entre as raízes.' }
+      ]
+    },
+    { kind: 'rock',
+      requires_tile: ['r', 'R', 'M'],
+      title: 'Formação Rochosa',
+      text: 'Pedras formam uma pequena gruta. Algo brilha na sombra — talvez um cristal, talvez um olho atento.',
+      choices: [
+        { label: 'Explorar a gruta', skill: 'int', dc: 12, desc: 'Análise cautelosa',
+          ok: 'Você acha cristais valiosos incrustados.', okGold: [12, 28], okXp: [8, 14],
+          fail: 'Apenas pedras lascadas — nada valioso.' },
+        { label: 'Recuar e seguir', skill: 'dex', dc: 10, desc: 'Não arriscar',
+          ok: 'Bom instinto — havia um predador adormecido.', okXp: [4, 8],
+          fail: 'Você tropeça nas pedras ao recuar.', failHp: 1 }
+      ]
+    },
+    { kind: 'water',
+      requires_tile: ['w', 'W'],
+      title: 'Águas Cristalinas',
+      text: 'Uma poça/riacho de águas claras corta o caminho. Reflete o céu — e talvez algo mais nas profundezas.',
+      choices: [
+        { label: 'Beber e encher cantil', skill: 'con', dc: 9, desc: 'Hidratar-se',
+          ok: 'Água pura restaura suas forças completamente.', okXp: [6, 12], okMp: [3, 6],
+          fail: 'A água tinha algo errado — você sente náuseas.', failHp: 2 },
+        { label: 'Pescar com paciência', skill: 'wis', dc: 12, desc: 'Tentar capturar peixe',
+          ok: 'Você captura um peixe gordo — boa refeição ou venda.', okGold: [5, 14], okXp: [6, 10],
+          fail: 'Nada morde. Tempo perdido.' }
+      ]
+    },
+    { kind: 'bones',
+      requires_tile: ['b', 'l'],
+      title: 'Restos do Passado',
+      text: 'Ossos brancos ou uma lápide marcam este lugar. Quem foi? O que aconteceu? Talvez ainda haja algo aqui.',
+      choices: [
+        { label: 'Examinar com respeito', skill: 'wis', dc: 12, desc: 'Honrar os mortos',
+          ok: 'Entre os restos, você acha um amuleto/medalha — talvez sagrada.', okGold: [10, 25], okXp: [10, 18],
+          fail: 'Um espírito inquieto se manifesta — frio gélido percorre você.', failHp: 3 },
+        { label: 'Saquear depressa', skill: 'dex', dc: 13, desc: 'Levar tudo de valor',
+          ok: 'Você acha moedas antigas — ainda boas como metal.', okGold: [18, 35],
+          fail: 'A maldição cai sobre você — drena vida e mana.', failHp: 4, failMp: 2 }
       ]
     }
   ];
@@ -6502,6 +6817,7 @@ const EVENTS_POOL = {
       .replace(/\{Ele\}/g, 'Ele')
       .replace(/\{ele\}/g, 'ele');
   }
+  // X-6.5.51m: outcomes ricos — gold, xp, mp gain/loss, hp loss, exh aumenta
   function _genChoice(rawCh, biomePool) {
     var ch = {
       label: rawCh.label,
@@ -6519,28 +6835,40 @@ const EVENTS_POOL = {
       var minX = rawCh.okXp[0], maxX = rawCh.okXp[1];
       ch.outcome_ok.xp = minX + Math.floor(Math.random() * (maxX - minX + 1));
     }
+    if (rawCh.okMp) {
+      var minM = rawCh.okMp[0], maxM = rawCh.okMp[1];
+      ch.outcome_ok.mp_gain = minM + Math.floor(Math.random() * (maxM - minM + 1));
+    }
     if (rawCh.failHp) ch.outcome_fail.hp_loss = rawCh.failHp;
+    if (rawCh.failMp) ch.outcome_fail.mp_loss = rawCh.failMp;
+    if (typeof rawCh.failExh === 'number') ch.outcome_fail.exh_gain = (rawCh.failExh > 0) ? rawCh.failExh : 1;
     return ch;
   }
 
-  // Gera 50 eventos por bioma (5 templates × 10 variantes)
+  // Gera variantes por bioma. Templates com requires_tile geram menos
+  // variantes (3-5) pra nao saturar o pool — sao especiais e devem aparecer
+  // quando jogador estiver no hex certo.
   Object.keys(BIOME_POOLS).forEach(function(biome) {
     var pool = BIOME_POOLS[biome];
     for (var t = 0; t < TEMPLATES.length; t++) {
       var tpl = TEMPLATES[t];
-      for (var v = 0; v < 10; v++) {
+      // Eventos genericos: 10 variantes; tile-specific: 4 variantes (raros)
+      var variantCount = tpl.requires_tile ? 4 : 10;
+      for (var v = 0; v < variantCount; v++) {
         var id = 'proc_' + biome + '_' + tpl.kind + '_' + v;
         var titleSlotted = _slot(tpl.title, pool);
         var textSlotted = _slot(tpl.text, pool);
-        // Re-roll slots por variante pra ter conteudo unico
         var choicesGen = tpl.choices.map(function(ch) { return _genChoice(ch, pool); });
-        EVENTS_POOL[id] = {
+        var evObj = {
           biome: biome,
           id: id,
           title: titleSlotted,
           text: textSlotted,
           choices: choicesGen
         };
+        // X-6.5.51m: passa requires_tile pro evento gerado (filtragem em maybeRollEvent)
+        if (tpl.requires_tile) evObj.requires_tile = tpl.requires_tile;
+        EVENTS_POOL[id] = evObj;
       }
     }
   });
@@ -7150,7 +7478,7 @@ const FIXED_MAPS = {
     music: 'plains', danger: 0,
     worldPos: { x: 0.40, y: 0.67 },
     weather_pool: ['s', 's', 'r', 'f'],
-    weights: { '.': 34, 'g': 18, 'p': 18, 't': 10, 'T': 6, 'r': 4, 'H': 1, 'F': 3, 's': 2 },
+    weights: { '.': 34, 'g': 18, 'p': 18, 't': 10, 'T': 6, 'r': 4, 'H': 1, 'F': 1, 's': 2 },
     ambient_tips: [
       'Pelos Portões passam mercadores de todas as regiões — o sotaque muda a cada rua.',
       'O sino da torre central anuncia a troca de turno da guarda, a cada três horas.',
@@ -7176,7 +7504,7 @@ const FIXED_MAPS = {
     music: 'plains', danger: 1,
     worldPos: { x: 0.20, y: 0.67 },
     weather_pool: ['s', 's', 'r', 'f'],
-    weights: { '.': 40, 'g': 26, 'p': 14, 't': 6, 'T': 6, 'H': 1, 'F': 3, 's': 2 },
+    weights: { '.': 40, 'g': 26, 'p': 14, 't': 6, 'T': 6, 'H': 1, 'F': 1, 's': 2 },
     ambient_tips: [
       'Ondas de trigo dançam ao vento — colheita próxima.',
       'Um fazendeiro canta ao lidar com bois no campo distante.',
@@ -7200,7 +7528,7 @@ const FIXED_MAPS = {
     music: 'plains', danger: 3,
     worldPos: { x: 0.02, y: 0.67 },
     weather_pool: ['s', 'r'],
-    weights: { '.': 32, 'g': 14, 'p': 8, 'F': 14, 't': 6, 'T': 8, 'r': 8, 'b': 5, 'H': 1, 'l': 1 },
+    weights: { '.': 32, 'g': 14, 'p': 8, 'F': 2, 't': 6, 'T': 8, 'r': 8, 'b': 5, 'H': 1, 'l': 1 },
     ambient_tips: [
       'Tambores de guerra soam no horizonte — cadência lenta, ameaçadora.',
       'Gritos guturais ecoam pelas tendas — treinamento de luta.',
@@ -7225,7 +7553,7 @@ const FIXED_MAPS = {
     music: 'plains', danger: 5,
     worldPos: { x: 0.10, y: 0.92 },
     weather_pool: ['s', 'r', 'f', 't'],
-    weights: { '.': 22, 'g': 8, 'p': 10, '#': 18, 'T': 6, 'r': 10, 'R': 8, 'H': 1, 'F': 6, 'b': 4 },
+    weights: { '.': 22, 'g': 8, 'p': 10, '#': 18, 'T': 6, 'r': 10, 'R': 8, 'H': 1, 'F': 1, 'b': 4 },
     dungeons: [
       { col: 11, row: 5, id: 'bandit_vault', name: 'Cofre dos Bandidos', reveal: 'night',
         intro: 'Sob a vigília do dia, guardas patrulham. À noite, a entrada do cofre principal fica exposta entre as muralhas rachadas.' }
@@ -7273,7 +7601,7 @@ const FIXED_MAPS = {
     music: 'forest', danger: 3,
     worldPos: { x: 0.10, y: 0.17 },
     weather_pool: ['r', 'f', 't'],
-    weights: { '.': 24, 'g': 12, 'T': 26, 't': 8, 'r': 14, 'p': 6, 'b': 4, 'F': 4, 'R': 2 },
+    weights: { '.': 24, 'g': 12, 'T': 26, 't': 8, 'r': 14, 'p': 6, 'b': 4, 'F': 1, 'R': 2 },
     dungeons: [
       { col: 10, row: 5, id: 'goblin_warren', name: 'Toca Principal', reveal: 'any',
         intro: 'Túneis escavados sob uma grande árvore. Tochas baixas ardem lá dentro. O fedor do lixo goblin é inconfundível.' }
@@ -7400,7 +7728,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 5,
     worldPos: { x: 0.80, y: 0.17 },
     weather_pool: ['s', 'f', 't'],
-    weights: { '.': 16, 'r': 26, 'M': 20, 'T': 8, 'p': 6, 'R': 6, 'b': 8, 'F': 4, 'i': 4, '#': 2 },
+    weights: { '.': 16, 'r': 26, 'M': 20, 'T': 8, 'p': 6, 'R': 6, 'b': 8, 'F': 1, 'i': 4, '#': 2 },
     dungeons: [
       { col: 10, row: 5, id: 'troll_lair', name: 'Covil do Troll', reveal: 'any',
         intro: 'Uma caverna grande o suficiente pra guardar trolls adultos. O cheiro de podre e ferro velho é imediato.' }
@@ -7452,7 +7780,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 3,
     worldPos: { x: 0.90, y: 0.33 },
     weather_pool: ['s', 'f', 't'],
-    weights: { '.': 22, 'p': 16, 'H': 2, 'r': 16, 'M': 12, 'T': 6, 'F': 4, 'b': 2 },
+    weights: { '.': 22, 'p': 16, 'H': 2, 'r': 16, 'M': 12, 'T': 6, 'F': 1, 'b': 2 },
     ambient_tips: [
       'O martelar rítmico das forjas anãs ecoa pelas galerias de pedra.',
       'Anciãos anões trocam runas entalhadas em pedras — é o jornal deles.',
@@ -7612,7 +7940,7 @@ const FIXED_MAPS = {
     music: 'volcanic', danger: 5, required_gear: 'canteen',
     worldPos: { x: 1.00, y: 0.58 },
     weather_pool: ['s', 't'],
-    weights: { '.': 22, 'p': 18, 'H': 2, 'v': 14, 'r': 10, 'M': 14, 'F': 4, 'L': 2, 'T': 4 },
+    weights: { '.': 22, 'p': 18, 'H': 2, 'v': 14, 'r': 10, 'M': 14, 'F': 1, 'L': 2, 'T': 4 },
     ambient_tips: [
       'Valkrest é dita como "vila forjada por dragões mortos" — a cada ano algum visitante confirma.',
       'O vento quente traz cheiro de enxofre das crateras próximas — os moradores se acostumam em meses.',
@@ -7636,7 +7964,7 @@ const FIXED_MAPS = {
     music: 'graveyard', danger: 3,
     worldPos: { x: 0.50, y: 0.75 },
     weather_pool: ['f', 'r', 'f', 't'],
-    weights: { '.': 24, 'g': 8, 'l': 22, 'T': 14, 't': 4, 'r': 6, 'p': 8, 'R': 8, 'F': 4, 'b': 2 },
+    weights: { '.': 24, 'g': 8, 'l': 22, 'T': 14, 't': 4, 'r': 6, 'p': 8, 'R': 8, 'F': 1, 'b': 2 },
     ambient_tips: [
       'Lápides antigas têm nomes gastos pelo tempo — algumas datas ultrapassam mil anos.',
       'Um vento súbito frio sopra sem fonte aparente — os mortos respiram.',
@@ -7664,18 +7992,47 @@ var setupChoices = { region: 'valdoria', map: 'city_gates', weather: 's', phase:
   // V2.6: PHB personality. Default neutro amig\u00e1vel.
   background: 'folk_hero', alignment: 'NG' };
 
+// X-6.5.51m (2026-04-25): pool de nomes fantasy originais (regra de naming \u2014
+// sem copia de fontes reais). Usados quando setupChoices.name nao foi escolhido.
+var FANTASY_NAMES_PT = [
+  'Aelric', 'Brynn', 'Caelum', 'Dareth', 'Elowen', 'Fendrel', 'Galadan',
+  'Hesper', 'Iorek', 'Jorvik', 'Kael', 'Lirael', 'Mordin', 'Nyssa',
+  'Orin', 'Perrin', 'Quorin', 'Renna', 'Sylas', 'Tyrra', 'Ulric',
+  'Vaeryn', 'Wynn', 'Xandros', 'Ysolde', 'Zarael', 'Aria', 'Brennen',
+  'Calyx', 'Darra', 'Eira', 'Fenwick', 'Gorath', 'Hilde', 'Isen', 'Jurin'
+];
+function randomFantasyName() {
+  return FANTASY_NAMES_PT[Math.floor(Math.random() * FANTASY_NAMES_PT.length)];
+}
+
 function initState() {
   const clsKey = pickRandom(Object.keys(CLASSES));
   const C = CLASSES[clsKey];
   const mapId = setupChoices.map;
   LOG('BOOT', 'initState start setupChoices=', JSON.stringify(setupChoices), 'pickedClass=' + clsKey + ' (' + C.name + ')');
   const map = generateMap(mapId);
-  // V2.4 FIX: sincronizar COLS/ROWS globais pras dimensões REAIS do mapa
-  // atual. Antes COLS/ROWS eram const 24x32 hardcoded, mas city_gates é
-  // 24x28 — drawTile loop ia até linha 31 (undefined) → pipeline kill.
   COLS = map.grid[0].length;
   ROWS = map.grid.length;
-  LOG('BOOT', 'initState generated map id=' + mapId + ' biome=' + map.biome + ' spawn=(' + map.spawnCol + ',' + map.spawnRow + ') cols=' + COLS + ' rows=' + ROWS);
+  // X-6.5.51m: se vindo de outro mapa via edge, spawn no hex de borda do
+  // novo mapa que aponta de VOLTA pro mapa de origem. Senao, usa spawn padrao.
+  let spawnCol = map.spawnCol, spawnRow = map.spawnRow;
+  const fromMap = setupChoices._fromMap;
+  if (fromMap) {
+    const newMapDef = FIXED_MAPS[mapId];
+    if (newMapDef && newMapDef.edges && newMapDef.edges.length > 0) {
+      const backEdge = newMapDef.edges.find(function(e) { return e.targetMap === fromMap; });
+      if (backEdge && typeof backEdge.col === 'number' && typeof backEdge.row === 'number') {
+        spawnCol = backEdge.col;
+        spawnRow = backEdge.row;
+        LOG('BOOT', 'initState spawn at back-edge col=' + spawnCol + ' row=' + spawnRow + ' (from ' + fromMap + ')');
+      }
+    }
+    setupChoices._fromMap = null;  // consumido
+  }
+  // Atualiza spawn em map pra ficar consistente
+  map.spawnCol = spawnCol;
+  map.spawnRow = spawnRow;
+  LOG('BOOT', 'initState generated map id=' + mapId + ' biome=' + map.biome + ' spawn=(' + spawnCol + ',' + spawnRow + ') cols=' + COLS + ' rows=' + ROWS);
   return {
     ph: 'idle',
     mapId: mapId,
@@ -7696,11 +8053,17 @@ function initState() {
       mods: C.mods, prof: C.prof,
       // V2.6: PHB personality (escolhido no setup overlay)
       background: setupChoices.background || 'folk_hero',
-      alignment: setupChoices.alignment || 'NG'
+      alignment: setupChoices.alignment || 'NG',
+      // X-6.5.51m: nome do personagem (jogador mostrado no popup do grupo,
+      // banners, dialogos. Nunca "VOCE"). Persistido entre boots se setado.
+      name: setupChoices.name || (S && S.player && S.player.name) || randomFantasyName()
     },
     grid: map.grid,
     hMul: map.hMul,
     decorations: map.decorations,
+    // X-6.5.51m: dungeons com posicao randomizada + flag discovered persiste
+    // por sessao. Discovery via skill check em evento contextual.
+    dungeons: map.dungeons || [],
     critters: [],
     fogState: {},
     visited: new Set(),
@@ -7808,9 +8171,33 @@ function generateMap(mapId) {
     hMul.push(hmulRow);
   }
 
-  // Apply landmarks — override tiles
+  // X-6.5.51m: dungeons agora tem posicao aleatoria por sessao + ficam ocultos
+  // ate jogador descobrir via skill check. User feedback: "faca com que as
+  // entradas das masmorras aparecam em locais aleatorios dos mapas, e que
+  // seja necessario passar por teste em algum evento, so depois o jogador/
+  // personagem tera registro da localidade da entrada que encontrou".
+  // Cada dungeon recebe rng_col/rng_row que sobrescrevem col/row originais
+  // se discovered=false. Discovery flag persistida em S.discoveredDungeons.
+  const dungeons = [];
   for (const dg of (m.dungeons || [])) {
-    if (dg.row < m.rows && dg.col < m.cols) {
+    // Randomiza posicao (mas evita borda — minDist 3 das edges do mapa)
+    let tries = 0;
+    let nc = dg.col, nr = dg.row;
+    while (tries < 50) {
+      nc = 3 + Math.floor(rng() * (m.cols - 6));
+      nr = 3 + Math.floor(rng() * (m.rows - 6));
+      // Nao sobre edges nem outras dungeons existentes
+      const tile = grid[nr] && grid[nr][nc];
+      const isEdge = (m.edges || []).some(function(e) { return e.col === nc && e.row === nr; });
+      const isDup = dungeons.some(function(d) { return d.col === nc && d.row === nr; });
+      if (tile && tile !== 'E' && !isEdge && !isDup) break;
+      tries++;
+    }
+    dungeons.push(Object.assign({}, dg, { col: nc, row: nr, discovered: false }));
+  }
+  // So aplica grid override nas dungeons descobertas (na primeira boot, nenhuma)
+  for (const dg of dungeons) {
+    if (dg.discovered && dg.row < m.rows && dg.col < m.cols) {
       grid[dg.row][dg.col] = 'D';
       hMul[dg.row][dg.col] = 1.0;
     }
@@ -7822,7 +8209,7 @@ function generateMap(mapId) {
     }
   }
 
-  return { grid, hMul, decorations, spawnCol: m.spawnCol, spawnRow: m.spawnRow, biome: m.biome };
+  return { grid, hMul, decorations, dungeons: dungeons, spawnCol: m.spawnCol, spawnRow: m.spawnRow, biome: m.biome };
 }
 
 function tileAt(col, row) {
@@ -7946,9 +8333,24 @@ setInterval(function() {
   }
 }, 2000);
 
+// X-6.5.51m (2026-04-25): throttle render pra ~33fps (skip 1 a cada 2 rAFs).
+// User feedback: "veja uma forma de tornar os mapas mais leves, esta ficando
+// pesado". Reduz workload em ~50% sem perda visual perceptivel (animacoes
+// ainda fluem). Tiles estaticos continuam renderizando por completo, animados
+// (T sway, F fogueira, w ripple, etc) tambem; soh frequencia menor.
+var _renderTargetFps = 33;  // alvo de FPS pro render (60 -> 33)
+var _renderLastTs = 0;
 function renderFrame(ts) {
   _rafScheduled = false;
   _animTime = ts || performance.now();
+  // X-6.5.51m: throttle por target FPS (skip frame se chegou cedo demais)
+  const minDelta = 1000 / _renderTargetFps;
+  if (_animTime - _renderLastTs < minDelta - 1) {
+    requestAnimationFrame(renderFrame);
+    _rafScheduled = true;
+    return;
+  }
+  _renderLastTs = _animTime;
   _frameCount++;
   // V3.0 FPS counter: atualiza a cada 1s
   _fpsFrames++;
@@ -11474,7 +11876,12 @@ function onMoveEnd(col, row) {
   let rolled = false;
   let wandered = false;
   if (!_remoteAuthoritative) {
-    rolled = maybeRollEvent();
+    // X-6.5.51m: dungeon discovery tem prioridade sobre eventos genericos
+    // (chance moderada de disparar quando jogador chega proximo de uma)
+    if (Math.random() < 0.35) {
+      rolled = (typeof maybeRollDungeonDiscovery === 'function') && maybeRollDungeonDiscovery();
+    }
+    if (!rolled) rolled = maybeRollEvent();
     // [FASE 3 R1 2026-04-23] Wandering monsters — combate direto sem narrativa.
     // Roda APENAS se nenhum evento normal rolou nesse step (pra não empilhar).
     // Independente de EVENTS_POOL — funciona em qualquer bioma com tabela de
@@ -11717,10 +12124,25 @@ function updateDmPanel() { /* no-op */ }
 function maybeRollEvent() {
   if (S.steps < 2) return false;
   if (Math.random() >= EVENT_CHANCE) return false;
-  // Filtra eventos pelo bioma do mapa atual (FIXED_MAPS[mapId].biome)
-  const ids = Object.keys(EVENTS_POOL).filter(id => EVENTS_POOL[id].biome === S.biome);
-  LOG('EVENT', 'maybeRollEvent biome=' + S.biome + ' totalPool=' + ids.length + ' recent=' + recentEventIds.join(','));
-  if (ids.length === 0) { LOGW('EVENT', 'biome ' + S.biome + ' has no events in pool'); return false; }
+  // X-6.5.51m: tile do hex atual pra filtrar eventos contextuais (fogueira
+  // soh em hex 'F', casa soh em 'H', etc). Eventos sem requires_tile sempre
+  // entram no pool (genericos).
+  const currentTile = (S.player && S.grid && S.grid[S.player.row]) ? S.grid[S.player.row][S.player.col] : null;
+  // Filtra eventos pelo bioma + tile se especificado
+  const ids = Object.keys(EVENTS_POOL).filter(function(id) {
+    const ev = EVENTS_POOL[id];
+    if (ev.biome !== S.biome) return false;
+    if (ev.requires_tile) {
+      if (Array.isArray(ev.requires_tile)) {
+        if (!ev.requires_tile.includes(currentTile)) return false;
+      } else {
+        if (currentTile !== ev.requires_tile) return false;
+      }
+    }
+    return true;
+  });
+  LOG('EVENT', 'maybeRollEvent biome=' + S.biome + ' tile=' + currentTile + ' totalPool=' + ids.length + ' recent=' + recentEventIds.join(','));
+  if (ids.length === 0) { LOGW('EVENT', 'biome ' + S.biome + ' tile=' + currentTile + ' has no events in pool'); return false; }
 
   // [R2 2026-04-23 / X-6.5.51l 2026-04-25] Cooldown reforcado:
   //   1. Ring buffer (5 últimos IDs) — nunca repete em rajada
@@ -12372,10 +12794,29 @@ function applyChoiceOutcome(choice, success, total, dc) {
   LOG('EVENT', 'tier=' + tier + ' outcome keys=' + (outcome ? Object.keys(outcome).join(',') : '(none)'));
   S.event.resolved = { tier, text: outcome.text, reward: outcome.reward || null };
 
+  // X-6.5.51m: dungeon discovery — registra masmorra se sucesso
+  if (S.event._isDungeonDiscovery && tier === 'success' && S.event._dungeonId) {
+    if (typeof _registerDungeonDiscovery === 'function') {
+      _registerDungeonDiscovery(S.event._dungeonId);
+    }
+  }
+
   if (outcome.hp_loss) S.player.hp = Math.max(0, S.player.hp - outcome.hp_loss);
   if (outcome.mp_loss) S.player.mp = Math.max(0, S.player.mp - outcome.mp_loss);
   if (outcome.exh_gain) S.player.exh = Math.min(6, S.player.exh + outcome.exh_gain);
   if (outcome.hp_gain) S.player.hp = Math.min(S.player.mhp, S.player.hp + outcome.hp_gain);
+  // X-6.5.51m: outcomes diretos (gold/xp/mp_gain) — eventos procedurais usam.
+  if (outcome.mp_gain && S.player.mmp > 0) {
+    S.player.mp = Math.min(S.player.mmp, S.player.mp + outcome.mp_gain);
+  }
+  if (typeof outcome.gold === 'number' && outcome.gold !== 0) {
+    S.gold = Math.max(0, (S.gold || 0) + outcome.gold);
+    LOG('ECONOMY', 'outcome.gold applied delta=' + outcome.gold + ' new_gold=' + S.gold + ' source=event:' + S.event.id);
+  }
+  if (typeof outcome.xp === 'number' && outcome.xp > 0 && S.player.xp != null) {
+    S.player.xp = (S.player.xp || 0) + outcome.xp;
+    LOG('XP', 'outcome.xp applied delta=' + outcome.xp + ' new_xp=' + S.player.xp);
+  }
   // V2.5: aplicar reward.gold no state — dois formatos aceitos:
   //   1. reward: { gold: N }   → soma N direto
   //   2. reward: "+N Valdoritas" ou "−N Valdoritas" → parse e aplica
@@ -12464,6 +12905,10 @@ function applyChoiceOutcome(choice, success, total, dc) {
   const consItems = [];
   if (outcome.reward) consItems.push({ kind: 'reward', ico: '✦', text: outcome.reward });
   if (outcome.hp_gain) consItems.push({ kind: 'reward', ico: '♥', text: '+' + outcome.hp_gain + ' HP' });
+  if (outcome.mp_gain) consItems.push({ kind: 'reward', ico: '◆', text: '+' + outcome.mp_gain + ' MP' });
+  // X-6.5.51m: gold/xp diretos (eventos procedurais)
+  if (typeof outcome.gold === 'number' && outcome.gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + outcome.gold + ' Valdoritas' });
+  if (typeof outcome.xp === 'number' && outcome.xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + outcome.xp + ' XP' });
   if (outcome.hp_loss) consItems.push({ kind: 'penalty', ico: '♥', text: '−' + outcome.hp_loss + ' HP' });
   if (outcome.mp_loss) consItems.push({ kind: 'penalty', ico: '◆', text: '−' + outcome.mp_loss + ' MP' });
   if (outcome.exh_gain) consItems.push({ kind: 'penalty', ico: '☉', text: '+' + outcome.exh_gain + ' Exaustão' });
@@ -12635,12 +13080,81 @@ function triggerDungeonEntry(dg) {
   LOG('DUNGEON', 'triggerDungeonEntry id=' + dg.id + ' name=' + dg.name + ' reveal=' + (dg.reveal || '-'));
   S.ph = 'event';
   S._currentDungeon = dg;
+  // X-6.5.51m: TODAS as masmorras estao em desenvolvimento ate ter mapa hexagonal
+  // proprio (planejamento em docs/sistemas/dungeons-planning.md). User feedback:
+  // "por enquanto nos locais que existem hexagonos dessas masmorras coloque que
+  // esta em desenvolvimento, ate que todas sejam desenhadas no jogo".
   document.getElementById('dungeon-title').textContent = dg.name;
-  document.getElementById('dungeon-desc').textContent = dg.intro;
+  document.getElementById('dungeon-desc').innerHTML =
+    '<div style="text-align:center;line-height:1.6">' +
+    '<p style="font-style:italic;margin-bottom:10px">' + dg.intro + '</p>' +
+    '<div style="background:rgba(196,149,58,0.15);border:1px dashed rgba(196,149,58,0.5);' +
+         'padding:8px 12px;border-radius:6px;margin:10px 0;color:#c4953a;font-family:Cinzel,serif;' +
+         'font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700">' +
+      'Masmorra em desenvolvimento' +
+    '</div>' +
+    '<p style="font-size:11px;color:#a09484">Mapa hexagonico proprio com encontros, ' +
+       'puzzles e tesouros vira em breve. Por enquanto, voce pode adentrar para ' +
+       'registrar a descoberta mas a aventura interna ainda nao esta implementada.</p>' +
+    '</div>';
+  document.getElementById('dungeon-enter').textContent = 'Adentrar (em dev)';
   const ov = document.getElementById('dungeon-overlay');
-  applyBiomeAccent(ov);  // V3.0: cor tem\u00e1tica do bioma
+  applyBiomeAccent(ov);
   ov.classList.add('visible');
-  dmNarrate({ text: '— ' + dg.name + ' —', type: 'event' });
+  dmNarrate({ text: '— ' + dg.name + ' (em desenvolvimento) —', type: 'event' });
+}
+
+// X-6.5.51m: dispara evento de descoberta quando jogador chega proximo de
+// masmorra nao descoberta. Skill check (perception/investigation), so revela
+// se passar.
+function maybeRollDungeonDiscovery() {
+  if (!S || !S.dungeons || S.dungeons.length === 0) return false;
+  if (S.ph !== 'idle') return false;
+  const pCol = S.player.col, pRow = S.player.row;
+  let candidate = null, minDist = 999;
+  for (const dg of S.dungeons) {
+    if (dg.discovered) continue;
+    const d = Math.max(Math.abs(dg.col - pCol), Math.abs(dg.row - pRow));
+    if (d <= 2 && d < minDist) {
+      minDist = d;
+      candidate = dg;
+    }
+  }
+  if (!candidate) return false;
+  if (S._dungeonDiscoveryCooldown && S._dungeonDiscoveryCooldown[candidate.id]) {
+    if (S.steps - S._dungeonDiscoveryCooldown[candidate.id] < 15) return false;
+  }
+  S.event = {
+    id: '_discover_' + candidate.id,
+    title: 'Algo Estranho no Caminho',
+    text: 'Voce nota marcas suspeitas — pegadas convergentes, vegetacao pisoteada, talvez vozes distantes. Algo importante pode estar oculto por aqui.',
+    choices: [
+      { label: 'Investigar com cuidado', skill: 'wis', dc: 13, desc: 'Procurar pistas (Sabedoria/Percepcao)',
+        outcome_ok: { text: 'Voce descobre a entrada de "' + candidate.name + '"! O caminho oculto foi revelado no mapa.' },
+        outcome_fail: { text: 'Voce nao encontra nada de interessante. Talvez tenha sido sua imaginacao.' } },
+      { label: 'Seguir em frente', desc: 'Ignorar e continuar',
+        outcome_ok: { text: 'Voce decide nao se desviar. Sua jornada continua.' } }
+    ],
+    _isDungeonDiscovery: true,
+    _dungeonId: candidate.id
+  };
+  if (!S._dungeonDiscoveryCooldown) S._dungeonDiscoveryCooldown = {};
+  S._dungeonDiscoveryCooldown[candidate.id] = S.steps;
+  if (typeof showEventOverlay === 'function') showEventOverlay();
+  return true;
+}
+
+function _registerDungeonDiscovery(dgId) {
+  if (!S || !S.dungeons) return;
+  const dg = S.dungeons.find(function(d) { return d.id === dgId; });
+  if (!dg || dg.discovered) return;
+  dg.discovered = true;
+  if (S.grid && S.grid[dg.row]) {
+    S.grid[dg.row][dg.col] = 'D';
+    if (typeof _hexBaseCache !== 'undefined') _hexBaseCache = {};
+  }
+  LOG('DUNGEON', 'discovered id=' + dg.id + ' at col=' + dg.col + ' row=' + dg.row);
+  scheduleRender();
 }
 
 function closeDungeonOverlay(entered) {
@@ -12662,12 +13176,58 @@ function triggerEdgeTransition(ed) {
   LOG('EDGE', 'triggerEdgeTransition ed=', JSON.stringify({targetMap: ed.targetMap, label: ed.label, col: ed.col, row: ed.row}));
   S.ph = 'event';
   S._pendingEdge = ed;
-  const title = ed.targetMap ? 'Sair do mapa' : 'Limite do território';
-  const desc = ed.targetMap
-    ? 'Você chegou à fronteira desta região. Deseja seguir para ' + ed.label + '?'
-    : 'Este caminho ainda não leva a lugar nenhum — em breve.';
+  let title, desc;
+  if (!ed.targetMap) {
+    title = 'Limite do território';
+    desc = 'Este caminho ainda não leva a lugar nenhum — em breve.';
+  } else {
+    // X-6.5.51m: enriquece descricao com nivel de perigo + bioma + indicacao
+    // se ja foi visitado. User feedback: "no popup para confirmar se o jogador
+    // quer ir ao novo mapa deve tambem sempre mostrar o nivel de perigo e
+    // informacoes que o jogador souber daquele local".
+    const tgt = FIXED_MAPS[ed.targetMap];
+    const tgtName = tgt && tgt.name ? tgt.name : ed.label;
+    title = 'Viajar para ' + tgtName;
+    if (tgt) {
+      const biomeNames = {
+        plains: 'Planície', forest: 'Floresta', swamp: 'Pântano',
+        mountain: 'Montanha', desert: 'Deserto', cave: 'Caverna',
+        snow: 'Neve', graveyard: 'Cemitério', volcanic: 'Vulcânico'
+      };
+      const biomeLabel = biomeNames[tgt.biome] || tgt.biome;
+      const danger = (typeof tgt.dangerLevel === 'number') ? tgt.dangerLevel : 2;
+      const dangerLabels = ['Tranquilo', 'Calmo', 'Atento', 'Perigoso', 'Mortal'];
+      const dangerLabel = dangerLabels[Math.min(4, Math.max(0, danger - 1))];
+      const dangerPips = '●'.repeat(danger) + '○'.repeat(Math.max(0, 5 - danger));
+      const isKnown = (typeof visitedMapIds !== 'undefined' && visitedMapIds.has(ed.targetMap));
+      let infoLines = [];
+      infoLines.push('🌿 <strong>Bioma:</strong> ' + biomeLabel);
+      infoLines.push('⚠ <strong>Perigo:</strong> ' + dangerPips + ' <em>' + dangerLabel + '</em>');
+      if (isKnown) {
+        // Player conhece o local — mostra mais info
+        if (tgt.dungeons && tgt.dungeons.length > 0) {
+          infoLines.push('🏰 <strong>Locais notáveis:</strong> ' + tgt.dungeons.length + ' masmorra(s) conhecida(s)');
+        }
+        if (tgt.weather_pool && tgt.weather_pool.length > 0) {
+          const wcounts = {};
+          tgt.weather_pool.forEach(function(w) { wcounts[w] = (wcounts[w] || 0) + 1; });
+          const wLabels = { s: '☀ sol', r: '🌧 chuva', f: '🌫 névoa', t: '⛈ tempestade' };
+          const sorted = Object.keys(wcounts).sort(function(a, b) { return wcounts[b] - wcounts[a]; });
+          infoLines.push('🌤 <strong>Clima típico:</strong> ' + sorted.map(function(w) { return wLabels[w] || w; }).join(', '));
+        }
+        infoLines.push('<em style="color:#a0d878">✓ Você já esteve aqui</em>');
+      } else {
+        infoLines.push('<em style="color:#d8a878">? Local desconhecido</em>');
+      }
+      desc = '<div style="text-align:left;line-height:1.55;font-size:13px">' +
+             infoLines.join('<br>') +
+             '</div>';
+    } else {
+      desc = 'Você chegou à fronteira desta região. Deseja seguir para ' + ed.label + '?';
+    }
+  }
   document.getElementById('dungeon-title').textContent = title;
-  document.getElementById('dungeon-desc').textContent = desc;
+  document.getElementById('dungeon-desc').innerHTML = desc;  // X-6.5.51m: HTML pra formatacao
   document.getElementById('dungeon-enter').textContent = ed.targetMap ? 'Viajar' : 'Retornar';
   const ov = document.getElementById('dungeon-overlay');
   applyBiomeAccent(ov);  // V3.0: acentua com cor do bioma atual
@@ -12749,6 +13309,11 @@ async function confirmEdgeTransition() {
 
   // LOCAL mode: comportamento original
   if (ed && ed.targetMap && FIXED_MAPS[ed.targetMap]) {
+    // X-6.5.51m: marca de qual mapa veio pra que initState do destino encontre
+    // o hex de borda que aponta de volta — spawn ali e nao no centro padrao.
+    // User feedback: "deveria aparecer sempre no hexagono do mapa de destino
+    // que leva ao mapa que estava".
+    setupChoices._fromMap = S && S.mapId;
     setupChoices.map = ed.targetMap;
     dmNarrate({ text: 'Você viaja para ' + FIXED_MAPS[ed.targetMap].name + '.', type: 'action' });
     boot();
@@ -13461,9 +14026,12 @@ function renderPartyPopup() {
   if (sub) sub.textContent = total + (total === 1 ? ' aventureiro' : ' aventureiros');
 
   // Jogador (sempre primeiro, destacado com .is-self)
+  // X-6.5.51m: usa p.name (nome do personagem) em vez de "Voce"; passa cls_key
+  // pra que _partyMemberCard renderize o icone heraldico se a lib estiver carregada.
   body.appendChild(_partyMemberCard({
-    name: 'Você',
+    name: p.name || randomFantasyName(),
     cls: p.cls || '—',
+    cls_key: p.cls_key || '',
     letter: p.ico || '?',
     color: p.color || '#c4953a',
     hp: p.hp, mhp: p.mhp,
@@ -13475,7 +14043,6 @@ function renderPartyPopup() {
   // Aliados (S.allies — pode ter dados parciais)
   allies.forEach(function(a) {
     const cls = a.cls || a.role || 'Aliado';
-    // Se ally tem dados de hp/mp explicitos usa; senao mostra placeholder
     const aHp = (typeof a.hp === 'number') ? a.hp : null;
     const aMhp = (typeof a.mhp === 'number') ? a.mhp : aHp;
     const aMp = (typeof a.mp === 'number') ? a.mp : null;
@@ -13483,6 +14050,7 @@ function renderPartyPopup() {
     body.appendChild(_partyMemberCard({
       name: a.name || 'Aliado',
       cls: cls,
+      cls_key: a.cls_key || a.cls || '',
       letter: (a.name || '?').charAt(0).toUpperCase(),
       color: a.color || '#a09484',
       hp: aHp, mhp: aMhp,
@@ -13501,7 +14069,22 @@ function _partyMemberCard(m) {
   head.className = 'pm-head';
   const ico = document.createElement('div');
   ico.className = 'pm-ico';
-  ico.textContent = m.letter;
+  // X-6.5.51m: usa heraldic-icons.html(cls_key) se a lib estiver carregada,
+  // senao fallback pra letra (G/M/L/etc).
+  let usedHeraldic = false;
+  if (typeof HeraldicIcons !== 'undefined' && HeraldicIcons.html && m.cls_key) {
+    try {
+      const heraldicHtml = HeraldicIcons.html(m.cls_key, { size: 22 });
+      if (heraldicHtml) {
+        ico.innerHTML = heraldicHtml;
+        ico.classList.add('pm-ico-heraldic');
+        usedHeraldic = true;
+      }
+    } catch (_e) { /* fallback pra letra */ }
+  }
+  if (!usedHeraldic) {
+    ico.textContent = m.letter;
+  }
   ico.style.background = 'linear-gradient(180deg, ' + m.color + ', ' +
                           _darkenHex(m.color, 0.35) + ')';
   const titles = document.createElement('div');
@@ -13620,6 +14203,20 @@ function openCampOverlay() {
   }
   _updateCampHud();
   _updateCampDetails();
+  // X-6.5.51m: variar cena por bioma do mapa atual. User feedback: "no
+  // camp-screen so existe imagem do acampamento a noite, faca melhorias
+  // epicas para que tambem possa representar o que esta acontecendo no
+  // bioma do mapa atual durante a exploracao".
+  // Remove biome-* classes antigas e adiciona a do bioma atual
+  ov.className = ov.className.replace(/\bbiome-\w+/g, '').trim();
+  if (S && S.biome) {
+    ov.classList.add('biome-' + S.biome);
+  }
+  // Tambem adiciona classe pro phase (dia/noite/etc) se quiser variar
+  if (S && S.dayPhase) {
+    ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
+    ov.classList.add('phase-' + S.dayPhase);
+  }
   ov.classList.add('active');
   // Particle fire canvas (explore-camp-fire.js carregado no <head>)
   try {

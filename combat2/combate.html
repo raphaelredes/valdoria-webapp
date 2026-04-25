@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-25T11:21:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-25T19:35:34Z — do not edit directly, edit source -->
 
 
 <!--
@@ -14430,9 +14430,14 @@ function render(s) {
     var html = '';
 
     if (ph === 'victory' || ph === 'defeat' || ph === 'fled') {
-        /* [SFX 2026-04-21] Música de vitória/derrota. fled usa defeat (melancólico). */
+        /* [SFX 2026-04-21 / X-6.5.51m] Música de vitória/derrota. fled usa
+           defeat (melancólico). PRIMEIRO para o force-loop de combate, senao
+           ele continuaria forçando o combat track sobre a musica de victory. */
         if (!s._simEndMusicPlayed) {
             s._simEndMusicPlayed = true;
+            if (typeof stopForceCombatMusic === 'function') {
+                try { stopForceCombatMusic(); } catch (_eS) { /* silent */ }
+            }
             if (ph === 'victory' && typeof sfxPlayMusicVictory === 'function') sfxPlayMusicVictory();
             else if ((ph === 'defeat' || ph === 'fled') && typeof sfxPlayMusicDefeat === 'function') sfxPlayMusicDefeat();
         }
@@ -22891,11 +22896,15 @@ function startSimAfterDiceBoot() {
       'skin=', document.documentElement.classList.contains('sim-combat-root'),
       'skinLast=', !!document.getElementById('sim-combat-skin-last'));
     ensureCombatVfxRuntime();
-    /* [SFX 2026-04-21] Música de combate (ValdoriaAudio auto-random de
-       combat_tense_*.mp3). Tocar uma vez no boot. Fallback silencioso se
-       ValdoriaAudio não carregou. */
+    /* [SFX 2026-04-21 / X-6.5.51m] Musica de combate FORCADA.
+       Toca uma vez no boot E inicia force-loop que garante que sempre tocara
+       combat (se algum outro tema invadir, sobrescreve). User feedback:
+       "garanta que forcadamente sempre tocara musica de combate". */
     if (typeof sfxPlayMusicCombat === 'function') {
         try { sfxPlayMusicCombat(); } catch (_eM) { /* silent */ }
+    }
+    if (typeof startForceCombatMusic === 'function') {
+        try { startForceCombatMusic(); } catch (_eF) { /* silent */ }
     }
     /* V1.7 (2026-04-21) — Instala botão de volume CUSTOM no top-right do simulador.
        Substitui o .va-float do audio-manager.js (que fica atrás do turn-queue
@@ -23098,6 +23107,35 @@ function sfxDamageType(dt) {
 function sfxPlayMusicVictory() { _vaPlayMusic('victory'); }
 function sfxPlayMusicDefeat() { _vaPlayMusic('defeat'); }
 function sfxPlayMusicCombat() { _vaPlayMusic('combat'); }
+
+/* X-6.5.51m (2026-04-25): force-loop pra garantir que SEMPRE toca musica de
+   combate enquanto a tela de combate esta ativa. User feedback: "na tela de
+   combate, garanta que forcadamente sempre tocara musica de combate, se
+   comecar a tocar musica de algum outro tema, force tocar musica de combate".
+   Roda a cada 2.5s; se ValdoriaAudio.getCurrentTrack() != 'combat', forca
+   play('combat'). Stop quando combate termina (cleanup hook em endCombat). */
+var _forceCombatMusicTimer = null;
+function startForceCombatMusic() {
+    if (_forceCombatMusicTimer) return;  // ja rodando
+    _forceCombatMusicTimer = setInterval(function() {
+        try {
+            if (typeof ValdoriaAudio === 'undefined' || !ValdoriaAudio.play) return;
+            var current = (ValdoriaAudio.getCurrentTrack && ValdoriaAudio.getCurrentTrack()) || null;
+            if (current !== 'combat') {
+                console.info('[COMBAT-MUSIC] force-loop: current=' + current + ' -> playing combat');
+                ValdoriaAudio.play('combat');
+            }
+        } catch (_e) { /* silent */ }
+    }, 2500);
+    console.info('[COMBAT-MUSIC] force-loop started');
+}
+function stopForceCombatMusic() {
+    if (_forceCombatMusicTimer) {
+        clearInterval(_forceCombatMusicTimer);
+        _forceCombatMusicTimer = null;
+        console.info('[COMBAT-MUSIC] force-loop stopped');
+    }
+}
 
 /* V1.7 (2026-04-21) — Botão de volume custom do simulador (top-right).
    Substitui o .va-float do audio-manager.js que é inconsistente no sim.
