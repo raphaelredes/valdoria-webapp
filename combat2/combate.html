@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-22T00:47:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-25T10:37:03Z — do not edit directly, edit source -->
 
 
 <!--
@@ -328,16 +328,33 @@
 <style>
 /* valdoria-design.css (CDN, @layer) aplica em body: contain+::before/::after+background-attachment:fixed.
    No file:// isso faz o fundo inteiro “respirar” com text-shadow do titulo e quebra altura flex.
-   Especificidade html.sim-combat-root vence o layer; pseudo-elementos desligados só no simulador. */
+   Especificidade html.sim-combat-root vence o layer; pseudo-elementos desligados só no simulador.
+
+   X-6.5.49 (2026-04-25): VIEWPORT REFERENCE = TELEGRAM DESKTOP. User pediu
+   pra simuladores usarem Telegram Desktop content area como base, ja que e
+   a menor altura real onde o jogo roda. Telegram Desktop window ~442x755px,
+   header ~70px + footer ~50px → content area ~442x635px. Adotamos:
+     width 430 (matches existing constraint, slightly narrower than Telegram = safe)
+     height 635 (Telegram Desktop content — REFERÊNCIA SMALLEST)
+   No file:// dev ve a constraint exata do menor viewport real. */
 html.sim-combat-root {
   max-width: min(100vw, 430px) !important;
   margin: 0 auto !important;
-  height: min(100dvh, 932px) !important;
-  max-height: min(100dvh, 932px) !important;
+  /* X-6.5.49: troca 932px (smartphone tall) → 635px (Telegram Desktop content)
+     Smartphones com Telegram WebApp sao mais altos, mas o jogo precisa
+     funcionar no MENOR caso (Telegram Desktop). 100dvh garante que em
+     viewports menores (Android keyboard, etc) o simulator se adapta. */
+  height: min(100dvh, 635px) !important;
+  max-height: min(100dvh, 635px) !important;
   overflow: hidden !important;
   background: #2a2420 !important;
   box-sizing: border-box !important;
+  /* Frame visual escuro fora do viewport simulado — fica óbvio onde sao
+     os limites do Telegram Desktop quando dev abrir file:// */
+  box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2) !important;
 }
+/* Background do body fora do html (browser do dev) */
+html.sim-combat-root > body { background: #2a2420; }
 </style>
 <script>
 var v = Date.now();
@@ -7068,14 +7085,19 @@ body.perf-lite .dnd-res-pill.available,
    Demais crianças (.res-title, .res-narr, .res-rewards, .action-bar) são
    fixas (flex:0 0 auto) pra não competirem pelo espaço com o log. */
 /* Tela de resolução — estilo grimório épico (mesmo padrão do lp-help-card):
-   double border, corner gleam, box-shadow empilhado, entry bounce. */
+   double border, corner gleam, box-shadow empilhado, entry bounce.
+   X-6.5.49 (2026-04-25): refator pra Telegram Desktop viewport (~635px content).
+   Rewards block flex-shrink + scroll vertical; action-bars sempre visíveis
+   no bottom. User reportou tela de vitória escondendo botão Continuar
+   abaixo do fold em Telegram Desktop. */
 .resolution {
     position: relative;
-    padding: 28px 22px 20px;
+    /* Padding reduzido — viewport baixo precisa de cada pixel */
+    padding: 18px 18px 12px;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     align-items: center;
     justify-content: flex-start;
     z-index: 9990;
@@ -7108,28 +7130,45 @@ body.perf-lite .dnd-res-pill.available,
     z-index: 0;
 }
 .resolution > * { position: relative; z-index: 1; }
+/* X-6.5.49: title + narr fixos no topo; res-rewards flex-grow + scroll
+   pra acomodar viewport baixo (Telegram Desktop ~635px); action-bar
+   sempre fixo no bottom (regra mais abaixo, linha 7145). */
 .resolution > .res-title,
-.resolution > .res-narr,
-.resolution > .res-rewards { flex: 0 0 auto; }
+.resolution > .res-narr { flex: 0 0 auto; }
+.resolution > .res-rewards {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196,149,58,0.5) transparent;
+}
+.resolution > .res-rewards::-webkit-scrollbar { width: 6px; }
+.resolution > .res-rewards::-webkit-scrollbar-thumb {
+    background: rgba(196,149,58,0.5);
+    border-radius: 3px;
+}
 @keyframes resOverlayIn { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(2px); } }
 .res-title {
-    font-size: 44px;
+    /* X-6.5.49: reduzido de 44px (era enorme em Telegram Desktop) pra 36px
+       — clamp permite ainda menor em viewports muito baixos. */
+    font-size: clamp(28px, 6vh, 36px);
     font-weight: 700;
-    letter-spacing: 6px;
+    letter-spacing: 4px;
     font-family: var(--v-font-display, 'Cinzel'), serif;
     text-transform: uppercase;
     line-height: 1.1;
     animation: resTitlePop 0.8s cubic-bezier(.34,1.56,.64,1);
-    margin-top: 6px;
+    margin-top: 4px;
 }
 .res-title::after {
     content: '✧  ◆  ✧';
     display: block;
     font-family: serif;
     font-weight: 400;
-    font-size: 13px;
-    letter-spacing: 8px;
-    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 6px;
+    /* X-6.5.49: margin-top reduzido (12->6) pra economizar pixels em viewport baixo */
+    margin-top: 6px;
     color: rgba(196,149,58,0.85);
     text-shadow: 0 0 10px rgba(196,149,58,0.6);
     animation: lpHelpGemPulse 2.4s ease-in-out infinite alternate;
@@ -7139,7 +7178,8 @@ body.perf-lite .dnd-res-pill.available,
 @keyframes victoryShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.2); } }
 .resolution.defeat .res-title { color: #c06a3a; text-shadow: 0 0 24px rgba(192,106,58,.6), 0 0 48px rgba(192,106,58,.3), 0 2px 4px rgba(0,0,0,.9); }
 .resolution.fled .res-title { color: var(--v-text-dim, #a09484); text-shadow: 0 1px 3px rgba(0,0,0,.9); }
-.res-narr { color: var(--v-text-dim, #a09484); font-style: italic; font-size: 15px; max-width: 320px; line-height: 1.55; animation: resFadeIn .6s ease .4s both; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+/* X-6.5.49: font 15->13, max-width 320->300, line-height 1.55->1.45 — economiza pixels em viewport baixo */
+.res-narr { color: var(--v-text-dim, #a09484); font-style: italic; font-size: 13px; max-width: 300px; line-height: 1.45; animation: resFadeIn .6s ease .4s both; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 @keyframes resFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .res-log { max-width: 360px; width: 100%; max-height: 180px; overflow-y: auto; padding: 12px 16px; background: rgba(15,12,8,.6); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; font-size: 12px; color: var(--v-text-dim, #a09484); text-align: left; line-height: 1.5; animation: resFadeIn .6s ease .6s both; }
 .res-log div { padding: 2px 0; }
@@ -15085,7 +15125,9 @@ function __combatShowErrorOverlay(title, detailsHtml) {
         s.style.maxWidth = '340px';
         s.style.margin = '0 auto';
         /* setHTML existe no escopo — safe: detailsHtml é montado por nós (não user input). */
-        setHTML(s, detailsHtml + '<br><br><em style="opacity:.7">Erro registrado no servidor. Agente IA pode grep [C-REM:LEAVE-ERR] em bot.log.</em>');
+        /* X-6.5.45: NAO appendar string de debug ("Erro registrado [C-REM:...]"
+           "Agente IA grep bot.log") — UI clean, console-only relay. */
+        setHTML(s, detailsHtml);
         card.appendChild(s);
         var btn = document.createElement('button');
         btn.className = 'dice-continue-btn';
@@ -15143,17 +15185,19 @@ async function __combatCompleteCanonical(result, origin) {
         });
         if (!r.ok) {
             console.error('[C-REM:PIVOT-COMPLETE] status=' + r.status);
+            /* X-6.5.45: msg amigavel; status fica no console.error pra agente IA. */
             __combatShowErrorOverlay(
-                'Falha ao salvar resultado',
-                'Servidor retornou ' + r.status + '.<br>Tente novamente.'
+                'Algo deu errado',
+                'Tente novamente em poucos segundos.'
             );
             return;
         }
         var data = await r.json();
         if (!data || !data.url) {
+            console.error('[C-REM:PIVOT-COMPLETE] no_url_in_response');
             __combatShowErrorOverlay(
-                'Resposta sem destino',
-                'Servidor aceitou mas não retornou URL pra voltar.'
+                'Algo deu errado',
+                'Tente novamente em poucos segundos.'
             );
             return;
         }
@@ -15168,10 +15212,11 @@ async function __combatCompleteCanonical(result, origin) {
         console.info('[C-REM:PIVOT-COMPLETE] redirecting to ' + targetUrl.slice(0, 100));
         location.replace(targetUrl);
     } catch (e) {
+        /* X-6.5.45: e.message fica no console.error pra agente IA; UI clean. */
         console.error('[C-REM:PIVOT-COMPLETE] exception', e && e.message);
         __combatShowErrorOverlay(
-            'Erro de rede',
-            'Falha ao conectar ao servidor.<br>' + (e && e.message || e)
+            'Sem conexão',
+            'Verifique sua internet e tente novamente.'
         );
     }
 }
@@ -15222,12 +15267,12 @@ async function __combatLeaveRemoteToOrigin() {
         + ' curHashLen=' + (location.hash || '').length
         + ' curHrefLen=' + location.href.length);
     if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) {
+        /* X-6.5.45: console.error registra api/token/uid pra agente IA; UI clean. */
+        console.error('[C-REM:LEAVE] missing_session api=' + !!window.__COMBAT_API_BASE
+            + ' token=' + !!window.__COMBAT_TOKEN + ' uid=' + window.__COMBAT_USER_ID);
         __combatShowErrorOverlay(
-            'Sess\u00e3o incompleta',
-            'N\u00e3o foi poss\u00edvel retornar: token ou URL da API ausente.' +
-            '<br>api=' + !!window.__COMBAT_API_BASE +
-            ' token=' + !!window.__COMBAT_TOKEN +
-            ' uid=' + window.__COMBAT_USER_ID
+            'Sess\u00e3o expirada',
+            'Reabra o jogo para continuar.'
         );
         return;
     }
@@ -15268,20 +15313,24 @@ async function __combatLeaveRemoteToOrigin() {
             + ' error=' + (data && data.error)
             + ' bodyPreview=' + String(rawBody || '').slice(0, 200));
         if (!r.ok) {
+            /* X-6.5.45: detalhes (status/from/to/result/error/body) ficam no
+               console.info do bloco anterior; UI clean. */
+            console.error('[C-REM:LEAVE] transition_refused status=' + r.status
+                + ' from=combat to=' + origin + ' result=' + result
+                + ' error=' + ((data && data.error) || '?')
+                + ' bodyPreview=' + String(rawBody).slice(0, 120));
             __combatShowErrorOverlay(
-                'Erro ao retornar (HTTP ' + r.status + ')',
-                'Servidor recusou a transi\u00e7\u00e3o.' +
-                '<br>from=combat \u2192 to=' + origin + ' result=' + result +
-                '<br>resposta: ' + ((data && data.error) || String(rawBody).slice(0, 120) || '(vazia)')
+                'Algo deu errado',
+                'Tente novamente em poucos segundos.'
             );
             return;
         }
         if (!data || !data.url) {
+            console.error('[C-REM:LEAVE] no_url_in_response status=' + r.status
+                + ' bodyPreview=' + String(rawBody).slice(0, 150));
             __combatShowErrorOverlay(
-                'Resposta sem destino',
-                'Servidor aceitou mas n\u00e3o retornou URL pra voltar.' +
-                '<br>status=' + r.status +
-                '<br>corpo: ' + String(rawBody).slice(0, 150)
+                'Algo deu errado',
+                'Tente novamente em poucos segundos.'
             );
             return;
         }
@@ -15385,11 +15434,12 @@ async function __combatLeaveRemoteToOrigin() {
         } catch (_eXr) {}
         location.replace(targetUrl);
     } catch (e) {
+        /* X-6.5.45: e.message fica no console.error pra agente IA; UI clean. */
         var eMsg = (e && e.message) || String(e);
         console.error('[C-REM:LEAVE] exception', eMsg, e);
         __combatShowErrorOverlay(
-            'Erro de rede',
-            'Falha ao conectar ao servidor.<br>' + eMsg
+            'Sem conexão',
+            'Verifique sua internet e tente novamente.'
         );
     }
 }
@@ -22862,10 +22912,11 @@ async function startCombatRemoteCanonical() {
             }
         });
         if (!r.ok) {
+            /* X-6.5.45: status no console pra agente IA; UI clean. */
             console.error('[C-REM:PIVOT-BOOT] prepare_failed status=' + r.status);
             __combatShowErrorOverlay(
-                'Falha ao carregar combate',
-                'Servidor retornou status ' + r.status + '.<br>Tente reabrir o combate.'
+                'Algo deu errado',
+                'Tente reabrir o combate em poucos segundos.'
             );
             return;
         }
@@ -22873,8 +22924,8 @@ async function startCombatRemoteCanonical() {
         if (!data || !data.setup) {
             console.error('[C-REM:PIVOT-BOOT] prepare_no_setup');
             __combatShowErrorOverlay(
-                'Resposta inválida',
-                'Servidor aceitou mas não retornou setup.'
+                'Algo deu errado',
+                'Tente reabrir o combate em poucos segundos.'
             );
             return;
         }
@@ -22892,10 +22943,11 @@ async function startCombatRemoteCanonical() {
         render(currentState);
         console.info('[C-REM:PIVOT-BOOT] complete — LOCAL engine running');
     } catch (e) {
+        /* X-6.5.45: e.message fica no console.error pra agente IA; UI clean. */
         console.error('[C-REM:PIVOT-BOOT] exception', e && e.message);
         __combatShowErrorOverlay(
-            'Erro de rede',
-            'Falha ao conectar ao servidor.<br>' + (e && e.message || e)
+            'Sem conexão',
+            'Verifique sua internet e tente novamente.'
         );
     }
 }
