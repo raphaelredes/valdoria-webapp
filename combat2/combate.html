@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-25T10:37:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-25T11:21:12Z — do not edit directly, edit source -->
 
 
 <!--
@@ -283,7 +283,7 @@
   SECOES DO CSS (dentro do <style> principal ~210–1660; detalhe visual):
   -----------------------------------------------------------------------------
   .sim-side-panel                 Painel lateral esquerdo (desc + Voltar ao setup)
-  body / viewport lock            Limite 430px, scroll lock
+  body / viewport lock            Limite 384x694 (Telegram Desktop oficial — X-6.5.50)
   .hit-particle / shake           VFX de ataque (particulas + shake)
   .epic-banner / .epic-title      Banner epico da intro (COMBATE INICIADO)
   .cell-init / badge              Badge 🎲N da iniciativa nas celulas
@@ -330,31 +330,47 @@
    No file:// isso faz o fundo inteiro “respirar” com text-shadow do titulo e quebra altura flex.
    Especificidade html.sim-combat-root vence o layer; pseudo-elementos desligados só no simulador.
 
-   X-6.5.49 (2026-04-25): VIEWPORT REFERENCE = TELEGRAM DESKTOP. User pediu
-   pra simuladores usarem Telegram Desktop content area como base, ja que e
-   a menor altura real onde o jogo roda. Telegram Desktop window ~442x755px,
-   header ~70px + footer ~50px → content area ~442x635px. Adotamos:
-     width 430 (matches existing constraint, slightly narrower than Telegram = safe)
-     height 635 (Telegram Desktop content — REFERÊNCIA SMALLEST)
-   No file:// dev ve a constraint exata do menor viewport real. */
+   X-6.5.50 (2026-04-25): VIEWPORT OFICIAL TELEGRAM DESKTOP.
+   Tamanho EXATO da janela popup Mini App, do código-fonte tdesktop:
+
+     File: Telegram/SourceFiles/payments/ui/payments.style
+     Line: botWebViewPanelSize: size(384px, 694px);
+     URL:  https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style
+
+   384x694 é o popup completo. Webview real (descontando header do
+   Telegram ~50px) ~ 384x644.
+
+   Game UI DEVE ser responsiva pra esse tamanho. Override do #app
+   max-width 430->384 abaixo, garantindo que nenhum overlay escape. */
 html.sim-combat-root {
-  max-width: min(100vw, 430px) !important;
+  max-width: min(100vw, 384px) !important;
   margin: 0 auto !important;
-  /* X-6.5.49: troca 932px (smartphone tall) → 635px (Telegram Desktop content)
-     Smartphones com Telegram WebApp sao mais altos, mas o jogo precisa
-     funcionar no MENOR caso (Telegram Desktop). 100dvh garante que em
-     viewports menores (Android keyboard, etc) o simulator se adapta. */
-  height: min(100dvh, 635px) !important;
-  max-height: min(100dvh, 635px) !important;
+  height: min(100dvh, 694px) !important;
+  max-height: min(100dvh, 694px) !important;
   overflow: hidden !important;
   background: #2a2420 !important;
   box-sizing: border-box !important;
-  /* Frame visual escuro fora do viewport simulado — fica óbvio onde sao
-     os limites do Telegram Desktop quando dev abrir file:// */
+  /* Frame visual fora do viewport simulado — delimita o popup Telegram Desktop */
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2) !important;
 }
-/* Background do body fora do html (browser do dev) */
-html.sim-combat-root > body { background: #2a2420; }
+/* Body herda dimensoes do html constrained */
+html.sim-combat-root > body {
+  background: #2a2420;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+/* X-6.5.50: #app override pra largura do simulator (era hardcoded 430px). */
+html.sim-combat-root #app {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
 </style>
 <script>
 var v = Date.now();
@@ -668,10 +684,12 @@ loadCSS('/combat/combat-vfx.css');
 /* Ícone skip-init — removido (design 3 é texto limpo) */
 #intro-choice-popup .epic-cta-btn[data-act="skip-init"] .epic-cta-icon { display: none !important; }
 
-/* Mesmo viewport lock que valdoria-design (telefone / WebApp Telegram), nao altura total do desktop */
+/* X-6.5.50 (2026-04-25): VIEWPORT OFICIAL TELEGRAM DESKTOP.
+   Dimensoes do botWebViewPanelSize do tdesktop = 384x694px.
+   Antes era 430x932 (iPhone Pro Max). Agora alinhado com Telegram Desktop. */
 :root {
-  --sim-frame-w: min(100vw, 430px);
-  --sim-frame-h: min(100vh, 932px);
+  --sim-frame-w: min(100vw, 384px);
+  --sim-frame-h: min(100vh, 694px);
   /* ==== Class color identity (heraldic cards V8 — ver card-icons-heraldic.html) ==== */
   --class-guerreiro: #b06040;   --class-guerreiro-dark: #5a2a18;
   --class-mago: #4080c0;        --class-mago-dark: #1a3a66;
@@ -692,7 +710,8 @@ loadCSS('/combat/combat-vfx.css');
   --summon-arcane: #8c70d0;     --summon-arcane-dark: #3a2a6a;
 }
 @supports (height: 100dvh) {
-  :root { --sim-frame-h: min(100dvh, 932px); }
+  /* X-6.5.50: 100dvh, 694px (Telegram Desktop oficial) */
+  :root { --sim-frame-h: min(100dvh, 694px); }
 }
 /* Resumo: combat-layout (flex) + anular pele global do valdoria-design nesta página. */
 html.sim-combat-root body.sim-combat-layout {
@@ -737,16 +756,17 @@ html.sim-combat-root #app {
   /* Containing block para position:fixed dos filhos (dock/folha) = frame do sim, não o browser */
   transform: translateZ(0) !important;
 }
-/* sim-side-panel: painel lateral à ESQUERDA do frame do jogo (430px centralizado).
-   Ocupa o espaço vazio fora do frame; em viewports ≤ 430px (mobile) fica escondido
+/* sim-side-panel: painel lateral à ESQUERDA do frame do jogo (384px centralizado).
+   X-6.5.50: largura ajustada de 430→384 (Telegram Desktop oficial).
+   Ocupa o espaço vazio fora do frame; em viewports ≤ 384px (mobile) fica escondido
    pra não invadir o jogo. Conteúdo: descrição + botão "Voltar ao setup". */
 .sim-side-panel {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  /* Largura = metade do espaço vazio à esquerda. Em telas ≤ 430px → 0. */
-  width: max(0px, calc((100vw - 430px) / 2));
+  /* Largura = metade do espaço vazio à esquerda. Em telas ≤ 384px → 0. */
+  width: max(0px, calc((100vw - 384px) / 2));
   z-index: 9999;
   padding: 16px 14px;
   box-sizing: border-box;
@@ -823,7 +843,7 @@ html.sim-combat-root #app {
   margin-left: auto !important;
   margin-right: auto !important;
   top: 0 !important;
-  width: min(100vw, 430px) !important;
+  width: min(100vw, 384px) !important; /* X-6.5.50: Telegram Desktop oficial */
   max-width: 100% !important;
   height: var(--sim-frame-h) !important;
   max-height: var(--sim-frame-h) !important;
@@ -836,7 +856,7 @@ html.sim-combat-root #app {
   right: 0 !important;
   margin-left: auto !important;
   margin-right: auto !important;
-  width: min(100vw, 430px) !important;
+  width: min(100vw, 384px) !important; /* X-6.5.50: Telegram Desktop oficial */
   max-width: 100% !important;
 }
 /* Acima do .sim-side-panel (9999), do #vfxCanvas e do #app — rolagens sempre visiveis */
@@ -3736,9 +3756,9 @@ body.perf-lite .dnd-res-pill.available,
    overflow:hidden no #app + max-width 430px garante que nenhum overlay
    escape horizontalmente. max-height 100% + overflow interno garante scroll
    controlado em painéis grandes. */
-#app { max-width: 430px; max-height: 100vh; overflow: hidden; position: relative; }
+#app { max-width: 384px; max-height: 100vh; overflow: hidden; position: relative; /* X-6.5.50: Telegram Desktop 384 */ }
 #app > * { max-width: 100%; }
-.list-panel-overlay { max-width: 430px; max-height: 100%; }
+.list-panel-overlay { max-width: 384px; max-height: 100%; /* X-6.5.50: Telegram Desktop 384 */ }
 .list-panel-card {
     width: 100%;
     max-width: 360px;
@@ -7346,8 +7366,8 @@ body.perf-lite .dnd-res-pill.available,
     var st = document.createElement('style');
     st.id = 'sim-combat-skin-last';
     st.textContent = [
-      'html.sim-combat-root{max-width:min(100vw,430px)!important;margin:0 auto!important;height:min(100dvh,932px)!important;',
-      'max-height:min(100dvh,932px)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
+      'html.sim-combat-root{max-width:min(100vw,384px)!important;margin:0 auto!important;height:min(100dvh,694px)!important;',
+      'max-height:min(100dvh,694px)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
       'html.sim-combat-root body.sim-combat-layout{contain:none!important;background-image:none!important;',
       'background-attachment:scroll!important;height:100%!important;max-height:100%!important;justify-content:flex-start!important;}',
       'html.sim-combat-root body.sim-combat-layout::before,html.sim-combat-root body.sim-combat-layout::after{content:none!important;display:none!important;}',

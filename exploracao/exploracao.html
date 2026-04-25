@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-24T21:25:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T11:20:51Z - do not edit directly, edit source -->
 
 
 <!--
@@ -472,15 +472,66 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 body {
+  /* X-6.5.50 (2026-04-25): VIEWPORT OFICIAL TELEGRAM DESKTOP.
+     Dimensoes tiradas DIRETAMENTE do código-fonte tdesktop:
+       File: Telegram/SourceFiles/payments/ui/payments.style
+       Line: botWebViewPanelSize: size(384px, 694px);
+       URL:  https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style
+     384x694 = janela popup Telegram Desktop pra QUALQUER Mini App.
+     Inclui ~50px do header proprio do Telegram → webview real ~384x644. */
   width: 100vw; height: 100vh; height: 100dvh;
   position: relative;
   display: flex; justify-content: center; align-items: stretch;
 }
 #frame {
-  width: 100%; max-width: 430px; height: 100%;
+  width: 100%;
+  max-width: 384px;
+  height: 100%;
+  max-height: min(100dvh, 694px);
+  margin: 0 auto;
   position: relative;
   background: var(--v-bg, #2a2420);
   overflow: hidden;
+  /* Frame visual fora do viewport simulado — delimita o popup Telegram Desktop */
+  box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
+}
+
+/* X-6.5.50 OVERRIDES — elementos que audio-manager.js / vOverlay.js / outros
+   shareds appendam ao document.body com position:fixed escapam do #frame.
+   Em produção (Telegram WebApp) o body É o viewport, então funciona.
+   No simulador (file://) o body é maior que o frame → elemento aparece
+   FORA do frame (user reportou audio button no bottom do browser).
+
+   Solucao: limitar `.va-float` (audio btn), `.v-overlay-host` e qualquer
+   outro `position:fixed`-em-body a 384px e ancorar bottom no bottom do frame
+   simulado (não viewport). */
+html body .va-float {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 auto !important;
+  max-width: 384px !important;
+  width: 384px !important;
+  transform: none !important;
+  /* Bottom: viewport-bottom + (espaço vazio abaixo do frame) + 8px padding.
+     Quando viewport > 694, frame fica centralizado e há espaço empty embaixo;
+     audio button precisa subir esse tanto pra ficar no bottom do frame. */
+  bottom: calc(max(0px, (100dvh - 694px) / 2) + 8px) !important;
+}
+/* Mesmo pattern pra qualquer toast/popup que use position:fixed em body */
+html body .v-toast-host,
+html body .v-popup-host,
+html body .v-overlay-host,
+html body .processing-overlay,
+html body .connection-overlay {
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 auto !important;
+  max-width: 384px !important;
+  max-height: min(100dvh, 694px) !important;
+  /* Centralizar tambem verticalmente (overlays cobrem o frame inteiro) */
+  top: max(0px, calc((100dvh - 694px) / 2)) !important;
+  height: min(100dvh, 694px) !important;
 }
 
 /* ====== MAP VIEWPORT (scrollável + canvas maior que a tela) =========== */
@@ -1084,15 +1135,12 @@ body {
 /* ====== QUICK ACTIONS ================================================= */
 /* X-6.5.20: hud-quick desceu (bottom menor) pra liberar espaço vertical
    e evitar sobreposição com right-panel (minimap + zoom). Cartografia
-   ganhou margin-top extra pra descer um pouco mais.
-   X-6.5.27: z-index elevado pra 17 (acima de #right-panel z=16) — em
-   smartphones com viewport curto a mochila estava ficando atrás do
-   minimap (queixa user 2026-04-24). */
+   ganhou margin-top extra pra descer um pouco mais. */
 #hud-quick {
   position: absolute;
   right: 10px;
   bottom: 140px;   /* era 160 — baixou 20px */
-  z-index: 17;
+  z-index: 15;
   display: flex; flex-direction: column;
   gap: 8px;
 }
@@ -1608,39 +1656,23 @@ body {
 
 /* V3.0: DM TOAST removido (user: "n\u00e3o d\u00e1 imersividade, melhor os eventos mesmo") */
 
-/* ====== DICE OVERLAY (padrão check-overlay do combate) ===============
-   X-6.5.46 (2026-04-25) REFATORADO: layout 2-zonas. Top-zone com dado +
-   fórmula + resultado (flex-center). Bottom-zone com botão Continuar
-   ANCORADO via position:absolute ao bottom do overlay — botão NUNCA é
-   empurrado pra fora do viewport (era bug recorrente: 5 reports do user
-   sobre "botão não aparece"). Watchdog mantido como safety net pro
-   relatório console, mas layout absoluto não depende dele. */
+/* ====== DICE OVERLAY (padrão check-overlay do combate) =============== */
 #dice-overlay {
   position: absolute; inset: 0;
   background: rgba(42, 36, 32, 0.96);
   display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 18px;
   z-index: 200;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease;
 }
 #dice-overlay.visible {
-  display: block;
+  display: flex;
   opacity: 1;
   pointer-events: auto;
-}
-/* Top-zone: dado + fórmula + resultado, ocupa overlay inteiro menos
-   espaço reservado pro botão no bottom (110px = ~botão 55px + padding). */
-#dice-content-zone {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  bottom: 110px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 16px;
 }
 #dice-canvas-wrap {
   position: relative;
@@ -1697,68 +1729,20 @@ body {
 }
 .v-skip-btn {
   font-family: var(--v-font-display);
-  font-size: 16px;
-  letter-spacing: 3px;
+  font-size: 12px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  /* X-6.5.41: contraste alto — texto escuro sobre fundo dourado vivo
-     (era texto dourado sobre fundo dark = baixo contraste, user nao via
-     o botao mesmo com h=48 segundo logs WATCHDOG OK). */
-  color: #1a1410;
-  background: linear-gradient(180deg, #e8c772 0%, #c4953a 50%, #8b6420 100%);
-  border: 2px solid #fff4d0;
-  padding: 14px 32px;
-  border-radius: 10px;
+  color: var(--v-gold, #c4953a);
+  background: transparent;
+  border: 1px solid var(--v-gold, #c4953a);
+  padding: 7px 16px;
+  border-radius: 6px;
   cursor: pointer;
   display: none;
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
-  box-shadow:
-    0 0 24px rgba(255, 200, 80, 0.7),
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  font-weight: 900;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: background 0.15s ease;
 }
-/* X-6.5.46: dice-skip-btn ESPECIFICAMENTE — anchored ao bottom do overlay
-   via position:absolute. NUNCA é empurrado pra fora do viewport por
-   conteudo expandindo acima dele. */
-#dice-skip-btn {
-  position: absolute;
-  bottom: max(20px, env(safe-area-inset-bottom, 20px));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-}
-#dice-skip-btn.v-skip-btn--shown {
-  /* Mantem position:absolute mesmo quando .v-skip-btn--shown ativa */
-  display: inline-block !important;
-}
-/* X-6.5.35: classe explícita pra mostrar.
-   X-6.5.41: animacao de pulso pra chamar atencao do user. */
-.v-skip-btn.v-skip-btn--shown {
-  display: inline-block !important;
-  animation: skipBtnPulse 1.6s ease-in-out infinite;
-}
-@keyframes skipBtnPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 24px rgba(255, 200, 80, 0.7),
-      0 4px 16px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow:
-      0 0 36px rgba(255, 220, 120, 0.95),
-      0 6px 20px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    transform: scale(1.04);
-  }
-}
-.v-skip-btn:hover {
-  background: linear-gradient(180deg, #fff4d0 0%, #e8c772 50%, #c4953a 100%);
-  border-color: #fff4d0;
-}
-.v-skip-btn:active { transform: scale(0.97); animation: none; }
+.v-skip-btn:hover { background: rgba(196, 149, 58, 0.1); }
+.v-skip-btn:active { transform: scale(0.97); }
 
 /* ====== DEFEAT ======================================================== */
 #defeat-overlay {
@@ -2334,8 +2318,6 @@ body.remote-mode #debug-hud { display: none !important; }
 }
 
 /* ====== RIGHT PANEL (minimap + coord + zoom, TOPO DIREITO) ========== */
-/* X-6.5.27: padding removido — minimap deve ficar flush com a borda direita
-   da tela quando expandido (queixa do user 2026-04-24). */
 #right-panel {
   position: absolute;
   right: 0;
@@ -2345,72 +2327,71 @@ body.remote-mode #debug-hud { display: none !important; }
   flex-direction: column;
   align-items: flex-end;
   gap: 5px;
+  padding: 0 2px;
 }
-/* X-6.5.27 (2026-04-24): minimap-block como FLEX ROW simples — toggle +
-   content como siblings, flush direito. Antes usava position:absolute +
-   right:100% no toggle que estava sendo posicionado errado em smartphones
-   pequenos (toggle ficava no meio do mapa, longe do minimap). Agora ambos
-   são flex children e respeitam align-items:flex-end do #right-panel.
-
-   Layout esperado:
-   - Expandido: [TOGGLE]+[MINIMAP+COORD] flush direito da tela
-   - Recolhido: minimap-content display:none, só toggle visível flush direito
-*/
+/* X-6.5.14/15/20: minimap-block tem o minimap-content + botão toggle
+   absolutamente posicionado à esquerda dele. Antes era flex-row, mas
+   o botão ficava deslocado visualmente. Agora minimap-content é o
+   bloco principal e o botão flutua ao lado. */
 #minimap-block {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;   /* toggle estica vertical p/ acompanhar altura */
-  gap: 0;
-  margin: 0;
+  /* position:relative definido acima (no #btn-minimap-toggle reset) */
+  display: block;
+  margin-right: 20px;   /* reserva espaço pro botão toggle absolute */
 }
-/* X-6.5.32 (2026-04-24): toggle minimap MINIMALISTA — só a seta, sem fundo
-   nem efeitos, encostada à esquerda do minimap. User explícito 2026-04-24:
-   "tire o fundo e efeito dele, deixe somente a seta e coloque essa seta
-   encostada ao lado esquerdo do minimapa". */
+/* X-6.5.20: toggle button posicionado absolutamente pra grudar na borda
+   esquerda do minimap-wrap, centralizado verticalmente. Antes ficava
+   solto no início do flex-row, descolado do minimap visualmente. */
+#minimap-block {
+  position: relative;   /* context pra botão absolute */
+}
 #btn-minimap-toggle {
-  position: relative;
-  align-self: stretch;
-  width: 18px;
-  min-height: 48px;
+  position: absolute;
+  /* Grudar à esquerda do minimap-wrap (que vive no #minimap-content).
+     right: 100% alinha o lado direito do botão com o lado esquerdo do
+     content. top centrado. */
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  margin-right: 0;   /* flush com minimap-wrap */
+  width: 20px;
+  height: 48px;
   padding: 0;
-  margin: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.94));
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-right: none;
   color: var(--v-gold, #c4953a);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.5);
+  transition: all 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
   z-index: 2;
-  flex-shrink: 0;
-  /* Sombra sutil só na seta (text-shadow, não box-shadow) — pra leitura
-     contra qualquer fundo do mapa, sem caixa visível. */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 4px rgba(0, 0, 0, 0.6);
 }
 #btn-minimap-toggle:hover {
-  color: #fff4c8;  /* dourado claro no hover, sem fundo */
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
+  box-shadow: -2px 2px 12px rgba(196, 149, 58, 0.4);
 }
-#btn-minimap-toggle:active { transform: scale(0.85); }
+#btn-minimap-toggle:active { transform: scale(0.92); }
 
-/* X-6.5.27: minimap-content é o irmão direito do toggle. Com display:flex
-   e align-items:flex-end no parent #right-panel, ele fica flush no canto
-   direito da tela. Quando .collapsed, recolhe pra largura 0 (toggle vira
-   o único filho visível, automaticamente flush direito).
-*/
+/* #minimap-content = bloco que EFETIVAMENTE some quando collapsed.
+   Inclui apenas o minimap-wrap + current-coord; o botão toggle fica
+   fora e sempre visível. */
 #minimap-content {
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: flex-end;
-  transition: opacity 0.25s ease, max-width 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
   max-width: 300px;
   overflow: hidden;
 }
 #minimap-content.collapsed {
   opacity: 0;
+  transform: translateX(40px);
   max-width: 0;
   pointer-events: none;
 }
@@ -2456,7 +2437,7 @@ body.remote-mode #debug-hud { display: none !important; }
   display: flex;
   flex-direction: row;   /* X-6.5.13: horizontal */
   gap: 6px;
-  margin-right: 0;       /* X-6.5.27: flush direito */
+  margin-right: 2px;
   margin-bottom: 4px;    /* espaço entre zoom-controls e minimap abaixo */
   justify-content: flex-end;
 }
@@ -2714,13 +2695,9 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <div id="dice-overlay">
-    <!-- X-6.5.46: top-zone com dado/formula/resultado (flex-center).
-         Bottom-zone (botao) eh anchored via position:absolute em CSS. -->
-    <div id="dice-content-zone">
-      <div id="dice-canvas-wrap"></div>
-      <div id="dice-formula"></div>
-      <div id="dice-result"></div>
-    </div>
+    <div id="dice-canvas-wrap"></div>
+    <div id="dice-formula"></div>
+    <div id="dice-result"></div>
     <button class="v-skip-btn" id="dice-skip-btn">Continuar >></button>
   </div>
 
@@ -3093,21 +3070,13 @@ body.remote-mode #debug-hud { display: none !important; }
       // motor auth: Bearer peek (motor ainda exige peek pra /move/state/finish/event_choice)
       headers = _bearer();
     }
-    /* X-6.5.30: AbortController + timeout 8s pra não pendurar UI quando rede
-       cair. Sem retry automático — server NÃO tem idempotency key, retry
-       poderia dobrar deltas. Cliente decide retry manualmente (caller). */
-    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timeoutMs = 8000;
-    var timeoutId = controller ? setTimeout(function() { controller.abort(); }, timeoutMs) : null;
     try {
       var resp = await fetch(API_BASE + path, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(body || {}),
-        keepalive: true,
-        signal: controller ? controller.signal : undefined
+        keepalive: true
       });
-      if (timeoutId) clearTimeout(timeoutId);
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
@@ -3119,11 +3088,9 @@ body.remote-mode #debug-hud { display: none !important; }
       console.info('[E-REM:API] ' + path + ' ok ms=' + dt);
       return data;
     } catch (eNet) {
-      if (timeoutId) clearTimeout(timeoutId);
       var dtE = Math.round(performance.now() - t0);
-      var isAbort = eNet && eNet.name === 'AbortError';
-      console.error('[E-REM:API-ERROR] ' + path + (isAbort ? ' timeout' : ' network') + ' ms=' + dtE + ' msg=' + (eNet && eNet.message));
-      return { _network_error: true, error: isAbort ? 'timeout' : 'network' };
+      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, error: 'network' };
     }
   }
 
@@ -5812,9 +5779,7 @@ const FIXED_MAPS = {
     id: 'orc_tribe', region: 'valdoria', biome: 'plains',
     name: 'Acampamento Orc',
     cols: 20, rows: 24, seed: 10003, spawnCol: 10, spawnRow: 12,
-    /* X-6.5.32: stealth track — acampamento orc hostil, tambores de guerra,
-       tensão de território inimigo. Diferencia auralmente de plains genérico. */
-    music: 'stealth', danger: 3,
+    music: 'plains', danger: 3,
     worldPos: { x: 0.02, y: 0.67 },
     weather_pool: ['s', 'r'],
     weights: { '.': 32, 'g': 14, 'p': 8, 'F': 14, 't': 6, 'T': 8, 'r': 8, 'b': 5, 'H': 1, 'l': 1 },
@@ -5839,8 +5804,7 @@ const FIXED_MAPS = {
     id: 'bandit_fortress', region: 'valdoria', biome: 'plains',
     name: 'Fortaleza Bandida',
     cols: 22, rows: 26, seed: 10004, spawnCol: 11, spawnRow: 13,
-    /* X-6.5.32: stealth track — fortaleza inimiga, infiltração tensa */
-    music: 'stealth', danger: 5,
+    music: 'plains', danger: 5,
     worldPos: { x: 0.10, y: 0.92 },
     weather_pool: ['s', 'r', 'f', 't'],
     weights: { '.': 22, 'g': 8, 'p': 10, '#': 18, 'T': 6, 'r': 10, 'R': 8, 'H': 1, 'F': 6, 'b': 4 },
@@ -9315,45 +9279,13 @@ function revealFogAt(col, row, radius) {
 // MOVEMENT + HEX-NAV
 // ============================================================================
 
-/* X-6.5.38 (2026-04-24): movimento client-authoritative INTERRUPTIBLE.
-   Antes: S.ph === 'moving' bloqueava qualquer click → user perceia trava.
-   Agora: SO bloqueia durante 'event' (modal aberto) ou condições impossiveis
-   (HP<=0, exhaustion 6, fora do mapa, intransitavel, nao-adjacente).
-   Click durante animacao → interrompe (snap pro target da anim cancelada)
-   + inicia nova animacao. Server fire-and-forget recebe cada move. */
 function isValidMove(col, row) {
-  if (S.ph === 'event') {
-    LOGW('MOVE', 'isValidMove_blocked reason=event_open col=' + col + ' row=' + row);
-    return false;  // event modal aberto — usuario tem que responder primeiro
-  }
+  if (S.ph !== 'idle') return false;
   const p = S.player;
-  if (p.hp <= 0) {
-    LOGW('MOVE', 'isValidMove_blocked reason=dead hp=' + p.hp);
-    return false;
-  }
-  if (p.exh >= 6) {
-    LOGW('MOVE', 'isValidMove_blocked reason=exhausted exh=' + p.exh);
-    return false;
-  }
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) {
-    LOGW('MOVE', 'isValidMove_blocked reason=out_of_bounds col=' + col + ' row=' + row);
-    return false;
-  }
-  /* Adjacency: durante anim, p.col/p.row ainda nao atualizou — checa contra
-     playerAnim.targetCol/Row se anim em curso (interrupt vai snap ali). */
-  var fromCol = p.col, fromRow = p.row;
-  if (S.ph === 'moving' && playerAnim) {
-    fromCol = playerAnim.targetCol;
-    fromRow = playerAnim.targetRow;
-  }
-  if (!isAdjacent(fromCol, fromRow, col, row)) {
-    LOGW('MOVE', 'isValidMove_blocked reason=not_adjacent from=(' + fromCol + ',' + fromRow + ') to=(' + col + ',' + row + ')');
-    return false;
-  }
-  if (isTileImpassable(col, row)) {
-    LOGW('MOVE', 'isValidMove_blocked reason=impassable col=' + col + ' row=' + row);
-    return false;
-  }
+  if (p.hp <= 0 || p.exh >= 6) return false;
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
+  if (!isAdjacent(p.col, p.row, col, row)) return false;
+  if (isTileImpassable(col, row)) return false;
   return true;
 }
 
@@ -9382,92 +9314,8 @@ function getMoveDurationFor(toCol, toRow, fromCol, fromRow) {
   return Math.round(base * paceMul);
 }
 
-/* X-6.5.38: timer global para anim atual — permite cancelar/interromper
-   quando user clica novamente durante movimento. */
-var _moveTimer = null;
-/* X-6.5.39: watchdog timestamp pra detectar S.ph travado em 'moving'. */
-var _movingPhStartedAt = 0;
-
-/* X-6.5.39 STATE WATCHDOG (moving): a cada 1s verifica se S.ph === 'moving'
-   por mais de 3s. Se sim, e bug — forca volta pra 'idle' pra desbloquear UI. */
-setInterval(function() {
-  if (S && S.ph === 'moving' && _movingPhStartedAt > 0) {
-    var elapsed = Date.now() - _movingPhStartedAt;
-    if (elapsed > 3000) {
-      LOGE('MOVE', 'STATE_WATCHDOG ph=moving stuck for ' + elapsed + 'ms — forcing idle + cleanup');
-      try {
-        if (_moveTimer) { clearTimeout(_moveTimer); _moveTimer = null; }
-        playerAnim = null;
-        S.ph = 'idle';
-        _movingPhStartedAt = 0;
-        if (typeof updateHexNav === 'function') updateHexNav();
-        if (typeof scheduleRender === 'function') scheduleRender();
-      } catch (e) { LOGE('MOVE', 'state_watchdog_recovery_err msg=' + (e && e.message)); }
-    }
-  } else if (S && S.ph !== 'moving') {
-    _movingPhStartedAt = 0;
-  }
-}, 1000);
-
-/* X-6.5.40 STATE WATCHDOG (event): se S.ph === 'event' por mais de 60s SEM
-   o modal #event-modal visivel no DOM, e bug (openEventModal crashou e
-   travou state). Forca volta pra 'idle'. Bug user 2026-04-24: forEach
-   crash em combat_forced events sem ev.choices deixava state preso. */
-var _eventPhStartedAt = 0;
-setInterval(function() {
-  if (S && S.ph === 'event') {
-    if (_eventPhStartedAt === 0) _eventPhStartedAt = Date.now();
-    var elapsed = Date.now() - _eventPhStartedAt;
-    if (elapsed > 60000) {
-      var modal = document.getElementById('event-modal');
-      var modalVisible = modal && modal.classList.contains('visible');
-      if (!modalVisible) {
-        LOGE('EVENT', 'STATE_WATCHDOG ph=event stuck for ' + elapsed + 'ms WITHOUT visible modal — forcing idle');
-        try {
-          S.ph = 'idle';
-          S.event = null;
-          _eventPhStartedAt = 0;
-          if (typeof updateHexNav === 'function') updateHexNav();
-          if (typeof scheduleRender === 'function') scheduleRender();
-        } catch (e) { LOGE('EVENT', 'state_watchdog_event_recovery_err msg=' + (e && e.message)); }
-      }
-    }
-  } else {
-    _eventPhStartedAt = 0;
-  }
-}, 5000);
-
 function beginMove(col, row) {
-  /* X-6.5.38: ANIMACAO INTERRUPTIVEL — se ja ha animacao em curso, completa
-     ela logicamente (onMoveEnd no target da anim cancelada) ANTES de iniciar
-     nova. Isso garante:
-       1. Server recebe cada move (onMoveEnd dispara API call)
-       2. p.col/p.row atualizam corretamente em sequencia
-       3. Visual: pequeno snap pro target da anim cancelada antes de continuar
-          (alternativa seria interpolar smooth, mais complexo) */
-  if (_moveTimer && playerAnim) {
-    var oldTargetCol = playerAnim.targetCol;
-    var oldTargetRow = playerAnim.targetRow;
-    LOG('MOVE', 'beginMove_interrupt cancelling_anim from=(' + S.player.col + ',' + S.player.row
-      + ') to_target=(' + oldTargetCol + ',' + oldTargetRow + ')');
-    clearTimeout(_moveTimer);
-    _moveTimer = null;
-    playerAnim = null;
-    /* Completa o move cancelado logicamente (dispara onMoveEnd → atualiza
-       p.col/p.row, fog, server API, walk text). */
-    try {
-      onMoveEnd(oldTargetCol, oldTargetRow);
-    } catch (e) {
-      LOGE('MOVE', 'beginMove_interrupt onMoveEnd_err msg=' + (e && e.message));
-    }
-  }
   const p = S.player;
-  /* Sanity check pos-interrupt: target precisa ser adjacente a posicao atual.
-     Sem isso, isValidMove ja teria filtrado, mas defensa extra contra bugs. */
-  if (!isAdjacent(p.col, p.row, col, row)) {
-    LOGW('MOVE', 'beginMove_skip not_adjacent_after_interrupt from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ')');
-    return;
-  }
   const from = hexToScreen(p.col, p.row);
   const to = hexToScreen(col, row);
   const dur = getMoveDurationFor(col, row, p.col, p.row);
@@ -9482,18 +9330,29 @@ function beginMove(col, row) {
   };
   p._prevFacing = p.facing;
   S.ph = 'moving';
-  _movingPhStartedAt = Date.now();  /* X-6.5.39: watchdog rastreia inicio */
+  // X-6.5.19: desabilita hex-dir buttons durante animação. Click fica
+  // fisicamente bloqueado pelo browser — zero chance de "trava" por race.
+  try { _setHexNavDisabled(true); } catch (_) {}
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
   requestAnimationFrame(() => { try { centerOnPlayer(true); } catch (_) {} });
-  _moveTimer = setTimeout(() => {
-    _moveTimer = null;
+  setTimeout(() => {
     const tc = playerAnim ? playerAnim.targetCol : col;
     const tr = playerAnim ? playerAnim.targetRow : row;
     playerAnim = null;
     onMoveEnd(tc, tr);
+    // Centraliza no destino final
     try { centerOnPlayer(true); } catch (_) {}
+    // X-6.5.20: reabilita buttons com BUFFER de 250ms após fim da animação.
+    // User reportou trava mesmo com disable — buffer extra absorve clicks
+    // rápidos residuais do browser. Reabilita só se ph voltou pra idle
+    // (evento pode ter mudado pra 'event' — fica bloqueado via updateHexNav).
+    setTimeout(() => {
+      try {
+        if (S.ph === 'idle') _setHexNavDisabled(false);
+      } catch (_) {}
+    }, 250);
   }, dur + 10);
 }
 
@@ -9507,8 +9366,6 @@ function shakeBlockedDir(btn) {
 function onMoveEnd(col, row) {
   const p = S.player;
   LOG('MOVE', 'onMoveEnd from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') steps=' + S.steps + ' tile=' + tileAt(col, row));
-  /* X-6.5.33: REMOVIDO snapshot/rollback. Cliente autoritativo — server é
-     fire-and-forget. Se server rejeitar, log warn mas NAO desfaz movimento. */
   p.col = col;
   p.row = row;
   S.steps += 1;
@@ -9614,46 +9471,28 @@ function onMoveEnd(col, row) {
       wandered = maybeRollWanderingMonster();
     }
   }
-  /* X-6.5.44 (2026-04-24): NAO sobrescrever S.ph='event' se modal remoto ja
-     esta aberto. Bug: response do segundo /move chega DEPOIS do primeiro abrir
-     modal → onMoveEnd resetava S.ph='idle' → segundo response ve 'idle' e
-     sobrescreve modal. Agora preserva 'event' se ja em event. */
-  if (S.ph !== 'event') {
-    S.ph = (rolled || wandered) ? 'event' : 'idle';
-  }
+  S.ph = (rolled || wandered) ? 'event' : 'idle';
 
   updateHud();
   updateHexNav();
   centerOnPlayer(true);
   scheduleRender();
 
-  // X-6.5.33: cliente autoritativo — server é fire-and-forget. Se server
-  // rejeitar (out_of_bounds/impassable/unknown_token), apenas LOG WARN.
-  // NAO desfaz movimento (user reportou que rollback travava o jogo).
-  // Server tolera: is_valid_move e permissivo (so rejeita out_of_bounds e
-  // impassable; jumps suspeitos sao logados mas aceitos).
+  // X-4.3: em REMOTE, sincroniza com motor server (fire-and-forget).
+  // Server pode: (a) retornar state atualizado (HP/MP/gold/visible),
+  // (b) retornar event rolado → abre modal com o event do servidor.
   if (_remoteAuthoritative) {
-    LOG('MOVE', 'remote_move_request col=' + col + ' row=' + row);
     window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
-        LOGW('API', 'remote_move err=' + (res && res.error)
-          + ' col=' + col + ' row=' + row + ' — client-authoritative, no rollback');
+        LOGW('API', 'remote_move err=' + (res && res.error));
         return;
       }
-      LOG('MOVE', 'remote_move_ok col=' + col + ' row=' + row
-        + ' has_state=' + !!res.state + ' has_event=' + !!res.event);
       // Sync state HP/MP/gold/xp + visible do servidor
       if (res.state) {
         try {
-          /* X-6.5.29: sync TODOS os campos numéricos (antes faltava
-             mhp/mmp/xp/exhaustion → HUD não refletia max stats nem exaus). */
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
-          if (typeof res.state.mhp === 'number') S.player.mhp = res.state.mhp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
-          if (typeof res.state.mmp === 'number') S.player.mmp = res.state.mmp;
           if (typeof res.state.gold === 'number') S.gold = res.state.gold;
-          if (typeof res.state.xp === 'number' && S.player.xp !== undefined) S.player.xp = res.state.xp;
-          if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
           if (Array.isArray(res.state.visited)) {
             for (var i = 0; i < res.state.visited.length; i++) {
               var pair = res.state.visited[i];
@@ -9665,34 +9504,15 @@ function onMoveEnd(col, row) {
           LOGE('API', 'state_sync err=' + (eS && eS.message));
         }
       }
-      // Event: server rolou → abre modal (sobrepõe local, que não rodou).
-      /* X-6.5.44 (2026-04-24): GUARD ROBUSTO contra sobrescrever evento ja
-         exibido. Bug user 23:22:29-33 (logs):
-           1. Move 7 → server rola orc_raid → response abre modal
-           2. Moves 8/9/10 ja em flight → server rola bandit_ambush no move 10
-           3. Response do move 10 chega → S.ph era 'event' (orc_raid aberto),
-              mas SE algum estado intermediario resetar S.ph→idle (ex:
-              onMoveEnd subsequente), o segundo openEventModal sobrescreve.
-         Fix: alem de S.ph !== 'event', checa se ja existe S.event remoto
-         pendente. Se sim, IGNORA novo event (fica logado pro debug). */
-      if (res.event) {
-        var hasOpenRemoteEvent = !!(S.event && S.event.__remote && !S.event.resolved);
-        var modalEl = document.getElementById('event-modal');
-        var modalVisible = modalEl && modalEl.classList.contains('visible');
-        if (hasOpenRemoteEvent || modalVisible || S.ph === 'event') {
-          LOGW('API', 'motor_event_discarded id=' + res.event.id
-            + ' reason=' + (hasOpenRemoteEvent ? 'open_remote_event' : (modalVisible ? 'modal_visible' : 'ph_event'))
-            + ' current_ev=' + (S.event ? S.event.id : 'null'));
-        } else {
-          LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
-          S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
-          S.ph = 'event';
-          try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
-        }
+      // Event: server rolou → abre modal (sobrepõe local, que não rodou)
+      if (res.event && S.ph !== 'event') {
+        LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
+        S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
+        S.ph = 'event';
+        try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
       }
     }).catch(function(e) {
-      /* X-6.5.33: network error — log warn, NAO desfaz movimento. */
-      LOGE('API', 'remote_move rejected msg=' + (e && e.message) + ' — client-authoritative, no rollback');
+      LOGE('API', 'remote_move rejected msg=' + (e && e.message));
     });
   }
 }
@@ -9782,13 +9602,13 @@ function updateHexNav() {
     if (isTileImpassable(c, r)) btn.classList.add('blocked');
     else btn.classList.remove('blocked');
   }
-  /* X-6.5.39 (2026-04-24): NUNCA disabilita os botoes. User reportou trava
-     persistente apos X-6.5.33/38. CSS .hex-dir:disabled tem pointer-events:
-     none que silencia clicks. Removendo o disabled fisico, click ALWAYS
-     dispara — isValidMove decide se aceita ou nao (bloqueia 'event' apenas).
-     Visual: botoes ficam sempre clicaveis; clicks invalidos disparam shake. */
+  // X-6.5.19: mantém disabled sync com S.ph. Chamado em vários paths
+  // (onMoveEnd, fechar modal, resolveChoice) → reabilita botões sempre
+  // que o estado volta pra 'idle'. Durante 'moving'/'event' permanece
+  // disabled (beginMove seta explicitamente; fim de evento → idle → aqui).
   try {
-    _setHexNavDisabled(false);
+    const shouldDisable = (S.ph !== 'idle');
+    _setHexNavDisabled(shouldDisable);
   } catch (_) {}
 }
 
@@ -9815,20 +9635,13 @@ function bindHexNav() {
     btn.addEventListener('click', () => {
       // Shake só para erros reais: direção bloqueada OU evento/transição aberto
       if (btn.classList.contains('blocked')) { shakeBlockedDir(btn); return; }
-      /* X-6.5.38: click durante 'moving' é PERMITIDO — beginMove faz
-         interrupt + completa anim antiga. Sem block "S.ph !== idle".
-         isValidMove ainda bloqueia 'event' modal aberto. */
-      // Pega vizinhos do TARGET da anim em curso (se houver), senao da pos atual
-      var fromCol = S.player.col, fromRow = S.player.row;
-      if (S.ph === 'moving' && playerAnim) {
-        fromCol = playerAnim.targetCol;
-        fromRow = playerAnim.targetRow;
-      }
-      const n = getNeighbors(fromCol, fromRow);
+      // X-6.5.19: durante moving, botão está disabled (sem click disparando).
+      // Este if é defense-in-depth se animação/estado falhar por algum motivo.
+      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }
+      const n = getNeighbors(S.player.col, S.player.row);
       const [c, r] = n[i];
       if (!isValidMove(c, r)) { shakeBlockedDir(btn); return; }
       S.player.facing = i;
-      LOG('MOVE', 'click_dispatch dir=' + i + ' from=(' + fromCol + ',' + fromRow + ') to=(' + c + ',' + r + ') ph=' + S.ph);
       beginMove(c, r);
     });
   }
@@ -10136,43 +9949,6 @@ function openEventModal() {
   const alignKey = S.player.alignment;
   const allies = S.allies || [];
 
-  /* X-6.5.40 (2026-04-24): combat_forced events NAO tem ev.choices — tem
-     ev.combat top-level direto. Antes (bug user 2026-04-24): forEach em
-     undefined throw → S.ph travado em 'event' → todos clicks bloqueados.
-     Logs revelaram: openModal err=Cannot read properties of undefined
-     (reading 'forEach') seguido de loop de isValidMove_blocked event_open. */
-  if (!Array.isArray(ev.choices) || ev.choices.length === 0) {
-    LOGW('EVENT', 'no_choices type=' + (ev.type || '?')
-      + ' has_combat=' + !!(ev.combat) + ' id=' + ev.id);
-    if (ev.type === 'combat_forced' || ev.combat) {
-      /* combat_forced: cria choice sintetica "Atacar" que dispara combate.
-         O event_choice no servidor vai resolver via outcome.combat. */
-      LOG('EVENT', 'auto_choice_for_combat_forced id=' + ev.id);
-      const btn = document.createElement('button');
-      btn.className = 'event-choice combat-forced-btn';
-      btn.style.cssText = 'background: linear-gradient(180deg, rgba(170,68,68,0.3), rgba(110,40,40,0.4)); border-color: rgba(196,68,68,0.6);';
-      const lbl = document.createElement('span');
-      lbl.className = 'choice-label';
-      lbl.textContent = '⚔️ Lutar';
-      btn.appendChild(lbl);
-      btn.onclick = function() {
-        LOG('EVENT', 'combat_forced_choice_clicked id=' + ev.id);
-        applyChoiceLogic(0);  // server tem combat top-level — qualquer idx OK
-      };
-      choicesEl.appendChild(btn);
-    } else {
-      /* Evento sem choices E sem combat — bug, fecha modal pra desbloquear. */
-      LOGE('EVENT', 'malformed_event_no_choices_no_combat id=' + ev.id + ' — closing modal to unblock');
-      try {
-        if (typeof closeEventModal === 'function') closeEventModal();
-        if (S.ph === 'event') S.ph = 'idle';
-        if (typeof updateHexNav === 'function') updateHexNav();
-      } catch (e) { LOGE('EVENT', 'force_close_err msg=' + (e && e.message)); }
-    }
-    /* Mostra modal com texto/title (sem choices regulares) */
-    return;
-  }
-
   ev.choices.forEach((ch, idx) => {
     // V2.6: filtro unificado — classe, background, alignment, ally-class
     if (!classCanTakeChoice(ch, clsKey, bgKey, alignKey, allies)) return;
@@ -10328,16 +10104,9 @@ function resolveChoice(idx) {
       var oc = res.outcome || {};
       if (res.state) {
         try {
-          /* X-6.5.29: sync TODOS os campos numéricos pra HUD em tempo real
-             (antes faltava mhp/mmp/xp/exhaustion → bar não atualizava em
-             eventos que mexem em recursos compostos). */
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
-          if (typeof res.state.mhp === 'number') S.player.mhp = res.state.mhp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
-          if (typeof res.state.mmp === 'number') S.player.mmp = res.state.mmp;
           if (typeof res.state.gold === 'number') S.gold = res.state.gold;
-          if (typeof res.state.xp === 'number' && S.player.xp !== undefined) S.player.xp = res.state.xp;
-          if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
           updateHud();
         } catch (eS) { LOGE('API', 'state_sync err=' + (eS && eS.message)); }
       }
@@ -10365,310 +10134,83 @@ function resolveChoice(idx) {
 }
 
 // X-4.5: helper — anima dice 3D com valor do servidor, depois resolve outcome.
-// X-6.5.36: entry log + advance() trigger source pra mapear cada rolagem.
 function _remoteRenderDiceAndResolve(ch, oc) {
-  /* Entry log: rastreia cada rolagem que entra no overlay remoto. */
-  LOG('DICE', 'remote_render_entry event=' + (S.event && S.event.id || '?')
-    + ' skill=' + (ch && ch.skill || '?')
-    + ' dc=' + (oc && oc.check && oc.check.dc || '?')
-    + ' d20=' + (oc && oc.check && oc.check.d20 || '?')
-    + ' total=' + (oc && oc.check && oc.check.total || '?')
-    + ' success=' + (oc && oc.check && oc.check.success));
   var overlay = document.getElementById('dice-overlay');
   var wrap = document.getElementById('dice-canvas-wrap');
   var formula = document.getElementById('dice-formula');
   var result = document.getElementById('dice-result');
   var skipBtn = document.getElementById('dice-skip-btn');
-  if (!overlay || !skipBtn || !formula || !result || !wrap) {
-    LOGE('DICE', 'remote DOM_MISSING overlay=' + !!overlay + ' skip=' + !!skipBtn);
-    return;
-  }
-  /* X-6.5.35 REFACTOR: reset COMPLETO via cssText='' — limpa TODOS inline
-     styles incluindo !important residuais que poderiam estar bloqueando a
-     visibilidade do botao em runs subsequentes. */
   clearChildren(wrap); clearChildren(formula); clearChildren(result);
   result.className = '';
-  result.style.cssText = '';
-  skipBtn.classList.remove('v-skip-btn--shown');
-  skipBtn.style.cssText = '';
+  result.style.display = 'none';
+  skipBtn.style.display = 'none';
   overlay.classList.add('visible');
   var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
   var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
   var advanced = false;
-  var safetyTimer = null;
-  var watchdogTimer = null;
-  function advance(source) {
+  function advance() {
     if (advanced) return;
     advanced = true;
-    /* X-6.5.36: log origem do advance — diagnostico futuro. Possíveis fontes:
-       'user_skip_btn' (clicou Continuar), 'user_result_click' (clicou
-       resultado), 'auto_watchdog' (botão invisível, fallback), ou undefined
-       (chamado manualmente). */
-    LOG('DICE', 'advance source=' + (source || 'unknown')
-      + ' had_safety=' + !!safetyTimer + ' had_watchdog=' + !!watchdogTimer);
-    if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
-    if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; }
     overlay.classList.remove('visible');
     setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
   }
-  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance('user_skip_btn'); };
-  result.onclick = function() { advance('user_result_click'); };
+  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance(); };
+  result.onclick = advance;
   var shown = false;
   function showResult() {
     if (shown) return; shown = true;
-    LOG('DICE', 'remote showResult d20=' + d20 + ' total=' + total + ' dc=' + dc + ' success=' + success);
     var modStr = (mod >= 0 ? '+' : '') + mod;
     formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
     var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
     formula.appendChild(document.createTextNode(' vs CD ' + dc));
     result.className = success ? 'success' : 'failure';
     result.textContent = success ? 'SUCESSO' : 'FALHA';
-    /* X-6.5.35: setAttribute('style', ...) atomica + classe CSS dedicada
-       (.v-skip-btn--shown com !important no display) — dupla garantia. */
-    result.setAttribute('style', 'display: inline-block !important;');
-    skipBtn.textContent = 'Continuar ❯❯';
-    skipBtn.classList.add('v-skip-btn--shown');
-    /* X-6.5.35 WATCHDOG: 500ms apos showResult, verifica se o botao esta
-       REALMENTE visivel (offsetHeight > 0). Se nao, fallback inline e se
-       AINDA nao, auto-advance pra nao deixar usuario travado. */
-    watchdogTimer = setTimeout(function() {
-      try {
-        if (!skipBtn.offsetHeight) {
-          LOGW('DICE', 'WATCHDOG btn invisible after class — applying setAttribute fallback');
-          skipBtn.setAttribute('style',
-            'display: inline-block !important; visibility: visible !important; ' +
-            'opacity: 1 !important; pointer-events: auto !important; position: relative; z-index: 999;');
-          setTimeout(function() {
-            if (!skipBtn.offsetHeight) {
-              LOGE('DICE', 'WATCHDOG FAILED — btn still invisible after fallback. Auto-advance in 2s.');
-              setTimeout(function() { advance('auto_watchdog_failed'); }, 2000);
-            } else {
-              LOG('DICE', 'WATCHDOG fallback OK h=' + skipBtn.offsetHeight);
-            }
-          }, 200);
-        } else {
-          LOG('DICE', 'WATCHDOG btn visible OK h=' + skipBtn.offsetHeight);
-        }
-      } catch (eW) { LOGE('DICE', 'watchdog err=' + (eW && eW.message)); }
-    }, 500);
+    result.style.display = 'inline-block';
+    skipBtn.textContent = 'Continuar \u276f\u276f';
+    skipBtn.style.setProperty('display', 'inline-block', 'important');
+    skipBtn.style.setProperty('visibility', 'visible', 'important');
   }
-  /* SAFETY TIMER: forca showResult se Dice3D callback nunca disparar */
-  safetyTimer = setTimeout(function() {
-    LOGW('DICE', 'remote safety timeout fired - Dice3D callback never fired?');
-    showResult();
-  }, 3500);
-  var wrappedShow = function() {
-    if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
-    showResult();
-  };
   if (window.Dice3D) {
     try {
       var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
-      dice.roll(d20, wrappedShow);
+      dice.roll(d20, showResult);
       return;
-    } catch (e) { LOGE('DICE', 'remote Dice3D failed: ' + (e && e.message)); }
-  } else {
-    LOGW('DICE', 'remote: window.Dice3D not loaded');
+    } catch (e) { /* fall through */ }
   }
-  setTimeout(wrappedShow, 900);
+  setTimeout(showResult, 900);
 }
 
 // X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
-// X-6.5.47 (2026-04-25) FIX BUG 5x REPORTADO PELO USER: em REMOTE mode,
-// _remoteShowOutcome NAO mostrava o botao #event-continue após o dado
-// fechar. User ficava preso na tela de outcome sem opção de avançar
-// (logs 00:29:51 → 00:30:08: 17s sem nenhum log de close — user tentou
-// clicar em vários lugares e desistiu).
-//
-// applyChoiceOutcome (LOCAL flow) tem `continueEl.classList.remove('hidden')`
-// na linha 10774. _remoteShowOutcome NÃO TINHA. Bug existia desde X-4.5.
-//
-// Logs novos pra diagnostico futuro:
-//   - remote_outcome_entry tier=X has_combat=Y reward=Z
-//   - remote_outcome_continue_shown event=X tier=Y
-//   - remote_outcome_continue_clicked event=X (user fechou modal)
-//   - remote_outcome_combat_redirect_pending (esperando navigate)
 function _remoteShowOutcome(ch, oc) {
-  LOG('EVENT', 'remote_outcome_entry event=' + (S.event && S.event.id || '?')
-    + ' tier=' + (oc.tier || 'success')
-    + ' has_combat=' + !!oc.combat_trigger
-    + ' reward=' + ((oc.delta && oc.delta.gold) ? oc.delta.gold : '0'));
   S.event.resolved = {
     tier: oc.tier || 'success',
     text: oc.text || '',
     reward: (oc.delta && oc.delta.gold) ? ('+' + oc.delta.gold + ' Valdoritas') : null
   };
-  /* X-6.5.47: BUG GROTESCO descoberto na 5a investigação dos logs:
-     codigo antigo escrevia em #event-resolved (que NAO EXISTE no DOM —
-     apenas #event-outcome existe). User nao via nem o resultado nem
-     o botao Continuar — modal ficava 100% em branco apos dado fechar.
-     Fix: replicar render de applyChoiceOutcome (header + paragrafo +
-     consequencias) no #event-outcome real. */
   try {
-    var outcomeEl = document.getElementById('event-outcome');
-    if (!outcomeEl) {
-      LOGE('EVENT', 'remote_outcome_DOM_BUG event-outcome not found');
-    } else {
-      outcomeEl.classList.remove('hidden');
-      outcomeEl.className = 'event-outcome ' + (oc.tier || 'success');
-      clearChildren(outcomeEl);
-
-      var hdr = document.createElement('div');
-      hdr.className = 'outcome-header';
-      var tier = oc.tier || 'success';
-      hdr.textContent = tier === 'success' ? '✦ Sucesso'
-                      : tier === 'partial' ? '○ Sucesso Parcial'
-                      : '✗ Falha';
-      outcomeEl.appendChild(hdr);
-
-      var narr = document.createElement('p');
-      narr.style.margin = '6px 0 0 0';
-      narr.textContent = oc.text || '';
-      outcomeEl.appendChild(narr);
-
-      /* Consequências derivadas do delta (server enviou hp/mp/gold/xp). */
-      var consItems = [];
-      if (oc.delta) {
-        if (oc.delta.gold > 0) consItems.push({ kind: 'reward', ico: '✦', text: '+' + oc.delta.gold + ' Valdoritas' });
-        else if (oc.delta.gold < 0) consItems.push({ kind: 'penalty', ico: '✦', text: oc.delta.gold + ' Valdoritas' });
-        if (oc.delta.hp > 0) consItems.push({ kind: 'reward', ico: '♥', text: '+' + oc.delta.hp + ' HP' });
-        else if (oc.delta.hp < 0) consItems.push({ kind: 'penalty', ico: '♥', text: oc.delta.hp + ' HP' });
-        if (oc.delta.mp < 0) consItems.push({ kind: 'penalty', ico: '◆', text: oc.delta.mp + ' MP' });
-        if (oc.delta.xp > 0) consItems.push({ kind: 'reward', ico: '✦', text: '+' + oc.delta.xp + ' XP' });
-      }
-      if (consItems.length) {
-        var cons = document.createElement('div');
-        cons.className = 'outcome-consequences';
-        var lbl = document.createElement('div');
-        lbl.className = 'outcome-consequences-label';
-        lbl.textContent = 'Consequências';
-        cons.appendChild(lbl);
-        for (var ci = 0; ci < consItems.length; ci++) {
-          var item = document.createElement('div');
-          item.className = 'consequence-item ' + consItems[ci].kind;
-          var ico = document.createElement('span');
-          ico.className = 'c-ico'; ico.textContent = consItems[ci].ico;
-          item.appendChild(ico);
-          var ctxt = document.createElement('span');
-          ctxt.className = 'c-text'; ctxt.textContent = consItems[ci].text;
-          item.appendChild(ctxt);
-          cons.appendChild(item);
-        }
-        outcomeEl.appendChild(cons);
-      }
-      LOG('EVENT', 'remote_outcome_rendered tier=' + tier
-        + ' consequences=' + consItems.length
-        + ' hp_delta=' + ((oc.delta && oc.delta.hp) || 0)
-        + ' gold_delta=' + ((oc.delta && oc.delta.gold) || 0));
+    var resolvedEl = document.getElementById('event-resolved');
+    if (resolvedEl) {
+      clearChildren(resolvedEl);
+      var txt = document.createElement('div');
+      txt.className = 'resolved-text ' + (S.event.resolved.tier || 'success');
+      txt.textContent = S.event.resolved.text;
+      resolvedEl.appendChild(txt);
+      resolvedEl.style.display = 'block';
     }
     var confirmEl = document.getElementById('confirm-overlay');
     if (confirmEl) confirmEl.classList.remove('visible');
-  } catch (eRO) {
-    LOGE('EVENT', 'remote_outcome_render_err=' + (eRO && eRO.message));
-  }
+  } catch (_) {}
   updateHud();
-
-  /* X-6.5.47: ESCONDE choices/labels (já não são clicáveis) e mostra
-     botão Continuar pro user fechar a modal. Mesma lógica da
-     applyChoiceOutcome, agora replicada pro REMOTE path. */
-  try {
-    var choicesEl = document.getElementById('event-choices');
-    var choicesLbl = document.getElementById('event-choices-label');
-    var flavorEl = document.getElementById('event-flavor');
-    if (choicesEl) choicesEl.style.display = 'none';
-    if (choicesLbl) choicesLbl.style.display = 'none';
-    if (flavorEl) flavorEl.style.display = 'none';
-    /* Disable choice buttons (já estavam clicáveis antes do dado) */
-    var choiceBtns = document.querySelectorAll('.event-choice');
-    for (var ci = 0; ci < choiceBtns.length; ci++) {
-      choiceBtns[ci].disabled = true;
-      choiceBtns[ci].style.opacity = '0.4';
-      choiceBtns[ci].style.pointerEvents = 'none';
-    }
-  } catch (eU) { LOGW('EVENT', 'remote_outcome_ui_cleanup_err=' + (eU && eU.message)); }
-
   // Combat redirect (X-3.5): se server disparou combate, navega após leitura.
-  // X-6.5.37: logs detalhados do bridge response pra diagnosticar
-  // bugs lobo->mimico e player ausente.
   if (oc.combat_trigger) {
-    LOG('COMBAT_BRIDGE', 'redirect_received enemy=' + oc.combat_trigger.enemy_id
-      + ' has_url=' + !!(oc._combat_redirect && oc._combat_redirect.redirect_url)
-      + ' combat_token=' + (oc._combat_redirect && oc._combat_redirect.combat_token
-                             ? oc._combat_redirect.combat_token.slice(0, 8) + '...'
-                             : 'none'));
+    LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
     setTimeout(function() {
       try {
         var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
           || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
-        LOG('COMBAT_BRIDGE', 'about_to_navigate url_len=' + redir.length
-          + ' has_token=' + (redir.indexOf('token=') > -1)
-          + ' has_api=' + (redir.indexOf('api=') > -1)
-          + ' has_origin=' + (redir.indexOf('origin=') > -1)
-          + ' url_preview=' + redir.slice(0, 80));
-        /* X-6.5.42: FORCE FLUSH dos logs ANTES da navegacao. window.location.href
-           muda a pagina IMEDIATAMENTE, JS context destruido, log buffer perdido.
-           Sem isso, logs do bridge nunca chegam ao bot.log → impossivel
-           diagnosticar "Falha ao carregar combate" reportada pelo user.
-           keepalive:true em sendBeacon equivalente pra sobreviver navegacao. */
-        try {
-          if (typeof _flushLogBuffer === 'function') _flushLogBuffer();
-          /* Forca flush sincrono via sendBeacon (sobrevive unload) */
-          if (typeof _LOG_BUFFER !== 'undefined' && _LOG_BUFFER.length > 0
-              && typeof window.__EXPLORE_API_BASE === 'string'
-              && window.__EXPLORE_API_BASE
-              && navigator.sendBeacon) {
-            var payload = JSON.stringify({
-              entries: _LOG_BUFFER.slice(-50).map(function(line) {
-                return { level: 'log', msg: line };
-              }),
-              uid: window.__EXPLORE_USER_ID || 0,
-            });
-            navigator.sendBeacon(
-              window.__EXPLORE_API_BASE + '/api/game/log',
-              new Blob([payload], { type: 'application/json' })
-            );
-          }
-        } catch (eF) { /* silent */ }
-        window.__valdoria_transitioning = true;
         window.location.href = redir;
-      } catch (e) {
-        LOGE('COMBAT_BRIDGE', 'navigate_err msg=' + (e && e.message));
-      }
-    }, 1200);  /* X-6.5.42: era 2000, reduzido pra responder mais rapido */
-    LOG('EVENT', 'remote_outcome_combat_redirect_pending delay_ms=1200');
-  } else {
-    LOG('COMBAT_BRIDGE', 'no_combat_trigger event_id=' + (S.event && S.event.id));
-    /* X-6.5.47: SEM combat — mostra botão Continuar pro user fechar a modal.
-       Esse era o BUG reportado 5x: tela de outcome ficava sem opção de
-       avançar em REMOTE mode. */
-    try {
-      var continueEl = document.getElementById('event-continue');
-      if (!continueEl) {
-        LOGE('EVENT', 'remote_outcome_continue_btn_missing — DOM bug');
-        return;
-      }
-      continueEl.classList.remove('hidden');
-      LOG('EVENT', 'remote_outcome_continue_shown event=' + (S.event && S.event.id || '?')
-        + ' tier=' + (oc.tier || 'success'));
-      var advanced = false;
-      continueEl.onclick = function() {
-        if (advanced) return;
-        advanced = true;
-        LOG('EVENT', 'remote_outcome_continue_clicked event=' + (S.event && S.event.id || '?'));
-        if (typeof closeEventModal === 'function') closeEventModal();
-      };
-      /* Defeat fallback: se HP=0, fecha modal automaticamente após 2.5s
-         (matches LOCAL applyChoiceOutcome behavior). */
-      if (S.player && S.player.hp <= 0) {
-        LOG('EVENT', 'remote_outcome_player_defeated — auto closing in 2.5s');
-        setTimeout(function() {
-          if (typeof closeEventModal === 'function') closeEventModal();
-          if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu.');
-        }, 2500);
-      }
-    } catch (eC) {
-      LOGE('EVENT', 'remote_outcome_continue_err=' + (eC && eC.message));
-    }
+      } catch (_) {}
+    }, 2000);
   }
 }
 
@@ -12613,113 +12155,17 @@ function closeDetailPopup() {
 }
 
 // ---- SOUND / MUSIC --------------------------------------------------
-// X-6.5.32 (2026-04-24): mapDef.music override + audio unlock.
-// Tracks válidos no audio-manager: tavern, city, forest, combat, desert, dungeon,
-// swamp, mountain, snow, victory, defeat, levelup, prologue, boss, inn_rest,
-// festival, combat_ambush, stealth, death, character_creation, guild_hall,
-// ancient_ruins, market, mystery, sacred, ocean, intro.
-var _VALID_MUSIC_TRACKS = ['tavern','city','forest','combat','desert','dungeon',
-  'swamp','mountain','snow','prologue','boss','inn_rest','festival',
-  'combat_ambush','stealth','character_creation','guild_hall',
-  'ancient_ruins','market','mystery','sacred','ocean'];
-
 function applyBiomeMusic() {
   try {
-    if (!window.ValdoriaAudio) {
-      LOGW('AUDIO', 'apply_skipped reason=valdoria_audio_not_loaded map=' + (S && S.mapId));
-      return;
-    }
-    if (!S.soundOn) {
-      LOG('AUDIO', 'apply_stop reason=sound_off map=' + S.mapId);
-      if (typeof ValdoriaAudio.stop === 'function') ValdoriaAudio.stop();
-      return;
-    }
-    /* X-6.5.32: per-map override via mapDef.music. Se for um track válido,
-       toca direto; senão (ex: 'plains' que não é track), fallback pra biome. */
-    var mapMusic = S.mapDef && S.mapDef.music;
-    if (mapMusic && _VALID_MUSIC_TRACKS.indexOf(mapMusic) >= 0) {
-      LOG('AUDIO', 'play track=' + mapMusic + ' source=mapDef.music_override map=' + S.mapId);
-      ValdoriaAudio.play(mapMusic);
-    } else if (typeof ValdoriaAudio.playBiome === 'function') {
-      LOG('AUDIO', 'playBiome biome=' + S.biome + ' map=' + S.mapId
-        + ' mapDef.music=' + (mapMusic || 'unset')
-        + ' reason=' + (mapMusic ? 'invalid_track_fallback' : 'no_override'));
-      ValdoriaAudio.playBiome(S.biome);
-    } else {
-      LOGE('AUDIO', 'apply_failed reason=playBiome_unavailable mapMusic=' + mapMusic);
-    }
-  } catch (e) {
-    console.warn('[EXPLORACAO] audio failed:', e);
-    LOGE('AUDIO', 'apply_exception err=' + (e && e.message));
-  }
-}
-
-/* X-6.5.34 (2026-04-24): audio bootstrap ROBUSTO. Causa root da musica
-   silenciada: audio-manager.js carrega async (script tag inserido em runtime
-   linha 2756). Quando boot() chamava applyBiomeMusic, ValdoriaAudio podia
-   ainda nao estar definido → if(!window.ValdoriaAudio) return → silencio.
-   Plus Telegram WebView bloqueia autoplay ate primeira interacao.
-
-   Solucao em 2 camadas:
-   1. Polling: aguarda ate 5s ValdoriaAudio aparecer (load script async)
-   2. Unlock listener: bind apos audio-manager carregar, garante play apos
-      primeira interacao do user. */
-var _audioBootstrapDone = false;
-var _audioBootstrapAttempts = 0;
-
-function _audioBootstrap() {
-  if (_audioBootstrapDone) return;
-  _audioBootstrapAttempts++;
-  if (!window.ValdoriaAudio) {
-    if (_audioBootstrapAttempts < 50) {
-      /* Retry every 100ms ate 5s — aguarda audio-manager.js async load.
-         X-6.5.36: log apenas no 1º + ultimos 5 attempts pra evitar spam mas
-         dar visibilidade do polling. */
-      if (_audioBootstrapAttempts === 1) {
-        LOG('AUDIO', 'bootstrap_polling_started waiting=ValdoriaAudio');
-      } else if (_audioBootstrapAttempts >= 45) {
-        LOGW('AUDIO', 'bootstrap_polling_late attempt=' + _audioBootstrapAttempts
-          + '/50 elapsed_ms=' + (_audioBootstrapAttempts * 100));
+    if (window.ValdoriaAudio && S.soundOn) {
+      if (typeof ValdoriaAudio.playBiome === 'function') {
+        ValdoriaAudio.playBiome(S.biome);
       }
-      setTimeout(_audioBootstrap, 100);
-    } else {
-      console.warn('[EXPLORACAO][AUDIO] ValdoriaAudio nao carregou em 5s — desistindo');
-      LOGE('AUDIO', 'bootstrap_timeout audio-manager.js never loaded after_ms=5000');
+    } else if (window.ValdoriaAudio && !S.soundOn) {
+      if (typeof ValdoriaAudio.stop === 'function') ValdoriaAudio.stop();
     }
-    return;
-  }
-  _audioBootstrapDone = true;
-  console.info('[EXPLORACAO][AUDIO] ValdoriaAudio loaded after ' + (_audioBootstrapAttempts * 100) + 'ms');
-  LOG('AUDIO', 'bootstrap_ready after_ms=' + (_audioBootstrapAttempts * 100)
-    + ' attempts=' + _audioBootstrapAttempts);
-  /* 1. Aplica music inicial (pode falhar silencioso se autoplay bloqueado) */
-  applyBiomeMusic();
-  /* 2. Bind unlock listener pra primeira interacao destravar autoplay */
-  var unlocked = false;
-  function unlock() {
-    if (unlocked) return;
-    unlocked = true;
-    document.removeEventListener('click', unlock, true);
-    document.removeEventListener('touchstart', unlock, true);
-    document.removeEventListener('pointerdown', unlock, true);
-    try {
-      if (typeof ValdoriaAudio.forceUnlock === 'function') ValdoriaAudio.forceUnlock();
-      if (typeof ValdoriaAudio._warmUp === 'function') ValdoriaAudio._warmUp();
-    } catch (e) { console.warn('[EXPLORACAO][AUDIO] unlock err:', e); }
-    /* Re-aplica music apos unlock — mesmo que ja tenha tocado, garante o
-       track correto pro mapa atual (mapDef.music override). */
-    applyBiomeMusic();
-    console.info('[EXPLORACAO][AUDIO] unlocked on user interaction — music reapplied');
-    LOG('AUDIO', 'unlocked_on_interaction music_reapplied');
-  }
-  document.addEventListener('click', unlock, { capture: true });
-  document.addEventListener('touchstart', unlock, { capture: true });
-  document.addEventListener('pointerdown', unlock, { capture: true });
-  console.info('[EXPLORACAO][AUDIO] unlock listeners bound');
+  } catch (e) { console.warn('[EXPLORACAO] audio failed:', e); }
 }
-
-/* Compat: nome antigo */
-function _bindAudioUnlock() { _audioBootstrap(); }
 
 // ============================================================================
 // HUD
@@ -13003,18 +12449,26 @@ function bindQuickActions() {
   if (_cbl) _cbl.addEventListener('click', doLongRest);
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
 
-  // X-6.5.31 (2026-04-24): mochila via TRANSITION canonical.
-  // Antes (X-6.5.20): cliente construía URL /inventory/?token=X&api=Y diretamente.
-  // BUG: o token enviado tinha scope 'explore' (motor exploracao), mas o endpoint
-  // /api/inventory/payload exige scope 'combat'. validate_session retornava None
-  // → 401 → cliente mostrava tela vazia.
-  // Agora: POST /api/webapp/transition com {from:'exploracao', to:'inventory'}
-  // → server valida sessão, cria token combat-scope, pre-stage payload, retorna
-  // URL completa. Cliente apenas navega.
-  document.getElementById('btn-inventory').addEventListener('click', async function() {
-    LOG('INV', 'btn_clicked mode=' + (window.__EXPLORE_MODE || 'unknown') + ' map=' + (S && S.mapId));
-    if (window.__EXPLORE_MODE !== 'remote') {
-      LOGW('INV', 'local_mode_blocked — bot DEV requerido');
+  // X-6.5.20: mochila abre a TELA REAL /inventory/ (webapp SPA já existente
+  // com 7 arquivos JS completos em valdoria-webapp/inventory/). User pediu:
+  // "já existe um sistema de inventário completo, implemente ele como popup
+  // ao apertar o botão da mochila". REMOTE: navega mantendo return=exploracao;
+  // LOCAL (file://): toast informando que precisa do jogo real.
+  document.getElementById('btn-inventory').addEventListener('click', function() {
+    if (window.__EXPLORE_MODE === 'remote') {
+      // Preserva contexto de retorno via 'return' param. /inventory/ sabe
+      // voltar pra /exploracao/ quando fechar.
+      var params = new URLSearchParams();
+      if (window.__EXPLORE_TOKEN) params.set('token', window.__EXPLORE_TOKEN);
+      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
+      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
+      params.set('return', 'exploracao');
+      if (S && S.mapId) params.set('return_map', S.mapId);
+      params.set('_cb', String(Date.now()));
+      window.__valdoria_transitioning = true;
+      window.location.href = '/inventory/?' + params.toString();
+    } else {
+      // LOCAL (file://): sistema real requer bot DEV. Mostra narração.
       if (typeof dmNarrate === 'function') {
         dmNarrate({
           text: '📦 A mochila está no acampamento principal. (Disponível no jogo real via Telegram.)',
@@ -13023,58 +12477,6 @@ function bindQuickActions() {
       } else {
         console.info('[INVENTORY] LOCAL mode — use bot DEV para acessar inventário real');
       }
-      return;
-    }
-    var apiBase = window.__EXPLORE_API_BASE;
-    var token = window.__EXPLORE_TOKEN;
-    var uid = window.__EXPLORE_USER_ID;
-    if (!apiBase || !token || !uid) {
-      LOGE('INV', 'transition_skipped missing apiBase=' + !!apiBase + ' token=' + !!token + ' uid=' + !!uid);
-      if (typeof vToast === 'function') vToast('Sessão inválida — recarregue', 'err', 3000);
-      return;
-    }
-    LOG('INV', 'transition_request_started uid=' + uid + ' apiBase=' + apiBase.slice(0, 30));
-    if (typeof vProcessing !== 'undefined') vProcessing.show({ text: 'Abrindo mochila...' });
-    try {
-      var headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-        'X-Idempotency-Key': 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2),
-      };
-      if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) {
-        headers['X-Telegram-Init-Data'] = Telegram.WebApp.initData;
-      }
-      var resp = await fetch(apiBase + '/api/webapp/transition', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          from: 'exploracao',
-          to: 'inventory',
-          user_id: uid,
-          payload: { map_data: window.__EXPLORE_SNAP_B64 || '' }
-        }),
-      });
-      if (!resp.ok) {
-        var errBody = await resp.json().catch(function() { return {}; });
-        LOGE('INV', 'transition_http_err status=' + resp.status + ' err=' + (errBody && errBody.error));
-        if (typeof vProcessing !== 'undefined') vProcessing.hide();
-        if (typeof vToast === 'function') vToast('Erro ao abrir mochila: ' + (errBody.error || resp.status), 'err', 3500);
-        return;
-      }
-      var data = await resp.json();
-      if (data && data.url) {
-        LOG('INV', 'transition_ok navigating');
-        window.__valdoria_transitioning = true;
-        window.location.href = data.url;
-      } else {
-        LOGE('INV', 'transition_no_url response=' + JSON.stringify(data).slice(0, 120));
-        if (typeof vProcessing !== 'undefined') vProcessing.hide();
-        if (typeof vToast === 'function') vToast('Resposta inválida do servidor', 'err', 3000);
-      }
-    } catch (e) {
-      LOGE('INV', 'transition_fetch_err msg=' + (e && e.message));
-      if (typeof vProcessing !== 'undefined') vProcessing.hide();
-      if (typeof vToast === 'function') vToast('Erro de rede: ' + (e && e.message), 'err', 3500);
     }
   });
 
@@ -13360,50 +12762,6 @@ function boot() {
       } catch (eInit) {
         LOGE('API', 'motor_init sync err=' + (eInit && eInit.message));
       }
-
-      /* X-6.5.29: re-fetch state quando jogador volta pra explore vindo
-         de combate ou outro webapp. visibilitychange dispara quando aba
-         ganha foco (combat finalizou, transição voltou pro explore).
-         Combat aplica deltas de HP/MP/recursos no servidor; sem essa
-         sync o cliente fica defasado até próximo /move. */
-      var _stateRefreshPending = false;
-      function _refreshExploreState(reason) {
-        if (_stateRefreshPending) return;
-        if (!window.ExploracaoAPI || !window.ExploracaoAPI.state) return;
-        if (!window.ExploracaoAPI.hasToken || !window.ExploracaoAPI.hasToken()) return;
-        _stateRefreshPending = true;
-        LOG('API', 'state_refresh trigger=' + reason);
-        window.ExploracaoAPI.state().then(function(res) {
-          _stateRefreshPending = false;
-          if (!res || res.error || !res.state) {
-            LOGW('API', 'state_refresh skip err=' + (res && res.error));
-            return;
-          }
-          var st = res.state;
-          try {
-            if (typeof st.hp === 'number') S.player.hp = st.hp;
-            if (typeof st.mhp === 'number') S.player.mhp = st.mhp;
-            if (typeof st.mp === 'number') S.player.mp = st.mp;
-            if (typeof st.mmp === 'number') S.player.mmp = st.mmp;
-            if (typeof st.gold === 'number') S.gold = st.gold;
-            if (typeof st.xp === 'number' && S.player.xp !== undefined) S.player.xp = st.xp;
-            if (typeof st.exhaustion === 'number') S.player.exh = st.exhaustion;
-            updateHud();
-            LOG('API', 'state_refresh ok hp=' + S.player.hp + '/' + S.player.mhp
-              + ' mp=' + S.player.mp + '/' + S.player.mmp + ' gold=' + S.gold + ' exh=' + S.player.exh);
-          } catch (eR) { LOGE('API', 'state_refresh apply err=' + (eR && eR.message)); }
-        }).catch(function(e) {
-          _stateRefreshPending = false;
-          LOGE('API', 'state_refresh fetch err=' + (e && e.message));
-        });
-      }
-      document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') _refreshExploreState('visibilitychange');
-      });
-      window.addEventListener('pageshow', function(e) {
-        if (e.persisted) _refreshExploreState('pageshow_persisted');
-      });
-      window.__exploracaoRefreshState = _refreshExploreState;  /* exposto pra debug + chamadas externas */
     }
 
     recentEventIds = [];
@@ -13427,9 +12785,6 @@ function boot() {
     revealFogAt(S.player.col, S.player.row, getVisionRange());
     LOG('BOOT', 'fog revealed around player vision=' + getVisionRange());
     applyBiomeMusic();
-    /* X-6.5.32: bind audio unlock — Telegram bloqueia autoplay até user
-       interagir; sem isso music silenciado mesmo com play() chamado. */
-    _bindAudioUnlock();
 
     S.dm_log = [];
     ['Você pisa em solo florestal. O caminho à frente é incerto, mas seus passos são firmes.',
