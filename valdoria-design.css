@@ -305,10 +305,20 @@
     font-size: max(16px, var(--v-font-body));
   }
   html {
-    /* Viewport lock — widest phone: iPhone 15 Pro Max (430px), tallest: 932px */
-    max-width: min(100vw, 430px);
+    /* X-6.5.51 (2026-04-25): VIEWPORT OFICIAL TELEGRAM DESKTOP 384×694px.
+       Tamanho exato da janela popup Mini App no Telegram Desktop:
+         File: tdesktop/Telegram/SourceFiles/payments/ui/payments.style
+         Const: botWebViewPanelSize: size(384px, 694px);
+       Webview real ~384×644 (descontando ~50px do header Telegram).
+
+       ANTES (legacy): 430×932 (iPhone 15 Pro Max). Causava browser-preview
+       maior que o popup real do Telegram → bugs visuais detectados só no
+       deploy. Trade-off: iPhone Pro Max nativo (430px wide) agora vai ter
+       ~23px de bordas escuras (10% dos users mobile), mas garante UX
+       consistente com Telegram Desktop (menor caso real). */
+    max-width: min(100vw, 384px);
     height: 100vh;
-    height: min(100dvh, 932px);
+    height: min(100dvh, 694px);
     margin: 0 auto;
     overflow: hidden;
     background: #2a2420;
@@ -325,11 +335,12 @@
     background: var(--v-bg);
     color: var(--v-text);
     height: 100%;
-    max-height: min(100dvh, 932px);
+    /* X-6.5.51: 932px → 694px (Telegram Desktop oficial — ver html acima) */
+    max-height: min(100dvh, 694px);
     overflow-y: auto;
     overflow-x: hidden;
     /* contain: layout size — makes position:fixed children behave as position:absolute
-     * relative to body (430x932 frame), not the browser viewport (1920px+).
+     * relative to body (384×694 frame, X-6.5.51), not the browser viewport (1920px+).
      * This is the KEY rule that constrains ALL game UI to the phone-sized frame. */
     contain: layout size;
     position: relative;
@@ -1866,16 +1877,17 @@ body::before {
 }
 
 /* Ensure all fixed overlays respect the phone frame limits.
- * NEVER use left:50% + translateX(-50%) — it breaks when viewport > 430px
- * (web portal, desktop browser, DEV panel). Use left:0; right:0; margin:auto
- * which works at any viewport width. */
+ * NEVER use left:50% + translateX(-50%) — it breaks when viewport > 384px
+ * (X-6.5.51 — Telegram Desktop oficial é 384, antes era 430 iPhone Pro Max).
+ * Use left:0; right:0; margin:auto which works at any viewport width. */
 .v-popup-overlay,
 .loading-overlay,
 .processing-overlay,
 #travel-overlay,
 .displaced-overlay {
-  max-width: min(100vw, 430px);
-  max-height: min(100dvh, 932px);
+  /* X-6.5.51: 430→384, 932→694 (Telegram Desktop oficial — ver html acima) */
+  max-width: min(100vw, 384px);
+  max-height: min(100dvh, 694px);
   left: 0;
   right: 0;
   margin-left: auto;

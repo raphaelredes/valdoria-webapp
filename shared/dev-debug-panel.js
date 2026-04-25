@@ -505,7 +505,8 @@ function _initAsHost() {
     s.textContent = [
         'html.dev-panel-active{max-width:none!important;margin:0!important;height:100dvh!important;overflow:hidden!important}',
         'html.dev-panel-active body{display:flex!important;flex-direction:row!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
-        '#dev-game-iframe{width:430px;min-width:430px;max-width:430px;height:min(100dvh,932px);border:none;flex-shrink:0;background:#1a1510;align-self:center;border-radius:12px;box-shadow:0 0 40px rgba(0,0,0,0.6)}',
+        /* X-6.5.51: 430×932 (iPhone Pro Max) → 384×694 (Telegram Desktop oficial) */
+        '#dev-game-iframe{width:384px;min-width:384px;max-width:384px;height:min(100dvh,694px);border:none;flex-shrink:0;background:#1a1510;align-self:center;border-radius:12px;box-shadow:0 0 40px rgba(0,0,0,0.6)}',
         '#dev-log-panel{flex: 1 !important; display: flex !important; min-width: 0 !important; background: #0f0d0a !important}'
     ].join('\n');
     document.head.appendChild(s);
