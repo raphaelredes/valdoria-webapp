@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:38:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T19:00:02Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1824,6 +1824,232 @@ html body .camp-screen {
   background: rgba(60, 48, 32, 0.95);
 }
 
+/* X-6.5.51l (2026-04-25): JOURNEY OVERLAY — viagem entre mapas com etapas
+   (turnos), narrativas, hazards (skill checks D&D 5e), linha do tempo. */
+#journey-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  background: rgba(0, 0, 0, 0.78);
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  backdrop-filter: blur(3px);
+}
+#journey-overlay.show { display: flex; }
+.journey-card {
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
+  width: calc(100% - 24px);
+  max-width: 340px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
+  color: var(--v-text, #d4c8b0);
+  position: relative;
+  animation: journeySlideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes journeySlideUp {
+  from { transform: translateY(15px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.journey-card::before {
+  content: ''; position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 12px;
+  background: var(--v-gold, #c4953a);
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
+  z-index: 2;
+}
+.journey-header {
+  flex-shrink: 0;
+  padding: 12px 14px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  text-align: center;
+}
+.journey-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin: 0 0 4px 0;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.journey-subtitle {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9.5px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--v-text-dim, #a09484);
+}
+.journey-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.journey-progress {
+  margin-bottom: 10px;
+}
+.journey-progress-bar {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.journey-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--v-gold, #c4953a) 0%, #e8b850 100%);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 4px rgba(232, 184, 80, 0.5);
+}
+.journey-progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+.journey-progress-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(60, 48, 40, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+}
+.journey-progress-dot.done {
+  background: var(--v-gold, #c4953a);
+  border-color: #e8b850;
+  box-shadow: 0 0 4px rgba(232, 184, 80, 0.6);
+}
+.journey-progress-dot.current {
+  background: rgba(232, 184, 80, 0.4);
+  border-color: var(--v-gold, #c4953a);
+  animation: journeyDotPulse 1.2s ease-in-out infinite;
+}
+@keyframes journeyDotPulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(232, 184, 80, 0.4); }
+  50% { box-shadow: 0 0 8px rgba(232, 184, 80, 0.8); }
+}
+.journey-narration {
+  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--v-text, #d4c8b0);
+  margin-bottom: 10px;
+  min-height: 60px;
+}
+.journey-step-badge {
+  display: inline-block;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.journey-step-badge.safe {
+  background: rgba(80, 130, 60, 0.25);
+  border: 1px solid rgba(120, 170, 90, 0.5);
+  color: #a8d878;
+}
+.journey-step-badge.hazard {
+  background: rgba(170, 80, 50, 0.25);
+  border: 1px solid rgba(220, 130, 90, 0.5);
+  color: #e8a878;
+}
+.journey-step-badge.danger {
+  background: rgba(180, 50, 40, 0.30);
+  border: 1px solid #c44438;
+  color: #ffaaaa;
+}
+.journey-check {
+  text-align: center;
+  margin: 8px 0;
+  min-height: 28px;
+}
+.journey-check-result {
+  margin-top: 4px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+.journey-check-result.success { color: #6acc78; text-shadow: 0 0 6px rgba(106, 204, 120, 0.4); }
+.journey-check-result.fail { color: #d85848; text-shadow: 0 0 6px rgba(216, 88, 72, 0.4); }
+.journey-formula {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 11px;
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.5px;
+}
+.journey-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.journey-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.9), rgba(22, 18, 14, 0.9));
+  border: 1.5px solid var(--v-text-dim, #a09484);
+  color: var(--v-text, #d4c8b0);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+.journey-btn:hover {
+  border-color: var(--v-text, #d4c8b0);
+  background: rgba(60, 48, 32, 0.95);
+  transform: translateX(2px);
+}
+.journey-btn.gold {
+  border-color: var(--v-gold, #c4953a);
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.25), rgba(139, 100, 32, 0.18));
+  color: #f0e0b8;
+}
+.journey-btn.gold:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.4), rgba(139, 100, 32, 0.3));
+  border-color: #fbd770;
+}
+.journey-btn.danger {
+  border-color: #c44438;
+  color: #ffcccc;
+}
+.journey-btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.journey-btn-text { flex: 1; }
+.journey-btn-desc {
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.8px;
+  text-transform: none;
+  margin-top: 2px;
+}
+
 /* ====== HEX-NAV (6 dirs + center) ===================================== */
 #hex-nav {
   position: absolute;
@@ -2530,23 +2756,70 @@ body.remote-mode #debug-hud { display: none !important; }
   background: rgba(196, 149, 58, 0.4);
   border-radius: 3px;
 }
+/* X-6.5.51l (2026-04-25): cart-canvas-wrap pra container relativo dos zoom
+   controls. */
+.cart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
 #cart-canvas {
   display: block;
   margin: 0 auto;
   width: 100%;
   height: auto;
   aspect-ratio: 400 / 540;
-  /* X-6.5.51j: canvas agora tem fundo dark (era parchment cream).
-     Pra continuar legivel, drawCart vai usar mais alpha em halos + estradas. */
+  /* X-6.5.51l: voltou pro look pergaminho papel cream (user feedback:
+     "deixando como estava antes, com design mais parecido com papel"). */
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(196, 149, 58, 0.06) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 80%, rgba(196, 149, 58, 0.04) 0%, transparent 55%),
-    linear-gradient(180deg, var(--v-bg, #2a2420), #1a1510);
-  border: 1px solid rgba(196, 149, 58, 0.3);
-  border-radius: 4px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
-  touch-action: manipulation;
+    radial-gradient(ellipse at 28% 18%, rgba(255, 245, 215, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse at 72% 82%, rgba(120, 80, 30, 0.18) 0%, transparent 60%),
+    linear-gradient(180deg, #e8d4a8 0%, #d8be88 100%);
+  touch-action: none;  /* X-6.5.51l: pan nativo desativado pra zoom funcionar */
+  cursor: grab;
 }
+#cart-canvas:active { cursor: grabbing; }
+/* X-6.5.51l: zoom controls overlay no canto inferior esquerdo do canvas */
+.cart-zoom-controls {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+}
+.cart-zoom-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(245, 230, 200, 0.95), rgba(220, 195, 145, 0.92));
+  border: 1.5px solid rgba(120, 80, 30, 0.6);
+  color: #4a3018;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.15s ease;
+}
+.cart-zoom-btn:hover {
+  background: linear-gradient(180deg, rgba(255, 240, 210, 1), rgba(230, 205, 155, 1));
+  border-color: var(--v-gold, #c4953a);
+  transform: scale(1.06);
+}
+.cart-zoom-btn:active { transform: scale(0.94); }
+.cart-zoom-btn.cart-pin { font-size: 14px; }
+.cart-zoom-btn:disabled,
+.cart-zoom-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+.cart-zoom-btn:disabled:hover { transform: none; }
 .cart-legend {
   display: flex;
   justify-content: center;
@@ -3466,7 +3739,15 @@ body.remote-mode #debug-hud { display: none !important; }
         <div class="cart-subtitle">Mapa das Terras Conhecidas</div>
       </div>
       <div class="cart-body">
-        <canvas id="cart-canvas" width="400" height="540"></canvas>
+        <div class="cart-canvas-wrap">
+          <canvas id="cart-canvas" width="400" height="540"></canvas>
+          <!-- X-6.5.51l: zoom controls + center on player -->
+          <div class="cart-zoom-controls">
+            <button type="button" class="cart-zoom-btn" id="cart-zoom-out" title="Diminuir zoom">−</button>
+            <button type="button" class="cart-zoom-btn cart-pin" id="cart-zoom-center" title="Centralizar onde voce esta">📍</button>
+            <button type="button" class="cart-zoom-btn" id="cart-zoom-in" title="Aumentar zoom">+</button>
+          </div>
+        </div>
         <div class="cart-legend">
           <div class="cart-legend-item"><span class="dot" style="background:#c4953a"></span>Atual</div>
           <div class="cart-legend-item"><span class="dot" style="background:#8a7a5a"></span>Visitado</div>
@@ -3510,6 +3791,30 @@ body.remote-mode #debug-hud { display: none !important; }
       <div class="loc-footer">
         <button class="loc-close" id="loc-close-btn">Fechar</button>
         <button class="loc-travel" id="loc-travel-btn">Viajar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- X-6.5.51l: journey-overlay — viagem entre mapas via cartografia, com
+       turnos, hazards (skill checks D&D 5e), narracoes, e linha do tempo
+       visual (etapas + dots de progresso). Adaptado de
+       valdoria-webapp/explore/explore-outbound-travel.js. User feedback:
+       "coloque os riscos da viagem, turnos, etc, o que existir de mecânica
+       D&D, e use o sistema que já existe de viagem que mostra eventos
+       acontecendo, inclusive encontros em uma linha do tempo". -->
+  <div id="journey-overlay">
+    <div class="journey-card">
+      <div class="journey-header">
+        <h2 class="journey-title" id="journey-title">Rumo a ...</h2>
+        <div class="journey-subtitle" id="journey-subtitle">Preparando partida</div>
+      </div>
+      <div class="journey-body">
+        <div class="journey-progress" id="journey-progress"></div>
+        <div class="journey-narration" id="journey-narration"></div>
+        <div class="journey-check" id="journey-check"></div>
+      </div>
+      <div class="journey-footer" id="journey-footer">
+        <!-- preenchido dinamicamente: 1-2 botoes de acao por etapa -->
       </div>
     </div>
   </div>
@@ -6053,6 +6358,195 @@ const EVENTS_POOL = {
 };
 
 // ============================================================================
+// X-6.5.51l (2026-04-25): +50 EVENTOS PROCEDURAIS POR BIOMA
+// ============================================================================
+// Gera eventos a partir de templates × variantes pra dar pool gigante (50+
+// por bioma). Cada template tem narracao base + pool de NPCs/objetos/criaturas
+// que substituem placeholders. Skill checks D&D 5e padronizados (DC 11-14,
+// 1-2 choices). User feedback: "adicione pelo menos mais 50 encontros
+// diferentes em cada mapa".
+//
+// Estrutura: template define title_pattern + text_pattern + slots; gera
+// eventos id `proc_<biome>_<n>` com title/text concretos.
+(function _generateProceduralEvents() {
+  // Pools de palavras por bioma — cada bioma tem 6+ NPCs/criaturas + 6+ objetos/locais
+  var BIOME_POOLS = {
+    forest: {
+      npcs: ['lenhador idoso', 'caçador silencioso', 'druida solitário', 'curandeira de ervas', 'jovem pastor', 'monge errante', 'arqueiro élfico'],
+      creatures: ['lobo solitário', 'urso desperto', 'corvo gigante', 'cervo branco', 'serpente verde', 'javali enraivecido', 'salteador encapuzado'],
+      objects: ['baú musgoso', 'tronco oco curioso', 'altar coberto de hera', 'pegadas frescas', 'cogumelo brilhante', 'pena dourada caída', 'pedra rúnica'],
+      hazards: ['galho que estala', 'raiz traiçoeira', 'cipó retorcido', 'cova escondida sob folhas']
+    },
+    plains: {
+      npcs: ['mercador ambulante', 'fazendeiro rude', 'caravaneiro perdido', 'sacerdote viajante', 'minstrel cantante', 'mensageiro real', 'velho contador de histórias'],
+      creatures: ['lebre branca', 'falcão de caça', 'matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'bandido a cavalo'],
+      objects: ['carroça abandonada', 'fogueira ainda quente', 'estrada bifurcada', 'pedra com inscrição', 'campo de flores', 'esqueleto de cavalo'],
+      hazards: ['poço escondido', 'tempestade súbita', 'terra movediça', 'enxame de abelhas']
+    },
+    swamp: {
+      npcs: ['eremita encurvado', 'bruxo do brejo', 'caçador de sapos', 'curandeira pantanosa', 'velho pescador'],
+      creatures: ['sapo gigante', 'crocodilo silencioso', 'serpente venenosa', 'will-o-wisp dançante', 'lobo do pântano'],
+      objects: ['árvore retorcida', 'pedra coberta de musgo', 'crânio na lama', 'baú meio submerso', 'fogo-fátuo brilhante'],
+      hazards: ['lama profunda', 'gás venenoso', 'sanguessuga', 'raiz submersa']
+    },
+    mountain: {
+      npcs: ['guia montanhês', 'eremita das alturas', 'minerador anão', 'sacerdote da pedra', 'caçador de avalanches'],
+      creatures: ['águia gigante', 'cabra-montês agressiva', 'goblin batedor', 'urso pardo', 'lobo cinzento'],
+      objects: ['cairn de pedras', 'fenda profunda', 'caverna pequena', 'gravura antiga na rocha', 'lago alpino'],
+      hazards: ['pedra solta', 'vento cortante', 'fenda escondida', 'avalanche pequena']
+    },
+    desert: {
+      npcs: ['nômade silencioso', 'mercador de água', 'eremita do deserto', 'caravaneiro perdido', 'profeta louco'],
+      creatures: ['escorpião gigante', 'serpente da areia', 'abutre faminto', 'lagarto venenoso', 'salteador do deserto'],
+      objects: ['oásis pequeno', 'esqueleto enterrado', 'palmeira solitária', 'baú coberto de areia', 'pedra glífica'],
+      hazards: ['miragem confusa', 'tempestade de areia', 'sol abrasador', 'areia movediça']
+    },
+    snow: {
+      npcs: ['caçador de peles', 'eremita gélido', 'mensageiro perdido', 'sacerdote do gelo'],
+      creatures: ['lobo branco', 'urso polar', 'coruja-da-neve gigante', 'goblin do frio'],
+      objects: ['iglu abandonado', 'esqueleto congelado', 'fogueira apagada', 'baú no gelo'],
+      hazards: ['placa de gelo', 'rajada congelante', 'avalanche', 'fenda gelada']
+    },
+    cave: {
+      npcs: ['minerador abandonado', 'eremita das trevas', 'kobold solitário', 'arqueólogo perdido'],
+      creatures: ['morcego gigante', 'aranha das cavernas', 'goblin batedor', 'verme de pedra'],
+      objects: ['cristal brilhante', 'fonte subterrânea', 'baú cravejado', 'glifo na parede', 'pilha de ossos'],
+      hazards: ['estalactite', 'fenda profunda', 'gás tóxico', 'pedras soltas']
+    },
+    graveyard: {
+      npcs: ['coveiro silencioso', 'sacerdote dos mortos', 'profanador hesitante', 'velha lamentosa'],
+      creatures: ['esqueleto cambaleante', 'fantasma chorando', 'corvo agourento', 'rato dos mortos'],
+      objects: ['lápide quebrada', 'mausoléu trancado', 'estátua chorona', 'cova recém-cavada'],
+      hazards: ['solo cedendo', 'maldição residual', 'névoa fria', 'espírito perdido']
+    },
+    volcanic: {
+      npcs: ['ferreiro do magma', 'culto-louco do fogo', 'minerador audaz'],
+      creatures: ['salamandra de fogo', 'demônio menor', 'gargula derretida'],
+      objects: ['cristal de obsidiana', 'forja antiga', 'altar enegrecido', 'lago de lava pequeno'],
+      hazards: ['gêiser de lava', 'cinzas tóxicas', 'rocha incandescente', 'pedra que desmorona']
+    }
+  };
+
+  // Templates universais (5 tipos × ~10 variantes cada via pool = 50/bioma)
+  var TEMPLATES = [
+    { kind: 'meet_npc',
+      title: 'Encontro Inesperado',
+      text: 'Você cruza o caminho de {npc}. {Ele} parece avaliar você antes de falar.',
+      choices: [
+        { label: 'Cumprimentar', skill: 'cha', dc: 11, desc: 'Tentar criar laço amigável',
+          ok: 'Conversa amena. {Ele} compartilha algumas dicas do caminho.', okGold: [3, 12],
+          fail: 'Vossa abordagem soa rude. {Ele} se afasta sem dizer mais nada.' },
+        { label: 'Observar de longe', skill: 'wis', dc: 11, desc: 'Estudar antes de revelar-se',
+          ok: 'Você nota detalhes úteis e segue sem ser visto.', okXp: [10, 20],
+          fail: '{Ele} percebe sua presença e se assusta — alarme!' }
+      ]
+    },
+    { kind: 'creature_threat',
+      title: 'Ameaça à Vista',
+      text: 'Um {creature} surge subitamente! Os olhos travam nos seus.',
+      choices: [
+        { label: 'Recuar devagar', skill: 'wis', dc: 12, desc: 'Sair sem provocar',
+          ok: 'Você recua sem despertar a fúria da criatura.', okXp: [8, 14],
+          fail: '{Ele} avança! Você sangra antes de escapar.', failHp: 3 },
+        { label: 'Intimidar', skill: 'cha', dc: 13, desc: 'Mostrar quem manda',
+          ok: '{Ele} hesita e foge.', okXp: [12, 22],
+          fail: '{Ele} responde com um ataque feroz.', failHp: 5 }
+      ]
+    },
+    { kind: 'object_inspect',
+      title: 'Objeto Curioso',
+      text: 'Você encontra {object} que chama sua atenção.',
+      choices: [
+        { label: 'Examinar', skill: 'int', dc: 12, desc: 'Estudar com cuidado',
+          ok: 'Você descobre algo valioso!', okGold: [10, 30],
+          fail: 'Você não consegue interpretar o significado.' },
+        { label: 'Tocar', skill: 'dex', dc: 11, desc: 'Manipular com cautela',
+          ok: 'Suas mãos descobrem um compartimento secreto.', okGold: [8, 20],
+          fail: 'Algo se quebra ao toque.', failHp: 1 }
+      ]
+    },
+    { kind: 'hazard',
+      title: 'Perigo Iminente',
+      text: 'O caminho revela {hazard}!',
+      choices: [
+        { label: 'Esquivar', skill: 'dex', dc: 12, desc: 'Reflexos rápidos',
+          ok: 'Você evita por pouco.', okXp: [8, 14],
+          fail: 'Você é atingido!', failHp: 4 },
+        { label: 'Resistir', skill: 'con', dc: 13, desc: 'Suportar firme',
+          ok: 'Você suporta sem ferimentos.', okXp: [8, 14],
+          fail: 'O impacto cobra seu preço.', failHp: 5 }
+      ]
+    },
+    { kind: 'npc_help',
+      title: 'Pedido de Ajuda',
+      text: '{npc} acena pra você, com aparente urgência. "Por favor, preciso de auxílio!"',
+      choices: [
+        { label: 'Ajudar', skill: 'wis', dc: 11, desc: 'Oferecer assistência',
+          ok: 'Você resolve o problema; {ele} retribui generosamente.', okGold: [15, 35],
+          fail: 'Vossa ajuda piora a situação. {Ele} se afasta com raiva.' },
+        { label: 'Recusar', skill: 'cha', dc: 11, desc: 'Polidamente declinar',
+          ok: 'Você sai sem ofender ninguém.',
+          fail: '{Ele} amaldiçoa seu nome ao vento.' }
+      ]
+    }
+  ];
+
+  // Gerador
+  function _capit(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function _slot(text, biomePool) {
+    return text
+      .replace(/\{npc\}/g, biomePool.npcs[Math.floor(Math.random() * biomePool.npcs.length)])
+      .replace(/\{creature\}/g, biomePool.creatures[Math.floor(Math.random() * biomePool.creatures.length)])
+      .replace(/\{object\}/g, biomePool.objects[Math.floor(Math.random() * biomePool.objects.length)])
+      .replace(/\{hazard\}/g, biomePool.hazards[Math.floor(Math.random() * biomePool.hazards.length)])
+      .replace(/\{Ele\}/g, 'Ele')
+      .replace(/\{ele\}/g, 'ele');
+  }
+  function _genChoice(rawCh, biomePool) {
+    var ch = {
+      label: rawCh.label,
+      skill: rawCh.skill,
+      dc: rawCh.dc,
+      desc: rawCh.desc,
+      outcome_ok: { text: _slot(rawCh.ok, biomePool) },
+      outcome_fail: { text: _slot(rawCh.fail, biomePool) }
+    };
+    if (rawCh.okGold) {
+      var minG = rawCh.okGold[0], maxG = rawCh.okGold[1];
+      ch.outcome_ok.gold = minG + Math.floor(Math.random() * (maxG - minG + 1));
+    }
+    if (rawCh.okXp) {
+      var minX = rawCh.okXp[0], maxX = rawCh.okXp[1];
+      ch.outcome_ok.xp = minX + Math.floor(Math.random() * (maxX - minX + 1));
+    }
+    if (rawCh.failHp) ch.outcome_fail.hp_loss = rawCh.failHp;
+    return ch;
+  }
+
+  // Gera 50 eventos por bioma (5 templates × 10 variantes)
+  Object.keys(BIOME_POOLS).forEach(function(biome) {
+    var pool = BIOME_POOLS[biome];
+    for (var t = 0; t < TEMPLATES.length; t++) {
+      var tpl = TEMPLATES[t];
+      for (var v = 0; v < 10; v++) {
+        var id = 'proc_' + biome + '_' + tpl.kind + '_' + v;
+        var titleSlotted = _slot(tpl.title, pool);
+        var textSlotted = _slot(tpl.text, pool);
+        // Re-roll slots por variante pra ter conteudo unico
+        var choicesGen = tpl.choices.map(function(ch) { return _genChoice(ch, pool); });
+        EVENTS_POOL[id] = {
+          biome: biome,
+          id: id,
+          title: titleSlotted,
+          text: textSlotted,
+          choices: choicesGen
+        };
+      }
+    }
+  });
+})();
+
+// ============================================================================
 // TERRAIN_NAMES / HEX MATH / ISO
 // ============================================================================
 
@@ -8097,14 +8591,19 @@ function drawTile(ctx, col, row) {
 function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   const rng = seededRng(col + row * 31);
   if (tile === 'T') {
-    // V2.7: 3 variantes de árvore por hex (seed determinístico) + size jitter.
-    // Tipo 0 = carvalho (3 camadas cônicas padrão)
-    // Tipo 1 = cedro/conífero (alta e estreita, 4 camadas triangulares)
-    // Tipo 2 = bétula/jovem (tronco claro, copa pequena e redonda)
-    // Tipo 3 = pinheiro gigante (mais alta, copa larga)
+    // X-6.5.51l (2026-04-25): 10 variacoes de scena de mata + 4 tipos de
+    // arvore principal. Scene preenche o hex com undergrowth/cogumelos/
+    // ferns/troncos/pedras antes da arvore principal. User feedback:
+    // "aumente a quantidade de detalhes minimalistas nos hexagonos de mata,
+    // crie 10 variacoes prontas, que preenchem todo o hexagono".
+    const sceneSeed = seededRng(col * 17 + row * 23 + 207);
+    const sceneVariant = Math.floor(sceneSeed() * 10);
+    drawForestScene(ctx, cx, cy, col, row, sceneVariant, sceneSeed);
+    // Variante 9 = clareira escondida (so undergrowth, sem arvore alta)
+    if (sceneVariant === 9) return;
     const variantSeed = seededRng(col * 13 + row * 7 + 101);
     const variant = Math.floor(variantSeed() * 4);
-    const sizeJitter = 0.85 + variantSeed() * 0.35;  // 0.85x..1.2x
+    const sizeJitter = 0.85 + variantSeed() * 0.35;
     if (variant === 1) { drawTree_cedar(ctx, cx, cy, col, row, sizeJitter); return; }
     if (variant === 2) { drawTree_birch(ctx, cx, cy, col, row, sizeJitter); return; }
     if (variant === 3) { drawTree_pine(ctx, cx, cy, col, row, sizeJitter); return; }
@@ -8324,22 +8823,46 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
       ctx.fill();
     }
   } else if (tile === '.') {
-    // V2.8: chão básico ganha micro-detalhes em planícies (blades esparsas + tufos)
-    // Só ativa se biome plains pra não encher tiles de outros biomas.
-    if (S && S.biome === 'plains' && rng() < 0.55) {
-      const windX = Math.sin(_animTime * 0.0006) * 0.8;  // V3.0 suave
-      const bladeCount = 2 + Math.floor(rng() * 2);
-      ctx.strokeStyle = '#557a32';
+    // X-6.5.51l (2026-04-25): textura de grama em TODOS os biomas (nao so
+    // plains). User feedback: "melhorias nos hexagonos abertos, colocando
+    // textura de grama pequena pelo menos, para nao ficar um verde liso".
+    // Cor da grama tinted por bioma (verde/marrom/branco/cinza/etc).
+    const biomeGrass = {
+      plains:    { color1: '#557a32', color2: '#3d5e22', density: 0.95, blades: 4 },
+      forest:    { color1: '#3a5a22', color2: '#2c4418', density: 0.85, blades: 3 },
+      swamp:     { color1: '#4a6028', color2: '#283818', density: 0.75, blades: 3 },
+      mountain:  { color1: '#6a7050', color2: '#4a5238', density: 0.55, blades: 2 },
+      desert:    { color1: '#a8845a', color2: '#82603a', density: 0.40, blades: 2 },
+      snow:      { color1: '#bcc6d0', color2: '#7a8898', density: 0.35, blades: 2 },
+      cave:      { color1: '#3a4040', color2: '#202828', density: 0.30, blades: 1 },
+      graveyard: { color1: '#4a4838', color2: '#28281c', density: 0.65, blades: 2 },
+      volcanic:  { color1: '#3e2820', color2: '#1e1410', density: 0.30, blades: 1 }
+    };
+    const bg = biomeGrass[S && S.biome] || biomeGrass.plains;
+    if (rng() < bg.density) {
+      const windX = Math.sin(_animTime * 0.0006) * 0.8;
+      const bladeCount = bg.blades + Math.floor(rng() * 2);
       ctx.lineWidth = 0.8;
       ctx.lineCap = 'round';
       for (let i = 0; i < bladeCount; i++) {
         const gx = cx + (rng() - 0.5) * HEX_W * 0.55;
         const gy = cy + (rng() - 0.5) * HEX_H * 0.35;
         const hVar = 2 + rng() * 2;
+        // Mistura de tons claro/escuro
+        ctx.strokeStyle = (rng() < 0.55) ? bg.color1 : bg.color2;
         ctx.beginPath();
         ctx.moveTo(gx, gy);
         ctx.quadraticCurveTo(gx + windX * 0.4, gy - hVar * 0.6, gx + windX * 0.8, gy - hVar);
         ctx.stroke();
+      }
+      // Tufo ocasional pra quebrar uniformidade (10%)
+      if (rng() < 0.10) {
+        const tx = cx + (rng() - 0.5) * HEX_W * 0.4;
+        const ty = cy + (rng() - 0.5) * HEX_H * 0.25;
+        ctx.fillStyle = bg.color2;
+        ctx.beginPath();
+        ctx.ellipse(tx, ty, 1.4, 0.7, rng() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
   } else if (tile === 'E') {
@@ -8491,56 +9014,23 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     ctx.lineTo(cx + HEX_W * 0.025, cy - HEX_H * 0.06);
     ctx.stroke();
   } else if (tile === 'H') {
-    // V3.0: casa simples mas detalhada (user req: "pouquissimas casas, bem
-    // simples mas com maximo de detalhes possivel"). Weights reduzidos pra 1-2
-    // em todos os mapas. Iterativo \u2014 user testa e melhoramos.
-    drawCottage(ctx, cx, cy, col, row, rng);
+    // X-6.5.51l (2026-04-25): 6 variacoes de casa minimalistas detalhadas.
+    // Picker baseado em (col,row) seed -> variantes A-F com paletas diferentes
+    // (rustica/pedra/cal-branca/floresteiro/timber/pintada).
+    const cottageSeed = seededRng(col * 19 + row * 23 + 401);
+    const cottageVariant = Math.floor(cottageSeed() * 6);
+    drawCottage(ctx, cx, cy, col, row, rng, cottageVariant);
   } else if (tile === 'F') {
     // V2.9 PRO: fogueira ativa com chama animada, brasas pulsando, fumaça,
     // halo quente, 5 pedras em círculo de contenção, lenha cruzada visível.
     drawCampfire(ctx, cx, cy, col, row, rng);
   } else if (tile === 't') {
-    // V2.6: arbusto melhorado — 3-4 tufos densos no mesmo hex, parecendo
-    // um aglomerado real de folhas em vez de 2 bolinhas soltas.
-    // seedRng por hex pra variação consistente frame a frame.
-    const rng = seededRng(col * 7 + row * 13 + 1);
-    const tufts = 4;
-    // Sombra base embaixo
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + HEX_H * 0.04, HEX_W * 0.17, HEX_H * 0.04, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Tufos em anel compacto (3 médios + 1 maior no topo)
-    for (let i = 0; i < tufts; i++) {
-      const a = (Math.PI * 2 / tufts) * i + (rng() - 0.5) * 0.4;
-      const dist = HEX_W * (0.07 + rng() * 0.04);
-      const tx = cx + Math.cos(a) * dist;
-      const ty = cy + Math.sin(a) * dist * 0.7 - HEX_H * 0.015;
-      const r = HEX_W * (0.085 + rng() * 0.02);
-      // Lado escuro da folhagem (mais para baixo)
-      ctx.fillStyle = '#1f3818';
-      ctx.beginPath();
-      ctx.arc(tx, ty + r * 0.3, r, 0, Math.PI * 2);
-      ctx.fill();
-      // Lado claro (mais para cima)
-      ctx.fillStyle = '#3d5c28';
-      ctx.beginPath();
-      ctx.arc(tx - r * 0.15, ty - r * 0.1, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-      // Highlight pontual
-      ctx.fillStyle = 'rgba(120, 160, 80, 0.55)';
-      ctx.beginPath();
-      ctx.arc(tx - r * 0.25, ty - r * 0.3, r * 0.25, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    // Galho fino marrom saindo do centro (detalhe)
-    ctx.strokeStyle = 'rgba(60, 40, 24, 0.7)';
-    ctx.lineWidth = 1.2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.02, cy + HEX_H * 0.02);
-    ctx.lineTo(cx + HEX_W * 0.03, cy - HEX_H * 0.06);
-    ctx.stroke();
+    // X-6.5.51l (2026-04-25): 10 variacoes de arbusto. User feedback:
+    // "aumente a quantidade de detalhes minimalistas para os hexagonos
+    // arbustos, pelo menos 10 variacoes tambem prontas".
+    const bushSeed = seededRng(col * 7 + row * 13 + 1);
+    const bushVariant = Math.floor(bushSeed() * 10);
+    drawBushVariant(ctx, cx, cy, col, row, bushVariant, bushSeed);
   } else if (tile === '*') {
     // Clarabóia — feixe de luz natural descendo (teto ausente)
     // Haste do feixe com gradiente suave de topo pro centro
@@ -8581,22 +9071,86 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   }
 }
 
+// X-6.5.51l (2026-04-25): paleta + props por variante (6 estilos).
+// Cada variante muda paredes/telhado/porta/chamine/janelas/decoracoes pra dar
+// senso de aldeia heterogenea. User feedback: "faca mais casas parecidas com
+// a casa atual que existe no hexagono de casa, com bastante detalhes
+// minimalistas, crie 6 variacoes".
+var COTTAGE_VARIANTS = [
+  { // 0 — Rustica (original)
+    wall: '#8a6235', wallLit: 'rgba(170, 120, 70, 0.55)', wallShade: 'rgba(30, 20, 10, 0.3)',
+    roofDark: '#4a281a', roofLit: '#6a3a22',
+    door: '#3a2010', doorGradHi: 'rgba(80, 50, 25, 0.65)',
+    foundation: '#5a504a', foundLit: null,
+    chimney: '#605650', chimneyLit: '#806e5e', chimneyTop: '#3a322a',
+    plankCount: 5, windowCount: 1, hasChimney: true, scale: 1.0,
+    detail: 'logs'  // tora de lenha lateral
+  },
+  { // 1 — Pedra cinza com telhado de ardosia
+    wall: '#7a7068', wallLit: 'rgba(155, 145, 135, 0.55)', wallShade: 'rgba(25, 22, 20, 0.35)',
+    roofDark: '#2a2c34', roofLit: '#454852',
+    door: '#28180c', doorGradHi: 'rgba(70, 42, 22, 0.65)',
+    foundation: '#3e3a36', foundLit: '#5a5450',
+    chimney: '#5e574e', chimneyLit: '#7c7468', chimneyTop: '#28241e',
+    plankCount: 0, windowCount: 2, hasChimney: true, scale: 0.95,
+    detail: 'stones'  // pilha de pedras
+  },
+  { // 2 — Cal branca com porta verde (mediterraneo rustico)
+    wall: '#d8cbb0', wallLit: 'rgba(245, 235, 215, 0.65)', wallShade: 'rgba(80, 65, 50, 0.35)',
+    roofDark: '#682818', roofLit: '#9a4628',
+    door: '#2c4828', doorGradHi: 'rgba(85, 130, 70, 0.55)',
+    foundation: '#6c625c', foundLit: null,
+    chimney: '#5a504a', chimneyLit: '#7a6e62', chimneyTop: '#382e26',
+    plankCount: 0, windowCount: 2, hasChimney: true, scale: 1.05,
+    detail: 'flowerbox'  // floreira na janela
+  },
+  { // 3 — Cabana de floresteiro (madeira escura + telhado de palha)
+    wall: '#4a3220', wallLit: 'rgba(110, 78, 48, 0.55)', wallShade: 'rgba(15, 10, 5, 0.4)',
+    roofDark: '#7a5418', roofLit: '#b48028',
+    door: '#1e1208', doorGradHi: 'rgba(50, 32, 16, 0.65)',
+    foundation: '#3a2e22', foundLit: null,
+    chimney: '#3e3026', chimneyLit: '#5a4a3a', chimneyTop: '#22180e',
+    plankCount: 6, windowCount: 1, hasChimney: false, scale: 0.92,
+    detail: 'antlers'  // chifres no topo
+  },
+  { // 4 — Tudor (timber escuro sobre cal)
+    wall: '#c8b896', wallLit: 'rgba(230, 215, 185, 0.55)', wallShade: 'rgba(60, 48, 30, 0.35)',
+    roofDark: '#3a2820', roofLit: '#5a4032',
+    door: '#2a1a10', doorGradHi: 'rgba(60, 38, 22, 0.6)',
+    foundation: '#5e544a', foundLit: '#80766a',
+    chimney: '#6e5e4a', chimneyLit: '#8e7c66', chimneyTop: '#3e342a',
+    plankCount: 0, windowCount: 2, hasChimney: true, scale: 1.0,
+    detail: 'crossbeams'  // X de madeira nas paredes
+  },
+  { // 5 — Pintada vermelho terracota
+    wall: '#a14538', wallLit: 'rgba(195, 105, 90, 0.55)', wallShade: 'rgba(60, 18, 10, 0.4)',
+    roofDark: '#1e1a1a', roofLit: '#3a3030',
+    door: '#3a2a18', doorGradHi: 'rgba(85, 60, 35, 0.6)',
+    foundation: '#4a3a32', foundLit: null,
+    chimney: '#5a4a40', chimneyLit: '#7c6c5e', chimneyTop: '#2e2218',
+    plankCount: 4, windowCount: 1, hasChimney: true, scale: 0.97,
+    detail: 'bench'  // banco de madeira na frente
+  }
+];
+
 // V3.0: chalé/casinha medieval simples mas com detalhes finos.
+// X-6.5.51l: agora aceita parametro `variant` (0-5) que muda paleta + decoracao.
 // Camadas (de trás pra frente):
 //   1. Sombra projetada no chão
 //   2. Base de pedra (fundação) com textura de blocos
-//   3. Paredes de madeira com ripas verticais visíveis
-//   4. Porta de madeira escura com maçaneta pontual
-//   5. 1-2 janelas pequenas com moldura + luz interna quente piscando
-//   6. Telhado triangular inclinado com ripas horizontais
-//   7. Chaminé de pedra com fumaça sutil saindo
-//   8. Rim light na quina superior-esquerda
-// Tudo em escala HEX_W/HEX_H pra cadencia com o mapa.
-function drawCottage(ctx, cx, cy, col, row, rng) {
+//   3. Paredes (cor da variante) com ripas verticais visíveis
+//   4. Porta da variante com maçaneta pontual
+//   5. 1-2 janelas com moldura + luz interna quente piscando
+//   6. Telhado triangular inclinado (cores da variante)
+//   7. Chaminé de pedra com fumaça (se variante tem)
+//   8. Detalhe extra da variante (logs/stones/flowerbox/antlers/crossbeams/bench)
+//   9. Rim light na quina superior-esquerda
+function drawCottage(ctx, cx, cy, col, row, rng, variant) {
+  const vd = COTTAGE_VARIANTS[((variant | 0) % COTTAGE_VARIANTS.length + COTTAGE_VARIANTS.length) % COTTAGE_VARIANTS.length];
   const t = _animTime * 0.001;
   const flick = 0.75 + Math.sin(t * 4 + col * 0.5) * 0.18 + Math.cos(t * 7) * 0.08;
-  const bodyW = HEX_W * 0.34;
-  const bodyH = HEX_H * 0.2;
+  const bodyW = HEX_W * 0.34 * vd.scale;
+  const bodyH = HEX_H * 0.2 * vd.scale;
   const bx = cx - bodyW / 2;
   const by = cy - bodyH * 0.25;
   const groundY = cy + bodyH * 0.55;
@@ -8605,10 +9159,15 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   ctx.beginPath();
   ctx.ellipse(cx + 1, groundY + 2, bodyW * 0.65, bodyH * 0.15, 0, 0, Math.PI * 2);
   ctx.fill();
-  // 2. Fundação de pedra (faixa baixa, mais clara que o chão)
+  // 2. Fundação de pedra (faixa baixa)
   const foundH = bodyH * 0.14;
-  ctx.fillStyle = '#5a504a';
+  ctx.fillStyle = vd.foundation;
   ctx.fillRect(bx - 1, by + bodyH - foundH, bodyW + 2, foundH);
+  // Lit face (variantes que tem)
+  if (vd.foundLit) {
+    ctx.fillStyle = vd.foundLit;
+    ctx.fillRect(bx - 1, by + bodyH - foundH, (bodyW + 2) * 0.4, foundH);
+  }
   // Blocos de pedra (3-4 divisões verticais sutis)
   ctx.strokeStyle = 'rgba(25, 18, 14, 0.55)';
   ctx.lineWidth = 0.6;
@@ -8624,25 +9183,37 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   ctx.moveTo(bx - 1, by + bodyH - foundH);
   ctx.lineTo(bx + bodyW + 1, by + bodyH - foundH);
   ctx.stroke();
-  // 3. Paredes de madeira (base tone + ripas verticais)
-  ctx.fillStyle = '#8a6235';
+  // 3. Paredes (cor da variante)
+  ctx.fillStyle = vd.wall;
   ctx.fillRect(bx, by, bodyW, bodyH - foundH);
   // Face iluminada NW (gradient sutil)
   const wallGrad = ctx.createLinearGradient(bx, by, bx + bodyW, by + bodyH);
-  wallGrad.addColorStop(0, 'rgba(170, 120, 70, 0.55)');
-  wallGrad.addColorStop(0.4, 'rgba(170, 120, 70, 0.15)');
-  wallGrad.addColorStop(1, 'rgba(30, 20, 10, 0.3)');
+  wallGrad.addColorStop(0, vd.wallLit);
+  wallGrad.addColorStop(0.4, vd.wallLit.replace(/0\.\d+\)$/, '0.15)'));
+  wallGrad.addColorStop(1, vd.wallShade);
   ctx.fillStyle = wallGrad;
   ctx.fillRect(bx, by, bodyW, bodyH - foundH);
-  // Ripas verticais (pranchas da parede)
-  ctx.strokeStyle = 'rgba(40, 25, 12, 0.5)';
-  ctx.lineWidth = 0.5;
-  const plankCount = 5;
-  for (let i = 1; i < plankCount; i++) {
-    const plankX = bx + (bodyW / plankCount) * i;
+  // Ripas verticais (pranchas da parede) — só se variante tem
+  if (vd.plankCount > 0) {
+    ctx.strokeStyle = 'rgba(40, 25, 12, 0.5)';
+    ctx.lineWidth = 0.5;
+    for (let i = 1; i < vd.plankCount; i++) {
+      const plankX = bx + (bodyW / vd.plankCount) * i;
+      ctx.beginPath();
+      ctx.moveTo(plankX, by);
+      ctx.lineTo(plankX, by + bodyH - foundH);
+      ctx.stroke();
+    }
+  }
+  // X-6.5.51l: detalhe extra "crossbeams" (Tudor) — X de madeira escura
+  if (vd.detail === 'crossbeams') {
+    ctx.strokeStyle = 'rgba(40, 25, 12, 0.8)';
+    ctx.lineWidth = 1.0;
+    const cbX = bx + bodyW * 0.65, cbY = by + (bodyH - foundH) * 0.15;
+    const cbW = bodyW * 0.28, cbH = (bodyH - foundH) * 0.65;
     ctx.beginPath();
-    ctx.moveTo(plankX, by);
-    ctx.lineTo(plankX, by + bodyH - foundH);
+    ctx.moveTo(cbX, cbY); ctx.lineTo(cbX + cbW, cbY + cbH);
+    ctx.moveTo(cbX + cbW, cbY); ctx.lineTo(cbX, cbY + cbH);
     ctx.stroke();
   }
   // 4. Porta (centralizada, ocupa ~25% da largura)
@@ -8650,11 +9221,11 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   const doorH = (bodyH - foundH) * 0.7;
   const doorX = cx - doorW / 2;
   const doorY = by + bodyH - foundH - doorH;
-  ctx.fillStyle = '#3a2010';
+  ctx.fillStyle = vd.door;
   ctx.fillRect(doorX, doorY, doorW, doorH);
   // Gradient de profundidade da porta
   const doorGrad = ctx.createLinearGradient(doorX, doorY, doorX, doorY + doorH);
-  doorGrad.addColorStop(0, 'rgba(80, 50, 25, 0.65)');
+  doorGrad.addColorStop(0, vd.doorGradHi);
   doorGrad.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
   ctx.fillStyle = doorGrad;
   ctx.fillRect(doorX, doorY, doorW, doorH);
@@ -8667,41 +9238,61 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   ctx.strokeStyle = 'rgba(20, 12, 5, 0.85)';
   ctx.lineWidth = 0.7;
   ctx.strokeRect(doorX, doorY, doorW, doorH);
-  // 5. Janela(s) — 1 à esquerda da porta, com luz piscando (warm)
-  const winW = bodyW * 0.14;
-  const winH = (bodyH - foundH) * 0.32;
-  const winX = bx + bodyW * 0.14;
-  const winY = by + (bodyH - foundH) * 0.22;
-  // Moldura escura
-  ctx.fillStyle = '#2a1810';
-  ctx.fillRect(winX - 1, winY - 1, winW + 2, winH + 2);
-  // Vidraça com luz warm
-  ctx.fillStyle = 'rgba(255, 200, 110, ' + flick.toFixed(3) + ')';
-  ctx.fillRect(winX, winY, winW, winH);
-  // Cruz central (divisor de janela)
-  ctx.strokeStyle = 'rgba(30, 20, 12, 0.85)';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(winX + winW / 2, winY);
-  ctx.lineTo(winX + winW / 2, winY + winH);
-  ctx.moveTo(winX, winY + winH / 2);
-  ctx.lineTo(winX + winW, winY + winH / 2);
-  ctx.stroke();
-  // Glow sutil em volta da janela (luz warm saindo)
-  const winGlow = ctx.createRadialGradient(winX + winW / 2, winY + winH / 2, 0, winX + winW / 2, winY + winH / 2, winW * 1.8);
-  winGlow.addColorStop(0, 'rgba(255, 200, 100, ' + (0.32 * flick).toFixed(3) + ')');
-  winGlow.addColorStop(1, 'rgba(255, 200, 100, 0)');
-  ctx.fillStyle = winGlow;
-  ctx.beginPath();
-  ctx.arc(winX + winW / 2, winY + winH / 2, winW * 1.8, 0, Math.PI * 2);
-  ctx.fill();
-  // 6. Telhado triangular — 2 faces (iluminada + sombra)
+  // 5. Janela(s) — 1 à esquerda OU 2 (esq + dir) dependendo da variante
+  for (let wi = 0; wi < vd.windowCount; wi++) {
+    const winW = bodyW * 0.14;
+    const winH = (bodyH - foundH) * 0.32;
+    const winX = (wi === 0)
+      ? bx + bodyW * 0.14
+      : bx + bodyW - bodyW * 0.14 - winW;
+    const winY = by + (bodyH - foundH) * 0.22;
+    // Moldura escura
+    ctx.fillStyle = '#2a1810';
+    ctx.fillRect(winX - 1, winY - 1, winW + 2, winH + 2);
+    // Vidraça com luz warm
+    ctx.fillStyle = 'rgba(255, 200, 110, ' + flick.toFixed(3) + ')';
+    ctx.fillRect(winX, winY, winW, winH);
+    // Cruz central (divisor de janela)
+    ctx.strokeStyle = 'rgba(30, 20, 12, 0.85)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(winX + winW / 2, winY);
+    ctx.lineTo(winX + winW / 2, winY + winH);
+    ctx.moveTo(winX, winY + winH / 2);
+    ctx.lineTo(winX + winW, winY + winH / 2);
+    ctx.stroke();
+    // X-6.5.51l: floreira na janela (variante "flowerbox")
+    if (vd.detail === 'flowerbox') {
+      // Caixa de madeira marrom
+      ctx.fillStyle = '#5a3818';
+      ctx.fillRect(winX - 1, winY + winH, winW + 2, 2);
+      // Flores coloridas (3 pontos)
+      const flwrColors = ['#d84838', '#f0c038', '#a868c8'];
+      for (let fi = 0; fi < 3; fi++) {
+        ctx.fillStyle = flwrColors[fi % flwrColors.length];
+        ctx.beginPath();
+        ctx.arc(winX + winW * (0.2 + fi * 0.3), winY + winH + 0.5, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    // Glow sutil em volta da janela (luz warm saindo) — só na primeira pra perf
+    if (wi === 0) {
+      const winGlow = ctx.createRadialGradient(winX + winW / 2, winY + winH / 2, 0, winX + winW / 2, winY + winH / 2, winW * 1.8);
+      winGlow.addColorStop(0, 'rgba(255, 200, 100, ' + (0.32 * flick).toFixed(3) + ')');
+      winGlow.addColorStop(1, 'rgba(255, 200, 100, 0)');
+      ctx.fillStyle = winGlow;
+      ctx.beginPath();
+      ctx.arc(winX + winW / 2, winY + winH / 2, winW * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // 6. Telhado triangular — 2 faces (iluminada + sombra) com cores da variante
   const roofPeakY = by - bodyH * 0.5;
   const roofL = { x: bx - 3, y: by };
   const roofR = { x: bx + bodyW + 3, y: by };
   const roofPeak = { x: cx, y: roofPeakY };
   // Face escura (lado direito, sombra)
-  ctx.fillStyle = '#4a281a';
+  ctx.fillStyle = vd.roofDark;
   ctx.beginPath();
   ctx.moveTo(roofPeak.x, roofPeak.y);
   ctx.lineTo(roofR.x, roofR.y);
@@ -8709,13 +9300,31 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   ctx.closePath();
   ctx.fill();
   // Face iluminada (lado esquerdo)
-  ctx.fillStyle = '#6a3a22';
+  ctx.fillStyle = vd.roofLit;
   ctx.beginPath();
   ctx.moveTo(roofPeak.x, roofPeak.y);
   ctx.lineTo(roofL.x, roofL.y);
   ctx.lineTo(cx, roofL.y);
   ctx.closePath();
   ctx.fill();
+  // X-6.5.51l: chifres no topo do telhado (variante floresteiro)
+  if (vd.detail === 'antlers') {
+    ctx.strokeStyle = '#d8c8a8';
+    ctx.lineWidth = 0.8;
+    ctx.lineCap = 'round';
+    // Galhada esquerda
+    ctx.beginPath();
+    ctx.moveTo(roofPeak.x - 1, roofPeak.y);
+    ctx.lineTo(roofPeak.x - 5, roofPeak.y - 3);
+    ctx.moveTo(roofPeak.x - 3, roofPeak.y - 1);
+    ctx.lineTo(roofPeak.x - 6, roofPeak.y - 1.5);
+    // Galhada direita
+    ctx.moveTo(roofPeak.x + 1, roofPeak.y);
+    ctx.lineTo(roofPeak.x + 5, roofPeak.y - 3);
+    ctx.moveTo(roofPeak.x + 3, roofPeak.y - 1);
+    ctx.lineTo(roofPeak.x + 6, roofPeak.y - 1.5);
+    ctx.stroke();
+  }
   // Ripas horizontais do telhado (2-3 traços paralelos de cada lado)
   ctx.strokeStyle = 'rgba(20, 10, 5, 0.6)';
   ctx.lineWidth = 0.4;
@@ -8737,33 +9346,70 @@ function drawCottage(ctx, cx, cy, col, row, rng) {
   ctx.moveTo(roofPeak.x - 1, roofPeak.y);
   ctx.lineTo(roofL.x + 2, roofL.y - 1);
   ctx.stroke();
-  // 7. Chaminé de pedra (direita do telhado)
-  const chimX = bx + bodyW * 0.72;
-  const chimY = by - bodyH * 0.25;
-  const chimW = bodyW * 0.07;
-  const chimH = bodyH * 0.35;
-  ctx.fillStyle = '#605650';
-  ctx.fillRect(chimX, chimY, chimW, chimH);
-  // Face iluminada da chaminé
-  ctx.fillStyle = '#806e5e';
-  ctx.fillRect(chimX, chimY, chimW * 0.5, chimH);
-  // Topo (pedra mais escura)
-  ctx.fillStyle = '#3a322a';
-  ctx.fillRect(chimX - 1, chimY - 1, chimW + 2, 2);
-  // Fumaça saindo (só quando há luz na janela = casa habitada)
-  if (flick > 0.75) {
-    ctx.fillStyle = 'rgba(180, 170, 160, 0.35)';
+  // 7. Chaminé de pedra (direita do telhado) — só se variante tem
+  if (vd.hasChimney) {
+    const chimX = bx + bodyW * 0.72;
+    const chimY = by - bodyH * 0.25;
+    const chimW = bodyW * 0.07;
+    const chimH = bodyH * 0.35;
+    ctx.fillStyle = vd.chimney;
+    ctx.fillRect(chimX, chimY, chimW, chimH);
+    // Face iluminada da chaminé
+    ctx.fillStyle = vd.chimneyLit;
+    ctx.fillRect(chimX, chimY, chimW * 0.5, chimH);
+    // Topo (pedra mais escura)
+    ctx.fillStyle = vd.chimneyTop;
+    ctx.fillRect(chimX - 1, chimY - 1, chimW + 2, 2);
+    // Fumaça saindo (só quando há luz na janela = casa habitada)
+    if (flick > 0.75) {
+      ctx.fillStyle = 'rgba(180, 170, 160, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6) * 1, chimY - 3, 1.5, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(180, 170, 160, 0.18)';
+      ctx.beginPath();
+      ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6 + 1) * 2, chimY - 7, 2.2, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(180, 170, 160, 0.08)';
+      ctx.beginPath();
+      ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6 + 2) * 3, chimY - 12, 3, 3.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // X-6.5.51l: detalhes laterais por variante
+  if (vd.detail === 'logs') {
+    // Pilha de toras à esquerda da casa
+    ctx.fillStyle = '#5a3818';
+    for (let li = 0; li < 3; li++) {
+      ctx.fillRect(bx - 5, by + bodyH - foundH - 2 - li * 1.6, 4, 1.4);
+    }
+    // Marcas das toras (anéis)
+    ctx.strokeStyle = 'rgba(20, 10, 5, 0.6)';
+    ctx.lineWidth = 0.4;
+    for (let li = 0; li < 3; li++) {
+      ctx.beginPath();
+      ctx.arc(bx - 4, by + bodyH - foundH - 1.3 - li * 1.6, 0.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  } else if (vd.detail === 'stones') {
+    // Pilha de pedras pequenas
+    ctx.fillStyle = '#6e6660';
     ctx.beginPath();
-    ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6) * 1, chimY - 3, 1.5, 2.5, 0, 0, Math.PI * 2);
+    ctx.arc(bx - 3, by + bodyH - foundH + 1, 1.5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(180, 170, 160, 0.18)';
     ctx.beginPath();
-    ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6 + 1) * 2, chimY - 7, 2.2, 3, 0, 0, Math.PI * 2);
+    ctx.arc(bx - 1.5, by + bodyH - foundH + 0.5, 1.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(180, 170, 160, 0.08)';
     ctx.beginPath();
-    ctx.ellipse(chimX + chimW / 2 + Math.sin(t * 0.6 + 2) * 3, chimY - 12, 3, 3.5, 0, 0, Math.PI * 2);
+    ctx.arc(bx - 2.5, by + bodyH - foundH - 1, 1.0, 0, Math.PI * 2);
     ctx.fill();
+  } else if (vd.detail === 'bench') {
+    // Banco de madeira na frente
+    ctx.fillStyle = '#4a3018';
+    ctx.fillRect(bx + bodyW * 0.18, by + bodyH + 1, bodyW * 0.32, 1.4);
+    // Pés do banco
+    ctx.fillRect(bx + bodyW * 0.20, by + bodyH + 2, 0.8, 1.5);
+    ctx.fillRect(bx + bodyW * 0.46, by + bodyH + 2, 0.8, 1.5);
   }
   // 8. Contorno sutil do corpo (definição)
   ctx.strokeStyle = 'rgba(20, 12, 8, 0.55)';
@@ -9053,6 +9699,450 @@ function drawCampfire(ctx, cx, cy, col, row, rng) {
     ctx.beginPath();
     ctx.ellipse(cx + Math.sin(t * 0.4) * 2, smokeY, smokeW, smokeH, 0, 0, Math.PI * 2);
     ctx.fill();
+  }
+}
+
+// X-6.5.51l (2026-04-25): scene composition pra hex de mata. Antes da
+// arvore principal, desenha undergrowth/cogumelos/troncos caidos/pedras/
+// ferns/musgo de acordo com a variante. 10 variantes (0-9). Variante 9 e
+// "clareira" — so undergrowth, sem arvore principal (return early no caller).
+function drawForestScene(ctx, cx, cy, col, row, variant, rng) {
+  // Helper: cogumelo pequeno
+  function _shroom(sx, sy, capColor, scale) {
+    scale = scale || 1;
+    // Cabo branco
+    ctx.fillStyle = '#e6dac0';
+    ctx.fillRect(sx - 0.6 * scale, sy, 1.2 * scale, 2 * scale);
+    // Chapeu colorido (semi-circulo)
+    ctx.fillStyle = capColor;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.4 * scale, Math.PI, 0);
+    ctx.fill();
+    // Pintinhas brancas no chapeu
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(sx - 0.4 * scale, sy - 0.5 * scale, 0.25 * scale, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sx + 0.4 * scale, sy - 0.7 * scale, 0.2 * scale, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Helper: tronco caido (log)
+  function _fallenLog(sx, sy, len, angle) {
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(angle);
+    // Sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(0.5, 1.2, len * 0.55, 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Corpo do tronco
+    ctx.fillStyle = '#4a3220';
+    ctx.fillRect(-len / 2, -1.2, len, 2.4);
+    // Topo iluminado
+    ctx.fillStyle = '#6e4e2e';
+    ctx.fillRect(-len / 2, -1.2, len, 1);
+    // Aneis de madeira nas pontas
+    ctx.fillStyle = '#2a1a0e';
+    ctx.beginPath();
+    ctx.arc(-len / 2 + 0.5, 0, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#5a3a22';
+    ctx.beginPath();
+    ctx.arc(-len / 2 + 0.5, 0, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  // Helper: pedra musgosa
+  function _mossyRock(sx, sy, r) {
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy + r * 0.5, r * 1.2, r * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#5e5852';
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, Math.PI, 0);
+    ctx.fill();
+    // Musgo no topo
+    ctx.fillStyle = '#3a5a28';
+    ctx.beginPath();
+    ctx.ellipse(sx - r * 0.2, sy - r * 0.7, r * 0.7, r * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Helper: arvore pequena (silhueta)
+  function _smallTree(sx, sy, size, color) {
+    ctx.fillStyle = '#2a1a0e';
+    ctx.fillRect(sx - 0.6, sy, 1.2, size * 0.4);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(sx, sy - size * 0.3, size * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Helper: fern (samambaia)
+  function _fern(sx, sy, len, angle) {
+    ctx.strokeStyle = 'rgba(50, 90, 35, 0.85)';
+    ctx.lineWidth = 0.8;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 5; i++) {
+      const a = (i - 2) * 0.35 + angle;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(
+        sx + Math.cos(a) * len * 0.5,
+        sy + Math.sin(a) * len * 0.5,
+        sx + Math.cos(a) * len,
+        sy + Math.sin(a) * len
+      );
+      ctx.stroke();
+    }
+  }
+  // Helper: trilha de folhas caidas (chão)
+  function _leafLitter(num, color) {
+    for (let i = 0; i < num; i++) {
+      const lx = cx + (rng() - 0.5) * HEX_W * 0.7;
+      const ly = cy + (rng() - 0.5) * HEX_H * 0.45 + HEX_H * 0.05;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 1.2, 0.7, rng() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Variantes de scena
+  if (variant === 0) {
+    // Mata densa basica — folhas no chao + 2 cogumelos esquerda
+    _leafLitter(8, 'rgba(95, 65, 30, 0.5)');
+    _shroom(cx - HEX_W * 0.18, cy + HEX_H * 0.18, '#a8382a', 1);
+    _shroom(cx - HEX_W * 0.13, cy + HEX_H * 0.21, '#6a3818', 0.7);
+  } else if (variant === 1) {
+    // Tronco caido atravessando + fern atras
+    _leafLitter(6, 'rgba(95, 65, 30, 0.45)');
+    _fallenLog(cx + HEX_W * 0.05, cy + HEX_H * 0.15, HEX_W * 0.32, 0.25);
+    _fern(cx - HEX_W * 0.18, cy + HEX_H * 0.05, 4, -Math.PI / 2);
+  } else if (variant === 2) {
+    // 2 pedras musgosas + cogumelo pequeno
+    _leafLitter(5, 'rgba(80, 55, 25, 0.4)');
+    _mossyRock(cx - HEX_W * 0.20, cy + HEX_H * 0.20, 3);
+    _mossyRock(cx + HEX_W * 0.18, cy + HEX_H * 0.22, 2.2);
+    _shroom(cx + HEX_W * 0.05, cy + HEX_H * 0.18, '#d8c038', 0.8);
+  } else if (variant === 3) {
+    // Aglomerado de cogumelos coloridos (familia)
+    _leafLitter(7, 'rgba(95, 65, 30, 0.45)');
+    _shroom(cx - HEX_W * 0.10, cy + HEX_H * 0.20, '#a8382a', 1);
+    _shroom(cx - HEX_W * 0.04, cy + HEX_H * 0.22, '#a8382a', 0.7);
+    _shroom(cx + HEX_W * 0.04, cy + HEX_H * 0.21, '#d88828', 0.85);
+    _shroom(cx + HEX_W * 0.12, cy + HEX_H * 0.23, '#a8382a', 0.6);
+  } else if (variant === 4) {
+    // 3 pequenas arvorezinhas atras + ferns
+    _leafLitter(6, 'rgba(85, 60, 28, 0.45)');
+    _smallTree(cx - HEX_W * 0.22, cy - HEX_H * 0.05, 6, '#1d3a18');
+    _smallTree(cx + HEX_W * 0.22, cy - HEX_H * 0.02, 5, '#204018');
+    _fern(cx + HEX_W * 0.15, cy + HEX_H * 0.18, 3.5, -Math.PI / 2.5);
+  } else if (variant === 5) {
+    // Galhos secos no chao + pedras pequenas
+    _leafLitter(9, 'rgba(95, 65, 30, 0.5)');
+    ctx.strokeStyle = 'rgba(50, 32, 18, 0.85)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(cx - HEX_W * 0.20, cy + HEX_H * 0.18);
+    ctx.lineTo(cx - HEX_W * 0.05, cy + HEX_H * 0.20);
+    ctx.moveTo(cx + HEX_W * 0.10, cy + HEX_H * 0.22);
+    ctx.lineTo(cx + HEX_W * 0.20, cy + HEX_H * 0.18);
+    ctx.stroke();
+    _mossyRock(cx + HEX_W * 0.20, cy + HEX_H * 0.05, 1.8);
+  } else if (variant === 6) {
+    // Tronco caido + cogumelos crescendo nele + fern
+    _leafLitter(5, 'rgba(85, 60, 28, 0.4)');
+    _fallenLog(cx, cy + HEX_H * 0.22, HEX_W * 0.4, -0.15);
+    _shroom(cx - HEX_W * 0.06, cy + HEX_H * 0.18, '#d8b838', 0.6);
+    _shroom(cx + HEX_W * 0.04, cy + HEX_H * 0.17, '#d8b838', 0.5);
+    _fern(cx + HEX_W * 0.18, cy + HEX_H * 0.22, 3, -Math.PI / 2);
+  } else if (variant === 7) {
+    // Bosque jovem — 4 ferns ao redor + cogumelos
+    for (let f = 0; f < 4; f++) {
+      const fa = (Math.PI * 2 / 4) * f + Math.PI / 4;
+      const fx = cx + Math.cos(fa) * HEX_W * 0.20;
+      const fy = cy + Math.sin(fa) * HEX_H * 0.18 + HEX_H * 0.05;
+      _fern(fx, fy, 3.2, -Math.PI / 2 + Math.cos(fa) * 0.3);
+    }
+    _shroom(cx, cy + HEX_H * 0.20, '#a85838', 0.85);
+  } else if (variant === 8) {
+    // Pedras musgosas grandes (afloramento) + folhas
+    _leafLitter(8, 'rgba(95, 65, 30, 0.45)');
+    _mossyRock(cx - HEX_W * 0.15, cy + HEX_H * 0.18, 3.5);
+    _mossyRock(cx + HEX_W * 0.05, cy + HEX_H * 0.20, 4);
+    _mossyRock(cx + HEX_W * 0.20, cy + HEX_H * 0.15, 2.5);
+  } else if (variant === 9) {
+    // Clareira — sem arvore principal, so undergrowth + flores selvagens
+    _leafLitter(10, 'rgba(95, 65, 30, 0.4)');
+    // Flores
+    const flwrColors = ['#c44438', '#d8c428', '#a868c8', '#f0f0f0'];
+    for (let f = 0; f < 5; f++) {
+      const fx = cx + (rng() - 0.5) * HEX_W * 0.55;
+      const fy = cy + (rng() - 0.5) * HEX_H * 0.4;
+      ctx.strokeStyle = 'rgba(60, 100, 40, 0.6)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy + 2);
+      ctx.lineTo(fx, fy - 1.5);
+      ctx.stroke();
+      ctx.fillStyle = flwrColors[f % flwrColors.length];
+      for (let p = 0; p < 5; p++) {
+        const pa = (Math.PI * 2 / 5) * p;
+        ctx.beginPath();
+        ctx.arc(fx + Math.cos(pa) * 0.9, fy - 1.5 + Math.sin(pa) * 0.9, 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#fbd770';
+      ctx.beginPath();
+      ctx.arc(fx, fy - 1.5, 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Tufos de grama alta
+    ctx.strokeStyle = '#3d5e22';
+    ctx.lineWidth = 0.8;
+    ctx.lineCap = 'round';
+    for (let g = 0; g < 6; g++) {
+      const gx = cx + (rng() - 0.5) * HEX_W * 0.5;
+      const gy = cy + (rng() - 0.5) * HEX_H * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.quadraticCurveTo(gx + 0.4, gy - 2, gx + 0.8, gy - 4);
+      ctx.stroke();
+    }
+  }
+}
+
+// X-6.5.51l (2026-04-25): 10 variantes de arbusto (tile 't'). Cada uma tem
+// silhueta + paleta diferente — galho seco / florido / espinhoso / sarcado /
+// frutificado / 3-tufos / linha / aglomerado denso / folhagem outonal /
+// musgoso. User feedback: "aumente a quantidade de detalhes minimalistas
+// para os hexagonos arbustos, pelo menos 10 variacoes tambem prontas".
+function drawBushVariant(ctx, cx, cy, col, row, variant, rng) {
+  // Helper: tufo verde com lighting NW
+  function _greenTuft(tx, ty, r, darkColor, lightColor, hlColor) {
+    ctx.fillStyle = darkColor;
+    ctx.beginPath();
+    ctx.arc(tx, ty + r * 0.3, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = lightColor;
+    ctx.beginPath();
+    ctx.arc(tx - r * 0.15, ty - r * 0.1, r * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    if (hlColor) {
+      ctx.fillStyle = hlColor;
+      ctx.beginPath();
+      ctx.arc(tx - r * 0.25, ty - r * 0.3, r * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Sombra base (todas variantes tem)
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + HEX_H * 0.04, HEX_W * 0.17, HEX_H * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (variant === 0) {
+    // Original — 4 tufos em anel
+    const tufts = 4;
+    for (let i = 0; i < tufts; i++) {
+      const a = (Math.PI * 2 / tufts) * i + (rng() - 0.5) * 0.4;
+      const dist = HEX_W * (0.07 + rng() * 0.04);
+      const tx = cx + Math.cos(a) * dist;
+      const ty = cy + Math.sin(a) * dist * 0.7 - HEX_H * 0.015;
+      const r = HEX_W * (0.085 + rng() * 0.02);
+      _greenTuft(tx, ty, r, '#1f3818', '#3d5c28', 'rgba(120, 160, 80, 0.55)');
+    }
+    // Galho fino marrom
+    ctx.strokeStyle = 'rgba(60, 40, 24, 0.7)';
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - HEX_W * 0.02, cy + HEX_H * 0.02);
+    ctx.lineTo(cx + HEX_W * 0.03, cy - HEX_H * 0.06);
+    ctx.stroke();
+  } else if (variant === 1) {
+    // Florido — folhagem com flores brancas pequenas
+    for (let i = 0; i < 4; i++) {
+      const a = (Math.PI * 2 / 4) * i + (rng() - 0.5) * 0.4;
+      const dist = HEX_W * (0.07 + rng() * 0.04);
+      const tx = cx + Math.cos(a) * dist;
+      const ty = cy + Math.sin(a) * dist * 0.7 - HEX_H * 0.015;
+      const r = HEX_W * (0.085 + rng() * 0.02);
+      _greenTuft(tx, ty, r, '#1f3818', '#456a28', 'rgba(120, 160, 80, 0.55)');
+    }
+    // Flores brancas (5 pontos)
+    ctx.fillStyle = 'rgba(245, 235, 220, 0.95)';
+    for (let f = 0; f < 5; f++) {
+      const fa = (Math.PI * 2 / 5) * f + 0.3;
+      const fx = cx + Math.cos(fa) * HEX_W * 0.085;
+      const fy = cy + Math.sin(fa) * HEX_H * 0.07 - HEX_H * 0.03;
+      ctx.beginPath();
+      ctx.arc(fx, fy, 0.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (variant === 2) {
+    // Espinhoso — silhueta angular com espinhos visiveis
+    ctx.fillStyle = '#1a3018';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - HEX_H * 0.10);
+    ctx.lineTo(cx + HEX_W * 0.10, cy - HEX_H * 0.04);
+    ctx.lineTo(cx + HEX_W * 0.13, cy + HEX_H * 0.04);
+    ctx.lineTo(cx + HEX_W * 0.05, cy + HEX_H * 0.10);
+    ctx.lineTo(cx - HEX_W * 0.05, cy + HEX_H * 0.10);
+    ctx.lineTo(cx - HEX_W * 0.13, cy + HEX_H * 0.04);
+    ctx.lineTo(cx - HEX_W * 0.10, cy - HEX_H * 0.04);
+    ctx.closePath();
+    ctx.fill();
+    // Lit
+    ctx.fillStyle = '#3a5a28';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - HEX_H * 0.10);
+    ctx.lineTo(cx + HEX_W * 0.05, cy - HEX_H * 0.06);
+    ctx.lineTo(cx, cy + HEX_H * 0.02);
+    ctx.lineTo(cx - HEX_W * 0.05, cy - HEX_H * 0.06);
+    ctx.closePath();
+    ctx.fill();
+    // Espinhos (linhas radiais)
+    ctx.strokeStyle = 'rgba(100, 80, 50, 0.85)';
+    ctx.lineWidth = 0.7;
+    for (let s = 0; s < 6; s++) {
+      const sa = (Math.PI * 2 / 6) * s + 0.3;
+      const x1 = cx + Math.cos(sa) * HEX_W * 0.08;
+      const y1 = cy + Math.sin(sa) * HEX_H * 0.07;
+      const x2 = cx + Math.cos(sa) * HEX_W * 0.13;
+      const y2 = cy + Math.sin(sa) * HEX_H * 0.10;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+  } else if (variant === 3) {
+    // Frutificado — bagas vermelhas/roxas
+    for (let i = 0; i < 3; i++) {
+      const a = (Math.PI * 2 / 3) * i + 0.4;
+      const dist = HEX_W * 0.08;
+      const tx = cx + Math.cos(a) * dist;
+      const ty = cy + Math.sin(a) * dist * 0.7;
+      _greenTuft(tx, ty, HEX_W * 0.085, '#1f3818', '#3a5a22', null);
+    }
+    // Bagas
+    const berryColors = ['#8a2828', '#682838', '#6a1818'];
+    for (let b = 0; b < 7; b++) {
+      const ba = rng() * Math.PI * 2;
+      const bd = HEX_W * (0.04 + rng() * 0.10);
+      const bx = cx + Math.cos(ba) * bd;
+      const by = cy + Math.sin(ba) * bd * 0.65;
+      ctx.fillStyle = berryColors[Math.floor(rng() * berryColors.length)];
+      ctx.beginPath();
+      ctx.arc(bx, by, 0.9, 0, Math.PI * 2);
+      ctx.fill();
+      // Highlight
+      ctx.fillStyle = 'rgba(255, 200, 200, 0.55)';
+      ctx.beginPath();
+      ctx.arc(bx - 0.3, by - 0.3, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (variant === 4) {
+    // 3 tufos lineares (arbusto baixo + alongado)
+    for (let i = 0; i < 3; i++) {
+      const tx = cx + (i - 1) * HEX_W * 0.10;
+      const ty = cy + (rng() - 0.5) * HEX_H * 0.04;
+      const r = HEX_W * (0.075 + rng() * 0.02);
+      _greenTuft(tx, ty, r, '#1f3818', '#3d5c28', 'rgba(120, 160, 80, 0.45)');
+    }
+  } else if (variant === 5) {
+    // Aglomerado denso — 6 tufos pequenos compactos
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI * 2 / 6) * i + 0.3;
+      const dist = HEX_W * 0.08;
+      const tx = cx + Math.cos(a) * dist;
+      const ty = cy + Math.sin(a) * dist * 0.6 - HEX_H * 0.01;
+      const r = HEX_W * 0.06;
+      _greenTuft(tx, ty, r, '#1a2e15', '#3a5828', null);
+    }
+    // Tufo central destacado
+    _greenTuft(cx, cy - HEX_H * 0.03, HEX_W * 0.075, '#1f3818', '#456a28', 'rgba(120, 160, 80, 0.6)');
+  } else if (variant === 6) {
+    // Outonal — folhagem amarela/laranja
+    for (let i = 0; i < 4; i++) {
+      const a = (Math.PI * 2 / 4) * i + (rng() - 0.5) * 0.4;
+      const dist = HEX_W * (0.07 + rng() * 0.04);
+      const tx = cx + Math.cos(a) * dist;
+      const ty = cy + Math.sin(a) * dist * 0.7 - HEX_H * 0.015;
+      const r = HEX_W * (0.085 + rng() * 0.02);
+      _greenTuft(tx, ty, r, '#683818', '#a85828', 'rgba(220, 160, 80, 0.55)');
+    }
+    // Algumas folhas caidas
+    ctx.fillStyle = 'rgba(180, 100, 40, 0.7)';
+    for (let l = 0; l < 4; l++) {
+      const lx = cx + (rng() - 0.5) * HEX_W * 0.5;
+      const ly = cy + (rng() - 0.5) * HEX_H * 0.35 + HEX_H * 0.05;
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 1.4, 0.8, rng() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (variant === 7) {
+    // Musgoso baixo — tufos amplos e achatados, escuros
+    for (let i = 0; i < 3; i++) {
+      const tx = cx + (i - 1) * HEX_W * 0.11;
+      const ty = cy + HEX_H * 0.02;
+      ctx.fillStyle = '#1a2812';
+      ctx.beginPath();
+      ctx.ellipse(tx, ty, HEX_W * 0.08, HEX_H * 0.04, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2d4818';
+      ctx.beginPath();
+      ctx.ellipse(tx, ty - HEX_H * 0.005, HEX_W * 0.065, HEX_H * 0.03, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (variant === 8) {
+    // Galho seco torto + folhagem rala
+    // Galho principal
+    ctx.strokeStyle = 'rgba(50, 32, 18, 0.85)';
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - HEX_W * 0.04, cy + HEX_H * 0.10);
+    ctx.quadraticCurveTo(cx, cy + HEX_H * 0.02, cx + HEX_W * 0.05, cy - HEX_H * 0.08);
+    ctx.stroke();
+    // Galhos secundarios
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + HEX_H * 0.04);
+    ctx.lineTo(cx - HEX_W * 0.07, cy - HEX_H * 0.02);
+    ctx.moveTo(cx + HEX_W * 0.03, cy - HEX_H * 0.02);
+    ctx.lineTo(cx + HEX_W * 0.10, cy - HEX_H * 0.06);
+    ctx.stroke();
+    // Folhagem rala (3 pontos pequenos)
+    for (let l = 0; l < 3; l++) {
+      _greenTuft(
+        cx + (rng() - 0.5) * HEX_W * 0.16,
+        cy + (rng() - 0.5) * HEX_H * 0.12 - HEX_H * 0.02,
+        HEX_W * 0.04,
+        '#2a4818', '#456a28', null
+      );
+    }
+  } else if (variant === 9) {
+    // Tufo unico grande + flores roxas (lavanda style)
+    _greenTuft(cx, cy - HEX_H * 0.02, HEX_W * 0.13, '#1f3818', '#3d5c28', 'rgba(120, 160, 80, 0.55)');
+    // Flores roxas (4 pontos)
+    ctx.fillStyle = 'rgba(150, 80, 180, 0.85)';
+    for (let f = 0; f < 5; f++) {
+      const fa = (Math.PI * 2 / 5) * f - Math.PI / 2;
+      const fx = cx + Math.cos(fa) * HEX_W * 0.10;
+      const fy = cy - HEX_H * 0.05 + Math.sin(fa) * HEX_H * 0.05;
+      ctx.beginPath();
+      ctx.arc(fx, fy, 1, 0, Math.PI * 2);
+      ctx.fill();
+      // Centro amarelo
+      ctx.fillStyle = '#f0d038';
+      ctx.beginPath();
+      ctx.arc(fx, fy, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(150, 80, 180, 0.85)';
+    }
   }
 }
 
@@ -10632,12 +11722,14 @@ function maybeRollEvent() {
   LOG('EVENT', 'maybeRollEvent biome=' + S.biome + ' totalPool=' + ids.length + ' recent=' + recentEventIds.join(','));
   if (ids.length === 0) { LOGW('EVENT', 'biome ' + S.biome + ' has no events in pool'); return false; }
 
-  // [R2 2026-04-23] Cooldown inteligente em 2 camadas:
+  // [R2 2026-04-23 / X-6.5.51l 2026-04-25] Cooldown reforcado:
   //   1. Ring buffer (5 últimos IDs) — nunca repete em rajada
   //   2. Histórico persistido (player.metadata['explore_event_history'])
   //      — evento rolado nos últimos COOLDOWN_STEPS evita sair de novo
+  // X-6.5.51l: COOLDOWN_STEPS 30 -> 200 (user feedback: eventos repetiam,
+  // queremos pool gigante novo +50 por bioma e nunca repetir na mesma sessao).
   // Prioriza eventos NUNCA rolados. Se todo pool já saiu, relaxa filtros.
-  const COOLDOWN_STEPS = 30;  // eventos dos últimos 30 steps em cooldown
+  const COOLDOWN_STEPS = 200;  // X-6.5.51l: 30->200
   const currentStep = S.steps || 0;
   const history = (S.persistedEventHistory || []);
 
@@ -11787,25 +12879,22 @@ function pickFamiliarityVariant(ev, fieldName) {
     if (firstVar && firstVar.length) return firstVar[0];
     return ev[baseField];
   }
+  // X-6.5.51l (2026-04-25): User feedback — remover prefixos meta-narrativos
+  // ("De novo aquele encontro..." / "Você já conhece bem esta cena."). Esses
+  // prefixos aparecem porque o cooldown nem sempre é suficiente. Solução:
+  // (a) remover prefixos completamente; (b) reforçar cooldown abaixo (de 30
+  // pra 200 steps) pra eventos quase nunca repetirem em uma sessão.
   if (count === 1) {
-    // Segundo encontro
+    // Segundo encontro — usa variante "returning" se existir, senao variante
+    // aleatoria SEM prefixo meta
     const returningVar = ev[baseField + '_returning_variants'];
     if (returningVar && returningVar.length) return pickRandom(returningVar);
-    // Fallback: variante aleatória + prefixo sutil
-    const base = pickVariant(ev, baseField);
-    if (baseField === 'text') {
-      return '*(De novo aquele encontro...)*\n\n' + base;
-    }
-    return base;
+    return pickVariant(ev, baseField);
   }
-  // count >= 2: familiar
+  // count >= 2: familiar — variante familiar se existir, senao aleatoria SEM prefixo
   const familiarVar = ev[baseField + '_familiar_variants'];
   if (familiarVar && familiarVar.length) return pickRandom(familiarVar);
-  const base = pickVariant(ev, baseField);
-  if (baseField === 'text') {
-    return '*(Você já conhece bem esta cena.)*\n\n' + base;
-  }
-  return base;
+  return pickVariant(ev, baseField);
 }
 
 // V2.6: filtro estendido — class + background + alignment + ally-class.
@@ -12066,6 +13155,273 @@ function openQuestJournal(opts) {
 
 function closeQuestJournal() {
   document.getElementById('journal-overlay').classList.remove('visible');
+}
+
+// ============================================================================
+// JOURNEY (X-6.5.51l) — viagem entre mapas via cartografia
+// ============================================================================
+// Adaptado de valdoria-webapp/explore/explore-outbound-travel.js. Mostra
+// viagem com etapas (turnos), narracoes, hazards (skill checks D&D 5e),
+// progress dots na linha do tempo. Ao chegar, faz boot() pro mapa destino.
+// User feedback: "coloque os riscos da viagem, turnos, etc, o que existir
+// de mecânica D&D, e use o sistema que já existe de viagem que mostra
+// eventos acontecendo, inclusive encontros em uma linha do tempo".
+
+var _journey = null;
+
+// Pool de hazards por bioma destino (skill checks D&D 5e)
+var JOURNEY_HAZARDS = {
+  forest: [
+    { title: 'Armadilha de Caçadores', narr: 'Um laço escondido nas folhas se prende ao seu pé!',
+      choices: [
+        { i: '🔍', t: 'Desarmar', stat: 'dex', dc: 12, sNarr: 'Suas mãos ágeis desarmam o laço sem ferimento.', fNarr: 'O laço corta sua perna ao apertar.', dmg: 3 },
+        { i: '💪', t: 'Romper', stat: 'str', dc: 13, sNarr: 'Você arrebenta a corda com força bruta!', fNarr: 'A corda lacera sua pele.', dmg: 4 } ] },
+    { title: 'Galho Caído', narr: 'Um galho enorme cai do alto, bloqueando a trilha.',
+      choices: [
+        { i: '🧗', t: 'Saltar por cima', stat: 'dex', dc: 11, sNarr: 'Salto leve, sem dificuldade.', fNarr: 'Você tropeça e arranha o joelho.', dmg: 2 },
+        { i: '💪', t: 'Empurrar', stat: 'str', dc: 12, sNarr: 'Você move o galho do caminho.', fNarr: 'O galho é mais pesado do que parece.', dmg: 2 } ] },
+    { title: 'Atoleiro', narr: 'O caminho se afoga em lama negra entre raízes.',
+      choices: [
+        { i: '🔍', t: 'Encontrar trilha firme', stat: 'wis', dc: 12, sNarr: 'Você encontra um caminho seco.', fNarr: 'Você afunda até as canelas e perde tempo.', dmg: 2 } ] }
+  ],
+  plains: [
+    { title: 'Vendaval', narr: 'O vento sopra com força, levantando poeira que cega seus olhos.',
+      choices: [
+        { i: '🛡', t: 'Resistir', stat: 'con', dc: 11, sNarr: 'Você suporta o vendaval sem perder o passo.', fNarr: 'O vento o derruba; areia entra nos olhos.', dmg: 2 } ] },
+    { title: 'Bandidos!', narr: 'Três figuras encapuzadas saem do trigal!',
+      choices: [
+        { i: '🗣', t: 'Negociar', stat: 'cha', dc: 13, sNarr: 'Sua lábia os convence a recuar.', fNarr: 'Eles atacam; você sangra antes de fugir.', dmg: 5 },
+        { i: '🏃', t: 'Fugir', stat: 'dex', dc: 12, sNarr: 'Você corre mais rápido que eles!', fNarr: 'Uma flecha o atinge nas costas.', dmg: 4 } ] }
+  ],
+  swamp: [
+    { title: 'Areia Movediça', narr: 'Seus pés afundam na lama traiçoeira!',
+      choices: [
+        { i: '💪', t: 'Forçar saída', stat: 'str', dc: 13, sNarr: 'Com esforço brutal, você se liberta.', fNarr: 'Você afunda mais antes de escapar.', dmg: 4 },
+        { i: '🧠', t: 'Manter calma', stat: 'wis', dc: 12, sNarr: 'Movimentos lentos permitem sair.', fNarr: 'O pânico consome sua energia.', dmg: 3 } ] },
+    { title: 'Gás Pantanoso', narr: 'Uma nuvem verde sobe das poças apodrecidas.',
+      choices: [
+        { i: '🛡', t: 'Prender respiração', stat: 'con', dc: 13, sNarr: 'Você segura o ar a tempo.', fNarr: 'O gás queima seus pulmões.', dmg: 4 } ] }
+  ],
+  mountain: [
+    { title: 'Avalanche', narr: 'Neve e pedras descem a encosta sobre você!',
+      choices: [
+        { i: '🏃', t: 'Correr lateral', stat: 'dex', dc: 13, sNarr: 'Você desvia da avalanche a tempo.', fNarr: 'A força da neve o derruba.', dmg: 5 },
+        { i: '🛡', t: 'Proteger-se', stat: 'con', dc: 12, sNarr: 'Você suporta o impacto.', fNarr: 'Pedras quebram suas costelas.', dmg: 4 } ] },
+    { title: 'Fenda', narr: 'Uma fenda profunda corta o caminho.',
+      choices: [
+        { i: '🧗', t: 'Saltar', stat: 'str', dc: 12, sNarr: 'Salto perfeito sobre o abismo!', fNarr: 'Você escorrega na borda.', dmg: 3 } ] }
+  ],
+  desert: [
+    { title: 'Tempestade de Areia', narr: 'O céu escurece e areia gira em redemoinho.',
+      choices: [
+        { i: '🛡', t: 'Cobrir-se', stat: 'con', dc: 12, sNarr: 'Você se protege com o manto e espera.', fNarr: 'A areia rasga sua pele.', dmg: 4 } ] }
+  ],
+  snow: [
+    { title: 'Lobo Solitário', narr: 'Olhos amarelos brilham na neve à frente.',
+      choices: [
+        { i: '🗣', t: 'Intimidar', stat: 'cha', dc: 13, sNarr: 'O lobo recua, intimidado.', fNarr: 'Ele ataca antes de fugir.', dmg: 4 },
+        { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12, sNarr: 'Você recua sem provocar.', fNarr: 'Você escorrega no gelo; ele avança.', dmg: 3 } ] }
+  ],
+  cave: [
+    { title: 'Estalactite', narr: 'Uma estalactite cai do teto sem aviso!',
+      choices: [
+        { i: '🏃', t: 'Esquivar', stat: 'dex', dc: 13, sNarr: 'Você se joga pro lado a tempo.', fNarr: 'A pedra raspa em você.', dmg: 4 } ] }
+  ],
+  graveyard: [
+    { title: 'Espíritos Inquietos', narr: 'Vultos translúcidos cercam você.',
+      choices: [
+        { i: '🧠', t: 'Resistir', stat: 'wis', dc: 13, sNarr: 'Sua vontade afasta os espíritos.', fNarr: 'O medo paralisa você por instantes.', dmg: 3 },
+        { i: '🏃', t: 'Correr', stat: 'dex', dc: 12, sNarr: 'Você escapa antes que se aproximem.', fNarr: 'Um toque gelado drena sua energia.', dmg: 4 } ] }
+  ],
+  volcanic: [
+    { title: 'Erupção Lateral', narr: 'Lava escorre por uma fissura próxima.',
+      choices: [
+        { i: '🏃', t: 'Saltar', stat: 'dex', dc: 13, sNarr: 'Você salta pra terra firme!', fNarr: 'Faíscas queimam suas pernas.', dmg: 5 } ] }
+  ]
+};
+
+// Pool de narrativas seguras por bioma destino (sem hazard)
+var JOURNEY_SAFE = {
+  forest: ['A trilha serpenteia entre carvalhos ancestrais.', 'Pássaros cantam ao longe.', 'Raios de sol filtram pelas copas.'],
+  plains: ['O vento ondula o trigal dourado.', 'Uma estrada de terra clara se estende ao horizonte.', 'Andorinhas cruzam o céu.'],
+  swamp: ['Sapos coaxam nas poças escuras.', 'Árvores retorcidas formam arcos.', 'Luzes estranhas piscam ao longe.'],
+  mountain: ['O ar fica rarefeito.', 'Picos nevados brilham ao longe.', 'Águias circulam acima.'],
+  desert: ['A estrada se estende sob o sol abrasador.', 'Dunas mudam de forma com o vento.', 'Miragens dançam no horizonte.'],
+  snow: ['A neve range sob seus pés.', 'O hálito embaça no ar gelado.', 'Lobos uivam ao longe.'],
+  cave: ['Gotas ecoam nos túneis.', 'Cristais reflexos sua luz.', 'O ar é frio e denso.'],
+  graveyard: ['Lápides marcam o caminho.', 'Corvos observam em silêncio.', 'A névoa se arrasta entre as cruzes.'],
+  volcanic: ['Cinzas caem como neve preta.', 'Brasas brilham no chão.', 'O calor faz o ar tremular.']
+};
+var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
+
+function startJourneyToMap(targetMapId, targetMap) {
+  // Inicia jornada com 3-5 etapas dependendo da distancia/bioma
+  const totalSteps = 3 + Math.floor(Math.random() * 3);
+  _journey = {
+    targetMapId: targetMapId,
+    targetMap: targetMap,
+    biome: targetMap.biome,
+    totalSteps: totalSteps,
+    currentStep: 0,
+    riskChance: 55  // 55% de chance de hazard por etapa
+  };
+  document.getElementById('journey-title').textContent = 'Rumo a ' + targetMap.name;
+  document.getElementById('journey-overlay').classList.add('show');
+  _showJourneyStep();
+}
+
+function _showJourneyStep() {
+  if (!_journey) return;
+  _journey.currentStep++;
+  if (_journey.currentStep > _journey.totalSteps) {
+    _journeyArrive();
+    return;
+  }
+  _renderJourneyStep();
+}
+
+function _renderJourneyStep() {
+  const j = _journey;
+  if (!j) return;
+  const remaining = j.totalSteps - j.currentStep;
+  document.getElementById('journey-subtitle').textContent =
+    (remaining >= 1)
+      ? 'Etapa ' + j.currentStep + ' de ' + j.totalSteps + ' — ' + (remaining + 1) + ' restantes'
+      : 'Etapa final — chegando ao destino';
+
+  // Progress bar + dots
+  const pEl = document.getElementById('journey-progress');
+  const pct = Math.round((j.currentStep / (j.totalSteps + 1)) * 100);
+  let dots = '';
+  for (let i = 1; i <= j.totalSteps; i++) {
+    let cls = '';
+    if (i < j.currentStep) cls = 'done';
+    else if (i === j.currentStep) cls = 'current';
+    dots += '<div class="journey-progress-dot ' + cls + '"></div>';
+  }
+  pEl.innerHTML =
+    '<div class="journey-progress-bar"><div class="journey-progress-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="journey-progress-dots">' + dots + '</div>';
+
+  // Hazard ou seguro?
+  const roll = Math.random() * 100;
+  const hasHazard = roll < j.riskChance;
+  const narrEl = document.getElementById('journey-narration');
+  const checkEl = document.getElementById('journey-check');
+  const footEl = document.getElementById('journey-footer');
+  checkEl.innerHTML = '';
+  footEl.innerHTML = '';
+
+  if (hasHazard) {
+    const pool = JOURNEY_HAZARDS[j.biome] || JOURNEY_HAZARDS.forest;
+    const hazard = pool[Math.floor(Math.random() * pool.length)];
+    narrEl.innerHTML =
+      '<div class="journey-step-badge hazard">⚠ ' + hazard.title + '</div>' +
+      '<div>' + hazard.narr + '</div>';
+    hazard.choices.forEach(function(ch) {
+      _addJourneyBtn(footEl, ch.i, ch.t, _statLabel(ch.stat) + ' DC ' + ch.dc, '', function() {
+        _resolveJourneyHazard(hazard, ch);
+      });
+    });
+  } else {
+    const safePool = JOURNEY_SAFE[j.biome] || JOURNEY_SAFE.forest;
+    const txt = safePool[Math.floor(Math.random() * safePool.length)];
+    narrEl.innerHTML =
+      '<div class="journey-step-badge safe">✓ Caminho seguro</div>' +
+      '<div>' + txt + '</div>';
+    _journeyContinueBtn();
+  }
+}
+
+function _statLabel(stat) {
+  return STAT_NAMES_PT[stat] || stat.toUpperCase();
+}
+
+function _resolveJourneyHazard(hazard, choice) {
+  const checkEl = document.getElementById('journey-check');
+  const narrEl = document.getElementById('journey-narration');
+  const footEl = document.getElementById('journey-footer');
+  footEl.innerHTML = '';
+  // Roll d20 + ability mod
+  const stat = choice.stat;
+  const mod = (S.player && S.player.mods && typeof S.player.mods[stat] === 'number')
+    ? S.player.mods[stat] : 0;
+  const d20 = Math.floor(Math.random() * 20) + 1;
+  const total = d20 + mod;
+  const success = total >= choice.dc;
+  // Mostra dado + total
+  const sign = mod >= 0 ? '+' : '';
+  checkEl.innerHTML =
+    '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + _statLabel(stat) + ') = ' + total + ' vs DC ' + choice.dc + '</div>' +
+    '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
+    (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
+  if (success) {
+    narrEl.innerHTML =
+      '<div class="journey-step-badge safe">' + hazard.title + ' — Superado</div>' +
+      '<div>' + choice.sNarr + '</div>';
+  } else {
+    const dmg = choice.dmg || 3;
+    if (S && S.player) S.player.hp = Math.max(0, S.player.hp - dmg);
+    if (typeof updateHud === 'function') updateHud();
+    narrEl.innerHTML =
+      '<div class="journey-step-badge danger">' + hazard.title + ' — Falha</div>' +
+      '<div>' + choice.fNarr + '</div>' +
+      '<div style="margin-top:6px;color:#d85848;font-size:12px;font-family:Cinzel,serif;font-weight:700">−' + dmg + ' HP</div>';
+  }
+  // Verifica defeat antes de continuar
+  setTimeout(function() {
+    if (S.player && S.player.hp <= 0) {
+      _addJourneyBtn(footEl, '💀', 'Você sucumbiu...', 'A jornada terminou aqui', '', function() {
+        _closeJourney();
+        if (typeof triggerDefeat === 'function') triggerDefeat('journey_hazard');
+      });
+      return;
+    }
+    _journeyContinueBtn();
+  }, 1500);
+}
+
+function _journeyContinueBtn() {
+  const footEl = document.getElementById('journey-footer');
+  const j = _journey;
+  if (!j) return;
+  const remaining = j.totalSteps - j.currentStep;
+  if (remaining > 0) {
+    _addJourneyBtn(footEl, '🚶', 'Continuar viagem',
+      remaining + ' etapa' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : ''),
+      '', function() { _showJourneyStep(); });
+  } else {
+    _addJourneyBtn(footEl, '✦', 'Chegar ao destino', 'Você avista as fronteiras de ' + j.targetMap.name, 'gold', function() { _journeyArrive(); });
+  }
+}
+
+function _addJourneyBtn(container, icon, title, desc, cls, onClick) {
+  const btn = document.createElement('button');
+  btn.className = 'journey-btn' + (cls ? ' ' + cls : '');
+  btn.innerHTML =
+    (icon ? '<span class="journey-btn-icon">' + icon + '</span>' : '') +
+    '<div class="journey-btn-text">' + title +
+    (desc ? '<div class="journey-btn-desc">' + desc + '</div>' : '') +
+    '</div>';
+  btn.addEventListener('click', onClick);
+  container.appendChild(btn);
+}
+
+function _journeyArrive() {
+  const j = _journey;
+  if (!j) return;
+  _closeJourney();
+  // Boot no novo mapa
+  setupChoices.map = j.targetMapId;
+  if (typeof dmNarrate === 'function') {
+    dmNarrate({ text: 'Você chega às terras de ' + j.targetMap.name + '.', type: 'action' });
+  }
+  if (typeof boot === 'function') boot();
+}
+
+function _closeJourney() {
+  document.getElementById('journey-overlay').classList.remove('show');
+  _journey = null;
 }
 
 // ============================================================================
@@ -12837,8 +14193,11 @@ function possibleMaterialsForMap(mapId) {
 var visitedMapIds = new Set();
 
 function openCartography() {
+  // X-6.5.51l: reset zoom/pan ao abrir pra sempre ver mapa inteiro
+  _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0;
   document.getElementById('cartography-overlay').classList.add('visible');
   renderCartography();
+  _cartUpdateZoomBtns();
 }
 
 function closeCartography() {
@@ -12847,6 +14206,21 @@ function closeCartography() {
 
 // Renderiza o grafo de mapas como pergaminho com nodes posicionados via worldPos.
 // Geografia espelha hub-data.js do jogo real (LOCATION_COORDS normalizado).
+// X-6.5.51l (2026-04-25): cartografia REDESIGN — fundo de pergaminho cream
+// + caminhos curvos organicos (Bezier) entre locais + zoom pan + center on
+// player. User feedback: "deixando como estava antes, com design mais
+// parecido com papel, e nao deixe locais em linha reta ou formatos
+// geometrico retos, pois fica pouco realista".
+var _cartZoom = 1.0;
+var _cartPanX = 0;
+var _cartPanY = 0;
+var CART_ZOOM_MIN = 0.6;
+var CART_ZOOM_MAX = 3.0;
+
+// Helper: aplica transform de zoom+pan sobre coords logicas
+function _cartTx(x, w) { return (x - w / 2) * _cartZoom + w / 2 + _cartPanX; }
+function _cartTy(y, h) { return (y - h / 2) * _cartZoom + h / 2 + _cartPanY; }
+
 function renderCartography() {
   const canvas = document.getElementById('cart-canvas');
   if (!canvas) return;
@@ -12854,51 +14228,86 @@ function renderCartography() {
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
 
+  // X-6.5.51l: pergaminho papel — fundo cream + textura noise + bordas
+  // envelhecidas (vinheta marrom)
+  // 1. Base cream com gradient suave de iluminacao
+  const baseGrad = ctx.createLinearGradient(0, 0, 0, h);
+  baseGrad.addColorStop(0, '#ecd6a8');
+  baseGrad.addColorStop(0.5, '#e0c590');
+  baseGrad.addColorStop(1, '#c8a868');
+  ctx.fillStyle = baseGrad;
+  ctx.fillRect(0, 0, w, h);
+  // 2. Manchas/idade — pontos marrons sutis espalhados
+  const stainRng = seededRng(7777);
+  ctx.fillStyle = 'rgba(120, 80, 30, 0.08)';
+  for (let i = 0; i < 32; i++) {
+    const sx = stainRng() * w;
+    const sy = stainRng() * h;
+    const sr = 6 + stainRng() * 14;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 3. Vinheta marrom escura nas bordas (envelhecimento)
+  const vignetteGrad = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.7);
+  vignetteGrad.addColorStop(0, 'rgba(80, 50, 20, 0)');
+  vignetteGrad.addColorStop(1, 'rgba(60, 35, 12, 0.45)');
+  ctx.fillStyle = vignetteGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // X-6.5.51l: clip pra zoom nao vazar pra fora do canvas
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, w, h);
+  ctx.clip();
+
   const margin = 34;
   const mw = w - margin * 2;
-  const mh = h - margin * 2 - 18;  // reserva 18px pro título no topo
+  const mh = h - margin * 2 - 18;
   const topOffset = 22;
 
   const mapIds = Object.keys(FIXED_MAPS);
 
-  // Zonas biomáticas como halos coloridos suaves (identidade geográfica visual)
+  // Zonas biomáticas como halos coloridos suaves
   const biomeZones = {
-    plains:    { color: 'rgba(180, 200, 120, 0.18)' },
-    forest:    { color: 'rgba(80, 140, 70, 0.18)' },
-    swamp:     { color: 'rgba(100, 110, 80, 0.22)' },
-    mountain:  { color: 'rgba(140, 140, 150, 0.18)' },
-    desert:    { color: 'rgba(220, 180, 90, 0.22)' },
-    snow:      { color: 'rgba(200, 220, 230, 0.30)' },
-    cave:      { color: 'rgba(60, 60, 80, 0.25)' },
-    volcanic:  { color: 'rgba(220, 110, 60, 0.22)' },
-    graveyard: { color: 'rgba(120, 110, 130, 0.22)' }
+    plains:    { color: 'rgba(180, 200, 120, 0.32)' },
+    forest:    { color: 'rgba(80, 140, 70, 0.32)' },
+    swamp:     { color: 'rgba(100, 110, 80, 0.36)' },
+    mountain:  { color: 'rgba(140, 140, 150, 0.32)' },
+    desert:    { color: 'rgba(220, 180, 90, 0.36)' },
+    snow:      { color: 'rgba(200, 220, 230, 0.42)' },
+    cave:      { color: 'rgba(60, 60, 80, 0.40)' },
+    volcanic:  { color: 'rgba(220, 110, 60, 0.36)' },
+    graveyard: { color: 'rgba(120, 110, 130, 0.36)' }
   };
-  // Desenha halos de bioma (nuvens suaves por trás)
+  // Desenha halos de bioma (nuvens suaves por trás) — coords logicas
   mapIds.forEach(mid => {
     const m = FIXED_MAPS[mid];
     if (!m.worldPos) return;
-    const x = margin + m.worldPos.x * mw;
-    const y = topOffset + margin + m.worldPos.y * mh;
+    const lx = margin + m.worldPos.x * mw;
+    const ly = topOffset + margin + m.worldPos.y * mh;
+    const x = _cartTx(lx, w), y = _cartTy(ly, h);
     const zone = biomeZones[m.biome];
     if (!zone) return;
-    const grad = ctx.createRadialGradient(x, y, 5, x, y, 50);
+    const r = 50 * _cartZoom;
+    const grad = ctx.createRadialGradient(x, y, 5 * _cartZoom, x, y, r);
     grad.addColorStop(0, zone.color);
     grad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = grad;
-    ctx.fillRect(x - 50, y - 50, 100, 100);
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
   });
 
-  // Edges (estradas pontilhadas) — gold com alpha pra contrastar com fundo dark
-  // X-6.5.51j: cores ajustadas pro fundo DARK do canvas (era brown sobre cream)
-  ctx.strokeStyle = 'rgba(196, 149, 58, 0.55)';
-  ctx.lineWidth = 1.8;
-  ctx.setLineDash([5, 3]);
-  const drawnEdges = new Set();  // evita desenhar mão dupla
+  // X-6.5.51l: edges como caminhos curvos organicos (Bezier) — cor de tinta
+  // marrom envelhecida sobre o pergaminho. Control point offset perpendicular
+  // ao segmento da linha gera curva natural. Stroke duplo (sombra + tinta)
+  // pra dar look de tinta seca e tinta fresca.
+  const drawnEdges = new Set();
   mapIds.forEach(mid => {
     const m = FIXED_MAPS[mid];
     if (!m.worldPos || !m.edges) return;
-    const fromX = margin + m.worldPos.x * mw;
-    const fromY = topOffset + margin + m.worldPos.y * mh;
+    const lFromX = margin + m.worldPos.x * mw;
+    const lFromY = topOffset + margin + m.worldPos.y * mh;
+    const fromX = _cartTx(lFromX, w), fromY = _cartTy(lFromY, h);
     (m.edges || []).forEach(ed => {
       if (!ed.targetMap) return;
       const target = FIXED_MAPS[ed.targetMap];
@@ -12906,31 +14315,54 @@ function renderCartography() {
       const edgeKey = [mid, ed.targetMap].sort().join('↔');
       if (drawnEdges.has(edgeKey)) return;
       drawnEdges.add(edgeKey);
-      const toX = margin + target.worldPos.x * mw;
-      const toY = topOffset + margin + target.worldPos.y * mh;
+      const lToX = margin + target.worldPos.x * mw;
+      const lToY = topOffset + margin + target.worldPos.y * mh;
+      const toX = _cartTx(lToX, w), toY = _cartTy(lToY, h);
+      // Calcula 2 control points perpendiculares ao segmento, com offset
+      // determinado pelo edgeKey (consistente entre frames)
+      const dx = toX - fromX, dy = toY - fromY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const perpX = -dy / Math.max(dist, 1);
+      const perpY = dx / Math.max(dist, 1);
+      // Seed determinada por edgeKey (mesmo curve sempre)
+      let seed = 0;
+      for (let i = 0; i < edgeKey.length; i++) seed = (seed * 31 + edgeKey.charCodeAt(i)) | 0;
+      const seedRng = seededRng(seed);
+      const offset1 = (seedRng() - 0.5) * dist * 0.30;
+      const offset2 = (seedRng() - 0.5) * dist * 0.30;
+      const cp1X = fromX + dx * 0.33 + perpX * offset1;
+      const cp1Y = fromY + dy * 0.33 + perpY * offset1;
+      const cp2X = fromX + dx * 0.66 + perpX * offset2;
+      const cp2Y = fromY + dy * 0.66 + perpY * offset2;
+      // Stroke "sombra" (mais escura, mais grossa)
+      ctx.strokeStyle = 'rgba(70, 40, 18, 0.35)';
+      ctx.lineWidth = 3.5;
+      ctx.setLineDash([6, 4]);
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
-      ctx.lineTo(toX, toY);
+      ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
+      ctx.stroke();
+      // Stroke "tinta" (cor da tinta marrom)
+      ctx.strokeStyle = 'rgba(110, 70, 30, 0.85)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
       ctx.stroke();
     });
   });
   ctx.setLineDash([]);
 
-  // Bússola no canto superior-direito
-  // X-6.5.51j: w-32 -> w-44 (afastada da linha direita do mapa, user feedback:
-  // "rosa dos ventos esta encostada na linha")
-  drawCompassRose(ctx, w - 44, topOffset + 32, 18);
-
   // Nodes
-  const nodeRadius = 12;
-  const hitRadius = 18;  // hit area maior pra toque no smartphone
+  const nodeRadius = 12 * _cartZoom;
+  const hitRadius = 18 * _cartZoom;
   _cartNodes = [];
   const biomeIcons = {
     plains: '🌾', forest: '🌲', swamp: '🌿', mountain: '⛰',
     desert: '🏜', snow: '❄', cave: '🕳', volcanic: '🌋', graveyard: '🪦'
   };
 
-  // Ordem de desenho: desconhecidos → visitados → atual (pra atual ficar em cima)
+  // Ordem de desenho: desconhecidos → visitados → atual
   const sorted = [...mapIds].sort((a, b) => {
     const aCur = S && S.mapId === a ? 2 : visitedMapIds.has(a) ? 1 : 0;
     const bCur = S && S.mapId === b ? 2 : visitedMapIds.has(b) ? 1 : 0;
@@ -12940,8 +14372,9 @@ function renderCartography() {
   sorted.forEach(mid => {
     const m = FIXED_MAPS[mid];
     if (!m.worldPos) return;
-    const x = margin + m.worldPos.x * mw;
-    const y = topOffset + margin + m.worldPos.y * mh;
+    const lx = margin + m.worldPos.x * mw;
+    const ly = topOffset + margin + m.worldPos.y * mh;
+    const x = _cartTx(lx, w), y = _cartTy(ly, h);
     const isCurrent = S && S.mapId === mid;
     const isVisited = visitedMapIds.has(mid);
     _cartNodes.push({ id: mid, x, y, r: hitRadius });
@@ -12954,86 +14387,148 @@ function renderCartography() {
       const pulse = 0.5 + Math.sin(Date.now() * 0.003) * 0.25;
       ctx.fillStyle = 'rgba(196, 149, 58, ' + (pulse * 0.6).toFixed(3) + ')';
       ctx.beginPath();
-      ctx.arc(x, y, nodeRadius + 10, 0, Math.PI * 2);
+      ctx.arc(x, y, nodeRadius + 10 * _cartZoom, 0, Math.PI * 2);
       ctx.fill();
     }
 
     // Disc sombra
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
     ctx.beginPath();
-    ctx.arc(x + 1, y + 2, nodeRadius, 0, Math.PI * 2);
+    ctx.arc(x + 1.5 * _cartZoom, y + 2.5 * _cartZoom, nodeRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Node
-    ctx.fillStyle = fillColor;
+    // Node — usa fundo cream pra legibilidade no pergaminho
+    ctx.fillStyle = isCurrent ? '#f0d890' : (isVisited ? '#d8b878' : '#a08858');
     ctx.beginPath();
     ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
     ctx.fill();
+    // Halo interno cor do bioma (suave)
+    ctx.fillStyle = fillColor;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    ctx.arc(x, y, nodeRadius * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
 
-    // Border
-    ctx.strokeStyle = isCurrent ? '#c4953a' : (isVisited ? '#8a6a3a' : '#5a4028');
+    // Border tinta marrom
+    ctx.strokeStyle = isCurrent ? '#5a3018' : (isVisited ? '#6e4220' : '#8a6840');
     ctx.lineWidth = isCurrent ? 2.5 : 1.6;
+    ctx.beginPath();
+    ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
     ctx.stroke();
 
     // Ícone bioma
-    ctx.font = '11px serif';
+    ctx.font = (11 * _cartZoom).toFixed(0) + 'px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#3a1f08';
     ctx.fillText(biomeIcons[m.biome] || '?', x, y);
 
-    // Dungeon dot (se tem masmorra)
+    // Dungeon dot
     if (m.dungeons && m.dungeons.length > 0) {
-      ctx.fillStyle = '#b03a38';
+      ctx.fillStyle = '#9c2828';
       ctx.beginPath();
-      ctx.arc(x + nodeRadius - 2, y - nodeRadius + 2, 2.5, 0, Math.PI * 2);
+      ctx.arc(x + nodeRadius - 2 * _cartZoom, y - nodeRadius + 2 * _cartZoom, 2.5 * _cartZoom, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(60, 30, 18, 0.6)';
+      ctx.lineWidth = 0.6 * _cartZoom;
       ctx.stroke();
     }
 
-    // Label só para atual + visitados (desconhecidos ficam anônimos — descoberta)
+    // Label só para atual + visitados — agora cor de tinta marrom sobre cream
     if (isCurrent || isVisited) {
       const labelText = m.name;
-      ctx.font = (isCurrent ? 'bold ' : '') + '9px Cinzel, serif';
+      ctx.font = (isCurrent ? 'bold ' : '') + (9 * _cartZoom).toFixed(0) + 'px Cinzel, serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       const textW = ctx.measureText(labelText).width;
-      const padH = 4, padV = 2;
+      const padH = 4 * _cartZoom, padV = 2 * _cartZoom;
       const labelX = x - textW / 2 - padH;
-      const labelY = y + nodeRadius + 3;
-      // Pill de fundo (legibilidade sobre pergaminho)
-      ctx.fillStyle = isCurrent ? 'rgba(58, 40, 24, 0.92)' : 'rgba(90, 64, 40, 0.80)';
-      ctx.fillRect(labelX, labelY, textW + padH * 2, 12 + padV);
-      // Borda dourada na pill atual
-      if (isCurrent) {
-        ctx.strokeStyle = '#c4953a';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(labelX - 0.5, labelY - 0.5, textW + padH * 2 + 1, 13 + padV);
-      }
-      // Texto
-      ctx.fillStyle = isCurrent ? '#e8dcc8' : '#e0ccab';
-      ctx.fillText(labelText, x, labelY + 2);
+      const labelY = y + nodeRadius + 3 * _cartZoom;
+      // Pill de fundo cream com borda marrom
+      ctx.fillStyle = isCurrent ? 'rgba(245, 220, 170, 0.95)' : 'rgba(228, 200, 150, 0.85)';
+      ctx.fillRect(labelX, labelY, textW + padH * 2, 12 * _cartZoom + padV);
+      ctx.strokeStyle = isCurrent ? '#5a3018' : 'rgba(110, 70, 30, 0.6)';
+      ctx.lineWidth = isCurrent ? 1.0 : 0.6;
+      ctx.strokeRect(labelX - 0.5, labelY - 0.5, textW + padH * 2 + 1, 13 * _cartZoom + padV);
+      // Texto cor de tinta
+      ctx.fillStyle = '#3a1f08';
+      ctx.fillText(labelText, x, labelY + 2 * _cartZoom);
     }
   });
+
+  ctx.restore();  // fim do clip
+
+  // Bússola no canto superior-direito (fora do clip — sempre na mesma posicao)
+  drawCompassRose(ctx, w - 44, topOffset + 32, 18);
 
   // Título + subtítulo flavor
   ctx.font = 'italic 10px serif';
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(58, 40, 24, 0.75)';
+  ctx.fillStyle = 'rgba(60, 35, 12, 0.85)';
   ctx.fillText('"Aqui jazem as terras conhecidas de Valdoria..."', w / 2, 14);
 
   // Footer: mapa atual destacado
   if (S && S.mapId && FIXED_MAPS[S.mapId]) {
     ctx.font = 'bold 11px Cinzel, serif';
-    ctx.fillStyle = '#3a2818';
+    ctx.fillStyle = '#3a1f08';
     ctx.textAlign = 'center';
     ctx.fillText('Vós estais em: ' + FIXED_MAPS[S.mapId].name, w / 2, h - 14);
     ctx.font = 'italic 9px serif';
-    ctx.fillStyle = 'rgba(58, 40, 24, 0.6)';
+    ctx.fillStyle = 'rgba(60, 35, 12, 0.7)';
     ctx.fillText(visitedMapIds.size + '/' + mapIds.length + ' terras descobertas', w / 2, h - 3);
   }
+}
+
+// X-6.5.51l: zoom controls + center on player no cart-canvas
+function _cartUpdateZoomBtns() {
+  const inBtn = document.getElementById('cart-zoom-in');
+  const outBtn = document.getElementById('cart-zoom-out');
+  if (inBtn) {
+    if (_cartZoom >= CART_ZOOM_MAX - 0.001) inBtn.setAttribute('disabled', 'disabled');
+    else inBtn.removeAttribute('disabled');
+  }
+  if (outBtn) {
+    if (_cartZoom <= CART_ZOOM_MIN + 0.001) outBtn.setAttribute('disabled', 'disabled');
+    else outBtn.removeAttribute('disabled');
+  }
+}
+
+function _cartSetZoom(z) {
+  const old = _cartZoom;
+  _cartZoom = Math.max(CART_ZOOM_MIN, Math.min(CART_ZOOM_MAX, z));
+  if (Math.abs(_cartZoom - old) < 0.001) {
+    _cartUpdateZoomBtns();
+    return;
+  }
+  // Ajusta pan se o zoom diminuiu pra nao deixar mapa fora do canvas
+  if (_cartZoom <= 1.001) { _cartPanX = 0; _cartPanY = 0; }
+  _cartUpdateZoomBtns();
+  renderCartography();
+}
+
+function _cartCenterOnPlayer() {
+  // Centraliza o pan no mapa atual do jogador
+  if (!S || !S.mapId) return;
+  const m = FIXED_MAPS[S.mapId];
+  if (!m || !m.worldPos) return;
+  const canvas = document.getElementById('cart-canvas');
+  if (!canvas) return;
+  const w = canvas.width, h = canvas.height;
+  const margin = 34;
+  const mw = w - margin * 2;
+  const mh = h - margin * 2 - 18;
+  const topOffset = 22;
+  const lx = margin + m.worldPos.x * mw;
+  const ly = topOffset + margin + m.worldPos.y * mh;
+  // Zoom em 1.6x se ainda nao for grande, e centraliza
+  if (_cartZoom < 1.5) _cartZoom = 1.6;
+  // Pan pra que o ponto logico (lx, ly) caia no centro do canvas
+  // x_screen = (lx - w/2) * zoom + w/2 + pan -> queremos x_screen = w/2
+  _cartPanX = -(lx - w / 2) * _cartZoom;
+  _cartPanY = -(ly - h / 2) * _cartZoom;
+  _cartUpdateZoomBtns();
+  renderCartography();
 }
 
 /* X-6.5.51j (2026-04-25): rosa-dos-ventos AJUSTADA pro fundo DARK do
@@ -13269,11 +14764,14 @@ function openLocationPopup(mapId) {
   }
   travelBtn.onclick = () => {
     if (travelBtn.disabled) return;
+    // X-6.5.51l: dispara journey overlay (riscos da viagem, turnos, encontros
+    // em linha do tempo). Adaptado de valdoria-webapp/explore/explore-outbound-travel.js
+    // User feedback: "coloque os riscos da viagem, turnos, etc, o que existir
+    // de mecânica D&D, e use o sistema que já existe de viagem que mostra
+    // eventos acontecendo, inclusive encontros em uma linha do tempo".
     closeLocationPopup();
     closeCartography();
-    setupChoices.map = mapId;
-    dmNarrate({ text: 'Você parte rumo a ' + m.name + '.', type: 'action' });
-    boot();
+    startJourneyToMap(mapId, m);
   };
 
   ov.classList.add('visible');
@@ -13924,6 +15422,57 @@ function bindQuickActions() {
   // V2.7: btn-download-log removido. Console global downloadExploracaoLogs() continua.
   document.getElementById('cart-close-btn').addEventListener('click', closeCartography);
   document.getElementById('cart-canvas').addEventListener('click', onCartographyClick);
+  // X-6.5.51l: cart zoom + center on player
+  var cZoomIn = document.getElementById('cart-zoom-in');
+  var cZoomOut = document.getElementById('cart-zoom-out');
+  var cZoomCenter = document.getElementById('cart-zoom-center');
+  if (cZoomIn) cZoomIn.addEventListener('click', function() {
+    if (_cartZoom >= CART_ZOOM_MAX - 0.001) return;
+    _cartSetZoom(_cartZoom + 0.3);
+  });
+  if (cZoomOut) cZoomOut.addEventListener('click', function() {
+    if (_cartZoom <= CART_ZOOM_MIN + 0.001) return;
+    _cartSetZoom(_cartZoom - 0.3);
+  });
+  if (cZoomCenter) cZoomCenter.addEventListener('click', _cartCenterOnPlayer);
+  // Drag pra panorar quando zoom > 1
+  (function() {
+    var cv = document.getElementById('cart-canvas');
+    if (!cv) return;
+    var dragging = null;
+    function _scaleFactor() {
+      // Coords reais do canvas vs CSS rendering scale
+      var rect = cv.getBoundingClientRect();
+      return cv.width / rect.width;
+    }
+    cv.addEventListener('mousedown', function(e) {
+      if (_cartZoom <= 1.001) return;
+      e.preventDefault();
+      dragging = { x: e.clientX, y: e.clientY, panX: _cartPanX, panY: _cartPanY };
+    });
+    cv.addEventListener('touchstart', function(e) {
+      if (_cartZoom <= 1.001 || e.touches.length !== 1) return;
+      var t = e.touches[0];
+      dragging = { x: t.clientX, y: t.clientY, panX: _cartPanX, panY: _cartPanY };
+    }, { passive: true });
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      var sf = _scaleFactor();
+      _cartPanX = dragging.panX + (e.clientX - dragging.x) * sf;
+      _cartPanY = dragging.panY + (e.clientY - dragging.y) * sf;
+      renderCartography();
+    });
+    document.addEventListener('touchmove', function(e) {
+      if (!dragging || e.touches.length !== 1) return;
+      var t = e.touches[0];
+      var sf = _scaleFactor();
+      _cartPanX = dragging.panX + (t.clientX - dragging.x) * sf;
+      _cartPanY = dragging.panY + (t.clientY - dragging.y) * sf;
+      renderCartography();
+    }, { passive: true });
+    document.addEventListener('mouseup', function() { dragging = null; });
+    document.addEventListener('touchend', function() { dragging = null; });
+  })();
   // Light menu — expansível com fontes de luz disponíveis por classe
   const lightWrap = document.getElementById('light-wrap');
   const lightBtn = document.getElementById('btn-light');
