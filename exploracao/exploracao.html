@@ -12187,11 +12187,38 @@ function applyBiomeMusic() {
   } catch (e) { console.warn('[EXPLORACAO] audio failed:', e); }
 }
 
-/* X-6.5.32: audio unlock listener — Telegram WebView bloqueia autoplay até
-   primeira interação do usuário. Sem isso, applyBiomeMusic() chama play()
-   mas browser silencia. Mirror do legacy explore-renderer.js handleCanvasClick. */
-function _bindAudioUnlock() {
-  if (!window.ValdoriaAudio) return;
+/* X-6.5.34 (2026-04-24): audio bootstrap ROBUSTO. Causa root da musica
+   silenciada: audio-manager.js carrega async (script tag inserido em runtime
+   linha 2756). Quando boot() chamava applyBiomeMusic, ValdoriaAudio podia
+   ainda nao estar definido → if(!window.ValdoriaAudio) return → silencio.
+   Plus Telegram WebView bloqueia autoplay ate primeira interacao.
+
+   Solucao em 2 camadas:
+   1. Polling: aguarda ate 5s ValdoriaAudio aparecer (load script async)
+   2. Unlock listener: bind apos audio-manager carregar, garante play apos
+      primeira interacao do user. */
+var _audioBootstrapDone = false;
+var _audioBootstrapAttempts = 0;
+
+function _audioBootstrap() {
+  if (_audioBootstrapDone) return;
+  _audioBootstrapAttempts++;
+  if (!window.ValdoriaAudio) {
+    if (_audioBootstrapAttempts < 50) {
+      /* Retry every 100ms ate 5s — aguarda audio-manager.js async load */
+      setTimeout(_audioBootstrap, 100);
+    } else {
+      console.warn('[EXPLORACAO][AUDIO] ValdoriaAudio nao carregou em 5s — desistindo');
+      LOGW('AUDIO', 'bootstrap_timeout audio-manager.js never loaded');
+    }
+    return;
+  }
+  _audioBootstrapDone = true;
+  console.info('[EXPLORACAO][AUDIO] ValdoriaAudio loaded after ' + (_audioBootstrapAttempts * 100) + 'ms');
+  LOG('AUDIO', 'bootstrap_ready after_ms=' + (_audioBootstrapAttempts * 100));
+  /* 1. Aplica music inicial (pode falhar silencioso se autoplay bloqueado) */
+  applyBiomeMusic();
+  /* 2. Bind unlock listener pra primeira interacao destravar autoplay */
   var unlocked = false;
   function unlock() {
     if (unlocked) return;
@@ -12199,20 +12226,24 @@ function _bindAudioUnlock() {
     document.removeEventListener('click', unlock, true);
     document.removeEventListener('touchstart', unlock, true);
     document.removeEventListener('pointerdown', unlock, true);
-    if (typeof ValdoriaAudio.forceUnlock === 'function') {
-      ValdoriaAudio.forceUnlock();
-    }
-    if (typeof ValdoriaAudio._warmUp === 'function') {
-      ValdoriaAudio._warmUp();
-    }
-    /* Re-aplica music agora que audio está desbloqueado */
+    try {
+      if (typeof ValdoriaAudio.forceUnlock === 'function') ValdoriaAudio.forceUnlock();
+      if (typeof ValdoriaAudio._warmUp === 'function') ValdoriaAudio._warmUp();
+    } catch (e) { console.warn('[EXPLORACAO][AUDIO] unlock err:', e); }
+    /* Re-aplica music apos unlock — mesmo que ja tenha tocado, garante o
+       track correto pro mapa atual (mapDef.music override). */
     applyBiomeMusic();
-    LOG('AUDIO', 'unlocked on first user interaction — music reapplied');
+    console.info('[EXPLORACAO][AUDIO] unlocked on user interaction — music reapplied');
+    LOG('AUDIO', 'unlocked_on_interaction music_reapplied');
   }
   document.addEventListener('click', unlock, { capture: true });
   document.addEventListener('touchstart', unlock, { capture: true });
   document.addEventListener('pointerdown', unlock, { capture: true });
+  console.info('[EXPLORACAO][AUDIO] unlock listeners bound');
 }
+
+/* Compat: nome antigo */
+function _bindAudioUnlock() { _audioBootstrap(); }
 
 // ============================================================================
 // HUD
