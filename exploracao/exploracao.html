@@ -9254,13 +9254,45 @@ function revealFogAt(col, row, radius) {
 // MOVEMENT + HEX-NAV
 // ============================================================================
 
+/* X-6.5.38 (2026-04-24): movimento client-authoritative INTERRUPTIBLE.
+   Antes: S.ph === 'moving' bloqueava qualquer click → user perceia trava.
+   Agora: SO bloqueia durante 'event' (modal aberto) ou condições impossiveis
+   (HP<=0, exhaustion 6, fora do mapa, intransitavel, nao-adjacente).
+   Click durante animacao → interrompe (snap pro target da anim cancelada)
+   + inicia nova animacao. Server fire-and-forget recebe cada move. */
 function isValidMove(col, row) {
-  if (S.ph !== 'idle') return false;
+  if (S.ph === 'event') {
+    LOGW('MOVE', 'isValidMove_blocked reason=event_open col=' + col + ' row=' + row);
+    return false;  // event modal aberto — usuario tem que responder primeiro
+  }
   const p = S.player;
-  if (p.hp <= 0 || p.exh >= 6) return false;
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
-  if (!isAdjacent(p.col, p.row, col, row)) return false;
-  if (isTileImpassable(col, row)) return false;
+  if (p.hp <= 0) {
+    LOGW('MOVE', 'isValidMove_blocked reason=dead hp=' + p.hp);
+    return false;
+  }
+  if (p.exh >= 6) {
+    LOGW('MOVE', 'isValidMove_blocked reason=exhausted exh=' + p.exh);
+    return false;
+  }
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) {
+    LOGW('MOVE', 'isValidMove_blocked reason=out_of_bounds col=' + col + ' row=' + row);
+    return false;
+  }
+  /* Adjacency: durante anim, p.col/p.row ainda nao atualizou — checa contra
+     playerAnim.targetCol/Row se anim em curso (interrupt vai snap ali). */
+  var fromCol = p.col, fromRow = p.row;
+  if (S.ph === 'moving' && playerAnim) {
+    fromCol = playerAnim.targetCol;
+    fromRow = playerAnim.targetRow;
+  }
+  if (!isAdjacent(fromCol, fromRow, col, row)) {
+    LOGW('MOVE', 'isValidMove_blocked reason=not_adjacent from=(' + fromCol + ',' + fromRow + ') to=(' + col + ',' + row + ')');
+    return false;
+  }
+  if (isTileImpassable(col, row)) {
+    LOGW('MOVE', 'isValidMove_blocked reason=impassable col=' + col + ' row=' + row);
+    return false;
+  }
   return true;
 }
 
@@ -9289,8 +9321,41 @@ function getMoveDurationFor(toCol, toRow, fromCol, fromRow) {
   return Math.round(base * paceMul);
 }
 
+/* X-6.5.38: timer global para anim atual — permite cancelar/interromper
+   quando user clica novamente durante movimento. */
+var _moveTimer = null;
+
 function beginMove(col, row) {
+  /* X-6.5.38: ANIMACAO INTERRUPTIVEL — se ja ha animacao em curso, completa
+     ela logicamente (onMoveEnd no target da anim cancelada) ANTES de iniciar
+     nova. Isso garante:
+       1. Server recebe cada move (onMoveEnd dispara API call)
+       2. p.col/p.row atualizam corretamente em sequencia
+       3. Visual: pequeno snap pro target da anim cancelada antes de continuar
+          (alternativa seria interpolar smooth, mais complexo) */
+  if (_moveTimer && playerAnim) {
+    var oldTargetCol = playerAnim.targetCol;
+    var oldTargetRow = playerAnim.targetRow;
+    LOG('MOVE', 'beginMove_interrupt cancelling_anim from=(' + S.player.col + ',' + S.player.row
+      + ') to_target=(' + oldTargetCol + ',' + oldTargetRow + ')');
+    clearTimeout(_moveTimer);
+    _moveTimer = null;
+    playerAnim = null;
+    /* Completa o move cancelado logicamente (dispara onMoveEnd → atualiza
+       p.col/p.row, fog, server API, walk text). */
+    try {
+      onMoveEnd(oldTargetCol, oldTargetRow);
+    } catch (e) {
+      LOGE('MOVE', 'beginMove_interrupt onMoveEnd_err msg=' + (e && e.message));
+    }
+  }
   const p = S.player;
+  /* Sanity check pos-interrupt: target precisa ser adjacente a posicao atual.
+     Sem isso, isValidMove ja teria filtrado, mas defensa extra contra bugs. */
+  if (!isAdjacent(p.col, p.row, col, row)) {
+    LOGW('MOVE', 'beginMove_skip not_adjacent_after_interrupt from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ')');
+    return;
+  }
   const from = hexToScreen(p.col, p.row);
   const to = hexToScreen(col, row);
   const dur = getMoveDurationFor(col, row, p.col, p.row);
@@ -9305,22 +9370,16 @@ function beginMove(col, row) {
   };
   p._prevFacing = p.facing;
   S.ph = 'moving';
-  /* X-6.5.33 (2026-04-24): REMOVIDO _setHexNavDisabled(true) que causava
-     freeze. User reportou trava persistente com X-6.5.19/20 (disable+buffer).
-     Agora cliente AUTORITATIVO 100%: isValidMove() já bloqueia move durante
-     animação via S.ph !== 'idle'. Sem disable de DOM, sem buffer 250ms.
-     Click rápido durante anim simplesmente é ignorado por isValidMove. */
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
   requestAnimationFrame(() => { try { centerOnPlayer(true); } catch (_) {} });
-  setTimeout(() => {
+  _moveTimer = setTimeout(() => {
+    _moveTimer = null;
     const tc = playerAnim ? playerAnim.targetCol : col;
     const tr = playerAnim ? playerAnim.targetRow : row;
     playerAnim = null;
     onMoveEnd(tc, tr);
-    /* Centraliza no destino final. S.ph volta pra idle dentro de onMoveEnd
-       (ou pra 'event' se evento rolou). isValidMove ja respeita isso. */
     try { centerOnPlayer(true); } catch (_) {}
   }, dur + 10);
 }
@@ -9586,12 +9645,11 @@ function updateHexNav() {
     if (isTileImpassable(c, r)) btn.classList.add('blocked');
     else btn.classList.remove('blocked');
   }
-  // X-6.5.19: mantém disabled sync com S.ph. Chamado em vários paths
-  // (onMoveEnd, fechar modal, resolveChoice) → reabilita botões sempre
-  // que o estado volta pra 'idle'. Durante 'moving'/'event' permanece
-  // disabled (beginMove seta explicitamente; fim de evento → idle → aqui).
+  /* X-6.5.38 (2026-04-24): SO disabled durante 'event'. Antes (X-6.5.19)
+     bloqueava tambem 'moving' o que causava trava de UI. Agora click durante
+     anim e PERMITIDO — beginMove faz interrupt + completa anim antiga. */
   try {
-    const shouldDisable = (S.ph !== 'idle');
+    const shouldDisable = (S.ph === 'event');
     _setHexNavDisabled(shouldDisable);
   } catch (_) {}
 }
@@ -9619,13 +9677,20 @@ function bindHexNav() {
     btn.addEventListener('click', () => {
       // Shake só para erros reais: direção bloqueada OU evento/transição aberto
       if (btn.classList.contains('blocked')) { shakeBlockedDir(btn); return; }
-      // X-6.5.19: durante moving, botão está disabled (sem click disparando).
-      // Este if é defense-in-depth se animação/estado falhar por algum motivo.
-      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }
-      const n = getNeighbors(S.player.col, S.player.row);
+      /* X-6.5.38: click durante 'moving' é PERMITIDO — beginMove faz
+         interrupt + completa anim antiga. Sem block "S.ph !== idle".
+         isValidMove ainda bloqueia 'event' modal aberto. */
+      // Pega vizinhos do TARGET da anim em curso (se houver), senao da pos atual
+      var fromCol = S.player.col, fromRow = S.player.row;
+      if (S.ph === 'moving' && playerAnim) {
+        fromCol = playerAnim.targetCol;
+        fromRow = playerAnim.targetRow;
+      }
+      const n = getNeighbors(fromCol, fromRow);
       const [c, r] = n[i];
       if (!isValidMove(c, r)) { shakeBlockedDir(btn); return; }
       S.player.facing = i;
+      LOG('MOVE', 'click_dispatch dir=' + i + ' from=(' + fromCol + ',' + fromRow + ') to=(' + c + ',' + r + ') ph=' + S.ph);
       beginMove(c, r);
     });
   }
