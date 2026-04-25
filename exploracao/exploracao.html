@@ -9455,11 +9455,15 @@ function onMoveEnd(col, row) {
   // Server tolera: is_valid_move e permissivo (so rejeita out_of_bounds e
   // impassable; jumps suspeitos sao logados mas aceitos).
   if (_remoteAuthoritative) {
+    LOG('MOVE', 'remote_move_request col=' + col + ' row=' + row);
     window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
-        LOGW('API', 'remote_move err=' + (res && res.error) + ' — client-authoritative, no rollback');
+        LOGW('API', 'remote_move err=' + (res && res.error)
+          + ' col=' + col + ' row=' + row + ' — client-authoritative, no rollback');
         return;
       }
+      LOG('MOVE', 'remote_move_ok col=' + col + ' row=' + row
+        + ' has_state=' + !!res.state + ' has_event=' + !!res.event);
       // Sync state HP/MP/gold/xp + visible do servidor
       if (res.state) {
         try {
@@ -10121,7 +10125,15 @@ function resolveChoice(idx) {
 }
 
 // X-4.5: helper — anima dice 3D com valor do servidor, depois resolve outcome.
+// X-6.5.36: entry log + advance() trigger source pra mapear cada rolagem.
 function _remoteRenderDiceAndResolve(ch, oc) {
+  /* Entry log: rastreia cada rolagem que entra no overlay remoto. */
+  LOG('DICE', 'remote_render_entry event=' + (S.event && S.event.id || '?')
+    + ' skill=' + (ch && ch.skill || '?')
+    + ' dc=' + (oc && oc.check && oc.check.dc || '?')
+    + ' d20=' + (oc && oc.check && oc.check.d20 || '?')
+    + ' total=' + (oc && oc.check && oc.check.total || '?')
+    + ' success=' + (oc && oc.check && oc.check.success));
   var overlay = document.getElementById('dice-overlay');
   var wrap = document.getElementById('dice-canvas-wrap');
   var formula = document.getElementById('dice-formula');
@@ -10145,16 +10157,22 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   var advanced = false;
   var safetyTimer = null;
   var watchdogTimer = null;
-  function advance() {
+  function advance(source) {
     if (advanced) return;
     advanced = true;
+    /* X-6.5.36: log origem do advance — diagnostico futuro. Possíveis fontes:
+       'user_skip_btn' (clicou Continuar), 'user_result_click' (clicou
+       resultado), 'auto_watchdog' (botão invisível, fallback), ou undefined
+       (chamado manualmente). */
+    LOG('DICE', 'advance source=' + (source || 'unknown')
+      + ' had_safety=' + !!safetyTimer + ' had_watchdog=' + !!watchdogTimer);
     if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
     if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; }
     overlay.classList.remove('visible');
     setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
   }
-  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance(); };
-  result.onclick = advance;
+  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance('user_skip_btn'); };
+  result.onclick = function() { advance('user_result_click'); };
   var shown = false;
   function showResult() {
     if (shown) return; shown = true;
@@ -10183,7 +10201,7 @@ function _remoteRenderDiceAndResolve(ch, oc) {
           setTimeout(function() {
             if (!skipBtn.offsetHeight) {
               LOGE('DICE', 'WATCHDOG FAILED — btn still invisible after fallback. Auto-advance in 2s.');
-              setTimeout(function() { advance(); }, 2000);
+              setTimeout(function() { advance('auto_watchdog_failed'); }, 2000);
             } else {
               LOG('DICE', 'WATCHDOG fallback OK h=' + skipBtn.offsetHeight);
             }
@@ -12202,8 +12220,12 @@ var _VALID_MUSIC_TRACKS = ['tavern','city','forest','combat','desert','dungeon',
 
 function applyBiomeMusic() {
   try {
-    if (!window.ValdoriaAudio) return;
+    if (!window.ValdoriaAudio) {
+      LOGW('AUDIO', 'apply_skipped reason=valdoria_audio_not_loaded map=' + (S && S.mapId));
+      return;
+    }
     if (!S.soundOn) {
+      LOG('AUDIO', 'apply_stop reason=sound_off map=' + S.mapId);
       if (typeof ValdoriaAudio.stop === 'function') ValdoriaAudio.stop();
       return;
     }
@@ -12211,14 +12233,20 @@ function applyBiomeMusic() {
        toca direto; senão (ex: 'plains' que não é track), fallback pra biome. */
     var mapMusic = S.mapDef && S.mapDef.music;
     if (mapMusic && _VALID_MUSIC_TRACKS.indexOf(mapMusic) >= 0) {
-      LOG('AUDIO', 'play track=' + mapMusic + ' (mapDef.music override) map=' + S.mapId);
+      LOG('AUDIO', 'play track=' + mapMusic + ' source=mapDef.music_override map=' + S.mapId);
       ValdoriaAudio.play(mapMusic);
     } else if (typeof ValdoriaAudio.playBiome === 'function') {
-      LOG('AUDIO', 'playBiome biome=' + S.biome + ' (mapDef.music='
-        + (mapMusic || 'unset') + ' invalid/missing) map=' + S.mapId);
+      LOG('AUDIO', 'playBiome biome=' + S.biome + ' map=' + S.mapId
+        + ' mapDef.music=' + (mapMusic || 'unset')
+        + ' reason=' + (mapMusic ? 'invalid_track_fallback' : 'no_override'));
       ValdoriaAudio.playBiome(S.biome);
+    } else {
+      LOGE('AUDIO', 'apply_failed reason=playBiome_unavailable mapMusic=' + mapMusic);
     }
-  } catch (e) { console.warn('[EXPLORACAO] audio failed:', e); }
+  } catch (e) {
+    console.warn('[EXPLORACAO] audio failed:', e);
+    LOGE('AUDIO', 'apply_exception err=' + (e && e.message));
+  }
 }
 
 /* X-6.5.34 (2026-04-24): audio bootstrap ROBUSTO. Causa root da musica
@@ -12239,17 +12267,26 @@ function _audioBootstrap() {
   _audioBootstrapAttempts++;
   if (!window.ValdoriaAudio) {
     if (_audioBootstrapAttempts < 50) {
-      /* Retry every 100ms ate 5s — aguarda audio-manager.js async load */
+      /* Retry every 100ms ate 5s — aguarda audio-manager.js async load.
+         X-6.5.36: log apenas no 1º + ultimos 5 attempts pra evitar spam mas
+         dar visibilidade do polling. */
+      if (_audioBootstrapAttempts === 1) {
+        LOG('AUDIO', 'bootstrap_polling_started waiting=ValdoriaAudio');
+      } else if (_audioBootstrapAttempts >= 45) {
+        LOGW('AUDIO', 'bootstrap_polling_late attempt=' + _audioBootstrapAttempts
+          + '/50 elapsed_ms=' + (_audioBootstrapAttempts * 100));
+      }
       setTimeout(_audioBootstrap, 100);
     } else {
       console.warn('[EXPLORACAO][AUDIO] ValdoriaAudio nao carregou em 5s — desistindo');
-      LOGW('AUDIO', 'bootstrap_timeout audio-manager.js never loaded');
+      LOGE('AUDIO', 'bootstrap_timeout audio-manager.js never loaded after_ms=5000');
     }
     return;
   }
   _audioBootstrapDone = true;
   console.info('[EXPLORACAO][AUDIO] ValdoriaAudio loaded after ' + (_audioBootstrapAttempts * 100) + 'ms');
-  LOG('AUDIO', 'bootstrap_ready after_ms=' + (_audioBootstrapAttempts * 100));
+  LOG('AUDIO', 'bootstrap_ready after_ms=' + (_audioBootstrapAttempts * 100)
+    + ' attempts=' + _audioBootstrapAttempts);
   /* 1. Aplica music inicial (pode falhar silencioso se autoplay bloqueado) */
   applyBiomeMusic();
   /* 2. Bind unlock listener pra primeira interacao destravar autoplay */
@@ -12570,7 +12607,9 @@ function bindQuickActions() {
   // → server valida sessão, cria token combat-scope, pre-stage payload, retorna
   // URL completa. Cliente apenas navega.
   document.getElementById('btn-inventory').addEventListener('click', async function() {
+    LOG('INV', 'btn_clicked mode=' + (window.__EXPLORE_MODE || 'unknown') + ' map=' + (S && S.mapId));
     if (window.__EXPLORE_MODE !== 'remote') {
+      LOGW('INV', 'local_mode_blocked — bot DEV requerido');
       if (typeof dmNarrate === 'function') {
         dmNarrate({
           text: '📦 A mochila está no acampamento principal. (Disponível no jogo real via Telegram.)',
@@ -12585,10 +12624,11 @@ function bindQuickActions() {
     var token = window.__EXPLORE_TOKEN;
     var uid = window.__EXPLORE_USER_ID;
     if (!apiBase || !token || !uid) {
-      LOGE('INV', 'transition_skipped missing apiBase/token/uid');
+      LOGE('INV', 'transition_skipped missing apiBase=' + !!apiBase + ' token=' + !!token + ' uid=' + !!uid);
       if (typeof vToast === 'function') vToast('Sessão inválida — recarregue', 'err', 3000);
       return;
     }
+    LOG('INV', 'transition_request_started uid=' + uid + ' apiBase=' + apiBase.slice(0, 30));
     if (typeof vProcessing !== 'undefined') vProcessing.show({ text: 'Abrindo mochila...' });
     try {
       var headers = {
