@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:15:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:28:55Z - do not edit directly, edit source -->
 
 
 <!--
@@ -601,16 +601,12 @@ body {
    da action column #hud-quick em right:10 + hex-nav em center-bottom).
    `bottom: 8px` de fato == 8px do bottom do body (= 8px do frame bottom).
    `left: 8px` mesma logica. */
-/* X-6.5.51h (2026-04-25): SOLUCAO DEFINITIVA — JS re-parenta .va-float
-   pra dentro de #frame (audio-manager.js cria como child de body, nao
-   atende). Quando dentro do frame (que e position:relative + overflow:hidden),
-   simplesmente position:absolute relativo ao FRAME funciona limpo.
-   Antes (X-6.5.51e/f/g): tentamos calc baseado em (100vw - 384) / 2 mas
-   layout flex-row do body confundia o calc — audio aparecia fora.
+/* X-6.5.51h+j (2026-04-25): SOLUCAO DEFINITIVA — JS re-parenta .va-float +
+   .va-popup + .va-backdrop pra dentro de #frame. Quando dentro do frame
+   (position:relative + overflow:hidden), position:absolute funciona limpo.
 
-   CSS abaixo aplica APOS re-parenting (script no final do <body> faz isso).
-   Selector inclui ambos os casos: enquanto child de body (fallback) E child
-   de #frame (apos re-parenting). */
+   X-6.5.51j: extendido pra .va-popup (volume controls modal) e .va-backdrop
+   (clickable underlay) que tambem escapavam fora do frame. */
 html body .va-float,
 html body #frame .va-float {
   position: absolute !important;
@@ -623,6 +619,22 @@ html body #frame .va-float {
   max-width: 44px !important;
   justify-content: flex-start !important;
   transform: none !important;
+}
+/* X-6.5.51j: popup de volume + backdrop dentro do frame */
+html body #frame .va-popup,
+html body .va-popup {
+  position: absolute !important;
+  bottom: 56px !important;  /* acima do botao audio (8 + 36 + 12 spacing) */
+  left: 8px !important;
+  right: 8px !important;
+  margin: 0 !important;
+  max-width: none !important;
+}
+html body #frame .va-backdrop,
+html body .va-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  margin: 0 !important;
 }
 /* Toasts/popups overlay: cobrir o body inteiro (que e 694px tall por X-6.5.51).
    X-6.5.51b: top: 0 + height: 100% suficiente porque body tem contain:layout
@@ -1165,141 +1177,133 @@ html body .camp-screen {
 #journal-overlay.visible { display: flex; }
 
 
-/* X-6.5.51h (2026-04-25): journal-card refatorado pra responsividade em
-   Telegram Desktop (384x694). User feedback: "Diario de missoes nao tem
-   responsividade para telas pequenas como a do webapp do telegram desktop,
-   melhore ele profissionalmente, assim como a Cartografia esta bem estruturada".
-   Mudancas:
-   - max-height 92vh -> calc(100% - 24px) (respeita frame)
-   - padding 18 14 14 -> 14 12 (mais compacto)
-   - flex-direction:column + sticky header pra titulo nao some no scroll
-   - width adapta sem max-width fixo */
+/* X-6.5.51j (2026-04-25): journal-card REFATORADO pro design system do jogo.
+   Antes: parchment cream/brown (custom). Agora: dark + gold (--v-bg-raised,
+   --v-gold, --v-text). User feedback: "faca a tela do Diario de missoes e a
+   tela de cartografia seguirem os padroes/regras CSS do jogo". */
 .journal-card {
-  background:
-    linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 18%),
-    linear-gradient(180deg, #e8d4a0 0%, #c8ac78 100%);
-  border: 3px double #5a3e22;
-  border-radius: 6px;
-  padding: 0;  /* padding agora interno, header e body separados */
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
   width: calc(100% - 24px);
   max-width: 360px;
   max-height: calc(100% - 24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(100, 70, 40, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
   position: relative;
 }
 .journal-card::before, .journal-card::after {
   content: ''; position: absolute;
-  width: 14px; height: 14px;
-  background: #5a3e22; border-radius: 50%;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+  width: 12px; height: 12px;
+  background: var(--v-gold, #c4953a);
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
   z-index: 2;
 }
-.journal-card::before { top: -7px; left: 20%; }
-.journal-card::after  { top: -7px; right: 20%; }
-/* Header sticky no topo do card (titulo + subtitle nao somem ao scrollar) */
+.journal-card::before { top: -6px; left: 20%; }
+.journal-card::after  { top: -6px; right: 20%; }
+/* Header sticky */
 .journal-header {
   flex-shrink: 0;
-  padding: 14px 14px 10px;
-  background: linear-gradient(180deg, #e8d4a0 0%, rgba(232, 212, 160, 0.95) 100%);
-  border-bottom: 1px solid rgba(90, 62, 34, 0.3);
+  padding: 14px 16px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
 }
 .journal-title {
   font-family: var(--v-font-display);
   font-size: 16px; font-weight: 700;
   letter-spacing: 3px; text-transform: uppercase;
-  color: #3a2818; text-align: center;
+  color: var(--v-gold, #c4953a);
+  text-align: center;
   margin: 0 0 2px 0;
-  text-shadow: 1px 1px 0 rgba(200, 170, 120, 0.6);
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 .journal-subtitle {
   font-style: italic; font-size: 10px;
-  text-align: center; color: #6a4828;
+  text-align: center;
+  color: var(--v-text-dim, #a09484);
   margin: 0; letter-spacing: 0.8px;
 }
-/* Body scrollavel — onde fica a lista de quests */
 .journal-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 12px;
+  padding: 12px 14px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(90, 62, 34, 0.5) transparent;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
 }
-.journal-body::-webkit-scrollbar { width: 6px; }
+.journal-body::-webkit-scrollbar { width: 5px; }
 .journal-body::-webkit-scrollbar-thumb {
-  background: rgba(90, 62, 34, 0.5);
+  background: rgba(196, 149, 58, 0.4);
   border-radius: 3px;
 }
-/* Footer sticky com botao close */
 .journal-footer {
   flex-shrink: 0;
   padding: 10px 14px;
-  background: linear-gradient(0deg, #c8ac78 0%, rgba(200, 172, 120, 0.95) 100%);
-  border-top: 1px solid rgba(90, 62, 34, 0.3);
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
   display: flex;
   justify-content: center;
 }
 #journal-list { display: flex; flex-direction: column; gap: 10px; }
+/* X-6.5.51j (2026-04-25): journal items refatorados pro design system. */
 .journal-empty {
   text-align: center;
   padding: 30px 12px;
-  color: #6a4828;
+  color: var(--v-text-dim, #a09484);
   font-style: italic;
   font-size: 12px;
   line-height: 1.55;
 }
 .journal-item {
-  background: rgba(90, 62, 34, 0.15);
-  border-left: 3px solid #8b6420;
+  background: rgba(40, 32, 24, 0.6);
+  border-left: 3px solid var(--v-gold, #c4953a);
   padding: 10px 12px;
   border-radius: 4px;
+  margin-bottom: 8px;
 }
 .journal-item.completed {
-  opacity: 0.65;
+  opacity: 0.55;
   border-left-color: #6ab554;
-  color: #3a4a28;
   font-family: var(--v-font-display);
   font-size: 11px;
   padding: 6px 10px;
-}
-.journal-title {
-  /* override above */
+  background: rgba(40, 32, 24, 0.4);
 }
 .journal-item .journal-title {
   font-family: var(--v-font-display);
   font-size: 13px; font-weight: 700;
-  letter-spacing: 1px;
-  color: #3a2818;
+  color: var(--v-gold, #c4953a);
   text-transform: none;
   text-align: left;
   margin: 0 0 6px 0;
-  text-shadow: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   letter-spacing: 0.5px;
 }
 .journal-desc {
   font-size: 12px; line-height: 1.55;
-  color: #4a3220;
+  color: var(--v-text, #d4c8b0);
   margin-bottom: 6px;
 }
 .journal-meta {
   font-family: var(--v-font-display);
   font-size: 10px;
   letter-spacing: 1px;
-  color: #6a4828;
+  color: var(--v-text-dim, #a09484);
   font-weight: 700;
 }
 .journal-section {
   margin-top: 14px;
   padding-top: 8px;
-  border-top: 1px dashed #8b6420;
+  border-top: 1px dashed rgba(196, 149, 58, 0.3);
   font-family: var(--v-font-display);
   font-size: 11px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #5a3e22;
+  color: var(--v-gold, #c4953a);
 }
 
 /* Inventory rows */
@@ -1308,15 +1312,15 @@ html body .camp-screen {
   gap: 8px;
   padding: 6px 10px;
   margin-top: 4px;
-  background: rgba(90, 62, 34, 0.12);
-  border: 1px solid rgba(90, 62, 34, 0.25);
+  background: rgba(40, 32, 24, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.2);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .inv-row:hover {
-  background: rgba(196, 149, 58, 0.22);
-  border-color: #c4953a;
+  background: rgba(196, 149, 58, 0.18);
+  border-color: var(--v-gold, #c4953a);
   transform: translateX(2px);
 }
 .inv-ico { font-size: 16px; width: 20px; text-align: center; }
@@ -1324,13 +1328,13 @@ html body .camp-screen {
   flex: 1;
   font-family: var(--v-font-display);
   font-size: 12px; font-weight: 700;
-  color: #3a2818;
+  color: var(--v-text, #d4c8b0);
 }
 .inv-count {
   font-family: var(--v-font-display);
   font-size: 11px; font-weight: 700;
-  color: #8b6420;
-  background: rgba(196, 149, 58, 0.2);
+  color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.18);
   padding: 2px 7px;
   border-radius: 8px;
 }
@@ -1341,7 +1345,7 @@ html body .camp-screen {
   gap: 8px;
   padding: 6px 10px;
   margin-top: 4px;
-  background: rgba(90, 62, 34, 0.1);
+  background: rgba(40, 32, 24, 0.4);
   border-radius: 6px;
 }
 .rep-row.pos { border-left: 3px solid #6a9a6a; }
@@ -1351,7 +1355,7 @@ html body .camp-screen {
   flex: 1;
   font-family: var(--v-font-display);
   font-size: 11px; font-weight: 700;
-  color: #3a2818;
+  color: var(--v-text, #d4c8b0);
   letter-spacing: 0.5px;
 }
 .rep-val {
@@ -1362,26 +1366,24 @@ html body .camp-screen {
   min-width: 28px;
   text-align: center;
 }
-.rep-row.pos .rep-val { color: #3a6a3a; background: rgba(106, 154, 106, 0.18); }
-.rep-row.neg .rep-val { color: #8a2820; background: rgba(176, 58, 56, 0.18); }
+.rep-row.pos .rep-val { color: #98d088; background: rgba(106, 154, 106, 0.25); }
+.rep-row.neg .rep-val { color: #e08070; background: rgba(176, 58, 56, 0.25); }
 .rep-label {
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #6a4828;
+  color: var(--v-text-dim, #a09484);
 }
 .journal-close {
-  display: block;
-  margin: 14px auto 0;
-  background: linear-gradient(180deg, #8b6420, #5a3e22);
-  border: 1px solid #3a2818;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
+  border: 1px solid var(--v-gold, #c4953a);
   border-radius: 6px;
-  padding: 9px 26px;
+  padding: 8px 24px;
   font-family: var(--v-font-display);
-  font-size: 12px;
-  letter-spacing: 2.5px;
+  font-size: 11px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: #e8dcc8; font-weight: 700;
+  color: var(--v-gold, #c4953a); font-weight: 700;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
@@ -2213,48 +2215,72 @@ body.remote-mode #debug-hud { display: none !important; }
   overflow-y: auto;
 }
 #cartography-overlay.visible { display: flex; }
+/* X-6.5.51j (2026-04-25): cart-card REFATORADO pro design system do jogo.
+   Antes: parchment cream/brown. Agora: dark + gold (matches journal).
+   Layout 3-zonas (header sticky + body scrollavel + footer sticky). */
 .cart-card {
-  background:
-    linear-gradient(135deg, rgba(74, 52, 30, 0.4) 0%, transparent 20%),
-    linear-gradient(-135deg, rgba(74, 52, 30, 0.4) 0%, transparent 20%),
-    linear-gradient(180deg, #d8bc7a 0%, #c4a66a 100%);
-  border: 3px double #5a3e22;
-  border-radius: 6px;
-  padding: 16px 10px 12px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(100, 70, 40, 0.25);
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
+  width: calc(100% - 24px);
+  max-width: 360px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
   position: relative;
 }
 .cart-card::before, .cart-card::after {
   content: '';
   position: absolute;
-  width: 14px; height: 14px;
-  background: #5a3e22;
+  width: 12px; height: 12px;
+  background: var(--v-gold, #c4953a);
   border-radius: 50%;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
+  z-index: 2;
 }
-.cart-card::before { top: -7px; left: 50%; transform: translateX(-50%); }
-.cart-card::after { bottom: -7px; left: 50%; transform: translateX(-50%); }
+.cart-card::before { top: -6px; left: 50%; transform: translateX(-50%); }
+.cart-card::after { bottom: -6px; left: 50%; transform: translateX(-50%); }
+.cart-header {
+  flex-shrink: 0;
+  padding: 14px 16px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+}
 .cart-title {
   font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: #3a2818;
+  color: var(--v-gold, #c4953a);
   text-align: center;
-  margin: 0 0 4px 0;
-  text-shadow: 1px 1px 0 rgba(200, 170, 120, 0.6);
+  margin: 0 0 2px 0;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 .cart-subtitle {
   font-family: var(--v-font, serif);
   font-style: italic;
-  font-size: 12px;
+  font-size: 10px;
   text-align: center;
-  color: #6a4828;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
+  color: var(--v-text-dim, #a09484);
+  margin: 0;
+  letter-spacing: 0.8px;
+}
+.cart-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.cart-body::-webkit-scrollbar { width: 5px; }
+.cart-body::-webkit-scrollbar-thumb {
+  background: rgba(196, 149, 58, 0.4);
+  border-radius: 3px;
 }
 #cart-canvas {
   display: block;
@@ -2262,23 +2288,25 @@ body.remote-mode #debug-hud { display: none !important; }
   width: 100%;
   height: auto;
   aspect-ratio: 400 / 540;
+  /* X-6.5.51j: canvas agora tem fundo dark (era parchment cream).
+     Pra continuar legivel, drawCart vai usar mais alpha em halos + estradas. */
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(255, 240, 200, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 80%, rgba(220, 190, 140, 0.22) 0%, transparent 55%),
-    linear-gradient(180deg, #e8d4a0, #c8ac78);
-  border: 2px solid #5a3e22;
-  border-radius: 3px;
-  box-shadow: inset 0 0 28px rgba(100, 70, 40, 0.4);
+    radial-gradient(ellipse at 30% 20%, rgba(196, 149, 58, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 80%, rgba(196, 149, 58, 0.04) 0%, transparent 55%),
+    linear-gradient(180deg, var(--v-bg, #2a2420), #1a1510);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 4px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
   touch-action: manipulation;
 }
 .cart-legend {
   display: flex;
   justify-content: center;
   gap: 14px;
-  margin-top: 12px;
+  margin-top: 10px;
   font-family: var(--v-font-display);
   font-size: 10px;
-  color: #3a2818;
+  color: var(--v-text, #d4c8b0);
   letter-spacing: 1px;
   text-transform: uppercase;
   flex-wrap: wrap;
@@ -2286,25 +2314,31 @@ body.remote-mode #debug-hud { display: none !important; }
 .cart-legend-item { display: flex; align-items: center; gap: 5px; }
 .cart-legend-item .dot {
   width: 10px; height: 10px; border-radius: 50%;
-  border: 1px solid #3a2818;
+  border: 1px solid rgba(196, 149, 58, 0.5);
   display: inline-block;
 }
+.cart-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex;
+  justify-content: center;
+}
 .cart-close {
-  display: block;
-  margin: 14px auto 0;
-  background: linear-gradient(180deg, #8b6420, #5a3e22);
-  border: 1px solid #3a2818;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2), rgba(139, 100, 32, 0.15));
+  border: 1px solid var(--v-gold, #c4953a);
   border-radius: 6px;
-  padding: 9px 26px;
+  padding: 8px 24px;
   font-family: var(--v-font-display);
-  font-size: 12px;
-  letter-spacing: 2.5px;
+  font-size: 11px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: #e8dcc8;
+  color: var(--v-gold, #c4953a);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
+.cart-close:hover { background: linear-gradient(180deg, rgba(196, 149, 58, 0.3), rgba(139, 100, 32, 0.2)); }
 .cart-close:active { transform: scale(0.97); }
 
 /* ====== LOCATION POPUP (bestiário + compêndio) ====================== */
@@ -2320,66 +2354,91 @@ body.remote-mode #debug-hud { display: none !important; }
 #detail-popup { z-index: 290; }
 #location-popup.visible, #detail-popup.visible { display: flex; }
 
+/* X-6.5.51j (2026-04-25): loc/detail cards REFATORADOS pro design system
+   do jogo + layout 3-zonas (header sticky + body scroll + footer sticky).
+   User feedback: "melhore a responsividade das telas que abrem ao clicar
+   em uma regiao dentro da cartografia". */
 .loc-card, .detail-card {
-  background:
-    linear-gradient(135deg, rgba(58, 40, 24, 0.4) 0%, transparent 18%),
-    linear-gradient(180deg, #e8d4a0 0%, #c8ac78 100%);
-  border: 3px double #5a3e22;
-  border-radius: 6px;
-  padding: 16px 14px;
-  width: 100%;
-  max-width: 400px;
-  max-height: 94vh;
-  overflow-y: auto;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(100,70,40,0.3);
-  color: #3a2818;
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
+  width: calc(100% - 24px);
+  max-width: 360px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
+  color: var(--v-text, #d4c8b0);
   position: relative;
 }
 .loc-card::before, .detail-card::before {
   content: ''; position: absolute;
-  top: -7px; left: 50%; transform: translateX(-50%);
-  width: 14px; height: 14px; background: #5a3e22;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 12px;
+  background: var(--v-gold, #c4953a);
   border-radius: 50%;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
+  z-index: 2;
 }
-.loc-header { text-align: center; margin-bottom: 10px; }
+/* Header sticky com title + meta tags */
+.loc-header {
+  flex-shrink: 0;
+  padding: 14px 16px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  text-align: center;
+}
 .loc-title, .detail-title {
   font-family: var(--v-font-display);
-  font-size: 17px; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: #3a2818;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
   margin: 0 0 6px 0;
-  text-shadow: 1px 1px 0 rgba(200,170,120,0.6);
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
 }
-.loc-meta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.loc-meta { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
 .loc-tag {
   font-family: var(--v-font-display);
-  font-size: 10px; letter-spacing: 1.5px;
-  background: rgba(90, 62, 34, 0.18);
-  border: 1px solid rgba(90, 62, 34, 0.4);
+  font-size: 9px; letter-spacing: 1.2px;
+  background: rgba(196, 149, 58, 0.12);
+  border: 1px solid rgba(196, 149, 58, 0.4);
   padding: 2px 8px; border-radius: 10px;
-  color: #5a3e22;
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
 }
-.loc-tag.danger { background: rgba(170, 50, 50, 0.15); color: #8a2820; border-color: rgba(170, 50, 50, 0.4); }
-
-.loc-section { margin: 12px 0; }
+.loc-tag.danger { background: rgba(170, 50, 50, 0.15); color: #e08070; border-color: rgba(170, 50, 50, 0.4); }
+/* Body scrollavel com sections */
+.loc-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.loc-body::-webkit-scrollbar { width: 5px; }
+.loc-body::-webkit-scrollbar-thumb { background: rgba(196, 149, 58, 0.4); border-radius: 3px; }
+.loc-section { margin: 0 0 12px 0; }
+.loc-section:last-child { margin-bottom: 0; }
 .loc-section-head {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 6px;
-  padding-bottom: 3px;
-  border-bottom: 1px dashed #8b6420;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(196, 149, 58, 0.3);
 }
 .ls-title {
   font-family: var(--v-font-display);
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: #3a2818;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
 }
 .ls-count {
   font-family: var(--v-font-display);
-  font-size: 11px;
-  color: #6a4828;
-  background: rgba(90, 62, 34, 0.15);
+  font-size: 10px;
+  color: var(--v-text-dim, #a09484);
+  background: rgba(196, 149, 58, 0.15);
   padding: 2px 7px;
   border-radius: 8px;
 }
@@ -2391,22 +2450,22 @@ body.remote-mode #debug-hud { display: none !important; }
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(90, 62, 34, 0.12);
-  border: 1px solid rgba(90, 62, 34, 0.3);
+  background: rgba(40, 32, 24, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.2);
   border-radius: 6px;
   padding: 6px 10px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .bestiary-card.discovered:hover {
-  background: rgba(196, 149, 58, 0.2);
-  border-color: #c4953a;
+  background: rgba(196, 149, 58, 0.18);
+  border-color: var(--v-gold, #c4953a);
   transform: translateX(2px);
 }
 .bestiary-card.locked {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: default;
-  background: rgba(50, 40, 30, 0.08);
+  background: rgba(40, 32, 24, 0.25);
 }
 .bc-icon {
   font-size: 20px;
@@ -2414,7 +2473,7 @@ body.remote-mode #debug-hud { display: none !important; }
   flex-shrink: 0;
 }
 .bestiary-card.locked .bc-icon {
-  color: #8a6a48;
+  color: var(--v-text-dim, #a09484);
   font-weight: 700;
 }
 .bc-info { flex: 1; min-width: 0; }
@@ -2422,90 +2481,112 @@ body.remote-mode #debug-hud { display: none !important; }
   font-family: var(--v-font-display);
   font-size: 12px;
   font-weight: 700;
-  color: #3a2818;
+  color: var(--v-text, #d4c8b0);
   letter-spacing: 0.5px;
 }
-.bestiary-card.locked .bc-name { color: #6a5030; font-style: italic; }
+.bestiary-card.locked .bc-name { color: var(--v-text-dim, #a09484); font-style: italic; }
 .bc-meta {
   font-size: 10px;
-  color: #6a4828;
+  color: var(--v-text-dim, #a09484);
   font-style: italic;
 }
 .bc-count {
   font-family: var(--v-font-display);
   font-size: 11px;
   font-weight: 700;
-  color: #8b6420;
-  background: rgba(196, 149, 58, 0.18);
+  color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.15);
   padding: 2px 7px;
   border-radius: 8px;
 }
 
-.loc-actions {
-  display: flex; gap: 8px; margin-top: 14px;
+/* X-6.5.51j: footer sticky com action buttons */
+.loc-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex; gap: 8px;
 }
 .loc-close, .loc-travel, .detail-close {
   flex: 1;
   border-radius: 6px;
-  padding: 9px;
+  padding: 8px;
   font-family: var(--v-font-display);
   font-size: 11px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid #3a2818;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 .loc-close, .detail-close {
-  background: linear-gradient(180deg, #8a7050, #5a3e22);
-  color: #e8dcc8;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.9), rgba(22, 18, 14, 0.9));
+  border: 1px solid var(--v-text-dim, #a09484);
+  color: var(--v-text, #d4c8b0);
 }
+.loc-close:hover, .detail-close:hover { border-color: var(--v-text, #d4c8b0); background: rgba(60, 48, 32, 0.95); }
 .loc-travel {
-  background: linear-gradient(180deg, #c4953a, #8b6420);
+  background: linear-gradient(180deg, var(--v-gold, #c4953a), #8b6420);
+  border: 1px solid #fbd770;
   color: #1a1510;
-  border-color: #8b6420;
 }
+.loc-travel:hover { background: linear-gradient(180deg, #fbd770, var(--v-gold, #c4953a)); }
 .loc-travel.disabled {
-  background: linear-gradient(180deg, #8a7a5a, #6a4828);
-  color: #a09484;
+  background: linear-gradient(180deg, rgba(60, 48, 32, 0.6), rgba(40, 32, 24, 0.6));
+  color: var(--v-text-dim, #a09484);
+  border-color: var(--v-border, #4a3828);
   cursor: not-allowed;
   opacity: 0.65;
 }
-.detail-close { width: 100%; margin-top: 12px; }
+.detail-close { flex: 1; }
 
-/* Detail popup specifics */
+/* X-6.5.51j: Detail popup com layout 3-zonas (header sticky + body scroll +
+   footer sticky), refatorado pro design system do jogo (dark/gold). */
 .detail-header {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(58, 40, 24, 0.3);
+  flex-shrink: 0;
+  padding: 12px 14px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex; align-items: center; gap: 12px;
 }
 .detail-icon {
-  font-size: 42px;
-  width: 60px; height: 60px;
+  font-size: 32px;
+  width: 50px; height: 50px;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(90, 62, 34, 0.2);
-  border: 2px solid #5a3e22;
+  background: rgba(196, 149, 58, 0.12);
+  border: 2px solid var(--v-gold, #c4953a);
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(196, 149, 58, 0.25);
 }
-.detail-titlebar { flex: 1; }
+.detail-titlebar { flex: 1; min-width: 0; text-align: left; }
+.detail-titlebar .detail-title { margin: 0 0 4px 0; }
 .detail-subtitle {
   font-family: var(--v-font-display);
-  font-size: 11px; letter-spacing: 1.5px;
-  color: #6a4828;
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--v-text-dim, #a09484);
   text-transform: uppercase;
 }
+/* Body scrollavel com stats/desc/attacks/drops */
+.detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.detail-body::-webkit-scrollbar { width: 5px; }
+.detail-body::-webkit-scrollbar-thumb { background: rgba(196, 149, 58, 0.4); border-radius: 3px; }
 .detail-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .ds-item {
-  background: rgba(90, 62, 34, 0.15);
-  border: 1px solid rgba(90, 62, 34, 0.3);
+  background: rgba(40, 32, 24, 0.6);
+  border: 1px solid rgba(196, 149, 58, 0.25);
   border-radius: 6px;
   padding: 6px 4px;
   text-align: center;
@@ -2515,41 +2596,49 @@ body.remote-mode #debug-hud { display: none !important; }
   font-size: 9px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #6a4828;
+  color: var(--v-text-dim, #a09484);
 }
 .ds-v {
   font-family: var(--v-font-display);
   font-size: 14px; font-weight: 700;
-  color: #3a2818;
+  color: var(--v-gold, #c4953a);
 }
 .detail-desc {
   font-size: 12.5px;
   line-height: 1.6;
-  color: #3a2818;
-  margin: 10px 0;
+  color: var(--v-text, #d4c8b0);
+  margin: 8px 0;
   text-align: justify;
   font-style: italic;
 }
 .detail-attacks, .detail-drops {
   margin-top: 10px;
   padding: 8px 10px;
-  background: rgba(90, 62, 34, 0.08);
-  border-left: 3px solid #8b6420;
+  background: rgba(40, 32, 24, 0.5);
+  border-left: 3px solid var(--v-gold, #c4953a);
   border-radius: 0 4px 4px 0;
 }
 .detail-attacks h4, .detail-drops h4 {
   margin: 0 0 6px 0;
   font-family: var(--v-font-display);
-  font-size: 12px;
-  letter-spacing: 2px;
+  font-size: 11px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: #5a3e22;
+  color: var(--v-gold, #c4953a);
 }
 .detail-attacks p {
   font-size: 11.5px;
   line-height: 1.5;
-  color: #3a2818;
+  color: var(--v-text, #d4c8b0);
   margin: 0;
+}
+/* Detail footer sticky */
+.detail-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex; gap: 8px;
 }
 .drop-row {
   display: flex;
@@ -2559,15 +2648,15 @@ body.remote-mode #debug-hud { display: none !important; }
   margin-top: 3px;
   border-radius: 4px;
   font-size: 12px;
-  background: rgba(90, 62, 34, 0.1);
+  background: rgba(40, 32, 24, 0.5);
 }
-.drop-row.found { background: rgba(196, 149, 58, 0.2); color: #3a2818; }
-.drop-row.unknown { opacity: 0.55; font-style: italic; }
-.drop-row:hover.found { background: rgba(196, 149, 58, 0.35); }
+.drop-row.found { background: rgba(196, 149, 58, 0.18); color: var(--v-text, #d4c8b0); }
+.drop-row.unknown { opacity: 0.55; font-style: italic; color: var(--v-text-dim, #a09484); }
+.drop-row:hover.found { background: rgba(196, 149, 58, 0.3); }
 .dr-icon { font-size: 14px; margin-right: 6px; }
-.dr-name { font-family: var(--v-font-display); font-size: 11px; font-weight: 700; }
-.dr-count { font-family: var(--v-font-display); font-size: 11px; color: #8b6420; }
-.drops-empty { font-size: 11px; font-style: italic; color: #6a4828; margin: 4px 0; }
+.dr-name { font-family: var(--v-font-display); font-size: 11px; font-weight: 700; color: var(--v-text, #d4c8b0); }
+.dr-count { font-family: var(--v-font-display); font-size: 11px; color: var(--v-gold, #c4953a); }
+.drops-empty { font-size: 11px; font-style: italic; color: var(--v-text-dim, #a09484); margin: 4px 0; }
 .use-item {
   font-size: 11.5px;
   line-height: 1.55;
@@ -3095,20 +3184,29 @@ body.remote-mode #debug-hud { display: none !important; }
 
   <!-- Cartografia: mapa de interligações entre todos os mapas -->
   <div id="cartography-overlay">
+    <!-- X-6.5.51j: cart-card 3-zonas (header sticky + body scrollavel + footer) -->
     <div class="cart-card">
-      <h2 class="cart-title">Cartografia de Valdoria</h2>
-      <div class="cart-subtitle">Mapa das Terras Conhecidas</div>
-      <canvas id="cart-canvas" width="400" height="540"></canvas>
-      <div class="cart-legend">
-        <div class="cart-legend-item"><span class="dot" style="background:#c4953a"></span>Local Atual</div>
-        <div class="cart-legend-item"><span class="dot" style="background:#8a7a5a"></span>Visitado</div>
-        <div class="cart-legend-item"><span class="dot" style="background:#4a4030"></span>Conhecido</div>
+      <div class="cart-header">
+        <h2 class="cart-title">Cartografia de Valdoria</h2>
+        <div class="cart-subtitle">Mapa das Terras Conhecidas</div>
       </div>
-      <button class="cart-close" id="cart-close-btn">Fechar Pergaminho</button>
+      <div class="cart-body">
+        <canvas id="cart-canvas" width="400" height="540"></canvas>
+        <div class="cart-legend">
+          <div class="cart-legend-item"><span class="dot" style="background:#c4953a"></span>Atual</div>
+          <div class="cart-legend-item"><span class="dot" style="background:#8a7a5a"></span>Visitado</div>
+          <div class="cart-legend-item"><span class="dot" style="background:#4a4030"></span>Conhecido</div>
+        </div>
+      </div>
+      <div class="cart-footer">
+        <button class="cart-close" id="cart-close-btn">Fechar</button>
+      </div>
     </div>
   </div>
 
-  <!-- Location popup (bestiário + materiais + travel) -->
+  <!-- X-6.5.51j: location-popup refatorado pra layout 3-zonas (header sticky
+       com title+meta + body scrollavel com sections + footer sticky com
+       action buttons). Igual journal/cartografia. -->
   <div id="location-popup">
     <div class="loc-card">
       <div class="loc-header">
@@ -3118,21 +3216,23 @@ body.remote-mode #debug-hud { display: none !important; }
           <span id="loc-danger" class="loc-tag danger">—</span>
         </div>
       </div>
-      <div class="loc-section">
-        <div class="loc-section-head">
-          <span class="ls-title">⚔ Inimigos</span>
-          <span class="ls-count" id="loc-enemy-count">0/0</span>
+      <div class="loc-body">
+        <div class="loc-section">
+          <div class="loc-section-head">
+            <span class="ls-title">⚔ Inimigos</span>
+            <span class="ls-count" id="loc-enemy-count">0/0</span>
+          </div>
+          <div id="loc-enemies" class="bestiary-list"></div>
         </div>
-        <div id="loc-enemies" class="bestiary-list"></div>
-      </div>
-      <div class="loc-section">
-        <div class="loc-section-head">
-          <span class="ls-title">📦 Materiais</span>
-          <span class="ls-count" id="loc-mat-count">0/0</span>
+        <div class="loc-section">
+          <div class="loc-section-head">
+            <span class="ls-title">📦 Materiais</span>
+            <span class="ls-count" id="loc-mat-count">0/0</span>
+          </div>
+          <div id="loc-materials" class="bestiary-list"></div>
         </div>
-        <div id="loc-materials" class="bestiary-list"></div>
       </div>
-      <div class="loc-actions">
+      <div class="loc-footer">
         <button class="loc-close" id="loc-close-btn">Fechar</button>
         <button class="loc-travel" id="loc-travel-btn">Viajar</button>
       </div>
@@ -3140,6 +3240,9 @@ body.remote-mode #debug-hud { display: none !important; }
   </div>
 
   <!-- Detail popup (enemy/material deep info) -->
+  <!-- X-6.5.51j: detail-popup refatorado pra layout 3-zonas (header sticky
+       com icon+title + body scrollavel com stats/desc/attacks/drops + footer
+       sticky com close button). Igual loc-popup. -->
   <div id="detail-popup">
     <div class="detail-card">
       <div class="detail-header">
@@ -3149,11 +3252,15 @@ body.remote-mode #debug-hud { display: none !important; }
           <div class="detail-subtitle" id="detail-subtitle">—</div>
         </div>
       </div>
-      <div class="detail-stats" id="detail-stats"></div>
-      <p class="detail-desc" id="detail-desc"></p>
-      <div class="detail-attacks" id="detail-attacks"></div>
-      <div class="detail-drops" id="detail-drops"></div>
-      <button class="detail-close" id="detail-close-btn">Fechar</button>
+      <div class="detail-body">
+        <div class="detail-stats" id="detail-stats"></div>
+        <p class="detail-desc" id="detail-desc"></p>
+        <div class="detail-attacks" id="detail-attacks"></div>
+        <div class="detail-drops" id="detail-drops"></div>
+      </div>
+      <div class="detail-footer">
+        <button class="detail-close" id="detail-close-btn">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -3282,43 +3389,43 @@ body.remote-mode #debug-hud { display: none !important; }
   _appendLine('info', ['[sim-log-panel] ativo. Console + LOG/LOGW/LOGE capturados.']);
 })();
 
-/* X-6.5.51h (2026-04-25): SOLUCAO DEFINITIVA pro audio button (.va-float)
-   ficar dentro do #frame. audio-manager.js cria como child de body, mas
-   queremos como child de #frame pra herdar overflow:hidden + position:relative.
-   MutationObserver detecta quando .va-float e adicionado e re-parenta. */
+/* X-6.5.51h+j (2026-04-25): SOLUCAO DEFINITIVA pro audio button + popup +
+   backdrop ficarem dentro do #frame. audio-manager.js cria os 3 elementos
+   (#va-float, #va-popup, #va-backdrop) como children de body, mas queremos
+   como children de #frame pra herdar overflow:hidden + position:relative.
+
+   X-6.5.51j: estende pra #va-popup + #va-backdrop (criados lazy quando user
+   abre o popup de volume — observer fica ativo permanentemente pra capturar). */
 (function() {
   var frame = document.getElementById('frame');
   if (!frame) return;
 
-  function _adoptVaFloat() {
-    var vf = document.getElementById('va-float');
-    if (vf && vf.parentElement !== frame) {
-      frame.appendChild(vf);
-      console.info('[sim] va-float re-parented from body to #frame');
+  var _wantedIds = ['va-float', 'va-popup', 'va-backdrop'];
+
+  function _adopt(id) {
+    var el = document.getElementById(id);
+    if (el && el.parentElement === document.body) {
+      frame.appendChild(el);
+      console.info('[sim] ' + id + ' re-parented from body to #frame');
       return true;
     }
     return false;
   }
 
-  /* Tenta imediatamente (caso audio-manager ja tenha rodado) */
-  if (_adoptVaFloat()) return;
+  /* Adopta imediatamente (caso ja existam) */
+  _wantedIds.forEach(_adopt);
 
-  /* Senao, observa body por adicoes */
+  /* Observa body permanentemente (popup e criado lazy no primeiro click) */
   var observer = new MutationObserver(function(mutations) {
     for (var m of mutations) {
       for (var node of m.addedNodes) {
-        if (node && node.id === 'va-float') {
-          _adoptVaFloat();
-          observer.disconnect();
-          return;
+        if (node && node.id && _wantedIds.indexOf(node.id) >= 0) {
+          _adopt(node.id);
         }
       }
     }
   });
   observer.observe(document.body, { childList: true });
-
-  /* Fallback: para de observar apos 5s pra nao vazar */
-  setTimeout(function() { observer.disconnect(); }, 5000);
 })();
 </script>
 
@@ -12343,8 +12450,9 @@ function renderCartography() {
     ctx.fillRect(x - 50, y - 50, 100, 100);
   });
 
-  // Edges (estradas pontilhadas) — linhas mais marcantes
-  ctx.strokeStyle = 'rgba(80, 52, 28, 0.55)';
+  // Edges (estradas pontilhadas) — gold com alpha pra contrastar com fundo dark
+  // X-6.5.51j: cores ajustadas pro fundo DARK do canvas (era brown sobre cream)
+  ctx.strokeStyle = 'rgba(196, 149, 58, 0.55)';
   ctx.lineWidth = 1.8;
   ctx.setLineDash([5, 3]);
   const drawnEdges = new Set();  // evita desenhar mão dupla
@@ -12371,7 +12479,9 @@ function renderCartography() {
   ctx.setLineDash([]);
 
   // Bússola no canto superior-direito
-  drawCompassRose(ctx, w - 32, topOffset + 28, 18);
+  // X-6.5.51j: w-32 -> w-44 (afastada da linha direita do mapa, user feedback:
+  // "rosa dos ventos esta encostada na linha")
+  drawCompassRose(ctx, w - 44, topOffset + 32, 18);
 
   // Nodes
   const nodeRadius = 12;
@@ -12488,17 +12598,15 @@ function renderCartography() {
   }
 }
 
-/* X-6.5.51h (2026-04-25): rosa-dos-ventos REDESENHADA. Antes era circulo
-   simples + 4 linhas — feio. Agora: 8 petalas (cardinal + intercardinal)
-   com gradient claro/escuro pra simular relevo, fleur-de-lis no Norte,
-   anel duplo, marcadores de N/S/L/O em fonte serif elegante.
-   User feedback: "melhore o desenho das rosas do vento pois esta
-   extremamente feio, mal configurado/desenhado". */
+/* X-6.5.51j (2026-04-25): rosa-dos-ventos AJUSTADA pro fundo DARK do
+   cart-canvas refatorado (X-6.5.51j). Antes cores escuras (pra fundo cream);
+   agora gold/light pra contraste com fundo dark. User feedback: "mova a
+   rosa dos ventos um pouco para a esquerda pois ficou encostada na linha". */
 function drawCompassRose(ctx, cx, cy, size) {
   ctx.save();
 
-  // Anel externo + interno (double border decorativo)
-  ctx.strokeStyle = 'rgba(58, 38, 22, 0.7)';
+  // Anel externo + interno (double border decorativo, gold)
+  ctx.strokeStyle = 'rgba(196, 149, 58, 0.7)';
   ctx.lineWidth = 1.4;
   ctx.beginPath();
   ctx.arc(cx, cy, size + 3, 0, Math.PI * 2);
@@ -12517,16 +12625,16 @@ function drawCompassRose(ctx, cx, cy, size) {
     const baseLeftY = cy + Math.sin(a + 0.18) * size * 0.18;
     const baseRightX = cx + Math.cos(a - 0.18) * size * 0.18;
     const baseRightY = cy + Math.sin(a - 0.18) * size * 0.18;
-    /* Petala light side (gradient claro) */
-    ctx.fillStyle = 'rgba(216, 188, 122, 0.85)';
+    /* Light side (parchment golden) */
+    ctx.fillStyle = 'rgba(232, 212, 160, 0.55)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(baseLeftX, baseLeftY);
     ctx.lineTo(tipX, tipY);
     ctx.closePath();
     ctx.fill();
-    /* Petala dark side (gradient escuro) */
-    ctx.fillStyle = 'rgba(90, 62, 34, 0.7)';
+    /* Dark side (deep brown shadow) */
+    ctx.fillStyle = 'rgba(40, 28, 16, 0.7)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(tipX, tipY);
@@ -12544,16 +12652,16 @@ function drawCompassRose(ctx, cx, cy, size) {
     const baseLeftY = cy + Math.sin(a + 0.20) * size * 0.22;
     const baseRightX = cx + Math.cos(a - 0.20) * size * 0.22;
     const baseRightY = cy + Math.sin(a - 0.20) * size * 0.22;
-    /* Light side */
-    ctx.fillStyle = 'rgba(232, 212, 160, 0.95)';
+    /* Light side (gold bright) */
+    ctx.fillStyle = 'rgba(232, 212, 160, 0.85)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(baseLeftX, baseLeftY);
     ctx.lineTo(tipX, tipY);
     ctx.closePath();
     ctx.fill();
-    /* Dark side */
-    ctx.fillStyle = 'rgba(58, 38, 22, 0.85)';
+    /* Dark side (deep brown) */
+    ctx.fillStyle = 'rgba(30, 22, 12, 0.85)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(tipX, tipY);
@@ -12561,7 +12669,7 @@ function drawCompassRose(ctx, cx, cy, size) {
     ctx.closePath();
     ctx.fill();
     /* Outline da petala pra contraste */
-    ctx.strokeStyle = 'rgba(58, 38, 22, 0.6)';
+    ctx.strokeStyle = 'rgba(196, 149, 58, 0.6)';
     ctx.lineWidth = 0.6;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
@@ -12572,7 +12680,7 @@ function drawCompassRose(ctx, cx, cy, size) {
     ctx.stroke();
   });
 
-  // Disco central (gem)
+  // Disco central (gem dourada)
   const gemGrad = ctx.createRadialGradient(cx - 1, cy - 1, 0, cx, cy, size * 0.13);
   gemGrad.addColorStop(0, '#fbd770');
   gemGrad.addColorStop(0.5, '#c4953a');
@@ -12581,13 +12689,13 @@ function drawCompassRose(ctx, cx, cy, size) {
   ctx.beginPath();
   ctx.arc(cx, cy, size * 0.13, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(58, 38, 22, 0.9)';
+  ctx.strokeStyle = 'rgba(196, 149, 58, 0.9)';
   ctx.lineWidth = 0.8;
   ctx.stroke();
 
-  // Fleur-de-lis estilizada acima do N (apenas linhas pra nao competir com letra)
+  // Fleur-de-lis estilizada acima do N (linhas gold pra contraste com dark)
   const fdlY = cy - size * 1.05;
-  ctx.strokeStyle = 'rgba(58, 38, 22, 0.9)';
+  ctx.strokeStyle = 'rgba(196, 149, 58, 0.9)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(cx - 3, fdlY + 3);
@@ -12595,15 +12703,18 @@ function drawCompassRose(ctx, cx, cy, size) {
   ctx.lineTo(cx + 3, fdlY + 3);
   ctx.stroke();
 
-  // Letras N/S/L/O — fora do anel externo pra nao bater nas petalas
-  ctx.fillStyle = '#3a2818';
+  // Letras N/S/L/O em gold pra contraste com fundo dark
+  ctx.fillStyle = '#fbd770';
   ctx.font = 'bold 11px "Cinzel", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+  ctx.shadowBlur = 3;
   ctx.fillText('N', cx, cy - size - 14);
   ctx.fillText('S', cx, cy + size + 14);
   ctx.fillText('L', cx + size + 12, cy);
   ctx.fillText('O', cx - size - 12, cy);
+  ctx.shadowBlur = 0;
 
   ctx.restore();
 }
