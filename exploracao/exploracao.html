@@ -9327,8 +9327,8 @@ var _moveTimer = null;
 /* X-6.5.39: watchdog timestamp pra detectar S.ph travado em 'moving'. */
 var _movingPhStartedAt = 0;
 
-/* X-6.5.39 STATE WATCHDOG: a cada 1s verifica se S.ph === 'moving' por
-   mais de 3s. Se sim, e bug — forca volta pra 'idle' pra desbloquear UI. */
+/* X-6.5.39 STATE WATCHDOG (moving): a cada 1s verifica se S.ph === 'moving'
+   por mais de 3s. Se sim, e bug — forca volta pra 'idle' pra desbloquear UI. */
 setInterval(function() {
   if (S && S.ph === 'moving' && _movingPhStartedAt > 0) {
     var elapsed = Date.now() - _movingPhStartedAt;
@@ -9347,6 +9347,34 @@ setInterval(function() {
     _movingPhStartedAt = 0;
   }
 }, 1000);
+
+/* X-6.5.40 STATE WATCHDOG (event): se S.ph === 'event' por mais de 60s SEM
+   o modal #event-modal visivel no DOM, e bug (openEventModal crashou e
+   travou state). Forca volta pra 'idle'. Bug user 2026-04-24: forEach
+   crash em combat_forced events sem ev.choices deixava state preso. */
+var _eventPhStartedAt = 0;
+setInterval(function() {
+  if (S && S.ph === 'event') {
+    if (_eventPhStartedAt === 0) _eventPhStartedAt = Date.now();
+    var elapsed = Date.now() - _eventPhStartedAt;
+    if (elapsed > 60000) {
+      var modal = document.getElementById('event-modal');
+      var modalVisible = modal && modal.classList.contains('visible');
+      if (!modalVisible) {
+        LOGE('EVENT', 'STATE_WATCHDOG ph=event stuck for ' + elapsed + 'ms WITHOUT visible modal — forcing idle');
+        try {
+          S.ph = 'idle';
+          S.event = null;
+          _eventPhStartedAt = 0;
+          if (typeof updateHexNav === 'function') updateHexNav();
+          if (typeof scheduleRender === 'function') scheduleRender();
+        } catch (e) { LOGE('EVENT', 'state_watchdog_event_recovery_err msg=' + (e && e.message)); }
+      }
+    }
+  } else {
+    _eventPhStartedAt = 0;
+  }
+}, 5000);
 
 function beginMove(col, row) {
   /* X-6.5.38: ANIMACAO INTERRUPTIVEL — se ja ha animacao em curso, completa
@@ -10022,6 +10050,43 @@ function openEventModal() {
   const bgKey = S.player.background;
   const alignKey = S.player.alignment;
   const allies = S.allies || [];
+
+  /* X-6.5.40 (2026-04-24): combat_forced events NAO tem ev.choices — tem
+     ev.combat top-level direto. Antes (bug user 2026-04-24): forEach em
+     undefined throw → S.ph travado em 'event' → todos clicks bloqueados.
+     Logs revelaram: openModal err=Cannot read properties of undefined
+     (reading 'forEach') seguido de loop de isValidMove_blocked event_open. */
+  if (!Array.isArray(ev.choices) || ev.choices.length === 0) {
+    LOGW('EVENT', 'no_choices type=' + (ev.type || '?')
+      + ' has_combat=' + !!(ev.combat) + ' id=' + ev.id);
+    if (ev.type === 'combat_forced' || ev.combat) {
+      /* combat_forced: cria choice sintetica "Atacar" que dispara combate.
+         O event_choice no servidor vai resolver via outcome.combat. */
+      LOG('EVENT', 'auto_choice_for_combat_forced id=' + ev.id);
+      const btn = document.createElement('button');
+      btn.className = 'event-choice combat-forced-btn';
+      btn.style.cssText = 'background: linear-gradient(180deg, rgba(170,68,68,0.3), rgba(110,40,40,0.4)); border-color: rgba(196,68,68,0.6);';
+      const lbl = document.createElement('span');
+      lbl.className = 'choice-label';
+      lbl.textContent = '⚔️ Lutar';
+      btn.appendChild(lbl);
+      btn.onclick = function() {
+        LOG('EVENT', 'combat_forced_choice_clicked id=' + ev.id);
+        applyChoiceLogic(0);  // server tem combat top-level — qualquer idx OK
+      };
+      choicesEl.appendChild(btn);
+    } else {
+      /* Evento sem choices E sem combat — bug, fecha modal pra desbloquear. */
+      LOGE('EVENT', 'malformed_event_no_choices_no_combat id=' + ev.id + ' — closing modal to unblock');
+      try {
+        if (typeof closeEventModal === 'function') closeEventModal();
+        if (S.ph === 'event') S.ph = 'idle';
+        if (typeof updateHexNav === 'function') updateHexNav();
+      } catch (e) { LOGE('EVENT', 'force_close_err msg=' + (e && e.message)); }
+    }
+    /* Mostra modal com texto/title (sem choices regulares) */
+    return;
+  }
 
   ev.choices.forEach((ch, idx) => {
     // V2.6: filtro unificado — classe, background, alignment, ally-class
