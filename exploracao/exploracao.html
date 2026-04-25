@@ -10255,15 +10255,30 @@ function _remoteShowOutcome(ch, oc) {
   } catch (_) {}
   updateHud();
   // Combat redirect (X-3.5): se server disparou combate, navega após leitura.
+  // X-6.5.37: logs detalhados do bridge response pra diagnosticar
+  // bugs lobo->mimico e player ausente.
   if (oc.combat_trigger) {
-    LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
+    LOG('COMBAT_BRIDGE', 'redirect_received enemy=' + oc.combat_trigger.enemy_id
+      + ' has_url=' + !!(oc._combat_redirect && oc._combat_redirect.redirect_url)
+      + ' combat_token=' + (oc._combat_redirect && oc._combat_redirect.combat_token
+                             ? oc._combat_redirect.combat_token.slice(0, 8) + '...'
+                             : 'none'));
     setTimeout(function() {
       try {
         var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
           || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
+        LOG('COMBAT_BRIDGE', 'navigating url_len=' + redir.length
+          + ' has_token=' + (redir.indexOf('token=') > -1)
+          + ' has_api=' + (redir.indexOf('api=') > -1)
+          + ' has_origin=' + (redir.indexOf('origin=') > -1));
+        window.__valdoria_transitioning = true;
         window.location.href = redir;
-      } catch (_) {}
+      } catch (e) {
+        LOGE('COMBAT_BRIDGE', 'navigate_err msg=' + (e && e.message));
+      }
     }, 2000);
+  } else {
+    LOG('COMBAT_BRIDGE', 'no_combat_trigger event_id=' + (S.event && S.event.id));
   }
 }
 
