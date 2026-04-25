@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:28:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-25T18:38:04Z - do not edit directly, edit source -->
 
 
 <!--
@@ -882,7 +882,9 @@ html body .camp-screen {
 /* V2.9 HUD PROFISSIONAL MINIMALISTA — SVG icons + tipografia limpa */
 #hud-float-hp.hud-pro {
   position: absolute;
-  top: 44px; left: 10px;
+  /* X-6.5.51k: top 44->58 (top-bar tem ~44px; deixa folga 14px pra nao
+     sobrepor com biome/weather/phase icons) */
+  top: 58px; left: 10px;
   z-index: 15;
   display: flex; flex-direction: column;
   pointer-events: none;
@@ -939,6 +941,25 @@ html body .camp-screen {
 .hud-pro .hud-bar-fill.mp {
   background: linear-gradient(90deg, #3a68b0 0%, #5a9cd8 100%);
   box-shadow: 0 0 4px rgba(90, 156, 216, 0.35);
+}
+/* X-6.5.51k: barra de XP (level + progresso pro proximo nivel) */
+.hud-pro .hud-bar-fill.xp {
+  background: linear-gradient(90deg, #c4953a 0%, #e8b850 100%);
+  box-shadow: 0 0 4px rgba(232, 184, 80, 0.4);
+}
+.hud-pro .hud-lvl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.15);
+  padding: 1px 5px;
+  border-radius: 6px;
+  min-width: 28px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
 }
 .hud-pro .hud-val {
   font-size: 10.5px;
@@ -1557,6 +1578,31 @@ html body .camp-screen {
   box-shadow: 0 0 12px rgba(196, 149, 58, 0.55);
 }
 .light-opt.off { color: var(--v-text-dim, #a09484); }
+/* X-6.5.51k: icone "Apagar" agora e fogo (lo-emoji) com slash diagonal vermelho
+   (universal "no fire/extinguish"). User feedback: "nao da pra saber que se
+   trata de apagar a tocha; coloque algo inteligente". */
+.light-opt.off .lo-emoji {
+  display: inline-block;
+  filter: grayscale(0.55) brightness(0.85);
+  opacity: 0.85;
+}
+.light-opt.off::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 26px; height: 2.5px;
+  background: linear-gradient(90deg, #c44638, #e87050);
+  transform: translate(-50%, -50%) rotate(-45deg);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(232, 112, 80, 0.7),
+              0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+.light-opt.off.selected::after {
+  background: linear-gradient(90deg, #d85838, #ff8060);
+  box-shadow: 0 0 6px rgba(255, 128, 96, 0.9),
+              0 1px 2px rgba(0, 0, 0, 0.6);
+}
 .light-opt .lo-label {
   position: absolute;
   bottom: -18px;
@@ -1575,6 +1621,208 @@ html body .camp-screen {
   pointer-events: none;
 }
 .light-opt:hover .lo-label { opacity: 1; }
+
+/* X-6.5.51k: PARTY POPUP — botao acima do btn-inventory abre popup com lista
+   resumida dos membros do grupo (cls + hp + mp + nivel). Mesmo layout 3-zonas
+   das outras telas (header sticky + body scroll + footer sticky). */
+#party-popup {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.65);
+  align-items: flex-end;  /* sobe da base */
+  justify-content: center;
+  padding: 16px 12px 84px;  /* 84 deixa espaco pros botoes do hud-quick */
+  backdrop-filter: blur(2px);
+}
+#party-popup.show { display: flex; }
+.party-card {
+  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 10px;
+  padding: 0;
+  width: calc(100% - 24px);
+  max-width: 320px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
+  color: var(--v-text, #d4c8b0);
+  position: relative;
+  animation: partySlideUp 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes partySlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.party-card::before {
+  content: ''; position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 12px;
+  background: var(--v-gold, #c4953a);
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
+  z-index: 2;
+}
+.party-header {
+  flex-shrink: 0;
+  padding: 12px 14px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  text-align: center;
+}
+.party-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin: 0 0 4px 0;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.party-subtitle {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9.5px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--v-text-dim, #a09484);
+}
+.party-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.party-body::-webkit-scrollbar { width: 5px; }
+.party-body::-webkit-scrollbar-thumb { background: rgba(196, 149, 58, 0.4); border-radius: 3px; }
+.party-member {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 10px;
+  margin-bottom: 8px;
+  background: rgba(40, 32, 24, 0.55);
+  border: 1px solid rgba(196, 149, 58, 0.25);
+  border-radius: 7px;
+}
+.party-member:last-child { margin-bottom: 0; }
+.party-member.is-self {
+  border-color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.1);
+  box-shadow: inset 0 0 8px rgba(196, 149, 58, 0.15);
+}
+.pm-head {
+  display: flex; align-items: center; gap: 8px;
+}
+.pm-ico {
+  flex: 0 0 26px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1510;
+  border: 1.5px solid rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.pm-titles { flex: 1; min-width: 0; }
+.pm-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--v-text, #d4c8b0);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pm-cls {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--v-text-dim, #a09484);
+}
+.pm-lvl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.15);
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.pm-bars { display: flex; flex-direction: column; gap: 4px; }
+.pm-row { display: flex; align-items: center; gap: 6px; }
+.pm-row-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  color: var(--v-text-dim, #a09484);
+  min-width: 30px;
+  text-transform: uppercase;
+}
+.pm-row-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.pm-row-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+.pm-row-fill.hp { background: linear-gradient(90deg, #c44638, #e87050); }
+.pm-row-fill.mp { background: linear-gradient(90deg, #3a68b0, #5a9cd8); }
+.pm-row-val {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 9px;
+  font-weight: 700;
+  color: #e8dcc8;
+  letter-spacing: 0.5px;
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.party-empty {
+  padding: 18px 12px;
+  text-align: center;
+  font-style: italic;
+  color: var(--v-text-dim, #a09484);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.party-footer {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  display: flex; gap: 8px;
+}
+.party-close {
+  flex: 1;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.9), rgba(22, 18, 14, 0.9));
+  border: 1px solid var(--v-text-dim, #a09484);
+  color: var(--v-text, #d4c8b0);
+  border-radius: 6px;
+  padding: 8px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+}
+.party-close:hover {
+  border-color: var(--v-text, #d4c8b0);
+  background: rgba(60, 48, 32, 0.95);
+}
 
 /* ====== HEX-NAV (6 dirs + center) ===================================== */
 #hex-nav {
@@ -2918,6 +3166,23 @@ body.remote-mode #debug-hud { display: none !important; }
 }
 .zoom-btn:active { transform: scale(0.94); }
 .zoom-btn.pin { font-size: 15px; }
+/* X-6.5.51k: estado disabled quando zoom no min/max */
+.zoom-btn:disabled,
+.zoom-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: rgba(160, 148, 132, 0.25);
+  color: var(--v-text-dim, #a09484);
+  filter: grayscale(0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.zoom-btn:disabled:hover,
+.zoom-btn.disabled:hover {
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.95), rgba(22, 18, 14, 0.92));
+  border-color: rgba(160, 148, 132, 0.25);
+  transform: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
 
 /* ====== ZOOM INDICATOR =============================================== */
 #zoom-indicator {
@@ -3005,6 +3270,13 @@ body.remote-mode #debug-hud { display: none !important; }
       <div class="hud-pips" id="exh-pips"></div>
       <span class="hud-val" id="exh-val">0/6</span>
     </div>
+    <!-- X-6.5.51k: barra de XP com nivel + progresso pro proximo -->
+    <div class="hud-row" title="Experiência (XP) e Nível">
+      <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l2.1 4.5 4.9.5-3.7 3.4 1.1 4.8L8 11.7 3.6 14.2 4.7 9.4 1 6l4.9-.5z"/></svg>
+      <span class="hud-lvl" id="hud-level">N1</span>
+      <div class="hud-bar"><div class="hud-bar-fill xp" id="xp-fill"></div></div>
+      <span class="hud-val" id="xp-val">0/300</span>
+    </div>
     <div class="hud-row hud-row-gold" title="Valdoritas (moeda oficial)">
       <span class="vi vi-coin hud-coin"></span>
       <span class="hud-lbl">VALD.</span>
@@ -3023,7 +3295,10 @@ body.remote-mode #debug-hud { display: none !important; }
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
          "remova o botao Diario de missoes". Quest journal agora e acessado
          clicando no #minimap-wrap inteiro (X-6.5.51e refator).
-         Ordem atual: 🎒 mochila, 🔥 tocha, 🏕️ acampar, 🗺️ cartografia. -->
+         X-6.5.51k (2026-04-25): btn-party adicionado ACIMA do btn-inventory.
+         Abre popup com lista resumida dos membros do grupo (cls + hp + mp + lvl).
+         Ordem atual: 👥 grupo, 🎒 mochila, 🔥 tocha, 🏕️ acampar, 🗺️ cartografia. -->
+    <button class="quick-btn" id="btn-party" title="Grupo (membros do partido)">👥</button>
     <button class="quick-btn" id="btn-inventory" title="Mochila (Inventário)">🎒</button>
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz">🔥</button>
@@ -3235,6 +3510,24 @@ body.remote-mode #debug-hud { display: none !important; }
       <div class="loc-footer">
         <button class="loc-close" id="loc-close-btn">Fechar</button>
         <button class="loc-travel" id="loc-travel-btn">Viajar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- X-6.5.51k: party-popup — lista resumida dos membros do grupo (jogador +
+       aliados). Aberto pelo btn-party (acima do btn-inventory no hud-quick).
+       Layout 3-zonas (header sticky + body scrollavel + footer sticky). -->
+  <div id="party-popup">
+    <div class="party-card">
+      <div class="party-header">
+        <h2 class="party-title">Grupo</h2>
+        <div class="party-subtitle" id="party-subtitle">1 aventureiro</div>
+      </div>
+      <div class="party-body" id="party-body">
+        <!-- preenchido por renderPartyPopup() -->
+      </div>
+      <div class="party-footer">
+        <button type="button" class="party-close" id="party-close-btn">Fechar</button>
       </div>
     </div>
   </div>
@@ -11776,6 +12069,151 @@ function closeQuestJournal() {
 }
 
 // ============================================================================
+// PARTY POPUP (X-6.5.51k) — lista resumida do grupo (jogador + S.allies)
+// ============================================================================
+// Mostra HP/MP/nivel de cada membro do grupo de maneira compacta. Aliados nao
+// tem level/mp explicito (estado simplificado): a interface omite quando
+// ausente. Layout 3-zonas igual loc/cart/journal cards.
+
+function openPartyPopup() {
+  renderPartyPopup();
+  const pp = document.getElementById('party-popup');
+  if (pp) pp.classList.add('show');
+}
+
+function closePartyPopup() {
+  const pp = document.getElementById('party-popup');
+  if (pp) pp.classList.remove('show');
+}
+
+function renderPartyPopup() {
+  const body = document.getElementById('party-body');
+  const sub = document.getElementById('party-subtitle');
+  if (!body) return;
+  clearChildren(body);
+  const p = S && S.player;
+  if (!p) {
+    const empty = document.createElement('div');
+    empty.className = 'party-empty';
+    empty.textContent = 'Nenhum aventureiro no grupo.';
+    body.appendChild(empty);
+    if (sub) sub.textContent = '0 aventureiros';
+    return;
+  }
+  const allies = (S && S.allies) ? S.allies : [];
+  const total = 1 + allies.length;
+  if (sub) sub.textContent = total + (total === 1 ? ' aventureiro' : ' aventureiros');
+
+  // Jogador (sempre primeiro, destacado com .is-self)
+  body.appendChild(_partyMemberCard({
+    name: 'Você',
+    cls: p.cls || '—',
+    letter: p.ico || '?',
+    color: p.color || '#c4953a',
+    hp: p.hp, mhp: p.mhp,
+    mp: p.mp, mmp: p.mmp,
+    level: (typeof p.level === 'number') ? p.level : 1,
+    isSelf: true
+  }));
+
+  // Aliados (S.allies — pode ter dados parciais)
+  allies.forEach(function(a) {
+    const cls = a.cls || a.role || 'Aliado';
+    // Se ally tem dados de hp/mp explicitos usa; senao mostra placeholder
+    const aHp = (typeof a.hp === 'number') ? a.hp : null;
+    const aMhp = (typeof a.mhp === 'number') ? a.mhp : aHp;
+    const aMp = (typeof a.mp === 'number') ? a.mp : null;
+    const aMmp = (typeof a.mmp === 'number') ? a.mmp : aMp;
+    body.appendChild(_partyMemberCard({
+      name: a.name || 'Aliado',
+      cls: cls,
+      letter: (a.name || '?').charAt(0).toUpperCase(),
+      color: a.color || '#a09484',
+      hp: aHp, mhp: aMhp,
+      mp: aMp, mmp: aMmp,
+      level: (typeof a.level === 'number') ? a.level : null,
+      isSelf: false
+    }));
+  });
+}
+
+function _partyMemberCard(m) {
+  const card = document.createElement('div');
+  card.className = 'party-member' + (m.isSelf ? ' is-self' : '');
+
+  const head = document.createElement('div');
+  head.className = 'pm-head';
+  const ico = document.createElement('div');
+  ico.className = 'pm-ico';
+  ico.textContent = m.letter;
+  ico.style.background = 'linear-gradient(180deg, ' + m.color + ', ' +
+                          _darkenHex(m.color, 0.35) + ')';
+  const titles = document.createElement('div');
+  titles.className = 'pm-titles';
+  const nm = document.createElement('div');
+  nm.className = 'pm-name';
+  nm.textContent = m.name;
+  const cl = document.createElement('div');
+  cl.className = 'pm-cls';
+  cl.textContent = m.cls;
+  titles.appendChild(nm);
+  titles.appendChild(cl);
+  head.appendChild(ico);
+  head.appendChild(titles);
+  if (m.level !== null) {
+    const lv = document.createElement('div');
+    lv.className = 'pm-lvl';
+    lv.textContent = 'N' + m.level;
+    head.appendChild(lv);
+  }
+  card.appendChild(head);
+
+  const bars = document.createElement('div');
+  bars.className = 'pm-bars';
+  if (m.hp !== null) {
+    bars.appendChild(_partyBarRow('VIDA', 'hp', m.hp, m.mhp));
+  }
+  if (m.mp !== null && m.mmp > 0) {
+    bars.appendChild(_partyBarRow('MANA', 'mp', m.mp, m.mmp));
+  }
+  card.appendChild(bars);
+  return card;
+}
+
+function _partyBarRow(label, kind, val, max) {
+  const row = document.createElement('div');
+  row.className = 'pm-row';
+  const lbl = document.createElement('span');
+  lbl.className = 'pm-row-lbl';
+  lbl.textContent = label;
+  const bar = document.createElement('div');
+  bar.className = 'pm-row-bar';
+  const fill = document.createElement('div');
+  fill.className = 'pm-row-fill ' + kind;
+  const pct = (max > 0) ? Math.max(0, Math.min(100, (val / max) * 100)) : 0;
+  fill.style.width = pct + '%';
+  bar.appendChild(fill);
+  const txt = document.createElement('span');
+  txt.className = 'pm-row-val';
+  txt.textContent = val + '/' + max;
+  row.appendChild(lbl);
+  row.appendChild(bar);
+  row.appendChild(txt);
+  return row;
+}
+
+// Helper: escurece hex color por fator (0 = preserva, 1 = preto)
+function _darkenHex(hex, factor) {
+  if (typeof hex !== 'string' || hex.charAt(0) !== '#' || hex.length !== 7) return hex;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const f = Math.max(0, Math.min(1, 1 - factor));
+  const _h = function(n) { return Math.round(n * f).toString(16).padStart(2, '0'); };
+  return '#' + _h(r) + _h(g) + _h(b);
+}
+
+// ============================================================================
 // CAMP (X-6.5.19) — usa HTML real portado de explore/index.html + CSS real
 // (explore-camp.css) + particle fire canvas (explore-camp-fire.js).
 // ============================================================================
@@ -12956,12 +13394,30 @@ function updateHud() {
   setBarFill('mp-fill', 'mp-val', p.mp, p.mmp, 'mp');
   drawExhPips(p.exh);
   document.getElementById('exh-val').textContent = p.exh + '/6';
+  // X-6.5.51k: XP bar (level + progresso pro proximo nivel)
+  if (typeof p.level !== 'number') p.level = 1;
+  if (typeof p.xp !== 'number') p.xp = 0;
+  const xpNext = xpForNextLevel(p.level);
+  setBarFill('xp-fill', 'xp-val', p.xp, xpNext, 'xp');
+  const lvlEl = document.getElementById('hud-level');
+  if (lvlEl) lvlEl.textContent = 'N' + p.level;
   // V2.5: gold visível no HUD (steps-val removido — steps-val element já não existe)
   const goldEl = document.getElementById('gold-val');
   if (goldEl) goldEl.textContent = (S.gold || 0).toLocaleString('pt-BR');
   updateTopBar();
   updateCurrentCoord();
   drawMinimap();
+}
+
+// X-6.5.51k: tabela XP D&D 5e simplificada — proximo nivel
+// PHB usa thresholds cumulativos; aqui mostramos quanto falta DENTRO do nivel atual.
+var XP_THRESHOLDS = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+                     85000, 100000, 120000, 140000, 165000, 195000, 225000,
+                     265000, 305000, 355000];
+function xpForNextLevel(lvl) {
+  if (lvl < 1) lvl = 1;
+  if (lvl >= XP_THRESHOLDS.length) return 999000;
+  return XP_THRESHOLDS[lvl] - XP_THRESHOLDS[lvl - 1];
 }
 
 function drawMinimap() {
@@ -13212,11 +13668,31 @@ function drawExhPips(level) {
 function setZoom(z) {
   const old = _zoom;
   _zoom = clamp(z, ZOOM_MIN, ZOOM_MAX);
-  if (Math.abs(_zoom - old) < 0.001) return;
+  if (Math.abs(_zoom - old) < 0.001) {
+    // Mesmo se nao mudou, atualizar estado dos botoes (caso seja boot)
+    updateZoomButtonsState();
+    return;
+  }
   resizeCanvases();
   scheduleRender();
   centerOnPlayer(false);
   showZoomIndicator();
+  updateZoomButtonsState();
+}
+
+// X-6.5.51k: desabilita btn-zoom-in/out quando bate no limite (visual feedback
+// pra usuario nao ficar tentando clicar a toa)
+function updateZoomButtonsState() {
+  const inBtn = document.getElementById('btn-zoom-in');
+  const outBtn = document.getElementById('btn-zoom-out');
+  if (inBtn) {
+    if (_zoom >= ZOOM_MAX - 0.001) inBtn.setAttribute('disabled', 'disabled');
+    else inBtn.removeAttribute('disabled');
+  }
+  if (outBtn) {
+    if (_zoom <= ZOOM_MIN + 0.001) outBtn.setAttribute('disabled', 'disabled');
+    else outBtn.removeAttribute('disabled');
+  }
 }
 
 var _zoomIndTimer = null;
@@ -13254,15 +13730,23 @@ function bindWheelZoom() {
 
 // Zoom buttons + Pin (centro da tela direita)
 function bindZoomControls() {
-  document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(_zoom + 0.2));
-  document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(_zoom - 0.2));
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    if (_zoom >= ZOOM_MAX - 0.001) return;  // X-6.5.51k: ignora click se ja no max
+    setZoom(_zoom + 0.2);
+  });
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    if (_zoom <= ZOOM_MIN + 0.001) return;  // X-6.5.51k: ignora click se ja no min
+    setZoom(_zoom - 0.2);
+  });
   document.getElementById('btn-pin').addEventListener('click', () => {
     _zoom = DEFAULT_ZOOM;
     resizeCanvases();
     scheduleRender();
     setTimeout(() => centerOnPlayer(true), 30);
     showZoomIndicator();
+    updateZoomButtonsState();  // X-6.5.51k
   });
+  updateZoomButtonsState();  // X-6.5.51k: estado inicial
 }
 
 // Pan drag (mouse + 1 dedo) sobre o viewport
@@ -13376,6 +13860,26 @@ function bindQuickActions() {
     });
   }
 
+  // X-6.5.51k: btn-party — abre popup com lista resumida dos membros do grupo
+  // (jogador + S.allies). User feedback: "adicione um botao logo acima do
+  // btn-inventory para que abra uma tela com informacoes parecidas com
+  // hud-float-hp mas de todos os membros do grupo, de maneira resumida".
+  var btnParty = document.getElementById('btn-party');
+  if (btnParty) {
+    btnParty.addEventListener('click', openPartyPopup);
+  }
+  var partyClose = document.getElementById('party-close-btn');
+  if (partyClose) {
+    partyClose.addEventListener('click', closePartyPopup);
+  }
+  // Fecha clicando fora do card (no backdrop)
+  var partyPopup = document.getElementById('party-popup');
+  if (partyPopup) {
+    partyPopup.addEventListener('click', function(e) {
+      if (e.target === partyPopup) closePartyPopup();
+    });
+  }
+
   // X-6.5.15: toggle minimap+coord — botão colado à esquerda do minimap.
   // Setas direcionais: ▶ (vai fechar pra direita) quando aberto; ◀ (vai
   // abrir vindo da esquerda) quando fechado. Preferência salva em
@@ -13427,18 +13931,20 @@ function bindQuickActions() {
 
   function renderLightMenu() {
     clearChildren(lightMenu);
-    // Sempre tem opção "Apagar"
+    // X-6.5.51k: opcao "Apagar" agora mostra fogo (.lo-emoji) com slash diagonal
+    // vermelho via CSS — semantica universal "no fire/extinguish". Antes era
+    // 🌑 (lua nova) que confundia o usuario.
     const offBtn = document.createElement('button');
     offBtn.className = 'light-opt off' + (!S.lightSource ? ' selected' : '');
-    offBtn.innerHTML = '🌑<span class="lo-label">Apagar</span>';
-    offBtn.title = 'Apagar luz';
+    offBtn.innerHTML = '<span class="lo-emoji">🔥</span><span class="lo-label">Apagar</span>';
+    offBtn.title = 'Apagar luz (extinguir tocha/feitico)';
     offBtn.addEventListener('click', () => selectLightSource(null));
     lightMenu.appendChild(offBtn);
     // Opções disponíveis por classe
     availableLightSources(S.player).forEach(ls => {
       const btn = document.createElement('button');
       btn.className = 'light-opt' + (S.lightSource === ls.id ? ' selected' : '');
-      btn.innerHTML = ls.icon + '<span class="lo-label">' + ls.label + '</span>';
+      btn.innerHTML = '<span class="lo-emoji">' + ls.icon + '</span><span class="lo-label">' + ls.label + '</span>';
       btn.title = ls.label + ' — ' + ls.desc;
       btn.addEventListener('click', () => selectLightSource(ls.id));
       lightMenu.appendChild(btn);
