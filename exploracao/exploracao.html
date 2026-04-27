@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:55:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:09:45Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10454,18 +10454,41 @@ body.perf-lite .stub-popup-voice { animation: none; }
   var SPRITE_SIZE = 96;
   // Type ativo no showcase. Pode ser trocado via dropdown.
   var _currentType = 'orc_camp';
-  // 3 cards lite/medium/full do tipo ativo. hexIds estáveis (não dependem do tipo).
+  // 3 cards lite/medium/epic do tipo ativo. hexIds estáveis (não dependem do tipo).
+  // 2026-04-27: renomeado FULL→EPIC no label (per user request).
   var SHOWCASE_CARDS = [
     { tier: 'lite',   cardX:   8, label: 'LITE',   hexId: 'showcase_lite' },
     { tier: 'medium', cardX: 130, label: 'MEDIUM', hexId: 'showcase_medium' },
-    { tier: 'full',   cardX: 252, label: 'FULL',   hexId: 'showcase_full' }
+    { tier: 'full',   cardX: 252, label: 'EPIC',   hexId: 'showcase_full' }
   ];
   // Lista de tipos pro dropdown — display names PT-BR vêm de StubEventLayer.
+  // 2026-04-27 USER RULE: hex tiles também via showcase — prefixo 'hex_'
+  // identifica entry como hex tile (canvas drawer) em vez de tile-object SVG.
+  var HEX_SHOWCASE_TYPES = [
+    { id: 'hex_T', char: 'T', label: 'Árvore' },
+    { id: 'hex_t', char: 't', label: 'Arbusto' },
+    { id: 'hex_g', char: 'g', label: 'Mata' },
+    { id: 'hex_r', char: 'r', label: 'Rochas' },
+    { id: 'hex_R', char: 'R', label: 'Afloramento Rochoso' },
+    { id: 'hex_M', char: 'M', label: 'Montanha' },
+    { id: 'hex_H', char: 'H', label: 'Casa' }
+  ];
   var SHOWCASE_TYPES = [
     'orc_camp', 'bandit_camp', 'hunter_camp', 'caravan_camp', 'abandoned_camp',
     'sentinel_post', 'runestone', 'broken_tower', 'fresh_tracks',
-    'forgotten_chest', 'tripwire_trap', 'war_drum'
+    'forgotten_chest', 'tripwire_trap', 'war_drum',
+    // Hex tiles (canvas drawn — drawTileDecoration)
+    'hex_T', 'hex_t', 'hex_g', 'hex_r', 'hex_R', 'hex_M', 'hex_H'
   ];
+  function _isHexShowcaseType(typeId) {
+    return typeof typeId === 'string' && typeId.indexOf('hex_') === 0;
+  }
+  function _findHexEntry(typeId) {
+    for (var hi = 0; hi < HEX_SHOWCASE_TYPES.length; hi++) {
+      if (HEX_SHOWCASE_TYPES[hi].id === typeId) return HEX_SHOWCASE_TYPES[hi];
+    }
+    return null;
+  }
   var ALL_STATES = [
     { state: 'dormant', label: 'DORMENTE' },
     { state: 'active',  label: 'ATIVO' },
@@ -10507,13 +10530,114 @@ body.perf-lite .stub-popup-voice { animation: none; }
     });
   }
 
+  // 2026-04-27 USER RULE: render hex tile (canvas drawer) em 3 mini-canvases
+  // — um por tier. Cada canvas chama drawTileDecoration com tier sobrescrito.
+  // Substitui sprites de tile-objects no showcase quando type tem prefixo 'hex_'.
+  function _renderHexShowcase(hexEntry) {
+    // Esconde sprites de tile-object (TileRenderer) — não aplicáveis a hex tiles
+    for (var ui = 0; ui < SHOWCASE_CARDS.length; ui++) {
+      if (window.TileRenderer && typeof window.TileRenderer.unrender === 'function') {
+        window.TileRenderer.unrender(SHOWCASE_CARDS[ui].hexId);
+      }
+    }
+    // Esconde state buttons (não aplicáveis — hex tiles não têm FSM states)
+    var stateBar = document.getElementById('showcase-state-bar');
+    if (stateBar) stateBar.style.display = 'none';
+    var hint = document.getElementById('showcase-hint');
+    if (hint) hint.textContent = 'COMPARAÇÃO LITE / MEDIUM / EPIC — ' + hexEntry.label;
+
+    // Cria/renderiza mini-canvas por tier
+    var frame = document.getElementById('frame');
+    if (!frame) return;
+    var cardY = PANEL.y + 78;
+    var canvasW = SPRITE_SIZE + 8, canvasH = SPRITE_SIZE + 8;
+    for (var ci = 0; ci < SHOWCASE_CARDS.length; ci++) {
+      var card = SHOWCASE_CARDS[ci];
+      var canvasId = 'showcase-hex-canvas-' + card.tier;
+      var canvas = document.getElementById(canvasId);
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = canvasId;
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        canvas.style.position = 'absolute';
+        canvas.style.left = (PANEL.x + card.cardX + (CARD_W - canvasW) / 2) + 'px';
+        canvas.style.top = (cardY + 4) + 'px';
+        canvas.style.zIndex = '51';
+        canvas.style.pointerEvents = 'none';
+        canvas.className = 'showcase-hex-canvas';
+        frame.appendChild(canvas);
+      }
+      canvas.style.display = '';
+      var hctx = canvas.getContext('2d');
+      hctx.clearRect(0, 0, canvasW, canvasH);
+      // Backdrop hexagonal (cor verde grama pra contexto natural)
+      hctx.fillStyle = '#5a6a3a';
+      var midX = canvasW / 2, midY = canvasH / 2;
+      var hexR = canvasW * 0.42;
+      hctx.beginPath();
+      for (var hp = 0; hp < 6; hp++) {
+        var ha = (Math.PI / 3) * hp;
+        var hx = midX + Math.cos(ha) * hexR;
+        var hy = midY + Math.sin(ha) * hexR;
+        if (hp === 0) hctx.moveTo(hx, hy);
+        else hctx.lineTo(hx, hy);
+      }
+      hctx.closePath();
+      hctx.fill();
+      hctx.strokeStyle = 'rgba(20, 30, 12, 0.5)';
+      hctx.lineWidth = 1;
+      hctx.stroke();
+      // Override tier global temporariamente pra esse draw
+      var savedTier = window._valdoriaPerformanceTier;
+      window._valdoriaPerformanceTier = card.tier;
+      try {
+        if (typeof drawTileDecoration === 'function') {
+          drawTileDecoration(hctx, midX, midY, hexEntry.char, ci, ci);
+        }
+      } catch (e) {
+        if (window.TileLog) window.TileLog.error('HEX-SHOWCASE', 'draw_error', { type: hexEntry.id, tier: card.tier, msg: e.message });
+      }
+      window._valdoriaPerformanceTier = savedTier;
+    }
+    if (window.TileLog) window.TileLog.info('HEX-SHOWCASE', 'rendered', {
+      type: hexEntry.id, char: hexEntry.char
+    });
+  }
+
+  function _hideHexCanvases() {
+    for (var hi = 0; hi < SHOWCASE_CARDS.length; hi++) {
+      var c = document.getElementById('showcase-hex-canvas-' + SHOWCASE_CARDS[hi].tier);
+      if (c) c.style.display = 'none';
+    }
+  }
+
   function _switchType(newType) {
+    var oldType = _currentType;
+    if (oldType === newType) return;
+    // 2026-04-27: rota pra hex showcase se prefixo 'hex_'
+    if (_isHexShowcaseType(newType)) {
+      var hexEntry = _findHexEntry(newType);
+      if (!hexEntry) {
+        if (window.TileLog) window.TileLog.warn('HEX-SHOWCASE', 'unknown_hex_type', { type: newType });
+        return;
+      }
+      _currentType = newType;
+      var bannerEl0 = document.getElementById('showcase-banner-text');
+      if (bannerEl0) bannerEl0.textContent = 'SHOWCASE — ' + hexEntry.label + ' (hex)';
+      _renderHexShowcase(hexEntry);
+      return;
+    }
+    // Sai do hex showcase: esconde canvases dedicados + restaura state bar
+    _hideHexCanvases();
+    var stateBar0 = document.getElementById('showcase-state-bar');
+    if (stateBar0) stateBar0.style.display = '';
+    var hint0 = document.getElementById('showcase-hint');
+    if (hint0) hint0.textContent = 'CLIQUE CARD = EVENTO · BOTÕES = FORÇAR ESTADO';
     if (!window.TileObjectsDB || !window.TileObjectsDB.has(newType)) {
       if (window.TileLog) window.TileLog.warn('HUD', 'showcase_switch_unknown_type', { type: newType });
       return;
     }
-    var oldType = _currentType;
-    if (oldType === newType) return;
     if (window.TileLog) window.TileLog.info('HUD', 'showcase_type_switch', {
       from: oldType, to: newType
     });
@@ -10647,14 +10771,28 @@ body.perf-lite .stub-popup-voice { animation: none; }
       typeSelect.style.font = "11px ui-monospace, monospace";
       typeSelect.style.cursor = 'pointer';
       var displayNames = (window.StubEventLayer && window.StubEventLayer._displayNames) || {};
+      // 2026-04-27: 2 grupos no dropdown — Tile-Objects (sprites SVG) + Hex Tiles (canvas)
+      var tileObjGroup = document.createElement('optgroup');
+      tileObjGroup.label = '── Tile-Objects (SVG) ──';
+      var hexTileGroup = document.createElement('optgroup');
+      hexTileGroup.label = '── Hex Tiles (canvas) ──';
       for (var t = 0; t < SHOWCASE_TYPES.length; t++) {
+        var typeId = SHOWCASE_TYPES[t];
         var opt = document.createElement('option');
-        opt.value = SHOWCASE_TYPES[t];
-        opt.textContent = (displayNames[SHOWCASE_TYPES[t]] || SHOWCASE_TYPES[t])
-                       + '  (' + SHOWCASE_TYPES[t] + ')';
-        if (SHOWCASE_TYPES[t] === _currentType) opt.selected = true;
-        typeSelect.appendChild(opt);
+        opt.value = typeId;
+        if (_isHexShowcaseType(typeId)) {
+          var hexEntry = _findHexEntry(typeId);
+          opt.textContent = (hexEntry ? hexEntry.label : typeId) + '  (' + typeId.replace('hex_', '') + ')';
+          if (typeId === _currentType) opt.selected = true;
+          hexTileGroup.appendChild(opt);
+        } else {
+          opt.textContent = (displayNames[typeId] || typeId) + '  (' + typeId + ')';
+          if (typeId === _currentType) opt.selected = true;
+          tileObjGroup.appendChild(opt);
+        }
       }
+      typeSelect.appendChild(tileObjGroup);
+      typeSelect.appendChild(hexTileGroup);
       typeSelect.addEventListener('change', function () {
         _switchType(typeSelect.value);
       });
