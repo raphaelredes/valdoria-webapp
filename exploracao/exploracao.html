@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:15:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:28:21Z - do not edit directly, edit source -->
 
 
 <!--
@@ -3293,10 +3293,18 @@ body.perf-lite #top-danger { animation: none !important; }
   /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
      pra ficar formato HEXAGONO real, nao quase-quadrado). User feedback:
      "separando um pouco verticalmente os botoes hex-dir 1 e 2, e 4 e 5
-     entre si, para que fique mais parecido com um hexagono". */
+     entre si, para que fique mais parecido com um hexagono".
+     2026-04-27 USER RULE: "faça os hex-dir ficarem o mais próximo de
+     hex-nav-center proporcionalmente, sem mudar o posicionamento
+     relativo entre si". Solução: transform:scale uniforme — preserva
+     EXATAMENTE todas as posições relativas dos 6 hex-dirs e do center
+     (é só visual scale), e aproxima tudo do centro proporcionalmente.
+     0.78 = 22% mais compacto, mantendo legibilidade dos labels. */
   position: relative;
   width: 240px; height: 188px;
   pointer-events: auto;
+  transform: scale(0.78);
+  transform-origin: center center;
 }
 .hex-dir {
   position: absolute;
