@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T16:36:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:05:45Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2052,22 +2052,28 @@ body.perf-lite #top-danger { animation: none !important; }
   transition: min-width 0.3s ease, padding 0.3s ease;
 }
 /* Botão toggle expand/collapse — similar a btn-minimap-toggle.
-   Posicionado absolute no canto superior direito do hud-float. */
+   Posicionado absolute FORA do container hud-float (lateral direita,
+   encostado mas não sobrepondo o conteúdo HP/MP/EXAUS/XP/VALD.).
+   right: -24px coloca o botão imediatamente à direita do limite do
+   hud-float, com -1px overlap visual pra parecer colado. */
 #btn-hud-float-toggle {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 10px;
+  right: -24px;
   width: 22px;
-  height: 18px;
+  height: 22px;
   padding: 0;
-  background: transparent;
-  border: none;
+  background: linear-gradient(180deg, rgba(28, 22, 16, 0.94), rgba(14, 11, 8, 0.92));
+  border: 1px solid rgba(196, 149, 58, 0.28);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
   color: var(--v-gold, #c4953a);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
   transition: color 0.15s ease, text-shadow 0.15s ease, transform 0.15s ease;
   line-height: 1;
   font-family: var(--v-font-display);
@@ -9658,11 +9664,22 @@ body.perf-lite .stub-popup-voice { animation: none; }
   function fromLegacy(rawLegacyEvent) {
     if (!rawLegacyEvent || !rawLegacyEvent.id) return null;
     if (_cache[rawLegacyEvent.id]) return _cache[rawLegacyEvent.id];
+    // FIX (2026-04-27): suporta schema rico V1.9 (title_variants, text_variants,
+    // flavor_variants). Antes só lia title/text/flavor singulares — eventos do
+    // EVENTS_POOL com title_variants caíam pra fallback 'Evento' e o jogador
+    // via apenas "EVENTO" como título. Agora pickamos variante aleatória.
+    function _pick(arr) {
+      if (!Array.isArray(arr) || !arr.length) return null;
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+    var titleResolved = rawLegacyEvent.title || _pick(rawLegacyEvent.title_variants) || '';
+    var textResolved = rawLegacyEvent.text || _pick(rawLegacyEvent.text_variants) || '';
+    var flavorResolved = rawLegacyEvent.flavor || _pick(rawLegacyEvent.flavor_variants) || '';
     var bodyParts = [];
-    if (rawLegacyEvent.text) bodyParts.push(rawLegacyEvent.text);
-    if (rawLegacyEvent.flavor) bodyParts.push(rawLegacyEvent.flavor);
+    if (textResolved) bodyParts.push(textResolved);
+    if (flavorResolved) bodyParts.push(flavorResolved);
     var entry = {
-      title: rawLegacyEvent.title || '',
+      title: titleResolved,
       body: bodyParts.join(' — '),
       voiceLines: {},
       choices: (rawLegacyEvent.choices || []).map(_normChoice),
@@ -13676,39 +13693,45 @@ const EVENTS_POOL = {
       ]
     },
     { kind: 'object_inspect',
-      title: 'Objeto Curioso',
-      text: 'Você encontra {object} entre o cenário. Algo sobre o objeto chama sua atenção.',
+      title: 'Objeto Curioso na Trilha',
+      text: 'Algo na vegetação chama sua atenção — {object} repousa parcialmente coberto, fora do lugar comum. Quem deixou aqui não pretendia ser fácil de achar; quem encontra precisa decidir o que vale uma curiosidade dessas.',
       choices: [
-        { label: 'Examinar com calma', skill: 'int', dc: 12, desc: 'Estudo metódico',
-          ok: 'Você descobre detalhes ocultos — gravuras, marcas, valor histórico.', okGold: [10, 30], okXp: [8, 16],
-          fail: 'O significado escapa à sua compreensão. Talvez outro saiba.' },
-        { label: 'Tocar com cuidado', skill: 'dex', dc: 11, desc: 'Manipular com cautela',
-          ok: 'Suas mãos revelam um compartimento secreto.', okGold: [8, 20],
-          fail: 'Algo se quebra ao toque — armadilha latente!', failHp: 2 }
+        { label: 'Examinar com calma', skill: 'int', dc: 12,
+          desc: 'Estudo metódico — virar o objeto, procurar gravuras, comparar com memórias.',
+          ok: 'Você gira o objeto nas mãos com paciência de quem aprendeu a ler peças antigas. Marcas finas no verso revelam um símbolo regional, gravuras quase apagadas pelo tempo, e indícios de valor histórico que poucos perceberiam. Guarda com cuidado — alguém pagará bem por isso.', okGold: [10, 30], okXp: [8, 16],
+          fail: 'Você analisa por bom tempo mas o objeto guarda seus segredos. Pode ser falsificação grosseira, pode ser arte de uma cultura que não estudou. Algum erudito de cidade saberia em segundos; você não. Decide deixar pra trás com a sensação de oportunidade que escapa.' },
+        { label: 'Tocar com cuidado', skill: 'dex', dc: 11,
+          desc: 'Manipular com cautela calculada — dedos leves, atenção a peso e textura.',
+          ok: 'Seus dedos correm pelo objeto detectando irregularidades sutis — uma costura disfarçada, uma articulação minúscula. Pressiona devagar e o compartimento secreto se revela com um clique seco, expondo algo guardado por mãos cuidadosas há muito tempo.', okGold: [8, 20],
+          fail: 'O objeto cede sob pressão mais cedo que esperava — você sente a mola se soltar antes de poder recuar. Uma agulha ou lâmina oculta corta sua mão; armadilha clássica de quem não queria visitas. Sangue escorre enquanto você xinga em voz baixa.', failHp: 2 }
       ]
     },
     { kind: 'hazard',
       title: 'Perigo Iminente',
-      text: 'O caminho revela {hazard}! Reaja agora ou pague o preço.',
+      text: 'O terreno trai sua confiança — {hazard} se manifesta sem aviso, deixando frações de segundo entre instinto e preço pago. Reaja já, ou aprenda no sangue por que viajantes experientes leem cada passo da estrada.',
       choices: [
-        { label: 'Esquivar', skill: 'dex', dc: 12, desc: 'Reflexos rápidos',
-          ok: 'Você evita por pouco — fôlego curto, mas ileso.', okXp: [8, 14],
-          fail: 'Você é atingido em cheio.', failHp: 4 },
-        { label: 'Resistir', skill: 'con', dc: 13, desc: 'Suportar firme',
-          ok: 'Você suporta o impacto sem ferimentos sérios.', okXp: [8, 14],
-          fail: 'O impacto cobra seu preço em sangue e fôlego.', failHp: 5, failExh: 0 }
+        { label: 'Esquivar', skill: 'dex', dc: 12,
+          desc: 'Confiar em reflexo treinado — corpo se move antes da mente analisar a ameaça.',
+          ok: 'Seu corpo reage antes do raciocínio chegar — pernas dobram, ombro torce, mochila balança junto. O perigo passa raspando a um palmo do seu rosto. Quando levanta, o coração martela como tambor de guerra, mas você está inteiro.', okXp: [8, 14],
+          fail: 'O reflexo veio tarde — meio segundo a menos que o necessário. Você é atingido em cheio antes de processar o que aconteceu, jogado contra o terreno com força que tira o ar dos pulmões. Fica de quatro tossindo e xingando.', failHp: 4 },
+        { label: 'Resistir', skill: 'con', dc: 13,
+          desc: 'Plantar os pés e absorver o impacto — confiar em fibra muscular e armadura.',
+          ok: 'Você firma a postura, encolhe ombros e tensiona o tronco no instante exato. O impacto vem mas encontra um corpo preparado — força distribuída, articulações alinhadas, fôlego controlado. Sai com o equilíbrio intacto e algumas marcas que viram histórias de fogueira.', okXp: [8, 14],
+          fail: 'Você tenta resistir mas a força é maior que sua capacidade de absorvê-la. Ouve algo trincar — costela, talvez fibra muscular — antes mesmo de processar a dor. Cai de joelhos sangrando, ofegante, lembrando que orgulho não substitui agilidade.', failHp: 5, failExh: 0 }
       ]
     },
     { kind: 'npc_help',
-      title: 'Pedido de Ajuda',
-      text: '{npc} acena pra você, com aparente urgência. "Por favor, preciso de auxílio!"',
+      title: 'Pedido na Estrada',
+      text: '{npc} acena de longe, urgência clara nos gestos — mãos no ar, passo apressado em sua direção. Quando se aproxima, a respiração está curta e o olhar carrega o tipo de aflição que não dá pra fingir. "Pelos deuses, viajante — preciso de auxílio. Não há tempo a perder."',
       choices: [
-        { label: 'Ajudar prontamente', skill: 'wis', dc: 11, desc: 'Oferecer assistência',
-          ok: 'Você resolve o problema; {ele} retribui generosamente — moedas e gratidão.', okGold: [15, 35], okXp: [10, 18],
-          fail: 'Vossa ajuda piora a situação. {Ele} se afasta com raiva.' },
-        { label: 'Negociar antes', skill: 'cha', dc: 12, desc: 'Estabelecer recompensa',
-          ok: 'Acordo justo selado. Você ganha proteção mútua na região.', okGold: [8, 20], okXp: [6, 12],
-          fail: '{Ele} se ofende; você precisa partir vazio.' }
+        { label: 'Ajudar prontamente', skill: 'wis', dc: 11,
+          desc: 'Avaliar a situação no calor do momento e agir sem cobrar — a urgência fala por si.',
+          ok: 'Você lê a situação rápido — postura, contexto, urgência real — e age com instinto. O problema cede com cooperação imediata: nó desfeito, peso erguido, ferida estancada, ou seja lá o que era. {Ele} chora de alívio e te pressiona moedas na palma sem deixar você recusar. "Os deuses verão isto."', okGold: [15, 35], okXp: [10, 18],
+          fail: 'Você mergulha pra ajudar mas sua leitura da situação foi errada — pisada no lugar errado, palavra trocada, gesto que assustou. {Ele} se afasta com raiva nos olhos, gritando algo sobre forasteiros que pioram tudo que tocam. Você fica plantado, mãos vazias, sem saber se ofereceu mal ou se nunca havia chance.' },
+        { label: 'Negociar antes', skill: 'cha', dc: 12,
+          desc: 'Pausar o pânico e estabelecer recompensa — caridade sem acordo costuma virar ressentimento.',
+          ok: 'Você ergue a mão pedindo respiro e propõe termos com calma. Nem caro demais nem barato — preço justo de quem entende risco e tempo. {Ele} fecha em aperto de mão firme, e o trato sela um vínculo que vai além desta tarde: vocês são aliados na região agora.', okGold: [8, 20], okXp: [6, 12],
+          fail: '{Ele} cospe no chão ao ouvir números na hora errada. "Eu suplicando e você cobrando? Pague-me a desonra de ter te procurado." Vira as costas e se afasta a passos firmes, deixando você com a sensação amarga de leitura pessimal do momento.' }
       ]
     },
     // X-6.5.51m: TILE-SPECIFIC TEMPLATES (so dispara em hex correspondente)
