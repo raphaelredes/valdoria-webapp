@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T20:42:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T20:58:54Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8091,6 +8091,24 @@ body.remote-mode #debug-hud { display: none !important; }
   }
 
   /**
+   * 2026-04-27 USER RULE: tile-objects NÃO devem aparecer em hexes sob fog
+   * (fogState undefined = nunca revelado). User reportou: "logo abaixo de
+   * onde está escrito VIDA, na parte superior da tela, está aparecendo um
+   * dos tile-objects mesmo estando com fog. faça com que nenhum tile-object
+   * apareça se estiver com fog".
+   *
+   * fogState valores:
+   *   undefined | 'hidden' → nunca revelado (HIDE tile-object)
+   *   'dim'                → memória passada (SHOW tile-object)
+   *   'visible'            → vendo agora (SHOW tile-object)
+   */
+  function _isHexFogged(hexId) {
+    if (!window.S || !window.S.fogState) return false;  // sem fog system = sempre mostrar
+    var fs = window.S.fogState[hexId];
+    return !(fs === 'visible' || fs === 'dim');
+  }
+
+  /**
    * Render ou refresh do tile-object no hexId. Le state de S.tileObjects[hexId].
    * Tier vem do _valdoriaPerformanceTier (lite/medium/full).
    */
@@ -8100,6 +8118,16 @@ body.remote-mode #debug-hud { display: none !important; }
     var tobj = window.S && window.S.tileObjects && window.S.tileObjects[hexId];
     if (!tobj) {
       if (window.TileLog) window.TileLog.warn('RENDER', 'refresh_no_object', { hex: hexId });
+      return null;
+    }
+    // 2026-04-27: fog gate — hexes não revelados não mostram tile-object.
+    // Se já tava renderizado e ficou fogged (raro mas possível em fade outs),
+    // desrender pra liberar pool slot.
+    if (_isHexFogged(hexId)) {
+      if (_activeUses[hexId]) {
+        _releaseUse(_activeUses[hexId]);
+        delete _activeUses[hexId];
+      }
       return null;
     }
     var pos = getHexPos(hexId);
@@ -8178,9 +8206,22 @@ body.remote-mode #debug-hud { display: none !important; }
     return Object.keys(_activeUses).length;
   }
 
+  // 2026-04-27: refresh em massa de todos tile-objects (re-aplica fog gate).
+  // Chamado por revealFogAt apos jogador se mover — assim que hexes ficam
+  // 'visible' ou 'dim' os tile-objects materializam; hexes 'fogged' continuam
+  // ocultos. Tambem libera pool de hexes que sairam de visao (raro).
+  function refreshAll() {
+    if (!window.S || !window.S.tileObjects) return;
+    var hexIds = Object.keys(window.S.tileObjects);
+    for (var i = 0; i < hexIds.length; i++) {
+      refresh(hexIds[i]);
+    }
+  }
+
   window.TileRenderer = {
     render: render,
     refresh: refresh,
+    refreshAll: refreshAll,
     unrender: unrender,
     clear: clear,
     getActiveCount: getActiveCount,
@@ -22842,6 +22883,11 @@ function revealFogAt(col, row, radius) {
   // V3.0 PERF: marca fog + hardFog cache como dirty pra rebuild no próximo frame
   _fogMaskDirty = true;
   _hardFogDirty = true;
+  // 2026-04-27: re-aplica fog gate em todos tile-objects (hexes recém
+  // revelados materializam; hexes que voltaram a fogged ocultam).
+  if (window.TileRenderer && typeof window.TileRenderer.refreshAll === 'function') {
+    window.TileRenderer.refreshAll();
+  }
 }
 
 // ============================================================================
