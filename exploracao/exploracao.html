@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:09:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:18:00Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10470,15 +10470,17 @@ body.perf-lite .stub-popup-voice { animation: none; }
     { id: 'hex_g', char: 'g', label: 'Mata' },
     { id: 'hex_r', char: 'r', label: 'Rochas' },
     { id: 'hex_R', char: 'R', label: 'Afloramento Rochoso' },
-    { id: 'hex_M', char: 'M', label: 'Montanha' },
+    // 2026-04-27 USER RULE: hex_M (Montanha) REMOVIDO — "os hex mais
+    // altos já simulam isso". Decoração snow-peak também removida em
+    // drawTileDecoration; weights biome também limpos.
     { id: 'hex_H', char: 'H', label: 'Casa' }
   ];
   var SHOWCASE_TYPES = [
     'orc_camp', 'bandit_camp', 'hunter_camp', 'caravan_camp', 'abandoned_camp',
     'sentinel_post', 'runestone', 'broken_tower', 'fresh_tracks',
     'forgotten_chest', 'tripwire_trap', 'war_drum',
-    // Hex tiles (canvas drawn — drawTileDecoration)
-    'hex_T', 'hex_t', 'hex_g', 'hex_r', 'hex_R', 'hex_M', 'hex_H'
+    // Hex tiles (canvas drawn — drawTileDecoration). M removido (2026-04-27).
+    'hex_T', 'hex_t', 'hex_g', 'hex_r', 'hex_R', 'hex_H'
   ];
   function _isHexShowcaseType(typeId) {
     return typeof typeId === 'string' && typeId.indexOf('hex_') === 0;
@@ -10718,10 +10720,31 @@ body.perf-lite .stub-popup-voice { animation: none; }
       return;
     }
 
-    // ═════ Painel principal ═════
+    // ═════ Backdrop tela inteira (escurece TUDO abaixo do showcase) ═════
+    // 2026-04-27 USER RULE: "faça com que o overlay do showcase deixe o que
+    // estiver abaixo dele escuro". HTML div é mais confiável que SVG rect
+    // (SVG sem viewBox tem dimensões inconsistentes). Z-index 49 fica abaixo
+    // do panel (50+) mas acima do canvas do mapa.
+    var frameForBdrop = document.getElementById('frame');
+    if (frameForBdrop) {
+      var existingBdrop = document.getElementById('showcase-fullscreen-bdrop');
+      if (existingBdrop) existingBdrop.remove();
+      var bdrop = document.createElement('div');
+      bdrop.id = 'showcase-fullscreen-bdrop';
+      bdrop.style.position = 'absolute';
+      bdrop.style.left = '0';
+      bdrop.style.top = '0';
+      bdrop.style.width = '100%';
+      bdrop.style.height = '100%';
+      bdrop.style.background = 'rgba(0, 0, 0, 0.82)';
+      bdrop.style.zIndex = '49';
+      bdrop.style.pointerEvents = 'none';
+      frameForBdrop.appendChild(bdrop);
+    }
+    // ═════ Painel principal (totalmente opaco agora — sem vazamento) ═════
     _addEl(overlay, 'rect', {
       x: PANEL.x, y: PANEL.y, width: PANEL.w, height: PANEL.h,
-      rx: 8, fill: 'rgba(15,12,8,0.92)', stroke: '#c4953a', 'stroke-width': '1.5'
+      rx: 8, fill: '#0a0805', stroke: '#c4953a', 'stroke-width': '1.5'
     });
 
     // Banner topo
@@ -15727,7 +15750,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 4,
     worldPos: { x: 0.70, y: 0.33 },
     weather_pool: ['s', 'f', 't'],
-    weights: { '.': 18, 'g': 8, 'T': 12, 'r': 22, 'p': 8, 'M': 18, 'R': 4, 'i': 4, 'w': 2 },
+    weights: { '.': 18, 'g': 8, 'T': 12, 'r': 40, 'p': 8, 'R': 4, 'i': 4, 'w': 2 },
     ambient_tips: [
       'Vento cortante traz o som distante de uma águia solitária.',
       'Pedras soltas rolam em encostas vizinhas — a montanha nunca descansa.',
@@ -15756,7 +15779,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 5,
     worldPos: { x: 0.80, y: 0.17 },
     weather_pool: ['s', 'f', 't'],
-    weights: { '.': 16, 'r': 26, 'M': 20, 'T': 8, 'p': 6, 'R': 6, 'b': 8, 'F': 1, 'i': 4, '#': 2 },
+    weights: { '.': 16, 'r': 46, 'T': 8, 'p': 6, 'R': 6, 'b': 8, 'F': 1, 'i': 4, '#': 2 },
     dungeons: [
       { col: 10, row: 5, id: 'troll_lair', name: 'Covil do Troll', reveal: 'any',
         intro: 'Uma caverna grande o suficiente pra guardar trolls adultos. O cheiro de podre e ferro velho é imediato.' }
@@ -15773,7 +15796,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 6,
     worldPos: { x: 0.90, y: 0.50 },
     weather_pool: ['t', 's', 'f', 't'],
-    weights: { '.': 12, 'r': 22, 'M': 28, 'p': 6, 'b': 12, 'R': 6, 'v': 6, 'i': 4, 'T': 4 },
+    weights: { '.': 12, 'r': 50, 'p': 6, 'b': 12, 'R': 6, 'v': 6, 'i': 4, 'T': 4 },
     dungeons: [
       { col: 11, row: 5, id: 'dragon_lair', name: 'Cova do Dragão', reveal: 'storm',
         intro: 'Uma fenda enorme na rocha. O vento traz um odor de enxofre. Só a tempestade abafa o ronco da criatura lá dentro.' }
@@ -15790,7 +15813,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 4, required_gear: 'torch',
     worldPos: { x: 0.60, y: 0.67 },
     weather_pool: ['s', 'f'],
-    weights: { '.': 22, 'r': 22, 'M': 14, 'p': 10, '#': 12, 'c': 6, 'w': 4, 'R': 4, 'b': 6 },
+    weights: { '.': 22, 'r': 36, 'p': 10, '#': 12, 'c': 6, 'w': 4, 'R': 4, 'b': 6 },
     dungeons: [
       { col: 10, row: 5, id: 'forgotten_tunnel', name: 'Túnel Esquecido', reveal: 'torch_on',
         intro: 'Uma bifurcação escura que só se revela quando a tocha lança luz entre as colunas. Mapeado há séculos, esquecido desde então.' }
@@ -15808,7 +15831,7 @@ const FIXED_MAPS = {
     music: 'mountain', danger: 3,
     worldPos: { x: 0.90, y: 0.33 },
     weather_pool: ['s', 'f', 't'],
-    weights: { '.': 22, 'p': 16, 'H': 2, 'r': 16, 'M': 12, 'T': 6, 'F': 1, 'b': 2 },
+    weights: { '.': 22, 'p': 16, 'H': 2, 'r': 28, 'T': 6, 'F': 1, 'b': 2 },
     ambient_tips: [
       'O martelar rítmico das forjas anãs ecoa pelas galerias de pedra.',
       'Anciãos anões trocam runas entalhadas em pedras — é o jornal deles.',
@@ -15862,7 +15885,7 @@ const FIXED_MAPS = {
     music: 'snow', danger: 5, required_gear: 'torch',
     worldPos: { x: 0.40, y: 0.00 },
     weather_pool: ['f', 's', 't'],
-    weights: { '.': 26, 'g': 4, 'i': 20, 'T': 14, 't': 8, 'r': 10, 'p': 6, 'w': 4, 'W': 3, 'R': 3, 'M': 2 },
+    weights: { '.': 26, 'g': 4, 'i': 20, 'T': 14, 't': 8, 'r': 12, 'p': 6, 'w': 4, 'W': 3, 'R': 3 },
     ambient_tips: [
       'Aurora boreal pinta o céu de verde e violeta — fenômeno raro das tundras do norte.',
       'Um alce solitário atravessa a trilha — chifres enormes cobertos de gelo cristalizado.',
@@ -15921,7 +15944,7 @@ const FIXED_MAPS = {
     weather_pool: ['s'],
     default_day_phase: 'night',
     fog_base_mul: 1.30,
-    weights: { '.': 18, 'r': 22, 'c': 20, '*': 3, '#': 14, 'w': 4, 'W': 4, 'M': 8, 'b': 4, 'L': 3 },
+    weights: { '.': 18, 'r': 30, 'c': 20, '*': 3, '#': 14, 'w': 4, 'W': 4, 'b': 4, 'L': 3 },
     dungeons: [
       { col: 10, row: 5, id: 'dimensional_portal', name: 'Portal Dimensional', reveal: 'torch_on',
         intro: 'Uma câmara de cristal puro onde a realidade ondula. O portal só se abre sob luz viva — e quem entra raramente retorna.' }
@@ -15941,7 +15964,7 @@ const FIXED_MAPS = {
     worldPos: { x: 1.00, y: 1.00 },
     weather_pool: ['s', 't'],
     fog_base_mul: 1.20,
-    weights: { '.': 20, 'v': 24, 'r': 14, 'L': 10, 'p': 6, 'R': 4, 'M': 18, 'b': 4 },
+    weights: { '.': 20, 'v': 24, 'r': 32, 'L': 10, 'p': 6, 'R': 4, 'b': 4 },
     ambient_tips: [
       'Calor sobe em ondas trêmulas — o ar mesmo parece derreter.',
       'Uma bolha de lava explode ao longe com som de cristal partindo.',
@@ -15968,7 +15991,7 @@ const FIXED_MAPS = {
     music: 'volcanic', danger: 5, required_gear: 'canteen',
     worldPos: { x: 1.00, y: 0.58 },
     weather_pool: ['s', 't'],
-    weights: { '.': 22, 'p': 18, 'H': 2, 'v': 14, 'r': 10, 'M': 14, 'F': 1, 'L': 2, 'T': 4 },
+    weights: { '.': 22, 'p': 18, 'H': 2, 'v': 14, 'r': 24, 'F': 1, 'L': 2, 'T': 4 },
     ambient_tips: [
       'Valkrest é dita como "vila forjada por dragões mortos" — a cada ano algum visitante confirma.',
       'O vento quente traz cheiro de enxofre das crateras próximas — os moradores se acostumam em meses.',
@@ -20516,20 +20539,9 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // musgo nas rachaduras, sombra de contato projetada.
     drawRockOutcrop(ctx, cx, cy, rng);
   } else if (tile === 'M') {
-    ctx.fillStyle = darken('#6a6560', 0.7);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - HEX_H * 0.45);
-    ctx.lineTo(cx + HEX_W * 0.22, cy + HEX_H * 0.18);
-    ctx.lineTo(cx - HEX_W * 0.22, cy + HEX_H * 0.18);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#d4c8b0';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - HEX_H * 0.45);
-    ctx.lineTo(cx + HEX_W * 0.09, cy - HEX_H * 0.18);
-    ctx.lineTo(cx - HEX_W * 0.09, cy - HEX_H * 0.18);
-    ctx.closePath();
-    ctx.fill();
+    // 2026-04-27 USER RULE: "remova o hexagono montanha de tudo... os hex
+    // mais altos já simulam isso". Decoração snow-peak removida — TILE_HEIGHT['M']
+    // continua alto pra hex render como mountain via altura 3D somente.
   } else if (tile === 'g') {
     // V2.9 MATA densa — feel de floresta baixa/underbrush com 3 camadas:
     //   1. Sombra base no chão (terra úmida)
