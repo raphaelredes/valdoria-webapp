@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:38:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:42:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -20303,6 +20303,31 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     ctx.beginPath();
     ctx.ellipse(cx + HEX_W * 0.06, canopyY - HEX_H * 0.12, HEX_W * 0.018, HEX_H * 0.015, -0.3, 0, Math.PI * 2);
     ctx.fill();
+    // 2026-04-27 AAA polish: folhas caídas no chão (full+medium tier).
+    // Grounding visual — árvore parece pertencer ao terreno em vez de
+    // flutuar. 4 folhas pequenas elípticas em tons terrosos ao redor da
+    // base. Custo: 4 ellipses por hex de árvore.
+    var _tierT = window._valdoriaPerformanceTier || 'medium';
+    if (_tierT !== 'lite') {
+      var _treeLitterRng = seededRng(col * 41 + row * 19 + 333);
+      var _treeLitterColors = ['rgba(120, 80, 40, 0.65)', 'rgba(95, 60, 30, 0.7)', 'rgba(140, 100, 50, 0.6)'];
+      for (var _li = 0; _li < 4; _li++) {
+        var _llx = cx + (_treeLitterRng() - 0.5) * HEX_W * 0.28;
+        var _lly = trunkBaseY + 1.5 + _treeLitterRng() * 4;
+        ctx.fillStyle = _treeLitterColors[Math.floor(_treeLitterRng() * 3)];
+        ctx.beginPath();
+        ctx.ellipse(_llx, _lly, 1.2 + _treeLitterRng() * 0.7, 0.55, _treeLitterRng() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    // 2026-04-27 AAA polish: dappled sun spot na copa (full tier) — pontinho
+    // dourado quente sugerindo raio de sol penetrando entre folhas.
+    if (_tierT === 'full') {
+      ctx.fillStyle = 'rgba(255, 230, 150, 0.35)';
+      ctx.beginPath();
+      ctx.arc(cx - HEX_W * 0.02 + sway * 1.25, canopyY - HEX_H * 0.18, HEX_W * 0.025, 0, Math.PI * 2);
+      ctx.fill();
+    }
   } else if (tile === 'r') {
     // V2.9 PRO: agrupamento de 3 rochas (grande central + 2 menores laterais)
     // com lighting consistente (sol em cima-esquerda), sombras de contato,
@@ -21022,6 +21047,40 @@ function drawCottage(ctx, cx, cy, col, row, rng, variant) {
   ctx.strokeStyle = 'rgba(20, 12, 8, 0.55)';
   ctx.lineWidth = 0.5;
   ctx.strokeRect(bx, by, bodyW, bodyH - foundH);
+  // 2026-04-27 AAA polish: fumaça da chaminé subindo (full+medium tier).
+  // Sinal de "casa habitada" — 4 partículas crescentes em gradiente cinza
+  // semitransparente dispersando pra cima-direita com sway por animação.
+  // Custo: 4 arcs por hex de casa (cheap).
+  var _tierH = window._valdoriaPerformanceTier || 'medium';
+  if (_tierH !== 'lite') {
+    var _smokeT = _animTime * 0.0015;
+    var _smokeBaseX = cx + bodyW * 0.28;  // chaminé tipicamente right side
+    var _smokeBaseY = by - 4;
+    for (var _si = 0; _si < 4; _si++) {
+      var _sProg = (_si + (_smokeT % 1)) / 4;  // 0..1 progress
+      var _sR = 0.8 + _sProg * 2.2;
+      var _sX = _smokeBaseX + Math.sin(_smokeT * 3 + _si) * 1.5 + _sProg * 2;
+      var _sY = _smokeBaseY - _sProg * 14;
+      ctx.fillStyle = 'rgba(190, 185, 175, ' + (0.5 * (1 - _sProg)).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(_sX, _sY, _sR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 2026-04-27 AAA polish: brilho quente de janela (window glow) — só
+    // full tier. Halo dourado pequeno sugerindo lareira acesa lá dentro.
+    if (_tierH === 'full') {
+      var _winX = cx + bodyW * 0.22;
+      var _winY = by + (bodyH - foundH) * 0.35;
+      var _winGlow = ctx.createRadialGradient(_winX, _winY, 0, _winX, _winY, bodyW * 0.18);
+      _winGlow.addColorStop(0, 'rgba(255, 220, 130, ' + (0.45 * flick).toFixed(3) + ')');
+      _winGlow.addColorStop(0.5, 'rgba(255, 180, 90, ' + (0.18 * flick).toFixed(3) + ')');
+      _winGlow.addColorStop(1, 'rgba(255, 150, 60, 0)');
+      ctx.fillStyle = _winGlow;
+      ctx.beginPath();
+      ctx.arc(_winX, _winY, bodyW * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 }
 
 // V3.0: arbusto rabiscado — silhueta orgânica irregular, não é círculo.
@@ -21114,6 +21173,37 @@ function drawBushShape(ctx, cx, cy, r, tone, seed) {
     ctx.lineTo(leafR, 0);
     ctx.stroke();
     ctx.restore();
+  }
+  // 2026-04-27 AAA polish: bagas/flores ocasionais (40%) — pontos
+  // pequenos vermelhos/amarelos/violeta na copa pra quebrar uniformidade
+  // e dar sensação de vida orgânica. Custo: 1-3 arcs minúsculos.
+  var _tierB = window._valdoriaPerformanceTier || 'medium';
+  if (_tierB !== 'lite' && br() < 0.4) {
+    var berryCount = 1 + Math.floor(br() * 3);
+    var berryPalette = [
+      'rgba(180, 50, 50, 0.85)',   // baga vermelha
+      'rgba(220, 180, 60, 0.85)',  // baga amarela
+      'rgba(120, 60, 130, 0.80)',  // baga violeta
+      'rgba(245, 230, 220, 0.75)'  // florzinha branca
+    ];
+    ctx.fillStyle = berryPalette[Math.floor(br() * berryPalette.length)];
+    for (var bi = 0; bi < berryCount; bi++) {
+      var bbx = cx + (br() - 0.5) * r * 0.9;
+      var bby = cy - r * (0.15 + br() * 0.4);
+      ctx.beginPath();
+      ctx.arc(bbx, bby, 0.7 + br() * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // 2026-04-27 AAA polish: rim light NW no topo (full tier) — single
+  // stroke arc sugerindo luz de manhã batendo na borda das folhas.
+  if (_tierB === 'full' && br() < 0.65) {
+    ctx.strokeStyle = 'rgba(180, 220, 130, 0.45)';
+    ctx.lineWidth = 0.7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.15, cy - r * 0.55, r * 0.55, Math.PI * 1.15, Math.PI * 1.55);
+    ctx.stroke();
   }
 }
 
@@ -21930,6 +22020,25 @@ function drawOneRock(ctx, cx, baseY, rw, rh, rng) {
       ctx.beginPath();
       ctx.arc(mx, my, 0.9 + rng() * 0.5, 0, Math.PI * 2);
       ctx.fill();
+    }
+  }
+  // 2026-04-27 AAA polish: liquen amarelado (30%) — patch único na face
+  // iluminada. Quebra o tom uniforme da pedra com mancha biológica.
+  // Custo: 1 ellipse + 1 stroke contour. Tier-aware (lite skip).
+  var _tierR = window._valdoriaPerformanceTier || 'medium';
+  if (_tierR !== 'lite' && rng() < 0.3) {
+    ctx.fillStyle = 'rgba(180, 180, 110, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(cx - rw * 0.25, baseY - rh * 0.3, rw * 0.18, rh * 0.12, rng() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+    if (_tierR === 'full') {
+      // Pontilhado interno do liquen (textura)
+      ctx.fillStyle = 'rgba(140, 145, 80, 0.5)';
+      for (var _lpi = 0; _lpi < 3; _lpi++) {
+        ctx.beginPath();
+        ctx.arc(cx - rw * (0.18 + rng() * 0.15), baseY - rh * (0.25 + rng() * 0.1), 0.5 + rng() * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
   // 5. Borda silhueta (definição sutil, mais clara que antes)
