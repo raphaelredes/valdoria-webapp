@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:42:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:48:44Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8647,7 +8647,18 @@ body.remote-mode #debug-hud { display: none !important; }
       choiceId: choice.id, hex: rt.hexId, source: rt.source
     });
     var container = _getEl('stub-popup-choices');
-    if (container) container.style.pointerEvents = 'none';
+    if (container) {
+      container.style.pointerEvents = 'none';
+      // 2026-04-27 USER RULE: ocultar choices DURANTE rolagem do dado.
+      // User feedback: "demora um pouco pras opções sumirem e o resultado
+      // ser mostrado" quando overlay do dado fecha. Causa: choices antigas
+      // ficavam visíveis atrás do overlay (apenas pointerEvents desabilitado).
+      // Agora opacity 0 + visibility hidden imediato — quando overlay fecha,
+      // outcome já está pronto sem flash visual das choices.
+      container.style.opacity = '0';
+      container.style.visibility = 'hidden';
+      container.style.transition = 'opacity 0.15s ease';
+    }
     var rollPromise;
     if (choice.skill && typeof choice.dc === 'number' && window.SkillCheckResolver) {
       rollPromise = window.SkillCheckResolver.rollChoice(
@@ -8685,6 +8696,10 @@ body.remote-mode #debug-hud { display: none !important; }
         if (container) {
           container.innerHTML = '';
           container.style.pointerEvents = '';
+          // 2026-04-27: restaura visibility (foi escondido em _onChoiceClickEnhanced
+          // pra não mostrar choices antigas durante rolagem do dado)
+          container.style.opacity = '1';
+          container.style.visibility = '';
           var nextBtn = document.createElement('button');
           nextBtn.type = 'button';
           nextBtn.className = 'stub-popup-choice stub-popup-finalize';
@@ -8713,6 +8728,10 @@ body.remote-mode #debug-hud { display: none !important; }
       if (container) {
         container.innerHTML = '';
         container.style.pointerEvents = '';
+        // 2026-04-27: restaura visibility (foi escondido em _onChoiceClickEnhanced
+        // pra não mostrar choices antigas durante rolagem do dado)
+        container.style.opacity = '1';
+        container.style.visibility = '';
         var finalBtn = document.createElement('button');
         finalBtn.type = 'button';
         finalBtn.className = 'stub-popup-choice stub-popup-finalize';
