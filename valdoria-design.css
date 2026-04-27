@@ -305,20 +305,23 @@
     font-size: max(16px, var(--v-font-body));
   }
   html {
-    /* X-6.5.51 (2026-04-25): VIEWPORT OFICIAL TELEGRAM DESKTOP 384×694px.
-       Tamanho exato da janela popup Mini App no Telegram Desktop:
-         File: tdesktop/Telegram/SourceFiles/payments/ui/payments.style
-         Const: botWebViewPanelSize: size(384px, 694px);
-       Webview real ~384×644 (descontando ~50px do header Telegram).
+    /* 2026-04-27 USER RULE: "preencher toda a tela independente da largura
+       e altura, mas tendo a limitação na largura e altura do smartphone com
+       mais pixels atualmente". Cap atualizado de 384×694 (Telegram Desktop
+       mínimo) → 480×960 (smartphone com mais pixels atual em CSS pixels —
+       cobre iPhone 17 Pro Max 440×956 + Galaxy S25 Ultra 412×915 + folga).
 
-       ANTES (legacy): 430×932 (iPhone 15 Pro Max). Causava browser-preview
-       maior que o popup real do Telegram → bugs visuais detectados só no
-       deploy. Trade-off: iPhone Pro Max nativo (430px wide) agora vai ter
-       ~23px de bordas escuras (10% dos users mobile), mas garante UX
-       consistente com Telegram Desktop (menor caso real). */
-    max-width: min(100vw, 384px);
+       Comportamento:
+         Telegram Desktop popup ~442×755 (default minimum) → fills entirely
+         Telegram Desktop popup resizado pra 600×900 → fills até 480×900
+         iPhone 17 Pro Max nativo (440×956) → fills entirely
+         Browser desktop monitor 1920×1080 → caps em 480×960 (phone sim)
+
+       Tokens runtime: usar `html.clientWidth/Height` em vez de hardcoded
+       no canvas. Essas variáveis CSS são apenas o TETO máximo. */
+    max-width: min(100vw, 480px);
     height: 100vh;
-    height: min(100dvh, 694px);
+    height: min(100dvh, 960px);
     margin: 0 auto;
     overflow: hidden;
     background: #2a2420;
@@ -335,12 +338,12 @@
     background: var(--v-bg);
     color: var(--v-text);
     height: 100%;
-    /* X-6.5.51: 932px → 694px (Telegram Desktop oficial — ver html acima) */
-    max-height: min(100dvh, 694px);
+    /* 2026-04-27: 694→960 (smartphone com mais pixels atual — ver html acima) */
+    max-height: min(100dvh, 960px);
     overflow-y: auto;
     overflow-x: hidden;
     /* contain: layout size — makes position:fixed children behave as position:absolute
-     * relative to body (384×694 frame, X-6.5.51), not the browser viewport (1920px+).
+     * relative to body (480×960 frame, 2026-04-27), not the browser viewport (1920px+).
      * This is the KEY rule that constrains ALL game UI to the phone-sized frame. */
     contain: layout size;
     position: relative;
@@ -1885,9 +1888,9 @@ body::before {
 .processing-overlay,
 #travel-overlay,
 .displaced-overlay {
-  /* X-6.5.51: 430→384, 932→694 (Telegram Desktop oficial — ver html acima) */
-  max-width: min(100vw, 384px);
-  max-height: min(100dvh, 694px);
+  /* 2026-04-27 USER RULE: 384→480, 694→960 (smartphone com mais pixels atual — ver html acima) */
+  max-width: min(100vw, 480px);
+  max-height: min(100dvh, 960px);
   left: 0;
   right: 0;
   margin-left: auto;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:30:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:56:13Z - do not edit directly, edit source -->
 
 
 <!--
@@ -697,12 +697,14 @@ body {
   justify-content: flex-start;
   background: #0f0d0a;  /* fundo do dev-log-panel area */
 }
-/* X-6.5.51o (2026-04-25): RESPONSIVO touch-aware. Default 384x694 (Telegram
-   Desktop minimum) pra simulação browser desktop. Touch devices (smartphone
-   Telegram WebApp) usam viewport real até 480px. CSS-only, zero JS, zero UA. */
+/* 2026-04-27 USER RULE: "preencher toda a tela independente da largura e
+   altura, mas tendo a limitação na largura e altura do smartphone com mais
+   pixels atualmente". Cap subiu de 384×694 → 480×960 (cobre iPhone 17 Pro
+   Max 440×956 + Galaxy S25 Ultra 412×915 + folga). Telegram Desktop popup
+   resizable cresce até 480×960. Browser desktop fica como phone-sim. */
 :root {
-  --sim-frame-w: min(100vw, 384px);
-  --sim-frame-h: min(100dvh, 694px);
+  --sim-frame-w: min(100vw, 480px);
+  --sim-frame-h: min(100dvh, 960px);
 
   /* === Tile-Objects AAA #2 (Spec Apêndice A) === */
   /* Faction palettes */
@@ -724,6 +726,7 @@ body {
   --v-state-alerted-glow: drop-shadow(0 0 8px rgba(217, 26, 26, 0.6));
 }
 @media (hover: none) and (pointer: coarse) {
+  /* Touch (smartphone real): igual ao default agora — fill 100dvh real */
   :root {
     --sim-frame-w: min(100vw, 480px);
     --sim-frame-h: 100dvh;
@@ -753,8 +756,8 @@ body {
 #sim-log-panel {
   flex: 1 1 auto;
   min-width: 0;
-  height: min(100dvh, 694px);
-  max-height: min(100dvh, 694px);
+  height: min(100dvh, 960px);
+  max-height: min(100dvh, 960px);
   background: #0f0d0a;
   border-left: 1px solid rgba(196, 149, 58, 0.3);
   display: flex;
@@ -1373,7 +1376,7 @@ html body .camp-screen {
   width: var(--sim-frame-w) !important;
   top: 0 !important;
   height: 100% !important;
-  max-height: 694px !important;
+  max-height: var(--sim-frame-h) !important;
 }
 
 /* ====== MAP VIEWPORT (scrollável + canvas maior que a tela) =========== */
@@ -24609,6 +24612,103 @@ function revealFogAt(col, row, radius) {
 // MOVEMENT + HEX-NAV
 // ============================================================================
 
+// 2026-04-27 USER RULE: "tive problema na exploração usando os botões de
+// andar, em algum momento travaram, isso é um problema recorrente, então
+// faça uma pesquisa técnica e analítica de como esse tipo de controle para
+// andar funciona da melhor forma possível para que nunca trave".
+//
+// PESQUISA APLICADA — State Machine Robusta (Nystrom, "Game Programming
+// Patterns" Ch. State + game dev tradition):
+//   1. Centralized state setter (`_setPhase`) — toda transição loga + reseta
+//      timestamp pra watchdog detectar stuck states.
+//   2. Watchdog setInterval(1500ms) — se ph='moving' >5s OU ph='event' sem
+//      modal aberto >3s, força recovery pra 'idle'.
+//   3. Try/finally em beginMove + onMoveEnd — JS exceptions internas NUNCA
+//      deixam o FSM travado. finally GARANTE cleanup.
+//   4. Timestamp tracking — `S._phaseStartedAt` permite detectar duração
+//      do estado (não confiar em setTimeout que browser pode throttlar em
+//      tabs background — Chrome/Edge throttle setTimeout to 1Hz mínimo).
+//   5. Idempotent — `_setPhase('moving')` quando já 'moving' = no-op.
+//   6. Detailed logging — todas transições marcadas com tag `[FSM]`.
+//
+// CAUSAS RAIZ DO TRAVA QUE ESTE FIX RESOLVE:
+//   a) Tab backgrounded: setTimeout(callback, dur+10) atrasado, animation
+//      finishes mas onMoveEnd não chamado → S.ph fica 'moving'.
+//   b) JS exception em onMoveEnd interno (centerOnPlayer, openEventModal,
+//      dmNarrate, etc.) → S.ph nunca volta pra 'idle'.
+//   c) Auto-trigger tile-object popup não seta S.ph → popup aparece mas
+//      hexnav permanece active. Watchdog detecta inconsistência.
+//   d) Remote API.move() retorna event tarde (5s) → S.ph='event' setado
+//      depois de player ter movido. Sem modal visível: watchdog corrige.
+//   e) `_resolvedDungeons` Set lookup retorna stale state → ph='event'
+//      sem modal. Watchdog detecta + corrige.
+function _setPhase(newPhase, reason) {
+  if (!window.S) return;
+  var old = S.ph;
+  if (old === newPhase) return;  // idempotent — early return
+  S.ph = newPhase;
+  S._phaseStartedAt = (typeof Date !== 'undefined') ? Date.now() : 0;
+  try { LOG('FSM', 'phase=' + old + '->' + newPhase + ' reason=' + (reason || '?')); } catch (_) {}
+  // Side effect: re-evaluate hex nav UI (botões enable/disable)
+  try { if (typeof updateHexNav === 'function') updateHexNav(); } catch (_) {}
+}
+
+function _isAnyEventModalVisible() {
+  try {
+    var em = document.getElementById('event-modal');
+    if (em && em.classList.contains('visible')) return true;
+    var stub = document.getElementById('stub-event-overlay');
+    if (stub && !stub.classList.contains('stub-popup-hidden')) {
+      var st = window.getComputedStyle(stub);
+      if (st && st.display !== 'none' && st.visibility !== 'hidden') return true;
+    }
+    // Defeat / boss / outros overlays bloqueantes
+    var defeat = document.getElementById('defeat-overlay');
+    if (defeat && defeat.classList.contains('visible')) return true;
+    var combat = document.getElementById('combat-pending-overlay');
+    if (combat && combat.classList.contains('visible')) return true;
+  } catch (_) {}
+  return false;
+}
+
+// Watchdog global — detecta + recupera stuck states. Single setInterval.
+// Usar var pra evitar redeclaração em hot reload.
+if (typeof window._fsmWatchdogInterval === 'undefined') {
+  window._fsmWatchdogInterval = setInterval(function _fsmWatchdog() {
+    if (!window.S || !window.S.ph) return;
+    var now = Date.now();
+    var startedAt = S._phaseStartedAt || now;
+    var elapsed = now - startedAt;
+
+    if (S.ph === 'moving') {
+      // Animation should complete em <2s. >5s = stuck (browser throttle / JS error).
+      if (elapsed > 5000) {
+        try { LOGE('FSM-WATCHDOG', 'STUCK on moving for ' + elapsed + 'ms — forcing idle. anim=' + (playerAnim ? 'set' : 'null')); } catch (_) {}
+        playerAnim = null;
+        _setPhase('idle', 'watchdog_recovery_moving_stuck');
+        try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
+      }
+    } else if (S.ph === 'event') {
+      // Event should have modal showing. No modal + ph=event >3s = stuck (popup
+      // closed sem reset, ou auto-trigger setou ph mas modal não abriu).
+      if (!_isAnyEventModalVisible() && elapsed > 3000) {
+        try { LOGE('FSM-WATCHDOG', 'STUCK on event without modal for ' + elapsed + 'ms — forcing idle. event=' + (S.event && S.event.id || 'null')); } catch (_) {}
+        S.event = null;
+        _setPhase('idle', 'watchdog_recovery_event_no_modal');
+        try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
+      }
+    } else if (S.ph === 'return') {
+      // Return de combat. Se >10s sem progresso, força idle (combate falhou silenciosamente).
+      if (elapsed > 10000) {
+        try { LOGE('FSM-WATCHDOG', 'STUCK on return for ' + elapsed + 'ms — forcing idle'); } catch (_) {}
+        _setPhase('idle', 'watchdog_recovery_return_stuck');
+        try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
+      }
+    }
+    // 'idle', 'defeat' não são watchdoged — são estados terminais válidos.
+  }, 1500);
+}
+
 function isValidMove(col, row) {
   if (S.ph !== 'idle') return false;
   const p = S.player;
@@ -24659,30 +24759,36 @@ function beginMove(col, row) {
     toFacing: p.facing
   };
   p._prevFacing = p.facing;
-  S.ph = 'moving';
-  // X-6.5.19: desabilita hex-dir buttons durante animação. Click fica
-  // fisicamente bloqueado pelo browser — zero chance de "trava" por race.
+  // 2026-04-27: usa _setPhase pra logging + timestamp + idempotent + side effects
+  _setPhase('moving', 'beginMove(' + col + ',' + row + ')');
   try { _setHexNavDisabled(true); } catch (_) {}
   LOG('MOVE', 'beginMove from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') dur=' + dur + 'ms tile=' + tileAt(col, row));
   scheduleRender();
   // Camera follow smooth durante o move (se player sair do viewport)
   requestAnimationFrame(() => { try { centerOnPlayer(true); } catch (_) {} });
   setTimeout(() => {
+    // 2026-04-27 USER RULE: try/finally GARANTE que mesmo se onMoveEnd
+    // throw (centerOnPlayer/openEventModal/dmNarrate exceptions), o FSM
+    // sempre tem cleanup. playerAnim sempre nulled.
     const tc = playerAnim ? playerAnim.targetCol : col;
     const tr = playerAnim ? playerAnim.targetRow : row;
     playerAnim = null;
-    onMoveEnd(tc, tr);
-    // Centraliza no destino final
-    try { centerOnPlayer(true); } catch (_) {}
-    // X-6.5.20: reabilita buttons com BUFFER de 250ms após fim da animação.
-    // User reportou trava mesmo com disable — buffer extra absorve clicks
-    // rápidos residuais do browser. Reabilita só se ph voltou pra idle
-    // (evento pode ter mudado pra 'event' — fica bloqueado via updateHexNav).
-    setTimeout(() => {
-      try {
-        if (S.ph === 'idle') _setHexNavDisabled(false);
-      } catch (_) {}
-    }, 250);
+    try {
+      onMoveEnd(tc, tr);
+    } catch (e) {
+      try { LOGE('MOVE', 'onMoveEnd threw — forcing idle. err=' + (e && e.message)); } catch (_) {}
+      // onMoveEnd não chegou ao final (não setou ph). Force idle aqui pra
+      // não travar. Watchdog também pegaria mas é melhor recuperar agora.
+      if (S.ph === 'moving') _setPhase('idle', 'onMoveEnd_threw');
+    } finally {
+      // Centraliza no destino final (best-effort)
+      try { centerOnPlayer(true); } catch (_) {}
+      setTimeout(() => {
+        try {
+          if (S.ph === 'idle') _setHexNavDisabled(false);
+        } catch (_) {}
+      }, 250);
+    }
   }, dur + 10);
 }
 
@@ -24710,10 +24816,24 @@ function onMoveEnd(col, row) {
     var tobj = S.tileObjects[hexId];
     LOG('TILE-OBJ', 'auto_trigger_step hex=' + hexId + ' type=' + tobj.type + ' state=' + tobj.state);
     if (window.StubEventLayer && window.StubEventLayer.showTileObjectEvent) {
+      // 2026-04-27 USER RULE FIX: seta ph='event' ANTES do popup pra blockar
+      // moves enquanto popup está aberto. StubEventLayer._close() já reseta
+      // ph='idle' quando popup fecha. Watchdog detecta se popup nunca abrir.
+      _setPhase('event', 'tile_object_auto_trigger:' + tobj.type);
       // Pequeno delay pra movement animation completar antes do popup aparecer
       setTimeout(function () {
-        window.StubEventLayer.showTileObjectEvent(hexId);
+        try {
+          window.StubEventLayer.showTileObjectEvent(hexId);
+        } catch (e) {
+          try { LOGE('TILE-OBJ', 'showTileObjectEvent_threw: ' + (e && e.message)); } catch (_) {}
+          // Popup falhou em abrir — força ph back to idle pra não travar.
+          if (S.ph === 'event') _setPhase('idle', 'tile_object_popup_failed');
+        }
       }, 200);
+      // Skip o resto de onMoveEnd — popup vai cuidar do fluxo.
+      // (Bloqueia maybeRollEvent/wandering enquanto tile-object popup ativo.)
+      updateHud(); updateHexNav(); scheduleRender();
+      return;
     }
   }
 
@@ -24857,7 +24977,8 @@ function onMoveEnd(col, row) {
       wandered = maybeRollWanderingMonster();
     }
   }
-  S.ph = (rolled || wandered) ? 'event' : 'idle';
+  // 2026-04-27: _setPhase em vez de assign direto pra logging + timestamp
+  _setPhase((rolled || wandered) ? 'event' : 'idle', 'onMoveEnd_complete rolled=' + rolled + ' wandered=' + wandered);
 
   updateHud();
   updateHexNav();
