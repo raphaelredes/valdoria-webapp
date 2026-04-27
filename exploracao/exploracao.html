@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:46:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:49:29Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10363,20 +10363,20 @@ body.perf-lite .stub-popup-voice { animation: none; }
       var fps = window.RafLoopManager.getFps();
       var tier = getTier();
       var target = tier === 'lite' ? 25 : (tier === 'medium' ? 35 : 45);
+      // 2026-04-27 USER RULE: FPS auto-downgrade DESABILITADO. User pediu
+      // "garanta que seja entregue a melhor versão sempre, somente em casos
+      // de extrema necessidade entregar versões LITE ou MEDIUM". Auto-
+      // downgrade engatilhava durante eventos transitórios (chuva, storm,
+      // partículas) e descia tier indevidamente — detalhes AAA sumiam justo
+      // quando o jogador queria ver mais. Mantemos battery downgrade
+      // (extreme: <20% não-charging) como safety net real. Só telemetria.
       if (fps < target && fps > 0) {
         _slowFrames++;
-        if (window.TileLog) window.TileLog.debug('PERF', 'slow_frame', {
-          fps: fps, target: target, tier: tier, consecutive: _slowFrames
+        if (window.TileLog) window.TileLog.debug('PERF', 'slow_frame_observed_no_action', {
+          fps: fps, target: target, tier: tier, consecutive: _slowFrames,
+          note: 'auto_downgrade_disabled_by_user_rule'
         });
-        if (_slowFrames >= THRESHOLD_SLOW_FRAMES && tier !== 'lite') {
-          var nextTier = tier === 'full' ? 'medium' : 'lite';
-          if (window.TileLog) window.TileLog.warn('PERF', 'auto_downgrade', {
-            fps: fps, target: target, from: tier, to: nextTier,
-            slowFramesObserved: _slowFrames
-          });
-          _applyTier(nextTier, 'fps_drop');
-          _slowFrames = 0;
-        }
+        // NÃO chama _applyTier — telemetria só.
       } else {
         if (_slowFrames > 0 && _slowFrames >= 3) {
           if (window.TileLog) window.TileLog.debug('PERF', 'slow_frames_recovered', {
@@ -22474,24 +22474,31 @@ function drawWeatherOverlay(ctx) {
     const drops = isStorm ? 100 : 50;
     const speed = isStorm ? 0.85 : 0.42;
     const length = isStorm ? 14 : 9;
+    const slant = isStorm ? 3 : 2;
+    // 2026-04-27 PERF: batch TODAS as raindrops num ÚNICO path + stroke.
+    // Antes 50-100 beginPath/moveTo/lineTo/stroke separados (250-520 canvas
+    // ops/frame). User reportou FPS < 60 em desktop gamer durante chuva.
+    // Agora 1 beginPath + N (moveTo+lineTo) + 1 stroke = 102-202 ops total
+    // (60% redução). Todas as drops compartilham strokeStyle/lineWidth.
+    ctx.beginPath();
     for (let i = 0; i < drops; i++) {
       const x = rng() * canvasW;
       const y = (rng() * canvasH + _animTime * speed) % canvasH;
-      ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.lineTo(x - (isStorm ? 3 : 2), y + length);
-      ctx.stroke();
+      ctx.lineTo(x - slant, y + length);
     }
-    // Respingos no chão (storm)
+    ctx.stroke();
+    // Respingos no chão (storm) — também batched num único fill.
     if (isStorm) {
       ctx.fillStyle = 'rgba(200, 215, 240, 0.35)';
+      ctx.beginPath();
       for (let i = 0; i < 18; i++) {
         const x = rng() * canvasW;
         const y = rng() * canvasH;
-        ctx.beginPath();
+        ctx.moveTo(x + 1.4, y);
         ctx.arc(x, y, 1.4, 0, Math.PI * 2);
-        ctx.fill();
       }
+      ctx.fill();
     }
     // Lightning flash (raro em storm)
     if (isStorm) {
