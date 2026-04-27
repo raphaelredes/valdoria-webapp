@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:55:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:17:10Z - do not edit directly, edit source -->
 
 
 <!--
@@ -13694,16 +13694,18 @@ const EVENTS_POOL = {
     },
     { kind: 'creature_threat',
       title: 'Ameaça à Vista',
-      text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Decisão precisa vir agora.',
+      text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada.',
       choices: [
         { label: 'Recuar devagar', skill: 'wis', dc: 12,
           desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
           ok: 'Você dá um passo pra trás devagar, calcanhar primeiro, sem quebrar contato visual nem desafiar a postura. Outro passo. E outro. {Ele} estuda você por longos instantes — calculando se vale a investida — e decide que não. Recua na direção oposta, deixando você em pé com o coração nas costelas.', okXp: [8, 14],
-          fail: '{Ele} percebe sua hesitação antes mesmo de você completar o segundo passo — leitura de postura tem tradição mais antiga que palavras. A investida vem em explosão, e você é jogado contra o terreno antes de processar o ataque, ferimento aberto enquanto rola pra escapar.', failHp: 4 },
+          fail: '{Ele} percebe sua hesitação antes mesmo de você completar o segundo passo — leitura de postura tem tradição mais antiga que palavras. A investida vem em explosão, e você é jogado contra o terreno antes de processar o ataque. Não há mais distância entre vocês; o combate começou.',
+          failHp: 4, failCombat: true },
         { label: 'Intimidar', skill: 'cha', dc: 13,
           desc: 'Postura ereta, voz grave, gestos amplos — apresentar-se como ameaça maior, não presa.',
           ok: 'Você se ergue ao máximo, abre os braços e ruge com a voz mais grave que encontra no peito. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de confronto contra alvo que parece mais perigoso que esperado — e recua. Vira-se com a postura quebrada e some de sua linha de visão. Você fica vibrante de adrenalina, sentindo que dominou algo perigoso só com presença.', okXp: [12, 22], okGold: [2, 8],
-          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio direto, e a resposta é inequívoca. Posiciona-se pra investida e avança com fúria de quem aceita guerra. Você defende mas o impacto é brutal, e o sangue começa a escorrer.', failHp: 6 }
+          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio direto, e a resposta é inequívoca. Posiciona-se pra investida e avança com fúria de quem aceita guerra. Você saca a arma; não há saída além do confronto.',
+          failHp: 6, failCombat: true }
       ]
     },
     { kind: 'object_inspect',
@@ -13836,31 +13838,103 @@ const EVENTS_POOL = {
         { label: 'Saquear depressa', skill: 'dex', dc: 13,
           desc: 'Mãos rápidas, sem cerimônia — extrair tudo de valor antes que algo perceba.',
           ok: 'Mãos rápidas, sem cerimônia. Você revira o que sobrou com eficiência fria — moedas antigas em pequena bolsa, dente de ouro que pode ser arrancado limpo, uma fivela com pedras semipreciosas. Sai com bolso pesado e a indiferença treinada de quem aprendeu cedo que mortos não se ofendem com práticos.', okGold: [18, 35],
-          fail: 'A maldição cai antes mesmo da pilhagem terminar — esses restos tinham guardião invisível. Frio percorre você de dentro pra fora, força esvai, magia sente-se drenada como água escorrendo de balde furado. Cai de joelhos engasgando, deixando cair o que tinha pegado, com a lição amarga de que alguns mortos cobram juros.', failHp: 4, failMp: 2 }
+          fail: 'A maldição cai antes mesmo da pilhagem terminar — esses restos tinham guardião invisível. Frio percorre você de dentro pra fora, força esvai, magia drena como água em balde furado. Quando ergue os olhos, o esqueleto se reergue do solo com luz pálida nos órbitas vazias. Os mortos cobram juros — e o pagamento é em sangue.',
+          failHp: 4, failMp: 2, failCombat: 'skeleton' }
       ]
     }
   ];
 
   // Gerador
   function _capit(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-  function _slot(text, biomePool) {
+
+  // 2026-04-27: pre-pick tokens UMA vez por evento. Bug anterior: cada
+  // _slot() pickava randoms novos — title podia mostrar 'lobo' enquanto
+  // o text mostrava 'urso'. Agora todos os {creature}/{npc}/{object}/
+  // {hazard} de um mesmo evento usam o mesmo valor sorteado.
+  function _pickTokens(pool) {
+    return {
+      npc:      pool.npcs[Math.floor(Math.random() * pool.npcs.length)],
+      creature: pool.creatures[Math.floor(Math.random() * pool.creatures.length)],
+      object:   pool.objects[Math.floor(Math.random() * pool.objects.length)],
+      hazard:   pool.hazards[Math.floor(Math.random() * pool.hazards.length)]
+    };
+  }
+
+  // CREATURE_TO_ENEMY (2026-04-27): label PT-BR (BIOME_POOLS.creatures) →
+  // enemy_id (ENEMIES_DB key, line ~25989). Usado por failCombat:true
+  // pra disparar combate consistente com a criatura mostrada na narrativa.
+  // Fallback pra _fallbackEnemyForBiome quando label não está no map.
+  var CREATURE_TO_ENEMY = {
+    // forest
+    'lobo solitário': 'gray_wolf', 'urso desperto': 'orc_raider',
+    'lince da mata': 'gray_wolf', 'pantera negra': 'gray_wolf',
+    'serpente verde': 'giant_spider', 'javali enraivecido': 'gray_wolf',
+    'corvo gigante de bando': 'giant_eagle',
+    // plains
+    'matilha de cães selvagens': 'gray_wolf', 'touro escapado': 'orc_raider',
+    'serpente do trigal': 'giant_spider', 'lobo da estepe': 'gray_wolf',
+    'pacote de hienas': 'gray_wolf', 'urso pardo errante': 'orc_raider',
+    // swamp
+    'sapo gigante': 'giant_toad', 'crocodilo silencioso': 'giant_toad',
+    'serpente venenosa': 'giant_spider', 'will-o-wisp dançante': 'will_o_wisp',
+    'lobo do pântano': 'gray_wolf',
+    // mountain
+    'águia gigante': 'giant_eagle', 'cabra-montês agressiva': 'orc_raider',
+    'puma das alturas': 'gray_wolf', 'urso pardo': 'orc_raider',
+    'lobo cinzento': 'gray_wolf',
+    // desert
+    'escorpião gigante': 'giant_scorpion', 'serpente da areia': 'giant_spider',
+    'leão do deserto': 'sand_lion', 'lagarto venenoso': 'giant_spider',
+    'hiena solitária': 'gray_wolf', 'monstro de gila gigante': 'giant_spider',
+    // snow
+    'lobo branco': 'tundra_wolf', 'urso polar': 'frost_yeti',
+    'coruja-da-neve gigante': 'giant_eagle', 'lince do norte': 'tundra_wolf',
+    'wendigo faminto': 'frost_yeti',
+    // cave
+    'morcego gigante': 'giant_bat', 'aranha das cavernas': 'giant_spider',
+    'urso das cavernas': 'cave_troll', 'verme de pedra': 'cave_troll',
+    // graveyard
+    'esqueleto cambaleante': 'skeleton', 'fantasma chorando': 'will_o_wisp',
+    'corvo agourento': 'giant_eagle', 'rato dos mortos': 'giant_spider',
+    // volcanic
+    'salamandra de fogo': 'magma_elemental', 'demônio menor': 'fire_cultist',
+    'gargula derretida': 'magma_elemental'
+  };
+  var BIOME_FALLBACK_ENEMY = {
+    forest: 'gray_wolf', plains: 'gray_wolf', swamp: 'giant_toad',
+    mountain: 'orc_raider', desert: 'giant_scorpion', snow: 'tundra_wolf',
+    cave: 'giant_bat', graveyard: 'skeleton', volcanic: 'magma_elemental'
+  };
+  function _fallbackEnemyForBiome(biome) {
+    return BIOME_FALLBACK_ENEMY[biome] || 'goblin';
+  }
+
+  // _slot agora aceita tokens pre-picked (3o param) pra consistência.
+  // Mantém compat: se tokens=null/undefined, picka fresh (legado).
+  function _slot(text, biomePool, tokens) {
+    if (!text) return '';
+    var t = tokens || _pickTokens(biomePool);
     return text
-      .replace(/\{npc\}/g, biomePool.npcs[Math.floor(Math.random() * biomePool.npcs.length)])
-      .replace(/\{creature\}/g, biomePool.creatures[Math.floor(Math.random() * biomePool.creatures.length)])
-      .replace(/\{object\}/g, biomePool.objects[Math.floor(Math.random() * biomePool.objects.length)])
-      .replace(/\{hazard\}/g, biomePool.hazards[Math.floor(Math.random() * biomePool.hazards.length)])
+      .replace(/\{npc\}/g, t.npc)
+      .replace(/\{creature\}/g, t.creature)
+      .replace(/\{object\}/g, t.object)
+      .replace(/\{hazard\}/g, t.hazard)
       .replace(/\{Ele\}/g, 'Ele')
       .replace(/\{ele\}/g, 'ele');
   }
   // X-6.5.51m: outcomes ricos — gold, xp, mp gain/loss, hp loss, exh aumenta
-  function _genChoice(rawCh, biomePool) {
+  // 2026-04-27: tokens (3o param) compartilhado com _slot. failCombat (4o)
+  // adiciona dungeon_combat ao outcome_fail — pode ser true (deriva enemy
+  // do {creature} token via CREATURE_TO_ENEMY) ou string (enemy_id explícito).
+  function _genChoice(rawCh, biomePool, tokens, biome) {
+    var t = tokens || _pickTokens(biomePool);
     var ch = {
       label: rawCh.label,
       skill: rawCh.skill,
       dc: rawCh.dc,
       desc: rawCh.desc,
-      outcome_ok: { text: _slot(rawCh.ok, biomePool) },
-      outcome_fail: { text: _slot(rawCh.fail, biomePool) }
+      outcome_ok: { text: _slot(rawCh.ok, biomePool, t) },
+      outcome_fail: { text: _slot(rawCh.fail, biomePool, t) }
     };
     if (rawCh.okGold) {
       var minG = rawCh.okGold[0], maxG = rawCh.okGold[1];
@@ -13877,6 +13951,17 @@ const EVENTS_POOL = {
     if (rawCh.failHp) ch.outcome_fail.hp_loss = rawCh.failHp;
     if (rawCh.failMp) ch.outcome_fail.mp_loss = rawCh.failMp;
     if (typeof rawCh.failExh === 'number') ch.outcome_fail.exh_gain = (rawCh.failExh > 0) ? rawCh.failExh : 1;
+    // failCombat → dungeon_combat (mesmo mecanismo das masmorras AAA).
+    // Após closeEventModal, S._pendingCombat dispara triggerCombatScreen.
+    if (rawCh.failCombat) {
+      var enemyId;
+      if (typeof rawCh.failCombat === 'string') {
+        enemyId = rawCh.failCombat;
+      } else {
+        enemyId = CREATURE_TO_ENEMY[t.creature] || _fallbackEnemyForBiome(biome);
+      }
+      ch.outcome_fail.dungeon_combat = { enemy: enemyId, surprise: false };
+    }
     return ch;
   }
 
@@ -13891,9 +13976,12 @@ const EVENTS_POOL = {
       var variantCount = tpl.requires_tile ? 4 : 10;
       for (var v = 0; v < variantCount; v++) {
         var id = 'proc_' + biome + '_' + tpl.kind + '_' + v;
-        var titleSlotted = _slot(tpl.title, pool);
-        var textSlotted = _slot(tpl.text, pool);
-        var choicesGen = tpl.choices.map(function(ch) { return _genChoice(ch, pool); });
+        // 2026-04-27: pre-pick tokens UMA vez por variante; reusa em
+        // title/text/all choices pra coerência narrativa.
+        var tokens = _pickTokens(pool);
+        var titleSlotted = _slot(tpl.title, pool, tokens);
+        var textSlotted = _slot(tpl.text, pool, tokens);
+        var choicesGen = tpl.choices.map(function(ch) { return _genChoice(ch, pool, tokens, biome); });
         var evObj = {
           biome: biome,
           id: id,
