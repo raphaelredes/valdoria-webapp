@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:18:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:30:44Z - do not edit directly, edit source -->
 
 
 <!--
@@ -303,6 +303,36 @@
 =================================================================================
   HISTÓRICO DE VERSÕES (mais recente no topo)
 =================================================================================
+
+  V2.6 — Avoiding-centro + Mata Isolation Fog (2026-04-27):
+   * USER RULE: "o foco dos hex tiles é não ficar no centro, pois lá estará
+     o jogador... exceto o hex de mata que deve ser fechado mesmo, e nesse
+     hex de mata, faça o personagem parecer estar entrando na mata mesmo".
+   * Hex tiles agora têm múltiplos elementos espalhados em ring (raio
+     mínimo ~0.18-0.22 W), centro livre pro player:
+     - _drawTreeAAA (T)        : 5 árvores (NW/NE/W/E/S) batched
+     - _drawBushAAA (t)        : 4 arbustos espalhados
+     - _drawRockClusterAAA (r) : 4 rochas (2 médias + 2 pequenas)
+     - _drawCottageAAA (H)     : casa offset NW + lenha SE pra balanço
+     - _drawCrystalAAA (c)     : 3 cristais (1 grande NW + 2 menores)
+     - _drawTombstoneAAA (l)   : 3 lápides com tilts variados
+     - _drawVolcanicAAA (v)    : 3 rochas vulcânicas + lava cracks
+   * Mata Isolation Fog Effect (4 pontos de integração):
+     - _isPlayerOnMata() helper @ 24128 (window.* exposed)
+     - getVisionRange() @ 24136 → 0 quando em mata
+     - buildFogMask early-continue @ 24196 → alpha=0 player, 255 resto
+     - Skylight post-pass skip quando em mata (fog absoluto)
+     - TileRenderer._isHexFogged @ 8131 → mata bypass (oculta sprites
+       de tile-objects em hexes não-current)
+   * Showcase mode fix: bypass fog gate pra hexIds 'showcase_*' (cards
+     vazios fix) + tile-objects placed também no mapa subjacente +
+     backdrop alpha 0.40 (era 0.82) pra mapa visível.
+   * Performance: paths batched (1 fillStyle + 1 beginPath + N subpaths
+     + 1 fill = 1 op por cor) — mais elementos visuais SEM mais ops.
+   * Documentação técnica:
+     - docs/sistemas/hex-tiles-aaa.md       (sistema completo)
+     - docs/sistemas/mata-isolation-fog.md  (4 pontos integração)
+     - docs/sistemas/showcase-mode.md       (panel + bypass + URL params)
 
   V2.5 — Hex Tiles AAA mobile-minimalist Batch 2 (2026-04-27):
    * USER RULE: "agora vamos refazer todos os hexagonos existentes... refaça
