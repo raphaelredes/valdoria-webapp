@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:17:10Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:33:15Z - do not edit directly, edit source -->
 
 
 <!--
@@ -23249,13 +23249,30 @@ function tickDayPhase() {
 // V3.0: updateDmPanel virou NO-OP (user removeu #dm-toast, prefere eventos em popup)
 function updateDmPanel() { /* no-op */ }
 
+// 2026-04-27 USER RULE: spacing 3-7 hexes entre eventos.
+// Substituiu lógica antiga (Math.random() < EVENT_CHANCE = 20% per step)
+// que causava rajadas (às vezes 1-2 hexes entre eventos consecutivos)
+// e gaps gigantes. Agora determinístico: contador decrementa a cada
+// passo; evento só dispara quando == 0; reseta pra 3..7 random.
+function _resetEventSpacing() {
+  S._stepsToNextEvent = 3 + Math.floor(Math.random() * 5);  // 3..7
+  LOG('EVENT', 'spacing reset — next event in ' + S._stepsToNextEvent + ' steps');
+}
+
 function maybeRollEvent() {
   if (S.steps < 2) return false;
   // Phase 3 dungeons AAA (2026-04-26): masmorras tem so encontros FIXOS via
   // dungeonEncounters. Eventos procedurais (mendigo, minstrel, mercador, etc)
   // sao do overworld — nao fazem sentido dentro de acampamento orc hostil.
   if (S.mapDef && S.mapDef.dungeon) return false;
-  if (Math.random() >= EVENT_CHANCE) return false;
+  // 2026-04-27: spacing rule (3..7 hexes) — substitui EVENT_CHANCE.
+  if (typeof S._stepsToNextEvent !== 'number') {
+    _resetEventSpacing();
+  }
+  if (S._stepsToNextEvent > 0) {
+    S._stepsToNextEvent -= 1;
+    return false;
+  }
   // X-6.5.51m: tile do hex atual pra filtrar eventos contextuais (fogueira
   // soh em hex 'F', casa soh em 'H', etc). Eventos sem requires_tile sempre
   // entram no pool (genericos).
@@ -23349,6 +23366,7 @@ function maybeRollEvent() {
   if (_eventHasCombat(ev) && Math.random() < 0.10) {
     LOG('EVENT', 'SURPRISE AMBUSH triggered for id=' + evId);
     triggerSurpriseAmbush(ev);
+    _resetEventSpacing();
     return true;
   }
   // V2.4 FIX: spread do EVENTO INTEIRO (title_variants, text_variants, flavor_variants,
@@ -23374,6 +23392,7 @@ function maybeRollEvent() {
          ' eventsDB=' + !!window.__EXPLORACAO_EVENTS);
     openEventModal();
   }
+  _resetEventSpacing();
   return true;
 }
 
