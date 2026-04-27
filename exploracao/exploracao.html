@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:33:36Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:42:45Z - do not edit directly, edit source -->
 
 
 <!--
@@ -303,6 +303,34 @@
 =================================================================================
   HISTÓRICO DE VERSÕES (mais recente no topo)
 =================================================================================
+
+  V2.5 — Hex Tiles AAA mobile-minimalist Batch 2 (2026-04-27):
+   * USER RULE: "agora vamos refazer todos os hexagonos existentes... refaça
+     um a um, LITE, MEDIUM e EPIC... detalhes minimalistas em todos
+     principalmente no EPIC, que seja focado em leveza para rodar em mobile."
+   * 8 helpers novos AAA tier-gated (LITE 2-3 / MEDIUM 4-6 / EPIC 6-10 ops):
+     - _drawCampfireAAA   (F)  @ ~20677 — 3 estados active/embers/cold,
+       halo SOLID alpha (sem radial gradient — caro mobile), animação só EPIC
+     - _drawSkylightAAA   (*)  @ ~20771 — feixe trapezoidal solid (sem
+       linear gradient), pool de luz no chão, dust motes só EPIC
+     - _drawCrystalAAA    (c)  @ ~20845 — prisma 3-tom + glow halo solid,
+       sparkle topo + 2 cristais menores só EPIC
+     - _drawVolcanicAAA   (v)  @ ~20918 — pentagonal silueta + crack lava,
+       brasas pulsando só EPIC
+     - _drawTombstoneAAA  (l)  @ ~20988 — slab tilt sutil + cruz, musgo +
+       crack só EPIC
+     - _drawWaterAAA      (w/W) @ ~21069 — superfície + 2 ripples MEDIUM,
+       sparkle animado + sombra profunda só EPIC
+     - _drawMudAAA        (~)  @ ~21121 — poça 2-tom, bolha pulsante só EPIC
+     - _drawDuneAAA       (S)  @ ~21174 — volume duna + linhas de vento,
+       grãos sparkle + pedra meio enterrada só EPIC
+   * drawTileDecoration switch atualizado pra delegar nos novos helpers
+     (substitui inline drawCampfire + 7 blocos inline de tiles).
+   * Princípios: silueta forte (LITE), 3-tom palette, ZERO gradients (caros
+     em mobile), fills sólidos + alpha layers, animação só em EPIC tier.
+   * Performance: ops budget estrito + tier-gating reduz custo render em
+     mobile (LITE devices). Anti-pattern conhecido (createLinearGradient/
+     createRadialGradient) eliminado de TODOS os tiles batch 2.
 
   V2.4 — drawPlayer após fog + DOM HUD failsafe + Image-only POST (2026-04-22):
    * Bug real corrigido: drawPlayer estava ANTES de drawFogComposite, e bilinear
@@ -20668,6 +20696,575 @@ function _drawBushAAA(ctx, cx, cy, col, row) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+// AAA mobile-minimalist helpers — Batch 2 (2026-04-27)
+// Tile types: F (fogueira), * (clarabóia), c (cristal), v (vulcânica),
+//             l (lápide), w/W (água), ~ (lama), S (duna)
+// Princípios: silhueta forte, 3-tom palette, ZERO gradients (caros em mobile),
+// fills sólidos + alpha layers. Ops budgets: LITE 2-3, MEDIUM 4-6, EPIC 7-10.
+// Animações apenas em EPIC (sin/cos sobre _animTime).
+// ════════════════════════════════════════════════════════════════════════
+
+function _drawCampfireAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 29 + row * 41 + 7) & 0xFFFF;
+  var rng = seededRng(seed);
+  // 3 estados: 40% active / 40% embers / 20% cold
+  var s = rng();
+  var state = s < 0.40 ? 'active' : (s < 0.80 ? 'embers' : 'cold');
+  var t = (tier === 'full') ? _animTime * 0.001 : 0;
+  var flick = (tier === 'full') ? (Math.sin(t * 9 + seed * 0.011) * 0.3 + 0.7) : 0.85;
+  var baseY = cy + H * 0.06;
+  // ─── LITE (3 ops) ───
+  // Anel de pedras (1 ellipse base shadow)
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(cx, baseY + H * 0.02, W * 0.16, H * 0.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Base carvão/cinza central
+  ctx.fillStyle = state === 'cold' ? '#5a5248' : '#0d0806';
+  ctx.beginPath();
+  ctx.ellipse(cx, baseY - H * 0.005, W * 0.09, H * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Chama silueta (active) ou cinza (cold) — 1 path
+  if (state === 'active') {
+    ctx.fillStyle = '#c8451a';
+    ctx.beginPath();
+    ctx.moveTo(cx - W * 0.05, baseY - H * 0.02);
+    ctx.quadraticCurveTo(cx, baseY - H * (0.18 + flick * 0.04), cx + W * 0.05, baseY - H * 0.02);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.fillStyle = state === 'cold' ? '#3a342c' : '#5a3a18';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY - H * 0.01, W * 0.06, H * 0.018, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+3 ops) ───
+  // 4 pedras pequenas em arco (1 path conjunto)
+  ctx.fillStyle = state === 'cold' ? '#48423a' : '#3a322a';
+  for (var pi = 0; pi < 4; pi++) {
+    var pa = (Math.PI * 2 / 4) * pi - Math.PI / 2;
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(pa) * W * 0.11, baseY + Math.sin(pa) * H * 0.06, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Lenha cruzada (2 strokes)
+  ctx.strokeStyle = state === 'cold' ? '#2a2520' : '#3a2414';
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.07, baseY + H * 0.005);
+  ctx.lineTo(cx + W * 0.06, baseY - H * 0.04);
+  ctx.moveTo(cx + W * 0.07, baseY + H * 0.005);
+  ctx.lineTo(cx - W * 0.06, baseY - H * 0.04);
+  ctx.stroke();
+  // Núcleo quente (1 ellipse) — só active/embers
+  if (state !== 'cold') {
+    ctx.fillStyle = state === 'active'
+      ? 'rgba(255,200,90,' + (0.55 * flick).toFixed(3) + ')'
+      : 'rgba(220,90,30,' + (0.45 * flick).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.arc(cx, baseY - H * 0.04, W * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (tier !== 'full') return;
+  // ─── EPIC (+4 ops) ───
+  // Halo solid (sem radial gradient — solid fill com alpha baixo)
+  if (state === 'active') {
+    ctx.fillStyle = 'rgba(255,150,60,' + (0.18 * flick).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.arc(cx, baseY - H * 0.02, W * 0.22 * flick, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Fumaça wisp animada (1 path)
+  if (state !== 'cold') {
+    var sway = Math.sin(t * 1.5 + seed * 0.013) * W * 0.025;
+    ctx.fillStyle = state === 'active' ? 'rgba(80,75,70,0.45)' : 'rgba(70,65,60,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(cx + sway, baseY - H * 0.22, W * 0.04, H * 0.06, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 2 brasas pulsando (active/embers)
+  if (state !== 'cold') {
+    var emberPulse = 0.5 + Math.sin(t * 4 + seed * 0.017) * 0.4;
+    ctx.fillStyle = 'rgba(255,140,40,' + emberPulse.toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.arc(cx + W * 0.03, baseY - H * 0.025, 1.0, 0, Math.PI * 2);
+    ctx.arc(cx - W * 0.04, baseY - H * 0.005, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // EPIC = ~10 ops total
+}
+
+function _drawSkylightAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 23 + row * 47 + 13) & 0xFFFF;
+  var rng = seededRng(seed);
+  var t = (tier === 'full') ? _animTime * 0.0015 : 0;
+  var pulse = (tier === 'full') ? (0.85 + Math.sin(t) * 0.12) : 0.92;
+  // ─── LITE (3 ops) ───
+  // Pool de luz no chão (1 ellipse solid alpha)
+  ctx.fillStyle = 'rgba(255,225,150,' + (0.42 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy + H * 0.02, W * 0.30, 0, Math.PI * 2);
+  ctx.fill();
+  // Centro brilhante (1 ellipse mais opaca)
+  ctx.fillStyle = 'rgba(255,240,200,' + (0.55 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy + H * 0.02, W * 0.16, 0, Math.PI * 2);
+  ctx.fill();
+  // Trapézio do feixe (1 path solid)
+  ctx.fillStyle = 'rgba(255,225,140,' + (0.18 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.05, cy - H * 0.55);
+  ctx.lineTo(cx + W * 0.05, cy - H * 0.55);
+  ctx.lineTo(cx + W * 0.20, cy + H * 0.18);
+  ctx.lineTo(cx - W * 0.20, cy + H * 0.18);
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+3 ops) ───
+  // Camada interna do feixe (mais brilhante)
+  ctx.fillStyle = 'rgba(255,240,180,' + (0.30 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.025, cy - H * 0.55);
+  ctx.lineTo(cx + W * 0.025, cy - H * 0.55);
+  ctx.lineTo(cx + W * 0.10, cy + H * 0.10);
+  ctx.lineTo(cx - W * 0.10, cy + H * 0.10);
+  ctx.closePath();
+  ctx.fill();
+  // Hot spot central (mais saturado)
+  ctx.fillStyle = 'rgba(255,250,220,' + (0.65 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy + H * 0.02, W * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+  // Ground rim (anel sutil de borda)
+  ctx.strokeStyle = 'rgba(255,200,100,' + (0.35 * pulse).toFixed(3) + ')';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(cx, cy + H * 0.02, W * 0.30, 0, Math.PI * 2);
+  ctx.stroke();
+  if (tier !== 'full') return;
+  // ─── EPIC (+4 ops) ───
+  // 3 dust motes animados subindo
+  var dRng = seededRng(seed + 100);
+  ctx.fillStyle = 'rgba(255,240,200,' + (0.7 * pulse).toFixed(3) + ')';
+  for (var di = 0; di < 3; di++) {
+    var phase = (t * 0.4 + dRng()) % 1;
+    var dx = (dRng() - 0.5) * W * 0.13;
+    var dy = cy + H * 0.18 - phase * H * 0.7;
+    ctx.beginPath();
+    ctx.arc(cx + dx, dy, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // God ray streak (1 stroke fino vertical)
+  ctx.strokeStyle = 'rgba(255,235,170,' + (0.4 * pulse).toFixed(3) + ')';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.015, cy - H * 0.50);
+  ctx.lineTo(cx - W * 0.05, cy + H * 0.10);
+  ctx.moveTo(cx + W * 0.020, cy - H * 0.48);
+  ctx.lineTo(cx + W * 0.06, cy + H * 0.10);
+  ctx.stroke();
+  // EPIC = ~10 ops total
+}
+
+function _drawCrystalAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 17 + row * 53 + 19) & 0xFFFF;
+  var t = (tier === 'full') ? _animTime * 0.002 : 0;
+  var pulse = (tier === 'full') ? (0.7 + Math.sin(t + seed * 0.017) * 0.25) : 0.85;
+  // ─── LITE (2 ops) ───
+  // Sombra no chão
+  ctx.fillStyle = 'rgba(0,0,0,0.32)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + H * 0.10, W * 0.10, H * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Prisma silueta (path triangular)
+  ctx.fillStyle = '#3a5a78';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.07, cy + H * 0.10);
+  ctx.lineTo(cx, cy - H * 0.18);
+  ctx.lineTo(cx + W * 0.07, cy + H * 0.10);
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+3 ops) ───
+  // Face iluminada (1 path)
+  ctx.fillStyle = '#5a8aa8';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.07, cy + H * 0.10);
+  ctx.lineTo(cx, cy - H * 0.18);
+  ctx.lineTo(cx, cy + H * 0.10);
+  ctx.closePath();
+  ctx.fill();
+  // Tip highlight (1 path)
+  ctx.fillStyle = 'rgba(180,230,255,' + pulse.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.025, cy + H * 0.04);
+  ctx.lineTo(cx, cy - H * 0.15);
+  ctx.lineTo(cx + W * 0.025, cy + H * 0.04);
+  ctx.closePath();
+  ctx.fill();
+  // Glow halo (1 arc — sem gradient)
+  ctx.fillStyle = 'rgba(120,200,240,' + (0.18 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy - H * 0.05, W * 0.16, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier !== 'full') return;
+  // ─── EPIC (+3 ops) ───
+  // 2 cristais menores ao redor (1 path conjunto)
+  ctx.fillStyle = '#3a5a78';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.16, cy + H * 0.09);
+  ctx.lineTo(cx - W * 0.13, cy - H * 0.02);
+  ctx.lineTo(cx - W * 0.10, cy + H * 0.09);
+  ctx.closePath();
+  ctx.moveTo(cx + W * 0.10, cy + H * 0.09);
+  ctx.lineTo(cx + W * 0.13, cy + H * 0.00);
+  ctx.lineTo(cx + W * 0.16, cy + H * 0.09);
+  ctx.closePath();
+  ctx.fill();
+  // Sparkle pulsante topo
+  var sparkle = 0.5 + Math.sin(t * 3) * 0.5;
+  ctx.fillStyle = 'rgba(220,240,255,' + sparkle.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy - H * 0.18, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+  // Faceta linha (stroke fino)
+  ctx.strokeStyle = 'rgba(220,240,255,' + (0.6 * pulse).toFixed(3) + ')';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - H * 0.18);
+  ctx.lineTo(cx, cy + H * 0.10);
+  ctx.stroke();
+  // EPIC = ~8 ops total
+}
+
+function _drawVolcanicAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 31 + row * 19 + 5) & 0xFFFF;
+  var rng = seededRng(seed);
+  var t = (tier === 'full') ? _animTime * 0.005 : 0;
+  // ─── LITE (2 ops) ───
+  // Sombra base
+  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + H * 0.03, W * 0.16, H * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Rocha pentagonal escura (path silueta)
+  ctx.fillStyle = '#2a1810';
+  ctx.beginPath();
+  for (var pi = 0; pi < 5; pi++) {
+    var pa = (Math.PI * 2 / 5) * pi - Math.PI / 2;
+    var pr = W * (0.13 + (rng() - 0.5) * 0.04);
+    var px = cx + Math.cos(pa) * pr;
+    var py = cy + Math.sin(pa) * pr * 0.65;
+    if (pi === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+3 ops) ───
+  // Face iluminada NW (clip+fill aproximado por overlay)
+  ctx.fillStyle = 'rgba(80,40,30,0.55)';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.13, cy - H * 0.04);
+  ctx.lineTo(cx, cy - H * 0.10);
+  ctx.lineTo(cx - W * 0.04, cy + H * 0.02);
+  ctx.closePath();
+  ctx.fill();
+  // Crack fenda (1 stroke)
+  ctx.strokeStyle = 'rgba(255,80,30,0.75)';
+  ctx.lineWidth = 1.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.05, cy - H * 0.04);
+  ctx.lineTo(cx + W * 0.04, cy + H * 0.04);
+  ctx.stroke();
+  // Brasa central pulsando
+  var emberPulse = 0.4 + Math.sin(t + seed * 0.013) * 0.3;
+  ctx.fillStyle = 'rgba(232,90,30,' + emberPulse.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.02, cy - H * 0.01, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier !== 'full') return;
+  // ─── EPIC (+3 ops) ───
+  // 2 brasas adicionais animadas
+  var p2 = 0.3 + Math.sin(t * 1.4 + seed * 0.021) * 0.4;
+  ctx.fillStyle = 'rgba(255,140,50,' + p2.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx - W * 0.05, cy + H * 0.04, 0.9, 0, Math.PI * 2);
+  ctx.arc(cx + W * 0.07, cy + H * 0.02, 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  // Glow da fenda (overlay alpha)
+  ctx.fillStyle = 'rgba(255,90,30,' + (0.18 * emberPulse).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx, cy, W * 0.10, 0, Math.PI * 2);
+  ctx.fill();
+  // Wisp de fumaça (1 ellipse)
+  ctx.fillStyle = 'rgba(60,55,50,0.40)';
+  ctx.beginPath();
+  ctx.ellipse(cx + W * 0.03, cy - H * 0.14, W * 0.025, H * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // EPIC = ~8 ops total
+}
+
+function _drawTombstoneAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 13 + row * 37 + 11) & 0xFFFF;
+  var rng = seededRng(seed);
+  var tilt = (rng() - 0.5) * 0.08; // tilt sutil pra variedade
+  // ─── LITE (2 ops) ───
+  // Sombra no chão
+  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+  ctx.beginPath();
+  ctx.ellipse(cx + 1, cy + H * 0.10, W * 0.10, H * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Lápide silueta (rect+arc) com tilt aplicado
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(tilt);
+  ctx.fillStyle = '#3a3835';
+  ctx.beginPath();
+  ctx.rect(-W * 0.06, -H * 0.12, W * 0.12, H * 0.20);
+  ctx.arc(0, -H * 0.12, W * 0.06, Math.PI, 0);
+  ctx.fill();
+  ctx.restore();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+2 ops) ───
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(tilt);
+  // Face escura à direita (volume)
+  ctx.fillStyle = 'rgba(20,18,16,0.45)';
+  ctx.beginPath();
+  ctx.rect(W * 0.005, -H * 0.12, W * 0.055, H * 0.20);
+  ctx.arc(0, -H * 0.12, W * 0.06, -Math.PI / 2, Math.PI / 2);
+  ctx.fill();
+  // Cruz gravada
+  ctx.strokeStyle = '#1a1815';
+  ctx.lineWidth = 1.0;
+  ctx.beginPath();
+  ctx.moveTo(0, -H * 0.08);
+  ctx.lineTo(0, -H * 0.02);
+  ctx.moveTo(-W * 0.025, -H * 0.06);
+  ctx.lineTo(W * 0.025, -H * 0.06);
+  ctx.stroke();
+  ctx.restore();
+  if (tier !== 'full') return;
+  // ─── EPIC (+3 ops) ───
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(tilt);
+  // Musgo na base (mancha verde escura)
+  ctx.fillStyle = 'rgba(60,90,40,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(-W * 0.04, H * 0.06, W * 0.025, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.ellipse(W * 0.025, H * 0.07, W * 0.018, H * 0.010, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Crack diagonal
+  ctx.strokeStyle = 'rgba(20,18,15,0.7)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.04, -H * 0.10);
+  ctx.lineTo(-W * 0.015, -H * 0.04);
+  ctx.lineTo(-W * 0.025, H * 0.02);
+  ctx.stroke();
+  // Highlight no topo (luar)
+  ctx.fillStyle = 'rgba(180,180,200,0.35)';
+  ctx.beginPath();
+  ctx.arc(-W * 0.025, -H * 0.13, W * 0.018, Math.PI, 0);
+  ctx.fill();
+  ctx.restore();
+  // Tufo de grama na base
+  ctx.strokeStyle = 'rgba(60,90,40,0.7)';
+  ctx.lineWidth = 0.7;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.07, cy + H * 0.09);
+  ctx.lineTo(cx - W * 0.075, cy + H * 0.05);
+  ctx.moveTo(cx + W * 0.06, cy + H * 0.09);
+  ctx.lineTo(cx + W * 0.065, cy + H * 0.06);
+  ctx.stroke();
+  // EPIC = ~7 ops total
+}
+
+function _drawWaterAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 41 + row * 23 + 17) & 0xFFFF;
+  var t = (tier === 'full') ? _animTime * 0.003 : 0;
+  var ripple = (tier === 'full') ? (Math.sin(t + col * 0.4 + row * 0.3) * 0.5 + 0.5) : 0.5;
+  // ─── LITE (2 ops) ───
+  // Reflexo claro (1 ellipse fina)
+  ctx.fillStyle = 'rgba(120,180,210,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - H * 0.05, W * 0.22, H * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Linha de superfície (1 stroke)
+  ctx.strokeStyle = 'rgba(140,200,225,0.55)';
+  ctx.lineWidth = 1.0;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.18, cy);
+  ctx.lineTo(cx + W * 0.18, cy);
+  ctx.stroke();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+2 ops) ───
+  // 2 ripples concentricos (arc strokes)
+  ctx.strokeStyle = 'rgba(100,160,200,' + (0.28 + ripple * 0.18).toFixed(3) + ')';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx - W * 0.08, cy - H * 0.03, W * 0.16, Math.PI * 0.2, Math.PI * 0.8);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.08, cy + H * 0.06, W * 0.10, Math.PI * 0.1, Math.PI * 0.9);
+  ctx.stroke();
+  // Highlight glint (1 ellipse pequena)
+  ctx.fillStyle = 'rgba(200,230,250,' + (0.45 + ripple * 0.20).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.ellipse(cx - W * 0.06, cy - H * 0.08, W * 0.04, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier !== 'full') return;
+  // ─── EPIC (+2 ops) ───
+  // 1 sparkle animado
+  var sparkle = 0.5 + Math.sin(t * 2.5 + seed * 0.013) * 0.5;
+  ctx.fillStyle = 'rgba(220,240,255,' + sparkle.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.12, cy + H * 0.02, 0.9, 0, Math.PI * 2);
+  ctx.arc(cx - W * 0.10, cy + H * 0.10, 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  // Sombra profunda inferior (volume)
+  ctx.fillStyle = 'rgba(20,40,60,0.30)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + H * 0.12, W * 0.18, H * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // EPIC = ~6 ops total
+}
+
+function _drawMudAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 19 + row * 43 + 23) & 0xFFFF;
+  var rng = seededRng(seed);
+  var t = (tier === 'full') ? _animTime * 0.002 : 0;
+  var bubble = (tier === 'full') ? (Math.sin(t + col * 2.3 + row * 1.7) * 0.5 + 0.5) : 0.5;
+  // ─── LITE (2 ops) ───
+  // Poça escura central
+  ctx.fillStyle = 'rgba(40,30,20,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, W * 0.22, H * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Reflexo lama clara (1 ellipse)
+  ctx.fillStyle = 'rgba(90,75,50,0.45)';
+  ctx.beginPath();
+  ctx.ellipse(cx - W * 0.04, cy - H * 0.02, W * 0.10, H * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+2 ops) ───
+  // 3 manchas mud espalhadas
+  ctx.fillStyle = 'rgba(60,45,28,0.55)';
+  for (var mi = 0; mi < 3; mi++) {
+    var mx = cx + (rng() - 0.5) * W * 0.45;
+    var my = cy + (rng() - 0.5) * H * 0.40;
+    ctx.beginPath();
+    ctx.arc(mx, my, 1.2 + rng() * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Borda escura (anel sutil)
+  ctx.strokeStyle = 'rgba(20,15,8,0.45)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, W * 0.22, H * 0.08, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  if (tier !== 'full') return;
+  // ─── EPIC (+2 ops) ───
+  // Bolha pulsando (1 arc com pulse alpha)
+  ctx.fillStyle = 'rgba(110,90,60,' + (bubble * 0.6).toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.04, cy - H * 0.04, 0.9 + bubble * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+  // Pegada/marca arrastada (1 stroke)
+  ctx.strokeStyle = 'rgba(20,15,8,0.50)';
+  ctx.lineWidth = 1.4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.10, cy + H * 0.04);
+  ctx.lineTo(cx - W * 0.04, cy + H * 0.02);
+  ctx.stroke();
+  // EPIC = ~6 ops total
+}
+
+function _drawDuneAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 7 + row * 67 + 29) & 0xFFFF;
+  var rng = seededRng(seed);
+  // ─── LITE (2 ops) ───
+  // Crista/sombra inferior (volume)
+  ctx.fillStyle = 'rgba(120,90,55,0.40)';
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.22, cy + H * 0.08);
+  ctx.quadraticCurveTo(cx, cy - H * 0.04, cx + W * 0.22, cy + H * 0.08);
+  ctx.lineTo(cx + W * 0.22, cy + H * 0.16);
+  ctx.lineTo(cx - W * 0.22, cy + H * 0.16);
+  ctx.closePath();
+  ctx.fill();
+  // Linha do vento principal (curva)
+  ctx.strokeStyle = 'rgba(90,70,40,0.45)';
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.18, cy);
+  ctx.quadraticCurveTo(cx, cy - H * 0.08, cx + W * 0.18, cy);
+  ctx.stroke();
+  if (tier === 'lite') return;
+  // ─── MEDIUM (+2 ops) ───
+  // 2 linhas de vento adicionais
+  ctx.strokeStyle = 'rgba(110,85,50,0.35)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.12, cy + H * 0.08);
+  ctx.quadraticCurveTo(cx, cy + H * 0.03, cx + W * 0.14, cy + H * 0.10);
+  ctx.moveTo(cx - W * 0.20, cy - H * 0.06);
+  ctx.quadraticCurveTo(cx - W * 0.05, cy - H * 0.10, cx + W * 0.10, cy - H * 0.08);
+  ctx.stroke();
+  // Highlight na crista
+  ctx.strokeStyle = 'rgba(220,190,140,0.55)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.16, cy - H * 0.02);
+  ctx.quadraticCurveTo(cx, cy - H * 0.06, cx + W * 0.16, cy - H * 0.02);
+  ctx.stroke();
+  if (tier !== 'full') return;
+  // ─── EPIC (+2 ops) ───
+  // 3 grãos de areia destaque (sparkle)
+  ctx.fillStyle = 'rgba(240,220,170,0.75)';
+  for (var gi = 0; gi < 3; gi++) {
+    var gx = cx + (rng() - 0.5) * W * 0.35;
+    var gy = cy + (rng() - 0.5) * H * 0.20;
+    ctx.beginPath();
+    ctx.arc(gx, gy, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 1 pequena pedra meio enterrada
+  ctx.fillStyle = '#5a4a38';
+  ctx.beginPath();
+  ctx.ellipse(cx + W * 0.08, cy + H * 0.05, W * 0.018, H * 0.008, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(140,115,85,0.7)';
+  ctx.beginPath();
+  ctx.ellipse(cx + W * 0.075, cy + H * 0.045, W * 0.010, H * 0.004, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // EPIC = ~6 ops total
+}
+
+// ════════════════════════════════════════════════════════════════════════
 function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   const rng = seededRng(col + row * 31);
   // Phase 2 ajuste v6 (2026-04-26): COPAS DE ARVORES com altura. Em vez de grama
@@ -20994,15 +21591,9 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // Tier-gated: 2/5/8 ops por tier.
     _drawRockClusterAAA(ctx, cx, cy, col, row);
   } else if (tile === 'w' || tile === 'W') {
-    const ripple = Math.sin(_animTime * 0.003 + col * 0.4 + row * 0.3) * 0.5 + 0.5;
-    ctx.strokeStyle = `rgba(100, 160, 200, ${0.3 + ripple * 0.2})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(cx - HEX_W * 0.08, cy - HEX_H * 0.08, HEX_W * 0.18, Math.PI * 0.2, Math.PI * 0.8);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx + HEX_W * 0.08, cy + HEX_H * 0.08, HEX_W * 0.12, Math.PI * 0.1, Math.PI * 0.9);
-    ctx.stroke();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // ANTES: 2 ripples animados sempre. AGORA: tier-gated 2/4/6 ops.
+    _drawWaterAAA(ctx, cx, cy, col, row);
   } else if (tile === 'R') {
     // 2026-04-27 USER RULE: AAA mobile-minimalist redesign.
     // ANTES: drawRockOutcrop (~25 ops/hex com gradients pesados).
@@ -21212,75 +21803,22 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // visual suficiente — sem rachadura/reflexo poluindo.
     // (Bloco vazio intencional — preserva o else if pra manter a chain.)
   } else if (tile === 'S') {
-    // Duna — linhas curvas de vento
-    ctx.strokeStyle = 'rgba(90, 70, 40, 0.35)';
-    ctx.lineWidth = 0.7;
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.18, cy);
-    ctx.quadraticCurveTo(cx, cy - HEX_H * 0.08, cx + HEX_W * 0.18, cy);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.12, cy + HEX_H * 0.08);
-    ctx.quadraticCurveTo(cx, cy + HEX_H * 0.03, cx + HEX_W * 0.14, cy + HEX_H * 0.1);
-    ctx.stroke();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // Tier-gated 2/4/6 ops. Volume da duna (LITE) + crista iluminada + grãos
+    // sparkle (EPIC) + 1 pedra meio enterrada (EPIC).
+    _drawDuneAAA(ctx, cx, cy, col, row);
   } else if (tile === 'v') {
-    // Rocha vulcânica — brasas piscando
-    ctx.fillStyle = '#2a1810';
-    ctx.beginPath();
-    for (let i = 0; i < 5; i++) {
-      const a = (Math.PI * 2 / 5) * i;
-      const d = HEX_W * 0.11 + rng() * 2;
-      const px = cx + Math.cos(a) * d;
-      const py = cy + Math.sin(a) * d * 0.65;
-      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-    ctx.fill();
-    // Brasas pulsando
-    const ember = 0.4 + Math.sin(_animTime * 0.005 + col * 3 + row * 2) * 0.3;
-    ctx.fillStyle = 'rgba(232, 90, 30, ' + ember.toFixed(3) + ')';
-    ctx.beginPath();
-    ctx.arc(cx + HEX_W * 0.03, cy - HEX_H * 0.02, 1.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(cx - HEX_W * 0.05, cy + HEX_H * 0.04, 0.9, 0, Math.PI * 2);
-    ctx.fill();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // Tier-gated 2/5/8 ops. Sem gradients, fills sólidos.
+    _drawVolcanicAAA(ctx, cx, cy, col, row);
   } else if (tile === '~') {
-    // Lama — textura marrom + bolhas ocasionais
-    ctx.fillStyle = 'rgba(60, 45, 28, 0.35)';
-    for (let i = 0; i < 4; i++) {
-      const mx = cx + (rng() - 0.5) * HEX_W * 0.5;
-      const my = cy + (rng() - 0.5) * HEX_H * 0.5;
-      ctx.beginPath();
-      ctx.arc(mx, my, 1 + rng() * 1.2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    const bubble = (Math.sin(_animTime * 0.002 + col * 2.3 + row * 1.7) * 0.5 + 0.5);
-    ctx.fillStyle = 'rgba(90, 75, 50, ' + (bubble * 0.6).toFixed(3) + ')';
-    ctx.beginPath();
-    ctx.arc(cx + HEX_W * 0.04, cy - HEX_H * 0.05, 0.9 + bubble * 0.5, 0, Math.PI * 2);
-    ctx.fill();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // Tier-gated 2/4/6 ops. Bolha animada apenas em EPIC.
+    _drawMudAAA(ctx, cx, cy, col, row);
   } else if (tile === 'c') {
-    // Cristal — prisma vertical com glow fosforescente azul
-    const pulse = 0.6 + Math.sin(_animTime * 0.003 + col + row) * 0.3;
-    ctx.fillStyle = 'rgba(90, 180, 220, ' + (pulse * 0.25).toFixed(3) + ')';
-    ctx.beginPath();
-    ctx.arc(cx, cy - HEX_H * 0.05, HEX_W * 0.16, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#3a5a78';
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.05, cy + HEX_H * 0.08);
-    ctx.lineTo(cx, cy - HEX_H * 0.15);
-    ctx.lineTo(cx + HEX_W * 0.05, cy + HEX_H * 0.08);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = 'rgba(180, 230, 255, ' + pulse.toFixed(3) + ')';
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.02, cy + HEX_H * 0.03);
-    ctx.lineTo(cx, cy - HEX_H * 0.12);
-    ctx.lineTo(cx + HEX_W * 0.02, cy + HEX_H * 0.03);
-    ctx.closePath();
-    ctx.fill();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // Tier-gated 2/5/8 ops. Cristais menores + sparkle apenas em EPIC.
+    _drawCrystalAAA(ctx, cx, cy, col, row);
   } else if (tile === 'b') {
     // 2026-04-27 USER RULE: "adicione aos hexagonos o que fizemos no mapa
     // do Brakthar, pois os hexagonos lá ficaram épicos, de osso e da mata".
@@ -21294,22 +21832,9 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     drawDecorSprite(ctx, 0, 0, 'bonepile', col * 7 + row * 13 + 31);
     ctx.restore();
   } else if (tile === 'l') {
-    // Lápide — bloco cinza com cruz ou símbolo
-    ctx.fillStyle = '#3a3835';
-    ctx.fillRect(cx - HEX_W * 0.06, cy - HEX_H * 0.12, HEX_W * 0.12, HEX_H * 0.2);
-    // Topo arredondado
-    ctx.beginPath();
-    ctx.arc(cx, cy - HEX_H * 0.12, HEX_W * 0.06, Math.PI, 0);
-    ctx.fill();
-    // Cruz
-    ctx.strokeStyle = '#1a1815';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - HEX_H * 0.08);
-    ctx.lineTo(cx, cy - HEX_H * 0.02);
-    ctx.moveTo(cx - HEX_W * 0.025, cy - HEX_H * 0.06);
-    ctx.lineTo(cx + HEX_W * 0.025, cy - HEX_H * 0.06);
-    ctx.stroke();
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // Tier-gated 2/4/7 ops. Tilt sutil + musgo + crack apenas em EPIC.
+    _drawTombstoneAAA(ctx, cx, cy, col, row);
   } else if (tile === 'H') {
     // 2026-04-27 USER RULE: AAA mobile-minimalist redesign.
     // ANTES: drawCottage com 6 variantes + 8 layers (foundation/walls/roof/
@@ -21318,9 +21843,12 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // 3/7/9 ops por tier. Sem gradients, fills sólidos.
     _drawCottageAAA(ctx, cx, cy, col, row);
   } else if (tile === 'F') {
-    // V2.9 PRO: fogueira ativa com chama animada, brasas pulsando, fumaça,
-    // halo quente, 5 pedras em círculo de contenção, lenha cruzada visível.
-    drawCampfire(ctx, cx, cy, col, row, rng);
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // ANTES: drawCampfire (4 layers + halo radial gradient + 5 pedras + lenha
+    // cruzada + chama animada + brasas + fumaça = ~25 ops sempre).
+    // AGORA: _drawCampfireAAA tier-gated 3/6/10 ops. Halo solid alpha (sem
+    // radial gradient — caro em mobile). Animação só em EPIC.
+    _drawCampfireAAA(ctx, cx, cy, col, row);
   } else if (tile === 't') {
     // 2026-04-27 USER RULE: AAA mobile-minimalist redesign — chama helper
     // _drawBushAAA com tier-gating estrito (2/4/6 ops por tier).
@@ -21328,42 +21856,11 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // orgânica + 3 tons + bagas EPIC.
     _drawBushAAA(ctx, cx, cy, col, row);
   } else if (tile === '*') {
-    // Clarabóia — feixe de luz natural descendo (teto ausente)
-    // Haste do feixe com gradiente suave de topo pro centro
-    const beamPulse = 0.7 + Math.sin(_animTime * 0.002) * 0.15;
-    const grad = ctx.createLinearGradient(cx, cy - HEX_H * 0.7, cx, cy + HEX_H * 0.2);
-    grad.addColorStop(0, 'rgba(255, 240, 180, 0)');
-    grad.addColorStop(0.4, 'rgba(255, 230, 150, ' + (0.18 * beamPulse).toFixed(3) + ')');
-    grad.addColorStop(1, 'rgba(255, 220, 140, ' + (0.42 * beamPulse).toFixed(3) + ')');
-    ctx.fillStyle = grad;
-    // Trapézio invertido — feixe afunilando do topo pro chão
-    ctx.beginPath();
-    ctx.moveTo(cx - HEX_W * 0.05, cy - HEX_H * 0.7);
-    ctx.lineTo(cx + HEX_W * 0.05, cy - HEX_H * 0.7);
-    ctx.lineTo(cx + HEX_W * 0.18, cy + HEX_H * 0.15);
-    ctx.lineTo(cx - HEX_W * 0.18, cy + HEX_H * 0.15);
-    ctx.closePath();
-    ctx.fill();
-    // Halo warm no solo
-    const haloGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, HEX_W * 0.35);
-    haloGrad.addColorStop(0, 'rgba(255, 240, 190, ' + (0.55 * beamPulse).toFixed(3) + ')');
-    haloGrad.addColorStop(0.6, 'rgba(255, 210, 130, ' + (0.22 * beamPulse).toFixed(3) + ')');
-    haloGrad.addColorStop(1, 'rgba(255, 180, 80, 0)');
-    ctx.fillStyle = haloGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, HEX_W * 0.35, 0, Math.PI * 2);
-    ctx.fill();
-    // Partículas de poeira dançando no feixe (dust motes)
-    const dustRng = seededRng(col + row * 71);
-    ctx.fillStyle = 'rgba(255, 240, 200, ' + (0.6 * beamPulse).toFixed(3) + ')';
-    for (let i = 0; i < 3; i++) {
-      const t = ((_animTime * 0.0005 + dustRng() * 10) % 1);
-      const dx = (dustRng() - 0.5) * HEX_W * 0.15;
-      const dy = cy - HEX_H * 0.5 + t * HEX_H * 0.7;
-      ctx.beginPath();
-      ctx.arc(cx + dx, dy, 0.6, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
+    // ANTES: createLinearGradient + createRadialGradient (caros em mobile)
+    // + 3 dust motes + animação sempre. AGORA: _drawSkylightAAA tier-gated
+    // 3/6/10 ops com solid fills + alpha layers, dust motes só em EPIC.
+    _drawSkylightAAA(ctx, cx, cy, col, row);
   }
 }
 
