@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:55:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:58:21Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10165,17 +10165,34 @@ body.perf-lite .stub-popup-voice { animation: none; }
   var VALID_TIERS = ['lite', 'medium', 'full'];
 
   function _detectAuto() {
-    var cores = navigator.hardwareConcurrency || 4;
-    var ram = navigator.deviceMemory || 4;  // fallback 4 GB se API não disponível
+    // 2026-04-27 USER RULE: "garanta que seja entregue a melhor versão
+    // sempre, somente em casos de extrema necessidade entregar versões
+    // LITE ou MEDIUM". Auto-detect agora prefere FULL (AAA quality) por
+    // padrão; só cai pra LITE/MEDIUM em casos genuinamente extremos.
+    //
+    // ANTES (agressivo demais — descia gaming PCs pra MEDIUM):
+    //   cores<=2 OR ram<=2  → lite
+    //   cores<=4 AND ram<=4 → lite     (devices comuns caíam)
+    //   cores<=8 AND ram<=8 → medium   (todo PC com Chrome cap deviceMemory=8 caía)
+    //   else                → full
+    //
+    // AGORA (otimista — quad-core+ = full sempre):
+    //   prefers-reduced-motion → lite  (acessibilidade explícita)
+    //   cores<=2 AND ram<=2    → lite  (hardware muito antigo, raro hoje)
+    //   cores<=2               → medium (CPU dual-core, smartphones <2018)
+    //   else                   → full   (qualquer quad-core+)
+    //
+    // Fallbacks otimistas: assume hardware decente quando API não disponível.
+    var cores = navigator.hardwareConcurrency || 8;
+    var ram = navigator.deviceMemory || 8;
     var prefersReduced = false;
     try {
       prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     } catch (_) {}
 
     if (prefersReduced) return 'lite';
-    if (cores <= 2 || ram <= 2) return 'lite';
-    if (cores <= 4 && ram <= 4) return 'lite';
-    if (cores <= 8 && ram <= 8) return 'medium';
+    if (cores <= 2 && ram <= 2) return 'lite';
+    if (cores <= 2) return 'medium';
     return 'full';
   }
 
