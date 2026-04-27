@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:42:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:46:43Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9582,7 +9582,13 @@ body.perf-lite .stub-popup-voice { animation: none; }
       overlay.classList.remove('visible');
       // Reset estilos forçados ao fechar (próxima abertura volta ao default)
       skipBtn.style.cssText = '';
-      setTimeout(callback, 350);
+      // 2026-04-27 USER RULE: callback IMEDIATO. Antes setTimeout 350ms
+      // dava tempo a fade-out — mas dice-overlay.visible{display:flex}
+      // → sem .visible{display:none} corta tudo instantâneo (sem fade).
+      // O 350ms só atrasava o popup do resultado por nada. User feedback:
+      // "ainda está demorando um pouco para ser mostrado, cerca de 1
+      // segundo, faça aparecer imediatamente".
+      setTimeout(callback, 0);
     }
     // Múltiplos handlers redundantes (padrão do rollSkillCheck V2.7)
     skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance('onclick'); };
