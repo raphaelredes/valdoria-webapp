@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T20:58:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T21:38:32Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8727,12 +8727,22 @@ body.remote-mode #debug-hud { display: none !important; }
     var container = _getEl('stub-popup-choices');
     if (container) {
       container.style.pointerEvents = 'none';
-      // 2026-04-27 USER RULE: ocultar choices DURANTE rolagem do dado
-      // (instantâneo, sem transition — user pediu "popup somente pronto,
-      // resultado com design fechado", sem animação no outcome).
+      // 2026-04-27: ocultar choices DURANTE rolagem (sem transition).
       container.style.transition = 'none';
       container.style.opacity = '0';
       container.style.visibility = 'hidden';
+    }
+    // 2026-04-27 USER RULE: ocultar POPUP INTEIRO durante a rolagem do dado.
+    // User feedback: "faça com que ao invés de sumir só as opções, o popup
+    // suma quando já abrir a tela de rolagem de dados... pois quando está
+    // saindo da tela da rolagem de dados ainda continua aparecendo o popup
+    // de escolhas sem as escolhas, depois só que carrega o popup do resultado".
+    // Hide o card visível inteiro; restaura após outcome estar pronto.
+    var _popupCard = document.querySelector('#stub-event-overlay .stub-popup-card');
+    if (_popupCard) {
+      _popupCard.style.transition = 'none';
+      _popupCard.style.opacity = '0';
+      _popupCard.style.visibility = 'hidden';
     }
     var rollPromise;
     if (choice.skill && typeof choice.dc === 'number' && window.SkillCheckResolver) {
@@ -8775,6 +8785,13 @@ body.remote-mode #debug-hud { display: none !important; }
           // pra não mostrar choices antigas durante rolagem do dado)
           container.style.opacity = '1';
           container.style.visibility = '';
+        }
+        // 2026-04-27: restaura popup card inteiro com outcome já pronto
+        if (_popupCard) {
+          _popupCard.style.opacity = '1';
+          _popupCard.style.visibility = '';
+        }
+        if (container) {
           var nextBtn = document.createElement('button');
           nextBtn.type = 'button';
           nextBtn.className = 'stub-popup-choice stub-popup-finalize';
@@ -8807,6 +8824,13 @@ body.remote-mode #debug-hud { display: none !important; }
         // pra não mostrar choices antigas durante rolagem do dado)
         container.style.opacity = '1';
         container.style.visibility = '';
+      }
+      // 2026-04-27: restaura popup card inteiro com outcome já pronto
+      if (_popupCard) {
+        _popupCard.style.opacity = '1';
+        _popupCard.style.visibility = '';
+      }
+      if (container) {
         var finalBtn = document.createElement('button');
         finalBtn.type = 'button';
         finalBtn.className = 'stub-popup-choice stub-popup-finalize';
