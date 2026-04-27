@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:05:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:18:04Z - do not edit directly, edit source -->
 
 
 <!--
@@ -13669,27 +13669,31 @@ const EVENTS_POOL = {
   // se estiver no tile certo do template).
   var TEMPLATES = [
     { kind: 'meet_npc',
-      title: 'Encontro Inesperado',
-      text: 'Você cruza o caminho de {npc}. {Ele} parece avaliar você antes de falar.',
+      title: 'Encontro na Estrada',
+      text: 'Você cruza o caminho de {npc} — passos cruzados, olhares trocados num breve instante de avaliação mútua. {Ele} para a uns dois metros, mãos visíveis mas postura prudente, esperando você revelar a intenção primeiro. Estrada longa ensina que cada encontro é leitura.',
       choices: [
-        { label: 'Cumprimentar', skill: 'cha', dc: 11, desc: 'Tentar laço amigável',
-          ok: 'Conversa amena. {Ele} compartilha dicas do caminho — você ganha confiança.', okGold: [3, 12], okXp: [5, 12],
-          fail: 'Vossa abordagem soa rude. {Ele} se afasta sem dizer mais nada.', failExh: 0 },
-        { label: 'Observar de longe', skill: 'wis', dc: 11, desc: 'Estudar antes de revelar-se',
-          ok: 'Você nota detalhes úteis sem ser visto.', okXp: [10, 20],
-          fail: '{Ele} percebe sua presença e foge — informação perdida.' }
+        { label: 'Cumprimentar', skill: 'cha', dc: 11,
+          desc: 'Voz aberta, mãos longe da arma — proposta de paz e conversa breve.',
+          ok: 'Você cumprimenta com voz tranquila e gesto aberto, perguntando sobre a estrada à frente. {Ele} relaxa os ombros e responde sem reservas — partilha dicas sobre desvios seguros, água potável próxima, fogueiras que viajantes confiáveis acendem à noite. Quando se separam, há aperto de mão e uma pequena moeda passada como sinal de boa-fé.', okGold: [3, 12], okXp: [5, 12],
+          fail: 'Sua abordagem sai com pressa demais — voz alta no momento errado, ou pergunta direta antes da apresentação. {Ele} estreita os olhos, balança a cabeça, e se afasta a passos firmes sem dizer mais nada. Você fica plantado entendendo tarde demais que conversa de estrada tem ritmo próprio.', failExh: 0 },
+        { label: 'Observar de longe', skill: 'wis', dc: 11,
+          desc: 'Esconder-se em vegetação ou contorno do terreno — estudar antes de revelar-se.',
+          ok: 'Você se acocora atrás de mato denso e observa em silêncio durante minutos. Detalhes vão aparecendo: o tipo de calçado revela ofício, a postura denuncia treino militar passado, a bolsa carrega marcas de uma guilda específica. Quando {ele} finalmente segue caminho, você sai com informação sem ter sido visto.', okXp: [10, 20],
+          fail: '{Ele} tem ouvidos treinados — talvez patrulheiro, talvez caçador. Vira a cabeça no instante exato em que você se acomoda, escuta um galho mal-pisado, e dispara em direção oposta sem olhar pra trás. Você se ergue dos arbustos com o constrangimento de quem foi pego espionando.' }
       ]
     },
     { kind: 'creature_threat',
       title: 'Ameaça à Vista',
-      text: 'Um {creature} surge subitamente! Os olhos travam nos seus, lâmina de tensão no ar.',
+      text: 'Um {creature} surge subitamente da vegetação — músculos tensos sob a pelagem, presas à mostra, olhos travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Decisão precisa vir agora.',
       choices: [
-        { label: 'Recuar devagar', skill: 'wis', dc: 12, desc: 'Sair sem provocar',
-          ok: 'Você recua silenciosamente. A fera segue seu rumo, sem agir.', okXp: [8, 14],
-          fail: '{Ele} farejou seu medo! Avança numa investida.', failHp: 4 },
-        { label: 'Intimidar', skill: 'cha', dc: 13, desc: 'Mostrar quem manda',
-          ok: '{Ele} hesita, dobra o pescoço e some na mata.', okXp: [12, 22], okGold: [2, 8],
-          fail: '{Ele} interpreta como desafio direto. Investida feroz!', failHp: 6 }
+        { label: 'Recuar devagar', skill: 'wis', dc: 12,
+          desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
+          ok: 'Você dá um passo pra trás devagar, calcanhar primeiro, sem quebrar contato visual nem mostrar dentes. Outro passo. E outro. {Ele} estuda você com curiosidade animal — calculando se vale o esforço — e decide que não. Vira-se com um resmungo grave e segue seu rumo pela mata, deixando você em pé com o coração nas costelas.', okXp: [8, 14],
+          fail: '{Ele} fareja seu medo antes mesmo de você dar o segundo passo — predadores leem química melhor que linguagem. As orelhas baixam, o corpo se agacha, e a investida vem em explosão de músculo. Você é jogado contra o chão antes de processar o ataque, mordida raspando braço enquanto rola pra escapar.', failHp: 4 },
+        { label: 'Intimidar', skill: 'cha', dc: 13,
+          desc: 'Postura ereta, voz grave, gestos amplos — apresentar-se como predador rival, não presa.',
+          ok: 'Você se ergue ao máximo, abre os braços e ruge com a voz mais grave que encontra no peito. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de combate contra alvo que parece grande demais — e recua. Vira-se com a postura quebrada e some entre árvores. Você fica vibrante de adrenalina, sentindo que dominou algo selvagem só com presença.', okXp: [12, 22], okGold: [2, 8],
+          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio territorial direto, e a resposta é inequívoca. Patas fincam no chão, músculos tensos, e a investida vem com fúria de quem aceita guerra. Você defende mas o impacto é brutal, e o sangue começa a escorrer.', failHp: 6 }
       ]
     },
     { kind: 'object_inspect',
@@ -13738,79 +13742,91 @@ const EVENTS_POOL = {
     { kind: 'campfire',
       requires_tile: 'F',
       title: 'Fogueira Crepitante',
-      text: 'A fogueira ainda arde, recente. Marcas de viajantes ao redor — restos de comida, pegadas frescas.',
+      text: 'A fogueira ainda arde firme, brasas alaranjadas dançando entre cinzas frescas. Marcas de viajantes anteriores marcam o solo ao redor — galhos quebrados em pilha, restos de comida envoltos em pano, pegadas que pisaram terra úmida há poucas horas. Quem esteve aqui partiu sem urgência.',
       choices: [
-        { label: 'Aquecer-se e descansar', skill: 'con', dc: 10, desc: 'Renovar fôlego',
-          ok: 'O calor restaura suas forças. Sua exaustão alivia.', okXp: [5, 10], okMp: [2, 5],
-          fail: 'A fumaça queima seus olhos — você tosse sem descanso.' },
-        { label: 'Examinar pegadas', skill: 'wis', dc: 12, desc: 'Rastrear viajantes',
-          ok: 'Você identifica o tipo de viajante recente — informação útil.', okXp: [10, 18], okGold: [3, 8],
-          fail: 'As marcas se misturam — apenas confusão.' }
+        { label: 'Aquecer-se e descansar', skill: 'con', dc: 10,
+          desc: 'Sentar-se com as costas no tronco, esticar pernas, deixar o calor desfazer a tensão da estrada.',
+          ok: 'Você se acomoda contra um tronco e estica as pernas pro calor da fogueira. As chamas trabalham silenciosamente — descongelam articulações, secam roupa úmida, soltam a tensão acumulada nos ombros. Quando finalmente se ergue, o corpo agradece como se tivesse dormido três horas em vez de descansado vinte minutos.', okXp: [5, 10], okMp: [2, 5],
+          fail: 'O vento muda de direção e a fumaça vem direta no seu rosto — fuligem nos olhos, garganta queimando, tosse impossível de controlar. Você se afasta lacrimejando, com a sensação amarga de que até descanso simples pode trair quando a sorte está virada.' },
+        { label: 'Examinar pegadas', skill: 'wis', dc: 12,
+          desc: 'Acocorar próximo às marcas e ler o solo — número de viajantes, calçado, peso da carga, tempo decorrido.',
+          ok: 'Você se acocora e estuda as marcas com paciência de rastreador — três adultos, calçados militares de couro reforçado, um cavalo de carga (talvez dois). Saíram para nordeste há cerca de duas horas, ritmo controlado. Informação útil pra cidade onde caçadores de fugitivos pagam por boas pistas.', okXp: [10, 18], okGold: [3, 8],
+          fail: 'Você examina o solo mas as marcas se sobrepõem demais — pegadas de quem ficou, de quem saiu, de animais que vieram depois farejar restos. A confusão venceu antes da leitura. Levanta-se com joelhos doloridos e nada de concreto pra mostrar pelo esforço.' }
       ]
     },
     { kind: 'house',
       requires_tile: 'H',
       title: 'Porta Entreaberta',
-      text: 'Uma casa solitária se ergue diante de você. A porta está entreaberta, e luz de vela escapa pela fresta.',
+      text: 'Uma casa solitária se ergue à beira do caminho — telhado de palha, paredes de barro escuro, vidraça única espelhando luz de vela amarelada. A porta está entreaberta exatamente o suficiente pra ver mas não o bastante pra invadir. Convite ou armadilha, depende de quem chega.',
       choices: [
-        { label: 'Bater à porta', skill: 'cha', dc: 11, desc: 'Anunciar-se cordialmente',
-          ok: 'O morador o recebe — talvez ofereça sopa, um quarto, ou notícia.', okGold: [10, 25], okXp: [8, 14],
-          fail: 'O morador grita pela janela — vai embora ou chamo a guarda!' },
-        { label: 'Espreitar pela janela', skill: 'dex', dc: 13, desc: 'Discrição total',
-          ok: 'Você observa interior — vasilhas de prata, baús, marcas de riqueza.', okXp: [12, 20],
-          fail: 'O cão do morador late! Você foge correndo.', failHp: 2 }
+        { label: 'Bater à porta', skill: 'cha', dc: 11,
+          desc: 'Postura ereta, voz clara mas tranquila, anunciar-se como viajante de passagem que pede apenas notícia da estrada.',
+          ok: 'Você bate três vezes com nós dos dedos — pausa, três vezes mais — e anuncia-se em voz tranquila. A porta abre devagar revelando uma mulher de meia-idade que estuda você por instantes, depois sorri. "Entre, viajante. Sopa quente, fogo aceso, pão fresco. A noite é longa pra quem caminha sozinho."', okGold: [10, 25], okXp: [8, 14],
+          fail: 'Você bate alto demais ou no horário errado. A janela se abre num gesto seco e a voz que vem de dentro tem ferro: "Vai-te embora ou chamo a guarda do distrito! Não tenho nada pra forasteiros desta hora!" A porta é trancada por dentro com estrépito. Você se afasta com a vergonha de um cumprimento mal-feito.' },
+        { label: 'Espreitar pela janela', skill: 'dex', dc: 13,
+          desc: 'Aproximar-se silenciosamente do lado cego da janela — agachar, controlar respiração, ler o interior em segundos.',
+          ok: 'Você se agacha sob o peitoril e ergue-se devagar com olhos no canto da vidraça. O que vê surpreende — interior bem mais rico do que a fachada sugere: vasilhas de prata expostas, dois baús de carvalho com fechaduras complexas, um manto bordado em ouro pendurado na parede. Esta casa pertence a alguém que esconde riqueza por motivo.', okXp: [12, 20],
+          fail: 'O cão dorme no canto que você não viu — animal grande, alerta, treinado. Quando você ergue a cabeça pra espreitar, ele já está em pé latindo enraivecido, dentes na vidraça. Você dispara estrada afora antes que a porta abra, perna arranhada por algum prego que pegou na fuga.', failHp: 2 }
       ]
     },
     { kind: 'tree',
       requires_tile: 'T',
       title: 'Árvore Antiga',
-      text: 'Uma árvore enorme se ergue diante de você. Suas raízes formam recantos, e galhos altos prometem visão.',
+      text: 'Uma árvore monumental ergue-se solitária — tronco largo como torre de homem feito, raízes formando recantos onde criaturas pequenas se abrigam, galhos altos perdendo-se em copa densa. Conta gerações silenciosas de quem passou por aqui, e talvez guarde algo de cada um.',
       choices: [
-        { label: 'Escalar pra avistar', skill: 'str', dc: 12, desc: 'Buscar perspectiva',
-          ok: 'Do alto, você vê marcos distantes do mapa — atalhos revelados.', okXp: [12, 20], okGold: [0, 5],
-          fail: 'Galho cede; você cai dolorosamente.', failHp: 4 },
-        { label: 'Procurar entre as raízes', skill: 'wis', dc: 11, desc: 'Vasculhar o entorno',
-          ok: 'Você acha um pequeno tesouro escondido — talvez de um viajante anterior.', okGold: [8, 22],
-          fail: 'Apenas insetos e sapos entre as raízes.' }
+        { label: 'Escalar pra avistar', skill: 'str', dc: 12,
+          desc: 'Subir pelos nós do tronco e galhos baixos — alcançar copa pra ter perspectiva real do terreno ao redor.',
+          ok: 'Você sobe testando cada apoio antes de comprometer peso. Suor escorre, mãos ficam coladas de seiva, mas chega à copa após boa subida. Lá em cima, o mundo se abre — vê a curva do rio, fumaça de um vilarejo distante, atalho que corta a montanha. Memoriza posições antes de descer com cuidado redobrado.', okXp: [12, 20], okGold: [0, 5],
+          fail: 'Quase no alto, um galho que parecia firme cede sob seu peso com estalo seco. Você cai numa sequência feia — bate em dois galhos, raspa o tronco, aterrissa de costas em raízes salientes. Levanta tossindo, com gosto de sangue na boca e a humilhação de ter superestimado madeira velha.', failHp: 4 },
+        { label: 'Procurar entre as raízes', skill: 'wis', dc: 11,
+          desc: 'Examinar os recantos formados pelas raízes — viajantes anteriores escondem coisas em árvores antigas.',
+          ok: 'Você se ajoelha entre as raízes e tateia os recantos sombreados. Os dedos encontram o que esperava: pequena bolsa de couro escondida em fenda profunda, deixada por viajante anterior. Dentro, moedas, talvez uma carta amarelada. Considera se merece levar — decide que sim, dado que quem deixou nunca voltou.', okGold: [8, 22],
+          fail: 'Você revira folhas, raízes e terra úmida por bom tempo, mas só encontra o que árvores antigas guardam de costume — insetos assustados, sapos confusos, o cheiro forte de húmus. Levanta com mãos sujas e a sensação de ter perdido tempo numa esperança boba.' }
       ]
     },
     { kind: 'rock',
       requires_tile: ['r', 'R', 'M'],
       title: 'Formação Rochosa',
-      text: 'Pedras formam uma pequena gruta. Algo brilha na sombra — talvez um cristal, talvez um olho atento.',
+      text: 'Pedras imensas se acumulam em formação que sugere gruta natural — abertura escura entre dois blocos do tamanho de carroças, profundidade indefinida lá dentro. Algo brilha pálido na sombra interna; pode ser cristal incrustado, pode ser olho de criatura adormecida. Distinção importa.',
       choices: [
-        { label: 'Explorar a gruta', skill: 'int', dc: 12, desc: 'Análise cautelosa',
-          ok: 'Você acha cristais valiosos incrustados.', okGold: [12, 28], okXp: [8, 14],
-          fail: 'Apenas pedras lascadas — nada valioso.' },
-        { label: 'Recuar e seguir', skill: 'dex', dc: 10, desc: 'Não arriscar',
-          ok: 'Bom instinto — havia um predador adormecido.', okXp: [4, 8],
-          fail: 'Você tropeça nas pedras ao recuar.', failHp: 1 }
+        { label: 'Explorar a gruta', skill: 'int', dc: 12,
+          desc: 'Entrar com cautela analisando o terreno — se for predador, recuar; se for cristal, marcar e extrair.',
+          ok: 'Você acende uma tocha improvisada e avança devagar, lendo cada parede. O brilho revela-se cristais legítimos — quartzo de boa qualidade incrustado em veio que continua fundo. Extrai o que pode com punhal e paciência, deixando marca discreta pra retornar com ferramentas certas. Sai com o saco mais pesado que entrou.', okGold: [12, 28], okXp: [8, 14],
+          fail: 'Você entra com expectativa mas a gruta era promessa vazia — apenas pedras lascadas, restos de outros caçadores frustrados, cheiro de morcego antigo. O brilho era só água escorrendo numa parede polida. Sai sem nada, com a piada amarga de quem caiu na própria miragem.' },
+        { label: 'Recuar e seguir', skill: 'dex', dc: 10,
+          desc: 'Confiar no instinto — algo na sombra parecia respirar. Recuar sem virar as costas.',
+          ok: 'Você sente o instinto antes da mente — algo na sombra estava observando, talvez respirando devagar. Recua passo a passo, calcanhar primeiro, mantendo o olhar fixo na entrada. A escolha era certeira: a léguas adiante encontra restos de viajante menos cauteloso. Seu prudência foi a diferença entre estrada e covil.', okXp: [4, 8],
+          fail: 'Você recua mas o cascalho solto trai os pés — escorrega, bate o cotovelo, derruba pequena cascata de pedras. Levanta xingando baixo, joelho ralado, com a humilhação dupla de ter sido cauteloso e ainda assim atrapalhado. Pelo menos saiu inteiro.', failHp: 1 }
       ]
     },
     { kind: 'water',
       requires_tile: ['w', 'W'],
       title: 'Águas Cristalinas',
-      text: 'Uma poça/riacho de águas claras corta o caminho. Reflete o céu — e talvez algo mais nas profundezas.',
+      text: 'Um riacho de águas claras corta a trilha — leito de pedra polida visível através da transparência absoluta, reflexos do céu se misturando com sombras de peixes pequenos no fundo. Promessa rara em estrada longa: água que parece beber sem perguntar.',
       choices: [
-        { label: 'Beber e encher cantil', skill: 'con', dc: 9, desc: 'Hidratar-se',
-          ok: 'Água pura restaura suas forças completamente.', okXp: [6, 12], okMp: [3, 6],
-          fail: 'A água tinha algo errado — você sente náuseas.', failHp: 2 },
-        { label: 'Pescar com paciência', skill: 'wis', dc: 12, desc: 'Tentar capturar peixe',
-          ok: 'Você captura um peixe gordo — boa refeição ou venda.', okGold: [5, 14], okXp: [6, 10],
-          fail: 'Nada morde. Tempo perdido.' }
+        { label: 'Beber e encher cantil', skill: 'con', dc: 9,
+          desc: 'Ajoelhar-se na margem, encher as duas mãos primeiro como teste, depois cantil cheio.',
+          ok: 'Você ajoelha na margem e enche as mãos primeiro — cheira, prova com língua, espera. Pura. Bebe em goles longos sentindo cada centímetro de garganta agradecer. Enche o cantil até a tampa e ainda lava o rosto. Sai do riacho sentindo-se renovado de um jeito que só água verdadeira de fonte montanhesa proporciona.', okXp: [6, 12], okMp: [3, 6],
+          fail: 'A água parecia clara mas tinha algo escondido — talvez animal morto rio acima, talvez planta tóxica em afloramento. Cinco minutos depois você sente o estômago revirar, suor frio, vontade urgente de vomitar. Senta-se na margem perdendo metade do que bebeu, jurando nunca mais confiar em transparência.', failHp: 2 },
+        { label: 'Pescar com paciência', skill: 'wis', dc: 12,
+          desc: 'Improvisar linha com fio e isca — exige calma e leitura do comportamento dos peixes.',
+          ok: 'Você improvisa linha com fio resistente e isca de inseto vivo, depois espera. Espera mesmo — paciência verdadeira de pescador. A primeira fisgada é falsa, a segunda também, mas a terceira puxa fundo. Captura peixe gordo de carne firme — refeição farta pro acampamento ou venda boa na próxima cidade. Sente orgulho da paciência que rendeu.', okGold: [5, 14], okXp: [6, 10],
+          fail: 'Você tenta diferentes iscas, diferentes profundidades, diferentes ângulos. Nada morde. Os peixes nadam visíveis a um palmo da linha como se zombassem. Quando finalmente desiste, o sol já mudou de posição e você só ganhou cãibras nas pernas e a lição de que pesca exige mais que vontade.' }
       ]
     },
     { kind: 'bones',
       requires_tile: ['b', 'l'],
       title: 'Restos do Passado',
-      text: 'Ossos brancos ou uma lápide marcam este lugar. Quem foi? O que aconteceu? Talvez ainda haja algo aqui.',
+      text: 'Ossos branqueados pelo tempo formam silhueta humana parcial sob mato baixo, ou uma lápide cinza inclinada marca o local — depende do que a estrada decidiu mostrar hoje. Em ambos os casos, alguém terminou jornada aqui, e algo pode ter ficado guardado junto.',
       choices: [
-        { label: 'Examinar com respeito', skill: 'wis', dc: 12, desc: 'Honrar os mortos',
-          ok: 'Entre os restos, você acha um amuleto/medalha — talvez sagrada.', okGold: [10, 25], okXp: [10, 18],
-          fail: 'Um espírito inquieto se manifesta — frio gélido percorre você.', failHp: 3 },
-        { label: 'Saquear depressa', skill: 'dex', dc: 13, desc: 'Levar tudo de valor',
-          ok: 'Você acha moedas antigas — ainda boas como metal.', okGold: [18, 35],
-          fail: 'A maldição cai sobre você — drena vida e mana.', failHp: 4, failMp: 2 }
+        { label: 'Examinar com respeito', skill: 'wis', dc: 12,
+          desc: 'Ajoelhar-se em silêncio, fazer sinal de proteção, examinar sem profanar — só perturbar o necessário.',
+          ok: 'Você ajoelha-se ao lado dos restos e murmura algo curto — prece improvisada de viajante pra viajante. Os dedos exploram com respeito, e em meio ao tecido apodrecido encontra o que procurava: amuleto de prata gravada, pequena medalha de ordem religiosa, talvez sagrada. Guarda com promessa silenciosa de devolver à família se algum dia encontrar.', okGold: [10, 25], okXp: [10, 18],
+          fail: 'Por mais respeitoso que tenha sido seu gesto, algo no local não estava em paz — espírito perturbado, maldição residual, instinto que define ar como hostil. Frio gélido sobe pela espinha sem aviso, dedos formigando, pulso acelerando. Afasta-se trêmulo, com a sensação de ter sido observado por algo que esperava ali há tempo demais.', failHp: 3 },
+        { label: 'Saquear depressa', skill: 'dex', dc: 13,
+          desc: 'Mãos rápidas, sem cerimônia — extrair tudo de valor antes que algo perceba.',
+          ok: 'Mãos rápidas, sem cerimônia. Você revira o que sobrou com eficiência fria — moedas antigas em pequena bolsa, dente de ouro que pode ser arrancado limpo, uma fivela com pedras semipreciosas. Sai com bolso pesado e a indiferença treinada de quem aprendeu cedo que mortos não se ofendem com práticos.', okGold: [18, 35],
+          fail: 'A maldição cai antes mesmo da pilhagem terminar — esses restos tinham guardião invisível. Frio percorre você de dentro pra fora, força esvai, magia sente-se drenada como água escorrendo de balde furado. Cai de joelhos engasgando, deixando cair o que tinha pegado, com a lição amarga de que alguns mortos cobram juros.', failHp: 4, failMp: 2 }
       ]
     }
   ];
