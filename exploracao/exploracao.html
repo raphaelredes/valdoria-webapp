@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:58:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T20:42:40Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8686,15 +8686,12 @@ body.remote-mode #debug-hud { display: none !important; }
     var container = _getEl('stub-popup-choices');
     if (container) {
       container.style.pointerEvents = 'none';
-      // 2026-04-27 USER RULE: ocultar choices DURANTE rolagem do dado.
-      // User feedback: "demora um pouco pras opções sumirem e o resultado
-      // ser mostrado" quando overlay do dado fecha. Causa: choices antigas
-      // ficavam visíveis atrás do overlay (apenas pointerEvents desabilitado).
-      // Agora opacity 0 + visibility hidden imediato — quando overlay fecha,
-      // outcome já está pronto sem flash visual das choices.
+      // 2026-04-27 USER RULE: ocultar choices DURANTE rolagem do dado
+      // (instantâneo, sem transition — user pediu "popup somente pronto,
+      // resultado com design fechado", sem animação no outcome).
+      container.style.transition = 'none';
       container.style.opacity = '0';
       container.style.visibility = 'hidden';
-      container.style.transition = 'opacity 0.15s ease';
     }
     var rollPromise;
     if (choice.skill && typeof choice.dc === 'number' && window.SkillCheckResolver) {
@@ -8967,10 +8964,14 @@ body.remote-mode #debug-hud { display: none !important; }
   padding: 2px 6px;
   white-space: nowrap;
 }
-.stub-popup-outcome-ok { color: var(--v-success, #6dca6f); transition: color 0.3s ease; }
-.stub-popup-outcome-fail { color: var(--v-danger, #d35454); transition: color 0.3s ease; }
-body.perf-lite .stub-popup-outcome-ok,
-body.perf-lite .stub-popup-outcome-fail { transition: none; }
+/* 2026-04-27 USER RULE: outcome aparece estático/pronto. Antes tinha
+   transition:color 0.3s — ao adicionar class após dice roll, cor deslizava
+   in (verde/vermelho) em ondas. User feedback: "tem uma animação que faz
+   ficar com o texto colorido, mexe no popup e está mal feita... melhor
+   mostrar o popup somente pronto... com o resultado com design fechado".
+   Removidas todas transitions — cor aplicada instantaneamente. */
+.stub-popup-outcome-ok { color: var(--v-success, #6dca6f); }
+.stub-popup-outcome-fail { color: var(--v-danger, #d35454); }
 
 /* Finalizar button — único botão pós-outcome, fecha o popup só com click */
 .stub-popup-choice.stub-popup-finalize {
