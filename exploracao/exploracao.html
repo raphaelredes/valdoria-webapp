@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:18:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:23:07Z - do not edit directly, edit source -->
 
 
 <!--
@@ -20225,7 +20225,12 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   // 4 tipos de copa: round, pointed (pine), irregular (oak), broad (spread).
   // Z-sorted por Y pra back-to-front rendering correto.
   // Pra cobrir o hex (sem gaps): 6 floor blobs darkest atras das arvores.
-  if (tile === '#' && S.mapDef && S.mapDef.dungeon) {
+  // 2026-04-27 USER RULE: "adicione aos hexagonos o que fizemos no mapa do
+  // Brakthar... inclusive faça a mata ser os hexagonos de lá". Mata 'g'
+  // agora usa o mesmo renderer épico do dungeon '#' (4 árvores z-sorted +
+  // floor blobs cobrindo hex). Condition cobre AMBOS '#' (dungeon) E 'g'
+  // (mata em qualquer mapa).
+  if ((tile === '#' && S.mapDef && S.mapDef.dungeon) || tile === 'g') {
     var W = HEX_W;
     var tierMata = window._valdoriaPerformanceTier;
     var hashSeed = (col * 73 + row * 31) & 0xFFFF;
@@ -20542,7 +20547,10 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // 2026-04-27 USER RULE: "remova o hexagono montanha de tudo... os hex
     // mais altos já simulam isso". Decoração snow-peak removida — TILE_HEIGHT['M']
     // continua alto pra hex render como mountain via altura 3D somente.
-  } else if (tile === 'g') {
+  } else if (tile === 'g' && false) {
+    // 2026-04-27: dead-code (tile === 'g' agora é capturado no IF de cima
+    // que reusa o renderer épico do dungeon '#' — 4 árvores + floor blobs).
+    // Bloco antigo preservado pra histórico/rollback. Comentado via && false.
     // V2.9 MATA densa — feel de floresta baixa/underbrush com 3 camadas:
     //   1. Sombra base no chão (terra úmida)
     //   2. Grama alta (10 blades curvados com sway de vento)
@@ -20807,6 +20815,18 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     ctx.lineTo(cx + HEX_W * 0.02, cy + HEX_H * 0.03);
     ctx.closePath();
     ctx.fill();
+  } else if (tile === 'b') {
+    // 2026-04-27 USER RULE: "adicione aos hexagonos o que fizemos no mapa
+    // do Brakthar, pois os hexagonos lá ficaram épicos, de osso e da mata".
+    // Reusa drawDecorSprite('bonepile') que tem 6 camadas (~30 elementos:
+    // sombra base, ossos longos, fêmures cruzados, costelas, fragmentos,
+    // crânios). Escala via ctx.scale pra fill o hex inteiro (drawDecorSprite
+    // usa HEX_W/14 internamente — pequeno; escalamos 2.4x pra hex tile).
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(2.4, 2.4);
+    drawDecorSprite(ctx, 0, 0, 'bonepile', col * 7 + row * 13 + 31);
+    ctx.restore();
   } else if (tile === 'l') {
     // Lápide — bloco cinza com cruz ou símbolo
     ctx.fillStyle = '#3a3835';
