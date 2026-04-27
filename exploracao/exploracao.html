@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:23:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:33:36Z - do not edit directly, edit source -->
 
 
 <!--
@@ -20212,6 +20212,462 @@ function drawTile(ctx, col, row) {
   // sort + fog culling correto. Não precisamos hookar aqui.
 }
 
+// ════════════════════════════════════════════════════════════════════════
+// 2026-04-27 USER RULE: AAA mobile-minimalist hex tile redesign.
+// "agora vamos refazer todos os hexagonos existentes... para que seja um
+// jogo com hexagonos épicos de jogo AAA com mapa em hexagonos, quero
+// detalhes minimalistas em todos principalmente no EPIC, que seja focado
+// em leveza para rodar em mobile".
+//
+// FILOSOFIA AAA MOBILE (referências: Polytopia, Bad North, Catan):
+//   - Silhueta forte (recognizable em hex pequeno mobile)
+//   - 3 cores por elemento (shadow / mid / highlight)
+//   - Animação só em EPIC (sway, pulse — single sin)
+//   - SEM gradients caros (createRadialGradient/createLinearGradient)
+//   - Solid fills + opacity layers em vez de gradients
+//   - Z-sort por Y pra back-to-front
+//
+// BUDGET DE OPS POR TIER (excluindo conditionals):
+//   LITE:    3-4 ops  (silueta + base + shadow)
+//   MEDIUM:  6-8 ops  (+ shading + 1 detalhe)
+//   EPIC:    10-14 ops (+ rim light + 2 micro-detalhes + sway anim)
+// ════════════════════════════════════════════════════════════════════════
+
+// Palette helper — gera 3 cores tonais (shadow/mid/highlight) a partir de hue base.
+// Usa solid fills (sem gradient). Tonal contrast tight pra leitura em mobile.
+function _drawTreeAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 41 + row * 17 + 89) & 0xFFFF;
+  var rng = seededRng(seed);
+  // Sway só em EPIC pra economizar Math.sin chamadas
+  var sway = (tier === 'full') ? Math.sin(_animTime * 0.0008 + seed * 0.013) * W * 0.012 : 0;
+  // Cores: paleta verde-floresta tonalizada (shadow/mid/highlight/trunk)
+  var SH = '#1a2e10', MID = '#2d5224', HL = '#5a8035', TRK = '#3a2418', TRK_HL = '#5a3820';
+  // Trunk dimensions
+  var trunkBaseY = cy + H * 0.18;
+  var trunkTopY = trunkBaseY - H * 0.18;
+  var trunkW = W * 0.05;
+
+  // ─── BASE LAYER (todos os tiers) ────────────────────────────────────
+  // 1. Sombra circular no chão (sempre presente — grounding)
+  ctx.fillStyle = 'rgba(0,0,0,0.32)';
+  ctx.beginPath();
+  ctx.ellipse(cx + sway * 0.5, trunkBaseY + H * 0.015, W * 0.16, H * 0.035, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2. Trunk silhouette (silueta vertical robusta)
+  ctx.fillStyle = TRK;
+  ctx.fillRect(cx - trunkW / 2, trunkTopY, trunkW, trunkBaseY - trunkTopY);
+  // 3. Canopy silueta principal — triangular cone com base larga (silueta forte)
+  ctx.fillStyle = SH;
+  ctx.beginPath();
+  ctx.moveTo(cx + sway, cy - H * 0.42);
+  ctx.lineTo(cx + W * 0.20 + sway, trunkTopY + H * 0.04);
+  ctx.lineTo(cx - W * 0.20 + sway, trunkTopY + H * 0.04);
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;  // LITE = 3 ops (sombra + tronco + canopy silueta)
+
+  // ─── MEDIUM: + shading + 1 detalhe ──────────────────────────────────
+  // 4. Canopy mid layer (cone menor, tom médio — sugere volume 3D)
+  ctx.fillStyle = MID;
+  ctx.beginPath();
+  ctx.moveTo(cx + sway * 1.2, cy - H * 0.34);
+  ctx.lineTo(cx + W * 0.14 + sway * 1.2, trunkTopY - H * 0.02);
+  ctx.lineTo(cx - W * 0.14 + sway * 1.2, trunkTopY - H * 0.02);
+  ctx.closePath();
+  ctx.fill();
+  // 5. Trunk highlight (lateral direita — luz NW)
+  ctx.fillStyle = TRK_HL;
+  ctx.fillRect(cx + trunkW / 4, trunkTopY, trunkW / 4, trunkBaseY - trunkTopY);
+  // 6. Folha caída single (grounding extra)
+  ctx.fillStyle = 'rgba(140, 80, 40, 0.7)';
+  ctx.beginPath();
+  ctx.ellipse(cx + (rng() - 0.5) * W * 0.25, trunkBaseY + H * 0.025,
+              1.8, 0.9, rng() * Math.PI, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier !== 'full') return;  // MEDIUM = 6 ops total
+
+  // ─── EPIC: + rim light + sun spots + 2nd folha caída ────────────────
+  // 7. Topo light cone — silhueta menor + cor clara (sugere luz solar topo)
+  ctx.fillStyle = HL;
+  ctx.beginPath();
+  ctx.moveTo(cx + sway * 1.4, cy - H * 0.40);
+  ctx.lineTo(cx + W * 0.07 + sway * 1.4, cy - H * 0.20);
+  ctx.lineTo(cx - W * 0.07 + sway * 1.4, cy - H * 0.20);
+  ctx.closePath();
+  ctx.fill();
+  // 8-9. 2 sun-dapple spots (single arc each — sem gradient pra economizar)
+  ctx.fillStyle = 'rgba(255, 235, 150, 0.55)';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.05 + sway * 1.4, cy - H * 0.28, W * 0.025, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx - W * 0.06 + sway * 1.4, cy - H * 0.18, W * 0.020, 0, Math.PI * 2);
+  ctx.fill();
+  // 10. Folha caída #2 (cluster de 2 dá feel orgânico)
+  ctx.fillStyle = 'rgba(180, 130, 50, 0.6)';
+  ctx.beginPath();
+  ctx.ellipse(cx + (rng() - 0.5) * W * 0.30, trunkBaseY + H * 0.04,
+              2.2, 1.0, rng() * Math.PI, 0, Math.PI * 2);
+  ctx.fill();
+  // EPIC = 10 ops total
+}
+
+// _drawCottageAAA — Casa minimalista AAA mobile.
+// LITE: silueta + telhado + sombra (3 ops)
+// MEDIUM: + porta + parede sombra + chaminé (6 ops)
+// EPIC: + janela glow animada + fumaça (9 ops)
+function _drawCottageAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 19 + row * 23 + 401) & 0xFFFF;
+  var rng = seededRng(seed);
+  // Cores: casa rústica madeira/pedra
+  var WALL = '#7a5430', WALL_HL = '#a07848', WALL_SH = '#4a3018';
+  var ROOF = '#3a2418', ROOF_HL = '#5a3820';
+  var DOOR = '#2a1810';
+  var bodyW = W * 0.32;
+  var bodyH = H * 0.20;
+  var bx = cx - bodyW / 2;
+  var by = cy - bodyH * 0.20;
+  var groundY = by + bodyH + 1;
+  var roofH = bodyH * 0.55;
+
+  // ─── BASE ───────────────────────────────────────────────────────────
+  // 1. Sombra projetada
+  ctx.fillStyle = 'rgba(0,0,0,0.42)';
+  ctx.beginPath();
+  ctx.ellipse(cx + 1, groundY + 1, bodyW * 0.7, bodyH * 0.14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2. Parede principal (rect)
+  ctx.fillStyle = WALL;
+  ctx.fillRect(bx, by, bodyW, bodyH);
+  // 3. Telhado (triangle)
+  ctx.fillStyle = ROOF;
+  ctx.beginPath();
+  ctx.moveTo(cx, by - roofH);
+  ctx.lineTo(bx + bodyW + 2, by);
+  ctx.lineTo(bx - 2, by);
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;  // LITE = 3 ops
+
+  // ─── MEDIUM: + porta + sombras + chaminé ────────────────────────────
+  // 4. Porta (rect centralizado)
+  var doorW = bodyW * 0.22, doorH = bodyH * 0.65;
+  ctx.fillStyle = DOOR;
+  ctx.fillRect(cx - doorW / 2, by + bodyH - doorH, doorW, doorH);
+  // 5. Sombra da parede direita (face SE — sol NW)
+  ctx.fillStyle = WALL_SH;
+  ctx.fillRect(bx + bodyW * 0.62, by, bodyW * 0.38, bodyH);
+  // 6. Telhado highlight esquerda (luz NW)
+  ctx.fillStyle = ROOF_HL;
+  ctx.beginPath();
+  ctx.moveTo(cx, by - roofH);
+  ctx.lineTo(cx - 2, by);
+  ctx.lineTo(bx - 2, by);
+  ctx.closePath();
+  ctx.fill();
+  // 7. Chaminé (rect pequeno no telhado direito)
+  ctx.fillStyle = WALL_SH;
+  ctx.fillRect(cx + bodyW * 0.22, by - roofH * 0.7, 4, roofH * 0.7);
+  ctx.fillStyle = '#5a4a3a';
+  ctx.fillRect(cx + bodyW * 0.22 - 0.5, by - roofH * 0.7, 5, 1.5);
+  if (tier !== 'full') return;  // MEDIUM = 7 ops
+
+  // ─── EPIC: + janela glow + fumaça da chaminé ────────────────────────
+  // 8. Janela retangular dourada brilhando (animada via flick simples)
+  var flick = 0.78 + Math.sin(_animTime * 0.004 + col) * 0.18;
+  var winX = cx + bodyW * 0.22, winY = by + bodyH * 0.32;
+  var winW = bodyW * 0.10, winH = bodyH * 0.30;
+  ctx.fillStyle = 'rgba(255, 200, 90, ' + (0.92 * flick).toFixed(3) + ')';
+  ctx.fillRect(winX - winW / 2, winY - winH / 2, winW, winH);
+  // Cruzeta da janela (4 painéis — single beginPath com 2 lineTo)
+  ctx.strokeStyle = 'rgba(60, 35, 15, 0.85)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(winX, winY - winH / 2);
+  ctx.lineTo(winX, winY + winH / 2);
+  ctx.moveTo(winX - winW / 2, winY);
+  ctx.lineTo(winX + winW / 2, winY);
+  ctx.stroke();
+  // 9. Fumaça da chaminé (5 partículas crescentes)
+  var smokeT = _animTime * 0.0015;
+  var sBaseX = cx + bodyW * 0.22 + 1.5;
+  var sBaseY = by - roofH * 0.7 - 2;
+  for (var si = 0; si < 5; si++) {
+    var sProg = (si + (smokeT % 1)) / 5;
+    var sR = 1.5 + sProg * 3.8;
+    var sX = sBaseX + Math.sin(smokeT * 3 + si) * 2 + sProg * 3;
+    var sY = sBaseY - sProg * 18;
+    ctx.fillStyle = 'rgba(200, 195, 185, ' + (0.65 * (1 - sProg)).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.arc(sX, sY, sR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // EPIC = 9 ops total
+}
+
+// _drawRockClusterAAA — Cluster de rochas minimalista AAA.
+// LITE: 1 rocha grande silueta + sombra (2 ops)
+// MEDIUM: + face iluminada + rocha pequena ao lado (5 ops)
+// EPIC: + highlight branco + crack + musgo verde (8 ops)
+function _drawRockClusterAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 13 + row * 19 + 67) & 0xFFFF;
+  var rng = seededRng(seed);
+  var SH = '#3a322a', MID = '#56493a', HL = '#9a8868';
+  var groundY = cy + H * 0.08;
+  var rw = W * 0.18, rh = H * 0.13;
+
+  // ─── BASE LAYER ─────────────────────────────────────────────────────
+  // 1. Sombra de contato (sempre)
+  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+  ctx.beginPath();
+  ctx.ellipse(cx + W * 0.02, groundY + H * 0.02, rw * 1.15, H * 0.045, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2. Silueta principal (5 vértices irregulares — pedra natural)
+  ctx.fillStyle = MID;
+  ctx.beginPath();
+  for (var i = 0; i < 7; i++) {
+    var a = (Math.PI * 2 / 7) * i - Math.PI / 2;
+    var jit = 0.93 + rng() * 0.14;
+    var yBias = Math.sin(a) > 0 ? 0.65 : 1.0;
+    var px = cx + Math.cos(a) * rw * jit;
+    var py = groundY + Math.sin(a) * rh * jit * yBias;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;  // LITE = 2 ops
+
+  // ─── MEDIUM: + face iluminada NW + rocha pequena flanco ─────────────
+  // 3. Face iluminada (elipse offset NW dentro da silueta)
+  ctx.save();
+  ctx.beginPath();
+  for (var j = 0; j < 7; j++) {
+    var a2 = (Math.PI * 2 / 7) * j - Math.PI / 2;
+    var jit2 = 0.93 + rng() * 0.14;
+    var yBias2 = Math.sin(a2) > 0 ? 0.65 : 1.0;
+    var px2 = cx + Math.cos(a2) * rw * jit2;
+    var py2 = groundY + Math.sin(a2) * rh * jit2 * yBias2;
+    if (j === 0) ctx.moveTo(px2, py2);
+    else ctx.lineTo(px2, py2);
+  }
+  ctx.closePath();
+  ctx.clip();
+  ctx.fillStyle = HL;
+  ctx.beginPath();
+  ctx.ellipse(cx - rw * 0.3, groundY - rh * 0.35, rw * 0.7, rh * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  // 4. Rocha pequena lateral (silueta menor à direita)
+  ctx.fillStyle = MID;
+  ctx.beginPath();
+  ctx.ellipse(cx + rw * 0.85, groundY + rh * 0.1, rw * 0.5, rh * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 5. Borda silueta principal (definição)
+  ctx.strokeStyle = 'rgba(15, 10, 5, 0.5)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.ellipse(cx, groundY, rw, rh * 0.85, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  if (tier !== 'full') return;  // MEDIUM = 5 ops
+
+  // ─── EPIC: + highlight white + crack + musgo ────────────────────────
+  // 6. Highlight branco sutil no ponto mais iluminado
+  ctx.fillStyle = 'rgba(190, 175, 145, 0.55)';
+  ctx.beginPath();
+  ctx.ellipse(cx - rw * 0.42, groundY - rh * 0.50, rw * 0.28, rh * 0.20, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 7. Crack fino (single quad curve)
+  ctx.strokeStyle = 'rgba(15, 10, 5, 0.6)';
+  ctx.lineWidth = 0.55;
+  ctx.beginPath();
+  var crX = cx + (rng() - 0.5) * rw * 0.4;
+  ctx.moveTo(crX, groundY - rh * 0.4);
+  ctx.quadraticCurveTo(crX + (rng() - 0.5) * 3, groundY - rh * 0.1, crX + (rng() - 0.5) * rw * 0.3, groundY + rh * 0.2);
+  ctx.stroke();
+  // 8. Musgo verde (3 pontos na base)
+  ctx.fillStyle = 'rgba(70, 110, 50, 0.78)';
+  for (var mi = 0; mi < 3; mi++) {
+    ctx.beginPath();
+    ctx.arc(cx + (rng() - 0.5) * rw * 1.1, groundY + rh * (0.2 + rng() * 0.2), 1.3 + rng() * 0.7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // EPIC = 8 ops total
+}
+
+// _drawRockOutcropAAA — Afloramento monolítico (R) — pedra alta dominante.
+// LITE: 1 silueta tall + sombra (2 ops)
+// MEDIUM: + face iluminada + face escura (4 ops)
+// EPIC: + 2 cracks verticais + musgo no topo (7 ops)
+function _drawRockOutcropAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 19 + row * 11 + 113) & 0xFFFF;
+  var rng = seededRng(seed);
+  var SH = '#1f1812', MID = '#4a3a2a', HL = '#a89478';
+  var baseY = cy + H * 0.06;
+  var topY = cy - H * 0.32;
+  var halfW = W * 0.20;
+
+  // ─── BASE ───────────────────────────────────────────────────────────
+  // 1. Sombra de contato larga
+  ctx.fillStyle = 'rgba(0,0,0,0.50)';
+  ctx.beginPath();
+  ctx.ellipse(cx + W * 0.02, baseY + H * 0.018, halfW * 1.25, H * 0.045, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2. Silueta monolítica (trapézio com topo irregular — 7 pontos)
+  ctx.fillStyle = MID;
+  ctx.beginPath();
+  ctx.moveTo(cx - halfW * 0.85, baseY);
+  ctx.lineTo(cx - halfW, baseY - H * 0.10);
+  ctx.lineTo(cx - halfW * 0.7, topY + H * 0.02);
+  ctx.lineTo(cx - W * 0.05, topY - H * 0.04);
+  ctx.lineTo(cx + W * 0.04, topY - H * 0.02);
+  ctx.lineTo(cx + halfW * 0.7, topY + H * 0.04);
+  ctx.lineTo(cx + halfW, baseY - H * 0.08);
+  ctx.lineTo(cx + halfW * 0.85, baseY);
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;  // LITE = 2 ops
+
+  // ─── MEDIUM: + face iluminada (NW) + face escura (SE) ───────────────
+  // 3. Face iluminada — clip pela silhueta + fill esquerda
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx - halfW * 0.85, baseY);
+  ctx.lineTo(cx - halfW, baseY - H * 0.10);
+  ctx.lineTo(cx - halfW * 0.7, topY + H * 0.02);
+  ctx.lineTo(cx - W * 0.05, topY - H * 0.04);
+  ctx.lineTo(cx + W * 0.04, topY - H * 0.02);
+  ctx.lineTo(cx + halfW * 0.7, topY + H * 0.04);
+  ctx.lineTo(cx + halfW, baseY - H * 0.08);
+  ctx.lineTo(cx + halfW * 0.85, baseY);
+  ctx.closePath();
+  ctx.clip();
+  // Iluminada NW (rect que cobre só metade esquerda)
+  ctx.fillStyle = HL;
+  ctx.fillRect(cx - halfW - 2, topY - H * 0.05, halfW * 0.9, baseY - topY + H * 0.05);
+  // Sombra direita (camada escura)
+  ctx.fillStyle = SH;
+  ctx.fillRect(cx + halfW * 0.1, topY - H * 0.05, halfW * 1.1, baseY - topY + H * 0.05);
+  ctx.restore();
+  // 4. Borda silueta (definição)
+  ctx.strokeStyle = 'rgba(10, 8, 4, 0.55)';
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(cx - halfW * 0.85, baseY);
+  ctx.lineTo(cx - halfW, baseY - H * 0.10);
+  ctx.lineTo(cx - halfW * 0.7, topY + H * 0.02);
+  ctx.lineTo(cx - W * 0.05, topY - H * 0.04);
+  ctx.lineTo(cx + W * 0.04, topY - H * 0.02);
+  ctx.lineTo(cx + halfW * 0.7, topY + H * 0.04);
+  ctx.lineTo(cx + halfW, baseY - H * 0.08);
+  ctx.lineTo(cx + halfW * 0.85, baseY);
+  ctx.closePath();
+  ctx.stroke();
+  if (tier !== 'full') return;  // MEDIUM = 4 ops
+
+  // ─── EPIC: + 2 cracks verticais + musgo no topo ─────────────────────
+  // 5-6. 2 cracks verticais (single stroke each)
+  ctx.strokeStyle = 'rgba(8, 5, 2, 0.65)';
+  ctx.lineWidth = 0.7;
+  for (var ci = 0; ci < 2; ci++) {
+    var ckX = cx + (rng() - 0.5) * halfW * 1.2;
+    ctx.beginPath();
+    ctx.moveTo(ckX, topY + H * 0.02);
+    ctx.quadraticCurveTo(ckX + (rng() - 0.5) * 3, (baseY + topY) / 2, ckX + (rng() - 0.5) * 4, baseY - H * 0.05);
+    ctx.stroke();
+  }
+  // 7. Musgo no topo (2-3 patches verdes)
+  ctx.fillStyle = 'rgba(70, 110, 50, 0.75)';
+  for (var mi2 = 0; mi2 < 3; mi2++) {
+    ctx.beginPath();
+    ctx.arc(cx + (rng() - 0.5) * halfW * 0.8, topY + H * (0.0 + rng() * 0.05),
+            1.4 + rng() * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // EPIC = 7 ops total
+}
+
+// _drawBushAAA — Arbusto minimalista AAA mobile.
+// Silueta orgânica (8 vértices irregulares) + 3 tons + bagas EPIC.
+function _drawBushAAA(ctx, cx, cy, col, row) {
+  var W = HEX_W, H = HEX_H;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  var seed = (col * 23 + row * 31 + 47) & 0xFFFF;
+  var rng = seededRng(seed);
+  // Cores: paleta verde-arbusto (mais clara que tree pra contraste)
+  var SH = '#1f3a18', MID = '#3a6a28', HL = '#6a9540';
+  var bushR = W * 0.20;  // raio principal
+  var by = cy + H * 0.05;  // levemente abaixo do centro
+
+  // ─── BASE LAYER (todos tiers) ───────────────────────────────────────
+  // 1. Sombra projetada
+  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  ctx.ellipse(cx, by + H * 0.12, bushR * 0.95, H * 0.030, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2. Silueta orgânica base (8 vértices com jitter)
+  ctx.fillStyle = SH;
+  ctx.beginPath();
+  for (var i = 0; i < 8; i++) {
+    var a = (Math.PI * 2 / 8) * i - Math.PI / 2;
+    var jit = 0.85 + rng() * 0.30;
+    // Achatamento na base
+    var yBias = Math.sin(a) > 0 ? 1.10 : 0.85;
+    var px = cx + Math.cos(a) * bushR * jit;
+    var py = by + Math.sin(a) * bushR * jit * yBias;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  if (tier === 'lite') return;  // LITE = 2 ops
+
+  // ─── MEDIUM: + volume mid + 1 highlight ─────────────────────────────
+  // 3. Volume médio NW (elipse offset, tom médio)
+  ctx.fillStyle = MID;
+  ctx.beginPath();
+  ctx.ellipse(cx - bushR * 0.18, by - bushR * 0.18, bushR * 0.85, bushR * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 4. Highlight NW (luz NW direta)
+  ctx.fillStyle = HL;
+  ctx.beginPath();
+  ctx.ellipse(cx - bushR * 0.32, by - bushR * 0.34, bushR * 0.40, bushR * 0.30, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (tier !== 'full') return;  // MEDIUM = 4 ops
+
+  // ─── EPIC: + bagas (cluster) + rim arc ──────────────────────────────
+  // 5. Cluster de bagas (3-5 pontos coloridos)
+  var berryColors = ['#c84040', '#e0b840', '#9050b0'];
+  var berryCol = berryColors[Math.floor(rng() * 3)];
+  var clusterX = cx + (rng() - 0.5) * bushR * 0.6;
+  var clusterY = by - bushR * (0.10 + rng() * 0.30);
+  ctx.fillStyle = berryCol;
+  for (var bi = 0; bi < 4; bi++) {
+    var bbx = clusterX + (rng() - 0.5) * bushR * 0.4;
+    var bby = clusterY + (rng() - 0.5) * bushR * 0.3;
+    ctx.beginPath();
+    ctx.arc(bbx, bby, 1.4 + rng() * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 6. Rim arc (single stroke — luz NW na borda superior)
+  ctx.strokeStyle = 'rgba(180, 220, 130, 0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(cx - bushR * 0.10, by - bushR * 0.40, bushR * 0.55, Math.PI * 1.15, Math.PI * 1.55);
+  ctx.stroke();
+  // EPIC = 6 ops total
+}
+
+// ════════════════════════════════════════════════════════════════════════
 function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   const rng = seededRng(col + row * 31);
   // Phase 2 ajuste v6 (2026-04-26): COPAS DE ARVORES com altura. Em vez de grama
@@ -20380,11 +20836,19 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     return;  // wall sprite e exclusivo — nao continua pra arvore/etc
   }
   if (tile === 'T') {
-    // X-6.5.51l (2026-04-25): 10 variacoes de scena de mata + 4 tipos de
-    // arvore principal. Scene preenche o hex com undergrowth/cogumelos/
-    // ferns/troncos/pedras antes da arvore principal. User feedback:
-    // "aumente a quantidade de detalhes minimalistas nos hexagonos de mata,
-    // crie 10 variacoes prontas, que preenchem todo o hexagono".
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign — chama helper
+    // _drawTreeAAA com tier-gating estrito (3/6/10 ops por tier).
+    // ANTES: drawForestScene + 4 variants (cedar/birch/pine/oak) + 100+
+    // canvas ops por hex. Mobile sofria.
+    // AGORA: silueta cônica forte + 3 cores (shadow/mid/highlight) +
+    // sway só em EPIC. Polytopia/Bad North style.
+    _drawTreeAAA(ctx, cx, cy, col, row);
+    return;
+  }
+  if (false && tile === 'T') {
+    // ═════ DEAD CODE preservado pra rollback histórico (2026-04-27) ═════
+    // Bloco antigo tile==='T' — drawForestScene + variants. Captura via
+    // `if (false && tile === 'T')` — nunca executa, ESLint feliz.
     const sceneSeed = seededRng(col * 17 + row * 23 + 207);
     const sceneVariant = Math.floor(sceneSeed() * 10);
     drawForestScene(ctx, cx, cy, col, row, sceneVariant, sceneSeed);
@@ -20524,10 +20988,11 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
       }
     }
   } else if (tile === 'r') {
-    // V2.9 PRO: agrupamento de 3 rochas (grande central + 2 menores laterais)
-    // com lighting consistente (sol em cima-esquerda), sombras de contato,
-    // musgo pontual, trincas finas, textura granular.
-    drawRockCluster(ctx, cx, cy, rng);
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign.
+    // ANTES: drawRockCluster (3 rochas + 4 layers cada = ~30 ops/hex).
+    // AGORA: _drawRockClusterAAA (silueta principal + face + flanco rocha).
+    // Tier-gated: 2/5/8 ops por tier.
+    _drawRockClusterAAA(ctx, cx, cy, col, row);
   } else if (tile === 'w' || tile === 'W') {
     const ripple = Math.sin(_animTime * 0.003 + col * 0.4 + row * 0.3) * 0.5 + 0.5;
     ctx.strokeStyle = `rgba(100, 160, 200, ${0.3 + ripple * 0.2})`;
@@ -20539,10 +21004,11 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     ctx.arc(cx + HEX_W * 0.08, cy + HEX_H * 0.08, HEX_W * 0.12, Math.PI * 0.1, Math.PI * 0.9);
     ctx.stroke();
   } else if (tile === 'R') {
-    // V2.9 PRO: afloramento rochoso imponente — monólito com 3 faces visíveis
-    // (iluminada, sombra média, sombra escura), trincas verticais, topo irregular,
-    // musgo nas rachaduras, sombra de contato projetada.
-    drawRockOutcrop(ctx, cx, cy, rng);
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign.
+    // ANTES: drawRockOutcrop (~25 ops/hex com gradients pesados).
+    // AGORA: _drawRockOutcropAAA (silueta + clip+fill faces + cracks).
+    // Tier-gated: 2/4/7 ops por tier. Sem gradients (solid fills only).
+    _drawRockOutcropAAA(ctx, cx, cy, col, row);
   } else if (tile === 'M') {
     // 2026-04-27 USER RULE: "remova o hexagono montanha de tudo... os hex
     // mais altos já simulam isso". Decoração snow-peak removida — TILE_HEIGHT['M']
@@ -20845,23 +21311,22 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     ctx.lineTo(cx + HEX_W * 0.025, cy - HEX_H * 0.06);
     ctx.stroke();
   } else if (tile === 'H') {
-    // X-6.5.51l (2026-04-25): 6 variacoes de casa minimalistas detalhadas.
-    // Picker baseado em (col,row) seed -> variantes A-F com paletas diferentes
-    // (rustica/pedra/cal-branca/floresteiro/timber/pintada).
-    const cottageSeed = seededRng(col * 19 + row * 23 + 401);
-    const cottageVariant = Math.floor(cottageSeed() * 6);
-    drawCottage(ctx, cx, cy, col, row, rng, cottageVariant);
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign.
+    // ANTES: drawCottage com 6 variantes + 8 layers (foundation/walls/roof/
+    // door/window/details + crossbeams/shutters/etc) = ~40 ops/hex.
+    // AGORA: _drawCottageAAA (silueta única + 3 cores). Tier-gated:
+    // 3/7/9 ops por tier. Sem gradients, fills sólidos.
+    _drawCottageAAA(ctx, cx, cy, col, row);
   } else if (tile === 'F') {
     // V2.9 PRO: fogueira ativa com chama animada, brasas pulsando, fumaça,
     // halo quente, 5 pedras em círculo de contenção, lenha cruzada visível.
     drawCampfire(ctx, cx, cy, col, row, rng);
   } else if (tile === 't') {
-    // X-6.5.51l (2026-04-25): 10 variacoes de arbusto. User feedback:
-    // "aumente a quantidade de detalhes minimalistas para os hexagonos
-    // arbustos, pelo menos 10 variacoes tambem prontas".
-    const bushSeed = seededRng(col * 7 + row * 13 + 1);
-    const bushVariant = Math.floor(bushSeed() * 10);
-    drawBushVariant(ctx, cx, cy, col, row, bushVariant, bushSeed);
+    // 2026-04-27 USER RULE: AAA mobile-minimalist redesign — chama helper
+    // _drawBushAAA com tier-gating estrito (2/4/6 ops por tier).
+    // Substitui drawBushVariant (10 variantes pesadas) por silueta única
+    // orgânica + 3 tons + bagas EPIC.
+    _drawBushAAA(ctx, cx, cy, col, row);
   } else if (tile === '*') {
     // Clarabóia — feixe de luz natural descendo (teto ausente)
     // Haste do feixe com gradiente suave de topo pro centro
