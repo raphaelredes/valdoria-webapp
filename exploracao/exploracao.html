@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:48:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:55:16Z - do not edit directly, edit source -->
 
 
 <!--
@@ -3291,21 +3291,54 @@ body.perf-lite #top-danger { animation: none !important; }
 }
 #hex-nav-inner {
   /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
-     pra ficar formato HEXAGONO real, nao quase-quadrado). User feedback:
-     "separando um pouco verticalmente os botoes hex-dir 1 e 2, e 4 e 5
-     entre si, para que fique mais parecido com um hexagono".
-     2026-04-27 USER RULE: "faça os hex-dir ficarem o mais próximo de
-     hex-nav-center proporcionalmente, sem mudar o posicionamento
-     relativo entre si". Solução: transform:scale uniforme — preserva
-     EXATAMENTE todas as posições relativas dos 6 hex-dirs e do center
-     (é só visual scale), e aproxima tudo do centro proporcionalmente.
-     0.78 = 22% mais compacto, mantendo legibilidade dos labels. */
+     pra ficar formato HEXAGONO real, nao quase-quadrado).
+     2026-04-27 USER RULE: scale dinâmico (3 níveis: 0.6 / 0.78 / 1.0)
+     controlado pelos botões #btn-hex-size-dec/-inc. Default 0.78.
+     transform-origin:center pra encolher/aumentar simétrico em torno do
+     center. Estado salvo em localStorage 'valdoria_explore_hex_nav_scale_level'. */
   position: relative;
   width: 240px; height: 188px;
   pointer-events: auto;
   transform: scale(0.78);
   transform-origin: center center;
+  transition: transform 0.2s ease;
 }
+/* Size control buttons (− / +) — flanqueiam o hex-dir S (data-dir="3"). */
+.hex-size-btn {
+  position: absolute;
+  bottom: 0;
+  height: 34px;
+  width: 42px;
+  padding: 0;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.95));
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 8px;
+  color: var(--v-gold, #c4953a);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+}
+.hex-size-btn:hover:not(:disabled) {
+  border-color: var(--v-gold, #c4953a);
+  background: linear-gradient(180deg, rgba(60, 48, 32, 0.98), rgba(32, 26, 20, 0.97));
+  box-shadow: 0 2px 12px rgba(196, 149, 58, 0.35);
+  color: #fbd770;
+}
+.hex-size-btn:active:not(:disabled) { transform: scale(0.92); }
+.hex-size-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+#btn-hex-size-dec { left: 8px; }
+#btn-hex-size-inc { right: 8px; }
 .hex-dir {
   position: absolute;
   height: 34px;
@@ -7106,6 +7139,10 @@ body.remote-mode #debug-hud { display: none !important; }
       <button class="hex-dir" data-dir="4"><span class="arrow">↙</span><span class="label">—</span></button>
       <button class="hex-dir" data-dir="5"><span class="arrow">↖</span><span class="label">—</span></button>
       <button id="hex-nav-center" title="Centralizar no personagem">◉</button>
+      <!-- 2026-04-27 USER RULE: 3 níveis de tamanho do hex-nav (0.6/0.78/1.0).
+           Botões flanqueiam o hex-dir S (data-dir="3" no centro-bottom). -->
+      <button class="hex-size-btn" id="btn-hex-size-dec" title="Diminuir tamanho dos controles" aria-label="Diminuir tamanho dos controles">−</button>
+      <button class="hex-size-btn" id="btn-hex-size-inc" title="Aumentar tamanho dos controles" aria-label="Aumentar tamanho dos controles">+</button>
     </div>
   </div>
 
@@ -27961,6 +27998,40 @@ function bindQuickActions() {
       try { localStorage.setItem('valdoria_explore_hud_float_collapsed', willCollapse ? '1' : '0'); } catch (_e) {}
     });
   }
+  // 2026-04-27 USER RULE: hex-nav size controls — 3 níveis (0.6 / 0.78 / 1.0).
+  // Botões − e + flanqueiam o hex-dir S (centro-bottom). Estado salvo em
+  // localStorage 'valdoria_explore_hex_nav_scale_level' (0..2).
+  (function setupHexNavSizeButtons() {
+    var SCALE_LEVELS = [0.6, 0.78, 1.0];
+    var DEFAULT_LEVEL = 1;  // index do scale 0.78 (default visual atual)
+    var STORAGE_KEY = 'valdoria_explore_hex_nav_scale_level';
+    var inner = document.getElementById('hex-nav-inner');
+    var btnDec = document.getElementById('btn-hex-size-dec');
+    var btnInc = document.getElementById('btn-hex-size-inc');
+    if (!inner || !btnDec || !btnInc) return;
+    var level = DEFAULT_LEVEL;
+    try {
+      var saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+      if (!isNaN(saved) && saved >= 0 && saved < SCALE_LEVELS.length) level = saved;
+    } catch (_e) { /* localStorage bloqueado */ }
+    function applyHexNavScale() {
+      var scale = SCALE_LEVELS[level];
+      inner.style.transform = 'scale(' + scale + ')';
+      inner.style.transformOrigin = 'center center';
+      btnDec.disabled = (level === 0);
+      btnInc.disabled = (level === SCALE_LEVELS.length - 1);
+      try { localStorage.setItem(STORAGE_KEY, String(level)); } catch (_e) {}
+    }
+    btnDec.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (level > 0) { level -= 1; applyHexNavScale(); }
+    });
+    btnInc.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (level < SCALE_LEVELS.length - 1) { level += 1; applyHexNavScale(); }
+    });
+    applyHexNavScale();
+  })();
   document.getElementById('btn-cartografia').addEventListener('click', openCartography);
   // V2.7: btn-download-log removido. Console global downloadExploracaoLogs() continua.
   document.getElementById('cart-close-btn').addEventListener('click', closeCartography);
