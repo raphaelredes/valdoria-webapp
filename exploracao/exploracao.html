@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:33:15Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T19:42:29Z - do not edit directly, edit source -->
 
 
 <!--
@@ -3689,7 +3689,9 @@ body.perf-lite #top-danger { animation: none !important; }
 /* ====== DICE OVERLAY (padrão check-overlay do combate) =============== */
 #dice-overlay {
   position: absolute; inset: 0;
-  background: rgba(42, 36, 32, 0.96);
+  /* 2026-04-27 USER RULE: 100% opaco (era 0.96 = 4% transparência que
+     deixava vazar o popup do evento atrás como "quadrado menor"). */
+  background: #2a2420;
   display: none;
   align-items: center; justify-content: center;
   flex-direction: column;
