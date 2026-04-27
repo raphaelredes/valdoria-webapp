@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:00:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:07:23Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8132,6 +8132,10 @@ body.remote-mode #debug-hud { display: none !important; }
    */
   function _isHexFogged(hexId) {
     if (!window.S || !window.S.fogState) return false;  // sem fog system = sempre mostrar
+    // 2026-04-27 USER RULE: showcase hexIds ('showcase_lite/medium/full') são
+    // overlays do panel — não passam pelo sistema de fog. Sempre visíveis.
+    // Sem este bypass, refresh() retornava null e os cards apareciam vazios.
+    if (typeof hexId === 'string' && hexId.indexOf('showcase_') === 0) return false;
     var fs = window.S.fogState[hexId];
     return !(fs === 'visible' || fs === 'dim');
   }
