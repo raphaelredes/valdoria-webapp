@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:35:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:55:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -13619,14 +13619,14 @@ const EVENTS_POOL = {
   var BIOME_POOLS = {
     forest: {
       npcs: ['lenhador idoso', 'caçador silencioso', 'druida solitário', 'curandeira de ervas', 'jovem pastor', 'monge errante', 'arqueiro élfico'],
-      creatures: ['lobo solitário', 'urso desperto', 'corvo gigante', 'cervo branco', 'serpente verde', 'javali enraivecido', 'salteador encapuzado'],
-      objects: ['baú musgoso', 'tronco oco curioso', 'altar coberto de hera', 'pegadas frescas', 'cogumelo brilhante', 'pena dourada caída', 'pedra rúnica'],
+      creatures: ['lobo solitário', 'urso desperto', 'lince da mata', 'pantera negra', 'serpente verde', 'javali enraivecido', 'corvo gigante de bando'],
+      objects: ['baú musgoso', 'tronco oco curioso', 'altar coberto de hera', 'medalha caída entre folhas', 'cogumelo brilhante', 'pena dourada caída', 'pedra rúnica'],
       hazards: ['galho que estala', 'raiz traiçoeira', 'cipó retorcido', 'cova escondida sob folhas']
     },
     plains: {
-      npcs: ['mercador ambulante', 'fazendeiro rude', 'caravaneiro perdido', 'sacerdote viajante', 'minstrel cantante', 'mensageiro real', 'velho contador de histórias'],
-      creatures: ['lebre branca', 'falcão de caça', 'matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'bandido a cavalo'],
-      objects: ['carroça abandonada', 'fogueira ainda quente', 'estrada bifurcada', 'pedra com inscrição', 'campo de flores', 'esqueleto de cavalo'],
+      npcs: ['mercador ambulante', 'fazendeiro a caminho da feira', 'caravaneiro perdido', 'sacerdote viajante', 'menestrel cantante', 'mensageiro real', 'velho contador de histórias'],
+      creatures: ['matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'lobo da estepe', 'pacote de hienas', 'urso pardo errante'],
+      objects: ['carroça abandonada', 'fogueira ainda quente', 'mochila à beira da estrada', 'pedra com inscrição', 'estatueta caída entre flores', 'esqueleto de cavalo'],
       hazards: ['poço escondido', 'tempestade súbita', 'terra movediça', 'sulco profundo de carroça', 'cova de tatu sob o mato alto', 'tronco caído coberto pelo capim']
     },
     swamp: {
@@ -13636,26 +13636,26 @@ const EVENTS_POOL = {
       hazards: ['lama profunda', 'gás venenoso', 'tronco apodrecido sob o lodo', 'raiz submersa', 'pedra escorregadia coberta de musgo']
     },
     mountain: {
-      npcs: ['guia montanhês', 'eremita das alturas', 'minerador anão', 'sacerdote da pedra', 'caçador de avalanches'],
-      creatures: ['águia gigante', 'cabra-montês agressiva', 'goblin batedor', 'urso pardo', 'lobo cinzento'],
+      npcs: ['guia montanhês', 'eremita das alturas', 'minerador anão', 'sacerdote da pedra', 'sentinela das encostas'],
+      creatures: ['águia gigante', 'cabra-montês agressiva', 'puma das alturas', 'urso pardo', 'lobo cinzento'],
       objects: ['cairn de pedras', 'fenda profunda', 'caverna pequena', 'gravura antiga na rocha', 'lago alpino'],
       hazards: ['pedra solta', 'vento cortante', 'fenda escondida', 'avalanche pequena']
     },
     desert: {
       npcs: ['nômade silencioso', 'mercador de água', 'eremita do deserto', 'caravaneiro perdido', 'profeta louco'],
-      creatures: ['escorpião gigante', 'serpente da areia', 'abutre faminto', 'lagarto venenoso', 'salteador do deserto'],
+      creatures: ['escorpião gigante', 'serpente da areia', 'leão do deserto', 'lagarto venenoso', 'hiena solitária', 'monstro de gila gigante'],
       objects: ['oásis pequeno', 'esqueleto enterrado', 'palmeira solitária', 'baú coberto de areia', 'pedra glífica'],
       hazards: ['duna instável sob os pés', 'tempestade de areia', 'pedra escaldante sob areia fina', 'areia movediça', 'fenda do canyon coberta por areia']
     },
     snow: {
       npcs: ['caçador de peles', 'eremita gélido', 'mensageiro perdido', 'sacerdote do gelo'],
-      creatures: ['lobo branco', 'urso polar', 'coruja-da-neve gigante', 'goblin do frio'],
+      creatures: ['lobo branco', 'urso polar', 'coruja-da-neve gigante', 'lince do norte', 'wendigo faminto'],
       objects: ['iglu abandonado', 'esqueleto congelado', 'fogueira apagada', 'baú no gelo'],
       hazards: ['placa de gelo', 'rajada congelante', 'avalanche', 'fenda gelada']
     },
     cave: {
       npcs: ['minerador abandonado', 'eremita das trevas', 'kobold solitário', 'arqueólogo perdido'],
-      creatures: ['morcego gigante', 'aranha das cavernas', 'goblin batedor', 'verme de pedra'],
+      creatures: ['morcego gigante', 'aranha das cavernas', 'urso das cavernas', 'verme de pedra'],
       objects: ['cristal brilhante', 'fonte subterrânea', 'baú cravejado', 'glifo na parede', 'pilha de ossos'],
       hazards: ['estalactite', 'fenda profunda', 'gás tóxico', 'pedras soltas']
     },
@@ -13694,16 +13694,16 @@ const EVENTS_POOL = {
     },
     { kind: 'creature_threat',
       title: 'Ameaça à Vista',
-      text: 'Um {creature} surge subitamente da vegetação — músculos tensos sob a pelagem, presas à mostra, olhos travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Decisão precisa vir agora.',
+      text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Decisão precisa vir agora.',
       choices: [
         { label: 'Recuar devagar', skill: 'wis', dc: 12,
           desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
-          ok: 'Você dá um passo pra trás devagar, calcanhar primeiro, sem quebrar contato visual nem mostrar dentes. Outro passo. E outro. {Ele} estuda você com curiosidade animal — calculando se vale o esforço — e decide que não. Vira-se com um resmungo grave e segue seu rumo pela mata, deixando você em pé com o coração nas costelas.', okXp: [8, 14],
-          fail: '{Ele} fareja seu medo antes mesmo de você dar o segundo passo — predadores leem química melhor que linguagem. As orelhas baixam, o corpo se agacha, e a investida vem em explosão de músculo. Você é jogado contra o chão antes de processar o ataque, mordida raspando braço enquanto rola pra escapar.', failHp: 4 },
+          ok: 'Você dá um passo pra trás devagar, calcanhar primeiro, sem quebrar contato visual nem desafiar a postura. Outro passo. E outro. {Ele} estuda você por longos instantes — calculando se vale a investida — e decide que não. Recua na direção oposta, deixando você em pé com o coração nas costelas.', okXp: [8, 14],
+          fail: '{Ele} percebe sua hesitação antes mesmo de você completar o segundo passo — leitura de postura tem tradição mais antiga que palavras. A investida vem em explosão, e você é jogado contra o terreno antes de processar o ataque, ferimento aberto enquanto rola pra escapar.', failHp: 4 },
         { label: 'Intimidar', skill: 'cha', dc: 13,
-          desc: 'Postura ereta, voz grave, gestos amplos — apresentar-se como predador rival, não presa.',
-          ok: 'Você se ergue ao máximo, abre os braços e ruge com a voz mais grave que encontra no peito. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de combate contra alvo que parece grande demais — e recua. Vira-se com a postura quebrada e some entre árvores. Você fica vibrante de adrenalina, sentindo que dominou algo selvagem só com presença.', okXp: [12, 22], okGold: [2, 8],
-          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio territorial direto, e a resposta é inequívoca. Patas fincam no chão, músculos tensos, e a investida vem com fúria de quem aceita guerra. Você defende mas o impacto é brutal, e o sangue começa a escorrer.', failHp: 6 }
+          desc: 'Postura ereta, voz grave, gestos amplos — apresentar-se como ameaça maior, não presa.',
+          ok: 'Você se ergue ao máximo, abre os braços e ruge com a voz mais grave que encontra no peito. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de confronto contra alvo que parece mais perigoso que esperado — e recua. Vira-se com a postura quebrada e some de sua linha de visão. Você fica vibrante de adrenalina, sentindo que dominou algo perigoso só com presença.', okXp: [12, 22], okGold: [2, 8],
+          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio direto, e a resposta é inequívoca. Posiciona-se pra investida e avança com fúria de quem aceita guerra. Você defende mas o impacto é brutal, e o sangue começa a escorrer.', failHp: 6 }
       ]
     },
     { kind: 'object_inspect',
