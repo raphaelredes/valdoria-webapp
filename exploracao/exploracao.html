@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:07:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:18:29Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8136,6 +8136,12 @@ body.remote-mode #debug-hud { display: none !important; }
     // overlays do panel — não passam pelo sistema de fog. Sempre visíveis.
     // Sem este bypass, refresh() retornava null e os cards apareciam vazios.
     if (typeof hexId === 'string' && hexId.indexOf('showcase_') === 0) return false;
+    // 2026-04-27 USER RULE: mata isolation — quando player está em hex 'g',
+    // SÓ o hex atual mostra tile-objects. Todo resto fica fogged total.
+    if (window._isPlayerOnMata && window._isPlayerOnMata()) {
+      var pHex = window.S.player.col + ',' + window.S.player.row;
+      if (hexId !== pHex) return true;
+    }
     var fs = window.S.fogState[hexId];
     return !(fs === 'visible' || fs === 'dim');
   }
@@ -20279,79 +20285,139 @@ function _drawTreeAAA(ctx, cx, cy, col, row) {
   var W = HEX_W, H = HEX_H;
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 41 + row * 17 + 89) & 0xFFFF;
-  var rng = seededRng(seed);
-  // Sway só em EPIC pra economizar Math.sin chamadas
   var sway = (tier === 'full') ? Math.sin(_animTime * 0.0008 + seed * 0.013) * W * 0.012 : 0;
-  // Cores: paleta verde-floresta tonalizada (shadow/mid/highlight/trunk)
+  // Cores: paleta verde-floresta tonalizada
   var SH = '#1a2e10', MID = '#2d5224', HL = '#5a8035', TRK = '#3a2418', TRK_HL = '#5a3820';
-  // Trunk dimensions
-  var trunkBaseY = cy + H * 0.18;
-  var trunkTopY = trunkBaseY - H * 0.18;
-  var trunkW = W * 0.05;
+  // 2026-04-27 USER RULE: "faça ser mais de uma árvore, pelo menos 5
+  // árvores, espalhadas pelo hex" + "o foco dos hex tiles é não ficar no
+  // centro, pois lá estará o jogador". 5 árvores em ring ao redor do hex
+  // (raio mínimo ~0.22W) — centro fica LIVRE pro player. Z-sort por dy
+  // pra back-to-front. Paths batched (1 fill por tom = ops mínimos).
+  var trees = [
+    { dx: -0.30, dy: -0.20, scale: 1.00 },  // NW
+    { dx:  0.28, dy: -0.22, scale: 0.95 },  // NE
+    { dx: -0.32, dy:  0.12, scale: 0.85 },  // W
+    { dx:  0.32, dy:  0.10, scale: 0.92 },  // E
+    { dx:  0.00, dy:  0.30, scale: 0.88 }   // S (não centro — abaixo do player)
+  ];
+  trees.sort(function(a, b) { return a.dy - b.dy; });
+  var n = trees.length;
 
-  // ─── BASE LAYER (todos os tiers) ────────────────────────────────────
-  // 1. Sombra circular no chão (sempre presente — grounding)
+  // ─── BASE: 3 ops batched (sombras + troncos + silhueta canopy) ────────
+  // 1. Sombras coletivas (1 op)
   ctx.fillStyle = 'rgba(0,0,0,0.32)';
   ctx.beginPath();
-  ctx.ellipse(cx + sway * 0.5, trunkBaseY + H * 0.015, W * 0.16, H * 0.035, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W;
+    var ty = cy + t.dy * H + H * 0.18 * t.scale;
+    var rx = W * 0.11 * t.scale;
+    var ry = H * 0.030 * t.scale;
+    ctx.moveTo(tx + rx, ty);
+    ctx.ellipse(tx, ty, rx, ry, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // 2. Trunk silhouette (silueta vertical robusta)
+  // 2. Troncos coletivos (1 op via rect path)
   ctx.fillStyle = TRK;
-  ctx.fillRect(cx - trunkW / 2, trunkTopY, trunkW, trunkBaseY - trunkTopY);
-  // 3. Canopy silueta principal — triangular cone com base larga (silueta forte)
+  ctx.beginPath();
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W + sway * 0.5 * (i - n/2);
+    var ty = cy + t.dy * H;
+    var trunkW = W * 0.045 * t.scale;
+    var trunkH = H * 0.18 * t.scale;
+    ctx.rect(tx - trunkW / 2, ty + H * 0.02 * t.scale, trunkW, trunkH);
+  }
+  ctx.fill();
+  // 3. Canopy silhouettes coletivas (1 op)
   ctx.fillStyle = SH;
   ctx.beginPath();
-  ctx.moveTo(cx + sway, cy - H * 0.42);
-  ctx.lineTo(cx + W * 0.20 + sway, trunkTopY + H * 0.04);
-  ctx.lineTo(cx - W * 0.20 + sway, trunkTopY + H * 0.04);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W + sway * (i - n/2);
+    var ty = cy + t.dy * H;
+    var s = t.scale;
+    ctx.moveTo(tx, ty - H * 0.30 * s);
+    ctx.lineTo(tx + W * 0.16 * s, ty + H * 0.04 * s);
+    ctx.lineTo(tx - W * 0.16 * s, ty + H * 0.04 * s);
+    ctx.closePath();
+  }
   ctx.fill();
-  if (tier === 'lite') return;  // LITE = 3 ops (sombra + tronco + canopy silueta)
+  if (tier === 'lite') return;  // LITE = 3 ops batched (5 árvores totais)
 
-  // ─── MEDIUM: + shading + 1 detalhe ──────────────────────────────────
-  // 4. Canopy mid layer (cone menor, tom médio — sugere volume 3D)
+  // ─── MEDIUM: + canopy mid + trunk highlight = +2 ops ──────────────────
+  // 4. Canopy mid layer coletivo
   ctx.fillStyle = MID;
   ctx.beginPath();
-  ctx.moveTo(cx + sway * 1.2, cy - H * 0.34);
-  ctx.lineTo(cx + W * 0.14 + sway * 1.2, trunkTopY - H * 0.02);
-  ctx.lineTo(cx - W * 0.14 + sway * 1.2, trunkTopY - H * 0.02);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W + sway * 1.2 * (i - n/2);
+    var ty = cy + t.dy * H;
+    var s = t.scale;
+    ctx.moveTo(tx, ty - H * 0.22 * s);
+    ctx.lineTo(tx + W * 0.11 * s, ty + H * 0.00 * s);
+    ctx.lineTo(tx - W * 0.11 * s, ty + H * 0.00 * s);
+    ctx.closePath();
+  }
   ctx.fill();
-  // 5. Trunk highlight (lateral direita — luz NW)
+  // 5. Trunks highlight lateral (face NW iluminada)
   ctx.fillStyle = TRK_HL;
-  ctx.fillRect(cx + trunkW / 4, trunkTopY, trunkW / 4, trunkBaseY - trunkTopY);
-  // 6. Folha caída single (grounding extra)
-  ctx.fillStyle = 'rgba(140, 80, 40, 0.7)';
   ctx.beginPath();
-  ctx.ellipse(cx + (rng() - 0.5) * W * 0.25, trunkBaseY + H * 0.025,
-              1.8, 0.9, rng() * Math.PI, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W + sway * 0.5 * (i - n/2);
+    var ty = cy + t.dy * H;
+    var trunkW = W * 0.045 * t.scale;
+    var trunkH = H * 0.18 * t.scale;
+    ctx.rect(tx + trunkW * 0.10, ty + H * 0.02 * t.scale, trunkW * 0.35, trunkH);
+  }
   ctx.fill();
-  if (tier !== 'full') return;  // MEDIUM = 6 ops total
+  if (tier !== 'full') return;  // MEDIUM = 5 ops batched
 
-  // ─── EPIC: + rim light + sun spots + 2nd folha caída ────────────────
-  // 7. Topo light cone — silhueta menor + cor clara (sugere luz solar topo)
+  // ─── EPIC: + topo light + sun spots + folhas no chão = +3 ops ─────────
+  // 6. Topo light cones (silhueta menor + cor clara — luz solar no topo)
   ctx.fillStyle = HL;
   ctx.beginPath();
-  ctx.moveTo(cx + sway * 1.4, cy - H * 0.40);
-  ctx.lineTo(cx + W * 0.07 + sway * 1.4, cy - H * 0.20);
-  ctx.lineTo(cx - W * 0.07 + sway * 1.4, cy - H * 0.20);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var tx = cx + t.dx * W + sway * 1.4 * (i - n/2);
+    var ty = cy + t.dy * H;
+    var s = t.scale;
+    ctx.moveTo(tx, ty - H * 0.27 * s);
+    ctx.lineTo(tx + W * 0.06 * s, ty - H * 0.08 * s);
+    ctx.lineTo(tx - W * 0.06 * s, ty - H * 0.08 * s);
+    ctx.closePath();
+  }
   ctx.fill();
-  // 8-9. 2 sun-dapple spots (single arc each — sem gradient pra economizar)
-  ctx.fillStyle = 'rgba(255, 235, 150, 0.55)';
+  // 7. Sun-dapple spots (3 spots em 3 árvores diferentes — não todas)
+  ctx.fillStyle = 'rgba(255,235,150,0.55)';
   ctx.beginPath();
-  ctx.arc(cx + W * 0.05 + sway * 1.4, cy - H * 0.28, W * 0.025, 0, Math.PI * 2);
+  for (var i = 0; i < 3; i++) {
+    var t = trees[i % n];
+    var tx = cx + t.dx * W + sway * 1.4;
+    var ty = cy + t.dy * H;
+    var s = t.scale;
+    var ox = (i === 0 ? -0.04 : (i === 1 ? 0.04 : 0));
+    var oy = (i === 0 ? -0.13 : (i === 1 ? -0.18 : -0.10));
+    ctx.moveTo(tx + ox * W + W * 0.020 * s, ty + oy * H * s);
+    ctx.arc(tx + ox * W, ty + oy * H * s, W * 0.020 * s, 0, Math.PI * 2);
+  }
   ctx.fill();
+  // 8. Folhas caídas espalhadas no chão (4 folhas, posições determinísticas)
+  ctx.fillStyle = 'rgba(150,90,40,0.65)';
   ctx.beginPath();
-  ctx.arc(cx - W * 0.06 + sway * 1.4, cy - H * 0.18, W * 0.020, 0, Math.PI * 2);
+  for (var li = 0; li < 4; li++) {
+    var lseed = ((seed >> (li * 3)) & 0xFF) / 255;
+    var langle = lseed * Math.PI * 2;
+    // Distribui folhas em ring entre ~0.20-0.45 de raio (chão visível)
+    var lr = (0.22 + lseed * 0.20) * W;
+    var lx = cx + Math.cos(langle) * lr;
+    var ly = cy + Math.sin(langle) * lr * 0.55;
+    ctx.moveTo(lx + 1.6, ly);
+    ctx.ellipse(lx, ly, 1.6, 0.8, langle, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // 10. Folha caída #2 (cluster de 2 dá feel orgânico)
-  ctx.fillStyle = 'rgba(180, 130, 50, 0.6)';
-  ctx.beginPath();
-  ctx.ellipse(cx + (rng() - 0.5) * W * 0.30, trunkBaseY + H * 0.04,
-              2.2, 1.0, rng() * Math.PI, 0, Math.PI * 2);
-  ctx.fill();
-  // EPIC = 10 ops total
+  // EPIC = 8 ops batched (5 árvores totais)
 }
 
 // _drawCottageAAA — Casa minimalista AAA mobile.
@@ -20363,11 +20429,16 @@ function _drawCottageAAA(ctx, cx, cy, col, row) {
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 19 + row * 23 + 401) & 0xFFFF;
   var rng = seededRng(seed);
-  // Cores: casa rústica madeira/pedra
+  // 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro".
+  // Casa offset para NW — player tem espaço SE livre. Pequenos detalhes
+  // (lenha + bancos) ficam no SE pra balanço visual sem ocupar centro.
+  var origCx = cx, origCy = cy;
+  cx = cx - W * 0.14;
+  cy = cy - H * 0.10;
   var WALL = '#7a5430', WALL_HL = '#a07848', WALL_SH = '#4a3018';
   var ROOF = '#3a2418', ROOF_HL = '#5a3820';
   var DOOR = '#2a1810';
-  var bodyW = W * 0.32;
+  var bodyW = W * 0.30;
   var bodyH = H * 0.20;
   var bx = cx - bodyW / 2;
   var by = cy - bodyH * 0.20;
@@ -20414,7 +20485,17 @@ function _drawCottageAAA(ctx, cx, cy, col, row) {
   ctx.fillRect(cx + bodyW * 0.22, by - roofH * 0.7, 4, roofH * 0.7);
   ctx.fillStyle = '#5a4a3a';
   ctx.fillRect(cx + bodyW * 0.22 - 0.5, by - roofH * 0.7, 5, 1.5);
-  if (tier !== 'full') return;  // MEDIUM = 7 ops
+  // 7b. Lenha empilhada SE (balanço visual — fora do centro, lado oposto da casa)
+  var pileX = origCx + W * 0.20, pileY = origCy + H * 0.18;
+  ctx.fillStyle = '#3a2614';
+  ctx.beginPath();
+  ctx.ellipse(pileX, pileY + 1.5, W * 0.06, H * 0.014, 0, 0, Math.PI * 2);  // sombra
+  ctx.fill();
+  ctx.fillStyle = '#5a3a18';
+  ctx.fillRect(pileX - W * 0.06, pileY - H * 0.018, W * 0.12, H * 0.024);
+  ctx.fillStyle = '#7a5028';
+  ctx.fillRect(pileX - W * 0.06, pileY - H * 0.040, W * 0.10, H * 0.020);
+  if (tier !== 'full') return;  // MEDIUM = 8 ops
 
   // ─── EPIC: + janela glow + fumaça da chaminé ────────────────────────
   // 8. Janela retangular dourada brilhando (animada via flick simples)
@@ -20450,95 +20531,115 @@ function _drawCottageAAA(ctx, cx, cy, col, row) {
 }
 
 // _drawRockClusterAAA — Cluster de rochas minimalista AAA.
-// LITE: 1 rocha grande silueta + sombra (2 ops)
-// MEDIUM: + face iluminada + rocha pequena ao lado (5 ops)
-// EPIC: + highlight branco + crack + musgo verde (8 ops)
+// 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro".
+// 4 rochas espalhadas (2 médias NW/SE + 2 pequenas NE/SW), todas avoiding
+// centro. Player tem espaço pra ficar no meio.
 function _drawRockClusterAAA(ctx, cx, cy, col, row) {
   var W = HEX_W, H = HEX_H;
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 13 + row * 19 + 67) & 0xFFFF;
   var rng = seededRng(seed);
-  var SH = '#3a322a', MID = '#56493a', HL = '#9a8868';
-  var groundY = cy + H * 0.08;
-  var rw = W * 0.18, rh = H * 0.13;
+  var MID = '#56493a', HL = '#9a8868';
+  // 4 rochas em ring avoiding center
+  var rocks = [
+    { dx: -0.26, dy: -0.10, rw: 0.14, rh: 0.10 },  // NW média
+    { dx:  0.24, dy:  0.16, rw: 0.13, rh: 0.09 },  // SE média
+    { dx:  0.28, dy: -0.14, rw: 0.08, rh: 0.06 },  // NE pequena
+    { dx: -0.28, dy:  0.18, rw: 0.07, rh: 0.05 }   // SW pequena
+  ];
+  rocks.sort(function(a, b) { return a.dy - b.dy; });  // z-sort
+  var n = rocks.length;
 
-  // ─── BASE LAYER ─────────────────────────────────────────────────────
-  // 1. Sombra de contato (sempre)
-  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+  // ─── BASE: shadows + silhouettes (2 ops batched) ─────────────────────
+  ctx.fillStyle = 'rgba(0,0,0,0.42)';
   ctx.beginPath();
-  ctx.ellipse(cx + W * 0.02, groundY + H * 0.02, rw * 1.15, H * 0.045, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H + r.rh * H * 0.45;
+    var sw = r.rw * W * 1.10, sh = H * 0.030;
+    ctx.moveTo(rx + sw, ry);
+    ctx.ellipse(rx, ry, sw, sh, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // 2. Silueta principal (5 vértices irregulares — pedra natural)
+  // Silhouettes (7-vert irregulares)
   ctx.fillStyle = MID;
   ctx.beginPath();
-  for (var i = 0; i < 7; i++) {
-    var a = (Math.PI * 2 / 7) * i - Math.PI / 2;
-    var jit = 0.93 + rng() * 0.14;
-    var yBias = Math.sin(a) > 0 ? 0.65 : 1.0;
-    var px = cx + Math.cos(a) * rw * jit;
-    var py = groundY + Math.sin(a) * rh * jit * yBias;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    var rrw = r.rw * W, rrh = r.rh * H;
+    for (var vi = 0; vi < 7; vi++) {
+      var a = (Math.PI * 2 / 7) * vi - Math.PI / 2;
+      var jit = 0.92 + rng() * 0.16;
+      var yBias = Math.sin(a) > 0 ? 0.65 : 1.0;
+      var px = rx + Math.cos(a) * rrw * jit;
+      var py = ry + Math.sin(a) * rrh * jit * yBias;
+      if (vi === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
   }
-  ctx.closePath();
   ctx.fill();
-  if (tier === 'lite') return;  // LITE = 2 ops
+  if (tier === 'lite') return;  // LITE = 2 ops batched
 
-  // ─── MEDIUM: + face iluminada NW + rocha pequena flanco ─────────────
-  // 3. Face iluminada (elipse offset NW dentro da silueta)
-  ctx.save();
-  ctx.beginPath();
-  for (var j = 0; j < 7; j++) {
-    var a2 = (Math.PI * 2 / 7) * j - Math.PI / 2;
-    var jit2 = 0.93 + rng() * 0.14;
-    var yBias2 = Math.sin(a2) > 0 ? 0.65 : 1.0;
-    var px2 = cx + Math.cos(a2) * rw * jit2;
-    var py2 = groundY + Math.sin(a2) * rh * jit2 * yBias2;
-    if (j === 0) ctx.moveTo(px2, py2);
-    else ctx.lineTo(px2, py2);
-  }
-  ctx.closePath();
-  ctx.clip();
+  // ─── MEDIUM: + face iluminada NW (single op com clipping multi-rock) ─
+  // 3. Highlight NW em cada rocha (sem clip individual — usa elipse menor sobre cada)
   ctx.fillStyle = HL;
   ctx.beginPath();
-  ctx.ellipse(cx - rw * 0.3, groundY - rh * 0.35, rw * 0.7, rh * 0.7, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W - r.rw * W * 0.30;
+    var ry = cy + r.dy * H - r.rh * H * 0.35;
+    var hw = r.rw * W * 0.65, hh = r.rh * H * 0.55;
+    ctx.moveTo(rx + hw, ry);
+    ctx.ellipse(rx, ry, hw, hh, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  ctx.restore();
-  // 4. Rocha pequena lateral (silueta menor à direita)
-  ctx.fillStyle = MID;
-  ctx.beginPath();
-  ctx.ellipse(cx + rw * 0.85, groundY + rh * 0.1, rw * 0.5, rh * 0.4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // 5. Borda silueta principal (definição)
-  ctx.strokeStyle = 'rgba(15, 10, 5, 0.5)';
+  // 4. Borda silueta (definição)
+  ctx.strokeStyle = 'rgba(15, 10, 5, 0.50)';
   ctx.lineWidth = 0.5;
   ctx.beginPath();
-  ctx.ellipse(cx, groundY, rw, rh * 0.85, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    ctx.moveTo(rx + r.rw * W, ry);
+    ctx.ellipse(rx, ry, r.rw * W, r.rh * H * 0.85, 0, 0, Math.PI * 2);
+  }
   ctx.stroke();
-  if (tier !== 'full') return;  // MEDIUM = 5 ops
+  if (tier !== 'full') return;  // MEDIUM = 4 ops batched
 
-  // ─── EPIC: + highlight white + crack + musgo ────────────────────────
-  // 6. Highlight branco sutil no ponto mais iluminado
-  ctx.fillStyle = 'rgba(190, 175, 145, 0.55)';
-  ctx.beginPath();
-  ctx.ellipse(cx - rw * 0.42, groundY - rh * 0.50, rw * 0.28, rh * 0.20, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // 7. Crack fino (single quad curve)
-  ctx.strokeStyle = 'rgba(15, 10, 5, 0.6)';
+  // ─── EPIC: + cracks finos + musgo verde ─────────────────────────────
+  // 5. Cracks (1 stroke per rock — batched)
+  ctx.strokeStyle = 'rgba(15, 10, 5, 0.55)';
   ctx.lineWidth = 0.55;
   ctx.beginPath();
-  var crX = cx + (rng() - 0.5) * rw * 0.4;
-  ctx.moveTo(crX, groundY - rh * 0.4);
-  ctx.quadraticCurveTo(crX + (rng() - 0.5) * 3, groundY - rh * 0.1, crX + (rng() - 0.5) * rw * 0.3, groundY + rh * 0.2);
-  ctx.stroke();
-  // 8. Musgo verde (3 pontos na base)
-  ctx.fillStyle = 'rgba(70, 110, 50, 0.78)';
-  for (var mi = 0; mi < 3; mi++) {
-    ctx.beginPath();
-    ctx.arc(cx + (rng() - 0.5) * rw * 1.1, groundY + rh * (0.2 + rng() * 0.2), 1.3 + rng() * 0.7, 0, Math.PI * 2);
-    ctx.fill();
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    var rrw = r.rw * W, rrh = r.rh * H;
+    var crX = rx + (rng() - 0.5) * rrw * 0.4;
+    ctx.moveTo(crX, ry - rrh * 0.4);
+    ctx.quadraticCurveTo(crX + (rng() - 0.5) * 3, ry - rrh * 0.1, crX + (rng() - 0.5) * rrw * 0.3, ry + rrh * 0.2);
   }
-  // EPIC = 8 ops total
+  ctx.stroke();
+  // 6. Musgo verde (3 pontos espalhados pela base de TODAS as rochas)
+  ctx.fillStyle = 'rgba(70, 110, 50, 0.75)';
+  ctx.beginPath();
+  for (var mi = 0; mi < 6; mi++) {
+    var rkIdx = mi % n;
+    var rk = rocks[rkIdx];
+    var mx = cx + rk.dx * W + (rng() - 0.5) * rk.rw * W * 1.0;
+    var my = cy + rk.dy * H + rk.rh * H * (0.20 + rng() * 0.20);
+    var mr = 1.2 + rng() * 0.6;
+    ctx.moveTo(mx + mr, my);
+    ctx.arc(mx, my, mr, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // EPIC = 6 ops batched
 }
 
 // _drawRockOutcropAAA — Afloramento monolítico (R) — pedra alta dominante.
@@ -20636,75 +20737,116 @@ function _drawRockOutcropAAA(ctx, cx, cy, col, row) {
 }
 
 // _drawBushAAA — Arbusto minimalista AAA mobile.
-// Silueta orgânica (8 vértices irregulares) + 3 tons + bagas EPIC.
+// 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro, pois
+// lá estará o jogador". 4 arbustos pequenos espalhados em ring (raio
+// ~0.24W) evitando o centro. Player tem espaço livre pra ficar.
 function _drawBushAAA(ctx, cx, cy, col, row) {
   var W = HEX_W, H = HEX_H;
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 23 + row * 31 + 47) & 0xFFFF;
   var rng = seededRng(seed);
-  // Cores: paleta verde-arbusto (mais clara que tree pra contraste)
   var SH = '#1f3a18', MID = '#3a6a28', HL = '#6a9540';
-  var bushR = W * 0.20;  // raio principal
-  var by = cy + H * 0.05;  // levemente abaixo do centro
+  // 4 arbustos em ring avoiding center
+  var bushes = [
+    { dx: -0.26, dy: -0.10, r: 0.13 },  // NW
+    { dx:  0.28, dy: -0.14, r: 0.14 },  // NE
+    { dx: -0.30, dy:  0.18, r: 0.12 },  // SW
+    { dx:  0.26, dy:  0.20, r: 0.13 }   // SE
+  ];
+  bushes.sort(function(a, b) { return a.dy - b.dy; });  // z-sort
+  var n = bushes.length;
 
-  // ─── BASE LAYER (todos tiers) ───────────────────────────────────────
-  // 1. Sombra projetada
-  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  // ─── BASE: shadows + silhouettes (2 ops batched) ─────────────────────
+  // 1. Sombras coletivas
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
   ctx.beginPath();
-  ctx.ellipse(cx, by + H * 0.12, bushR * 0.95, H * 0.030, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var b = bushes[i];
+    var bx = cx + b.dx * W;
+    var by = cy + b.dy * H + b.r * W * 0.45;
+    var sr = b.r * W * 0.95, syr = H * 0.022;
+    ctx.moveTo(bx + sr, by);
+    ctx.ellipse(bx, by, sr, syr, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // 2. Silueta orgânica base (8 vértices com jitter)
+  // 2. Silhouettes orgânicas (1 op — todos os arbustos juntos)
   ctx.fillStyle = SH;
   ctx.beginPath();
-  for (var i = 0; i < 8; i++) {
-    var a = (Math.PI * 2 / 8) * i - Math.PI / 2;
-    var jit = 0.85 + rng() * 0.30;
-    // Achatamento na base
-    var yBias = Math.sin(a) > 0 ? 1.10 : 0.85;
-    var px = cx + Math.cos(a) * bushR * jit;
-    var py = by + Math.sin(a) * bushR * jit * yBias;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+  for (var i = 0; i < n; i++) {
+    var b = bushes[i];
+    var bx = cx + b.dx * W;
+    var by = cy + b.dy * H;
+    var br = b.r * W;
+    // 8 vértices irregulares pra silueta orgânica
+    for (var vi = 0; vi < 8; vi++) {
+      var a = (Math.PI * 2 / 8) * vi - Math.PI / 2;
+      var jit = 0.82 + rng() * 0.32;
+      var yBias = Math.sin(a) > 0 ? 1.08 : 0.85;
+      var px = bx + Math.cos(a) * br * jit;
+      var py = by + Math.sin(a) * br * jit * yBias;
+      if (vi === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
   }
-  ctx.closePath();
   ctx.fill();
-  if (tier === 'lite') return;  // LITE = 2 ops
+  if (tier === 'lite') return;  // LITE = 2 ops batched (4 arbustos)
 
-  // ─── MEDIUM: + volume mid + 1 highlight ─────────────────────────────
-  // 3. Volume médio NW (elipse offset, tom médio)
+  // ─── MEDIUM: + volume mid + highlight (2 ops batched) ────────────────
   ctx.fillStyle = MID;
   ctx.beginPath();
-  ctx.ellipse(cx - bushR * 0.18, by - bushR * 0.18, bushR * 0.85, bushR * 0.7, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var b = bushes[i];
+    var bx = cx + b.dx * W - b.r * W * 0.15;
+    var by = cy + b.dy * H - b.r * W * 0.18;
+    var br = b.r * W;
+    ctx.moveTo(bx + br * 0.85, by);
+    ctx.ellipse(bx, by, br * 0.85, br * 0.7, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // 4. Highlight NW (luz NW direta)
+  // Highlights NW
   ctx.fillStyle = HL;
   ctx.beginPath();
-  ctx.ellipse(cx - bushR * 0.32, by - bushR * 0.34, bushR * 0.40, bushR * 0.30, 0, 0, Math.PI * 2);
-  ctx.fill();
-  if (tier !== 'full') return;  // MEDIUM = 4 ops
-
-  // ─── EPIC: + bagas (cluster) + rim arc ──────────────────────────────
-  // 5. Cluster de bagas (3-5 pontos coloridos)
-  var berryColors = ['#c84040', '#e0b840', '#9050b0'];
-  var berryCol = berryColors[Math.floor(rng() * 3)];
-  var clusterX = cx + (rng() - 0.5) * bushR * 0.6;
-  var clusterY = by - bushR * (0.10 + rng() * 0.30);
-  ctx.fillStyle = berryCol;
-  for (var bi = 0; bi < 4; bi++) {
-    var bbx = clusterX + (rng() - 0.5) * bushR * 0.4;
-    var bby = clusterY + (rng() - 0.5) * bushR * 0.3;
-    ctx.beginPath();
-    ctx.arc(bbx, bby, 1.4 + rng() * 0.8, 0, Math.PI * 2);
-    ctx.fill();
+  for (var i = 0; i < n; i++) {
+    var b = bushes[i];
+    var bx = cx + b.dx * W - b.r * W * 0.30;
+    var by = cy + b.dy * H - b.r * W * 0.34;
+    var br = b.r * W;
+    ctx.moveTo(bx + br * 0.40, by);
+    ctx.ellipse(bx, by, br * 0.40, br * 0.30, 0, 0, Math.PI * 2);
   }
-  // 6. Rim arc (single stroke — luz NW na borda superior)
-  ctx.strokeStyle = 'rgba(180, 220, 130, 0.5)';
-  ctx.lineWidth = 1.2;
+  ctx.fill();
+  if (tier !== 'full') return;  // MEDIUM = 4 ops batched
+
+  // ─── EPIC: + bagas em 1-2 arbustos + rim arc ─────────────────────────
+  // Cluster de bagas em 1 arbusto random (não em todos — pra ter variedade)
+  var berryColors = ['#c84040', '#e0b840', '#9050b0'];
+  var berryBush = bushes[seed % n];
+  ctx.fillStyle = berryColors[(seed >> 4) % 3];
+  ctx.beginPath();
+  for (var bi = 0; bi < 4; bi++) {
+    var bbx = cx + berryBush.dx * W + (rng() - 0.5) * berryBush.r * W * 0.7;
+    var bby = cy + berryBush.dy * H - berryBush.r * W * (0.10 + rng() * 0.30);
+    var brad = 1.4 + rng() * 0.7;
+    ctx.moveTo(bbx + brad, bby);
+    ctx.arc(bbx, bby, brad, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Rim arcs nos arbustos (luz NW)
+  ctx.strokeStyle = 'rgba(180, 220, 130, 0.45)';
+  ctx.lineWidth = 1.1;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.arc(cx - bushR * 0.10, by - bushR * 0.40, bushR * 0.55, Math.PI * 1.15, Math.PI * 1.55);
+  for (var i = 0; i < n; i++) {
+    var b = bushes[i];
+    var bx = cx + b.dx * W - b.r * W * 0.10;
+    var by = cy + b.dy * H - b.r * W * 0.40;
+    var br = b.r * W;
+    ctx.moveTo(bx + Math.cos(Math.PI * 1.15) * br * 0.55, by + Math.sin(Math.PI * 1.15) * br * 0.55);
+    ctx.arc(bx, by, br * 0.55, Math.PI * 1.15, Math.PI * 1.55);
+  }
   ctx.stroke();
-  // EPIC = 6 ops total
+  // EPIC = 6 ops batched (4 arbustos)
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -20890,71 +21032,111 @@ function _drawCrystalAAA(ctx, cx, cy, col, row) {
   var seed = (col * 17 + row * 53 + 19) & 0xFFFF;
   var t = (tier === 'full') ? _animTime * 0.002 : 0;
   var pulse = (tier === 'full') ? (0.7 + Math.sin(t + seed * 0.017) * 0.25) : 0.85;
-  // ─── LITE (2 ops) ───
-  // Sombra no chão
+  // 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro".
+  // 3 cristais espalhados (1 grande NW + 2 menores NE/S), todos avoiding centro.
+  var crystals = [
+    { dx: -0.20, dy: -0.04, w: 0.07, h: 0.18 },  // NW grande (h = altura)
+    { dx:  0.22, dy:  0.02, w: 0.05, h: 0.13 },  // NE médio
+    { dx: -0.04, dy:  0.22, w: 0.045, h: 0.10 }  // S pequeno
+  ];
+  crystals.sort(function(a, b) { return a.dy - b.dy; });
+  var n = crystals.length;
+
+  // ─── LITE (2 ops batched) ───
+  // Sombras coletivas
   ctx.fillStyle = 'rgba(0,0,0,0.32)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + H * 0.10, W * 0.10, H * 0.025, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H + c.h * H * 0.5;
+    var sw = c.w * W * 1.2, sh = H * 0.022;
+    ctx.moveTo(cxx + sw, cyy);
+    ctx.ellipse(cxx, cyy, sw, sh, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Prisma silueta (path triangular)
+  // Prismas silhouettes coletivas (path triangular cada)
   ctx.fillStyle = '#3a5a78';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.07, cy + H * 0.10);
-  ctx.lineTo(cx, cy - H * 0.18);
-  ctx.lineTo(cx + W * 0.07, cy + H * 0.10);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H;
+    ctx.moveTo(cxx - c.w * W, cyy + c.h * H * 0.5);
+    ctx.lineTo(cxx, cyy - c.h * H * 0.5);
+    ctx.lineTo(cxx + c.w * W, cyy + c.h * H * 0.5);
+    ctx.closePath();
+  }
   ctx.fill();
   if (tier === 'lite') return;
-  // ─── MEDIUM (+3 ops) ───
-  // Face iluminada (1 path)
+
+  // ─── MEDIUM (+3 ops batched) ───
+  // Face iluminada (left half de cada cristal)
   ctx.fillStyle = '#5a8aa8';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.07, cy + H * 0.10);
-  ctx.lineTo(cx, cy - H * 0.18);
-  ctx.lineTo(cx, cy + H * 0.10);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H;
+    ctx.moveTo(cxx - c.w * W, cyy + c.h * H * 0.5);
+    ctx.lineTo(cxx, cyy - c.h * H * 0.5);
+    ctx.lineTo(cxx, cyy + c.h * H * 0.5);
+    ctx.closePath();
+  }
   ctx.fill();
-  // Tip highlight (1 path)
+  // Tip highlight (parte mais clara)
   ctx.fillStyle = 'rgba(180,230,255,' + pulse.toFixed(3) + ')';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.025, cy + H * 0.04);
-  ctx.lineTo(cx, cy - H * 0.15);
-  ctx.lineTo(cx + W * 0.025, cy + H * 0.04);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H;
+    ctx.moveTo(cxx - c.w * W * 0.4, cyy + c.h * H * 0.20);
+    ctx.lineTo(cxx, cyy - c.h * H * 0.42);
+    ctx.lineTo(cxx + c.w * W * 0.4, cyy + c.h * H * 0.20);
+    ctx.closePath();
+  }
   ctx.fill();
-  // Glow halo (1 arc — sem gradient)
-  ctx.fillStyle = 'rgba(120,200,240,' + (0.18 * pulse).toFixed(3) + ')';
+  // Glow halo coletivo (1 arc por cristal, mesmo alpha)
+  ctx.fillStyle = 'rgba(120,200,240,' + (0.16 * pulse).toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx, cy - H * 0.05, W * 0.16, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H;
+    ctx.moveTo(cxx + c.w * W * 1.5, cyy);
+    ctx.arc(cxx, cyy, c.w * W * 1.5, 0, Math.PI * 2);
+  }
   ctx.fill();
   if (tier !== 'full') return;
+
   // ─── EPIC (+3 ops) ───
-  // 2 cristais menores ao redor (1 path conjunto)
-  ctx.fillStyle = '#3a5a78';
-  ctx.beginPath();
-  ctx.moveTo(cx - W * 0.16, cy + H * 0.09);
-  ctx.lineTo(cx - W * 0.13, cy - H * 0.02);
-  ctx.lineTo(cx - W * 0.10, cy + H * 0.09);
-  ctx.closePath();
-  ctx.moveTo(cx + W * 0.10, cy + H * 0.09);
-  ctx.lineTo(cx + W * 0.13, cy + H * 0.00);
-  ctx.lineTo(cx + W * 0.16, cy + H * 0.09);
-  ctx.closePath();
-  ctx.fill();
-  // Sparkle pulsante topo
-  var sparkle = 0.5 + Math.sin(t * 3) * 0.5;
+  // Sparkles pulsantes nos topos
+  var sparkle = 0.5 + Math.sin(t * 3 + seed * 0.013) * 0.5;
   ctx.fillStyle = 'rgba(220,240,255,' + sparkle.toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx, cy - H * 0.18, 1.4, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H - c.h * H * 0.5;
+    var sr = 1.2 + (i === 0 ? 0.4 : 0);
+    ctx.moveTo(cxx + sr, cyy);
+    ctx.arc(cxx, cyy, sr, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Faceta linha (stroke fino)
-  ctx.strokeStyle = 'rgba(220,240,255,' + (0.6 * pulse).toFixed(3) + ')';
-  ctx.lineWidth = 0.8;
+  // Facetas linha (stroke fino — vertical em cada)
+  ctx.strokeStyle = 'rgba(220,240,255,' + (0.55 * pulse).toFixed(3) + ')';
+  ctx.lineWidth = 0.7;
   ctx.beginPath();
-  ctx.moveTo(cx, cy - H * 0.18);
-  ctx.lineTo(cx, cy + H * 0.10);
+  for (var i = 0; i < n; i++) {
+    var c = crystals[i];
+    var cxx = cx + c.dx * W;
+    var cyy = cy + c.dy * H;
+    ctx.moveTo(cxx, cyy - c.h * H * 0.5);
+    ctx.lineTo(cxx, cyy + c.h * H * 0.5);
+  }
   ctx.stroke();
-  // EPIC = ~8 ops total
+  // EPIC = 8 ops batched (3 cristais)
 }
 
 function _drawVolcanicAAA(ctx, cx, cy, col, row) {
@@ -20963,68 +21145,130 @@ function _drawVolcanicAAA(ctx, cx, cy, col, row) {
   var seed = (col * 31 + row * 19 + 5) & 0xFFFF;
   var rng = seededRng(seed);
   var t = (tier === 'full') ? _animTime * 0.005 : 0;
-  // ─── LITE (2 ops) ───
-  // Sombra base
+  // 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro".
+  // 3 rochas vulcânicas espalhadas (1 grande NW + 2 menores NE/S), todas
+  // avoiding centro. Cracks de lava pulsantes em cada uma.
+  var rocks = [
+    { dx: -0.22, dy: -0.05, scale: 1.00 },  // NW grande
+    { dx:  0.24, dy:  0.08, scale: 0.75 },  // SE médio
+    { dx: -0.05, dy:  0.24, scale: 0.65 }   // S pequena
+  ];
+  rocks.sort(function(a, b) { return a.dy - b.dy; });
+  var n = rocks.length;
+  var emberPulse = 0.4 + Math.sin(t + seed * 0.013) * 0.3;
+
+  // ─── LITE (2 ops batched) ───
+  // Sombras coletivas
   ctx.fillStyle = 'rgba(0,0,0,0.40)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + H * 0.03, W * 0.16, H * 0.04, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H + H * 0.04 * r.scale;
+    var sw = W * 0.13 * r.scale, sh = H * 0.030;
+    ctx.moveTo(rx + sw, ry);
+    ctx.ellipse(rx, ry, sw, sh, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Rocha pentagonal escura (path silueta)
+  // Silhouettes pentagonais coletivas
   ctx.fillStyle = '#2a1810';
   ctx.beginPath();
-  for (var pi = 0; pi < 5; pi++) {
-    var pa = (Math.PI * 2 / 5) * pi - Math.PI / 2;
-    var pr = W * (0.13 + (rng() - 0.5) * 0.04);
-    var px = cx + Math.cos(pa) * pr;
-    var py = cy + Math.sin(pa) * pr * 0.65;
-    if (pi === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    for (var pi = 0; pi < 5; pi++) {
+      var pa = (Math.PI * 2 / 5) * pi - Math.PI / 2;
+      var pr = W * (0.11 + (rng() - 0.5) * 0.04) * r.scale;
+      var px = rx + Math.cos(pa) * pr;
+      var py = ry + Math.sin(pa) * pr * 0.65;
+      if (pi === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
   }
-  ctx.closePath();
   ctx.fill();
   if (tier === 'lite') return;
-  // ─── MEDIUM (+3 ops) ───
-  // Face iluminada NW (clip+fill aproximado por overlay)
+
+  // ─── MEDIUM (+3 ops batched) ───
+  // Faces iluminadas NW
   ctx.fillStyle = 'rgba(80,40,30,0.55)';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.13, cy - H * 0.04);
-  ctx.lineTo(cx, cy - H * 0.10);
-  ctx.lineTo(cx - W * 0.04, cy + H * 0.02);
-  ctx.closePath();
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    ctx.moveTo(rx - W * 0.11 * r.scale, ry - H * 0.03 * r.scale);
+    ctx.lineTo(rx, ry - H * 0.08 * r.scale);
+    ctx.lineTo(rx - W * 0.035 * r.scale, ry + H * 0.02 * r.scale);
+    ctx.closePath();
+  }
   ctx.fill();
-  // Crack fenda (1 stroke)
+  // Cracks de lava (1 stroke por rocha — batched)
   ctx.strokeStyle = 'rgba(255,80,30,0.75)';
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.0;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.05, cy - H * 0.04);
-  ctx.lineTo(cx + W * 0.04, cy + H * 0.04);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    ctx.moveTo(rx - W * 0.04 * r.scale, ry - H * 0.03 * r.scale);
+    ctx.lineTo(rx + W * 0.035 * r.scale, ry + H * 0.035 * r.scale);
+  }
   ctx.stroke();
-  // Brasa central pulsando
-  var emberPulse = 0.4 + Math.sin(t + seed * 0.013) * 0.3;
+  // Brasas centrais pulsando (1 op batched)
   ctx.fillStyle = 'rgba(232,90,30,' + emberPulse.toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx + W * 0.02, cy - H * 0.01, 1.4, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    var br = 1.2 * r.scale;
+    ctx.moveTo(rx + W * 0.018 * r.scale + br, ry - H * 0.008 * r.scale);
+    ctx.arc(rx + W * 0.018 * r.scale, ry - H * 0.008 * r.scale, br, 0, Math.PI * 2);
+  }
   ctx.fill();
   if (tier !== 'full') return;
-  // ─── EPIC (+3 ops) ───
-  // 2 brasas adicionais animadas
+
+  // ─── EPIC (+3 ops batched) ───
+  // 2 brasas extras animadas por rocha
   var p2 = 0.3 + Math.sin(t * 1.4 + seed * 0.021) * 0.4;
   ctx.fillStyle = 'rgba(255,140,50,' + p2.toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx - W * 0.05, cy + H * 0.04, 0.9, 0, Math.PI * 2);
-  ctx.arc(cx + W * 0.07, cy + H * 0.02, 0.7, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    var br = 0.8 * r.scale;
+    ctx.moveTo(rx - W * 0.045 * r.scale + br, ry + H * 0.035 * r.scale);
+    ctx.arc(rx - W * 0.045 * r.scale, ry + H * 0.035 * r.scale, br, 0, Math.PI * 2);
+    ctx.moveTo(rx + W * 0.06 * r.scale + br * 0.7, ry + H * 0.018 * r.scale);
+    ctx.arc(rx + W * 0.06 * r.scale, ry + H * 0.018 * r.scale, br * 0.7, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Glow da fenda (overlay alpha)
-  ctx.fillStyle = 'rgba(255,90,30,' + (0.18 * emberPulse).toFixed(3) + ')';
+  // Glow das fendas (halo solid alpha)
+  ctx.fillStyle = 'rgba(255,90,30,' + (0.16 * emberPulse).toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx, cy, W * 0.10, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W;
+    var ry = cy + r.dy * H;
+    ctx.moveTo(rx + W * 0.09 * r.scale, ry);
+    ctx.arc(rx, ry, W * 0.09 * r.scale, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Wisp de fumaça (1 ellipse)
-  ctx.fillStyle = 'rgba(60,55,50,0.40)';
+  // Wisps de fumaça (1 por rocha)
+  ctx.fillStyle = 'rgba(60,55,50,0.38)';
   ctx.beginPath();
-  ctx.ellipse(cx + W * 0.03, cy - H * 0.14, W * 0.025, H * 0.04, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var r = rocks[i];
+    var rx = cx + r.dx * W + W * 0.025 * r.scale;
+    var ry = cy + r.dy * H - H * 0.13 * r.scale;
+    ctx.moveTo(rx + W * 0.022 * r.scale, ry);
+    ctx.ellipse(rx, ry, W * 0.022 * r.scale, H * 0.035 * r.scale, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // EPIC = ~8 ops total
+  // EPIC = batched (3 rochas vulcânicas)
 }
 
 function _drawTombstoneAAA(ctx, cx, cy, col, row) {
@@ -21032,80 +21276,116 @@ function _drawTombstoneAAA(ctx, cx, cy, col, row) {
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 13 + row * 37 + 11) & 0xFFFF;
   var rng = seededRng(seed);
-  var tilt = (rng() - 0.5) * 0.08; // tilt sutil pra variedade
+  // 2026-04-27 USER RULE: "o foco dos hex tiles é não ficar no centro".
+  // 3 lápides espalhadas (cada uma com tilt próprio pra senso de
+  // cemitério antigo abandonado), todas avoiding centro.
+  var graves = [
+    { dx: -0.22, dy: -0.06, scale: 1.00, tilt: (rng() - 0.5) * 0.10 },  // NW grande
+    { dx:  0.22, dy: -0.10, scale: 0.85, tilt: (rng() - 0.5) * 0.20 },  // NE médio (mais tilted)
+    { dx:  0.05, dy:  0.22, scale: 0.75, tilt: (rng() - 0.5) * 0.30 }   // S pequena (caindo)
+  ];
+  graves.sort(function(a, b) { return a.dy - b.dy; });
+  var n = graves.length;
+
   // ─── LITE (2 ops) ───
-  // Sombra no chão
+  // Sombras coletivas no chão
   ctx.fillStyle = 'rgba(0,0,0,0.40)';
   ctx.beginPath();
-  ctx.ellipse(cx + 1, cy + H * 0.10, W * 0.10, H * 0.025, 0, 0, Math.PI * 2);
+  for (var i = 0; i < n; i++) {
+    var g = graves[i];
+    var gx = cx + g.dx * W;
+    var gy = cy + g.dy * H + H * 0.10 * g.scale;
+    var sw = W * 0.085 * g.scale, sh = H * 0.022;
+    ctx.moveTo(gx + sw, gy);
+    ctx.ellipse(gx, gy, sw, sh, 0, 0, Math.PI * 2);
+  }
   ctx.fill();
-  // Lápide silueta (rect+arc) com tilt aplicado
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(tilt);
+  // Silhouettes (rect+arc) com tilt individual
   ctx.fillStyle = '#3a3835';
-  ctx.beginPath();
-  ctx.rect(-W * 0.06, -H * 0.12, W * 0.12, H * 0.20);
-  ctx.arc(0, -H * 0.12, W * 0.06, Math.PI, 0);
-  ctx.fill();
-  ctx.restore();
+  for (var i = 0; i < n; i++) {
+    var g = graves[i];
+    ctx.save();
+    ctx.translate(cx + g.dx * W, cy + g.dy * H);
+    ctx.rotate(g.tilt);
+    ctx.beginPath();
+    var ww = W * 0.10 * g.scale, hh = H * 0.18 * g.scale;
+    ctx.rect(-ww / 2, -hh / 2, ww, hh);
+    ctx.arc(0, -hh / 2, ww / 2, Math.PI, 0);
+    ctx.fill();
+    ctx.restore();
+  }
   if (tier === 'lite') return;
+
   // ─── MEDIUM (+2 ops) ───
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(tilt);
-  // Face escura à direita (volume)
-  ctx.fillStyle = 'rgba(20,18,16,0.45)';
-  ctx.beginPath();
-  ctx.rect(W * 0.005, -H * 0.12, W * 0.055, H * 0.20);
-  ctx.arc(0, -H * 0.12, W * 0.06, -Math.PI / 2, Math.PI / 2);
-  ctx.fill();
-  // Cruz gravada
-  ctx.strokeStyle = '#1a1815';
-  ctx.lineWidth = 1.0;
-  ctx.beginPath();
-  ctx.moveTo(0, -H * 0.08);
-  ctx.lineTo(0, -H * 0.02);
-  ctx.moveTo(-W * 0.025, -H * 0.06);
-  ctx.lineTo(W * 0.025, -H * 0.06);
-  ctx.stroke();
-  ctx.restore();
+  // Face escura + cruz por lápide
+  for (var i = 0; i < n; i++) {
+    var g = graves[i];
+    ctx.save();
+    ctx.translate(cx + g.dx * W, cy + g.dy * H);
+    ctx.rotate(g.tilt);
+    var ww = W * 0.10 * g.scale, hh = H * 0.18 * g.scale;
+    // Face escura SE
+    ctx.fillStyle = 'rgba(20,18,16,0.45)';
+    ctx.beginPath();
+    ctx.rect(0, -hh / 2, ww / 2, hh);
+    ctx.arc(0, -hh / 2, ww / 2, -Math.PI / 2, Math.PI / 2);
+    ctx.fill();
+    // Cruz
+    ctx.strokeStyle = '#1a1815';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(0, -hh * 0.30);
+    ctx.lineTo(0, hh * 0.10);
+    ctx.moveTo(-ww * 0.20, -hh * 0.18);
+    ctx.lineTo(ww * 0.20, -hh * 0.18);
+    ctx.stroke();
+    ctx.restore();
+  }
   if (tier !== 'full') return;
+
   // ─── EPIC (+3 ops) ───
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(tilt);
-  // Musgo na base (mancha verde escura)
-  ctx.fillStyle = 'rgba(60,90,40,0.55)';
-  ctx.beginPath();
-  ctx.ellipse(-W * 0.04, H * 0.06, W * 0.025, H * 0.012, 0, 0, Math.PI * 2);
-  ctx.ellipse(W * 0.025, H * 0.07, W * 0.018, H * 0.010, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Crack diagonal
-  ctx.strokeStyle = 'rgba(20,18,15,0.7)';
-  ctx.lineWidth = 0.7;
-  ctx.beginPath();
-  ctx.moveTo(-W * 0.04, -H * 0.10);
-  ctx.lineTo(-W * 0.015, -H * 0.04);
-  ctx.lineTo(-W * 0.025, H * 0.02);
-  ctx.stroke();
-  // Highlight no topo (luar)
-  ctx.fillStyle = 'rgba(180,180,200,0.35)';
-  ctx.beginPath();
-  ctx.arc(-W * 0.025, -H * 0.13, W * 0.018, Math.PI, 0);
-  ctx.fill();
-  ctx.restore();
-  // Tufo de grama na base
-  ctx.strokeStyle = 'rgba(60,90,40,0.7)';
+  for (var i = 0; i < n; i++) {
+    var g = graves[i];
+    ctx.save();
+    ctx.translate(cx + g.dx * W, cy + g.dy * H);
+    ctx.rotate(g.tilt);
+    var ww = W * 0.10 * g.scale, hh = H * 0.18 * g.scale;
+    // Musgo na base
+    ctx.fillStyle = 'rgba(60,90,40,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(-ww * 0.30, hh * 0.42, ww * 0.22, hh * 0.06, 0, 0, Math.PI * 2);
+    ctx.ellipse(ww * 0.20, hh * 0.45, ww * 0.18, hh * 0.05, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Crack diagonal
+    ctx.strokeStyle = 'rgba(20,18,15,0.65)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(-ww * 0.35, -hh * 0.30);
+    ctx.lineTo(-ww * 0.10, -hh * 0.05);
+    ctx.lineTo(-ww * 0.18, hh * 0.18);
+    ctx.stroke();
+    // Highlight topo (luar)
+    ctx.fillStyle = 'rgba(180,180,200,0.32)';
+    ctx.beginPath();
+    ctx.arc(-ww * 0.20, -hh * 0.45, ww * 0.18, Math.PI, 0);
+    ctx.fill();
+    ctx.restore();
+  }
+  // Tufos de grama coletivos ao redor das lápides (espalhados)
+  ctx.strokeStyle = 'rgba(60,90,40,0.65)';
   ctx.lineWidth = 0.7;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.07, cy + H * 0.09);
-  ctx.lineTo(cx - W * 0.075, cy + H * 0.05);
-  ctx.moveTo(cx + W * 0.06, cy + H * 0.09);
-  ctx.lineTo(cx + W * 0.065, cy + H * 0.06);
+  for (var ti = 0; ti < 5; ti++) {
+    var ang = (ti / 5) * Math.PI * 2 + seed * 0.001;
+    var rr = (0.20 + ((seed >> ti) & 0x7) / 14) * W;
+    var tx = cx + Math.cos(ang) * rr;
+    var ty = cy + Math.sin(ang) * rr * 0.55;
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx + (rng() - 0.5), ty - 3);
+  }
   ctx.stroke();
-  // EPIC = ~7 ops total
+  // EPIC = 3 lápides totais com detalhes
 }
 
 function _drawWaterAAA(ctx, cx, cy, col, row) {
@@ -23843,7 +24123,22 @@ function availableLightSources(p) {
 // - cave (qualquer fase): vision 0 sem luz (escuridão absoluta)
 // - volcanic: fog_base_mul no mapa ajusta intensidade
 // - Luz adiciona vision_bonus conforme fonte ativa (1-3 hexes)
+// 2026-04-27 USER RULE: "no hex de mata, faça o personagem parecer estar
+// entrando na mata mesmo, fazendo o jogador enxergar somente dentro da mata
+// e o restante inteiro do mapa fica em fog enquanto estiver nessa mata".
+// Helper compartilhado entre getVisionRange + buildFogMask + revealFogAt.
+function _isPlayerOnMata() {
+  if (!S || !S.player) return false;
+  var t = tileAt(S.player.col, S.player.row);
+  return t === 'g';
+}
+// Expose pra TileRenderer (módulo separado) checar fog gate de tile-objects
+window._isPlayerOnMata = _isPlayerOnMata;
+
 function getVisionRange() {
+  // Mata isolation: vision 0 (só hex atual visível). buildFogMask aplica
+  // override extra pra fogar TODOS os outros hexes, mesmo memória.
+  if (_isPlayerOnMata()) return 0;
   const phase = S.dayPhase || 'day';
   const biome = S.biome || 'forest';
   const weather = S.weather || 's';
@@ -23912,13 +24207,25 @@ function buildFogMask() {
   const pCol = S.player.col, pRow = S.player.row;
   const intensity = getFogIntensity();
   const vision = getVisionRange();
-  if (shouldLogM) LOG('FOG', 'buildFogMask mask=' + w + 'x' + h + ' player=(' + pCol + ',' + pRow + ') vision=' + vision + ' intensity=' + intensity.toFixed(2));
+  // 2026-04-27 USER RULE: mata isolation effect — quando player está em
+  // hex 'g', SOMENTE o hex atual é visível; TUDO ELSE (incluindo memória
+  // 'dim' de hexes já visitados) recebe alpha=255 (fog total). Resultado:
+  // sensação épica de estar perdido dentro da mata densa.
+  const inMata = _isPlayerOnMata();
+  if (shouldLogM) LOG('FOG', 'buildFogMask mask=' + w + 'x' + h + ' player=(' + pCol + ',' + pRow + ') vision=' + vision + ' intensity=' + intensity.toFixed(2) + (inMata ? ' MATA_ISOLATION' : ''));
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const key = fogKey(c, r);
       const state = S.fogState[key];
       const dist = hexDist(c, r, pCol, pRow);
       let alpha;
+      // Mata isolation: dist=0 visível, todo resto fogged total
+      if (inMata) {
+        alpha = (dist === 0) ? 0 : 255;
+        const idx0 = ((r + MASK_PADDING) * w + (c + MASK_PADDING)) * 4;
+        data[idx0] = 0; data[idx0 + 1] = 0; data[idx0 + 2] = 0; data[idx0 + 3] = alpha;
+        continue;
+      }
       if (state === 'visible') {
         if (dist === 0) alpha = 0;
         else if (vision === 0) {
@@ -23958,7 +24265,9 @@ function buildFogMask() {
   // Post-pass: clarabóias (tile '*') criam bolsão de luz natural — iluminam
   // o próprio hex + vizinhos (radius 1), mesmo que player nunca tenha visitado.
   // Útil em cavernas onde o teto caiu e a luz do dia desce.
-  for (let r = 0; r < ROWS; r++) {
+  // 2026-04-27 USER RULE: skip post-pass quando player está em mata —
+  // mata isolation deve ser absoluta, sem clarabóia furando o fog.
+  if (!inMata) for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (S.grid[r][c] !== '*') continue;
       const skylightAlpha = 40;  // hex com clarabóia: bem iluminado
