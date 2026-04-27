@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:18:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:47:48Z - do not edit directly, edit source -->
 
 
 <!--
@@ -16804,49 +16804,90 @@ function _placeBiomeTileObjects(m, grid, rng, landmarkKeys, decorations, tileObj
   var density = BIOME_TILE_DENSITY[biome] || 0.10;
   var placed = 0;
   var skipped = 0;
-  var skippedReasons = { landmark: 0, spawn: 0, tile: 0, no_meta: 0, no_states: 0, no_density: 0 };
+  var skippedReasons = { landmark: 0, spawn: 0, tile: 0, no_meta: 0, no_states: 0, no_density: 0, max_count: 0, dist_rule: 0 };
 
+  // 2026-04-27 USER RULE: máximo 2 tile-objects do MESMO tipo por mapa.
+  // Quando um tipo tem 1 placement, o segundo DEVE estar:
+  //   - Adjacente (hexDistance == 1, lado a lado intencional), OU
+  //   - Bem separado (hexDistance >= 4, espalhamento real)
+  // Distâncias 2-3 são proibidas (parecem "espalhamento aleatório descuidado").
+  var MAX_PER_TYPE = 2;
+  var MIN_FAR_DIST = 4;
+  var typePositions = {};  // type → array of {col, row}
+
+  // Hex axial distance (mesmo formula de LODController._hexDistance, linha 8168)
+  function _hexDist(c1, r1, c2, r2) {
+    return (Math.abs(c1 - c2) + Math.abs(r1 - r2) + Math.abs((c1 + r1) - (c2 + r2))) / 2;
+  }
+  function _typeAllowedAt(type, col, row) {
+    var positions = typePositions[type];
+    if (!positions || positions.length === 0) return true;  // primeiro placement
+    if (positions.length >= MAX_PER_TYPE) return false;     // máx atingido
+    // count == 1: testar regra de adjacência ou separação
+    var d = _hexDist(positions[0].col, positions[0].row, col, row);
+    return d <= 1 || d >= MIN_FAR_DIST;
+  }
+
+  // Pass 1: coleta candidates (passes density roll). Embaralha pra evitar
+  // bias top-left. Pass 2: tenta colocar respeitando regras.
+  var candidates = [];
   for (var r = 0; r < m.rows; r++) {
     for (var c = 0; c < m.cols; c++) {
-      // Skip landmarks (dungeons, edges, fixed landmarks)
       if (landmarkKeys && landmarkKeys.has(c + ',' + r)) { skipped++; skippedReasons.landmark++; continue; }
-      // Skip spawn + adjacentes (raio 2) pra player não começar em cima de tile-object
       var d = Math.max(Math.abs(c - m.spawnCol), Math.abs(r - m.spawnRow));
       if (d <= 2) { skipped++; skippedReasons.spawn++; continue; }
       var tile = grid[r][c];
       if (!PLACEABLE_TILES[tile]) { skipped++; skippedReasons.tile++; continue; }
       if (rng() >= density) { skippedReasons.no_density++; continue; }
-      // Pick random type compatível com bioma
-      var type = pool[Math.floor(rng() * pool.length)];
-      var meta = window.TileObjectsDB.get(type);
-      if (!meta) { skipped++; skippedReasons.no_meta++; continue; }
-      var validStates = (meta.states || []).filter(function (s) {
-        return s !== 'alerted'; // alerted nunca placement inicial
-      });
-      if (validStates.length === 0) { skippedReasons.no_states++; continue; }
-      var state = _pickPlacementState(rng, validStates);
-      // hexId convenção: 'col,row' (mesmo formato usado por landmarkKeys)
-      var hexId = c + ',' + r;
-      // Sub-projeto #4 v4 (2026-04-27): escreve direto em tileObjectsOut local
-      // pra survive a re-init de S em initState. boot inclui isto no novo S.
-      tileObjectsOut[hexId] = {
-        type: type,
-        state: state,
-        lastTransition: { from: null, to: state, ts: Date.now(), cause: 'biome_placement' },
-        discoveredAt: 0,
-        flags: {}
-      };
-      // Sub-projeto #4 v5: tile-objects renderizam via SVG overlay (não mais
-      // via decorations array). A entrada em tileObjectsOut é suficiente —
-      // _renderInitialTileObjects() chama setHexPos+refresh no SVG overlay
-      // após S = initState() popular S.tileObjects.
-      placed++;
+      candidates.push({ col: c, row: r });
     }
   }
+  // Fisher-Yates shuffle determinístico via rng
+  for (var si = candidates.length - 1; si > 0; si--) {
+    var sj = Math.floor(rng() * (si + 1));
+    var stmp = candidates[si];
+    candidates[si] = candidates[sj];
+    candidates[sj] = stmp;
+  }
+
+  for (var ki = 0; ki < candidates.length; ki++) {
+    var cand = candidates[ki];
+    // Filtra pool: só types que ainda cabem aqui (count + distância)
+    var validTypes = [];
+    for (var pi = 0; pi < pool.length; pi++) {
+      if (_typeAllowedAt(pool[pi], cand.col, cand.row)) validTypes.push(pool[pi]);
+    }
+    if (validTypes.length === 0) { skippedReasons.dist_rule++; continue; }
+    var type = validTypes[Math.floor(rng() * validTypes.length)];
+    var meta = window.TileObjectsDB.get(type);
+    if (!meta) { skipped++; skippedReasons.no_meta++; continue; }
+    var validStates = (meta.states || []).filter(function (s) {
+      return s !== 'alerted';
+    });
+    if (validStates.length === 0) { skippedReasons.no_states++; continue; }
+    var state = _pickPlacementState(rng, validStates);
+    var hexId = cand.col + ',' + cand.row;
+    tileObjectsOut[hexId] = {
+      type: type,
+      state: state,
+      lastTransition: { from: null, to: state, ts: Date.now(), cause: 'biome_placement' },
+      discoveredAt: 0,
+      flags: {}
+    };
+    if (!typePositions[type]) typePositions[type] = [];
+    typePositions[type].push({ col: cand.col, row: cand.row });
+    placed++;
+  }
+  // Log per-type counts pra debug
+  var typeSummary = Object.keys(typePositions).map(function (t) {
+    var ps = typePositions[t];
+    if (ps.length === 1) return t + '×1';
+    var dd = _hexDist(ps[0].col, ps[0].row, ps[1].col, ps[1].row);
+    return t + '×2(d=' + dd + ')';
+  }).join(' ');
   LOG('TILE-OBJ', 'placement_DONE mapId=' + m.id + ' biome=' + biome +
       ' placed=' + placed + ' skipped=' + skipped + ' density=' + density +
-      ' decoArrSize=' + (decorations ? decorations.length : 'null') +
-      ' reasons=', skippedReasons);
+      ' types=[' + typeSummary + '] reasons=', skippedReasons);
   // Reset render-log flag pra novo mapa (assim primeiro draw também loga)
   if (typeof _tileObjMarkerLogged !== 'undefined') _tileObjMarkerLogged = false;
   if (placed === 0) {
@@ -27548,32 +27589,19 @@ function pixelToHex(px, py) {
 // Sub-projeto #4 v2: click no canvas → detecta hex → se tem tile-object,
 // abre popup. Ignora clicks que viraram pan drag (panDrag.moved=true).
 function bindTileObjectClickHandler() {
-  var vp = document.getElementById('map-viewport');
-  if (!vp) return;
-  vp.addEventListener('click', function (e) {
-    // Skip se foi pan drag (mouse moveu durante hold)
-    if (_panDrag && _panDrag.moved) return;
-    // Skip se popup já aberto (não dispara dois ao mesmo tempo)
-    if (window.StubEventLayer && window.StubEventLayer.isOpen && window.StubEventLayer.isOpen()) return;
-    // Click pixel coords no canvas (conta scroll do viewport)
-    var rect = vp.getBoundingClientRect();
-    var px = (e.clientX - rect.left) + vp.scrollLeft;
-    var py = (e.clientY - rect.top) + vp.scrollTop;
-    var hex = pixelToHex(px, py);
-    var hexId = hex.col + ',' + hex.row;
-    var hasTobj = window.S && window.S.tileObjects && window.S.tileObjects[hexId];
-    LOG('TILE-OBJ', 'canvas_click px=' + Math.round(px) + ' py=' + Math.round(py) +
-        ' hex=' + hexId + ' hasTileObj=' + !!hasTobj +
-        (hasTobj ? ' type=' + window.S.tileObjects[hexId].type +
-                   ' state=' + window.S.tileObjects[hexId].state : ''));
-    if (hasTobj) {
-      if (window.StubEventLayer && window.StubEventLayer.showTileObjectEvent) {
-        window.StubEventLayer.showTileObjectEvent(hexId);
-      } else {
-        LOGW('TILE-OBJ', 'click_no_StubEventLayer');
-      }
-    }
-  });
+  // 2026-04-27 USER RULE: REMOVIDA opção de clicar em tile-objects pra
+  // disparar evento. Triggers DEVEM vir SOMENTE via onMoveEnd (pisar no
+  // hex). Função mantida como no-op pra compat — chamado em
+  // _renderInitialTileObjects mas não anexa listener algum.
+  //
+  // Comportamento canônico:
+  // - Player anda → onMoveEnd(col,row) → S.tileObjects[hexId] check →
+  //   StubEventLayer.showTileObjectEvent (linha 22720-22729)
+  // - Click no hex com tile-object: NADA acontece (apenas pan/zoom map)
+  //
+  // Justificativa user: "remova a opção de clicar nesses tile-objects, só
+  // devem rodar o evento se o jogador pisar no hex em que estão"
+  LOG('TILE-OBJ', 'click_handler_disabled_by_design (step-on-hex only)');
 }
 
 // Pan drag (mouse + 1 dedo) sobre o viewport
