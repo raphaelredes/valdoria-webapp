@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T22:42:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:00:05Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10764,7 +10764,11 @@ body.perf-lite .stub-popup-voice { animation: none; }
       bdrop.style.top = '0';
       bdrop.style.width = '100%';
       bdrop.style.height = '100%';
-      bdrop.style.background = 'rgba(0, 0, 0, 0.82)';
+      // 2026-04-27 USER RULE update: "apareçam os tile-objects normalmente
+      // também". Backdrop reduzido de 0.82 → 0.40 pra mapa + tile-objects
+      // ficarem visíveis sob o panel. Panel bg ('#0a0805') é opaco, então
+      // cards continuam legíveis mesmo com map visível ao fundo.
+      bdrop.style.background = 'rgba(0, 0, 0, 0.40)';
       bdrop.style.zIndex = '49';
       bdrop.style.pointerEvents = 'none';
       frameForBdrop.appendChild(bdrop);
@@ -17484,9 +17488,13 @@ function generateMap(mapId) {
   // Sub-projeto #4 — Roll-out por bioma: placement de tile-objects.
   // Sub-projeto #4 v4: tileObjects sobrevive a re-init de S em initState
   // sendo retornado no map result e atribuído pelo boot.
+  // 2026-04-27 USER RULE: "faça com que no ?showcase=1 apareçam os
+  // tile-objects normalmente também". Removido skip de showcase — tile-objects
+  // agora também são placed no mapa subjacente em showcase mode. Os
+  // SHOWCASE_CARDS (hexIds 'showcase_lite/medium/full') são separados dos
+  // grid hexIds ('col,row'), então não há conflito.
   var tileObjects = {};
-  var isShowcase = new URLSearchParams(window.location.search).get('showcase') === '1';
-  if (!isShowcase && !m.gridTemplate) {
+  if (!m.gridTemplate) {
     _placeBiomeTileObjects(m, grid, rng, landmarkKeys, decorations, tileObjects);
   }
 
