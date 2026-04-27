@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:08:19Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:13:23Z - do not edit directly, edit source -->
 
 
 <!--
@@ -2049,7 +2049,6 @@ body.perf-lite #top-danger { animation: none !important; }
               inset 0 1px 0 rgba(196, 149, 58, 0.08);
   min-width: 204px;
   font-family: var(--v-font-display, 'Cinzel', serif);
-  transition: min-width 0.3s ease, padding 0.3s ease;
 }
 /* Botão toggle expand/collapse — similar a btn-minimap-toggle.
    Posicionado absolute FORA do container hud-float (lateral direita,
@@ -2085,13 +2084,11 @@ body.perf-lite #top-danger { animation: none !important; }
   text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.9);
 }
 #btn-hud-float-toggle:active { transform: scale(0.92); }
-/* Estado collapsed: padding reduzido pra deixar só o botão visível na borda. */
-#hud-float.hf-collapsed {
-  min-width: 0;
-  padding: 4px 6px;
-}
-/* #hud-float-content = bloco que EFETIVAMENTE some quando collapsed.
-   Mantém o botão toggle sempre visível (fora deste wrapper). */
+/* 2026-04-27 USER RULE: collapse SOMENTE vertical. Antes #hud-float.hf-collapsed
+   reduzia min-width pra 0 e padding lateral 10px→6px — causava encolhimento
+   horizontal indesejado. AGORA: largura preservada (min-width 204px, padding
+   8px 10px herdados de #hud-float.hud-pro). Só o content interno some via
+   max-height/opacity. Container vira "barra fina" horizontal mantendo posição. */
 #hud-float-content {
   display: flex;
   flex-direction: column;
