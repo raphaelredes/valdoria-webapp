@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T17:47:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T18:08:19Z - do not edit directly, edit source -->
 
 
 <!--
@@ -16809,10 +16809,20 @@ function _placeBiomeTileObjects(m, grid, rng, landmarkKeys, decorations, tileObj
   // 2026-04-27 USER RULE: máximo 2 tile-objects do MESMO tipo por mapa.
   // Quando um tipo tem 1 placement, o segundo DEVE estar:
   //   - Adjacente (hexDistance == 1, lado a lado intencional), OU
-  //   - Bem separado (hexDistance >= 4, espalhamento real)
-  // Distâncias 2-3 são proibidas (parecem "espalhamento aleatório descuidado").
+  //   - Em LADOS OPOSTOS do mapa (hexDistance >= 60% do eixo mais longo)
+  // Distâncias intermediárias são proibidas — ou colado, ou no canto oposto.
+  //
+  // Update 2026-04-27 (refinement): MIN_FAR_DIST de 4 → dinâmico baseado no
+  // tamanho do mapa. User feedback: "aumente mais ainda a quantidade de
+  // hexes de distância, para que fiquem um de um lado do mapa e outro do
+  // outro lado". Com 60% do eixo maior:
+  //   - 20×24 map → MIN_FAR = 14 (de 24)
+  //   - 22×26 map → MIN_FAR = 15 (de 26)
+  //   - 24×28 map → MIN_FAR = 16 (de 28)
+  //   - 22×30 map → MIN_FAR = 18 (de 30)
+  // Floor 8 garante mapas pequenos ainda separam visualmente.
   var MAX_PER_TYPE = 2;
-  var MIN_FAR_DIST = 4;
+  var MIN_FAR_DIST = Math.max(8, Math.floor(Math.max(m.cols, m.rows) * 0.6));
   var typePositions = {};  // type → array of {col, row}
 
   // Hex axial distance (mesmo formula de LODController._hexDistance, linha 8168)
@@ -16887,6 +16897,7 @@ function _placeBiomeTileObjects(m, grid, rng, landmarkKeys, decorations, tileObj
   }).join(' ');
   LOG('TILE-OBJ', 'placement_DONE mapId=' + m.id + ' biome=' + biome +
       ' placed=' + placed + ' skipped=' + skipped + ' density=' + density +
+      ' minFarDist=' + MIN_FAR_DIST + '/' + Math.max(m.cols, m.rows) +
       ' types=[' + typeSummary + '] reasons=', skippedReasons);
   // Reset render-log flag pra novo mapa (assim primeiro draw também loga)
   if (typeof _tileObjMarkerLogged !== 'undefined') _tileObjMarkerLogged = false;
