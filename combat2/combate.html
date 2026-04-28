@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T00:50:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:23:09Z — do not edit directly, edit source -->
 
 
 <!--
@@ -4923,11 +4923,18 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     /* X-6.5.51AB (2026-04-26): max-height relativo ao overlay (sim-frame),
        nao vh (estoura desktop). Caps em 600px pra manter card compacto. */
     max-height: min(calc(100% - 24px), 600px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    /* 2026-04-27 USER RULE: "tem um fundo que é o brilhante que não tem
+       responsividade, então não acompanha o layer todo corretamente como
+       deveria". Causa: card tinha overflow-y:auto → ::before (frame com
+       gleam nos cantos) escrollava com conteúdo, sumindo do viewport.
+       Fix: card SEM overflow (frame fica fixo); .lp-help-body recebe
+       overflow agora, scroll APENAS no conteúdo. */
+    overflow: hidden;
     padding: 22px 22px 18px;
     box-sizing: border-box;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
     background:
         radial-gradient(ellipse at 50% 0%, rgba(130,90,40,0.25) 0%, transparent 70%),
         linear-gradient(180deg, #3a2e1e 0%, #2a2014 100%);
@@ -5035,6 +5042,14 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     color: #d4c8b0;
     text-align: left;
     padding-top: 2px;
+    /* 2026-04-27: scroll movido do card pro body — frame com gleam fica fixo */
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Padding extra nos lados pra scroll bar não cobrir conteúdo */
+    padding-right: 8px;
+    margin-right: -6px;
 }
 .lp-help-body .lp-help-p:first-child::first-letter {
     font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -10223,6 +10238,32 @@ window.WAVE_TEMPLATES = {
             mini_icon: 'sym_war_drum_t3',
             fullscreen_flash: true
         }
+    },
+
+    /* 2026-04-27 USER RULE: matilha de lobos. PHB MM p.341 — wolves are pack
+       hunters. Quando player engaja "lobo solitário", o lobo uiva pra chamar
+       a matilha; reforços (2-3 lobos) chegam em 2-4 turnos staggered. */
+    wolf_pack: {
+        id: 'wolf_pack',
+        source_default: 'fresh_tracks',
+        enemy_count_range: [2, 3],
+        enemy_pool: ['gray_wolf', 'gray_wolf', 'dire_wolf'],
+        delayedTurns_range: [2, 4],
+        cancellable: false,
+        arrival_pattern: 'staggered',
+        intent_text: 'Matilha respondendo ao uivo',
+        flavor_lines: [
+            'Patas batem no solo distante — vindo de várias direções.',
+            'Um uivo distante responde ao do batedor.',
+            'Olhos dourados aparecem entre os arbustos altos.',
+            'A vegetação treme — algo grande e em grupo se aproxima.'
+        ],
+        banner_aesthetic: 'wolf',
+        fx_signature: {
+            border_pulse_color: '#5a6b3a',
+            arrival_burst: 'leaf_dark',
+            mini_icon: 'sym_fresh_tracks_t1'
+        }
     }
 };
 
@@ -14905,7 +14946,12 @@ function simHealOverlayCellClasses(u) {
     if (!u) return { utype: 'player', classes: 'cell occupied player heal-overlay-cell' };
     var utype = u.t === 'p' ? 'player' : (u.t === 'a' ? 'ally' : 'enemy');
     var classes = 'cell occupied ' + utype + ' heal-overlay-cell';
-    if (u.t === 'e' && !u.alive) classes += ' dead';
+    /* 2026-04-27 USER RULE: "faça com que quando um combatente inimigo morrer,
+       estiver com 0 de vida, o card fique cinza... veja se existe algo nas
+       mecânicas D&D 5e que possa ser aplicado visualmente". PHB MM p.7: monstros
+       não fazem death saves — morrem direto a 0 HP. Aplicado cell--dead-perm
+       (grayscale + brightness 0.72) pra enemy quando hp<=0 OU !alive. */
+    if (u.t === 'e' && (!u.alive || u.hp <= 0)) classes += ' dead cell--dead-perm';
     else if (u.t === 'p' || u.t === 'a') {
         if (u.isDead) classes += ' dead cell--dead-perm';
         else if (u.hp <= 0 && u.dying && !u.stable) classes += ' cell--dying';
@@ -15617,7 +15663,8 @@ function buildCell(cell, activeId) {
         }
     }
     if (u.initRolling) classes += ' init-rolling';
-    if (u.t === 'e' && !u.alive) classes += ' dead';
+    /* 2026-04-27 USER RULE: enemy hp<=0 → cell--dead-perm (grayscale). PHB MM p.7. */
+    if (u.t === 'e' && (!u.alive || u.hp <= 0)) classes += ' dead cell--dead-perm';
     else if (u.t === 'p' || u.t === 'a') {
         if (u.isDead) classes += ' dead cell--dead-perm';
         else if (u.hp <= 0 && u.dying && !u.stable) classes += ' cell--dying';
@@ -19585,6 +19632,12 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
     skills.forEach(function (sk, i) {
         var cat = _skillCategoryOf(sk);
         if (filter !== 'all' && cat !== filter) return;
+        // 2026-04-27 USER RULE: "remova do popup de habilidades todas as
+        // habilidades que não foram aprendidas pelos personagens... isso
+        // não pode acontecer de nenhuma maneira". Skills com minLevel >
+        // player.lvl NÃO aparecem mais no popup (antes apareciam com badge
+        // "Requer nv N" — quebra imersão). Player vê apenas o que já tem.
+        if (sk.minLevel && pCur && (pCur.lvl | 0) < (sk.minLevel | 0)) return;
         var skCanUse = pCur ? _simIsSkillUsable(sCur, pCur, sk) : (true);
         filtered.push({ sk: sk, origIdx: i, cat: cat, canUse: skCanUse });
     });
@@ -26517,7 +26570,7 @@ function startSimAfterDiceBoot() {
                 '.flee-info-card',
                 '.lp-log-scroll',
                 '.target-confirm-card',
-                '.lp-help-card',
+                '.lp-help-body',  /* 2026-04-27: scroll movido pra body (frame fica fixo) */
                 '.end-turn-confirm-card'
             ];
             var attachScrollHint = function (el) {
