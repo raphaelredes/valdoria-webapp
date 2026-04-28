@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:16:18Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:20:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25897,6 +25897,14 @@ function resolveChoice(idx) {
 }
 
 // X-4.5: helper — anima dice 3D com valor do servidor, depois resolve outcome.
+// 2026-04-27 USER RULE: "verifique se os eventos estão funcionando assim como
+// funcionam em exploracao.html". User reportou rolagem travada (dice rolou
+// mas botão Continuar nunca apareceu) em REMOTE mode (bot DEV). Causa raiz:
+// _remoteRenderDiceAndResolve estava com APENAS `skipBtn.onclick` + UM result
+// click handler. LOCAL `rollSkillCheck` (linha ~25979) tem 4 camadas de
+// safety: handlers redundantes + pointer-events + safety timeout +
+// wrappedShow clearTimeout. Aplicado AQUI o MESMO pattern pra paridade
+// total entre LOCAL e REMOTE — Continuar SEMPRE aparece, dice 3D ou não.
 function _remoteRenderDiceAndResolve(ch, oc) {
   var overlay = document.getElementById('dice-overlay');
   var wrap = document.getElementById('dice-canvas-wrap');
@@ -25911,17 +25919,33 @@ function _remoteRenderDiceAndResolve(ch, oc) {
   var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
   var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
   var advanced = false;
-  function advance() {
+  function advance(src) {
+    try { LOG('DICE', '_remote advance source=' + (src || 'unknown') + ' advanced=' + advanced); } catch (_) {}
     if (advanced) return;
     advanced = true;
     overlay.classList.remove('visible');
     setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
   }
-  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance(); };
-  result.onclick = advance;
+  // SAFETY 1: handlers redundantes (paridade com LOCAL rollSkillCheck V2.7).
+  // User reportou trava em REMOTE — onclick às vezes não dispara em mobile
+  // touch. addEventListener('click') + addEventListener('pointerdown') cobrem
+  // os casos onde onclick falha (Telegram WebApp Android usa pointer events).
+  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance('onclick'); };
+  skipBtn.addEventListener('click', function(ev) { ev.stopPropagation(); advance('addEventListener'); });
+  skipBtn.addEventListener('pointerdown', function(ev) { ev.stopPropagation(); advance('pointerdown'); });
+  // SAFETY 2: pointer-events forçado pra evitar overlay/CSS bloqueando click
+  skipBtn.style.setProperty('pointer-events', 'auto', 'important');
+  skipBtn.style.setProperty('cursor', 'pointer', 'important');
+  skipBtn.style.setProperty('z-index', '999', 'important');
+  // Click no resultado também avança (UX intuitivo — área grande)
+  result.onclick = function() { advance('result-click'); };
+  result.style.cursor = 'pointer';
+  result.style.userSelect = 'none';
   var shown = false;
   function showResult() {
     if (shown) return; shown = true;
+    try { LOG('DICE', '_remote showResult d20=' + d20 + ' total=' + total + ' dc=' + dc + ' success=' + success); } catch (_) {}
+    clearChildren(formula);
     var modStr = (mod >= 0 ? '+' : '') + mod;
     formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
     var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
@@ -25932,15 +25956,29 @@ function _remoteRenderDiceAndResolve(ch, oc) {
     skipBtn.textContent = 'Continuar';
     skipBtn.style.setProperty('display', 'inline-block', 'important');
     skipBtn.style.setProperty('visibility', 'visible', 'important');
+    skipBtn.style.setProperty('opacity', '1', 'important');
   }
+  // SAFETY 3: timeout absoluto — se Dice3D.roll NUNCA chamar callback (race
+  // condition, async error, audio context locked, etc.), em 3s mostra
+  // resultado mesmo assim. Evita dice rolando pra sempre sem botão.
+  var safetyTimer = setTimeout(function() {
+    try { LOGW('DICE', '_remote safety timeout triggered — Dice3D callback never fired?'); } catch (_) {}
+    showResult();
+  }, 3000);
+  function wrappedShow() { clearTimeout(safetyTimer); showResult(); }
   if (window.Dice3D) {
     try {
+      try { LOG('DICE', '_remote using Dice3D, rolling d20=' + d20); } catch (_) {}
       var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
-      dice.roll(d20, showResult);
+      dice.roll(d20, wrappedShow);
       return;
-    } catch (e) { /* fall through */ }
+    } catch (e) {
+      try { LOGE('DICE', '_remote Dice3D failed:', e.message); } catch (_) {}
+    }
+  } else {
+    try { LOGW('DICE', '_remote window.Dice3D not loaded — fallback timer'); } catch (_) {}
   }
-  setTimeout(showResult, 900);
+  setTimeout(wrappedShow, 900);
 }
 
 // X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
