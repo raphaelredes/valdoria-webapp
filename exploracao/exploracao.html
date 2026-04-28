@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:44:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:50:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12004,6 +12004,11 @@ window.__exploreRewards = {
   mp_start: null,
   hd_start: null,
   exh_start: null,
+  // 2026-04-27 audit REMOTE: faltava baseline de XP e gold pra calcular delta
+  // ao final da sessão. Sem isso, __buildRewardsDelta retornava 0 mesmo após
+  // gains de eventos. Server só recebia HP/MP delta, perdendo XP/gold.
+  xp_start: null,
+  gold_start: null,
   steps_taken: 0,
   _initialized: false,
   _sent: false            // guard pra não mandar 2x (beacon + transition)
@@ -12014,6 +12019,10 @@ window.__rewardsCaptureStart = function(player) {
   if (!player || window.__exploreRewards._initialized) return;
   window.__exploreRewards.hp_start = player.hp;
   window.__exploreRewards.mp_start = player.mp;
+  // 2026-04-27 audit REMOTE: captura baseline de XP e gold também.
+  window.__exploreRewards.xp_start = (typeof player.xp === 'number') ? player.xp : 0;
+  window.__exploreRewards.gold_start = (typeof player.gold === 'number') ? player.gold
+    : ((window.S && typeof window.S.gold === 'number') ? window.S.gold : 0);
   window.__exploreRewards.hd_start = player.hd;
   window.__exploreRewards.exh_start = player.exh;
   window.__exploreRewards._initialized = true;
@@ -12141,9 +12150,17 @@ window.__hydrateStateFromRemote = function(S) {
 window.__buildRewardsDelta = function() {
   var R = window.__exploreRewards;
   var p = (window.S && window.S.player) || {};
+  // 2026-04-27 audit REMOTE: prioriza delta calculado do baseline (mais
+  // confiável que counter manual que pode não ser incrementado em todo
+  // path). Fallback pra counter se baseline não foi capturado (LOCAL).
+  var pXp = (typeof p.xp === 'number') ? p.xp : 0;
+  var pGold = (typeof p.gold === 'number') ? p.gold
+    : ((window.S && typeof window.S.gold === 'number') ? window.S.gold : 0);
+  var xpDelta = (R.xp_start != null) ? Math.max(0, pXp - R.xp_start) : (R.xp_gained || 0);
+  var goldDelta = (R.gold_start != null) ? (pGold - R.gold_start) : (R.gold_gained || 0);
   return {
-    xp_gained: R.xp_gained || 0,
-    gold_gained: R.gold_gained || 0,
+    xp_gained: xpDelta,
+    gold_gained: goldDelta,
     items_gained: R.items_gained || [],
     items_consumed: R.items_consumed || [],
     quests_completed: R.quests_completed || [],
@@ -26410,7 +26427,16 @@ function resolveChoice(idx) {
         try {
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
-          if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          if (typeof res.state.gold === 'number') {
+            // 2026-04-27: sincroniza tanto S.gold (legacy) quanto S.player.gold
+            // pra que applyChoiceOutcome / __buildRewardsDelta vejam o valor.
+            S.gold = res.state.gold;
+            if (S.player) S.player.gold = res.state.gold;
+          }
+          // 2026-04-27 audit REMOTE: faltava sync de XP do server. Sem isso,
+          // XP ganho em eventos REMOTE só aparecia visualmente no toast mas
+          // S.player.xp não atualizava → triggerReturnToCity reportava xp=0.
+          if (typeof res.state.xp === 'number' && S.player) S.player.xp = res.state.xp;
           updateHud();
         } catch (eS) { LOGE('API', 'state_sync err=' + (eS && eS.message)); }
       }
