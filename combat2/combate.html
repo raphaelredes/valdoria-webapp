@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:23:09Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:33:21Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12327,7 +12327,13 @@ function randomEnemies() {
            enfrentar este inimigo em combate solo. Heuristica simples
            baseada em HP + CA + bonus de ataque. */
         var sugLvl = Math.max(1, Math.round((b.hp + (b.ac - 10) * 2 + b.atk) / 10));
-        var enemy = { t: 'e', n: b.n + (n > 1 ? ' ' + (i + 1) : ''),
+        // 2026-04-27 USER RULE: nome fantasia em vez de "Orc 1, Orc 2".
+        // Pool de 8 nomes em ENEMY_NAME_POOLS (combate-data-shared.js).
+        // Fallback: se species não tem pool, usa "Species" puro (sem número).
+        var _fName = (typeof _pickEnemyFantasyName === 'function')
+            ? _pickEnemyFantasyName(b.n, i) : null;
+        var _displayName = (n > 1 && _fName) ? _fName : b.n;
+        var enemy = { t: 'e', n: _displayName,
                   hp: b.hp, mhp: b.hp, ac: b.ac, atk: b.atk, die: b.die,
                   dmgMod: b.dmgMod || 0,
                   attr: b.attr || 'STR',
@@ -12682,12 +12688,17 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
     }
     var sc = scaleEnemyTemplate(b, diff);
     var sugLvl = Math.max(1, Math.round((b.hp + (b.ac - 10) * 2 + b.atk) / 10));
-    var suffix = totalEnemies > 1 ? (' ' + (labelIdx + 1)) : '';
+    /* 2026-04-27 USER RULE: nome fantasia em vez de " 1/2/3". Pool de 8
+       nomes em ENEMY_NAME_POOLS (combate-data-shared.js). Fallback: nome
+       puro da espécie sem número quando pool não tem entry. */
+    var _fNameSetup = (totalEnemies > 1 && typeof _pickEnemyFantasyName === 'function')
+        ? _pickEnemyFantasyName(sc.n, labelIdx) : null;
+    var _scaledName = _fNameSetup || sc.n;
     /* [MELHORIA 2026-04-21] Overrides *_exact pra REMOTE mode: enemies vêm do
        EncounterManager server-side com HP/AC/ATK já calculados.
        spec.n_exact: nome custom (ex: "Orc Feroz")
        spec.hp_exact, mhp_exact, ac_exact, atk_exact: stats exatos. */
-    var n = (spec.n_exact) ? String(spec.n_exact) : (sc.n + suffix);
+    var n = (spec.n_exact) ? String(spec.n_exact) : _scaledName;
     var hp = (spec.hp_exact != null) ? Math.max(1, parseInt(spec.hp_exact, 10) || 1) : sc.hp;
     var mhp = (spec.mhp_exact != null) ? Math.max(hp, parseInt(spec.mhp_exact, 10) || hp) : hp;
     var ac = (spec.ac_exact != null) ? parseInt(spec.ac_exact, 10) : sc.ac;

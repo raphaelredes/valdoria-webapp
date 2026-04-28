@@ -8,6 +8,45 @@
    viram window.X em browser. NÃO usar IIFE aqui (combate.html acessa
    diretamente como CHAR_CLASSES, sem prefixo window). */
 
+/* 2026-04-27 USER RULE: "nunca utilizar nomes de combatentes inimigos com
+   números, como Orc 1, Goblin 2, etc... ter pelo menos 8 variações de nomes,
+   que é a quantidade máxima de inimigos no campo de combate atual".
+
+   Pool de nomes fantásticos originais (não-copia) por espécie. 8+ variações
+   pra cobrir o máximo (8 inimigos no campo) sem repetir. Usados por
+   randomEnemies + buildEnemyFromSetup pra substituir o suffix " 1/2/3..." */
+var ENEMY_NAME_POOLS = {
+    'Goblin':                    ['Snik', 'Grizzle', 'Vrek', 'Squirm', 'Niblat', 'Pricka', 'Mossi', 'Gritto'],
+    'Orc':                       ['Grarok', 'Zharak', 'Drugaz', 'Morgosh', 'Krukor', 'Vrachal', 'Bromak', 'Skarrog'],
+    'Esqueleto':                 ['Marrow', 'Calcid', 'Femuk', 'Grinso', 'Velhusco', 'Pálidor', 'Ossal', 'Cínero'],
+    'Aranha Gigante':            ['Acanto', 'Veneno', 'Tess', 'Mandíbu', 'Pernal', 'Ferrão', 'Aracne', 'Fios'],
+    'Sapo Gigante':              ['Glub', 'Pântanal', 'Mucol', 'Croak', 'Limbo', 'Rana', 'Lodal', 'Saltas'],
+    'Homem-Lagarto':             ['Sszik', 'Karro', 'Vossh', 'Ramaz', 'Esquam', 'Garrok', 'Sszal', 'Verdek'],
+    'Crocodilo':                 ['Sarro', 'Gnarl', 'Mandib', 'Pântano', 'Garra', 'Lodarg', 'Rasgo', 'Sclypa'],
+    'Cobra Constritora Gigante': ['Vipara', 'Slarno', 'Constri', 'Sibilo', 'Languar', 'Ofídio', 'Anelar', 'Píton'],
+    'Bruxa Verde':               ['Morganha', 'Hexala', 'Verdélia', 'Ranzinza', 'Mostrenga', 'Cróna', 'Erva-Má', 'Pântanorra'],
+    'Mímico':                    ['Caixus', 'Falsão', 'Engano', 'Trapace', 'Ladriz', 'Quimera', 'Ilus', 'Falaz'],
+    'Lobo':                      ['Sombra', 'Garra', 'Presa', 'Fauce', 'Vento', 'Caçador', 'Furtivo', 'Uivo'],
+    'Lobo Atroz':                ['Crisalid', 'Vorago', 'Mordak', 'Rasgaz', 'Fenrak', 'Ulfar', 'Greyfang', 'Skarn'],
+    'Bandido':                   ['Lasco', 'Gallum', 'Verme', 'Escuro', 'Faísca', 'Bruto', 'Sorrato', 'Punho'],
+    'Troll':                     ['Brackor', 'Gorm', 'Hrundi', 'Kragmar', 'Stozz', 'Vurg', 'Chumbal', 'Gnashek'],
+    'Ghoul':                     ['Vorácie', 'Carniço', 'Necrol', 'Ranço', 'Pútri', 'Esquál', 'Vísce', 'Mortenó'],
+    'Zumbi':                     ['Lerdo', 'Pútre', 'Ressuro', 'Errante', 'Cinor', 'Brancol', 'Lacerto', 'Mudo'],
+    'Urso':                      ['Bruno', 'Pelago', 'Furacão', 'Trovão', 'Pesado', 'Rugir', 'Massivo', 'Patarro'],
+    'Urso Pardo':                ['Bruno', 'Pelago', 'Trovão', 'Rugir', 'Massivo', 'Patarro', 'Furacão', 'Pesado'],
+    'Bandido Arqueiro':          ['Flecha', 'Olhar', 'Ágil', 'Silenço', 'Pluma', 'Mira', 'Vento', 'Corda'],
+    'Capitão Bandido':           ['Garrick', 'Mestre', 'Lâmina', 'Sangra', 'Ferro', 'Capa', 'Pino', 'Cifrão'],
+};
+
+/* Helper: pick fantasy name from pool by species + index. Determinístico
+   pra que same enemy index sempre tenha same name (consistência durante
+   reload). Fallback: usa species name puro se não tem pool. */
+function _pickEnemyFantasyName(species, idx) {
+    var pool = ENEMY_NAME_POOLS[species];
+    if (!pool || !pool.length) return null;
+    return pool[idx % pool.length];
+}
+
 var BESTIARY = [
     /* V1.7 Sprint-17 Ronda 22 (2026-04-21 QA PHB MM creature types) — tags em todos
        os inimigos base. Enables: Divine Smite +1d8 vs undead/fiend, Hold Person
