@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:33:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:55:29Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12643,7 +12643,11 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         bag: (spec.bag && Array.isArray(spec.bag)) ? spec.bag : randomBagForChar(),
         /* V1 Invocações Phase 1 — Bonus Action System (2026-04-18, só importam quando t==='p'). */
         actionSpent: false,
-        bonusActionSpent: false
+        bonusActionSpent: false,
+        /* 2026-04-27: Wet status (D&D 5e DMG p.110). Importado da exploração via
+           wetTurns_exact no SIM payload. Quando > 0: vulnerabilidade a frio +
+           resistência a fogo. Decrementa 1 por round em rollInitiative/start. */
+        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0
     };
 }
 
@@ -12924,6 +12928,11 @@ function newCombatFromSetup(cfg) {
             player: p ? { n: p.n, cls: p.cls, race: p.race, hp: p.hp, mp: p.mp, lvl: p.lvl } : null
         });
     } catch (_eL) { /* silent */ }
+    /* 2026-04-27: anuncia Wet status no log inicial. Player veio de água na
+       exploração — combate inicia com vulnerabilidade frio + resistência fogo. */
+    if (p && p.wetTurns > 0) {
+        _state.log.push(p.n + ' está MOLHADO (' + p.wetTurns + ' turnos): vulnerabilidade a frio + resistência a fogo (DMG p.110).');
+    }
     return _state;
 }
 
@@ -14500,6 +14509,26 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
 function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     dmgMeta = dmgMeta || {};
     var damageApplied = Math.max(0, oldHp - newHp);
+    /* 2026-04-27: Wet status (D&D 5e DMG p.110 "Wet").
+       MOLHADO → vulnerabilidade a frio (×2) + resistência a fogo (÷2).
+       Aplica ANTES de outras reduções (Reflexos Evasivos etc.) seguindo PHB
+       p.197 ordering: vulnerabilidade/resistência multiplica primeiro, depois
+       reduções aditivas. Importa target.wetTurns (vem de wetTurns_exact via
+       buildCharUnitFromSetup) e dmgMeta.dmgType (de resolveSkillHitDmgType). */
+    if (damageApplied > 0 && target && target.wetTurns > 0 && dmgMeta.dmgType) {
+        var _wdt = String(dmgMeta.dmgType).toLowerCase();
+        if (_wdt === 'cold') {
+            var _origCold = damageApplied;
+            damageApplied = damageApplied * 2;
+            newHp = oldHp - damageApplied;
+            if (s && s.log) s.log.push(target.n + ' está MOLHADO — vulnerabilidade a frio (DMG p.110): ' + _origCold + ' → ' + damageApplied + ' dano.');
+        } else if (_wdt === 'fire') {
+            var _origFire = damageApplied;
+            damageApplied = Math.floor(damageApplied / 2);
+            newHp = oldHp - damageApplied;
+            if (s && s.log) s.log.push(target.n + ' está MOLHADO — resistência a fogo (DMG p.110): ' + _origFire + ' → ' + damageApplied + ' dano.');
+        }
+    }
     // Redução por Reflexos Evasivos (halfDmg) — só se não for cura/skip
     if (damageApplied > 0 && !dmgMeta.noReduction) {
         /* V1.7 Sprint-17 Ronda 13 (2026-04-21 QA PHB p.96) — passa contexto
@@ -26441,6 +26470,19 @@ async function runNpcSegmentUntilPlayerTurn() {
                 s._simLogHdrKey = null;
                 s.log.push('::SIM_ROUND::' + s.rn);
                 tickBuffsOnNewRound(s);
+                /* 2026-04-27: tick Wet status (D&D 5e DMG p.110). Decrementa
+                   wetTurns por round. Quando zera, narra "secou" + remove.
+                   ~1 round = ~1 turno de exploração; combate longo seca o player. */
+                if (s.order && s.order.length) {
+                    s.order.forEach(function (_u) {
+                        if (_u && _u.wetTurns > 0) {
+                            _u.wetTurns -= 1;
+                            if (_u.wetTurns === 0) {
+                                if (s.log) s.log.push(_u.n + ' não está mais MOLHADO — roupas secaram (vulnerabilidade frio / resistência fogo removidas).');
+                            }
+                        }
+                    });
+                }
                 /* V1 Invocações Phase 2 — tick durLeft das attached summons. */
                 tickAttachedSummonsDuration(s);
                 /* W2 (escolha autor 2026-04-20) — tick duração das criaturas conjuradas
