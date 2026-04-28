@@ -842,10 +842,58 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
         ops: [{ op: 'xp', delta: 15 }],
         fsm: 'sneak_success'
       },
+      // 2026-04-27 USER RULE: chain de decisão após falha — sentinela
+      // detectou e ordenou identificação. Player precisa decidir: render-se,
+      // tentar persuadir, fugir, ou atacar primeiro. Padrão BG3/Pathfinder.
       outcome_fail: {
-        flavor: 'O sentinela te avista. "Pare! Identifique-se!"',
+        flavor: 'O sentinela te avista. "Pare! Identifique-se!" A besta dele já está apontada na sua direção — o gatilho a centímetros do dedo dele.',
         ops: [],
-        fsm: 'player_attack_choice'
+        fsm: 'player_attack_choice',
+        chain: {
+          id: 'sentinel_post.spotted',
+          title: 'POSTO DE SENTINELA',
+          body: 'A besta do sentinela aponta firme. Ele espera resposta — qualquer movimento errado e a flecha sai. Você decide.',
+          choices: [
+            {
+              id: 'sentinel_surrender',
+              label: 'Render-se e identificar-se (Persuasão)',
+              skill: 'persuasion', dc: 13,
+              outcome_ok: {
+                flavor: 'Você ergue as mãos lentamente, fala devagar — nome, motivo, destino. O vigia escuta sem baixar a besta. Quando termina, ele acena com a cabeça e abaixa a arma. "Passe. Mas a próxima patrulha pode não ser tão tolerante."',
+                ops: [
+                  { op: 'xp', delta: 12 },
+                  { op: 'flag', id: 'sentinel_identified', scope: 'session' }
+                ]
+              },
+              outcome_fail: {
+                flavor: 'Sua voz tropeça nas palavras erradas. O sentinela não acredita na história. "Espião." Ele atira primeiro — você consegue se desviar mas leva um corte na lateral.',
+                ops: [{ op: 'hp', delta: -6 }, { op: 'xp', delta: 5 }]
+              }
+            },
+            {
+              id: 'sentinel_run',
+              label: 'Correr para a mata (Atletismo)',
+              skill: 'athletics', dc: 12,
+              outcome_ok: {
+                flavor: 'Você gira em silêncio e mergulha entre as árvores antes que ele possa apontar. Ouve o som da besta sendo recarregada — mas você já desapareceu.',
+                ops: [{ op: 'xp', delta: 8 }]
+              },
+              outcome_fail: {
+                flavor: 'Sua bota escorrega numa raiz. A flecha te alcança no ombro com um silvo seco. Você ainda chega na mata, mas marcado.',
+                ops: [{ op: 'hp', delta: -8 }]
+              }
+            },
+            {
+              id: 'sentinel_attack',
+              label: 'Atacar primeiro — força bruta',
+              outcome_ok: {
+                flavor: 'Você fecha distância antes que o gatilho seja puxado. A besta dispara num arco que passa por cima do seu ombro. O combate começa de frente, sem hesitação.',
+                ops: [],
+                combat: { enemy_id: 'bandit', enemy_count: 1 }
+              }
+            }
+          ]
+        }
       }
     },
     {
@@ -861,9 +909,33 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
         fsm: 'player_proximity'
       },
       outcome_fail: {
-        flavor: 'Ele ergue a besta. "Não se aproxime mais."',
+        flavor: 'Ele ergue a besta. "Não se aproxime mais." Os olhos dele não piscam — cada passo seu agora é peso de morte calculada.',
         ops: [],
-        fsm: null
+        fsm: null,
+        chain: {
+          id: 'sentinel_post.parley_failed',
+          title: 'POSTO DE SENTINELA',
+          body: 'O sentinela mantém a mira firme. Você está dentro do alcance, sem escudo. O que decide?',
+          choices: [
+            {
+              id: 'sentinel_back_off',
+              label: 'Recuar lentamente — sem virar as costas',
+              outcome_ok: {
+                flavor: 'Você ergue as mãos vazias e dá passos pra trás, devagar, mantendo o olhar nele. Ele te observa até a mata engolir sua silhueta. A besta nunca abaixou — mas também nunca disparou.',
+                ops: []
+              }
+            },
+            {
+              id: 'sentinel_force_through',
+              label: 'Forçar passagem — atacar de surpresa',
+              outcome_ok: {
+                flavor: 'Você se atira pra frente. A besta dispara mas a flecha passa de raspão. Vocês dois se enfrentam ali mesmo.',
+                ops: [],
+                combat: { enemy_id: 'bandit', enemy_count: 1 }
+              }
+            }
+          ]
+        }
       }
     },
     {

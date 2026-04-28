@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T01:23:09Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T01:47:29Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12282,7 +12282,10 @@ const STEPS_PER_PHASE = 30;          // ciclo dia/noite a cada N passos
 
 const BASE_HEX_W = 48;       // HEX_W at zoom 1.0
 const DEFAULT_ZOOM = 1.3;    // tiles maiores por padrão
-const ZOOM_MIN = 0.6;
+// 2026-04-27 USER RULE: "limite o zoom out somente até 84%". Antes 0.6
+// (60%) deixava o mapa muito longe — perdia detalhe das hex tiles e o
+// player ficava minúsculo. 0.84 mantém legibilidade em qualquer zoom.
+const ZOOM_MIN = 0.84;
 const ZOOM_MAX = 2.2;
 
 var HEX_W = BASE_HEX_W;
@@ -21255,11 +21258,29 @@ function _drawCampfireAAA(ctx, cx, cy, col, row) {
   }
   if (tier !== 'full') return;
   // ─── EPIC (+4 ops) ───
-  // Halo solid (sem radial gradient — solid fill com alpha baixo)
+  // 2026-04-27 USER RULE: "a fogueira está com um efeito feio de um circulo
+  // pulsante, isso não ficou realista... remova... faça ter um efeito mais
+  // real de iluminação". Antes: 1 arco solid pulsante (escala com flick) —
+  // parecia anel pulsando, óbvio e amador. Agora: 3 ellipses layered ao
+  // redor da base (não centradas no fogo) com alpha decrescente — simula
+  // a luz da fogueira refletindo no chão como uma poça de luz orgânica
+  // sem pulsar visivelmente. Estática (não usa flick — só pulsa via brasas
+  // separadas que já existem).
   if (state === 'active') {
-    ctx.fillStyle = 'rgba(255,150,60,' + (0.18 * flick).toFixed(3) + ')';
+    // Camada 1: poça quente próxima ao fogo (mais opaca)
+    ctx.fillStyle = 'rgba(255,170,80,0.22)';
     ctx.beginPath();
-    ctx.arc(cx, baseY - H * 0.02, W * 0.22 * flick, 0, Math.PI * 2);
+    ctx.ellipse(cx, baseY + H * 0.005, W * 0.18, H * 0.045, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Camada 2: borda quente difusa (mid)
+    ctx.fillStyle = 'rgba(255,140,50,0.12)';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY + H * 0.010, W * 0.26, H * 0.055, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Camada 3: bruma alaranjada externa (gradient soft)
+    ctx.fillStyle = 'rgba(255,110,40,0.06)';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY + H * 0.012, W * 0.34, H * 0.065, 0, 0, Math.PI * 2);
     ctx.fill();
   }
   // Fumaça wisp animada (1 path)
@@ -21351,6 +21372,11 @@ function _drawCampfireAAA(ctx, cx, cy, col, row) {
 }
 
 function _drawSkylightAAA(ctx, cx, cy, col, row) {
+  // 2026-04-27 USER RULE: "quando o personagem entra na mata, as luzes
+  // solares continuam aparecendo, faça com que elas sumam enquanto tiver
+  // no hexagono da mata". Skip skylight decoration completo quando player
+  // está em mata — fog vai cobrir, mas garante zero leak visual.
+  if (typeof _isPlayerOnMata === 'function' && _isPlayerOnMata()) return;
   var W = HEX_W, H = HEX_H;
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 23 + row * 47 + 13) & 0xFFFF;
@@ -21930,104 +21956,115 @@ function _drawTombstoneAAA(ctx, cx, cy, col, row) {
 }
 
 function _drawWaterAAA(ctx, cx, cy, col, row) {
+  // 2026-04-27 USER RULE: "o hexagono de água está estranho, mal feito...
+  // esse hexagono especialmente precisa de efeito que de fato pareça/simule
+  // água nele todo, ou peixes se movendo, ou algum animal em algum hexagono
+  // próximo abaixando a cabeça para beber água".
+  // REDESIGN COMPLETO — surface azul preenchendo hex todo + 4 ripples
+  // animados + 2-3 peixes silhuetas movendo + cattails na borda.
   var W = HEX_W, H = HEX_H;
   var tier = window._valdoriaPerformanceTier || 'medium';
   var seed = (col * 41 + row * 23 + 17) & 0xFFFF;
   var t = (tier === 'full') ? _animTime * 0.003 : 0;
-  var ripple = (tier === 'full') ? (Math.sin(t + col * 0.4 + row * 0.3) * 0.5 + 0.5) : 0.5;
-  // ─── LITE (2 ops) ───
-  // Reflexo claro (1 ellipse fina)
-  ctx.fillStyle = 'rgba(120,180,210,0.18)';
+  var rng = seededRng(seed);
+  // ─── LITE (3 ops) ───
+  // Surface azul-profundo cobrindo hex inteiro (water body real)
+  ctx.fillStyle = 'rgba(40,80,120,0.55)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy - H * 0.05, W * 0.22, H * 0.04, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy, W * 0.45, H * 0.40, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Linha de superfície (1 stroke)
-  ctx.strokeStyle = 'rgba(140,200,225,0.55)';
-  ctx.lineWidth = 1.0;
+  // Camada média (azul mais claro — sugere profundidade variável)
+  ctx.fillStyle = 'rgba(80,140,180,0.45)';
   ctx.beginPath();
-  ctx.moveTo(cx - W * 0.18, cy);
-  ctx.lineTo(cx + W * 0.18, cy);
-  ctx.stroke();
+  ctx.ellipse(cx - W * 0.05, cy - H * 0.03, W * 0.32, H * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Reflexo da superfície (banda clara horizontal)
+  ctx.fillStyle = 'rgba(200,230,250,0.30)';
+  ctx.beginPath();
+  ctx.ellipse(cx - W * 0.04, cy - H * 0.10, W * 0.20, H * 0.040, 0, 0, Math.PI * 2);
+  ctx.fill();
   if (tier === 'lite') return;
-  // ─── MEDIUM (+2 ops) ───
-  // 2 ripples concentricos (arc strokes)
-  ctx.strokeStyle = 'rgba(100,160,200,' + (0.28 + ripple * 0.18).toFixed(3) + ')';
-  ctx.lineWidth = 1;
+  // ─── MEDIUM (+3 ops) ───
+  // 4 ripples concentricos animados (offset por seed pra cada hex)
+  var rippleA = Math.sin(t + col * 0.4 + row * 0.3) * 0.5 + 0.5;
+  var rippleB = Math.sin(t * 1.4 + col * 0.6 + row * 0.7 + 1.5) * 0.5 + 0.5;
+  ctx.strokeStyle = 'rgba(180,220,240,' + (0.35 + rippleA * 0.25).toFixed(3) + ')';
+  ctx.lineWidth = 0.9;
   ctx.beginPath();
-  ctx.arc(cx - W * 0.08, cy - H * 0.03, W * 0.16, Math.PI * 0.2, Math.PI * 0.8);
+  ctx.arc(cx - W * 0.10, cy - H * 0.06, W * 0.10 + rippleA * W * 0.06, 0, Math.PI * 2);
+  ctx.arc(cx + W * 0.12, cy + H * 0.05, W * 0.08 + rippleB * W * 0.05, 0, Math.PI * 2);
   ctx.stroke();
+  ctx.strokeStyle = 'rgba(140,200,225,' + (0.30 + rippleB * 0.20).toFixed(3) + ')';
   ctx.beginPath();
-  ctx.arc(cx + W * 0.08, cy + H * 0.06, W * 0.10, Math.PI * 0.1, Math.PI * 0.9);
+  ctx.arc(cx + W * 0.05, cy - H * 0.10, W * 0.08 + rippleB * W * 0.04, 0, Math.PI * 2);
+  ctx.arc(cx - W * 0.14, cy + H * 0.10, W * 0.06 + rippleA * W * 0.04, 0, Math.PI * 2);
   ctx.stroke();
-  // Highlight glint (1 ellipse pequena)
-  ctx.fillStyle = 'rgba(200,230,250,' + (0.45 + ripple * 0.20).toFixed(3) + ')';
+  // Sparkle highlights (2 pontos brilhantes na superfície)
+  ctx.fillStyle = 'rgba(255,255,255,' + (0.50 + rippleA * 0.30).toFixed(3) + ')';
   ctx.beginPath();
-  ctx.ellipse(cx - W * 0.06, cy - H * 0.08, W * 0.04, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx - W * 0.07, cy - H * 0.12, W * 0.025, H * 0.006, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + W * 0.10, cy + H * 0.08, W * 0.020, H * 0.005, 0, 0, Math.PI * 2);
   ctx.fill();
   if (tier !== 'full') return;
-  // ─── EPIC (+2 ops) ───
-  // 1 sparkle animado
-  var sparkle = 0.5 + Math.sin(t * 2.5 + seed * 0.013) * 0.5;
-  ctx.fillStyle = 'rgba(220,240,255,' + sparkle.toFixed(3) + ')';
+  // ─── EPIC (+4 ops): peixes silhueta + cattails + lily pads ───
+  // 2 PEIXES SILHUETA movendo (sub-superfície escura)
+  // Cada peixe segue trajetória circular lenta — visíveis como vulto escuro
+  var fishT1 = t * 0.3 + seed * 0.011;
+  var fishT2 = t * 0.25 + seed * 0.017 + Math.PI;
+  ctx.fillStyle = 'rgba(15,30,50,0.75)';
   ctx.beginPath();
-  ctx.arc(cx + W * 0.12, cy + H * 0.02, 0.9, 0, Math.PI * 2);
-  ctx.arc(cx - W * 0.10, cy + H * 0.10, 0.7, 0, Math.PI * 2);
+  // Peixe 1 — corpo elíptico orientado pela trajetória
+  var f1x = cx + Math.cos(fishT1) * W * 0.15;
+  var f1y = cy + Math.sin(fishT1) * H * 0.10;
+  var f1ang = fishT1 + Math.PI / 2;
+  ctx.ellipse(f1x, f1y, 4.5, 1.8, f1ang, 0, Math.PI * 2);
+  // Peixe 2 — direção oposta
+  var f2x = cx + Math.cos(fishT2) * W * 0.13;
+  var f2y = cy + Math.sin(fishT2) * H * 0.09;
+  var f2ang = fishT2 + Math.PI / 2;
+  ctx.moveTo(f2x + 4, f2y);
+  ctx.ellipse(f2x, f2y, 4.0, 1.5, f2ang, 0, Math.PI * 2);
   ctx.fill();
-  // Sombra profunda inferior (volume)
-  ctx.fillStyle = 'rgba(20,40,60,0.30)';
+  // Caudas dos peixes (triangle pontudo atrás)
+  ctx.fillStyle = 'rgba(15,30,50,0.65)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + H * 0.12, W * 0.18, H * 0.025, 0, 0, Math.PI * 2);
+  // Peixe 1 cauda
+  var f1bx = f1x - Math.cos(fishT1) * 5;
+  var f1by = f1y - Math.sin(fishT1) * 5;
+  ctx.moveTo(f1bx, f1by);
+  ctx.lineTo(f1bx - Math.cos(fishT1) * 3 + Math.sin(fishT1) * 2,
+             f1by - Math.sin(fishT1) * 3 - Math.cos(fishT1) * 2);
+  ctx.lineTo(f1bx - Math.cos(fishT1) * 3 - Math.sin(fishT1) * 2,
+             f1by - Math.sin(fishT1) * 3 + Math.cos(fishT1) * 2);
+  ctx.closePath();
   ctx.fill();
-  // POLISH ÉPICO (2026-04-27): lily pads (vitórias-régias) + cattails na borda
-  // pra dar feel de lago/charco AAA. 2 lily pads em ring avoiding centro.
-  ctx.fillStyle = '#2c5a2a';  // verde lírio escuro
+  // Lily pad pequena (1 só, NW)
+  ctx.fillStyle = '#3a6a30';
   ctx.beginPath();
-  // Lily pad 1 (NE)
-  ctx.moveTo(cx + W * 0.20 + W * 0.05, cy - H * 0.08);
-  ctx.ellipse(cx + W * 0.20, cy - H * 0.08, W * 0.05, H * 0.022, 0, 0, Math.PI * 2);
-  // Lily pad 2 (SW)
-  ctx.moveTo(cx - W * 0.18 + W * 0.04, cy + H * 0.06);
-  ctx.ellipse(cx - W * 0.18, cy + H * 0.06, W * 0.04, H * 0.018, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx - W * 0.20, cy - H * 0.18, W * 0.04, H * 0.018, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Highlight nas lily pads
-  ctx.fillStyle = '#5a8038';
-  ctx.beginPath();
-  ctx.moveTo(cx + W * 0.20 + W * 0.025, cy - H * 0.10);
-  ctx.ellipse(cx + W * 0.20, cy - H * 0.10, W * 0.025, H * 0.008, 0, 0, Math.PI * 2);
-  ctx.moveTo(cx - W * 0.18 + W * 0.020, cy + H * 0.04);
-  ctx.ellipse(cx - W * 0.18, cy + H * 0.04, W * 0.020, H * 0.006, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Flor de lírio (1 flor branca/rosa em uma das pads)
-  ctx.fillStyle = '#f0d8e8';
-  ctx.beginPath();
-  ctx.arc(cx + W * 0.20, cy - H * 0.09, 1.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#e8a8c8';
-  ctx.beginPath();
-  ctx.arc(cx + W * 0.20, cy - H * 0.09, 0.6, 0, Math.PI * 2);
-  ctx.fill();
-  // Cattails (3 strokes verticais finos com cabeça marrom — borda do hex)
+  // Cattails (3 strokes verticais finos — borda SE)
   ctx.strokeStyle = '#3a5028';
   ctx.lineWidth = 1.0;
   ctx.lineCap = 'round';
   ctx.beginPath();
   for (var ci = 0; ci < 3; ci++) {
-    var cax = cx - W * 0.30 + ci * 2.8;
-    var cay = cy - H * 0.16;
+    var cax = cx + W * 0.18 + ci * 2.8;
+    var cay = cy + H * 0.18;
     ctx.moveTo(cax, cay + 5);
     ctx.lineTo(cax, cay - 3);
   }
   ctx.stroke();
-  // Cabeça marrom dos cattails (rect pequeno no topo)
+  // Cabeça marrom dos cattails
   ctx.fillStyle = '#5a3818';
   ctx.beginPath();
   for (var ci = 0; ci < 3; ci++) {
-    var cax = cx - W * 0.30 + ci * 2.8;
-    var cay = cy - H * 0.16;
+    var cax = cx + W * 0.18 + ci * 2.8;
+    var cay = cy + H * 0.18;
     ctx.rect(cax - 0.6, cay - 4.5, 1.2, 2.5);
   }
   ctx.fill();
-  // EPIC = ~10 ops total (pond AAA com lírios + cattails)
+  // EPIC = water AAA com peixes + ripples + cattails
 }
 
 function _drawMudAAA(ctx, cx, cy, col, row) {
@@ -24792,7 +24829,17 @@ window._isPlayerOnMata = _isPlayerOnMata;
 function getVisionRange() {
   // Mata isolation: vision 0 (só hex atual visível). buildFogMask aplica
   // override extra pra fogar TODOS os outros hexes, mesmo memória.
-  if (_isPlayerOnMata()) return 0;
+  // 2026-04-27 USER RULE: "permita que ao acender tocha ou usar alguma
+  // skill de iluminação, consiga ver os hexagonos adjacentes normalmente,
+  // mas não muito longe do hexagono da mata, máximo 2 hexagonos, mesmo
+  // durante o dia com tempo limpo". Se em mata + tocha/luz: vision 2.
+  if (_isPlayerOnMata()) {
+    var _src = S.lightSource;
+    if (_src === 'torch') return 1;            // tocha simples: adjacentes
+    if (_src === 'light' || _src === 'dancing_lights') return 2;  // magia
+    if (_src === 'daylight') return 2;         // luz divina
+    return 0;  // sem luz: só hex atual
+  }
   const phase = S.dayPhase || 'day';
   const biome = S.biome || 'forest';
   const weather = S.weather || 's';
@@ -24873,9 +24920,14 @@ function buildFogMask() {
       const state = S.fogState[key];
       const dist = hexDist(c, r, pCol, pRow);
       let alpha;
-      // Mata isolation: dist=0 visível, todo resto fogged total
+      // Mata isolation: dist=0 visível, todo resto fogged total. Com luz
+      // (tocha/light/dancing_lights), revela hexes adjacentes até `vision`
+      // hexes — máximo 2 (USER RULE 2026-04-27).
       if (inMata) {
-        alpha = (dist === 0) ? 0 : 255;
+        if (dist === 0) alpha = 0;
+        else if (vision >= 1 && dist === 1) alpha = 60;    // adjacente quase visível com luz
+        else if (vision >= 2 && dist === 2) alpha = 160;   // d=2 fortemente atenuado
+        else alpha = 255;
         const idx0 = ((r + MASK_PADDING) * w + (c + MASK_PADDING)) * 4;
         data[idx0] = 0; data[idx0 + 1] = 0; data[idx0 + 2] = 0; data[idx0 + 3] = alpha;
         continue;
@@ -24981,11 +25033,17 @@ function drawFogComposite() {
     fogCtx.drawImage(maskCanvas, 0, 0, maskCanvas.width, maskCanvas.height,
       gridLeft - padX, gridTop - padY, gridW + padX * 2, gridH + padY * 2);
 
+    // 2026-04-27 USER RULE: "faça com que os hexagonos que não sejam da
+    // mata fiquem literalmente pretos, fog 100% até que o personagem saia
+    // da mata". Em mata, FOG_COLOR = preto puro 100% opaco em vez do
+    // fog padrão 92%. Cobre tudo fora do hex atual.
+    var _matFogColor = (typeof _isPlayerOnMata === 'function' && _isPlayerOnMata())
+      ? 'rgba(0,0,0,1)' : FOG_COLOR;
     fogCtx.globalCompositeOperation = 'source-in';
-    fogCtx.fillStyle = FOG_COLOR;
+    fogCtx.fillStyle = _matFogColor;
     fogCtx.fillRect(0, 0, canvasW, canvasH);
     fogCtx.globalCompositeOperation = 'source-over';
-    fogCtx.fillStyle = FOG_COLOR;
+    fogCtx.fillStyle = _matFogColor;
     if (gridLeft - padX > 0) fogCtx.fillRect(0, 0, gridLeft - padX, canvasH);
     const rEdge = gridLeft + gridW + padX;
     if (rEdge < canvasW) fogCtx.fillRect(rEdge, 0, canvasW - rEdge, canvasH);
@@ -25429,6 +25487,16 @@ function onMoveEnd(col, row) {
   S.visited.add(fogKey(col, row));
   revealFogAt(col, row, getVisionRange());
 
+  // 2026-04-27: Wet status (D&D 5e DMG p.110 "Wet"). Decrementa a cada step.
+  // Player ganha o status ao pisar em water tile (definido abaixo). Dura ~5 turnos.
+  // Em combate aplica vulnerabilidade a frio + resistência a fogo (PHB MM ad-hoc).
+  if (typeof p.wet === 'number' && p.wet > 0) {
+    p.wet -= 1;
+    if (p.wet === 0) {
+      dmNarrate({ text: 'Suas roupas finalmente secaram.', type: 'ambient' });
+    }
+  }
+
   // Sub-projeto #4 v6 (2026-04-27): auto-trigger tile-object event quando
   // player pisa no hex. UX descoberta natural — sem precisar clicar.
   // Skip se already triggered (state cleared/ruins ainda re-mostra mas state-aware).
@@ -25525,6 +25593,35 @@ function onMoveEnd(col, row) {
         return;
       }
     }
+  }
+
+  // 2026-04-27: Water tile (w/W) — narração própria + status MOLHADO (D&D 5e
+  // DMG p.110). Pula event roll (não dá pra ter encontro de POI dentro d'água).
+  // Wet status dura 5 turnos. Em combate dispara vulnerabilidade a frio + resist
+  // fogo (passado pra combate.html via SIM payload em wetTurns_exact).
+  var _isWaterTile = (tile === 'w' || tile === 'W');
+  if (_isWaterTile) {
+    var _waterTexts = [
+      'Você atravessa a água, sentindo o frio subir pelas pernas.',
+      'A água gelada se infiltra nas suas botas — você se molha por inteiro.',
+      'Cada passo na água levanta ondulações que ecoam pelo silêncio.',
+      'A correnteza puxa contra suas pernas — você avança com dificuldade.'
+    ];
+    dmNarrate({ text: pickRandom(_waterTexts), type: 'action' });
+    var _wasWet = (typeof p.wet === 'number' && p.wet > 0);
+    p.wet = 5;
+    if (!_wasWet) {
+      dmNarrate({ text: 'Você ganha o status MOLHADO. Frio causa mais dano; fogo, menos. (5 turnos)', type: 'event' });
+    }
+    LOG('WATER', 'wet_status_applied tile=' + tile + ' turns=' + p.wet);
+    // Pula tudo: ambient tip, weather, event roll. Apenas tickDayPhase + render.
+    tickDayPhase();
+    _setPhase('idle', 'onMoveEnd_water_skip_events');
+    updateHud();
+    updateHexNav();
+    centerOnPlayer(true);
+    scheduleRender();
+    return;
   }
 
   // Walk text — por bioma + superfície, com fallback em cascata
@@ -26165,7 +26262,10 @@ function triggerCombatScreen(cfg) {
         hp_exact: godmode ? 9999 : p.hp,
         mhp_exact: godmode ? 9999 : p.mhp,
         mp_exact: godmode ? 9999 : p.mp,
-        mmp_exact: godmode ? 9999 : p.mmp
+        mmp_exact: godmode ? 9999 : p.mmp,
+        // 2026-04-27: Wet status (D&D 5e DMG p.110). Combate aplica
+        // vulnerabilidade a frio + resistência a fogo enquanto wetTurns > 0.
+        wetTurns_exact: (typeof p.wet === 'number' && p.wet > 0) ? p.wet : 0
       },
       enemies: [simEnemy].concat(reinforcements)
     }));
