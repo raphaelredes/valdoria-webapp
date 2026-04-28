@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:50:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T01:11:21Z - do not edit directly, edit source -->
 
 
 <!--
@@ -17509,14 +17509,33 @@ function generateMap(mapId) {
         }
         gridRow.push(tile);
 
-        let mul = 0.75 + rng() * 0.55;
+        // 2026-04-27 USER RULE: "precisamos resolver problemas graves de
+        // altitude de hexagonos, para padronizar e manter a visualização
+        // mais realista... causando sensação de ser um piso flutuante".
+        // Antes: ground tiles ('.', 'g', 'p', 's') tinham mul random
+        // 0.75-1.30 → adjacent hexes com alturas diferentes (5-9px) →
+        // sensação de pisos flutuantes. Agora: ground tiles UNIFORMES
+        // (sem randomização) — apenas variação sutil entre TIPOS (path
+        // mais baixa que grama). Variação random preservada SÓ em
+        // objetos verticais (árvores, rochas, montanhas) onde faz
+        // sentido visual orgânico (cada árvore tem altura diferente).
+        let mul = 1.0;  // default UNIFORME pra todo ground tile
         if (tile === 'w' || tile === 'W') mul = 1.0;
-        else if (tile === 'p') mul = 0.85 + rng() * 0.2;
+        else if (tile === 'p') mul = 0.95;        // path levemente abaixo (uniforme)
+        else if (tile === '.') mul = 1.0;          // grama nivelada
+        else if (tile === 'g') mul = 1.0;          // mata nivelada com grama
+        else if (tile === 's') mul = 0.95;         // areia plana
         else if (tile === 'T') {
+          // Árvores: variação ORGÂNICA mantida (cada árvore altura única)
           mul = 0.9 + rng() * 0.6;
           if (d > 2 && rng() < 0.08) mul = 1.7 + rng() * 0.6;
-        } else if (tile === 'r' && rng() < 0.18) mul = 1.4 + rng() * 0.5;
-        else if (tile === 'M') mul = 0.85 + rng() * 0.4;
+        } else if (tile === 'r') {
+          // Rochas: variação leve (algumas mais imponentes)
+          mul = 1.0 + (rng() < 0.18 ? 0.4 + rng() * 0.5 : 0);
+        }
+        else if (tile === 'M') mul = 0.85 + rng() * 0.4;  // montanha mantém var
+        else if (tile === 'R') mul = 1.0 + rng() * 0.2;   // afloramento leve var
+        // Outros tiles que não são ground específico: padrão 1.0 (uniforme)
         hmulRow.push(mul);
 
         // Decorações NÃO em landmarks

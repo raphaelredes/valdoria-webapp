@@ -39,7 +39,7 @@ window.TILE_EVENTS_DB['orc_camp.dormant'] = {
       label: 'Descansar brevemente',
       flavor: 'Você se senta perto da fogueira morta. Por alguns minutos, o silêncio é um aliado.',
       outcome_ok: {
-        flavor: 'Você recupera o fôlego. +5 HP.',
+        flavor: 'Você recupera o fôlego. O peso da estrada cede um pouco.',
         ops: [{ op: 'hp', delta: 5 }],
         fsm: null
       }
@@ -238,7 +238,7 @@ window.TILE_EVENTS_DB['orc_camp.ruins'] = {
       label: 'Refletir sobre o passado',
       flavor: 'Você fica em silêncio um momento, contemplando a passagem do tempo.',
       outcome_ok: {
-        flavor: 'Algo no ar te traz clareza. +5 XP de sabedoria silenciosa.',
+        flavor: 'Algo no ar te traz clareza — sabedoria silenciosa que ficará com você.',
         ops: [{ op: 'xp', delta: 5 }],
         fsm: null
       }
@@ -558,7 +558,7 @@ window.TILE_EVENTS_DB['runestone.active'] = {
       label: 'Observar em silêncio',
       flavor: 'Você se afasta e contempla. A pedra eventualmente acalma.',
       outcome_ok: {
-        flavor: 'Algo no ato de observar te ensina. +10 XP.',
+        flavor: 'Algo no ato de observar te ensina. Você não saberia explicar o quê — mas ficou.',
         ops: [{ op: 'xp', delta: 10 }],
         fsm: 'player_proximity'
       }
@@ -645,15 +645,78 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
       label: 'Seguir as pegadas (Sobrevivência)',
       skill: 'survival', dc: 13,
       outcome_ok: {
-        flavor: 'Você segue o rastro até uma clareira. O urso pardo está ferido, mas vivo. Pode ser caçado por xp ou poupado.',
+        // 2026-04-27 USER RULE: removido "por xp" (referência técnica quebra
+        // imersão) + adicionado chain real pra escolher caçar/poupar/curar.
+        // Padrão AAA tipo BG3/Pathfinder/Witcher 3 — encontro com criatura
+        // ferida exige decisão moral, não apenas FINALIZAR.
+        flavor: 'Você segue o rastro até uma clareira sob a luz filtrada das árvores. O urso pardo está deitado de lado, ofegante. Tem uma flecha quebrada cravada no flanco esquerdo, e o sangue escuro mancha o pelo. Os olhos te encaram — não com fúria, mas com cansaço. Ainda é perigoso. Ainda é um urso.',
         ops: [
-          { op: 'xp', delta: 18 },
           { op: 'flag', id: 'fresh_tracks_followed', scope: 'session' }
         ],
-        fsm: 'player_proximity'
+        fsm: 'player_proximity',
+        chain: {
+          id: 'fresh_tracks.bear_encounter',
+          title: 'PEGADAS FRESCAS',
+          body: 'O urso ergue a cabeça com esforço, observando seus passos. Em alguns segundos ele decide se reage ou cede. Você decide primeiro.',
+          choices: [
+            {
+              id: 'fresh_tracks_hunt',
+              label: 'Abater rápido — golpe certeiro',
+              skill: 'str', dc: 10,
+              outcome_ok: {
+                flavor: 'Você se aproxima em silêncio e desfere o golpe. O urso solta um rosnado curto e tomba sem agonia desnecessária. Você recolhe pele, gordura e carne — recursos que valem em qualquer vilarejo. A clareira fica em silêncio outra vez.',
+                ops: [
+                  { op: 'xp', delta: 25 },
+                  { op: 'gold', delta: 12 },
+                  { op: 'flag', id: 'fresh_tracks_hunted', scope: 'pc' }
+                ]
+              },
+              outcome_fail: {
+                flavor: 'O golpe sai mal calculado e o urso reage. Mesmo ferido, te derruba com a pata antes de sucumbir. Você sente as costelas reclamarem — e o gosto amargo de uma caça malfeita.',
+                ops: [
+                  { op: 'hp', delta: -8 },
+                  { op: 'xp', delta: 10 },
+                  { op: 'flag', id: 'fresh_tracks_hunted', scope: 'pc' }
+                ]
+              }
+            },
+            {
+              id: 'fresh_tracks_heal',
+              label: 'Tentar curar a fera (Medicina)',
+              skill: 'medicine', dc: 14,
+              outcome_ok: {
+                flavor: 'Você se aproxima com cautela. O urso permite. Arranca a flecha quebrada num movimento firme, aplica o que tem de erva e tecido limpo, e recua devagar. O animal te encara por um longo segundo — um juramento mudo — e desaparece nas árvores.',
+                ops: [
+                  { op: 'xp', delta: 30 },
+                  { op: 'flag', id: 'fresh_tracks_healed', scope: 'pc' }
+                ]
+              },
+              outcome_fail: {
+                flavor: 'O urso se assusta com a aproximação e ataca antes de você explicar gesto algum. Você consegue se afastar mas leva um corte profundo no braço. O animal cambaleia floresta adentro, mais ferido ainda do que antes.',
+                ops: [
+                  { op: 'hp', delta: -6 },
+                  { op: 'xp', delta: 5 },
+                  { op: 'flag', id: 'fresh_tracks_healed_failed', scope: 'pc' }
+                ]
+              }
+            },
+            {
+              id: 'fresh_tracks_spare',
+              label: 'Recuar — deixar a fera viver',
+              flavor: 'Você não tira o olho do urso enquanto recua. Ele te observa de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
+              outcome_ok: {
+                flavor: 'Você não tira o olho do urso enquanto recua. Ele te observa de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
+                ops: [
+                  { op: 'xp', delta: 18 },
+                  { op: 'flag', id: 'fresh_tracks_spared', scope: 'pc' }
+                ]
+              }
+            }
+          ]
+        }
       },
       outcome_fail: {
-        flavor: 'Você perde o rastro entre raízes. Cansado e frustrado.',
+        flavor: 'Você perde o rastro entre raízes e samambaias. A floresta engole as pegadas. Cansaço e frustração — pelo menos a floresta não te traiu de propósito.',
         ops: [{ op: 'exh', delta: 1 }],
         fsm: null
       }
@@ -826,7 +889,7 @@ window.TILE_EVENTS_DB['sentinel_post.cleared'] = {
       label: 'Descanso curto (5 min)',
       flavor: 'Você fecha os olhos por um momento.',
       outcome_ok: {
-        flavor: 'Você recupera o fôlego. +5 HP, +2 MP.',
+        flavor: 'Você recupera o fôlego — e algo da chama interior também volta. A pausa valeu.',
         ops: [
           { op: 'hp', delta: 5 },
           { op: 'mp', delta: 2 }
@@ -991,7 +1054,7 @@ window.TILE_EVENTS_DB['bandit_camp.dormant'] = {
       label: 'Descansar entre as tendas',
       flavor: 'Você se acomoda, vigilante.',
       outcome_ok: {
-        flavor: '+5 HP. Mas o sono é leve.',
+        flavor: 'Algumas horas de sono leve — uma orelha sempre acordada. O corpo agradece o pouco que pôde.',
         ops: [{ op: 'hp', delta: 5 }],
         fsm: null
       }
@@ -1302,7 +1365,7 @@ window.TILE_EVENTS_DB['hunter_camp.cleared'] = {
       label: 'Coletar suprimentos com respeito',
       flavor: 'Você toma apenas o necessário.',
       outcome_ok: {
-        flavor: '+15 Valdoritas e rações. Você pratica o ritual silencioso de despedida.',
+        flavor: 'Algumas moedas, rações que ainda servem — você toma apenas o que viajante de boa fé toma. Um momento de silêncio, e segue.',
         ops: [
           { op: 'gold', delta: 15 },
           { op: 'item', id: 'travel_rations' },
@@ -1428,7 +1491,7 @@ window.TILE_EVENTS_DB['caravan_camp.dormant'] = {
       label: 'Acampar próximo (em paz)',
       flavor: 'Você descansa a uma distância respeitosa.',
       outcome_ok: {
-        flavor: '+8 HP, +3 MP de descanso curto.',
+        flavor: 'Você se acomoda perto, mas não próximo demais. O sono vem fácil, e a chama interior volta a respirar.',
         ops: [
           { op: 'hp', delta: 8 },
           { op: 'mp', delta: 3 }
@@ -1531,7 +1594,7 @@ window.TILE_EVENTS_DB['caravan_camp.ruins'] = {
       label: 'Prestar respeito',
       flavor: 'Você dedica um momento.',
       outcome_ok: {
-        flavor: 'Você se sente em paz. +5 XP.',
+        flavor: 'Você se sente em paz. Pequeno gesto, eco silencioso.',
         ops: [{ op: 'xp', delta: 5 }],
         fsm: null
       }
@@ -1581,7 +1644,7 @@ window.TILE_EVENTS_DB['abandoned_camp.dormant'] = {
       label: 'Salvar o que puder',
       flavor: 'Você revira as tendas em busca de utilitários.',
       outcome_ok: {
-        flavor: '+8 Valdoritas em moedas espalhadas + um cantil.',
+        flavor: 'Algumas moedas espalhadas no chão, um cantil ainda com água. Não muito — mas o suficiente pra valer o tempo.',
         ops: [{ op: 'gold', delta: 8 }],
         fsm: null
       }
