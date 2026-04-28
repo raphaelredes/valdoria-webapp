@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:33:15Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:39:38Z - do not edit directly, edit source -->
 
 
 <!--
@@ -26523,26 +26523,116 @@ function _remoteRenderDiceAndResolve(ch, oc) {
 }
 
 // X-4.5: helper — aplica outcome remoto; se combat_redirect, navega.
+// 2026-04-27 USER RULE: "ficou travado no popup quando cliquei em CONTINUAR
+// após finalizar a rolagem do dado". Bug raiz: _remoteShowOutcome só
+// atualizava texto em #event-resolved (elemento errado) e removia
+// confirm-overlay, mas NUNCA mostrava o botão #event-continue nem fechava
+// o event-modal. LOCAL applyChoiceOutcome (linha ~26649) fazia isso direito.
+//
+// FIX: replicar flow LOCAL — esconder choices/flavor + popular #event-outcome
+// com header (Sucesso/Falha) + narrativa + consequences (gold/xp/hp) +
+// mostrar #event-continue button bindado a closeEventModal. Paridade total
+// LOCAL ↔ REMOTE pra eventos com skill check (Caravana, Camponês, Santuário,
+// Pedregulho, Peregrino, etc.).
 function _remoteShowOutcome(ch, oc) {
+  var tier = oc.tier || 'success';
+  var outcomeText = oc.text || '';
   S.event.resolved = {
-    tier: oc.tier || 'success',
-    text: oc.text || '',
+    tier: tier,
+    text: outcomeText,
     reward: (oc.delta && oc.delta.gold) ? ('+' + oc.delta.gold + ' Valdoritas') : null
   };
+  // Confirm overlay close (legacy)
   try {
-    var resolvedEl = document.getElementById('event-resolved');
-    if (resolvedEl) {
-      clearChildren(resolvedEl);
-      var txt = document.createElement('div');
-      txt.className = 'resolved-text ' + (S.event.resolved.tier || 'success');
-      txt.textContent = S.event.resolved.text;
-      resolvedEl.appendChild(txt);
-      resolvedEl.style.display = 'block';
-    }
     var confirmEl = document.getElementById('confirm-overlay');
     if (confirmEl) confirmEl.classList.remove('visible');
   } catch (_) {}
+  // Esconde choices + label + flavor (mesma lógica do LOCAL applyChoiceOutcome)
+  try {
+    var choicesEl = document.getElementById('event-choices');
+    var choicesLbl = document.getElementById('event-choices-label');
+    var flavorEl = document.getElementById('event-flavor');
+    if (choicesEl) choicesEl.style.display = 'none';
+    if (choicesLbl) choicesLbl.style.display = 'none';
+    if (flavorEl) flavorEl.style.display = 'none';
+  } catch (_) {}
+  // Renderiza outcome em #event-outcome (elemento canônico, mesmo que LOCAL)
+  try {
+    var outcomeEl = document.getElementById('event-outcome');
+    if (outcomeEl) {
+      outcomeEl.classList.remove('hidden');
+      outcomeEl.className = 'event-outcome ' + tier;
+      clearChildren(outcomeEl);
+      // Header
+      var hdr = document.createElement('div');
+      hdr.className = 'outcome-header';
+      hdr.textContent = tier === 'success' ? '✦ Sucesso' : tier === 'partial' ? '○ Sucesso Parcial' : '✗ Falha';
+      outcomeEl.appendChild(hdr);
+      // Narrativa
+      var narr = document.createElement('p');
+      narr.style.margin = '6px 0 0 0';
+      narr.textContent = outcomeText;
+      outcomeEl.appendChild(narr);
+      // Consequences (server delta — gold/xp/hp/mp)
+      var consItems = [];
+      var d = oc.delta || {};
+      if (typeof d.gold === 'number' && d.gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + d.gold + ' Valdoritas' });
+      else if (typeof d.gold === 'number' && d.gold < 0) consItems.push({ kind: 'penalty', ico: '◉', text: d.gold + ' Valdoritas' });
+      if (typeof d.xp === 'number' && d.xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + d.xp + ' XP' });
+      if (typeof d.hp === 'number' && d.hp > 0) consItems.push({ kind: 'reward', ico: '♥', text: '+' + d.hp + ' HP' });
+      else if (typeof d.hp === 'number' && d.hp < 0) consItems.push({ kind: 'penalty', ico: '♥', text: d.hp + ' HP' });
+      if (typeof d.mp === 'number' && d.mp > 0) consItems.push({ kind: 'reward', ico: '◆', text: '+' + d.mp + ' MP' });
+      else if (typeof d.mp === 'number' && d.mp < 0) consItems.push({ kind: 'penalty', ico: '◆', text: d.mp + ' MP' });
+      if (consItems.length) {
+        var cons = document.createElement('div');
+        cons.className = 'outcome-consequences';
+        for (var ci = 0; ci < consItems.length; ci++) {
+          var item = consItems[ci];
+          var ditem = document.createElement('div');
+          ditem.className = 'outcome-consequence ' + item.kind;
+          ditem.textContent = item.ico + ' ' + item.text;
+          cons.appendChild(ditem);
+        }
+        outcomeEl.appendChild(cons);
+      }
+    }
+  } catch (eOC) {
+    try { LOGE('EVENT', '_remoteShowOutcome render err=' + (eOC && eOC.message)); } catch (_) {}
+  }
   updateHud();
+  // Mostra Continuar button + bind (com handlers redundantes e CSS forçado
+  // — mesma robustez do dice safety pra Telegram WebView)
+  try {
+    var continueEl = document.getElementById('event-continue');
+    if (continueEl) {
+      continueEl.classList.remove('hidden');
+      var advanced = false;
+      var advance = function(src) {
+        try { LOG('EVENT', '_remote continue advance source=' + (src || '?') + ' advanced=' + advanced); } catch (_) {}
+        if (advanced) return;
+        advanced = true;
+        try { closeEventModal(); } catch (eC) {
+          try { LOGE('EVENT', 'closeEventModal err=' + (eC && eC.message)); } catch (_) {}
+          // Force fallback: hide modal + reset ph
+          try {
+            document.getElementById('event-modal').classList.remove('visible');
+            S.event = null;
+            if (S.ph !== 'defeat' && typeof _setPhase === 'function') _setPhase('idle', 'remote_continue_fallback');
+            else if (S.ph !== 'defeat') S.ph = 'idle';
+          } catch (_) {}
+        }
+      };
+      // 3 handlers redundantes (paridade com dice safety — Telegram Android pointer)
+      continueEl.onclick = function() { advance('onclick'); };
+      continueEl.addEventListener('click', function() { advance('click'); });
+      continueEl.addEventListener('pointerdown', function() { advance('pointerdown'); });
+      continueEl.style.setProperty('pointer-events', 'auto', 'important');
+      continueEl.style.setProperty('cursor', 'pointer', 'important');
+      continueEl.style.setProperty('z-index', '999', 'important');
+    }
+  } catch (eBtn) {
+    try { LOGE('EVENT', '_remoteShowOutcome continue-btn err=' + (eBtn && eBtn.message)); } catch (_) {}
+  }
   // Combat redirect (X-3.5): se server disparou combate, navega após leitura.
   if (oc.combat_trigger) {
     LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
@@ -29756,57 +29846,148 @@ function closeDetailPopup() {
 }
 
 // ---- SOUND / MUSIC --------------------------------------------------
-// X-6.5.51AB (2026-04-26): retry de musica ate ValdoriaAudio carregar (file://
-// + script https assincrono pode demorar). Tambem registra unlock no primeiro
-// gesto pra QA shortcut (entrada direta na masmorra sem click "Adentrar").
+// 2026-04-27 USER RULE: "as músicas não estão tocando também na exploração,
+// melhore o funcionamento para que isso nunca mais aconteça, sempre que
+// tiver botão de música deve pegar de referência o conteúdo e resolver
+// sempre qual track estará tocando".
+//
+// PESQUISA APLICADA — Audio Resilience Pattern (3 camadas):
+//   1. Context resolver (`_resolveExpectedTrack`): pega track baseado em
+//      mapDef.music > S.biome (single source of truth — sem código
+//      duplicado). Botão de música usa este resolver pra sempre tocar
+//      a música certa pro contexto atual.
+//   2. Continuous gesture binding (não one-shot): cada gesto do user
+//      (até música tocar de fato) tenta o play. Removido SÓ quando
+//      ValdoriaAudio.getCurrentTrack() === expectedTrack.
+//   3. Watchdog setInterval(3000ms): a cada 3s checa se música está
+//      tocando o track esperado. Se não, retry (cobre casos: usuário
+//      mudou bioma, autoplay foi liberado tarde, audio-manager ainda
+//      carregando, etc.).
+//
+// CAUSAS RAIZ DO BUG QUE ESTE FIX RESOLVE:
+//   a) Telegram WebView Android bloqueia autoplay até user gesture; o
+//      one-shot listener antigo se removia depois do PRIMEIRO gesture
+//      (que podia ser dentro de overlay com stopPropagation, ou ser um
+//      gesture inválido pra audio context). Música nunca tocava.
+//   b) Race condition: ValdoriaAudio carregava DEPOIS do applyBiomeMusic
+//      ser chamado. Retry de 5s funcionava SE network era rápida, senão
+//      perdia. Watchdog cobre TODO esse intervalo com retry contínuo.
+//   c) Mudança de bioma (player atravessou edge tile): music ficava no
+//      track antigo. Watchdog detecta mismatch e crossfade pro novo.
+
 var _musicRetryAttempts = 0;
-var _musicGestureBound = false;
+var _musicGestureListeners = null;  // { click, touch, keydown } — re-bound on retry
+
+function _resolveExpectedTrack() {
+  // Single source of truth: mapDef.music > biome map.
+  // Aplicado em applyBiomeMusic + _audioWatchdog + retry on gesture.
+  if (window.S && window.S.mapDef && window.S.mapDef.music) return window.S.mapDef.music;
+  if (window.ValdoriaAudio && typeof window.ValdoriaAudio.playBiome === 'function') {
+    // playBiome internamente faz biomeMap[S.biome] || 'forest'. Como precisamos
+    // o trackKey resolvido aqui, replicamos o mapa (sincronizado com audio-manager.js).
+    var biomeMap = {
+      'plains': 'forest', 'forest': 'forest', 'swamp': 'swamp',
+      'mountain': 'mountain', 'cave': 'dungeon', 'desert': 'desert',
+      'snow': 'snow', 'volcanic': 'dungeon', 'ocean': 'ocean',
+      'coastal': 'ocean', 'ruins': 'ancient_ruins', 'underground': 'dungeon',
+      'graveyard': 'mystery'
+    };
+    var biome = (window.S && window.S.biome) ? window.S.biome : 'forest';
+    return biomeMap[biome] || 'forest';
+  }
+  return null;
+}
+
+function _tryPlayExpected() {
+  if (!window.ValdoriaAudio || !window.S || !window.S.soundOn) return false;
+  var expected = _resolveExpectedTrack();
+  if (!expected) return false;
+  var current = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : null;
+  if (current === expected) return true;  // já tocando o certo — sucesso
+  try {
+    if (typeof ValdoriaAudio.play === 'function') {
+      ValdoriaAudio.play(expected);
+      try { LOG('AUDIO', 'play expected=' + expected + ' was_current=' + (current || 'null')); } catch (_) {}
+    }
+  } catch (e) {
+    try { LOGW('AUDIO', '_tryPlayExpected err=' + (e && e.message)); } catch (_) {}
+  }
+  // Retorna true se ValdoriaAudio confirmou o track novo (audio.play() é async,
+  // mas getCurrentTrack atualiza imediatamente — confirmando intent).
+  return (typeof ValdoriaAudio.getCurrentTrack === 'function')
+    ? (ValdoriaAudio.getCurrentTrack() === expected) : true;
+}
+
+function _bindMusicGestureRetry() {
+  if (_musicGestureListeners) return;  // já bindado
+  var fired = false;
+  var handler = function () {
+    if (fired) return;
+    var ok = _tryPlayExpected();
+    if (ok && window.ValdoriaAudio && typeof ValdoriaAudio.isUnlocked === 'function' && ValdoriaAudio.isUnlocked()) {
+      // Sucesso confirmado — remove handlers
+      fired = true;
+      _unbindMusicGesture();
+    }
+    // Senão, deixa bindado pro próximo gesto (autoplay ainda bloqueado).
+  };
+  _musicGestureListeners = { click: handler, touch: handler, keydown: handler };
+  document.addEventListener('click', handler, true);
+  document.addEventListener('touchstart', handler, true);
+  document.addEventListener('keydown', handler, true);
+  try { LOG('AUDIO', 'gesture retry bound (continuous until unlocked)'); } catch (_) {}
+}
+
+function _unbindMusicGesture() {
+  if (!_musicGestureListeners) return;
+  document.removeEventListener('click', _musicGestureListeners.click, true);
+  document.removeEventListener('touchstart', _musicGestureListeners.touch, true);
+  document.removeEventListener('keydown', _musicGestureListeners.keydown, true);
+  _musicGestureListeners = null;
+  try { LOG('AUDIO', 'gesture retry unbound (audio playing)'); } catch (_) {}
+}
+
 function applyBiomeMusic() {
   try {
     if (!window.ValdoriaAudio) {
-      // Audio-manager ainda carregando. Retry ate 10x (5s total).
-      if (_musicRetryAttempts < 10) {
+      // Audio-manager ainda carregando. Retry ate 20x (10s total — generoso pra Telegram WebView).
+      if (_musicRetryAttempts < 20) {
         _musicRetryAttempts++;
         setTimeout(applyBiomeMusic, 500);
       } else {
-        console.warn('[EXPLORACAO] ValdoriaAudio nao carregou apos 5s');
+        try { LOGW('AUDIO', 'ValdoriaAudio nao carregou apos 10s'); } catch (_) {}
       }
       return;
     }
     _musicRetryAttempts = 0;
     if (S.soundOn) {
-      // Phase 5b polish v4 (2026-04-26): mapDef.music TEM PRIORIDADE sobre biome.
-      // Permite orc_chief_tent (biome=plains, music=dungeon) tocar dungeon_dark.
-      // Fallback continua S.biome via playBiome se mapDef nao tem music.
-      var mapMusic = (S.mapDef && S.mapDef.music) ? S.mapDef.music : null;
-      if (mapMusic && typeof ValdoriaAudio.play === 'function') {
-        ValdoriaAudio.play(mapMusic);
-        LOG('AUDIO', 'playing track from mapDef.music: ' + mapMusic);
-      } else if (typeof ValdoriaAudio.playBiome === 'function') {
-        ValdoriaAudio.playBiome(S.biome);
-      }
-      // Registra retry no primeiro gesto pra cobrir autoplay block (QA shortcut
-      // landing direto na pagina sem clicar antes). Roda 1x e remove listeners.
-      if (!_musicGestureBound) {
-        _musicGestureBound = true;
-        var _retryOnGesture = function () {
-          try {
-            var m = (S.mapDef && S.mapDef.music) ? S.mapDef.music : null;
-            if (m && S.soundOn && window.ValdoriaAudio) ValdoriaAudio.play(m);
-            else if (window.ValdoriaAudio && typeof ValdoriaAudio.playBiome === 'function') ValdoriaAudio.playBiome(S.biome);
-          } catch (e) { /* silent */ }
-          document.removeEventListener('click', _retryOnGesture, true);
-          document.removeEventListener('touchstart', _retryOnGesture, true);
-          document.removeEventListener('keydown', _retryOnGesture, true);
-        };
-        document.addEventListener('click', _retryOnGesture, true);
-        document.addEventListener('touchstart', _retryOnGesture, true);
-        document.addEventListener('keydown', _retryOnGesture, true);
-      }
+      _tryPlayExpected();
+      _bindMusicGestureRetry();
     } else if (typeof ValdoriaAudio.stop === 'function') {
       ValdoriaAudio.stop();
     }
-  } catch (e) { console.warn('[EXPLORACAO] audio failed:', e); }
+  } catch (e) {
+    try { LOGW('AUDIO', 'applyBiomeMusic failed: ' + (e && e.message)); } catch (_) {}
+  }
+}
+
+// Watchdog global — a cada 3s checa se música está tocando o track esperado.
+// Cobre: ValdoriaAudio late-load, autoplay unlock atraso, mudança de bioma
+// sem applyBiomeMusic chamado, audio crashou silenciosamente.
+if (typeof window._audioWatchdogInterval === 'undefined') {
+  window._audioWatchdogInterval = setInterval(function _audioWatchdog() {
+    if (!window.S || !window.S.soundOn || !window.ValdoriaAudio) return;
+    var expected = _resolveExpectedTrack();
+    if (!expected) return;
+    var current = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : null;
+    var unlocked = (typeof ValdoriaAudio.isUnlocked === 'function') ? ValdoriaAudio.isUnlocked() : true;
+    if (current !== expected) {
+      try { LOG('AUDIO-WATCHDOG', 'mismatch current=' + (current || 'null') + ' expected=' + expected + ' unlocked=' + unlocked); } catch (_) {}
+      _tryPlayExpected();
+      // Se ainda não unlocked, garante gesture binding ativo
+      if (!unlocked) _bindMusicGestureRetry();
+    }
+  }, 3000);
 }
 
 // ============================================================================
