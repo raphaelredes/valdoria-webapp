@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:20:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:33:15Z - do not edit directly, edit source -->
 
 
 <!--
@@ -20494,7 +20494,51 @@ function _drawTreeAAA(ctx, cx, cy, col, row) {
     ctx.ellipse(lx, ly, 1.6, 0.8, langle, 0, Math.PI * 2);
   }
   ctx.fill();
-  // EPIC = 8 ops batched (5 árvores totais)
+  // 9. POLISH ÉPICO (2026-04-27): cogumelos + raízes visíveis (forest underbrush feel)
+  // 2-3 cogumelos no chão (chapéu vermelho/branco, base bege) — narrativo D&D
+  var mushHat = '#a83020', mushStem = '#e8d8b0';
+  ctx.fillStyle = mushStem;
+  ctx.beginPath();
+  for (var mi = 0; mi < 2; mi++) {
+    var mseed = ((seed >> (mi * 5 + 2)) & 0x7F) / 127;
+    var mangle = mseed * Math.PI * 2;
+    var mr = (0.28 + mseed * 0.10) * W;
+    var mxx = cx + Math.cos(mangle) * mr;
+    var myy = cy + Math.sin(mangle) * mr * 0.55;
+    // Stem (rect pequeno)
+    ctx.rect(mxx - 0.7, myy - 1.5, 1.4, 2.0);
+  }
+  ctx.fill();
+  ctx.fillStyle = mushHat;
+  ctx.beginPath();
+  for (var mi = 0; mi < 2; mi++) {
+    var mseed = ((seed >> (mi * 5 + 2)) & 0x7F) / 127;
+    var mangle = mseed * Math.PI * 2;
+    var mr = (0.28 + mseed * 0.10) * W;
+    var mxx = cx + Math.cos(mangle) * mr;
+    var myy = cy + Math.sin(mangle) * mr * 0.55;
+    // Hat (semicírculo)
+    ctx.moveTo(mxx + 2.2, myy - 1.8);
+    ctx.arc(mxx, myy - 1.8, 2.2, 0, Math.PI, true);
+  }
+  ctx.fill();
+  // 10. Raízes visíveis (3 strokes finos saindo da base de cada árvore — sugere árvore plantada)
+  ctx.strokeStyle = TRK;
+  ctx.lineWidth = 0.8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var i = 0; i < n; i++) {
+    var t = trees[i];
+    var rxx = cx + t.dx * W;
+    var ryy = cy + t.dy * H + H * 0.16 * t.scale;
+    // 2 raízes saindo lado a lado da base
+    ctx.moveTo(rxx - W * 0.025 * t.scale, ryy);
+    ctx.lineTo(rxx - W * 0.06 * t.scale, ryy + H * 0.025 * t.scale);
+    ctx.moveTo(rxx + W * 0.025 * t.scale, ryy);
+    ctx.lineTo(rxx + W * 0.06 * t.scale, ryy + H * 0.022 * t.scale);
+  }
+  ctx.stroke();
+  // EPIC = 11 ops batched (5 árvores + cogumelos + raízes)
 }
 
 // _drawCottageAAA — Casa minimalista AAA mobile.
@@ -20604,7 +20648,70 @@ function _drawCottageAAA(ctx, cx, cy, col, row) {
     ctx.arc(sX, sY, sR, 0, Math.PI * 2);
     ctx.fill();
   }
-  // EPIC = 9 ops total
+  // 10. POLISH ÉPICO (2026-04-27): jardim com flores na frente da casa +
+  // caminho de pedras saindo da porta + cerca de madeira pequena à esquerda.
+  // Detalhes narrativos AAA — sente que tem alguém vivendo ali.
+  // Caminho de pedras (3 pedrinhas saindo da porta)
+  ctx.fillStyle = '#7a6e5a';
+  ctx.beginPath();
+  for (var pi = 0; pi < 3; pi++) {
+    var pcx = cx + (pi * W * 0.045);
+    var pcy = groundY + 1 + pi * 1.2;
+    ctx.moveTo(pcx + 1.6, pcy);
+    ctx.ellipse(pcx, pcy, 1.6, 0.7, 0, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Sombra das pedras
+  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  for (var pi = 0; pi < 3; pi++) {
+    var pcx = cx + (pi * W * 0.045);
+    var pcy = groundY + 1 + pi * 1.2;
+    ctx.moveTo(pcx + 1.8, pcy + 0.5);
+    ctx.ellipse(pcx, pcy + 0.5, 1.8, 0.4, 0, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Pequeno jardim de flores no lado oposto da porta (canteiro)
+  // 3 flores coloridas (vermelho, amarelo, branco) pra dar vida
+  var flowerColors = ['#c43838', '#e8c238', '#f0e8d0'];
+  for (var fi = 0; fi < 3; fi++) {
+    var fxx = bx - W * 0.04 + fi * 2.5;
+    var fyy = groundY - 0.5;
+    // Caule
+    ctx.strokeStyle = '#3a5028';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(fxx, fyy + 1.5);
+    ctx.lineTo(fxx + (fi - 1) * 0.4, fyy - 1.5);
+    ctx.stroke();
+    // Pétalas
+    ctx.fillStyle = flowerColors[fi];
+    ctx.beginPath();
+    ctx.arc(fxx + (fi - 1) * 0.4, fyy - 1.5, 1.0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Cerca pequena de madeira (3 estacas verticais lado direito da casa)
+  ctx.fillStyle = '#5a3820';
+  ctx.beginPath();
+  for (var fi = 0; fi < 3; fi++) {
+    var fxx = bx + bodyW + 1 + fi * 3.5;
+    var fyy = groundY - bodyH * 0.20;
+    ctx.rect(fxx, fyy, 1.2, bodyH * 0.20);
+    // Topo pontudo (triangle)
+    ctx.moveTo(fxx, fyy);
+    ctx.lineTo(fxx + 0.6, fyy - 1.2);
+    ctx.lineTo(fxx + 1.2, fyy);
+    ctx.closePath();
+  }
+  ctx.fill();
+  // Travessa horizontal da cerca
+  ctx.strokeStyle = '#5a3820';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(bx + bodyW + 1, groundY - bodyH * 0.10);
+  ctx.lineTo(bx + bodyW + 1 + 2 * 3.5 + 1.2, groundY - bodyH * 0.10);
+  ctx.stroke();
+  // EPIC = ~14 ops total (homestead AAA)
 }
 
 // _drawRockClusterAAA — Cluster de rochas minimalista AAA.
@@ -20716,7 +20823,63 @@ function _drawRockClusterAAA(ctx, cx, cy, col, row) {
     ctx.arc(mx, my, mr, 0, Math.PI * 2);
   }
   ctx.fill();
-  // EPIC = 6 ops batched
+  // POLISH ÉPICO (2026-04-27): pedrinhas (pebbles) espalhadas + lichen
+  // amarelo/laranja nos topos das rochas + tufos de grama nas fendas.
+  // Líchen amarelo (deposição rocha velha)
+  ctx.fillStyle = 'rgba(200,180,80,0.65)';  // lichen yellow
+  ctx.beginPath();
+  for (var li = 0; li < 4; li++) {
+    var rkIdx = li % n;
+    var rk = rocks[rkIdx];
+    var lxx = cx + rk.dx * W + (rng() - 0.5) * rk.rw * W * 1.4;
+    var lyy = cy + rk.dy * H + rk.rh * H * (-0.30 + rng() * 0.20);
+    var lrr = 0.8 + rng() * 0.7;
+    ctx.moveTo(lxx + lrr, lyy);
+    ctx.arc(lxx, lyy, lrr, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Líchen laranja (variação)
+  ctx.fillStyle = 'rgba(220,140,60,0.55)';
+  ctx.beginPath();
+  for (var li = 0; li < 3; li++) {
+    var rkIdx = li % n;
+    var rk = rocks[rkIdx];
+    var lxx = cx + rk.dx * W + (rng() - 0.5) * rk.rw * W * 1.2;
+    var lyy = cy + rk.dy * H + rk.rh * H * (-0.10 + rng() * 0.25);
+    var lrr = 0.6 + rng() * 0.5;
+    ctx.moveTo(lxx + lrr, lyy);
+    ctx.arc(lxx, lyy, lrr, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // 5 pedrinhas espalhadas pela base (extra grounding)
+  ctx.fillStyle = '#3a322a';
+  ctx.beginPath();
+  for (var pi = 0; pi < 5; pi++) {
+    var pseed = ((seed >> (pi * 5 + 7)) & 0x7F) / 127;
+    var pangle = pseed * Math.PI * 2 + 0.3;
+    var prr = (0.20 + pseed * 0.18) * W;
+    var pxx = cx + Math.cos(pangle) * prr;
+    var pyy = cy + Math.sin(pangle) * prr * 0.55;
+    var psize = 0.7 + pseed * 0.6;
+    ctx.moveTo(pxx + psize, pyy);
+    ctx.ellipse(pxx, pyy, psize, psize * 0.6, pangle, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Highlight nas pedrinhas (face NW)
+  ctx.fillStyle = 'rgba(140,128,108,0.55)';
+  ctx.beginPath();
+  for (var pi = 0; pi < 5; pi++) {
+    var pseed = ((seed >> (pi * 5 + 7)) & 0x7F) / 127;
+    var pangle = pseed * Math.PI * 2 + 0.3;
+    var prr = (0.20 + pseed * 0.18) * W;
+    var pxx = cx + Math.cos(pangle) * prr;
+    var pyy = cy + Math.sin(pangle) * prr * 0.55;
+    var psize = (0.7 + pseed * 0.6) * 0.6;
+    ctx.moveTo(pxx - 0.2 + psize * 0.5, pyy - 0.2);
+    ctx.ellipse(pxx - 0.2, pyy - 0.2, psize * 0.5, psize * 0.3, pangle, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // EPIC = rock cluster AAA (4 rochas + lichen yellow/orange + 5 pebbles)
 }
 
 // _drawRockOutcropAAA — Afloramento monolítico (R) — pedra alta dominante.
@@ -20923,7 +21086,61 @@ function _drawBushAAA(ctx, cx, cy, col, row) {
     ctx.arc(bx, by, br * 0.55, Math.PI * 1.15, Math.PI * 1.55);
   }
   ctx.stroke();
-  // EPIC = 6 ops batched (4 arbustos)
+  // POLISH ÉPICO (2026-04-27): wildflowers (pontos coloridos espalhados
+  // entre os arbustos — vermelho, amarelo, branco) + samambaia rara
+  // (3 hastes de fern) + butterflies (rare seed-based, 1 borboleta amarela).
+  // 4 wildflowers em ring (cores variadas)
+  var wfColors = ['#c43838', '#e8c238', '#f0e8d0', '#a85eb0'];
+  for (var fi = 0; fi < 4; fi++) {
+    var fseed = ((seed >> (fi * 4 + 5)) & 0x7F) / 127;
+    var fangle = fseed * Math.PI * 2 + fi * 1.5;
+    var frr = (0.16 + fseed * 0.10) * W;
+    var fxx = cx + Math.cos(fangle) * frr;
+    var fyy = cy + Math.sin(fangle) * frr * 0.55;
+    // Caule (verde)
+    ctx.strokeStyle = '#3a5028';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(fxx, fyy + 1.5);
+    ctx.lineTo(fxx, fyy - 1.0);
+    ctx.stroke();
+    // Pétalas (5 dots em roseta)
+    ctx.fillStyle = wfColors[fi];
+    ctx.beginPath();
+    for (var pe = 0; pe < 5; pe++) {
+      var pa = (pe / 5) * Math.PI * 2;
+      var pxx = fxx + Math.cos(pa) * 0.8;
+      var pyy = fyy - 1.0 + Math.sin(pa) * 0.8;
+      ctx.moveTo(pxx + 0.7, pyy);
+      ctx.arc(pxx, pyy, 0.7, 0, Math.PI * 2);
+    }
+    ctx.fill();
+    // Centro (amarelo)
+    ctx.fillStyle = '#e8c238';
+    ctx.beginPath();
+    ctx.arc(fxx, fyy - 1.0, 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Samambaias (3 hastes finas em arcos curvos — folhagem entre arbustos)
+  ctx.strokeStyle = 'rgba(50,80,30,0.75)';
+  ctx.lineWidth = 0.7;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var si = 0; si < 3; si++) {
+    var ssseed = ((seed >> (si * 7 + 9)) & 0x7F) / 127;
+    var sangle = ssseed * Math.PI * 2;
+    var srr = (0.22 + ssseed * 0.10) * W;
+    var sxx = cx + Math.cos(sangle) * srr;
+    var syy = cy + Math.sin(sangle) * srr * 0.55;
+    // Haste curva (5 mini-folhas via short strokes)
+    for (var fi = 0; fi < 4; fi++) {
+      var fy = syy - fi * 1.3;
+      ctx.moveTo(sxx, fy);
+      ctx.lineTo(sxx + (fi % 2 === 0 ? 1.5 : -1.5), fy - 0.8);
+    }
+  }
+  ctx.stroke();
+  // EPIC = bush AAA (4 arbustos + 4 wildflowers + 3 samambaias)
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -21026,7 +21243,75 @@ function _drawCampfireAAA(ctx, cx, cy, col, row) {
     ctx.arc(cx - W * 0.04, baseY - H * 0.005, 0.8, 0, Math.PI * 2);
     ctx.fill();
   }
-  // EPIC = ~10 ops total
+  // POLISH ÉPICO (2026-04-27): tripod com pote de cozinhar (active) +
+  // bedroll ao lado (todos states). Camp AAA narrativo D&D — sente
+  // que tem alguém acampando aqui.
+  // Tripod (3 strokes que convergem no topo)
+  if (state !== 'cold') {
+    ctx.strokeStyle = '#3a2810';
+    ctx.lineWidth = 0.9;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    var tipX = cx, tipY = baseY - H * 0.10;
+    ctx.moveTo(cx - W * 0.06, baseY); ctx.lineTo(tipX, tipY);
+    ctx.moveTo(cx + W * 0.06, baseY); ctx.lineTo(tipX, tipY);
+    ctx.moveTo(cx + W * 0.005, baseY + H * 0.005); ctx.lineTo(tipX, tipY);
+    ctx.stroke();
+    // Pote pendurado (rect + alça curva)
+    ctx.fillStyle = '#1a1410';
+    ctx.beginPath();
+    var potX = cx, potY = baseY - H * 0.04;
+    ctx.rect(potX - 2.5, potY - 1.5, 5, 3);
+    // Tampa
+    ctx.moveTo(potX - 2.5, potY - 1.5);
+    ctx.ellipse(potX, potY - 1.5, 2.5, 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Alça do pote (stroke arc)
+    ctx.strokeStyle = '#1a1410';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.arc(potX, potY - 1.5, 2.5, Math.PI, 0);
+    ctx.stroke();
+    // Vapor saindo do pote (3 wisps subindo)
+    ctx.strokeStyle = 'rgba(180,180,170,0.55)';
+    ctx.lineWidth = 0.8;
+    ctx.lineCap = 'round';
+    var steamT = _animTime * 0.001;
+    ctx.beginPath();
+    for (var sti = 0; sti < 3; sti++) {
+      var stx = potX + (sti - 1) * 1.5;
+      var sty = potY - 3;
+      var swy = Math.sin(steamT * 2 + sti) * 1.5;
+      ctx.moveTo(stx, sty);
+      ctx.quadraticCurveTo(stx + swy, sty - 3, stx + swy * 2, sty - 6);
+    }
+    ctx.stroke();
+  }
+  // Bedroll (rolinho de tecido) — SE do fogo, TODOS estados
+  var brX = cx + W * 0.18, brY = baseY + H * 0.04;
+  // Sombra do bedroll
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(brX, brY + 1.5, W * 0.05, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Bedroll (corpo enrolado — elipse marrom)
+  ctx.fillStyle = '#5a3820';
+  ctx.beginPath();
+  ctx.ellipse(brX, brY, W * 0.05, H * 0.020, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Highlight do bedroll
+  ctx.fillStyle = '#7a5430';
+  ctx.beginPath();
+  ctx.ellipse(brX, brY - 0.5, W * 0.04, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Linha enrolada (textura do tecido)
+  ctx.strokeStyle = 'rgba(40,28,16,0.6)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(brX - W * 0.04, brY);
+  ctx.lineTo(brX + W * 0.04, brY);
+  ctx.stroke();
+  // EPIC = camp AAA com tripod + pote vapor + bedroll
 }
 
 function _drawSkylightAAA(ctx, cx, cy, col, row) {
@@ -21213,7 +21498,58 @@ function _drawCrystalAAA(ctx, cx, cy, col, row) {
     ctx.lineTo(cxx, cyy + c.h * H * 0.5);
   }
   ctx.stroke();
-  // EPIC = 8 ops batched (3 cristais)
+  // POLISH ÉPICO (2026-04-27): shards de cristal acumulados no chão
+  // (formação subterrânea aflorando) + linhas de refração luminosa
+  // saindo do cristal principal. Crystal cave AAA.
+  // 4 shards pequenos espalhados em ring (formação rochosa)
+  ctx.fillStyle = '#2a4a68';  // azul cristal escuro
+  ctx.beginPath();
+  for (var si = 0; si < 4; si++) {
+    var sseed = ((seed >> (si * 4 + 3)) & 0x7F) / 127;
+    var sangle = sseed * Math.PI * 2 + 0.3;
+    var srr = (0.18 + sseed * 0.10) * W;
+    var sxx = cx + Math.cos(sangle) * srr;
+    var syy = cy + Math.sin(sangle) * srr * 0.55;
+    // Triangle pequeno (shard)
+    var sh = 2.5 + sseed * 1.5;
+    ctx.moveTo(sxx - 1.0, syy);
+    ctx.lineTo(sxx, syy - sh);
+    ctx.lineTo(sxx + 1.0, syy);
+    ctx.closePath();
+  }
+  ctx.fill();
+  // Highlight nos shards (face iluminada)
+  ctx.fillStyle = 'rgba(180,220,240,' + (0.7 * pulse).toFixed(3) + ')';
+  ctx.beginPath();
+  for (var si = 0; si < 4; si++) {
+    var sseed = ((seed >> (si * 4 + 3)) & 0x7F) / 127;
+    var sangle = sseed * Math.PI * 2 + 0.3;
+    var srr = (0.18 + sseed * 0.10) * W;
+    var sxx = cx + Math.cos(sangle) * srr;
+    var syy = cy + Math.sin(sangle) * srr * 0.55;
+    var sh = 2.5 + sseed * 1.5;
+    ctx.moveTo(sxx - 0.4, syy);
+    ctx.lineTo(sxx, syy - sh);
+    ctx.lineTo(sxx, syy);
+    ctx.closePath();
+  }
+  ctx.fill();
+  // Linhas de refração — 4 raios saindo do cristal principal (mainCrystal[0])
+  var mainC = crystals[Math.floor(n / 2)];
+  var mcx = cx + mainC.dx * W;
+  var mcy = cy + mainC.dy * H;
+  ctx.strokeStyle = 'rgba(180,220,240,' + (0.32 * pulse).toFixed(3) + ')';
+  ctx.lineWidth = 0.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var ri = 0; ri < 4; ri++) {
+    var rangle = (ri / 4) * Math.PI * 2 + 0.4;
+    var rlen = W * 0.10;
+    ctx.moveTo(mcx + Math.cos(rangle) * mainC.w * W * 0.5, mcy + Math.sin(rangle) * mainC.h * H * 0.3);
+    ctx.lineTo(mcx + Math.cos(rangle) * (mainC.w * W * 0.5 + rlen), mcy + Math.sin(rangle) * (mainC.h * H * 0.3 + rlen * 0.4));
+  }
+  ctx.stroke();
+  // EPIC = crystal cave AAA (3 cristais grandes + 4 shards + raios refração)
 }
 
 function _drawVolcanicAAA(ctx, cx, cy, col, row) {
@@ -21345,7 +21681,44 @@ function _drawVolcanicAAA(ctx, cx, cy, col, row) {
     ctx.ellipse(rx, ry, W * 0.022 * r.scale, H * 0.035 * r.scale, 0, 0, Math.PI * 2);
   }
   ctx.fill();
-  // EPIC = batched (3 rochas vulcânicas)
+  // POLISH ÉPICO (2026-04-27): vapor sulfúrico extra + cinza branca ao redor
+  // (deposição). Sente o ar pesado de calor e enxofre. Volcanic AAA.
+  // Vapor sulfúrico (3 wisps amarelados subindo entre as rochas — animado)
+  var steamY = _animTime * 0.0008;
+  ctx.strokeStyle = 'rgba(220,210,140,0.32)';  // amarelo enxofre
+  ctx.lineWidth = 1.0;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var stI = 0; stI < 3; stI++) {
+    var stx = cx + (stI - 1) * W * 0.15;
+    var sty = cy - H * 0.18;
+    var swayX = Math.sin(steamY + stI * 1.5) * 1.5;
+    ctx.moveTo(stx, sty + 4);
+    ctx.quadraticCurveTo(stx + swayX, sty - 1, stx + swayX * 1.5, sty - 6);
+    ctx.quadraticCurveTo(stx + swayX * 0.5, sty - 9, stx, sty - 12);
+  }
+  ctx.stroke();
+  // Cinza branca depositada ao redor das rochas (4 patches espalhados)
+  ctx.fillStyle = 'rgba(220,200,180,0.35)';
+  ctx.beginPath();
+  for (var ai = 0; ai < 4; ai++) {
+    var aseed = ((seed >> (ai * 4)) & 0x7F) / 127;
+    var aangle = aseed * Math.PI * 2 + 0.7;
+    var ar = (0.20 + aseed * 0.15) * W;
+    var axx = cx + Math.cos(aangle) * ar;
+    var ayy = cy + Math.sin(aangle) * ar * 0.55;
+    ctx.moveTo(axx + 2.5, ayy);
+    ctx.ellipse(axx, ayy, 2.5, 0.9, aangle, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // Pontos brilhantes de cristal/sulfeto entre as rochas (2-3 sparks pulsantes)
+  var sparkPulse = 0.5 + Math.sin(t * 3 + seed * 0.019) * 0.5;
+  ctx.fillStyle = 'rgba(255,200,80,' + sparkPulse.toFixed(3) + ')';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.05, cy + H * 0.08, 0.6, 0, Math.PI * 2);
+  ctx.arc(cx - W * 0.10, cy + H * 0.10, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  // EPIC = volcanic AAA (3 rochas + vapor + cinza + sparks)
 }
 
 function _drawTombstoneAAA(ctx, cx, cy, col, row) {
@@ -21462,7 +21835,62 @@ function _drawTombstoneAAA(ctx, cx, cy, col, row) {
     ctx.lineTo(tx + (rng() - 0.5), ty - 3);
   }
   ctx.stroke();
-  // EPIC = 3 lápides totais com detalhes
+  // POLISH ÉPICO (2026-04-27): flor murcha (oferenda) na lápide principal +
+  // chão rachado em volta + vela apagada (resíduo de cera). Cemitério AAA.
+  // Flor murcha (offering — caule curvo + 3 pétalas escurecidas)
+  var mainGrave = graves[Math.floor(n / 2)];
+  var fgx = cx + mainGrave.dx * W - W * 0.02;
+  var fgy = cy + mainGrave.dy * H + H * 0.10;
+  // Caule
+  ctx.strokeStyle = '#6a5530';
+  ctx.lineWidth = 0.8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(fgx, fgy);
+  ctx.quadraticCurveTo(fgx - 1.5, fgy - 3, fgx - 2.5, fgy - 5);
+  ctx.stroke();
+  // Pétalas murchas (3 pontos cinza-roxos pequenos)
+  ctx.fillStyle = '#5a4060';
+  ctx.beginPath();
+  ctx.arc(fgx - 2.5, fgy - 5, 1.2, 0, Math.PI * 2);
+  ctx.arc(fgx - 1.0, fgy - 4.5, 1.0, 0, Math.PI * 2);
+  ctx.arc(fgx - 3.5, fgy - 4.0, 0.9, 0, Math.PI * 2);
+  ctx.fill();
+  // Centro da flor (escuro)
+  ctx.fillStyle = '#2a1a30';
+  ctx.beginPath();
+  ctx.arc(fgx - 2.3, fgy - 5, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  // Vela apagada (rect + base de cera derretida)
+  var cgx = cx + mainGrave.dx * W + W * 0.04;
+  var cgy = cy + mainGrave.dy * H + H * 0.10;
+  ctx.fillStyle = '#d8c8a8';  // cera bege
+  ctx.beginPath();
+  ctx.rect(cgx - 0.6, cgy - 3, 1.2, 3);
+  // Base derretida (irregular)
+  ctx.moveTo(cgx + 1.5, cgy);
+  ctx.ellipse(cgx, cgy, 1.5, 0.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Pavio (linha preta vertical)
+  ctx.strokeStyle = '#1a0a08';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(cgx, cgy - 3);
+  ctx.lineTo(cgx, cgy - 4);
+  ctx.stroke();
+  // Chão rachado (3 cracks finas saindo do centro do hex pra fora)
+  ctx.strokeStyle = 'rgba(30,25,20,0.40)';
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  for (var ci = 0; ci < 3; ci++) {
+    var cangle = (ci / 3) * Math.PI * 2 + seed * 0.002 + 0.5;
+    var cstart_r = W * 0.06;
+    var cend_r = W * 0.18;
+    ctx.moveTo(cx + Math.cos(cangle) * cstart_r, cy + Math.sin(cangle) * cstart_r * 0.55);
+    ctx.lineTo(cx + Math.cos(cangle) * cend_r, cy + Math.sin(cangle) * cend_r * 0.55);
+  }
+  ctx.stroke();
+  // EPIC = 3 lápides + flor murcha + vela + chão rachado (graveyard AAA)
 }
 
 function _drawWaterAAA(ctx, cx, cy, col, row) {
@@ -21514,7 +21942,56 @@ function _drawWaterAAA(ctx, cx, cy, col, row) {
   ctx.beginPath();
   ctx.ellipse(cx, cy + H * 0.12, W * 0.18, H * 0.025, 0, 0, Math.PI * 2);
   ctx.fill();
-  // EPIC = ~6 ops total
+  // POLISH ÉPICO (2026-04-27): lily pads (vitórias-régias) + cattails na borda
+  // pra dar feel de lago/charco AAA. 2 lily pads em ring avoiding centro.
+  ctx.fillStyle = '#2c5a2a';  // verde lírio escuro
+  ctx.beginPath();
+  // Lily pad 1 (NE)
+  ctx.moveTo(cx + W * 0.20 + W * 0.05, cy - H * 0.08);
+  ctx.ellipse(cx + W * 0.20, cy - H * 0.08, W * 0.05, H * 0.022, 0, 0, Math.PI * 2);
+  // Lily pad 2 (SW)
+  ctx.moveTo(cx - W * 0.18 + W * 0.04, cy + H * 0.06);
+  ctx.ellipse(cx - W * 0.18, cy + H * 0.06, W * 0.04, H * 0.018, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Highlight nas lily pads
+  ctx.fillStyle = '#5a8038';
+  ctx.beginPath();
+  ctx.moveTo(cx + W * 0.20 + W * 0.025, cy - H * 0.10);
+  ctx.ellipse(cx + W * 0.20, cy - H * 0.10, W * 0.025, H * 0.008, 0, 0, Math.PI * 2);
+  ctx.moveTo(cx - W * 0.18 + W * 0.020, cy + H * 0.04);
+  ctx.ellipse(cx - W * 0.18, cy + H * 0.04, W * 0.020, H * 0.006, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Flor de lírio (1 flor branca/rosa em uma das pads)
+  ctx.fillStyle = '#f0d8e8';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.20, cy - H * 0.09, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#e8a8c8';
+  ctx.beginPath();
+  ctx.arc(cx + W * 0.20, cy - H * 0.09, 0.6, 0, Math.PI * 2);
+  ctx.fill();
+  // Cattails (3 strokes verticais finos com cabeça marrom — borda do hex)
+  ctx.strokeStyle = '#3a5028';
+  ctx.lineWidth = 1.0;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var ci = 0; ci < 3; ci++) {
+    var cax = cx - W * 0.30 + ci * 2.8;
+    var cay = cy - H * 0.16;
+    ctx.moveTo(cax, cay + 5);
+    ctx.lineTo(cax, cay - 3);
+  }
+  ctx.stroke();
+  // Cabeça marrom dos cattails (rect pequeno no topo)
+  ctx.fillStyle = '#5a3818';
+  ctx.beginPath();
+  for (var ci = 0; ci < 3; ci++) {
+    var cax = cx - W * 0.30 + ci * 2.8;
+    var cay = cy - H * 0.16;
+    ctx.rect(cax - 0.6, cay - 4.5, 1.2, 2.5);
+  }
+  ctx.fill();
+  // EPIC = ~10 ops total (pond AAA com lírios + cattails)
 }
 
 function _drawMudAAA(ctx, cx, cy, col, row) {
@@ -21630,7 +22107,71 @@ function _drawDuneAAA(ctx, cx, cy, col, row) {
   ctx.beginPath();
   ctx.ellipse(cx + W * 0.075, cy + H * 0.045, W * 0.010, H * 0.004, 0, 0, Math.PI * 2);
   ctx.fill();
-  // EPIC = ~6 ops total
+  // POLISH ÉPICO (2026-04-27): crânio de animal meio enterrado +
+  // tufos de grama seca + pegadas atravessando. Deserto AAA narrativo.
+  // Crânio (calota + 2 cavidades dos olhos)
+  var skullX = cx - W * 0.18, skullY = cy + H * 0.10;
+  // Sombra
+  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  ctx.ellipse(skullX, skullY + 1.5, W * 0.045, H * 0.012, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Calota (ellipse osso bege)
+  ctx.fillStyle = '#d8c8a8';
+  ctx.beginPath();
+  ctx.ellipse(skullX, skullY, W * 0.045, H * 0.022, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Highlight da calota (face iluminada NW)
+  ctx.fillStyle = '#f0e0c0';
+  ctx.beginPath();
+  ctx.ellipse(skullX - W * 0.010, skullY - H * 0.005, W * 0.022, H * 0.010, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 2 cavidades dos olhos (escuras)
+  ctx.fillStyle = '#1a1408';
+  ctx.beginPath();
+  ctx.arc(skullX - W * 0.013, skullY - H * 0.003, 1.2, 0, Math.PI * 2);
+  ctx.arc(skullX + W * 0.013, skullY - H * 0.003, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Linha mandíbula (trinca pequena)
+  ctx.strokeStyle = 'rgba(80,60,40,0.6)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(skullX - W * 0.015, skullY + H * 0.007);
+  ctx.lineTo(skullX + W * 0.015, skullY + H * 0.007);
+  ctx.stroke();
+  // Tufos de grama seca (3 tufos amarelos espalhados)
+  ctx.strokeStyle = 'rgba(190,160,90,0.75)';
+  ctx.lineWidth = 0.7;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var ti = 0; ti < 3; ti++) {
+    var tseed = ((seed >> (ti * 5 + 1)) & 0x7F) / 127;
+    var tangle = tseed * Math.PI * 2 + 0.5;
+    var trr = (0.20 + tseed * 0.15) * W;
+    var txx = cx + Math.cos(tangle) * trr;
+    var tyy = cy + Math.sin(tangle) * trr * 0.55;
+    // 3 lâminas curvadas por tufo
+    for (var bi = 0; bi < 3; bi++) {
+      ctx.moveTo(txx + (bi - 1) * 0.8, tyy);
+      ctx.lineTo(txx + (bi - 1) * 0.8 + (bi - 1) * 0.5, tyy - 3.5);
+    }
+  }
+  ctx.stroke();
+  // Pegadas (3 pares pequenos atravessando — caminho diagonal)
+  ctx.fillStyle = 'rgba(140,110,70,0.50)';
+  ctx.beginPath();
+  for (var pi = 0; pi < 3; pi++) {
+    var pxx = cx + W * (-0.20 + pi * 0.15);
+    var pyy = cy + H * (-0.10 + pi * 0.08);
+    // Pegada esquerda
+    ctx.moveTo(pxx + 1.2, pyy);
+    ctx.ellipse(pxx, pyy, 1.2, 0.7, 0.3, 0, Math.PI * 2);
+    // Pegada direita (offset)
+    ctx.moveTo(pxx + 3.0 + 1.0, pyy + 1.5);
+    ctx.ellipse(pxx + 3.0, pyy + 1.5, 1.0, 0.6, 0.3, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  // EPIC = desert AAA (crânio + tufos + pegadas)
 }
 
 // ════════════════════════════════════════════════════════════════════════
