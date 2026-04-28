@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-27T23:56:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T00:16:18Z - do not edit directly, edit source -->
 
 
 <!--
@@ -653,6 +653,42 @@
 <title>Simulador de Exploração — Lendas de Valdoria</title>
 
 <script>
+/* 2026-04-27 USER RULE: "o mapa de exploração está mostrando os logs
+   simulator no bot DEV do Telegram, mas lá faça com que não mostre de
+   forma alguma, deverá mostrar exclusivamente no navegador apenas para
+   mim que sou o desenvolvedor".
+
+   Detector EARLY (antes de qualquer CSS) — marca o modo no <html>:
+     sim-dev   → file:// OU ?dev=1 explícito → painel sim-log-panel visível
+     sim-prod  → HTTPS production (bot DEV/PROD via Cloudflare) → painel
+                 escondido via CSS + removido do DOM ao DOMContentLoaded
+                 (zero overhead, ZERO leak pro jogador).
+
+   Por que classe no <html>: aplicada ANTES do CSS rodar — sem flash visível.
+   Por que escape ?dev=1: permite testar painel via HTTPS em casos especiais
+   (debugging remoto raro). Default é ESCONDER. */
+(function() {
+  try {
+    var qs = new URLSearchParams(location.search);
+    var isDev = (location.protocol === 'file:') || qs.get('dev') === '1';
+    document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
+    if (!isDev) {
+      // PROD: remove painel do DOM ao DOMContentLoaded — zero overhead,
+      // zero risco de leak pro jogador. CSS já esconde via class, mas
+      // remoção física garante que nem inspector revela.
+      document.addEventListener('DOMContentLoaded', function() {
+        var p = document.getElementById('sim-log-panel');
+        if (p && p.parentNode) p.parentNode.removeChild(p);
+      });
+    }
+  } catch (_) {
+    // Fallback defensivo: se URLSearchParams falhar, assume PRODUCTION
+    document.documentElement.classList.add('sim-prod');
+  }
+})();
+</script>
+
+<script>
 (function() {
   var v = Date.now();
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
@@ -748,6 +784,14 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
 }
+
+/* 2026-04-27 USER RULE: sim-log-panel é DEV-ONLY. Default escondido em
+   produção (HTTPS bot DEV/PROD). Mostrado SÓ se html.sim-dev (file:// OU
+   ?dev=1). Layout body também resetado: em prod, frame fica centralizado
+   sem flex-row pro panel ocupar espaço. */
+html.sim-prod #sim-log-panel { display: none !important; }
+html.sim-prod body { justify-content: center !important; background: var(--v-bg, #2a2420) !important; }
+html.sim-prod #frame { margin: 0 auto !important; }
 
 /* X-6.5.51f: #sim-log-panel — replica visual do #dev-log-panel do
    valdoria-webapp/shared/dev-debug-panel.js. Painel a direita do frame

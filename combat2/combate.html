@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-27T23:56:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T00:16:18Z — do not edit directly, edit source -->
 
 
 <!--
@@ -367,6 +367,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#2a2420">
 <title>Combate — Pré-visualização</title>
+
+<script>
+/* 2026-04-27 USER RULE: "o mesmo precisa acontecer para combate.html, nunca
+   deve mostrar esse painel". sim-log-panel é DEV-ONLY (file:// + ?dev=1).
+   No bot DEV (Telegram WebApp via HTTPS), painel NUNCA aparece — escondido
+   via CSS + removido do DOM ao DOMContentLoaded.
+
+   Por que classe no <html>: aplicada ANTES do CSS rodar — sem flash visível.
+   Por que escape ?dev=1: permite testar painel via HTTPS em casos especiais.
+   Default é ESCONDER (production-by-default). */
+(function() {
+  try {
+    var qs = new URLSearchParams(location.search);
+    var isDev = (location.protocol === 'file:') || qs.get('dev') === '1';
+    document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
+    if (!isDev) {
+      document.addEventListener('DOMContentLoaded', function() {
+        var p = document.getElementById('sim-log-panel');
+        if (p && p.parentNode) p.parentNode.removeChild(p);
+      });
+    }
+  } catch (_) {
+    document.documentElement.classList.add('sim-prod');
+  }
+})();
+</script>
+
 <style>
 /* valdoria-design.css (CDN, @layer) aplica em body: contain+::before/::after+background-attachment:fixed.
    No file:// isso faz o fundo inteiro “respirar” com text-shadow do titulo e quebra altura flex.
@@ -874,6 +901,13 @@ html.sim-combat-root #app {
 @media (max-width: 430px) {
   .sim-side-panel { display: none; }
 }
+
+/* 2026-04-27 USER RULE: sim-log-panel é DEV-ONLY. Default escondido em
+   produção (HTTPS bot DEV/PROD). Mostrado SÓ se html.sim-dev (file:// OU
+   ?dev=1). Também escondido layout: side-panel da esquerda em prod (não
+   precisa do espaço vazio "fora do frame" pra log). */
+html.sim-prod #sim-log-panel { display: none !important; }
+html.sim-prod .sim-side-panel { display: none !important; }
 
 /* X-6.5.51y (2026-04-25): #sim-log-panel — painel DIREITA do frame, espelha
    .sim-side-panel da esquerda. Mostra logs em tempo real (LOG/LOGW/LOGE +
