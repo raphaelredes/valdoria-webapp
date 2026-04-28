@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T01:55:29Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-04-28T02:15:41Z — do not edit directly, edit source -->
 
 
 <!--
@@ -18088,6 +18088,11 @@ async function __combatCompleteCanonical(result, origin) {
         origin: origin,
         player_hp_final: p ? (p.hp | 0) : null,
         player_mp_final: (p && p.res) ? (p.res.value | 0) : null,
+        /* 2026-04-27: persiste wetTurns restantes do combate de volta pra
+           exploração (D&D 5e DMG p.110). Player que entrou MOLHADO sai com
+           o turno-counter atualizado pelo tick de round (combat decrementa
+           1 por round em runNpcSegmentUntilPlayerTurn). */
+        player_wet_turns_final: (p && typeof p.wetTurns === 'number') ? Math.max(0, p.wetTurns | 0) : 0,
         rewards: rewards
     };
     try {
