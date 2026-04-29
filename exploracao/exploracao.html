@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:58:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:09:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25818,13 +25818,17 @@ function drawWeatherOverlay(ctx) {
   if (shouldLogW) LOG('WEATHER', 'drawWeatherOverlay weather=' + S.weather + ' canvas=' + canvasW + 'x' + canvasH);
   try {
 
-  // 2026-04-27: Cloud shadows deslizando pelo mapa — sempre renderizadas
-  // exceto em weather='s' (sol limpo). Densidade e opacidade mudam por
-  // weather. Técnica AAA — dá sensação de céu vivo sem custo alto.
+  // 2026-04-27: Cloud shadows deslizando pelo mapa.
+  // User pediu (2026-04-27): "as nuvens... mostre mesmo com tempo limpo,
+  // mas mais raramente, devem aparecer como se fossem sombras no mapa, se
+  // movimentando para alguma direção". Agora s='s' (clear) tem 1 nuvem
+  // grande, MUITO suave (alpha 0.08), drift lento. Storm/rain/fog mantêm
+  // densidade e ritmo próprios.
   // Performance tier-aware (skip em perf-lite).
-  if (S.weather && S.weather !== 's' && _renderDetail >= 1) {
+  if (S.weather && _renderDetail >= 1) {
     var cloudCfg = null;
-    if (S.weather === 'r')      cloudCfg = { count: 5, alpha: 0.18, speed: 0.06, scale: 1.0 };
+    if (S.weather === 's')      cloudCfg = { count: 1, alpha: 0.10, speed: 0.022, scale: 1.4 };  // raro, lento, suave
+    else if (S.weather === 'r') cloudCfg = { count: 5, alpha: 0.18, speed: 0.06, scale: 1.0 };
     else if (S.weather === 't') cloudCfg = { count: 8, alpha: 0.32, speed: 0.10, scale: 1.3 };
     else if (S.weather === 'f') cloudCfg = { count: 4, alpha: 0.10, speed: 0.04, scale: 0.9 };
     if (cloudCfg) {
