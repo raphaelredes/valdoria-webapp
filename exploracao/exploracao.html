@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:49:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:56:12Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9969,11 +9969,28 @@ body.perf-lite .stub-popup-voice { animation: none; }
   function _buildOps(outcome) {
     if (!outcome) return [];
     var ops = [];
+    // Legacy field names (exploracao_events_data.js)
     if (typeof outcome.reward_gold === 'number') ops.push({ op: 'gold', delta: outcome.reward_gold });
     if (typeof outcome.reward_xp === 'number') ops.push({ op: 'xp', delta: outcome.reward_xp });
     if (typeof outcome.hp_delta === 'number') ops.push({ op: 'hp', delta: outcome.hp_delta });
     if (typeof outcome.mp_delta === 'number') ops.push({ op: 'mp', delta: outcome.mp_delta });
     if (typeof outcome.exh_delta === 'number') ops.push({ op: 'exh', delta: outcome.exh_delta });
+    // 2026-04-27 USER FIX: PROCEDURAL field names (TEMPLATES via _genChoice).
+    // Esses são gerados pelo gen loop em outcome_ok/outcome_fail. Sem essas
+    // linhas o normalizer drop os rewards de TODO evento procedural — bug
+    // root cause de "eventos shallow" mesmo com auto-enricher rodando.
+    if (typeof outcome.gold === 'number') ops.push({ op: 'gold', delta: outcome.gold });
+    if (typeof outcome.xp === 'number') ops.push({ op: 'xp', delta: outcome.xp });
+    if (typeof outcome.hp_gain === 'number') ops.push({ op: 'hp', delta: outcome.hp_gain });
+    if (typeof outcome.hp_loss === 'number') ops.push({ op: 'hp', delta: -outcome.hp_loss });
+    if (typeof outcome.mp_gain === 'number') ops.push({ op: 'mp', delta: outcome.mp_gain });
+    if (typeof outcome.mp_loss === 'number') ops.push({ op: 'mp', delta: -outcome.mp_loss });
+    if (typeof outcome.exh_gain === 'number') ops.push({ op: 'exh', delta: outcome.exh_gain });
+    if (outcome.item) ops.push({ op: 'item', id: outcome.item });
+    // Existing ops array — passthrough (já vem em formato {op, ...})
+    if (Array.isArray(outcome.ops)) {
+      for (var k = 0; k < outcome.ops.length; k++) ops.push(outcome.ops[k]);
+    }
     // loot_table + loot_rolls (legacy) → op item com poolId + rolls
     if (outcome.loot_table) {
       var rolls = (typeof outcome.loot_rolls === 'number' && outcome.loot_rolls > 0) ? outcome.loot_rolls : 1;
@@ -10011,33 +10028,52 @@ body.perf-lite .stub-popup-voice { animation: none; }
     };
     if (legacyChoice.skill) c.skill = legacyChoice.skill;
     if (typeof legacyChoice.dc === 'number') c.dc = legacyChoice.dc;
+    if (legacyChoice.desc) c.desc = legacyChoice.desc;
+    if (legacyChoice.flavor && !legacyChoice.outcome_ok && !legacyChoice.outcome_fail) {
+      // Choice "informativa" sem skill check (apenas flavor) — preserva
+      c.flavor = legacyChoice.flavor;
+    }
     var when = _buildWhen(legacyChoice);
     if (when) c.when = when;
 
     var ok = legacyChoice.outcome_ok || {};
     c.outcome_ok = {
-      flavor: ok.text || '',
+      flavor: ok.text || ok.flavor || '',
       ops: _buildOps(ok),
       fsm: ok.combat_trigger ? 'player_attack_choice' : null
     };
+    // 2026-04-27 USER FIX: preserva campos extras do schema novo
+    // (chain, tech, dungeon_combat) — sem isso, eventos procedurais perdem
+    // toda a profundidade. Bug root cause de "eventos shallow".
+    if (ok.chain) c.outcome_ok.chain = ok.chain;
+    if (ok._chainTo) c.outcome_ok.chain = ok._chainTo;  // legacy alias
+    if (ok.tech) c.outcome_ok.tech = ok.tech;
+    if (ok.dungeon_combat) c.outcome_ok.dungeon_combat = ok.dungeon_combat;
+    if (ok.starts_quest) c.outcome_ok.starts_quest = ok.starts_quest;
+    if (ok.recruit_ally) c.outcome_ok.recruit_ally = ok.recruit_ally;
+    if (ok.record_enemy) c.outcome_ok.record_enemy = ok.record_enemy;
 
     var fail = legacyChoice.outcome_fail || legacyChoice.outcome_ok;
     c.outcome_fail = {
-      flavor: (fail && fail.text) || '',
+      flavor: (fail && (fail.text || fail.flavor)) || '',
       ops: _buildOps(fail),
       fsm: (fail && fail.combat_trigger) ? 'player_attack_choice' : null
     };
+    if (fail) {
+      if (fail.chain) c.outcome_fail.chain = fail.chain;
+      if (fail._chainTo) c.outcome_fail.chain = fail._chainTo;
+      if (fail.tech) c.outcome_fail.tech = fail.tech;
+      if (fail.dungeon_combat) c.outcome_fail.dungeon_combat = fail.dungeon_combat;
+      if (fail.starts_quest) c.outcome_fail.starts_quest = fail.starts_quest;
+      if (fail.recruit_ally) c.outcome_fail.recruit_ally = fail.recruit_ally;
+      if (fail.record_enemy) c.outcome_fail.record_enemy = fail.record_enemy;
+    }
 
     if (legacyChoice.outcome_partial) {
       if (window.TileLog) window.TileLog.warn('NORMALIZER', 'partial_outcome_dropped', {
         choiceId: c.id, reason: 'no_5e_equivalent'
       });
     }
-    // Sub-projeto #4 v11: chain support (legacy _chainTo → new schema chain).
-    // Recursivo — chain steps podem ter chains internos. _normChoice é chamado
-    // recursivamente nas choices internas via _showChainStep no popup.
-    if (ok._chainTo) c.outcome_ok.chain = ok._chainTo;
-    if (fail && fail._chainTo) c.outcome_fail.chain = fail._chainTo;
     return c;
   }
 
@@ -10061,7 +10097,9 @@ body.perf-lite .stub-popup-voice { animation: none; }
     var entry = {
       title: titleResolved,
       body: bodyParts.join(' — '),
-      voiceLines: {},
+      // 2026-04-27 USER FIX: propaga tech callout + voiceLines do evento procedural
+      tech: rawLegacyEvent.tech || null,
+      voiceLines: rawLegacyEvent.voiceLines || {},
       choices: (rawLegacyEvent.choices || []).map(_normChoice),
       _legacyType: rawLegacyEvent.type || null,
       _legacyBiome: rawLegacyEvent.biome || null
