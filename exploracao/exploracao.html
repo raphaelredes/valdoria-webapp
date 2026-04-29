@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:57:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:28:39Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25942,6 +25942,10 @@ function drawWeatherOverlay(ctx) {
         if (S.dm_log && S.dm_log[S.dm_log.length - 1]?.text !== 'Um raio corta o céu!') {
           dmNarrate({ text: 'Um raio corta o céu!', type: 'ambient' });
         }
+        // 2026-04-27 USER FIX: tocar som de trovão quando flash visual
+        // dispara. Realismo: luz chega antes do som — delay aleatório
+        // 0.5-2s simula distância variável do raio. SFX vol respeitado.
+        try { _playLightningThunder(); } catch (_) {}
       }
     }
   } else if (S.weather === 'f') {
@@ -27708,6 +27712,51 @@ function _stopWeatherAmbient() {
   _weatherAmbient.currentKey = null;
   _weatherAmbient.lastFile = null;
   _weatherAmbient.lastSfxVol = -1;
+}
+
+// 2026-04-27 USER FIX: som sincronizado com flash visual do raio.
+// Disparado quando S._lightningFlash = 240 (flash visual). Delay realista
+// 0.5-2.0s entre flash e som (luz chega antes do som — distância varia).
+// Volume escalado pelo SFX slider (mesmo helper do ambient layer).
+//
+// Pool de variantes:
+//   sfx_thunder_new_1.mp3, sfx_thunder_new_2.mp3 (mais nítidos, raio próximo)
+//   amb_thunder_distant_1.mp3, amb_thunder_distant_2.mp3 (distantes)
+// Aleatoriza entre os 4 pra variar — flash perto/longe.
+var _LIGHTNING_THUNDER_POOL = [
+  'sfx_thunder_new_1.mp3', 'sfx_thunder_new_2.mp3',
+  'amb_thunder_distant_1.mp3', 'amb_thunder_distant_2.mp3'
+];
+var _lastThunderFile = null;
+
+function _playLightningThunder() {
+  // Pick variante diferente da última (anti-repetição)
+  var pool = _LIGHTNING_THUNDER_POOL;
+  var pick;
+  var attempts = 0;
+  do {
+    pick = pool[Math.floor(Math.random() * pool.length)];
+    attempts++;
+  } while (pick === _lastThunderFile && attempts < 5);
+  _lastThunderFile = pick;
+  // Volume base depende da variante (sfx_thunder mais alto = raio próximo;
+  // amb_thunder_distant mais baixo = raio distante)
+  var isClose = pick.indexOf('sfx_thunder') === 0;
+  var baseVol = isClose ? 0.65 : 0.45;
+  // Delay realista: raios próximos = som mais rápido (300-800ms);
+  // raios distantes = mais demorado (1000-2200ms)
+  var delayMs = isClose
+    ? (300 + Math.random() * 500)
+    : (1000 + Math.random() * 1200);
+  setTimeout(function () {
+    try {
+      var thunder = new Audio(_AUDIO_BASE_URL + pick);
+      // /1.5 pra não double-amplify (helper já amplifica 1.5x ambient)
+      thunder.volume = _resolveAmbientVolume(baseVol / 1.5);
+      thunder.play().catch(function () {});
+      LOG('WEATHER', 'lightning_thunder_played file=' + pick + ' delay=' + delayMs.toFixed(0) + 'ms vol=' + thunder.volume.toFixed(2));
+    } catch (_) {}
+  }, delayMs);
 }
 
 var _thunderClapTimer = null;
