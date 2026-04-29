@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:46:10Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:58:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14383,7 +14383,7 @@ const EVENTS_POOL = {
       npcs: ['mercador ambulante', 'fazendeiro a caminho da feira', 'caravaneiro perdido', 'sacerdote viajante', 'menestrel cantante', 'mensageiro real', 'velho contador de histórias'],
       creatures: ['matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'lobo da estepe', 'matilha de hienas', 'urso pardo errante', 'corvo gigante'],
       objects: ['carroça abandonada', 'fogueira ainda quente', 'mochila à beira da estrada', 'pedra com inscrição', 'estatueta caída entre flores', 'esqueleto de cavalo'],
-      hazards: ['poço escondido', 'tempestade súbita', 'terra movediça', 'sulco profundo de carroça', 'cova de tatu sob o mato alto', 'tronco caído coberto pelo capim']
+      hazards: ['poço escondido sob folhagem', 'rajada de vento corredora', 'terra movediça sob a areia rasa', 'sulco profundo de carroça', 'cova de tatu sob o mato alto', 'tronco caído coberto pelo capim', 'cardume de mosquitos agressivos']
     },
     swamp: {
       npcs: ['eremita encurvado', 'bruxo do brejo', 'caçador de sapos', 'curandeira pantanosa', 'velho pescador'],
@@ -14401,7 +14401,7 @@ const EVENTS_POOL = {
       npcs: ['nômade silencioso', 'mercador de água', 'eremita do deserto', 'caravaneiro perdido', 'profeta louco'],
       creatures: ['escorpião gigante', 'serpente da areia', 'leão do deserto', 'lagarto venenoso', 'hiena solitária', 'monstro de gila gigante'],
       objects: ['oásis pequeno', 'esqueleto enterrado', 'palmeira solitária', 'baú coberto de areia', 'pedra glífica'],
-      hazards: ['duna instável sob os pés', 'tempestade de areia', 'pedra escaldante sob areia fina', 'areia movediça', 'fenda do canyon coberta por areia']
+      hazards: ['duna instável sob os pés', 'rajada de areia cortante', 'pedra escaldante sob areia fina', 'areia movediça', 'fenda do canyon coberta por areia', 'pedaço de osso branqueado afiado']
     },
     snow: {
       npcs: ['caçador de peles', 'eremita gélido', 'mensageiro perdido', 'sacerdote do gelo'],
@@ -14784,7 +14784,7 @@ const EVENTS_POOL = {
               okXp: [10, 14],
               chainOk: {
                 id: 'hazard_dodge_followup',
-                body: 'Você está em pé, vivo, com adrenalina alta. Pode investigar o que sobrou do hazard ou seguir.',
+                body: 'Você está em pé, vivo, com adrenalina alta. Pode investigar o que sobrou do perigo ou seguir.',
                 choices: [
                   { label: 'Examinar o que era (Investigação)', skill: 'investigation', dc: 12,
                     desc: 'Compreender pra evitar próxima vez — pode ter sido armadilha intencional.',
@@ -14807,7 +14807,7 @@ const EVENTS_POOL = {
         {
           title: 'Sinal de Alerta Tarde',
           text: 'Você nota tarde demais o que devia ter notado antes — {hazard} já está agindo. Não é súbito como uma armadilha, é insidioso: o cheiro estranho, o solo cedendo devagar, a respiração que pesa por motivo errado. Você tem alguns segundos pra agir antes do problema virar grave.',
-          tech: { label: 'PERIGO', text: 'Hazard progressivo — exposição prolongada causa dano cumulativo.' },
+          tech: { label: 'PERIGO', text: 'Perigo progressivo — exposição prolongada causa dano cumulativo.' },
           choices: [
             { label: 'Sair correndo na direção contrária (Atletismo)', skill: 'athletics', dc: 13,
               desc: 'Velocidade pura — colocar 50 passos entre você e a fonte.',
