@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:10:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:16:46Z - do not edit directly, edit source -->
 
 
 <!--
@@ -18993,6 +18993,11 @@ function renderFrame(ts) {
   _runStep('drawFogComposite', () => drawFogComposite());
   _runStep('drawImage(fogCanvas)', () => mainCtx.drawImage(fogCanvas, 0, 0, canvasW, canvasH));
   _runStep('drawHardFogOnUnexplored', () => drawHardFogOnUnexplored(mainCtx));
+  // 2026-04-27 USER FIX: efeitos visuais épicos pra fontes de luz
+  // (torch/light/dancing_lights/daylight). Renderizado APÓS player + fog
+  // mas ANTES de cloud shadows pra ficar visível através da névoa. Auras
+  // que iluminam o entorno do personagem.
+  _runStep('drawPlayerLightAura', () => drawPlayerLightAura(mainCtx));
   // V2.8 atmosféricos: cloud shadows + heat shimmer + sun rays + bird flock
   _runStep('drawCloudShadows', () => drawCloudShadows(mainCtx));
   _runStep('drawHeatShimmer', () => drawHeatShimmer(mainCtx));
@@ -25808,6 +25813,140 @@ function drawPlayer(ctx) {
   }
 }
 
+// 2026-04-27 USER FIX: efeitos visuais épicos para fontes de luz D&D 5e.
+// User pediu: "luzes dançantes podem ser whispers quase invisíveis circulando
+// o personagem e iluminando o mapa, pode fazer a iluminação se movimentar
+// os limites de acordo com a movimentação dos whispers. Luz (truque) pode
+// colocar como se fosse a tocha mas um efeito mais amarelado, ou mesmo
+// branco".
+//
+// Performance tier-aware: lite skip todos efeitos extras, medium reduzido,
+// epic completo. Cada source tem characteristic visual:
+//   - torch:           glow dourado/laranja com flicker (chama natural)
+//   - light:           glow branco-amarelado constante (luz mágica estável)
+//   - dancing_lights:  4 wisps orbitando + glow conjunto pulsante
+//   - daylight:        orbe grande dourado acima do player (luz solar divina)
+function drawPlayerLightAura(ctx) {
+  if (!S || !S.player) return;
+  if (!S.lightSource) return;
+  // Tier guard — lite skip pra performance mobile
+  if (window._valdoriaPerformanceTier === 'lite') return;
+  var src = S.lightSource;
+  if (!LIGHT_SOURCES[src]) return;
+
+  // Posição do player (mesmo cálculo de drawPlayer pra consistência)
+  var pCx, pCy;
+  try {
+    if (playerAnim) {
+      var at = clamp((_animTime - playerAnim.t0) / playerAnim.dur, 0, 1);
+      var ease = at < 0.5 ? 4 * at * at * at : 1 - Math.pow(-2 * at + 2, 3) / 2;
+      pCx = playerAnim.fromX + (playerAnim.toX - playerAnim.fromX) * ease;
+      var heightPx = playerAnim.fromH + (playerAnim.toH - playerAnim.fromH) * ease;
+      pCy = playerAnim.fromY + (playerAnim.toY - playerAnim.fromY) * ease;
+      pCy = pCy - heightPx * 0.5;  // meio do sprite (não nos pés)
+    } else {
+      var c = hexToScreen(S.player.col, S.player.row);
+      pCx = c.x;
+      pCy = c.y - effectiveTileHeightPx(S.player.col, S.player.row) * 0.5;
+    }
+  } catch (_) { return; }
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';  // luz somativa
+
+  if (src === 'torch') {
+    // === TOCHA — glow dourado-laranja com flicker natural ===
+    var flick = 1 + Math.sin(_animTime * 0.012) * 0.08
+              + Math.sin(_animTime * 0.027) * 0.05;
+    var rT = HEX_W * 1.3 * flick;
+    var torchGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rT);
+    torchGrad.addColorStop(0, 'rgba(255, 180, 90, 0.30)');
+    torchGrad.addColorStop(0.4, 'rgba(255, 140, 50, 0.18)');
+    torchGrad.addColorStop(0.75, 'rgba(220, 100, 30, 0.08)');
+    torchGrad.addColorStop(1, 'rgba(180, 70, 20, 0)');
+    ctx.fillStyle = torchGrad;
+    ctx.beginPath();
+    ctx.arc(pCx, pCy, rT, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (src === 'light') {
+    // === LUZ (TRUQUE) — branco-amarelado estável ===
+    // User pediu: "tocha mas mais amarelado, ou mesmo branco". Luz mágica
+    // estável (sem flicker), forma orbe difuso ao redor do player.
+    var pulse = 1 + Math.sin(_animTime * 0.003) * 0.04;  // pulse muito sutil
+    var rL = HEX_W * 1.5 * pulse;
+    var lightGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rL);
+    lightGrad.addColorStop(0, 'rgba(255, 250, 220, 0.34)');     // branco-amarelado quente
+    lightGrad.addColorStop(0.35, 'rgba(255, 245, 200, 0.20)');
+    lightGrad.addColorStop(0.7, 'rgba(255, 235, 160, 0.08)');
+    lightGrad.addColorStop(1, 'rgba(255, 225, 140, 0)');
+    ctx.fillStyle = lightGrad;
+    ctx.beginPath();
+    ctx.arc(pCx, pCy, rL, 0, Math.PI * 2);
+    ctx.fill();
+    // Detalhe extra (medium+): pequeno highlight central mais branco
+    if (window._valdoriaPerformanceTier !== 'medium') {
+      var coreGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, HEX_W * 0.4);
+      coreGrad.addColorStop(0, 'rgba(255, 255, 245, 0.30)');
+      coreGrad.addColorStop(1, 'rgba(255, 255, 245, 0)');
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(pCx, pCy, HEX_W * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (src === 'dancing_lights') {
+    // === LUZES DANÇANTES — 4 wisps orbitando + iluminação dinâmica ===
+    // User pediu: "whispers quase invisíveis circulando o personagem e
+    // iluminando o mapa, pode fazer a iluminação se movimentar os limites
+    // de acordo com a movimentação dos whispers".
+    var wispCount = (window._valdoriaPerformanceTier === 'medium') ? 3 : 4;
+    var orbitR = HEX_W * 0.95;
+    var t = _animTime * 0.0010;     // ciclo orbital ~6s/volta
+    // Renderiza UNION de halos de cada wisp — luz cumulativa segue movimento
+    for (var w = 0; w < wispCount; w++) {
+      var phase = (w / wispCount) * Math.PI * 2;
+      // Movimento elíptico não-circular pra parecer "dançante" não-uniforme
+      var wx = pCx + Math.cos(t + phase) * orbitR;
+      var wy = pCy + Math.sin(t * 1.3 + phase) * orbitR * 0.7
+             + Math.sin(t * 2.1 + phase * 1.5) * 8;
+      // Halo grande de cada wisp — alpha baixo (quase invisível) mas
+      // contribui pra iluminação cumulativa
+      var rW = HEX_W * 0.85;
+      var wispGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, rW);
+      wispGrad.addColorStop(0, 'rgba(220, 230, 255, 0.22)');     // azul-branco frio
+      wispGrad.addColorStop(0.4, 'rgba(180, 200, 255, 0.10)');
+      wispGrad.addColorStop(1, 'rgba(140, 160, 240, 0)');
+      ctx.fillStyle = wispGrad;
+      ctx.beginPath();
+      ctx.arc(wx, wy, rW, 0, Math.PI * 2);
+      ctx.fill();
+      // Core "whisper" — pequeno ponto brilhante (o wisp em si)
+      var coreSize = 2 + Math.sin(t * 5 + phase) * 0.6;  // pulsa sutilmente
+      var coreGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, coreSize * 4);
+      coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+      coreGrad.addColorStop(0.4, 'rgba(220, 230, 255, 0.40)');
+      coreGrad.addColorStop(1, 'rgba(180, 200, 255, 0)');
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(wx, wy, coreSize * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (src === 'daylight') {
+    // === DAYLIGHT — orbe brilhante acima do player (luz solar divina) ===
+    var rD = HEX_W * 2.0;
+    var dayGrad = ctx.createRadialGradient(pCx, pCy - HEX_H * 0.3, 0, pCx, pCy - HEX_H * 0.3, rD);
+    dayGrad.addColorStop(0, 'rgba(255, 245, 200, 0.45)');
+    dayGrad.addColorStop(0.3, 'rgba(255, 230, 160, 0.25)');
+    dayGrad.addColorStop(0.7, 'rgba(255, 210, 130, 0.10)');
+    dayGrad.addColorStop(1, 'rgba(255, 200, 100, 0)');
+    ctx.fillStyle = dayGrad;
+    ctx.beginPath();
+    ctx.arc(pCx, pCy - HEX_H * 0.3, rD, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 function drawWeatherOverlay(ctx) {
   const shouldLogW = _frameCount % 120 === 1;
   if (!S) { if (shouldLogW) LOGW('WEATHER', 'S=null'); return; }
@@ -25853,30 +25992,67 @@ function drawWeatherOverlay(ctx) {
         if (ccx + cloudW < 0 || ccx > canvasW) continue;
         var ccy = rndY * canvasH * 0.85;
 
-        // 2026-04-27 USER FIX: nuvens com FORMATOS IRREGULARES — composição
-        // de múltiplas blobs elípticas sobrepostas com offsets aleatórios.
-        // User reportou: "nuvens em formatos arredondados nada realistas".
-        // Agora 5-8 sub-blobs por nuvem (tier-aware), formando contornos
-        // orgânicos puffy ao estilo cumulus/stratus realista.
-        var blobs = (_wTier >= 2) ? 8 : 5;
+        // 2026-04-27 USER FIX: nuvens HIPERREALISTAS. User pediu: "melhore
+        // muito o desenho das nuvens no mapa, para ficar hiperrealista o
+        // formato e movimentação".
+        //
+        // Técnica AAA mobile-friendly: composição de 8-14 sub-blobs por
+        // nuvem com:
+        //   - Hierarquia de tamanhos (1 grande core + 5-8 médios + 4-6 pequenos)
+        //   - Gradientes layered com alphas extremamente variadas
+        //   - Ofssets gaussianos (concentração no centro, dispersão nas bordas)
+        //   - Rotações independentes (cada blob inclinado)
+        //
+        // Performance: tier-aware (lite=6, medium=10, epic=14)
+        var blobs = (_wTier >= 2) ? 14 : (_wTier >= 1 ? 10 : 6);
         var blobRng = seededRng(42 + ci * 13);  // seed por nuvem pra consistência
-        var rotation = (rndR - 0.5) * 0.4;       // ±0.2 rad rotação geral
+        var rotation = (rndR - 0.5) * 0.4;
+        // Hierarquia: blobs maiores ficam no centro, menores nas pontas
         for (var bi = 0; bi < blobs; bi++) {
-          // Offset relativo dentro do "envelope" da nuvem
-          var ox = (blobRng() - 0.5) * cloudW * 0.85;
-          var oy = (blobRng() - 0.5) * cloudH * 0.85;
-          var sub = blobRng();
-          var subW = cloudW * (0.20 + sub * 0.30);  // tamanhos variados
-          var subH = subW * (0.55 + blobRng() * 0.30);
-          var subRot = rotation + (blobRng() - 0.5) * 0.6;
-          var alphaScale = 0.55 + blobRng() * 0.45;  // alpha por blob
-          var blobAlpha = cloudCfg.alpha * alphaScale;
+          // Distribuição: 1 core grande + 35% médios + resto pequenos
+          var sizeTier;
+          if (bi === 0) sizeTier = 'core';                    // 1 core grande
+          else if (bi < blobs * 0.4) sizeTier = 'medium';     // 35% médios
+          else sizeTier = 'puff';                              // resto pequenos
+          // Distribuição gaussiana via box-muller pra concentração no centro
+          var u1 = blobRng() || 0.001;
+          var u2 = blobRng();
+          var gx = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+          var gy = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+          // Limitar ao envelope (0.4 dispersão)
+          gx = Math.max(-1.5, Math.min(1.5, gx)) * cloudW * 0.30;
+          gy = Math.max(-1.5, Math.min(1.5, gy)) * cloudH * 0.30;
+          var ox, oy, subW, subH, subRot, blobAlpha;
+          if (sizeTier === 'core') {
+            ox = 0; oy = 0;
+            subW = cloudW * 0.55;
+            subH = subW * 0.65;
+            subRot = rotation;
+            blobAlpha = cloudCfg.alpha * 0.95;  // core é o mais denso
+          } else if (sizeTier === 'medium') {
+            ox = gx;
+            oy = gy * 0.7;  // achata vertical (nuvens são mais largas que altas)
+            var medScale = 0.30 + blobRng() * 0.20;
+            subW = cloudW * medScale;
+            subH = subW * (0.55 + blobRng() * 0.25);
+            subRot = rotation + (blobRng() - 0.5) * 0.6;
+            blobAlpha = cloudCfg.alpha * (0.55 + blobRng() * 0.35);
+          } else {
+            // Puffs: pequenos detalhes nas bordas — mais espalhados
+            ox = gx * 1.4;
+            oy = gy * 0.9;
+            var puffScale = 0.10 + blobRng() * 0.15;
+            subW = cloudW * puffScale;
+            subH = subW * (0.55 + blobRng() * 0.30);
+            subRot = rotation + (blobRng() - 0.5) * 1.0;
+            blobAlpha = cloudCfg.alpha * (0.30 + blobRng() * 0.30);
+          }
           var grad = ctx.createRadialGradient(
             ccx + ox, ccy + oy, 0,
             ccx + ox, ccy + oy, subW * 0.6
           );
           grad.addColorStop(0, 'rgba(20, 18, 16, ' + blobAlpha + ')');
-          grad.addColorStop(0.55, 'rgba(20, 18, 16, ' + (blobAlpha * 0.45) + ')');
+          grad.addColorStop(0.5, 'rgba(20, 18, 16, ' + (blobAlpha * 0.55) + ')');
           grad.addColorStop(1, 'rgba(20, 18, 16, 0)');
           ctx.fillStyle = grad;
           ctx.beginPath();
