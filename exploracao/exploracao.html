@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:42:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:55:25Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25933,6 +25933,12 @@ function drawWeatherOverlay(ctx) {
         ctx.fillStyle = 'rgba(230, 240, 255, ' + la.toFixed(3) + ')';
         ctx.fillRect(0, 0, canvasW, canvasH);
         S._lightningFlash -= 16;
+        // 2026-04-27 USER FIX: tile-objects (PEDRA RÚNICA, fogueiras, etc)
+        // são SVG em DOM overlay separado do canvas — flash do canvas não
+        // os afeta. Aplica filter: brightness no overlay pra simular clarão
+        // também sobre eles. User reportou: "PEDRA RUNICA fica acima do
+        // efeito... o mapa recebe o efeito do clarão normalmente".
+        try { _applyLightningFlashToOverlays(la); } catch (_) {}
       } else if (Math.random() < 0.003) {
         S._lightningFlash = 240;
         if (S.dm_log && S.dm_log[S.dm_log.length - 1]?.text !== 'Um raio corta o céu!') {
@@ -25942,7 +25948,13 @@ function drawWeatherOverlay(ctx) {
         // dispara. Realismo: luz chega antes do som — delay aleatório
         // 0.5-2s simula distância variável do raio. SFX vol respeitado.
         try { _playLightningThunder(); } catch (_) {}
+      } else {
+        // Flash não está ativo — limpa filter dos overlays (no-op se já vazio)
+        try { _applyLightningFlashToOverlays(0); } catch (_) {}
       }
+    } else if (S.weather !== 't') {
+      // Saiu de tempestade — limpa qualquer filter residual
+      try { _applyLightningFlashToOverlays(0); } catch (_) {}
     }
   } else if (S.weather === 'f') {
     // V2.4: névoa realista — D&D 5e "heavily obscured at distance, visible nearby".
@@ -27808,6 +27820,36 @@ function _stopWeatherAmbient() {
   _weatherAmbient.currentKey = null;
   _weatherAmbient.lastFile = null;
   _weatherAmbient.lastSfxVol = -1;
+}
+
+// 2026-04-27 USER FIX: aplica clarão também nos tile-objects (SVG overlay
+// fora do canvas) e em outros DOM overlays sobre o mapa. la = 0..1
+// (intensidade do flash). Usa filter brightness pra simular o branco
+// estourado do raio. la=0 limpa o filtro.
+//
+// Tile-objects (PEDRA RÚNICA, fogueiras, war_drum, baú, etc) são SVG
+// renderizados em #tile-overlay-layer — fora do canvas. Mesmo problema
+// pode afetar player sprite se ele for DOM (não é, é canvas — OK).
+var _flashTargetIds = [
+  'tile-overlay-layer',  // tile-objects SVG (PEDRA RÚNICA etc)
+  'decorations-layer'    // decorations adicionais (se existir)
+];
+var _flashLastLa = 0;
+function _applyLightningFlashToOverlays(la) {
+  // Throttle: só atualiza DOM quando muda significativamente
+  if (Math.abs(la - _flashLastLa) < 0.02) return;
+  _flashLastLa = la;
+  var brightness = 1 + la * 3.0;        // la=0 → 1x, la=0.55 → 2.65x
+  var saturate = 1 - la * 0.7;          // dessatura levemente (raio = branco)
+  var filterStr = (la > 0.01)
+    ? ('brightness(' + brightness.toFixed(2) + ') saturate(' + saturate.toFixed(2) + ')')
+    : '';
+  for (var i = 0; i < _flashTargetIds.length; i++) {
+    var el = document.getElementById(_flashTargetIds[i]);
+    if (el) {
+      try { el.style.filter = filterStr; } catch (_) {}
+    }
+  }
 }
 
 // 2026-04-27 USER FIX: som sincronizado com flash visual do raio.
