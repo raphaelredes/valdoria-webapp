@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:32:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:42:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9035,17 +9035,13 @@ body.remote-mode #debug-hud { display: none !important; }
           var nextBtn = document.createElement('button');
           nextBtn.type = 'button';
           nextBtn.className = 'stub-popup-choice stub-popup-finalize';
-          nextBtn.style.opacity = '0.5';
-          nextBtn.style.pointerEvents = 'none';
+          // 2026-04-27 USER FIX: botão Continuar sempre clicável (era
+          // disabled por 800-1800ms baseado em reading time). User pediu
+          // pra remover o gate de tempo — clique imediato.
           var nextLbl = document.createElement('span');
           nextLbl.textContent = 'Continuar';
           nextBtn.appendChild(nextLbl);
           container.appendChild(nextBtn);
-          // Habilita após reading time
-          setTimeout(function () {
-            nextBtn.style.opacity = '1';
-            nextBtn.style.pointerEvents = '';
-          }, Math.max(800, waitMs - 200));
           nextBtn.addEventListener('click', function () {
             if (window.TileLog) window.TileLog.info('STUB-EVT', 'chain_advance', {
               fromChoice: choice.id, toChainId: chain.id || '?', hex: rt.hexId
@@ -27616,7 +27612,12 @@ function _updateWeatherAmbient(weather) {
   _playWeatherAmbientVariant(true /* primeira vez = fade in completo */);
   LOG('WEATHER', 'ambient_loop_started key=' + spec.key + ' baseVol=' + spec.vol
       + ' effectiveVol=' + _resolveAmbientVolume(spec.vol).toFixed(2));
-  if (spec.key === 'storm') _scheduleThunderClap();
+  // 2026-04-27 USER FIX: trovão SEMPRE acompanha flash visual (sincronizado
+  // em drawWeatherOverlay → _playLightningThunder). _scheduleThunderClap
+  // (trovões periódicos SEM flash) DESABILITADO — user reportou:
+  // "confira se de fato os trovões/raios estão fazendo som somente quando
+  // a tela faz o efeito de clarão". Resposta: AGORA sim. Som = flash sempre.
+  // Função _scheduleThunderClap fica disponível mas não é chamada.
 }
 
 // Toca próxima variante. Se firstTime=true, fade in 1.5s. Senão, é parte do
