@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:39:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:10:31Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1194,6 +1194,42 @@ html.sim-prod #frame { margin: 0 auto !important; }
   font-style: italic;
   border-left: 2px solid rgba(196, 149, 58, 0.4);
   padding-left: 10px;
+}
+/* 2026-04-27: Tech text — informação mecânica (D&D 5e rules, vantagem,
+   condições, "quem move primeiro", etc) renderizada SEPARADA da narrativa.
+   Fonte monospace + cor neutra azulada + ícone ⚙ pra deixar claro que é
+   regra de jogo, não pensamento do personagem. */
+.stub-popup-tech {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(160, 196, 230, 0.92);
+  background: linear-gradient(180deg, rgba(28, 38, 56, 0.45), rgba(20, 28, 42, 0.45));
+  border: 1px solid rgba(80, 130, 180, 0.35);
+  border-left: 3px solid rgba(120, 170, 220, 0.65);
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 6px 0 12px;
+  letter-spacing: 0.2px;
+}
+.stub-popup-tech::before {
+  content: '⚙';
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(120, 170, 220, 0.85);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.stub-popup-tech-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: rgba(120, 170, 220, 0.85);
+  margin-right: 4px;
 }
 .stub-popup-choices {
   display: flex;
@@ -7028,6 +7064,8 @@ body.remote-mode #debug-hud { display: none !important; }
       <h3 class="stub-popup-title" id="stub-popup-title">—</h3>
       <div class="stub-popup-meta" id="stub-popup-meta"></div>
       <div class="stub-popup-body" id="stub-popup-body">—</div>
+      <!-- 2026-04-27: tech callout — info mecânica separada da narrativa -->
+      <div class="stub-popup-tech" id="stub-popup-tech" style="display:none"></div>
       <div class="stub-popup-choices" id="stub-popup-choices"></div>
       <div class="stub-popup-footer" id="stub-popup-footer"></div>
     </div>
@@ -7305,9 +7343,13 @@ body.remote-mode #debug-hud { display: none !important; }
       <div class="event-divider"><span class="gem">◆</span></div>
       <p class="event-text" id="event-text"></p>
       <p class="event-flavor hidden" id="event-flavor"></p>
+      <!-- 2026-04-27: tech callout — info mecânica separada da narrativa -->
+      <div class="stub-popup-tech" id="event-tech" style="display:none"></div>
       <div class="event-choices-label" id="event-choices-label">Escolha uma ação</div>
       <div class="event-choices" id="event-choices"></div>
       <div id="event-outcome" class="hidden"></div>
+      <!-- tech do outcome — renderizado abaixo do outcome flavor -->
+      <div class="stub-popup-tech" id="event-outcome-tech" style="display:none"></div>
       <button id="event-continue" class="event-continue hidden">Continuar</button>
     </div>
   </div>
@@ -8736,6 +8778,39 @@ body.remote-mode #debug-hud { display: none !important; }
 
   function _getEl(id) { return document.getElementById(id); }
 
+  // 2026-04-27 USER FIX: renderiza tech callout (info mecânica) separado da
+  // narrativa. Aceita string ou null/undef. Limpo se vazio.
+  // Pode receber tech.label custom (ex: "INICIATIVA", "VANTAGEM", "COMBATE")
+  // ou usa default "INFO".
+  function _renderTechCallout(tech) {
+    var el = _getEl('stub-popup-tech');
+    if (!el) return;
+    if (!tech) {
+      el.innerHTML = '';
+      el.style.display = 'none';
+      return;
+    }
+    // tech pode ser string OU { label, text }
+    var label = 'INFO';
+    var text = '';
+    if (typeof tech === 'string') {
+      text = tech;
+    } else if (tech && typeof tech === 'object') {
+      label = tech.label || 'INFO';
+      text = tech.text || '';
+    }
+    if (!text) { el.innerHTML = ''; el.style.display = 'none'; return; }
+    el.innerHTML = '';
+    var span = document.createElement('span');
+    var lbl = document.createElement('span');
+    lbl.className = 'stub-popup-tech-label';
+    lbl.textContent = label;
+    span.appendChild(lbl);
+    span.appendChild(document.createTextNode(' ' + text));
+    el.appendChild(span);
+    el.style.display = 'flex';
+  }
+
   function _buildChoicesForState(state, family) {
     var pool = STATE_CHOICES[state] || [];
     var out = [];
@@ -8822,6 +8897,8 @@ body.remote-mode #debug-hud { display: none !important; }
       bodyEl.textContent = rt.body || '';
       bodyEl.classList.remove('stub-popup-outcome-ok', 'stub-popup-outcome-fail');
     }
+    // 2026-04-27: tech callout — info mecânica separada da narrativa
+    _renderTechCallout(rt.tech);
     if (window.VoiceLineLayer) {
       window.VoiceLineLayer.clearRender();
       if (rt.voiceLine && bodyEl) window.VoiceLineLayer.render(rt.voiceLine, bodyEl);
@@ -8920,6 +8997,8 @@ body.remote-mode #debug-hud { display: none !important; }
         bodyEl.textContent = outcome.flavor || (rollResult.success ? 'Sucesso.' : 'Falha.');
         bodyEl.classList.add('stub-popup-outcome-' + (rollResult.success ? 'ok' : 'fail'));
       }
+      // 2026-04-27: tech callout no outcome também — combate iniciando, vantagem, condição, etc.
+      _renderTechCallout(outcome.tech);
       if (window.OutcomeApplier) {
         window.OutcomeApplier.apply(outcome, {
           player: (window.S && window.S.player) ? window.S.player : {},
@@ -10140,6 +10219,9 @@ body.perf-lite .stub-popup-voice { animation: none; }
       legacyId: ctx.legacyId,
       title: entry.title || (ctx.type ? ctx.type : 'Evento'),
       body: body,
+      // 2026-04-27: tech callout — info mecânica separada da narrativa.
+      // Pode ser string OU { label, text }. Renderizado em box monospace azul.
+      tech: entry.tech || null,
       voiceLine: voiceLine,
       choices: choices,
       resolvedAt: Date.now(),
@@ -14517,13 +14599,17 @@ const EVENTS_POOL = {
         // Variante 2: Emboscada — criatura já viu primeiro
         {
           title: 'Olhos na Vegetação',
-          text: 'Você sente antes de ver — algo nos arbustos parou de respirar quando você se aproximou. Para. Escuta. Um {creature} está ali, escondido, possivelmente já decidiu o que vai fazer com você. Quem se mexer primeiro perde a iniciativa.',
+          text: 'Você sente antes de ver — algo nos arbustos parou de respirar quando você se aproximou. Para. Escuta. Um {creature} está ali, escondido, possivelmente já decidiu o que vai fazer com você.',
+          tech: { label: 'INICIATIVA', text: 'Quem se mexer primeiro define a iniciativa neste encontro.' },
           choices: [
             { label: 'Atacar primeiro (Atletismo)', skill: 'athletics', dc: 14,
               desc: 'Carga decidida no ponto onde sente o predador — surpresa pode reverter o jogo.',
-              ok: 'Você se atira no arbusto com lâmina alta. {Ele} é pego de surpresa — você teve a iniciativa. Combate começa, mas com vantagem grande.',
-              okXp: [16, 22], okFlag: 'first_attack_advantage', failCombat: true,
-              fail: 'Você ataca o lugar errado — só folhas e gravetos. {Ele} sai do verdadeiro esconderijo às suas costas e investe. Combate em desvantagem.',
+              ok: 'Você se atira no arbusto com lâmina alta. {Ele} é pego de surpresa.',
+              okTech: { label: 'COMBATE', text: 'Vantagem na iniciativa + atacante com surpresa. Combate iniciando…' },
+              okXp: [16, 22], okFlag: 'first_attack_advantage',
+              okCombat: { enemy: null /* auto via CREATURE_TO_ENEMY */, surprise: true },
+              fail: 'Você ataca o lugar errado — só folhas e gravetos. {Ele} sai do verdadeiro esconderijo às suas costas e investe.',
+              failTech: { label: 'COMBATE', text: 'Combate em desvantagem (criatura te flanqueou). Iniciando…' },
               failHp: 4, failCombat: true },
             { label: 'Falar com voz baixa (Persuasão)', skill: 'cha', dc: 14,
               desc: 'Algumas criaturas inteligentes entendem tom — "estou só passando, não busco luta".',
@@ -14535,14 +14621,17 @@ const EVENTS_POOL = {
                 choices: [
                   { label: 'Oferecer ração da mochila (Lidar com Animais)', skill: 'animal_handling', dc: 12,
                     desc: 'Comida pode comprar passagem segura na região.',
-                    ok: 'Você joga uma ração no chão. {Ele} se aproxima, pega cuidadoso, e desaparece. Da próxima vez nesta região, ele lembrará. Você tem aliado discreto.',
+                    ok: 'Você joga uma ração no chão. {Ele} se aproxima, pega cuidadoso, e desaparece. Da próxima vez nesta região, ele lembrará.',
+                    okTech: 'Aliança formada — flag creature_friendship persistida.',
                     okFlag: 'creature_friendship', okXp: [12, 18],
                     fail: '{Ele} ignora a comida e desaparece. Talvez não estivesse com fome, ou talvez você ofereceu errado.' },
                   { label: 'Apenas seguir caminho com respeito', flavor: 'Algumas criaturas pedem só passagem.',
                     ok: 'Você se vira devagar e sai. {Ele} te observa até a curva.', okXp: [8, 12] }
                 ]
               },
-              fail: 'Sua voz, mesmo baixa, foi ameaça pra ele. Sai dos arbustos furioso. Combate.', failHp: 3, failCombat: true }
+              fail: 'Sua voz, mesmo baixa, foi ameaça pra ele. Sai dos arbustos furioso.',
+              failTech: 'Combate iniciando — sem vantagem nem desvantagem.',
+              failHp: 3, failCombat: true }
           ]
         },
         // Variante 3: Bando, não solo — cálculo diferente
@@ -15007,6 +15096,16 @@ const EVENTS_POOL = {
     if (rawCh.failHp) ch.outcome_fail.hp_loss = rawCh.failHp;
     if (rawCh.failMp) ch.outcome_fail.mp_loss = rawCh.failMp;
     if (typeof rawCh.failExh === 'number') ch.outcome_fail.exh_gain = (rawCh.failExh > 0) ? rawCh.failExh : 1;
+    // 2026-04-27 USER FIX: tech callouts em outcomes (separar info mecânica
+    // da narrativa). Aceita string OR { label, text }.
+    if (rawCh.okTech) ch.outcome_ok.tech = rawCh.okTech;
+    if (rawCh.failTech) ch.outcome_fail.tech = rawCh.failTech;
+    // okItem / okFlag (já existentes em alguns variants) — propaga
+    if (rawCh.okItem) ch.outcome_ok.item = rawCh.okItem;
+    if (rawCh.okFlag) {
+      if (!Array.isArray(ch.outcome_ok.ops)) ch.outcome_ok.ops = [];
+      ch.outcome_ok.ops.push({ op: 'flag', id: rawCh.okFlag, scope: 'session' });
+    }
     // failCombat → dungeon_combat (mesmo mecanismo das masmorras AAA).
     // Após closeEventModal, S._pendingCombat dispara triggerCombatScreen.
     if (rawCh.failCombat) {
@@ -15017,6 +15116,24 @@ const EVENTS_POOL = {
         enemyId = CREATURE_TO_ENEMY[t.creature] || _fallbackEnemyForBiome(biome);
       }
       ch.outcome_fail.dungeon_combat = { enemy: enemyId, surprise: false };
+    }
+    // 2026-04-27 USER FIX: okCombat → dungeon_combat no outcome_ok também.
+    // Eventos como "Atacar primeiro" devem disparar combate ao SUCEDER (com
+    // vantagem/surprise=true se quiser). Suporta:
+    //   okCombat: true  → enemy auto via CREATURE_TO_ENEMY (surprise=false)
+    //   okCombat: 'enemy_id'  → enemy explícito
+    //   okCombat: { enemy: 'id', surprise: true }  → controle total
+    if (rawCh.okCombat) {
+      var okEnemyId, okSurprise = false;
+      if (typeof rawCh.okCombat === 'string') {
+        okEnemyId = rawCh.okCombat;
+      } else if (typeof rawCh.okCombat === 'object' && rawCh.okCombat) {
+        okEnemyId = rawCh.okCombat.enemy || (CREATURE_TO_ENEMY[t.creature] || _fallbackEnemyForBiome(biome));
+        okSurprise = !!rawCh.okCombat.surprise;
+      } else {
+        okEnemyId = CREATURE_TO_ENEMY[t.creature] || _fallbackEnemyForBiome(biome);
+      }
+      ch.outcome_ok.dungeon_combat = { enemy: okEnemyId, surprise: okSurprise };
     }
     // 2026-04-27 USER FIX: chains AAA — outcome.chain abre próxima etapa do
     // evento com nova body + choices. Profundidade 2-3 níveis (BG3/Pathfinder).
@@ -15233,6 +15350,8 @@ const EVENTS_POOL = {
             scenarioIdx: sv,       // pra picker rotacionar (encounter % variants)
             title: titleSlotted,
             text: textSlotted,
+            // 2026-04-27 USER FIX: tech callout do body — info mecânica separada
+            tech: scenario.tech || tpl.tech || null,
             choices: choicesGen
           };
           // X-6.5.51m: passa requires_tile pro evento gerado (filtragem em maybeRollEvent)
@@ -27066,6 +27185,37 @@ function _processChoiceOutcome(choice, outcome, isSuccess) {
   try { _checkQuestGoals(); } catch (_) {}
 }
 
+// 2026-04-27: helper global pra renderizar tech callout em qualquer elemento
+// (used by procedural event-modal AND tile-object stub-popup). Aceita string
+// OU { label, text }. Limpa se vazio.
+function _renderTechCalloutInModal(elementId, tech) {
+  var el = document.getElementById(elementId);
+  if (!el) return;
+  if (!tech) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  var label = 'INFO';
+  var text = '';
+  if (typeof tech === 'string') {
+    text = tech;
+  } else if (tech && typeof tech === 'object') {
+    label = tech.label || 'INFO';
+    text = tech.text || '';
+  }
+  if (!text) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.innerHTML = '';
+  var span = document.createElement('span');
+  var lbl = document.createElement('span');
+  lbl.className = 'stub-popup-tech-label';
+  lbl.textContent = label;
+  span.appendChild(lbl);
+  span.appendChild(document.createTextNode(' ' + text));
+  el.appendChild(span);
+  el.style.display = 'flex';
+}
+
 // 2026-04-27: Sistema de áudio ambiente de clima — loop infinito de chuva/
 // trovão/vento conforme S.weather. Audio paralelo à música principal (não
 // substitui — é uma camada extra de imersão).
@@ -27620,6 +27770,10 @@ function openEventModal() {
 
   document.getElementById('event-title').textContent = ev._pickedTitle;
   document.getElementById('event-text').textContent = ev._pickedText;
+  // 2026-04-27: tech callout — info mecânica separada da narrativa
+  _renderTechCalloutInModal('event-tech', ev.tech);
+  // Limpa tech do outcome (será setado quando aplicar choice)
+  _renderTechCalloutInModal('event-outcome-tech', null);
 
   const cat = inferCategory(ev);
   const badge = document.getElementById('event-badge');
@@ -28442,6 +28596,10 @@ function applyChoiceOutcome(choice, success, total, dc) {
   if (choicesEl) choicesEl.style.display = 'none';
   if (choicesLbl) choicesLbl.style.display = 'none';
   if (flavorEl) flavorEl.style.display = 'none';
+  // 2026-04-27: tech callout do OUTCOME (combate iniciando, vantagem, etc)
+  // Esconde o tech do EVENT (intro) e mostra o tech do OUTCOME se houver.
+  _renderTechCalloutInModal('event-tech', null);
+  _renderTechCalloutInModal('event-outcome-tech', outcome.tech);
 
   const hdr = document.createElement('div');
   hdr.className = 'outcome-header';
