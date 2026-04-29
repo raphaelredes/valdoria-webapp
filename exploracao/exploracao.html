@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:55:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:01:24Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25829,64 +25829,76 @@ function drawWeatherOverlay(ctx) {
              : (typeof _tileDetail !== 'undefined' ? _tileDetail : 1);
   if (S.weather && _wTier >= 1) {
     var cloudCfg = null;
-    // FIX 2026-04-27: speed agora é em px/ms (não fator multiplicado por 60).
-    // _animTime está em milissegundos via performance.now(). Antes:
-    //   speed=0.022 * 60 = 1.32 px/ms = 1320 px/s — cruzava tela em <1s ❌
-    // Agora calibrado:
-    //   's' (clear): 0.012 px/ms ≈ 12 px/s — cruza tela em ~30s, perceptível
-    //   'r' (rain):  0.040 px/ms ≈ 40 px/s — vento moderado
-    //   't' (storm): 0.080 px/ms ≈ 80 px/s — vento forte
-    //   'f' (fog):   0.008 px/ms ≈  8 px/s — quase parado, atmosférico
+    // 2026-04-27 USER FIX: tempestade tem MUITO mais cobertura (count 8→14,
+    // alpha 0.32→0.42) — quase totalmente sombreado, mais escuro que sol.
     if (S.weather === 's')      cloudCfg = { count: 1, alpha: 0.14, speed: 0.012, scale: 1.8 };  // sombra grande lenta
-    else if (S.weather === 'r') cloudCfg = { count: 5, alpha: 0.18, speed: 0.040, scale: 1.0 };
-    else if (S.weather === 't') cloudCfg = { count: 8, alpha: 0.32, speed: 0.080, scale: 1.3 };
+    else if (S.weather === 'r') cloudCfg = { count: 8, alpha: 0.22, speed: 0.040, scale: 1.1 };
+    else if (S.weather === 't') cloudCfg = { count: 14, alpha: 0.42, speed: 0.080, scale: 1.4 };  // tempestade densa
     else if (S.weather === 'f') cloudCfg = { count: 4, alpha: 0.10, speed: 0.008, scale: 0.9 };
     if (cloudCfg) {
-      // cloudT agora é o offset em pixels (speed é px/ms direto)
       var cloudT = _animTime * cloudCfg.speed;
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
       var cloudRng = seededRng(42);
       for (var ci = 0; ci < cloudCfg.count; ci++) {
-        // Cada nuvem tem position + size determinísticos por seed (consistente),
-        // mas drift via _animTime. Wraps na borda direita.
         var rndX = cloudRng();
         var rndY = cloudRng();
         var rndS = cloudRng();
+        var rndR = cloudRng();   // rotação
         var cloudW = (180 + rndS * 280) * cloudCfg.scale;
-        var cloudH = cloudW * (0.55 + rndS * 0.25);
-        // 2026-04-27 FIX: drift correto sem multiplicador * 60 errado.
-        // Para 's' (clear) com count=1, period é 3x maior que canvas pra
-        // criar GAPS entre passagens — usuário vê nuvem chegar, atravessar,
-        // sumir, e só depois de uns 60s outra aparece. Storm/rain mantém
-        // padrão denso (period = canvasW + cloudW = nuvens contínuas).
+        var cloudH = cloudW * (0.45 + rndS * 0.30);
         var rare = (S.weather === 's');
         var period = rare ? (canvasW + cloudW) * 3 : (canvasW + cloudW);
         var ccx = ((rndX * period + cloudT) % period) - cloudW * 0.5;
-        // Skip se totalmente fora da tela (perf — não desenha invisível)
         if (ccx + cloudW < 0 || ccx > canvasW) continue;
         var ccy = rndY * canvasH * 0.85;
-        // Múltiplas elipses sobrepostas pra forma orgânica de nuvem
-        var grad = ctx.createRadialGradient(ccx, ccy, 0, ccx, ccy, cloudW * 0.5);
-        grad.addColorStop(0, 'rgba(20, 18, 16, ' + cloudCfg.alpha + ')');
-        grad.addColorStop(0.7, 'rgba(20, 18, 16, ' + (cloudCfg.alpha * 0.4) + ')');
-        grad.addColorStop(1, 'rgba(20, 18, 16, 0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.ellipse(ccx, ccy, cloudW * 0.5, cloudH * 0.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Detalhe extra (somente EPIC) — segunda elipse menor pra forma irregular
-        if (_wTier >= 2) {
-          var grad2 = ctx.createRadialGradient(ccx + cloudW * 0.18, ccy - cloudH * 0.12, 0, ccx + cloudW * 0.18, ccy - cloudH * 0.12, cloudW * 0.32);
-          grad2.addColorStop(0, 'rgba(20, 18, 16, ' + (cloudCfg.alpha * 0.7) + ')');
-          grad2.addColorStop(1, 'rgba(20, 18, 16, 0)');
-          ctx.fillStyle = grad2;
+
+        // 2026-04-27 USER FIX: nuvens com FORMATOS IRREGULARES — composição
+        // de múltiplas blobs elípticas sobrepostas com offsets aleatórios.
+        // User reportou: "nuvens em formatos arredondados nada realistas".
+        // Agora 5-8 sub-blobs por nuvem (tier-aware), formando contornos
+        // orgânicos puffy ao estilo cumulus/stratus realista.
+        var blobs = (_wTier >= 2) ? 8 : 5;
+        var blobRng = seededRng(42 + ci * 13);  // seed por nuvem pra consistência
+        var rotation = (rndR - 0.5) * 0.4;       // ±0.2 rad rotação geral
+        for (var bi = 0; bi < blobs; bi++) {
+          // Offset relativo dentro do "envelope" da nuvem
+          var ox = (blobRng() - 0.5) * cloudW * 0.85;
+          var oy = (blobRng() - 0.5) * cloudH * 0.85;
+          var sub = blobRng();
+          var subW = cloudW * (0.20 + sub * 0.30);  // tamanhos variados
+          var subH = subW * (0.55 + blobRng() * 0.30);
+          var subRot = rotation + (blobRng() - 0.5) * 0.6;
+          var alphaScale = 0.55 + blobRng() * 0.45;  // alpha por blob
+          var blobAlpha = cloudCfg.alpha * alphaScale;
+          var grad = ctx.createRadialGradient(
+            ccx + ox, ccy + oy, 0,
+            ccx + ox, ccy + oy, subW * 0.6
+          );
+          grad.addColorStop(0, 'rgba(20, 18, 16, ' + blobAlpha + ')');
+          grad.addColorStop(0.55, 'rgba(20, 18, 16, ' + (blobAlpha * 0.45) + ')');
+          grad.addColorStop(1, 'rgba(20, 18, 16, 0)');
+          ctx.fillStyle = grad;
           ctx.beginPath();
-          ctx.ellipse(ccx + cloudW * 0.18, ccy - cloudH * 0.12, cloudW * 0.32, cloudH * 0.4, 0, 0, Math.PI * 2);
+          ctx.ellipse(ccx + ox, ccy + oy, subW * 0.5, subH * 0.5, subRot, 0, Math.PI * 2);
           ctx.fill();
         }
       }
       ctx.restore();
+
+      // 2026-04-27 USER FIX: tempestade À NOITE = quase tão escuro como
+      // hex de mata. User pediu: "durante a noite é preciso que fique
+      // quase tão escuro quanto o efeito de entrar nos hexagonos de mata".
+      // Aplica overlay escuro adicional só em storm + dayPhase noite.
+      if (S.weather === 't') {
+        var nightDarkness = 0;
+        if (S.dayPhase === 'night') nightDarkness = 0.55;
+        else if (S.dayPhase === 'dusk' || S.dayPhase === 'dawn') nightDarkness = 0.25;
+        if (nightDarkness > 0) {
+          ctx.fillStyle = 'rgba(10, 12, 22, ' + nightDarkness + ')';
+          ctx.fillRect(0, 0, canvasW, canvasH);
+        }
+      }
     }
   }
 
@@ -25957,13 +25969,19 @@ function drawWeatherOverlay(ctx) {
       try { _applyLightningFlashToOverlays(0); } catch (_) {}
     }
   } else if (S.weather === 'f') {
-    // V2.4: névoa realista — D&D 5e "heavily obscured at distance, visible nearby".
-    // Camada 1: tint base sutil em toda a tela
-    ctx.fillStyle = 'rgba(210, 215, 225, 0.08)';
-    ctx.fillRect(0, 0, canvasW, canvasH);
-    // Camada 2: gradiente radial — denso nas bordas, transparente no centro
-    // (simula que você vê o que tá perto mas perde visibilidade na distância).
-    // Se o player existe, centraliza no player; senão no meio do canvas.
+    // 2026-04-27 USER FIX: névoa ÉPICA. User pediu: "efeito de nuvem em
+    // volta do personagem, aplicado a todo o cenário, e quando o personagem
+    // andar a névoa se move parecido com nuvem".
+    //
+    // 4 camadas:
+    //   1. Tint base mais denso (toda a tela)
+    //   2. Vignette radial centrado no player (visibilidade próxima)
+    //   3. Wisps orbitando o player (drift orgânico)
+    //   4. NOVAS: nuvens grandes irregulares que se movem por TODA a tela
+    //      em direções diferentes — sensação de mar de névoa em movimento
+    //
+    // Player movement: como vignette é centrado em hexToScreen(player), a
+    // névoa se "move" relativa ao mundo conforme player anda.
     let cx = canvasW * 0.5, cy = canvasH * 0.5;
     try {
       if (S.player) {
@@ -25971,23 +25989,28 @@ function drawWeatherOverlay(ctx) {
         cx = c.x; cy = c.y;
       }
     } catch (_) {}
-    const maxR = Math.max(canvasW, canvasH) * 0.8;
-    const innerR = Math.min(canvasW, canvasH) * 0.15;
+
+    // Camada 1: tint base mais denso (era 0.08, agora 0.14)
+    ctx.fillStyle = 'rgba(215, 220, 230, 0.14)';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    // Camada 2: vignette radial — visibilidade próxima
+    const maxR = Math.max(canvasW, canvasH) * 0.85;
+    const innerR = Math.min(canvasW, canvasH) * 0.12;
     const vignette = ctx.createRadialGradient(cx, cy, innerR, cx, cy, maxR);
     vignette.addColorStop(0, 'rgba(220, 225, 235, 0)');
-    vignette.addColorStop(0.45, 'rgba(215, 220, 230, 0.18)');
-    vignette.addColorStop(0.8, 'rgba(210, 215, 225, 0.36)');
-    vignette.addColorStop(1, 'rgba(205, 210, 220, 0.55)');
+    vignette.addColorStop(0.40, 'rgba(215, 220, 230, 0.22)');
+    vignette.addColorStop(0.75, 'rgba(210, 215, 225, 0.45)');
+    vignette.addColorStop(1, 'rgba(205, 210, 220, 0.62)');
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, canvasW, canvasH);
-    // Camada 3: 8 wisps orgânicos drifting — elipses grandes borradas em órbita lenta.
-    // seedRng pra wisps consistentes entre frames; translado por _animTime.
+
+    // Camada 3: wisps orbitais (mantida — efeito ao redor do player)
     const t = _animTime * 0.00012;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < 8; i++) {
       const phase = (i / 8) * Math.PI * 2;
-      // Cada wisp orbita com raio e velocidade diferentes
       const orbitR = canvasW * (0.28 + 0.18 * Math.sin(i * 1.3));
       const orbitSpeed = 0.3 + i * 0.12;
       const wx = cx + Math.cos(phase + t * orbitSpeed) * orbitR;
@@ -25996,8 +26019,8 @@ function drawWeatherOverlay(ctx) {
       const rx = 90 + Math.sin(t * 3 + i * 1.7) * 20;
       const ry = 40 + Math.cos(t * 2.5 + i) * 12;
       const wispGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, rx);
-      wispGrad.addColorStop(0, 'rgba(230, 235, 245, 0.14)');
-      wispGrad.addColorStop(0.6, 'rgba(220, 225, 235, 0.06)');
+      wispGrad.addColorStop(0, 'rgba(230, 235, 245, 0.18)');
+      wispGrad.addColorStop(0.6, 'rgba(220, 225, 235, 0.08)');
       wispGrad.addColorStop(1, 'rgba(210, 215, 225, 0)');
       ctx.fillStyle = wispGrad;
       ctx.beginPath();
@@ -26005,6 +26028,57 @@ function drawWeatherOverlay(ctx) {
       ctx.fill();
     }
     ctx.restore();
+
+    // 2026-04-27: Camada 4 — NUVENS GRANDES de névoa em movimento por TODA
+    // a tela (drift independente, direções e velocidades variadas). Cria
+    // sensação de mar denso de névoa cobrindo o cenário inteiro.
+    if (_wTier >= 1) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      var fogCloudT = _animTime * 0.012;  // 12 px/s drift (lento)
+      var fogRng = seededRng(99);
+      var fogClouds = (_wTier >= 2) ? 6 : 4;
+      for (var fci = 0; fci < fogClouds; fci++) {
+        var rndX = fogRng();
+        var rndY = fogRng();
+        var rndS = fogRng();
+        var rndDir = fogRng();
+        // Direção alternada (alguns vão pra direita, outros pra esquerda
+        // pra criar tornado/swirl visual)
+        var dirSign = (rndDir < 0.5) ? 1 : -1;
+        var fcW = (200 + rndS * 240);
+        var fcH = fcW * 0.6;
+        var period = canvasW + fcW;
+        var fcx = ((rndX * period + fogCloudT * dirSign) % period);
+        if (fcx < 0) fcx += period;
+        fcx -= fcW * 0.5;
+        if (fcx + fcW < 0 || fcx > canvasW) continue;
+        var fcy = rndY * canvasH;
+        // Composição irregular (5 sub-blobs por nuvem)
+        var blobRng = seededRng(99 + fci * 17);
+        for (var fbi = 0; fbi < 5; fbi++) {
+          var fox = (blobRng() - 0.5) * fcW * 0.8;
+          var foy = (blobRng() - 0.5) * fcH * 0.8;
+          var fsub = blobRng();
+          var subW = fcW * (0.25 + fsub * 0.30);
+          var subH = subW * (0.55 + blobRng() * 0.30);
+          var subRot = (blobRng() - 0.5) * 0.6;
+          var blobAlpha = 0.10 + blobRng() * 0.08;
+          var grad = ctx.createRadialGradient(
+            fcx + fox, fcy + foy, 0,
+            fcx + fox, fcy + foy, subW * 0.6
+          );
+          grad.addColorStop(0, 'rgba(225, 230, 240, ' + blobAlpha + ')');
+          grad.addColorStop(0.55, 'rgba(220, 225, 235, ' + (blobAlpha * 0.5) + ')');
+          grad.addColorStop(1, 'rgba(215, 220, 230, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.ellipse(fcx + fox, fcy + foy, subW * 0.5, subH * 0.5, subRot, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
   }
   } catch (e) {
     LOGE('WEATHER', 'drawWeatherOverlay failed:', e.message, e.stack);
@@ -26906,6 +26980,13 @@ function onMoveEnd(col, row) {
       S.weather = next;
       // 2026-04-27: Atualiza áudio ambiente de clima quando muda.
       _updateWeatherAmbient(next);
+      // 2026-04-27 USER FIX: tempestade começou e tocha está acesa? agenda extinção.
+      // Tempestade acabou? cancela timer pendente.
+      if (next === 't') {
+        _scheduleTorchStormExtinguish();
+      } else {
+        _cancelTorchStormExtinguish();
+      }
       // Narração contextual por bioma
       const biomeNarr = {
         desert: { s: 'O sol volta a brilhar forte sobre as dunas.', t: 'Uma tempestade de areia se aproxima ao horizonte!', r: 'Uma chuva rara cai sobre o deserto — uma bênção breve.', f: 'Uma névoa morna envolve as dunas.' },
@@ -27602,10 +27683,13 @@ function _fadeAudioVol(audio, fromVol, toVol, durationMs, onComplete) {
 
 function _updateWeatherAmbient(weather) {
   // Mapeia weather code → ambient track key + volume relativo
+  // 2026-04-27 USER FIX: névoa não tem som — user reportou "som está
+  // ruim, parecendo um rádio chiado apenas". Removido amb_wind do fog.
+  // Apenas chuva e tempestade têm ambient layer.
   var spec = null;
   if (weather === 'r') spec = { files: ['amb_rain_1.mp3', 'amb_rain_2.mp3'], vol: 0.32, key: 'rain' };
   else if (weather === 't') spec = { files: ['amb_rain_1.mp3', 'amb_rain_2.mp3'], vol: 0.42, key: 'storm' };
-  else if (weather === 'f') spec = { files: ['amb_wind_1.mp3', 'amb_wind_2.mp3'], vol: 0.18, key: 'fog' };
+  // weather 'f' (fog) → silêncio (sem ambient)
   // Se já está tocando o mesmo, não recria
   if (spec && _weatherAmbient.currentKey === spec.key && _weatherAmbient.active) {
     return;
@@ -27820,6 +27904,49 @@ function _stopWeatherAmbient() {
   _weatherAmbient.currentKey = null;
   _weatherAmbient.lastFile = null;
   _weatherAmbient.lastSfxVol = -1;
+}
+
+// 2026-04-27 USER FIX: tocha apaga em tempestade.
+// User pediu: "na tempestade também precisamos fazer com que a tocha seja
+// apagada de tempo em tempo, fazendo voltar a ficar apagada no menu
+// automaticamente... variando entre 8 e 50 segundos".
+//
+// Schedule fires SE:
+//   1. weather === 't' (tempestade)
+//   2. lightSource === 'torch' (tocha física, não magia)
+// Mage lights (light, dancing_lights, daylight) NÃO afetadas — magia
+// é resistente a vento/chuva.
+var _torchStormTimer = null;
+function _scheduleTorchStormExtinguish() {
+  _cancelTorchStormExtinguish();
+  if (!S || S.weather !== 't') return;        // só em tempestade
+  if (S.lightSource !== 'torch') return;      // só tocha física
+  var delayMs = (8 + Math.random() * 42) * 1000;  // 8-50s
+  _torchStormTimer = setTimeout(function () {
+    _torchStormTimer = null;
+    // Re-check (player pode ter trocado/apagado nesse meio tempo)
+    if (!S || S.weather !== 't') return;
+    if (S.lightSource !== 'torch') return;
+    // Apaga
+    S.lightSource = null;
+    S.torchActive = false;
+    dmNarrate({ text: '⚡ A chuva e o vento apagam sua tocha! Você fica no escuro.', type: 'event' });
+    try { _showWaterStatusToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 4000); } catch (_) {}
+    // Re-reveal fog com novo vision range (sem luz)
+    try { revealFogAt(S.player.col, S.player.row, getVisionRange()); } catch (_) {}
+    try { updateLightButtonVisual(); } catch (_) {}
+    try { renderLightMenu(); } catch (_) {}
+    try { scheduleRender(); } catch (_) {}
+    try { drawMinimap(); } catch (_) {}
+    LOG('TORCH', 'auto_extinguished_in_storm delayMs=' + delayMs.toFixed(0));
+  }, delayMs);
+  LOG('TORCH', 'storm_extinguish_scheduled in ' + (delayMs / 1000).toFixed(1) + 's');
+}
+function _cancelTorchStormExtinguish() {
+  if (_torchStormTimer) {
+    clearTimeout(_torchStormTimer);
+    _torchStormTimer = null;
+  }
 }
 
 // 2026-04-27 USER FIX: aplica clarão também nos tile-objects (SVG overlay
@@ -33223,10 +33350,14 @@ function bindQuickActions() {
         daylight: 'Você canaliza poder divino e uma esfera de luz solar se manifesta acima de você.'
       };
       dmNarrate({ text: narr[srcId] || 'Luz conjurada.', type: 'ambient' });
+      // 2026-04-27 USER FIX: tocha em tempestade apaga sozinha (vento + chuva).
+      // Schedule auto-extinguish entre 8-50s. Clear se trocar pra outro source.
+      _scheduleTorchStormExtinguish();
     } else {
       S.lightSource = null;
       S.torchActive = false;
       if (prev) dmNarrate({ text: 'A luz se apaga.', type: 'ambient' });
+      _cancelTorchStormExtinguish();
     }
     // Re-reveal fog com novo vision range
     revealFogAt(S.player.col, S.player.row, getVisionRange());
