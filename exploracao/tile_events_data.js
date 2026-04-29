@@ -1994,6 +1994,7 @@ window.TILE_EVENTS_DB['abandoned_camp.active']  = window.TILE_EVENTS_DB['abandon
 // State 'alerted' — entries específicas (player triggered interaction direta).
 window.TILE_EVENTS_DB['war_drum.alerted'] = {
   body: 'O som do tambor reverberou pelas montanhas. Algo respondeu — passos pesados se aproximam. Você precisa decidir AGORA.',
+  tech: { label: 'AMEAÇA', text: 'Inimigos atraídos pelo tambor — combate iminente.' },
   voiceLines: {
     martial:    '"Eles vêm. Postura de combate."',
     specialist: '"Aqueles passos não são humanos. Reforços!"',
@@ -2011,8 +2012,10 @@ window.TILE_EVENTS_DB['war_drum.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Você tropeça. Os passos se aproximam — combate iminente.',
+        flavor: 'Você tropeça. Os passos se aproximam.',
+        tech: { label: 'COMBATE', text: 'Sem vantagem. Iniciando…' },
         ops: [{ op: 'flag', id: 'drum_alerted_combat', scope: 'session' }],
+        dungeon_combat: { enemy: 'orc_raider', surprise: false },
         fsm: 'alerted'
       }
     },
@@ -2022,7 +2025,9 @@ window.TILE_EVENTS_DB['war_drum.alerted'] = {
       flavor: 'Você se prepara — espada em punho, pés firmes.',
       outcome_ok: {
         flavor: 'Você ganha vantagem ao escolher o terreno.',
+        tech: { label: 'COMBATE', text: 'Vantagem na iniciativa pelo terreno preparado. Iniciando…' },
         ops: [{ op: 'flag', id: 'first_attack_adv', scope: 'session' }],
+        dungeon_combat: { enemy: 'orc_raider', surprise: true },
         fsm: 'cleared'
       }
     }
@@ -2031,6 +2036,7 @@ window.TILE_EVENTS_DB['war_drum.alerted'] = {
 
 window.TILE_EVENTS_DB['broken_tower.alerted'] = {
   body: 'Algo se moveu nas ruínas — uma silhueta entre as pedras. Não está sozinho aqui.',
+  tech: { label: 'PERCEPÇÃO', text: 'Presença hostil próxima — possível bandido ou criatura.' },
   voiceLines: {
     martial:    '"Inimigo. Pronto."',
     specialist: '"Movimento atrás dos blocos caídos."',
@@ -2048,8 +2054,10 @@ window.TILE_EVENTS_DB['broken_tower.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Era um saqueador escondido. Ele te viu — combate iminente.',
+        flavor: 'Era um saqueador escondido. Ele te viu.',
+        tech: { label: 'COMBATE', text: 'Bandido em emboscada. Sem vantagem inicial. Iniciando…' },
         ops: [{ op: 'flag', id: 'tower_combat', scope: 'session' }],
+        dungeon_combat: { enemy: 'orc_raider', surprise: false },
         fsm: 'alerted'
       }
     },
@@ -2064,6 +2072,7 @@ window.TILE_EVENTS_DB['broken_tower.alerted'] = {
 
 window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
   body: 'As pegadas levam a um animal grande, agora a poucos metros. Ele ergueu a cabeça — te viu.',
+  tech: { label: 'AMEAÇA', text: 'Animal selvagem alerta. Movimento errado dispara investida.' },
   voiceLines: {
     martial:    '"Caça ou luta. Decida rápido."',
     specialist: '"Postura defensiva da fera."',
@@ -2082,7 +2091,9 @@ window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
       },
       outcome_fail: {
         flavor: 'Movimento brusco demais. O animal investe contra você!',
+        tech: { label: 'COMBATE', text: 'Animal hostil em investida. Você sofre 4 dano antes do combate. Iniciando…' },
         ops: [{ op: 'hp', delta: -4 }],
+        dungeon_combat: { enemy: 'gray_wolf', surprise: false },
         fsm: 'alerted'
       }
     },
@@ -2097,6 +2108,7 @@ window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
 
 window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
   body: 'O acampamento parecia abandonado — mas alguém estava escondido. Uma figura se levanta de trás de uma carroça quebrada.',
+  tech: { label: 'AMEAÇA', text: 'Humano armado em postura defensiva. Diplomacia ou combate.' },
   voiceLines: {
     martial:    '"Postura agressiva. Identifique-se ou ataque."',
     specialist: '"Não estava abandonado. Armadilha clássica."',
@@ -2117,8 +2129,10 @@ window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Ele saca uma adaga. Combate iminente.',
+        flavor: 'Ele saca uma adaga.',
+        tech: { label: 'COMBATE', text: 'Sobrevivente em pânico ataca por desespero. Iniciando…' },
         ops: [{ op: 'flag', id: 'camp_combat', scope: 'session' }],
+        dungeon_combat: { enemy: 'orc_raider', surprise: false },
         fsm: 'alerted'
       }
     },
@@ -2133,6 +2147,7 @@ window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
 
 window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
   body: 'A sentinela te viu. O grito de alarme já saiu — outras vozes respondem ao longe. Combate ou fuga, em segundos.',
+  tech: { label: 'AMEAÇA', text: 'Alarme disparado. Reforços chegando em 1-2 turnos. Janela tática curta.' },
   voiceLines: {
     martial:    '"Eles vêm. Aço pronto."',
     specialist: '"Reforços a 30 passos. Janela curta."',
@@ -2143,13 +2158,15 @@ window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
     {
       id: 'fight_sentinel',
       label: 'Atacar antes que reforços cheguem',
-      flavor: 'Você avança decidido — vantagem da iniciativa.',
+      flavor: 'Você avança decidido com vantagem da iniciativa.',
       outcome_ok: {
         flavor: 'Você abate a sentinela em segundos, mas reforços já vêm correndo.',
+        tech: { label: 'COMBATE', text: 'Vantagem na iniciativa + atacante com surpresa. Iniciando…' },
         ops: [
           { op: 'xp', delta: 20 },
           { op: 'flag', id: 'sentinel_killed', scope: 'session' }
         ],
+        dungeon_combat: { enemy: 'orc_raider', surprise: true },
         fsm: 'alerted'
       }
     },
@@ -2163,8 +2180,10 @@ window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Galho estala — eles te vêem. Combate iminente.',
+        flavor: 'Galho estala — eles te vêem.',
+        tech: { label: 'COMBATE', text: 'Fuga falha — combate em desvantagem. Iniciando…' },
         ops: [{ op: 'flag', id: 'sentinel_combat', scope: 'session' }],
+        dungeon_combat: { enemy: 'orc_raider', surprise: false },
         fsm: 'alerted'
       }
     }

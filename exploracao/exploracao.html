@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:10:31Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:49:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14554,7 +14554,8 @@ const EVENTS_POOL = {
         // Variante 1: Confronto direto na trilha
         {
           title: 'Ameaça à Vista',
-          text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Movimento errado e você está em combate.',
+          text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada.',
+          tech: { label: 'AMEAÇA', text: 'Movimento errado e combate inicia.' },
           choices: [
             { label: 'Recuar devagar (Sabedoria)', skill: 'wis', dc: 12,
               desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
@@ -14573,7 +14574,8 @@ const EVENTS_POOL = {
                     ok: 'Você prossegue olhando pra trás. A estrada ficou mais sombria, mas também mais sábia.', okXp: [4, 6] }
                 ]
               },
-              fail: '{Ele} percebe sua hesitação. A investida vem em explosão e você é jogado contra o terreno antes de processar o ataque. Combate começou.',
+              fail: '{Ele} percebe sua hesitação. A investida vem em explosão e você é jogado contra o terreno antes de processar o ataque.',
+              failTech: { label: 'COMBATE', text: 'Iniciativa perdida. Você sofre 4 dano. Iniciando…' },
               failHp: 4, failCombat: true },
             { label: 'Intimidar (Carisma)', skill: 'cha', dc: 13,
               desc: 'Postura ereta, voz grave — apresentar-se como ameaça maior, não presa.',
@@ -14592,7 +14594,8 @@ const EVENTS_POOL = {
                     ok: 'Você prossegue rápido. Vitória é o suficiente.', okXp: [6, 8] }
                 ]
               },
-              fail: '{Ele} não recua — sua intimidação foi lida como desafio. Posiciona-se pra investida e avança. Combate.',
+              fail: '{Ele} não recua — sua intimidação foi lida como desafio. Posiciona-se pra investida e avança.',
+              failTech: { label: 'COMBATE', text: 'Intimidação falhou — criatura aceita confronto. Você sofre 6 dano. Iniciando…' },
               failHp: 6, failCombat: true }
           ]
         },
@@ -14637,7 +14640,8 @@ const EVENTS_POOL = {
         // Variante 3: Bando, não solo — cálculo diferente
         {
           title: 'Não Está Sozinho',
-          text: 'Um {creature} aparece à frente — mas o som é outro. Ouve farfalhares à direita e à esquerda. Não é um. São três, talvez mais. Você é cercado num triângulo perfeito por predadores que não estão com fome — estão caçando por jogo.',
+          text: 'Um {creature} aparece à frente — mas o som é outro. Ouve farfalhares à direita e à esquerda. Não é um. São três, talvez mais. Você é cercado num triângulo perfeito por predadores caçando por jogo.',
+          tech: { label: 'AMEAÇA', text: 'Encontro com bando — combate em desvantagem numérica se iniciar.' },
           choices: [
             { label: 'Plantar costas em árvore e brandir arma (Atletismo)', skill: 'athletics', dc: 14,
               desc: 'Limitar ângulos de ataque — forçar combate frontal um por um.',
@@ -14651,21 +14655,28 @@ const EVENTS_POOL = {
                     desc: 'Manter postura por uma hora — predadores oportunistas eventualmente desistem.',
                     ok: 'Você aguenta firme. Sol se move. Os passos circulares ficam mais lentos, depois cessam. Eles desistiram. Você sai com pernas trêmulas e respeito profundo pela própria paciência.',
                     okXp: [16, 22], okFlag: 'survived_pack_standoff',
-                    fail: 'Cãibras vêm cedo demais. Você se mexe, eles percebem. Combate inevitável.', failHp: 5, failCombat: true },
+                    fail: 'Cãibras vêm cedo demais. Você se mexe, eles percebem.',
+                    failTech: { label: 'COMBATE', text: 'Bando vs solo. Você sofre 5 dano antes do combate. Iniciando…' },
+                    failHp: 5, failCombat: true },
                   { label: 'Chamar ajuda gritando (Carisma)', skill: 'cha', dc: 12,
                     desc: 'Pode haver outro viajante na estrada que ouça.',
                     ok: 'Você grita o nome de uma cidade próxima como se chamasse aliados. Eles param ao ouvir — talvez calculem que vem reforço. Recuam definitivo.',
                     okXp: [14, 20],
-                    fail: 'Seu grito ecoa vazio. Apenas confirma sua localização. Eles avançam coordenados. Combate desfavorável.', failHp: 4, failCombat: true }
+                    fail: 'Seu grito ecoa vazio. Apenas confirma sua localização. Eles avançam coordenados.',
+                    failTech: { label: 'COMBATE', text: 'Bando posicionado. Combate em desvantagem. Iniciando…' },
+                    failHp: 4, failCombat: true }
                 ]
               },
-              fail: 'Você não consegue alcançar a árvore — eles preveem o movimento e se reposicionam. O tronco fica longe demais. Combate em terreno aberto contra três.',
+              fail: 'Você não consegue alcançar a árvore — eles preveem o movimento e se reposicionam. O tronco fica longe demais.',
+              failTech: { label: 'COMBATE', text: 'Combate em terreno aberto contra três. Sem cobertura. Iniciando…' },
               failHp: 6, failCombat: true },
             { label: 'Largar mochila e correr (Acrobacia)', skill: 'acrobatics', dc: 13,
               desc: 'Ofereça presa fácil — mochila com comida — e use os segundos pra fugir.',
               ok: 'Você joga a mochila num arco que cai entre dois deles. Eles convergem na isca, brigando por restos. Você corre na direção oposta com tudo que tem. Quando a mata fica escassa, você chegou. Perdeu equipamento, mas está vivo.',
               okGold: [-15, -10], okXp: [16, 22],
-              fail: 'Eles ignoram a mochila — caçavam você, não comida. Suas pernas falham na fuga e o tropeço quase é o fim. Combate em fuga, ferido.', failHp: 5, failCombat: true }
+              fail: 'Eles ignoram a mochila — caçavam você, não comida. Suas pernas falham na fuga e o tropeço quase é o fim.',
+              failTech: { label: 'COMBATE', text: 'Combate em fuga — você ferido (5 dano). Iniciando…' },
+              failHp: 5, failCombat: true }
           ]
         }
       ]
@@ -14690,6 +14701,7 @@ const EVENTS_POOL = {
         {
           title: 'Perigo Iminente',
           text: 'O terreno trai sua confiança — {hazard} se manifesta sem aviso, deixando frações de segundo entre instinto e preço pago. Reaja já, ou aprenda no sangue por que viajantes experientes leem cada passo da estrada.',
+          tech: { label: 'PERIGO', text: 'Perigo súbito — teste de reação imediato (DEX ou CON).' },
           choices: [
             { label: 'Esquivar (Destreza)', skill: 'dex', dc: 12,
               desc: 'Confiar em reflexo treinado — corpo se move antes da mente analisar.',
@@ -14720,6 +14732,7 @@ const EVENTS_POOL = {
         {
           title: 'Sinal de Alerta Tarde',
           text: 'Você nota tarde demais o que devia ter notado antes — {hazard} já está agindo. Não é súbito como uma armadilha, é insidioso: o cheiro estranho, o solo cedendo devagar, a respiração que pesa por motivo errado. Você tem alguns segundos pra agir antes do problema virar grave.',
+          tech: { label: 'PERIGO', text: 'Hazard progressivo — exposição prolongada causa dano cumulativo.' },
           choices: [
             { label: 'Sair correndo na direção contrária (Atletismo)', skill: 'athletics', dc: 13,
               desc: 'Velocidade pura — colocar 50 passos entre você e a fonte.',
@@ -14750,6 +14763,7 @@ const EVENTS_POOL = {
         {
           title: 'Não Estou Sozinho no Apuro',
           text: '{hazard} pegou a estrada — e pegou também {npc} que vinha à frente. Você ouve os gritos antes de ver. {Ele} está preso/ferido/em pânico a 20 passos. Seu próprio caminho ficou tenso, mas o de {ele} é grave. Decisão difícil em segundos.',
+          tech: { label: 'DILEMA', text: 'Resgate envolve risco. Salvar primeiro a si próprio é mais seguro mas {ele} pode não sobreviver.' },
           choices: [
             { label: 'Ajudar arriscando a si mesmo (Atletismo)', skill: 'athletics', dc: 14,
               desc: 'Mergulhar pra tirar {ele} mesmo se você se machucar no processo.',
@@ -14844,12 +14858,17 @@ const EVENTS_POOL = {
                     desc: '"Vejo seu amigo atrás daquela árvore. Saiam ou chamo a guarda."',
                     ok: 'Os dois disparam estrada afora xingando. Você ganhou respeito com prudência.',
                     okXp: [14, 20], okGold: [4, 8],
-                    fail: 'Eles dobram a aposta — sacam armas, exigem tudo que você tem. Combate.', failCombat: true, failHp: 3 },
+                    fail: 'Eles dobram a aposta — sacam armas, exigem tudo que você tem.',
+                    failTech: { label: 'COMBATE', text: 'Bandidos vs solo. Você sofre 3 dano. Iniciando…' },
+                    failCombat: true, failHp: 3 },
                   { label: 'Fingir que caiu e seguir (Engano)', skill: 'deception', dc: 12,
                     desc: 'Doar moedas pequenas, sair com cara de bobo — eles te ignoram nas próximas vezes.',
-                    ok: 'Você dá 5 moedas com cara de tristeza. {Ele} agradece e sai. Você lembra o rosto pra reconhecer da próxima vez. Conhecimento ganha.',
+                    ok: 'Você dá 5 moedas com cara de tristeza. {Ele} agradece e sai. Você lembra o rosto pra reconhecer da próxima vez.',
+                    okTech: 'Flag scammer_face_known persistida — útil em encontros futuros.',
                     okGold: [-5, -5], okFlag: 'scammer_face_known', okXp: [10, 14],
-                    fail: 'Sua atuação foi pobre. Eles percebem que você sacou e mudam o tom — agora exigem tudo. Combate.', failCombat: true, failHp: 2 }
+                    fail: 'Sua atuação foi pobre. Eles percebem que você sacou e mudam o tom — agora exigem tudo.',
+                    failTech: { label: 'COMBATE', text: 'Engano fracassado. Bandidos hostis. Iniciando…' },
+                    failCombat: true, failHp: 2 }
                 ]
               },
               fail: 'Você não nota nada estranho. Acredita na história. Essa pode dar errado mais tarde — ou pode ter sido genuíno mesmo.' },
@@ -14857,7 +14876,9 @@ const EVENTS_POOL = {
               desc: 'Mesmo que seja golpe, 5 moedas não custam o tempo de discussão.',
               ok: 'Você dá moedas e prossegue. Talvez tenha sido golpe, talvez não. Em qualquer caso, sua paz mental vale o preço.',
               okGold: [-5, -3], okXp: [4, 6],
-              fail: '{Ele} pede mais. E mais. Quando você tenta ir, há um segundo bandido bloqueando. Combate.', failCombat: true, failHp: 4 }
+              fail: '{Ele} pede mais. E mais. Quando você tenta ir, há um segundo bandido bloqueando.',
+              failTech: { label: 'COMBATE', text: 'Cilada de dois — você sofre 4 dano. Iniciando…' },
+              failCombat: true, failHp: 4 }
           ]
         },
         // Variante 3: Caçador ferido com criatura encurralada
@@ -14885,12 +14906,16 @@ const EVENTS_POOL = {
                     ok: 'Você acena e prossegue. {Ele} grita um agradecimento até você sumir.', okXp: [6, 8] }
                 ]
               },
-              fail: '{Ele} (criatura) ignora seus gritos — está focado demais. O caçador desfalece. Você se aproxima, mas a criatura também: agora tem que lidar com ela diretamente.', failCombat: true, failHp: 2 },
+              fail: '{Ele} (criatura) ignora seus gritos — está focado demais. O caçador desfalece. Você se aproxima, mas a criatura também: agora tem que lidar com ela diretamente.',
+              failTech: { label: 'COMBATE', text: 'Distração falhou. Você herda a luta do caçador. Iniciando…' },
+              failCombat: true, failHp: 2 },
             { label: 'Atirar pedra na criatura (Atletismo)', skill: 'athletics', dc: 13,
               desc: 'Pedrada certeira pode espantar — ou enraivecer.',
               ok: 'Sua pedra acerta de raspão e {ele} (criatura) recua, sangrando mais. Foge pra mata. O caçador te chama.',
               okXp: [12, 18], okFlag: 'hunter_owes',
-              fail: 'A pedra erra ou bate em ângulo errado. {Ele} (criatura) vira pra você furioso. Combate inevitável.', failCombat: true, failHp: 3 }
+              fail: 'A pedra erra ou bate em ângulo errado. {Ele} (criatura) vira pra você furioso.',
+              failTech: { label: 'COMBATE', text: 'Pedra errou — criatura redirecionada pra você. Iniciando…' },
+              failCombat: true, failHp: 3 }
           ]
         }
       ]
@@ -31562,10 +31587,12 @@ var _VALID_AUDIO_TRACKS = {
   'market': 1, 'mystery': 1, 'sacred': 1, 'ocean': 1, 'intro': 1
 };
 
-// Mapa biome → track. 'plains' = wilderness (forest amb), NÃO city.
-// Sincronizado com audio-manager.js playBiome() biomeMap.
+// Mapa biome → track. 'plains' = mountain_wind (campos abertos com vento),
+// 'forest' próprio. Diferenciação biome distinta. User feedback 2026-04-27:
+// "estou em planície e está tocando música de floresta — não tem música
+// de planície?" — agora tem (mountain_wind serve bem pra campos abertos).
 var _BIOME_TO_TRACK = {
-  'plains': 'forest', 'forest': 'forest', 'swamp': 'swamp',
+  'plains': 'mountain', 'forest': 'forest', 'swamp': 'swamp',
   'mountain': 'mountain', 'cave': 'dungeon', 'desert': 'desert',
   'snow': 'snow', 'volcanic': 'dungeon', 'ocean': 'ocean',
   'coastal': 'ocean', 'ruins': 'ancient_ruins', 'underground': 'dungeon',
