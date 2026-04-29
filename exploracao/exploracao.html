@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:40:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:57:21Z - do not edit directly, edit source -->
 
 
 <!--
@@ -27500,12 +27500,71 @@ var _weatherAmbient = {
   fadeAudio: null,    // saindo (crossfade out)
   currentKey: null,   // 'rain' / 'storm' / 'fog'
   files: null,        // pool de variantes
-  vol: 0,             // volume target
+  vol: 0,             // volume BASE (antes de aplicar SFX scale)
   lastFile: null,     // última variante tocada (anti-repetição)
-  active: false       // flag pra cancelar listeners pendentes
+  active: false,      // flag pra cancelar listeners pendentes
+  lastSfxVol: -1,     // último valor de SFX vol — pra detectar mudança e re-scale
+  pollTimer: null     // timer que sincroniza com slider de SFX
 };
 var _AUDIO_BASE_URL = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
 var _AMBIENT_CROSSFADE_MS = 2500;  // 2.5s overlap — começa B antes de A acabar
+
+// 2026-04-27 USER FIX: ambient de chuva/tempestade/névoa agora é classificado
+// como SFX. Volume = baseVol * SFX scale (slider do user). Mute SFX silencia
+// ambient. User reportou: "coloque a chuva como efeito, o volume de efeito
+// altera o volume da chuva também".
+function _resolveAmbientVolume(baseVol) {
+  if (typeof baseVol !== 'number') return 0;
+  // Se ValdoriaAudio carregou, usa SFX scale; senão fallback pra baseVol direto
+  try {
+    if (window.ValdoriaAudio) {
+      // Mute total ou SFX mute → silencia ambient
+      if (typeof ValdoriaAudio.isMuted === 'function' && ValdoriaAudio.isMuted()) return 0;
+      if (typeof ValdoriaAudio.isSFXMuted === 'function' && ValdoriaAudio.isSFXMuted()) return 0;
+      var sfxVol = (typeof ValdoriaAudio.getSFXVolume === 'function')
+        ? ValdoriaAudio.getSFXVolume()
+        : 1;
+      // Multiplicador 1.5x ambient (ambient tem mix mais baixo que SFX one-shot)
+      // Cap em 1.0 final
+      return Math.min(1, baseVol * sfxVol * 1.5);
+    }
+  } catch (_) {}
+  return baseVol;
+}
+
+// Polling: a cada 500ms re-avalia volume do ambient ativo. Permite slider de
+// SFX afetar chuva em tempo real sem listener.
+function _startAmbientVolumePoll() {
+  if (_weatherAmbient.pollTimer) return;
+  _weatherAmbient.pollTimer = setInterval(function () {
+    if (!_weatherAmbient.active || !_weatherAmbient.audio) return;
+    var sfxNow = (window.ValdoriaAudio && typeof ValdoriaAudio.getSFXVolume === 'function')
+      ? ValdoriaAudio.getSFXVolume() : 1;
+    var muted = !!(window.ValdoriaAudio && (
+      (typeof ValdoriaAudio.isMuted === 'function' && ValdoriaAudio.isMuted()) ||
+      (typeof ValdoriaAudio.isSFXMuted === 'function' && ValdoriaAudio.isSFXMuted())
+    ));
+    var effectiveSfx = muted ? -1 : sfxNow;  // -1 marker pra mute
+    if (effectiveSfx === _weatherAmbient.lastSfxVol) return;  // sem mudança
+    _weatherAmbient.lastSfxVol = effectiveSfx;
+    var targetVol = _resolveAmbientVolume(_weatherAmbient.vol);
+    // Suave fade pra novo target (300ms)
+    if (_weatherAmbient.audio) {
+      var current = _weatherAmbient.audio;
+      _fadeAudioVol(current, current.volume, targetVol, 300);
+    }
+    if (_weatherAmbient.fadeAudio) {
+      // Não mexe no fadeAudio — ele já está em fade out independente
+    }
+  }, 500);
+}
+
+function _stopAmbientVolumePoll() {
+  if (_weatherAmbient.pollTimer) {
+    clearInterval(_weatherAmbient.pollTimer);
+    _weatherAmbient.pollTimer = null;
+  }
+}
 
 // Helper: fade volume de áudio. Retorna o intervalId pra poder cancelar.
 function _fadeAudioVol(audio, fromVol, toVol, durationMs, onComplete) {
@@ -27544,11 +27603,14 @@ function _updateWeatherAmbient(weather) {
   if (!spec) return;  // weather sunny/null — sem ambient
   // Inicia novo loop seamless
   _weatherAmbient.files = spec.files;
-  _weatherAmbient.vol = spec.vol;
+  _weatherAmbient.vol = spec.vol;       // BASE volume (antes de aplicar SFX scale)
   _weatherAmbient.currentKey = spec.key;
   _weatherAmbient.active = true;
+  _weatherAmbient.lastSfxVol = -2;       // força recalc no primeiro poll
+  _startAmbientVolumePoll();             // sincroniza com SFX slider em tempo real
   _playWeatherAmbientVariant(true /* primeira vez = fade in completo */);
-  LOG('WEATHER', 'ambient_loop_started key=' + spec.key + ' vol=' + spec.vol);
+  LOG('WEATHER', 'ambient_loop_started key=' + spec.key + ' baseVol=' + spec.vol
+      + ' effectiveVol=' + _resolveAmbientVolume(spec.vol).toFixed(2));
   if (spec.key === 'storm') _scheduleThunderClap();
 }
 
@@ -27597,7 +27659,9 @@ function _playWeatherAmbientVariant(firstTime) {
       _weatherAmbient.audio = audio;
       // Fade in (1.5s primeira vez, 2.5s em crossfade)
       var fadeInMs = firstTime ? 1500 : _AMBIENT_CROSSFADE_MS;
-      _fadeAudioVol(audio, 0, _weatherAmbient.vol, fadeInMs);
+      // Volume target = baseVol * SFX scale (slider do user)
+      var targetVol = _resolveAmbientVolume(_weatherAmbient.vol);
+      _fadeAudioVol(audio, 0, targetVol, fadeInMs);
     }).catch(function (e) {
       LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message));
     });
@@ -27625,6 +27689,7 @@ function _crossfadeToNextVariant() {
 
 function _stopWeatherAmbient() {
   _weatherAmbient.active = false;
+  _stopAmbientVolumePoll();
   // Fade out current (rápido — 600ms)
   if (_weatherAmbient.audio) {
     var current = _weatherAmbient.audio;
@@ -27642,6 +27707,7 @@ function _stopWeatherAmbient() {
   }
   _weatherAmbient.currentKey = null;
   _weatherAmbient.lastFile = null;
+  _weatherAmbient.lastSfxVol = -1;
 }
 
 var _thunderClapTimer = null;
@@ -27654,7 +27720,9 @@ function _scheduleThunderClap() {
       try {
         var file = 'amb_thunder_distant_' + (1 + Math.floor(Math.random() * 2)) + '.mp3';
         var thunder = new Audio(_AUDIO_BASE_URL + file);
-        thunder.volume = 0.55;
+        // 2026-04-27 USER FIX: trovão também respeita SFX volume slider.
+        // Base 0.55 escalado pelo SFX vol (mesma lógica do ambient layer).
+        thunder.volume = _resolveAmbientVolume(0.55 / 1.5);  // /1.5 pra não double-amplify
         thunder.play().catch(function () {});
       } catch (_) {}
       _scheduleThunderClap();  // reagenda
