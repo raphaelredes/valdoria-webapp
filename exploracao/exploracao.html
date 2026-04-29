@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:25:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:39:26Z - do not edit directly, edit source -->
 
 
 <!--
@@ -8927,6 +8927,8 @@ body.remote-mode #debug-hud { display: none !important; }
           choiceId: choice.id
         });
       }
+      // 2026-04-27 P1+P2: hooks robustness pra tile-object events também.
+      try { if (typeof _processChoiceOutcome === 'function') _processChoiceOutcome(choice, outcome, !!rollResult.success); } catch (_) {}
       // Sub-projeto #4 v11 (2026-04-27): chain detection — se outcome tem
       // chain (ou _chainTo legacy), renderiza próxima etapa do evento em vez
       // do botão Finalizar. Padrão multi-screen AAA tipo BG3/Pathfinder.
@@ -26499,6 +26501,10 @@ function onMoveEnd(col, row) {
     if (pool && pool.length) dmNarrate({ text: pickRandom(pool), type: 'ambient' });
   }
 
+  // 2026-04-27 P2: ambient tip toast contextual (biome + weather + dayPhase).
+  // Skeleton em AMBIENT_TIP_POOLS — extensível só adicionando entries.
+  try { _maybeShowAmbientTip(); } catch (_) {}
+
   if (S.steps % 12 === 0 && Math.random() < 0.45) {
     const pool = (S.mapDef && S.mapDef.weather_pool) || ['s', 'r', 'f', 't'];
     const next = pickRandom(pool);
@@ -26756,6 +26762,310 @@ function dmNarrate(entry) {
   // updateDmPanel() removido — não há painel pra atualizar
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ROBUSTNESS SKELETONS (2026-04-27 — P0/P1/P2)
+// ────────────────────────────────────────────────────────────────────────────
+// Skeletons prontos pra extensão DATA-DRIVEN. Nenhum requer mudança de motor
+// quando novo conteúdo for adicionado — só plug-in de dados nas tabelas.
+// ════════════════════════════════════════════════════════════════════════════
+
+// ──────────────────────── P0a: Flag-aware variant picker ────────────────────
+// Inspirado em BG3 (NPCs lembram), Pathfinder (quest gates).
+// Variants podem declarar:
+//   requires_flag: 'name' | ['a', 'b']  → todos precisam estar setados
+//   excludes_flag: 'name' | ['a', 'b']  → nenhum pode estar setado
+//   requires_no_flag: 'name'            → atalho equivalente a excludes_flag
+//
+// Lê de: S.player.flags (set), S.player.metadata.flags (compat), e flags
+// agregados de S.persistedFlags. OutcomeApplier já popula flags via op:'flag'.
+function _checkFlagRequirements(eventOrChoice) {
+  if (!eventOrChoice) return true;
+  function _hasFlag(name) {
+    if (!name) return false;
+    var p = S && S.player;
+    if (p && p.flags && p.flags[name]) return true;
+    if (p && p.metadata && p.metadata.flags && p.metadata.flags[name]) return true;
+    if (S && S.persistedFlags && S.persistedFlags[name]) return true;
+    return false;
+  }
+  var req = eventOrChoice.requires_flag;
+  if (req) {
+    var arr = Array.isArray(req) ? req : [req];
+    for (var i = 0; i < arr.length; i++) if (!_hasFlag(arr[i])) return false;
+  }
+  var exc = eventOrChoice.excludes_flag || eventOrChoice.requires_no_flag;
+  if (exc) {
+    var arr2 = Array.isArray(exc) ? exc : [exc];
+    for (var j = 0; j < arr2.length; j++) if (_hasFlag(arr2[j])) return false;
+  }
+  return true;
+}
+
+// Persiste flag globalmente. Chamado por OutcomeApplier (op:'flag' scope:pc/session).
+function _setPersistedFlag(name, scope) {
+  if (!name || !S) return;
+  if (scope === 'session' || !scope) {
+    if (!S.persistedFlags) S.persistedFlags = {};
+    S.persistedFlags[name] = true;
+  }
+  if (scope === 'pc') {
+    if (!S.player) return;
+    if (!S.player.flags) S.player.flags = {};
+    S.player.flags[name] = true;
+    // espelha em metadata pra survive serialize
+    if (!S.player.metadata) S.player.metadata = {};
+    if (!S.player.metadata.flags) S.player.metadata.flags = {};
+    S.player.metadata.flags[name] = true;
+  }
+  LOG('FLAGS', 'set name=' + name + ' scope=' + (scope || 'session'));
+  // Hook em quest manager — se essa flag dispara quest, abre.
+  try { _checkQuestHooks(name); } catch (_) {}
+}
+
+// ──────────────────────── P1a: Archetype tracks accumulator ─────────────────
+// Inspirado em Disco Elysium (Thoughts), Pathfinder (alignment shifts).
+// 4 contadores abstratos: diplomata, marcial, erudito, furtivo.
+// Choices podem ter `track: 'diplomata'` (ou array). Outcome ok bumpa +1.
+// Variants podem ter `requires_track: { diplomata: 5 }` pra gate.
+function _archetypeTrackName(skill, choiceLabel) {
+  // Inferência automática se choice não declara track explicitamente
+  var s = (skill || '').toLowerCase();
+  var lbl = (choiceLabel || '').toLowerCase();
+  if (s === 'cha' || s === 'persuasion' || s === 'performance' || lbl.indexOf('cumprimentar') >= 0 || lbl.indexOf('ajudar') >= 0 || lbl.indexOf('persuad') >= 0) return 'diplomata';
+  if (s === 'str' || s === 'athletics' || s === 'intimidation' || lbl.indexOf('intimid') >= 0 || lbl.indexOf('atacar') >= 0) return 'marcial';
+  if (s === 'int' || s === 'investigation' || s === 'arcana' || s === 'history' || lbl.indexOf('examin') >= 0 || lbl.indexOf('estudar') >= 0) return 'erudito';
+  if (s === 'dex' || s === 'stealth' || s === 'sleight' || s === 'acrobatics' || lbl.indexOf('esgueirar') >= 0 || lbl.indexOf('observar') >= 0) return 'furtivo';
+  return null;
+}
+
+function _bumpArchetypeTrack(track) {
+  if (!track || !S || !S.player) return;
+  if (!S.player.archetypeTracks) S.player.archetypeTracks = { diplomata: 0, marcial: 0, erudito: 0, furtivo: 0 };
+  S.player.archetypeTracks[track] = (S.player.archetypeTracks[track] || 0) + 1;
+  LOG('TRACK', 'bump ' + track + ' = ' + S.player.archetypeTracks[track]);
+}
+
+function _checkTrackRequirements(eventOrChoice) {
+  if (!eventOrChoice) return true;
+  var req = eventOrChoice.requires_track;
+  if (!req) return true;
+  if (!S || !S.player || !S.player.archetypeTracks) return false;
+  for (var t in req) {
+    if ((S.player.archetypeTracks[t] || 0) < req[t]) return false;
+  }
+  return true;
+}
+
+// ──────────────────────── P1b: NPC name persistence ─────────────────────────
+// Inspirado em BG3 (Volo aparece em 3 mapas), Wildermyth (companions).
+// Variants declaram: persistent_npc: 'lendro' (ID estável)
+// Picker resolve {npc} pra nome estável armazenado em S.persistentNPCs[id].
+// Primeira vez: gera nome aleatório do pool e salva. Próximas: usa o salvo.
+function _resolvePersistentNPC(npcId, biomePool) {
+  if (!npcId) return null;
+  if (!S) return null;
+  if (!S.persistentNPCs) S.persistentNPCs = {};
+  if (S.persistentNPCs[npcId] && S.persistentNPCs[npcId].name) {
+    return S.persistentNPCs[npcId];
+  }
+  // Primeira vez: cria registro
+  var pool = biomePool && biomePool.npcs ? biomePool.npcs : ['viajante anônimo'];
+  var name = pool[Math.floor(Math.random() * pool.length)];
+  S.persistentNPCs[npcId] = {
+    id: npcId,
+    name: name,
+    firstMet: S.steps || 0,
+    encounterCount: 0,
+    relationship: 0  // -10 a +10
+  };
+  LOG('NPC', 'persistent_created id=' + npcId + ' name=' + name);
+  return S.persistentNPCs[npcId];
+}
+
+function _bumpNPCRelationship(npcId, delta) {
+  if (!npcId || !S || !S.persistentNPCs || !S.persistentNPCs[npcId]) return;
+  var npc = S.persistentNPCs[npcId];
+  npc.relationship = Math.max(-10, Math.min(10, (npc.relationship || 0) + delta));
+  npc.encounterCount = (npc.encounterCount || 0) + 1;
+}
+
+// ──────────────────────── P2a: Quest hook consumer ──────────────────────────
+// Inspirado em BG3 (event flag → journal entry → quest tracker).
+// Tabela QUEST_HOOKS: { trigger_flag, title, description, goal, reward }
+// Quando _setPersistedFlag dispara nome que match trigger, abre quest no
+// journal automaticamente. Goal types: find_item, reach_map, return_to_npc.
+//
+// SKELETON: tabela vazia inicialmente. User adiciona entries quando criar
+// quest content — motor já consome.
+var QUEST_HOOKS = window.QUEST_HOOKS || [
+  // EXEMPLO 1 — descomenta quando tiver o item lost_satchel registrado:
+  // {
+  //   id: 'lost_satchel_quest',
+  //   trigger_flag: 'messenger_quest_offered',
+  //   title: 'Cartas Perdidas',
+  //   description: 'O mensageiro pediu pra recuperar a sacola caída — três horas atrás de bandidos.',
+  //   goal: { type: 'find_item', item: 'lost_satchel' },
+  //   reward: { gold: 50, xp: 80 }
+  // },
+  // EXEMPLO 2 — quando criar a guilda de mercadores:
+  // {
+  //   id: 'merchant_lendro_quest',
+  //   trigger_flag: 'merchant_lendro_intro',
+  //   title: 'Procurando Lendro',
+  //   description: 'Lendro mencionou um comprador especial em Eldoria. "Diga que Lendro mandou."',
+  //   goal: { type: 'reach_map', map: 'eldoria_market' },
+  //   reward: { gold: 30, xp: 50, flag: 'lendro_merchant_unlocked' }
+  // }
+];
+
+// Quest manager — verifica hooks quando flag é setada, abre quest se match.
+function _checkQuestHooks(flagName) {
+  if (!flagName || !QUEST_HOOKS || !QUEST_HOOKS.length) return;
+  for (var i = 0; i < QUEST_HOOKS.length; i++) {
+    var hook = QUEST_HOOKS[i];
+    if (hook.trigger_flag !== flagName) continue;
+    // Já tem essa quest ativa ou completa?
+    var alreadyActive = (S.activeQuests || []).some(function (q) { return q.id === hook.id; });
+    var alreadyDone = (S.completedQuests || []).some(function (q) { return q.id === hook.id; });
+    if (alreadyActive || alreadyDone) continue;
+    // Abre a quest
+    if (!S.activeQuests) S.activeQuests = [];
+    S.activeQuests.push({
+      id: hook.id,
+      title: hook.title,
+      description: hook.description,
+      goal: hook.goal,
+      reward: hook.reward,
+      step: 0,
+      addedAt: S.steps || 0
+    });
+    LOG('QUEST', 'hook_triggered flag=' + flagName + ' quest=' + hook.id + ' title=' + hook.title);
+    // Notifica via toast
+    try {
+      _showWaterStatusToast('📜 <b>Nova Missão</b><br>' + hook.title + '<br><small>' + (hook.description || '') + '</small>', 5000);
+    } catch (_) {}
+  }
+}
+
+// Verifica goal completion. Chamado em onMoveEnd + após coleta de item.
+function _checkQuestGoals() {
+  if (!S || !S.activeQuests || !S.activeQuests.length) return;
+  for (var i = S.activeQuests.length - 1; i >= 0; i--) {
+    var q = S.activeQuests[i];
+    if (!q.goal) continue;
+    var done = false;
+    if (q.goal.type === 'find_item') {
+      done = !!(S.inventory || []).find(function (it) { return it.id === q.goal.item; });
+    } else if (q.goal.type === 'reach_map') {
+      done = (S.mapId === q.goal.map);
+    } else if (q.goal.type === 'has_flag') {
+      done = !!(S.persistedFlags && S.persistedFlags[q.goal.flag]);
+    }
+    if (done) {
+      // Completa
+      S.activeQuests.splice(i, 1);
+      if (!S.completedQuests) S.completedQuests = [];
+      S.completedQuests.push(Object.assign({}, q, { completedAt: S.steps || 0 }));
+      // Aplica reward
+      if (q.reward) {
+        if (q.reward.gold) S.gold = (S.gold || 0) + q.reward.gold;
+        if (q.reward.xp && S.player) S.player.xp = (S.player.xp || 0) + q.reward.xp;
+        if (q.reward.flag) _setPersistedFlag(q.reward.flag, 'pc');
+      }
+      LOG('QUEST', 'completed id=' + q.id);
+      try { _showWaterStatusToast('✅ <b>Missão Completa</b><br>' + q.title +
+        (q.reward && q.reward.gold ? '<br>+' + q.reward.gold + ' Valdoritas' : '') +
+        (q.reward && q.reward.xp ? ' • +' + q.reward.xp + ' XP' : ''), 5000); } catch (_) {}
+      try { updateHud(); } catch (_) {}
+    }
+  }
+}
+
+// ──────────────────────── P2b: Atmospheric ambient toast ────────────────────
+// Inspirado em RDR2 (procedural ambient prose), Sunless Sea.
+// Mostra 1 ambient tip via toast a cada N steps, contextualizado por
+// biome + weather + dayPhase. Não-bloqueante, fade out 4s.
+//
+// Pool extensível em AMBIENT_TIP_POOLS — só plug-in data, motor já consome.
+var AMBIENT_TIP_POOLS = {
+  // Por biome+weather+dayPhase. Fallback cascade: combo > biome+weather > biome > generic.
+  // SKELETON com poucos exemplos — user/agent expande adicionando entries.
+  forest_clear_day: [
+    'Pássaros cantam alto entre as copas. A floresta respira.',
+    'Folhas filtram a luz em padrões dourados no chão.',
+    'Algo pequeno corre entre raízes — esquilo, talvez.'
+  ],
+  forest_rain_day: [
+    'A chuva tamborila nas folhas — som de mil dedos batendo lentos.',
+    'O cheiro de terra molhada sobe do chão como bênção.',
+    'Galhos pingam mesmo onde a chuva já passou.'
+  ],
+  forest_clear_night: [
+    'Galhos se mexem sozinhos — apenas vento, você espera.',
+    'Uma coruja pia ao longe. Pausa. Pia de novo.',
+    'A luz da lua corta o dossel em fios de prata.'
+  ],
+  desert_clear_day: [
+    'O calor faz o ar tremer no horizonte. Sombras parecem menos sólidas.',
+    'Pequenos lagartos correm entre pedras.',
+    'O silêncio é tão completo que você ouve seu próprio coração.'
+  ],
+  swamp_fog_day: [
+    'A névoa esconde sons. Você não sabe o que está a 10 passos.',
+    'Pequenas bolhas afloram em poças escuras.',
+    'O ar é doce demais — odor de matéria morrendo.'
+  ],
+  generic: [
+    'A estrada continua. Cada passo conta uma frase silenciosa.',
+    'Você sente o peso da mochila reorganizar-se.',
+    'O céu mudou de cor sem você notar.'
+  ]
+};
+
+var _lastAmbientTipAt = 0;
+function _maybeShowAmbientTip() {
+  if (!S || !S.steps) return;
+  // 1 tip a cada 25-40 steps, com cooldown
+  var stepsSince = (S.steps - _lastAmbientTipAt);
+  if (stepsSince < 25) return;
+  if (Math.random() > 0.4) return;  // 40% chance quando elegível
+  // Resolve pool com cascade
+  var biome = S.biome || 'forest';
+  var weather = (S.weather === 's') ? 'clear' : (S.weather === 'r') ? 'rain' : (S.weather === 'f') ? 'fog' : (S.weather === 't') ? 'storm' : 'clear';
+  var phase = S.dayPhase || 'day';
+  var keys = [biome + '_' + weather + '_' + phase, biome + '_' + weather, biome, 'generic'];
+  var pool = null;
+  for (var k = 0; k < keys.length; k++) {
+    if (AMBIENT_TIP_POOLS[keys[k]]) { pool = AMBIENT_TIP_POOLS[keys[k]]; break; }
+  }
+  if (!pool || !pool.length) return;
+  var tip = pool[Math.floor(Math.random() * pool.length)];
+  _lastAmbientTipAt = S.steps;
+  try { _showWaterStatusToast('<small><i>' + tip + '</i></small>', 4000); } catch (_) {}
+}
+
+// ──────────────────────── Hooks de outcome (auto-bump tracks/flags) ─────────
+// Wrapper sobre OutcomeApplier — bump archetype track + persistir flags.
+function _processChoiceOutcome(choice, outcome, isSuccess) {
+  if (!choice || !outcome) return;
+  // 1. Auto-bump archetype track baseado em skill da choice
+  if (isSuccess) {
+    var track = choice.archetype || _archetypeTrackName(
+      Array.isArray(choice.skill) ? choice.skill[0] : choice.skill,
+      choice.label
+    );
+    if (track) _bumpArchetypeTrack(track);
+  }
+  // 2. Persistir flags do outcome.ops (se OutcomeApplier não tiver feito)
+  if (Array.isArray(outcome.ops)) {
+    outcome.ops.forEach(function (op) {
+      if (op && op.op === 'flag' && op.id) _setPersistedFlag(op.id, op.scope || 'session');
+    });
+  }
+  // 3. Quest progress check
+  try { _checkQuestGoals(); } catch (_) {}
+}
+
 // 2026-04-27: Sistema de áudio ambiente de clima — loop infinito de chuva/
 // trovão/vento conforme S.weather. Audio paralelo à música principal (não
 // substitui — é uma camada extra de imersão).
@@ -26974,8 +27284,16 @@ function maybeRollEvent() {
     return false;
   }
 
+  // 2026-04-27 P0: filtra por flag/track requirements (skeleton extensível).
+  // Variants podem declarar: requires_flag, excludes_flag, requires_track.
+  const flagAware = ids.filter(function (id) {
+    var ev = EVENTS_POOL[id];
+    if (!_checkFlagRequirements(ev)) return false;
+    if (!_checkTrackRequirements(ev)) return false;
+    return true;
+  });
   // Fresh pool: eventos sem cooldown. Fallback: ids original se vazio
-  const pool = ids.filter(id => !isInCooldown(id));
+  const pool = flagAware.filter(id => !isInCooldown(id));
   let evId;
   if (pool.length > 0) {
     // [R3] Prefere eventos NUNCA rolados (count=0) pra feel de descoberta
@@ -27763,12 +28081,77 @@ function _remoteShowOutcome(ch, oc) {
 }
 
 // Dice overlay estilo check-overlay do combate (formula + result pill + skip btn)
+// 2026-04-27 P0+P2: env modifiers + DC scaling + multi-skill choices.
+// Inspirado em Witcher 3 (chuva afeta combate), Skyrim (stealth +20% noite),
+// Pathfinder (DC sobe com nível de zona), BG3 ("Athletics ou Acrobatics").
+function _envModifiers(skill, weather, dayPhase) {
+  var advantage = false, disadvantage = false, dcMod = 0;
+  // Furtividade / Acrobacia: noite ajuda (sombras), dia atrapalha
+  if (skill === 'stealth' || skill === 'dex' || skill === 'acrobatics') {
+    if (dayPhase === 'night' || dayPhase === 'dusk') advantage = true;
+  }
+  // Percepção: névoa atrapalha, dia ajuda, noite atrapalha
+  if (skill === 'perception' || skill === 'wis') {
+    if (weather === 'f') disadvantage = true;
+    if (dayPhase === 'night') dcMod += 2;
+    if (dayPhase === 'dawn' || dayPhase === 'day') {
+      // padrão — sem mod
+    }
+  }
+  // Sobrevivência: chuva apaga rastros
+  if (skill === 'survival') {
+    if (weather === 'r' || weather === 't') dcMod += 2;
+  }
+  // Atletismo / força: tempestade dificulta (ventos, terreno)
+  if (skill === 'athletics' || skill === 'str') {
+    if (weather === 't') disadvantage = true;
+  }
+  // Investigação: dawn dá foco bônus (luz baixa horizontal revela detalhes)
+  if (skill === 'investigation' || skill === 'int') {
+    if (dayPhase === 'dawn') advantage = true;
+    if (dayPhase === 'night') dcMod += 1;
+  }
+  return { advantage: advantage, disadvantage: disadvantage, dcMod: dcMod };
+}
+
+// Pega o melhor mod do player se choice.skill é array (multi-skill).
+// PHB-fiel: player com prof em UMA das skills ainda ganha bônus +2.
+function _resolveSkillForCheck(p, skillSpec) {
+  if (!skillSpec) return { skill: 'wis', mod: 0 };
+  var skills = Array.isArray(skillSpec) ? skillSpec : [skillSpec];
+  var best = { skill: skills[0], mod: -99 };
+  for (var i = 0; i < skills.length; i++) {
+    var sk = skills[i];
+    var m = (p.mods[sk] || 0) + (p.prof && p.prof.includes(sk) ? 2 : 0);
+    if (m > best.mod) best = { skill: sk, mod: m };
+  }
+  return best;
+}
+
 function rollSkillCheck(choice, cb) {
   const p = S.player;
-  const mod = (p.mods[choice.skill] || 0) + (p.prof.includes(choice.skill) ? 2 : 0);
-  const d20 = rollD20();
+  // Multi-skill: choice.skill pode ser ['athletics', 'acrobatics'] — usa o melhor
+  var resolved = _resolveSkillForCheck(p, choice.skill);
+  var skill = resolved.skill;
+  var mod = resolved.mod;
+  // Env modifiers (weather, dayPhase) — adv/disadv + DC mod
+  var env = _envModifiers(skill, S.weather, S.dayPhase);
+  // DC scaling por dangerLevel do mapa (Pathfinder-style)
+  var dangerMod = (S.mapDef && S.mapDef.danger) ? Math.floor(S.mapDef.danger * 0.5) : 0;
+  var effectiveDC = (choice.dc || 10) + env.dcMod + dangerMod;
+  // d20 com adv/disadv: rola 2 e usa max (adv) ou min (disadv)
+  var d20a = rollD20();
+  var d20b = (env.advantage || env.disadvantage) ? rollD20() : null;
+  var d20;
+  if (env.advantage) d20 = Math.max(d20a, d20b);
+  else if (env.disadvantage) d20 = Math.min(d20a, d20b);
+  else d20 = d20a;
   const total = d20 + mod;
-  const success = total >= choice.dc;
+  const success = total >= effectiveDC;
+  LOG('DICE', 'roll skill=' + skill + ' mod=' + mod + ' d20=' + d20
+    + (d20b ? ' (rolled ' + d20a + '/' + d20b + ' adv=' + env.advantage + ' dis=' + env.disadvantage + ')' : '')
+    + ' total=' + total + ' baseDC=' + (choice.dc || 10) + ' envDcMod=' + env.dcMod
+    + ' dangerMod=' + dangerMod + ' effDC=' + effectiveDC + ' result=' + (success ? 'OK' : 'FAIL'));
 
   const overlay = document.getElementById('dice-overlay');
   const wrap = document.getElementById('dice-canvas-wrap');
@@ -27863,6 +28246,8 @@ function applyChoiceOutcome(choice, success, total, dc) {
   else { tier = 'failure'; outcome = choice.outcome_fail || choice.outcome_ok; }
   LOG('EVENT', 'tier=' + tier + ' outcome keys=' + (outcome ? Object.keys(outcome).join(',') : '(none)'));
   S.event.resolved = { tier, text: outcome.text, reward: outcome.reward || null };
+  // 2026-04-27 P1+P2: hooks robustness — bump archetype track + persist flags + quest check.
+  try { _processChoiceOutcome(choice, outcome, success); } catch (_) {}
 
   // X-6.5.51m: dungeon discovery — registra masmorra se sucesso
   if (S.event._isDungeonDiscovery && tier === 'success' && S.event._dungeonId) {
