@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:28:39Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T18:32:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -27612,6 +27612,7 @@ function _updateWeatherAmbient(weather) {
   _weatherAmbient.active = true;
   _weatherAmbient.lastSfxVol = -2;       // força recalc no primeiro poll
   _startAmbientVolumePoll();             // sincroniza com SFX slider em tempo real
+  _startAmbientWatchdog();               // detecta loop morto e reinicia
   _playWeatherAmbientVariant(true /* primeira vez = fade in completo */);
   LOG('WEATHER', 'ambient_loop_started key=' + spec.key + ' baseVol=' + spec.vol
       + ' effectiveVol=' + _resolveAmbientVolume(spec.vol).toFixed(2));
@@ -27675,25 +27676,119 @@ function _playWeatherAmbientVariant(firstTime) {
 }
 
 // Crossfade: inicia próxima variante (com fade in) enquanto current faz
-// fade out. Os 2 áudios tocam SOBREPOSTOS pelo CROSSFADE_MS — 0 silêncio,
-// 0 corte audível.
+// fade out. Os 2 áudios tocam SOBREPOSTOS pelo CROSSFADE_MS — 0 silêncio.
+//
+// FIX 2026-04-27: VALIDA play() antes de fazer swap. Antes: se play()
+// falhava silenciosamente (autoplay policy, network, etc), o current
+// fazia fade out pra zero e a rain morria. Agora: pré-cria next audio,
+// só faz swap após play() confirmado. Senão, retry em 3s com current
+// continuando a tocar.
 function _crossfadeToNextVariant() {
   var current = _weatherAmbient.audio;
-  if (!current) return;
-  // Move current pra fadeAudio slot (saindo)
-  _weatherAmbient.fadeAudio = current;
-  // Inicia fade out da current — paralelo ao fade in da próxima
-  _fadeAudioVol(current, current.volume, 0, _AMBIENT_CROSSFADE_MS, function () {
-    try { current.pause(); current.src = ''; } catch (_) {}
-    if (_weatherAmbient.fadeAudio === current) _weatherAmbient.fadeAudio = null;
-  });
-  // Inicia próxima variante
-  _playWeatherAmbientVariant(false);
+  if (!current || !_weatherAmbient.active) return;
+  // Pré-cria next variant (sem swap ainda)
+  var pool = _weatherAmbient.files;
+  var pick;
+  if (pool.length === 1) pick = pool[0];
+  else {
+    var attempts = 0;
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (pick === _weatherAmbient.lastFile && attempts < 5);
+  }
+  try {
+    var nextAudio = new Audio(_AUDIO_BASE_URL + pick);
+    nextAudio.volume = 0;
+    nextAudio.preload = 'auto';
+    // Listener pro próximo crossfade
+    var crossfadeStarted = false;
+    nextAudio.addEventListener('timeupdate', function () {
+      if (crossfadeStarted) return;
+      if (nextAudio !== _weatherAmbient.audio) return;
+      if (!_weatherAmbient.active) return;
+      var dur = nextAudio.duration;
+      if (!isFinite(dur) || dur <= 0) return;
+      var remaining = dur - nextAudio.currentTime;
+      if (remaining <= (_AMBIENT_CROSSFADE_MS / 1000)) {
+        crossfadeStarted = true;
+        _crossfadeToNextVariant();
+      }
+    });
+    // Cleanup defensivo (caso crossfade falhe e track terminar normalmente)
+    nextAudio.addEventListener('ended', function () {
+      try { nextAudio.src = ''; } catch (_) {}
+      // Watchdog: se loop ainda ativo mas next acabou sem ser substituído,
+      // restart o loop.
+      if (_weatherAmbient.active && _weatherAmbient.audio === nextAudio) {
+        LOGW('WEATHER', 'ambient track ended without crossfade — restarting loop');
+        _weatherAmbient.audio = null;
+        _playWeatherAmbientVariant(false);
+      }
+    });
+    nextAudio.play().then(function () {
+      // SUCESSO — agora sim fazer o swap + fade out current
+      _weatherAmbient.lastFile = pick;
+      _weatherAmbient.fadeAudio = current;
+      _weatherAmbient.audio = nextAudio;
+      // Fade out current
+      _fadeAudioVol(current, current.volume, 0, _AMBIENT_CROSSFADE_MS, function () {
+        try { current.pause(); current.src = ''; } catch (_) {}
+        if (_weatherAmbient.fadeAudio === current) _weatherAmbient.fadeAudio = null;
+      });
+      // Fade in next
+      var targetVol = _resolveAmbientVolume(_weatherAmbient.vol);
+      _fadeAudioVol(nextAudio, 0, targetVol, _AMBIENT_CROSSFADE_MS);
+    }).catch(function (e) {
+      LOGW('WEATHER', 'crossfade_play_failed: ' + (e && e.message) + ' — current continua tocando, retry em 3s');
+      // Cleanup do next falhado
+      try { nextAudio.src = ''; } catch (_) {}
+      // Retry em 3s — current ainda tem audio rolando (só remaining curto)
+      setTimeout(function () {
+        if (_weatherAmbient.active && _weatherAmbient.audio === current) {
+          // Force re-trigger crossfade (current pode ter terminado já)
+          _crossfadeToNextVariant();
+        }
+      }, 3000);
+    });
+  } catch (e) {
+    LOGW('WEATHER', 'crossfade_setup_failed: ' + (e && e.message));
+  }
+}
+
+// Watchdog: a cada 10s verifica se loop está saudável. Se active=true mas
+// audio é null ou paused/ended, reinicia. Cobre edge cases onde:
+//   - Browser pausou audio (tab inactive + voltou)
+//   - Resource exhaustion (muitos thunders)
+//   - Crossfade silenciosamente falhou
+var _ambientWatchdogTimer = null;
+function _startAmbientWatchdog() {
+  if (_ambientWatchdogTimer) return;
+  _ambientWatchdogTimer = setInterval(function () {
+    if (!_weatherAmbient.active) return;
+    var a = _weatherAmbient.audio;
+    var stalled = !a || a.paused || a.ended;
+    if (stalled) {
+      LOGW('WEATHER', 'ambient watchdog: stalled (audio=' + (!!a) + ' paused=' + (a && a.paused) + ' ended=' + (a && a.ended) + ') — restarting');
+      try {
+        if (a) { a.pause(); a.src = ''; }
+      } catch (_) {}
+      _weatherAmbient.audio = null;
+      _playWeatherAmbientVariant(false);
+    }
+  }, 10000);
+}
+function _stopAmbientWatchdog() {
+  if (_ambientWatchdogTimer) {
+    clearInterval(_ambientWatchdogTimer);
+    _ambientWatchdogTimer = null;
+  }
 }
 
 function _stopWeatherAmbient() {
   _weatherAmbient.active = false;
   _stopAmbientVolumePoll();
+  _stopAmbientWatchdog();
   // Fade out current (rápido — 600ms)
   if (_weatherAmbient.audio) {
     var current = _weatherAmbient.audio;
@@ -27753,7 +27848,15 @@ function _playLightningThunder() {
       var thunder = new Audio(_AUDIO_BASE_URL + pick);
       // /1.5 pra não double-amplify (helper já amplifica 1.5x ambient)
       thunder.volume = _resolveAmbientVolume(baseVol / 1.5);
-      thunder.play().catch(function () {});
+      // 2026-04-27 FIX: cleanup quando termina pra liberar Audio object —
+      // sem isso, browser acumula objects e eventualmente refusa novos
+      // Audios (rain morria após N flashes).
+      thunder.addEventListener('ended', function () {
+        try { thunder.src = ''; } catch (_) {}
+      });
+      thunder.play().catch(function () {
+        try { thunder.src = ''; } catch (_) {}
+      });
       LOG('WEATHER', 'lightning_thunder_played file=' + pick + ' delay=' + delayMs.toFixed(0) + 'ms vol=' + thunder.volume.toFixed(2));
     } catch (_) {}
   }, delayMs);
@@ -27772,7 +27875,14 @@ function _scheduleThunderClap() {
         // 2026-04-27 USER FIX: trovão também respeita SFX volume slider.
         // Base 0.55 escalado pelo SFX vol (mesma lógica do ambient layer).
         thunder.volume = _resolveAmbientVolume(0.55 / 1.5);  // /1.5 pra não double-amplify
-        thunder.play().catch(function () {});
+        // FIX 2026-04-27: cleanup pra evitar resource leak (browser limita
+        // ~100 simultâneos). Sem isso, rain ambient eventualmente parava.
+        thunder.addEventListener('ended', function () {
+          try { thunder.src = ''; } catch (_) {}
+        });
+        thunder.play().catch(function () {
+          try { thunder.src = ''; } catch (_) {}
+        });
       } catch (_) {}
       _scheduleThunderClap();  // reagenda
     }
