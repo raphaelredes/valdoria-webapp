@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T15:56:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:07:35Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10002,6 +10002,28 @@ body.perf-lite .stub-popup-voice { animation: none; }
     if (outcome.flag) {
       ops.push({ op: 'flag', id: outcome.flag, scope: outcome.flag_scope || 'session' });
     }
+    // 2026-04-27 USER FIX: parse reward field (string OR object) — formato
+    // legacy de muitos eventos pre-existentes (plains_farmer, plains_caravan,
+    // etc) usa "reward: '+25 Valdoritas'" e/ou "reward: { gold: 30 }".
+    // Sem parse, recompensa NÃO É APLICADA. Bug real: user matou os lobos
+    // do fazendeiro mas não recebeu Valdoritas.
+    if (outcome.reward) {
+      var rewardDelta = 0;
+      if (typeof outcome.reward === 'object') {
+        if (typeof outcome.reward.gold === 'number') rewardDelta = outcome.reward.gold;
+        if (typeof outcome.reward.xp === 'number') ops.push({ op: 'xp', delta: outcome.reward.xp });
+      } else if (typeof outcome.reward === 'string') {
+        // parse "+N Valdoritas" ou "−N Valdoritas"
+        var m = outcome.reward.match(/([+−\-])\s*(\d+)\s*Valdoritas?/i);
+        if (m) {
+          rewardDelta = parseInt(m[2], 10);
+          if (m[1] === '−' || m[1] === '-') rewardDelta = -rewardDelta;
+        }
+      }
+      if (rewardDelta !== 0) ops.push({ op: 'gold', delta: rewardDelta });
+    }
+    // record_enemy / record_material (legacy bestiary tracking)
+    // Não vira op, mas é preservado em _normChoice pra UI usar.
     return ops;
   }
 
@@ -13347,14 +13369,29 @@ const EVENTS_POOL = {
         },
         outcome_fail: { text: 'Trabalho maior que esperava. As toras pesam demais, e você desiste exausto ao cair do sol.', exh_gain: 1 } },
       { label: 'Caçar os lobos', skill: 'dex', dc: 13,
-        desc: 'Pegar o arco emprestado e rastrear a alcateia pela mata, afugentando-os antes da noite.',
+        desc: 'Rastrear a alcateia pela mata e enfrentá-los antes da noite.',
         outcome_ok: {
-          text: 'Flechas certeiras no líder. A alcateia desaparece na mata, uivando frustrada. Não voltará tão cedo.',
+          text: 'Você rastreia a alcateia até uma clareira. Eles te detectam — não vão fugir. Tem que enfrentá-los.',
+          tech: { label: 'COMBATE', text: 'Você se posiciona com vantagem (rastreio bem-sucedido). Iniciando…' },
           reward: '+25 Valdoritas',
-          record_enemy: 'gray_wolf', record_material: ['wolf_pelt', 'wolf_fang']
+          record_enemy: 'gray_wolf', record_material: ['wolf_pelt', 'wolf_fang'],
+          dungeon_combat: { enemy: 'gray_wolf', surprise: true }
         },
-        outcome_partial: { text: 'Você atinge um ou dois, mas o líder escapa. Vão voltar — só mais devagar.', reward: '+10 Valdoritas', hp_loss: 2, record_enemy: 'gray_wolf', record_material: 'wolf_fang' },
-        outcome_fail: { text: 'Perde a trilha. A floresta engana olhos apressados, e um dos lobos quase te derruba.', hp_loss: 3, record_enemy: 'gray_wolf' } },
+        outcome_partial: {
+          text: 'Você acha a alcateia mas não tem o melhor ângulo. Combate começa em pé de igualdade.',
+          tech: { label: 'COMBATE', text: 'Combate sem vantagem nem desvantagem. Iniciando…' },
+          reward: '+10 Valdoritas',
+          hp_loss: 2,
+          record_enemy: 'gray_wolf', record_material: 'wolf_fang',
+          dungeon_combat: { enemy: 'gray_wolf', surprise: false }
+        },
+        outcome_fail: {
+          text: 'Perde a trilha. A floresta engana olhos apressados, e um dos lobos sai de uma moita atrás de você.',
+          tech: { label: 'COMBATE', text: 'Lobos surpreendem você. Combate em desvantagem. Iniciando…' },
+          hp_loss: 3,
+          record_enemy: 'gray_wolf',
+          dungeon_combat: { enemy: 'gray_wolf', surprise: false }
+        } },
       { label: 'Intimidar os lobos no território', skill: 'cha', dc: 14,
         only_class: 'guerreiro',
         desc: 'Vestir armadura completa, entrar na mata e assumir postura de predador alfa rival. Forçar recuo sem violência.',
@@ -14338,13 +14375,13 @@ const EVENTS_POOL = {
   var BIOME_POOLS = {
     forest: {
       npcs: ['lenhador idoso', 'caçador silencioso', 'druida solitário', 'curandeira de ervas', 'jovem pastor', 'monge errante', 'arqueiro élfico'],
-      creatures: ['lobo solitário', 'urso desperto', 'lince da mata', 'pantera negra', 'serpente verde', 'javali enraivecido', 'corvo gigante de bando'],
+      creatures: ['lobo solitário', 'urso desperto', 'lince da mata', 'pantera negra', 'serpente verde', 'javali enraivecido', 'bando de corvos gigantes'],
       objects: ['baú musgoso', 'tronco oco curioso', 'altar coberto de hera', 'medalha caída entre folhas', 'cogumelo brilhante', 'pena dourada caída', 'pedra rúnica'],
       hazards: ['galho que estala', 'raiz traiçoeira', 'cipó retorcido', 'cova escondida sob folhas']
     },
     plains: {
       npcs: ['mercador ambulante', 'fazendeiro a caminho da feira', 'caravaneiro perdido', 'sacerdote viajante', 'menestrel cantante', 'mensageiro real', 'velho contador de histórias'],
-      creatures: ['matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'lobo da estepe', 'pacote de hienas', 'urso pardo errante'],
+      creatures: ['matilha de cães selvagens', 'touro escapado', 'serpente do trigal', 'lobo da estepe', 'matilha de hienas', 'urso pardo errante', 'corvo gigante'],
       objects: ['carroça abandonada', 'fogueira ainda quente', 'mochila à beira da estrada', 'pedra com inscrição', 'estatueta caída entre flores', 'esqueleto de cavalo'],
       hazards: ['poço escondido', 'tempestade súbita', 'terra movediça', 'sulco profundo de carroça', 'cova de tatu sob o mato alto', 'tronco caído coberto pelo capim']
     },
@@ -15077,11 +15114,12 @@ const EVENTS_POOL = {
     'lobo solitário': 'gray_wolf', 'urso desperto': 'orc_raider',
     'lince da mata': 'gray_wolf', 'pantera negra': 'gray_wolf',
     'serpente verde': 'giant_spider', 'javali enraivecido': 'gray_wolf',
-    'corvo gigante de bando': 'giant_eagle',
+    'bando de corvos gigantes': 'giant_eagle',
     // plains
     'matilha de cães selvagens': 'gray_wolf', 'touro escapado': 'orc_raider',
     'serpente do trigal': 'giant_spider', 'lobo da estepe': 'gray_wolf',
-    'pacote de hienas': 'gray_wolf', 'urso pardo errante': 'orc_raider',
+    'matilha de hienas': 'gray_wolf', 'urso pardo errante': 'orc_raider',
+    'corvo gigante': 'giant_eagle',
     // swamp
     'sapo gigante': 'giant_toad', 'crocodilo silencioso': 'giant_toad',
     'serpente venenosa': 'giant_spider', 'will-o-wisp dançante': 'will_o_wisp',
@@ -15119,16 +15157,35 @@ const EVENTS_POOL = {
 
   // _slot agora aceita tokens pre-picked (3o param) pra consistência.
   // Mantém compat: se tokens=null/undefined, picka fresh (legado).
+  //
+  // 2026-04-27 USER FIX: pluralização automática de {Ele}/{ele} baseada no
+  // token {creature}. Tokens como "matilha de hienas", "bando de corvos",
+  // "alcateia de lobos" são gramaticalmente PLURAIS — gerar texto com "Ele
+  // hesita" pra matilha estava errado. Heurística: keywords no token
+  // disparam substituição plural.
+  var _PLURAL_KEYWORDS = /^(matilha|bando|alcateia|grupo|horda|cl[aã]|pacote|pares?\s+de|pelot[aã]o|enxame|cardume|nuvem\s+de|conjunto)\s+de\s+/i;
+  function _isPluralToken(token) {
+    if (!token) return false;
+    return _PLURAL_KEYWORDS.test(token);
+  }
   function _slot(text, biomePool, tokens) {
     if (!text) return '';
     var t = tokens || _pickTokens(biomePool);
+    // Detecta plural pra cada categoria de token
+    var creaturePlural = _isPluralToken(t.creature);
+    var npcPlural = _isPluralToken(t.npc);
+    // Se EITHER token é plural, conjuga {Ele}/{ele} pra {Eles}/{eles}.
+    // Limitação aceita: se ambos forem singular, mantém singular default.
+    // Pra textos que se referem só a creature OR só a npc, isso funciona
+    // bem em 95%+ dos casos.
+    var anyPlural = creaturePlural || npcPlural;
     return text
       .replace(/\{npc\}/g, t.npc)
       .replace(/\{creature\}/g, t.creature)
       .replace(/\{object\}/g, t.object)
       .replace(/\{hazard\}/g, t.hazard)
-      .replace(/\{Ele\}/g, 'Ele')
-      .replace(/\{ele\}/g, 'ele');
+      .replace(/\{Ele\}/g, anyPlural ? 'Eles' : 'Ele')
+      .replace(/\{ele\}/g, anyPlural ? 'eles' : 'ele');
   }
   // X-6.5.51m: outcomes ricos — gold, xp, mp gain/loss, hp loss, exh aumenta
   // 2026-04-27: tokens (3o param) compartilhado com _slot. failCombat (4o)
