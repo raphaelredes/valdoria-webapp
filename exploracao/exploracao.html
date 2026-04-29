@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:07:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:19:20Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14175,39 +14175,313 @@ const EVENTS_POOL = {
     }
   };
 
-  // Templates universais (5 tipos × ~10 variantes cada via pool = 50/bioma)
-  // X-6.5.51m: outcomes ricos — okMp (restaura mana), failMp (drena), okItem
-  // (recompensa item), failExh (aumenta exaustao), tile_bonus (ganha advantage
-  // se estiver no tile certo do template).
+  // ════════════════════════════════════════════════════════════════════════
+  // 2026-04-27 USER FIX: AAA EVENT REFACTOR
+  // Templates com .variantPool (3+ variantes únicas) + chains profundos
+  // (2-3 níveis). Picker usa S.persistedEventHistory pra rotacionar variants
+  // baseado em quantas vezes o player encontrou aquele kind no mapa atual.
+  //
+  // Cada variante tem narrativa COMPLETAMENTE diferente — não é só troca de
+  // {npc} token, é cenário próprio (mercador, peregrino ferido, mensageiro
+  // suspeito). Todas as escolhas têm chainOk/chainFail abrindo decisão nova.
+  // ════════════════════════════════════════════════════════════════════════
   var TEMPLATES = [
     { kind: 'meet_npc',
-      title: 'Encontro na Estrada',
-      text: 'Você cruza o caminho de {npc} — passos cruzados, olhares trocados num breve instante de avaliação mútua. {Ele} para a uns dois metros, mãos visíveis mas postura prudente, esperando você revelar a intenção primeiro. Estrada longa ensina que cada encontro é leitura.',
-      choices: [
-        { label: 'Cumprimentar', skill: 'cha', dc: 11,
-          desc: 'Voz aberta, mãos longe da arma — proposta de paz e conversa breve.',
-          ok: 'Você cumprimenta com voz tranquila e gesto aberto, perguntando sobre a estrada à frente. {Ele} relaxa os ombros e responde sem reservas — partilha dicas sobre desvios seguros, água potável próxima, fogueiras que viajantes confiáveis acendem à noite. Quando se separam, há aperto de mão e uma pequena moeda passada como sinal de boa-fé.', okGold: [3, 12], okXp: [5, 12],
-          fail: 'Sua abordagem sai com pressa demais — voz alta no momento errado, ou pergunta direta antes da apresentação. {Ele} estreita os olhos, balança a cabeça, e se afasta a passos firmes sem dizer mais nada. Você fica plantado entendendo tarde demais que conversa de estrada tem ritmo próprio.', failExh: 0 },
-        { label: 'Observar de longe', skill: 'wis', dc: 11,
-          desc: 'Esconder-se em vegetação ou contorno do terreno — estudar antes de revelar-se.',
-          ok: 'Você se acocora atrás de mato denso e observa em silêncio durante minutos. Detalhes vão aparecendo: o tipo de calçado revela ofício, a postura denuncia treino militar passado, a bolsa carrega marcas de uma guilda específica. Quando {ele} finalmente segue caminho, você sai com informação sem ter sido visto.', okXp: [10, 20],
-          fail: '{Ele} tem ouvidos treinados — talvez patrulheiro, talvez caçador. Vira a cabeça no instante exato em que você se acomoda, escuta um galho mal-pisado, e dispara em direção oposta sem olhar pra trás. Você se ergue dos arbustos com o constrangimento de quem foi pego espionando.' }
+      // 3 variantes únicas — cada uma com cenário completamente diferente.
+      // Picker rotaciona baseado em encounter count (persistEventHistory).
+      variantPool: [
+        // ─── Variante 1: Viajante prudente cruzando caminho ───
+        {
+          title: 'Encontro na Estrada',
+          text: 'Você cruza o caminho de {npc} — passos cruzados, olhares trocados num breve instante de avaliação mútua. {Ele} para a uns dois metros, mãos visíveis mas postura prudente, esperando você revelar a intenção primeiro. Estrada longa ensina que cada encontro é leitura, e o silêncio entre vocês carrega mais informação que palavras.',
+          choices: [
+            { label: 'Cumprimentar abertamente', skill: 'cha', dc: 11,
+              desc: 'Voz aberta, mãos longe da arma — proposta de paz e conversa breve.',
+              ok: 'Você cumprimenta com voz tranquila e gesto aberto. {Ele} relaxa os ombros e responde sem reservas — partilha que viu fumaça suspeita ao norte e ouviu rumores de bandidos no desvio leste. Aceita uma pequena moeda como sinal de boa-fé e oferece informação extra em troca.',
+              okGold: [3, 8], okXp: [8, 12],
+              chainOk: {
+                id: 'meet1_extra_info',
+                body: '{Ele} se inclina e baixa a voz: "Posso te dizer mais — mas precisa decidir o que quer saber primeiro. Tempo é curto."',
+                choices: [
+                  { label: 'Pedir o desvio mais seguro (Sabedoria)', skill: 'wis', dc: 12,
+                    desc: 'Verdadeiro valor: rota que evita patrulhas E bandidos.',
+                    ok: '{Ele} desenha uma trilha no chão com a ponta da bota — passa por cabana abandonada, cruza riacho raso, sai na estrada principal depois do desvio perigoso. "Use isso e você me deve uma cerveja em Eldoria."',
+                    okGold: [0, 0], okXp: [12, 18],
+                    fail: '{Ele} desenha a trilha mas você não memoriza direito — perdeu detalhe importante sobre o riacho. A informação vai te servir só parcialmente.', failExh: 1 },
+                  { label: 'Pedir notícia de Valdoria (Persuasão)', skill: 'cha', dc: 11,
+                    desc: 'Política da capital — quem subiu, quem caiu, quem procura mercenários.',
+                    ok: '{Ele} olha em volta antes de falar: "A Guarda do Norte foi reforçada. Conde Velmuir morreu há semanas — sucessão briga em sussurros. Quem sobe na corte agora compra espadas, não lealdades."',
+                    okXp: [10, 16], okGold: [4, 10],
+                    fail: '{Ele} fica desconfortável: "Não sou de cidade, viajante. Só ouço o que cavalos contam — e cavalos exageram." Recua a oferta.' }
+                ]
+              },
+              fail: 'Sua abordagem sai com pressa demais — voz alta no momento errado. {Ele} estreita os olhos, balança a cabeça, e se afasta a passos firmes sem dizer mais nada.',
+              failExh: 0,
+              chainFail: {
+                id: 'meet1_recover',
+                body: '{Ele} já está a vinte passos. Você pode ainda tentar consertar a impressão.',
+                choices: [
+                  { label: 'Correr atrás e oferecer compensação (Persuasão)', skill: 'cha', dc: 13,
+                    desc: 'Voz humilde, oferta de moedas pelo incômodo — pedir desculpa explícita.',
+                    ok: '{Ele} para, suspira, aceita as moedas e te concede 30 segundos. Pelo menos te avisa do bandido escondido na próxima curva.',
+                    okXp: [6, 10],
+                    fail: '{Ele} continua andando. "Já disse o que tinha pra dizer. Boa sorte." Você fica sem nada.' },
+                  { label: 'Deixar pra lá e seguir', flavor: 'Estrada longa, próximo viajante terá mais paciência.',
+                    ok: 'Você prossegue. A próxima curva pode esconder ajuda ou perigo.', okXp: [2, 4] }
+                ]
+              }
+            },
+            { label: 'Observar de longe (Sabedoria)', skill: 'wis', dc: 12,
+              desc: 'Esconder-se em vegetação — estudar antes de revelar-se.',
+              ok: 'Você se acocora atrás de mato denso. Detalhes aparecem: calçado revela ofício, postura denuncia treino militar passado, a bolsa carrega marca de guilda. {Ele} segue caminho — você sai com informação sem ter sido visto.',
+              okXp: [12, 18],
+              chainOk: {
+                id: 'meet1_silent_followup',
+                body: 'Agora que sabe quem é, pode decidir o que fazer com a informação.',
+                choices: [
+                  { label: 'Seguir os passos discretamente (Furtividade)', skill: 'stealth', dc: 14,
+                    desc: 'Acompanhar a 100 passos pra ver onde {ele} vai — pode levar a algo valioso.',
+                    ok: '{Ele} entra em pequena cabana escondida — clube clandestino de mercadores. Você marca a localização e segue caminho. Informação vendável.',
+                    okGold: [12, 22], okXp: [10, 14],
+                    fail: '{Ele} percebe que está sendo seguido. Vira-se de repente, mão na faca. Você foge entre arbustos, mas a impressão deixada não é boa.', failHp: 3 },
+                  { label: 'Continuar viagem com a info', flavor: 'Conhecimento é poder. Pode ser útil mais tarde.',
+                    ok: 'Você prossegue. A informação fica guardada na cabeça, valiosa pra quando souber o contexto certo.',
+                    okXp: [4, 8] }
+                ]
+              },
+              fail: '{Ele} tem ouvidos treinados. Vira a cabeça no instante exato em que você se acomoda — galho mal-pisado denuncia. Dispara em direção oposta sem olhar pra trás. Você se ergue dos arbustos com o constrangimento de quem foi pego espionando.' }
+          ]
+        },
+        // ─── Variante 2: Mercador solitário empurrando carroça ───
+        {
+          title: 'Mercador Solitário',
+          text: '{npc} empurra uma carroça pequena pela trilha — rodas rangendo, lona cobrindo cargas que não se identificam de relance. Quando vê você, para imediatamente e ergue uma das mãos com sorriso ansioso. "Pelos deuses, viajante! Companhia humana é mais rara que cobre nesta estrada. Tem um momento?"',
+          choices: [
+            { label: 'Conversar e perguntar o que vende (Persuasão)', skill: 'cha', dc: 11,
+              desc: '{Ele} parece carente de conversa — pode soltar mais que pretendia.',
+              ok: 'Você se aproxima e {ele} abre a lona com entusiasmo. Tem temperos raros, alguns frascos de vidro com tinturas, e um livro antigo enrolado em pano. "Vendo barato — preciso chegar à cidade vivo, e companhia justa vale desconto."',
+              okXp: [8, 14],
+              chainOk: {
+                id: 'meet2_buy_or_trade',
+                body: 'O que tem na carroça pode valer ouro mais tarde. Você decide o que negociar.',
+                choices: [
+                  { label: 'Comprar tinturas medicinais (10 moedas)', flavor: 'Frascos de vidro com líquido âmbar — útil em ferimentos.',
+                    ok: 'Você paga 10 moedas e leva 2 frascos. {Ele} agradece efusivo. Pode usar mais tarde.',
+                    okItem: 'healing_potion', okGold: [-10, -10] },
+                  { label: 'Trocar info de estrada por desconto (Persuasão)', skill: 'cha', dc: 13,
+                    desc: 'Oferecer o que sabe de bandidos/patrulhas em troca de melhor preço.',
+                    ok: '{Ele} adora o trato — ouve avidamente sobre o caminho à frente, deixa o frasco quase pelo custo. Sabedoria de estrada vale prata.',
+                    okItem: 'healing_potion', okGold: [-3, -3], okXp: [10, 14],
+                    fail: '{Ele} ouve mas já sabia tudo. "Boa tentativa, mas estou nesta estrada há vinte anos." Cobra preço cheio.', failExh: 0 },
+                  { label: 'Apenas seguir caminho', flavor: 'Sem moedas pra gastar agora.',
+                    ok: 'Você agradece e prossegue. {Ele} acena triste e empurra a carroça adiante.', okXp: [3, 5] }
+                ]
+              },
+              fail: '{Ele} fica desconfiado da sua insistência em saber detalhes. "Compra ou caminha, viajante. Não dou aula sobre meu ofício." Fecha a lona.', failExh: 0 },
+            { label: 'Oferecer ajuda com a carroça (Atletismo)', skill: 'athletics', dc: 11,
+              desc: 'Empurrar junto até o próximo descanso — gratidão sincera vale mais que moedas.',
+              ok: 'Você empurra junto por meia hora. {Ele} conta histórias, ri, oferece água. Quando se separam, te dá um pequeno objeto de presente — "amuleto de proteção que comprei em terra distante. Use bem."',
+              okItem: 'rune_protection', okXp: [12, 18],
+              chainOk: {
+                id: 'meet2_gratitude',
+                body: '{Ele} hesita antes de seguir, depois volta-se: "Espera. Tem algo mais que posso fazer."',
+                choices: [
+                  { label: 'Pedir notícia da cidade próxima (Sabedoria)', skill: 'wis', dc: 11,
+                    desc: 'Mercador conhece o ânimo do mercado.',
+                    ok: '{Ele} conta sobre o feirão semanal, qual lojista compra ervas raras, qual taverna não cobra alta hospedagem. Informação útil.',
+                    okGold: [5, 10], okXp: [8, 12],
+                    fail: '{Ele} confunde nomes — não conhece bem a cidade que você vai. "Desculpa, acho que estou pensando em outra." Sem info útil.' },
+                  { label: 'Pedir indicação de comprador (Persuasão)', skill: 'cha', dc: 12,
+                    desc: 'Quem compra coisas raras na cidade?',
+                    ok: '{Ele} dá nome, descrição e palavra-chave de mercador discreto: "Diga que Lendro mandou. Ele pagará bem por bons itens."',
+                    okXp: [10, 14], okFlag: 'merchant_lendro_intro' },
+                  { label: 'Apenas agradecer e seguir', flavor: 'O amuleto já é mais do que esperava.',
+                    ok: 'Você acena e segue. O amuleto repousa no bolso, peso pequeno mas reconfortante.', okXp: [4, 6] }
+                ]
+              },
+              fail: 'A carroça é mais pesada do que parecia. Você escorrega e ela quase tomba — {ele} grita alarmado. Quando recupera o controle, sorri amarelo: "Obrigado por tentar. Boa estrada." Não há gratidão real.', failHp: 1 }
+          ]
+        },
+        // ─── Variante 3: Mensageiro com pressa suspeita ───
+        {
+          title: 'Mensageiro Apressado',
+          text: '{npc} vem rápido pela estrada, mochila pequena saltando nas costas, respiração curta. Quando vê você, hesita meio segundo — calcula se você é ameaça ou aliado — e decide passar reto, gesto seco em cumprimento mínimo. Algo na pressa não cheira bem. Algo no olhar relanceou pra sua cinta de armas.',
+          choices: [
+            { label: 'Bloquear a passagem com palavra (Intimidação)', skill: 'cha', dc: 13,
+              desc: 'Postura firme, voz calma mas autoritativa — "Espera. Quero falar."',
+              ok: '{Ele} para, ombros tensos. "Não tenho tempo, viajante." Você nota a marca úmida no ombro — sangue. Algo aconteceu antes desta estrada. Pressiona com perguntas certas e {ele} cede.',
+              okXp: [12, 16],
+              chainOk: {
+                id: 'meet3_pressure',
+                body: '{Ele} suspira: "Tudo bem. Pergunte. Mas seja rápido."',
+                choices: [
+                  { label: 'Perguntar pelo sangue no ombro (Persuasão)', skill: 'cha', dc: 12,
+                    desc: 'Direto: "De onde vem isso? Quem te feriu?"',
+                    ok: '{Ele} fala em voz baixa: "Bandidos, três horas pra trás. Levaram cartas que devo entregar — perdi mais que ouro. Se topares ir buscar a sacola caída, divido o que tem dentro." Pista de side-quest.',
+                    okFlag: 'messenger_quest_offered', okXp: [14, 20],
+                    fail: '{Ele} desvia: "Cortei numa cerca. Não é nada." Mas a tensão denuncia que foi mentira. Sem informação útil.' },
+                  { label: 'Perguntar o que carrega (Investigação)', skill: 'investigation', dc: 13,
+                    desc: 'Qual a natureza dessas mensagens?',
+                    ok: '{Ele} tira da mochila dois lacres — um da Guarda de Valdoria, outro selo desconhecido com águia preta. "Política. Não pergunte mais."',
+                    okFlag: 'messenger_carries_political', okXp: [10, 14],
+                    fail: '{Ele} fecha a mochila brusco: "Não é da sua conta, mercenário." Vira-se pra ir.' },
+                  { label: 'Deixá-lo ir', flavor: 'Tem coisa demais errada aqui. Distância é prudência.',
+                    ok: '{Ele} agradece com aceno e sai correndo. Ainda assim, você guarda a imagem. Algo aconteceu hoje.',
+                    okXp: [5, 8] }
+                ]
+              },
+              fail: '{Ele} não para — passa por você de raspão e segue correndo. "Saia do caminho!" Você ouve passos extras à distância — talvez perseguidores. Algo grande está acontecendo, e você não saberá o quê.',
+              chainFail: {
+                id: 'meet3_followers',
+                body: 'Ouve passos pesados se aproximando da curva atrás. Três figuras vêm rápido — armadas. Você decide.',
+                choices: [
+                  { label: 'Esconder-se na vegetação (Furtividade)', skill: 'stealth', dc: 14,
+                    desc: 'Sair da estrada e ver quem persegue.',
+                    ok: 'Você se afunda em mato denso. Três bandidos passam correndo, sem te ver. Conseguiu evitar combate e ganhou contexto: caçadores em ação.',
+                    okXp: [12, 18], okFlag: 'witnessed_chase',
+                    fail: 'Você se mexeu tarde — eles te veem entrando no mato e desviam pra cobrar passagem. Combate em desvantagem.',
+                    failHp: 3, failCombat: true },
+                  { label: 'Manter postura na estrada e bloquear (Intimidação)', skill: 'cha', dc: 15,
+                    desc: 'Postura de combate, mão na arma — "Quem caça nas estradas do rei?"',
+                    ok: 'Os três param, calculam, e fingem civilidade: "Apenas mensageiros, viajante. Bom dia." Passam de raspão sem te encarar. Você ganhou respeito sem violência.',
+                    okXp: [14, 22],
+                    fail: 'Eles consideram você obstáculo. Sacam armas. Combate.', failCombat: true }
+                ]
+              } },
+            { label: 'Deixá-lo passar e estudar do canto do olho (Percepção)', skill: 'perception', dc: 12,
+              desc: 'Não confrontar — só registrar detalhes pra usar mais tarde.',
+              ok: 'Você nota: ferimento recente no ombro escondido sob capa, brasão da Casa Velmuir bordado discretamente na manga, mochila com formato de cilindro (carrega pergaminho). Estes detalhes podem valer ouro pra quem souber pra quem vender.',
+              okXp: [16, 24], okFlag: 'observed_velmuir_messenger',
+              chainOk: {
+                id: 'meet3_use_intel',
+                body: 'Você guarda a observação. Em algum momento futuro, esta informação pode ser barganhada.',
+                choices: [
+                  { label: 'Decidir vender essa info pro maior pagador (Investigação)', skill: 'investigation', dc: 13,
+                    desc: 'Quais facções pagariam por isso?',
+                    ok: 'Você lista mentalmente: Guarda de Valdoria, rivais de Velmuir, agentes da capital. Já tem 3 compradores em potencial.',
+                    okFlag: 'messenger_intel_marketable', okXp: [12, 18],
+                    fail: 'Você não conhece bem a política regional. A info fica guardada mas sem destino claro.' },
+                  { label: 'Não vender — usar pra proteção', flavor: 'Saber é vantagem em conflito futuro.',
+                    ok: 'Você guarda mentalmente. Quando alguém ameaçar, terá alavanca.', okXp: [8, 12] }
+                ]
+              },
+              fail: 'Você olha mas não captura detalhes específicos. {Ele} passou rápido demais — só fica a impressão genérica de pressa e perigo. Sem informação útil.' }
+          ]
+        }
       ]
     },
     { kind: 'creature_threat',
-      title: 'Ameaça à Vista',
-      text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada.',
-      choices: [
-        { label: 'Recuar devagar', skill: 'wis', dc: 12,
-          desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
-          ok: 'Você dá um passo pra trás devagar, calcanhar primeiro, sem quebrar contato visual nem desafiar a postura. Outro passo. E outro. {Ele} estuda você por longos instantes — calculando se vale a investida — e decide que não. Recua na direção oposta, deixando você em pé com o coração nas costelas.', okXp: [8, 14],
-          fail: '{Ele} percebe sua hesitação antes mesmo de você completar o segundo passo — leitura de postura tem tradição mais antiga que palavras. A investida vem em explosão, e você é jogado contra o terreno antes de processar o ataque. Não há mais distância entre vocês; o combate começou.',
-          failHp: 4, failCombat: true },
-        { label: 'Intimidar', skill: 'cha', dc: 13,
-          desc: 'Postura ereta, voz grave, gestos amplos — apresentar-se como ameaça maior, não presa.',
-          ok: 'Você se ergue ao máximo, abre os braços e ruge com a voz mais grave que encontra no peito. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de confronto contra alvo que parece mais perigoso que esperado — e recua. Vira-se com a postura quebrada e some de sua linha de visão. Você fica vibrante de adrenalina, sentindo que dominou algo perigoso só com presença.', okXp: [12, 22], okGold: [2, 8],
-          fail: '{Ele} não recua — pelo contrário. Sua intimidação foi lida como desafio direto, e a resposta é inequívoca. Posiciona-se pra investida e avança com fúria de quem aceita guerra. Você saca a arma; não há saída além do confronto.',
-          failHp: 6, failCombat: true }
+      variantPool: [
+        // Variante 1: Confronto direto na trilha
+        {
+          title: 'Ameaça à Vista',
+          text: 'Um {creature} surge subitamente do entorno — postura tensa, olhar travando nos seus na fração de segundo que separa fuga de ataque. O ar fica denso de tensão; cada respiração sua é registrada. Movimento errado e você está em combate.',
+          choices: [
+            { label: 'Recuar devagar (Sabedoria)', skill: 'wis', dc: 12,
+              desc: 'Passos para trás sem virar as costas — sustentar olhar sem desafiar, mãos baixas.',
+              ok: 'Você dá um passo pra trás devagar, calcanhar primeiro. {Ele} estuda você por longos instantes — calculando se vale a investida — e decide que não. Recua na direção oposta. Você fica em pé, coração nas costelas, com a vitória silenciosa de quem leu o momento.',
+              okXp: [10, 14],
+              chainOk: {
+                id: 'creature_retreat_followup',
+                body: '{Ele} desapareceu, mas o terreno ficou marcado. Você nota algo no chão onde ele estava — pode investigar ou seguir.',
+                choices: [
+                  { label: 'Investigar a marca (Sobrevivência)', skill: 'survival', dc: 12,
+                    desc: 'Pegada profunda, ferimento velho, ou rastro de sangue?',
+                    ok: 'A pegada é profunda — a criatura está ferida há dias. Você marca a direção do recuo: fuga pra território natural, possível covil. Se voltar com aliados, pode caçar.',
+                    okXp: [10, 14], okFlag: 'creature_lair_known',
+                    fail: 'Você revira o chão mas não consegue ler claramente. As marcas são confusas. Sem informação útil.' },
+                  { label: 'Continuar viagem cauteloso', flavor: 'Distância é a melhor recompensa.',
+                    ok: 'Você prossegue olhando pra trás. A estrada ficou mais sombria, mas também mais sábia.', okXp: [4, 6] }
+                ]
+              },
+              fail: '{Ele} percebe sua hesitação. A investida vem em explosão e você é jogado contra o terreno antes de processar o ataque. Combate começou.',
+              failHp: 4, failCombat: true },
+            { label: 'Intimidar (Carisma)', skill: 'cha', dc: 13,
+              desc: 'Postura ereta, voz grave — apresentar-se como ameaça maior, não presa.',
+              ok: 'Você se ergue ao máximo, abre os braços e ruge. Bate na arma sem desembainhar. {Ele} hesita — calcula custo de confronto contra alvo perigoso — e recua, virando-se com postura quebrada. Você fica vibrante de adrenalina, dominando algo perigoso só com presença.',
+              okXp: [14, 22], okGold: [2, 8],
+              chainOk: {
+                id: 'creature_intimidate_followup',
+                body: 'Adrenalina alta. Você pode aproveitar pra explorar a área que {ele} estava protegendo.',
+                choices: [
+                  { label: 'Procurar o que ele defendia (Investigação)', skill: 'investigation', dc: 13,
+                    desc: 'Criaturas territoriais defendem algo de valor.',
+                    ok: 'Atrás de uma rocha, escondido por folhas: um pequeno tesouro — moedas, um anel, ossos antigos. Vale o risco que correu.',
+                    okGold: [15, 30], okItem: 'rune_protection', okXp: [10, 14],
+                    fail: 'Você procura mas só encontra restos comuns. {Ele} talvez defendesse só território, não tesouro.', failExh: 1 },
+                  { label: 'Sair antes que ele volte', flavor: 'Sorte é recurso fininho.',
+                    ok: 'Você prossegue rápido. Vitória é o suficiente.', okXp: [6, 8] }
+                ]
+              },
+              fail: '{Ele} não recua — sua intimidação foi lida como desafio. Posiciona-se pra investida e avança. Combate.',
+              failHp: 6, failCombat: true }
+          ]
+        },
+        // Variante 2: Emboscada — criatura já viu primeiro
+        {
+          title: 'Olhos na Vegetação',
+          text: 'Você sente antes de ver — algo nos arbustos parou de respirar quando você se aproximou. Para. Escuta. Um {creature} está ali, escondido, possivelmente já decidiu o que vai fazer com você. Quem se mexer primeiro perde a iniciativa.',
+          choices: [
+            { label: 'Atacar primeiro (Atletismo)', skill: 'athletics', dc: 14,
+              desc: 'Carga decidida no ponto onde sente o predador — surpresa pode reverter o jogo.',
+              ok: 'Você se atira no arbusto com lâmina alta. {Ele} é pego de surpresa — você teve a iniciativa. Combate começa, mas com vantagem grande.',
+              okXp: [16, 22], okFlag: 'first_attack_advantage', failCombat: true,
+              fail: 'Você ataca o lugar errado — só folhas e gravetos. {Ele} sai do verdadeiro esconderijo às suas costas e investe. Combate em desvantagem.',
+              failHp: 4, failCombat: true },
+            { label: 'Falar com voz baixa (Persuasão)', skill: 'cha', dc: 14,
+              desc: 'Algumas criaturas inteligentes entendem tom — "estou só passando, não busco luta".',
+              ok: 'Você fala devagar, voz baixa, mãos visíveis. Pausa. {Ele} avalia. Após segundos longos, sai do arbusto, te encara — e desvia. Não foi medo, foi cálculo respeitoso.',
+              okXp: [18, 26],
+              chainOk: {
+                id: 'creature_parley_after',
+                body: '{Ele} se afastou mas parou a 30 passos, te observando. Está esperando algo.',
+                choices: [
+                  { label: 'Oferecer ração da mochila (Lidar com Animais)', skill: 'animal_handling', dc: 12,
+                    desc: 'Comida pode comprar passagem segura na região.',
+                    ok: 'Você joga uma ração no chão. {Ele} se aproxima, pega cuidadoso, e desaparece. Da próxima vez nesta região, ele lembrará. Você tem aliado discreto.',
+                    okFlag: 'creature_friendship', okXp: [12, 18],
+                    fail: '{Ele} ignora a comida e desaparece. Talvez não estivesse com fome, ou talvez você ofereceu errado.' },
+                  { label: 'Apenas seguir caminho com respeito', flavor: 'Algumas criaturas pedem só passagem.',
+                    ok: 'Você se vira devagar e sai. {Ele} te observa até a curva.', okXp: [8, 12] }
+                ]
+              },
+              fail: 'Sua voz, mesmo baixa, foi ameaça pra ele. Sai dos arbustos furioso. Combate.', failHp: 3, failCombat: true }
+          ]
+        },
+        // Variante 3: Bando, não solo — cálculo diferente
+        {
+          title: 'Não Está Sozinho',
+          text: 'Um {creature} aparece à frente — mas o som é outro. Ouve farfalhares à direita e à esquerda. Não é um. São três, talvez mais. Você é cercado num triângulo perfeito por predadores que não estão com fome — estão caçando por jogo.',
+          choices: [
+            { label: 'Plantar costas em árvore e brandir arma (Atletismo)', skill: 'athletics', dc: 14,
+              desc: 'Limitar ângulos de ataque — forçar combate frontal um por um.',
+              ok: 'Você gira até as costas baterem em tronco firme. Saca a arma e gira a lâmina lentamente, mostrando alcance. Eles param, recalculam, e — após meio minuto — recuam. Caça por jogo é só caça por jogo; ninguém quer morrer pelo esporte.',
+              okXp: [22, 30],
+              chainOk: {
+                id: 'creature_pack_stalemate',
+                body: 'Eles recuaram mas não foram embora — você os ouve circulando à distância. Vai ter que sair desta de algum jeito.',
+                choices: [
+                  { label: 'Esperar até cansarem (Constituição)', skill: 'con', dc: 13,
+                    desc: 'Manter postura por uma hora — predadores oportunistas eventualmente desistem.',
+                    ok: 'Você aguenta firme. Sol se move. Os passos circulares ficam mais lentos, depois cessam. Eles desistiram. Você sai com pernas trêmulas e respeito profundo pela própria paciência.',
+                    okXp: [16, 22], okFlag: 'survived_pack_standoff',
+                    fail: 'Cãibras vêm cedo demais. Você se mexe, eles percebem. Combate inevitável.', failHp: 5, failCombat: true },
+                  { label: 'Chamar ajuda gritando (Carisma)', skill: 'cha', dc: 12,
+                    desc: 'Pode haver outro viajante na estrada que ouça.',
+                    ok: 'Você grita o nome de uma cidade próxima como se chamasse aliados. Eles param ao ouvir — talvez calculem que vem reforço. Recuam definitivo.',
+                    okXp: [14, 20],
+                    fail: 'Seu grito ecoa vazio. Apenas confirma sua localização. Eles avançam coordenados. Combate desfavorável.', failHp: 4, failCombat: true }
+                ]
+              },
+              fail: 'Você não consegue alcançar a árvore — eles preveem o movimento e se reposicionam. O tronco fica longe demais. Combate em terreno aberto contra três.',
+              failHp: 6, failCombat: true },
+            { label: 'Largar mochila e correr (Acrobacia)', skill: 'acrobatics', dc: 13,
+              desc: 'Ofereça presa fácil — mochila com comida — e use os segundos pra fugir.',
+              ok: 'Você joga a mochila num arco que cai entre dois deles. Eles convergem na isca, brigando por restos. Você corre na direção oposta com tudo que tem. Quando a mata fica escassa, você chegou. Perdeu equipamento, mas está vivo.',
+              okGold: [-15, -10], okXp: [16, 22],
+              fail: 'Eles ignoram a mochila — caçavam você, não comida. Suas pernas falham na fuga e o tropeço quase é o fim. Combate em fuga, ferido.', failHp: 5, failCombat: true }
+          ]
+        }
       ]
     },
     { kind: 'object_inspect',
@@ -14225,31 +14499,214 @@ const EVENTS_POOL = {
       ]
     },
     { kind: 'hazard',
-      title: 'Perigo Iminente',
-      text: 'O terreno trai sua confiança — {hazard} se manifesta sem aviso, deixando frações de segundo entre instinto e preço pago. Reaja já, ou aprenda no sangue por que viajantes experientes leem cada passo da estrada.',
-      choices: [
-        { label: 'Esquivar', skill: 'dex', dc: 12,
-          desc: 'Confiar em reflexo treinado — corpo se move antes da mente analisar a ameaça.',
-          ok: 'Seu corpo reage antes do raciocínio chegar — pernas dobram, ombro torce, mochila balança junto. O perigo passa raspando a um palmo do seu rosto. Quando levanta, o coração martela como tambor de guerra, mas você está inteiro.', okXp: [8, 14],
-          fail: 'O reflexo veio tarde — meio segundo a menos que o necessário. Você é atingido em cheio antes de processar o que aconteceu, jogado contra o terreno com força que tira o ar dos pulmões. Fica de quatro tossindo e xingando.', failHp: 4 },
-        { label: 'Resistir', skill: 'con', dc: 13,
-          desc: 'Plantar os pés e absorver o impacto — confiar em fibra muscular e armadura.',
-          ok: 'Você firma a postura, encolhe ombros e tensiona o tronco no instante exato. O impacto vem mas encontra um corpo preparado — força distribuída, articulações alinhadas, fôlego controlado. Sai com o equilíbrio intacto e algumas marcas que viram histórias de fogueira.', okXp: [8, 14],
-          fail: 'Você tenta resistir mas a força é maior que sua capacidade de absorvê-la. Ouve algo trincar — costela, talvez fibra muscular — antes mesmo de processar a dor. Cai de joelhos sangrando, ofegante, lembrando que orgulho não substitui agilidade.', failHp: 5, failExh: 0 }
+      variantPool: [
+        // Variante 1: Hazard direto e imediato
+        {
+          title: 'Perigo Iminente',
+          text: 'O terreno trai sua confiança — {hazard} se manifesta sem aviso, deixando frações de segundo entre instinto e preço pago. Reaja já, ou aprenda no sangue por que viajantes experientes leem cada passo da estrada.',
+          choices: [
+            { label: 'Esquivar (Destreza)', skill: 'dex', dc: 12,
+              desc: 'Confiar em reflexo treinado — corpo se move antes da mente analisar.',
+              ok: 'Seu corpo reage antes do raciocínio chegar. O perigo passa raspando a um palmo do rosto. Coração martela, mas você está inteiro.',
+              okXp: [10, 14],
+              chainOk: {
+                id: 'hazard_dodge_followup',
+                body: 'Você está em pé, vivo, com adrenalina alta. Pode investigar o que sobrou do hazard ou seguir.',
+                choices: [
+                  { label: 'Examinar o que era (Investigação)', skill: 'investigation', dc: 12,
+                    desc: 'Compreender pra evitar próxima vez — pode ter sido armadilha intencional.',
+                    ok: 'Você examina e descobre: era armadilha colocada por alguém. Dispositivo de fio quase invisível, contrapeso pesado. Sabedoria útil.',
+                    okXp: [12, 18], okFlag: 'trap_recognition',
+                    fail: 'Você examina mas não consegue ler o mecanismo. Talvez tenha sido natural, talvez não. Sem conclusão clara.' },
+                  { label: 'Continuar viagem com pulso acelerado', flavor: 'Sair vivo é o que importa.',
+                    ok: 'Você prossegue, mais alerta. A estrada exige atenção constante.', okXp: [4, 6] }
+                ]
+              },
+              fail: 'O reflexo veio tarde — meio segundo a menos. Você é atingido em cheio, jogado contra o terreno. Cai de quatro tossindo.', failHp: 4 },
+            { label: 'Resistir (Constituição)', skill: 'con', dc: 13,
+              desc: 'Plantar os pés e absorver o impacto.',
+              ok: 'Você firma postura, tensiona tronco no instante exato. Impacto encontra corpo preparado. Sai com o equilíbrio intacto e marcas que viram histórias.',
+              okXp: [10, 14],
+              fail: 'Você tenta resistir mas a força é maior. Ouve algo trincar — costela, talvez. Cai de joelhos sangrando.', failHp: 5, failExh: 0 }
+          ]
+        },
+        // Variante 2: Hazard ambiental progressivo (gás, fumaça, piso instável)
+        {
+          title: 'Sinal de Alerta Tarde',
+          text: 'Você nota tarde demais o que devia ter notado antes — {hazard} já está agindo. Não é súbito como uma armadilha, é insidioso: o cheiro estranho, o solo cedendo devagar, a respiração que pesa por motivo errado. Você tem alguns segundos pra agir antes do problema virar grave.',
+          choices: [
+            { label: 'Sair correndo na direção contrária (Atletismo)', skill: 'athletics', dc: 13,
+              desc: 'Velocidade pura — colocar 50 passos entre você e a fonte.',
+              ok: 'Você corre com tudo. Pulmões queimam mas você sai do raio. Quando para, a sensação ainda persiste por minutos — mas você está fora de perigo.',
+              okXp: [12, 16],
+              fail: 'Você corre mas tropeça em raiz na pressa. Cai e fica exposto por mais alguns segundos. Pago em sangue.', failHp: 4 },
+            { label: 'Identificar a fonte primeiro (Investigação)', skill: 'investigation', dc: 14,
+              desc: 'Descobrir o que é antes de reagir — pode evitar próximo encontro.',
+              ok: 'Você localiza: fenda no solo soltando vapor, ou planta tóxica que floresce só nesta época. Memoriza o sinal pra próxima vez. Sai com calma controlada.',
+              okXp: [16, 22], okFlag: 'hazard_source_known',
+              chainOk: {
+                id: 'hazard_source_known_chain',
+                body: 'Sabe agora o que era. Pode marcar a localização ou apenas seguir.',
+                choices: [
+                  { label: 'Marcar com pedras pra próximos viajantes (Sabedoria)', skill: 'wis', dc: 11,
+                    desc: 'Pequena pilha de pedras como aviso — gesto de viajante decente.',
+                    ok: 'Você ergue um marco em três minutos. Próximos viajantes saberão evitar. Karma na estrada se paga eventualmente.',
+                    okXp: [10, 14], okFlag: 'hazard_marked',
+                    fail: 'Você tenta mas as pedras estão úmidas e desabam. Tempo perdido.' },
+                  { label: 'Seguir e guardar a info', flavor: 'Conhecimento próprio vale mais.',
+                    ok: 'Você prossegue carregando a sabedoria silenciosa.', okXp: [6, 8] }
+                ]
+              },
+              fail: 'Você analisa mas o tempo de exposição já estava cobrando preço. Recolhe-se enjoado, sem conclusão clara.', failHp: 2, failExh: 1 }
+          ]
+        },
+        // Variante 3: Hazard que afeta terceiro também (NPC ou animal)
+        {
+          title: 'Não Estou Sozinho no Apuro',
+          text: '{hazard} pegou a estrada — e pegou também {npc} que vinha à frente. Você ouve os gritos antes de ver. {Ele} está preso/ferido/em pânico a 20 passos. Seu próprio caminho ficou tenso, mas o de {ele} é grave. Decisão difícil em segundos.',
+          choices: [
+            { label: 'Ajudar arriscando a si mesmo (Atletismo)', skill: 'athletics', dc: 14,
+              desc: 'Mergulhar pra tirar {ele} mesmo se você se machucar no processo.',
+              ok: 'Você se atira no perigo, agarra {ele} com força, puxa pra zona segura. Ambos saem mancando, mas vivos. {Ele} chora gratidão.',
+              okXp: [20, 28], okGold: [10, 20], okFlag: 'rescued_npc',
+              chainOk: {
+                id: 'rescued_npc_followup',
+                body: '{Ele} se ergue trêmulo: "Eu ia morrer. Tenho que te dar algo."',
+                choices: [
+                  { label: 'Aceitar gratidão tangível (item ou ouro)', flavor: 'Recompensa material direta.',
+                    ok: '{Ele} desamarra um pequeno talismã do pescoço. "Era da minha avó. Você merece." Você guarda com peso emocional.',
+                    okItem: 'rune_protection', okXp: [10, 14] },
+                  { label: 'Pedir favor pra cobrar mais tarde (Persuasão)', skill: 'cha', dc: 11,
+                    desc: 'Aliança vale mais que objeto.',
+                    ok: '{Ele} jura: "Se precisares de mim, qualquer coisa, em qualquer cidade — meu nome é {npc}. Procure-me."',
+                    okFlag: 'npc_lifedebt', okXp: [16, 22] },
+                  { label: 'Recusar e seguir', flavor: 'Salvar foi gratificante o suficiente.',
+                    ok: 'Você acena humilde e prossegue. {Ele} fica olhando até você sumir.', okXp: [12, 16] }
+                ]
+              },
+              fail: 'Você tenta mas o hazard te pega também. Ambos ficam feridos, mas você consegue arrastar {ele} pra fora. Sobrevive sangrando.', failHp: 6 },
+            { label: 'Salvar a si mesmo primeiro (Sabedoria)', skill: 'wis', dc: 11,
+              desc: 'Garantir sua segurança antes de tentar resgate — só assim pode ajudar mesmo.',
+              ok: 'Você se posiciona em segurança, depois usa galho longo pra puxar {ele} sem se expor. Ambos saem vivos, embora {ele} desconfie do tempo que esperou.',
+              okXp: [14, 20],
+              fail: '{Ele} desmaia/morre antes de você chegar com o galho. Você sobrevive carregando culpa. A estrada pesa mais.',
+              failExh: 2 }
+          ]
+        }
       ]
     },
     { kind: 'npc_help',
-      title: 'Pedido na Estrada',
-      text: '{npc} acena de longe, urgência clara nos gestos — mãos no ar, passo apressado em sua direção. Quando se aproxima, a respiração está curta e o olhar carrega o tipo de aflição que não dá pra fingir. "Pelos deuses, viajante — preciso de auxílio. Não há tempo a perder."',
-      choices: [
-        { label: 'Ajudar prontamente', skill: 'wis', dc: 11,
-          desc: 'Avaliar a situação no calor do momento e agir sem cobrar — a urgência fala por si.',
-          ok: 'Você lê a situação rápido — postura, contexto, urgência real — e age com instinto. O problema cede com cooperação imediata: nó desfeito, peso erguido, ferida estancada, ou seja lá o que era. {Ele} chora de alívio e te pressiona moedas na palma sem deixar você recusar. "Os deuses verão isto."', okGold: [15, 35], okXp: [10, 18],
-          fail: 'Você mergulha pra ajudar mas sua leitura da situação foi errada — pisada no lugar errado, palavra trocada, gesto que assustou. {Ele} se afasta com raiva nos olhos, gritando algo sobre forasteiros que pioram tudo que tocam. Você fica plantado, mãos vazias, sem saber se ofereceu mal ou se nunca havia chance.' },
-        { label: 'Negociar antes', skill: 'cha', dc: 12,
-          desc: 'Pausar o pânico e estabelecer recompensa — caridade sem acordo costuma virar ressentimento.',
-          ok: 'Você ergue a mão pedindo respiro e propõe termos com calma. Nem caro demais nem barato — preço justo de quem entende risco e tempo. {Ele} fecha em aperto de mão firme, e o trato sela um vínculo que vai além desta tarde: vocês são aliados na região agora.', okGold: [8, 20], okXp: [6, 12],
-          fail: '{Ele} cospe no chão ao ouvir números na hora errada. "Eu suplicando e você cobrando? Pague-me a desonra de ter te procurado." Vira as costas e se afasta a passos firmes, deixando você com a sensação amarga de leitura pessimal do momento.' }
+      variantPool: [
+        // Variante 1: Aflição genuína (clássico pedido honesto)
+        {
+          title: 'Pedido na Estrada',
+          text: '{npc} acena de longe, urgência clara nos gestos — mãos no ar, passo apressado em sua direção. Quando se aproxima, a respiração está curta e o olhar carrega o tipo de aflição que não dá pra fingir. "Pelos deuses, viajante — preciso de auxílio. Não há tempo a perder."',
+          choices: [
+            { label: 'Ajudar prontamente (Sabedoria)', skill: 'wis', dc: 11,
+              desc: 'Avaliar a situação no calor do momento e agir sem cobrar.',
+              ok: 'Você lê rápido — postura, contexto, urgência real — e age com instinto. O problema cede: nó desfeito, peso erguido, ferida estancada. {Ele} chora de alívio e te pressiona moedas na palma. "Os deuses verão isto."',
+              okGold: [15, 30], okXp: [12, 18],
+              chainOk: {
+                id: 'help_grateful_chain',
+                body: '{Ele} hesita antes de seguir: "Posso te oferecer algo mais, mas precisas escolher."',
+                choices: [
+                  { label: 'Pedir notícia da região (Investigação)', skill: 'investigation', dc: 12,
+                    desc: 'Quem mora aqui, o que aconteceu recente, onde tem perigo.',
+                    ok: '{Ele} desenha um pequeno mapa mental: vila pacífica a leste, bandidos no caminho do norte, uma caverna escondida que poucos conhecem. Vale ouro.',
+                    okXp: [14, 20], okFlag: 'region_intel',
+                    fail: '{Ele} fica confuso — não conhece bem a região. "Sou de longe, viajante. Desculpe." Sem info útil.' },
+                  { label: 'Pedir um favor pra cobrar depois', flavor: 'Aliança vale mais que moeda no longo prazo.',
+                    ok: '{Ele} aceita solene: "Quando precisar, me procure em Eldoria. Sou homem de palavra." Aliança formada.',
+                    okFlag: 'npc_owes_favor', okXp: [12, 16] }
+                ]
+              },
+              fail: 'Você mergulha pra ajudar mas leu errado — pisada no lugar errado, gesto que assustou. {Ele} se afasta com raiva, gritando algo sobre forasteiros.',
+              chainFail: {
+                id: 'help_recover_chain',
+                body: '{Ele} já está se afastando. Você tem segundos pra reverter.',
+                choices: [
+                  { label: 'Correr atrás e oferecer compensação (Persuasão)', skill: 'cha', dc: 13,
+                    desc: 'Algumas moedas como pedido de desculpas.',
+                    ok: '{Ele} para, suspira, aceita as moedas. "Tudo bem. Talvez você quisesse ajudar mesmo." Fica relação morna mas honesta.',
+                    okGold: [-5, -3], okXp: [8, 12],
+                    fail: '{Ele} continua andando. "Não preciso da sua caridade tardia."' },
+                  { label: 'Deixar pra lá', flavor: 'Erro acontece. Próximo dia.',
+                    ok: 'Você prossegue. A culpa fica, mas a estrada continua.', okXp: [3, 5] }
+                ]
+              } },
+            { label: 'Negociar antes (Persuasão)', skill: 'cha', dc: 12,
+              desc: 'Pausar o pânico e estabelecer recompensa — caridade sem acordo vira ressentimento.',
+              ok: 'Você ergue a mão pedindo respiro e propõe termos com calma. Preço justo. {Ele} fecha em aperto de mão firme — vocês são aliados na região agora.',
+              okGold: [8, 20], okXp: [10, 14], okFlag: 'npc_alliance',
+              fail: '{Ele} cospe no chão. "Eu suplicando e você cobrando? Pague-me a desonra de ter te procurado." Vira as costas.', failExh: 1 }
+          ]
+        },
+        // Variante 2: Pedido suspeito (golpe disfarçado)
+        {
+          title: 'Aflição Suspeita',
+          text: '{npc} corre em sua direção chorando, dizendo que foi atacado e roubado — precisa de moedas pra pagar a passagem do barco que parte logo. Os detalhes batem demais, ensaiados demais. As lágrimas chegam exatamente quando o discurso pede. Você sente o cheiro de armadilha, mas talvez seja real.',
+          choices: [
+            { label: 'Investigar antes de decidir (Percepção)', skill: 'perception', dc: 13,
+              desc: 'Procurar sinais — ferimento real, sapatos gastos, marcas de bota recentes.',
+              ok: 'Você nota: as mãos não têm marcas de luta, os sapatos estão limpos demais pra alguém que correu pela floresta, e há um cúmplice esperando 30 passos atrás de uma árvore. Golpe clássico.',
+              okXp: [16, 24], okFlag: 'scam_exposed',
+              chainOk: {
+                id: 'scam_response',
+                body: 'Você descobriu o golpe. {Ele} ainda chora dramaticamente. O cúmplice está esperando o sinal. Você decide.',
+                choices: [
+                  { label: 'Confrontar abertamente (Intimidação)', skill: 'cha', dc: 13,
+                    desc: '"Vejo seu amigo atrás daquela árvore. Saiam ou chamo a guarda."',
+                    ok: 'Os dois disparam estrada afora xingando. Você ganhou respeito com prudência.',
+                    okXp: [14, 20], okGold: [4, 8],
+                    fail: 'Eles dobram a aposta — sacam armas, exigem tudo que você tem. Combate.', failCombat: true, failHp: 3 },
+                  { label: 'Fingir que caiu e seguir (Engano)', skill: 'deception', dc: 12,
+                    desc: 'Doar moedas pequenas, sair com cara de bobo — eles te ignoram nas próximas vezes.',
+                    ok: 'Você dá 5 moedas com cara de tristeza. {Ele} agradece e sai. Você lembra o rosto pra reconhecer da próxima vez. Conhecimento ganha.',
+                    okGold: [-5, -5], okFlag: 'scammer_face_known', okXp: [10, 14],
+                    fail: 'Sua atuação foi pobre. Eles percebem que você sacou e mudam o tom — agora exigem tudo. Combate.', failCombat: true, failHp: 2 }
+                ]
+              },
+              fail: 'Você não nota nada estranho. Acredita na história. Essa pode dar errado mais tarde — ou pode ter sido genuíno mesmo.' },
+            { label: 'Dar moedas e seguir (Sabedoria)', skill: 'wis', dc: 10,
+              desc: 'Mesmo que seja golpe, 5 moedas não custam o tempo de discussão.',
+              ok: 'Você dá moedas e prossegue. Talvez tenha sido golpe, talvez não. Em qualquer caso, sua paz mental vale o preço.',
+              okGold: [-5, -3], okXp: [4, 6],
+              fail: '{Ele} pede mais. E mais. Quando você tenta ir, há um segundo bandido bloqueando. Combate.', failCombat: true, failHp: 4 }
+          ]
+        },
+        // Variante 3: Caçador ferido com criatura encurralada
+        {
+          title: 'Caçador em Apuros',
+          text: 'Você ouve gritos — um {npc} está encostado em uma árvore, perna sangrando, ofegante. A 50 passos, encurralado entre rochas, há um {creature} ferido também. "Por favor, viajante! Atire algo, faça barulho — preciso que recue ou eu morro!"',
+          choices: [
+            { label: 'Distrair a criatura (Performance)', skill: 'performance', dc: 12,
+              desc: 'Gritar, bater pedras, fazer-se notar — desviar a atenção do caçador ferido.',
+              ok: 'Você grita, bate em pedras, faz movimento amplo. {Ele} (criatura) vira em sua direção, calcula novo alvo — e foge pra mata. O caçador respira aliviado e te chama.',
+              okXp: [16, 22],
+              chainOk: {
+                id: 'hunter_rescued',
+                body: 'O caçador se ergue com dificuldade, abraça você de gratidão. "Salvou minha vida. Pega a recompensa, é justa."',
+                choices: [
+                  { label: 'Aceitar a recompensa', flavor: 'Bolsa de couro com moedas. Direto e simples.',
+                    ok: 'Você guarda 25 moedas. Ele anota seu nome num caderno gasto: "Te devo. Procure-me em Eldoria — sou Caçador Krell."',
+                    okGold: [20, 30], okFlag: 'hunter_krell_owes', okXp: [10, 14] },
+                  { label: 'Recusar e ajudá-lo a voltar (Sabedoria)', skill: 'wis', dc: 11,
+                    desc: 'Apoiar o ombro, caminhar com ele até estrada principal — gratidão maior.',
+                    ok: 'Vocês caminham por uma hora. {Ele} conta histórias da região, tradições da família, conhecimento profundo dos bosques. Aliança real, não comercial.',
+                    okFlag: 'hunter_krell_friend', okXp: [18, 26],
+                    fail: 'O ferimento dele é pior do que parecia. {Ele} desmaia no caminho. Você o carrega até estrada e vai embora — sem saber se sobreviveu.', failExh: 1 },
+                  { label: 'Apenas desejar boa sorte e seguir', flavor: 'Sua vida tem outras urgências.',
+                    ok: 'Você acena e prossegue. {Ele} grita um agradecimento até você sumir.', okXp: [6, 8] }
+                ]
+              },
+              fail: '{Ele} (criatura) ignora seus gritos — está focado demais. O caçador desfalece. Você se aproxima, mas a criatura também: agora tem que lidar com ela diretamente.', failCombat: true, failHp: 2 },
+            { label: 'Atirar pedra na criatura (Atletismo)', skill: 'athletics', dc: 13,
+              desc: 'Pedrada certeira pode espantar — ou enraivecer.',
+              ok: 'Sua pedra acerta de raspão e {ele} (criatura) recua, sangrando mais. Foge pra mata. O caçador te chama.',
+              okXp: [12, 18], okFlag: 'hunter_owes',
+              fail: 'A pedra erra ou bate em ângulo errado. {Ele} (criatura) vira pra você furioso. Combate inevitável.', failCombat: true, failHp: 3 }
+          ]
+        }
       ]
     },
     // X-6.5.51m: TILE-SPECIFIC TEMPLATES (so dispara em hex correspondente)
@@ -14464,36 +14921,69 @@ const EVENTS_POOL = {
       }
       ch.outcome_fail.dungeon_combat = { enemy: enemyId, surprise: false };
     }
+    // 2026-04-27 USER FIX: chains AAA — outcome.chain abre próxima etapa do
+    // evento com nova body + choices. Profundidade 2-3 níveis (BG3/Pathfinder).
+    // Recursivamente processa chains aninhadas. okGold/okXp etc também aplicáveis.
+    function _genChainOutcome(raw, biomePool, tokens, biome) {
+      if (!raw) return null;
+      var sub = _genChoice(raw, biomePool, tokens, biome);
+      return sub;
+    }
+    function _genChain(rawChain, biomePool, tokens, biome) {
+      if (!rawChain) return null;
+      return {
+        id: rawChain.id || ('chain_' + Math.floor(Math.random() * 99999)),
+        body: _slot(rawChain.body || '', biomePool, tokens),
+        choices: (rawChain.choices || []).map(function (subCh) {
+          return _genChoice(subCh, biomePool, tokens, biome);
+        })
+      };
+    }
+    if (rawCh.chainOk) ch.outcome_ok.chain = _genChain(rawCh.chainOk, biomePool, t, biome);
+    if (rawCh.chainFail) ch.outcome_fail.chain = _genChain(rawCh.chainFail, biomePool, t, biome);
     return ch;
   }
 
   // Gera variantes por bioma. Templates com requires_tile geram menos
   // variantes (3-5) pra nao saturar o pool — sao especiais e devem aparecer
   // quando jogador estiver no hex certo.
+  //
+  // 2026-04-27 USER FIX: templates com .variantPool (3+ cenários únicos) são
+  // expandidos: cada variant gera N entries no pool (rotação por encounter
+  // count). Templates legados (sem variantPool) usam title/text direto.
   Object.keys(BIOME_POOLS).forEach(function(biome) {
     var pool = BIOME_POOLS[biome];
     for (var t = 0; t < TEMPLATES.length; t++) {
       var tpl = TEMPLATES[t];
-      // Eventos genericos: 10 variantes; tile-specific: 4 variantes (raros)
-      var variantCount = tpl.requires_tile ? 4 : 10;
-      for (var v = 0; v < variantCount; v++) {
-        var id = 'proc_' + biome + '_' + tpl.kind + '_' + v;
-        // 2026-04-27: pre-pick tokens UMA vez por variante; reusa em
-        // title/text/all choices pra coerência narrativa.
-        var tokens = _pickTokens(pool);
-        var titleSlotted = _slot(tpl.title, pool, tokens);
-        var textSlotted = _slot(tpl.text, pool, tokens);
-        var choicesGen = tpl.choices.map(function(ch) { return _genChoice(ch, pool, tokens, biome); });
-        var evObj = {
-          biome: biome,
-          id: id,
-          title: titleSlotted,
-          text: textSlotted,
-          choices: choicesGen
-        };
-        // X-6.5.51m: passa requires_tile pro evento gerado (filtragem em maybeRollEvent)
-        if (tpl.requires_tile) evObj.requires_tile = tpl.requires_tile;
-        EVENTS_POOL[id] = evObj;
+      // 2026-04-27: variantPool — múltiplos cenários narrativos por kind.
+      // Player encontra cenário diferente a cada N encontros (3 únicos).
+      var sourceVariants = tpl.variantPool || [{ title: tpl.title, text: tpl.text, choices: tpl.choices }];
+      // Eventos genericos: 4 variantes por scenario × 3 scenarios = 12 total;
+      // tile-specific: 2 variantes por scenario.
+      var perScenario = tpl.requires_tile ? 2 : 4;
+      for (var sv = 0; sv < sourceVariants.length; sv++) {
+        var scenario = sourceVariants[sv];
+        for (var v = 0; v < perScenario; v++) {
+          var id = 'proc_' + biome + '_' + tpl.kind + '_s' + sv + '_v' + v;
+          // 2026-04-27: pre-pick tokens UMA vez por variante; reusa em
+          // title/text/all choices pra coerência narrativa.
+          var tokens = _pickTokens(pool);
+          var titleSlotted = _slot(scenario.title, pool, tokens);
+          var textSlotted = _slot(scenario.text, pool, tokens);
+          var choicesGen = scenario.choices.map(function(ch) { return _genChoice(ch, pool, tokens, biome); });
+          var evObj = {
+            biome: biome,
+            id: id,
+            kind: tpl.kind,        // pra event_history identificar variant family
+            scenarioIdx: sv,       // pra picker rotacionar (encounter % variants)
+            title: titleSlotted,
+            text: textSlotted,
+            choices: choicesGen
+          };
+          // X-6.5.51m: passa requires_tile pro evento gerado (filtragem em maybeRollEvent)
+          if (tpl.requires_tile) evObj.requires_tile = tpl.requires_tile;
+          EVENTS_POOL[id] = evObj;
+        }
       }
     }
   });
