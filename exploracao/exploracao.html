@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:25:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:40:47Z - do not edit directly, edit source -->
 
 
 <!--
@@ -27485,8 +27485,49 @@ function _renderTechCalloutInModal(elementId, tech) {
 //   amb_rain_1.mp3, amb_rain_2.mp3 (chuva loop)
 //   amb_thunder_distant_1.mp3, amb_thunder_distant_2.mp3 (trovão distante)
 //   amb_wind_1.mp3, amb_wind_2.mp3 (vento — usado em fog/storm)
-var _weatherAmbient = { audio: null, currentKey: null };
+// 2026-04-27 USER FIX: substituir audio.loop=true (que causa corte audível
+// no ponto de loop) por SEAMLESS CROSSFADE entre variantes. Pattern:
+//   1. Toca variante A
+//   2. Quando faltam 2.5s pro fim → inicia variante B com fade-in
+//   3. A faz fade-out simultâneo (overlap = sem silêncio)
+//   4. Próxima sempre é variante DIFERENTE da última (anti-repetição)
+//
+// User reportou: "barulho de chuva está cortando no final pra iniciar de novo".
+// Mesma técnica usada em audio-manager.js _loopCrossfade — agora aplicada
+// também aos ambient layers de weather (rain, storm wind, fog).
+var _weatherAmbient = {
+  audio: null,        // tocando atualmente
+  fadeAudio: null,    // saindo (crossfade out)
+  currentKey: null,   // 'rain' / 'storm' / 'fog'
+  files: null,        // pool de variantes
+  vol: 0,             // volume target
+  lastFile: null,     // última variante tocada (anti-repetição)
+  active: false       // flag pra cancelar listeners pendentes
+};
 var _AUDIO_BASE_URL = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
+var _AMBIENT_CROSSFADE_MS = 2500;  // 2.5s overlap — começa B antes de A acabar
+
+// Helper: fade volume de áudio. Retorna o intervalId pra poder cancelar.
+function _fadeAudioVol(audio, fromVol, toVol, durationMs, onComplete) {
+  if (!audio) return null;
+  try { audio.volume = fromVol; } catch (_) {}
+  var steps = Math.max(10, Math.floor(durationMs / 50));
+  var stepMs = durationMs / steps;
+  var delta = (toVol - fromVol) / steps;
+  var current = fromVol;
+  var iv = setInterval(function () {
+    current += delta;
+    var done = (delta > 0 && current >= toVol) || (delta < 0 && current <= toVol);
+    if (done) {
+      try { audio.volume = Math.max(0, Math.min(1, toVol)); } catch (_) {}
+      clearInterval(iv);
+      if (onComplete) try { onComplete(); } catch (_) {}
+    } else {
+      try { audio.volume = Math.max(0, Math.min(1, current)); } catch (_) {}
+    }
+  }, stepMs);
+  return iv;
+}
 
 function _updateWeatherAmbient(weather) {
   // Mapeia weather code → ambient track key + volume relativo
@@ -27495,50 +27536,112 @@ function _updateWeatherAmbient(weather) {
   else if (weather === 't') spec = { files: ['amb_rain_1.mp3', 'amb_rain_2.mp3'], vol: 0.42, key: 'storm' };
   else if (weather === 'f') spec = { files: ['amb_wind_1.mp3', 'amb_wind_2.mp3'], vol: 0.18, key: 'fog' };
   // Se já está tocando o mesmo, não recria
-  if (spec && _weatherAmbient.currentKey === spec.key && _weatherAmbient.audio && !_weatherAmbient.audio.paused) {
+  if (spec && _weatherAmbient.currentKey === spec.key && _weatherAmbient.active) {
     return;
   }
-  // Para o anterior (fade out 0.6s)
-  if (_weatherAmbient.audio) {
-    var oldA = _weatherAmbient.audio;
-    var fadeOut = setInterval(function () {
-      try {
-        oldA.volume = Math.max(0, oldA.volume - 0.05);
-        if (oldA.volume <= 0) {
-          oldA.pause();
-          oldA.src = '';
-          clearInterval(fadeOut);
-        }
-      } catch (_) { clearInterval(fadeOut); }
-    }, 50);
-    _weatherAmbient.audio = null;
-    _weatherAmbient.currentKey = null;
+  // Para o anterior com fade out suave
+  _stopWeatherAmbient();
+  if (!spec) return;  // weather sunny/null — sem ambient
+  // Inicia novo loop seamless
+  _weatherAmbient.files = spec.files;
+  _weatherAmbient.vol = spec.vol;
+  _weatherAmbient.currentKey = spec.key;
+  _weatherAmbient.active = true;
+  _playWeatherAmbientVariant(true /* primeira vez = fade in completo */);
+  LOG('WEATHER', 'ambient_loop_started key=' + spec.key + ' vol=' + spec.vol);
+  if (spec.key === 'storm') _scheduleThunderClap();
+}
+
+// Toca próxima variante. Se firstTime=true, fade in 1.5s. Senão, é parte do
+// crossfade contínuo (fade in 2.5s sobreposto com fade out da anterior).
+function _playWeatherAmbientVariant(firstTime) {
+  if (!_weatherAmbient.active || !_weatherAmbient.files) return;
+  // Pick variante diferente da última
+  var pool = _weatherAmbient.files;
+  var pick;
+  if (pool.length === 1) {
+    pick = pool[0];
+  } else {
+    var attempts = 0;
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (pick === _weatherAmbient.lastFile && attempts < 5);
   }
-  if (!spec) return;  // weather sunny — sem ambient
-  // Toca novo (fade in)
+  _weatherAmbient.lastFile = pick;
   try {
-    var file = spec.files[Math.floor(Math.random() * spec.files.length)];
-    var url = _AUDIO_BASE_URL + file;
-    var a = new Audio(url);
-    a.loop = true;
-    a.volume = 0;
-    a.preload = 'auto';
-    a.play().then(function () {
-      _weatherAmbient.audio = a;
-      _weatherAmbient.currentKey = spec.key;
-      var fadeIn = setInterval(function () {
-        try {
-          a.volume = Math.min(spec.vol, a.volume + 0.04);
-          if (a.volume >= spec.vol) clearInterval(fadeIn);
-        } catch (_) { clearInterval(fadeIn); }
-      }, 60);
-      LOG('WEATHER', 'ambient_started key=' + spec.key + ' vol=' + spec.vol);
-      // Storm: trovão distante intermitente (random 40-90s gaps)
-      if (spec.key === 'storm') {
-        _scheduleThunderClap();
+    var audio = new Audio(_AUDIO_BASE_URL + pick);
+    audio.volume = 0;
+    audio.preload = 'auto';
+    // timeupdate handler — quando faltam 2.5s pro fim, dispara a próxima
+    // variante com fade in. NÃO usa audio.loop=true (que cortaria).
+    var crossfadeStarted = false;
+    audio.addEventListener('timeupdate', function () {
+      if (crossfadeStarted) return;
+      if (audio !== _weatherAmbient.audio) return;  // já foi substituído
+      if (!_weatherAmbient.active) return;          // foi parado
+      var dur = audio.duration;
+      if (!isFinite(dur) || dur <= 0) return;
+      var remaining = dur - audio.currentTime;
+      if (remaining <= (_AMBIENT_CROSSFADE_MS / 1000)) {
+        crossfadeStarted = true;
+        _crossfadeToNextVariant();
       }
-    }).catch(function (e) { LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message)); });
-  } catch (e) { LOGW('WEATHER', 'ambient_setup_failed: ' + (e && e.message)); }
+    });
+    // Cleanup ao terminar de tocar (caso crossfade tenha falhado ou track curta)
+    audio.addEventListener('ended', function () {
+      try { audio.src = ''; } catch (_) {}
+    });
+    audio.play().then(function () {
+      // Substitui current
+      _weatherAmbient.audio = audio;
+      // Fade in (1.5s primeira vez, 2.5s em crossfade)
+      var fadeInMs = firstTime ? 1500 : _AMBIENT_CROSSFADE_MS;
+      _fadeAudioVol(audio, 0, _weatherAmbient.vol, fadeInMs);
+    }).catch(function (e) {
+      LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message));
+    });
+  } catch (e) {
+    LOGW('WEATHER', 'ambient_setup_failed: ' + (e && e.message));
+  }
+}
+
+// Crossfade: inicia próxima variante (com fade in) enquanto current faz
+// fade out. Os 2 áudios tocam SOBREPOSTOS pelo CROSSFADE_MS — 0 silêncio,
+// 0 corte audível.
+function _crossfadeToNextVariant() {
+  var current = _weatherAmbient.audio;
+  if (!current) return;
+  // Move current pra fadeAudio slot (saindo)
+  _weatherAmbient.fadeAudio = current;
+  // Inicia fade out da current — paralelo ao fade in da próxima
+  _fadeAudioVol(current, current.volume, 0, _AMBIENT_CROSSFADE_MS, function () {
+    try { current.pause(); current.src = ''; } catch (_) {}
+    if (_weatherAmbient.fadeAudio === current) _weatherAmbient.fadeAudio = null;
+  });
+  // Inicia próxima variante
+  _playWeatherAmbientVariant(false);
+}
+
+function _stopWeatherAmbient() {
+  _weatherAmbient.active = false;
+  // Fade out current (rápido — 600ms)
+  if (_weatherAmbient.audio) {
+    var current = _weatherAmbient.audio;
+    _fadeAudioVol(current, current.volume, 0, 600, function () {
+      try { current.pause(); current.src = ''; } catch (_) {}
+    });
+    _weatherAmbient.audio = null;
+  }
+  if (_weatherAmbient.fadeAudio) {
+    var fading = _weatherAmbient.fadeAudio;
+    _fadeAudioVol(fading, fading.volume, 0, 400, function () {
+      try { fading.pause(); fading.src = ''; } catch (_) {}
+    });
+    _weatherAmbient.fadeAudio = null;
+  }
+  _weatherAmbient.currentKey = null;
+  _weatherAmbient.lastFile = null;
 }
 
 var _thunderClapTimer = null;
