@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:07:35Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:36:59Z - do not edit directly, edit source -->
 
 
 <!--
@@ -15179,13 +15179,23 @@ const EVENTS_POOL = {
     // Pra textos que se referem só a creature OR só a npc, isso funciona
     // bem em 95%+ dos casos.
     var anyPlural = creaturePlural || npcPlural;
-    return text
+    var result = text
       .replace(/\{npc\}/g, t.npc)
       .replace(/\{creature\}/g, t.creature)
       .replace(/\{object\}/g, t.object)
       .replace(/\{hazard\}/g, t.hazard)
       .replace(/\{Ele\}/g, anyPlural ? 'Eles' : 'Ele')
       .replace(/\{ele\}/g, anyPlural ? 'eles' : 'ele');
+    // 2026-04-27 USER FIX: capitalização automática.
+    // Tokens NPCs/creatures vêm em lowercase ("velho contador", "matilha de
+    // hienas"). Quando substituem {npc} no INÍCIO da frase ou após ponto,
+    // ficam em lowercase — visualmente errado. Fix: capitaliza primeira
+    // letra do texto inteiro + primeira letra após ". ", "! ", "? ".
+    result = result.replace(/^([a-zà-ÿ])/, function (m, c) { return c.toUpperCase(); });
+    result = result.replace(/([.!?]\s+)([a-zà-ÿ])/g, function (m, sep, c) {
+      return sep + c.toUpperCase();
+    });
+    return result;
   }
   // X-6.5.51m: outcomes ricos — gold, xp, mp gain/loss, hp loss, exh aumenta
   // 2026-04-27: tokens (3o param) compartilhado com _slot. failCombat (4o)
