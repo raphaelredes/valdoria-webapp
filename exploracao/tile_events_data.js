@@ -789,37 +789,155 @@ window.TILE_EVENTS_DB['fresh_tracks.ruins'] = {
 // =============================================================================
 
 window.TILE_EVENTS_DB['sentinel_post.dormant'] = {
-  body: 'Uma torre baixa de pedra, com janela estreita virada para o caminho. Sem luz dentro, sem movimento.',
+  // 2026-04-27 USER FIX: enriched AAA — múltiplas choices + chains após falhas.
+  // User reportou: "POSTO SENTINELA tem só um teste de dados e uma frase de
+  // resultado... precisamos da imersividade AAA, onde estão os eventos com
+  // consequência e mais diálogos?"
+  body: 'Uma torre baixa de pedra cinzenta se ergue à beira do caminho — quatro metros de altura, sem porta visível. Janela estreita virada para a estrada, fenestrada como olho que dorme. A chaminé está fria. Cinzas pretas espalhadas no parapeito sugerem que alguém apagou o fogo às pressas. No chão, junto à parede oeste, marcas de bota — pesadas, recentes, mas vão da torre PARA o bosque. Quem estava aqui partiu rápido.',
   voiceLines: {
-    martial:    '"Vazia. Deserto ou descanso?"',
-    specialist: '"Sem fumaça da chaminé. Está fria há horas."',
-    spiritual:  '"Quem vigia aqui não está mais."',
-    arcane:     '"Sem auras vivas. Apenas pedra e silêncio."'
+    martial:    '"Saíram apressados. Algo os assustou."',
+    specialist: '"As cinzas ainda têm forma — apagaram há menos de doze horas."',
+    spiritual:  '"O lugar carrega medo recente. O posto foi traído pelos próprios que jurou proteger."',
+    arcane:     '"Sem auras vivas, mas há resíduo de magia menor — proteção, talvez, ou alarme rompido."',
+    BARBARO:    '"Pulem fora antes da luta. Covardes."',
+    PATRULHEIRO: '"Marcas de três pessoas, uma ferida. Foram pra noroeste, pra mata espessa."'
   },
   choices: [
     {
       id: 'climb_post',
-      label: 'Subir e investigar (Atletismo)',
+      label: 'Escalar a torre (Atletismo)',
       skill: 'athletics', dc: 12,
       outcome_ok: {
-        flavor: 'Você escala a parede e olha pela janela: nada além de um banco vazio e papéis velhos. Mas há um sino — pode tocar para chamar reforços.',
+        flavor: 'Você sobe pela parede, encontrando saliências entre as pedras irregulares. Pela janela: um banco virado, papéis pisoteados, e um sino de bronze pendurado num gancho de ferro. Há sangue seco na soleira da janela, lado de dentro — alguém saiu por ali, ferido. Você guarda a localização do sino — pode ser útil mais tarde para chamar reforços, ou para evitar que outros o façam.',
         ops: [
-          { op: 'xp', delta: 12 },
-          { op: 'flag', id: 'sentinel_bell_known', scope: 'pc' }
+          { op: 'xp', delta: 18 },
+          { op: 'flag', id: 'sentinel_bell_known', scope: 'pc' },
+          { op: 'flag', id: 'sentinel_bloodtrail', scope: 'session' }
         ],
         fsm: null
       },
       outcome_fail: {
-        flavor: 'Você escorrega na pedra úmida. Seu joelho protesta.',
+        flavor: 'A pedra está úmida do orvalho da madrugada. Seu pé escorrega no terceiro apoio e você cai de costas no chão — joelho ralado, fôlego fora. Mas ao se levantar você nota algo que não viu antes: uma pequena fenda na base da torre, na parede oeste. Parece ter sido aberta às pressas. Talvez quem estava lá fugiu por ali.',
         ops: [{ op: 'hp', delta: -3 }],
+        chain: {
+          id: 'sentinel_climb_failed_chain',
+          body: 'A fenda é estreita — caberia uma pessoa esguia, mas com esforço. Vinhas mortas penduram da abertura. Você decide o que fazer agora.',
+          choices: [
+            {
+              id: 'squeeze_through',
+              label: 'Espremer-se pela fenda (Acrobacia)',
+              skill: 'acrobatics', dc: 13,
+              outcome_ok: {
+                flavor: 'Você se contorce de lado e desliza pela fenda — frio e estreito. Dentro, o posto guarda uma mochila esquecida: alguém pretendia voltar mas não conseguiu. Há rações, um pequeno bolso de moedas e um diário com letras tremidas: "se eu não voltar até a lua nova, levem isto a Eldoria. Eles SABEM."',
+                ops: [
+                  { op: 'gold', delta: 18 },
+                  { op: 'item', id: 'rations' },
+                  { op: 'xp', delta: 22 },
+                  { op: 'flag', id: 'sentinel_diary_found', scope: 'pc' }
+                ],
+                fsm: null
+              },
+              outcome_fail: {
+                flavor: 'Você fica preso pelos ombros — vinhas mortas se prendem em sua mochila. Após um minuto de luta silenciosa, recua, com cortes nos braços e a dignidade ferida.',
+                ops: [{ op: 'hp', delta: -2 }],
+                fsm: null
+              }
+            },
+            {
+              id: 'follow_tracks',
+              label: 'Seguir as marcas para a mata (Sobrevivência)',
+              skill: 'survival', dc: 12,
+              outcome_ok: {
+                flavor: 'As marcas levam a um pequeno acampamento abandonado a 200 passos. Restos de uma fogueira urgente — alguém esquentou água e partiu. Você encontra um cantil meio cheio e uma faca de prata caída entre folhas — claramente derrubada na fuga.',
+                ops: [
+                  { op: 'gold', delta: 8 },
+                  { op: 'item', id: 'silver_dagger' },
+                  { op: 'xp', delta: 16 }
+                ],
+                fsm: null
+              },
+              outcome_fail: {
+                flavor: 'As pegadas se perdem entre folhas e raízes — o solo tem muita matéria solta. Você gasta meia hora rastreando até admitir que perdeu o rastro. Pelo menos sabe a direção: noroeste.',
+                ops: [
+                  { op: 'flag', id: 'sentinel_tracks_lost', scope: 'session' },
+                  { op: 'xp', delta: 5 }
+                ],
+                fsm: null
+              }
+            },
+            {
+              id: 'abandon_climb',
+              label: 'Recuar e seguir caminho',
+              flavor: 'Sua perna ainda dói. Melhor não insistir.',
+              outcome_ok: { ops: [], fsm: null, flavor: 'Você se afasta cuidadosamente, deixando a torre para trás.' }
+            }
+          ]
+        }
+      }
+    },
+    {
+      id: 'investigate_perimeter',
+      label: 'Vasculhar o perímetro (Investigação)',
+      skill: 'investigation', dc: 13,
+      outcome_ok: {
+        flavor: 'Você circula a torre observando o chão, paredes, telhado. Encontra: (a) uma flecha quebrada cravada na pedra, com pena negra — mercenários do Norte; (b) um pequeno saco de couro escondido sob um arbusto, contendo moedas; (c) marcas no telhado sugerem que algo grande pousou ali — talvez um animal grande ou um humano caindo de cima.',
+        ops: [
+          { op: 'gold', delta: 12 },
+          { op: 'xp', delta: 15 },
+          { op: 'flag', id: 'sentinel_norte_arrows', scope: 'pc' }
+        ],
+        fsm: null
+      },
+      outcome_fail: {
+        flavor: 'Você encontra apenas pegadas comuns e um pedaço de pano rasgado preso em um galho — nada conclusivo. Algo aconteceu aqui, mas você não consegue ler a história.',
+        ops: [{ op: 'xp', delta: 4 }],
+        chain: {
+          id: 'sentinel_investigate_failed_chain',
+          body: 'Você fica olhando o pano rasgado entre os galhos. É lã grossa, tingida de azul-escuro — um uniforme ou capa. Pode tentar encontrar mais pistas, ou seguir.',
+          choices: [
+            {
+              id: 'second_look',
+              label: 'Examinar o pano com cuidado (Percepção)',
+              skill: 'perception', dc: 14,
+              outcome_ok: {
+                flavor: 'Há um pequeno bordado na orla — o brasão da Guarda de Valdoria. Quem usou isso era da capital. E foi puxado com violência — a costura está rasgada, não cortada.',
+                ops: [
+                  { op: 'xp', delta: 12 },
+                  { op: 'flag', id: 'sentinel_valdoria_guard', scope: 'pc' }
+                ],
+                fsm: null
+              },
+              outcome_fail: {
+                flavor: 'Pano comum. Você abandona a tentativa.',
+                ops: [],
+                fsm: null
+              }
+            },
+            {
+              id: 'leave_after_investigate',
+              label: 'Continuar viagem',
+              flavor: 'Você prossegue, com as perguntas guardadas.',
+              outcome_ok: { ops: [], fsm: null, flavor: 'Você se afasta.' }
+            }
+          ]
+        }
+      }
+    },
+    {
+      id: 'rest_at_post',
+      label: 'Descansar à sombra do posto',
+      flavor: 'Você se senta apoiado contra a pedra. Por alguns minutos, o silêncio é seu único companheiro.',
+      outcome_ok: {
+        flavor: 'O descanso é breve mas reparador. Você recupera o fôlego, e o silêncio do posto te dá tempo para pensar — talvez houvesse algo importante aqui.',
+        ops: [{ op: 'hp', delta: 4 }],
         fsm: null
       }
     },
     {
       id: 'leave_post',
-      label: 'Seguir caminho',
-      flavor: 'Você passa rapidamente, sem chamar atenção.',
-      outcome_ok: { ops: [], fsm: null, flavor: 'Você prossegue.' }
+      label: 'Seguir caminho sem se demorar',
+      flavor: 'Você passa rapidamente, sem chamar atenção. O posto dorme atrás de você.',
+      outcome_ok: { ops: [], fsm: null, flavor: 'Você prossegue, e a torre desaparece entre as árvores.' }
     }
   ]
 };

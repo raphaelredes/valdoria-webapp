@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T13:05:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T13:19:16Z - do not edit directly, edit source -->
 
 
 <!--
@@ -24720,6 +24720,55 @@ function drawWeatherOverlay(ctx) {
   if (!S) { if (shouldLogW) LOGW('WEATHER', 'S=null'); return; }
   if (shouldLogW) LOG('WEATHER', 'drawWeatherOverlay weather=' + S.weather + ' canvas=' + canvasW + 'x' + canvasH);
   try {
+
+  // 2026-04-27: Cloud shadows deslizando pelo mapa — sempre renderizadas
+  // exceto em weather='s' (sol limpo). Densidade e opacidade mudam por
+  // weather. Técnica AAA — dá sensação de céu vivo sem custo alto.
+  // Performance tier-aware (skip em perf-lite).
+  if (S.weather && S.weather !== 's' && _renderDetail >= 1) {
+    var cloudCfg = null;
+    if (S.weather === 'r')      cloudCfg = { count: 5, alpha: 0.18, speed: 0.06, scale: 1.0 };
+    else if (S.weather === 't') cloudCfg = { count: 8, alpha: 0.32, speed: 0.10, scale: 1.3 };
+    else if (S.weather === 'f') cloudCfg = { count: 4, alpha: 0.10, speed: 0.04, scale: 0.9 };
+    if (cloudCfg) {
+      var cloudT = _animTime * cloudCfg.speed;
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+      var cloudRng = seededRng(42);
+      for (var ci = 0; ci < cloudCfg.count; ci++) {
+        // Cada nuvem tem position + size determinísticos por seed (consistente),
+        // mas drift via _animTime. Wraps na borda direita.
+        var rndX = cloudRng();
+        var rndY = cloudRng();
+        var rndS = cloudRng();
+        var cloudW = (180 + rndS * 280) * cloudCfg.scale;
+        var cloudH = cloudW * (0.55 + rndS * 0.25);
+        var ccx = ((rndX * canvasW + cloudT * 60) % (canvasW + cloudW)) - cloudW * 0.5;
+        var ccy = rndY * canvasH * 0.85;
+        // Múltiplas elipses sobrepostas pra forma orgânica de nuvem
+        var grad = ctx.createRadialGradient(ccx, ccy, 0, ccx, ccy, cloudW * 0.5);
+        grad.addColorStop(0, 'rgba(20, 18, 16, ' + cloudCfg.alpha + ')');
+        grad.addColorStop(0.7, 'rgba(20, 18, 16, ' + (cloudCfg.alpha * 0.4) + ')');
+        grad.addColorStop(1, 'rgba(20, 18, 16, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(ccx, ccy, cloudW * 0.5, cloudH * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Detalhe extra (somente EPIC) — segunda elipse menor pra forma irregular
+        if (_renderDetail >= 2) {
+          var grad2 = ctx.createRadialGradient(ccx + cloudW * 0.18, ccy - cloudH * 0.12, 0, ccx + cloudW * 0.18, ccy - cloudH * 0.12, cloudW * 0.32);
+          grad2.addColorStop(0, 'rgba(20, 18, 16, ' + (cloudCfg.alpha * 0.7) + ')');
+          grad2.addColorStop(1, 'rgba(20, 18, 16, 0)');
+          ctx.fillStyle = grad2;
+          ctx.beginPath();
+          ctx.ellipse(ccx + cloudW * 0.18, ccy - cloudH * 0.12, cloudW * 0.32, cloudH * 0.4, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+  }
+
   if (S.weather === 'r' || S.weather === 't') {
     const isStorm = S.weather === 't';
     ctx.fillStyle = isStorm ? 'rgba(40, 55, 80, 0.18)' : 'rgba(60, 80, 100, 0.09)';
@@ -25714,6 +25763,8 @@ function onMoveEnd(col, row) {
     if (next !== S.weather) {
       LOG('WEATHER', 'CHANGE ' + S.weather + ' -> ' + next);
       S.weather = next;
+      // 2026-04-27: Atualiza áudio ambiente de clima quando muda.
+      _updateWeatherAmbient(next);
       // Narração contextual por bioma
       const biomeNarr = {
         desert: { s: 'O sol volta a brilhar forte sobre as dunas.', t: 'Uma tempestade de areia se aproxima ao horizonte!', r: 'Uma chuva rara cai sobre o deserto — uma bênção breve.', f: 'Uma névoa morna envolve as dunas.' },
@@ -25960,6 +26011,88 @@ function dmNarrate(entry) {
   S.dm_log.push(entry);
   while (S.dm_log.length > 20) S.dm_log.shift();
   // updateDmPanel() removido — não há painel pra atualizar
+}
+
+// 2026-04-27: Sistema de áudio ambiente de clima — loop infinito de chuva/
+// trovão/vento conforme S.weather. Audio paralelo à música principal (não
+// substitui — é uma camada extra de imersão).
+//
+// Files disponíveis em valdoria-webapp/shared/audio/:
+//   amb_rain_1.mp3, amb_rain_2.mp3 (chuva loop)
+//   amb_thunder_distant_1.mp3, amb_thunder_distant_2.mp3 (trovão distante)
+//   amb_wind_1.mp3, amb_wind_2.mp3 (vento — usado em fog/storm)
+var _weatherAmbient = { audio: null, currentKey: null };
+var _AUDIO_BASE_URL = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
+
+function _updateWeatherAmbient(weather) {
+  // Mapeia weather code → ambient track key + volume relativo
+  var spec = null;
+  if (weather === 'r') spec = { files: ['amb_rain_1.mp3', 'amb_rain_2.mp3'], vol: 0.32, key: 'rain' };
+  else if (weather === 't') spec = { files: ['amb_rain_1.mp3', 'amb_rain_2.mp3'], vol: 0.42, key: 'storm' };
+  else if (weather === 'f') spec = { files: ['amb_wind_1.mp3', 'amb_wind_2.mp3'], vol: 0.18, key: 'fog' };
+  // Se já está tocando o mesmo, não recria
+  if (spec && _weatherAmbient.currentKey === spec.key && _weatherAmbient.audio && !_weatherAmbient.audio.paused) {
+    return;
+  }
+  // Para o anterior (fade out 0.6s)
+  if (_weatherAmbient.audio) {
+    var oldA = _weatherAmbient.audio;
+    var fadeOut = setInterval(function () {
+      try {
+        oldA.volume = Math.max(0, oldA.volume - 0.05);
+        if (oldA.volume <= 0) {
+          oldA.pause();
+          oldA.src = '';
+          clearInterval(fadeOut);
+        }
+      } catch (_) { clearInterval(fadeOut); }
+    }, 50);
+    _weatherAmbient.audio = null;
+    _weatherAmbient.currentKey = null;
+  }
+  if (!spec) return;  // weather sunny — sem ambient
+  // Toca novo (fade in)
+  try {
+    var file = spec.files[Math.floor(Math.random() * spec.files.length)];
+    var url = _AUDIO_BASE_URL + file;
+    var a = new Audio(url);
+    a.loop = true;
+    a.volume = 0;
+    a.preload = 'auto';
+    a.play().then(function () {
+      _weatherAmbient.audio = a;
+      _weatherAmbient.currentKey = spec.key;
+      var fadeIn = setInterval(function () {
+        try {
+          a.volume = Math.min(spec.vol, a.volume + 0.04);
+          if (a.volume >= spec.vol) clearInterval(fadeIn);
+        } catch (_) { clearInterval(fadeIn); }
+      }, 60);
+      LOG('WEATHER', 'ambient_started key=' + spec.key + ' vol=' + spec.vol);
+      // Storm: trovão distante intermitente (random 40-90s gaps)
+      if (spec.key === 'storm') {
+        _scheduleThunderClap();
+      }
+    }).catch(function (e) { LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message)); });
+  } catch (e) { LOGW('WEATHER', 'ambient_setup_failed: ' + (e && e.message)); }
+}
+
+var _thunderClapTimer = null;
+function _scheduleThunderClap() {
+  if (_thunderClapTimer) clearTimeout(_thunderClapTimer);
+  if (S.weather !== 't') return;
+  var delayMs = 40000 + Math.random() * 50000;  // 40-90s
+  _thunderClapTimer = setTimeout(function () {
+    if (S.weather === 't') {
+      try {
+        var file = 'amb_thunder_distant_' + (1 + Math.floor(Math.random() * 2)) + '.mp3';
+        var thunder = new Audio(_AUDIO_BASE_URL + file);
+        thunder.volume = 0.55;
+        thunder.play().catch(function () {});
+      } catch (_) {}
+      _scheduleThunderClap();  // reagenda
+    }
+  }, delayMs);
 }
 
 // 2026-04-27: Inline self-contained toast pro status MOLHADO. NÃO depende de
@@ -31394,6 +31527,12 @@ function boot() {
 
     // Quest delivery check — se algum quest aponta pra este mapa, abre após pequeno delay
     setTimeout(checkQuestDelivery, 1200);
+    // 2026-04-27: Inicia áudio ambiente de clima de acordo com S.weather inicial.
+    // Aguarda 2s pra dar tempo do unlock por user gesture (audio policy).
+    setTimeout(function () {
+      try { if (typeof _updateWeatherAmbient === 'function') _updateWeatherAmbient(S.weather); }
+      catch (_) {}
+    }, 2000);
     LOG('BOOT', '=== boot() end OK ===');
   } catch (e) {
     LOGE('BOOT', 'boot() FAILED:', e.message, e.stack);
