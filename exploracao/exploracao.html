@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:09:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T17:14:10Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25824,8 +25824,14 @@ function drawWeatherOverlay(ctx) {
   // movimentando para alguma direção". Agora s='s' (clear) tem 1 nuvem
   // grande, MUITO suave (alpha 0.08), drift lento. Storm/rain/fog mantêm
   // densidade e ritmo próprios.
-  // Performance tier-aware (skip em perf-lite).
-  if (S.weather && _renderDetail >= 1) {
+  // Performance tier-aware. Resolver tier via window._valdoriaPerformanceTier
+  // ou fallback _tileDetail (sincronizado com tile renderer).
+  // FIX 2026-04-27: _renderDetail era undefined — bug catado em log spam.
+  // Substituído por _wTier inline guard (lite=0, medium=1, full=2).
+  var _wTier = (window._valdoriaPerformanceTier === 'lite') ? 0
+             : (window._valdoriaPerformanceTier === 'full') ? 2
+             : (typeof _tileDetail !== 'undefined' ? _tileDetail : 1);
+  if (S.weather && _wTier >= 1) {
     var cloudCfg = null;
     if (S.weather === 's')      cloudCfg = { count: 1, alpha: 0.10, speed: 0.022, scale: 1.4 };  // raro, lento, suave
     else if (S.weather === 'r') cloudCfg = { count: 5, alpha: 0.18, speed: 0.06, scale: 1.0 };
@@ -25856,7 +25862,7 @@ function drawWeatherOverlay(ctx) {
         ctx.ellipse(ccx, ccy, cloudW * 0.5, cloudH * 0.5, 0, 0, Math.PI * 2);
         ctx.fill();
         // Detalhe extra (somente EPIC) — segunda elipse menor pra forma irregular
-        if (_renderDetail >= 2) {
+        if (_wTier >= 2) {
           var grad2 = ctx.createRadialGradient(ccx + cloudW * 0.18, ccy - cloudH * 0.12, 0, ccx + cloudW * 0.18, ccy - cloudH * 0.12, cloudW * 0.32);
           grad2.addColorStop(0, 'rgba(20, 18, 16, ' + (cloudCfg.alpha * 0.7) + ')');
           grad2.addColorStop(1, 'rgba(20, 18, 16, 0)');
