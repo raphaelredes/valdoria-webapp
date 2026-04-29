@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-28T02:15:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T13:05:32Z - do not edit directly, edit source -->
 
 
 <!--
@@ -692,7 +692,7 @@
 (function() {
   var v = Date.now();
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
-  ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css'].forEach(function(h) {
+  ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css', '/shared/toast.css'].forEach(function(h) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';
     l.href = cdn + h + '?v=' + v;
@@ -11535,7 +11535,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
 (function() {
   var v = Date.now();
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
-  ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js'].forEach(function(src) {
+  ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js', '/shared/toast.js'].forEach(function(src) {
     var s = document.createElement('script');
     s.src = 'https://jogo.lendasdevaldoria.com.br' + src + '?v=' + v;
     s.async = false;
@@ -25545,13 +25545,11 @@ function onMoveEnd(col, row) {
   // 2026-04-27: Wet status (D&D 5e DMG p.110 "Wet"). Decrementa a cada step.
   // Player ganha o status ao pisar em water tile (definido abaixo). Dura ~5 turnos.
   // Em combate aplica vulnerabilidade a frio + resistência a fogo.
-  // FIX 2026-04-27: dmNarrate não tem UI panel (no-op visual) — usa vToast pra
-  // o jogador realmente VER a mensagem.
   if (typeof p.wet === 'number' && p.wet > 0) {
     p.wet -= 1;
     if (p.wet === 0) {
       dmNarrate({ text: 'Suas roupas finalmente secaram.', type: 'ambient' });
-      try { if (typeof vToast === 'function') vToast('💧 Roupas secaram — status MOLHADO removido.', 'info', 3000); } catch (_) {}
+      _showWaterStatusToast('💧 Roupas secaram — status MOLHADO removido.');
     }
   }
 
@@ -25671,12 +25669,10 @@ function onMoveEnd(col, row) {
     p.wet = 5;
     if (!_wasWet) {
       dmNarrate({ text: 'Você ganha o status MOLHADO. Frio causa mais dano; fogo, menos. (5 turnos)', type: 'event' });
-      // FIX 2026-04-27: vToast garantido pro jogador ver. dmNarrate sozinho
-      // é no-op visual (S.dm_log não tem panel UI).
-      try { if (typeof vToast === 'function') vToast('💧 ' + _waterMsg + ' Status MOLHADO (5 turnos): vulnerabilidade a frio + resistência a fogo.', 'info', 4500); } catch (_) {}
+      _showWaterStatusToast('💧 ' + _waterMsg + '<br><small>Status MOLHADO (5 turnos): vulnerabilidade a frio + resistência a fogo.</small>', 4500);
     } else {
       // Já estava molhado — apenas reforça duração + toast curto
-      try { if (typeof vToast === 'function') vToast('💧 Status MOLHADO renovado (5 turnos).', 'info', 2500); } catch (_) {}
+      _showWaterStatusToast('💧 Status MOLHADO renovado (5 turnos).', 2500);
     }
     LOG('WATER', 'wet_status_applied tile=' + tile + ' turns=' + p.wet);
     // Pula tudo: ambient tip, weather, event roll. Apenas tickDayPhase + render.
@@ -25964,6 +25960,40 @@ function dmNarrate(entry) {
   S.dm_log.push(entry);
   while (S.dm_log.length > 20) S.dm_log.shift();
   // updateDmPanel() removido — não há painel pra atualizar
+}
+
+// 2026-04-27: Inline self-contained toast pro status MOLHADO. NÃO depende de
+// vToast (que pode não estar carregado em LOCAL file://). Cria div efêmero
+// posicionado dentro do #frame (respeita viewport lock smartphone-only).
+function _showWaterStatusToast(htmlMsg, duration) {
+  duration = duration || 3500;
+  try {
+    var host = document.getElementById('frame') || document.getElementById('app') || document.body;
+    var t = document.createElement('div');
+    t.id = '_water-status-toast';
+    t.style.cssText = ''
+      + 'position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%);'
+      + 'min-width: 240px; max-width: 90%; padding: 10px 16px;'
+      + 'background: linear-gradient(180deg, rgba(36,56,78,0.96), rgba(20,36,52,0.96));'
+      + 'border: 1px solid rgba(80,160,220,0.55);'
+      + 'border-radius: 10px;'
+      + 'box-shadow: 0 6px 24px rgba(0,0,0,0.65), 0 0 14px rgba(80,160,220,0.25);'
+      + 'color: #d8ecff; font-family: serif; font-size: 13px; line-height: 1.45;'
+      + 'text-align: center; z-index: 10000; pointer-events: none;'
+      + 'opacity: 0; transition: opacity 0.25s ease;';
+    t.innerHTML = htmlMsg || '';
+    // Remove qualquer toast anterior pra evitar empilhar
+    var prev = document.getElementById('_water-status-toast');
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+    host.appendChild(t);
+    requestAnimationFrame(function () { t.style.opacity = '1'; });
+    setTimeout(function () {
+      t.style.opacity = '0';
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 280);
+    }, duration);
+  } catch (e) {
+    LOGW('WATER', 'toast_failed: ' + (e && e.message));
+  }
 }
 
 function tickDayPhase() {

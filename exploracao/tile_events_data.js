@@ -1855,6 +1855,204 @@ window.TILE_EVENTS_DB['war_drum.ruins'] = {
   ]
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+// 2026-04-27 USER FIX: STATE ALIASES — alinhar event keys com catalog states
+// ────────────────────────────────────────────────────────────────────────────
+// User reportou: "TORRE FENDIDA e BAÚ ESQUECIDO não estão funcionando".
+// Root cause: catalog declara states ['active','cleared','ruins'] mas eventos
+// foram escritos como 'dormant'. Quando spawning escolhe 'active', o lookup
+// TILE_EVENTS_DB['<type>.active'] falha → fallback genérico (sem rich content).
+//
+// Fix: aliases que apontam pro mesmo entry. Sem duplicar conteúdo. Plus
+// entries novas pra states 'alerted' que faltavam.
+// ════════════════════════════════════════════════════════════════════════════
+window.TILE_EVENTS_DB['forgotten_chest.active'] = window.TILE_EVENTS_DB['forgotten_chest.dormant'];
+window.TILE_EVENTS_DB['tripwire_trap.active']   = window.TILE_EVENTS_DB['tripwire_trap.dormant'];
+window.TILE_EVENTS_DB['war_drum.active']        = window.TILE_EVENTS_DB['war_drum.dormant'];
+window.TILE_EVENTS_DB['broken_tower.active']    = window.TILE_EVENTS_DB['broken_tower.dormant'];
+window.TILE_EVENTS_DB['fresh_tracks.active']    = window.TILE_EVENTS_DB['fresh_tracks.dormant'];
+window.TILE_EVENTS_DB['abandoned_camp.active']  = window.TILE_EVENTS_DB['abandoned_camp.dormant'];
+
+// State 'alerted' — entries específicas (player triggered interaction direta).
+window.TILE_EVENTS_DB['war_drum.alerted'] = {
+  body: 'O som do tambor reverberou pelas montanhas. Algo respondeu — passos pesados se aproximam. Você precisa decidir AGORA.',
+  voiceLines: {
+    martial:    '"Eles vêm. Postura de combate."',
+    specialist: '"Aqueles passos não são humanos. Reforços!"',
+    spiritual:  '"O eco chamou os mortos. Eles vêm."',
+    arcane:     '"Auras hostis a 200 passos. Iminente."'
+  },
+  choices: [
+    {
+      id: 'flee_drum',
+      label: 'Fugir do som',
+      skill: 'dex', dc: 13,
+      outcome_ok: {
+        flavor: 'Você corre para o lado oposto. O som fica para trás.',
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: 'cleared'
+      },
+      outcome_fail: {
+        flavor: 'Você tropeça. Os passos se aproximam — combate iminente.',
+        ops: [{ op: 'flag', id: 'drum_alerted_combat', scope: 'session' }],
+        fsm: 'alerted'
+      }
+    },
+    {
+      id: 'wait_combat',
+      label: 'Posicionar para combate',
+      flavor: 'Você se prepara — espada em punho, pés firmes.',
+      outcome_ok: {
+        flavor: 'Você ganha vantagem ao escolher o terreno.',
+        ops: [{ op: 'flag', id: 'first_attack_adv', scope: 'session' }],
+        fsm: 'cleared'
+      }
+    }
+  ]
+};
+
+window.TILE_EVENTS_DB['broken_tower.alerted'] = {
+  body: 'Algo se moveu nas ruínas — uma silhueta entre as pedras. Não está sozinho aqui.',
+  voiceLines: {
+    martial:    '"Inimigo. Pronto."',
+    specialist: '"Movimento atrás dos blocos caídos."',
+    spiritual:  '"Espírito ou vivo? Não sei ainda."',
+    arcane:     '"Algo arcano permanece. E não está em paz."'
+  },
+  choices: [
+    {
+      id: 'investigate_alerted',
+      label: 'Avançar com cautela',
+      skill: 'wis', dc: 13,
+      outcome_ok: {
+        flavor: 'Apenas um corvo sobre uma pilha de pedras. Você relaxa.',
+        ops: [{ op: 'xp', delta: 8 }],
+        fsm: 'cleared'
+      },
+      outcome_fail: {
+        flavor: 'Era um saqueador escondido. Ele te viu — combate iminente.',
+        ops: [{ op: 'flag', id: 'tower_combat', scope: 'session' }],
+        fsm: 'alerted'
+      }
+    },
+    {
+      id: 'retreat_tower',
+      label: 'Recuar e seguir caminho',
+      flavor: 'Você prefere não testar o destino.',
+      outcome_ok: { ops: [], fsm: null, flavor: 'Você prossegue, mantendo distância.' }
+    }
+  ]
+};
+
+window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
+  body: 'As pegadas levam a um animal grande, agora a poucos metros. Ele ergueu a cabeça — te viu.',
+  voiceLines: {
+    martial:    '"Caça ou luta. Decida rápido."',
+    specialist: '"Postura defensiva da fera."',
+    spiritual:  '"Animal que sente algo errado em você."',
+    arcane:     '"Aura selvagem. Instintos no comando."'
+  },
+  choices: [
+    {
+      id: 'calm_animal',
+      label: 'Tentar acalmar (Lidar com Animais)',
+      skill: 'animal_handling', dc: 14,
+      outcome_ok: {
+        flavor: 'Você se aproxima devagar, mãos abertas. O animal segue seu rumo.',
+        ops: [{ op: 'xp', delta: 12 }],
+        fsm: 'cleared'
+      },
+      outcome_fail: {
+        flavor: 'Movimento brusco demais. O animal investe contra você!',
+        ops: [{ op: 'hp', delta: -4 }],
+        fsm: 'alerted'
+      }
+    },
+    {
+      id: 'flee_animal',
+      label: 'Recuar lentamente',
+      flavor: 'Você dá meia-volta sem tirar os olhos.',
+      outcome_ok: { ops: [], fsm: 'cleared', flavor: 'Você se afasta sem incidentes.' }
+    }
+  ]
+};
+
+window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
+  body: 'O acampamento parecia abandonado — mas alguém estava escondido. Uma figura se levanta de trás de uma carroça quebrada.',
+  voiceLines: {
+    martial:    '"Postura agressiva. Identifique-se ou ataque."',
+    specialist: '"Não estava abandonado. Armadilha clássica."',
+    spiritual:  '"Ele teme você mais do que você o teme."',
+    arcane:     '"Sem aura mágica. Apenas humano desesperado."'
+  },
+  choices: [
+    {
+      id: 'parley_camp',
+      label: 'Conversar (Persuasão)',
+      skill: 'persuasion', dc: 12,
+      outcome_ok: {
+        flavor: 'Era um sobrevivente assustado. Ele compartilha rações e te dá direções.',
+        ops: [
+          { op: 'xp', delta: 10 },
+          { op: 'gold', delta: 4 }
+        ],
+        fsm: 'cleared'
+      },
+      outcome_fail: {
+        flavor: 'Ele saca uma adaga. Combate iminente.',
+        ops: [{ op: 'flag', id: 'camp_combat', scope: 'session' }],
+        fsm: 'alerted'
+      }
+    },
+    {
+      id: 'leave_camp',
+      label: 'Sair sem provocar',
+      flavor: 'Você levanta as mãos, dá meia-volta.',
+      outcome_ok: { ops: [], fsm: 'cleared', flavor: 'Você se afasta com calma.' }
+    }
+  ]
+};
+
+window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
+  body: 'A sentinela te viu. O grito de alarme já saiu — outras vozes respondem ao longe. Combate ou fuga, em segundos.',
+  voiceLines: {
+    martial:    '"Eles vêm. Aço pronto."',
+    specialist: '"Reforços a 30 passos. Janela curta."',
+    spiritual:  '"Vidas em jogo. Faça-as contarem."',
+    arcane:     '"Sem tempo para magia complexa. Reaja."'
+  },
+  choices: [
+    {
+      id: 'fight_sentinel',
+      label: 'Atacar antes que reforços cheguem',
+      flavor: 'Você avança decidido — vantagem da iniciativa.',
+      outcome_ok: {
+        flavor: 'Você abate a sentinela em segundos, mas reforços já vêm correndo.',
+        ops: [
+          { op: 'xp', delta: 20 },
+          { op: 'flag', id: 'sentinel_killed', scope: 'session' }
+        ],
+        fsm: 'alerted'
+      }
+    },
+    {
+      id: 'flee_sentinel',
+      label: 'Fugir pela mata',
+      skill: 'dex', dc: 14,
+      outcome_ok: {
+        flavor: 'Você se enfia na vegetação densa.',
+        ops: [{ op: 'xp', delta: 8 }],
+        fsm: 'cleared'
+      },
+      outcome_fail: {
+        flavor: 'Galho estala — eles te vêem. Combate iminente.',
+        ops: [{ op: 'flag', id: 'sentinel_combat', scope: 'session' }],
+        fsm: 'alerted'
+      }
+    }
+  ]
+};
+
 if (window.TileLog) window.TileLog.info('TILE-EVT', 'tile_events_data_loaded', {
   entries: Object.keys(window.TILE_EVENTS_DB).length
 });
