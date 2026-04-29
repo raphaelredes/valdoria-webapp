@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:19:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:25:33Z - do not edit directly, edit source -->
 
 
 <!--
@@ -11591,6 +11591,101 @@ body.perf-lite .stub-popup-voice { animation: none; }
   var s = document.createElement('script');
   s.src = './tile_events_data.js?v=' + Date.now();
   s.async = false;
+  s.onload = function () {
+    // 2026-04-27 USER GUARANTEE: auto-enrich TILE_EVENTS_DB também — todo
+    // outcome sem chain recebe chain padrão pra garantir profundidade mínima.
+    try {
+      if (!window.TILE_EVENTS_DB) return;
+      var enriched = 0, skipped = 0;
+      // Pools de chain genéricos pra tile events (sem dependência de biome pool)
+      var TILE_AUTO_CHAIN = {
+        ok: [
+          {
+            body: 'O momento abre brecha pra mais. Você decide o próximo passo.',
+            choices: [
+              { id: 'auto_inspect_area', label: 'Examinar a área (Investigação)',
+                skill: 'investigation', dc: 12,
+                desc: 'Ler detalhes sutis que normalmente passariam.',
+                outcome_ok: { flavor: 'Você descobre um pequeno objeto esquecido — moeda antiga ou peça pequena valiosa.', ops: [{ op: 'gold', delta: 8 }, { op: 'xp', delta: 8 }], fsm: null },
+                outcome_fail: { flavor: 'Você procura mas só encontra restos comuns.', ops: [], fsm: null } },
+              { id: 'auto_recover_breath', label: 'Tirar momento pra recuperar (Constituição)',
+                skill: 'con', dc: 10,
+                desc: 'Sentar, respirar, reorganizar pensamentos.',
+                outcome_ok: { flavor: 'Pequeno descanso é reparador. Você sai mais centrado.', ops: [{ op: 'hp', delta: 3 }, { op: 'xp', delta: 5 }], fsm: null },
+                outcome_fail: { flavor: 'Tensão não cede. Você fica inquieto.', ops: [], fsm: null } },
+              { id: 'auto_continue', label: 'Continuar com a vitória',
+                flavor: 'O que ganhou já basta.',
+                outcome_ok: { flavor: 'Você prossegue, satisfeito.', ops: [{ op: 'xp', delta: 4 }], fsm: null } }
+            ]
+          },
+          {
+            body: 'A energia do que aconteceu ainda pulsa. Você considera o que fazer.',
+            choices: [
+              { id: 'auto_mark_place', label: 'Marcar local pra próximos viajantes (Sabedoria)',
+                skill: 'wis', dc: 11,
+                desc: 'Pequena pilha de pedras, marca em árvore — gesto de viajante decente.',
+                outcome_ok: { flavor: 'Você ergue marco discreto. Karma de estrada se paga em dia distante.', ops: [{ op: 'xp', delta: 8 }], fsm: null },
+                outcome_fail: { flavor: 'Material em volta não coopera. Marco fica frágil.', ops: [], fsm: null } },
+              { id: 'auto_search_predecessors', label: 'Procurar pista do que veio antes (Percepção)',
+                skill: 'perception', dc: 13,
+                desc: 'Quem mais passou por aqui?',
+                outcome_ok: { flavor: 'Você lê o terreno: passos antigos, sinais sutis. Outro viajante teve experiência aqui antes.', ops: [{ op: 'xp', delta: 10 }, { op: 'flag', id: 'predecessor_trace', scope: 'pc' }], fsm: null },
+                outcome_fail: { flavor: 'Histórias do lugar permanecem mudas.', ops: [], fsm: null } },
+              { id: 'auto_continue_calm', label: 'Apenas seguir',
+                flavor: 'Sabedoria às vezes é não procurar mais.',
+                outcome_ok: { flavor: 'Você prossegue.', ops: [{ op: 'xp', delta: 4 }], fsm: null } }
+            ]
+          }
+        ],
+        fail: [
+          {
+            body: 'O erro custou caro mas a estrada continua. Você decide.',
+            choices: [
+              { id: 'auto_try_different', label: 'Tentar abordagem diferente (Sabedoria)',
+                skill: 'wis', dc: 12,
+                desc: 'Recuar mentalmente, repensar, recompor.',
+                outcome_ok: { flavor: 'Da segunda vez, leitura é melhor — recupera parte do que estava perdido.', ops: [{ op: 'gold', delta: 4 }, { op: 'xp', delta: 8 }], fsm: null },
+                outcome_fail: { flavor: 'Mesma cabeça, mesmos erros. Você desiste com fadiga.', ops: [{ op: 'exh_gain', delta: 1 }], fsm: null } },
+              { id: 'auto_investigate_fail', label: 'Investigar causa do fracasso (Investigação)',
+                skill: 'investigation', dc: 12,
+                desc: 'Ler o que deu errado pra não repetir.',
+                outcome_ok: { flavor: 'Você identifica o erro. Lição vale ouro pra próxima.', ops: [{ op: 'xp', delta: 12 }, { op: 'flag', id: 'lesson_learned', scope: 'pc' }], fsm: null },
+                outcome_fail: { flavor: 'O fracasso permanece opaco.', ops: [], fsm: null } },
+              { id: 'auto_recede', label: 'Recuar e seguir caminho',
+                flavor: 'Algumas perdas são definitivas.',
+                outcome_ok: { flavor: 'Você prossegue carregando o aprendizado silencioso.', ops: [{ op: 'xp', delta: 4 }], fsm: null } }
+            ]
+          }
+        ]
+      };
+      function _pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+      Object.keys(window.TILE_EVENTS_DB).forEach(function (key) {
+        var entry = window.TILE_EVENTS_DB[key];
+        if (!entry || !Array.isArray(entry.choices)) return;
+        entry.choices.forEach(function (choice) {
+          // Auto-chain pra outcome_ok
+          if (choice.outcome_ok && !choice.outcome_ok.chain && !choice.outcome_ok.dungeon_combat) {
+            // Skip se a choice é só "leave/continue" (não merece chain)
+            var lblLow = (choice.label || '').toLowerCase();
+            if (lblLow.indexOf('seguir caminho') < 0 && lblLow.indexOf('deixar') < 0 && lblLow.indexOf('passar') < 0) {
+              choice.outcome_ok.chain = JSON.parse(JSON.stringify(_pickRandom(TILE_AUTO_CHAIN.ok)));
+              choice.outcome_ok.chain.id = 'auto_ok_' + key + '_' + Math.floor(Math.random() * 9999);
+              enriched++;
+            } else { skipped++; }
+          }
+          // Auto-chain pra outcome_fail
+          if (choice.outcome_fail && !choice.outcome_fail.chain && !choice.outcome_fail.dungeon_combat) {
+            choice.outcome_fail.chain = JSON.parse(JSON.stringify(_pickRandom(TILE_AUTO_CHAIN.fail)));
+            choice.outcome_fail.chain.id = 'auto_fail_' + key + '_' + Math.floor(Math.random() * 9999);
+            enriched++;
+          }
+        });
+      });
+      console.info('[TILE-EVT] auto-enrich complete: ' + enriched + ' chains injected, ' + skipped + ' skipped (leave/continue choices)');
+    } catch (e) {
+      console.warn('[TILE-EVT] auto-enrich failed:', e && e.message);
+    }
+  };
   s.onerror = function() {
     console.warn('[TILE-EVT] tile_events_data.js failed to load — TILE_EVENTS_DB will be empty');
   };
@@ -14944,6 +15039,157 @@ const EVENTS_POOL = {
     return ch;
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // 2026-04-27 USER FIX (segunda rodada): AUTO-ENRICHER
+  // ────────────────────────────────────────────────────────────────────────
+  // User reportou: "me garanta que nenhum evento vai ser simples, de ter um
+  // diálogo introdutório, uma escolha e um diálogo finalizador".
+  //
+  // GARANTIA: cada outcome (ok/fail) que NÃO tem chain explícito recebe
+  // chain auto-gerado com 2-3 follow-ups contextuais pelo kind do evento.
+  // Combate (dungeon_combat) é exceção — vai direto pro combate sem chain.
+  //
+  // Resultado: profundidade mínima de 2 níveis EM TODO EVENTO. Player nunca
+  // mais vê só "intro + 1 escolha + 1 frase + Finalizar".
+  // ════════════════════════════════════════════════════════════════════════
+
+  // Pools genéricos de follow-up choices por kind. Variedade por sub-pool
+  // (ok-positivo, ok-curioso, fail-tentar-de-novo, fail-investigar-causa).
+  var AUTO_CHAIN_TEMPLATES = {
+    // Genéricos (fallback pra qualquer kind)
+    generic_ok: [
+      {
+        body: 'O momento abre brecha pra mais. Você decide o próximo passo.',
+        choices: [
+          { label: 'Examinar a área (Investigação)', skill: 'investigation', dc: 12,
+            desc: 'Aproveitar o foco do momento pra ler detalhes que normalmente passariam.',
+            ok: 'Você acha um pequeno objeto esquecido — moeda antiga, fivela rara, talvez fragmento de carta. Vale ouro pro colecionista certo.', okGold: [4, 12], okXp: [6, 10],
+            fail: 'Você procura mas só encontra restos comuns. Tempo gasto sem retorno.' },
+          { label: 'Tirar momento pra recuperar fôlego (Constituição)', skill: 'con', dc: 10,
+            desc: 'Sentar um instante, beber água, reorganizar pensamentos.',
+            ok: 'O descanso breve é reparador. Você sai mais centrado.', okMp: [2, 5], okXp: [4, 8],
+            fail: 'Tensão acumulada não cede. Você fica inquieto e segue mais cansado.', failExh: 1 },
+          { label: 'Continuar viagem com a vitória', flavor: 'O que ganhou já basta.',
+            ok: 'Você prossegue, satisfeito. A estrada espera.', okXp: [3, 6] }
+        ]
+      },
+      {
+        body: 'A energia do que aconteceu ainda pulsa. Você considera as opções.',
+        choices: [
+          { label: 'Marcar o local pra próximos viajantes (Sabedoria)', skill: 'wis', dc: 11,
+            desc: 'Pequena pilha de pedras, marca em árvore — gesto que outros entenderão.',
+            ok: 'Você ergue marco discreto. Karma de estrada se paga em dia distante.', okXp: [8, 12],
+            fail: 'Material em volta não coopera. Marco fica frágil ou ambíguo.' },
+          { label: 'Procurar pista do que veio antes (Investigação)', skill: 'investigation', dc: 13,
+            desc: 'Quem mais passou por aqui? Que história este lugar guarda?',
+            ok: 'Você lê o terreno: passos antigos, sinais sutis. Outro viajante teve experiência aqui antes — talvez você possa cruzar com {ele} mais tarde.', okFlag: 'predecessor_trace', okXp: [10, 14],
+            fail: 'Solo perturbado demais ou tempo escasso. Histórias do lugar permanecem mudas.' },
+          { label: 'Apenas seguir', flavor: 'Sabedoria às vezes é não procurar mais.',
+            ok: 'Você prossegue com a calma de quem aprendeu a soltar.', okXp: [4, 6] }
+        ]
+      }
+    ],
+    generic_fail: [
+      {
+        body: 'O erro custou caro mas a estrada continua. Você decide o próximo passo.',
+        choices: [
+          { label: 'Tentar abordagem diferente (Sabedoria)', skill: 'wis', dc: 12,
+            desc: 'Recuar mentalmente, repensar, recompor com outra estratégia.',
+            ok: 'Você redireciona com clareza. Da segunda vez, a leitura é melhor — recupera parte do que estava perdido.', okXp: [10, 14], okGold: [3, 6],
+            fail: 'Mesma cabeça, mesmos erros. Você desiste com a fadiga de quem já gastou energia demais.', failExh: 1 },
+          { label: 'Investigar causa do fracasso (Investigação)', skill: 'investigation', dc: 12,
+            desc: 'Ler o que deu errado pra não repetir.',
+            ok: 'Você identifica o erro: leitura precipitada, gesto fora de tempo, palavra incorreta. Lição vale ouro pra próxima.', okXp: [12, 16], okFlag: 'lesson_learned',
+            fail: 'O fracasso permanece opaco. Você sai sem entender o que falhou.' },
+          { label: 'Recuar e seguir caminho', flavor: 'Algumas perdas são definitivas.',
+            ok: 'Você prossegue carregando o aprendizado silencioso. A estrada absorve fracassos também.', okXp: [4, 6] }
+        ]
+      },
+      {
+        body: 'Algo ficou pra trás — coragem, ouro, oportunidade. Você precisa decidir.',
+        choices: [
+          { label: 'Voltar e tentar reverter (Persuasão)', skill: 'cha', dc: 13,
+            desc: 'Recuperar relação ou objeto perdido — voz humilde, oferta concreta.',
+            ok: 'Você consegue parcialmente. Não tudo que perdeu, mas algo. Aprendizado vale mais que o resto.', okGold: [3, 8], okXp: [10, 14],
+            fail: 'A oportunidade já passou — quem estava aqui foi embora, ou o objeto não está mais visível.', failExh: 1 },
+          { label: 'Aceitar e usar o erro como combustível (Constituição)', skill: 'con', dc: 11,
+            desc: 'Transformar frustração em foco renovado.',
+            ok: 'Você respira fundo, encaixa o ombro, reorganiza a postura. A energia volta — e melhora.', okXp: [12, 16], okMp: [2, 4],
+            fail: 'A frustração permanece. Você segue cansado e ressentido.', failExh: 2 },
+          { label: 'Apenas continuar', flavor: 'Nem todo erro precisa ser resolvido.',
+            ok: 'Você prossegue. A estrada é longa.', okXp: [3, 5] }
+        ]
+      }
+    ],
+    // Específicos por kind — variantes mais contextuais (mais imersão)
+    object_inspect_ok: [
+      {
+        body: 'O objeto repousa nas suas mãos com peso simbólico. Talvez tenha mais a revelar.',
+        choices: [
+          { label: 'Estudar as inscrições (Inteligência)', skill: 'int', dc: 13,
+            desc: 'Linhas finas no verso podem contar origem.',
+            ok: 'Você decifra: nome de antiga ordem, símbolo de família falida, talvez maldição inscrita. Conhecimento que pode ser barganhado.', okXp: [14, 20], okFlag: 'object_lore_known',
+            fail: 'Inscrição é dialeto morto. Você guarda mesmo assim, alguém na cidade saberá.' },
+          { label: 'Procurar par desse objeto na vegetação (Percepção)', skill: 'perception', dc: 14,
+            desc: 'Objetos especiais raramente vêm sozinhos.',
+            ok: 'Você acha um pequeno saco escondido — alguém mais passou por aqui e deixou objetos relacionados. Pequeno tesouro adicional.', okGold: [10, 22], okXp: [8, 12],
+            fail: 'Você revira mato e raízes mas o objeto era mesmo solitário.' },
+          { label: 'Guardar e seguir', flavor: 'O que tem na mão já é mais que esperava.',
+            ok: 'Você prossegue, objeto seguro na mochila.', okXp: [4, 6] }
+        ]
+      }
+    ],
+    tile_specific_ok: [
+      {
+        body: 'O lugar guarda mais do que mostrou. Você pode investigar ou seguir.',
+        choices: [
+          { label: 'Vasculhar com cuidado (Investigação)', skill: 'investigation', dc: 12,
+            desc: 'Lugares assim escondem mais que primeira vista.',
+            ok: 'Você acha objeto ou pista importante. Vale ouro ou conhecimento.', okGold: [6, 14], okXp: [8, 12],
+            fail: 'Sem mais do que o óbvio. Você sai com o que já tinha.' },
+          { label: 'Memorizar localização (Sabedoria)', skill: 'wis', dc: 11,
+            desc: 'Marcar mentalmente pra retornar com tempo/ferramentas.',
+            ok: 'Você grava: árvore tronco bifurcado, pedra com musgo a oeste, contagem de passos da curva. Volta possível.', okXp: [10, 14], okFlag: 'place_remembered',
+            fail: 'Você tenta mas o terreno é genérico demais. Não saberá voltar.' },
+          { label: 'Continuar viagem', flavor: 'O suficiente para hoje.',
+            ok: 'Você prossegue.', okXp: [4, 6] }
+        ]
+      }
+    ]
+  };
+
+  // Seleciona pool apropriado por kind do evento e tipo de outcome (ok/fail).
+  function _pickAutoChainTemplate(kind, isOk) {
+    // Mapeia kinds específicos a pools (com fallback pra generic)
+    var key;
+    if (isOk) {
+      if (kind === 'object_inspect') key = 'object_inspect_ok';
+      else if (['campfire', 'house', 'tree', 'rock', 'water', 'bones'].indexOf(kind) >= 0) key = 'tile_specific_ok';
+      else key = 'generic_ok';
+    } else {
+      key = 'generic_fail';
+    }
+    var pool = AUTO_CHAIN_TEMPLATES[key] || AUTO_CHAIN_TEMPLATES[isOk ? 'generic_ok' : 'generic_fail'];
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // Auto-injeta chain em outcome se não tiver. Skip se já tem chain ou se é
+  // dungeon_combat (combate vai direto, não precisa chain).
+  function _autoEnrichOutcome(outcome, kind, isOk, biomePool, tokens, biome) {
+    if (!outcome) return;
+    if (outcome.chain) return;            // já tem chain explícito (rich event)
+    if (outcome.dungeon_combat) return;   // vai pra combate — não chainable
+    var rawChain = _pickAutoChainTemplate(kind, isOk);
+    if (!rawChain) return;
+    outcome.chain = {
+      id: 'auto_chain_' + kind + '_' + (isOk ? 'ok' : 'fail') + '_' + Math.floor(Math.random() * 99999),
+      body: _slot(rawChain.body, biomePool, tokens),
+      choices: rawChain.choices.map(function (subCh) {
+        return _genChoice(subCh, biomePool, tokens, biome);
+      })
+    };
+  }
+
   // Gera variantes por bioma. Templates com requires_tile geram menos
   // variantes (3-5) pra nao saturar o pool — sao especiais e devem aparecer
   // quando jogador estiver no hex certo.
@@ -14971,6 +15217,13 @@ const EVENTS_POOL = {
           var titleSlotted = _slot(scenario.title, pool, tokens);
           var textSlotted = _slot(scenario.text, pool, tokens);
           var choicesGen = scenario.choices.map(function(ch) { return _genChoice(ch, pool, tokens, biome); });
+          // 2026-04-27 USER GUARANTEE: TODO outcome (ok/fail) sem chain explícito
+          // recebe auto-chain. Profundidade mínima de 2 níveis em CADA evento.
+          // Skip dungeon_combat (vai direto pro combate).
+          choicesGen.forEach(function (ch) {
+            _autoEnrichOutcome(ch.outcome_ok, tpl.kind, true, pool, tokens, biome);
+            _autoEnrichOutcome(ch.outcome_fail, tpl.kind, false, pool, tokens, biome);
+          });
           var evObj = {
             biome: biome,
             id: id,
