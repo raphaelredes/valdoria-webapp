@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T13:19:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T14:07:37Z - do not edit directly, edit source -->
 
 
 <!--
@@ -27676,9 +27676,12 @@ function closeDungeonOverlay(entered) {
       // duas vezes nao reinicia nem corta a track ja em curso).
       try {
         var dgMusic = (FIXED_MAPS[dg.id].music) || null;
-        if (dgMusic && window.ValdoriaAudio && typeof ValdoriaAudio.play === 'function') {
-          ValdoriaAudio.play(dgMusic);
-          LOG('AUDIO', 'dungeon entry play track=' + dgMusic + ' (in user gesture)');
+        if (dgMusic && typeof _safeAudioPlay === 'function') {
+          // 2026-04-27 USER FIX: usa _safeAudioPlay (normaliza biome→track)
+          // em vez de ValdoriaAudio.play direto. Antes "music: 'plains'"
+          // causava "Unknown track: plains".
+          _safeAudioPlay(dgMusic);
+          LOG('AUDIO', 'dungeon entry play track=' + dgMusic + ' (normalized + in user gesture)');
         }
       } catch (eMu) { console.warn('[EXPLORACAO] dungeon music failed:', eMu); }
       setupChoices._fromMap = S.mapId;
@@ -30251,42 +30254,108 @@ function closeDetailPopup() {
 var _musicRetryAttempts = 0;
 var _musicGestureListeners = null;  // { click, touch, keydown } — re-bound on retry
 
+// 2026-04-27 USER FIX (refazer backend de áudio): bug recorrente
+// "[AUDIO] Unknown track: plains" — root cause:
+//   1. mapDef.music = 'plains' (nome de bioma) era retornado direto
+//   2. ValdoriaAudio.play('plains') falha — só tem track 'forest'
+//   3. Watchdog detectava mismatch, retentava infinito (spam de logs)
+//
+// Refactor: SINGLE source of truth + defensive lookup com fallback garantido
+// pra 'forest'. NUNCA mais retorna track inválido. Tudo passa pelo mesmo
+// resolver — applyBiomeMusic, _audioWatchdog, _bindMusicGestureRetry,
+// _tryPlayExpected, _audioBiomeMusic.
+
+// Lista hardcoded de tracks VÁLIDOS no ValdoriaAudio (sincronizado com
+// valdoria-webapp/shared/audio-manager.js TRACKS dict).
+var _VALID_AUDIO_TRACKS = {
+  'tavern': 1, 'city': 1, 'forest': 1, 'combat': 1, 'desert': 1,
+  'dungeon': 1, 'swamp': 1, 'mountain': 1, 'snow': 1, 'victory': 1,
+  'defeat': 1, 'levelup': 1, 'prologue': 1, 'boss': 1, 'inn_rest': 1,
+  'festival': 1, 'combat_ambush': 1, 'stealth': 1, 'death': 1,
+  'character_creation': 1, 'guild_hall': 1, 'ancient_ruins': 1,
+  'market': 1, 'mystery': 1, 'sacred': 1, 'ocean': 1, 'intro': 1
+};
+
+// Mapa biome → track. 'plains' = wilderness (forest amb), NÃO city.
+// Sincronizado com audio-manager.js playBiome() biomeMap.
+var _BIOME_TO_TRACK = {
+  'plains': 'forest', 'forest': 'forest', 'swamp': 'swamp',
+  'mountain': 'mountain', 'cave': 'dungeon', 'desert': 'desert',
+  'snow': 'snow', 'volcanic': 'dungeon', 'ocean': 'ocean',
+  'coastal': 'ocean', 'ruins': 'ancient_ruins', 'underground': 'dungeon',
+  'graveyard': 'mystery', 'urban': 'city', 'tavern': 'tavern'
+};
+
 function _resolveExpectedTrack() {
-  // Single source of truth: mapDef.music > biome map.
-  // Aplicado em applyBiomeMusic + _audioWatchdog + retry on gesture.
-  if (window.S && window.S.mapDef && window.S.mapDef.music) return window.S.mapDef.music;
-  if (window.ValdoriaAudio && typeof window.ValdoriaAudio.playBiome === 'function') {
-    // playBiome internamente faz biomeMap[S.biome] || 'forest'. Como precisamos
-    // o trackKey resolvido aqui, replicamos o mapa (sincronizado com audio-manager.js).
-    var biomeMap = {
-      'plains': 'forest', 'forest': 'forest', 'swamp': 'swamp',
-      'mountain': 'mountain', 'cave': 'dungeon', 'desert': 'desert',
-      'snow': 'snow', 'volcanic': 'dungeon', 'ocean': 'ocean',
-      'coastal': 'ocean', 'ruins': 'ancient_ruins', 'underground': 'dungeon',
-      'graveyard': 'mystery'
-    };
-    var biome = (window.S && window.S.biome) ? window.S.biome : 'forest';
-    return biomeMap[biome] || 'forest';
+  // Resolução em camadas com fallback garantido. NUNCA retorna track inválido.
+  //   1. mapDef.music explicit (do FIXED_MAPS)
+  //   2. S.biome
+  //   3. fallback 'forest' (track sempre existente)
+  var rawKey = null;
+  if (window.S && window.S.mapDef && window.S.mapDef.music) {
+    rawKey = window.S.mapDef.music;
+  } else if (window.S && window.S.biome) {
+    rawKey = window.S.biome;
   }
-  return null;
+  if (!rawKey) return 'forest';  // fallback safe — sempre existe
+
+  // Step 1: rawKey já é um track válido? (ex: mapDef.music='dungeon')
+  if (_VALID_AUDIO_TRACKS[rawKey]) return rawKey;
+
+  // Step 2: rawKey é um nome de bioma? Mapeia pra track.
+  if (_BIOME_TO_TRACK[rawKey]) return _BIOME_TO_TRACK[rawKey];
+
+  // Step 3: fallback final — 'forest' sempre existe. Log para debug.
+  try { LOGW('AUDIO', 'unknown_track_normalized rawKey=' + rawKey + ' → forest'); } catch (_) {}
+  return 'forest';
+}
+
+// Tracking de últimas tentativas pra reduzir spam de log.
+var _lastAudioAttempt = { track: null, ts: 0, count: 0 };
+
+// Helper público: normaliza qualquer rawKey (biome OR track) e toca via
+// ValdoriaAudio.play. NUNCA causa "Unknown track" — sempre resolve pra valido.
+function _safeAudioPlay(rawKey) {
+  if (!window.ValdoriaAudio || typeof ValdoriaAudio.play !== 'function') return;
+  var resolved = rawKey;
+  // Step 1: já é track válido?
+  if (!_VALID_AUDIO_TRACKS[resolved]) {
+    // Step 2: é nome de bioma?
+    if (_BIOME_TO_TRACK[resolved]) resolved = _BIOME_TO_TRACK[resolved];
+    else {
+      try { LOGW('AUDIO', '_safeAudioPlay unknown_key=' + rawKey + ' → forest fallback'); } catch (_) {}
+      resolved = 'forest';
+    }
+  }
+  try { ValdoriaAudio.play(resolved); } catch (e) {
+    try { LOGW('AUDIO', '_safeAudioPlay err=' + (e && e.message)); } catch (_) {}
+  }
 }
 
 function _tryPlayExpected() {
   if (!window.ValdoriaAudio || !window.S || !window.S.soundOn) return false;
   var expected = _resolveExpectedTrack();
-  if (!expected) return false;
+  // expected agora SEMPRE é um track válido — não precisa checar null
   var current = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : null;
   if (current === expected) return true;  // já tocando o certo — sucesso
   try {
     if (typeof ValdoriaAudio.play === 'function') {
       ValdoriaAudio.play(expected);
-      try { LOG('AUDIO', 'play expected=' + expected + ' was_current=' + (current || 'null')); } catch (_) {}
+      // Reduz spam: só loga 1° attempt + a cada 30s. Watchdog fica silencioso
+      // depois disso, mas continua tentando (defensive).
+      var now = Date.now();
+      var sameTrack = _lastAudioAttempt.track === expected;
+      var elapsed = now - _lastAudioAttempt.ts;
+      if (!sameTrack || elapsed > 30000) {
+        try { LOG('AUDIO', 'play expected=' + expected + ' was_current=' + (current || 'null')); } catch (_) {}
+        _lastAudioAttempt = { track: expected, ts: now, count: 1 };
+      } else {
+        _lastAudioAttempt.count++;
+      }
     }
   } catch (e) {
     try { LOGW('AUDIO', '_tryPlayExpected err=' + (e && e.message)); } catch (_) {}
   }
-  // Retorna true se ValdoriaAudio confirmou o track novo (audio.play() é async,
-  // mas getCurrentTrack atualiza imediatamente — confirmando intent).
   return (typeof ValdoriaAudio.getCurrentTrack === 'function')
     ? (ValdoriaAudio.getCurrentTrack() === expected) : true;
 }
@@ -30347,15 +30416,27 @@ function applyBiomeMusic() {
 // Watchdog global — a cada 3s checa se música está tocando o track esperado.
 // Cobre: ValdoriaAudio late-load, autoplay unlock atraso, mudança de bioma
 // sem applyBiomeMusic chamado, audio crashou silenciosamente.
+//
+// 2026-04-27 USER FIX: throttle de logs. Watchdog continua tentando a cada 3s
+// (mantém retry pra audio unlock), mas SÓ loga quando muda de track ou a cada
+// 30s. Antes spammava log a cada 3s indefinidamente quando autoplay bloqueava.
 if (typeof window._audioWatchdogInterval === 'undefined') {
+  window._watchdogLastLog = { track: null, current: null, ts: 0 };
   window._audioWatchdogInterval = setInterval(function _audioWatchdog() {
     if (!window.S || !window.S.soundOn || !window.ValdoriaAudio) return;
     var expected = _resolveExpectedTrack();
-    if (!expected) return;
     var current = (typeof ValdoriaAudio.getCurrentTrack === 'function') ? ValdoriaAudio.getCurrentTrack() : null;
     var unlocked = (typeof ValdoriaAudio.isUnlocked === 'function') ? ValdoriaAudio.isUnlocked() : true;
     if (current !== expected) {
-      try { LOG('AUDIO-WATCHDOG', 'mismatch current=' + (current || 'null') + ' expected=' + expected + ' unlocked=' + unlocked); } catch (_) {}
+      // Log throttle: só loga se mudou track expected/current OU passaram 30s
+      var now = Date.now();
+      var ll = window._watchdogLastLog;
+      var changed = (ll.track !== expected) || (ll.current !== current);
+      var elapsed = now - ll.ts;
+      if (changed || elapsed > 30000) {
+        try { LOG('AUDIO-WATCHDOG', 'mismatch current=' + (current || 'null') + ' expected=' + expected + ' unlocked=' + unlocked); } catch (_) {}
+        window._watchdogLastLog = { track: expected, current: current, ts: now };
+      }
       _tryPlayExpected();
       // Se ainda não unlocked, garante gesture binding ativo
       if (!unlocked) _bindMusicGestureRetry();
