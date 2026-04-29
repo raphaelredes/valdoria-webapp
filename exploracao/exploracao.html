@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:01:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:10:01Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25886,18 +25886,93 @@ function drawWeatherOverlay(ctx) {
       }
       ctx.restore();
 
-      // 2026-04-27 USER FIX: tempestade À NOITE = quase tão escuro como
-      // hex de mata. User pediu: "durante a noite é preciso que fique
-      // quase tão escuro quanto o efeito de entrar nos hexagonos de mata".
-      // Aplica overlay escuro adicional só em storm + dayPhase noite.
+      // 2026-04-27 USER FIX: storm INVERTIDO. User pediu: "fica mais escuro
+      // o mapa inteiro e alguns feixes de luz passam quando for dia, que
+      // aí simula o sol passando em algumas poucas partes da tempestade,
+      // e pode inclusive aplicar efeito de arco-íris nessas partes".
+      //
+      // Camada extra em storm:
+      //   1. Base dark overlay (escurece TUDO — 85%+ shadow coverage)
+      //   2. 2-3 "sun ray spots" (frestas de luz brilhante drift slow)
+      //   3. Rainbow gradient suave em sun rays (só durante day/dusk/dawn)
       if (S.weather === 't') {
-        var nightDarkness = 0;
-        if (S.dayPhase === 'night') nightDarkness = 0.55;
-        else if (S.dayPhase === 'dusk' || S.dayPhase === 'dawn') nightDarkness = 0.25;
-        if (nightDarkness > 0) {
-          ctx.fillStyle = 'rgba(10, 12, 22, ' + nightDarkness + ')';
-          ctx.fillRect(0, 0, canvasW, canvasH);
+        ctx.save();
+        // Camada A: base dark overlay (cobre 100% — mas frestas vão "subtrair")
+        var stormBaseDarkness = (S.dayPhase === 'night') ? 0.62
+                              : (S.dayPhase === 'dusk' || S.dayPhase === 'dawn') ? 0.42
+                              : 0.32;  // day
+        ctx.fillStyle = 'rgba(10, 12, 22, ' + stormBaseDarkness + ')';
+        ctx.fillRect(0, 0, canvasW, canvasH);
+
+        // Camada B: 2-3 sun ray spots — pontos brilhantes que "perfuram" o overlay
+        // (destination-out subtrai luminância → efeito de fresta).
+        // Drift LENTO — feixes percebem-se como nuvens-fenda passando.
+        var rayCount = (_wTier >= 2) ? 3 : 2;
+        var rayT = _animTime * 0.018;  // ~18 px/s — bem mais lento que cloud
+        var rayRng = seededRng(77);
+        ctx.globalCompositeOperation = 'destination-out';
+        for (var ri = 0; ri < rayCount; ri++) {
+          var rrx = rayRng();
+          var rry = rayRng();
+          var rrs = rayRng();
+          var rayW = 90 + rrs * 100;   // diâmetro 90-190px (pequeno)
+          var rayPeriod = (canvasW + rayW) * 1.5;
+          var rcx = ((rrx * rayPeriod + rayT) % rayPeriod) - rayW * 0.5;
+          if (rcx + rayW < 0 || rcx > canvasW) continue;
+          var rcy = rry * canvasH * 0.7 + canvasH * 0.15;  // banda central
+          // Subtrai darkness — feixe forma fresta
+          var raySubAlpha = 0.40 + rrs * 0.20;
+          var rayGrad = ctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, rayW * 0.5);
+          rayGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
+          rayGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
+          rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = rayGrad;
+          ctx.beginPath();
+          ctx.ellipse(rcx, rcy, rayW * 0.5, rayW * 0.6, 0, 0, Math.PI * 2);
+          ctx.fill();
         }
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Camada C: arco-íris suave dentro das frestas (só durante luz solar)
+        // user pediu "bem de leve, quase transparente". Apenas day/dusk/dawn.
+        if (S.dayPhase !== 'night') {
+          var rainbowAlpha = (S.dayPhase === 'day') ? 0.10
+                           : 0.06;  // dusk/dawn mais sutil
+          // Re-percorre os mesmos sun rays e adiciona arco-íris layered
+          var rbRng = seededRng(77);
+          ctx.globalCompositeOperation = 'lighter';  // somativo — luz colorida
+          for (var ci2 = 0; ci2 < rayCount; ci2++) {
+            var crx = rbRng();
+            var cry = rbRng();
+            var crs = rbRng();
+            var rayW2 = 90 + crs * 100;
+            var rayPeriod2 = (canvasW + rayW2) * 1.5;
+            var ccx2 = ((crx * rayPeriod2 + rayT) % rayPeriod2) - rayW2 * 0.5;
+            if (ccx2 + rayW2 < 0 || ccx2 > canvasW) continue;
+            var ccy2 = cry * canvasH * 0.7 + canvasH * 0.15;
+            // Arco-íris: 3 arcs concêntricos com cores diferentes
+            // (vermelho fora, violeta dentro — clássico)
+            var rbColors = [
+              'rgba(255, 100, 100, ' + rainbowAlpha + ')',  // vermelho
+              'rgba(255, 220, 80, '  + rainbowAlpha + ')',  // amarelo
+              'rgba(80,  220, 120, ' + rainbowAlpha + ')',  // verde
+              'rgba(80,  140, 240, ' + rainbowAlpha + ')',  // azul
+              'rgba(180, 100, 220, ' + rainbowAlpha + ')'   // violeta
+            ];
+            for (var rb = 0; rb < rbColors.length; rb++) {
+              var radius = rayW2 * (0.20 + rb * 0.07);
+              ctx.strokeStyle = rbColors[rb];
+              ctx.lineWidth = 6;
+              ctx.beginPath();
+              ctx.ellipse(ccx2, ccy2, radius, radius * 0.7, 0, Math.PI * 1.05, Math.PI * 1.95);
+              ctx.stroke();
+            }
+          }
+          ctx.globalCompositeOperation = 'source-over';
+        }
+        ctx.restore();
+        // Fim camada storm-inversion. Old night-darkness overlay removido
+        // (substituído por stormBaseDarkness com 3 níveis acima).
       }
     }
   }
@@ -27765,7 +27840,11 @@ function _playWeatherAmbientVariant(firstTime) {
       var targetVol = _resolveAmbientVolume(_weatherAmbient.vol);
       _fadeAudioVol(audio, 0, targetVol, fadeInMs);
     }).catch(function (e) {
-      LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message));
+      // Background tab policy → não loga (esperado). Outros erros sim.
+      var isBgPolicy = e && /paused to save power|interrupted/i.test(e.message || '');
+      if (!isBgPolicy) {
+        LOGW('WEATHER', 'ambient_play_failed: ' + (e && e.message));
+      }
     });
   } catch (e) {
     LOGW('WEATHER', 'ambient_setup_failed: ' + (e && e.message));
@@ -27837,13 +27916,21 @@ function _crossfadeToNextVariant() {
       var targetVol = _resolveAmbientVolume(_weatherAmbient.vol);
       _fadeAudioVol(nextAudio, 0, targetVol, _AMBIENT_CROSSFADE_MS);
     }).catch(function (e) {
-      LOGW('WEATHER', 'crossfade_play_failed: ' + (e && e.message) + ' — current continua tocando, retry em 3s');
-      // Cleanup do next falhado
+      // 2026-04-27 USER FIX: tab em background causa "play() interrupted
+      // because video-only background media was paused to save power".
+      // Não loga warning (esperado), só retry SE não em backoff e tab visível.
+      var isBgPolicy = e && /paused to save power|interrupted/i.test(e.message || '');
+      if (!isBgPolicy) {
+        LOGW('WEATHER', 'crossfade_play_failed: ' + (e && e.message));
+      }
       try { nextAudio.src = ''; } catch (_) {}
-      // Retry em 3s — current ainda tem audio rolando (só remaining curto)
+      // Não retry se tab background ou backoff ativo
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (Date.now() < _ambientBackoffUntil) return;
+      // Retry em 3s — current ainda tem audio rolando
       setTimeout(function () {
-        if (_weatherAmbient.active && _weatherAmbient.audio === current) {
-          // Force re-trigger crossfade (current pode ter terminado já)
+        if (_weatherAmbient.active && _weatherAmbient.audio === current
+            && (typeof document === 'undefined' || !document.hidden)) {
           _crossfadeToNextVariant();
         }
       }, 3000);
@@ -27858,27 +27945,77 @@ function _crossfadeToNextVariant() {
 //   - Browser pausou audio (tab inactive + voltou)
 //   - Resource exhaustion (muitos thunders)
 //   - Crossfade silenciosamente falhou
+//
+// 2026-04-27 USER FIX: tab em background causava loop infinito de
+// "play() interrupted because video-only background media was paused
+// to save power". Agora:
+//   1. Detecta document.hidden → SUSPENDE retry (não tenta tocar)
+//   2. Limita tentativas falhadas consecutivas (3) → backoff longo (60s)
+//   3. visibilitychange listener resume quando volta a visível
 var _ambientWatchdogTimer = null;
+var _ambientFailCount = 0;
+var _ambientBackoffUntil = 0;
+
 function _startAmbientWatchdog() {
   if (_ambientWatchdogTimer) return;
   _ambientWatchdogTimer = setInterval(function () {
     if (!_weatherAmbient.active) return;
+    // Suspende durante tab background — browser pausa audio por policy
+    if (typeof document !== 'undefined' && document.hidden) return;
+    // Backoff após N falhas consecutivas
+    if (Date.now() < _ambientBackoffUntil) return;
     var a = _weatherAmbient.audio;
     var stalled = !a || a.paused || a.ended;
     if (stalled) {
-      LOGW('WEATHER', 'ambient watchdog: stalled (audio=' + (!!a) + ' paused=' + (a && a.paused) + ' ended=' + (a && a.ended) + ') — restarting');
+      _ambientFailCount++;
+      // Após 3 falhas consecutivas, backoff longo (60s) pra parar spam
+      if (_ambientFailCount >= 3) {
+        _ambientBackoffUntil = Date.now() + 60000;
+        LOGW('WEATHER', 'ambient: 3 falhas consecutivas — backoff 60s');
+        return;
+      }
+      LOG('WEATHER', 'ambient watchdog: restarting (fail #' + _ambientFailCount + ')');
       try {
         if (a) { a.pause(); a.src = ''; }
       } catch (_) {}
       _weatherAmbient.audio = null;
       _playWeatherAmbientVariant(false);
+    } else {
+      // Saudável — reset fail counter
+      _ambientFailCount = 0;
     }
   }, 10000);
+
+  // Listener de visibilidade: ao voltar pra tab, restart se necessário
+  if (typeof document !== 'undefined' && !_weatherAmbient._visListener) {
+    _weatherAmbient._visListener = function () {
+      if (!_weatherAmbient.active) return;
+      if (document.hidden) return;  // ainda escondido, ignora
+      // Voltou visível — reset backoff e tenta restart
+      _ambientFailCount = 0;
+      _ambientBackoffUntil = 0;
+      var a = _weatherAmbient.audio;
+      if (!a || a.paused || a.ended) {
+        LOG('WEATHER', 'ambient: tab visible novamente — restart');
+        try { if (a) { a.pause(); a.src = ''; } } catch (_) {}
+        _weatherAmbient.audio = null;
+        _playWeatherAmbientVariant(false);
+      }
+    };
+    document.addEventListener('visibilitychange', _weatherAmbient._visListener);
+  }
 }
+
 function _stopAmbientWatchdog() {
   if (_ambientWatchdogTimer) {
     clearInterval(_ambientWatchdogTimer);
     _ambientWatchdogTimer = null;
+  }
+  _ambientFailCount = 0;
+  _ambientBackoffUntil = 0;
+  if (_weatherAmbient._visListener && typeof document !== 'undefined') {
+    document.removeEventListener('visibilitychange', _weatherAmbient._visListener);
+    _weatherAmbient._visListener = null;
   }
 }
 
@@ -27931,7 +28068,17 @@ function _scheduleTorchStormExtinguish() {
     S.lightSource = null;
     S.torchActive = false;
     dmNarrate({ text: '⚡ A chuva e o vento apagam sua tocha! Você fica no escuro.', type: 'event' });
-    try { _showWaterStatusToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 4000); } catch (_) {}
+    // 2026-04-27 USER FIX: usar vToast canônico (segue regras CSS do projeto).
+    // Antes usava _showWaterStatusToast (azul-água) que era off-theme pra tocha.
+    // vToast é o componente oficial do design system — fonte, cores, posição
+    // padrão. Fallback pra inline se vToast não carregou.
+    try {
+      if (typeof vToast === 'function') {
+        vToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'warn', 4000);
+      } else if (typeof _showWaterStatusToast === 'function') {
+        _showWaterStatusToast('🔥 Tocha apagada pela tempestade.', 4000);
+      }
+    } catch (_) {}
     // Re-reveal fog com novo vision range (sem luz)
     try { revealFogAt(S.player.col, S.player.row, getVisionRange()); } catch (_) {}
     try { updateLightButtonVisual(); } catch (_) {}
