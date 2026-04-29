@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:16:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T19:21:33Z - do not edit directly, edit source -->
 
 
 <!--
@@ -25968,11 +25968,13 @@ function drawWeatherOverlay(ctx) {
              : (typeof _tileDetail !== 'undefined' ? _tileDetail : 1);
   if (S.weather && _wTier >= 1) {
     var cloudCfg = null;
-    // 2026-04-27 USER FIX: tempestade tem MUITO mais cobertura (count 8→14,
-    // alpha 0.32→0.42) — quase totalmente sombreado, mais escuro que sol.
+    // 2026-04-27 USER FIX: storm NÃO usa shadow clouds — usa apenas sistema
+    // INVERTIDO (dark base + sun ray spots + rainbow). User reportou:
+    // "a tempestade continua com nuvens passando ao invés de feixes de luz".
+    // Storm pula o cloudCfg aqui e usa apenas o bloco storm-inversion abaixo.
     if (S.weather === 's')      cloudCfg = { count: 1, alpha: 0.14, speed: 0.012, scale: 1.8 };  // sombra grande lenta
     else if (S.weather === 'r') cloudCfg = { count: 8, alpha: 0.22, speed: 0.040, scale: 1.1 };
-    else if (S.weather === 't') cloudCfg = { count: 14, alpha: 0.42, speed: 0.080, scale: 1.4 };  // tempestade densa
+    // 't' (storm) intencionalmente sem cloudCfg — sistema invertido toma conta
     else if (S.weather === 'f') cloudCfg = { count: 4, alpha: 0.10, speed: 0.008, scale: 0.9 };
     if (cloudCfg) {
       var cloudT = _animTime * cloudCfg.speed;
@@ -26061,95 +26063,87 @@ function drawWeatherOverlay(ctx) {
         }
       }
       ctx.restore();
+    }
 
-      // 2026-04-27 USER FIX: storm INVERTIDO. User pediu: "fica mais escuro
-      // o mapa inteiro e alguns feixes de luz passam quando for dia, que
-      // aí simula o sol passando em algumas poucas partes da tempestade,
-      // e pode inclusive aplicar efeito de arco-íris nessas partes".
-      //
-      // Camada extra em storm:
-      //   1. Base dark overlay (escurece TUDO — 85%+ shadow coverage)
-      //   2. 2-3 "sun ray spots" (frestas de luz brilhante drift slow)
-      //   3. Rainbow gradient suave em sun rays (só durante day/dusk/dawn)
-      if (S.weather === 't') {
-        ctx.save();
-        // Camada A: base dark overlay (cobre 100% — mas frestas vão "subtrair")
-        var stormBaseDarkness = (S.dayPhase === 'night') ? 0.62
-                              : (S.dayPhase === 'dusk' || S.dayPhase === 'dawn') ? 0.42
-                              : 0.32;  // day
-        ctx.fillStyle = 'rgba(10, 12, 22, ' + stormBaseDarkness + ')';
-        ctx.fillRect(0, 0, canvasW, canvasH);
+    // 2026-04-27 USER FIX: storm INVERTIDO — substitui shadow clouds.
+    // User pediu: "a tempestade continua com nuvens passando ao invés de
+    // feixes de luz quando durante o dia". Agora storm SÓ tem este sistema
+    // (sem shadow clouds — cloudCfg pulado pra weather='t').
+    //
+    // 3 camadas:
+    //   1. Base dark overlay (escurece TUDO uniformemente)
+    //   2. 2-3 "sun ray spots" (frestas de luz drift slow)
+    //   3. Rainbow gradient suave nas frestas (só durante day/dusk/dawn)
+    //
+    // Movido FORA do `if (cloudCfg)` pra rodar mesmo sem shadow clouds.
+    if (S.weather === 't') {
+      ctx.save();
+      // Camada A: base dark overlay
+      var stormBaseDarkness = (S.dayPhase === 'night') ? 0.62
+                            : (S.dayPhase === 'dusk' || S.dayPhase === 'dawn') ? 0.42
+                            : 0.32;  // day
+      ctx.fillStyle = 'rgba(10, 12, 22, ' + stormBaseDarkness + ')';
+      ctx.fillRect(0, 0, canvasW, canvasH);
 
-        // Camada B: 2-3 sun ray spots — pontos brilhantes que "perfuram" o overlay
-        // (destination-out subtrai luminância → efeito de fresta).
-        // Drift LENTO — feixes percebem-se como nuvens-fenda passando.
-        var rayCount = (_wTier >= 2) ? 3 : 2;
-        var rayT = _animTime * 0.018;  // ~18 px/s — bem mais lento que cloud
-        var rayRng = seededRng(77);
-        ctx.globalCompositeOperation = 'destination-out';
-        for (var ri = 0; ri < rayCount; ri++) {
-          var rrx = rayRng();
-          var rry = rayRng();
-          var rrs = rayRng();
-          var rayW = 90 + rrs * 100;   // diâmetro 90-190px (pequeno)
-          var rayPeriod = (canvasW + rayW) * 1.5;
-          var rcx = ((rrx * rayPeriod + rayT) % rayPeriod) - rayW * 0.5;
-          if (rcx + rayW < 0 || rcx > canvasW) continue;
-          var rcy = rry * canvasH * 0.7 + canvasH * 0.15;  // banda central
-          // Subtrai darkness — feixe forma fresta
-          var raySubAlpha = 0.40 + rrs * 0.20;
-          var rayGrad = ctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, rayW * 0.5);
-          rayGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
-          rayGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
-          rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          ctx.fillStyle = rayGrad;
-          ctx.beginPath();
-          ctx.ellipse(rcx, rcy, rayW * 0.5, rayW * 0.6, 0, 0, Math.PI * 2);
-          ctx.fill();
+      // Camada B: 2-3 sun ray spots
+      var rayCount = (_wTier >= 2) ? 3 : 2;
+      var rayT = _animTime * 0.018;
+      var rayRng = seededRng(77);
+      ctx.globalCompositeOperation = 'destination-out';
+      for (var ri = 0; ri < rayCount; ri++) {
+        var rrx = rayRng();
+        var rry = rayRng();
+        var rrs = rayRng();
+        var rayW = 90 + rrs * 100;
+        var rayPeriod = (canvasW + rayW) * 1.5;
+        var rcx = ((rrx * rayPeriod + rayT) % rayPeriod) - rayW * 0.5;
+        if (rcx + rayW < 0 || rcx > canvasW) continue;
+        var rcy = rry * canvasH * 0.7 + canvasH * 0.15;
+        var raySubAlpha = 0.40 + rrs * 0.20;
+        var rayGrad = ctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, rayW * 0.5);
+        rayGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
+        rayGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
+        rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = rayGrad;
+        ctx.beginPath();
+        ctx.ellipse(rcx, rcy, rayW * 0.5, rayW * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Camada C: arco-íris suave dentro das frestas (só day/dusk/dawn)
+      if (S.dayPhase !== 'night') {
+        var rainbowAlpha = (S.dayPhase === 'day') ? 0.10 : 0.06;
+        var rbRng = seededRng(77);
+        ctx.globalCompositeOperation = 'lighter';
+        for (var ci2 = 0; ci2 < rayCount; ci2++) {
+          var crx = rbRng();
+          var cry = rbRng();
+          var crs = rbRng();
+          var rayW2 = 90 + crs * 100;
+          var rayPeriod2 = (canvasW + rayW2) * 1.5;
+          var ccx2 = ((crx * rayPeriod2 + rayT) % rayPeriod2) - rayW2 * 0.5;
+          if (ccx2 + rayW2 < 0 || ccx2 > canvasW) continue;
+          var ccy2 = cry * canvasH * 0.7 + canvasH * 0.15;
+          var rbColors = [
+            'rgba(255, 100, 100, ' + rainbowAlpha + ')',
+            'rgba(255, 220, 80, '  + rainbowAlpha + ')',
+            'rgba(80,  220, 120, ' + rainbowAlpha + ')',
+            'rgba(80,  140, 240, ' + rainbowAlpha + ')',
+            'rgba(180, 100, 220, ' + rainbowAlpha + ')'
+          ];
+          for (var rb = 0; rb < rbColors.length; rb++) {
+            var radius = rayW2 * (0.20 + rb * 0.07);
+            ctx.strokeStyle = rbColors[rb];
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.ellipse(ccx2, ccy2, radius, radius * 0.7, 0, Math.PI * 1.05, Math.PI * 1.95);
+            ctx.stroke();
+          }
         }
         ctx.globalCompositeOperation = 'source-over';
-
-        // Camada C: arco-íris suave dentro das frestas (só durante luz solar)
-        // user pediu "bem de leve, quase transparente". Apenas day/dusk/dawn.
-        if (S.dayPhase !== 'night') {
-          var rainbowAlpha = (S.dayPhase === 'day') ? 0.10
-                           : 0.06;  // dusk/dawn mais sutil
-          // Re-percorre os mesmos sun rays e adiciona arco-íris layered
-          var rbRng = seededRng(77);
-          ctx.globalCompositeOperation = 'lighter';  // somativo — luz colorida
-          for (var ci2 = 0; ci2 < rayCount; ci2++) {
-            var crx = rbRng();
-            var cry = rbRng();
-            var crs = rbRng();
-            var rayW2 = 90 + crs * 100;
-            var rayPeriod2 = (canvasW + rayW2) * 1.5;
-            var ccx2 = ((crx * rayPeriod2 + rayT) % rayPeriod2) - rayW2 * 0.5;
-            if (ccx2 + rayW2 < 0 || ccx2 > canvasW) continue;
-            var ccy2 = cry * canvasH * 0.7 + canvasH * 0.15;
-            // Arco-íris: 3 arcs concêntricos com cores diferentes
-            // (vermelho fora, violeta dentro — clássico)
-            var rbColors = [
-              'rgba(255, 100, 100, ' + rainbowAlpha + ')',  // vermelho
-              'rgba(255, 220, 80, '  + rainbowAlpha + ')',  // amarelo
-              'rgba(80,  220, 120, ' + rainbowAlpha + ')',  // verde
-              'rgba(80,  140, 240, ' + rainbowAlpha + ')',  // azul
-              'rgba(180, 100, 220, ' + rainbowAlpha + ')'   // violeta
-            ];
-            for (var rb = 0; rb < rbColors.length; rb++) {
-              var radius = rayW2 * (0.20 + rb * 0.07);
-              ctx.strokeStyle = rbColors[rb];
-              ctx.lineWidth = 6;
-              ctx.beginPath();
-              ctx.ellipse(ccx2, ccy2, radius, radius * 0.7, 0, Math.PI * 1.05, Math.PI * 1.95);
-              ctx.stroke();
-            }
-          }
-          ctx.globalCompositeOperation = 'source-over';
-        }
-        ctx.restore();
-        // Fim camada storm-inversion. Old night-darkness overlay removido
-        // (substituído por stormBaseDarkness com 3 níveis acima).
       }
+      ctx.restore();
     }
   }
 
