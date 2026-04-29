@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:36:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-04-29T16:46:10Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14917,9 +14917,15 @@ const EVENTS_POOL = {
           ]
         },
         // Variante 2: Pedido suspeito (golpe disfarçado)
+        // 2026-04-27 USER FIX: refatorado com CONSEQUÊNCIAS REAIS em todos
+        // outcomes. Antes outcome_fail de Investigar era 1 frase narrativa
+        // ("essa pode dar errado mais tarde") sem efeito mecânico. Agora
+        // toda escolha tem impacto: gold loss, item perdido, condition,
+        // flag persistido pra continuidade narrativa, ou combate.
         {
           title: 'Aflição Suspeita',
           text: '{npc} corre em sua direção chorando, dizendo que foi atacado e roubado — precisa de moedas pra pagar a passagem do barco que parte logo. Os detalhes batem demais, ensaiados demais. As lágrimas chegam exatamente quando o discurso pede. Você sente o cheiro de armadilha, mas talvez seja real.',
+          tech: { label: 'INSTINTO', text: 'Algo está errado. Investigação revelará a verdade — mas distração custa caro.' },
           choices: [
             { label: 'Investigar antes de decidir (Percepção)', skill: 'perception', dc: 13,
               desc: 'Procurar sinais — ferimento real, sapatos gastos, marcas de bota recentes.',
@@ -14946,14 +14952,37 @@ const EVENTS_POOL = {
                     failCombat: true, failHp: 2 }
                 ]
               },
-              fail: 'Você não nota nada estranho. Acredita na história. Essa pode dar errado mais tarde — ou pode ter sido genuíno mesmo.' },
+              // CONSEQUÊNCIA REAL no fail: enquanto você procura sinais (e não
+              // acha), o cúmplice se aproxima por trás e te bate carteirista.
+              // Player perde gold + 1 nível de exaustão (susto/distração) +
+              // flag pra reconhecer o golpista no futuro.
+              fail: 'Você procura sinais mas não encontra nada óbvio. Acredita na história e abre a mochila pra pegar moedas — exatamente quando o cúmplice (que você não viu) bate carteira por trás. Os dois desaparecem antes de você se virar.',
+              failTech: { label: 'CONSEQUÊNCIA', text: 'Pickpocket: -8 a -15 Valdoritas + Exaustão 1 (susto/distração). Flag scammer_marked_you persistida pra futuras revanches.' },
+              failGold: [-15, -8],
+              failExh: 1,
+              failFlag: 'scammer_marked_you' },
             { label: 'Dar moedas e seguir (Sabedoria)', skill: 'wis', dc: 10,
               desc: 'Mesmo que seja golpe, 5 moedas não custam o tempo de discussão.',
               ok: 'Você dá moedas e prossegue. Talvez tenha sido golpe, talvez não. Em qualquer caso, sua paz mental vale o preço.',
               okGold: [-5, -3], okXp: [4, 6],
               fail: '{Ele} pede mais. E mais. Quando você tenta ir, há um segundo bandido bloqueando.',
               failTech: { label: 'COMBATE', text: 'Cilada de dois — você sofre 4 dano. Iniciando…' },
-              failCombat: true, failHp: 4 }
+              failCombat: true, failHp: 4 },
+            // 2026-04-27: terceira choice — confiar na intuição sem teste.
+            // Custo psicológico (exaustão) mas sem perda de gold. Choice
+            // "intuição pura" pra player que prefere narrative-led.
+            { label: 'Recusar friamente e seguir',
+              desc: 'Sem teste. Você ignora o pedido e segue caminho. Sem perda mas com peso na consciência.',
+              flavor: 'Você ergue a mão num "não" seco e contorna {ele}. Pode ter sido golpe genuíno, pode ter sido pedido genuíno. Você nunca saberá. O peso da dúvida fica.',
+              outcome_ok: {
+                text: 'Você prossegue. A 200 passos pra frente, encontra restos de uma bolsa cortada — alguém foi vítima ali. Você se sente justificado, ou culpado, ou ambos.',
+                tech: { label: 'PESO MORAL', text: 'Exaustão +1 (peso da indecisão). Flag chose_indifference persistida — afeta diálogos com clérigos.' },
+                ops: [
+                  { op: 'exh', delta: 1 },
+                  { op: 'flag', id: 'chose_indifference', scope: 'pc' },
+                  { op: 'xp', delta: 4 }
+                ]
+              } }
           ]
         },
         // Variante 3: Caçador ferido com criatura encurralada
@@ -15226,6 +15255,37 @@ const EVENTS_POOL = {
     if (rawCh.failHp) ch.outcome_fail.hp_loss = rawCh.failHp;
     if (rawCh.failMp) ch.outcome_fail.mp_loss = rawCh.failMp;
     if (typeof rawCh.failExh === 'number') ch.outcome_fail.exh_gain = (rawCh.failExh > 0) ? rawCh.failExh : 1;
+    // 2026-04-27 USER FIX: failGold + failFlag + failItem + failCondition pra
+    // outcomes_fail terem CONSEQUÊNCIAS REAIS (não só narrativa). User reportou:
+    // "evento mal feito... erro custou caro mas nada aconteceu de relevante".
+    if (rawCh.failGold) {
+      var minFG = rawCh.failGold[0], maxFG = rawCh.failGold[1];
+      ch.outcome_fail.gold = minFG + Math.floor(Math.random() * (maxFG - minFG + 1));
+    }
+    if (rawCh.failFlag) {
+      if (!Array.isArray(ch.outcome_fail.ops)) ch.outcome_fail.ops = [];
+      ch.outcome_fail.ops.push({ op: 'flag', id: rawCh.failFlag, scope: 'pc' });
+    }
+    if (rawCh.failItem) {
+      if (!Array.isArray(ch.outcome_fail.ops)) ch.outcome_fail.ops = [];
+      // Item negativo = perda (item field positive seria ganho)
+      ch.outcome_fail.lost_item = rawCh.failItem;
+    }
+    if (rawCh.failCondition) {
+      if (!Array.isArray(ch.outcome_fail.ops)) ch.outcome_fail.ops = [];
+      // failCondition: 'poisoned' OR { id: 'poisoned', durationRounds: 3 }
+      var condSpec = (typeof rawCh.failCondition === 'string')
+        ? { id: rawCh.failCondition }
+        : rawCh.failCondition;
+      ch.outcome_fail.ops.push(Object.assign({ op: 'condition' }, condSpec));
+    }
+    if (rawCh.okCondition) {
+      if (!Array.isArray(ch.outcome_ok.ops)) ch.outcome_ok.ops = [];
+      var okCondSpec = (typeof rawCh.okCondition === 'string')
+        ? { id: rawCh.okCondition }
+        : rawCh.okCondition;
+      ch.outcome_ok.ops.push(Object.assign({ op: 'condition' }, okCondSpec));
+    }
     // 2026-04-27 USER FIX: tech callouts em outcomes (separar info mecânica
     // da narrativa). Aceita string OR { label, text }.
     if (rawCh.okTech) ch.outcome_ok.tech = rawCh.okTech;
@@ -15422,12 +15482,55 @@ const EVENTS_POOL = {
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
+  // 2026-04-27 USER FIX: Detector de outcome "oco" — sem efeito mecânico real.
+  // User reportou: "erro custou caro mas nada aconteceu que seja relevante".
+  // Outcome oco = só flavor text, sem hp/mp/gold/exh/condition/flag/combat/quest.
+  // Quando detectado, auto-enricher injeta efeito mínimo (ou só skip).
+  function _outcomeHasRealEffect(outcome) {
+    if (!outcome) return false;
+    if (typeof outcome.gold === 'number' && outcome.gold !== 0) return true;
+    if (typeof outcome.xp === 'number' && outcome.xp !== 0) return true;
+    if (typeof outcome.hp_loss === 'number' && outcome.hp_loss !== 0) return true;
+    if (typeof outcome.hp_gain === 'number' && outcome.hp_gain !== 0) return true;
+    if (typeof outcome.mp_loss === 'number' && outcome.mp_loss !== 0) return true;
+    if (typeof outcome.mp_gain === 'number' && outcome.mp_gain !== 0) return true;
+    if (typeof outcome.exh_gain === 'number' && outcome.exh_gain !== 0) return true;
+    if (outcome.dungeon_combat) return true;
+    if (outcome.starts_quest) return true;
+    if (outcome.recruit_ally) return true;
+    if (outcome.lost_item) return true;
+    if (outcome.item) return true;
+    if (Array.isArray(outcome.ops) && outcome.ops.length > 0) {
+      // ops com efeito (não só flag scope:session pure-cosmetic)
+      return outcome.ops.some(function (op) {
+        return op && op.op && op.op !== 'noop';
+      });
+    }
+    return false;
+  }
+
   // Auto-injeta chain em outcome se não tiver. Skip se já tem chain ou se é
   // dungeon_combat (combate vai direto, não precisa chain).
+  // 2026-04-27 USER FIX: NÃO enriquece outcome OCO (sem efeito) — em vez
+  // disso adiciona micro-efeito mecânico (flag chose_calm/exh+1) pra
+  // garantir que TODA escolha tenha causa→efeito real.
   function _autoEnrichOutcome(outcome, kind, isOk, biomePool, tokens, biome) {
     if (!outcome) return;
     if (outcome.chain) return;            // já tem chain explícito (rich event)
     if (outcome.dungeon_combat) return;   // vai pra combate — não chainable
+    // Garante efeito mínimo se outcome é "oco" — caso contrário user fica
+    // sem feedback mecânico real.
+    if (!_outcomeHasRealEffect(outcome)) {
+      if (!Array.isArray(outcome.ops)) outcome.ops = [];
+      if (isOk) {
+        // OK sem efeito: pequena XP de aprendizado
+        outcome.ops.push({ op: 'xp', delta: 4 });
+      } else {
+        // FAIL sem efeito: marca peso da indecisão (1 exhaustion)
+        outcome.ops.push({ op: 'exh', delta: 1 });
+        outcome.ops.push({ op: 'flag', id: 'paid_no_attention', scope: 'session' });
+      }
+    }
     var rawChain = _pickAutoChainTemplate(kind, isOk);
     if (!rawChain) return;
     outcome.chain = {
