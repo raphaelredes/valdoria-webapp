@@ -110,14 +110,24 @@ function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
 
-  /* Icon */
+  /* Icon — suporta SVG heraldico (innerHTML) ou emoji (textContent) */
   var ico = el('div', 'vc-service-icon');
-  ico.textContent = svc.icon || '';
+  var icoStr = svc.icon || '';
+  if (icoStr.indexOf('<svg') >= 0) {
+    ico.innerHTML = icoStr;
+  } else {
+    ico.textContent = icoStr;
+  }
   card.appendChild(ico);
 
-  /* Name */
+  /* Name — suporta HTML (label pode conter <span class="vi vi-coin">) */
   var name = el('div', 'vc-service-name');
-  name.textContent = svc.label || '';
+  var lblStr = svc.label || '';
+  if (lblStr.indexOf('<') >= 0) {
+    name.innerHTML = lblStr;
+  } else {
+    name.textContent = lblStr;
+  }
   card.appendChild(name);
 
   /* Price */
@@ -246,11 +256,23 @@ function actionList(items) {
       var btn = el('button', 'vc-action-btn');
       if (item.icon) {
         var ico = el('span', 'vc-action-ico');
-        ico.textContent = item.icon;
+        var icoStr = item.icon;
+        if (icoStr.indexOf('<svg') >= 0) {
+          ico.innerHTML = icoStr;
+        } else {
+          ico.textContent = icoStr;
+        }
         btn.appendChild(ico);
       }
-      var txt = document.createTextNode(item.label || item.text || '');
-      btn.appendChild(txt);
+      /* Label — suporta HTML (vi-coin, italic flavor) ou texto puro */
+      var lbl = item.label || item.text || '';
+      if (lbl.indexOf('<') >= 0) {
+        var span = el('span', '');
+        span.innerHTML = lbl;
+        btn.appendChild(span);
+      } else {
+        btn.appendChild(document.createTextNode(lbl));
+      }
       if (item.badge) {
         var bdg = el('span', 'vc-badge');
         bdg.textContent = item.badge;
