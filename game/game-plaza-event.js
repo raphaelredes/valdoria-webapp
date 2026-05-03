@@ -70,7 +70,7 @@
   function _showGambleMenu(d) {
     if (!d.bets || !d.bets.length) { console.error("[PLAZA] _showGambleMenu: missing bets", d); }
     var body = "<div class=\"v-popup-desc\">" + vEsc(d.desc || "Escolha sua aposta para o jogo de dados.") + "</div>";
-    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Ouro: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
+    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Valdoritas: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
     if (d.remaining != null) body += "<div class=\"v-popup-row\">🎲 Apostas restantes: " + d.remaining + "</div>";
     body += "<div class=\"v-popup-divider\"></div>";
     var actions = [];
@@ -134,7 +134,7 @@
     if (!d.items) { console.error("[PLAZA] _showVendor: missing items", d); }
     var body = "";
     if (d.greeting) body += "<div class=\"v-popup-desc\">" + vEsc(d.greeting) + "</div><div class=\"v-popup-divider\"></div>";
-    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Ouro: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
+    if (d.gold != null) body += "<div class=\"v-popup-row\"><span class=\"vi vi-coin sm\"></span> Valdoritas: " + d.gold + " <span class=\"vi vi-coin sm\"></span></div>";
     if (d.items && d.items.length) {
       body += "<div class=\"v-popup-section-label\">🛒 Itens</div>";
       for (var i = 0; i < d.items.length; i++) {

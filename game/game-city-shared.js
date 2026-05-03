@@ -86,7 +86,7 @@ function npcBanner(npc) {
 function goldBalance(gold) {
   var row = el('div', 'vc-gold-row');
   var lbl = el('span', 'vc-gold-label');
-  lbl.textContent = 'Seu ouro: ';
+  lbl.textContent = 'Suas Valdoritas: ';
   row.appendChild(lbl);
   var val = el('span', 'vc-gold-value');
   val.textContent = String(gold) + ' ';

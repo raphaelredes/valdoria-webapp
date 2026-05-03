@@ -187,7 +187,7 @@ var CHAR_CLASSES = [
               preCombatRitual: true,
               helpDnd5e: 'Achar Familiar (PHB p.240 — Find Familiar): invoca um espírito ' +
                          'em forma animal (Pseudodragon-like). Stats: HP 4, CA 13, atk +4. ' +
-                         'INVOCAÇÃO PHB-FIEL: requer 1h de ritual + 10 GP em incenso/ervas ' +
+                         'INVOCAÇÃO PHB-FIEL: requer 1h de ritual + 10 Valdoritas em incenso/ervas ' +
                          'FORA DE COMBATE. Combat2 assume que ritual foi feito (toggle no ' +
                          'setup-frontend permite desabilitar). ' +
                          'ADAPTAÇÕES vs PHB: ' +
@@ -1023,7 +1023,7 @@ var CHAR_CLASSES = [
                          'ADAPTAÇÕES vs PHB: ' +
                          '(a) PHB Familiar não pode atacar (combat2 desabilita ataque via ' +
                          'noAttack:true — vira presença visual, conforme escolha A1 do autor); ' +
-                         '(b) Cast 1h ritual + 10 GP — combat2 assume ritual já feito (vide ' +
+                         '(b) Cast 1h ritual + 10 Valdoritas — combat2 assume ritual já feito (vide ' +
                          'toggle no setup-frontend); ' +
                          '(c) Delivery de magias touch (PHB) não implementado.',
               summonSpec: {

@@ -849,7 +849,7 @@ function _buildCTA(d) {
 function _buildGoldBalance(gold) {
   var row = _el('div', 'inn-gold-balance');
   var lbl = _el('span', 'inn-gold-label');
-  lbl.textContent = 'Seu ouro: ';
+  lbl.textContent = 'Suas Valdoritas: ';
   row.appendChild(lbl);
   var val = _el('span', 'inn-gold-value');
   val.textContent = String(gold) + ' ';
