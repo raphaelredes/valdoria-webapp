@@ -45,6 +45,8 @@ function renderFestivalHub(container, data) {
       var ev = data.events[i];
       var btn = vCity.el('button', 'fst-event-btn' + (ev.played ? ' fst-event-done' : ''));
       btn.setAttribute('data-action', ev.cb);
+      /* FIX 2026-05-03: bind click listener (data-action sozinho não dispara) */
+      btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(ev.cb));
 
       var evIcon = vCity.el('span', 'fst-event-icon');
       evIcon.textContent = (ev.played ? '✅ ' : '') + ev.icon;
@@ -67,6 +69,8 @@ function renderFestivalHub(container, data) {
     /* Merchant button */
     var merch = vCity.el('button', 'fst-event-btn');
     merch.setAttribute('data-action', 'festival_merchant');
+    /* FIX 2026-05-03: bind click listener */
+    merch.addEventListener('click', function(){ vCity.act('festival_merchant'); });
     var merchIcon = vCity.el('span', 'fst-event-icon');
     merchIcon.textContent = '🛒';
     merch.appendChild(merchIcon);
