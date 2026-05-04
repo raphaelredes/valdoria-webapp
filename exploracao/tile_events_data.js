@@ -86,7 +86,15 @@ window.TILE_EVENTS_DB['orc_camp.active'] = {
       id: 'attack_frontal',
       label: 'Atacar de frente',
       flavor: 'Você saca a arma e avança rugindo!',
-      outcome_ok: { ops: [], fsm: 'player_attack_choice', flavor: 'O combate começa.' }
+      // X-6.5.51AC (2026-05-04): dungeon_combat trigger. Antes só ops:[] (vazio) — a
+      // escolha "Atacar" não iniciava combate, fazia popup fechar. Padrão canonical
+      // alinhado com sentinel_post.alerted. Inimigo: orc_raider (camp ativo, regulares).
+      outcome_ok: {
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: 'player_attack_choice',
+        flavor: 'O combate começa.',
+        dungeon_combat: { enemy: 'orc_raider', surprise: false }
+      }
     },
     {
       id: 'parley_hunter_kid',
@@ -130,7 +138,15 @@ window.TILE_EVENTS_DB['orc_camp.alerted'] = {
       id: 'fight',
       label: 'Lutar até o fim',
       flavor: 'Você firma os pés e enfrenta o cerco.',
-      outcome_ok: { ops: [], fsm: 'combat_won', flavor: 'Que comece a luta!' }
+      // X-6.5.51AC (2026-05-04): dungeon_combat trigger. Antes só ops:[] (vazio).
+      // Estado alerted = orcs já preparados pra luta — orc_warrior (variante mais
+      // resistente que orc_raider) representa essa vantagem dos defensores.
+      outcome_ok: {
+        ops: [{ op: 'xp', delta: 8 }],
+        fsm: 'combat_won',
+        flavor: 'Que comece a luta!',
+        dungeon_combat: { enemy: 'orc_warrior', surprise: false }
+      }
     },
     {
       id: 'flee_combat',
@@ -1287,7 +1303,14 @@ window.TILE_EVENTS_DB['bandit_camp.active'] = {
       id: 'attack_bandit',
       label: 'Atacar de surpresa',
       flavor: 'Você saca a arma e ataca!',
-      outcome_ok: { ops: [], fsm: 'player_attack_choice', flavor: 'O combate começa.' }
+      // X-6.5.51AC (2026-05-04): dungeon_combat trigger + surprise=true (vantagem
+      // do agressor — bandidos não esperavam, perdem 1° turno). Antes ops:[] (vazio).
+      outcome_ok: {
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: 'player_attack_choice',
+        flavor: 'O combate começa.',
+        dungeon_combat: { enemy: 'bandit', surprise: true }
+      }
     },
     {
       id: 'parley_bandit',
@@ -1329,7 +1352,13 @@ window.TILE_EVENTS_DB['bandit_camp.alerted'] = {
       id: 'fight_bandit',
       label: 'Lutar',
       flavor: 'Você firma a posição.',
-      outcome_ok: { ops: [], fsm: 'combat_won', flavor: 'Combate inicia.' }
+      // X-6.5.51AC (2026-05-04): dungeon_combat trigger. Bandidos alerta = sem surpresa.
+      outcome_ok: {
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: 'combat_won',
+        flavor: 'Combate inicia.',
+        dungeon_combat: { enemy: 'bandit', surprise: false }
+      }
     },
     {
       id: 'flee_bandit',
@@ -1521,7 +1550,14 @@ window.TILE_EVENTS_DB['hunter_camp.alerted'] = {
       id: 'fight_hunter',
       label: 'Lutar',
       flavor: 'Você ataca.',
-      outcome_ok: { ops: [], fsm: 'combat_won', flavor: 'Combate inicia.' }
+      // X-6.5.51AC (2026-05-04): dungeon_combat trigger. Caçadores hostis ≈ bandit
+      // mecanicamente (humano com arco, AC 12, HP 11) — reusa entry existente.
+      outcome_ok: {
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: 'combat_won',
+        flavor: 'Combate inicia.',
+        dungeon_combat: { enemy: 'bandit', surprise: false }
+      }
     },
     {
       id: 'flee_hunter',

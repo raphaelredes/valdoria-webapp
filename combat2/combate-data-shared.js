@@ -124,6 +124,19 @@ var BESTIARY = [
           buffSim: { id: 'escudo_arcano_npc', turns: 2, acBonus: 5, kind: 'buff' } }
       ]
     },
+    /* X-6.5.51AC (2026-05-04): 6 entries adicionadas pra fechar gap com ENEMIES_DB
+       em simuladores/exploracao.html (linhas 34685-34898). ANTES: encounters de Lobo/
+       Bandido/Orc Guerreiro/Fogo-Fátuo/Troll/Zumbi caiam em fallback BESTIARY[0]=Goblin
+       silenciosamente em buildEnemyFromSetup (combate.html:12834) porque lookup_name
+       resolvido via bestiary_name não existia. Issue #1 do fluxo travel→combat.
+       Stats canonicos PHB MM mantidos em sintonia com ENEMIES_DB pra coerência visual
+       (HP/CA exibidos na exploração devem bater com combate). */
+    { n: 'Lobo',                      hp: 11, ac: 13, atk: 4, die: 8,  dex: 15, str: 12, con: 12, wis: 12, int: 3,  cha: 6,  ico: '🐺', dmgMod: 2, attr: 'STR', tags: ['beast'] },
+    { n: 'Bandido',                   hp: 11, ac: 12, atk: 3, die: 6,  dex: 12, str: 11, con: 12, wis: 10, int: 10, cha: 10, ico: '🗡️', dmgMod: 1, attr: 'DEX', tags: ['humanoid'] },
+    { n: 'Orc Guerreiro',             hp: 22, ac: 14, atk: 5, die: 12, dex: 12, str: 16, con: 16, wis: 11, int: 7,  cha: 10, ico: '⚔️', dmgMod: 3, attr: 'STR', tags: ['humanoid'] },
+    { n: 'Fogo-Fátuo',                hp: 22, ac: 19, atk: 4, die: 10, dex: 28, str: 1,  con: 10, wis: 14, int: 13, cha: 11, ico: '💡', dmgMod: 4, attr: 'DEX', tags: ['undead'] },
+    { n: 'Troll',                     hp: 84, ac: 15, atk: 7, die: 12, dex: 13, str: 18, con: 20, wis: 9,  int: 7,  cha: 7,  ico: '🧌', dmgMod: 4, attr: 'STR', tags: ['giant'] },
+    { n: 'Zumbi',                     hp: 22, ac: 8,  atk: 3, die: 6,  dex: 6,  str: 13, con: 16, wis: 6,  int: 3,  cha: 5,  ico: '🧟', dmgMod: 1, attr: 'STR', tags: ['undead'] },
 ];
 
 var CHAR_NAMES = ['Kael', 'Elara', 'Thorne', 'Miriel', 'Garrick', 'Sylas', 'Vaela', 'Rurik', 'Isen', 'Brynn'];
