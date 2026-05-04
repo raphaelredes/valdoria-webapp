@@ -6,7 +6,7 @@
  * Componentes:
  *   el(tag, cls)           — helper de criacao de DOM
  *   npcBanner(npc)         — banner de NPC clickavel (nome + mood + greeting)
- *   goldBalance(gold)      — linha "Seu ouro: X coin"
+ *   goldBalance(gold)      — linha "Suas Valdoritas: X coin"
  *   serviceGrid(services)  — grid 2 colunas de servicos (icone + nome + preco)
  *   serviceCard(svc)       — card individual de servico
  *   statusAlert(text, type)— banner de alerta (info, warn, danger)
