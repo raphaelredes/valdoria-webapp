@@ -43,59 +43,49 @@ function _hubEsc(s) {
 
 /* ── Location Mapping ────────────────────────────────────────── */
 
-var _LOC_MAP = {
-    'tavern':           { ico: '\uD83C\uDF7A', nm: 'Taverna' },
-    'taverna':          { ico: '\uD83C\uDF7A', nm: 'Taverna' },
-    'inn':              { ico: '\uD83D\uDECF\uFE0F', nm: 'Estalagem' },
-    'estalagem':        { ico: '\uD83D\uDECF\uFE0F', nm: 'Estalagem' },
-    'open_inn':         { ico: '\uD83D\uDECF\uFE0F', nm: 'Estalagem' },
-    'arena':            { ico: '\u2694\uFE0F',        nm: 'Arena' },
-    'arena_main':       { ico: '\u2694\uFE0F',        nm: 'Arena' },
-    'market':           { ico: '\uD83C\uDFEA',        nm: 'Mercado' },
-    'mercado':          { ico: '\uD83C\uDFEA',        nm: 'Mercado' },
-    'city_locations':   { ico: '\uD83C\uDFD8\uFE0F',   nm: 'Cidade' },
-    'action_city_locations': { ico: '\uD83C\uDFD8\uFE0F', nm: 'Cidade' },
-    'guild':            { ico: '\uD83C\uDFDB\uFE0F',  nm: 'Guilda' },
-    'guilda':           { ico: '\uD83C\uDFDB\uFE0F',  nm: 'Guilda' },
-    'temple':           { ico: '\u26EA',               nm: 'Templo' },
-    'templo':           { ico: '\u26EA',               nm: 'Templo' },
-    'gates':            { ico: '\uD83D\uDEAA',         nm: 'Port\u00f5es' },
-    'portoes':          { ico: '\uD83D\uDEAA',         nm: 'Port\u00f5es' },
-    'square':           { ico: '\u26F2',               nm: 'Pra\u00e7a' },
-    'praca':            { ico: '\u26F2',               nm: 'Pra\u00e7a' },
-    'bank':             { ico: '\uD83C\uDFE6',         nm: 'Banco' },
-    'banco':            { ico: '\uD83C\uDFE6',         nm: 'Banco' },
-    'action_quests':    { ico: '\uD83D\uDCDC',         nm: 'Miss\u00f5es' },
-    'quests':           { ico: '\uD83D\uDCDC',         nm: 'Miss\u00f5es' },
-    'daily_challenge':  { ico: '\uD83D\uDC3A',         nm: 'Desafio' },
-    'action_codex':     { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' },
-    'codex':            { ico: '\uD83D\uDCD6',         nm: 'Comp\u00eandio' },
-    /* Substrings para callbacks do screen_data / registry (audit: scripts/audit_hub_loc_map.py) */
-    'crime':            { ico: '\uD83D\uDD75\uFE0F', nm: 'Crime' },
-    'druid':            { ico: '\uD83C\uDF32',         nm: 'Druida' },
-    'festival':         { ico: '\uD83C\uDF89',         nm: 'Festival' },
-    'guard_':           { ico: '\uD83D\uDEE1\uFE0F', nm: 'Guarda' },
-    /* help_ removed — meta-action, not a location (would leak footer buttons into grid) */
-    'league_':          { ico: '\uD83C\uDFC6',         nm: 'Liga' },
-    'manage_':          { ico: '\uD83D\uDC65',         nm: 'Contas' },
-    'mural_':           { ico: '\uD83D\uDDBC\uFE0F', nm: 'Mural' },
-    'online':           { ico: '\uD83C\uDF10',         nm: 'Online' },
-    'open_workshop':    { ico: '\uD83D\uDD28',         nm: 'Oficina' },
-    'pix_':             { ico: '\uD83D\uDCB3',         nm: 'PIX' },
-    'rel_':             { ico: '\uD83D\uDC9D',         nm: 'Vinculos' },
-    'rune_scribe':      { ico: '\u2728',               nm: 'Runas' },
-    'settle_':          { ico: '\u26CF\uFE0F',         nm: 'Descoberta' },
-    'shadow_alley':     { ico: '\uD83C\uDF11',         nm: 'Beco' },
-    'social_do':        { ico: '\uD83D\uDCAC',         nm: 'Social' },
-    'social_':          { ico: '\uD83E\uDD1D',         nm: 'Social' },
-    'trade_':           { ico: '\uD83E\uDEA3',         nm: 'Troca' },
-    'wnpc_':            { ico: '\uD83E\uDDE4',         nm: 'NPC' },
-    'workshop_':        { ico: '\uD83D\uDD28',         nm: 'Oficina' },
-    /* Prefixos especificos (sem fallback generico 'action_' — muito amplo, captura back/settings/toggle) */
-    'action_social':    { ico: '\uD83E\uDD1D',         nm: 'Social' },
-    'ach_':             { ico: '\uD83C\uDFC6',         nm: 'Conquistas' },
-    'stl_':             { ico: '\u26CF\uFE0F',         nm: 'Assentamento' }
-};
+var _LOC_MAP = (function(){
+    function S(id) { return '<svg viewBox="0 0 120 120"><use href="#' + id + '"/></svg>'; }
+    return {
+        'tavern':           { ico: S('ic-taverna'), nm: 'Taverna' },
+        'taverna':          { ico: S('ic-taverna'), nm: 'Taverna' },
+        'inn':              { ico: S('ic-estalagem'), nm: 'Estalagem' },
+        'estalagem':        { ico: S('ic-estalagem'), nm: 'Estalagem' },
+        'open_inn':         { ico: S('ic-estalagem'), nm: 'Estalagem' },
+        'arena':            { ico: S('ic-arena'),    nm: 'Arena' },
+        'arena_main':       { ico: S('ic-arena'),    nm: 'Arena' },
+        'market':           { ico: S('ic-mercado'),  nm: 'Mercado' },
+        'mercado':          { ico: S('ic-mercado'),  nm: 'Mercado' },
+        'city_locations':   { ico: S('ic-portoes'),  nm: 'Cidade' },
+        'action_city_locations': { ico: S('ic-portoes'), nm: 'Cidade' },
+        'guild':            { ico: S('ic-paladino'), nm: 'Guilda' },
+        'guilda':           { ico: S('ic-paladino'), nm: 'Guilda' },
+        'temple':           { ico: S('ic-templo'),   nm: 'Templo' },
+        'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
+        'gates':            { ico: S('ic-portoes'),  nm: 'Portoes' },
+        'portoes':          { ico: S('ic-portoes'),  nm: 'Portoes' },
+        'square':           { ico: S('ic-praca'),    nm: 'Praca' },
+        'praca':            { ico: S('ic-praca'),    nm: 'Praca' },
+        'bank':             { ico: S('ic-banco'),    nm: 'Banco' },
+        'banco':            { ico: S('ic-banco'),    nm: 'Banco' },
+        'action_quests':    { ico: S('ic-missoes'),  nm: 'Missoes' },
+        'quests':           { ico: S('ic-missoes'),  nm: 'Missoes' },
+        'daily_challenge':  { ico: S('ic-desafio'),  nm: 'Desafio' },
+        'action_codex':     { ico: S('ic-compendio'),nm: 'Compendio' },
+        'codex':            { ico: S('ic-compendio'),nm: 'Compendio' },
+        'festival':         { ico: S('ic-festival'), nm: 'Festival' },
+        'league_':          { ico: S('ic-desafio'),  nm: 'Liga' },
+        'manage_':          { ico: S('ic-grupo'),    nm: 'Contas' },
+        'open_workshop':    { ico: S('ic-oficina'),  nm: 'Oficina' },
+        'rel_':             { ico: S('ic-vinculos'), nm: 'Vinculos' },
+        'rune_scribe':      { ico: S('ic-runas'),    nm: 'Runas' },
+        'shadow_alley':     { ico: S('ic-portoes'),  nm: 'Beco' },
+        'workshop_':        { ico: S('ic-oficina'),  nm: 'Oficina' },
+        'cartografia':      { ico: S('ic-cartografia'), nm: 'Mapa' },
+        'travel':           { ico: S('ic-cartografia'), nm: 'Viajar' },
+        'druid':            { ico: S('ic-druida'),   nm: 'Druida' },
+        'ach_':             { ico: S('ic-desafio'),  nm: 'Conquistas' }
+    };
+})();
 
 /** Classifica um callback de botao como localizacao conhecida.
  *  Exact match first, then substring — prevents greedy substring
@@ -442,9 +432,13 @@ function _hubMiniBar(type, pct) {
 function _buildLocCell(ico, name, btn) {
     var cell = _hubDiv('hub-loc');
 
-    /* Emoji icon */
+    /* Icon: heraldic SVG (canonical) ou emoji fallback */
     var icoEl = _hubDiv('hl-ico');
-    icoEl.textContent = ico;
+    if (typeof ico === 'string' && ico.indexOf('<svg') === 0) {
+        icoEl.innerHTML = ico;
+    } else {
+        icoEl.textContent = ico;
+    }
     cell.appendChild(icoEl);
 
     /* Label */
