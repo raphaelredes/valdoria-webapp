@@ -12,14 +12,24 @@ function _looksLikeProdHost(hostname) {
     if (hostname.endsWith('.lendasdevaldoria.com.br') && !hostname.startsWith('dev.')) return true;
     return false;
 }
-var _hostProd = _looksLikeProdHost(window.location.hostname);
+var _hostname = String(window.location.hostname || '').toLowerCase();
+var _hostProd = _looksLikeProdHost(_hostname);
 var _envOverride = window._envOverride || new URLSearchParams(window.location.search).get('env');
-// 2026-05-04 USER FIX: Removed silent ignore of env=dev on canonical PROD host.
-// Architecture (.env) shares WEBAPP_BASE_URL between DEV and PROD bots, so
-// honoring ?env=dev here is the ONLY way DEV players access their chars via web.
-// Cross-env contamination is already prevented by env-prefixed localStorage,
-// separate api-url-{env}.json, separate bot OAuth (different bot_id signs
-// each env's token), and server-side token validation. See env-utils.js.
+
+// 2026-05-04 USER ARCHITECTURE RULE (canonical):
+//   • jogo.lendasdevaldoria.com.br = PROD ONLY (canonical public host)
+//   • dev.lendasdevaldoria.com.br  = DEV (auth-restricted allowlist)
+// Browser DEV access goes ONLY through dev.*. If user lands on jogo.*?env=dev,
+// redirect to dev.*?env=dev. See shared/env-utils.js for full rationale.
+if (_hostname === 'jogo.lendasdevaldoria.com.br' && _envOverride === 'dev') {
+    console.warn('[WEB-AUTH] jogo.* + ?env=dev → redirecting to dev.lendasdevaldoria.com.br');
+    try {
+        var _devUrl = 'https://dev.lendasdevaldoria.com.br' + window.location.pathname + window.location.search + window.location.hash;
+        window.location.replace(_devUrl);
+    } catch (e) { /* noqa: preflight */ }
+    _envOverride = null;
+}
+
 if (_envOverride && _envOverride !== 'prod' && _envOverride !== 'dev') {
     console.warn('[WEB-AUTH] Ignoring invalid env override:', _envOverride);
     _envOverride = null;
@@ -28,7 +38,7 @@ var _isProd = _envOverride ? (_envOverride === 'prod') : _hostProd;
 var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'DevValdoriaBot';
 var _envId = _isProd ? 'prod' : 'dev';
 if (_envOverride && _envOverride !== (_hostProd ? 'prod' : 'dev')) {
-    console.info('[WEB-AUTH] env override ACTIVE: env=' + _envId + ' (host=' + window.location.hostname + ' would default to ' + (_hostProd ? 'prod' : 'dev') + ')');
+    console.info('[WEB-AUTH] env override ACTIVE: env=' + _envId + ' (host=' + _hostname + ' would default to ' + (_hostProd ? 'prod' : 'dev') + ')');
 }
 
 // Storage keys

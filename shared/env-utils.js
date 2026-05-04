@@ -12,29 +12,38 @@ var ValdoriaEnv = (function() {
         if (hostname.endsWith('.lendasdevaldoria.com.br') && !hostname.startsWith('dev.')) return true;
         return false;
     }
-    var _hostProd = _looksLikeProdHost(window.location.hostname);
+    var _hostname = String(window.location.hostname || '').toLowerCase();
+    var _hostProd = _looksLikeProdHost(_hostname);
     var _envOverride = window._envOverride || new URLSearchParams(window.location.search).get('env');
-    // 2026-05-04 USER FIX: Removed the hard guard that silently ignored env=dev
-    // on the canonical host (jogo.lendasdevaldoria.com.br). Architecture (.env)
-    // intentionally shares WEBAPP_BASE_URL between DEV and PROD bots, so
-    // ?env=dev MUST be honored on the canonical host — otherwise DEV players
-    // can never access their characters via web. Cross-env contamination is
-    // already prevented by:
-    //   - env-prefixed localStorage keys (*_dev vs *_prod)
-    //   - separate api-url-{env}.json files
-    //   - bot_id-based OAuth (DEV bot signs DEV tokens; PROD bot signs PROD)
-    //   - server-side token validation (DEV API rejects PROD tokens, vice-versa)
-    // Honoring ?env=dev here just changes which API/bot the WebApp talks to;
-    // the user's actual data (chars, etc.) stays scoped to their env via auth.
+
+    // 2026-05-04 USER ARCHITECTURE RULE (canonical):
+    //   • jogo.lendasdevaldoria.com.br  → PROD ONLY (canonical public host)
+    //   • dev.lendasdevaldoria.com.br   → DEV (auth-restricted allowlist)
+    //   • bot-launched WebApps from DEV bot use jogo.* with HMAC initData
+    //     (NOT ?env=dev — that's the path for browser users only)
+    //
+    // If a user lands on jogo.*?env=dev (e.g., from an old link/typo), we
+    // REDIRECT to dev.lendasdevaldoria.com.br/web/?env=dev. This is the ONLY
+    // valid browser entry point for DEV. Never silently honor ?env=dev on
+    // jogo.* — that mixes PROD bot OAuth + DEV API and just creates broken
+    // sessions ("Bot domain invalid" or worse, cross-env contamination).
+    if (_hostname === 'jogo.lendasdevaldoria.com.br' && _envOverride === 'dev') {
+        try { console.warn('[ENV] jogo.* + ?env=dev → redirecting to dev.lendasdevaldoria.com.br (DEV is auth-restricted on dev.*)'); } catch (e) {}
+        var _newUrl = 'https://dev.lendasdevaldoria.com.br' + window.location.pathname + window.location.search + window.location.hash;
+        try { window.location.replace(_newUrl); } catch (e) { /* noqa: preflight */ }
+        // Continue with PROD env below — the redirect supersedes; this
+        // only prevents a flash of broken auth in case redirect is delayed.
+        _envOverride = null;
+    }
+
     if (_envOverride && _envOverride !== 'prod' && _envOverride !== 'dev') {
-        // Reject malformed override values
         try { console.warn('[ENV] Ignoring invalid env override:', _envOverride); } catch (e) {}
         _envOverride = null;
     }
     var _isProd = _envOverride ? (_envOverride === 'prod') : _hostProd;
     var _envId = _isProd ? 'prod' : 'dev';
     if (_envOverride && _envOverride !== (_hostProd ? 'prod' : 'dev')) {
-        try { console.info('[ENV] Override active: env=' + _envId + ' on host=' + window.location.hostname); } catch (e) {}
+        try { console.info('[ENV] Override active: env=' + _envId + ' on host=' + _hostname); } catch (e) {}
     }
 
     function getEnvKey(baseKey) {
