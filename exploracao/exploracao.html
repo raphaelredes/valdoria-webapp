@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-04T21:47:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-04T22:33:28Z - do not edit directly, edit source -->
 
 
 <!--
@@ -31964,11 +31964,16 @@ function triggerCombatScreen(cfg) {
     + ' surprise=' + !!cfg.surprise
     + ' lookup_name=' + (resolvedLookupName || '-'));
   // [FASE 3 FIX 2026-04-23] URL path absoluto em vez de relativo.
-  // ANTES: 'combate.html?...' → em REMOTE (/exploracao/exploracao.html)
-  //   resolvia pra /exploracao/combate.html → 404 no Cloudflare!
+  // [X-6.5.51AC FIX 2026-05-04] LOCAL mode em domínio hosted (Cloudflare Pages
+  // dev.lendasdevaldoria.com.br/exploracao/exploracao) caía em 404 porque
+  // 'combate.html' relativo resolvia /exploracao/combate.html (combate vive
+  // em /combat2/). Agora detecta protocol — file:// usa relativo (master path
+  // local), http(s):// usa absoluto /combat2/combate.html (deploy hosted).
+  // ANTES: 'combate.html?...' → 404 em qualquer hosted/non-file:// URL
   // AGORA:
-  //   REMOTE: '/combat2/?...' (shim redireciona pra /combat2/combate.html)
-  //   LOCAL (file://): 'combate.html?...' relativo (mesmo diretório)
+  //   REMOTE: '/combat2/?...' (shim canonical em /combat2/)
+  //   LOCAL hosted (http/https): '/combat2/combate.html?...' (absoluto)
+  //   LOCAL file:// (master path testing): 'combate.html?...' (mesmo dir)
   console.info('[E-REM:COMBAT] redirecting to combate.html enemy=' + cfg.enemyId
     + ' surprise=' + !!cfg.surprise + ' mode=' + window.__EXPLORE_MODE);
   // Marca transition pra anti close-beacon
@@ -31976,9 +31981,12 @@ function triggerCombatScreen(cfg) {
   if (window.__EXPLORE_MODE === 'remote') {
     // URL absoluta pro combate2 shim (infra canonical deployada em /combat2/)
     window.location.href = '/combat2/?' + params.toString();
-  } else {
-    // LOCAL file:// — mesmo diretório pois combate.html está ao lado de exploracao.html
+  } else if (window.location.protocol === 'file:') {
+    // LOCAL file:// — mesmo diretório (master path /simuladores/)
     window.location.href = 'combate.html?' + params.toString();
+  } else {
+    // LOCAL hosted (Cloudflare Pages dev/PROD) — combate vive em /combat2/
+    window.location.href = '/combat2/combate.html?' + params.toString();
   }
 }
 
