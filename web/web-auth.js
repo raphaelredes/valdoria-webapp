@@ -14,15 +14,22 @@ function _looksLikeProdHost(hostname) {
 }
 var _hostProd = _looksLikeProdHost(window.location.hostname);
 var _envOverride = window._envOverride || new URLSearchParams(window.location.search).get('env');
-// Hard guard: on PROD host we NEVER allow forcing env=dev via query param.
-if (_hostProd && _envOverride === 'dev') {
-    console.warn('[WEB-AUTH] Ignoring env=dev override on PROD host:', window.location.hostname);
+// 2026-05-04 USER FIX: Removed silent ignore of env=dev on canonical PROD host.
+// Architecture (.env) shares WEBAPP_BASE_URL between DEV and PROD bots, so
+// honoring ?env=dev here is the ONLY way DEV players access their chars via web.
+// Cross-env contamination is already prevented by env-prefixed localStorage,
+// separate api-url-{env}.json, separate bot OAuth (different bot_id signs
+// each env's token), and server-side token validation. See env-utils.js.
+if (_envOverride && _envOverride !== 'prod' && _envOverride !== 'dev') {
+    console.warn('[WEB-AUTH] Ignoring invalid env override:', _envOverride);
     _envOverride = null;
 }
 var _isProd = _envOverride ? (_envOverride === 'prod') : _hostProd;
 var BOT_USERNAME = _isProd ? 'LendasDeValdoriaBOT' : 'DevValdoriaBot';
 var _envId = _isProd ? 'prod' : 'dev';
-if (_envOverride) console.info('[WEB-AUTH] environment FORCED to %s (isProd=%s)', _envId, _isProd);
+if (_envOverride && _envOverride !== (_hostProd ? 'prod' : 'dev')) {
+    console.info('[WEB-AUTH] env override ACTIVE: env=' + _envId + ' (host=' + window.location.hostname + ' would default to ' + (_hostProd ? 'prod' : 'dev') + ')');
+}
 
 // Storage keys
 var WEB_TOKEN_KEY = 'valdoria_web_token' + '_' + _envId;
@@ -931,6 +938,17 @@ async function _tryTelegramInitAuth() {
 
 async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
+
+    /* 2026-05-04 USER FIX: visible env badge on auth screen — prevents user
+     * from being silently logged into the wrong env (recurring complaint
+     * "?env=dev está pegando dados do PROD novamente"). */
+    try {
+        var _envBadge = document.getElementById('wa-env-badge');
+        if (_envBadge) {
+            _envBadge.setAttribute('data-env', _envId);
+            _envBadge.textContent = _envId === 'dev' ? '⚙ Ambiente DEV' : 'Ambiente PROD';
+        }
+    } catch (e) { /* noqa: preflight */ }
 
     /* ── AUTO-LOGIN VIA TELEGRAM MINI APP (deve rodar ANTES do dev portal) ─
      * Quando a pagina abre de dentro do Telegram (bot Menu Button ou link
