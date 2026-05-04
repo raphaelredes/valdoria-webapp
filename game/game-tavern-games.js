@@ -22,6 +22,13 @@ function _tgBtn(label, action, cls) {
     btn.className = cls || 'tg-bet-btn';
     btn.textContent = label;
     btn.setAttribute('data-action', action);
+    /* FIX 2026-05-03: bind click listener (defensivo — popup.js delegation
+       só captura dentro de vPopup; em fallbacks fora do popup, listener vivo) */
+    if (action && typeof vCity !== 'undefined' && vCity.act) {
+        btn.addEventListener('click', function(){ vCity.act(action); });
+    } else if (action && typeof doAction === 'function') {
+        btn.addEventListener('click', function(){ doAction(action); });
+    }
     return btn;
 }
 

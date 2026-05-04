@@ -65,6 +65,8 @@ function renderWorkshopHub(container, data) {
     btnCount.textContent = t.recipe_count + ' receitas';
     btnInfo.appendChild(btnCount);
     btn.appendChild(btnInfo);
+    /* FIX 2026-05-03: bind click handler (data-action sozinho não dispara) */
+    btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
     toolsGrid.appendChild(btn);
   }
   root.appendChild(toolsGrid);
@@ -74,6 +76,8 @@ function renderWorkshopHub(container, data) {
     var scribeBtn = vCity.el('button', 'wks-scribe-btn');
     scribeBtn.setAttribute('data-action', 'workshop_scribe_menu');
     scribeBtn.textContent = data.scribe;
+    /* FIX 2026-05-03: bind click handler */
+    scribeBtn.addEventListener('click', function(){ vCity.act('workshop_scribe_menu'); });
     root.appendChild(scribeBtn);
   }
 
@@ -85,6 +89,8 @@ function renderWorkshopHub(container, data) {
       var qBtn = vCity.el('button', 'wks-quick-btn');
       qBtn.setAttribute('data-action', qa.cb);
       qBtn.textContent = qa.icon + ' ' + qa.label;
+      /* FIX 2026-05-03: bind click handler */
+      qBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(qa.cb));
       qRow.appendChild(qBtn);
     }
     root.appendChild(qRow);

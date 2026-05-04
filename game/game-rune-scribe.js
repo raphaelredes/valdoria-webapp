@@ -69,6 +69,8 @@ function _renderCraftMenu(container, data) {
       if (t.can_craft) {
         btn.textContent = '✅ Forjar Runa Tier ' + t.tier;
         btn.classList.add('rns-craft-ready');
+        /* FIX 2026-05-03: bind click listener (data-action sozinho não dispara) */
+        btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
       } else if (t.locked_level) {
         btn.textContent = '🔒 Nivel ' + t.min_level + ' necessario';
         btn.disabled = true;
@@ -92,6 +94,8 @@ function _renderCraftMenu(container, data) {
       var aBtn = vCity.el('button', 'rns-action-btn');
       aBtn.setAttribute('data-action', act.cb);
       aBtn.textContent = act.icon + ' ' + act.label;
+      /* FIX 2026-05-03: bind click listener */
+      aBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(act.cb));
       qRow.appendChild(aBtn);
     }
     root.appendChild(qRow);

@@ -65,6 +65,9 @@ function _renderInsurance(container, data) {
     if (data.action.disabled) {
       btn.disabled = true;
       btn.classList.add('bsb-disabled');
+    } else {
+      /* FIX 2026-05-03: bind click listener (data-action sozinho não dispara) */
+      btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(data.action.cb));
     }
     root.appendChild(btn);
   }
@@ -108,6 +111,8 @@ function _renderLoans(container, data) {
       var btn = vCity.el('button', 'bsb-action-btn');
       btn.textContent = data.action.label;
       btn.setAttribute('data-action', data.action.cb);
+      /* FIX 2026-05-03: bind click listener */
+      btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(data.action.cb));
       root.appendChild(btn);
     }
   } else {
@@ -120,6 +125,8 @@ function _renderLoans(container, data) {
       if (t.locked) continue;
       var tCard = vCity.el('button', 'bsb-tier-card');
       tCard.setAttribute('data-action', t.cb);
+      /* FIX 2026-05-03: bind click listener */
+      tCard.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
 
       var tHeader = vCity.el('div', 'bsb-tier-header');
       var tEmoji = vCity.el('span', 'bsb-tier-emoji');
@@ -163,6 +170,8 @@ function _renderInvestments(container, data) {
       var inv = data.active[i];
       var card = vCity.el('button', 'bsb-invest-card' + (inv.mature ? ' bsb-invest-mature' : ''));
       card.setAttribute('data-action', inv.cb);
+      /* FIX 2026-05-03: bind click listener */
+      card.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(inv.cb));
 
       var hdr = vCity.el('div', 'bsb-invest-header');
       var emoji = vCity.el('span');
@@ -191,6 +200,8 @@ function _renderInvestments(container, data) {
       if (tier.locked) continue;
       var tBtn = vCity.el('button', 'bsb-tier-card');
       tBtn.setAttribute('data-action', tier.cb);
+      /* FIX 2026-05-03: bind click listener */
+      tBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(tier.cb));
 
       var tHdr = vCity.el('div', 'bsb-tier-header');
       var tE = vCity.el('span', 'bsb-tier-emoji');

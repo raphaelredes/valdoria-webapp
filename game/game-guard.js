@@ -37,6 +37,8 @@ function renderGuardScreen(container, data) {
       var btn = vCity.el('button', 'grd-action-btn');
       btn.setAttribute('data-action', a.cb);
       btn.textContent = a.label;
+      /* FIX 2026-05-03: bind click listener */
+      btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(a.cb));
       grid.appendChild(btn);
     }
     root.appendChild(grid);
