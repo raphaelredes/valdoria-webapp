@@ -43,6 +43,7 @@ function _hubEsc(s) {
 
 /* ── Location Mapping ────────────────────────────────────────── */
 
+// === SYNC_REGION: _LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
     function S(id) { return '<svg viewBox="0 0 120 120"><use href="#' + id + '"/></svg>'; }
     return {
@@ -86,6 +87,7 @@ var _LOC_MAP = (function(){
         'ach_':             { ico: S('ic-desafio'),  nm: 'Conquistas' }
     };
 })();
+// === SYNC_REGION END ===
 
 /** Classifica um callback de botao como localizacao conhecida.
  *  Exact match first, then substring — prevents greedy substring
@@ -147,6 +149,7 @@ function _hubCoin(size) {
  * @param {HTMLElement} el  — container de conteudo (o #content)
  * @param {Object} screen   — dados completos da tela do serializer
  */
+// === SYNC_REGION: renderHubScreen BEGIN ===
 function renderHubScreen(el, screen) {
     el.className = 'hub-screen';
     var frag = document.createDocumentFragment();
@@ -276,8 +279,11 @@ function renderHubScreen(el, screen) {
                 if (typeof haptic === 'function') haptic('light');
                 if (ps.league_cb && typeof doAction === 'function') doAction(ps.league_cb);
             });
+            // ps.league_icon agora é ID heráldico (ic-liga-bronze/prata/ouro/...)
+            var leagueIconId = ps.league_icon || 'ic-liga-bronze';
+            var leagueColor = ps.league_color || '#cd7f32';
             var leagueVal = _hubDiv('hp-val');
-            leagueVal.textContent = (ps.league_icon || '') + ' ' + (ps.league_xp || 0).toLocaleString('pt-BR');
+            leagueVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + leagueColor + ';"><use href="#' + leagueIconId + '"/></svg>' + (ps.league_xp || 0).toLocaleString('pt-BR');
             leagueCard.appendChild(leagueVal);
             var leagueLbl = _hubDiv('hp-lbl');
             leagueLbl.textContent = ps.league_name || 'Liga';
@@ -292,7 +298,7 @@ function renderHubScreen(el, screen) {
                 if (ps.ach_cb && typeof doAction === 'function') doAction(ps.ach_cb);
             });
             var achVal = _hubDiv('hp-val');
-            achVal.textContent = '\uD83C\uDFC6 ' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
+            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
             achCard.appendChild(achVal);
             var achLbl = _hubDiv('hp-lbl');
             achLbl.textContent = 'Conquistas';
@@ -303,8 +309,13 @@ function renderHubScreen(el, screen) {
         /* Combat stats (from _player_stats) */
         if (pStats && pStats.kills > 0) {
             var killCard = _hubDiv('hub-prog-card');
+            killCard.style.cursor = 'pointer';
+            killCard.addEventListener('click', function () {
+                if (typeof haptic === 'function') haptic('light');
+                if (typeof doAction === 'function') doAction(pStats.kills_cb || 'kills_log');
+            });
             var killVal = _hubDiv('hp-val');
-            killVal.textContent = '\u2694\uFE0F ' + pStats.kills;
+            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
             killCard.appendChild(killVal);
             var killLbl = _hubDiv('hp-lbl');
             killLbl.textContent = 'Abates';
@@ -313,8 +324,13 @@ function renderHubScreen(el, screen) {
         }
         if (pStats && pStats.streak > 0) {
             var streakCard = _hubDiv('hub-prog-card');
+            streakCard.style.cursor = 'pointer';
+            streakCard.addEventListener('click', function () {
+                if (typeof haptic === 'function') haptic('light');
+                if (typeof doAction === 'function') doAction(pStats.streak_cb || 'streak_log');
+            });
             var streakVal = _hubDiv('hp-val');
-            streakVal.textContent = '\uD83D\uDD25 ' + pStats.streak;
+            streakVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:#ff8a4a;"><use href="#ic-ach-indomavel"/></svg>' + pStats.streak;
             streakCard.appendChild(streakVal);
             var streakLbl = _hubDiv('hp-lbl');
             streakLbl.textContent = 'Sequência';
@@ -352,6 +368,7 @@ function renderHubScreen(el, screen) {
     /* Append everything to the container */
     el.appendChild(frag);
 }
+// === SYNC_REGION END ===
 
 
 /* ================================================================
@@ -363,6 +380,7 @@ function renderHubScreen(el, screen) {
  * @param {Object} a — dados do aliado {n, c, ico, l, hp, mhp, mp, mmp, type, dead, ...}
  * @returns {HTMLElement}
  */
+// === SYNC_REGION: _buildHubAlly BEGIN ===
 function _buildHubAlly(a) {
     var card = _hubDiv('hub-ally');
     if (a.type === 'player') card.classList.add('player');
@@ -403,6 +421,7 @@ function _buildHubAlly(a) {
     card.appendChild(info);
     return card;
 }
+// === SYNC_REGION END ===
 
 /**
  * Cria uma mini barra de HP ou MP (3px de altura).
@@ -429,6 +448,7 @@ function _hubMiniBar(type, pct) {
  * @param {Object} btn   — {text, cb} do botao original
  * @returns {HTMLElement}
  */
+// === SYNC_REGION: _buildLocCell BEGIN ===
 function _buildLocCell(ico, name, btn) {
     var cell = _hubDiv('hub-loc');
 
@@ -464,12 +484,14 @@ function _buildLocCell(ico, name, btn) {
 
     return cell;
 }
+// === SYNC_REGION END ===
 
 /**
  * Constroi uma linha do mini quest tracker.
  * @param {Object} q — {title, stage, total, ready, cb, obj}
  * @returns {HTMLElement}
  */
+// === SYNC_REGION: _buildQuestRow BEGIN ===
 function _buildQuestRow(q) {
     var row = _hubDiv('hub-quest');
     row.style.cursor = 'pointer';
@@ -502,6 +524,7 @@ function _buildQuestRow(q) {
 
     return row;
 }
+// === SYNC_REGION END ===
 
 
 /* ── Nota ────────────────────────────────────────────────────── */
