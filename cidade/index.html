@@ -37604,8 +37604,13 @@ function _findAdjacentDiscoverable(player) {
 
 // RNG: rola descoberta. Chance baseada em level + game_day + flag rumor.
 function _maybeRollDiscovery(player) {
-  player._discovered_attempts = player._discovered_attempts || {};
-  var lastDay = player._last_discovery_day || 0;
+  // FIX 2026-05-04 (revisão): persistir em metadata pro REMOTE mode
+  // saber sincronizar com server. Player object cleared em REMOTE init,
+  // mas metadata é preservada via /api/auth/characters.
+  player.metadata = player.metadata || {};
+  player.metadata._discovered_attempts = player.metadata._discovered_attempts || {};
+  player._discovered_attempts = player.metadata._discovered_attempts;
+  var lastDay = player.metadata._last_discovery_day || 0;
   // Cap: 1 descoberta por dia
   if ((player.game_day || 1) <= lastDay) return null;
   var candidates = _findAdjacentDiscoverable(player);
@@ -37624,7 +37629,8 @@ function _maybeRollDiscovery(player) {
     return null;
   }
   // Descoberta!
-  player._last_discovery_day = player.game_day || 1;
+  player.metadata._last_discovery_day = player.game_day || 1;
+  player._last_discovery_day = player.metadata._last_discovery_day;
   delete player._discovered_attempts[target.key];
   return target;
 }
@@ -37906,6 +37912,24 @@ var OUTBOUND_SAFE_NARR = {
 
 var _preTravelState = null;
 
+// FIX 2026-05-04 (revisão): helpers D&D 5e pra modificadores reais
+function _getStatMod(player, statKey) {
+  // statKey: 'str','dex','con','int','wis','cha'
+  if (!player) return 0;
+  // Tenta player.stats[statKey] primeiro (objeto)
+  var statVal = (player.stats && player.stats[statKey])
+             || (player.stats && player.stats[statKey + 'ength']) // strength → str
+             || 10;
+  // Fallback: stat=10 = +0
+  return Math.floor((statVal - 10) / 2);
+}
+function _getProfBonus(player) {
+  if (!player) return 2;
+  var lvl = player.level || 1;
+  // D&D 5e proficiency bonus: 1-4=+2, 5-8=+3, 9-12=+4, etc.
+  return 2 + Math.floor((lvl - 1) / 4);
+}
+
 function _startPreTravelJourney(biome, displayName, finalRedirectUrl) {
   // Mock player stats
   var player = window.CITY_MOCK_PLAYER || {};
@@ -37929,7 +37953,7 @@ function _injectPreTravelCSS() {
   var st = document.createElement('style');
   st.id = 'pretravel-style';
   st.textContent = ''
-    + '#pt-overlay{position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,0.93);'
+    + '#pt-overlay{position:fixed;inset:0;z-index:9650;background:rgba(0,0,0,0.93);'
     + '  display:flex;align-items:center;justify-content:center;padding:14px;'
     + '  animation:ptFade 0.5s ease-out}'
     + '@keyframes ptFade{from{opacity:0}to{opacity:1}}'
@@ -38050,7 +38074,13 @@ function _renderSafeStep(s) {
   var btn = document.createElement('button');
   btn.className = 'pt-btn pt-btn-continue';
   btn.textContent = '🚶 Continuar';
-  btn.onclick = function(){ _renderPreTravelStep(); };
+  // FIX 2026-05-04 (revisão): prevent double-click race
+  btn.onclick = function(){
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    _renderPreTravelStep();
+  };
   document.getElementById('pt-actions').appendChild(btn);
 }
 
@@ -38066,14 +38096,21 @@ function _renderHazardStep(s) {
   var btn = document.createElement('button');
   btn.className = 'pt-btn';
   btn.innerHTML = '🎲 Rolar ' + hazard.statName + ' (DC ' + hazard.dc + ')';
-  btn.onclick = function(){ _resolveHazardRoll(s, hazard); };
+  // FIX 2026-05-04 (revisão): prevent double-click
+  btn.onclick = function(){
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    _resolveHazardRoll(s, hazard);
+  };
   actEl.appendChild(btn);
 }
 
 function _resolveHazardRoll(s, hazard) {
-  // Mock modifier (D&D 5e: stat=10 = +0; level 5 mago tem ~ +2 wisdom)
+  // FIX 2026-05-04 (revisão): mod baseado em player.stats real quando
+  // disponível. D&D 5e: stat=10 → +0, stat=12 → +1, stat=14 → +2, etc.
   var p = window.CITY_MOCK_PLAYER || {};
-  var mod = 2; // mock simplificado
+  var mod = _getStatMod(p, hazard.stat);
   var bodyEl = document.getElementById('pt-body');
   var actEl = document.getElementById('pt-actions');
   actEl.innerHTML = '';
@@ -38125,7 +38162,11 @@ function _showHazardResult(s, hazard, rollVal, mod, total, success) {
   var btn = document.createElement('button');
   btn.className = 'pt-btn pt-btn-continue';
   btn.textContent = '🚶 Seguir Viagem';
+  // FIX 2026-05-04 (revisão): prevent double-click race
   btn.onclick = function(){
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
     if (s.hp <= 0) { _failPreTravel(s); return; }
     _renderPreTravelStep();
   };
@@ -38151,11 +38192,22 @@ function _renderCombatStep(s) {
   var fightBtn = document.createElement('button');
   fightBtn.className = 'pt-btn pt-btn-fight';
   fightBtn.innerHTML = '⚔️ Lutar (rolar ataque vs CA 12)';
-  fightBtn.onclick = function(){ _resolveCombatRoll(s, enemy, 'fight'); };
   var fleeBtn = document.createElement('button');
   fleeBtn.className = 'pt-btn pt-btn-flee';
   fleeBtn.innerHTML = '🏃 Fugir (DES vs DC 12 — falha = ' + Math.ceil(enemy.dmg / 2) + ' HP)';
-  fleeBtn.onclick = function(){ _resolveCombatRoll(s, enemy, 'flee'); };
+  // FIX 2026-05-04 (revisão): disable AMBOS após click pra prevenir spam
+  fightBtn.onclick = function(){
+    if (fightBtn.disabled) return;
+    fightBtn.disabled = true; fleeBtn.disabled = true;
+    fightBtn.style.opacity = '0.5'; fleeBtn.style.opacity = '0.3';
+    _resolveCombatRoll(s, enemy, 'fight');
+  };
+  fleeBtn.onclick = function(){
+    if (fleeBtn.disabled) return;
+    fightBtn.disabled = true; fleeBtn.disabled = true;
+    fightBtn.style.opacity = '0.3'; fleeBtn.style.opacity = '0.5';
+    _resolveCombatRoll(s, enemy, 'flee');
+  };
   actEl.appendChild(fightBtn);
   actEl.appendChild(fleeBtn);
 }
@@ -38170,7 +38222,11 @@ function _resolveCombatRoll(s, enemy, mode) {
   bodyEl.appendChild(diceArea);
 
   var rollVal = 1 + Math.floor(Math.random() * 20);
-  var mod = 3; // mock attack/dex modifier
+  // FIX 2026-05-04 (revisão): mod real do player + proficiency bonus.
+  // Fight: STR (corpo a corpo) + prof. Flee: DEX + prof.
+  var p = window.CITY_MOCK_PLAYER || {};
+  var statKey = mode === 'fight' ? 'str' : 'dex';
+  var mod = _getStatMod(p, statKey) + _getProfBonus(p);
   var total = rollVal + mod;
   var dc = mode === 'fight' ? 12 : 12; // CA do inimigo / DC fugir
 
@@ -38239,7 +38295,11 @@ function _showCombatResult(s, enemy, mode, rollVal, mod, total, success, dc) {
   var btn = document.createElement('button');
   btn.className = 'pt-btn pt-btn-continue';
   btn.textContent = '🚶 Seguir Viagem';
+  // FIX 2026-05-04 (revisão): prevent double-click race
   btn.onclick = function(){
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
     if (s.hp <= 0) { _failPreTravel(s); return; }
     _renderPreTravelStep();
   };
