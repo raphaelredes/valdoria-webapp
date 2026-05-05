@@ -262,8 +262,26 @@ if(window._loadDbgSetApp)_loadDbgSetApp('GAME');
             }
         }
         var ctrl = _ensureCtrl();
+        // 2026-05-04 USER REPORT: ctrl.getState is not a function (race when
+        // ValdoriaLoadingController não carregou ainda, e _ctrl ficou com
+        // versão fallback sem getState/show). Guard tanto contra controller
+        // ausente quanto método missing — evita unhandled rejection que trava
+        // boot do Game Hub no bot DEV.
+        if (!ctrl || typeof ctrl.getState !== 'function') {
+            console.warn('[GAME-LOADING] showLoading() skipped — controller missing getState (loading-controller.js race)');
+            // Show fallback overlay diretamente
+            var el = document.getElementById('loading');
+            if (el) el.style.display = '';
+            return;
+        }
         if (!isRetry && ctrl.getState() === 'loading') {
             console.warn('[GAME-LOADING] showLoading() skipped — controller already loading');
+            return;
+        }
+        if (typeof ctrl.show !== 'function') {
+            console.warn('[GAME-LOADING] showLoading() skipped — controller.show missing');
+            var el2 = document.getElementById('loading');
+            if (el2) el2.style.display = '';
             return;
         }
         ctrl.show(isRetry);
