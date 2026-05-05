@@ -7017,6 +7017,19 @@ function _showCharactersPopup(){
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Hall de Personagens';
 
+  // USER REQUEST 2026-05-04: Hall toca character_creation track (não há track
+  // específica de hall — tocar a mesma do creator garante continuidade ao
+  // clicar Criar Novo Personagem). Salva track atual pra restaurar ao fechar.
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play && ValdoriaAudio.getCurrentTrack){
+      var cur = ValdoriaAudio.getCurrentTrack();
+      if (cur && cur !== 'character_creation'){
+        window._hallPrevAudioTrack = cur;
+      }
+      ValdoriaAudio.play('character_creation');
+    }
+  } catch(e){ console.warn('[CITY] hall audio:', e); }
+
   // Helper: classe → ID heráldico canonical (regra No NPC Emotes)
   function _hallClassToHeraldic(cls){
     var k = (cls || '').toLowerCase().split(' ')[0];
@@ -32292,6 +32305,13 @@ function closeCityPopup(silent){
   var popup = document.getElementById('city-subscreen-popup');
   if (popup) popup.classList.remove('active');
   _popupStack = [];
+  // USER REQUEST 2026-05-04: restaurar track salvo se Hall mudou pra character_creation
+  try {
+    if (window._hallPrevAudioTrack && typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play){
+      ValdoriaAudio.play(window._hallPrevAudioTrack);
+      window._hallPrevAudioTrack = null;
+    }
+  } catch(e){}
   if (!silent) _logCity('popup closed');
 }
 // Renderiza popup pro key — dispatch para renderer canonical (AREA_REGISTRY) ou
