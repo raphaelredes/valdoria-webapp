@@ -110,21 +110,156 @@
     }
   }
 
+  // === _drawOrganicBlob ===
+  // Mancha orgânica baseada em pétalas Bezier (NÃO círculo perfeito).
+  // 6-9 pontos de borda com raio variável + curvas suaves entre eles.
+  // Usado pra manchas de água, café, vinho, oxidação — formas naturais.
+  function _drawOrganicBlob(ctx, cx, cy, baseRadius, color, alpha, seed){
+    var rng = _cartSeedRand(seed || (cx * 1000 + cy));
+    var nPts = 6 + Math.floor(rng() * 4);
+    var angles = [];
+    for (var i = 0; i < nPts; i++) {
+      angles.push((i / nPts) * Math.PI * 2 + (rng() - 0.5) * 0.5);
+    }
+    var pts = angles.map(function(a){
+      var r = baseRadius * (0.65 + rng() * 0.7);
+      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+    });
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var k = 0; k < pts.length; k++) {
+      var p = pts[k];
+      var pn = pts[(k + 1) % pts.length];
+      var mx = (p[0] + pn[0]) / 2 + (rng() - 0.5) * baseRadius * 0.18;
+      var my = (p[1] + pn[1]) / 2 + (rng() - 0.5) * baseRadius * 0.18;
+      ctx.quadraticCurveTo(p[0], p[1], mx, my);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    return rng;
+  }
+
+  // === _drawAgedStain ===
+  // Mancha envelhecida MULTI-CAMADA (água, café, vinho).
+  // 1) Halo difuso grande (fade out)
+  // 2) Blob orgânico médio (corpo da mancha)
+  // 3) Anel de capilaridade escuro (coffee-ring effect — borda mais escura)
+  // 4) Salpicos pequenos ao redor (3-6 micro-blobs)
+  function _drawAgedStain(ctx, cx, cy, size, baseColor, edgeColor, seed){
+    var rng = _cartSeedRand(seed || (cx + cy * 13));
+    // 1) Halo gradient suave (fade)
+    var halo = ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.6);
+    halo.addColorStop(0, baseColor);
+    halo.addColorStop(0.6, baseColor);
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = halo;
+    ctx.globalAlpha = 0.15 + rng() * 0.08;
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // 2) Blob orgânico (corpo)
+    _drawOrganicBlob(ctx, cx, cy, size * 0.85, baseColor, 0.20 + rng() * 0.10, seed);
+    // 3) Coffee-ring: borda mais escura (anel de capilaridade)
+    var ringInner = size * 0.7, ringOuter = size * 0.92;
+    var ring = ctx.createRadialGradient(cx, cy, ringInner, cx, cy, ringOuter);
+    ring.addColorStop(0, 'rgba(0,0,0,0)');
+    ring.addColorStop(0.5, edgeColor);
+    ring.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = ring;
+    ctx.globalAlpha = 0.35;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringOuter, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // 4) Salpicos pequenos
+    var nSplats = 3 + Math.floor(rng() * 4);
+    for (var s = 0; s < nSplats; s++) {
+      var ang = rng() * Math.PI * 2;
+      var dist = size * (1.0 + rng() * 0.6);
+      var sx = cx + Math.cos(ang) * dist;
+      var sy = cy + Math.sin(ang) * dist;
+      var ssz = 1 + rng() * (size * 0.08);
+      _drawOrganicBlob(ctx, sx, sy, ssz, baseColor, 0.18 + rng() * 0.15, seed + s * 7);
+    }
+  }
+
+  // === _drawCrease ===
+  // Dobra/vinco no papel — linha hesitante com sombra adjacente
+  function _drawCrease(ctx, x1, y1, x2, y2, seed){
+    var rng = _cartSeedRand(seed || 1);
+    ctx.save();
+    // Linha principal da dobra (hesitante)
+    ctx.strokeStyle = 'rgba(80,50,20,0.16)';
+    ctx.lineWidth = 0.6;
+    var steps = Math.max(20, Math.round(Math.hypot(x2 - x1, y2 - y1) / 8));
+    ctx.beginPath();
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var x = x1 + (x2 - x1) * t + (rng() - 0.5) * 1.2;
+      var y = y1 + (y2 - y1) * t + (rng() - 0.5) * 1.2;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Sombra paralela (capilaridade da dobra)
+    ctx.strokeStyle = 'rgba(60,40,12,0.08)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    var dx = (x2 - x1) / steps, dy = (y2 - y1) / steps;
+    var nx = -dy / Math.hypot(dx, dy), ny = dx / Math.hypot(dx, dy);
+    for (var j = 0; j <= steps; j++) {
+      var t2 = j / steps;
+      var px = x1 + (x2 - x1) * t2 + nx * 1.5 + (rng() - 0.5) * 1.2;
+      var py = y1 + (y2 - y1) * t2 + ny * 1.5 + (rng() - 0.5) * 1.2;
+      if (j === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // === _drawScorchedEdge ===
+  // Borda chamuscada — gradient escuro + chamas irregulares no contorno
+  function _drawScorchedEdge(ctx, w, h, intensity){
+    intensity = intensity || 0.42;
+    // 1) Gradient radial nas bordas
+    var grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.min(w, h) * 0.85);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.7, 'rgba(40,20,10,' + (intensity * 0.4) + ')');
+    grad.addColorStop(1, 'rgba(40,20,10,' + intensity + ')');
+    ctx.save();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    // 2) Chamuscado irregular nos cantos (4 manchas escuras orgânicas)
+    var corners = [[0, 0], [w, 0], [0, h], [w, h]];
+    corners.forEach(function(c, i){
+      var seed = 100 + i * 7;
+      var rng = _cartSeedRand(seed);
+      var size = 30 + rng() * 25;
+      _drawOrganicBlob(ctx, c[0], c[1], size, 'rgba(28,14,6,0.5)', 0.55, seed);
+    });
+  }
+
   // === _drawParchmentBase ===
   function _drawParchmentBase(ctx, w, h){
     // 1. Base flat sepia (sem gradient)
     ctx.fillStyle = PAPER_BG;
     ctx.fillRect(0, 0, w, h);
-    // 2. Aged blotches em algumas áreas (pseudo-random clusters)
+    // 2. Aged blotches ORGÂNICOS (não círculos toscos — formas Bezier irregulares
+    //    com pétalas + capilaridade + salpicos). 2026-05-04: substitui ctx.arc plano.
     var rng = _cartSeedRand(42);
-    for (var bi = 0; bi < 8; bi++) {
+    for (var bi = 0; bi < 6; bi++) {
       var bx = rng() * w, by = rng() * h;
-      var blotchSize = 30 + rng()*50;
-      ctx.fillStyle = PAPER_DARK;
-      ctx.globalAlpha = 0.18 + rng()*0.12;
-      ctx.beginPath();
-      ctx.arc(bx, by, blotchSize, 0, Math.PI*2);
-      ctx.fill();
+      var blotchSize = 28 + rng() * 50;
+      _drawOrganicBlob(ctx, bx, by, blotchSize, PAPER_DARK, 0.16 + rng() * 0.12, 42 + bi * 13);
     }
     ctx.globalAlpha = 1;
     // 3. Paper grain (pontos pequenos espalhados, look graphite)
@@ -763,6 +898,65 @@
   }
 
 
+  // === _drawAgedParchment ===
+  // PERGAMINHO VELHO MANCHADO — wear effects orgânicos AAA (2026-05-04).
+  // User pediu manchas que NÃO sejam círculos toscos. Usa _drawAgedStain
+  // (multi-camada com coffee-ring + salpicos), creases orgânicas, scorched
+  // edge irregular. Estilo "mapa do tesouro 1450" — bem usado, autêntico.
+  function _drawAgedParchment(ctx, w, h){
+    var rng = _cartSeedRand(57);
+    // 1) Base sépia escurecida (cor do estilo #4)
+    ctx.fillStyle = '#d8b878';
+    ctx.fillRect(0, 0, w, h);
+    // 2) Variação tonal sutil — 6 lavagens grandes orgânicas
+    for (var i = 0; i < 6; i++) {
+      var bx = rng() * w, by = rng() * h;
+      _drawOrganicBlob(ctx, bx, by, 40 + rng() * 60, '#b08050', 0.10 + rng() * 0.08, 200 + i * 11);
+    }
+    // 3) Manchas de vinho/café envelhecidas (4 grandes com coffee-ring)
+    var stainColors = [
+      ['#6a3818', '#3a1808'], // vinho escuro
+      ['#8a5028', '#4a2818'], // café
+      ['#7a4020', '#3a1810'], // vinho médio
+      ['#92583a', '#502818']  // café claro
+    ];
+    for (var s = 0; s < 4; s++) {
+      var sx = rng() * w, sy = rng() * h;
+      var ssz = 18 + rng() * 28;
+      var c = stainColors[s % stainColors.length];
+      _drawAgedStain(ctx, sx, sy, ssz, c[0], c[1], 300 + s * 23);
+    }
+    // 4) Manchas de tinta antigas (clusters de pontos densos)
+    for (var ki = 0; ki < 10; ki++) {
+      var kx = rng() * w, ky = rng() * h;
+      var clusterN = 4 + Math.floor(rng() * 6);
+      for (var kj = 0; kj < clusterN; kj++) {
+        var ox = (rng() - 0.5) * 12;
+        var oy = (rng() - 0.5) * 12;
+        var ka = 0.10 + rng() * 0.20;
+        ctx.fillStyle = 'rgba(40,20,4,' + ka.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(kx + ox, ky + oy, 0.5 + rng() * 1.0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+    // 5) Paper grain (textura de fibras)
+    for (var gi = 0; gi < 380; gi++) {
+      var gx = rng() * w, gy = rng() * h;
+      var ga = 0.04 + rng() * 0.10;
+      ctx.fillStyle = 'rgba(60,40,12,' + ga.toFixed(3) + ')';
+      ctx.fillRect(gx, gy, 0.8, 0.8);
+    }
+    // 6) Dobras (creases) orgânicas — 3 horizontais + 1 diagonal
+    _drawCrease(ctx, 0, h * 0.32, w, h * 0.34, 91);
+    _drawCrease(ctx, 0, h * 0.66, w, h * 0.64, 92);
+    _drawCrease(ctx, w * 0.45, 0, w * 0.55, h, 93);
+    // NOTA: Scorched edges é uma função separada (_drawScorchedEdge) —
+    // chamada APÓS o conteúdo (biome art + paths + nodes) pra ficar
+    // por cima como vinheta. Evita escurecer demais o conteúdo central.
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -772,6 +966,11 @@
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
+    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA
+    _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
+    _drawAgedStain: _drawAgedStain,                // helper exposto
+    _drawCrease: _drawCrease,                      // helper exposto
+    _drawScorchedEdge: _drawScorchedEdge,          // helper exposto
     _drawBiomeArt: _drawBiomeArt,
     _drawCartPath: _drawCartPath,
     _drawCartNode: _drawCartNode,

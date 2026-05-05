@@ -35868,11 +35868,13 @@ function _drawCart(){
   ctx.save();
   ctx.clearRect(0, 0, w, h);
 
-  // === STAGE 1: SEM textura de fundo (Fase 7.2 — 2026-04-30) ===
-  // User feedback: "remova as texturas de fundo do mapa, que não estão na
-  // camada que funciona o zoom, deixando apenas a rosa dos ventos".
-  // Container .cart-canvas-frame tem bg #e6c890 (papel sépia) — basta
-  // clearRect (transparente) e o bg do container aparece.
+  // === STAGE 1: PERGAMINHO VELHO MANCHADO (USER REQUEST 2026-05-04) ===
+  // Aplica estilo #4 escolhido pelo user. Manchas ORGÂNICAS (não círculos
+  // toscos) via _drawOrganicBlob/_drawAgedStain — coffee-ring + salpicos
+  // + creases + scorched edges. Pintura no canvas, não mais CSS bg flat.
+  if (CartShared && CartShared._drawAgedParchment) {
+    CartShared._drawAgedParchment(ctx, w, h);
+  }
 
   // === STAGE 2: Conteúdo do mapa (PAN + ZOOM) ===
   ctx.save();
@@ -35889,6 +35891,14 @@ function _drawCart(){
   // === STAGE 3: Compass rose top-right (FIXED) ===
   // Sai do bottom-right pra não conflitar com os botões de zoom (+/-/⌂).
   _drawCartCompass(ctx, w, h);
+
+  // === STAGE 4: Scorched edges (vinheta chamuscada — POR CIMA do conteúdo) ===
+  // USER REQUEST 2026-05-04 (estilo #4 Pergaminho Velho Manchado): bordas
+  // chamuscadas com chamas irregulares orgânicas. Aplicado por último pra
+  // criar vinheta que escurece somente os cantos sem obscurecer o centro.
+  if (CartShared && CartShared._drawScorchedEdge) {
+    CartShared._drawScorchedEdge(ctx, w, h, 0.38);
+  }
 
   ctx.restore();
 }
