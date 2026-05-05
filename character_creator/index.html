@@ -1376,27 +1376,27 @@
             inset: 0;
             border-radius: 50%;
             border-style: solid;
-            border-color: rgba(168, 148, 120, 0.35); /* silver-bronze */
+            border-color: rgba(58, 48, 40, 0.5); /* iron dark */
         }
         .ob-mc-ring-outer {
             border-width: 1px;
-            border-color: rgba(184, 115, 51, 0.35); /* bronze outer */
+            border-color: rgba(74, 24, 18, 0.45); /* dark crimson */
             animation: obMcRotate 22s linear infinite;
         }
         .ob-mc-ring-mid {
             inset: 18%;
             border-width: 1px;
             border-style: dashed;
-            border-color: rgba(168, 148, 120, 0.45); /* silver mid */
+            border-color: rgba(58, 48, 40, 0.55); /* iron ash */
             animation: obMcRotate 16s linear infinite reverse;
         }
         .ob-mc-ring-inner {
             inset: 35%;
             border-width: 1px;
-            border-color: rgba(74, 120, 196, 0.5); /* sapphire inner — magic core */
+            border-color: rgba(42, 26, 64, 0.6); /* twilight indigo magic core */
             box-shadow:
-              inset 0 0 12px rgba(74, 120, 196, 0.3),
-              0 0 16px rgba(74, 120, 196, 0.2);
+              inset 0 0 12px rgba(42, 26, 64, 0.4),
+              0 0 16px rgba(42, 26, 64, 0.25);
             animation: obMcRotate 12s linear infinite, obMcPulse 4s ease-in-out infinite;
         }
         @keyframes obMcRotate {
@@ -1405,7 +1405,7 @@
         }
         @keyframes obMcPulse {
             0%, 100% { opacity: 0.7; }
-            50%      { opacity: 1; box-shadow: inset 0 0 18px rgba(74, 120, 196, 0.5), 0 0 24px rgba(74, 120, 196, 0.4); }
+            50%      { opacity: 1; box-shadow: inset 0 0 18px rgba(42, 26, 64, 0.6), 0 0 24px rgba(42, 26, 64, 0.5); }
         }
         .ob-mc-runes {
             position: absolute; inset: 0;
@@ -1416,8 +1416,8 @@
             top: 50%; left: 50%;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
             font-size: 18px;
-            color: rgba(168, 148, 120, 0.85); /* silver-bronze */
-            text-shadow: 0 0 8px rgba(74, 120, 196, 0.5); /* sapphire glow magic */
+            color: rgba(106, 90, 78, 0.7); /* aged ash */
+            text-shadow: 0 0 8px rgba(42, 26, 64, 0.6); /* twilight glow */
             transform-origin: center;
         }
         /* 8 runas distribuídas em círculo (45° apart) */
@@ -1552,9 +1552,8 @@
             perspective-origin: center;
         }
 
-        /* Wisps — Streamers etéreos com paleta DIVERSA (USER REQUEST 2026-05-05:
-           menos gold, mais variedade). Default neutro; nth-child override pra
-           bronze/silver/sapphire alternados. */
+        /* Wisps — paleta DARK MEDIEVAL SOMBRIO (USER REQUEST 2026-05-05).
+           Default ash dark; nth-child override pra dark crimson / twilight purple. */
         .ob-wisp {
             position: absolute;
             width: clamp(50px, 14vw, 90px);
@@ -1562,33 +1561,33 @@
             border-radius: 50%;
             background: linear-gradient(90deg,
               transparent 0%,
-              rgba(168, 148, 120, 0.3) 25%,
-              rgba(248, 245, 238, 0.7) 50%,
-              rgba(168, 148, 120, 0.3) 75%,
+              rgba(58, 48, 40, 0.4) 25%,           /* iron dark */
+              rgba(106, 90, 78, 0.6) 50%,          /* aged ash */
+              rgba(58, 48, 40, 0.4) 75%,
               transparent 100%);
             filter: blur(3px);
             opacity: 0;
             will-change: transform, opacity;
         }
-        /* Bronze wisp (warm) */
+        /* Dark crimson wisp (blood/somber) */
         .ob-wisp:nth-child(3n+1) {
             background: linear-gradient(90deg,
               transparent 0%,
-              rgba(184, 115, 51, 0.3) 25%,
-              rgba(232, 160, 96, 0.7) 50%,
-              rgba(184, 115, 51, 0.3) 75%,
+              rgba(74, 24, 18, 0.4) 25%,           /* deep dark crimson */
+              rgba(122, 40, 28, 0.6) 50%,
+              rgba(74, 24, 18, 0.4) 75%,
               transparent 100%);
         }
-        /* Sapphire wisp (cool) */
+        /* Twilight purple wisp (mystic somber) */
         .ob-wisp:nth-child(3n+2) {
             background: linear-gradient(90deg,
               transparent 0%,
-              rgba(74, 120, 196, 0.3) 25%,
-              rgba(160, 200, 232, 0.7) 50%,
-              rgba(74, 120, 196, 0.3) 75%,
+              rgba(42, 26, 64, 0.4) 25%,           /* twilight indigo */
+              rgba(74, 48, 96, 0.6) 50%,
+              rgba(42, 26, 64, 0.4) 75%,
               transparent 100%);
         }
-        /* Silver wisp (neutral) — nth-child(3n+3) usa o default acima */
+        /* Iron ash wisp (default 3n+3) — usa o default acima */
         .ob-wisp:nth-child(1)  { left: -10%; top: 12%; animation: obWispDriftRight 10s ease-in-out infinite; animation-delay: 0s; }
         .ob-wisp:nth-child(2)  { left: 110%; top: 22%; animation: obWispDriftLeft 11s ease-in-out infinite; animation-delay: 1.5s; }
         .ob-wisp:nth-child(3)  { left: -10%; top: 32%; animation: obWispDriftRight 12s ease-in-out infinite; animation-delay: 3s; }
@@ -1648,32 +1647,32 @@
             100% { transform: translate3d(-110vw, -55vh, -40px) rotateX(-1080deg) rotateY(-720deg) rotateZ(-360deg); opacity: 0; }
         }
 
-        /* Sparks — pontos com paleta DIVERSA (USER REQUEST 2026-05-05) */
+        /* Sparks — paleta DARK MEDIEVAL SOMBRIO (USER REQUEST 2026-05-05) */
         .ob-particle {
             position: absolute;
             width: 3px; height: 3px;
             border-radius: 50%;
-            background: #a89478; /* silver default */
-            box-shadow: 0 0 6px #a89478;
+            background: #6a5a4e; /* aged ash default */
+            box-shadow: 0 0 6px #6a5a4e;
             opacity: 0;
             animation: obParticleDrift 6s ease-in infinite;
         }
-        /* Bronze sparks (warm) */
+        /* Dark bronze (aged) */
         .ob-particle:nth-child(4n+1) {
-            background: #b87333;
-            box-shadow: 0 0 6px #b87333;
+            background: #5a3010;
+            box-shadow: 0 0 6px #5a3010;
         }
-        /* Sapphire sparks (cool) */
+        /* Twilight indigo (mystic somber) */
         .ob-particle:nth-child(4n+2) {
-            background: #4a78c4;
-            box-shadow: 0 0 6px #4a78c4;
+            background: #2a1a40;
+            box-shadow: 0 0 6px #2a1a40;
         }
-        /* Crimson sparks (warm accent) */
+        /* Dark crimson (blood somber) */
         .ob-particle:nth-child(4n+3) {
-            background: #a04030;
-            box-shadow: 0 0 6px #a04030;
+            background: #5a1810;
+            box-shadow: 0 0 6px #5a1810;
         }
-        /* Silver default em :nth-child(4n+4) */
+        /* Iron ash default em :nth-child(4n+4) */
         /* Sparks: indexes 19-30 (10 wisps + 8 dice + 12 sparks = 30 total) */
         .ob-particle:nth-child(19) { left: 6%;  animation-delay: 0.4s; animation-duration: 7s; }
         .ob-particle:nth-child(20) { left: 14%; animation-delay: 1.4s; animation-duration: 6.2s; }
