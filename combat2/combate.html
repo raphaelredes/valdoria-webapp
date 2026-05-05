@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-05T10:33:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-05T11:03:49Z — do not edit directly, edit source -->
 
 
 <!--
@@ -377,6 +377,18 @@
 <meta name="theme-color" content="#2a2420">
 <title>Combate — Pré-visualização</title>
 
+<!-- Telegram WebApp SDK + enableClosingConfirmation (USER REQUEST 2026-05-04) -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  try {
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.enableClosingConfirmation();
+    }
+  } catch (_) { /* fallback silencioso */ }
+</script>
+
 <script>
 /* 2026-04-27 USER RULE: "o mesmo precisa acontecer para combate.html, nunca
    deve mostrar esse painel". sim-log-panel é DEV-ONLY (file:// + ?dev=1).
@@ -389,7 +401,11 @@
 (function() {
   try {
     var qs = new URLSearchParams(location.search);
-    var isDev = (location.protocol === 'file:') || qs.get('dev') === '1';
+    // FIX 2026-05-04 (USER RULE): NUNCA habilitar painéis DEV em Telegram WebApp,
+    // mesmo com ?dev=1. Bot DEV simula jogo pro jogador real — proibido expor.
+    var inTg = !!(window.Telegram && window.Telegram.WebApp
+                  && window.Telegram.WebApp.initData);
+    var isDev = !inTg && ((location.protocol === 'file:') || qs.get('dev') === '1');
     document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
     if (!isDev) {
       document.addEventListener('DOMContentLoaded', function() {

@@ -412,6 +412,19 @@ LOG SINK (Fase 7):
   <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#2a2420">
   <title>Simulador da Cidade — Lendas de Valdoria</title>
+  <!-- Telegram WebApp SDK: enableClosingConfirmation popup nativo de
+       confirmação ao fechar. (USER REQUEST 2026-05-04) -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Confirma fechamento via popup nativo do Telegram. Sem efeito fora do TG.
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.enableClosingConfirmation();
+      }
+    } catch (_) { /* fallback silencioso */ }
+  </script>
   <script>
     // Cache busting para CSS/JS imports
     var v = Date.now();
@@ -6403,6 +6416,17 @@ function _renderLogPanel(){
   }).join('');
 }
 function _toggleLogPanel(){
+  // FIX 2026-05-04 (USER RULE): NUNCA abrir log panel em Telegram WebApp.
+  // Bot DEV simula jogo pro jogador real — proibido expor painéis DEV.
+  // Acesso só em file:// OU navegador com ?dev=1.
+  try {
+    var inTg = !!(window.Telegram && window.Telegram.WebApp
+                  && window.Telegram.WebApp.initData);
+    if (inTg) return;
+    var isFile = (location.protocol === 'file:');
+    var hasDev = (location.search.indexOf('dev=1') >= 0);
+    if (!isFile && !hasDev) return;
+  } catch (_) { return; }
   var el = document.getElementById('sim-log-panel');
   if (el) el.classList.toggle('active');
 }
@@ -36240,7 +36264,7 @@ document.addEventListener('DOMContentLoaded', function(){
   var cspBack = document.getElementById('csp-back-btn');
   if (cspBack) cspBack.addEventListener('click', navigateBack);
   // Inn animation usa #inn-overlay canonical (inn-animation.js gerencia próprios listeners)
-  // Keyboard: Ctrl+L toggle log panel
+  // Keyboard: Ctrl+L toggle log panel (DEV only — _toggleLogPanel já tem gate)
   document.addEventListener('keydown', function(e){
     if (e.ctrlKey && e.key === 'l') {
       e.preventDefault();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T10:33:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T11:03:49Z - do not edit directly, edit source -->
 
 
 <!--
@@ -696,6 +696,18 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Simulador de Exploração — Lendas de Valdoria</title>
+
+<!-- Telegram WebApp SDK + enableClosingConfirmation (USER REQUEST 2026-05-04) -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  try {
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.enableClosingConfirmation();
+    }
+  } catch (_) { /* fallback silencioso */ }
+</script>
 
 <script>
 /* 2026-04-27 USER RULE: "o mapa de exploração está mostrando os logs
@@ -10770,13 +10782,17 @@ body.perf-lite .stub-popup-voice { animation: none; }
    ════════════════════════════════════════════════════════════════════════════ */
 (function () {
   // Production guard — só ativa em file:// OU ?dev=1 OU localStorage flag
+  // FIX 2026-05-04: NUNCA habilitar em Telegram WebApp, mesmo com flags.
+  //   Bot DEV simula jogo pro jogador — não pode expor HUD de debug.
+  var inTg = !!(window.Telegram && window.Telegram.WebApp
+                && window.Telegram.WebApp.initData);
   var isFileProto = location.protocol === 'file:';
   var hasDevParam = location.search.indexOf('dev=1') >= 0;
   var hasDevUnlock = (function () {
     try { return localStorage.getItem('valdoria_dev_unlock') === '1'; }
     catch (_) { return false; }
   })();
-  var devEnabled = isFileProto || hasDevParam || hasDevUnlock;
+  var devEnabled = !inTg && (isFileProto || hasDevParam || hasDevUnlock);
 
   if (!devEnabled) {
     if (window.TileLog) window.TileLog.debug('HUD', 'production_disabled');
@@ -30458,6 +30474,19 @@ function buildFeatPanel() {
       qs.indexOf('ld_silhouettes=1') >= 0) {
     return;
   }
+  // FIX 2026-05-04 (USER REQUEST): NUNCA expor painéis DEV ao jogador.
+  //   - Em Telegram WebApp (qualquer env): SEMPRE bloqueado.
+  //   - Em qualquer http(s) (DEV ou PROD): SEMPRE bloqueado.
+  //   - Acesso DEV: SOMENTE via file:// (master path local) OU URL explicita
+  //     com ?perf=1. Bot DEV continua simulando jogo real pro jogador.
+  try {
+    var inTg = !!(window.Telegram && window.Telegram.WebApp
+                  && window.Telegram.WebApp.initData);
+    if (inTg) return;
+    var isHttp = (location.protocol === 'http:' || location.protocol === 'https:');
+    var hasOptIn = (qs.indexOf('perf=1') >= 0 || qs.indexOf('debug_panel=1') >= 0);
+    if (isHttp && !hasOptIn) return;
+  } catch (_e) { /* fail-safe: se detection falhar, esconde */ return; }
   // V6 USER REFACTOR: ambient + atmosphere + critters REMOVIDOS. Apenas layers
   // essenciais agora. Fog reescrito (drawSimpleFog 1 fillRect + 2 cuts batched).
   var GROUPS = [
