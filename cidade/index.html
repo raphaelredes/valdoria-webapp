@@ -3997,22 +3997,26 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     /* === Hall de Personagens — AAA Orb canonical (USER REQUEST 2026-05-04) ====
        Reusa estrutura DOM de loading-title.js + classes .title-orb-* do
-       loading-title.css. Container scoped para limitar tamanho ao popup
-       (padrão fullscreen do canonical não cabe). */
+       loading-title.css. Container scoped pra centralizar e escalar.
+       Canonical .title-orb-wrap é 160x100 (relative + flex center). Host
+       usa flex pra centralizar o wrap escalado. Anima entrance cancelada. */
     .hall-orb-aaa {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 110px;
+      height: 70px;
+      margin: 0 auto;
       pointer-events: none;
+      overflow: visible;
     }
     .hall-orb-aaa .title-orb-wrap {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.32);
+      transform: scale(0.55);
       transform-origin: center center;
+      margin: 0 !important;
+      animation: none !important;
     }
+    body.perf-lite .hall-orb-aaa .title-orb-wrap { transform: scale(0.55) !important; }
   </style>
 </head>
 <body>

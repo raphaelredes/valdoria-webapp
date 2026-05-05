@@ -25,6 +25,7 @@
     <script>
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
+        document.write('<link rel="stylesheet" href="creator.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
@@ -1023,7 +1024,13 @@
 
     <script>
     (function() {
-        if (localStorage.getItem('valdoria_onboarding_seen')) return;
+        // USER REQUEST 2026-05-04: ?intro=1 força mostrar onboarding (debug/QA),
+        // ignorando o flag valdoria_onboarding_seen. Útil pra revisar o flow.
+        var forceIntro = false;
+        try {
+          forceIntro = new URLSearchParams(window.location.search).get('intro') === '1';
+        } catch(e){}
+        if (!forceIntro && localStorage.getItem('valdoria_onboarding_seen')) return;
         var overlay = document.getElementById('onboarding-overlay');
         if (!overlay) return;
         overlay.style.display = 'flex';
