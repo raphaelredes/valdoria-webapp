@@ -2092,10 +2092,15 @@ LOG SINK (Fase 7):
     body.state-cart #city-group-panel,
     body.state-cart #city-exit-btn,
     body.state-cart #city-hotbar-bottom,
-    body.state-cart #footer-collapsible { display: none !important; }
-    /* state-cart KEEP bottom-panel visible — botão "Voltar" no nav row é o padrão */
-    /* cart-controls (zoom +/-/⌂) precisam subir pra não colidir com bottom-panel */
-    body.state-cart .cart-controls { bottom: 96px !important; }
+    body.state-cart #footer-collapsible,
+    /* FIX 2026-05-04 v2: esconder bottom-panel + toggle em cart mode.
+       Mochila/Ficha/etc não fazem sentido olhando pro mapa. Voltar fica
+       solo no fundo central (subscreen-back-row). */
+    body.state-cart #bottom-panel,
+    body.state-cart #footer-collapse-toggle,
+    body.state-cart #footer-restore { display: none !important; }
+    /* cart-controls (zoom +/-/⌂) sobem pra não colidir com Voltar (bottom:6px+pad) */
+    body.state-cart .cart-controls { bottom: 60px !important; }
     body.state-cart #content {
       position: absolute; inset: 0;
       z-index: 50;
@@ -2141,19 +2146,25 @@ LOG SINK (Fase 7):
     }
     /* Botão Voltar como overlay flutuante no canto top-left (não rouba espaço do canvas) */
     body.state-cart .subscreen-back-row {
+      /* FIX 2026-05-04 v2: Voltar movido pro fundo central do mapa
+         (USER REQUEST: "crie o botão voltar na parte inferior do mapa").
+         bottom: 6px sobre cart-controls (zoom +/-/⌂) que estão a bottom:96px. */
       position: absolute;
-      top: 6px;
-      left: 6px;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 60;
       flex-shrink: 0;
     }
     body.state-cart .subscreen-back {
-      background: rgba(28,22,16,0.96) !important;  /* opaque (was 0.92 + blur 2px — perf) */
+      background: rgba(28,22,16,0.96) !important;
       border: 1px solid rgba(196,149,58,0.55) !important;
       color: #c4953a !important;
-      padding: 4px 10px !important;
-      border-radius: 6px !important;
-      font-size: var(--v-font-xs, 11px) !important;
+      padding: 8px 24px !important;  /* maior pra tap-target Telegram (44px+) */
+      border-radius: 8px !important;
+      font-size: var(--v-font-base, 13px) !important;
+      min-height: 36px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
     }
     #cart-canvas {
       display: block;
@@ -7060,7 +7071,11 @@ function buildMockHubScreen(player){
 // --- Bottom Panel (footer estilo bot DEV — replica game-renderer.js#renderFooter) ---
 // Estrutura: footer-quick (Mochila/Ficha/Grupo) + footer-nav (Voltar/Help/Config)
 // Toggle imersivo (·) recolhe o panel inteiro, mostrando #footer-restore como pill.
-var _footerCollapsed = false;
+/* USER REQUEST 2026-05-04: menu DEFAULT = recolhido. Player vê só pill
+   "· Menu" embaixo, abre quando precisar. Aplica body.footer-collapsed
+   imediatamente pra evitar flash do panel expandido. */
+var _footerCollapsed = true;
+try { document.body.classList.add('footer-collapsed'); } catch (_) { /* DOM not ready */ }
 function renderFooter(){
   var quickEl = document.getElementById('footer-quick');
   var navEl   = document.getElementById('footer-nav');
@@ -35549,25 +35564,31 @@ function _wireCartEvents(){
   });
 
   // Touch: pinch zoom + 1-finger pan + tap-to-click
-  // FIX 2026-05-04 (USER REPORT): Telegram WebApp Android NÃO sintetiza click
-  //   após touchstart com preventDefault. Solução: rastrear pos inicial + total
-  //   movimento; em touchend, se mover < 8px, é tap → _cartHandleClick.
-  var _cartTouchStartX = 0, _cartTouchStartY = 0;
+  // FIX 2026-05-04 v2 (USER REPORT): Telegram WebApp Android continuava sem
+  //   registrar tap. Refeito com state INDEPENDENTE de drag (não acoplado a
+  //   _cartIsDragging que pode ser limpo por mouseup sintético do Android).
+  //   Tap window: 400ms + movimento <12px (mais permissivo pra dedo).
+  var _cartTapPending = false;
+  var _cartTapStartX = 0, _cartTapStartY = 0;
+  var _cartTapStartT = 0;
   var _cartTouchMoved = false;
   _cartCanvas.addEventListener('touchstart', function(e){
     e.preventDefault();
     if (e.touches.length === 2) {
       _cartLastPinchDist = _cartTouchDist(e.touches);
       _cartTouchMoved = true; /* pinch nunca é tap */
+      _cartTapPending = false;
     } else if (e.touches.length === 1) {
       var t = e.touches[0];
       var rect = _cartCanvas.getBoundingClientRect();
-      _cartTouchStartX = t.clientX - rect.left;
-      _cartTouchStartY = t.clientY - rect.top;
+      _cartTapStartX = t.clientX - rect.left;
+      _cartTapStartY = t.clientY - rect.top;
+      _cartTapStartT = Date.now();
+      _cartTapPending = true;
       _cartTouchMoved = false;
       _cartIsDragging = true;
-      _cartDragStartX = _cartTouchStartX - _cartPanX;
-      _cartDragStartY = _cartTouchStartY - _cartPanY;
+      _cartDragStartX = _cartTapStartX - _cartPanX;
+      _cartDragStartY = _cartTapStartY - _cartPanY;
     }
   }, { passive: false });
   _cartCanvas.addEventListener('touchmove', function(e){
@@ -35581,16 +35602,18 @@ function _wireCartEvents(){
       _cartSetZoom(_cartZoom * ratio, midX, midY);
       _cartLastPinchDist = d;
       _cartTouchMoved = true;
-    } else if (e.touches.length === 1 && _cartIsDragging) {
+      _cartTapPending = false;
+    } else if (e.touches.length === 1) {
       var t = e.touches[0];
       var rect2 = _cartCanvas.getBoundingClientRect();
       var curX = t.clientX - rect2.left;
       var curY = t.clientY - rect2.top;
-      // Tap threshold: 8px de movimento = drag
-      if (!_cartTouchMoved) {
-        var dx = curX - _cartTouchStartX;
-        var dy = curY - _cartTouchStartY;
-        if (dx*dx + dy*dy > 64) _cartTouchMoved = true;
+      var dx = curX - _cartTapStartX;
+      var dy = curY - _cartTapStartY;
+      // Tap threshold: 12px de movimento = drag (mais permissivo pra dedo)
+      if (dx*dx + dy*dy > 144) {
+        _cartTouchMoved = true;
+        _cartTapPending = false;
       }
       if (_cartTouchMoved) {
         _cartPanX = curX - _cartDragStartX;
@@ -35603,15 +35626,23 @@ function _wireCartEvents(){
   _cartCanvas.addEventListener('touchend', function(e){
     if (e.touches.length < 2) _cartLastPinchDist = 0;
     if (e.touches.length === 0) {
-      // Tap detectado (sem movimento significativo) — dispara click manual.
-      // Necessário pq Telegram Android não sintetiza click após touchstart
-      // com preventDefault.
-      if (_cartIsDragging && !_cartTouchMoved) {
-        _cartHandleClick(_cartTouchStartX, _cartTouchStartY);
+      // Tap detectado: pendente + sem movimento + dentro de 600ms.
+      // Independente de _cartIsDragging (Android sintetiza mouseup que zera).
+      var dt = Date.now() - _cartTapStartT;
+      if (_cartTapPending && !_cartTouchMoved && dt < 600) {
+        _logCity('cart tap detected at (' + Math.round(_cartTapStartX) + ',' + Math.round(_cartTapStartY) + ') dt=' + dt + 'ms');
+        _cartHandleClick(_cartTapStartX, _cartTapStartY);
       }
       _cartIsDragging = false;
       _cartTouchMoved = false;
+      _cartTapPending = false;
     }
+  });
+  _cartCanvas.addEventListener('touchcancel', function(){
+    _cartIsDragging = false;
+    _cartTouchMoved = false;
+    _cartTapPending = false;
+    _cartLastPinchDist = 0;
   });
 
   // Botões
@@ -35686,15 +35717,27 @@ function _cartFindNodeAt(mx, my){
   // Convert screen coords to world coords (revert pan/zoom)
   var wx = (mx - _cartPanX) / _cartZoom;
   var wy = (my - _cartPanY) / _cartZoom;
+  // FIX 2026-05-04 v2: detectar touch device → raio maior (36px) pra mobile
+  // (dedo é maior que cursor). Hover (mouse) continua usando 24px estrito.
+  var isTouch = (typeof window !== 'undefined' && (
+    ('ontouchstart' in window) ||
+    (navigator && navigator.maxTouchPoints > 0)
+  ));
+  var radius = isTouch ? 36 : 24;
+  var rsq = radius * radius;
+  // Two-pass: closest match within radius (não primeiro encontrado)
+  var best = null;
+  var bestD = rsq + 1;
   for (var i = 0; i < CART_BIOMES.length; i++) {
     var b = CART_BIOMES[i];
     var bx = b.x * _cartW;
     var by = b.y * _cartH;
     var dx = wx - bx;
     var dy = wy - by;
-    if (dx*dx + dy*dy <= 24*24) return b;  // raio do node
+    var d = dx*dx + dy*dy;
+    if (d <= rsq && d < bestD) { best = b; bestD = d; }
   }
-  return null;
+  return best;
 }
 function _cartShowTooltip(b, mx, my){
   var tip = document.getElementById('cart-tooltip');
