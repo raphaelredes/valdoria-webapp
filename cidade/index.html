@@ -4085,105 +4085,69 @@ body.perf-lite .vc-action-btn { transition: none; }
 </head>
 <body>
   <!-- ====================================================================
-       INTRO TITLE SCREEN — ValdoriaTitleScreen canonical (USER REQUEST 2026-05-04)
-       Substitui intro custom pela esfera AAA animada (orb + nebula + raios +
-       particulas + runas) usada em app.html / game/index.html. Apos tap,
-       mostra loading screen AAA (ValdoriaLoadingController) com runas + particulas.
-       Usa flag window.__cidadeIntroBlocking pra bloquear audio auto-play ate o tap.
-       Auto-skip via ?nointro=1 (Walker) ou returning < 30s (audio_resume_ts).
+       INTRO TITLE + LOADING — pattern canonical (igual /app.html, /game/index.html)
+       USER REQUEST 2026-05-05: NÃO é cidade-specific — funciona pra qualquer
+       destino (cidade/exploracao/combate). Player tap libera audio + esconde
+       loading + libera init do conteúdo. Resume de outra WebApp (<30s) skip.
+       Walker test usa ?nointro=1.
        ==================================================================== -->
   <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
   <script>
+  /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
+    if (window.__introTitleSkip) { console.log('[INTRO] skip — flag set'); return; }
     var params = new URLSearchParams(location.search);
-    /* Skip se Walker (test automation) ou retornando de outra WebApp */
-    if (params.get('nointro') === '1') {
-      window.__introTitleSkip = true;
-      console.log('[CIDADE-INTRO] skip — nointro=1');
-      return;
-    }
+    if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
     var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
-    if (resumeTs && (Date.now() - resumeTs) < 30000) {
-      console.log('[CIDADE-INTRO] skip — returning from other WebApp');
-      return;
-    }
-    if (sessionStorage.getItem('valdoria_intro_shown') === '1') {
-      console.log('[CIDADE-INTRO] skip — already shown this session');
-      return;
-    }
-
-    /* Block audio + cidade init ate user tap */
-    window.__cidadeIntroBlocking = true;
-    window.__cidadeIntroLoadingPhase = false;
-
-    /* Wait for ValdoriaTitleScreen + ValdoriaLoadingHTML to load (deferred via document.write) */
-    function _bootIntro() {
-      if (typeof ValdoriaTitleScreen !== 'function') {
-        console.log('[CIDADE-INTRO] waiting for ValdoriaTitleScreen lib...');
-        setTimeout(_bootIntro, 80);
-        return;
-      }
-      console.log('[CIDADE-INTRO] showing canonical title screen (esfera AAA)');
-      window.__introTitle = ValdoriaTitleScreen({
-        onStart: function() {
-          console.log('[CIDADE-INTRO] user TAPPED — starting AAA loading screen');
-          sessionStorage.setItem('valdoria_intro_shown', '1');
-          /* Step 1: Audio gesture unlock — autoplay agora permitido */
-          try {
-            if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
-              ValdoriaAudio.play('city');
-            }
-          } catch(e){ console.warn('[CIDADE-INTRO] audio play failed:', e); }
-
-          /* Step 2: Mostra loading AAA via ValdoriaLoadingController */
-          window.__cidadeIntroLoadingPhase = true;
-          var loadingEl = document.getElementById('loading');
-          if (loadingEl && typeof ValdoriaLoadingHTML === 'function') {
-            var tmp = document.createElement('div');
-            tmp.innerHTML = ValdoriaLoadingHTML({ tier: window._valdoriaPerformanceTier || 'full' });
-            loadingEl.innerHTML = tmp.firstElementChild ? tmp.firstElementChild.innerHTML : '';
-            loadingEl.style.display = '';
-            loadingEl.style.background = '#1a1510';
-          }
-          if (typeof ValdoriaLoadingController === 'function' && loadingEl) {
-            window.__cidadeLoadingCtrl = ValdoriaLoadingController({
-              overlayId: 'loading',
-              tips: [
-                'Aventureiros descansam na taverna...',
-                'Mercadores chegam e partem todos os dias...',
-                'Os portões da cidade levam a aventuras desconhecidas...',
-                'O templo oferece cura — mas cobra um preço...',
-                'A guilda recruta os corajosos...',
-              ],
-              tipInterval: 5000,
-              timeoutMs: 15000,
-              hasRingAccel: true,
-              hasGemPhase: true,
-            });
-            window.__cidadeLoadingCtrl.show();
-          }
-
-          /* Step 3: Libera cidade init + esconde loading apos 1.8s */
-          setTimeout(function() {
-            window.__cidadeIntroBlocking = false;
-            window.__cidadeIntroLoadingPhase = false;
-            if (window.__cidadeLoadingCtrl && window.__cidadeLoadingCtrl.hide) {
-              window.__cidadeLoadingCtrl.hide();
-            } else if (loadingEl) {
-              loadingEl.style.display = 'none';
-            }
-            /* Trigger refresh — re-render cidade caso ja tenha bootado parado */
-            try {
-              if (typeof refreshHud === 'function') refreshHud();
-              if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
-            } catch(e){ console.warn('[CIDADE-INTRO] refresh failed:', e); }
-          }, 1800);
-        }
-      });
+    if (resumeTs && (Date.now() - resumeTs) < 30000) { console.log('[INTRO] skip — resume <30s'); return; }
+    /* Bloqueia audio auto-play até user tap (autoplay policy) */
+    window.__introBlocking = true;
+    function _show() {
+      if (typeof ValdoriaTitleScreen !== 'function') { setTimeout(_show, 80); return; }
+      window.__introTitle = ValdoriaTitleScreen({ onStart: function() {
+        console.log('[INTRO] tapped');
+        window.__introBlocking = false;
+        if (typeof window.__onIntroTap === 'function') window.__onIntroTap();
+        else window.__introTapped = true;
+      }});
       window.__introTitle.show();
     }
-    _bootIntro();
+    _show();
   })();
+  </script>
+  <script>
+  /* __onIntroTap callback: 1) play audio, 2) show loading, 3) finalize content */
+  window.__onIntroTap = function() {
+    /* Step 1: Audio (gesto do user destrava autoplay) */
+    try {
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+        var SCREEN_AUDIO_FALLBACK = 'city';
+        var trackKey = (typeof SCREEN_AUDIO_MAP !== 'undefined' && typeof _currentScreen !== 'undefined')
+          ? (SCREEN_AUDIO_MAP[_currentScreen] || SCREEN_AUDIO_FALLBACK)
+          : SCREEN_AUDIO_FALLBACK;
+        ValdoriaAudio.play(trackKey);
+      }
+    } catch(e){ console.warn('[INTRO] audio play failed:', e); }
+
+    /* Step 2: Loading overlay (preenche placeholder com ValdoriaLoadingHTML) */
+    var loadingEl = document.getElementById('loading');
+    if (loadingEl && typeof ValdoriaLoadingHTML === 'function') {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = ValdoriaLoadingHTML({ tier: window._valdoriaPerformanceTier || 'full' });
+      loadingEl.innerHTML = tmp.firstElementChild ? tmp.firstElementChild.innerHTML : '';
+      loadingEl.style.display = '';
+      loadingEl.style.background = '#1a1510';
+    }
+
+    /* Step 3: Esconde loading após 1.8s + refresha conteúdo */
+    setTimeout(function() {
+      if (loadingEl) loadingEl.style.display = 'none';
+      try {
+        if (typeof refreshHud === 'function') refreshHud();
+        if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+      } catch(e){ console.warn('[INTRO] content refresh failed:', e); }
+    }, 1800);
+  };
   </script>
   <!-- ====================================================================
        HERALDIC SPRITE (inline subset — regra Heraldic Icons Only)
@@ -36171,7 +36135,7 @@ document.addEventListener('DOMContentLoaded', function(){
        Se cidade-intro overlay esta visivel/blocking, pula auto-play. O proprio
        click handler do intro screen chama ValdoriaAudio.play('city') apos o
        gesto do user (autoplay policy compliance). */
-    if (window.__cidadeIntroBlocking) {
+    if (window.__introBlocking) {
       console.log('[CIDADE] audio play deferred — intro screen blocking');
       return;
     }
