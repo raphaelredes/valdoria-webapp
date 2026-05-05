@@ -6198,6 +6198,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _drawBiomeArt = CartShared._drawBiomeArt;
   var _drawPlayerPin = CartShared._drawPlayerPin;
   var _drawCartCompass = CartShared._drawCartCompass;
+  var _drawUnknownLocation = CartShared._drawUnknownLocation;  // 2026-05-04
   /* _drawCartPath needs biomes arg (shared takes it) */
   function _drawCartPath(ctx, fromKey, toKey, w, h){
     return CartShared._drawCartPath(ctx, fromKey, toKey, w, h, CART_BIOMES);
@@ -6217,7 +6218,17 @@ body.perf-lite .vc-action-btn { transition: none; }
     name: 'Aventureiro', cls: 'mago', race: 'elfo', level: 5,
     hp: 28, hpMax: 28, mp: 12, mpMax: 12,
     xp: 1200, xpNext: 2000, gold: 150,
-    exh: 0  // Exaustão D&D 5e (0-6)
+    exh: 0,  // Exaustão D&D 5e (0-6)
+    // 2026-05-04: locais conhecidos (visíveis na cartografia) — STARTER_NODES
+    // do server (world_init.py): apenas portões + 2 biomas iniciais. Resto
+    // só aparece se player tiver Mapa Regional do Cartógrafo Corvus.
+    known_locations: ['plains', 'green_fields', 'forest'],
+    // Mapas no inventário (mock — REMOTE preenche via /api/game/state)
+    maps_owned: [],
+    // Pedidos pendentes do cartógrafo (cada um: {map, ordered_day, ready_day, paid})
+    cartographer_orders: [],
+    // Dia atual do jogo (para checagem de pedidos prontos)
+    game_day: 1
   };
   var params = new URLSearchParams(window.location.search);
   var override = {};
@@ -35797,6 +35808,64 @@ function _openCartLocationPopup(biome){
   var el = document.getElementById('cart-loc-popup');
   if (!el) return;
   var isCurrent = (_cartGetPlayerBiome()) === biome.key;
+
+  // 2026-05-04: visibility check — locais não-descobertos mostram popup
+  // de "local desconhecido" com sugestão de visitar o Cartógrafo Corvus.
+  var p = window.CITY_MOCK_PLAYER || {};
+  var knownLocs = p.known_locations || [];
+  var isKnown = knownLocs.indexOf(biome.key) >= 0 || biome.isOrigin;
+
+  var card = document.getElementById('clp-card-content');
+  if (!card) return;
+
+  if (!isKnown) {
+    // Popup imersivo de local desconhecido
+    var hasMapItem = (p.maps_owned || []).indexOf(biome.mapKey || '') >= 0;
+    var orderInProgress = (p.cartographer_orders || []).some(function(o){
+      return o.map === biome.mapKey;
+    });
+    var bodyHtml = '<div class="clp-icon" style="opacity:0.4;font-size:48px">❓</div>'
+      + '<h2 style="color:#a09484">Local Desconhecido</h2>'
+      + '<p style="font-style:italic;color:#a09484">Sussurros nas tavernas mencionam algo nessa direção, '
+      + 'mas você não tem informação cartográfica suficiente para traçar uma rota.</p>'
+      + '<div class="clp-meta" style="background:rgba(74,56,40,0.4);border-left:3px solid #c4953a;padding:10px 12px;margin-top:12px;text-align:left">'
+      + '<b style="color:#c4953a">📜 Como descobrir este local:</b><br>'
+      + '<span style="font-size:11px">';
+    if (biome.mapKey) {
+      if (hasMapItem) {
+        bodyHtml += '✅ Você tem o <b>' + biome.mapKey + '</b>! '
+                  + 'Visite os Portões e parta para essa região.';
+      } else if (orderInProgress) {
+        bodyHtml += '⏳ Pedido do <b>' + biome.mapKey + '</b> em andamento '
+                  + 'com o <b>Mestre Cartógrafo Corvus</b>. '
+                  + 'Aguarde a chegada de aventureiros que retornam à cidade '
+                  + 'com novas informações.';
+      } else {
+        bodyHtml += '🔭 Visite o <b>Mestre Cartógrafo Corvus</b> na Praça Central. '
+                  + 'Ele pode encomendar o <b>' + biome.mapKey + '</b> — '
+                  + 'leva alguns dias para preparar (depende de aventureiros '
+                  + 'que retornam com informações da região).<br><br>'
+                  + '🎲 Você também pode descobrir este local naturalmente '
+                  + 'enquanto explora regiões adjacentes.';
+      }
+    } else {
+      bodyHtml += '🎲 Este local só pode ser descoberto explorando regiões adjacentes. '
+                + 'Aventureiros relatam ter encontrado por acaso.';
+    }
+    bodyHtml += '</span></div>'
+      + '<div class="clp-buttons">'
+      + (biome.mapKey && !hasMapItem && !orderInProgress
+          ? '<button class="clp-btn clp-btn-travel" data-clp="goto-cartographer">📜 Ir ao Cartógrafo</button>'
+          : '')
+      + '<button class="clp-btn clp-btn-back" data-clp="back">🗺️ Voltar pro Mapa</button>'
+      + '</div>';
+    card.innerHTML = bodyHtml;
+    el.classList.add('active');
+    window._cartCurrentLocBiome = biome;
+    return;
+  }
+
+  // Local conhecido — popup normal
   var rec = '';
   if (biome.tier) {
     rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
@@ -35805,15 +35874,13 @@ function _openCartLocationPopup(biome){
           biome.tier <= 7 ? 'Experiente (nv 7-10)' :
                             'Lendário (nv 10+)';
   }
-  var card = document.getElementById('clp-card-content');
-  if (!card) return;
   card.innerHTML = ''
     + '<div class="clp-icon">' + biome.ico + '</div>'
     + (isCurrent ? '<div class="clp-current-here">📍 VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
     + (biome.tier ? '<div class="clp-tier">⚡ Tier ' + biome.tier + '</div>' : '')
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + biome.key + '</div>' : '')
+    + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + (biome.biome || biome.key) + '</div>' : '')
     + '<div class="clp-buttons">'
     + (isCurrent
         ? '<button class="clp-btn clp-btn-back" data-clp="back">🗺️ Voltar pro Mapa</button>'
@@ -35847,6 +35914,31 @@ function _closeCartLocationPopup(){
         _closeCartLocationPopup();
         if (ACTION_HANDLERS['cart_' + biome.key]) { ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER); }
       }
+      // 2026-05-04: navegar pro Cartógrafo Corvus na Praça Central
+      if (action === 'goto-cartographer') {
+        _closeCartLocationPopup();
+        // Volta pro hub e abre Praça → Cartógrafo
+        if (typeof navigateBack === 'function') {
+          navigateBack();
+          // Delay pra navigateBack completar antes de abrir popup
+          setTimeout(function(){
+            // Pré-seleciona o mapa que o jogador veio buscar
+            var targetMap = (biome && biome.mapKey) || '';
+            if (targetMap) {
+              window._cartographerTargetMap = targetMap;
+            }
+            if (typeof navigateTo === 'function') {
+              navigateTo('square');
+              // Após popup da Praça, abre Cartógrafo
+              setTimeout(function(){
+                if (ACTION_HANDLERS['square_cartographer_open']) {
+                  ACTION_HANDLERS['square_cartographer_open'](window.CITY_MOCK_PLAYER);
+                }
+              }, 200);
+            }
+          }, 100);
+        }
+      }
     });
   });
 })();
@@ -35877,12 +35969,34 @@ function _drawCart(){
   }
 
   // === STAGE 2: Conteúdo do mapa (PAN + ZOOM) ===
+  // 2026-05-04 USER REQUEST: visibility-based rendering. Apenas locais em
+  // known_locations aparecem completos. Outros: silhueta com "?" (insinuação
+  // de que existe algo, mas precisa de mapa do Cartógrafo Corvus).
   ctx.save();
   ctx.translate(_cartPanX, _cartPanY);
   ctx.scale(_cartZoom, _cartZoom);
-  CART_BIOMES.forEach(function(b){ _drawBiomeArt(ctx, b, w, h); });
-  CART_PATHS.forEach(function(p){ _drawCartPath(ctx, p[0], p[1], w, h); });
-  CART_BIOMES.forEach(function(b){ _drawCartNode(ctx, b, w, h); });
+  var _knownLocs = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || [];
+  // Pictogramas — só os conhecidos (com pictograma completo)
+  CART_BIOMES.forEach(function(b){
+    if (_knownLocs.indexOf(b.key) >= 0 || b.isOrigin) {
+      _drawBiomeArt(ctx, b, w, h);
+    }
+  });
+  // Paths — só entre locais conhecidos
+  CART_PATHS.forEach(function(p){
+    var aKnown = _knownLocs.indexOf(p[0]) >= 0 || p[0] === 'plains';
+    var bKnown = _knownLocs.indexOf(p[1]) >= 0 || p[1] === 'plains';
+    if (aKnown && bKnown) _drawCartPath(ctx, p[0], p[1], w, h);
+  });
+  // Nodes — locais conhecidos com label completo, desconhecidos com "?"
+  CART_BIOMES.forEach(function(b){
+    if (_knownLocs.indexOf(b.key) >= 0 || b.isOrigin) {
+      _drawCartNode(ctx, b, w, h);
+    } else {
+      // Local desconhecido — silhueta com "?"
+      _drawUnknownLocation(ctx, b, w, h);
+    }
+  });
   var playerBiomeKey = _cartGetPlayerBiome();
   var playerNode = CART_BIOMES.find(function(b){ return b.key === playerBiomeKey; });
   if (playerNode) _drawPlayerPin(ctx, playerNode, w, h);

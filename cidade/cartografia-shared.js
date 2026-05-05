@@ -1907,6 +1907,34 @@
     // por cima como vinheta. Evita escurecer demais o conteúdo central.
   }
 
+  // === _drawUnknownLocation ===
+  // 2026-05-04 USER REQUEST: locais não-descobertos aparecem como
+  // INSINUAÇÃO no mapa — círculo tracejado com "?" no centro. Sugere
+  // que existe algo ali, mas o jogador precisa de mapa do Cartógrafo
+  // Corvus (na Praça Central) ou descoberta natural pra revelar.
+  function _drawUnknownLocation(ctx, b, w, h){
+    var bx = b.x * w, by = b.y * h;
+    ctx.save();
+    // Círculo tracejado discreto
+    ctx.strokeStyle = INK_LIGHT;
+    ctx.lineWidth = 0.6;
+    ctx.globalAlpha = 0.55;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.arc(bx, by, 14, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // "?" no centro (italic, sutil)
+    ctx.fillStyle = INK_MED;
+    ctx.globalAlpha = 0.65;
+    ctx.font = 'italic 14px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', bx, by);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -1925,6 +1953,7 @@
     _drawCartPath: _drawCartPath,
     _drawCartNode: _drawCartNode,
     _drawPlayerPin: _drawPlayerPin,
-    _drawCartCompass: _drawCartCompass
+    _drawCartCompass: _drawCartCompass,
+    _drawUnknownLocation: _drawUnknownLocation  // 2026-05-04: locais não-descobertos
   };
 })();
