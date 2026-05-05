@@ -1072,14 +1072,10 @@
          corner runes, vignette background, animated title/subtitle stagger.
          Text atualizado: 9 raças (não 3), narrativa mais imersiva. -->
     <div id="onboarding-overlay" class="onboarding-overlay" style="display:none">
-        <!-- Hidden SVG defs DEPRECATED — gradients movidos pra top-level
-             #creator-svg-defs (no <body>) pra resolver bug em que rh-* refs
-             paravam de resolver após overlay ficar display:none (~300ms).
-             Bloco vazio mantido apenas como placeholder estrutural; pode ser
-             removido se nada referenciar IDs duplicados aqui. -->
-        <!-- defs movidos pra #creator-svg-defs (top-level body) — fix bug
-             cores sumindo após onboarding (gradients dentro de display:none
-             paravam de resolver). 2026-05-05. -->
+        <!-- SVG defs movidos pra #creator-svg-defs (top-level body, linha
+             ~989). Fix 2026-05-05: gradients dentro de display:none paravam
+             de resolver no Chrome/Telegram WebView, heráldicos perdiam cor
+             após dismissal do onboarding (~300ms). -->
 
         <!-- Aurora layer (gradient suave animado no fundo) -->
         <div class="ob-aurora" aria-hidden="true"></div>
