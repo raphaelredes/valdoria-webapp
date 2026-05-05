@@ -428,9 +428,56 @@ LOG SINK (Fase 7):
   </script>
   <style>
     /* === BRASÕES HERÁLDICOS canonical em botões do hub (FIX 2026-05-04) ===
-       Override do font-size emoji do .hl-ico — pra SVG renderizar com tamanho correto. */
-    .hub-loc .hl-ico svg { width: 30px; height: 30px; color: var(--v-gold, #c4953a); }
+       Override do font-size emoji do .hl-ico — pra SVG renderizar com tamanho correto.
+       USER REQUEST 2026-05-05: cada local tem sua COR TEMÁTICA natural (não tudo gold).
+       Default: gold suave; per-cb override aplica cor heráldica do local. */
+    .hub-loc .hl-ico svg { width: 30px; height: 30px; color: var(--v-gold, #c4953a); transition: color 0.25s ease; }
     .fb-btn .fb-heraldic { color: var(--v-gold, #c4953a); }
+
+    /* === Cores temáticas por local (heraldic palette diversa) === */
+    /* Convívio — tons quentes/sociais */
+    .hub-loc[data-cb="tavern"]      .hl-ico svg { color: #c47a3a; } /* mead/ale brown */
+    .hub-loc[data-cb="taverna"]     .hl-ico svg { color: #c47a3a; }
+    .hub-loc[data-cb="inn"]         .hl-ico svg { color: #d49050; } /* warm hearth */
+    .hub-loc[data-cb="estalagem"]   .hl-ico svg { color: #d49050; }
+    .hub-loc[data-cb="rel_main"]    .hl-ico svg { color: #d4708a; } /* relationship rose */
+    .hub-loc[data-cb="action_quests"] .hl-ico svg { color: #d4c8a8; } /* parchment */
+    .hub-loc[data-cb="quests"]      .hl-ico svg { color: #d4c8a8; }
+
+    /* Comércio — tons mercantis/dourados/verdes */
+    .hub-loc[data-cb="market"]      .hl-ico svg { color: #4aa86a; } /* market emerald */
+    .hub-loc[data-cb="mercado"]     .hl-ico svg { color: #4aa86a; }
+    .hub-loc[data-cb="bank"]        .hl-ico svg { color: #c4953a; } /* bank gold (ÚNICO gold) */
+    .hub-loc[data-cb="banco"]       .hl-ico svg { color: #c4953a; }
+    .hub-loc[data-cb="open_workshop"] .hl-ico svg { color: #d46520; } /* forge orange */
+    .hub-loc[data-cb="rune_scribe"] .hl-ico svg { color: #5a8ad4; } /* arcane sapphire */
+
+    /* Combate — tons marciais/aço/sangue */
+    .hub-loc[data-cb="guild"]       .hl-ico svg { color: #8a96a8; } /* steel knight */
+    .hub-loc[data-cb="guilda"]      .hl-ico svg { color: #8a96a8; }
+    .hub-loc[data-cb="gates"]       .hl-ico svg { color: #9a8a78; } /* stone gate */
+    .hub-loc[data-cb="portoes"]     .hl-ico svg { color: #9a8a78; }
+    .hub-loc[data-cb="arena"]       .hl-ico svg { color: #c44030; } /* blood crimson */
+    .hub-loc[data-cb="arena_main"]  .hl-ico svg { color: #c44030; }
+    .hub-loc[data-cb="daily_challenge"] .hl-ico svg { color: #9a4ab0; } /* mystic purple */
+
+    /* Espírito — tons sagrados/místicos */
+    .hub-loc[data-cb="temple"]      .hl-ico svg { color: #e8d8b8; } /* sacred ivory */
+    .hub-loc[data-cb="templo"]      .hl-ico svg { color: #e8d8b8; }
+    .hub-loc[data-cb="square"]      .hl-ico svg { color: #7aa078; } /* garden sage */
+    .hub-loc[data-cb="praca"]       .hl-ico svg { color: #7aa078; }
+    .hub-loc[data-cb="action_codex"] .hl-ico svg { color: #8a5a3a; } /* library mahogany */
+    .hub-loc[data-cb="codex"]       .hl-ico svg { color: #8a5a3a; }
+    .hub-loc[data-cb="festival"]    .hl-ico svg { color: #d8709a; } /* festival rose */
+
+    /* Special / fallback */
+    .hub-loc[data-cb="cartografia"] .hl-ico svg { color: #a87a4a; } /* map sepia */
+    .hub-loc[data-cb="travel"]      .hl-ico svg { color: #a87a4a; }
+    .hub-loc[data-cb="explore_main"] .hl-ico svg { color: #4aa080; } /* explore green */
+
+    /* Hover/selected boost — saturação extra */
+    .hub-loc:hover .hl-ico svg,
+    .hub-loc:active .hl-ico svg { filter: brightness(1.3) drop-shadow(0 0 6px currentColor); }
     /* === VIEWPORT LOCK CANONICAL (Telegram Desktop webapp) === */
     /* O lock REAL vem do valdoria-design.css importado acima:
        html { max-width: min(100vw, 480px); height: min(100dvh, 960px); ... }
@@ -36465,6 +36512,10 @@ function _buildHubAlly(a) {
 // === SYNC_TARGET: game-hub.js#_buildLocCell BEGIN ===
 function _buildLocCell(ico, name, btn) {
     var cell = _hubDiv('hub-loc');
+
+    /* USER REQUEST 2026-05-05: data-cb pra CSS aplicar cor temática por local
+       (evita "tudo gold" — cada local tem sua cor heráldica natural). */
+    if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
     /* Icon: heraldic SVG (canonical) ou emoji fallback */
     var icoEl = _hubDiv('hl-ico');
