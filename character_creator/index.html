@@ -1552,8 +1552,7 @@
             perspective-origin: center;
         }
 
-        /* Wisps — paleta DARK MEDIEVAL SOMBRIO (USER REQUEST 2026-05-05).
-           Default ash dark; nth-child override pra dark crimson / twilight purple. */
+        /* Wisps — paleta dark medieval sombrio (swap puro do gold antigo). */
         .ob-wisp {
             position: absolute;
             width: clamp(50px, 14vw, 90px);
@@ -1569,25 +1568,6 @@
             opacity: 0;
             will-change: transform, opacity;
         }
-        /* Dark crimson wisp (blood/somber) */
-        .ob-wisp:nth-child(3n+1) {
-            background: linear-gradient(90deg,
-              transparent 0%,
-              rgba(74, 24, 18, 0.4) 25%,           /* deep dark crimson */
-              rgba(122, 40, 28, 0.6) 50%,
-              rgba(74, 24, 18, 0.4) 75%,
-              transparent 100%);
-        }
-        /* Twilight purple wisp (mystic somber) */
-        .ob-wisp:nth-child(3n+2) {
-            background: linear-gradient(90deg,
-              transparent 0%,
-              rgba(42, 26, 64, 0.4) 25%,           /* twilight indigo */
-              rgba(74, 48, 96, 0.6) 50%,
-              rgba(42, 26, 64, 0.4) 75%,
-              transparent 100%);
-        }
-        /* Iron ash wisp (default 3n+3) — usa o default acima */
         .ob-wisp:nth-child(1)  { left: -10%; top: 12%; animation: obWispDriftRight 10s ease-in-out infinite; animation-delay: 0s; }
         .ob-wisp:nth-child(2)  { left: 110%; top: 22%; animation: obWispDriftLeft 11s ease-in-out infinite; animation-delay: 1.5s; }
         .ob-wisp:nth-child(3)  { left: -10%; top: 32%; animation: obWispDriftRight 12s ease-in-out infinite; animation-delay: 3s; }
@@ -1647,32 +1627,16 @@
             100% { transform: translate3d(-110vw, -55vh, -40px) rotateX(-1080deg) rotateY(-720deg) rotateZ(-360deg); opacity: 0; }
         }
 
-        /* Sparks — paleta DARK MEDIEVAL SOMBRIO (USER REQUEST 2026-05-05) */
+        /* Sparks — aged ash sombrio (swap puro do gold antigo). */
         .ob-particle {
             position: absolute;
             width: 3px; height: 3px;
             border-radius: 50%;
-            background: #6a5a4e; /* aged ash default */
+            background: #6a5a4e; /* aged ash */
             box-shadow: 0 0 6px #6a5a4e;
             opacity: 0;
             animation: obParticleDrift 6s ease-in infinite;
         }
-        /* Dark bronze (aged) */
-        .ob-particle:nth-child(4n+1) {
-            background: #5a3010;
-            box-shadow: 0 0 6px #5a3010;
-        }
-        /* Twilight indigo (mystic somber) */
-        .ob-particle:nth-child(4n+2) {
-            background: #2a1a40;
-            box-shadow: 0 0 6px #2a1a40;
-        }
-        /* Dark crimson (blood somber) */
-        .ob-particle:nth-child(4n+3) {
-            background: #5a1810;
-            box-shadow: 0 0 6px #5a1810;
-        }
-        /* Iron ash default em :nth-child(4n+4) */
         /* Sparks: indexes 19-30 (10 wisps + 8 dice + 12 sparks = 30 total) */
         .ob-particle:nth-child(19) { left: 6%;  animation-delay: 0.4s; animation-duration: 7s; }
         .ob-particle:nth-child(20) { left: 14%; animation-delay: 1.4s; animation-duration: 6.2s; }
@@ -1727,21 +1691,17 @@
             .onboarding-title { animation: none !important; }
         }
 
-        /* === Corner runes (paleta diversa — USER REQUEST 2026-05-05) === */
+        /* === Corner runes — aged ash sombrio (swap puro do gold antigo) === */
         .ob-rune {
             position: absolute;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
             font-size: 28px;
-            color: rgba(168, 148, 120, 0.4); /* silver default */
-            text-shadow: 0 0 10px rgba(168, 148, 120, 0.25);
+            color: rgba(106, 90, 78, 0.45); /* aged ash */
+            text-shadow: 0 0 10px rgba(58, 48, 40, 0.4); /* iron dark glow */
             pointer-events: none;
             z-index: 2;
             animation: obRunePulse 3s ease-in-out infinite;
         }
-        .ob-rune-tl { color: rgba(184, 115, 51, 0.4); text-shadow: 0 0 10px rgba(184, 115, 51, 0.25); } /* bronze TL */
-        .ob-rune-tr { color: rgba(74, 120, 196, 0.4); text-shadow: 0 0 10px rgba(74, 120, 196, 0.25); } /* sapphire TR */
-        .ob-rune-bl { color: rgba(168, 148, 120, 0.4); text-shadow: 0 0 10px rgba(168, 148, 120, 0.25); } /* silver BL */
-        .ob-rune-br { color: rgba(160, 64, 48, 0.4); text-shadow: 0 0 10px rgba(160, 64, 48, 0.25); } /* crimson BR */
         .ob-rune-tl { top: 16px; left: 16px; }
         .ob-rune-tr { top: 16px; right: 16px; animation-delay: 0.75s; }
         .ob-rune-bl { bottom: 16px; left: 16px; animation-delay: 1.5s; }
