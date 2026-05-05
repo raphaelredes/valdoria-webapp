@@ -30,40 +30,104 @@
   var SEA_FAINT  = 'rgba(74,96,128,0.45)';
 
   // === CART_BIOMES ===
+  // 2026-05-04: REWRITE BASEADO em src/game/world/map_data.py (WORLD_MAP).
+  // 19 locais oficiais + sistema de descoberta progressiva. Posições
+  // orgânicas (NUNCA alinhadas) inspiradas no antigo mapa do mundo.
+  // 'biome' alinha com pictograma; 'discoverable' = só visível após
+  // settlement_discovery; 'mapKey' = item Mapa Regional que revela.
   var CART_BIOMES = [
-    { key: 'plains',    name: 'Planície de Valdoria',  x: 0.36, y: 0.58, color: '#a8c878', accent: '#7da855', tier: 1,  ico: '🌾', isOrigin: true,
-      desc: 'Cidade de Valdoria. Origem do aventureiro. Verdes campos e estradas.' },
-    { key: 'forest',    name: 'Floresta dos Lobos',    x: 0.54, y: 0.34, color: '#508e46', accent: '#2e5e2a', tier: 2,  ico: '🌲',
-      desc: 'Lobos cinzentos rondam. Árvores antigas. Caminhos sinuosos.' },
-    { key: 'cave',      name: 'Caverna dos Ecos',      x: 0.20, y: 0.44, color: '#6a5a4a', accent: '#3e3428', tier: 3,  ico: '🏔️',
-      desc: 'Minérios e cristais. Sons ecoam pelas câmaras subterrâneas.' },
-    { key: 'swamp',     name: 'Pântano Sussurrante',   x: 0.64, y: 0.55, color: '#5a6b3a', accent: '#3a4a22', tier: 4,  ico: '🌫️',
-      desc: 'Águas turvas. Venenos raros. Sussurros entre os juncos.' },
-    { key: 'mountain',  name: 'Montanha Gelada',       x: 0.20, y: 0.22, color: '#8a8a9a', accent: '#5a5a6a', tier: 5,  ico: '⛰️',
-      desc: 'Picos cobertos de neve. Metais raros. Escalada perigosa.' },
-    { key: 'desert',    name: 'Deserto de Khass',      x: 0.78, y: 0.70, color: '#dcb45a', accent: '#a08840', tier: 6,  ico: '🏜️',
-      desc: 'Dunas infinitas. Sol implacável. Tesouros enterrados.' },
-    { key: 'graveyard', name: 'Cemitério Esquecido',   x: 0.42, y: 0.80, color: '#5a4a5a', accent: '#3a2a3a', tier: 6,  ico: '💀',
-      desc: 'Mortos-vivos vagam. Tumbas centenárias. Maldições antigas.' },
-    { key: 'snow',      name: 'Tundra do Norte',       x: 0.50, y: 0.22, color: '#c8d4e0', accent: '#88a0b8', tier: 7,  ico: '❄️',
-      desc: 'Frio extremo. Lobos de gelo. Aurora boreal eterna.' },
-    { key: 'volcanic',  name: 'Vulcão Adormecido',     x: 0.78, y: 0.34, color: '#c84030', accent: '#8a2010', tier: 8,  ico: '🌋',
-      desc: 'Lava sob a crosta. Cristais de fogo. Drakhul dorme aqui.' }
+    // ─── HUB CENTRAL (origem) ─────────────────────
+    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.36, y: 0.58, biome: 'plains',    tier: 0, ico: '🏰', isOrigin: true,
+      mapKey: null,
+      desc: 'Os grandes portões da cidade. Aldric vigia a entrada. Ponto de partida de toda jornada.' },
+    // ─── PLAINS (Oeste) ───────────────────────────
+    { key: 'green_fields',   name: 'Campos Verdes',       x: 0.46, y: 0.62, biome: 'plains',  tier: 1, ico: '🌾',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Vastas planícies onde o vento sopra livre. Lar de coelhos... e bandidos.' },
+    { key: 'orc_tribe',      name: 'Acampamento Orc',     x: 0.54, y: 0.70, biome: 'plains',  tier: 3, ico: '⛺',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Tendas de couro grosseiro e fogueiras. Tambores de guerra ecoam.' },
+    { key: 'bandit_fortress', name: 'Forte dos Bandidos', x: 0.62, y: 0.76, biome: 'plains',  tier: 5, ico: '🏴',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Fortaleza improvisada de madeira e pedra. Base de saqueadores.' },
+    // ─── FOREST (Norte) ───────────────────────────
+    { key: 'forest',    name: 'Floresta dos Sussurros',  x: 0.50, y: 0.40, biome: 'forest',   tier: 2, ico: '🌲',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Árvores antigas que bloqueiam a luz do sol. Sombras com vida.' },
+    { key: 'goblin_nest',     name: 'Ninho de Goblins',  x: 0.42, y: 0.32, biome: 'forest',   tier: 2, ico: '👺',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Clareira cheia de armadilhas e lixo. O cheiro é terrível.' },
+    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.60, y: 0.30, biome: 'forest',   tier: 4, ico: '🏛️',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa.' },
+    // ─── CAVE / UNDERGROUND ─────────────────────
+    { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.26, y: 0.50, biome: 'cave',     tier: 3, ico: '🕳️',
+      mapKey: null,
+      desc: 'Túnel escuro sob as colinas. Ecos estranhos das profundezas.' },
+    { key: 'troll_cave', name: 'Caverna do Troll',       x: 0.16, y: 0.32, biome: 'cave',     tier: 5, ico: '🧌',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Abertura escura na rocha. Ossos enormes na entrada.' },
+    // ─── SWAMP (Leste) ───────────────────────────
+    { key: 'swamp',     name: 'Pântano Nebuloso',         x: 0.62, y: 0.62, biome: 'swamp',   tier: 3, ico: '🐍',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas paradas e névoa eterna. Cuidado onde pisa.' },
+    { key: 'deep_swamp', name: 'Pântano Profundo',        x: 0.72, y: 0.66, biome: 'swamp',   tier: 5, ico: '🐊',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas negras e árvores mortas. Criaturas anciãs espreitam.' },
+    // ─── MOUNTAIN (Noroeste) ──────────────────────
+    { key: 'mountain',  name: 'Picos de Pedra',           x: 0.24, y: 0.20, biome: 'mountain', tier: 4, ico: '🏔️',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Montanhas íngremes e vento cortante. Harpias fazem ninhos.' },
+    { key: 'dragon_pass', name: 'Passo do Dragão',        x: 0.34, y: 0.14, biome: 'mountain', tier: 6, ico: '🐉',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Passagem estreita entre picos vulcânicos. Fumaça sobe do vale.' },
+    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.16, y: 0.10, biome: 'mountain', tier: 3, ico: '⛏️', settlement: true, discoverable: true,
+      mapKey: null,
+      desc: 'Vila mineradora encravada nos picos. Fornalhas ardem dia e noite.' },
+    // ─── DESERT (Sul) ─────────────────────────────
+    { key: 'desert',    name: 'Deserto Dourado',          x: 0.78, y: 0.74, biome: 'desert',   tier: 4, ico: '🌵',
+      mapKey: 'Mapa do Deserto',
+      desc: 'Dunas sem fim sob um sol impiedoso. Água vale mais que ouro.' },
+    // ─── GRAVEYARD ─────────────────────────────
+    { key: 'graveyard', name: 'Cemitério Antigo',         x: 0.42, y: 0.84, biome: 'graveyard', tier: 3, ico: '⚰️',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Lápides cobertas de musgo. Mortos não descansam em paz.' },
+    // ─── SNOW (Norte distante) ────────────────────
+    { key: 'snow',      name: 'Ermo Congelado',           x: 0.46, y: 0.16, biome: 'snow',     tier: 5, ico: '❄️',
+      mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Tudo é branco e mortal. O frio penetra até a alma.' },
+    // ─── VOLCANIC (Leste-Sul, alto nível) ────────
+    { key: 'volcanic',  name: 'Cratera Vulcânica',        x: 0.84, y: 0.40, biome: 'volcanic', tier: 8, ico: '🌋',
+      mapKey: 'Mapa Vulcânico',
+      desc: 'Rios de lava e cinzas. O calor derrete metal. Lar de dragões?' },
+    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.90, y: 0.30, biome: 'volcanic', tier: 5, ico: '⛺', settlement: true, discoverable: true,
+      mapKey: null,
+      desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' }
   ];
 
   // === CART_PATHS ===
+  // 2026-05-04: BASEADO em WORLD_MAP.connections (map_data.py).
+  // Trajetos NUNCA retos — _drawCartPath usa Bezier curvada.
   var CART_PATHS = [
-    ['plains', 'forest'],
-    ['plains', 'cave'],
-    ['plains', 'swamp'],
-    ['plains', 'graveyard'],
-    ['forest', 'mountain'],
-    ['forest', 'snow'],
-    ['cave', 'mountain'],
-    ['swamp', 'graveyard'],
-    ['swamp', 'volcanic'],
-    ['desert', 'volcanic'],
-    ['snow', 'mountain']
+    // Hub
+    ['plains', 'green_fields'], ['plains', 'forest'], ['plains', 'swamp'],
+    ['plains', 'desert'], ['plains', 'cave'],
+    // Plains internas
+    ['green_fields', 'orc_tribe'], ['green_fields', 'mountain'],
+    ['green_fields', 'bandit_fortress'], ['bandit_fortress', 'desert'],
+    // Forest
+    ['forest', 'goblin_nest'], ['forest', 'elven_ruins'], ['forest', 'snow'],
+    ['elven_ruins', 'snow'],
+    // Cave
+    ['cave', 'graveyard'], ['cave', 'korthag'],
+    // Graveyard / Swamp
+    ['graveyard', 'swamp'], ['swamp', 'deep_swamp'], ['deep_swamp', 'volcanic'],
+    // Mountain
+    ['mountain', 'troll_cave'], ['mountain', 'snow'],
+    ['mountain', 'dragon_pass'], ['mountain', 'korthag'],
+    ['dragon_pass', 'volcanic'], ['dragon_pass', 'valkrest'],
+    // Volcanic
+    ['desert', 'volcanic'], ['volcanic', 'valkrest']
   ];
 
   // === _cartSeedRand ===
@@ -333,7 +397,7 @@
     // - Proporções autênticas Frà Mauro / Atlas Catalão (1375-1459)
     // ──────────────────────────────────────────────────────────────────
 
-    if (b.key === 'plains') {
+    if (b.biome === 'plains' || b.key === 'plains') {
       // CASTELO DE VALDORIA — torre central alta + 2 torres laterais +
       // muralha com crenelações + portão arqueado + 3 casas no entorno.
       // Look: vista 3/4 medieval, elementos com volume via hatching.
@@ -472,7 +536,7 @@
       ctx.lineTo(ttx, tty - 27);
       ctx.stroke();
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'forest') {
+    } else if (b.biome === 'forest' || b.key === 'forest') {
       // FLORESTA AAA — mistura: 4 carvalhos com canopy round + 3 pinheiros
       // altos + 1 árvore destacada + chão com sombras + 2 cogumelos.
       // Hierarquia: árvore central grande dominante.
@@ -566,128 +630,172 @@
         ctx.globalAlpha = 1;
       });
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'cave') {
-      // CAVERNA AAA — entrada arqueada GRANDE em 3/4 + estalactites
-      // detalhadas + 2 cristais com sombra + rochas com textura de fratura.
-      // Profundidade visível através do arco.
-      // Profundidade interna (gradient escuro)
-      var caveGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, 18);
-      caveGrad.addColorStop(0, 'rgba(0,0,0,0.85)');
-      caveGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+    } else if (b.biome === 'cave' || b.key === 'cave') {
+      // CAVERNA REWRITE 2026-05-04 — montanha rochosa com entrada de
+      // caverna em 3/4 vista, estalactites pendentes, escadinha de pedras
+      // descendo, lanterna acesa pendurada, morcegos voando.
+      // MONTANHA HOSPEDEIRA (cone irregular com volume)
+      ctx.fillStyle = '#5a4836';
+      ctx.globalAlpha = 0.30;
+      ctx.beginPath();
+      ctx.moveTo(-26, 22);
+      ctx.lineTo(-20, 6);
+      ctx.lineTo(-10, -8);
+      ctx.lineTo(-2, -16);
+      ctx.lineTo(8, -10);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(26, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-26, 22);
+      ctx.lineTo(-20, 6);
+      ctx.lineTo(-10, -8);
+      ctx.lineTo(-2, -16);
+      ctx.lineTo(8, -10);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(26, 22);
+      ctx.stroke();
+      // Hatching denso na lateral direita (sombra da rocha)
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.5;
+      for (var hc = 0; hc < 6; hc++) {
+        ctx.beginPath();
+        ctx.moveTo(2 + hc * 3, -6 + hc * 2);
+        ctx.lineTo(20 + hc * 1, 22);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // ENTRADA DA CAVERNA (arco GRANDE escuro com profundidade)
+      var caveGrad = ctx.createRadialGradient(0, 8, 2, 0, 8, 14);
+      caveGrad.addColorStop(0, 'rgba(0,0,0,0.95)');
+      caveGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+      caveGrad.addColorStop(1, 'rgba(20,15,10,0.45)');
       ctx.save();
       ctx.fillStyle = caveGrad;
       ctx.beginPath();
-      ctx.moveTo(-15, 14);
-      ctx.lineTo(-15, -2);
-      ctx.bezierCurveTo(-15, -14, 15, -14, 15, -2);
-      ctx.lineTo(15, 14);
+      ctx.moveTo(-9, 22);
+      ctx.lineTo(-9, 8);
+      ctx.bezierCurveTo(-9, -2, 9, -2, 9, 8);
+      ctx.lineTo(9, 22);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
-      // Arco da entrada (contorno)
-      ctx.lineWidth = 1.0;
+      // Contorno da entrada (mais grosso + jitter hand-drawn)
+      ctx.lineWidth = 1.1;
       ctx.beginPath();
-      ctx.moveTo(-15, 14);
-      ctx.lineTo(-15, -2);
-      ctx.bezierCurveTo(-15, -14, 15, -14, 15, -2);
-      ctx.lineTo(15, 14);
+      ctx.moveTo(-9, 22);
+      ctx.lineTo(-9.5, 14);
+      ctx.lineTo(-9, 8);
+      ctx.bezierCurveTo(-9, -1, 9, -1, 9, 8);
+      ctx.lineTo(9.5, 14);
+      ctx.lineTo(9, 22);
       ctx.stroke();
-      // Estalactites detalhadas (5 com tamanhos variados — alpha forte)
-      var stals = [[-9, 0.85], [-5, 0.6], [-1, 0.95], [4, 0.7], [9, 0.85]];
+      ctx.lineWidth = 0.9;
+      // ESTALACTITES PENDENTES (4, com perspectiva — frontal + lateral em sombra)
+      var stals = [[-6, 1.0], [-2, 0.7], [2, 1.0], [6, 0.8]];
       stals.forEach(function(st){
         var stx = st[0], stsc = st[1];
-        ctx.fillStyle = INK_DARK;
+        // Estalactite (triângulo invertido + linha lateral)
+        ctx.fillStyle = '#3a2410';
         ctx.beginPath();
-        ctx.moveTo(stx - 1.5*stsc, -8);
-        ctx.lineTo(stx, -2 - 2*stsc);
-        ctx.lineTo(stx + 1.5*stsc, -8);
+        ctx.moveTo(stx - 1.4*stsc, 1);
+        ctx.lineTo(stx, 1 + 5*stsc);
+        ctx.lineTo(stx + 1.4*stsc, 1);
         ctx.closePath();
         ctx.fill();
-        // Detail line
-        ctx.lineWidth = 0.4;
+        // Sombra lateral
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.45;
         ctx.beginPath();
-        ctx.moveTo(stx - 0.5*stsc, -7); ctx.lineTo(stx + 0.5*stsc, -3.5*stsc);
+        ctx.moveTo(stx, 1);
+        ctx.lineTo(stx, 1 + 5*stsc);
+        ctx.lineTo(stx + 1.4*stsc, 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // ESCADA DE PEDRAS na entrada (3 degraus)
+      ctx.fillStyle = '#5a4836';
+      ctx.globalAlpha = 0.7;
+      [[-7, 16], [-5, 18], [-3, 20]].forEach(function(stp){
+        ctx.beginPath();
+        ctx.rect(stp[0], stp[1], 14, 1.8);
+        ctx.fill();
+        ctx.lineWidth = 0.5;
         ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // LANTERNA pendurada na entrada (luz amarela sutil)
+      var lnx = -10, lny = 4;
+      // Cabo
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(lnx, 2); ctx.lineTo(lnx, lny - 2);
+      ctx.stroke();
+      // Corpo da lanterna
+      ctx.fillStyle = '#3a2410';
+      ctx.beginPath();
+      ctx.rect(lnx - 1.5, lny - 2, 3, 3);
+      ctx.fill();
+      // Luz emanando (radial)
+      var lampGrad = ctx.createRadialGradient(lnx, lny, 0.5, lnx, lny, 8);
+      lampGrad.addColorStop(0, 'rgba(255,200,100,0.65)');
+      lampGrad.addColorStop(1, 'rgba(255,200,100,0)');
+      ctx.fillStyle = lampGrad;
+      ctx.beginPath();
+      ctx.arc(lnx, lny, 8, 0, Math.PI*2);
+      ctx.fill();
+      // Vidro da lanterna (point bright)
+      ctx.fillStyle = '#ffd870';
+      ctx.beginPath();
+      ctx.arc(lnx, lny - 0.5, 0.6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 0.9;
+      // 2 MORCEGOS voando saindo da caverna
+      ctx.lineWidth = 0.5;
+      ctx.fillStyle = INK_DARK;
+      [[-14, -4], [12, -2]].forEach(function(bt){
+        var btx = bt[0], bty = bt[1];
+        // Asa direita
+        ctx.beginPath();
+        ctx.moveTo(btx, bty);
+        ctx.quadraticCurveTo(btx + 1, bty - 1, btx + 2, bty);
+        ctx.quadraticCurveTo(btx + 3.5, bty + 0.5, btx + 4, bty - 0.5);
+        ctx.stroke();
+        // Asa esquerda
+        ctx.beginPath();
+        ctx.moveTo(btx, bty);
+        ctx.quadraticCurveTo(btx - 1, bty - 1, btx - 2, bty);
+        ctx.quadraticCurveTo(btx - 3.5, bty + 0.5, btx - 4, bty - 0.5);
+        ctx.stroke();
+        // Corpo
+        ctx.beginPath();
+        ctx.arc(btx, bty + 0.3, 0.6, 0, Math.PI*2);
+        ctx.fill();
       });
       ctx.lineWidth = 0.9;
-      // Estalagmites no chão (3 menores)
-      [[-7, 0.7], [3, 0.9], [9, 0.7]].forEach(function(sm){
-        var smx = sm[0], smsc = sm[1];
-        ctx.fillStyle = INK_DARK;
-        ctx.globalAlpha = 0.85;
+      // Pedras avulsas na frente da entrada (textura)
+      [[-14, 23, 3], [14, 22, 2.5]].forEach(function(rk){
+        ctx.lineWidth = 0.6;
+        ctx.fillStyle = '#5a4836';
         ctx.beginPath();
-        ctx.moveTo(smx - 1.5*smsc, 14);
-        ctx.lineTo(smx, 14 - 5*smsc);
-        ctx.lineTo(smx + 1.5*smsc, 14);
-        ctx.closePath();
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      });
-      // 2 CRISTAIS BRILHANTES nas rochas laterais (prismas hexagonais)
-      [[-22, 8], [22, 6]].forEach(function(cr){
-        var crx = cr[0], cry = cr[1];
-        // Glow azulado sutil
-        ctx.fillStyle = '#88a8c8';
-        ctx.globalAlpha = 0.30;
-        ctx.beginPath();
-        ctx.arc(crx, cry, 6, 0, Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        // Prisma (3 facetas — frontal + 2 laterais)
-        ctx.lineWidth = 0.7;
-        ctx.fillStyle = PAPER_BG;
-        ctx.beginPath();
-        ctx.moveTo(crx, cry - 4);
-        ctx.lineTo(crx - 2, cry - 1);
-        ctx.lineTo(crx - 1.5, cry + 3);
-        ctx.lineTo(crx + 1.5, cry + 3);
-        ctx.lineTo(crx + 2, cry - 1);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        // Linha vertical mestre
-        ctx.beginPath();
-        ctx.moveTo(crx, cry - 4); ctx.lineTo(crx, cry + 3);
-        ctx.stroke();
-        // Reflexo highlight
-        ctx.fillStyle = PAPER_BG;
-        ctx.globalAlpha = 0.85;
-        ctx.beginPath();
-        ctx.moveTo(crx, cry - 4);
-        ctx.lineTo(crx - 0.6, cry - 1);
-        ctx.lineTo(crx, cry + 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      });
-      ctx.lineWidth = 0.9;
-      // Rochas ao redor com TEXTURA de fratura (5 rochas, formas irregulares)
-      var rocks2 = [[-25, 18, 5], [25, 18, 6], [-26, 0, 4], [26, -2, 4]];
-      rocks2.forEach(function(rk){
-        ctx.lineWidth = 0.7;
-        // Forma irregular (poligonal — não elipse)
-        ctx.fillStyle = PAPER_BG;
-        ctx.beginPath();
-        ctx.moveTo(rk[0] - rk[2], rk[1] + rk[2]*0.3);
-        ctx.lineTo(rk[0] - rk[2]*0.6, rk[1] - rk[2]*0.6);
-        ctx.lineTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.7);
+        ctx.moveTo(rk[0] - rk[2], rk[1]);
+        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] - rk[2]*0.7);
+        ctx.lineTo(rk[0] + rk[2]*0.5, rk[1] - rk[2]*0.6);
         ctx.lineTo(rk[0] + rk[2], rk[1] - rk[2]*0.1);
-        ctx.lineTo(rk[0] + rk[2]*0.7, rk[1] + rk[2]*0.6);
-        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] + rk[2]*0.7);
+        ctx.lineTo(rk[0] + rk[2]*0.3, rk[1] + rk[2]*0.4);
+        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] + rk[2]*0.4);
         ctx.closePath();
         ctx.fill();
-        ctx.stroke();
-        // Linhas de fratura (2-3 internas)
-        ctx.lineWidth = 0.35;
-        ctx.beginPath();
-        ctx.moveTo(rk[0] - rk[2]*0.3, rk[1] - rk[2]*0.4);
-        ctx.lineTo(rk[0] + rk[2]*0.2, rk[1] + rk[2]*0.3);
-        ctx.moveTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.2);
-        ctx.lineTo(rk[0] + rk[2]*0.6, rk[1] + rk[2]*0.3);
         ctx.stroke();
         ctx.lineWidth = 0.9;
       });
-    } else if (b.key === 'swamp') {
+    } else if (b.key === 'swamp' || b.biome === 'swamp') {
       // PÂNTANO AAA — poças orgânicas (não elipses) + lily pads + árvore
       // morta com galhos torcidos detalhados + juncos altos + neblina sutil.
       // Poças orgânicas com hatching de água
@@ -814,7 +922,7 @@
       ctx.globalAlpha = 1;
       ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'mountain') {
+    } else if (b.biome === 'mountain' || b.key === 'mountain') {
       // MONTANHAS AAA — 5 picos com VOLUME 3D real (lado claro + sombra
       // triangular hatched), pico central destacado, snowcaps com curva
       // detalhada, estrada serpenteando, hatching de rocha denso.
@@ -887,7 +995,7 @@
       ctx.setLineDash([]);
       ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'desert') {
+    } else if (b.biome === 'desert' || b.key === 'desert') {
       // DESERTO AAA — pirâmide GIZA com textura de blocos, 2 menores em
       // escala, dunas onduladas com crests, sol com face medieval estilizada,
       // pequeno oásis com 2 palmeiras.
@@ -1019,7 +1127,7 @@
         });
       });
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'graveyard') {
+    } else if (b.biome === 'graveyard' || b.key === 'graveyard') {
       // CEMITÉRIO AAA — variedade de lápides (sarcófago, cruz celta, tumba
       // romana com inscrição), árvore retorcida grande, cripta no fundo,
       // caveira com sombra, neblina sutil.
@@ -1199,7 +1307,7 @@
       ctx.globalAlpha = 1;
       ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'snow') {
+    } else if (b.biome === 'snow' || b.key === 'snow') {
       // TUNDRA DO NORTE AAA — picos de gelo com brilho azulado, aurora
       // boreal acima, flocos de 6 pontas (não 4), pinheiro congelado
       // dominante, cobertura de neve hatching.
@@ -1298,129 +1406,199 @@
         }
       }
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'volcanic') {
-      // VULCÃO ADORMECIDO AAA — cone com VOLUME (lado claro + sombra),
-      // cratera elíptica com lava preenchida, lava streams curvas
-      // descendo, fumaça com volume real, cracks no chão.
-      // Cone — lado claro
-      ctx.fillStyle = '#a85040';
-      ctx.globalAlpha = 0.18;
+    } else if (b.biome === 'volcanic' || b.key === 'volcanic') {
+      // VULCÃO REWRITE 2026-05-04 — silhueta dramática estilo Mt. Doom
+      // (Tolkien). Cone alto e robusto + cratera ampla pulsante + 4 lava
+      // flows reais com bifurcação + nuvem de fumaça grande retorcida +
+      // poças de lava ardendo no chão + brasas voando + pico secundário.
+      // PICO SECUNDÁRIO atrás (vista profundidade)
+      ctx.fillStyle = '#3a2818';
+      ctx.globalAlpha = 0.45;
       ctx.beginPath();
-      ctx.moveTo(-22, 18);
-      ctx.lineTo(-6, -10);
-      ctx.lineTo(0, -10);
-      ctx.lineTo(0, 18);
+      ctx.moveTo(-26, 18);
+      ctx.lineTo(-18, -2);
+      ctx.lineTo(-12, -8);
+      ctx.lineTo(-8, -2);
+      ctx.lineTo(-4, 18);
       ctx.closePath();
       ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.lineWidth = 0.9;
+      ctx.lineWidth = 0.7;
       ctx.beginPath();
-      ctx.moveTo(-22, 18);
-      ctx.lineTo(-6, -10);
-      ctx.lineTo(0, -10);
-      ctx.lineTo(0, 18);
+      ctx.moveTo(-26, 18);
+      ctx.lineTo(-18, -2);
+      ctx.lineTo(-12, -8);
+      ctx.lineTo(-8, -2);
+      ctx.lineTo(-4, 18);
       ctx.stroke();
-      // Cone — lado em sombra (direito)
+      // CONE PRINCIPAL — silhueta dramática (lados levemente côncavos)
+      ctx.fillStyle = '#5a3020';
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      ctx.moveTo(-22, 22);
+      ctx.bezierCurveTo(-18, 10, -12, -2, -7, -12); // lateral esquerda côncava
+      ctx.lineTo(-4, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22); // lateral direita
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(-22, 22);
+      ctx.bezierCurveTo(-18, 10, -12, -2, -7, -12);
+      ctx.lineTo(-4, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // SOMBRA do lado direito (preenchimento + hatching)
       ctx.fillStyle = INK_DARK;
       ctx.globalAlpha = 0.30;
       ctx.beginPath();
-      ctx.moveTo(0, -10);
-      ctx.lineTo(6, -10);
-      ctx.lineTo(22, 18);
-      ctx.lineTo(0, 18);
+      ctx.moveTo(0, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22);
+      ctx.lineTo(0, 22);
       ctx.closePath();
       ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, -10);
-      ctx.lineTo(6, -10);
-      ctx.lineTo(22, 18);
-      ctx.lineTo(0, 18);
-      ctx.stroke();
-      // Hatching denso no lado escuro
       ctx.lineWidth = 0.3;
-      ctx.globalAlpha = 0.55;
-      for (var hl = 0; hl < 6; hl++) {
-        var t3 = 0.15 + hl*0.14;
+      ctx.globalAlpha = 0.6;
+      for (var vh = 0; vh < 8; vh++) {
         ctx.beginPath();
-        ctx.moveTo(0 + 1, -10 + t3*4);
-        ctx.lineTo(20 - hl*1.5, 18 - hl*0.5);
+        ctx.moveTo(2 + vh * 1.5, -10 + vh * 4);
+        ctx.lineTo(20 - vh * 0.8, 22);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
       ctx.lineWidth = 0.9;
-      // Cratera elíptica com LAVA preenchida (vermelho real)
+      // CRATERA ampla com BORDAS irregulares (não elipse perfeita)
       ctx.fillStyle = '#c84030';
       ctx.beginPath();
-      ctx.ellipse(0, -10, 6, 1.8, 0, 0, Math.PI*2);
+      ctx.moveTo(-7, -15);
+      ctx.bezierCurveTo(-5, -17, 0, -17, 4, -16);
+      ctx.bezierCurveTo(7, -15, 7, -13, 4, -12);
+      ctx.bezierCurveTo(0, -11, -3, -12, -7, -13);
+      ctx.closePath();
       ctx.fill();
-      ctx.lineWidth = 0.7;
-      ctx.beginPath();
-      ctx.ellipse(0, -10, 6, 1.8, 0, 0, Math.PI*2);
+      ctx.lineWidth = 0.8;
       ctx.stroke();
-      // Glow lava (radial)
-      var lavaGrad = ctx.createRadialGradient(0, -10, 1, 0, -10, 8);
-      lavaGrad.addColorStop(0, 'rgba(255,160,80,0.7)');
-      lavaGrad.addColorStop(1, 'rgba(255,160,80,0)');
-      ctx.fillStyle = lavaGrad;
-      ctx.globalAlpha = 0.8;
+      // GLOW VULCÂNICO grande (radial, alaranjado intenso)
+      var lavaCoreGrad = ctx.createRadialGradient(-2, -14, 1, -2, -14, 14);
+      lavaCoreGrad.addColorStop(0, 'rgba(255,200,100,0.8)');
+      lavaCoreGrad.addColorStop(0.5, 'rgba(255,120,40,0.4)');
+      lavaCoreGrad.addColorStop(1, 'rgba(255,80,0,0)');
+      ctx.fillStyle = lavaCoreGrad;
+      ctx.globalAlpha = 0.85;
       ctx.beginPath();
-      ctx.arc(0, -10, 8, 0, Math.PI*2);
+      ctx.arc(-2, -14, 14, 0, Math.PI*2);
       ctx.fill();
       ctx.globalAlpha = 1;
-      // Lava streams DESCENDO (3 curvas com spread no final)
-      ctx.strokeStyle = '#c84030';
-      ctx.lineWidth = 1.3;
-      [-1, 0, 1].forEach(function(li){
-        var lx = li * 4;
-        ctx.beginPath();
-        ctx.moveTo(lx, -8);
-        ctx.bezierCurveTo(lx + 1, -2, lx - 1, 4, lx + 2, 16);
-        ctx.stroke();
-        // Spread no final
-        ctx.beginPath();
-        ctx.arc(lx + 2, 16, 1.5, 0, Math.PI*2);
-        ctx.fillStyle = '#c84030';
-        ctx.fill();
-      });
-      ctx.strokeStyle = INK_DARK;
-      ctx.lineWidth = 0.9;
-      // Fumaça com VOLUME (3 plumes orgânicas grandes)
-      ctx.lineWidth = 0.6;
-      ctx.fillStyle = INK_LIGHT;
-      ctx.globalAlpha = 0.35;
-      [[-3, -16], [0, -19], [3, -17]].forEach(function(sm, smi){
-        var smx = sm[0], smy = sm[1];
-        // Plume orgânica (ovais sobrepostas)
-        ctx.beginPath();
-        ctx.arc(smx, smy, 3 + smi * 0.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(smx + 1, smy - 3, 2.5 + smi * 0.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(smx - 1, smy - 5 - smi, 2 + smi * 0.4, 0, Math.PI*2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-      // Contorno da fumaça (linha externa)
-      ctx.strokeStyle = INK_LIGHT;
-      ctx.lineWidth = 0.4;
+      // 4 LAVA FLOWS descendo (curvas naturais, com bifurcação no flow central)
+      ctx.strokeStyle = '#e85020';
+      ctx.lineWidth = 1.6;
+      // Flow 1 — esquerda principal
       ctx.beginPath();
       ctx.moveTo(-5, -14);
-      ctx.bezierCurveTo(-7, -18, -3, -22, 0, -25);
-      ctx.bezierCurveTo(3, -22, 7, -18, 5, -14);
+      ctx.bezierCurveTo(-7, -8, -10, -2, -8, 6);
+      ctx.bezierCurveTo(-10, 14, -14, 18, -16, 22);
+      ctx.stroke();
+      // Flow 2 — direita principal
+      ctx.beginPath();
+      ctx.moveTo(2, -14);
+      ctx.bezierCurveTo(4, -6, 6, 0, 8, 8);
+      ctx.bezierCurveTo(10, 14, 14, 18, 16, 22);
+      ctx.stroke();
+      // Flow 3 — central (bifurcação)
+      ctx.beginPath();
+      ctx.moveTo(-1, -14);
+      ctx.bezierCurveTo(-2, -6, 0, 0, -1, 8);
+      ctx.bezierCurveTo(-3, 14, -2, 20, 0, 22);
+      ctx.stroke();
+      // Bifurcação do flow 2
+      ctx.beginPath();
+      ctx.moveTo(8, 8);
+      ctx.bezierCurveTo(11, 12, 13, 16, 12, 22);
+      ctx.stroke();
+      // POÇAS DE LAVA na base (3 ovais brilhantes)
+      ctx.lineWidth = 0.6;
+      [[-15, 22, 4], [0, 22.5, 5], [15, 22, 4]].forEach(function(lp){
+        ctx.fillStyle = '#ff8030';
+        ctx.beginPath();
+        ctx.ellipse(lp[0], lp[1], lp[2], lp[2]*0.4, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#c84030';
+        ctx.stroke();
+        // Glow
+        ctx.fillStyle = '#ffa040';
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(lp[0], lp[1], lp[2]*0.6, lp[2]*0.25, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+      // FUMAÇA grande retorcida (cone de fumaça subindo + se espalhando)
+      ctx.fillStyle = '#4a3828';
+      ctx.globalAlpha = 0.40;
+      // Plume base (logo acima da cratera)
+      ctx.beginPath();
+      ctx.arc(-2, -19, 4, 0, Math.PI*2);
+      ctx.arc(2, -22, 4.5, 0, Math.PI*2);
+      ctx.arc(-3, -25, 5, 0, Math.PI*2);
+      ctx.arc(4, -27, 4, 0, Math.PI*2);
+      ctx.arc(-1, -30, 5.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 0.25;
+      // Topo da fumaça (mais espalhada)
+      ctx.beginPath();
+      ctx.arc(-6, -33, 5, 0, Math.PI*2);
+      ctx.arc(6, -33, 5, 0, Math.PI*2);
+      ctx.arc(0, -35, 6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Contorno da fumaça (linha sinuosa)
+      ctx.strokeStyle = '#5a4838';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-5, -16);
+      ctx.bezierCurveTo(-9, -22, -7, -28, -10, -34);
+      ctx.bezierCurveTo(-6, -38, 0, -38, 6, -34);
+      ctx.bezierCurveTo(10, -28, 8, -22, 5, -16);
       ctx.stroke();
       ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-      // Cracks/rachaduras no chão ao redor
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(-22, 19); ctx.lineTo(-25, 22); ctx.lineTo(-23, 25);
-      ctx.moveTo(22, 19); ctx.lineTo(25, 22); ctx.lineTo(23, 25);
-      ctx.moveTo(-15, 22); ctx.lineTo(-12, 25);
-      ctx.moveTo(15, 22); ctx.lineTo(12, 25);
-      ctx.stroke();
+      // BRASAS voando (5 pontos brilhantes)
+      ctx.fillStyle = '#ff8030';
+      [[-8, -8], [6, -10], [10, -16], [-12, -14], [4, -22]].forEach(function(em){
+        ctx.beginPath();
+        ctx.arc(em[0], em[1], 0.9, 0, Math.PI*2);
+        ctx.fill();
+        // Glow
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath();
+        ctx.arc(em[0], em[1], 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // CRACKS/rachaduras no chão (irradiando do vulcão com glow vermelho)
+      ctx.strokeStyle = '#c84030';
+      ctx.lineWidth = 0.6;
+      ctx.globalAlpha = 0.7;
+      [[-22, 25], [-25, 24], [22, 25], [25, 24], [-12, 26], [12, 26]].forEach(function(cr){
+        ctx.beginPath();
+        ctx.moveTo(cr[0], cr[1]);
+        ctx.lineTo(cr[0] + (rng()-0.5)*4, cr[1] + 3);
+        ctx.lineTo(cr[0] + (rng()-0.5)*5, cr[1] + 6);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
     }
     ctx.lineCap = 'butt';
