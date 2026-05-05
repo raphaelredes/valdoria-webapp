@@ -260,32 +260,49 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   ~1390  <script>SIMULADOR — não sincronizado pra webapp ──┐
                                                                         │
   DEV-ONLY (linhas verificadas)                                         │
-  ~1396  (function setupMockPlayer) — defaults + URL params + ?back=    │
-  ~1424  vars _cityLogEntries / _cityLogMax                             │
-  ~1426  function _logCity / _renderLogPanel / _toggleLogPanel          │
-  ~1445  (function SIM LOG SINK) IIFE — console.* hijack + POST sink    │
-  ~1568  hub helpers: _hubDiv, _hubSpan, _hubBtn, _hubEsc, _hubMiniBar, │
+  ~6203  (function setupMockPlayer) — defaults + URL params + ?back=    │
+         + REMOTE mode fetch /api/auth/characters (Fase 8)              │
+  ~6240  vars _cityLogEntries / _cityLogMax                             │
+  ~6260  function _logCity / _renderLogPanel / _toggleLogPanel          │
+  ~6300  (function SIM LOG SINK) IIFE — console.* hijack + POST sink    │
+  ~6420  hub helpers: _hubDiv, _hubSpan, _hubBtn, _hubEsc, _hubMiniBar, │
          _hubCoin, _matchLocation, _extractBadge, _isCTA                │
-  ~1609  (function setupMocks) — haptic/doAction/vToast/vProcessing     │
+  ~6505  (function setupMocks) — haptic/doAction/vToast/vProcessing     │
                                                                         │
-  CITY SECTORS & DISCOVERY SYSTEM (USER REQUEST 2026-05-04)             │
-  ~6325  var CITY_SECTORS / CITY_SECTOR_ORDER (4 setores: Convívio/     │
+  CITY SECTORS & DISCOVERY SYSTEM (Fase 9 — 2026-05-04)                 │
+  ~6644  var CITY_SECTORS / CITY_SECTOR_ORDER (4 setores: Convívio/     │
          Comércio/Combate/Espírito)                                     │
-  ~6340  var CITY_LOCATIONS — 16 locais com sector/levelReq/discoveryQ  │
-  ~6370  var CITY_DISCOVERY_QUESTS — 8 quests multi-stage com lore      │
-  ~6443  state helpers: _ensureCityState, _findLocByCb,                 │
+  ~6653  var CITY_LOCATIONS — 16 locais com sector/levelReq/discoveryQ  │
+  ~6677  var CITY_DISCOVERY_QUESTS — 8 quests multi-stage com lore      │
+  ~6770  state helpers: _ensureCityState, _findLocByCb,                 │
          _getLocationState (hidden|newly_available|in_progress|unlocked)│
-  ~6469  _getVisibleLocationsForSector / _markLocationSeen              │
-  ~6477  Discovery quest popup: _startDiscoveryQuest,                   │
+  ~6790  _getVisibleLocationsForSector / _markLocationSeen              │
+  ~6810  Discovery quest popup: _startDiscoveryQuest,                   │
          _advanceDiscoveryStage, _renderDiscoveryStage,                 │
          _closeDiscoveryPopup, _esc                                     │
-  ~6549  window._cityCheckDiscovery — hook chamado em doAction          │
+  ~6885  window._cityCheckDiscovery — hook chamado em doAction          │
          (intercepta locations com quest pendente)                      │
-  ~6567  _renderSectorTabs — tab bar inserido após renderHubScreen      │
-  ~6588  _applyDiscoveryAnimations — sparkle+badge nas cells (.hub-loc) │
+  ~6900  _renderSectorTabs — tab bar inserido após renderHubScreen      │
+  ~6920  _applyDiscoveryAnimations — sparkle+badge nas cells (.hub-loc) │
                                                                         │
-  ~1652  function buildMockHubScreen — mock screen p/ renderHubScreen   │
+  ~6948  function buildMockHubScreen — mock screen p/ renderHubScreen   │
          (filtra por sector ativo + level + discovery state)            │
+                                                                        │
+  ~9128  function _heralIco(id, color, size) — render heráldico SVG    │
+         default 1em (fix bug 2026-05-05 estrela gigante)               │
+                                                                        │
+  POPUPS (innerHTML pra suportar SVG icons — fix 2026-05-05):           │
+  ~32034 function _showConfirmPurchase — cpp-icon usa innerHTML         │
+  ~32154 function _showInfoPopup — cpp-icon usa innerHTML               │
+                                                                        │
+  RENDER (canonical SYNC_TARGETs):                                      │
+  ~35051 function renderCityTopBar — clima usa emoji ☀️/⛅/🌧️/⛈️         │
+         (sunny voltou pra emoji em 2026-05-05, antes era ic-stat-cha)  │
+  ~36252 function renderHubScreen (SYNC_TARGET game-hub.js)             │
+  ~36516 function _buildLocCell — adiciona data-cb attr + badge.innerHTML│
+         (per-cb CSS color override + SVG badge support)                │
+                                                                        │
+  ~34969 var GROUP_MEMBERS — player + 3 aliados (5 recursos cada)       │
   ~1688  vars _footerCollapsed                                          │
   ~1689  function renderFooter / _toggleFooter                          │
   ~1718  vars _navStack / _currentScreen                                │
