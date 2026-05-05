@@ -151,20 +151,21 @@
   // 4) Salpicos pequenos ao redor (3-6 micro-blobs)
   function _drawAgedStain(ctx, cx, cy, size, baseColor, edgeColor, seed){
     var rng = _cartSeedRand(seed || (cx + cy * 13));
-    // 1) Halo gradient suave (fade)
-    var halo = ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.6);
+    // 1) Halo gradient suave (fade) — 2026-05-04 v2: halo reduzido 1.6→1.3
+    //    e alpha mais sutil pra manchas menores não dominarem.
+    var halo = ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.3);
     halo.addColorStop(0, baseColor);
     halo.addColorStop(0.6, baseColor);
     halo.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.save();
     ctx.fillStyle = halo;
-    ctx.globalAlpha = 0.15 + rng() * 0.08;
+    ctx.globalAlpha = 0.10 + rng() * 0.06;
     ctx.beginPath();
-    ctx.arc(cx, cy, size * 1.6, 0, Math.PI * 2);
+    ctx.arc(cx, cy, size * 1.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-    // 2) Blob orgânico (corpo)
-    _drawOrganicBlob(ctx, cx, cy, size * 0.85, baseColor, 0.20 + rng() * 0.10, seed);
+    // 2) Blob orgânico (corpo) — alpha também reduzido pra discrição
+    _drawOrganicBlob(ctx, cx, cy, size * 0.85, baseColor, 0.16 + rng() * 0.08, seed);
     // 3) Coffee-ring: borda mais escura (anel de capilaridade)
     var ringInner = size * 0.7, ringOuter = size * 0.92;
     var ring = ctx.createRadialGradient(cx, cy, ringInner, cx, cy, ringOuter);
@@ -908,21 +909,28 @@
     // 1) Base sépia escurecida (cor do estilo #4)
     ctx.fillStyle = '#d8b878';
     ctx.fillRect(0, 0, w, h);
-    // 2) Variação tonal sutil — 6 lavagens grandes orgânicas
+    // 2) Variação tonal sutil — 6 lavagens orgânicas (raio reduzido pra
+    //    não dominar o papel). 2026-05-04 v2: 40-100 → 22-50 (menores).
     for (var i = 0; i < 6; i++) {
       var bx = rng() * w, by = rng() * h;
-      _drawOrganicBlob(ctx, bx, by, 40 + rng() * 60, '#b08050', 0.10 + rng() * 0.08, 200 + i * 11);
+      _drawOrganicBlob(ctx, bx, by, 22 + rng() * 28, '#b08050', 0.08 + rng() * 0.07, 200 + i * 11);
     }
-    // 3) Manchas de vinho/café envelhecidas (4 grandes com coffee-ring)
+    // 3) Manchas de vinho/café envelhecidas (USER REQUEST 2026-05-04 v2:
+    //    "tem manchas que estão muito exageradas, faça menores"). Antes:
+    //    4 manchas com size 18-46 (chegando 73px com halo). Agora: 6
+    //    manchas com size 6-18 (max ~28px com halo) — discretas, naturais.
     var stainColors = [
       ['#6a3818', '#3a1808'], // vinho escuro
       ['#8a5028', '#4a2818'], // café
       ['#7a4020', '#3a1810'], // vinho médio
-      ['#92583a', '#502818']  // café claro
+      ['#92583a', '#502818'], // café claro
+      ['#6a3818', '#3a1808'], // vinho repete
+      ['#7a4020', '#3a1810']  // vinho médio repete
     ];
-    for (var s = 0; s < 4; s++) {
+    for (var s = 0; s < 6; s++) {
       var sx = rng() * w, sy = rng() * h;
-      var ssz = 18 + rng() * 28;
+      // size 6-18 (mistura: pequenas e médias, NUNCA grandes)
+      var ssz = 6 + rng() * 12;
       var c = stainColors[s % stainColors.length];
       _drawAgedStain(ctx, sx, sy, ssz, c[0], c[1], 300 + s * 23);
     }
