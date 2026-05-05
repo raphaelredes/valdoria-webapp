@@ -6691,6 +6691,13 @@ function _isCTA(btn) {
       if (typeof window._cityCheckDiscovery === 'function' && window._cityCheckDiscovery(action)) {
         return;
       }
+      // 0.5 CHANCE ENCOUNTER (USER REQUEST 2026-05-04 AAA):
+      //    Antes de navegar, 30% chance de NPC familiar interceptar com diálogo
+      //    imersivo, dica de exploração, info de mapas. Padrão Witcher 3 / RDR2.
+      if (typeof window._tryChanceEncounter === 'function'
+          && window._tryChanceEncounter(action, window.CITY_MOCK_PLAYER)) {
+        return; // Encontro disparou — popup vai chamar doAction(action) ao continuar
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -36505,6 +36512,466 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   _logCity('cidade.html ready');
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// CHANCE ENCOUNTERS — Diálogos imersivos AAA (USER REQUEST 2026-05-04)
+// ═══════════════════════════════════════════════════════════════════
+// Sistema inspirado em Witcher 3 (NPCs interceptam o player com info
+// orgânica) e Red Dead Redemption 2 (NPCs lembram do player). Antes de
+// abrir Taverna, Mercado, Praça, Portões, etc., há 30% chance de um
+// NPC interceptar com diálogo roteirizado.
+//
+// Cada encontro tem:
+// - npc: nome + título + personalidade (define tom)
+// - trigger: array de actions onde pode disparar
+// - condition(player): elegibilidade (level, has_met, etc.)
+// - script: array de blocos {type, text} (narration | speech | choice)
+// - result: ação ao confirmar (revelar local, criar pedido cartógrafo, etc.)
+//
+// MAPA_IA:
+//   ~36510 RECURRING_NPCS — roster de personagens (8 NPCs)
+//   ~36540 CHANCE_ENCOUNTERS — 6 encontros com scripts ricos
+//   ~36720 _tryChanceEncounter — RNG + filtro + render
+//   ~36770 _renderEncounterPopup — DOM + animação
+//   ~36850 _onEncounterChoice — handlers de escolha
+// ═══════════════════════════════════════════════════════════════════
+
+// Roster de NPCs recorrentes (memória do mundo)
+var RECURRING_NPCS = {
+  vorhan: {
+    name: 'Vorhan, o Veterano',
+    portrait: 'ic-guerreiro',
+    desc: 'Aventureiro aposentado, barba grisalha, cicatriz no rosto, armadura desgastada.'
+  },
+  aldric: {
+    name: 'Guarda Aldric',
+    portrait: 'ic-paladino',
+    desc: 'Veterano dos portões. Olho atento, voz grave.'
+  },
+  silvana: {
+    name: 'Silvana, a Bardisa',
+    portrait: 'ic-bardo',
+    desc: 'Bardisa elfa com harpa de cordas douradas. Sorriso enigmático.'
+  },
+  thessil: {
+    name: 'Thessil, o Mercador',
+    portrait: 'ic-ladino',
+    desc: 'Mercador baixo de chapéu largo. Sempre com novidades das caravanas.'
+  },
+  miriana: {
+    name: 'Mestra Miriana',
+    portrait: 'ic-mago',
+    desc: 'Erudita de vestes acadêmicas. Carrega livros antigos.'
+  },
+  garrick: {
+    name: 'Garrick, o Caçador',
+    portrait: 'ic-patrulheiro',
+    desc: 'Patrulheiro humano, capa de pele, arco às costas.'
+  }
+};
+
+// Pool de encontros (cada um é uma mini-novela)
+var CHANCE_ENCOUNTERS = [
+  // ═══ ENCONTRO 1: Vorhan na Taverna ═══════════════════════════════
+  {
+    id: 'vorhan_tavern_first',
+    npc: 'vorhan',
+    triggers: ['nav:tavern', 'nav:taverna'],
+    condition: function(p){
+      return !(p._encountered_npcs || {}).vorhan_first;
+    },
+    script: [
+      { type: 'narration', text: 'Você cruza a porta da Taverna do Urso Cego. O cheiro de hidromel e fumaça de carvalho toma seus sentidos. Antes que possa procurar uma mesa, uma voz rouca te chama do canto mais escuro.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Ei... você aí. Senta um pouco.' },
+      { type: 'narration', text: 'Um homem de barba grisalha, com uma cicatriz longa atravessando o rosto, gesticula para a cadeira em frente. A armadura sobre ele está coberta de cortes velhos — testemunhos de muitas batalhas.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Sou Vorhan. Há vinte invernos eu batia essas terras como você. Hoje só observo. Mas observar ensina muito.' },
+      { type: 'narration', text: 'Ele aponta com a caneca para fora da janela.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Ouvi do velho Corvus, na Praça, que ele tá precisando de informação fresca de uma região nova. Mapas regionais, sabe? Cada um cobre uma parte de Valdoria. Não sei se você tem interesse... mas pra um aventureiro do seu calibre, valeria a visita ao cartógrafo.' }
+    ],
+    choices: [
+      { id: 'thank', label: 'Obrigado pela dica, Vorhan.', result: 'continue' },
+      { id: 'goto_cart', label: '📜 Vou agora à Praça falar com Corvus', result: 'goto_cartographer' },
+      { id: 'later', label: 'Talvez mais tarde.', result: 'continue' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.vorhan_first = true;
+      p._encountered_npcs.vorhan_count = 1;
+    }
+  },
+
+  // ═══ ENCONTRO 2: Aldric ao tentar abrir Cartografia primeira vez ═══
+  {
+    id: 'aldric_first_map',
+    npc: 'aldric',
+    triggers: ['cartografia', 'open_cartografia'],
+    condition: function(p){
+      return !(p._encountered_npcs || {}).aldric_map_warning;
+    },
+    script: [
+      { type: 'narration', text: 'Você se aproxima dos Portões para consultar o mapa de Valdoria. Aldric, o guarda veterano, levanta o capacete ao te ver. Você o conhece — guarda esses portões há décadas.' },
+      { type: 'speech', speaker: 'aldric', text: '— Aventureiro... uma palavra antes de você partir.' },
+      { type: 'narration', text: 'Ele baixa a voz, olhando ao redor. Em sua mão, um pergaminho amarelado com bordas chamuscadas — provavelmente o único mapa que ele carrega há anos.' },
+      { type: 'speech', speaker: 'aldric', text: '— Vejo aventureiros entrando e saindo todo dia. A maioria nem sabe pra onde vai. Você não pode atravessar Valdoria sem mapa. É praticamente suicídio.' },
+      { type: 'speech', speaker: 'aldric', text: '— O Mestre Corvus, na Praça Central, vende mapas regionais. Cada um cobre uma região do reino. Mas ele leva tempo pra preparar — depende de aventureiros como você que voltam contando o que viram.' },
+      { type: 'narration', text: 'Aldric te entrega seu pergaminho gasto.' },
+      { type: 'speech', speaker: 'aldric', text: '— Toma. É um mapa antigo dos arredores próximos. Não cobre muito, mas é um começo. Volte aqui quando quiser saber mais — sempre tô de plantão.' }
+    ],
+    choices: [
+      { id: 'thank', label: '— Obrigado, Aldric.', result: 'continue_to_cart' },
+      { id: 'goto_cart', label: '📜 Visitar Corvus agora', result: 'goto_cartographer' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.aldric_map_warning = true;
+    }
+  },
+
+  // ═══ ENCONTRO 3: Silvana, a Bardisa (Taverna, recorrente) ═══════
+  {
+    id: 'silvana_tavern_rumor',
+    npc: 'silvana',
+    triggers: ['nav:tavern', 'nav:taverna'],
+    condition: function(p){
+      var enc = p._encountered_npcs || {};
+      // Só após ter encontrado Vorhan primeiro
+      return enc.vorhan_first && !enc.silvana_rumor;
+    },
+    script: [
+      { type: 'narration', text: 'A bardisa no canto interrompe sua música no momento em que seus olhos se cruzam. Ela desliza um dedo languidamente pela harpa de cordas douradas, abrindo um sorriso enigmático.' },
+      { type: 'speech', speaker: 'silvana', text: '— Ah, viajante... há dias eu te vejo passar por aqui. Senta, senta. Tenho uma história fresca pra você.' },
+      { type: 'narration', text: 'Ela tira o cabelo prateado dos olhos e se inclina mais perto.' },
+      { type: 'speech', speaker: 'silvana', text: '— Faz três noites, um caçador veio chegando dos Pântanos Profundos. Coberto de lama, mas sorrindo como quem viu coisas. Entregou um pergaminho ao velho Corvus na Praça.' },
+      { type: 'speech', speaker: 'silvana', text: '— Informações cartográficas valiosas, dizem. O cartógrafo agora tá adicionando aquela região ao próximo mapa que ele vai vender. Se você tem coragem de explorar terras inexploradas, talvez seja hora de visitá-lo. Os melhores mapas são os mais frescos — e Corvus tem um quase pronto.' }
+    ],
+    choices: [
+      { id: 'thank', label: 'Linda história. Obrigado, Silvana.', result: 'continue' },
+      { id: 'goto_cart', label: '📜 Ir à Praça falar com Corvus', result: 'goto_cartographer' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.silvana_rumor = true;
+    }
+  },
+
+  // ═══ ENCONTRO 4: Thessil no Mercado ════════════════════════════
+  {
+    id: 'thessil_market_caravan',
+    npc: 'thessil',
+    triggers: ['nav:market', 'nav:mercado'],
+    condition: function(p){
+      return !(p._encountered_npcs || {}).thessil_caravan;
+    },
+    script: [
+      { type: 'narration', text: 'Antes de chegar nos balcões do mercado, alguém puxa sua manga com firmeza. Um homem baixo, de chapéu largo e olhos espertos, te puxa pra um canto entre as barracas.' },
+      { type: 'speech', speaker: 'thessil', text: '— Pst! Você aí! Tô precisando trocar uma palavra rápida.' },
+      { type: 'narration', text: 'Ele inclina o chapéu pra trás, revelando um sorriso astuto.' },
+      { type: 'speech', speaker: 'thessil', text: '— Sou Thessil. Recebi uma carga rara de uma caravana das Montanhas hoje pela manhã. Eles trouxeram mais que mercadorias — trouxeram informações.' },
+      { type: 'speech', speaker: 'thessil', text: '— Ouvi dizer que o cartógrafo Corvus tá juntando detalhes do Passo do Dragão. A caravana passou por lá. Falaram pra ele tudo que viram. Se você vai pra Praça, leva esse rumor — pode acelerar o pedido de algum aventureiro lá.' },
+      { type: 'narration', text: 'Ele te dá um tapinha amistoso no ombro.' },
+      { type: 'speech', speaker: 'thessil', text: '— Falo isso de coração. Entre mercadores e aventureiros, a gente compartilha boas oportunidades.' }
+    ],
+    choices: [
+      { id: 'thank', label: 'Valeu, Thessil.', result: 'continue' },
+      { id: 'goto_cart', label: '📜 Levar o rumor a Corvus', result: 'goto_cartographer' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.thessil_caravan = true;
+    }
+  },
+
+  // ═══ ENCONTRO 5: Miriana, a Erudita (Praça) ═════════════════════
+  {
+    id: 'miriana_square_research',
+    npc: 'miriana',
+    triggers: ['nav:square', 'nav:praca'],
+    condition: function(p){
+      return !(p._encountered_npcs || {}).miriana_research && (p.level || 1) >= 3;
+    },
+    script: [
+      { type: 'narration', text: 'Você atravessa a Praça Central. O burburinho dos vendedores se mistura com o som das fontes. Uma mulher de vestes acadêmicas se aproxima, segurando um livro grosso de capa em couro escuro.' },
+      { type: 'speech', speaker: 'miriana', text: '— Perdão pela interrupção, aventureiro. Vi você nos portões antes. Você... viaja, não viaja? Cruza terras de Valdoria além das muralhas?' },
+      { type: 'narration', text: 'Ela abre o livro com cuidado, mostrando ilustrações detalhadas de mapas antigos — alguns com séculos de idade.' },
+      { type: 'speech', speaker: 'miriana', text: '— Sou Mestra Miriana, da Academia de História. Estou pesquisando a história cartográfica de nosso reino. O Mestre Corvus na Praça é o melhor cartógrafo vivo — herdou três gerações de traço de família.' },
+      { type: 'speech', speaker: 'miriana', text: '— Mas ele só vende mapas regionais comuns. Para o Mapa Mestre completo de Valdoria, ele exige um teste de erudição. Caso você queira... eu posso te treinar nas runas cartográficas. É uma arte difícil, mas... recompensadora.' }
+    ],
+    choices: [
+      { id: 'interested', label: 'Estou interessado em estudar.', result: 'continue' },
+      { id: 'goto_cart', label: '📜 Ir falar com Corvus primeiro', result: 'goto_cartographer' },
+      { id: 'later', label: 'Talvez quando estiver mais experiente.', result: 'continue' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.miriana_research = true;
+    }
+  },
+
+  // ═══ ENCONTRO 6: Vorhan retorna (RECORRENTE — após primeira) ════
+  {
+    id: 'vorhan_tavern_recurring',
+    npc: 'vorhan',
+    triggers: ['nav:tavern', 'nav:taverna'],
+    condition: function(p){
+      var enc = p._encountered_npcs || {};
+      return enc.vorhan_first && (enc.vorhan_count || 0) < 3 && Math.random() < 0.5;
+    },
+    script: [
+      { type: 'narration', text: 'Você entra na taverna. Vorhan, o veterano, te reconhece imediatamente do canto e levanta a caneca em saudação.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Você de novo! Bom te ver inteiro. Estive pensando... aquela conversa que tivemos sobre mapas.' },
+      { type: 'narration', text: 'Ele coça a barba grisalha com a mão calejada.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Não vou te empurrar nada. Mas ouvi essa manhã que dois aventureiros voltaram do Forte dos Bandidos com info nova. Corvus vai conseguir acelerar mapas se eles dividirem o que viram.' },
+      { type: 'speech', speaker: 'vorhan', text: '— Você sabe como é. Cartógrafo bom precisa de informação fresca, e informação fresca vem de quem volta vivo. Vale a visita.' }
+    ],
+    choices: [
+      { id: 'thank', label: 'Obrigado pela dica, velho.', result: 'continue' },
+      { id: 'goto_cart', label: '📜 Visitar Corvus na Praça', result: 'goto_cartographer' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.vorhan_count = (p._encountered_npcs.vorhan_count || 1) + 1;
+    }
+  },
+
+  // ═══ ENCONTRO 7: Garrick, o Caçador (Portões/Cartografia) ═══════
+  {
+    id: 'garrick_gates_routes',
+    npc: 'garrick',
+    triggers: ['nav:gates', 'nav:portoes'],
+    condition: function(p){
+      var enc = p._encountered_npcs || {};
+      return !enc.garrick_routes && (p.level || 1) >= 4;
+    },
+    script: [
+      { type: 'narration', text: 'Você se aproxima dos portões. Um patrulheiro de capa de pele encosta na muralha, observando o horizonte. Quando vê você, faz um aceno breve com a cabeça.' },
+      { type: 'speech', speaker: 'garrick', text: '— Saindo a campo? Ou só conferindo o tempo?' },
+      { type: 'narration', text: 'Ele se afasta da muralha, ajustando o arco às costas. O olhar dele tem aquela calma só dos que andaram muito sob estrelas.' },
+      { type: 'speech', speaker: 'garrick', text: '— Sou Garrick. Patrulho rotas pra Coroa há dezessete invernos. Conheço Valdoria como minha mão direita.' },
+      { type: 'speech', speaker: 'garrick', text: '— Olha, vou te dar um conselho que ninguém vai te dar: Corvus, na Praça, vende mapas. Bons. Mas ele só sabe vender o que TEM. Tem regiões que ninguém mapeou ainda — locais escondidos que só descobrem quem realmente caminha por eles.' },
+      { type: 'speech', speaker: 'garrick', text: '— Quando você passa perto de um lugar inexplorado, presta atenção nos sinais. Pegadas estranhas. Fumaça de longe. Um aroma que não é da floresta. É assim que aventureiros descobrem o que não tá nos pergaminhos.' }
+    ],
+    choices: [
+      { id: 'thank', label: 'Vou ficar de olho. Obrigado, Garrick.', result: 'continue' },
+      { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'continue' }
+    ],
+    onDone: function(p){
+      p._encountered_npcs = p._encountered_npcs || {};
+      p._encountered_npcs.garrick_routes = true;
+    }
+  }
+];
+
+var ENCOUNTER_BASE_CHANCE = 0.35; // 35% chance base (alto pra showcasing)
+
+// ═══ MOTOR DE ENCONTRO ═══════════════════════════════════════════
+function _tryChanceEncounter(action, player) {
+  if (!player) return false;
+  if (window._encounterActive) return false; // já tem um popup aberto
+
+  // Filtra encontros elegíveis
+  var eligible = CHANCE_ENCOUNTERS.filter(function(enc){
+    if (enc.triggers.indexOf(action) < 0) return false;
+    try { return enc.condition(player) !== false; }
+    catch(e){ return false; }
+  });
+
+  if (eligible.length === 0) return false;
+
+  // Roll geral (alguns encontros são "first time" — sempre 100%)
+  var firstTimeEnc = eligible.filter(function(e){ return e.id.indexOf('first') >= 0 || e.id.indexOf('aldric_first') >= 0; });
+  var rolledEnc;
+  if (firstTimeEnc.length > 0) {
+    // Sempre dispara primeiro encontro novo
+    rolledEnc = firstTimeEnc[0];
+  } else {
+    // Demais: 35% chance
+    if (Math.random() > ENCOUNTER_BASE_CHANCE) return false;
+    rolledEnc = eligible[Math.floor(Math.random() * eligible.length)];
+  }
+
+  _logCity('chance encounter triggered: ' + rolledEnc.id);
+  _renderEncounterPopup(rolledEnc, action, player);
+  return true;
+}
+
+// ═══ POPUP DOM ════════════════════════════════════════════════════
+function _renderEncounterPopup(enc, originalAction, player) {
+  window._encounterActive = true;
+
+  var npc = RECURRING_NPCS[enc.npc];
+  if (!npc) {
+    window._encounterActive = false;
+    return;
+  }
+
+  // Inject CSS once
+  if (!document.getElementById('encounter-style')) {
+    var st = document.createElement('style');
+    st.id = 'encounter-style';
+    st.textContent = ''
+      + '#encounter-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.85);'
+      + '  display:flex;align-items:center;justify-content:center;padding:16px;'
+      + '  animation:encFadeIn 0.4s ease-out}'
+      + '@keyframes encFadeIn{from{opacity:0}to{opacity:1}}'
+      + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+      + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
+      + '  max-width:420px;width:100%;max-height:88vh;overflow-y:auto;'
+      + '  display:flex;flex-direction:column;'
+      + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
+      + '.enc-header{display:flex;gap:12px;padding:14px 16px;'
+      + '  background:rgba(15,12,8,0.55);border-bottom:1px solid rgba(196,149,58,0.3);'
+      + '  align-items:center;flex-shrink:0}'
+      + '.enc-portrait{width:48px;height:48px;flex-shrink:0;border-radius:50%;'
+      + '  background:rgba(196,149,58,0.18);border:1px solid rgba(196,149,58,0.55);'
+      + '  display:flex;align-items:center;justify-content:center;color:#c4953a}'
+      + '.enc-portrait svg{width:32px;height:32px}'
+      + '.enc-meta{flex:1;min-width:0}'
+      + '.enc-name{font-family:Cinzel,serif;color:#c4953a;font-size:15px;font-weight:700;'
+      + '  letter-spacing:1px;margin:0 0 2px;text-shadow:0 0 8px rgba(196,149,58,0.3)}'
+      + '.enc-desc{font-style:italic;color:#a09484;font-size:11px;line-height:1.4;margin:0}'
+      + '.enc-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto}'
+      + '.enc-line{font-size:13px;line-height:1.6;color:#d4c8b0;animation:encSlideIn 0.5s ease-out}'
+      + '@keyframes encSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}'
+      + '.enc-narration{font-style:italic;color:#a09484;padding-left:12px;border-left:2px solid rgba(196,149,58,0.3)}'
+      + '.enc-speech{color:#d4c8b0;padding:8px 12px;background:rgba(74,56,40,0.25);'
+      + '  border-radius:6px;border-left:3px solid #c4953a}'
+      + '.enc-speech::before{content:attr(data-speaker);color:#c4953a;font-weight:700;'
+      + '  font-family:Cinzel,serif;display:block;font-size:11px;letter-spacing:1px;margin-bottom:3px}'
+      + '.enc-actions{padding:14px 16px;border-top:1px solid rgba(196,149,58,0.3);'
+      + '  background:rgba(15,12,8,0.4);flex-shrink:0;display:flex;flex-direction:column;gap:6px}'
+      + '.enc-btn{padding:10px 14px;background:rgba(74,56,40,0.45);'
+      + '  border:1px solid rgba(196,149,58,0.45);border-radius:6px;'
+      + '  color:#d4c8b0;font-family:Cinzel,serif;font-size:12px;letter-spacing:0.6px;'
+      + '  cursor:pointer;text-align:left;transition:transform 0.1s,border-color 0.15s,background 0.15s}'
+      + '.enc-btn:hover{border-color:#c4953a;background:rgba(196,149,58,0.18);color:#c4953a}'
+      + '.enc-btn:active{transform:scale(0.97)}'
+      + '.enc-btn-primary{background:linear-gradient(180deg,#c4953a,#9a7530);color:#1a1510;'
+      + '  font-weight:700;border-color:#c4953a}'
+      + '.enc-btn-primary:hover{background:linear-gradient(180deg,#d4a54a,#a78540);color:#1a1510}'
+      + '.enc-skip{align-self:flex-end;margin-top:6px;background:transparent;border:0;'
+      + '  color:#6a5a4a;font-size:11px;font-style:italic;cursor:pointer;padding:4px 8px}'
+      + '.enc-skip:hover{color:#c4953a}';
+    document.head.appendChild(st);
+  }
+
+  // Build DOM
+  var ov = document.createElement('div');
+  ov.id = 'encounter-overlay';
+
+  var portraitSvg = (typeof _heralIco === 'function') ? _heralIco(npc.portrait) : '';
+
+  var html = ''
+    + '<div class="enc-card">'
+    + '  <div class="enc-header">'
+    + '    <div class="enc-portrait">' + portraitSvg + '</div>'
+    + '    <div class="enc-meta">'
+    + '      <h3 class="enc-name">' + npc.name + '</h3>'
+    + '      <p class="enc-desc">' + npc.desc + '</p>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="enc-body" id="enc-body"></div>'
+    + '  <div class="enc-actions" id="enc-actions" style="display:none"></div>'
+    + '  <button class="enc-skip" id="enc-skip">Pular diálogo →</button>'
+    + '</div>';
+  ov.innerHTML = html;
+  document.body.appendChild(ov);
+
+  // Render lines progressively
+  var bodyEl = document.getElementById('enc-body');
+  var actionsEl = document.getElementById('enc-actions');
+  var lineIdx = 0;
+
+  function renderNextLine() {
+    if (lineIdx >= enc.script.length) {
+      // All lines shown — render choices
+      _renderEncounterChoices(enc, originalAction, player, actionsEl);
+      return;
+    }
+    var line = enc.script[lineIdx++];
+    var div = document.createElement('div');
+    if (line.type === 'speech') {
+      var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
+      div.className = 'enc-line enc-speech';
+      div.setAttribute('data-speaker', spkr.name);
+      div.textContent = line.text;
+    } else {
+      div.className = 'enc-line enc-narration';
+      div.textContent = line.text;
+    }
+    bodyEl.appendChild(div);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    // Auto-advance with reading time
+    var words = line.text.split(/\s+/).length;
+    var delay = Math.max(1200, Math.min(words * 220, 3500));
+    setTimeout(renderNextLine, delay);
+  }
+  renderNextLine();
+
+  // Skip button: show all lines + choices immediately
+  document.getElementById('enc-skip').onclick = function(){
+    while (lineIdx < enc.script.length) {
+      var line = enc.script[lineIdx++];
+      var div = document.createElement('div');
+      if (line.type === 'speech') {
+        var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
+        div.className = 'enc-line enc-speech';
+        div.setAttribute('data-speaker', spkr.name);
+        div.textContent = line.text;
+      } else {
+        div.className = 'enc-line enc-narration';
+        div.textContent = line.text;
+      }
+      bodyEl.appendChild(div);
+    }
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    _renderEncounterChoices(enc, originalAction, player, actionsEl);
+  };
+}
+
+function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
+  actionsEl.innerHTML = '';
+  actionsEl.style.display = 'flex';
+  enc.choices.forEach(function(c, idx){
+    var btn = document.createElement('button');
+    btn.className = 'enc-btn' + (c.result === 'goto_cartographer' ? ' enc-btn-primary' : '');
+    btn.textContent = c.label;
+    btn.onclick = function(){
+      _onEncounterChoice(enc, c, originalAction, player);
+    };
+    actionsEl.appendChild(btn);
+  });
+}
+
+function _onEncounterChoice(enc, choice, originalAction, player) {
+  if (typeof enc.onDone === 'function') {
+    try { enc.onDone(player); } catch(e){ console.warn('encounter onDone:', e); }
+  }
+  var ov = document.getElementById('encounter-overlay');
+  if (ov) ov.parentNode.removeChild(ov);
+  window._encounterActive = false;
+
+  if (choice.result === 'goto_cartographer') {
+    // Navega pra Praça → abre Corvus
+    if (typeof navigateTo === 'function') {
+      navigateTo('square');
+      setTimeout(function(){
+        if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['square_cartographer_open']) {
+          ACTION_HANDLERS['square_cartographer_open'](player);
+        }
+      }, 250);
+    }
+  } else if (choice.result === 'continue_to_cart') {
+    // Continua pra abrir cartografia
+    if (typeof navigateTo === 'function') navigateTo('cartografia');
+  } else {
+    // Continue: re-dispara doAction original SEM passar pelo interceptor de novo
+    // (nesse momento _encountered_npcs já registrou que o encontro aconteceu)
+    if (typeof window.doAction === 'function') window.doAction(originalAction);
+  }
+}
+
+// Expor globalmente pra interceptor em doAction
+window._tryChanceEncounter = _tryChanceEncounter;
 
 // === SYNC_TARGET: game-hub.js#_LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
