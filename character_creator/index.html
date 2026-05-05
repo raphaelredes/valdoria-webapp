@@ -1844,6 +1844,8 @@
             document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
             document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
             setupBackButton();
+            // USER REQUEST 2026-05-04: init layout pixel-based (smartphone constraint)
+            if (typeof _initLayout === 'function') _initLayout();
             if (window._creatorLoadingCtrl) window._creatorLoadingCtrl.hide();
         })();
 
@@ -2269,9 +2271,24 @@
         // ═══════════════════════════════════════════════
         // NAVIGATION
         // ═══════════════════════════════════════════════
-        // USER REQUEST 2026-05-04: helper pixel-based pra slide track.
-        // 100vw quebrava em smartphone-only layout (html max-width: 430px).
-        // clientWidth do viewport pega o tamanho REAL do container.
+        // USER REQUEST 2026-05-04: layout pixel-based pra smartphone-only constraint.
+        // 100vw referencia viewport REAL do navegador (1920px desktop) e ignora
+        // html max-width: 430px. Pixel math via clientWidth garante slide correto
+        // dentro do container. Init + resize re-aplicam tamanho.
+        function _initLayout() {
+            const viewport = document.getElementById('screenViewport');
+            const track = document.getElementById('screenTrack');
+            if (!viewport || !track) return;
+            const w = viewport.clientWidth;
+            if (!w) return;
+            track.style.width = (SCREENS.length * w) + 'px';
+            Array.from(track.children).forEach(s => {
+                s.style.flex = `0 0 ${w}px`;
+                s.style.width = w + 'px';
+            });
+            _slideTrackTo(currentScreen);
+        }
+
         function _slideTrackTo(idx) {
             const track = document.getElementById('screenTrack');
             const viewport = document.getElementById('screenViewport');
@@ -2359,10 +2376,10 @@
             goScreen(idx);
         }
 
-        // USER REQUEST 2026-05-04: re-slide on resize (orientation change ou
+        // USER REQUEST 2026-05-04: re-init layout on resize (orientation change ou
         // janela ajustada). Sem isso, slide quebra ao redimensionar.
         window.addEventListener('resize', function() {
-            try { _slideTrackTo(currentScreen); } catch(e){}
+            try { _initLayout(); } catch(e){}
         });
 
         // ═══════════════════════════════════════════════
