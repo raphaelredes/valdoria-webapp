@@ -986,8 +986,8 @@
         <svg width="0" height="0" style="position:absolute" aria-hidden="true">
             <defs>
                 <linearGradient id="ob-mini-die-edge" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e8c45a"/>
-                    <stop offset="100%" stop-color="#7a5818"/>
+                    <stop offset="0%" stop-color="#f8f5ee"/>
+                    <stop offset="100%" stop-color="#5a4838"/>
                 </linearGradient>
                 <linearGradient id="ob-mini-die-face" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#3a2e22"/>
@@ -1376,27 +1376,27 @@
             inset: 0;
             border-radius: 50%;
             border-style: solid;
-            border-color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+            border-color: rgba(168, 148, 120, 0.35); /* silver-bronze */
         }
         .ob-mc-ring-outer {
             border-width: 1px;
-            border-color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+            border-color: rgba(184, 115, 51, 0.35); /* bronze outer */
             animation: obMcRotate 22s linear infinite;
         }
         .ob-mc-ring-mid {
             inset: 18%;
             border-width: 1px;
             border-style: dashed;
-            border-color: var(--v-gold-40, rgba(196, 149, 58, 0.4));
+            border-color: rgba(168, 148, 120, 0.45); /* silver mid */
             animation: obMcRotate 16s linear infinite reverse;
         }
         .ob-mc-ring-inner {
             inset: 35%;
             border-width: 1px;
-            border-color: var(--v-gold-50, rgba(196, 149, 58, 0.5));
+            border-color: rgba(74, 120, 196, 0.5); /* sapphire inner — magic core */
             box-shadow:
-              inset 0 0 12px var(--v-gold-30, rgba(196, 149, 58, 0.3)),
-              0 0 16px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+              inset 0 0 12px rgba(74, 120, 196, 0.3),
+              0 0 16px rgba(74, 120, 196, 0.2);
             animation: obMcRotate 12s linear infinite, obMcPulse 4s ease-in-out infinite;
         }
         @keyframes obMcRotate {
@@ -1405,7 +1405,7 @@
         }
         @keyframes obMcPulse {
             0%, 100% { opacity: 0.7; }
-            50%      { opacity: 1; box-shadow: inset 0 0 18px var(--v-gold-50), 0 0 24px var(--v-gold-40); }
+            50%      { opacity: 1; box-shadow: inset 0 0 18px rgba(74, 120, 196, 0.5), 0 0 24px rgba(74, 120, 196, 0.4); }
         }
         .ob-mc-runes {
             position: absolute; inset: 0;
@@ -1416,8 +1416,8 @@
             top: 50%; left: 50%;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
             font-size: 18px;
-            color: var(--v-gold, #c4953a);
-            text-shadow: 0 0 8px var(--v-gold-50, rgba(196, 149, 58, 0.5));
+            color: rgba(168, 148, 120, 0.85); /* silver-bronze */
+            text-shadow: 0 0 8px rgba(74, 120, 196, 0.5); /* sapphire glow magic */
             transform-origin: center;
         }
         /* 8 runas distribuídas em círculo (45° apart) */
@@ -1430,16 +1430,16 @@
         .ob-mc-runes span:nth-child(7) { transform: translate(-50%, -50%) rotate(270deg) translateY(-150px) rotate(-270deg); }
         .ob-mc-runes span:nth-child(8) { transform: translate(-50%, -50%) rotate(315deg) translateY(-150px) rotate(-315deg); }
 
-        /* === Burst radial flash (ativado em .slide-bursting) === */
+        /* === Burst radial flash — paleta diversa (USER REQUEST 2026-05-05) === */
         .ob-burst-flash {
             position: absolute;
             top: 50%; left: 50%;
             width: 0; height: 0;
             border-radius: 50%;
             background: radial-gradient(circle,
-              rgba(255, 244, 208, 0.7) 0%,
-              var(--v-gold-50, rgba(196, 149, 58, 0.5)) 30%,
-              var(--v-gold-30, rgba(196, 149, 58, 0.3)) 50%,
+              rgba(248, 245, 238, 0.8) 0%,         /* silver-white core */
+              rgba(160, 200, 232, 0.5) 30%,        /* sapphire mid */
+              rgba(184, 115, 51, 0.3) 50%,         /* bronze edge */
               transparent 70%);
             transform: translate(-50%, -50%);
             opacity: 0;
@@ -1552,9 +1552,9 @@
             perspective-origin: center;
         }
 
-        /* Wisps — Streamers etéreos de energia dourada do Orb (canonical
-           .title-orb-wisp do loading-title.css). Elongados, translúcidos,
-           com blur, drift diagonal pela tela. NÃO são orbs (orb é único). */
+        /* Wisps — Streamers etéreos com paleta DIVERSA (USER REQUEST 2026-05-05:
+           menos gold, mais variedade). Default neutro; nth-child override pra
+           bronze/silver/sapphire alternados. */
         .ob-wisp {
             position: absolute;
             width: clamp(50px, 14vw, 90px);
@@ -1562,14 +1562,33 @@
             border-radius: 50%;
             background: linear-gradient(90deg,
               transparent 0%,
-              var(--v-gold-30, rgba(196, 149, 58, 0.3)) 25%,
-              rgba(255, 244, 208, 0.7) 50%,
-              var(--v-gold-30, rgba(196, 149, 58, 0.3)) 75%,
+              rgba(168, 148, 120, 0.3) 25%,
+              rgba(248, 245, 238, 0.7) 50%,
+              rgba(168, 148, 120, 0.3) 75%,
               transparent 100%);
             filter: blur(3px);
             opacity: 0;
             will-change: transform, opacity;
         }
+        /* Bronze wisp (warm) */
+        .ob-wisp:nth-child(3n+1) {
+            background: linear-gradient(90deg,
+              transparent 0%,
+              rgba(184, 115, 51, 0.3) 25%,
+              rgba(232, 160, 96, 0.7) 50%,
+              rgba(184, 115, 51, 0.3) 75%,
+              transparent 100%);
+        }
+        /* Sapphire wisp (cool) */
+        .ob-wisp:nth-child(3n+2) {
+            background: linear-gradient(90deg,
+              transparent 0%,
+              rgba(74, 120, 196, 0.3) 25%,
+              rgba(160, 200, 232, 0.7) 50%,
+              rgba(74, 120, 196, 0.3) 75%,
+              transparent 100%);
+        }
+        /* Silver wisp (neutral) — nth-child(3n+3) usa o default acima */
         .ob-wisp:nth-child(1)  { left: -10%; top: 12%; animation: obWispDriftRight 10s ease-in-out infinite; animation-delay: 0s; }
         .ob-wisp:nth-child(2)  { left: 110%; top: 22%; animation: obWispDriftLeft 11s ease-in-out infinite; animation-delay: 1.5s; }
         .ob-wisp:nth-child(3)  { left: -10%; top: 32%; animation: obWispDriftRight 12s ease-in-out infinite; animation-delay: 3s; }
@@ -1629,16 +1648,32 @@
             100% { transform: translate3d(-110vw, -55vh, -40px) rotateX(-1080deg) rotateY(-720deg) rotateZ(-360deg); opacity: 0; }
         }
 
-        /* Sparks — pontos dourados ambientes */
+        /* Sparks — pontos com paleta DIVERSA (USER REQUEST 2026-05-05) */
         .ob-particle {
             position: absolute;
             width: 3px; height: 3px;
             border-radius: 50%;
-            background: var(--v-gold, #c4953a);
-            box-shadow: 0 0 6px var(--v-gold, #c4953a);
+            background: #a89478; /* silver default */
+            box-shadow: 0 0 6px #a89478;
             opacity: 0;
             animation: obParticleDrift 6s ease-in infinite;
         }
+        /* Bronze sparks (warm) */
+        .ob-particle:nth-child(4n+1) {
+            background: #b87333;
+            box-shadow: 0 0 6px #b87333;
+        }
+        /* Sapphire sparks (cool) */
+        .ob-particle:nth-child(4n+2) {
+            background: #4a78c4;
+            box-shadow: 0 0 6px #4a78c4;
+        }
+        /* Crimson sparks (warm accent) */
+        .ob-particle:nth-child(4n+3) {
+            background: #a04030;
+            box-shadow: 0 0 6px #a04030;
+        }
+        /* Silver default em :nth-child(4n+4) */
         /* Sparks: indexes 19-30 (10 wisps + 8 dice + 12 sparks = 30 total) */
         .ob-particle:nth-child(19) { left: 6%;  animation-delay: 0.4s; animation-duration: 7s; }
         .ob-particle:nth-child(20) { left: 14%; animation-delay: 1.4s; animation-duration: 6.2s; }
@@ -1693,17 +1728,21 @@
             .onboarding-title { animation: none !important; }
         }
 
-        /* === Corner runes (decorative) === */
+        /* === Corner runes (paleta diversa — USER REQUEST 2026-05-05) === */
         .ob-rune {
             position: absolute;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
             font-size: 28px;
-            color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
-            text-shadow: 0 0 10px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+            color: rgba(168, 148, 120, 0.4); /* silver default */
+            text-shadow: 0 0 10px rgba(168, 148, 120, 0.25);
             pointer-events: none;
             z-index: 2;
             animation: obRunePulse 3s ease-in-out infinite;
         }
+        .ob-rune-tl { color: rgba(184, 115, 51, 0.4); text-shadow: 0 0 10px rgba(184, 115, 51, 0.25); } /* bronze TL */
+        .ob-rune-tr { color: rgba(74, 120, 196, 0.4); text-shadow: 0 0 10px rgba(74, 120, 196, 0.25); } /* sapphire TR */
+        .ob-rune-bl { color: rgba(168, 148, 120, 0.4); text-shadow: 0 0 10px rgba(168, 148, 120, 0.25); } /* silver BL */
+        .ob-rune-br { color: rgba(160, 64, 48, 0.4); text-shadow: 0 0 10px rgba(160, 64, 48, 0.25); } /* crimson BR */
         .ob-rune-tl { top: 16px; left: 16px; }
         .ob-rune-tr { top: 16px; right: 16px; animation-delay: 0.75s; }
         .ob-rune-bl { bottom: 16px; left: 16px; animation-delay: 1.5s; }
