@@ -37007,6 +37007,416 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
 // Expor globalmente pra interceptor em doAction
 window._tryChanceEncounter = _tryChanceEncounter;
 
+// ═══════════════════════════════════════════════════════════════════
+// MESTRE CARTÓGRAFO CORVUS — Popup imersivo AAA (Phase 3 — 2026-05-04)
+// ═══════════════════════════════════════════════════════════════════
+// Sistema canonical do projeto (src/game/city/cartographer_data.py +
+// town_square_services.py:436). Player encomenda mapa, paga, aguarda
+// X dias enquanto aventureiros voltam à cidade trazendo informações
+// que aceleram o pedido. Padrão Skyrim/Witcher 3 — não-instantâneo
+// pra criar imersão de mundo vivo.
+//
+// MAPA_IA:
+//   ~37000 CORVUS_MAPS — 7 mapas regionais (preço + tempo + biomas)
+//   ~37050 CORVUS_NPC_RETURNS — pool de aventureiros que retornam
+//   ~37100 _gameTick — incrementa game_day, dispara NPC arrivals
+//   ~37150 _openCartographerPopup — main entry, render UI
+//   ~37250 _renderOrderProgress — barra de progresso do pedido
+//   ~37300 _placeOrder — confirmação + débito de gold
+//   ~37350 _checkOrderReady — entrega mapa quando ready_day chega
+// ═══════════════════════════════════════════════════════════════════
+
+// Catálogo de mapas — alinhado com REGIONAL_MAP_CATALOG do server
+var CORVUS_MAPS = [
+  { name: 'Mapa das Planícies',  price: 30, days: 2, emoji: '🌾',
+    desc: 'Campos verdes e estradas conhecidas. Acampamento Orc + Forte dos Bandidos.',
+    reveals: ['orc_tribe', 'bandit_fortress'] },
+  { name: 'Mapa da Floresta',    price: 35, days: 3, emoji: '🌲',
+    desc: 'Florestas ancestrais e ruínas perdidas. Ninho de Goblins + Ruínas Élficas.',
+    reveals: ['goblin_nest', 'elven_ruins'] },
+  { name: 'Mapa do Deserto',     price: 20, days: 2, emoji: '🌵',
+    desc: 'Areias douradas sob o sol implacável.',
+    reveals: ['desert'] },
+  { name: 'Mapa do Pântano',     price: 40, days: 4, emoji: '🐍',
+    desc: 'Águas turvas e mortos antigos. Pântano Profundo + Cemitério Antigo.',
+    reveals: ['deep_swamp', 'graveyard'] },
+  { name: 'Mapa do Ermo Gelado', price: 30, days: 4, emoji: '❄️',
+    desc: 'Tundra do norte sob aurora boreal eterna.',
+    reveals: ['snow'] },
+  { name: 'Mapa das Montanhas',  price: 60, days: 5, emoji: '🏔️',
+    desc: 'Picos rochosos e cavernas profundas. Caverna do Troll + Passo do Dragão + Passagem Subterrânea.',
+    reveals: ['troll_cave', 'dragon_pass', 'cave'] },
+  { name: 'Mapa Vulcânico',      price: 55, days: 6, emoji: '🌋',
+    desc: 'Cratera fumegante e rios de lava. Cuidado com os dragões.',
+    reveals: ['volcanic'] }
+];
+
+// Pool de NPCs que retornam à cidade trazendo informações.
+// Cada NPC retornando reduz ready_day em 1-2 dias de UM pedido aleatório.
+var CORVUS_NPC_RETURNS = [
+  { name: 'Borgar, o Anão', cls: 'guerreiro', region: 'das Montanhas Geladas',
+    quote: 'Ele entrega um croqui detalhado dos Picos de Pedra ao Mestre Corvus.' },
+  { name: 'Lyra, a Patrulheira', cls: 'patrulheiro', region: 'da Floresta dos Sussurros',
+    quote: 'Os pés dela ainda têm folhas presas. Ela sussurra rotas secretas a Corvus.' },
+  { name: 'Theron, o Caçador', cls: 'patrulheiro', region: 'do Pântano Profundo',
+    quote: 'Cobertura de lama e olhar cansado. Entrega pergaminhos manchados ao cartógrafo.' },
+  { name: 'Sarya, a Druidisa', cls: 'druida', region: 'do Ermo Congelado',
+    quote: 'Roupas brancas de neve. Ela desenha trilhas de gelo na mesa de Corvus.' },
+  { name: 'Magnus, o Mercador', cls: 'ladino', region: 'do Deserto Dourado',
+    quote: 'Ainda com chapéu de palha. Conta histórias de oásis a Corvus.' },
+  { name: 'Krael, o Bárbaro', cls: 'barbaro', region: 'da Cratera Vulcânica',
+    quote: 'Cabelo chamuscado. Marca cracks de lava em uma carta de Corvus.' },
+  { name: 'Vexa, a Bruxa', cls: 'bruxo', region: 'do Cemitério Antigo',
+    quote: 'Pálida e silenciosa. Aponta tumbas perigosas no mapa de Corvus.' }
+];
+
+// Tick de tempo — incrementa game_day quando jogador faz ações que envolvem tempo
+function _gameTick(amount) {
+  amount = amount || 1;
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  p.game_day = (p.game_day || 1) + amount;
+}
+
+// Verifica se algum pedido está pronto pra entregar
+function _checkOrderReady(player) {
+  if (!player.cartographer_orders) return [];
+  var ready = [];
+  var pending = [];
+  player.cartographer_orders.forEach(function(o){
+    if ((o.ready_day || 0) <= (player.game_day || 1)) {
+      // Pronto! Entrega mapa
+      ready.push(o);
+      player.maps_owned = player.maps_owned || [];
+      if (player.maps_owned.indexOf(o.map) < 0) {
+        player.maps_owned.push(o.map);
+      }
+      // Revela locais associados
+      var def = CORVUS_MAPS.find(function(m){ return m.name === o.map; });
+      if (def && def.reveals) {
+        player.known_locations = player.known_locations || [];
+        def.reveals.forEach(function(loc){
+          if (player.known_locations.indexOf(loc) < 0) {
+            player.known_locations.push(loc);
+          }
+        });
+      }
+    } else {
+      pending.push(o);
+    }
+  });
+  player.cartographer_orders = pending;
+  return ready;
+}
+
+// Trigger random NPC arrival que acelera 1 pedido (chance baixa)
+function _maybeRollNpcReturn(player) {
+  if (!player.cartographer_orders || player.cartographer_orders.length === 0) return null;
+  if (Math.random() > 0.45) return null; // 45% de chance
+  var npc = CORVUS_NPC_RETURNS[Math.floor(Math.random() * CORVUS_NPC_RETURNS.length)];
+  // Acelera o primeiro pedido em 1 dia
+  var order = player.cartographer_orders[Math.floor(Math.random() * player.cartographer_orders.length)];
+  if (order && order.ready_day > (player.game_day || 1)) {
+    order.ready_day = Math.max((player.game_day || 1) + 1, order.ready_day - 1);
+    return { npc: npc, order: order };
+  }
+  return null;
+}
+
+// === MAIN ENTRY ====================================================
+function _openCartographerPopup(player) {
+  player = player || window.CITY_MOCK_PLAYER || {};
+
+  // Avança 1 dia ao visitar (mock — server real teria timer)
+  _gameTick(1);
+
+  // Check pedidos prontos
+  var delivered = _checkOrderReady(player);
+  // Trigger random NPC arrival
+  var npcReturn = _maybeRollNpcReturn(player);
+
+  _injectCartographerCSS();
+  _renderCartographerOverlay(player, delivered, npcReturn);
+}
+
+function _injectCartographerCSS() {
+  if (document.getElementById('cart-popup-style')) return;
+  var st = document.createElement('style');
+  st.id = 'cart-popup-style';
+  st.textContent = ''
+    + '#corvus-overlay{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.88);'
+    + '  display:flex;align-items:center;justify-content:center;padding:14px;'
+    + '  animation:corvFadeIn 0.4s ease-out}'
+    + '@keyframes corvFadeIn{from{opacity:0}to{opacity:1}}'
+    + '.corv-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+    + '  border:1px solid rgba(196,149,58,0.6);border-radius:14px;'
+    + '  max-width:480px;width:100%;max-height:90vh;overflow:hidden;'
+    + '  display:flex;flex-direction:column;'
+    + '  box-shadow:0 14px 50px rgba(0,0,0,0.75),0 0 30px rgba(196,149,58,0.15)}'
+    + '.corv-header{display:flex;gap:14px;padding:16px;'
+    + '  background:rgba(15,12,8,0.55);border-bottom:1px solid rgba(196,149,58,0.3);'
+    + '  align-items:center;flex-shrink:0}'
+    + '.corv-portrait{width:54px;height:54px;flex-shrink:0;border-radius:50%;'
+    + '  background:rgba(196,149,58,0.18);border:1px solid rgba(196,149,58,0.55);'
+    + '  display:flex;align-items:center;justify-content:center;color:#c4953a}'
+    + '.corv-portrait svg{width:36px;height:36px}'
+    + '.corv-name{font-family:Cinzel,serif;color:#c4953a;font-size:17px;font-weight:700;'
+    + '  letter-spacing:1.5px;margin:0 0 3px;text-shadow:0 0 10px rgba(196,149,58,0.35)}'
+    + '.corv-flavor{font-style:italic;color:#a09484;font-size:11px;line-height:1.45;margin:0}'
+    + '.corv-body{padding:14px 16px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px}'
+    + '.corv-section{}'
+    + '.corv-section-title{font-family:Cinzel,serif;color:#c4953a;font-size:12px;'
+    + '  letter-spacing:1.5px;text-transform:uppercase;margin:0 0 6px;font-weight:700;'
+    + '  padding-bottom:4px;border-bottom:1px solid rgba(196,149,58,0.25)}'
+    + '.corv-news{background:rgba(74,56,40,0.30);border-left:3px solid #c4953a;'
+    + '  padding:10px 12px;border-radius:0 6px 6px 0;font-size:11px;line-height:1.5;'
+    + '  color:#d4c8b0}'
+    + '.corv-news b{color:#c4953a}'
+    + '.corv-delivered{background:rgba(120,180,80,0.18);border-left:3px solid #88c468;'
+    + '  padding:10px 12px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.5;'
+    + '  color:#d4f0c0}'
+    + '.corv-delivered b{color:#88c468}'
+    + '.corv-order{background:rgba(40,32,24,0.55);border:1px solid rgba(196,149,58,0.25);'
+    + '  border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:11px}'
+    + '.corv-order-row{display:flex;justify-content:space-between;align-items:center;'
+    + '  margin-bottom:4px}'
+    + '.corv-order-name{color:#c4953a;font-weight:600;font-size:12px}'
+    + '.corv-order-days{color:#a09484;font-size:10px;font-style:italic}'
+    + '.corv-order-bar{height:5px;background:rgba(0,0,0,0.4);border-radius:3px;overflow:hidden;'
+    + '  border:1px solid rgba(196,149,58,0.2)}'
+    + '.corv-order-fill{height:100%;background:linear-gradient(90deg,#8a6a3a,#c4953a);'
+    + '  transition:width 0.4s ease}'
+    + '.corv-map{display:flex;align-items:center;gap:10px;background:rgba(40,32,24,0.45);'
+    + '  border:1px solid rgba(196,149,58,0.25);border-radius:6px;padding:8px 10px;'
+    + '  margin-bottom:5px;cursor:pointer;transition:border-color 0.15s,background 0.15s}'
+    + '.corv-map:hover{border-color:#c4953a;background:rgba(196,149,58,0.10)}'
+    + '.corv-map.disabled{opacity:0.4;cursor:not-allowed}'
+    + '.corv-map.owned{background:rgba(120,180,80,0.10);border-color:rgba(120,180,80,0.35)}'
+    + '.corv-map-emoji{font-size:22px;flex-shrink:0;width:30px;text-align:center}'
+    + '.corv-map-info{flex:1;min-width:0}'
+    + '.corv-map-name{font-family:Cinzel,serif;color:#c4953a;font-size:12px;font-weight:700;'
+    + '  letter-spacing:0.5px;margin:0 0 2px}'
+    + '.corv-map.owned .corv-map-name{color:#88c468}'
+    + '.corv-map-desc{color:#a09484;font-size:10px;font-style:italic;margin:0;line-height:1.4}'
+    + '.corv-map-meta{display:flex;gap:8px;margin-top:3px;font-size:10px}'
+    + '.corv-price{color:#c4953a;font-weight:700}'
+    + '.corv-time{color:#a09484;font-style:italic}'
+    + '.corv-status{flex-shrink:0;font-size:10px;font-weight:700;padding:2px 6px;'
+    + '  border-radius:4px;text-transform:uppercase;letter-spacing:0.5px}'
+    + '.corv-status-owned{background:rgba(120,180,80,0.30);color:#88c468}'
+    + '.corv-status-pending{background:rgba(196,149,58,0.30);color:#c4953a}'
+    + '.corv-actions{padding:12px 16px;border-top:1px solid rgba(196,149,58,0.3);'
+    + '  background:rgba(15,12,8,0.4);flex-shrink:0;display:flex;justify-content:flex-end;gap:8px}'
+    + '.corv-btn{padding:8px 14px;border:1px solid rgba(196,149,58,0.45);'
+    + '  border-radius:6px;color:#c4953a;background:rgba(74,56,40,0.45);'
+    + '  font-family:Cinzel,serif;font-size:11px;letter-spacing:1px;cursor:pointer;'
+    + '  text-transform:uppercase;transition:transform 0.1s,background 0.15s}'
+    + '.corv-btn:hover{background:rgba(196,149,58,0.18);color:#fff}'
+    + '.corv-btn:active{transform:scale(0.96)}'
+    + '/* Confirmation modal */'
+    + '#corv-confirm{position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,0.85);'
+    + '  display:none;align-items:center;justify-content:center;padding:20px}'
+    + '#corv-confirm.active{display:flex}'
+    + '.corv-confirm-card{background:#1f1a12;border:1px solid #c4953a;'
+    + '  border-radius:10px;padding:20px;max-width:380px;text-align:center}'
+    + '.corv-confirm-title{font-family:Cinzel,serif;color:#c4953a;font-size:16px;'
+    + '  margin:0 0 10px;letter-spacing:1.5px}'
+    + '.corv-confirm-text{color:#d4c8b0;font-size:12px;line-height:1.6;margin:0 0 14px}'
+    + '.corv-confirm-actions{display:flex;gap:8px;justify-content:center}'
+    + '.corv-confirm-btn{padding:8px 16px;border-radius:6px;font-family:Cinzel,serif;'
+    + '  font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;'
+    + '  border:1px solid rgba(196,149,58,0.5);min-width:90px}'
+    + '.corv-confirm-yes{background:linear-gradient(180deg,#c4953a,#9a7530);'
+    + '  color:#1a1510;font-weight:700;border-color:#c4953a}'
+    + '.corv-confirm-no{background:transparent;color:#a09484}'
+    + '.corv-confirm-no:hover{color:#c4953a}';
+  document.head.appendChild(st);
+}
+
+function _renderCartographerOverlay(player, delivered, npcReturn) {
+  // Remove existing
+  var prev = document.getElementById('corvus-overlay');
+  if (prev) prev.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'corvus-overlay';
+  ov.onclick = function(e){ if (e.target === ov) _closeCartographerPopup(); };
+
+  var portraitSvg = (typeof _heralIco === 'function') ? _heralIco('ic-cartografia') : '';
+
+  // Build content
+  var deliveredHtml = '';
+  if (delivered && delivered.length > 0) {
+    deliveredHtml = '<div class="corv-section">'
+      + '<h4 class="corv-section-title">📦 Pedido Entregue!</h4>';
+    delivered.forEach(function(o){
+      var def = CORVUS_MAPS.find(function(m){ return m.name === o.map; });
+      var locsText = '';
+      if (def && def.reveals && def.reveals.length > 0) {
+        var bn = (window.CartShared && CartShared.CART_BIOMES) ? CartShared.CART_BIOMES : [];
+        var names = def.reveals.map(function(k){
+          var b = bn.find(function(b){ return b.key === k; });
+          return b ? b.name : k;
+        });
+        locsText = '<br><i>Locais revelados: ' + names.join(', ') + '</i>';
+      }
+      deliveredHtml += '<div class="corv-delivered">'
+        + 'Corvus desenrola um pergaminho fresco. <b>"O ' + o.map + ' está pronto. Cuide bem dele."</b>'
+        + locsText + '</div>';
+    });
+    deliveredHtml += '</div>';
+  }
+
+  var newsHtml = '';
+  if (npcReturn) {
+    newsHtml = '<div class="corv-section">'
+      + '<h4 class="corv-section-title">📰 Notícias Frescas</h4>'
+      + '<div class="corv-news">'
+      + '<b>👤 ' + npcReturn.npc.name + '</b> (' + npcReturn.npc.cls + ') retornou ' + npcReturn.npc.region + '.<br>'
+      + '<i>' + npcReturn.npc.quote + '</i><br>'
+      + '<span style="color:#88c468">⏳ Pedido <b>' + npcReturn.order.map + '</b> acelerado em 1 dia!</span>'
+      + '</div></div>';
+  }
+
+  // Pedidos em andamento
+  var ordersHtml = '';
+  if (player.cartographer_orders && player.cartographer_orders.length > 0) {
+    ordersHtml = '<div class="corv-section">'
+      + '<h4 class="corv-section-title">⏳ Pedidos em Andamento</h4>';
+    player.cartographer_orders.forEach(function(o){
+      var def = CORVUS_MAPS.find(function(m){ return m.name === o.map; });
+      var totalDays = def ? def.days : 3;
+      var elapsed = Math.max(0, (player.game_day || 1) - (o.ordered_day || 1));
+      var pct = Math.min(100, (elapsed / totalDays) * 100);
+      var remaining = Math.max(0, (o.ready_day || 1) - (player.game_day || 1));
+      ordersHtml += '<div class="corv-order">'
+        + '<div class="corv-order-row">'
+        + '<span class="corv-order-name">' + (def ? def.emoji : '🗺️') + ' ' + o.map + '</span>'
+        + '<span class="corv-order-days">' + (remaining === 0 ? 'pronto em breve' : remaining + ' dias') + '</span>'
+        + '</div>'
+        + '<div class="corv-order-bar"><div class="corv-order-fill" style="width:' + pct + '%"></div></div>'
+        + '</div>';
+    });
+    ordersHtml += '</div>';
+  }
+
+  // Mapas disponíveis
+  var mapsHtml = '<div class="corv-section">'
+    + '<h4 class="corv-section-title">🗺️ Mapas Disponíveis</h4>';
+  CORVUS_MAPS.forEach(function(m){
+    var owned = (player.maps_owned || []).indexOf(m.name) >= 0;
+    var pending = (player.cartographer_orders || []).some(function(o){ return o.map === m.name; });
+    var canAfford = (player.gold || 0) >= m.price;
+    var cls = 'corv-map' + (owned ? ' owned' : '') + (pending || (!canAfford && !owned) ? ' disabled' : '');
+    var statusBadge = owned ? '<span class="corv-status corv-status-owned">Possuído</span>'
+                    : pending ? '<span class="corv-status corv-status-pending">Em curso</span>'
+                    : '';
+    mapsHtml += '<div class="' + cls + '" data-map="' + m.name + '">'
+      + '<div class="corv-map-emoji">' + m.emoji + '</div>'
+      + '<div class="corv-map-info">'
+      + '<p class="corv-map-name">' + m.name + '</p>'
+      + '<p class="corv-map-desc">' + m.desc + '</p>'
+      + (owned || pending ? ''
+        : '<div class="corv-map-meta">'
+          + '<span class="corv-price">💰 ' + m.price + ' Valdoritas</span>'
+          + '<span class="corv-time">⏳ ' + m.days + ' dias</span>'
+          + '</div>')
+      + '</div>'
+      + statusBadge
+      + '</div>';
+  });
+  mapsHtml += '</div>';
+
+  ov.innerHTML = ''
+    + '<div class="corv-card">'
+    + '  <div class="corv-header">'
+    + '    <div class="corv-portrait">' + portraitSvg + '</div>'
+    + '    <div style="flex:1">'
+    + '      <h3 class="corv-name">Mestre Corvus</h3>'
+    + '      <p class="corv-flavor">Cartógrafo veterano. Pergaminhos manchados de tinta. <b>Dia ' + (player.game_day || 1) + '</b></p>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="corv-body">'
+    +    deliveredHtml
+    +    newsHtml
+    +    ordersHtml
+    +    mapsHtml
+    + '  </div>'
+    + '  <div class="corv-actions">'
+    + '    <button class="corv-btn" id="corv-close">Sair</button>'
+    + '  </div>'
+    + '</div>';
+
+  document.body.appendChild(ov);
+
+  // Wire interactions
+  document.getElementById('corv-close').onclick = _closeCartographerPopup;
+  ov.querySelectorAll('.corv-map').forEach(function(card){
+    if (card.classList.contains('disabled') || card.classList.contains('owned')) return;
+    card.onclick = function(){
+      var mapName = card.getAttribute('data-map');
+      _confirmOrderMap(mapName, player);
+    };
+  });
+}
+
+function _closeCartographerPopup() {
+  var ov = document.getElementById('corvus-overlay');
+  if (ov) ov.remove();
+  var cf = document.getElementById('corv-confirm');
+  if (cf) cf.remove();
+}
+
+function _confirmOrderMap(mapName, player) {
+  var def = CORVUS_MAPS.find(function(m){ return m.name === mapName; });
+  if (!def) return;
+
+  // Build confirmation modal
+  var cf = document.createElement('div');
+  cf.id = 'corv-confirm';
+  cf.className = 'active';
+  cf.innerHTML = ''
+    + '<div class="corv-confirm-card">'
+    + '  <h3 class="corv-confirm-title">' + def.emoji + ' ' + def.name + '</h3>'
+    + '  <p class="corv-confirm-text">'
+    +    'Corvus passa o dedo sobre o pergaminho.<br>'
+    +    '<i>"Esse mapa eu posso preparar — mas leva <b>' + def.days + ' dias</b> '
+    +    'pra reunir as informações. Aventureiros que voltam à cidade aceleram o trabalho. '
+    +    'Custa <b>' + def.price + ' Valdoritas</b>. Aceita?"</i>'
+    + '  </p>'
+    + '  <div class="corv-confirm-actions">'
+    + '    <button class="corv-confirm-btn corv-confirm-yes" id="corv-yes">Encomendar</button>'
+    + '    <button class="corv-confirm-btn corv-confirm-no" id="corv-no">Cancelar</button>'
+    + '  </div>'
+    + '</div>';
+  document.body.appendChild(cf);
+
+  document.getElementById('corv-no').onclick = function(){ cf.remove(); };
+  document.getElementById('corv-yes').onclick = function(){
+    if ((player.gold || 0) < def.price) {
+      cf.remove();
+      return;
+    }
+    player.gold -= def.price;
+    player.cartographer_orders = player.cartographer_orders || [];
+    player.cartographer_orders.push({
+      map: def.name,
+      ordered_day: player.game_day || 1,
+      ready_day: (player.game_day || 1) + def.days,
+      paid: true
+    });
+    cf.remove();
+    // Re-render popup pra mostrar pedido na lista
+    _openCartographerPopup(player);
+  };
+}
+
+// Registra handler oficial
+ACTION_HANDLERS['square_cartographer_open'] = function(player) {
+  _openCartographerPopup(player);
+};
+window._openCartographerPopup = _openCartographerPopup;
+
 // === SYNC_TARGET: game-hub.js#_LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
     function S(id) { return '<svg viewBox="0 0 120 120"><use href="#' + id + '"/></svg>'; }
