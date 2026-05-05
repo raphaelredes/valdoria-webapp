@@ -424,6 +424,28 @@ LOG SINK (Fase 7):
       --sim-frame-w: min(100vw, 480px);
       --sim-frame-h: min(100dvh, 960px);
     }
+    /* === USER REQUEST 2026-05-04: cidade caber em Telegram Desktop ===
+       Telegram Desktop WebApp window e ~442x680 (vs smartphone 430x844).
+       Conteudo da cidade e ~700-720px (transborda ~30-50px no desktop).
+       Solucao: media query compacta padding/gap quando viewport h < 720px.
+       Smartphone (h>=720px) mantem layout original. */
+    @media (max-height: 720px) {
+      #city-group-panel { padding: 4px 6px !important; gap: 4px !important; }
+      .cgp-card { padding: 3px 4px 4px !important; gap: 1px !important; }
+      .hub-screen { padding-top: 4px !important; padding-bottom: 4px !important; gap: 4px !important; }
+      .hub-loc-grid { gap: 4px !important; }
+      .hub-loc { padding: 6px 4px !important; min-height: 56px !important; }
+      .hub-loc .hl-ico svg { width: 22px !important; height: 22px !important; }
+      .hub-loc .hl-nm { font-size: 10px !important; line-height: 1.1 !important; margin-top: 2px !important; }
+      /* Quest hint banner mais fino */
+      #hub-quest-hint, .hub-quest-hint { padding: 4px 8px !important; font-size: 11px !important; }
+      /* Botao PARTIR PARA AVENTURA mais fino */
+      .hub-cta-partir, [data-action="partir"] { padding: 8px 12px !important; font-size: 13px !important; }
+      /* Quests tracker rows mais finas */
+      .hub-quests-list .quest-row, .hub-quest-row { padding: 4px 8px !important; font-size: 11px !important; }
+      /* Stats badges mais finos */
+      .hub-stats, .hub-stats-row { padding: 4px 6px !important; font-size: 10px !important; gap: 4px !important; }
+    }
     @media (hover: none) and (pointer: coarse) {
       :root { --sim-frame-h: 100dvh; }
     }
@@ -3769,6 +3791,105 @@ body.perf-lite .vc-action-btn { transition: none; }
 </head>
 <body>
   <!-- ====================================================================
+       INTRO TITLE SCREEN — TOQUE PARA INICIAR (USER REQUEST 2026-05-04)
+       Cold start: mostra logo + título antes da cidade. User tap remove
+       overlay e ativa música (gesto necessário pra autoplay policy do browser).
+       Skip se vinda de outra WebApp (sessionStorage flag) ou param ?nointro=1.
+       ==================================================================== -->
+  <div id="cidade-intro" class="cidade-intro" style="display:none">
+    <div class="cidade-intro-inner">
+      <div class="title-orb"></div>
+      <div class="title-text">LENDAS DE</div>
+      <div class="title-text-sub">VALDORIA</div>
+      <div class="title-divider"><span class="divider-line"></span><span class="divider-gem">◆</span><span class="divider-line"></span></div>
+      <div class="cidade-intro-tap">Toque para Iniciar</div>
+    </div>
+  </div>
+  <style>
+  .cidade-intro {
+    position: fixed; inset: 0; z-index: 99999;
+    background: var(--v-bg, #1a1510);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    animation: cidadeIntroFadeIn 0.4s ease;
+  }
+  .cidade-intro.fading-out { animation: cidadeIntroFadeOut 0.5s ease forwards; }
+  @keyframes cidadeIntroFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cidadeIntroFadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+  .cidade-intro-inner {
+    text-align: center;
+    color: var(--v-gold, #c4953a);
+    font-family: 'Cinzel', serif;
+  }
+  .cidade-intro .title-orb {
+    width: 100px; height: 100px; margin: 0 auto 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff4d0 0%, #e8c45a 25%, #c4953a 55%, #8b6420 80%, #5a3e10 100%);
+    box-shadow: 0 0 30px rgba(196,149,58,0.5), 0 0 60px rgba(196,149,58,0.25);
+    animation: orbPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes orbPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .cidade-intro .title-text {
+    font-size: clamp(20px, 6vw, 28px); font-weight: 700; letter-spacing: 3px;
+    text-shadow: 0 0 18px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2);
+  }
+  .cidade-intro .title-text-sub {
+    font-size: clamp(26px, 9vw, 38px); font-weight: 700; letter-spacing: 5px;
+    text-shadow: 0 0 22px rgba(196,149,58,0.5), 0 0 50px rgba(196,149,58,0.25);
+    margin-top: 4px;
+  }
+  .cidade-intro .title-divider {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin: 16px auto; opacity: 0.6;
+  }
+  .cidade-intro .divider-line {
+    display: inline-block; width: 40px; height: 1px;
+    background: var(--v-gold, #c4953a);
+  }
+  .cidade-intro .divider-gem { color: var(--v-gold, #c4953a); }
+  .cidade-intro-tap {
+    margin-top: 30px; font-size: 14px; letter-spacing: 2px;
+    color: var(--v-text-dim, #a09484);
+    animation: tapPulse 1.6s ease-in-out infinite;
+    text-transform: uppercase;
+  }
+  @keyframes tapPulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+  </style>
+  <script>
+  /* Intro title screen — TOQUE PARA INICIAR (cold start only).
+     Skip when:
+       - URL param ?nointro=1 (Walker/automated test)
+       - sessionStorage flag valdoria_intro_shown (already tapped this session)
+       - returning from other WebApp (sessionStorage valdoria_audio_resume_ts < 30s old)
+     User tap → fade out + start audio (gesture required for autoplay). */
+  (function(){
+    var params = new URLSearchParams(location.search);
+    if (params.get('nointro') === '1') return;
+    if (sessionStorage.getItem('valdoria_intro_shown') === '1') return;
+    var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
+    if (resumeTs && (Date.now() - resumeTs) < 30000) return; /* coming back from another WebApp */
+    var el = document.getElementById('cidade-intro');
+    if (!el) return;
+    el.style.display = 'flex';
+    /* Block audio play until user taps */
+    window.__cidadeIntroBlocking = true;
+    function dismiss(){
+      sessionStorage.setItem('valdoria_intro_shown', '1');
+      window.__cidadeIntroBlocking = false;
+      el.classList.add('fading-out');
+      /* Audio gesture unlock — user tapped, autoplay now allowed */
+      try {
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+          ValdoriaAudio.play('city');
+        }
+      } catch(e){ console.warn('[CIDADE-INTRO] audio play failed:', e); }
+      setTimeout(function(){ el.remove(); }, 550);
+    }
+    el.addEventListener('click', dismiss, { once: true });
+    el.addEventListener('touchend', dismiss, { once: true });
+  })();
+  </script>
+  <!-- ====================================================================
        HERALDIC SPRITE (inline subset — regra Heraldic Icons Only)
        Canonical em valdoria-webapp/shared/heraldic-sprite.svg (28 ícones).
        Inline aqui pq <use href="external.svg#id"> falha em file:// por CORS.
@@ -5730,6 +5851,10 @@ body.perf-lite .vc-action-btn { transition: none; }
     // FIX 2026-05-04: limpa resume key antes do load — cidade SEMPRE inicia com 'city',
     // não com track residual de outra WebApp (tavern/combat/etc).
     try { localStorage.removeItem('valdoria_audio_resume'); } catch(e){}
+    // USER REQUEST 2026-05-04: botão de som FLUTUANTE (igual exploracao + combate),
+    // não embedded no footer-quick (Mochila/Ficha/Grupo). audio-manager.js checa
+    // window.__audioForceFloat antes de tentar embed.
+    window.__audioForceFloat = true;
     document.write('<script src="/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
@@ -35179,6 +35304,14 @@ document.addEventListener('DOMContentLoaded', function(){
   // Ao entrar na cidade, sempre toca 'city' (ou track da tela atual).
   // Crossfade automático via SCREEN_AUDIO_MAP em navigateTo() ao trocar de tela.
   setTimeout(function(){
+    /* USER REQUEST 2026-05-04: respeitar intro screen — audio espera tap.
+       Se cidade-intro overlay esta visivel/blocking, pula auto-play. O proprio
+       click handler do intro screen chama ValdoriaAudio.play('city') apos o
+       gesto do user (autoplay policy compliance). */
+    if (window.__cidadeIntroBlocking) {
+      console.log('[CIDADE] audio play deferred — intro screen blocking');
+      return;
+    }
     var screen = _currentScreen || 'hub';
     var trackKey = SCREEN_AUDIO_MAP[screen] || 'city';
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {

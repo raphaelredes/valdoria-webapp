@@ -283,7 +283,12 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             body.perf-lite .va-footer-btn.va-playing,body.perf-lite .va-float-btn.va-playing{animation:none !important;}
             body.perf-lite .va-hint-pulse{animation:none !important;}
         `;document.head.appendChild(style);}
-let _isEmbedded=false;let _footerObserver=null;let _embedObserver=null;let _embedTime=0;let _hintShownThisSession=false;let _reEmbedDebounce=null;function _tryEmbedInFooter(){const footerEl=document.getElementById('footer-quick');if(footerEl&&footerEl.children.length>0){_embedInFooter(footerEl);return;}
+let _isEmbedded=false;let _footerObserver=null;let _embedObserver=null;let _embedTime=0;let _hintShownThisSession=false;let _reEmbedDebounce=null;function _tryEmbedInFooter(){
+/* USER REQUEST 2026-05-04: cidade.html quer botao audio FLUTUANTE (igual
+   exploracao + combate), nao embed no footer. Honor window.__audioForceFloat
+   pra skip detecting #footer-quick e ir direto pro floating btn. */
+if(window.__audioForceFloat){_createFloatingBtn();return;}
+const footerEl=document.getElementById('footer-quick');if(footerEl&&footerEl.children.length>0){_embedInFooter(footerEl);return;}
 if(_footerObserver){_footerObserver.disconnect();_footerObserver=null;}const observer=new MutationObserver(()=>{const el=document.getElementById('footer-quick');if(el&&el.children.length>0&&!_isEmbedded){const floatEl=document.getElementById('va-float');if(floatEl)floatEl.remove();const oldBtn=document.getElementById('va-btn');if(oldBtn)oldBtn.remove();_embedInFooter(el);}});observer.observe(document.body,{childList:true,subtree:true});_footerObserver=observer;setTimeout(()=>{if(!document.getElementById('va-btn')){if(document.getElementById('dev-game-iframe'))return; /* noqa: preflight */_createFloatingBtn();}},3000);}
 function _embedInFooter(footerEl){_isEmbedded=true;_embedTime=Date.now();const btn=document.createElement('button');btn.className='va-footer-btn';btn.id='va-btn';btn.setAttribute('aria-label','Ajustar volume');_updateBtnIcon(btn);const buttons=footerEl.querySelectorAll('.btn-action');let settingsBtn=null;for(const b of buttons){if(b.textContent.includes('⚙')||b.textContent.includes('\u2699')){settingsBtn=b;break;}}
 if(settingsBtn&&settingsBtn.nextSibling){footerEl.insertBefore(btn,settingsBtn.nextSibling);}else if(settingsBtn){footerEl.appendChild(btn);}else{footerEl.appendChild(btn);}
