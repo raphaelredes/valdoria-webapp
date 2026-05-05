@@ -11,7 +11,7 @@ function _tryMutedAutoplay(trackKey){if(_mutedAutoplay)return;const file=_pickVa
 }).catch(function(e){console.warn('[AUDIO]',e.name);});}
 function init(){_muted=localStorage.getItem(STORAGE_KEY)==='1';const savedVol=parseFloat(localStorage.getItem(VOLUME_KEY));if(!isNaN(savedVol)&&savedVol>=0&&savedVol<=1){_volume=savedVol;}
 _musicMuted=localStorage.getItem(MUSIC_MUTED_KEY)==='1';_sfxMuted=localStorage.getItem(SFX_MUTED_KEY)==='1';const savedSfxVol=parseFloat(localStorage.getItem(SFX_VOLUME_KEY));if(!isNaN(savedSfxVol)&&savedSfxVol>=0&&savedSfxVol<=1){_sfxVolume=savedSfxVol;}
-if(_muted)_musicMuted=true;if(_volume===0&&!_muted&&!_musicMuted){_volume=DEFAULT_VOLUME;localStorage.setItem(VOLUME_KEY,_volume.toString());}
+if(_muted)_musicMuted=true;/* USER REQUEST 2026-05-04: respeitar 100% o volume escolhido pelo jogador. Removido o auto-reset _volume=DEFAULT quando saved=0 e não-mute — ANTES o sistema sobrescrevia escolha do user. AGORA: se saved=0, fica 0 (player optou por silenciar via slider). DEFAULT_VOLUME só aplica em first-load (sem localStorage entry). Mute via toggleMute persiste em STORAGE_KEY independentemente do volume numérico. */
 _registerUnlockListeners();try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.onEvent('viewportChanged',function _tgUnlock(){Telegram.WebApp.offEvent('viewportChanged',_tgUnlock);if(!_unlocked)_unlockHandler();});}}catch(e){console.warn('[AUDIO_MANAGER]',e);}
 _injectUI();if(_pendingTrack&&!_muted&&!_musicMuted){play(_pendingTrack);}}
 function play(trackKey){_injectUI();if(_retryTimer){clearTimeout(_retryTimer);_retryTimer=null;}if(!trackKey||!TRACKS[trackKey]||TRACKS[trackKey].length===0){console.warn('[AUDIO] Unknown track:',trackKey);return;}
