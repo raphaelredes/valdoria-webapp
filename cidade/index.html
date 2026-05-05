@@ -9033,6 +9033,11 @@ function renderCurrentScreen(params){
     return;
   }
   document.body.classList.remove('state-cart');
+  // Phase 4 (2026-05-04): reset flag ao sair da cartografia (próxima visita
+  // deve avançar dia + reroll discovery).
+  if (typeof window._resetCartVisitFlag === 'function') {
+    window._resetCartVisitFlag();
+  }
   contentEl.innerHTML = '';
   // Hub canonical: renderHubScreen (SYNC_TARGET) com mock screen → grid central
   // de locations + ambient + party + dm tip. Replica o que o serializer manda
@@ -35572,6 +35577,13 @@ function renderCartographyCanvas(el){
 
   _wireCartEvents();
   _drawCart();
+  // Phase 4 (2026-05-04): trigger Settlement Discovery após render.
+  // Delay 600ms pra não competir com fade-in da cartografia.
+  setTimeout(function(){
+    if (typeof _checkCartographyDiscovery === 'function') {
+      _checkCartographyDiscovery();
+    }
+  }, 600);
 }
 
 // === EVENTS ===
@@ -37486,6 +37498,260 @@ ACTION_HANDLERS['square_cartographer_open'] = function(player) {
   _openCartographerPopup(player);
 };
 window._openCartographerPopup = _openCartographerPopup;
+
+// ═══════════════════════════════════════════════════════════════════
+// SETTLEMENT DISCOVERY — Descoberta orgânica (Phase 4 — 2026-05-04)
+// ═══════════════════════════════════════════════════════════════════
+// USER REQUEST: chance de encontrar novos locais quando estiver a 1
+// passo de local nunca visitado. Disparada ao abrir o Mapa de Valdoria.
+// Popup imersivo "Você descobriu...!" estilo Witcher 3 / Skyrim.
+//
+// Sistema canonical do projeto: src/game/world/settlement_discovery.py
+// (chance_explore: 15% sem rumor, 40% com rumor)
+//
+// MAPA_IA:
+//   ~37500 SETTLEMENT_DISCOVERY_DATA — narrativas de descoberta
+//   ~37580 _findAdjacentDiscoverable — encontra locais elegíveis
+//   ~37620 _maybeRollDiscovery — RNG + chance baseada em level
+//   ~37660 _showDiscoveryPopup — popup imersivo de descoberta
+// ═══════════════════════════════════════════════════════════════════
+
+// Narrativas de descoberta por local (baseado em settlement_discovery_data.py)
+var SETTLEMENT_DISCOVERY_DATA = {
+  korthag: {
+    header: '⛏️ Vila Mineira Descoberta!',
+    icon: 'ic-mochila',
+    narrative: [
+      'Conforme você desliza o dedo pelo Mapa de Valdoria, algo chama sua atenção.',
+      'Uma fumaça fina sobe das montanhas próximas — você se lembra de tê-la visto enquanto cruzava os Picos de Pedra.',
+      'Aprofundando os olhos, vê pequenas luzes piscando entre os penhascos. <b>Vila mineira de Korthag.</b>',
+      'Os anões mineradores preferem isolamento, mas as fornalhas ardendo dia e noite são impossíveis de esconder.'
+    ],
+    desc: 'Anões mineradores escavam minério raro nos Picos de Pedra. Comércio de cobre e quartzo.'
+  },
+  valkrest: {
+    header: '⛺ Acampamento de Veteranos!',
+    icon: 'ic-mochila',
+    narrative: [
+      'Você nota algo no Mapa próximo ao Passo do Dragão.',
+      'Um grupo de aventureiros veteranos te disse na taverna que estabeleceram base por lá — você não acreditou na época.',
+      'Mas as marcas no pergaminho não mentem: <b>tendas reforçadas, postos de guarda, pequena forja improvisada.</b>',
+      'Valkrest. Acampamento fortificado pra quem é louco o bastante de explorar terras vulcânicas.'
+    ],
+    desc: 'Acampamento de aventureiros veteranos perto da Cratera Vulcânica. Refúgio em terras hostis.'
+  },
+  ancestral_graveyard: {
+    header: '🪦 Cemitério Ancestral!',
+    icon: 'ic-templo',
+    narrative: [
+      'Suas viagens pelo Cemitério Antigo te ensinaram a ler os sinais.',
+      'Caminhos antigos partem dali — você seguiu um até onde ousou. Mausoléus maiores, mais antigos.',
+      'No Mapa, agora identifica claramente: <b>Cemitério Ancestral.</b>',
+      'Tumbas da aristocracia esquecida, magia necromântica residual. Recompensa rara — perigo maior.'
+    ],
+    desc: 'Mausoléus antigos da aristocracia esquecida. Magia necromântica residual.'
+  },
+  underground_caverns: {
+    header: '🪨 Cavernas Subterrâneas!',
+    icon: 'ic-mochila',
+    narrative: [
+      'Conforme você examina a Passagem Subterrânea, sente uma corrente de ar fria vinda de fissuras nas paredes.',
+      'Você seguiu o vento numa expedição passada — as fissuras dão pra um sistema de túneis bem maior.',
+      '<b>Cavernas Subterrâneas.</b> Pedras esculpidas pelo tempo, ecos profundos.',
+      'Local pra quem busca minério raro... ou quer fugir de algo.'
+    ],
+    desc: 'Sistema de túneis profundos sob os Picos de Pedra. Pedra esculpida pelo tempo.'
+  },
+  crystal_depths: {
+    header: '💎 Profundezas de Cristal!',
+    icon: 'ic-mochila',
+    narrative: [
+      'Nas Cavernas Subterrâneas, você ouviu rumores de um lugar ainda mais profundo.',
+      'Mineradores sussurram sobre <b>cristais luminescentes</b> nas câmaras mais distantes — magia ancestral pulsando nas paredes.',
+      'No Mapa, agora você delimita esse lugar: <b>Profundezas de Cristal.</b>',
+      'Apenas os mais corajosos descem até lá. A recompensa, dizem, vale a pena.'
+    ],
+    desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.'
+  }
+};
+
+// Encontra locais discoverable adjacentes a known_locations
+function _findAdjacentDiscoverable(player) {
+  if (!window.CartShared || !CartShared.CART_BIOMES || !CartShared.CART_PATHS) return [];
+  var biomes = CartShared.CART_BIOMES;
+  var paths = CartShared.CART_PATHS;
+  var known = player.known_locations || [];
+  // Locais ainda não conhecidos
+  var unknown = biomes.filter(function(b){
+    return known.indexOf(b.key) < 0 && !b.isOrigin && SETTLEMENT_DISCOVERY_DATA[b.key];
+  });
+  // Filtra: pelo menos uma conexão conhecida
+  return unknown.filter(function(b){
+    return paths.some(function(p){
+      var connected = (p[0] === b.key && known.indexOf(p[1]) >= 0)
+                   || (p[1] === b.key && known.indexOf(p[0]) >= 0);
+      return connected;
+    });
+  });
+}
+
+// RNG: rola descoberta. Chance baseada em level + game_day + flag rumor.
+function _maybeRollDiscovery(player) {
+  player._discovered_attempts = player._discovered_attempts || {};
+  var lastDay = player._last_discovery_day || 0;
+  // Cap: 1 descoberta por dia
+  if ((player.game_day || 1) <= lastDay) return null;
+  var candidates = _findAdjacentDiscoverable(player);
+  if (candidates.length === 0) return null;
+  // Pick um candidato aleatório
+  var target = candidates[Math.floor(Math.random() * candidates.length)];
+  // Chance: base 25% + 5% por level + 15% se tiver rumor
+  var lvl = player.level || 1;
+  var hasRumor = (player._encountered_npcs || {})['rumor_' + target.key];
+  var chance = Math.min(0.85, 0.25 + lvl * 0.05 + (hasRumor ? 0.30 : 0));
+  // Tracker — se já tentou várias vezes, aumenta chance (pity)
+  var tries = player._discovered_attempts[target.key] || 0;
+  chance += tries * 0.10;
+  if (Math.random() > chance) {
+    player._discovered_attempts[target.key] = tries + 1;
+    return null;
+  }
+  // Descoberta!
+  player._last_discovery_day = player.game_day || 1;
+  delete player._discovered_attempts[target.key];
+  return target;
+}
+
+// Aplica descoberta (adiciona a known_locations)
+function _applyDiscovery(player, biome) {
+  player.known_locations = player.known_locations || [];
+  if (player.known_locations.indexOf(biome.key) < 0) {
+    player.known_locations.push(biome.key);
+  }
+  _logCity('discovered: ' + biome.key);
+}
+
+// Popup imersivo de descoberta
+function _showDiscoveryPopup(biome, onDone) {
+  var data = SETTLEMENT_DISCOVERY_DATA[biome.key];
+  if (!data) { if (onDone) onDone(); return; }
+
+  // CSS injection (one-time)
+  if (!document.getElementById('discovery-style')) {
+    var st = document.createElement('style');
+    st.id = 'discovery-style';
+    st.textContent = ''
+      + '#discovery-overlay{position:fixed;inset:0;z-index:9550;background:rgba(0,0,0,0.92);'
+      + '  display:flex;align-items:center;justify-content:center;padding:16px;'
+      + '  animation:discFade 0.6s ease-out}'
+      + '@keyframes discFade{from{opacity:0}to{opacity:1}}'
+      + '.disc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+      + '  border:2px solid rgba(196,149,58,0.65);border-radius:14px;'
+      + '  max-width:440px;width:100%;max-height:90vh;overflow:hidden;'
+      + '  display:flex;flex-direction:column;'
+      + '  box-shadow:0 14px 50px rgba(0,0,0,0.8),0 0 50px rgba(196,149,58,0.25)}'
+      + '.disc-header{padding:18px 16px 12px;background:rgba(15,12,8,0.55);'
+      + '  border-bottom:1px solid rgba(196,149,58,0.4);text-align:center}'
+      + '.disc-icon{font-size:42px;margin-bottom:8px;'
+      + '  filter:drop-shadow(0 0 12px rgba(196,149,58,0.5));'
+      + '  animation:discIcon 1.2s ease-in-out infinite}'
+      + '@keyframes discIcon{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}'
+      + '.disc-title{font-family:Cinzel,serif;color:#c4953a;font-size:18px;'
+      + '  font-weight:700;letter-spacing:2px;margin:0;'
+      + '  text-shadow:0 0 12px rgba(196,149,58,0.45)}'
+      + '.disc-subtitle{font-style:italic;color:#a09484;font-size:11px;'
+      + '  margin:4px 0 0;letter-spacing:0.5px}'
+      + '.disc-body{padding:16px;flex:1;overflow-y:auto;display:flex;'
+      + '  flex-direction:column;gap:10px}'
+      + '.disc-line{font-size:13px;line-height:1.6;color:#d4c8b0;'
+      + '  font-style:italic;animation:discLine 0.6s ease-out}'
+      + '@keyframes discLine{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}'
+      + '.disc-line b{color:#c4953a;font-style:normal;font-weight:700}'
+      + '.disc-info{margin-top:10px;background:rgba(74,56,40,0.30);'
+      + '  border-left:3px solid #c4953a;padding:10px 12px;'
+      + '  border-radius:0 6px 6px 0;font-size:11px;color:#a09484}'
+      + '.disc-actions{padding:14px 16px;border-top:1px solid rgba(196,149,58,0.3);'
+      + '  background:rgba(15,12,8,0.4);display:flex;justify-content:flex-end}'
+      + '.disc-btn{padding:10px 20px;background:linear-gradient(180deg,#c4953a,#9a7530);'
+      + '  border:1px solid #c4953a;border-radius:6px;color:#1a1510;'
+      + '  font-family:Cinzel,serif;font-size:12px;font-weight:700;letter-spacing:1.5px;'
+      + '  cursor:pointer;text-transform:uppercase;transition:transform 0.1s,filter 0.15s}'
+      + '.disc-btn:hover{filter:brightness(1.1)}.disc-btn:active{transform:scale(0.96)}';
+    document.head.appendChild(st);
+  }
+
+  var ov = document.createElement('div');
+  ov.id = 'discovery-overlay';
+  ov.innerHTML = ''
+    + '<div class="disc-card">'
+    + '  <div class="disc-header">'
+    + '    <div class="disc-icon">' + (biome.ico || '🗺️') + '</div>'
+    + '    <h3 class="disc-title">' + data.header + '</h3>'
+    + '    <p class="disc-subtitle">— ' + biome.name + ' —</p>'
+    + '  </div>'
+    + '  <div class="disc-body" id="disc-body"></div>'
+    + '  <div class="disc-actions">'
+    + '    <button class="disc-btn" id="disc-continue">Continuar</button>'
+    + '  </div>'
+    + '</div>';
+  document.body.appendChild(ov);
+
+  // Render lines progressively
+  var bodyEl = document.getElementById('disc-body');
+  var idx = 0;
+  function nextLine() {
+    if (idx >= data.narrative.length) {
+      // Add info box
+      var info = document.createElement('div');
+      info.className = 'disc-info';
+      info.innerHTML = '<b style="color:#c4953a">📍 ' + biome.name + '</b><br>' + data.desc;
+      bodyEl.appendChild(info);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+      return;
+    }
+    var line = data.narrative[idx++];
+    var p = document.createElement('p');
+    p.className = 'disc-line';
+    p.innerHTML = line;
+    bodyEl.appendChild(p);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    var words = line.split(/\s+/).length;
+    setTimeout(nextLine, Math.max(1200, Math.min(words * 220, 3500)));
+  }
+  nextLine();
+
+  document.getElementById('disc-continue').onclick = function(){
+    ov.remove();
+    if (onDone) onDone();
+  };
+}
+
+// Hook chamado em renderCartographyCanvas após render
+function _checkCartographyDiscovery() {
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  if (window.vReducedMotion) return;
+  // Avança 1 dia ao abrir mapa (mock — REMOTE seria via timer real)
+  // FIX: só avança 1x por sessão de cartografia (não a cada redraw)
+  if (!window._cartDayAdvancedThisVisit) {
+    if (typeof _advanceCorvusDay === 'function') _advanceCorvusDay(1);
+    window._cartDayAdvancedThisVisit = true;
+  }
+  var discovered = _maybeRollDiscovery(p);
+  if (discovered) {
+    _showDiscoveryPopup(discovered, function(){
+      _applyDiscovery(p, discovered);
+      // Re-renderiza o mapa pra mostrar local descoberto
+      if (typeof _drawCart === 'function') _drawCart();
+    });
+  }
+}
+window._checkCartographyDiscovery = _checkCartographyDiscovery;
+
+// Reset day-advanced flag quando sai da cartografia
+window._resetCartVisitFlag = function(){
+  window._cartDayAdvancedThisVisit = false;
+};
 
 // === SYNC_TARGET: game-hub.js#_LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
