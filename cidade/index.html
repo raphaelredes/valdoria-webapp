@@ -37124,20 +37124,62 @@ function _maybeRollNpcReturn(player) {
 }
 
 // === MAIN ENTRY ====================================================
-function _openCartographerPopup(player) {
+// FIX 2026-05-04 (revisão): NÃO incrementar dia ao abrir popup (quebrava
+// sistema — 5 cliques = 5 dias). Tick agora vem de ações canônicas
+// (rest/sleep/travel via _advanceCorvusDay). Popup apenas LÊ estado.
+//
+// opts.silent: true — não roll NPC return + não consume "delivered"
+// (usado em re-render após confirmar ordem pra preservar estado).
+function _openCartographerPopup(player, opts) {
   player = player || window.CITY_MOCK_PLAYER || {};
+  opts = opts || {};
 
-  // Avança 1 dia ao visitar (mock — server real teria timer)
-  _gameTick(1);
+  // Check pedidos prontos (sempre — entrega imediata se ready_day passou)
+  var delivered;
+  if (opts.silent && Array.isArray(window._lastCorvusDelivered)) {
+    // Re-render: reusa delivered da última invocação principal
+    delivered = window._lastCorvusDelivered;
+  } else {
+    delivered = _checkOrderReady(player);
+    window._lastCorvusDelivered = delivered;
+  }
 
-  // Check pedidos prontos
-  var delivered = _checkOrderReady(player);
-  // Trigger random NPC arrival
-  var npcReturn = _maybeRollNpcReturn(player);
+  // Roll NPC return apenas em primeira abertura por dia
+  // (FIX BUG 4: spam de 45% toda vez que abre)
+  var npcReturn = null;
+  if (opts.silent) {
+    npcReturn = window._lastCorvusNpcReturn || null;
+  } else {
+    var lastDay = player._last_corvus_npc_day || 0;
+    if ((player.game_day || 1) > lastDay) {
+      npcReturn = _maybeRollNpcReturn(player);
+      if (npcReturn) {
+        player._last_corvus_npc_day = player.game_day || 1;
+      }
+      window._lastCorvusNpcReturn = npcReturn;
+    } else {
+      // Mesmo dia, reutiliza notícia anterior se houver
+      npcReturn = window._lastCorvusNpcReturn || null;
+    }
+  }
 
   _injectCartographerCSS();
   _renderCartographerOverlay(player, delivered, npcReturn);
 }
+
+// FIX BUG 11: avança dia em ações canônicas (chamar de rest/sleep/travel).
+// Expõe globalmente pra outras partes do código chamarem.
+function _advanceCorvusDay(amount) {
+  amount = amount || 1;
+  _gameTick(amount);
+  // Reset NPC return tracker pra novo dia
+  if (window.CITY_MOCK_PLAYER) {
+    window.CITY_MOCK_PLAYER._last_corvus_npc_day = 0;
+  }
+  window._lastCorvusNpcReturn = null;
+  window._lastCorvusDelivered = null;
+}
+window._advanceCorvusDay = _advanceCorvusDay;
 
 function _injectCartographerCSS() {
   if (document.getElementById('cart-popup-style')) return;
@@ -37358,6 +37400,19 @@ function _renderCartographerOverlay(player, delivered, npcReturn) {
       _confirmOrderMap(mapName, player);
     };
   });
+
+  // FIX (revisão): ESC fecha popup
+  if (!window._corvusEscHandler) {
+    window._corvusEscHandler = function(ev){
+      if (ev.key === 'Escape' && document.getElementById('corvus-overlay')) {
+        // Fecha confirm modal primeiro se aberto
+        var cf = document.getElementById('corv-confirm');
+        if (cf) { cf.remove(); return; }
+        _closeCartographerPopup();
+      }
+    };
+    document.addEventListener('keydown', window._corvusEscHandler);
+  }
 }
 
 function _closeCartographerPopup() {
@@ -37371,10 +37426,16 @@ function _confirmOrderMap(mapName, player) {
   var def = CORVUS_MAPS.find(function(m){ return m.name === mapName; });
   if (!def) return;
 
+  // FIX BUG 8: limpar modal anterior se existir (previne duplicate)
+  var prev = document.getElementById('corv-confirm');
+  if (prev) prev.remove();
+
   // Build confirmation modal
   var cf = document.createElement('div');
   cf.id = 'corv-confirm';
   cf.className = 'active';
+  // FIX BUG 9: backdrop click cancela modal
+  cf.onclick = function(e){ if (e.target === cf) cf.remove(); };
   cf.innerHTML = ''
     + '<div class="corv-confirm-card">'
     + '  <h3 class="corv-confirm-title">' + def.emoji + ' ' + def.name + '</h3>'
@@ -37406,9 +37467,18 @@ function _confirmOrderMap(mapName, player) {
       paid: true
     });
     cf.remove();
-    // Re-render popup pra mostrar pedido na lista
-    _openCartographerPopup(player);
+    // FIX BUG 7+13: re-render silent — não tick + não roll NPC novo
+    _openCartographerPopup(player, { silent: true });
   };
+
+  // FIX BUG 15: ESC fecha modal
+  var escHandler = function(ev){
+    if (ev.key === 'Escape') {
+      cf.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
 // Registra handler oficial
