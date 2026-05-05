@@ -6219,10 +6219,12 @@ body.perf-lite .vc-action-btn { transition: none; }
     hp: 28, hpMax: 28, mp: 12, mpMax: 12,
     xp: 1200, xpNext: 2000, gold: 150,
     exh: 0,  // Exaustão D&D 5e (0-6)
-    // 2026-05-04: locais conhecidos (visíveis na cartografia) — STARTER_NODES
-    // do server (world_init.py): apenas portões + 2 biomas iniciais. Resto
-    // só aparece se player tiver Mapa Regional do Cartógrafo Corvus.
-    known_locations: ['plains', 'green_fields', 'forest'],
+    // 2026-05-04 (FIX revisão): locais conhecidos alinhados com STARTER_NODES
+    // do server (src/game/world/world_init.py:28). Server tem 5 starters:
+    // city_gates, green_fields, whispering_woods, misty_marshes, golden_sands.
+    // Mas no CART_BIOMES o key 'forest'='whispering_woods', 'swamp'='misty_marshes',
+    // 'desert'='golden_sands'. Aliasamos pra coincidir.
+    known_locations: ['plains', 'green_fields', 'forest', 'swamp', 'desert'],
     // Mapas no inventário (mock — REMOTE preenche via /api/game/state)
     maps_owned: [],
     // Pedidos pendentes do cartógrafo (cada um: {map, ordered_day, ready_day, paid})
@@ -35476,15 +35478,18 @@ function _travelToBiome(biomeKey, displayName){
 }
 
 // Cartografia handlers — abrem exploracao.html com bioma escolhido
-ACTION_HANDLERS['cart_plains']    = function(p){ _travelToBiome('plains',    'Planície de Valdoria'); };
-ACTION_HANDLERS['cart_forest']    = function(p){ _travelToBiome('forest',    'Floresta dos Lobos'); };
-ACTION_HANDLERS['cart_swamp']     = function(p){ _travelToBiome('swamp',     'Pântano Sussurrante'); };
-ACTION_HANDLERS['cart_mountain']  = function(p){ _travelToBiome('mountain',  'Montanha Gelada'); };
-ACTION_HANDLERS['cart_desert']    = function(p){ _travelToBiome('desert',    'Deserto de Khass'); };
-ACTION_HANDLERS['cart_snow']      = function(p){ _travelToBiome('snow',      'Tundra do Norte'); };
-ACTION_HANDLERS['cart_cave']      = function(p){ _travelToBiome('cave',      'Caverna dos Ecos'); };
-ACTION_HANDLERS['cart_volcanic']  = function(p){ _travelToBiome('volcanic',  'Vulcão Adormecido'); };
-ACTION_HANDLERS['cart_graveyard'] = function(p){ _travelToBiome('graveyard', 'Cemitério Esquecido'); };
+// 2026-05-04 FIX BUG 3+4: handlers dinâmicos pra TODOS os 19 locais de
+// CART_BIOMES (antes só 9 hardcoded — clicar em korthag/orc_tribe/etc
+// disparava "Ação não-implementada"). Display name agora vem de
+// biome.name (consistência com mapa).
+(function _registerCartHandlers(){
+  if (typeof CART_BIOMES === 'undefined') return;
+  CART_BIOMES.forEach(function(b){
+    ACTION_HANDLERS['cart_' + b.key] = (function(biomeKey, biomeBiome, displayName){
+      return function(p){ _travelToBiome(biomeBiome || biomeKey, displayName); };
+    })(b.key, b.biome || b.key, b.name);
+  });
+})();
 
 // ============================================================
 // ============================================================
@@ -35784,9 +35789,20 @@ function _cartFindNodeAt(mx, my){
 function _cartShowTooltip(b, mx, my){
   var tip = document.getElementById('cart-tooltip');
   if (!tip) return;
-  tip.innerHTML = '<strong>' + b.name + '</strong><br>'
-    + '<span class="tier">Tier ' + b.tier + '</span><br>'
-    + '<span style="font-size:10px; font-style:italic; color:#a09484;">' + b.desc + '</span>';
+  // 2026-05-04 FIX: locais desconhecidos NÃO devem revelar nome/descrição
+  // (BUG 1 da revisão). Tooltip genérico mantém o mistério.
+  var p = window.CITY_MOCK_PLAYER || {};
+  var knownLocs = p.known_locations || [];
+  var isKnown = knownLocs.indexOf(b.key) >= 0 || b.isOrigin;
+  if (!isKnown) {
+    tip.innerHTML = '<strong style="color:#a09484">❓ Local Desconhecido</strong><br>'
+      + '<span style="font-size:10px;font-style:italic;color:#6a5a4a">'
+      + 'Clique para mais informações</span>';
+  } else {
+    tip.innerHTML = '<strong>' + b.name + '</strong><br>'
+      + '<span class="tier">Tier ' + b.tier + '</span><br>'
+      + '<span style="font-size:10px; font-style:italic; color:#a09484;">' + b.desc + '</span>';
+  }
   tip.style.left = (mx + 12) + 'px';
   tip.style.top = (my + 12) + 'px';
   tip.classList.add('active');
@@ -35874,12 +35890,18 @@ function _openCartLocationPopup(biome){
 
   // Local conhecido — popup normal
   var rec = '';
-  if (biome.tier) {
-    rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
-          biome.tier <= 3 ? 'Aventureiro (nv 2-4)' :
-          biome.tier <= 5 ? 'Veterano (nv 4-7)' :
-          biome.tier <= 7 ? 'Experiente (nv 7-10)' :
-                            'Lendário (nv 10+)';
+  // FIX 2026-05-04 (revisão): tier 0 (origem) não cai no mapeamento abaixo
+  // por ser falsy. Tratamos tier 0 como "Origem (sem perigo)".
+  if (typeof biome.tier === 'number') {
+    if (biome.tier === 0) {
+      rec = 'Origem (Cidade Segura)';
+    } else {
+      rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
+            biome.tier <= 3 ? 'Aventureiro (nv 2-4)' :
+            biome.tier <= 5 ? 'Veterano (nv 4-7)' :
+            biome.tier <= 7 ? 'Experiente (nv 7-10)' :
+                              'Lendário (nv 10+)';
+    }
   }
   card.innerHTML = ''
     + '<div class="clp-icon">' + biome.ico + '</div>'
@@ -36604,7 +36626,9 @@ var CHANCE_ENCOUNTERS = [
   {
     id: 'aldric_first_map',
     npc: 'aldric',
-    triggers: ['cartografia', 'open_cartografia'],
+    // 2026-05-04 FIX (revisão): inclui gates_explore + open_exit_modal +
+    // explore_main — todos eles também abrem cartografia direto.
+    triggers: ['cartografia', 'open_cartografia', 'gates_explore', 'open_exit_modal', 'explore_main'],
     condition: function(p){
       return !(p._encountered_npcs || {}).aldric_map_warning;
     },
@@ -36767,6 +36791,9 @@ var ENCOUNTER_BASE_CHANCE = 0.35; // 35% chance base (alto pra showcasing)
 function _tryChanceEncounter(action, player) {
   if (!player) return false;
   if (window._encounterActive) return false; // já tem um popup aberto
+  // 2026-05-04 FIX (revisão): respeitar prefer-reduced-motion + lite mode
+  // (A11Y + perf). Player com motion reduzida não recebe encontros longos.
+  if (window.vReducedMotion) return false;
 
   // Filtra encontros elegíveis
   var eligible = CHANCE_ENCOUNTERS.filter(function(enc){
@@ -36809,7 +36836,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
     var st = document.createElement('style');
     st.id = 'encounter-style';
     st.textContent = ''
-      + '#encounter-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.85);'
+      + '#encounter-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.85);'
       + '  display:flex;align-items:center;justify-content:center;padding:16px;'
       + '  animation:encFadeIn 0.4s ease-out}'
       + '@keyframes encFadeIn{from{opacity:0}to{opacity:1}}'
@@ -36880,14 +36907,10 @@ function _renderEncounterPopup(enc, originalAction, player) {
   var bodyEl = document.getElementById('enc-body');
   var actionsEl = document.getElementById('enc-actions');
   var lineIdx = 0;
+  var _nextTimer = null;
+  var _choicesShown = false;
 
-  function renderNextLine() {
-    if (lineIdx >= enc.script.length) {
-      // All lines shown — render choices
-      _renderEncounterChoices(enc, originalAction, player, actionsEl);
-      return;
-    }
-    var line = enc.script[lineIdx++];
+  function _appendLine(line) {
     var div = document.createElement('div');
     if (line.type === 'speech') {
       var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
@@ -36899,38 +36922,49 @@ function _renderEncounterPopup(enc, originalAction, player) {
       div.textContent = line.text;
     }
     bodyEl.appendChild(div);
+  }
+
+  function renderNextLine() {
+    _nextTimer = null;
+    if (lineIdx >= enc.script.length) {
+      if (!_choicesShown) {
+        _choicesShown = true;
+        _renderEncounterChoices(enc, originalAction, player, actionsEl);
+      }
+      return;
+    }
+    var line = enc.script[lineIdx++];
+    _appendLine(line);
     bodyEl.scrollTop = bodyEl.scrollHeight;
-    // Auto-advance with reading time
+    // Auto-advance com reading time
     var words = line.text.split(/\s+/).length;
     var delay = Math.max(1200, Math.min(words * 220, 3500));
-    setTimeout(renderNextLine, delay);
+    _nextTimer = setTimeout(renderNextLine, delay);
   }
   renderNextLine();
 
-  // Skip button: show all lines + choices immediately
+  // Skip button: cancela timer pendente + mostra todas as linhas + choices
+  // FIX 2026-05-04 (BUG revisão): cancelar setTimeout previne duplicação.
   document.getElementById('enc-skip').onclick = function(){
+    if (_nextTimer) { clearTimeout(_nextTimer); _nextTimer = null; }
     while (lineIdx < enc.script.length) {
-      var line = enc.script[lineIdx++];
-      var div = document.createElement('div');
-      if (line.type === 'speech') {
-        var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
-        div.className = 'enc-line enc-speech';
-        div.setAttribute('data-speaker', spkr.name);
-        div.textContent = line.text;
-      } else {
-        div.className = 'enc-line enc-narration';
-        div.textContent = line.text;
-      }
-      bodyEl.appendChild(div);
+      _appendLine(enc.script[lineIdx++]);
     }
     bodyEl.scrollTop = bodyEl.scrollHeight;
-    _renderEncounterChoices(enc, originalAction, player, actionsEl);
+    if (!_choicesShown) {
+      _choicesShown = true;
+      _renderEncounterChoices(enc, originalAction, player, actionsEl);
+    }
   };
 }
 
 function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
   actionsEl.innerHTML = '';
   actionsEl.style.display = 'flex';
+  // FIX 2026-05-04 (revisão): esconde "Pular diálogo" quando choices renderizam
+  // (botão fica redundante e poluente após todas as linhas mostradas).
+  var skipBtn = document.getElementById('enc-skip');
+  if (skipBtn) skipBtn.style.display = 'none';
   enc.choices.forEach(function(c, idx){
     var btn = document.createElement('button');
     btn.className = 'enc-btn' + (c.result === 'goto_cartographer' ? ' enc-btn-primary' : '');

@@ -62,7 +62,7 @@
       desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa.' },
     // ─── CAVE / UNDERGROUND ─────────────────────
     { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.26, y: 0.50, biome: 'cave',     tier: 3, ico: '🕳️',
-      mapKey: null,
+      mapKey: 'Mapa das Montanhas',  // alinha com BIOME_TO_MAP no server (cave + mountain compartilham mapa)
       desc: 'Túnel escuro sob as colinas. Ecos estranhos das profundezas.' },
     { key: 'troll_cave', name: 'Caverna do Troll',       x: 0.16, y: 0.32, biome: 'cave',     tier: 5, ico: '🧌',
       mapKey: 'Mapa das Montanhas',
