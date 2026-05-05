@@ -3791,102 +3791,104 @@ body.perf-lite .vc-action-btn { transition: none; }
 </head>
 <body>
   <!-- ====================================================================
-       INTRO TITLE SCREEN — TOQUE PARA INICIAR (USER REQUEST 2026-05-04)
-       Cold start: mostra logo + título antes da cidade. User tap remove
-       overlay e ativa música (gesto necessário pra autoplay policy do browser).
-       Skip se vinda de outra WebApp (sessionStorage flag) ou param ?nointro=1.
+       INTRO TITLE SCREEN — ValdoriaTitleScreen canonical (USER REQUEST 2026-05-04)
+       Substitui intro custom pela esfera AAA animada (orb + nebula + raios +
+       particulas + runas) usada em app.html / game/index.html. Apos tap,
+       mostra loading screen AAA (ValdoriaLoadingController) com runas + particulas.
+       Usa flag window.__cidadeIntroBlocking pra bloquear audio auto-play ate o tap.
+       Auto-skip via ?nointro=1 (Walker) ou returning < 30s (audio_resume_ts).
        ==================================================================== -->
-  <div id="cidade-intro" class="cidade-intro" style="display:none">
-    <div class="cidade-intro-inner">
-      <div class="title-orb"></div>
-      <div class="title-text">LENDAS DE</div>
-      <div class="title-text-sub">VALDORIA</div>
-      <div class="title-divider"><span class="divider-line"></span><span class="divider-gem">◆</span><span class="divider-line"></span></div>
-      <div class="cidade-intro-tap">Toque para Iniciar</div>
-    </div>
-  </div>
-  <style>
-  .cidade-intro {
-    position: fixed; inset: 0; z-index: 99999;
-    background: var(--v-bg, #1a1510);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    animation: cidadeIntroFadeIn 0.4s ease;
-  }
-  .cidade-intro.fading-out { animation: cidadeIntroFadeOut 0.5s ease forwards; }
-  @keyframes cidadeIntroFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes cidadeIntroFadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
-  .cidade-intro-inner {
-    text-align: center;
-    color: var(--v-gold, #c4953a);
-    font-family: 'Cinzel', serif;
-  }
-  .cidade-intro .title-orb {
-    width: 100px; height: 100px; margin: 0 auto 22px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff4d0 0%, #e8c45a 25%, #c4953a 55%, #8b6420 80%, #5a3e10 100%);
-    box-shadow: 0 0 30px rgba(196,149,58,0.5), 0 0 60px rgba(196,149,58,0.25);
-    animation: orbPulse 2.5s ease-in-out infinite;
-  }
-  @keyframes orbPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-  .cidade-intro .title-text {
-    font-size: clamp(20px, 6vw, 28px); font-weight: 700; letter-spacing: 3px;
-    text-shadow: 0 0 18px rgba(196,149,58,0.4), 0 0 40px rgba(196,149,58,0.2);
-  }
-  .cidade-intro .title-text-sub {
-    font-size: clamp(26px, 9vw, 38px); font-weight: 700; letter-spacing: 5px;
-    text-shadow: 0 0 22px rgba(196,149,58,0.5), 0 0 50px rgba(196,149,58,0.25);
-    margin-top: 4px;
-  }
-  .cidade-intro .title-divider {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    margin: 16px auto; opacity: 0.6;
-  }
-  .cidade-intro .divider-line {
-    display: inline-block; width: 40px; height: 1px;
-    background: var(--v-gold, #c4953a);
-  }
-  .cidade-intro .divider-gem { color: var(--v-gold, #c4953a); }
-  .cidade-intro-tap {
-    margin-top: 30px; font-size: 14px; letter-spacing: 2px;
-    color: var(--v-text-dim, #a09484);
-    animation: tapPulse 1.6s ease-in-out infinite;
-    text-transform: uppercase;
-  }
-  @keyframes tapPulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-  </style>
+  <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
   <script>
-  /* Intro title screen — TOQUE PARA INICIAR (cold start only).
-     Skip when:
-       - URL param ?nointro=1 (Walker/automated test)
-       - sessionStorage flag valdoria_intro_shown (already tapped this session)
-       - returning from other WebApp (sessionStorage valdoria_audio_resume_ts < 30s old)
-     User tap → fade out + start audio (gesture required for autoplay). */
   (function(){
     var params = new URLSearchParams(location.search);
-    if (params.get('nointro') === '1') return;
-    if (sessionStorage.getItem('valdoria_intro_shown') === '1') return;
-    var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
-    if (resumeTs && (Date.now() - resumeTs) < 30000) return; /* coming back from another WebApp */
-    var el = document.getElementById('cidade-intro');
-    if (!el) return;
-    el.style.display = 'flex';
-    /* Block audio play until user taps */
-    window.__cidadeIntroBlocking = true;
-    function dismiss(){
-      sessionStorage.setItem('valdoria_intro_shown', '1');
-      window.__cidadeIntroBlocking = false;
-      el.classList.add('fading-out');
-      /* Audio gesture unlock — user tapped, autoplay now allowed */
-      try {
-        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
-          ValdoriaAudio.play('city');
-        }
-      } catch(e){ console.warn('[CIDADE-INTRO] audio play failed:', e); }
-      setTimeout(function(){ el.remove(); }, 550);
+    /* Skip se Walker (test automation) ou retornando de outra WebApp */
+    if (params.get('nointro') === '1') {
+      window.__introTitleSkip = true;
+      console.log('[CIDADE-INTRO] skip — nointro=1');
+      return;
     }
-    el.addEventListener('click', dismiss, { once: true });
-    el.addEventListener('touchend', dismiss, { once: true });
+    var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
+    if (resumeTs && (Date.now() - resumeTs) < 30000) {
+      console.log('[CIDADE-INTRO] skip — returning from other WebApp');
+      return;
+    }
+    if (sessionStorage.getItem('valdoria_intro_shown') === '1') {
+      console.log('[CIDADE-INTRO] skip — already shown this session');
+      return;
+    }
+
+    /* Block audio + cidade init ate user tap */
+    window.__cidadeIntroBlocking = true;
+    window.__cidadeIntroLoadingPhase = false;
+
+    /* Wait for ValdoriaTitleScreen + ValdoriaLoadingHTML to load (deferred via document.write) */
+    function _bootIntro() {
+      if (typeof ValdoriaTitleScreen !== 'function') {
+        console.log('[CIDADE-INTRO] waiting for ValdoriaTitleScreen lib...');
+        setTimeout(_bootIntro, 80);
+        return;
+      }
+      console.log('[CIDADE-INTRO] showing canonical title screen (esfera AAA)');
+      window.__introTitle = ValdoriaTitleScreen({
+        onStart: function() {
+          console.log('[CIDADE-INTRO] user TAPPED — starting AAA loading screen');
+          sessionStorage.setItem('valdoria_intro_shown', '1');
+          /* Step 1: Audio gesture unlock — autoplay agora permitido */
+          try {
+            if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+              ValdoriaAudio.play('city');
+            }
+          } catch(e){ console.warn('[CIDADE-INTRO] audio play failed:', e); }
+
+          /* Step 2: Mostra loading AAA via ValdoriaLoadingController */
+          window.__cidadeIntroLoadingPhase = true;
+          var loadingEl = document.getElementById('loading');
+          if (loadingEl && typeof ValdoriaLoadingHTML === 'function') {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = ValdoriaLoadingHTML({ tier: window._valdoriaPerformanceTier || 'full' });
+            loadingEl.innerHTML = tmp.firstElementChild ? tmp.firstElementChild.innerHTML : '';
+            loadingEl.style.display = '';
+            loadingEl.style.background = '#1a1510';
+          }
+          if (typeof ValdoriaLoadingController === 'function' && loadingEl) {
+            window.__cidadeLoadingCtrl = ValdoriaLoadingController({
+              overlayId: 'loading',
+              tips: [
+                'Aventureiros descansam na taverna...',
+                'Mercadores chegam e partem todos os dias...',
+                'Os portões da cidade levam a aventuras desconhecidas...',
+                'O templo oferece cura — mas cobra um preço...',
+                'A guilda recruta os corajosos...',
+              ],
+              tipInterval: 5000,
+              timeoutMs: 15000,
+              hasRingAccel: true,
+              hasGemPhase: true,
+            });
+            window.__cidadeLoadingCtrl.show();
+          }
+
+          /* Step 3: Libera cidade init + esconde loading apos 1.8s */
+          setTimeout(function() {
+            window.__cidadeIntroBlocking = false;
+            window.__cidadeIntroLoadingPhase = false;
+            if (window.__cidadeLoadingCtrl && window.__cidadeLoadingCtrl.hide) {
+              window.__cidadeLoadingCtrl.hide();
+            } else if (loadingEl) {
+              loadingEl.style.display = 'none';
+            }
+            /* Trigger refresh — re-render cidade caso ja tenha bootado parado */
+            try {
+              if (typeof refreshHud === 'function') refreshHud();
+              if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+            } catch(e){ console.warn('[CIDADE-INTRO] refresh failed:', e); }
+          }, 1800);
+        }
+      });
+      window.__introTitle.show();
+    }
+    _bootIntro();
   })();
   </script>
   <!-- ====================================================================
@@ -5840,6 +5842,16 @@ body.perf-lite .vc-action-btn { transition: none; }
     <div id="sim-log-panel"></div>
   </div>
   <script>
+    // === Canonical loading/title libs (USER REQUEST 2026-05-04) ===
+    // ValdoriaTitleScreen (esfera bonita AAA com nebula + raios) +
+    // ValdoriaLoadingController (carregamento AAA com particulas/runas/anel ardente)
+    document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + Date.now() + '">');
+    document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + Date.now() + '">');
+    document.write('<link rel="stylesheet" href="/shared/loading-reactive.css?v=' + Date.now() + '">');
+    document.write('<script src="/shared/loading-title.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + Date.now() + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.
@@ -5933,7 +5945,74 @@ body.perf-lite .vc-action-btn { transition: none; }
     if (!isNaN(v) && v >= 0) override[k] = v;
   });
   window.CITY_MOCK_PLAYER = Object.assign({}, defaults, override);
-  console.log('[CITY] mock player:', window.CITY_MOCK_PLAYER);
+  console.log('[CITY] mock player (initial):', window.CITY_MOCK_PLAYER);
+
+  // === REMOTE mode fetch (USER REQUEST 2026-05-04) ============================
+  // Quando token+api+uid presentes (web OAuth flow), buscar personagem REAL via
+  // /api/auth/characters em vez de exibir mock "Aventureiro Mago Elfo Nv 5".
+  // O endpoint foi enriquecido em src/game/core/web_auth.py:_get_characters
+  // p/ retornar hp, max_hp, mp, max_mp, gold, xp, exhaustion alem de id/name/level/class_name/race.
+  var _token = params.get('token');
+  var _api   = params.get('api');
+  var _uid   = params.get('uid');
+  var _wantedChar = params.get('char');
+  if (_token && _api && _uid){
+    console.log('[CITY] REMOTE mode detected — fetching real character data');
+    fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + _token }
+    }).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(payload){
+      var chars = (payload && payload.characters) || [];
+      if (!chars.length){
+        console.warn('[CITY] no characters returned — keeping mock');
+        return;
+      }
+      var picked = null;
+      if (_wantedChar){
+        for (var i = 0; i < chars.length; i++){
+          if (chars[i].id === _wantedChar || chars[i].char_id === _wantedChar){ picked = chars[i]; break; }
+        }
+      }
+      if (!picked) picked = chars[0];
+      var p = window.CITY_MOCK_PLAYER;
+      if (picked.name)       p.name = picked.name;
+      if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
+      if (picked.race)       p.race = String(picked.race).toLowerCase();
+      if (picked.level)      p.level = picked.level;
+      if (picked.hp)         p.hp = picked.hp;
+      if (picked.max_hp)     p.hpMax = picked.max_hp;
+      if (picked.mp != null) p.mp = picked.mp;
+      if (picked.max_mp)     p.mpMax = picked.max_mp;
+      if (picked.gold != null) p.gold = picked.gold;
+      if (picked.xp != null)   p.xp = picked.xp;
+      if (picked.exhaustion != null) p.exh = picked.exhaustion;
+      console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
+      // Sincroniza index 0 do GROUP_MEMBERS (player slot)
+      if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
+        window.GROUP_MEMBERS[0] = {
+          name: p.name, cls: p.cls, race: p.race, level: p.level,
+          hp: p.hp, hpMax: p.hpMax, mp: p.mp, mpMax: p.mpMax,
+          exh: p.exh, exhMax: 6, xp: p.xp, xpNext: p.xpNext, gold: p.gold,
+          dead: false
+        };
+      }
+      // Em REMOTE mode, allies sao apenas mock — fazer Liriel/Korin se tornarem null
+      // ate ter sistema de party real no backend (TODO: /api/web/party).
+      if (window.GROUP_MEMBERS){
+        for (var k = 1; k < window.GROUP_MEMBERS.length; k++){
+          window.GROUP_MEMBERS[k] = null;
+        }
+      }
+      // Re-render se hub ja foi montado
+      if (typeof refreshHud === 'function') refreshHud();
+      if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+    }).catch(function(err){
+      console.warn('[CITY] /api/auth/characters fetch failed:', err.message || err);
+    });
+  }
 
   // canonical: market_npcs_data.py REPUTATION_TIERS — reputação por mercador.
   // Mock distribuído pra demonstrar todos os tiers (Aliado/Amigável/Neutro/Desconfiado/Hostil).
