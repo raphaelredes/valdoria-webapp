@@ -508,11 +508,20 @@ function redirectToGame(charId, isNew, token) {
         params.set('nodevpanel', '1');
     }
 
-    var route = isNew && !charId ? 'character_creator' : 'game';
-    params.set('route', route);
-    var url = '../app.html?' + params.toString();
-    console.info('[WEB-AUTH] redirect route=%s uid=%s char=%s env=%s api=%s nodevpanel=%s',
-        route, _userId, charId || 'none', _envId, _apiBase,
+    /* USER REQUEST 2026-05-04: redirect pra simulator standalone /cidade/
+       em vez de Game Hub legacy /app.html?route=game. Cidade.html le params
+       via setupMockPlayer (linha 5789-5807) e fetcha /api/game/state pra
+       popular dados reais (REMOTE mode, fallback mock se nao auth). */
+    var url;
+    if (isNew && !charId) {
+        params.set('route', 'character_creator');
+        url = '../app.html?' + params.toString();
+    } else {
+        /* /cidade/ standalone — mesma sessao via token+uid+api+env+char */
+        url = '../cidade/index.html?' + params.toString();
+    }
+    console.info('[WEB-AUTH] redirect target=%s uid=%s char=%s env=%s api=%s nodevpanel=%s',
+        url.split('?')[0], _userId, charId || 'none', _envId, _apiBase,
         params.get('nodevpanel') || '0');
     window.location.href = url;
 }
