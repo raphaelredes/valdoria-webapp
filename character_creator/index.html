@@ -919,23 +919,223 @@
 
 <body>
 
-    <!-- Onboarding carousel (shows once for new players) -->
+    <!-- Onboarding carousel AAA — USER REQUEST 2026-05-04
+         Visual upgrade: custom SVG illustrations (no emoji), particle field,
+         corner runes, vignette background, animated title/subtitle stagger.
+         Text atualizado: 9 raças (não 3), narrativa mais imersiva. -->
     <div id="onboarding-overlay" class="onboarding-overlay" style="display:none">
+        <!-- Hidden SVG defs (gradients reusados pelos mini-dados D20) -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+                <linearGradient id="ob-mini-die-edge" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#e8c45a"/>
+                    <stop offset="100%" stop-color="#7a5818"/>
+                </linearGradient>
+                <linearGradient id="ob-mini-die-face" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3a2e22"/>
+                    <stop offset="100%" stop-color="#1a1410"/>
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Particle field AAA — wisps da esfera (energia dourada), mini-dados 3D, sparks
+             USER NOTE: o Orb of Valdoria é UM só (brand mark), não multiplica.
+             Wisps = streamers etéreos de energia dourada do orb (.title-orb-wisp canonical). -->
+        <div class="onboarding-particles" id="onboarding-particles" aria-hidden="true">
+            <!-- 6 wisps de energia dourada (elongados, translúcidos, blur) -->
+            <span class="ob-wisp"></span>
+            <span class="ob-wisp"></span>
+            <span class="ob-wisp"></span>
+            <span class="ob-wisp"></span>
+            <span class="ob-wisp"></span>
+            <span class="ob-wisp"></span>
+
+            <!-- 5 mini-dados D20 3D rolando (passam pela tela) -->
+            <div class="ob-mini-die">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" fill="url(#ob-mini-die-face)" stroke="url(#ob-mini-die-edge)" stroke-width="0.8"/><polygon points="12,7 17,10 12,17 7,10" fill="rgba(196,149,58,0.18)" stroke="#c4953a" stroke-width="0.4"/><text x="12" y="14" text-anchor="middle" font-size="5.5" font-weight="700" fill="#e8c45a" font-family="Cinzel,serif">20</text></svg>
+            </div>
+            <div class="ob-mini-die">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" fill="url(#ob-mini-die-face)" stroke="url(#ob-mini-die-edge)" stroke-width="0.8"/><polygon points="12,7 17,10 12,17 7,10" fill="rgba(196,149,58,0.18)" stroke="#c4953a" stroke-width="0.4"/><text x="12" y="14" text-anchor="middle" font-size="5.5" font-weight="700" fill="#e8c45a" font-family="Cinzel,serif">20</text></svg>
+            </div>
+            <div class="ob-mini-die">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" fill="url(#ob-mini-die-face)" stroke="url(#ob-mini-die-edge)" stroke-width="0.8"/><polygon points="12,7 17,10 12,17 7,10" fill="rgba(196,149,58,0.18)" stroke="#c4953a" stroke-width="0.4"/><text x="12" y="14" text-anchor="middle" font-size="5.5" font-weight="700" fill="#e8c45a" font-family="Cinzel,serif">20</text></svg>
+            </div>
+            <div class="ob-mini-die">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" fill="url(#ob-mini-die-face)" stroke="url(#ob-mini-die-edge)" stroke-width="0.8"/><polygon points="12,7 17,10 12,17 7,10" fill="rgba(196,149,58,0.18)" stroke="#c4953a" stroke-width="0.4"/><text x="12" y="14" text-anchor="middle" font-size="5.5" font-weight="700" fill="#e8c45a" font-family="Cinzel,serif">20</text></svg>
+            </div>
+            <div class="ob-mini-die">
+                <svg viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" fill="url(#ob-mini-die-face)" stroke="url(#ob-mini-die-edge)" stroke-width="0.8"/><polygon points="12,7 17,10 12,17 7,10" fill="rgba(196,149,58,0.18)" stroke="#c4953a" stroke-width="0.4"/><text x="12" y="14" text-anchor="middle" font-size="5.5" font-weight="700" fill="#e8c45a" font-family="Cinzel,serif">20</text></svg>
+            </div>
+
+            <!-- 8 sparks (gold dots ambient) -->
+            <span class="ob-particle"></span><span class="ob-particle"></span>
+            <span class="ob-particle"></span><span class="ob-particle"></span>
+            <span class="ob-particle"></span><span class="ob-particle"></span>
+            <span class="ob-particle"></span><span class="ob-particle"></span>
+        </div>
+        <!-- Corner runes (decorative) -->
+        <div class="ob-rune ob-rune-tl" aria-hidden="true">ᚱ</div>
+        <div class="ob-rune ob-rune-tr" aria-hidden="true">ᚦ</div>
+        <div class="ob-rune ob-rune-bl" aria-hidden="true">ᚷ</div>
+        <div class="ob-rune ob-rune-br" aria-hidden="true">ᛟ</div>
+
         <div class="onboarding-slides" id="onboarding-slides">
+
+            <!-- ═══ SLIDE 0: D20 / RPG essence ═══ -->
             <div class="onboarding-slide active" data-slide="0">
-                <div class="onboarding-visual">🎲</div>
-                <div class="onboarding-title">ROLE UM D20 E<br>MUDE SEU DESTINO</div>
-                <div class="onboarding-subtitle">Um RPG de mesa direto no Telegram.<br>Dados reais. Mecânicas de D&D 5e. Aventura épica.</div>
+                <div class="onboarding-visual">
+                    <svg viewBox="0 0 200 200" class="ob-icon ob-icon-d20" aria-hidden="true">
+                        <defs>
+                            <radialGradient id="d20-glow" cx="50%" cy="50%" r="60%">
+                                <stop offset="0%" stop-color="#fff4d0" stop-opacity="0.55"/>
+                                <stop offset="55%" stop-color="#c4953a" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="#5a3e10" stop-opacity="0"/>
+                            </radialGradient>
+                            <linearGradient id="d20-face" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#3a2e22"/>
+                                <stop offset="55%" stop-color="#241a12"/>
+                                <stop offset="100%" stop-color="#0e0805"/>
+                            </linearGradient>
+                            <linearGradient id="d20-edge" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#e8c45a"/>
+                                <stop offset="100%" stop-color="#8b6420"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Aura -->
+                        <circle cx="100" cy="100" r="92" fill="url(#d20-glow)" class="ob-aura"/>
+                        <!-- D20 hexagonal silhouette -->
+                        <polygon points="100,28 162,64 162,136 100,172 38,136 38,64"
+                                 fill="url(#d20-face)" stroke="url(#d20-edge)" stroke-width="2.5"/>
+                        <!-- Inner triangle face highlight -->
+                        <polygon points="100,52 146,82 100,148 54,82"
+                                 fill="rgba(196,149,58,0.12)" stroke="#c4953a" stroke-width="1.2"/>
+                        <!-- Cross lines (faces division) -->
+                        <line x1="100" y1="28" x2="100" y2="172" stroke="rgba(196,149,58,0.2)" stroke-width="1"/>
+                        <line x1="38" y1="64" x2="162" y2="136" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+                        <line x1="162" y1="64" x2="38" y2="136" stroke="rgba(196,149,58,0.15)" stroke-width="0.8"/>
+                        <!-- Number 20 -->
+                        <text x="100" y="116" text-anchor="middle"
+                              font-family="Cinzel, serif" font-size="42" font-weight="700"
+                              fill="#e8c45a"
+                              style="text-shadow: 0 0 8px rgba(196,149,58,0.6);">20</text>
+                        <!-- Sparks orbiting -->
+                        <circle cx="100" cy="35" r="2" fill="#fff4d0" class="ob-spark ob-spark-1"/>
+                        <circle cx="155" cy="100" r="1.5" fill="#fff4d0" class="ob-spark ob-spark-2"/>
+                        <circle cx="100" cy="165" r="1.8" fill="#fff4d0" class="ob-spark ob-spark-3"/>
+                    </svg>
+                </div>
+                <div class="onboarding-title">ROLE UM D20<br>E MUDE SEU DESTINO</div>
+                <div class="onboarding-subtitle">Um RPG D&D 5e direto no Telegram.<br>Dados rolados de verdade. Combate tático, magia e narrativa épica.</div>
             </div>
+
+            <!-- ═══ SLIDE 1: World exploration / Compass ═══ -->
             <div class="onboarding-slide" data-slide="1">
-                <div class="onboarding-visual">🗺️</div>
-                <div class="onboarding-title">EXPLORE UM MUNDO<br>VIVO DE FANTASIA</div>
-                <div class="onboarding-subtitle">Masmorras, florestas, montanhas e cidades.<br>Cada escolha muda sua história.</div>
+                <div class="onboarding-visual">
+                    <svg viewBox="0 0 200 200" class="ob-icon ob-icon-compass" aria-hidden="true">
+                        <defs>
+                            <radialGradient id="compass-glow" cx="50%" cy="50%" r="60%">
+                                <stop offset="0%" stop-color="#fff4d0" stop-opacity="0.45"/>
+                                <stop offset="65%" stop-color="#c4953a" stop-opacity="0.18"/>
+                                <stop offset="100%" stop-color="#5a3e10" stop-opacity="0"/>
+                            </radialGradient>
+                            <radialGradient id="compass-face" cx="50%" cy="45%" r="55%">
+                                <stop offset="0%" stop-color="#3a2e22"/>
+                                <stop offset="100%" stop-color="#1a1410"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Aura -->
+                        <circle cx="100" cy="100" r="92" fill="url(#compass-glow)" class="ob-aura"/>
+                        <!-- Outer ring -->
+                        <circle cx="100" cy="100" r="78" fill="url(#compass-face)" stroke="#c4953a" stroke-width="2.5"/>
+                        <!-- Tick marks -->
+                        <g stroke="#9a7530" stroke-width="1" opacity="0.6">
+                            <line x1="100" y1="22" x2="100" y2="32"/>
+                            <line x1="178" y1="100" x2="168" y2="100"/>
+                            <line x1="100" y1="178" x2="100" y2="168"/>
+                            <line x1="22" y1="100" x2="32" y2="100"/>
+                        </g>
+                        <!-- Cardinal labels -->
+                        <text x="100" y="44" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="700" fill="#c4953a">N</text>
+                        <text x="156" y="105" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="700" fill="#c4953a">L</text>
+                        <text x="100" y="166" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="700" fill="#c4953a">S</text>
+                        <text x="44" y="105" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="700" fill="#c4953a">O</text>
+                        <!-- Inner ring -->
+                        <circle cx="100" cy="100" r="50" fill="none" stroke="#7a5d28" stroke-width="0.8" opacity="0.5"/>
+                        <!-- 8-point star -->
+                        <polygon points="100,55 110,90 145,100 110,110 100,145 90,110 55,100 90,90"
+                                 fill="#c4953a" opacity="0.9"/>
+                        <polygon points="100,55 105,95 145,100 105,105 100,145 95,105 55,100 95,95"
+                                 fill="#fff4d0" opacity="0.4"/>
+                        <!-- Rotating needle group -->
+                        <g class="ob-compass-needle" style="transform-origin: 100px 100px;">
+                            <polygon points="100,68 96,100 100,98 104,100" fill="#a04030"/>
+                            <polygon points="100,132 96,100 100,102 104,100" fill="#3a3028"/>
+                            <circle cx="100" cy="100" r="3.5" fill="#c4953a" stroke="#5a3e10" stroke-width="1"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="onboarding-title">EXPLORE UM<br>MUNDO VIVO</div>
+                <div class="onboarding-subtitle">Masmorras secretas, cidades vivas, NPCs que lembram de você.<br>Cada decisão escreve sua lenda.</div>
             </div>
+
+            <!-- ═══ SLIDE 2: Hero / Crossed swords + Crown ═══ -->
             <div class="onboarding-slide" data-slide="2">
-                <div class="onboarding-visual">⚔️</div>
+                <div class="onboarding-visual">
+                    <svg viewBox="0 0 200 200" class="ob-icon ob-icon-swords" aria-hidden="true">
+                        <defs>
+                            <radialGradient id="hero-glow" cx="50%" cy="55%" r="55%">
+                                <stop offset="0%" stop-color="#fff4d0" stop-opacity="0.5"/>
+                                <stop offset="60%" stop-color="#c4953a" stop-opacity="0.22"/>
+                                <stop offset="100%" stop-color="#5a3e10" stop-opacity="0"/>
+                            </radialGradient>
+                            <linearGradient id="blade-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#f4ead0"/>
+                                <stop offset="50%" stop-color="#a89478"/>
+                                <stop offset="100%" stop-color="#5a4838"/>
+                            </linearGradient>
+                            <linearGradient id="crown-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#fff4d0"/>
+                                <stop offset="60%" stop-color="#c4953a"/>
+                                <stop offset="100%" stop-color="#7a5818"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Aura -->
+                        <circle cx="100" cy="105" r="90" fill="url(#hero-glow)" class="ob-aura"/>
+                        <!-- Crown (top) -->
+                        <g transform="translate(70 30)">
+                            <path d="M 0 28 L 8 8 L 18 24 L 30 4 L 42 24 L 52 8 L 60 28 L 60 38 L 0 38 Z"
+                                  fill="url(#crown-grad)" stroke="#7a5818" stroke-width="1.5"/>
+                            <rect x="0" y="34" width="60" height="5" fill="#9a7530" stroke="#7a5818" stroke-width="0.5"/>
+                            <circle cx="8" cy="10" r="2" fill="#a04030"/>
+                            <circle cx="30" cy="6" r="2.5" fill="#a04030"/>
+                            <circle cx="52" cy="10" r="2" fill="#a04030"/>
+                        </g>
+                        <!-- Sword 1 (rotated -45°) -->
+                        <g transform="rotate(-45 100 130)">
+                            <rect x="97" y="78" width="6" height="100" fill="url(#blade-grad)" stroke="#3a2e22" stroke-width="0.5"/>
+                            <polygon points="97,78 100,68 103,78" fill="url(#blade-grad)"/>
+                            <line x1="100" y1="78" x2="100" y2="178" stroke="#fff4d0" stroke-width="0.8" opacity="0.4"/>
+                            <rect x="80" y="176" width="40" height="6" rx="3" fill="url(#crown-grad)" stroke="#7a5818" stroke-width="1"/>
+                            <rect x="96" y="182" width="8" height="20" fill="#5a3e10"/>
+                            <circle cx="100" cy="204" r="5" fill="url(#crown-grad)" stroke="#7a5818" stroke-width="0.8"/>
+                        </g>
+                        <!-- Sword 2 (rotated +45°) -->
+                        <g transform="rotate(45 100 130)">
+                            <rect x="97" y="78" width="6" height="100" fill="url(#blade-grad)" stroke="#3a2e22" stroke-width="0.5"/>
+                            <polygon points="97,78 100,68 103,78" fill="url(#blade-grad)"/>
+                            <line x1="100" y1="78" x2="100" y2="178" stroke="#fff4d0" stroke-width="0.8" opacity="0.4"/>
+                            <rect x="80" y="176" width="40" height="6" rx="3" fill="url(#crown-grad)" stroke="#7a5818" stroke-width="1"/>
+                            <rect x="96" y="182" width="8" height="20" fill="#5a3e10"/>
+                            <circle cx="100" cy="204" r="5" fill="url(#crown-grad)" stroke="#7a5818" stroke-width="0.8"/>
+                        </g>
+                        <!-- Sparkles around -->
+                        <circle cx="55" cy="60" r="1.5" fill="#fff4d0" class="ob-spark ob-spark-1"/>
+                        <circle cx="148" cy="55" r="1.8" fill="#fff4d0" class="ob-spark ob-spark-2"/>
+                        <circle cx="100" cy="170" r="2" fill="#fff4d0" class="ob-spark ob-spark-3"/>
+                    </svg>
+                </div>
                 <div class="onboarding-title">CRIE SEU<br>AVENTUREIRO</div>
-                <div class="onboarding-subtitle">12 classes. 3 raças. Centenas de combinações.<br>Sua jornada começa agora.</div>
+                <div class="onboarding-subtitle">12 classes. 9 raças. Centenas de antecedentes e combinações.<br>Sua jornada épica começa agora.</div>
             </div>
         </div>
         <div class="onboarding-dots" id="onboarding-dots">
@@ -947,65 +1147,341 @@
     </div>
 
     <style>
+        /* ====================================================================
+           ONBOARDING AAA — USER REQUEST 2026-05-04
+           Custom SVG illustrations, particle field (drift up), corner runes,
+           vignette background, animated title (slide-up + glow), subtitle
+           stagger fade, icon pulse + spark orbit. 100% design tokens.
+           ==================================================================== */
         .onboarding-overlay {
             position: fixed; inset: 0; z-index: var(--v-z-critical, 10000);
-            background: var(--v-bg, #2a2420);
+            background:
+              radial-gradient(ellipse at 50% 50%,
+                var(--v-bg, #2a2420) 0%,
+                var(--v-bg-deep, #1a1410) 75%,
+                #0e0805 100%);
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 24px;
+            padding: var(--v-space-xl, 24px);
+            overflow: hidden;
         }
-        .onboarding-slides { position: relative; width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; }
+        /* Vignette overlay (subtle) */
+        .onboarding-overlay::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+              radial-gradient(ellipse at 50% 50%,
+                transparent 40%,
+                rgba(0, 0, 0, 0.55) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* === Particle field AAA — mini-orbs canonical, mini-dados 3D, sparks === */
+        .onboarding-particles {
+            position: absolute; inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            perspective: 800px;
+            perspective-origin: center;
+        }
+
+        /* Wisps — Streamers etéreos de energia dourada do Orb (canonical
+           .title-orb-wisp do loading-title.css). Elongados, translúcidos,
+           com blur, drift diagonal pela tela. NÃO são orbs (orb é único). */
+        .ob-wisp {
+            position: absolute;
+            width: clamp(50px, 14vw, 90px);
+            height: 7px;
+            border-radius: 50%;
+            background: linear-gradient(90deg,
+              transparent 0%,
+              var(--v-gold-30, rgba(196, 149, 58, 0.3)) 25%,
+              rgba(255, 244, 208, 0.7) 50%,
+              var(--v-gold-30, rgba(196, 149, 58, 0.3)) 75%,
+              transparent 100%);
+            filter: blur(3px);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .ob-wisp:nth-child(1) { left: -10%; top: 18%; animation: obWispDriftRight 10s ease-in-out infinite; animation-delay: 0s; }
+        .ob-wisp:nth-child(2) { left: 110%; top: 32%; animation: obWispDriftLeft 11s ease-in-out infinite; animation-delay: 2.5s; }
+        .ob-wisp:nth-child(3) { left: -10%; top: 50%; animation: obWispDriftRight 12s ease-in-out infinite; animation-delay: 5s; }
+        .ob-wisp:nth-child(4) { left: 110%; top: 68%; animation: obWispDriftLeft 9s  ease-in-out infinite; animation-delay: 1.5s; }
+        .ob-wisp:nth-child(5) { left: -10%; top: 82%; animation: obWispDriftRight 11s ease-in-out infinite; animation-delay: 4s; }
+        .ob-wisp:nth-child(6) { left: 110%; top: 12%; animation: obWispDriftLeft 13s ease-in-out infinite; animation-delay: 7s; }
+        @keyframes obWispDriftRight {
+            0%   { transform: translateX(0) translateY(0) rotate(-8deg) scaleX(0.5); opacity: 0; }
+            12%  { opacity: 0.7; transform: translateX(15vw) translateY(-2vh) rotate(-5deg) scaleX(1); }
+            50%  { transform: translateX(60vw) translateY(-8vh) rotate(2deg) scaleX(1.1); opacity: 0.9; }
+            88%  { opacity: 0.5; }
+            100% { transform: translateX(120vw) translateY(-12vh) rotate(8deg) scaleX(0.6); opacity: 0; }
+        }
+        @keyframes obWispDriftLeft {
+            0%   { transform: translateX(0) translateY(0) rotate(8deg) scaleX(0.5); opacity: 0; }
+            12%  { opacity: 0.7; transform: translateX(-15vw) translateY(-2vh) rotate(5deg) scaleX(1); }
+            50%  { transform: translateX(-60vw) translateY(-8vh) rotate(-2deg) scaleX(1.1); opacity: 0.9; }
+            88%  { opacity: 0.5; }
+            100% { transform: translateX(-120vw) translateY(-12vh) rotate(-8deg) scaleX(0.6); opacity: 0; }
+        }
+
+        /* Mini-dados D20 — 3D rotation (rotateX/Y) atravessando a tela */
+        .ob-mini-die {
+            position: absolute;
+            width: 26px; height: 26px;
+            opacity: 0;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 0 6px var(--v-gold-40, rgba(196, 149, 58, 0.4)));
+            will-change: transform, opacity;
+        }
+        .ob-mini-die svg { width: 100%; height: 100%; display: block; }
+        /* Indexes ajustados: 6 wisps (1-6) precedem os dados, então dados começam em 7 */
+        .ob-mini-die:nth-child(7)  { left: -5%;  top: 75%;  animation: obMiniDieDiagonal 8s linear infinite; animation-delay: 0s; }
+        .ob-mini-die:nth-child(8)  { left: -5%;  top: 35%;  animation: obMiniDieDiagonal 10s linear infinite; animation-delay: 2.5s; }
+        .ob-mini-die:nth-child(9)  { left: 105%; top: 60%;  animation: obMiniDieReverse 9s linear infinite; animation-delay: 1s; }
+        .ob-mini-die:nth-child(10) { left: -5%;  top: 15%;  animation: obMiniDieDiagonal 11s linear infinite; animation-delay: 5.5s; }
+        .ob-mini-die:nth-child(11) { left: 105%; top: 85%;  animation: obMiniDieReverse 8.5s linear infinite; animation-delay: 4s; }
+        @keyframes obMiniDieDiagonal {
+            0%   { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); opacity: 0; }
+            8%   { opacity: 0.85; }
+            50%  { transform: translate3d(50vw, -25vh, 60px) rotateX(540deg) rotateY(360deg) rotateZ(180deg); opacity: 1; }
+            92%  { opacity: 0.6; }
+            100% { transform: translate3d(110vw, -55vh, -40px) rotateX(1080deg) rotateY(720deg) rotateZ(360deg); opacity: 0; }
+        }
+        @keyframes obMiniDieReverse {
+            0%   { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); opacity: 0; }
+            8%   { opacity: 0.85; }
+            50%  { transform: translate3d(-50vw, -25vh, 60px) rotateX(-540deg) rotateY(-360deg) rotateZ(-180deg); opacity: 1; }
+            92%  { opacity: 0.6; }
+            100% { transform: translate3d(-110vw, -55vh, -40px) rotateX(-1080deg) rotateY(-720deg) rotateZ(-360deg); opacity: 0; }
+        }
+
+        /* Sparks — pontos dourados ambientes */
+        .ob-particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            border-radius: 50%;
+            background: var(--v-gold, #c4953a);
+            box-shadow: 0 0 6px var(--v-gold, #c4953a);
+            opacity: 0;
+            animation: obParticleDrift 6s ease-in infinite;
+        }
+        /* Sparks: indexes 12-19 (6 wisps + 5 dice + 8 sparks = 19 total) */
+        .ob-particle:nth-child(12) { left: 10%; animation-delay: 0.4s; animation-duration: 7s; }
+        .ob-particle:nth-child(13) { left: 22%; animation-delay: 1.4s; animation-duration: 6.2s; }
+        .ob-particle:nth-child(14) { left: 38%; animation-delay: 2.8s; animation-duration: 5.8s; }
+        .ob-particle:nth-child(15) { left: 50%; animation-delay: 0.9s; animation-duration: 7.5s; }
+        .ob-particle:nth-child(16) { left: 62%; animation-delay: 3.1s; animation-duration: 6s; }
+        .ob-particle:nth-child(17) { left: 74%; animation-delay: 4.2s; animation-duration: 6.8s; }
+        .ob-particle:nth-child(18) { left: 86%; animation-delay: 1.9s; animation-duration: 7.2s; }
+        .ob-particle:nth-child(19) { left: 94%; animation-delay: 5.0s; animation-duration: 6.5s; width: 2px; height: 2px; }
+        @keyframes obParticleDrift {
+            0%   { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            15%  { opacity: 0.7; }
+            85%  { opacity: 0.3; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* Burst épico nas transições de slide (acelera wisps + dados) */
+        .onboarding-overlay.slide-bursting .ob-wisp,
+        .onboarding-overlay.slide-bursting .ob-mini-die,
+        .onboarding-overlay.slide-bursting .ob-particle {
+            animation-duration: 2.5s !important;
+            animation-iteration-count: 1 !important;
+        }
+        .onboarding-overlay.slide-bursting .ob-wisp {
+            filter: blur(2px)
+                    drop-shadow(0 0 12px var(--v-gold, #c4953a))
+                    drop-shadow(0 0 24px var(--v-gold-50, rgba(196, 149, 58, 0.5))) !important;
+        }
+        .onboarding-overlay.slide-bursting .ob-mini-die {
+            filter: drop-shadow(0 0 10px var(--v-gold, #c4953a))
+                    drop-shadow(0 0 20px var(--v-gold-40, rgba(196, 149, 58, 0.4))) !important;
+        }
+
+        /* Performance / a11y */
+        body.perf-lite .ob-wisp,
+        body.perf-lite .ob-mini-die,
+        body.perf-lite .ob-particle { display: none !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .ob-wisp, .ob-mini-die, .ob-particle,
+            .ob-aura, .ob-spark, .ob-compass-needle,
+            .ob-rune { animation: none !important; }
+        }
+
+        /* === Corner runes (decorative) === */
+        .ob-rune {
+            position: absolute;
+            font-family: 'Noto Sans Runic', 'Cinzel', serif;
+            font-size: 28px;
+            color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
+            text-shadow: 0 0 10px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+            pointer-events: none;
+            z-index: 2;
+            animation: obRunePulse 3s ease-in-out infinite;
+        }
+        .ob-rune-tl { top: 16px; left: 16px; }
+        .ob-rune-tr { top: 16px; right: 16px; animation-delay: 0.75s; }
+        .ob-rune-bl { bottom: 16px; left: 16px; animation-delay: 1.5s; }
+        .ob-rune-br { bottom: 16px; right: 16px; animation-delay: 2.25s; }
+        @keyframes obRunePulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50%      { opacity: 0.85; transform: scale(1.08); }
+        }
+
+        /* === Slides === */
+        .onboarding-slides {
+            position: relative; width: 100%; flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 3;
+        }
         .onboarding-slide {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             text-align: center; padding: 40px 24px;
-            opacity: 0; transition: opacity var(--v-transition-slow), transform var(--v-transition-slow);
+            opacity: 0;
             transform: translateX(40px);
+            transition:
+              opacity var(--v-transition-slow, 0.5s) ease,
+              transform var(--v-transition-slow, 0.5s) ease;
             pointer-events: none;
         }
         .onboarding-slide.active {
             opacity: 1; transform: translateX(0); pointer-events: auto;
         }
+        .onboarding-slide.active .onboarding-visual {
+            animation: obIconEntrance 0.7s ease-out both;
+        }
+        .onboarding-slide.active .onboarding-title {
+            animation: obTitleEntrance 0.9s ease-out 0.2s both;
+        }
+        .onboarding-slide.active .onboarding-subtitle {
+            animation: obSubtitleEntrance 0.9s ease-out 0.5s both;
+        }
         .onboarding-slide.exit {
             opacity: 0; transform: translateX(-40px);
         }
+
+        /* === Visual container === */
         .onboarding-visual {
-            font-size: clamp(56px, 15vw, 80px);
-            margin-bottom: var(--v-space-lg, 16px);
-            filter: drop-shadow(0 0 20px rgba(196, 149, 58, 0.4));
+            margin-bottom: var(--v-space-xl, 20px);
+            filter: drop-shadow(0 0 18px var(--v-gold-30, rgba(196, 149, 58, 0.3)));
         }
+        .ob-icon {
+            width: clamp(140px, 35vw, 200px);
+            height: clamp(140px, 35vw, 200px);
+            display: block;
+        }
+        .ob-icon .ob-aura {
+            animation: obAuraPulse 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+        @keyframes obAuraPulse {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50%      { opacity: 1; transform: scale(1.06); }
+        }
+        .ob-spark {
+            opacity: 0;
+            animation: obSparkOrbit 4s ease-in-out infinite;
+        }
+        .ob-spark-1 { animation-delay: 0s; }
+        .ob-spark-2 { animation-delay: 1.3s; }
+        .ob-spark-3 { animation-delay: 2.6s; }
+        @keyframes obSparkOrbit {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            30%      { opacity: 1; transform: scale(1.2); }
+            60%      { opacity: 0.6; transform: scale(0.9); }
+        }
+        /* Compass needle slow rotation */
+        .ob-compass-needle {
+            transform-origin: 100px 100px;
+            animation: obCompassRotate 8s ease-in-out infinite;
+        }
+        @keyframes obCompassRotate {
+            0%   { transform: rotate(0deg); }
+            25%  { transform: rotate(45deg); }
+            50%  { transform: rotate(15deg); }
+            75%  { transform: rotate(-30deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* === Title === */
         .onboarding-title {
             font-family: var(--v-font-display, 'Cinzel', serif);
-            font-size: clamp(20px, 6vw, 26px);
+            font-size: clamp(20px, 6vw, 28px);
+            font-weight: 700;
             color: var(--v-gold-light, #e8c874);
-            line-height: 1.3; margin-bottom: var(--v-space-lg, 16px);
-            text-shadow: 0 0 16px rgba(196, 149, 58, 0.3);
-            letter-spacing: 1px;
+            line-height: 1.25;
+            margin-bottom: var(--v-space-lg, 16px);
+            letter-spacing: 1.5px;
+            text-shadow:
+              0 0 18px var(--v-gold-40, rgba(196, 149, 58, 0.4)),
+              0 0 36px var(--v-gold-20, rgba(196, 149, 58, 0.2));
         }
+
+        /* === Subtitle === */
         .onboarding-subtitle {
             font-family: var(--v-font, 'MedievalSharp', serif);
             font-size: var(--v-font-base, 14px);
             color: var(--v-text-dim, #a09484);
-            line-height: 1.6;
+            line-height: 1.65;
+            max-width: 320px;
         }
+
+        /* === Animations === */
+        @keyframes obIconEntrance {
+            from { opacity: 0; transform: scale(0.6) rotate(-10deg); }
+            to   { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        @keyframes obTitleEntrance {
+            from { opacity: 0; transform: translateY(16px); letter-spacing: 4px; }
+            to   { opacity: 1; transform: translateY(0); letter-spacing: 1.5px; }
+        }
+        @keyframes obSubtitleEntrance {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === Next button === */
         .onboarding-next {
+            position: relative;
+            z-index: 4;
             margin-top: var(--v-space-2xl, 24px);
             padding: 14px 48px;
-            background: linear-gradient(165deg, var(--v-bg-accent, #3a1515) 0%, #2a1010 100%);
-            border: 1px solid rgba(196, 149, 58, 0.3);
+            background: linear-gradient(165deg,
+              var(--v-bg-accent, #3a1515) 0%,
+              #2a1010 100%);
+            border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
             border-radius: var(--v-radius, 10px);
             color: var(--v-gold-light, #e8c874);
             font-family: var(--v-font-display, 'Cinzel', serif);
             font-size: var(--v-font-lg, 16px);
-            cursor: pointer; min-height: 48px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            min-height: 48px;
+            box-shadow:
+              0 4px 14px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 var(--v-gold-15, rgba(196, 149, 58, 0.15));
             transition: all var(--v-transition-base, 0.2s) ease;
             -webkit-tap-highlight-color: transparent;
         }
+        .onboarding-next:hover {
+            background: linear-gradient(165deg, #4a1d1d 0%, #3a1515 100%);
+            border-color: var(--v-gold-50, rgba(196, 149, 58, 0.5));
+            box-shadow:
+              0 6px 20px var(--v-gold-20, rgba(196, 149, 58, 0.2)),
+              inset 0 1px 0 var(--v-gold-30, rgba(196, 149, 58, 0.3));
+        }
         .onboarding-next:active { transform: scale(0.96); }
+
+        /* === Dots === */
         .onboarding-dots {
             display: flex; gap: var(--v-space-md, 8px);
             margin-top: var(--v-space-lg, 16px);
+            position: relative;
+            z-index: 4;
         }
         .onboarding-dot {
             width: 8px; height: 8px; border-radius: 50%;
@@ -1053,6 +1529,15 @@
             if (currentSlide === totalSlides - 1) {
                 nextBtn.textContent = 'Começar →';
             }
+            // USER REQUEST 2026-05-04: burst épico nas transições — acelera
+            // mini-orbs + mini-dados 3D atravessando a tela por ~2.5s
+            try {
+                overlay.classList.remove('slide-bursting');
+                // Force reflow to restart animation
+                void overlay.offsetWidth;
+                overlay.classList.add('slide-bursting');
+                setTimeout(function() { overlay.classList.remove('slide-bursting'); }, 2600);
+            } catch(e){}
         }
 
         nextBtn.addEventListener('click', function() {
