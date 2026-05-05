@@ -35433,6 +35433,7 @@ function _travelToBiome(biomeKey, displayName){
   function _doAnim(){
     if (window.vReducedMotion) {
       _logCity('reduced-motion: pulando anim, redirect direto');
+      window.__valdoria_transitioning = true;
       window.location.href = url;
       return;
     }
@@ -35445,6 +35446,8 @@ function _travelToBiome(biomeKey, displayName){
     // Anim existe: SEMPRE roda (riscos/encontros/eventos durante trajeto)
     playTravelAnimation(biomeKey, displayName, function(){
       _logCity('travel anim done -> redirect');
+      // Cross-WebApp Transition Safety (regra CLAUDE.md): suprime close beacon
+      window.__valdoria_transitioning = true;
       window.location.href = url;
     });
   }
