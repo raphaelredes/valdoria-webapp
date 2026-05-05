@@ -267,7 +267,25 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   ~1568  hub helpers: _hubDiv, _hubSpan, _hubBtn, _hubEsc, _hubMiniBar, │
          _hubCoin, _matchLocation, _extractBadge, _isCTA                │
   ~1609  (function setupMocks) — haptic/doAction/vToast/vProcessing     │
+                                                                        │
+  CITY SECTORS & DISCOVERY SYSTEM (USER REQUEST 2026-05-04)             │
+  ~6325  var CITY_SECTORS / CITY_SECTOR_ORDER (4 setores: Convívio/     │
+         Comércio/Combate/Espírito)                                     │
+  ~6340  var CITY_LOCATIONS — 16 locais com sector/levelReq/discoveryQ  │
+  ~6370  var CITY_DISCOVERY_QUESTS — 8 quests multi-stage com lore      │
+  ~6443  state helpers: _ensureCityState, _findLocByCb,                 │
+         _getLocationState (hidden|newly_available|in_progress|unlocked)│
+  ~6469  _getVisibleLocationsForSector / _markLocationSeen              │
+  ~6477  Discovery quest popup: _startDiscoveryQuest,                   │
+         _advanceDiscoveryStage, _renderDiscoveryStage,                 │
+         _closeDiscoveryPopup, _esc                                     │
+  ~6549  window._cityCheckDiscovery — hook chamado em doAction          │
+         (intercepta locations com quest pendente)                      │
+  ~6567  _renderSectorTabs — tab bar inserido após renderHubScreen      │
+  ~6588  _applyDiscoveryAnimations — sparkle+badge nas cells (.hub-loc) │
+                                                                        │
   ~1652  function buildMockHubScreen — mock screen p/ renderHubScreen   │
+         (filtra por sector ativo + level + discovery state)            │
   ~1688  vars _footerCollapsed                                          │
   ~1689  function renderFooter / _toggleFooter                          │
   ~1718  vars _navStack / _currentScreen                                │
@@ -3787,6 +3805,195 @@ body.perf-lite .vc-action-btn { transition: none; }
       opacity: 0.8;
     }
     .inv-detail-btn:active { transform: scale(0.97); }
+
+    /* ====================================================================
+       CITY SECTORS & DISCOVERY SYSTEM (USER REQUEST 2026-05-04)
+       Tab bar de setores (Convívio/Comércio/Combate/Espírito) + animação
+       de descoberta (sparkle + badge "NOVO!") + popup multi-stage de quest.
+       Padrão visual: design tokens (var(--v-*)) — sem hardcoded.
+       ==================================================================== */
+    .city-sector-tabs {
+      display: flex;
+      gap: var(--v-space-xs, 4px);
+      padding: var(--v-space-sm, 6px) var(--v-space-md, 10px);
+      margin: var(--v-space-sm, 6px) 0;
+      background: var(--v-bg-raised, #332a22);
+      border-top: 1px solid var(--v-border, #4a3828);
+      border-bottom: 1px solid var(--v-border, #4a3828);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .city-sector-tab {
+      flex: 1 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--v-space-xs, 4px);
+      padding: var(--v-space-sm, 6px) var(--v-space-md, 10px);
+      border: 1px solid var(--v-border, #4a3828);
+      border-radius: var(--v-radius-pill, 20px);
+      background: transparent;
+      color: var(--v-text-dim, #a09484);
+      font-family: var(--v-font, 'MedievalSharp', serif);
+      font-size: var(--v-font-sm, 12px);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--v-transition-base, 0.2s ease);
+    }
+    .city-sector-tab.active {
+      border-color: var(--v-gold-dim, #9a7530);
+      background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
+      color: var(--v-gold, #c4953a);
+      font-weight: 600;
+      box-shadow: 0 0 8px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+    }
+    .city-sector-tab:active { transform: scale(0.95); }
+    .city-sector-tab .cst-ico { font-size: var(--v-font-base, 14px); }
+
+    /* Badge "NOVO!" + sparkle de descoberta em locais newly_available */
+    .hub-loc--new::after {
+      content: 'NOVO!';
+      position: absolute;
+      top: -6px; right: -6px;
+      background: linear-gradient(135deg, #ffd97a, var(--v-gold, #c4953a));
+      color: var(--v-bg-deep, #1a1510);
+      padding: 1px 6px;
+      border-radius: var(--v-radius-pill, 20px);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: var(--v-font-xs, 9px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      animation: cityNewBadgePulse 1.6s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes cityNewBadgePulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.12); }
+    }
+
+    /* Badge "EM CURSO" para in_progress (quest iniciada mas não finalizada) */
+    .hub-loc--inprogress::after {
+      content: '📜';
+      position: absolute;
+      top: -4px; right: -4px;
+      background: var(--v-bg-card, #2e2520);
+      color: var(--v-gold, #c4953a);
+      padding: 1px 4px;
+      border-radius: var(--v-radius-pill, 20px);
+      border: 1px solid var(--v-gold-dim, #9a7530);
+      font-size: var(--v-font-xs, 10px);
+      box-shadow: 0 0 6px var(--v-gold-30, rgba(196, 149, 58, 0.3));
+      z-index: 2;
+    }
+
+    /* Sparkle de descoberta (primeira aparição) */
+    .hub-loc.discovering {
+      animation: cityLocDiscover 1.4s ease;
+    }
+    @keyframes cityLocDiscover {
+      0%   { opacity: 0; transform: scale(0.7) rotate(-3deg);
+             box-shadow: 0 0 0 var(--v-gold-30, rgba(196, 149, 58, 0)); }
+      40%  { opacity: 1; transform: scale(1.12);
+             box-shadow: 0 0 24px var(--v-gold, #c4953a),
+                         0 0 48px var(--v-gold-50, rgba(196, 149, 58, 0.5)); }
+      70%  { transform: scale(0.98);
+             box-shadow: 0 0 16px var(--v-gold-40, rgba(196, 149, 58, 0.4)); }
+      100% { transform: scale(1);
+             box-shadow: 0 0 8px var(--v-gold-20, rgba(196, 149, 58, 0.2)); }
+    }
+    body.perf-lite .hub-loc.discovering { animation: none !important; }
+    body.perf-lite .hub-loc--new::after { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .hub-loc.discovering,
+      .hub-loc--new::after { animation: none !important; }
+    }
+
+    /* === Discovery Quest Popup (multi-stage com lore) ============== */
+    .city-discovery-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 12, 8, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--v-z-modal, 9000);
+      animation: cityDiscOverlayIn 0.25s ease;
+      padding: var(--v-space-lg, 16px);
+    }
+    @keyframes cityDiscOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+    .city-discovery-card {
+      max-width: 380px;
+      width: 100%;
+      background: linear-gradient(180deg,
+                  var(--v-bg-raised, #332a22) 0%,
+                  var(--v-bg-card, #2e2520) 100%);
+      border: 1px solid var(--v-gold-dim, #9a7530);
+      border-radius: var(--v-radius-lg, 14px);
+      padding: var(--v-space-xl, 20px) var(--v-space-lg, 16px);
+      color: var(--v-text, #d4c8b0);
+      font-family: var(--v-font, 'MedievalSharp', serif);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7),
+                  0 0 24px var(--v-gold-20, rgba(196, 149, 58, 0.2));
+      animation: cityDiscCardIn 0.35s ease;
+    }
+    @keyframes cityDiscCardIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .cdv-questname {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: var(--v-font-lg, 16px);
+      color: var(--v-gold, #c4953a);
+      text-align: center;
+      letter-spacing: 1px;
+      margin-bottom: var(--v-space-md, 10px);
+      padding-bottom: var(--v-space-sm, 6px);
+      border-bottom: 1px solid var(--v-border, #4a3828);
+    }
+    .cdv-speaker {
+      font-size: var(--v-font-sm, 12px);
+      color: var(--v-gold-dim, #9a7530);
+      font-style: italic;
+      text-align: center;
+      margin-bottom: var(--v-space-sm, 6px);
+    }
+    .cdv-text {
+      font-size: var(--v-font-body, 14px);
+      line-height: 1.6;
+      color: var(--v-text, #d4c8b0);
+      margin-bottom: var(--v-space-lg, 16px);
+      text-align: justify;
+    }
+    .cdv-choices {
+      display: flex;
+      flex-direction: column;
+      gap: var(--v-space-sm, 6px);
+    }
+    .cdv-choice {
+      width: 100%;
+      padding: var(--v-space-md, 10px);
+      border: 1px solid var(--v-border, #4a3828);
+      border-radius: var(--v-radius, 10px);
+      background: var(--v-bg-card, #2e2520);
+      color: var(--v-text, #d4c8b0);
+      font-family: var(--v-font, 'MedievalSharp', serif);
+      font-size: var(--v-font-body, 14px);
+      cursor: pointer;
+      transition: all var(--v-transition-base, 0.2s ease);
+    }
+    .cdv-choice:hover,
+    .cdv-choice:active {
+      border-color: var(--v-gold-dim, #9a7530);
+      background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
+      color: var(--v-gold, #c4953a);
+    }
+    body.perf-lite .city-discovery-overlay,
+    body.perf-lite .city-discovery-card { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .city-discovery-overlay,
+      .city-discovery-card { animation: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -6295,6 +6502,12 @@ function _isCTA(btn) {
     };
     window.doAction = function(action, payload){
       _logCity('doAction: ' + action);
+      // 0. Discovery quest interception (USER REQUEST 2026-05-04):
+      //    Locais com discovery quest pendente abrem popup de quest em vez de
+      //    navegar pra tela do local. Após completar, action_quests segue normal.
+      if (typeof window._cityCheckDiscovery === 'function' && window._cityCheckDiscovery(action)) {
+        return;
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -6321,22 +6534,349 @@ function _isCTA(btn) {
   }
 })();
 
+// === CITY SECTORS & DISCOVERY SYSTEM (USER REQUEST 2026-05-04) =================
+// Divide locais em 4 setores (Convívio/Comércio/Combate/Espírito) com tab bar.
+// Cada local tem level_req (oculto até nível mínimo) + discovery_quest opcional
+// (multi-stage com lore — completar antes de poder usar o local).
+//
+// Estado em CITY_MOCK_PLAYER:
+//   .seen_locations[]       — locais já vistos (não re-anima sparkle)
+//   .discovered_locations[] — locais com discovery quest em progresso
+//   .completed_locations[]  — quest concluída, local liberado normalmente
+//   .active_discovery       — { questId, stageId } da quest em curso
+// Estados possíveis por local:
+//   'hidden'           — level < req (NÃO renderiza o botão)
+//   'newly_available'  — level OK + tem quest + não iniciada (sparkle + "NOVO!")
+//   'in_progress'      — quest em curso (clique continua de onde parou)
+//   'unlocked'         — sem quest OU quest completa (normal)
+
+var CITY_SECTORS = {
+  convivio:  { id:'convivio',  label:'Convívio',  ico:'🍺' },
+  comercio:  { id:'comercio',  label:'Comércio',  ico:'🏪' },
+  combate:   { id:'combate',   label:'Combate',   ico:'⚔️' },
+  espirito:  { id:'espirito',  label:'Espírito',  ico:'⛪' }
+};
+var CITY_SECTOR_ORDER = ['convivio','comercio','combate','espirito'];
+
+// Locais por callback. labelEdge usado em sparkle/popup.
+var CITY_LOCATIONS = {
+  // === CONVÍVIO === (essenciais, sem level gate)
+  tavern:        { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Taverna',    cb:'tavern' },
+  inn:           { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Estalagem',  cb:'inn' },
+  rel_main:      { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Vínculos',   cb:'rel_main' },
+  action_quests: { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Missões',    cb:'action_quests' },
+  // === COMÉRCIO === (gates progressivos)
+  market:        { sector:'comercio', levelReq:1, discoveryQuestId:null,             label:'Mercado',    cb:'market' },
+  bank:          { sector:'comercio', levelReq:4, discoveryQuestId:'q_disc_bank',    label:'Banco',      cb:'bank' },
+  open_workshop: { sector:'comercio', levelReq:6, discoveryQuestId:'q_disc_oficina', label:'Oficina',    cb:'open_workshop' },
+  rune_scribe:   { sector:'comercio', levelReq:8, discoveryQuestId:'q_disc_runas',   label:'Runas',      cb:'rune_scribe' },
+  // === COMBATE === (essenciais + tier-locked)
+  guild:           { sector:'combate', levelReq:1, discoveryQuestId:null,              label:'Guilda',    cb:'guild' },
+  gates:           { sector:'combate', levelReq:1, discoveryQuestId:null,              label:'Portões',   cb:'gates' },
+  arena:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_arena',    label:'Arena',     cb:'arena' },
+  daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',   cb:'daily_challenge' },
+  // === ESPÍRITO === (templo livre, lore-locked)
+  temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
+  square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
+  action_codex:  { sector:'espirito', levelReq:5, discoveryQuestId:'q_disc_codex',    label:'Compêndio', cb:'action_codex' },
+  festival:      { sector:'espirito', levelReq:7, discoveryQuestId:'q_disc_festival', label:'Festival',  cb:'festival' }
+};
+
+// Quests multi-stage (lore). choice.next = stageId ou 'unlock' (completa).
+var CITY_DISCOVERY_QUESTS = {
+  q_disc_bank: { id:'q_disc_bank', name:'A Carta Selada', targetCb:'bank', stages:[
+    { id:'s1', speaker:'Mirena, joalheira',
+      text:'Você está sempre carregando muito ouro consigo? Perigoso, isso. Existe um lugar nas costas da praça onde guardam os bens dos aventureiros que sabem...',
+      choices:[{ label:'Onde fica?', next:'s2' }] },
+    { id:'s2', speaker:'Mirena, joalheira',
+      text:'Procure pela Casa de Tholram. Porta de carvalho com símbolo de balança. O velho aceita depósitos e empresta — mas cobra os juros dele, não os seus.',
+      choices:[{ label:'Vou procurar agora.', next:'unlock' }] }
+  ]},
+  q_disc_oficina: { id:'q_disc_oficina', name:'A Ferramenta Enferrujada', targetCb:'open_workshop', stages:[
+    { id:'s1', speaker:'Thorne, ferreiro',
+      text:'Achou esse martelo de gravação? Era do mestre Bergrim, ferreiro de três gerações. Morreu sem aprendiz. A oficina dele está fechada faz seis luas, mas o filho ainda paga o aluguel...',
+      choices:[{ label:'Posso usar a oficina?', next:'s2' }] },
+    { id:'s2', speaker:'Thorne, ferreiro',
+      text:'Se você for sério em forjar suas próprias coisas — e não vender pro primeiro mercador faminto — eu te apresento ao filho de Bergrim. Mora atrás do banco. Diga que Thorne te mandou.',
+      choices:[{ label:'Vou falar com ele.', next:'unlock' }] }
+  ]},
+  q_disc_runas: { id:'q_disc_runas', name:'Pedra Rúnica Intacta', targetCb:'rune_scribe', stages:[
+    { id:'s1', speaker:'Velithra, alquimista',
+      text:'Hmm. Essa pedra que você trouxe... a runa nela ainda pulsa. Não é toda runa que sobrevive a uma dungeon. Sobrevivente como você merece falar com a Escrivã.',
+      choices:[{ label:'Quem é?', next:'s2' }] },
+    { id:'s2', speaker:'Velithra, alquimista',
+      text:'Sereniel. Mora sobre a torre da praça, lê runas há mais de oitenta anos. Vai querer ver isso. Se gostar de você, ensina a inscrever as suas próprias.',
+      choices:[{ label:'Subir até a torre.', next:'unlock' }] }
+  ]},
+  q_disc_arena: { id:'q_disc_arena', name:'O Pergaminho do Sangue', targetCb:'arena', stages:[
+    { id:'s1', speaker:'Você (lendo)',
+      text:'Um cartaz desbotado pregado na taverna: "TORNEIO REAL DE VALDORIA — Glória, ouro e o respeito da capital aguardam quem ousar pisar na Arena. Procure Tharos, mestre de armas."',
+      choices:[{ label:'Procurar Tharos.', next:'s2' }] },
+    { id:'s2', speaker:'Tharos, mestre de armas',
+      text:'Outro hopeful, hein? A Arena não é cinema, garoto. Mas você passou da porta — então já sabe o que quer. Aceito sua inscrição.',
+      choices:[{ label:'Estou pronto.', next:'unlock' }] }
+  ]},
+  q_disc_desafio: { id:'q_disc_desafio', name:'Boletim do Conselho', targetCb:'daily_challenge', stages:[
+    { id:'s1', speaker:'Capitã Ysoria',
+      text:'Aventureiro com história. Vimos teu nome no quadro da Guilda — três missões resolvidas no mês. O Conselho está abrindo Desafios Diários para os que provam serviço.',
+      choices:[{ label:'O que são?', next:'s2' }] },
+    { id:'s2', speaker:'Capitã Ysoria',
+      text:'Dungeons rotativas — uma diferente por dia. Ouro extra, reputação dobrada e um item raro garantido pra quem completar. Mas só uma chance por dia. Topa?',
+      choices:[{ label:'Topo.', next:'unlock' }] }
+  ]},
+  q_disc_praca: { id:'q_disc_praca', name:'A Voz da Fonte', targetCb:'square', stages:[
+    { id:'s1', speaker:'Velho mendigo',
+      text:'Ei, forasteiro. Tu já visitou a fonte da praça? Lyana ainda canta lá nas tardes. Diz que viajou com a guarda real, mas voltou pra cantar pros pombos.',
+      choices:[{ label:'Vou conhecê-la.', next:'s2' }] },
+    { id:'s2', speaker:'Lyana, bardo',
+      text:'Bem-vindo à praça, viajante. Aqui não tem coroas, só conversa boa e a fonte que ouve. Volte sempre que precisar de notícia — eu sei de quase tudo que se conta na cidade.',
+      choices:[{ label:'Vou voltar.', next:'unlock' }] }
+  ]},
+  q_disc_codex: { id:'q_disc_codex', name:'Ruínas de Maerthal', targetCb:'action_codex', stages:[
+    { id:'s1', speaker:'Você (lendo um pergaminho)',
+      text:'Caiu de um inimigo que você derrotou. Letras antigas, traduzidas: "Maerthal — onde os pactos foram quebrados, onde os arquivos do reino dormem."',
+      choices:[{ label:'Procurar quem traduz isso.', next:'s2' }] },
+    { id:'s2', speaker:'Sereniel, escrivã',
+      text:'Maerthal. Sim, já ouvi. O Compêndio guarda fragmentos do arquivo de lá — bestiário, locais explorados, segredos coletados. Sua jornada é digna de leitura. Posso te dar acesso.',
+      choices:[{ label:'Aceito.', next:'unlock' }] }
+  ]},
+  q_disc_festival: { id:'q_disc_festival', name:'O Calendário Sagrado', targetCb:'festival', stages:[
+    { id:'s1', speaker:'Sumo Sacerdote',
+      text:'Os ventos mudaram, aventureiro. A lua de Florescência se aproxima — quando Valdoria abre suas portas para o Festival da Colheita. Quem prova-se em batalha é convidado.',
+      choices:[{ label:'O que acontece no festival?', next:'s2' }] },
+    { id:'s2', speaker:'Sumo Sacerdote',
+      text:'Jogos, mercado especial, blessing dos deuses, e a oportunidade rara de ganhar Selos do Festival — moeda única. Voltarei a te chamar quando as luas se alinharem.',
+      choices:[{ label:'Aguardarei o sinal.', next:'unlock' }] }
+  ]}
+};
+
+// Estado helpers
+function _ensureCityState(){
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return null;
+  if (!p.seen_locations)       p.seen_locations = [];
+  if (!p.discovered_locations) p.discovered_locations = [];
+  if (!p.completed_locations)  p.completed_locations = [];
+  if (!p.active_discovery)     p.active_discovery = null;
+  return p;
+}
+window._currentSector = window._currentSector || 'convivio';
+
+function _findLocByCb(cb){
+  for (var k in CITY_LOCATIONS) if (CITY_LOCATIONS[k].cb === cb) return k;
+  return null;
+}
+
+function _getLocationState(loc){
+  var p = _ensureCityState();
+  if (!p) return 'hidden';
+  if ((p.level || 1) < (loc.levelReq || 1)) return 'hidden';
+  if (!loc.discoveryQuestId) return 'unlocked';
+  if (p.completed_locations.indexOf(loc.cb) >= 0) return 'unlocked';
+  if (p.discovered_locations.indexOf(loc.cb) >= 0) return 'in_progress';
+  return 'newly_available';
+}
+
+function _getVisibleLocationsForSector(sectorId){
+  var visible = [];
+  for (var key in CITY_LOCATIONS){
+    var loc = CITY_LOCATIONS[key];
+    if (loc.sector !== sectorId) continue;
+    var st = _getLocationState(loc);
+    if (st === 'hidden') continue;
+    visible.push({ key:key, loc:loc, state:st });
+  }
+  return visible;
+}
+
+function _markLocationSeen(cb){
+  var p = _ensureCityState();
+  if (!p) return false;
+  if (p.seen_locations.indexOf(cb) >= 0) return false;
+  p.seen_locations.push(cb);
+  return true;
+}
+
+// === Discovery quest popup =================================================
+function _startDiscoveryQuest(locKey){
+  var loc = CITY_LOCATIONS[locKey];
+  if (!loc || !loc.discoveryQuestId) return false;
+  var quest = CITY_DISCOVERY_QUESTS[loc.discoveryQuestId];
+  if (!quest) return false;
+  var p = _ensureCityState();
+  if (p.discovered_locations.indexOf(loc.cb) < 0) p.discovered_locations.push(loc.cb);
+  p.active_discovery = { questId:quest.id, stageId:quest.stages[0].id };
+  _logCity('discovery start: ' + quest.id);
+  _renderDiscoveryStage();
+  return true;
+}
+
+function _advanceDiscoveryStage(nextStageId){
+  var p = _ensureCityState();
+  if (!p || !p.active_discovery) return;
+  var quest = CITY_DISCOVERY_QUESTS[p.active_discovery.questId];
+  if (!quest) return;
+  if (nextStageId === 'unlock'){
+    if (p.completed_locations.indexOf(quest.targetCb) < 0) p.completed_locations.push(quest.targetCb);
+    var idx = p.discovered_locations.indexOf(quest.targetCb);
+    if (idx >= 0) p.discovered_locations.splice(idx, 1);
+    p.active_discovery = null;
+    _closeDiscoveryPopup();
+    var locKey = _findLocByCb(quest.targetCb);
+    var locLabel = (locKey && CITY_LOCATIONS[locKey]) ? CITY_LOCATIONS[locKey].label : quest.targetCb;
+    if (typeof vToast === 'function') vToast('✨ ' + locLabel + ' liberado!');
+    _logCity('discovery complete: ' + quest.id);
+    if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+    return;
+  }
+  p.active_discovery.stageId = nextStageId;
+  _renderDiscoveryStage();
+}
+
+function _renderDiscoveryStage(){
+  var p = _ensureCityState();
+  if (!p || !p.active_discovery) return;
+  var quest = CITY_DISCOVERY_QUESTS[p.active_discovery.questId];
+  if (!quest) return;
+  var stage = null;
+  for (var i = 0; i < quest.stages.length; i++){
+    if (quest.stages[i].id === p.active_discovery.stageId){ stage = quest.stages[i]; break; }
+  }
+  if (!stage) return;
+  var old = document.getElementById('city-discovery-overlay');
+  if (old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'city-discovery-overlay';
+  overlay.className = 'city-discovery-overlay';
+  var card = document.createElement('div');
+  card.className = 'city-discovery-card';
+  card.innerHTML = ''
+    + '<div class="cdv-questname">' + _esc(quest.name) + '</div>'
+    + '<div class="cdv-speaker">' + _esc(stage.speaker) + '</div>'
+    + '<div class="cdv-text">' + _esc(stage.text) + '</div>'
+    + '<div class="cdv-choices"></div>';
+  overlay.appendChild(card);
+  var choicesEl = card.querySelector('.cdv-choices');
+  stage.choices.forEach(function(c){
+    var btn = document.createElement('button');
+    btn.className = 'cdv-choice';
+    btn.textContent = c.label;
+    btn.addEventListener('click', function(){ _advanceDiscoveryStage(c.next); });
+    choicesEl.appendChild(btn);
+  });
+  if (typeof vOverlay !== 'undefined' && vOverlay.add) vOverlay.add(overlay);
+  else document.body.appendChild(overlay);
+}
+
+function _closeDiscoveryPopup(){
+  var el = document.getElementById('city-discovery-overlay');
+  if (el) el.remove();
+}
+
+function _esc(s){
+  return String(s == null ? '' : s).replace(/[<>&]/g, function(c){
+    return c === '<' ? '&lt;' : c === '>' ? '&gt;' : '&amp;';
+  });
+}
+
+// Hook chamado em doAction antes da rota normal. Retorna true se interceptou.
+window._cityCheckDiscovery = function(action){
+  var locKey = _findLocByCb(action);
+  if (!locKey) return false;
+  var loc = CITY_LOCATIONS[locKey];
+  if (!loc) return false;
+  var st = _getLocationState(loc);
+  if (st === 'newly_available') return _startDiscoveryQuest(locKey);
+  if (st === 'in_progress'){
+    var p = _ensureCityState();
+    if (p && p.active_discovery && p.active_discovery.questId === loc.discoveryQuestId){
+      _renderDiscoveryStage();
+      return true;
+    }
+    return _startDiscoveryQuest(locKey);
+  }
+  return false;
+};
+
+// === Sector tab bar render =================================================
+// Inserido APÓS renderHubScreen rodar — entre o divider (◆) e o location grid.
+function _renderSectorTabs(rootEl){
+  var existing = rootEl.querySelector('.city-sector-tabs');
+  if (existing) existing.remove();
+  var locGrid = rootEl.querySelector('.hub-loc-grid');
+  if (!locGrid) return;
+  var tabs = document.createElement('div');
+  tabs.className = 'city-sector-tabs';
+  CITY_SECTOR_ORDER.forEach(function(sid){
+    var sec = CITY_SECTORS[sid];
+    var btn = document.createElement('button');
+    btn.className = 'city-sector-tab' + (sid === window._currentSector ? ' active' : '');
+    btn.innerHTML = '<span class="cst-ico">' + sec.ico + '</span><span class="cst-lbl">' + sec.label + '</span>';
+    btn.addEventListener('click', function(){
+      if (window._currentSector === sid) return;
+      window._currentSector = sid;
+      _logCity('sector switch: ' + sid);
+      if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+    });
+    tabs.appendChild(btn);
+  });
+  locGrid.parentNode.insertBefore(tabs, locGrid);
+}
+
+// Aplica sparkle/badge nas células de locais newly_available / in_progress.
+// renderHubScreen canonical usa class `.hub-loc` (não `.hub-loc-cell`) e `.hl-nm` p/ label.
+function _applyDiscoveryAnimations(rootEl){
+  var cells = rootEl.querySelectorAll('.hub-loc');
+  cells.forEach(function(cell){
+    var labelEl = cell.querySelector('.hl-nm') || cell;
+    var label = (labelEl.textContent || '').trim();
+    var matched = null;
+    for (var k in CITY_LOCATIONS){
+      if (CITY_LOCATIONS[k].label === label){ matched = CITY_LOCATIONS[k]; break; }
+    }
+    if (!matched) return;
+    var st = _getLocationState(matched);
+    if (st === 'newly_available'){
+      cell.classList.add('hub-loc--new');
+      if (_markLocationSeen(matched.cb)){
+        cell.classList.add('discovering');
+        if (typeof vToast === 'function') vToast('✨ Você descobriu ' + matched.label + '!');
+      }
+    } else if (st === 'in_progress'){
+      cell.classList.add('hub-loc--inprogress');
+    }
+  });
+}
+// === END CITY SECTORS & DISCOVERY SYSTEM ====================================
+
+
 // --- Mock screen pro renderHubScreen ---
 // Estrutura espelha o que game_api_serializer.py manda em /api/game/start (city.hub).
+// USER REQUEST 2026-05-04: locations agora filtradas por sector ativo + level_req
+// + discovery state. CTA fixo. Tab bar inserido no post-render via _renderSectorTabs.
 function buildMockHubScreen(player){
+  _ensureCityState();
+  var sector = window._currentSector || 'convivio';
+  var visible = _getVisibleLocationsForSector(sector);
+
+  // CTA sempre na primeira linha
+  var rows = [[{ text: '⚔️ PARTIR PARA AVENTURA', cb: 'explore_main' }]];
+
+  // Locations filtradas em pares de 2 por linha
+  var pair = [];
+  visible.forEach(function(item){
+    var loc = item.loc;
+    var label = loc.label;
+    // Missões keeps badge count (mock 3 ate API real)
+    if (loc.cb === 'action_quests') label = label + ' (3)';
+    pair.push({ text: label, cb: loc.cb });
+    if (pair.length === 2){ rows.push(pair); pair = []; }
+  });
+  if (pair.length) rows.push(pair);
+
   return {
     suggested_action: { text: 'Há lobos rondando o caminho do norte. Talvez seja hora de partir.', cb: 'action_quests' },
-    buttons: [
-      [{ text: '⚔️ PARTIR PARA AVENTURA', cb: 'explore_main' }],
-      [{ text: 'Taverna', cb: 'tavern' }, { text: 'Estalagem', cb: 'inn' }],
-      [{ text: 'Mercado', cb: 'market' }, { text: 'Guilda', cb: 'guild' }],
-      [{ text: 'Templo', cb: 'temple' }, { text: 'Arena', cb: 'arena' }],
-      [{ text: 'Praça', cb: 'square' }, { text: 'Banco', cb: 'bank' }],
-      [{ text: 'Portões', cb: 'gates' }, { text: 'Missões (3)', cb: 'action_quests' }],
-      [{ text: 'Compêndio', cb: 'action_codex' }, { text: 'Desafio', cb: 'daily_challenge' }],
-      [{ text: 'Oficina', cb: 'open_workshop' }, { text: 'Runas', cb: 'rune_scribe' }],
-      [{ text: 'Festival', cb: 'festival' }, { text: 'Vínculos', cb: 'rel_main' }]
-    ],
+    buttons: rows,
     notifications: [],
     // Allies vazio: renderHubScreen pula a section "Grupo" quando lista é vazia.
     // Os cards de membros já são exibidos no #city-group-panel (HUD topo) — não precisa duplicar.
@@ -8187,6 +8727,9 @@ function renderCurrentScreen(params){
   // de locations + ambient + party + dm tip. Replica o que o serializer manda
   // em /api/game/start no bot DEV.
   renderHubScreen(contentEl, buildMockHubScreen(window.CITY_MOCK_PLAYER));
+  // USER REQUEST 2026-05-04: sector tab bar + sparkle on newly_available locations
+  if (typeof _renderSectorTabs === 'function') _renderSectorTabs(contentEl);
+  if (typeof _applyDiscoveryAnimations === 'function') _applyDiscoveryAnimations(contentEl);
 }
 
 // ============================================================================
