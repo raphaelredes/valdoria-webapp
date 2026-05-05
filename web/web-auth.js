@@ -498,32 +498,56 @@ function redirectToGame(charId, isNew, token) {
     }
     if (isNew) params.set('new', '1');
 
-    /* BUG (2026-04-11): when this web-auth.js is running inside the DEV
-     * panel iframe (URL has nodevpanel=1), the redirect to /app must also
-     * carry nodevpanel=1 — otherwise /app reloads dev-debug-panel.js,
-     * detects ?env=dev and tries to activate host mode a second time,
-     * creating a recursive iframe-inside-iframe tree. */
+    /* BUG (2026-04-11): nodevpanel iframe carry-over */
     var _currentParams = new URLSearchParams(window.location.search);
     if (_currentParams.get('nodevpanel') === '1') {
         params.set('nodevpanel', '1');
     }
 
-    /* USER REQUEST 2026-05-04: redirect pra simulator standalone /cidade/
-       em vez de Game Hub legacy /app.html?route=game. Cidade.html le params
-       via setupMockPlayer (linha 5789-5807) e fetcha /api/game/state pra
-       popular dados reais (REMOTE mode, fallback mock se nao auth). */
-    var url;
+    /* USER REQUEST 2026-05-05: REGRA MANDATORY last_screen_payload —
+       pre-fetch /api/game/state pra determinar destino (player NUNCA é forçado
+       pra cidade hub se estava em explore/combat). Server retorna transition.to
+       indicando onde player parou. */
+    var paramStr = params.toString();
     if (isNew && !charId) {
+        // Fluxo de criação de personagem (sem state restore)
         params.set('route', 'character_creator');
-        url = '../app.html?' + params.toString();
-    } else {
-        /* /cidade/ standalone — mesma sessao via token+uid+api+env+char */
-        url = '../cidade/index.html?' + params.toString();
+        var url = '../app.html?' + params.toString();
+        console.info('[WEB-AUTH] redirect target=%s (new char flow)', url.split('?')[0]);
+        window.location.href = url;
+        return;
     }
-    console.info('[WEB-AUTH] redirect target=%s uid=%s char=%s env=%s api=%s nodevpanel=%s',
-        url.split('?')[0], _userId, charId || 'none', _envId, _apiBase,
-        params.get('nodevpanel') || '0');
-    window.location.href = url;
+
+    // Pre-fetch /api/game/state pra determinar destino exato
+    fetch(_apiBase + '/api/game/state', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: _userId })
+    }).then(function(r){
+        if (!r.ok) throw new Error('state HTTP ' + r.status);
+        return r.json();
+    }).then(function(state){
+        var dest = '../cidade/index.html'; // default
+        if (state && state.transition && state.transition.to){
+            var to = state.transition.to;
+            if (to === 'explore' || to === 'exploration') dest = '../exploracao/exploracao.html';
+            else if (to === 'combat' || to === 'combat2') dest = '../combat2/combate.html';
+            else if (to === 'levelup') dest = '../levelup/index.html';
+            else if (to === 'navigate') dest = '../app.html?route=navigate';
+            else if (to === 'inventory') dest = '../app.html?route=inventory';
+            else dest = '../cidade/index.html';
+        }
+        var url = dest + (dest.indexOf('?') >= 0 ? '&' : '?') + paramStr;
+        console.info('[WEB-AUTH] redirect target=%s uid=%s char=%s last_screen=%s',
+            dest.split('?')[0], _userId, charId || 'none',
+            state && state.transition ? state.transition.to : 'none');
+        window.location.href = url;
+    }).catch(function(err){
+        // Fallback graceful: vai pra cidade como antes
+        console.warn('[WEB-AUTH] /api/game/state failed, fallback to cidade:', err.message || err);
+        var fallbackUrl = '../cidade/index.html?' + paramStr;
+        window.location.href = fallbackUrl;
+    });
 }
 
 /* ----- Logout ----- */
