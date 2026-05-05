@@ -37912,16 +37912,20 @@ var OUTBOUND_SAFE_NARR = {
 
 var _preTravelState = null;
 
-// FIX 2026-05-04 (revisão): helpers D&D 5e pra modificadores reais
+// FIX 2026-05-04 (revisão): helpers D&D 5e pra modificadores reais.
+// Suporta múltiplos formatos de player.stats (REMOTE pode usar full name).
+var _STAT_FULL_NAMES = {
+  str: 'strength', dex: 'dexterity', con: 'constitution',
+  'int': 'intelligence', wis: 'wisdom', cha: 'charisma'
+};
 function _getStatMod(player, statKey) {
-  // statKey: 'str','dex','con','int','wis','cha'
-  if (!player) return 0;
-  // Tenta player.stats[statKey] primeiro (objeto)
-  var statVal = (player.stats && player.stats[statKey])
-             || (player.stats && player.stats[statKey + 'ength']) // strength → str
-             || 10;
-  // Fallback: stat=10 = +0
-  return Math.floor((statVal - 10) / 2);
+  if (!player || !player.stats) return 0;
+  var s = player.stats;
+  // Tenta abreviado, full name, e também upper case
+  var v = s[statKey] || s[_STAT_FULL_NAMES[statKey]]
+       || s[statKey.toUpperCase()] || s[(_STAT_FULL_NAMES[statKey] || '').toUpperCase()]
+       || 10;
+  return Math.floor((Number(v) - 10) / 2);
 }
 function _getProfBonus(player) {
   if (!player) return 2;
@@ -38315,6 +38319,12 @@ function _finishPreTravel() {
     p.xp = (p.xp || 0) + s.xpGained;
     p.gold = (p.gold || 0) + s.goldGained;
   }
+  // FIX 2026-05-04 (revisão A1): viagem avança game_day (canonical D&D 5e
+  // travel pace ~24mi/day). Cada etapa = ~1 dia. 3 etapas = 3 dias.
+  // Permite que pedidos do Cartógrafo Corvus avancem durante viagens reais.
+  if (typeof _advanceCorvusDay === 'function') {
+    _advanceCorvusDay(s.totalSteps);
+  }
   var ov = document.getElementById('pt-overlay');
   if (ov) ov.remove();
   // Dispara playTravelAnimation épica + redirect canonical
@@ -38346,13 +38356,66 @@ function _failPreTravel(s) {
     var ov = document.getElementById('pt-overlay');
     if (ov) ov.remove();
     var p = window.CITY_MOCK_PLAYER;
-    if (p) p.hp = Math.max(1, Math.floor(p.hpMax / 4));
+    if (p) {
+      p.hp = Math.max(1, Math.floor(p.hpMax / 4));
+      // FIX 2026-05-04 (revisão A7): persist gains até a derrota
+      p.xp = (p.xp || 0) + s.xpGained;
+      p.gold = (p.gold || 0) + s.goldGained;
+    }
+    // Mesmo em derrota, dia avança (player passou tempo na trilha)
+    if (typeof _advanceCorvusDay === 'function') {
+      _advanceCorvusDay(Math.max(1, s.currentStep - 1));
+    }
     _preTravelState = null;
   };
   actEl.appendChild(btn);
 }
 
 window._startPreTravelJourney = _startPreTravelJourney;
+
+// ═══════════════════════════════════════════════════════════════════
+// REMOTE ADAPTER (Phase 6 stub — 2026-05-04)
+// ═══════════════════════════════════════════════════════════════════
+// USER REQUEST: "tudo deve ser executado ao máximo do lado do servidor,
+// o jogador só vê o resultado na tela" (regra Server-Only State).
+//
+// Quando token+api+uid presentes, este adapter intercepta chamadas
+// LOCAIS (rolls, gold spend, discovery) e roteia pra API server-side.
+// Sem REMOTE: comportamento atual mantido (mock LOCAL pro simulador).
+//
+// API endpoints planejados (Phase 6 implementation):
+//   POST /api/cartographer/order { map_name }      → encomenda (server valida gold)
+//   GET  /api/cartographer/state                   → orders + maps + game_day
+//   POST /api/cartographer/check_ready             → entrega prontos
+//   POST /api/exploracao/discovery_check           → roll discovery server-side
+//   POST /api/travel/preview { from, to }          → server gera 3-step plan
+//   POST /api/travel/resolve_step { step, choice } → server roll + persist
+//
+// Por ora, exposemos hooks pra futuras chamadas:
+window.ValdoriaRemote = {
+  isRemote: function() {
+    var qs = new URLSearchParams(window.location.search || '');
+    return !!(qs.get('token') && qs.get('api') && qs.get('uid'));
+  },
+  apiBase: function() {
+    var qs = new URLSearchParams(window.location.search || '');
+    return (qs.get('api') || '').replace(/\/+$/, '');
+  },
+  token: function() {
+    var qs = new URLSearchParams(window.location.search || '');
+    return qs.get('token') || '';
+  },
+  // Futuro: wrapper de fetch com Authorization header
+  authFetch: function(path, opts) {
+    if (!this.isRemote()) return Promise.reject(new Error('not_remote'));
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers || {}, {
+      'Authorization': 'Bearer ' + this.token(),
+      'Content-Type': 'application/json'
+    });
+    return fetch(this.apiBase() + path, opts);
+  }
+};
 
 // === SYNC_TARGET: game-hub.js#_LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
