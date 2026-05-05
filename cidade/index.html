@@ -9129,9 +9129,13 @@ var AREA_REGISTRY = {
 // availability é probabilidade do service estar visível hoje (0.15-0.75).
 // No simulador, mostramos TODOS pra facilitar teste — backend filtra por dia/seed.
 // Helper canonical: SVG heráldico inline (string compatível com serviceCard polymorphic renderer)
-function _heralIco(id, color){
+function _heralIco(id, color, size){
   color = color || 'var(--v-gold,#c4953a)';
-  return '<svg viewBox="0 0 120 120" style="width:100%;height:100%;color:' + color + ';"><use href="#' + id + '"/></svg>';
+  // USER REPORT 2026-05-05: width:100%;height:100% causava SVG gigante
+  // quando pai não tinha tamanho fixo (ex: ctb-weather span). Default 1em
+  // (acompanha font-size do parent — ~14-16px nas top bars).
+  size = size || '1em';
+  return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size + ';color:' + color + ';vertical-align:middle;display:inline-block;"><use href="#' + id + '"/></svg>';
 }
 
 var TEMPLE_NPCS_DB = {
