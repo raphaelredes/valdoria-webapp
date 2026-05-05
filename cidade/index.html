@@ -6215,14 +6215,58 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
   if (_token && _api && _uid){
-    console.log('[CITY] REMOTE mode detected — fetching real character data');
-    fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + _token }
+    console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state');
+
+    // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
+    // posição EXATA do player (last_screen_payload). Se player estava em
+    // exploracao/combate, redireciona pra lá em vez de ficar na cidade.
+    fetch(_api.replace(/\/$/,'') + '/api/game/state', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: parseInt(_uid, 10) || _uid })
     }).then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if (!r.ok) throw new Error('state HTTP ' + r.status);
       return r.json();
+    }).then(function(state){
+      // Detect transition: server diz que player estava em explore/combat
+      if (state && state.transition && state.transition.to){
+        var dest = state.transition.to;
+        console.log('[CITY] last_screen_payload → redirect to:', dest);
+        var newParams = new URLSearchParams(window.location.search);
+        window.__valdoria_transitioning = true;
+        // Mapeia destination → URL
+        if (dest === 'explore' || dest === 'exploration') {
+          window.location.replace('/exploracao/exploracao.html?' + newParams.toString());
+        } else if (dest === 'combat' || dest === 'combat2') {
+          window.location.replace('/combat2/combate.html?' + newParams.toString());
+        } else if (dest === 'levelup') {
+          window.location.replace('/levelup/?' + newParams.toString());
+        }
+        // Otherwise stay in cidade (default fall-through)
+        return null; // skip char data load — we're navigating away
+      }
+      // Apply HUD snapshot from state (overrides CITY_MOCK_PLAYER)
+      if (state && state.hud) {
+        var p = window.CITY_MOCK_PLAYER;
+        if (state.hud.hp != null)     p.hp = state.hud.hp;
+        if (state.hud.max_hp != null) p.hpMax = state.hud.max_hp;
+        if (state.hud.mp != null)     p.mp = state.hud.mp;
+        if (state.hud.max_mp != null) p.mpMax = state.hud.max_mp;
+        if (state.hud.gold != null)   p.gold = state.hud.gold;
+        if (state.hud.xp != null)     p.xp = state.hud.xp;
+        if (state.hud.level != null)  p.level = state.hud.level;
+        if (state.hud.name)           p.name = state.hud.name;
+      }
+      // Continue to fetch character list for Hall popup
+      return fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + _token }
+      }).then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
     }).then(function(payload){
+      if (!payload) return; // navigated away
       var chars = (payload && payload.characters) || [];
       if (!chars.length){
         console.warn('[CITY] no characters returned — keeping mock');
@@ -6293,7 +6337,21 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
     }).catch(function(err){
-      console.warn('[CITY] /api/auth/characters fetch failed:', err.message || err);
+      console.warn('[CITY] state/characters fetch failed:', err.message || err);
+      // Fallback: tenta só /api/auth/characters (sem state restoration)
+      fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + _token }
+      }).then(function(r){ return r.ok ? r.json() : null; }).then(function(payload){
+        if (!payload || !payload.characters || !payload.characters.length) return;
+        var picked = payload.characters[0];
+        var p = window.CITY_MOCK_PLAYER;
+        if (picked.name) p.name = picked.name;
+        if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
+        if (picked.race) p.race = String(picked.race).toLowerCase();
+        if (picked.level) p.level = picked.level;
+        console.log('[CITY] fallback char loaded:', p.name);
+      }).catch(function(e){ console.warn('[CITY] fallback failed:', e); });
     });
   }
 

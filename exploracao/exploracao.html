@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-04T22:33:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T10:33:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -5538,8 +5538,61 @@ body.remote-mode #debug-hud { display: none !important; }
 <link rel="stylesheet" href="../valdoria-webapp/explore/explore-camp.css?v=local">
 <link rel="stylesheet" href="/explore/explore-camp.css?v=remote" onerror="this.remove()">
 <script src="./cartografia-shared.js"></script>
+<!-- Canonical title screen + loading libs (USER REQUEST 2026-05-05) -->
+<script>var _vti = Date.now();
+document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-title.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
+document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
+document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + _vti + '"><\/script>');
+</script>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     INTRO TITLE + LOADING — pattern canonical (USER REQUEST 2026-05-05)
+     Igual /app.html e cidade.html. Player reabre → loading anima → restore
+     state via /api/game/state → posiciona player exato.
+     ════════════════════════════════════════════════════════════════════════ -->
+<div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+<script>
+(function(){
+  if (window.__introTitleSkip) return;
+  var params = new URLSearchParams(location.search);
+  if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
+  var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);
+  if (resumeTs && (Date.now()-resumeTs) < 30000) return;
+  window.__introBlocking = true;
+  function _show() {
+    if (typeof ValdoriaTitleScreen !== 'function') { setTimeout(_show, 80); return; }
+    window.__introTitle = ValdoriaTitleScreen({ onStart: function() {
+      window.__introBlocking = false;
+      if (typeof window.__onIntroTap === 'function') window.__onIntroTap();
+      else window.__introTapped = true;
+    }});
+    window.__introTitle.show();
+  }
+  _show();
+})();
+window.__onIntroTap = function() {
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+      ValdoriaAudio.play('forest');
+    }
+  } catch(e){}
+  var loadingEl = document.getElementById('loading');
+  if (loadingEl && typeof ValdoriaLoadingHTML === 'function') {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = ValdoriaLoadingHTML({ tier: window._valdoriaPerformanceTier || 'full' });
+    loadingEl.innerHTML = tmp.firstElementChild ? tmp.firstElementChild.innerHTML : '';
+    loadingEl.style.display = '';
+  }
+  setTimeout(function() {
+    if (loadingEl) loadingEl.style.display = 'none';
+  }, 1800);
+};
+</script>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      TILE-OBJECTS AAA #2 — Sprite Atlas (Phase 1.1+)
