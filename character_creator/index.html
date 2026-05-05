@@ -1798,11 +1798,16 @@
             }
             // USER REQUEST 2026-05-04: burst épico nas transições — acelera
             // mini-orbs + mini-dados 3D atravessando a tela por ~2.5s
+            // + lightning bolt visual + sfx_lightning som canonical
             try {
                 overlay.classList.remove('slide-bursting');
                 // Force reflow to restart animation
                 void overlay.offsetWidth;
                 overlay.classList.add('slide-bursting');
+                // Som de raio canonical (sfx_lightning existe em audio-manager.js TRACKS)
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                    ValdoriaAudio.playSFX('sfx_lightning');
+                }
                 setTimeout(function() { overlay.classList.remove('slide-bursting'); }, 2600);
             } catch(e){}
         }
