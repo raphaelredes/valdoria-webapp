@@ -35462,6 +35462,9 @@ var _cartHoverNode = null;
 function renderCartographyCanvas(el){
   el.innerHTML = ''
     + '<div class="cart-wrapper">'
+    + '  <div class="subscreen-back-row">'
+    + '    <button class="subscreen-back" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">← Voltar</button>'
+    + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2>🗺️ Mapa de Valdoria</h2>'
     + '    <p class="flavor">Toca um destino pra viajar. Roda do mouse ou pinça pra zoom.</p>'
@@ -35477,8 +35480,17 @@ function renderCartographyCanvas(el){
     + '    </div>'
     + '  </div>'
     + '</div>';
-    /* Voltar agora usa o botão "🔙 Voltar" do #bottom-panel (local padrão central inferior).
-       O navigateBack desempilha _navStack e volta pra hub (push feito em navigateTo). */
+    /* FIX 2026-05-04: Voltar como botão overlay top-left (CSS já tem
+       .subscreen-back-row absolute em state-cart). Footer foi reduzido
+       a [Personagens][Ajuda][Settings] e não tem mais Voltar. */
+    var _backBtn = document.getElementById('cart-back-btn');
+    if (_backBtn) {
+      _backBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        navigateBack();
+      });
+    }
 
   _cartCanvas = document.getElementById('cart-canvas');
   _cartCtx = _cartCanvas.getContext('2d');
@@ -35536,17 +35548,26 @@ function _wireCartEvents(){
     if (!_cartIsDragging) _cartHandleClick(e.offsetX, e.offsetY);
   });
 
-  // Touch: pinch zoom + 1-finger pan
+  // Touch: pinch zoom + 1-finger pan + tap-to-click
+  // FIX 2026-05-04 (USER REPORT): Telegram WebApp Android NÃO sintetiza click
+  //   após touchstart com preventDefault. Solução: rastrear pos inicial + total
+  //   movimento; em touchend, se mover < 8px, é tap → _cartHandleClick.
+  var _cartTouchStartX = 0, _cartTouchStartY = 0;
+  var _cartTouchMoved = false;
   _cartCanvas.addEventListener('touchstart', function(e){
     e.preventDefault();
     if (e.touches.length === 2) {
       _cartLastPinchDist = _cartTouchDist(e.touches);
+      _cartTouchMoved = true; /* pinch nunca é tap */
     } else if (e.touches.length === 1) {
       var t = e.touches[0];
       var rect = _cartCanvas.getBoundingClientRect();
+      _cartTouchStartX = t.clientX - rect.left;
+      _cartTouchStartY = t.clientY - rect.top;
+      _cartTouchMoved = false;
       _cartIsDragging = true;
-      _cartDragStartX = (t.clientX - rect.left) - _cartPanX;
-      _cartDragStartY = (t.clientY - rect.top) - _cartPanY;
+      _cartDragStartX = _cartTouchStartX - _cartPanX;
+      _cartDragStartY = _cartTouchStartY - _cartPanY;
     }
   }, { passive: false });
   _cartCanvas.addEventListener('touchmove', function(e){
@@ -35559,18 +35580,38 @@ function _wireCartEvents(){
       var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
       _cartSetZoom(_cartZoom * ratio, midX, midY);
       _cartLastPinchDist = d;
+      _cartTouchMoved = true;
     } else if (e.touches.length === 1 && _cartIsDragging) {
       var t = e.touches[0];
       var rect2 = _cartCanvas.getBoundingClientRect();
-      _cartPanX = (t.clientX - rect2.left) - _cartDragStartX;
-      _cartPanY = (t.clientY - rect2.top) - _cartDragStartY;
-      _cartClampPan();
-      _drawCart();
+      var curX = t.clientX - rect2.left;
+      var curY = t.clientY - rect2.top;
+      // Tap threshold: 8px de movimento = drag
+      if (!_cartTouchMoved) {
+        var dx = curX - _cartTouchStartX;
+        var dy = curY - _cartTouchStartY;
+        if (dx*dx + dy*dy > 64) _cartTouchMoved = true;
+      }
+      if (_cartTouchMoved) {
+        _cartPanX = curX - _cartDragStartX;
+        _cartPanY = curY - _cartDragStartY;
+        _cartClampPan();
+        _drawCart();
+      }
     }
   }, { passive: false });
   _cartCanvas.addEventListener('touchend', function(e){
     if (e.touches.length < 2) _cartLastPinchDist = 0;
-    if (e.touches.length === 0) _cartIsDragging = false;
+    if (e.touches.length === 0) {
+      // Tap detectado (sem movimento significativo) — dispara click manual.
+      // Necessário pq Telegram Android não sintetiza click após touchstart
+      // com preventDefault.
+      if (_cartIsDragging && !_cartTouchMoved) {
+        _cartHandleClick(_cartTouchStartX, _cartTouchStartY);
+      }
+      _cartIsDragging = false;
+      _cartTouchMoved = false;
+    }
   });
 
   // Botões
