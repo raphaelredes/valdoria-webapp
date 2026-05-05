@@ -13,6 +13,10 @@
     <link rel="preload" href="/shared/fonts/medievalsharp.woff2" as="font" type="font/woff2"
         crossorigin>
     <link rel="stylesheet" href="/shared/fonts.css">
+    <!-- Telegram WebApp SDK: popula window.Telegram.WebApp.initData quando aberto
+         como mini-app do Telegram. Necessario para detectar contexto e oferecer
+         "Tentar Novamente" em vez de "Voltar ao Portal". -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         var v = Date.now();
         var lk = document.createElement('link');
@@ -357,12 +361,39 @@
             Siga a luz do Orbe para encontrar o caminho de volta.
         </div>
 
-        <div class="cta-group">
-            <a href="/" class="cta-primary">Voltar ao Portal</a>
-            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="cta-secondary">Jogar
-                no Telegram</a>
+        <div class="cta-group" id="cta-group">
+            <!-- Browser mode (default): portal + telegram -->
+            <a href="/" class="cta-primary" id="cta-portal">Voltar ao Portal</a>
+            <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener"
+                class="cta-secondary" id="cta-telegram">Jogar no Telegram</a>
         </div>
     </div>
+
+    <script>
+        // FIX 2026-05-04: detectar Telegram WebApp.
+        //   Se aberto via mini-app do Telegram, NAO faz sentido oferecer "voltar
+        //   ao portal" (autenticacao acontece pelo Telegram). Substitui por
+        //   "Tentar Novamente" que recarrega a pagina.
+        (function () {
+            try {
+                var inTg = !!(window.Telegram && window.Telegram.WebApp
+                    && window.Telegram.WebApp.initData);
+                if (!inTg) return;
+                var portal = document.getElementById('cta-portal');
+                var tgLink = document.getElementById('cta-telegram');
+                if (tgLink) tgLink.style.display = 'none';
+                if (portal) {
+                    portal.textContent = 'Tentar Novamente';
+                    portal.href = 'javascript:void(0)';
+                    portal.addEventListener('click', function (ev) {
+                        ev.preventDefault();
+                        // Recarrega a URL atual (mesma rota que deu 404)
+                        location.reload();
+                    });
+                }
+            } catch (e) { /* fallback silencioso */ }
+        })();
+    </script>
 </body>
 
 </html>
