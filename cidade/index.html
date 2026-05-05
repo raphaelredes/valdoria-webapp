@@ -35471,10 +35471,17 @@ function _travelToBiome(biomeKey, displayName){
       setTimeout(_doAnim, 200);
       return;
     }
-    // Anim existe: SEMPRE roda (riscos/encontros/eventos durante trajeto)
+    // 2026-05-04 PHASE 5: jornada pré-épica com hazards + combate + Dice3D
+    // ANTES da animação épica de viagem. Sistema canonical do projeto
+    // (travel_encounters.py + explore-outbound-travel.js).
+    if (typeof _startPreTravelJourney === 'function') {
+      _logCity('pre-travel journey starting -> ' + biomeKey);
+      _startPreTravelJourney(biomeKey, displayName, url);
+      return; // _finishPreTravel chama playTravelAnimation + redirect
+    }
+    // Fallback (sem pre-travel): direto pra animação épica
     playTravelAnimation(biomeKey, displayName, function(){
       _logCity('travel anim done -> redirect');
-      // Cross-WebApp Transition Safety (regra CLAUDE.md): suprime close beacon
       window.__valdoria_transitioning = true;
       window.location.href = url;
     });
@@ -37752,6 +37759,540 @@ window._checkCartographyDiscovery = _checkCartographyDiscovery;
 window._resetCartVisitFlag = function(){
   window._cartDayAdvancedThisVisit = false;
 };
+
+// ═══════════════════════════════════════════════════════════════════
+// JORNADA DE VIAGEM PRÉ-ÉPICA — Phase 5 (2026-05-04)
+// ═══════════════════════════════════════════════════════════════════
+// USER REQUEST: animação de eventos durante viagem ANTES da chegada
+// (animação épica). Sistema canonical: src/game/world/travel_encounters.py
+// (cascade: 15% evento + 20% field + 15% hazard + 50% combate).
+// Frontend canonical: explore-outbound-travel.js (multi-step + hazards).
+//
+// USER REQUEST: incluir COMBATE + Dice3D nos rolls.
+//
+// FLUXO:
+//   _travelToBiome (intercept) → _startPreTravelJourney(biome, displayName)
+//     → 3 etapas com cascata 50% safe / 30% hazard / 20% combate
+//     → cada hazard/combat usa dice3d roll d20 + mod
+//     → após 3 etapas → playTravelAnimation épica → redirect canonical
+//
+// MAPA_IA:
+//   ~37800 OUTBOUND_HAZARDS_LITE — pool simplificado por bioma
+//   ~37880 OUTBOUND_COMBATS — pool de inimigos por bioma
+//   ~37950 _startPreTravelJourney — entry point
+//   ~38000 _renderPreTravelStep — render etapa
+//   ~38100 _resolveDiceRoll — wrapper Dice3D
+// ═══════════════════════════════════════════════════════════════════
+
+// Hazards leves por bioma (subset adaptado de OUTBOUND_HAZARDS canonical)
+var OUTBOUND_HAZARDS_LITE = {
+  plains: [
+    { title: 'Bandidos na Estrada', narr: 'Sombras se mexem por trás das pedras à frente.',
+      stat: 'wis', statName: 'SAB', dc: 12,
+      sNarr: 'Você os detecta a tempo e desvia.', fNarr: 'Eles te emboscam — golpes rápidos!', fDmg: 4 },
+    { title: 'Riacho Traiçoeiro', narr: 'A trilha cruza um riacho com correnteza forte.',
+      stat: 'str', statName: 'FOR', dc: 11,
+      sNarr: 'Você atravessa firme, sem perder o passo.', fNarr: 'A correnteza te derruba.', fDmg: 3 }
+  ],
+  forest: [
+    { title: 'Armadilha de Caçadores', narr: 'Um laço escondido entre as folhas!',
+      stat: 'dex', statName: 'DES', dc: 12,
+      sNarr: 'Suas mãos hábeis desarmam o laço.', fNarr: 'O laço fecha no tornozelo!', fDmg: 4 },
+    { title: 'Galho Caindo', narr: 'Um galho seco range no alto de uma árvore.',
+      stat: 'dex', statName: 'DES', dc: 11,
+      sNarr: 'Você se desvia rolando.', fNarr: 'O galho cai sobre o ombro.', fDmg: 3 }
+  ],
+  swamp: [
+    { title: 'Areia Movediça', narr: 'Seus pés afundam na lama traiçoeira!',
+      stat: 'str', statName: 'FOR', dc: 13,
+      sNarr: 'Com esforço brutal, você se liberta!', fNarr: 'Você afunda mais antes de escapar.', fDmg: 5 },
+    { title: 'Gás Pantanoso', narr: 'Uma nuvem verde sobe das poças.',
+      stat: 'con', statName: 'CON', dc: 13,
+      sNarr: 'Você prende a respiração a tempo.', fNarr: 'O gás queima seus pulmões.', fDmg: 4 }
+  ],
+  mountain: [
+    { title: 'Avalanche', narr: 'Neve e pedras descem a encosta!',
+      stat: 'dex', statName: 'DES', dc: 13,
+      sNarr: 'Você desvia da avalanche a tempo!', fNarr: 'A força da neve te derruba.', fDmg: 5 },
+    { title: 'Desfiladeiro Estreito', narr: 'O caminho se reduz a uma fenda na rocha.',
+      stat: 'str', statName: 'FOR', dc: 12,
+      sNarr: 'Você se espreme com sucesso.', fNarr: 'A rocha arranha suas costas.', fDmg: 3 }
+  ],
+  cave: [
+    { title: 'Desmoronamento', narr: 'Pedras começam a cair do teto!',
+      stat: 'dex', statName: 'DES', dc: 13,
+      sNarr: 'Você rola para o lado a tempo!', fNarr: 'Pedras te atingem de raspão.', fDmg: 4 },
+    { title: 'Fissura Profunda', narr: 'Uma fenda escura corta o caminho.',
+      stat: 'dex', statName: 'DES', dc: 12,
+      sNarr: 'Salto perfeito!', fNarr: 'Você escorrega na borda.', fDmg: 3 }
+  ],
+  desert: [
+    { title: 'Tempestade de Areia', narr: 'O horizonte fica vermelho de poeira.',
+      stat: 'con', statName: 'CON', dc: 12,
+      sNarr: 'Você cobre o rosto e atravessa.', fNarr: 'A areia corta sua pele.', fDmg: 4 },
+    { title: 'Calor Implacável', narr: 'O sol castiga sem misericórdia.',
+      stat: 'con', statName: 'CON', dc: 11,
+      sNarr: 'Você racionaliza a água com sabedoria.', fNarr: 'Desidratação cobra seu preço.', fDmg: 3 }
+  ],
+  graveyard: [
+    { title: 'Espíritos Inquietos', narr: 'Vultos translúcidos cercam você.',
+      stat: 'wis', statName: 'SAB', dc: 13,
+      sNarr: 'Sua vontade os afasta.', fNarr: 'O medo paralisa por instantes.', fDmg: 4 }
+  ],
+  snow: [
+    { title: 'Tempestade de Neve', narr: 'A visibilidade despenca para zero.',
+      stat: 'con', statName: 'CON', dc: 12,
+      sNarr: 'Você se abriga e espera passar.', fNarr: 'O frio penetra suas roupas.', fDmg: 4 }
+  ],
+  volcanic: [
+    { title: 'Erupção Inesperada', narr: 'Lava jorra de uma fissura próxima!',
+      stat: 'dex', statName: 'DES', dc: 14,
+      sNarr: 'Você se afasta no último segundo!', fNarr: 'Pedras quentes atingem você.', fDmg: 6 }
+  ]
+};
+
+// Inimigos por bioma — versão simplificada pra encontros rápidos
+var OUTBOUND_COMBATS = {
+  plains: [
+    { name: 'Bandido', emoji: '🏴', hp: 10, atk: 4, dmg: 3, xp: 25, gold: 8 },
+    { name: 'Lobo Selvagem', emoji: '🐺', hp: 8, atk: 4, dmg: 3, xp: 20, gold: 0 }
+  ],
+  forest: [
+    { name: 'Goblin', emoji: '👺', hp: 7, atk: 4, dmg: 2, xp: 15, gold: 5 },
+    { name: 'Aranha Gigante', emoji: '🕷️', hp: 9, atk: 5, dmg: 3, xp: 22, gold: 0 }
+  ],
+  swamp: [
+    { name: 'Sapo Gigante', emoji: '🐸', hp: 12, atk: 4, dmg: 3, xp: 25, gold: 0 },
+    { name: 'Will-o-Wisp', emoji: '✨', hp: 6, atk: 5, dmg: 4, xp: 30, gold: 0 }
+  ],
+  mountain: [
+    { name: 'Águia Gigante', emoji: '🦅', hp: 10, atk: 5, dmg: 3, xp: 28, gold: 0 },
+    { name: 'Orc Saqueador', emoji: '👹', hp: 14, atk: 5, dmg: 4, xp: 35, gold: 12 }
+  ],
+  cave: [
+    { name: 'Troll de Caverna', emoji: '🧌', hp: 18, atk: 6, dmg: 5, xp: 50, gold: 15 },
+    { name: 'Morcego Gigante', emoji: '🦇', hp: 6, atk: 4, dmg: 2, xp: 12, gold: 0 }
+  ],
+  desert: [
+    { name: 'Escorpião Gigante', emoji: '🦂', hp: 11, atk: 5, dmg: 4, xp: 30, gold: 0 },
+    { name: 'Leão das Areias', emoji: '🦁', hp: 14, atk: 5, dmg: 4, xp: 38, gold: 0 }
+  ],
+  graveyard: [
+    { name: 'Esqueleto', emoji: '💀', hp: 8, atk: 4, dmg: 3, xp: 18, gold: 4 },
+    { name: 'Carniçal', emoji: '🧟', hp: 10, atk: 5, dmg: 3, xp: 25, gold: 6 }
+  ],
+  snow: [
+    { name: 'Yeti Glacial', emoji: '❄️', hp: 16, atk: 5, dmg: 4, xp: 40, gold: 10 },
+    { name: 'Lobo da Tundra', emoji: '🐺', hp: 9, atk: 4, dmg: 3, xp: 22, gold: 0 }
+  ],
+  volcanic: [
+    { name: 'Cultista do Fogo', emoji: '🔥', hp: 12, atk: 5, dmg: 5, xp: 45, gold: 18 },
+    { name: 'Elemental de Magma', emoji: '🌋', hp: 18, atk: 6, dmg: 5, xp: 60, gold: 0 }
+  ]
+};
+
+// Narrações safe (caminho tranquilo)
+var OUTBOUND_SAFE_NARR = {
+  plains: ['A estrada se estende. Vento suave nos campos.', 'Camponeses acenam ao longe. Estrada calma.', 'Pássaros cantam. O sol aquece sua armadura.'],
+  forest: ['Folhas estalam sob seus pés. Raios de sol filtram.', 'Um veado te observa e foge na clareira.', 'O som de água corrente vem de algum lugar.'],
+  swamp: ['Bolhas sobem da lama em silêncio.', 'Vapores brancos sobem da água escura.', 'O som de sapos é constante.'],
+  mountain: ['O ar fica rarefeito. Picos brancos brilham.', 'Pedras soltas rolam. Águias circulam.', 'Vento uiva entre os desfiladeiros.'],
+  cave: ['Estalactites brilham à luz da tocha.', 'Água pinga ao longe. Eco de seus passos.', 'Cristais incrustados refletem sua luz.'],
+  desert: ['Dunas mudam de forma com o vento.', 'Mirages tremulam no horizonte.', 'O sol bate forte. Areia pulveriza ao redor.'],
+  graveyard: ['Lápides enfileiradas marcam o caminho.', 'Corvos observam em silêncio.', 'Estátuas de anjos esquecidos apontam direção.'],
+  snow: ['A neve range sob suas botas.', 'Lobos uivam ao longe.', 'Aurora boreal brilha brevemente.'],
+  volcanic: ['Cinzas caem como neve negra.', 'Calor sufocante. Pedras chiam.', 'Trovoadas distantes. Solo treme levemente.']
+};
+
+var _preTravelState = null;
+
+function _startPreTravelJourney(biome, displayName, finalRedirectUrl) {
+  // Mock player stats
+  var player = window.CITY_MOCK_PLAYER || {};
+  _preTravelState = {
+    biome: biome,
+    dest: displayName,
+    finalUrl: finalRedirectUrl,
+    totalSteps: 3,
+    currentStep: 0,
+    hp: player.hp || 28,
+    hpMax: player.hpMax || 28,
+    xpGained: 0,
+    goldGained: 0
+  };
+  _injectPreTravelCSS();
+  _renderPreTravelStep();
+}
+
+function _injectPreTravelCSS() {
+  if (document.getElementById('pretravel-style')) return;
+  var st = document.createElement('style');
+  st.id = 'pretravel-style';
+  st.textContent = ''
+    + '#pt-overlay{position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,0.93);'
+    + '  display:flex;align-items:center;justify-content:center;padding:14px;'
+    + '  animation:ptFade 0.5s ease-out}'
+    + '@keyframes ptFade{from{opacity:0}to{opacity:1}}'
+    + '.pt-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+    + '  border:1px solid rgba(196,149,58,0.6);border-radius:14px;'
+    + '  max-width:440px;width:100%;max-height:92vh;overflow:hidden;'
+    + '  display:flex;flex-direction:column;'
+    + '  box-shadow:0 14px 50px rgba(0,0,0,0.8),0 0 30px rgba(196,149,58,0.18)}'
+    + '.pt-progress{padding:14px 16px;border-bottom:1px solid rgba(196,149,58,0.3);'
+    + '  background:rgba(15,12,8,0.55)}'
+    + '.pt-step-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}'
+    + '.pt-dest{font-family:Cinzel,serif;color:#c4953a;font-size:13px;letter-spacing:1px;font-weight:700}'
+    + '.pt-step-count{color:#a09484;font-size:11px;font-style:italic}'
+    + '.pt-bar{height:6px;background:rgba(0,0,0,0.4);border-radius:3px;overflow:hidden;'
+    + '  border:1px solid rgba(196,149,58,0.25)}'
+    + '.pt-bar-fill{height:100%;background:linear-gradient(90deg,#8a6a3a,#c4953a);'
+    + '  transition:width 0.5s ease}'
+    + '.pt-hp{display:flex;justify-content:space-between;font-size:10px;margin-top:5px;color:#a09484}'
+    + '.pt-hp b{color:#e87474}'
+    + '.pt-body{padding:18px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px}'
+    + '.pt-narr{font-style:italic;color:#d4c8b0;font-size:13px;line-height:1.6;'
+    + '  background:rgba(74,56,40,0.25);padding:14px;border-radius:8px;'
+    + '  border-left:3px solid #c4953a;animation:ptSlideIn 0.5s ease-out}'
+    + '@keyframes ptSlideIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}'
+    + '.pt-event-title{font-family:Cinzel,serif;color:#c4953a;font-size:15px;'
+    + '  font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin:0}'
+    + '.pt-enemy{display:flex;align-items:center;gap:14px;background:rgba(140,30,30,0.18);'
+    + '  border:1px solid rgba(220,68,68,0.45);border-radius:8px;padding:12px}'
+    + '.pt-enemy-emoji{font-size:42px;flex-shrink:0;'
+    + '  filter:drop-shadow(0 0 8px rgba(220,68,68,0.5));animation:ptIcon 1.5s ease-in-out infinite}'
+    + '@keyframes ptIcon{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}'
+    + '.pt-enemy-info{flex:1}'
+    + '.pt-enemy-name{font-family:Cinzel,serif;color:#e87474;font-size:14px;font-weight:700;margin:0 0 3px}'
+    + '.pt-enemy-stats{color:#a09484;font-size:11px}'
+    + '.pt-actions{padding:12px 16px;border-top:1px solid rgba(196,149,58,0.3);'
+    + '  background:rgba(15,12,8,0.4);display:flex;flex-direction:column;gap:6px}'
+    + '.pt-btn{padding:11px 14px;border:1px solid rgba(196,149,58,0.45);'
+    + '  background:rgba(74,56,40,0.45);color:#d4c8b0;border-radius:6px;'
+    + '  font-family:Cinzel,serif;font-size:12px;letter-spacing:0.6px;cursor:pointer;'
+    + '  text-align:left;transition:transform 0.1s,border-color 0.15s,background 0.15s}'
+    + '.pt-btn:hover{border-color:#c4953a;background:rgba(196,149,58,0.18);color:#c4953a}'
+    + '.pt-btn:active{transform:scale(0.97)}'
+    + '.pt-btn-fight{border-color:#e87474;color:#e87474}'
+    + '.pt-btn-fight:hover{background:rgba(220,68,68,0.18)}'
+    + '.pt-btn-flee{border-color:#88c468;color:#88c468}'
+    + '.pt-btn-flee:hover{background:rgba(120,180,80,0.18)}'
+    + '.pt-btn-continue{background:linear-gradient(180deg,#c4953a,#9a7530);'
+    + '  color:#1a1510;font-weight:700;border-color:#c4953a;text-align:center}'
+    + '.pt-dice-area{display:flex;justify-content:center;padding:10px;min-height:160px}'
+    + '.pt-result{padding:12px;border-radius:8px;text-align:center;font-size:13px;line-height:1.6;'
+    + '  animation:ptSlideIn 0.4s ease-out}'
+    + '.pt-result-success{background:rgba(120,180,80,0.18);border:1px solid rgba(120,180,80,0.45);color:#d4f0c0}'
+    + '.pt-result-fail{background:rgba(220,68,68,0.18);border:1px solid rgba(220,68,68,0.45);color:#f0c0c0}';
+  document.head.appendChild(st);
+}
+
+function _renderPreTravelStep() {
+  var s = _preTravelState;
+  if (!s) return;
+  s.currentStep++;
+
+  // Após 3 etapas → playTravelAnimation épica → redirect
+  if (s.currentStep > s.totalSteps) {
+    _finishPreTravel();
+    return;
+  }
+
+  // Save HP de volta no player
+  if (window.CITY_MOCK_PLAYER) window.CITY_MOCK_PLAYER.hp = Math.max(0, s.hp);
+
+  // Cascata: 50% safe, 30% hazard, 20% combat
+  var roll = Math.random();
+  var eventType;
+  if (roll < 0.50) eventType = 'safe';
+  else if (roll < 0.80) eventType = 'hazard';
+  else eventType = 'combat';
+
+  // Última etapa SEMPRE safe (garantir chegada)
+  if (s.currentStep === s.totalSteps) eventType = 'safe';
+
+  _renderPreTravelOverlay(s, eventType);
+}
+
+function _renderPreTravelOverlay(s, eventType) {
+  var prev = document.getElementById('pt-overlay');
+  if (prev) prev.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'pt-overlay';
+  ov.innerHTML = ''
+    + '<div class="pt-card">'
+    + '  <div class="pt-progress">'
+    + '    <div class="pt-step-row">'
+    + '      <span class="pt-dest">🗡️ Rumo a ' + s.dest + '</span>'
+    + '      <span class="pt-step-count">Etapa ' + s.currentStep + '/' + s.totalSteps + '</span>'
+    + '    </div>'
+    + '    <div class="pt-bar"><div class="pt-bar-fill" style="width:' + ((s.currentStep / s.totalSteps) * 100) + '%"></div></div>'
+    + '    <div class="pt-hp">'
+    + '      <span>❤️ HP: <b>' + s.hp + '/' + s.hpMax + '</b></span>'
+    + '      <span>' + (s.xpGained > 0 ? '✨ +' + s.xpGained + ' XP · ' : '')
+    +                  (s.goldGained > 0 ? '💰 +' + s.goldGained + ' Valdoritas' : '') + '</span>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="pt-body" id="pt-body"></div>'
+    + '  <div class="pt-actions" id="pt-actions"></div>'
+    + '</div>';
+  document.body.appendChild(ov);
+
+  if (eventType === 'safe')   _renderSafeStep(s);
+  if (eventType === 'hazard') _renderHazardStep(s);
+  if (eventType === 'combat') _renderCombatStep(s);
+}
+
+function _renderSafeStep(s) {
+  var pool = OUTBOUND_SAFE_NARR[s.biome] || OUTBOUND_SAFE_NARR.plains;
+  var narr = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById('pt-body').innerHTML = '<div class="pt-narr">' + narr + '</div>';
+  var btn = document.createElement('button');
+  btn.className = 'pt-btn pt-btn-continue';
+  btn.textContent = '🚶 Continuar';
+  btn.onclick = function(){ _renderPreTravelStep(); };
+  document.getElementById('pt-actions').appendChild(btn);
+}
+
+function _renderHazardStep(s) {
+  var pool = OUTBOUND_HAZARDS_LITE[s.biome] || OUTBOUND_HAZARDS_LITE.plains;
+  var hazard = pool[Math.floor(Math.random() * pool.length)];
+  s._currentHazard = hazard;
+  var bodyEl = document.getElementById('pt-body');
+  bodyEl.innerHTML = ''
+    + '<h3 class="pt-event-title">⚠️ ' + hazard.title + '</h3>'
+    + '<div class="pt-narr">' + hazard.narr + '</div>';
+  var actEl = document.getElementById('pt-actions');
+  var btn = document.createElement('button');
+  btn.className = 'pt-btn';
+  btn.innerHTML = '🎲 Rolar ' + hazard.statName + ' (DC ' + hazard.dc + ')';
+  btn.onclick = function(){ _resolveHazardRoll(s, hazard); };
+  actEl.appendChild(btn);
+}
+
+function _resolveHazardRoll(s, hazard) {
+  // Mock modifier (D&D 5e: stat=10 = +0; level 5 mago tem ~ +2 wisdom)
+  var p = window.CITY_MOCK_PLAYER || {};
+  var mod = 2; // mock simplificado
+  var bodyEl = document.getElementById('pt-body');
+  var actEl = document.getElementById('pt-actions');
+  actEl.innerHTML = '';
+
+  // Dice3D area
+  var diceArea = document.createElement('div');
+  diceArea.className = 'pt-dice-area';
+  bodyEl.appendChild(diceArea);
+
+  // Roll d20 antecipadamente pra saber resultado
+  var rollVal = 1 + Math.floor(Math.random() * 20);
+  var total = rollVal + mod;
+  var success = total >= hazard.dc;
+
+  // Dice3D animation
+  if (typeof Dice3D !== 'undefined') {
+    try {
+      var dice = new Dice3D(diceArea, { size: 140, dieType: 'd20', duration: 1800 });
+      setTimeout(function(){
+        dice.roll(rollVal, function(){
+          setTimeout(function(){ _showHazardResult(s, hazard, rollVal, mod, total, success); }, 600);
+        });
+      }, 200);
+      return;
+    } catch(e) { console.warn('[PRETRAVEL] Dice3D failed:', e); }
+  }
+  // Fallback: roll instantâneo
+  diceArea.innerHTML = '<div style="font-size:28px;font-family:Cinzel,serif;color:#c4953a;text-align:center;padding:20px">' + rollVal + '</div>';
+  setTimeout(function(){ _showHazardResult(s, hazard, rollVal, mod, total, success); }, 800);
+}
+
+function _showHazardResult(s, hazard, rollVal, mod, total, success) {
+  var bodyEl = document.getElementById('pt-body');
+  var resultClass = success ? 'pt-result-success' : 'pt-result-fail';
+  var resultText = success ? '✅ Sucesso!' : '❌ Falha!';
+  var formula = rollVal + ' (' + (mod >= 0 ? '+' : '') + mod + ') = <b>' + total + '</b> vs DC ' + hazard.dc;
+  bodyEl.innerHTML += ''
+    + '<div class="pt-result ' + resultClass + '">'
+    + '<b style="font-size:14px">' + resultText + '</b><br>'
+    + '<span style="font-size:11px;color:#a09484">' + formula + '</span><br><br>'
+    + (success ? hazard.sNarr : hazard.fNarr)
+    + (!success && hazard.fDmg ? '<br><b style="color:#e87474">💔 -' + hazard.fDmg + ' HP</b>' : '')
+    + '</div>';
+
+  if (!success && hazard.fDmg) s.hp = Math.max(0, s.hp - hazard.fDmg);
+
+  var actEl = document.getElementById('pt-actions');
+  actEl.innerHTML = '';
+  var btn = document.createElement('button');
+  btn.className = 'pt-btn pt-btn-continue';
+  btn.textContent = '🚶 Seguir Viagem';
+  btn.onclick = function(){
+    if (s.hp <= 0) { _failPreTravel(s); return; }
+    _renderPreTravelStep();
+  };
+  actEl.appendChild(btn);
+}
+
+function _renderCombatStep(s) {
+  var pool = OUTBOUND_COMBATS[s.biome] || OUTBOUND_COMBATS.plains;
+  var enemy = JSON.parse(JSON.stringify(pool[Math.floor(Math.random() * pool.length)]));
+  s._currentEnemy = enemy;
+  var bodyEl = document.getElementById('pt-body');
+  bodyEl.innerHTML = ''
+    + '<h3 class="pt-event-title">⚔️ Emboscada!</h3>'
+    + '<div class="pt-enemy">'
+    + '  <div class="pt-enemy-emoji">' + enemy.emoji + '</div>'
+    + '  <div class="pt-enemy-info">'
+    + '    <h4 class="pt-enemy-name">' + enemy.name + '</h4>'
+    + '    <p class="pt-enemy-stats">❤️ ' + enemy.hp + ' HP · ⚔️ +' + enemy.atk + ' atk · 🩸 ' + enemy.dmg + ' dmg</p>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="pt-narr">Um <b>' + enemy.name + '</b> bloqueia seu caminho. Você precisa decidir.</div>';
+  var actEl = document.getElementById('pt-actions');
+  var fightBtn = document.createElement('button');
+  fightBtn.className = 'pt-btn pt-btn-fight';
+  fightBtn.innerHTML = '⚔️ Lutar (rolar ataque vs CA 12)';
+  fightBtn.onclick = function(){ _resolveCombatRoll(s, enemy, 'fight'); };
+  var fleeBtn = document.createElement('button');
+  fleeBtn.className = 'pt-btn pt-btn-flee';
+  fleeBtn.innerHTML = '🏃 Fugir (DES vs DC 12 — falha = ' + Math.ceil(enemy.dmg / 2) + ' HP)';
+  fleeBtn.onclick = function(){ _resolveCombatRoll(s, enemy, 'flee'); };
+  actEl.appendChild(fightBtn);
+  actEl.appendChild(fleeBtn);
+}
+
+function _resolveCombatRoll(s, enemy, mode) {
+  var bodyEl = document.getElementById('pt-body');
+  var actEl = document.getElementById('pt-actions');
+  actEl.innerHTML = '';
+
+  var diceArea = document.createElement('div');
+  diceArea.className = 'pt-dice-area';
+  bodyEl.appendChild(diceArea);
+
+  var rollVal = 1 + Math.floor(Math.random() * 20);
+  var mod = 3; // mock attack/dex modifier
+  var total = rollVal + mod;
+  var dc = mode === 'fight' ? 12 : 12; // CA do inimigo / DC fugir
+
+  if (typeof Dice3D !== 'undefined') {
+    try {
+      var dice = new Dice3D(diceArea, { size: 140, dieType: 'd20', duration: 1800 });
+      setTimeout(function(){
+        dice.roll(rollVal, function(){
+          setTimeout(function(){ _showCombatResult(s, enemy, mode, rollVal, mod, total, total >= dc, dc); }, 600);
+        });
+      }, 200);
+      return;
+    } catch(e) { console.warn('[PRETRAVEL] Dice3D failed:', e); }
+  }
+  diceArea.innerHTML = '<div style="font-size:28px;font-family:Cinzel,serif;color:#c4953a;text-align:center;padding:20px">' + rollVal + '</div>';
+  setTimeout(function(){ _showCombatResult(s, enemy, mode, rollVal, mod, total, total >= dc, dc); }, 800);
+}
+
+function _showCombatResult(s, enemy, mode, rollVal, mod, total, success, dc) {
+  var bodyEl = document.getElementById('pt-body');
+  var resultText, narr, dmg = 0, gainXp = 0, gainGold = 0;
+
+  if (mode === 'fight') {
+    if (success) {
+      resultText = '⚔️ Vitória!';
+      // Player ataca, inimigo morre. Pequeno dano recebido (1d4)
+      dmg = 1 + Math.floor(Math.random() * 4);
+      gainXp = enemy.xp;
+      gainGold = enemy.gold;
+      narr = 'Sua lâmina encontra o alvo. O <b>' + enemy.name + '</b> cai derrotado, mas conseguiu te machucar antes.';
+    } else {
+      resultText = '⚔️ Errou!';
+      // Inimigo contra-ataca
+      dmg = enemy.dmg + 1;
+      narr = 'Você erra o ataque. O <b>' + enemy.name + '</b> contra-ataca com força brutal — você foge ferido.';
+    }
+  } else { // flee
+    if (success) {
+      resultText = '🏃 Escapou!';
+      narr = 'Você corre rapidamente, deixando o <b>' + enemy.name + '</b> para trás.';
+    } else {
+      resultText = '🏃 Pego!';
+      dmg = Math.ceil(enemy.dmg / 2);
+      narr = 'Você tropeça. O <b>' + enemy.name + '</b> te alcança e te fere antes que escape.';
+    }
+  }
+
+  s.hp = Math.max(0, s.hp - dmg);
+  s.xpGained += gainXp;
+  s.goldGained += gainGold;
+
+  var resultClass = success ? 'pt-result-success' : 'pt-result-fail';
+  var formula = rollVal + ' (' + (mod >= 0 ? '+' : '') + mod + ') = <b>' + total + '</b> vs DC ' + dc;
+  bodyEl.innerHTML += ''
+    + '<div class="pt-result ' + resultClass + '">'
+    + '<b style="font-size:14px">' + resultText + '</b><br>'
+    + '<span style="font-size:11px;color:#a09484">' + formula + '</span><br><br>'
+    + narr
+    + (dmg ? '<br><b style="color:#e87474">💔 -' + dmg + ' HP</b>' : '')
+    + (gainXp ? '<br><b style="color:#88c468">✨ +' + gainXp + ' XP</b>' : '')
+    + (gainGold ? '<br><b style="color:#c4953a">💰 +' + gainGold + ' Valdoritas</b>' : '')
+    + '</div>';
+
+  var actEl = document.getElementById('pt-actions');
+  actEl.innerHTML = '';
+  var btn = document.createElement('button');
+  btn.className = 'pt-btn pt-btn-continue';
+  btn.textContent = '🚶 Seguir Viagem';
+  btn.onclick = function(){
+    if (s.hp <= 0) { _failPreTravel(s); return; }
+    _renderPreTravelStep();
+  };
+  actEl.appendChild(btn);
+}
+
+function _finishPreTravel() {
+  var s = _preTravelState;
+  // Persist gains no player
+  var p = window.CITY_MOCK_PLAYER;
+  if (p) {
+    p.hp = s.hp;
+    p.xp = (p.xp || 0) + s.xpGained;
+    p.gold = (p.gold || 0) + s.goldGained;
+  }
+  var ov = document.getElementById('pt-overlay');
+  if (ov) ov.remove();
+  // Dispara playTravelAnimation épica + redirect canonical
+  if (typeof playTravelAnimation === 'function' && !window.vReducedMotion) {
+    playTravelAnimation(s.biome, s.dest, function(){
+      window.__valdoria_transitioning = true;
+      window.location.href = s.finalUrl;
+    });
+  } else {
+    window.__valdoria_transitioning = true;
+    window.location.href = s.finalUrl;
+  }
+  _preTravelState = null;
+}
+
+function _failPreTravel(s) {
+  var bodyEl = document.getElementById('pt-body');
+  bodyEl.innerHTML = ''
+    + '<div class="pt-result pt-result-fail">'
+    + '<b style="font-size:16px">💀 Você foi derrotado!</b><br><br>'
+    + 'Voltando aos Portões de Valdoria... Aldric te ajudará a se recuperar.'
+    + '</div>';
+  var actEl = document.getElementById('pt-actions');
+  actEl.innerHTML = '';
+  var btn = document.createElement('button');
+  btn.className = 'pt-btn pt-btn-continue';
+  btn.textContent = '🏰 Retornar aos Portões';
+  btn.onclick = function(){
+    var ov = document.getElementById('pt-overlay');
+    if (ov) ov.remove();
+    var p = window.CITY_MOCK_PLAYER;
+    if (p) p.hp = Math.max(1, Math.floor(p.hpMax / 4));
+    _preTravelState = null;
+  };
+  actEl.appendChild(btn);
+}
+
+window._startPreTravelJourney = _startPreTravelJourney;
 
 // === SYNC_TARGET: game-hub.js#_LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
