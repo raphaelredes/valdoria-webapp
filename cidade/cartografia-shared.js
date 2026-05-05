@@ -92,6 +92,18 @@
     { key: 'graveyard', name: 'Cemitério Antigo',         x: 0.42, y: 0.84, biome: 'graveyard', tier: 3, ico: '⚰️',
       mapKey: 'Mapa do Pântano',
       desc: 'Lápides cobertas de musgo. Mortos não descansam em paz.' },
+    // ─── ANCESTRAL GRAVEYARD (canonical FIXED_MAPS — diferente de ancient_cemetery) ─
+    { key: 'ancestral_graveyard', name: 'Cemitério Ancestral', x: 0.74, y: 0.85, biome: 'graveyard', tier: 5, ico: '🪦',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Mausoléus antigos da aristocracia esquecida. Magia necromântica residual.' },
+    // ─── UNDERGROUND CAVERNS (canonical FIXED_MAPS — caverna profunda) ─
+    { key: 'underground_caverns', name: 'Cavernas Subterrâneas', x: 0.30, y: 0.40, biome: 'cave', tier: 5, ico: '🪨',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Sistema de túneis profundos. Pedra esculpida pelo tempo.' },
+    // ─── CRYSTAL DEPTHS (canonical FIXED_MAPS — caverna mágica) ─
+    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.32, y: 0.30, biome: 'cave', tier: 7, ico: '💎',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.' },
     // ─── SNOW (Norte distante) ────────────────────
     { key: 'snow',      name: 'Ermo Congelado',           x: 0.46, y: 0.16, biome: 'snow',     tier: 5, ico: '❄️',
       mapKey: 'Mapa do Ermo Gelado',
@@ -127,7 +139,13 @@
     ['mountain', 'dragon_pass'], ['mountain', 'korthag'],
     ['dragon_pass', 'volcanic'], ['dragon_pass', 'valkrest'],
     // Volcanic
-    ['desert', 'volcanic'], ['volcanic', 'valkrest']
+    ['desert', 'volcanic'], ['volcanic', 'valkrest'],
+    // 2026-05-04 — locais canonical adicionais (FIXED_MAPS):
+    ['graveyard', 'ancestral_graveyard'],     // Cemitério Antigo → Ancestral
+    ['ancestral_graveyard', 'deep_swamp'],    // ancestral conecta a deep_swamp
+    ['cave', 'underground_caverns'],          // Passagem → Cavernas Subterrâneas
+    ['underground_caverns', 'crystal_depths'], // Cavernas → Profundezas de Cristal
+    ['crystal_depths', 'mountain']            // Profundezas → Picos (passagem alta)
   ];
 
   // === _cartSeedRand ===
