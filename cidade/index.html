@@ -3994,6 +3994,25 @@ body.perf-lite .vc-action-btn { transition: none; }
       .city-discovery-overlay,
       .city-discovery-card { animation: none !important; }
     }
+
+    /* === Hall de Personagens — AAA Orb canonical (USER REQUEST 2026-05-04) ====
+       Reusa estrutura DOM de loading-title.js + classes .title-orb-* do
+       loading-title.css. Container scoped para limitar tamanho ao popup
+       (padrão fullscreen do canonical não cabe). */
+    .hall-orb-aaa {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: inline-block;
+      pointer-events: none;
+    }
+    .hall-orb-aaa .title-orb-wrap {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.32);
+      transform-origin: center center;
+    }
   </style>
 </head>
 <body>
@@ -6197,6 +6216,31 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.xp != null)   p.xp = picked.xp;
       if (picked.exhaustion != null) p.exh = picked.exhaustion;
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
+
+      // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
+      // (em REMOTE não usa mock fixo Brunhilda/Lyana — usa apenas chars reais do user).
+      var pickedId = picked.id || picked.char_id;
+      var clsToHeraldic = {
+        mago:'ic-mago', guerreiro:'ic-guerreiro', sacerdote:'ic-clerigo',
+        sacerdotisa:'ic-clerigo', clerigo:'ic-clerigo', ladino:'ic-ladino',
+        patrulheiro:'ic-patrulheiro', paladino:'ic-paladino', bardo:'ic-bardo',
+        druida:'ic-druida', monge:'ic-monge', barbaro:'ic-barbaro',
+        feiticeiro:'ic-feiticeiro', bruxo:'ic-bruxo'
+      };
+      window._mockCharacters = chars.map(function(c){
+        var cid = c.id || c.char_id;
+        var clsKey = String(c.class_name || '').toLowerCase().split(' ')[0];
+        return {
+          id: cid,
+          name: c.name || '',
+          cls: clsKey,
+          race: String(c.race || '').toLowerCase(),
+          level: c.level || 1,
+          icon: clsToHeraldic[clsKey] || 'ic-guerreiro',
+          active: cid === pickedId
+        };
+      });
+      console.log('[CITY] characters loaded:', window._mockCharacters.length);
       // Sincroniza index 0 do GROUP_MEMBERS (player slot)
       if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
         window.GROUP_MEMBERS[0] = {
@@ -7019,18 +7063,12 @@ function _showCharactersPopup(){
   }
   var selectedId = window._hallSelectedId;
 
-  // Mini-orb (SVG canonical do web/index.html L152-162)
-  var orbSvg = '<svg width="36" height="36" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">'
-    + '<defs><radialGradient id="hall-orb" cx="38%" cy="35%" r="55%">'
-    + '<stop offset="0%" stop-color="#fff4d0"/>'
-    + '<stop offset="20%" stop-color="#e8c45a"/>'
-    + '<stop offset="50%" stop-color="#c4953a"/>'
-    + '<stop offset="80%" stop-color="#8b6420"/>'
-    + '<stop offset="100%" stop-color="#5a3e10"/>'
-    + '</radialGradient></defs>'
-    + '<circle cx="14" cy="14" r="12" fill="url(#hall-orb)"/>'
-    + '<ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/>'
-    + '</svg>';
+  // USER REQUEST 2026-05-04: esfera AAA canonical (mesma do ValdoriaTitleScreen).
+  // Reusa classes .title-orb-* do shared/loading-title.css. Escala via .hall-orb-aaa
+  // em CSS scoped pra caber no popup (~80px em vez do tamanho fullscreen).
+  // Estrutura idêntica a loading-title.js#_buildDOM mas só o orb (sem texto/tap).
+  // orbSvg vira string vazia — substituído pelo DOM real construído após bodyEl.innerHTML.
+  var orbSvg = '<div class="hall-orb-aaa"><!-- AAA orb populado via JS depois --></div>';
 
   // === Layout idêntico ao .wa-chars-card ===
   var html = '<div class="hall-card" '
@@ -7162,6 +7200,11 @@ function _showCharactersPopup(){
   html += '</div>';  // close .hall-card
   bodyEl.innerHTML = html;
 
+  // USER REQUEST 2026-05-04: popular .hall-orb-aaa com AAA orb canonical
+  // (mesma estrutura DOM de shared/loading-title.js — replicada em escala menor).
+  var orbHost = bodyEl.querySelector('.hall-orb-aaa');
+  if (orbHost) _buildHallAAAOrb(orbHost);
+
   // === Wire listeners ===
   bodyEl.querySelectorAll('.hall-char-card').forEach(function(card){
     card.addEventListener('click', function(){
@@ -7176,7 +7219,29 @@ function _showCharactersPopup(){
   });
   var createBtn = bodyEl.querySelector('.hall-btn-create');
   if (createBtn) createBtn.addEventListener('click', function(){
-    vToast('🎭 No bot real, abre WebApp character_creator.');
+    // USER REQUEST 2026-05-04: redireciona p/ /character_creator/index.html
+    // (WebApp standalone com fluxo de criação completo). Em REMOTE passa token+api+uid.
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get('token');
+    var api = params.get('api');
+    var uid = params.get('uid');
+    var env = params.get('env');
+    if (window.location.protocol === 'file:'){
+      vToast('🎭 LOCAL mode: bot real abre /character_creator/.');
+      return;
+    }
+    if (!token || !api){
+      vToast('Sessão não encontrada. Faça login novamente.');
+      return;
+    }
+    var newParams = new URLSearchParams();
+    newParams.set('token', token);
+    newParams.set('api', api);
+    if (uid){ newParams.set('uid', uid); newParams.set('user_id', uid); }
+    if (env) newParams.set('env', env);
+    newParams.set('new', '1');
+    window.__valdoria_transitioning = true;
+    window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');
   if (logoutBtn) logoutBtn.addEventListener('click', function(){
@@ -7187,6 +7252,57 @@ function _showCharactersPopup(){
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'characters') {
     _popupStack.push('characters');
   }
+}
+
+// USER REQUEST 2026-05-04: AAA orb (mesma DOM de shared/loading-title.js#_buildDOM)
+// mas só o orb (sem texto/tap/runas externas), escalado pra caber em popup.
+function _buildHallAAAOrb(host){
+  if (!host) return;
+  host.innerHTML = ''; // reset
+  // Container scale wrapper
+  var orbWrap = document.createElement('div');
+  orbWrap.className = 'title-orb-wrap';
+  // Light rays + ambient glow
+  var rays = document.createElement('div');
+  rays.className = 'title-orb-rays';
+  orbWrap.appendChild(rays);
+  var ambient = document.createElement('div');
+  ambient.className = 'title-orb-ambient';
+  orbWrap.appendChild(ambient);
+  // Main orb shell
+  var orb = document.createElement('div');
+  orb.className = 'title-orb';
+  // Nebula container (rotates) + 4 nebula layers + 5 wisps + 3 sparks
+  var nebula = document.createElement('div');
+  nebula.className = 'title-orb-nebula';
+  ['title-orb-neb1','title-orb-neb2','title-orb-neb3','title-orb-neb4'].forEach(function(c){
+    var n = document.createElement('div'); n.className = c; nebula.appendChild(n);
+  });
+  ['title-orb-wisp title-orb-w1','title-orb-wisp title-orb-w2',
+   'title-orb-wisp title-orb-w3','title-orb-wisp title-orb-w4',
+   'title-orb-wisp title-orb-w5'].forEach(function(c){
+    var w = document.createElement('div'); w.className = c; nebula.appendChild(w);
+  });
+  ['title-orb-spark title-orb-sp1','title-orb-spark title-orb-sp2',
+   'title-orb-spark title-orb-sp3'].forEach(function(c){
+    var s = document.createElement('div'); s.className = c; nebula.appendChild(s);
+  });
+  orb.appendChild(nebula);
+  // Core (não rotaciona) + flare + lighting layers + glass reflections
+  var core = document.createElement('div'); core.className = 'title-orb-core'; orb.appendChild(core);
+  var coreFl = document.createElement('div'); coreFl.className = 'title-orb-core-fl'; orb.appendChild(coreFl);
+  ['title-orb-intlight','title-orb-term','title-orb-fresnel','title-orb-sss'].forEach(function(c){
+    var ll = document.createElement('div'); ll.className = c; orb.appendChild(ll);
+  });
+  // Glass reflections (top + bottom highlights)
+  var glassTop = document.createElement('div'); glassTop.className = 'title-orb-glass-top'; orb.appendChild(glassTop);
+  var glassBot = document.createElement('div'); glassBot.className = 'title-orb-glass-bot'; orb.appendChild(glassBot);
+  orbWrap.appendChild(orb);
+  // Caustics
+  ['title-orb-caustic-1','title-orb-caustic-2','title-orb-caustic-3'].forEach(function(c){
+    var ca = document.createElement('div'); ca.className = c; orbWrap.appendChild(ca);
+  });
+  host.appendChild(orbWrap);
 }
 
 // === JOGAR — confirma troca (sem semântica de compra) ===
@@ -7228,10 +7344,40 @@ function _showCharSwitchConfirm(picked){
     confirmLabel: 'Confirmar',
     cancelLabel: 'Voltar',
     onConfirm: function(){
-      // Marca novo ativo
+      // USER REQUEST 2026-05-04: REMOTE mode chama /api/auth/select-character
+      // pra trocar a sessão server-side (gera novo token p/ novo char).
+      // LOCAL mode (file://) só muta state client-side.
+      var params = new URLSearchParams(window.location.search);
+      var token = params.get('token');
+      var api = params.get('api');
+      var uid = params.get('uid');
+      if (token && api){
+        if (typeof vProcessing !== 'undefined' && vProcessing.show) vProcessing.show({ text: 'Trocando para ' + picked.name + '...' });
+        fetch(api.replace(/\/$/,'') + '/api/auth/select-character', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ char_id: picked.id })
+        }).then(function(r){
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        }).then(function(data){
+          if (data.error) throw new Error(data.error);
+          // Reload page com novo token + novo char id
+          var newParams = new URLSearchParams(window.location.search);
+          newParams.set('token', data.token || token);
+          newParams.set('char', picked.id);
+          window.__valdoria_transitioning = true;
+          window.location.replace(window.location.pathname + '?' + newParams.toString());
+        }).catch(function(err){
+          if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+          vToast('Falha ao trocar personagem: ' + (err.message || err));
+          console.error('[CITY] select-character failed:', err);
+        });
+        return;
+      }
+      // LOCAL mode: client-side mutation
       var chars = window._mockCharacters || [];
       chars.forEach(function(c){ c.active = (c.id === picked.id); });
-      // Atualiza CITY_MOCK_PLAYER
       if (window.CITY_MOCK_PLAYER){
         window.CITY_MOCK_PLAYER.name = picked.name;
         window.CITY_MOCK_PLAYER.cls = picked.cls;
