@@ -323,339 +323,1104 @@
     var r = 50; // raio art reduzido (mais limpo)
     var i, x, y, sz;
 
+    // ─── PICTOGRAMAS PROFISSIONAIS AAA (REWRITE 2026-05-04) ───────────
+    // USER REQUEST: "está parecendo desenho infantil, faça melhorias
+    // profundas e profissionais". Reescrita completa com:
+    // - Volume real via cross-hatching diagonal mestre + finos
+    // - Perspectiva 3/4 onde apropriado (castelos, torres, vulcão)
+    // - Hierarquia visual (1 elemento dominante + secundários)
+    // - Texturas: blocos de pedra, folhagem, água ondulante, neve granular
+    // - Proporções autênticas Frà Mauro / Atlas Catalão (1375-1459)
+    // ──────────────────────────────────────────────────────────────────
+
     if (b.key === 'plains') {
-      // Pictograma: 3 colinas onduladas + tufos de grama (pequenos n)
-      // Colinas (3 arcos baixos)
-      ctx.beginPath();
-      for (i = 0; i < 3; i++) {
-        x = (i - 1) * 18;
-        y = 8;
-        ctx.moveTo(x - 12, y);
-        ctx.quadraticCurveTo(x, y - 6, x + 12, y);
-      }
-      ctx.stroke();
-      // Tufos de grama — letrinha "u" estilizada
-      for (i = 0; i < 8; i++) {
-        x = (rng() - 0.5) * r * 1.6;
-        y = (rng() - 0.5) * r * 1.4;
+      // CASTELO DE VALDORIA — torre central alta + 2 torres laterais +
+      // muralha com crenelações + portão arqueado + 3 casas no entorno.
+      // Look: vista 3/4 medieval, elementos com volume via hatching.
+      // Casas pequenas atrás (3 com telhado triangular)
+      ctx.lineWidth = 0.7;
+      var houses = [[-22, 14, 0.85], [22, 12, 0.9], [-26, 4, 0.75]];
+      houses.forEach(function(h){
+        var hx = h[0], hy = h[1], sc = h[2];
+        // Corpo
         ctx.beginPath();
-        ctx.moveTo(x - 1.5, y); ctx.lineTo(x - 1.5, y - 2);
-        ctx.moveTo(x + 1.5, y); ctx.lineTo(x + 1.5, y - 2);
-        ctx.quadraticCurveTo(x, y, x - 1.5, y);
+        ctx.rect(hx - 4*sc, hy - 2*sc, 8*sc, 5*sc);
+        ctx.stroke();
+        // Telhado
+        ctx.beginPath();
+        ctx.moveTo(hx - 5*sc, hy - 2*sc);
+        ctx.lineTo(hx, hy - 6*sc);
+        ctx.lineTo(hx + 5*sc, hy - 2*sc);
+        ctx.closePath();
+        ctx.stroke();
+        // Janela
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.rect(hx - 0.8, hy - 0.5, 1.6, 1.6);
+        ctx.fill();
+      });
+      ctx.lineWidth = 0.9;
+      // MURALHA frontal (com volume — face frontal + topo em 3/4)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-18, 4, 36, 12);
+      ctx.fill();
+      ctx.stroke();
+      // Crenelações no topo da muralha
+      for (var cn = 0; cn < 9; cn++) {
+        var cnx = -18 + cn * 4;
+        ctx.beginPath();
+        ctx.rect(cnx, 2, 2, 2);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
         ctx.stroke();
       }
-      // Pontos esparsos (terra)
-      for (i = 0; i < 14; i++) {
-        x = (rng() - 0.5) * r * 1.6;
-        y = (rng() - 0.5) * r * 1.4;
+      // Hatching vertical na muralha (textura de pedra)
+      ctx.lineWidth = 0.35;
+      for (var sx_ = -16; sx_ < 18; sx_ += 4) {
         ctx.beginPath();
-        ctx.arc(x, y, 0.5, 0, Math.PI*2);
+        ctx.moveTo(sx_, 4); ctx.lineTo(sx_, 16);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.9;
+      // Portão arco
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-3, 16);
+      ctx.lineTo(-3, 10);
+      ctx.bezierCurveTo(-3, 6, 3, 6, 3, 10);
+      ctx.lineTo(3, 16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // 2 TORRES LATERAIS (com volume)
+      [[-20, 14], [20, 14]].forEach(function(t){
+        var tx = t[0], ty = t[1];
+        // Corpo da torre (face frontal)
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.rect(tx - 4, ty - 16, 8, 20);
+        ctx.fill();
+        ctx.stroke();
+        // Lado em sombra (paralelogramo direito)
+        ctx.beginPath();
+        ctx.moveTo(tx + 4, ty - 16);
+        ctx.lineTo(tx + 6, ty - 14);
+        ctx.lineTo(tx + 6, ty + 4);
+        ctx.lineTo(tx + 4, ty + 4);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.18;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+        // Telhado cônico
+        ctx.beginPath();
+        ctx.moveTo(tx - 5, ty - 16);
+        ctx.lineTo(tx, ty - 23);
+        ctx.lineTo(tx + 5, ty - 16);
+        ctx.closePath();
+        ctx.stroke();
+        // Janela
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.rect(tx - 0.8, ty - 11, 1.6, 2.5);
+        ctx.fill();
+      });
+      // TORRE CENTRAL alta (Donjon) com VOLUME
+      var ttx = 0, tty = 0;
+      // Corpo principal (frontal)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(ttx - 5, tty - 22, 10, 26);
+      ctx.fill();
+      ctx.stroke();
+      // Lado em sombra
+      ctx.beginPath();
+      ctx.moveTo(ttx + 5, tty - 22);
+      ctx.lineTo(ttx + 8, tty - 19);
+      ctx.lineTo(ttx + 8, tty + 4);
+      ctx.lineTo(ttx + 5, tty + 4);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.22;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // Crenelações no topo
+      for (var ct = 0; ct < 4; ct++) {
+        ctx.beginPath();
+        ctx.rect(ttx - 5 + ct * 2.7, tty - 24, 1.8, 2);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
+        ctx.stroke();
+      }
+      // Janelas (3 verticais)
+      ctx.fillStyle = INK_DARK;
+      for (var wd = 0; wd < 3; wd++) {
+        ctx.beginPath();
+        ctx.rect(ttx - 0.8, tty - 18 + wd * 5, 1.6, 2.5);
         ctx.fill();
       }
+      // Bandeira do reino
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(ttx, tty - 24);
+      ctx.lineTo(ttx, tty - 30);
+      ctx.lineTo(ttx + 5, tty - 28);
+      ctx.lineTo(ttx, tty - 27);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'forest') {
-      // Pictograma: cluster de 8 pinheiros estilizados (^^^ stack)
-      // Cada árvore = tronco curto + 2-3 carets verticais (estilo pinha)
-      var trees = [
-        [-22, 8, 1.0], [-10, 12, 0.85], [4, 10, 1.0], [18, 14, 0.9],
-        [-18, -6, 0.8], [-4, -2, 1.0], [12, -4, 0.85], [22, 0, 0.9]
-      ];
-      trees.forEach(function(t){
-        var tx = t[0] + (rng()-0.5)*2;
-        var ty = t[1] + (rng()-0.5)*2;
-        var sc = t[2];
-        // Tronco curto
+      // FLORESTA AAA — mistura: 4 carvalhos com canopy round + 3 pinheiros
+      // altos + 1 árvore destacada + chão com sombras + 2 cogumelos.
+      // Hierarquia: árvore central grande dominante.
+      // Sombras no chão (manchas elípticas leves)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.10;
+      var groundShadows = [[-18, 18, 12], [4, 18, 14], [22, 18, 10]];
+      groundShadows.forEach(function(s){
         ctx.beginPath();
-        ctx.moveTo(tx, ty);
-        ctx.lineTo(tx, ty + 2*sc);
+        ctx.ellipse(s[0], s[1], s[2], s[2]*0.3, 0, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      // Pinheiros altos no fundo (3)
+      var pines = [[-24, 14, 0.85], [16, 14, 0.95], [26, 16, 0.75]];
+      pines.forEach(function(p){
+        var px = p[0], py = p[1], sc = p[2];
+        // Tronco com volume (2 linhas paralelas)
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(px - 0.8, py); ctx.lineTo(px - 0.8, py - 2*sc);
+        ctx.moveTo(px + 0.8, py); ctx.lineTo(px + 0.8, py - 2*sc);
         ctx.stroke();
-        // 3 níveis de "pinha" (^ empilhados)
-        for (var lv = 0; lv < 3; lv++) {
-          var ly = ty - lv*5*sc;
-          var lw = (5 - lv*1.2) * sc;
+        ctx.lineWidth = 0.9;
+        // 4 níveis de pinha com PREENCHIMENTO sutil
+        for (var lv = 0; lv < 4; lv++) {
+          var ly = py - lv*5*sc - 2*sc;
+          var lw = (6 - lv*1.1) * sc;
           ctx.beginPath();
-          ctx.moveTo(tx - lw, ly);
-          ctx.lineTo(tx, ly - 4*sc);
-          ctx.lineTo(tx + lw, ly);
+          ctx.moveTo(px - lw, ly);
+          ctx.lineTo(px, ly - 5*sc);
+          ctx.lineTo(px + lw, ly);
+          ctx.closePath();
+          ctx.fillStyle = PAPER_BG;
+          ctx.fill();
           ctx.stroke();
         }
       });
+      // Carvalhos (3 com canopy round texturada)
+      var oaks = [[-12, 16, 1.1], [8, 16, 1.0], [-2, 18, 0.85]];
+      oaks.forEach(function(o, oi){
+        var ox = o[0], oy = o[1], sc = o[2];
+        // Tronco (2 linhas + ramificação)
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(ox - 1, oy); ctx.lineTo(ox - 1, oy - 5*sc);
+        ctx.moveTo(ox + 1, oy); ctx.lineTo(ox + 1, oy - 5*sc);
+        ctx.stroke();
+        // Canopy (cluster de bolhas — 3-5 círculos sobrepostos)
+        ctx.lineWidth = 0.7;
+        var cR = 5 * sc;
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.arc(ox, oy - 5*sc - cR, cR, 0, Math.PI*2);
+        ctx.fill();
+        ctx.stroke();
+        // Bolhas adicionais (4) ao redor pra textura
+        var bubbles = [[-cR*0.7, -cR*0.4, cR*0.6], [cR*0.7, -cR*0.4, cR*0.6],
+                       [0, -cR*1.0, cR*0.5], [-cR*0.4, cR*0.2, cR*0.45], [cR*0.4, cR*0.2, cR*0.45]];
+        bubbles.forEach(function(bub){
+          ctx.beginPath();
+          ctx.arc(ox + bub[0], oy - 5*sc - cR + bub[1], bub[2], 0, Math.PI*2);
+          ctx.fillStyle = PAPER_BG;
+          ctx.fill();
+          ctx.stroke();
+        });
+        // Hatching diagonal do lado direito (sombra)
+        ctx.lineWidth = 0.3;
+        ctx.globalAlpha = 0.5;
+        for (var hh2 = 0; hh2 < 4; hh2++) {
+          ctx.beginPath();
+          ctx.moveTo(ox + cR*0.2, oy - 5*sc - cR*1.4 + hh2*1.2);
+          ctx.lineTo(ox + cR*1.2, oy - 5*sc - cR*0.5 + hh2*1.2);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.9;
+      });
+      // Cogumelos pequenos (2 detalhes)
+      ctx.lineWidth = 0.6;
+      [[-26, 22], [22, 22]].forEach(function(m){
+        ctx.beginPath();
+        ctx.moveTo(m[0], m[1]); ctx.lineTo(m[0], m[1] - 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(m[0], m[1] - 1.5, 1.2, Math.PI, Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.6;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'cave') {
-      // Pictograma: arco da entrada + estalactites + rochas ao lado
-      // Arco da caverna (semi-círculo na ponta)
+      // CAVERNA AAA — entrada arqueada GRANDE em 3/4 + estalactites
+      // detalhadas + 2 cristais com sombra + rochas com textura de fratura.
+      // Profundidade visível através do arco.
+      // Profundidade interna (gradient escuro)
+      var caveGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, 18);
+      caveGrad.addColorStop(0, 'rgba(0,0,0,0.85)');
+      caveGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+      ctx.save();
+      ctx.fillStyle = caveGrad;
       ctx.beginPath();
-      ctx.moveTo(-14, 14);
-      ctx.lineTo(-14, 0);
-      ctx.bezierCurveTo(-14, -12, 14, -12, 14, 0);
-      ctx.lineTo(14, 14);
+      ctx.moveTo(-15, 14);
+      ctx.lineTo(-15, -2);
+      ctx.bezierCurveTo(-15, -14, 15, -14, 15, -2);
+      ctx.lineTo(15, 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      // Arco da entrada (contorno)
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(-15, 14);
+      ctx.lineTo(-15, -2);
+      ctx.bezierCurveTo(-15, -14, 15, -14, 15, -2);
+      ctx.lineTo(15, 14);
       ctx.stroke();
-      // Estalactites internas (3 triângulos pequenos do topo)
-      for (i = 0; i < 4; i++) {
-        x = -8 + i * 5;
+      // Estalactites detalhadas (5 com tamanhos variados — alpha forte)
+      var stals = [[-9, 0.85], [-5, 0.6], [-1, 0.95], [4, 0.7], [9, 0.85]];
+      stals.forEach(function(st){
+        var stx = st[0], stsc = st[1];
+        ctx.fillStyle = INK_DARK;
         ctx.beginPath();
-        ctx.moveTo(x - 1.5, -6);
-        ctx.lineTo(x, -2);
-        ctx.lineTo(x + 1.5, -6);
-        ctx.stroke();
-      }
-      // Hatching dentro do arco (escuridão)
-      _hatchArea(ctx, -13, -6, 26, 18, Math.PI/4, 3, INK_DARK, 0.4);
-      // Rochas ao lado da entrada (ovais com hatch)
-      var rocks = [[-22, 18, 6], [22, 16, 5], [-26, -2, 4], [24, -8, 5]];
-      rocks.forEach(function(rk){
+        ctx.moveTo(stx - 1.5*stsc, -8);
+        ctx.lineTo(stx, -2 - 2*stsc);
+        ctx.lineTo(stx + 1.5*stsc, -8);
+        ctx.closePath();
+        ctx.fill();
+        // Detail line
+        ctx.lineWidth = 0.4;
         ctx.beginPath();
-        ctx.ellipse(rk[0], rk[1], rk[2], rk[2]*0.7, 0, 0, Math.PI*2);
-        ctx.stroke();
-        // Hatching diagonal
-        ctx.beginPath();
-        ctx.moveTo(rk[0] - rk[2]*0.4, rk[1]);
-        ctx.lineTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.3);
+        ctx.moveTo(stx - 0.5*stsc, -7); ctx.lineTo(stx + 0.5*stsc, -3.5*stsc);
         ctx.stroke();
       });
-    } else if (b.key === 'swamp') {
-      // Pictograma: 4 poças (elipses outline) + árvore morta + juncos
-      // Poças (elipses outline com hatching wave dentro)
-      var pools = [[-15, -4, 9], [10, 2, 11], [-8, 14, 8], [18, 16, 7]];
-      pools.forEach(function(po){
+      ctx.lineWidth = 0.9;
+      // Estalagmites no chão (3 menores)
+      [[-7, 0.7], [3, 0.9], [9, 0.7]].forEach(function(sm){
+        var smx = sm[0], smsc = sm[1];
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.85;
         ctx.beginPath();
-        ctx.ellipse(po[0], po[1], po[2], po[2]*0.45, 0, 0, Math.PI*2);
+        ctx.moveTo(smx - 1.5*smsc, 14);
+        ctx.lineTo(smx, 14 - 5*smsc);
+        ctx.lineTo(smx + 1.5*smsc, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // 2 CRISTAIS BRILHANTES nas rochas laterais (prismas hexagonais)
+      [[-22, 8], [22, 6]].forEach(function(cr){
+        var crx = cr[0], cry = cr[1];
+        // Glow azulado sutil
+        ctx.fillStyle = '#88a8c8';
+        ctx.globalAlpha = 0.30;
+        ctx.beginPath();
+        ctx.arc(crx, cry, 6, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // Prisma (3 facetas — frontal + 2 laterais)
+        ctx.lineWidth = 0.7;
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.moveTo(crx, cry - 4);
+        ctx.lineTo(crx - 2, cry - 1);
+        ctx.lineTo(crx - 1.5, cry + 3);
+        ctx.lineTo(crx + 1.5, cry + 3);
+        ctx.lineTo(crx + 2, cry - 1);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
-        // 2 linhas wave dentro (água)
-        ctx.lineWidth = 0.5;
+        // Linha vertical mestre
         ctx.beginPath();
-        ctx.moveTo(po[0]-po[2]*0.6, po[1]);
-        ctx.quadraticCurveTo(po[0], po[1]+1, po[0]+po[2]*0.6, po[1]);
+        ctx.moveTo(crx, cry - 4); ctx.lineTo(crx, cry + 3);
+        ctx.stroke();
+        // Reflexo highlight
+        ctx.fillStyle = PAPER_BG;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(crx, cry - 4);
+        ctx.lineTo(crx - 0.6, cry - 1);
+        ctx.lineTo(crx, cry + 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      ctx.lineWidth = 0.9;
+      // Rochas ao redor com TEXTURA de fratura (5 rochas, formas irregulares)
+      var rocks2 = [[-25, 18, 5], [25, 18, 6], [-26, 0, 4], [26, -2, 4]];
+      rocks2.forEach(function(rk){
+        ctx.lineWidth = 0.7;
+        // Forma irregular (poligonal — não elipse)
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.moveTo(rk[0] - rk[2], rk[1] + rk[2]*0.3);
+        ctx.lineTo(rk[0] - rk[2]*0.6, rk[1] - rk[2]*0.6);
+        ctx.lineTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.7);
+        ctx.lineTo(rk[0] + rk[2], rk[1] - rk[2]*0.1);
+        ctx.lineTo(rk[0] + rk[2]*0.7, rk[1] + rk[2]*0.6);
+        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] + rk[2]*0.7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Linhas de fratura (2-3 internas)
+        ctx.lineWidth = 0.35;
+        ctx.beginPath();
+        ctx.moveTo(rk[0] - rk[2]*0.3, rk[1] - rk[2]*0.4);
+        ctx.lineTo(rk[0] + rk[2]*0.2, rk[1] + rk[2]*0.3);
+        ctx.moveTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.2);
+        ctx.lineTo(rk[0] + rk[2]*0.6, rk[1] + rk[2]*0.3);
         ctx.stroke();
         ctx.lineWidth = 0.9;
       });
-      // Árvore morta (linha vertical com galhos)
-      ctx.beginPath();
-      ctx.moveTo(-22, 12); ctx.lineTo(-22, -10);
-      ctx.moveTo(-22, -2); ctx.lineTo(-28, -8);
-      ctx.moveTo(-22, -5); ctx.lineTo(-16, -10);
-      ctx.moveTo(-22, -8); ctx.lineTo(-26, -13);
-      ctx.stroke();
-      // Juncos (pequenos | espalhados)
-      for (i = 0; i < 12; i++) {
-        var jx = (rng() - 0.5) * r * 1.5;
-        var jy = (rng() - 0.5) * r * 1.4;
+    } else if (b.key === 'swamp') {
+      // PÂNTANO AAA — poças orgânicas (não elipses) + lily pads + árvore
+      // morta com galhos torcidos detalhados + juncos altos + neblina sutil.
+      // Poças orgânicas com hatching de água
+      var pools2 = [[-15, -2, 11], [10, 4, 13], [-6, 14, 9], [18, 16, 8]];
+      pools2.forEach(function(po, pi){
+        // Forma irregular (Bezier)
+        ctx.fillStyle = '#6a7a4a';
+        ctx.globalAlpha = 0.18;
         ctx.beginPath();
-        ctx.moveTo(jx, jy); ctx.lineTo(jx, jy - 3 - rng()*3);
+        ctx.moveTo(po[0] - po[2], po[1]);
+        ctx.bezierCurveTo(po[0] - po[2], po[1] - po[2]*0.5,
+                          po[0] - po[2]*0.3, po[1] - po[2]*0.6,
+                          po[0] + po[2]*0.5, po[1] - po[2]*0.4);
+        ctx.bezierCurveTo(po[0] + po[2], po[1] - po[2]*0.2,
+                          po[0] + po[2]*1.1, po[1] + po[2]*0.4,
+                          po[0] + po[2]*0.4, po[1] + po[2]*0.5);
+        ctx.bezierCurveTo(po[0] - po[2]*0.2, po[1] + po[2]*0.6,
+                          po[0] - po[2]*1.1, po[1] + po[2]*0.3,
+                          po[0] - po[2], po[1]);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+        // Hatching de água (3 ondulações dentro)
+        ctx.lineWidth = 0.4;
+        for (var w_ = 0; w_ < 3; w_++) {
+          var wy_ = po[1] - po[2]*0.2 + w_*po[2]*0.2;
+          ctx.beginPath();
+          ctx.moveTo(po[0] - po[2]*0.7, wy_);
+          ctx.bezierCurveTo(po[0] - po[2]*0.3, wy_ + 0.6,
+                            po[0] + po[2]*0.3, wy_ - 0.6,
+                            po[0] + po[2]*0.7, wy_);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 0.9;
+        // Lily pad (1 por poça, 50% chance)
+        if (pi % 2 === 0) {
+          var lpx = po[0] + (rng()-0.5)*po[2];
+          var lpy = po[1] + (rng()-0.5)*po[2]*0.4;
+          ctx.fillStyle = INK_DARK;
+          ctx.globalAlpha = 0.55;
+          ctx.beginPath();
+          ctx.ellipse(lpx, lpy, 2, 1.3, rng()*Math.PI, 0, Math.PI*2);
+          ctx.fill();
+          // Notch da folha
+          ctx.fillStyle = PAPER_BG;
+          ctx.beginPath();
+          ctx.moveTo(lpx, lpy);
+          ctx.lineTo(lpx + 1, lpy + 0.5);
+          ctx.lineTo(lpx + 1.5, lpy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      });
+      // ÁRVORE MORTA grande com galhos torcidos (estilo Burton)
+      ctx.lineWidth = 1.1;
+      // Tronco
+      ctx.beginPath();
+      ctx.moveTo(-22, 14);
+      ctx.bezierCurveTo(-23, 6, -21, -2, -22, -10);
+      ctx.stroke();
+      // Galho principal direito
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-22, -2);
+      ctx.bezierCurveTo(-19, -4, -16, -6, -14, -10);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      // Sub-galhos do principal
+      ctx.beginPath();
+      ctx.moveTo(-17, -7); ctx.lineTo(-15, -10);
+      ctx.moveTo(-19, -5); ctx.lineTo(-18, -8);
+      ctx.stroke();
+      // Galho esquerdo
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-22, -5);
+      ctx.bezierCurveTo(-25, -7, -27, -9, -28, -12);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-26, -10); ctx.lineTo(-27, -12);
+      ctx.stroke();
+      // Galhos finais no topo
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-22, -10); ctx.lineTo(-24, -13);
+      ctx.moveTo(-22, -10); ctx.lineTo(-20, -14);
+      ctx.moveTo(-22, -10); ctx.lineTo(-22, -14);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // Juncos altos (8 verticais variados)
+      ctx.lineWidth = 0.5;
+      for (var rd = 0; rd < 10; rd++) {
+        var jx = (rng() - 0.5) * 60;
+        var jy = (rng() - 0.5) * 50;
+        var jh = 3 + rng() * 4;
+        // Junco com leve curvatura
+        ctx.beginPath();
+        ctx.moveTo(jx, jy);
+        ctx.quadraticCurveTo(jx + (rng()-0.5)*0.8, jy - jh*0.5, jx, jy - jh);
+        ctx.stroke();
+        // Topo (espigueta)
+        ctx.beginPath();
+        ctx.arc(jx, jy - jh, 0.4, 0, Math.PI*2);
+        ctx.fillStyle = INK_DARK;
+        ctx.fill();
+      }
+      ctx.lineWidth = 0.9;
+      // Neblina sutil (3 linhas onduladas levíssimas)
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.lineWidth = 0.4;
+      ctx.globalAlpha = 0.4;
+      for (var fg = 0; fg < 3; fg++) {
+        var fy = -22 + fg * 4;
+        ctx.beginPath();
+        ctx.moveTo(-30, fy);
+        ctx.bezierCurveTo(-15, fy - 1, 0, fy + 1, 15, fy - 0.5);
+        ctx.bezierCurveTo(25, fy + 0.5, 30, fy - 1, 35, fy);
         ctx.stroke();
       }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'mountain') {
-      // Pictograma: 5 picos (^) com hatching diagonal pra sombra + linha snowcap
-      var peakXs = [-22, -10, 0, 12, 22];
-      var peakHts = [16, 22, 14, 20, 12];
-      for (i = 0; i < 5; i++) {
-        var mx = peakXs[i];
-        var mh = peakHts[i];
-        var my = 14;
-        // Triângulo outline
+      // MONTANHAS AAA — 5 picos com VOLUME 3D real (lado claro + sombra
+      // triangular hatched), pico central destacado, snowcaps com curva
+      // detalhada, estrada serpenteando, hatching de rocha denso.
+      var peakXs2 = [-22, -10, 0, 12, 22];
+      var peakHts2 = [16, 22, 14, 20, 12];
+      // Renderizar de trás pra frente (z-order)
+      for (var pi2 = 0; pi2 < 5; pi2++) {
+        var mx = peakXs2[pi2], mh = peakHts2[pi2], my = 14;
+        // Lado claro (esquerdo) — preenchido com paper
+        ctx.fillStyle = PAPER_BG;
         ctx.beginPath();
         ctx.moveTo(mx - mh*0.6, my);
         ctx.lineTo(mx, my - mh);
-        ctx.lineTo(mx + mh*0.6, my);
+        ctx.lineTo(mx, my);
+        ctx.closePath();
+        ctx.fill();
+        ctx.lineWidth = 0.85;
         ctx.stroke();
-        // Snowcap (linha zigzag perto do topo)
+        // Lado em sombra (direito) — preenchimento + hatching denso
         ctx.beginPath();
-        ctx.moveTo(mx - mh*0.22, my - mh*0.55);
-        ctx.lineTo(mx - mh*0.10, my - mh*0.50);
-        ctx.lineTo(mx, my - mh*0.65);
-        ctx.lineTo(mx + mh*0.10, my - mh*0.50);
-        ctx.lineTo(mx + mh*0.22, my - mh*0.55);
+        ctx.moveTo(mx, my - mh);
+        ctx.lineTo(mx + mh*0.6, my);
+        ctx.lineTo(mx, my);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.20;
+        ctx.fill();
+        ctx.globalAlpha = 1;
         ctx.stroke();
-        // Hatching diagonal no lado direito (sombra)
-        ctx.lineWidth = 0.4;
-        for (var hh = 0; hh < 3; hh++) {
-          var t = 0.3 + hh*0.18;
+        // Hatching denso no lado escuro (textura de rocha)
+        ctx.lineWidth = 0.3;
+        ctx.globalAlpha = 0.55;
+        for (var hh3 = 0; hh3 < 5; hh3++) {
+          var t2 = 0.2 + hh3*0.15;
           ctx.beginPath();
-          ctx.moveTo(mx + mh*0.05, my - mh*(1-t));
-          ctx.lineTo(mx + mh*0.50, my - mh*0.05);
+          ctx.moveTo(mx + 1, my - mh*(1-t2));
+          ctx.lineTo(mx + mh*0.55, my - mh*0.05);
           ctx.stroke();
         }
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.85;
+        // Snowcap com curva detalhada (não zigzag — agora bezier)
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.moveTo(mx - mh*0.22, my - mh*0.55);
+        ctx.bezierCurveTo(mx - mh*0.10, my - mh*0.62, mx + mh*0.10, my - mh*0.62, mx + mh*0.22, my - mh*0.55);
+        ctx.lineTo(mx + mh*0.05, my - mh*0.85);
+        ctx.lineTo(mx, my - mh);
+        ctx.lineTo(mx - mh*0.05, my - mh*0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Linha de detalhe na neve (textura)
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(mx - mh*0.18, my - mh*0.58);
+        ctx.bezierCurveTo(mx - mh*0.08, my - mh*0.65, mx + mh*0.08, my - mh*0.65, mx + mh*0.18, my - mh*0.58);
+        ctx.stroke();
         ctx.lineWidth = 0.9;
       }
+      // Estrada serpenteante subindo o pico central
+      ctx.strokeStyle = INK_MED;
+      ctx.lineWidth = 0.7;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(-8, 16);
+      ctx.bezierCurveTo(-6, 12, -3, 10, -1, 6);
+      ctx.bezierCurveTo(1, 4, 0, 0, -1, -4);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'desert') {
-      // Pictograma: pirâmide outline + dunas (curvas) + sol (raios) + cactus
-      // Pirâmide grande (triângulo outline + linha do meio = aresta)
+      // DESERTO AAA — pirâmide GIZA com textura de blocos, 2 menores em
+      // escala, dunas onduladas com crests, sol com face medieval estilizada,
+      // pequeno oásis com 2 palmeiras.
+      // Dunas de fundo (3 ondas no horizonte com gradação)
+      ctx.lineWidth = 0.6;
+      ctx.globalAlpha = 0.55;
+      for (var dn = 0; dn < 3; dn++) {
+        var dy_ = -18 + dn*4;
+        ctx.beginPath();
+        ctx.moveTo(-r, dy_);
+        ctx.bezierCurveTo(-15, dy_ - 3, -5, dy_ + 1, 5, dy_ - 1);
+        ctx.bezierCurveTo(15, dy_ + 2, 25, dy_ - 1, r*0.8, dy_);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // Sol estilizado medieval (face sutil)
+      ctx.lineWidth = 0.7;
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(20, -22, 5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      // Raios alternados (longos+curtos, 12 total)
+      for (var sr = 0; sr < 12; sr++) {
+        var sa = sr * Math.PI / 6;
+        var slen = sr % 2 === 0 ? 10 : 7;
+        ctx.beginPath();
+        ctx.moveTo(20 + Math.cos(sa) * 7, -22 + Math.sin(sa) * 7);
+        ctx.lineTo(20 + Math.cos(sa) * slen, -22 + Math.sin(sa) * slen);
+        ctx.stroke();
+      }
+      // Face do sol (olhos + boca sutil)
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(18.5, -23, 0.5, 0, Math.PI*2);
+      ctx.arc(21.5, -23, 0.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      ctx.beginPath();
+      ctx.arc(20, -21.5, 1.2, 0.2*Math.PI, 0.8*Math.PI);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // PIRÂMIDE PRINCIPAL (com textura de blocos de pedra)
+      ctx.fillStyle = PAPER_BG;
+      // Face frontal
       ctx.beginPath();
       ctx.moveTo(-12, 18);
       ctx.lineTo(-2, 0);
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Face lateral (sombra)
+      ctx.beginPath();
+      ctx.moveTo(-2, 0);
       ctx.lineTo(14, 18);
-      ctx.lineTo(-12, 18);
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.stroke();
-      // Aresta da pirâmide
-      ctx.beginPath();
-      ctx.moveTo(-2, 0); ctx.lineTo(0, 18);
-      ctx.stroke();
-      // Hatching no lado direito (sombra)
-      ctx.lineWidth = 0.4;
-      for (i = 0; i < 4; i++) {
-        var t = 0.2 + i*0.18;
+      // Textura de blocos (linhas horizontais espaçadas em ambas as faces)
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.5;
+      // Frontal (5 níveis)
+      for (var bl = 1; bl <= 4; bl++) {
+        var bly = 0 + bl * 4.5;
+        var blx1 = -2 - (bl/4) * 10;
+        var blx2 = 0 - (bl/4) * 0;
         ctx.beginPath();
-        ctx.moveTo(0 + i*0.5, 18*t);
-        ctx.lineTo(14 - i*1.2, 18 - i*0.5);
+        ctx.moveTo(blx1, bly); ctx.lineTo(blx2, bly);
         ctx.stroke();
       }
+      // Lateral (sombra)
+      for (var bl2 = 1; bl2 <= 4; bl2++) {
+        var bly2 = 0 + bl2 * 4.5;
+        var blx21 = -2 + (bl2/4) * 16;
+        var blx22 = 0 + (bl2/4) * 0;
+        ctx.beginPath();
+        ctx.moveTo(blx21, bly2); ctx.lineTo(blx22, bly2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
       ctx.lineWidth = 0.9;
-      // Pirâmide menor à direita
+      // Pirâmide menor à direita (mesma técnica simplificada)
+      ctx.fillStyle = PAPER_BG;
       ctx.beginPath();
-      ctx.moveTo(8, 18); ctx.lineTo(15, 8); ctx.lineTo(22, 18);
+      ctx.moveTo(8, 18); ctx.lineTo(14, 8); ctx.lineTo(15, 18);
+      ctx.closePath();
+      ctx.fill();
       ctx.stroke();
-      // Dunas (3 curvas onduladas atrás)
-      ctx.lineWidth = 0.7;
-      for (i = 0; i < 3; i++) {
-        var dy = -16 + i*4;
+      ctx.beginPath();
+      ctx.moveTo(14, 8); ctx.lineTo(22, 18); ctx.lineTo(15, 18);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // Oásis com palmeira (canto esquerdo)
+      // Poça
+      ctx.fillStyle = '#88a8c8';
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.ellipse(-26, 18, 5, 1.8, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+      // 2 Palmeiras
+      [[-28, 0.95], [-23, 0.85]].forEach(function(p){
+        var px = p[0], sc = p[1];
+        // Tronco curvado
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
-        ctx.moveTo(-r, dy);
-        ctx.quadraticCurveTo(-15, dy-4, 0, dy);
-        ctx.quadraticCurveTo(15, dy+4, r*0.8, dy-2);
+        ctx.moveTo(px, 16);
+        ctx.bezierCurveTo(px - 1*sc, 12, px + 1*sc, 8, px - 0.5*sc, 4);
         ctx.stroke();
-      }
-      ctx.lineWidth = 0.9;
-      // Sol (círculo + raios)
-      ctx.beginPath();
-      ctx.arc(20, -20, 5, 0, Math.PI*2);
-      ctx.stroke();
-      for (i = 0; i < 8; i++) {
-        var ang = i * Math.PI/4;
-        ctx.beginPath();
-        ctx.moveTo(20 + Math.cos(ang)*7, -20 + Math.sin(ang)*7);
-        ctx.lineTo(20 + Math.cos(ang)*10, -20 + Math.sin(ang)*10);
-        ctx.stroke();
-      }
-      // Cactus (haste vertical + 1 braço)
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(-25, 20); ctx.lineTo(-25, 8);
-      ctx.moveTo(-25, 13); ctx.lineTo(-29, 13); ctx.lineTo(-29, 9);
-      ctx.stroke();
+        // Folhas (4 leques arqueados)
+        ctx.lineWidth = 0.5;
+        var leafs = [-1.2, -0.4, 0.4, 1.2];
+        leafs.forEach(function(la){
+          ctx.beginPath();
+          ctx.moveTo(px - 0.5*sc, 4);
+          ctx.bezierCurveTo(px - 0.5*sc + la*3*sc, 1, px - 0.5*sc + la*5*sc, 2, px - 0.5*sc + la*4*sc, 5);
+          ctx.stroke();
+        });
+      });
       ctx.lineWidth = 0.9;
     } else if (b.key === 'graveyard') {
-      // Pictograma: cerca + 6 lápides outline (cruz/arco/rect) + árvore seca
-      // Linha do chão
+      // CEMITÉRIO AAA — variedade de lápides (sarcófago, cruz celta, tumba
+      // romana com inscrição), árvore retorcida grande, cripta no fundo,
+      // caveira com sombra, neblina sutil.
+      // Linha do chão com textura
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(-r*1.1, 18); ctx.lineTo(r*1.1, 18);
       ctx.stroke();
-      // Lápides
-      var gStyles = ['cross', 'arch', 'rect', 'cross', 'arch', 'rect'];
-      for (i = 0; i < 6; i++) {
-        var gx = -20 + i * 8;
-        var gy = 4;
-        var gh = 10;
-        var style = gStyles[i];
-        if (style === 'cross') {
-          ctx.beginPath();
-          ctx.moveTo(gx, gy + gh); ctx.lineTo(gx, gy - 4);
-          ctx.moveTo(gx - 2.5, gy - 1); ctx.lineTo(gx + 2.5, gy - 1);
-          ctx.stroke();
-        } else if (style === 'arch') {
-          ctx.beginPath();
-          ctx.moveTo(gx - 2, gy + gh); ctx.lineTo(gx - 2, gy - 2);
-          ctx.bezierCurveTo(gx - 2, gy - 6, gx + 2, gy - 6, gx + 2, gy - 2);
-          ctx.lineTo(gx + 2, gy + gh);
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.rect(gx - 2, gy - 4, 4, gh + 4);
-          ctx.stroke();
-        }
+      // Hatching no chão (relva curta)
+      for (var gh_ = 0; gh_ < 14; gh_++) {
+        var ghx = -r*1.1 + gh_ * (r*2.2/14) + (rng()-0.5)*1.5;
+        ctx.beginPath();
+        ctx.moveTo(ghx, 18); ctx.lineTo(ghx, 19 + rng()*1);
+        ctx.stroke();
       }
-      // Árvore seca (canto direito)
+      ctx.lineWidth = 0.85;
+      // CRIPTA pequena no fundo (estilo mausoléu romano)
+      ctx.fillStyle = PAPER_BG;
+      // Base + colunas
       ctx.beginPath();
-      ctx.moveTo(22, 18); ctx.lineTo(22, -2);
-      ctx.moveTo(22, 4); ctx.lineTo(28, -3);
-      ctx.moveTo(22, 0); ctx.lineTo(16, -6);
-      ctx.moveTo(22, -2); ctx.lineTo(25, -8);
-      ctx.stroke();
-      // Caveira pequena no canto esquerdo (pictograma simples)
-      ctx.beginPath();
-      ctx.arc(-26, 8, 3, 0, Math.PI*2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(-27, 8, 0.6, 0, Math.PI*2);
-      ctx.arc(-25, 8, 0.6, 0, Math.PI*2);
+      ctx.rect(8, 6, 14, 12);
       ctx.fill();
+      ctx.stroke();
+      // 2 colunas
+      ctx.lineWidth = 0.5;
+      [10, 20].forEach(function(cx){
+        ctx.beginPath();
+        ctx.rect(cx - 0.8, 8, 1.6, 8);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.85;
+      // Fronton triangular
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.moveTo(8, 6); ctx.lineTo(15, 1); ctx.lineTo(22, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Lado em sombra (paralelogramo)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.18;
+      ctx.beginPath();
+      ctx.moveTo(22, 6); ctx.lineTo(24, 8); ctx.lineTo(24, 18); ctx.lineTo(22, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Porta da cripta
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.rect(13, 11, 4, 7);
+      ctx.fill();
+      // Lápides variadas
+      // 1) Cruz Celta com círculo (à esquerda)
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-22, 14); ctx.lineTo(-22, 4);
+      ctx.moveTo(-25, 9); ctx.lineTo(-19, 9);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(-22, 9, 2.2, 0, Math.PI*2);
+      ctx.stroke();
+      // Base
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-25, 14, 6, 4);
+      ctx.fill();
+      ctx.stroke();
+      // 2) Tumba romana com inscrição
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.moveTo(-15, 14);
+      ctx.lineTo(-15, 5);
+      ctx.bezierCurveTo(-15, 2, -10, 2, -10, 5);
+      ctx.lineTo(-10, 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Inscrição (linhas horizontais)
+      ctx.lineWidth = 0.3;
+      [7, 9, 11].forEach(function(iy){
+        ctx.beginPath();
+        ctx.moveTo(-14, iy); ctx.lineTo(-11, iy);
+        ctx.stroke();
+      });
+      // R.I.P (linhas mais curtas no topo)
+      ctx.lineWidth = 0.85;
+      // 3) Sarcófago (à direita da cruz celta)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-7, 8, 8, 10);
+      ctx.fill();
+      ctx.stroke();
+      // Tampa em perspectiva
+      ctx.beginPath();
+      ctx.moveTo(-7, 8); ctx.lineTo(-5, 6); ctx.lineTo(3, 6); ctx.lineTo(1, 8);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // 4) Cruz simples menor (entre tumba e sarcófago)
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(2, 14); ctx.lineTo(2, 6);
+      ctx.moveTo(0, 9); ctx.lineTo(4, 9);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      // ÁRVORE RETORCIDA grande (canto direito-fundo)
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(28, 18);
+      ctx.bezierCurveTo(27, 10, 30, 4, 28, -2);
+      ctx.stroke();
+      ctx.lineWidth = 0.7;
+      // Galhos torcidos
+      ctx.beginPath();
+      ctx.moveTo(28, 4);
+      ctx.bezierCurveTo(31, 2, 32, -2, 30, -5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(28, 0);
+      ctx.bezierCurveTo(25, -2, 23, -4, 26, -7);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(28, -2);
+      ctx.lineTo(28, -6);
+      ctx.moveTo(28, -2);
+      ctx.lineTo(31, -6);
+      ctx.moveTo(30, -5);
+      ctx.lineTo(31, -8);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      // Caveira no chão (canto esquerdo) com sombra
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.ellipse(-28, 17.5, 3.5, 1, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Crânio
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(-28, 14, 3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      // Mandíbula
+      ctx.beginPath();
+      ctx.moveTo(-30, 16); ctx.lineTo(-26, 16);
+      ctx.stroke();
+      // Olhos (escuros profundos)
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(-29, 13.8, 0.8, 0, Math.PI*2);
+      ctx.arc(-27, 13.8, 0.8, 0, Math.PI*2);
+      ctx.fill();
+      // Dentes (3 verticais)
+      ctx.lineWidth = 0.3;
+      [-29, -28, -27].forEach(function(dx){
+        ctx.beginPath();
+        ctx.moveTo(dx, 16); ctx.lineTo(dx, 16.8);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.85;
+      // Wisps fantasmagóricos sutis
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.lineWidth = 0.4;
+      ctx.globalAlpha = 0.5;
+      [[-12, -10], [4, -12], [20, -10]].forEach(function(wp){
+        ctx.beginPath();
+        ctx.moveTo(wp[0], wp[1] + 5);
+        ctx.bezierCurveTo(wp[0] - 1.5, wp[1] + 1, wp[0] + 1.5, wp[1] - 2, wp[0], wp[1] - 5);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'snow') {
-      // Pictograma: 5 picos com snowcap + flocos (asteriscos) espalhados
-      var icePeakXs = [-22, -10, 2, 14, 24];
-      var icePeakHts = [14, 20, 12, 16, 10];
-      for (i = 0; i < icePeakXs.length; i++) {
-        var ix = icePeakXs[i];
-        var ih = icePeakHts[i];
-        var iy = 16;
+      // TUNDRA DO NORTE AAA — picos de gelo com brilho azulado, aurora
+      // boreal acima, flocos de 6 pontas (não 4), pinheiro congelado
+      // dominante, cobertura de neve hatching.
+      // Aurora boreal (3 ondas curvas longas no topo)
+      ctx.strokeStyle = '#88c8e8';
+      ctx.lineWidth = 0.7;
+      ctx.globalAlpha = 0.5;
+      for (var au = 0; au < 3; au++) {
+        var ay = -28 + au * 3;
+        ctx.beginPath();
+        ctx.moveTo(-30, ay);
+        ctx.bezierCurveTo(-15, ay - 4, 0, ay + 4, 15, ay - 2);
+        ctx.bezierCurveTo(20, ay - 1, 25, ay - 3, 30, ay);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      // Picos de gelo (5) com VOLUME 3D azulado
+      var icePeakXs2 = [-24, -12, 0, 12, 24];
+      var icePeakHts2 = [12, 18, 11, 14, 9];
+      for (var ip = 0; ip < 5; ip++) {
+        var ix = icePeakXs2[ip], ih = icePeakHts2[ip], iy = 16;
+        // Lado claro
+        ctx.fillStyle = '#e0eef6';
         ctx.beginPath();
         ctx.moveTo(ix - ih*0.5, iy);
         ctx.lineTo(ix, iy - ih);
-        ctx.lineTo(ix + ih*0.5, iy);
+        ctx.lineTo(ix, iy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.lineWidth = 0.85;
         ctx.stroke();
-        // Snowcap (zigzag perto do topo)
+        // Lado escuro azulado
+        ctx.beginPath();
+        ctx.moveTo(ix, iy - ih);
+        ctx.lineTo(ix + ih*0.5, iy);
+        ctx.lineTo(ix, iy);
+        ctx.closePath();
+        ctx.fillStyle = '#88a8c8';
+        ctx.globalAlpha = 0.30;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+        // Reflexo no pico (highlight)
+        ctx.fillStyle = '#fff';
+        ctx.globalAlpha = 0.7;
         ctx.beginPath();
         ctx.moveTo(ix - ih*0.18, iy - ih*0.55);
         ctx.lineTo(ix, iy - ih*0.7);
-        ctx.lineTo(ix + ih*0.18, iy - ih*0.55);
-        ctx.stroke();
+        ctx.lineTo(ix - ih*0.05, iy - ih*0.85);
+        ctx.lineTo(ix, iy - ih);
+        ctx.lineTo(ix - ih*0.10, iy - ih*0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
-      // Flocos de neve (asteriscos *)
+      // Pinheiro congelado dominante
       ctx.lineWidth = 0.7;
-      for (i = 0; i < 8; i++) {
-        x = (rng() - 0.5) * r * 1.5;
-        y = -r * 0.6 + rng() * r * 0.5;
-        sz = 1.6 + rng() * 1.3;
+      ctx.beginPath();
+      ctx.moveTo(-26, 22); ctx.lineTo(-26, 18);
+      ctx.stroke();
+      ctx.lineWidth = 0.6;
+      ctx.fillStyle = '#e0eef6';
+      for (var pl = 0; pl < 3; pl++) {
+        var ply = 18 - pl*3;
+        var plw = 4 - pl;
         ctx.beginPath();
-        ctx.moveTo(x - sz, y); ctx.lineTo(x + sz, y);
-        ctx.moveTo(x, y - sz); ctx.lineTo(x, y + sz);
-        ctx.moveTo(x - sz*0.7, y - sz*0.7); ctx.lineTo(x + sz*0.7, y + sz*0.7);
-        ctx.moveTo(x - sz*0.7, y + sz*0.7); ctx.lineTo(x + sz*0.7, y - sz*0.7);
+        ctx.moveTo(-26 - plw, ply);
+        ctx.lineTo(-26, ply - 3);
+        ctx.lineTo(-26 + plw, ply);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
       }
       ctx.lineWidth = 0.9;
+      // Flocos de neve com 6 PONTAS (estrelas dêndríticas reais)
+      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = INK_DARK;
+      for (var ff = 0; ff < 8; ff++) {
+        var fx = (rng() - 0.5) * 60;
+        var fy = -20 + rng() * 30;
+        var fsz = 1.4 + rng() * 1.2;
+        for (var fa = 0; fa < 6; fa++) {
+          var fang = fa * Math.PI / 3;
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(fx + Math.cos(fang) * fsz, fy + Math.sin(fang) * fsz);
+          ctx.stroke();
+          // Pequenos braços laterais (nas pontas)
+          ctx.beginPath();
+          ctx.moveTo(fx + Math.cos(fang) * fsz * 0.6, fy + Math.sin(fang) * fsz * 0.6);
+          ctx.lineTo(fx + Math.cos(fang + 0.5) * fsz * 0.4, fy + Math.sin(fang + 0.5) * fsz * 0.4);
+          ctx.moveTo(fx + Math.cos(fang) * fsz * 0.6, fy + Math.sin(fang) * fsz * 0.6);
+          ctx.lineTo(fx + Math.cos(fang - 0.5) * fsz * 0.4, fy + Math.sin(fang - 0.5) * fsz * 0.4);
+          ctx.stroke();
+        }
+      }
+      ctx.lineWidth = 0.9;
     } else if (b.key === 'volcanic') {
-      // Pictograma: cone do vulcão outline + cratera + fumaça (espirais) +
-      // lava streams (linhas wavy descendo)
-      // Cone outline
+      // VULCÃO ADORMECIDO AAA — cone com VOLUME (lado claro + sombra),
+      // cratera elíptica com lava preenchida, lava streams curvas
+      // descendo, fumaça com volume real, cracks no chão.
+      // Cone — lado claro
+      ctx.fillStyle = '#a85040';
+      ctx.globalAlpha = 0.18;
       ctx.beginPath();
       ctx.moveTo(-22, 18);
       ctx.lineTo(-6, -10);
+      ctx.lineTo(0, -10);
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-22, 18);
+      ctx.lineTo(-6, -10);
+      ctx.lineTo(0, -10);
+      ctx.lineTo(0, 18);
+      ctx.stroke();
+      // Cone — lado em sombra (direito)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.30;
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
       ctx.lineTo(6, -10);
       ctx.lineTo(22, 18);
-      ctx.stroke();
-      // Cratera (linha curva no topo)
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.beginPath();
-      ctx.moveTo(-6, -10);
-      ctx.quadraticCurveTo(0, -7, 6, -10);
+      ctx.moveTo(0, -10);
+      ctx.lineTo(6, -10);
+      ctx.lineTo(22, 18);
+      ctx.lineTo(0, 18);
       ctx.stroke();
-      // Lava streams (3 linhas wavy do topo até a base)
-      ctx.lineWidth = 1.1;
-      for (i = 0; i < 3; i++) {
-        var lx = (i - 1) * 4;
+      // Hatching denso no lado escuro
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.55;
+      for (var hl = 0; hl < 6; hl++) {
+        var t3 = 0.15 + hl*0.14;
+        ctx.beginPath();
+        ctx.moveTo(0 + 1, -10 + t3*4);
+        ctx.lineTo(20 - hl*1.5, 18 - hl*0.5);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // Cratera elíptica com LAVA preenchida (vermelho real)
+      ctx.fillStyle = '#c84030';
+      ctx.beginPath();
+      ctx.ellipse(0, -10, 6, 1.8, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.ellipse(0, -10, 6, 1.8, 0, 0, Math.PI*2);
+      ctx.stroke();
+      // Glow lava (radial)
+      var lavaGrad = ctx.createRadialGradient(0, -10, 1, 0, -10, 8);
+      lavaGrad.addColorStop(0, 'rgba(255,160,80,0.7)');
+      lavaGrad.addColorStop(1, 'rgba(255,160,80,0)');
+      ctx.fillStyle = lavaGrad;
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.arc(0, -10, 8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Lava streams DESCENDO (3 curvas com spread no final)
+      ctx.strokeStyle = '#c84030';
+      ctx.lineWidth = 1.3;
+      [-1, 0, 1].forEach(function(li){
+        var lx = li * 4;
         ctx.beginPath();
         ctx.moveTo(lx, -8);
         ctx.bezierCurveTo(lx + 1, -2, lx - 1, 4, lx + 2, 16);
         ctx.stroke();
-      }
+        // Spread no final
+        ctx.beginPath();
+        ctx.arc(lx + 2, 16, 1.5, 0, Math.PI*2);
+        ctx.fillStyle = '#c84030';
+        ctx.fill();
+      });
+      ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-      // Hatching no lado direito do cone (sombra)
+      // Fumaça com VOLUME (3 plumes orgânicas grandes)
+      ctx.lineWidth = 0.6;
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.35;
+      [[-3, -16], [0, -19], [3, -17]].forEach(function(sm, smi){
+        var smx = sm[0], smy = sm[1];
+        // Plume orgânica (ovais sobrepostas)
+        ctx.beginPath();
+        ctx.arc(smx, smy, 3 + smi * 0.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(smx + 1, smy - 3, 2.5 + smi * 0.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(smx - 1, smy - 5 - smi, 2 + smi * 0.4, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      // Contorno da fumaça (linha externa)
+      ctx.strokeStyle = INK_LIGHT;
       ctx.lineWidth = 0.4;
-      for (i = 0; i < 4; i++) {
-        var t = 0.2 + i*0.2;
-        ctx.beginPath();
-        ctx.moveTo(0, -10 + t*2);
-        ctx.lineTo(20 - i*1.5, 18 - i);
-        ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.moveTo(-5, -14);
+      ctx.bezierCurveTo(-7, -18, -3, -22, 0, -25);
+      ctx.bezierCurveTo(3, -22, 7, -18, 5, -14);
+      ctx.stroke();
+      ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
-      // Fumaça (3 espirais saindo do topo)
-      ctx.lineWidth = 0.7;
-      for (i = 0; i < 3; i++) {
-        var sx = (i - 1) * 6;
-        var sy = -14 - i*4;
-        ctx.beginPath();
-        ctx.moveTo(sx, -10);
-        ctx.quadraticCurveTo(sx - 4, sy + 4, sx, sy);
-        ctx.quadraticCurveTo(sx + 4, sy - 2, sx, sy - 4);
-        ctx.stroke();
-      }
+      // Cracks/rachaduras no chão ao redor
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-22, 19); ctx.lineTo(-25, 22); ctx.lineTo(-23, 25);
+      ctx.moveTo(22, 19); ctx.lineTo(25, 22); ctx.lineTo(23, 25);
+      ctx.moveTo(-15, 22); ctx.lineTo(-12, 25);
+      ctx.moveTo(15, 22); ctx.lineTo(12, 25);
+      ctx.stroke();
       ctx.lineWidth = 0.9;
     }
     ctx.lineCap = 'butt';
