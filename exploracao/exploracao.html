@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T11:03:49Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T15:24:22Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12300,7 +12300,9 @@ body.perf-lite .stub-popup-voice { animation: none; }
 (function() {
   var v = Date.now();
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
-  ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js', '/shared/toast.js'].forEach(function(src) {
+  // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
+  ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
+   '/shared/toast.js', '/shared/state-checkpoint.js'].forEach(function(src) {
     var s = document.createElement('script');
     s.src = 'https://jogo.lendasdevaldoria.com.br' + src + '?v=' + v;
     s.async = false;
@@ -37935,6 +37937,40 @@ function boot() {
       }
     }
 
+    // ─── State Checkpoint (AAA persistence — USER REQUEST 2026-05-04) ───
+    // Heartbeat 30s + sendBeacon ao fechar. Persiste HP/MP/posição/gold
+    // pra que ao reabrir o WebApp o player volte exatamente no mesmo hex
+    // com os mesmos recursos. Combinado com displacement (single-device).
+    if (window.__EXPLORE_MODE === 'remote'
+        && window.ValdoriaCheckpoint
+        && window.__EXPLORE_TOKEN
+        && window.__EXPLORE_API_BASE
+        && window.__EXPLORE_USER_ID) {
+      try {
+        window.ValdoriaCheckpoint.start({
+          api: window.__EXPLORE_API_BASE,
+          token: window.__EXPLORE_TOKEN,
+          userId: window.__EXPLORE_USER_ID,
+          area: 'exploracao',
+          getState: function () {
+            if (!S || !S.player) return {};
+            return {
+              hp: S.player.hp,
+              mp: S.player.mp,
+              gold: S.gold,
+              col: S.player_col,
+              row: S.player_row,
+              map_id: S.mapId,
+              exhaustion: S.player.exhaustion || 0,
+            };
+          },
+        });
+        LOG('CHECKPOINT', 'started area=exploracao uid=' + window.__EXPLORE_USER_ID);
+      } catch (eCk) {
+        LOGW('CHECKPOINT', 'start_failed err=' + (eCk && eCk.message));
+      }
+    }
+
     recentEventIds = [];
     _zoom = DEFAULT_ZOOM;
     visitedMapIds.add(S.mapId);   // marca mapa como descoberto
@@ -38885,14 +38921,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // pra travel subsequente (edge transition) usar back-edge normal.
       var spawnColParam = qs.get('ld_spawn_col');
       var spawnRowParam = qs.get('ld_spawn_row');
+      // FIX 2026-05-04 (AAA position restore): col + row params (sem prefix
+      // ld_) também aceitos — vem de detect_explore_transition no resume,
+      // restaurando hex exato salvo via state-checkpoint.
+      if (spawnColParam === null) spawnColParam = qs.get('col');
+      if (spawnRowParam === null) spawnRowParam = qs.get('row');
       if (spawnColParam !== null && spawnRowParam !== null) {
         var sCol = parseInt(spawnColParam, 10);
         var sRow = parseInt(spawnRowParam, 10);
         if (!isNaN(sCol) && !isNaN(sRow) && sCol >= 0 && sRow >= 0) {
           window.__LD_SPAWN_COL = sCol;
           window.__LD_SPAWN_ROW = sRow;
-          LOG('BOOT', 'spawn override URL params: col=' + sCol + ' row=' + sRow
-            + ' (hex=' + (qs.get('ld_spawn_hex') || '?') + ')');
+          LOG('BOOT', 'spawn position URL params: col=' + sCol + ' row=' + sRow
+            + ' (source=' + (qs.get('ld_spawn_col') !== null ? 'qa' : 'checkpoint_restore') + ')');
         }
       }
       // X-6.5.51 (2026-04-26): QA params adicionais — ld_day, ld_gold, ld_auto_discover.
