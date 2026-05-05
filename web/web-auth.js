@@ -527,6 +527,15 @@ function redirectToGame(charId, isNew, token) {
         if (!r.ok) throw new Error('state HTTP ' + r.status);
         return r.json();
     }).then(function(state){
+        // FIX 2026-05-04 v2: se server retornou URL completa (com snap/map_id/etc),
+        //   USAR essa URL — não construir uma URL genérica que perde estado.
+        //   detect_explore_transition retorna URL pronta com map_id + snap_b64.
+        if (state && state.transition && state.transition.url){
+            var fullUrl = state.transition.url;
+            console.info('[WEB-AUTH] redirect via transition.url to=%s', state.transition.to);
+            window.location.href = fullUrl;
+            return;
+        }
         var dest = '../cidade/index.html'; // default
         if (state && state.transition && state.transition.to){
             var to = state.transition.to;

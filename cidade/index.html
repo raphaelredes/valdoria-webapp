@@ -35410,8 +35410,26 @@ function _travelToBiome(biomeKey, displayName){
   //   LOCAL (file://): simuladores/cidade.html + simuladores/exploracao.html → relativo
   //   WEBAPP: /cidade/index.html + /exploracao/exploracao.html → absoluto
   var isLocal = (location.protocol === 'file:');
-  var url = (isLocal ? './exploracao.html' : '/exploracao/exploracao.html')
-            + '?biome=' + biomeKey + '&back=cidade';
+  var basePath = (isLocal ? './exploracao.html' : '/exploracao/exploracao.html');
+  // FIX 2026-05-04 v2 (USER REPORT bug grave): propagar token+uid+api+char+env
+  //   da URL atual pra exploracao. Sem isso, exploracao roda em modo LOCAL
+  //   (sem API), /api/exploracao/init NUNCA é chamado, in_explore_webapp NUNCA
+  //   é setado, e ao reabrir o WebApp /api/game/state cai no fallback de cidade.
+  //   Estado server-side per-character só funciona com REMOTE mode.
+  var qParams = new URLSearchParams();
+  qParams.set('biome', biomeKey);
+  qParams.set('back', 'cidade');
+  try {
+    var cur = new URLSearchParams(location.search || '');
+    var carry = ['token', 'uid', 'user_id', 'api', 'api_base', 'char', 'char_id', 'env'];
+    for (var i = 0; i < carry.length; i++) {
+      var k = carry[i];
+      var v = cur.get(k);
+      if (v) qParams.set(k, v);
+    }
+  } catch (_e) { /* fallback: URL mínima sem token (LOCAL mode) */ }
+  var url = basePath + '?' + qParams.toString();
+  _logCity('travel url has_token=' + qParams.has('token') + ' has_api=' + qParams.has('api'));
   function _doAnim(){
     if (window.vReducedMotion) {
       _logCity('reduced-motion: pulando anim, redirect direto');
