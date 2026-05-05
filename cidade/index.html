@@ -32035,7 +32035,8 @@ function _showConfirmPurchase(opts){
   //   sem warning, sem opção de dívida/empréstimo.
   var creditMode = !!opts.creditMode;
   var canAfford = creditMode ? true : (p.gold >= opts.cost);
-  document.getElementById('cpp-icon').textContent = opts.icon || '⚖️';
+  // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
+  document.getElementById('cpp-icon').innerHTML = opts.icon || '⚖️';
   document.getElementById('cpp-title').textContent = (opts.title || 'Confirmar').toUpperCase();
   document.getElementById('cpp-npc').textContent = opts.npc || '';
   document.getElementById('cpp-npc').style.display = opts.npc ? '' : 'none';
@@ -32157,7 +32158,9 @@ function _showConfirmPurchase(opts){
 function _showInfoPopup(opts){
   var ov = document.getElementById('confirm-purchase-overlay');
   if (!ov) return;
-  document.getElementById('cpp-icon').textContent = opts.icon || '✦';
+  // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
+  // textContent fazia SVG markup virar texto literal na tela.
+  document.getElementById('cpp-icon').innerHTML = opts.icon || '✦';
   document.getElementById('cpp-title').textContent = (opts.title || 'Confirmar').toUpperCase();
   document.getElementById('cpp-npc').textContent = opts.npc || '';
   document.getElementById('cpp-npc').style.display = opts.npc ? '' : 'none';
@@ -35043,7 +35046,7 @@ function _getGameWeather(dayOfYear){
   var temp = baseTemp + Math.floor(rng() * 11) - 5;
   if (rng() < 0.001) return { icon: '🌑', desc: 'Eclipse', temp: temp - 10 };
   var roll = rng();
-  if (roll < 0.4)  return { icon: _heralIco('ic-stat-cha'), desc: 'Ensolarado', temp: temp + 2 };
+  if (roll < 0.4)  return { icon: '☀️', desc: 'Ensolarado', temp: temp + 2 };
   if (roll < 0.7)  return { icon: '⛅', desc: 'Nublado',    temp: temp };
   if (roll < 0.9)  return { icon: '🌧️', desc: 'Chuvoso',    temp: temp - 3 };
   return { icon: '⛈️', desc: 'Tempestade', temp: temp - 5 };
@@ -36680,10 +36683,10 @@ function _buildLocCard(loc) {
     card.appendChild(newB);
   }
 
-  /* Count badge (for travelers, etc.) */
+  /* Count badge (for travelers, etc.) — innerHTML pra suportar SVG icons (USER FIX 2026-05-05) */
   if (loc.badge) {
     var badge = _clEl('span', 'cloc-badge-count');
-    badge.textContent = loc.badge;
+    badge.innerHTML = loc.badge;
     card.appendChild(badge);
   }
 
