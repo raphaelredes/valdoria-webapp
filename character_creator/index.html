@@ -968,10 +968,46 @@
         <!-- Burst radial flash (ativado por .slide-bursting) -->
         <div class="ob-burst-flash" aria-hidden="true"></div>
 
-        <!-- Lightning crackle (ativado por .slide-bursting) -->
-        <svg class="ob-lightning" viewBox="0 0 200 400" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M100,0 L80,100 L120,120 L70,250 L130,260 L90,400" fill="none" stroke="#fff4d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 10px #c4953a)"/>
-        </svg>
+        <!-- Sky flash branca pra trovão AAA (ativado por .slide-bursting-lightning) -->
+        <div class="ob-sky-flash" aria-hidden="true"></div>
+
+        <!-- Lightning storm AAA (3 bolts em ângulos diferentes, ativado SÓ no slide 2/CRIE SEU AVENTUREIRO) -->
+        <div class="ob-lightnings" aria-hidden="true">
+            <svg class="ob-bolt ob-bolt-1" viewBox="0 0 200 800" preserveAspectRatio="none">
+                <!-- Bolt central, mais grosso -->
+                <path d="M100,0 L75,150 L125,180 L60,400 L135,420 L85,650 L120,680 L95,800"
+                      fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                      filter="url(#bolt-glow)"/>
+                <path d="M100,0 L75,150 L125,180 L60,400 L135,420 L85,650 L120,680 L95,800"
+                      fill="none" stroke="#fff4d0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+                <defs>
+                    <filter id="bolt-glow" x="-50%" y="-10%" width="200%" height="120%">
+                        <feGaussianBlur stdDeviation="4" result="blur1"/>
+                        <feFlood flood-color="#c4953a" result="gold"/>
+                        <feComposite in="gold" in2="blur1" operator="in" result="goldGlow"/>
+                        <feMerge>
+                            <feMergeNode in="goldGlow"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+            </svg>
+            <svg class="ob-bolt ob-bolt-2" viewBox="0 0 200 800" preserveAspectRatio="none">
+                <!-- Bolt esquerdo, menor, ramificado -->
+                <path d="M100,0 L80,180 L130,200 L90,380 L140,400 L100,600"
+                      fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      filter="drop-shadow(0 0 8px #c4953a) drop-shadow(0 0 16px #e8c45a)"/>
+                <!-- Branch -->
+                <path d="M130,200 L160,260 L140,300" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+            <svg class="ob-bolt ob-bolt-3" viewBox="0 0 200 800" preserveAspectRatio="none">
+                <!-- Bolt direito, mais fino, ângulo diferente -->
+                <path d="M100,0 L120,140 L70,170 L110,330 L60,360 L100,540 L80,580"
+                      fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      filter="drop-shadow(0 0 8px #c4953a) drop-shadow(0 0 16px #e8c45a)"/>
+                <path d="M70,170 L40,220" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+        </div>
 
         <!-- Particle field AAA — wisps da esfera (energia dourada), mini-dados 3D, sparks
              USER NOTE: o Orb of Valdoria é UM só (brand mark), não multiplica.
@@ -1307,27 +1343,91 @@
             100% { width: 200vw; height: 200vw; opacity: 0; }
         }
 
-        /* === Lightning crackle (ativado em .slide-bursting) === */
-        .ob-lightning {
+        /* === Lightning storm AAA (ativado SÓ em .slide-bursting-lightning — slide 2) === */
+        .ob-lightnings {
             position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 100vh;
-            opacity: 0;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             pointer-events: none;
             z-index: 3;
         }
-        .onboarding-overlay.slide-bursting .ob-lightning {
-            animation: obLightningFlash 0.6s ease-out;
+        .ob-bolt {
+            position: absolute;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            opacity: 0;
+            mix-blend-mode: screen;
         }
-        @keyframes obLightningFlash {
+        .ob-bolt-1 {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+        }
+        .ob-bolt-2 {
+            left: 18%;
+            transform: rotate(-12deg);
+            transform-origin: top center;
+            height: 75%;
+        }
+        .ob-bolt-3 {
+            right: 20%;
+            transform: rotate(10deg);
+            transform-origin: top center;
+            height: 70%;
+        }
+
+        /* Sky flash branca cobrindo a tela durante o trovão */
+        .ob-sky-flash {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center top,
+              rgba(255, 255, 255, 0.85) 0%,
+              rgba(232, 196, 90, 0.35) 30%,
+              rgba(196, 149, 58, 0.1) 60%,
+              transparent 100%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+            mix-blend-mode: screen;
+        }
+
+        .onboarding-overlay.slide-bursting-lightning .ob-sky-flash {
+            animation: obSkyFlash 1.4s ease-out;
+        }
+        .onboarding-overlay.slide-bursting-lightning .ob-bolt-1 {
+            animation: obBoltMain 1.4s ease-out;
+        }
+        .onboarding-overlay.slide-bursting-lightning .ob-bolt-2 {
+            animation: obBoltSide 1.4s ease-out 0.15s;
+        }
+        .onboarding-overlay.slide-bursting-lightning .ob-bolt-3 {
+            animation: obBoltSide 1.4s ease-out 0.3s;
+        }
+        @keyframes obSkyFlash {
             0%   { opacity: 0; }
-            10%  { opacity: 1; }
-            20%  { opacity: 0.3; }
-            30%  { opacity: 0.9; }
+            8%   { opacity: 1; }
+            18%  { opacity: 0.2; }
+            28%  { opacity: 0.85; }
+            40%  { opacity: 0.05; }
+            55%  { opacity: 0.5; }
+            100% { opacity: 0; }
+        }
+        @keyframes obBoltMain {
+            0%   { opacity: 0; transform: translateX(-50%) scaleY(0); transform-origin: top center; }
+            5%   { opacity: 1; transform: translateX(-50%) scaleY(1); }
+            12%  { opacity: 0.25; }
+            22%  { opacity: 1; }
+            32%  { opacity: 0.1; }
+            45%  { opacity: 0.7; }
+            100% { opacity: 0; transform: translateX(-50%) scaleY(1); }
+        }
+        @keyframes obBoltSide {
+            0%   { opacity: 0; }
+            8%   { opacity: 0.9; }
+            16%  { opacity: 0.2; }
+            26%  { opacity: 0.7; }
             40%  { opacity: 0; }
-            50%  { opacity: 0.6; }
             100% { opacity: 0; }
         }
 
@@ -1796,19 +1896,39 @@
             if (currentSlide === totalSlides - 1) {
                 nextBtn.textContent = 'Começar →';
             }
-            // USER REQUEST 2026-05-04: burst épico nas transições — acelera
-            // mini-orbs + mini-dados 3D atravessando a tela por ~2.5s
-            // + lightning bolt visual + sfx_lightning som canonical
+            // USER REQUEST 2026-05-04: re-trigger play após gesto do user (autoplay policy
+            // dos browsers bloqueia audio até primeira interação. Onboarding init chama
+            // play antes de qualquer click — sem gesto fica bloqueado. Click em Próximo
+            // destrava audio context, daí esta call efetivamente toca a música).
+            try {
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+                    ValdoriaAudio.play('character_creation');
+                }
+            } catch(e){}
+            // USER REQUEST 2026-05-04: burst épico nas transições + lightning storm
+            // EXCLUSIVO no slide 2 (CRIE SEU AVENTUREIRO) com sfx_lightning + sfx_thunder.
+            // Demais transições só recebem o burst flash (sem raios).
             try {
                 overlay.classList.remove('slide-bursting');
+                overlay.classList.remove('slide-bursting-lightning');
                 // Force reflow to restart animation
                 void overlay.offsetWidth;
                 overlay.classList.add('slide-bursting');
-                // Som de raio canonical (sfx_lightning existe em audio-manager.js TRACKS)
-                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
-                    ValdoriaAudio.playSFX('sfx_lightning');
+                if (idx === 2) {
+                    // Slide 2 ganha lightning storm AAA (3 bolts + sky flash + thunder)
+                    overlay.classList.add('slide-bursting-lightning');
+                    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                        ValdoriaAudio.playSFX('sfx_lightning');
+                        // Trovão segue o raio (~150ms delay) — efeito cinematográfico
+                        setTimeout(function(){
+                            try { ValdoriaAudio.playSFX('sfx_thunder'); } catch(e){}
+                        }, 150);
+                    }
                 }
-                setTimeout(function() { overlay.classList.remove('slide-bursting'); }, 2600);
+                setTimeout(function() {
+                    overlay.classList.remove('slide-bursting');
+                    overlay.classList.remove('slide-bursting-lightning');
+                }, 2600);
             } catch(e){}
         }
 
