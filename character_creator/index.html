@@ -1990,14 +1990,12 @@
                 void overlay.offsetWidth;
                 overlay.classList.add('slide-bursting');
                 if (idx === 2) {
-                    // Slide 2 ganha lightning storm AAA (3 bolts + sky flash + thunder)
+                    // Slide 2 ganha lightning storm AAA (3 bolts + sky flash)
+                    // USER REQUEST 2026-05-04: removido sfx_thunder (era prolongado +
+                    // tinha rain ambient). Mantido só sfx_lightning (crackle curto).
                     overlay.classList.add('slide-bursting-lightning');
                     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
                         ValdoriaAudio.playSFX('sfx_lightning');
-                        // Trovão segue o raio (~150ms delay) — efeito cinematográfico
-                        setTimeout(function(){
-                            try { ValdoriaAudio.playSFX('sfx_thunder'); } catch(e){}
-                        }, 150);
                     }
                 }
                 setTimeout(function() {
