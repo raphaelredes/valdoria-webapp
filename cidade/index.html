@@ -6134,6 +6134,9 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<script src="/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
+    /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
+       Mostra overlay medieval com instruções de correção. (USER REQUEST 2026-05-04) */
+    document.write('<script src="/shared/clock-skew-guard.js?v=' + Date.now() + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + Date.now() + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.

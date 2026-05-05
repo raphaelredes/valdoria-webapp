@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T15:24:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T15:51:07Z - do not edit directly, edit source -->
 
 
 <!--
@@ -12302,7 +12302,8 @@ body.perf-lite .stub-popup-voice { animation: none; }
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
-   '/shared/toast.js', '/shared/state-checkpoint.js'].forEach(function(src) {
+   '/shared/toast.js', '/shared/state-checkpoint.js',
+   '/shared/clock-skew-guard.js'].forEach(function(src) {
     var s = document.createElement('script');
     s.src = 'https://jogo.lendasdevaldoria.com.br' + src + '?v=' + v;
     s.async = false;

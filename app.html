@@ -80,6 +80,9 @@
     document.write('<script src="shared/connection-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/console-collector.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/error-reporter.js?v=' + v + '"><\/script>');
+    /* Clock skew guard (USER REQUEST 2026-05-04) — detecta relógio errado no device.
+       Mostra overlay com instruções pra evitar NET::ERR_CERT_DATE_INVALID em outras telas. */
+    document.write('<script src="shared/clock-skew-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/wake-lock.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/perf-tracker.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/env-utils.js?v=' + v + '"><\/script>');

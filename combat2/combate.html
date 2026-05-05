@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-05T11:03:49Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-05T15:51:07Z — do not edit directly, edit source -->
 
 
 <!--
@@ -10226,6 +10226,9 @@ window.__onIntroTap = function() {
        sfx_fire.mp3, sfx_cold.mp3, etc.). Chamadas: ValdoriaAudio.play('combat')
        pra música; ValdoriaAudio.playSFX('sfx_hit') pra effects. */
     document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
+    /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
+       proativamente quando relógio do device está errado. */
+    document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
     /* Pan/zoom: cópia local (shared/) — setPointerCapture tardio para não roubar click das .cell */
     document.write('<script src="./shared/combat-battlefield-pan-zoom.js?v=' + v + '"><\/script>');
     /* DADOS canônicos extraídos (2026-04-25): BESTIARY, CHAR_NAMES, CHAR_CLASSES, CHAR_RACES.
