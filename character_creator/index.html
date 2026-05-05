@@ -977,91 +977,109 @@
 
 <body>
 
+    <!-- ════════════════════════════════════════════════════════════════════
+         BUG FIX 2026-05-05: SVG defs MOVED OUT of #onboarding-overlay.
+         Anteriormente os gradients rh-* (heráldicos das raças) ficavam DENTRO
+         do overlay que vira display:none após 300ms (linha ~2052). Quando o
+         parent é display:none, Chrome/Telegram WebView NÃO resolvem refs
+         url(#rh-bronze) etc. — os heráldicos perdem cor e ficam tosco/feio.
+         Solução: SVG defs em top-level do <body>, sempre "live", invisível
+         via width=0 height=0 + position:absolute.
+         ════════════════════════════════════════════════════════════════════ -->
+    <svg id="creator-svg-defs" width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <!-- Mini-dado (D20 onboarding) -->
+            <linearGradient id="ob-mini-die-edge" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f8f5ee"/>
+                <stop offset="100%" stop-color="#5a4838"/>
+            </linearGradient>
+            <linearGradient id="ob-mini-die-face" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3a2e22"/>
+                <stop offset="100%" stop-color="#1a1410"/>
+            </linearGradient>
+            <!-- Heraldic gold (vertical, brilho topo → sombra base) -->
+            <linearGradient id="rh-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fff4d0"/>
+                <stop offset="40%" stop-color="#e8c45a"/>
+                <stop offset="75%" stop-color="#c4953a"/>
+                <stop offset="100%" stop-color="#5a3e10"/>
+            </linearGradient>
+            <!-- Heraldic silver (lâminas de aço) -->
+            <linearGradient id="rh-silver" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f8f5ee"/>
+                <stop offset="50%" stop-color="#a89478"/>
+                <stop offset="100%" stop-color="#5a4838"/>
+            </linearGradient>
+            <!-- Heraldic crimson (gemas/sangue) -->
+            <linearGradient id="rh-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#e85040"/>
+                <stop offset="60%" stop-color="#a04030"/>
+                <stop offset="100%" stop-color="#5a2018"/>
+            </linearGradient>
+            <!-- Heraldic shadow (atrás dos elementos pra profundidade) -->
+            <radialGradient id="rh-shadow" cx="50%" cy="50%" r="55%">
+                <stop offset="0%" stop-color="#1a1410" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Heraldic flame (chama tiefling) -->
+            <linearGradient id="rh-flame" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#c43020"/>
+                <stop offset="50%" stop-color="#e85020"/>
+                <stop offset="100%" stop-color="#fff4d0"/>
+            </linearGradient>
+            <!-- USER REQUEST 2026-05-05: paleta diversa pra cada raça ter
+                 identidade única (regra MEMORY.md "menos gold em heráldicos") -->
+            <linearGradient id="rh-bronze" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#e8a060"/>
+                <stop offset="50%" stop-color="#b87333"/>
+                <stop offset="100%" stop-color="#5a3010"/>
+            </linearGradient>
+            <linearGradient id="rh-emerald" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#a0e0a0"/>
+                <stop offset="50%" stop-color="#3a8a3a"/>
+                <stop offset="100%" stop-color="#1a4a1a"/>
+            </linearGradient>
+            <linearGradient id="rh-sapphire" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#a0c8e8"/>
+                <stop offset="50%" stop-color="#4a78c4"/>
+                <stop offset="100%" stop-color="#1a3a78"/>
+            </linearGradient>
+            <linearGradient id="rh-violet" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#e8a0e8"/>
+                <stop offset="50%" stop-color="#8a4ab0"/>
+                <stop offset="100%" stop-color="#3a1a5a"/>
+            </linearGradient>
+            <linearGradient id="rh-bone" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f8f0d8"/>
+                <stop offset="50%" stop-color="#d4c8a8"/>
+                <stop offset="100%" stop-color="#8a7a5a"/>
+            </linearGradient>
+            <linearGradient id="rh-rust" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#e8a070"/>
+                <stop offset="50%" stop-color="#a04030"/>
+                <stop offset="100%" stop-color="#5a1810"/>
+            </linearGradient>
+            <linearGradient id="rh-stone" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#a0a0a0"/>
+                <stop offset="50%" stop-color="#5a5a5a"/>
+                <stop offset="100%" stop-color="#2a2a2a"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
     <!-- Onboarding carousel AAA — USER REQUEST 2026-05-04
          Visual upgrade: custom SVG illustrations (no emoji), particle field,
          corner runes, vignette background, animated title/subtitle stagger.
          Text atualizado: 9 raças (não 3), narrativa mais imersiva. -->
     <div id="onboarding-overlay" class="onboarding-overlay" style="display:none">
-        <!-- Hidden SVG defs (gradients reusados em mini-dados + heráldicos das raças) -->
-        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-            <defs>
-                <linearGradient id="ob-mini-die-edge" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#f8f5ee"/>
-                    <stop offset="100%" stop-color="#5a4838"/>
-                </linearGradient>
-                <linearGradient id="ob-mini-die-face" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#3a2e22"/>
-                    <stop offset="100%" stop-color="#1a1410"/>
-                </linearGradient>
-                <!-- Heraldic gold (vertical, brilho topo → sombra base) -->
-                <linearGradient id="rh-gold" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#fff4d0"/>
-                    <stop offset="40%" stop-color="#e8c45a"/>
-                    <stop offset="75%" stop-color="#c4953a"/>
-                    <stop offset="100%" stop-color="#5a3e10"/>
-                </linearGradient>
-                <!-- Heraldic silver (lâminas de aço) -->
-                <linearGradient id="rh-silver" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#f8f5ee"/>
-                    <stop offset="50%" stop-color="#a89478"/>
-                    <stop offset="100%" stop-color="#5a4838"/>
-                </linearGradient>
-                <!-- Heraldic crimson (gemas/sangue) -->
-                <linearGradient id="rh-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e85040"/>
-                    <stop offset="60%" stop-color="#a04030"/>
-                    <stop offset="100%" stop-color="#5a2018"/>
-                </linearGradient>
-                <!-- Heraldic shadow (atrás dos elementos pra profundidade) -->
-                <radialGradient id="rh-shadow" cx="50%" cy="50%" r="55%">
-                    <stop offset="0%" stop-color="#1a1410" stop-opacity="0.7"/>
-                    <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
-                </radialGradient>
-                <!-- Heraldic flame (chama tiefling) -->
-                <linearGradient id="rh-flame" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stop-color="#c43020"/>
-                    <stop offset="50%" stop-color="#e85020"/>
-                    <stop offset="100%" stop-color="#fff4d0"/>
-                </linearGradient>
-                <!-- USER REQUEST 2026-05-05: REGRA — menos gold em heráldicos.
-                     Paleta diversa pra cada raça ter sua identidade única. -->
-                <linearGradient id="rh-bronze" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e8a060"/>
-                    <stop offset="50%" stop-color="#b87333"/>
-                    <stop offset="100%" stop-color="#5a3010"/>
-                </linearGradient>
-                <linearGradient id="rh-emerald" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#a0e0a0"/>
-                    <stop offset="50%" stop-color="#3a8a3a"/>
-                    <stop offset="100%" stop-color="#1a4a1a"/>
-                </linearGradient>
-                <linearGradient id="rh-sapphire" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#a0c8e8"/>
-                    <stop offset="50%" stop-color="#4a78c4"/>
-                    <stop offset="100%" stop-color="#1a3a78"/>
-                </linearGradient>
-                <linearGradient id="rh-violet" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e8a0e8"/>
-                    <stop offset="50%" stop-color="#8a4ab0"/>
-                    <stop offset="100%" stop-color="#3a1a5a"/>
-                </linearGradient>
-                <linearGradient id="rh-bone" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#f8f0d8"/>
-                    <stop offset="50%" stop-color="#d4c8a8"/>
-                    <stop offset="100%" stop-color="#8a7a5a"/>
-                </linearGradient>
-                <linearGradient id="rh-rust" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e8a070"/>
-                    <stop offset="50%" stop-color="#a04030"/>
-                    <stop offset="100%" stop-color="#5a1810"/>
-                </linearGradient>
-                <linearGradient id="rh-stone" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#a0a0a0"/>
-                    <stop offset="50%" stop-color="#5a5a5a"/>
-                    <stop offset="100%" stop-color="#2a2a2a"/>
-                </linearGradient>
-            </defs>
-        </svg>
+        <!-- Hidden SVG defs DEPRECATED — gradients movidos pra top-level
+             #creator-svg-defs (no <body>) pra resolver bug em que rh-* refs
+             paravam de resolver após overlay ficar display:none (~300ms).
+             Bloco vazio mantido apenas como placeholder estrutural; pode ser
+             removido se nada referenciar IDs duplicados aqui. -->
+        <!-- defs movidos pra #creator-svg-defs (top-level body) — fix bug
+             cores sumindo após onboarding (gradients dentro de display:none
+             paravam de resolver). 2026-05-05. -->
 
         <!-- Aurora layer (gradient suave animado no fundo) -->
         <div class="ob-aurora" aria-hidden="true"></div>
