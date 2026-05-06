@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T23:29:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T23:34:56Z - do not edit directly, edit source -->
 
 
 <!--
@@ -4551,6 +4551,19 @@ body.perf-lite .event-text-line {
   color: #c4953a;
   margin: 0 0 4px 0;
   text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* 2026-05-06: ícone heráldico ao lado do título Mochila (substitui 🎒). */
+.inv-title-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  color: #c4953a;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.5))
+          drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 .inv-subtitle {
   font-family: Cinzel, serif;
@@ -8351,7 +8364,7 @@ window.__onIntroTap = function() {
   <div id="inv-overlay">
     <div class="inv-card">
       <div class="inv-header">
-        <h2 class="inv-title">🎒 Mochila</h2>
+        <h2 class="inv-title"><svg class="inv-title-icon" aria-hidden="true"><use href="#ic-mochila"></use></svg>Mochila</h2>
         <div class="inv-subtitle" id="inv-subtitle">— itens</div>
       </div>
       <div class="inv-body" id="inv-body">
