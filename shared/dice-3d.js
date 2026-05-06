@@ -1070,6 +1070,21 @@ var Dice3D = (function () {
         }
     };
 
+    /**
+     * Som canonical embutido — usa ValdoriaAudio.playSFX('sfx_dice_roll')
+     * (audio-manager.js TRACKS.sfx_dice_roll = ['sfx_dice_roll.mp3', 'sfx_dice_roll_2.mp3']).
+     * Cada call escolhe random entre as 2 variantes. Reaproveitado por TODOS
+     * os WebApps que usam Dice3D — sem wireing manual.
+     * Caller deve carregar audio-manager.js antes; sem ele, fail-soft (sem som).
+     */
+    Dice3DInstance._playRollSfx = function () {
+        try {
+            if (typeof window.ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+                ValdoriaAudio.playSFX('sfx_dice_roll');
+            }
+        } catch (e) { /* fail-soft */ }
+    };
+
     Dice3DInstance.prototype.roll = function (resultValue, onDone) {
         var self = this;
         this._epicResult = null;
@@ -1078,6 +1093,10 @@ var Dice3D = (function () {
         this._rolling = false;
         this._createMesh();
         haptic('medium');
+        // 2026-05-02 — Som CANONICAL embutido no Dice3D (auto pra TODO uso).
+        // Antes: cada caller tinha que chamar sfxDiceRoll() manualmente.
+        // Agora: dice 3D toca som sozinho. Tries ValdoriaAudio first → fallback procedural.
+        Dice3DInstance._playRollSfx();
         var mesh = this._dieMesh;
         var dieType = this._dieType;
         this._finalQuat = getTargetQuaternion(mesh, resultValue);
@@ -1143,6 +1162,8 @@ var Dice3D = (function () {
         }
         var self = this;
         var count = Math.min(configs.length, 5);
+        // Som canonical (idem .roll() — auto pra todos os usos)
+        Dice3DInstance._playRollSfx();
         this._showingResult = false;
         this._rolling = true;
         this._multiMode = true;

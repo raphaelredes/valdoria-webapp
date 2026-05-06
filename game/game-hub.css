@@ -247,6 +247,7 @@
 .hub-div {
   display: flex;
   align-items: center;
+  justify-content: center;  /* divider sempre centralizado horizontalmente */
   gap: var(--v-space-md, 8px);
   padding: var(--v-space-xs, 2px) 0;
   opacity: 0.2;
