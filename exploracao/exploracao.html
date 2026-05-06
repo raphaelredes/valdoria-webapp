@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:03:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:21:46Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10195,7 +10195,12 @@ window.__onIntroTap = function() {
 
       if (idx === pages.length - 1) {
         if (navEl) navEl.style.display = 'none';
-        if (techEl) techEl.style.display = '';
+        /* FIX 2026-05-06: NÃO setar techEl.style.display='' aqui — isso
+           voltaria pro default CSS (flex) e mostraria a div azul vazia
+           durante o totalDelay enquanto o reveal do texto roda.
+           _renderTechCallout (chamado dentro do setTimeout) decide o
+           display final baseado em rt.tech, escondendo se ausente/vazio. */
+        if (techEl) techEl.style.display = 'none';
         if (choicesEl) {
           choicesEl.style.display = '';
           choicesEl.style.opacity = '0';
