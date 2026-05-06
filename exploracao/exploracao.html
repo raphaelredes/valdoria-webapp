@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T20:39:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T20:43:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10251,6 +10251,11 @@ window.__onIntroTap = function() {
             }
           });
           choicesEl.style.pointerEvents = '';
+          /* FIX 2026-05-06: REMOVER .choices-revealing após finish pra
+             impedir re-disparo de epicChoiceReveal quando idle-pulse togglar
+             classes — choice ficaria "sumindo/reaparecendo". Mesmo fix do
+             setTimeout principal pós-cascata. */
+          choicesEl.classList.remove('choices-revealing');
           /* Iniciar idle-loop imediato (sem aguardar cascata) */
           _startChoiceIdleLoop();
         }
@@ -10346,15 +10351,17 @@ window.__onIntroTap = function() {
             choicesEl.classList.remove('choices-pending');
             choicesEl.classList.add('choices-revealing');
             choicesEl.style.pointerEvents = '';
-            /* PADRAO_ALDRIC idle-loop 2026-05-06: após cascata épica
-               terminar (~1s + 140ms × N choices), iniciar rotating
-               highlight que pulsa cada choice uma por vez pra sinalizar
-               ao jogador que precisa escolher. Loop infinito até user
-               decidir, fechar, pular ou trocar página. */
             var nChoices = choicesEl.querySelectorAll('.stub-popup-choice').length;
             var cascadeEnd = 720 + (nChoices * 140);  /* ms até última choice acabar reveal */
             setTimeout(function () {
               if (myToken !== renderToken) return;
+              /* FIX 2026-05-06: REMOVER .choices-revealing após cascata pra
+                 evitar que toggle de .choice-idle-pulse no idle-loop
+                 re-dispare animation epicChoiceReveal (slide+blur+fade)
+                 — o que causava choice "sumindo e reaparecendo" entre
+                 cada glow. Sem .choices-revealing, choice fica em estado
+                 base visível e idle-pulse aplica APENAS o glow. */
+              if (choicesEl) choicesEl.classList.remove('choices-revealing');
               _startChoiceIdleLoop();
             }, cascadeEnd);
           }
