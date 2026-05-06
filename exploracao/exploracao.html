@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T21:19:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T21:29:13Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9589,6 +9589,102 @@ window.__onIntroTap = function() {
                        _logChoiceMap, GENERIC_STUB}
    ════════════════════════════════════════════════════════════════════════════ */
 (function () {
+  /* ═══════════════════════════════════════════════════════════════════════
+     EVENT CHOICE PERSISTENCE — anti-cheat (2026-05-06)
+     Salva escolhas feitas em eventos no Player.metadata.event_choices.
+     Quando jogador re-encontra evento já-decidido, mostra outcome
+     anterior em vez de novas choices (impede save-scumming).
+
+     repeatable: true em entries (campfire_rest, abandoned_camp.cleared) =
+     evento sem persistência — pode ser refeito.
+
+     LOCAL mode (file://): backup em localStorage pra sobreviver F5.
+     REMOTE mode: persistência futura via /api/event/save_choice.
+     ═══════════════════════════════════════════════════════════════════════ */
+  var EVENT_CHOICES_LS_KEY = 'valdoria_event_choices_v1';
+
+  function _getChoicesStore() {
+    var p = (window.S && window.S.player) ? window.S.player : null;
+    if (!p) return null;
+    p.metadata = p.metadata || {};
+    p.metadata.event_choices = p.metadata.event_choices || {};
+    return p.metadata.event_choices;
+  }
+
+  function _eventKey(rt) {
+    if (!rt) return null;
+    if (rt.hexId) return 'hex:' + rt.hexId;
+    if (rt.legacyId) return 'leg:' + rt.legacyId;
+    return null;
+  }
+
+  function _persistLocal(store) {
+    try {
+      localStorage.setItem(EVENT_CHOICES_LS_KEY, JSON.stringify(store || {}));
+    } catch (e) { /* silente em file:// raro */ }
+  }
+
+  function _hydrateFromLocal() {
+    try {
+      var raw = localStorage.getItem(EVENT_CHOICES_LS_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (!data || typeof data !== 'object') return;
+      var p = (window.S && window.S.player) ? window.S.player : null;
+      if (!p) return;
+      p.metadata = p.metadata || {};
+      /* Mescla: localStorage só preenche keys ausentes — server/state vence */
+      p.metadata.event_choices = p.metadata.event_choices || {};
+      Object.keys(data).forEach(function (k) {
+        if (!p.metadata.event_choices[k]) p.metadata.event_choices[k] = data[k];
+      });
+    } catch (e) { /* silente */ }
+  }
+
+  function _hasChoiceFor(rt) {
+    var key = _eventKey(rt);
+    if (!key) return null;
+    var store = _getChoicesStore();
+    if (!store) return null;
+    return store[key] || null;
+  }
+
+  function _recordChoice(rt, choice, repeatable, outcomeFlavor, outcomeOk) {
+    if (repeatable === true) return; /* eventos repetíveis não persistem */
+    var key = _eventKey(rt);
+    if (!key) return; /* showcase / sem id estável → não persiste */
+    var store = _getChoicesStore();
+    if (!store) return;
+    store[key] = {
+      choice_id: choice ? choice.id : null,
+      choice_label: choice ? choice.label : null,
+      ok: !!outcomeOk,
+      flavor: outcomeFlavor || '',
+      ts: Date.now()
+    };
+    _persistLocal(store);
+    if (window.TileLog) window.TileLog.info('CHOICE-PERSIST', 'recorded', {
+      key: key, choice: choice && choice.id, ok: outcomeOk
+    });
+  }
+
+  /* Hydratar quando StubEventLayer init (window.S.player precisa existir) */
+  if (typeof window !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _hydrateFromLocal);
+    } else {
+      setTimeout(_hydrateFromLocal, 100);
+    }
+  }
+
+  /* Expor pra EventResolver e _onChoiceClickEnhanced consumirem */
+  window.EventChoicePersistence = {
+    hasChoiceFor: _hasChoiceFor,
+    recordChoice: _recordChoice,
+    eventKey: _eventKey,
+    LS_KEY: EVENT_CHOICES_LS_KEY
+  };
+
   // Display names em PT-BR (per regra "100% PT-BR" + "Original Naming").
   // Type 'orc_camp' → 'Acampamento Orc'. Outros virão em Phase 8.
   var TYPE_DISPLAY_NAMES = {
@@ -9802,6 +9898,28 @@ window.__onIntroTap = function() {
 
   function _showRuntimeEvent(rt) {
     if (!rt) return;
+    /* 2026-05-06: anti-cheat — se rt.alreadyChosen, sobrescreve choices
+       com botão único "Continuar" + flavor mostrando outcome prévio.
+       Aplica antes do delegate paginated pra que ambos paths respeitem. */
+    if (rt.alreadyChosen) {
+      var prev = rt.alreadyChosen;
+      var label = prev.choice_label || prev.choice_id || 'sua escolha';
+      var status = prev.ok ? 'sucesso' : 'falha';
+      rt.choices = [
+        { id: 'already_chosen_continue', label: 'Continuar', flavor: 'Você prossegue.' }
+      ];
+      var memoryNote = '\n\n<i>Você já tomou sua decisão aqui anteriormente: ' +
+        '<b>"' + label + '"</b> (' + status + ').</i>\n<i>' +
+        (prev.flavor || 'O passado pesa, mas você precisa seguir.') + '</i>';
+      if (rt.script && Array.isArray(rt.script) && rt.script.length > 0) {
+        rt.script = rt.script.slice();
+        rt.script.push({ type: 'narration', text: memoryNote });
+      } else if (rt.body) {
+        rt.body = rt.body + memoryNote;
+      } else {
+        rt.body = memoryNote;
+      }
+    }
     /* PADRAO_ALDRIC delegação 2026-05-06: rt.script[] (array de
        {type:'narration'|'speech',speaker?,text}) → renderer paginado AAA.
        Fallback pro caminho legacy quando entry só tem rt.body string. */
@@ -9926,6 +10044,17 @@ window.__onIntroTap = function() {
     rollPromise.then(function (rollResult) {
       var outcome = rollResult.success ? choice.outcome_ok : choice.outcome_fail;
       if (!outcome) outcome = choice.outcome_ok || { ops: [], fsm: null, flavor: '' };
+      /* 2026-05-06: Persistir choice (anti-cheat save-scumming).
+         Skipa eventos com rt.repeatable=true (campfire_rest, descansos etc.).
+         Skipa showcase (sem hexId/legacyId estável → eventKey null → no-op). */
+      try {
+        if (window.EventChoicePersistence) {
+          window.EventChoicePersistence.recordChoice(
+            rt, choice, !!rt.repeatable,
+            outcome.flavor || '', !!rollResult.success
+          );
+        }
+      } catch (_) { /* persist falha silenciosa não bloqueia gameplay */ }
       var bodyEl = _getEl('stub-popup-body');
       if (bodyEl) {
         bodyEl.textContent = outcome.flavor || (rollResult.success ? 'Sucesso.' : 'Falha.');
@@ -11964,9 +12093,31 @@ body.perf-lite .stub-popup-voice { animation: none; }
       // speaker?, text}) habilita renderer paginado AAA. Quando ausente,
       // _showRuntimeEvent cai pro caminho legacy com `body` string.
       script: Array.isArray(entry.script) ? entry.script : null,
+      // 2026-05-06: anti-cheat persistence — repeatable flag do entry +
+      // alreadyChosen lookup no Player.metadata.event_choices. Quando
+      // alreadyChosen presente, _showRuntimeEvent renderiza outcome
+      // anterior (sem choices) ao invés de permitir nova escolha.
+      repeatable: entry.repeatable === true,
+      alreadyChosen: null, /* preenchido logo abaixo se aplicável */
       resolvedAt: Date.now(),
       archetype: window.VoiceLineLayer ? window.VoiceLineLayer.getArchetype(ctx.player.cls) : null
     };
+    /* Anti-cheat gate: lookup choice prévia no Player.metadata.event_choices.
+       Se entry NÃO é repeatable e player já decidiu antes, marca rt
+       com alreadyChosen → renderer mostra "você já decidiu" no lugar das
+       choices. Eventos repeatable (campfire_rest, descansos) ignoram. */
+    if (!rt.repeatable && window.EventChoicePersistence) {
+      try {
+        var prev = window.EventChoicePersistence.hasChoiceFor(rt);
+        if (prev) {
+          rt.alreadyChosen = prev;
+          if (window.TileLog) window.TileLog.info('CHOICE-PERSIST', 'gate_blocked', {
+            key: window.EventChoicePersistence.eventKey(rt),
+            prev_choice: prev.choice_id, prev_ok: prev.ok
+          });
+        }
+      } catch (_) { /* lookup falha silente */ }
+    }
     if (window.TileLog) window.TileLog.info('TILE-EVT', 'resolved', {
       hex: ctx.hexId || null, source: source, type: ctx.type,
       state: ctx.state, choices: choices.length, hasVoice: !!voiceLine
