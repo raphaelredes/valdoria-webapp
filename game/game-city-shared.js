@@ -146,7 +146,9 @@ function serviceCard(svc) {
   /* Badge */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
-    bdg.textContent = svc.badge;
+    /* FIX 2026-05-06: badge pode ser SVG markup heráldico */
+    if (typeof svc.badge === 'string' && svc.badge.charAt(0) === '<') bdg.innerHTML = svc.badge;
+    else bdg.textContent = svc.badge;
     card.appendChild(bdg);
   }
 
@@ -275,7 +277,9 @@ function actionList(items) {
       }
       if (item.badge) {
         var bdg = el('span', 'vc-badge');
-        bdg.textContent = item.badge;
+        /* FIX 2026-05-06: badge pode ser SVG markup heráldico */
+        if (typeof item.badge === 'string' && item.badge.charAt(0) === '<') bdg.innerHTML = item.badge;
+        else bdg.textContent = item.badge;
         btn.appendChild(bdg);
       }
       btn.addEventListener('click', function () { act(item.cb); });
@@ -298,7 +302,9 @@ function sectionLabel(text) {
 function badgeEl(text, type) {
   var b = el('span', 'vc-badge');
   if (type) b.classList.add('vc-badge--' + type);
-  b.textContent = text;
+  /* FIX 2026-05-06: text pode ser SVG markup heráldico */
+  if (typeof text === 'string' && text.charAt(0) === '<') b.innerHTML = text;
+  else b.textContent = text;
   return b;
 }
 
