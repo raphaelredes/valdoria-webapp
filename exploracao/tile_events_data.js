@@ -7,6 +7,14 @@ window.TILE_EVENTS_DB = window.TILE_EVENTS_DB || {};
 
 window.TILE_EVENTS_DB['orc_camp.dormant'] = {
   body: 'O acampamento está em silêncio profundo. Brasas mortas onde havia uma fogueira; lonas escuras, sem movimento. Nenhuma sentinela à vista.',
+  /* PADRAO_ALDRIC v1 — narrativa AAA paginada (4-7 linhas multi-camada).
+     Quando presente, _renderEncounterPopup canonical pagina automaticamente. */
+  script: [
+    { type: 'narration', text: 'Você se aproxima de uma clareira na orla do bosque. Um acampamento orc se estende em meia-lua entre as árvores — três tendas pretas, um totem pintado em sangue ressecado, e o vão circular de uma fogueira já consumida.' },
+    { type: 'narration', text: 'O silêncio é <i>denso demais</i>. Nenhum corvo, nenhum eco de cantilena gutural — só o vento agitando lonas vazias. As cinzas no centro estão geladas há horas.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Algo aconteceu aqui. Eles não saíram em formação — saíram <i>às pressas</i>. Olhe pelas pegadas: passos largos, espalhados, sem ordem.' },
+    { type: 'narration', text: 'Sob a lona mais distante, um pequeno saco de couro repousa esquecido. Pelo formato, é pesado — talvez moeda, talvez algo mais. A questão é: você se atreve a vasculhar o que abandonaram?' }
+  ],
   voiceLines: {
     martial:    '"Calmo demais. Algo aconteceu aqui."',
     specialist: '"Sem trilhas frescas saindo. Eles partiram, ou estão dormindo."',
@@ -55,6 +63,13 @@ window.TILE_EVENTS_DB['orc_camp.dormant'] = {
 
 window.TILE_EVENTS_DB['orc_camp.active'] = {
   body: 'Você espia da mata. Vultos se movem entre as tendas, fogueira crepita, banner tremula no vento. Eles ainda não te viram.',
+  script: [
+    { type: 'narration', text: 'Você se agacha atrás de uma fileira de samambaias densas. À frente, o acampamento orc <b>vivo</b>: lança-chamas crepitando, fumaça subindo em duas colunas, e o estandarte de osso e couro batendo contra o vento como um tambor surdo.' },
+    { type: 'narration', text: 'Cinco vultos. <i>Talvez seis.</i> Um patrulha o perímetro com passos pesados, machado de duas mãos pendurado no quadril. Os outros se aglomeram ao redor da fogueira, devorando carne crua.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Eles ainda não te viram. <i>Ainda.</i>' },
+    { type: 'narration', text: 'A vegetação rasteira oferece cobertura ao leste — até a curva do penhasco. Por outro lado, o ângulo frontal é claro: três passos e você está dentro do círculo de luz da fogueira, lâmina contra lâmina.' },
+    { type: 'narration', text: 'O coração martela. Cada decisão aqui pode terminar em sangue derramado — o seu, ou o deles. Como você quer que isso termine?' }
+  ],
   voiceLines: {
     martial:    '"Cheiro de aço e suor. São poucos. Posso pegá-los."',
     specialist: '"Sentinela ao leste. Fogueira de iscas. Padrão típico."',
@@ -274,6 +289,12 @@ window.TILE_EVENTS_DB['orc_camp.ruins'] = {
 
 window.TILE_EVENTS_DB['forgotten_chest.dormant'] = {
   body: 'Um baú de madeira escurecida pelo tempo descansa sob raízes retorcidas. Cadeado intacto, mas a tampa parece ceder à pressão certa.',
+  script: [
+    { type: 'narration', text: 'Sob a sombra de um carvalho ancião, raízes nodosas envolvem um baú esquecido pelo mundo. A madeira é negra de umidade, as ferragens cobertas de musgo verde-prateado.' },
+    { type: 'narration', text: 'Quem deixou isto aqui? <i>Há quanto tempo?</i> O cadeado de bronze, embora intacto, traz a marca de quem viajou muito — um pequeno selo gasto, ilegível.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'O baú parece chamar você. Mas todo tesouro abandonado tem dono — vivo ou morto. Decida com cuidado.' },
+    { type: 'narration', text: 'Você se ajoelha. As raízes formaram um abraço protetor sobre o baú. O ar é úmido, perfumado de cogumelo e madeira em decomposição. Algo aqui aguarda há muito tempo.' }
+  ],
   voiceLines: {
     martial:    '"Madeira velha. Não vai resistir."',
     specialist: '"Cadeado simples. Posso abrir limpo."',
@@ -482,6 +503,12 @@ window.TILE_EVENTS_DB['tripwire_trap.ruins'] = {
 
 window.TILE_EVENTS_DB['runestone.dormant'] = {
   body: 'Uma pedra ereta com runas gravadas pulsa fracamente. As linhas formam um padrão antigo — quem o gravou já não vive mais.',
+  script: [
+    { type: 'narration', text: 'No centro de uma clareira coberta de líquens prateados, uma pedra ereta de quatro metros se ergue contra o céu. Suas faces estão cobertas de glifos profundamente entalhados — runas que <b>não pertencem</b> a nenhuma língua viva.' },
+    { type: 'narration', text: 'Você toca a superfície. Está <i>fria</i> além do natural — um frio antigo, como pedra retirada das profundezas da terra. As linhas pulsam fracamente, lentas, no ritmo de um coração que dorme.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Algo aqui ainda <i>respira</i>. Uma magia esquecida pelo mundo, mas não por si mesma. Os druidas diriam: a terra escuta esta pedra.' },
+    { type: 'narration', text: 'Há quem afirme que tais marcos foram erguidos pelos primeiros conclaves do Sul, antes da fundação dos reinos atuais. Tocar uma destas pedras pode despertar algo — bênção, maldição, ou apenas eco. Você decide se vale o risco.' }
+  ],
   voiceLines: {
     martial:    '"Uma pedra. Símbolos estranhos."',
     specialist: '"Marca de fronteira ou aviso. Talvez ambos."',
@@ -648,6 +675,12 @@ window.TILE_EVENTS_DB['runestone.ruins'] = {
 
 window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
   body: 'Pegadas profundas no barro úmido. Recentes — talvez horas atrás. Algo grande passou por aqui.',
+  script: [
+    { type: 'narration', text: 'Você se ajoelha à beira do caminho lamacento. Pegadas profundas mordem a terra macia — quatro patas, garras visíveis, peso considerável. <i>Algo grande</i> passou por aqui.' },
+    { type: 'narration', text: 'A umidade não secou nas bordas. Talvez três horas. Talvez menos. O cheiro úmido de pelo molhado ainda paira no ar, misturado com algo metálico — <b>sangue</b>.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'A criatura está ferida. Cada gota deixa um rastro. Para um caçador habilidoso, isto é uma trilha clara. Para um inocente, é um aviso.' },
+    { type: 'narration', text: 'O rastro segue mata adentro, em direção a uma elevação rochosa. Vento sussurra entre os pinheiros. O que você decidir agora pode terminar com troféu, com cura, ou com uma fera enraivecida cobrando sua dívida.' }
+  ],
   voiceLines: {
     martial:    '"Algo grande. Posso seguir e pegá-lo."',
     specialist: '"Quatro patas. Animal selvagem, não humanoide."',
@@ -810,6 +843,12 @@ window.TILE_EVENTS_DB['sentinel_post.dormant'] = {
   // resultado... precisamos da imersividade AAA, onde estão os eventos com
   // consequência e mais diálogos?"
   body: 'Uma torre baixa de pedra cinzenta se ergue à beira do caminho — quatro metros de altura, sem porta visível. Janela estreita virada para a estrada, fenestrada como olho que dorme. A chaminé está fria. Cinzas pretas espalhadas no parapeito sugerem que alguém apagou o fogo às pressas. No chão, junto à parede oeste, marcas de bota — pesadas, recentes, mas vão da torre PARA o bosque. Quem estava aqui partiu rápido.',
+  script: [
+    { type: 'narration', text: 'Uma torre baixa de pedra cinzenta se ergue à beira do caminho — quatro metros de altura, sem porta visível. Apenas uma fenda estreita voltada para a estrada, como um <i>olho que dorme</i>.' },
+    { type: 'narration', text: 'A chaminé está fria há horas. No parapeito, cinzas pretas — alguém apagou o fogo <b>às pressas</b>. Junto à parede oeste, marcas de bota: pesadas, recentes, mas saindo da torre <i>em direção ao bosque</i>.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Quem montava guarda aqui partiu correndo. A pergunta é — <i>do que estavam fugindo?</i>' },
+    { type: 'narration', text: 'O silêncio é solene. Você poderia subir, investigar a fenda, ou seguir as pegadas mata adentro. Cada caminho promete respostas — e talvez perigos próprios.' }
+  ],
   voiceLines: {
     martial:    '"Saíram apressados. Algo os assustou."',
     specialist: '"As cinzas ainda têm forma — apagaram há menos de doze horas."',
@@ -1136,6 +1175,12 @@ window.TILE_EVENTS_DB['sentinel_post.ruins'] = {
 
 window.TILE_EVENTS_DB['broken_tower.dormant'] = {
   body: 'Uma torre alta partida ao meio. As pedras superiores caíram, criando uma rampa improvisada até o que sobrou da plataforma.',
+  script: [
+    { type: 'narration', text: 'A torre se ergue rachada como um <i>dente partido</i> contra o céu. Metade superior despencou em algum cataclismo esquecido — pedras enormes formam uma rampa caótica até a plataforma residual.' },
+    { type: 'narration', text: 'Hera cresceu sobre os escombros, abraçando o que restou. Aves de rapina giram em volta da abertura — sinal de que algo se aninhou no alto. Talvez seguro. Talvez não.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Do topo, você teria visão de toda esta região. Mas a subida testará seu equilíbrio — e o que quer que more lá em cima pode não receber visitas com gentileza.' },
+    { type: 'narration', text: 'Resíduos antigos cintilam fracamente entre as fendas — fragmentos de cristal, talvez. Quem ergueu esta torre carregava poder, e o que jaz nas ruínas pode ainda valer um teste de coragem.' }
+  ],
   voiceLines: {
     martial:    '"Torre quebrada. Ainda há altura útil."',
     specialist: '"Vista privilegiada do alto. Vale subir."',
@@ -1230,6 +1275,12 @@ window.TILE_EVENTS_DB['broken_tower.ruins'] = {
 
 window.TILE_EVENTS_DB['bandit_camp.dormant'] = {
   body: 'Acampamento abandonado às pressas. Tendas torpes, fogueira morta, pegadas confusas para todos os lados.',
+  script: [
+    { type: 'narration', text: 'Quatro tendas malfeitas circulam uma fogueira apagada. O cenário é de <b>fuga</b>: tigelas viradas, mantos largados no chão, uma bota solitária fincada na lama.' },
+    { type: 'narration', text: 'As cinzas estão frias, mas o cheiro de bacon queimado ainda persiste. Pegadas saem em direções diferentes — sem ordem, sem comando. Quem dormia aqui foi <i>surpreendido</i>.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Bandidos não fogem da própria sombra. O que quer que tenha aparecido aqui foi <i>pior</i> que eles. Convém pensar duas vezes antes de remexer no que abandonaram.' },
+    { type: 'narration', text: 'Mas onde há fuga apressada, há também tesouros esquecidos. Dependendo da sua audácia, este acampamento pode render moedas — ou atrair de volta o que afugentou seus donos.' }
+  ],
   voiceLines: {
     martial:    '"Foram assustados ou rolaram em pânico."',
     specialist: '"Padrão de fuga. Algo os pegou de surpresa."',
@@ -1438,6 +1489,12 @@ window.TILE_EVENTS_DB['bandit_camp.ruins'] = {
 
 window.TILE_EVENTS_DB['hunter_camp.dormant'] = {
   body: 'Acampamento de caçadores em silêncio. Couros estendidos para secar, fogueira fria, sem sinal recente de uso.',
+  script: [
+    { type: 'narration', text: 'Em uma clareira protegida por pinheiros antigos, três tendas pequenas e bem-feitas formam um triângulo. Couros estão pendurados para secar — pele de cervo, raposa, javali — todos curados com competência.' },
+    { type: 'narration', text: 'A fogueira está coberta com pedras chatas: <i>técnica de caçador</i>, mantém calor sem fumaça delatora. Mas as cinzas embaixo já não são mornas. Há horas saíram em busca de presa.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Estes são caçadores de verdade — não bandidos. Eles vivem da floresta e respeitam quem respeita. Aproxime-se com calma e talvez seja recebido. Tente roubá-los e suas flechas voarão antes de você ouvir o silvo.' },
+    { type: 'narration', text: 'Você poderia esperá-los, deixar uma oferenda em sinal de paz, ou seguir adiante respeitosamente. O que escolher revela seu caráter — e a floresta sempre se lembra.' }
+  ],
   voiceLines: {
     martial:    '"Saíram pra caçar. Talvez voltem."',
     specialist: '"Padrão típico. Acampamento de duas semanas."',
@@ -1840,6 +1897,12 @@ window.TILE_EVENTS_DB['caravan_camp.ruins'] = {
 
 window.TILE_EVENTS_DB['abandoned_camp.dormant'] = {
   body: 'Um acampamento abandonado há tempos. Tendas em farrapos, fogueira coberta de musgo. Sinais de partida apressada — alguns objetos pessoais ainda restam.',
+  script: [
+    { type: 'narration', text: 'Você se aproxima de um acampamento que <i>o tempo esqueceu</i>. Tendas em frangalhos, lonas tomadas pelo musgo, uma marmita ainda virada sobre uma pedra como se a refeição tivesse sido interrompida no meio.' },
+    { type: 'narration', text: 'Anos talvez. Quem viveu aqui partiu sem despedida — uma boneca de pano descansa sob folhas secas, um pingente quebrado pende de um galho como amuleto esquecido.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Há histórias que terminam com fuga. Esta é uma delas. O <i>medo</i> ainda paira como névoa antiga.' },
+    { type: 'narration', text: 'Não há perigo imediato — só ecos. Você pode revirar à procura de algo de valor, prestar respeitos pelos que partiram, ou apenas seguir, deixando as ruínas em sua paz silenciosa.' }
+  ],
   voiceLines: {
     martial:    '"Foram embora rápido. Ou pior."',
     specialist: '"Saída em pânico. Investigarei o porquê."',
@@ -1926,6 +1989,12 @@ window.TILE_EVENTS_DB['abandoned_camp.ruins'] = {
 
 window.TILE_EVENTS_DB['war_drum.dormant'] = {
   body: 'Um grande tambor de guerra orc montado em postes. Decorado com ossos e pinturas tribais. Silencioso por enquanto — mas funcional.',
+  script: [
+    { type: 'narration', text: 'Quatro postes de carvalho fincados em círculo sustentam um tambor colossal — pele tensa de couro escuro, repleta de runas tribais pintadas em vermelho-óxido e branco-osso.' },
+    { type: 'narration', text: 'Crânios de animais — e talvez não só animais — pendem das amarras. O tambor está em silêncio, mas não <b>morto</b>: a tensão da pele sugere uso recente.' },
+    { type: 'speech', speaker: 'Mestre da Sombra', text: 'Um único toque deste tambor pode ressoar por <i>quilômetros</i>. Convocação. Aviso. Anúncio de batalha. Quem o tocar mudará a paisagem inteira.' },
+    { type: 'narration', text: 'Você poderia destruí-lo, sabotá-lo silenciosamente, ou — se ousar — tocá-lo. As consequências dependerão de qual é a sua audácia, e de quem está escutando.' }
+  ],
   voiceLines: {
     martial:    '"Tambor de guerra. Convocação tribal."',
     specialist: '"Posso destruir antes que toque — mas dará reforços vir."',

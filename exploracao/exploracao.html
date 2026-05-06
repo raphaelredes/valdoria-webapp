@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T15:32:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T18:42:51Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9634,6 +9634,12 @@ window.__onIntroTap = function() {
 
   function _showRuntimeEvent(rt) {
     if (!rt) return;
+    /* PADRAO_ALDRIC delegação 2026-05-06: rt.script[] (array de
+       {type:'narration'|'speech',speaker?,text}) → renderer paginado AAA.
+       Fallback pro caminho legacy quando entry só tem rt.body string. */
+    if (rt.script && Array.isArray(rt.script) && rt.script.length > 0) {
+      return _showRuntimeEventPaginated(rt);
+    }
     var titleEl = _getEl('stub-popup-title');
     if (titleEl) {
       // Resolve título PT-BR via TYPE_DISPLAY_NAMES quando entry não fornece title.
@@ -9917,6 +9923,23 @@ window.__onIntroTap = function() {
     if (overlay) {
       overlay.classList.add('stub-popup-hidden');
       overlay.classList.remove('stub-event-overlay-force-interaction');
+      /* PADRAO_ALDRIC cleanup 2026-05-06: remove keydown handler
+         e reseta paginated class pra não vazar entre eventos. */
+      if (overlay._padraoAldricKeyHandler) {
+        document.removeEventListener('keydown', overlay._padraoAldricKeyHandler);
+        overlay._padraoAldricKeyHandler = null;
+      }
+      var card = overlay.querySelector('.stub-popup-card');
+      if (card) {
+        card.classList.remove('stub-popup-paginated');
+        card.style.opacity = '';
+        card.style.visibility = '';
+        card.style.transition = '';
+      }
+      var navEl = document.getElementById('stub-popup-nav-paginated');
+      if (navEl) navEl.style.display = 'none';
+      var bodyEl = _getEl('stub-popup-body');
+      if (bodyEl) bodyEl.classList.remove('stub-popup-outcome-ok','stub-popup-outcome-fail');
     }
     if (window.TileLog && _isOpen) window.TileLog.info('STUB-EVT', 'closed', {
       hex: _currentHexId, wasForcedInteraction: _forceInteraction
@@ -9990,6 +10013,223 @@ window.__onIntroTap = function() {
     _setupBackdropClose();
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     PADRAO_ALDRIC — paginação narrativa AAA (porting from cidade.html)
+     2026-05-06: stub-popup-card recebe script[] paginado quando rt.script
+     presente. 1-2 linhas/página com reveal animado horizontal (~14ms/char),
+     choices renderizadas só na última página. Manter compat com rt.body
+     simples — eventos legacy sem script[] continuam funcionando.
+     ═══════════════════════════════════════════════════════════════════════ */
+  function _sanitizeDialogueHTML(s) {
+    if (!s) return '';
+    var escaped = String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+    return escaped.replace(/&lt;(\/?)(i|em|b|strong|br)&gt;/g, '<$1$2>');
+  }
+
+  function _groupScriptIntoPages(script) {
+    var MAX_PAIR_WORDS = 50;
+    var pages = [];
+    var i = 0;
+    while (i < script.length) {
+      var page = [script[i]];
+      var curr = script[i];
+      var currWords = (curr.text || '').split(/\s+/).length;
+      if (i + 1 < script.length) {
+        var next = script[i + 1];
+        var nextWords = (next.text || '').split(/\s+/).length;
+        var combined = currWords + nextWords;
+        var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
+                          && (curr.speaker || '') === (next.speaker || '');
+        var compat =
+          (curr.type === 'speech'    && next.type === 'narration') ||
+          (curr.type === 'narration' && next.type === 'speech') ||
+          (curr.type === 'narration' && next.type === 'narration') ||
+          sameSpeaker;
+        if (combined <= MAX_PAIR_WORDS && compat) {
+          page.push(next);
+          i++;
+        }
+      }
+      pages.push(page);
+      i++;
+    }
+    return pages;
+  }
+
+  function _computeRevealDuration(text) {
+    var chars = (text || '').length;
+    var dur = chars * 14 + 600;
+    return Math.max(900, Math.min(4000, dur));
+  }
+
+  function _ensureNavEl() {
+    var existing = document.getElementById('stub-popup-nav-paginated');
+    if (existing) return existing;
+    var navEl = document.createElement('div');
+    navEl.id = 'stub-popup-nav-paginated';
+    navEl.className = 'stub-popup-nav-paginated';
+    navEl.innerHTML = ''
+      + '<button type="button" class="stub-nav-btn" id="stub-nav-prev" disabled>← Anterior</button>'
+      + '<span class="stub-page-indicator" id="stub-page-indicator">1 / 1</span>'
+      + '<button type="button" class="stub-nav-btn stub-nav-btn-next" id="stub-nav-next">Próximo →</button>';
+    var bodyEl = _getEl('stub-popup-body');
+    var techEl = _getEl('stub-popup-tech');
+    var card = document.querySelector('#stub-event-overlay .stub-popup-card');
+    if (card && techEl) card.insertBefore(navEl, techEl);
+    else if (card && bodyEl) card.insertBefore(navEl, bodyEl.nextSibling);
+    return navEl;
+  }
+
+  function _showRuntimeEventPaginated(rt) {
+    if (!rt) return;
+    var titleEl = _getEl('stub-popup-title');
+    if (titleEl) {
+      var resolvedTitle = rt.title;
+      if (rt.source === 'tile_object' && rt.type && TYPE_DISPLAY_NAMES[rt.type]) {
+        resolvedTitle = TYPE_DISPLAY_NAMES[rt.type];
+      }
+      titleEl.textContent = resolvedTitle || rt.title || 'Evento';
+    }
+    var metaEl = _getEl('stub-popup-meta');
+    if (metaEl) {
+      metaEl.textContent = '';
+      metaEl.style.display = 'none';
+    }
+    var bodyEl = _getEl('stub-popup-body');
+    var techEl = _getEl('stub-popup-tech');
+    var choicesEl = _getEl('stub-popup-choices');
+    var card = document.querySelector('#stub-event-overlay .stub-popup-card');
+    if (card) card.classList.add('stub-popup-paginated');
+
+    var pages = _groupScriptIntoPages(rt.script);
+    var navEl = _ensureNavEl();
+    var prevBtn = document.getElementById('stub-nav-prev');
+    var nextBtn = document.getElementById('stub-nav-next');
+    var pageInd = document.getElementById('stub-page-indicator');
+    var currentPage = 0;
+    var renderToken = 0;
+
+    function renderPage(idx) {
+      renderToken++;
+      var myToken = renderToken;
+      if (!bodyEl) return;
+      bodyEl.innerHTML = '';
+      bodyEl.classList.remove('stub-popup-outcome-ok', 'stub-popup-outcome-fail');
+      var page = pages[idx];
+      var cumulativeDelay = 0;
+      var lineDurations = [];
+      page.forEach(function (line, lineIdx) {
+        var revealDur = _computeRevealDuration(line.text || '');
+        lineDurations.push(revealDur);
+        function spawn() {
+          if (myToken !== renderToken) return;
+          var div = document.createElement('div');
+          var safe = _sanitizeDialogueHTML(line.text || '');
+          div.style.setProperty('--reveal-dur', revealDur + 'ms');
+          if (line.type === 'speech') {
+            div.className = 'enc-line enc-speech';
+            if (line.speaker) div.setAttribute('data-speaker', line.speaker);
+            div.innerHTML = safe;
+          } else {
+            div.className = 'enc-line enc-narration';
+            div.innerHTML = safe;
+          }
+          bodyEl.appendChild(div);
+        }
+        if (lineIdx === 0) spawn();
+        else setTimeout(spawn, cumulativeDelay);
+        cumulativeDelay += Math.round(revealDur * 0.6);
+      });
+
+      if (pageInd) pageInd.textContent = (idx + 1) + ' / ' + pages.length;
+      if (prevBtn) prevBtn.disabled = (idx === 0);
+
+      var lastDur = lineDurations[lineDurations.length - 1] || 0;
+      var totalDelay = cumulativeDelay - Math.round(lastDur * 0.6) + lastDur + 200;
+
+      if (idx === pages.length - 1) {
+        if (navEl) navEl.style.display = 'none';
+        if (techEl) techEl.style.display = '';
+        if (choicesEl) {
+          choicesEl.style.display = '';
+          choicesEl.style.opacity = '0';
+        }
+        setTimeout(function () {
+          if (myToken !== renderToken) return;
+          _renderTechCallout(rt.tech);
+          _renderChoicesEnhanced(rt);
+          if (choicesEl) {
+            choicesEl.style.transition = 'opacity 300ms ease';
+            choicesEl.style.opacity = '1';
+            choicesEl.style.visibility = '';
+            choicesEl.style.pointerEvents = '';
+          }
+        }, totalDelay);
+      } else {
+        if (navEl) navEl.style.display = 'flex';
+        if (choicesEl) {
+          choicesEl.innerHTML = '';
+          choicesEl.style.display = 'none';
+        }
+        if (techEl) techEl.style.display = 'none';
+        if (nextBtn) {
+          nextBtn.textContent = (idx === pages.length - 2) ? 'Continuar →' : 'Próximo →';
+        }
+      }
+    }
+
+    if (prevBtn) prevBtn.onclick = function () {
+      if (currentPage > 0) { currentPage--; renderPage(currentPage); }
+    };
+    if (nextBtn) nextBtn.onclick = function () {
+      if (currentPage < pages.length - 1) { currentPage++; renderPage(currentPage); }
+    };
+
+    var keyHandler = function (ev) {
+      if (!_isOpen) return;
+      if (ev.key === 'ArrowRight' || ev.key === 'Enter' || ev.key === ' ') {
+        if (navEl && navEl.style.display !== 'none' && nextBtn && !nextBtn.disabled) {
+          ev.preventDefault();
+          nextBtn.click();
+        }
+      } else if (ev.key === 'ArrowLeft') {
+        if (prevBtn && !prevBtn.disabled) {
+          ev.preventDefault();
+          prevBtn.click();
+        }
+      }
+    };
+    document.addEventListener('keydown', keyHandler);
+    var overlay = _getEl('stub-event-overlay');
+    if (overlay) overlay._padraoAldricKeyHandler = keyHandler;
+
+    if (window.VoiceLineLayer) {
+      window.VoiceLineLayer.clearRender();
+      if (rt.voiceLine && bodyEl) window.VoiceLineLayer.render(rt.voiceLine, bodyEl);
+    }
+
+    if (overlay) {
+      overlay.classList.remove('stub-popup-hidden');
+      if (_forceInteraction) {
+        overlay.classList.add('stub-event-overlay-force-interaction');
+      } else {
+        overlay.classList.remove('stub-event-overlay-force-interaction');
+      }
+      _isOpen = true;
+      _currentHexId = rt.hexId;
+      _currentRuntime = rt;
+    }
+    if (window.TileLog) window.TileLog.info('STUB-EVT', 'opened_paginated', {
+      hex: rt.hexId, source: rt.source, type: rt.type,
+      pages: pages.length, totalLines: rt.script.length
+    });
+    renderPage(0);
+  }
+
   window.StubEventLayer = {
     showTileObjectEvent: showTileObjectEvent,
     showLegacyEvent: showLegacyEvent,
@@ -9997,7 +10237,10 @@ window.__onIntroTap = function() {
     isOpen: function () { return _isOpen; },
     _displayNames: TYPE_DISPLAY_NAMES,
     _stateChoices: STATE_CHOICES,
-    GENERIC_STUB: GENERIC_STUB
+    GENERIC_STUB: GENERIC_STUB,
+    /* PADRAO_ALDRIC */
+    _showRuntimeEventPaginated: _showRuntimeEventPaginated,
+    _groupScriptIntoPages: _groupScriptIntoPages
   };
 
   if (window.TileLog) window.TileLog.info('STUB-EVT', 'stubeventlayer_init', {
@@ -10009,6 +10252,147 @@ window.__onIntroTap = function() {
 </script>
 
 <style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   PADRAO_ALDRIC — narrativa paginada AAA dentro do stub-popup-card
+   2026-05-06: porting do _renderEncounterPopup de cidade.html. Mesma fonte
+   16px / line-height 1.65, reveal horizontal animado (~14ms/char), pares
+   speech+narration por página, choices só na última página.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stub-popup-paginated .stub-popup-body { padding-top: 6px; }
+
+.stub-popup-paginated .enc-line {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #d4c8b0;
+  margin: 8px 0;
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  animation: encReveal var(--reveal-dur, 1400ms) cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+
+@keyframes encReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    -webkit-clip-path: inset(0 100% 0 0);
+    opacity: 0.5;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.stub-popup-paginated .enc-narration {
+  font-style: italic;
+  color: #9b8e7c;
+  padding: 8px 12px;
+  border-left: 2px solid rgba(196, 149, 58, 0.4);
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 0 6px 6px 0;
+}
+
+.stub-popup-paginated .enc-speech {
+  color: #e6dac0;
+  padding: 12px 14px;
+  background: rgba(74, 56, 40, 0.32);
+  border-radius: 7px;
+  border-left: 3px solid #c4953a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.stub-popup-paginated .enc-speech::before {
+  content: attr(data-speaker);
+  color: #c4953a;
+  font-weight: 700;
+  font-family: Cinzel, serif;
+  display: block;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
+  text-shadow: 0 0 6px rgba(196, 149, 58, 0.4);
+  text-transform: uppercase;
+}
+
+.stub-popup-paginated .enc-speech i,
+.stub-popup-paginated .enc-speech em {
+  color: #9b8e7c;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.stub-popup-paginated .enc-narration i,
+.stub-popup-paginated .enc-narration em {
+  color: #7d705e;
+  font-style: italic;
+}
+
+/* Nav paginado: ← Anterior / 2/4 / Próximo → */
+.stub-popup-nav-paginated {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0 6px;
+  border-top: 1px solid rgba(196, 149, 58, 0.18);
+  margin-top: 8px;
+}
+
+.stub-popup-nav-paginated .stub-nav-btn {
+  padding: 7px 14px;
+  background: rgba(74, 56, 40, 0.45);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  border-radius: 6px;
+  color: #d4c8b0;
+  font-family: Cinzel, serif;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s, opacity 0.15s;
+  min-width: 96px;
+  text-align: center;
+}
+
+.stub-popup-nav-paginated .stub-nav-btn:hover:not(:disabled) {
+  border-color: #c4953a;
+  background: rgba(196, 149, 58, 0.18);
+  color: #c4953a;
+}
+
+.stub-popup-nav-paginated .stub-nav-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.stub-popup-nav-paginated .stub-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.stub-popup-nav-paginated .stub-nav-btn-next {
+  background: linear-gradient(180deg, #c4953a, #9a7530);
+  color: #1a1510;
+  border-color: #c4953a;
+}
+
+.stub-popup-nav-paginated .stub-nav-btn-next:hover:not(:disabled) {
+  background: linear-gradient(180deg, #d4a54a, #a78540);
+  color: #1a1510;
+}
+
+.stub-popup-nav-paginated .stub-page-indicator {
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  color: #a09484;
+  letter-spacing: 1.5px;
+  padding: 5px 9px;
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 4px;
+  background: rgba(15, 12, 8, 0.45);
+}
+
 /* StubEventLayer expansão — choice badges + outcome render (Phase A.7) */
 .stub-popup-choice {
   display: flex;
@@ -11060,6 +11444,10 @@ body.perf-lite .stub-popup-voice { animation: none; }
       tech: entry.tech || null,
       voiceLine: voiceLine,
       choices: choices,
+      // PADRAO_ALDRIC 2026-05-06: script[] (array {type:'narration'|'speech',
+      // speaker?, text}) habilita renderer paginado AAA. Quando ausente,
+      // _showRuntimeEvent cai pro caminho legacy com `body` string.
+      script: Array.isArray(entry.script) ? entry.script : null,
       resolvedAt: Date.now(),
       archetype: window.VoiceLineLayer ? window.VoiceLineLayer.getArchetype(ctx.player.cls) : null
     };
