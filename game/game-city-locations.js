@@ -56,7 +56,7 @@ function _buildLocCard(loc) {
 
   /* Icon */
   var ico = _clEl('div', 'cloc-card-icon');
-  ico.textContent = loc.icon || '';
+  ico.innerHTML = loc.icon || '';
   card.appendChild(ico);
 
   /* Info block */

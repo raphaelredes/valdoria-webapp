@@ -55,7 +55,8 @@ function renderWorkshopHub(container, data) {
     var btn = vCity.el('button', 'wks-tool-btn');
     btn.setAttribute('data-action', t.cb);
     var btnIcon = vCity.el('span', 'wks-tool-icon');
-    btnIcon.textContent = t.emoji || '🔧';
+    /* FIX 2026-05-06: t.emoji pode ser SVG markup heráldico (_heralIco) — innerHTML parsea, textContent renderizaria como texto literal causando overflow 1352px. */
+    btnIcon.innerHTML = t.emoji || '🔧';
     btn.appendChild(btnIcon);
     var btnInfo = vCity.el('span', 'wks-tool-info');
     var btnName = vCity.el('span', 'wks-tool-name');

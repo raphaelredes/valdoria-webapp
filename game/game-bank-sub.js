@@ -130,7 +130,7 @@ function _renderLoans(container, data) {
 
       var tHeader = vCity.el('div', 'bsb-tier-header');
       var tEmoji = vCity.el('span', 'bsb-tier-emoji');
-      tEmoji.textContent = t.emoji;
+      tEmoji.innerHTML = t.emoji;
       tHeader.appendChild(tEmoji);
       var tName = vCity.el('span', 'bsb-tier-name');
       tName.textContent = t.name;
@@ -205,7 +205,7 @@ function _renderInvestments(container, data) {
 
       var tHdr = vCity.el('div', 'bsb-tier-header');
       var tE = vCity.el('span', 'bsb-tier-emoji');
-      tE.textContent = tier.emoji;
+      tE.innerHTML = tier.emoji;
       tHdr.appendChild(tE);
       var tN = vCity.el('span', 'bsb-tier-name');
       tN.textContent = tier.name;

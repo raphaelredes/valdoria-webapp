@@ -125,7 +125,7 @@ function _renderArenaMain(el, d) {
     var chCls = (ch.cls || '').toLowerCase().replace(/\s+/g, '-');
     if (chCls) portraitFrame.setAttribute('data-class', chCls);
     var icon = _div('arena-challenger-icon');
-    icon.textContent = ch.icon || '\u2694\uFE0F';
+    icon.innerHTML = ch.icon || '\u2694\uFE0F';
     portraitFrame.appendChild(icon);
     portraitWrap.appendChild(portraitFrame);
     card.appendChild(portraitWrap);
@@ -327,7 +327,7 @@ function _renderArenaResult(el, d) {
         opLabelEl.textContent = opLabel;
         op.appendChild(opLabelEl);
         var opName = _div('opponent-name');
-        opName.textContent = (ch.icon || '\u2694\uFE0F') + ' ' + ch.name;
+        opName.innerHTML = (ch.icon || '\u2694\uFE0F') + ' ' + (ch.name);
         op.appendChild(opName);
         wrap.appendChild(op);
     }
@@ -605,7 +605,7 @@ function _cStat(icon, value, label) {
     s.className = 'c-stat';
     var iconEl = document.createElement('span');
     iconEl.className = 'c-stat-icon';
-    iconEl.textContent = icon;
+    iconEl.innerHTML = icon;
     s.appendChild(iconEl);
     var valEl = document.createElement('span');
     valEl.className = 'c-stat-value';
@@ -633,7 +633,7 @@ function _makeChoiceCard(icon, title, subtitle, cb, extraCls) {
     var card = document.createElement('button');
     card.className = 'arena-hp-choice' + (extraCls ? ' ' + extraCls : '');
     var icoEl = _div('arena-hp-choice-icon');
-    icoEl.textContent = icon;
+    icoEl.innerHTML = icon;
     var textEl = _div('arena-hp-choice-text');
     var titleEl = document.createElement('div');
     titleEl.textContent = title;

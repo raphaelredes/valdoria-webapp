@@ -128,7 +128,7 @@ function _buildRoomGrid(rooms, hasAllies) {
       if (room.selected) tile.classList.add('selected');
 
       var ico = _el('div', 'inn-room-tile-icon');
-      ico.textContent = room.icon || '';
+      ico.innerHTML = room.icon || '';
       tile.appendChild(ico);
 
       var name = _el('div', 'inn-room-tile-name');
@@ -193,7 +193,7 @@ function _buildQuickActions(actions) {
     (function (a) {
       var btn = _el('button', 'inn-quick-btn');
       var ico = _el('div', 'inn-quick-ico');
-      ico.textContent = a.icon || '';
+      ico.innerHTML = a.icon || '';
       btn.appendChild(ico);
       var lbl = _el('div', 'inn-quick-label');
       lbl.textContent = a.label || '';
@@ -213,7 +213,7 @@ function _buildActionList(items) {
       var btn = _el('button', 'inn-action-btn');
       if (item.icon) {
         var ico = _el('span', 'inn-action-ico');
-        ico.textContent = item.icon;
+        ico.innerHTML = item.icon;
         btn.appendChild(ico);
       }
       var txt = document.createTextNode(item.label || item.text || '');
@@ -335,7 +335,7 @@ function _buildSelectAllyRow(a) {
   row.appendChild(chk);
 
   var ico = _el('div', 'inn-ally-ico');
-  ico.textContent = a.icon || '\u2694\uFE0F';
+  ico.innerHTML = a.icon || '\u2694\uFE0F';
   row.appendChild(ico);
 
   var info = _el('div', 'inn-select-ally-info');
@@ -404,7 +404,7 @@ function _buildMealCard(m) {
 
   var top = _el('div', 'inn-meal-card-top');
   var ico = _el('div', 'inn-meal-card-icon');
-  ico.textContent = m.icon || '';
+  ico.innerHTML = m.icon || '';
   top.appendChild(ico);
 
   var info = _el('div', 'inn-meal-card-info');
@@ -457,7 +457,7 @@ function _renderResult(ct, d) {
   var hdr = _el('div', 'inn-result-header');
   if (d.icon) {
     var ico = _el('div', 'inn-result-icon');
-    ico.textContent = d.icon;
+    ico.innerHTML = d.icon;
     hdr.appendChild(ico);
   }
   var title = _el('div', 'inn-result-title');
@@ -769,7 +769,7 @@ function _buildAllyRow(a) {
   row.appendChild(chk);
 
   var ico = _el('div', 'inn-ally-ico');
-  ico.textContent = a.icon || '\u2694\uFE0F';
+  ico.innerHTML = a.icon || '\u2694\uFE0F';
   row.appendChild(ico);
 
   var info = _el('div', 'inn-ally-info');

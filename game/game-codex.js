@@ -73,7 +73,7 @@ function renderCodexScreen(container, data) {
     }
 
     var icon = vCity.el('div', 'cdx-entry-icon');
-    icon.textContent = e.icon || '\u2753';
+    icon.innerHTML = e.icon || '\u2753';
     card.appendChild(icon);
 
     var info = vCity.el('div', 'cdx-entry-info');
