@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T20:00:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T20:39:51Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10204,9 +10204,9 @@ window.__onIntroTap = function() {
       if (choices.length === 0) return;
       choiceIdleStopped = false;
       var idx = 0;
-      /* 2026-05-06 v2: animation 1400ms, interval 1400ms (sem gap) — choice
-         atual termina o glow exatamente quando próxima começa. Loop fluido. */
-      var INTERVAL_MS = 1400;
+      /* 2026-05-06 v3: 2200ms — somente glow respiratório (sem translateX
+         "deslizar de novo"). Sensação meditativa, ritmo de respiração. */
+      var INTERVAL_MS = 2200;
       var reducedMotion = (typeof window !== 'undefined' && window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       function tick() {
@@ -10601,46 +10601,39 @@ window.__onIntroTap = function() {
    por vez (~900ms cada) pra sinalizar ao jogador que precisa escolher.
    Para ao clicar choice, trocar página, pular reveal, ou fechar popup.
    ═══════════════════════════════════════════════════════════════════════════ */
-/* 2026-05-06 v2: especificidade aumentada (3 classes) pra sobrescrever
-   .stub-popup-choices.choices-revealing .stub-popup-choice (cascata épica
-   também tinha 3 classes). Sem isso, a animation: epicChoiceReveal da
-   cascata permanecia e o pulse idle não tomava efeito (bug visual). */
+/* 2026-05-06 v3: SOMENTE glow respiratório (sem translateX que dava
+   sensação de "deslizar/aparecer de novo"). Ritmo lento meditativo.
+   Especificidade 3 classes pra sobrescrever cascata épica revealing. */
 .stub-popup-choices .stub-popup-choice.choice-idle-pulse {
-  /* 1400ms, ease-in-out — glow cresce simetricamente até pico em 50%,
-     depois decresce simetricamente. Sensação respiratória. */
-  animation: choiceIdlePulse 1400ms ease-in-out;
+  animation: choiceIdlePulse 2200ms ease-in-out;
 }
 
 @keyframes choiceIdlePulse {
   0% {
     box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
     border-color: rgba(196, 149, 58, 0.45);
-    transform: translateX(0);
   }
   20% {
-    box-shadow: 0 0 12px 2px rgba(196, 149, 58, 0.32),
-                inset 0 0 8px 1px rgba(196, 149, 58, 0.14);
+    box-shadow: 0 0 14px 2px rgba(196, 149, 58, 0.32),
+                inset 0 0 9px 1px rgba(196, 149, 58, 0.14);
     border-color: rgba(196, 149, 58, 0.7);
-    transform: translateX(1px);
   }
   50% {
-    /* Pico do glow: máxima saturação + máximo glow + leve translate */
-    box-shadow: 0 0 32px 5px rgba(196, 149, 58, 0.65),
-                0 0 12px 1px rgba(255, 200, 100, 0.35),
-                inset 0 0 18px 2px rgba(196, 149, 58, 0.28);
+    /* Pico do glow respiratório — máxima saturação + halo amarelado.
+       Choice fica PARADA no lugar (sem transform). Só o glow respira. */
+    box-shadow: 0 0 36px 6px rgba(196, 149, 58, 0.6),
+                0 0 14px 2px rgba(255, 200, 100, 0.32),
+                inset 0 0 20px 2px rgba(196, 149, 58, 0.26);
     border-color: rgba(220, 180, 90, 1);
-    transform: translateX(2px);
   }
   80% {
-    box-shadow: 0 0 12px 2px rgba(196, 149, 58, 0.32),
-                inset 0 0 8px 1px rgba(196, 149, 58, 0.14);
+    box-shadow: 0 0 14px 2px rgba(196, 149, 58, 0.32),
+                inset 0 0 9px 1px rgba(196, 149, 58, 0.14);
     border-color: rgba(196, 149, 58, 0.7);
-    transform: translateX(1px);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
     border-color: rgba(196, 149, 58, 0.45);
-    transform: translateX(0);
   }
 }
 
@@ -10648,7 +10641,7 @@ window.__onIntroTap = function() {
    Mesma duração 1400ms pra match com versão completa (interval JS). */
 @media (prefers-reduced-motion: reduce) {
   .stub-popup-choices .stub-popup-choice.choice-idle-pulse {
-    animation: choiceIdlePulseReduced 1400ms ease-in-out;
+    animation: choiceIdlePulseReduced 2200ms ease-in-out;
   }
   @keyframes choiceIdlePulseReduced {
     0%, 100% { border-color: rgba(196, 149, 58, 0.45); }
