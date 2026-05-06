@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:42:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:48:39Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9972,6 +9972,17 @@ window.__onIntroTap = function() {
         card.style.opacity = '';
         card.style.visibility = '';
         card.style.transition = '';
+        /* PADRAO_ALDRIC skip-reveal cleanup: remove listener pra próxima
+           abertura wire-up fresh handler com novo closure (state + tokens). */
+        if (card._skipHandler) {
+          card.removeEventListener('click', card._skipHandler);
+          card._skipHandler = null;
+        }
+      }
+      /* Reset choices state classes pra próxima abertura não herdar */
+      var choicesElCleanup = document.getElementById('stub-popup-choices');
+      if (choicesElCleanup) {
+        choicesElCleanup.classList.remove('choices-pending', 'choices-revealing');
       }
       var navEl = document.getElementById('stub-popup-nav-paginated');
       if (navEl) navEl.style.display = 'none';
@@ -10163,12 +10174,63 @@ window.__onIntroTap = function() {
     var currentPage = 0;
     var renderToken = 0;
 
+    /* PADRAO_ALDRIC skip-reveal 2026-05-06: estado por página.
+       - revealSkipped: idempotente — uma vez pulado, próximos toques no-op
+       - pageRenderTime: timestamp pra debounce 250ms (anti tap acidental
+         em transição de página, ex.: user spammando "Próximo →")
+       - skipReveal(): cancela animations em curso e força estado final */
+    var pageRenderTime = 0;
+    var revealSkipped = false;
+    function skipReveal(currentIdx) {
+      if (revealSkipped) return;                              /* idempotente */
+      if (Date.now() - pageRenderTime < 250) return;          /* tap acidental */
+      revealSkipped = true;
+      /* Finalizar todas animations das narrações desta página */
+      if (bodyEl) {
+        bodyEl.querySelectorAll('.enc-line').forEach(function (el) {
+          if (typeof el.getAnimations === 'function') {
+            el.getAnimations().forEach(function (a) { a.finish(); });
+          }
+        });
+      }
+      /* Se já é a última página: pular straight pra tech + choices revelados */
+      if (currentIdx === pages.length - 1) {
+        _renderTechCallout(rt.tech);
+        if (choicesEl) {
+          choicesEl.classList.remove('choices-pending');
+          choicesEl.classList.add('choices-revealing');
+          /* Forçar todas animations dos choices a terminarem instantaneamente */
+          choicesEl.querySelectorAll('.stub-popup-choice').forEach(function (el) {
+            if (typeof el.getAnimations === 'function') {
+              el.getAnimations().forEach(function (a) { a.finish(); });
+            }
+          });
+          choicesEl.style.pointerEvents = '';
+        }
+      }
+    }
+    /* Wire listener no card (click/pointerdown). Ignora clicks em botões
+       reais (choices, nav prev/next, close) — esses têm handlers próprios. */
+    var cardEl = document.querySelector('#stub-event-overlay .stub-popup-card');
+    if (cardEl && !cardEl._skipHandler) {
+      cardEl._skipHandler = function (ev) {
+        var t = ev.target;
+        if (!t || !t.closest) return;
+        if (t.closest('button, .stub-popup-choice, .stub-popup-close, .stub-nav-btn')) return;
+        skipReveal(currentPage);
+      };
+      cardEl.addEventListener('click', cardEl._skipHandler);
+    }
+
     function renderPage(idx) {
       renderToken++;
       var myToken = renderToken;
       if (!bodyEl) return;
       bodyEl.innerHTML = '';
       bodyEl.classList.remove('stub-popup-outcome-ok', 'stub-popup-outcome-fail');
+      /* Reset estado de skip ao trocar de página: nova animação pode rolar */
+      pageRenderTime = Date.now();
+      revealSkipped = false;
       var page = pages[idx];
       var cumulativeDelay = 0;
       var lineDurations = [];
