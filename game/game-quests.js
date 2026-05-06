@@ -38,7 +38,7 @@ return card;}
 function _qdMakeEl(tag, cls, text) {
     var el = document.createElement(tag);
     if (cls) el.className = cls;
-    if (text != null) el.textContent = text;
+    if (text != null) { if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text; }
     return el;
 }
 function _qdMakePanelHead(iconText, titleText, countText) {

@@ -13,7 +13,7 @@
 function _tgEl(tag, cls, text) {
     var el = document.createElement(tag);
     if (cls) el.className = cls;
-    if (text) el.textContent = text;
+    if (text) { if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text; }
     return el;
 }
 

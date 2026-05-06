@@ -25,28 +25,28 @@ function _divider() {
 function _section(text) {
     var el = document.createElement('div');
     el.className = 'v-popup-section-label';
-    el.textContent = text;
+    if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text;
     return el;
 }
 
 function _tip(text) {
     var el = document.createElement('div');
     el.className = 'v-popup-tip';
-    el.textContent = text;
+    if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text;
     return el;
 }
 
 function _highlight(text) {
     var el = document.createElement('div');
     el.className = 'v-popup-highlight';
-    el.textContent = text;
+    if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text;
     return el;
 }
 
 function _centerText(text) {
     var el = document.createElement('div');
     el.className = 'v-popup-center-text';
-    el.textContent = text;
+    if (typeof text === 'string' && text.charAt(0) === '<') el.innerHTML = text; else el.textContent = text;
     return el;
 }
 
