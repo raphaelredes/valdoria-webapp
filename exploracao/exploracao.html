@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:21:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:25:45Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1339,13 +1339,16 @@ html.sim-prod #frame { margin: 0 auto !important; }
 }
 .stub-popup-card {
   position: relative;
-  /* 2026-05-06: 80% da tela em ambas as dimensões. min() garante que em
-     smartphones cabe na viewport mantendo padding mínimo, e em desktop
-     respeita cap legível pro PADRAO_ALDRIC (narrativa AAA fluindo). */
+  /* 2026-05-06 v2: altura ADAPTATIVA ao conteúdo. width 80% (cap 640px),
+     altura cresce conforme conteúdo até max 80vh — depois body scrolla
+     internamente. Resultado: 1 frase = card compacto / 5 narrações + choices
+     = card médio / texto longo = card no cap com scroll. Sem espaço vazio. */
   width: min(80vw, 640px);
   max-width: 80vw;
-  height: min(80vh, 760px);
   max-height: 80vh;
+  /* min-height razoável pra animação stub-card-in não nascer esmagado.
+     180px = título + 1 linha narrativa + 1 choice (cabe o mínimo). */
+  min-height: 180px;
   background: linear-gradient(180deg, rgba(46, 37, 32, 0.98), rgba(28, 22, 18, 0.98));
   border: 2px solid var(--v-gold, #c4953a);
   border-radius: 10px;
@@ -1357,28 +1360,33 @@ html.sim-prod #frame { margin: 0 auto !important; }
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(196, 149, 58, 0.5) transparent;
-  /* Layout flex coluna pra narrativa respirar verticalmente; choices ficam
-     ancoradas embaixo enquanto body cresce conforme conteúdo da página. */
+  /* Layout flex coluna: header + body + nav + choices empilhados naturalmente.
+     body NÃO força flex:1 — assume altura intrínseca do conteúdo (sem
+     espaço vazio quando uma página é curta). */
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
-/* Body cresce ocupando o espaço disponível — narrativa centralizada
-   verticalmente em páginas curtas, scroll em páginas longas. */
+/* Body com altura natural do conteúdo; scroll interno apenas se ele
+   próprio passar do espaço disponível dentro do card (~80vh - header - choices). */
 .stub-popup-card .stub-popup-body {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 6px 4px;
 }
-/* Telas pequenas: padding mais enxuto, body com justify-content top
-   pra evitar saltos quando paginar. */
+/* Telas pequenas: padding mais enxuto, max-height maior pra aproveitar
+   altura curta da viewport mobile. */
 @media (max-height: 600px) {
-  .stub-popup-card { padding: 16px 14px 12px; height: min(85vh, 600px); max-height: 85vh; }
-  .stub-popup-card .stub-popup-body { justify-content: flex-start; padding-top: 4px; }
+  .stub-popup-card {
+    padding: 16px 14px 12px;
+    max-height: 85vh;
+    min-height: 140px;
+  }
+  .stub-popup-card .stub-popup-body { padding-top: 4px; }
 }
 @media (max-width: 380px) {
   .stub-popup-card { padding: 16px 14px 12px; width: min(92vw, 360px); max-width: 92vw; }
