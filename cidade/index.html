@@ -29655,7 +29655,7 @@ function _showInventoryPopup(){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = '🎒 Mochila';
+  if (titleEl) titleEl.innerHTML = _heralIco('ic-mochila', null, '20px') + ' Mochila';  // 2026-05-06: heraldic em vez de emoji
   _renderInventoryPopup();
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'inventory') {
@@ -31766,7 +31766,7 @@ function _gatesShowPrep(p, opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = '🎒 Preparar Viagem';
+  if (titleEl) titleEl.innerHTML = _heralIco('ic-mochila', null, '20px') + ' Preparar Viagem';  // 2026-05-06: heraldic em vez de emoji
   var flavor = opts.beforeTravel
     ? '<i>Antes de partir, revise seu equipamento. Aldric aponta os itens essenciais. <b>Aventureiro precavido volta vivo.</b></i>'
     : '<i>Aldric aponta. "Aventureiro precavido volta vivo. Compre o necessário antes de partir."</i>';
@@ -33849,7 +33849,7 @@ function _renderCityPopup(key){
   // === Casos especiais legados (Fase 8.1) ===
   var d = SUBSCREEN_DATA[key];
   if (!d) return;
-  if (titleEl) titleEl.textContent = d.header || key;
+  if (titleEl) titleEl.innerHTML = d.header || key;  // 2026-05-06: innerHTML pra suportar SVG heráldico no header
   if (key === 'inn_rest') {
     _renderInnRestPopup(bodyEl, d);
     return;
@@ -34555,7 +34555,7 @@ var SUBSCREEN_DATA = {
     ]
   },
   'market_bjorn': {
-    header: '🎒 Bjorn — Seleiro / Equipamento de Acampamento',
+    header: _heralIco('ic-mochila', null, '20px') + ' Bjorn — Seleiro / Equipamento de Acampamento',
     flavor: 'Couros, cordas, barracas. Bjorn é taciturno mas sabe tudo sobre viajar.',
     buttons: [
       [_heralIco('ic-mochila'), 'Barraca', '35 <span class="vi vi-coin sm"></span> — 5 usos LR', 'buy_bjorn_tent'],
@@ -34990,7 +34990,7 @@ var SUBSCREEN_DATA = {
 
   // ========== SUB-SUB-SCREENS — GATES PREP ==========
   'gates_prep': {
-    header: '🎒 Preparar Viagem',
+    header: _heralIco('ic-mochila', null, '20px') + ' Preparar Viagem',
     flavor: 'Aldric te aconselha. "Cada item pode salvar uma vida lá fora."',
     buttons: [
       [_heralIco('ic-mochila'), 'Rações 7 dias', '10 <span class="vi vi-coin sm"></span> — sem fome em viagem', 'prep_rations'],
