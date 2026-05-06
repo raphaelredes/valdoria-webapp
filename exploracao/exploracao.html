@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:57:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T20:00:16Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10601,9 +10601,13 @@ window.__onIntroTap = function() {
    por vez (~900ms cada) pra sinalizar ao jogador que precisa escolher.
    Para ao clicar choice, trocar página, pular reveal, ou fechar popup.
    ═══════════════════════════════════════════════════════════════════════════ */
-.stub-popup-choice.choice-idle-pulse {
-  /* 2026-05-06 v2: 1400ms, ease-in-out — glow cresce simetricamente até
-     pico em 50%, depois decresce simetricamente. Sensação respiratória. */
+/* 2026-05-06 v2: especificidade aumentada (3 classes) pra sobrescrever
+   .stub-popup-choices.choices-revealing .stub-popup-choice (cascata épica
+   também tinha 3 classes). Sem isso, a animation: epicChoiceReveal da
+   cascata permanecia e o pulse idle não tomava efeito (bug visual). */
+.stub-popup-choices .stub-popup-choice.choice-idle-pulse {
+  /* 1400ms, ease-in-out — glow cresce simetricamente até pico em 50%,
+     depois decresce simetricamente. Sensação respiratória. */
   animation: choiceIdlePulse 1400ms ease-in-out;
 }
 
@@ -10643,7 +10647,7 @@ window.__onIntroTap = function() {
 /* prefers-reduced-motion: idle hint mais sutil (só border tint, sem transform/shadow).
    Mesma duração 1400ms pra match com versão completa (interval JS). */
 @media (prefers-reduced-motion: reduce) {
-  .stub-popup-choice.choice-idle-pulse {
+  .stub-popup-choices .stub-popup-choice.choice-idle-pulse {
     animation: choiceIdlePulseReduced 1400ms ease-in-out;
   }
   @keyframes choiceIdlePulseReduced {
