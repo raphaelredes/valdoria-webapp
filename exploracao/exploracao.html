@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T18:42:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T18:51:35Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1339,13 +1339,17 @@ html.sim-prod #frame { margin: 0 auto !important; }
 }
 .stub-popup-card {
   position: relative;
-  width: calc(100% - 32px);
-  max-width: 340px;
-  max-height: 80%;
+  /* 2026-05-06: 80% da tela em ambas as dimensões. min() garante que em
+     smartphones cabe na viewport mantendo padding mínimo, e em desktop
+     respeita cap legível pro PADRAO_ALDRIC (narrativa AAA fluindo). */
+  width: min(80vw, 640px);
+  max-width: 80vw;
+  height: min(80vh, 760px);
+  max-height: 80vh;
   background: linear-gradient(180deg, rgba(46, 37, 32, 0.98), rgba(28, 22, 18, 0.98));
   border: 2px solid var(--v-gold, #c4953a);
   border-radius: 10px;
-  padding: 18px 16px 14px;
+  padding: 22px 22px 18px;
   color: var(--v-text, #d4c8b0);
   font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(196, 149, 58, 0.2);
@@ -1353,6 +1357,31 @@ html.sim-prod #frame { margin: 0 auto !important; }
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(196, 149, 58, 0.5) transparent;
+  /* Layout flex coluna pra narrativa respirar verticalmente; choices ficam
+     ancoradas embaixo enquanto body cresce conforme conteúdo da página. */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+/* Body cresce ocupando o espaço disponível — narrativa centralizada
+   verticalmente em páginas curtas, scroll em páginas longas. */
+.stub-popup-card .stub-popup-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 4px;
+}
+/* Telas pequenas: padding mais enxuto, body com justify-content top
+   pra evitar saltos quando paginar. */
+@media (max-height: 600px) {
+  .stub-popup-card { padding: 16px 14px 12px; height: min(85vh, 600px); max-height: 85vh; }
+  .stub-popup-card .stub-popup-body { justify-content: flex-start; padding-top: 4px; }
+}
+@media (max-width: 380px) {
+  .stub-popup-card { padding: 16px 14px 12px; width: min(92vw, 360px); max-width: 92vw; }
 }
 @keyframes stub-card-in {
   from { transform: translateY(12px) scale(0.96); opacity: 0; }
@@ -10031,7 +10060,11 @@ window.__onIntroTap = function() {
   }
 
   function _groupScriptIntoPages(script) {
-    var MAX_PAIR_WORDS = 50;
+    /* 2026-05-06: card 80% da tela permite densidade maior. Aumentei
+       MAX_PAIR_WORDS de 50 → 70 pra agrupar pares de linhas mais frequentemente
+       (menos páginas, narrativa mais fluída). Em telas pequenas (<= 600px alt),
+       cai pra 50 pra evitar overflow vertical na página. */
+    var MAX_PAIR_WORDS = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600) ? 50 : 70;
     var pages = [];
     var i = 0;
     while (i < script.length) {
@@ -10262,13 +10295,25 @@ window.__onIntroTap = function() {
 .stub-popup-paginated .stub-popup-body { padding-top: 6px; }
 
 .stub-popup-paginated .enc-line {
-  font-size: 16px;
-  line-height: 1.65;
+  /* 2026-05-06: card 80% suporta fonte maior + line-height generoso pra
+     leitura fluída. Em telas pequenas a regra responsiva abaixo encolhe. */
+  font-size: 17px;
+  line-height: 1.7;
   color: #d4c8b0;
-  margin: 8px 0;
+  margin: 14px 0;
   clip-path: inset(0 100% 0 0);
   -webkit-clip-path: inset(0 100% 0 0);
   animation: encReveal var(--reveal-dur, 1400ms) cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+
+@media (max-width: 480px), (max-height: 600px) {
+  .stub-popup-paginated .enc-line {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 10px 0;
+  }
+  .stub-popup-paginated .enc-narration { padding: 7px 10px; }
+  .stub-popup-paginated .enc-speech { padding: 10px 12px; }
 }
 
 @keyframes encReveal {
