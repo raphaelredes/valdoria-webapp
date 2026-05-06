@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:30:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:42:38Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10206,24 +10206,26 @@ window.__onIntroTap = function() {
 
       if (idx === pages.length - 1) {
         if (navEl) navEl.style.display = 'none';
-        /* FIX 2026-05-06: NÃO setar techEl.style.display='' aqui — isso
-           voltaria pro default CSS (flex) e mostraria a div azul vazia
-           durante o totalDelay enquanto o reveal do texto roda.
-           _renderTechCallout (chamado dentro do setTimeout) decide o
-           display final baseado em rt.tech, escondendo se ausente/vazio. */
         if (techEl) techEl.style.display = 'none';
+        /* FIX 2026-05-06: pre-render choices IMEDIATAMENTE (não esperar
+           totalDelay) pra card já dimensionar com choices na altura final.
+           Visibilidade controlada via class .choices-pending (invisíveis
+           mas ocupando espaço) → .choices-revealing (efeito épico em cascata).
+           Antes choices só renderizavam após totalDelay → card crescia. */
         if (choicesEl) {
           choicesEl.style.display = '';
-          choicesEl.style.opacity = '0';
+          choicesEl.classList.remove('choices-revealing');
+          choicesEl.classList.add('choices-pending');
+          _renderChoicesEnhanced(rt);  /* popula AGORA — reserva altura final */
         }
         setTimeout(function () {
           if (myToken !== renderToken) return;
           _renderTechCallout(rt.tech);
-          _renderChoicesEnhanced(rt);
           if (choicesEl) {
-            choicesEl.style.transition = 'opacity 300ms ease';
-            choicesEl.style.opacity = '1';
-            choicesEl.style.visibility = '';
+            /* Trigger efeito épico: classes alternadas garantem keyframe
+               re-roda mesmo se renderPage for chamado de novo na mesma página. */
+            choicesEl.classList.remove('choices-pending');
+            choicesEl.classList.add('choices-revealing');
             choicesEl.style.pointerEvents = '';
           }
         }, totalDelay);
@@ -10359,6 +10361,108 @@ window.__onIntroTap = function() {
   .stub-popup-paginated .enc-narration { padding: 6px 9px; }
   .stub-popup-paginated .enc-speech { padding: 9px 11px; }
   .stub-popup-paginated .enc-speech::before { font-size: 11px; margin-bottom: 3px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHOICES — efeito épico de revelação AAA (2026-05-06)
+   .choices-pending: choices renderizadas mas invisíveis (reserva altura).
+   .choices-revealing: efeito cascata com slide + blur + glow gold sequencial.
+   Cada choice entra com delay escalonado via nth-child.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.stub-popup-choices.choices-pending .stub-popup-choice {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-30px) scale(0.94);
+  filter: blur(6px);
+}
+
+.stub-popup-choices.choices-revealing .stub-popup-choice {
+  visibility: visible;
+  animation: epicChoiceReveal 720ms cubic-bezier(0.2, 0.85, 0.25, 1.05) both;
+}
+
+/* Cascata: cada choice aparece ~140ms após a anterior */
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(1) { animation-delay: 0ms; }
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(2) { animation-delay: 140ms; }
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(3) { animation-delay: 280ms; }
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(4) { animation-delay: 420ms; }
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(5) { animation-delay: 560ms; }
+.stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(6) { animation-delay: 700ms; }
+
+@keyframes epicChoiceReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.94);
+    filter: blur(6px);
+    box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
+  }
+  35% {
+    opacity: 1;
+    filter: blur(0px);
+    box-shadow: 0 0 24px 4px rgba(196, 149, 58, 0.55),
+                inset 0 0 16px 2px rgba(196, 149, 58, 0.25);
+  }
+  60% {
+    transform: translateX(3px) scale(1.015);
+    box-shadow: 0 0 32px 6px rgba(196, 149, 58, 0.42),
+                inset 0 0 12px 2px rgba(196, 149, 58, 0.18);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+    box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
+  }
+}
+
+/* Pulse sutil residual no border-left durante a revelação (energia que persiste) */
+.stub-popup-choices.choices-revealing .stub-popup-choice::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(196, 149, 58, 0.95) 50%,
+    transparent 100%);
+  opacity: 0;
+  animation: choicePulseEdge 720ms cubic-bezier(0.2, 0.85, 0.25, 1.05) both;
+  animation-delay: inherit;
+  pointer-events: none;
+}
+
+@keyframes choicePulseEdge {
+  0%   { opacity: 0; transform: scaleY(0.3); }
+  40%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+/* Garantir que o container choice é position relative pro ::before absoluto */
+.stub-popup-choices .stub-popup-choice {
+  position: relative;
+  overflow: hidden;
+}
+
+/* prefers-reduced-motion: respeita acessibilidade — sem cascata, fade simples */
+@media (prefers-reduced-motion: reduce) {
+  .stub-popup-choices.choices-pending .stub-popup-choice {
+    transform: none;
+    filter: none;
+  }
+  .stub-popup-choices.choices-revealing .stub-popup-choice {
+    animation: epicChoiceFadeOnly 200ms ease-out both;
+  }
+  .stub-popup-choices.choices-revealing .stub-popup-choice:nth-child(n) {
+    animation-delay: 0ms;
+  }
+  .stub-popup-choices.choices-revealing .stub-popup-choice::before {
+    display: none;
+  }
+}
+
+@keyframes epicChoiceFadeOnly {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes encReveal {
