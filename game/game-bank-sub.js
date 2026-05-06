@@ -175,7 +175,7 @@ function _renderInvestments(container, data) {
 
       var hdr = vCity.el('div', 'bsb-invest-header');
       var emoji = vCity.el('span');
-      emoji.textContent = inv.mature ? '✅' : inv.emoji;
+      emoji.innerHTML = inv.mature ? '✅' : inv.emoji;
       hdr.appendChild(emoji);
       var name = vCity.el('span', 'bsb-invest-name');
       name.textContent = ' ' + inv.tier_name + ' — ' + inv.amount + ' V';

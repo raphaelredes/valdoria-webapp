@@ -29,7 +29,7 @@ function renderTempleHub(container, data) {
     if (pd.disabled) payBtn.classList.add('disabled');
     if (pd.icon) {
       var iconSpan = vCity.el('span', 'tmp-pay-icon');
-      iconSpan.textContent = pd.icon + ' ';
+      iconSpan.innerHTML = pd.icon + ' ';
       payBtn.appendChild(iconSpan);
     }
     var labelSpan = vCity.el('span', 'tmp-pay-label');

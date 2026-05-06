@@ -89,7 +89,7 @@ function renderWorkshopHub(container, data) {
       var qa = data.quick_actions[q];
       var qBtn = vCity.el('button', 'wks-quick-btn');
       qBtn.setAttribute('data-action', qa.cb);
-      qBtn.textContent = qa.icon + ' ' + qa.label;
+      qBtn.innerHTML = qa.icon + ' ' + qa.label;
       /* FIX 2026-05-03: bind click handler */
       qBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(qa.cb));
       qRow.appendChild(qBtn);

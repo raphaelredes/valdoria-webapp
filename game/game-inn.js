@@ -279,7 +279,7 @@ function _renderSelect(ct, d) {
     var hdr = _el('div', 'inn-select-header');
     if (d.tier_icon) {
       var ico = _el('span', 'inn-select-icon');
-      ico.textContent = d.tier_icon;
+      ico.innerHTML = d.tier_icon;
       hdr.appendChild(ico);
     }
     var txt = document.createTextNode(d.tier_name);
@@ -480,7 +480,7 @@ function _renderResult(ct, d) {
       var row = _el('div', 'inn-result-effect');
       var isGood = e.good || e.icon === '\u2713' || e.icon === '\u2728' || e.icon === '\uD83D\uDE0C';
       var sym = _el('span', 'inn-result-sym ' + (isGood ? 'good' : 'bad'));
-      sym.textContent = e.icon || (isGood ? '\u2713' : '\u26A0\uFE0F');
+      sym.innerHTML = e.icon || (isGood ? '\u2713' : '\u26A0\uFE0F');
       row.appendChild(sym);
       var txt = _el('span', '');
       txt.textContent = e.text || '';
@@ -589,7 +589,7 @@ function _buildRoomHeader(d) {
   var hdr = _el('div', 'inn-room-header');
 
   var ico = _el('div', 'inn-room-icon');
-  ico.textContent = d.tier_icon || '';
+  ico.innerHTML = d.tier_icon || '';
   hdr.appendChild(ico);
 
   var info = _el('div', 'inn-room-info');
@@ -642,7 +642,7 @@ function _buildPlayerBlock(p) {
   /* Head: name + class */
   var head = _el('div', 'inn-player-head');
   var nameEl = _el('div', 'inn-player-name');
-  nameEl.textContent = (p.class_icon || '') + ' ' + (p.name || '');
+  nameEl.innerHTML = (p.class_icon || '') + ' ' + (p.name || '');
   head.appendChild(nameEl);
   var clsEl = _el('div', 'inn-player-class');
   clsEl.textContent = (p.class_name || '') + ' ' + (p.level || '');

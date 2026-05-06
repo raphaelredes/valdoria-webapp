@@ -36,7 +36,7 @@ function renderCodexScreen(container, data) {
     for (var c = 0; c < cats.length; c++) {
       (function(cat) {
         var tab = vCity.el('button', 'cdx-tab');
-        tab.textContent = cat.icon + ' ' + cat.label;
+        tab.innerHTML = cat.icon + ' ' + cat.label;
         tab.setAttribute('data-cat', cat.key);
         tab.onclick = function() { _codexSwitchTab(cat.key, tabs, entries, data); };
         tabs.appendChild(tab);

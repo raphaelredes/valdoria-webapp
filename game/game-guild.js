@@ -158,7 +158,7 @@ function renderGuildAdventurer(container, data) {
   /* Hero scene: avatar (left) + text block (right) — horizontal compact */
   var hero = _gldEl('div', 'gld-adv-hero');
   var av = _gldEl('div', 'gld-adv-avatar ' + _gldClassSlug(data.class_name));
-  av.textContent = data.class_icon || '⚔';
+  av.innerHTML = data.class_icon || '⚔';
   hero.appendChild(av);
   var heroText = _gldEl('div', 'gld-adv-hero-text');
   heroText.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
@@ -277,7 +277,7 @@ function renderGuildHireConfirm(container, data) {
   var card = _gldEl('div', 'gld-confirm-card');
 
   var iconEl = _gldEl('div', 'gld-confirm-icon');
-  iconEl.textContent = data.class_icon || '⚔';
+  iconEl.innerHTML = data.class_icon || '⚔';
   card.appendChild(iconEl);
 
   card.appendChild(_gldEl('div', 'gld-confirm-q', 'Contratar?'));
@@ -349,7 +349,7 @@ function renderGuildHireSuccess(container, data) {
   scene.appendChild(_gldEl('div', 'gld-success-confetti'));
   var avWrap = _gldEl('div', 'gld-success-av-wrap');
   var av = _gldEl('div', 'gld-success-avatar ' + _gldClassSlug(data.class_name));
-  av.textContent = data.class_icon || '⚔';
+  av.innerHTML = data.class_icon || '⚔';
   avWrap.appendChild(av);
   avWrap.appendChild(_gldEl('span', 'gld-success-wave', '👋'));
   scene.appendChild(avWrap);

@@ -16,7 +16,7 @@ function _renderCraftMenu(container, data) {
   /* NPC header */
   var npc = vCity.el('div', 'rns-npc');
   var npcIcon = vCity.el('div', 'rns-npc-icon');
-  npcIcon.textContent = data.npc_emoji || '🔮';
+  npcIcon.innerHTML = data.npc_emoji || '🔮';
   npc.appendChild(npcIcon);
   var npcName = vCity.el('div', 'rns-npc-name');
   npcName.textContent = data.npc_name || 'Eirik';
@@ -40,7 +40,7 @@ function _renderCraftMenu(container, data) {
 
       var hdr = vCity.el('div', 'rns-tier-header');
       var emoji = vCity.el('span', 'rns-tier-emoji');
-      emoji.textContent = t.frag_emoji;
+      emoji.innerHTML = t.frag_emoji;
       hdr.appendChild(emoji);
       var name = vCity.el('span', 'rns-tier-name');
       name.textContent = t.frag_name;
@@ -93,7 +93,7 @@ function _renderCraftMenu(container, data) {
       var act = data.actions[a];
       var aBtn = vCity.el('button', 'rns-action-btn');
       aBtn.setAttribute('data-action', act.cb);
-      aBtn.textContent = act.icon + ' ' + act.label;
+      aBtn.innerHTML = act.icon + ' ' + act.label;
       /* FIX 2026-05-03: bind click listener */
       aBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(act.cb));
       qRow.appendChild(aBtn);

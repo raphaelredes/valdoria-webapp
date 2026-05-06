@@ -251,7 +251,7 @@ function _buildAttrsPanel(data) {
         card.className = 'char-attr-card';
         var iconEl = document.createElement('span');
         iconEl.className = 'char-attr-icon';
-        iconEl.textContent = a.icon;
+        iconEl.innerHTML = a.icon;
         card.appendChild(iconEl);
         var labelEl = document.createElement('div');
         labelEl.className = 'char-attr-label';

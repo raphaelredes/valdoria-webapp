@@ -12,7 +12,7 @@ function renderFestivalHub(container, data) {
   /* Festival header */
   var header = vCity.el('div', 'fst-header');
   var icon = vCity.el('div', 'fst-header-icon');
-  icon.textContent = data.fest_icon || '🎪';
+  icon.innerHTML = data.fest_icon || '🎪';
   header.appendChild(icon);
   var name = vCity.el('div', 'fst-header-name');
   name.textContent = data.fest_name || 'Festival';
@@ -49,7 +49,7 @@ function renderFestivalHub(container, data) {
       btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(ev.cb));
 
       var evIcon = vCity.el('span', 'fst-event-icon');
-      evIcon.textContent = (ev.played ? '✅ ' : '') + ev.icon;
+      evIcon.innerHTML = (ev.played ? '✅ ' : '') + ev.icon;
       btn.appendChild(evIcon);
 
       var evInfo = vCity.el('span', 'fst-event-info');
