@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T18:51:35Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:03:00Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10060,32 +10060,41 @@ window.__onIntroTap = function() {
   }
 
   function _groupScriptIntoPages(script) {
-    /* 2026-05-06: card 80% da tela permite densidade maior. Aumentei
-       MAX_PAIR_WORDS de 50 → 70 pra agrupar pares de linhas mais frequentemente
-       (menos páginas, narrativa mais fluída). Em telas pequenas (<= 600px alt),
-       cai pra 50 pra evitar overflow vertical na página. */
-    var MAX_PAIR_WORDS = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600) ? 50 : 70;
+    /* 2026-05-06 v3: card 80% suporta 2-3 linhas por página (não só pares).
+       Threshold aumentado pra ~120 palavras combinadas; tela pequena cai pra
+       60. Resultado: scripts de 4-5 linhas agora ficam em 1-2 páginas (era 3).
+       Densidade narrativa profissional, menos cliques de paginação. */
+    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600);
+    var MAX_PAGE_WORDS = smallScreen ? 60 : 120;
+    var MAX_LINES_PER_PAGE = smallScreen ? 2 : 3;
+    var countWords = function (s) { return (s || '').split(/\s+/).filter(Boolean).length; };
+    var canGroup = function (curr, next) {
+      var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
+                        && (curr.speaker || '') === (next.speaker || '');
+      return (
+        (curr.type === 'speech'    && next.type === 'narration') ||
+        (curr.type === 'narration' && next.type === 'speech') ||
+        (curr.type === 'narration' && next.type === 'narration') ||
+        sameSpeaker
+      );
+    };
     var pages = [];
     var i = 0;
     while (i < script.length) {
       var page = [script[i]];
-      var curr = script[i];
-      var currWords = (curr.text || '').split(/\s+/).length;
-      if (i + 1 < script.length) {
-        var next = script[i + 1];
-        var nextWords = (next.text || '').split(/\s+/).length;
-        var combined = currWords + nextWords;
-        var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
-                          && (curr.speaker || '') === (next.speaker || '');
-        var compat =
-          (curr.type === 'speech'    && next.type === 'narration') ||
-          (curr.type === 'narration' && next.type === 'speech') ||
-          (curr.type === 'narration' && next.type === 'narration') ||
-          sameSpeaker;
-        if (combined <= MAX_PAIR_WORDS && compat) {
-          page.push(next);
-          i++;
-        }
+      var totalWords = countWords(script[i].text);
+      var lines = 1;
+      while (
+        lines < MAX_LINES_PER_PAGE &&
+        i + 1 < script.length &&
+        canGroup(page[page.length - 1], script[i + 1])
+      ) {
+        var nextWords = countWords(script[i + 1].text);
+        if (totalWords + nextWords > MAX_PAGE_WORDS) break;
+        page.push(script[i + 1]);
+        totalWords += nextWords;
+        lines++;
+        i++;
       }
       pages.push(page);
       i++;
@@ -10292,28 +10301,44 @@ window.__onIntroTap = function() {
    speech+narration por página, choices só na última página.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.stub-popup-paginated .stub-popup-body { padding-top: 6px; }
+/* PADRAO_ALDRIC v3 layout — top-aligned, denso, profissional.
+   3 linhas por página em desktop / tablet, 2 em mobile alto-fundo curto. */
+.stub-popup-card.stub-popup-paginated .stub-popup-body {
+  justify-content: flex-start;  /* override do flex center — top-align pro fluxo de leitura */
+  gap: 10px;                    /* espaçamento consistente entre lines (substitui margin) */
+  padding: 4px 2px 8px;
+}
 
 .stub-popup-paginated .enc-line {
-  /* 2026-05-06: card 80% suporta fonte maior + line-height generoso pra
-     leitura fluída. Em telas pequenas a regra responsiva abaixo encolhe. */
-  font-size: 17px;
-  line-height: 1.7;
+  /* 2026-05-06 v3: spacing reduzido (margin → gap no parent), padding interno
+     mais consistente, fonte 16px (legível mas compacta). */
+  font-size: 16px;
+  line-height: 1.65;
   color: #d4c8b0;
-  margin: 14px 0;
+  margin: 0;                    /* gap no parent .stub-popup-body controla */
   clip-path: inset(0 100% 0 0);
   -webkit-clip-path: inset(0 100% 0 0);
   animation: encReveal var(--reveal-dur, 1400ms) cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
 }
 
+/* VoiceLine acima do body fica integrada (subtítulo em italic, sem caixa pesada).
+   Reduz "ar morto" entre header e narrativa. */
+.stub-popup-card .stub-popup-body .stub-popup-voice {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 @media (max-width: 480px), (max-height: 600px) {
   .stub-popup-paginated .enc-line {
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 10px 0;
+    font-size: 14.5px;
+    line-height: 1.55;
   }
-  .stub-popup-paginated .enc-narration { padding: 7px 10px; }
-  .stub-popup-paginated .enc-speech { padding: 10px 12px; }
+  .stub-popup-card.stub-popup-paginated .stub-popup-body { gap: 8px; }
+  .stub-popup-paginated .enc-narration { padding: 6px 9px; }
+  .stub-popup-paginated .enc-speech { padding: 9px 11px; }
+  .stub-popup-paginated .enc-speech::before { font-size: 11px; margin-bottom: 3px; }
 }
 
 @keyframes encReveal {
