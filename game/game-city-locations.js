@@ -87,10 +87,10 @@ function _buildLocCard(loc) {
     card.appendChild(newB);
   }
 
-  /* Count badge (for travelers, etc.) */
+  /* Count badge (for travelers, etc.) — innerHTML pra suportar SVG icons (USER FIX 2026-05-05) */
   if (loc.badge) {
     var badge = _clEl('span', 'cloc-badge-count');
-    badge.textContent = loc.badge;
+    badge.innerHTML = loc.badge;
     card.appendChild(badge);
   }
 

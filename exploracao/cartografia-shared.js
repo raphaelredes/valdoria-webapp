@@ -30,40 +30,133 @@
   var SEA_FAINT  = 'rgba(74,96,128,0.45)';
 
   // === CART_BIOMES ===
+  // 2026-05-04: REWRITE BASEADO em src/game/world/map_data.py (WORLD_MAP).
+  // 19 locais oficiais + sistema de descoberta progressiva. Posições
+  // orgânicas (NUNCA alinhadas) inspiradas no antigo mapa do mundo.
+  // 'biome' alinha com pictograma; 'discoverable' = só visível após
+  // settlement_discovery; 'mapKey' = item Mapa Regional que revela.
   var CART_BIOMES = [
-    { key: 'plains',    name: 'Planície de Valdoria',  x: 0.36, y: 0.58, color: '#a8c878', accent: '#7da855', tier: 1,  ico: '🌾', isOrigin: true,
-      desc: 'Cidade de Valdoria. Origem do aventureiro. Verdes campos e estradas.' },
-    { key: 'forest',    name: 'Floresta dos Lobos',    x: 0.54, y: 0.34, color: '#508e46', accent: '#2e5e2a', tier: 2,  ico: '🌲',
-      desc: 'Lobos cinzentos rondam. Árvores antigas. Caminhos sinuosos.' },
-    { key: 'cave',      name: 'Caverna dos Ecos',      x: 0.20, y: 0.44, color: '#6a5a4a', accent: '#3e3428', tier: 3,  ico: '🏔️',
-      desc: 'Minérios e cristais. Sons ecoam pelas câmaras subterrâneas.' },
-    { key: 'swamp',     name: 'Pântano Sussurrante',   x: 0.64, y: 0.55, color: '#5a6b3a', accent: '#3a4a22', tier: 4,  ico: '🌫️',
-      desc: 'Águas turvas. Venenos raros. Sussurros entre os juncos.' },
-    { key: 'mountain',  name: 'Montanha Gelada',       x: 0.20, y: 0.22, color: '#8a8a9a', accent: '#5a5a6a', tier: 5,  ico: '⛰️',
-      desc: 'Picos cobertos de neve. Metais raros. Escalada perigosa.' },
-    { key: 'desert',    name: 'Deserto de Khass',      x: 0.78, y: 0.70, color: '#dcb45a', accent: '#a08840', tier: 6,  ico: '🏜️',
-      desc: 'Dunas infinitas. Sol implacável. Tesouros enterrados.' },
-    { key: 'graveyard', name: 'Cemitério Esquecido',   x: 0.42, y: 0.80, color: '#5a4a5a', accent: '#3a2a3a', tier: 6,  ico: '💀',
-      desc: 'Mortos-vivos vagam. Tumbas centenárias. Maldições antigas.' },
-    { key: 'snow',      name: 'Tundra do Norte',       x: 0.50, y: 0.22, color: '#c8d4e0', accent: '#88a0b8', tier: 7,  ico: '❄️',
-      desc: 'Frio extremo. Lobos de gelo. Aurora boreal eterna.' },
-    { key: 'volcanic',  name: 'Vulcão Adormecido',     x: 0.78, y: 0.34, color: '#c84030', accent: '#8a2010', tier: 8,  ico: '🌋',
-      desc: 'Lava sob a crosta. Cristais de fogo. Drakhul dorme aqui.' }
+    // ═══════════════════════════════════════════════════════════════
+    // POSIÇÕES v10 (2026-05-05) — Redistribuição com min 0.15 separação
+    // pra eliminar overlap entre nodes (raio render ~50px = 0.08-0.10).
+    // Layout radial em torno do hub central, com regiões geográficas:
+    //   HUB: plains (0.42, 0.55)
+    //   ─── NORTE ───────  forest, goblin_nest, elven_ruins, snow
+    //   ─── NW ──────────  mountain, dragon_pass, korthag
+    //   ─── W ───────────  cave, troll_cave, crystal_depths, underground_caverns
+    //   ─── SW ──────────  green_fields, ancestral_graveyard
+    //   ─── S ───────────  graveyard
+    //   ─── SE ──────────  orc_tribe, bandit_fortress
+    //   ─── E ───────────  swamp, deep_swamp, desert, volcanic, valkrest
+    // ═══════════════════════════════════════════════════════════════
+    // ─── HUB CENTRAL (origem) ─────────────────────
+    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.42, y: 0.55, biome: 'plains',    tier: 0, ico: '🏰', isOrigin: true,
+      mapKey: null,
+      desc: 'Os grandes portões da cidade. Aldric vigia a entrada. Ponto de partida de toda jornada.' },
+    // ─── PLAINS interior (Sudoeste/Sudeste) ──────
+    { key: 'green_fields',   name: 'Campos Verdes',       x: 0.30, y: 0.72, biome: 'plains',  tier: 1, ico: '🌾',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Vastas planícies onde o vento sopra livre. Lar de coelhos... e bandidos.' },
+    { key: 'orc_tribe',      name: 'Acampamento Orc',     x: 0.56, y: 0.74, biome: 'plains',  tier: 3, ico: '⛺',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Tendas de couro grosseiro e fogueiras. Tambores de guerra ecoam.' },
+    { key: 'bandit_fortress', name: 'Forte dos Bandidos', x: 0.70, y: 0.66, biome: 'plains',  tier: 5, ico: '🏴',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Fortaleza improvisada de madeira e pedra. Base de saqueadores.' },
+    // ─── FOREST (Norte) ───────────────────────────
+    { key: 'forest',    name: 'Floresta dos Sussurros',  x: 0.42, y: 0.34, biome: 'forest',   tier: 2, ico: '🌲',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Árvores antigas que bloqueiam a luz do sol. Sombras com vida.' },
+    { key: 'goblin_nest',     name: 'Ninho de Goblins',  x: 0.28, y: 0.30, biome: 'forest',   tier: 2, ico: '👺',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Clareira cheia de armadilhas e lixo. O cheiro é terrível.' },
+    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.58, y: 0.26, biome: 'forest',   tier: 4, ico: '🏛️',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa.' },
+    // ─── CAVE / UNDERGROUND (Oeste) ──────────────
+    { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.20, y: 0.52, biome: 'cave',     tier: 3, ico: '🕳️',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Túnel escuro sob as colinas. Ecos estranhos das profundezas.' },
+    { key: 'troll_cave', name: 'Caverna do Troll',       x: 0.10, y: 0.40, biome: 'cave',     tier: 5, ico: '🧌',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Abertura escura na rocha. Ossos enormes na entrada.' },
+    // ─── SWAMP (Leste) ───────────────────────────
+    { key: 'swamp',     name: 'Pântano Nebuloso',         x: 0.66, y: 0.50, biome: 'swamp',   tier: 3, ico: '🐍',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas paradas e névoa eterna. Cuidado onde pisa.' },
+    { key: 'deep_swamp', name: 'Pântano Profundo',        x: 0.80, y: 0.58, biome: 'swamp',   tier: 5, ico: '🐊',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas negras e árvores mortas. Criaturas anciãs espreitam.' },
+    // ─── MOUNTAIN (Noroeste) ──────────────────────
+    { key: 'mountain',  name: 'Picos de Pedra',           x: 0.20, y: 0.18, biome: 'mountain', tier: 4, ico: '🏔️',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Montanhas íngremes e vento cortante. Harpias fazem ninhos.' },
+    { key: 'dragon_pass', name: 'Passo do Dragão',        x: 0.36, y: 0.10, biome: 'mountain', tier: 6, ico: '🐉',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Passagem estreita entre picos vulcânicos. Fumaça sobe do vale.' },
+    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.04, y: 0.20, biome: 'mountain', tier: 3, ico: '⛏️', settlement: true, discoverable: true,
+      mapKey: null,
+      desc: 'Vila mineradora encravada nos picos. Fornalhas ardem dia e noite.' },
+    // ─── DESERT (Sudeste) ─────────────────────────
+    { key: 'desert',    name: 'Deserto Dourado',          x: 0.78, y: 0.80, biome: 'desert',   tier: 4, ico: '🌵',
+      mapKey: 'Mapa do Deserto',
+      desc: 'Dunas sem fim sob um sol impiedoso. Água vale mais que ouro.' },
+    // ─── GRAVEYARD (Sul) ──────────────────────────
+    { key: 'graveyard', name: 'Cemitério Antigo',         x: 0.50, y: 0.88, biome: 'graveyard', tier: 3, ico: '⚰️',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Lápides cobertas de musgo. Mortos não descansam em paz.' },
+    { key: 'ancestral_graveyard', name: 'Cemitério Ancestral', x: 0.18, y: 0.86, biome: 'graveyard', tier: 5, ico: '🪦',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Mausoléus antigos da aristocracia esquecida. Magia necromântica residual.' },
+    // ─── UNDERGROUND DEEP (Oeste profundo) ───────
+    { key: 'underground_caverns', name: 'Cavernas Subterrâneas', x: 0.06, y: 0.66, biome: 'cave', tier: 5, ico: '🪨',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Sistema de túneis profundos. Pedra esculpida pelo tempo.' },
+    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.06, y: 0.50, biome: 'cave', tier: 7, ico: '💎',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.' },
+    // ─── SNOW (Norte distante) ────────────────────
+    { key: 'snow',      name: 'Ermo Congelado',           x: 0.50, y: 0.06, biome: 'snow',     tier: 5, ico: '❄️',
+      mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Tudo é branco e mortal. O frio penetra até a alma.' },
+    // ─── VOLCANIC (Leste extremo) ─────────────────
+    { key: 'volcanic',  name: 'Cratera Vulcânica',        x: 0.92, y: 0.40, biome: 'volcanic', tier: 8, ico: '🌋',
+      mapKey: 'Mapa Vulcânico',
+      desc: 'Rios de lava e cinzas. O calor derrete metal. Lar de dragões?' },
+    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.22, biome: 'volcanic', tier: 5, ico: '⛺', settlement: true, discoverable: true,
+      mapKey: null,
+      desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' }
   ];
 
   // === CART_PATHS ===
+  // 2026-05-04: BASEADO em WORLD_MAP.connections (map_data.py).
+  // Trajetos NUNCA retos — _drawCartPath usa Bezier curvada.
   var CART_PATHS = [
-    ['plains', 'forest'],
-    ['plains', 'cave'],
-    ['plains', 'swamp'],
-    ['plains', 'graveyard'],
-    ['forest', 'mountain'],
-    ['forest', 'snow'],
-    ['cave', 'mountain'],
-    ['swamp', 'graveyard'],
-    ['swamp', 'volcanic'],
-    ['desert', 'volcanic'],
-    ['snow', 'mountain']
+    // Hub
+    ['plains', 'green_fields'], ['plains', 'forest'], ['plains', 'swamp'],
+    ['plains', 'desert'], ['plains', 'cave'],
+    // Plains internas
+    ['green_fields', 'orc_tribe'], ['green_fields', 'mountain'],
+    ['green_fields', 'bandit_fortress'], ['bandit_fortress', 'desert'],
+    // Forest
+    ['forest', 'goblin_nest'], ['forest', 'elven_ruins'], ['forest', 'snow'],
+    ['elven_ruins', 'snow'],
+    // Cave
+    ['cave', 'graveyard'], ['cave', 'korthag'],
+    // Graveyard / Swamp
+    ['graveyard', 'swamp'], ['swamp', 'deep_swamp'], ['deep_swamp', 'volcanic'],
+    // Mountain
+    ['mountain', 'troll_cave'], ['mountain', 'snow'],
+    ['mountain', 'dragon_pass'], ['mountain', 'korthag'],
+    ['dragon_pass', 'volcanic'], ['dragon_pass', 'valkrest'],
+    // Volcanic
+    ['desert', 'volcanic'], ['volcanic', 'valkrest'],
+    // 2026-05-04 — locais canonical adicionais (FIXED_MAPS):
+    ['graveyard', 'ancestral_graveyard'],     // Cemitério Antigo → Ancestral
+    ['ancestral_graveyard', 'deep_swamp'],    // ancestral conecta a deep_swamp
+    ['cave', 'underground_caverns'],          // Passagem → Cavernas Subterrâneas
+    ['underground_caverns', 'crystal_depths'], // Cavernas → Profundezas de Cristal
+    ['crystal_depths', 'mountain']            // Profundezas → Picos (passagem alta)
   ];
 
   // === _cartSeedRand ===
@@ -110,21 +203,156 @@
     }
   }
 
+  // === _drawOrganicBlob ===
+  // Mancha orgânica baseada em pétalas Bezier (NÃO círculo perfeito).
+  // 6-9 pontos de borda com raio variável + curvas suaves entre eles.
+  // Usado pra manchas de água, café, vinho, oxidação — formas naturais.
+  function _drawOrganicBlob(ctx, cx, cy, baseRadius, color, alpha, seed){
+    var rng = _cartSeedRand(seed || (cx * 1000 + cy));
+    var nPts = 6 + Math.floor(rng() * 4);
+    var angles = [];
+    for (var i = 0; i < nPts; i++) {
+      angles.push((i / nPts) * Math.PI * 2 + (rng() - 0.5) * 0.5);
+    }
+    var pts = angles.map(function(a){
+      var r = baseRadius * (0.65 + rng() * 0.7);
+      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+    });
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var k = 0; k < pts.length; k++) {
+      var p = pts[k];
+      var pn = pts[(k + 1) % pts.length];
+      var mx = (p[0] + pn[0]) / 2 + (rng() - 0.5) * baseRadius * 0.18;
+      var my = (p[1] + pn[1]) / 2 + (rng() - 0.5) * baseRadius * 0.18;
+      ctx.quadraticCurveTo(p[0], p[1], mx, my);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    return rng;
+  }
+
+  // === _drawAgedStain ===
+  // Mancha envelhecida MULTI-CAMADA (água, café, vinho).
+  // 1) Halo difuso grande (fade out)
+  // 2) Blob orgânico médio (corpo da mancha)
+  // 3) Anel de capilaridade escuro (coffee-ring effect — borda mais escura)
+  // 4) Salpicos pequenos ao redor (3-6 micro-blobs)
+  function _drawAgedStain(ctx, cx, cy, size, baseColor, edgeColor, seed){
+    var rng = _cartSeedRand(seed || (cx + cy * 13));
+    // 1) Halo gradient suave (fade) — 2026-05-04 v3: alpha 0.05-0.09 (mt sutil)
+    var halo = ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.3);
+    halo.addColorStop(0, baseColor);
+    halo.addColorStop(0.6, baseColor);
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = halo;
+    ctx.globalAlpha = 0.05 + rng() * 0.04;
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // 2) Blob orgânico (corpo) — 2026-05-04 v3: alpha 0.08-0.13 (suave)
+    _drawOrganicBlob(ctx, cx, cy, size * 0.85, baseColor, 0.08 + rng() * 0.05, seed);
+    // 3) Coffee-ring: borda de capilaridade — 2026-05-04 v3: alpha 0.35 → 0.18
+    var ringInner = size * 0.7, ringOuter = size * 0.92;
+    var ring = ctx.createRadialGradient(cx, cy, ringInner, cx, cy, ringOuter);
+    ring.addColorStop(0, 'rgba(0,0,0,0)');
+    ring.addColorStop(0.5, edgeColor);
+    ring.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = ring;
+    ctx.globalAlpha = 0.18;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringOuter, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // 4) Salpicos pequenos — 2026-05-04 v3: alpha 0.10-0.20 (mais discretos)
+    var nSplats = 2 + Math.floor(rng() * 3);
+    for (var s = 0; s < nSplats; s++) {
+      var ang = rng() * Math.PI * 2;
+      var dist = size * (1.0 + rng() * 0.6);
+      var sx = cx + Math.cos(ang) * dist;
+      var sy = cy + Math.sin(ang) * dist;
+      var ssz = 0.8 + rng() * (size * 0.06);
+      _drawOrganicBlob(ctx, sx, sy, ssz, baseColor, 0.10 + rng() * 0.10, seed + s * 7);
+    }
+  }
+
+  // === _drawCrease ===
+  // Dobra/vinco no papel — linha hesitante com sombra adjacente
+  function _drawCrease(ctx, x1, y1, x2, y2, seed){
+    var rng = _cartSeedRand(seed || 1);
+    ctx.save();
+    // Linha principal da dobra (hesitante)
+    ctx.strokeStyle = 'rgba(80,50,20,0.16)';
+    ctx.lineWidth = 0.6;
+    var steps = Math.max(20, Math.round(Math.hypot(x2 - x1, y2 - y1) / 8));
+    ctx.beginPath();
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var x = x1 + (x2 - x1) * t + (rng() - 0.5) * 1.2;
+      var y = y1 + (y2 - y1) * t + (rng() - 0.5) * 1.2;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Sombra paralela (capilaridade da dobra)
+    ctx.strokeStyle = 'rgba(60,40,12,0.08)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    var dx = (x2 - x1) / steps, dy = (y2 - y1) / steps;
+    var nx = -dy / Math.hypot(dx, dy), ny = dx / Math.hypot(dx, dy);
+    for (var j = 0; j <= steps; j++) {
+      var t2 = j / steps;
+      var px = x1 + (x2 - x1) * t2 + nx * 1.5 + (rng() - 0.5) * 1.2;
+      var py = y1 + (y2 - y1) * t2 + ny * 1.5 + (rng() - 0.5) * 1.2;
+      if (j === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // === _drawScorchedEdge ===
+  // Borda chamuscada — gradient escuro + chamas irregulares no contorno
+  function _drawScorchedEdge(ctx, w, h, intensity){
+    intensity = intensity || 0.42;
+    // 1) Gradient radial nas bordas
+    var grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.min(w, h) * 0.85);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.7, 'rgba(40,20,10,' + (intensity * 0.4) + ')');
+    grad.addColorStop(1, 'rgba(40,20,10,' + intensity + ')');
+    ctx.save();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    // 2) Chamuscado irregular nos cantos (4 manchas escuras orgânicas)
+    var corners = [[0, 0], [w, 0], [0, h], [w, h]];
+    corners.forEach(function(c, i){
+      var seed = 100 + i * 7;
+      var rng = _cartSeedRand(seed);
+      var size = 30 + rng() * 25;
+      _drawOrganicBlob(ctx, c[0], c[1], size, 'rgba(28,14,6,0.5)', 0.55, seed);
+    });
+  }
+
   // === _drawParchmentBase ===
   function _drawParchmentBase(ctx, w, h){
     // 1. Base flat sepia (sem gradient)
     ctx.fillStyle = PAPER_BG;
     ctx.fillRect(0, 0, w, h);
-    // 2. Aged blotches em algumas áreas (pseudo-random clusters)
+    // 2. Aged blotches ORGÂNICOS (não círculos toscos — formas Bezier irregulares
+    //    com pétalas + capilaridade + salpicos). 2026-05-04: substitui ctx.arc plano.
     var rng = _cartSeedRand(42);
-    for (var bi = 0; bi < 8; bi++) {
+    for (var bi = 0; bi < 6; bi++) {
       var bx = rng() * w, by = rng() * h;
-      var blotchSize = 30 + rng()*50;
-      ctx.fillStyle = PAPER_DARK;
-      ctx.globalAlpha = 0.18 + rng()*0.12;
-      ctx.beginPath();
-      ctx.arc(bx, by, blotchSize, 0, Math.PI*2);
-      ctx.fill();
+      var blotchSize = 28 + rng() * 50;
+      _drawOrganicBlob(ctx, bx, by, blotchSize, PAPER_DARK, 0.16 + rng() * 0.12, 42 + bi * 13);
     }
     ctx.globalAlpha = 1;
     // 3. Paper grain (pontos pequenos espalhados, look graphite)
@@ -171,8 +399,348 @@
     _hatchArea(ctx, w-cornerSz, h-cornerSz, cornerSz, cornerSz, Math.PI/4, 6, 'rgba(60,35,12,0.18)', 0.5);
   }
 
-  // === _drawBiomeArt ===
-  function _drawBiomeArt(ctx, b, w, h){
+  // === _drawBiomeAtmosphere v13 (2026-05-06) — AAA POLISH AMPLIFIED ========
+  // User reportou v12: "polish dos pictogram não senti diferença". v13:
+  // alphas duplicados (de 0.10 → 0.25), particles 2× mais numerous, light
+  // rays mais largos e contrastantes, frame circular de aura, halos atrás
+  // dos pictogramas pra leitura clara.
+  function _drawBiomeAtmosphere(ctx, b, w, h) {
+    var bx = b.x * w, by = b.y * h;
+    var biome = b.biome || b.key;
+    ctx.save();
+    ctx.translate(bx, by);
+    var rng = _cartSeedRand(b.key.charCodeAt(0) * 200 + b.key.length * 7);
+
+    // ─── HALO de fundo circular (dá depth + frame visual a TODOS) ───
+    // Cria glow-frame radial que separa o pictograma do mapa around.
+    // ANTES da arte (renderizado primeiro pra não cobrir). Aplicado via
+    // composite. v13: agora 0.18 (era invisible).
+    ctx.save();
+    var haloColor = (biome === 'volcanic' || biome === 'desert') ? INK_DARK : INK_LIGHT;
+    ctx.fillStyle = haloColor;
+    ctx.globalAlpha = 0.18;
+    ctx.beginPath();
+    ctx.arc(0, 0, 38, 0, Math.PI * 2);
+    ctx.fill();
+    // Halo mais escuro nas bordas
+    ctx.globalAlpha = 0.10;
+    ctx.fillStyle = INK_DARK;
+    ctx.beginPath();
+    ctx.arc(0, 0, 42, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // ─── GROUND SHADOW grande elíptica (volume 3D claro v13) ────────
+    var hasGroundShadow = (biome !== 'volcanic' && biome !== 'graveyard'
+                          && biome !== 'snow' && biome !== 'cave');
+    if (hasGroundShadow) {
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.25;  // v13: 0.10 → 0.25 (2.5× mais visível)
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 32, 5, 0, 0, Math.PI * 2);  // 28×3.5 → 32×5 (mais largo)
+      ctx.fill();
+      // Sombra interna mais escura
+      ctx.globalAlpha = 0.18;
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 22, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // ─── LIGHT RAY accent — agora 3 raios paralelos (era 1) ─────────
+    var lightBiomes = { plains:1, green_fields:1, desert:1, snow:1, volcanic:1 };
+    if (lightBiomes[biome] || lightBiomes[b.key]) {
+      ctx.save();
+      ctx.fillStyle = INK_LIGHT;
+      // Raio 1 (mais largo, mais opaco)
+      ctx.globalAlpha = 0.22;  // v13: 0.10 → 0.22
+      ctx.beginPath();
+      ctx.moveTo(-34, -32);
+      ctx.lineTo(-26, -36);
+      ctx.lineTo(2, 26);
+      ctx.lineTo(-8, 26);
+      ctx.closePath();
+      ctx.fill();
+      // Raio 2 (mais fino, atrás)
+      ctx.globalAlpha = 0.14;
+      ctx.beginPath();
+      ctx.moveTo(-22, -34);
+      ctx.lineTo(-18, -36);
+      ctx.lineTo(8, 22);
+      ctx.lineTo(2, 22);
+      ctx.closePath();
+      ctx.fill();
+      // Raio 3 (mais lateral)
+      ctx.globalAlpha = 0.10;
+      ctx.beginPath();
+      ctx.moveTo(-38, -22);
+      ctx.lineTo(-32, -28);
+      ctx.lineTo(-4, 28);
+      ctx.lineTo(-12, 28);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ─── BIOME-SPECIFIC PARTICLES (v13 amplified — 2x mais numerous) ───
+    if (biome === 'forest' || b.key === 'goblin_nest' || b.key === 'elven_ruins') {
+      // Folhas caindo MAIS (10 silhuetas — era 5)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.6;  // v13: 0.4 → 0.6
+      for (var fl = 0; fl < 10; fl++) {
+        var fx = -32 + rng() * 64;
+        var fy = -28 + rng() * 22;
+        var rot = rng() * Math.PI;
+        var siz = 1.2 + rng() * 0.8;
+        ctx.save();
+        ctx.translate(fx, fy);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, siz, siz * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Veia central da folha
+        ctx.beginPath();
+        ctx.moveTo(-siz, 0); ctx.lineTo(siz, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    } else if (biome === 'swamp' || b.key === 'deep_swamp') {
+      // Mist 5 layers (era 3) com opacidade maior
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.32;  // v13: 0.18 → 0.32
+      [-22, -14, -6, 2, 12].forEach(function(my) {
+        ctx.beginPath();
+        ctx.ellipse(0, my, 32, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      // Bolhas (era 3, agora 8)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.7;
+      for (var bb = 0; bb < 8; bb++) {
+        var bbx = -14 + rng() * 28;
+        var bby = 6 + rng() * 18;
+        ctx.beginPath();
+        ctx.arc(bbx, bby, 0.6 + rng() * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if (biome === 'volcanic' || b.key === 'volcanic') {
+      // Cinzas (era 9, agora 18)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.75;  // v13: 0.55 → 0.75
+      for (var as = 0; as < 18; as++) {
+        var asx = -36 + rng() * 72;
+        var asy = -36 + rng() * 60;
+        ctx.beginPath();
+        ctx.arc(asx, asy, 0.5 + rng() * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // Brasas brilhantes (NEW v13 — pontos lighter pra contraste)
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.65;
+      for (var br = 0; br < 6; br++) {
+        var brx = -28 + rng() * 56;
+        var bry = -12 + rng() * 32;
+        ctx.beginPath();
+        ctx.arc(brx, bry, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // Heat shimmer (linhas onduladas verticais)
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.25;
+      ctx.lineWidth = 0.4;
+      [-22, -8, 8, 22].forEach(function(hsx) {
+        ctx.beginPath();
+        ctx.moveTo(hsx, 18);
+        ctx.bezierCurveTo(hsx + 1, 12, hsx - 1, 8, hsx, 0);
+        ctx.bezierCurveTo(hsx + 0.5, -6, hsx - 0.5, -10, hsx, -16);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+    } else if (biome === 'snow' || b.key === 'snow') {
+      // Flocos de neve (asteriscos pequenos)
+      ctx.strokeStyle = INK_DARK;
+      ctx.globalAlpha = 0.7;
+      ctx.lineWidth = 0.3;
+      for (var sf = 0; sf < 12; sf++) {
+        var sfx = -32 + rng() * 64;
+        var sfy = -32 + rng() * 56;
+        var sz = 0.8 + rng() * 0.6;
+        // Cruz vertical+horizontal
+        ctx.beginPath();
+        ctx.moveTo(sfx - sz, sfy); ctx.lineTo(sfx + sz, sfy);
+        ctx.moveTo(sfx, sfy - sz); ctx.lineTo(sfx, sfy + sz);
+        // Diagonais
+        ctx.moveTo(sfx - sz * 0.7, sfy - sz * 0.7); ctx.lineTo(sfx + sz * 0.7, sfy + sz * 0.7);
+        ctx.moveTo(sfx - sz * 0.7, sfy + sz * 0.7); ctx.lineTo(sfx + sz * 0.7, sfy - sz * 0.7);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    } else if (biome === 'desert' || b.key === 'desert') {
+      // Wind streaks horizontais (linhas curvas)
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 0.4;
+      for (var ws = 0; ws < 6; ws++) {
+        var wsy = -28 + ws * 8;
+        var wsx0 = -30 + rng() * 6;
+        ctx.beginPath();
+        ctx.moveTo(wsx0, wsy);
+        ctx.bezierCurveTo(wsx0 + 10, wsy - 1, wsx0 + 22, wsy + 1, wsx0 + 32, wsy);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    } else if (biome === 'graveyard' || b.key === 'graveyard' || b.key === 'ancestral_graveyard') {
+      // Mist baixa + corvos pretos (silhuetas em V)
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.20;
+      ctx.beginPath();
+      ctx.ellipse(0, 18, 32, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // 2 corvos voando
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.6;
+      ctx.lineCap = 'round';
+      [[-18, -22], [12, -26]].forEach(function(c) {
+        var cx = c[0], cy = c[1];
+        // Asas em M (V invertido)
+        ctx.beginPath();
+        ctx.moveTo(cx - 3, cy + 1);
+        ctx.quadraticCurveTo(cx - 1, cy - 1.5, cx, cy);
+        ctx.quadraticCurveTo(cx + 1, cy - 1.5, cx + 3, cy + 1);
+        ctx.stroke();
+      });
+    } else if (biome === 'mountain' || b.key === 'dragon_pass') {
+      // Águia voando + névoa baixa
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(8, -22);
+      ctx.quadraticCurveTo(11, -25, 14, -22);
+      ctx.quadraticCurveTo(17, -25, 20, -22);
+      ctx.stroke();
+      // Nuvem baixa
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.20;
+      ctx.beginPath();
+      ctx.arc(-18, -10, 3, 0, Math.PI * 2);
+      ctx.arc(-14, -11, 3.5, 0, Math.PI * 2);
+      ctx.arc(-10, -9, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else if (biome === 'cave' || b.key === 'troll_cave' || b.key === 'underground_caverns'
+               || b.key === 'crystal_depths') {
+      // Pó de pedra subindo (pequenos pontos translúcidos)
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.4;
+      for (var ds = 0; ds < 8; ds++) {
+        var dsx = -22 + rng() * 44;
+        var dsy = -18 + rng() * 36;
+        ctx.beginPath();
+        ctx.arc(dsx, dsy, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // Sparkle de cristal pra crystal_depths
+      if (b.key === 'crystal_depths') {
+        ctx.strokeStyle = INK_LIGHT;
+        ctx.lineWidth = 0.5;
+        ctx.globalAlpha = 0.7;
+        for (var sp = 0; sp < 5; sp++) {
+          var spx = -18 + rng() * 36;
+          var spy = -10 + rng() * 24;
+          var sps = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(spx, spy - sps); ctx.lineTo(spx, spy + sps);
+          ctx.moveTo(spx - sps, spy); ctx.lineTo(spx + sps, spy);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+    } else if (b.key === 'orc_tribe' || b.key === 'bandit_fortress') {
+      // Smoke do fogo (3 puffs pequenos subindo)
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.30;
+      var smX = (b.key === 'orc_tribe') ? 18 : 4;
+      var smY = (b.key === 'orc_tribe') ? 8 : -16;
+      for (var sm = 0; sm < 3; sm++) {
+        ctx.beginPath();
+        ctx.arc(smX + sm, smY - sm * 4, 1.5 + sm * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if (b.key === 'korthag') {
+      // Mais smoke da fornalha (puffs altos)
+      ctx.fillStyle = INK_LIGHT;
+      ctx.globalAlpha = 0.30;
+      for (var ks = 0; ks < 3; ks++) {
+        ctx.beginPath();
+        ctx.arc(2 + ks * 2, -22 - ks * 4, 2 + ks * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if (b.key === 'green_fields') {
+      // Pólen flutuando (4 pontos dourados translúcidos)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.35;
+      for (var pl = 0; pl < 5; pl++) {
+        var plx = -28 + rng() * 56;
+        var ply = -20 + rng() * 24;
+        ctx.beginPath();
+        ctx.arc(plx, ply, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if (b.key === 'valkrest') {
+      // Cinzas leves (acampamento próximo do vulcão)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.40;
+      for (var vs = 0; vs < 5; vs++) {
+        var vsx = -26 + rng() * 52;
+        var vsy = -22 + rng() * 18;
+        ctx.beginPath();
+        ctx.arc(vsx, vsy, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // ─── HATCHING AMBIENTE direcional (sombra NE pra todos) ─────────
+    // Pequena hachura diagonal no canto superior direito como
+    // sombra atmosférica de luz vinda do canto inferior esquerdo
+    ctx.strokeStyle = INK_DARK;
+    ctx.lineWidth = 0.25;
+    ctx.globalAlpha = 0.18;
+    for (var hh = 0; hh < 5; hh++) {
+      var hhy = -28 + hh * 2;
+      ctx.beginPath();
+      ctx.moveTo(20 + hh * 1.5, hhy);
+      ctx.lineTo(28 + hh * 1.5, hhy + 8);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+
+  // === _drawBiomeArt — wrapper AAA POLISH v12 (2026-05-06) ============
+  // Wrapper que chama o pictograma core + atmospheric polish layer.
+  // User pediu "AAA polish dos 22 pictogramas". Polish é shared (uma
+  // função que adiciona elementos baseados no biome/key) — alimenta
+  // todos os pictogramas existentes sem editar cada um individualmente.
+  function _drawBiomeArt(ctx, b, w, h) {
+    _drawBiomeArtCore(ctx, b, w, h);
+    _drawBiomeAtmosphere(ctx, b, w, h);
+  }
+
+  // === _drawBiomeArtCore (renamed do antigo _drawBiomeArt) ===========
+  function _drawBiomeArtCore(ctx, b, w, h){
     // === Biome Art hand-drawn (Fase 6.5 — 2026-04-30) ========================
     // Pencil/ink pictogramas estilo cartografia antiga — line-only, single
     // sépia color, hatching pra shading. SEM gradients, SEM shadows, SEM glow.
@@ -188,339 +756,2168 @@
     var r = 50; // raio art reduzido (mais limpo)
     var i, x, y, sz;
 
-    if (b.key === 'plains') {
-      // Pictograma: 3 colinas onduladas + tufos de grama (pequenos n)
-      // Colinas (3 arcos baixos)
-      ctx.beginPath();
-      for (i = 0; i < 3; i++) {
-        x = (i - 1) * 18;
-        y = 8;
-        ctx.moveTo(x - 12, y);
-        ctx.quadraticCurveTo(x, y - 6, x + 12, y);
-      }
-      ctx.stroke();
-      // Tufos de grama — letrinha "u" estilizada
-      for (i = 0; i < 8; i++) {
-        x = (rng() - 0.5) * r * 1.6;
-        y = (rng() - 0.5) * r * 1.4;
+    // ─── PICTOGRAMAS PROFISSIONAIS AAA (REWRITE 2026-05-04) ───────────
+    // USER REQUEST: "está parecendo desenho infantil, faça melhorias
+    // profundas e profissionais". Reescrita completa com:
+    // - Volume real via cross-hatching diagonal mestre + finos
+    // - Perspectiva 3/4 onde apropriado (castelos, torres, vulcão)
+    // - Hierarquia visual (1 elemento dominante + secundários)
+    // - Texturas: blocos de pedra, folhagem, água ondulante, neve granular
+    // - Proporções autênticas Frà Mauro / Atlas Catalão (1375-1459)
+    // ──────────────────────────────────────────────────────────────────
+
+    // === PER-KEY UNIQUE PICTOGRAMS v10 (2026-05-05) ==================
+    // User feedback: "nenhum desenho deve ser repetido". Locais não-genéricos
+    // (orc_tribe, bandit_fortress, goblin_nest, elven_ruins, troll_cave,
+    // deep_swamp, dragon_pass, korthag, ancestral_graveyard, valkrest,
+    // green_fields, underground_caverns, crystal_depths) ganham pictograma
+    // próprio inequívoco. Os 9 biomas base mantêm seus pictogramas existentes
+    // (plains/forest/cave/swamp/mountain/desert/graveyard/snow/volcanic).
+    // Cada um termina com `return` pra evitar fall-through ao biome generic.
+    // =================================================================
+
+    // ─── GREEN_FIELDS (Campos Verdes) — fardos de trigo + moinho ─────
+    if (b.key === 'green_fields') {
+      ctx.lineWidth = 0.8;
+      // Linhas onduladas do solo (campos)
+      for (var gf = 0; gf < 4; gf++) {
+        var gy_ = 8 + gf * 4;
         ctx.beginPath();
-        ctx.moveTo(x - 1.5, y); ctx.lineTo(x - 1.5, y - 2);
-        ctx.moveTo(x + 1.5, y); ctx.lineTo(x + 1.5, y - 2);
-        ctx.quadraticCurveTo(x, y, x - 1.5, y);
+        ctx.moveTo(-30, gy_);
+        ctx.bezierCurveTo(-15, gy_ - 1.5, 0, gy_ + 1.5, 15, gy_ - 0.8);
+        ctx.bezierCurveTo(22, gy_ + 1, 28, gy_ - 0.5, 30, gy_);
         ctx.stroke();
       }
-      // Pontos esparsos (terra)
-      for (i = 0; i < 14; i++) {
-        x = (rng() - 0.5) * r * 1.6;
-        y = (rng() - 0.5) * r * 1.4;
+      // 3 fardos de trigo (cones com cordilha)
+      [[-14, 4], [10, 6], [-2, 10]].forEach(function(s){
+        var sx = s[0], sy = s[1];
         ctx.beginPath();
-        ctx.arc(x, y, 0.5, 0, Math.PI*2);
+        ctx.moveTo(sx - 3, sy + 4);
+        ctx.lineTo(sx, sy - 6);
+        ctx.lineTo(sx + 3, sy + 4);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(sx - 2.5, sy + 1); ctx.lineTo(sx + 2.5, sy + 1);
+        ctx.moveTo(sx - 2, sy + 2.5); ctx.lineTo(sx + 2, sy + 2.5);
+        ctx.stroke();
+      });
+      // MOINHO (torre cônica + 4 pás cruz)
+      var mwX = 18, mwY = -10;
+      ctx.beginPath();
+      ctx.moveTo(mwX - 5, mwY + 12);
+      ctx.lineTo(mwX - 3, mwY - 4);
+      ctx.lineTo(mwX + 3, mwY - 4);
+      ctx.lineTo(mwX + 5, mwY + 12);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(mwX, mwY - 4, 1, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 0.7;
+      [[0, -10], [0, 10], [-10, 0], [10, 0]].forEach(function(p){
+        ctx.beginPath();
+        ctx.moveTo(mwX, mwY - 4);
+        ctx.lineTo(mwX + p[0], mwY - 4 + p[1]);
+        ctx.stroke();
+        var ang_ = Math.atan2(p[1], p[0]);
+        var px_ = mwX + p[0] * 0.85, py_ = mwY - 4 + p[1] * 0.85;
+        ctx.save();
+        ctx.translate(px_, py_);
+        ctx.rotate(ang_);
+        ctx.beginPath(); ctx.rect(-3, -1.2, 6, 2.4); ctx.stroke();
+        ctx.restore();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── ORC_TRIBE (Acampamento Orc) — tendas + totem caveira + tambor ─
+    if (b.key === 'orc_tribe') {
+      ctx.lineWidth = 0.85;
+      var tents = [[-16, 8, 0.95], [12, 6, 1.0], [-2, 12, 0.85]];
+      tents.forEach(function(t){
+        var tx = t[0], ty = t[1], sc = t[2];
+        ctx.beginPath();
+        ctx.moveTo(tx - 7 * sc, ty + 6);
+        ctx.lineTo(tx, ty - 10 * sc);
+        ctx.lineTo(tx + 7 * sc, ty + 6);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tx - 1, ty - 11 * sc); ctx.lineTo(tx + 1, ty - 13 * sc);
+        ctx.moveTo(tx + 1, ty - 11 * sc); ctx.lineTo(tx - 1, ty - 13 * sc);
+        ctx.stroke();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(tx - 1.5, ty + 6);
+        ctx.lineTo(tx, ty - 2);
+        ctx.lineTo(tx + 1.5, ty + 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // TOTEM CENTRAL — caveira em poste alto
+      var tmX = 0, tmY = -6;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(tmX, tmY + 16); ctx.lineTo(tmX, tmY - 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(tmX, tmY - 8, 3.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(tmX - 1.2, tmY - 8.5, 0.7, 0, Math.PI * 2);
+      ctx.arc(tmX + 1.2, tmY - 8.5, 0.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.arc(tmX, tmY - 6, 1.5, 0, Math.PI);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      [-5, 5].forEach(function(off){
+        ctx.beginPath();
+        ctx.moveTo(tmX + off, tmY - 4);
+        ctx.lineTo(tmX + off * 1.5, tmY + 1);
+        ctx.stroke();
+        ctx.beginPath(); ctx.arc(tmX + off * 1.5, tmY + 1, 0.6, 0, Math.PI * 2); ctx.fill();
+      });
+      // FOGUEIRA pequena
+      var fX = 18, fY = 12;
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(fX - 2, fY + 2); ctx.lineTo(fX, fY - 4); ctx.lineTo(fX + 2, fY + 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(fX - 1.2, fY + 1); ctx.lineTo(fX, fY - 2); ctx.lineTo(fX + 1.2, fY + 1);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(fX - 3, fY + 4); ctx.lineTo(fX + 3, fY + 4);
+      ctx.moveTo(fX - 2, fY + 3); ctx.lineTo(fX + 2, fY + 5);
+      ctx.stroke();
+      ctx.restore(); return;
+    }
+
+    // ─── BANDIT_FORTRESS — paliçada + torre + bandeira pirata ────────
+    if (b.key === 'bandit_fortress') {
+      ctx.lineWidth = 0.8;
+      var pX = -22;
+      for (var pp = 0; pp < 12; pp++) {
+        var sx_ = pX + pp * 4;
+        ctx.beginPath();
+        ctx.moveTo(sx_, 14); ctx.lineTo(sx_, -2);
+        ctx.lineTo(sx_ + 1.5, -4); ctx.lineTo(sx_ + 3, -2);
+        ctx.lineTo(sx_ + 3, 14);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(-22, 6); ctx.lineTo(26, 6);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      var twX = 4, twY = -16;
+      ctx.beginPath();
+      ctx.moveTo(twX - 4, 0); ctx.lineTo(twX - 5, twY + 8);
+      ctx.moveTo(twX + 4, 0); ctx.lineTo(twX + 5, twY + 8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.rect(twX - 7, twY + 2, 14, 8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(twX - 8, twY + 2);
+      ctx.lineTo(twX, twY - 4);
+      ctx.lineTo(twX + 8, twY + 2);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(twX, twY - 4); ctx.lineTo(twX, twY - 14);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.rect(twX, twY - 14, 8, 5);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(twX + 4, twY - 11.5, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      ctx.strokeStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.moveTo(twX + 2.5, twY - 9.5); ctx.lineTo(twX + 5.5, twY - 12.5);
+      ctx.moveTo(twX + 5.5, twY - 9.5); ctx.lineTo(twX + 2.5, twY - 12.5);
+      ctx.stroke();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.8;
+      [[-22, 0], [25, 0]].forEach(function(p){
+        ctx.beginPath();
+        ctx.moveTo(p[0], p[1] - 4); ctx.lineTo(p[0] + 0.5, p[1] - 8);
+        ctx.lineTo(p[0] + 1, p[1] - 5); ctx.lineTo(p[0] + 0.5, p[1] - 6.5);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── GOBLIN_NEST — gravetos cruzados + armadilhas + crânio ───────
+    if (b.key === 'goblin_nest') {
+      ctx.lineWidth = 0.7;
+      var nX = 0, nY = 6;
+      for (var ng = 0; ng < 8; ng++) {
+        var ang = (ng / 8) * Math.PI * 2;
+        var ax = nX + Math.cos(ang) * 7;
+        var ay = nY + Math.sin(ang) * 4;
+        var bx2 = nX + Math.cos(ang + 0.7) * 11;
+        var by2 = nY + Math.sin(ang + 0.7) * 6;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay); ctx.lineTo(bx2, by2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.ellipse(nX, nY, 4, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      [[-18, 12], [16, 14]].forEach(function(t){
+        var tx = t[0], ty = t[1];
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(tx, ty, 4, 1.5, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        for (var sp = 0; sp < 4; sp++) {
+          var spx = tx - 2.5 + sp * 1.5;
+          ctx.beginPath();
+          ctx.moveTo(spx, ty); ctx.lineTo(spx, ty - 3);
+          ctx.stroke();
+          ctx.fillStyle = INK_DARK;
+          ctx.beginPath();
+          ctx.moveTo(spx - 0.7, ty - 2.5);
+          ctx.lineTo(spx, ty - 4);
+          ctx.lineTo(spx + 0.7, ty - 2.5);
+          ctx.closePath();
+          ctx.fill();
+        }
+      });
+      ctx.lineWidth = 0.4;
+      for (var sc_ = 0; sc_ < 6; sc_++) {
+        var scAng = rng() * Math.PI * 2;
+        var scR = 16 + rng() * 8;
+        var scx = Math.cos(scAng) * scR;
+        var scy = Math.sin(scAng) * scR * 0.6 + 2;
+        ctx.beginPath();
+        ctx.moveTo(scx, scy); ctx.lineTo(scx + 1.5, scy + 0.8);
+        ctx.moveTo(scx + 0.7, scy - 0.3); ctx.lineTo(scx + 2.2, scy + 0.5);
+        ctx.stroke();
+      }
+      var skX = -22, skY = -2;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(skX, skY + 12); ctx.lineTo(skX, skY - 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(skX, skY - 4, 1.8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(skX - 0.6, skY - 4.3, 0.4, 0, Math.PI * 2);
+      ctx.arc(skX + 0.6, skY - 4.3, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore(); return;
+    }
+
+    // ─── ELVEN_RUINS — arco ogival + pilar caído + runas ────────────
+    if (b.key === 'elven_ruins') {
+      ctx.lineWidth = 0.85;
+      var arcX = -2, arcBottom = 14;
+      ctx.beginPath();
+      ctx.moveTo(arcX - 7, arcBottom);
+      ctx.lineTo(arcX - 7, arcBottom - 8);
+      ctx.bezierCurveTo(arcX - 6, arcBottom - 18, arcX - 1, arcBottom - 22, arcX, arcBottom - 24);
+      ctx.bezierCurveTo(arcX + 1, arcBottom - 22, arcX + 6, arcBottom - 18, arcX + 7, arcBottom - 8);
+      ctx.lineTo(arcX + 7, arcBottom);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(arcX - 5, arcBottom);
+      ctx.lineTo(arcX - 5, arcBottom - 6);
+      ctx.bezierCurveTo(arcX - 4, arcBottom - 14, arcX - 0.5, arcBottom - 18, arcX, arcBottom - 20);
+      ctx.bezierCurveTo(arcX + 0.5, arcBottom - 18, arcX + 4, arcBottom - 14, arcX + 5, arcBottom - 6);
+      ctx.lineTo(arcX + 5, arcBottom);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      [-7, 7].forEach(function(off){
+        ctx.beginPath();
+        ctx.moveTo(arcX + off - 1.2, arcBottom - 8);
+        ctx.lineTo(arcX + off + 1.2, arcBottom - 8);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(-26, 10);
+      ctx.lineTo(-15, 14);
+      ctx.lineTo(-15, 16);
+      ctx.lineTo(-26, 12);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.3;
+      for (var pli = 0; pli < 3; pli++) {
+        ctx.beginPath();
+        ctx.moveTo(-23 + pli * 3, 11); ctx.lineTo(-23 + pli * 3, 13);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.6;
+      var runas = [[16, 12], [20, 8], [12, 16], [22, 14]];
+      runas.forEach(function(r_){
+        var rx = r_[0], ry = r_[1];
+        ctx.beginPath();
+        ctx.moveTo(rx - 1.5, ry); ctx.lineTo(rx, ry - 2); ctx.lineTo(rx + 1.5, ry);
+        ctx.moveTo(rx, ry - 2); ctx.lineTo(rx, ry + 1.5);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.5;
+      var leaves = [[-18, -4], [10, -6], [-8, -8], [22, -2]];
+      leaves.forEach(function(l){
+        ctx.beginPath();
+        ctx.ellipse(l[0], l[1], 1.5, 0.7, 0.4, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── TROLL_CAVE — caverna larga + olhos no escuro + clava + ossos ─
+    if (b.key === 'troll_cave') {
+      ctx.lineWidth = 0.95;
+      var cvX = 0, cvY = 6;
+      ctx.beginPath();
+      ctx.moveTo(cvX - 16, cvY + 8);
+      ctx.bezierCurveTo(cvX - 18, cvY - 4, cvX - 8, cvY - 14, cvX, cvY - 14);
+      ctx.bezierCurveTo(cvX + 8, cvY - 14, cvX + 18, cvY - 4, cvX + 16, cvY + 8);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(cvX - 13, cvY + 7);
+      ctx.bezierCurveTo(cvX - 15, cvY - 3, cvX - 7, cvY - 12, cvX, cvY - 12);
+      ctx.bezierCurveTo(cvX + 7, cvY - 12, cvX + 15, cvY - 3, cvX + 13, cvY + 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(cvX - 3, cvY - 4, 0.9, 0, Math.PI * 2);
+      ctx.arc(cvX + 3, cvY - 4, 0.9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 0.6;
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.moveTo(cvX - 12, cvY + 11); ctx.lineTo(cvX - 4, cvY + 12);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cvX - 12, cvY + 11, 1.2, 0, Math.PI * 2);
+      ctx.arc(cvX - 4, cvY + 12, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cvX + 4, cvY + 11); ctx.lineTo(cvX + 12, cvY + 13);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cvX + 4, cvY + 11, 1.2, 0, Math.PI * 2);
+      ctx.arc(cvX + 12, cvY + 13, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cvX + 14, cvY + 11, 2.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cvX + 13.2, cvY + 10.5, 0.5, 0, Math.PI * 2);
+      ctx.arc(cvX + 14.8, cvY + 10.5, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Clava gigante
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cvX - 18, cvY + 14);
+      ctx.lineTo(cvX - 22, cvY - 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cvX - 22, cvY - 7, 3, 4, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      [-3, 3].forEach(function(dx){
+        [-3, 3].forEach(function(dy){
+          ctx.beginPath();
+          ctx.moveTo(cvX - 22 + dx, cvY - 7 + dy);
+          ctx.lineTo(cvX - 22 + dx * 1.6, cvY - 7 + dy * 1.6);
+          ctx.stroke();
+        });
+      });
+      ctx.lineWidth = 0.5;
+      [-4, 0, 5].forEach(function(sX_){
+        ctx.beginPath();
+        ctx.moveTo(cvX + sX_ - 1, cvY - 12);
+        ctx.lineTo(cvX + sX_, cvY - 9);
+        ctx.lineTo(cvX + sX_ + 1, cvY - 12);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── DEEP_SWAMP — árvore morta retorcida + crocodilo + fogo-fátuo ─
+    if (b.key === 'deep_swamp') {
+      ctx.lineWidth = 0.8;
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.rect(-30, 8, 60, 14);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.4;
+      for (var w_ = 0; w_ < 4; w_++) {
+        var wy = 11 + w_ * 3;
+        ctx.beginPath();
+        ctx.moveTo(-28, wy);
+        ctx.bezierCurveTo(-15, wy - 1, 0, wy + 1, 15, wy - 0.5);
+        ctx.bezierCurveTo(22, wy + 1, 28, wy - 0.3, 30, wy);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 1;
+      var trX = -8, trY = 8;
+      ctx.beginPath();
+      ctx.moveTo(trX, trY);
+      ctx.bezierCurveTo(trX + 2, trY - 8, trX - 2, trY - 14, trX + 1, trY - 22);
+      ctx.stroke();
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(trX + 1, trY - 16);
+      ctx.lineTo(trX - 6, trY - 20);
+      ctx.lineTo(trX - 8, trY - 24);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(trX + 0.5, trY - 18);
+      ctx.lineTo(trX + 7, trY - 21);
+      ctx.lineTo(trX + 9, trY - 25);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(trX, trY - 12);
+      ctx.lineTo(trX - 5, trY - 13);
+      ctx.lineTo(trX - 7, trY - 11);
+      ctx.stroke();
+      // Crocodilo
+      ctx.lineWidth = 0.85;
+      var crX = 12, crY = 14;
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(crX - 10, crY);
+      ctx.lineTo(crX - 8, crY - 0.8);
+      ctx.lineTo(crX, crY - 1.2);
+      ctx.lineTo(crX + 6, crY - 0.5);
+      ctx.lineTo(crX + 7, crY + 0.5);
+      ctx.lineTo(crX + 4, crY + 1);
+      ctx.lineTo(crX - 8, crY + 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(crX - 10, crY);
+      ctx.lineTo(crX - 16, crY - 1);
+      ctx.lineTo(crX - 18, crY + 0.5);
+      ctx.lineTo(crX - 14, crY + 0.8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(crX + 4, crY - 1.3, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(crX + 4, crY - 1.3, 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      // Will-o-wisp
+      ctx.lineWidth = 0.5;
+      var wpX = -18, wpY = 4;
+      ctx.beginPath();
+      ctx.arc(wpX, wpY, 1.5, 0, Math.PI * 2);
+      ctx.stroke();
+      for (var wr_ = 0; wr_ < 6; wr_++) {
+        var wrAng = (wr_ / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(wpX + Math.cos(wrAng) * 2.5, wpY + Math.sin(wrAng) * 2.5);
+        ctx.lineTo(wpX + Math.cos(wrAng) * 4, wpY + Math.sin(wrAng) * 4);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.4;
+      [[-22, 16], [22, 18], [4, 19]].forEach(function(lp){
+        ctx.beginPath();
+        ctx.ellipse(lp[0], lp[1], 1.5, 0.6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── DRAGON_PASS — desfiladeiro + fumaça + garra ─────────────────
+    if (b.key === 'dragon_pass') {
+      ctx.lineWidth = 0.9;
+      var pkLX = -18, pkRX = 18, pkBase = 16, pkTop = -16;
+      ctx.beginPath();
+      ctx.moveTo(pkLX - 12, pkBase);
+      ctx.lineTo(pkLX - 4, pkTop + 4);
+      ctx.lineTo(pkLX, pkTop);
+      ctx.lineTo(pkLX + 5, pkTop + 6);
+      ctx.lineTo(pkLX + 8, pkBase);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.3;
+      for (var hL = 0; hL < 6; hL++) {
+        ctx.beginPath();
+        ctx.moveTo(pkLX + hL * 1.2, pkTop + 4 + hL * 1.5);
+        ctx.lineTo(pkLX + 4 + hL * 1.2, pkBase - 1);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(pkRX + 12, pkBase);
+      ctx.lineTo(pkRX + 4, pkTop + 4);
+      ctx.lineTo(pkRX, pkTop);
+      ctx.lineTo(pkRX - 5, pkTop + 6);
+      ctx.lineTo(pkRX - 8, pkBase);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.3;
+      for (var hR = 0; hR < 6; hR++) {
+        ctx.beginPath();
+        ctx.moveTo(pkRX - hR * 1.2, pkTop + 4 + hR * 1.5);
+        ctx.lineTo(pkRX - 4 - hR * 1.2, pkBase - 1);
+        ctx.stroke();
+      }
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-3, pkBase);
+      ctx.lineTo(-2, 0);
+      ctx.lineTo(2, 0);
+      ctx.lineTo(3, pkBase);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.5;
+      for (var sm = 0; sm < 3; sm++) {
+        var smY_ = -4 - sm * 6;
+        var smX_ = sm * 0.8 - 1;
+        ctx.beginPath();
+        ctx.arc(smX_ - 2, smY_, 2.5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(smX_ + 1.5, smY_ - 1, 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.7;
+      var clX = -6, clY = 18;
+      [-3, 0, 3].forEach(function(off){
+        ctx.beginPath();
+        ctx.moveTo(clX + off, clY + 2); ctx.lineTo(clX + off, clY - 1);
+        ctx.stroke();
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.moveTo(clX + off - 0.7, clY - 1);
+        ctx.lineTo(clX + off, clY - 3);
+        ctx.lineTo(clX + off + 0.7, clY - 1);
+        ctx.closePath();
+        ctx.fill();
+      });
+      ctx.beginPath();
+      ctx.arc(clX, clY + 2, 4, 0, Math.PI);
+      ctx.stroke();
+      ctx.restore(); return;
+    }
+
+    // ─── KORTHAG (Vila Mineira) — casas pedra + fornalha + picaretas ─
+    if (b.key === 'korthag') {
+      ctx.lineWidth = 0.8;
+      var khouses = [[-14, 8, 1.0], [10, 6, 1.05], [-2, 12, 0.85]];
+      khouses.forEach(function(h){
+        var hx = h[0], hy = h[1], sc = h[2];
+        ctx.beginPath();
+        ctx.rect(hx - 6 * sc, hy - 1, 12 * sc, 7);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(hx - 7 * sc, hy - 1);
+        ctx.lineTo(hx - 4 * sc, hy - 4);
+        ctx.lineTo(hx + 4 * sc, hy - 4);
+        ctx.lineTo(hx + 7 * sc, hy - 1);
+        ctx.stroke();
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(hx - 4 * sc, hy - 4); ctx.lineTo(hx, hy - 2);
+        ctx.moveTo(hx + 4 * sc, hy - 4); ctx.lineTo(hx, hy - 2);
+        ctx.stroke();
+        ctx.lineWidth = 0.8;
+        ctx.fillStyle = INK_DARK;
+        ctx.fillRect(hx - 1, hy + 0.5, 1.5, 1.5);
+      });
+      ctx.lineWidth = 1;
+      var fnX = 0, fnY = -2;
+      ctx.beginPath();
+      ctx.rect(fnX - 4, fnY - 2, 8, 8);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.moveTo(fnX - 2, fnY + 6);
+      ctx.lineTo(fnX - 2, fnY + 3);
+      ctx.bezierCurveTo(fnX - 2, fnY + 1, fnX + 2, fnY + 1, fnX + 2, fnY + 3);
+      ctx.lineTo(fnX + 2, fnY + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.rect(fnX + 1, fnY - 12, 3, 10);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.arc(fnX + 1, fnY - 14, 2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(fnX + 4, fnY - 17, 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(fnX, fnY - 20, 3, 0, Math.PI * 2);
+      ctx.stroke();
+      // Picaretas cruzadas
+      ctx.lineWidth = 0.7;
+      var pkX = -22, pkY = -8;
+      ctx.beginPath();
+      ctx.moveTo(pkX - 4, pkY + 5); ctx.lineTo(pkX + 4, pkY - 4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pkX + 3, pkY - 5);
+      ctx.lineTo(pkX + 6, pkY - 4);
+      ctx.lineTo(pkX + 5, pkY - 7);
+      ctx.lineTo(pkX + 2, pkY - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(pkX + 4, pkY + 5); ctx.lineTo(pkX - 4, pkY - 4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pkX - 3, pkY - 5);
+      ctx.lineTo(pkX - 6, pkY - 4);
+      ctx.lineTo(pkX - 5, pkY - 7);
+      ctx.lineTo(pkX - 2, pkY - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      var orX = 22, orY = 14;
+      [[0, 0], [-2, 1], [2, 1], [-1, -2], [1, -2]].forEach(function(o){
+        ctx.beginPath();
+        ctx.arc(orX + o[0], orY + o[1], 1, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── ANCESTRAL_GRAVEYARD — mausoléu colunado + sarcófago ─────────
+    if (b.key === 'ancestral_graveyard') {
+      ctx.lineWidth = 0.85;
+      var msX = 0, msBase = 14;
+      for (var st_ = 0; st_ < 3; st_++) {
+        ctx.beginPath();
+        ctx.rect(msX - 16 + st_ * 1, msBase - st_ * 1.5, 32 - st_ * 2, 1.5);
+        ctx.stroke();
+      }
+      [-12, -4, 4, 12].forEach(function(cx){
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(msX + cx - 1.5, msBase - 4);
+        ctx.lineTo(msX + cx - 1.5, -2);
+        ctx.lineTo(msX + cx + 1.5, -2);
+        ctx.lineTo(msX + cx + 1.5, msBase - 4);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(msX + cx - 0.5, msBase - 5); ctx.lineTo(msX + cx - 0.5, -2);
+        ctx.moveTo(msX + cx + 0.5, msBase - 5); ctx.lineTo(msX + cx + 0.5, -2);
+        ctx.stroke();
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.rect(msX + cx - 2.2, -3.5, 4.4, 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(msX + cx - 2.2, msBase - 4, 4.4, 1.5);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(msX - 14, -3.5);
+      ctx.lineTo(msX, -10);
+      ctx.lineTo(msX + 14, -3.5);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.3;
+      for (var fh = 0; fh < 4; fh++) {
+        ctx.beginPath();
+        ctx.moveTo(msX - 10 + fh * 5, -4);
+        ctx.lineTo(msX - 7 + fh * 5, -7);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(msX, -10); ctx.lineTo(msX, -14);
+      ctx.moveTo(msX - 1.5, -12.5); ctx.lineTo(msX + 1.5, -12.5);
+      ctx.stroke();
+      // Sarcófago
+      var scX = 0, scY = 18;
+      ctx.beginPath();
+      ctx.rect(scX - 8, scY - 1, 16, 4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(scX - 7, scY); ctx.lineTo(scX + 7, scY);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.rect(scX - 0.5, scY - 0.5, 1, 2);
+      ctx.rect(scX - 1.2, scY + 0.2, 2.4, 0.6);
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      ctx.beginPath();
+      ctx.ellipse(-22, 18, 3, 1.5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      [-22 - 1.5, -22, -22 + 1.5].forEach(function(fx){
+        ctx.beginPath();
+        ctx.arc(fx, 17.5, 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── UNDERGROUND_CAVERNS — túnel + estalactites + plataforma + escada ─
+    if (b.key === 'underground_caverns') {
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-22, 16); ctx.lineTo(-22, -16);
+      ctx.lineTo(-16, -14); ctx.lineTo(-14, -10); ctx.lineTo(-12, -8);
+      ctx.lineTo(-10, -4); ctx.lineTo(-12, 0); ctx.lineTo(-10, 4);
+      ctx.lineTo(-12, 8); ctx.lineTo(-10, 12); ctx.lineTo(-12, 16);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(22, 16); ctx.lineTo(22, -16);
+      ctx.lineTo(16, -14); ctx.lineTo(14, -10); ctx.lineTo(12, -8);
+      ctx.lineTo(10, -4); ctx.lineTo(12, 0); ctx.lineTo(10, 4);
+      ctx.lineTo(12, 8); ctx.lineTo(10, 12); ctx.lineTo(12, 16);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.6;
+      [-14, -7, 7, 14].forEach(function(stX){
+        ctx.beginPath();
+        ctx.moveTo(stX - 1.5, -16);
+        ctx.lineTo(stX, -10);
+        ctx.lineTo(stX + 1.5, -16);
+        ctx.stroke();
+      });
+      [-10, 0, 12].forEach(function(stX){
+        ctx.beginPath();
+        ctx.moveTo(stX - 1.2, 14);
+        ctx.lineTo(stX, 10);
+        ctx.lineTo(stX + 1.2, 14);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.rect(-6, 4, 12, 1.5);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.fillRect(-6, 4.2, 12, 0.5);
+      ctx.lineWidth = 0.4;
+      ctx.setLineDash([0.8, 0.6]);
+      ctx.beginPath();
+      ctx.moveTo(-4, 4); ctx.lineTo(-4, -8);
+      ctx.moveTo(4, 4); ctx.lineTo(4, -8);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-1, 4); ctx.lineTo(0, 0); ctx.lineTo(1, 4);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(15, -10); ctx.lineTo(17, 14);
+      ctx.moveTo(19, -10); ctx.lineTo(20, 14);
+      ctx.stroke();
+      for (var dg = 0; dg < 5; dg++) {
+        var dgY = -8 + dg * 5;
+        ctx.beginPath();
+        ctx.moveTo(15.5 + dg * 0.4, dgY);
+        ctx.lineTo(19 + dg * 0.4, dgY);
+        ctx.stroke();
+      }
+      ctx.restore(); return;
+    }
+
+    // ─── CRYSTAL_DEPTHS — cluster luminescente + glow rays ───────────
+    if (b.key === 'crystal_depths') {
+      ctx.lineWidth = 0.8;
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 26, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 26, 18, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.lineWidth = 0.7;
+      var crystals = [
+        { x: -4, y: 6, h: 10, w: 2, ang: 0 },
+        { x: 2, y: 4, h: 14, w: 2.5, ang: 0.1 },
+        { x: 8, y: 8, h: 8, w: 1.8, ang: -0.2 },
+        { x: -10, y: 10, h: 6, w: 1.5, ang: 0.3 },
+        { x: 0, y: 12, h: 4, w: 2.2, ang: 0 }
+      ];
+      crystals.forEach(function(cr){
+        ctx.fillStyle = PAPER_BG;
+        ctx.save();
+        ctx.translate(cr.x, cr.y);
+        ctx.rotate(cr.ang);
+        ctx.beginPath();
+        ctx.moveTo(0, -cr.h);
+        ctx.lineTo(cr.w * 0.6, -cr.h + 2);
+        ctx.lineTo(cr.w, 0);
+        ctx.lineTo(cr.w * 0.6, 2);
+        ctx.lineTo(-cr.w * 0.6, 2);
+        ctx.lineTo(-cr.w, 0);
+        ctx.lineTo(-cr.w * 0.6, -cr.h + 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(0, -cr.h); ctx.lineTo(0, 2);
+        ctx.stroke();
+        ctx.lineWidth = 0.7;
+        ctx.restore();
+      });
+      ctx.lineWidth = 0.4;
+      for (var gr_ = 0; gr_ < 12; gr_++) {
+        var grAng = (gr_ / 12) * Math.PI * 2;
+        var grX = Math.cos(grAng) * 14;
+        var grY = Math.sin(grAng) * 9 + 4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(grAng) * 8, Math.sin(grAng) * 5 + 4);
+        ctx.lineTo(grX, grY);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.5;
+      [[-22, -2], [22, 2], [-18, 18]].forEach(function(c){
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.moveTo(c[0], c[1] - 2);
+        ctx.lineTo(c[0] + 1, c[1]);
+        ctx.lineTo(c[0], c[1] + 2);
+        ctx.lineTo(c[0] - 1, c[1]);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.restore(); return;
+    }
+
+    // ─── VALKREST — paliçada + tendas + bandeira águia + fogueira ────
+    if (b.key === 'valkrest') {
+      ctx.lineWidth = 0.85;
+      ctx.lineWidth = 0.6;
+      for (var ps = 0; ps < 14; ps++) {
+        var psAng = -Math.PI * 0.85 + ps * (Math.PI * 1.7 / 14);
+        var psR = 22;
+        var psX = Math.cos(psAng) * psR;
+        var psY = Math.sin(psAng) * psR * 0.55 + 8;
+        ctx.beginPath();
+        ctx.moveTo(psX, psY + 4);
+        ctx.lineTo(psX, psY - 3);
+        ctx.lineTo(psX + 0.6, psY - 5);
+        ctx.lineTo(psX + 1.2, psY - 3);
+        ctx.lineTo(psX + 1.2, psY + 4);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.85;
+      var t1X = -8, t1Y = 6;
+      ctx.beginPath();
+      ctx.moveTo(t1X - 8, t1Y + 6);
+      ctx.lineTo(t1X - 6, t1Y - 8);
+      ctx.lineTo(t1X + 6, t1Y - 8);
+      ctx.lineTo(t1X + 8, t1Y + 6);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(t1X - 6, t1Y - 8); ctx.lineTo(t1X + 6, t1Y - 8);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.moveTo(t1X - 2, t1Y + 6);
+      ctx.lineTo(t1X - 2, t1Y - 4);
+      ctx.lineTo(t1X + 2, t1Y - 4);
+      ctx.lineTo(t1X + 2, t1Y + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      ctx.beginPath();
+      ctx.moveTo(t1X - 6, t1Y - 8); ctx.lineTo(t1X - 12, t1Y + 6);
+      ctx.moveTo(t1X + 6, t1Y - 8); ctx.lineTo(t1X + 12, t1Y + 6);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      var t2X = 12, t2Y = 8;
+      ctx.beginPath();
+      ctx.moveTo(t2X - 5, t2Y + 4);
+      ctx.lineTo(t2X - 4, t2Y - 5);
+      ctx.lineTo(t2X + 4, t2Y - 5);
+      ctx.lineTo(t2X + 5, t2Y + 4);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.moveTo(t2X - 1.2, t2Y + 4);
+      ctx.lineTo(t2X - 1.2, t2Y - 2);
+      ctx.lineTo(t2X + 1.2, t2Y - 2);
+      ctx.lineTo(t2X + 1.2, t2Y + 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(0, 4); ctx.lineTo(0, -16);
+      ctx.stroke();
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(0, -16);
+      ctx.lineTo(10, -15);
+      ctx.lineTo(11, -10);
+      ctx.lineTo(0, -10);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(2, -13); ctx.lineTo(5, -14); ctx.lineTo(7, -13); ctx.lineTo(9, -14);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(5, -14); ctx.lineTo(5, -12);
+      ctx.stroke();
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(5, -14.5, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 0.6;
+      var vfX = 0, vfY = 16;
+      ctx.beginPath();
+      ctx.moveTo(vfX - 3, vfY + 1);
+      ctx.lineTo(vfX - 1, vfY - 3);
+      ctx.lineTo(vfX, vfY - 1);
+      ctx.lineTo(vfX + 1, vfY - 3);
+      ctx.lineTo(vfX + 3, vfY + 1);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(vfX - 4, vfY + 2); ctx.lineTo(vfX + 4, vfY + 2);
+      ctx.moveTo(vfX - 3, vfY + 1); ctx.lineTo(vfX + 3, vfY + 3);
+      ctx.stroke();
+      ctx.restore(); return;
+    }
+    // === END PER-KEY UNIQUE PICTOGRAMS ===========================
+
+    if (b.biome === 'plains' || b.key === 'plains') {
+      // CASTELO DE VALDORIA — torre central alta + 2 torres laterais +
+      // muralha com crenelações + portão arqueado + 3 casas no entorno.
+      // Look: vista 3/4 medieval, elementos com volume via hatching.
+      // Casas pequenas atrás (3 com telhado triangular)
+      ctx.lineWidth = 0.7;
+      var houses = [[-22, 14, 0.85], [22, 12, 0.9], [-26, 4, 0.75]];
+      houses.forEach(function(h){
+        var hx = h[0], hy = h[1], sc = h[2];
+        // Corpo
+        ctx.beginPath();
+        ctx.rect(hx - 4*sc, hy - 2*sc, 8*sc, 5*sc);
+        ctx.stroke();
+        // Telhado
+        ctx.beginPath();
+        ctx.moveTo(hx - 5*sc, hy - 2*sc);
+        ctx.lineTo(hx, hy - 6*sc);
+        ctx.lineTo(hx + 5*sc, hy - 2*sc);
+        ctx.closePath();
+        ctx.stroke();
+        // Janela
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.rect(hx - 0.8, hy - 0.5, 1.6, 1.6);
+        ctx.fill();
+      });
+      ctx.lineWidth = 0.9;
+      // MURALHA frontal (com volume — face frontal + topo em 3/4)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-18, 4, 36, 12);
+      ctx.fill();
+      ctx.stroke();
+      // Crenelações no topo da muralha
+      for (var cn = 0; cn < 9; cn++) {
+        var cnx = -18 + cn * 4;
+        ctx.beginPath();
+        ctx.rect(cnx, 2, 2, 2);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
+        ctx.stroke();
+      }
+      // Hatching vertical na muralha (textura de pedra)
+      ctx.lineWidth = 0.35;
+      for (var sx_ = -16; sx_ < 18; sx_ += 4) {
+        ctx.beginPath();
+        ctx.moveTo(sx_, 4); ctx.lineTo(sx_, 16);
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.9;
+      // Portão arco
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-3, 16);
+      ctx.lineTo(-3, 10);
+      ctx.bezierCurveTo(-3, 6, 3, 6, 3, 10);
+      ctx.lineTo(3, 16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // 2 TORRES LATERAIS (com volume)
+      [[-20, 14], [20, 14]].forEach(function(t){
+        var tx = t[0], ty = t[1];
+        // Corpo da torre (face frontal)
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.rect(tx - 4, ty - 16, 8, 20);
+        ctx.fill();
+        ctx.stroke();
+        // Lado em sombra (paralelogramo direito)
+        ctx.beginPath();
+        ctx.moveTo(tx + 4, ty - 16);
+        ctx.lineTo(tx + 6, ty - 14);
+        ctx.lineTo(tx + 6, ty + 4);
+        ctx.lineTo(tx + 4, ty + 4);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.18;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+        // Telhado cônico
+        ctx.beginPath();
+        ctx.moveTo(tx - 5, ty - 16);
+        ctx.lineTo(tx, ty - 23);
+        ctx.lineTo(tx + 5, ty - 16);
+        ctx.closePath();
+        ctx.stroke();
+        // Janela
+        ctx.fillStyle = INK_DARK;
+        ctx.beginPath();
+        ctx.rect(tx - 0.8, ty - 11, 1.6, 2.5);
+        ctx.fill();
+      });
+      // TORRE CENTRAL alta (Donjon) com VOLUME
+      var ttx = 0, tty = 0;
+      // Corpo principal (frontal)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(ttx - 5, tty - 22, 10, 26);
+      ctx.fill();
+      ctx.stroke();
+      // Lado em sombra
+      ctx.beginPath();
+      ctx.moveTo(ttx + 5, tty - 22);
+      ctx.lineTo(ttx + 8, tty - 19);
+      ctx.lineTo(ttx + 8, tty + 4);
+      ctx.lineTo(ttx + 5, tty + 4);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.22;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // Crenelações no topo
+      for (var ct = 0; ct < 4; ct++) {
+        ctx.beginPath();
+        ctx.rect(ttx - 5 + ct * 2.7, tty - 24, 1.8, 2);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
+        ctx.stroke();
+      }
+      // Janelas (3 verticais)
+      ctx.fillStyle = INK_DARK;
+      for (var wd = 0; wd < 3; wd++) {
+        ctx.beginPath();
+        ctx.rect(ttx - 0.8, tty - 18 + wd * 5, 1.6, 2.5);
         ctx.fill();
       }
-    } else if (b.key === 'forest') {
-      // Pictograma: cluster de 8 pinheiros estilizados (^^^ stack)
-      // Cada árvore = tronco curto + 2-3 carets verticais (estilo pinha)
-      var trees = [
-        [-22, 8, 1.0], [-10, 12, 0.85], [4, 10, 1.0], [18, 14, 0.9],
-        [-18, -6, 0.8], [-4, -2, 1.0], [12, -4, 0.85], [22, 0, 0.9]
-      ];
-      trees.forEach(function(t){
-        var tx = t[0] + (rng()-0.5)*2;
-        var ty = t[1] + (rng()-0.5)*2;
-        var sc = t[2];
-        // Tronco curto
+      // Bandeira do reino
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(ttx, tty - 24);
+      ctx.lineTo(ttx, tty - 30);
+      ctx.lineTo(ttx + 5, tty - 28);
+      ctx.lineTo(ttx, tty - 27);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'forest' || b.key === 'forest') {
+      // FLORESTA AAA — mistura: 4 carvalhos com canopy round + 3 pinheiros
+      // altos + 1 árvore destacada + chão com sombras + 2 cogumelos.
+      // Hierarquia: árvore central grande dominante.
+      // Sombras no chão (manchas elípticas leves)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.10;
+      var groundShadows = [[-18, 18, 12], [4, 18, 14], [22, 18, 10]];
+      groundShadows.forEach(function(s){
         ctx.beginPath();
-        ctx.moveTo(tx, ty);
-        ctx.lineTo(tx, ty + 2*sc);
+        ctx.ellipse(s[0], s[1], s[2], s[2]*0.3, 0, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      // Pinheiros altos no fundo (3)
+      var pines = [[-24, 14, 0.85], [16, 14, 0.95], [26, 16, 0.75]];
+      pines.forEach(function(p){
+        var px = p[0], py = p[1], sc = p[2];
+        // Tronco com volume (2 linhas paralelas)
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(px - 0.8, py); ctx.lineTo(px - 0.8, py - 2*sc);
+        ctx.moveTo(px + 0.8, py); ctx.lineTo(px + 0.8, py - 2*sc);
         ctx.stroke();
-        // 3 níveis de "pinha" (^ empilhados)
-        for (var lv = 0; lv < 3; lv++) {
-          var ly = ty - lv*5*sc;
-          var lw = (5 - lv*1.2) * sc;
+        ctx.lineWidth = 0.9;
+        // 4 níveis de pinha com PREENCHIMENTO sutil
+        for (var lv = 0; lv < 4; lv++) {
+          var ly = py - lv*5*sc - 2*sc;
+          var lw = (6 - lv*1.1) * sc;
           ctx.beginPath();
-          ctx.moveTo(tx - lw, ly);
-          ctx.lineTo(tx, ly - 4*sc);
-          ctx.lineTo(tx + lw, ly);
+          ctx.moveTo(px - lw, ly);
+          ctx.lineTo(px, ly - 5*sc);
+          ctx.lineTo(px + lw, ly);
+          ctx.closePath();
+          ctx.fillStyle = PAPER_BG;
+          ctx.fill();
           ctx.stroke();
         }
       });
-    } else if (b.key === 'cave') {
-      // Pictograma: arco da entrada + estalactites + rochas ao lado
-      // Arco da caverna (semi-círculo na ponta)
-      ctx.beginPath();
-      ctx.moveTo(-14, 14);
-      ctx.lineTo(-14, 0);
-      ctx.bezierCurveTo(-14, -12, 14, -12, 14, 0);
-      ctx.lineTo(14, 14);
-      ctx.stroke();
-      // Estalactites internas (3 triângulos pequenos do topo)
-      for (i = 0; i < 4; i++) {
-        x = -8 + i * 5;
+      // Carvalhos (3 com canopy round texturada)
+      var oaks = [[-12, 16, 1.1], [8, 16, 1.0], [-2, 18, 0.85]];
+      oaks.forEach(function(o, oi){
+        var ox = o[0], oy = o[1], sc = o[2];
+        // Tronco (2 linhas + ramificação)
+        ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.moveTo(x - 1.5, -6);
-        ctx.lineTo(x, -2);
-        ctx.lineTo(x + 1.5, -6);
+        ctx.moveTo(ox - 1, oy); ctx.lineTo(ox - 1, oy - 5*sc);
+        ctx.moveTo(ox + 1, oy); ctx.lineTo(ox + 1, oy - 5*sc);
+        ctx.stroke();
+        // Canopy (cluster de bolhas — 3-5 círculos sobrepostos)
+        ctx.lineWidth = 0.7;
+        var cR = 5 * sc;
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.arc(ox, oy - 5*sc - cR, cR, 0, Math.PI*2);
+        ctx.fill();
+        ctx.stroke();
+        // Bolhas adicionais (4) ao redor pra textura
+        var bubbles = [[-cR*0.7, -cR*0.4, cR*0.6], [cR*0.7, -cR*0.4, cR*0.6],
+                       [0, -cR*1.0, cR*0.5], [-cR*0.4, cR*0.2, cR*0.45], [cR*0.4, cR*0.2, cR*0.45]];
+        bubbles.forEach(function(bub){
+          ctx.beginPath();
+          ctx.arc(ox + bub[0], oy - 5*sc - cR + bub[1], bub[2], 0, Math.PI*2);
+          ctx.fillStyle = PAPER_BG;
+          ctx.fill();
+          ctx.stroke();
+        });
+        // Hatching diagonal do lado direito (sombra)
+        ctx.lineWidth = 0.3;
+        ctx.globalAlpha = 0.5;
+        for (var hh2 = 0; hh2 < 4; hh2++) {
+          ctx.beginPath();
+          ctx.moveTo(ox + cR*0.2, oy - 5*sc - cR*1.4 + hh2*1.2);
+          ctx.lineTo(ox + cR*1.2, oy - 5*sc - cR*0.5 + hh2*1.2);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.9;
+      });
+      // Cogumelos pequenos (2 detalhes)
+      ctx.lineWidth = 0.6;
+      [[-26, 22], [22, 22]].forEach(function(m){
+        ctx.beginPath();
+        ctx.moveTo(m[0], m[1]); ctx.lineTo(m[0], m[1] - 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(m[0], m[1] - 1.5, 1.2, Math.PI, Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.6;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'cave' || b.key === 'cave') {
+      // CAVERNA REWRITE 2026-05-04 — montanha rochosa com entrada de
+      // caverna em 3/4 vista, estalactites pendentes, escadinha de pedras
+      // descendo, lanterna acesa pendurada, morcegos voando.
+      // MONTANHA HOSPEDEIRA (cone irregular com volume)
+      ctx.fillStyle = '#5a4836';
+      ctx.globalAlpha = 0.30;
+      ctx.beginPath();
+      ctx.moveTo(-26, 22);
+      ctx.lineTo(-20, 6);
+      ctx.lineTo(-10, -8);
+      ctx.lineTo(-2, -16);
+      ctx.lineTo(8, -10);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(26, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-26, 22);
+      ctx.lineTo(-20, 6);
+      ctx.lineTo(-10, -8);
+      ctx.lineTo(-2, -16);
+      ctx.lineTo(8, -10);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(26, 22);
+      ctx.stroke();
+      // Hatching denso na lateral direita (sombra da rocha)
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.5;
+      for (var hc = 0; hc < 6; hc++) {
+        ctx.beginPath();
+        ctx.moveTo(2 + hc * 3, -6 + hc * 2);
+        ctx.lineTo(20 + hc * 1, 22);
         ctx.stroke();
       }
-      // Hatching dentro do arco (escuridão)
-      _hatchArea(ctx, -13, -6, 26, 18, Math.PI/4, 3, INK_DARK, 0.4);
-      // Rochas ao lado da entrada (ovais com hatch)
-      var rocks = [[-22, 18, 6], [22, 16, 5], [-26, -2, 4], [24, -8, 5]];
-      rocks.forEach(function(rk){
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // ENTRADA DA CAVERNA (arco GRANDE escuro com profundidade)
+      var caveGrad = ctx.createRadialGradient(0, 8, 2, 0, 8, 14);
+      caveGrad.addColorStop(0, 'rgba(0,0,0,0.95)');
+      caveGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+      caveGrad.addColorStop(1, 'rgba(20,15,10,0.45)');
+      ctx.save();
+      ctx.fillStyle = caveGrad;
+      ctx.beginPath();
+      ctx.moveTo(-9, 22);
+      ctx.lineTo(-9, 8);
+      ctx.bezierCurveTo(-9, -2, 9, -2, 9, 8);
+      ctx.lineTo(9, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      // Contorno da entrada (mais grosso + jitter hand-drawn)
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-9, 22);
+      ctx.lineTo(-9.5, 14);
+      ctx.lineTo(-9, 8);
+      ctx.bezierCurveTo(-9, -1, 9, -1, 9, 8);
+      ctx.lineTo(9.5, 14);
+      ctx.lineTo(9, 22);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // ESTALACTITES PENDENTES (4, com perspectiva — frontal + lateral em sombra)
+      var stals = [[-6, 1.0], [-2, 0.7], [2, 1.0], [6, 0.8]];
+      stals.forEach(function(st){
+        var stx = st[0], stsc = st[1];
+        // Estalactite (triângulo invertido + linha lateral)
+        ctx.fillStyle = '#3a2410';
         ctx.beginPath();
-        ctx.ellipse(rk[0], rk[1], rk[2], rk[2]*0.7, 0, 0, Math.PI*2);
-        ctx.stroke();
-        // Hatching diagonal
+        ctx.moveTo(stx - 1.4*stsc, 1);
+        ctx.lineTo(stx, 1 + 5*stsc);
+        ctx.lineTo(stx + 1.4*stsc, 1);
+        ctx.closePath();
+        ctx.fill();
+        // Sombra lateral
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.45;
         ctx.beginPath();
-        ctx.moveTo(rk[0] - rk[2]*0.4, rk[1]);
-        ctx.lineTo(rk[0] + rk[2]*0.4, rk[1] - rk[2]*0.3);
+        ctx.moveTo(stx, 1);
+        ctx.lineTo(stx, 1 + 5*stsc);
+        ctx.lineTo(stx + 1.4*stsc, 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // ESCADA DE PEDRAS na entrada (3 degraus)
+      ctx.fillStyle = '#5a4836';
+      ctx.globalAlpha = 0.7;
+      [[-7, 16], [-5, 18], [-3, 20]].forEach(function(stp){
+        ctx.beginPath();
+        ctx.rect(stp[0], stp[1], 14, 1.8);
+        ctx.fill();
+        ctx.lineWidth = 0.5;
         ctx.stroke();
       });
-    } else if (b.key === 'swamp') {
-      // Pictograma: 4 poças (elipses outline) + árvore morta + juncos
-      // Poças (elipses outline com hatching wave dentro)
-      var pools = [[-15, -4, 9], [10, 2, 11], [-8, 14, 8], [18, 16, 7]];
-      pools.forEach(function(po){
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // LANTERNA pendurada na entrada (luz amarela sutil)
+      var lnx = -10, lny = 4;
+      // Cabo
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(lnx, 2); ctx.lineTo(lnx, lny - 2);
+      ctx.stroke();
+      // Corpo da lanterna
+      ctx.fillStyle = '#3a2410';
+      ctx.beginPath();
+      ctx.rect(lnx - 1.5, lny - 2, 3, 3);
+      ctx.fill();
+      // Luz emanando (radial)
+      var lampGrad = ctx.createRadialGradient(lnx, lny, 0.5, lnx, lny, 8);
+      lampGrad.addColorStop(0, 'rgba(255,200,100,0.65)');
+      lampGrad.addColorStop(1, 'rgba(255,200,100,0)');
+      ctx.fillStyle = lampGrad;
+      ctx.beginPath();
+      ctx.arc(lnx, lny, 8, 0, Math.PI*2);
+      ctx.fill();
+      // Vidro da lanterna (point bright)
+      ctx.fillStyle = '#ffd870';
+      ctx.beginPath();
+      ctx.arc(lnx, lny - 0.5, 0.6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 0.9;
+      // 2 MORCEGOS voando saindo da caverna
+      ctx.lineWidth = 0.5;
+      ctx.fillStyle = INK_DARK;
+      [[-14, -4], [12, -2]].forEach(function(bt){
+        var btx = bt[0], bty = bt[1];
+        // Asa direita
         ctx.beginPath();
-        ctx.ellipse(po[0], po[1], po[2], po[2]*0.45, 0, 0, Math.PI*2);
+        ctx.moveTo(btx, bty);
+        ctx.quadraticCurveTo(btx + 1, bty - 1, btx + 2, bty);
+        ctx.quadraticCurveTo(btx + 3.5, bty + 0.5, btx + 4, bty - 0.5);
         ctx.stroke();
-        // 2 linhas wave dentro (água)
-        ctx.lineWidth = 0.5;
+        // Asa esquerda
         ctx.beginPath();
-        ctx.moveTo(po[0]-po[2]*0.6, po[1]);
-        ctx.quadraticCurveTo(po[0], po[1]+1, po[0]+po[2]*0.6, po[1]);
+        ctx.moveTo(btx, bty);
+        ctx.quadraticCurveTo(btx - 1, bty - 1, btx - 2, bty);
+        ctx.quadraticCurveTo(btx - 3.5, bty + 0.5, btx - 4, bty - 0.5);
+        ctx.stroke();
+        // Corpo
+        ctx.beginPath();
+        ctx.arc(btx, bty + 0.3, 0.6, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.lineWidth = 0.9;
+      // Pedras avulsas na frente da entrada (textura)
+      [[-14, 23, 3], [14, 22, 2.5]].forEach(function(rk){
+        ctx.lineWidth = 0.6;
+        ctx.fillStyle = '#5a4836';
+        ctx.beginPath();
+        ctx.moveTo(rk[0] - rk[2], rk[1]);
+        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] - rk[2]*0.7);
+        ctx.lineTo(rk[0] + rk[2]*0.5, rk[1] - rk[2]*0.6);
+        ctx.lineTo(rk[0] + rk[2], rk[1] - rk[2]*0.1);
+        ctx.lineTo(rk[0] + rk[2]*0.3, rk[1] + rk[2]*0.4);
+        ctx.lineTo(rk[0] - rk[2]*0.4, rk[1] + rk[2]*0.4);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
         ctx.lineWidth = 0.9;
       });
-      // Árvore morta (linha vertical com galhos)
-      ctx.beginPath();
-      ctx.moveTo(-22, 12); ctx.lineTo(-22, -10);
-      ctx.moveTo(-22, -2); ctx.lineTo(-28, -8);
-      ctx.moveTo(-22, -5); ctx.lineTo(-16, -10);
-      ctx.moveTo(-22, -8); ctx.lineTo(-26, -13);
-      ctx.stroke();
-      // Juncos (pequenos | espalhados)
-      for (i = 0; i < 12; i++) {
-        var jx = (rng() - 0.5) * r * 1.5;
-        var jy = (rng() - 0.5) * r * 1.4;
+    } else if (b.key === 'swamp' || b.biome === 'swamp') {
+      // PÂNTANO AAA — poças orgânicas (não elipses) + lily pads + árvore
+      // morta com galhos torcidos detalhados + juncos altos + neblina sutil.
+      // Poças orgânicas com hatching de água
+      var pools2 = [[-15, -2, 11], [10, 4, 13], [-6, 14, 9], [18, 16, 8]];
+      pools2.forEach(function(po, pi){
+        // Forma irregular (Bezier)
+        ctx.fillStyle = '#6a7a4a';
+        ctx.globalAlpha = 0.18;
         ctx.beginPath();
-        ctx.moveTo(jx, jy); ctx.lineTo(jx, jy - 3 - rng()*3);
+        ctx.moveTo(po[0] - po[2], po[1]);
+        ctx.bezierCurveTo(po[0] - po[2], po[1] - po[2]*0.5,
+                          po[0] - po[2]*0.3, po[1] - po[2]*0.6,
+                          po[0] + po[2]*0.5, po[1] - po[2]*0.4);
+        ctx.bezierCurveTo(po[0] + po[2], po[1] - po[2]*0.2,
+                          po[0] + po[2]*1.1, po[1] + po[2]*0.4,
+                          po[0] + po[2]*0.4, po[1] + po[2]*0.5);
+        ctx.bezierCurveTo(po[0] - po[2]*0.2, po[1] + po[2]*0.6,
+                          po[0] - po[2]*1.1, po[1] + po[2]*0.3,
+                          po[0] - po[2], po[1]);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+        // Hatching de água (3 ondulações dentro)
+        ctx.lineWidth = 0.4;
+        for (var w_ = 0; w_ < 3; w_++) {
+          var wy_ = po[1] - po[2]*0.2 + w_*po[2]*0.2;
+          ctx.beginPath();
+          ctx.moveTo(po[0] - po[2]*0.7, wy_);
+          ctx.bezierCurveTo(po[0] - po[2]*0.3, wy_ + 0.6,
+                            po[0] + po[2]*0.3, wy_ - 0.6,
+                            po[0] + po[2]*0.7, wy_);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 0.9;
+        // Lily pad (1 por poça, 50% chance)
+        if (pi % 2 === 0) {
+          var lpx = po[0] + (rng()-0.5)*po[2];
+          var lpy = po[1] + (rng()-0.5)*po[2]*0.4;
+          ctx.fillStyle = INK_DARK;
+          ctx.globalAlpha = 0.55;
+          ctx.beginPath();
+          ctx.ellipse(lpx, lpy, 2, 1.3, rng()*Math.PI, 0, Math.PI*2);
+          ctx.fill();
+          // Notch da folha
+          ctx.fillStyle = PAPER_BG;
+          ctx.beginPath();
+          ctx.moveTo(lpx, lpy);
+          ctx.lineTo(lpx + 1, lpy + 0.5);
+          ctx.lineTo(lpx + 1.5, lpy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      });
+      // ÁRVORE MORTA grande com galhos torcidos (estilo Burton)
+      ctx.lineWidth = 1.1;
+      // Tronco
+      ctx.beginPath();
+      ctx.moveTo(-22, 14);
+      ctx.bezierCurveTo(-23, 6, -21, -2, -22, -10);
+      ctx.stroke();
+      // Galho principal direito
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-22, -2);
+      ctx.bezierCurveTo(-19, -4, -16, -6, -14, -10);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      // Sub-galhos do principal
+      ctx.beginPath();
+      ctx.moveTo(-17, -7); ctx.lineTo(-15, -10);
+      ctx.moveTo(-19, -5); ctx.lineTo(-18, -8);
+      ctx.stroke();
+      // Galho esquerdo
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-22, -5);
+      ctx.bezierCurveTo(-25, -7, -27, -9, -28, -12);
+      ctx.stroke();
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-26, -10); ctx.lineTo(-27, -12);
+      ctx.stroke();
+      // Galhos finais no topo
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-22, -10); ctx.lineTo(-24, -13);
+      ctx.moveTo(-22, -10); ctx.lineTo(-20, -14);
+      ctx.moveTo(-22, -10); ctx.lineTo(-22, -14);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // Juncos altos (8 verticais variados)
+      ctx.lineWidth = 0.5;
+      for (var rd = 0; rd < 10; rd++) {
+        var jx = (rng() - 0.5) * 60;
+        var jy = (rng() - 0.5) * 50;
+        var jh = 3 + rng() * 4;
+        // Junco com leve curvatura
+        ctx.beginPath();
+        ctx.moveTo(jx, jy);
+        ctx.quadraticCurveTo(jx + (rng()-0.5)*0.8, jy - jh*0.5, jx, jy - jh);
+        ctx.stroke();
+        // Topo (espigueta)
+        ctx.beginPath();
+        ctx.arc(jx, jy - jh, 0.4, 0, Math.PI*2);
+        ctx.fillStyle = INK_DARK;
+        ctx.fill();
+      }
+      ctx.lineWidth = 0.9;
+      // Neblina sutil (3 linhas onduladas levíssimas)
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.lineWidth = 0.4;
+      ctx.globalAlpha = 0.4;
+      for (var fg = 0; fg < 3; fg++) {
+        var fy = -22 + fg * 4;
+        ctx.beginPath();
+        ctx.moveTo(-30, fy);
+        ctx.bezierCurveTo(-15, fy - 1, 0, fy + 1, 15, fy - 0.5);
+        ctx.bezierCurveTo(25, fy + 0.5, 30, fy - 1, 35, fy);
         ctx.stroke();
       }
-    } else if (b.key === 'mountain') {
-      // Pictograma: 5 picos (^) com hatching diagonal pra sombra + linha snowcap
-      var peakXs = [-22, -10, 0, 12, 22];
-      var peakHts = [16, 22, 14, 20, 12];
-      for (i = 0; i < 5; i++) {
-        var mx = peakXs[i];
-        var mh = peakHts[i];
-        var my = 14;
-        // Triângulo outline
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'mountain' || b.key === 'mountain') {
+      // MONTANHAS AAA — 5 picos com VOLUME 3D real (lado claro + sombra
+      // triangular hatched), pico central destacado, snowcaps com curva
+      // detalhada, estrada serpenteando, hatching de rocha denso.
+      var peakXs2 = [-22, -10, 0, 12, 22];
+      var peakHts2 = [16, 22, 14, 20, 12];
+      // Renderizar de trás pra frente (z-order)
+      for (var pi2 = 0; pi2 < 5; pi2++) {
+        var mx = peakXs2[pi2], mh = peakHts2[pi2], my = 14;
+        // Lado claro (esquerdo) — preenchido com paper
+        ctx.fillStyle = PAPER_BG;
         ctx.beginPath();
         ctx.moveTo(mx - mh*0.6, my);
         ctx.lineTo(mx, my - mh);
-        ctx.lineTo(mx + mh*0.6, my);
+        ctx.lineTo(mx, my);
+        ctx.closePath();
+        ctx.fill();
+        ctx.lineWidth = 0.85;
         ctx.stroke();
-        // Snowcap (linha zigzag perto do topo)
+        // Lado em sombra (direito) — preenchimento + hatching denso
         ctx.beginPath();
-        ctx.moveTo(mx - mh*0.22, my - mh*0.55);
-        ctx.lineTo(mx - mh*0.10, my - mh*0.50);
-        ctx.lineTo(mx, my - mh*0.65);
-        ctx.lineTo(mx + mh*0.10, my - mh*0.50);
-        ctx.lineTo(mx + mh*0.22, my - mh*0.55);
+        ctx.moveTo(mx, my - mh);
+        ctx.lineTo(mx + mh*0.6, my);
+        ctx.lineTo(mx, my);
+        ctx.closePath();
+        ctx.fillStyle = INK_DARK;
+        ctx.globalAlpha = 0.20;
+        ctx.fill();
+        ctx.globalAlpha = 1;
         ctx.stroke();
-        // Hatching diagonal no lado direito (sombra)
-        ctx.lineWidth = 0.4;
-        for (var hh = 0; hh < 3; hh++) {
-          var t = 0.3 + hh*0.18;
+        // Hatching denso no lado escuro (textura de rocha)
+        ctx.lineWidth = 0.3;
+        ctx.globalAlpha = 0.55;
+        for (var hh3 = 0; hh3 < 5; hh3++) {
+          var t2 = 0.2 + hh3*0.15;
           ctx.beginPath();
-          ctx.moveTo(mx + mh*0.05, my - mh*(1-t));
-          ctx.lineTo(mx + mh*0.50, my - mh*0.05);
+          ctx.moveTo(mx + 1, my - mh*(1-t2));
+          ctx.lineTo(mx + mh*0.55, my - mh*0.05);
           ctx.stroke();
         }
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 0.85;
+        // Snowcap com curva detalhada (não zigzag — agora bezier)
+        ctx.fillStyle = PAPER_BG;
+        ctx.beginPath();
+        ctx.moveTo(mx - mh*0.22, my - mh*0.55);
+        ctx.bezierCurveTo(mx - mh*0.10, my - mh*0.62, mx + mh*0.10, my - mh*0.62, mx + mh*0.22, my - mh*0.55);
+        ctx.lineTo(mx + mh*0.05, my - mh*0.85);
+        ctx.lineTo(mx, my - mh);
+        ctx.lineTo(mx - mh*0.05, my - mh*0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Linha de detalhe na neve (textura)
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(mx - mh*0.18, my - mh*0.58);
+        ctx.bezierCurveTo(mx - mh*0.08, my - mh*0.65, mx + mh*0.08, my - mh*0.65, mx + mh*0.18, my - mh*0.58);
+        ctx.stroke();
         ctx.lineWidth = 0.9;
       }
-    } else if (b.key === 'desert') {
-      // Pictograma: pirâmide outline + dunas (curvas) + sol (raios) + cactus
-      // Pirâmide grande (triângulo outline + linha do meio = aresta)
+      // Estrada serpenteante subindo o pico central
+      ctx.strokeStyle = INK_MED;
+      ctx.lineWidth = 0.7;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(-8, 16);
+      ctx.bezierCurveTo(-6, 12, -3, 10, -1, 6);
+      ctx.bezierCurveTo(1, 4, 0, 0, -1, -4);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'desert' || b.key === 'desert') {
+      // DESERTO AAA — pirâmide GIZA com textura de blocos, 2 menores em
+      // escala, dunas onduladas com crests, sol com face medieval estilizada,
+      // pequeno oásis com 2 palmeiras.
+      // Dunas de fundo (3 ondas no horizonte com gradação)
+      ctx.lineWidth = 0.6;
+      ctx.globalAlpha = 0.55;
+      for (var dn = 0; dn < 3; dn++) {
+        var dy_ = -18 + dn*4;
+        ctx.beginPath();
+        ctx.moveTo(-r, dy_);
+        ctx.bezierCurveTo(-15, dy_ - 3, -5, dy_ + 1, 5, dy_ - 1);
+        ctx.bezierCurveTo(15, dy_ + 2, 25, dy_ - 1, r*0.8, dy_);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // Sol estilizado medieval (face sutil)
+      ctx.lineWidth = 0.7;
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(20, -22, 5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      // Raios alternados (longos+curtos, 12 total)
+      for (var sr = 0; sr < 12; sr++) {
+        var sa = sr * Math.PI / 6;
+        var slen = sr % 2 === 0 ? 10 : 7;
+        ctx.beginPath();
+        ctx.moveTo(20 + Math.cos(sa) * 7, -22 + Math.sin(sa) * 7);
+        ctx.lineTo(20 + Math.cos(sa) * slen, -22 + Math.sin(sa) * slen);
+        ctx.stroke();
+      }
+      // Face do sol (olhos + boca sutil)
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(18.5, -23, 0.5, 0, Math.PI*2);
+      ctx.arc(21.5, -23, 0.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.lineWidth = 0.4;
+      ctx.beginPath();
+      ctx.arc(20, -21.5, 1.2, 0.2*Math.PI, 0.8*Math.PI);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // PIRÂMIDE PRINCIPAL (com textura de blocos de pedra)
+      ctx.fillStyle = PAPER_BG;
+      // Face frontal
       ctx.beginPath();
       ctx.moveTo(-12, 18);
       ctx.lineTo(-2, 0);
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Face lateral (sombra)
+      ctx.beginPath();
+      ctx.moveTo(-2, 0);
       ctx.lineTo(14, 18);
-      ctx.lineTo(-12, 18);
+      ctx.lineTo(0, 18);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.stroke();
-      // Aresta da pirâmide
-      ctx.beginPath();
-      ctx.moveTo(-2, 0); ctx.lineTo(0, 18);
-      ctx.stroke();
-      // Hatching no lado direito (sombra)
-      ctx.lineWidth = 0.4;
-      for (i = 0; i < 4; i++) {
-        var t = 0.2 + i*0.18;
+      // Textura de blocos (linhas horizontais espaçadas em ambas as faces)
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.5;
+      // Frontal (5 níveis)
+      for (var bl = 1; bl <= 4; bl++) {
+        var bly = 0 + bl * 4.5;
+        var blx1 = -2 - (bl/4) * 10;
+        var blx2 = 0 - (bl/4) * 0;
         ctx.beginPath();
-        ctx.moveTo(0 + i*0.5, 18*t);
-        ctx.lineTo(14 - i*1.2, 18 - i*0.5);
+        ctx.moveTo(blx1, bly); ctx.lineTo(blx2, bly);
         ctx.stroke();
       }
-      ctx.lineWidth = 0.9;
-      // Pirâmide menor à direita
-      ctx.beginPath();
-      ctx.moveTo(8, 18); ctx.lineTo(15, 8); ctx.lineTo(22, 18);
-      ctx.stroke();
-      // Dunas (3 curvas onduladas atrás)
-      ctx.lineWidth = 0.7;
-      for (i = 0; i < 3; i++) {
-        var dy = -16 + i*4;
+      // Lateral (sombra)
+      for (var bl2 = 1; bl2 <= 4; bl2++) {
+        var bly2 = 0 + bl2 * 4.5;
+        var blx21 = -2 + (bl2/4) * 16;
+        var blx22 = 0 + (bl2/4) * 0;
         ctx.beginPath();
-        ctx.moveTo(-r, dy);
-        ctx.quadraticCurveTo(-15, dy-4, 0, dy);
-        ctx.quadraticCurveTo(15, dy+4, r*0.8, dy-2);
+        ctx.moveTo(blx21, bly2); ctx.lineTo(blx22, bly2);
         ctx.stroke();
       }
+      ctx.globalAlpha = 1;
       ctx.lineWidth = 0.9;
-      // Sol (círculo + raios)
+      // Pirâmide menor à direita (mesma técnica simplificada)
+      ctx.fillStyle = PAPER_BG;
       ctx.beginPath();
-      ctx.arc(20, -20, 5, 0, Math.PI*2);
+      ctx.moveTo(8, 18); ctx.lineTo(14, 8); ctx.lineTo(15, 18);
+      ctx.closePath();
+      ctx.fill();
       ctx.stroke();
-      for (i = 0; i < 8; i++) {
-        var ang = i * Math.PI/4;
+      ctx.beginPath();
+      ctx.moveTo(14, 8); ctx.lineTo(22, 18); ctx.lineTo(15, 18);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // Oásis com palmeira (canto esquerdo)
+      // Poça
+      ctx.fillStyle = '#88a8c8';
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.ellipse(-26, 18, 5, 1.8, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+      // 2 Palmeiras
+      [[-28, 0.95], [-23, 0.85]].forEach(function(p){
+        var px = p[0], sc = p[1];
+        // Tronco curvado
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
-        ctx.moveTo(20 + Math.cos(ang)*7, -20 + Math.sin(ang)*7);
-        ctx.lineTo(20 + Math.cos(ang)*10, -20 + Math.sin(ang)*10);
+        ctx.moveTo(px, 16);
+        ctx.bezierCurveTo(px - 1*sc, 12, px + 1*sc, 8, px - 0.5*sc, 4);
         ctx.stroke();
-      }
-      // Cactus (haste vertical + 1 braço)
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(-25, 20); ctx.lineTo(-25, 8);
-      ctx.moveTo(-25, 13); ctx.lineTo(-29, 13); ctx.lineTo(-29, 9);
-      ctx.stroke();
+        // Folhas (4 leques arqueados)
+        ctx.lineWidth = 0.5;
+        var leafs = [-1.2, -0.4, 0.4, 1.2];
+        leafs.forEach(function(la){
+          ctx.beginPath();
+          ctx.moveTo(px - 0.5*sc, 4);
+          ctx.bezierCurveTo(px - 0.5*sc + la*3*sc, 1, px - 0.5*sc + la*5*sc, 2, px - 0.5*sc + la*4*sc, 5);
+          ctx.stroke();
+        });
+      });
       ctx.lineWidth = 0.9;
-    } else if (b.key === 'graveyard') {
-      // Pictograma: cerca + 6 lápides outline (cruz/arco/rect) + árvore seca
-      // Linha do chão
+    } else if (b.biome === 'graveyard' || b.key === 'graveyard') {
+      // CEMITÉRIO AAA — variedade de lápides (sarcófago, cruz celta, tumba
+      // romana com inscrição), árvore retorcida grande, cripta no fundo,
+      // caveira com sombra, neblina sutil.
+      // Linha do chão com textura
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(-r*1.1, 18); ctx.lineTo(r*1.1, 18);
       ctx.stroke();
-      // Lápides
-      var gStyles = ['cross', 'arch', 'rect', 'cross', 'arch', 'rect'];
-      for (i = 0; i < 6; i++) {
-        var gx = -20 + i * 8;
-        var gy = 4;
-        var gh = 10;
-        var style = gStyles[i];
-        if (style === 'cross') {
-          ctx.beginPath();
-          ctx.moveTo(gx, gy + gh); ctx.lineTo(gx, gy - 4);
-          ctx.moveTo(gx - 2.5, gy - 1); ctx.lineTo(gx + 2.5, gy - 1);
-          ctx.stroke();
-        } else if (style === 'arch') {
-          ctx.beginPath();
-          ctx.moveTo(gx - 2, gy + gh); ctx.lineTo(gx - 2, gy - 2);
-          ctx.bezierCurveTo(gx - 2, gy - 6, gx + 2, gy - 6, gx + 2, gy - 2);
-          ctx.lineTo(gx + 2, gy + gh);
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.rect(gx - 2, gy - 4, 4, gh + 4);
-          ctx.stroke();
-        }
+      // Hatching no chão (relva curta)
+      for (var gh_ = 0; gh_ < 14; gh_++) {
+        var ghx = -r*1.1 + gh_ * (r*2.2/14) + (rng()-0.5)*1.5;
+        ctx.beginPath();
+        ctx.moveTo(ghx, 18); ctx.lineTo(ghx, 19 + rng()*1);
+        ctx.stroke();
       }
-      // Árvore seca (canto direito)
+      ctx.lineWidth = 0.85;
+      // CRIPTA pequena no fundo (estilo mausoléu romano)
+      ctx.fillStyle = PAPER_BG;
+      // Base + colunas
       ctx.beginPath();
-      ctx.moveTo(22, 18); ctx.lineTo(22, -2);
-      ctx.moveTo(22, 4); ctx.lineTo(28, -3);
-      ctx.moveTo(22, 0); ctx.lineTo(16, -6);
-      ctx.moveTo(22, -2); ctx.lineTo(25, -8);
-      ctx.stroke();
-      // Caveira pequena no canto esquerdo (pictograma simples)
-      ctx.beginPath();
-      ctx.arc(-26, 8, 3, 0, Math.PI*2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(-27, 8, 0.6, 0, Math.PI*2);
-      ctx.arc(-25, 8, 0.6, 0, Math.PI*2);
+      ctx.rect(8, 6, 14, 12);
       ctx.fill();
-    } else if (b.key === 'snow') {
-      // Pictograma: 5 picos com snowcap + flocos (asteriscos) espalhados
-      var icePeakXs = [-22, -10, 2, 14, 24];
-      var icePeakHts = [14, 20, 12, 16, 10];
-      for (i = 0; i < icePeakXs.length; i++) {
-        var ix = icePeakXs[i];
-        var ih = icePeakHts[i];
-        var iy = 16;
+      ctx.stroke();
+      // 2 colunas
+      ctx.lineWidth = 0.5;
+      [10, 20].forEach(function(cx){
+        ctx.beginPath();
+        ctx.rect(cx - 0.8, 8, 1.6, 8);
+        ctx.fillStyle = PAPER_BG;
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.85;
+      // Fronton triangular
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.moveTo(8, 6); ctx.lineTo(15, 1); ctx.lineTo(22, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Lado em sombra (paralelogramo)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.18;
+      ctx.beginPath();
+      ctx.moveTo(22, 6); ctx.lineTo(24, 8); ctx.lineTo(24, 18); ctx.lineTo(22, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Porta da cripta
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.rect(13, 11, 4, 7);
+      ctx.fill();
+      // Lápides variadas
+      // 1) Cruz Celta com círculo (à esquerda)
+      ctx.lineWidth = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-22, 14); ctx.lineTo(-22, 4);
+      ctx.moveTo(-25, 9); ctx.lineTo(-19, 9);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(-22, 9, 2.2, 0, Math.PI*2);
+      ctx.stroke();
+      // Base
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-25, 14, 6, 4);
+      ctx.fill();
+      ctx.stroke();
+      // 2) Tumba romana com inscrição
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.moveTo(-15, 14);
+      ctx.lineTo(-15, 5);
+      ctx.bezierCurveTo(-15, 2, -10, 2, -10, 5);
+      ctx.lineTo(-10, 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Inscrição (linhas horizontais)
+      ctx.lineWidth = 0.3;
+      [7, 9, 11].forEach(function(iy){
+        ctx.beginPath();
+        ctx.moveTo(-14, iy); ctx.lineTo(-11, iy);
+        ctx.stroke();
+      });
+      // R.I.P (linhas mais curtas no topo)
+      ctx.lineWidth = 0.85;
+      // 3) Sarcófago (à direita da cruz celta)
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.rect(-7, 8, 8, 10);
+      ctx.fill();
+      ctx.stroke();
+      // Tampa em perspectiva
+      ctx.beginPath();
+      ctx.moveTo(-7, 8); ctx.lineTo(-5, 6); ctx.lineTo(3, 6); ctx.lineTo(1, 8);
+      ctx.closePath();
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.20;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+      // 4) Cruz simples menor (entre tumba e sarcófago)
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(2, 14); ctx.lineTo(2, 6);
+      ctx.moveTo(0, 9); ctx.lineTo(4, 9);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      // ÁRVORE RETORCIDA grande (canto direito-fundo)
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(28, 18);
+      ctx.bezierCurveTo(27, 10, 30, 4, 28, -2);
+      ctx.stroke();
+      ctx.lineWidth = 0.7;
+      // Galhos torcidos
+      ctx.beginPath();
+      ctx.moveTo(28, 4);
+      ctx.bezierCurveTo(31, 2, 32, -2, 30, -5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(28, 0);
+      ctx.bezierCurveTo(25, -2, 23, -4, 26, -7);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(28, -2);
+      ctx.lineTo(28, -6);
+      ctx.moveTo(28, -2);
+      ctx.lineTo(31, -6);
+      ctx.moveTo(30, -5);
+      ctx.lineTo(31, -8);
+      ctx.stroke();
+      ctx.lineWidth = 0.85;
+      // Caveira no chão (canto esquerdo) com sombra
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.ellipse(-28, 17.5, 3.5, 1, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Crânio
+      ctx.fillStyle = PAPER_BG;
+      ctx.beginPath();
+      ctx.arc(-28, 14, 3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      // Mandíbula
+      ctx.beginPath();
+      ctx.moveTo(-30, 16); ctx.lineTo(-26, 16);
+      ctx.stroke();
+      // Olhos (escuros profundos)
+      ctx.fillStyle = INK_DARK;
+      ctx.beginPath();
+      ctx.arc(-29, 13.8, 0.8, 0, Math.PI*2);
+      ctx.arc(-27, 13.8, 0.8, 0, Math.PI*2);
+      ctx.fill();
+      // Dentes (3 verticais)
+      ctx.lineWidth = 0.3;
+      [-29, -28, -27].forEach(function(dx){
+        ctx.beginPath();
+        ctx.moveTo(dx, 16); ctx.lineTo(dx, 16.8);
+        ctx.stroke();
+      });
+      ctx.lineWidth = 0.85;
+      // Wisps fantasmagóricos sutis
+      ctx.strokeStyle = INK_LIGHT;
+      ctx.lineWidth = 0.4;
+      ctx.globalAlpha = 0.5;
+      [[-12, -10], [4, -12], [20, -10]].forEach(function(wp){
+        ctx.beginPath();
+        ctx.moveTo(wp[0], wp[1] + 5);
+        ctx.bezierCurveTo(wp[0] - 1.5, wp[1] + 1, wp[0] + 1.5, wp[1] - 2, wp[0], wp[1] - 5);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'snow' || b.key === 'snow') {
+      // TUNDRA DO NORTE AAA — picos de gelo com brilho azulado, aurora
+      // boreal acima, flocos de 6 pontas (não 4), pinheiro congelado
+      // dominante, cobertura de neve hatching.
+      // Aurora boreal (3 ondas curvas longas no topo)
+      ctx.strokeStyle = '#88c8e8';
+      ctx.lineWidth = 0.7;
+      ctx.globalAlpha = 0.5;
+      for (var au = 0; au < 3; au++) {
+        var ay = -28 + au * 3;
+        ctx.beginPath();
+        ctx.moveTo(-30, ay);
+        ctx.bezierCurveTo(-15, ay - 4, 0, ay + 4, 15, ay - 2);
+        ctx.bezierCurveTo(20, ay - 1, 25, ay - 3, 30, ay);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
+      // Picos de gelo (5) com VOLUME 3D azulado
+      var icePeakXs2 = [-24, -12, 0, 12, 24];
+      var icePeakHts2 = [12, 18, 11, 14, 9];
+      for (var ip = 0; ip < 5; ip++) {
+        var ix = icePeakXs2[ip], ih = icePeakHts2[ip], iy = 16;
+        // Lado claro
+        ctx.fillStyle = '#e0eef6';
         ctx.beginPath();
         ctx.moveTo(ix - ih*0.5, iy);
         ctx.lineTo(ix, iy - ih);
-        ctx.lineTo(ix + ih*0.5, iy);
+        ctx.lineTo(ix, iy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.lineWidth = 0.85;
         ctx.stroke();
-        // Snowcap (zigzag perto do topo)
+        // Lado escuro azulado
+        ctx.beginPath();
+        ctx.moveTo(ix, iy - ih);
+        ctx.lineTo(ix + ih*0.5, iy);
+        ctx.lineTo(ix, iy);
+        ctx.closePath();
+        ctx.fillStyle = '#88a8c8';
+        ctx.globalAlpha = 0.30;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+        // Reflexo no pico (highlight)
+        ctx.fillStyle = '#fff';
+        ctx.globalAlpha = 0.7;
         ctx.beginPath();
         ctx.moveTo(ix - ih*0.18, iy - ih*0.55);
         ctx.lineTo(ix, iy - ih*0.7);
-        ctx.lineTo(ix + ih*0.18, iy - ih*0.55);
-        ctx.stroke();
+        ctx.lineTo(ix - ih*0.05, iy - ih*0.85);
+        ctx.lineTo(ix, iy - ih);
+        ctx.lineTo(ix - ih*0.10, iy - ih*0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
-      // Flocos de neve (asteriscos *)
+      // Pinheiro congelado dominante
       ctx.lineWidth = 0.7;
-      for (i = 0; i < 8; i++) {
-        x = (rng() - 0.5) * r * 1.5;
-        y = -r * 0.6 + rng() * r * 0.5;
-        sz = 1.6 + rng() * 1.3;
-        ctx.beginPath();
-        ctx.moveTo(x - sz, y); ctx.lineTo(x + sz, y);
-        ctx.moveTo(x, y - sz); ctx.lineTo(x, y + sz);
-        ctx.moveTo(x - sz*0.7, y - sz*0.7); ctx.lineTo(x + sz*0.7, y + sz*0.7);
-        ctx.moveTo(x - sz*0.7, y + sz*0.7); ctx.lineTo(x + sz*0.7, y - sz*0.7);
-        ctx.stroke();
-      }
-      ctx.lineWidth = 0.9;
-    } else if (b.key === 'volcanic') {
-      // Pictograma: cone do vulcão outline + cratera + fumaça (espirais) +
-      // lava streams (linhas wavy descendo)
-      // Cone outline
       ctx.beginPath();
-      ctx.moveTo(-22, 18);
-      ctx.lineTo(-6, -10);
-      ctx.lineTo(6, -10);
-      ctx.lineTo(22, 18);
+      ctx.moveTo(-26, 22); ctx.lineTo(-26, 18);
       ctx.stroke();
-      // Cratera (linha curva no topo)
+      ctx.lineWidth = 0.6;
+      ctx.fillStyle = '#e0eef6';
+      for (var pl = 0; pl < 3; pl++) {
+        var ply = 18 - pl*3;
+        var plw = 4 - pl;
+        ctx.beginPath();
+        ctx.moveTo(-26 - plw, ply);
+        ctx.lineTo(-26, ply - 3);
+        ctx.lineTo(-26 + plw, ply);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.lineWidth = 0.9;
+      // Flocos de neve com 6 PONTAS (estrelas dêndríticas reais)
+      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = INK_DARK;
+      for (var ff = 0; ff < 8; ff++) {
+        var fx = (rng() - 0.5) * 60;
+        var fy = -20 + rng() * 30;
+        var fsz = 1.4 + rng() * 1.2;
+        for (var fa = 0; fa < 6; fa++) {
+          var fang = fa * Math.PI / 3;
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(fx + Math.cos(fang) * fsz, fy + Math.sin(fang) * fsz);
+          ctx.stroke();
+          // Pequenos braços laterais (nas pontas)
+          ctx.beginPath();
+          ctx.moveTo(fx + Math.cos(fang) * fsz * 0.6, fy + Math.sin(fang) * fsz * 0.6);
+          ctx.lineTo(fx + Math.cos(fang + 0.5) * fsz * 0.4, fy + Math.sin(fang + 0.5) * fsz * 0.4);
+          ctx.moveTo(fx + Math.cos(fang) * fsz * 0.6, fy + Math.sin(fang) * fsz * 0.6);
+          ctx.lineTo(fx + Math.cos(fang - 0.5) * fsz * 0.4, fy + Math.sin(fang - 0.5) * fsz * 0.4);
+          ctx.stroke();
+        }
+      }
+      ctx.lineWidth = 0.9;
+    } else if (b.biome === 'volcanic' || b.key === 'volcanic') {
+      // VULCÃO REWRITE 2026-05-04 — silhueta dramática estilo Mt. Doom
+      // (Tolkien). Cone alto e robusto + cratera ampla pulsante + 4 lava
+      // flows reais com bifurcação + nuvem de fumaça grande retorcida +
+      // poças de lava ardendo no chão + brasas voando + pico secundário.
+      // PICO SECUNDÁRIO atrás (vista profundidade)
+      ctx.fillStyle = '#3a2818';
+      ctx.globalAlpha = 0.45;
       ctx.beginPath();
-      ctx.moveTo(-6, -10);
-      ctx.quadraticCurveTo(0, -7, 6, -10);
-      ctx.stroke();
-      // Lava streams (3 linhas wavy do topo até a base)
-      ctx.lineWidth = 1.1;
-      for (i = 0; i < 3; i++) {
-        var lx = (i - 1) * 4;
-        ctx.beginPath();
-        ctx.moveTo(lx, -8);
-        ctx.bezierCurveTo(lx + 1, -2, lx - 1, 4, lx + 2, 16);
-        ctx.stroke();
-      }
-      ctx.lineWidth = 0.9;
-      // Hatching no lado direito do cone (sombra)
-      ctx.lineWidth = 0.4;
-      for (i = 0; i < 4; i++) {
-        var t = 0.2 + i*0.2;
-        ctx.beginPath();
-        ctx.moveTo(0, -10 + t*2);
-        ctx.lineTo(20 - i*1.5, 18 - i);
-        ctx.stroke();
-      }
-      ctx.lineWidth = 0.9;
-      // Fumaça (3 espirais saindo do topo)
+      ctx.moveTo(-26, 18);
+      ctx.lineTo(-18, -2);
+      ctx.lineTo(-12, -8);
+      ctx.lineTo(-8, -2);
+      ctx.lineTo(-4, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.lineWidth = 0.7;
-      for (i = 0; i < 3; i++) {
-        var sx = (i - 1) * 6;
-        var sy = -14 - i*4;
+      ctx.beginPath();
+      ctx.moveTo(-26, 18);
+      ctx.lineTo(-18, -2);
+      ctx.lineTo(-12, -8);
+      ctx.lineTo(-8, -2);
+      ctx.lineTo(-4, 18);
+      ctx.stroke();
+      // CONE PRINCIPAL — silhueta dramática (lados levemente côncavos)
+      ctx.fillStyle = '#5a3020';
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      ctx.moveTo(-22, 22);
+      ctx.bezierCurveTo(-18, 10, -12, -2, -7, -12); // lateral esquerda côncava
+      ctx.lineTo(-4, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22); // lateral direita
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(-22, 22);
+      ctx.bezierCurveTo(-18, 10, -12, -2, -7, -12);
+      ctx.lineTo(-4, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22);
+      ctx.stroke();
+      ctx.lineWidth = 0.9;
+      // SOMBRA do lado direito (preenchimento + hatching)
+      ctx.fillStyle = INK_DARK;
+      ctx.globalAlpha = 0.30;
+      ctx.beginPath();
+      ctx.moveTo(0, -15);
+      ctx.lineTo(4, -15);
+      ctx.lineTo(7, -12);
+      ctx.bezierCurveTo(12, -2, 18, 10, 22, 22);
+      ctx.lineTo(0, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.3;
+      ctx.globalAlpha = 0.6;
+      for (var vh = 0; vh < 8; vh++) {
         ctx.beginPath();
-        ctx.moveTo(sx, -10);
-        ctx.quadraticCurveTo(sx - 4, sy + 4, sx, sy);
-        ctx.quadraticCurveTo(sx + 4, sy - 2, sx, sy - 4);
+        ctx.moveTo(2 + vh * 1.5, -10 + vh * 4);
+        ctx.lineTo(20 - vh * 0.8, 22);
         ctx.stroke();
       }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 0.9;
+      // CRATERA ampla com BORDAS irregulares (não elipse perfeita)
+      ctx.fillStyle = '#c84030';
+      ctx.beginPath();
+      ctx.moveTo(-7, -15);
+      ctx.bezierCurveTo(-5, -17, 0, -17, 4, -16);
+      ctx.bezierCurveTo(7, -15, 7, -13, 4, -12);
+      ctx.bezierCurveTo(0, -11, -3, -12, -7, -13);
+      ctx.closePath();
+      ctx.fill();
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      // GLOW VULCÂNICO grande (radial, alaranjado intenso)
+      var lavaCoreGrad = ctx.createRadialGradient(-2, -14, 1, -2, -14, 14);
+      lavaCoreGrad.addColorStop(0, 'rgba(255,200,100,0.8)');
+      lavaCoreGrad.addColorStop(0.5, 'rgba(255,120,40,0.4)');
+      lavaCoreGrad.addColorStop(1, 'rgba(255,80,0,0)');
+      ctx.fillStyle = lavaCoreGrad;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.arc(-2, -14, 14, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // 4 LAVA FLOWS descendo (curvas naturais, com bifurcação no flow central)
+      ctx.strokeStyle = '#e85020';
+      ctx.lineWidth = 1.6;
+      // Flow 1 — esquerda principal
+      ctx.beginPath();
+      ctx.moveTo(-5, -14);
+      ctx.bezierCurveTo(-7, -8, -10, -2, -8, 6);
+      ctx.bezierCurveTo(-10, 14, -14, 18, -16, 22);
+      ctx.stroke();
+      // Flow 2 — direita principal
+      ctx.beginPath();
+      ctx.moveTo(2, -14);
+      ctx.bezierCurveTo(4, -6, 6, 0, 8, 8);
+      ctx.bezierCurveTo(10, 14, 14, 18, 16, 22);
+      ctx.stroke();
+      // Flow 3 — central (bifurcação)
+      ctx.beginPath();
+      ctx.moveTo(-1, -14);
+      ctx.bezierCurveTo(-2, -6, 0, 0, -1, 8);
+      ctx.bezierCurveTo(-3, 14, -2, 20, 0, 22);
+      ctx.stroke();
+      // Bifurcação do flow 2
+      ctx.beginPath();
+      ctx.moveTo(8, 8);
+      ctx.bezierCurveTo(11, 12, 13, 16, 12, 22);
+      ctx.stroke();
+      // POÇAS DE LAVA na base (3 ovais brilhantes)
+      ctx.lineWidth = 0.6;
+      [[-15, 22, 4], [0, 22.5, 5], [15, 22, 4]].forEach(function(lp){
+        ctx.fillStyle = '#ff8030';
+        ctx.beginPath();
+        ctx.ellipse(lp[0], lp[1], lp[2], lp[2]*0.4, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#c84030';
+        ctx.stroke();
+        // Glow
+        ctx.fillStyle = '#ffa040';
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.ellipse(lp[0], lp[1], lp[2]*0.6, lp[2]*0.25, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+      // FUMAÇA grande retorcida (cone de fumaça subindo + se espalhando)
+      ctx.fillStyle = '#4a3828';
+      ctx.globalAlpha = 0.40;
+      // Plume base (logo acima da cratera)
+      ctx.beginPath();
+      ctx.arc(-2, -19, 4, 0, Math.PI*2);
+      ctx.arc(2, -22, 4.5, 0, Math.PI*2);
+      ctx.arc(-3, -25, 5, 0, Math.PI*2);
+      ctx.arc(4, -27, 4, 0, Math.PI*2);
+      ctx.arc(-1, -30, 5.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 0.25;
+      // Topo da fumaça (mais espalhada)
+      ctx.beginPath();
+      ctx.arc(-6, -33, 5, 0, Math.PI*2);
+      ctx.arc(6, -33, 5, 0, Math.PI*2);
+      ctx.arc(0, -35, 6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Contorno da fumaça (linha sinuosa)
+      ctx.strokeStyle = '#5a4838';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-5, -16);
+      ctx.bezierCurveTo(-9, -22, -7, -28, -10, -34);
+      ctx.bezierCurveTo(-6, -38, 0, -38, 6, -34);
+      ctx.bezierCurveTo(10, -28, 8, -22, 5, -16);
+      ctx.stroke();
+      ctx.strokeStyle = INK_DARK;
+      ctx.lineWidth = 0.9;
+      // BRASAS voando (5 pontos brilhantes)
+      ctx.fillStyle = '#ff8030';
+      [[-8, -8], [6, -10], [10, -16], [-12, -14], [4, -22]].forEach(function(em){
+        ctx.beginPath();
+        ctx.arc(em[0], em[1], 0.9, 0, Math.PI*2);
+        ctx.fill();
+        // Glow
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath();
+        ctx.arc(em[0], em[1], 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      // CRACKS/rachaduras no chão (irradiando do vulcão com glow vermelho)
+      ctx.strokeStyle = '#c84030';
+      ctx.lineWidth = 0.6;
+      ctx.globalAlpha = 0.7;
+      [[-22, 25], [-25, 24], [22, 25], [25, 24], [-12, 26], [12, 26]].forEach(function(cr){
+        ctx.beginPath();
+        ctx.moveTo(cr[0], cr[1]);
+        ctx.lineTo(cr[0] + (rng()-0.5)*4, cr[1] + 3);
+        ctx.lineTo(cr[0] + (rng()-0.5)*5, cr[1] + 6);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = INK_DARK;
       ctx.lineWidth = 0.9;
     }
     ctx.lineCap = 'butt';
@@ -620,11 +3017,18 @@
     // Texto do label
     ctx.fillStyle = INK_DARK;
     ctx.fillText(labelText, bx, by + 24);
-    // Tier badge embaixo (T1, T2, etc)
-    if (b.tier) {
+    // 2026-05-05 v10: User pediu remover "Tier N" e mostrar só range de
+    // nível recomendado. Tier interno mantido em b.tier (calc/balance), só
+    // o display muda. Origem (tier 0) sem badge — é cidade segura.
+    if (typeof b.tier === 'number' && b.tier > 0) {
+      var lvlRange = (b.tier <= 1) ? 'nv 1–2' :
+                     (b.tier <= 3) ? 'nv 2–4' :
+                     (b.tier <= 5) ? 'nv 4–7' :
+                     (b.tier <= 7) ? 'nv 7–10' :
+                                     'nv 10+';
       ctx.font = 'italic 8px serif';
       ctx.fillStyle = INK_MED;
-      ctx.fillText('Tier ' + b.tier, bx, by + 37);
+      ctx.fillText(lvlRange, bx, by + 37);
     }
     ctx.restore();
   }
@@ -763,6 +3167,100 @@
   }
 
 
+  // === _drawAgedParchment ===
+  // PERGAMINHO VELHO MANCHADO — wear effects orgânicos AAA (2026-05-04).
+  // User pediu manchas que NÃO sejam círculos toscos. Usa _drawAgedStain
+  // (multi-camada com coffee-ring + salpicos), creases orgânicas, scorched
+  // edge irregular. Estilo "mapa do tesouro 1450" — bem usado, autêntico.
+  function _drawAgedParchment(ctx, w, h){
+    var rng = _cartSeedRand(57);
+    // 1) Base sépia escurecida (cor do estilo #4)
+    ctx.fillStyle = '#d8b878';
+    ctx.fillRect(0, 0, w, h);
+    // 2) Variação tonal MUITO SUTIL — 2026-05-04 v3: USER pediu "bem mais
+    //    sutis, suaves". Raio 22-50 → 14-26 (menor). Alpha 0.08-0.15 →
+    //    0.04-0.07 (quase imperceptível, só dá vida ao papel).
+    for (var i = 0; i < 6; i++) {
+      var bx = rng() * w, by = rng() * h;
+      _drawOrganicBlob(ctx, bx, by, 14 + rng() * 12, '#b08050', 0.04 + rng() * 0.03, 200 + i * 11);
+    }
+    // 3) Manchas de vinho/café envelhecidas — 2026-05-04 v3: tamanho
+    //    6-18 → 3-9 (bem pequenas). Alphas reduzidos no _drawAgedStain.
+    //    Mais variedade de cores/tons pra parecer natural.
+    var stainColors = [
+      ['#6a3818', '#3a1808'], // vinho escuro
+      ['#8a5028', '#4a2818'], // café
+      ['#7a4020', '#3a1810'], // vinho médio
+      ['#92583a', '#502818'], // café claro
+      ['#6a3818', '#3a1808'], // vinho repete
+      ['#7a4020', '#3a1810']  // vinho médio repete
+    ];
+    for (var s = 0; s < 6; s++) {
+      var sx = rng() * w, sy = rng() * h;
+      // size 3-9 (bem pequenas — só dão "personalidade" ao papel)
+      var ssz = 3 + rng() * 6;
+      var c = stainColors[s % stainColors.length];
+      _drawAgedStain(ctx, sx, sy, ssz, c[0], c[1], 300 + s * 23);
+    }
+    // 4) Manchas de tinta antigas (clusters de pontos densos)
+    for (var ki = 0; ki < 10; ki++) {
+      var kx = rng() * w, ky = rng() * h;
+      var clusterN = 4 + Math.floor(rng() * 6);
+      for (var kj = 0; kj < clusterN; kj++) {
+        var ox = (rng() - 0.5) * 12;
+        var oy = (rng() - 0.5) * 12;
+        var ka = 0.10 + rng() * 0.20;
+        ctx.fillStyle = 'rgba(40,20,4,' + ka.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(kx + ox, ky + oy, 0.5 + rng() * 1.0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+    // 5) Paper grain (textura de fibras)
+    for (var gi = 0; gi < 380; gi++) {
+      var gx = rng() * w, gy = rng() * h;
+      var ga = 0.04 + rng() * 0.10;
+      ctx.fillStyle = 'rgba(60,40,12,' + ga.toFixed(3) + ')';
+      ctx.fillRect(gx, gy, 0.8, 0.8);
+    }
+    // 6) Dobras (creases) orgânicas — 3 horizontais + 1 diagonal
+    _drawCrease(ctx, 0, h * 0.32, w, h * 0.34, 91);
+    _drawCrease(ctx, 0, h * 0.66, w, h * 0.64, 92);
+    _drawCrease(ctx, w * 0.45, 0, w * 0.55, h, 93);
+    // NOTA: Scorched edges é uma função separada (_drawScorchedEdge) —
+    // chamada APÓS o conteúdo (biome art + paths + nodes) pra ficar
+    // por cima como vinheta. Evita escurecer demais o conteúdo central.
+  }
+
+  // === _drawUnknownLocation ===
+  // 2026-05-04 USER REQUEST: locais não-descobertos aparecem como
+  // INSINUAÇÃO no mapa — círculo tracejado com "?" no centro. Sugere
+  // que existe algo ali, mas o jogador precisa de mapa do Cartógrafo
+  // Corvus (na Praça Central) ou descoberta natural pra revelar.
+  function _drawUnknownLocation(ctx, b, w, h){
+    var bx = b.x * w, by = b.y * h;
+    ctx.save();
+    // Círculo tracejado discreto
+    ctx.strokeStyle = INK_LIGHT;
+    ctx.lineWidth = 0.6;
+    ctx.globalAlpha = 0.55;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.arc(bx, by, 14, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // "?" no centro (italic, sutil)
+    ctx.fillStyle = INK_MED;
+    ctx.globalAlpha = 0.65;
+    ctx.font = 'italic 14px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', bx, by);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -772,10 +3270,16 @@
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
+    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA
+    _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
+    _drawAgedStain: _drawAgedStain,                // helper exposto
+    _drawCrease: _drawCrease,                      // helper exposto
+    _drawScorchedEdge: _drawScorchedEdge,          // helper exposto
     _drawBiomeArt: _drawBiomeArt,
     _drawCartPath: _drawCartPath,
     _drawCartNode: _drawCartNode,
     _drawPlayerPin: _drawPlayerPin,
-    _drawCartCompass: _drawCartCompass
+    _drawCartCompass: _drawCartCompass,
+    _drawUnknownLocation: _drawUnknownLocation  // 2026-05-04: locais não-descobertos
   };
 })();

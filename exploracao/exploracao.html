@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-05T15:51:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T11:20:34Z - do not edit directly, edit source -->
 
 
 <!--
@@ -4023,13 +4023,97 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   color: var(--v-gold);
   font-size: 8px;
 }
+/* PADRAO_ALDRIC v12 (2026-05-06): event-text é container, .event-text-line
+   é cada sentença individual com reveal cascateado. Sem label MESTRE. */
 .event-text, .confirm-desc {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
-  color: var(--v-text);
-  margin: 0 0 8px 0;
-  text-align: justify;
-  text-indent: 14px;
+  color: #9b8e7c;
+  margin: 0 0 10px 0;
+  text-align: left;
+  font-style: italic;
+  padding: 6px 0;
+  letter-spacing: 0.3px;
+}
+.event-text-line {
+  display: inline;
+  /* Reveal horizontal por sentença (clip-path wipe esquerda→direita) */
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  opacity: 0.4;
+  animation: eventTextReveal 1400ms cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+/* PADRAO_ALDRIC v13 (2026-05-06): segmentos de FALA destacados em gold,
+   NARRAÇÃO em cinza italic. Auto-detectado via _classifyEventSentence. */
+.event-text-speech {
+  display: block;
+  margin: var(--v-space-md, 8px) 0;
+  padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
+  background: var(--v-bg-overlay, rgba(74, 56, 40, 0.32));
+  border-left: 3px solid var(--v-gold, #c4953a);
+  border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
+  color: var(--v-text-bright, #e6dac0);
+  font-style: normal;
+  font-size: var(--v-font-lg, 15px);
+  line-height: 1.65;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  opacity: 0.4;
+  animation: eventTextReveal 1500ms cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+.event-text-narration {
+  display: block;
+  margin: var(--v-space-sm, 6px) 0;
+  color: var(--v-text-dim, #9b8e7c);
+  font-style: italic;
+  font-size: var(--v-font-body, 14px);
+  line-height: 1.7;
+  letter-spacing: 0.3px;
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  opacity: 0.4;
+  animation: eventTextReveal 1300ms cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+/* Performance tier guard: dispositivos lite/reduce-motion não animam reveal
+   das 9 sentenças simultâneas (cascata de 700ms × 9 ≈ 6s de animação total
+   pode causar layout thrashing em smartphone fraco). */
+body.perf-lite .event-text-speech,
+body.perf-lite .event-text-narration,
+body.perf-lite .event-text-line {
+  animation: none !important;
+  clip-path: none;
+  -webkit-clip-path: none;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-text-speech,
+  .event-text-narration,
+  .event-text-line {
+    animation: none !important;
+    clip-path: none;
+    -webkit-clip-path: none;
+    opacity: 1;
+  }
+}
+/* Confirm desc não recebe split — animação simples */
+.confirm-desc {
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  animation: eventTextReveal 1400ms cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+}
+@keyframes eventTextReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    -webkit-clip-path: inset(0 100% 0 0);
+    opacity: 0.5;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
 }
 .event-flavor {
   font-size: 12px;
@@ -4039,6 +4123,10 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   margin: 0 0 14px 0;
   padding-left: 10px;
   border-left: 2px solid rgba(196, 149, 58, 0.3);
+  /* Reveal com delay pra entrar depois do main text */
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+  animation: eventTextReveal 1200ms cubic-bezier(0.55, 0.08, 0.3, 1) 600ms forwards;
 }
 .event-choices-label {
   font-family: var(--v-font-display);
@@ -4230,13 +4318,18 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 .consequence-item.reward .c-text { color: var(--v-gold); }
 .consequence-item.penalty .c-text { color: #e08888; }
 .consequence-item.info .c-text { color: #9ec8d4; }
+/* event-continue v11.3 (2026-05-06): user reportou "botão continuar
+   ocupando tela toda". Antes width:100%. Agora auto-width centrado. */
 .event-continue {
-  margin-top: 12px;
-  width: 100%;
+  display: block;
+  margin: 14px auto 4px;
+  width: auto;
+  min-width: 160px;
+  max-width: 280px;
   background: linear-gradient(180deg, #c4953a, #8b6420);
   border: 1px solid #8b6420;
   border-radius: 6px;
-  padding: 9px;
+  padding: 8px 28px;
   font-family: var(--v-font-display);
   font-size: 11px;
   letter-spacing: 2px;
@@ -4250,15 +4343,17 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 /* V3.0: DM TOAST removido (user: "n\u00e3o d\u00e1 imersividade, melhor os eventos mesmo") */
 
 /* ====== DICE OVERLAY (padrão check-overlay do combate) =============== */
+/* DICE OVERLAY v10 (2026-05-05): compactado — user reportou "botões
+   gigantes ocupando toda a tela". Antes: dice 170-220px + result 20-24px
+   font + 10px 22px padding + gap 18px. Agora dimensões reduzidas pra
+   smartphone. */
 #dice-overlay {
   position: absolute; inset: 0;
-  /* 2026-04-27 USER RULE: 100% opaco (era 0.96 = 4% transparência que
-     deixava vazar o popup do evento atrás como "quadrado menor"). */
   background: #2a2420;
   display: none;
   align-items: center; justify-content: center;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
   z-index: 200;
   pointer-events: none;
   opacity: 0;
@@ -4271,8 +4366,8 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 }
 #dice-canvas-wrap {
   position: relative;
-  width: clamp(170px, 52vw, 220px);
-  height: clamp(170px, 52vw, 220px);
+  width: clamp(120px, 36vw, 150px);
+  height: clamp(120px, 36vw, 150px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4288,19 +4383,19 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 }
 #dice-formula {
   font-family: var(--v-font-display);
-  font-size: 18px;
-  letter-spacing: 1px;
+  font-size: 13px;
+  letter-spacing: 0.6px;
   color: var(--v-text-dim, #a09484);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   text-align: center;
 }
 #dice-formula b { color: #e8dcc8; font-weight: 900; }
 #dice-result {
-  font-size: clamp(20px, 6vw, 24px);
+  font-size: 15px;
   font-weight: 900;
-  letter-spacing: 3px;
-  padding: 10px 22px;
-  border-radius: 8px;
+  letter-spacing: 2px;
+  padding: 5px 14px;
+  border-radius: 6px;
   display: none;
   animation: resultReveal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -4322,22 +4417,210 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   0% { transform: scale(0.7); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-.v-skip-btn {
+/* MOCHILA POPUP v12.5 (2026-05-06) — fix: position absolute pra ficar
+   DENTRO do #frame do jogo (não do viewport todo). User reportou
+   "abrindo na tela inteira, sem limitação horizontal". */
+#inv-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9700;
+  background: rgba(0, 0, 0, 0.88);
+  display: none;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  backdrop-filter: blur(3px);
+}
+#inv-overlay.show { display: flex; }
+.inv-card {
+  background: linear-gradient(180deg, #332a22 0%, #2a2420 100%);
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #d4c8b0;
+  box-shadow: inset 0 0 24px rgba(196, 149, 58, 0.12);
+  animation: invSlideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes invSlideUp {
+  from { transform: translateY(15px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.inv-header {
+  flex-shrink: 0;
+  padding: 14px 16px 10px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(196, 149, 58, 0.30);
+  text-align: center;
+}
+.inv-title {
+  font-family: Cinzel, serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c4953a;
+  margin: 0 0 4px 0;
+  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.inv-subtitle {
+  font-family: Cinzel, serif;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #a09484;
+}
+.inv-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.inv-body > * { max-width: 540px; width: 100%; margin-left: auto; margin-right: auto; }
+.inv-meta-bar {
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #a09484;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+.inv-meta-bar .gold { color: #e8c45a; }
+.inv-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+.inv-filter-pill {
+  padding: 4px 10px;
+  background: rgba(60, 48, 40, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 12px;
+  font-family: Cinzel, serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #d4c8b0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.inv-filter-pill:hover { border-color: #c4953a; background: rgba(196, 149, 58, 0.18); }
+.inv-filter-pill.active {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.30), rgba(139, 100, 32, 0.20));
+  border-color: #c4953a;
+  color: #f0e0b8;
+}
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+.inv-item-card {
+  background: linear-gradient(180deg, rgba(50, 40, 30, 0.85), rgba(34, 26, 20, 0.85));
+  border: 1px solid rgba(196, 149, 58, 0.30);
+  border-radius: 7px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.inv-item-card:hover {
+  border-color: #c4953a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 149, 58, 0.25);
+}
+.inv-item-icon {
+  font-size: 22px;
+  display: block;
+  margin-bottom: 4px;
+}
+.inv-item-name {
+  font-family: serif;
+  font-size: 11px;
+  color: #d4c8b0;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.inv-item-count {
+  font-family: Cinzel, serif;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: #c4953a;
+}
+.inv-empty {
+  text-align: center;
+  padding: 30px 10px;
+  color: #a09484;
+  font-style: italic;
+  font-size: 13px;
+}
+.inv-footer {
+  flex-shrink: 0;
+  padding: 12px 16px 16px;
+  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border-top: 1px solid rgba(196, 149, 58, 0.30);
+  display: flex;
+  justify-content: center;
+}
+.inv-close {
+  display: inline-block;
+  padding: 8px 32px;
+  min-width: 160px;
+  max-width: 280px;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.30), rgba(139, 100, 32, 0.18));
+  border: 1px solid #c4953a;
+  border-radius: 6px;
+  color: #d4c8b0;
+  font-family: Cinzel, serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.inv-close:hover { background: linear-gradient(180deg, rgba(196, 149, 58, 0.45), rgba(139, 100, 32, 0.30)); border-color: #fbd770; color: #f0e0b8; }
+.inv-close:active { transform: scale(0.97); }
+
+/* v-skip-btn dentro do dice-overlay v12.1 (2026-05-06): RESET absoluto
+   pra anular regra antiga (top:14px right:14px no .v-skip-btn anterior).
+   Botão fica BOTTOM-CENTER (40px do fundo), auto-width, height auto. */
+#dice-overlay .v-skip-btn {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  top: auto;
+  right: auto;
+  transform: translateX(-50%);
   font-family: var(--v-font-display);
   font-size: 12px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--v-gold, #c4953a);
   background: transparent;
   border: 1px solid var(--v-gold, #c4953a);
-  padding: 7px 16px;
+  padding: 8px 24px;
   border-radius: 6px;
   cursor: pointer;
   display: none;
+  width: auto;
+  min-width: 140px;
+  max-width: 220px;
+  height: auto;
+  flex: 0 0 auto;
   transition: background 0.15s ease;
+  z-index: 250;
 }
-.v-skip-btn:hover { background: rgba(196, 149, 58, 0.1); }
-.v-skip-btn:active { transform: scale(0.97); }
+#dice-overlay .v-skip-btn:hover { background: rgba(196, 149, 58, 0.1); }
+#dice-overlay .v-skip-btn:active { transform: translateX(-50%) scale(0.97); }
 
 /* ====== DEFEAT ======================================================== */
 #defeat-overlay {
@@ -7644,7 +7927,7 @@ window.__onIntroTap = function() {
       <div class="light-menu" id="light-menu"></div>
     </div>
     <button class="quick-btn" id="btn-camp" title="Acampar">🏕️</button>
-    <button class="quick-btn" id="btn-cartografia" title="Cartografia">🗺️</button>
+    <button class="quick-btn" id="btn-cartografia" title="Mapa de Valdoria" aria-label="Mapa de Valdoria">🗺️</button>
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
          logs/exploracao/ via sink server. Console ainda tem downloadExploracaoLogs(). -->
   </div>
@@ -7804,13 +8087,33 @@ window.__onIntroTap = function() {
        simuladores/exploracao-setup-frontend-testes.html (launcher QA local).
        Ver docs/sistemas/exploracao-master-index.md pra arquitetura canonical. -->
 
+  <!-- Mochila popup v12.4 (2026-05-06) — replica visual do _showInventoryPopup
+       de cidade.html. User pediu: "deve ser uma mochila padrão, mesma fonte
+       de design e funcionalidades abrindo como popup na tela inteira em
+       ambos html". Fullscreen overlay com header sticky + body scrollavel
+       + footer sticky. Renderiza S.inventory (formato exploracao). -->
+  <div id="inv-overlay">
+    <div class="inv-card">
+      <div class="inv-header">
+        <h2 class="inv-title">🎒 Mochila</h2>
+        <div class="inv-subtitle" id="inv-subtitle">— itens</div>
+      </div>
+      <div class="inv-body" id="inv-body">
+        <!-- preenchido por _showExploracaoInventoryPopup() -->
+      </div>
+      <div class="inv-footer">
+        <button class="inv-close" id="inv-close-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Cartografia: mapa de interligações entre todos os mapas -->
   <div id="cartography-overlay">
     <!-- X-6.5.51j: cart-card 3-zonas (header sticky + body scrollavel + footer) -->
     <div class="cart-card">
       <div class="cart-header">
-        <h2 class="cart-title">Cartografia de Valdoria</h2>
-        <div class="cart-subtitle">Mapa das Terras Conhecidas</div>
+        <h2 class="cart-title">🗺️ Mapa de Valdoria</h2>
+        <div class="cart-subtitle">Toca um destino pra ver — backend canonical (CartShared)</div>
       </div>
       <div class="cart-body">
         <div class="cart-canvas-wrap">
@@ -8741,31 +9044,29 @@ window.__onIntroTap = function() {
   }
 
   /**
-   * 2026-04-27 USER RULE: tile-objects NÃO devem aparecer em hexes sob fog
-   * (fogState undefined = nunca revelado). User reportou: "logo abaixo de
-   * onde está escrito VIDA, na parte superior da tela, está aparecendo um
-   * dos tile-objects mesmo estando com fog. faça com que nenhum tile-object
-   * apareça se estiver com fog".
+   * 2026-05-06 v12.7 USER RULE: tile-objects DEVEM ser INVISÍVEIS em fog.
+   * User reportou: "dá pra ver o tile-object do baú de longe, mesmo no
+   * pântano e com neblina. garanta que nenhum tile-object seja visivel
+   * assim. todo tile-object existente deve ter mesmo efeito de qualquer
+   * hexagono do mapa".
+   *
+   * Antes: 'dim' (memória) também mostrava — tile-objects ficavam visíveis
+   * de longe quando hex já fora visitado. Agora STRICT: só 'visible' mostra.
    *
    * fogState valores:
-   *   undefined | 'hidden' → nunca revelado (HIDE tile-object)
-   *   'dim'                → memória passada (SHOW tile-object)
-   *   'visible'            → vendo agora (SHOW tile-object)
+   *   undefined | 'hidden' | 'dim' → HIDE tile-object (não está em vision atual)
+   *   'visible'                    → SHOW tile-object (está em vision atual)
    */
   function _isHexFogged(hexId) {
-    if (!window.S || !window.S.fogState) return false;  // sem fog system = sempre mostrar
-    // 2026-04-27 USER RULE: showcase hexIds ('showcase_lite/medium/full') são
-    // overlays do panel — não passam pelo sistema de fog. Sempre visíveis.
-    // Sem este bypass, refresh() retornava null e os cards apareciam vazios.
+    if (!window.S || !window.S.fogState) return false;
     if (typeof hexId === 'string' && hexId.indexOf('showcase_') === 0) return false;
-    // 2026-04-27 USER RULE: mata isolation — quando player está em hex 'g',
-    // SÓ o hex atual mostra tile-objects. Todo resto fica fogged total.
     if (window._isPlayerOnMata && window._isPlayerOnMata()) {
       var pHex = window.S.player.col + ',' + window.S.player.row;
       if (hexId !== pHex) return true;
     }
     var fs = window.S.fogState[hexId];
-    return !(fs === 'visible' || fs === 'dim');
+    // STRICT: só 'visible' mostra. 'dim'/undefined/'hidden' = fogged.
+    return fs !== 'visible';
   }
 
   /**
@@ -10309,9 +10610,29 @@ body.perf-lite .stub-popup-voice { animation: none; }
       skipBtn.style.setProperty('display', 'inline-block', 'important');
       skipBtn.style.setProperty('visibility', 'visible', 'important');
       skipBtn.style.setProperty('opacity', '1', 'important');
-      skipBtn.style.setProperty('font-size', '15px', 'important');
-      skipBtn.style.setProperty('padding', '12px 28px', 'important');
-      skipBtn.style.setProperty('letter-spacing', '2px', 'important');
+      skipBtn.style.setProperty('font-size', '12px', 'important');
+      skipBtn.style.setProperty('padding', '8px 24px', 'important');
+      skipBtn.style.setProperty('letter-spacing', '1.5px', 'important');
+      // v12.1 (2026-05-06) — FIX bug "botão ocupando altura máxima":
+      // .v-skip-btn tinha position:absolute herdada (top:14px right:14px)
+      // de regra antiga + flex container do dice-overlay = layout zoado.
+      // Forçando agora ABSOLUTE bottom-center: 40px do fundo, centralizado
+      // via left 50% + translateX -50%. Width auto, height auto, sem
+      // herança de min/max-height. Substitui completamente top/right
+      // antigos.
+      skipBtn.style.setProperty('position', 'absolute', 'important');
+      skipBtn.style.setProperty('bottom', '40px', 'important');
+      skipBtn.style.setProperty('left', '50%', 'important');
+      skipBtn.style.setProperty('transform', 'translateX(-50%)', 'important');
+      skipBtn.style.setProperty('top', 'auto', 'important');
+      skipBtn.style.setProperty('right', 'auto', 'important');
+      skipBtn.style.setProperty('width', 'auto', 'important');
+      skipBtn.style.setProperty('min-width', '140px', 'important');
+      skipBtn.style.setProperty('max-width', '220px', 'important');
+      skipBtn.style.setProperty('height', 'auto', 'important');
+      skipBtn.style.setProperty('min-height', 'auto', 'important');
+      skipBtn.style.setProperty('max-height', 'none', 'important');
+      skipBtn.style.setProperty('flex', '0 0 auto', 'important');
       skipBtn.style.setProperty('background', 'linear-gradient(180deg, rgba(196,149,58,0.30), rgba(196,149,58,0.12))', 'important');
       skipBtn.style.setProperty('border', '1px solid var(--v-gold, #c4953a)', 'important');
       skipBtn.style.setProperty('color', '#e8dcc8', 'important');
@@ -13541,13 +13862,25 @@ const EVENTS_POOL = {
     title_variants: ['Um Mercador Perdido', 'Uma Carroça Atolada', 'Viajante em Apuros'],
     text_variants: [
       'Um mercador de barba cinzenta te acena da trilha. A carroça está atolada profundo, os cavalos resfolegam. Há urgência: "Sua Excelência precisa desta encomenda em Valdoria antes do pôr do sol!"',
-      'A carroça cobre metade da trilha, torta. O mercador tenta soltar os cavalos. "Por favor — carrego um medicamento pra uma criança nos Portões. Ajude-me."',
-      'Entre as árvores, uma carroça virada. O mercador — homem pequeno, olhos vivos — não se desespera; calcula. "Se me ajudares aqui, tenho algo a oferecer. E uma encomenda urgente."'
+      'A carroça cobre metade da trilha, torta. O mercador tenta soltar os cavalos. — Por favor, viajante. Carrego um medicamento pra uma criança nos Portões. Ajude-me.',
+      'Entre as árvores, uma carroça virada. O mercador — homem pequeno, olhos vivos — não se desespera; calcula. "Se me ajudares aqui, tenho algo a oferecer. E uma encomenda urgente."',
+      'A trilha morre sob lama da última chuva. Um homem grisalho quebra a cabeça contra a roda travada. Ao te ver, ele se ajoelha um instante. — Os deuses te enviaram. Eu rezei agora há pouco.',
+      'Carroça virada quase de lado, eixo torcido. O mercador apoia a mão na cruz dos cavalos como quem se despede. "Se eu não chegar a Valdoria hoje, alguém morre." Ele encara teus olhos sem piscar.',
+      'O homem te avista da curva, levanta o braço, e seu chapéu cai na lama enquanto corre. — Estranho! Pelo amor do Pai Branco, para um momento! A urgência dele te alcança antes que ele alcance.',
+      'Cavalos relincham nervosos, escutando alguma coisa que tu ainda não ouviste. O mercador equilibra-se na barra do veículo. "Lobos virão antes do pôr do sol. Tenho carga e família — e nem uma flecha."',
+      'Sentado num tronco caído, o mercador segura cabeça nas mãos. Vê tua sombra crescer no chão à frente dele e ergue o rosto sem esperança. — Já chamei dez vezes. Você é o primeiro que ouviu.',
+      'A carroça é uma fortaleza atolada — quatro rodas, dois cavalos, um cofre lacrado, um homem só. Ele arruma o lenço no pescoço quando te vê, dignidade sobre o medo. "Bom dia, viajante. Tenho uma proposta justa."'
     ],
     flavor_variants: [
       'A bandeira bordada mostra uma coroa e uma chave — ele serve a alguém importante. O selo da caixa dentro da carga segue intacto.',
       'Os cavalos são percherons de guerra — bem-cuidados. Na cintura, um punhal de bainha de prata: não é mercador qualquer.',
-      'Um mapa aberto no banco dianteiro com anotações. Nomes de cidades distantes, rotas marcadas. Alguém que viaja muito.'
+      'Um mapa aberto no banco dianteiro com anotações. Nomes de cidades distantes, rotas marcadas. Alguém que viaja muito.',
+      'Há cicatrizes finas nas mãos dele — antigas, alinhadas, como cortes rituais. Esse mercador já carregou outra fé.',
+      'Sob o assento, a coronha de uma besta desmontada. Mercador que viaja com besta sabe que nem toda mercadoria volta inteira.',
+      'O frasco no bolso interno reflete a luz com tom ametista — não é água, não é vinho. É algo que a própria luz se recusa a atravessar direito.',
+      'Sela da carroça com brasão riscado a faca — ele tentou apagar o símbolo. Quem é este homem que precisa esconder a quem serve?',
+      'Os arreios têm sininhos costurados de propósito mudos: alguém amassou os badalos. Esta caravana foi feita pra atravessar territórios em silêncio.',
+      'No flanco interno do braço, descoberto quando a manga subiu, uma queimadura redonda do tamanho de uma moeda — marca de prisioneiro liberto. Há vidas dentro dessa vida.'
     ],
     choices: [
       { label: 'Empurrar a carroça', skill: 'str', dc: 12,
@@ -13706,12 +14039,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Um homem magro, em farrapos, se aproxima com braços estendidos. "Três dias sem comer." Olhos de fome verdadeira.',
       'Entre as árvores, figura curvada. Pele colada aos ossos. Ele implora sem voz.',
-      'O andarilho se senta contra um carvalho. "Faz dias que não como. Qualquer sobra serve."'
+      'O andarilho se senta contra um carvalho. — Faz dias que não como. Qualquer sobra serve.',
+      'Ele se levanta da raiz onde dormia ao escutar teus passos. Cambaleia. — Não tens medo de mim, viajante? Eu já tive medo de mim mesmo.',
+      'Vê tua sombra primeiro, e só depois ergue o rosto. A magreza da fome puxou todos os ossos pra superfície. "Não peço por mim", ele diz. "Peço pelo meu cão. Está esperando ali atrás. Não comeu sequer ontem."',
+      'O andarilho caminha pra você de braços abertos — não em ameaça, em rendição. Joelha-se na trilha mesmo. — Mate-me se quiseres. Mas dá teu pão pro próximo viajante. A fome ensina que ninguém anda sozinho.',
+      'Você o vê antes que ele te veja: encolhido entre raízes, comendo casca de árvore. Quando percebe tua presença, encolhe os ombros como criança que vai apanhar. "Não sou ladrão, senhor. Só esperando a morte vir educada."',
+      'Ele segura uma flauta de osso na mão trêmula. Vê teu cantil e seus olhos enchem-se de água sem desviar do recipiente. — Toco em troca de água. Não toco bem. Mas é tudo que o mundo me deixou pra trocar.',
+      'Caminha encostado nos troncos pra não cair. Suspende o passo ao te ver e tenta sorriso que não funciona mais. "Foi um bom homem que esteve aqui antes desta carcaça. Juro."'
     ],
     flavor_variants: [
       'Uma medalha quebrada pendurada no pescoço — símbolo de alguma guilda antiga. Não é simples mendigo.',
       'Mãos tremem de fome, dedos com calos antigos de armas. Um mercenário caído em desgraça.',
-      'Sotaque de terras distantes. Como foi parar nos bosques? A história tem camadas.'
+      'Sotaque de terras distantes. Como foi parar nos bosques? A história tem camadas.',
+      'Tatuagem desbotada no antebraço — uma estrela de oito pontas. É o emblema da Companhia do Norte, dissolvida em desgraça há dez anos.',
+      'No bolso, um anel de aliança que ele toca sempre que pensa em algo. Casado uma vez. Talvez ainda seja, talvez não saiba mais.',
+      'A bota direita é boa, militar. A esquerda é trapo costurado. Ele perdeu a outra em algum lugar e não conseguiu substituir. Cada passo é desigual.',
+      'Sob a barba imunda, uma cicatriz limpa de espadachim — corte de torneio, não de rixa. Este homem disputou honras outrora.',
+      'Cheira a fumaça velha — três dias de chuva apagaram tudo menos o cheiro de uma fogueira que ele não acendeu. Há outros nesta floresta, e ele sabe.',
+      'Carrega um livro embrulhado em couro, mais cuidado que ele próprio. As páginas têm letra de criança. Está aprendendo a ler aos quarenta — ou ensinando alguém que já não está aqui.'
     ],
     choices: [
       { label: 'Oferecer comida e conversar', skill: 'wis', dc: 10,
@@ -13773,12 +14118,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Um pequeno altar de pedra coberto de musgo, entre duas árvores antigas. Inscrições desgastadas. Uma sensação vigilante paira.',
       'Entre samambaias altas, um bloco de granito talhado com símbolos élficos. O ar aqui é mais fresco e carrega o eco de vozes antigas.',
-      'Sob os galhos cruzados de carvalhos centenários, um altar onde oferendas de épocas perdidas ainda persistem: moedas oxidadas, flores secas.'
+      'Sob os galhos cruzados de carvalhos centenários, um altar onde oferendas de épocas perdidas ainda persistem: moedas oxidadas, flores secas.',
+      'O caminho se abre sem aviso para uma pequena clareira circular onde o sol entra como se tivesse sido convocado. No centro, o altar — sólido, antigo, paciente. Esperou séculos. Pode esperar mais.',
+      'Você sente antes de ver: o ar muda, fica mais lento, mais doce. Então a luz desce em feixes verticais entre os galhos e ilumina a pedra rachada por dentro de musgo prateado.',
+      'A vegetação ao redor desvia respeitosamente do altar — nenhum cipó o invade, nenhuma raiz o abala. A própria mata reconhece soberania.',
+      'Uma criança de pedra, lavrada faz mil verões, segura uma tigela ao centro do altar. A água da chuva acumulada na tigela ainda está limpa, como se algo a renovasse.',
+      'Você ouve um sino tocar — três badaladas — e procura a fonte por minutos. Não há sino. O som vinha do altar, e parou no exato instante em que tu o reconheceste.',
+      'Sob a sombra dos carvalhos, o altar parece estar respirando. Ilusão da luz, talvez. Ou talvez não. — Que os deuses ouçam quem ainda escuta, sussurra teu próprio pensamento sem que tu o tenhas pensado.'
     ],
     flavor_variants: [
       'O musgo só cresce assim em pedra muito antiga. Este altar pode ser anterior à própria fundação de Valdoria.',
       'Pegadas recentes — uma mulher, pés descalços, veio ontem. Alguém ainda venera este lugar.',
-      'Há marcas de queimadura recentes no altar. Alguém tentou profaná-lo. E algo impediu.'
+      'Há marcas de queimadura recentes no altar. Alguém tentou profaná-lo. E algo impediu.',
+      'Em volta, um círculo perfeito de cogumelos brancos — anel de fada. Eles aparecem onde duas realidades se tocam.',
+      'Uma das árvores tem dezenas de tiras de pano amarradas nos galhos baixos: pedidos de gente que veio em desespero. Algumas estão novas. Outras são tão velhas que já são parte da casca.',
+      'Pequenos ossos de pássaro empilhados de modo cuidadoso sob a pedra — não foi animal, foi mão humana. Alguém faz oferendas ainda hoje, em segredo.',
+      'A pedra do altar é fria mesmo no calor do meio-dia. Quando tu a tocas, sentes pulsação fraca como de coração distante.',
+      'Gravado discretamente na lateral, em alfabeto que tu não conheces: três palavras. A última delas, mesmo desconhecida, parece uma pergunta dirigida a ti.',
+      'Há uma sombra ao lado do altar que não corresponde a nenhum objeto. Tu vês ela ao canto do olho. Quando viras a cabeça, ela já não está. Quando volta a olhar, está de novo.'
     ],
     choices: [
       { label: 'Decifrar inscrições', skill: 'int', dc: 13,
@@ -13816,12 +14173,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Marcas recentes de botas e sangue seco. As pegadas desviam da trilha principal.',
       'Alguém passou aqui há pouco — um homem armado, carregando peso. O sangue que pinga é de animal.',
-      'Trilha lateral marcada com pegadas profundas. Uma mão ensanguentada tocou a casca de um carvalho — pedido de ajuda talvez.'
+      'Trilha lateral marcada com pegadas profundas. Uma mão ensanguentada tocou a casca de um carvalho — pedido de ajuda talvez.',
+      'Há um jeito específico de pisar quando se está ferido — peso na perna boa, arrasto na ruim. Esses passos contam uma história sem precisar de palavras.',
+      'Pingos de sangue compõem um caminho regular: um a cada três passos, gota grossa, escura. Não é caça que sangra assim. É homem.',
+      'A mata fica em silêncio nesta região. Os pássaros calam quando há predador maior por perto — humano, lobo, ou algo entre os dois.',
+      'Uma flecha quebrada espetada no chão como marca de orientação: três entalhes na haste apontam a direção. Língua antiga dos batedores da Marca Sul.',
+      'No tronco de uma faia, três cortes paralelos a altura de pescoço: marca de caçador territorial. Tu acabas de entrar na zona de caça de alguém — convidado ou não.',
+      'Um corno de bisão bota arrombado abandonado na trilha — alguém o usou pra chamar e jogou fora ao receber resposta. Que resposta?'
     ],
     flavor_variants: [
       'As pegadas mostram pés trôpegos. O caçador está ferido, mas ainda se move.',
       'Um lenço vermelho amarrado num galho — sinal de território ou pedido silencioso de socorro.',
-      'Botas pequenas. Pode ser jovem caçador em primeira caçada. A presa pode tê-lo ferido.'
+      'Botas pequenas. Pode ser jovem caçador em primeira caçada. A presa pode tê-lo ferido.',
+      'O sangue na casca da árvore tem padrão de mão pequena — quase de criança. Um aprendiz fugindo do que treinou pra enfrentar.',
+      'Um colar de dentes de javali jogado no mato — talismã que só se descarta quando não funciona mais. Algo o assustou bastante pra abandoná-lo.',
+      'Pena de gavião presa numa farpa: dom recebido, talvez de mestre xamã. O caçador andou em conselho antes de virar presa.',
+      'A trilha lateral tem cheiro de ferro fresco e algo mais — almíscar. Não é só caçador ali. Algo grande passou primeiro.',
+      'No barro mole, junto à pegada humana, uma marca circular do tamanho de prato: pata de algo que tu não conheces. O instinto dispara antes do raciocínio.',
+      'Um pedaço de peruca de mulher — cabelo trançado e selado com cera — caiu numa moita. Caçadores deste lado da mata costumam levar reféns.'
     ],
     choices: [
       { label: 'Seguir pegadas em silêncio', skill: 'dex', dc: 11,
@@ -13861,12 +14230,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Uma menina sentada num tronco, abraçando os joelhos. Olhar assustado mas curioso. Um cesto quebrado ao lado.',
       'Entre samambaias, uma criança pequena. Ao ver você, ela paralisa — ensaia correr mas não sai do lugar.',
-      'Ouve-se um soluço abafado. Você encontra a menina de cerca de oito anos escondida atrás de um tronco.'
+      'Ouve-se um soluço abafado. Você encontra a menina de cerca de oito anos escondida atrás de um tronco.',
+      'Ela canta uma canção infantil baixinho pra si mesma quando tu a encontras — voz fininha entre as samambaias. Quando para de cantar, é mais assustador que o silêncio anterior.',
+      'A menina segura uma boneca de pano com o coração arrancado. Ela ergue o brinquedo pra ti como quem mostra um ferimento. — A senhora do mato disse que a gente conserta com fé. Tu tens fé?',
+      'Sentada de costas pra trilha, ela desenha no chão com um graveto. Círculos dentro de círculos. Quando tu te aproximas, ela apaga tudo com a mão — gesto demasiado adulto pra essa idade.',
+      'Você ouve passos miúdos correndo em algum lugar à frente, depois silêncio. Quando vira a curva, ela está parada na trilha como se sempre tivesse estado ali. Sorri sem mostrar os dentes. — Achou.',
+      'A criança dorme aos pés de uma árvore, vestida só com camisola. O frio da manhã lhe arrepia os braços. Ao teu primeiro passo, ela acorda devagar, sem susto, como quem te esperava: "Demoraste."',
+      '"Estou perdida há tantos dias", diz a menina quando tu a encontras, "que já esqueci o caminho de volta — mas não esqueci tua cara. Eu sonhei contigo ontem." Ela tem olhos cor de água da chuva.'
     ],
     flavor_variants: [
       'O vestido está rasgado mas limpo. Alguém cuidou bem dela — e ela se perdeu há pouco.',
       'As amoras espalhadas pelo chão são maduras. Ela estava colhendo quando algo a assustou.',
-      'Há pegadas pequenas pelo caminho — ela fugiu, não foi abandonada. De quê?'
+      'Há pegadas pequenas pelo caminho — ela fugiu, não foi abandonada. De quê?',
+      'No bolso do avental, uma pena de coruja-das-torres — ave noturna. Ela esteve fora desde a noite anterior, no mínimo.',
+      'Os pés descalços têm calos antigos: criança que anda muito, costuma andar muito. Não é a primeira vez que ela está sozinha na mata.',
+      'No pulso fino, um cordão com nó de marinheiro — marca de família portuária. Está distante de casa.',
+      'Um colar de dentes-de-leite enfileirados no fio: irmãos? Lembrança? Talismã? Costume das aldeias do alto rio.',
+      'O cabelo dela tem orvalho na ponta — passou a noite ao relento. Mas o vestido ainda cheira a sabão de sebo. Alguém a banhou ontem.',
+      'Há uma cicatriz fina, recente, no canto da boca dela. Como se alguém tivesse forçado a sustentar um sorriso por muito tempo.'
     ],
     choices: [
       { label: 'Acalmar e perguntar', skill: 'cha', dc: 10,
@@ -13902,12 +14283,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Paredes de pedra quebrada entre as árvores — restos de uma torre. Telhas com hera. Séculos desabitada.',
       'Entre carvalhos colossais, uma torre baixa cede aos séculos. Hera cobre o que era janela. O tempo comeu os selos.',
-      'Ruínas modestas mas bem-feitas. Uma torre de três andares, hoje reduzida a dois. Alguma nobreza menor a ergueu, outrora.'
+      'Ruínas modestas mas bem-feitas. Uma torre de três andares, hoje reduzida a dois. Alguma nobreza menor a ergueu, outrora.',
+      'A torre desponta entre as copas como osso fora da carne — branca, gasta, paciente. Quando o vento bate certo, parece que ela sussurra com a própria boca de pedra.',
+      'Pedras tombadas formam um caminho que a mata ainda respeita — duzentos passos sem raiz invasora, como se as árvores temessem ofender o que ali jaz.',
+      'Uma porta de carvalho ainda pende da dobradiça superior, oscilando no vento. Cada batida na ombreira soa como knock atrasado de visita que nunca chegou.',
+      '"Se aqui foi torre de mago, ainda há magia respirando", tu pensas — e teus pelos do braço se eriçam contra a vontade. O silêncio das ruínas é silêncio que escuta.',
+      'Entre as pedras quebradas, uma fonte seca. No fundo do tanque vazio, escrito a carvão antigo: — Voltarei pelo Cálice. Promessa de quem? Promessa de quando?',
+      'A escada interna ainda existe, três degraus em cinco. Cada um tem entalhado um nome diferente. Os nomes não têm sobrenome. Os nomes parecem estar à espera dos vivos correspondentes.'
     ],
     flavor_variants: [
       'Na base, uma placa quase ilegível: "Torre de Elvar — 312 anos atrás." Um nome, uma data, uma vida esquecida.',
       'Marcas de fogo antigas nas paredes — não foi o tempo que a derrubou, mas cerco. Quem atacou Elvar?',
-      'Um símbolo entalhado: a flor de lis com espadas cruzadas. A Ordem do Cisne Branco esteve aqui.'
+      'Um símbolo entalhado: a flor de lis com espadas cruzadas. A Ordem do Cisne Branco esteve aqui.',
+      'Restos de tinta carmim numa parede interna: contorno apagado de figura humana com braços abertos. Era oratório, não aposento.',
+      'Esqueleto de um lobo dentro de uma sala: morreu sob o teto desabado, esperando dono que não voltou.',
+      'Caracóis-de-fogo cobrem certo trecho de parede — espécie rara, vive só onde houve magia evocativa intensa. Aqui foi laboratório.',
+      'Um pequeno cofre de pedra encaixado na argamassa, ainda lacrado por símbolo arcano em cera. Trezentos anos de pó não esconderam o sigilo dourado.',
+      'Buracos de besta nas pedras da torre apontam pra cima — defensores atiravam pra baixo. Quem sitiou Elvar veio escalando.',
+      'Uma escada interna desemboca em parede sólida. Há ali sala selada que não estava nas plantas originais. Magos sempre constroem o cofre antes da casa.'
     ],
     choices: [
       { label: 'Escalar e vasculhar', skill: 'dex', dc: 12,
@@ -13953,12 +14346,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Pequena caravana de mercadores descansa à beira da trilha. Tendas coloridas ao vento. Convite cauteloso.',
       'No horizonte, cinco carroças paradas em círculo. Fumaça de fogueira. Guardas posicionados discretamente nas pontas.',
-      'Um comerciante baixo e rechonchudo acena pra você desde o acampamento. "Viajante! Vem sentar! A noite é longa."'
+      'Um comerciante baixo e rechonchudo acena pra você desde o acampamento. — Viajante! Vem sentar! A noite é longa.',
+      'A caravana brilha contra o pôr-do-sol — bandeiras de seis cores ondulando, tambor leve marcando ritmo de fogueira. Música, riso, e aquela calma que só estradas longas ensinam.',
+      '"Estranho!", grita o líder ao te avistar de longe. "Tens cara de quem viu coisas. Senta aqui que a gente paga em vinho a história que valer a pena!"',
+      'Carroças pintadas com cenas de nascimento, casamento, morte — em cada lateral, uma vida. Caravana de famílias, não só de mercadoria. Crianças correm entre os pés dos cavalos sem medo.',
+      'O acampamento te observa antes mesmo de tu o veres. Três batedores nas pontas, arcos preparados, conversa amena pra esconder a vigilância. Profissionais.',
+      'Sentada sozinha numa carroça lateral, uma idosa cega com tabuleiro de osso à frente fala alto pra ninguém: — Aproxima-te, viajante. Tua sombra eu sinto. Tua dor, também.',
+      '— Pelos cinco ventos! Um companheiro de trilha! O mercador-líder vem te abraçar como se já te conhecesse. Tu não o conheces. Mas há uma cumplicidade no abraço que parece antiga.'
     ],
     flavor_variants: [
       'Cavalos pastam livres. Fogueira central, panela de ensopado. A confiança é medida por cada gesto.',
       'Mercadorias de várias regiões: sedas do oriente, especiarias do deserto, peles de neve. Caravana rica — e vulnerável.',
-      'Há uma criança amarrada por corda a uma tenda — aprendiz ou prisioneiro? A cena merece olhar atento.'
+      'Há uma criança amarrada por corda a uma tenda — aprendiz ou prisioneiro? A cena merece olhar atento.',
+      'Uma das carroças tem três cadeados duplos — pesados demais pra mercadoria comum. Carga interna inclui algo que ninguém quer ver à luz do dia.',
+      'Os guardas usam capa cinza com forro vermelho. Companhia das Mãos Calmas — mercenários neutros, escudo de aluguel, palavras pesam ouro.',
+      'Um mapa rasgado pendurado dentro da tenda do líder mostra rotas alternativas pelos pântanos — caminhos que evitam alfândega da coroa.',
+      'No tabuleiro de osso da idosa cega, uma peça está virada pra dentro: signo do Acaso. Ela viu algo sobre ti antes de tu chegares.',
+      'Uma das tendas é só de instrumentos musicais — alaúdes, flautas, tamborins. Caravana de Bardos errantes. Eles compram histórias mais que mercadoria.',
+      'Há um homem amarrado num poste do acampamento, mordaça e tudo — barba ruiva, olhos furiosos. Ninguém se aproxima dele. Ninguém menciona ele. A presença é gritada pelo silêncio.'
     ],
     choices: [
       { label: 'Compartilhar copo e conversar', skill: 'cha', dc: 10,
@@ -14010,12 +14415,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Um fazendeiro com mãos calejadas te olha de baixo do chapéu de palha. "Por favor, viajante — lobos atacaram minhas ovelhas esta manhã. Preciso consertar a cerca antes do pôr do sol."',
       'O fazendeiro está exausto. Sua voz treme entre raiva e medo: "Eram três, talvez quatro. Arrancaram uma das minhas melhores ovelhas. Se voltarem hoje à noite..."',
-      'Um homem rústico te intercepta na trilha, desespero velado nos olhos. "Você tem porte de aventureiro. Lobos — preciso que ajude antes que volte a noite."'
+      'Um homem rústico te intercepta na trilha, desespero velado nos olhos. — Você tem porte de aventureiro. Lobos. Preciso que ajude antes que volte a noite.',
+      'O fazendeiro está ajoelhado entre estilhaços de madeira, costurando o que pode da cerca com tiras de couro. Olha pra ti como quem olha pra um milagre tardio. — Cheguei a pedir aos deuses. Não esperava que mandassem alguém.',
+      'No pasto, ele segura nos braços o corpo de uma ovelha morta como quem segura criança. Tu ouves, antes de ver, ele falando baixo pro animal: "Foi rápido, menina. Eu sei. Eu sei." Quando te avista, levanta-se devagar.',
+      'Sob o sol forte do meio-dia, o fazendeiro martela uma estaca com mãos que tremem de exaustão. Erra. Acerta o próprio polegar. Não solta um som — só fecha os olhos e respira. Quando os abre, vê tu, e força um sorriso. — Bom dia, viajante.',
+      'Uma menina de uns sete anos te chama de longe correndo: — Moço! Moço! Meu pai precisa de ajuda! Ele não dormiu desde ontem! Ela tem sangue de ovelha no avental e olhos de quem não está mais entendendo o mundo.',
+      '"Já passei por mais que isso", diz o fazendeiro quando tu te aproximas, secando suor. "Guerra, fome, peste. Mas lobo é diferente. Lobo escolhe hora." Ele te mostra a cerca rasgada como quem mostra ferida em filho.',
+      'O homem está sentado no chão, costas contra o tronco de uma figueira, foice ao lado, pão na mão. Te oferece a metade do pão antes mesmo de te conhecer. — Senta. Come. Depois falamos do que precisa de fazer.'
     ],
     flavor_variants: [
       'A cerca se estende pelo pasto verde: três trechos rasgados com sangue seco na madeira. Atrás da casa, uma criança pequena observa escondida; o pai parece não saber que ela está ali.',
       'No pasto adjacente, duas ovelhas sobreviventes tremem juntas. Pegadas largas de lobo marcam a terra em volta dos vestígios — um macho grande, talvez dominante.',
-      'A família mora há três gerações nesta terra, conta uma placa de madeira pregada na casa. O homem tem uma foice gasta apoiada na parede — só uma.'
+      'A família mora há três gerações nesta terra, conta uma placa de madeira pregada na casa. O homem tem uma foice gasta apoiada na parede — só uma.',
+      'Na varanda da casa, um berço improvisado de palha balança no vento. A esposa não aparece — você nota o luto recente nas roupas escuras da criança.',
+      'Sobre a cerca, plumas de cabelo cinza grudadas em farpa: lobo grande mesmo, talvez alfa. Mas há também fiapo de tecido de lã azul: alguém de bota fina passou aqui antes dos lobos. Quem?',
+      'Cães de pastoreio uivam fechados no celeiro — o fazendeiro os trancou pra protegê-los. O instinto deles foi acertado: dois lobos têm como matar dois cães em segundos.',
+      'No campo, marcas de queimadura recentes em padrão de círculo: alguém tentou rito menor de proteção e falhou. Há fé tentada e perdida nesta terra.',
+      'Um par de pequenas botinhas de criança no degrau da porta — alguém esperou pai voltar do pasto até cair de sono ali mesmo.',
+      'No alto do estábulo, um pendão velho com brasão dos Cavaleiros do Trigo Dourado — ordem de proteção dos camponeses dissolvida há vinte anos. Esta família já foi defendida por gente armada. Não é mais.'
     ],
     choices: [
       { label: 'Consertar a cerca (força bruta)', skill: 'str', dc: 10,
@@ -14124,12 +14541,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Três luzes verde-pálidas dançam sobre a névoa. Cada vez que você se aproxima, recuam um passo.',
       'Entre samambaias molhadas, luzes etéreas flutuam a altura de peito. Não são naturais.',
-      'Orbes pulsantes com luminescência pantanosa. Elas notam sua chegada — ou fingem não notar.'
+      'Orbes pulsantes com luminescência pantanosa. Elas notam sua chegada — ou fingem não notar.',
+      'Cinco esferas de luz pálida flutuam em formação circular. Quando uma delas se move, as outras ajustam o desenho. Não é dança aleatória — é linguagem.',
+      'Uma única luz, do tamanho de pulso fechado, paira logo à frente do teu rosto. Pulsa devagar como respiração. Em cada pulso, tu sentes uma palavra que não sabes pronunciar.',
+      'A névoa abre-se em corredor diante de ti. No fim do corredor, uma luz só. Espera.',
+      '— Vem, vem, vem, sussurram as luzes na cadência da água gotejando. Não há boca que sussurre, mas tu ouves nítido como se ao ouvido.',
+      'Sete luzes em fila de procissão atravessam tua frente da esquerda pra direita, sem te notar. A última delas pausa, vira-se e te encara um instante longo. Depois segue.',
+      'Sob teus pés, a água lamacenta começa a brilhar de baixo pra cima — reflexo de luzes que estão acima e abaixo simultaneamente. Tu estás no meio do enxame antes de perceber.'
     ],
     flavor_variants: [
       'O pântano silencia de jeito errado: sem sapos, sem insetos. Apenas seu coração e as luzes respirando devagar.',
       'A névoa fica mais densa perto das luzes. Você sente que há algo a mais — vozes sussurradas no limiar da audição.',
-      'No chão perto delas, ossos de viajantes que as seguiram. Muitos ossos.'
+      'No chão perto delas, ossos de viajantes que as seguiram. Muitos ossos.',
+      'A bússola na tua bolsa gira sem âncora. Não há norte aqui. Só luzes.',
+      'O barbante de proteção que tua mãe te deu, costurado interno na túnica, está aquecendo levemente. Velho talismã sentindo coisa antiga.',
+      'Pegadas tuas anteriores, deixadas há minutos, já estão sumidas. O pântano apaga rastro humano com pressa estranha.',
+      'Uma das luzes tem cor diferente — azul-violeta, não verde. É a guia, dizem os contos antigos. Ou a armadilha, dizem os contos esquecidos.',
+      'Folhas de uma planta carnívora gigante se fecham e abrem perto da margem como se respirassem em sincronia com as luzes. Tudo aqui está ligado.',
+      'A canção que tua avó cantava pra te fazer dormir surge na tua cabeça sem motivo. Tu não pensavas nela há vinte anos. Aqui, ela está toda inteira.'
     ],
     choices: [
       { label: 'Seguir cautelosamente', skill: 'wis', dc: 12,
@@ -14158,12 +14587,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Corpo de soldado, armadura enferrujada, meio submerso. A mão segura um medalhão.',
       'Entre juncos, você avista a forma de um homem — há décadas morto. A armadura foi boa antes da ferrugem a tomar.',
-      'Um corpo meio-enterrado na lama, vestes dissolvidas mas as peças de metal ainda visíveis. Um cavaleiro esqueceu de uma missão aqui.'
+      'Um corpo meio-enterrado na lama, vestes dissolvidas mas as peças de metal ainda visíveis. Um cavaleiro esqueceu de uma missão aqui.',
+      'Sob a água escura do brejo, contornos de armadura: peitoral, elmo, gantelete. Um homem inteiro repousa de costas no leito, olhando o céu que não vê há oitenta anos.',
+      'O esqueleto está apoiado contra um tronco caído, postura de descanso. Como se tivesse se sentado pra esperar e adormecido pra sempre. A espada cruza o regaço como cobertor.',
+      'Dois corpos, lado a lado, uniformes opostos. Inimigos morrendo juntos no abraço do pântano — uma forma final de paz que nem deuses prometeram a eles.',
+      'A armadura é boa demais pra ter sido abandonada. Quem a usou morreu fiel. Tu sentes isso antes de ver o medalhão na mão fechada.',
+      'Os juncos crescem dentro das frestas do peitoral, brotando como vida nova nos espaços do que foi corpo. O pântano sempre devolve algo no lugar do que toma.',
+      'Não há cheiro de morte aqui — há decênios não há. Apenas o cheiro doce-amargo de junco, e algo abaixo: ferro velho, sangue antigo, juramento não cumprido.'
     ],
     flavor_variants: [
       'Brasão de ordem esquecida — flor de lis com três espadas. Ordem do Cisne Branco, extinta há 80 anos.',
       'No dedo esquerdo, um anel de sinete. A inscrição do anel traz o mesmo símbolo do medalhão.',
-      'Uma espada curta ao lado — lâmina surpreendentemente intacta. Forjada pra durar. Ele merecia melhor.'
+      'Uma espada curta ao lado — lâmina surpreendentemente intacta. Forjada pra durar. Ele merecia melhor.',
+      'O elmo tem um amassado profundo na lateral — golpe que matou. Veio por trás. Traição.',
+      'Dentro do peitoral, embrulhada em couro encerado, uma carta selada. O lacre ainda está intacto: cera vermelha, brasão de família.',
+      'Uma trança fina de cabelo loiro presa por um anel de prata na cintura: presente da amada. Ele morreu com lembrança dela.',
+      'Botas de couro fino com sola dupla — equipamento de batedor de elite, não soldado de linha. Ele tinha missão específica.',
+      'No fundo do tanque ao lado, lança partida em três pedaços, claramente quebrada de propósito. Ele não queria que o inimigo a usasse.',
+      'No baixo-ventre da armadura, gravada à faca: três marcas de batalha. Cada marca é vida poupada — um soldado misericordioso. Não é qualquer um.'
     ],
     choices: [
       { label: 'Retirar medalhão', skill: 'dex', dc: 11,
@@ -14208,12 +14649,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Um velho de barba longa senta em lótus sobre um rochedo exposto ao vento. Olhos fechados. Ao lado, uma tigela vazia e um bastão gasto por décadas. Ele parece não notar sua chegada — ou escolhe não notar.',
       'A figura magra do eremita se destaca contra o céu claro da montanha. Os cabelos brancos dançam no vento. Você sente o silêncio dele antes mesmo de ouvi-lo.',
-      'No alto do penhasco, um homem velho medita. A luz da manhã ilumina seu rosto sereno. Ele não se move quando você se aproxima — mas um sorriso sutil aparece nos lábios.'
+      'No alto do penhasco, um homem velho medita. A luz da manhã ilumina seu rosto sereno. Ele não se move quando você se aproxima — mas um sorriso sutil aparece nos lábios.',
+      'O eremita está sentado na borda do penhasco, perigosamente próximo do precipício, mas tu sabes — ao olhá-lo — que ele não vai cair. A montanha não permitiria.',
+      'Tu o ouves antes de o ver: respiração profunda, ritmada, exatamente cinco vezes mais lenta que a tua. Quando a tua respiração começa a copiar a dele sem que tu queiras, tu entendes que estás na presença de alguém que aprendeu coisas.',
+      '"Já estive te esperando há três dias", diz o velho sem abrir os olhos quando tu chegas. — Pensei em descer para te encontrar, mas a montanha pediu paciência. A montanha tem razão.',
+      'Ele canta baixinho um mantra de uma só sílaba, repetida em ondas. Tu sentes vibração no esterno, depois nos joelhos, depois na nuca. O som é antigo demais pra ter ouvido humano original.',
+      'O eremita está alimentando uma águia que pousa em seu ombro como se fosse perto. Ela come um peixe das mãos dele, depois se vira, te encara fixamente, e voa. — Ela te aceita, viajante. Bom sinal.',
+      'Tu te aproximas e ele segue meditando. Tu sentas. Esperas. Uma hora passa. Duas. Quando ele finalmente fala, é a tua própria voz que sai dele: — "O que tu vieste perguntar?" Calafrio. Ele continua sereno.'
     ],
     flavor_variants: [
       'Ao redor, pedras dispostas em círculo formam um mandala antigo — seu próprio trabalho ao longo dos anos. Entre elas, ossos pequenos de pássaros e uma flor azul que não deveria crescer nesta altitude.',
       'O bastão ao lado dele é de madeira negra — rara nesta região. Um símbolo entalhado: a mesma flor de lis com espadas cruzadas que você viu em alguma ordem extinta. Ele foi cavaleiro, um dia.',
-      'Há uma caverna rasa escavada atrás dele — seu abrigo. Dentro, pergaminhos empilhados e um medalhão quebrado ao meio. Pistas de uma vida antes do silêncio.'
+      'Há uma caverna rasa escavada atrás dele — seu abrigo. Dentro, pergaminhos empilhados e um medalhão quebrado ao meio. Pistas de uma vida antes do silêncio.',
+      'Sob o tapete sob ele, tu vês o canto de um livro — capa de couro escuro com ferragens de prata. Diário pessoal de duzentas páginas, talvez. Vida inteira escrita em vinte anos de silêncio.',
+      'Dois jarros à entrada da caverna: um com água-da-rocha (eterna), outro com cinzas (de quem?). Ele come pouco, lembra muito.',
+      'Uma corda fina amarrada do bastão à árvore mais próxima — sinal de quem caminha à noite na borda do precipício. O eremita tem hábitos de quem ainda planeja viver.',
+      'No chão perto dele, pegadas de várias visitas: pequenas (criança), descalças (peregrino), com botas militares (alguém uniformizado, recente). Ele recebe gente. O silêncio dele é escolha social.',
+      'Há um ferro de marca em brasa na fogueira — instrumento de cauterizar feridas. Ele sabe medicina. Ou já soube. E ainda está pronto.',
+      'No alto da caverna, esculpida na própria rocha, uma fenda em forma de coração lascado ao meio. Coração lascado é símbolo da Ordem dos Penitentes — quem usa carrega culpa antiga.'
     ],
     choices: [
       { label: 'Oferenda e pedido de sabedoria', skill: 'wis', dc: 12,
@@ -14290,7 +14743,13 @@ const EVENTS_POOL = {
     text_variants: [
       'Tremor leve. Pedras pequenas caem, depois maiores. A trilha adiante está prestes a colapsar.',
       'Eco de ruído na garganta acima. Uma avalanche de pedras está começando, a dez passos à frente.',
-      'Você sente a vibração antes de ver: rochas gigantes se soltam dos picos. A trilha vai ceder.'
+      'Você sente a vibração antes de ver: rochas gigantes se soltam dos picos. A trilha vai ceder.',
+      'Um único pedrinho rola pela encosta — som inocente. Depois dois. Depois centenas. A montanha começa a falar com voz que não tem sílabas.',
+      'O eco do trovão de ontem ainda não acabou. Ele se converteu em vibração lenta na rocha, e agora pede saída. A trilha vai pagar pela tempestade.',
+      'Aves abandonam os ninhos do alto em pânico — todas ao mesmo tempo. Tu olhas pra cima e o céu está negro de asas. A montanha está prestes a chorar pedra.',
+      'Um trinco grande na falésia se abre como olho lentamente. De dentro, pó de calcário cai em fluxo contínuo. Tu tens segundos antes de virar trecho da paisagem permanente.',
+      '"Que os deuses estejam comigo", tu sussurras antes mesmo da consciência reconhecer o perigo. O instinto de sobrevivência desta vez chegou primeiro que a razão.',
+      'No alto, uma cabra-montês escala em pânico horizontal — ela conhece a fisiologia da montanha. Quando cabra foge, homem corre.'
     ],
     flavor_variants: [
       'Eco ressoa pela garganta. Uma coluna rachada acima ameaça tudo.',
@@ -14338,12 +14797,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Ao longe, entre ondas de calor: palmeiras, água cristalina, tendas coloridas. Seu instinto te diz algo.',
       'O sol do zênite distorce tudo. Um reflexo promete água onde pode não haver nada. Ou pode haver.',
-      'Você vê o oásis perfeito — verde, azul, prometedor. Mas você já foi enganado antes.'
+      'Você vê o oásis perfeito — verde, azul, prometedor. Mas você já foi enganado antes.',
+      'O céu queima branco e a areia abaixo de teus pés é forno. Mas ali — naquela distância — verde tremeluzente, palmeiras como dedos abertos, e azul. Ah, azul.',
+      'Tu te lembras do conselho do velho condutor: "Deserto promete duas vezes a água. Uma é dom. Outra é morte." Como saber qual?',
+      '— Vem, viajante, sussurra a brisa quente, e tu juras que ouves uma canção tribal vinda das palmeiras distantes. Música real ou febre solar?',
+      'Sob teus pés, a sombra desaparece — meio-dia exato. À frente, três imagens sobrepostas: oásis, ruína, deserto vazio. Tua alma escolhe qual ver primeiro.',
+      'Tua boca está tão seca que tu sentes os dentes na própria gengiva. À frente — promessa líquida. Tua salvação ou tua sentença, e tu tens que apostar a vida pra descobrir.',
+      'No horizonte, palmeiras balançam num vento que não te alcança aqui. Vento próprio, ar próprio. Lugar próprio. Lugar real ou lugar do outro lado?'
     ],
     flavor_variants: [
       'Sol crava no topo. Boca seca. A imagem dança a cada passo mas continua ali.',
       'Ossos de caravanas pelos lados da trilha. Muitos seguiram o que viam. Poucos voltaram.',
-      'No horizonte próximo, uma coluna de vapor real se eleva. Pode ser chaminé de forno, ou apenas ar quente.'
+      'No horizonte próximo, uma coluna de vapor real se eleva. Pode ser chaminé de forno, ou apenas ar quente.',
+      'Sob a aparência do oásis, tu vês — pelos cantos do olho — silhuetas que se mexem rápido demais pra ser palmeira ao vento.',
+      'Pegadas frescas de pés descalços indicam que alguém — recente — caminhou na direção do que tu vês. Não há pegadas voltando.',
+      'Tua sombra, ao se aproximar do oásis, encurta mais que deveria. Como se a luz ali fosse mais forte. Ou de origem diferente.',
+      'Pequenas pedras translúcidas, do tamanho de unhas, espalhadas pelo chão: cristais de sal-do-deserto. Se há sal aqui em quantidade, houve mar. E se há mar antigo, há restos.',
+      'Uma única pluma de pássaro escarlate caída na areia bem à tua frente. Pássaros vermelhos não voam por aqui. Pluma de fênix? Ou simples ilusão de pluma?',
+      'Ao se inclinar pra recolher um osso branco da trilha, tu vês entalhado nele em letra firme: "Era miragem. Toma cuidado." A despedida do antecessor.'
     ],
     choices: [
       { label: 'Investigar com cautela', skill: 'wis', dc: 12,
@@ -14376,12 +14847,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Três nômades de lenços azuis te observam por cima das chamas. Um acena devagar.',
       'Ao entardecer, você avista camelos e tendas pequenas. Nômades do sul — tribo pacífica mas reservada.',
-      'Na penumbra entre dunas, uma fogueira discreta. Três figuras envoltas em lenços te estudam sem palavras.'
+      'Na penumbra entre dunas, uma fogueira discreta. Três figuras envoltas em lenços te estudam sem palavras.',
+      'A noite cai com aquela rapidez do deserto, e a fogueira aparece como milagre. Cinco silhuetas em volta, cinco lenços azuis, cinco oferecimentos silenciosos de chá.',
+      'O mais velho dos nômades te ergue um copo de barro fumegante e diz, sem cerimônia: — Caminhante, no deserto não se recusa chá. Não comigo, não esta noite. Sirva-se ou siga em paz.',
+      'Tu vês a fogueira do alto da duna, e por um momento parece pintura: três figuras imóveis, fogo central, quatro camelos deitados em volta, lua em quarto crescente atrás. Cena que existe há mil anos repetida.',
+      '"Senta, viajante", diz uma voz feminina sob o lenço, "deserto pertence a quem passa, não a quem fica. Mas esta noite, este círculo é nosso. Te convidamos. Te avisamos." Ela aponta o cume distante: tempestade de areia se aproxima.',
+      'Os nômades cantam baixo numa língua que tu não conheces — três vozes em harmonia milenar. A canção tem a forma de um caminho. Tu sentes vontade de chorar sem motivo.',
+      'Um menino de uns dez anos tira a cabeça do lenço da mãe pra te encarar. Olhos verde-deserto, raros. Ele te observa fixamente até a mãe colocar a mão sobre os olhos dele. — Não encares estranhos demais, filho. Pode ficar com eles na alma.'
     ],
     flavor_variants: [
       'Camelos carregados atrás. Café árabe num bule de cobre. Nada sugere hostilidade — nem convite caloroso.',
       'No fogo, um pedaço de carne de cabra assando. Eles têm comida suficiente pra vocês todos — se ganharem confiança.',
-      'Um dos nômades toca um alaúde de três cordas. A melodia é antiga e melancólica. Canção de travessia.'
+      'Um dos nômades toca um alaúde de três cordas. A melodia é antiga e melancólica. Canção de travessia.',
+      'No mais velho dos lenços azuis, um nó complexo de marinheiro do deserto: marca da tribo Al-Sirit, ferreiros do nascente. Mestres em estrelas e em lâminas curvas.',
+      'Tatuagens henna nas mãos das duas mulheres: traços indicam casamento e duas mortes em parto. Família que conheceu dor e seguiu caminhando.',
+      'Dentro da tenda menor, criança recém-nascida dorme em rede de seda. O motivo do silêncio do acampamento — não querem acordá-la.',
+      'Três espadas curvas embainhadas em pedestal de pedra, longe da fogueira: sinal claro de paz. Em deserto, lâmina ao alcance é linguagem; lâmina recolhida é juramento.',
+      'Uma das tendas tem o teto pintado por dentro com mapa estelar do desespero — a constelação Filha-da-Areia, vista só nas piores noites do verão. Eles estavam perdidos antes de te ver.',
+      'No bule de cobre, gravura entrelaçada que tu conheces de outras vezes: o brasão dos Sangue-Velho, ordem secreta de protetores das dunas. Estes não são simples comerciantes.'
     ],
     choices: [
       { label: 'Compartilhar café', skill: 'cha', dc: 11,
@@ -14420,12 +14903,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Figura coberta de neve contra um tronco, mal respirando. Lábios azulados. Minutos — talvez horas — e está morto.',
       'Você avista algo incomum na neve — um corpo encolhido, mas ainda com respiração visível. Um viajante quase perdido.',
-      'Sob uma árvore de pinho, uma forma humana enregelada. Ele ainda pisca os olhos, mas mal consegue falar.'
+      'Sob uma árvore de pinho, uma forma humana enregelada. Ele ainda pisca os olhos, mas mal consegue falar.',
+      'A neve sobre ele forma quase um cobertor — gentil, mortal. Sob a brancura, tu vês movimento mínimo: o tórax sobe e desce uma vez por minuto.',
+      'Tu o ouves antes de o ver: gemido baixo, contínuo, sem palavra. Som primário de criatura que ainda não desistiu de viver.',
+      '— Mãe... ele murmura sem abrir os olhos quando tu te aproximas. Frase de quem está em outro tempo, em outra idade. Tu te ajoelhas junto.',
+      'Ele segura nas mãos congeladas um broche de prata em forma de coração — apertado tanto que os dedos não vão soltar mesmo quando tu tentares descongelá-los. Aquilo importa mais que respirar.',
+      'Quando teu primeiro passo quebra o silêncio congelado, três corvos pretos levantam voo do alto da árvore. Eles esperavam. Tu chegaste a tempo de mudar o que esperavam.',
+      'A figura está sentada de modo errado — cabeça encostada no tronco, mas pernas perfeitamente cruzadas. Não foi acidente. Ele sentou pra morrer. Tu chegas no exato instante em que ele começa a desistir.'
     ],
     flavor_variants: [
       'Tempestade passou há pouco. Rastro dele termina aqui. Mãos congeladas no formato de onde largou o cantil.',
       'Uma mochila ao lado dele, meia-enterrada. Ele tem formação de sobrevivente mas algo deu muito errado.',
-      'Ao redor, pegadas de lobos. Ele escapou deles apenas pra cair no frio. Gladly, você chegou primeiro.'
+      'Ao redor, pegadas de lobos. Ele escapou deles apenas pra cair no frio. Gladly, você chegou primeiro.',
+      'No bolso interno, um pedaço de pão duro envolto em pano: ele guardou pra última extremidade e nem assim comeu. Algumas pessoas economizam até pra além de si.',
+      'A faca de caça presa na bota tem três entalhes na empunhadura: três presas, três trocas. Tradição dos rastreadores das Terras Altas.',
+      'Em volta do pescoço dele, sob o capote, uma medalha de regimento — Hussardos do Norte, dispersos há sete invernos. Soldado sem guerra, ou veterano sem casa.',
+      'Há uma mensagem escrita com sangue na neve, perto da mão direita, já meio coberta: três letras só. Talvez um nome começando.',
+      'Botas dele com sola dupla — preparado pra travessia de gelo. Algo o desviou pro improviso. Tempestade não estava no plano.',
+      'Sua bolsa está fechada com correntinha embutida e cadeado pequeno. Ele protegia algo até no fim. Há histórias inteiras dentro de objetos pequenos como esse.'
     ],
     choices: [
       { label: 'Aquecer com fogueira e pele', skill: 'wis', dc: 11,
@@ -14461,12 +14956,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Uivos coordenados. Olhos amarelos brilham entre pinheiros. Lobos da tundra — grandes como ursos pequenos.',
       'O silêncio da neve se quebra com uivos em coro. Ao redor, cinco lobos te encurralam entre os pinheiros.',
-      'Eles se revelam um por um, emergindo da neve. Uma alcateia faminta — inverno prolongado os tornou ousados.'
+      'Eles se revelam um por um, emergindo da neve. Uma alcateia faminta — inverno prolongado os tornou ousados.',
+      'O primeiro uivo congela teu sangue mais que a neve. Vem de longe. O segundo, mais perto. O terceiro, atrás de ti — e tu sabes o que isso significa: cerco coordenado de predador inteligente.',
+      'Tu vês primeiro a sombra entre os pinheiros: cinza, baixa, rápida. Depois outra. Depois quatro. Depois sete. Cada respiração tua sai em vapor que delata exatamente onde tu estás.',
+      'Eles não rosnam ainda. Ainda. O silêncio dos lobos antes do salto é a coisa mais antiga e terrível que humano já ouviu — som de quem sabe que tu és comida.',
+      '"Os Tundra-Brancos", tu sussurras pra ti mesmo, lembrando dos contos da avó: eles não matam por fome quando há fome maior — matam pra mostrar à alcateia jovem como se mata. E tu és a aula desta noite.',
+      'Neve lateral se ergue como cortina. De dentro dela, uma cabeça de lobo emerge — só a cabeça, olhos acima da brancura, observando. Depois afunda de novo. A alcateia inteira se moveu de posição sem fazer ruído.',
+      'No alto de um penhasco visível, a líder. Imóvel, branca contra o branco. Ela espera. Os outros sete fazem o trabalho de conduzir. Tu estás caminhando para um abate desenhado.'
     ],
     flavor_variants: [
       'Neve amortece passos. Fecham o círculo — comunicam-se como único predador.',
       'O líder tem pelo branco-prateado e cicatrizes de guerra. Os outros são jovens, mas implacáveis.',
-      'Uma cria pequena atrás — eles estão defendendo território, não caçando por esporte.'
+      'Uma cria pequena atrás — eles estão defendendo território, não caçando por esporte.',
+      'Pelos pelos do flanco do macho-alfa, marcas de chicote: lobo já fugiu de homem com domínio. Ele odeia humanos com memória.',
+      'Os mais jovens da alcateia têm os flancos magros — primeiro inverno deles em caça grande. A líder está testando a coragem da nova geração com o teu corpo.',
+      'Uma das fêmeas trota com mancada leve — pata posterior atingida em luta antiga. Ela vai ser primeira a recuar se o ataque demorar. Ponto fraco da formação.',
+      'No flanco do líder, dentes-de-leão amarelos colados ao pelo: ele atravessou campo de cura no caminho. Veio escolher esta caça com cuidado.',
+      'Cheiro do pelo deles é quase doce — almíscar de tundra. Uma vez sentido, nunca esquecido. Tu vais lembrar disso pelo resto da vida, se houver vida pra lembrar.',
+      'Marcas de garra no tronco do pinheiro mais próximo: três altas, uma baixa, em padrão ritual. Eles marcaram este território como caçada formal. Não improvisada.'
     ],
     choices: [
       { label: 'Subir em árvore', skill: 'dex', dc: 13,
@@ -14503,12 +15010,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Caverna lateral coberta de cogumelos azuis e verdes. Teto parece céu estrelado invertido.',
       'Uma câmara escavada pela natureza — cogumelos gigantes emitem luz pulsante de todos os cantos.',
-      'Dentro da caverna, um jardim impossível: fungos azuis brilham, emitindo calor suave. Milagres crescem no escuro.'
+      'Dentro da caverna, um jardim impossível: fungos azuis brilham, emitindo calor suave. Milagres crescem no escuro.',
+      'A passagem se abre em câmara de luz suave e contínua. Por um instante, tu te perguntas se voltaste à superfície ao crepúsculo — mas é o teto inteiro de fungos pulsando juntos como única respiração.',
+      'O ar muda assim que tu entras: mais doce, mais denso, mais vivo. Tu sentes as próprias pupilas se dilatando contra vontade, e cada batida do teu coração parece responder ao pulsar lento dos cogumelos.',
+      'Cada superfície tem fungo, e cada fungo tem cor própria — azul-cobalto, verde-jade, violeta-noite. A pedra em si parece mero suporte pra o reino vegetal soberano que aqui se formou.',
+      '— Bem-vindo, sussurra uma voz tão baixa que tu não sabes se a ouviste ou pensaste. As paredes da câmara devolvem teu próprio nome em eco vegetal, como se o jardim já te conhecesse.',
+      'Sob o domo brilhante de fungos, esqueletos de criaturas pequenas — não em ataque, em descanso. Roedores, pássaros, até um lobo. Todos sentados como se tivessem dormido olhando o teto. Não foi morte violenta.',
+      'Tu sentes vontade absurda de sentar e respirar fundo — vontade que não é tua. Os esporos no ar te oferecem paz. E a paz, em caverna desconhecida, é a primeira armadilha.'
     ],
     flavor_variants: [
       'Cada respiração engolida pelo silêncio do subsolo. Os cogumelos pulsam como se respirassem também.',
       'Gotejamento ritmado marca o tempo. Os cogumelos se inclinam sutilmente quando você se move — reagem à presença.',
-      'No centro da câmara, um cogumelo maior — do tamanho de um escudo — pulsa mais intensamente. Coração do jardim.'
+      'No centro da câmara, um cogumelo maior — do tamanho de um escudo — pulsa mais intensamente. Coração do jardim.',
+      'Ao chão, marcas de pés descalços recentes — de criança ou de algo do tamanho de criança. Não humano, talvez. Goblin? Algo menos conhecido?',
+      'Os esporos no ar têm cheiro de pão de mel. O cheiro mais perigoso — atrai e narcotiza ao mesmo tempo.',
+      'Em círculos perfeitos no chão, padrões de fungos menores formam runas. Não foram colocadas: cresceram em desenho. Algo aqui ensinou a esporo a desenhar.',
+      'Há uma única pedra solta no centro da câmara, cinza, sem fungo crescendo nela. Os cogumelos a respeitam ou a temem. Algo está sob ela.',
+      'Um aroma adicional sob o doce: ferro velho. Sangue antigo, talvez. O jardim cresceu sobre algo que sangrou aqui muito tempo atrás.',
+      'Ao longe na câmara, o som arrastado de uma respiração que não é tua. Lenta. Profunda. Está desperta. O jardim tem guardião.'
     ],
     choices: [
       { label: 'Colher medicinais', skill: 'wis', dc: 11,
@@ -14546,12 +15065,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Figura translúcida — anão barbudo com picareta etérea. Não é agressivo mas vela por algo.',
       'Entre pilastras de pedra, um anão fantasmagórico continua seu trabalho de séculos atrás — picareta sem som bate na rocha.',
-      'Você avista o espectro: um anão robusto, barba branca, vestes de mineração. Ele ergue olhos cheios de tristeza antiga.'
+      'Você avista o espectro: um anão robusto, barba branca, vestes de mineração. Ele ergue olhos cheios de tristeza antiga.',
+      'O anão não nota tua chegada por minutos — está absorto. A picareta dele bate na rocha sem produzir som; cada golpe ergue cintilação azul-pálida que se dissolve antes de tocar o chão.',
+      'Tu vês primeiro a sombra dele projetada na parede — sombra com volume e detalhe, mas sem fonte luminosa ao redor. A figura que produz a sombra surge três segundos depois, como se ainda estivesse decidindo se aparece pra ti.',
+      '— Olá, viajante, diz o fantasma sem se virar, picareta ainda batendo. — Demora hoje pra chegar visita. Sente, se quiser. Hoje completam-se quarenta anos.',
+      'Ele canta baixinho uma canção mineira em anão antigo enquanto trabalha. A melodia tem ritmo de marreta. Tu sentes vontade de chorar sem motivo aparente — música de povo perdido afeta sangue de jeito estranho.',
+      '"Tu és o primeiro vivo que vejo desde que morri", diz o anão erguendo finalmente os olhos. — Confesso que esqueci como soa voz humana. Fala. Conta-me uma novidade. Trinta anos é tempo demais.',
+      'O fantasma para de bater na rocha quando tu te aproximas. Vira o rosto: uma metade é anão jovem, robusto, vivo. A outra metade é caveira. Ele não tem consciência da assimetria. Aceitou tanto o que foi quanto o que é.'
     ],
     flavor_variants: [
       'Olhos têm pressa eterna de quem morreu no meio de uma tarefa. Barba flutua como em correnteza.',
       'Nas paredes ao redor, marcas de picareta antigas. Ele trabalhou neste trecho por anos — mortos anos.',
-      'No chão, uma lamparina anã — apagada, mas ainda intacta. Ele a levava quando morreu.'
+      'No chão, uma lamparina anã — apagada, mas ainda intacta. Ele a levava quando morreu.',
+      'No bolso etéreo do colete, contorno de uma flauta de osso. Ele tocava nas pausas do trabalho. Ainda tocaria, se alguém pedisse.',
+      'A picareta tem inscrição visível mesmo na transparência: "Para Drogan, do filho." Trinta gerações poderia significar isso. Ainda significa.',
+      'Os botões dourados do colete dele têm o brasão dos Sete-Picos — clã extinto na Guerra das Profundezas. Ele é o último de uma linha que não sabe que acabou.',
+      'Há uma marca seca de lágrimas no canto do olho direito dele — lágrima fantasma que nunca terminou de cair.',
+      'Em volta da cintura, um cinto com onze entalhes — onze filhos, onze órfãos. Ele morreu com família esperando jantar.',
+      'No chão, ao seu lado, marca de pegadas de bota de criança vinda de cima, parando a metro dele, virando e voltando. Algum filho veio buscar pai. E desistiu antes de tocar fantasma.'
     ],
     choices: [
       { label: 'Oferecer ajuda com tarefa', skill: 'wis', dc: 12,
@@ -14591,12 +15122,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Figura encapuzada de vermelho levanta os braços diante de uma fenda de lava. Canta em idioma arrepiante.',
       'Um cultista ajoelhado recita versos desconhecidos sobre uma cratera menor. A lava borbulha em sincronia.',
-      'Três cultistas em círculo entoam cânticos diante de uma abertura vulcânica. O ar tremia ao som das palavras.'
+      'Três cultistas em círculo entoam cânticos diante de uma abertura vulcânica. O ar tremia ao som das palavras.',
+      'O cultista tem os braços erguidos em V perfeito, capuz caído pra trás. Tu vês uma juventude assustadora — não tem trinta anos, mas a voz que sai dele é de um velho sem idade. Outro está falando por dentro.',
+      'Sob o capuz vermelho, no instante em que ele se vira pra ti, um sorriso. Não é sorriso humano — é exibição de dentes. — Bem-vindo, irmão. Vens cedo. Ainda há tempo.',
+      'Cinco cultistas em pentagrama em volta da fenda. Os quatro nos vértices estão imóveis em transe. Apenas o central se move, jogando algo no fogo a cada verso. Tu estás na sexta posição vazia. Tu chegaste pra completar a roda.',
+      '"Não temas, viajante", diz o cultista virando-se sem pressa. — Nós não somos do mal que tu imaginas. Somos da espera que tu não conheces. Senta. Escuta. Decide depois.',
+      'A fenda de lava bate três vezes — explosões pequenas, ritmadas — como coração gigante respondendo ao chamado. Cada batida ilumina a face do cultista como luz de sol pequeno. Ele não pisca.',
+      'Um cultista solitário, lendo de um livro pesado encadernado em couro vermelho-vivo. Quando tu te aproximas, ele para a leitura, marca a página com o próprio sangue de um corte recente no dedo, e te encara. — Tens nome? Vais dizer? Nada vem de graça aqui.'
     ],
     flavor_variants: [
       'Chamas da cratera dançam em ritmo com a voz. Algo sendo invocado. Temperatura aumentou.',
       'Nas mãos do cultista, uma adaga preta com runas vermelhas. Oferenda de sangue é iminente.',
-      'Você sente um cheiro doce-enjoativo — oferendas de carne queimada. A invocação está avançada.'
+      'Você sente um cheiro doce-enjoativo — oferendas de carne queimada. A invocação está avançada.',
+      'No chão em volta da fenda, círculo de pó vermelho — não é tinta, é osso moído. Pó de fêmur queimado. Quanta vida foi necessária pra fazer este círculo.',
+      'No capuz do cultista, bordada em fio dourado, a marca de Vedraharth: ordem proibida há trezentos anos pelo Concílio Sagrado. Ressurgência? Ou nunca foi extinta de fato?',
+      'Pendurada no pescoço dele, debaixo da túnica, uma chave de ferro retorcido. Chave que abre o quê? Ou que abre quando?',
+      'A adaga ritual tem três entalhes recentes na empunhadura — três sacrifícios já consumados aqui. O quarto está pronto. Tu estás chegando pra cerimônia que importa.',
+      'Linhas de sangue seco saindo da fenda em padrão radial: a oferenda anterior foi grande. Veio gente em cima de gente.',
+      'Sobre uma rocha lateral, um pedaço de manto azul-real cortado: tecido de família nobre. Algum filho de casa importante caiu nesta hierarquia. Família talvez nem saiba ainda.'
     ],
     choices: [
       { label: 'Interromper o ritual', skill: 'str', dc: 13,
@@ -14651,7 +15194,13 @@ const EVENTS_POOL = {
     text_variants: [
       'Parede de rocha escura com reflexos vítreos — obsidiana pura. Material raro e afiado.',
       'Um veio espesso de obsidiana cristalina pontilha a parede. Fortuna pra quem souber extrair.',
-      'Entre fendas fumegantes, um blocão de obsidiana aguarda. A rocha em volta é escaldante.'
+      'Entre fendas fumegantes, um blocão de obsidiana aguarda. A rocha em volta é escaldante.',
+      'A parede negra reflete tua imagem distorcida — alta, magra, esticada como espada. Por um segundo, tu não te reconheces no reflexo. A obsidiana mostra possíveis versões de ti.',
+      'Tu sentes o calor primeiro, depois vês o brilho. Veios negros tão polidos pelo tempo que parecem vidro de joalheiro — só que do tamanho de muralhas.',
+      'Uma lasca solta no chão tem afiação de bisturi: poderia partir cabelo. Material de armas-relíquia, das que se herdam por gerações.',
+      'Dentro do veio, uma figura pétrea — homem? Animal? — preso há eras. Talvez ilusão de luz. Talvez exatamente o que tu vês: alguém parado pra sempre dentro do vidro vulcânico.',
+      'Quando tu tocas a parede, ela emite nota grave longa, como sino. Cada parte vibra em frequência própria. Sinfonia geológica esperando o regente certo.',
+      'Em três pontos da parede, marcas de extração antiga: alguém minerou aqui, há séculos talvez. Foi embora antes de terminar. Ou alguma coisa o impediu.'
     ],
     flavor_variants: [
       'Lascas refletem luz laranja da lava próxima. Quem soubesse trabalhar faria fortuna.',
@@ -14686,12 +15235,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Sobre uma lápide simples, uma figura feminina translúcida chora em silêncio. As mãos cobrem o rosto. Ela não parece tê-lo notado.',
       'Uma mulher etérea se materializa diante de uma lápide modesta. Os soluços dela atravessam o vento — um som que não deveria existir no mundo dos vivos.',
-      'A névoa se condensa em forma humana diante de uma tumba. É ela, ainda. Uma mãe chorando uma despedida que não pôde dar.'
+      'A névoa se condensa em forma humana diante de uma tumba. É ela, ainda. Uma mãe chorando uma despedida que não pôde dar.',
+      'Tu ouves o choro antes de ver de onde vem — fino, contínuo, infantil. Mas é mulher adulta quem chora, e tu te dás conta apenas quando vês a forma dela inclinada sobre a pedra: choro de quem voltou a ser criança no momento da própria morte.',
+      'A figura translúcida não te nota mesmo quando tu tossis. Está tão dentro do próprio luto que o mundo exterior já não a alcança. Dor virou arquitetura interna, e ela mora nela.',
+      'Sentada de frente pra lápide, ela canta uma canção de ninar com voz quebrada. Cada verso é interrompido por soluço. Tu reconheces a melodia: é canção de berço comum em Valdoria. A criança pra qual ela canta deve estar em algum lugar deste mundo, esperando voz que nunca volta.',
+      'Quando a lua atravessa atrás dela, tu vês a silhueta perfeitamente delineada — mãos na cintura, ombros caídos, posição exata de quem já chorou demasiado e segue ainda assim. Postura humana eterna do luto inacabado.',
+      '— Elio, sussurra ela ao vento. Apenas isso. Um nome. Repete e repete enquanto tu te aproximas: "Elio. Elio. Elio." Cada repetição é um esforço de lembrar a quem o nome pertencia.',
+      'A neblina ao redor da tumba se afasta um metro do corpo dela em círculo perfeito. Como se a dor irradiasse calor próprio, derretendo ar úmido. Ou como se a própria névoa não suportasse o que ali se passa.'
     ],
     flavor_variants: [
       'O nome na lápide está gasto, mas a data mostra que ela foi sepultada há apenas um mês. A dor é fresca — e eterna para quem cruza o véu antes de se resolver.',
       'Flores murchas na base da lápide. Alguém cuidou dela recentemente — talvez o mesmo filho por quem ela ainda chora. Há ternura na memória recente.',
-      'A lápide é pobre mas cuidada. Na base, brinquedos de madeira pequenos — feitos por mãos amorosas em algum tempo passado. Uma vida inteira em miniatura.'
+      'A lápide é pobre mas cuidada. Na base, brinquedos de madeira pequenos — feitos por mãos amorosas em algum tempo passado. Uma vida inteira em miniatura.',
+      'Sobre a pedra, três pedrinhas pequenas empilhadas: tradição Halfling. Alguém deixou marca de visita anônima, mas alguém da comunidade veio.',
+      'O contorno do corpo dela está vestido em saia simples, avental, faixa no cabelo: roupa de trabalho doméstico. Ela morreu na cozinha, não na cama. Algum acidente cotidiano levou esta vida.',
+      'No anel da mão dela — visível mesmo na transparência — entalhe pequeno: um menino segurando peixe. Símbolo de família de pescadores. Ela veio de longe pra terminar nesta cidade.',
+      'Há marcas de unhas no chão de terra ao pé da lápide — alguém ajoelhou-se aqui repetidamente. Entre as marcas, uma pequena impressão de bota de criança recente. O filho ainda visita. Ela ainda espera.',
+      'Vento bate nas folhas mas não toca os cabelos do espírito. Cabelo dela paira em correnteza própria — invisível pra quem assiste, real pra quem é morto.',
+      'O ar em volta dela tem cheiro de pão acabado de assar. Memória olfativa muito viva — nem todo morto é silencioso, alguns ainda transmitem. Ela cozinhava bem. Ela amava cozinhar.'
     ],
     choices: [
       { label: 'Perguntar o que a prende', skill: 'cha', dc: 11,
@@ -14777,12 +15338,24 @@ const EVENTS_POOL = {
     text_variants: [
       'Homem magro cava cova fresca sob o luar. Não há caixão. Olhos cansados, sorriso sem alegria.',
       'Entre as lápides, uma silhueta se movimenta. A pá levanta e desce com cadência sombria. Ele ergue a vista quando você chega.',
-      'Um coveiro magro trabalha sob a lua. A cova é funda demais pra uma única pessoa. Algo errado aqui.'
+      'Um coveiro magro trabalha sob a lua. A cova é funda demais pra uma única pessoa. Algo errado aqui.',
+      'Tu ouves a pá antes de ver o coveiro: chha-zás, chha-zás, ritmo lento mas inexorável. Quando ele te avista, para o trabalho mas não larga a pá. Tu sentes a posição como ameaça contida.',
+      'O homem está cantarolando enquanto cava — melodia infantil deslocada na noite do cemitério. Quando ele te nota, para o canto mas continua sorrindo. Sorriso que não chega aos olhos. Nenhum dos dois sabe se isso é amizade ou invitação fatal.',
+      '— Boa noite, viajante, diz o coveiro sem parar de trabalhar. Sua voz é educada demais pra hora e lugar. — Estranho passear por aqui à meia-noite. Ou estranho não. Cada um tem suas razões. Senta, se quiser.',
+      'Ele cava com precisão estranha — exatamente seis pés, sem erro de medida. Mas a forma da cova não é retangular, é em estrela de cinco pontas. Algo mais que sepultamento está acontecendo aqui.',
+      'Sentado na borda da cova, fumando cachimbo de barro, o coveiro descansa. Quando tu te aproximas, ele oferece o cachimbo sem palavra. — Boa erva. Acalma o que precisa ser acalmado. Tu pareces de quem precisa.',
+      'O coveiro tem sangue no avental. Não é dele. Não é da terra. Quando teu olho repara, ele segue teu olhar e só dá de ombros. — Trabalho honesto, viajante. Trabalho honesto cobra preço de qualquer coisa.'
     ],
     flavor_variants: [
       'Pá range na terra molhada. Linho simples, manchas de barro — ou algo escuro.',
       'Nas mãos dele, cicatrizes antigas. Não é coveiro profissional — ou já o foi há muito.',
-      'Ao lado da cova, uma sacola grande. Você não quer saber o conteúdo, mas precisa.'
+      'Ao lado da cova, uma sacola grande. Você não quer saber o conteúdo, mas precisa.',
+      'No bolso do colete, ponta de uma caderneta com nomes — talvez os enterrados, talvez os a enterrar. Caderneta de coveiro de verdade não tem nomes; só mapa de jazigos.',
+      'O cachimbo dele tem cabeça em formato de caveira sorrindo. Detalhe estético comum entre certas profissões noturnas, dizem os contos. Símbolo da Confraria do Pó.',
+      'Os anéis nos dedos dele são todos diferentes — cada um marca de fé distinta. Coveiro que precisa do favor de muitos deuses não tem fé própria. Tem profissão difícil.',
+      'Sob o avental, o cabo de uma adaga curta. Coveiros não precisam de adaga. Algumas categorias de "coveiro" precisam.',
+      'Ao lado da cova, terra revolvida em padrão circular: ele já cavou e fechou várias outras antes desta nesta noite. Quantas?',
+      'Atrás de um arbusto próximo, um cavalo amarrado, com alforjes cheios. Pronto pra fugir antes do amanhecer. Ele sabe que não vai conseguir terminar tranquilo.'
     ],
     choices: [
       { label: 'Perguntar pra quem é', skill: 'cha', dc: 12,
@@ -19939,13 +20512,18 @@ function resizeCanvases() {
   canvasW = totalW;
   canvasH = totalH;
 
-  // 2026-04-29 USER PERF FIX: cap DPR em 1 (era 2). Em zoom alto, canvas
-  // backing buffer = totalW × DPR pode ultrapassar 8192px (limite GPU em
-  // muitos browsers/drivers) → browser cai pra software rendering →
-  // FPS catastrofica (7-10 em hardware top tier). DPR=1 garante que mesmo
-  // em zoom 2x o backing buffer fica < 8192px na maioria dos mapas.
-  // Tradeoff: textos/linhas levemente menos crispy, mas FPS 5-10x melhor.
-  const dpr = Math.min(window.devicePixelRatio || 1, 1);
+  // 2026-05-06 USER PERF FIX v2: DPR adaptativo. Mobile (Telegram WebApp)
+  // reportou mapa "embaçado" — DPR clamped em 1 fazia canvas backing 1×
+  // em smartphone retina (DPR 2-3). Agora: usa DPR real até cap 2, mas
+  // fallback automático pra 1 se backing buffer fosse exceder 8000px
+  // (limite GPU 8192). Mantém a perf otimização do v1 sem sacrificar
+  // crispness em mobile. Maior mapa: 24×30 → totalW ~1925px @ zoom 2.2;
+  // com DPR=2 backing 3850px (ok); com DPR=3 5775px (ok). Desktop com
+  // monitor 4K+zoom extremo cai pra 1 automaticamente.
+  const _rawDpr = window.devicePixelRatio || 1;
+  const _maxSafeDim = 8000;
+  const _safeDpr = _maxSafeDim / Math.max(totalW, totalH, 1);
+  const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
   mainCanvas.style.width = totalW + 'px';
   mainCanvas.style.height = totalH + 'px';
   mainCanvas.width = Math.round(totalW * dpr);
@@ -29495,7 +30073,11 @@ function drawFogComposite() {
   if (fogCanvas.width !== mainCanvas.width || fogCanvas.height !== mainCanvas.height) {
     fogCanvas.width = mainCanvas.width;
     fogCanvas.height = mainCanvas.height;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1);
+    // 2026-05-06 v2: DPR adaptativo (ver resizeCanvases). Deriva o DPR
+    // efetivo a partir das dims atuais — mainCanvas.width/canvasW.
+    const _rawDpr = window.devicePixelRatio || 1;
+    const _safeDpr = 8000 / Math.max(canvasW || mainCanvas.width, canvasH || mainCanvas.height, 1);
+    const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
     fogCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     _fogMaskDirty = true;  // V8.1: resize força rebuild do composite
     if (shouldLogF) LOG('FOG', 'fogCanvas dims resynced to ' + fogCanvas.width + 'x' + fogCanvas.height);
@@ -29570,13 +30152,11 @@ function drawHardFogOnUnexplored(ctx) {
       _hardFogLastZoom !== HEX_W) {
     _hardFogCanvas.width = mainCanvas.width;
     _hardFogCanvas.height = mainCanvas.height;
-    // 2026-04-29 USER PERF FIX: cap DPR em 1 (era 2). Em zoom alto, canvas
-  // backing buffer = totalW × DPR pode ultrapassar 8192px (limite GPU em
-  // muitos browsers/drivers) → browser cai pra software rendering →
-  // FPS catastrofica (7-10 em hardware top tier). DPR=1 garante que mesmo
-  // em zoom 2x o backing buffer fica < 8192px na maioria dos mapas.
-  // Tradeoff: textos/linhas levemente menos crispy, mas FPS 5-10x melhor.
-  const dpr = Math.min(window.devicePixelRatio || 1, 1);
+    // 2026-05-06 v2: DPR adaptativo (ver resizeCanvases) — usa real DPR
+    // até cap 2 com fallback automático se backing exceder 8000px (GPU).
+    const _rawDpr = window.devicePixelRatio || 1;
+    const _safeDpr = 8000 / Math.max(canvasW || mainCanvas.width, canvasH || mainCanvas.height, 1);
+    const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
     _hardFogCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     _hardFogLastZoom = HEX_W;
     _hardFogDirty = true;
@@ -30035,7 +30615,7 @@ function onMoveEnd(col, row) {
     p.wet -= 1;
     if (p.wet === 0) {
       dmNarrate({ text: 'Suas roupas finalmente secaram.', type: 'ambient' });
-      _showWaterStatusToast('💧 Roupas secaram — status MOLHADO removido.');
+      _showWaterStatusToast('💧 <b>Roupas secaram</b><br><span style="font-size:13px">Status <b>MOLHADO</b> removido — você está pronto pra enfrentar fogo e frio normalmente.</span>', 0, { centered: true });
     }
   }
 
@@ -30155,10 +30735,23 @@ function onMoveEnd(col, row) {
     p.wet = 5;
     if (!_wasWet) {
       dmNarrate({ text: 'Você ganha o status MOLHADO. Frio causa mais dano; fogo, menos. (5 turnos)', type: 'event' });
-      _showWaterStatusToast('💧 ' + _waterMsg + '<br><small>Status MOLHADO (5 turnos): vulnerabilidade a frio + resistência a fogo.</small>', 4500);
+      _showWaterStatusToast(
+        '<div style="font-size:32px;margin-bottom:10px">💧</div>'
+        + '<div style="margin-bottom:14px;font-size:15px">' + _waterMsg + '</div>'
+        + '<div style="padding:10px 14px;background:rgba(80,160,220,0.15);'
+        + 'border-left:3px solid #5aacd0;border-radius:4px;text-align:left;'
+        + 'font-size:13px;line-height:1.55">'
+        + '<b style="color:#aae0ff">Status MOLHADO (5 turnos)</b><br>'
+        + '⚡ Vulnerabilidade a dano de <b>Frio</b><br>'
+        + '🔥 Resistência a dano de <b>Fogo</b>'
+        + '</div>', 0, { centered: true });
     } else {
       // Já estava molhado — apenas reforça duração + toast curto
-      _showWaterStatusToast('💧 Status MOLHADO renovado (5 turnos).', 2500);
+      _showWaterStatusToast(
+        '<div style="font-size:28px;margin-bottom:8px">💧</div>'
+        + '<div style="margin-bottom:6px"><b>Status MOLHADO renovado</b></div>'
+        + '<div style="font-size:13px;color:#aac8e0">Duração resetada para 5 turnos.</div>',
+        0, { centered: true });
     }
     LOG('WATER', 'wet_status_applied tile=' + tile + ' turns=' + p.wet);
     // Pula tudo: ambient tip, weather, event roll. Apenas tickDayPhase + render.
@@ -30329,15 +30922,26 @@ const BIOME_WANDERING_ENCOUNTERS = {
 function maybeRollWanderingMonster() {
   if (S.steps < 3) return false;  // grace period no início do mapa
   if (S.ph !== 'idle') return false;  // não interrompe evento/combate
-  // Chance base escala com dangerLevel do mapa (2% + 1.5% per level)
+  // v12.7 (2026-05-06): user reportou "não está havendo encontros com combate".
+  // Bumped chances 4× + deterministic forced combat counter PHB-style.
+  // Antes: 2% base + 1.5%/lvl. Agora: 8% base + 2.5%/lvl (4× mais frequente).
   const dangerLvl = (S.mapDef && S.mapDef.dangerLevel) || S.dangerLevel || 2;
-  const baseChance = 0.02 + (dangerLvl * 0.015);
-  // Noite dobra a chance (criaturas da escuridão)
+  const baseChance = 0.08 + (dangerLvl * 0.025);
+  // Noite dobra (criaturas da escuridão), tempestade/fog +50%
   const nightMult = (S.dayPhase === 'night') ? 2.0 : 1.0;
-  // Clima de tempestade/névoa +50%
   const weatherMult = (S.weather === 't' || S.weather === 'f') ? 1.5 : 1.0;
   const chance = baseChance * nightMult * weatherMult;
-  if (Math.random() >= chance) return false;
+
+  // FORCED COMBAT counter PHB Ch.8 — garante encontro cada 8-14 steps
+  // sem combate. User: "garanta que não se repitam" implica combates
+  // deterministically frequentes durante exploration prolongada.
+  S._stepsSinceLastCombat = (S._stepsSinceLastCombat || 0) + 1;
+  var forced = false;
+  if (S._stepsSinceLastCombat >= 12) {
+    forced = true;
+    LOG('COMBAT', 'forced_after_' + S._stepsSinceLastCombat + '_steps');
+  }
+  if (!forced && Math.random() >= chance) return false;
 
   // Escolhe inimigo do pool do biome+dayPhase
   const biomeTable = BIOME_WANDERING_ENCOUNTERS[S.biome] || BIOME_WANDERING_ENCOUNTERS.plains;
@@ -30356,10 +30960,13 @@ function maybeRollWanderingMonster() {
   console.info('[E-REM:COMBAT] wandering_monster biome=' + S.biome
     + ' dayPhase=' + S.dayPhase + ' enemy=' + safeEnemyId);
 
+  // Reset counter quando combat dispara
+  S._stepsSinceLastCombat = 0;
+
   triggerCombatScreen({
     enemyId: safeEnemyId,
     surprise: true,
-    context: { source: 'wandering', biome: S.biome, dayPhase: S.dayPhase },
+    context: { source: 'wandering', biome: S.biome, dayPhase: S.dayPhase, forced: forced },
     onLose: () => triggerDefeat('Morto por um(a) ' + safeEnemyId + ' vagante.')
   });
   return true;
@@ -31628,13 +32235,292 @@ function _scheduleThunderClap() {
 // 2026-04-27: Inline self-contained toast pro status MOLHADO. NÃO depende de
 // vToast (que pode não estar carregado em LOCAL file://). Cria div efêmero
 // posicionado dentro do #frame (respeita viewport lock smartphone-only).
-function _showWaterStatusToast(htmlMsg, duration) {
+// _showWaterStatusToast v12.2 (2026-05-06): user pediu pro popup de
+// "molhado" aparecer CENTRALIZADO com tamanho maior e botão fechar.
+// Sintaxe: _showWaterStatusToast(html, duration, opts)
+//   opts.centered = true → popup grande no centro com X close (não auto-dismiss)
+//   sem opts → comportamento legado: toast pequeno no bottom auto-dismiss
+// ═══════════════════════════════════════════════════════════════════════
+// MOCHILA POPUP v12.5 (2026-05-06) — SHARED inventory com cidade.html
+// via localStorage 'valdoria_shared_inventory_v1'. Cidade serializa
+// MOCK_PLAYER_INVENTORY → localStorage no boot. Exploracao lê do mesmo
+// storage ao abrir popup. User pediu: "devem estar conectadas
+// diretamente, com mesmas funções".
+//
+// Fallback: se localStorage vazio (nunca abriu cidade), usa default mock
+// que ESPELHA o de cidade.html (21 itens canonical).
+// ═══════════════════════════════════════════════════════════════════════
+var SHARED_INVENTORY_KEY = 'valdoria_shared_inventory_v1';
+window._invFilterExp = window._invFilterExp || 'all';
+
+// Default fallback inventory — espelha MOCK_PLAYER_INVENTORY de cidade.html
+// (mesmos 21 itens, mesmas quantidades, mesmos ícones canonical).
+var EXPLORACAO_DEFAULT_INVENTORY = [
+  { name: 'Espada Élfica',          quantity: 1, icon: '⚔️', value: 80 },
+  { name: 'Poção de Cura',          quantity: 3, icon: '🧪', value: 25 },
+  { name: 'Poção de Cura Maior',    quantity: 1, icon: '🧪', value: 75 },
+  { name: 'Turquesa',               quantity: 4, icon: '💎', value: 12 },
+  { name: 'Ametista',               quantity: 1, icon: '💎', value: 35 },
+  { name: 'Pergaminho Antigo',      quantity: 1, icon: '📜', value: 50 },
+  { name: 'Pele de Lobo',           quantity: 4, icon: '🪶', value: 8 },
+  { name: 'Presa de Lobo',          quantity: 6, icon: '🦷', value: 5 },
+  { name: 'Orelha de Goblin',       quantity: 3, icon: '👂', value: 3 },
+  { name: 'Adaga Balanceada',       quantity: 1, icon: '🗡️', value: 30 },
+  { name: 'Erva Curativa',          quantity: 5, icon: '🌿', value: 4 },
+  { name: 'Rações de 7 dias',       quantity: 2, icon: '🥖', value: 5 },
+  { name: 'Mapa da Floresta',       quantity: 1, icon: '🗺️', value: 50 },
+  { name: 'Fogo Alquímico',         quantity: 2, icon: '🔥', value: 50 },
+  { name: 'Anel de Sorte',          quantity: 1, icon: '💍', value: 200 },
+  { name: 'Tochas (5)',             quantity: 1, icon: '🕯️', value: 5 },
+  { name: 'Osso',                   quantity: 8, icon: '🦴', value: 1 },
+  { name: 'Vela',                   quantity: 3, icon: '🕯️', value: 1 },
+  { name: 'Garras do Lobo Selvagem',     quantity: 1, icon: '🐾', value: 35 },
+  { name: 'Botas do Lobo Selvagem',      quantity: 1, icon: '👢', value: 40 },
+  { name: 'Elmo do Protetor Ancestral',  quantity: 1, icon: '⛑️', value: 60 }
+];
+
+// Reads inventory from shared localStorage (set by cidade.html on boot).
+// Fallback to default mock if empty/invalid.
+function _readSharedInventory() {
+  try {
+    var raw = localStorage.getItem(SHARED_INVENTORY_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  // Fallback: usa default + escreve no localStorage pra próximas leituras
+  try {
+    localStorage.setItem(SHARED_INVENTORY_KEY, JSON.stringify(EXPLORACAO_DEFAULT_INVENTORY));
+  } catch (e) {}
+  return EXPLORACAO_DEFAULT_INVENTORY.slice();
+}
+
+// Categorização canonical (matching cidade)
+function _exploracaoItemCategory(item) {
+  var name = ((typeof item === 'string') ? item : (item.name || item.id || '')).toLowerCase();
+  if (name.indexOf('poção') >= 0 || name.indexOf('elixir') >= 0
+      || name.indexOf('erva') >= 0 || name.indexOf('rações') >= 0
+      || name.indexOf('fogo alquímico') >= 0) return 'use';
+  if (name.indexOf('espada') >= 0 || name.indexOf('adaga') >= 0
+      || name.indexOf('arco') >= 0 || name.indexOf('elmo') >= 0
+      || name.indexOf('botas') >= 0 || name.indexOf('cota') >= 0
+      || name.indexOf('escudo') >= 0 || name.indexOf('garras') >= 0) return 'equip';
+  if (name.indexOf('turquesa') >= 0 || name.indexOf('ametista') >= 0
+      || name.indexOf('rubi') >= 0 || name.indexOf('esmeralda') >= 0
+      || name.indexOf('diamante') >= 0 || name.indexOf('safira') >= 0) return 'gem';
+  return 'misc';
+}
+
+// Ícone do item (usa o do storage se disponível, senão heurística)
+function _exploracaoItemIcon(item) {
+  if (item && item.icon) return item.icon;
+  var cat = _exploracaoItemCategory(item);
+  if (cat === 'use') return '🧪';
+  if (cat === 'equip') return '⚔️';
+  if (cat === 'gem') return '💎';
+  return '📦';
+}
+
+// Nome bonito (storage já tem 'name' canonical, fallback heurístico)
+function _exploracaoItemName(item) {
+  if (item && item.name) return item.name;
+  var id = (typeof item === 'string') ? item : (item.id || '');
+  return id.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+}
+
+function _showExploracaoInventoryPopup() {
+  var ov = document.getElementById('inv-overlay');
+  if (!ov) return;
+  _renderExploracaoInventoryPopup();
+  ov.classList.add('show');
+}
+
+function _closeExploracaoInventoryPopup() {
+  var ov = document.getElementById('inv-overlay');
+  if (ov) ov.classList.remove('show');
+}
+
+function _renderExploracaoInventoryPopup() {
+  var bodyEl = document.getElementById('inv-body');
+  var subtitleEl = document.getElementById('inv-subtitle');
+  if (!bodyEl) return;
+  // v12.5: lê do shared localStorage (cidade.html escreve aqui no boot)
+  var inv = _readSharedInventory();
+  var totalCount = inv.reduce(function(sum, it){ return sum + (it.quantity || 0); }, 0);
+  var totalValue = inv.reduce(function(sum, it){ return sum + (it.value || 0) * (it.quantity || 0); }, 0);
+  var gold = (S && S.player && S.player.gold) || 0;
+
+  // Filtrar por categoria
+  var filter = window._invFilterExp || 'all';
+  var counts = { all: 0, equip: 0, use: 0, gem: 0, misc: 0 };
+  inv.forEach(function(it) {
+    var cat = _exploracaoItemCategory(it);
+    counts.all += it.quantity || 0;
+    counts[cat] = (counts[cat] || 0) + (it.quantity || 0);
+  });
+  if (subtitleEl) subtitleEl.textContent = totalCount + ' iten' + (totalCount === 1 ? '' : 's');
+
+  var filtered = inv.filter(function(it) {
+    if (filter === 'all') return true;
+    return _exploracaoItemCategory(it) === filter;
+  });
+
+  // Header meta + filter pills
+  var html = ''
+    + '<div class="inv-meta-bar">'
+    +   '<span>Bolsa: <span class="gold">' + gold + ' V</span></span>'
+    +   '<span>' + totalCount + ' iten' + (totalCount === 1 ? '' : 's') + ' · ' + totalValue + 'V</span>'
+    + '</div>'
+    + '<div class="inv-filter-row">'
+    +   '<span class="inv-filter-pill' + (filter === 'all' ? ' active' : '') + '" data-filter="all">Todos (' + counts.all + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'equip' ? ' active' : '') + '" data-filter="equip">⚔️ Equip (' + counts.equip + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'use' ? ' active' : '') + '" data-filter="use">🧪 Consum (' + counts.use + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'gem' ? ' active' : '') + '" data-filter="gem">💎 Gemas (' + counts.gem + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'misc' ? ' active' : '') + '" data-filter="misc">📦 Outros (' + counts.misc + ')</span>'
+    + '</div>';
+
+  if (filtered.length === 0) {
+    html += '<div class="inv-empty">'
+      + (filter === 'all'
+          ? 'Sua mochila está vazia. Explore o mapa pra encontrar itens.'
+          : 'Nenhum item desta categoria.')
+      + '</div>';
+  } else {
+    html += '<div class="inv-grid">';
+    filtered.forEach(function(it, idx) {
+      var ico = _exploracaoItemIcon(it);
+      var name = _exploracaoItemName(it);
+      var cnt = it.quantity || 1;
+      html += '<div class="inv-item-card" data-item-idx="' + idx + '">'
+        +   '<span class="inv-item-icon">' + ico + '</span>'
+        +   '<div class="inv-item-name">' + name + '</div>'
+        +   '<div class="inv-item-count">×' + cnt + (it.value ? ' · ' + it.value + 'V' : '') + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+
+  bodyEl.innerHTML = html;
+
+  // Wire filter pills
+  bodyEl.querySelectorAll('.inv-filter-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      window._invFilterExp = pill.dataset.filter;
+      _renderExploracaoInventoryPopup();
+    });
+  });
+  // Wire item card click (placeholder pra detail popup futuro)
+  bodyEl.querySelectorAll('.inv-item-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var idx = parseInt(card.dataset.itemIdx, 10);
+      var item = filtered[idx];
+      if (item && typeof dmNarrate === 'function') {
+        dmNarrate({ text: '🔍 ' + item.name + ' (×' + item.quantity + ') — '
+          + (item.value ? 'Valor: ' + item.value + ' Valdoritas. ' : '')
+          + 'Detalhes completos no jogo real.', type: 'ambient' });
+      }
+    });
+  });
+}
+
+function _showWaterStatusToast(htmlMsg, duration, opts) {
   duration = duration || 3500;
+  opts = opts || {};
   try {
     var host = document.getElementById('frame') || document.getElementById('app') || document.body;
-    var t = document.createElement('div');
-    t.id = '_water-status-toast';
-    t.style.cssText = ''
+    var prev = document.getElementById('_water-status-toast');
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+
+    if (opts.centered) {
+      // POPUP CENTRALIZADO com botão fechar — pra eventos importantes
+      // (status molhado, status removido). User pediu maior + fechável.
+      var t = document.createElement('div');
+      t.id = '_water-status-toast';
+      t.style.cssText = ''
+        + 'position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);'
+        + 'min-width: 280px; max-width: 90%; width: auto;'
+        + 'padding: 22px 24px 20px;'
+        + 'background: linear-gradient(180deg, rgba(36,56,78,0.97), rgba(20,36,52,0.97));'
+        + 'border: 1.5px solid rgba(80,160,220,0.65);'
+        + 'border-radius: 12px;'
+        + 'box-shadow: 0 12px 48px rgba(0,0,0,0.75), 0 0 24px rgba(80,160,220,0.35);'
+        + 'color: #d8ecff; font-family: serif; font-size: 15px; line-height: 1.6;'
+        + 'text-align: center; z-index: 10000; pointer-events: auto;'
+        + 'opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;';
+
+      var msgDiv = document.createElement('div');
+      msgDiv.style.cssText = 'margin-bottom: 16px;';
+      msgDiv.innerHTML = htmlMsg || '';
+      t.appendChild(msgDiv);
+
+      var closeBtn = document.createElement('button');
+      closeBtn.textContent = 'Fechar';
+      closeBtn.style.cssText = ''
+        + 'display: inline-block;'
+        + 'padding: 7px 24px;'
+        + 'background: linear-gradient(180deg, rgba(80,160,220,0.30), rgba(40,90,140,0.20));'
+        + 'border: 1px solid rgba(120,200,240,0.55);'
+        + 'border-radius: 6px;'
+        + 'color: #d8ecff;'
+        + 'font-family: Cinzel, serif; font-size: 12px;'
+        + 'letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600;'
+        + 'cursor: pointer; transition: background 0.15s, transform 0.1s;'
+        + 'box-shadow: 0 2px 8px rgba(80,160,220,0.25);';
+      closeBtn.addEventListener('mouseenter', function(){
+        closeBtn.style.background = 'linear-gradient(180deg, rgba(80,160,220,0.45), rgba(40,90,140,0.30))';
+      });
+      closeBtn.addEventListener('mouseleave', function(){
+        closeBtn.style.background = 'linear-gradient(180deg, rgba(80,160,220,0.30), rgba(40,90,140,0.20))';
+      });
+      // Backdrop semitransparente clicável (também fecha)
+      var backdrop = document.createElement('div');
+      backdrop.id = '_water-status-backdrop';
+      backdrop.style.cssText = ''
+        + 'position: absolute; inset: 0;'
+        + 'background: rgba(0, 0, 0, 0.45);'
+        + 'z-index: 9999;'
+        + 'cursor: pointer;'
+        + 'opacity: 0; transition: opacity 0.3s ease;';
+      var prevBd = document.getElementById('_water-status-backdrop');
+      if (prevBd && prevBd.parentNode) prevBd.parentNode.removeChild(prevBd);
+      host.appendChild(backdrop);
+
+      // FIX 2026-05-06 v12.3: ao clicar Fechar/backdrop, o backdrop
+      // (overlay escuro) deve sair INSTANTANEAMENTE — user reportou
+      // "esse overlay que escurece a tela deve sair na hora que clicar
+      // para fechar, instantaneamente". Antes ficava 320ms com fade.
+      var doClose = function(){
+        // Remove backdrop NO ATO (sem transition delay)
+        if (backdrop && backdrop.parentNode) {
+          backdrop.parentNode.removeChild(backdrop);
+        }
+        // Card faz fade rápido pra UX (não persiste como o backdrop fazia)
+        t.style.opacity = '0';
+        t.style.transform = 'translate(-50%, -45%)';
+        setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 200);
+      };
+      closeBtn.addEventListener('click', doClose);
+      backdrop.addEventListener('click', doClose);
+      t.appendChild(closeBtn);
+
+      host.appendChild(t);
+      requestAnimationFrame(function(){
+        t.style.opacity = '1';
+        backdrop.style.opacity = '1';
+      });
+
+      // Auto-close fallback após 12s (caso user esqueça)
+      setTimeout(function(){
+        if (t.parentNode || backdrop.parentNode) doClose();
+      }, 12000);
+      return;
+    }
+
+    // Toast padrão (bottom, auto-dismiss) — usado pra quests/tips/tocha
+    var t2 = document.createElement('div');
+    t2.id = '_water-status-toast';
+    t2.style.cssText = ''
       + 'position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%);'
       + 'min-width: 240px; max-width: 90%; padding: 10px 16px;'
       + 'background: linear-gradient(180deg, rgba(36,56,78,0.96), rgba(20,36,52,0.96));'
@@ -31644,15 +32530,12 @@ function _showWaterStatusToast(htmlMsg, duration) {
       + 'color: #d8ecff; font-family: serif; font-size: 13px; line-height: 1.45;'
       + 'text-align: center; z-index: 10000; pointer-events: none;'
       + 'opacity: 0; transition: opacity 0.25s ease;';
-    t.innerHTML = htmlMsg || '';
-    // Remove qualquer toast anterior pra evitar empilhar
-    var prev = document.getElementById('_water-status-toast');
-    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
-    host.appendChild(t);
-    requestAnimationFrame(function () { t.style.opacity = '1'; });
+    t2.innerHTML = htmlMsg || '';
+    host.appendChild(t2);
+    requestAnimationFrame(function () { t2.style.opacity = '1'; });
     setTimeout(function () {
-      t.style.opacity = '0';
-      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 280);
+      t2.style.opacity = '0';
+      setTimeout(function () { if (t2.parentNode) t2.parentNode.removeChild(t2); }, 280);
     }, duration);
   } catch (e) {
     LOGW('WATER', 'toast_failed: ' + (e && e.message));
@@ -32095,6 +32978,86 @@ const CATEGORY_LABELS = {
   mystery: 'Mistério'
 };
 
+// ═══════════════════════════════════════════════════════════════════════
+// PADRAO_ALDRIC adapter v12 (2026-05-06) — eventos exploracao com narrativa
+// rica multi-linha. Inspirado nos encounters Aldric/Corvus em cidade.html.
+//
+// User pediu: "adapter PADRAO_ALDRIC pra eventos exploracao (50+) ...
+// quero imersividade e somente esse do Aldric conseguiu atingir o objetivo".
+//
+// Adapter splita texto em SENTENÇAS (split por ". " ou linha), aplica
+// reveal horizontal (clip-path wipe) com animation-delay cascateado.
+// Cada sentença vira um span próprio com fade-in independente.
+//
+// Trabalha com qualquer evento do EVENTS_POOL — sem refatorar dados.
+// Os 50+ eventos existentes ganham automaticamente o visual paginado.
+// ═══════════════════════════════════════════════════════════════════════
+// Detector PADRAO_ALDRIC v13 (2026-05-06): identifica se sentença é FALA
+// (aspas/em-dash) vs NARRAÇÃO. Speech ganha card gold com border-left;
+// narration fica italic gray. Diferenciação visual MASSIVA — usuário pediu
+// "vai fazer ou vai ficar me enrolando?". Resposta: FAZER.
+function _classifyEventSentence(text) {
+  var t = (text || '').trim();
+  if (!t) return 'narration';
+  // Em-dash (—, –) no início = fala (estilo brasileiro de diálogo)
+  if (/^[—–-]\s*[A-ZÀ-Úa-zà-ú]/.test(t)) return 'speech';
+  // Aspas duplas ou simples envolvendo grande parte do texto
+  if (/^["“'‘].+["”'’][.!?]*$/.test(t)) return 'speech';
+  // Padrão "Fulano disse:", "X grita:", "X sussurra:" etc → próxima parte é fala
+  // mas como já estamos no nível de sentença, esses são tipicamente narration
+  // que introduz fala. Mantém como narration.
+  // Aspas no meio mas com peso > 50% do texto = speech
+  var quoteMatches = t.match(/["“'‘][^"”'’]+["”'’]/g);
+  if (quoteMatches && quoteMatches.length > 0) {
+    var quotedLen = quoteMatches.reduce(function(s, m) { return s + m.length; }, 0);
+    if (quotedLen > t.length * 0.5) return 'speech';
+  }
+  return 'narration';
+}
+
+function _renderEventTextAsAldric(elId, fullText, opts) {
+  opts = opts || {};
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (!fullText) return;
+  // Split por sentenças preservando o ponto final
+  // Regex: divide após ". " mas não em abreviações (Sr., Dra., etc.)
+  var sentences = fullText.split(/(?<=[.!?])\s+(?=[—–"“'‘A-ZÀ-Ú])/);
+  if (sentences.length <= 1) {
+    // Texto simples ou única frase — ainda aplica reveal
+    sentences = [fullText];
+  }
+  var baseDelay = opts.delayBase || 0;
+  var stepDelay = opts.stepDelay || 700;
+  // v13: também aceita classe override pra narração simples (flavor)
+  var forceClass = opts.forceClass || null;
+  sentences.forEach(function(sent, idx) {
+    var clean = sent.trim();
+    if (!clean) return;
+    var span = document.createElement('span');
+    var kind = forceClass || _classifyEventSentence(clean);
+    // PADRAO_ALDRIC v13: classes diferenciadas — speech (gold card) vs narration (italic gray)
+    if (kind === 'speech') {
+      span.className = 'event-text-speech';
+    } else if (kind === 'narration') {
+      span.className = 'event-text-narration';
+    } else {
+      span.className = 'event-text-line';
+    }
+    span.textContent = clean;
+    var delay = baseDelay + idx * stepDelay;
+    span.style.animationDelay = delay + 'ms';
+    // chars-by-char duration: ~14ms/char clamp 900-2400 (speech um pouco mais lento)
+    var charCount = clean.length;
+    var dur = (kind === 'speech')
+      ? Math.max(1100, Math.min(2400, charCount * 16 + 500))
+      : Math.max(900, Math.min(2200, charCount * 14 + 400));
+    span.style.animationDuration = dur + 'ms';
+    el.appendChild(span);
+  });
+}
+
 function openEventModal() {
   // V4: enquanto modal aberto, anim mode ativo (dado/animação podem rolar). 60s.
   if (typeof _markActive === 'function') _markActive(60000);
@@ -32108,7 +33071,12 @@ function openEventModal() {
   ev._pickedTitle = ev._pickedTitle || pickFamiliarityVariant(ev, 'title');
 
   document.getElementById('event-title').textContent = ev._pickedTitle;
-  document.getElementById('event-text').textContent = ev._pickedText;
+  // PADRAO_ALDRIC v12 (2026-05-06): adapter — text agora é renderizado como
+  // multi-linha script com reveal sequencial. Antes: textContent raw.
+  // Agora: split por sentenças (". ") e cada uma vira <span> com
+  // animation-delay cascateado (overlap 45% via cubic-bezier).
+  // Doc: docs/sistemas/dialogue-pattern-aldric.md § "voz DM"
+  _renderEventTextAsAldric('event-text', ev._pickedText);
   // 2026-04-27: tech callout — info mecânica separada da narrativa
   _renderTechCalloutInModal('event-tech', ev.tech);
   // Limpa tech do outcome (será setado quando aplicar choice)
@@ -32121,7 +33089,7 @@ function openEventModal() {
 
   const flavorEl = document.getElementById('event-flavor');
   if (ev._pickedFlavor) {
-    flavorEl.textContent = ev._pickedFlavor;
+    _renderEventTextAsAldric('event-flavor', ev._pickedFlavor, { delayBase: 600 });
     flavorEl.classList.remove('hidden');
   } else {
     flavorEl.classList.add('hidden');
@@ -33416,13 +34384,30 @@ async function confirmEdgeTransition() {
   document.getElementById('dungeon-overlay').classList.remove('visible');
   document.getElementById('dungeon-enter').textContent = 'Entrar';
 
+  // v12.7 (2026-05-06): user reportou "encontrei o hexagono para ir para o
+  // acampamento orc e não funcionou". Adicionado LOG robusto + safety checks
+  // pra LOCAL mode garantir boot do novo mapa.
+  LOG('EDGE', 'confirmEdgeTransition START ed=' + JSON.stringify({
+    has_ed: !!ed,
+    targetMap: ed && ed.targetMap,
+    has_FM: !!(ed && ed.targetMap && typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[ed.targetMap]),
+    mode: window.__EXPLORE_MODE,
+    has_token: !!window.__EXPLORE_TOKEN,
+    isRemote: (window.__EXPLORE_MODE === 'remote' && !!window.__EXPLORE_TOKEN)
+  }));
+
   // [FASE 3 R1-B 2026-04-23] Edge travel:
   // - REMOTE + targetMap válido: POST /api/webapp/transition with
   //   from='exploracao', to='exploracao', payload.target_map=X. Server remonta
   //   URL do novo mapa SEM passar pelo Game Hub. User continua no simulador.
   // - REMOTE + targetMap vazio: saída total -> triggerReturnToCity (Game Hub)
   // - LOCAL: reboot local no novo mapa (comportamento original)
-  if (window.__EXPLORE_MODE === 'remote' && ed && ed.targetMap) {
+  // v12.7 fix: REMOTE só se tiver TOKEN+API (sem isso é file:// LOCAL,
+  // mesmo que __EXPLORE_MODE === 'remote' por engano)
+  var _isRemoteEdge = (window.__EXPLORE_MODE === 'remote'
+                      && !!window.__EXPLORE_TOKEN
+                      && !!window.__EXPLORE_API_BASE);
+  if (_isRemoteEdge && ed && ed.targetMap) {
     LOG('EDGE', 'remote edge_travel target=' + ed.targetMap);
     console.info('[E-REM:EDGE] travel_to_map target=' + ed.targetMap);
     try {
@@ -33475,7 +34460,7 @@ async function confirmEdgeTransition() {
   }
 
   // REMOTE sem targetMap: saída total (voltar à cidade)
-  if (window.__EXPLORE_MODE === 'remote') {
+  if (_isRemoteEdge) {
     LOG('EDGE', 'remote exit_edge (no target) — triggerReturnToCity');
     if (typeof triggerReturnToCity === 'function') {
       triggerReturnToCity({ reason: 'exit_edge' });
@@ -33483,18 +34468,28 @@ async function confirmEdgeTransition() {
     }
   }
 
-  // LOCAL mode: comportamento original
-  if (ed && ed.targetMap && FIXED_MAPS[ed.targetMap]) {
-    // X-6.5.51m: marca de qual mapa veio pra que initState do destino encontre
-    // o hex de borda que aponta de volta — spawn ali e nao no centro padrao.
-    // User feedback: "deveria aparecer sempre no hexagono do mapa de destino
-    // que leva ao mapa que estava".
+  // LOCAL mode: comportamento original (v12.7: também usado quando
+  // __EXPLORE_MODE === 'remote' MAS sem TOKEN — file:// fallback)
+  if (ed && ed.targetMap && typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[ed.targetMap]) {
+    LOG('EDGE', 'LOCAL boot to ' + ed.targetMap + ' (' + FIXED_MAPS[ed.targetMap].name + ')');
     setupChoices._fromMap = S && S.mapId;
     setupChoices.map = ed.targetMap;
     dmNarrate({ text: 'Você viaja para ' + FIXED_MAPS[ed.targetMap].name + '.', type: 'action' });
-    boot();
+    try {
+      boot();
+      LOG('EDGE', 'LOCAL boot SUCCESS new mapId=' + (S && S.mapId));
+    } catch (eBoot) {
+      LOGE('EDGE', 'LOCAL boot FAILED: ' + (eBoot && eBoot.message));
+      // Fallback: re-show overlay pra user tentar de novo
+      S._pendingEdge = ed;
+      document.getElementById('dungeon-overlay').classList.add('visible');
+      if (typeof vToast === 'function') vToast('⚠ Erro ao viajar — tente novamente');
+    }
     return;
   }
+  // Nem mesmo local funcionou — log explícito do motivo
+  LOGW('EDGE', 'NO PATH MATCHED — ed=' + JSON.stringify(ed)
+    + ' FIXED_MAPS_has=' + (ed && ed.targetMap && typeof FIXED_MAPS !== 'undefined' && !!FIXED_MAPS[ed.targetMap]));
   if (S.ph !== 'defeat') S.ph = 'idle';
   updateHud();
   scheduleRender();
@@ -34127,7 +35122,12 @@ var JOURNEY_SAFE = {
 };
 var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
 
-function startJourneyToMap(targetMapId, targetMap) {
+function startJourneyToMap(targetMapId, targetMap, options) {
+  // 2026-05-05 v11: opções pra suportar "first arrival from cidade".
+  // Antes só era usado pra map-to-map travel WITHIN exploracao.
+  // Agora também é a tela canônica pra travel cidade→exploracao
+  // (substituiu pt-overlay deletada em cidade.html).
+  options = options || {};
   // Inicia jornada com 3-5 etapas dependendo da distancia/bioma
   const totalSteps = 3 + Math.floor(Math.random() * 3);
   _journey = {
@@ -34136,9 +35136,12 @@ function startJourneyToMap(targetMapId, targetMap) {
     biome: targetMap.biome,
     totalSteps: totalSteps,
     currentStep: 0,
-    riskChance: 55  // 55% de chance de hazard por etapa
+    riskChance: 55,  // 55% de chance de hazard por etapa
+    // Quando vem de cidade, mapa já foi booted → não re-boot ao chegar
+    skipReboot: !!options.skipReboot,
+    titlePrefix: options.titlePrefix || 'Rumo a '
   };
-  document.getElementById('journey-title').textContent = 'Rumo a ' + targetMap.name;
+  document.getElementById('journey-title').textContent = _journey.titlePrefix + targetMap.name;
   document.getElementById('journey-overlay').classList.add('show');
   _showJourneyStep();
 }
@@ -34283,11 +35286,20 @@ function _addJourneyBtn(container, icon, title, desc, cls, onClick) {
 function _journeyArrive() {
   const j = _journey;
   if (!j) return;
+  const skipReboot = j.skipReboot;
+  const targetName = j.targetMap.name;
   _closeJourney();
-  // Boot no novo mapa
+  if (skipReboot) {
+    // First arrival from cidade — mapa já booted, só anuncia chegada
+    if (typeof dmNarrate === 'function') {
+      dmNarrate({ text: 'Você chega em ' + targetName + '.', type: 'action' });
+    }
+    return;
+  }
+  // Map-to-map travel — boot no novo mapa
   setupChoices.map = j.targetMapId;
   if (typeof dmNarrate === 'function') {
-    dmNarrate({ text: 'Você chega às terras de ' + j.targetMap.name + '.', type: 'action' });
+    dmNarrate({ text: 'Você chega às terras de ' + targetName + '.', type: 'action' });
   }
   if (typeof boot === 'function') boot();
 }
@@ -35177,6 +36189,8 @@ var visitedMapIds = new Set();
 
 function openCartography() {
   // X-6.5.51l: reset zoom/pan ao abrir pra sempre ver mapa inteiro
+  // NOTA: este openCartography é overridden pela versão V2 em ~36746
+  // (`overlay.innerHTML = ...` cria xcart-canvas). Mantido por compat.
   _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0;
   document.getElementById('cartography-overlay').classList.add('visible');
   renderCartography();
@@ -35205,263 +36219,79 @@ function _cartTx(x, w) { return (x - w / 2) * _cartZoom + w / 2 + _cartPanX; }
 function _cartTy(y, h) { return (y - h / 2) * _cartZoom + h / 2 + _cartPanY; }
 
 function renderCartography() {
+  // v12.5 (2026-05-06) — REWRITE pra usar CartShared canonical (mesmo
+  // backend de cidade.html). User reportou "o mapa de valdoria na
+  // exploracao.html mostra muito mais locais que da cidade.html".
+  // Cause: antes iterava Object.keys(FIXED_MAPS) — 30+ maps incluindo
+  // dungeons. Agora itera apenas CART_BIOMES_V2 (= CartShared.CART_BIOMES,
+  // 22 locais oficiais do mundo) — paridade total com cidade.
+  // NOTA: este renderCartography é reassinado pra _xcartDraw em ~37008.
+  // Mantido por compat (caso outros codepath chamem direto). xcartDraw
+  // já usa HiDPI corretamente via _xcartInit.
   const canvas = document.getElementById('cart-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
 
-  // X-6.5.51l: pergaminho papel — fundo cream + textura noise + bordas
-  // envelhecidas (vinheta marrom)
-  // 1. Base cream com gradient suave de iluminacao
-  const baseGrad = ctx.createLinearGradient(0, 0, 0, h);
-  baseGrad.addColorStop(0, '#ecd6a8');
-  baseGrad.addColorStop(0.5, '#e0c590');
-  baseGrad.addColorStop(1, '#c8a868');
-  ctx.fillStyle = baseGrad;
-  ctx.fillRect(0, 0, w, h);
-  // 2. Manchas/idade — pontos marrons sutis espalhados
-  const stainRng = seededRng(7777);
-  ctx.fillStyle = 'rgba(120, 80, 30, 0.08)';
-  for (let i = 0; i < 32; i++) {
-    const sx = stainRng() * w;
-    const sy = stainRng() * h;
-    const sr = 6 + stainRng() * 14;
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-    ctx.fill();
+  // STAGE 1: pergaminho velho manchado (canonical CartShared, mesmo de cidade)
+  if (window.CartShared && CartShared._drawAgedParchment) {
+    CartShared._drawAgedParchment(ctx, w, h);
+  } else {
+    // Fallback simples
+    ctx.fillStyle = '#e0c590';
+    ctx.fillRect(0, 0, w, h);
   }
-  // 3. Vinheta marrom escura nas bordas (envelhecimento)
-  const vignetteGrad = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.7);
-  vignetteGrad.addColorStop(0, 'rgba(80, 50, 20, 0)');
-  vignetteGrad.addColorStop(1, 'rgba(60, 35, 12, 0.45)');
-  ctx.fillStyle = vignetteGrad;
-  ctx.fillRect(0, 0, w, h);
 
-  // X-6.5.51l: clip pra zoom nao vazar pra fora do canvas
+  // STAGE 2: pan/zoom transform
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, w, h);
-  ctx.clip();
+  ctx.translate(_cartPanX, _cartPanY);
+  ctx.scale(_cartZoom, _cartZoom);
 
-  const margin = 34;
-  const mw = w - margin * 2;
-  const mh = h - margin * 2 - 18;
-  const topOffset = 22;
-
-  const mapIds = Object.keys(FIXED_MAPS);
-
-  // Zonas biomáticas como halos coloridos suaves
-  const biomeZones = {
-    plains:    { color: 'rgba(180, 200, 120, 0.32)' },
-    forest:    { color: 'rgba(80, 140, 70, 0.32)' },
-    swamp:     { color: 'rgba(100, 110, 80, 0.36)' },
-    mountain:  { color: 'rgba(140, 140, 150, 0.32)' },
-    desert:    { color: 'rgba(220, 180, 90, 0.36)' },
-    snow:      { color: 'rgba(200, 220, 230, 0.42)' },
-    cave:      { color: 'rgba(60, 60, 80, 0.40)' },
-    volcanic:  { color: 'rgba(220, 110, 60, 0.36)' },
-    graveyard: { color: 'rgba(120, 110, 130, 0.36)' }
-  };
-  // Desenha halos de bioma (nuvens suaves por trás) — coords logicas
-  mapIds.forEach(mid => {
-    const m = FIXED_MAPS[mid];
-    if (!m.worldPos) return;
-    const lx = margin + m.worldPos.x * mw;
-    const ly = topOffset + margin + m.worldPos.y * mh;
-    const x = _cartTx(lx, w), y = _cartTy(ly, h);
-    const zone = biomeZones[m.biome];
-    if (!zone) return;
-    const r = 50 * _cartZoom;
-    const grad = ctx.createRadialGradient(x, y, 5 * _cartZoom, x, y, r);
-    grad.addColorStop(0, zone.color);
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x - r, y - r, r * 2, r * 2);
-  });
-
-  // X-6.5.51l: edges como caminhos curvos organicos (Bezier) — cor de tinta
-  // marrom envelhecida sobre o pergaminho. Control point offset perpendicular
-  // ao segmento da linha gera curva natural. Stroke duplo (sombra + tinta)
-  // pra dar look de tinta seca e tinta fresca.
-  const drawnEdges = new Set();
-  mapIds.forEach(mid => {
-    const m = FIXED_MAPS[mid];
-    if (!m.worldPos || !m.edges) return;
-    const lFromX = margin + m.worldPos.x * mw;
-    const lFromY = topOffset + margin + m.worldPos.y * mh;
-    const fromX = _cartTx(lFromX, w), fromY = _cartTy(lFromY, h);
-    (m.edges || []).forEach(ed => {
-      if (!ed.targetMap) return;
-      const target = FIXED_MAPS[ed.targetMap];
-      if (!target || !target.worldPos) return;
-      const edgeKey = [mid, ed.targetMap].sort().join('↔');
-      if (drawnEdges.has(edgeKey)) return;
-      drawnEdges.add(edgeKey);
-      const lToX = margin + target.worldPos.x * mw;
-      const lToY = topOffset + margin + target.worldPos.y * mh;
-      const toX = _cartTx(lToX, w), toY = _cartTy(lToY, h);
-      // Calcula 2 control points perpendiculares ao segmento, com offset
-      // determinado pelo edgeKey (consistente entre frames)
-      const dx = toX - fromX, dy = toY - fromY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const perpX = -dy / Math.max(dist, 1);
-      const perpY = dx / Math.max(dist, 1);
-      // Seed determinada por edgeKey (mesmo curve sempre)
-      let seed = 0;
-      for (let i = 0; i < edgeKey.length; i++) seed = (seed * 31 + edgeKey.charCodeAt(i)) | 0;
-      const seedRng = seededRng(seed);
-      const offset1 = (seedRng() - 0.5) * dist * 0.30;
-      const offset2 = (seedRng() - 0.5) * dist * 0.30;
-      const cp1X = fromX + dx * 0.33 + perpX * offset1;
-      const cp1Y = fromY + dy * 0.33 + perpY * offset1;
-      const cp2X = fromX + dx * 0.66 + perpX * offset2;
-      const cp2Y = fromY + dy * 0.66 + perpY * offset2;
-      // Stroke "sombra" (mais escura, mais grossa)
-      ctx.strokeStyle = 'rgba(70, 40, 18, 0.35)';
-      ctx.lineWidth = 3.5;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      ctx.moveTo(fromX, fromY);
-      ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
-      ctx.stroke();
-      // Stroke "tinta" (cor da tinta marrom)
-      ctx.strokeStyle = 'rgba(110, 70, 30, 0.85)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(fromX, fromY);
-      ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
-      ctx.stroke();
+  // Pictogramas dos biomes (todos 22 conhecidos no exploracao — diferente
+  // de cidade que tem visibility filter via known_locations)
+  if (typeof CART_BIOMES_V2 !== 'undefined' && CartShared && CartShared._drawBiomeArt) {
+    CART_BIOMES_V2.forEach(function(b){
+      CartShared._drawBiomeArt(ctx, b, w, h);
     });
-  });
-  ctx.setLineDash([]);
+  }
+  // Paths
+  if (typeof CART_PATHS_V2 !== 'undefined' && CartShared && CartShared._drawCartPath) {
+    CART_PATHS_V2.forEach(function(p){
+      CartShared._drawCartPath(ctx, p[0], p[1], w, h, CART_BIOMES_V2);
+    });
+  }
+  // Nodes (label + dot)
+  if (CART_BIOMES_V2 && CartShared._drawCartNode) {
+    CART_BIOMES_V2.forEach(function(b){
+      CartShared._drawCartNode(ctx, b, w, h, _xcartHoverNode === b);
+    });
+  }
+  // Player pin no biome atual (look up by S.biome ou S.mapDef.biome)
+  if (CART_BIOMES_V2 && CartShared._drawPlayerPin) {
+    var pBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
+    var playerNode = CART_BIOMES_V2.find(function(b){
+      return b.key === pBiome || b.biome === pBiome;
+    });
+    if (playerNode) CartShared._drawPlayerPin(ctx, playerNode, w, h);
+  }
+  ctx.restore();
 
-  // Nodes
-  const nodeRadius = 12 * _cartZoom;
-  const hitRadius = 18 * _cartZoom;
-  _cartNodes = [];
-  const biomeIcons = {
-    plains: '🌾', forest: '🌲', swamp: '🌿', mountain: '⛰',
-    desert: '🏜', snow: '❄', cave: '🕳', volcanic: '🌋', graveyard: '🪦'
-  };
-
-  // Ordem de desenho: desconhecidos → visitados → atual
-  const sorted = [...mapIds].sort((a, b) => {
-    const aCur = S && S.mapId === a ? 2 : visitedMapIds.has(a) ? 1 : 0;
-    const bCur = S && S.mapId === b ? 2 : visitedMapIds.has(b) ? 1 : 0;
-    return aCur - bCur;
-  });
-
-  sorted.forEach(mid => {
-    const m = FIXED_MAPS[mid];
-    if (!m.worldPos) return;
-    const lx = margin + m.worldPos.x * mw;
-    const ly = topOffset + margin + m.worldPos.y * mh;
-    const x = _cartTx(lx, w), y = _cartTy(ly, h);
-    const isCurrent = S && S.mapId === mid;
-    const isVisited = visitedMapIds.has(mid);
-    _cartNodes.push({ id: mid, x, y, r: hitRadius });
-
-    const biomePal = BIOME_COLORS[m.biome] || BIOME_COLORS.forest;
-    const fillColor = biomePal['.'] || '#4a4030';
-
-    // Halo pulsante pro atual
-    if (isCurrent) {
-      const pulse = 0.5 + Math.sin(Date.now() * 0.003) * 0.25;
-      ctx.fillStyle = 'rgba(196, 149, 58, ' + (pulse * 0.6).toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.arc(x, y, nodeRadius + 10 * _cartZoom, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Disc sombra
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
-    ctx.beginPath();
-    ctx.arc(x + 1.5 * _cartZoom, y + 2.5 * _cartZoom, nodeRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Node — usa fundo cream pra legibilidade no pergaminho
-    ctx.fillStyle = isCurrent ? '#f0d890' : (isVisited ? '#d8b878' : '#a08858');
-    ctx.beginPath();
-    ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
-    ctx.fill();
-    // Halo interno cor do bioma (suave)
-    ctx.fillStyle = fillColor;
-    ctx.globalAlpha = 0.35;
-    ctx.beginPath();
-    ctx.arc(x, y, nodeRadius * 0.85, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Border tinta marrom
-    ctx.strokeStyle = isCurrent ? '#5a3018' : (isVisited ? '#6e4220' : '#8a6840');
-    ctx.lineWidth = isCurrent ? 2.5 : 1.6;
-    ctx.beginPath();
-    ctx.arc(x, y, nodeRadius, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Ícone bioma
-    ctx.font = (11 * _cartZoom).toFixed(0) + 'px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#3a1f08';
-    ctx.fillText(biomeIcons[m.biome] || '?', x, y);
-
-    // Dungeon dot
-    if (m.dungeons && m.dungeons.length > 0) {
-      ctx.fillStyle = '#9c2828';
-      ctx.beginPath();
-      ctx.arc(x + nodeRadius - 2 * _cartZoom, y - nodeRadius + 2 * _cartZoom, 2.5 * _cartZoom, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(60, 30, 18, 0.6)';
-      ctx.lineWidth = 0.6 * _cartZoom;
-      ctx.stroke();
-    }
-
-    // Label só para atual + visitados — agora cor de tinta marrom sobre cream
-    if (isCurrent || isVisited) {
-      const labelText = m.name;
-      ctx.font = (isCurrent ? 'bold ' : '') + (9 * _cartZoom).toFixed(0) + 'px Cinzel, serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      const textW = ctx.measureText(labelText).width;
-      const padH = 4 * _cartZoom, padV = 2 * _cartZoom;
-      const labelX = x - textW / 2 - padH;
-      const labelY = y + nodeRadius + 3 * _cartZoom;
-      // Pill de fundo cream com borda marrom
-      ctx.fillStyle = isCurrent ? 'rgba(245, 220, 170, 0.95)' : 'rgba(228, 200, 150, 0.85)';
-      ctx.fillRect(labelX, labelY, textW + padH * 2, 12 * _cartZoom + padV);
-      ctx.strokeStyle = isCurrent ? '#5a3018' : 'rgba(110, 70, 30, 0.6)';
-      ctx.lineWidth = isCurrent ? 1.0 : 0.6;
-      ctx.strokeRect(labelX - 0.5, labelY - 0.5, textW + padH * 2 + 1, 13 * _cartZoom + padV);
-      // Texto cor de tinta
-      ctx.fillStyle = '#3a1f08';
-      ctx.fillText(labelText, x, labelY + 2 * _cartZoom);
-    }
-  });
-
-  ctx.restore();  // fim do clip
-
-  // Bússola no canto superior-direito (fora do clip — sempre na mesma posicao)
-  drawCompassRose(ctx, w - 44, topOffset + 32, 18);
-
-  // Título + subtítulo flavor
+  // STAGE 3: Compass + título flavor
+  if (CartShared && CartShared._drawCartCompass) {
+    CartShared._drawCartCompass(ctx, w, h);
+  }
   ctx.font = 'italic 10px serif';
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(60, 35, 12, 0.85)';
   ctx.fillText('"Aqui jazem as terras conhecidas de Valdoria..."', w / 2, 14);
 
-  // Footer: mapa atual destacado
-  if (S && S.mapId && FIXED_MAPS[S.mapId]) {
-    ctx.font = 'bold 11px Cinzel, serif';
-    ctx.fillStyle = '#3a1f08';
-    ctx.textAlign = 'center';
-    ctx.fillText('Vós estais em: ' + FIXED_MAPS[S.mapId].name, w / 2, h - 14);
-    ctx.font = 'italic 9px serif';
-    ctx.fillStyle = 'rgba(60, 35, 12, 0.7)';
-    ctx.fillText(visitedMapIds.size + '/' + mapIds.length + ' terras descobertas', w / 2, h - 3);
+  // STAGE 4: scorched edges (mesmo final de cidade)
+  if (CartShared && CartShared._drawScorchedEdge) {
+    CartShared._drawScorchedEdge(ctx, w, h, 0.38);
   }
 }
+
 
 // X-6.5.51l: zoom controls + center on player no cart-canvas
 function _cartUpdateZoomBtns() {
@@ -35920,14 +36750,20 @@ function openCartography() {
   _xcartCanvas = document.getElementById('xcart-canvas');
   _xcartCtx = _xcartCanvas.getContext('2d');
 
-  // HiDPI canvas setup
+  // HiDPI canvas setup — 2026-05-06: cap DPR em 2 + safety 8000px backing
+  // (GPU limit). Em smartphones com DPR=3 + rect grande, sem cap o backing
+  // pode causar fallback pra software rendering (FPS catastrofica).
   var rect = _xcartCanvas.getBoundingClientRect();
-  var dpr = window.devicePixelRatio || 1;
-  _xcartCanvas.width = rect.width * dpr;
-  _xcartCanvas.height = rect.height * dpr;
+  var rectW = Math.max(1, rect.width);
+  var rectH = Math.max(1, rect.height);
+  var rawDpr = window.devicePixelRatio || 1;
+  var safeDpr = 8000 / Math.max(rectW, rectH);
+  var dpr = Math.max(1, Math.min(rawDpr, 2, safeDpr));
+  _xcartCanvas.width = Math.round(rectW * dpr);
+  _xcartCanvas.height = Math.round(rectH * dpr);
   _xcartCtx.scale(dpr, dpr);
-  _xcartW = rect.width;
-  _xcartH = rect.height;
+  _xcartW = rectW;
+  _xcartH = rectH;
 
   _xcartWireEvents();
   _xcartDraw();
@@ -37349,17 +38185,17 @@ function bindQuickActions() {
   if (_cbl) _cbl.addEventListener('click', doLongRest);
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
 
-  // X-6.5.20: mochila abre a TELA REAL /inventory/ (webapp SPA já existente
-  // com 7 arquivos JS completos em valdoria-webapp/inventory/). User pediu:
-  // "já existe um sistema de inventário completo, implemente ele como popup
-  // ao apertar o botão da mochila". REMOTE: navega mantendo return=exploracao;
-  // LOCAL (file://): toast informando que precisa do jogo real.
+  // X-6.5.20 + v12.4 (2026-05-06): mochila abre POPUP fullscreen com mesmo
+  // visual de cidade.html#_showInventoryPopup. User pediu "deve ser uma
+  // mochila padrão, mesma fonte de design e funcionalidades abrindo como
+  // popup na tela inteira em ambos html". Popup canonical aqui no HTML
+  // (#inv-overlay). REMOTE: ainda navega pra /inventory/ se preferir o
+  // sistema completo.
   document.getElementById('btn-inventory').addEventListener('click', function() {
-    if (window.__EXPLORE_MODE === 'remote') {
-      // Preserva contexto de retorno via 'return' param. /inventory/ sabe
-      // voltar pra /exploracao/ quando fechar.
+    if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN) {
+      // REMOTE: usa /inventory/ webapp SPA (sistema completo com 7 arquivos JS)
       var params = new URLSearchParams();
-      if (window.__EXPLORE_TOKEN) params.set('token', window.__EXPLORE_TOKEN);
+      params.set('token', window.__EXPLORE_TOKEN);
       if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
       if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
       params.set('return', 'exploracao');
@@ -37368,17 +38204,29 @@ function bindQuickActions() {
       window.__valdoria_transitioning = true;
       window.location.href = '/inventory/?' + params.toString();
     } else {
-      // LOCAL (file://): sistema real requer bot DEV. Mostra narração.
-      if (typeof dmNarrate === 'function') {
-        dmNarrate({
-          text: '📦 A mochila está no acampamento principal. (Disponível no jogo real via Telegram.)',
-          type: 'ambient'
-        });
-      } else {
-        console.info('[INVENTORY] LOCAL mode — use bot DEV para acessar inventário real');
-      }
+      // LOCAL (file://): popup inline canonical
+      _showExploracaoInventoryPopup();
     }
   });
+
+  // Wire close button + backdrop click
+  var invCloseBtn = document.getElementById('inv-close-btn');
+  if (invCloseBtn) {
+    invCloseBtn.addEventListener('click', _closeExploracaoInventoryPopup);
+  }
+  var invOverlay = document.getElementById('inv-overlay');
+  if (invOverlay) {
+    invOverlay.addEventListener('click', function(e) {
+      if (e.target === invOverlay) _closeExploracaoInventoryPopup();
+    });
+    // v12.5: move overlay INTO #frame para position:absolute respeitar
+    // viewport do jogo (não viewport do browser). User reportou
+    // "Mochila abrindo na tela inteira sem limitação horizontal".
+    var frame = document.getElementById('frame');
+    if (frame && invOverlay.parentNode !== frame) {
+      frame.appendChild(invOverlay);
+    }
+  }
 
   // X-6.5.19: botão dedicado de Diário de Missões (antes bindado no 🎒).
   // openQuestJournal agora mostra SÓ missões (opts.questsOnly=true).
@@ -38030,15 +38878,17 @@ function boot() {
       catch (_) {}
     }, 2000);
     // === Biome Arrival (Fase 6.4) ===
-    // Cidade já tocou playTravelAnimation (4.5s) antes do redirect, então aqui
-    // só consumimos a flag — exploracao só renderiza o mapa do bioma correto.
+    // Cidade rodou journey-overlay (com hazards/dice/etc) ANTES do
+    // redirect, então aqui só consumimos a flag. Exploracao só renderiza
+    // hex map do bioma. v11.1: trigger journey-overlay aqui em exploracao
+    // foi REMOVIDO — agora roda em cidade.html (user pediu: "deve aparecer
+    // enquanto está no mapa de valdoria, até finalizar todos os eventos").
     if (window.__BIOME_ARRIVAL) {
       var _arrKey = window.__BIOME_ARRIVAL;
       window.__BIOME_ARRIVAL = null;
       try { LOG('BOOT', 'arrived from cidade biome=' + _arrKey); } catch (_) {}
-      // FIX 2026-05-04 (audit): welcome toast só quando vem da cidade (back=cidade)
-      // — antes era silente. Mostra nome legível do bioma.
       if (window.__BACK_TO_CIDADE) {
+        // Fallback (sem from=cidade ou journey indisponível): toast simples
         var BIOME_DISPLAY_NAMES = {
           plains: 'Planície de Valdoria',
           forest: 'Floresta dos Lobos',
@@ -38051,13 +38901,11 @@ function boot() {
           graveyard: 'Cemitério Esquecido'
         };
         var _arrLabel = BIOME_DISPLAY_NAMES[_arrKey] || _arrKey;
-        // 1.5s delay pra UI estar pronta + toast persistir 4.5s (maior leitura)
         setTimeout(function(){
           try {
             if (typeof vToast === 'function') {
               vToast('🏕️ Você chegou em ' + _arrLabel);
             } else {
-              // Fallback DOM se vToast não disponível
               var t = document.createElement('div');
               t.textContent = 'Você chegou em ' + _arrLabel;
               t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(20,15,10,0.95);color:#c4953a;padding:10px 18px;border:1px solid #c4953a;border-radius:8px;font-family:Cinzel,serif;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.5);';

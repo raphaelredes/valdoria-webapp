@@ -452,6 +452,10 @@ function _hubMiniBar(type, pct) {
 function _buildLocCell(ico, name, btn) {
     var cell = _hubDiv('hub-loc');
 
+    /* USER REQUEST 2026-05-05: data-cb pra CSS aplicar cor temática por local
+       (evita "tudo gold" — cada local tem sua cor heráldica natural). */
+    if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
+
     /* Icon: heraldic SVG (canonical) ou emoji fallback */
     var icoEl = _hubDiv('hl-ico');
     if (typeof ico === 'string' && ico.indexOf('<svg') === 0) {
