@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:25:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:30:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -10172,26 +10172,29 @@ window.__onIntroTap = function() {
       var page = pages[idx];
       var cumulativeDelay = 0;
       var lineDurations = [];
+      /* FIX 2026-05-06: appendar TODAS as linhas instantaneamente pra card já
+         dimensionar pra altura final, e usar animation-delay pra sequenciar
+         o reveal. Antes appendava cada linha via setTimeout, fazendo o card
+         crescer gradualmente (visual amador). animation-fill-mode no CSS
+         controla estado inicial (invisível) durante o delay. */
       page.forEach(function (line, lineIdx) {
         var revealDur = _computeRevealDuration(line.text || '');
         lineDurations.push(revealDur);
-        function spawn() {
-          if (myToken !== renderToken) return;
-          var div = document.createElement('div');
-          var safe = _sanitizeDialogueHTML(line.text || '');
-          div.style.setProperty('--reveal-dur', revealDur + 'ms');
-          if (line.type === 'speech') {
-            div.className = 'enc-line enc-speech';
-            if (line.speaker) div.setAttribute('data-speaker', line.speaker);
-            div.innerHTML = safe;
-          } else {
-            div.className = 'enc-line enc-narration';
-            div.innerHTML = safe;
-          }
-          bodyEl.appendChild(div);
+        var div = document.createElement('div');
+        var safe = _sanitizeDialogueHTML(line.text || '');
+        div.style.setProperty('--reveal-dur', revealDur + 'ms');
+        if (lineIdx > 0) {
+          div.style.animationDelay = cumulativeDelay + 'ms';
         }
-        if (lineIdx === 0) spawn();
-        else setTimeout(spawn, cumulativeDelay);
+        if (line.type === 'speech') {
+          div.className = 'enc-line enc-speech';
+          if (line.speaker) div.setAttribute('data-speaker', line.speaker);
+          div.innerHTML = safe;
+        } else {
+          div.className = 'enc-line enc-narration';
+          div.innerHTML = safe;
+        }
+        bodyEl.appendChild(div);
         cumulativeDelay += Math.round(revealDur * 0.6);
       });
 
@@ -10331,7 +10334,11 @@ window.__onIntroTap = function() {
   margin: 0;                    /* gap no parent .stub-popup-body controla */
   clip-path: inset(0 100% 0 0);
   -webkit-clip-path: inset(0 100% 0 0);
-  animation: encReveal var(--reveal-dur, 1400ms) cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
+  /* FIX 2026-05-06: 'both' aplica o keyframe inicial DURANTE animation-delay
+     (linhas com delay ficam invisíveis até começar) E mantém estado final
+     após terminar (linhas reveladas permanecem visíveis). Antes era 'forwards'
+     só, então linhas 2+ apareciam sem clip durante o delay. */
+  animation: encReveal var(--reveal-dur, 1400ms) cubic-bezier(0.55, 0.08, 0.3, 1) both;
 }
 
 /* VoiceLine acima do body fica integrada (subtítulo em italic, sem caixa pesada).
