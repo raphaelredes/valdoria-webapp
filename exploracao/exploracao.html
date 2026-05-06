@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:48:39Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T19:53:07Z - do not edit directly, edit source -->
 
 
 <!--
@@ -9983,6 +9983,10 @@ window.__onIntroTap = function() {
       var choicesElCleanup = document.getElementById('stub-popup-choices');
       if (choicesElCleanup) {
         choicesElCleanup.classList.remove('choices-pending', 'choices-revealing');
+        /* Cleanup do idle-loop (.choice-idle-pulse classes residuais) */
+        choicesElCleanup.querySelectorAll('.choice-idle-pulse').forEach(function (c) {
+          c.classList.remove('choice-idle-pulse');
+        });
       }
       var navEl = document.getElementById('stub-popup-nav-paginated');
       if (navEl) navEl.style.display = 'none';
@@ -10178,9 +10182,39 @@ window.__onIntroTap = function() {
        - revealSkipped: idempotente — uma vez pulado, próximos toques no-op
        - pageRenderTime: timestamp pra debounce 250ms (anti tap acidental
          em transição de página, ex.: user spammando "Próximo →")
-       - skipReveal(): cancela animations em curso e força estado final */
+       - skipReveal(): cancela animations em curso e força estado final
+       - choiceIdleTimer: timeout do loop "rotating highlight" que pulsa
+         cada choice uma por vez pra sinalizar que falta escolher. */
     var pageRenderTime = 0;
     var revealSkipped = false;
+    var choiceIdleTimer = null;
+    var choiceIdleStopped = false;
+    function _stopChoiceIdle() {
+      choiceIdleStopped = true;
+      if (choiceIdleTimer) { clearTimeout(choiceIdleTimer); choiceIdleTimer = null; }
+      if (choicesEl) {
+        choicesEl.querySelectorAll('.choice-idle-pulse').forEach(function (c) {
+          c.classList.remove('choice-idle-pulse');
+        });
+      }
+    }
+    function _startChoiceIdleLoop() {
+      if (!choicesEl) return;
+      var choices = choicesEl.querySelectorAll('.stub-popup-choice');
+      if (choices.length === 0) return;
+      choiceIdleStopped = false;
+      var idx = 0;
+      var INTERVAL_MS = 900;  /* duração de cada pulse + pausa */
+      function tick() {
+        if (choiceIdleStopped) return;
+        choices.forEach(function (c, i) {
+          c.classList.toggle('choice-idle-pulse', i === idx);
+        });
+        idx = (idx + 1) % choices.length;
+        choiceIdleTimer = setTimeout(tick, INTERVAL_MS);
+      }
+      tick();
+    }
     function skipReveal(currentIdx) {
       if (revealSkipped) return;                              /* idempotente */
       if (Date.now() - pageRenderTime < 250) return;          /* tap acidental */
@@ -10206,8 +10240,20 @@ window.__onIntroTap = function() {
             }
           });
           choicesEl.style.pointerEvents = '';
+          /* Iniciar idle-loop imediato (sem aguardar cascata) */
+          _startChoiceIdleLoop();
         }
       }
+    }
+    /* Parar loop ao user CLICAR em qualquer choice (escolha feita) */
+    if (choicesEl && !choicesEl._idleStopHandler) {
+      choicesEl._idleStopHandler = function (ev) {
+        var t = ev.target;
+        if (t && t.closest && t.closest('.stub-popup-choice')) {
+          _stopChoiceIdle();
+        }
+      };
+      choicesEl.addEventListener('click', choicesEl._idleStopHandler, true);
     }
     /* Wire listener no card (click/pointerdown). Ignora clicks em botões
        reais (choices, nav prev/next, close) — esses têm handlers próprios. */
@@ -10289,6 +10335,17 @@ window.__onIntroTap = function() {
             choicesEl.classList.remove('choices-pending');
             choicesEl.classList.add('choices-revealing');
             choicesEl.style.pointerEvents = '';
+            /* PADRAO_ALDRIC idle-loop 2026-05-06: após cascata épica
+               terminar (~1s + 140ms × N choices), iniciar rotating
+               highlight que pulsa cada choice uma por vez pra sinalizar
+               ao jogador que precisa escolher. Loop infinito até user
+               decidir, fechar, pular ou trocar página. */
+            var nChoices = choicesEl.querySelectorAll('.stub-popup-choice').length;
+            var cascadeEnd = 720 + (nChoices * 140);  /* ms até última choice acabar reveal */
+            setTimeout(function () {
+              if (myToken !== renderToken) return;
+              _startChoiceIdleLoop();
+            }, cascadeEnd);
           }
         }, totalDelay);
       } else {
@@ -10305,10 +10362,10 @@ window.__onIntroTap = function() {
     }
 
     if (prevBtn) prevBtn.onclick = function () {
-      if (currentPage > 0) { currentPage--; renderPage(currentPage); }
+      if (currentPage > 0) { _stopChoiceIdle(); currentPage--; renderPage(currentPage); }
     };
     if (nextBtn) nextBtn.onclick = function () {
-      if (currentPage < pages.length - 1) { currentPage++; renderPage(currentPage); }
+      if (currentPage < pages.length - 1) { _stopChoiceIdle(); currentPage++; renderPage(currentPage); }
     };
 
     var keyHandler = function (ev) {
@@ -10525,6 +10582,49 @@ window.__onIntroTap = function() {
 @keyframes epicChoiceFadeOnly {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IDLE-LOOP — rotating highlight nas choices (2026-05-06)
+   Após cascata épica revelar choices, loop infinito pulsa cada choice uma
+   por vez (~900ms cada) pra sinalizar ao jogador que precisa escolher.
+   Para ao clicar choice, trocar página, pular reveal, ou fechar popup.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.stub-popup-choice.choice-idle-pulse {
+  animation: choiceIdlePulse 900ms cubic-bezier(0.4, 0, 0.6, 1);
+  border-color: rgba(196, 149, 58, 0.95);
+}
+
+@keyframes choiceIdlePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
+    transform: translateX(0);
+  }
+  35% {
+    box-shadow: 0 0 22px 3px rgba(196, 149, 58, 0.55),
+                inset 0 0 14px 1px rgba(196, 149, 58, 0.22);
+    transform: translateX(3px);
+  }
+  60% {
+    box-shadow: 0 0 14px 2px rgba(196, 149, 58, 0.32),
+                inset 0 0 8px 1px rgba(196, 149, 58, 0.14);
+    transform: translateX(0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 149, 58, 0);
+    transform: translateX(0);
+  }
+}
+
+/* prefers-reduced-motion: idle hint mais sutil (só border tint, sem transform/shadow) */
+@media (prefers-reduced-motion: reduce) {
+  .stub-popup-choice.choice-idle-pulse {
+    animation: choiceIdlePulseReduced 900ms ease-in-out;
+  }
+  @keyframes choiceIdlePulseReduced {
+    0%, 100% { border-color: rgba(196, 149, 58, 0.45); }
+    50%      { border-color: rgba(196, 149, 58, 0.95); }
+  }
 }
 
 @keyframes encReveal {
