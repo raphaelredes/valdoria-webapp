@@ -576,8 +576,10 @@ LOG SINK (Fase 7):
        Override do font-size emoji do .hl-ico — pra SVG renderizar com tamanho correto.
        USER REQUEST 2026-05-05: cada local tem sua COR TEMÁTICA natural (não tudo gold).
        Default: gold suave; per-cb override aplica cor heráldica do local. */
-    .hub-loc .hl-ico svg { width: 30px; height: 30px; color: var(--v-gold, #c4953a); transition: color 0.25s ease; }
-    .fb-btn .fb-heraldic { color: var(--v-gold, #c4953a); }
+    /* 2026-05-06 user req: NÃO forçar gold como fallback. Default neutro stone
+       pra locations não mapeadas; .fb-heraldic agora pega cor inline natural. */
+    .hub-loc .hl-ico svg { width: 30px; height: 30px; color: #8a7a6a; transition: color 0.25s ease; }
+    /* .fb-btn .fb-heraldic — sem color override; cor vem inline do _heralB() via HERALDIC_COLORS */
 
     /* === Cores temáticas por local (heraldic palette diversa) === */
     /* Convívio — tons quentes/sociais */
@@ -7660,7 +7662,10 @@ function renderFooter(){
   // Quick row: [Mochila][Ficha][Grupo] — brasões heráldicos canonical
   // (toggle · removido daqui — agora fica em #footer-collapse-toggle FORA do panel)
   function _heralB(id){
-    return '<svg class="fb-heraldic" viewBox="0 0 120 120" style="width:18px;height:18px;flex-shrink:0;color:var(--v-gold,#c4953a);"><use href="#' + id + '"/></svg>';
+    // 2026-05-06: cor natural do HERALDIC_COLORS (couro pra mochila, cinza-azul
+    // pra grupo, etc) — fallback neutro stone (não-gold) pra IDs não mapeados.
+    var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
+    return '<svg class="fb-heraldic" viewBox="0 0 120 120" style="width:18px;height:18px;flex-shrink:0;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
   quickEl.innerHTML = ''
     + '<button class="fb-btn" data-action="inventory">' + _heralB('ic-mochila') + 'Mochila</button>'
@@ -8667,7 +8672,7 @@ function _showStatusPopup(memberIdx){
       + 'padding: var(--v-space-sm, 6px); text-align: center;">'
       + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; '
       + 'display:inline-flex; align-items:center; gap:3px; justify-content:center;">'
-      + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:var(--v-gold,#c4953a);"><use href="#' + s.icon + '"/></svg>'
+      + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:' + (HERALDIC_COLORS[s.icon] || '#8a7a6a') + ';"><use href="#' + s.icon + '"/></svg>'
       + s.label + '</div>'
       + '<div style="font-size: var(--v-font-display, 20px); font-weight: 700; color: var(--v-gold, #c4953a); line-height: 1.1; margin-top: 2px;">'
       + val + '</div>'
@@ -8698,7 +8703,7 @@ function _showStatusPopup(memberIdx){
       + 'background: rgba(196,149,58,0.06); border: 1px solid var(--v-border, #4a3828); '
       + 'border-radius: var(--v-radius-sm, 6px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);">'
       + '<span style="display:inline-flex; align-items:center; gap:4px; font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484);">'
-      + '<svg viewBox="0 0 120 120" style="width:16px;height:16px;color:var(--v-gold,#c4953a);"><use href="#' + c.icon + '"/></svg>'
+      + '<svg viewBox="0 0 120 120" style="width:16px;height:16px;color:' + (HERALDIC_COLORS[c.icon] || '#8a7a6a') + ';"><use href="#' + c.icon + '"/></svg>'
       + c.label + '</span>'
       + '<span style="font-size: var(--v-font-md, 14px); font-weight: 700; color: var(--v-gold, #c4953a);">' + c.value + '</span>'
       + '</div>';
@@ -9312,7 +9317,7 @@ function _showKillsPopup(p){
     + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
     + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); '
     + 'display: flex; flex-direction: column; align-items: center; gap: 4px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 48px; height: 48px; color: var(--v-gold, #c4953a);"><use href="#ic-ach-algoz"/></svg>'
+    + '<svg viewBox="0 0 120 120" style="width: 48px; height: 48px; color: ' + (HERALDIC_COLORS['ic-ach-algoz'] || '#c43020') + ';"><use href="#ic-ach-algoz"/></svg>'
     + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-display, 24px); '
     + 'color: var(--v-gold, #c4953a); font-weight: 700; line-height: 1;">' + total + '</div>'
     + '<div style="font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">'
@@ -9328,7 +9333,7 @@ function _showKillsPopup(p){
       + 'background: rgba(196,149,58,0.04); border: 1px solid var(--v-border, #4a3828); '
       + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 2px;">'
       + '<div style="display:flex; align-items: center; gap: var(--v-space-md, 8px); margin-bottom: 4px;">'
-      + '<svg viewBox="0 0 120 120" style="width: 22px; height: 22px; flex-shrink: 0; color: var(--v-gold, #c4953a);"><use href="#' + k.icon + '"/></svg>'
+      + '<svg viewBox="0 0 120 120" style="width: 22px; height: 22px; flex-shrink: 0; color: ' + (HERALDIC_COLORS[k.icon] || '#8a7a6a') + ';"><use href="#' + k.icon + '"/></svg>'
       + '<span style="flex: 1; font-size: var(--v-font-md, 14px); color: var(--v-text-bright, #e8dcc8);">' + k.type + '</span>'
       + '<span style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">CR ' + k.cr + '</span>'
       + '<span style="font-size: var(--v-font-md, 14px); font-weight: 700; color: var(--v-gold, #c4953a); min-width: 24px; text-align: right;">' + k.kills + '</span>'
@@ -9380,7 +9385,7 @@ function _showStreakPopup(p){
     + '<div style="flex: 1; padding: var(--v-space-md, 8px); background: rgba(196,149,58,0.06); border-radius: var(--v-radius-sm, 6px); text-align: center;">'
     + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">Recorde</div>'
     + '<div style="display:flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 20px; height: 20px; color: var(--v-gold, #c4953a);"><use href="#ic-trofeu"/></svg>'
+    + '<svg viewBox="0 0 120 120" style="width: 20px; height: 20px; color: ' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>'
     + '<span style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-lg, 18px); color: var(--v-gold, #c4953a); font-weight: 700;">' + best.wins + '</span>'
     + '</div>'
     + '</div>'
@@ -9397,7 +9402,7 @@ function _showStreakPopup(p){
     if (s.current) {
       iconHtml = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink: 0; color: #ff8a4a;"><use href="#ic-ach-indomavel"/></svg>';
     } else if (s.best) {
-      iconHtml = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink: 0; color: var(--v-gold, #c4953a);"><use href="#ic-trofeu"/></svg>';
+      iconHtml = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink: 0; color: ' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>';
     } else {
       iconHtml = '<span style="width: 16px; flex-shrink: 0; text-align: center; color: var(--v-text-dim, #a09484); font-size: 14px; line-height: 1;">·</span>';
     }
@@ -9891,6 +9896,22 @@ var HERALDIC_COLORS = {
   'ic-tochas':      '#e85020',  // laranja chama
   'ic-trofeu':      '#e8d878',  // dourado troféu (gold OK)
   'ic-vinculos':    '#c43050',  // vermelho coração
+  // ─── UI / NAVEGAÇÃO (adicionados 2026-05-06 — anti-gold sweep) ─
+  'ic-ficha':         '#c0b890',  // pergaminho (character sheet)
+  'ic-portal':        '#7a6a5a',  // pedra/portão neutro
+  'ic-ajuda':         '#5a8ac4',  // azul advisor (?)
+  'ic-sino':          '#a05028',  // bronze sino
+  'ic-coroa':         '#e8c850',  // ouro coroa (gold OK pra coroa)
+  'ic-ach-algoz':     '#c43020',  // sangue (executor/algoz)
+  'ic-fonte':         '#4a78c4',  // azul água (alias de ic-cura/poção contexto)
+  'ic-mensagem':      '#c0b890',  // pergaminho carta
+  'ic-ficha':         '#c0b890',  // pergaminho ficha
+  'ic-som':           '#a05028',  // bronze
+  'ic-enemy-beast':       '#5a8a30',  // verde besta/feral
+  'ic-enemy-fey':         '#9050a0',  // púrpura fey
+  'ic-enemy-humanoid':    '#a89478',  // tan humanoide
+  'ic-enemy-monstrosity': '#5a3030',  // vermelho-marrom monstro
+  'ic-enemy-undead':      '#d8d0c0',  // osso undead
 
   // ─── LIGAS (literais — bronze/prata/ouro/mithril) ───────────────
   'ic-liga-bronze':   '#8a5028',  // bronze
@@ -33861,8 +33882,11 @@ function _renderCityPopup(key){
 // 3 tiles (estábulo/comum/real) + linha de descanso curto. Click → _innSleep.
 function _renderInnRestPopup(bodyEl, d){
   // Helper: SVG heráldico no tile (substitui emojis 🐎/🛏️/👑/💤)
+  // 2026-05-06: cor natural do HERALDIC_COLORS (cavalo marrom, estalagem âmbar,
+  // coroa dourada — gold OK pra coroa real). Fallback neutro stone.
   function _innIco(id){
-    return '<svg viewBox="0 0 120 120" style="width:42px;height:42px;color:var(--v-gold,#c4953a);"><use href="#' + id + '"/></svg>';
+    var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
+    return '<svg viewBox="0 0 120 120" style="width:42px;height:42px;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
   bodyEl.innerHTML = ''
     + '<div class="city-subscreen">'
@@ -33888,7 +33912,7 @@ function _renderInnRestPopup(bodyEl, d){
     + '    </div>'
     + '  </div>'
     + '  <button class="subscreen-btn" data-room="short">'
-    + '    <span class="sb-icon"><svg viewBox="0 0 120 120" style="width:18px;height:18px;color:var(--v-gold,#c4953a);"><use href="#ic-sono"/></svg></span>'
+    + '    <span class="sb-icon"><svg viewBox="0 0 120 120" style="width:18px;height:18px;color:' + (HERALDIC_COLORS['ic-sono'] || '#5a78a8') + ';"><use href="#ic-sono"/></svg></span>'
     + '    <span class="sb-text">Descanso curto (1 HD)</span>'
     + '    <span class="sb-info">+5 HP — Grátis</span>'
     + '  </button>'
@@ -42978,7 +43002,7 @@ function renderHubScreen(el, screen) {
                 if (ps.ach_cb && typeof doAction === 'function') doAction(ps.ach_cb);
             });
             var achVal = _hubDiv('hp-val');
-            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
+            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
             achCard.appendChild(achVal);
             var achLbl = _hubDiv('hp-lbl');
             achLbl.textContent = 'Conquistas';
@@ -42995,7 +43019,7 @@ function renderHubScreen(el, screen) {
                 if (typeof doAction === 'function') doAction(pStats.kills_cb || 'kills_log');
             });
             var killVal = _hubDiv('hp-val');
-            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
+            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-ach-algoz'] || '#c43020') + ';"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
             killCard.appendChild(killVal);
             var killLbl = _hubDiv('hp-lbl');
             killLbl.textContent = 'Abates';
