@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Preview Heráldicos AAA — Itens do Inventário</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<!--
+  MAPA_IA — heraldic_items_preview.html (offline preview de ícones heráldicos para inventário)
+  =============================================================================================
+  ~1     <!DOCTYPE> + head (meta, title, cache-no-store)
+  ~30    <style> tema medieval dark (fundo, grid, cards, search, nav)
+  ~250   </style>
+  ~260   <body>
+  ~265   <svg defs hidden> — gradientes rh-* + symbols por família
+         (Batch 1: armas + focos mágicos. Próximos batches estendem este bloco.)
+  ~270     gradients: rh-gold, rh-silver, rh-bronze, rh-emerald, rh-sapphire, rh-violet,
+           rh-bone, rh-rust, rh-stone, rh-crimson, rh-flame, rh-shadow, rh-iron, rh-wood,
+           rh-leather, rh-blood, rh-ice, rh-arcane, rh-poison
+  ~330     === BASE SYMBOLS (reutilizáveis) — adicionados nas peças 2-5 ===
+  ~  ?     === ITEM SYMBOLS (1 por item da DB) — adicionados na peça 5 ===
+  ~  ?   </svg>
+  ~  ?   <header> h1, subtitle, search, nav de categorias
+  ~  ?   <main> seções por categoria (cat-weapon populada no Batch 1, demais são placeholders)
+  ~  ?   <footer> contagem total
+  ~  ?   <script> filter de busca por nome (live)
+
+  REGRAS APLICADAS (CLAUDE.md):
+  - viewBox 0 0 120 120 uniforme (matches existing class/race icons)
+  - Paleta rh-* sem gold forçado — gold APENAS em casos extremos (relíquias únicas)
+  - Composição em camadas: sombra base → corpo → símbolo central → highlights
+  - Sem emoji como ícone de UI; todo visual via SVG heráldico
+  - Smartphone-first viewport (max 430px de conteúdo); desktop mostra grid maior
+  - Cache no-store; arquivo standalone, abre via file:// sem servidor
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #1a1410; }
+  body {
+    background: linear-gradient(180deg, #2a2420 0%, #1a1410 100%);
+    color: #d4c8b0;
+    font-family: 'Cinzel', Georgia, serif;
+    padding: 24px 16px 60px;
+    min-height: 100vh;
+    line-height: 1.45;
+  }
+  /* ── Header ─────────────────────────────────────────── */
+  header {
+    max-width: 1500px;
+    margin: 0 auto 24px;
+    text-align: center;
+  }
+  h1 {
+    color: #c4953a;
+    font-size: 28px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 16px rgba(196,149,58,0.4), 0 0 32px rgba(196,149,58,0.2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .subtitle {
+    color: #a09484;
+    font-size: 13px;
+    margin-bottom: 14px;
+    line-height: 1.55;
+    font-family: Georgia, serif;
+  }
+  .subtitle strong { color: #c4953a; }
+  .search-box {
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.5);
+    border: 1.5px solid #4a3828;
+    border-radius: 6px;
+    color: #d4c8b0;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    margin: 8px auto 16px;
+    display: block;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus {
+    outline: none;
+    border-color: #c4953a;
+    box-shadow: 0 0 12px rgba(196,149,58,0.25);
+  }
+  .cat-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin: 12px auto 8px;
+    max-width: 1200px;
+  }
+  .cat-nav a, .cat-nav span {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid #3a2e22;
+    background: rgba(0,0,0,0.3);
+    color: #a09484;
+    transition: all 0.2s;
+    font-family: Georgia, serif;
+  }
+  .cat-nav a {
+    color: #d4c8b0;
+    cursor: pointer;
+  }
+  .cat-nav a:hover, .cat-nav a.active {
+    border-color: #c4953a;
+    color: #e8c874;
+    background: rgba(196,149,58,0.08);
+  }
+  .cat-nav .upcoming {
+    opacity: 0.5;
+    font-style: italic;
+  }
+  /* ── Sections + Subsections ─────────────────────────── */
+  main { max-width: 1500px; margin: 0 auto; }
+  section {
+    margin-bottom: 48px;
+    padding-top: 8px;
+  }
+  section h2 {
+    color: #c4953a;
+    font-size: 22px;
+    letter-spacing: 2.5px;
+    border-bottom: 1px solid #4a3828;
+    padding: 0 0 8px 8px;
+    margin: 0 8px 18px;
+    text-transform: uppercase;
+  }
+  section h3 {
+    color: #a89478;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    margin: 24px 0 12px 12px;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  section h3 .count {
+    color: #6a5a4a;
+    font-size: 11px;
+    margin-left: 6px;
+  }
+  /* ── Item grid ──────────────────────────────────────── */
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 0 8px;
+  }
+  .item-card {
+    background: linear-gradient(165deg, #2e2520 0%, #1a1410 100%);
+    border: 1.5px solid #4a3828;
+    border-radius: 10px;
+    padding: 14px 8px 10px;
+    text-align: center;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .item-card:hover {
+    border-color: #c4953a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.55), 0 0 16px rgba(196,149,58,0.25);
+  }
+  .item-card.rarity-uncommon { border-color: #3a8a3a; }
+  .item-card.rarity-rare    { border-color: #4a78c4; }
+  .item-card.rarity-epic    { border-color: #8a4ab0; }
+  .item-card.rarity-legend  { border-color: #c4953a; box-shadow: 0 0 8px rgba(196,149,58,0.2); }
+  .item-card.rarity-quest   { border-color: #a04030; }
+  .item-card.rarity-junk    { border-color: #5a5a5a; opacity: 0.85; }
+  .item-icon {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.55));
+  }
+  .item-icon svg { width: 100%; height: 100%; display: block; }
+  .item-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e8dcc8;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    line-height: 1.25;
+    min-height: 32px;
+  }
+  .item-card.rarity-uncommon .item-name { color: #a8e0a8; }
+  .item-card.rarity-rare    .item-name { color: #a0c8e8; }
+  .item-card.rarity-epic    .item-name { color: #d8a8e8; }
+  .item-card.rarity-legend  .item-name { color: #f0d088; }
+  .item-card.rarity-quest   .item-name { color: #e88a78; }
+  .item-card.rarity-junk    .item-name { color: #b0a898; }
+  .item-meta {
+    font-size: 10.5px;
+    color: #8a7a68;
+    font-family: Georgia, serif;
+    line-height: 1.35;
+    min-height: 26px;
+  }
+  .item-meta .val { color: #c4953a; }
+  .item-meta .die { color: #d4c8b0; font-weight: 600; }
+  /* ── Inventory size demo (54×54 — tamanho real do slot) ── */
+  .real-size-strip {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid #3a2e22;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 0 8px 24px;
+    text-align: center;
+  }
+  .real-size-strip .lbl {
+    color: #a89478;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .real-size-strip .row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .real-size-strip .slot {
+    width: 54px;
+    height: 54px;
+    background: #161210;
+    border: 1.5px solid #3a2e22;
+    border-radius: 6px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .real-size-strip .slot svg { width: 100%; height: 100%; }
+  /* ── Footer ─────────────────────────────────────────── */
+  footer {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 16px;
+    text-align: center;
+    color: #6a5a4a;
+    font-size: 11px;
+    border-top: 1px solid #3a2e22;
+    font-family: Georgia, serif;
+    line-height: 1.6;
+  }
+  footer strong { color: #a89478; }
+  /* ── Smartphone (≤430px) ────────────────────────────── */
+  @media (max-width: 480px) {
+    body { padding: 16px 8px 40px; }
+    h1 { font-size: 20px; letter-spacing: 2px; }
+    .item-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+    .item-icon { width: 68px; height: 68px; }
+    .item-name { font-size: 12px; min-height: 30px; }
+    .item-meta { font-size: 10px; }
+  }
+  /* ── Hidden (search filter) ──────────────────────────── */
+  .item-card.hidden, section.hidden, h3.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<!-- HIDDEN SVG DEFS — gradientes + symbols                                       -->
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- ── GRADIENTES rh-* (mesmos do creator + extras) ── -->
+    <linearGradient id="rh-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff4d0"/>
+      <stop offset="40%" stop-color="#e8c45a"/>
+      <stop offset="75%" stop-color="#c4953a"/>
+      <stop offset="100%" stop-color="#5a3e10"/>
+    </linearGradient>
+    <linearGradient id="rh-silver" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8f5ee"/>
+      <stop offset="50%" stop-color="#a89478"/>
+      <stop offset="100%" stop-color="#5a4838"/>
+    </linearGradient>
+    <linearGradient id="rh-iron" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c8c4be"/>
+      <stop offset="50%" stop-color="#6a6258"/>
+      <stop offset="100%" stop-color="#2a2620"/>
+    </linearGradient>
+    <linearGradient id="rh-bronze" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8a060"/>
+      <stop offset="50%" stop-color="#b87333"/>
+      <stop offset="100%" stop-color="#5a3010"/>
+    </linearGradient>
+    <linearGradient id="rh-wood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8a6040"/>
+      <stop offset="50%" stop-color="#5a3a20"/>
+      <stop offset="100%" stop-color="#2a1810"/>
+    </linearGradient>
+    <linearGradient id="rh-wood-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5a3a20"/>
+      <stop offset="50%" stop-color="#3a2410"/>
+      <stop offset="100%" stop-color="#1a0f08"/>
+    </linearGradient>
+    <linearGradient id="rh-leather" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8a5a3a"/>
+      <stop offset="50%" stop-color="#5a381e"/>
+      <stop offset="100%" stop-color="#2a1810"/>
+    </linearGradient>
+    <linearGradient id="rh-emerald" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a0e0a0"/>
+      <stop offset="50%" stop-color="#3a8a3a"/>
+      <stop offset="100%" stop-color="#1a4a1a"/>
+    </linearGradient>
+    <linearGradient id="rh-sapphire" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a0c8e8"/>
+      <stop offset="50%" stop-color="#4a78c4"/>
+      <stop offset="100%" stop-color="#1a3a78"/>
+    </linearGradient>
+    <linearGradient id="rh-violet" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8a0e8"/>
+      <stop offset="50%" stop-color="#8a4ab0"/>
+      <stop offset="100%" stop-color="#3a1a5a"/>
+    </linearGradient>
+    <linearGradient id="rh-bone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8f0d8"/>
+      <stop offset="50%" stop-color="#d4c8a8"/>
+      <stop offset="100%" stop-color="#8a7a5a"/>
+    </linearGradient>
+    <linearGradient id="rh-rust" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8a070"/>
+      <stop offset="50%" stop-color="#a04030"/>
+      <stop offset="100%" stop-color="#5a1810"/>
+    </linearGradient>
+    <linearGradient id="rh-stone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a0a0a0"/>
+      <stop offset="50%" stop-color="#5a5a5a"/>
+      <stop offset="100%" stop-color="#2a2a2a"/>
+    </linearGradient>
+    <linearGradient id="rh-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e85040"/>
+      <stop offset="60%" stop-color="#a04030"/>
+      <stop offset="100%" stop-color="#5a2018"/>
+    </linearGradient>
+    <linearGradient id="rh-flame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#c43020"/>
+      <stop offset="50%" stop-color="#e85020"/>
+      <stop offset="100%" stop-color="#fff4d0"/>
+    </linearGradient>
+    <linearGradient id="rh-ice" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8f8ff"/>
+      <stop offset="50%" stop-color="#88c8e8"/>
+      <stop offset="100%" stop-color="#3a78a8"/>
+    </linearGradient>
+    <linearGradient id="rh-arcane" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c8a0e8"/>
+      <stop offset="50%" stop-color="#6a3a98"/>
+      <stop offset="100%" stop-color="#1a0838"/>
+    </linearGradient>
+    <linearGradient id="rh-poison" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a8e858"/>
+      <stop offset="50%" stop-color="#5a8a20"/>
+      <stop offset="100%" stop-color="#1a3a08"/>
+    </linearGradient>
+    <linearGradient id="rh-shadow-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3a2a2a"/>
+      <stop offset="50%" stop-color="#1a1010"/>
+      <stop offset="100%" stop-color="#080404"/>
+    </linearGradient>
+    <radialGradient id="rh-shadow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#1a1410" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rh-glow-arcane" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a878ff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#a878ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rh-glow-fire" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff8830" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff4010" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rh-glow-ice" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a8e8ff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#3a78c8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rh-glow-thunder" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8a0" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#c8a020" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — SWORDS                                          -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Espada Longa: blade tapered + fuller + cross-guard + leather grip + iron pommel -->
+    <symbol id="ic-it-base-longsword" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="112" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 60 8 L 65 14 L 67 64 L 60 70 L 53 64 L 55 14 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.8"/>
+      <line x1="60" y1="16" x2="60" y2="62" stroke="#3a3530" stroke-width="0.9" opacity="0.65"/>
+      <path d="M 55 16 L 57 64" stroke="#fff" stroke-width="0.6" opacity="0.45"/>
+      <path d="M 38 68 L 82 68 L 80 74 L 40 74 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="38" cy="71" r="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="82" cy="71" r="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="56" y="74" width="8" height="24" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="79" x2="64" y2="79" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="85" x2="64" y2="85" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="91" x2="64" y2="91" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="60" cy="103" r="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="58" cy="101" r="1.8" fill="#fff" opacity="0.45"/>
+    </symbol>
+
+    <!-- Espada Curta: blade encurtada, cross-guard menor, grip mais curto -->
+    <symbol id="ic-it-base-shortsword" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.2" fill="#000" opacity="0.45"/>
+      <path d="M 60 22 L 64 28 L 66 68 L 60 74 L 54 68 L 56 28 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.8"/>
+      <line x1="60" y1="30" x2="60" y2="66" stroke="#3a3530" stroke-width="0.8" opacity="0.65"/>
+      <path d="M 56 28 L 58 68" stroke="#fff" stroke-width="0.55" opacity="0.45"/>
+      <path d="M 42 72 L 78 72 L 76 78 L 44 78 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="42" cy="75" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="78" cy="75" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="56" y="78" width="8" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="83" x2="64" y2="83" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="91" x2="64" y2="91" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="60" cy="103" r="5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="58" cy="101" r="1.5" fill="#fff" opacity="0.45"/>
+    </symbol>
+
+    <!-- Montante (Greatsword): blade massiva + quillons + grip duas mãos + pommel pesado -->
+    <symbol id="ic-it-base-greatsword" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="24" ry="2.6" fill="#000" opacity="0.45"/>
+      <path d="M 60 4 L 67 12 L 69 58 L 60 64 L 51 58 L 53 12 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.9"/>
+      <line x1="60" y1="14" x2="60" y2="56" stroke="#3a3530" stroke-width="1" opacity="0.7"/>
+      <path d="M 53 12 L 55 58" stroke="#fff" stroke-width="0.7" opacity="0.5"/>
+      <path d="M 30 62 L 90 62 L 88 70 L 32 70 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <path d="M 28 62 L 30 56 L 32 62 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 88 62 L 90 56 L 92 62 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="55" y="70" width="10" height="32" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="76" x2="65" y2="76" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="83" x2="65" y2="83" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="90" x2="65" y2="90" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="96" x2="65" y2="96" stroke="#2a1408" stroke-width="0.5"/>
+      <path d="M 50 102 L 70 102 L 66 112 L 54 112 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="60" cy="106" r="1.8" fill="#fff" opacity="0.4"/>
+    </symbol>
+
+    <!-- Rapieira: blade fina e longa + swept guard (cup-like) + grip elegante -->
+    <symbol id="ic-it-base-rapier" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="112" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <path d="M 60 6 L 62 12 L 63 64 L 60 68 L 57 64 L 58 12 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="14" x2="60" y2="62" stroke="#3a3530" stroke-width="0.6" opacity="0.6"/>
+      <path d="M 58 12 L 59 64" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+      <!-- Swept cup guard -->
+      <path d="M 50 68 Q 60 60 70 68 Q 74 72 70 76 Q 60 72 50 76 Q 46 72 50 68 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <ellipse cx="60" cy="72" rx="6" ry="2" fill="#1a1410" opacity="0.5"/>
+      <!-- Swept knuckle bow -->
+      <path d="M 70 72 Q 78 84 70 96" fill="none" stroke="url(#rh-iron)" stroke-width="1.6"/>
+      <rect x="57" y="76" width="6" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.4"/>
+      <path d="M 57 78 Q 60 80 63 78 M 57 84 Q 60 86 63 84 M 57 90 Q 60 92 63 90" stroke="#c4953a" stroke-width="0.4" fill="none" opacity="0.7"/>
+      <circle cx="60" cy="102" r="4.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="58.5" cy="100.5" r="1.4" fill="#fff" opacity="0.45"/>
+    </symbol>
+
+    <!-- Cimitarra: blade curva (single edge) + cross-guard ligeiramente curvo + pommel arredondado -->
+    <symbol id="ic-it-base-scimitar" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="112" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Curved blade: outer convex, inner concave -->
+      <path d="M 64 14 Q 90 32 80 62 Q 76 70 60 70 L 56 64 Q 60 38 56 18 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- Outer edge highlight -->
+      <path d="M 64 16 Q 86 32 78 60" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <!-- Inner ridge -->
+      <path d="M 58 22 Q 60 44 60 66" fill="none" stroke="#3a3530" stroke-width="0.7" opacity="0.6"/>
+      <!-- Curved cross-guard -->
+      <path d="M 38 68 Q 60 64 82 68 L 80 74 Q 60 71 40 74 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="38" cy="71" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="82" cy="71" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="56" y="74" width="8" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="80" x2="64" y2="80" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="88" x2="64" y2="88" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- Curved horn pommel (Eastern style) -->
+      <path d="M 54 96 Q 60 110 66 96 Q 70 102 64 104 L 56 104 Q 50 102 54 96 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="60" cy="100" r="1.4" fill="#fff" opacity="0.45"/>
+    </symbol>
+
+    <!-- Espada de Treino: lâmina sem fio (madeira), sem fuller, dull -->
+    <symbol id="ic-it-base-training-sword" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="112" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 60 12 L 64 18 L 66 64 L 60 70 L 54 64 L 56 18 Z" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <!-- Wood grain lines -->
+      <line x1="58" y1="22" x2="58" y2="60" stroke="#2a1810" stroke-width="0.5" opacity="0.6"/>
+      <line x1="62" y1="24" x2="62" y2="58" stroke="#2a1810" stroke-width="0.4" opacity="0.5"/>
+      <!-- Cross-guard rope-bound -->
+      <rect x="40" y="68" width="40" height="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <line x1="44" y1="68" x2="44" y2="74" stroke="#5a3a20" stroke-width="0.5"/>
+      <line x1="60" y1="68" x2="60" y2="74" stroke="#5a3a20" stroke-width="0.5"/>
+      <line x1="76" y1="68" x2="76" y2="74" stroke="#5a3a20" stroke-width="0.5"/>
+      <rect x="56" y="74" width="8" height="24" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="80" x2="64" y2="80" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="88" x2="64" y2="88" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="60" cy="103" r="5" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — DAGGERS                                         -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Adaga: blade curta direita + cross-guard fino + grip envolto + pommel pequeno -->
+    <symbol id="ic-it-base-dagger" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="16" ry="2" fill="#000" opacity="0.45"/>
+      <path d="M 60 28 L 64 34 L 66 70 L 60 76 L 54 70 L 56 34 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="36" x2="60" y2="68" stroke="#3a3530" stroke-width="0.6" opacity="0.6"/>
+      <path d="M 56 34 L 58 70" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+      <path d="M 46 74 L 74 74 L 73 78 L 47 78 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="46" cy="76" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="74" cy="76" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="57" y="78" width="6" height="18" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="57" y1="82" x2="63" y2="82" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="57" y1="88" x2="63" y2="88" stroke="#2a1408" stroke-width="0.4"/>
+      <circle cx="60" cy="100" r="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="58.8" cy="98.8" r="1" fill="#fff" opacity="0.45"/>
+    </symbol>
+
+    <!-- Adaga Balanceada: lâmina perfeitamente simétrica, dois fullers, grip bem trabalhado -->
+    <symbol id="ic-it-base-balanced-dagger" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="16" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Perfect symmetric blade -->
+      <path d="M 60 24 L 65 32 L 66 70 L 60 76 L 54 70 L 55 32 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.75"/>
+      <line x1="58" y1="34" x2="58" y2="68" stroke="#3a3530" stroke-width="0.55" opacity="0.6"/>
+      <line x1="62" y1="34" x2="62" y2="68" stroke="#3a3530" stroke-width="0.55" opacity="0.6"/>
+      <path d="M 55 32 L 57 70" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <!-- Cross-guard with center jewel (balance mark) -->
+      <path d="M 44 74 L 76 74 L 75 78 L 45 78 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="60" cy="76" r="1.4" fill="url(#rh-sapphire)" stroke="#1a3a78" stroke-width="0.3"/>
+      <rect x="56" y="78" width="8" height="18" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <path d="M 56 80 Q 60 82 64 80 M 56 86 Q 60 88 64 86 M 56 92 Q 60 94 64 92" stroke="#c4953a" stroke-width="0.4" fill="none" opacity="0.7"/>
+      <circle cx="60" cy="100" r="4" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <circle cx="60" cy="100" r="1.2" fill="url(#rh-sapphire)"/>
+    </symbol>
+
+    <!-- Adaga Cerimonial: lâmina ornamentada com motivos gravados, gemstones no cabo -->
+    <symbol id="ic-it-base-cerimonial-dagger" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="16" ry="2" fill="#000" opacity="0.45"/>
+      <path d="M 60 24 L 64 32 L 66 70 L 60 76 L 54 70 L 56 32 Z" fill="url(#rh-silver)" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Engraved motifs on blade -->
+      <path d="M 60 38 L 58 42 L 60 46 L 62 42 Z" fill="#1a1410" opacity="0.5"/>
+      <path d="M 60 52 L 58 56 L 60 60 L 62 56 Z" fill="#1a1410" opacity="0.5"/>
+      <line x1="58" y1="48" x2="62" y2="48" stroke="#1a1410" stroke-width="0.4" opacity="0.5"/>
+      <path d="M 56 32 L 58 70" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+      <!-- Ornate cross-guard with downward curl -->
+      <path d="M 42 74 Q 60 70 78 74 L 76 78 Q 72 84 70 78 L 50 78 Q 48 84 44 78 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <circle cx="60" cy="76" r="1.6" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.3"/>
+      <rect x="57" y="80" width="6" height="16" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.5"/>
+      <line x1="57" y1="84" x2="63" y2="84" stroke="#c4953a" stroke-width="0.4"/>
+      <line x1="57" y1="90" x2="63" y2="90" stroke="#c4953a" stroke-width="0.4"/>
+      <!-- Pommel: gemstone setting -->
+      <circle cx="60" cy="100" r="4.5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <circle cx="60" cy="100" r="2" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.3"/>
+      <circle cx="59" cy="99" r="0.7" fill="#fff" opacity="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — CLUBS / MACES                                   -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Clava: bludgeon de madeira tapered, knots, grip envolto -->
+    <symbol id="ic-it-base-club" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <path d="M 48 8 Q 44 30 50 58 L 52 90 Q 52 96 56 96 L 64 96 Q 68 96 68 90 L 70 58 Q 76 30 72 8 Z" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <ellipse cx="55" cy="22" rx="3" ry="2" fill="#3a2410" opacity="0.7"/>
+      <ellipse cx="65" cy="36" rx="2.5" ry="1.5" fill="#3a2410" opacity="0.6"/>
+      <line x1="54" y1="14" x2="54" y2="56" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <line x1="60" y1="12" x2="60" y2="58" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <line x1="66" y1="14" x2="66" y2="56" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 50 20 Q 52 40 53 58" stroke="#a87a4a" stroke-width="0.6" fill="none" opacity="0.5"/>
+      <rect x="54" y="68" width="12" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="54" y1="74" x2="66" y2="74" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="54" y1="82" x2="66" y2="82" stroke="#2a1408" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Maça: cabeça de ferro flanged + haste + grip + cap pommel -->
+    <symbol id="ic-it-base-mace" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <path d="M 60 8 L 70 14 L 74 22 L 70 30 L 60 36 L 50 30 L 46 22 L 50 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <line x1="60" y1="10" x2="60" y2="34" stroke="#1a1410" stroke-width="0.6" opacity="0.7"/>
+      <line x1="50" y1="14" x2="56" y2="32" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <line x1="70" y1="14" x2="64" y2="32" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <path d="M 52 16 L 56 26" stroke="#fff" stroke-width="0.6" opacity="0.5"/>
+      <rect x="57" y="36" width="6" height="22" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="55" y="58" width="10" height="36" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="64" x2="65" y2="64" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="72" x2="65" y2="72" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="80" x2="65" y2="80" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="88" x2="65" y2="88" stroke="#2a1408" stroke-width="0.5"/>
+      <ellipse cx="60" cy="98" rx="6" ry="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- Maça de Estrela (morningstar): cabeça com 6 spikes radiando -->
+    <symbol id="ic-it-base-morningstar" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Central ball -->
+      <circle cx="60" cy="24" r="10" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- 8 spikes radiating -->
+      <path d="M 60 6 L 58 16 L 62 16 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 60 42 L 58 32 L 62 32 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 42 24 L 52 22 L 52 26 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 78 24 L 68 22 L 68 26 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 47 11 L 53 17 L 51 19 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 73 11 L 67 17 L 69 19 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 47 37 L 53 31 L 51 29 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 73 37 L 67 31 L 69 29 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="56" cy="20" r="2.2" fill="#fff" opacity="0.4"/>
+      <!-- Iron shaft -->
+      <rect x="57" y="34" width="6" height="22" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Grip -->
+      <rect x="55" y="56" width="10" height="38" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="62" x2="65" y2="62" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="70" x2="65" y2="70" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="78" x2="65" y2="78" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="86" x2="65" y2="86" stroke="#2a1408" stroke-width="0.5"/>
+      <ellipse cx="60" cy="98" rx="6" ry="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — AXES                                            -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Machadinha (handaxe): pequena cabeça crescente, cabo curto -->
+    <symbol id="ic-it-base-handaxe" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Crescent blade (head) -->
+      <path d="M 38 14 Q 30 30 38 46 L 52 42 Q 50 30 52 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- Edge highlight -->
+      <path d="M 36 18 Q 30 30 36 42" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <!-- Top spike (counterweight) -->
+      <path d="M 52 18 L 60 22 L 56 26 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Wooden shaft -->
+      <rect x="56" y="22" width="6" height="56" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <!-- Iron mounting bands -->
+      <rect x="54" y="26" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="54" y="40" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Wood grain -->
+      <line x1="58" y1="32" x2="58" y2="76" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Leather grip wrap (lower portion) -->
+      <rect x="55" y="78" width="8" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="83" x2="63" y2="83" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="91" x2="63" y2="91" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- Pommel cap -->
+      <circle cx="59" cy="102" r="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Machado de Batalha (battleaxe): cabeça maior, single-bit, cabo médio -->
+    <symbol id="ic-it-base-battleaxe" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Larger crescent blade -->
+      <path d="M 26 14 Q 14 36 26 58 L 52 50 Q 48 36 52 22 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
+      <path d="M 24 18 Q 16 36 24 54" fill="none" stroke="#fff" stroke-width="0.65" opacity="0.55"/>
+      <!-- Decorative groove on blade -->
+      <path d="M 36 28 Q 32 36 36 44" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <!-- Top counterweight spike -->
+      <path d="M 52 22 L 64 24 L 58 30 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Wooden shaft -->
+      <rect x="56" y="28" width="6" height="58" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <!-- Iron bands -->
+      <rect x="54" y="32" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="54" y="48" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <line x1="58" y1="36" x2="58" y2="84" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Grip lower -->
+      <rect x="55" y="86" width="8" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="92" x2="63" y2="92" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="59" cy="104" r="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Machado Grande (greataxe): cabeça enorme, double-bit, cabo longo two-handed -->
+    <symbol id="ic-it-base-greataxe" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="24" ry="2.6" fill="#000" opacity="0.45"/>
+      <!-- Front blade (left) -->
+      <path d="M 18 10 Q 4 36 18 62 L 50 54 Q 48 36 50 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
+      <!-- Back blade (right) -->
+      <path d="M 102 10 Q 116 36 102 62 L 70 54 Q 72 36 70 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
+      <!-- Edge highlights -->
+      <path d="M 16 16 Q 6 36 16 56" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <path d="M 104 16 Q 114 36 104 56" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <!-- Center hub (where shaft meets blades) -->
+      <rect x="50" y="22" width="20" height="32" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="22" x2="60" y2="54" stroke="#1a1410" stroke-width="0.5" opacity="0.7"/>
+      <!-- Long wooden shaft -->
+      <rect x="56" y="54" width="8" height="44" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="58" y1="60" x2="58" y2="96" stroke="#3a2410" stroke-width="0.5" opacity="0.6"/>
+      <line x1="62" y1="62" x2="62" y2="96" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <rect x="54" y="64" width="12" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="54" y="86" width="12" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <ellipse cx="60" cy="103" rx="5" ry="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — HAMMERS / WAR PICKS / FLAILS                    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Martelo Leve: cabeça quadrada pequena, cabo curto -->
+    <symbol id="ic-it-base-light-hammer" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Hammer head -->
+      <rect x="40" y="20" width="40" height="20" rx="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- Front face highlight -->
+      <rect x="42" y="22" width="36" height="3" fill="#fff" opacity="0.35"/>
+      <!-- Iron banding around shaft -->
+      <rect x="56" y="36" width="8" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Wooden shaft -->
+      <rect x="57" y="42" width="6" height="36" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="48" x2="59" y2="76" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Grip -->
+      <rect x="55" y="78" width="10" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="84" x2="65" y2="84" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="92" x2="65" y2="92" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="60" cy="103" r="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Martelo de Guerra: cabeça pesada com spike traseiro -->
+    <symbol id="ic-it-base-warhammer" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Hammer head (left side flat) -->
+      <rect x="22" y="14" width="36" height="28" rx="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <rect x="24" y="16" width="32" height="3" fill="#fff" opacity="0.4"/>
+      <!-- Decorative ridge -->
+      <line x1="40" y1="14" x2="40" y2="42" stroke="#1a1410" stroke-width="0.6" opacity="0.7"/>
+      <!-- Spike on the right (back) -->
+      <path d="M 58 14 L 86 22 L 86 34 L 58 42 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <path d="M 86 22 L 96 28 L 86 34 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Shaft mounting -->
+      <rect x="56" y="42" width="8" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="57" y="48" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="54" x2="59" y2="80" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <rect x="55" y="82" width="10" height="16" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="89" x2="65" y2="89" stroke="#2a1408" stroke-width="0.5"/>
+      <ellipse cx="60" cy="104" rx="5" ry="2.8" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- Malho (Maul): sledgehammer two-handed, cabeça massiva -->
+    <symbol id="ic-it-base-maul" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="24" ry="2.6" fill="#000" opacity="0.45"/>
+      <!-- Massive hammer head (rectangular) -->
+      <rect x="22" y="10" width="76" height="34" rx="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="1"/>
+      <rect x="24" y="12" width="72" height="4" fill="#fff" opacity="0.35"/>
+      <!-- Vertical center stripe -->
+      <rect x="58" y="10" width="4" height="34" fill="#1a1410" opacity="0.55"/>
+      <!-- Side rivets -->
+      <circle cx="32" cy="22" r="1.4" fill="#1a1410"/>
+      <circle cx="32" cy="32" r="1.4" fill="#1a1410"/>
+      <circle cx="88" cy="22" r="1.4" fill="#1a1410"/>
+      <circle cx="88" cy="32" r="1.4" fill="#1a1410"/>
+      <!-- Iron mounting bracket -->
+      <rect x="54" y="44" width="12" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Long wooden shaft -->
+      <rect x="56" y="50" width="8" height="46" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="58" y1="56" x2="58" y2="94" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <line x1="62" y1="58" x2="62" y2="94" stroke="#3a2410" stroke-width="0.4" opacity="0.5"/>
+      <rect x="54" y="62" width="12" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="54" y="86" width="12" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <ellipse cx="60" cy="103" rx="5.5" ry="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- Picareta de Guerra (warpick): single curved spike, mining-style -->
+    <symbol id="ic-it-base-warpick" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Curved pick (left side) -->
+      <path d="M 56 24 Q 30 14 14 22 Q 22 28 30 30 Q 44 32 56 36 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Edge highlight on pick -->
+      <path d="M 18 24 Q 30 28 50 30" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.5"/>
+      <!-- Counterweight on right -->
+      <path d="M 64 22 Q 78 22 86 28 Q 80 36 70 34 L 64 36 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Center hub -->
+      <rect x="56" y="22" width="8" height="20" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Shaft -->
+      <rect x="57" y="42" width="6" height="38" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="48" x2="59" y2="78" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <rect x="54" y="48" width="12" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="55" y="80" width="10" height="18" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="86" x2="65" y2="86" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="92" x2="65" y2="92" stroke="#2a1408" stroke-width="0.5"/>
+      <circle cx="60" cy="104" r="3.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Mangual (flail): cabo + corrente + bola spiked -->
+    <symbol id="ic-it-base-flail" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Wooden handle (vertical) -->
+      <rect x="57" y="44" width="6" height="50" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="50" x2="59" y2="92" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Iron cap at top of handle -->
+      <rect x="54" y="40" width="12" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Chain links (4 links going up-left) -->
+      <ellipse cx="55" cy="36" rx="3" ry="2" fill="none" stroke="url(#rh-iron)" stroke-width="1.4" transform="rotate(-30 55 36)"/>
+      <ellipse cx="48" cy="30" rx="3" ry="2" fill="none" stroke="url(#rh-iron)" stroke-width="1.4" transform="rotate(30 48 30)"/>
+      <ellipse cx="42" cy="24" rx="3" ry="2" fill="none" stroke="url(#rh-iron)" stroke-width="1.4" transform="rotate(-30 42 24)"/>
+      <!-- Spiked ball -->
+      <circle cx="34" cy="18" r="9" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <path d="M 34 4 L 32 12 L 36 12 Z M 34 32 L 32 24 L 36 24 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 20 18 L 28 16 L 28 20 Z M 48 18 L 40 16 L 40 20 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 24 8 L 30 12 L 28 14 Z M 44 8 L 38 12 L 40 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 24 28 L 30 24 L 28 22 Z M 44 28 L 38 24 L 40 22 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="31" cy="15" r="1.8" fill="#fff" opacity="0.4"/>
+      <!-- Grip lower -->
+      <rect x="55" y="80" width="10" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="86" x2="65" y2="86" stroke="#2a1408" stroke-width="0.5"/>
+      <ellipse cx="60" cy="100" rx="5" ry="2.8" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — POLEARMS                                        -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Lança: leaf-shaped tip + cabo médio + buttspike -->
+    <symbol id="ic-it-base-spear" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Leaf-shaped spearhead -->
+      <path d="M 60 6 Q 52 18 54 32 Q 56 38 60 42 Q 64 38 66 32 Q 68 18 60 6 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- Center ridge of spearhead -->
+      <line x1="60" y1="10" x2="60" y2="40" stroke="#1a1410" stroke-width="0.7" opacity="0.65"/>
+      <!-- Edge highlight -->
+      <path d="M 56 14 Q 55 26 58 38" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.5"/>
+      <!-- Iron socket where tip meets shaft -->
+      <rect x="56" y="42" width="8" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <line x1="56" y1="45" x2="64" y2="45" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Wooden shaft -->
+      <rect x="57" y="48" width="6" height="46" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="54" x2="59" y2="92" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Leather grip wrap (middle) -->
+      <rect x="55" y="64" width="10" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="70" x2="65" y2="70" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="78" x2="65" y2="78" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- Iron buttspike -->
+      <path d="M 56 94 L 64 94 L 60 108 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- Pique: ponta perfurante longa, shaft super longo -->
+    <symbol id="ic-it-base-pike" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="16" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Narrow piercing pike head -->
+      <path d="M 60 4 L 56 14 L 57 26 L 60 30 L 63 26 L 64 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.75"/>
+      <line x1="60" y1="6" x2="60" y2="28" stroke="#1a1410" stroke-width="0.6" opacity="0.65"/>
+      <path d="M 56 14 L 58 26" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <!-- Iron socket -->
+      <rect x="56" y="30" width="8" height="5" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Very long shaft -->
+      <rect x="57.5" y="35" width="5" height="60" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.55"/>
+      <line x1="59" y1="40" x2="59" y2="93" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <line x1="61" y1="42" x2="61" y2="93" stroke="#3a2410" stroke-width="0.35" opacity="0.5"/>
+      <!-- Iron bands -->
+      <rect x="55" y="50" width="10" height="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <rect x="55" y="78" width="10" height="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <!-- Buttspike -->
+      <path d="M 57 95 L 63 95 L 60 108 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Alabarda: axe-blade + spike (top) + hook (back) — clássica medieval -->
+    <symbol id="ic-it-base-halberd" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Top piercing spike -->
+      <path d="M 60 4 L 56 18 L 60 24 L 64 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="6" x2="60" y2="22" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <!-- Axe blade (left side, crescent) -->
+      <path d="M 56 24 Q 32 26 22 40 Q 28 48 40 46 L 56 42 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <path d="M 26 32 Q 22 40 28 46" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+      <!-- Decorative cutout on blade -->
+      <circle cx="42" cy="38" r="2.2" fill="#1a1410" opacity="0.55"/>
+      <!-- Back hook -->
+      <path d="M 64 24 Q 80 26 84 36 Q 78 38 72 32 L 64 32 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Iron socket -->
+      <rect x="56" y="42" width="8" height="8" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Long wooden shaft -->
+      <rect x="57" y="50" width="6" height="46" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="56" x2="59" y2="94" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <rect x="55" y="62" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="55" y="84" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Buttspike -->
+      <path d="M 56 96 L 64 96 L 60 108 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Glaive: lâmina longa de espada montada em cabo longo -->
+    <symbol id="ic-it-base-glaive" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Long curved single-edged blade (mounted on shaft) -->
+      <path d="M 60 4 Q 70 14 70 36 Q 64 44 56 42 L 56 28 Q 52 16 60 4 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Edge highlight on outer curve -->
+      <path d="M 60 8 Q 68 18 68 34" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+      <!-- Inner ridge -->
+      <line x1="60" y1="14" x2="60" y2="40" stroke="#1a1410" stroke-width="0.6" opacity="0.6"/>
+      <!-- Iron collar where blade meets shaft -->
+      <rect x="54" y="42" width="12" height="6" rx="1" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <line x1="54" y1="45" x2="66" y2="45" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Long wooden shaft -->
+      <rect x="57" y="48" width="6" height="48" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="54" x2="59" y2="94" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <line x1="61" y1="56" x2="61" y2="94" stroke="#3a2410" stroke-width="0.35" opacity="0.5"/>
+      <rect x="55" y="62" width="10" height="3" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <rect x="55" y="84" width="10" height="3" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Buttspike -->
+      <path d="M 56 96 L 64 96 L 60 108 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Tridente: 3 pontas paralelas + cabo -->
+    <symbol id="ic-it-base-trident" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Center prong -->
+      <path d="M 60 6 L 57 16 L 58 30 L 62 30 L 63 16 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="8" x2="60" y2="28" stroke="#1a1410" stroke-width="0.5" opacity="0.65"/>
+      <!-- Left prong (curved outward) -->
+      <path d="M 44 10 Q 40 18 44 30 L 50 32 Q 48 22 50 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="46" y1="14" x2="46" y2="28" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <!-- Right prong (curved outward) -->
+      <path d="M 76 10 Q 80 18 76 30 L 70 32 Q 72 22 70 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="74" y1="14" x2="74" y2="28" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+      <!-- Edge highlights -->
+      <path d="M 56 12 L 57 26 M 42 14 L 44 26 M 78 14 L 76 26" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+      <!-- Cross brace connecting prongs -->
+      <rect x="44" y="30" width="32" height="5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Iron socket -->
+      <rect x="56" y="35" width="8" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Wooden shaft -->
+      <rect x="57" y="41" width="6" height="48" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="47" x2="59" y2="87" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <rect x="55" y="56" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="55" y="78" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Buttspike -->
+      <path d="M 56 89 L 64 89 L 60 102 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — BOWS / CROSSBOWS                                -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Arco Curto: arco recurvado pequeno + corda + flecha nocked -->
+    <symbol id="ic-it-base-shortbow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Bow body (vertical recurve) -->
+      <path d="M 60 16 Q 78 30 78 60 Q 78 90 60 104" fill="none" stroke="url(#rh-wood)" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- Bow tips (recurve) -->
+      <path d="M 60 16 Q 56 14 54 18 M 60 104 Q 56 106 54 102" fill="none" stroke="url(#rh-wood-dark)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Bone tips -->
+      <circle cx="56" cy="17" r="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="56" cy="103" r="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <!-- String -->
+      <line x1="56" y1="18" x2="56" y2="102" stroke="#d4c8b0" stroke-width="0.7" opacity="0.85"/>
+      <!-- Grip wrap (center) -->
+      <rect x="73" y="56" width="8" height="12" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="73" y1="60" x2="81" y2="60" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="73" y1="64" x2="81" y2="64" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Nocked arrow -->
+      <line x1="56" y1="60" x2="20" y2="60" stroke="url(#rh-wood)" stroke-width="1.5"/>
+      <path d="M 14 58 L 20 60 L 14 62 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Fletching -->
+      <path d="M 56 60 L 60 58 L 60 62 Z" fill="#d4c8b0" opacity="0.9"/>
+    </symbol>
+
+    <!-- Arco Longo: arco maior, recurvo profundo, corda mais longa -->
+    <symbol id="ic-it-base-longbow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="18" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Tall recurve bow -->
+      <path d="M 60 6 Q 84 32 84 60 Q 84 88 60 114" fill="none" stroke="url(#rh-wood)" stroke-width="4" stroke-linecap="round"/>
+      <!-- Bow tips -->
+      <path d="M 60 6 Q 54 4 52 10 M 60 114 Q 54 116 52 110" fill="none" stroke="url(#rh-wood-dark)" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="54" cy="7" r="2.2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="54" cy="113" r="2.2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <!-- Decorative carvings on limbs -->
+      <path d="M 70 24 Q 76 28 78 36 M 70 96 Q 76 92 78 84" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <!-- String -->
+      <line x1="54" y1="8" x2="54" y2="112" stroke="#d4c8b0" stroke-width="0.7" opacity="0.85"/>
+      <!-- Grip wrap (center) -->
+      <rect x="79" y="54" width="8" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="79" y1="58" x2="87" y2="58" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="79" y1="62" x2="87" y2="62" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="79" y1="66" x2="87" y2="66" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Nocked arrow -->
+      <line x1="54" y1="60" x2="14" y2="60" stroke="url(#rh-wood)" stroke-width="1.6"/>
+      <path d="M 8 58 L 14 60 L 8 62 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Fletching -->
+      <path d="M 54 60 L 60 56 L 60 64 Z" fill="#d4c8b0" opacity="0.9"/>
+      <path d="M 54 60 L 60 58 L 60 62 Z" fill="url(#rh-crimson)" opacity="0.65"/>
+    </symbol>
+
+    <!-- Besta Leve: T-shape (bow horizontal + stock vertical) + lever -->
+    <symbol id="ic-it-base-light-crossbow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Horizontal bow (limbs) -->
+      <path d="M 14 28 Q 60 22 106 28" fill="none" stroke="url(#rh-wood)" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="14" cy="28" r="2.4" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="106" cy="28" r="2.4" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <!-- String -->
+      <path d="M 14 28 Q 60 32 106 28" fill="none" stroke="#d4c8b0" stroke-width="0.7" opacity="0.85"/>
+      <!-- Loaded bolt (short arrow on top of stock) -->
+      <line x1="60" y1="32" x2="60" y2="14" stroke="url(#rh-wood-dark)" stroke-width="1.5"/>
+      <path d="M 58 14 L 60 8 L 62 14 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Stock body (wooden) -->
+      <path d="M 50 32 L 70 32 L 70 90 L 64 96 L 56 96 L 50 90 Z" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <line x1="60" y1="36" x2="60" y2="88" stroke="#3a2410" stroke-width="0.5" opacity="0.65"/>
+      <!-- Iron mounting plate where bow meets stock -->
+      <rect x="48" y="30" width="24" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Trigger guard -->
+      <path d="M 50 70 Q 46 76 50 82" fill="none" stroke="url(#rh-iron)" stroke-width="1.5"/>
+      <!-- Trigger -->
+      <line x1="58" y1="78" x2="58" y2="84" stroke="url(#rh-iron)" stroke-width="1.2"/>
+      <!-- Decorative inlay on stock -->
+      <circle cx="60" cy="50" r="2.5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Besta Pesada: T-shape maior, mais robusta, com gear/cranequin -->
+    <symbol id="ic-it-base-heavy-crossbow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="24" ry="2.6" fill="#000" opacity="0.45"/>
+      <!-- Wider, heavier bow -->
+      <path d="M 6 30 Q 60 22 114 30" fill="none" stroke="url(#rh-wood-dark)" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="6" cy="30" r="2.8" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="114" cy="30" r="2.8" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <path d="M 6 30 Q 60 34 114 30" fill="none" stroke="#d4c8b0" stroke-width="0.8" opacity="0.85"/>
+      <line x1="60" y1="34" x2="60" y2="12" stroke="url(#rh-wood-dark)" stroke-width="2"/>
+      <path d="M 57 12 L 60 4 L 63 12 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Heavier stock -->
+      <path d="M 46 34 L 74 34 L 74 92 L 66 100 L 54 100 L 46 92 Z" fill="url(#rh-wood-dark)" stroke="#1a0f08" stroke-width="0.8"/>
+      <line x1="60" y1="38" x2="60" y2="92" stroke="#3a2410" stroke-width="0.55" opacity="0.65"/>
+      <!-- Iron reinforcement plates -->
+      <rect x="44" y="32" width="32" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <rect x="44" y="92" width="32" height="4" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Trigger mechanism (larger) -->
+      <path d="M 48 70 Q 42 78 48 86" fill="none" stroke="url(#rh-iron)" stroke-width="1.8"/>
+      <line x1="58" y1="78" x2="58" y2="86" stroke="url(#rh-iron)" stroke-width="1.4"/>
+      <!-- Cranequin gear visible on side -->
+      <circle cx="68" cy="76" r="3.5" fill="none" stroke="url(#rh-iron)" stroke-width="1.2"/>
+      <circle cx="68" cy="76" r="1" fill="url(#rh-iron)"/>
+    </symbol>
+
+    <!-- Besta de Mão: pistol-sized, compacta -->
+    <symbol id="ic-it-base-hand-crossbow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Small horizontal bow -->
+      <path d="M 26 38 Q 60 32 94 38" fill="none" stroke="url(#rh-wood)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="26" cy="38" r="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="94" cy="38" r="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <path d="M 26 38 Q 60 41 94 38" fill="none" stroke="#d4c8b0" stroke-width="0.6" opacity="0.85"/>
+      <!-- Small bolt -->
+      <line x1="60" y1="40" x2="60" y2="22" stroke="url(#rh-wood-dark)" stroke-width="1.4"/>
+      <path d="M 58 22 L 60 16 L 62 22 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Pistol-grip stock -->
+      <path d="M 52 40 L 68 40 L 68 60 L 76 80 L 70 96 L 56 96 L 52 80 Z" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <!-- Iron plate -->
+      <rect x="50" y="38" width="20" height="5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Pistol grip (leather) -->
+      <path d="M 56 70 L 70 70 L 72 84 L 60 92 L 54 84 Z" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="78" x2="70" y2="78" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Trigger guard -->
+      <path d="M 50 60 Q 46 66 50 72" fill="none" stroke="url(#rh-iron)" stroke-width="1.4"/>
+      <line x1="58" y1="66" x2="58" y2="72" stroke="url(#rh-iron)" stroke-width="1.2"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — THROWN / UTILITY                                -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Dardo: spike curto + fletching (3 penas) -->
+    <symbol id="ic-it-base-dart" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Pointed iron tip -->
+      <path d="M 60 10 L 56 30 L 64 30 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="14" x2="60" y2="28" stroke="#1a1410" stroke-width="0.5" opacity="0.65"/>
+      <path d="M 57 16 L 58 28" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <!-- Slim wooden shaft -->
+      <rect x="58" y="30" width="4" height="56" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.5"/>
+      <line x1="60" y1="36" x2="60" y2="84" stroke="#3a2410" stroke-width="0.35" opacity="0.55"/>
+      <!-- Fletching (3 feathers at the back) -->
+      <path d="M 58 86 L 50 88 L 50 96 L 58 94 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+      <path d="M 62 86 L 70 88 L 70 96 L 62 94 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+      <path d="M 58 90 L 62 90" stroke="#5a4838" stroke-width="0.5"/>
+      <line x1="52" y1="89" x2="52" y2="95" stroke="#5a4838" stroke-width="0.4"/>
+      <line x1="68" y1="89" x2="68" y2="95" stroke="#5a4838" stroke-width="0.4"/>
+      <!-- Rear cap -->
+      <rect x="58" y="96" width="4" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Funda: leather strip em V + pouch central com pedra -->
+    <symbol id="ic-it-base-sling" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Two leather straps forming V -->
+      <path d="M 16 14 L 56 60" fill="none" stroke="url(#rh-leather)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 104 14 L 64 60" fill="none" stroke="url(#rh-leather)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Strap finger loops -->
+      <circle cx="16" cy="14" r="3.5" fill="none" stroke="url(#rh-leather)" stroke-width="2"/>
+      <circle cx="104" cy="14" r="3.5" fill="none" stroke="url(#rh-leather)" stroke-width="2"/>
+      <!-- Knot at finger loops -->
+      <circle cx="16" cy="14" r="1.4" fill="#2a1408"/>
+      <circle cx="104" cy="14" r="1.4" fill="#2a1408"/>
+      <!-- Leather pouch (rounded diamond with stone bulge) -->
+      <path d="M 48 60 Q 60 56 72 60 Q 78 70 60 88 Q 42 70 48 60 Z" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Stitching on pouch -->
+      <path d="M 50 64 Q 60 62 70 64 M 50 70 Q 60 68 70 70 M 52 78 Q 60 76 68 78" fill="none" stroke="#3a1808" stroke-width="0.4" opacity="0.75"/>
+      <!-- Stone in the pouch (slight bulge top) -->
+      <ellipse cx="60" cy="72" rx="6" ry="5" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.5" opacity="0.85"/>
+      <circle cx="58" cy="70" r="1.4" fill="#fff" opacity="0.4"/>
+    </symbol>
+
+    <!-- Foice: lâmina curva grande + cabo curto -->
+    <symbol id="ic-it-base-sickle" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Big curved blade (sweep from upper right to lower left) -->
+      <path d="M 62 10 Q 26 30 22 64 Q 30 68 38 62 Q 54 50 62 32 Q 66 20 62 10 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Outer edge highlight -->
+      <path d="M 62 14 Q 30 32 26 60" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <!-- Inner ridge -->
+      <path d="M 60 18 Q 50 36 42 56" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
+      <!-- Iron socket -->
+      <rect x="56" y="64" width="14" height="8" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Wooden short handle -->
+      <rect x="58" y="72" width="6" height="22" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="60" y1="76" x2="60" y2="92" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- Leather wrap -->
+      <rect x="56" y="80" width="10" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="86" x2="66" y2="86" stroke="#2a1408" stroke-width="0.5"/>
+      <ellipse cx="61" cy="100" rx="4.5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Chicote: cabo + chicote enrolado em espiral -->
+    <symbol id="ic-it-base-whip" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Coiled whip (spiral) -->
+      <circle cx="60" cy="40" r="28" fill="none" stroke="url(#rh-leather)" stroke-width="3"/>
+      <circle cx="60" cy="40" r="22" fill="none" stroke="url(#rh-leather)" stroke-width="2.5"/>
+      <circle cx="60" cy="40" r="16" fill="none" stroke="url(#rh-leather)" stroke-width="2"/>
+      <circle cx="60" cy="40" r="10" fill="none" stroke="url(#rh-leather)" stroke-width="1.5"/>
+      <!-- Leather texture lines on coils -->
+      <path d="M 40 22 Q 60 18 80 22 M 40 58 Q 60 62 80 58" fill="none" stroke="#3a1808" stroke-width="0.4" opacity="0.6"/>
+      <!-- Tail of whip dangling -->
+      <path d="M 60 68 Q 56 80 64 88 Q 60 96 56 104" fill="none" stroke="url(#rh-leather)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Tail tip (cracker) -->
+      <path d="M 56 104 L 54 110 L 58 108 Z" fill="#2a1408"/>
+      <!-- Handle (top, integrated with coil) -->
+      <rect x="56" y="74" width="8" height="14" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="80" x2="64" y2="80" stroke="#5a3a20" stroke-width="0.4"/>
+      <!-- Iron buttcap -->
+      <ellipse cx="60" cy="92" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Flecha Quebrada (junk arrow): partida ao meio -->
+    <symbol id="ic-it-base-broken-arrow" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Iron arrowhead (top half) tilted -->
+      <g transform="rotate(-15 60 30)">
+        <path d="M 58 20 L 54 36 L 64 38 L 62 22 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+        <line x1="58" y1="24" x2="60" y2="36" stroke="#1a1410" stroke-width="0.5" opacity="0.6"/>
+        <!-- Top half of shaft -->
+        <rect x="58" y="36" width="4" height="22" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.5"/>
+        <!-- Crack/break point at the bottom -->
+        <path d="M 57 58 L 60 62 L 63 58 L 59 60 Z" fill="#2a1408"/>
+      </g>
+      <!-- Bottom half of shaft (separated, tilted differently) -->
+      <g transform="rotate(20 60 86)">
+        <path d="M 56 70 L 60 66 L 64 70 L 60 72 Z" fill="#2a1408"/>
+        <rect x="58" y="72" width="4" height="22" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.5"/>
+        <!-- Fletching -->
+        <path d="M 58 94 L 50 96 L 50 102 L 58 100 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5" opacity="0.7"/>
+        <path d="M 62 94 L 70 96 L 70 102 L 62 100 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5" opacity="0.7"/>
+        <!-- Damaged feather -->
+        <path d="M 50 98 L 48 100 L 50 100" stroke="#5a4838" stroke-width="0.3" fill="none"/>
+        <rect x="58" y="102" width="4" height="4" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      </g>
+      <!-- Splinter particles -->
+      <circle cx="50" cy="64" r="0.8" fill="#5a3a20"/>
+      <circle cx="70" cy="68" r="0.7" fill="#5a3a20"/>
+      <circle cx="48" cy="72" r="0.6" fill="#5a3a20"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — STAFFS                                          -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Bordão (quarterstaff): vara de madeira simples + iron caps + grip -->
+    <symbol id="ic-it-base-quarterstaff" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Iron cap top -->
+      <rect x="55" y="6" width="10" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <line x1="55" y1="9" x2="65" y2="9" stroke="#1a1410" stroke-width="0.4" opacity="0.7"/>
+      <!-- Wooden shaft -->
+      <rect x="56" y="12" width="8" height="86" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="58" y1="18" x2="58" y2="96" stroke="#3a2410" stroke-width="0.45" opacity="0.6"/>
+      <line x1="62" y1="20" x2="62" y2="96" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <!-- Knot detail -->
+      <ellipse cx="60" cy="44" rx="2.5" ry="1.5" fill="#3a2410" opacity="0.7"/>
+      <ellipse cx="60" cy="68" rx="2" ry="1.2" fill="#3a2410" opacity="0.6"/>
+      <!-- Leather grip wrap (middle) -->
+      <rect x="54" y="50" width="12" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="54" y1="55" x2="66" y2="55" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="54" y1="61" x2="66" y2="61" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="54" y1="67" x2="66" y2="67" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Iron cap bottom -->
+      <rect x="55" y="98" width="10" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Cajado de Aprendiz (mage staff): vara polida + cristal arcano no topo -->
+    <symbol id="ic-it-base-mage-staff" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Crystal at top (arcane) -->
+      <radialGradient id="ic-mage-glow-tmp" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#a878ff" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#a878ff" stop-opacity="0"/>
+      </radialGradient>
+      <circle cx="60" cy="18" r="14" fill="url(#ic-mage-glow-tmp)"/>
+      <!-- Crystal body (faceted gem) -->
+      <path d="M 60 6 L 67 14 L 64 24 L 60 30 L 56 24 L 53 14 Z" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.7"/>
+      <!-- Crystal facet highlights -->
+      <path d="M 60 6 L 64 14 L 60 22 Z" fill="#fff" opacity="0.35"/>
+      <path d="M 56 14 L 60 22" stroke="#fff" stroke-width="0.5" opacity="0.65"/>
+      <!-- Decorative iron claw holding crystal -->
+      <path d="M 53 22 Q 56 32 56 36 M 67 22 Q 64 32 64 36" fill="none" stroke="url(#rh-bronze)" stroke-width="1.4"/>
+      <path d="M 56 32 L 64 32" stroke="url(#rh-bronze)" stroke-width="2"/>
+      <!-- Wooden shaft (ornate) -->
+      <rect x="57" y="36" width="6" height="60" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.55"/>
+      <!-- Carved spiral on shaft -->
+      <path d="M 57 44 Q 60 47 63 44 M 57 56 Q 60 59 63 56 M 57 68 Q 60 71 63 68 M 57 80 Q 60 83 63 80" stroke="url(#rh-bronze)" stroke-width="0.5" fill="none" opacity="0.85"/>
+      <!-- Leather grip wrap -->
+      <rect x="55" y="62" width="10" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="68" x2="65" y2="68" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Bronze cap bottom -->
+      <path d="M 55 96 L 65 96 L 62 106 L 58 106 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.55"/>
+    </symbol>
+
+    <!-- Cajado de Salgueiro (willow staff): mais flexível, casca clara, sem cristal -->
+    <symbol id="ic-it-base-willow-staff" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Slight curve to suggest flexibility -->
+      <path d="M 60 8 Q 58 30 60 60 Q 62 88 60 102" fill="none" stroke="url(#rh-bronze)" stroke-width="6" stroke-linecap="round"/>
+      <!-- Bark texture overlay -->
+      <path d="M 58 16 Q 56 30 58 46 M 62 24 Q 64 40 62 56 M 58 64 Q 56 78 58 92" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <!-- Small willow leaves wrapped around top -->
+      <path d="M 60 8 Q 50 8 48 16 Q 54 18 58 14 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 60 8 Q 70 8 72 16 Q 66 18 62 14 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 56 16 Q 54 22 58 24 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.3"/>
+      <path d="M 64 16 Q 66 22 62 24 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.3"/>
+      <!-- Cord/fiber wrap (middle) -->
+      <rect x="54" y="54" width="12" height="14" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4" opacity="0.85"/>
+      <path d="M 54 58 Q 60 56 66 58 M 54 62 Q 60 60 66 62 M 54 66 Q 60 64 66 66" stroke="#5a4838" stroke-width="0.4" fill="none"/>
+      <!-- Carved spiral -->
+      <path d="M 58 76 Q 60 80 62 76 M 58 84 Q 60 88 62 84 M 58 92 Q 60 96 62 92" stroke="#3a2410" stroke-width="0.5" fill="none" opacity="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE WEAPON SYMBOLS — MAGIC FOCI (off_hand)                           -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Grimório (closed book): capa de couro + spine + clasp + gem na frente -->
+    <symbol id="ic-it-base-grimoire" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="3" fill="#000" opacity="0.5"/>
+      <!-- Book back cover (depth shadow) -->
+      <path d="M 26 18 L 90 14 L 96 22 L 96 100 L 30 104 Z" fill="#2a1810" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Book front cover -->
+      <path d="M 22 22 L 86 18 L 92 26 L 92 102 L 26 106 Z" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.8"/>
+      <!-- Spine highlight -->
+      <path d="M 26 22 L 26 106" stroke="#3a1808" stroke-width="2" opacity="0.85"/>
+      <!-- Decorative border on cover -->
+      <path d="M 36 32 L 82 28 L 86 90 L 38 96 Z" fill="none" stroke="url(#rh-bronze)" stroke-width="0.7" opacity="0.9"/>
+      <!-- Central gem inset -->
+      <circle cx="60" cy="62" r="9" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <circle cx="60" cy="62" r="6" fill="url(#rh-sapphire)" stroke="#1a3a78" stroke-width="0.5"/>
+      <circle cx="58" cy="60" r="2" fill="#fff" opacity="0.55"/>
+      <!-- Corner bronze fittings -->
+      <path d="M 24 24 L 32 23 L 28 30 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <path d="M 88 22 L 92 28 L 86 30 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <path d="M 24 100 L 32 102 L 28 96 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <path d="M 88 102 L 92 98 L 86 96 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Clasp -->
+      <rect x="68" y="58" width="14" height="8" rx="1" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4" opacity="0"/>
+    </symbol>
+
+    <!-- Tomo (large open book): páginas abertas + binding visível -->
+    <symbol id="ic-it-base-tome" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="3" fill="#000" opacity="0.5"/>
+      <!-- Left page -->
+      <path d="M 12 30 Q 60 22 60 24 L 60 100 Q 36 96 12 102 Z" fill="url(#rh-bone)" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Right page -->
+      <path d="M 60 24 Q 60 22 108 30 L 108 102 Q 84 96 60 100 Z" fill="url(#rh-bone)" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Spine in middle -->
+      <path d="M 60 24 L 60 100" stroke="#5a3010" stroke-width="1.4"/>
+      <!-- Text lines on left page -->
+      <line x1="20" y1="42" x2="54" y2="38" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="50" x2="54" y2="46" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="58" x2="50" y2="54" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="66" x2="54" y2="62" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="74" x2="48" y2="70" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="82" x2="54" y2="78" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="20" y1="90" x2="50" y2="86" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <!-- Text lines on right page -->
+      <line x1="66" y1="38" x2="100" y2="42" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="46" x2="100" y2="50" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="54" x2="96" y2="58" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="62" x2="100" y2="66" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="70" x2="94" y2="74" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="78" x2="100" y2="82" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <line x1="66" y1="86" x2="96" y2="90" stroke="#3a2410" stroke-width="0.5" opacity="0.7"/>
+      <!-- Decorative initial letter -->
+      <path d="M 24 42 L 24 52 M 22 42 L 28 42 M 22 52 L 28 52 M 24 47 L 27 47" stroke="url(#rh-crimson)" stroke-width="0.8" fill="none"/>
+      <!-- Bookmark ribbon -->
+      <path d="M 60 24 L 70 24 L 70 42 L 65 38 L 60 42 Z" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Orbe (crystal sphere): esfera com glow + base de bronze -->
+    <symbol id="ic-it-base-orb" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.6" fill="#000" opacity="0.5"/>
+      <!-- Outer glow -->
+      <circle cx="60" cy="50" r="36" fill="url(#rh-glow-arcane)"/>
+      <!-- Crystal sphere body -->
+      <circle cx="60" cy="50" r="28" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.8" opacity="0.92"/>
+      <!-- Inner energy swirl -->
+      <path d="M 50 38 Q 60 50 70 62 M 70 38 Q 60 50 50 62 M 60 30 Q 65 50 60 70 M 44 50 Q 60 55 76 50" fill="none" stroke="#c8a0e8" stroke-width="0.6" opacity="0.55"/>
+      <!-- Crystal highlight -->
+      <ellipse cx="50" cy="40" rx="8" ry="6" fill="#fff" opacity="0.45"/>
+      <ellipse cx="68" cy="58" rx="3" ry="2" fill="#fff" opacity="0.25"/>
+      <!-- Bronze claw stand (3 prongs) -->
+      <path d="M 40 78 Q 38 82 42 86 L 50 82 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <path d="M 80 78 Q 82 82 78 86 L 70 82 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <path d="M 60 80 L 56 90 L 64 90 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Bronze base ring -->
+      <ellipse cx="60" cy="100" rx="22" ry="6" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <ellipse cx="60" cy="100" rx="18" ry="4" fill="none" stroke="#3a1810" stroke-width="0.5" opacity="0.7"/>
+    </symbol>
+
+    <!-- Varinha (wand): cabo curto + ponta com pequeno cristal -->
+    <symbol id="ic-it-base-wand" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2" fill="#000" opacity="0.45"/>
+      <!-- Glow at tip -->
+      <circle cx="60" cy="20" r="14" fill="url(#rh-glow-arcane)" opacity="0.7"/>
+      <!-- Star tip (4-pointed) -->
+      <path d="M 60 8 L 64 18 L 74 20 L 64 22 L 60 32 L 56 22 L 46 20 L 56 18 Z" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.6"/>
+      <!-- Center crystal -->
+      <circle cx="60" cy="20" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="60" cy="20" r="1.5" fill="url(#rh-violet)"/>
+      <!-- Wand body -->
+      <rect x="58" y="32" width="4" height="56" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <!-- Carved runes/spiral on wand -->
+      <path d="M 58 40 Q 60 42 62 40 M 58 50 Q 60 52 62 50 M 58 60 Q 60 62 62 60 M 58 70 Q 60 72 62 70 M 58 80 Q 60 82 62 80" stroke="url(#rh-violet)" stroke-width="0.4" fill="none" opacity="0.85"/>
+      <!-- Leather grip lower -->
+      <rect x="56" y="84" width="8" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.4"/>
+      <line x1="56" y1="89" x2="64" y2="89" stroke="#2a1408" stroke-width="0.4"/>
+      <line x1="56" y1="94" x2="64" y2="94" stroke="#2a1408" stroke-width="0.4"/>
+      <!-- Pommel -->
+      <circle cx="60" cy="102" r="3.5" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Símbolo Sagrado (holy symbol): sol radiante (estilo D&D 5e cleric) -->
+    <symbol id="ic-it-base-holy-symbol" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Outer glow -->
+      <circle cx="60" cy="50" r="36" fill="url(#rh-glow-thunder)" opacity="0.5"/>
+      <!-- Sun rays (8 rays) -->
+      <g transform="translate(60 50)">
+        <path d="M 0 -34 L 3 -22 L -3 -22 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M 0 34 L 3 22 L -3 22 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M -34 0 L -22 3 L -22 -3 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M 34 0 L 22 3 L 22 -3 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M -24 -24 L -14 -19 L -19 -14 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M 24 -24 L 14 -19 L 19 -14 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M -24 24 L -14 19 L -19 14 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <path d="M 24 24 L 14 19 L 19 14 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+      </g>
+      <!-- Central sun disc -->
+      <circle cx="60" cy="50" r="18" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.8"/>
+      <circle cx="60" cy="50" r="14" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+      <!-- Engraved face/symbol on disc -->
+      <circle cx="55" cy="46" r="1.2" fill="#3a2410"/>
+      <circle cx="65" cy="46" r="1.2" fill="#3a2410"/>
+      <path d="M 53 54 Q 60 58 67 54" fill="none" stroke="#3a2410" stroke-width="0.7"/>
+      <!-- Highlight on bronze ring -->
+      <path d="M 50 38 Q 56 32 64 32" fill="none" stroke="#fff" stroke-width="1" opacity="0.5"/>
+      <!-- Chain at top -->
+      <ellipse cx="60" cy="14" rx="3" ry="2" fill="none" stroke="url(#rh-iron)" stroke-width="0.8"/>
+      <ellipse cx="60" cy="22" rx="2.5" ry="1.5" fill="none" stroke="url(#rh-iron)" stroke-width="0.7"/>
+      <line x1="60" y1="26" x2="60" y2="32" stroke="url(#rh-iron)" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- Foco Druídico (totem): vara com folhas + bolota + amarras de fibra -->
+    <symbol id="ic-it-base-druid-totem" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="16" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Vertical wooden totem -->
+      <rect x="56" y="20" width="8" height="76" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="58" y1="26" x2="58" y2="92" stroke="#3a2410" stroke-width="0.45" opacity="0.6"/>
+      <line x1="62" y1="28" x2="62" y2="92" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <!-- Acorn at top -->
+      <ellipse cx="60" cy="14" rx="6" ry="7" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <!-- Acorn cap (textured) -->
+      <path d="M 54 12 Q 60 8 66 12 L 64 16 L 56 16 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <path d="M 56 14 L 56 16 M 60 14 L 60 16 M 64 14 L 64 16" stroke="#1a0808" stroke-width="0.4"/>
+      <circle cx="58" cy="14" r="1" fill="#fff" opacity="0.4"/>
+      <!-- Leaves wrapped at top of totem -->
+      <path d="M 50 30 Q 40 36 42 46 Q 48 44 52 38 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.5"/>
+      <path d="M 70 30 Q 80 36 78 46 Q 72 44 68 38 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.5"/>
+      <line x1="44" y1="40" x2="48" y2="38" stroke="#1a4a1a" stroke-width="0.4"/>
+      <line x1="76" y1="40" x2="72" y2="38" stroke="#1a4a1a" stroke-width="0.4"/>
+      <!-- Carved animal mark middle -->
+      <path d="M 56 56 L 60 52 L 64 56 L 64 64 L 60 68 L 56 64 Z" fill="#3a2410" opacity="0.7"/>
+      <circle cx="58" cy="60" r="0.8" fill="#fff" opacity="0.5"/>
+      <circle cx="62" cy="60" r="0.8" fill="#fff" opacity="0.5"/>
+      <!-- Fiber/cord wraps -->
+      <rect x="54" y="74" width="12" height="14" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4" opacity="0.85"/>
+      <path d="M 54 78 Q 60 76 66 78 M 54 82 Q 60 80 66 82 M 54 86 Q 60 84 66 86" stroke="#5a4838" stroke-width="0.4" fill="none"/>
+      <!-- Hanging beads -->
+      <line x1="56" y1="88" x2="54" y2="98" stroke="#3a2410" stroke-width="0.4"/>
+      <line x1="64" y1="88" x2="66" y2="98" stroke="#3a2410" stroke-width="0.4"/>
+      <circle cx="54" cy="100" r="1.5" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.3"/>
+      <circle cx="66" cy="100" r="1.5" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.3"/>
+    </symbol>
+
+    <!-- Alaúde (lute): corpo pera + braço + cordas -->
+    <symbol id="ic-it-base-lute" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="26" ry="3" fill="#000" opacity="0.5"/>
+      <!-- Lute body (pear shape) -->
+      <path d="M 60 50 Q 28 56 30 84 Q 36 102 60 104 Q 84 102 90 84 Q 92 56 60 50 Z" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.8"/>
+      <!-- Body highlights -->
+      <path d="M 38 64 Q 46 60 56 60" fill="none" stroke="#a87a4a" stroke-width="1" opacity="0.6"/>
+      <!-- Sound hole (rosette) -->
+      <circle cx="60" cy="78" r="8" fill="#1a0808" stroke="#3a2410" stroke-width="0.5"/>
+      <circle cx="60" cy="78" r="6" fill="none" stroke="url(#rh-bronze)" stroke-width="0.6" opacity="0.85"/>
+      <path d="M 56 74 L 64 82 M 64 74 L 56 82" stroke="url(#rh-bronze)" stroke-width="0.5" opacity="0.7"/>
+      <!-- Bridge (where strings end) -->
+      <rect x="52" y="92" width="16" height="2.5" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.4"/>
+      <!-- Neck (going up) -->
+      <rect x="56" y="20" width="8" height="32" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <!-- Frets -->
+      <line x1="56" y1="26" x2="64" y2="26" stroke="url(#rh-bronze)" stroke-width="0.5"/>
+      <line x1="56" y1="32" x2="64" y2="32" stroke="url(#rh-bronze)" stroke-width="0.5"/>
+      <line x1="56" y1="38" x2="64" y2="38" stroke="url(#rh-bronze)" stroke-width="0.5"/>
+      <line x1="56" y1="44" x2="64" y2="44" stroke="url(#rh-bronze)" stroke-width="0.5"/>
+      <!-- Headstock (angled tuning head) -->
+      <path d="M 50 8 L 70 8 L 68 22 L 52 22 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Tuning pegs -->
+      <circle cx="55" cy="14" r="1.4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+      <circle cx="65" cy="14" r="1.4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+      <circle cx="55" cy="20" r="1.4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+      <circle cx="65" cy="20" r="1.4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+      <!-- Strings -->
+      <line x1="58" y1="22" x2="56" y2="92" stroke="#d4c8b0" stroke-width="0.4" opacity="0.85"/>
+      <line x1="60" y1="22" x2="60" y2="92" stroke="#d4c8b0" stroke-width="0.4" opacity="0.85"/>
+      <line x1="62" y1="22" x2="64" y2="92" stroke="#d4c8b0" stroke-width="0.4" opacity="0.85"/>
+    </symbol>
+
+    <!-- Partitura (music sheet): pergaminho enrolado com notas -->
+    <symbol id="ic-it-base-music-sheet" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="26" ry="3" fill="#000" opacity="0.5"/>
+      <!-- Rolled scroll body -->
+      <path d="M 22 24 L 98 22 L 100 96 L 24 98 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.8"/>
+      <!-- Spiral edges (rolled ends) -->
+      <ellipse cx="22" cy="60" rx="6" ry="38" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.8"/>
+      <ellipse cx="98" cy="60" rx="6" ry="38" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.8"/>
+      <ellipse cx="22" cy="60" rx="3" ry="36" fill="none" stroke="#5a4838" stroke-width="0.5" opacity="0.7"/>
+      <ellipse cx="98" cy="60" rx="3" ry="36" fill="none" stroke="#5a4838" stroke-width="0.5" opacity="0.7"/>
+      <!-- Music staff (5 lines) -->
+      <line x1="32" y1="42" x2="88" y2="40" stroke="#3a2410" stroke-width="0.5"/>
+      <line x1="32" y1="48" x2="88" y2="46" stroke="#3a2410" stroke-width="0.5"/>
+      <line x1="32" y1="54" x2="88" y2="52" stroke="#3a2410" stroke-width="0.5"/>
+      <line x1="32" y1="60" x2="88" y2="58" stroke="#3a2410" stroke-width="0.5"/>
+      <line x1="32" y1="66" x2="88" y2="64" stroke="#3a2410" stroke-width="0.5"/>
+      <!-- Treble clef (stylized G) -->
+      <path d="M 36 38 Q 40 44 36 52 Q 32 58 36 64 L 38 70" fill="none" stroke="url(#rh-crimson)" stroke-width="1.2"/>
+      <circle cx="38" cy="68" r="1.5" fill="url(#rh-crimson)"/>
+      <!-- Notes on staff -->
+      <ellipse cx="48" cy="50" rx="2" ry="1.5" fill="#1a1410" transform="rotate(-15 48 50)"/>
+      <line x1="50" y1="49" x2="50" y2="38" stroke="#1a1410" stroke-width="0.6"/>
+      <ellipse cx="58" cy="58" rx="2" ry="1.5" fill="#1a1410" transform="rotate(-15 58 58)"/>
+      <line x1="60" y1="57" x2="60" y2="44" stroke="#1a1410" stroke-width="0.6"/>
+      <ellipse cx="68" cy="46" rx="2" ry="1.5" fill="#1a1410" transform="rotate(-15 68 46)"/>
+      <line x1="70" y1="45" x2="70" y2="34" stroke="#1a1410" stroke-width="0.6"/>
+      <ellipse cx="78" cy="54" rx="2" ry="1.5" fill="#1a1410" transform="rotate(-15 78 54)"/>
+      <line x1="80" y1="53" x2="80" y2="42" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Lyrics line below staff -->
+      <line x1="34" y1="80" x2="58" y2="78" stroke="#3a2410" stroke-width="0.4" opacity="0.7"/>
+      <line x1="62" y1="78" x2="86" y2="76" stroke="#3a2410" stroke-width="0.4" opacity="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — items_srd.py WEAPONS_SIMPLE (12)              -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <symbol id="ic-it-clava"        viewBox="0 0 120 120"><use href="#ic-it-base-club"/></symbol>
+    <symbol id="ic-it-adaga"        viewBox="0 0 120 120"><use href="#ic-it-base-dagger"/></symbol>
+    <symbol id="ic-it-maca"         viewBox="0 0 120 120"><use href="#ic-it-base-mace"/></symbol>
+    <symbol id="ic-it-bordao"       viewBox="0 0 120 120"><use href="#ic-it-base-quarterstaff"/></symbol>
+    <symbol id="ic-it-lanca"        viewBox="0 0 120 120"><use href="#ic-it-base-spear"/></symbol>
+    <symbol id="ic-it-martelo-leve" viewBox="0 0 120 120"><use href="#ic-it-base-light-hammer"/></symbol>
+    <symbol id="ic-it-machadinha"   viewBox="0 0 120 120"><use href="#ic-it-base-handaxe"/></symbol>
+    <symbol id="ic-it-dardo"        viewBox="0 0 120 120"><use href="#ic-it-base-dart"/></symbol>
+    <symbol id="ic-it-foice-leve"   viewBox="0 0 120 120"><use href="#ic-it-base-sickle"/></symbol>
+    <symbol id="ic-it-besta-leve"   viewBox="0 0 120 120"><use href="#ic-it-base-light-crossbow"/></symbol>
+    <symbol id="ic-it-arco-curto"   viewBox="0 0 120 120"><use href="#ic-it-base-shortbow"/></symbol>
+    <symbol id="ic-it-funda"        viewBox="0 0 120 120"><use href="#ic-it-base-sling"/></symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — items_srd.py WEAPONS_MARTIAL (19)             -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <symbol id="ic-it-espada-longa"        viewBox="0 0 120 120"><use href="#ic-it-base-longsword"/></symbol>
+    <symbol id="ic-it-espada-curta"        viewBox="0 0 120 120"><use href="#ic-it-base-shortsword"/></symbol>
+    <symbol id="ic-it-rapieira"            viewBox="0 0 120 120"><use href="#ic-it-base-rapier"/></symbol>
+    <symbol id="ic-it-cimitarra"           viewBox="0 0 120 120"><use href="#ic-it-base-scimitar"/></symbol>
+    <symbol id="ic-it-montante"            viewBox="0 0 120 120"><use href="#ic-it-base-greatsword"/></symbol>
+    <symbol id="ic-it-machado-batalha"     viewBox="0 0 120 120"><use href="#ic-it-base-battleaxe"/></symbol>
+    <symbol id="ic-it-machado-grande"      viewBox="0 0 120 120"><use href="#ic-it-base-greataxe"/></symbol>
+    <symbol id="ic-it-martelo-guerra"      viewBox="0 0 120 120"><use href="#ic-it-base-warhammer"/></symbol>
+    <symbol id="ic-it-malho"               viewBox="0 0 120 120"><use href="#ic-it-base-maul"/></symbol>
+    <symbol id="ic-it-alabarda"            viewBox="0 0 120 120"><use href="#ic-it-base-halberd"/></symbol>
+    <symbol id="ic-it-mangual"             viewBox="0 0 120 120"><use href="#ic-it-base-flail"/></symbol>
+    <symbol id="ic-it-glaive"              viewBox="0 0 120 120"><use href="#ic-it-base-glaive"/></symbol>
+    <symbol id="ic-it-pique"               viewBox="0 0 120 120"><use href="#ic-it-base-pike"/></symbol>
+    <symbol id="ic-it-tridente"            viewBox="0 0 120 120"><use href="#ic-it-base-trident"/></symbol>
+    <symbol id="ic-it-picareta-guerra"     viewBox="0 0 120 120"><use href="#ic-it-base-warpick"/></symbol>
+    <symbol id="ic-it-chicote"             viewBox="0 0 120 120"><use href="#ic-it-base-whip"/></symbol>
+    <symbol id="ic-it-arco-longo"          viewBox="0 0 120 120"><use href="#ic-it-base-longbow"/></symbol>
+    <symbol id="ic-it-besta-pesada"        viewBox="0 0 120 120"><use href="#ic-it-base-heavy-crossbow"/></symbol>
+    <symbol id="ic-it-besta-mao"           viewBox="0 0 120 120"><use href="#ic-it-base-hand-crossbow"/></symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — item_registry_data.py JUNK & STARTER (~18)    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Lança Quebrada: spear + broken shaft (crack visível na haste) -->
+    <symbol id="ic-it-lanca-quebrada" viewBox="0 0 120 120">
+      <use href="#ic-it-base-spear"/>
+      <path d="M 56 70 L 60 76 L 64 70 L 60 74 Z" fill="#2a1408"/>
+      <path d="M 56 76 L 60 80 L 64 76" stroke="#1a0808" stroke-width="0.7" fill="none"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.18"/>
+    </symbol>
+
+    <!-- Machado de Pedra: handaxe primitivo (lâmina substituída por pedra) -->
+    <symbol id="ic-it-machado-pedra" viewBox="0 0 120 120">
+      <use href="#ic-it-base-handaxe"/>
+      <!-- Stone overlay over the iron blade -->
+      <path d="M 38 14 Q 30 30 38 46 L 52 42 Q 50 30 52 18 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.8"/>
+      <!-- Rough chips on stone -->
+      <path d="M 32 22 L 36 26 L 32 28 Z M 34 38 L 38 36 L 36 40 Z M 42 28 L 46 30 L 44 32 Z" fill="#3a3530" opacity="0.7"/>
+    </symbol>
+
+    <!-- Machado de Batalha Lascado: battleaxe + chips -->
+    <symbol id="ic-it-machado-batalha-lascado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-battleaxe"/>
+      <path d="M 22 30 L 18 34 L 24 36 Z M 16 50 L 22 50 L 18 54 Z" fill="#1a1410"/>
+      <path d="M 30 22 L 28 30 M 28 50 L 32 56" stroke="#1a1410" stroke-width="0.6" opacity="0.85"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.15"/>
+    </symbol>
+
+    <!-- Adaga de Arremesso: dagger + slim profile + extra balance gem -->
+    <symbol id="ic-it-adaga-arremesso" viewBox="0 0 120 120">
+      <use href="#ic-it-base-dagger"/>
+      <circle cx="60" cy="76" r="1.8" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+      <path d="M 56 32 L 64 32" stroke="url(#rh-bronze)" stroke-width="0.6" opacity="0.7"/>
+    </symbol>
+
+    <!-- Adaga Cerimonial -->
+    <symbol id="ic-it-adaga-cerimonial" viewBox="0 0 120 120"><use href="#ic-it-base-cerimonial-dagger"/></symbol>
+
+    <!-- Espada Longa Velha: longsword + rust streaks + dim -->
+    <symbol id="ic-it-espada-longa-velha" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <path d="M 56 18 L 56 64 M 64 22 L 64 60" stroke="#5a3a18" stroke-width="0.7" opacity="0.65"/>
+      <circle cx="58" cy="30" r="1.2" fill="#5a1810" opacity="0.55"/>
+      <circle cx="62" cy="46" r="1" fill="#5a1810" opacity="0.55"/>
+      <path d="M 60 24 L 58 30 L 62 36" stroke="#1a0808" stroke-width="0.4" opacity="0.7"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.22"/>
+    </symbol>
+
+    <!-- Flecha Quebrada -->
+    <symbol id="ic-it-flecha-quebrada" viewBox="0 0 120 120"><use href="#ic-it-base-broken-arrow"/></symbol>
+
+    <!-- Clava Gigante: club scaled up + cracks (boss drop) -->
+    <symbol id="ic-it-clava-gigante" viewBox="0 0 120 120">
+      <g transform="translate(60 60) scale(1.18) translate(-60 -60)"><use href="#ic-it-base-club"/></g>
+      <path d="M 56 30 L 58 38 L 56 46 M 64 26 L 62 36 L 64 44" stroke="#1a0808" stroke-width="0.55" fill="none" opacity="0.8"/>
+    </symbol>
+
+    <!-- Adaga Enferrujada: dagger + heavy rust -->
+    <symbol id="ic-it-adaga-enferrujada" viewBox="0 0 120 120">
+      <use href="#ic-it-base-dagger"/>
+      <path d="M 56 36 L 56 70 M 60 36 L 60 70 M 64 36 L 64 70" stroke="#7a3a18" stroke-width="0.5" opacity="0.55"/>
+      <circle cx="58" cy="46" r="1.4" fill="#5a1810" opacity="0.7"/>
+      <circle cx="62" cy="58" r="1.2" fill="#5a1810" opacity="0.7"/>
+      <circle cx="60" cy="64" r="1" fill="#5a1810" opacity="0.7"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.28"/>
+    </symbol>
+
+    <!-- Cajado de Aprendiz -->
+    <symbol id="ic-it-cajado-aprendiz" viewBox="0 0 120 120"><use href="#ic-it-base-mage-staff"/></symbol>
+
+    <!-- Espada de Treino -->
+    <symbol id="ic-it-espada-treino" viewBox="0 0 120 120"><use href="#ic-it-base-training-sword"/></symbol>
+
+    <!-- Cajado de Salgueiro -->
+    <symbol id="ic-it-cajado-salgueiro" viewBox="0 0 120 120"><use href="#ic-it-base-willow-staff"/></symbol>
+
+    <!-- Adaga Balanceada -->
+    <symbol id="ic-it-adaga-balanceada" viewBox="0 0 120 120"><use href="#ic-it-base-balanced-dagger"/></symbol>
+
+    <!-- Arco de Caça: shortbow with hunting decoration (feathers) -->
+    <symbol id="ic-it-arco-caca" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shortbow"/>
+      <!-- Hanging hunter's feather -->
+      <line x1="80" y1="68" x2="86" y2="80" stroke="#3a2410" stroke-width="0.5"/>
+      <path d="M 86 80 Q 90 84 90 90 Q 86 88 84 84 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Maça de Estrela -->
+    <symbol id="ic-it-maca-estrela" viewBox="0 0 120 120"><use href="#ic-it-base-morningstar"/></symbol>
+
+    <!-- Foice -->
+    <symbol id="ic-it-foice" viewBox="0 0 120 120"><use href="#ic-it-base-sickle"/></symbol>
+
+    <!-- Espada Enferrujada -->
+    <symbol id="ic-it-espada-enferrujada" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <path d="M 56 18 L 56 64 M 60 18 L 60 64 M 64 22 L 64 60" stroke="#7a3a18" stroke-width="0.6" opacity="0.6"/>
+      <circle cx="58" cy="30" r="1.4" fill="#5a1810" opacity="0.7"/>
+      <circle cx="62" cy="42" r="1.2" fill="#5a1810" opacity="0.7"/>
+      <circle cx="60" cy="56" r="1.3" fill="#5a1810" opacity="0.7"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.3"/>
+    </symbol>
+
+    <!-- Arco Rachado: shortbow + crack on limb -->
+    <symbol id="ic-it-arco-rachado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shortbow"/>
+      <path d="M 76 38 L 78 44 L 76 50" stroke="#1a0808" stroke-width="0.7" fill="none"/>
+      <path d="M 78 60 L 80 66 L 78 72" stroke="#1a0808" stroke-width="0.6" fill="none"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.22"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- VARIANTS +1 (mágicas) — base + sparks + halo arcane                   -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- "+1 decoration": 4 sparks brancos + halo arcane subtle (10-30 px)    -->
+
+    <symbol id="ic-it-espada-longa-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="32" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 36 30 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 84 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 28 50 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+      <path d="M 90 56 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-machado-guerra-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-battleaxe"/>
+      <circle cx="40" cy="38" r="32" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 16 28 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 60 22 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 22 56 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-martelo-guerra-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-warhammer"/>
+      <circle cx="60" cy="30" r="38" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 30 18 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 90 26 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 22 40 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-arma-magica-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="32" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 36 32 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 84 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-rapieira-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rapier"/>
+      <circle cx="60" cy="38" r="30" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 38 28 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 82 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 26 48 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-espada-curta-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shortsword"/>
+      <circle cx="60" cy="46" r="28" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 38 40 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 82 44 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-cimitarra-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-scimitar"/>
+      <circle cx="60" cy="40" r="32" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 86 26 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 30 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-adaga-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-dagger"/>
+      <circle cx="60" cy="50" r="26" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 38 42 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 82 48 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-arco-longo-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longbow"/>
+      <circle cx="74" cy="60" r="36" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <path d="M 96 36 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 100 80 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 90 60 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-arco-curto-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shortbow"/>
+      <circle cx="72" cy="60" r="30" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <path d="M 90 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 92 78 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-besta-leve-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-light-crossbow"/>
+      <circle cx="60" cy="40" r="42" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <path d="M 18 24 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 100 24 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-bordao-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-quarterstaff"/>
+      <circle cx="60" cy="14" r="14" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <path d="M 44 8 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 76 12 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 60 38 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-maca-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-mace"/>
+      <circle cx="60" cy="22" r="26" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 36 14 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 82 18 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-lanca-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-spear"/>
+      <circle cx="60" cy="26" r="24" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 38 18 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 80 22 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <symbol id="ic-it-montante-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-greatsword"/>
+      <circle cx="60" cy="36" r="36" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 30 22 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 88 28 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 22 50 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-alabarda-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-halberd"/>
+      <circle cx="50" cy="32" r="38" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 28 18 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 78 14 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 88 36 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <symbol id="ic-it-machado-grande-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-greataxe"/>
+      <circle cx="60" cy="36" r="42" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <path d="M 12 22 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 102 22 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 60 14 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- VARIANTS +2 / ELEMENTAIS                                              -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Espada Longa +2: glow mais brilhante + 6 sparks + halo gold -->
+    <symbol id="ic-it-espada-longa-2" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="40" fill="url(#rh-glow-arcane)" opacity="0.7"/>
+      <circle cx="60" cy="40" r="28" fill="url(#rh-glow-thunder)" opacity="0.4"/>
+      <path d="M 30 26 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 86 30 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 22 50 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 92 56 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 30 70 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+      <path d="M 88 70 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Espada Longa Flamejante: chamas envolvendo a lâmina -->
+    <symbol id="ic-it-espada-longa-flamejante" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="36" fill="url(#rh-glow-fire)" opacity="0.7"/>
+      <!-- Flames hugging the blade -->
+      <path d="M 50 14 Q 44 24 48 36 Q 42 50 50 60 Q 44 68 56 68" fill="none" stroke="url(#rh-flame)" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+      <path d="M 70 14 Q 76 24 72 36 Q 78 50 70 60 Q 76 68 64 68" fill="none" stroke="url(#rh-flame)" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+      <!-- Flame tips above blade -->
+      <path d="M 60 8 Q 54 4 50 -2 Q 56 4 60 0 Q 64 4 70 -2 Q 66 4 60 8 Z" fill="url(#rh-flame)" stroke="#7a2010" stroke-width="0.4"/>
+      <!-- Embers -->
+      <circle cx="42" cy="28" r="0.9" fill="#ff8830"/>
+      <circle cx="80" cy="34" r="0.8" fill="#ff8830"/>
+      <circle cx="38" cy="50" r="0.7" fill="#ffb060"/>
+      <circle cx="86" cy="56" r="0.7" fill="#ffb060"/>
+    </symbol>
+
+    <!-- Espada Longa Gélida: gelo + cristais frios -->
+    <symbol id="ic-it-espada-longa-gelida" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="36" fill="url(#rh-glow-ice)" opacity="0.65"/>
+      <!-- Ice crystals along blade -->
+      <path d="M 54 18 L 50 22 L 54 24 L 52 28 L 56 28 Z" fill="url(#rh-ice)" stroke="#3a78a8" stroke-width="0.4" opacity="0.9"/>
+      <path d="M 66 22 L 70 26 L 66 28 L 68 32 L 64 32 Z" fill="url(#rh-ice)" stroke="#3a78a8" stroke-width="0.4" opacity="0.9"/>
+      <path d="M 52 44 L 46 48 L 52 50 L 50 54 L 56 54 Z" fill="url(#rh-ice)" stroke="#3a78a8" stroke-width="0.4" opacity="0.9"/>
+      <path d="M 68 50 L 74 54 L 68 56 L 70 60 L 66 60 Z" fill="url(#rh-ice)" stroke="#3a78a8" stroke-width="0.4" opacity="0.9"/>
+      <!-- Mist drifting upward -->
+      <path d="M 56 12 Q 54 6 58 4 Q 60 6 62 4 Q 66 6 64 12" fill="none" stroke="#a8d8f0" stroke-width="0.6" opacity="0.6"/>
+      <!-- Snowflake sparks -->
+      <circle cx="42" cy="34" r="0.8" fill="#e8f8ff"/>
+      <circle cx="80" cy="40" r="0.8" fill="#e8f8ff"/>
+      <circle cx="38" cy="56" r="0.7" fill="#e8f8ff"/>
+    </symbol>
+
+    <!-- Espada Longa Trovejante: raios + faíscas elétricas -->
+    <symbol id="ic-it-espada-longa-trovejante" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="36" fill="url(#rh-glow-thunder)" opacity="0.7"/>
+      <!-- Lightning bolts on blade -->
+      <path d="M 56 18 L 52 28 L 58 28 L 54 38 L 62 38 L 58 48 L 64 48 L 56 60" fill="none" stroke="#fff8a0" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M 56 18 L 52 28 L 58 28 L 54 38 L 62 38 L 58 48 L 64 48 L 56 60" fill="none" stroke="#fff" stroke-width="0.5" stroke-linecap="round" opacity="0.95"/>
+      <!-- Crackle sparks emanating -->
+      <path d="M 30 32 L 36 30 L 34 34 L 38 36" stroke="#fff8a0" stroke-width="0.6" fill="none"/>
+      <path d="M 90 38 L 84 36 L 86 40 L 82 42" stroke="#fff8a0" stroke-width="0.6" fill="none"/>
+      <path d="M 28 56 L 34 54 L 32 58" stroke="#fff8a0" stroke-width="0.5" fill="none"/>
+      <path d="M 92 60 L 86 58 L 88 62" stroke="#fff8a0" stroke-width="0.5" fill="none"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SET WEAPONS (4) — designs únicos temáticos                            -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Garras do Lobo Selvagem: 2 lâminas curvas (claw shape) montadas no punho -->
+    <symbol id="ic-it-garras-lobo-selvagem" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Knuckle/handle base (leather + bronze) -->
+      <rect x="48" y="64" width="24" height="22" rx="3" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.7"/>
+      <line x1="48" y1="70" x2="72" y2="70" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="48" y1="78" x2="72" y2="78" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- 4 finger knuckle plates -->
+      <rect x="50" y="62" width="4" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="56" y="60" width="4" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="62" y="60" width="4" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="68" y="62" width="4" height="6" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- 4 curved claw blades -->
+      <path d="M 50 60 Q 38 38 30 14 Q 36 10 42 22 Q 48 38 52 58 Z" fill="url(#rh-bone)" stroke="#3a2a1a" stroke-width="0.7"/>
+      <path d="M 56 58 Q 50 32 48 8 Q 54 8 56 22 Q 60 36 60 56 Z" fill="url(#rh-bone)" stroke="#3a2a1a" stroke-width="0.7"/>
+      <path d="M 64 58 Q 70 32 72 8 Q 66 8 64 22 Q 60 36 60 56 Z" fill="url(#rh-bone)" stroke="#3a2a1a" stroke-width="0.7"/>
+      <path d="M 70 60 Q 82 38 90 14 Q 84 10 78 22 Q 72 38 68 58 Z" fill="url(#rh-bone)" stroke="#3a2a1a" stroke-width="0.7"/>
+      <!-- Edge highlights on claws -->
+      <path d="M 32 18 Q 40 30 50 56" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 88 18 Q 80 30 70 56" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <!-- Wolf head emblem on knuckle -->
+      <path d="M 56 75 L 60 72 L 64 75 L 64 80 L 60 82 L 56 80 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="58" cy="76" r="0.6" fill="#3a8a3a"/>
+      <circle cx="62" cy="76" r="0.6" fill="#3a8a3a"/>
+      <!-- Bottom wrap -->
+      <rect x="52" y="86" width="16" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="52" y1="92" x2="68" y2="92" stroke="#2a1408" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Arco do Guardião Silvestre: longbow + esmeralda + folhas talhadas -->
+    <symbol id="ic-it-arco-guardiao-silvestre" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longbow"/>
+      <!-- Emerald aura -->
+      <circle cx="74" cy="60" r="40" fill="url(#rh-emerald)" opacity="0.18"/>
+      <!-- Carved leaves on limbs -->
+      <path d="M 78 30 Q 86 28 88 36 Q 84 38 80 34 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 78 90 Q 86 92 88 84 Q 84 82 80 86 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 84 56 Q 92 54 94 62 Q 90 64 86 60 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <!-- Emerald gem center grip -->
+      <ellipse cx="83" cy="60" rx="3.5" ry="2.4" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <circle cx="82" cy="59" r="0.8" fill="#fff" opacity="0.6"/>
+    </symbol>
+
+    <!-- Machado da Fúria das Montanhas: greataxe + runas anãs + glow crimson -->
+    <symbol id="ic-it-machado-furia-montanhas" viewBox="0 0 120 120">
+      <use href="#ic-it-base-greataxe"/>
+      <circle cx="60" cy="36" r="42" fill="url(#rh-glow-fire)" opacity="0.32"/>
+      <!-- Dwarven runes on left blade -->
+      <path d="M 26 28 L 26 36 M 22 32 L 30 32" stroke="url(#rh-crimson)" stroke-width="0.7"/>
+      <path d="M 28 44 L 32 48 L 28 52" stroke="url(#rh-crimson)" stroke-width="0.7" fill="none"/>
+      <!-- Dwarven runes on right blade -->
+      <path d="M 94 28 L 94 36 M 90 32 L 98 32" stroke="url(#rh-crimson)" stroke-width="0.7"/>
+      <path d="M 92 44 L 88 48 L 92 52" stroke="url(#rh-crimson)" stroke-width="0.7" fill="none"/>
+      <!-- Crimson gem on hub -->
+      <circle cx="60" cy="36" r="3.5" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.5"/>
+      <circle cx="59" cy="35" r="1" fill="#fff" opacity="0.6"/>
+    </symbol>
+
+    <!-- Lâmina do Lamento Sombrio: rapier + black tint + crimson sussurro -->
+    <symbol id="ic-it-lamina-lamento-sombrio" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rapier"/>
+      <!-- Dark overlay on blade -->
+      <path d="M 60 6 L 62 12 L 63 64 L 60 68 L 57 64 L 58 12 Z" fill="url(#rh-shadow-dark)" opacity="0.55"/>
+      <circle cx="60" cy="38" r="32" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+      <!-- Crimson runes whispering -->
+      <path d="M 56 22 L 58 26 L 56 30 M 64 28 L 62 32 L 64 36 M 56 40 L 58 44 L 56 48 M 64 50 L 62 54 L 64 58" stroke="url(#rh-crimson)" stroke-width="0.5" fill="none" opacity="0.85"/>
+      <!-- Shadow wisps emanating -->
+      <path d="M 38 60 Q 42 56 46 60 M 82 60 Q 78 56 74 60" fill="none" stroke="#3a1a3a" stroke-width="0.5" opacity="0.75"/>
+      <!-- Crimson gem in pommel -->
+      <circle cx="60" cy="102" r="2.5" fill="url(#rh-crimson)"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- QUEST WEAPONS (4)                                                     -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Lâmina de Thorne: longsword + bronze hilt ornament + +1 glow -->
+    <symbol id="ic-it-lamina-thorne" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="32" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Bronze quillon ornament -->
+      <path d="M 38 68 L 82 68 L 80 74 L 40 74 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <circle cx="38" cy="71" r="2.5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <circle cx="82" cy="71" r="2.5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Engraved T (Thorne) on blade -->
+      <path d="M 56 38 L 64 38 M 60 38 L 60 50" stroke="#1a1410" stroke-width="0.7"/>
+      <path d="M 36 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 84 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Adaga das Sombras: dagger + dark blade + shadow wisps -->
+    <symbol id="ic-it-adaga-sombras" viewBox="0 0 120 120">
+      <use href="#ic-it-base-dagger"/>
+      <path d="M 60 28 L 64 34 L 66 70 L 60 76 L 54 70 L 56 34 Z" fill="url(#rh-shadow-dark)" opacity="0.6"/>
+      <circle cx="60" cy="50" r="26" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <path d="M 56 38 L 58 42 L 56 46 M 64 46 L 62 50 L 64 54 M 56 56 L 58 60 L 56 64" stroke="#a878ff" stroke-width="0.5" fill="none" opacity="0.85"/>
+      <circle cx="60" cy="100" r="2" fill="url(#rh-arcane)"/>
+    </symbol>
+
+    <!-- Lâmina do Veterano: longsword + worn but +1 glow + bronze accent -->
+    <symbol id="ic-it-lamina-veterano" viewBox="0 0 120 120">
+      <use href="#ic-it-base-longsword"/>
+      <circle cx="60" cy="40" r="32" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Subtle wear marks (small notches) -->
+      <path d="M 55 30 L 57 32 M 64 50 L 62 52" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Bronze pommel accent -->
+      <circle cx="60" cy="103" r="6" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <path d="M 56 99 L 64 99 M 56 107 L 64 107" stroke="#5a3010" stroke-width="0.5"/>
+      <path d="M 36 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 84 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Adaga do Beco: dagger + silver inlay glow + +1 -->
+    <symbol id="ic-it-adaga-beco" viewBox="0 0 120 120">
+      <use href="#ic-it-base-dagger"/>
+      <circle cx="60" cy="50" r="26" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Silver inlay vine pattern on blade -->
+      <path d="M 60 38 Q 58 44 60 50 Q 62 56 60 62" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.8"/>
+      <path d="M 38 42 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 80 46 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Machado de Montanha: greataxe + stone overlay (Korthag dwarf) -->
+    <symbol id="ic-it-machado-montanha" viewBox="0 0 120 120">
+      <use href="#ic-it-base-greataxe"/>
+      <!-- Stone-like blade overlay -->
+      <path d="M 18 10 Q 4 36 18 62 L 50 54 Q 48 36 50 18 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.9" opacity="0.85"/>
+      <path d="M 102 10 Q 116 36 102 62 L 70 54 Q 72 36 70 18 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.9" opacity="0.85"/>
+      <!-- Mountain peak emblem on hub -->
+      <path d="M 52 30 L 60 18 L 68 30 L 64 30 L 60 24 L 56 30 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MAGIC FOCI — base + variants                                          -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <symbol id="ic-it-grimorio-aprendiz" viewBox="0 0 120 120"><use href="#ic-it-base-grimoire"/></symbol>
+    <symbol id="ic-it-orbe-mistico"      viewBox="0 0 120 120"><use href="#ic-it-base-orb"/></symbol>
+    <symbol id="ic-it-tomo-conhecimento" viewBox="0 0 120 120"><use href="#ic-it-base-tome"/></symbol>
+
+    <!-- Orbe Arcano +1: orb + sparks + brighter glow -->
+    <symbol id="ic-it-orbe-arcano-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-orb"/>
+      <circle cx="60" cy="50" r="44" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <path d="M 24 24 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 92 26 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 18 70 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 98 72 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Varinha Mago de Guerra +1: wand + sparks -->
+    <symbol id="ic-it-varinha-mago-guerra-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-wand"/>
+      <circle cx="60" cy="20" r="20" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <path d="M 36 14 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 84 18 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- Tomo Sombrio: tome + dark + skull mark -->
+    <symbol id="ic-it-tomo-sombrio" viewBox="0 0 120 120">
+      <use href="#ic-it-base-tome"/>
+      <!-- Dark overlay -->
+      <path d="M 12 30 Q 60 22 60 24 L 60 100 Q 36 96 12 102 Z" fill="url(#rh-shadow-dark)" opacity="0.55"/>
+      <path d="M 60 24 Q 60 22 108 30 L 108 102 Q 84 96 60 100 Z" fill="url(#rh-shadow-dark)" opacity="0.55"/>
+      <!-- Skull mark center -->
+      <circle cx="60" cy="62" r="9" fill="url(#rh-bone)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="56" cy="60" r="1.4" fill="#1a0808"/>
+      <circle cx="64" cy="60" r="1.4" fill="#1a0808"/>
+      <path d="M 56 66 L 58 68 L 60 66 L 62 68 L 64 66" stroke="#1a0808" stroke-width="0.6" fill="none"/>
+    </symbol>
+
+    <!-- Símbolo Sagrado +1: holy symbol + brighter glow + sparks -->
+    <symbol id="ic-it-simbolo-sagrado-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-holy-symbol"/>
+      <circle cx="60" cy="50" r="48" fill="url(#rh-glow-thunder)" opacity="0.4"/>
+      <path d="M 14 50 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 102 50 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 60 6 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.95"/>
+    </symbol>
+
+    <!-- Foco Druídico +1: druid totem + emerald glow -->
+    <symbol id="ic-it-foco-druidico-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-druid-totem"/>
+      <circle cx="60" cy="50" r="40" fill="url(#rh-emerald)" opacity="0.18"/>
+      <path d="M 30 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 86 32 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 28 70 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <!-- Orbe do Arcanista (set): orb + arcane runes orbiting -->
+    <symbol id="ic-it-orbe-arcanista" viewBox="0 0 120 120">
+      <use href="#ic-it-base-orb"/>
+      <circle cx="60" cy="50" r="44" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Orbiting runes -->
+      <path d="M 24 28 L 26 32 L 24 36 M 22 32 L 26 32" stroke="url(#rh-violet)" stroke-width="0.6" fill="none" opacity="0.85"/>
+      <path d="M 92 28 L 94 32 L 92 36 M 90 32 L 94 32" stroke="url(#rh-violet)" stroke-width="0.6" fill="none" opacity="0.85"/>
+      <path d="M 22 68 L 24 72 L 22 76" stroke="url(#rh-violet)" stroke-width="0.6" fill="none" opacity="0.85"/>
+      <path d="M 96 70 L 98 74 L 96 78" stroke="url(#rh-violet)" stroke-width="0.6" fill="none" opacity="0.85"/>
+    </symbol>
+
+    <!-- Alaúde do Canto Estelar (set): lute + stars on body -->
+    <symbol id="ic-it-alaude-canto-estelar" viewBox="0 0 120 120">
+      <use href="#ic-it-base-lute"/>
+      <circle cx="60" cy="80" r="34" fill="url(#rh-glow-arcane)" opacity="0.22"/>
+      <!-- Constellation dots on body -->
+      <circle cx="44" cy="70" r="0.9" fill="#fff" opacity="0.9"/>
+      <circle cx="76" cy="68" r="0.9" fill="#fff" opacity="0.9"/>
+      <circle cx="50" cy="92" r="0.9" fill="#fff" opacity="0.9"/>
+      <circle cx="70" cy="96" r="0.9" fill="#fff" opacity="0.9"/>
+      <line x1="44" y1="70" x2="50" y2="92" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="50" y1="92" x2="70" y2="96" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="70" y1="96" x2="76" y2="68" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <!-- Star above headstock -->
+      <path d="M 60 4 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+    </symbol>
+
+    <!-- Grimório Menor: simpler grimoire with fewer ornaments -->
+    <symbol id="ic-it-grimorio-menor" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="24" ry="2.6" fill="#000" opacity="0.5"/>
+      <path d="M 28 26 L 84 22 L 88 30 L 88 96 L 30 100 Z" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.8"/>
+      <path d="M 30 26 L 30 100" stroke="#3a1808" stroke-width="2" opacity="0.85"/>
+      <!-- Center simple star symbol -->
+      <path d="M 58 58 l 2 -3 l 2 3 l 3 2 l -3 2 l -2 3 l -2 -3 l -3 -2 z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Corner fittings -->
+      <path d="M 30 28 L 36 28 L 33 32 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <path d="M 84 28 L 88 32 L 84 34 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Cristal de Convergência: orb + ley line arcane swirl -->
+    <symbol id="ic-it-cristal-convergencia" viewBox="0 0 120 120">
+      <use href="#ic-it-base-orb"/>
+      <circle cx="60" cy="50" r="46" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <!-- Ley lines crossing through orb -->
+      <path d="M 14 50 L 106 50" stroke="#a878ff" stroke-width="0.6" opacity="0.7"/>
+      <path d="M 60 14 L 60 90" stroke="#a878ff" stroke-width="0.6" opacity="0.7"/>
+      <path d="M 28 18 L 92 82" stroke="#a878ff" stroke-width="0.5" opacity="0.5"/>
+      <path d="M 92 18 L 28 82" stroke="#a878ff" stroke-width="0.5" opacity="0.5"/>
+    </symbol>
+
+    <!-- Fragmento do Pacto: orb fragmented (broken sphere) -->
+    <symbol id="ic-it-fragmento-pacto" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.6" fill="#000" opacity="0.5"/>
+      <circle cx="60" cy="50" r="36" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <!-- Fragmented obsidian shards (3) -->
+      <path d="M 40 30 L 56 36 L 52 56 L 36 44 Z" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.7"/>
+      <path d="M 60 24 L 78 32 L 70 48 L 56 36 Z" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.7"/>
+      <path d="M 62 56 L 84 60 L 74 76 L 56 70 Z" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.7"/>
+      <!-- Highlights -->
+      <path d="M 42 34 L 50 40" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 64 28 L 72 34" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 66 60 L 76 64" stroke="#fff" stroke-width="0.5" opacity="0.55"/>
+      <!-- Bronze base -->
+      <ellipse cx="60" cy="98" rx="18" ry="5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+    </symbol>
+
+    <!-- Partitura Élfica: music sheet + emerald edge + leaf -->
+    <symbol id="ic-it-partitura-elfica" viewBox="0 0 120 120">
+      <use href="#ic-it-base-music-sheet"/>
+      <ellipse cx="22" cy="60" rx="6" ry="38" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.6" opacity="0.85"/>
+      <ellipse cx="98" cy="60" rx="6" ry="38" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.6" opacity="0.85"/>
+      <path d="M 88 92 Q 96 88 98 96 Q 92 100 90 96 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 32 92 Q 24 88 22 96 Q 28 100 30 96 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Símbolo Purificado: holy symbol + radiant white aura + extra rays -->
+    <symbol id="ic-it-simbolo-purificado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-holy-symbol"/>
+      <circle cx="60" cy="50" r="50" fill="#fff" opacity="0.18"/>
+      <circle cx="60" cy="50" r="30" fill="url(#rh-glow-thunder)" opacity="0.6"/>
+      <!-- Extra fine rays -->
+      <g transform="translate(60 50)" stroke="#fff" stroke-width="0.4" opacity="0.65">
+        <line x1="0" y1="-44" x2="0" y2="-36"/>
+        <line x1="0" y1="44" x2="0" y2="36"/>
+        <line x1="-44" y1="0" x2="-36" y2="0"/>
+        <line x1="44" y1="0" x2="36" y2="0"/>
+        <line x1="-30" y1="-30" x2="-26" y2="-26"/>
+        <line x1="30" y1="-30" x2="26" y2="-26"/>
+        <line x1="-30" y1="30" x2="-26" y2="26"/>
+        <line x1="30" y1="30" x2="26" y2="26"/>
+      </g>
+    </symbol>
+
+    <!-- Página do Grimório: stylized scroll page -->
+    <symbol id="ic-it-pagina-grimorio" viewBox="0 0 120 120">
+      <use href="#ic-it-base-music-sheet"/>
+      <circle cx="60" cy="60" r="38" fill="url(#rh-glow-arcane)" opacity="0.32"/>
+      <!-- Arcane sigil overlay center -->
+      <circle cx="60" cy="58" r="10" fill="none" stroke="url(#rh-violet)" stroke-width="0.7"/>
+      <path d="M 56 58 L 64 58 M 60 54 L 60 62" stroke="url(#rh-violet)" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- Relíquia da Torre: orb + tower silhouette inside -->
+    <symbol id="ic-it-reliquia-torre" viewBox="0 0 120 120">
+      <use href="#ic-it-base-orb"/>
+      <circle cx="60" cy="50" r="40" fill="url(#rh-glow-arcane)" opacity="0.32"/>
+      <!-- Tower silhouette inside orb -->
+      <path d="M 56 38 L 56 64 L 64 64 L 64 38 Z" fill="#1a0838" opacity="0.85"/>
+      <path d="M 54 38 L 60 30 L 66 38 Z" fill="#1a0838" opacity="0.85"/>
+      <rect x="58" y="50" width="4" height="6" fill="#a878ff" opacity="0.7"/>
+    </symbol>
+
+    <!-- Artefato do Vale: orb + valley/mountain silhouette -->
+    <symbol id="ic-it-artefato-vale" viewBox="0 0 120 120">
+      <use href="#ic-it-base-orb"/>
+      <circle cx="60" cy="50" r="38" fill="url(#rh-emerald)" opacity="0.18"/>
+      <!-- Mountain silhouette inside orb -->
+      <path d="M 38 64 L 50 46 L 56 54 L 64 38 L 70 50 L 82 64 Z" fill="#1a4a1a" opacity="0.75"/>
+      <circle cx="62" cy="40" r="2" fill="url(#rh-bone)" opacity="0.65"/>
+    </symbol>
+
+    <!-- Fragmento de Obsidiana: dark crystal shard -->
+    <symbol id="ic-it-fragmento-obsidiana" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.6" fill="#000" opacity="0.5"/>
+      <circle cx="60" cy="50" r="36" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Single large obsidian shard -->
+      <path d="M 60 14 L 80 38 L 76 80 L 60 100 L 44 80 L 40 38 Z" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.9"/>
+      <!-- Facet highlights -->
+      <path d="M 60 14 L 60 100" stroke="#fff" stroke-width="0.5" opacity="0.45"/>
+      <path d="M 44 38 L 76 38" stroke="#fff" stroke-width="0.4" opacity="0.4"/>
+      <path d="M 60 14 L 76 38" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
+      <!-- Bronze setting -->
+      <ellipse cx="60" cy="100" rx="20" ry="5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+    </symbol>
+
+  </defs>
+</svg>
+
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<!-- HEADER + SEARCH + NAV                                                        -->
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<header>
+  <h1>Heráldicos do Inventário</h1>
+  <p class="subtitle">
+    <strong>Batch 1 / 9</strong> — Armas + Focos Mágicos<br>
+    SVG heráldico AAA, sem gold forçado, mesmo padrão dos ícones de classe/raça.<br>
+    Cada slot do inventário renderiza a 54×54 — preview também mostra essa demo.
+  </p>
+  <input type="text" class="search-box" placeholder="🔍 Buscar item por nome..." id="search">
+  <nav class="cat-nav">
+    <a href="#cat-weapon" class="active">⚔️ Armas + Focos</a>
+    <span class="upcoming">🛡️ Armaduras (Batch 2)</span>
+    <span class="upcoming">🧪 Consumíveis (Batch 3)</span>
+    <span class="upcoming">💎 Gemas/Runas (Batch 4)</span>
+    <span class="upcoming">💍 Acessórios (Batch 5)</span>
+    <span class="upcoming">🏆 Loot/Troféus (Batch 6)</span>
+    <span class="upcoming">🪨 Materiais (Batch 7)</span>
+    <span class="upcoming">🗝️ Ferramentas/Quest (Batch 8)</span>
+    <span class="upcoming">🐺 Sets (Batch 9)</span>
+  </nav>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<!-- MAIN — categorias                                                            -->
+<!-- ════════════════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ═══════ CATEGORIA: ARMAS + FOCOS MÁGICOS ═══════ -->
+  <section id="cat-weapon">
+    <h2>⚔️ Armas + Focos Mágicos <span style="color:#6a5a4a;font-size:14px">(Batch 1 — 99 itens)</span></h2>
+
+    <!-- Faixa demo: tamanho real do slot do inventário (54×54) -->
+    <div class="real-size-strip">
+      <div class="lbl">Demo: como aparecem nos slots reais do inventário (54×54px)</div>
+      <div class="row">
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-longo"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-grande"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-bordao-1"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-orbe-mistico"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-grimorio-aprendiz"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-flamejante"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-garras-lobo-selvagem"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-lamina-thorne"/></svg></div>
+      </div>
+    </div>
+
+    <!-- ── Armas Simples — Corpo a Corpo ── -->
+    <h3>Armas Simples — Corpo a Corpo <span class="count">(9)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="clava"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-clava"/></svg></div><div class="item-name">Clava</div><div class="item-meta"><span class="die">1d4</span> contundente · <span class="val">1</span></div></article>
+      <article class="item-card" data-name="adaga"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga"/></svg></div><div class="item-name">Adaga</div><div class="item-meta"><span class="die">1d4</span> perfurante · <span class="val">2</span></div></article>
+      <article class="item-card" data-name="maca"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-maca"/></svg></div><div class="item-name">Maça</div><div class="item-meta"><span class="die">1d6</span> contundente · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="bordao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-bordao"/></svg></div><div class="item-name">Bordão</div><div class="item-meta"><span class="die">1d6</span>/1d8 versátil · <span class="val">2</span></div></article>
+      <article class="item-card" data-name="lanca"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lanca"/></svg></div><div class="item-name">Lança</div><div class="item-meta"><span class="die">1d6</span>/1d8 arremesso · <span class="val">1</span></div></article>
+      <article class="item-card" data-name="martelo leve"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-martelo-leve"/></svg></div><div class="item-name">Martelo Leve</div><div class="item-meta"><span class="die">1d4</span> arremesso · <span class="val">2</span></div></article>
+      <article class="item-card" data-name="machadinha"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machadinha"/></svg></div><div class="item-name">Machadinha</div><div class="item-meta"><span class="die">1d6</span> cortante · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="dardo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-dardo"/></svg></div><div class="item-name">Dardo</div><div class="item-meta"><span class="die">1d4</span> arremesso · <span class="val">1</span></div></article>
+      <article class="item-card" data-name="foice leve"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-foice-leve"/></svg></div><div class="item-name">Foice Leve</div><div class="item-meta"><span class="die">1d4</span> cortante · <span class="val">1</span></div></article>
+    </div>
+
+    <!-- ── Armas Simples — À Distância ── -->
+    <h3>Armas Simples — À Distância <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="besta leve"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-besta-leve"/></svg></div><div class="item-name">Besta Leve</div><div class="item-meta"><span class="die">1d8</span> perfurante · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="arco curto"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-curto"/></svg></div><div class="item-name">Arco Curto</div><div class="item-meta"><span class="die">1d6</span> perfurante · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="funda"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-funda"/></svg></div><div class="item-name">Funda</div><div class="item-meta"><span class="die">1d4</span> contundente · <span class="val">1</span></div></article>
+    </div>
+
+    <!-- ── Armas Marciais — Corpo a Corpo ── -->
+    <h3>Armas Marciais — Corpo a Corpo <span class="count">(16)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="espada longa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa"/></svg></div><div class="item-name">Espada Longa</div><div class="item-meta"><span class="die">1d8</span>/1d10 versátil · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="espada curta"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-curta"/></svg></div><div class="item-name">Espada Curta</div><div class="item-meta"><span class="die">1d6</span> perfurante · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="rapieira"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-rapieira"/></svg></div><div class="item-name">Rapieira</div><div class="item-meta"><span class="die">1d8</span> perf., finesse · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="cimitarra"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cimitarra"/></svg></div><div class="item-name">Cimitarra</div><div class="item-meta"><span class="die">1d6</span> cort., finesse · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="montante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-montante"/></svg></div><div class="item-name">Montante</div><div class="item-meta"><span class="die">2d6</span> cort., 2 mãos · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="machado de batalha"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-batalha"/></svg></div><div class="item-name">Machado de Batalha</div><div class="item-meta"><span class="die">1d8</span>/1d10 versátil · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="machado grande"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-grande"/></svg></div><div class="item-name">Machado Grande</div><div class="item-meta"><span class="die">1d12</span> cort., 2 mãos · <span class="val">30</span></div></article>
+      <article class="item-card" data-name="martelo de guerra"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-martelo-guerra"/></svg></div><div class="item-name">Martelo de Guerra</div><div class="item-meta"><span class="die">1d8</span>/1d10 versátil · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="malho"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-malho"/></svg></div><div class="item-name">Malho</div><div class="item-meta"><span class="die">2d6</span> contund., 2 mãos · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="alabarda"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-alabarda"/></svg></div><div class="item-name">Alabarda</div><div class="item-meta"><span class="die">1d10</span> cort., reach · <span class="val">20</span></div></article>
+      <article class="item-card" data-name="mangual"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-mangual"/></svg></div><div class="item-name">Mangual</div><div class="item-meta"><span class="die">1d8</span> contundente · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="glaive"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-glaive"/></svg></div><div class="item-name">Glaive</div><div class="item-meta"><span class="die">1d10</span> cort., reach · <span class="val">20</span></div></article>
+      <article class="item-card" data-name="pique"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pique"/></svg></div><div class="item-name">Pique</div><div class="item-meta"><span class="die">1d10</span> perf., reach · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="tridente"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-tridente"/></svg></div><div class="item-name">Tridente</div><div class="item-meta"><span class="die">1d6</span>/1d8 arremesso · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="picareta de guerra"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-picareta-guerra"/></svg></div><div class="item-name">Picareta de Guerra</div><div class="item-meta"><span class="die">1d8</span> perfurante · <span class="val">45</span></div></article>
+      <article class="item-card" data-name="chicote"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-chicote"/></svg></div><div class="item-name">Chicote</div><div class="item-meta"><span class="die">1d4</span> cort., reach · <span class="val">2</span></div></article>
+    </div>
+
+    <!-- ── Armas Marciais — À Distância ── -->
+    <h3>Armas Marciais — À Distância <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="arco longo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-longo"/></svg></div><div class="item-name">Arco Longo</div><div class="item-meta"><span class="die">1d8</span> perfurante · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="besta pesada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-besta-pesada"/></svg></div><div class="item-name">Besta Pesada</div><div class="item-meta"><span class="die">1d10</span> perfurante · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="besta de mao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-besta-mao"/></svg></div><div class="item-name">Besta de Mão</div><div class="item-meta"><span class="die">1d6</span> perfurante · <span class="val">75</span></div></article>
+    </div>
+
+    <!-- ── Armas Iniciais & Especialidades ── -->
+    <h3>Armas Iniciais & Especialidades <span class="count">(8)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="cajado de aprendiz"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cajado-aprendiz"/></svg></div><div class="item-name">Cajado de Aprendiz</div><div class="item-meta"><span class="die">1d6</span> mágico · <span class="val">20</span></div></article>
+      <article class="item-card" data-name="espada de treino"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-treino"/></svg></div><div class="item-name">Espada de Treino</div><div class="item-meta"><span class="die">1d8</span> contundente · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="cajado de salgueiro"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cajado-salgueiro"/></svg></div><div class="item-name">Cajado de Salgueiro</div><div class="item-meta"><span class="die">1d6</span> mágico · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="adaga balanceada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-balanceada"/></svg></div><div class="item-name">Adaga Balanceada</div><div class="item-meta"><span class="die">1d4+1</span> perfurante · <span class="val">12</span></div></article>
+      <article class="item-card" data-name="arco de caca"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-caca"/></svg></div><div class="item-name">Arco de Caça</div><div class="item-meta"><span class="die">1d6</span> perfurante · <span class="val">18</span></div></article>
+      <article class="item-card" data-name="maca de estrela"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-maca-estrela"/></svg></div><div class="item-name">Maça de Estrela</div><div class="item-meta"><span class="die">1d6+1</span> contundente · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="foice"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-foice"/></svg></div><div class="item-name">Foice</div><div class="item-meta"><span class="die">1d4</span> cortante · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="adaga cerimonial"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-cerimonial"/></svg></div><div class="item-name">Adaga Cerimonial</div><div class="item-meta"><span class="die">1d4</span> ritualística · <span class="val">20</span></div></article>
+    </div>
+
+    <!-- ── Variantes Mundanas (Velhas/Quebradas/Junk) ── -->
+    <h3>Variantes Mundanas — Velhas / Quebradas / Junk <span class="count">(10)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-junk" data-name="lanca quebrada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lanca-quebrada"/></svg></div><div class="item-name">Lança Quebrada</div><div class="item-meta">junk · sucata · <span class="val">3</span></div></article>
+      <article class="item-card rarity-junk" data-name="machado de pedra"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-pedra"/></svg></div><div class="item-name">Machado de Pedra</div><div class="item-meta"><span class="die">1d6</span> primitivo · <span class="val">8</span></div></article>
+      <article class="item-card rarity-junk" data-name="machado de batalha lascado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-batalha-lascado"/></svg></div><div class="item-name">Machado de Batalha Lascado</div><div class="item-meta"><span class="die">1d8</span> desgastado · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="adaga de arremesso"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-arremesso"/></svg></div><div class="item-name">Adaga de Arremesso</div><div class="item-meta"><span class="die">1d4</span> arremesso · <span class="val">8</span></div></article>
+      <article class="item-card rarity-junk" data-name="espada longa velha"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-velha"/></svg></div><div class="item-name">Espada Longa Velha</div><div class="item-meta"><span class="die">1d8</span> gasta · <span class="val">12</span></div></article>
+      <article class="item-card rarity-junk" data-name="flecha quebrada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-flecha-quebrada"/></svg></div><div class="item-name">Flecha Quebrada</div><div class="item-meta">junk · sucata · <span class="val">1</span></div></article>
+      <article class="item-card" data-name="clava gigante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-clava-gigante"/></svg></div><div class="item-name">Clava Gigante</div><div class="item-meta"><span class="die">2d8</span> ogro drop · <span class="val">20</span></div></article>
+      <article class="item-card rarity-junk" data-name="adaga enferrujada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-enferrujada"/></svg></div><div class="item-name">Adaga Enferrujada</div><div class="item-meta"><span class="die">1d4</span> ferrugem · <span class="val">10</span></div></article>
+      <article class="item-card rarity-junk" data-name="espada enferrujada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-enferrujada"/></svg></div><div class="item-name">Espada Enferrujada</div><div class="item-meta"><span class="die">1d8</span> ferrugem · <span class="val">8</span></div></article>
+      <article class="item-card rarity-junk" data-name="arco rachado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-rachado"/></svg></div><div class="item-name">Arco Rachado</div><div class="item-meta"><span class="die">1d4</span> rachado · <span class="val">5</span></div></article>
+    </div>
+
+    <!-- ── Variantes +1 Mágicas ── -->
+    <h3>Variantes +1 — Mágicas <span class="count">(17)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="espada longa +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-1"/></svg></div><div class="item-name">Espada Longa +1</div><div class="item-meta"><span class="die">1d8</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="machado de guerra +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-guerra-1"/></svg></div><div class="item-name">Machado de Guerra +1</div><div class="item-meta"><span class="die">1d8</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="martelo de guerra +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-martelo-guerra-1"/></svg></div><div class="item-name">Martelo de Guerra +1</div><div class="item-meta"><span class="die">1d8</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="arma magica +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arma-magica-1"/></svg></div><div class="item-name">Arma Mágica +1</div><div class="item-meta"><span class="die">1d8</span> legacy · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="rapieira +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-rapieira-1"/></svg></div><div class="item-name">Rapieira +1</div><div class="item-meta"><span class="die">1d8</span> finesse +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="espada curta +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-curta-1"/></svg></div><div class="item-name">Espada Curta +1</div><div class="item-meta"><span class="die">1d6</span> finesse +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="cimitarra +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cimitarra-1"/></svg></div><div class="item-name">Cimitarra +1</div><div class="item-meta"><span class="die">1d6</span> finesse +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="adaga +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-1"/></svg></div><div class="item-name">Adaga +1</div><div class="item-meta"><span class="die">1d4</span> arremesso +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="arco longo +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-longo-1"/></svg></div><div class="item-name">Arco Longo +1</div><div class="item-meta"><span class="die">1d8</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="arco curto +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-curto-1"/></svg></div><div class="item-name">Arco Curto +1</div><div class="item-meta"><span class="die">1d6</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="besta leve +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-besta-leve-1"/></svg></div><div class="item-name">Besta Leve +1</div><div class="item-meta"><span class="die">1d8</span> +1 atk/dano · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="bordao +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-bordao-1"/></svg></div><div class="item-name">Bordão +1</div><div class="item-meta"><span class="die">1d6</span> caster +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="maca +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-maca-1"/></svg></div><div class="item-name">Maça +1</div><div class="item-meta"><span class="die">1d6</span> divina +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="lanca +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lanca-1"/></svg></div><div class="item-name">Lança +1</div><div class="item-meta"><span class="die">1d6</span> arremesso +1 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-rare" data-name="montante +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-montante-1"/></svg></div><div class="item-name">Montante +1</div><div class="item-meta"><span class="die">2d6</span> heavy +1 · <span class="val">800</span></div></article>
+      <article class="item-card rarity-rare" data-name="alabarda +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-alabarda-1"/></svg></div><div class="item-name">Alabarda +1</div><div class="item-meta"><span class="die">1d10</span> reach +1 · <span class="val">800</span></div></article>
+      <article class="item-card rarity-rare" data-name="machado grande +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-grande-1"/></svg></div><div class="item-name">Machado Grande +1</div><div class="item-meta"><span class="die">1d12</span> heavy +1 · <span class="val">800</span></div></article>
+    </div>
+
+    <!-- ── Variantes +2 / Elementais ── -->
+    <h3>Variantes +2 / Elementais <span class="count">(4)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-rare" data-name="espada longa +2"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-2"/></svg></div><div class="item-name">Espada Longa +2</div><div class="item-meta"><span class="die">1d8</span> +2 atk/dano · <span class="val">2000</span></div></article>
+      <article class="item-card rarity-rare" data-name="espada longa flamejante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-flamejante"/></svg></div><div class="item-name">Espada Longa Flamejante</div><div class="item-meta"><span class="die">1d8</span> +1d6 fogo · <span class="val">1500</span></div></article>
+      <article class="item-card rarity-rare" data-name="espada longa gelida"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-gelida"/></svg></div><div class="item-name">Espada Longa Gélida</div><div class="item-meta"><span class="die">1d8</span> +1d6 frio · <span class="val">1500</span></div></article>
+      <article class="item-card rarity-rare" data-name="espada longa trovejante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-espada-longa-trovejante"/></svg></div><div class="item-name">Espada Longa Trovejante</div><div class="item-meta"><span class="die">1d8</span> +1d6 trovão · <span class="val">1500</span></div></article>
+    </div>
+
+    <!-- ── Set Pieces — Armas ── -->
+    <h3>Armas de Set (4 dos 8 sets) <span class="count">(4)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-epic" data-name="garras do lobo selvagem"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-garras-lobo-selvagem"/></svg></div><div class="item-name">Garras do Lobo Selvagem</div><div class="item-meta">Lobo Selvagem · <span class="die">1d6</span> +1 · <span class="val">600</span></div></article>
+      <article class="item-card rarity-epic" data-name="arco do guardiao silvestre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-arco-guardiao-silvestre"/></svg></div><div class="item-name">Arco do Guardião Silvestre</div><div class="item-meta">Guardião · <span class="die">1d8</span> +1 · <span class="val">600</span></div></article>
+      <article class="item-card rarity-epic" data-name="machado da furia das montanhas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-furia-montanhas"/></svg></div><div class="item-name">Machado da Fúria das Montanhas</div><div class="item-meta">Montanhas · <span class="die">1d12</span> +1 · <span class="val">800</span></div></article>
+      <article class="item-card rarity-epic" data-name="lamina do lamento sombrio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lamina-lamento-sombrio"/></svg></div><div class="item-name">Lâmina do Lamento Sombrio</div><div class="item-meta">Sombrio · <span class="die">1d8</span> finesse +1 · <span class="val">600</span></div></article>
+    </div>
+
+    <!-- ── Quest Weapons ── -->
+    <h3>Armas de Quest <span class="count">(5)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-quest" data-name="lamina de thorne"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lamina-thorne"/></svg></div><div class="item-name">Lâmina de Thorne</div><div class="item-meta">Quest · <span class="die">1d8</span> +1 · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="adaga das sombras"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-sombras"/></svg></div><div class="item-name">Adaga das Sombras</div><div class="item-meta">Quest · <span class="die">1d4</span> +1 · <span class="val">200</span></div></article>
+      <article class="item-card rarity-quest" data-name="lamina do veterano"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-lamina-veterano"/></svg></div><div class="item-name">Lâmina do Veterano</div><div class="item-meta">Quest · <span class="die">1d8</span> +1 · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="adaga do beco"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-adaga-beco"/></svg></div><div class="item-name">Adaga do Beco</div><div class="item-meta">Quest · <span class="die">1d4</span> +1 finesse · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="machado de montanha"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-machado-montanha"/></svg></div><div class="item-name">Machado de Montanha</div><div class="item-meta">Korthag · <span class="die">1d10</span> 2 mãos · <span class="val">55</span></div></article>
+    </div>
+
+    <!-- ── Magic Foci (Off-Hand) ── -->
+    <h3>Focos Mágicos (Off-Hand) <span class="count">(19)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="grimorio do aprendiz"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-grimorio-aprendiz"/></svg></div><div class="item-name">Grimório do Aprendiz</div><div class="item-meta">+5 MP · <span class="val">200</span></div></article>
+      <article class="item-card" data-name="orbe mistico"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-orbe-mistico"/></svg></div><div class="item-name">Orbe Místico</div><div class="item-meta">+1 atk · <span class="val">150</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="tomo de conhecimento"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-tomo-conhecimento"/></svg></div><div class="item-name">Tomo de Conhecimento</div><div class="item-meta">+2 INT · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="orbe arcano +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-orbe-arcano-1"/></svg></div><div class="item-name">Orbe Arcano +1</div><div class="item-meta">+1 atk, +5 MP · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="varinha de mago de guerra +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-varinha-mago-guerra-1"/></svg></div><div class="item-name">Varinha de Mago de Guerra +1</div><div class="item-meta">+1 magias arcanas · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="tomo sombrio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-tomo-sombrio"/></svg></div><div class="item-name">Tomo Sombrio</div><div class="item-meta">+1 necrótico, +3 MP · <span class="val">400</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="simbolo sagrado +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-simbolo-sagrado-1"/></svg></div><div class="item-name">Símbolo Sagrado +1</div><div class="item-meta">+1 magias divinas · <span class="val">400</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="foco druidico +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-foco-druidico-1"/></svg></div><div class="item-name">Foco Druídico +1</div><div class="item-meta">+1 magias naturais · <span class="val">400</span></div></article>
+      <article class="item-card rarity-epic" data-name="orbe do arcanista"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-orbe-arcanista"/></svg></div><div class="item-name">Orbe do Arcanista</div><div class="item-meta">Set Arcanista · +1 atk, +3 MP · <span class="val">600</span></div></article>
+      <article class="item-card rarity-epic" data-name="alaude do canto estelar"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-alaude-canto-estelar"/></svg></div><div class="item-name">Alaúde do Canto Estelar</div><div class="item-meta">Set Estelar · +1 atk, +3 MP · <span class="val">600</span></div></article>
+      <article class="item-card" data-name="grimorio menor"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-grimorio-menor"/></svg></div><div class="item-name">Grimório Menor</div><div class="item-meta">+3 MP, +1 magia 1º nível · <span class="val">180</span></div></article>
+      <article class="item-card rarity-quest" data-name="cristal de convergencia"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cristal-convergencia"/></svg></div><div class="item-name">Cristal de Convergência</div><div class="item-meta">Quest · +1 atk, +5 MP · <span class="val">300</span></div></article>
+      <article class="item-card rarity-quest" data-name="fragmento do pacto"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-pacto"/></svg></div><div class="item-name">Fragmento do Pacto</div><div class="item-meta">Quest · +1 atk, +3 MP · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="partitura elfica"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-partitura-elfica"/></svg></div><div class="item-name">Partitura Élfica</div><div class="item-meta">Quest · +1 magias bárdicas · <span class="val">200</span></div></article>
+      <article class="item-card rarity-quest" data-name="simbolo purificado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-simbolo-purificado"/></svg></div><div class="item-name">Símbolo Purificado</div><div class="item-meta">Quest · +1 divinas · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="pagina do grimorio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pagina-grimorio"/></svg></div><div class="item-name">Página do Grimório</div><div class="item-meta">Quest · +5 MP · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="reliquia da torre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-reliquia-torre"/></svg></div><div class="item-name">Relíquia da Torre</div><div class="item-meta">Quest · +1 atk · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="artefato do vale"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-artefato-vale"/></svg></div><div class="item-name">Artefato do Vale</div><div class="item-meta">Quest · +1 atk · <span class="val">250</span></div></article>
+      <article class="item-card rarity-quest" data-name="fragmento de obsidiana"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-obsidiana"/></svg></div><div class="item-name">Fragmento de Obsidiana</div><div class="item-meta">Quest · +1 atk · <span class="val">150</span></div></article>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>Preview Heráldicos AAA — Lendas de Valdoria</strong></p>
+  <p>Batch 1 (Armas + Focos) · Próximos batches estendem este mesmo arquivo.</p>
+  <p style="margin-top:8px;color:#4a3828">Abra via <code style="color:#a89478">file://</code> — sem necessidade de servidor.</p>
+</footer>
+
+<script>
+  // Filtro de busca live (case-insensitive, normaliza acentos)
+  (function () {
+    var input = document.getElementById('search');
+    if (!input) return;
+    function norm(s) {
+      return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+    input.addEventListener('input', function () {
+      var q = norm(input.value.trim());
+      var cards = document.querySelectorAll('.item-card');
+      var hasAny = {};
+      cards.forEach(function (c) {
+        var name = norm(c.getAttribute('data-name') || c.querySelector('.item-name').textContent);
+        var match = !q || name.indexOf(q) >= 0;
+        c.classList.toggle('hidden', !match);
+        if (match) {
+          var section = c.closest('section');
+          var h3 = c.parentElement.previousElementSibling;
+          if (section) hasAny[section.id] = true;
+          if (h3 && h3.tagName === 'H3') h3.classList.remove('hidden');
+        }
+      });
+      // Hide empty subsections (h3 cujo grid seguinte tem 0 cards visíveis)
+      document.querySelectorAll('section h3').forEach(function (h) {
+        var grid = h.nextElementSibling;
+        if (!grid || !grid.classList.contains('item-grid')) return;
+        var visible = grid.querySelectorAll('.item-card:not(.hidden)').length;
+        h.classList.toggle('hidden', visible === 0);
+      });
+      // Hide empty sections
+      document.querySelectorAll('main > section').forEach(function (s) {
+        var visible = s.querySelectorAll('.item-card:not(.hidden)').length;
+        s.classList.toggle('hidden', visible === 0);
+      });
+    });
+  }());
+
+  // Smooth scroll para links de categoria
+  document.querySelectorAll('.cat-nav a').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      var target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.cat-nav a').forEach(function (x) { x.classList.remove('active'); });
+        a.classList.add('active');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
