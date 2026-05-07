@@ -852,55 +852,48 @@
       <path d="M 57 95 L 63 95 L 60 108 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
     </symbol>
 
-    <!-- Alabarda v3: axe POLIGONAL com cantos pontudos (forma de machado real) + hook bico claro -->
+    <!-- Alabarda v4: estudo de game-icons.net (lorc/halberd) — axe com FURO CIRCULAR + corners pontudos + hook integrado -->
     <symbol id="ic-it-base-halberd" viewBox="0 0 120 120">
       <ellipse cx="60" cy="113" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- TOP SPIKE: ponta de lança longa e fina -->
-      <path d="M 60 4 L 56 18 L 56 26 L 64 26 L 64 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
-      <line x1="60" y1="6" x2="60" y2="24" stroke="#1a1410" stroke-width="0.5" opacity="0.7"/>
-      <path d="M 56 18 L 58 24" stroke="#fff" stroke-width="0.4" opacity="0.55"/>
-      <!-- AXE BLADE (esquerda): polígono com canto pontudo no topo + canto pontudo embaixo + curva no fio externo -->
-      <!-- Forma: top-mount → top-corner-spike → cutting curve → bottom-corner-spike → bottom-mount -->
-      <path d="M 56 26
-               L 50 20
-               L 30 12
-               L 8 28
-               Q 0 50 10 66
-               L 30 74
-               L 50 68
-               L 56 62 Z"
+      <!-- WOODEN SHAFT (vertical, full length) -->
+      <rect x="57" y="22" width="6" height="78" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="28" x2="59" y2="98" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <!-- TOP SPIKE: ponta de lança integrada no topo -->
+      <path d="M 60 4 L 55 22 L 65 22 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="8" x2="60" y2="20" stroke="#1a1410" stroke-width="0.5" opacity="0.7"/>
+      <!-- AXE BLADE (esquerda): forma anatômica correta (5 lados: top-mount → top-horn → cutting curve → bottom-horn → bottom-mount) -->
+      <!-- Top-horn e bottom-horn EXTENDEM para fora do mount, criando a silhueta icônica do machado -->
+      <path d="M 57 24
+               L 48 14
+               L 22 26
+               Q 4 48 22 70
+               L 48 82
+               L 57 72 Z"
             fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
-      <!-- Cutting edge curve highlight (no fio externo, lado esquerdo) -->
-      <path d="M 10 32 Q 2 50 12 64" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.6"/>
-      <!-- Decorative grooves -->
-      <path d="M 22 32 Q 16 50 24 64" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
-      <path d="M 32 26 Q 26 50 32 70" fill="none" stroke="#1a1410" stroke-width="0.4" opacity="0.5"/>
-      <!-- Heraldic hole no centro -->
-      <circle cx="34" cy="46" r="2.8" fill="#1a1410" opacity="0.7"/>
-      <!-- HOOK/BEAK (direita): forma clara de bico de águia com ponta -->
-      <path d="M 64 30
-               C 80 26, 100 32, 108 46
-               L 100 50
-               L 88 44
-               L 64 40 Z"
-            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
-      <!-- Hook tip (ponta saliente) -->
-      <path d="M 100 32 L 112 40 L 108 46 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Cutting edge highlight (na curva externa do fio) -->
+      <path d="M 22 28 Q 6 48 22 68" fill="none" stroke="#fff" stroke-width="0.85" opacity="0.6"/>
+      <!-- Inner shadow (junto ao mount) -->
+      <path d="M 50 18 Q 48 48 50 78" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.5"/>
+      <!-- FURO CIRCULAR HERÁLDICO (signature do lorc halberd) — buraco real no metal -->
+      <circle cx="34" cy="48" r="5.5" fill="#1a1410" stroke="#0a0605" stroke-width="0.6"/>
+      <circle cx="34" cy="48" r="4" fill="url(#rh-shadow-dark)"/>
+      <!-- HOOK (direita): bico curvo afiado, integrado ao mount -->
+      <path d="M 63 28
+               L 78 18
+               Q 100 22 106 40
+               L 96 44
+               Q 86 36 76 36
+               L 63 38 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
       <!-- Hook outer highlight -->
-      <path d="M 88 28 Q 100 30 110 42" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.6"/>
-      <!-- Iron mounting collar -->
-      <rect x="54" y="62" width="12" height="10" rx="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
-      <line x1="54" y1="66" x2="66" y2="66" stroke="#1a1410" stroke-width="0.4"/>
-      <line x1="54" y1="70" x2="66" y2="70" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Wooden shaft -->
-      <rect x="57" y="72" width="6" height="26" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
-      <line x1="59" y1="78" x2="59" y2="96" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
-      <!-- Iron banding -->
-      <rect x="55" y="80" width="10" height="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Leather grip -->
-      <rect x="55" y="84" width="10" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
-      <line x1="55" y1="90" x2="65" y2="90" stroke="#2a1408" stroke-width="0.5"/>
-      <!-- Iron buttspike -->
+      <path d="M 78 20 Q 98 24 104 38" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.6"/>
+      <!-- IRON COLLAR (mount junction) -->
+      <rect x="54" y="80" width="12" height="6" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <line x1="54" y1="83" x2="66" y2="83" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- LEATHER GRIP -->
+      <rect x="55" y="86" width="10" height="12" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="91" x2="65" y2="91" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- IRON BUTTSPIKE -->
       <path d="M 56 98 L 64 98 L 60 110 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
     </symbol>
 
@@ -1123,54 +1116,45 @@
       <circle cx="58" cy="70" r="1.4" fill="#fff" opacity="0.4"/>
     </symbol>
 
-    <!-- Foice v3: blade via stroke trick (dark outline + iron por cima) — silhueta hook limpa -->
+    <!-- Foice v4: estudo do delapouite/sickle — hook fino sweep contínuo com tip pontuda + cutting edge interna -->
     <symbol id="ic-it-base-sickle" viewBox="0 0 120 120">
       <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- BLADE OUTLINE: dark stroke embaixo (cria contorno escuro) -->
-      <path d="M 60 42 Q 38 50 18 38 Q 0 22 14 8 Q 28 0 38 8"
+      <!-- HANDLE (vertical, base) -->
+      <rect x="57" y="56" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="62" x2="59" y2="86" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- IRON SOCKET (onde blade encontra handle) -->
+      <rect x="50" y="50" width="20" height="8" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="55" cy="54" r="0.7" fill="#1a1410"/>
+      <circle cx="65" cy="54" r="0.7" fill="#1a1410"/>
+      <!-- BLADE: stroke trick (centerline path stroked grosso) — hook anatomicamente correto -->
+      <!-- Centerline: top do socket UP até top-mid, depois DOWN-LEFT até far-left, depois CURL RIGHT terminando dentro do hook -->
+      <!-- Layer 1: dark contour outline (cria silhueta com bordas) -->
+      <path d="M 60 50 Q 60 28 36 16 Q 12 8 8 32 Q 8 48 26 46"
             fill="none"
             stroke="#1a1410"
-            stroke-width="16"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
-      <!-- BLADE BODY: iron stroke por cima (preenchimento metálico do gume) -->
-      <path d="M 60 42 Q 38 50 18 38 Q 0 22 14 8 Q 28 0 38 8"
+            stroke-width="20"
+            stroke-linecap="round"/>
+      <!-- Layer 2: iron blade body -->
+      <path d="M 60 50 Q 60 28 36 16 Q 12 8 8 32 Q 8 48 26 46"
             fill="none"
             stroke="url(#rh-iron)"
-            stroke-width="13"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
-      <!-- Inner cutting edge highlight (linha branca clara no gume interno) -->
-      <path d="M 56 38 Q 38 44 22 36 Q 10 24 18 14 Q 28 8 34 12"
+            stroke-width="16"
+            stroke-linecap="round"/>
+      <!-- Layer 3: inner cutting edge highlight (linha branca no fio interno do hook) -->
+      <path d="M 56 48 Q 56 30 36 22 Q 18 18 16 32"
             fill="none"
             stroke="#fff"
-            stroke-width="0.8"
+            stroke-width="0.9"
             opacity="0.7"
             stroke-linecap="round"/>
-      <!-- Outer back ridge (linha escura subtle no back/dull side) -->
-      <path d="M 60 46 Q 38 54 14 40 Q -4 22 12 4"
-            fill="none"
-            stroke="#0a0605"
-            stroke-width="0.5"
-            opacity="0.5"
-            stroke-linecap="round"/>
-      <!-- Tip detail (ponta da blade) -->
-      <circle cx="40" cy="6" r="1.3" fill="#fff" opacity="0.55"/>
-      <!-- Iron socket onde blade encontra handle (cobre a ponta inferior do stroke) -->
-      <rect x="54" y="42" width="14" height="10" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
-      <line x1="54" y1="47" x2="68" y2="47" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Rivets no socket -->
-      <circle cx="58" cy="47" r="0.6" fill="#1a1410"/>
-      <circle cx="64" cy="47" r="0.6" fill="#1a1410"/>
-      <!-- Wooden handle (vertical, curto) -->
-      <rect x="58" y="52" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
-      <line x1="60" y1="58" x2="60" y2="84" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
-      <!-- Leather grip wrap -->
-      <rect x="56" y="66" width="10" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
-      <line x1="56" y1="72" x2="66" y2="72" stroke="#2a1408" stroke-width="0.5"/>
-      <line x1="56" y1="80" x2="66" y2="80" stroke="#2a1408" stroke-width="0.5"/>
-      <!-- Iron pommel cap -->
-      <ellipse cx="61" cy="92" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+      <!-- TIP detail: pequena ponta saliente no final da curva (em (26, 46)) -->
+      <path d="M 26 46 L 30 38 L 32 42 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- LEATHER GRIP -->
+      <rect x="55" y="64" width="10" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="70" x2="65" y2="70" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="78" x2="65" y2="78" stroke="#2a1408" stroke-width="0.5"/>
+      <!-- IRON POMMEL -->
+      <ellipse cx="60" cy="92" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
     </symbol>
 
     <!-- Chicote: cabo + chicote enrolado em espiral -->
