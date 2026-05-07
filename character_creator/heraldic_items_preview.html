@@ -2445,6 +2445,63 @@
     </symbol>
 
     <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE GEM / RUNE SYMBOLS (Batch 4)                                     -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Faceted gem (octahedron diamond shape) — color overlaid by variant -->
+    <symbol id="ic-it-base-gem-faceted" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Gem body (neutral gray, will be tinted) -->
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#9a9a9a" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Top facets (highlights) -->
+      <path d="M 60 14 L 36 36 L 60 50 Z" fill="#fff" opacity="0.45"/>
+      <path d="M 60 14 L 84 36 L 60 50 Z" fill="#fff" opacity="0.3"/>
+      <!-- Facet edges -->
+      <line x1="60" y1="50" x2="84" y2="36" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+      <line x1="60" y1="50" x2="36" y2="36" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+      <line x1="60" y1="50" x2="60" y2="100" stroke="#1a1410" stroke-width="0.5" opacity="0.5"/>
+      <line x1="60" y1="50" x2="96" y2="60" stroke="#1a1410" stroke-width="0.5" opacity="0.4"/>
+      <line x1="60" y1="50" x2="24" y2="60" stroke="#1a1410" stroke-width="0.5" opacity="0.4"/>
+      <!-- Bottom shadow facets -->
+      <path d="M 60 70 L 96 60 L 60 100 Z" fill="#000" opacity="0.25"/>
+      <path d="M 60 70 L 24 60 L 60 100 Z" fill="#000" opacity="0.2"/>
+      <!-- Sparkle -->
+      <circle cx="48" cy="38" r="1.8" fill="#fff" opacity="0.7"/>
+    </symbol>
+
+    <!-- Pearl / round gem -->
+    <symbol id="ic-it-base-gem-pearl" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <circle cx="60" cy="60" r="38" fill="#d4d8e0" stroke="#1a1410" stroke-width="0.85"/>
+      <ellipse cx="48" cy="48" rx="14" ry="8" fill="#fff" opacity="0.6"/>
+      <ellipse cx="72" cy="76" rx="6" ry="3" fill="#000" opacity="0.18"/>
+      <circle cx="42" cy="42" r="3" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Rune stone (rectangular tablet with carved rune) -->
+    <symbol id="ic-it-base-rune-stone" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="26" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Stone tablet (rounded rectangle) -->
+      <path d="M 26 18 L 94 18 Q 100 18 100 26 L 100 94 Q 100 102 94 102 L 26 102 Q 20 102 20 94 L 20 26 Q 20 18 26 18 Z"
+            fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Stone texture cracks -->
+      <path d="M 28 32 L 36 50 M 88 28 L 80 44 M 30 88 L 44 76" stroke="#1a1410" stroke-width="0.4" opacity="0.55"/>
+      <!-- Highlight edge -->
+      <path d="M 26 22 L 94 22" stroke="#fff" stroke-width="0.55" opacity="0.4"/>
+    </symbol>
+
+    <!-- Rune fragment (small triangular chip) -->
+    <symbol id="ic-it-base-rune-fragment" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Triangular shard -->
+      <path d="M 60 18 L 88 70 L 32 70 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Bottom rough edge (chipped) -->
+      <path d="M 32 70 L 38 80 L 46 72 L 56 84 L 68 76 L 80 84 L 88 70 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Highlight on top edge -->
+      <path d="M 60 22 L 84 66" stroke="#fff" stroke-width="0.55" opacity="0.5"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
     <!-- SPECIFIC ITEM SYMBOLS — items_srd.py ARMOR_LIGHT / MEDIUM / HEAVY     -->
     <!-- ════════════════════════════════════════════════════════════════════ -->
 
@@ -3325,6 +3382,164 @@
       </g>
     </symbol>
 
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — GEMS + RUNES (Batch 4)                        -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- GEMS (9) -->
+    <symbol id="ic-it-turquesa" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#4ec5dc" opacity="0.55"/>
+      <circle cx="60" cy="60" r="42" fill="#4ec5dc" opacity="0.25"/>
+    </symbol>
+    <symbol id="ic-it-quartzo" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#e8e8f0" opacity="0.5"/>
+      <circle cx="60" cy="60" r="40" fill="#fff" opacity="0.2"/>
+    </symbol>
+    <symbol id="ic-it-onix" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#1a1418" opacity="0.7"/>
+      <circle cx="60" cy="60" r="40" fill="#3a1a3a" opacity="0.3"/>
+    </symbol>
+    <symbol id="ic-it-ametista" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#a060d8" opacity="0.6"/>
+      <circle cx="60" cy="60" r="44" fill="#a878ff" opacity="0.3"/>
+    </symbol>
+    <symbol id="ic-it-jade" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#3aa860" opacity="0.6"/>
+      <circle cx="60" cy="60" r="42" fill="#5acc88" opacity="0.3"/>
+    </symbol>
+    <symbol id="ic-it-perola" viewBox="0 0 120 120"><use href="#ic-it-base-gem-pearl"/></symbol>
+    <symbol id="ic-it-rubi" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#d83040" opacity="0.7"/>
+      <circle cx="60" cy="60" r="48" fill="url(#rh-glow-fire)" opacity="0.4"/>
+    </symbol>
+    <symbol id="ic-it-safira" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#3060d8" opacity="0.65"/>
+      <circle cx="60" cy="60" r="48" fill="url(#rh-glow-ice)" opacity="0.4"/>
+    </symbol>
+    <symbol id="ic-it-esmeralda" viewBox="0 0 120 120">
+      <use href="#ic-it-base-gem-faceted"/>
+      <path d="M 60 14 L 84 36 L 96 60 L 60 100 L 24 60 L 36 36 Z" fill="#20a060" opacity="0.7"/>
+      <circle cx="60" cy="60" r="48" fill="#3aa860" opacity="0.4"/>
+    </symbol>
+
+    <!-- RUNES (10) — rune-stone + central rune symbol overlay -->
+    <symbol id="ic-it-runa-protecao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <!-- Shield rune -->
+      <path d="M 50 36 L 70 36 L 70 56 Q 70 70 60 78 Q 50 70 50 56 Z" fill="none" stroke="url(#rh-sapphire)" stroke-width="2" opacity="0.95"/>
+      <circle cx="60" cy="60" r="3" fill="url(#rh-sapphire)"/>
+      <circle cx="60" cy="60" r="28" fill="#4a78c4" opacity="0.18"/>
+    </symbol>
+    <symbol id="ic-it-runa-vigor" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <!-- Heart rune -->
+      <path d="M 60 70 Q 44 56 44 46 Q 44 38 50 38 Q 56 38 60 44 Q 64 38 70 38 Q 76 38 76 46 Q 76 56 60 70 Z" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.85"/>
+      <circle cx="60" cy="60" r="32" fill="url(#rh-glow-fire)" opacity="0.18"/>
+    </symbol>
+    <symbol id="ic-it-runa-precisao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <!-- Target rune (concentric circles with crosshair) -->
+      <circle cx="60" cy="60" r="18" fill="none" stroke="url(#rh-bronze)" stroke-width="1.4"/>
+      <circle cx="60" cy="60" r="10" fill="none" stroke="url(#rh-bronze)" stroke-width="1.2"/>
+      <circle cx="60" cy="60" r="3" fill="url(#rh-crimson)"/>
+      <line x1="40" y1="60" x2="50" y2="60" stroke="url(#rh-bronze)" stroke-width="0.85"/>
+      <line x1="70" y1="60" x2="80" y2="60" stroke="url(#rh-bronze)" stroke-width="0.85"/>
+      <line x1="60" y1="40" x2="60" y2="50" stroke="url(#rh-bronze)" stroke-width="0.85"/>
+      <line x1="60" y1="70" x2="60" y2="80" stroke="url(#rh-bronze)" stroke-width="0.85"/>
+    </symbol>
+    <symbol id="ic-it-runa-chamas" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <!-- Flame rune -->
+      <circle cx="60" cy="60" r="32" fill="url(#rh-glow-fire)" opacity="0.5"/>
+      <path d="M 60 32 Q 48 48 52 60 Q 44 70 60 80 Q 76 70 68 60 Q 72 48 60 32 Z" fill="url(#rh-flame)" stroke="#7a3018" stroke-width="0.85"/>
+      <path d="M 60 38 Q 54 50 58 58 Q 54 64 60 70 Q 66 64 62 58 Q 66 50 60 38 Z" fill="#fff" opacity="0.55"/>
+    </symbol>
+    <symbol id="ic-it-runa-gelo" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="32" fill="url(#rh-glow-ice)" opacity="0.5"/>
+      <!-- Snowflake rune -->
+      <g transform="translate(60 60)" stroke="url(#rh-ice)" stroke-width="2" stroke-linecap="round">
+        <line x1="0" y1="-22" x2="0" y2="22"/>
+        <line x1="-22" y1="0" x2="22" y2="0"/>
+        <line x1="-16" y1="-16" x2="16" y2="16"/>
+        <line x1="-16" y1="16" x2="16" y2="-16"/>
+        <line x1="-4" y1="-22" x2="4" y2="-22"/>
+        <line x1="-4" y1="22" x2="4" y2="22"/>
+      </g>
+    </symbol>
+    <symbol id="ic-it-runa-cura" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="32" fill="url(#rh-emerald)" opacity="0.3"/>
+      <!-- Cross rune (healing) -->
+      <rect x="56" y="38" width="8" height="44" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <rect x="40" y="54" width="40" height="8" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+    </symbol>
+    <symbol id="ic-it-runa-fortuna" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="32" fill="url(#rh-emerald)" opacity="0.3"/>
+      <!-- 4-leaf clover -->
+      <g transform="translate(60 60)" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.6">
+        <ellipse cx="-9" cy="-9" rx="7" ry="9" transform="rotate(-45 -9 -9)"/>
+        <ellipse cx="9" cy="-9" rx="7" ry="9" transform="rotate(45 9 -9)"/>
+        <ellipse cx="-9" cy="9" rx="7" ry="9" transform="rotate(45 -9 9)"/>
+        <ellipse cx="9" cy="9" rx="7" ry="9" transform="rotate(-45 9 9)"/>
+      </g>
+      <line x1="60" y1="68" x2="60" y2="80" stroke="#1a4a1a" stroke-width="1.4"/>
+    </symbol>
+    <symbol id="ic-it-runa-trovao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="34" fill="url(#rh-glow-thunder)" opacity="0.5"/>
+      <!-- Lightning bolt rune -->
+      <path d="M 64 30 L 50 56 L 60 56 L 56 86 L 70 60 L 60 60 L 64 30 Z" fill="#fff8a0" stroke="#7a5a00" stroke-width="0.85"/>
+    </symbol>
+    <symbol id="ic-it-runa-absorcao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="36" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Spiral / vortex rune -->
+      <path d="M 60 60 Q 60 40 76 44 Q 88 52 80 70 Q 70 86 50 78 Q 36 68 44 50 Q 56 36 70 48"
+            fill="none" stroke="url(#rh-violet)" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-it-runa-devastacao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-stone"/>
+      <circle cx="60" cy="60" r="36" fill="url(#rh-shadow-dark)" opacity="0.5"/>
+      <!-- Skull rune -->
+      <ellipse cx="60" cy="56" rx="14" ry="16" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.85"/>
+      <ellipse cx="54" cy="54" rx="2.5" ry="3" fill="#1a0808"/>
+      <ellipse cx="66" cy="54" rx="2.5" ry="3" fill="#1a0808"/>
+      <path d="M 58 64 L 60 70 L 62 64 Z" fill="#1a0808"/>
+      <path d="M 52 76 L 54 78 L 56 76 L 58 78 L 60 76 L 62 78 L 64 76 L 66 78 L 68 76" stroke="#1a0808" stroke-width="0.6" fill="none"/>
+    </symbol>
+
+    <!-- FRAGMENTS (3) -->
+    <symbol id="ic-it-fragmento-runico-menor" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-fragment"/>
+      <!-- Small blue rune mark -->
+      <path d="M 56 40 L 64 40 M 60 40 L 60 60 M 52 60 L 68 60" stroke="url(#rh-sapphire)" stroke-width="1.4" opacity="0.95"/>
+    </symbol>
+    <symbol id="ic-it-fragmento-runico-maior" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-fragment"/>
+      <circle cx="60" cy="55" r="22" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Larger bronze rune -->
+      <path d="M 50 36 L 70 36 L 70 50 L 60 60 L 50 50 Z M 60 60 L 60 72" stroke="url(#rh-bronze)" stroke-width="1.6" fill="none" opacity="0.95"/>
+    </symbol>
+    <symbol id="ic-it-fragmento-runico-ancestral" viewBox="0 0 120 120">
+      <use href="#ic-it-base-rune-fragment"/>
+      <circle cx="60" cy="55" r="28" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <circle cx="60" cy="55" r="20" fill="url(#rh-glow-thunder)" opacity="0.3"/>
+      <!-- Ancient rune (more complex) -->
+      <path d="M 50 36 L 70 36 L 70 56 L 60 64 L 50 56 Z M 60 64 L 60 76 M 56 70 L 64 70" stroke="url(#rh-violet)" stroke-width="1.6" fill="none" opacity="0.95"/>
+      <!-- Sparkle decoration -->
+      <circle cx="42" cy="44" r="0.9" fill="#fff" opacity="0.85"/>
+      <circle cx="78" cy="48" r="0.9" fill="#fff" opacity="0.85"/>
+    </symbol>
+
     <symbol id="ic-it-clava"        viewBox="0 0 120 120"><use href="#ic-it-base-club"/></symbol>
     <symbol id="ic-it-adaga"        viewBox="0 0 120 120"><use href="#ic-it-base-dagger"/></symbol>
     <symbol id="ic-it-maca"         viewBox="0 0 120 120"><use href="#ic-it-base-mace"/></symbol>
@@ -4026,12 +4241,11 @@
     <a href="#cat-weapon" class="active">⚔️ Armas + Focos</a>
     <a href="#cat-armor">🛡️ Armaduras + Escudos</a>
     <a href="#cat-consumable">🧪 Poções & Consumíveis</a>
-    <span class="upcoming">💎 Gemas/Runas (Batch 4)</span>
-    <span class="upcoming">💍 Acessórios (Batch 5)</span>
-    <span class="upcoming">🏆 Loot/Troféus (Batch 6)</span>
-    <span class="upcoming">🪨 Materiais (Batch 7)</span>
-    <span class="upcoming">🗝️ Ferramentas/Quest (Batch 8)</span>
-    <span class="upcoming">🐺 Sets (Batch 9)</span>
+    <a href="#cat-gemrune">💎 Gemas & Runas</a>
+    <a href="#cat-accessory">💍 Acessórios</a>
+    <a href="#cat-loot">🏆 Loot & Troféus</a>
+    <a href="#cat-material">🪨 Materiais & Crafting</a>
+    <a href="#cat-tool">🗝️ Ferramentas & Quest</a>
   </nav>
 </header>
 
@@ -4428,6 +4642,98 @@
       <article class="item-card rarity-uncommon" data-name="amuleto da sorte"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-amuleto-sorte"/></svg></div><div class="item-name">Amuleto da Sorte</div><div class="item-meta">+1 d20 × 3 combates · <span class="val">250</span></div></article>
     </div>
 
+  </section>
+
+  <!-- ═══════ CATEGORIA: GEMAS & RUNAS ═══════ -->
+  <section id="cat-gemrune">
+    <h2>💎 Gemas & Runas <span style="color:#6a5a4a;font-size:14px">(Batch 4 — 22 itens)</span></h2>
+
+    <div class="real-size-strip">
+      <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
+      <div class="row">
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-turquesa"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-ametista"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-rubi"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-safira"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-esmeralda"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-perola"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-protecao"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-chamas"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-trovao"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-runico-ancestral"/></svg></div>
+      </div>
+    </div>
+
+    <h3>Gemas Tier 1 — Comuns <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="turquesa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-turquesa"/></svg></div><div class="item-name">Turquesa</div><div class="item-meta">+2 HP gem · <span class="val">75</span></div></article>
+      <article class="item-card" data-name="quartzo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-quartzo"/></svg></div><div class="item-name">Quartzo</div><div class="item-meta">+1 MP gem · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="onix"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-onix"/></svg></div><div class="item-name">Ônix</div><div class="item-meta">+1 save gem · <span class="val">100</span></div></article>
+    </div>
+
+    <h3>Gemas Tier 2 — Incomuns <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="ametista"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-ametista"/></svg></div><div class="item-name">Ametista</div><div class="item-meta">+3 HP gem · <span class="val">250</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="jade"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-jade"/></svg></div><div class="item-name">Jade</div><div class="item-meta">+2 MP gem · <span class="val">200</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="perola"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-perola"/></svg></div><div class="item-name">Pérola</div><div class="item-meta">+1 CA gem · <span class="val">500</span></div></article>
+    </div>
+
+    <h3>Gemas Tier 3 — Raras <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-rare" data-name="rubi"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-rubi"/></svg></div><div class="item-name">Rubi</div><div class="item-meta">+5 HP, +1 atk/dmg · <span class="val">1000</span></div></article>
+      <article class="item-card rarity-rare" data-name="safira"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-safira"/></svg></div><div class="item-name">Safira</div><div class="item-meta">+3 MP, +1 save · <span class="val">800</span></div></article>
+      <article class="item-card rarity-rare" data-name="esmeralda"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-esmeralda"/></svg></div><div class="item-name">Esmeralda</div><div class="item-meta">+1 CA, +1 save · <span class="val">1500</span></div></article>
+    </div>
+
+    <h3>Runas Tier 1 — Comuns <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="runa de protecao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-protecao"/></svg></div><div class="item-name">Runa de Proteção</div><div class="item-meta">10% reduz dano 1d4 · <span class="val">100</span></div></article>
+      <article class="item-card" data-name="runa de vigor"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-vigor"/></svg></div><div class="item-name">Runa de Vigor</div><div class="item-meta">on-kill: +1d4 HP · <span class="val">100</span></div></article>
+      <article class="item-card" data-name="runa de precisao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-precisao"/></svg></div><div class="item-name">Runa de Precisão</div><div class="item-meta">+1 atk vs. low HP · <span class="val">100</span></div></article>
+    </div>
+
+    <h3>Runas Tier 2 — Incomuns <span class="count">(4)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="runa de chamas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-chamas"/></svg></div><div class="item-name">Runa de Chamas</div><div class="item-meta">15% +1d6 fogo · <span class="val">300</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="runa de gelo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-gelo"/></svg></div><div class="item-name">Runa de Gelo</div><div class="item-meta">10% slow alvo -2 · <span class="val">300</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="runa de cura"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-cura"/></svg></div><div class="item-name">Runa de Cura</div><div class="item-meta">post-victory +2d4 HP · <span class="val">300</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="runa de fortuna"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-fortuna"/></svg></div><div class="item-name">Runa de Fortuna</div><div class="item-meta">+5% gold, +3% drop · <span class="val">300</span></div></article>
+    </div>
+
+    <h3>Runas Tier 3 — Raras <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-rare" data-name="runa de trovao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-trovao"/></svg></div><div class="item-name">Runa de Trovão</div><div class="item-meta">on-crit +2d8 trovão · <span class="val">800</span></div></article>
+      <article class="item-card rarity-rare" data-name="runa de absorcao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-absorcao"/></svg></div><div class="item-name">Runa de Absorção</div><div class="item-meta">5% absorve dano · <span class="val">800</span></div></article>
+      <article class="item-card rarity-rare" data-name="runa de devastacao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-runa-devastacao"/></svg></div><div class="item-name">Runa de Devastação</div><div class="item-meta">+1 todas rolagens dmg · <span class="val">800</span></div></article>
+    </div>
+
+    <h3>Fragmentos Rúnicos <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="fragmento runico menor"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-runico-menor"/></svg></div><div class="item-name">Fragmento Rúnico Menor</div><div class="item-meta">3× = runa T1 · <span class="val">25</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="fragmento runico maior"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-runico-maior"/></svg></div><div class="item-name">Fragmento Rúnico Maior</div><div class="item-meta">3× = runa T2 · <span class="val">75</span></div></article>
+      <article class="item-card rarity-rare" data-name="fragmento runico ancestral"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-runico-ancestral"/></svg></div><div class="item-name">Fragmento Rúnico Ancestral</div><div class="item-meta">3× = runa T3 · <span class="val">200</span></div></article>
+    </div>
+
+  </section>
+
+  <!-- ═══════ CATEGORIA: ACESSÓRIOS (placeholder Batch 5) ═══════ -->
+  <section id="cat-accessory">
+    <h2>💍 Acessórios <span style="color:#6a5a4a;font-size:14px">(Batch 5)</span></h2>
+  </section>
+
+  <!-- ═══════ CATEGORIA: LOOT & TROFÉUS (placeholder Batch 6) ═══════ -->
+  <section id="cat-loot">
+    <h2>🏆 Loot & Troféus <span style="color:#6a5a4a;font-size:14px">(Batch 6)</span></h2>
+  </section>
+
+  <!-- ═══════ CATEGORIA: MATERIAIS & CRAFTING (placeholder Batch 7) ═══════ -->
+  <section id="cat-material">
+    <h2>🪨 Materiais & Crafting <span style="color:#6a5a4a;font-size:14px">(Batch 7)</span></h2>
+  </section>
+
+  <!-- ═══════ CATEGORIA: FERRAMENTAS & QUEST (placeholder Batch 8) ═══════ -->
+  <section id="cat-tool">
+    <h2>🗝️ Ferramentas & Quest <span style="color:#6a5a4a;font-size:14px">(Batch 8)</span></h2>
   </section>
 
 </main>
