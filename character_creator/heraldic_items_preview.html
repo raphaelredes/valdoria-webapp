@@ -1512,8 +1512,1061 @@
     </symbol>
 
     <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- SPECIFIC ITEM SYMBOLS — items_srd.py WEAPONS_SIMPLE (12)              -->
+    <!-- BASE ARMOR SYMBOLS — CHEST (Batch 2)                                  -->
     <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Padded armor: gambeson de tecido com costuras quilted -->
+    <symbol id="ic-it-base-padded-armor" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Vest silhouette (cloth) -->
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- V-neck shadow -->
+      <path d="M 50 16 L 60 30 L 70 16" fill="none" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Quilting diagonal lines (forward slash) -->
+      <line x1="34" y1="58" x2="58" y2="34" stroke="#3a1808" stroke-width="0.5" opacity="0.6"/>
+      <line x1="34" y1="76" x2="76" y2="34" stroke="#3a1808" stroke-width="0.5" opacity="0.6"/>
+      <line x1="34" y1="94" x2="86" y2="42" stroke="#3a1808" stroke-width="0.5" opacity="0.6"/>
+      <line x1="48" y1="100" x2="92" y2="56" stroke="#3a1808" stroke-width="0.5" opacity="0.6"/>
+      <line x1="68" y1="100" x2="92" y2="76" stroke="#3a1808" stroke-width="0.5" opacity="0.6"/>
+      <!-- Counter diagonals (back slash) -->
+      <line x1="34" y1="42" x2="86" y2="94" stroke="#3a1808" stroke-width="0.5" opacity="0.55"/>
+      <line x1="34" y1="60" x2="92" y2="100" stroke="#3a1808" stroke-width="0.5" opacity="0.55"/>
+      <line x1="34" y1="78" x2="62" y2="100" stroke="#3a1808" stroke-width="0.5" opacity="0.55"/>
+      <line x1="50" y1="34" x2="92" y2="76" stroke="#3a1808" stroke-width="0.5" opacity="0.55"/>
+      <line x1="68" y1="34" x2="92" y2="58" stroke="#3a1808" stroke-width="0.5" opacity="0.55"/>
+      <!-- Belt -->
+      <rect x="26" y="68" width="68" height="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <circle cx="60" cy="71" r="1.5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+    </symbol>
+
+    <!-- Leather chest armor: liso, sem quilting, com belt e laces -->
+    <symbol id="ic-it-base-leather-chest" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- V-neck -->
+      <path d="M 50 16 L 60 32 L 70 16" fill="none" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Center seam (laces down the front) -->
+      <line x1="60" y1="32" x2="60" y2="98" stroke="#1a0808" stroke-width="0.7" opacity="0.85"/>
+      <!-- X-laces along the seam -->
+      <path d="M 56 38 L 64 42 M 64 38 L 56 42" stroke="#3a1808" stroke-width="0.55"/>
+      <path d="M 56 48 L 64 52 M 64 48 L 56 52" stroke="#3a1808" stroke-width="0.55"/>
+      <path d="M 56 58 L 64 62 M 64 58 L 56 62" stroke="#3a1808" stroke-width="0.55"/>
+      <path d="M 56 78 L 64 82 M 64 78 L 56 82" stroke="#3a1808" stroke-width="0.55"/>
+      <path d="M 56 88 L 64 92 M 64 88 L 56 92" stroke="#3a1808" stroke-width="0.55"/>
+      <!-- Belt -->
+      <rect x="26" y="68" width="68" height="7" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <rect x="56" y="67" width="8" height="9" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Highlights (subtle leather sheen) -->
+      <path d="M 32 28 L 35 80" stroke="#a87a4a" stroke-width="0.6" opacity="0.5" fill="none"/>
+    </symbol>
+
+    <!-- Studded leather: leather + rivets em padrão grid -->
+    <symbol id="ic-it-base-studded-leather" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.95"/>
+      <path d="M 50 16 L 60 32 L 70 16" fill="none" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Studs (iron rivets in grid pattern) -->
+      <g fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3">
+        <circle cx="38" cy="40" r="1.5"/>
+        <circle cx="48" cy="40" r="1.5"/>
+        <circle cx="72" cy="40" r="1.5"/>
+        <circle cx="82" cy="40" r="1.5"/>
+        <circle cx="34" cy="52" r="1.5"/>
+        <circle cx="44" cy="52" r="1.5"/>
+        <circle cx="76" cy="52" r="1.5"/>
+        <circle cx="86" cy="52" r="1.5"/>
+        <circle cx="34" cy="80" r="1.5"/>
+        <circle cx="44" cy="80" r="1.5"/>
+        <circle cx="76" cy="80" r="1.5"/>
+        <circle cx="86" cy="80" r="1.5"/>
+        <circle cx="38" cy="92" r="1.5"/>
+        <circle cx="48" cy="92" r="1.5"/>
+        <circle cx="72" cy="92" r="1.5"/>
+        <circle cx="82" cy="92" r="1.5"/>
+      </g>
+      <!-- Belt -->
+      <rect x="26" y="64" width="68" height="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <rect x="56" y="63" width="8" height="8" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Hide armor: vest com FUR texture nas bordas -->
+    <symbol id="ic-it-base-hide-armor" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-bronze)" stroke="#1a0808" stroke-width="0.95"/>
+      <path d="M 50 16 L 60 30 L 70 16" fill="none" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Fur trim at top (zigzag along shoulders) -->
+      <path d="M 30 22 L 33 18 L 36 22 L 39 18 L 42 22 L 45 18 L 48 16
+               M 72 16 L 75 18 L 78 22 L 81 18 L 84 22 L 87 18 L 90 22"
+            fill="none" stroke="#5a3010" stroke-width="0.7"/>
+      <!-- Fur trim at bottom (zigzag) -->
+      <path d="M 28 100 L 32 96 L 36 100 L 40 96 L 44 100 L 48 96 L 52 100 L 56 96 L 60 100 L 64 96 L 68 100 L 72 96 L 76 100 L 80 96 L 84 100 L 88 96 L 92 100"
+            fill="none" stroke="#5a3010" stroke-width="0.7"/>
+      <!-- Vertical fur strokes (texture) -->
+      <line x1="36" y1="40" x2="38" y2="62" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <line x1="44" y1="42" x2="46" y2="68" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <line x1="74" y1="42" x2="76" y2="68" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <line x1="82" y1="40" x2="84" y2="62" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <line x1="40" y1="76" x2="42" y2="92" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <line x1="78" y1="76" x2="80" y2="92" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <!-- Bone toggle/clasp -->
+      <ellipse cx="60" cy="40" rx="3" ry="6" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Chainmail tunic: vest com pattern de RINGS interlocked -->
+    <symbol id="ic-it-base-chainmail-tunic" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <path d="M 50 16 L 60 30 L 70 16" fill="none" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Chainmail rings (small circles in offset rows) -->
+      <g fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.85">
+        <!-- Row 1 -->
+        <circle cx="36" cy="36" r="2.2"/><circle cx="44" cy="36" r="2.2"/><circle cx="52" cy="36" r="2.2"/>
+        <circle cx="68" cy="36" r="2.2"/><circle cx="76" cy="36" r="2.2"/><circle cx="84" cy="36" r="2.2"/>
+        <!-- Row 2 (offset) -->
+        <circle cx="40" cy="42" r="2.2"/><circle cx="48" cy="42" r="2.2"/><circle cx="56" cy="42" r="2.2"/>
+        <circle cx="64" cy="42" r="2.2"/><circle cx="72" cy="42" r="2.2"/><circle cx="80" cy="42" r="2.2"/>
+        <!-- Row 3 -->
+        <circle cx="36" cy="48" r="2.2"/><circle cx="44" cy="48" r="2.2"/><circle cx="52" cy="48" r="2.2"/>
+        <circle cx="60" cy="48" r="2.2"/><circle cx="68" cy="48" r="2.2"/><circle cx="76" cy="48" r="2.2"/><circle cx="84" cy="48" r="2.2"/>
+        <!-- Row 4 (offset) -->
+        <circle cx="40" cy="54" r="2.2"/><circle cx="48" cy="54" r="2.2"/><circle cx="56" cy="54" r="2.2"/>
+        <circle cx="64" cy="54" r="2.2"/><circle cx="72" cy="54" r="2.2"/><circle cx="80" cy="54" r="2.2"/>
+        <!-- Row 5 -->
+        <circle cx="36" cy="60" r="2.2"/><circle cx="44" cy="60" r="2.2"/><circle cx="52" cy="60" r="2.2"/>
+        <circle cx="60" cy="60" r="2.2"/><circle cx="68" cy="60" r="2.2"/><circle cx="76" cy="60" r="2.2"/><circle cx="84" cy="60" r="2.2"/>
+        <!-- Row 6 (offset) -->
+        <circle cx="40" cy="66" r="2.2"/><circle cx="48" cy="66" r="2.2"/><circle cx="56" cy="66" r="2.2"/>
+        <circle cx="64" cy="66" r="2.2"/><circle cx="72" cy="66" r="2.2"/><circle cx="80" cy="66" r="2.2"/>
+        <!-- Row 7 -->
+        <circle cx="36" cy="72" r="2.2"/><circle cx="44" cy="72" r="2.2"/><circle cx="52" cy="72" r="2.2"/>
+        <circle cx="60" cy="72" r="2.2"/><circle cx="68" cy="72" r="2.2"/><circle cx="76" cy="72" r="2.2"/><circle cx="84" cy="72" r="2.2"/>
+        <!-- Row 8 (offset) -->
+        <circle cx="40" cy="78" r="2.2"/><circle cx="48" cy="78" r="2.2"/><circle cx="56" cy="78" r="2.2"/>
+        <circle cx="64" cy="78" r="2.2"/><circle cx="72" cy="78" r="2.2"/><circle cx="80" cy="78" r="2.2"/>
+        <!-- Row 9 -->
+        <circle cx="36" cy="84" r="2.2"/><circle cx="44" cy="84" r="2.2"/><circle cx="52" cy="84" r="2.2"/>
+        <circle cx="60" cy="84" r="2.2"/><circle cx="68" cy="84" r="2.2"/><circle cx="76" cy="84" r="2.2"/><circle cx="84" cy="84" r="2.2"/>
+        <!-- Row 10 -->
+        <circle cx="40" cy="90" r="2.2"/><circle cx="48" cy="90" r="2.2"/><circle cx="56" cy="90" r="2.2"/>
+        <circle cx="64" cy="90" r="2.2"/><circle cx="72" cy="90" r="2.2"/><circle cx="80" cy="90" r="2.2"/>
+      </g>
+      <!-- Highlight on left side (metal sheen) -->
+      <path d="M 32 30 Q 30 60 32 90" fill="none" stroke="#fff" stroke-width="0.7" opacity="0.45"/>
+    </symbol>
+
+    <!-- Scale mail: vest com scales overlapping (fish-scale pattern) -->
+    <symbol id="ic-it-base-scale-mail" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <path d="M 50 16 L 60 30 L 70 16" fill="none" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Scales (overlapping arcs in offset rows, like fish scales) -->
+      <g fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5">
+        <!-- Row 1 -->
+        <path d="M 32 38 Q 38 32 44 38 Q 38 42 32 38 Z"/>
+        <path d="M 44 38 Q 50 32 56 38 Q 50 42 44 38 Z"/>
+        <path d="M 56 38 Q 62 32 68 38 Q 62 42 56 38 Z"/>
+        <path d="M 68 38 Q 74 32 80 38 Q 74 42 68 38 Z"/>
+        <path d="M 80 38 Q 86 32 92 38 Q 86 42 80 38 Z"/>
+        <!-- Row 2 (offset by half) -->
+        <path d="M 38 46 Q 44 40 50 46 Q 44 50 38 46 Z"/>
+        <path d="M 50 46 Q 56 40 62 46 Q 56 50 50 46 Z"/>
+        <path d="M 62 46 Q 68 40 74 46 Q 68 50 62 46 Z"/>
+        <path d="M 74 46 Q 80 40 86 46 Q 80 50 74 46 Z"/>
+        <!-- Row 3 -->
+        <path d="M 32 54 Q 38 48 44 54 Q 38 58 32 54 Z"/>
+        <path d="M 44 54 Q 50 48 56 54 Q 50 58 44 54 Z"/>
+        <path d="M 56 54 Q 62 48 68 54 Q 62 58 56 54 Z"/>
+        <path d="M 68 54 Q 74 48 80 54 Q 74 58 68 54 Z"/>
+        <path d="M 80 54 Q 86 48 92 54 Q 86 58 80 54 Z"/>
+        <!-- Row 4 -->
+        <path d="M 38 62 Q 44 56 50 62 Q 44 66 38 62 Z"/>
+        <path d="M 50 62 Q 56 56 62 62 Q 56 66 50 62 Z"/>
+        <path d="M 62 62 Q 68 56 74 62 Q 68 66 62 62 Z"/>
+        <path d="M 74 62 Q 80 56 86 62 Q 80 66 74 62 Z"/>
+        <!-- Row 5 -->
+        <path d="M 32 70 Q 38 64 44 70 Q 38 74 32 70 Z"/>
+        <path d="M 44 70 Q 50 64 56 70 Q 50 74 44 70 Z"/>
+        <path d="M 56 70 Q 62 64 68 70 Q 62 74 56 70 Z"/>
+        <path d="M 68 70 Q 74 64 80 70 Q 74 74 68 70 Z"/>
+        <path d="M 80 70 Q 86 64 92 70 Q 86 74 80 70 Z"/>
+        <!-- Row 6 -->
+        <path d="M 38 78 Q 44 72 50 78 Q 44 82 38 78 Z"/>
+        <path d="M 50 78 Q 56 72 62 78 Q 56 82 50 78 Z"/>
+        <path d="M 62 78 Q 68 72 74 78 Q 68 82 62 78 Z"/>
+        <path d="M 74 78 Q 80 72 86 78 Q 80 82 74 78 Z"/>
+        <!-- Row 7 -->
+        <path d="M 32 86 Q 38 80 44 86 Q 38 90 32 86 Z"/>
+        <path d="M 44 86 Q 50 80 56 86 Q 50 90 44 86 Z"/>
+        <path d="M 56 86 Q 62 80 68 86 Q 62 90 56 86 Z"/>
+        <path d="M 68 86 Q 74 80 80 86 Q 74 90 68 86 Z"/>
+        <path d="M 80 86 Q 86 80 92 86 Q 86 90 80 86 Z"/>
+        <!-- Row 8 (bottom) -->
+        <path d="M 38 94 Q 44 88 50 94 Q 44 98 38 94 Z"/>
+        <path d="M 50 94 Q 56 88 62 94 Q 56 98 50 94 Z"/>
+        <path d="M 62 94 Q 68 88 74 94 Q 68 98 62 94 Z"/>
+        <path d="M 74 94 Q 80 88 86 94 Q 80 98 74 94 Z"/>
+      </g>
+    </symbol>
+
+    <!-- Breastplate: solid metal curved chest piece (anatomical) -->
+    <symbol id="ic-it-base-breastplate" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Breastplate body (curved anatomical shape, narrower than vest) -->
+      <path d="M 32 26
+               C 38 18, 50 16, 60 16
+               C 70 16, 82 18, 88 26
+               L 92 60
+               C 88 80, 82 96, 60 96
+               C 38 96, 32 80, 28 60 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="1"/>
+      <!-- Center chest ridge -->
+      <line x1="60" y1="22" x2="60" y2="92" stroke="#1a1410" stroke-width="0.6" opacity="0.7"/>
+      <!-- Pectoral muscle definition (anatomical curves) -->
+      <path d="M 38 30 Q 50 36 56 50" fill="none" stroke="#1a1410" stroke-width="0.6" opacity="0.65"/>
+      <path d="M 82 30 Q 70 36 64 50" fill="none" stroke="#1a1410" stroke-width="0.6" opacity="0.65"/>
+      <!-- Abdominal lines -->
+      <path d="M 50 56 Q 60 58 70 56" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 48 66 Q 60 68 72 66" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.55"/>
+      <path d="M 46 76 Q 60 78 74 76" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.55"/>
+      <!-- Shoulder rivets -->
+      <circle cx="38" cy="26" r="1.4" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="82" cy="26" r="1.4" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Highlight (metal sheen on left chest) -->
+      <path d="M 36 30 Q 38 50 42 80" fill="none" stroke="#fff" stroke-width="1" opacity="0.5"/>
+      <path d="M 44 32 Q 46 50 48 78" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.35"/>
+    </symbol>
+
+    <!-- Splint mail: vest com VERTICAL METAL STRIPS -->
+    <symbol id="ic-it-base-splint-mail" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Leather backing -->
+      <path d="M 30 22 L 48 16 L 72 16 L 90 22 L 95 58 L 92 100 L 28 100 L 25 58 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- V-neck -->
+      <path d="M 50 16 L 60 30 L 70 16" fill="none" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Vertical metal splint strips -->
+      <g fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5">
+        <rect x="32" y="32" width="6" height="62"/>
+        <rect x="40" y="32" width="6" height="62"/>
+        <rect x="48" y="32" width="6" height="62"/>
+        <rect x="56" y="36" width="6" height="58"/>
+        <rect x="64" y="36" width="6" height="58"/>
+        <rect x="72" y="32" width="6" height="62"/>
+        <rect x="80" y="32" width="6" height="62"/>
+        <rect x="88" y="32" width="3" height="62"/>
+      </g>
+      <!-- Metal rivets at top and bottom of each strip -->
+      <g fill="#1a1410">
+        <circle cx="35" cy="35" r="0.7"/><circle cx="43" cy="35" r="0.7"/><circle cx="51" cy="35" r="0.7"/>
+        <circle cx="59" cy="39" r="0.7"/><circle cx="67" cy="39" r="0.7"/>
+        <circle cx="75" cy="35" r="0.7"/><circle cx="83" cy="35" r="0.7"/>
+        <circle cx="35" cy="91" r="0.7"/><circle cx="43" cy="91" r="0.7"/><circle cx="51" cy="91" r="0.7"/>
+        <circle cx="59" cy="91" r="0.7"/><circle cx="67" cy="91" r="0.7"/>
+        <circle cx="75" cy="91" r="0.7"/><circle cx="83" cy="91" r="0.7"/>
+      </g>
+      <!-- Belt -->
+      <rect x="26" y="60" width="68" height="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <rect x="56" y="59" width="8" height="8" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Full plate: corpo completo com helm gothic -->
+    <symbol id="ic-it-base-full-plate" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Helmet (great helm at top) -->
+      <path d="M 48 4 L 72 4 L 76 18 L 72 28 L 48 28 L 44 18 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Helmet visor slit -->
+      <rect x="50" y="14" width="20" height="2.5" fill="#1a1410"/>
+      <!-- Helmet decorative ridge -->
+      <line x1="60" y1="4" x2="60" y2="14" stroke="#1a1410" stroke-width="0.6" opacity="0.7"/>
+      <!-- Pauldrons (shoulders) -->
+      <path d="M 26 30 Q 22 40 28 50 L 38 44 L 38 30 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <path d="M 94 30 Q 98 40 92 50 L 82 44 L 82 30 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Breastplate body -->
+      <path d="M 36 30
+               C 42 28, 50 28, 60 28
+               C 70 28, 78 28, 84 30
+               L 88 60
+               C 84 80, 78 96, 60 96
+               C 42 96, 36 80, 32 60 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="1"/>
+      <!-- Center ridge -->
+      <line x1="60" y1="32" x2="60" y2="92" stroke="#1a1410" stroke-width="0.7" opacity="0.7"/>
+      <!-- Pectoral curves -->
+      <path d="M 42 36 Q 52 40 56 54" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
+      <path d="M 78 36 Q 68 40 64 54" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
+      <!-- Abdominal plates (faulds) -->
+      <path d="M 38 70 L 82 70" stroke="#1a1410" stroke-width="0.6" opacity="0.6"/>
+      <path d="M 36 80 L 84 80" stroke="#1a1410" stroke-width="0.6" opacity="0.6"/>
+      <path d="M 36 90 L 84 90" stroke="#1a1410" stroke-width="0.6" opacity="0.55"/>
+      <!-- Highlight (gothic plate sheen) -->
+      <path d="M 40 34 Q 44 60 46 90" fill="none" stroke="#fff" stroke-width="1" opacity="0.5"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE ARMOR SYMBOLS — SHIELDS                                          -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Round shield: wooden circle with iron rim + central boss -->
+    <symbol id="ic-it-base-shield-round" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Outer iron rim -->
+      <circle cx="60" cy="56" r="46" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Wooden body (slightly smaller circle) -->
+      <circle cx="60" cy="56" r="42" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <!-- Wood grain (concentric texture) -->
+      <circle cx="60" cy="56" r="34" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.6"/>
+      <circle cx="60" cy="56" r="26" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <circle cx="60" cy="56" r="18" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.5"/>
+      <!-- 4 iron rivets at compass points -->
+      <circle cx="60" cy="20" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="60" cy="92" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="24" cy="56" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <circle cx="96" cy="56" r="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Central iron boss (umbo) -->
+      <circle cx="60" cy="56" r="10" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <circle cx="60" cy="56" r="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Boss highlight -->
+      <circle cx="57" cy="53" r="2" fill="#fff" opacity="0.45"/>
+      <!-- Shield highlight (left side) -->
+      <path d="M 18 40 Q 14 56 18 72" fill="none" stroke="#fff" stroke-width="0.9" opacity="0.5"/>
+    </symbol>
+
+    <!-- Kite shield: tall teardrop/almond shape (knight) -->
+    <symbol id="ic-it-base-shield-kite" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Outer rim/silhouette: rounded top, tapered bottom -->
+      <path d="M 28 18
+               Q 60 8 92 18
+               L 88 56
+               Q 84 88 60 110
+               Q 36 88 32 56 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Wooden body -->
+      <path d="M 32 22
+               Q 60 14 88 22
+               L 84 56
+               Q 80 84 60 104
+               Q 40 84 36 56 Z"
+            fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <!-- Vertical center boss strip (reinforcement) -->
+      <rect x="56" y="22" width="8" height="78" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Cross pattern (heraldic) -->
+      <rect x="32" y="50" width="56" height="8" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Rivets -->
+      <circle cx="60" cy="22" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="60" cy="100" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="36" cy="54" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="84" cy="54" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <!-- Central rivet on cross -->
+      <circle cx="60" cy="54" r="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Highlight -->
+      <path d="M 40 28 Q 38 56 44 90" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.5"/>
+    </symbol>
+
+    <!-- Heater shield: knight tournament style (square top, pointed bottom) -->
+    <symbol id="ic-it-base-shield-heater" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="113" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Heater outline -->
+      <path d="M 24 14
+               L 96 14
+               L 94 50
+               Q 90 88 60 110
+               Q 30 88 26 50 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Decorative line at top -->
+      <line x1="28" y1="22" x2="92" y2="22" stroke="#1a1410" stroke-width="0.7" opacity="0.7"/>
+      <!-- Quartered heraldic pattern (cross) -->
+      <line x1="60" y1="14" x2="60" y2="106" stroke="#1a1410" stroke-width="0.7" opacity="0.7"/>
+      <line x1="26" y1="56" x2="94" y2="56" stroke="#1a1410" stroke-width="0.7" opacity="0.7"/>
+      <!-- Quarter tints (alternating bronze/iron for heraldic effect) -->
+      <path d="M 28 18 L 58 18 L 58 54 L 30 54 Q 27 36 28 22 Z" fill="url(#rh-bronze)" opacity="0.35"/>
+      <path d="M 62 56 L 92 56 Q 92 78 86 92 L 62 100 Z" fill="url(#rh-bronze)" opacity="0.35"/>
+      <!-- Rivets at corners + center -->
+      <circle cx="32" cy="20" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="88" cy="20" r="1.6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="60" cy="56" r="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Highlight -->
+      <path d="M 30 22 Q 30 56 36 92" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.5"/>
+    </symbol>
+
+    <!-- Buckler: small round shield (compact, hand-held) -->
+    <symbol id="ic-it-base-shield-buckler" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Outer iron rim (smaller than round shield) -->
+      <circle cx="60" cy="56" r="32" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Wooden body -->
+      <circle cx="60" cy="56" r="28" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.7"/>
+      <!-- Wood grain ring -->
+      <circle cx="60" cy="56" r="22" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <circle cx="60" cy="56" r="16" fill="none" stroke="#3a2410" stroke-width="0.5" opacity="0.5"/>
+      <!-- 6 rivets evenly spaced -->
+      <g fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3">
+        <circle cx="60" cy="28" r="1.5"/>
+        <circle cx="60" cy="84" r="1.5"/>
+        <circle cx="36" cy="56" r="1.5"/>
+        <circle cx="84" cy="56" r="1.5"/>
+        <circle cx="42" cy="34" r="1.5"/>
+        <circle cx="78" cy="78" r="1.5"/>
+      </g>
+      <!-- Central spike boss (small, sharp - bucklers were often pointed) -->
+      <circle cx="60" cy="56" r="7" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <path d="M 60 50 L 56 56 L 60 62 L 64 56 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <circle cx="58" cy="54" r="1" fill="#fff" opacity="0.55"/>
+      <!-- Highlight -->
+      <path d="M 30 44 Q 28 56 30 68" fill="none" stroke="#fff" stroke-width="0.7" opacity="0.5"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE ARMOR SYMBOLS — HELMETS                                          -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Leather cap: simples chapéu de couro arredondado -->
+    <symbol id="ic-it-base-leather-cap" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Cap body (rounded dome) -->
+      <path d="M 24 70 Q 24 30 60 26 Q 96 30 96 70 L 88 78 L 32 78 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Brim/edge band -->
+      <rect x="24" y="74" width="72" height="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Stitching across the top -->
+      <path d="M 36 40 Q 60 32 84 40" fill="none" stroke="#3a1808" stroke-width="0.5" opacity="0.7"/>
+      <!-- Center seam down -->
+      <path d="M 60 26 Q 60 50 60 74" stroke="#3a1808" stroke-width="0.55" opacity="0.6" fill="none"/>
+      <!-- Highlight (left side dome) -->
+      <path d="M 32 50 Q 36 38 50 32" fill="none" stroke="#a87a4a" stroke-width="0.7" opacity="0.5"/>
+      <!-- Chin strap (small detail at side) -->
+      <line x1="28" y1="76" x2="26" y2="92" stroke="#3a1808" stroke-width="0.7"/>
+      <line x1="92" y1="76" x2="94" y2="92" stroke="#3a1808" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- Cloth hood: pointed wizard/monk hood -->
+    <symbol id="ic-it-base-cloth-hood" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="34" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Pointed hood (taller than cap) -->
+      <path d="M 28 80
+               Q 24 50 36 28
+               Q 50 8 62 14
+               Q 76 22 84 36
+               Q 96 56 92 80
+               L 86 90 L 34 90 Z"
+            fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Pointed tip -->
+      <path d="M 60 14 Q 70 18 76 28" fill="none" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Drape folds (vertical lines) -->
+      <line x1="40" y1="40" x2="38" y2="86" stroke="#3a1808" stroke-width="0.5" opacity="0.65"/>
+      <line x1="50" y1="34" x2="48" y2="86" stroke="#3a1808" stroke-width="0.5" opacity="0.65"/>
+      <line x1="70" y1="32" x2="72" y2="86" stroke="#3a1808" stroke-width="0.5" opacity="0.65"/>
+      <line x1="80" y1="40" x2="82" y2="86" stroke="#3a1808" stroke-width="0.5" opacity="0.65"/>
+      <!-- Inner shadow (face hole) -->
+      <ellipse cx="60" cy="68" rx="14" ry="14" fill="#1a1410" opacity="0.65"/>
+      <!-- Cord/tie at neck -->
+      <line x1="46" y1="86" x2="74" y2="86" stroke="url(#rh-bronze)" stroke-width="0.7"/>
+      <circle cx="60" cy="86" r="1.4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.3"/>
+    </symbol>
+
+    <!-- Iron helm: pot helm cilíndrico (closed pot) -->
+    <symbol id="ic-it-base-iron-helm" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Cylindrical helm body -->
+      <path d="M 32 26
+               L 32 76
+               Q 32 86 60 86
+               Q 88 86 88 76
+               L 88 26
+               Q 88 18 60 18
+               Q 32 18 32 26 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Top dome/flat -->
+      <ellipse cx="60" cy="22" rx="28" ry="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Eye slit -->
+      <rect x="40" y="46" width="40" height="3" fill="#1a1410"/>
+      <!-- Vertical center reinforcement -->
+      <line x1="60" y1="22" x2="60" y2="46" stroke="#1a1410" stroke-width="0.7" opacity="0.8"/>
+      <line x1="60" y1="50" x2="60" y2="80" stroke="#1a1410" stroke-width="0.7" opacity="0.8"/>
+      <!-- Breathing holes (small dots below eye slit) -->
+      <circle cx="50" cy="60" r="0.9" fill="#1a1410"/>
+      <circle cx="55" cy="60" r="0.9" fill="#1a1410"/>
+      <circle cx="65" cy="60" r="0.9" fill="#1a1410"/>
+      <circle cx="70" cy="60" r="0.9" fill="#1a1410"/>
+      <circle cx="50" cy="66" r="0.9" fill="#1a1410"/>
+      <circle cx="55" cy="66" r="0.9" fill="#1a1410"/>
+      <circle cx="65" cy="66" r="0.9" fill="#1a1410"/>
+      <circle cx="70" cy="66" r="0.9" fill="#1a1410"/>
+      <!-- Rivets along top edge -->
+      <circle cx="38" cy="32" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="60" cy="32" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="82" cy="32" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <!-- Highlight (left side metallic sheen) -->
+      <path d="M 36 30 Q 34 56 38 78" fill="none" stroke="#fff" stroke-width="1" opacity="0.45"/>
+    </symbol>
+
+    <!-- Knight helm: great helm com visor cônico (gothic) -->
+    <symbol id="ic-it-base-knight-helm" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Helm body (more anatomical, with brow ridge) -->
+      <path d="M 28 36
+               Q 28 22 60 16
+               Q 92 22 92 36
+               L 92 64
+               Q 92 80 78 88
+               L 42 88
+               Q 28 80 28 64 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Brow ridge -->
+      <path d="M 28 38 Q 60 30 92 38" fill="none" stroke="#1a1410" stroke-width="0.85"/>
+      <!-- Eye slits (T-shape) -->
+      <rect x="36" y="42" width="20" height="4" fill="#1a1410"/>
+      <rect x="64" y="42" width="20" height="4" fill="#1a1410"/>
+      <!-- Vertical breathing slit (center) -->
+      <rect x="58" y="50" width="4" height="22" fill="#1a1410"/>
+      <!-- Decorative cross on visor -->
+      <line x1="60" y1="48" x2="60" y2="74" stroke="url(#rh-bronze)" stroke-width="0.5" opacity="0.85"/>
+      <!-- Crest (small plume mount on top) -->
+      <path d="M 56 16 L 60 8 L 64 16 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Crest plume (red) -->
+      <path d="M 60 8 L 56 0 L 60 4 L 64 0 Z" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.4"/>
+      <!-- Side rivets (jaw and forehead) -->
+      <circle cx="32" cy="50" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="88" cy="50" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="32" cy="74" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <circle cx="88" cy="74" r="1.3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.3"/>
+      <!-- Neck guard (gorget hint at bottom) -->
+      <path d="M 42 88 L 38 96 L 82 96 L 78 88 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Highlight -->
+      <path d="M 32 38 Q 30 60 36 84" fill="none" stroke="#fff" stroke-width="1" opacity="0.5"/>
+    </symbol>
+
+    <!-- Bone helm: skull-themed (orcish/barbarian) -->
+    <symbol id="ic-it-base-bone-helm" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Helm body (rough dome) -->
+      <path d="M 28 76
+               Q 28 30 60 22
+               Q 92 30 92 76
+               L 86 84 L 34 84 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Skull mounted on top (front) -->
+      <path d="M 44 26
+               Q 38 38 44 50
+               L 50 56 L 70 56 L 76 50
+               Q 82 38 76 26
+               Q 60 16 44 26 Z"
+            fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.7"/>
+      <!-- Skull eye sockets -->
+      <ellipse cx="52" cy="38" rx="3" ry="4" fill="#1a1410"/>
+      <ellipse cx="68" cy="38" rx="3" ry="4" fill="#1a1410"/>
+      <!-- Skull nose hole -->
+      <path d="M 58 44 L 60 50 L 62 44 Z" fill="#1a1410"/>
+      <!-- Skull teeth (jagged line) -->
+      <path d="M 52 54 L 54 56 L 56 54 L 58 56 L 60 54 L 62 56 L 64 54 L 66 56 L 68 54" fill="none" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Horns curving outward (small) -->
+      <path d="M 42 28 Q 30 26 26 36" fill="none" stroke="url(#rh-bone)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 78 28 Q 90 26 94 36" fill="none" stroke="url(#rh-bone)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Bones decorations on side (ribs) -->
+      <line x1="34" y1="60" x2="42" y2="60" stroke="url(#rh-bone)" stroke-width="0.7"/>
+      <line x1="34" y1="68" x2="42" y2="68" stroke="url(#rh-bone)" stroke-width="0.7"/>
+      <line x1="34" y1="76" x2="42" y2="76" stroke="url(#rh-bone)" stroke-width="0.7"/>
+      <line x1="78" y1="60" x2="86" y2="60" stroke="url(#rh-bone)" stroke-width="0.7"/>
+      <line x1="78" y1="68" x2="86" y2="68" stroke="url(#rh-bone)" stroke-width="0.7"/>
+      <line x1="78" y1="76" x2="86" y2="76" stroke="url(#rh-bone)" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — items_srd.py ARMOR_LIGHT / MEDIUM / HEAVY     -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- LIGHT ARMOR -->
+    <symbol id="ic-it-armadura-acolchoada" viewBox="0 0 120 120"><use href="#ic-it-base-padded-armor"/></symbol>
+    <symbol id="ic-it-armadura-couro"      viewBox="0 0 120 120"><use href="#ic-it-base-leather-chest"/></symbol>
+    <symbol id="ic-it-couro-batido"        viewBox="0 0 120 120"><use href="#ic-it-base-studded-leather"/></symbol>
+
+    <!-- MEDIUM ARMOR -->
+    <symbol id="ic-it-gibao-peles"         viewBox="0 0 120 120"><use href="#ic-it-base-hide-armor"/></symbol>
+    <symbol id="ic-it-cota-malha"          viewBox="0 0 120 120"><use href="#ic-it-base-chainmail-tunic"/></symbol>
+    <symbol id="ic-it-cota-escamas"        viewBox="0 0 120 120"><use href="#ic-it-base-scale-mail"/></symbol>
+    <symbol id="ic-it-brunea"              viewBox="0 0 120 120"><use href="#ic-it-base-breastplate"/></symbol>
+
+    <!-- Meia-Placa: breastplate + small shoulder pieces -->
+    <symbol id="ic-it-meia-placa" viewBox="0 0 120 120">
+      <use href="#ic-it-base-breastplate"/>
+      <!-- Small pauldron pieces -->
+      <path d="M 26 28 Q 22 36 28 44 L 36 40 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <path d="M 94 28 Q 98 36 92 44 L 84 40 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- HEAVY ARMOR -->
+    <!-- Brunea de Anéis (ring mail): chainmail base com decoração de anéis grandes -->
+    <symbol id="ic-it-brunea-aneis" viewBox="0 0 120 120">
+      <use href="#ic-it-base-chainmail-tunic"/>
+      <!-- Large rings overlay -->
+      <g fill="none" stroke="#1a1410" stroke-width="0.85" opacity="0.9">
+        <circle cx="44" cy="40" r="4"/>
+        <circle cx="60" cy="40" r="4"/>
+        <circle cx="76" cy="40" r="4"/>
+        <circle cx="44" cy="56" r="4"/>
+        <circle cx="60" cy="56" r="4"/>
+        <circle cx="76" cy="56" r="4"/>
+        <circle cx="44" cy="72" r="4"/>
+        <circle cx="60" cy="72" r="4"/>
+        <circle cx="76" cy="72" r="4"/>
+      </g>
+    </symbol>
+    <symbol id="ic-it-cota-talas"          viewBox="0 0 120 120"><use href="#ic-it-base-splint-mail"/></symbol>
+    <symbol id="ic-it-placa-completa"      viewBox="0 0 120 120"><use href="#ic-it-base-full-plate"/></symbol>
+
+    <!-- SHIELDS -->
+    <symbol id="ic-it-escudo-madeira"      viewBox="0 0 120 120"><use href="#ic-it-base-shield-round"/></symbol>
+    <symbol id="ic-it-escudo-aco"          viewBox="0 0 120 120"><use href="#ic-it-base-shield-heater"/></symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — item_registry_data.py CHEST / HEAD / MAGIC    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- HELMETS - non-magic -->
+    <symbol id="ic-it-elmo-couro"          viewBox="0 0 120 120"><use href="#ic-it-base-leather-cap"/></symbol>
+    <symbol id="ic-it-capuz-tecido"        viewBox="0 0 120 120"><use href="#ic-it-base-cloth-hood"/></symbol>
+
+    <!-- Elmo Enferrujado: iron helm + rust overlay -->
+    <symbol id="ic-it-elmo-enferrujado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-iron-helm"/>
+      <!-- Rust streaks -->
+      <path d="M 38 32 L 40 76 M 50 28 L 50 80 M 70 28 L 70 80 M 82 32 L 80 76" stroke="#5a3a18" stroke-width="0.6" opacity="0.7"/>
+      <circle cx="42" cy="50" r="1.4" fill="#5a1810" opacity="0.7"/>
+      <circle cx="78" cy="60" r="1.2" fill="#5a1810" opacity="0.65"/>
+      <circle cx="55" cy="80" r="1.1" fill="#5a1810" opacity="0.65"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.22"/>
+    </symbol>
+
+    <!-- Bandana Suja: simple cloth wrap (use cloth-hood reduced) -->
+    <symbol id="ic-it-bandana-suja" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Bandana strip -->
+      <path d="M 18 56 L 102 56 L 100 70 L 88 76 L 32 76 L 20 70 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- Knot on the side -->
+      <path d="M 100 60 L 110 56 L 108 68 L 100 70 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Stains -->
+      <ellipse cx="50" cy="64" rx="3" ry="1.5" fill="#3a1808" opacity="0.7"/>
+      <ellipse cx="72" cy="68" rx="2" ry="1.2" fill="#3a1808" opacity="0.6"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.18"/>
+    </symbol>
+
+    <!-- Elmo Anão (Dwarven Helm): iron helm + dwarven decoration (winged horns) -->
+    <symbol id="ic-it-elmo-anao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-iron-helm"/>
+      <!-- Dwarven horns/wings on sides -->
+      <path d="M 30 34 Q 16 30 12 42 Q 22 38 30 42 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <path d="M 90 34 Q 104 30 108 42 Q 98 38 90 42 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Bronze ornament strip across forehead -->
+      <rect x="36" y="30" width="48" height="4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Runes on the strip -->
+      <path d="M 42 32 L 42 33 M 50 32 L 51 33 L 50 34 M 60 32 L 60 33 M 70 32 L 70 33 M 78 32 L 79 33 L 78 34" stroke="#1a0808" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Elmo de Ossos -->
+    <symbol id="ic-it-elmo-ossos" viewBox="0 0 120 120"><use href="#ic-it-base-bone-helm"/></symbol>
+
+    <!-- MAGIC HELMETS -->
+
+    <!-- Tiara do Conhecimento -->
+    <symbol id="ic-it-tiara-conhecimento" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Silver tiara band -->
+      <path d="M 24 54 Q 60 38 96 54 L 92 64 Q 60 50 28 64 Z" fill="url(#rh-silver)" stroke="#5a4838" stroke-width="0.7"/>
+      <!-- Central gem -->
+      <path d="M 56 42 L 60 32 L 64 42 L 60 50 Z" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.5"/>
+      <circle cx="60" cy="40" r="1.4" fill="#fff" opacity="0.7"/>
+      <!-- Side gemstones -->
+      <circle cx="38" cy="56" r="2" fill="url(#rh-sapphire)" stroke="#1a3a78" stroke-width="0.3"/>
+      <circle cx="82" cy="56" r="2" fill="url(#rh-sapphire)" stroke="#1a3a78" stroke-width="0.3"/>
+      <!-- Arcane sparks -->
+      <circle cx="46" cy="38" r="0.8" fill="#fff" opacity="0.7"/>
+      <circle cx="74" cy="38" r="0.8" fill="#fff" opacity="0.7"/>
+      <!-- Glow halo -->
+      <circle cx="60" cy="48" r="34" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+    </symbol>
+
+    <!-- Circlet da Explosão -->
+    <symbol id="ic-it-circlet-explosao" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.5" fill="#000" opacity="0.45"/>
+      <circle cx="60" cy="56" r="38" fill="url(#rh-glow-fire)" opacity="0.4"/>
+      <!-- Bronze circlet band -->
+      <path d="M 22 56 Q 60 44 98 56 L 96 66 Q 60 56 24 66 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <!-- Central crimson gem with flame motif -->
+      <path d="M 56 44 L 60 30 L 64 44 Q 64 52 60 54 Q 56 52 56 44 Z" fill="url(#rh-flame)" stroke="#7a3018" stroke-width="0.5"/>
+      <!-- Flame sparks above -->
+      <path d="M 56 30 L 58 22 L 60 28 L 62 22 L 64 30" fill="none" stroke="url(#rh-flame)" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- Chapéu de Disfarce -->
+    <symbol id="ic-it-chapeu-disfarce" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="36" ry="2.5" fill="#000" opacity="0.45"/>
+      <!-- Wide-brim hat -->
+      <ellipse cx="60" cy="74" rx="44" ry="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- Hat top (cone) -->
+      <path d="M 38 74 Q 38 32 60 24 Q 82 32 82 74 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- Hat band -->
+      <rect x="38" y="68" width="44" height="6" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <!-- Buckle on band -->
+      <rect x="56" y="67" width="8" height="8" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Magic shimmer -->
+      <circle cx="60" cy="50" r="22" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+    </symbol>
+
+    <!-- Elmo da Telepatia: iron helm + arcane sparkles + sapphire gem -->
+    <symbol id="ic-it-elmo-telepatia" viewBox="0 0 120 120">
+      <use href="#ic-it-base-iron-helm"/>
+      <circle cx="60" cy="50" r="36" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Sapphire on forehead -->
+      <path d="M 56 28 L 60 22 L 64 28 L 60 32 Z" fill="url(#rh-sapphire)" stroke="#1a3a78" stroke-width="0.4"/>
+      <!-- Sparks -->
+      <path d="M 38 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 82 32 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Elmo de Proteção +1: iron helm + +1 sparks + bronze ornament -->
+    <symbol id="ic-it-elmo-protecao-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-iron-helm"/>
+      <circle cx="60" cy="50" r="38" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Bronze ornament cross on forehead -->
+      <rect x="58" y="22" width="4" height="14" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <rect x="52" y="28" width="16" height="4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Sparks -->
+      <path d="M 32 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 86 36 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 28 70 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <!-- ARCANE/CLERIC ROBES (variants of padded armor) -->
+
+    <!-- Veste Arcana -->
+    <symbol id="ic-it-veste-arcana" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="40" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <!-- Arcane symbol on chest (pentagram-like star) -->
+      <path d="M 60 42 L 54 56 L 66 56 Z M 60 42 L 66 56 L 50 50 L 70 50 L 54 56 Z" fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.5" opacity="0.85"/>
+    </symbol>
+
+    <!-- Manto da Resistência -->
+    <symbol id="ic-it-manto-resistencia" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="42" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Triple ring on chest -->
+      <circle cx="60" cy="56" r="10" fill="none" stroke="url(#rh-bronze)" stroke-width="0.7"/>
+      <circle cx="60" cy="56" r="6" fill="none" stroke="url(#rh-bronze)" stroke-width="0.6"/>
+      <circle cx="60" cy="56" r="2" fill="url(#rh-bronze)"/>
+      <!-- +1 sparks -->
+      <path d="M 32 40 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 86 40 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Túnica de Proteção -->
+    <symbol id="ic-it-tunica-protecao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="38" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+      <!-- Diamond shield motif -->
+      <path d="M 60 38 L 70 52 L 60 80 L 50 52 Z" fill="none" stroke="url(#rh-silver)" stroke-width="0.85"/>
+      <circle cx="60" cy="56" r="2" fill="url(#rh-silver)"/>
+    </symbol>
+
+    <!-- Veste do Arcanista -->
+    <symbol id="ic-it-veste-arcanista" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="44" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <!-- Arcane sigil -->
+      <circle cx="60" cy="56" r="12" fill="none" stroke="url(#rh-violet)" stroke-width="0.85"/>
+      <path d="M 60 44 L 60 68 M 48 56 L 72 56 M 52 48 L 68 64 M 68 48 L 52 64" stroke="url(#rh-violet)" stroke-width="0.6" opacity="0.85"/>
+      <!-- 4 sparks -->
+      <path d="M 30 38 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 88 40 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 28 88 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+      <path d="M 90 88 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Veste do Sacerdote -->
+    <symbol id="ic-it-veste-sacerdote" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="42" fill="url(#rh-glow-thunder)" opacity="0.3"/>
+      <!-- Holy cross -->
+      <rect x="58" y="40" width="4" height="36" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <rect x="48" y="50" width="24" height="4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <!-- Holy sparks -->
+      <path d="M 32 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 86 40 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- ENCHANTED VARIANTS (+1, +2, junk) -->
+
+    <!-- Cota de Malha Enferrujada -->
+    <symbol id="ic-it-cota-malha-enferrujada" viewBox="0 0 120 120">
+      <use href="#ic-it-base-chainmail-tunic"/>
+      <!-- Rust streaks -->
+      <path d="M 36 36 L 36 86 M 50 36 L 50 86 M 70 36 L 70 86 M 84 36 L 84 86" stroke="#5a3a18" stroke-width="0.6" opacity="0.55"/>
+      <circle cx="42" cy="50" r="1.5" fill="#5a1810" opacity="0.7"/>
+      <circle cx="78" cy="64" r="1.3" fill="#5a1810" opacity="0.7"/>
+      <circle cx="56" cy="80" r="1.4" fill="#5a1810" opacity="0.7"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.25"/>
+    </symbol>
+
+    <!-- Cota de Malha +1 -->
+    <symbol id="ic-it-cota-malha-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-chainmail-tunic"/>
+      <circle cx="60" cy="56" r="44" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <path d="M 30 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 88 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 32 88 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+    </symbol>
+
+    <!-- Cota de Malha +2 -->
+    <symbol id="ic-it-cota-malha-2" viewBox="0 0 120 120">
+      <use href="#ic-it-base-chainmail-tunic"/>
+      <circle cx="60" cy="56" r="48" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <circle cx="60" cy="56" r="32" fill="url(#rh-glow-thunder)" opacity="0.3"/>
+      <path d="M 30 30 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 86 30 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 24 60 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 92 60 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- Armadura de Couro +1 -->
+    <symbol id="ic-it-armadura-couro-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-leather-chest"/>
+      <circle cx="60" cy="56" r="42" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <path d="M 30 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 86 40 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- ENHANCED SHIELDS -->
+
+    <symbol id="ic-it-escudo-pequeno" viewBox="0 0 120 120"><use href="#ic-it-base-shield-buckler"/></symbol>
+
+    <!-- Escudo -->
+    <symbol id="ic-it-escudo-generic" viewBox="0 0 120 120"><use href="#ic-it-base-shield-round"/></symbol>
+
+    <!-- Escudo +1 -->
+    <symbol id="ic-it-escudo-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-round"/>
+      <circle cx="60" cy="56" r="50" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <path d="M 22 22 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 96 24 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 22 88 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Escudo de Aço +1 -->
+    <symbol id="ic-it-escudo-aco-1" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-heater"/>
+      <circle cx="60" cy="60" r="50" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <path d="M 20 20 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 96 22 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+      <path d="M 24 90 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Escudo de Aço +2 -->
+    <symbol id="ic-it-escudo-aco-2" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-heater"/>
+      <circle cx="60" cy="60" r="54" fill="url(#rh-glow-arcane)" opacity="0.5"/>
+      <circle cx="60" cy="60" r="36" fill="url(#rh-glow-thunder)" opacity="0.3"/>
+      <path d="M 18 18 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 96 18 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 18 90 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+      <path d="M 96 90 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- Escudo Quebrado: round shield + cracks + dim -->
+    <symbol id="ic-it-escudo-quebrado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-round"/>
+      <!-- Cracks across the wood -->
+      <path d="M 30 36 L 50 56 L 36 70 L 60 80" stroke="#1a0808" stroke-width="0.85" fill="none" opacity="0.85"/>
+      <path d="M 80 30 L 70 50 L 88 60 L 76 78" stroke="#1a0808" stroke-width="0.7" fill="none" opacity="0.85"/>
+      <!-- Missing chunk -->
+      <path d="M 90 30 L 100 40 L 92 48 Z" fill="#2a2420"/>
+      <rect x="0" y="0" width="120" height="120" fill="#1a1410" opacity="0.25"/>
+    </symbol>
+
+    <!-- Escudo da Redenção (Quest) -->
+    <symbol id="ic-it-escudo-redencao" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-heater"/>
+      <circle cx="60" cy="60" r="56" fill="url(#rh-glow-thunder)" opacity="0.45"/>
+      <!-- Holy cross -->
+      <rect x="58" y="20" width="4" height="80" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <rect x="40" y="48" width="40" height="6" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Sun rays -->
+      <g transform="translate(60 56)" stroke="#fff" stroke-width="0.5" opacity="0.7">
+        <line x1="-50" y1="0" x2="-42" y2="0"/>
+        <line x1="50" y1="0" x2="42" y2="0"/>
+        <line x1="0" y1="-44" x2="0" y2="-36"/>
+        <line x1="0" y1="44" x2="0" y2="36"/>
+      </g>
+    </symbol>
+
+    <!-- Escudo de Pedra (settlement) -->
+    <symbol id="ic-it-escudo-pedra" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-round"/>
+      <!-- Stone overlay -->
+      <circle cx="60" cy="56" r="42" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.7" opacity="0.85"/>
+      <!-- Stone cracks -->
+      <path d="M 30 50 L 50 58 L 38 70" stroke="#1a1410" stroke-width="0.5" fill="none" opacity="0.6"/>
+      <path d="M 78 56 L 90 50 L 84 68" stroke="#1a1410" stroke-width="0.5" fill="none" opacity="0.6"/>
+      <!-- Central stone boss -->
+      <circle cx="60" cy="56" r="9" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SET PIECES — armaduras, escudos, elmos                                -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Gibão do Lobo Selvagem -->
+    <symbol id="ic-it-gibao-lobo-selvagem" viewBox="0 0 120 120">
+      <use href="#ic-it-base-leather-chest"/>
+      <!-- Wolf paw print on chest -->
+      <g fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4" opacity="0.95">
+        <ellipse cx="60" cy="56" rx="6" ry="7"/>
+        <ellipse cx="52" cy="48" rx="2.5" ry="3"/>
+        <ellipse cx="58" cy="44" rx="2.5" ry="3"/>
+        <ellipse cx="64" cy="44" rx="2.5" ry="3"/>
+        <ellipse cx="68" cy="48" rx="2.5" ry="3"/>
+      </g>
+      <!-- Glow -->
+      <circle cx="60" cy="60" r="40" fill="url(#rh-glow-arcane)" opacity="0.18"/>
+    </symbol>
+
+    <!-- Couraça do Protetor Ancestral -->
+    <symbol id="ic-it-couraca-protetor-ancestral" viewBox="0 0 120 120">
+      <use href="#ic-it-base-breastplate"/>
+      <circle cx="60" cy="60" r="48" fill="url(#rh-glow-thunder)" opacity="0.35"/>
+      <!-- Sacred sun emblem on chest -->
+      <circle cx="60" cy="56" r="9" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <g transform="translate(60 56)" stroke="url(#rh-bronze)" stroke-width="0.7">
+        <line x1="0" y1="-14" x2="0" y2="-9"/>
+        <line x1="0" y1="14" x2="0" y2="9"/>
+        <line x1="-14" y1="0" x2="-9" y2="0"/>
+        <line x1="14" y1="0" x2="9" y2="0"/>
+      </g>
+    </symbol>
+
+    <!-- Elmo do Protetor Ancestral -->
+    <symbol id="ic-it-elmo-protetor-ancestral" viewBox="0 0 120 120">
+      <use href="#ic-it-base-iron-helm"/>
+      <circle cx="60" cy="50" r="44" fill="url(#rh-glow-thunder)" opacity="0.35"/>
+      <!-- Sacred cross -->
+      <rect x="58" y="22" width="4" height="14" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <rect x="52" y="26" width="16" height="4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Escudo do Protetor Ancestral -->
+    <symbol id="ic-it-escudo-protetor-ancestral" viewBox="0 0 120 120">
+      <use href="#ic-it-base-shield-heater"/>
+      <circle cx="60" cy="60" r="58" fill="url(#rh-glow-thunder)" opacity="0.45"/>
+      <!-- Sacred sun emblem center -->
+      <circle cx="60" cy="56" r="14" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <g transform="translate(60 56)" stroke="url(#rh-bronze)" stroke-width="0.8">
+        <line x1="0" y1="-22" x2="0" y2="-15"/>
+        <line x1="0" y1="22" x2="0" y2="15"/>
+        <line x1="-22" y1="0" x2="-15" y2="0"/>
+        <line x1="22" y1="0" x2="15" y2="0"/>
+        <line x1="-15" y1="-15" x2="-11" y2="-11"/>
+        <line x1="15" y1="-15" x2="11" y2="-11"/>
+        <line x1="-15" y1="15" x2="-11" y2="11"/>
+        <line x1="15" y1="15" x2="11" y2="11"/>
+      </g>
+      <circle cx="60" cy="56" r="3" fill="#fff" opacity="0.6"/>
+    </symbol>
+
+    <!-- Manto do Arcanista -->
+    <symbol id="ic-it-manto-arcanista" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="46" fill="url(#rh-glow-arcane)" opacity="0.45"/>
+      <!-- Star/violet emblem -->
+      <path d="M 60 38 L 64 52 L 78 52 L 67 60 L 71 74 L 60 66 L 49 74 L 53 60 L 42 52 L 56 52 Z"
+            fill="url(#rh-violet)" stroke="#3a1a5a" stroke-width="0.5" opacity="0.95"/>
+    </symbol>
+
+    <!-- Chapéu do Arcanista -->
+    <symbol id="ic-it-chapeu-arcanista" viewBox="0 0 120 120">
+      <use href="#ic-it-base-cloth-hood"/>
+      <circle cx="60" cy="56" r="40" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <!-- Stars on hood -->
+      <path d="M 40 36 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="url(#rh-violet)" opacity="0.95"/>
+      <path d="M 80 38 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="url(#rh-violet)" opacity="0.85"/>
+      <path d="M 52 56 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="url(#rh-violet)" opacity="0.85"/>
+    </symbol>
+
+    <!-- Manto do Devoto Solar -->
+    <symbol id="ic-it-manto-devoto-solar" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="44" fill="url(#rh-glow-thunder)" opacity="0.35"/>
+      <!-- Sun emblem on chest -->
+      <circle cx="60" cy="56" r="10" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <g transform="translate(60 56)" stroke="url(#rh-bronze)" stroke-width="0.6">
+        <line x1="0" y1="-16" x2="0" y2="-12"/>
+        <line x1="0" y1="16" x2="0" y2="12"/>
+        <line x1="-16" y1="0" x2="-12" y2="0"/>
+        <line x1="16" y1="0" x2="12" y2="0"/>
+        <line x1="-11" y1="-11" x2="-8" y2="-8"/>
+        <line x1="11" y1="-11" x2="8" y2="-8"/>
+        <line x1="-11" y1="11" x2="-8" y2="8"/>
+        <line x1="11" y1="11" x2="8" y2="8"/>
+      </g>
+    </symbol>
+
+    <!-- Capa do Guardião Silvestre -->
+    <symbol id="ic-it-capa-guardiao-silvestre" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="42" fill="url(#rh-emerald)" opacity="0.18"/>
+      <!-- Leaves on chest -->
+      <path d="M 50 50 Q 48 56 52 60 L 56 56 Q 54 50 50 50 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 70 52 Q 72 58 68 62 L 64 58 Q 66 52 70 52 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+      <path d="M 60 64 Q 56 70 60 76 L 64 70 Q 62 64 60 64 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Peitoral da Fúria das Montanhas -->
+    <symbol id="ic-it-peitoral-furia-montanhas" viewBox="0 0 120 120">
+      <use href="#ic-it-base-breastplate"/>
+      <circle cx="60" cy="60" r="44" fill="url(#rh-glow-fire)" opacity="0.3"/>
+      <!-- Mountain peak emblem -->
+      <path d="M 44 64 L 56 44 L 60 50 L 64 44 L 76 64 Z" fill="url(#rh-stone)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Crimson rune accent -->
+      <path d="M 56 70 L 60 76 L 64 70" stroke="url(#rh-crimson)" stroke-width="0.7" fill="none"/>
+    </symbol>
+
+    <!-- Capuz do Lamento Sombrio -->
+    <symbol id="ic-it-capuz-lamento-sombrio" viewBox="0 0 120 120">
+      <use href="#ic-it-base-cloth-hood"/>
+      <!-- Dark overlay -->
+      <path d="M 28 80 Q 24 50 36 28 Q 50 8 62 14 Q 76 22 84 36 Q 96 56 92 80 L 86 90 L 34 90 Z"
+            fill="url(#rh-shadow-dark)" opacity="0.55"/>
+      <circle cx="60" cy="56" r="36" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <!-- Crimson rune -->
+      <path d="M 56 50 L 60 56 L 56 62 M 64 50 L 60 56 L 64 62" stroke="url(#rh-crimson)" stroke-width="0.6" fill="none" opacity="0.9"/>
+    </symbol>
+
+    <!-- Vestes do Canto Estelar -->
+    <symbol id="ic-it-vestes-canto-estelar" viewBox="0 0 120 120">
+      <use href="#ic-it-base-padded-armor"/>
+      <circle cx="60" cy="60" r="44" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <!-- Constellation stars -->
+      <circle cx="44" cy="44" r="1" fill="#fff" opacity="0.95"/>
+      <circle cx="76" cy="48" r="1" fill="#fff" opacity="0.95"/>
+      <circle cx="60" cy="56" r="1.4" fill="#fff" opacity="0.95"/>
+      <circle cx="48" cy="68" r="1" fill="#fff" opacity="0.95"/>
+      <circle cx="72" cy="72" r="1" fill="#fff" opacity="0.95"/>
+      <circle cx="60" cy="84" r="1" fill="#fff" opacity="0.95"/>
+      <line x1="44" y1="44" x2="60" y2="56" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="76" y1="48" x2="60" y2="56" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="60" y1="56" x2="48" y2="68" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="60" y1="56" x2="72" y2="72" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="48" y1="68" x2="60" y2="84" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+      <line x1="72" y1="72" x2="60" y2="84" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
+    </symbol>
     <symbol id="ic-it-clava"        viewBox="0 0 120 120"><use href="#ic-it-base-club"/></symbol>
     <symbol id="ic-it-adaga"        viewBox="0 0 120 120"><use href="#ic-it-base-dagger"/></symbol>
     <symbol id="ic-it-maca"         viewBox="0 0 120 120"><use href="#ic-it-base-mace"/></symbol>
@@ -2213,7 +3266,7 @@
   <input type="text" class="search-box" placeholder="🔍 Buscar item por nome..." id="search">
   <nav class="cat-nav">
     <a href="#cat-weapon" class="active">⚔️ Armas + Focos</a>
-    <span class="upcoming">🛡️ Armaduras (Batch 2)</span>
+    <a href="#cat-armor">🛡️ Armaduras + Escudos</a>
     <span class="upcoming">🧪 Consumíveis (Batch 3)</span>
     <span class="upcoming">💎 Gemas/Runas (Batch 4)</span>
     <span class="upcoming">💍 Acessórios (Batch 5)</span>
@@ -2401,6 +3454,121 @@
       <article class="item-card rarity-quest" data-name="reliquia da torre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-reliquia-torre"/></svg></div><div class="item-name">Relíquia da Torre</div><div class="item-meta">Quest · +1 atk · <span class="val">250</span></div></article>
       <article class="item-card rarity-quest" data-name="artefato do vale"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-artefato-vale"/></svg></div><div class="item-name">Artefato do Vale</div><div class="item-meta">Quest · +1 atk · <span class="val">250</span></div></article>
       <article class="item-card rarity-quest" data-name="fragmento de obsidiana"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fragmento-obsidiana"/></svg></div><div class="item-name">Fragmento de Obsidiana</div><div class="item-meta">Quest · +1 atk · <span class="val">150</span></div></article>
+    </div>
+
+  </section>
+
+  <!-- ═══════ CATEGORIA: ARMADURAS + ESCUDOS ═══════ -->
+  <section id="cat-armor">
+    <h2>🛡️ Armaduras + Escudos + Elmos <span style="color:#6a5a4a;font-size:14px">(Batch 2 — 47 itens)</span></h2>
+
+    <!-- Demo strip 54×54 -->
+    <div class="real-size-strip">
+      <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
+      <div class="row">
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-armadura-couro"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-malha"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-brunea"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-placa-completa"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-madeira"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-aco-1"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-couro"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-protetor-ancestral"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-couraca-protetor-ancestral"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-veste-arcanista"/></svg></div>
+      </div>
+    </div>
+
+    <!-- ── Light Armor ── -->
+    <h3>Armaduras Leves <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="armadura acolchoada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-armadura-acolchoada"/></svg></div><div class="item-name">Armadura Acolchoada</div><div class="item-meta">CA +1 leve · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="armadura de couro"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-armadura-couro"/></svg></div><div class="item-name">Armadura de Couro</div><div class="item-meta">CA +1 leve · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="couro batido"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-couro-batido"/></svg></div><div class="item-name">Couro Batido</div><div class="item-meta">CA +2 leve · <span class="val">45</span></div></article>
+    </div>
+
+    <!-- ── Medium Armor ── -->
+    <h3>Armaduras Médias <span class="count">(5)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="gibao de peles"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-gibao-peles"/></svg></div><div class="item-name">Gibão de Peles</div><div class="item-meta">CA +2 média · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="cota de malha"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-malha"/></svg></div><div class="item-name">Cota de Malha</div><div class="item-meta">CA +3/+6 · <span class="val">75</span></div></article>
+      <article class="item-card" data-name="cota de escamas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-escamas"/></svg></div><div class="item-name">Cota de Escamas</div><div class="item-meta">CA +4 média · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="brunea"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-brunea"/></svg></div><div class="item-name">Brunea</div><div class="item-meta">CA +4 média · <span class="val">400</span></div></article>
+      <article class="item-card" data-name="meia-placa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-meia-placa"/></svg></div><div class="item-name">Meia-Placa</div><div class="item-meta">CA +5 média · <span class="val">750</span></div></article>
+    </div>
+
+    <!-- ── Heavy Armor ── -->
+    <h3>Armaduras Pesadas <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="brunea de aneis"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-brunea-aneis"/></svg></div><div class="item-name">Brunea de Anéis</div><div class="item-meta">CA +4 pesada · <span class="val">30</span></div></article>
+      <article class="item-card" data-name="cota de talas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-talas"/></svg></div><div class="item-name">Cota de Talas</div><div class="item-meta">CA +7 pesada · <span class="val">200</span></div></article>
+      <article class="item-card rarity-rare" data-name="placa completa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-placa-completa"/></svg></div><div class="item-name">Placa Completa</div><div class="item-meta">CA +8 pesada · <span class="val">1500</span></div></article>
+    </div>
+
+    <!-- ── Magic Robes & Tunics ── -->
+    <h3>Vestes Mágicas <span class="count">(5)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="veste arcana"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-veste-arcana"/></svg></div><div class="item-name">Veste Arcana</div><div class="item-meta">CA +2 mágica · <span class="val">400</span></div></article>
+      <article class="item-card rarity-rare" data-name="manto da resistencia"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-manto-resistencia"/></svg></div><div class="item-name">Manto da Resistência</div><div class="item-meta">CA +2, +1 save · <span class="val">800</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="tunica de protecao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-tunica-protecao"/></svg></div><div class="item-name">Túnica de Proteção</div><div class="item-meta">CA +2 mágica · <span class="val">400</span></div></article>
+      <article class="item-card rarity-rare" data-name="veste do arcanista"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-veste-arcanista"/></svg></div><div class="item-name">Veste do Arcanista</div><div class="item-meta">CA +2, +5 MP · <span class="val">600</span></div></article>
+      <article class="item-card rarity-rare" data-name="veste do sacerdote"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-veste-sacerdote"/></svg></div><div class="item-name">Veste do Sacerdote</div><div class="item-meta">CA +2, +5 HP · <span class="val">500</span></div></article>
+    </div>
+
+    <!-- ── Enchanted +1/+2 Armor ── -->
+    <h3>Variantes +1 / +2 / Junk <span class="count">(4)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="cota de malha +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-malha-1"/></svg></div><div class="item-name">Cota de Malha +1</div><div class="item-meta">CA +1 mágica · <span class="val">600</span></div></article>
+      <article class="item-card rarity-rare" data-name="cota de malha +2"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-malha-2"/></svg></div><div class="item-name">Cota de Malha +2</div><div class="item-meta">CA +2 mágica · <span class="val">3000</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="armadura couro +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-armadura-couro-1"/></svg></div><div class="item-name">Armadura de Couro +1</div><div class="item-meta">CA +1 mágica · <span class="val">500</span></div></article>
+      <article class="item-card rarity-junk" data-name="cota de malha enferrujada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cota-malha-enferrujada"/></svg></div><div class="item-name">Cota de Malha Enferrujada</div><div class="item-meta">CA +2 (junk) · <span class="val">30</span></div></article>
+    </div>
+
+    <!-- ── Shields ── -->
+    <h3>Escudos <span class="count">(10)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="escudo de madeira"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-madeira"/></svg></div><div class="item-name">Escudo de Madeira</div><div class="item-meta">CA +2 escudo · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="escudo de aco"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-aco"/></svg></div><div class="item-name">Escudo de Aço</div><div class="item-meta">CA +2 escudo · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="escudo pequeno"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-pequeno"/></svg></div><div class="item-name">Escudo Pequeno</div><div class="item-meta">CA +1 escudo · <span class="val">150</span></div></article>
+      <article class="item-card" data-name="escudo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-generic"/></svg></div><div class="item-name">Escudo</div><div class="item-meta">CA +2 escudo · <span class="val">10</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="escudo +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-1"/></svg></div><div class="item-name">Escudo +1</div><div class="item-meta">CA +3 mágico · <span class="val">400</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="escudo de aco +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-aco-1"/></svg></div><div class="item-name">Escudo de Aço +1</div><div class="item-meta">CA +3 mágico · <span class="val">600</span></div></article>
+      <article class="item-card rarity-rare" data-name="escudo de aco +2"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-aco-2"/></svg></div><div class="item-name">Escudo de Aço +2</div><div class="item-meta">CA +4 mágico · <span class="val">2000</span></div></article>
+      <article class="item-card rarity-junk" data-name="escudo quebrado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-quebrado"/></svg></div><div class="item-name">Escudo Quebrado</div><div class="item-meta">CA +1 (junk) · <span class="val">8</span></div></article>
+      <article class="item-card rarity-quest" data-name="escudo da redencao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-redencao"/></svg></div><div class="item-name">Escudo da Redenção</div><div class="item-meta">Quest · CA +3 sagrado · <span class="val">300</span></div></article>
+      <article class="item-card" data-name="escudo de pedra"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-pedra"/></svg></div><div class="item-name">Escudo de Pedra</div><div class="item-meta">Korthag · CA +2 · <span class="val">40</span></div></article>
+    </div>
+
+    <!-- ── Helmets ── -->
+    <h3>Elmos <span class="count">(11)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="elmo de couro"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-couro"/></svg></div><div class="item-name">Elmo de Couro</div><div class="item-meta">CA +1 leve · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="capuz de tecido"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-capuz-tecido"/></svg></div><div class="item-name">Capuz de Tecido</div><div class="item-meta">cabeça · <span class="val">5</span></div></article>
+      <article class="item-card rarity-junk" data-name="elmo enferrujado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-enferrujado"/></svg></div><div class="item-name">Elmo Enferrujado</div><div class="item-meta">CA +2 (junk) · <span class="val">25</span></div></article>
+      <article class="item-card rarity-junk" data-name="bandana suja"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-bandana-suja"/></svg></div><div class="item-name">Bandana Suja</div><div class="item-meta">cabeça (junk) · <span class="val">5</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="elmo anao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-anao"/></svg></div><div class="item-name">Elmo Anão</div><div class="item-meta">CA +2 mágico · <span class="val">300</span></div></article>
+      <article class="item-card" data-name="elmo de ossos"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-ossos"/></svg></div><div class="item-name">Elmo de Ossos</div><div class="item-meta">CA +1 osso · <span class="val">15</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="tiara do conhecimento"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-tiara-conhecimento"/></svg></div><div class="item-name">Tiara do Conhecimento</div><div class="item-meta">CA +1 mágica · <span class="val">250</span></div></article>
+      <article class="item-card rarity-rare" data-name="circlet da explosao"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-circlet-explosao"/></svg></div><div class="item-name">Circlet da Explosão</div><div class="item-meta">+1 mágica · <span class="val">700</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="chapeu de disfarce"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-chapeu-disfarce"/></svg></div><div class="item-name">Chapéu de Disfarce</div><div class="item-meta">disguise · <span class="val">300</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="elmo da telepatia"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-telepatia"/></svg></div><div class="item-name">Elmo da Telepatia</div><div class="item-meta">+1 INT mágica · <span class="val">500</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="elmo de protecao +1"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-protecao-1"/></svg></div><div class="item-name">Elmo de Proteção +1</div><div class="item-meta">CA +2, +1 save · <span class="val">400</span></div></article>
+    </div>
+
+    <!-- ── Set Pieces (Armor + Helmets + Shields) ── -->
+    <h3>Peças de Set <span class="count">(11)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-epic" data-name="gibao do lobo selvagem"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-gibao-lobo-selvagem"/></svg></div><div class="item-name">Gibão do Lobo Selvagem</div><div class="item-meta">Lobo · CA +3 · <span class="val">500</span></div></article>
+      <article class="item-card rarity-epic" data-name="couraca do protetor ancestral"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-couraca-protetor-ancestral"/></svg></div><div class="item-name">Couraça do Protetor Ancestral</div><div class="item-meta">Protetor · CA +7 · <span class="val">700</span></div></article>
+      <article class="item-card rarity-epic" data-name="elmo do protetor ancestral"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-elmo-protetor-ancestral"/></svg></div><div class="item-name">Elmo do Protetor Ancestral</div><div class="item-meta">Protetor · CA +2 · <span class="val">400</span></div></article>
+      <article class="item-card rarity-epic" data-name="escudo do protetor ancestral"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-escudo-protetor-ancestral"/></svg></div><div class="item-name">Escudo do Protetor Ancestral</div><div class="item-meta">Protetor · CA +3 · <span class="val">600</span></div></article>
+      <article class="item-card rarity-epic" data-name="manto do arcanista"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-manto-arcanista"/></svg></div><div class="item-name">Manto do Arcanista</div><div class="item-meta">Arcanista · CA +2, +3 MP · <span class="val">700</span></div></article>
+      <article class="item-card rarity-epic" data-name="chapeu do arcanista"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-chapeu-arcanista"/></svg></div><div class="item-name">Chapéu do Arcanista</div><div class="item-meta">Arcanista · CA +1, +1 INT · <span class="val">500</span></div></article>
+      <article class="item-card rarity-epic" data-name="manto do devoto solar"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-manto-devoto-solar"/></svg></div><div class="item-name">Manto do Devoto Solar</div><div class="item-meta">Solar · CA +2, +3 HP · <span class="val">600</span></div></article>
+      <article class="item-card rarity-epic" data-name="capa do guardiao silvestre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-capa-guardiao-silvestre"/></svg></div><div class="item-name">Capa do Guardião Silvestre</div><div class="item-meta">Guardião · CA +1 · <span class="val">400</span></div></article>
+      <article class="item-card rarity-epic" data-name="peitoral da furia das montanhas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-peitoral-furia-montanhas"/></svg></div><div class="item-name">Peitoral da Fúria das Montanhas</div><div class="item-meta">Montanhas · CA +7 · <span class="val">700</span></div></article>
+      <article class="item-card rarity-epic" data-name="capuz do lamento sombrio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-capuz-lamento-sombrio"/></svg></div><div class="item-name">Capuz do Lamento Sombrio</div><div class="item-meta">Sombrio · CA +1 · <span class="val">400</span></div></article>
+      <article class="item-card rarity-epic" data-name="vestes do canto estelar"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-vestes-canto-estelar"/></svg></div><div class="item-name">Vestes do Canto Estelar</div><div class="item-meta">Estelar · CA +2, +2 MP · <span class="val">500</span></div></article>
     </div>
 
   </section>
