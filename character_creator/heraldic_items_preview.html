@@ -2081,6 +2081,370 @@
     </symbol>
 
     <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- BASE CONSUMABLE SYMBOLS — POTIONS / FOOD / THROW / HERBS (Batch 3)    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Potion bottle: round glass bottle with cork (liquid color overlaid by item variant) -->
+    <symbol id="ic-it-base-potion-bottle" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Cork stopper -->
+      <rect x="50" y="14" width="20" height="8" rx="1.5" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <line x1="50" y1="18" x2="70" y2="18" stroke="#1a0808" stroke-width="0.4" opacity="0.7"/>
+      <!-- Bottle neck -->
+      <rect x="52" y="20" width="16" height="18" fill="#3a4040" stroke="#1a1410" stroke-width="0.7" opacity="0.75"/>
+      <!-- Round bottle body -->
+      <path d="M 42 36 L 78 36 L 82 60 Q 82 88 70 100 L 50 100 Q 38 88 38 60 Z" fill="#3a4040" stroke="#1a1410" stroke-width="0.85" opacity="0.75"/>
+      <!-- Glass highlights -->
+      <path d="M 46 42 Q 44 70 50 96" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.5"/>
+      <path d="M 50 44 Q 49 60 51 76" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.4"/>
+    </symbol>
+
+    <!-- Potion vial: slim test-tube style -->
+    <symbol id="ic-it-base-potion-vial" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="14" ry="2.2" fill="#000" opacity="0.45"/>
+      <!-- Cork -->
+      <rect x="52" y="10" width="16" height="6" rx="1" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.5"/>
+      <!-- Vial body (long cylinder with rounded bottom) -->
+      <path d="M 50 16 L 70 16 L 70 96 Q 70 104 60 104 Q 50 104 50 96 Z"
+            fill="#3a4040" stroke="#1a1410" stroke-width="0.75" opacity="0.75"/>
+      <!-- Highlights -->
+      <path d="M 53 22 Q 52 70 54 96" fill="none" stroke="#fff" stroke-width="0.7" opacity="0.55"/>
+      <path d="M 57 20 L 56 92" stroke="#fff" stroke-width="0.4" opacity="0.35"/>
+    </symbol>
+
+    <!-- Thrown flask: round explosive flask with rope handle (Molotov style) -->
+    <symbol id="ic-it-base-thrown-flask" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Rope handle / fuse at top -->
+      <path d="M 52 16 Q 60 8 68 16" fill="none" stroke="url(#rh-leather)" stroke-width="2"/>
+      <!-- Cork/cloth stuffed in neck -->
+      <rect x="52" y="16" width="16" height="6" rx="1" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <!-- Bulbous round body -->
+      <circle cx="60" cy="62" r="32" fill="#3a4040" stroke="#1a1410" stroke-width="0.95" opacity="0.8"/>
+      <!-- Neck tapering to body -->
+      <path d="M 52 22 L 50 38 L 70 38 L 68 22 Z" fill="#3a4040" stroke="#1a1410" stroke-width="0.7" opacity="0.8"/>
+      <!-- Glass highlight -->
+      <path d="M 36 50 Q 32 62 36 76" fill="none" stroke="#fff" stroke-width="0.85" opacity="0.55"/>
+      <ellipse cx="46" cy="48" rx="6" ry="3" fill="#fff" opacity="0.3"/>
+    </symbol>
+
+    <!-- ────────────── FOOD ────────────── -->
+
+    <!-- Bread: oval loaf with crust marks -->
+    <symbol id="ic-it-base-bread" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="34" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Loaf body (oval) -->
+      <ellipse cx="60" cy="62" rx="38" ry="26" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.95"/>
+      <!-- Crust slash marks (3 diagonal cuts on top) -->
+      <path d="M 38 50 L 46 38" stroke="#3a1808" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M 56 44 L 64 32" stroke="#3a1808" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M 74 50 L 82 38" stroke="#3a1808" stroke-width="1.6" stroke-linecap="round"/>
+      <!-- Crust speckles -->
+      <circle cx="40" cy="62" r="1.2" fill="#3a1808" opacity="0.8"/>
+      <circle cx="50" cy="68" r="1" fill="#3a1808" opacity="0.7"/>
+      <circle cx="78" cy="64" r="1.2" fill="#3a1808" opacity="0.8"/>
+      <circle cx="68" cy="74" r="1" fill="#3a1808" opacity="0.7"/>
+      <circle cx="58" cy="78" r="1.1" fill="#3a1808" opacity="0.8"/>
+      <!-- Highlight -->
+      <ellipse cx="50" cy="50" rx="14" ry="6" fill="#fff" opacity="0.18"/>
+    </symbol>
+
+    <!-- Meat (cooked): chunk of meat on a bone (drumstick style) -->
+    <symbol id="ic-it-base-meat-cooked" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Bone (white, sticking out at angle) -->
+      <g transform="rotate(-20 60 80)">
+        <rect x="56" y="68" width="8" height="32" rx="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.7"/>
+        <ellipse cx="60" cy="68" rx="6" ry="3" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+        <ellipse cx="60" cy="100" rx="6" ry="3" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5"/>
+      </g>
+      <!-- Meat chunk (glazed brown, bulbous) -->
+      <ellipse cx="58" cy="46" rx="28" ry="22" fill="url(#rh-rust)" stroke="#5a1810" stroke-width="0.95"/>
+      <!-- Sear marks -->
+      <path d="M 38 38 L 50 32 M 60 30 L 72 36 M 80 50 L 70 56 M 42 56 L 52 50" stroke="#1a0808" stroke-width="0.7" opacity="0.7"/>
+      <!-- Glaze highlight -->
+      <ellipse cx="48" cy="36" rx="10" ry="4" fill="#fff" opacity="0.35"/>
+      <!-- Steam wisps -->
+      <path d="M 46 22 Q 44 18 48 16 M 60 18 Q 58 14 62 12 M 72 22 Q 70 18 74 16" fill="none" stroke="#a09484" stroke-width="0.7" opacity="0.55"/>
+    </symbol>
+
+    <!-- Meal bowl: bowl with food + steam -->
+    <symbol id="ic-it-base-meal-bowl" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="36" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Bowl outer rim (top edge) -->
+      <ellipse cx="60" cy="62" rx="40" ry="6" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.8"/>
+      <!-- Bowl body (half-ellipse below rim) -->
+      <path d="M 20 62 Q 20 96 60 100 Q 100 96 100 62 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Inner rim (darker, depth) -->
+      <ellipse cx="60" cy="62" rx="36" ry="4" fill="#1a0808" opacity="0.7"/>
+      <!-- Stew/food inside (top visible) -->
+      <ellipse cx="60" cy="62" rx="32" ry="3.5" fill="url(#rh-rust)" stroke="#5a1810" stroke-width="0.5"/>
+      <!-- Chunks visible in the food -->
+      <circle cx="48" cy="62" r="2" fill="#5a3010" opacity="0.85"/>
+      <circle cx="68" cy="61" r="1.6" fill="#5a3010" opacity="0.8"/>
+      <circle cx="58" cy="63" r="1.4" fill="#5a3010" opacity="0.8"/>
+      <!-- Steam wisps -->
+      <path d="M 44 50 Q 42 42 46 38" fill="none" stroke="#a09484" stroke-width="0.85" opacity="0.55"/>
+      <path d="M 60 46 Q 58 36 62 30" fill="none" stroke="#a09484" stroke-width="0.85" opacity="0.55"/>
+      <path d="M 76 50 Q 74 42 78 38" fill="none" stroke="#a09484" stroke-width="0.85" opacity="0.55"/>
+      <!-- Bowl highlight -->
+      <path d="M 26 70 Q 24 84 32 92" fill="none" stroke="#5a3a20" stroke-width="0.7" opacity="0.6"/>
+    </symbol>
+
+    <!-- Mushroom: cap + stem -->
+    <symbol id="ic-it-base-mushroom" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="18" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Cap (rounded dome) -->
+      <path d="M 22 56 Q 22 22 60 18 Q 98 22 98 56 L 88 60 L 32 60 Z" fill="url(#rh-rust)" stroke="#5a1810" stroke-width="0.95"/>
+      <!-- Cap spots -->
+      <circle cx="44" cy="38" r="3.5" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="60" cy="32" r="4" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="76" cy="40" r="3" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.4"/>
+      <circle cx="50" cy="50" r="2" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.3"/>
+      <circle cx="70" cy="52" r="2.5" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.3"/>
+      <!-- Cap underside (gills hint) -->
+      <ellipse cx="60" cy="60" rx="38" ry="3" fill="#1a0808" opacity="0.65"/>
+      <!-- Stem -->
+      <path d="M 48 60 Q 46 90 50 100 L 70 100 Q 74 90 72 60 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.85"/>
+      <!-- Stem highlight -->
+      <path d="M 52 64 Q 50 86 54 98" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.5"/>
+    </symbol>
+
+    <!-- Mug / Tankard: drinking vessel with handle -->
+    <symbol id="ic-it-base-mug" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Mug body (cylindrical with slight tapering) -->
+      <path d="M 36 30 L 32 100 L 78 100 L 74 30 Z" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Top rim -->
+      <ellipse cx="55" cy="30" rx="20" ry="4" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.85"/>
+      <!-- Beer/drink inside (top visible) -->
+      <ellipse cx="55" cy="30" rx="16" ry="3" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Foam on top (small bubbles) -->
+      <ellipse cx="48" cy="28" rx="3" ry="1.5" fill="#fff" opacity="0.85"/>
+      <ellipse cx="58" cy="27" rx="2.5" ry="1.2" fill="#fff" opacity="0.85"/>
+      <ellipse cx="64" cy="29" rx="2" ry="1" fill="#fff" opacity="0.75"/>
+      <!-- Iron bands (mug reinforcement) -->
+      <rect x="32" y="50" width="46" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <rect x="32" y="80" width="46" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Handle (loop on right side) -->
+      <path d="M 78 40 Q 96 50 96 70 Q 96 90 78 86" fill="none" stroke="url(#rh-wood-dark)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 78 40 Q 96 50 96 70 Q 96 90 78 86" fill="none" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Wood grain -->
+      <line x1="40" y1="60" x2="42" y2="92" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <line x1="56" y1="62" x2="58" y2="94" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+      <line x1="68" y1="60" x2="70" y2="92" stroke="#3a2410" stroke-width="0.5" opacity="0.55"/>
+    </symbol>
+
+    <!-- ────────────── HERBS / PLANTS ────────────── -->
+
+    <!-- Herb leaf: single sprig with leaves -->
+    <symbol id="ic-it-base-herb-leaf" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Stem (vertical) -->
+      <path d="M 60 14 Q 58 50 60 100" fill="none" stroke="url(#rh-emerald)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Leaves (alternating left/right pairs) -->
+      <path d="M 60 24 Q 38 26 30 18 Q 36 28 60 30 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 26 Q 82 28 90 20 Q 84 30 60 32 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 44 Q 38 46 26 38 Q 32 50 60 50 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 46 Q 82 48 94 40 Q 88 52 60 52 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 64 Q 40 68 30 60 Q 36 72 60 72 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 66 Q 80 70 90 62 Q 84 74 60 74 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 84 Q 44 88 36 84 Q 42 92 60 90 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <path d="M 60 86 Q 76 90 84 86 Q 78 94 60 92 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.7"/>
+      <!-- Vein lines on leaves -->
+      <path d="M 36 24 L 56 28 M 84 26 L 60 30 M 32 44 L 56 48 M 88 46 L 62 50" stroke="#1a4a1a" stroke-width="0.3" opacity="0.7"/>
+      <!-- Top sprig -->
+      <path d="M 60 14 L 56 8 M 60 14 L 64 8 M 60 14 L 60 4" stroke="url(#rh-emerald)" stroke-width="0.85"/>
+    </symbol>
+
+    <!-- Herb bunch: bundle of dried herbs tied with twine -->
+    <symbol id="ic-it-base-herb-bunch" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Bunch of leaves at top (cluster of green leaves) -->
+      <g fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.6">
+        <path d="M 38 18 Q 26 30 32 50 L 44 40 Q 40 24 42 16 Z"/>
+        <path d="M 60 12 Q 50 24 54 50 L 64 40 Q 60 22 62 12 Z"/>
+        <path d="M 82 18 Q 92 30 86 50 L 76 40 Q 80 24 78 16 Z"/>
+        <path d="M 50 16 Q 40 30 46 48 L 54 38 Q 50 22 52 14 Z"/>
+        <path d="M 70 14 Q 78 28 74 50 L 64 40 Q 68 22 68 14 Z"/>
+      </g>
+      <!-- Vein lines -->
+      <path d="M 36 28 L 36 46 M 56 22 L 56 46 M 80 28 L 80 46 M 50 22 L 50 44 M 70 24 L 70 46" stroke="#1a4a1a" stroke-width="0.4" opacity="0.7"/>
+      <!-- Tied stems (dark bundle in middle) -->
+      <rect x="50" y="48" width="20" height="36" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Twine wrapping (3 horizontal lines) -->
+      <line x1="48" y1="56" x2="72" y2="56" stroke="url(#rh-bronze)" stroke-width="1.4"/>
+      <line x1="48" y1="66" x2="72" y2="66" stroke="url(#rh-bronze)" stroke-width="1.4"/>
+      <line x1="48" y1="76" x2="72" y2="76" stroke="url(#rh-bronze)" stroke-width="1.4"/>
+      <!-- Stem ends visible at bottom (thin lines) -->
+      <line x1="52" y1="84" x2="51" y2="98" stroke="url(#rh-wood-dark)" stroke-width="1"/>
+      <line x1="56" y1="84" x2="55" y2="98" stroke="url(#rh-wood-dark)" stroke-width="1"/>
+      <line x1="60" y1="84" x2="60" y2="100" stroke="url(#rh-wood-dark)" stroke-width="1"/>
+      <line x1="64" y1="84" x2="65" y2="98" stroke="url(#rh-wood-dark)" stroke-width="1"/>
+      <line x1="68" y1="84" x2="69" y2="98" stroke="url(#rh-wood-dark)" stroke-width="1"/>
+    </symbol>
+
+    <!-- Honey jar: ceramic jar with sticky honey -->
+    <symbol id="ic-it-base-honey-jar" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="26" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Cloth cover on top -->
+      <path d="M 38 26 L 82 26 L 84 36 L 36 36 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.7"/>
+      <!-- Twine tying cloth -->
+      <line x1="36" y1="32" x2="84" y2="32" stroke="url(#rh-wood-dark)" stroke-width="0.85"/>
+      <!-- Jar body (rounded ceramic) -->
+      <path d="M 32 36 L 88 36 L 86 60 Q 84 96 60 100 Q 36 96 34 60 Z" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.95"/>
+      <!-- Honey label area (lighter band) -->
+      <rect x="36" y="60" width="48" height="20" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.5" opacity="0.85"/>
+      <!-- Honey drip (dark amber drop on side) -->
+      <path d="M 84 50 Q 88 56 84 62 Q 82 56 84 50 Z" fill="#c4953a" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Bee/honey symbol on label -->
+      <ellipse cx="60" cy="70" rx="6" ry="3" fill="#c4953a" stroke="#5a3010" stroke-width="0.4"/>
+      <line x1="56" y1="68" x2="56" y2="72" stroke="#1a0808" stroke-width="0.4"/>
+      <line x1="60" y1="68" x2="60" y2="72" stroke="#1a0808" stroke-width="0.4"/>
+      <line x1="64" y1="68" x2="64" y2="72" stroke="#1a0808" stroke-width="0.4"/>
+      <!-- Highlight on jar -->
+      <path d="M 36 42 Q 32 70 38 96" fill="none" stroke="#fff" stroke-width="0.7" opacity="0.4"/>
+    </symbol>
+
+    <!-- ────────────── TOOLS / OTHERS ────────────── -->
+
+    <!-- Bandage: rolled cloth bandage -->
+    <symbol id="ic-it-base-bandage" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Outer roll (cylinder seen from end) -->
+      <ellipse cx="60" cy="60" rx="38" ry="32" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.95"/>
+      <!-- Inner ring (hollow center / depth) -->
+      <ellipse cx="60" cy="60" rx="14" ry="12" fill="#5a4838" opacity="0.7"/>
+      <ellipse cx="60" cy="60" rx="10" ry="8" fill="#3a2820"/>
+      <!-- Cloth wrap lines (showing layers) -->
+      <ellipse cx="60" cy="60" rx="30" ry="24" fill="none" stroke="#5a4838" stroke-width="0.6" opacity="0.7"/>
+      <ellipse cx="60" cy="60" rx="22" ry="18" fill="none" stroke="#5a4838" stroke-width="0.6" opacity="0.7"/>
+      <!-- Loose end of bandage hanging -->
+      <path d="M 96 60 L 110 78 L 100 84 L 90 70 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.7"/>
+      <!-- Stains (slight blood spots) -->
+      <circle cx="40" cy="50" r="1.4" fill="#5a1810" opacity="0.5"/>
+      <circle cx="70" cy="78" r="1.2" fill="#5a1810" opacity="0.5"/>
+    </symbol>
+
+    <!-- Scroll (rolled): rolled parchment with red ribbon -->
+    <symbol id="ic-it-base-scroll" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="36" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Scroll body (horizontal cylinder) -->
+      <rect x="14" y="40" width="92" height="40" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.95"/>
+      <!-- Spiral ends (rolled-up scroll edges) -->
+      <ellipse cx="14" cy="60" rx="8" ry="22" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.95"/>
+      <ellipse cx="106" cy="60" rx="8" ry="22" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.95"/>
+      <!-- Inner spiral lines on rolled ends -->
+      <ellipse cx="14" cy="60" rx="4" ry="20" fill="none" stroke="#5a4838" stroke-width="0.5"/>
+      <ellipse cx="106" cy="60" rx="4" ry="20" fill="none" stroke="#5a4838" stroke-width="0.5"/>
+      <!-- Text lines on the scroll body -->
+      <line x1="22" y1="50" x2="98" y2="50" stroke="#3a2410" stroke-width="0.6" opacity="0.7"/>
+      <line x1="22" y1="56" x2="92" y2="56" stroke="#3a2410" stroke-width="0.55" opacity="0.7"/>
+      <line x1="22" y1="62" x2="98" y2="62" stroke="#3a2410" stroke-width="0.55" opacity="0.7"/>
+      <line x1="22" y1="68" x2="88" y2="68" stroke="#3a2410" stroke-width="0.55" opacity="0.7"/>
+      <line x1="22" y1="74" x2="98" y2="74" stroke="#3a2410" stroke-width="0.55" opacity="0.7"/>
+      <!-- Red ribbon tie around scroll (vertical) -->
+      <rect x="56" y="38" width="8" height="44" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.5"/>
+      <!-- Ribbon ends hanging -->
+      <path d="M 56 82 L 52 92 L 60 88 Z" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.4"/>
+      <path d="M 64 82 L 68 92 L 60 88 Z" fill="url(#rh-crimson)" stroke="#5a2018" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Bag of rations: small leather bag tied at top -->
+    <symbol id="ic-it-base-bag-rations" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="30" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Bag body (rounded sack) -->
+      <path d="M 26 38 L 94 38 Q 100 70 90 96 L 30 96 Q 20 70 26 38 Z"
+            fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.95"/>
+      <!-- Tied top (cinch with twine) -->
+      <path d="M 30 36 L 50 22 L 70 22 L 90 36 Z" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.7"/>
+      <!-- Twine cinch (horizontal rope) -->
+      <ellipse cx="60" cy="36" rx="22" ry="3" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.5"/>
+      <!-- Twine ends sticking up -->
+      <path d="M 50 22 L 46 10 L 50 18" stroke="url(#rh-bronze)" stroke-width="0.85" fill="none"/>
+      <path d="M 70 22 L 74 10 L 70 18" stroke="url(#rh-bronze)" stroke-width="0.85" fill="none"/>
+      <!-- Bulges showing food contents (small lumps) -->
+      <ellipse cx="42" cy="60" rx="6" ry="4" fill="#3a1808" opacity="0.4"/>
+      <ellipse cx="78" cy="64" rx="5" ry="4" fill="#3a1808" opacity="0.4"/>
+      <ellipse cx="60" cy="78" rx="8" ry="5" fill="#3a1808" opacity="0.45"/>
+      <!-- Stitching seams -->
+      <path d="M 32 50 L 32 88 M 88 50 L 88 88" stroke="#3a1808" stroke-width="0.4" opacity="0.7"/>
+      <!-- Leather highlight -->
+      <path d="M 32 46 Q 28 70 34 92" fill="none" stroke="#a87a4a" stroke-width="0.7" opacity="0.45"/>
+    </symbol>
+
+    <!-- Poison bottle: dark bottle with skull motif and dripping liquid -->
+    <symbol id="ic-it-base-poison-bottle" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Cork -->
+      <rect x="50" y="14" width="20" height="8" rx="1.5" fill="url(#rh-wood-dark)" stroke="#1a0808" stroke-width="0.6"/>
+      <!-- Bottle neck -->
+      <rect x="52" y="20" width="16" height="14" fill="url(#rh-shadow-dark)" stroke="#1a1410" stroke-width="0.7"/>
+      <!-- Dark bottle body -->
+      <path d="M 38 32 L 82 32 L 86 60 Q 86 90 70 100 L 50 100 Q 34 90 34 60 Z"
+            fill="url(#rh-shadow-dark)" stroke="#1a1410" stroke-width="0.95"/>
+      <!-- Skull label on bottle -->
+      <ellipse cx="60" cy="64" rx="10" ry="11" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.6"/>
+      <!-- Skull eyes -->
+      <ellipse cx="55" cy="62" rx="2" ry="2.5" fill="#1a0808"/>
+      <ellipse cx="65" cy="62" rx="2" ry="2.5" fill="#1a0808"/>
+      <!-- Skull nose -->
+      <path d="M 58 67 L 60 71 L 62 67 Z" fill="#1a0808"/>
+      <!-- Skull teeth -->
+      <path d="M 54 73 L 56 75 L 58 73 L 60 75 L 62 73 L 64 75 L 66 73" stroke="#1a0808" stroke-width="0.5" fill="none"/>
+      <!-- Liquid dripping -->
+      <path d="M 84 38 Q 88 44 84 50 Q 82 44 84 38 Z" fill="url(#rh-poison)" stroke="#1a3a08" stroke-width="0.5"/>
+      <!-- Glass highlight -->
+      <path d="M 42 38 Q 40 70 46 96" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.35"/>
+    </symbol>
+
+    <!-- Caltrop: 4-pointed iron spike (top-down view) -->
+    <symbol id="ic-it-base-caltrop" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- 4 spikes radiating from center (looks like a star or jacks) -->
+      <g fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85">
+        <!-- North spike -->
+        <path d="M 60 14 L 54 56 L 66 56 Z"/>
+        <!-- South spike -->
+        <path d="M 60 100 L 54 58 L 66 58 Z"/>
+        <!-- West spike -->
+        <path d="M 14 60 L 56 54 L 56 66 Z"/>
+        <!-- East spike -->
+        <path d="M 106 60 L 64 54 L 64 66 Z"/>
+      </g>
+      <!-- Center hub -->
+      <circle cx="60" cy="60" r="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.85"/>
+      <circle cx="58" cy="58" r="1.5" fill="#fff" opacity="0.5"/>
+      <!-- Tip highlights -->
+      <path d="M 60 14 L 60 30" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+      <path d="M 60 100 L 60 84" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+      <path d="M 14 60 L 30 60" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+      <path d="M 106 60 L 90 60" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
+    </symbol>
+
+    <!-- Smoke bomb: round black bomb with lit fuse -->
+    <symbol id="ic-it-base-smoke-bomb" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Bomb body (round black sphere) -->
+      <circle cx="60" cy="68" r="32" fill="url(#rh-shadow-dark)" stroke="#0a0605" stroke-width="0.95"/>
+      <!-- Highlight (sphere shading) -->
+      <ellipse cx="48" cy="56" rx="10" ry="6" fill="#fff" opacity="0.18"/>
+      <!-- Fuse cap (small cylinder on top) -->
+      <rect x="54" y="32" width="12" height="6" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- Fuse (curving wick) -->
+      <path d="M 60 32 Q 50 24 46 14 Q 44 6 50 4" fill="none" stroke="url(#rh-leather)" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Fuse spark (lit end) -->
+      <circle cx="50" cy="4" r="3" fill="url(#rh-flame)" stroke="#7a3018" stroke-width="0.4"/>
+      <circle cx="50" cy="4" r="1.4" fill="#fff" opacity="0.85"/>
+      <!-- Smoke wisps from spark -->
+      <path d="M 48 0 Q 44 -4 46 -8" fill="none" stroke="#a09484" stroke-width="0.6" opacity="0.55"/>
+      <!-- Bomb texture (subtle grit) -->
+      <circle cx="50" cy="76" r="0.7" fill="#0a0605" opacity="0.7"/>
+      <circle cx="70" cy="80" r="0.6" fill="#0a0605" opacity="0.7"/>
+      <circle cx="58" cy="88" r="0.8" fill="#0a0605" opacity="0.7"/>
+    </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
     <!-- SPECIFIC ITEM SYMBOLS — items_srd.py ARMOR_LIGHT / MEDIUM / HEAVY     -->
     <!-- ════════════════════════════════════════════════════════════════════ -->
 
@@ -2567,6 +2931,400 @@
       <line x1="48" y1="68" x2="60" y2="84" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
       <line x1="72" y1="72" x2="60" y2="84" stroke="#fff" stroke-width="0.3" opacity="0.5"/>
     </symbol>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC ITEM SYMBOLS — CONSUMABLES (Batch 3)                         -->
+    <!-- Potions overlay colored liquid INSIDE the bottle base                 -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Helper: liquid path that fits INSIDE the potion-bottle base -->
+    <!-- Liquid path: M 42 56 L 78 56 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z -->
+
+    <!-- Poção de Cura (red liquid) -->
+    <symbol id="ic-it-pocao-cura" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 56 L 78 56 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-crimson)" opacity="0.85"/>
+      <ellipse cx="60" cy="56" rx="18" ry="2" fill="url(#rh-crimson)" opacity="0.95"/>
+    </symbol>
+
+    <!-- Poção de Cura Maior (more vivid red + +1 sparks) -->
+    <symbol id="ic-it-pocao-cura-maior" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 50 L 78 50 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-crimson)" opacity="0.9"/>
+      <ellipse cx="60" cy="50" rx="18" ry="2" fill="#fff" opacity="0.5"/>
+      <circle cx="60" cy="68" r="32" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+      <path d="M 28 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Poção de Cura Superior (deep red + bright glow + 2 sparks) -->
+    <symbol id="ic-it-pocao-cura-superior" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 44 L 78 44 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-crimson)" opacity="0.95"/>
+      <ellipse cx="60" cy="44" rx="18" ry="2" fill="#fff" opacity="0.6"/>
+      <circle cx="60" cy="64" r="38" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <path d="M 24 26 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 92 30 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.9"/>
+    </symbol>
+
+    <!-- Poção de Cura Suprema (vibrant red + shimmer + 3 sparks) -->
+    <symbol id="ic-it-pocao-cura-suprema" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 40 L 78 40 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-crimson)" opacity="1"/>
+      <ellipse cx="60" cy="40" rx="18" ry="2.5" fill="#fff" opacity="0.7"/>
+      <!-- Inner radiance bubbles -->
+      <circle cx="50" cy="60" r="2" fill="#fff" opacity="0.7"/>
+      <circle cx="68" cy="76" r="1.5" fill="#fff" opacity="0.6"/>
+      <circle cx="60" cy="86" r="1.2" fill="#fff" opacity="0.6"/>
+      <circle cx="60" cy="64" r="42" fill="url(#rh-glow-thunder)" opacity="0.45"/>
+      <circle cx="60" cy="64" r="36" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <path d="M 22 22 l 1.5 -2.5 l 1.5 2.5 l 2.5 1.5 l -2.5 1.5 l -1.5 2.5 l -1.5 -2.5 l -2.5 -1.5 z" fill="#fff" opacity="0.95"/>
+      <path d="M 92 26 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.95"/>
+      <path d="M 24 90 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Poção de Heroísmo (golden warm liquid + glow) -->
+    <symbol id="ic-it-pocao-heroismo" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 50 L 78 50 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-bronze)" opacity="0.9"/>
+      <ellipse cx="60" cy="50" rx="18" ry="2" fill="#fff" opacity="0.55"/>
+      <circle cx="60" cy="64" r="36" fill="url(#rh-glow-thunder)" opacity="0.4"/>
+      <!-- Heroic star -->
+      <path d="M 60 64 l 2 -4 l 4 0 l -3.2 2.4 l 1.2 4 l -4 -2.4 l -4 2.4 l 1.2 -4 l -3.2 -2.4 l 4 0 z" fill="#fff" opacity="0.7"/>
+    </symbol>
+
+    <!-- Poção de Resist. Fogo (red-orange flame liquid) -->
+    <symbol id="ic-it-pocao-resist-fogo" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 50 L 78 50 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-flame)" opacity="0.85"/>
+      <ellipse cx="60" cy="50" rx="18" ry="2" fill="#fff" opacity="0.5"/>
+      <circle cx="60" cy="64" r="34" fill="url(#rh-glow-fire)" opacity="0.4"/>
+      <!-- Flame shape inside -->
+      <path d="M 56 70 Q 52 80 60 88 Q 68 80 64 70 Q 60 76 56 70 Z" fill="url(#rh-flame)" opacity="0.95"/>
+    </symbol>
+
+    <!-- Poção de Resist. Frio (icy blue liquid) -->
+    <symbol id="ic-it-pocao-resist-frio" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 50 L 78 50 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="url(#rh-ice)" opacity="0.85"/>
+      <ellipse cx="60" cy="50" rx="18" ry="2" fill="#fff" opacity="0.6"/>
+      <circle cx="60" cy="64" r="34" fill="url(#rh-glow-ice)" opacity="0.4"/>
+      <!-- Snowflake inside -->
+      <path d="M 60 70 L 60 86 M 52 78 L 68 78 M 54 72 L 66 84 M 66 72 L 54 84" stroke="#e8f8ff" stroke-width="0.85" opacity="0.85"/>
+    </symbol>
+
+    <!-- Poção de Velocidade (yellow lightning liquid) -->
+    <symbol id="ic-it-pocao-velocidade" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <path d="M 42 50 L 78 50 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="#c8a020" opacity="0.85"/>
+      <ellipse cx="60" cy="50" rx="18" ry="2" fill="#fff8a0" opacity="0.7"/>
+      <circle cx="60" cy="64" r="36" fill="url(#rh-glow-thunder)" opacity="0.45"/>
+      <!-- Lightning bolt inside -->
+      <path d="M 58 60 L 54 72 L 60 72 L 56 88 L 64 76 L 58 76 L 62 64 Z" fill="#fff8a0" stroke="#7a5a00" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Poção de Invisibilidade (transparent shimmer) -->
+    <symbol id="ic-it-pocao-invisibilidade" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-bottle"/>
+      <!-- Almost-transparent shimmer (very low opacity) -->
+      <path d="M 42 56 L 78 56 L 80 60 Q 80 86 70 96 L 50 96 Q 40 86 40 60 Z" fill="#a0c8e8" opacity="0.25"/>
+      <ellipse cx="60" cy="56" rx="18" ry="2" fill="#fff" opacity="0.4"/>
+      <circle cx="60" cy="64" r="32" fill="url(#rh-glow-arcane)" opacity="0.3"/>
+      <!-- Sparkle dots showing transparency -->
+      <circle cx="50" cy="68" r="0.8" fill="#fff" opacity="0.7"/>
+      <circle cx="70" cy="72" r="0.7" fill="#fff" opacity="0.6"/>
+      <circle cx="60" cy="80" r="0.9" fill="#fff" opacity="0.7"/>
+      <circle cx="55" cy="86" r="0.6" fill="#fff" opacity="0.55"/>
+      <circle cx="65" cy="90" r="0.7" fill="#fff" opacity="0.6"/>
+    </symbol>
+
+    <!-- Antídoto (vial with green liquid) -->
+    <symbol id="ic-it-antidoto" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-vial"/>
+      <!-- Green liquid in vial -->
+      <path d="M 51 30 L 69 30 L 69 96 Q 69 102 60 102 Q 51 102 51 96 Z" fill="url(#rh-emerald)" opacity="0.85"/>
+      <ellipse cx="60" cy="30" rx="9" ry="1.5" fill="#fff" opacity="0.55"/>
+      <circle cx="58" cy="60" r="0.8" fill="#fff" opacity="0.6"/>
+      <circle cx="62" cy="80" r="0.7" fill="#fff" opacity="0.55"/>
+    </symbol>
+
+    <!-- Fogo Alquímico (orange flame in thrown flask) -->
+    <symbol id="ic-it-fogo-alquimico" viewBox="0 0 120 120">
+      <use href="#ic-it-base-thrown-flask"/>
+      <!-- Orange/red liquid inside -->
+      <circle cx="60" cy="62" r="28" fill="url(#rh-flame)" opacity="0.85"/>
+      <!-- Flame swirl pattern -->
+      <path d="M 50 56 Q 60 50 70 56 Q 64 64 60 70 Q 56 64 50 56 Z" fill="#ffb060" opacity="0.85"/>
+      <circle cx="60" cy="62" r="30" fill="url(#rh-glow-fire)" opacity="0.35"/>
+    </symbol>
+
+    <!-- Frasco de Ácido (green sloshing liquid) -->
+    <symbol id="ic-it-frasco-acido" viewBox="0 0 120 120">
+      <use href="#ic-it-base-thrown-flask"/>
+      <circle cx="60" cy="62" r="28" fill="url(#rh-poison)" opacity="0.85"/>
+      <!-- Bubbles -->
+      <circle cx="48" cy="58" r="2" fill="#fff" opacity="0.7"/>
+      <circle cx="68" cy="68" r="1.5" fill="#fff" opacity="0.6"/>
+      <circle cx="58" cy="76" r="1.2" fill="#fff" opacity="0.55"/>
+      <circle cx="60" cy="62" r="30" fill="url(#rh-poison)" opacity="0.25"/>
+    </symbol>
+
+    <!-- Água Benta (pure white-blue glow) -->
+    <symbol id="ic-it-agua-benta" viewBox="0 0 120 120">
+      <use href="#ic-it-base-thrown-flask"/>
+      <circle cx="60" cy="62" r="28" fill="#e8f0ff" opacity="0.85"/>
+      <circle cx="60" cy="62" r="34" fill="url(#rh-glow-thunder)" opacity="0.5"/>
+      <!-- Cross inside -->
+      <rect x="58" y="48" width="4" height="28" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+      <rect x="50" y="58" width="20" height="4" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.4"/>
+    </symbol>
+
+    <!-- Bomba de Fumaça -->
+    <symbol id="ic-it-bomba-fumaca" viewBox="0 0 120 120"><use href="#ic-it-base-smoke-bomb"/></symbol>
+
+    <!-- Pó Cegante (white powder thrown flask) -->
+    <symbol id="ic-it-po-cegante" viewBox="0 0 120 120">
+      <use href="#ic-it-base-thrown-flask"/>
+      <circle cx="60" cy="62" r="28" fill="#f0f4f8" opacity="0.85"/>
+      <!-- Powder dots -->
+      <g fill="#fff" opacity="0.75">
+        <circle cx="46" cy="56" r="0.8"/>
+        <circle cx="54" cy="50" r="0.7"/>
+        <circle cx="62" cy="54" r="0.9"/>
+        <circle cx="70" cy="58" r="0.7"/>
+        <circle cx="48" cy="68" r="0.8"/>
+        <circle cx="56" cy="72" r="0.7"/>
+        <circle cx="64" cy="76" r="0.8"/>
+        <circle cx="72" cy="70" r="0.7"/>
+        <circle cx="58" cy="82" r="0.9"/>
+      </g>
+      <circle cx="60" cy="62" r="34" fill="#fff" opacity="0.2"/>
+    </symbol>
+
+    <!-- Estrepes -->
+    <symbol id="ic-it-estrepes" viewBox="0 0 120 120">
+      <use href="#ic-it-base-caltrop"/>
+    </symbol>
+
+    <!-- Esferas de Aço (cluster of metal balls) -->
+    <symbol id="ic-it-esferas-aco" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="32" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Cluster of round iron balls -->
+      <g stroke="#1a1410" stroke-width="0.85">
+        <circle cx="40" cy="80" r="14" fill="url(#rh-iron)"/>
+        <circle cx="64" cy="80" r="14" fill="url(#rh-iron)"/>
+        <circle cx="86" cy="76" r="12" fill="url(#rh-iron)"/>
+        <circle cx="52" cy="58" r="12" fill="url(#rh-iron)"/>
+        <circle cx="74" cy="56" r="14" fill="url(#rh-iron)"/>
+        <circle cx="60" cy="38" r="10" fill="url(#rh-iron)"/>
+      </g>
+      <!-- Highlights on each ball -->
+      <circle cx="36" cy="74" r="3" fill="#fff" opacity="0.4"/>
+      <circle cx="60" cy="74" r="3" fill="#fff" opacity="0.4"/>
+      <circle cx="48" cy="52" r="2.5" fill="#fff" opacity="0.4"/>
+      <circle cx="70" cy="50" r="3" fill="#fff" opacity="0.4"/>
+      <circle cx="56" cy="34" r="2" fill="#fff" opacity="0.4"/>
+      <circle cx="82" cy="70" r="2.5" fill="#fff" opacity="0.4"/>
+    </symbol>
+
+    <!-- Veneno Básico (poison bottle) -->
+    <symbol id="ic-it-veneno-basico" viewBox="0 0 120 120"><use href="#ic-it-base-poison-bottle"/></symbol>
+
+    <!-- Veneno Refinado (poison bottle + brighter glow) -->
+    <symbol id="ic-it-veneno-refinado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-poison-bottle"/>
+      <circle cx="60" cy="68" r="42" fill="url(#rh-poison)" opacity="0.3"/>
+      <circle cx="60" cy="68" r="32" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+    </symbol>
+
+    <!-- Frasco de Veneno (vial with green liquid + skull) -->
+    <symbol id="ic-it-frasco-veneno" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-vial"/>
+      <path d="M 51 30 L 69 30 L 69 96 Q 69 102 60 102 Q 51 102 51 96 Z" fill="url(#rh-poison)" opacity="0.85"/>
+      <ellipse cx="60" cy="30" rx="9" ry="1.5" fill="#fff" opacity="0.5"/>
+      <!-- Tiny skull -->
+      <circle cx="60" cy="62" r="4" fill="url(#rh-bone)"/>
+      <circle cx="58" cy="61" r="0.9" fill="#1a0808"/>
+      <circle cx="62" cy="61" r="0.9" fill="#1a0808"/>
+    </symbol>
+
+    <!-- ────────────── FOOD ────────────── -->
+
+    <!-- Rações de Viagem -->
+    <symbol id="ic-it-racoes-viagem" viewBox="0 0 120 120"><use href="#ic-it-base-bag-rations"/></symbol>
+
+    <!-- Pão Fresco -->
+    <symbol id="ic-it-pao-fresco" viewBox="0 0 120 120"><use href="#ic-it-base-bread"/></symbol>
+
+    <!-- Carne Seca (jerky strips - smaller meat without bone, dried) -->
+    <symbol id="ic-it-carne-seca" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="28" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Two strips of jerky -->
+      <path d="M 30 30 L 80 36 L 84 60 L 36 56 Z" fill="url(#rh-rust)" stroke="#5a1810" stroke-width="0.85"/>
+      <path d="M 36 60 L 84 66 L 88 92 L 38 86 Z" fill="url(#rh-rust)" stroke="#5a1810" stroke-width="0.85"/>
+      <!-- Dried texture (lines and specks) -->
+      <line x1="40" y1="42" x2="78" y2="48" stroke="#3a0808" stroke-width="0.4" opacity="0.85"/>
+      <line x1="42" y1="48" x2="80" y2="54" stroke="#3a0808" stroke-width="0.4" opacity="0.7"/>
+      <line x1="42" y1="74" x2="86" y2="80" stroke="#3a0808" stroke-width="0.4" opacity="0.85"/>
+      <line x1="44" y1="80" x2="86" y2="86" stroke="#3a0808" stroke-width="0.4" opacity="0.7"/>
+      <circle cx="50" cy="40" r="0.8" fill="#3a0808" opacity="0.85"/>
+      <circle cx="68" cy="46" r="0.7" fill="#3a0808" opacity="0.85"/>
+      <circle cx="56" cy="78" r="0.8" fill="#3a0808" opacity="0.85"/>
+      <circle cx="74" cy="84" r="0.7" fill="#3a0808" opacity="0.85"/>
+    </symbol>
+
+    <!-- Carne Assada -->
+    <symbol id="ic-it-carne-assada" viewBox="0 0 120 120"><use href="#ic-it-base-meat-cooked"/></symbol>
+
+    <!-- Cogumelo Grelhado (mushroom + grill marks) -->
+    <symbol id="ic-it-cogumelo-grelhado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-mushroom"/>
+      <!-- Grill marks across cap -->
+      <path d="M 30 38 L 90 42" stroke="#1a0808" stroke-width="0.85" opacity="0.7"/>
+      <path d="M 32 50 L 88 54" stroke="#1a0808" stroke-width="0.85" opacity="0.7"/>
+    </symbol>
+
+    <!-- Ensopado Revigorante -->
+    <symbol id="ic-it-ensopado-revigorante" viewBox="0 0 120 120"><use href="#ic-it-base-meal-bowl"/></symbol>
+
+    <!-- Refeição Completa (meal bowl + bigger steam + side bread) -->
+    <symbol id="ic-it-refeicao-completa" viewBox="0 0 120 120">
+      <use href="#ic-it-base-meal-bowl"/>
+      <!-- Mini bread on side -->
+      <ellipse cx="100" cy="74" r="10" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <line x1="94" y1="70" x2="98" y2="64" stroke="#3a1808" stroke-width="0.85" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Refeição Fortificante (meal bowl + +1 sparks) -->
+    <symbol id="ic-it-refeicao-fortificante" viewBox="0 0 120 120">
+      <use href="#ic-it-base-meal-bowl"/>
+      <circle cx="60" cy="62" r="48" fill="url(#rh-glow-thunder)" opacity="0.18"/>
+      <path d="M 28 26 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+      <path d="M 90 28 l 1 -1.5 l 1 1.5 l 1.5 1 l -1.5 1 l -1 1.5 l -1 -1.5 l -1.5 -1 z" fill="#fff" opacity="0.85"/>
+    </symbol>
+
+    <!-- Cerveja Forte -->
+    <symbol id="ic-it-cerveja-forte" viewBox="0 0 120 120"><use href="#ic-it-base-mug"/></symbol>
+
+    <!-- Hidromel Fortificado (mug + golden glow) -->
+    <symbol id="ic-it-hidromel-fortificado" viewBox="0 0 120 120">
+      <use href="#ic-it-base-mug"/>
+      <circle cx="55" cy="60" r="42" fill="url(#rh-glow-thunder)" opacity="0.25"/>
+    </symbol>
+
+    <!-- Mel Silvestre -->
+    <symbol id="ic-it-mel-silvestre" viewBox="0 0 120 120"><use href="#ic-it-base-honey-jar"/></symbol>
+
+    <!-- ────────────── HERBS / PLANTS ────────────── -->
+
+    <!-- Erva Curativa -->
+    <symbol id="ic-it-erva-curativa" viewBox="0 0 120 120"><use href="#ic-it-base-herb-leaf"/></symbol>
+
+    <!-- Cogumelo Silvestre (plain mushroom, smaller) -->
+    <symbol id="ic-it-cogumelo-silvestre" viewBox="0 0 120 120"><use href="#ic-it-base-mushroom"/></symbol>
+
+    <!-- Raiz Amarga (twisted root) -->
+    <symbol id="ic-it-raiz-amarga" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Twisted gnarled root (curving body) -->
+      <path d="M 36 14 Q 50 30 42 50 Q 36 70 56 80 Q 76 86 70 100"
+            fill="none" stroke="url(#rh-bronze)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M 36 14 Q 50 30 42 50 Q 36 70 56 80 Q 76 86 70 100"
+            fill="none" stroke="#3a2410" stroke-width="0.85"/>
+      <!-- Side roots/whiskers -->
+      <path d="M 42 26 L 30 22 M 42 26 L 32 32 M 38 60 L 26 64 M 56 78 L 70 70 M 64 90 L 78 96"
+            stroke="#3a2410" stroke-width="1.4" stroke-linecap="round"/>
+      <!-- Knots/lumps on root -->
+      <ellipse cx="46" cy="38" rx="3" ry="2" fill="#3a2410" opacity="0.7"/>
+      <ellipse cx="42" cy="60" rx="2.5" ry="1.5" fill="#3a2410" opacity="0.7"/>
+    </symbol>
+
+    <!-- Musgo Luminoso (glowing moss patches) -->
+    <symbol id="ic-it-musgo-luminoso" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="34" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Glow halo -->
+      <ellipse cx="60" cy="60" rx="42" ry="32" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Moss clumps (irregular green blobs) -->
+      <g fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.6">
+        <ellipse cx="34" cy="58" rx="10" ry="8"/>
+        <ellipse cx="56" cy="50" rx="14" ry="10"/>
+        <ellipse cx="78" cy="56" rx="12" ry="9"/>
+        <ellipse cx="44" cy="80" rx="11" ry="8"/>
+        <ellipse cx="68" cy="78" rx="10" ry="7"/>
+        <ellipse cx="86" cy="78" rx="9" ry="6"/>
+      </g>
+      <!-- Glow spots inside moss (light points) -->
+      <circle cx="38" cy="56" r="1.4" fill="#a8e858" opacity="0.95"/>
+      <circle cx="56" cy="48" r="1.6" fill="#a8e858" opacity="0.95"/>
+      <circle cx="78" cy="54" r="1.4" fill="#a8e858" opacity="0.95"/>
+      <circle cx="44" cy="78" r="1.4" fill="#a8e858" opacity="0.95"/>
+      <circle cx="68" cy="76" r="1.4" fill="#a8e858" opacity="0.95"/>
+    </symbol>
+
+    <!-- Cataplasma Curativo (bandage with herb leaves) -->
+    <symbol id="ic-it-cataplasma-curativo" viewBox="0 0 120 120">
+      <use href="#ic-it-base-bandage"/>
+      <!-- Herb leaves on top -->
+      <path d="M 56 32 Q 48 28 50 22 Q 56 24 60 32 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.5"/>
+      <path d="M 64 32 Q 72 28 70 22 Q 64 24 60 32 Z" fill="url(#rh-emerald)" stroke="#1a4a1a" stroke-width="0.5"/>
+    </symbol>
+
+    <!-- Bálsamo de Cura (small jar with green salve) -->
+    <symbol id="ic-it-balsamo-cura" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <!-- Lid -->
+      <ellipse cx="60" cy="36" rx="26" ry="5" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <rect x="34" y="36" width="52" height="6" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.6"/>
+      <!-- Jar body (squat, ceramic) -->
+      <path d="M 32 42 L 88 42 L 86 90 Q 84 100 60 100 Q 36 100 34 90 Z" fill="url(#rh-bone)" stroke="#5a4838" stroke-width="0.85"/>
+      <!-- Salve label -->
+      <ellipse cx="60" cy="70" rx="20" ry="14" fill="url(#rh-emerald)" opacity="0.55"/>
+      <!-- Cross/healing mark -->
+      <rect x="58" y="62" width="4" height="16" fill="#1a4a1a"/>
+      <rect x="52" y="68" width="16" height="4" fill="#1a4a1a"/>
+    </symbol>
+
+    <!-- Ataduras Medicinais (rolled bandage) -->
+    <symbol id="ic-it-ataduras-medicinais" viewBox="0 0 120 120"><use href="#ic-it-base-bandage"/></symbol>
+
+    <!-- ────────────── MAGIC CONSUMABLES ────────────── -->
+
+    <symbol id="ic-it-pergaminho-magico" viewBox="0 0 120 120">
+      <use href="#ic-it-base-scroll"/>
+      <circle cx="60" cy="60" r="50" fill="url(#rh-glow-arcane)" opacity="0.25"/>
+      <!-- Arcane sigil overlay -->
+      <circle cx="60" cy="60" r="8" fill="none" stroke="url(#rh-violet)" stroke-width="0.7"/>
+      <path d="M 56 60 L 64 60 M 60 56 L 60 64" stroke="url(#rh-violet)" stroke-width="0.55"/>
+    </symbol>
+
+    <symbol id="ic-it-cantil-magico" viewBox="0 0 120 120">
+      <use href="#ic-it-base-potion-vial"/>
+      <path d="M 51 30 L 69 30 L 69 96 Q 69 102 60 102 Q 51 102 51 96 Z" fill="url(#rh-arcane)" opacity="0.85"/>
+      <ellipse cx="60" cy="30" rx="9" ry="1.5" fill="#a878ff" opacity="0.7"/>
+      <circle cx="60" cy="60" r="36" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+    </symbol>
+
+    <symbol id="ic-it-amuleto-sorte" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
+      <circle cx="60" cy="60" r="42" fill="url(#rh-glow-arcane)" opacity="0.35"/>
+      <!-- Crystal ball -->
+      <circle cx="60" cy="56" r="22" fill="url(#rh-arcane)" stroke="#1a0838" stroke-width="0.85" opacity="0.85"/>
+      <!-- Inner shimmer -->
+      <ellipse cx="52" cy="48" rx="6" ry="4" fill="#fff" opacity="0.5"/>
+      <ellipse cx="64" cy="62" rx="3" ry="2" fill="#fff" opacity="0.3"/>
+      <!-- Bronze base -->
+      <ellipse cx="60" cy="84" rx="20" ry="6" fill="url(#rh-bronze)" stroke="#5a3010" stroke-width="0.7"/>
+      <!-- Chain at top -->
+      <ellipse cx="60" cy="22" rx="3" ry="2" fill="none" stroke="url(#rh-bronze)" stroke-width="0.85"/>
+      <line x1="60" y1="26" x2="60" y2="34" stroke="url(#rh-bronze)" stroke-width="0.7"/>
+      <!-- 4-leaf clover INSIDE the orb (luck symbol) -->
+      <g transform="translate(60 56)" fill="#3a8a3a" stroke="#1a4a1a" stroke-width="0.4">
+        <ellipse cx="-4" cy="-4" rx="3" ry="3"/>
+        <ellipse cx="4" cy="-4" rx="3" ry="3"/>
+        <ellipse cx="-4" cy="4" rx="3" ry="3"/>
+        <ellipse cx="4" cy="4" rx="3" ry="3"/>
+      </g>
+    </symbol>
+
     <symbol id="ic-it-clava"        viewBox="0 0 120 120"><use href="#ic-it-base-club"/></symbol>
     <symbol id="ic-it-adaga"        viewBox="0 0 120 120"><use href="#ic-it-base-dagger"/></symbol>
     <symbol id="ic-it-maca"         viewBox="0 0 120 120"><use href="#ic-it-base-mace"/></symbol>
@@ -3267,7 +4025,7 @@
   <nav class="cat-nav">
     <a href="#cat-weapon" class="active">⚔️ Armas + Focos</a>
     <a href="#cat-armor">🛡️ Armaduras + Escudos</a>
-    <span class="upcoming">🧪 Consumíveis (Batch 3)</span>
+    <a href="#cat-consumable">🧪 Poções & Consumíveis</a>
     <span class="upcoming">💎 Gemas/Runas (Batch 4)</span>
     <span class="upcoming">💍 Acessórios (Batch 5)</span>
     <span class="upcoming">🏆 Loot/Troféus (Batch 6)</span>
@@ -3569,6 +4327,105 @@
       <article class="item-card rarity-epic" data-name="peitoral da furia das montanhas"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-peitoral-furia-montanhas"/></svg></div><div class="item-name">Peitoral da Fúria das Montanhas</div><div class="item-meta">Montanhas · CA +7 · <span class="val">700</span></div></article>
       <article class="item-card rarity-epic" data-name="capuz do lamento sombrio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-capuz-lamento-sombrio"/></svg></div><div class="item-name">Capuz do Lamento Sombrio</div><div class="item-meta">Sombrio · CA +1 · <span class="val">400</span></div></article>
       <article class="item-card rarity-epic" data-name="vestes do canto estelar"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-vestes-canto-estelar"/></svg></div><div class="item-name">Vestes do Canto Estelar</div><div class="item-meta">Estelar · CA +2, +2 MP · <span class="val">500</span></div></article>
+    </div>
+
+  </section>
+
+  <!-- ═══════ CATEGORIA: POÇÕES & CONSUMÍVEIS ═══════ -->
+  <section id="cat-consumable">
+    <h2>🧪 Poções & Consumíveis <span style="color:#6a5a4a;font-size:14px">(Batch 3 — 41 itens)</span></h2>
+
+    <!-- Demo strip 54×54 -->
+    <div class="real-size-strip">
+      <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
+      <div class="row">
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-cura"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-velocidade"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-fogo-alquimico"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-frasco-acido"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-bomba-fumaca"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-pao-fresco"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-erva-curativa"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-cogumelo-silvestre"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-cerveja-forte"/></svg></div>
+        <div class="slot"><svg viewBox="0 0 120 120"><use href="#ic-it-pergaminho-magico"/></svg></div>
+      </div>
+    </div>
+
+    <!-- ── Poções de Cura ── -->
+    <h3>Poções de Cura <span class="count">(4)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="pocao de cura"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-cura"/></svg></div><div class="item-name">Poção de Cura</div><div class="item-meta">2d4+2 HP · <span class="val">50</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="pocao de cura maior"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-cura-maior"/></svg></div><div class="item-name">Poção de Cura Maior</div><div class="item-meta">4d4+4 HP · <span class="val">150</span></div></article>
+      <article class="item-card rarity-rare" data-name="pocao de cura superior"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-cura-superior"/></svg></div><div class="item-name">Poção de Cura Superior</div><div class="item-meta">8d4+8 HP · <span class="val">450</span></div></article>
+      <article class="item-card rarity-epic" data-name="pocao de cura suprema"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-cura-suprema"/></svg></div><div class="item-name">Poção de Cura Suprema</div><div class="item-meta">10d4+20 HP · <span class="val">1350</span></div></article>
+    </div>
+
+    <!-- ── Outras Poções ── -->
+    <h3>Outras Poções Mágicas <span class="count">(6)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="pocao de heroismo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-heroismo"/></svg></div><div class="item-name">Poção de Heroísmo</div><div class="item-meta">+10 HP temp, blessed · <span class="val">180</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="pocao resistencia fogo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-resist-fogo"/></svg></div><div class="item-name">Poção de Resist. ao Fogo</div><div class="item-meta">resist. fogo 1h · <span class="val">300</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="pocao resistencia frio"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-resist-frio"/></svg></div><div class="item-name">Poção de Resist. ao Frio</div><div class="item-meta">resist. frio 1h · <span class="val">300</span></div></article>
+      <article class="item-card rarity-rare" data-name="pocao de velocidade"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-velocidade"/></svg></div><div class="item-name">Poção de Velocidade</div><div class="item-meta">+2 CA, ação extra 1min · <span class="val">400</span></div></article>
+      <article class="item-card rarity-rare" data-name="pocao de invisibilidade"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pocao-invisibilidade"/></svg></div><div class="item-name">Poção de Invisibilidade</div><div class="item-meta">invisível 1h · <span class="val">500</span></div></article>
+      <article class="item-card" data-name="antidoto"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-antidoto"/></svg></div><div class="item-name">Antídoto</div><div class="item-meta">remove envenenado · <span class="val">50</span></div></article>
+    </div>
+
+    <!-- ── Throwing Combat Items ── -->
+    <h3>Itens de Arremesso (Combate) <span class="count">(7)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="fogo alquimico"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-fogo-alquimico"/></svg></div><div class="item-name">Fogo Alquímico</div><div class="item-meta">1d4 fogo + queimando · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="frasco de acido"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-frasco-acido"/></svg></div><div class="item-name">Frasco de Ácido</div><div class="item-meta">2d6 ácido · <span class="val">25</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="agua benta"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-agua-benta"/></svg></div><div class="item-name">Água Benta</div><div class="item-meta">2d6 radiante vs undead · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="bomba de fumaca"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-bomba-fumaca"/></svg></div><div class="item-name">Bomba de Fumaça</div><div class="item-meta">fuga garantida · <span class="val">35</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="po cegante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-po-cegante"/></svg></div><div class="item-name">Pó Cegante</div><div class="item-meta">cega alvo 1 turno · <span class="val">120</span></div></article>
+      <article class="item-card" data-name="estrepes"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-estrepes"/></svg></div><div class="item-name">Estrepes</div><div class="item-meta">área 1.5m, 1 dmg + slow · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="esferas de aco"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-esferas-aco"/></svg></div><div class="item-name">Esferas de Aço</div><div class="item-meta">DEX CD 10 ou prone · <span class="val">5</span></div></article>
+    </div>
+
+    <!-- ── Venenos ── -->
+    <h3>Venenos <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="veneno basico"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-veneno-basico"/></svg></div><div class="item-name">Veneno Básico</div><div class="item-meta">+1d4 dano veneno · <span class="val">100</span></div></article>
+      <article class="item-card rarity-rare" data-name="veneno refinado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-veneno-refinado"/></svg></div><div class="item-name">Veneno Refinado</div><div class="item-meta">+1d4 veneno × 3 ataques · <span class="val">150</span></div></article>
+      <article class="item-card" data-name="frasco de veneno"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-frasco-veneno"/></svg></div><div class="item-name">Frasco de Veneno</div><div class="item-meta">+1d4 veneno na arma · <span class="val">100</span></div></article>
+    </div>
+
+    <!-- ── Comida & Bebida ── -->
+    <h3>Comida & Bebida <span class="count">(11)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="racoes de viagem"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-racoes-viagem"/></svg></div><div class="item-name">Rações de Viagem</div><div class="item-meta">1 dia · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="pao fresco"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pao-fresco"/></svg></div><div class="item-name">Pão Fresco</div><div class="item-meta">comida · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="carne seca"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-carne-seca"/></svg></div><div class="item-name">Carne Seca</div><div class="item-meta">ração curada · <span class="val">25</span></div></article>
+      <article class="item-card" data-name="carne assada"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-carne-assada"/></svg></div><div class="item-name">Carne Assada</div><div class="item-meta">cozida · <span class="val">12</span></div></article>
+      <article class="item-card" data-name="cogumelo grelhado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cogumelo-grelhado"/></svg></div><div class="item-name">Cogumelo Grelhado</div><div class="item-meta">cozido · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="ensopado revigorante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-ensopado-revigorante"/></svg></div><div class="item-name">Ensopado Revigorante</div><div class="item-meta">+1d4 HP · <span class="val">20</span></div></article>
+      <article class="item-card" data-name="refeicao completa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-refeicao-completa"/></svg></div><div class="item-name">Refeição Completa</div><div class="item-meta">restaura vigor · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="refeicao fortificante"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-refeicao-fortificante"/></svg></div><div class="item-name">Refeição Fortificante</div><div class="item-meta">+1 CON save · <span class="val">50</span></div></article>
+      <article class="item-card" data-name="cerveja forte"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cerveja-forte"/></svg></div><div class="item-name">Cerveja Forte</div><div class="item-meta">+1 atk corpo a corpo · <span class="val">15</span></div></article>
+      <article class="item-card" data-name="hidromel fortificado"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-hidromel-fortificado"/></svg></div><div class="item-name">Hidromel Fortificado</div><div class="item-meta">+2 STR 1 combate · <span class="val">60</span></div></article>
+      <article class="item-card" data-name="mel silvestre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-mel-silvestre"/></svg></div><div class="item-name">Mel Silvestre</div><div class="item-meta">comida medicinal · <span class="val">10</span></div></article>
+    </div>
+
+    <!-- ── Ervas & Plantas ── -->
+    <h3>Ervas, Plantas & Bálsamos <span class="count">(7)</span></h3>
+    <div class="item-grid">
+      <article class="item-card" data-name="erva curativa"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-erva-curativa"/></svg></div><div class="item-name">Erva Curativa</div><div class="item-meta">alívio de dor · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="cogumelo silvestre"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cogumelo-silvestre"/></svg></div><div class="item-name">Cogumelo Silvestre</div><div class="item-meta">food/alquimia · <span class="val">5</span></div></article>
+      <article class="item-card" data-name="raiz amarga"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-raiz-amarga"/></svg></div><div class="item-name">Raiz Amarga</div><div class="item-meta">antídoto base · <span class="val">8</span></div></article>
+      <article class="item-card" data-name="musgo luminoso"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-musgo-luminoso"/></svg></div><div class="item-name">Musgo Luminoso</div><div class="item-meta">brilha no escuro · <span class="val">10</span></div></article>
+      <article class="item-card" data-name="cataplasma curativo"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cataplasma-curativo"/></svg></div><div class="item-name">Cataplasma Curativo</div><div class="item-meta">2d4+2 HP fora combate · <span class="val">50</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="balsamo de cura"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-balsamo-cura"/></svg></div><div class="item-name">Bálsamo de Cura</div><div class="item-meta">3d4+3 HP regen 3 turnos · <span class="val">70</span></div></article>
+      <article class="item-card" data-name="ataduras medicinais"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-ataduras-medicinais"/></svg></div><div class="item-name">Ataduras Medicinais</div><div class="item-meta">1d6 HP fora combate · <span class="val">40</span></div></article>
+    </div>
+
+    <!-- ── Mágicos & Misc ── -->
+    <h3>Consumíveis Mágicos & Diversos <span class="count">(3)</span></h3>
+    <div class="item-grid">
+      <article class="item-card rarity-uncommon" data-name="pergaminho magico"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-pergaminho-magico"/></svg></div><div class="item-name">Pergaminho Mágico</div><div class="item-meta">conjura magia · <span class="val">100</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="cantil magico"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-cantil-magico"/></svg></div><div class="item-name">Cantil Mágico</div><div class="item-meta">+5 MP · <span class="val">100</span></div></article>
+      <article class="item-card rarity-uncommon" data-name="amuleto da sorte"><div class="item-icon"><svg viewBox="0 0 120 120"><use href="#ic-it-amuleto-sorte"/></svg></div><div class="item-name">Amuleto da Sorte</div><div class="item-meta">+1 d20 × 3 combates · <span class="val">250</span></div></article>
     </div>
 
   </section>
