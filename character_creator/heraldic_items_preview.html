@@ -1116,45 +1116,44 @@
       <circle cx="58" cy="70" r="1.4" fill="#fff" opacity="0.4"/>
     </symbol>
 
-    <!-- Foice v4: estudo do delapouite/sickle — hook fino sweep contínuo com tip pontuda + cutting edge interna -->
+    <!-- Foice v5: closed path asymmetric crescent (stroke trick falhou — voltando pra polygon controlado) -->
+    <!-- Anatomia: OUTER envelope esquerda + TOP em (38,6) + TIP em (56,18) + INNER envelope direita -->
     <symbol id="ic-it-base-sickle" viewBox="0 0 120 120">
       <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- HANDLE (vertical, base) -->
-      <rect x="57" y="56" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
-      <line x1="59" y1="62" x2="59" y2="86" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
-      <!-- IRON SOCKET (onde blade encontra handle) -->
-      <rect x="50" y="50" width="20" height="8" rx="1" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
-      <circle cx="55" cy="54" r="0.7" fill="#1a1410"/>
-      <circle cx="65" cy="54" r="0.7" fill="#1a1410"/>
-      <!-- BLADE: stroke trick (centerline path stroked grosso) — hook anatomicamente correto -->
-      <!-- Centerline: top do socket UP até top-mid, depois DOWN-LEFT até far-left, depois CURL RIGHT terminando dentro do hook -->
-      <!-- Layer 1: dark contour outline (cria silhueta com bordas) -->
-      <path d="M 60 50 Q 60 28 36 16 Q 12 8 8 32 Q 8 48 26 46"
-            fill="none"
-            stroke="#1a1410"
-            stroke-width="20"
-            stroke-linecap="round"/>
-      <!-- Layer 2: iron blade body -->
-      <path d="M 60 50 Q 60 28 36 16 Q 12 8 8 32 Q 8 48 26 46"
-            fill="none"
-            stroke="url(#rh-iron)"
-            stroke-width="16"
-            stroke-linecap="round"/>
-      <!-- Layer 3: inner cutting edge highlight (linha branca no fio interno do hook) -->
-      <path d="M 56 48 Q 56 30 36 22 Q 18 18 16 32"
-            fill="none"
-            stroke="#fff"
-            stroke-width="0.9"
-            opacity="0.7"
-            stroke-linecap="round"/>
-      <!-- TIP detail: pequena ponta saliente no final da curva (em (26, 46)) -->
-      <path d="M 26 46 L 30 38 L 32 42 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.5"/>
+      <!-- HANDLE (wooden) -->
+      <rect x="57" y="60" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="66" x2="59" y2="90" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- IRON SOCKET (joint between blade and handle) -->
+      <rect x="48" y="52" width="24" height="10" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="54" cy="57" r="0.8" fill="#1a1410"/>
+      <circle cx="66" cy="57" r="0.8" fill="#1a1410"/>
+      <!-- BLADE: closed asymmetric crescent path -->
+      <!-- Vertices traced clockwise from socket-left:
+           (48,52) → up-left curve to (8,22) → top arc to (38,6) → top-right to TIP at (56,18)
+           → tip inner edge (50,22) → inner curve down to (36,38) → curve right to (72,52) → close -->
+      <path d="M 48 52
+               C 26 50, 8 38, 8 22
+               C 8 10, 22 4, 38 6
+               C 48 8, 56 14, 56 18
+               L 50 22
+               C 42 24, 36 30, 36 38
+               C 38 44, 52 48, 72 52
+               Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
+      <!-- Outer back edge highlight (along left curve) -->
+      <path d="M 14 20 C 8 28, 14 38, 26 44"
+            fill="none" stroke="#fff" stroke-width="0.7" opacity="0.55"/>
+      <!-- Inner cutting edge shadow (along the concave inner edge) -->
+      <path d="M 50 22 C 42 26, 38 32, 38 38"
+            fill="none" stroke="#0a0605" stroke-width="0.5" opacity="0.55"/>
+      <!-- Sharp TIP highlight (sparkle on the point) -->
+      <circle cx="55" cy="17" r="1.4" fill="#fff" opacity="0.65"/>
       <!-- LEATHER GRIP -->
-      <rect x="55" y="64" width="10" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
-      <line x1="55" y1="70" x2="65" y2="70" stroke="#2a1408" stroke-width="0.5"/>
-      <line x1="55" y1="78" x2="65" y2="78" stroke="#2a1408" stroke-width="0.5"/>
+      <rect x="55" y="68" width="10" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="55" y1="74" x2="65" y2="74" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="55" y1="82" x2="65" y2="82" stroke="#2a1408" stroke-width="0.5"/>
       <!-- IRON POMMEL -->
-      <ellipse cx="60" cy="92" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <ellipse cx="60" cy="96" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
     </symbol>
 
     <!-- Chicote: cabo + chicote enrolado em espiral -->
