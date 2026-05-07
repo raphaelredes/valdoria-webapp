@@ -298,7 +298,8 @@ function renderHubScreen(el, screen) {
                 if (ps.ach_cb && typeof doAction === 'function') doAction(ps.ach_cb);
             });
             var achVal = _hubDiv('hp-val');
-            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
+            // 2026-05-06: cor natural do troféu via HERALDIC_COLORS lookup (gold OK pra ic-trofeu por canon).
+            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + ((typeof HERALDIC_COLORS !== "undefined" && HERALDIC_COLORS["ic-trofeu"]) || "#e8d878") + ';"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
             achCard.appendChild(achVal);
             var achLbl = _hubDiv('hp-lbl');
             achLbl.textContent = 'Conquistas';
@@ -315,7 +316,8 @@ function renderHubScreen(el, screen) {
                 if (typeof doAction === 'function') doAction(pStats.kills_cb || 'kills_log');
             });
             var killVal = _hubDiv('hp-val');
-            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:var(--v-gold,#c4953a);"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
+            // 2026-05-06: ic-ach-algoz cor natural sangue vermelho (#c43020).
+            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + ((typeof HERALDIC_COLORS !== "undefined" && HERALDIC_COLORS["ic-ach-algoz"]) || "#c43020") + ';"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
             killCard.appendChild(killVal);
             var killLbl = _hubDiv('hp-lbl');
             killLbl.textContent = 'Abates';

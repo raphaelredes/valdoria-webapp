@@ -1995,13 +1995,15 @@ LOG SINK (Fase 7):
        banqueiro, escriba, aldeao, crianca. Canonical em valdoria-webapp/shared/
        heraldic-sprite.svg (28 ícones). Para sincronizar mudanças, recopiar do
        sprite. Inline pq <use href="external.svg#id"> falha em file:// (CORS). */
+    /* 2026-05-06: cor padrão NEUTRA stone (não-gold). Cor real é injetada
+       inline pelo _colorizeHeraldic() abaixo via HERALDIC_COLORS lookup. */
     .v-heraldic {
       display: inline-block;
       width: 1.2em; height: 1.2em;
       vertical-align: -0.18em;
       fill: currentColor;
       flex-shrink: 0;
-      color: #c4953a;
+      color: #8a7a6a;
     }
     .v-heraldic.v-h-banner { width: 1.6em; height: 1.6em; vertical-align: -0.3em; }
     .v-heraldic.v-h-btn    { width: 1.5em; height: 1.5em; vertical-align: -0.3em; }
@@ -7838,17 +7840,22 @@ function _showCharactersPopup(){
       + '">'
 
       // Brasão heráldico de classe (canonical, NUNCA emoji sistema)
-      + '<div class="hall-char-icon" '
-      + 'style="flex-shrink: 0; width: 44px; height: 44px; '
-      + 'display: flex; align-items: center; justify-content: center; '
-      + 'background: var(--v-gold-06, rgba(196,149,58,0.06)); '
-      + 'border-radius: var(--v-radius-sm, 6px); '
-      + 'border: 1px solid var(--v-border, #4a3828); '
-      + 'color: var(--v-gold, #c4953a);">'
-      + '<svg viewBox="0 0 120 120" style="width: 30px; height: 30px;">'
-      + '<use href="#' + (c.icon || _hallClassToHeraldic(c.cls)) + '"/>'
-      + '</svg>'
-      + '</div>'
+      // 2026-05-06: cor NATURAL por classe via HERALDIC_COLORS (mago azul,
+      // guerreiro aço, druida verde, etc) — NÃO força gold.
+      + (function(){
+          var iconId = c.icon || _hallClassToHeraldic(c.cls);
+          var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
+          return '<div class="hall-char-icon" '
+            + 'style="flex-shrink: 0; width: 44px; height: 44px; '
+            + 'display: flex; align-items: center; justify-content: center; '
+            + 'background: rgba(58,48,40,0.45); '
+            + 'border-radius: var(--v-radius-sm, 6px); '
+            + 'border: 1px solid var(--v-border, #4a3828);">'
+            + '<svg viewBox="0 0 120 120" style="width: 30px; height: 30px; color: ' + iconColor + ';">'
+            + '<use href="#' + iconId + '"/>'
+            + '</svg>'
+            + '</div>';
+        })()
 
       // Info
       + '<div class="hall-char-info" style="flex:1; min-width:0;">'
@@ -9903,10 +9910,20 @@ var HERALDIC_COLORS = {
   'ic-sino':          '#a05028',  // bronze sino
   'ic-coroa':         '#e8c850',  // ouro coroa (gold OK pra coroa)
   'ic-ach-algoz':     '#c43020',  // sangue (executor/algoz)
+  'ic-ach-indomavel': '#ff8a4a',  // chama laranja (resistente)
   'ic-fonte':         '#4a78c4',  // azul água (alias de ic-cura/poção contexto)
   'ic-mensagem':      '#c0b890',  // pergaminho carta
-  'ic-ficha':         '#c0b890',  // pergaminho ficha
   'ic-som':           '#a05028',  // bronze
+  // ─── NPCs / PROFISSÕES (.v-heraldic widespread no city tavern/markets) ─
+  'ic-taverneiro':    '#a07030',  // âmbar avental do barman
+  'ic-estalajadeira': '#c87a5a',  // warm hearth innkeeper
+  'ic-banqueiro':     '#a89478',  // prata envelhecida (cofre/coin)
+  'ic-alquimista':    '#5a9890',  // verde-azulado mistura
+  'ic-ferreiro':      '#6a5040',  // dark forge gray
+  'ic-joalheiro':     '#2a7858',  // emerald deep
+  // ─── Stats ──────────────────────────────────────────────────────
+  'ic-stat-prof':     '#a89478',  // bronze proficiência
+  // ─── Inimigos famílias ──────────────────────────────────────────
   'ic-enemy-beast':       '#5a8a30',  // verde besta/feral
   'ic-enemy-fey':         '#9050a0',  // púrpura fey
   'ic-enemy-humanoid':    '#a89478',  // tan humanoide
@@ -9919,6 +9936,43 @@ var HERALDIC_COLORS = {
   'ic-liga-ouro':     '#e8c850',  // ouro (literal — gold OK)
   'ic-liga-mithril':  '#a8d8e8'   // azul-claro mithril
 };
+
+// 2026-05-06: auto-colorize de TODAS as `<svg class="v-heraldic">` no DOM.
+// Lê o `<use href="#ic-X">` interno e injeta inline `style.color` natural
+// via HERALDIC_COLORS. Roda no load + MutationObserver pra novos elementos.
+// Resolve o "tudo dourado" pra ~100 NPCs/roles/portrait-icons sem precisar
+// reescrever cada string de template HTML.
+function _colorizeHeraldic(root){
+  root = root || document;
+  var els = root.querySelectorAll && root.querySelectorAll('svg.v-heraldic');
+  if (!els) return;
+  els.forEach(function(svg){
+    if (svg.dataset && svg.dataset.colorized === '1') return;
+    var useEl = svg.querySelector('use');
+    if (!useEl) return;
+    var href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
+    var id = href.replace(/^#/, '');
+    var color = HERALDIC_COLORS[id];
+    if (color) {
+      svg.style.color = color;
+      if (svg.dataset) svg.dataset.colorized = '1';
+    }
+  });
+}
+// Roda imediatamente (HERALDIC_COLORS já foi definido acima) + observer.
+try {
+  _colorizeHeraldic();
+  if (typeof MutationObserver !== 'undefined') {
+    var _heraldObs = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        m.addedNodes && m.addedNodes.forEach(function(n){
+          if (n.nodeType === 1) _colorizeHeraldic(n);
+        });
+      });
+    });
+    _heraldObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
+} catch(e){ console.warn('[CITY] heraldic colorize:', e); }
 
 function _heralIco(id, color, size){
   // Phase 6.6.x v6: cor padrão vem do HERALDIC_COLORS por ID.
