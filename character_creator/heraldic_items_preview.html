@@ -1116,38 +1116,39 @@
       <circle cx="58" cy="70" r="1.4" fill="#fff" opacity="0.4"/>
     </symbol>
 
-    <!-- Foice v5: closed path asymmetric crescent (stroke trick falhou — voltando pra polygon controlado) -->
-    <!-- Anatomia: OUTER envelope esquerda + TOP em (38,6) + TIP em (56,18) + INNER envelope direita -->
+    <!-- Foice v6: single sweep C curve com sharp TIP triangle — finalmente shape de hook/sickle -->
+    <!-- v5 closed crescent ficou tipo Pac-Man no render. v6 = stroke trick com C curve simples -->
     <symbol id="ic-it-base-sickle" viewBox="0 0 120 120">
       <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- HANDLE (wooden) -->
+      <!-- HANDLE (wooden vertical) -->
       <rect x="57" y="60" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
       <line x1="59" y1="66" x2="59" y2="90" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
-      <!-- IRON SOCKET (joint between blade and handle) -->
-      <rect x="48" y="52" width="24" height="10" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
-      <circle cx="54" cy="57" r="0.8" fill="#1a1410"/>
-      <circle cx="66" cy="57" r="0.8" fill="#1a1410"/>
-      <!-- BLADE: closed asymmetric crescent path -->
-      <!-- Vertices traced clockwise from socket-left:
-           (48,52) → up-left curve to (8,22) → top arc to (38,6) → top-right to TIP at (56,18)
-           → tip inner edge (50,22) → inner curve down to (36,38) → curve right to (72,52) → close -->
-      <path d="M 48 52
-               C 26 50, 8 38, 8 22
-               C 8 10, 22 4, 38 6
-               C 48 8, 56 14, 56 18
-               L 50 22
-               C 42 24, 36 30, 36 38
-               C 38 44, 52 48, 72 52
-               Z"
-            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
-      <!-- Outer back edge highlight (along left curve) -->
-      <path d="M 14 20 C 8 28, 14 38, 26 44"
-            fill="none" stroke="#fff" stroke-width="0.7" opacity="0.55"/>
-      <!-- Inner cutting edge shadow (along the concave inner edge) -->
-      <path d="M 50 22 C 42 26, 38 32, 38 38"
-            fill="none" stroke="#0a0605" stroke-width="0.5" opacity="0.55"/>
-      <!-- Sharp TIP highlight (sparkle on the point) -->
-      <circle cx="55" cy="17" r="1.4" fill="#fff" opacity="0.65"/>
+      <!-- IRON SOCKET -->
+      <rect x="50" y="52" width="20" height="10" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <circle cx="55" cy="57" r="0.8" fill="#1a1410"/>
+      <circle cx="65" cy="57" r="0.8" fill="#1a1410"/>
+      <!-- BLADE: single sweeping C curve — socket(60,52) UP-OVER-LEFT até endpoint(16,30) -->
+      <!-- Layer 1: dark contour (stroke 18, butt cap deixa flat pra triangle pegar) -->
+      <path d="M 60 52 C 62 32 36 8 16 30"
+            fill="none" stroke="#1a1410" stroke-width="18"
+            stroke-linecap="butt" stroke-linejoin="round"/>
+      <!-- Layer 2: iron blade body (stroke 14) -->
+      <path d="M 60 52 C 62 32 36 8 16 30"
+            fill="none" stroke="url(#rh-iron)" stroke-width="14"
+            stroke-linecap="butt" stroke-linejoin="round"/>
+      <!-- TIP: triangle pontuda no endpoint (16,30) extendendo pra esquerda -->
+      <path d="M 16 22 L 2 30 L 16 38 Z"
+            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Outer back highlight (linha branca no back/dull side) -->
+      <path d="M 56 48 C 58 30 36 12 18 30"
+            fill="none" stroke="#fff" stroke-width="0.8" opacity="0.6"
+            stroke-linecap="round"/>
+      <!-- Inner cutting edge shadow (lado interno do hook) -->
+      <path d="M 64 52 C 66 36 38 16 22 32"
+            fill="none" stroke="#0a0605" stroke-width="0.6" opacity="0.55"
+            stroke-linecap="round"/>
+      <!-- TIP highlight (sparkle na ponta) -->
+      <circle cx="6" cy="29" r="1.2" fill="#fff" opacity="0.7"/>
       <!-- LEATHER GRIP -->
       <rect x="55" y="68" width="10" height="22" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
       <line x1="55" y1="74" x2="65" y2="74" stroke="#2a1408" stroke-width="0.5"/>
