@@ -852,45 +852,52 @@
       <path d="M 57 95 L 63 95 L 60 108 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
     </symbol>
 
-    <!-- Alabarda v2: axe MAIOR (crescent dominante) + hook tipo bico + spike alto -->
+    <!-- Alabarda v3: axe POLIGONAL com cantos pontudos (forma de machado real) + hook bico claro -->
     <symbol id="ic-it-base-halberd" viewBox="0 0 120 120">
       <ellipse cx="60" cy="113" rx="20" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- TOP SPIKE: alto e proeminente (ponta de lança) -->
-      <path d="M 60 4 Q 55 14 56 24 L 64 24 Q 65 14 60 4 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.75"/>
-      <line x1="60" y1="6" x2="60" y2="22" stroke="#1a1410" stroke-width="0.5" opacity="0.65"/>
-      <path d="M 56 14 L 58 22" stroke="#fff" stroke-width="0.4" opacity="0.5"/>
-      <!-- AXE BLADE (esquerda): grande crescente — feature dominante -->
-      <path d="M 56 24
-               C 30 22, 10 30, 6 50
-               C 10 64, 28 66, 44 60
-               L 56 56 Z"
+      <!-- TOP SPIKE: ponta de lança longa e fina -->
+      <path d="M 60 4 L 56 18 L 56 26 L 64 26 L 64 18 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="60" y1="6" x2="60" y2="24" stroke="#1a1410" stroke-width="0.5" opacity="0.7"/>
+      <path d="M 56 18 L 58 24" stroke="#fff" stroke-width="0.4" opacity="0.55"/>
+      <!-- AXE BLADE (esquerda): polígono com canto pontudo no topo + canto pontudo embaixo + curva no fio externo -->
+      <!-- Forma: top-mount → top-corner-spike → cutting curve → bottom-corner-spike → bottom-mount -->
+      <path d="M 56 26
+               L 50 20
+               L 30 12
+               L 8 28
+               Q 0 50 10 66
+               L 30 74
+               L 50 68
+               L 56 62 Z"
             fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
-      <!-- Outer edge highlight (back do axe) -->
-      <path d="M 12 38 Q 6 50 14 62" fill="none" stroke="#fff" stroke-width="0.7" opacity="0.55"/>
-      <!-- Groove decorativo no axe -->
-      <path d="M 22 36 Q 18 50 24 60" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
-      <!-- Furo heráldico no axe -->
-      <circle cx="34" cy="48" r="2.5" fill="#1a1410" opacity="0.65"/>
-      <!-- HOOK/BEAK (direita): bico curvo proeminente -->
-      <path d="M 64 28
-               C 78 24, 96 30, 102 44
-               C 96 50, 84 46, 76 40
-               L 64 38 Z"
+      <!-- Cutting edge curve highlight (no fio externo, lado esquerdo) -->
+      <path d="M 10 32 Q 2 50 12 64" fill="none" stroke="#fff" stroke-width="0.8" opacity="0.6"/>
+      <!-- Decorative grooves -->
+      <path d="M 22 32 Q 16 50 24 64" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.6"/>
+      <path d="M 32 26 Q 26 50 32 70" fill="none" stroke="#1a1410" stroke-width="0.4" opacity="0.5"/>
+      <!-- Heraldic hole no centro -->
+      <circle cx="34" cy="46" r="2.8" fill="#1a1410" opacity="0.7"/>
+      <!-- HOOK/BEAK (direita): forma clara de bico de águia com ponta -->
+      <path d="M 64 30
+               C 80 26, 100 32, 108 46
+               L 100 50
+               L 88 44
+               L 64 40 Z"
             fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.9"/>
-      <!-- Hook tip highlight -->
-      <path d="M 90 30 Q 98 36 100 46" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.55"/>
-      <!-- Hook curl (claw point) -->
-      <path d="M 95 42 Q 102 46 98 50" fill="none" stroke="#1a1410" stroke-width="0.5" opacity="0.7"/>
-      <!-- Iron mounting collar (junção das 3 partes ao shaft) -->
-      <rect x="54" y="56" width="12" height="10" rx="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
-      <line x1="54" y1="60" x2="66" y2="60" stroke="#1a1410" stroke-width="0.4"/>
-      <line x1="54" y1="64" x2="66" y2="64" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Wooden shaft (mais curto para que cabeça domine) -->
-      <rect x="57" y="66" width="6" height="32" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
-      <line x1="59" y1="72" x2="59" y2="96" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
-      <!-- Mid-shaft iron band -->
-      <rect x="55" y="76" width="10" height="3" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Leather grip wrap -->
+      <!-- Hook tip (ponta saliente) -->
+      <path d="M 100 32 L 112 40 L 108 46 Z" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <!-- Hook outer highlight -->
+      <path d="M 88 28 Q 100 30 110 42" fill="none" stroke="#fff" stroke-width="0.55" opacity="0.6"/>
+      <!-- Iron mounting collar -->
+      <rect x="54" y="62" width="12" height="10" rx="2" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.7"/>
+      <line x1="54" y1="66" x2="66" y2="66" stroke="#1a1410" stroke-width="0.4"/>
+      <line x1="54" y1="70" x2="66" y2="70" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Wooden shaft -->
+      <rect x="57" y="72" width="6" height="26" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="59" y1="78" x2="59" y2="96" stroke="#3a2410" stroke-width="0.4" opacity="0.55"/>
+      <!-- Iron banding -->
+      <rect x="55" y="80" width="10" height="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Leather grip -->
       <rect x="55" y="84" width="10" height="14" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
       <line x1="55" y1="90" x2="65" y2="90" stroke="#2a1408" stroke-width="0.5"/>
       <!-- Iron buttspike -->
@@ -1116,39 +1123,54 @@
       <circle cx="58" cy="70" r="1.4" fill="#fff" opacity="0.4"/>
     </symbol>
 
-    <!-- Foice v2: blade crescente bold (como hook/comma) + handle vertical compacto -->
+    <!-- Foice v3: blade via stroke trick (dark outline + iron por cima) — silhueta hook limpa -->
     <symbol id="ic-it-base-sickle" viewBox="0 0 120 120">
       <ellipse cx="60" cy="111" rx="22" ry="2.4" fill="#000" opacity="0.45"/>
-      <!-- BLADE: crescente fechado, silhueta de hook reconhecível mesmo a 56px -->
-      <!-- outline: parte de baixo do socket, sweep para esquerda+cima, tip no topo, volta pelo lado interno -->
-      <path d="M 58 46
-               Q 32 50 12 32
-               Q 0 18 12 6
-               Q 26 0 38 8
-               Q 30 16 30 32
-               Q 36 42 56 44
-               L 58 46 Z"
-            fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.95"/>
-      <!-- Outer edge highlight (back/dull side da blade) -->
-      <path d="M 56 44 Q 30 48 14 30 Q 4 16 16 8" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.55"/>
-      <!-- Inner ridge (fio cortante interno) -->
-      <path d="M 36 12 Q 32 22 32 32 Q 38 40 50 42" fill="none" stroke="#1a1410" stroke-width="0.55" opacity="0.55"/>
-      <!-- Inner shadow bevel -->
-      <path d="M 38 16 Q 34 24 34 32" fill="none" stroke="#3a3530" stroke-width="0.4" opacity="0.5"/>
-      <!-- Tip highlight (ponta da blade) -->
-      <circle cx="34" cy="6" r="1.2" fill="#fff" opacity="0.5"/>
-      <!-- Iron socket onde blade encontra handle -->
-      <rect x="54" y="46" width="14" height="8" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
-      <line x1="54" y1="50" x2="68" y2="50" stroke="#1a1410" stroke-width="0.4"/>
-      <!-- Wooden handle (vertical) -->
-      <rect x="58" y="54" width="6" height="32" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
-      <line x1="60" y1="60" x2="60" y2="84" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
+      <!-- BLADE OUTLINE: dark stroke embaixo (cria contorno escuro) -->
+      <path d="M 60 42 Q 38 50 18 38 Q 0 22 14 8 Q 28 0 38 8"
+            fill="none"
+            stroke="#1a1410"
+            stroke-width="16"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+      <!-- BLADE BODY: iron stroke por cima (preenchimento metálico do gume) -->
+      <path d="M 60 42 Q 38 50 18 38 Q 0 22 14 8 Q 28 0 38 8"
+            fill="none"
+            stroke="url(#rh-iron)"
+            stroke-width="13"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+      <!-- Inner cutting edge highlight (linha branca clara no gume interno) -->
+      <path d="M 56 38 Q 38 44 22 36 Q 10 24 18 14 Q 28 8 34 12"
+            fill="none"
+            stroke="#fff"
+            stroke-width="0.8"
+            opacity="0.7"
+            stroke-linecap="round"/>
+      <!-- Outer back ridge (linha escura subtle no back/dull side) -->
+      <path d="M 60 46 Q 38 54 14 40 Q -4 22 12 4"
+            fill="none"
+            stroke="#0a0605"
+            stroke-width="0.5"
+            opacity="0.5"
+            stroke-linecap="round"/>
+      <!-- Tip detail (ponta da blade) -->
+      <circle cx="40" cy="6" r="1.3" fill="#fff" opacity="0.55"/>
+      <!-- Iron socket onde blade encontra handle (cobre a ponta inferior do stroke) -->
+      <rect x="54" y="42" width="14" height="10" rx="1.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.6"/>
+      <line x1="54" y1="47" x2="68" y2="47" stroke="#1a1410" stroke-width="0.4"/>
+      <!-- Rivets no socket -->
+      <circle cx="58" cy="47" r="0.6" fill="#1a1410"/>
+      <circle cx="64" cy="47" r="0.6" fill="#1a1410"/>
+      <!-- Wooden handle (vertical, curto) -->
+      <rect x="58" y="52" width="6" height="34" fill="url(#rh-wood)" stroke="#1a0f08" stroke-width="0.6"/>
+      <line x1="60" y1="58" x2="60" y2="84" stroke="#3a2410" stroke-width="0.4" opacity="0.6"/>
       <!-- Leather grip wrap -->
-      <rect x="56" y="68" width="10" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
-      <line x1="56" y1="74" x2="66" y2="74" stroke="#2a1408" stroke-width="0.5"/>
-      <line x1="56" y1="82" x2="66" y2="82" stroke="#2a1408" stroke-width="0.5"/>
+      <rect x="56" y="66" width="10" height="20" fill="url(#rh-leather)" stroke="#1a0808" stroke-width="0.5"/>
+      <line x1="56" y1="72" x2="66" y2="72" stroke="#2a1408" stroke-width="0.5"/>
+      <line x1="56" y1="80" x2="66" y2="80" stroke="#2a1408" stroke-width="0.5"/>
       <!-- Iron pommel cap -->
-      <ellipse cx="61" cy="94" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
+      <ellipse cx="61" cy="92" rx="5" ry="2.5" fill="url(#rh-iron)" stroke="#1a1410" stroke-width="0.55"/>
     </symbol>
 
     <!-- Chicote: cabo + chicote enrolado em espiral -->
@@ -1635,8 +1657,15 @@
     <!-- Maça de Estrela -->
     <symbol id="ic-it-maca-estrela" viewBox="0 0 120 120"><use href="#ic-it-base-morningstar"/></symbol>
 
-    <!-- Foice -->
-    <symbol id="ic-it-foice" viewBox="0 0 120 120"><use href="#ic-it-base-sickle"/></symbol>
+    <!-- Foice (agricultural): mesma base + nós rústicos no cabo + manchinha de ferrugem na blade -->
+    <symbol id="ic-it-foice" viewBox="0 0 120 120">
+      <use href="#ic-it-base-sickle"/>
+      <ellipse cx="62" cy="68" rx="2" ry="1.4" fill="#3a2410" opacity="0.85"/>
+      <ellipse cx="58" cy="78" rx="1.6" ry="1.1" fill="#3a2410" opacity="0.75"/>
+      <ellipse cx="61" cy="74" rx="1.2" ry="0.9" fill="#3a2410" opacity="0.6"/>
+      <circle cx="22" cy="24" r="1.4" fill="#5a3a1a" opacity="0.7"/>
+      <circle cx="14" cy="32" r="1" fill="#5a3a1a" opacity="0.55"/>
+    </symbol>
 
     <!-- Espada Enferrujada -->
     <symbol id="ic-it-espada-enferrujada" viewBox="0 0 120 120">
@@ -1774,14 +1803,14 @@
       <path d="M 22 50 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
     </symbol>
 
-    <!-- alabarda-1 v2: sparks reposicionados para os 4 cantos em volta da nova cabeça maior -->
+    <!-- alabarda-1 v3: sparks pros 4 cantos da nova cabeça (axe vai até x=0 / y=74) -->
     <symbol id="ic-it-alabarda-1" viewBox="0 0 120 120">
       <use href="#ic-it-base-halberd"/>
-      <circle cx="56" cy="38" r="52" fill="url(#rh-glow-arcane)" opacity="0.4"/>
-      <path d="M 10 12 l 1.4 -2.2 l 1.4 2.2 l 2.2 1.4 l -2.2 1.4 l -1.4 2.2 l -1.4 -2.2 l -2.2 -1.4 z" fill="#fff" opacity="0.95"/>
-      <path d="M 108 14 l 1.2 -2 l 1.2 2 l 2 1.2 l -2 1.2 l -1.2 2 l -1.2 -2 l -2 -1.2 z" fill="#fff" opacity="0.9"/>
-      <path d="M 110 56 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
-      <path d="M 8 72 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
+      <circle cx="58" cy="42" r="58" fill="url(#rh-glow-arcane)" opacity="0.4"/>
+      <path d="M 8 6 l 1.4 -2.2 l 1.4 2.2 l 2.2 1.4 l -2.2 1.4 l -1.4 2.2 l -1.4 -2.2 l -2.2 -1.4 z" fill="#fff" opacity="0.95"/>
+      <path d="M 104 8 l 1.4 -2.2 l 1.4 2.2 l 2.2 1.4 l -2.2 1.4 l -1.4 2.2 l -1.4 -2.2 l -2.2 -1.4 z" fill="#fff" opacity="0.9"/>
+      <path d="M 112 56 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.85"/>
+      <path d="M 14 80 l 0.8 -1.2 l 0.8 1.2 l 1.2 0.8 l -1.2 0.8 l -0.8 1.2 l -0.8 -1.2 l -1.2 -0.8 z" fill="#fff" opacity="0.8"/>
     </symbol>
 
     <symbol id="ic-it-machado-grande-1" viewBox="0 0 120 120">
