@@ -2,6 +2,34 @@ var tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();}
 var _spaP=window.__spaRouteParams||{};var params=new URLSearchParams(location.search);var TOKEN=_spaP.token||params.get('token')||'';var API_BASE=(_spaP.api||params.get('api')||'').replace(/\/$/,'');var USER_ID=parseInt(_spaP.uid||params.get('uid')||'0',10);if(window.SessionHeartbeat&&API_BASE&&TOKEN&&USER_ID){SessionHeartbeat.init({apiBase:API_BASE,token:TOKEN,uid:USER_ID});}
 var MODE=_spaP.mode||params.get('mode')||'full';var SHOW_PREFACE=(_spaP.preface||params.get('preface'))==='1';if(window.ValdoriaErrors){ValdoriaErrors.init({appName:'PROLOGUE',apiBase:API_BASE,token:TOKEN,uid:USER_ID,});}
 var DATA=null;var screenIdx=0;var choices={};var rerollsLeft=5;function haptic(type){if(window.vHaptic)vHaptic.impact(type||'light');}
+/* X-6.5.51AM (2026-05-08) PADRAO_ALDRIC helpers — wrap text in narration/speech
+   blocks com reveal animation. Substitui plain .prologue-text divs por blocos
+   AAA quality compatíveis com cidade.html PADRAO_ALDRIC encounters. */
+function _computeRevealDur(text){var c=(text||'').length;return Math.max(900,Math.min(4000,c*14+600));}
+function _narration(text){var dur=_computeRevealDur(text);return '<div class="prol-line prol-narration" style="--reveal-dur:'+dur+'ms">'+(text||'')+'</div>';}
+function _speech(speaker,text){var dur=_computeRevealDur(text);var safe=String(speaker||'').replace(/"/g,'&quot;');return '<div class="prol-line prol-speech" data-speaker="'+safe+'" style="--reveal-dur:'+dur+'ms">'+(text||'')+'</div>';}
+/* Build the PADRAO_ALDRIC card shell (header + body + actions) */
+function _prolCard(opts){
+  var portrait=opts.portrait||'<svg viewBox="0 0 120 120"><use href="#ic-portoes"/></svg>';
+  var name=opts.name||'';
+  var desc=opts.desc||'';
+  var pageInd=opts.pageInd||'';
+  var bodyHtml=opts.body||'';
+  var actionsHtml=opts.actions||'';
+  return ''
+    + '<div class="prol-card">'
+    + '  <div class="prol-header">'
+    + '    <div class="prol-portrait">' + portrait + '</div>'
+    + '    <div class="prol-meta">'
+    + '      <h3 class="prol-name">' + name + '</h3>'
+    + (desc ? '      <p class="prol-desc">' + desc + '</p>' : '')
+    + '    </div>'
+    + (pageInd ? '    <div class="prol-page-ind">' + pageInd + '</div>' : '')
+    + '  </div>'
+    + '  <div class="prol-body">' + bodyHtml + '</div>'
+    + (actionsHtml ? '  <div class="prol-actions">' + actionsHtml + '</div>' : '')
+    + '</div>';
+}
 async function apiCall(endpoint,body={}){const headers={'Content-Type':'application/json','Authorization':`Bearer ${TOKEN}`,};if(window.Telegram?.WebApp?.initData){headers['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 if(endpoint.includes('/reroll')||endpoint.includes('/fight')||endpoint.includes('/complete')||endpoint.includes('/distract')){headers['X-Idempotency-Key']=crypto.randomUUID();}
 const resp=await fetchT(`${API_BASE}${endpoint}`,{method:'POST',headers,body:JSON.stringify({user_id:USER_ID,...body}),});if(resp.status===401||resp.status===403){console.error('[PROLOGUE] Auth error:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'webapp_reconnect',webapp:'PROLOGUE',reason:resp.status===401?'session_expired':'invalid_init_data',}));setTimeout(function(){if(tg.close)tg.close();},1000);}
@@ -11,49 +39,101 @@ return resp.json().then(function(data){if(data&&data.status==='displaced'){if(wi
 var track=document.getElementById('track');function addScreen(html){const div=document.createElement('div');div.className='screen fade-in';div.innerHTML=html;track.appendChild(div);return track.children.length-1;}
 function goToScreen(idx){screenIdx=idx;track.style.transform=`translateX(-${idx * 100}%)`;}
 function nextScreen(html){const idx=addScreen(html);setTimeout(()=>goToScreen(idx),50);}
-function renderPreface(){const text=DATA.preface_text||'Boas vindas a Eldoria!';return`
-        <div class="screen-title">Boas-Vindas a Eldoria</div>
-        <div class="prologue-text">${text}</div>
-        <button class="hero-btn" onclick="haptic('medium'); onPrefaceDone()">Entendido!</button>
-    `;}
-function renderIntro(){const c=DATA.character||{};const l=DATA.lore||{};const fullName=`${c.name || ''} ${c.surname || ''}`.trim();const rerollLabel=rerollsLeft>0?`🎲 Sortear Outra (${rerollsLeft})`:'🎲 Limite atingido';return`
-        <div class="screen-title">A Jornada de ${fullName.toUpperCase()}</div>
-        <div class="char-badge">
-            <span class="char-badge-icon">${c.class_icon || '⚔️'}</span>
-            <div class="char-badge-info">
-                <div class="char-badge-name">${fullName}</div>
-                <div class="char-badge-details">${c.class_label || ''} ${c.race || ''} · Nível ${c.level || 1}</div>
-            </div>
-        </div>
-        <div class="lore-card">
-            <div class="lore-card-title">${l.title || 'Sua Origem'}</div>
-            <div class="lore-card-desc">${l.description || ''}</div>
-        </div>
-        <div class="screen-subtitle">As origens criam escolhas e eventos diferentes durante a jornada.</div>
-        <div class="btn-row">
-            <button class="outline-btn" onclick="haptic(); openLoreOverlay()">📜 Ver Origem</button>
-            <button class="outline-btn" id="rerollBtn" onclick="haptic(); doReroll()" ${rerollsLeft <= 0 ? 'disabled' : ''}>${rerollLabel}</button>
-        </div>
-        <button class="hero-btn" onclick="haptic('medium'); onIntroDone()">Continuar ▸</button>
-    `;}
-function renderGate(){const inter=DATA.interaction||{};const title=inter.title||'EVENTO';const text=inter.text||'';const options=inter.options||[];let choicesHtml=options.map(o=>`<button class="choice-btn" onclick="haptic('medium'); onGateChoice('${o.key}')">${o.label}</button>`).join('');return`
-        <div class="screen-title">${title}</div>
-        <div class="prologue-text">${text}</div>
-        <div class="choice-list">${choicesHtml}</div>
-    `;}
-function renderRoad(){const road=DATA.road||{};const text=road.text||'';return`
-        <div class="screen-title">Emboscada na Estrada</div>
-        <div class="prologue-text">${text}</div>
-        <div class="choice-list">
-            <button class="choice-btn" onclick="haptic('heavy'); onRoadChoice('fight')">⚔️ Lutar!</button>
-            <button class="choice-btn" onclick="haptic('medium'); onRoadChoice('distract')">🛡️ Criar distração</button>
-        </div>
-    `;}
-function renderAftermath(){const text=DATA.aftermath_text||'';return`
-        <div class="screen-title">Thorne, o Ferreiro</div>
-        <div class="prologue-text">${text}</div>
-        <button class="hero-btn" onclick="haptic('heavy'); onAftermathDone()">🏰 Seguir para os Portões</button>
-    `;}
+function renderPreface(){
+  const text=DATA.preface_text||'Boas vindas a Eldoria!';
+  return _prolCard({
+    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-portoes"/></svg>',
+    name: 'Boas-Vindas a Eldoria',
+    desc: 'O início da sua jornada',
+    pageInd: '1 / 1',
+    body: _narration(text),
+    actions: '<button class="prol-btn prol-btn-primary" onclick="haptic(\'medium\'); onPrefaceDone()">▸ Continuar</button>'
+  });
+}
+function renderIntro(){
+  const c=DATA.character||{};
+  const l=DATA.lore||{};
+  const fullName=`${c.name || ''} ${c.surname || ''}`.trim();
+  const rerollLabel=rerollsLeft>0?`🎲 Sortear Outra (${rerollsLeft})`:'🎲 Limite atingido';
+  const charBadgeHtml = ''
+    + '<div class="prol-char-badge">'
+    + '  <div class="prol-char-icon">' + (c.class_icon || '⚔️') + '</div>'
+    + '  <div class="prol-char-info">'
+    + '    <div class="prol-char-name">' + fullName + '</div>'
+    + '    <div class="prol-char-details">' + (c.class_label || '') + ' · ' + (c.race || '') + ' · Nível ' + (c.level || 1) + '</div>'
+    + '  </div>'
+    + '</div>';
+  const loreHtml = ''
+    + '<div class="prol-lore-card">'
+    + '  <div class="prol-lore-title">📜 ' + (l.title || 'Sua Origem') + '</div>'
+    + '  <div class="prol-lore-desc">' + (l.description || '') + '</div>'
+    + '</div>';
+  const subHtml = _narration('As origens criam escolhas e eventos diferentes durante a jornada.');
+  const actionsHtml = ''
+    + '<div class="prol-btn-row">'
+    + '  <button class="prol-btn prol-btn-outline" onclick="haptic(); openLoreOverlay()">📜 Ver Origem</button>'
+    + '  <button class="prol-btn prol-btn-outline" id="rerollBtn" onclick="haptic(); doReroll()"' + (rerollsLeft <= 0 ? ' disabled' : '') + '>' + rerollLabel + '</button>'
+    + '</div>'
+    + '<button class="prol-btn prol-btn-primary" onclick="haptic(\'medium\'); onIntroDone()">▸ Continuar Jornada</button>';
+  return _prolCard({
+    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-guerreiro"/></svg>',
+    name: 'A Jornada de ' + fullName.toUpperCase(),
+    desc: 'Sua história começa aqui',
+    body: charBadgeHtml + loreHtml + subHtml,
+    actions: actionsHtml
+  });
+}
+function renderGate(){
+  const inter=DATA.interaction||{};
+  const title=inter.title||'EVENTO';
+  const text=inter.text||'';
+  const options=inter.options||[];
+  const choicesHtml=options.map(function(o){
+    return '<button class="prol-btn" onclick="haptic(\'medium\'); onGateChoice(\'' + o.key + '\')">' + o.label + '</button>';
+  }).join('');
+  return _prolCard({
+    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-portoes"/></svg>',
+    name: title,
+    desc: 'Os portões de Valdória',
+    body: _narration(text),
+    actions: choicesHtml
+  });
+}
+function renderRoad(){
+  const road=DATA.road||{};
+  const text=road.text||'';
+  return _prolCard({
+    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-lobo"/></svg>',
+    name: 'Emboscada na Estrada',
+    desc: 'Lobos cercam a carroça do ferreiro',
+    body: _narration(text),
+    actions: ''
+      + '<button class="prol-btn" onclick="haptic(\'heavy\'); onRoadChoice(\'fight\')">⚔️ Lutar contra os lobos!</button>'
+      + '<button class="prol-btn" onclick="haptic(\'medium\'); onRoadChoice(\'distract\')">🛡️ Criar uma distração</button>'
+  });
+}
+function renderAftermath(){
+  const text=DATA.aftermath_text||'';
+  /* X-6.5.51AM: usa speech bubble pra fala do Thorne (texto chega geralmente
+     com fala dele), narration pro restante. Detecta aspas pra dividir. */
+  var bodyHtml = '';
+  /* Tenta separar narration | "fala" | narration */
+  var match = text.match(/^([\s\S]*?)([""''](.+)[""''])([\s\S]*)$/);
+  if (match && match[3]){
+    if (match[1] && match[1].trim()) bodyHtml += _narration(match[1].trim());
+    bodyHtml += _speech('Thorne, o Ferreiro', match[3]);
+    if (match[4] && match[4].trim()) bodyHtml += _narration(match[4].trim());
+  } else {
+    bodyHtml = _narration(text);
+  }
+  return _prolCard({
+    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-guerreiro"/></svg>',
+    name: 'Thorne, o Ferreiro',
+    desc: 'Salvo dos lobos, agradecido',
+    body: bodyHtml,
+    actions: '<button class="prol-btn prol-btn-primary" onclick="haptic(\'heavy\'); onAftermathDone()">🏰 Seguir para os Portões</button>'
+  });
+}
 function openLoreOverlay(){const l=DATA.lore||{};const c=DATA.character||{};const fullName=`${c.name || ''} ${c.surname || ''}`.trim();const body=document.getElementById('loreOverlayBody');if(!body)return;body.innerHTML=`
         <div class="screen-title" style="text-align:left;margin-bottom:12px">📜 ${fullName}</div>
         <div style="line-height:1.7">${l.intro_text || 'Nenhuma história disponível.'}</div>
