@@ -13548,10 +13548,52 @@ var SHADOW_EVENT_POOL = [
       return { ok: false, gold_from: preGold, gold_to: p.gold, msg: '❌ DES ' + roll + ' vs DC ' + dc + '. Quando percebe, <b>' + loss + ' Valdoritas</b> já sumiram do bolso.' };
     }
   },
-  { id: 'whispers', icon: _heralIco('ic-dialogo'), name: 'Sussurros',
+  /* X-6.5.51AV (2026-05-08) — Sussurros Arcanos AAA. User pediu: "garantir
+     narrativa nivel PADRAO_ALDRIC com falas de NPCs sempre destacadas".
+     Antes era um popup simples. Agora: encounter PADRAO_ALDRIC com 2 NPCs
+     conspirando (figuras encapuzadas), 4 falas em speech bubbles douradas,
+     skill check Percepção (DC 13) com 3 escolhas. */
+  { id: 'whispers', icon: _heralIco('ic-dialogo'), name: 'Sussurros Arcanos',
     text: 'Duas figuras cochicham atrás de uma cortina: <i>"...a forja abandonada guarda mais do que ferrugem..."</i>',
-    check: 'observação livre', resolve: function(p){
-      return { ok: true, msg: '<i>Você anota o boato no diário.</i> Pode investigar a forja abandonada numa próxima viagem.' };
+    check: 'PADRAO_ALDRIC encounter',
+    /* PADRAO_ALDRIC script — usa _renderEncounterPopup canonical */
+    isAldricEncounter: true,
+    encounterId: 'shadow_whispers',
+    npcKey: 'shadow_whisperer',
+    npcData: {
+      name: 'Figura Encapuzada',
+      desc: 'Conspirador noturno do submundo',
+      portrait: 'ic-bruxo'
+    },
+    script: [
+      { type: 'narration', text: 'Você se espreme atrás de barris empilhados. <b>Duas figuras encapuzadas</b> conversam baixo atrás de uma cortina rasgada — não te viram. As vozes carregam um peso ritualístico, palavras escolhidas com cuidado.' },
+      { type: 'speech', speaker: 'shadow_whisperer', text: '— A forja abandonada guarda mais do que ferrugem. <i>(uma pausa carregada)</i> Os irmãos antigos deixaram <b>algo</b> lá quando partiram. Algo que pulsa no escuro.' },
+      { type: 'speech', speaker: 'shadow_whisperer', text: '— Quem mexe sem saber, paga. <i>(o tom é grave)</i> Mas quem sabe — quem REALMENTE sabe — sai de lá com o que vale dez anos de ouro de mercador.' },
+      { type: 'narration', text: 'Você prende a respiração. Eles podem te pegar a qualquer momento. Mas o que ouviu vale ouro de outra forma — informação é poder no submundo de Eldoria.' }
+    ],
+    choices: [
+      { id: 'observe_carefully', label: '👁️ Memorizar (Percepção · SAB)', stat: 'wisdom', dc: 13,
+        result_text: 'Você grava cada palavra mentalmente. Os nomes dos "irmãos antigos" vão pra seu diário — informação valiosa pra missões futuras na <b>forja abandonada</b>.',
+        result_text_fail: 'Você se concentra demais e esbarra num barril. As figuras se calam abruptamente. Você sai antes de ser visto, mas perdeu metade do que diziam.',
+        effect: { xp: 18, gold: 0 },
+        effect_fail: { xp: 4 }
+      },
+      { id: 'arcane_attune', label: '✨ Sintonizar (Arcanismo · INT)', stat: 'intelligence', dc: 14,
+        result_text: 'Você reconhece os fragmentos arcanos nas palavras deles — uma <b>cifra de bruxos</b>. Decodifica em segundos: a forja guarda um <b>artefato selado</b>, mas só pode ser aberto na noite de lua nova com sangue de descendente.',
+        result_text_fail: 'A cifra é mais sutil que parece. Você capta apenas fragmentos soltos, sem contexto. Útil, mas pouco.',
+        effect: { xp: 25, gold: 5 },
+        effect_fail: { xp: 6 }
+      },
+      { id: 'walk_away', label: '🚶 Sair em silêncio',
+        result_text: 'Você recua devagar e se afasta. <i>"Algumas conversas não devem ser ouvidas. Algumas portas não devem ser abertas."</i>',
+        effect: { xp: 3 }
+      }
+    ],
+    resolve: function(p){
+      /* Fallback resolver pra compatibilidade com o old _shadowShowEvent flow.
+         Se _renderEncounterPopup estiver disponível, usa o encounter; senão
+         retorna msg simples como antes. */
+      return { ok: true, msg: '<i>Você anota o boato no diário.</i> A forja abandonada guarda segredos antigos.' };
     }
   },
   { id: 'guard_patrol', icon: _heralIco('ic-stat-ac'), name: 'Patrulha da Guarda',
@@ -13592,6 +13634,30 @@ function _shadowShowEvent(p){
     return;
   }
   var ev = SHADOW_EVENT_POOL[Math.floor(Math.random() * SHADOW_EVENT_POOL.length)];
+
+  /* X-6.5.51AV (2026-05-08): if event is marked PADRAO_ALDRIC encounter
+     (isAldricEncounter:true), dispatch to _renderEncounterPopup canonical
+     that renders speech bubbles + paginated dialogue + skill check choices.
+     Skips the legacy _showInfoPopup flow. */
+  if (ev.isAldricEncounter && typeof _renderEncounterPopup === 'function') {
+    /* Register NPC if not already (RECURRING_NPCS lookup) */
+    if (ev.npcData && typeof RECURRING_NPCS !== 'undefined' && !RECURRING_NPCS[ev.npcKey]) {
+      RECURRING_NPCS[ev.npcKey] = ev.npcData;
+    }
+    var enc = {
+      id: ev.encounterId || ev.id,
+      npc: ev.npcKey,
+      triggers: [],
+      script: ev.script,
+      choices: ev.choices.map(function(c){
+        return { id: c.id, label: c.label, result: 'shadow_aldric', _interactiveData: c };
+      }),
+      onDone: function(){}
+    };
+    _renderEncounterPopup(enc, 'shadow_aldric', p);
+    return;
+  }
+
   // canonical: usa textos longos de CANON_SHADOW_EVENTS quando disponiveis
   // (PICKPOCKET_TEXTS / WHISPERS_TEXTS / GUARD_PATROL_TEXTS_SPOTTED+MISSED).
   var canonEvents = (typeof CANON_SHADOW_EVENTS !== 'undefined') ? CANON_SHADOW_EVENTS : {};
@@ -19749,64 +19815,14 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
         }
       }
     ]
-  },
-  /* X-6.5.51AU (2026-05-08) — Sussurros Arcanos: evento misterioso AAA.
-     User reportou "apareceu uma tela Sussurros Arcanos, escolhi investigar,
-     não teve rolagem de dados, apareceu um popup em seguida e sumiu". O
-     evento não existia oficialmente — agora existe com narrativa rica,
-     dice roll obrigatório, e múltiplas escolhas. */
-  {
-    "id": "sussurros_arcanos",
-    "title": "Sussurros Arcanos",
-    "text": "Ao passar perto de uma fonte de pedra antiga, você sente um calafrio. <i>Vozes</i> sem boca chegam aos seus ouvidos — fragmentos de uma língua morta. Apenas <b>você</b> parece ouvi-las.",
-    "weight": 3,
-    "choices": [
-      {
-        "id": "investigate_arcane",
-        "label": "🔍 Investigar (INT)",
-        "stat": "intelligence",
-        "dc": 13,
-        "result_text": "<i>(Você se concentra nos sussurros)</i><br><br>"
-                     + "As vozes não falam <b>com</b> você — falam <b>através</b> de você. "
-                     + "São ecos antigos presos na <b>fonte de pedra</b>, vestígios de "
-                     + "rituais arcanos esquecidos. Você reconhece três palavras: "
-                     + "<i>'sangue'</i>, <i>'limiar'</i>, <i>'volta'</i>. "
-                     + "Anota mentalmente — pode ser pista pra missões futuras.",
-        "result_text_fail": "Você se aproxima da fonte e tenta <i>ouvir melhor</i>. "
-                          + "As vozes ficam mais altas, mais densas — começa uma <b>dor "
-                          + "aguda atrás dos olhos</b>. Você recua tonto, joelhos bambos. "
-                          + "Os sussurros somem com a dor.",
-        "effect": { "xp": 18 },
-        "effect_fail": { "xp": 4, "hp_heal": -2 }
-      },
-      {
-        "id": "channel_arcane",
-        "label": "✨ Canalizar (Conhecimento Arcano · CAR)",
-        "stat": "charisma",
-        "dc": 14,
-        "result_text": "<i>(Você responde aos sussurros com palavras antigas)</i><br><br>"
-                     + "Mãos invisíveis fecham ao redor das suas — quentes, mas não "
-                     + "ameaçadoras. Por um instante eternamente curto, você sente que "
-                     + "<b>algo do outro lado te conhece</b>. As vozes se calam, "
-                     + "satisfeitas. Você ganha uma <b>moeda antiga</b> caída na fonte "
-                     + "que não estava lá segundos atrás.",
-        "result_text_fail": "Você tenta responder com palavras solenes. As vozes <b>ri "
-                          + "alto</b> — uma risada sem alegria que ecoa em sua mente "
-                          + "por minutos. Você se afasta da fonte sentindo náusea.",
-        "effect": { "xp": 25, "gold": 8 },
-        "effect_fail": { "xp": 5 }
-      },
-      {
-        "id": "ignore_arcane",
-        "label": "🚶 Ignorar e seguir",
-        "stat": null,
-        "dc": null,
-        "result_text": "Você acelera o passo. As vozes desaparecem assim que você "
-                     + "se afasta da fonte. <i>Algumas portas é melhor não abrir.</i>",
-        "effect": { "xp": 2 }
-      }
-    ]
   }
+  /* X-6.5.51AV (2026-05-08): "Sussurros Arcanos" event REMOVED from this
+     plaza pool. The canonical event already exists in SHADOW_EVENT_POOL
+     (Beco Sombrio) at line ~13551 — id 'whispers' with isAldricEncounter:true
+     + speech bubbles + 3 PADRAO_ALDRIC choices. Triggered when player
+     visits the Shadow Alley (tavern_blackmarket nav). User confirmed the
+     event exists in the project — search initially missed it because
+     'Sussurros Arcanos' was actually 'Sussurros' (rebranded in X-6.5.51AV). */
 ];
 
 // canonical: data/interaction_results*.py (animals + merchants + artists + citizens)
@@ -42352,6 +42368,14 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     var interactiveData = choice._interactiveData;
     if (interactiveData && typeof _resolveInteractiveChoice === 'function') {
       _resolveInteractiveChoice(player, interactiveData);
+    }
+  } else if (choice.result === 'shadow_aldric') {
+    /* X-6.5.51AV (2026-05-08): shadow alley events com PADRAO_ALDRIC encounter.
+       Mesmo schema que plaza_interactive (stat check + result_text + effect).
+       Reusa _resolveInteractiveChoice canonical. */
+    var shadowData = choice._interactiveData;
+    if (shadowData && typeof _resolveInteractiveChoice === 'function') {
+      _resolveInteractiveChoice(player, shadowData);
     }
   } else if (choice.result === 'discovery_unlock') {
     // PADRAO_ALDRIC v9 (2026-05-05): discovery quest aceita — finaliza
