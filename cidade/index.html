@@ -7961,16 +7961,12 @@ function _showCharactersPopup(){
     _onPlayCharacter();
   });
   var createBtn = bodyEl.querySelector('.hall-btn-create');
-  if (createBtn) createBtn.addEventListener('click', function(){
-    // USER REQUEST 2026-05-04: redireciona p/ /character_creator/index.html
-    // (WebApp standalone com fluxo de criação completo). Em REMOTE passa token+api+uid.
+  if (createBtn) createBtn.addEventListener('click', async function(){
     var params = new URLSearchParams(window.location.search);
     var token = params.get('token');
     var api = params.get('api');
     var uid = params.get('uid');
     var env = params.get('env');
-    /* FIX 2026-05-07 (user report): em file:// o handler só mostrava toast.
-       Agora redireciona pro character_creator local pra fluxo testável. */
     if (window.location.protocol === 'file:'){
       window.__valdoria_transitioning = true;
       window.location.href = '../character_creator/index.html?local=1&new=1';
@@ -7980,9 +7976,47 @@ function _showCharactersPopup(){
       vToast('Sessão não encontrada. Faça login novamente.');
       return;
     }
+    /* X-6.5.51AK (2026-05-08) — handshake pra obter creation_token novo.
+       Antes: passava session_token direto pro character_creator → /apply
+       retornava 401 invalid_session (token type mismatch). Agora chama
+       /api/character/new_session que valida session + emite creation_token
+       fresco. character_creator vai usar esse token corretamente. */
+    var creationToken = token;  // fallback se handshake falhar
+    var charId = '';
+    try {
+      vToast('🎭 Preparando criação...');
+      var apiTrim = api.replace(/\/$/, '');
+      var resp = await fetch(apiTrim + '/api/character/new_session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify({ user_id: uid }),
+      });
+      if (resp.ok) {
+        var data = await resp.json();
+        if (data && data.token) {
+          creationToken = data.token;
+          charId = data.char_id || '';
+        } else {
+          vToast('⚠️ Sessão inválida. Faça login no bot.');
+          return;
+        }
+      } else {
+        vToast('⚠️ Erro de sessão (' + resp.status + ').');
+        return;
+      }
+    } catch (e) {
+      console.warn('[CITY] new_session handshake failed:', e);
+      vToast('⚠️ Erro de conexão.');
+      return;
+    }
     var newParams = new URLSearchParams();
-    newParams.set('token', token);
+    newParams.set('token', creationToken);
     newParams.set('api', api);
+    newParams.set('api_base', api);  // retro-compat com character_creator antigo
+    if (charId) newParams.set('char_id', charId);
     if (uid){ newParams.set('uid', uid); newParams.set('user_id', uid); }
     if (env) newParams.set('env', env);
     newParams.set('new', '1');
