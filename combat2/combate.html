@@ -13044,10 +13044,18 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     }
     var resMax = resMaxBase;
     var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
+    /* X-6.5.51AQ (2026-05-08): protect_player_when_low + min_hp_taunt_threshold +
+       icon (heráldico) propagados do spec → unit. Ally narrativo do prólogo
+       (Thorne) usa estes campos pra (1) AI dos lobos ignorar quando wounded
+       e (2) UI mostrar ícone heráldico canonical em vez de fallback. */
+    var protectPlayerWhenLow = !!(spec && spec.protect_player_when_low);
+    var minHpTauntThr = (spec && spec.min_hp_taunt_threshold != null)
+        ? Math.max(1, parseInt(spec.min_hp_taunt_threshold, 10) || 8) : 8;
+    var customIco = (spec && spec.icon) ? String(spec.icon) : null;
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
         summonsInvoked: summonsInvokedFinal,
-        race: race, ico: cdef.ico,
+        race: race, ico: customIco || cdef.ico,
         hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
@@ -13064,7 +13072,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         /* 2026-04-27: Wet status (D&D 5e DMG p.110). Importado da exploração via
            wetTurns_exact no SIM payload. Quando > 0: vulnerabilidade a frio +
            resistência a fogo. Decrementa 1 por round em rollInitiative/start. */
-        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0
+        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0,
+        /* X-6.5.51AQ: protect ally flags (Thorne ferreiro do prólogo) */
+        protect_player_when_low: protectPlayerWhenLow,
+        min_hp_taunt_threshold: minHpTauntThr
     };
 }
 
@@ -13382,6 +13393,16 @@ function pickNpcAttackTarget(s, attackerIdx) {
             if (u && u.noTarget) continue;
             /* V1.7 Sprint-8: PHB Charmed — pula caster bloqueado */
             if (_blockedCasterIdxs[i]) continue;
+            /* X-6.5.51AQ (2026-05-08) — Protect Ally flag: aliado marcado com
+               protect_player_when_low+min_hp_taunt_threshold (ex: Thorne ferreiro
+               do prólogo) é IGNORADO pelos inimigos quando HP <= threshold.
+               Inimigos focam no jogador. Garante que aliado narrativo nao morre
+               antes do player (regra do prólogo, lore-aware). */
+            if (u && u.t === 'a' && u.protect_player_when_low) {
+                var _thr = (typeof u.min_hp_taunt_threshold === 'number') ? u.min_hp_taunt_threshold : 8;
+                var _hp = (typeof u.hp === 'number') ? u.hp : 999;
+                if (_hp <= _thr) continue;  // skip — wolves ignore wounded protected ally
+            }
             if (partyMemberTargetable(u)) cand.push(i);
         }
         if (!cand.length) {

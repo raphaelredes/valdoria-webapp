@@ -24,6 +24,9 @@
         document.write('<link rel="stylesheet" href="../shared/processing-overlay.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/drawer.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="prologue.css?v=' + v + '">');
+        /* X-6.5.51AQ (2026-05-08): loading-title.css for AAA orb fallback in
+           PADRAO_ALDRIC card header (when no NPC icon — narration-only scenes). */
+        document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/orientation-gate.js?v=' + v + '"><\/script>');
@@ -44,6 +47,43 @@
 </head>
 
 <body>
+    <!-- X-6.5.51AQ (2026-05-08): Heraldic sprite subset for prologue. NPCs that
+         appear in prologue PADRAO_ALDRIC card header use these icons. Synced
+         from cidade.html master sprite (~L4615+). Add new icons here as needed.
+         Currently: ic-guerreiro (Thorne, the blacksmith). -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+      <symbol id="ic-guerreiro" viewBox="0 0 120 120">
+        <ellipse cx="60" cy="112" rx="30" ry="3" fill="#000" opacity="0.5"/>
+        <g transform="translate(60 60) rotate(-45)">
+          <path d="M -4 -50 L 4 -50 L 4 10 L -4 10 Z" fill="#d8d8d8" stroke="#0a0605" stroke-width="1.5"/>
+          <polygon points="-4,-50 4,-50 0,-62" fill="#d8d8d8" stroke="#0a0605" stroke-width="1.5"/>
+          <rect x="-1.2" y="-46" width="2.4" height="54" fill="#8a8a8a"/>
+          <line x1="-3" y1="-48" x2="-3" y2="8" stroke="#fff" stroke-width="0.7" opacity="0.6"/>
+          <path d="M -15 8 L 15 8 L 17 15 L -17 15 Z" fill="#c4953a" stroke="#0a0605" stroke-width="1.2"/>
+          <circle cx="0" cy="11.5" r="2" fill="#c02020" stroke="#0a0605" stroke-width="0.6"/>
+          <rect x="-3.5" y="15" width="7" height="17" fill="#4a2a10" stroke="#0a0605" stroke-width="1"/>
+          <g stroke="#0a0605" stroke-width="0.5"><line x1="-3.5" y1="18" x2="3.5" y2="19"/><line x1="-3.5" y1="21" x2="3.5" y2="22"/><line x1="-3.5" y1="24" x2="3.5" y2="25"/><line x1="-3.5" y1="27" x2="3.5" y2="28"/></g>
+          <circle cx="0" cy="35" r="4.5" fill="#c4953a" stroke="#0a0605" stroke-width="1.2"/>
+          <circle cx="0" cy="35" r="2.8" fill="#ffd700"/>
+        </g>
+        <g transform="translate(60 60) rotate(45)">
+          <path d="M -4 -50 L 4 -50 L 4 10 L -4 10 Z" fill="#d8d8d8" stroke="#0a0605" stroke-width="1.5"/>
+          <polygon points="-4,-50 4,-50 0,-62" fill="#d8d8d8" stroke="#0a0605" stroke-width="1.5"/>
+          <rect x="-1.2" y="-46" width="2.4" height="54" fill="#8a8a8a"/>
+          <line x1="-3" y1="-48" x2="-3" y2="8" stroke="#fff" stroke-width="0.7" opacity="0.6"/>
+          <path d="M -15 8 L 15 8 L 17 15 L -17 15 Z" fill="#c4953a" stroke="#0a0605" stroke-width="1.2"/>
+          <circle cx="0" cy="11.5" r="2" fill="#c02020" stroke="#0a0605" stroke-width="0.6"/>
+          <rect x="-3.5" y="15" width="7" height="17" fill="#4a2a10" stroke="#0a0605" stroke-width="1"/>
+          <g stroke="#0a0605" stroke-width="0.5"><line x1="-3.5" y1="18" x2="3.5" y2="19"/><line x1="-3.5" y1="21" x2="3.5" y2="22"/><line x1="-3.5" y1="24" x2="3.5" y2="25"/><line x1="-3.5" y1="27" x2="3.5" y2="28"/></g>
+          <circle cx="0" cy="35" r="4.5" fill="#c4953a" stroke="#0a0605" stroke-width="1.2"/>
+          <circle cx="0" cy="35" r="2.8" fill="#ffd700"/>
+        </g>
+        <circle cx="60" cy="60" r="5" fill="#c4953a" stroke="#0a0605" stroke-width="1.5"/>
+        <circle cx="60" cy="60" r="3" fill="#ffd700"/>
+        <circle cx="60" cy="60" r="1.2" fill="#fff8d0"/>
+      </symbol>
+    </defs></svg>
+
     <!-- Main viewport with horizontal slide transitions -->
     <div id="viewport">
         <div id="track"></div>

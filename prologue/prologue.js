@@ -8,9 +8,21 @@ var DATA=null;var screenIdx=0;var choices={};var rerollsLeft=5;function haptic(t
 function _computeRevealDur(text){var c=(text||'').length;return Math.max(900,Math.min(4000,c*14+600));}
 function _narration(text){var dur=_computeRevealDur(text);return '<div class="prol-line prol-narration" style="--reveal-dur:'+dur+'ms">'+(text||'')+'</div>';}
 function _speech(speaker,text){var dur=_computeRevealDur(text);var safe=String(speaker||'').replace(/"/g,'&quot;');return '<div class="prol-line prol-speech" data-speaker="'+safe+'" style="--reveal-dur:'+dur+'ms">'+(text||'')+'</div>';}
-/* Build the PADRAO_ALDRIC card shell (header + body + actions) */
+/* Build the PADRAO_ALDRIC card shell (header + body + actions).
+   X-6.5.51AQ (2026-05-08): se opts.portrait NÃO for fornecido (cenas sem NPC
+   falando — narração pura como "Emboscada na Estrada"), usa AAA orb (3D
+   animado, mesma esfera dourada da tela TOQUE PARA INICIAR) como fallback.
+   User pediu: "no circulo ao lado do titulo Emboscada na estrada precisamos
+   colocar a esfera 3d animada igual a tela TOQUE PARA INICIAR dentro dele
+   sempre que nao tiver icone para mostrar como nesse caso que nao tem NPC
+   falando, na narrativa atual... deve ser um fallback para quando nao tiver icone" */
 function _prolCard(opts){
-  var portrait=opts.portrait||'<svg viewBox="0 0 120 120"><use href="#ic-portoes"/></svg>';
+  var hasPortrait = !!(opts.portrait);
+  /* AAA orb fallback — placeholder DOM populado via JS depois (precisa
+     do CSS shared/loading-title.css carregado). */
+  var portrait = hasPortrait
+    ? opts.portrait
+    : '<div class="prol-aaa-orb" data-needs-orb="1"></div>';
   var name=opts.name||'';
   var desc=opts.desc||'';
   var pageInd=opts.pageInd||'';
@@ -19,7 +31,7 @@ function _prolCard(opts){
   return ''
     + '<div class="prol-card">'
     + '  <div class="prol-header">'
-    + '    <div class="prol-portrait">' + portrait + '</div>'
+    + '    <div class="prol-portrait' + (hasPortrait ? '' : ' prol-portrait-orb') + '">' + portrait + '</div>'
     + '    <div class="prol-meta">'
     + '      <h3 class="prol-name">' + name + '</h3>'
     + (desc ? '      <p class="prol-desc">' + desc + '</p>' : '')
@@ -30,13 +42,59 @@ function _prolCard(opts){
     + (actionsHtml ? '  <div class="prol-actions">' + actionsHtml + '</div>' : '')
     + '</div>';
 }
+/* X-6.5.51AQ — Build the AAA orb DOM (replicates ValdoriaTitleScreen orb
+   structure but scaled down for header portrait). Uses .title-orb-* CSS
+   classes from shared/loading-title.css (which prologue route MUST load). */
+function _buildProlAAAOrb(host){
+  if (!host) return;
+  host.innerHTML = '';
+  var orbWrap = document.createElement('div');
+  orbWrap.className = 'title-orb-wrap';
+  ['title-orb-rays','title-orb-ambient'].forEach(function(c){
+    var el = document.createElement('div'); el.className = c; orbWrap.appendChild(el);
+  });
+  var orb = document.createElement('div'); orb.className = 'title-orb';
+  var nebula = document.createElement('div'); nebula.className = 'title-orb-nebula';
+  ['title-orb-neb1','title-orb-neb2','title-orb-neb3','title-orb-neb4'].forEach(function(c){
+    var n = document.createElement('div'); n.className = c; nebula.appendChild(n);
+  });
+  ['title-orb-wisp title-orb-w1','title-orb-wisp title-orb-w2',
+   'title-orb-wisp title-orb-w3','title-orb-wisp title-orb-w4',
+   'title-orb-wisp title-orb-w5'].forEach(function(c){
+    var w = document.createElement('div'); w.className = c; nebula.appendChild(w);
+  });
+  ['title-orb-spark title-orb-sp1','title-orb-spark title-orb-sp2',
+   'title-orb-spark title-orb-sp3'].forEach(function(c){
+    var s = document.createElement('div'); s.className = c; nebula.appendChild(s);
+  });
+  orb.appendChild(nebula);
+  ['title-orb-core','title-orb-core-fl','title-orb-intlight','title-orb-term',
+   'title-orb-fresnel','title-orb-sss','title-orb-glass-top','title-orb-glass-bot'].forEach(function(c){
+    var l = document.createElement('div'); l.className = c; orb.appendChild(l);
+  });
+  orbWrap.appendChild(orb);
+  ['title-orb-caustic-1','title-orb-caustic-2','title-orb-caustic-3'].forEach(function(c){
+    var ca = document.createElement('div'); ca.className = c; orbWrap.appendChild(ca);
+  });
+  host.appendChild(orbWrap);
+}
+/* Hook: after each addScreen, populate any pending [data-needs-orb] elements */
+function _populatePendingOrbs(){
+  document.querySelectorAll('[data-needs-orb="1"]').forEach(function(host){
+    host.removeAttribute('data-needs-orb');
+    _buildProlAAAOrb(host);
+  });
+}
 async function apiCall(endpoint,body={}){const headers={'Content-Type':'application/json','Authorization':`Bearer ${TOKEN}`,};if(window.Telegram?.WebApp?.initData){headers['X-Telegram-Init-Data']=Telegram.WebApp.initData;}
 if(endpoint.includes('/reroll')||endpoint.includes('/fight')||endpoint.includes('/complete')||endpoint.includes('/distract')){headers['X-Idempotency-Key']=crypto.randomUUID();}
 const resp=await fetchT(`${API_BASE}${endpoint}`,{method:'POST',headers,body:JSON.stringify({user_id:USER_ID,...body}),});if(resp.status===401||resp.status===403){console.error('[PROLOGUE] Auth error:',resp.status);const tg=window.Telegram?.WebApp;if(tg?.sendData){window.__valdoria_transitioning=true;tg.sendData(JSON.stringify({action:'webapp_reconnect',webapp:'PROLOGUE',reason:resp.status===401?'session_expired':'invalid_init_data',}));setTimeout(function(){if(tg.close)tg.close();},1000);}
 throw new Error('session_expired');}
 if(!resp.ok){const errData=await resp.json().catch(()=>({}));throw new Error(errData.error||`HTTP ${resp.status}`);}
 return resp.json().then(function(data){if(data&&data.status==='displaced'){if(window.SessionHeartbeat){SessionHeartbeat.handleDisplaced(data.device||'',data.from_device||'');}return null;}return data;}).catch(function(){throw new Error('Resposta inválida do servidor');});}
-var track=document.getElementById('track');function addScreen(html){const div=document.createElement('div');div.className='screen fade-in';div.innerHTML=html;track.appendChild(div);return track.children.length-1;}
+var track=document.getElementById('track');function addScreen(html){const div=document.createElement('div');div.className='screen fade-in';div.innerHTML=html;track.appendChild(div);
+/* X-6.5.51AQ: populate AAA orb fallback in any new screen (data-needs-orb) */
+try { if(typeof _populatePendingOrbs === 'function') _populatePendingOrbs(); } catch(e){}
+return track.children.length-1;}
 function goToScreen(idx){screenIdx=idx;track.style.transform=`translateX(-${idx * 100}%)`;}
 function nextScreen(html){const idx=addScreen(html);setTimeout(()=>goToScreen(idx),50);}
 function renderPreface(){
@@ -103,9 +161,12 @@ function renderRoad(){
   const road=DATA.road||{};
   const text=road.text||'';
   return _prolCard({
-    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-lobo"/></svg>',
+    /* X-6.5.51AQ: SEM portrait — usa AAA orb fallback (cena de narração pura,
+       não há NPC falando aqui — apenas o narrador descrevendo a emboscada).
+       User pediu o orb 3D animado igual à tela TOQUE PARA INICIAR como
+       fallback quando não há ícone de NPC. */
     name: 'Emboscada na Estrada',
-    desc: 'Lobos cercam a carroça do ferreiro',
+    desc: 'A jornada se torna perigosa',
     body: _narration(text),
     actions: ''
       + '<button class="prol-btn" onclick="haptic(\'heavy\'); onRoadChoice(\'fight\')">⚔️ Lutar contra os lobos!</button>'
@@ -114,30 +175,92 @@ function renderRoad(){
 }
 function renderAftermath(){
   const text=DATA.aftermath_text||'';
-  /* X-6.5.51AM: usa speech bubble pra fala do Thorne (texto chega geralmente
-     com fala dele), narration pro restante. Detecta aspas pra dividir. */
+  /* X-6.5.51AQ (2026-05-08): aftermath narrative is multi-quote — Thorne has
+     TWO falas separadas. Old regex captured only ONE quote. Now: parse ALL
+     quotes between "..." (or smart quotes) and wrap each as separate speech
+     bubble; everything else is narration. User pediu: "tem uma segunda fala
+     dele que começa com Venha comigo... que deveria aparecer com visual igual
+     a fala Você salvou a vida do meu filho..." */
   var bodyHtml = '';
-  /* Tenta separar narration | "fala" | narration */
-  var match = text.match(/^([\s\S]*?)([""''](.+)[""''])([\s\S]*)$/);
-  if (match && match[3]){
-    if (match[1] && match[1].trim()) bodyHtml += _narration(match[1].trim());
-    bodyHtml += _speech('Thorne, o Ferreiro', match[3]);
-    if (match[4] && match[4].trim()) bodyHtml += _narration(match[4].trim());
+  var quoteRegex = /([""'']|<i>['"])(.+?)(['""'']|['"]<\/i>)/g;
+  var lastIdx = 0;
+  var match;
+  var foundAny = false;
+  while ((match = quoteRegex.exec(text)) !== null) {
+    foundAny = true;
+    var preText = text.slice(lastIdx, match.index).trim();
+    if (preText) bodyHtml += _narration(preText);
+    bodyHtml += _speech('Thorne, o Ferreiro', match[2]);
+    lastIdx = match.index + match[0].length;
+  }
+  if (foundAny) {
+    var trailing = text.slice(lastIdx).trim();
+    if (trailing) bodyHtml += _narration(trailing);
   } else {
     bodyHtml = _narration(text);
   }
   return _prolCard({
-    portrait: '<svg viewBox="0 0 120 120"><use href="#ic-guerreiro"/></svg>',
+    /* X-6.5.51AQ: portrait SVG com heraldic-sprite inline.
+       User pediu: "adicione o icone heraldico no circulo do lado esquerdo do
+       nome Thorne, o ferreiro no topo da janela". Usa ic-guerreiro (martelo
+       + escudo, condizente com ferreiro lutador). Color amber heraldic. */
+    portrait: '<svg viewBox="0 0 120 120" style="color:#b87333"><use href="#ic-guerreiro"/></svg>',
     name: 'Thorne, o Ferreiro',
     desc: 'Salvo dos lobos, agradecido',
     body: bodyHtml,
     actions: '<button class="prol-btn prol-btn-primary" onclick="haptic(\'heavy\'); onAftermathDone()">🏰 Seguir para os Portões</button>'
   });
 }
-function openLoreOverlay(){const l=DATA.lore||{};const c=DATA.character||{};const fullName=`${c.name || ''} ${c.surname || ''}`.trim();const body=document.getElementById('loreOverlayBody');if(!body)return;body.innerHTML=`
-        <div class="screen-title" style="text-align:left;margin-bottom:12px">📜 ${fullName}</div>
-        <div style="line-height:1.7">${l.intro_text || 'Nenhuma história disponível.'}</div>
-    `;vDrawer.open('loreOverlay');}
+function openLoreOverlay(){
+  const l=DATA.lore||{};
+  const c=DATA.character||{};
+  const fullName=`${c.name || ''} ${c.surname || ''}`.trim();
+  const body=document.getElementById('loreOverlayBody');
+  if(!body)return;
+  /* X-6.5.51AQ (2026-05-08): pagination + PADRAO_ALDRIC visual.
+     Server returns l.pages = [page1, page2, ...] (mínimo 2: Cap I real + Cap II procedural).
+     Client renderiza com nav Anterior/Próximo + page indicator. */
+  var pages = (l.pages && Array.isArray(l.pages) && l.pages.length) ? l.pages
+              : [l.intro_text || 'Nenhuma história disponível.'];
+  var curPage = 0;
+  function _renderPage() {
+    var pageHtml = pages[curPage] || '';
+    body.innerHTML = ''
+      + '<div class="prol-card" style="height:100%;">'
+      + '  <div class="prol-header">'
+      + '    <div class="prol-portrait prol-portrait-orb"><div class="prol-aaa-orb" data-needs-orb="1"></div></div>'
+      + '    <div class="prol-meta">'
+      + '      <h3 class="prol-name">📜 ' + (l.title || 'Sua Origem') + '</h3>'
+      + '      <p class="prol-desc">' + _escapeHtml(fullName) + '</p>'
+      + '    </div>'
+      + '    <div class="prol-page-ind">' + (curPage + 1) + ' / ' + pages.length + '</div>'
+      + '  </div>'
+      + '  <div class="prol-body" style="overflow-y:auto;">'
+      + '    <div class="prol-line prol-narration" style="--reveal-dur:' + _computeRevealDur(pageHtml) + 'ms;">'
+      + pageHtml.replace(/\n\n/g, '<br><br>')
+      + '    </div>'
+      + '  </div>'
+      + '  <div class="prol-actions" style="flex-direction:row;gap:6px;">'
+      + '    <button class="prol-btn" id="lore-prev"' + (curPage === 0 ? ' disabled' : '') + '>← Anterior</button>'
+      + (curPage < pages.length - 1
+          ? '    <button class="prol-btn prol-btn-primary" id="lore-next">Próximo →</button>'
+          : '    <button class="prol-btn prol-btn-primary" id="lore-close">✓ Entendido</button>')
+      + '  </div>'
+      + '</div>';
+    /* Wire buttons */
+    var prevBtn = body.querySelector('#lore-prev');
+    var nextBtn = body.querySelector('#lore-next');
+    var closeBtn = body.querySelector('#lore-close');
+    if (prevBtn) prevBtn.onclick = function(){ if(curPage>0){curPage--; haptic('light'); _renderPage();}};
+    if (nextBtn) nextBtn.onclick = function(){ if(curPage<pages.length-1){curPage++; haptic('light'); _renderPage();}};
+    if (closeBtn) closeBtn.onclick = function(){ haptic('medium'); closeLoreOverlay(); };
+    /* Populate AAA orb */
+    try { if(typeof _populatePendingOrbs === 'function') _populatePendingOrbs(); } catch(e){}
+  }
+  function _escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  _renderPage();
+  vDrawer.open('loreOverlay');
+}
 function closeLoreOverlay(){haptic();vDrawer.close('loreOverlay');}
 var _prologueDice=null;function showDiceRoll(result){const overlay=document.getElementById('diceOverlay');const canvas=document.getElementById('prologueDice3dCanvas');const breakdown=document.getElementById('diceBreakdown');const resultLabel=document.getElementById('diceResultLabel');const narrative=document.getElementById('diceNarrative');const actions=document.getElementById('diceActions');if(!overlay||!breakdown||!resultLabel||!narrative||!actions)return;breakdown.textContent='';resultLabel.textContent='';narrative.textContent='';actions.innerHTML='';overlay.classList.add('active');try{if(_prologueDice){_prologueDice.dispose();_prologueDice=null;}
 _prologueDice=new Dice3D(canvas,{size:typeof ValdoriaDice!=='undefined'?ValdoriaDice.D20_SIZE:220,dieType:'d20',duration:typeof ValdoriaDice!=='undefined'?ValdoriaDice.TIMING.D20_ROLL_MS:1200});}catch(e){console.warn('[PROLOGUE] Dice3D init failed, fallback:',e);_showDiceRollFallback(result);return;}
@@ -147,8 +270,78 @@ function _showDiceRollFallback(result){const d20=document.getElementById('diceD2
 function showGateResult(outcomeText,effectText,callback){const overlay=document.getElementById('resultOverlay');const textEl=document.getElementById('resultText');const effectsEl=document.getElementById('resultEffects');const skipBtn=document.getElementById('resultSkip');if(!overlay||!textEl||!effectsEl||!skipBtn)return;textEl.innerHTML=outcomeText;let badgeClass='neutral';if(effectText.includes('Penalidade')||effectText.includes('-'))badgeClass='negative';else if(effectText.includes('Bônus')||effectText.includes('+'))badgeClass='positive';effectsEl.innerHTML=effectText?`<div class="effect-badge ${badgeClass}">${effectText}</div>`:'';overlay.classList.add('active');const fullText=(outcomeText||'')+' '+(effectText||'');const delay=typeof calcReadTime==='function'?calcReadTime(fullText,'summary'):2500;let _done=false;const finish=()=>{if(_done)return;_done=true;skipBtn.classList.remove('visible');skipBtn.onclick=null;overlay.classList.remove('active');callback();};setTimeout(()=>{if(!_done){skipBtn.classList.add('visible');skipBtn.onclick=finish;}},500);setTimeout(finish,delay);}
 function onPrefaceDone(){nextScreen(renderIntro());}
 function onIntroDone(){closeLoreOverlay();nextScreen(renderRoad());}
-async function doReroll(){if(rerollsLeft<=0)return;const btn=document.getElementById('rerollBtn');if(btn){btn.disabled=true;btn.textContent='🎲 Sorteando...';}
-try{const result=await apiCall('/api/prologue/reroll');DATA.lore=result.lore;DATA.interaction=result.interaction;rerollsLeft=result.rerolls_left??(rerollsLeft-1);const screens=track.querySelectorAll('.screen');const currentScreen=screens[screenIdx];if(currentScreen){currentScreen.innerHTML=renderIntro();}}catch(e){showError('Erro ao sortear nova origem.',e);}}
+async function doReroll(){
+  if(rerollsLeft<=0)return;
+  const btn=document.getElementById('rerollBtn');
+  if(btn){btn.disabled=true;btn.textContent='🎲 Sorteando...';}
+  try{
+    const result=await apiCall('/api/prologue/reroll');
+    DATA.lore=result.lore;
+    DATA.interaction=result.interaction;
+    rerollsLeft=result.rerolls_left??(rerollsLeft-1);
+    const screens=track.querySelectorAll('.screen');
+    const currentScreen=screens[screenIdx];
+    if(currentScreen){currentScreen.innerHTML=renderIntro();}
+    /* X-6.5.51AQ (2026-05-08) — popup quando user usa o ULTIMO reroll.
+       Avisa que "Esta foi sua ultima sortida — mesmo se nao gostar, nao
+       conseguira sortear mais". User pediu: "precisamos de um popup com
+       botao Entendido avisando o jogador que ele nao conseguira sortear
+       mais, mesmo se nao gostar da ultima vez que sortear" */
+    if (rerollsLeft === 0) {
+      _showLastRerollPopup();
+    }
+  }catch(e){showError('Erro ao sortear nova origem.',e);}
+}
+function _showLastRerollPopup(){
+  /* Inject CSS (idempotent) */
+  if (!document.getElementById('reroll-limit-style')) {
+    var st = document.createElement('style');
+    st.id = 'reroll-limit-style';
+    st.textContent = ''
+      + '#reroll-limit-overlay{position:fixed;inset:0;z-index:10500;background:rgba(0,0,0,0.85);'
+      + '  display:flex;align-items:center;justify-content:center;padding:16px;'
+      + '  animation:rrFadeIn 0.4s ease-out}'
+      + '@keyframes rrFadeIn{from{opacity:0}to{opacity:1}}'
+      + '.rr-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+      + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
+      + '  max-width:380px;width:100%;padding:22px;text-align:center;'
+      + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
+      + '.rr-icon{font-size:36px;margin-bottom:12px;color:#c4953a;'
+      + '  text-shadow:0 0 12px rgba(196,149,58,0.5)}'
+      + '.rr-title{font-family:Cinzel,serif;color:#c4953a;font-size:16px;'
+      + '  font-weight:700;letter-spacing:1.5px;margin:0 0 12px;text-transform:uppercase;'
+      + '  text-shadow:0 0 8px rgba(196,149,58,0.4)}'
+      + '.rr-text{color:#d4c8b0;font-size:14px;line-height:1.6;margin-bottom:18px;'
+      + '  padding:10px 12px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.4);'
+      + '  border-radius:0 4px 4px 0;text-align:left;font-style:italic}'
+      + '.rr-btn{padding:14px 28px;background:linear-gradient(180deg,#c4953a,#9a7530);'
+      + '  border:1px solid #c4953a;border-radius:8px;color:#1a1510;'
+      + '  font-family:Cinzel,serif;font-size:14px;font-weight:700;'
+      + '  letter-spacing:1px;cursor:pointer;text-transform:uppercase;'
+      + '  min-width:160px;min-height:48px;'
+      + '  box-shadow:0 3px 12px rgba(196,149,58,0.3);'
+      + '  transition:transform 0.1s,background 0.15s}'
+      + '.rr-btn:hover{background:linear-gradient(180deg,#d4a54a,#a78540)}'
+      + '.rr-btn:active{transform:scale(0.97)}';
+    document.head.appendChild(st);
+  }
+  var ov = document.createElement('div');
+  ov.id = 'reroll-limit-overlay';
+  ov.innerHTML = ''
+    + '<div class="rr-card">'
+    + '  <div class="rr-icon">🎲</div>'
+    + '  <h3 class="rr-title">Última Sortida</h3>'
+    + '  <p class="rr-text">Esta foi a sua última oportunidade de sortear uma nova origem. '
+    + 'O destino agora se firmou — mesmo que não goste do resultado, terá que seguir adiante '
+    + 'com a história que o dado escolheu.</p>'
+    + '  <button class="rr-btn">Entendido</button>'
+    + '</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('.rr-btn').addEventListener('click', function(){
+    haptic('medium');
+    ov.remove();
+  });
+}
 /* X-6.5.51AN (2026-05-08) anti-cheat helper: persiste escolha server-side
    IMEDIATAMENTE. Falha silenciosa (best-effort) — se rede cair, escolha
    ainda vai no /complete. Mas se servidor confirmar, /init futuro retorna
