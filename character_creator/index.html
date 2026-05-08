@@ -2372,8 +2372,15 @@
             const params = new URLSearchParams(location.search);
             token = params.get('token') || '';
             charId = params.get('char_id') || '';
-            apiBase = params.get('api_base') || '';
-            userId = params.get('user_id') || '';
+            /* FIX 2026-05-08 (X-6.5.51AJ — bug "webapp do Telegram fecha sozinho"):
+               Backend manda `api` (canonical, ver build_game_url e demais URL builders
+               em src/game/webapp_transition_urls.py). Antes parser só lia `api_base`,
+               apiBase ficava '', código pulava direto pro fallback tg.sendData + close.
+               Logs server-side (logs/sim_character_creator_dev.2026-05-08.jsonl)
+               mostraram apiBase_present=false → fetch_skipped_no_creds → fallback.
+               Aceita ambos pra retro-compat. */
+            apiBase = params.get('api') || params.get('api_base') || '';
+            userId = params.get('user_id') || params.get('uid') || '';
             try { existingNames = JSON.parse(decodeBase64Utf8(params.get('names') || 'W10=')); } catch (e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
 
             // ── Shared Error Reporter ──
