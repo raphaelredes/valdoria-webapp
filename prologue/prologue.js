@@ -203,12 +203,27 @@ async function doFight(){try{if(window._prologueInitLoading){window._prologueIni
 function onAftermathDone(){nextScreen(renderGate());}
 async function onEnterCity(){try{if(window._prologueInitLoading){window._prologueInitLoading.show();}else{var _ld2=document.getElementById('loading');if(_ld2){_ld2.style.display='flex';_ld2.classList.remove('hidden');}}const body={gate_choice:choices.gate_choice||'',interaction_type:choices.interaction_type||'gate',aftermath_only:MODE==='aftermath',};if(choices.distract){body.distract=choices.distract;}
 const result=await apiCall('/api/prologue/complete',body);if(result&&result.game_url){window.__valdoria_transitioning=true;valdoriaSpaNav(result.game_url);}else{if(window.Telegram&&Telegram.WebApp){window.__valdoria_transitioning=true;valdoriaSpaClose();}}}catch(e){showError('Erro ao entrar na cidade.',e);}}
+/* X-6.5.51AP (2026-05-08) — _hideAllLoadings hides BOTH:
+   1. vProcessing overlay (used by /fight retry — _prologueInitLoading.hide())
+   2. SPA cold start #loading (created by app.html on first navigation)
+   3. SPA's window.hideLoading if exposed
+   Antes só chamava _prologueInitLoading.hide() (vProcessing) — mas cold start
+   usa #loading direto. Resultado: loading "Preparando sua aventura..." ficava
+   travado mesmo após /api/prologue/init retornar 200. */
+function _hideAllLoadings(){
+  try { if(window._prologueInitLoading && window._prologueInitLoading.hide) window._prologueInitLoading.hide(); } catch(e){}
+  try { if(window.vProcessing && window.vProcessing.hide) window.vProcessing.hide(); } catch(e){}
+  try { if(typeof window.hideLoading === 'function') window.hideLoading(); } catch(e){}
+  try {
+    var _ld = document.getElementById('loading');
+    if(_ld){ _ld.classList.add('hidden'); _ld.style.display = 'none'; }
+  } catch(e){}
+}
 async function boot(){
-  if(!TOKEN||!API_BASE||!USER_ID){showError('Parâmetros inválidos. Feche e tente novamente.');return;}
+  if(!TOKEN||!API_BASE||!USER_ID){_hideAllLoadings();showError('Parâmetros inválidos. Feche e tente novamente.');return;}
   try{
     DATA=await apiCall('/api/prologue/init');
-    if(window._prologueInitLoading){window._prologueInitLoading.hide();}
-    else{var _ld3=document.getElementById('loading');if(_ld3){_ld3.classList.add('hidden');_ld3.style.display='none';}}
+    _hideAllLoadings();
     if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('prologue');
 
     /* X-6.5.51AN (2026-05-08) anti-cheat: restaura escolhas ja persistidas
@@ -251,6 +266,9 @@ async function boot(){
     }
     addScreen(startScreen);
     goToScreen(0);
-  } catch(e){showError('Erro ao carregar prólogo. Feche e tente novamente.',e);}
+  } catch(e){
+    _hideAllLoadings();  /* X-6.5.51AP: hide loading on error too */
+    showError('Erro ao carregar prólogo. Feche e tente novamente.',e);
+  }
 }
 boot();

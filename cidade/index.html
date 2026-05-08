@@ -8484,10 +8484,18 @@ function _showCharSwitchConfirm(picked){
           return r.json();
         }).then(function(data){
           if (data.error) throw new Error(data.error);
-          // Reload page com novo token + novo char id
+          /* X-6.5.51AP (2026-05-08) BUG FIX: limpar params de DADO DO PERSONAGEM
+             (name, cls, race, level, hp, etc) ao trocar char. Antes carregava
+             com nome/level do char ANTERIOR antes do /api/game/state aplicar
+             o snapshot do novo char — user via brevemente "Aventureiro nivel 5"
+             ou (pior) o nome/dados do char antigo enquanto cidade montava. */
           var newParams = new URLSearchParams(window.location.search);
+          ['name','cls','race','level','hp','hpMax','mp','mpMax','gold','xp','exh','xpNext','_cb'].forEach(function(k){
+            newParams.delete(k);
+          });
           newParams.set('token', data.token || token);
           newParams.set('char', picked.id);
+          newParams.set('_cb', String(Date.now()));  /* cache bust pra evitar cidade.html stale */
           window.__valdoria_transitioning = true;
           window.location.replace(window.location.pathname + '?' + newParams.toString());
         }).catch(function(err){
