@@ -4852,16 +4852,15 @@
                             }
                             return;
                         }
-                        /* No redirect — backend antigo, antes do fix. Aviso visual
-                           ao player + delay maior antes do tg.close pra dar tempo
-                           do broker mensagem aparecer no chat. */
-                        console.warn('[CHAR_CREATOR] No redirect URL — backend may need restart. Falling back to tg.close.');
-                        try {
-                            if (typeof _showValidation === 'function') {
-                                _showValidation('Personagem criado. Volte ao chat para começar a aventura.');
-                            }
-                        } catch (eV) { console.warn('[CHAR_CREATOR] notify:', eV); }
-                        setTimeout(() => { try { tg?.close(); } catch (e) { console.warn('[CHAR_CREATOR] close:', e); } }, 1500);
+                        /* FIX 2026-05-07 v2 (user report: "webapp continua fechando").
+                           NUNCA fechar automaticamente. Player vê mensagem persistente
+                           e fecha manualmente quando estiver pronto pra ver chat. */
+                        console.warn('[CHAR_CREATOR] No redirect URL in response. Showing manual close UI.');
+                        _showCreationSuccessUI(
+                            'Personagem criado!',
+                            'Sua aventura está pronta. Toque em "Voltar ao chat" para iniciar — o Mestre Aldric te aguarda nos portões de Valdória.',
+                            'success_no_redirect'
+                        );
                         return;
                     }
                     // Handle server-side validation errors (400 = creation failed)
@@ -4887,14 +4886,26 @@
             }
 
             // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
+            // FIX 2026-05-07 v2 (user report: "webapp continua fechando"). Antes:
+            // sendData + tg.close em 300ms. Agora: diagnóstico visível + close manual
+            // pelo player (não-automático). Player pode ler estado e me reportar.
             try {
                 clearTimeout(_submitTimeout);
                 if (tg && tg.sendData) {
                     tg.sendData(JSON.stringify(payload));
-                    setTimeout(() => { try { tg.close(); } catch (e) { console.warn('[CHAR_CREATOR] tg.close:', e); } }, 300);
+                    _showCreationSuccessUI(
+                        'Dados enviados!',
+                        'Seu personagem foi enviado via Telegram. Toque em "Voltar ao chat" pra ver a mensagem do bot.',
+                        'fallback_senddata'
+                    );
                 } else {
+                    /* Modo teste/dev — sem Telegram ambiente */
                     console.log('WebApp payload:', JSON.stringify(payload, null, 2));
-                    alert('Personagem criado! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+                    _showCreationSuccessUI(
+                        'Personagem criado (modo teste)',
+                        'Tg.sendData indisponível — payload logado no console. Não em ambiente Telegram.',
+                        'no_tg_env'
+                    );
                 }
             } catch (e) {
                 clearTimeout(_submitTimeout);
@@ -4907,6 +4918,38 @@
                     _confirmBtn.style.opacity = '';
                     _confirmBtn.style.pointerEvents = '';
                 }
+            }
+        }
+
+        /* FIX 2026-05-07 v2: UI persistente pro player ler o estado e fechar manual.
+           Substitui o tg.close() automático que estava deixando o player órfão.
+           pathTag = 'success_no_redirect' | 'fallback_senddata' | 'no_tg_env'
+           pra eu identificar qual caminho caiu e debug remoto. */
+        function _showCreationSuccessUI(title, body, pathTag) {
+            try {
+                const overlay = document.createElement('div');
+                overlay.id = '__creation_success_ui';
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
+                overlay.innerHTML =
+                    '<div style="max-width:420px;text-align:center;">' +
+                    '<div style="font-size:48px;margin-bottom:16px;">⚔️</div>' +
+                    '<h2 style="font-size:20px;color:#c4953a;margin:0 0 12px;letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
+                    '<p style="font-size:14px;line-height:1.6;margin:0 0 20px;color:#a09484;">' + body + '</p>' +
+                    '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius:10px;font-family:Cinzel,serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +
+                    '<div style="margin-top:18px;font-size:10px;color:#5a5044;letter-spacing:1px;">debug: ' + pathTag + '</div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                const btn = document.getElementById('__creation_close_btn');
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        try { tg?.close(); } catch (e) { console.warn('[CHAR_CREATOR] manual close:', e); }
+                    });
+                }
+                console.log('[CHAR_CREATOR] success UI shown — path:', pathTag);
+            } catch (eUI) {
+                console.error('[CHAR_CREATOR] Failed to show success UI:', eUI);
+                /* Last resort: alert */
+                try { alert(title + '\n\n' + body); } catch(_) {}
             }
         }
     </script>
