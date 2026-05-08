@@ -149,9 +149,53 @@ function onPrefaceDone(){nextScreen(renderIntro());}
 function onIntroDone(){closeLoreOverlay();nextScreen(renderRoad());}
 async function doReroll(){if(rerollsLeft<=0)return;const btn=document.getElementById('rerollBtn');if(btn){btn.disabled=true;btn.textContent='🎲 Sorteando...';}
 try{const result=await apiCall('/api/prologue/reroll');DATA.lore=result.lore;DATA.interaction=result.interaction;rerollsLeft=result.rerolls_left??(rerollsLeft-1);const screens=track.querySelectorAll('.screen');const currentScreen=screens[screenIdx];if(currentScreen){currentScreen.innerHTML=renderIntro();}}catch(e){showError('Erro ao sortear nova origem.',e);}}
-function onGateChoice(key){choices.gate_choice=key;choices.interaction_type=DATA.interaction?.type||'gate';const inter=DATA.interaction||{};let outcomeText='';let effectText='';if(inter.type==='lore'&&inter.outcomes){const outcome=inter.outcomes[key]||{};outcomeText=outcome.text||'Você avança para a cidade.';if(outcome.gold){const sign=outcome.gold>0?'+':'';effectText=`${sign}${outcome.gold} GP`;}}else{const gateTexts={refuge:{text:'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.',effect:'⚠️ Inspeção nos portões'},bribe:{text:'O guarda pega as moedas rapidamente. "Um cidadão exemplar. A cidade lhe dá as boas-vindas."',effect:'<span class="vi vi-coin sm"></span> Taxa de entrada paga'},intimidate:{text:'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.',effect:'⚡ Entrada pela força'},};const g=gateTexts[key]||{text:'Você entra na cidade.',effect:''};outcomeText=g.text;effectText=g.effect;}
-showGateResult(outcomeText,effectText,()=>{onEnterCity();});}
-var _roadChoiceMade=false;async function onRoadChoice(key){if(_roadChoiceMade)return;_roadChoiceMade=true;document.querySelectorAll('.choice-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.5';});choices.road_choice=key;if(key==='fight'){await doFight();}else{await doDistract();}}
+/* X-6.5.51AN (2026-05-08) anti-cheat helper: persiste escolha server-side
+   IMEDIATAMENTE. Falha silenciosa (best-effort) — se rede cair, escolha
+   ainda vai no /complete. Mas se servidor confirmar, /init futuro retorna
+   choice via saved_choices e WebApp pula a tela. */
+async function _saveChoiceServer(choiceType, choiceValue){
+  try {
+    await apiCall('/api/prologue/save_choice', { choice_type: choiceType, choice_value: choiceValue });
+  } catch(e){
+    console.warn('[PROLOGUE] save_choice failed for ' + choiceType + '=' + choiceValue + ':', e);
+    /* Don't fail the user flow — /complete will still send all choices as fallback */
+  }
+}
+async function onGateChoice(key){
+  choices.gate_choice=key;
+  choices.interaction_type=DATA.interaction?.type||'gate';
+  /* X-6.5.51AN: persist choices server-side IMMEDIATELY (anti-cheat) */
+  await _saveChoiceServer('gate', key);
+  await _saveChoiceServer('interaction_type', choices.interaction_type);
+  const inter=DATA.interaction||{};
+  let outcomeText='';
+  let effectText='';
+  if(inter.type==='lore'&&inter.outcomes){
+    const outcome=inter.outcomes[key]||{};
+    outcomeText=outcome.text||'Você avança para a cidade.';
+    if(outcome.gold){const sign=outcome.gold>0?'+':'';effectText=`${sign}${outcome.gold} GP`;}
+  } else {
+    const gateTexts={
+      refuge:{text:'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.',effect:'⚠️ Inspeção nos portões'},
+      bribe:{text:'O guarda pega as moedas rapidamente. "Um cidadão exemplar. A cidade lhe dá as boas-vindas."',effect:'<span class="vi vi-coin sm"></span> Taxa de entrada paga'},
+      intimidate:{text:'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.',effect:'⚡ Entrada pela força'},
+    };
+    const g=gateTexts[key]||{text:'Você entra na cidade.',effect:''};
+    outcomeText=g.text;
+    effectText=g.effect;
+  }
+  showGateResult(outcomeText,effectText,()=>{onEnterCity();});
+}
+var _roadChoiceMade=false;
+async function onRoadChoice(key){
+  if(_roadChoiceMade)return;
+  _roadChoiceMade=true;
+  document.querySelectorAll('.prol-btn,.choice-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.5';});
+  choices.road_choice=key;
+  /* X-6.5.51AN: persist road choice IMMEDIATELY (anti-cheat) */
+  await _saveChoiceServer('road', key);
+  if(key==='fight'){await doFight();}else{await doDistract();}
+}
 async function doDistract(){try{const result=await apiCall('/api/prologue/distract');choices.distract=result;showDiceRoll(result);}catch(e){showError('Erro no teste de habilidade.',e);}}
 function onDistractSuccess(){document.getElementById('diceOverlay').classList.remove('active');nextScreen(renderAftermath());}
 async function onDistractFail(){document.getElementById('diceOverlay').classList.remove('active');await doFight();}
@@ -159,8 +203,54 @@ async function doFight(){try{if(window._prologueInitLoading){window._prologueIni
 function onAftermathDone(){nextScreen(renderGate());}
 async function onEnterCity(){try{if(window._prologueInitLoading){window._prologueInitLoading.show();}else{var _ld2=document.getElementById('loading');if(_ld2){_ld2.style.display='flex';_ld2.classList.remove('hidden');}}const body={gate_choice:choices.gate_choice||'',interaction_type:choices.interaction_type||'gate',aftermath_only:MODE==='aftermath',};if(choices.distract){body.distract=choices.distract;}
 const result=await apiCall('/api/prologue/complete',body);if(result&&result.game_url){window.__valdoria_transitioning=true;valdoriaSpaNav(result.game_url);}else{if(window.Telegram&&Telegram.WebApp){window.__valdoria_transitioning=true;valdoriaSpaClose();}}}catch(e){showError('Erro ao entrar na cidade.',e);}}
-async function boot(){if(!TOKEN||!API_BASE||!USER_ID){showError('Parâmetros inválidos. Feche e tente novamente.');return;}
-try{DATA=await apiCall('/api/prologue/init');if(window._prologueInitLoading){window._prologueInitLoading.hide();}else{var _ld3=document.getElementById('loading');if(_ld3){_ld3.classList.add('hidden');_ld3.style.display='none';}}if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('prologue');if(DATA.mode==='aftermath'){addScreen(renderAftermath());goToScreen(0);return;}
-if(DATA.show_preface){addScreen(renderPreface());}else{addScreen(renderIntro());}
-goToScreen(0);}catch(e){showError('Erro ao carregar prólogo. Feche e tente novamente.',e);}}
+async function boot(){
+  if(!TOKEN||!API_BASE||!USER_ID){showError('Parâmetros inválidos. Feche e tente novamente.');return;}
+  try{
+    DATA=await apiCall('/api/prologue/init');
+    if(window._prologueInitLoading){window._prologueInitLoading.hide();}
+    else{var _ld3=document.getElementById('loading');if(_ld3){_ld3.classList.add('hidden');_ld3.style.display='none';}}
+    if(typeof ValdoriaAudio!=='undefined')ValdoriaAudio.play('prologue');
+
+    /* X-6.5.51AN (2026-05-08) anti-cheat: restaura escolhas ja persistidas
+       server-side. Se user fechou WebApp apos escolher (ex: distract+fail
+       intermediario, ou gate_choice), SKIPA telas ja resolvidas e vai
+       direto pro proximo passo. NUNCA permite re-rodar dice de distract. */
+    var sc = (DATA && DATA.saved_choices) || {};
+    if (sc.gate_choice) choices.gate_choice = sc.gate_choice;
+    if (sc.interaction_type) choices.interaction_type = sc.interaction_type;
+    if (sc.road_choice) choices.road_choice = sc.road_choice;
+    if (sc.distract_result) choices.distract = sc.distract_result;
+
+    if(DATA.mode==='aftermath'){addScreen(renderAftermath());goToScreen(0);return;}
+
+    /* Skip-forward determinado pelo estado salvo:
+       - sem road_choice: comeca no comeco (preface ou intro)
+       - road_choice='fight': já indo pra combate (chamou /fight) — mas se
+         lore_completed=False ainda no server, /fight ainda funciona.
+         Provavelmente caiu aqui por conta de retry; vai pro intro mesmo.
+       - road_choice='distract' + sem distract_result: mostra road de novo
+         (situacao improvavel — distract sempre persiste o resultado).
+       - distract_result.success=True + sem gate_choice: pula direto pro aftermath
+       - distract_result.success=False: pula pro fight (perdeu o teste, tem
+         que lutar — cheating-proof) */
+    var startScreen = null;
+    if (sc.distract_result && sc.distract_result.success && !sc.gate_choice){
+      console.info('[PROLOGUE] resume: distract success → aftermath');
+      startScreen = renderAftermath();
+    } else if (sc.distract_result && sc.distract_result.success === false){
+      console.info('[PROLOGUE] resume: distract fail → fight (forced)');
+      addScreen(renderRoad());  // mostra brevemente o estado "fail"
+      goToScreen(0);
+      /* dispara fight automaticamente (anti-cheat: nao deixa user trocar) */
+      setTimeout(function(){ doFight(); }, 600);
+      return;
+    } else if(DATA.show_preface){
+      startScreen = renderPreface();
+    } else {
+      startScreen = renderIntro();
+    }
+    addScreen(startScreen);
+    goToScreen(0);
+  } catch(e){showError('Erro ao carregar prólogo. Feche e tente novamente.',e);}
+}
 boot();
