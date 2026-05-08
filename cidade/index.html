@@ -547,6 +547,10 @@ LOG SINK (Fase 7):
        vReducedMotion=false ANTES de outros scripts checarem. */
     var __vEarly = Date.now();
     document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '"><\/script>');
+    /* X-6.5.51AI (2026-05-07): server-log helper canônico — POST /api/sim/log
+       persiste logs do client em logs/sim_cidade_<env>.<date>.jsonl. */
+    document.write('<script src="/shared/server-log.js?v=' + __vEarly + '"><\/script>');
+    window.SERVER_LOG_AREA = 'cidade';
   </script>
   <script>
     // Cache busting para CSS/JS imports

@@ -37,6 +37,11 @@
         document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        /* X-6.5.51AI (2026-05-07): server-log helper para diagnóstico server-side
+           de TODAS as telas. Setamos area + captura de console.error/warn. */
+        document.write('<script src="../shared/server-log.js?v=' + v + '"><\/script>');
+        /* Configurar área canonical antes do helper inicializar */
+        window.SERVER_LOG_AREA = 'character_creator';
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
         // USER REQUEST 2026-05-04: limpar resume keys ANTES de carregar audio-manager.
@@ -4752,8 +4757,28 @@
         let _submitting = false;
         async function submitCharacter() {
             if (_submitting) return; // Guard against double-click
+
+            /* X-6.5.51AI: log inicial pra rastrear submissão server-side */
+            try {
+                window.serverLog && window.serverLog('character_creator', 'info', 'submit_start', {
+                    apiBase_present: !!apiBase,
+                    token_present: !!token,
+                    userId_present: !!userId,
+                    char_id: charId || 'unset',
+                    name: sel.name,
+                    surname: sel.surname,
+                    race: sel.race,
+                    cls: sel.classKey,
+                    has_tg_initData: !!(window.Telegram?.WebApp?.initData),
+                    has_tg_sendData: !!(typeof tg !== 'undefined' && tg && tg.sendData),
+                });
+            } catch (_) {}
+
             const err = validateCurrentScreen();
-            if (err) { _showValidation(err); return; }
+            if (err) {
+                try { window.serverLog && window.serverLog('character_creator', 'warn', 'submit_validation_fail', { error: err }); } catch (_) {}
+                _showValidation(err); return;
+            }
 
             _submitting = true;
             const _confirmBtn = document.getElementById('confirmBtn');
@@ -4827,10 +4852,18 @@
                         body: JSON.stringify(payload)
                     });
                     clearTimeout(_tid2);
+                    /* X-6.5.51AI: log status HTTP server-side */
+                    try { window.serverLog && window.serverLog('character_creator', 'info', 'fetch_response', { status: resp.status, ok: resp.ok }); } catch (_) {}
                     if (resp.ok) {
                         clearTimeout(_submitTimeout);
                         const result = await resp.json().catch(() => ({}));
                         console.log('[CHAR_CREATOR] Server response:', JSON.stringify(result));
+                        try { window.serverLog && window.serverLog('character_creator', 'info', 'response_parsed', {
+                            has_redirect: !!result.redirect,
+                            redirect_preview: result.redirect ? String(result.redirect).substring(0, 200) : null,
+                            status_field: result.status,
+                            keys: Object.keys(result),
+                        }); } catch (_) {}
                         /* FIX 2026-05-07 (user report: "ao escolher Criar Personagem
                            nada aconteceu" / "no bot DEV o jogo fecha"). Antes:
                            sem redirect, tg.close() fechava WebApp e player ficava
@@ -4843,11 +4876,13 @@
                            (pre-fix, antes do restart do bot DEV). */
                         if (result.redirect) {
                             console.log('[CHAR_CREATOR] Redirecting to game hub:', result.redirect);
+                            try { window.serverLog && window.serverLog('character_creator', 'info', 'redirecting_to_game', { redirect: String(result.redirect).substring(0, 200) }); } catch (_) {}
                             window.__valdoria_transitioning = true;
                             try {
                                 window.location.replace(result.redirect);
                             } catch (eR) {
                                 console.error('[CHAR_CREATOR] location.replace failed:', eR);
+                                try { window.serverLog && window.serverLog('character_creator', 'error', 'location_replace_failed', { error: String(eR && eR.message) }); } catch (_) {}
                                 window.location.href = result.redirect;
                             }
                             return;
@@ -4856,6 +4891,7 @@
                            NUNCA fechar automaticamente. Player vê mensagem persistente
                            e fecha manualmente quando estiver pronto pra ver chat. */
                         console.warn('[CHAR_CREATOR] No redirect URL in response. Showing manual close UI.');
+                        try { window.serverLog && window.serverLog('character_creator', 'warn', 'success_no_redirect', { result_keys: Object.keys(result) }); } catch (_) {}
                         _showCreationSuccessUI(
                             'Personagem criado!',
                             'Sua aventura está pronta. Toque em "Voltar ao chat" para iniciar — o Mestre Aldric te aguarda nos portões de Valdória.',
@@ -4869,6 +4905,7 @@
                         const errData = await resp.json().catch(() => ({}));
                         const errMsg = errData.message || 'Erro na criação. Verifique os dados.';
                         console.error('[CHAR_CREATOR] Creation failed:', errMsg);
+                        try { window.serverLog && window.serverLog('character_creator', 'error', 'creation_400', { error: errMsg, body: JSON.stringify(errData).substring(0, 500) }); } catch (_) {}
                         _submitting = false;
                         if (_confirmBtn) {
                             _confirmBtn.disabled = false;
@@ -4880,9 +4917,16 @@
                         return;
                     }
                     console.warn('[CHAR_CREATOR] API returned', resp.status, '— falling back to sendData');
+                    try { window.serverLog && window.serverLog('character_creator', 'warn', 'fetch_unexpected_status', { status: resp.status }); } catch (_) {}
                 } catch (e) {
                     console.warn('[CHAR_CREATOR] API fetch failed — falling back to sendData', e);
+                    try { window.serverLog && window.serverLog('character_creator', 'error', 'fetch_threw', { error: String(e && e.message), name: String(e && e.name) }); } catch (_) {}
                 }
+            } else {
+                /* Sem apiBase/token/userId — log + indica caminho */
+                try { window.serverLog && window.serverLog('character_creator', 'warn', 'fetch_skipped_no_creds', {
+                    apiBase_present: !!apiBase, token_present: !!token, userId_present: !!userId
+                }); } catch (_) {}
             }
 
             // Fallback: sendData (works from KeyboardButton web_app but unreliable from InlineKeyboardButton)
@@ -4892,6 +4936,7 @@
             try {
                 clearTimeout(_submitTimeout);
                 if (tg && tg.sendData) {
+                    try { window.serverLog && window.serverLog('character_creator', 'warn', 'fallback_senddata_invoked', {}); } catch (_) {}
                     tg.sendData(JSON.stringify(payload));
                     _showCreationSuccessUI(
                         'Dados enviados!',
@@ -4901,6 +4946,7 @@
                 } else {
                     /* Modo teste/dev — sem Telegram ambiente */
                     console.log('WebApp payload:', JSON.stringify(payload, null, 2));
+                    try { window.serverLog && window.serverLog('character_creator', 'warn', 'no_tg_env', {}); } catch (_) {}
                     _showCreationSuccessUI(
                         'Personagem criado (modo teste)',
                         'Tg.sendData indisponível — payload logado no console. Não em ambiente Telegram.',

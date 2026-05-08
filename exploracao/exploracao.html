@@ -720,6 +720,10 @@
     /* Carrega da CDN (production) com fallback local (file://). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../valdoria-webapp/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* X-6.5.51AI: server-log canônico */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    window.SERVER_LOG_AREA = 'exploracao';
   })();
 </script>
 

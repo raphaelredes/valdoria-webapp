@@ -534,6 +534,10 @@ function loadCSS(href) {
     l.href = BASE + href + '?v=' + v;
     document.head.appendChild(l);
 }
+/* X-6.5.51AI (2026-05-07): server-log canônico antes de qualquer outro
+   script — captura logs server-side em logs/sim_combate_<env>.<date>.jsonl. */
+document.write('<script src="' + BASE + '/shared/server-log.js?v=' + v + '"><\/script>');
+window.SERVER_LOG_AREA = 'combate';
 loadCSS('/shared/fonts.css');
 loadCSS('/valdoria-design.css');
 
