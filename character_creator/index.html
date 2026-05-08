@@ -44,14 +44,19 @@
         window.SERVER_LOG_AREA = 'character_creator';
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
-        // USER REQUEST 2026-05-04: limpar resume keys ANTES de carregar audio-manager.
-        // Sem isso o _tryResumeAudio() restaura a track 'city' (salva em pagehide
-        // de cidade.html) e sobrescreve o character_creation que creator-app.js toca.
+        // X-6.5.51AL (2026-05-08) — em vez de REMOVER as resume keys (que matava
+        // continuidade), seta a track correta ANTES de audio-manager carregar.
+        // Assim _tryResumeAudio() vai restaurar 'character_creation' diretamente
+        // (em vez de restaurar 'city' deixada por cidade.html → o crossfade
+        // imediato gerava silêncio breve). Garante que ao chegar no creator,
+        // a música começa instantaneamente sem precisar esperar primeiro click
+        // (audio-manager queda no _tryMutedAutoplay → unlocks no primeiro gesto).
         try {
-          localStorage.removeItem('valdoria_audio_resume');
-          localStorage.removeItem('valdoria_audio_resume_ts');
+          localStorage.setItem('valdoria_audio_resume', 'character_creation');
+          localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
         } catch(e){}
         document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+        document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
         // USER REQUEST 2026-05-04: D20 3D real no onboarding slide 0
         document.write('<script src="../shared/three.min.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');

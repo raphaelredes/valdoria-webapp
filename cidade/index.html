@@ -7899,10 +7899,40 @@ function _showCharactersPopup(){
         : '')
       + '</div>'
 
+      // X-6.5.51AL (2026-05-08) — botão excluir personagem (soft delete c/ recuperação)
+      // Abre confirm popup; backup é criado server-side antes do soft delete.
+      + '<button class="hall-char-del" data-char-del="' + c.id + '" data-char-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
+      + 'aria-label="Excluir personagem" title="Arquivar personagem (recuperável)" '
+      + 'style="flex-shrink:0; width: 32px; height: 32px; margin-left: 4px; '
+      + 'background: transparent; border: 1px solid var(--v-border, #4a3828); '
+      + 'border-radius: var(--v-radius-sm, 6px); cursor: pointer; '
+      + 'display:flex; align-items:center; justify-content:center; '
+      + 'color: var(--v-text-dim, #a09484); font-size: 14px; '
+      + 'transition: border-color var(--v-transition, 0.2s), color var(--v-transition, 0.2s);" '
+      + 'onmouseover="this.style.borderColor=\'#5a1810\'; this.style.color=\'#a04030\'" '
+      + 'onmouseout="this.style.borderColor=\'var(--v-border, #4a3828)\'; this.style.color=\'var(--v-text-dim, #a09484)\'">'
+      + '🗑'
+      + '</button>'
+
       + '</div>';
   });
 
   html += '</div>';  // close .hall-list
+
+  // X-6.5.51AL (2026-05-08) — secção "Personagens Arquivados" (collapsible)
+  // Mostra personagens soft-deletados com opção de restaurar. Lista carregada
+  // assincronamente via /api/auth/deleted-characters após render.
+  html += '<div id="hall-archived-section" style="width: 100%; margin-bottom: var(--v-space-md, 8px); '
+    + 'border-top: 1px solid var(--v-border, #4a3828); padding-top: var(--v-space-md, 8px);">'
+    + '<button id="hall-archived-toggle" '
+    + 'style="width: 100%; background: transparent; border: none; color: var(--v-text-dim, #a09484); '
+    + 'font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-base, 13px); '
+    + 'cursor: pointer; padding: 8px 0; text-align: center; min-height: 36px;" '
+    + 'aria-expanded="false">'
+    + '📜 Personagens Arquivados <span id="hall-archived-count" style="opacity:0.6;"></span> ▾'
+    + '</button>'
+    + '<div id="hall-archived-list" style="display:none; flex-direction:column; gap: 6px; margin-top: 8px;"></div>'
+    + '</div>';
 
   // Botão Jogar (canonical .wa-btn-play)
   var selChar = chars.find(function(c){ return c.id === selectedId; });
@@ -8028,10 +8058,246 @@ function _showCharactersPopup(){
     vToast('🚪 Logout: encerra sessão e volta à tela de login.');
   });
 
+  // X-6.5.51AL (2026-05-08) — wire delete buttons (cada char card)
+  bodyEl.querySelectorAll('.hall-char-del').forEach(function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.stopPropagation();  // evita selecionar o card
+      var charIdToDel = btn.getAttribute('data-char-del');
+      var charName = btn.getAttribute('data-char-name') || 'este personagem';
+      _showDeleteCharConfirm(charIdToDel, charName);
+    });
+  });
+
+  // X-6.5.51AL (2026-05-08) — wire archived section
+  var archivedToggle = bodyEl.querySelector('#hall-archived-toggle');
+  var archivedList = bodyEl.querySelector('#hall-archived-list');
+  if (archivedToggle && archivedList){
+    archivedToggle.addEventListener('click', function(){
+      var expanded = archivedToggle.getAttribute('aria-expanded') === 'true';
+      archivedToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      archivedList.style.display = expanded ? 'none' : 'flex';
+      archivedToggle.innerHTML = '📜 Personagens Arquivados <span id="hall-archived-count" style="opacity:0.6;">'
+        + (window._hallArchivedCountText || '') + '</span> ' + (expanded ? '▾' : '▴');
+    });
+  }
+  // Carrega arquivados (REMOTE only — LOCAL mode usa mock)
+  _loadHallArchivedChars();
+
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'characters') {
     _popupStack.push('characters');
   }
+}
+
+// X-6.5.51AL (2026-05-08) — Confirm popup pra excluir personagem
+// Usa _showInfoPopup (já existente) com confirmLabel/cancelLabel.
+// Após confirmar: fetch POST /api/auth/delete-character, refresh popup.
+function _showDeleteCharConfirm(charId, charName){
+  if (typeof _showInfoPopup !== 'function'){
+    if (!confirm('Arquivar ' + charName + '?')) return;
+    _doDeleteChar(charId, charName);
+    return;
+  }
+  _showInfoPopup({
+    icon: '🗑',
+    title: 'Arquivar Personagem?',
+    npc: 'Hall de Personagens',
+    desc: '<div style="text-align:left;">'
+      + '<p style="margin: 0 0 8px; color: var(--v-text-bright, #e8dcc8); font-weight: 700;">'
+      + _titleCase(charName) + '</p>'
+      + '<p style="margin: 0; font-size: 13px; color: var(--v-text-dim, #a09484); line-height: 1.5;">'
+      + 'O personagem será arquivado (não excluído permanentemente). '
+      + 'Você pode restaurá-lo a qualquer momento na seção '
+      + '<em>Personagens Arquivados</em> abaixo. '
+      + 'Um backup completo é criado automaticamente antes do arquivamento.'
+      + '</p></div>',
+    confirmLabel: '🗑 Arquivar',
+    cancelLabel: 'Cancelar',
+    onConfirm: function(){
+      _doDeleteChar(charId, charName);
+    }
+  });
+}
+
+function _doDeleteChar(charId, charName){
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var api = params.get('api');
+  if (window.location.protocol === 'file:' || !token || !api){
+    // LOCAL mode: just mutate mock list
+    var chars = window._mockCharacters || [];
+    window._mockCharacters = chars.filter(function(c){ return c.id !== charId; });
+    if (window._hallSelectedId === charId){
+      window._hallSelectedId = window._mockCharacters[0] ? window._mockCharacters[0].id : null;
+    }
+    vToast('🗑 ' + _titleCase(charName) + ' arquivado.');
+    _showCharactersPopup();  // re-render
+    return;
+  }
+  if (typeof vProcessing !== 'undefined' && vProcessing.show){
+    vProcessing.show({ text: 'Arquivando ' + charName + '...' });
+  }
+  fetch(api.replace(/\/$/,'') + '/api/auth/delete-character', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ char_id: charId })
+  }).then(function(r){
+    if (!r.ok) return r.json().then(function(d){ throw new Error(d.error || ('HTTP ' + r.status)); });
+    return r.json();
+  }).then(function(data){
+    if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+    // Update local mock with server-returned active list
+    if (data && data.characters){
+      window._mockCharacters = data.characters.map(function(c){
+        return {
+          id: c.id || c.char_id,
+          name: c.name,
+          cls: (c.class_name || '').toLowerCase(),
+          race: (c.race || '').toLowerCase(),
+          level: c.level || 1,
+          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          active: false  // none auto-activated; user must select Jogar
+        };
+      });
+      // mark first as active fallback (server can override later)
+      if (window._mockCharacters.length){
+        window._mockCharacters[0].active = true;
+        window._hallSelectedId = window._mockCharacters[0].id;
+      } else {
+        window._hallSelectedId = null;
+      }
+    }
+    vToast('🗑 ' + _titleCase(charName) + ' arquivado.');
+    _showCharactersPopup();  // re-render (mostra na lista de arquivados)
+  }).catch(function(err){
+    if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+    vToast('❌ Falha: ' + (err.message || err));
+    console.error('[CITY] delete-character failed:', err);
+  });
+}
+
+// X-6.5.51AL (2026-05-08) — Carrega lista de personagens arquivados via API
+function _loadHallArchivedChars(){
+  var listEl = document.getElementById('hall-archived-list');
+  var countEl = document.getElementById('hall-archived-count');
+  var toggleEl = document.getElementById('hall-archived-toggle');
+  if (!listEl || !countEl || !toggleEl) return;
+
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var api = params.get('api');
+  if (window.location.protocol === 'file:' || !token || !api){
+    // LOCAL mode: hide section (no archived chars in mock)
+    var section = document.getElementById('hall-archived-section');
+    if (section) section.style.display = 'none';
+    return;
+  }
+
+  fetch(api.replace(/\/$/,'') + '/api/auth/deleted-characters', {
+    method: 'GET',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    var chars = (data && data.characters) || [];
+    if (!chars.length){
+      var section = document.getElementById('hall-archived-section');
+      if (section) section.style.display = 'none';
+      return;
+    }
+    var countText = ' (' + chars.length + ')';
+    window._hallArchivedCountText = countText;
+    countEl.textContent = countText;
+
+    var html = '';
+    chars.forEach(function(c){
+      var iconId = 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]);
+      var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
+      html += '<div class="hall-archived-card" data-arch-id="' + (c.id || c.char_id) + '" '
+        + 'data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
+        + 'style="display:flex; align-items:center; gap: 10px; padding: 8px; '
+        + 'background: rgba(58,48,40,0.25); border: 1px solid var(--v-border, #4a3828); '
+        + 'border-radius: var(--v-radius-sm, 6px); opacity: 0.85;">'
+        + '<svg viewBox="0 0 120 120" style="flex-shrink:0; width: 28px; height: 28px; color: ' + iconColor + ';">'
+        + '<use href="#' + iconId + '"/>'
+        + '</svg>'
+        + '<div style="flex:1; min-width:0;">'
+        + '<div style="font-family: var(--v-font, MedievalSharp, serif); font-size: 13px; font-weight: 700; '
+        + 'color: var(--v-text-bright, #d4c8b0); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
+        + _titleCase(c.name || '?')
+        + '</div>'
+        + '<div style="font-size: 11px; color: var(--v-text-dim, #a09484); margin-top: 1px;">'
+        + 'Nv ' + (c.level || 1) + ' · ' + _titleCase(c.race || '') + ' ' + _titleCase(c.class_name || '')
+        + '</div>'
+        + '</div>'
+        + '<button class="hall-arch-restore" data-arch-id="' + (c.id || c.char_id) + '" '
+        + 'data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
+        + 'aria-label="Restaurar personagem" title="Restaurar para a lista ativa" '
+        + 'style="flex-shrink:0; padding: 6px 10px; background: transparent; '
+        + 'border: 1px solid var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); '
+        + 'border-radius: var(--v-radius-sm, 6px); cursor: pointer; '
+        + 'font-family: var(--v-font, MedievalSharp, serif); font-size: 12px; '
+        + 'min-height: 32px;">'
+        + '↻ Restaurar'
+        + '</button>'
+        + '</div>';
+    });
+    listEl.innerHTML = html;
+
+    // Wire restore buttons
+    listEl.querySelectorAll('.hall-arch-restore').forEach(function(btn){
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        _doRestoreChar(btn.getAttribute('data-arch-id'), btn.getAttribute('data-arch-name') || '?');
+      });
+    });
+  }).catch(function(err){
+    console.warn('[CITY] deleted-characters fetch failed:', err);
+    var section = document.getElementById('hall-archived-section');
+    if (section) section.style.display = 'none';
+  });
+}
+
+function _doRestoreChar(charId, charName){
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var api = params.get('api');
+  if (!token || !api){
+    vToast('Sessão não encontrada.');
+    return;
+  }
+  if (typeof vProcessing !== 'undefined' && vProcessing.show){
+    vProcessing.show({ text: 'Restaurando ' + charName + '...' });
+  }
+  fetch(api.replace(/\/$/,'') + '/api/auth/restore-character', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ char_id: charId })
+  }).then(function(r){
+    if (!r.ok) return r.json().then(function(d){ throw new Error(d.error || ('HTTP ' + r.status)); });
+    return r.json();
+  }).then(function(data){
+    if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+    if (data && data.characters){
+      window._mockCharacters = data.characters.map(function(c){
+        return {
+          id: c.id || c.char_id, name: c.name,
+          cls: (c.class_name || '').toLowerCase(), race: (c.race || '').toLowerCase(),
+          level: c.level || 1,
+          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          active: false
+        };
+      });
+      if (window._mockCharacters.length) window._mockCharacters[0].active = true;
+    }
+    vToast('↻ ' + _titleCase(charName) + ' restaurado!');
+    _showCharactersPopup();  // re-render
+  }).catch(function(err){
+    if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+    vToast('❌ ' + (err.message || err));
+    console.error('[CITY] restore-character failed:', err);
+  });
 }
 
 // USER REQUEST 2026-05-04: AAA orb (mesma DOM de shared/loading-title.js#_buildDOM)
