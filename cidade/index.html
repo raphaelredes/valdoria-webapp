@@ -8447,6 +8447,265 @@ function _doRestoreChar(charId, charName){
   });
 }
 
+// ============================================================================
+// X-6.5.51AT (2026-05-08) — FIRST-TIME CITY TUTORIAL
+// ============================================================================
+// User pediu: "na primeira vez que o jogador ver a cidade ele precisa entender
+// o que cada botão da cidade faz, então precisamos montar um tutorial visual
+// com explicação de cada elemento da tela para ele".
+//
+// Mecânica:
+//   - Trigger: hub render + sem flag valdoria_first_city_tutorial_seen
+//   - Overlay com spotlight no elemento atual + tooltip explicativo
+//   - Nav: Próximo / Anterior / Pular Tutorial / ✓ Entendido (último)
+//   - Marca seen ao concluir OU pular
+//   - Steps: cada step define {selector, title, description, position}
+// ============================================================================
+
+var TUTORIAL_STORAGE_KEY = 'valdoria_first_city_tutorial_seen';
+var TUTORIAL_STEPS = [
+  {
+    selector: null,  // welcome screen (no spotlight)
+    title: '🏰 Bem-vindo a Eldoria',
+    description: 'Esta é a sua cidade base. Aqui você descansa, prepara aventuras, e vive entre aventuras. '
+                + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
+  },
+  {
+    selector: '.hub-cta-explore, .hub-action-explore, [data-cb="explore_main"], [data-cb="gates_explore"]',
+    title: '⚔️ Partir para Aventura',
+    description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
+                + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, ouro e itens.'
+  },
+  {
+    selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
+    title: '📜 Missões',
+    description: 'Lista de missões disponíveis. Algumas são <b>diárias</b> (resetam todo dia), outras de <b>história</b> '
+                + '(longas, com recompensa épica), e <b>secundárias</b> aceitas com NPCs.'
+  },
+  {
+    selector: '.hub-loc[data-cb="taverna"], .hub-loc[data-cb="tavern"]',
+    title: '🍺 Taverna',
+    description: 'Onde aventureiros se encontram. Beba para ganhar bônus temporários, ouça boatos sobre '
+                + 'tesouros escondidos, ou jogue dados com outros para ganhar (ou perder) ouro.'
+  },
+  {
+    selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
+    title: '🛏️ Estalagem',
+    description: 'Descanso longo (recupera HP/MP totais + remove exaustão). Custa Valdoritas, mas é '
+                + 'essencial após aventuras pesadas. Quartos melhores recuperam mais.'
+  },
+  {
+    selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
+    title: '🏪 Mercado',
+    description: 'Compre poções, armas, armaduras. Venda itens que não usa. Os preços variam — '
+                + 'aprenda a barganhar. Forja, alquimista e ferreiro estão aqui.'
+  },
+  {
+    selector: '.hub-loc[data-cb="temple"], .hub-loc[data-cb="templo"]',
+    title: '⛪ Templo',
+    description: 'Cure ferimentos graves, remova venenos e maldições. Sacerdotes oferecem bênçãos divinas. '
+                + 'Doações geram favor com os deuses (e ganhos passivos).'
+  },
+  {
+    selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
+    title: '🏦 Banco',
+    description: 'Guarde Valdoritas com segurança (não perde ao morrer). Empréstimos para emergências, '
+                + 'investimentos para ganho passivo. Empreste com sabedoria — juros são reais.'
+  },
+  {
+    selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
+    title: '🛡️ Guilda dos Aventureiros',
+    description: 'Recrute aliados (mercenários, especialistas) para suas aventuras. Suba de rank na guilda '
+                + 'desbloqueando contratos mais lucrativos.'
+  },
+  {
+    selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
+    title: '⛲ Praça Central',
+    description: 'O coração social da cidade. NPCs falando, eventos aleatórios, festivais ocasionais. '
+                + 'Bom lugar para ouvir boatos sobre o mundo.'
+  },
+  {
+    selector: '#hotbar, .v-hotbar, [data-screen-footer]',
+    title: '⚡ Atalhos rápidos',
+    description: 'Barra inferior com atalhos pros locais mais usados. Clique para ir direto.'
+  },
+  {
+    selector: '#hud, .v-hud, [data-hud]',
+    title: '❤️ Sua barra de status',
+    description: '<b>HP</b> (vida), <b>MP</b> (mana/fé/vigor), <b>XP</b> (progresso de nível), <b>Valdoritas</b> '
+                + '(ouro). Quando HP fica vermelho, descanse na estalagem ou cure no templo.'
+  },
+  {
+    selector: null,  // closing slide
+    title: '🎲 Tudo pronto!',
+    description: 'Você está pronto pra começar. <b>Dica final:</b> sempre que tiver dúvida, clique no '
+                + 'menu (≡) → <em>Guia</em> para reler tutoriais e referências de regras.'
+  }
+];
+
+function _maybeShowFirstTimeTutorial(){
+  try {
+    if (localStorage.getItem(TUTORIAL_STORAGE_KEY) === '1') return;
+  } catch(e){ /* localStorage indisponível — segue mesmo assim */ }
+  /* Defer if popup already open (eg encounter, audio, etc) */
+  var anyPopup = document.querySelector('.city-popup-overlay.active, #city-subscreen-popup.active');
+  if (anyPopup) {
+    setTimeout(_maybeShowFirstTimeTutorial, 1500);
+    return;
+  }
+  _showFirstTimeTutorial(0);
+}
+
+function _markTutorialSeen(){
+  try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch(e){}
+}
+
+function _showFirstTimeTutorial(stepIdx){
+  /* Inject CSS once */
+  if (!document.getElementById('first-tut-style')) {
+    var st = document.createElement('style');
+    st.id = 'first-tut-style';
+    st.textContent = ''
+      + '#first-tut-overlay{position:fixed;inset:0;z-index:11000;'
+      + '  pointer-events:auto;animation:ftFadeIn 0.4s ease-out}'
+      + '@keyframes ftFadeIn{from{opacity:0}to{opacity:1}}'
+      + '#first-tut-mask{position:absolute;inset:0;'
+      + '  background:rgba(0,0,0,0.78);transition:clip-path 0.4s ease}'
+      + '#first-tut-spotlight{position:absolute;border:2px solid #c4953a;'
+      + '  border-radius:8px;box-shadow:0 0 0 6px rgba(196,149,58,0.3),'
+      + '    0 0 30px rgba(196,149,58,0.5);'
+      + '  pointer-events:none;transition:all 0.4s ease;'
+      + '  display:none}'
+      + '#first-tut-spotlight.visible{display:block}'
+      + '#first-tut-card{position:fixed;left:50%;transform:translateX(-50%);'
+      + '  bottom:24px;background:linear-gradient(180deg,#3a2e22,#2a2218);'
+      + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
+      + '  padding:18px 18px 14px;width:calc(100% - 32px);max-width:380px;'
+      + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.2);'
+      + '  z-index:11001}'
+      + '#first-tut-card.center{bottom:50%;transform:translate(-50%,50%)}'
+      + '#first-tut-step{font-family:Cinzel,serif;font-size:11px;'
+      + '  color:#a09484;letter-spacing:1.5px;text-align:center;'
+      + '  margin-bottom:6px}'
+      + '#first-tut-title{font-family:Cinzel,serif;font-size:16px;'
+      + '  font-weight:700;color:#c4953a;letter-spacing:1px;'
+      + '  text-align:center;margin:0 0 12px;'
+      + '  text-shadow:0 0 8px rgba(196,149,58,0.4)}'
+      + '#first-tut-desc{color:#d4c8b0;font-size:13px;line-height:1.6;'
+      + '  margin:0 0 14px;font-family:MedievalSharp,serif}'
+      + '#first-tut-desc b{color:#c4953a}'
+      + '#first-tut-desc em{color:#9b8e7c;font-style:italic}'
+      + '#first-tut-nav{display:flex;gap:6px;align-items:center}'
+      + '.ft-btn{flex:1;padding:10px;background:rgba(74,56,40,0.45);'
+      + '  border:1px solid rgba(196,149,58,0.45);border-radius:6px;'
+      + '  color:#d4c8b0;font-family:Cinzel,serif;font-size:12px;'
+      + '  font-weight:700;letter-spacing:0.6px;cursor:pointer;'
+      + '  min-height:40px;transition:transform 0.1s,background 0.15s}'
+      + '.ft-btn:hover:not(:disabled){background:rgba(196,149,58,0.18);'
+      + '  border-color:#c4953a;color:#c4953a}'
+      + '.ft-btn:disabled{opacity:0.3;cursor:default}'
+      + '.ft-btn-primary{background:linear-gradient(180deg,#c4953a,#9a7530);'
+      + '  color:#1a1410;border-color:#c4953a}'
+      + '.ft-btn-primary:hover{background:linear-gradient(180deg,#d4a54a,#a78540)}'
+      + '.ft-btn-skip{background:transparent;border-color:rgba(196,149,58,0.25);'
+      + '  color:#a09484;font-size:11px;flex:0 0 auto;padding:10px 14px}';
+    document.head.appendChild(st);
+  }
+  /* Build overlay if not exists */
+  var ov = document.getElementById('first-tut-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'first-tut-overlay';
+    ov.innerHTML = ''
+      + '<div id="first-tut-mask"></div>'
+      + '<div id="first-tut-spotlight"></div>'
+      + '<div id="first-tut-card">'
+      + '  <div id="first-tut-step"></div>'
+      + '  <h3 id="first-tut-title"></h3>'
+      + '  <p id="first-tut-desc"></p>'
+      + '  <div id="first-tut-nav">'
+      + '    <button class="ft-btn ft-btn-skip" id="ft-skip">Pular</button>'
+      + '    <button class="ft-btn" id="ft-prev">← Anterior</button>'
+      + '    <button class="ft-btn ft-btn-primary" id="ft-next">Próximo →</button>'
+      + '  </div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    /* Wire buttons */
+    document.getElementById('ft-skip').addEventListener('click', function(){
+      haptic('light');
+      _markTutorialSeen();
+      ov.remove();
+      vToast('💡 Tutorial pode ser visto depois em Menu → Guia.', 3500);
+    });
+    document.getElementById('ft-prev').addEventListener('click', function(){
+      haptic('light');
+      var cur = parseInt(ov.getAttribute('data-step') || '0', 10);
+      if (cur > 0) _showFirstTimeTutorial(cur - 1);
+    });
+    document.getElementById('ft-next').addEventListener('click', function(){
+      haptic('medium');
+      var cur = parseInt(ov.getAttribute('data-step') || '0', 10);
+      if (cur < TUTORIAL_STEPS.length - 1) {
+        _showFirstTimeTutorial(cur + 1);
+      } else {
+        _markTutorialSeen();
+        ov.remove();
+        vToast('🎉 Tutorial concluído! Boa aventura.', 3000);
+      }
+    });
+  }
+  /* Render current step */
+  var step = TUTORIAL_STEPS[stepIdx];
+  if (!step) {
+    _markTutorialSeen();
+    ov.remove();
+    return;
+  }
+  ov.setAttribute('data-step', String(stepIdx));
+  document.getElementById('first-tut-step').textContent = 'Passo ' + (stepIdx + 1) + ' de ' + TUTORIAL_STEPS.length;
+  document.getElementById('first-tut-title').textContent = step.title;
+  document.getElementById('first-tut-desc').innerHTML = step.description;
+  /* Nav state */
+  var prevBtn = document.getElementById('ft-prev');
+  var nextBtn = document.getElementById('ft-next');
+  prevBtn.disabled = (stepIdx === 0);
+  nextBtn.textContent = (stepIdx === TUTORIAL_STEPS.length - 1) ? '✓ Entendido' : 'Próximo →';
+  /* Spotlight */
+  var spotlight = document.getElementById('first-tut-spotlight');
+  var card = document.getElementById('first-tut-card');
+  if (step.selector) {
+    var target = document.querySelector(step.selector);
+    if (target) {
+      var rect = target.getBoundingClientRect();
+      var pad = 6;
+      spotlight.style.left = (rect.left - pad) + 'px';
+      spotlight.style.top = (rect.top - pad) + 'px';
+      spotlight.style.width = (rect.width + pad * 2) + 'px';
+      spotlight.style.height = (rect.height + pad * 2) + 'px';
+      spotlight.classList.add('visible');
+      card.classList.remove('center');
+      /* Position card to avoid overlap with target */
+      var cardOnTop = rect.top > window.innerHeight / 2;
+      if (cardOnTop) {
+        card.style.bottom = 'auto';
+        card.style.top = '24px';
+      } else {
+        card.style.top = 'auto';
+        card.style.bottom = '24px';
+      }
+      /* Scroll element into view if off-screen */
+      try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+    } else {
+      /* selector missed — center card, no spotlight */
+      spotlight.classList.remove('visible');
+      card.classList.add('center');
+    }
+  } else {
+    spotlight.classList.remove('visible');
+    card.classList.add('center');
+  }
+}
+
 // USER REQUEST 2026-05-04: AAA orb (mesma DOM de shared/loading-title.js#_buildDOM)
 // mas só o orb (sem texto/tap/runas externas), escalado pra caber em popup.
 function _buildHallAAAOrb(host){
@@ -10087,6 +10346,16 @@ function renderCurrentScreen(params){
   // USER REQUEST 2026-05-04: sector tab bar + sparkle on newly_available locations
   if (typeof _renderSectorTabs === 'function') _renderSectorTabs(contentEl);
   if (typeof _applyDiscoveryAnimations === 'function') _applyDiscoveryAnimations(contentEl);
+  /* X-6.5.51AT (2026-05-08) — first-time city tutorial trigger.
+     User pediu: "na primeira vez que o jogador ver a cidade ele precisa
+     entender o que cada botão da cidade faz, então precisamos montar um
+     tutorial visual com explicação de cada elemento da tela para ele".
+     Mostra overlay de tutorial só uma vez por device (localStorage flag). */
+  try {
+    if (_currentScreen === 'hub' && typeof _maybeShowFirstTimeTutorial === 'function') {
+      setTimeout(_maybeShowFirstTimeTutorial, 800);
+    }
+  } catch(e){ console.warn('[CITY] tutorial trigger:', e); }
 }
 
 // ============================================================================
