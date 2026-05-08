@@ -6722,22 +6722,45 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (!r.ok) throw new Error('state HTTP ' + r.status);
       return r.json();
     }).then(function(state){
-      // Detect transition: server diz que player estava em explore/combat
+      // X-6.5.51AM (2026-05-08) BUG FIX: detecta transition + usa state.transition.url
+      // se servidor já construiu (PROLOGUE caso novo char). Antes tinha apenas
+      // 4 branches hardcoded (explore/combat/levelup) e 'prologue' caía no
+      // default fall-through (return null) → user ficava preso na cidade SEM
+      // ver prólogo, e o /api/auth/characters NÃO era chamado, deixando o
+      // Hall com mock fallback (Brunhilda/Lyana). User report:
+      //   "criei Sage, foi direto para cidade sem prólogo, vejo Brunhilda/
+      //    Lyana ao invés de Wilzen, e 2 grupo members aleatórios (Liriel/Korin)"
       if (state && state.transition && state.transition.to){
         var dest = state.transition.to;
-        console.log('[CITY] last_screen_payload → redirect to:', dest);
+        var serverUrl = state.transition.url;  // server-built URL (preferred)
+        console.log('[CITY] last_screen_payload → redirect to:', dest, '(serverUrl:', serverUrl ? 'yes' : 'no', ')');
         var newParams = new URLSearchParams(window.location.search);
         window.__valdoria_transitioning = true;
-        // Mapeia destination → URL
+        // PRIORITY 1: use server-built URL when available (PROLOGUE always has this)
+        if (serverUrl) {
+          window.location.replace(serverUrl);
+          return null;
+        }
+        // PRIORITY 2: hardcoded fallback paths (preserva params do query atual)
         if (dest === 'explore' || dest === 'exploration') {
           window.location.replace('/exploracao/exploracao.html?' + newParams.toString());
+          return null;
         } else if (dest === 'combat' || dest === 'combat2') {
           window.location.replace('/combat2/combate.html?' + newParams.toString());
+          return null;
         } else if (dest === 'levelup') {
           window.location.replace('/levelup/?' + newParams.toString());
+          return null;
+        } else if (dest === 'prologue' || dest === 'prologo') {
+          // Fallback se servidor não passou serverUrl (não deveria acontecer)
+          window.location.replace('/prologue/?' + newParams.toString());
+          return null;
         }
-        // Otherwise stay in cidade (default fall-through)
-        return null; // skip char data load — we're navigating away
+        // Unknown destination — log warning, stay in cidade, MAS continua carregar chars
+        // (não retornar null — Hall precisa dos chars reais pra evitar mock fallback)
+        console.warn('[CITY] unknown transition destination:', dest, '— staying in cidade, will load chars');
+        window.__valdoria_transitioning = false;
+        // fall-through to chars fetch
       }
       // Apply HUD snapshot from state (overrides CITY_MOCK_PLAYER)
       if (state && state.hud) {
@@ -7773,26 +7796,79 @@ function _showCharactersPopup(){
     return MAP[k] || 'ic-guerreiro';
   }
 
-  // Lista mock de personagens (replica formato vindo de /api/auth/characters).
-  // icon = ID heráldico canonical (NUNCA emoji sistema — regra Heraldic Icons Only)
+  // X-6.5.51AM (2026-05-08) BUG FIX: em REMOTE mode (token+api+uid no URL),
+  // NUNCA usar mock chars Brunhilda/Lyana — eles confundiam o user que via
+  // chars de "outra conta" quando /api/auth/characters falhava silenciosamente.
+  // Em vez disso, mostra apenas o player atual (do CITY_MOCK_PLAYER já
+  // populado por setupMockPlayer/state) E dispara um re-fetch.
+  // Mock fixo (Brunhilda/Lyana) só em LOCAL mode (file://) onde é o esperado.
   var p = window.CITY_MOCK_PLAYER || {};
-  var chars = window._mockCharacters || [
-    {
-      id: 'active', name: p.name || 'Aventureiro',
-      cls: (p.cls || 'mago'), race: (p.race || 'elfo'),
-      level: p.level || 8, icon: 'ic-mago', active: true
-    },
-    {
-      id: 'char_2', name: 'Brunhilda',
-      cls: 'guerreiro', race: 'anão',
-      level: 12, icon: 'ic-guerreiro', active: false
-    },
-    {
-      id: 'char_3', name: 'Lyana',
-      cls: 'patrulheiro', race: 'meio-elfo',
-      level: 5, icon: 'ic-patrulheiro', active: false
+  var _isRemote = (function(){
+    try {
+      var pp = new URLSearchParams(window.location.search);
+      return !!(pp.get('token') && pp.get('api') && pp.get('uid'));
+    } catch(e){ return false; }
+  })();
+  var chars = window._mockCharacters;
+  if (!chars || !chars.length){
+    if (_isRemote){
+      // REMOTE sem _mockCharacters populado: erro real. Mostra só o player atual
+      // pra evitar mock de outra conta; tenta re-fetch em background.
+      chars = [{
+        id: 'active', name: p.name || 'Aventureiro',
+        cls: (p.cls || 'guerreiro'), race: (p.race || 'humano'),
+        level: p.level || 1,
+        icon: _hallClassToHeraldic(p.cls || 'guerreiro'),
+        active: true
+      }];
+      console.warn('[CITY] Hall: REMOTE mode but _mockCharacters empty — using current player only + re-fetch');
+      // Re-tenta fetch em background (não bloquear render)
+      setTimeout(function(){
+        try {
+          var pp = new URLSearchParams(window.location.search);
+          var _t = pp.get('token'), _a = pp.get('api');
+          if (_t && _a){
+            fetch(_a.replace(/\/$/,'') + '/api/auth/characters', {
+              headers: { 'Authorization': 'Bearer ' + _t }
+            }).then(function(r){ return r.ok ? r.json() : null; }).then(function(data){
+              if (data && data.characters && data.characters.length){
+                window._mockCharacters = data.characters.map(function(c){
+                  var clsKey = String(c.class_name || '').toLowerCase().split(' ')[0];
+                  return {
+                    id: c.id || c.char_id, name: c.name,
+                    cls: clsKey, race: String(c.race || '').toLowerCase(),
+                    level: c.level || 1, icon: _hallClassToHeraldic(clsKey),
+                    active: false
+                  };
+                });
+                if (window._mockCharacters.length) window._mockCharacters[0].active = true;
+                _showCharactersPopup();  // re-render com chars reais
+              }
+            }).catch(function(e){ console.warn('[CITY] Hall re-fetch failed:', e); });
+          }
+        } catch(e){}
+      }, 200);
+    } else {
+      // LOCAL mode (file://): usar mock fixo expected pra dev
+      chars = [
+        {
+          id: 'active', name: p.name || 'Aventureiro',
+          cls: (p.cls || 'mago'), race: (p.race || 'elfo'),
+          level: p.level || 8, icon: 'ic-mago', active: true
+        },
+        {
+          id: 'char_2', name: 'Brunhilda',
+          cls: 'guerreiro', race: 'anão',
+          level: 12, icon: 'ic-guerreiro', active: false
+        },
+        {
+          id: 'char_3', name: 'Lyana',
+          cls: 'patrulheiro', race: 'meio-elfo',
+          level: 5, icon: 'ic-patrulheiro', active: false
+        }
+      ];
     }
-  ];
+  }
   window._mockCharacters = chars;
   // Default: ativo já vem selecionado
   if (!window._hallSelectedId) {
@@ -36739,26 +36815,41 @@ function _resForClass(cls){
   return CLASS_RES_MAP[k] || { name: 'MANA', cls: 'mp' };
 }
 
-var GROUP_MEMBERS = [
-  null, // index 0 = player (preenchido no bootstrap a partir de CITY_MOCK_PLAYER)
-  {
-    name: 'Liriel', cls: 'sacerdotisa', race: 'humana', level: 4,
-    hp: 22, hpMax: 24, mp: 8, mpMax: 10,
-    exh: 1, exhMax: 6,
-    xp: 600, xpNext: 1500,
-    gold: 35,
-    dead: false
-  },
-  {
-    name: 'Korin', cls: 'guerreiro', race: 'anão', level: 3,
-    hp: 30, hpMax: 32, mp: 4, mpMax: 8,  // VIGOR (estilo guerreiro)
-    exh: 0, exhMax: 6,
-    xp: 850, xpNext: 1200,
-    gold: 22,
-    dead: false
-  },
-  null  // index 3 = vazio (recrutar na guilda)
-];
+// X-6.5.51AM (2026-05-08) BUG FIX: GROUP_MEMBERS inicializa baseado no mode.
+// Em REMOTE (token+api+uid no URL), aliados são SEMPRE null até backend ter
+// /api/web/party. Antes user via Liriel/Korin como mock, confundindo (parecia
+// outra conta). Em LOCAL (file://), mock fica pra dev/preview.
+var GROUP_MEMBERS = (function(){
+  try {
+    var pp = new URLSearchParams(window.location.search);
+    var isRemote = !!(pp.get('token') && pp.get('api') && pp.get('uid'));
+    if (isRemote) {
+      // REMOTE: solo char (sem aliados mock). Backend irá popular se /api/web/party existir.
+      return [null, null, null, null];
+    }
+  } catch(e){}
+  // LOCAL mode: mock allies pra preview/dev
+  return [
+    null, // index 0 = player (preenchido no bootstrap a partir de CITY_MOCK_PLAYER)
+    {
+      name: 'Liriel', cls: 'sacerdotisa', race: 'humana', level: 4,
+      hp: 22, hpMax: 24, mp: 8, mpMax: 10,
+      exh: 1, exhMax: 6,
+      xp: 600, xpNext: 1500,
+      gold: 35,
+      dead: false
+    },
+    {
+      name: 'Korin', cls: 'guerreiro', race: 'anão', level: 3,
+      hp: 30, hpMax: 32, mp: 4, mpMax: 8,  // VIGOR (estilo guerreiro)
+      exh: 0, exhMax: 6,
+      xp: 850, xpNext: 1200,
+      gold: 22,
+      dead: false
+    },
+    null  // index 3 = vazio (recrutar na guilda)
+  ];
+})();
 
 // --- HOTBAR FAVORITOS — 5 favs + "mais" ---
 // Atalhos rápidos. Ordem importa visualmente.
