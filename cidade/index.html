@@ -1090,16 +1090,27 @@ LOG SINK (Fase 7):
       100% { opacity: 1; transform: scale(1); }
     }
     .srp-card {
-      width: 100%;
+      width: auto;
+      min-width: 260px;
       max-width: 360px;
+      max-height: 88vh;  /* X-6.5.51AU: don't overflow viewport */
       margin: 0 16px;
-      padding: 24px 22px 20px;
+      padding: 22px 20px 18px;  /* tightened for short content */
       background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
       border: 1.5px solid #c4953a;
       border-radius: 12px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 0 14px rgba(196,149,58,0.15);
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;  /* X-6.5.51AU: scroll only if content exceeds 88vh */
     }
+    /* X-6.5.51AU (2026-05-08): adaptive sizing — short events get compact card,
+       long events fit viewport with internal scroll. User reportou: "ajuste o
+       popup ao tamanho da narrativa". */
+    .srp-card.compact { padding: 18px 18px 14px; min-width: 240px; }
+    .srp-card.compact .srp-icon { font-size: 36px; margin-bottom: 6px; }
+    .srp-card.compact .srp-narrative { padding: 8px 12px; }
     .srp-icon {
       font-size: 48px;
       filter: drop-shadow(0 0 14px rgba(196,149,58,0.5));
@@ -19738,6 +19749,63 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
         }
       }
     ]
+  },
+  /* X-6.5.51AU (2026-05-08) — Sussurros Arcanos: evento misterioso AAA.
+     User reportou "apareceu uma tela Sussurros Arcanos, escolhi investigar,
+     não teve rolagem de dados, apareceu um popup em seguida e sumiu". O
+     evento não existia oficialmente — agora existe com narrativa rica,
+     dice roll obrigatório, e múltiplas escolhas. */
+  {
+    "id": "sussurros_arcanos",
+    "title": "Sussurros Arcanos",
+    "text": "Ao passar perto de uma fonte de pedra antiga, você sente um calafrio. <i>Vozes</i> sem boca chegam aos seus ouvidos — fragmentos de uma língua morta. Apenas <b>você</b> parece ouvi-las.",
+    "weight": 3,
+    "choices": [
+      {
+        "id": "investigate_arcane",
+        "label": "🔍 Investigar (INT)",
+        "stat": "intelligence",
+        "dc": 13,
+        "result_text": "<i>(Você se concentra nos sussurros)</i><br><br>"
+                     + "As vozes não falam <b>com</b> você — falam <b>através</b> de você. "
+                     + "São ecos antigos presos na <b>fonte de pedra</b>, vestígios de "
+                     + "rituais arcanos esquecidos. Você reconhece três palavras: "
+                     + "<i>'sangue'</i>, <i>'limiar'</i>, <i>'volta'</i>. "
+                     + "Anota mentalmente — pode ser pista pra missões futuras.",
+        "result_text_fail": "Você se aproxima da fonte e tenta <i>ouvir melhor</i>. "
+                          + "As vozes ficam mais altas, mais densas — começa uma <b>dor "
+                          + "aguda atrás dos olhos</b>. Você recua tonto, joelhos bambos. "
+                          + "Os sussurros somem com a dor.",
+        "effect": { "xp": 18 },
+        "effect_fail": { "xp": 4, "hp_heal": -2 }
+      },
+      {
+        "id": "channel_arcane",
+        "label": "✨ Canalizar (Conhecimento Arcano · CAR)",
+        "stat": "charisma",
+        "dc": 14,
+        "result_text": "<i>(Você responde aos sussurros com palavras antigas)</i><br><br>"
+                     + "Mãos invisíveis fecham ao redor das suas — quentes, mas não "
+                     + "ameaçadoras. Por um instante eternamente curto, você sente que "
+                     + "<b>algo do outro lado te conhece</b>. As vozes se calam, "
+                     + "satisfeitas. Você ganha uma <b>moeda antiga</b> caída na fonte "
+                     + "que não estava lá segundos atrás.",
+        "result_text_fail": "Você tenta responder com palavras solenes. As vozes <b>ri "
+                          + "alto</b> — uma risada sem alegria que ecoa em sua mente "
+                          + "por minutos. Você se afasta da fonte sentindo náusea.",
+        "effect": { "xp": 25, "gold": 8 },
+        "effect_fail": { "xp": 5 }
+      },
+      {
+        "id": "ignore_arcane",
+        "label": "🚶 Ignorar e seguir",
+        "stat": null,
+        "dc": null,
+        "result_text": "Você acelera o passo. As vozes desaparecem assim que você "
+                     + "se afasta da fonte. <i>Algumas portas é melhor não abrir.</i>",
+        "effect": { "xp": 2 }
+      }
+    ]
   }
 ];
 
@@ -33733,6 +33801,22 @@ function _bankShowLoans(p){
 function _showServiceResultPopup(opts){
   var ov = document.getElementById('service-result-overlay');
   if (!ov) return;
+  /* X-6.5.51AU (2026-05-08) — adaptive sizing. Short narratives + no dice/deltas
+     get .compact card (smaller padding, smaller icon). Long content uses default
+     card with internal scroll. User pediu: "faça o popup deles aparecer menor,
+     ajustado ao tamanho da narrativa". */
+  var card = ov.querySelector('.srp-card');
+  if (card) {
+    var totalLen = String(opts.narrative || '').replace(/<[^>]*>/g,'').length;
+    var hasComplex = !!(opts.dice && opts.dice.formula)
+                  || (opts.deltas && opts.deltas.length > 0)
+                  || (opts.rewards && opts.rewards.length > 0);
+    if (totalLen < 200 && !hasComplex) {
+      card.classList.add('compact');
+    } else {
+      card.classList.remove('compact');
+    }
+  }
   // Header
   // FIX 2026-05-05: opts.icon pode ser SVG markup retornado por _heralIco()
   // (ex: '<svg ...><use href="#ic-festival"/></svg>'). textContent escapava
