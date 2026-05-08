@@ -541,6 +541,14 @@ LOG SINK (Fase 7):
     } catch (_) { /* fallback silencioso */ }
   </script>
   <script>
+    /* X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Mesmo fix
+       portado de combate.html via shared sim-full-motion.js. Carrega ANTES
+       de qualquer outro script pra spoofar matchMedia + setar
+       vReducedMotion=false ANTES de outros scripts checarem. */
+    var __vEarly = Date.now();
+    document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '"><\/script>');
+  </script>
+  <script>
     // Cache busting para CSS/JS imports
     var v = Date.now();
     document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
@@ -7957,8 +7965,11 @@ function _showCharactersPopup(){
     var api = params.get('api');
     var uid = params.get('uid');
     var env = params.get('env');
+    /* FIX 2026-05-07 (user report): em file:// o handler só mostrava toast.
+       Agora redireciona pro character_creator local pra fluxo testável. */
     if (window.location.protocol === 'file:'){
-      vToast('🎭 LOCAL mode: bot real abre /character_creator/.');
+      window.__valdoria_transitioning = true;
+      window.location.href = '../character_creator/index.html?local=1&new=1';
       return;
     }
     if (!token || !api){
@@ -13996,7 +14007,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     var msgExtra = '';
     if (opt._grantsXp){
       _gainXp(p, opt._grantsXp);
-      deltas.push({ type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false });
+      deltas.push(_lastXpDelta(p));
     }
     if (opt._isUniqueFinish && opt._reward){
       var r = opt._reward;
@@ -14013,7 +14024,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
         rewardLines.push('🎒 Obteve: ' + r.item);
       }
       if (r.xp){
-        deltas.push({ type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false });
+        deltas.push(_lastXpDelta(p));
       }
       if (rewardLines.length){
         msgExtra = '<br><br>' + rewardLines.join('<br>');
@@ -19936,7 +19947,7 @@ function _squareShowEntryPassive(p, ev){
   }
   if (ev.xp){
     _gainXp(p, ev.xp);
-    deltas.push({ type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false });
+    deltas.push(_lastXpDelta(p));
   }
   refreshHud();
   _showServiceResultPopup({
@@ -20112,6 +20123,8 @@ function _resolveInteractiveChoice(player, choice) {
   var narrative = success ? choice.result_text : (choice.result_text_fail || choice.result_text);
   var preGold = player.gold || 0;
   var preXp = player.xp || 0;
+  var preLevel = player.level || 1;
+  var preXpNext = player.xpNext || 100;
   var preHp = player.hp || 0;
   var hpMax = player.hpMax || 28;
   var deltas = [];
@@ -20124,8 +20137,16 @@ function _resolveInteractiveChoice(player, choice) {
   }
   if (effect.xp) {
     _gainXp(player, effect.xp);
-    deltas.push({ type:'gold', label:'XP', from: preXp, to: player.xp || 0,
-                  max: player.xpNext || 100, bar: false });
+    /* FIX 2026-05-07: ver _resolveOfferChoice — `to: player.xp` mostra valor
+       pós-level-up, gerando delta -1999 quando user leveled up. Use preXp+gain. */
+    if ((player.level || 1) > preLevel) {
+      deltas.push({ type:'gold', label:'XP', from: preXp, to: preXpNext,
+                    max: preXpNext, bar: false,
+                    _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+    } else {
+      deltas.push({ type:'gold', label:'XP', from: preXp, to: preXp + effect.xp,
+                    max: preXpNext, bar: false });
+    }
     rewards.push({ type:'xp', amount: effect.xp, label: 'Experiência' });
   }
   if (effect.hp_heal) {
@@ -24051,7 +24072,7 @@ function _buildSquareMockData(player){
     type: 'hub',
     flavor: flavor,
     rep_label: _squareRepLabel(player),
-    buff: activeBuff ? ('✨ ' + (player.metadata.artist_buff_name || 'Buff de Artista')) : '',
+    buff: activeBuff ? ('✨ ' + (player.metadata.artist_buff_name || 'Inspiração de Artista')) : '',
     services: [
       { icon: _heralIco('ic-praca'), label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
       { icon: _heralIco('ic-praca'), label: 'Explorar Área',      cb: 'square_explore_open' },
@@ -24808,7 +24829,7 @@ function _squareShowExploreEvent(p){
       }
       if (outcome.hp_heal || outcome.hp_damage) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || 999 });
       if (outcome.xp){
-        deltas.push({ type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false });
+        deltas.push(_lastXpDelta(p));
         rewards.push({ type:'xp', amount: outcome.xp, label: 'Experiência' });
       }
       _showServiceResultPopup({
@@ -24900,7 +24921,7 @@ function _squareShowObjectsPopup(p){
               { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
             ];
             if (outcome.xp){
-              deltas.push({ type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false });
+              deltas.push(_lastXpDelta(p));
             }
             _showServiceResultPopup({
               icon: icon, npc: obj.name,
@@ -25032,7 +25053,7 @@ function _squareShowBulletinPopup(p){
                                   : 'Mesmo tentando, você não consegue. O pedinte agradece a intenção.'),
               deltas: success ? [
                 { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false },
-                { type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false }
+                _lastXpDelta(p)
               ] : [],
               rewards: rewards,
               dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + d.dc, sides: 20, value: roll, total: total },
@@ -25354,7 +25375,7 @@ function _squareConfirmJob(p, job){
         dice: diceData,
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, 1), bar: false },
-          { type:'gold', label:'XP', from: preXp, to: p.xp || 0, max: p.xpNext || 100, bar: false }
+          _lastXpDelta(p)
         ],
         rewards: [
           { type:'gold', amount: actualReward, label: 'Pagamento' },
@@ -25429,7 +25450,7 @@ function _tavernShowDrinks(p){
           if (d.heal) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + d.heal) });
           if (d.mp) deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: p.mpMax || (preMp + d.mp) });
           var rewards = ce && p.metadata && p.metadata.drink_buff
-            ? [{ type:'item', amount: 1, label: ce.label || 'Buff de bebida' }]
+            ? [{ type:'item', amount: 1, label: ce.label || 'Bônus de bebida' }]
             : null;
           _showServiceResultPopup({
             icon: d.icon, npc: 'Grom Barba-Cinza',
@@ -25534,7 +25555,7 @@ function _tavernShowDrinking(p){
         dice: { formula: '1d20' + (totalMod >= 0 ? '+' : '') + totalMod + ' vs DC ' + lastDc, sides: 20, value: lastRoll, total: lastRoll + totalMod },
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false },
-          { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,    bar: false }
+          _lastXpDelta(p)
         ],
         rewards: rewards,
         onContinue: function(){ navigateBack(); }
@@ -26395,7 +26416,7 @@ var WNPC_GIFT_REJECTION_LINES = {
 };
 
 var WNPC_RECIPROCITY_ITEMS = {
-    "scholarly": ["Scroll of Identify", "Poção de Cura Menor"],
+    "scholarly": ["Pergaminho de Identificar", "Poção de Cura Menor"],
     "mercantile": ["Poção de Cura Menor", "Tocha"],
     "adventurous": ["Corda de Cânhamo", "Poção de Cura Menor"],
     "devout": ["Poção de Cura Menor", "Água Benta"],
@@ -29350,7 +29371,7 @@ function _tavernShowGather(p){
             : (canonExtra && canonExtra.gather_failure_lines && canonExtra.gather_failure_lines[t.id]);
           var resultLine = pool && pool.length
             ? pickFrom(pool)
-            : (success ? 'Grom sussurra informação útil.<br>Buff: ' + t.bonus
+            : (success ? 'Grom sussurra informação útil.<br>Bônus: ' + t.bonus
                        : 'Grom dá uma resposta vaga e inútil.');
           if (success){
             // Aplica buff em metadata canonical
@@ -30969,7 +30990,7 @@ function _guildShowRewards(p){
         narrative: '<i>Tavira anota no livro e entrega a bolsa.</i><br><b>+50 Valdoritas + 80 XP</b>',
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
-          { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,    bar: false }
+          _lastXpDelta(p)
         ],
         onContinue: function(){ navigateBack(); }
       });
@@ -31095,7 +31116,7 @@ function _guildShowResearch(p){
             dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' (' + skill.label + ') vs DC ' + t.dc, sides: 20, value: rolled, total: total },
             deltas: [
               { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false },
-              { type:'gold', label:'XP',    from: preXp, to: p.xp,    max: p.xpNext || 100,     bar: false }
+              _lastXpDelta(p)
             ],
             rewards: rewards,
             onContinue: function(){ navigateBack(); }
@@ -31560,7 +31581,7 @@ function _festivalEvent(p, ev){
         dice: { formula: '1d20' + (modAttr>=0?'+':'') + modAttr + ' vs DC ' + evDc, sides: 20, value: rolled, total: total },
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false },
-          { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,            bar: false }
+          _lastXpDelta(p)
         ],
         rewards: rewards.length > 0 ? rewards : null,
         onContinue: function(){ _renderCityPopup('festival'); }
@@ -31772,7 +31793,7 @@ function _arenaTier(p, tier){
           narrative: '<i>' + victoryLine + '</i><br><br><b>VITÓRIA</b> · +' + reward + ' V + ' + tier.xp + ' XP',
           deltas: [
             { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
-            { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,    bar: false }
+            _lastXpDelta(p)
           ],
           rewards: reward >= 5 ? [{ type:'gold', amount: reward, label: 'Prêmio da Arena' }, { type:'xp', amount: tier.xp, label: 'XP de Combate' }] : null,
           onContinue: function(){ navigateBack(); }
@@ -31976,7 +31997,7 @@ function _questsShowTab(p, tab){
               narrative: '<b>' + q.title + '</b> entregue!<br><i>"Bom trabalho, aventureiro."</i>',
               deltas: [
                 { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
-                { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,    bar: false }
+                _lastXpDelta(p)
               ],
               onContinue: function(){ navigateBack(); }
             });
@@ -32046,7 +32067,7 @@ function _dailyStartCombat(p){
                      '<b>Recompensa:</b> ' + goldGain + ' V + ' + xpGain + ' XP',
           deltas: [
             { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
-            { type:'gold', label:'XP',    from: preXp,   to: p.xp,   max: p.xpNext || 100,    bar: false }
+            _lastXpDelta(p)
           ],
           onContinue: function(){ navigateBack(); }
         });
@@ -33962,7 +33983,7 @@ function _renderInnRestPopup(bodyEl, d){
     + '      <div class="inn-rest-tile-ico">' + _innIco('ic-coroa') + '</div>'
     + '      <div class="inn-rest-tile-name">Suíte Real</div>'
     + '      <div class="inn-rest-tile-cost">10 Valdoritas</div>'
-    + '      <div class="inn-rest-tile-desc">Buff de descanso premium</div>'
+    + '      <div class="inn-rest-tile-desc">Descanso luxuoso</div>'
     + '    </div>'
     + '  </div>'
     + '  <button class="subscreen-btn" data-room="short">'
@@ -35781,7 +35802,7 @@ var ACTION_HANDLERS = {
                        : '❌ <b>Falha.</b> Os sacerdotes agradecem mesmo assim — você gasta um dia, sem ganhos.'),
           dice: { formula: '1d20', sides: 20, value: roll, total: roll },
           rewards: rewards,
-          deltas: success ? [{ type:'xp', label:'XP', from:preXp, to:p.xp, max:p.xpNext, bar:false }] : [],
+          deltas: success ? [_lastXpDelta(p)] : [],
           onContinue: function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); }
         });
       }
@@ -36242,9 +36263,33 @@ function _heal(p, hpAmt, mpAmt){
   refreshHud();
 }
 function _gainXp(p, amt){
+  /* FIX 2026-05-07: captura pre-state em p._lastXpGain pra que callers possam
+     gerar delta correto via _lastXpDelta(p), evitando bug "perdi 1999 XP" quando
+     o ganho dispara level-up (p.xp -= p.xpNext faz o display ficar negativo). */
+  var preLevel = p.level || 1;
+  var preXp = p.xp || 0;
+  var preXpNext = p.xpNext || 100;
   p.xp += amt;
   if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast('🎉 LEVEL UP! Agora nv ' + p.level); }
+  p._lastXpGain = { gain: amt, preXp: preXp, preLevel: preLevel, preXpNext: preXpNext, leveledUp: (p.level || 1) > preLevel };
   refreshHud();
+}
+/* FIX 2026-05-07: helper canonical pra deltas de XP em _showServiceResultPopup.
+   Lê info salva por _gainXp em p._lastXpGain. SEMPRE chamar APÓS _gainXp() — caso
+   contrário, p._lastXpGain pode estar stale. Retorna delta válido mesmo em
+   level-up: bar enche até preXpNext + suffix "Level Up!", em vez de mostrar
+   delta negativo enganoso (preXp → 0 quando xp roda em level-up). */
+function _lastXpDelta(p, label){
+  var info = p._lastXpGain || {};
+  var preXp = info.preXp || 0;
+  var preXpNext = info.preXpNext || 100;
+  if (info.leveledUp) {
+    return { type: 'gold', label: label || 'XP', from: preXp, to: preXpNext,
+             max: preXpNext, bar: false,
+             _suffix: ' 🎉 LEVEL UP! Nv ' + (p.level || 1) };
+  }
+  return { type: 'gold', label: label || 'XP', from: preXp,
+           to: preXp + (info.gain || 0), max: preXpNext, bar: false };
 }
 function refreshHud(){
   // FIX 2026-05-04: refreshHud agora propaga atualizações em TEMPO REAL pra
@@ -41507,18 +41552,40 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
 // Aplica effect immediate (apply_now), adiciona item ao inventory
 // (take_along), ou apenas mostra atmospheric (decline).
 // Sempre fecha com result popup pequeno mostrando narrative + deltas.
+//
+// FIX 2026-05-07 (user report): "perdi 1999 de Xp" no vendedor de queijo.
+// Bug: `to: player.xp || 0` mostrava o valor PÓS-level-up (que pode ser ~0
+// quando preXp+gain >= xpNext). Delta from=1999 to=0 = "perdeu 1999 XP" pra
+// o user, quando na verdade ele GANHOU 1 XP e subiu de nível.
+// Fix: delta sempre mostra `from=preXp, to=preXp+gain` (a quantia ganha real),
+// e empurra um delta extra "Level Up!" quando p.level subiu.
 function _resolveOfferChoice(player, offerChoice, subResult) {
   var deltas = [];
   var preXp = player.xp || 0;
+  var preLevel = player.level || 1;
+  var preXpNext = player.xpNext || 100;
   var preGold = player.gold || 0;
   var preHp = player.hp || 0;
+
+  function pushXpDelta(gain) {
+    if ((player.level || 1) > preLevel) {
+      // Level up: bar enche até preXpNext, suffix mostra novo nível.
+      deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXpNext,
+                    max: preXpNext, bar: false,
+                    _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+    } else {
+      // Ganho normal: from preXp → preXp+gain (não usa player.xp atual,
+      // que pode ter feito wraparound em level-up subsequente).
+      deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXp + gain,
+                    max: preXpNext, bar: false });
+    }
+  }
 
   if (subResult === 'apply_now' && offerChoice.effect) {
     var ef = offerChoice.effect;
     if (ef.xp) {
       _gainXp(player, ef.xp);
-      deltas.push({ type: 'gold', label: 'XP', from: preXp, to: player.xp || 0,
-                    max: player.xpNext || 100, bar: false });
+      pushXpDelta(ef.xp);
     }
     if (ef.hp_heal) {
       var hpMax = player.hpMax || 28;
@@ -41536,15 +41603,13 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
     player.inventory.push(offerChoice.item);
     // Pequeno XP por aceitar (não rejeitar)
     _gainXp(player, 1);
-    deltas.push({ type: 'gold', label: 'XP', from: preXp, to: player.xp || 0,
-                  max: player.xpNext || 100, bar: false });
+    pushXpDelta(1);
     deltas.push({ type: 'gold', label: 'Mochila', from: 0, to: 1,
                   max: 1, bar: false, _suffix: ' (' + offerChoice.item + ')' });
   } else if (subResult === 'decline' && offerChoice.effect) {
     if (offerChoice.effect.xp) {
       _gainXp(player, offerChoice.effect.xp);
-      deltas.push({ type: 'gold', label: 'XP', from: preXp, to: player.xp || 0,
-                    max: player.xpNext || 100, bar: false });
+      pushXpDelta(offerChoice.effect.xp);
     }
   }
 

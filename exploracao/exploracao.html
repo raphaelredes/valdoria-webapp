@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-06T23:43:31Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-07T23:25:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -707,6 +707,20 @@
       window.Telegram.WebApp.enableClosingConfirmation();
     }
   } catch (_) { /* fallback silencioso */ }
+</script>
+
+<!-- X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Exploração tem
+     muitas animações (terreno, hex map, eventos, weather, fog) que o jogador
+     PRECISA ver. Mesmo fix portado de combate.html via shared sim-full-motion.js.
+     Carrega ANTES de qualquer outro script pra spoofar matchMedia + setar
+     vReducedMotion=false ANTES de outros scripts checarem. -->
+<script>
+  (function(){
+    var __vEarly = Date.now();
+    /* Carrega da CDN (production) com fallback local (file://). */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+  })();
 </script>
 
 <script>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-06T23:43:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-07T23:15:03Z — do not edit directly, edit source -->
 
 
 <!--
@@ -467,6 +467,65 @@ html.sim-combat-root #app {
 }
 </style>
 <script>
+/* X-6.5.51AG (2026-05-07): COMBAT NEEDS FULL MOTION — bypass prefers-reduced-motion.
+   ════════════════════════════════════════════════════════════════════════════════
+   Para um JOGO de combate AAA, prefers-reduced-motion: reduce ligado no SO
+   QUEBRA tudo (mísseis teleportam, dano não aparece, fireball instantâneo, etc).
+   Esta camada bypassa o reduce-motion em 4 frentes:
+
+   1. JS — `window.matchMedia('(prefers-reduced-motion: reduce)').matches` LIE FALSE
+      (afeta haptic.js → vReducedMotion=false; motion.js → ValdoriaMotion._reduced=false;
+       combat-vfx.js → não entra em lite mode; etc.)
+
+   2. JS — força `window.vReducedMotion = false` mesmo se já setado por outro script
+
+   3. JS — patcha `ValdoriaMotion.duration(normal, reduced)` pra retornar SEMPRE normal
+
+   4. CSS — fetch valdoria-design.css + combat-polish.css, remove a regra
+      `* { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important }`
+      e injeta versões modificadas (autores originais ficam disabled).
+
+   Acessibilidade aqui significa "combate É o foco do jogador, então DEVE ser
+   visível". Decorative animations idle pulses podem ser reduzidas separadamente. */
+(function(){
+    /* 1) Override matchMedia ANTES de qualquer outro script ler. Mantém comportamento
+          original pra todas outras queries (color-scheme, hover, etc). */
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        var _origMatchMedia = window.matchMedia.bind(window);
+        window.matchMedia = function(query) {
+            var mql = _origMatchMedia(query);
+            if (typeof query === 'string' && query.indexOf('prefers-reduced-motion') >= 0 && query.indexOf('reduce') >= 0) {
+                /* Spoof: pretend reduced-motion is OFF for combat sim. */
+                try {
+                    Object.defineProperty(mql, 'matches', { get: function(){ return false; }, configurable: true });
+                } catch(_){}
+            }
+            return mql;
+        };
+        try { console.info('[SIM:FULL-MOTION] matchMedia spoof active — combat sim ignores prefers-reduced-motion.'); } catch(_){}
+    }
+    /* 2) Force vReducedMotion = false sempre. Watch attempts to set it. */
+    try {
+        Object.defineProperty(window, 'vReducedMotion', {
+            get: function(){ return false; },
+            set: function(_){ /* ignore */ },
+            configurable: true
+        });
+    } catch(_){}
+    /* 3) Aguarda ValdoriaMotion ser carregado e patcha .duration() pra ignorar reduce. */
+    var _waitVM = setInterval(function(){
+        if (typeof window.ValdoriaMotion === 'undefined') return;
+        clearInterval(_waitVM);
+        try {
+            window.ValdoriaMotion.duration = function(normal, _reduced){ return normal; };
+            if (typeof window.ValdoriaMotion.isReduced === 'function') {
+                window.ValdoriaMotion.isReduced = function(){ return false; };
+            }
+        } catch(_){}
+    }, 20);
+    setTimeout(function(){ clearInterval(_waitVM); }, 5000);
+})();
+
 var v = Date.now();
 var BASE = 'https://jogo.lendasdevaldoria.com.br';
 function loadCSS(href) {
@@ -477,6 +536,115 @@ function loadCSS(href) {
 }
 loadCSS('/shared/fonts.css');
 loadCSS('/valdoria-design.css');
+
+/* 4) CSS strip: TODOS files com regra `* { animation-duration: 0.01ms !important }`
+      dentro de @media reduced-motion são fetch + modificados + reinjetados.
+      Necessário porque @media CSS não respeita o spoof de matchMedia (browser
+      avalia diretamente o estado real do SO).
+      Auditado via fetch+regex 2026-05-07: 2 files têm a regra global *. */
+(function(){
+    /* Roda APENAS se SO tem reduced-motion (caso contrário, regras dormindo). */
+    var realMQL = (window.matchMedia && (function(){
+        try {
+            /* Usa o ORIGINAL matchMedia se disponível (antes do spoof do bloco acima
+               sobrescrevê-lo). Se já sobrescrito, fallback: testa via DOM. */
+            var probe = document.createElement('div');
+            probe.style.cssText = '@media (prefers-reduced-motion: reduce) { animation-duration: 1ms; }';
+            return matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch(_) { return false; }
+    })());
+    /* O spoof acima já trocou window.matchMedia. Pra detectar o estado REAL do SO,
+       precisamos chamar antes do spoof — ou usar uma técnica alternativa.
+       Solução: cria um elemento de teste com CSS que muda baseado em reduced-motion. */
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;animation:__simProbeMotion 1s infinite;pointer-events:none;';
+    var probeStyle = document.createElement('style');
+    probeStyle.textContent = '@keyframes __simProbeMotion { from { opacity: 0; } to { opacity: 1; } } @media (prefers-reduced-motion: reduce) { #__sim_probe_motion { opacity: 0.42 !important; } }';
+    probe.id = '__sim_probe_motion';
+    document.head.appendChild(probeStyle);
+    document.documentElement.appendChild(probe);
+    var probeOpacity = getComputedStyle(probe).opacity;
+    probe.remove();
+    probeStyle.remove();
+    var osHasReducedMotion = (probeOpacity === '0.42');
+
+    if (!osHasReducedMotion) return;
+
+    var FILES_WITH_REDUCE_MOTION = [
+        '/valdoria-design.css',
+        '/combat/combat-polish.css'
+    ];
+    function processFile(path) {
+        var url = BASE + path + '?v=' + v;
+        return fetch(url).then(function(r){ return r.text(); }).then(function(text){
+            var modified = text
+                .replace(/animation-duration\s*:\s*0\.01ms\s*!important\s*;?/g, '/* sim-no-reduce */')
+                .replace(/transition-duration\s*:\s*0\.01ms\s*!important\s*;?/g, '/* sim-no-reduce */')
+                .replace(/transition-duration\s*:\s*var\(--v-transition-instant\)\s*!important\s*;?/g, '/* sim-no-reduce */')
+                .replace(/animation-iteration-count\s*:\s*1\s*!important\s*;?/g, '/* sim-no-reduce */');
+            var pathFile = path.split('/').pop();
+            var links = document.querySelectorAll('link[href*="' + pathFile + '"]');
+            for (var i = 0; i < links.length; i++) links[i].disabled = true;
+            var s = document.createElement('style');
+            s.dataset.simNoReduce = path;
+            s.textContent = modified;
+            document.head.appendChild(s);
+        });
+    }
+    Promise.all(FILES_WITH_REDUCE_MOTION.map(processFile)).then(function(){
+        try { console.info('[SIM:NO-REDUCE-MOTION] Stripped 0.01ms enforcement from ' + FILES_WITH_REDUCE_MOTION.length + ' CSS files.'); } catch (_e) {}
+        /* X-6.5.51AG (2026-05-07): MESMO com a regra global stripped, Chrome 147+
+           ainda enforça `animation-duration: 0.01ms` ao nível user-agent quando
+           prefers-reduced-motion: reduce está no SO. A ÚNICA forma de vencer é
+           author CSS com !important. Solução: itera CSSOM, encontra regras
+           com `animation:` shorthand sem !important, e re-injeta cópias COM
+           !important. Skip @keyframes (não tem selectorText) e seletor universal
+           (`*` é justamente a regra do enforcement). */
+        try {
+            var rulesOut = [];
+            function collectAnimRules(rules, mediaWrapper) {
+                if (!rules) return;
+                for (var i = 0; i < rules.length; i++) {
+                    var r = rules[i];
+                    if (r.cssRules && !r.selectorText) {
+                        var nestedMedia = (r.media && r.media.mediaText) ? r.media.mediaText : mediaWrapper;
+                        collectAnimRules(r.cssRules, nestedMedia);
+                        continue;
+                    }
+                    if (!r.selectorText || !r.style) continue;
+                    var sel = r.selectorText;
+                    if (sel === '*' || /^\*\s*[,]/.test(sel) || /[,]\s*\*\s*$/.test(sel)) continue;
+                    var av = r.style.getPropertyValue('animation');
+                    if (!av) continue;
+                    if (r.style.getPropertyPriority('animation') === 'important') continue;
+                    /* Em @media reduced-motion, `animation: none` é desativação
+                       intencional (ex: `.v-scroll-hint-arrow`). Skip pra não
+                       ressuscitar animações que o autor quis silenciar. */
+                    if (mediaWrapper && mediaWrapper.indexOf('reduced-motion') >= 0
+                        && av.trim().toLowerCase().indexOf('none') === 0) continue;
+                    rulesOut.push(sel + ' { animation: ' + av + ' !important; }');
+                }
+            }
+            for (var si = 0; si < document.styleSheets.length; si++) {
+                try {
+                    var sheet = document.styleSheets[si];
+                    if (sheet.disabled) continue;
+                    if (sheet.ownerNode && sheet.ownerNode.id === '__sim_anim_important_override') continue;
+                    collectAnimRules(sheet.cssRules, null);
+                } catch (eC) { /* CORS, skip */ }
+            }
+            var overrideStyle = document.createElement('style');
+            overrideStyle.id = '__sim_anim_important_override';
+            overrideStyle.textContent = '/* X-6.5.51AG: ' + rulesOut.length + ' animation rules re-emitted with !important to win Chrome reduced-motion enforcement. */\n' + rulesOut.join('\n');
+            document.head.appendChild(overrideStyle);
+            try { console.info('[SIM:ANIM-IMPORTANT] Re-emitted ' + rulesOut.length + ' animation rules with !important.'); } catch (_e) {}
+        } catch (eO) {
+            try { console.warn('[SIM:ANIM-IMPORTANT] Failed:', eO && eO.message); } catch (_e) {}
+        }
+    }).catch(function(e){
+        try { console.warn('[SIM:NO-REDUCE-MOTION] Failed:', e && e.message); } catch (_e) {}
+    });
+})();
 loadCSS('/shared/coin-icon.css');
 loadCSS('/shared/status-bars.css');
 loadCSS('/shared/animations.css');
@@ -6306,10 +6474,10 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 body.perf-lite .boss-charge-streak,
 body.perf-lite .boss-charge-shockwave,
 body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
-@media (prefers-reduced-motion: reduce) {
-    .boss-charge-streak, .boss-charge-shockwave, .boss-charge-dust,
-    .boss-charge-target-shake { animation: none !important; }
-}
+/* X-6.5.51AG (2026-05-07): @media reduced-motion REMOVIDO. Combat VFX de boss
+   é gameplay-essential (jogador precisa ver Investida Furiosa do Brakthar).
+   Bypass do prefers-reduced-motion já está implementado no head (matchMedia
+   spoof + vReducedMotion=false + ValdoriaMotion.duration patched). */
 /* Cell flash impactante quando skill acerta — substitui camada DOM-on-cell */
 @keyframes simSkillImpactFlash {
     0%   { box-shadow: 0 0 0 0 rgba(255,180,40,0); }
@@ -14746,6 +14914,12 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     lbl.style.position = 'fixed'; // sobrevive ao setHTML(#app) do render
     lbl.style.left = (cx + jitterX) + 'px';
     lbl.style.top = cy + 'px';
+    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
+       pra vencer `* { animation-duration: 0.01ms !important }` global de
+       valdoria-design.css quando prefers-reduced-motion:reduce ligado no SO.
+       Sem isso animação termina em 0.01ms e jogador não vê o número de dano. */
+    lbl.style.setProperty('animation-duration', opts.crit ? '1.6s' : '1.4s', 'important');
+    lbl.style.setProperty('animation-iteration-count', '1', 'important');
     lbl.textContent = (opts.crit ? '✦ ' : '-') + dmg;
     document.body.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1400);
@@ -21267,15 +21441,29 @@ function flashTargetCellSim(el, damageType, isCrit) {
     var flashCls = _dmgFlashClassSim(damageType || 'slashing');
     _stripCellFlashClassesSim(el);
     void el.offsetWidth;
+    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
+       pra vencer reduced-motion global (ver _spawnFloatingDmgNumber pra contexto).
+       Usa 0.4s (dmgFlash) inicialmente, depois shakeCls com 0.45s/0.55s. */
+    el.style.setProperty('animation-duration', '0.4s', 'important');
+    el.style.setProperty('animation-iteration-count', '1', 'important');
     el.classList.add(flashCls);
     var rmFlash = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
         ? ValdoriaMotion.duration(400, 0) : 400;
-    setTimeout(function () { el.classList.remove(flashCls); }, rmFlash);
+    setTimeout(function () {
+        el.classList.remove(flashCls);
+    }, rmFlash);
     var shakeCls = isCrit ? 'enemy-hit-heavy' : 'dmg-shake';
     el.classList.add(shakeCls);
     var rmShake = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
         ? ValdoriaMotion.duration(isCrit ? 600 : 500, 0) : (isCrit ? 600 : 500);
-    setTimeout(function () { el.classList.remove(shakeCls); }, rmShake);
+    setTimeout(function () {
+        el.classList.remove(shakeCls);
+        /* Limpa override só se nenhuma outra anim ainda estiver rolando */
+        if (!el.classList.contains(flashCls) && !el.classList.contains('cell-skill-impact-flash--active')) {
+            el.style.removeProperty('animation-duration');
+            el.style.removeProperty('animation-iteration-count');
+        }
+    }, rmShake);
     _showImpactFlashSim(el, !!isCrit);
     if (isCrit) { _shakeAppSim('heavy'); } else { _shakeAppSim('light'); }
 }
@@ -21435,6 +21623,10 @@ function playHitVFX(uid, crit, dmgType, opts) {
         var dist = 25 + Math.random() * 30;
         p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
         p.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
+        /* X-6.5.51AE (2026-05-07): força animation-duration (ver
+           _spawnFloatingDmgNumber pra contexto). pFly = 0.7s. */
+        p.style.setProperty('animation-duration', '0.7s', 'important');
+        p.style.setProperty('animation-iteration-count', '1', 'important');
         mountInGameFrame(p);
         setTimeout((function (e) { return function () { e.remove(); }; })(p), 700);
     }
@@ -22171,6 +22363,10 @@ function _asSpawnFloatLabel(host, cx, cy, text, themeCls) {
     lbl.style.left = cx + 'px';
     lbl.style.top = cy + 'px';
     lbl.style.position = 'absolute';
+    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
+       (ver _spawnFloatingDmgNumber pra contexto). */
+    lbl.style.setProperty('animation-duration', '1.4s', 'important');
+    lbl.style.setProperty('animation-iteration-count', '1', 'important');
     host.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1450);
 }
@@ -23420,6 +23616,10 @@ function spawnMissFloatLabel(el) {
     var lbl = document.createElement('div');
     lbl.className = 'cell-miss-float-label';
     lbl.textContent = 'Errou';
+    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
+       (ver _spawnFloatingDmgNumber pra contexto completo). */
+    lbl.style.setProperty('animation-duration', '1.25s', 'important');
+    lbl.style.setProperty('animation-iteration-count', '1', 'important');
     el.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1300);
 }
@@ -23450,6 +23650,10 @@ function spawnSkillImpactLabel(el, text, kind) {
        translate(-50%, Y) — Y vem da animação, label sobe a partir desse anchor. */
     lbl.style.left = (rect.left + rect.width / 2) + 'px';
     lbl.style.top = (rect.top - 8) + 'px';
+    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
+       (ver _spawnFloatingDmgNumber pra contexto). */
+    lbl.style.setProperty('animation-duration', '1.0s', 'important');
+    lbl.style.setProperty('animation-iteration-count', '1', 'important');
     document.body.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 2500);
 }
@@ -23471,12 +23675,20 @@ function spawnSkillImpactFlash(el, kind) {
     var c3 = 'cell-skill-impact-flash--' + safeKind;
     try {
         el.classList.add(c1, c2, c3);
+        /* X-6.5.51AE (2026-05-07): força animation-duration inline (ver
+           _spawnFloatingDmgNumber pra contexto). 0.7s = duração canonical. */
+        el.style.setProperty('animation-duration', '0.7s', 'important');
+        el.style.setProperty('animation-iteration-count', '1', 'important');
     } catch (e) {
         console.warn('[SIM] spawnSkillImpactFlash classList.add failed', e);
         return;
     }
     setTimeout(function () {
-        try { el.classList.remove(c1, c2, c3); } catch (eR) {}
+        try {
+            el.classList.remove(c1, c2, c3);
+            el.style.removeProperty('animation-duration');
+            el.style.removeProperty('animation-iteration-count');
+        } catch (eR) {}
     }, 700);
 }
 
@@ -27566,9 +27778,23 @@ async function __combatAnimateOneEvent(ev) {
             if (typeof sfxMiss === 'function') sfxMiss();
             if (elT) elT.classList.add('dodged');
             setTimeout(function () { if (elT) elT.classList.remove('dodged'); }, 520);
-            if (typeof _spawnFloatingDmgNumber === 'function') {
-                try { _spawnFloatingDmgNumber(tUid, 'ERROU', 'miss'); } catch (eS) {}
+            /* X-6.5.51AD fix (2026-05-07): "Errou" label correto.
+               Antes: _spawnFloatingDmgNumber(tUid, 'ERROU', 'miss') — uid string +
+               texto + kind string. A função espera (target_object, dmg_number, opts);
+               com uid string o lookup currentState.order[i] === target nunca casa
+               (string vs objeto) → silent return em `if (!uid) return;`.
+               Agora: spawnMissFloatLabel(el) replica o pattern LOCAL playMissVFX. */
+            if (elT && typeof spawnMissFloatLabel === 'function') {
+                try { spawnMissFloatLabel(elT); } catch (eMS) {}
             }
+            if (window._combatVfx && elT) {
+                try { window._combatVfx.missFlash(elT); } catch (eMF) {}
+                if (tU && tU.se && tU.se.some(function (x) { return x && (x.id === 'esquiva' || x.attackAdvantage); })) {
+                    try { window._combatVfx.dodgeEvade(elT); } catch (eDE) {}
+                }
+            }
+            if (elT) elT.classList.add('miss-target-flash');
+            setTimeout(function () { if (elT) elT.classList.remove('miss-target-flash'); }, 700);
             render(currentState);
             await new Promise(function (r) { setTimeout(r, 420); });
             return;
@@ -27612,9 +27838,32 @@ async function __combatAnimateOneEvent(ev) {
         if (ev.dmgType && typeof sfxDamageType === 'function') sfxDamageType(ev.dmgType);
         if (elT) elT.classList.add('hit-flash');
         setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
-        if (typeof _spawnFloatingDmgNumber === 'function') {
-            var dtxt = (ev.crit ? 'CRIT ' : '-') + (ev.dmgTotal | 0);
-            try { _spawnFloatingDmgNumber(tUid, dtxt, ev.crit ? 'crit' : 'dmg'); } catch (eS) {}
+        /* X-6.5.51AD fix (2026-05-07): floating-dmg + impact VFX paridade LOCAL.
+           Antes: _spawnFloatingDmgNumber(tUid, dtxt, kind_string) — uid string em
+           vez de target object → função silently retorna (loop currentState.order[i]
+           === target nunca casa string vs objeto). E nunca chamava playHitVFX
+           → sem impact label "ATAQUE!"/"CRÍTICO!", sem flash, sem canvas particles.
+           Agora: chamada com signature correta (target object, dmg number, opts) +
+           playHitVFX assíncrono (mostra "ATAQUE!"/"[SKILL]!" sobre o card +
+           skill impact flash + meleeSlash/projectile/impact canvas particles). */
+        if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
+            try {
+                _spawnFloatingDmgNumber(tU, ev.dmgTotal | 0, {
+                    crit: !!ev.crit,
+                    dmgType: ev.dmgType || ''
+                });
+            } catch (eFCT) { console.warn('[C-REM:VFX] _spawnFloatingDmgNumber failed', eFCT); }
+        }
+        if (typeof playHitVFX === 'function') {
+            try {
+                var _skillObj = ev.skillName ? { n: ev.skillName, ranged: !!ev.ranged } : null;
+                playHitVFX(tUid, !!ev.crit, ev.dmgType || 'slashing', {
+                    fromUid: aUid,
+                    skill: _skillObj,
+                    sneakAttack: !!ev.sneakAttack,
+                    isBossSkill: !!(ev.actorIsBoss || ev.isBossSkill)
+                });
+            } catch (eVFX) { console.warn('[C-REM:VFX] playHitVFX failed', eVFX); }
         }
         /* [SFX REMOVE 2026-04-21] sfxEnemyDeath desabilitado (remote mode) —
            autor reportou "chiado muito alto" ao matar \u00faltimo inimigo. */
@@ -27679,8 +27928,21 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (elH) elH.classList.add('heal-flash');
         setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
-        if (typeof _spawnFloatingDmgNumber === 'function') {
-            try { _spawnFloatingDmgNumber(hUid, '+' + (ev.healGained | 0), 'heal'); } catch (eS) {}
+        /* X-6.5.51AD fix (2026-05-07): heal float label correto.
+           _spawnFloatingDmgNumber é só pra dano (cor vermelha). Heal usa
+           cell-float-label.heal (verde, sobe do card). Antes: chamada com
+           uid string + texto + 'heal' kind → silent return da função. */
+        if (elH && (ev.healGained | 0) > 0) {
+            try {
+                var _hLbl = document.createElement('div');
+                _hLbl.className = 'cell-float-label heal';
+                _hLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
+                /* X-6.5.51AE: força animation-duration inline (ver _spawnFloatingDmgNumber). */
+                _hLbl.style.setProperty('animation-duration', '1.4s', 'important');
+                _hLbl.style.setProperty('animation-iteration-count', '1', 'important');
+                elH.appendChild(_hLbl);
+                setTimeout(function () { if (_hLbl.parentNode) _hLbl.parentNode.removeChild(_hLbl); }, 1450);
+            } catch (eHL) {}
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 620); });
@@ -27769,10 +28031,25 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (elA) elA.classList.add('buff-flash');
         setTimeout(function () { if (elA) elA.classList.remove('buff-flash'); }, 520);
-        if (_remoteMode_b && kind === 'item_use' && ev.healGained && typeof _spawnFloatingDmgNumber === 'function') {
+        /* X-6.5.51AD fix (2026-05-07): item_use heal float label correto. Mesma
+           razão do bloco 'heal': cell-float-label.heal direto no cell DOM em
+           vez de _spawnFloatingDmgNumber (que silently retorna com uid string). */
+        if (_remoteMode_b && kind === 'item_use' && (ev.healGained | 0) > 0) {
             var _tUid = 'player';
             if (_tU && _tU.t === 'a') _tUid = 'ally_' + _tgtIdx;
-            try { _spawnFloatingDmgNumber(_tUid, '+' + (ev.healGained | 0), 'heal'); } catch (eS) {}
+            var _elHi = document.querySelector('[data-unit-id="' + _tUid + '"]');
+            if (_elHi) {
+                try {
+                    var _iLbl = document.createElement('div');
+                    _iLbl.className = 'cell-float-label heal';
+                    _iLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
+                    /* X-6.5.51AE: força animation-duration inline (ver _spawnFloatingDmgNumber). */
+                    _iLbl.style.setProperty('animation-duration', '1.4s', 'important');
+                    _iLbl.style.setProperty('animation-iteration-count', '1', 'important');
+                    _elHi.appendChild(_iLbl);
+                    setTimeout(function () { if (_iLbl.parentNode) _iLbl.parentNode.removeChild(_iLbl); }, 1450);
+                } catch (eIL) {}
+            }
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 420); });

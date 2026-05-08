@@ -4490,10 +4490,44 @@
             haptic();
         }
 
+        /* FIX 2026-05-07 (user report: "sobrenome está tosco"). Bug arquitetural:
+           generateSurname antes fazia `pre + title.stripped` (sem espaço → "AldBravo",
+           "BelSábio", "CorForte" — feios em PT-BR). Pools mortos: surnames[] (40
+           prontos) e sur_pre[]×sur_suf[] (gera 432 combinações) NUNCA chamados.
+
+           Fix: 3 estratégias com pesos:
+             40% — surnames[] direto (40 sobrenomes prontos canonicalmente OK)
+             40% — sur_pre + sur_suf (gera novo, sem-copyright)
+             20% — pre + " " + title (com espaço; "Aldric o Bravo" estilo D&D clássico)
+           User aceita estilo inglês AAA (Skyrim/D&D anglo) então pool surnames foi
+           expandido com 30 sugestões: Blackwood, Stormrider, Ironsong, Ravencrest,
+           Ashthorne, Vexbane, Grimward, Frostmane, Wolfsbane, Stoneveil, Shadowmere,
+           Brightblade, Thornwell, Duskborn, Wyrmrest, Vandermir, Corvalheiro,
+           Drakonar, Lumenrath, Veltharion, Solveric, Mournfall, Stelvarn,
+           Halvendar, Brammoth, Ironvale, Wolfvane, Embergrim, Skyrend, Goldhand. */
+        const SURNAME_BONUS = ['Blackwood', 'Stormrider', 'Ironsong', 'Ravencrest', 'Ashthorne',
+            'Vexbane', 'Grimward', 'Frostmane', 'Wolfsbane', 'Stoneveil',
+            'Shadowmere', 'Brightblade', 'Thornwell', 'Duskborn', 'Wyrmrest',
+            'Vandermir', 'Corvalheiro', 'Drakonar', 'Lumenrath', 'Veltharion',
+            'Solveric', 'Mournfall', 'Stelvarn', 'Halvendar', 'Brammoth',
+            'Ironvale', 'Wolfvane', 'Embergrim', 'Skyrend', 'Goldhand'];
         function generateSurname() {
-            const pre = pick(NAMES_DATA.pre);
-            const title = pick(NAMES_DATA.titles);
-            let surname = pre + title.replace(/^(o |a |da |do )/, '');
+            const r = Math.random();
+            let surname;
+            if (r < 0.30) {
+                /* 30%: surnames[] (canonical, 40 prontos) */
+                surname = pick(NAMES_DATA.surnames);
+            } else if (r < 0.55) {
+                /* 25%: sur_pre + sur_suf (combine, gera 432 variações) */
+                surname = pick(NAMES_DATA.sur_pre) + pick(NAMES_DATA.sur_suf);
+            } else if (r < 0.85) {
+                /* 30%: pool AAA inglês (estilo Skyrim/D&D anglo, sem copyright) */
+                surname = pick(SURNAME_BONUS);
+            } else {
+                /* 15%: pre + " " + title preservado (estilo D&D clássico
+                       "Aldric o Bravo" / "Cora Punho de Aço") */
+                surname = pick(NAMES_DATA.pre) + ' ' + pick(NAMES_DATA.titles);
+            }
             if (surname.length > 15) surname = surname.slice(0, 15);
             document.getElementById('surnameInput').value = surname;
             sel.surname = surname;
@@ -4796,15 +4830,38 @@
                     if (resp.ok) {
                         clearTimeout(_submitTimeout);
                         const result = await resp.json().catch(() => ({}));
-                        console.log('[CHAR_CREATOR] Character submitted via API');
-                        // Redirect to prologue WebApp if server provided URL
+                        console.log('[CHAR_CREATOR] Server response:', JSON.stringify(result));
+                        /* FIX 2026-05-07 (user report: "ao escolher Criar Personagem
+                           nada aconteceu" / "no bot DEV o jogo fecha"). Antes:
+                           sem redirect, tg.close() fechava WebApp e player ficava
+                           dependente da mensagem broker chegar no chat Telegram —
+                           se broker falhasse, player fica órfão sem feedback.
+                           Agora: server retorna `redirect: game_url` (fix em
+                           character_api_routes.py linha 127). Cliente redireciona
+                           DIRETO pro Game Hub que auto-abre Prólogo. tg.close
+                           só é fallback se backend ainda estiver com código antigo
+                           (pre-fix, antes do restart do bot DEV). */
                         if (result.redirect) {
-                            console.log('[CHAR_CREATOR] Redirecting to prologue:', result.redirect);
-                            window.__valdoria_transitioning = true; window.location.replace(result.redirect);
+                            console.log('[CHAR_CREATOR] Redirecting to game hub:', result.redirect);
+                            window.__valdoria_transitioning = true;
+                            try {
+                                window.location.replace(result.redirect);
+                            } catch (eR) {
+                                console.error('[CHAR_CREATOR] location.replace failed:', eR);
+                                window.location.href = result.redirect;
+                            }
                             return;
                         }
-                        // No redirect — close the WebApp (legacy fallback)
-                        setTimeout(() => { try { tg?.close(); } catch (e) { console.warn('[CHAR_CREATOR] close:', e); } }, 300);
+                        /* No redirect — backend antigo, antes do fix. Aviso visual
+                           ao player + delay maior antes do tg.close pra dar tempo
+                           do broker mensagem aparecer no chat. */
+                        console.warn('[CHAR_CREATOR] No redirect URL — backend may need restart. Falling back to tg.close.');
+                        try {
+                            if (typeof _showValidation === 'function') {
+                                _showValidation('Personagem criado. Volte ao chat para começar a aventura.');
+                            }
+                        } catch (eV) { console.warn('[CHAR_CREATOR] notify:', eV); }
+                        setTimeout(() => { try { tg?.close(); } catch (e) { console.warn('[CHAR_CREATOR] close:', e); } }, 1500);
                         return;
                     }
                     // Handle server-side validation errors (400 = creation failed)
