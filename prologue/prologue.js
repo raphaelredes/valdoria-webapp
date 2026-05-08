@@ -157,21 +157,111 @@ function renderGate(){
     actions: choicesHtml
   });
 }
+/* X-6.5.51AS (2026-05-08) — pagination AAA pra Emboscada (PADRAO_ALDRIC).
+   User pediu: "na emboscada na estrada faça ter paginação ao invés de
+   scrolling, enriqueça a narrativa com trechos separados, imersão épica".
+   Backend agora retorna road.script[] (lista de narration/speech segments).
+   Cada segment vira 1 página com reveal animation; última página mostra
+   action buttons (Lutar / Distração). */
 function renderRoad(){
   const road=DATA.road||{};
-  const text=road.text||'';
-  return _prolCard({
-    /* X-6.5.51AQ: SEM portrait — usa AAA orb fallback (cena de narração pura,
-       não há NPC falando aqui — apenas o narrador descrevendo a emboscada).
-       User pediu o orb 3D animado igual à tela TOQUE PARA INICIAR como
-       fallback quando não há ícone de NPC. */
+  const script=Array.isArray(road.script) && road.script.length ? road.script : null;
+  if (!script) {
+    /* fallback: backend antigo retorna só road.text — single page sem paginação */
+    return _prolCard({
+      name: 'Emboscada na Estrada',
+      desc: 'A jornada se torna perigosa',
+      body: _narration(road.text || ''),
+      actions: ''
+        + '<button class="prol-btn" onclick="haptic(\'heavy\'); onRoadChoice(\'fight\')">⚔️ Lutar contra os lobos!</button>'
+        + '<button class="prol-btn" onclick="haptic(\'medium\'); onRoadChoice(\'distract\')">🛡️ Criar uma distração</button>'
+    });
+  }
+  /* Pagination state — armazenado como prop do screen DOM */
+  window._roadCurPage = window._roadCurPage || 0;
+  return _renderPaginatedScreen({
     name: 'Emboscada na Estrada',
     desc: 'A jornada se torna perigosa',
-    body: _narration(text),
-    actions: ''
+    script: script,
+    pageVarName: '_roadCurPage',
+    onLastPageActions: ''
       + '<button class="prol-btn" onclick="haptic(\'heavy\'); onRoadChoice(\'fight\')">⚔️ Lutar contra os lobos!</button>'
-      + '<button class="prol-btn" onclick="haptic(\'medium\'); onRoadChoice(\'distract\')">🛡️ Criar uma distração</button>'
+      + '<button class="prol-btn" onclick="haptic(\'medium\'); onRoadChoice(\'distract\')">🛡️ Criar uma distração</button>',
+    rerenderFn: function(){
+      /* Re-render the road screen using pagination state */
+      var screens = track.querySelectorAll('.screen');
+      var current = screens[screenIdx];
+      if (current) {
+        current.innerHTML = renderRoad();
+        try { if(typeof _populatePendingOrbs === 'function') _populatePendingOrbs(); } catch(e){}
+      }
+    }
   });
+}
+/* Helper: renderiza um card paginado a partir de um script[] PADRAO_ALDRIC.
+   - opts.script: array {type, speaker?, text}
+   - opts.pageVarName: window prop name pra estado de página atual
+   - opts.onLastPageActions: HTML pros botões da última página
+   - opts.rerenderFn: chamado ao trocar de página (ou null = inline navigation)
+   Header sempre AAA orb fallback (cenas de narração pura sem NPC). */
+function _renderPaginatedScreen(opts){
+  var script = opts.script || [];
+  var pageVar = opts.pageVarName || '_paginatedCurPage';
+  var totalPages = script.length;
+  var curPage = Math.max(0, Math.min(window[pageVar] || 0, totalPages - 1));
+  var entry = script[curPage] || {};
+  var bodyHtml = entry.type === 'speech'
+    ? _speech(entry.speaker || 'Voz', entry.text || '')
+    : _narration(entry.text || '');
+  var isLastPage = curPage === totalPages - 1;
+  var actionsHtml;
+  if (isLastPage && opts.onLastPageActions) {
+    actionsHtml = opts.onLastPageActions;
+  } else {
+    /* Nav buttons: Anterior / Próximo */
+    actionsHtml = ''
+      + '<div class="prol-btn-row">'
+      + '<button class="prol-btn" onclick="_paginatedPrev(\'' + pageVar + '\')"' + (curPage === 0 ? ' disabled' : '') + '>← Anterior</button>'
+      + '<button class="prol-btn prol-btn-primary" onclick="_paginatedNext(\'' + pageVar + '\')">Próximo →</button>'
+      + '</div>';
+  }
+  return _prolCard({
+    /* SEM portrait — AAA 3D orb fallback (cena de narração pura) */
+    name: opts.name || '',
+    desc: opts.desc || '',
+    pageInd: (curPage + 1) + ' / ' + totalPages,
+    body: bodyHtml,
+    actions: actionsHtml
+  });
+}
+/* Pagination navigation handlers. Re-render current screen after page change. */
+window._paginatedPrev = function(pageVar){
+  haptic('light');
+  if ((window[pageVar] || 0) > 0) {
+    window[pageVar] = (window[pageVar] || 0) - 1;
+    _rerenderCurrentScreen();
+  }
+};
+window._paginatedNext = function(pageVar){
+  haptic('light');
+  /* Determina total de páginas pelo script atual baseado em pageVar.
+     Pra simplificar: incrementa e deixa _renderPaginatedScreen clampar. */
+  window[pageVar] = (window[pageVar] || 0) + 1;
+  _rerenderCurrentScreen();
+};
+function _rerenderCurrentScreen(){
+  var screens = track.querySelectorAll('.screen');
+  var current = screens[screenIdx];
+  if (!current) return;
+  /* Identifica qual screen está visível e re-renderiza */
+  if (DATA && DATA.mode === 'aftermath') {
+    current.innerHTML = renderAftermath();
+  } else {
+    /* Default: assume road (única tela paginada hoje). Adicionar mais
+       triggers se outras telas forem paginadas no futuro. */
+    current.innerHTML = renderRoad();
+  }
+  try { if(typeof _populatePendingOrbs === 'function') _populatePendingOrbs(); } catch(e){}
 }
 function renderAftermath(){
   const text=DATA.aftermath_text||'';
