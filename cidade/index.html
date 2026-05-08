@@ -7995,9 +7995,10 @@ function _showCharactersPopup(){
 
   html += '</div>';  // close .hall-list
 
-  // X-6.5.51AL (2026-05-08) — secção "Personagens Arquivados" (collapsible)
-  // Mostra personagens soft-deletados com opção de restaurar. Lista carregada
-  // assincronamente via /api/auth/deleted-characters após render.
+  // X-6.5.51AR (2026-05-08) — secção "Personagens Apagados" (collapsible)
+  // Mostra personagens soft-deletados com countdown "X dias restantes" e
+  // restore button (ou ticket badge se > 15 dias). Lista carregada async via
+  // /api/auth/deleted-characters após render.
   html += '<div id="hall-archived-section" style="width: 100%; margin-bottom: var(--v-space-md, 8px); '
     + 'border-top: 1px solid var(--v-border, #4a3828); padding-top: var(--v-space-md, 8px);">'
     + '<button id="hall-archived-toggle" '
@@ -8005,7 +8006,7 @@ function _showCharactersPopup(){
     + 'font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-base, 13px); '
     + 'cursor: pointer; padding: 8px 0; text-align: center; min-height: 36px;" '
     + 'aria-expanded="false">'
-    + '📜 Personagens Arquivados <span id="hall-archived-count" style="opacity:0.6;"></span> ▾'
+    + '🗑 Personagens Apagados <span id="hall-archived-count" style="opacity:0.6;"></span> ▾'
     + '</button>'
     + '<div id="hall-archived-list" style="display:none; flex-direction:column; gap: 6px; margin-top: 8px;"></div>'
     + '</div>';
@@ -8165,29 +8166,47 @@ function _showCharactersPopup(){
   }
 }
 
-// X-6.5.51AL (2026-05-08) — Confirm popup pra excluir personagem
-// Usa _showInfoPopup (já existente) com confirmLabel/cancelLabel.
-// Após confirmar: fetch POST /api/auth/delete-character, refresh popup.
+// X-6.5.51AR (2026-05-08) — Confirm popup pra APAGAR personagem (com janela de
+// recuperação de 15 dias). User pediu: "ao invés de arquivar informe que será
+// apagado mas poderá ser restaurado facilmente se o jogador quiser, num prazo
+// máximo, veja qual prazo existe no esqueleto do hall de personagens".
+// Skeleton (character_ui_manage.py:52): _RESTORE_DAYS=15 (1-clique),
+// _RETENTION_DAYS=180 (max via ticket).
 function _showDeleteCharConfirm(charId, charName){
   if (typeof _showInfoPopup !== 'function'){
-    if (!confirm('Arquivar ' + charName + '?')) return;
+    if (!confirm('Apagar ' + charName + '? (recuperável em até 15 dias)')) return;
     _doDeleteChar(charId, charName);
     return;
   }
   _showInfoPopup({
     icon: '🗑',
-    title: 'Arquivar Personagem?',
+    title: 'Apagar Personagem?',
     npc: 'Hall de Personagens',
     desc: '<div style="text-align:left;">'
-      + '<p style="margin: 0 0 8px; color: var(--v-text-bright, #e8dcc8); font-weight: 700;">'
+      + '<p style="margin: 0 0 10px; color: var(--v-text-bright, #e8dcc8); font-weight: 700; font-size: 15px;">'
       + _titleCase(charName) + '</p>'
-      + '<p style="margin: 0; font-size: 13px; color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'O personagem será arquivado (não excluído permanentemente). '
-      + 'Você pode restaurá-lo a qualquer momento na seção '
-      + '<em>Personagens Arquivados</em> abaixo. '
-      + 'Um backup completo é criado automaticamente antes do arquivamento.'
+      + '<div style="background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.25); '
+      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
+      + '<p style="margin: 0 0 6px; font-size: 13px; color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 15 dias</p>'
+      + '<p style="margin: 0; font-size: 12px; color: var(--v-text-dim, #a09484); line-height: 1.5;">'
+      + 'Por <b>15 dias</b>, você poderá restaurar este personagem com 1 clique '
+      + 'na secção <em>Personagens Apagados</em> abaixo.'
+      + '</p>'
+      + '</div>'
+      + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
+      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
+      + '<p style="margin: 0 0 6px; font-size: 13px; color: #d08070; font-weight: 700;">📩 Após 15 dias — via ticket</p>'
+      + '<p style="margin: 0; font-size: 12px; color: var(--v-text-dim, #a09484); line-height: 1.5;">'
+      + 'Entre 15 e 180 dias, restauração apenas via ticket de suporte (apenas '
+      + 'personagens nível 2+).'
+      + '</p>'
+      + '</div>'
+      + '<p style="margin: 0; font-size: 11px; color: var(--v-text-faint, #8a7a68); '
+      + 'font-style: italic; line-height: 1.4;">'
+      + 'Um backup completo é criado automaticamente antes do apagamento. '
+      + 'Após 180 dias, exclusão permanente.'
       + '</p></div>',
-    confirmLabel: '🗑 Arquivar',
+    confirmLabel: '🗑 Apagar',
     cancelLabel: 'Cancelar',
     onConfirm: function(){
       _doDeleteChar(charId, charName);
@@ -8286,16 +8305,64 @@ function _loadHallArchivedChars(){
     window._hallArchivedCountText = countText;
     countEl.textContent = countText;
 
+    /* X-6.5.51AR (2026-05-08): card mostra countdown + restore_kind badge.
+       - one_click (≤15d): botão "↻ Restaurar" gold + "Xd restantes" verde
+       - ticket (15-180d, lvl 2+): botão "📩 Ticket" laranja + "Xd até purga"
+       - expired: chip cinza "Não recuperável" (lvl 1 + > 15d) */
     var html = '';
     chars.forEach(function(c){
       var iconId = 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]);
       var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
+      var rk = c.restore_kind || 'one_click';
+      var dpl = c.days_passed || 0;
+      var drOC = c.days_remaining_one_click != null ? c.days_remaining_one_click : 15;
+      var drTk = c.days_remaining_ticket != null ? c.days_remaining_ticket : 180;
+      // Status badge text + color
+      var statusBadge = '';
+      var actionBtn = '';
+      var cardOpacity = '0.95';
+      if (rk === 'one_click') {
+        var badgeColor = drOC <= 3 ? '#d08070' : (drOC <= 7 ? '#d0a060' : '#7ec060');
+        statusBadge = '<div style="font-size: 10px; color: ' + badgeColor + '; margin-top: 2px; font-weight: 700;">'
+                    + '⏳ ' + drOC + ' dia' + (drOC === 1 ? '' : 's') + ' para recuperar'
+                    + '</div>';
+        actionBtn = '<button class="hall-arch-restore" data-arch-id="' + (c.id || c.char_id) + '" '
+          + 'data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
+          + 'aria-label="Restaurar personagem" title="Restaurar com 1 clique" '
+          + 'style="flex-shrink:0; padding: 8px 12px; background: linear-gradient(180deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530)); '
+          + 'border: 1px solid var(--v-gold, #c4953a); color: #1a1410; '
+          + 'border-radius: var(--v-radius-sm, 6px); cursor: pointer; '
+          + 'font-family: var(--v-font-display, Cinzel, serif); font-size: 12px; font-weight: 700; '
+          + 'letter-spacing: 0.5px; min-height: 36px;">'
+          + '↻ Restaurar'
+          + '</button>';
+      } else if (rk === 'ticket') {
+        statusBadge = '<div style="font-size: 10px; color: #d0a060; margin-top: 2px; font-weight: 700;">'
+                    + '📩 Apenas via ticket (' + drTk + 'd até purga)'
+                    + '</div>';
+        actionBtn = '<button class="hall-arch-ticket" data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
+          + 'aria-label="Solicitar restauração via ticket" title="Abrir ticket de suporte" '
+          + 'style="flex-shrink:0; padding: 8px 12px; background: transparent; '
+          + 'border: 1px solid #d0a060; color: #d0a060; '
+          + 'border-radius: var(--v-radius-sm, 6px); cursor: pointer; '
+          + 'font-family: var(--v-font, MedievalSharp, serif); font-size: 11px; min-height: 36px;">'
+          + '📩 Ticket'
+          + '</button>';
+        cardOpacity = '0.7';
+      } else {
+        statusBadge = '<div style="font-size: 10px; color: var(--v-text-faint, #8a7a68); margin-top: 2px; font-style: italic;">'
+                    + '✗ Não recuperável (nível baixo + ' + dpl + 'd)'
+                    + '</div>';
+        actionBtn = '<span style="flex-shrink:0; padding: 6px 10px; color: var(--v-text-faint, #8a7a68); '
+          + 'font-size: 11px; font-style: italic;">—</span>';
+        cardOpacity = '0.5';
+      }
       html += '<div class="hall-archived-card" data-arch-id="' + (c.id || c.char_id) + '" '
         + 'data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
-        + 'style="display:flex; align-items:center; gap: 10px; padding: 8px; '
-        + 'background: rgba(58,48,40,0.25); border: 1px solid var(--v-border, #4a3828); '
-        + 'border-radius: var(--v-radius-sm, 6px); opacity: 0.85;">'
-        + '<svg viewBox="0 0 120 120" style="flex-shrink:0; width: 28px; height: 28px; color: ' + iconColor + ';">'
+        + 'style="display:flex; align-items:center; gap: 10px; padding: 10px; '
+        + 'background: rgba(58,48,40,0.3); border: 1px solid var(--v-border, #4a3828); '
+        + 'border-radius: var(--v-radius-sm, 6px); opacity: ' + cardOpacity + ';">'
+        + '<svg viewBox="0 0 120 120" style="flex-shrink:0; width: 32px; height: 32px; color: ' + iconColor + ';">'
         + '<use href="#' + iconId + '"/>'
         + '</svg>'
         + '<div style="flex:1; min-width:0;">'
@@ -8306,26 +8373,30 @@ function _loadHallArchivedChars(){
         + '<div style="font-size: 11px; color: var(--v-text-dim, #a09484); margin-top: 1px;">'
         + 'Nv ' + (c.level || 1) + ' · ' + _titleCase(c.race || '') + ' ' + _titleCase(c.class_name || '')
         + '</div>'
+        + statusBadge
         + '</div>'
-        + '<button class="hall-arch-restore" data-arch-id="' + (c.id || c.char_id) + '" '
-        + 'data-arch-name="' + (c.name || '?').replace(/"/g, '&quot;') + '" '
-        + 'aria-label="Restaurar personagem" title="Restaurar para a lista ativa" '
-        + 'style="flex-shrink:0; padding: 6px 10px; background: transparent; '
-        + 'border: 1px solid var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); '
-        + 'border-radius: var(--v-radius-sm, 6px); cursor: pointer; '
-        + 'font-family: var(--v-font, MedievalSharp, serif); font-size: 12px; '
-        + 'min-height: 32px;">'
-        + '↻ Restaurar'
-        + '</button>'
+        + actionBtn
         + '</div>';
     });
     listEl.innerHTML = html;
 
-    // Wire restore buttons
+    // Wire restore buttons (1-click)
     listEl.querySelectorAll('.hall-arch-restore').forEach(function(btn){
       btn.addEventListener('click', function(ev){
         ev.stopPropagation();
         _doRestoreChar(btn.getAttribute('data-arch-id'), btn.getAttribute('data-arch-name') || '?');
+      });
+    });
+    // Wire ticket buttons (>15 days, lvl 2+)
+    listEl.querySelectorAll('.hall-arch-ticket').forEach(function(btn){
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var nm = btn.getAttribute('data-arch-name') || 'este personagem';
+        if (typeof vToast === 'function') {
+          vToast('📩 Tickets de suporte em breve. Use /ticket no bot Telegram.', 4000);
+        } else {
+          alert('Tickets de suporte: use /ticket no bot Telegram para restaurar ' + nm + '.');
+        }
       });
     });
   }).catch(function(err){
