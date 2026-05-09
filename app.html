@@ -10,7 +10,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preload" href="shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="shared/fonts.css">
@@ -78,6 +78,11 @@
     document.write('<link rel="stylesheet" href="shared/connection-overlay.css?v=' + v + '">');
     document.write('<script src="shared/network-diagnostic.js?v=' + v + '"><\/script>'); /* #53: diagnose local vs server */
     document.write('<script src="shared/connection-overlay.js?v=' + v + '"><\/script>');
+    /* Maintenance overlay (SUPREME — bloqueia jogo se servidor em manutenção).
+       Carregado ANTES de qualquer fetch da app pra que o monkey-patch de window.fetch
+       intercepte 100% das responses. Detecta `maintenance` em qualquer payload e
+       substitui UI inteira pela tela única bloqueante. */
+    document.write('<script src="shared/maintenance-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/console-collector.js?v=' + v + '"><\/script>');
     document.write('<script src="shared/error-reporter.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta relógio errado no device.
@@ -104,6 +109,33 @@
 <body>
     <!-- Dark placeholder — starts HIDDEN; title screen covers until user taps -->
     <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+    <script>
+    /* ── Maintenance proactive guard (SUPREME — corre ANTES da title screen) ──
+       Se servidor em manutenção, mostra tela única ANTES de qualquer outro UI.
+       Hits /api/game/health (allowlisted no maintenance_middleware, sempre responde).
+       Não bloqueia render — fire-and-forget; vMaintenance.show() substitui o body
+       quando detecta maintenance. */
+    (function(){
+        if(!window.vMaintenance)return;  /* maintenance-overlay.js não carregou */
+        try{
+            var url=new URL(window.location.href);
+            var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
+            if(!apiBase)return;  /* sem API URL — não dá pra checar */
+            window._VALDORIA_API_BASE=apiBase;  /* expõe pra retry button */
+            var ctrl=new AbortController();
+            var tid=setTimeout(function(){ctrl.abort();},5000);
+            fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(data){
+                    if(data&&data.maintenance&&data.maintenance.active){
+                        console.warn('[MAINT] proactive guard detected maintenance');
+                        window.vMaintenance.show(data.maintenance);
+                    }
+                })
+                .catch(function(){clearTimeout(tid);});
+        }catch(e){}
+    })();
+    </script>
     <script>
     /* ── Early title screen: show IMMEDIATELY to prevent loading flash ── */
     (function(){

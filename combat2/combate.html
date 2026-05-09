@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-07T23:15:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-09T02:20:57Z — do not edit directly, edit source -->
 
 
 <!--
@@ -76,7 +76,7 @@
   - valdoria-webapp/shared/dice-3d.js       window.Dice3D — 3D dice renderer
                                              (depende de THREE.js carregado antes)
   - https://cdn.jsdelivr.net/npm/three@0.160 THREE.js — dependencia do dice-3d
-  - valdoria-webapp/shared/fonts.css        MedievalSharp + Cinzel
+  - valdoria-webapp/shared/fonts.css        Marcellus + Cinzel + outras (X-6.5.51AT)
   - valdoria-webapp/shared/status-bars.css  Classes .fill-hp-high/mid/low
   - valdoria-webapp/shared/animations.css   Animacoes comuns
   - valdoria-webapp/combat/*.css            CSS do combate legado (19 arquivos)
@@ -458,12 +458,66 @@ html.sim-combat-root > body {
   padding: 0 !important;
   overflow: hidden !important;
 }
-/* X-6.5.50: #app override pra largura do simulator (era hardcoded 430px). */
+/* X-6.5.51AX (2026-05-08): #app FIXADO no tamanho exato do Telegram Desktop
+   WebApp — 384x694 default; 480x100dvh em touch (--sim-frame-w/h tokens).
+   Antes era 100%/100% (depende da cadeia html→body, frágil); agora explícito. */
 html.sim-combat-root #app {
+  width: var(--sim-frame-w) !important;
+  height: var(--sim-frame-h) !important;
+  max-width: var(--sim-frame-w) !important;
+  max-height: var(--sim-frame-h) !important;
+  margin: 0 auto !important;
+}
+/* X-6.5.51AS (2026-05-08): title-screen + loading-overlay DEVEM respeitar o
+   frame do simulador (384x694 default; 480x100dvh em touch). Loading-title.css
+   e loading.css usam position:fixed+inset:0 → escapam pra viewport do browser
+   inteiro quando viewport > frame. Override pra position:absolute (ancora em
+   body, que é position:relative + sim-frame size). Cobertura: #title-screen,
+   .title-screen, #loading, .loading-overlay, #processing-overlay, .v-popup. */
+html.sim-combat-root .title-screen,
+html.sim-combat-root #title-screen,
+html.sim-combat-root .loading-overlay,
+html.sim-combat-root #loading,
+html.sim-combat-root #processing-overlay,
+html.sim-combat-root .processing-overlay {
+  position: absolute !important;
+  inset: 0 !important;
   max-width: 100% !important;
   max-height: 100% !important;
   width: 100% !important;
   height: 100% !important;
+  margin: 0 !important;
+}
+
+/* X-6.5.51AV (2026-05-08): TODOS os overlays/popups/sheets do combate DEVEM
+   respeitar o frame 384x694 (Telegram Desktop) ou 480x100dvh (touch).
+   Usa max-width/max-height = sim-frame-w/h + left/right:0 + margin:auto pra
+   centralizar dentro do viewport, alinhado com html (que também usa margin:0 auto).
+   Funciona pra elementos appended em body, #app, ou qualquer ancestor. */
+html.sim-combat-root .v8-cond-popup-overlay,
+html.sim-combat-root .end-turn-confirm-overlay,
+html.sim-combat-root .mm-confirm-overlay,
+html.sim-combat-root .sim-action-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: var(--sim-frame-w) !important;
+  height: 100% !important;
+  max-height: var(--sim-frame-h) !important;
+  margin: 0 auto !important;
+}
+/* Action sheet e dock — full-width controls fixados no bottom. Constrange
+   também à largura do frame (em viewport > frame iam invadir espaço fora). */
+html.sim-combat-root .sim-action-sheet,
+html.sim-combat-root .sim-action-dock {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: var(--sim-frame-w) !important;
+  margin: 0 auto !important;
 }
 </style>
 <script>
@@ -534,10 +588,36 @@ function loadCSS(href) {
     l.href = BASE + href + '?v=' + v;
     document.head.appendChild(l);
 }
-/* X-6.5.51AI (2026-05-07): server-log canônico antes de qualquer outro
-   script — captura logs server-side em logs/sim_combate_<env>.<date>.jsonl. */
+/* X-6.5.51AI: server-log canônico — POST /api/sim/log persiste em
+   logs/sim_combate_<env>.<date>.jsonl. Carrega antes pra capturar logs
+   de todo o ciclo de vida da página. */
 document.write('<script src="' + BASE + '/shared/server-log.js?v=' + v + '"><\/script>');
 window.SERVER_LOG_AREA = 'combate';
+/* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
+   window.fetch pra detectar maintenance em qualquer response. */
+document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
+(function(){
+    try{
+        var url=new URL(window.location.href);
+        var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
+        if(!apiBase)return;
+        window._VALDORIA_API_BASE=apiBase;
+        setTimeout(function(){
+            if(!window.vMaintenance)return;
+            var ctrl=new AbortController();
+            var tid=setTimeout(function(){ctrl.abort();},5000);
+            fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(data){
+                    if(data&&data.maintenance&&data.maintenance.active){
+                        console.warn('[MAINT] combate proactive guard detected maintenance');
+                        window.vMaintenance.show(data.maintenance);
+                    }
+                })
+                .catch(function(){clearTimeout(tid);});
+        },100);
+    }catch(e){}
+})();
 loadCSS('/shared/fonts.css');
 loadCSS('/valdoria-design.css');
 
@@ -672,22 +752,74 @@ loadCSS('/combat/combat-vfx.css');
 /* [COMBAT 2026-04-21] Overrides específicos do simulador de combate.
    =================================================================== */
 
-/* 1. Botão de volume CUSTOM no simulador (V1.7 2026-04-21 — reescrita).
-      Audio-manager.js cria .va-float mas no simulador ele é inconsistente
-      (às vezes não aparece, às vezes fica atrás do turn-queue). Solução:
-      ocultamos .va-float e criamos #sim-vol-btn próprio que:
-        · Fica fixed no canto superior direito (top:10px right:10px)
-        · Z-index 9000 — acima de turn-queue (1) e arena, abaixo de popups (9999)
-        · Usa API ValdoriaAudio.toggleMute() + sincronização de ícone
-        · Click também dispara click no #va-btn invisível pra abrir popup de sliders */
-
-/* Esconde o .va-float padrão no simulador — botão custom abaixo substitui */
-.va-float, #va-float {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
+/* X-6.5.51AU revisado (2026-05-08): user pediu padronização — combate usa o
+   MESMO `va-float-btn` do audio-manager.js (idêntico a cidade/exploracao).
+   Click no botão flutuante abre `va-popup` (card com sliders Música + Efeitos).
+   Re-parent dos 3 elementos (va-float / va-popup / va-backdrop) pra dentro de
+   #app é feito via JS após audio-manager.js carregar (~linha 10440).
+   Tentativa anterior de criar #sim-vol-panel SEMPRE visível foi REMOVIDA. */
 .va-footer-btn { z-index: 1500; }
+
+/* X-6.5.51AY (2026-05-08): .va-float fica em body (NÃO re-parented em #app —
+   render(state) faria setHTML(app) e apagaria o button). body em combate é
+   position:relative + 100% das dims de html (384x694) — então position:absolute
+   anchora .va-float no canto inferior direito do FRAME visual.
+
+   Histórico:
+   · X-6.5.51AU v1 (errado): re-parent em #app → render() apagava
+   · X-6.5.51AY (correto): mantém em body, CSS faz absolute relativo a body
+   · Mesmo princípio de cidade.html, mas adaptado ao body de combate.
+
+   X-6.5.51AZ (2026-05-08): button DEVE ser PERSISTENTE em TODAS as telas —
+   loading, mochila, popups, overlays, vitória, etc. Audio-manager.js tem regra
+   `.loading:not(.hidden) ~ .va-float { opacity: 0 }` que esconde o button —
+   override explícito abaixo força visible em todos os contextos. */
+html.sim-combat-root body > .va-float,
+html.sim-combat-root #app .va-float {
+  position: absolute !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  width: auto !important;
+  max-width: 44px !important;
+  justify-content: flex-start !important;
+  transform: none !important;
+  z-index: 100000 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+/* Sobrescreve as regras do audio-manager que escondem .va-float durante loading/
+   overlay/outcome. No simulador, o button DEVE ficar visível em todas as telas. */
+html.sim-combat-root .loading:not(.hidden) ~ .va-float,
+html.sim-combat-root .dm-overlay.active ~ .va-float,
+html.sim-combat-root .outcome-overlay.active ~ .va-float,
+html.sim-combat-root .loading-overlay ~ .va-float,
+html.sim-combat-root #loading ~ .va-float,
+html.sim-combat-root .title-screen ~ .va-float {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  pointer-events: none !important; /* wrapper pass-through; .va-float-btn dentro tem pointer-events:auto */
+}
+/* O button interno SEMPRE clicável, mesmo sob overlays */
+html.sim-combat-root .va-float-btn {
+  pointer-events: auto !important;
+}
+html.sim-combat-root body > .va-popup,
+html.sim-combat-root #app .va-popup {
+  /* va-popup permanece position:fixed mas o auto-positioner JS (X-6.5.51AA)
+     reposiciona em runtime. Backup: garante z-index acima das overlays. */
+  z-index: 99999 !important;
+}
+html.sim-combat-root body > .va-backdrop,
+html.sim-combat-root #app .va-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  margin: 0 !important;
+}
 
 /* X-6.5.51v (2026-04-25): va-popup alinhado ao frame usando MESMO PATTERN das
    outras overlays do combate (dice-overlay, iop-overlay, initiative-order — bloco
@@ -725,96 +857,10 @@ html body .va-backdrop {
     inset: auto !important;
 }
 
-/* Botão de volume custom do simulador — DENTRO do frame #app (smartphone 430px).
-   REGRA SOBERANA (2026-04-21): TUDO que é adicionado à tela do simulador DEVE
-   aparecer dentro do frame limitado do smartphone (#app max-width:430px).
-   NADA vai pro body em elemento persistente/visível — body fica restrito ao
-   side-panel "Voltar ao setup" que intencionalmente está FORA do frame.
-
-   Técnica: position:fixed + append em #app. Como #app tem transform:translateZ(0)
-   (linha 707), ele vira containing block pra fixed dos filhos — logo o fixed
-   ancora no frame #app (não na viewport). Isso é o mesmo truque que dice-overlay
-   e intro popup usam.
-
-   POSITION 2026-04-21 (feedback autor): movido de top-right pra bottom-right,
-   ao lado do botão Agir (.sim-action-dock está em bottom:0). z-index 99999 >
-   action-dock (92200) > action-sheet (92100) — garante que o botão SEMPRE
-   fica por cima e clicável. pointer-events:auto !important também reforça a
-   captura de clique (solução pro bug "não clicável no bot DEV"). */
-#sim-vol-btn {
-    position: fixed !important;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 14px !important;
-    left: auto !important;
-    top: auto !important;
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50%;
-    background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2e2520));
-    border: 1px solid var(--v-border, #4a3828);
-    color: var(--v-gold, #c4953a);
-    cursor: pointer;
-    z-index: 99999 !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    box-shadow:
-        0 2px 10px rgba(0,0,0,.55),
-        0 0 14px rgba(196,149,58,.18),
-        inset 0 1px 0 rgba(220,200,150,.08);
-    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, opacity .18s ease;
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
-}
-#sim-vol-btn:hover {
-    border-color: rgba(196,149,58,.55);
-    box-shadow:
-        0 3px 14px rgba(0,0,0,.6),
-        0 0 20px rgba(196,149,58,.4),
-        inset 0 1px 0 rgba(240,220,170,.14);
-    color: #fff;
-    transform: scale(1.08);
-}
-#sim-vol-btn:active {
-    transform: scale(0.95);
-}
-#sim-vol-btn svg {
-    width: 18px;
-    height: 18px;
-    display: block;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0 3px currentColor);
-}
-#sim-vol-btn.muted {
-    color: var(--v-text-dim, #a09484);
-    opacity: 0.6;
-    border-color: rgba(128, 116, 96, .35);
-    box-shadow: 0 2px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(120,110,95,.05);
-}
-#sim-vol-btn.muted:hover {
-    color: var(--v-text, #d4c8b0);
-    opacity: 0.85;
-}
-#sim-vol-btn.playing {
-    animation: simVolPulse 2.5s ease-in-out infinite;
-}
-@keyframes simVolPulse {
-    0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 14px rgba(196,149,58,.18), inset 0 1px 0 rgba(220,200,150,.08); }
-    50%      { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 22px rgba(196,149,58,.35), inset 0 1px 0 rgba(240,220,170,.14); }
-}
-/* Tela muito estreita: botão menor */
-@media (max-height: 600px) {
-    #sim-vol-btn { width: 34px; height: 34px; top: 8px; right: 8px; }
-    #sim-vol-btn svg { width: 16px; height: 16px; }
-}
+/* X-6.5.51AU revisado (2026-05-08): #sim-vol-panel REMOVIDO. Combate agora usa
+   o `va-float-btn` padrão do audio-manager.js (mesma UX de cidade/exploracao):
+   click no botão flutuante → abre `va-popup-card` com sliders. Posicionamento
+   do popup permanece via auto-positioner JS (X-6.5.51AA) usando #app rect. */
 
 /* 2. Popup "Combate Iniciado" (showIntroChoicePopup) — Opção 3 aprovada:
       ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor ❦ +
@@ -986,13 +1032,16 @@ html body .va-backdrop {
 /* Ícone skip-init — removido (design 3 é texto limpo) */
 #intro-choice-popup .epic-cta-btn[data-act="skip-init"] .epic-cta-icon { display: none !important; }
 
-/* 2026-04-27 USER RULE: cap subiu de 384×694 → 480×960 (smartphone com mais
-   pixels atual em CSS pixels — cobre iPhone 17 Pro Max 440×956 + Galaxy S25
-   Ultra 412×915 + folga). Telegram Desktop popup resizable cresce até esse
-   teto; browser desktop fica como phone-sim. */
+/* USER RULE 2026-05-08: simulator DEVE ser limitado ao tamanho do Telegram
+   Desktop WebApp (384x694) — MENOR que smartphone (480x960). Browser desktop
+   simula o pior caso (Telegram Desktop popup). Touch devices (smartphone
+   real) recebem viewport maior via media query abaixo.
+
+   Dims oficiais Telegram Desktop popup (tdesktop botWebViewPanelSize 384x694):
+     https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style */
 :root {
-  --sim-frame-w: min(100vw, 480px);
-  --sim-frame-h: min(100vh, 960px);
+  --sim-frame-w: min(100vw, 384px);
+  --sim-frame-h: min(100vh, 694px);
   /* ==== Class color identity (heraldic cards V8 — ver card-icons-heraldic.html) ==== */
   --class-guerreiro: #b06040;   --class-guerreiro-dark: #5a2a18;
   --class-mago: #4080c0;        --class-mago-dark: #1a3a66;
@@ -1044,8 +1093,8 @@ html body .va-backdrop {
   font-size: var(--v-font-micro, 10px) !important;
 }
 @supports (height: 100dvh) {
-  /* 2026-04-27: 100dvh, 960px (smartphone com mais pixels atual) */
-  :root { --sim-frame-h: min(100dvh, 960px); }
+  /* USER RULE 2026-05-08: 100dvh capped 694px (Telegram Desktop popup) */
+  :root { --sim-frame-h: min(100dvh, 694px); }
 }
 /* X-6.5.51o (2026-04-25): RESPONSIVO touch-aware.
    Default acima = 384x694 (Telegram Desktop minimum). É o que browser desktop
@@ -1090,10 +1139,11 @@ html.sim-combat-root body.sim-combat-layout::after {
   display: none !important;
 }
 html.sim-combat-root #app {
+  /* X-6.5.51AX (2026-05-08): dims fixadas em --sim-frame-w/h (ver bloco em ~462).
+     width/height/max-* removidos daqui pra não conflitar — flex/display/position
+     mantidos pra layout interno. */
   flex: 1 1 auto !important;
   min-height: 0 !important;
-  max-height: 100% !important;
-  width: 100% !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5095,6 +5145,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .list-panel-card {
     width: 100%;
     max-width: 360px;
+    /* X-6.5.51AT v3 (2026-05-08): força card a SEMPRE ocupar quase todo o
+       overlay (igual ao max-height: ~94%). Sem isso o card colapsa pra
+       altura do conteúdo (popup pequeno). Card preenchendo overlay = mais
+       espaço útil pra lista = mais skills por página (PAGE_SIZE bumped 5→7). */
+    height: calc(100% - 40px);
     max-height: calc(100% - 40px);
     overflow: hidden; /* scroll interno vai na .lp-list, não no card */
     padding: 18px;
@@ -5147,10 +5202,12 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-help-card {
     position: relative;
     width: 100%;
-    max-width: 320px;
-    /* X-6.5.51AB (2026-04-26): max-height relativo ao overlay (sim-frame),
-       nao vh (estoura desktop). Caps em 600px pra manter card compacto. */
-    max-height: min(calc(100% - 24px), 600px);
+    /* X-6.5.51AT (2026-05-08): card ocupa ~95% do frame (era 320×600).
+       Motivo: descrição curta da skill (lp-item-desc) foi movida pra dentro
+       do help card, então o popup precisa de espaço pra mostrar resumo +
+       texto técnico D&D 5e juntos sem cortar. */
+    max-width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
     /* 2026-04-27 USER RULE: "tem um fundo que é o brilhante que não tem
        responsividade, então não acompanha o layer todo corretamente como
        deveria". Causa: card tinha overflow-y:auto → ::before (frame com
@@ -5259,6 +5316,26 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 @keyframes lpHelpGemPulse {
     0%   { opacity: 0.65; text-shadow: 0 0 4px rgba(196,149,58,0.4); }
     100% { opacity: 1;    text-shadow: 0 0 10px rgba(255,220,140,0.75); }
+}
+/* RESUMO: descrição curta da skill (movida da skill row pro help card em
+   X-6.5.51AT, 2026-05-08). Estilo: itálico centralizado, sutilmente
+   destacado por borda dourada e fundo translúcido — ledes a leitura
+   antes do texto técnico D&D 5e detalhado abaixo. */
+.lp-help-desc {
+    position: relative;
+    z-index: 3;
+    font-family: var(--v-font, 'Marcellus'), serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--v-text, #d4c8b0);
+    text-align: center;
+    font-style: italic;
+    padding: 8px 12px;
+    margin: 0;
+    background: rgba(196,149,58,0.06);
+    border-radius: 6px;
+    border: 1px solid rgba(196,149,58,0.18);
+    flex-shrink: 0;
 }
 /* CORPO: tipografia de manuscrito, drop cap na primeira letra */
 .lp-help-body {
@@ -5776,7 +5853,9 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-item:active:not(.disabled) { transform: scale(.98); }
 .lp-item.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.7); }
 .lp-item.disabled:hover { transform: none; border-color: var(--v-border, #4a3828); background: rgba(15,12,8,.5); }
-.lp-item-ico { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
+.lp-item-ico { font-size: 22px; flex-shrink: 0; width: 32px; min-width: 32px; height: 32px; text-align: center; display: flex; align-items: center; justify-content: center; }
+/* X-6.5.51AW (2026-05-08): heraldic SVG dentro do slot da mochila do combate. */
+.lp-item-ico svg.ic-it { width: 32px; height: 32px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
 .lp-item-body { flex: 1; min-width: 0; }
 /* V1 Invocações Phase 4 (2026-04-19) — chip de razão por que skill está bloqueada.
    Aparece embaixo da descrição em itens .lp-item.disabled. UX: o jogador entende
@@ -8921,13 +9000,17 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     if (document.getElementById('sim-combat-skin-last')) return;
     var st = document.createElement('style');
     st.id = 'sim-combat-skin-last';
+    /* X-6.5.51AX (2026-05-08): skin-last sincronizado com tokens canonicos.
+       html limita ao --sim-frame-w/h (384x694 desktop, 480x100dvh touch);
+       #app FIXADO em --sim-frame-w/h (não mais 100% — evita stretch). */
     st.textContent = [
-      'html.sim-combat-root{max-width:min(100vw,480px)!important;margin:0 auto!important;height:min(100dvh,960px)!important;',
-      'max-height:min(100dvh,960px)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
+      'html.sim-combat-root{max-width:var(--sim-frame-w)!important;margin:0 auto!important;height:var(--sim-frame-h)!important;',
+      'max-height:var(--sim-frame-h)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
       'html.sim-combat-root body.sim-combat-layout{contain:none!important;background-image:none!important;',
       'background-attachment:scroll!important;height:100%!important;max-height:100%!important;justify-content:flex-start!important;}',
       'html.sim-combat-root body.sim-combat-layout::before,html.sim-combat-root body.sim-combat-layout::after{content:none!important;display:none!important;}',
-      'html.sim-combat-root #app{flex:1 1 auto!important;min-height:0!important;max-height:100%!important;width:100%!important;',
+      'html.sim-combat-root #app{flex:1 1 auto!important;min-height:0!important;width:var(--sim-frame-w)!important;height:var(--sim-frame-h)!important;',
+      'max-width:var(--sim-frame-w)!important;max-height:var(--sim-frame-h)!important;margin:0 auto!important;',
       'overflow:hidden!important;display:flex!important;flex-direction:column!important;position:relative!important;',
       'transform:translateZ(0)!important;}'
     ].join('');
@@ -10420,7 +10503,21 @@ window.__onIntroTap = function() {
        arquivos em /shared/audio/ (sfx_hit.mp3, sfx_crit.mp3, sfx_miss.mp3,
        sfx_fire.mp3, sfx_cold.mp3, etc.). Chamadas: ValdoriaAudio.play('combat')
        pra música; ValdoriaAudio.playSFX('sfx_hit') pra effects. */
+    /* X-6.5.51AU revisado (2026-05-08): força audio-manager a criar `.va-float`
+       imediatamente em vez de esperar 3s por `#footer-quick` (que não existe
+       no simulador de combate). Mesma flag usada por cidade/exploracao. */
+    document.write('<script>window.__audioForceFloat=true;<\/script>');
     document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
+    /* X-6.5.51AY (2026-05-08): re-parent REVERTIDO. .va-float fica em body —
+       render(state) do combate faz setHTML(app, html) e apagaria a button
+       a cada state change (problema documentado em X-6.5.51u). CSS override
+       em ~linha 740 alinha visualmente o button ao frame via viewport-relative
+       fixed + margin auto. */
+    /* X-6.5.51AW (2026-05-08): heraldic items sprite + name->icon mapping.
+       Mochila do combate usa HeraldicItems.iconSvg(it.n) em vez de emoji `it.ico`.
+       X-6.5.51BA: bundle JS injeta sprite via <script> (file:// sem CORS pra fetch). */
+    document.write('<script src="' + BASE + '/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
+    document.write('<script src="' + BASE + '/shared/heraldic-items.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
@@ -13044,18 +13141,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     }
     var resMax = resMaxBase;
     var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
-    /* X-6.5.51AQ (2026-05-08): protect_player_when_low + min_hp_taunt_threshold +
-       icon (heráldico) propagados do spec → unit. Ally narrativo do prólogo
-       (Thorne) usa estes campos pra (1) AI dos lobos ignorar quando wounded
-       e (2) UI mostrar ícone heráldico canonical em vez de fallback. */
-    var protectPlayerWhenLow = !!(spec && spec.protect_player_when_low);
-    var minHpTauntThr = (spec && spec.min_hp_taunt_threshold != null)
-        ? Math.max(1, parseInt(spec.min_hp_taunt_threshold, 10) || 8) : 8;
-    var customIco = (spec && spec.icon) ? String(spec.icon) : null;
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
         summonsInvoked: summonsInvokedFinal,
-        race: race, ico: customIco || cdef.ico,
+        race: race, ico: cdef.ico,
         hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
@@ -13072,10 +13161,7 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         /* 2026-04-27: Wet status (D&D 5e DMG p.110). Importado da exploração via
            wetTurns_exact no SIM payload. Quando > 0: vulnerabilidade a frio +
            resistência a fogo. Decrementa 1 por round em rollInitiative/start. */
-        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0,
-        /* X-6.5.51AQ: protect ally flags (Thorne ferreiro do prólogo) */
-        protect_player_when_low: protectPlayerWhenLow,
-        min_hp_taunt_threshold: minHpTauntThr
+        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0
     };
 }
 
@@ -13393,16 +13479,6 @@ function pickNpcAttackTarget(s, attackerIdx) {
             if (u && u.noTarget) continue;
             /* V1.7 Sprint-8: PHB Charmed — pula caster bloqueado */
             if (_blockedCasterIdxs[i]) continue;
-            /* X-6.5.51AQ (2026-05-08) — Protect Ally flag: aliado marcado com
-               protect_player_when_low+min_hp_taunt_threshold (ex: Thorne ferreiro
-               do prólogo) é IGNORADO pelos inimigos quando HP <= threshold.
-               Inimigos focam no jogador. Garante que aliado narrativo nao morre
-               antes do player (regra do prólogo, lore-aware). */
-            if (u && u.t === 'a' && u.protect_player_when_low) {
-                var _thr = (typeof u.min_hp_taunt_threshold === 'number') ? u.min_hp_taunt_threshold : 8;
-                var _hp = (typeof u.hp === 'number') ? u.hp : 999;
-                if (_hp <= _thr) continue;  // skip — wolves ignore wounded protected ally
-            }
             if (partyMemberTargetable(u)) cand.push(i);
         }
         if (!cand.length) {
@@ -16143,7 +16219,11 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
     }
     return [
         { icoClass: actorIcoCls, clsSlug: actorClsSlug, name: actor.n + ' → ' + target.n, roll: atkRes, longName: false },
-        { icoClass: 'ic-d20', name: vsTitle, roll: vs, longName: false },
+        /* X-6.5.51AT (2026-05-08): trocado SVG inline d20 hexagonal por
+           emoji 🎲 (dado normal, consistente com badge de iniciativa
+           '🎲N' e dicas '🎲 Toque...' no resto do código). User pediu
+           "para Teste vs CA pode usar dado normal mesmo". */
+        { ico: '🎲', name: vsTitle, roll: vs, longName: false },
         { icoClass: 'ic-sword', name: parts, roll: String(total) + ' PV', longName: true },
         { icoClass: targetIcoCls, clsSlug: targetClsSlug, name: 'PV ' + target.n, roll: oldHp + ' → ' + newHp, longName: false }
     ];
@@ -19859,11 +19939,23 @@ function openSkillHelpMini(overlayEl, skill) {
     var title = document.createElement('div');
     title.className = 'lp-help-title';
     title.textContent = skill.n;
+    /* X-6.5.51AT (2026-05-08): resumo curto da skill (antes na skill row como
+       lp-item-desc). Mostrado entre title e body — orienta antes do texto
+       técnico D&D 5e detalhado. Só renderiza quando há desc; helpDnd5e
+       fallback abaixo continua funcionando pra skills sem texto técnico. */
+    var descNode = null;
+    if (skill.desc && String(skill.desc).trim()) {
+        descNode = document.createElement('div');
+        descNode.className = 'lp-help-desc';
+        descNode.textContent = skill.desc;
+    }
     var body = document.createElement('div');
     body.className = 'lp-help-body';
     var raw = skill.helpDnd5e;
     if (!raw || !String(raw).trim()) {
-        raw = skill.desc ? ('Resumo: ' + skill.desc + '\n\nConsulte o PHB/SRD 5.1 para a magia ou talento homólogo.') : 'Sem texto técnico extra; veja o PHB/SRD 5.1.';
+        /* Fallback: se NÃO há texto técnico D&D, body fica só com o pointer
+           pro PHB (resumo já está acima em descNode, não duplicar). */
+        raw = 'Consulte o PHB/SRD 5.1 para a magia ou talento homólogo.';
     }
     String(raw).split('\n').forEach(function (line) {
         if (!line.trim()) return;
@@ -19899,6 +19991,7 @@ function openSkillHelpMini(overlayEl, skill) {
     btnRow.appendChild(btnInfo);
     mini.appendChild(tag);
     mini.appendChild(title);
+    if (descNode) mini.appendChild(descNode);
     mini.appendChild(body);
     mini.appendChild(btnRow);
     layer.appendChild(mini);
@@ -20188,7 +20281,9 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         html += '<div class="lp-item-ico">' + sk.ico + '</div>';
         html += '<div class="lp-item-body">';
         html += '<div class="lp-item-name">' + escHtml(sk.n) + resBadgeHtml + '</div>';
-        html += '<div class="lp-item-desc">' + escHtml(sk.desc) + '</div>';
+        /* X-6.5.51AT (2026-05-08): lp-item-desc REMOVIDO daqui — descrição
+           agora vive dentro do help card (lp-help-desc). Linha mais curta
+           permite mais skills por página. Ver openSkillHelpMini. */
         if (blockReason) {
             html += '<div class="lp-item-block-chip">' + escHtml(blockReason) + '</div>';
         }
@@ -20253,8 +20348,28 @@ function openSkillsPanel() {
        ~430x580-600 — mais baixo que mobile por causa do chrome do Telegram
        Desktop + header bot). BASELINE NOVA: Telegram DESKTOP 430x700 é o target
        mais restritivo. Com PAGE_SIZE=2, 2 skills × 95px + header 80px + filter
-       55px + pagination 40px + close 50px = ~430px — cabe com folga. */
-    var PAGE_SIZE = 2;
+       55px + pagination 40px + close 50px = ~430px — cabe com folga.
+
+       FIX X-6.5.51AT (2026-05-08): lp-item-desc removido da row → cada skill
+       cai de ~95px pra ~50px (icon 32px + name 22px + padding 14px). Com
+       PAGE_SIZE=3: 3 × 50px + 225px fixos = ~375px — cabe sem scroll no
+       baseline 430x700. User pediu "pelo menos 3 habilidades por página".
+
+       FIX X-6.5.51AT v2 (2026-05-08, segunda iteração): card popup ganhou
+       height:80% forçado (antes colapsava pra altura do conteúdo). Com 80%
+       de 694 = ~555px - 265px fixos = ~290px pra lista. 5 skills × 50px +
+       4 gaps × 6px = ~274px — cabe com folga. User pediu "podendo ter mais
+       habilidades na mesma página".
+
+       FIX X-6.5.51AT v3 (2026-05-08, terceira iteração): card agora preenche
+       quase todo o overlay (~94% via height:calc(100% - 40px)). Com 654px de
+       card - 265px fixos = ~389px pra lista. 7 skills × 50px + 6 gaps × 6px =
+       386px — cabe sem scroll. User pediu "ainda dá pra aumentar a altura".
+
+       FIX X-6.5.51AT v4 (2026-05-08, quarta iteração): user pediu cap de
+       5 skills por página ("máximo de 5 habilidades por página"). Sobra
+       espaço útil pra cada item respirar — cards menos comprimidos. */
+    var PAGE_SIZE = 5;
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
@@ -20937,8 +21052,12 @@ function openBagPanel() {
     if (!p.bag.length) html += '<div class="lp-empty">Mochila vazia</div>';
     p.bag.forEach(function (it, i) {
         var canUse = it.qty > 0;
+        /* X-6.5.51AW (2026-05-08): prefere ícone heráldico via HeraldicItems
+           (carregado por heraldic-items.js); fallback pra emoji legado `it.ico`. */
+        var heraldic = (window.HeraldicItems ? HeraldicItems.iconSvg(it.n, '32px') : '');
+        var icoHtml = heraldic || it.ico || '';
         html += '<button class="lp-item' + (canUse ? '' : ' disabled') + '" data-item="' + i + '"' + (canUse ? '' : ' disabled') + '>';
-        html += '<div class="lp-item-ico">' + it.ico + '</div>';
+        html += '<div class="lp-item-ico">' + icoHtml + '</div>';
         html += '<div class="lp-item-body">';
         html += '<div class="lp-item-name">' + escHtml(it.n) + '</div>';
         html += '<div class="lp-item-desc">' + escHtml(it.desc) + '</div>';
@@ -20971,6 +21090,19 @@ function openBagPanel() {
             useItem(i);
         });
     });
+    /* X-6.5.51AW (2026-05-08): se sprite heráldico ainda não carregou, atualiza
+       inline os .lp-item-ico ao terminar (sem reabrir popup). */
+    if (window.HeraldicItems && !HeraldicItems.ready()) {
+        HeraldicItems.onReady(function () {
+            if (!document.body.contains(ov)) return;
+            p.bag.forEach(function (it, i) {
+                var ico = card.querySelector('[data-item="' + i + '"] .lp-item-ico');
+                if (!ico) return;
+                var heraldic = HeraldicItems.iconSvg(it.n, '32px');
+                if (heraldic) ico.innerHTML = heraldic;
+            });
+        });
+    }
 }
 
 async function useItem(idx) {
@@ -27196,12 +27328,10 @@ function startSimAfterDiceBoot() {
     if (typeof startForceCombatMusic === 'function') {
         try { startForceCombatMusic(); } catch (_eF) { /* silent */ }
     }
-    /* V1.7 (2026-04-21) — Instala botão de volume CUSTOM no top-right do simulador.
-       Substitui o .va-float do audio-manager.js (que fica atrás do turn-queue
-       ou não aparece de forma consistente no sim). O botão custom usa
-       ValdoriaAudio.toggleMute() pra mute/unmute rápido + click disparando
-       popup de sliders via #va-btn invisível quando disponível. */
-    try { simInstallVolumeBtn(); } catch (_eVB) { /* silent */ }
+    /* X-6.5.51AU revisado (2026-05-08): chamada `simInstallVolumePanel()` REMOVIDA.
+       Combate agora usa o .va-float-btn padrão criado pelo audio-manager.js
+       (idêntico cidade/exploracao). Re-parent dos elementos pra dentro de #app
+       é feito via JS após audio-manager.js carregar (~linha 10440). */
 
     /* X-6.5.51u (2026-04-25): re-parent REVERTIDO. Tentativa anterior (X-6.5.51q)
        reparentava #va-popup + #va-backdrop pra dentro de #app, MAS render(s) chama
@@ -27481,165 +27611,12 @@ function stopForceCombatMusic() {
     }
 }
 
-/* V1.7 (2026-04-21) — Botão de volume custom do simulador (top-right).
-   Substitui o .va-float do audio-manager.js que é inconsistente no sim.
-   Cria elemento fixed no canto superior direito, sincroniza ícone com
-   estado de mute, e despacha click pro #va-btn quando disponível pra
-   abrir popup de sliders (ou usa toggleMute como fallback). */
-var _SIM_VOL_ICONS = {
-    high: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>' +
-          '<path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
-    low:  '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
-    mute: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<line x1="23" y1="9" x2="17" y2="15"/>' +
-          '<line x1="17" y1="9" x2="23" y2="15"/></svg>'
-};
-function _simVolSyncIcon() {
-    var btn = document.getElementById('sim-vol-btn');
-    if (!btn) return;
-    var muted = false, vol = 1;
-    try {
-        if (window.ValdoriaAudio) {
-            muted = !!(ValdoriaAudio.isMuted && ValdoriaAudio.isMuted())
-                 || !!(ValdoriaAudio.isMusicMuted && ValdoriaAudio.isMusicMuted());
-            vol = ValdoriaAudio.getVolume ? ValdoriaAudio.getVolume() : 1;
-        }
-    } catch (_eI) {}
-    if (muted || vol <= 0) {
-        btn.innerHTML = _SIM_VOL_ICONS.mute;
-        btn.classList.add('muted');
-        btn.classList.remove('playing');
-        btn.setAttribute('title', 'Volume: silenciado');
-    } else if (vol < 0.5) {
-        btn.innerHTML = _SIM_VOL_ICONS.low;
-        btn.classList.remove('muted');
-        btn.classList.add('playing');
-        btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
-    } else {
-        btn.innerHTML = _SIM_VOL_ICONS.high;
-        btn.classList.remove('muted');
-        btn.classList.add('playing');
-        btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
-    }
-}
-function simInstallVolumeBtn() {
-    if (document.getElementById('sim-vol-btn')) {
-        _simVolSyncIcon();
-        return;
-    }
-    /* REGRA SOBERANA (2026-04-21): TUDO dentro do frame #app (smartphone).
-       #app tem transform:translateZ(0) → vira containing block pra position:fixed
-       dos FILHOS, ancorando o fixed ao frame do smartphone (não à viewport).
-       Isso é o mesmo truque usado por dice-overlay, intro popup e outros.
-       Append em body está PROIBIDO pra elementos persistentes do jogo. */
-    var appFrame = document.getElementById('app');
-    if (!appFrame) {
-        /* #app ainda não montado — retry com backoff até existir. */
-        console.info('[SIM-VOL] #app null; retrying in 150ms');
-        setTimeout(simInstallVolumeBtn, 150);
-        return;
-    }
-    var btn = document.createElement('button');
-    btn.id = 'sim-vol-btn';
-    btn.setAttribute('aria-label', 'Ajustar volume / som');
-    btn.setAttribute('type', 'button');
-    btn.innerHTML = _SIM_VOL_ICONS.high;
-    btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-        /* V1.7 (2026-04-21 v3) — TOGGLE robusto de popup de volume.
-           Comportamento: clicar abre popup; clicar de novo fecha (toggle).
-           Estratégia: dispatcha click em #va-btn (audio-manager.js toggla
-           internamente via _togglePopup). Se o toggle falhar (edge case),
-           força o estado via classList em #va-popup + #va-backdrop. */
-        var popup = document.getElementById('va-popup');
-        var wasOpen = !!(popup && popup.classList.contains('open'));
-        var vaBtn = document.getElementById('va-btn');
-        if (vaBtn && typeof vaBtn.click === 'function') {
-            try { vaBtn.click(); } catch (_eC) {
-                if (window.ValdoriaAudio && ValdoriaAudio.toggleMute) {
-                    try { ValdoriaAudio.toggleMute(); } catch (_eT) {}
-                }
-            }
-        } else if (window.ValdoriaAudio && ValdoriaAudio.toggleMute) {
-            try { ValdoriaAudio.toggleMute(); } catch (_eT) {}
-        }
-        /* Verify + force-correct se o toggle não tomou efeito (guard pro bug
-           "popup não fecha ao clicar de novo" 2026-04-21). */
-        setTimeout(function () {
-            var popupNow = document.getElementById('va-popup');
-            var backdropNow = document.getElementById('va-backdrop');
-            var isOpenNow = !!(popupNow && popupNow.classList.contains('open'));
-            if (wasOpen === isOpenNow) {
-                /* Toggle falhou — força o estado oposto no DOM. */
-                var targetOpen = !wasOpen;
-                console.warn('[SIM-VOL] vaBtn.click() did not toggle popup (wasOpen=' +
-                    wasOpen + ', isOpenNow=' + isOpenNow + ') \u2014 forcing to ' + targetOpen);
-                if (popupNow) popupNow.classList.toggle('open', targetOpen);
-                if (backdropNow) backdropNow.classList.toggle('open', targetOpen);
-            }
-            _simVolSyncIcon();
-        }, 80);
-        setTimeout(_simVolSyncIcon, 450);
-    });
-    appFrame.appendChild(btn);
-    console.info('[SIM-VOL] #sim-vol-btn mounted INSIDE #app frame (smartphone) at top:10 right:10 z-index:99999');
-    _simVolSyncIcon();
-    /* Sync periódico em caso de mudanças externas (popup abre sliders) */
-    if (!window._simVolSyncTimer) {
-        window._simVolSyncTimer = setInterval(_simVolSyncIcon, 800);
-    }
-    /* BUG 2026-04-21: render(s) faz setHTML(app, html) que apaga o botão.
-       MutationObserver detecta remoção e re-instala automaticamente.
-       Observa apenas direct children de #app (subtree:false) — eficiente. */
-    if (!window._simVolObserver) {
-        try {
-            var obs = new MutationObserver(function () {
-                if (!document.getElementById('sim-vol-btn')) {
-                    /* Botão foi apagado por render() — re-instala imediatamente.
-                       Como o botão vira child direto de #app, a flag
-                       _simVolObserver já existe → skip do setup de observer,
-                       mas o retry de createElement + appendChild roda. */
-                    simInstallVolumeBtn();
-                }
-            });
-            obs.observe(appFrame, { childList: true, subtree: false });
-            window._simVolObserver = obs;
-            console.info('[SIM-VOL] MutationObserver instalado em #app — botão vai se auto-reinstalar após cada render()');
-        } catch (_eO) {
-            console.warn('[SIM-VOL] MutationObserver falhou:', _eO);
-        }
-    }
-}
-
-/* V1.7 (2026-04-21 v2) — Instalação redundante pra garantir que o botão
-   SEMPRE aparece, independente de qual boot path rodar primeiro:
-   · DOMContentLoaded (early)
-   · load (depois de assets)
-   · setTimeout 500ms (fallback) */
-if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            try { simInstallVolumeBtn(); } catch (_eV1) {}
-        });
-    } else {
-        setTimeout(function () {
-            try { simInstallVolumeBtn(); } catch (_eV2) {}
-        }, 0);
-    }
-    window.addEventListener('load', function () {
-        try { simInstallVolumeBtn(); } catch (_eV3) {}
-    });
-    setTimeout(function () {
-        try { simInstallVolumeBtn(); } catch (_eV4) {}
-    }, 500);
-}
-
+/* X-6.5.51AU revisado (2026-05-08): bloco _simVolMakeRow / _simVolSyncPanel /
+   simInstallVolumePanel + boot calls REMOVIDOS. Combate agora usa o
+   .va-float-btn padrao do audio-manager.js (idêntico a cidade/exploracao).
+   Click no botao flutuante abre o va-popup com sliders. Re-parent dos 3
+   elementos (va-float / va-popup / va-backdrop) feito via JS apos audio-manager
+   carregar (~linha 10440). Auto-positioner X-6.5.51AA permanece abaixo. */
 /* X-6.5.51AA (2026-04-25) — va-popup auto-positioner JS-driven.
    Problema: CSS calc()-only (Pattern A puro X-6.5.51u) confiava em viewport
    centering match com #app centering. Em viewport com #sim-log-panel à direita
@@ -27654,8 +27631,10 @@ if (typeof document !== 'undefined') {
    · Resize/orientationchange do viewport
    · Mudanças de layout via #app rect (a cada toggle)
 
-   Usa `#sim-vol-btn` rect como anchor inferior (botão é fixed dentro do #app via
-   transform:translateZ(0) containing block — sempre alinhado ao frame visual). */
+   Usa `#va-btn` (.va-float-btn dentro de .va-float) como anchor inferior
+   (X-6.5.51AU revisado 2026-05-08 — voltamos pro padrão audio-manager.js).
+   Re-parent feito após audio-manager carregar (ver bloco ~linha 10384).
+   Fallback: 56px do bottom do #app se botão ainda não existe. */
 (function () {
     var _alreadyInit = false;
     function _ensureInit() {
@@ -27668,14 +27647,15 @@ if (typeof document !== 'undefined') {
             var backdrop = document.getElementById('va-backdrop');
             if (!popup) return;
             var rect = app.getBoundingClientRect();
-            var btn = document.getElementById('sim-vol-btn');
+            /* X-6.5.51AU revisado (2026-05-08): anchor = .va-float-btn (#va-btn)
+               do audio-manager.js. Re-parent feito após audio-manager carregar
+               (~linha 10384). Fallback 56px se botão ainda não existe. */
+            var anchor = document.getElementById('va-btn');
             var bottomPx;
-            if (btn) {
-                var br = btn.getBoundingClientRect();
-                /* 8px de gap acima do botão */
+            if (anchor) {
+                var br = anchor.getBoundingClientRect();
                 bottomPx = window.innerHeight - br.top + 8;
             } else {
-                /* fallback: 56px do bottom do #app */
                 bottomPx = window.innerHeight - rect.bottom + 56;
             }
             popup.style.setProperty('left', rect.left + 'px', 'important');

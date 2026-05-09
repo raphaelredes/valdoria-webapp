@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-07T23:25:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-09T02:20:57Z - do not edit directly, edit source -->
 
 
 <!--
@@ -724,6 +724,32 @@
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../valdoria-webapp/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     window.SERVER_LOG_AREA = 'exploracao';
+    /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
+       window.fetch pra detectar maintenance em qualquer response. */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* Proactive guard: hits /api/game/health imediatamente; se em manutenção
+       mostra overlay ANTES do resto do JS bootar. */
+    setTimeout(function(){
+        try{
+            if(!window.vMaintenance)return;
+            var url=new URL(window.location.href);
+            var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
+            if(!apiBase)return;
+            window._VALDORIA_API_BASE=apiBase;
+            var ctrl=new AbortController();
+            var tid=setTimeout(function(){ctrl.abort();},5000);
+            fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(data){
+                    if(data&&data.maintenance&&data.maintenance.active){
+                        console.warn('[MAINT] exploracao proactive guard detected maintenance');
+                        window.vMaintenance.show(data.maintenance);
+                    }
+                })
+                .catch(function(){clearTimeout(tid);});
+        }catch(e){}
+    },100);
   })();
 </script>
 
@@ -791,7 +817,7 @@ html, body {
   margin: 0; padding: 0;
   background: var(--v-bg-deep, #1a1510);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
+  font-family: var(--v-font, 'Marcellus', 'Cinzel', serif);
   overflow: hidden;
   -webkit-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -953,15 +979,19 @@ body {
      quando log panel ocupa o resto. */
   justify-content: flex-start;
   background: #0f0d0a;  /* fundo do dev-log-panel area */
+  overflow: hidden !important;  /* NO-SCROLL ABSOLUTO — regra soberana */
 }
-/* 2026-04-27 USER RULE: "preencher toda a tela independente da largura e
-   altura, mas tendo a limitação na largura e altura do smartphone com mais
-   pixels atualmente". Cap subiu de 384×694 → 480×960 (cobre iPhone 17 Pro
-   Max 440×956 + Galaxy S25 Ultra 412×915 + folga). Telegram Desktop popup
-   resizable cresce até 480×960. Browser desktop fica como phone-sim. */
+html { overflow: hidden !important; }  /* NO-SCROLL ABSOLUTO em html também */
+/* USER RULE 2026-05-08: simulator DEVE ser limitado ao tamanho do Telegram
+   Desktop WebApp (384x694) — MENOR que smartphone (480x960). Browser desktop
+   simula o pior caso (Telegram Desktop popup). Touch devices (smartphone
+   real) recebem viewport maior via media query abaixo.
+
+   Dims oficiais Telegram Desktop popup (tdesktop botWebViewPanelSize 384x694):
+     https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style */
 :root {
-  --sim-frame-w: min(100vw, 480px);
-  --sim-frame-h: min(100dvh, 960px);
+  --sim-frame-w: min(100vw, 384px);
+  --sim-frame-h: min(100dvh, 694px);
 
   /* === Tile-Objects AAA #2 (Spec Apêndice A) === */
   /* Faction palettes */
@@ -1004,6 +1034,32 @@ body {
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
+}
+
+/* X-6.5.51AS (2026-05-08): title-screen + loading-overlay DEVEM ficar dentro
+   do frame do simulador. shared/loading-title.css e shared/loading.css usam
+   position:fixed+inset:0 → escapam pra viewport do browser inteiro quando
+   viewport > frame (default 384x694).
+   exploracao.html é especial: body é flex-row 100vw x 100vh (acomoda #frame +
+   #sim-log-panel), então position:absolute em body preencheria o body inteiro
+   (errado). Solução: position:fixed com dim = --sim-frame-w/h + center via
+   left:50% / top:50% / transform translate. Cobre frame visualmente. */
+html body .title-screen,
+html body #title-screen,
+html body .loading-overlay,
+html body #loading,
+html body #processing-overlay,
+html body .processing-overlay {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: var(--sim-frame-w) !important;
+  height: var(--sim-frame-h) !important;
+  max-width: var(--sim-frame-w) !important;
+  max-height: var(--sim-frame-h) !important;
+  margin: 0 !important;
+  inset: auto !important;
 }
 
 /* 2026-04-27 USER RULE: sim-log-panel é DEV-ONLY. Default escondido em
@@ -1372,7 +1428,7 @@ html.sim-prod #frame { margin: 0 auto !important; }
   border-radius: 10px;
   padding: 22px 22px 18px;
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
+  font-family: var(--v-font, 'Marcellus', 'Cinzel', serif);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(196, 149, 58, 0.2);
   animation: stub-card-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
   overflow-y: auto;
@@ -1936,7 +1992,7 @@ html body .camp-screen {
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
-  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-family: var(--v-font, 'Marcellus'), serif;
   color: var(--v-text, #d4c8b0);
   overflow: hidden;
 }
@@ -2378,7 +2434,7 @@ body.perf-lite #top-danger { animation: none !important; }
   background: rgba(0, 0, 0, 0.65);
   padding: 20px;
   box-sizing: border-box;
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
 }
 #boss-danger-popup.bdp-hidden { display: none !important; }
 .bdp-card {
@@ -2513,7 +2569,7 @@ body.perf-lite #top-danger { animation: none !important; }
   background: rgba(0, 0, 0, 0.75);
   padding: 20px;
   box-sizing: border-box;
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
 }
 #boss-danger-tech-popup.bdtp-hidden { display: none !important; }
 .bdtp-card {
@@ -2566,7 +2622,7 @@ body.perf-lite #top-danger { animation: none !important; }
 .bdtp-body {
   font-size: 12px;
   line-height: 1.7;
-  font-family: monospace, var(--v-font, 'MedievalSharp', serif);
+  font-family: monospace, var(--v-font, 'Marcellus', serif);
   color: var(--v-text, #d4c8b0);
 }
 .bdtp-body strong { color: var(--v-gold, #c4953a); }
@@ -3800,7 +3856,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   50% { box-shadow: 0 0 8px rgba(232, 184, 80, 0.8); }
 }
 .journey-narration {
-  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-family: 'Marcellus', 'Cinzel', serif;
   font-size: 13px;
   line-height: 1.55;
   color: var(--v-text, #d4c8b0);
@@ -4653,9 +4709,14 @@ body.perf-lite .event-text-line {
 }
 .inv-item-icon {
   font-size: 22px;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
   margin-bottom: 4px;
 }
+/* X-6.5.51AW (2026-05-08): heraldic SVG dentro do slot da mochila do explore. */
+.inv-item-icon svg.ic-it { width: 32px; height: 32px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
 .inv-item-name {
   font-family: serif;
   font-size: 11px;
@@ -4842,7 +4903,7 @@ body.remote-mode #debug-hud { display: none !important; }
   border: 1px solid rgba(196, 149, 58, 0.25);
   border-radius: 6px;
   padding: 8px 10px;
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: 11px;
   color: var(--v-text, #d4c8b0);
   letter-spacing: 0.5px;
@@ -13792,7 +13853,11 @@ body.perf-lite .stub-popup-voice { animation: none; }
   var v = Date.now();
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
+  // X-6.5.51AW (2026-05-08): + heraldic-items.js (sprite 519 ícones para mochila)
+  // X-6.5.51BA (2026-05-08): heraldic-items-sprite.js (bundle JS) ANTES do helper
+  // — funciona em file:// onde fetch falha por CORS.
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
+   '/shared/heraldic-items-sprite.js', '/shared/heraldic-items.js',
    '/shared/toast.js', '/shared/state-checkpoint.js',
    '/shared/clock-skew-guard.js'].forEach(function(src) {
     var s = document.createElement('script');
@@ -33482,8 +33547,14 @@ function _exploracaoItemCategory(item) {
   return 'misc';
 }
 
-// Ícone do item (usa o do storage se disponível, senão heurística)
+// Ícone do item: prefere heráldico via HeraldicItems (X-6.5.51AW 2026-05-08),
+// fallback pra item.icon (storage), senão heurística por categoria com emoji.
 function _exploracaoItemIcon(item) {
+  var name = (item && item.name) || _exploracaoItemName(item);
+  if (window.HeraldicItems) {
+    var heraldic = HeraldicItems.iconSvg(name, '32px');
+    if (heraldic) return heraldic;
+  }
   if (item && item.icon) return item.icon;
   var cat = _exploracaoItemCategory(item);
   if (cat === 'use') return '🧪';
@@ -33504,6 +33575,13 @@ function _showExploracaoInventoryPopup() {
   if (!ov) return;
   _renderExploracaoInventoryPopup();
   ov.classList.add('show');
+  /* X-6.5.51AW (2026-05-08): se sprite heráldico ainda não carregou, re-renderiza
+     ao terminar pra trocar emoji por SVG `<use href="#ic-it-X">`. */
+  if (window.HeraldicItems && !HeraldicItems.ready()) {
+    HeraldicItems.onReady(function(){
+      if (ov.classList.contains('show')) _renderExploracaoInventoryPopup();
+    });
+  }
 }
 
 function _closeExploracaoInventoryPopup() {
@@ -41642,7 +41720,7 @@ body.silhouettes-demo-mode #silhouettes-demo-layer { display: block; }
   transform: translateX(-50%);
   background: rgba(15, 12, 10, 0.92);
   color: #c4953a;
-  font-family: 'Cinzel', 'MedievalSharp', serif;
+  font-family: 'Cinzel', 'Marcellus', serif;
   font-size: 8px;
   font-weight: 700;
   padding: 1px 4px;

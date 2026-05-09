@@ -549,6 +549,35 @@ LOG SINK (Fase 7):
        persiste logs do client em logs/sim_cidade_<env>.<date>.jsonl. */
     document.write('<script src="/shared/server-log.js?v=' + __vEarly + '"><\/script>');
     window.SERVER_LOG_AREA = 'cidade';
+    /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo se servidor em manutenção).
+       Carregado MUITO cedo pra que window.fetch seja monkey-patched ANTES de
+       qualquer chamada API ser feita pela cidade. Detecta `maintenance` em
+       qualquer payload e substitui UI inteira pela tela única bloqueante. */
+    document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
+    /* Proactive guard: hits /api/game/health imediatamente; se em manutenção
+       mostra overlay ANTES do resto do JS bootar. */
+    (function(){
+        try{
+            var url=new URL(window.location.href);
+            var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
+            if(!apiBase)return;
+            window._VALDORIA_API_BASE=apiBase;
+            setTimeout(function(){
+                if(!window.vMaintenance)return;
+                var ctrl=new AbortController();
+                var tid=setTimeout(function(){ctrl.abort();},5000);
+                fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+                    .then(function(r){clearTimeout(tid);return r.json();})
+                    .then(function(data){
+                        if(data&&data.maintenance&&data.maintenance.active){
+                            console.warn('[MAINT] cidade proactive guard detected maintenance');
+                            window.vMaintenance.show(data.maintenance);
+                        }
+                    })
+                    .catch(function(){clearTimeout(tid);});
+            },100);
+        }catch(e){}
+    })();
   </script>
   <script>
     // Cache busting para CSS/JS imports
@@ -676,7 +705,7 @@ LOG SINK (Fase 7):
     body {
       background: #2a2420;
       color: #d4c8b0;
-      font-family: 'MedievalSharp', 'Cinzel', serif;
+      font-family: 'Marcellus', 'Cinzel', serif;
       font-size: var(--v-font-body, 14px);
       line-height: 1.5;
       -webkit-text-size-adjust: 100%;
@@ -1672,7 +1701,7 @@ LOG SINK (Fase 7):
       border: 1px solid #4a3828;
       border-radius: 6px;
       color: #d4c8b0;
-      font-family: 'MedievalSharp', serif;
+      font-family: 'Marcellus', serif;
       font-size: var(--v-font-sm, 12px);
       text-align: left;
       cursor: pointer;
@@ -2557,17 +2586,7 @@ LOG SINK (Fase 7):
       line-height: 1.7;
       max-width: 320px;
     }
-    .city-hub-ambient .dm-tip {
-      font-size: var(--v-font-sm, 12px);
-      color: #d4c8b0;
-      padding: 12px 16px;
-      background: rgba(15, 12, 8, 0.4);
-      border-left: 3px solid #c4953a;
-      max-width: 320px;
-      text-align: left;
-      font-style: italic;
-    }
-    .city-hub-ambient .dm-tip::before { content: "📜 "; }
+    /* .city-hub-ambient .dm-tip CSS REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
 
     /* === SUB-SCREENS (DEV-ONLY — não sincronizam) === */
     .city-subscreen {
@@ -2798,7 +2817,7 @@ LOG SINK (Fase 7):
 
 /* Location name */
 .cloc-card-name {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   color: var(--v-text, #d4c8b0);
   line-height: 1.2;
@@ -2806,7 +2825,7 @@ LOG SINK (Fase 7):
 
 /* Brief description */
 .cloc-card-desc {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-xs, 10px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.2;
@@ -2843,7 +2862,7 @@ LOG SINK (Fase 7):
   background: var(--v-gold-20);
   padding: 1px 5px;
   border-radius: var(--v-radius-pill, 20px);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
 }
 
 /* Separator between core and extra locations */
@@ -2959,7 +2978,7 @@ body.perf-lite .cloc-card {
 }
 .vc-service-icon { font-size: var(--v-font-icon, 20px); line-height: 1; } /* HARDCODED: icon size, no exact token */
 .vc-service-name {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text, #d4c8b0);
   line-height: 1.2;
@@ -3083,7 +3102,7 @@ body.perf-lite .cloc-card {
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   cursor: pointer;
   text-align: left;
@@ -4062,7 +4081,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       border-radius: var(--v-radius-pill, 20px);
       background: transparent;
       color: var(--v-text-dim, #a09484);
-      font-family: var(--v-font, 'MedievalSharp', serif);
+      font-family: var(--v-font, 'Marcellus', serif);
       font-size: var(--v-font-sm, 12px);
       cursor: pointer;
       white-space: nowrap;
@@ -4160,7 +4179,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       border-radius: var(--v-radius-lg, 14px);
       padding: var(--v-space-xl, 20px) var(--v-space-lg, 16px);
       color: var(--v-text, #d4c8b0);
-      font-family: var(--v-font, 'MedievalSharp', serif);
+      font-family: var(--v-font, 'Marcellus', serif);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7),
                   0 0 24px var(--v-gold-20, rgba(196, 149, 58, 0.2));
       animation: cityDiscCardIn 0.35s ease;
@@ -4205,7 +4224,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       border-radius: var(--v-radius, 10px);
       background: var(--v-bg-card, #2e2520);
       color: var(--v-text, #d4c8b0);
-      font-family: var(--v-font, 'MedievalSharp', serif);
+      font-family: var(--v-font, 'Marcellus', serif);
       font-size: var(--v-font-body, 14px);
       cursor: pointer;
       transition: all var(--v-transition-base, 0.2s ease);
@@ -4370,7 +4389,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       50% { box-shadow: 0 0 8px rgba(232, 184, 80, 0.8); }
     }
     .journey-narration {
-      font-family: 'MedievalSharp', Cinzel, serif;
+      font-family: 'Marcellus', Cinzel, serif;
       font-size: 14px;
       line-height: 1.7;
       color: #d4c8b0;
@@ -7689,7 +7708,7 @@ function buildMockHubScreen(player){
     },
     player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
     daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' },
-    dm_tip: 'Os guardas comentam sobre lobos cinzentos rondando o caminho do norte.'
+    /* dm_tip REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
   };
 }
 
@@ -9007,7 +9026,7 @@ function _showSettingsPopup(){
   // SEÇÃO 4: Fonte (ic-fonte — letra A serif)
   html += _sectionHeader('ic-fonte', 'Fonte do Jogo');
   var FONTS = [
-    { id: 'medieval',  name: 'MedievalSharp', family: "'MedievalSharp', cursive" },
+    { id: 'medieval',  name: 'Marcellus', family: "'Marcellus', cursive" },
     { id: 'cinzel',    name: 'Cinzel',        family: "'Cinzel', serif" },
     { id: 'imfell',    name: 'IM Fell',       family: "'IM Fell English', serif" },
     { id: 'crimson',   name: 'Crimson',       family: "'Crimson Pro', serif" },
@@ -44027,15 +44046,8 @@ function renderHubScreen(el, screen) {
     }
 
     /* ── 9. DM Tip ───────────────────────────────────────────── */
-    var tip = screen.dm_tip;
-    if (tip) {
-        var dmEl = _hubDiv('hub-dm');
-        var dmIco = _hubSpan('hub-dm-ico', '\uD83D\uDCDC');
-        dmEl.appendChild(dmIco);
-        var dmText = document.createTextNode(' ' + tip);
-        dmEl.appendChild(dmText);
-        frag.appendChild(dmEl);
-    }
+    /* DM Tip REMOVIDO 2026-05-08 (X-6.5.51AQ): irrelevante, jogador n\u00E3o l\u00EA,
+       ocupava espa\u00E7o no hub. Conte\u00FAdo `_dm_tip` do backend \u00E9 ignorado. */
 
     /* Append everything to the container */
     el.appendChild(frag);
