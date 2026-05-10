@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-10T18:31:16Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-10T18:58:44Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12432,6 +12432,17 @@ window.__combatCheckResponseEnv = function (data, source) {
     if (!data || !data.env || !window.__COMBAT_ENV) return true;
     if (data.env !== window.__COMBAT_ENV) {
         console.error('[C-REM:CROSS-ENV] ' + source + ' expected=' + window.__COMBAT_ENV + ' got=' + data.env);
+        // BEACON 2026-05-10: server log CRITICAL pra alerta cross-env real-time.
+        try {
+            var _bMsg = '[CROSS_ENV_DETECTED] page=combate source=' + source +
+                ' expected_env=' + window.__COMBAT_ENV + ' got_env=' + data.env +
+                ' uid=' + (window.__COMBAT_USER_ID || 'unknown') +
+                ' href=' + location.href.substring(0, 200);
+            var _bPayload = JSON.stringify({entries: [{level: 'critical', msg: _bMsg}], uid: window.__COMBAT_USER_ID || 0});
+            var _bApi = window.__COMBAT_API_BASE;
+            if (navigator.sendBeacon && _bApi) navigator.sendBeacon(_bApi + '/api/game/log', new Blob([_bPayload], {type: 'application/json'}));
+            else if (_bApi) fetch(_bApi + '/api/game/log', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: _bPayload, keepalive: true}).catch(function () { });
+        } catch (_eb) { }
         try {
             if (window.EnvStorage) { EnvStorage.purgeOtherEnvs(); }
             else {
@@ -12462,6 +12473,27 @@ window.__COMBAT_FROM_EXPLORACAO = (function () {
 })();
 window.__COMBAT_PLAYER_CLS_KEY = (function () {
     try { return new URLSearchParams(location.search).get('pClass') || ''; } catch (e) { return ''; }
+})();
+// STARTUP BEACON 2026-05-10: server log INFO de toda carga de combate.html.
+(function () {
+    try {
+        var _sbMsg = '[WEBAPP_STARTUP] page=combate env=' + window.__COMBAT_ENV +
+            ' mode=' + window.__COMBAT_MODE +
+            ' has_token=' + !!window.__COMBAT_TOKEN +
+            ' has_api=' + !!window.__COMBAT_API_BASE +
+            ' uid=' + (window.__COMBAT_USER_ID || 0) +
+            ' has_initdata=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+        var _sbApi = window.__COMBAT_API_BASE ||
+            (window.__COMBAT_ENV === 'prod' ? 'https://prod.lendasdevaldoria.com.br' :
+                (window.__COMBAT_ENV === 'dev' ? 'https://api.lendasdevaldoria.com.br' : ''));
+        if (_sbApi) {
+            fetch(_sbApi + '/api/game/log', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({entries: [{level: 'info', msg: _sbMsg}], uid: window.__COMBAT_USER_ID || 0}),
+                keepalive: true,
+            }).catch(function () { });
+        }
+    } catch (_es) { }
 })();
 window.__COMBAT_ENEMY_ID = (function () {
     try { return new URLSearchParams(location.search).get('enemy') || ''; } catch (e) { return ''; }

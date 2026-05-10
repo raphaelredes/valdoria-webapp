@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-10T18:31:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-10T18:58:44Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14106,6 +14106,26 @@ body.perf-lite .stub-popup-voice { animation: none; }
   // REMOTE só ativa se tiver token+api (não basta não ser file://)
   var hasRemoteCtx = !!(window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE);
   window.__EXPLORE_MODE = (location.protocol === 'file:' || !hasRemoteCtx) ? 'local' : 'remote';
+  // STARTUP BEACON 2026-05-10: server log INFO da carga de exploracao.html.
+  try {
+    var _sbMsg = '[WEBAPP_STARTUP] page=exploracao env=' + window.__EXPLORE_ENV +
+      ' mode=' + window.__EXPLORE_MODE +
+      ' has_token=' + !!window.__EXPLORE_TOKEN +
+      ' has_api=' + !!window.__EXPLORE_API_BASE +
+      ' uid=' + (window.__EXPLORE_USER_ID || 0) +
+      ' map_id=' + (window.__EXPLORE_MAP_ID || 'none') +
+      ' has_initdata=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+    var _sbApi = window.__EXPLORE_API_BASE ||
+      (window.__EXPLORE_ENV === 'prod' ? 'https://prod.lendasdevaldoria.com.br' :
+        (window.__EXPLORE_ENV === 'dev' ? 'https://api.lendasdevaldoria.com.br' : ''));
+    if (_sbApi) {
+      fetch(_sbApi + '/api/game/log', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({entries: [{level: 'info', msg: _sbMsg}], uid: window.__EXPLORE_USER_ID || 0}),
+        keepalive: true,
+      }).catch(function () { });
+    }
+  } catch (_es) { }
   console.info('[E-REM:MODE] mode=' + window.__EXPLORE_MODE
     + ' api=' + (window.__EXPLORE_API_BASE || '(none)')
     + ' uid=' + window.__EXPLORE_USER_ID
@@ -14256,6 +14276,17 @@ body.perf-lite .stub-popup-voice { animation: none; }
     if (!data || !data.env || !window.__EXPLORE_ENV) return true;
     if (data.env !== window.__EXPLORE_ENV) {
       console.error('[E-REM:CROSS-ENV] ' + source + ' expected=' + window.__EXPLORE_ENV + ' got=' + data.env);
+      // BEACON 2026-05-10: server log CRITICAL pra alerta cross-env real-time.
+      try {
+        var _bMsg = '[CROSS_ENV_DETECTED] page=exploracao source=' + source +
+          ' expected_env=' + window.__EXPLORE_ENV + ' got_env=' + data.env +
+          ' uid=' + (window.__EXPLORE_USER_ID || 'unknown') +
+          ' map_id=' + (window.__EXPLORE_MAP_ID || 'unknown') +
+          ' href=' + location.href.substring(0, 200);
+        var _bPayload = JSON.stringify({entries: [{level: 'critical', msg: _bMsg}], uid: window.__EXPLORE_USER_ID || 0});
+        if (navigator.sendBeacon && window.__EXPLORE_API_BASE) navigator.sendBeacon(window.__EXPLORE_API_BASE + '/api/game/log', new Blob([_bPayload], {type: 'application/json'}));
+        else if (window.__EXPLORE_API_BASE) fetch(window.__EXPLORE_API_BASE + '/api/game/log', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: _bPayload, keepalive: true}).catch(function () { });
+      } catch (_eb) { }
       try {
         if (window.EnvStorage) { EnvStorage.purgeOtherEnvs(); }
         else {
