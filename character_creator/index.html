@@ -10,7 +10,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420}</style>
-    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <meta name="description" content="Criador de Personagens D&D 5e - Lendas de Valdoria">
     <meta property="og:title" content="Forjar Personagem - Lendas de Valdoria">
     <meta property="og:description" content="Crie seu personagem com racas, classes e habilidades do D&D 5e">
@@ -1880,7 +1880,7 @@
 
         /* === Subtitle (prateado, maior, mais legível — USER REQUEST 2026-05-04) === */
         .onboarding-subtitle {
-            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-family: var(--v-font, 'Marcellus', serif);
             font-size: clamp(15px, 4.2vw, 17px);
             font-weight: 500;
             color: #c8d0dc;  /* prateado claro */
@@ -2277,7 +2277,7 @@
                     </div>
 
                     <div class="v-error-msg" id="nameError"></div>
-                    <button class="v-btn v-btn-primary btn-block" onclick="goScreen(8)">Continuar</button>
+                    <button class="v-btn v-btn-primary btn-block" onclick="validateNameAndContinue(8)">Continuar</button>
                 </div>
             </div>
 
@@ -2879,6 +2879,130 @@
                 });
                 bar.appendChild(dot);
             }
+        }
+
+        // === Name Blocklist (2026-05-10) ===========================================
+        // Cache local da lista de nomes proibidos (placeholder + profanity PT-BR).
+        // Fetch on-demand quando user tenta avançar da tela de nome.
+        // Server-side _validate_selections é fonte de verdade final no /apply.
+        var NAME_BLOCKLIST = null;  // {placeholder: [...], profanity: [...]} ou null
+        function _normalizeName(s){
+            if (!s) return '';
+            // Mirror de normalize_name em name_validation.py: lowercase + strip accents + strip non-alphanumeric
+            var n = String(s).normalize('NFKD').replace(/[̀-ͯ]/g, '');
+            return n.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+        async function _loadBlocklistOnce(apiBase){
+            if (NAME_BLOCKLIST) return NAME_BLOCKLIST;
+            try {
+                var r = await fetch((apiBase || '').replace(/\/$/, '') + '/api/character/name_blocklist', {cache:'no-store'});
+                if (!r.ok) throw new Error('HTTP '+r.status);
+                NAME_BLOCKLIST = await r.json();
+            } catch(e){
+                console.warn('[CC] blocklist fetch failed, fallback to local minimum:', e);
+                NAME_BLOCKLIST = {
+                    placeholder: ['aventureiro', 'aventureira', 'novo aventureiro', 'nova aventureira', 'admin', 'sistema', 'bot'],
+                    profanity: []  // server-side ainda valida
+                };
+            }
+            return NAME_BLOCKLIST;
+        }
+        function _checkNameLocal(name, surname){
+            // Retorna {forbidden, reason} igual ao server. Usa NAME_BLOCKLIST cacheado.
+            if (!NAME_BLOCKLIST) return {forbidden:false, reason:''};
+            var allowPlaceholder = new Set((NAME_BLOCKLIST.placeholder || []).map(_normalizeName));
+            var allowProfanity = new Set((NAME_BLOCKLIST.profanity || []).map(_normalizeName));
+            function _hit(s){
+                var n = _normalizeName(s);
+                if (!n) return '';
+                if (allowPlaceholder.has(n)) return 'placeholder';
+                if (allowProfanity.has(n)) return 'profanity';
+                return '';
+            }
+            var r = _hit(name); if (r) return {forbidden:true, reason:r};
+            if (surname){
+                r = _hit(surname); if (r) return {forbidden:true, reason:r};
+                r = _hit((name||'') + (surname||'')); if (r) return {forbidden:true, reason:r};
+            }
+            return {forbidden:false, reason:''};
+        }
+        function _showNamePopup(title, message, isBanWarning){
+            // Popup modal bloqueante. Aceita 1 botão "Entendi" que fecha.
+            var existing = document.getElementById('name-warn-overlay');
+            if (existing) existing.remove();
+            var overlay = document.createElement('div');
+            overlay.id = 'name-warn-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;';
+            var card = document.createElement('div');
+            card.style.cssText = 'background:var(--v-bg-card,#2e2520);border:2px solid '+(isBanWarning?'#d77a4a':'#c4953a')+';border-radius:12px;max-width:340px;padding:24px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,0.6);';
+            var t = document.createElement('div');
+            t.style.cssText = 'font-family:Cinzel,serif;font-weight:700;font-size:18px;letter-spacing:2px;text-transform:uppercase;color:'+(isBanWarning?'#d77a4a':'#c4953a')+';margin-bottom:14px;';
+            t.textContent = title;
+            var m = document.createElement('div');
+            m.style.cssText = 'font-size:14px;color:#d4c8b0;line-height:1.5;margin-bottom:18px;';
+            m.innerHTML = message;
+            var btn = document.createElement('button');
+            btn.className = 'v-btn v-btn-primary';
+            btn.style.cssText = 'min-width:120px;';
+            btn.textContent = 'Entendi';
+            btn.onclick = function(){ overlay.remove(); };
+            card.appendChild(t); card.appendChild(m); card.appendChild(btn);
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
+        }
+        async function validateNameAndContinue(targetScreen){
+            // Validação especial pra tela de nome (screen 7 -> 8).
+            // 1. Verifica não-vazio (validateCurrentScreen ja faz)
+            // 2. Verifica blocklist local (sem roundtrip)
+            // 3. Se OK, chama server /api/character/check_name (defesa em profundidade)
+            // 4. Se algum bloquear: mostra popup. Caso contrário, goScreen(8).
+            var name = (sel.name || '').trim();
+            var surname = (sel.surname || '').trim();
+            if (!name){
+                _showValidation('Digite um nome para seu personagem.');
+                return;
+            }
+            // Tenta carregar blocklist (uma vez)
+            var apiBase = (typeof window._API_BASE === 'string' && window._API_BASE) ||
+                          (new URLSearchParams(location.search).get('api') || '');
+            await _loadBlocklistOnce(apiBase);
+            // Local check
+            var local = _checkNameLocal(name, surname);
+            if (local.forbidden){
+                if (local.reason === 'placeholder'){
+                    _showNamePopup('Nome Inválido',
+                        'O nome <strong>"'+name+(surname?' '+surname:'')+'"</strong> é um placeholder genérico do sistema e não pode ser usado.<br><br>Escolha um nome próprio para seu personagem.',
+                        false);
+                } else {
+                    _showNamePopup('⚠️ Aviso de Banimento',
+                        'O nome <strong>"'+name+(surname?' '+surname:'')+'"</strong> contém termo pejorativo proibido.<br><br><strong>Usar termos ofensivos pode resultar em banimento da sua conta.</strong> Escolha outro nome.',
+                        true);
+                }
+                return;
+            }
+            // Server-side double-check (defesa em profundidade — local pode estar desatualizado)
+            if (apiBase){
+                try {
+                    var r = await fetch(apiBase.replace(/\/$/, '') + '/api/character/check_name', {
+                        method:'POST', headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify({name: name, surname: surname})
+                    });
+                    if (r.ok){
+                        var data = await r.json();
+                        if (data && !data.ok){
+                            var isBan = data.reason === 'profanity';
+                            _showNamePopup(isBan ? '⚠️ Aviso de Banimento' : 'Nome Inválido',
+                                (data.message || 'Nome inválido') + (isBan ? '<br><br><strong>Termos pejorativos podem resultar em banimento da conta.</strong>' : ''),
+                                isBan);
+                            return;
+                        }
+                    }
+                } catch(e){
+                    console.warn('[CC] /check_name failed (passa pra goScreen, server-side /apply ainda valida):', e);
+                }
+            }
+            // Tudo OK — avança
+            goScreen(targetScreen);
         }
 
         function goScreen(idx) {
