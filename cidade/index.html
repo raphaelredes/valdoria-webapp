@@ -549,35 +549,30 @@ LOG SINK (Fase 7):
        persiste logs do client em logs/sim_cidade_<env>.<date>.jsonl. */
     document.write('<script src="/shared/server-log.js?v=' + __vEarly + '"><\/script>');
     window.SERVER_LOG_AREA = 'cidade';
-    /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo se servidor em manutenção).
-       Carregado MUITO cedo pra que window.fetch seja monkey-patched ANTES de
-       qualquer chamada API ser feita pela cidade. Detecta `maintenance` em
-       qualquer payload e substitui UI inteira pela tela única bloqueante. */
+    /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
+       window.fetch pra detectar maintenance em qualquer response do servidor. */
     document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
-    /* Proactive guard: hits /api/game/health imediatamente; se em manutenção
-       mostra overlay ANTES do resto do JS bootar. */
-    (function(){
+    /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
+    setTimeout(function(){
         try{
+            if(!window.vMaintenance)return;
             var url=new URL(window.location.href);
             var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
             if(!apiBase)return;
             window._VALDORIA_API_BASE=apiBase;
-            setTimeout(function(){
-                if(!window.vMaintenance)return;
-                var ctrl=new AbortController();
-                var tid=setTimeout(function(){ctrl.abort();},5000);
-                fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
-                    .then(function(r){clearTimeout(tid);return r.json();})
-                    .then(function(data){
-                        if(data&&data.maintenance&&data.maintenance.active){
-                            console.warn('[MAINT] cidade proactive guard detected maintenance');
-                            window.vMaintenance.show(data.maintenance);
-                        }
-                    })
-                    .catch(function(){clearTimeout(tid);});
-            },100);
+            var ctrl=new AbortController();
+            var tid=setTimeout(function(){ctrl.abort();},5000);
+            fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(data){
+                    if(data&&data.maintenance&&data.maintenance.active){
+                        console.warn('[MAINT] cidade proactive guard detected maintenance');
+                        window.vMaintenance.show(data.maintenance);
+                    }
+                })
+                .catch(function(){clearTimeout(tid);});
         }catch(e){}
-    })();
+    },100);
   </script>
   <script>
     // Cache busting para CSS/JS imports
@@ -664,16 +659,37 @@ LOG SINK (Fase 7):
     /* Hover/selected boost — saturação extra */
     .hub-loc:hover .hl-ico svg,
     .hub-loc:active .hl-ico svg { filter: brightness(1.3) drop-shadow(0 0 6px currentColor); }
-    /* === VIEWPORT LOCK CANONICAL (Telegram Desktop webapp) === */
-    /* O lock REAL vem do valdoria-design.css importado acima:
-       html { max-width: min(100vw, 480px); height: min(100dvh, 960px); ... }
-       body { max-height: min(100dvh, 960px); contain: layout size; ... }
-       Aqui apenas EXPÕE os tokens pra usar em filhos (#footer, #popup, etc.)
-       e ajusta cores específicas do simulador.
-       NUNCA adicionar `html { height: 100% }` aqui — quebra o lock canonical. */
+    /* === VIEWPORT LOCK CANONICAL (Telegram Desktop webapp) ===
+       USER RULE 2026-05-08: simuladores DEVEM ser limitados ao tamanho do
+       Telegram Desktop WebApp (384x694) que é MENOR que o smartphone webapp
+       (480x960). Browser desktop simula o pior caso (Telegram Desktop popup).
+       Touch devices (smartphone real) recebem viewport maior via media query.
+
+       Dims oficiais Telegram Desktop popup (botWebViewPanelSize 384x694):
+         File: Telegram/SourceFiles/payments/ui/payments.style
+         URL:  https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style
+
+       Override html/body abaixo SUPLANTA o lock genérico do valdoria-design.css
+       (480x960) com o lock específico do simulador (384x694 Telegram Desktop). */
     :root {
-      --sim-frame-w: min(100vw, 480px);
-      --sim-frame-h: min(100dvh, 960px);
+      --sim-frame-w: min(100vw, 384px);
+      --sim-frame-h: min(100dvh, 694px);
+    }
+    /* Override html/body do valdoria-design.css com Telegram Desktop dims +
+       NO-SCROLL ABSOLUTE (regra soberana — NUNCA scroll em telas de jogo).
+       valdoria-design.css default tem `body { overflow-y: auto }` que gera
+       scroll tosco de Windows — suplantado aqui com `overflow: hidden`. */
+    html {
+      max-width: var(--sim-frame-w) !important;
+      max-height: var(--sim-frame-h) !important;
+      height: var(--sim-frame-h) !important;
+      overflow: hidden !important;
+    }
+    body {
+      max-width: var(--sim-frame-w) !important;
+      max-height: var(--sim-frame-h) !important;
+      height: var(--sim-frame-h) !important;
+      overflow: hidden !important;
     }
     /* === USER REQUEST 2026-05-04: cidade caber em Telegram Desktop ===
        Telegram Desktop WebApp window e ~442x680 (vs smartphone 430x844).
@@ -697,8 +713,69 @@ LOG SINK (Fase 7):
       /* Stats badges mais finos */
       .hub-stats, .hub-stats-row { padding: 4px 6px !important; font-size: 10px !important; gap: 4px !important; }
     }
+    /* Touch-aware override: smartphone real recebe viewport maior (480x100dvh).
+       Browser desktop (default acima) fica limitado a 384x694 (Telegram Desktop). */
     @media (hover: none) and (pointer: coarse) {
-      :root { --sim-frame-h: 100dvh; }
+      :root {
+        --sim-frame-w: min(100vw, 480px);
+        --sim-frame-h: 100dvh;
+      }
+    }
+
+    /* X-6.5.51AR (2026-05-08): SOLUÇÃO DEFINITIVA pro audio button + popup +
+       backdrop ficarem DENTRO do simulator frame.
+       audio-manager.js cria .va-float / .va-popup / .va-backdrop como children
+       de body com `position: fixed` + `max-width: 430px` + `margin: 0 auto`,
+       que escapam fora dos 384x694 do simulador. JS abaixo re-parenta pra
+       dentro de #app + CSS força `position: absolute` ancorado no #app
+       (que tem position:relative + overflow:hidden). Pattern copiado de
+       exploracao.html (X-6.5.51h+j). */
+    html body .va-float,
+    html body #app .va-float {
+      position: absolute !important;
+      bottom: 8px !important;
+      right: 8px !important;
+      left: auto !important;
+      top: auto !important;
+      margin: 0 !important;
+      width: auto !important;
+      max-width: 44px !important;
+      justify-content: flex-start !important;
+      transform: none !important;
+    }
+    html body .va-popup,
+    html body #app .va-popup {
+      position: absolute !important;
+      bottom: 56px !important;  /* acima do botão audio (8 + 36 + 12 spacing) */
+      left: 8px !important;
+      right: 8px !important;
+      margin: 0 !important;
+      max-width: none !important;
+    }
+    html body .va-backdrop,
+    html body #app .va-backdrop {
+      position: absolute !important;
+      inset: 0 !important;
+      margin: 0 !important;
+    }
+    /* X-6.5.51AS (2026-05-08): title-screen + loading-overlay DEVEM ficar dentro
+       do frame do simulador. shared/loading-title.css e shared/loading.css usam
+       position:fixed+inset:0 → escapam pra viewport do browser quando viewport
+       > frame (default 384x694). Override pra position:absolute ancora em body
+       (que tem dim lock). */
+    html body .title-screen,
+    html body #title-screen,
+    html body .loading-overlay,
+    html body #loading,
+    html body #processing-overlay,
+    html body .processing-overlay {
+      position: absolute !important;
+      inset: 0 !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
     }
     /* html/body: cor de fundo do simulador (lock dimensional vem do valdoria-design.css importado acima). */
     html { background: #1a1510; }
@@ -2066,9 +2143,12 @@ LOG SINK (Fase 7):
        ============================================================ */
 
     /* Reset #app pra layout flex vertical (não scroll) */
-    #app { display: flex; flex-direction: column; height: 100%; }
+    #app { display: flex; flex-direction: column; height: 100%; overflow: hidden !important; }
     /* Fase 8: padding-bottom 100px reserva espaço pro #bottom-panel absolute */
-    #content { padding: 12px 12px 100px; overflow-y: auto; flex: 1; }
+    /* USER RULE 2026-05-08 (X-6.5.51AP): NO-SCROLL ABSOLUTO em todas as telas.
+       overflow-y: auto removido — conteúdo DEVE caber via compactação responsiva
+       (@media max-height: 720px), tabs, ou popups. */
+    #content { padding: 12px 12px 100px; overflow: hidden !important; flex: 1; }
 
     /* === Top Bar (estilo exploracao #top-bar) === */
     #city-top-bar {
@@ -3317,6 +3397,21 @@ body.perf-lite .vc-action-btn { transition: none; }
       text-align: center;
       line-height: 1;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+    }
+    /* X-6.5.51AW (2026-05-08): heraldic SVG dentro do slot do inventário.
+       svg.ic-it usa viewBox 120 — escala via width/height inline (32px no grid). */
+    .inv-card-emoji svg.ic-it {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+    }
+    .inv-grid.list .inv-card-emoji svg.ic-it {
+      width: 28px;
+      height: 28px;
     }
     .inv-card-name {
       font-family: var(--v-font-display, 'Cinzel', serif);
@@ -4062,21 +4157,23 @@ body.perf-lite .vc-action-btn { transition: none; }
     .city-sector-tabs {
       display: flex;
       gap: var(--v-space-xs, 4px);
-      padding: var(--v-space-sm, 6px) var(--v-space-md, 10px);
+      padding: var(--v-space-sm, 6px) var(--v-space-sm, 6px);
       margin: var(--v-space-sm, 6px) 0;
       background: var(--v-bg-raised, #332a22);
       border-top: 1px solid var(--v-border, #4a3828);
       border-bottom: 1px solid var(--v-border, #4a3828);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      /* USER RULE 2026-05-08 (X-6.5.51AP): NO-SCROLL ABSOLUTO em todas as telas.
+         overflow-x: auto removido — tabs DEVEM caber em 384px (Telegram Desktop) com flex:1 1 0. */
+      overflow: hidden !important;
     }
     .city-sector-tab {
-      flex: 1 0 auto;
+      flex: 1 1 0;  /* equal share, allow shrink — substitui o antigo "1 0 auto" que causava overflow horizontal */
+      min-width: 0;  /* permite encolher abaixo do tamanho do conteúdo */
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: var(--v-space-xs, 4px);
-      padding: var(--v-space-sm, 6px) var(--v-space-md, 10px);
+      gap: var(--v-space-xs, 3px);
+      padding: var(--v-space-sm, 6px) var(--v-space-xs, 4px);
       border: 1px solid var(--v-border, #4a3828);
       border-radius: var(--v-radius-pill, 20px);
       background: transparent;
@@ -4085,7 +4182,15 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-size: var(--v-font-sm, 12px);
       cursor: pointer;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       transition: all var(--v-transition-base, 0.2s ease);
+    }
+    /* Allow internal label/icon to truncate gracefully */
+    .city-sector-tab .cst-lbl {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
     }
     .city-sector-tab.active {
       border-color: var(--v-gold-dim, #9a7530);
@@ -6635,6 +6740,29 @@ body.perf-lite .vc-action-btn { transition: none; }
     // window.__audioForceFloat antes de tentar embed.
     window.__audioForceFloat = true;
     document.write('<script src="/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
+    /* X-6.5.51AW (2026-05-08): heraldic items sprite (519 ícones) + name->icon
+       mapping. X-6.5.51BA: bundle JS que injeta sprite via <script src> (file://
+       não tem CORS pra fetch; <script> funciona). bundle DEVE carregar ANTES
+       do helper pra setar window.__HERALDIC_ITEMS_SPRITE_SVG / __MAP. */
+    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/heraldic-items.js?v=' + Date.now() + '"><\/script>');
+    /* X-6.5.51AR (2026-05-08): SOLUÇÃO DEFINITIVA — re-parenta .va-float +
+       .va-popup + .va-backdrop pra dentro de #app (que tem position:relative
+       + overflow:hidden + dims 384x694). audio-manager.js cria os 3 elementos
+       como children de body com position:fixed que escapam fora do frame.
+       Pattern copiado de exploracao.html (X-6.5.51h+j). */
+    document.write('<script>(function(){' +
+      'var host=document.getElementById("app");' +
+      'if(!host){document.addEventListener("DOMContentLoaded",function(){host=document.getElementById("app");if(host)_setup();});return;}' +
+      '_setup();' +
+      'function _setup(){' +
+        'var ids=["va-float","va-popup","va-backdrop"];' +
+        'function _adopt(id){var el=document.getElementById(id);if(el&&el.parentElement===document.body){host.appendChild(el);console.info("[sim cidade] "+id+" re-parented from body to #app");return true;}return false;}' +
+        'ids.forEach(_adopt);' +
+        'var observer=new MutationObserver(function(mutations){for(var m of mutations){for(var node of m.addedNodes){if(node&&node.id&&ids.indexOf(node.id)>=0){_adopt(node.id);}}}});' +
+        'observer.observe(document.body,{childList:true});' +
+      '}' +
+    '})();<\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
     document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
@@ -6736,98 +6864,8 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _api   = params.get('api');
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
-
-  // === AUTO-AUTH via Telegram initData (USER REQUEST 2026-05-10) =============
-  // Quando user clica BotFather Mini App menu button, URL nao tem token/api/uid
-  // (botao estatico). Sem auto-auth, cidade.html ficaria em LOCAL mode (mock
-  // "Aventureiro"). Pra ter dados reais do personagem (igual /start fluxo),
-  // detectamos Telegram.WebApp.initData, chamamos /api/game/init-session, e
-  // redirecionamos pra mesma URL com params (cidade.html re-roda em REMOTE).
-  // Loading screen mascara o redirect (sem flash visivel pro user).
-  if (!_token) {
-    try {
-      var _hasInitData = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
-      if (_hasInitData) {
-        var _envForDisc = params.get('env') || 'prod';
-        var _discUrl = '/api-url-' + _envForDisc + '.json';
-        console.log('[CITY] no token in URL — attempting auto-auth via initData (env=' + _envForDisc + ')');
-        fetch(_discUrl + '?t=' + Date.now(), { cache: 'no-store' })
-          .then(function(r){ if (!r.ok) throw new Error('discovery HTTP ' + r.status); return r.json(); })
-          .then(function(disc){
-            var apiBase = (disc.url || '').replace(/\/$/, '');
-            if (!apiBase) throw new Error('discovery returned empty url');
-            return fetch(apiBase + '/api/game/init-session', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Telegram-Init-Data': window.Telegram.WebApp.initData,
-              },
-              body: '{}',
-            }).then(function(r){ return r.json(); }).then(function(d){ return Object.assign(d || {}, { _apiBase: apiBase }); });
-          })
-          .then(function(data){
-            if (!data || !data.token || !data.user_id) {
-              console.warn('[CITY] auto-auth response invalid:', data);
-              return;
-            }
-            // Cross-env check: server returns env stamp; if mismatch with URL ?env, abort.
-            var _expectedEnvAuth = params.get('env');
-            if (data.env && _expectedEnvAuth && data.env !== _expectedEnvAuth) {
-              console.error('[CITY] auto-auth CROSS-ENV: expected=' + _expectedEnvAuth + ' got=' + data.env);
-              return;
-            }
-            // Redirect com token+api+uid (cidade.html re-loads em REMOTE mode).
-            var newParams = new URLSearchParams(window.location.search);
-            newParams.set('token', data.token);
-            newParams.set('api', data.api || data._apiBase);
-            newParams.set('uid', String(data.user_id));
-            if (data.char_id) newParams.set('char', data.char_id);
-            console.log('[CITY] auto-auth OK — redirecting with token (uid=' + data.user_id + ' char=' + (data.char_id || 'none') + ')');
-            window.__valdoria_transitioning = true;
-            window.location.replace(window.location.pathname + '?' + newParams.toString());
-          })
-          .catch(function(e){ console.warn('[CITY] auto-auth failed (fallback to mock):', e.message || e); });
-      }
-    } catch (_e) {
-      console.warn('[CITY] auto-auth init exception:', _e);
-    }
-  }
-
-  // CROSS-ENV ISOLATION 2026-05-09: env esperado vem da URL (?env=prod) ou inferido
-  // do api param (.../prod.lendasdevaldoria => prod, .../api.lendasdevaldoria => dev).
-  // Server (env_response_middleware) injeta 'env' em toda response /api/* JSON dict.
-  // Se mismatch, descartamos resposta + purgamos cache + redirecionamos pro bot correto.
-  // Cobre cenario "Sage do DEV aparece em PROD" mesmo com api param errado em URL antiga.
-  var _expectedEnv = params.get('env') || (
-    (_api && _api.indexOf('prod.lendasdevaldoria') >= 0) ? 'prod' :
-    (_api && _api.indexOf('api.lendasdevaldoria') >= 0) ? 'dev' : ''
-  );
-  function _checkResponseEnv(data, source){
-    if (!data || !data.env || !_expectedEnv) return true; // sem env => skip (graceful migration)
-    if (data.env !== _expectedEnv){
-      console.error('[CITY] CROSS-ENV CONTAMINATION at', source, 'expected=', _expectedEnv, 'got=', data.env);
-      try {
-        if (window.EnvStorage){ EnvStorage.purgeOtherEnvs(); }
-        else {
-          var _xKeys = [];
-          for (var _xi=0; _xi<localStorage.length; _xi++){
-            var _xk = localStorage.key(_xi);
-            if (_xk && (_xk.indexOf('valdoria_session') === 0 || _xk.indexOf('valdoria_game_screen') === 0)) _xKeys.push(_xk);
-          }
-          _xKeys.forEach(function(k){ try { localStorage.removeItem(k); } catch(_){} });
-        }
-      } catch(_xe){}
-      // Hard fail: substitui body inteiro com aviso e bloqueia interacao.
-      try {
-        document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;text-align:center;padding:24px;z-index:2147483647"><div><h1 style="color:#c4953a;letter-spacing:3px">⚠️ Sessao Invalida</h1><p style="margin-top:24px;line-height:1.5">Voce abriu este jogo a partir de outro ambiente.<br>Feche e abra novamente pelo bot correto.</p><p style="margin-top:16px;font-size:12px;opacity:0.7">env esperado: '+_expectedEnv+' | env recebido: '+data.env+'</p></div></div>';
-      } catch(_eh){}
-      window.__valdoria_transitioning = true;
-      return false;
-    }
-    return true;
-  }
   if (_token && _api && _uid){
-    console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state (expected env='+_expectedEnv+')');
+    console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state');
 
     // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
     // posição EXATA do player (last_screen_payload). Se player estava em
@@ -6840,8 +6878,6 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (!r.ok) throw new Error('state HTTP ' + r.status);
       return r.json();
     }).then(function(state){
-      // CROSS-ENV ISOLATION 2026-05-09: rejeita response de env errado.
-      if (!_checkResponseEnv(state, '/api/game/state')) return null;
       // X-6.5.51AM (2026-05-08) BUG FIX: detecta transition + usa state.transition.url
       // se servidor já construiu (PROLOGUE caso novo char). Antes tinha apenas
       // 4 branches hardcoded (explore/combat/levelup) e 'prologue' caía no
@@ -6904,8 +6940,6 @@ body.perf-lite .vc-action-btn { transition: none; }
       });
     }).then(function(payload){
       if (!payload) return; // navigated away
-      // CROSS-ENV ISOLATION 2026-05-09: rejeita chars de env errado (Sage do DEV em PROD).
-      if (!_checkResponseEnv(payload, '/api/auth/characters')) return;
       var chars = (payload && payload.characters) || [];
       if (!chars.length){
         console.warn('[CITY] no characters returned — keeping mock');
@@ -6983,8 +7017,6 @@ body.perf-lite .vc-action-btn { transition: none; }
         headers: { 'Authorization': 'Bearer ' + _token }
       }).then(function(r){ return r.ok ? r.json() : null; }).then(function(payload){
         if (!payload || !payload.characters || !payload.characters.length) return;
-        // CROSS-ENV ISOLATION 2026-05-09: rejeita response do env errado tambem no fallback.
-        if (!_checkResponseEnv(payload, '/api/auth/characters[fallback]')) return;
         var picked = payload.characters[0];
         var p = window.CITY_MOCK_PLAYER;
         if (picked.name) p.name = picked.name;
@@ -7803,7 +7835,7 @@ function buildMockHubScreen(player){
       ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
     },
     player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
-    daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' },
+    daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' }
     /* dm_tip REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
   };
 }
@@ -30684,6 +30716,15 @@ function _showInventoryPopup(){
   }
   if (!window._popupRestoreFns) window._popupRestoreFns = {};
   window._popupRestoreFns['inventory'] = function(){ _showInventoryPopup(); };
+  /* X-6.5.51AW (2026-05-08): se o sprite heráldico ainda não carregou, re-renderiza
+     ao terminar pra trocar emoji `it.e` por SVG `<use href="#ic-it-X">`. */
+  if (window.HeraldicItems && !HeraldicItems.ready()) {
+    HeraldicItems.onReady(function(){
+      var open = ov && ov.classList.contains('active');
+      var lastPopup = (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1]);
+      if (open && lastPopup === 'inventory') _renderInventoryPopup();
+    });
+  }
 }
 
 function _renderInventoryPopup(){
@@ -30771,13 +30812,17 @@ function _renderInventoryPopup(){
       var fav = _isItemFav(inv.n);
       var meta = (it.dd ? it.dd : '') + (it.ac ? '+' + it.ac + ' CA' : '') + (it.b ? '+' + it.b + ' ATK' : '');
       var valHtml = (it.v ? ('<span class="inv-card-value">' + it.v + ' <span class="vi vi-coin sm"></span></span>') : '');
+      // X-6.5.51AW (2026-05-08): heraldic SVG primeiro, fallback pra emoji `it.e`,
+      // último fallback ic-mochila. Tamanho 32px no grid, 28px no list.
+      var heraldic = (window.HeraldicItems ? HeraldicItems.iconSvg(inv.n, isListView ? '28px' : '32px') : '');
+      var iconHtml = heraldic || it.e || _heralIco('ic-mochila');
       if (isListView) {
         // List: card horizontal com nome + descrição + meta + valor (canto inf-dir)
         var desc = (it.desc || it.fullDesc || '').replace(/<[^>]+>/g, '').slice(0, 120);
         html += '<div class="inv-card r-' + rarity + (equipped ? ' equipped' : '') + '" data-name="' + inv.n.replace(/"/g, '&quot;') + '">'
           +   (inv.q > 1 ? '<span class="inv-card-qty">×' + inv.q + '</span>' : '')
           +   (fav ? '<span class="inv-card-fav">★</span>' : '')
-          +   '<div class="inv-card-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
+          +   '<div class="inv-card-emoji">' + iconHtml + '</div>'
           +   '<div class="inv-card-body">'
           +     '<div class="inv-card-name r-' + rarity + '">' + inv.n + '</div>'
           +     (meta ? '<div class="inv-card-meta">' + meta + '</div>' : '')
@@ -30790,7 +30835,7 @@ function _renderInventoryPopup(){
         html += '<div class="inv-card r-' + rarity + (equipped ? ' equipped' : '') + '" data-name="' + inv.n.replace(/"/g, '&quot;') + '">'
           +   (inv.q > 1 ? '<span class="inv-card-qty">×' + inv.q + '</span>' : '')
           +   (fav ? '<span class="inv-card-fav">★</span>' : '')
-          +   '<div class="inv-card-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
+          +   '<div class="inv-card-emoji">' + iconHtml + '</div>'
           +   '<div class="inv-card-name r-' + rarity + '">' + inv.n + '</div>'
           +   (meta ? '<div class="inv-card-meta">' + meta + '</div>' : '')
           +   valHtml
