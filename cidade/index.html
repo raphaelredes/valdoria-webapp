@@ -7060,11 +7060,42 @@ body.perf-lite .vc-action-btn { transition: none; }
           dead: false
         };
       }
-      // Em REMOTE mode, allies sao apenas mock — fazer Liriel/Korin se tornarem null
-      // ate ter sistema de party real no backend (TODO: /api/web/party).
+      // REMOTE mode: popula GROUP_MEMBERS com allies REAIS do backend (2026-05-10).
+      // Backend retorna _allies_data em /api/game/state response (city_hub.py:485)
+      // shape: [{n, c, r, ico, l, hp, mhp, mp, mmp, res, dead, type, ...}, ...]
+      // Index 0 = player_card (já populado acima); indexes 1+ = allies reais.
+      // Substitui o TODO antigo que zerava Liriel/Korin mock.
       if (window.GROUP_MEMBERS){
+        var _alliesBackend = (state && state._allies_data) ? state._allies_data : null;
+        var _realAllies = (_alliesBackend && _alliesBackend.length > 1) ? _alliesBackend.slice(1) : [];
+        console.log('[CITY] real allies from backend:', _realAllies.length);
         for (var k = 1; k < window.GROUP_MEMBERS.length; k++){
-          window.GROUP_MEMBERS[k] = null;
+          var _a = _realAllies[k - 1];
+          if (_a){
+            // Converte shape backend (n/c/r/l/hp/mhp/mp/mmp) -> shape mock (name/cls/race/level/...)
+            window.GROUP_MEMBERS[k] = {
+              name: _a.n || 'Aliado',
+              cls: String(_a.c || 'guerreiro').toLowerCase(),
+              race: String(_a.r || 'humano').toLowerCase(),
+              level: _a.l || 1,
+              hp: _a.hp || 0,
+              hpMax: _a.mhp || 1,
+              mp: _a.mp || 0,
+              mpMax: _a.mmp || 0,
+              exh: 0, exhMax: 6,
+              xp: _a.xp || 0,
+              xpNext: _a.xpn || 100,
+              gold: 0,
+              dead: !!_a.dead,
+              ico: _a.ico || null,
+              type: _a.type || 'party',
+              affinity: _a.aff || 0,
+              levelUps: _a.lu || 0,
+              se: _a.se || []
+            };
+          } else {
+            window.GROUP_MEMBERS[k] = null;
+          }
         }
       }
       // Re-render se hub ja foi montado
