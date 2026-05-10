@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#2a2420">
+<title>Lendas de Valdoria — Carregando…</title>
+<style>
+  html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;height:100%;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;text-align:center}
+  .ob{width:64px;height:64px;border-radius:50%;margin:0 auto 18px;
+      background:radial-gradient(circle at 38% 32%,#fff4d0,#f0d080 12%,#e8c45a 25%,#c4953a 45%,#8b6420 72%,#5a3e10);
+      box-shadow:0 0 24px rgba(196,149,58,.5),0 0 48px rgba(196,149,58,.2),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25);
+      animation:gl 2.4s ease-in-out infinite}
+  @keyframes gl{0%,100%{box-shadow:0 0 24px rgba(196,149,58,.5),0 0 48px rgba(196,149,58,.2),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}50%{box-shadow:0 0 36px rgba(196,149,58,.75),0 0 60px rgba(196,149,58,.35),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}}
+  .t{font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#c4953a;font-size:18px;text-shadow:0 0 18px rgba(196,149,58,.4)}
+  .sb{margin-top:8px;font-size:11px;letter-spacing:2px;color:#a09484;opacity:.7}
+</style>
+</head>
+<body>
+<div>
+  <div class="ob"></div>
+  <div class="t">Valdoria</div>
+  <div class="sb" id="sb">Abrindo…</div>
+</div>
+<script>
+(function(){
+  // === LINK PERMANENTE ===
+  // Esta pagina e um shim que redireciona para a cidade do env correto, baseado
+  // EXCLUSIVAMENTE no hostname. NUNCA depende de query params (que podem vir
+  // errados do cache do Telegram WebView).
+  //
+  // Uso:
+  //   https://jogo.lendasdevaldoria.com.br/play  -> cidade/?env=prod  (PROD)
+  //   https://dev.lendasdevaldoria.com.br/play   -> cidade/?env=dev   (DEV)
+  //
+  // Pode ser usado como Mini App URL no BotFather de cada bot — nunca muda.
+  var h = (location.hostname || '').toLowerCase();
+  var env = '';
+  if (h === 'jogo.lendasdevaldoria.com.br' || h === 'www.jogo.lendasdevaldoria.com.br') env = 'prod';
+  else if (h === 'dev.lendasdevaldoria.com.br') env = 'dev';
+  // Fallback (file:// ou local): tenta inferir de ?env, senao prod.
+  if (!env) {
+    try { env = new URLSearchParams(location.search).get('env') || 'prod'; } catch(_e) { env = 'prod'; }
+  }
+  // Cache bust forte (Date.now) pra Telegram WebView nao reusar.
+  var dst = '/cidade/?env=' + env + '&_cb=' + Date.now();
+  // Preserva query params extras (token/api/uid se vier de OAuth web).
+  try {
+    var q = new URLSearchParams(location.search);
+    q.delete('env');
+    q.delete('_cb');
+    var rest = q.toString();
+    if (rest) dst += '&' + rest;
+  } catch(_e) {}
+  // Replace pra nao deixar /play no historico (back nao volta).
+  document.getElementById('sb').textContent = 'Abrindo cidade (' + env + ')…';
+  setTimeout(function(){ window.location.replace(dst); }, 80);
+})();
+</script>
+<noscript>
+  <p>JavaScript precisa estar habilitado.</p>
+  <p><a href="/cidade/">Continuar para a cidade</a></p>
+</noscript>
+</body>
+</html>
