@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#2a2420">
 <title>Lendas de Valdoria — Carregando…</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;height:100%;overflow:hidden}
   body{display:flex;align-items:center;justify-content:center;text-align:center}
@@ -17,48 +18,190 @@
       animation:gl 2.4s ease-in-out infinite}
   @keyframes gl{0%,100%{box-shadow:0 0 24px rgba(196,149,58,.5),0 0 48px rgba(196,149,58,.2),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}50%{box-shadow:0 0 36px rgba(196,149,58,.75),0 0 60px rgba(196,149,58,.35),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}}
   .t{font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#c4953a;font-size:18px;text-shadow:0 0 18px rgba(196,149,58,.4)}
-  .sb{margin-top:8px;font-size:11px;letter-spacing:2px;color:#a09484;opacity:.7}
+  .sb{margin-top:8px;font-size:11px;letter-spacing:2px;color:#a09484;opacity:.7;min-height:14px}
+  .err{color:#d77a4a;font-size:12px;margin-top:8px;opacity:.85;max-width:280px;line-height:1.4}
+  .btn{margin-top:14px;display:inline-block;padding:8px 18px;border:1px solid #c4953a;border-radius:4px;color:#c4953a;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent}
+  .btn:hover{background:rgba(196,149,58,.1)}
+  #fallback{display:none}
 </style>
 </head>
 <body>
 <div>
   <div class="ob"></div>
   <div class="t">Valdoria</div>
-  <div class="sb" id="sb">Abrindo…</div>
+  <div class="sb" id="sb">Iniciando…</div>
+  <div id="fallback">
+    <div class="err" id="err"></div>
+    <a href="#" class="btn" id="btnCity">Continuar para a cidade</a>
+  </div>
 </div>
 <script>
 (function(){
-  // === LINK PERMANENTE ===
-  // Esta pagina e um shim que redireciona para a cidade do env correto, baseado
-  // EXCLUSIVAMENTE no hostname. NUNCA depende de query params (que podem vir
-  // errados do cache do Telegram WebView).
+  // === LINK PERMANENTE (entry point unico) ===
+  // Esta pagina autentica via Telegram initData e redireciona pro destino
+  // correto com base em last_screen_payload (server-side state). Respeita
+  // CLAUDE.md REGRA MANDATORY 2026-05-05: TODA area do jogo persiste estado
+  // server-side, /api/game/state retorna onde player estava + HUD snapshot.
   //
-  // Uso:
-  //   https://jogo.lendasdevaldoria.com.br/play  -> cidade/?env=prod  (PROD)
-  //   https://dev.lendasdevaldoria.com.br/play   -> cidade/?env=dev   (DEV)
+  // Destinos possiveis:
+  //   - /cidade/         (default ou state.transition.to=null)
+  //   - /exploracao/     (state.transition.to in ['explore','exploration'])
+  //   - /combat2/        (state.transition.to in ['combat','combat2'])
+  //   - /levelup/        (state.transition.to='levelup')
+  //   - /prologue/       (state.transition.to in ['prologue','prologo'])
+  //   - state.transition.url se servidor construiu (PROLOGUE com flow especifico)
   //
-  // Pode ser usado como Mini App URL no BotFather de cada bot — nunca muda.
+  // Falhas (initData ausente, env mismatch, network) -> fallback pra /cidade/
+  // que tem auto-auth + mock fallback proprios.
+  //
+  // Hostname e fonte de verdade pra env (jogo.* = prod, dev.* = dev) —
+  // ignora ?env= antigo cacheado pelo Telegram WebView.
+
+  var $sb = document.getElementById('sb');
+  var $fb = document.getElementById('fallback');
+  var $err = document.getElementById('err');
+  var $btn = document.getElementById('btnCity');
+
+  function setStatus(msg){ if ($sb) $sb.textContent = msg; }
+  function fail(msg, redirectFn){
+    console.warn('[PLAY] fallback:', msg);
+    setStatus('');
+    if ($err) $err.textContent = msg;
+    if ($fb) $fb.style.display = 'block';
+    if ($btn && redirectFn){
+      $btn.onclick = function(e){ e.preventDefault(); redirectFn(); };
+      // Auto-redirect after 2s if user doesn't click
+      setTimeout(redirectFn, 2000);
+    }
+  }
+
+  // 1. Detect env from hostname (NEVER trust query params)
   var h = (location.hostname || '').toLowerCase();
   var env = '';
-  if (h === 'jogo.lendasdevaldoria.com.br' || h === 'www.jogo.lendasdevaldoria.com.br') env = 'prod';
-  else if (h === 'dev.lendasdevaldoria.com.br') env = 'dev';
-  // Fallback (file:// ou local): tenta inferir de ?env, senao prod.
-  if (!env) {
+  var apiHost = '';
+  if (h === 'jogo.lendasdevaldoria.com.br' || h === 'www.jogo.lendasdevaldoria.com.br'){
+    env = 'prod'; apiHost = 'https://prod.lendasdevaldoria.com.br';
+  } else if (h === 'dev.lendasdevaldoria.com.br'){
+    env = 'dev'; apiHost = 'https://api.lendasdevaldoria.com.br';
+  } else {
+    // Local/file/unknown — fallback to env from query, default prod
     try { env = new URLSearchParams(location.search).get('env') || 'prod'; } catch(_e) { env = 'prod'; }
+    apiHost = (env === 'dev') ? 'https://api.lendasdevaldoria.com.br' : 'https://prod.lendasdevaldoria.com.br';
   }
-  // Cache bust forte (Date.now) pra Telegram WebView nao reusar.
-  var dst = '/cidade/?env=' + env + '&_cb=' + Date.now();
-  // Preserva query params extras (token/api/uid se vier de OAuth web).
-  try {
-    var q = new URLSearchParams(location.search);
-    q.delete('env');
-    q.delete('_cb');
-    var rest = q.toString();
-    if (rest) dst += '&' + rest;
-  } catch(_e) {}
-  // Replace pra nao deixar /play no historico (back nao volta).
-  document.getElementById('sb').textContent = 'Abrindo cidade (' + env + ')…';
-  setTimeout(function(){ window.location.replace(dst); }, 80);
+  console.log('[PLAY] hostname=' + h + ' env=' + env + ' api=' + apiHost);
+
+  // Helper: redirect pra cidade (fallback ou destino default)
+  function gotoCidade(extraQs){
+    var q = new URLSearchParams(extraQs || '');
+    q.set('env', env);
+    q.set('_cb', String(Date.now()));
+    window.location.replace('/cidade/?' + q.toString());
+  }
+
+  // 2. Get Telegram initData (signed by the bot that opened the WebApp)
+  setStatus('Identificando…');
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg && typeof tg.ready === 'function') {
+    try { tg.ready(); } catch(_e){}
+    try { tg.expand && tg.expand(); } catch(_e){}
+  }
+  var initData = (tg && tg.initData) || '';
+
+  if (!initData) {
+    // No initData — open in browser (not Telegram). Fall back to cidade
+    // which has its own mock-fallback flow.
+    fail('Acesso direto detectado. Abra pelo bot do Telegram.', function(){ gotoCidade(); });
+    return;
+  }
+
+  // 3. Authenticate via init-session
+  setStatus('Autenticando…');
+  fetch(apiHost + '/api/game/init-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': initData },
+    body: '{}',
+    cache: 'no-store',
+    credentials: 'omit'
+  })
+  .then(function(r){
+    if (!r.ok) throw new Error('init-session HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(auth){
+    if (!auth || !auth.token || !auth.user_id) {
+      throw new Error('init-session retornou dados invalidos');
+    }
+    // Cross-env defense: server stamps env; if mismatch, abort hard.
+    if (auth.env && auth.env !== env){
+      throw new Error('Cross-env: hostname=' + env + ' mas servidor=' + auth.env);
+    }
+    var apiBase = (auth.api || apiHost).replace(/\/+$/, '');
+
+    // 4. Fetch player state (last_screen_payload)
+    setStatus('Restaurando…');
+    return fetch(apiBase + '/api/game/state', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + auth.token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: auth.user_id }),
+      cache: 'no-store',
+      credentials: 'omit',
+    })
+    .then(function(r){
+      // /api/game/state pode retornar 204/null se nao houver state — OK
+      if (!r.ok && r.status !== 204) throw new Error('state HTTP ' + r.status);
+      if (r.status === 204) return null;
+      return r.json();
+    })
+    .then(function(state){
+      // 5. Build query string preservada (token+api+uid+char+env)
+      var qs = new URLSearchParams();
+      qs.set('token', auth.token);
+      qs.set('api', apiBase);
+      qs.set('uid', String(auth.user_id));
+      if (auth.char_id) qs.set('char', auth.char_id);
+      qs.set('env', env);
+      qs.set('_cb', String(Date.now()));
+
+      // 6. Determinar destino baseado em last_screen_payload
+      // Mesma logica do cidade.html (X-6.5.51AM 2026-05-08)
+      if (state && state.transition && state.transition.to){
+        var to = String(state.transition.to);
+        var serverUrl = state.transition.url;
+        console.log('[PLAY] last_screen_payload transition.to=' + to + ' serverUrl=' + (serverUrl ? 'yes' : 'no'));
+        // PRIORITY 1: server-built URL (ex: PROLOGUE com flow especifico)
+        if (serverUrl){
+          setStatus('Continuando jornada…');
+          window.location.replace(serverUrl);
+          return;
+        }
+        // PRIORITY 2: hardcoded fallback paths
+        var dest = null;
+        if (to === 'explore' || to === 'exploration') { dest = '/exploracao/exploracao.html'; setStatus('Voltando à exploração…'); }
+        else if (to === 'combat' || to === 'combat2') { dest = '/combat2/combate.html'; setStatus('Retornando ao combate…'); }
+        else if (to === 'levelup') { dest = '/levelup/'; setStatus('Continuando level up…'); }
+        else if (to === 'prologue' || to === 'prologo') { dest = '/prologue/'; setStatus('Continuando o prólogo…'); }
+        else if (to === 'cidade' || to === 'city') { dest = '/cidade/'; setStatus('Voltando à cidade…'); }
+        if (dest){
+          window.location.replace(dest + '?' + qs.toString());
+          return;
+        }
+        console.warn('[PLAY] unknown transition.to=' + to + ' — fallback cidade');
+      }
+
+      // 7. Default: cidade (sem transition pendente)
+      setStatus('Entrando na cidade…');
+      window.location.replace('/cidade/?' + qs.toString());
+    });
+  })
+  .catch(function(err){
+    var msg = (err && err.message) || String(err);
+    console.error('[PLAY] auto-load FAILED:', msg);
+    // Fallback: cidade — tem flow proprio de auto-auth + mock + retry
+    fail('Falha ao restaurar (' + msg + ')', function(){ gotoCidade(); });
+  });
 })();
 </script>
 <noscript>
