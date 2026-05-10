@@ -8,75 +8,56 @@
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#2a2420">
 <title>Lendas de Valdoria — Carregando…</title>
+<style>html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;height:100%;overflow:hidden}</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;height:100%;overflow:hidden}
-  body{display:flex;align-items:center;justify-content:center;text-align:center}
-  .ob{width:64px;height:64px;border-radius:50%;margin:0 auto 18px;
-      background:radial-gradient(circle at 38% 32%,#fff4d0,#f0d080 12%,#e8c45a 25%,#c4953a 45%,#8b6420 72%,#5a3e10);
-      box-shadow:0 0 24px rgba(196,149,58,.5),0 0 48px rgba(196,149,58,.2),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25);
-      animation:gl 2.4s ease-in-out infinite}
-  @keyframes gl{0%,100%{box-shadow:0 0 24px rgba(196,149,58,.5),0 0 48px rgba(196,149,58,.2),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}50%{box-shadow:0 0 36px rgba(196,149,58,.75),0 0 60px rgba(196,149,58,.35),inset 0 -4px 8px rgba(60,30,5,.5),inset 0 3px 6px rgba(255,230,160,.25)}}
-  .t{font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#c4953a;font-size:18px;text-shadow:0 0 18px rgba(196,149,58,.4)}
-  .sb{margin-top:8px;font-size:11px;letter-spacing:2px;color:#a09484;opacity:.7;min-height:14px}
-  .err{color:#d77a4a;font-size:12px;margin-top:8px;opacity:.85;max-width:280px;line-height:1.4}
-  .btn{margin-top:14px;display:inline-block;padding:8px 18px;border:1px solid #c4953a;border-radius:4px;color:#c4953a;text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent}
-  .btn:hover{background:rgba(196,149,58,.1)}
-  #fallback{display:none}
-</style>
+<script>
+// Carrega CSS canonical (loading.css + loading-title.css + valdoria-design.css)
+// + loading-template.js que renderiza o magic-circle (esfera + runas + particles)
+var v = Date.now();
+document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + v + '">');
+document.write('<link rel="stylesheet" href="/shared/fonts.css?v=' + v + '">');
+document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>');
+</script>
 </head>
 <body>
-<div>
-  <div class="ob"></div>
-  <div class="t">Valdoria</div>
-  <div class="sb" id="sb">Iniciando…</div>
-  <div id="fallback">
-    <div class="err" id="err"></div>
-    <a href="#" class="btn" id="btnCity">Continuar para a cidade</a>
-  </div>
-</div>
+<!-- Placeholder escuro (regra No Hardcoded SVG in HTML Body — popular via JS apos CSS carregar) -->
+<div id="loading" class="loading-overlay" style="background:#1a1510" aria-busy="true"></div>
 <script>
 (function(){
-  // === LINK PERMANENTE (entry point unico) ===
-  // Esta pagina autentica via Telegram initData e redireciona pro destino
-  // correto com base em last_screen_payload (server-side state). Respeita
-  // CLAUDE.md REGRA MANDATORY 2026-05-05: TODA area do jogo persiste estado
-  // server-side, /api/game/state retorna onde player estava + HUD snapshot.
-  //
-  // Destinos possiveis:
-  //   - /cidade/         (default ou state.transition.to=null)
-  //   - /exploracao/     (state.transition.to in ['explore','exploration'])
-  //   - /combat2/        (state.transition.to in ['combat','combat2'])
-  //   - /levelup/        (state.transition.to='levelup')
-  //   - /prologue/       (state.transition.to in ['prologue','prologo'])
-  //   - state.transition.url se servidor construiu (PROLOGUE com flow especifico)
-  //
-  // Falhas (initData ausente, env mismatch, network) -> fallback pra /cidade/
-  // que tem auto-auth + mock fallback proprios.
-  //
-  // Hostname e fonte de verdade pra env (jogo.* = prod, dev.* = dev) —
-  // ignora ?env= antigo cacheado pelo Telegram WebView.
-
-  var $sb = document.getElementById('sb');
-  var $fb = document.getElementById('fallback');
-  var $err = document.getElementById('err');
-  var $btn = document.getElementById('btnCity');
-
-  function setStatus(msg){ if ($sb) $sb.textContent = msg; }
-  function fail(msg, redirectFn){
-    console.warn('[PLAY] fallback:', msg);
-    sendLog('warn', 'fallback: ' + msg);
-    setStatus('');
-    if ($err) $err.textContent = msg;
-    if ($fb) $fb.style.display = 'block';
-    if ($btn && redirectFn){
-      $btn.onclick = function(e){ e.preventDefault(); redirectFn(); };
-      // Auto-redirect after 2s if user doesn't click
-      setTimeout(redirectFn, 2000);
+  // === Popular overlay com magic-circle canonical ===========================
+  var _ld = document.getElementById('loading');
+  if (_ld && typeof window.ValdoriaLoadingHTML === 'function') {
+    var _tmp = document.createElement('div');
+    _tmp.innerHTML = ValdoriaLoadingHTML({
+      overlayId: 'loading',
+      title: 'LENDAS DE VALDORIA',
+      particleSet: 'standard',
+      defaultTip: 'Despertando os ventos de Valdória…',
+      hasRetry: false,
+      hasStage: true,
+      icon: 'magic-circle',
+    });
+    var _overlay = _tmp.firstElementChild;
+    if (_overlay) {
+      _overlay.style.background = '#1a1510';
+      _ld.parentNode.replaceChild(_overlay, _ld);
     }
   }
 
-  // 1. Detect env from hostname (NEVER trust query params)
+  // === LINK PERMANENTE (entry point unico) =================================
+  // Autentica via Telegram initData, busca last_screen_payload e redireciona
+  // pra ultima tela. Doc: docs/sistemas/INDEX_AGENTE_IA.md "ENTRY POINTS".
+
+  function setStage(msg){
+    var el = document.getElementById('loading-stage'); if (el) el.textContent = msg || '';
+  }
+  function setTip(msg){
+    var el = document.getElementById('loading-tip'); if (el) el.textContent = msg || '';
+  }
+
+  // 1. Detect env from hostname (NEVER trust query params — Telegram cache vazado)
   var h = (location.hostname || '').toLowerCase();
   var env = '';
   var apiHost = '';
@@ -85,88 +66,61 @@
   } else if (h === 'dev.lendasdevaldoria.com.br'){
     env = 'dev'; apiHost = 'https://api.lendasdevaldoria.com.br';
   } else {
-    // Local/file/unknown — fallback to env from query, default prod
     try { env = new URLSearchParams(location.search).get('env') || 'prod'; } catch(_e) { env = 'prod'; }
     apiHost = (env === 'dev') ? 'https://api.lendasdevaldoria.com.br' : 'https://prod.lendasdevaldoria.com.br';
   }
-  console.log('[PLAY] hostname=' + h + ' env=' + env + ' api=' + apiHost);
 
-  // === SERVER-SIDE LOGGING via sendBeacon (sobrevive navegacao/close) ===
-  // Sem isso, debug e impossivel — Telegram WebView nao expoe DevTools.
-  // /api/sim/log aceita POST sem auth e sink em logs/sim_play_{env}.{date}.jsonl
+  // === SERVER-SIDE LOGGING via sendBeacon ==================================
   function sendLog(level, msg, extra){
     try {
-      var payload = {
-        entries: [{
-          area: 'play',
-          level: level || 'info',
-          msg: msg || '',
-          ts: Date.now(),
-          extra: extra || null,
-          ua: (navigator && navigator.userAgent || '').slice(0, 200),
-          href: (location.href || '').slice(0, 300),
-          tg_platform: (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '',
-          tg_version: (window.Telegram && Telegram.WebApp && Telegram.WebApp.version) || '',
-        }],
-        env: env,
-      };
+      var payload = {entries:[{area:'play', level:level||'info', msg:msg||'', ts:Date.now(), extra:extra||null,
+        ua:(navigator&&navigator.userAgent||'').slice(0,200), href:(location.href||'').slice(0,300),
+        tg_platform:(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.platform)||'',
+        tg_version:(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.version)||''}], env:env};
       var url = apiHost + '/api/sim/log';
       var body = JSON.stringify(payload);
       if (navigator && navigator.sendBeacon){
-        navigator.sendBeacon(url, new Blob([body], {type: 'application/json'}));
+        navigator.sendBeacon(url, new Blob([body], {type:'application/json'}));
       } else {
-        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: body, keepalive: true}).catch(function(){});
+        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:body, keepalive:true}).catch(function(){});
       }
     } catch(_e){}
   }
-  // Capture uncaught errors & promise rejections — crucial pra debug
-  window.addEventListener('error', function(e){
-    sendLog('error', 'window.error: ' + (e && e.message), {
-      filename: e && e.filename,
-      lineno: e && e.lineno,
-      colno: e && e.colno,
-      stack: e && e.error && e.error.stack && String(e.error.stack).slice(0, 500),
-    });
-  });
-  window.addEventListener('unhandledrejection', function(e){
-    var r = e && e.reason;
-    sendLog('error', 'unhandled_rejection: ' + (r && (r.message || r)), {
-      stack: r && r.stack && String(r.stack).slice(0, 500),
-    });
-  });
-  // Beacon de inicio — sempre dispara, NÃO depende de fetch
-  sendLog('info', 'play_boot', {hostname: h, env: env, apiHost: apiHost, search: location.search});
+  window.addEventListener('error', function(e){ sendLog('error', 'window.error: '+(e&&e.message), {filename:e&&e.filename, lineno:e&&e.lineno, stack:e&&e.error&&e.error.stack&&String(e.error.stack).slice(0,500)}); });
+  window.addEventListener('unhandledrejection', function(e){ var r=e&&e.reason; sendLog('error', 'unhandled_rejection: '+(r&&(r.message||r)), {stack:r&&r.stack&&String(r.stack).slice(0,500)}); });
+  sendLog('info', 'play_boot', {hostname:h, env:env, apiHost:apiHost, search:location.search});
 
-  // Helper: redirect pra cidade (fallback ou destino default)
-  function gotoCidade(extraQs){
-    var q = new URLSearchParams(extraQs || '');
+  function gotoCidade(extra){
+    var q = new URLSearchParams(extra || '');
     q.set('env', env);
     q.set('_cb', String(Date.now()));
+    sendLog('info', 'redirect_cidade_fallback');
+    window.__valdoria_transitioning = true;
     window.location.replace('/cidade/?' + q.toString());
   }
 
-  // 2. Get Telegram initData (signed by the bot that opened the WebApp)
-  setStatus('Identificando…');
+  // 2. Get Telegram initData
+  setStage('Identificando…');
   var tg = window.Telegram && window.Telegram.WebApp;
   if (tg && typeof tg.ready === 'function') {
-    try { tg.ready(); sendLog('info', 'tg_ready_ok'); } catch(_e){ sendLog('error', 'tg_ready_failed: ' + _e); }
-    try { tg.expand && tg.expand(); sendLog('info', 'tg_expand_ok'); } catch(_e){ sendLog('error', 'tg_expand_failed: ' + _e); }
-  } else {
-    sendLog('warn', 'tg_unavailable', {has_telegram: !!window.Telegram});
+    try { tg.ready(); } catch(_e){}
+    try { tg.expand && tg.expand(); } catch(_e){}
   }
   var initData = (tg && tg.initData) || '';
-  sendLog('info', 'initData_check', {present: !!initData, length: initData.length, has_user: initData.indexOf('user=') >= 0});
+  sendLog('info', 'initData_check', {present: !!initData, length: initData.length});
 
   if (!initData) {
-    // No initData — open in browser (not Telegram). Fall back to cidade
-    // which has its own mock-fallback flow.
-    fail('Acesso direto detectado. Abra pelo bot do Telegram.', function(){ gotoCidade(); });
+    setTip('Abra pelo bot do Telegram');
+    setStage('Acesso direto — redirecionando…');
+    setTimeout(gotoCidade, 1200);
     return;
   }
 
   // 3. Authenticate via init-session
-  setStatus('Autenticando…');
+  setStage('Autenticando…');
+  setTip('Conectando aos ventos de Valdória…');
   sendLog('info', 'init_session_request', {host: apiHost});
+
   fetch(apiHost + '/api/game/init-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': initData },
@@ -180,38 +134,30 @@
     return r.json();
   })
   .then(function(auth){
-    sendLog('info', 'init_session_parsed', {has_token: !!(auth && auth.token), has_user_id: !!(auth && auth.user_id), env_returned: auth && auth.env, char_id: auth && auth.char_id});
-    if (!auth || !auth.token || !auth.user_id) {
-      throw new Error('init-session retornou dados invalidos');
-    }
-    // Cross-env defense: server stamps env; if mismatch, abort hard.
-    if (auth.env && auth.env !== env){
-      throw new Error('Cross-env: hostname=' + env + ' mas servidor=' + auth.env);
-    }
+    sendLog('info', 'init_session_parsed', {has_token: !!(auth && auth.token), env_returned: auth && auth.env, char_id: auth && auth.char_id});
+    if (!auth || !auth.token || !auth.user_id) throw new Error('auth invalida');
+    if (auth.env && auth.env !== env) throw new Error('Cross-env: host=' + env + ' server=' + auth.env);
     var apiBase = (auth.api || apiHost).replace(/\/+$/, '');
 
-    // 4. Fetch player state (last_screen_payload)
-    setStatus('Restaurando…');
+    setStage('Restaurando jornada…');
+    setTip('Buscando seu personagem…');
     sendLog('info', 'state_request', {api_base: apiBase, uid: auth.user_id});
+
     return fetch(apiBase + '/api/game/state', {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + auth.token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user_id: auth.user_id }),
+      headers: {'Authorization': 'Bearer ' + auth.token, 'Content-Type': 'application/json'},
+      body: JSON.stringify({user_id: auth.user_id}),
       cache: 'no-store',
-      credentials: 'omit',
+      credentials: 'omit'
     })
     .then(function(r){
       sendLog('info', 'state_response', {status: r.status, ok: r.ok});
-      // /api/game/state pode retornar 204/null se nao houver state — OK
       if (!r.ok && r.status !== 204) throw new Error('state HTTP ' + r.status);
       if (r.status === 204) return null;
       return r.json();
     })
     .then(function(state){
-      // 5. Build query string preservada (token+api+uid+char+env)
+      // Query string preservada com token+api+uid+char (REMOTE mode na pagina destino)
       var qs = new URLSearchParams();
       qs.set('token', auth.token);
       qs.set('api', apiBase);
@@ -220,54 +166,52 @@
       qs.set('env', env);
       qs.set('_cb', String(Date.now()));
 
-      // 6. Determinar destino baseado em last_screen_payload
-      // Mesma logica do cidade.html (X-6.5.51AM 2026-05-08)
-      sendLog('info', 'state_parsed', {has_transition: !!(state && state.transition), transition_to: state && state.transition && state.transition.to, has_server_url: !!(state && state.transition && state.transition.url)});
+      sendLog('info', 'state_parsed', {has_transition: !!(state && state.transition), transition_to: state && state.transition && state.transition.to});
+
+      // last_screen_payload — destino conforme transition.to
       if (state && state.transition && state.transition.to){
         var to = String(state.transition.to);
         var serverUrl = state.transition.url;
-        console.log('[PLAY] last_screen_payload transition.to=' + to + ' serverUrl=' + (serverUrl ? 'yes' : 'no'));
-        // PRIORITY 1: server-built URL (ex: PROLOGUE com flow especifico)
         if (serverUrl){
-          setStatus('Continuando jornada…');
+          setStage('Continuando jornada…');
           sendLog('info', 'redirect_serverUrl', {url: serverUrl.slice(0, 200)});
+          window.__valdoria_transitioning = true;
           window.location.replace(serverUrl);
           return;
         }
-        // PRIORITY 2: hardcoded fallback paths
         var dest = null;
-        if (to === 'explore' || to === 'exploration') { dest = '/exploracao/exploracao.html'; setStatus('Voltando à exploração…'); }
-        else if (to === 'combat' || to === 'combat2') { dest = '/combat2/combate.html'; setStatus('Retornando ao combate…'); }
-        else if (to === 'levelup') { dest = '/levelup/'; setStatus('Continuando level up…'); }
-        else if (to === 'prologue' || to === 'prologo') { dest = '/prologue/'; setStatus('Continuando o prólogo…'); }
-        else if (to === 'cidade' || to === 'city') { dest = '/cidade/'; setStatus('Voltando à cidade…'); }
+        if (to === 'explore' || to === 'exploration') { dest = '/exploracao/exploracao.html'; setStage('Voltando à exploração…'); }
+        else if (to === 'combat' || to === 'combat2') { dest = '/combat2/combate.html'; setStage('Retornando ao combate…'); }
+        else if (to === 'levelup') { dest = '/levelup/'; setStage('Continuando level up…'); }
+        else if (to === 'prologue' || to === 'prologo') { dest = '/prologue/'; setStage('Continuando o prólogo…'); }
+        else if (to === 'cidade' || to === 'city') { dest = '/cidade/'; setStage('Voltando à cidade…'); }
         if (dest){
-          sendLog('info', 'redirect_dest', {dest: dest, transition_to: to});
+          sendLog('info', 'redirect_dest', {dest: dest, to: to});
+          window.__valdoria_transitioning = true;
           window.location.replace(dest + '?' + qs.toString());
           return;
         }
-        console.warn('[PLAY] unknown transition.to=' + to + ' — fallback cidade');
         sendLog('warn', 'unknown_transition_to', {to: to});
       }
 
-      // 7. Default: cidade (sem transition pendente)
-      setStatus('Entrando na cidade…');
+      // Default: cidade (sem transition pendente)
+      setStage('Entrando na cidade…');
       sendLog('info', 'redirect_default_cidade');
+      window.__valdoria_transitioning = true;
       window.location.replace('/cidade/?' + qs.toString());
     });
   })
   .catch(function(err){
     var msg = (err && err.message) || String(err);
-    console.error('[PLAY] auto-load FAILED:', msg);
     sendLog('error', 'auto_load_failed: ' + msg, {stack: err && err.stack && String(err.stack).slice(0, 500)});
-    // Fallback: cidade — tem flow proprio de auto-auth + mock + retry
-    fail('Falha ao restaurar (' + msg + ')', function(){ gotoCidade(); });
+    setStage('Falha ao restaurar');
+    setTip(msg);
+    setTimeout(gotoCidade, 1800);
   });
 })();
 </script>
 <noscript>
-  <p>JavaScript precisa estar habilitado.</p>
-  <p><a href="/cidade/">Continuar para a cidade</a></p>
+  <p style="text-align:center;color:#c4953a;padding:24px;">JavaScript precisa estar habilitado. <a href="/cidade/">Continuar para a cidade</a></p>
 </noscript>
 </body>
 </html>

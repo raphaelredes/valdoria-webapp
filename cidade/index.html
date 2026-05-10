@@ -672,7 +672,12 @@ LOG SINK (Fase 7):
        Override html/body abaixo SUPLANTA o lock genérico do valdoria-design.css
        (480x960) com o lock específico do simulador (384x694 Telegram Desktop). */
     :root {
-      --sim-frame-w: min(100vw, 384px);
+      /* 2026-05-10: bumpado de 384px (Telegram Desktop minimum) -> 430px
+         (cap canonical do design system "Smartphone-Only Layout") pra evitar
+         faixas pretas laterais quando o Telegram Desktop popup abre maior
+         que 384px (frequente em DPI alto / Telegram Web). 384px era o
+         MINIMUM teorico — viewport real pode ser maior. */
+      --sim-frame-w: min(100vw, 430px);
       --sim-frame-h: min(100dvh, 694px);
     }
     /* Override html/body do valdoria-design.css com Telegram Desktop dims +
