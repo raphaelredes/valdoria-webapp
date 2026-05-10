@@ -7066,14 +7066,15 @@ body.perf-lite .vc-action-btn { transition: none; }
         };
       }
       // REMOTE mode: popula GROUP_MEMBERS com allies REAIS do backend (2026-05-10).
-      // Backend retorna _allies_data em /api/game/state response (city_hub.py:485)
-      // shape: [{n, c, r, ico, l, hp, mhp, mp, mmp, res, dead, type, ...}, ...]
+      // Backend retorna _allies_data em city_hub.py:485, e o serializer
+      // (game_api_serializer.py:174) mapeia _allies_data → state.allies (sem underscore).
+      // Shape: [{n, c, r, ico, l, hp, mhp, mp, mmp, res, dead, type, ...}, ...]
       // Index 0 = player_card (já populado acima); indexes 1+ = allies reais.
-      // Substitui o TODO antigo que zerava Liriel/Korin mock.
       if (window.GROUP_MEMBERS){
-        var _alliesBackend = (state && state._allies_data) ? state._allies_data : null;
+        // 2026-05-10 FIX: tentar 'allies' (serialized) e '_allies_data' (raw fallback).
+        var _alliesBackend = (state && (state.allies || state._allies_data)) ? (state.allies || state._allies_data) : null;
         var _realAllies = (_alliesBackend && _alliesBackend.length > 1) ? _alliesBackend.slice(1) : [];
-        console.log('[CITY] real allies from backend:', _realAllies.length);
+        console.log('[CITY] real allies from backend:', _realAllies.length, '(source: ' + (state && state.allies ? 'state.allies' : state && state._allies_data ? 'state._allies_data' : 'none') + ')');
         for (var k = 1; k < window.GROUP_MEMBERS.length; k++){
           var _a = _realAllies[k - 1];
           if (_a){
