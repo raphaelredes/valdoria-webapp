@@ -12,7 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420}</style>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../shared/fonts.css">
@@ -20,6 +20,10 @@
         var v = Date.now();
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
+        // SUPREME: maintenance overlay (FIRST). Bloqueia toda UI se servidor em manutencao.
+        // Carregado ANTES de qualquer outro JS — monkey-patcha window.fetch + chama vMaintenance.show.
+        document.write('<script src="../shared/loading-template.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/maintenance-overlay.js?v=' + v + '"><\/script>');
 document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/tabs.css?v=' + v + '">');
