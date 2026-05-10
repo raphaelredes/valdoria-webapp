@@ -6736,6 +6736,63 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _api   = params.get('api');
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
+
+  // === AUTO-AUTH via Telegram initData (USER REQUEST 2026-05-10) =============
+  // Quando user clica BotFather Mini App menu button, URL nao tem token/api/uid
+  // (botao estatico). Sem auto-auth, cidade.html ficaria em LOCAL mode (mock
+  // "Aventureiro"). Pra ter dados reais do personagem (igual /start fluxo),
+  // detectamos Telegram.WebApp.initData, chamamos /api/game/init-session, e
+  // redirecionamos pra mesma URL com params (cidade.html re-roda em REMOTE).
+  // Loading screen mascara o redirect (sem flash visivel pro user).
+  if (!_token) {
+    try {
+      var _hasInitData = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+      if (_hasInitData) {
+        var _envForDisc = params.get('env') || 'prod';
+        var _discUrl = '/api-url-' + _envForDisc + '.json';
+        console.log('[CITY] no token in URL — attempting auto-auth via initData (env=' + _envForDisc + ')');
+        fetch(_discUrl + '?t=' + Date.now(), { cache: 'no-store' })
+          .then(function(r){ if (!r.ok) throw new Error('discovery HTTP ' + r.status); return r.json(); })
+          .then(function(disc){
+            var apiBase = (disc.url || '').replace(/\/$/, '');
+            if (!apiBase) throw new Error('discovery returned empty url');
+            return fetch(apiBase + '/api/game/init-session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Telegram-Init-Data': window.Telegram.WebApp.initData,
+              },
+              body: '{}',
+            }).then(function(r){ return r.json(); }).then(function(d){ return Object.assign(d || {}, { _apiBase: apiBase }); });
+          })
+          .then(function(data){
+            if (!data || !data.token || !data.user_id) {
+              console.warn('[CITY] auto-auth response invalid:', data);
+              return;
+            }
+            // Cross-env check: server returns env stamp; if mismatch with URL ?env, abort.
+            var _expectedEnvAuth = params.get('env');
+            if (data.env && _expectedEnvAuth && data.env !== _expectedEnvAuth) {
+              console.error('[CITY] auto-auth CROSS-ENV: expected=' + _expectedEnvAuth + ' got=' + data.env);
+              return;
+            }
+            // Redirect com token+api+uid (cidade.html re-loads em REMOTE mode).
+            var newParams = new URLSearchParams(window.location.search);
+            newParams.set('token', data.token);
+            newParams.set('api', data.api || data._apiBase);
+            newParams.set('uid', String(data.user_id));
+            if (data.char_id) newParams.set('char', data.char_id);
+            console.log('[CITY] auto-auth OK — redirecting with token (uid=' + data.user_id + ' char=' + (data.char_id || 'none') + ')');
+            window.__valdoria_transitioning = true;
+            window.location.replace(window.location.pathname + '?' + newParams.toString());
+          })
+          .catch(function(e){ console.warn('[CITY] auto-auth failed (fallback to mock):', e.message || e); });
+      }
+    } catch (_e) {
+      console.warn('[CITY] auto-auth init exception:', _e);
+    }
+  }
+
   // CROSS-ENV ISOLATION 2026-05-09: env esperado vem da URL (?env=prod) ou inferido
   // do api param (.../prod.lendasdevaldoria => prod, .../api.lendasdevaldoria => dev).
   // Server (env_response_middleware) injeta 'env' em toda response /api/* JSON dict.
