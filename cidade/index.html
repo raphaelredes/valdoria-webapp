@@ -38119,8 +38119,20 @@ SUBSCREEN_DATA['city_more'] = {
 // progresso + texto região. 4.5s. Após onComplete, redirect pra exploracao.
 // FIX 2026-05-04: ALWAYS-anim — bloqueia se script não carregou (em vez de pular).
 //   Aguarda até 3s o script aparecer. Só pula se vReducedMotion=true (a11y).
-function _travelToBiome(biomeKey, displayName){
-  _logCity('travel -> ' + biomeKey);
+function _travelToBiome(mapIdOrBiome, displayName){
+  // 2026-05-11 fix: nome do parametro era enganoso. Aceitamos AGORA tanto
+  // map_id especifico (green_fields, volcanic, orc_tribe) quanto biome
+  // category (plains → city_gates default). Antes mandavamos ?biome=X mas
+  // exploracao.html SO le ?map_id= → fallback pra city_gates sempre.
+  // BUG REAL: cart_* handlers passavam b.biome (categoria) em vez de b.key
+  // (map_id). User clicava "Viajar pra Cratera Vulcanica" e ia pra Portoes
+  // de Valdoria toda vez.
+  var BIOME_TO_DEFAULT_MAP = {
+    'plains': 'city_gates',  // biome plains hub → mapa origem
+    // outros biomas usam map_id direto (caller sabe qual mapa abrir)
+  };
+  var mapId = BIOME_TO_DEFAULT_MAP[mapIdOrBiome] || mapIdOrBiome;
+  _logCity('travel -> ' + mapIdOrBiome + ' (resolved map_id=' + mapId + ')');
   // FIX 2026-05-04: path detection LOCAL vs WEBAPP
   //   LOCAL (file://): simuladores/cidade.html + simuladores/exploracao.html → relativo
   //   WEBAPP: /cidade/index.html + /exploracao/exploracao.html → absoluto
@@ -38132,7 +38144,7 @@ function _travelToBiome(biomeKey, displayName){
   //   é setado, e ao reabrir o WebApp /api/game/state cai no fallback de cidade.
   //   Estado server-side per-character só funciona com REMOTE mode.
   var qParams = new URLSearchParams();
-  qParams.set('biome', biomeKey);
+  qParams.set('map_id', mapId);  // 2026-05-11: antes era 'biome' (ignorado por exploracao)
   qParams.set('back', 'cidade');
   try {
     var cur = new URLSearchParams(location.search || '');
@@ -39438,9 +39450,15 @@ window.startCityJourney = startCityJourney;
 (function _registerCartHandlers(){
   if (typeof CART_BIOMES === 'undefined') return;
   CART_BIOMES.forEach(function(b){
-    ACTION_HANDLERS['cart_' + b.key] = (function(biomeKey, biomeBiome, displayName){
-      return function(p){ _travelToBiome(biomeBiome || biomeKey, displayName); };
-    })(b.key, b.biome || b.key, b.name);
+    // 2026-05-11 FIX: passar b.key (map_id especifico) em vez de b.biome
+    // (categoria). Antes: cart_volcanic → _travelToBiome('volcanic') OK,
+    // mas cart_green_fields → _travelToBiome('plains') → exploracao
+    // resolvia pra city_gates (mapa default da categoria plains).
+    // Agora: cart_green_fields → _travelToBiome('green_fields') → URL
+    // ?map_id=green_fields → exploracao boota corretamente.
+    ACTION_HANDLERS['cart_' + b.key] = (function(mapId, displayName){
+      return function(p){ _travelToBiome(mapId, displayName); };
+    })(b.key, b.name);
   });
 })();
 
