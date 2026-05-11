@@ -11139,7 +11139,10 @@ function _showKillsPopup(p){
     /* Bestiary cards com stagger entry + medal badges */
     + '.vKl-beast-card{position:relative;animation:vKlCardSlideIn 0.5s ease-out backwards;overflow:hidden;}'
     + '.vKl-beast-card:hover{transform:translateX(2px);transition:transform 0.15s ease-out;}'
-    + '.vKl-medal{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;font-weight:700;color:#3a2a08;text-shadow:0 1px 0 rgba(255,255,255,0.35);border:1px solid rgba(0,0,0,0.5);box-shadow:0 2px 4px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.4);animation:vKlMedalShine 2.6s ease-in-out infinite;}'
+    /* X-6.5.51BD (2026-05-11): removido text-shadow do numeral romano —
+       desenho central nao deve ter sombra (user request). Mantido box-shadow
+       no disco da medalha (depth do card) + inset highlight (metalico). */
+    + '.vKl-medal{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;font-weight:700;color:#3a2a08;border:1px solid rgba(0,0,0,0.5);box-shadow:0 2px 4px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.4);animation:vKlMedalShine 2.6s ease-in-out infinite;}'
     + '.vKl-medal.m1{background:radial-gradient(circle at 35% 30%,#fff4c0,#ffd700 55%,#a87520 100%);--medalCol:#ffd700;}'
     + '.vKl-medal.m2{background:radial-gradient(circle at 35% 30%,#f0f4f8,#c8d2dc 55%,#7a8390 100%);--medalCol:#c8d2dc;}'
     + '.vKl-medal.m3{background:radial-gradient(circle at 35% 30%,#f0b890,#c87a3a 55%,#7a3818 100%);--medalCol:#c87a3a;}'
