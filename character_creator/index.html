@@ -20,6 +20,9 @@
     <link rel="manifest" href="../manifest.json">
     <title>Forjar Personagem - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context.
+         Aceita creation_token URL param tambem (character creator flow). -->
+    <script src="../shared/auth-gate.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
     <script>

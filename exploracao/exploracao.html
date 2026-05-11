@@ -708,6 +708,8 @@
     }
   } catch (_) { /* fallback silencioso */ }
 </script>
+<!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
+<script src="/shared/auth-gate.js"></script>
 
 <!-- X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Exploração tem
      muitas animações (terreno, hex map, eventos, weather, fog) que o jogador

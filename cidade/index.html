@@ -538,6 +538,10 @@ LOG SINK (Fase 7):
       }
     } catch (_) { /* fallback silencioso */ }
   </script>
+  <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se nao houver contexto
+       de autenticacao (Telegram WebApp initData / URL token+uid / session
+       em localStorage). Skip em simulators file:// e paths public. -->
+  <script src="/shared/auth-gate.js"></script>
   <script>
     /* X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Mesmo fix
        portado de combate.html via shared sim-full-motion.js. Carrega ANTES

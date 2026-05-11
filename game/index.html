@@ -76,6 +76,8 @@ document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v +
     </script>
     <!-- THREE.js loaded via robust script-loader (see shared/script-loader.js) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
+    <script src="../shared/auth-gate.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
     <script>
