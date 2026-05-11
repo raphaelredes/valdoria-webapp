@@ -7092,6 +7092,15 @@ body.perf-lite .vc-action-btn { transition: none; }
     console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state');
     _cityLog('info', 'remote_mode_start', {api: _api, uid: _uid, wanted_char: _wantedChar || ''});
 
+    // FIX 2026-05-10 v3: bug critico descoberto via logs — `state` referenciado
+    // no .then(payload) segundo nivel mas era parametro do .then(state) anterior
+    // (out of scope). Causava ReferenceError 'state is not defined' -> catch
+    // dispara fallback que so atualizava nome/level (sem refresh UI) -> user
+    // ficava com mock Aventureiro renderizado.
+    // Fix: var _savedState no escopo da IIFE, salvar em primeira .then, acessar
+    // em segunda .then via _savedState.
+    var _savedState = null;
+
     // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
     // posição EXATA do player (last_screen_payload). Se player estava em
     // exploracao/combate, redireciona pra lá em vez de ficar na cidade.
@@ -7103,6 +7112,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (!r.ok) throw new Error('state HTTP ' + r.status);
       return r.json();
     }).then(function(state){
+      _savedState = state;  // FIX: salva pra acessar no proximo .then
       // X-6.5.51AM (2026-05-08) BUG FIX: detecta transition + usa state.transition.url
       // se servidor já construiu (PROLOGUE caso novo char). Antes tinha apenas
       // 4 branches hardcoded (explore/combat/levelup) e 'prologue' caía no
@@ -7238,7 +7248,9 @@ body.perf-lite .vc-action-btn { transition: none; }
       // Shape: [{n, c, r, ico, l, hp, mhp, mp, mmp, res, dead, type, ...}, ...]
       // Index 0 = player_card (já populado acima); indexes 1+ = allies reais.
       if (window.GROUP_MEMBERS){
-        // 2026-05-10 FIX: tentar 'allies' (serialized) e '_allies_data' (raw fallback).
+        // 2026-05-10 FIX v3: usa _savedState (era `state` mas estava fora de escopo
+        // neste .then — causava ReferenceError -> fallback -> mock visivel).
+        var state = _savedState;  // shim pra preservar logica abaixo
         var _alliesBackend = (state && (state.allies || state._allies_data)) ? (state.allies || state._allies_data) : null;
         var _realAllies = (_alliesBackend && _alliesBackend.length > 1) ? _alliesBackend.slice(1) : [];
         console.log('[CITY] real allies from backend:', _realAllies.length, '(source: ' + (state && state.allies ? 'state.allies' : state && state._allies_data ? 'state._allies_data' : 'none') + ')');
@@ -7295,14 +7307,41 @@ body.perf-lite .vc-action-btn { transition: none; }
           }
           return;
         }
-        var picked = payload.characters[0];
+        // FIX v3: respeitar _wantedChar tambem no fallback (nao so chars[0]).
+        var picked = null;
+        if (_wantedChar){
+          for (var i = 0; i < payload.characters.length; i++){
+            var c = payload.characters[i];
+            if (c.id === _wantedChar || c.char_id === _wantedChar){ picked = c; break; }
+          }
+        }
+        if (!picked) picked = payload.characters[0];
         var p = window.CITY_MOCK_PLAYER;
         if (picked.name) p.name = picked.name;
         if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
         if (picked.race) p.race = String(picked.race).toLowerCase();
         if (picked.level) p.level = picked.level;
+        if (picked.hp)         p.hp = picked.hp;
+        if (picked.max_hp)     p.hpMax = picked.max_hp;
+        if (picked.mp != null) p.mp = picked.mp;
+        if (picked.max_mp)     p.mpMax = picked.max_mp;
+        if (picked.gold != null) p.gold = picked.gold;
+        if (picked.xp != null)   p.xp = picked.xp;
+        if (picked.exhaustion != null) p.exh = picked.exhaustion;
+        // FIX v3: sincronizar GROUP_MEMBERS[0] tambem (player slot)
+        if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
+          window.GROUP_MEMBERS[0] = {
+            name: p.name, cls: p.cls, race: p.race, level: p.level,
+            hp: p.hp, hpMax: p.hpMax, mp: p.mp, mpMax: p.mpMax,
+            exh: p.exh, exhMax: 6, xp: p.xp, xpNext: p.xpNext, gold: p.gold,
+            dead: false
+          };
+        }
         console.log('[CITY] fallback char loaded:', p.name);
-        _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level});
+        _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level, cls: p.cls, race: p.race});
+        // FIX v3: forcar re-render apos fallback (antes o hub ficava com mock)
+        if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_re){} }
+        if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
       }).catch(function(e){
         console.warn('[CITY] fallback failed:', e);
         _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
