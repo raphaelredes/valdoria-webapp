@@ -10,7 +10,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420}</style>
-    <link rel="preload" href="../shared/fonts/medievalsharp.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../shared/fonts.css">
     <title>Compêndio - Lendas de Valdoria</title>
@@ -44,6 +44,19 @@
     document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
+    /* 2026-05-11 (user request): seta animada inferior central. */
+    document.write('<link rel="stylesheet" href="../shared/scroll-hint-arrow.css?v=' + v + '">');
+    document.write('<script src="../shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
+    document.write('<script>'
+      + 'document.addEventListener("DOMContentLoaded", function(){'
+      + '  if (window.vScrollHint && window.vScrollHint.register) {'
+      + '    window.vScrollHint.register(".entry-list");'
+      + '    window.vScrollHint.register(".entry-content");'
+      + '    window.vScrollHint.register(".v-popup-body");'
+      + '    window.vScrollHint.register(".screen-content");'
+      + '  }'
+      + '});'
+      + '<\/script>');
     </script>
 </head>
 

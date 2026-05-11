@@ -90,6 +90,27 @@
     document.write('<script src="../shared/processing-overlay.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
+    /* 2026-05-11 (user request): seta animada inferior central indicando
+       scroll disponivel. Auto-attach via [data-scroll-hint] + register API.
+       Distribui-se a info pra caber em 694px (Telegram Desktop minimum) e
+       quando ainda houver overflow, jogador ve o indicador. */
+    document.write('<link rel="stylesheet" href="../shared/scroll-hint-arrow.css?v=' + v + '">');
+    document.write('<script src="../shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
+    /* Registra TODOS os containers scrollable do creator. O modulo varre o
+       body em DOMContentLoaded + MutationObserver pra sub-screens criadas
+       dinamicamente (ex: detail overlays, summary sections, help card). */
+    document.write('<script>'
+      + 'document.addEventListener("DOMContentLoaded", function(){'
+      + '  if (window.vScrollHint && window.vScrollHint.register) {'
+      + '    window.vScrollHint.register(".screen");'
+      + '    window.vScrollHint.register(".sub-screen");'
+      + '    window.vScrollHint.register("#summarySections");'
+      + '    window.vScrollHint.register("#summaryContent .section-body");'
+      + '    window.vScrollHint.register(".help-card");'
+      + '    window.vScrollHint.register(".v-popup-body");'
+      + '  }'
+      + '});'
+      + '<\/script>');
     </script>
     <style>
         /* ─── Screen transition system ─── */

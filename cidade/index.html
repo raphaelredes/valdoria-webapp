@@ -583,6 +583,23 @@ LOG SINK (Fase 7):
     /* Popup canonical (.v-popup-btn / .v-popup-btn--primary / etc.) — usado por todos
        os WebApps pra botões padronizados. Estava faltando em cidade.html (Fase 9.5). */
     document.write('<link rel="stylesheet" href="/shared/popup.css?v=' + v + '">');
+    /* Scroll Hint Arrow (2026-05-11, user request): seta animada inferior
+       central indicando scroll disponivel em popups (Diario, NPCs, Templo,
+       Banco, etc). NOTA: aplicado direto aqui pra evitar sync wipe — manter
+       em sync com simuladores/cidade.html (mesma adicao). */
+    document.write('<link rel="stylesheet" href="/shared/scroll-hint-arrow.css?v=' + v + '">');
+    document.write('<script src="/shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
+    document.write('<script>'
+      + 'document.addEventListener("DOMContentLoaded", function(){'
+      + '  if (window.vScrollHint && window.vScrollHint.register) {'
+      + '    window.vScrollHint.register(".v-popup-body");'
+      + '    window.vScrollHint.register(".screen-content");'
+      + '    window.vScrollHint.register(".vc-popup-body");'
+      + '    window.vScrollHint.register(".quest-list");'
+      + '    window.vScrollHint.register(".npc-dialogue");'
+      + '  }'
+      + '});'
+      + '<\/script>');
     /* Coin icon canonical (.vi .vi-coin) — REGRA CLAUDE.md "Moeda Valdorita" exige
        isso em TODO WebApp que mostra valores monetários. Sem ele, ícone .vi-coin
        não renderiza e textos com 'g'/'gold' violam regra de moeda. */

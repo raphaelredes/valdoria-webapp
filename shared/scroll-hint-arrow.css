@@ -1,0 +1,59 @@
+/* Scroll Hint Arrow — Universal Scroll Indicator (2026-05-11)
+ *
+ * Seta dourada animada no canto inferior central de containers
+ * scrollable, indicando ao jogador que ha mais conteudo abaixo.
+ *
+ * Auto-attach via shared/scroll-hint-arrow.js:
+ *   - Elementos com [data-scroll-hint] sao instrumentados automaticamente
+ *   - window.vScrollHint.register(selector) adiciona seletor ao scan
+ *   - window.vScrollHint.attach(el) attacha manualmente
+ *
+ * Pattern canonical extraido de simuladores/combate.html (X-6.5.51AB).
+ * Host precisa ter position: relative (JS forca se for static).
+ * Seta auto-esconde quando container chega ao fim do scroll.
+ */
+
+.v-scroll-hint-arrow {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(180deg, rgba(15, 12, 8, 0.85), rgba(28, 20, 12, 0.95));
+    border: 1px solid rgba(196, 149, 58, 0.55);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--v-gold, #c4953a);
+    pointer-events: none;
+    z-index: 9;
+    animation: vScrollHintBounce 1.6s ease-in-out infinite;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 12px rgba(196, 149, 58, 0.25);
+    opacity: 0.92;
+    transition: opacity 0.25s ease;
+}
+
+.v-scroll-hint-arrow.v-scroll-hint-hidden {
+    opacity: 0;
+}
+
+.v-scroll-hint-arrow svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+@keyframes vScrollHintBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .v-scroll-hint-arrow { animation: none; }
+}
+
+body.perf-lite .v-scroll-hint-arrow {
+    animation: none;
+}

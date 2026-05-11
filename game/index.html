@@ -100,6 +100,23 @@ document.write('<link rel="stylesheet" href="../shared/status-bars.css?v=' + v +
 document.write('<script src="../shared/status-bars.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/motion.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/escape.js?v=' + v + '"><\/script>');
+    /* 2026-05-11 (user request): seta animada inferior central indicando
+       scroll disponivel em popups/sub-screens do Game Hub. Auto-attach via
+       MutationObserver — pega popups dinamicos (inventory, market, quest,
+       guide, social, etc) sem precisar instrumentar caso a caso. */
+    document.write('<link rel="stylesheet" href="../shared/scroll-hint-arrow.css?v=' + v + '">');
+    document.write('<script src="../shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
+    document.write('<script>'
+      + 'document.addEventListener("DOMContentLoaded", function(){'
+      + '  if (window.vScrollHint && window.vScrollHint.register) {'
+      + '    window.vScrollHint.register("#content");'
+      + '    window.vScrollHint.register(".v-popup-body");'
+      + '    window.vScrollHint.register(".v-game-popup-body");'
+      + '    window.vScrollHint.register(".popup-body");'
+      + '    window.vScrollHint.register(".help-body");'
+      + '  }'
+      + '});'
+      + '<\/script>');
     </script>
 </head>
 
