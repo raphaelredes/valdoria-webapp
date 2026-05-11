@@ -14688,27 +14688,15 @@ function _renderQuestDiary(bodyEl){
   // === SEARCH + SORT bar ===
   html += '<div class="qd-toolbar" '
     + 'style="display:flex; gap: var(--v-space-xs, 2px); padding: 0 var(--v-space-md, 8px) var(--v-space-sm, 6px);">';
+  // 2026-05-11 (user request): removido dropdown de sort. Apenas busca textual.
+  // Sort default mantido em state.sort='level' pra consistência interna —
+  // lista ainda fica ordenada por nível, só não exposto na UI.
   html += '<input type="search" class="qd-search" placeholder="🔍 Buscar missão..." '
     + 'value="' + (state.search || '').replace(/"/g, '&quot;') + '" '
     + 'style="flex:1; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
     + 'background: rgba(196,149,58,0.04); border: 1px solid var(--v-border, #4a3828); '
     + 'border-radius: var(--v-radius-sm, 6px); color: var(--v-text, #d4c8b0); '
     + 'font-family: inherit; font-size: var(--v-font-sm, 13px); min-height: 32px;">';
-  html += '<select class="qd-sort" '
-    + 'style="padding: var(--v-space-sm, 6px); background: rgba(196,149,58,0.04); '
-    + 'border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); '
-    + 'color: var(--v-text, #d4c8b0); font-family: inherit; font-size: var(--v-font-xs, 11px); '
-    + 'min-height: 32px; max-width: 100px;">';
-  var SORTS = [
-    { id: 'progress', label: '🔥 Status' },
-    { id: 'level',    label: '📊 Nível' },
-    { id: 'reward',   label: '🪙 Recompensa' },
-    { id: 'xp',       label: '⭐ XP' }
-  ];
-  SORTS.forEach(function(s){
-    html += '<option value="' + s.id + '"' + (state.sort === s.id ? ' selected' : '') + '>' + s.label + '</option>';
-  });
-  html += '</select>';
   html += '</div>';
 
   // === LISTA de quests ===
@@ -14809,13 +14797,8 @@ function _renderQuestDiary(bodyEl){
       }, 0);
     });
   }
-  var sortSelect = bodyEl.querySelector('.qd-sort');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', function(){
-      state.sort = sortSelect.value;
-      _renderQuestDiary(bodyEl);
-    });
-  }
+  // 2026-05-11 (user request): handler do .qd-sort removido — dropdown não
+  // existe mais. state.sort='level' fica fixo (ordenação por nível default).
   bodyEl.querySelectorAll('.qd-card').forEach(function(card){
     card.addEventListener('click', function(){
       var cb = card.getAttribute('data-cb');
