@@ -2214,16 +2214,18 @@ LOG SINK (Fase 7):
       filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.2));
     }
 
-    /* === Group Panel (ate 4 membros — V8 card compact 140x140) === */
-    /* 2026-05-11 v3 (user request): reduziu cards de 160x150 -> 140x140 e
-       moveu XP + Valdoritas pra DENTRO do card (em vez de cgp-extras
-       abaixo). Mais compacto, libera espaco vertical pro hub-screen. */
+    /* === Group Panel (ate 4 membros — V8 card mini, 1 linha) === */
+    /* 2026-05-11 v4 (user request): "diminua os 4 cards, para caber em uma
+       unica linha". Mudou de 2x2 grid 140x140 -> 1x4 grid responsive.
+       Cada card e fluido (grid 1fr) com height fixo de 120px. Em frame
+       de 384px (TG Desktop min) cada card fica ~90px wide; em 430px (cidade
+       sim cap) fica ~100px wide. */
     #city-group-panel {
       flex-shrink: 0;
-      padding: 6px 8px;
+      padding: 6px 6px;
       display: grid !important;
-      grid-template-columns: repeat(2, 140px);
-      gap: 6px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
       justify-content: center;
       background: rgba(26, 21, 16, 0.5);
       border-bottom: 1px solid rgba(196, 149, 58, 0.2);
@@ -2246,13 +2248,13 @@ LOG SINK (Fase 7):
     }
     .cgp-card:hover { border-color: #c4953a; box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
     .cgp-card.empty {
-      /* 2026-05-11 v3: empty placeholder matches V8 card dims (140x140) */
-      width: 140px;
-      min-width: 140px;
-      max-width: 140px;
-      height: 140px;
-      min-height: 140px;
-      max-height: 140px;
+      /* 2026-05-11 v4: empty placeholder responsivo (largura 100% do grid cell) */
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      height: 120px;
+      min-height: 120px;
+      max-height: 120px;
       flex: none;
       opacity: 0.45;
       border: 2px dashed rgba(196, 149, 58, 0.32);
@@ -2261,6 +2263,7 @@ LOG SINK (Fase 7):
       justify-content: center;
       text-align: center;
       flex-direction: column;
+      box-sizing: border-box;
     }
     .cgp-card.player { border-color: rgba(196, 149, 58, 0.6); }
     .cgp-card.dead { opacity: 0.4; filter: grayscale(0.8); }
@@ -2449,46 +2452,46 @@ LOG SINK (Fase 7):
       opacity: 0.5;
     }
 
-    /* ===== CARD V8 — compact 140x140, all stats inside (2026-05-11 v3) =====
-       User request: "tamanho menor igual ao combate, e as informacoes de XP e
-       valdoritas estejam dentro do card tambem, logo abaixo da informacao
-       do recurso (MP/furia/etc)". Reducido de 160x150 -> 140x140 e XP +
-       Valdoritas movidos pra DENTRO do c-stats grid (rows 3-4 full width). */
+    /* ===== CARD V8 — MINI compact (2026-05-11 v4) =====
+       User request: "diminua os 4 cards, para caber em uma unica linha".
+       Mudou de 140x140 -> 100% width (responsive) x 120px tall.
+       Em frame 384/430 com 4 cols, cada card fica ~88-100px wide. */
     .cgp-card.v8-style {
       position: relative;
       background: var(--card-accent-dark, #1a1510);
       border: 2px solid var(--v-gold, #c4953a);
-      border-radius: 6px;
+      border-radius: 5px;
       padding: 0 !important;
       gap: 0 !important;
       box-shadow:
         0 0 0 1px #0a0806,
-        0 4px 14px rgba(0, 0, 0, 0.65),
-        inset 0 0 0 1px rgba(255, 220, 140, 0.22);
+        0 3px 8px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px rgba(255, 220, 140, 0.2);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      /* Dimensoes compact: 140x140 (smaller que combate) */
-      width: 140px !important;
-      min-width: 140px !important;
-      max-width: 140px !important;
-      height: 140px !important;
-      min-height: 140px !important;
-      max-height: 140px !important;
+      /* Dimensoes mini: largura responsiva (100% grid cell), altura fixa 120 */
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      height: 120px !important;
+      min-height: 120px !important;
+      max-height: 120px !important;
       flex: none !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
+      box-sizing: border-box;
     }
 
-    /* ===== c-name (banner topo) — padding compacto pra portrait 24x24 ===== */
+    /* ===== c-name (banner topo) — padding super compacto pra portrait 18x18 ===== */
     .cgp-card.v8-style .c-name {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       border-bottom: none;
-      padding: 4px 30px 1px 7px;
+      padding: 3px 22px 1px 5px;
       margin: 0;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 900;
-      font-size: 10px;
-      letter-spacing: 0.5px;
+      font-size: 9px;
+      letter-spacing: 0.3px;
       text-align: left;
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
@@ -2503,12 +2506,12 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-class-tag {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      padding: 0 30px 4px 7px;
+      padding: 0 22px 3px 5px;
       margin: 0;
       border-bottom: 1px solid var(--v-gold, #c4953a);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 8px;
-      letter-spacing: 1px;
+      font-size: 6px;
+      letter-spacing: 0.4px;
       text-align: left;
       text-transform: uppercase;
       font-weight: 700;
@@ -2518,13 +2521,13 @@ LOG SINK (Fase 7):
       text-overflow: ellipsis;
     }
 
-    /* ===== c-portrait (heraldic SVG canto sup. direito) — 24x24 ===== */
+    /* ===== c-portrait (heraldic SVG canto sup. direito) — 18x18 mini ===== */
     .cgp-card.v8-style .c-portrait {
       position: absolute;
-      top: 4px;
-      right: 5px;
-      width: 24px;
-      height: 24px;
+      top: 2px;
+      right: 3px;
+      width: 18px;
+      height: 18px;
       margin: 0;
       background: transparent;
       border: 0;
@@ -2543,23 +2546,20 @@ LOG SINK (Fase 7):
       fill: currentColor;
       stroke: currentColor;
       filter:
-        drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
-        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+        drop-shadow(0 0 2px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
+        drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
     }
 
     /* ===== c-stats (grid 4 rows: PV/Recurso/XP/Gold + CA col2 span rows 1-2) ===== */
-    /* User request: "XP e valdoritas... logo abaixo da informacao do recurso".
-       Layout: linha 1 PV | CA, linha 2 Recurso | CA (CA span rows 1-2),
-       linha 3 XP full-width, linha 4 Gold full-width. */
     .cgp-card.v8-style .c-stats {
-      padding: 5px 7px;
+      padding: 3px 4px;
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       flex: 1 1 auto;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       grid-template-rows: auto auto auto auto;
-      gap: 2px 6px;
+      gap: 1px 4px;
       align-items: center;
       justify-items: stretch;
       overflow: hidden;
@@ -2600,8 +2600,8 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat-label {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
       opacity: 0.75;
-      font-size: 8px;
-      letter-spacing: 0.6px;
+      font-size: 6px;
+      letter-spacing: 0.3px;
       white-space: nowrap;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 700;
@@ -2610,8 +2610,8 @@ LOG SINK (Fase 7):
     }
     .cgp-card.v8-style .c-stat-val {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.9);
-      font-size: 12px;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.6), 0 1px 1px rgba(0, 0, 0, 0.9);
+      font-size: 9px;
       font-weight: 900;
       white-space: nowrap;
       font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -2622,27 +2622,27 @@ LOG SINK (Fase 7):
     @keyframes cgpHpLowBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.75; } }
     .cgp-card.v8-style .c-stat-val--ca {
       color: #ffd688;
-      text-shadow: 0 0 5px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0, 0, 0, 0.95);
-      font-size: 13px;
+      text-shadow: 0 0 4px rgba(196, 149, 58, 0.5), 0 1px 1px rgba(0, 0, 0, 0.95);
+      font-size: 10px;
     }
     /* XP val gold + smaller */
     .cgp-card.v8-style .c-stat--xp .c-stat-val,
     .cgp-card.v8-style .c-stat--xp .c-stat-label {
       color: var(--v-gold, #c4953a);
     }
-    .cgp-card.v8-style .c-stat--xp .c-stat-val { font-size: 10px; }
+    .cgp-card.v8-style .c-stat--xp .c-stat-val { font-size: 7px; }
     /* Gold val + coin icon */
     .cgp-card.v8-style .c-stat--gold .c-stat-val {
       color: var(--v-gold, #c4953a);
-      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
-      font-size: 11px;
+      text-shadow: 0 0 3px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
+      font-size: 8px;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
     }
     .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
-      width: 11px;
-      height: 11px;
+      width: 9px;
+      height: 9px;
       border-width: 1px;
     }
 
