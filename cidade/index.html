@@ -30867,6 +30867,45 @@ function _refreshTavernPopupIfOpen(){
 //     resultMsg: '<i>Mirena entrega a poção...</i>',
 //     extraComplication: true  // chama _marketRollMagicComplication após
 //   })
+// X-6.5.51AX (2026-05-11): helper canonical pra adicionar item ao
+// MOCK_PLAYER_INVENTORY. Usa stack (q++) se já existe.
+function _addItemToInventory(itemName, qty){
+  qty = qty || 1;
+  if (typeof MOCK_PLAYER_INVENTORY === 'undefined') return;
+  var existing = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === itemName; });
+  if (existing) {
+    existing.q = (existing.q || 0) + qty;
+  } else {
+    MOCK_PLAYER_INVENTORY.push({
+      n: itemName, q: qty,
+      get id(){ return 'bought_' + itemName.replace(/\s+/g, '_').toLowerCase(); },
+      get icon(){ return (typeof getItemData === 'function' ? getItemData(this.n).e : '📦'); },
+      get value(){ return (typeof getItemData === 'function' ? getItemData(this.n).v : 0); },
+      get name(){ return this.n; }
+    });
+  }
+  // Sync pra localStorage (compartilhado com exploracao.html)
+  if (typeof _syncInventoryToLocalStorage === 'function') {
+    try { _syncInventoryToLocalStorage(); } catch(_e){}
+  }
+}
+
+// X-6.5.51AX (2026-05-11): helper canonical pra remover qty do item.
+// Se q chega a 0, marca como zero (filter em render ignora). NÃO splice
+// pra preservar getters dinâmicos do array.
+function _removeItemFromInventory(itemName, qty){
+  qty = qty || 1;
+  if (typeof MOCK_PLAYER_INVENTORY === 'undefined') return 0;
+  var existing = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === itemName; });
+  if (!existing) return 0;
+  var removed = Math.min(existing.q || 0, qty);
+  existing.q = Math.max(0, (existing.q || 0) - qty);
+  if (typeof _syncInventoryToLocalStorage === 'function') {
+    try { _syncInventoryToLocalStorage(); } catch(_e){}
+  }
+  return removed;
+}
+
 function _buyConfirm(opts){
   var p = opts.p;
   var item = opts.item || 'Item';
@@ -30880,6 +30919,21 @@ function _buyConfirm(opts){
     onConfirm: function(){
       var preGold = p.gold;
       if (!_pay(p, opts.cost)) return;
+      // X-6.5.51AX (2026-05-11): adiciona item ao inventário por padrão.
+      // Antes _buyConfirm só deduzia gold sem adicionar item à mochila.
+      // Convenção:
+      //   - opts.onApply DEFINIDO = consumido na hora (poção/kit/whetstone),
+      //     NÃO adiciona ao inventário a menos que opts.alsoStore=true.
+      //   - opts.onApply NÃO DEFINIDO = equipamento/recurso → adiciona à
+      //     mochila pra equipar/usar depois.
+      //   - opts.skipInventory=true (override explícito) = nunca adiciona
+      //     (ex: mapas/serviços/conhecimento que aplicam efeito invisível).
+      var shouldStore = opts.skipInventory === true
+        ? false
+        : (typeof opts.onApply === 'function' ? !!opts.alsoStore : true);
+      if (shouldStore) {
+        _addItemToInventory(item, opts.qty || 1);
+      }
       // ctx pode ser populado pelo onApply pra usar no resultMsg
       var ctx = {};
       if (typeof opts.onApply === 'function') opts.onApply(p, ctx);
@@ -32707,6 +32761,15 @@ function _marketShowSell(p){
         onConfirm: function(){
           var preGold = p.gold;
           p.gold += sellPrice;
+          // X-6.5.51AX (2026-05-11): remove 1 unidade do item após venda.
+          // Antes _marketShowSell creditava gold mas não removia o item da
+          // mochila — player podia vender o mesmo item infinitamente.
+          // Se item está equipado em algum slot, NÃO vende (proteção UX).
+          if (_isItemEquipped(it.n)) {
+            vToast('⚠️ Item equipado. Desequipe antes de vender.', 'warn');
+            return;
+          }
+          _removeItemFromInventory(it.n, 1);
           refreshHud();
           _showServiceResultPopup({
             icon: it.icon, npc: 'Mercador',
