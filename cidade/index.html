@@ -11072,88 +11072,160 @@ function _showKillsPopup(p){
     if (c >= 1) return '#ffd040';
     return '#7cdb7c';
   }
-  // X-6.5.51AY (2026-05-11): tela épica com sangue, troféus pendurados e
-  // hierarquia visual por CR. Substitui versão "tabela simples".
-  // X-6.5.51BA (2026-05-11): pedestal hero pro ícone grande do trophy.
-  // Suporta tanto SVG heráldico fallback (#ic-ach-algoz) quanto PNG futuro
-  // (gerado via Gemini Imagen — salvar em /shared/img/hall-cacada-trophy.png).
-  // Player vê PNG quando existe, senão fallback SVG. Tamanho responsivo via
-  // clamp() pra Telegram Desktop (384px) e smartphone.
+  // Compute ranking (top 3 ganham medalha)
+  var ranking = KILLS_BY_TYPE.slice().sort(function(a,b){return b.kills-a.kills;});
+  var rankMap = {};
+  ranking.forEach(function(r, i){ rankMap[r.type] = i + 1; });
+  // X-6.5.51BB (2026-05-11): elevou tela Abates pra AAA "Diablo IV Trophy Hall":
+  //   - Contador animado 0→total com easeOutCubic (1.6s)
+  //   - 4 correntes pendentes (CSS) sustentando o pedestal
+  //   - 6 brasas flutuando ao redor do pedestal (vKlEmber)
+  //   - 4 gotas de sangue caindo do topo do card (vKlBloodDrip)
+  //   - Stagger entry 80ms por card (vKlCardSlideIn cascading)
+  //   - Medalhas 🥇🥈🥉 (gold/silver/bronze) nos top 3 bestiário
+  //   - Anel crimson rotativo orbitando pedestal (vKlOrbitRing)
+  //   - Eye glow no skull SVG fallback (vKlSkullEye pulsante)
+  //   - Decorative skulls nos cantos do header
   var html = '<style>'
     + '@keyframes vBladeShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,80,40,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,140,80,0.7));}}'
-    + '@keyframes vKlPedestalGlow{0%,100%{box-shadow:0 0 18px rgba(196,40,30,0.45),inset 0 0 18px rgba(255,80,40,0.2);}50%{box-shadow:0 0 28px rgba(255,80,40,0.7),inset 0 0 28px rgba(255,120,60,0.32);}}'
-    + '.vKl-blades{animation:vBladeShimmer 2.8s ease-in-out infinite;}'
-    + '@keyframes vDripPulse{0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;}}'
-    + '.vKl-drip{animation:vDripPulse 1.6s ease-in-out infinite;}'
-    /* Pedestal hero — slot pra PNG do trofeu (gerado via Gemini)
-       Usa background-image (se PNG existir) ou fallback pro SVG heraldico.
-       Animacao de glow pulsante na borda. Tamanho responsivo:
-       Telegram Desktop (384px frame): 92px
-       Smartphone (412px frame): 102px
-       Frames > 480px: 112px max */
-    + '.vKl-hero-pedestal{position:relative;width:clamp(92px,22vw,112px);height:clamp(92px,22vw,112px);margin:6px auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(255,80,40,0.18) 0%,rgba(80,18,12,0.55) 60%,rgba(20,10,8,0.85) 100%);border:1px solid rgba(196,40,30,0.55);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
-    + '.vKl-hero-pedestal::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(196,40,30,0.18);pointer-events:none;}'
+    + '@keyframes vKlPedestalGlow{0%,100%{box-shadow:0 0 18px rgba(196,40,30,0.45),inset 0 0 22px rgba(255,80,40,0.18);}50%{box-shadow:0 0 32px rgba(255,80,40,0.78),inset 0 0 34px rgba(255,120,60,0.36);}}'
+    + '@keyframes vKlOrbitRing{0%{transform:translate(-50%,-50%) rotate(0deg);}100%{transform:translate(-50%,-50%) rotate(360deg);}}'
+    + '@keyframes vKlEmberFloat{0%{opacity:0;transform:translate(var(--x0,0),0) scale(0.4);}15%{opacity:0.9;}80%{opacity:0.7;}100%{opacity:0;transform:translate(var(--x1,0),-90px) scale(0.15);}}'
+    + '@keyframes vKlBloodDrip{0%{transform:translateY(-6px) scaleY(0.4);opacity:0;}10%{opacity:1;}90%{opacity:0.9;}100%{transform:translateY(28px) scaleY(1.4);opacity:0;}}'
+    + '@keyframes vKlCardSlideIn{0%{opacity:0;transform:translateX(-22px) scale(0.96);}100%{opacity:1;transform:translateX(0) scale(1);}}'
+    + '@keyframes vKlSkullEye{0%,100%{filter:drop-shadow(0 0 4px rgba(255,40,20,0.4)) drop-shadow(0 0 10px rgba(255,80,40,0.3));}50%{filter:drop-shadow(0 0 10px rgba(255,90,50,0.85)) drop-shadow(0 0 22px rgba(255,40,20,0.6));}}'
+    + '@keyframes vKlCounterPulse{0%{transform:scale(1.18);text-shadow:0 0 22px rgba(255,80,40,0.95),0 2px 4px rgba(0,0,0,0.6);}100%{transform:scale(1);text-shadow:0 0 14px rgba(255,80,40,0.55),0 2px 4px rgba(0,0,0,0.6);}}'
+    + '@keyframes vKlHeaderInk{0%{opacity:0;transform:translateY(-8px);}100%{opacity:1;transform:translateY(0);}}'
+    + '@keyframes vKlMedalShine{0%,100%{filter:drop-shadow(0 0 4px var(--medalCol,#ffd700));}50%{filter:drop-shadow(0 0 12px var(--medalCol,#ffd700)) drop-shadow(0 0 22px var(--medalCol,#ffd700));}}'
+    + '@keyframes vKlChainSway{0%,100%{transform:translateX(-50%) rotate(-1.2deg);}50%{transform:translateX(-50%) rotate(1.2deg);}}'
+    /* Header epico — animation entry */
+    + '.vKl-header{animation:vKlHeaderInk 0.55s ease-out;}'
+    /* Pedestal hero hangs from chains; orbiting ring; embers behind */
+    + '.vKl-pedestal-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;margin:2px 0 4px;}'
+    + '.vKl-chains{position:relative;width:64px;height:14px;display:flex;justify-content:space-between;transform-origin:top center;animation:vKlChainSway 3.4s ease-in-out infinite;}'
+    + '.vKl-chain-link{width:2px;height:14px;background:linear-gradient(180deg,rgba(74,56,40,0.4),rgba(196,149,58,0.8));border-radius:1px;box-shadow:0 0 3px rgba(196,149,58,0.4);}'
+    + '.vKl-hero-pedestal{position:relative;width:clamp(96px,24vw,118px);height:clamp(96px,24vw,118px);margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 32%,rgba(255,80,40,0.22) 0%,rgba(80,18,12,0.65) 60%,rgba(20,10,8,0.92) 100%);border:1px solid rgba(196,40,30,0.65);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
+    + '.vKl-hero-pedestal::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(196,40,30,0.22);pointer-events:none;}'
+    /* Orbital ring (rotating runes orbit) */
+    + '.vKl-orbit-ring{position:absolute;top:50%;left:50%;width:130%;height:130%;border-radius:50%;border:1px dashed rgba(196,40,30,0.45);transform:translate(-50%,-50%);pointer-events:none;animation:vKlOrbitRing 16s linear infinite;}'
+    + '.vKl-orbit-ring::before,.vKl-orbit-ring::after{content:"◆";position:absolute;font-size:9px;color:#e85040;text-shadow:0 0 6px rgba(255,80,40,0.7);}'
+    + '.vKl-orbit-ring::before{top:-7px;left:50%;transform:translateX(-50%);}'
+    + '.vKl-orbit-ring::after{bottom:-7px;left:50%;transform:translateX(-50%);}'
+    /* Embers floating around pedestal */
+    + '.vKl-ember{position:absolute;bottom:10%;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#ffe080,#ff6020 60%,transparent);pointer-events:none;animation:vKlEmberFloat 3.2s ease-out infinite;}'
+    + '.vKl-ember.e1{left:18%;--x0:0px;--x1:-16px;animation-delay:0s;}'
+    + '.vKl-ember.e2{left:34%;--x0:0px;--x1:8px;animation-delay:0.5s;}'
+    + '.vKl-ember.e3{left:50%;--x0:0px;--x1:-6px;animation-delay:1.1s;}'
+    + '.vKl-ember.e4{left:66%;--x0:0px;--x1:14px;animation-delay:1.7s;}'
+    + '.vKl-ember.e5{left:82%;--x0:0px;--x1:-12px;animation-delay:2.3s;}'
+    + '.vKl-ember.e6{left:42%;--x0:0px;--x1:4px;animation-delay:2.7s;}'
+    /* Blood drips at top of header */
+    + '.vKl-blood-drip{position:absolute;top:0;width:2px;height:14px;background:linear-gradient(180deg,#c43020,#7a1810 80%,transparent);border-radius:0 0 2px 2px;pointer-events:none;animation:vKlBloodDrip 3.4s ease-in infinite;box-shadow:0 0 4px rgba(196,40,30,0.6);}'
+    + '.vKl-blood-drip.d1{left:18%;animation-delay:0s;}'
+    + '.vKl-blood-drip.d2{left:42%;animation-delay:1.0s;height:16px;}'
+    + '.vKl-blood-drip.d3{left:68%;animation-delay:1.9s;}'
+    + '.vKl-blood-drip.d4{left:84%;animation-delay:2.5s;height:12px;}'
+    /* Decorative skull glyphs in header corners */
+    + '.vKl-corner-skull{position:absolute;font-size:18px;color:rgba(196,40,30,0.32);text-shadow:0 0 6px rgba(196,40,30,0.4);pointer-events:none;font-family:serif;line-height:1;}'
+    + '.vKl-corner-skull.tl{top:8px;left:18px;}'
+    + '.vKl-corner-skull.tr{top:8px;right:18px;}'
+    /* Counter pulse no remount (chamado quando contador termina) */
+    + '.vKl-counter-pulse{animation:vKlCounterPulse 0.45s ease-out;}'
+    /* SVG fallback skull com eye glow */
+    + '.vKl-hero-fallback{width:64%;height:64%;color:#c43020;animation:vKlSkullEye 1.8s ease-in-out infinite;}'
     + '.vKl-hero-png{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:50%;}'
-    /* CSS image-set: tenta carregar o PNG; se falhar, fica transparente e SVG fallback aparece atras */
     + '.vKl-hero-png[data-src]{background-image:var(--v-trophy-img,none);}'
-    + '.vKl-hero-fallback{width:64%;height:64%;color:#c43020;}'
-    /* Quando PNG existe, esconde fallback. Sem JS gambi: usa atributo */
     + '.vKl-hero-pedestal[data-has-png="1"] .vKl-hero-fallback{display:none;}'
+    /* Bestiary cards com stagger entry + medal badges */
+    + '.vKl-beast-card{position:relative;animation:vKlCardSlideIn 0.5s ease-out backwards;overflow:hidden;}'
+    + '.vKl-beast-card:hover{transform:translateX(2px);transition:transform 0.15s ease-out;}'
+    + '.vKl-medal{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;font-weight:700;color:#3a2a08;text-shadow:0 1px 0 rgba(255,255,255,0.35);border:1px solid rgba(0,0,0,0.5);box-shadow:0 2px 4px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.4);animation:vKlMedalShine 2.6s ease-in-out infinite;}'
+    + '.vKl-medal.m1{background:radial-gradient(circle at 35% 30%,#fff4c0,#ffd700 55%,#a87520 100%);--medalCol:#ffd700;}'
+    + '.vKl-medal.m2{background:radial-gradient(circle at 35% 30%,#f0f4f8,#c8d2dc 55%,#7a8390 100%);--medalCol:#c8d2dc;}'
+    + '.vKl-medal.m3{background:radial-gradient(circle at 35% 30%,#f0b890,#c87a3a 55%,#7a3818 100%);--medalCol:#c87a3a;}'
     + '</style>';
-  /* Detecta se ha PNG disponivel (heuristica: tenta carregar; on load = mostra) */
   html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
-  // === HEADER ÉPICO: pedestal + skull/trofeu (PNG futuro) ===
-  html += '<div style="position:relative; text-align: center; padding: 14px 12px 14px; '
-    + 'background: radial-gradient(ellipse at 50% 0%, rgba(196,40,30,0.32) 0%, rgba(100,20,15,0.18) 35%, rgba(30,18,14,0.95) 75%); '
+  // === HEADER ÉPICO: ornamentos + correntes + pedestal + brasas + sangue ===
+  html += '<div class="vKl-header" style="position:relative; text-align: center; padding: 18px 12px 16px; '
+    + 'background: radial-gradient(ellipse at 50% 0%, rgba(196,40,30,0.35) 0%, rgba(100,20,15,0.20) 35%, rgba(30,18,14,0.96) 75%); '
     + 'border: 1px solid #c43020; '
     + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;">'
-    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:#e85040;letter-spacing:2px;opacity:0.75;">◆ HALL DE CAÇADA ◆</div>'
-    /* Pedestal hero — PNG slot + SVG fallback */
-    + '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
-    +   '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
-    +   '<svg class="vKl-blades vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
+    /* Decorative corner skulls */
+    + '<span class="vKl-corner-skull tl">☠</span>'
+    + '<span class="vKl-corner-skull tr">☠</span>'
+    /* Blood drips from top edge */
+    + '<span class="vKl-blood-drip d1"></span>'
+    + '<span class="vKl-blood-drip d2"></span>'
+    + '<span class="vKl-blood-drip d3"></span>'
+    + '<span class="vKl-blood-drip d4"></span>'
+    /* Banner ◆ HALL DE CAÇADA ◆ centered with ornaments */
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:10px;color:#e85040;letter-spacing:3px;opacity:0.85;margin-bottom:4px;">◆ HALL DE CAÇADA ◆</div>'
+    /* Pedestal wrap: chains + pedestal + orbit ring + embers */
+    + '<div class="vKl-pedestal-wrap">'
+    +   '<div class="vKl-chains"><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span></div>'
+    +   '<div style="position:relative;display:inline-block;">'
+    +     '<div class="vKl-orbit-ring"></div>'
+    +     '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
+    +       '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
+    +       '<svg class="vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
+    +     '</div>'
+    /* Embers floating up around the pedestal */
+    +     '<span class="vKl-ember e1"></span>'
+    +     '<span class="vKl-ember e2"></span>'
+    +     '<span class="vKl-ember e3"></span>'
+    +     '<span class="vKl-ember e4"></span>'
+    +     '<span class="vKl-ember e5"></span>'
+    +     '<span class="vKl-ember e6"></span>'
+    +   '</div>'
     + '</div>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: clamp(36px,9vw,48px); '
-    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.6), 0 2px 4px rgba(0,0,0,0.6);">' + total + '</div>'
+    /* Counter (animated 0→total via JS) */
+    + '<div id="vKl-counter" style="font-family: var(--v-font-display, Cinzel, serif); font-size: clamp(38px,9.5vw,52px); '
+    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6); margin-top:6px;">0</div>'
     + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: clamp(11px,2.8vw,13px); color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
     + 'Inimigos Abatidos'
     + '</div>'
     + (top && top.kills > 0
-      ? '<div style="font-size: clamp(10px,2.6vw,12px); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 6px; line-height:1.4;">'
-        + 'Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> (' + top.kills + ')'
+      ? '<div style="font-size: clamp(10px,2.6vw,12px); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 8px; line-height:1.4;">'
+        + '<span style="color:#c4953a;">⚔</span> Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> <span style="color:var(--v-text-dim,#a09484);">·</span> <b style="color:#ffd700">' + top.kills + '</b>'
       + '</div>'
       : '')
     + '</div>';
-  /* X-6.5.51BA: heuristica de fallback — tenta carregar o PNG; se nao
-     existir (404), o data-has-png NUNCA fica 1 e o SVG fallback aparece.
-     Quando o user gerar o PNG via Gemini e colocar em /shared/img/, o
-     PNG aparece automaticamente sem reload do codigo. */
-  html += '<script>(function(){var ped=document.getElementById("vKl-hero-pedestal");if(!ped)return;var slot=ped.querySelector(".vKl-hero-png");if(!slot)return;var src=slot.getAttribute("data-src");if(!src)return;var img=new Image();img.onload=function(){slot.style.backgroundImage="url(\""+src+"\")";ped.setAttribute("data-has-png","1");};img.onerror=function(){/* PNG nao existe, SVG fallback ja esta visivel */};img.src=src;})();<\/script>';
-  // === LISTA POR TIPO — cards com troféu + CR colorido ===
-  html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 12px 8px 8px; position:relative;">'
+  /* Heuristica de PNG (Gemini) — se nao existir, SVG fallback */
+  html += '<script>(function(){var ped=document.getElementById("vKl-hero-pedestal");if(!ped)return;var slot=ped.querySelector(".vKl-hero-png");if(!slot)return;var src=slot.getAttribute("data-src");if(!src)return;var img=new Image();img.onload=function(){slot.style.backgroundImage="url(\""+src+"\")";ped.setAttribute("data-has-png","1");};img.src=src;})();<\/script>';
+  /* Contador animado 0 -> total com easeOutCubic + pulse final */
+  html += '<script>(function(){var el=document.getElementById("vKl-counter");if(!el)return;var target=' + total + ';var dur=1600;var start=performance.now();function tick(t){var p=Math.min(1,(t-start)/dur);var eased=1-Math.pow(1-p,3);el.textContent=Math.round(eased*target);if(p<1){requestAnimationFrame(tick);}else{el.classList.add("vKl-counter-pulse");setTimeout(function(){try{el.classList.remove("vKl-counter-pulse");}catch(e){}},500);}}requestAnimationFrame(tick);})();<\/script>';
+  // === BESTIÁRIO: cards com stagger + medalha rank ===
+  html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 14px 8px 8px; position:relative;">'
     + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
-  KILLS_BY_TYPE.forEach(function(k){
+  KILLS_BY_TYPE.forEach(function(k, idx){
     var pct = Math.round(k.kills / total * 100);
     var crCol = _crColor(k.cr);
     var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
-    html += '<div style="padding: 8px 10px; '
-      + 'background: linear-gradient(90deg, rgba(196,40,30,0.06) 0%, rgba(196,149,58,0.04) 100%); '
-      + 'border: 1px solid rgba(74,56,40,0.6); '
+    var rank = rankMap[k.type] || 99;
+    var medalHtml = '';
+    if (rank === 1) medalHtml = '<div class="vKl-medal m1" title="1º lugar">I</div>';
+    else if (rank === 2) medalHtml = '<div class="vKl-medal m2" title="2º lugar">II</div>';
+    else if (rank === 3) medalHtml = '<div class="vKl-medal m3" title="3º lugar">III</div>';
+    html += '<div class="vKl-beast-card" style="padding: 9px 10px 8px; '
+      + 'background: linear-gradient(90deg, rgba(196,40,30,0.08) 0%, rgba(196,149,58,0.05) 100%); '
+      + 'border: 1px solid rgba(74,56,40,0.7); '
       + 'border-left: 3px solid ' + crCol + '; '
-      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 4px;">'
-      + '<div style="display:flex; align-items: center; gap: 10px; margin-bottom: 5px;">'
-      + '<svg viewBox="0 0 120 120" style="width: 26px; height: 26px; flex-shrink: 0; color: ' + iconCol + ';"><use href="#' + k.icon + '"/></svg>'
-      + '<div style="flex:1; min-width:0;">'
-      +   '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + '</div>'
-      +   '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;">◆ Perigo ' + k.cr + '</div>'
+      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 4px; '
+      + 'animation-delay:' + (0.08 * idx + 0.15) + 's;">'
+      + medalHtml
+      + '<div style="display:flex; align-items: center; gap: 10px; margin-bottom: 6px;">'
+      +   '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>'
+      +   '<div style="flex:1; min-width:0;' + (rank <= 3 ? 'padding-right:24px;' : '') + '">'
+      +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + '</div>'
+      +     '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;">◆ Perigo ' + k.cr + '</div>'
+      +   '</div>'
+      +   '<div style="text-align:right;">'
+      +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 22px; font-weight: 700; color: var(--v-gold, #c4953a); text-shadow:0 0 8px rgba(255,215,0,0.3);">' + k.kills + '</span>'
+      +     '<div style="font-size: 8px; color: var(--v-text-dim,#a09484); letter-spacing:1px; margin-top:-2px;">abates</div>'
+      +   '</div>'
       + '</div>'
-      + '<div style="text-align:right;">'
-      +   '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 20px; font-weight: 700; color: var(--v-gold, #c4953a);">' + k.kills + '</span>'
-      +   '<div style="font-size: 8px; color: var(--v-text-dim,#a09484); letter-spacing:1px; margin-top:-2px;">abates</div>'
-      + '</div>'
-      + '</div>'
-      + '<div style="height: 5px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.3);">'
-      + '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc); box-shadow: 0 0 6px ' + crCol + '66;"></div>'
+      + '<div style="height: 6px; background: rgba(0,0,0,0.55); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.3); position:relative;">'
+      +   '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc); box-shadow: 0 0 8px ' + crCol + '99, inset 0 1px 1px rgba(255,255,255,0.3);"></div>'
       + '</div>'
       + '</div>';
   });
