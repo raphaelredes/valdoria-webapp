@@ -6288,13 +6288,95 @@ body.perf-lite .vc-action-btn { transition: none; }
 </radialGradient>
 
 <symbol id="ic-ach-algoz" viewBox="0 0 120 120">
-  <!-- Algoz: caveira + espadas cruzadas -->
-  <rect x="14" y="55" width="92" height="6" fill="#8a6520" stroke="#0a0605" stroke-width="1.2" transform="rotate(45 60 60)"/>
-  <rect x="14" y="55" width="92" height="6" fill="#8a6520" stroke="#0a0605" stroke-width="1.2" transform="rotate(-45 60 60)"/>
-  <ellipse cx="60" cy="58" rx="24" ry="26" fill="currentColor" stroke="#0a0605" stroke-width="2"/>
-  <ellipse cx="51" cy="56" rx="5" ry="6" fill="#0a0605"/>
-  <ellipse cx="69" cy="56" rx="5" ry="6" fill="#0a0605"/>
-  <path d="M 53 76 L 56 82 L 60 76 L 64 82 L 67 76" stroke="#0a0605" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- X-6.5.51BE (2026-05-11) - Algoz redesenhado AAA:
+       Caveira anatomica detalhada (cranio, suturas, dentes, malar, nasal)
+       + 2 espadas cruzadas com lamina gradient steel, guard dourada,
+       grip de couro com wrap, pommel + ember glow nos olhos. -->
+  <defs>
+    <linearGradient id="alg-blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8b8b8"/>
+      <stop offset="35%" stop-color="#7a7a7a"/>
+      <stop offset="70%" stop-color="#4a4a4a"/>
+      <stop offset="100%" stop-color="#2a2a2a"/>
+    </linearGradient>
+    <linearGradient id="alg-skull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="1"/>
+      <stop offset="55%" stop-color="currentColor" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0.55"/>
+    </linearGradient>
+    <radialGradient id="alg-eye" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0%" stop-color="#ff5030"/>
+      <stop offset="40%" stop-color="#a01010"/>
+      <stop offset="100%" stop-color="#100000"/>
+    </radialGradient>
+  </defs>
+  <!-- === ESPADAS CRUZADAS (atras do cranio) === -->
+  <g transform="translate(60 60)">
+    <!-- Sword 1: rotacao 45deg -->
+    <g transform="rotate(45)">
+      <rect x="-52" y="-2.5" width="100" height="5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
+      <line x1="-50" y1="-1.5" x2="46" y2="-1.5" stroke="#e0e0e0" stroke-width="0.5" opacity="0.7"/>
+      <polygon points="-52,-2.5 -58,0 -52,2.5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
+      <rect x="42" y="-8" width="4" height="16" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
+      <rect x="42" y="-8" width="4" height="3" fill="#ffd700" opacity="0.6"/>
+      <rect x="46" y="-3.5" width="10" height="7" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
+      <line x1="48.5" y1="-3.5" x2="48.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <line x1="51" y1="-3.5" x2="51" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <line x1="53.5" y1="-3.5" x2="53.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <circle cx="58" cy="0" r="3.2" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
+      <circle cx="57.2" cy="-1" r="1.2" fill="#ffe080" opacity="0.8"/>
+    </g>
+    <!-- Sword 2: rotacao -45deg -->
+    <g transform="rotate(-45)">
+      <rect x="-52" y="-2.5" width="100" height="5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
+      <line x1="-50" y1="-1.5" x2="46" y2="-1.5" stroke="#e0e0e0" stroke-width="0.5" opacity="0.7"/>
+      <polygon points="-52,-2.5 -58,0 -52,2.5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
+      <rect x="42" y="-8" width="4" height="16" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
+      <rect x="42" y="-8" width="4" height="3" fill="#ffd700" opacity="0.6"/>
+      <rect x="46" y="-3.5" width="10" height="7" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
+      <line x1="48.5" y1="-3.5" x2="48.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <line x1="51" y1="-3.5" x2="51" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <line x1="53.5" y1="-3.5" x2="53.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
+      <circle cx="58" cy="0" r="3.2" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
+      <circle cx="57.2" cy="-1" r="1.2" fill="#ffe080" opacity="0.8"/>
+    </g>
+  </g>
+  <!-- === CRANIO (sobre as espadas) === -->
+  <!-- Cranio com mandibula + zigomatico + arcada dentaria -->
+  <path d="M 60 20 C 78 20 88 32 88 50 C 88 60 86 67 82 72 L 82 78 L 80 84 L 76 79 L 76 86 L 73 80 L 70 86 L 67 80 L 64 86 L 61 80 L 57 86 L 53 80 L 49 86 L 46 80 L 42 86 L 38 79 L 40 84 L 38 78 L 38 72 C 34 67 32 60 32 50 C 32 32 42 20 60 20 Z"
+        fill="url(#alg-skull)" stroke="#0a0605" stroke-width="1.8"/>
+  <!-- Olhos: cavidade profunda em camadas -->
+  <ellipse cx="47" cy="54" rx="9.5" ry="11" fill="#000"/>
+  <ellipse cx="73" cy="54" rx="9.5" ry="11" fill="#000"/>
+  <ellipse cx="47" cy="55" rx="7" ry="9" fill="url(#alg-eye)"/>
+  <ellipse cx="73" cy="55" rx="7" ry="9" fill="url(#alg-eye)"/>
+  <circle cx="47" cy="54" r="2.2" fill="#ff4020"/>
+  <circle cx="73" cy="54" r="2.2" fill="#ff4020"/>
+  <circle cx="46.5" cy="53.5" r="0.9" fill="#ffd0a0"/>
+  <circle cx="72.5" cy="53.5" r="0.9" fill="#ffd0a0"/>
+  <!-- Cavidade nasal (heart-shape invertido) -->
+  <path d="M 56 67 Q 58 65 60 66 Q 62 65 64 67 L 60 78 Z" fill="#000"/>
+  <path d="M 58 70 L 60 72 L 62 70" fill="none" stroke="#1a0a05" stroke-width="0.4" opacity="0.6"/>
+  <!-- Zigomatico (cheekbone shadow) -->
+  <path d="M 38 64 Q 42 72 47 75" fill="none" stroke="#0a0605" stroke-width="0.9" opacity="0.55"/>
+  <path d="M 82 64 Q 78 72 73 75" fill="none" stroke="#0a0605" stroke-width="0.9" opacity="0.55"/>
+  <!-- Sutura craniana -->
+  <line x1="60" y1="22" x2="60" y2="40" stroke="#0a0605" stroke-width="0.6" opacity="0.45" stroke-dasharray="2.5 1.5"/>
+  <line x1="48" y1="26" x2="52" y2="40" stroke="#0a0605" stroke-width="0.5" opacity="0.35"/>
+  <line x1="68" y1="28" x2="69" y2="40" stroke="#0a0605" stroke-width="0.5" opacity="0.35"/>
+  <!-- Cranial highlight -->
+  <ellipse cx="49" cy="32" rx="6" ry="11" fill="#fff" opacity="0.15" transform="rotate(-12 49 32)"/>
+  <!-- Separacao dentes (linhas verticais finas) -->
+  <g stroke="#0a0605" stroke-width="0.7" opacity="0.85">
+    <line x1="46" y1="80" x2="46" y2="86"/>
+    <line x1="50" y1="80" x2="50" y2="86"/>
+    <line x1="54" y1="80" x2="54" y2="86"/>
+    <line x1="58" y1="80" x2="58" y2="86"/>
+    <line x1="62" y1="80" x2="62" y2="86"/>
+    <line x1="66" y1="80" x2="66" y2="86"/>
+    <line x1="70" y1="80" x2="70" y2="86"/>
+    <line x1="74" y1="80" x2="74" y2="86"/>
+  </g>
 </symbol>
 
 <symbol id="ic-ach-cacador" viewBox="0 0 120 120">
@@ -6309,11 +6391,64 @@ body.perf-lite .vc-action-btn { transition: none; }
 </symbol>
 
 <symbol id="ic-ach-indomavel" viewBox="0 0 120 120">
-  <!-- Indomável: chama -->
-  <circle cx="60" cy="62" r="40" fill="#0a0605" opacity="0.25"/>
-  <path d="M 60 18 C 48 36 32 50 38 72 C 42 90 54 100 60 100 C 66 100 78 90 82 72 C 88 50 72 36 60 18 Z" fill="currentColor" stroke="#0a0605" stroke-width="2"/>
-  <path d="M 60 36 C 52 48 44 58 48 72 C 52 84 56 90 60 90 C 64 90 68 84 72 72 C 76 58 68 48 60 36 Z" fill="#ffd700" stroke="#0a0605" stroke-width="1"/>
-  <ellipse cx="60" cy="76" rx="6" ry="10" fill="#fff4d0"/>
+  <!-- X-6.5.51BE (2026-05-11) - Chama realista AAA:
+       4 camadas de fogo com radial gradients (hot core branco -> amarelo
+       -> laranja -> vermelho exterior), tongues laterais flickering,
+       embers subindo, heat haze base, e flame tip wisps. -->
+  <defs>
+    <radialGradient id="ind-outer" cx="0.5" cy="0.7" r="0.65">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="currentColor" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#7a1810" stop-opacity="0.35"/>
+    </radialGradient>
+    <radialGradient id="ind-mid" cx="0.5" cy="0.75" r="0.55">
+      <stop offset="0%" stop-color="#fff4a0"/>
+      <stop offset="35%" stop-color="#ffc850"/>
+      <stop offset="70%" stop-color="#ff7028"/>
+      <stop offset="100%" stop-color="#c43020" stop-opacity="0.85"/>
+    </radialGradient>
+    <radialGradient id="ind-core" cx="0.5" cy="0.78" r="0.4">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#fff4d0"/>
+      <stop offset="85%" stop-color="#ffd060" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#ffaa30" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ind-haze" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ff8040" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ff5020" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Heat haze base (chao da chama) -->
+  <ellipse cx="60" cy="98" rx="32" ry="7" fill="url(#ind-haze)"/>
+  <ellipse cx="60" cy="100" rx="24" ry="3.5" fill="#ff4020" opacity="0.5"/>
+  <!-- Camada externa - corpo principal da chama -->
+  <path d="M 60 8 Q 56 14 54 22 C 48 32 38 44 36 58 Q 32 76 42 90 C 48 98 56 102 60 102 C 64 102 72 98 78 90 Q 88 76 84 58 C 82 44 72 32 66 22 Q 64 14 60 8 Z"
+        fill="url(#ind-outer)" stroke="#0a0605" stroke-width="1.2" stroke-opacity="0.55"/>
+  <!-- Lingua lateral esquerda -->
+  <path d="M 36 60 Q 28 66 30 76 Q 33 70 36 66 Q 35 62 36 60 Z" fill="currentColor" opacity="0.7"/>
+  <!-- Lingua lateral direita -->
+  <path d="M 84 60 Q 92 66 90 76 Q 87 70 84 66 Q 85 62 84 60 Z" fill="currentColor" opacity="0.7"/>
+  <!-- Camada media (laranja-amarelo) -->
+  <path d="M 60 26 Q 56 32 54 38 C 48 48 44 60 46 72 C 48 84 54 92 58 95 C 60 96 62 96 64 94 C 67 91 72 84 74 72 C 76 60 72 48 66 38 Q 64 32 60 26 Z"
+        fill="url(#ind-mid)"/>
+  <!-- Camada interna (amarelo-branco) -->
+  <path d="M 60 42 Q 56 50 54 58 C 51 66 50 76 53 84 Q 57 91 60 92 Q 63 91 67 84 C 70 76 69 66 66 58 Q 64 50 60 42 Z"
+        fill="url(#ind-core)"/>
+  <!-- Hot white core (centro branco) -->
+  <ellipse cx="60" cy="78" rx="5.5" ry="11" fill="#ffffff" opacity="0.92"/>
+  <ellipse cx="60" cy="80" rx="3" ry="6" fill="#ffffff"/>
+  <!-- Embers subindo -->
+  <circle cx="46" cy="34" r="1.3" fill="#ffaa40" opacity="0.85"/>
+  <circle cx="74" cy="30" r="1.6" fill="#ffd060" opacity="0.9"/>
+  <circle cx="54" cy="20" r="0.9" fill="#ffe080" opacity="0.7"/>
+  <circle cx="66" cy="16" r="1.1" fill="#ffaa40" opacity="0.65"/>
+  <circle cx="78" cy="46" r="1" fill="#ff8040" opacity="0.6"/>
+  <circle cx="42" cy="48" r="0.9" fill="#ff8040" opacity="0.55"/>
+  <circle cx="60" cy="10" r="0.7" fill="#ffe080" opacity="0.85"/>
+  <circle cx="70" cy="40" r="0.6" fill="#fff4a0" opacity="0.75"/>
+  <!-- Wisps no topo -->
+  <path d="M 58 12 Q 56 8 59 6 Q 61 8 60 12" fill="#ffaa40" opacity="0.75"/>
+  <path d="M 62 14 Q 64 10 63 8 Q 61 10 62 14" fill="#ffd060" opacity="0.65"/>
 </symbol>
 
 <symbol id="ic-ach-cofreiro" viewBox="0 0 120 120">
