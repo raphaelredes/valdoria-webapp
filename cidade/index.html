@@ -587,6 +587,12 @@ LOG SINK (Fase 7):
        isso em TODO WebApp que mostra valores monetários. Sem ele, ícone .vi-coin
        não renderiza e textos com 'g'/'gold' violam regra de moeda. */
     document.write('<link rel="stylesheet" href="/shared/coin-icon.css?v=' + v + '">');
+    /* 2026-05-11 fix (user report): toast canonical visível.
+       Sem isso, window.vToast caía no fallback console-only (linha ~7682),
+       e clicks nos botões de quest "Entregar/Reler/Abandonar" pareciam
+       não funcionar pro user (só logavam no console). */
+    document.write('<link rel="stylesheet" href="/shared/toast.css?v=' + v + '">');
+    document.write('<script src="/shared/toast.js?v=' + v + '"><\/script>');
     /* City shared (.vc-alert / .vc-player-block / .vc-service-card / etc.) — usado
        por todos os renderers de área (templo/banco/etc). Estava faltando em
        cidade.html, fazendo .vc-alert--danger não estilizar. */
@@ -37456,9 +37462,11 @@ var ACTION_HANDLERS = {
   'quest_wolves_locate':    function(p){ vToast('📍 Localização: Floresta dos Lobos, 2km ao norte da cidade.'); },
   'quest_wolves_details':   function(p){ vToast('📜 Objetivo: matar 5 lobos cinzentos. Atual: 2/5. Recompensa: 50 Valdoritas + 80 XP.'); },
   'quest_wolves_partial':   function(p){ vToast('💰 Recompensa parcial não disponível. Termine os 5 lobos primeiro.'); },
-  'quest_lyana_deliver':    function(p){ p.gold += 20; _gainXp(p, 40); vToast('💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Quest completa!'); refreshHud(); },
+  // 2026-05-11 fix (user report): após entregar/abandonar a missão, fecha o
+  // popup pra voltar pra cidade. Reler apenas mostra toast (popup continua).
+  'quest_lyana_deliver':    function(p){ p.gold += 20; _gainXp(p, 40); vToast('💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!'); refreshHud(); if (typeof closeCityPopup === 'function') closeCityPopup(); },
   'quest_lyana_read':       function(p){ vToast('📜 Carta: "Lyana, encontre-me na fonte ao anoitecer. — Eirik"'); },
-  'quest_lyana_abandon':    function(p){ vToast('❌ Quest abandonada. -5 affinity com Lyana.'); },
+  'quest_lyana_abandon':    function(p){ vToast('❌ Missão abandonada. -5 afinidade com Lyana.'); if (typeof closeCityPopup === 'function') closeCityPopup(); },
   'accept_q_goblins':       function(p){ vToast('🐺 Quest aceita: Caçar 3 goblins. Recompensa: 25 Valdoritas + 40 XP.'); },
   'accept_q_herbs':         function(p){ vToast('🌿 Quest aceita: Coletar ervas raras. Recompensa: 15 Valdoritas + 25 XP.'); },
   'accept_q_escort':        function(p){ vToast('👥 Quest aceita: Escoltar caravana. Recompensa: 50 Valdoritas + 60 XP.'); },
