@@ -36344,8 +36344,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '🟢 Afinidade 80 — feliz | 6D: Joy 0.8, Trust 0.7, Fear 0.1, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
       [_heralIco('ic-vinculos'), 'Conversa profunda', 'desbloquear história', 'rel_martha_deep_talk'],
-      [_heralIco('ic-vinculos'), 'Dar presente (10 <span class="vi vi-coin sm"></span>)', '+5 affinity', 'rel_martha_gift'],
-      [_heralIco('ic-vinculos'), 'Pedir favor', 'requer 70+ affinity', 'rel_martha_favor'],
+      [_heralIco('ic-vinculos'), 'Dar presente (10 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_martha_gift'],
+      [_heralIco('ic-vinculos'), 'Pedir favor', 'requer 70+ afinidade', 'rel_martha_favor'],
       [_heralIco('ic-vinculos'), 'Ver memórias', 'encontros passados (12)', 'rel_martha_memories']
     ]
   },
@@ -36355,7 +36355,7 @@ var SUBSCREEN_DATA = {
     npcInfo: '🟡 Afinidade 60 — neutro | 6D: Joy 0.5, Trust 0.6, Fear 0.0, Surprise 0.1, Anger 0.2, Anticipation 0.3',
     buttons: [
       [_heralIco('ic-vinculos'), 'Conversa profunda', 'desbloq. fofocas', 'rel_grom_deep_talk'],
-      [_heralIco('ic-vinculos'), 'Beber juntos (5 <span class="vi vi-coin sm"></span>)', '+3 affinity', 'rel_grom_drink'],
+      [_heralIco('ic-vinculos'), 'Beber juntos (5 <span class="vi vi-coin sm"></span>)', '+3 afinidade', 'rel_grom_drink'],
       [_heralIco('ic-vinculos'), 'Pedir favor', 'requer 70+', 'rel_grom_favor']
     ]
   },
@@ -36365,7 +36365,7 @@ var SUBSCREEN_DATA = {
     npcInfo: '🟢 Afinidade 80 — confiante | 6D: Joy 0.6, Trust 0.9, Fear 0.0, Surprise 0.1, Anger 0.1, Anticipation 0.7',
     buttons: [
       [_heralIco('ic-vinculos'), 'Conversa de soldado', 'memórias de guerra', 'rel_aldric_war_talk'],
-      [_heralIco('ic-vinculos'), 'Dar presente (15 <span class="vi vi-coin sm"></span>)', '+5 affinity', 'rel_aldric_gift'],
+      [_heralIco('ic-vinculos'), 'Dar presente (15 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_aldric_gift'],
       [_heralIco('ic-vinculos'), 'Pedir info de viagem', 'rotas seguras', 'rel_aldric_route']
     ]
   },
@@ -36375,7 +36375,7 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 50 — distante | 6D: Joy 0.4, Trust 0.5, Fear 0.0, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
       [_heralIco('ic-vinculos'), 'Conversa espiritual', 'doutrinação', 'rel_elara_spirit'],
-      [_heralIco('ic-vinculos'), 'Doar ao templo (10 <span class="vi vi-coin sm"></span>)', '+4 affinity', 'rel_elara_donate'],
+      [_heralIco('ic-vinculos'), 'Doar ao templo (10 <span class="vi vi-coin sm"></span>)', '+4 afinidade', 'rel_elara_donate'],
       [_heralIco('ic-templo'), 'Pedir bênção (25 <span class="vi vi-coin sm"></span>)', 'mesmo que serviço', 'temple_bless']
     ]
   },
@@ -36384,7 +36384,7 @@ var SUBSCREEN_DATA = {
     flavor: '"Negócios acima de tudo. Sentimentos atrapalham contas."',
     npcInfo: '⚪ Afinidade 25 — frio | 6D: Joy 0.1, Trust 0.4, Fear 0.0, Surprise 0.1, Anger 0.3, Anticipation 0.6',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Investir 100 <span class="vi vi-coin sm"></span>', '+1 affinity', 'rel_aldwin_invest'],
+      [_heralIco('ic-vinculos'), 'Investir 100 <span class="vi vi-coin sm"></span>', '+1 afinidade', 'rel_aldwin_invest'],
       [_heralIco('ic-vinculos'), 'Discutir empréstimos', 'sem affinity gain', 'rel_aldwin_loans'],
       [_heralIco('ic-vinculos'), 'Tentar amizade', 'requer 50+', 'rel_aldwin_friend']
     ]
@@ -36396,7 +36396,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-vinculos'), 'Conversa sobre runas', 'lore arcano', 'rel_eirik_lore'],
       [_heralIco('ic-runas'), 'Forjar runa juntos', 'mesmo que craft', 'nav:runes_craft'],
-      [_heralIco('ic-vinculos'), 'Dar fragmento raro', '+10 affinity', 'rel_eirik_gift']
+      [_heralIco('ic-vinculos'), 'Dar fragmento raro', '+10 afinidade', 'rel_eirik_gift']
     ]
   },
 
@@ -36482,7 +36482,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar quest', 'quest_lyana_deliver'],
       [_heralIco('ic-missoes'), 'Reler conteúdo', 'pergaminho', 'quest_lyana_read'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-affinity Lyana', 'quest_lyana_abandon']
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
     ]
   },
 
@@ -37667,8 +37667,11 @@ function refreshHud(){
 function renderSubScreen(el, key){
   var d = SUBSCREEN_DATA[key];
   if (!d) { el.textContent = 'Tela em construção: ' + key; return; }
+  // 2026-05-11 fix (user report): título e botão Voltar estavam duplicados.
+  // O popup container (#csp-title + #csp-back-btn em cidade/index.html ~6649)
+  // JÁ renderiza o header e o Voltar — duplicar aqui produzia "💬 Missão: X"
+  // 2× e dois botões "← Voltar". Removidos h1 + back-row deste renderer.
   var html = '<div class="city-subscreen">';
-  html += '<h1 class="subscreen-h1">' + d.header + '</h1>';
   if (d.flavor) html += '<p class="subscreen-flavor">' + d.flavor + '</p>';
   if (d.npcInfo) html += '<div class="subscreen-npc">' + d.npcInfo + '</div>';
   html += '<div class="subscreen-buttons">';
@@ -37681,7 +37684,6 @@ function renderSubScreen(el, key){
       + '</button>';
   });
   html += '</div>';
-  html += '<div class="subscreen-back-row"><button class="subscreen-back" data-cb="__back">← Voltar</button></div>';
   html += '</div>';
   el.innerHTML = html;
 }
