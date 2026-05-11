@@ -6288,94 +6288,210 @@ body.perf-lite .vc-action-btn { transition: none; }
 </radialGradient>
 
 <symbol id="ic-ach-algoz" viewBox="0 0 120 120">
-  <!-- X-6.5.51BE (2026-05-11) - Algoz redesenhado AAA:
-       Caveira anatomica detalhada (cranio, suturas, dentes, malar, nasal)
-       + 2 espadas cruzadas com lamina gradient steel, guard dourada,
-       grip de couro com wrap, pommel + ember glow nos olhos. -->
+  <!-- X-6.5.51BK (2026-05-11) - Caveira AAA+ redesenhada profundamente:
+       Anatomia 3D realista (forehead com brow ridge, temporal bone,
+       jaw bone separado, individual teeth, weathering com cracks).
+       Iluminacao: side-light esquerda branca, dropshadow direita preta.
+       Olhos com 5 camadas (cavidade -> hollow black -> halo vermelho ->
+       pupila brilhante -> highlight). Espadas com edge bevel + ricasso
+       definidos. Sangue manchado no zigomatico. -->
   <defs>
+    <!-- Lamina das espadas: degrade 5-stop pra simular curvature da edge -->
     <linearGradient id="alg-blade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#b8b8b8"/>
-      <stop offset="35%" stop-color="#7a7a7a"/>
-      <stop offset="70%" stop-color="#4a4a4a"/>
-      <stop offset="100%" stop-color="#2a2a2a"/>
+      <stop offset="0%" stop-color="#d4d4d4"/>
+      <stop offset="20%" stop-color="#9a9a9a"/>
+      <stop offset="50%" stop-color="#6a6a6a"/>
+      <stop offset="80%" stop-color="#3a3a3a"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
     </linearGradient>
-    <linearGradient id="alg-skull" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="alg-blade-edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Cabo dourado com brilho -->
+    <linearGradient id="alg-guard" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="50%" stop-color="#c4953a"/>
+      <stop offset="100%" stop-color="#7a5a20"/>
+    </linearGradient>
+    <!-- Caveira: gradient diagonal pra dar 3D (luz vinda do canto sup-esq) -->
+    <linearGradient id="alg-skull-bone" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="currentColor" stop-opacity="1"/>
-      <stop offset="55%" stop-color="currentColor" stop-opacity="0.92"/>
+      <stop offset="35%" stop-color="currentColor" stop-opacity="0.96"/>
+      <stop offset="75%" stop-color="currentColor" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0.45"/>
+    </linearGradient>
+    <!-- Mandibula (osso isolado) -->
+    <linearGradient id="alg-skull-jaw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.85"/>
       <stop offset="100%" stop-color="currentColor" stop-opacity="0.55"/>
     </linearGradient>
-    <radialGradient id="alg-eye" cx="0.5" cy="0.45" r="0.6">
-      <stop offset="0%" stop-color="#ff5030"/>
-      <stop offset="40%" stop-color="#a01010"/>
-      <stop offset="100%" stop-color="#100000"/>
+    <!-- Cavidade ocular com depth -->
+    <radialGradient id="alg-eye-socket" cx="0.5" cy="0.35" r="0.7">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="100%" stop-color="#1a0505"/>
+    </radialGradient>
+    <radialGradient id="alg-eye-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffaa70"/>
+      <stop offset="25%" stop-color="#ff4020"/>
+      <stop offset="60%" stop-color="#a01010"/>
+      <stop offset="100%" stop-color="#1a0000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Drop shadow sob a caveira -->
+    <radialGradient id="alg-base-shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
   </defs>
+
+  <!-- Drop shadow sob a caveira (cria separacao do bg) -->
+  <ellipse cx="60" cy="98" rx="32" ry="5" fill="url(#alg-base-shadow)"/>
+
   <!-- === ESPADAS CRUZADAS (atras do cranio) === -->
   <g transform="translate(60 60)">
-    <!-- Sword 1: rotacao 45deg -->
     <g transform="rotate(45)">
-      <rect x="-52" y="-2.5" width="100" height="5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
-      <line x1="-50" y1="-1.5" x2="46" y2="-1.5" stroke="#e0e0e0" stroke-width="0.5" opacity="0.7"/>
-      <polygon points="-52,-2.5 -58,0 -52,2.5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
-      <rect x="42" y="-8" width="4" height="16" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
-      <rect x="42" y="-8" width="4" height="3" fill="#ffd700" opacity="0.6"/>
-      <rect x="46" y="-3.5" width="10" height="7" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
-      <line x1="48.5" y1="-3.5" x2="48.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <line x1="51" y1="-3.5" x2="51" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <line x1="53.5" y1="-3.5" x2="53.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <circle cx="58" cy="0" r="3.2" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
-      <circle cx="57.2" cy="-1" r="1.2" fill="#ffe080" opacity="0.8"/>
+      <!-- Lamina principal -->
+      <rect x="-52" y="-2.8" width="100" height="5.6" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.9"/>
+      <!-- Edge highlight (luz na borda superior) -->
+      <rect x="-50" y="-2.5" width="96" height="1.4" fill="url(#alg-blade-edge)"/>
+      <!-- Fuller central (ranhura cinza-claro) -->
+      <line x1="-48" y1="0" x2="44" y2="0" stroke="#5a5a5a" stroke-width="0.6" opacity="0.8"/>
+      <!-- Ponta -->
+      <polygon points="-52,-2.8 -60,0 -52,2.8" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.9"/>
+      <!-- Ricasso (parte nao-afiada perto do cabo) -->
+      <rect x="38" y="-2.5" width="6" height="5" fill="#3a3a3a" stroke="#0a0605" stroke-width="0.5"/>
+      <!-- Cross-guard com bevel -->
+      <rect x="44" y="-9" width="5" height="18" fill="url(#alg-guard)" stroke="#0a0605" stroke-width="0.8"/>
+      <rect x="44" y="-9" width="5" height="2.5" fill="#ffe080" opacity="0.7"/>
+      <!-- Grip de couro (texturizado) -->
+      <rect x="49" y="-4" width="11" height="8" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
+      <!-- Wraps (3 linhas pretas) -->
+      <line x1="52" y1="-4" x2="52" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <line x1="55" y1="-4" x2="55" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <line x1="58" y1="-4" x2="58" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <!-- Pommel esfera -->
+      <circle cx="62" cy="0" r="3.5" fill="url(#alg-guard)" stroke="#0a0605" stroke-width="0.8"/>
+      <circle cx="61" cy="-1.2" r="1.3" fill="#ffffaa" opacity="0.85"/>
     </g>
-    <!-- Sword 2: rotacao -45deg -->
     <g transform="rotate(-45)">
-      <rect x="-52" y="-2.5" width="100" height="5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
-      <line x1="-50" y1="-1.5" x2="46" y2="-1.5" stroke="#e0e0e0" stroke-width="0.5" opacity="0.7"/>
-      <polygon points="-52,-2.5 -58,0 -52,2.5" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.8"/>
-      <rect x="42" y="-8" width="4" height="16" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
-      <rect x="42" y="-8" width="4" height="3" fill="#ffd700" opacity="0.6"/>
-      <rect x="46" y="-3.5" width="10" height="7" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
-      <line x1="48.5" y1="-3.5" x2="48.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <line x1="51" y1="-3.5" x2="51" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <line x1="53.5" y1="-3.5" x2="53.5" y2="3.5" stroke="#1a0e08" stroke-width="0.5"/>
-      <circle cx="58" cy="0" r="3.2" fill="#c4953a" stroke="#0a0605" stroke-width="0.7"/>
-      <circle cx="57.2" cy="-1" r="1.2" fill="#ffe080" opacity="0.8"/>
+      <rect x="-52" y="-2.8" width="100" height="5.6" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.9"/>
+      <rect x="-50" y="-2.5" width="96" height="1.4" fill="url(#alg-blade-edge)"/>
+      <line x1="-48" y1="0" x2="44" y2="0" stroke="#5a5a5a" stroke-width="0.6" opacity="0.8"/>
+      <polygon points="-52,-2.8 -60,0 -52,2.8" fill="url(#alg-blade)" stroke="#0a0605" stroke-width="0.9"/>
+      <rect x="38" y="-2.5" width="6" height="5" fill="#3a3a3a" stroke="#0a0605" stroke-width="0.5"/>
+      <rect x="44" y="-9" width="5" height="18" fill="url(#alg-guard)" stroke="#0a0605" stroke-width="0.8"/>
+      <rect x="44" y="-9" width="5" height="2.5" fill="#ffe080" opacity="0.7"/>
+      <rect x="49" y="-4" width="11" height="8" fill="#3a2010" stroke="#0a0605" stroke-width="0.7"/>
+      <line x1="52" y1="-4" x2="52" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <line x1="55" y1="-4" x2="55" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <line x1="58" y1="-4" x2="58" y2="4" stroke="#0a0605" stroke-width="0.6"/>
+      <circle cx="62" cy="0" r="3.5" fill="url(#alg-guard)" stroke="#0a0605" stroke-width="0.8"/>
+      <circle cx="61" cy="-1.2" r="1.3" fill="#ffffaa" opacity="0.85"/>
     </g>
   </g>
-  <!-- === CRANIO (sobre as espadas) === -->
-  <!-- Cranio com mandibula + zigomatico + arcada dentaria -->
-  <path d="M 60 20 C 78 20 88 32 88 50 C 88 60 86 67 82 72 L 82 78 L 80 84 L 76 79 L 76 86 L 73 80 L 70 86 L 67 80 L 64 86 L 61 80 L 57 86 L 53 80 L 49 86 L 46 80 L 42 86 L 38 79 L 40 84 L 38 78 L 38 72 C 34 67 32 60 32 50 C 32 32 42 20 60 20 Z"
-        fill="url(#alg-skull)" stroke="#0a0605" stroke-width="1.8"/>
-  <!-- Olhos: cavidade profunda em camadas -->
-  <ellipse cx="47" cy="54" rx="9.5" ry="11" fill="#000"/>
-  <ellipse cx="73" cy="54" rx="9.5" ry="11" fill="#000"/>
-  <ellipse cx="47" cy="55" rx="7" ry="9" fill="url(#alg-eye)"/>
-  <ellipse cx="73" cy="55" rx="7" ry="9" fill="url(#alg-eye)"/>
-  <circle cx="47" cy="54" r="2.2" fill="#ff4020"/>
-  <circle cx="73" cy="54" r="2.2" fill="#ff4020"/>
-  <circle cx="46.5" cy="53.5" r="0.9" fill="#ffd0a0"/>
-  <circle cx="72.5" cy="53.5" r="0.9" fill="#ffd0a0"/>
-  <!-- Cavidade nasal (heart-shape invertido) -->
-  <path d="M 56 67 Q 58 65 60 66 Q 62 65 64 67 L 60 78 Z" fill="#000"/>
-  <path d="M 58 70 L 60 72 L 62 70" fill="none" stroke="#1a0a05" stroke-width="0.4" opacity="0.6"/>
-  <!-- Zigomatico (cheekbone shadow) -->
-  <path d="M 38 64 Q 42 72 47 75" fill="none" stroke="#0a0605" stroke-width="0.9" opacity="0.55"/>
-  <path d="M 82 64 Q 78 72 73 75" fill="none" stroke="#0a0605" stroke-width="0.9" opacity="0.55"/>
-  <!-- Sutura craniana -->
-  <line x1="60" y1="22" x2="60" y2="40" stroke="#0a0605" stroke-width="0.6" opacity="0.45" stroke-dasharray="2.5 1.5"/>
-  <line x1="48" y1="26" x2="52" y2="40" stroke="#0a0605" stroke-width="0.5" opacity="0.35"/>
-  <line x1="68" y1="28" x2="69" y2="40" stroke="#0a0605" stroke-width="0.5" opacity="0.35"/>
-  <!-- Cranial highlight -->
-  <ellipse cx="49" cy="32" rx="6" ry="11" fill="#fff" opacity="0.15" transform="rotate(-12 49 32)"/>
-  <!-- Separacao dentes (linhas verticais finas) -->
-  <g stroke="#0a0605" stroke-width="0.7" opacity="0.85">
-    <line x1="46" y1="80" x2="46" y2="86"/>
-    <line x1="50" y1="80" x2="50" y2="86"/>
-    <line x1="54" y1="80" x2="54" y2="86"/>
-    <line x1="58" y1="80" x2="58" y2="86"/>
-    <line x1="62" y1="80" x2="62" y2="86"/>
-    <line x1="66" y1="80" x2="66" y2="86"/>
-    <line x1="70" y1="80" x2="70" y2="86"/>
-    <line x1="74" y1="80" x2="74" y2="86"/>
+
+  <!-- === CRANIO (multilayered anatomical 3D) === -->
+  <!-- Camada 1: Cranium dome SOZINHO (sem mandibula) -->
+  <path d="M 60 18
+           C 78 18 90 32 90 50
+           C 90 60 88 68 84 74
+           L 84 80
+           L 36 80
+           L 36 74
+           C 32 68 30 60 30 50
+           C 30 32 42 18 60 18 Z"
+        fill="url(#alg-skull-bone)" stroke="#0a0605" stroke-width="2"/>
+
+  <!-- Brow ridge (sobrancelha ossea — proeminencia sobre os olhos) -->
+  <path d="M 40 48 Q 47 44 54 47" fill="none" stroke="#0a0605" stroke-width="1" opacity="0.6"/>
+  <path d="M 66 47 Q 73 44 80 48" fill="none" stroke="#0a0605" stroke-width="1" opacity="0.6"/>
+
+  <!-- Olhos: cavidades em camadas (depth realista) -->
+  <ellipse cx="47" cy="56" rx="10.5" ry="12" fill="url(#alg-eye-socket)" stroke="#0a0605" stroke-width="1.2"/>
+  <ellipse cx="73" cy="56" rx="10.5" ry="12" fill="url(#alg-eye-socket)" stroke="#0a0605" stroke-width="1.2"/>
+  <!-- Inner depth -->
+  <ellipse cx="47" cy="57" rx="7.5" ry="9.5" fill="#000"/>
+  <ellipse cx="73" cy="57" rx="7.5" ry="9.5" fill="#000"/>
+  <!-- Glow ardente vermelho (lava) -->
+  <ellipse cx="47" cy="56" rx="6" ry="7.5" fill="url(#alg-eye-glow)"/>
+  <ellipse cx="73" cy="56" rx="6" ry="7.5" fill="url(#alg-eye-glow)"/>
+  <!-- Pupila central pulsante -->
+  <circle cx="47" cy="56" r="2.5" fill="#ff5028"/>
+  <circle cx="73" cy="56" r="2.5" fill="#ff5028"/>
+  <!-- Highlight (especular dot) -->
+  <circle cx="45.8" cy="54.6" r="0.9" fill="#fff0c0"/>
+  <circle cx="71.8" cy="54.6" r="0.9" fill="#fff0c0"/>
+
+  <!-- Cavidade nasal (heart inverted com defined edges) -->
+  <path d="M 56 68 Q 58 65 60 67 Q 62 65 64 68 L 60 80 Z" fill="#000"/>
+  <path d="M 57 70 L 60 73 L 63 70" fill="none" stroke="#3a0a05" stroke-width="0.4" opacity="0.7"/>
+
+  <!-- Bochechas (zigomatico) com sombra definida -->
+  <path d="M 37 62 Q 41 71 47 76" fill="none" stroke="#0a0605" stroke-width="1.1" opacity="0.6"/>
+  <path d="M 83 62 Q 79 71 73 76" fill="none" stroke="#0a0605" stroke-width="1.1" opacity="0.6"/>
+
+  <!-- Temporal bone definicao (lateral) -->
+  <path d="M 32 50 Q 30 55 32 60" fill="none" stroke="#0a0605" stroke-width="0.8" opacity="0.5"/>
+  <path d="M 88 50 Q 90 55 88 60" fill="none" stroke="#0a0605" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Sutura craniana central + lateral (zigzag style) -->
+  <path d="M 60 22 L 59 28 L 61 34 L 60 40" stroke="#0a0605" stroke-width="0.7" fill="none" opacity="0.55"/>
+  <path d="M 48 26 L 50 32 L 49 38" stroke="#0a0605" stroke-width="0.55" fill="none" opacity="0.4"/>
+  <path d="M 70 26 L 68 32 L 69 38" stroke="#0a0605" stroke-width="0.55" fill="none" opacity="0.4"/>
+
+  <!-- Cracks (battle damage) -->
+  <path d="M 72 38 L 78 45 L 76 50" stroke="#1a0a05" stroke-width="0.6" fill="none" opacity="0.65"/>
+  <path d="M 40 70 L 36 76" stroke="#1a0a05" stroke-width="0.5" fill="none" opacity="0.55"/>
+
+  <!-- Highlight superior (luz canto sup-esq) -->
+  <ellipse cx="48" cy="30" rx="7" ry="13" fill="#ffffff" opacity="0.16" transform="rotate(-15 48 30)"/>
+  <!-- Highlight forehead secondario -->
+  <ellipse cx="56" cy="26" rx="4" ry="6" fill="#ffffff" opacity="0.1"/>
+
+  <!-- Sombra abaixo dos olhos (depth dentro do cranio) -->
+  <ellipse cx="47" cy="64" rx="5" ry="2" fill="#0a0605" opacity="0.3"/>
+  <ellipse cx="73" cy="64" rx="5" ry="2" fill="#0a0605" opacity="0.3"/>
+
+  <!-- Sangue manchado no zigomatico esq (battle scar) -->
+  <path d="M 39 68 Q 38 72 40 75 Q 41 73 40 70 Z" fill="#7a1810" opacity="0.6"/>
+  <circle cx="38" cy="76" r="0.8" fill="#7a1810" opacity="0.5"/>
+
+  <!-- === MANDIBULA (separada do cranio com gap) === -->
+  <!-- Gap entre cranio e mandibula (espaço fino) -->
+  <rect x="38" y="80" width="44" height="1.5" fill="#0a0605" opacity="0.7"/>
+  <!-- Mandibula osso -->
+  <path d="M 40 82
+           Q 38 84 38 88
+           Q 40 92 44 93
+           Q 50 95 60 95
+           Q 70 95 76 93
+           Q 80 92 82 88
+           Q 82 84 80 82 Z"
+        fill="url(#alg-skull-jaw)" stroke="#0a0605" stroke-width="1.4"/>
+
+  <!-- Dentes individuais (rounded rects realistas) -->
+  <g fill="#f4ecd4" stroke="#0a0605" stroke-width="0.5">
+    <rect x="42" y="82.5" width="3" height="6" rx="0.8"/>
+    <rect x="46" y="82.5" width="3.2" height="6.5" rx="0.8"/>
+    <rect x="50" y="82.5" width="3" height="6" rx="0.8"/>
+    <rect x="54" y="82.5" width="3.2" height="7" rx="0.8"/>
+    <rect x="58" y="82.5" width="3.5" height="7.5" rx="0.8"/>
+    <rect x="62.5" y="82.5" width="3.5" height="7.5" rx="0.8"/>
+    <rect x="66.5" y="82.5" width="3.2" height="7" rx="0.8"/>
+    <rect x="70.5" y="82.5" width="3" height="6.5" rx="0.8"/>
+    <rect x="74" y="82.5" width="3.2" height="6.5" rx="0.8"/>
+  </g>
+  <!-- Highlight nos dentes (efeito vidrado) -->
+  <g fill="#ffffff" opacity="0.45">
+    <rect x="42.5" y="83" width="1" height="2.5"/>
+    <rect x="46.5" y="83" width="1" height="2.5"/>
+    <rect x="50.5" y="83" width="1" height="2.5"/>
+    <rect x="54.5" y="83" width="1" height="2.5"/>
+    <rect x="58.5" y="83" width="1" height="2.5"/>
+    <rect x="63" y="83" width="1" height="2.5"/>
+    <rect x="67" y="83" width="1" height="2.5"/>
+    <rect x="71" y="83" width="1" height="2.5"/>
+    <rect x="74.5" y="83" width="1" height="2.5"/>
   </g>
 </symbol>
 
@@ -10081,8 +10197,12 @@ function _showSettingsPopup(){
   html += '</div>';
 
   // SEÇÃO 5: Extras (ic-mensagem — envelope canonical)
+  /* X-6.5.51BL (2026-05-11): adicionado "Diálogos Recentes" — acesso aos
+     ultimos 3 dialogos PADRAO_ALDRIC que o player viu. Util pra reler
+     conteudo sem precisar de bater na NPC novamente. */
   html += _sectionHeader('ic-mensagem', 'Extras');
   var extras = [
+    { icon: 'ic-pergaminho',        label: 'Diálogos Recentes',       cb: 'extras_dialog_history' },
     { icon: 'ic-mensagem',          label: 'Meu Código de Indicação', cb: 'extras_referral' },
     { icon: 'ic-ach-colecionador',  label: 'Apoiar Projeto',          cb: 'extras_support' },
     { icon: 'ic-stat-cha',          label: 'Avaliar o Jogo',          cb: 'extras_feedback' }
@@ -10177,6 +10297,11 @@ function _showSettingsPopup(){
   bodyEl.querySelectorAll('.setting-extra-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var cb = btn.getAttribute('data-extra');
+      /* X-6.5.51BL: Dialogos Recentes */
+      if (cb === 'extras_dialog_history') {
+        _showDialogHistoryPopup();
+        return;
+      }
       if (cb === 'extras_referral') {
         _showInfoPopup({
           icon: 'ic-mensagem', npc: 'Código de Indicação',
@@ -11295,13 +11420,10 @@ function _showKillsPopup(p){
     /* Bestiary cards com stagger entry + medal badges */
     + '.vKl-beast-card{position:relative;animation:vKlCardSlideIn 0.5s ease-out backwards;overflow:hidden;}'
     + '.vKl-beast-card:hover{transform:translateX(2px);transition:transform 0.15s ease-out;}'
-    /* X-6.5.51BD (2026-05-11): removido text-shadow do numeral romano —
-       desenho central nao deve ter sombra (user request). Mantido box-shadow
-       no disco da medalha (depth do card) + inset highlight (metalico). */
-    + '.vKl-medal{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;font-weight:700;color:#3a2a08;border:1px solid rgba(0,0,0,0.5);box-shadow:0 2px 4px rgba(0,0,0,0.5),inset 0 1px 1px rgba(255,255,255,0.4);animation:vKlMedalShine 2.6s ease-in-out infinite;}'
-    + '.vKl-medal.m1{background:radial-gradient(circle at 35% 30%,#fff4c0,#ffd700 55%,#a87520 100%);--medalCol:#ffd700;}'
-    + '.vKl-medal.m2{background:radial-gradient(circle at 35% 30%,#f0f4f8,#c8d2dc 55%,#7a8390 100%);--medalCol:#c8d2dc;}'
-    + '.vKl-medal.m3{background:radial-gradient(circle at 35% 30%,#f0b890,#c87a3a 55%,#7a3818 100%);--medalCol:#c87a3a;}'
+    /* X-6.5.51BK (2026-05-11): user request — medalhas I/II/III removidas
+       dos cards. Ficavam sobre partes dos monstros tampando texto. Top
+       agora destaca via border-left dourado + "LÍDER" badge inline +
+       glow extra no numero. */
     + '</style>';
   html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
   // === HEADER ÉPICO: ornamentos + correntes + pedestal + brasas + sangue ===
@@ -11356,30 +11478,34 @@ function _showKillsPopup(p){
   // === BESTIÁRIO: cards com stagger + medalha rank ===
   html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 14px 8px 8px; position:relative;">'
     + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
+  /* X-6.5.51BK (2026-05-11): user request - REMOVER medalhas I/II/III dos
+     cards. Numeros romanos sobre partes dos monstros + tampando textos.
+     Solucao: highlight no rank #1 via border-left dourado mais grosso +
+     glow extra no numero de abates. Sem badge sobreposta. */
   KILLS_BY_TYPE.forEach(function(k, idx){
     var pct = Math.round(k.kills / total * 100);
     var crCol = _crColor(k.cr);
     var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
     var rank = rankMap[k.type] || 99;
-    var medalHtml = '';
-    if (rank === 1) medalHtml = '<div class="vKl-medal m1" title="1º lugar">I</div>';
-    else if (rank === 2) medalHtml = '<div class="vKl-medal m2" title="2º lugar">II</div>';
-    else if (rank === 3) medalHtml = '<div class="vKl-medal m3" title="3º lugar">III</div>';
+    var isTop = rank === 1;
+    var borderLeftCol = isTop ? '#ffd700' : crCol;
+    var borderLeftW = isTop ? '4px' : '3px';
+    var killNumCol = isTop ? '#ffd700' : 'var(--v-gold, #c4953a)';
+    var killNumGlow = isTop ? '0 0 12px rgba(255,215,0,0.55)' : '0 0 8px rgba(255,215,0,0.3)';
     html += '<div class="vKl-beast-card" style="padding: 9px 10px 8px; '
       + 'background: linear-gradient(90deg, rgba(196,40,30,0.08) 0%, rgba(196,149,58,0.05) 100%); '
-      + 'border: 1px solid rgba(74,56,40,0.7); '
-      + 'border-left: 3px solid ' + crCol + '; '
+      + 'border: 1px solid ' + (isTop ? 'rgba(255,215,0,0.45)' : 'rgba(74,56,40,0.7)') + '; '
+      + 'border-left: ' + borderLeftW + ' solid ' + borderLeftCol + '; '
       + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 4px; '
       + 'animation-delay:' + (0.08 * idx + 0.15) + 's;">'
-      + medalHtml
       + '<div style="display:flex; align-items: center; gap: 10px; margin-bottom: 6px;">'
       +   '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>'
-      +   '<div style="flex:1; min-width:0;' + (rank <= 3 ? 'padding-right:24px;' : '') + '">'
-      +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + '</div>'
+      +   '<div style="flex:1; min-width:0;">'
+      +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + (isTop ? ' <span style="color:#ffd700;font-size:11px;letter-spacing:1px;">· LÍDER</span>' : '') + '</div>'
       +     '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;">◆ Perigo ' + k.cr + '</div>'
       +   '</div>'
       +   '<div style="text-align:right;">'
-      +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 22px; font-weight: 700; color: var(--v-gold, #c4953a); text-shadow:0 0 8px rgba(255,215,0,0.3);">' + k.kills + '</span>'
+      +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 22px; font-weight: 700; color: ' + killNumCol + '; text-shadow:' + killNumGlow + ';">' + k.kills + '</span>'
       +     '<div style="font-size: 8px; color: var(--v-text-dim,#a09484); letter-spacing:1px; margin-top:-2px;">abates</div>'
       +   '</div>'
       + '</div>'
@@ -44200,10 +44326,34 @@ function _renderEncounterPopup(enc, originalAction, player) {
     return revealDur;
   }
 
+  /* X-6.5.51BL (2026-05-11): user request - jogadores apressados podem
+     APERTAR NA TELA pra:
+     1) Pular animacao reveal das linhas (clip-path completa instantaneo)
+     2) Avancar pra proxima pagina sem esperar
+     3) Choices liberam mais rapido (totalDelay reduzido pra 100ms apos
+        reveal completar via skip).
+     window._encSkipRevealing flag indica se ha reveal em andamento. */
+  var _encChoicesReadyTimer = null;
+  var _pageStartedAt = 0;
+
+  function _encForceCompleteReveal() {
+    // Forca todas as .enc-line atuais a completarem a animacao
+    var lines = bodyEl.querySelectorAll('.enc-line');
+    lines.forEach(function(l){
+      l.style.animation = 'none';
+      l.style.clipPath = 'inset(0 0 0 0)';
+      l.style.webkitClipPath = 'inset(0 0 0 0)';
+      l.style.opacity = '1';
+    });
+    return lines.length > 0;
+  }
+
   function _renderPage(idx) {
     _renderToken++;
     var myToken = _renderToken;
     bodyEl.innerHTML = '';
+    if (_encChoicesReadyTimer) { clearTimeout(_encChoicesReadyTimer); _encChoicesReadyTimer = null; }
+    _pageStartedAt = Date.now();
     var page = pages[idx];
 
     // Phase 6.6.x ambience: cada linha revela horizontal (esquerda→direita)
@@ -44237,7 +44387,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
                    + (lineDurations[lineDurations.length - 1] || 0) + 200;
     if (idx === pages.length - 1) {
       navEl.style.display = 'none';
-      setTimeout(function(){
+      _encChoicesReadyTimer = setTimeout(function(){
         if (myToken !== _renderToken) return;
         if (!_choicesShown) {
           _choicesShown = true;
@@ -44247,30 +44397,84 @@ function _renderEncounterPopup(enc, originalAction, player) {
         }
       }, totalDelay);
     } else {
+      /* X-6.5.51BL: nav buttons aparecem IMEDIATO (visual visivel) com
+         leve fade-in. Player apressado pode ja clicar ANTES da reveal
+         terminar. Apertando na tela, pula reveal e libera o flow. */
       navEl.style.display = 'flex';
       actionsEl.style.display = 'none';
       nextBtn.textContent = (idx === pages.length - 2) ? 'Continuar →' : 'Próximo →';
     }
   }
 
-  prevBtn.onclick = function(){
+  prevBtn.onclick = function(ev){
+    if (ev && ev.stopPropagation) ev.stopPropagation();
     if (currentPage > 0) {
       currentPage--;
       _renderPage(currentPage);
     }
   };
-  nextBtn.onclick = function(){
+  nextBtn.onclick = function(ev){
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    // Se reveal ainda em andamento, primeiro completa
+    var stillRevealing = bodyEl.querySelector('.enc-line') ? false : true;
+    // Se body vazio, ja avanca direto
     if (currentPage < pages.length - 1) {
       currentPage++;
       _renderPage(currentPage);
     }
   };
 
-  // Atalhos de teclado: ← / → / Espaço / Enter
+  /* X-6.5.51BL: CLICK NA TELA pra pular animacao OU avancar. Player
+     apressado nao precisa esperar a reveal cinematografica. */
+  ov.addEventListener('click', function(ev){
+    // Ignora cliques em botoes (delegate normal)
+    if (ev.target.closest('button')) return;
+    var elapsed = Date.now() - _pageStartedAt;
+    var maxRevealDur = 0;
+    bodyEl.querySelectorAll('.enc-line').forEach(function(l){
+      var d = parseInt(getComputedStyle(l).getPropertyValue('--reveal-dur') || '0', 10);
+      if (d > maxRevealDur) maxRevealDur = d;
+    });
+    var stillRevealing = elapsed < (maxRevealDur + 200);
+    if (stillRevealing) {
+      // Completa todas as linhas instantaneo
+      _encForceCompleteReveal();
+      // Se ja era ultima pagina, libera choices imediato
+      if (currentPage === pages.length - 1 && !_choicesShown) {
+        if (_encChoicesReadyTimer) { clearTimeout(_encChoicesReadyTimer); _encChoicesReadyTimer = null; }
+        _choicesShown = true;
+        _renderEncounterChoices(enc, originalAction, player, actionsEl);
+      }
+    } else {
+      // Ja revelou tudo, avanca
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        _renderPage(currentPage);
+      }
+    }
+  });
+
+  // Atalhos de teclado: ← / → / Espaço / Enter (tap-skip via ov click)
   ov._encKeyHandler = function(ev){
     if (ev.key === 'ArrowRight' || ev.key === ' ' || ev.key === 'Enter') {
       ev.preventDefault();
-      if (!nextBtn.disabled && navEl.style.display !== 'none') nextBtn.click();
+      // Mesmo comportamento do click: skip OR advance
+      var elapsed = Date.now() - _pageStartedAt;
+      var maxRevealDur = 0;
+      bodyEl.querySelectorAll('.enc-line').forEach(function(l){
+        var d = parseInt(getComputedStyle(l).getPropertyValue('--reveal-dur') || '0', 10);
+        if (d > maxRevealDur) maxRevealDur = d;
+      });
+      if (elapsed < (maxRevealDur + 200)) {
+        _encForceCompleteReveal();
+        if (currentPage === pages.length - 1 && !_choicesShown) {
+          if (_encChoicesReadyTimer) { clearTimeout(_encChoicesReadyTimer); _encChoicesReadyTimer = null; }
+          _choicesShown = true;
+          _renderEncounterChoices(enc, originalAction, player, actionsEl);
+        }
+      } else if (!nextBtn.disabled && navEl.style.display !== 'none') {
+        nextBtn.click();
+      }
     } else if (ev.key === 'ArrowLeft') {
       ev.preventDefault();
       if (!prevBtn.disabled) prevBtn.click();
@@ -44278,7 +44482,89 @@ function _renderEncounterPopup(enc, originalAction, player) {
   };
   document.addEventListener('keydown', ov._encKeyHandler);
 
+  /* X-6.5.51BL: registra dialogo no historico (max 3) pra player consultar
+     depois. Salvo em localStorage com prefixo per-char (window.CITY_MOCK_PLAYER
+     fallback se sem char). */
+  try {
+    var npcRef = RECURRING_NPCS[enc.npc] || { name: enc.npc || '?', desc: '' };
+    var charKey = ((window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'player') + '_dialog_history';
+    var existing = [];
+    try { existing = JSON.parse(localStorage.getItem(charKey) || '[]'); } catch(_e1){ existing = []; }
+    if (!Array.isArray(existing)) existing = [];
+    existing.unshift({
+      ts: Date.now(),
+      npc: npcRef.name,
+      desc: npcRef.desc,
+      portrait: npcRef.portrait || 'ic-dialogo',
+      script: (enc.script || []).slice(),
+      choices: (enc.choices || []).map(function(c){ return c.label; })
+    });
+    if (existing.length > 3) existing = existing.slice(0, 3);
+    try { localStorage.setItem(charKey, JSON.stringify(existing)); } catch(_e2){}
+    /* Tambem em memoria pra fallback em modo private/incognito */
+    window._dialogHistory = existing;
+  } catch(_eH){}
+
   _renderPage(0);
+}
+
+/* X-6.5.51BL (2026-05-11): _showDialogHistoryPopup — exibe os 3 ultimos
+   dialogos do player num popup. Acessivel via settings (ou comando). */
+function _showDialogHistoryPopup(){
+  var charKey = ((window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'player') + '_dialog_history';
+  var hist = [];
+  try { hist = JSON.parse(localStorage.getItem(charKey) || '[]'); } catch(_e){}
+  if (!Array.isArray(hist) || hist.length === 0) {
+    if (typeof vToast === 'function') vToast('📜 Sem diálogos recentes pra consultar.');
+    return;
+  }
+  var ov = document.getElementById('city-subscreen-popup');
+  var titleEl = document.getElementById('csp-title');
+  var bodyEl = document.getElementById('csp-body');
+  if (!ov || !bodyEl) return;
+  if (titleEl) titleEl.textContent = '📜 Diálogos Recentes';
+  var html = '<style>'
+    + '.dlg-hist-entry{margin-bottom:14px;padding:12px;background:linear-gradient(180deg,rgba(74,56,40,0.35) 0%,rgba(42,30,18,0.25) 100%);border:1px solid rgba(196,149,58,0.3);border-radius:8px;}'
+    + '.dlg-hist-header{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(196,149,58,0.2);margin-bottom:8px;}'
+    + '.dlg-hist-name{font-family:var(--v-font-display,Cinzel,serif);font-size:13px;color:var(--v-gold,#c4953a);font-weight:700;}'
+    + '.dlg-hist-ts{font-size:10px;color:var(--v-text-dim,#a09484);margin-left:auto;}'
+    + '.dlg-hist-line{margin:6px 0;font-size:12px;line-height:1.5;color:#d4c8b0;}'
+    + '.dlg-hist-line.speech{padding:6px 8px;border-left:2px solid var(--v-gold,#c4953a);background:rgba(196,149,58,0.08);}'
+    + '.dlg-hist-line.narration{font-style:italic;color:#9b8e7c;padding-left:8px;}'
+    + '.dlg-hist-speaker{display:block;font-family:var(--v-font-display,Cinzel,serif);font-size:10px;color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1px;margin-bottom:2px;}'
+    + '.dlg-hist-empty{text-align:center;color:var(--v-text-dim,#a09484);padding:20px;font-style:italic;}'
+    + '</style>'
+    + '<div style="padding:8px;">'
+    + '<p style="font-size:11px;color:var(--v-text-dim,#a09484);font-style:italic;text-align:center;margin-bottom:12px;">Os últimos ' + hist.length + ' diálogo' + (hist.length === 1 ? '' : 's') + ' do dia ficam registrados no teu diário.</p>';
+  function _fmtTs(ts){
+    var d = new Date(ts);
+    var elapsed = Date.now() - ts;
+    if (elapsed < 60000) return 'agora';
+    if (elapsed < 3600000) return Math.floor(elapsed/60000) + 'min';
+    if (elapsed < 86400000) return Math.floor(elapsed/3600000) + 'h';
+    return d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+  }
+  hist.forEach(function(d){
+    html += '<div class="dlg-hist-entry">';
+    html += '<div class="dlg-hist-header">';
+    html += '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#' + (d.portrait || 'ic-dialogo') + '"/></svg>';
+    html += '<span class="dlg-hist-name">' + (d.npc || 'Desconhecido') + '</span>';
+    html += '<span class="dlg-hist-ts">' + _fmtTs(d.ts) + '</span>';
+    html += '</div>';
+    (d.script || []).forEach(function(line){
+      if (line.type === 'speech') {
+        var spkr = (RECURRING_NPCS[line.speaker] && RECURRING_NPCS[line.speaker].name) || d.npc;
+        html += '<div class="dlg-hist-line speech"><span class="dlg-hist-speaker">' + spkr + '</span>' + (line.text || '') + '</div>';
+      } else {
+        html += '<div class="dlg-hist-line narration">' + (line.text || '') + '</div>';
+      }
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  bodyEl.innerHTML = html;
+  ov.classList.add('active');
+  if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'dialog_history') _popupStack.push('dialog_history');
 }
 
 // Phase 6.6.x dialogue pagination helper:
