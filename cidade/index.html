@@ -2553,30 +2553,31 @@ LOG SINK (Fase 7):
         drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
     }
 
-    /* ===== c-stats (grid 4 rows: PV/Recurso/XP/Gold + CA col2 span rows 1-2) ===== */
+    /* ===== c-stats (single column 4 rows: PV/Recurso/XP/Gold — CA removida) ===== */
+    /* 2026-05-11 v5: removeu CA do card (user request). Grid simplificado pra
+       1 coluna — todas linhas full-width. */
     .cgp-card.v8-style .c-stats {
       padding: 3px 4px;
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       flex: 1 1 auto;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
-      gap: 1px 4px;
+      gap: 1px;
       align-items: center;
       justify-items: stretch;
       overflow: hidden;
     }
-    /* Class-based grid placement (independent of HTML order) */
-    .cgp-card.v8-style .c-stat--hp     { grid-column: 1; grid-row: 1; }
+    /* Class-based grid placement (1-col layout, sem CA) */
+    .cgp-card.v8-style .c-stat--hp     { grid-row: 1; }
     .cgp-card.v8-style .c-stat--mp,
     .cgp-card.v8-style .c-stat--furia,
     .cgp-card.v8-style .c-stat--vigor,
     .cgp-card.v8-style .c-stat--energia,
-    .cgp-card.v8-style .c-stat--ki     { grid-column: 1; grid-row: 2; }
-    .cgp-card.v8-style .c-stat--ca     { grid-column: 2; grid-row: 1 / 3; justify-self: center; }
-    .cgp-card.v8-style .c-stat--xp     { grid-column: 1 / -1; grid-row: 3; }
-    .cgp-card.v8-style .c-stat--gold   { grid-column: 1 / -1; grid-row: 4; }
+    .cgp-card.v8-style .c-stat--ki     { grid-row: 2; }
+    .cgp-card.v8-style .c-stat--xp     { grid-row: 3; }
+    .cgp-card.v8-style .c-stat--gold   { grid-row: 4; }
 
     /* Cada c-stat: horizontal (bar atras + label + val inline); CA vertical */
     .cgp-card.v8-style .c-stat {
@@ -2623,29 +2624,28 @@ LOG SINK (Fase 7):
     }
     .cgp-card.v8-style .c-stat-val--hp-low { animation: cgpHpLowBlink 1.2s ease-in-out infinite; }
     @keyframes cgpHpLowBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.75; } }
-    .cgp-card.v8-style .c-stat-val--ca {
-      color: #ffd688;
-      text-shadow: 0 0 4px rgba(196, 149, 58, 0.5), 0 1px 1px rgba(0, 0, 0, 0.95);
-      font-size: 10px;
-    }
-    /* XP val gold + smaller */
-    .cgp-card.v8-style .c-stat--xp .c-stat-val,
+    /* 2026-05-11 v5: XP val em BRANCO pra ficar mais legível sobre o fundo dourado */
     .cgp-card.v8-style .c-stat--xp .c-stat-label {
       color: var(--v-gold, #c4953a);
     }
-    .cgp-card.v8-style .c-stat--xp .c-stat-val { font-size: 7px; }
-    /* Gold val + coin icon */
+    .cgp-card.v8-style .c-stat--xp .c-stat-val {
+      color: #ffffff;
+      font-size: 9px;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
+    }
+    /* 2026-05-11 v5: Gold val em BRANCO + maior pra destaque (era gold 8px) */
     .cgp-card.v8-style .c-stat--gold .c-stat-val {
-      color: var(--v-gold, #c4953a);
-      text-shadow: 0 0 3px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
-      font-size: 8px;
+      color: #ffffff;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
+      font-size: 11px;
+      font-weight: 900;
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
     }
     .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
-      width: 9px;
-      height: 9px;
+      width: 11px;
+      height: 11px;
       border-width: 1px;
     }
 
@@ -38520,30 +38520,30 @@ function renderCityGroupPanel(){
     var res = _resForClass(m.cls);
     var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
 
-    var safeName = _hubEsc(_titleCase(m.name));
-    /* 2026-05-11: race + class agora vem em PT-BR canonical via _raceLabelPT
-       / _classLabelPT (garante "Anão" em vez de "Dwarf", etc). */
+    /* 2026-05-11 v5 (user request):
+       - Nome SEM sobrenome (split primeiro espaco) — ex: "Wilzen Thunderhoof" -> "Wilzen"
+       - Class tag SEM raca — ex: "Bárbaro · Nv 9" (sem "Anão") */
+    var displayName = (m.name || '').split(/\s+/)[0];
+    var safeName = _hubEsc(_titleCase(displayName));
     var safeCls = _hubEsc(_classLabelPT(m.cls));
-    var safeRace = _hubEsc(_raceLabelPT(m.race || ''));
     var safeResName = _hubEsc(res.name);
 
-    var ac = (m.ac != null) ? m.ac : (10 + Math.floor((m.level || 1) / 4) + 2);
     var goldStr = (m.gold || 0).toLocaleString('pt-BR');
 
-    // ===== Card V8 compact — TODOS os stats dentro de c-stats =====
+    // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
     html += '<div class="cgp-slot" data-slot="' + i + '">'
       + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-      + '    <div class="c-class-tag">' + safeCls + (safeRace ? ' ' + safeRace : '') + ' · Nv ' + m.level + '</div>'
+      + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>'
       + '    <div class="c-stats">'
-      // Linha 1: PV (col 1)
+      // Linha 1: PV (full width — CA removida)
       + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
       + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
       + '        <span class="c-stat-label">PV</span>'
       + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
       + '      </div>';
-    // Linha 2: Recurso (col 1) — so se mmp > 0
+    // Linha 2: Recurso — so se mmp > 0
     if (m.mpMax > 0) {
       html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
         + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
@@ -38551,18 +38551,13 @@ function renderCityGroupPanel(){
         + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
         + '      </div>';
     }
-    // CA (col 2 span rows 1-2)
-    html += '      <div class="c-stat c-stat--ca">'
-      + '        <span class="c-stat-label">CA</span>'
-      + '        <span class="c-stat-val c-stat-val--ca">' + ac + '</span>'
-      + '      </div>'
-      // Linha 3: XP (full width)
-      + '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
+    // Linha 3: XP (full width, val branco)
+    html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
       + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
       + '        <span class="c-stat-label">XP</span>'
       + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
       + '      </div>'
-      // Linha 4: Valdoritas (full width)
+      // Linha 4: Valdoritas (full width, val branco maior)
       + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
       + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
       + '      </div>'
