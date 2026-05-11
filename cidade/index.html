@@ -6921,6 +6921,67 @@ body.perf-lite .vc-action-btn { transition: none; }
   window.CITY_MOCK_PLAYER = Object.assign({}, defaults, override);
   console.log('[CITY] mock player (initial):', window.CITY_MOCK_PLAYER);
 
+  // === SERVER-SIDE LOGGING via sendBeacon (USER REQUEST 2026-05-10) ===========
+  // Bug recorrente: player ve "Aventureiro Mago Elfo Nv 5" em PROD em vez de seu
+  // personagem real. Sem logs, impossivel diagnosticar QUAL passo falhou.
+  // Logs vao pra /api/sim/log (area=cidade) — buscar via getRecent ou ler
+  // logs/sim_cidade_<env>.<date>.jsonl
+  var _hostnameForLog = (location.hostname || '').toLowerCase();
+  var _envForLog = (
+    _hostnameForLog === 'jogo.lendasdevaldoria.com.br' ? 'prod' :
+    _hostnameForLog === 'dev.lendasdevaldoria.com.br' ? 'dev' :
+    (params.get('env') || 'prod')
+  );
+  var _apiHostForLog = (
+    _envForLog === 'prod' ? 'https://prod.lendasdevaldoria.com.br' :
+    'https://api.lendasdevaldoria.com.br'
+  );
+  function _cityLog(level, msg, extra){
+    try {
+      var payload = {entries:[{area:'cidade', level:level||'info', msg:msg||'', ts:Date.now(),
+        extra: extra || null,
+        ua: (navigator && navigator.userAgent || '').slice(0, 200),
+        href: (location.href || '').slice(0, 300),
+        tg_platform: (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '',
+        tg_initData_present: !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData)
+      }], env: _envForLog};
+      var url = _apiHostForLog + '/api/sim/log';
+      var body = JSON.stringify(payload);
+      if (navigator && navigator.sendBeacon){
+        navigator.sendBeacon(url, new Blob([body], {type: 'application/json'}));
+      } else {
+        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: body, keepalive: true}).catch(function(){});
+      }
+    } catch(_e){}
+  }
+
+  // === ERROR OVERLAY (USER REQUEST 2026-05-10) =================================
+  // Quando o player abre cidade em PRODUCTION mas REMOTE auth falha, NUNCA
+  // mostrar o mock "Aventureiro Mago Elfo Nv 5". Mostrar overlay claro.
+  function _showSessionErrorOverlay(reason, detail){
+    _cityLog('critical', 'session_error_overlay_shown', {reason: reason, detail: detail || null});
+    try {
+      var ov = document.createElement('div');
+      ov.id = 'city-session-error';
+      ov.style.cssText = 'position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;';
+      ov.innerHTML = (
+        '<div style="max-width:340px">' +
+        '<div style="font-size:28px;font-weight:700;letter-spacing:5px;color:#c4953a;text-shadow:0 0 25px rgba(196,149,58,0.5);margin-bottom:8px">VALDORIA</div>' +
+        '<div style="font-size:14px;color:#c4953a;margin-bottom:20px;letter-spacing:3px">SESSAO EXPIRADA</div>' +
+        '<div style="font-size:14px;line-height:1.6;margin-bottom:20px">' + (reason || 'Nao foi possivel carregar seu personagem.') + '</div>' +
+        '<div style="font-size:13px;line-height:1.5;color:#a09484;margin-bottom:24px">Abra o jogo novamente pelo bot do Telegram (botao Jogar ou /start).</div>' +
+        (detail ? '<div style="font-size:11px;color:#6a5a4e;margin-top:16px;font-family:monospace">' + detail + '</div>' : '') +
+        '</div>'
+      );
+      document.body.appendChild(ov);
+      // Halt: sem mock player, sem render do hub
+      window.__CITY_SESSION_ERROR = true;
+      throw new Error('cidade-session-error-halt');  // pula resto do JS
+    } catch(_e){
+      if (_e && _e.message === 'cidade-session-error-halt') throw _e;
+    }
+  }
+
   // === REMOTE mode fetch (USER REQUEST 2026-05-04) ============================
   // Quando token+api+uid presentes (web OAuth flow), buscar personagem REAL via
   // /api/auth/characters em vez de exibir mock "Aventureiro Mago Elfo Nv 5".
@@ -6930,8 +6991,35 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _api   = params.get('api');
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
+
+  // === GUARD: production hostname requires REMOTE auth ========================
+  // USER REQUEST 2026-05-10: bug recorrente onde player ve "Aventureiro Mago Elfo
+  // Nv 5" em PROD. Causa: /play/ falhou auth -> gotoCidade fallback SEM token,
+  // OU Telegram WebView cacheou URL antiga sem auth params. Resultado: cidade
+  // entra LOCAL mode em PROD e mostra mock player. ISTO NUNCA DEVE ACONTECER.
+  // Em production hostname, FORCE REMOTE — se faltar auth, mostrar erro claro
+  // em vez do mock silencioso.
+  var _isProductionHost = (
+    _hostnameForLog === 'jogo.lendasdevaldoria.com.br' ||
+    _hostnameForLog === 'www.jogo.lendasdevaldoria.com.br' ||
+    _hostnameForLog === 'dev.lendasdevaldoria.com.br'
+  );
+  _cityLog('info', 'cidade_boot', {
+    isProduction: _isProductionHost,
+    has_token: !!_token, has_api: !!_api, has_uid: !!_uid, has_char: !!_wantedChar,
+    search_keys: Array.from(params.keys()).join(',')
+  });
+  if (_isProductionHost && (!_token || !_api || !_uid)){
+    _showSessionErrorOverlay(
+      'Sessao expirada ou abertura direta sem autenticacao.',
+      'missing: ' + ([!_token && 'token', !_api && 'api', !_uid && 'uid'].filter(Boolean).join(', '))
+    );
+    return;  // halt — _showSessionErrorOverlay throws but pra garantir
+  }
+
   if (_token && _api && _uid){
     console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state');
+    _cityLog('info', 'remote_mode_start', {api: _api, uid: _uid, wanted_char: _wantedChar || ''});
 
     // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
     // posição EXATA do player (last_screen_payload). Se player estava em
@@ -7009,8 +7097,16 @@ body.perf-lite .vc-action-btn { transition: none; }
       var chars = (payload && payload.characters) || [];
       if (!chars.length){
         console.warn('[CITY] no characters returned — keeping mock');
+        _cityLog('critical', 'characters_empty_response', {has_payload: !!payload});
+        if (_isProductionHost){
+          _showSessionErrorOverlay(
+            'Nenhum personagem encontrado em sua conta.',
+            'API retornou lista vazia — verifique se voce ja criou um personagem'
+          );
+        }
         return;
       }
+      _cityLog('info', 'characters_loaded', {count: chars.length, wanted: _wantedChar || ''});
       var picked = null;
       if (_wantedChar){
         for (var i = 0; i < chars.length; i++){
@@ -7109,12 +7205,25 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
     }).catch(function(err){
       console.warn('[CITY] state/characters fetch failed:', err.message || err);
+      _cityLog('error', 'state_or_chars_fetch_failed', {error: String(err && err.message || err).slice(0, 300)});
       // Fallback: tenta só /api/auth/characters (sem state restoration)
       fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
         method: 'GET',
         headers: { 'Authorization': 'Bearer ' + _token }
-      }).then(function(r){ return r.ok ? r.json() : null; }).then(function(payload){
-        if (!payload || !payload.characters || !payload.characters.length) return;
+      }).then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function(payload){
+        if (!payload || !payload.characters || !payload.characters.length) {
+          _cityLog('critical', 'fallback_characters_empty', {has_payload: !!payload});
+          if (_isProductionHost){
+            _showSessionErrorOverlay(
+              'Nao foi possivel carregar seu personagem.',
+              'state e characters API falharam em sequencia'
+            );
+          }
+          return;
+        }
         var picked = payload.characters[0];
         var p = window.CITY_MOCK_PLAYER;
         if (picked.name) p.name = picked.name;
@@ -7122,7 +7231,17 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (picked.race) p.race = String(picked.race).toLowerCase();
         if (picked.level) p.level = picked.level;
         console.log('[CITY] fallback char loaded:', p.name);
-      }).catch(function(e){ console.warn('[CITY] fallback failed:', e); });
+        _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level});
+      }).catch(function(e){
+        console.warn('[CITY] fallback failed:', e);
+        _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
+        if (_isProductionHost){
+          _showSessionErrorOverlay(
+            'Erro de conexao ao carregar personagem.',
+            'state + characters fallback falharam: ' + String(e && e.message || e).slice(0, 100)
+          );
+        }
+      });
     });
   }
 
