@@ -4677,6 +4677,43 @@ body.perf-lite .vc-action-btn { transition: none; }
   </style>
 </head>
 <body>
+  <!-- VERSION STAMP LOG — primeiro script do body. USER REQUEST 2026-05-10:
+       diagnosticar se Telegram WebView servia versao cacheada antiga.
+       Fetch direto (no dependencies), FLAT format, sempre tenta enviar.
+       Se este log aparece no servidor, cidade.html v2+ esta carregada. -->
+  <script>
+  (function(){
+    try {
+      var h = (location.hostname || '').toLowerCase();
+      var apiHost = (h === 'jogo.lendasdevaldoria.com.br' || h === 'www.jogo.lendasdevaldoria.com.br')
+        ? 'https://prod.lendasdevaldoria.com.br'
+        : (h === 'dev.lendasdevaldoria.com.br' ? 'https://api.lendasdevaldoria.com.br' : '');
+      if (!apiHost) return;  // local/file:// — skip
+      var env = h.indexOf('jogo.') === 0 ? 'prod' : (h.indexOf('dev.') === 0 ? 'dev' : 'prod');
+      var payload = {
+        area: 'cidade', env: env, level: 'info',
+        msg: 'cidade_html_loaded_v3',
+        ts: Date.now(),
+        ua: (navigator && navigator.userAgent || '').slice(0, 200),
+        href: (location.href || '').slice(0, 300),
+        extra: {
+          version: 'v3-flat-overlay-2026-05-11-early-stamp',
+          tg_platform: (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || 'no_tg',
+          tg_initData_present: !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData),
+          doc_ready: document.readyState
+        }
+      };
+      // Usar FETCH direto (mais confiavel que sendBeacon em Telegram WebView)
+      fetch(apiHost + '/api/sim/log', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+        keepalive: true,
+        credentials: 'omit'
+      }).catch(function(){});
+    } catch(_e){}
+  })();
+  </script>
   <!-- ====================================================================
        INTRO TITLE + LOADING — pattern canonical (igual /app.html, /game/index.html)
        USER REQUEST 2026-05-05: NÃO é cidade-specific — funciona pra qualquer
@@ -6937,9 +6974,9 @@ body.perf-lite .vc-action-btn { transition: none; }
     'https://api.lendasdevaldoria.com.br'
   );
   function _cityLog(level, msg, extra){
-    // FIX 2026-05-10 v2: api espera FLAT format {area,env,level,msg,ts,ua,href,extra}
-    // (ver sim_log_routes.py linha 16-19). Antes eu enviava {entries:[...],env}
-    // (nested) — silenciosamente rejeitado. Agora FLAT igual server-log.js.
+    // FIX 2026-05-10 v3: usar fetch direto (sendBeacon falhava silenciosamente
+    // em Telegram Desktop WebView — logs sumiam). fetch + keepalive funciona
+    // tanto durante page life quanto on-unload.
     try {
       var payload = {
         area: 'cidade',
@@ -6955,12 +6992,13 @@ body.perf-lite .vc-action-btn { transition: none; }
         }, extra || {})
       };
       var url = _apiHostForLog + '/api/sim/log';
-      var body = JSON.stringify(payload);
-      if (navigator && navigator.sendBeacon){
-        navigator.sendBeacon(url, new Blob([body], {type: 'application/json'}));
-      } else {
-        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: body, keepalive: true, credentials: 'omit'}).catch(function(){});
-      }
+      fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+        keepalive: true,
+        credentials: 'omit'
+      }).catch(function(){});
     } catch(_e){}
   }
 
