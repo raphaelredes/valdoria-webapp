@@ -11074,31 +11074,61 @@ function _showKillsPopup(p){
   }
   // X-6.5.51AY (2026-05-11): tela épica com sangue, troféus pendurados e
   // hierarquia visual por CR. Substitui versão "tabela simples".
+  // X-6.5.51BA (2026-05-11): pedestal hero pro ícone grande do trophy.
+  // Suporta tanto SVG heráldico fallback (#ic-ach-algoz) quanto PNG futuro
+  // (gerado via Gemini Imagen — salvar em /shared/img/hall-cacada-trophy.png).
+  // Player vê PNG quando existe, senão fallback SVG. Tamanho responsivo via
+  // clamp() pra Telegram Desktop (384px) e smartphone.
   var html = '<style>'
     + '@keyframes vBladeShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,80,40,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,140,80,0.7));}}'
+    + '@keyframes vKlPedestalGlow{0%,100%{box-shadow:0 0 18px rgba(196,40,30,0.45),inset 0 0 18px rgba(255,80,40,0.2);}50%{box-shadow:0 0 28px rgba(255,80,40,0.7),inset 0 0 28px rgba(255,120,60,0.32);}}'
     + '.vKl-blades{animation:vBladeShimmer 2.8s ease-in-out infinite;}'
     + '@keyframes vDripPulse{0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;}}'
     + '.vKl-drip{animation:vDripPulse 1.6s ease-in-out infinite;}'
+    /* Pedestal hero — slot pra PNG do trofeu (gerado via Gemini)
+       Usa background-image (se PNG existir) ou fallback pro SVG heraldico.
+       Animacao de glow pulsante na borda. Tamanho responsivo:
+       Telegram Desktop (384px frame): 92px
+       Smartphone (412px frame): 102px
+       Frames > 480px: 112px max */
+    + '.vKl-hero-pedestal{position:relative;width:clamp(92px,22vw,112px);height:clamp(92px,22vw,112px);margin:6px auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(255,80,40,0.18) 0%,rgba(80,18,12,0.55) 60%,rgba(20,10,8,0.85) 100%);border:1px solid rgba(196,40,30,0.55);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
+    + '.vKl-hero-pedestal::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(196,40,30,0.18);pointer-events:none;}'
+    + '.vKl-hero-png{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:50%;}'
+    /* CSS image-set: tenta carregar o PNG; se falhar, fica transparente e SVG fallback aparece atras */
+    + '.vKl-hero-png[data-src]{background-image:var(--v-trophy-img,none);}'
+    + '.vKl-hero-fallback{width:64%;height:64%;color:#c43020;}'
+    /* Quando PNG existe, esconde fallback. Sem JS gambi: usa atributo */
+    + '.vKl-hero-pedestal[data-has-png="1"] .vKl-hero-fallback{display:none;}'
     + '</style>';
+  /* Detecta se ha PNG disponivel (heuristica: tenta carregar; on load = mostra) */
   html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
-  // === HEADER ÉPICO: espadas cruzadas + sangue + contador ===
-  html += '<div style="position:relative; text-align: center; padding: 18px 12px 14px; '
+  // === HEADER ÉPICO: pedestal + skull/trofeu (PNG futuro) ===
+  html += '<div style="position:relative; text-align: center; padding: 14px 12px 14px; '
     + 'background: radial-gradient(ellipse at 50% 0%, rgba(196,40,30,0.32) 0%, rgba(100,20,15,0.18) 35%, rgba(30,18,14,0.95) 75%); '
     + 'border: 1px solid #c43020; '
     + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;">'
     + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:#e85040;letter-spacing:2px;opacity:0.75;">◆ HALL DE CAÇADA ◆</div>'
-    + '<svg class="vKl-blades" viewBox="0 0 120 120" style="width: 68px; height: 68px; color: #c43020; margin: 6px auto 4px;"><use href="#ic-ach-algoz"/></svg>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 42px; '
-    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 12px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6);">' + total + '</div>'
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 11px; color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
+    /* Pedestal hero — PNG slot + SVG fallback */
+    + '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
+    +   '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
+    +   '<svg class="vKl-blades vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
+    + '</div>'
+    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: clamp(36px,9vw,48px); '
+    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.6), 0 2px 4px rgba(0,0,0,0.6);">' + total + '</div>'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: clamp(11px,2.8vw,13px); color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
     + 'Inimigos Abatidos'
     + '</div>'
     + (top && top.kills > 0
-      ? '<div style="font-size: 10px; color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 6px;">'
+      ? '<div style="font-size: clamp(10px,2.6vw,12px); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 6px; line-height:1.4;">'
         + 'Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> (' + top.kills + ')'
       + '</div>'
       : '')
     + '</div>';
+  /* X-6.5.51BA: heuristica de fallback — tenta carregar o PNG; se nao
+     existir (404), o data-has-png NUNCA fica 1 e o SVG fallback aparece.
+     Quando o user gerar o PNG via Gemini e colocar em /shared/img/, o
+     PNG aparece automaticamente sem reload do codigo. */
+  html += '<script>(function(){var ped=document.getElementById("vKl-hero-pedestal");if(!ped)return;var slot=ped.querySelector(".vKl-hero-png");if(!slot)return;var src=slot.getAttribute("data-src");if(!src)return;var img=new Image();img.onload=function(){slot.style.backgroundImage="url(\""+src+"\")";ped.setAttribute("data-has-png","1");};img.onerror=function(){/* PNG nao existe, SVG fallback ja esta visivel */};img.src=src;})();<\/script>';
   // === LISTA POR TIPO — cards com troféu + CR colorido ===
   html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 12px 8px 8px; position:relative;">'
     + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
