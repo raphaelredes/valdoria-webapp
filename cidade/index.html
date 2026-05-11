@@ -8624,7 +8624,14 @@ function _renderSectorTabs(rootEl){
 
 // Aplica sparkle/badge nas células de locais newly_available / in_progress.
 // renderHubScreen canonical usa class `.hub-loc` (não `.hub-loc-cell`) e `.hl-nm` p/ label.
+/* X-6.5.51BI (2026-05-11): user report — badge "NOVO!" continuava aparecendo
+   mesmo apos ver o popup narrativo. Fix: badge so aparece se o local ainda
+   nao foi visto (seen_locations check ANTES de adicionar hub-loc--new). Apos
+   primeira visualizacao, _markLocationSeen registra e proximas renders
+   omitem a badge. State 'newly_available' continua valido (quest discovery
+   nao iniciou), mas visual deixa de gritar "NOVO!" ja na 2a vez. */
 function _applyDiscoveryAnimations(rootEl){
+  var p = _ensureCityState();
   var cells = rootEl.querySelectorAll('.hub-loc');
   cells.forEach(function(cell){
     var labelEl = cell.querySelector('.hl-nm') || cell;
@@ -8635,11 +8642,16 @@ function _applyDiscoveryAnimations(rootEl){
     }
     if (!matched) return;
     var st = _getLocationState(matched);
+    var alreadySeen = p && (p.seen_locations || []).indexOf(matched.cb) >= 0;
     if (st === 'newly_available'){
-      cell.classList.add('hub-loc--new');
-      if (_markLocationSeen(matched.cb)){
-        cell.classList.add('discovering');
+      if (!alreadySeen) {
+        cell.classList.add('hub-loc--new');     // Badge "NOVO!" SO na primeira vez
+        cell.classList.add('discovering');      // Sparkle animation
+        _markLocationSeen(matched.cb);          // Registra (proximas renders NAO mostram "NOVO!")
         if (typeof vToast === 'function') vToast('✨ Você descobriu ' + matched.label + '!');
+      } else {
+        // Ja foi visto, mostra apenas o estado "in_progress" sutil (sem badge gritando)
+        cell.classList.add('hub-loc--inprogress');
       }
     } else if (st === 'in_progress'){
       cell.classList.add('hub-loc--inprogress');
@@ -8748,16 +8760,21 @@ function renderFooter(){
     var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
     return '<svg class="fb-heraldic" viewBox="0 0 120 120" style="width:18px;height:18px;flex-shrink:0;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
+  /* X-6.5.51BG (2026-05-11): user request - remover "Grupo" + 1 linha so.
+     Antes:
+       - quick: [Mochila][Ficha][Grupo]
+       - nav:   [Personagens][Ajuda][Settings]
+     Agora: TUDO em quick (5 botoes 1 linha), nav vazio.
+     Layout: [Mochila][Ficha][Personagens][Ajuda][Settings]
+     fb-icon-only pra Ajuda e Settings (compactos), labels nos outros 3. */
   quickEl.innerHTML = ''
     + '<button class="fb-btn" data-action="inventory">' + _heralB('ic-mochila') + 'Mochila</button>'
     + '<button class="fb-btn" data-action="status">'    + _heralB('ic-ficha') + 'Ficha</button>'
-    + '<button class="fb-btn" data-action="party">'     + _heralB('ic-grupo') + 'Grupo</button>';
-  // Nav row: [Personagens][Ajuda][Settings] — heráldicos canonical
-  // (Sim Logs removido 2026-05-04 — era dev-only, escondido em produção)
-  navEl.innerHTML = ''
-    + '<button class="fb-btn" data-action="characters">' + _heralB('ic-portal') + 'Personagens</button>'
+    + '<button class="fb-btn" data-action="characters">' + _heralB('ic-portal') + 'Hall</button>'
     + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">' + _heralB('ic-ajuda') + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">' + _heralB('ic-engrenagem') + '</button>';
+  // Nav row agora vazio (todos botoes movidos pra quick em linha unica)
+  navEl.innerHTML = '';
 }
 function _toggleFooter(){
   _footerCollapsed = !_footerCollapsed;
@@ -10964,14 +10981,18 @@ function _showAchievementsPopup(p){
     // Cores do medal-bg por estado (matte, sem brilho exagerado)
     var medalColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#3a342e');
     var iconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
-    var glowFilter = st.mastered ? 'filter: drop-shadow(0 0 3px rgba(255,180,60,0.45));' : '';
+    /* X-6.5.51BF (2026-05-11): user request — remover sombra do icone central
+       da medalha. Antes: filter drop-shadow no .med-circle aplicava halo no
+       icone heraldico tambem (visualmente terrivel). Agora: filter SO no
+       medal-bg SVG (o disco metalico), icone central fica plano e crisp. */
+    var bgGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 3px rgba(255,180,60,0.45));' : '';
 
     html += '<div class="ach-medal ' + stateCls + '" data-chain="' + c.id + '" '
       + 'style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; cursor: pointer; position: relative; border-radius: 6px; transition: transform 0.15s ease;">'
       // Medalha circular: medal-bg (textura) + icone heráldico em camadas
-      + '<div class="med-circle" style="position: relative; width: 54px; height: 54px; '
-      + 'display: grid; place-items: center; ' + glowFilter + '">'
-      + '<svg viewBox="0 0 100 100" style="grid-area: 1/1; width: 100%; height: 100%; color: ' + medalColor + ';">'
+      + '<div class="med-circle" style="position: relative; width: 54px; height: 54px; display: grid; place-items: center;">'
+      // X-6.5.51BF: filter SO no disco da medalha, nao no icone central
+      + '<svg viewBox="0 0 100 100" style="grid-area: 1/1; width: 100%; height: 100%; color: ' + medalColor + '; ' + bgGlowFilter + '">'
       + '<use href="#medal-bg"/>'
       + '</svg>'
       + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 30px; height: 30px; color: ' + iconColor + '; pointer-events: none;">'
@@ -37468,16 +37489,17 @@ var SUBSCREEN_DATA = {
   },
 
   // ========== SUB-SUB-SCREENS — QUEST DETAIL (Fase 4) ==========
+  /* X-6.5.51BH (2026-05-11): wolves quest reworked
+     - removido "Reivindicar parcial" (user request)
+     - "Ver localização" agora abre cartografia com destaque
+     - "Detalhes objetivos" agora abre modal completo */
   'quest_open_wolves': {
     header: '🐺 Missão: Caçar Lobos Cinzentos',
     flavor: 'Lobos atacam fazendeiros do norte. Mata 5 pra que a vila durma em paz.',
     npcInfo: '📋 Estágio 2/5 — 2 lobos abatidos | Recompensa: 50 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Floresta dos Lobos', 'quest_wolves_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'requisitos', 'quest_wolves_details'],
-      [_heralIco('ic-missoes'), 'Reivindicar parcial', 'não disponível ainda', 'quest_wolves_partial'],
-      // 2026-05-11: consistência com quest_open_lyana — todas as missões
-      // ativas devem ter botão de abandono (com confirmação obrigatória).
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Lobos', 'quest_wolves_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '5 lobos cinzentos', 'quest_wolves_details'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
@@ -37486,8 +37508,10 @@ var SUBSCREEN_DATA = {
     flavor: 'Lyana, a herbalista, está na praça. Tens uma carta importante pra entregar.',
     npcInfo: '✅ Pronta pra entregar | Recompensa: 20 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
+      /* X-6.5.51BH: Reler conteudo agora abre modal pergaminho com texto da carta */
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Praça de Valdoria', 'quest_lyana_locate'],
+      [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
       [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar quest', 'quest_lyana_deliver'],
-      [_heralIco('ic-missoes'), 'Reler conteúdo', 'pergaminho', 'quest_lyana_read'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
     ]
   },
@@ -38541,17 +38565,67 @@ var ACTION_HANDLERS = {
   // Quests
   'quest_open_wolves':      function(p){ navigateTo('quest_open_wolves'); },
   'quest_open_lyana':       function(p){ navigateTo('quest_open_lyana'); },
-  'quest_wolves_locate':    function(p){ vToast('📍 Localização: Floresta dos Lobos, 2km ao norte da cidade.'); },
-  'quest_wolves_details':   function(p){ vToast('📜 Objetivo: matar 5 lobos cinzentos. Atual: 2/5. Recompensa: 50 Valdoritas + 80 XP.'); },
-  'quest_wolves_partial':   function(p){ vToast('💰 Recompensa parcial não disponível. Termine os 5 lobos primeiro.'); },
-  // 2026-05-11: handlers per-quest delegam pros helpers _deliverQuest /
-  // _abandonQuest (definidos ~linha 37670). Helpers fazem: check duplicate,
-  // state update em CITY_MOCK_PLAYER, splice em QUESTS_ACTIVE, push em
-  // QUESTS_HISTORY, refreshHud, closeCityPopup, confirmação para abandono.
+  /* X-6.5.51BH (2026-05-11): handlers reescritos com modais epicos +
+     integracao cartografia. quest_<id>_locate seta window._questFocusLoc
+     (key + name + quest title) antes de navegar pra cartografia, onde o
+     render pode highlightar a localizacao com ring pulsante.
+     quest_<id>_details abre _showInfoPopup com objetivo + progresso +
+     recompensa em pergaminho.
+     quest_lyana_read abre modal pergaminho com texto da carta. */
+  'quest_wolves_locate': function(p){
+    window._questFocusLoc = { key: 'forest', name: 'Floresta dos Lobos', questTitle: 'Caçar Lobos Cinzentos' };
+    closeCityPopup(true);
+    if (typeof navigateTo === 'function') navigateTo('cartografia');
+    setTimeout(function(){ vToast('📍 Floresta dos Lobos destacada no Mapa de Valdoria — toque pra viajar.'); }, 600);
+  },
+  'quest_wolves_details': function(p){
+    _showInfoPopup({
+      icon: _heralIco('ic-lobo'),
+      npc: 'Tavira — Caçadora-Chefe',
+      title: 'Caçar 5 Lobos Cinzentos',
+      desc: '<div style="text-align:left;line-height:1.6;">'
+          + '<b style="color:#c4953a;">◆ Objetivo:</b><br>Eliminar <b style="color:#e85040;">5 lobos cinzentos</b> que atacam fazendeiros do norte.<br><br>'
+          + '<b style="color:#c4953a;">◆ Progresso atual:</b><br><b style="color:#7cdb7c;">2 / 5</b> abatidos<br><br>'
+          + '<b style="color:#c4953a;">◆ Localização:</b><br>Floresta dos Lobos · 2km ao norte<br><br>'
+          + '<b style="color:#c4953a;">◆ Recompensa:</b><br>50 <span class="vi vi-coin sm"></span> + 80 XP<br>+10 afinidade com Tavira<br><br>'
+          + '<i style="color:#a09484;">"Esses lobos têm mordida pesada. Use suas Pontes de Mira."</i>'
+          + '</div>',
+      confirmLabel: 'Entendido',
+      cancelLabel: 'Voltar',
+      onConfirm: function(){}
+    });
+  },
+  'quest_lyana_locate': function(p){
+    window._questFocusLoc = { key: 'plains', name: 'Praça de Valdoria', questTitle: 'Falar com Lyana' };
+    closeCityPopup(true);
+    if (typeof navigateTo === 'function') navigateTo('cartografia');
+    setTimeout(function(){ vToast('📍 Lyana está na Praça de Valdoria (Portões) — toque pra viajar.'); }, 600);
+  },
   'quest_lyana_deliver': function(p){
     _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
   },
-  'quest_lyana_read':    function(p){ vToast('📜 Carta: "Lyana, encontre-me na fonte ao anoitecer. — Eirik"'); },
+  'quest_lyana_read': function(p){
+    _showInfoPopup({
+      icon: _heralIco('ic-pergaminho'),
+      npc: 'Carta selada · Pergaminho amarelado',
+      title: 'A Carta de Eirik',
+      desc: '<div style="text-align:left;line-height:1.7;font-style:italic;'
+          + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(74,56,40,0.20) 100%);'
+          + 'border:1px solid rgba(196,149,58,0.35);border-radius:6px;padding:14px 12px;color:#e8dcc8;">'
+          + '<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:13px;color:#c4953a;letter-spacing:2px;margin-bottom:10px;">◆ ◆ ◆</div>'
+          + '<b style="color:#ffd700;">"Lyana,</b><br><br>'
+          + 'Encontre-me na fonte ao anoitecer.<br>'
+          + 'Tenho notícias que não podem esperar — sobre o que vimos juntos no bosque, sobre as runas que sangram quando há lua nova.<br><br>'
+          + 'Traga o cristal. <b>Não o mostre a ninguém.</b><br><br>'
+          + 'Se eu não chegar até a terceira badalada, parta. Não me espere.<br><br>'
+          + '<b style="color:#c4953a;">— Eirik, o Runeiro"</b>'
+          + '<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:13px;color:#c4953a;letter-spacing:2px;margin-top:10px;">◆ ◆ ◆</div>'
+          + '</div>',
+      confirmLabel: 'Fechar carta',
+      cancelLabel: 'Voltar',
+      onConfirm: function(){}
+    });
+  },
   'quest_lyana_abandon': function(p){
     _abandonQuest('lyana', 'Falar com Lyana', '-5 afinidade com Lyana');
   },
@@ -39015,9 +39089,40 @@ function renderSubScreen(el, key){
   if (key === 'quests_active') {
     header = '📋 Missões Ativas (' + buttons.length + ')';
   }
-  var html = '<div class="city-subscreen">';
-  if (d.flavor) html += '<p class="subscreen-flavor">' + d.flavor + '</p>';
-  if (d.npcInfo) html += '<div class="subscreen-npc">' + d.npcInfo + '</div>';
+  /* X-6.5.51BJ (2026-05-11): quest_open_* recebe renderizacao epica AAA
+     com hero header pergaminho + npc-banner ornamentado + botoes maiores
+     com hover lift + bordas douradas pulsantes. Outras subscreens mantem
+     layout legacy. */
+  var isQuestOpen = (key && key.indexOf('quest_open_') === 0);
+  var html = '<div class="city-subscreen' + (isQuestOpen ? ' city-subscreen--quest' : '') + '">';
+  if (isQuestOpen) {
+    /* Pergaminho hero — flavor + npcInfo combinados num cartao ornamentado */
+    html += '<style>'
+      + '.cs-quest-hero{position:relative;margin:6px 0 12px;padding:14px 12px 12px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.25) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;}'
+      + '.cs-quest-hero::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
+      + '.cs-quest-hero::after{content:"◆";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
+      + '.cs-quest-flavor{font-family:var(--v-font,serif);font-size:13px;line-height:1.55;color:#e8dcc8;text-align:center;font-style:italic;margin:4px 0 10px;}'
+      + '.cs-quest-npc{font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);text-align:center;letter-spacing:1px;padding:8px 6px;border-top:1px dashed rgba(196,149,58,0.3);}'
+      + '@keyframes csQuestBtnGlow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}50%{box-shadow:0 2px 12px rgba(196,149,58,0.35),inset 0 1px 0 rgba(255,255,255,0.08);}}'
+      + '.city-subscreen--quest .subscreen-btn{background:linear-gradient(180deg,rgba(74,56,40,0.45) 0%,rgba(42,30,18,0.55) 100%);border:1px solid rgba(196,149,58,0.35);padding:12px 14px;margin-bottom:6px;transition:transform 0.15s ease,border-color 0.15s ease,background 0.15s ease;}'
+      + '.city-subscreen--quest .subscreen-btn:hover{transform:translateX(2px);background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.4) 100%);border-color:var(--v-gold,#c4953a);}'
+      + '.city-subscreen--quest .subscreen-btn .sb-icon{font-size:22px;width:30px;}'
+      + '.city-subscreen--quest .subscreen-btn .sb-text{font-family:var(--v-font-display,Cinzel,serif);font-weight:600;color:#e8dcc8;}'
+      + '.city-subscreen--quest .subscreen-btn .sb-info{color:#a09484;font-size:10px;}'
+      /* Botoes especiais: abandonar = vermelho, deliver = dourado */
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]{border-color:rgba(196,40,30,0.4);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]:hover{border-color:#c43020;background:linear-gradient(180deg,rgba(196,40,30,0.18) 0%,rgba(74,30,20,0.5) 100%);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]{border-color:rgba(255,215,0,0.45);animation:csQuestBtnGlow 2.4s ease-in-out infinite;}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]:hover{border-color:#ffd700;background:linear-gradient(180deg,rgba(255,215,0,0.18) 0%,rgba(196,149,58,0.3) 100%);}'
+      + '</style>';
+    html += '<div class="cs-quest-hero">';
+    if (d.flavor) html += '<div class="cs-quest-flavor">' + d.flavor + '</div>';
+    if (d.npcInfo) html += '<div class="cs-quest-npc">' + d.npcInfo + '</div>';
+    html += '</div>';
+  } else {
+    if (d.flavor) html += '<p class="subscreen-flavor">' + d.flavor + '</p>';
+    if (d.npcInfo) html += '<div class="subscreen-npc">' + d.npcInfo + '</div>';
+  }
   // Mensagem se lista vazia (todas concluídas)
   if (buttons.length === 0 && key === 'quests_active') {
     html += '<div class="subscreen-flavor" style="text-align:center;padding:20px;color:#a09484">'
