@@ -11190,10 +11190,10 @@ function _showKillsPopup(p){
       + '</div>'
       : '')
     + '</div>';
-  /* Heuristica de PNG (Gemini) — se nao existir, SVG fallback */
-  html += '<script>(function(){var ped=document.getElementById("vKl-hero-pedestal");if(!ped)return;var slot=ped.querySelector(".vKl-hero-png");if(!slot)return;var src=slot.getAttribute("data-src");if(!src)return;var img=new Image();img.onload=function(){slot.style.backgroundImage="url(\""+src+"\")";ped.setAttribute("data-has-png","1");};img.src=src;})();<\/script>';
-  /* Contador animado 0 -> total com easeOutCubic + pulse final */
-  html += '<script>(function(){var el=document.getElementById("vKl-counter");if(!el)return;var target=' + total + ';var dur=1600;var start=performance.now();function tick(t){var p=Math.min(1,(t-start)/dur);var eased=1-Math.pow(1-p,3);el.textContent=Math.round(eased*target);if(p<1){requestAnimationFrame(tick);}else{el.classList.add("vKl-counter-pulse");setTimeout(function(){try{el.classList.remove("vKl-counter-pulse");}catch(e){}},500);}}requestAnimationFrame(tick);})();<\/script>';
+  /* X-6.5.51BC (2026-05-11): script de PNG + contador EXECUTAM via setTimeout
+     pos-innerHTML. innerHTML NAO executa <script> tags (silently dropped),
+     bug causou contador parado em "0". Agora as funcoes ficam definidas no
+     escopo da funcao _showKillsPopup e rodam apos bodyEl.innerHTML setar. */
   // === BESTIÁRIO: cards com stagger + medalha rank ===
   html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 14px 8px 8px; position:relative;">'
     + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
@@ -11234,6 +11234,50 @@ function _showKillsPopup(p){
   bodyEl.innerHTML = html;
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'kills') _popupStack.push('kills');
+  // X-6.5.51BC (2026-05-11): scripts post-innerHTML — innerHTML <script>
+  // sao stripped silenciosamente pelo navegador, entao rodamos aqui APOS
+  // o DOM ser populado. Captura `total` no closure.
+  setTimeout(function(){
+    // 1) Heuristica de PNG: tenta carregar trophy.png, fallback SVG fica
+    try {
+      var ped = document.getElementById('vKl-hero-pedestal');
+      if (ped) {
+        var slot = ped.querySelector('.vKl-hero-png');
+        if (slot) {
+          var src = slot.getAttribute('data-src');
+          if (src) {
+            var img = new Image();
+            img.onload = function(){
+              slot.style.backgroundImage = 'url("' + src + '")';
+              ped.setAttribute('data-has-png', '1');
+            };
+            img.src = src;
+          }
+        }
+      }
+    } catch(_e1){}
+    // 2) Contador animado 0 -> total com easeOutCubic + pulse final
+    try {
+      var el = document.getElementById('vKl-counter');
+      if (el) {
+        var target = total;
+        var dur = 1600;
+        var start = performance.now();
+        function _vKlTick(t){
+          var p = Math.min(1, (t - start) / dur);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(eased * target);
+          if (p < 1) {
+            requestAnimationFrame(_vKlTick);
+          } else {
+            el.classList.add('vKl-counter-pulse');
+            setTimeout(function(){ try { el.classList.remove('vKl-counter-pulse'); } catch(_e2){} }, 500);
+          }
+        }
+        requestAnimationFrame(_vKlTick);
+      }
+    } catch(_e3){}
+  }, 30);  // pequeno delay pra garantir layout settled
 }
 
 // canonical: streak history
