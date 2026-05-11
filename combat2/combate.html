@@ -18678,19 +18678,39 @@ function __combatShowErrorOverlay(title, detailsHtml) {
         mountInGameFrame(ov);
         btn.addEventListener('click', function () {
             try { ov.remove(); } catch (eR) {}
+            /* 2026-05-11 (Chrome MCP testing): tg.close() so funciona em
+               Telegram WebApp real. Em browser, deixava tela vazia. Agora
+               detecta contexto e faz fallback pra /cidade/ via URL preservando
+               token/uid/api/env/char. */
             try {
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.close();
+                var tg = window.Telegram && window.Telegram.WebApp;
+                if (tg && tg.initData && String(tg.initData).length > 0) {
+                    tg.close();
+                    return;
                 }
             } catch (eC) {}
+            try {
+                var params = new URLSearchParams(location.search || '');
+                var carry = ['token', 'uid', 'user_id', 'api', 'api_base', 'env', 'char', 'char_id'];
+                var qp = new URLSearchParams();
+                for (var i = 0; i < carry.length; i++) {
+                    var v = params.get(carry[i]);
+                    if (v) qp.set(carry[i], v);
+                }
+                var url = '/cidade/' + (qp.toString() ? '?' + qp.toString() : '');
+                window.__valdoria_transitioning = true;
+                location.replace(url);
+            } catch (eF) {
+                location.href = '/cidade/';
+            }
         });
     } catch (eOv) {
         console.error('[C-REM:LEAVE-ERR] overlay_failed \u2014 fallback close', eOv);
         try {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.close();
-            }
+            var tg2 = window.Telegram && window.Telegram.WebApp;
+            if (tg2 && tg2.initData) { tg2.close(); return; }
         } catch (eC) {}
+        try { location.replace('/cidade/'); } catch (eFx) { location.href = '/cidade/'; }
     }
 }
 

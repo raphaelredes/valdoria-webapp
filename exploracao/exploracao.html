@@ -14636,6 +14636,11 @@ window.__applyExploreSnap = function(S, snap) {
   }
   // Gold (só pra UI — o delta é acumulado em __exploreRewards.gold_gained)
   if (typeof snap.gold === 'number') S.gold = snap.gold;
+  // X-6.5.51AT (2026-05-11): level + XP do player real (sem isso, HUD mostra
+  // "{xp}/300" porque p.level fica em 1 fallback e xpForNextLevel(1)=300).
+  // p.level também é referenciado em xpForNextLevel + display "N{p.level}".
+  if (typeof snap.lvl === 'number') p.level = snap.lvl;
+  if (typeof snap.xp === 'number') p.xp = snap.xp;
   // [R2 2026-04-23] Histórico de eventos persistente (cooldown cross-session)
   if (Array.isArray(snap.event_history)) {
     S.persistedEventHistory = snap.event_history.slice(-30);
@@ -14652,7 +14657,8 @@ window.__applyExploreSnap = function(S, snap) {
   }
   // Gera sessionId único pra esta sessão (usado em event_history entries)
   S._sessionId = Date.now();
-  console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' hp=' + p.hp + '/' + p.mhp
+  console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' lvl=' + p.level
+    + ' xp=' + p.xp + ' hp=' + p.hp + '/' + p.mhp
     + ' mp=' + p.mp + '/' + p.mmp + ' gold=' + S.gold
     + ' inv=' + ((S.inventory && S.inventory.length) || 0)
     + ' quests=' + ((S.activeQuests && S.activeQuests.length) || 0)
@@ -33681,7 +33687,12 @@ function _renderExploracaoInventoryPopup() {
   var inv = _readSharedInventory();
   var totalCount = inv.reduce(function(sum, it){ return sum + (it.quantity || 0); }, 0);
   var totalValue = inv.reduce(function(sum, it){ return sum + (it.value || 0) * (it.quantity || 0); }, 0);
-  var gold = (S && S.player && S.player.gold) || 0;
+  /* 2026-05-11 (Chrome MCP testing): Mochila mostrava "Bolsa: 0" pq lia
+     S.player.gold (nunca setado no boot do snap), enquanto HUD VALD lia
+     S.gold corretamente (snap.gold -> S.gold em L14638). Fix: usa S.gold
+     como source primaria, com fallback pra S.player.gold por compat. */
+  var gold = (S && typeof S.gold === 'number' ? S.gold :
+              (S && S.player && S.player.gold) || 0);
 
   // Filtrar por categoria
   var filter = window._invFilterExp || 'all';
