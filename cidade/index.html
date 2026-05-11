@@ -2361,6 +2361,257 @@ LOG SINK (Fase 7):
 
     .cgp-empty-label { font-size: var(--v-font-xs, 11px); color: #a09484; font-style: italic; line-height: 1.4; }
 
+    /* ==========================================================================
+       V8 HERALDIC STYLE pra .cgp-card (2026-05-11, user request:
+       "na cidade, mostrar os cards exatamente assim como sao mostrados no
+       combate, porem com informacoes adicionais como valdoritas, barra de XP
+       e pontos de exaustao").
+
+       Mirror direto do .cell.v8-card de simuladores/combate.html (~L1916+):
+       - Class-color theming via --card-accent
+       - Banner topo dark-class-color + nome uppercase + gold border-bottom
+       - Heraldic SVG portrait absolute top-right
+       - Stat bars com fill atras do valor (animated)
+
+       Adicionado em cidade: XP bar + Gold + Exhaustion pips (que combate
+       nao tem). Layout vertical (5 rows) porque cidade tem 4 cards-in-row
+       compactos (~88px cada em frame 384px).
+       ========================================================================== */
+    :root {
+      /* Class color tokens — espelham combate.html L1044-1056 */
+      --class-guerreiro: #b06040;   --class-guerreiro-dark: #5a2a18;
+      --class-mago: #4080c0;        --class-mago-dark: #1a3a66;
+      --class-ladino: #6a8030;      --class-ladino-dark: #2e3a12;
+      --class-clerigo: #e0c070;     --class-clerigo-dark: #7a5c20;
+      --class-paladino: #f090b8;    --class-paladino-dark: #8a3c66;
+      --class-barbaro: #c04040;     --class-barbaro-dark: #501818;
+      --class-patrulheiro: #50a050; --class-patrulheiro-dark: #1e4a22;
+      --class-bardo: #a060d0;       --class-bardo-dark: #401a66;
+      --class-druida: #5a9a3e;      --class-druida-dark: #1e3e1e;
+      --class-monge: #ff8c42;       --class-monge-dark: #5a2a10;
+      --class-feiticeiro: #d04080;  --class-feiticeiro-dark: #5a1030;
+      --class-bruxo: #8040b0;       --class-bruxo-dark: #3a1060;
+      --class-aliado: #6b9a6b;      --class-aliado-dark: #2e4a2e;
+    }
+
+    /* Class color modifiers — cada .cgp-card.cls-X define --card-accent + --card-accent-dark */
+    .cgp-card.cls-guerreiro   { --card-accent: var(--class-guerreiro);   --card-accent-dark: var(--class-guerreiro-dark); }
+    .cgp-card.cls-mago        { --card-accent: var(--class-mago);        --card-accent-dark: var(--class-mago-dark); }
+    .cgp-card.cls-ladino      { --card-accent: var(--class-ladino);      --card-accent-dark: var(--class-ladino-dark); }
+    .cgp-card.cls-clerigo,
+    .cgp-card.cls-sacerdotisa,
+    .cgp-card.cls-sacerdote   { --card-accent: var(--class-clerigo);     --card-accent-dark: var(--class-clerigo-dark); }
+    .cgp-card.cls-paladino    { --card-accent: var(--class-paladino);    --card-accent-dark: var(--class-paladino-dark); }
+    .cgp-card.cls-barbaro     { --card-accent: var(--class-barbaro);     --card-accent-dark: var(--class-barbaro-dark); }
+    .cgp-card.cls-patrulheiro { --card-accent: var(--class-patrulheiro); --card-accent-dark: var(--class-patrulheiro-dark); }
+    .cgp-card.cls-bardo       { --card-accent: var(--class-bardo);       --card-accent-dark: var(--class-bardo-dark); }
+    .cgp-card.cls-druida      { --card-accent: var(--class-druida);      --card-accent-dark: var(--class-druida-dark); }
+    .cgp-card.cls-monge       { --card-accent: var(--class-monge);       --card-accent-dark: var(--class-monge-dark); }
+    .cgp-card.cls-feiticeiro,
+    .cgp-card.cls-feiticeira  { --card-accent: var(--class-feiticeiro);  --card-accent-dark: var(--class-feiticeiro-dark); }
+    .cgp-card.cls-bruxo       { --card-accent: var(--class-bruxo);       --card-accent-dark: var(--class-bruxo-dark); }
+    .cgp-card.cls-aliado      { --card-accent: var(--class-aliado);      --card-accent-dark: var(--class-aliado-dark); }
+
+    /* V8 visual reskin — overrides do .cgp-card legacy. Aplica APENAS quando
+       o card tem .v8-style (controlado pelo JS pra rollback fácil). */
+    .cgp-card.v8-style {
+      background: var(--card-accent-dark, #1a1510);
+      border: 2px solid var(--v-gold, #c4953a);
+      border-radius: 6px;
+      /* !important pra vencer .cgp-card padding/gap do @media compact (L729) */
+      padding: 0 !important;
+      gap: 0 !important;
+      box-shadow:
+        0 0 0 1px #0a0806,
+        0 4px 14px rgba(0, 0, 0, 0.65),
+        inset 0 0 0 1px rgba(255, 220, 140, 0.22);
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+    }
+    .cgp-card.v8-style .cgp-head {
+      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
+      padding: 5px 26px 4px 7px;  /* right padding pra portrait nao colidir */
+      border-bottom: 1px solid var(--v-gold, #c4953a);
+      margin: 0;
+      position: relative;
+    }
+    .cgp-card.v8-style .cgp-name {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 900;
+      font-size: var(--v-font-xs, 11px);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 25%, #fff 75%);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+      line-height: 1.15;
+    }
+    .cgp-card.v8-style .cgp-classrace {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 700;
+      font-size: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 35%, #fff 65%);
+      opacity: 0.85;
+      font-style: normal;
+      margin-top: 1px;
+      line-height: 1.1;
+      max-height: none;
+      -webkit-line-clamp: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cgp-card.v8-style .cgp-level {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 50%, #fff 50%);
+      opacity: 0.9;
+      margin-top: 1px;
+    }
+    /* Heraldic portrait — absolute top-right corner */
+    .cgp-card.v8-style .cgp-portrait {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 45%, #fff 55%);
+      filter:
+        drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
+        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+      z-index: 2;
+    }
+    .cgp-card.v8-style .cgp-portrait svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
+      stroke: currentColor;
+    }
+    /* Stats container — vertical stack de rows compactos */
+    .cgp-card.v8-style .cgp-stats {
+      padding: 4px 5px 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
+    }
+    /* Cada row — bar com fill atras + label + valor */
+    .cgp-card.v8-style .cgp-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      font-size: 9px;
+      line-height: 1.1;
+      min-height: 12px;
+    }
+    .cgp-card.v8-style .cgp-row .cgp-ico {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
+      opacity: 0.85;
+      flex: 0 0 18px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+    .cgp-card.v8-style .cgp-row .cgp-bar {
+      flex: 1;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+    .cgp-card.v8-style .cgp-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.9;
+    }
+    .cgp-card.v8-style .cgp-row-value {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 900;
+      font-size: 8px;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+      flex: 0 0 auto;
+      min-width: 28px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    /* Exhaustion pips no estilo V8 — vermelho radial */
+    .cgp-card.v8-style .cgp-pips {
+      flex: 1;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    .cgp-card.v8-style .cgp-pip {
+      flex: 1;
+      height: 6px;
+      border: 1px solid rgba(160, 80, 60, 0.5);
+      border-radius: 1px;
+      background: rgba(40, 20, 15, 0.4);
+    }
+    .cgp-card.v8-style .cgp-pip.filled {
+      background: radial-gradient(circle at 30% 30%, #ff7a55, #a03828);
+      border-color: #c44a3a;
+      box-shadow: 0 0 3px rgba(200, 50, 40, 0.7);
+    }
+    /* Gold + Exhaustion combinados em row final (lado a lado, compacto) */
+    .cgp-card.v8-style .cgp-row.cgp-row-gold {
+      gap: 6px;
+      padding-top: 2px;
+      margin-top: 1px;
+      border-top: 1px solid rgba(196, 149, 58, 0.18);
+      justify-content: space-between;
+    }
+    .cgp-card.v8-style .cgp-val-gold {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 900;
+      font-size: 9px;
+      color: var(--v-gold, #c4953a);
+      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .cgp-card.v8-style .cgp-row.cgp-row-gold .vi-coin.sm {
+      width: 11px;
+      height: 11px;
+      border-width: 1px;
+    }
+    /* Border-color sutil por classe (alem do gold padrao) */
+    .cgp-card.v8-style.player {
+      border-color: var(--v-gold, #c4953a) !important;
+      box-shadow:
+        0 0 0 1px #0a0806,
+        0 4px 16px color-mix(in srgb, var(--card-accent, #c4953a) 30%, transparent),
+        inset 0 0 0 1px rgba(255, 220, 140, 0.3);
+    }
+    /* HP bar fill: cores V8 (high/mid/low) — gradientes idênticos ao combate */
+    .cgp-card.v8-style .cgp-bar-fill.hp.hp-high { background: linear-gradient(90deg, #5a8a3e 0%, #8ab04e 100%); }
+    .cgp-card.v8-style .cgp-bar-fill.hp.hp-mid  { background: linear-gradient(90deg, #b08038 0%, #d0a040 100%); }
+    .cgp-card.v8-style .cgp-bar-fill.hp.hp-low  { background: linear-gradient(90deg, #8a2a20 0%, #c04030 100%); }
+    /* Resource fills */
+    .cgp-card.v8-style .cgp-bar-fill.mp     { background: linear-gradient(90deg, #2a6090 0%, #70c0f0 100%); box-shadow: 0 0 4px rgba(112, 192, 240, 0.35); }
+    .cgp-card.v8-style .cgp-bar-fill.fury   { background: linear-gradient(90deg, #8a3020 0%, #ff6040 100%); box-shadow: 0 0 4px rgba(255, 96, 64, 0.35); }
+    .cgp-card.v8-style .cgp-bar-fill.energy { background: linear-gradient(90deg, #208a78 0%, #60e8d0 100%); box-shadow: 0 0 4px rgba(96, 232, 208, 0.35); }
+    .cgp-card.v8-style .cgp-bar-fill.ki     { background: linear-gradient(90deg, #603888 0%, #c080ff 100%); box-shadow: 0 0 4px rgba(192, 128, 255, 0.35); }
+    .cgp-card.v8-style .cgp-bar-fill.vigor  { background: linear-gradient(90deg, #806820 0%, #ffd060 100%); box-shadow: 0 0 4px rgba(255, 208, 96, 0.35); }
+    .cgp-card.v8-style .cgp-bar-fill.xp     { background: linear-gradient(90deg, var(--v-gold-dim, #8a6620) 0%, var(--v-gold, #c4953a) 100%); box-shadow: 0 0 4px rgba(196, 149, 58, 0.4); }
+    /* Dead state — desaturate + lighten */
+    .cgp-card.v8-style.dead {
+      filter: grayscale(0.85) brightness(0.65);
+      opacity: 0.55;
+    }
+
     /* === Cartografia Canvas (Phase 5.2 + Fase 6.2 fullscreen) ===
        Cartografia ocupa o frame inteiro: HUD top-bar, group panel, exit btn,
        hotbar bottom e footer ficam escondidos via body.state-cart. .cart-wrapper
@@ -38071,8 +38322,46 @@ if (typeof window !== 'undefined' && !window._cityTopbarInterval) {
   }, 10000);
 }
 
-// --- City Group Panel (4 cards expandidos — 5 recursos cada, estilo hud-float) ---
-// Espelha #hud-float da exploracao com VIDA / RECURSO / EXAUS pips / XP / VALD
+// --- City Group Panel (4 cards V8 heraldic — espelha combat cards) ---
+// 2026-05-11 (user request): cards exatamente como mostrados no combate,
+// com infos adicionais Valdoritas + XP bar + Exaustao. Mirror de
+// simuladores/combate.html .cell.v8-card (~L1916+).
+// Normalizadores key→cls/heraldic: removem acentos + lowercase pra
+// matchar tokens canonical (--class-mago etc).
+function _cgpClsKey(cls){
+  var k = (cls || '').toLowerCase()
+    .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+    .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
+    .replace(/[\s].*/, '');  // primeiro token apenas
+  // Aliases — match com seletores .cls-* do CSS V8
+  var ALIASES = {
+    sacerdote: 'sacerdotisa',  // sacerdote/sacerdotisa ambos viram clerigo no CSS
+    cleric:    'clerigo',
+    feiticeira: 'feiticeiro',
+    barbaro:   'barbaro',
+    'meio-elfo': 'aliado'
+  };
+  return ALIASES[k] || k;
+}
+function _cgpHeraldicIcon(cls){
+  var k = _cgpClsKey(cls);
+  var MAP = {
+    mago: 'ic-mago',
+    guerreiro: 'ic-guerreiro',
+    sacerdotisa: 'ic-clerigo',
+    clerigo: 'ic-clerigo',
+    ladino: 'ic-ladino',
+    patrulheiro: 'ic-patrulheiro',
+    paladino: 'ic-paladino',
+    bardo: 'ic-bardo',
+    druida: 'ic-druida',
+    monge: 'ic-monge',
+    feiticeiro: 'ic-feiticeiro',
+    bruxo: 'ic-bruxo',
+    barbaro: 'ic-barbaro'
+  };
+  return MAP[k] || 'ic-guerreiro';  // fallback aliado/desconhecido
+}
 function renderCityGroupPanel(){
   var el = document.getElementById('city-group-panel');
   if (!el) return;
@@ -38100,19 +38389,24 @@ function renderCityGroupPanel(){
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
     var xpPct = m.xpNext > 0 ? Math.round(100 * m.xp / m.xpNext) : 0;
+    // V8 HP threshold: high > 60%, mid 25-60%, low < 25% — mesmo do combate
+    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
     var deadCls = m.dead ? ' dead' : '';
     var playerCls = m.isPlayer ? ' player' : '';
+    var clsKey = _cgpClsKey(m.cls);
+    var clsModifier = ' cls-' + clsKey;
+    var heraldicId = _cgpHeraldicIcon(m.cls);
     var res = _resForClass(m.cls);
 
     // XSS guard: name/cls/race vêm de ?param= da URL — escapar antes de
     // concatenar em innerHTML. Helper _hubEsc usa textContent → innerHTML
     // do browser pra HTML-encode &<>"'.
-    // _titleCase 2026-05-04: padroniza "primeira letra maiúscula" pra display.
     var safeName = _hubEsc(_titleCase(m.name));
     var safeCls = _hubEsc(_titleCase(m.cls));
     var safeRace = _hubEsc(_titleCase(m.race || ''));
-    var safeResName = _hubEsc(res.name);  // res.name já vem capitalizado canonical
+    var safeResName = _hubEsc(res.name);
     var safeResCls = _hubEsc(res.cls);
+    var safeResAbbr = (res.name || '').substring(0, 3).toUpperCase();
 
     // Exaustão pips (6 dots)
     var pipsHtml = '';
@@ -38120,41 +38414,49 @@ function renderCityGroupPanel(){
       pipsHtml += '<div class="cgp-pip' + (pi < (m.exh || 0) ? ' filled' : '') + '"></div>';
     }
 
-    html += '<div class="cgp-card' + playerCls + deadCls + '" data-member="' + i + '">'
-      // Header: nome / classe-raça / nv
+    // V8 markup: banner + portrait absoluto + stats vertical stack
+    html += '<div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
+      // Banner: nome + classe-raca-nv (cgp-head com look V8 .c-name)
       + '  <div class="cgp-head">'
       + '    <div class="cgp-name">' + safeName + '</div>'
-      + '    <div class="cgp-classrace">' + safeCls + ' ' + safeRace + '</div>'
-      + '    <div class="cgp-level">Nv ' + m.level + '</div>'
+      + '    <div class="cgp-classrace">' + safeCls + (safeRace ? ' ' + safeRace : '') + ' · Nv ' + m.level + '</div>'
       + '  </div>'
-      // Row 1: VIDA
-      + '  <div class="cgp-row" title="HP ' + m.hp + '/' + m.hpMax + '">'
-      + '    <span class="cgp-ico">♥</span>'
-      + '    <div class="cgp-bar"><div class="cgp-bar-fill hp" style="width:' + hpPct + '%"></div></div>'
-      + '  </div>';
-    // Row 2: RECURSO (MP/Fúria/Energia/Ki/Vigor) — só se mmp > 0
+      // Heraldic portrait canto sup. direito (sobre o banner)
+      + '  <div class="cgp-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
+      // Stats container (V8 .c-stats look)
+      + '  <div class="cgp-stats">'
+      // Row 1: HP (sempre)
+      + '    <div class="cgp-row" title="HP ' + m.hp + '/' + m.hpMax + '">'
+      + '      <span class="cgp-ico">PV</span>'
+      + '      <div class="cgp-bar"><div class="cgp-bar-fill hp ' + hpCls + '" style="width:' + hpPct + '%"></div></div>'
+      + '      <span class="cgp-row-value">' + m.hp + '/' + m.hpMax + '</span>'
+      + '    </div>';
+    // Row 2: Recurso (so se max > 0)
     if (m.mpMax > 0) {
-      html += '  <div class="cgp-row" title="' + safeResName + ' ' + m.mp + '/' + m.mpMax + '">'
-        + '    <span class="cgp-ico">◆</span>'
-        + '    <div class="cgp-bar"><div class="cgp-bar-fill ' + safeResCls + '" style="width:' + mpPct + '%"></div></div>'
-        + '  </div>';
+      html += '    <div class="cgp-row" title="' + safeResName + ' ' + m.mp + '/' + m.mpMax + '">'
+        + '      <span class="cgp-ico">' + safeResAbbr + '</span>'
+        + '      <div class="cgp-bar"><div class="cgp-bar-fill ' + safeResCls + '" style="width:' + mpPct + '%"></div></div>'
+        + '      <span class="cgp-row-value">' + m.mp + '/' + m.mpMax + '</span>'
+        + '    </div>';
     }
-    // Row 3: EXAUSTÃO (6 pips)
-    html += '  <div class="cgp-row" title="Exaustão ' + (m.exh || 0) + '/6">'
-      + '    <span class="cgp-ico">〰</span>'
-      + '    <div class="cgp-pips">' + pipsHtml + '</div>'
-      + '  </div>';
-    // Row 4: XP
-    html += '  <div class="cgp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
-      + '    <span class="cgp-ico">★</span>'
-      + '    <div class="cgp-bar"><div class="cgp-bar-fill xp" style="width:' + xpPct + '%"></div></div>'
-      + '  </div>';
-    // Row 5: VALDORITAS — ícone canonical .vi-coin AO LADO do número (regra Moeda Valdorita)
-    html += '  <div class="cgp-row cgp-row-gold" title="' + (m.gold || 0) + ' Valdoritas">'
-      + '    <span class="cgp-val-gold">' + (m.gold || 0).toLocaleString('pt-BR') + '</span>'
-      + '    <span class="vi vi-coin sm"></span>'
-      + '  </div>'
-      + '</div>';
+    // Row 3: XP
+    html += '    <div class="cgp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
+      + '      <span class="cgp-ico">XP</span>'
+      + '      <div class="cgp-bar"><div class="cgp-bar-fill xp" style="width:' + xpPct + '%"></div></div>'
+      + '      <span class="cgp-row-value">' + m.xp + '/' + m.xpNext + '</span>'
+      + '    </div>'
+      // Row 4: Exaustao (pips 0-6)
+      + '    <div class="cgp-row" title="Exaustão ' + (m.exh || 0) + '/6">'
+      + '      <span class="cgp-ico">EX</span>'
+      + '      <div class="cgp-pips">' + pipsHtml + '</div>'
+      + '    </div>'
+      // Row 5: Valdoritas (gold) — separado por border-top, alinhado direita
+      + '    <div class="cgp-row cgp-row-gold" title="' + (m.gold || 0) + ' Valdoritas">'
+      + '      <span class="cgp-val-gold">' + (m.gold || 0).toLocaleString('pt-BR') + '</span>'
+      + '      <span class="vi vi-coin sm"></span>'
+      + '    </div>'
+      + '  </div>'  // /cgp-stats
+      + '</div>';  // /cgp-card
   }
   el.innerHTML = html;
   // FIX 2026-05-04: cards do HUD topo clicáveis → abre ficha do membro
