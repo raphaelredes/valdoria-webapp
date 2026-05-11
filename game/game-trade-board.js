@@ -11,7 +11,8 @@ function renderTradeBoard(container, data) {
 
   /* Rules bar */
   var rules = vCity.el('div', 'trb-rules');
-  rules.textContent = 'Max ' + data.max_offers + ' ofertas \u2022 Expira ' + data.expiry_hours + 'h \u2022 Max ' + data.max_gold + ' V';
+  /* 2026-05-11: " V" -> coin icon */
+  rules.innerHTML = 'Max ' + data.max_offers + ' ofertas \u2022 Expira ' + data.expiry_hours + 'h \u2022 Max ' + data.max_gold + ' <span class="vi vi-coin sm"></span>';
   root.appendChild(rules);
 
   /* Gold display */

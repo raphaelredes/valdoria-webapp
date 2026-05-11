@@ -210,7 +210,7 @@
         var lbl = it.name;
         if (it.qty && it.qty > 1) lbl += ' x' + it.qty;
         h += '<span class="v-popup-label">' + lbl + '</span>';
-        h += '<span class="v-popup-value v-popup-gold">' + it.cost + ' V</span>';
+        h += '<span class="v-popup-value v-popup-gold">' + it.cost + ' <span class="vi vi-coin sm"></span></span>';
         h += '</div>';
       }
       h += '</div>';

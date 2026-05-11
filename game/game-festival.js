@@ -58,7 +58,8 @@ function renderFestivalHub(container, data) {
       evInfo.appendChild(evName);
       if (!ev.played) {
         var evCost = vCity.el('span', 'fst-event-cost');
-        evCost.textContent = ev.cost + ' V';
+        /* 2026-05-11: " V" -> coin icon */
+        evCost.innerHTML = ev.cost + ' <span class="vi vi-coin sm"></span>';
         evInfo.appendChild(evCost);
       }
       btn.appendChild(evInfo);

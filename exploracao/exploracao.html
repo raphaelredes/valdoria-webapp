@@ -33701,8 +33701,8 @@ function _renderExploracaoInventoryPopup() {
   // Header meta + filter pills
   var html = ''
     + '<div class="inv-meta-bar">'
-    +   '<span>Bolsa: <span class="gold">' + gold + ' V</span></span>'
-    +   '<span>' + totalCount + ' iten' + (totalCount === 1 ? '' : 's') + ' · ' + totalValue + 'V</span>'
+    +   '<span>Bolsa: <span class="gold">' + gold + ' <span class="vi vi-coin sm"></span></span></span>'
+    +   '<span>' + totalCount + ' iten' + (totalCount === 1 ? '' : 's') + ' · ' + totalValue + ' <span class="vi vi-coin sm"></span></span>'
     + '</div>'
     + '<div class="inv-filter-row">'
     +   '<span class="inv-filter-pill' + (filter === 'all' ? ' active' : '') + '" data-filter="all">Todos (' + counts.all + ')</span>'

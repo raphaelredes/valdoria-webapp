@@ -178,14 +178,17 @@ function _renderInvestments(container, data) {
       emoji.innerHTML = inv.mature ? '✅' : inv.emoji;
       hdr.appendChild(emoji);
       var name = vCity.el('span', 'bsb-invest-name');
-      name.textContent = ' ' + inv.tier_name + ' — ' + inv.amount + ' V';
+      /* 2026-05-11 (user request): " V" -> icone .vi-coin */
+      name.innerHTML = ' ' + inv.tier_name + ' — ' + inv.amount + ' <span class="vi vi-coin sm"></span>';
       hdr.appendChild(name);
       card.appendChild(hdr);
 
       card.appendChild(_bsbProgressBar(inv.progress_pct));
 
       var detail = vCity.el('div', 'bsb-invest-detail');
-      detail.textContent = inv.mature ? 'Pronto! +' + inv.profit + ' V lucro' : inv.turns_left + ' turnos restantes • +' + inv.profit + ' V';
+      detail.innerHTML = inv.mature
+        ? 'Pronto! +' + inv.profit + ' <span class="vi vi-coin sm"></span> lucro'
+        : inv.turns_left + ' turnos restantes • +' + inv.profit + ' <span class="vi vi-coin sm"></span>';
       card.appendChild(detail);
 
       root.appendChild(card);
@@ -270,7 +273,17 @@ function _bsbDetailItem(label, value) {
   lbl.textContent = label;
   item.appendChild(lbl);
   var val = vCity.el('span', 'bsb-detail-value');
-  val.textContent = value;
+  /* 2026-05-11 (user request): auto-detect " V" suffix como valdoritas e
+     substitui pelo icone .vi-coin (era textContent literal mostrando V). */
+  var v = String(value);
+  if (/\sV$/.test(v)) {
+    val.textContent = v.slice(0, -2) + ' ';
+    var coin = document.createElement('span');
+    coin.className = 'vi vi-coin sm';
+    val.appendChild(coin);
+  } else {
+    val.textContent = v;
+  }
   item.appendChild(val);
   return item;
 }

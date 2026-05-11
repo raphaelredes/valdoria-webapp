@@ -10252,7 +10252,11 @@ function _showStatusPopup(memberIdx){
     + 'margin-top: 4px; padding-top: 4px; '
     + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));">';
   if (m.isPlayer) {
-    html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:', '<b style="color: var(--v-gold, #c4953a);">' + (m.gold || 0) + ' V</b>');
+    /* 2026-05-11 (user request): "V" literal -> icone .vi-coin canonical */
+    html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:',
+      '<b style="color: var(--v-gold, #c4953a); display:inline-flex; align-items:center; gap:4px;">'
+      + (m.gold || 0)
+      + '<span class="vi vi-coin sm"></span></b>');
   }
   html += '<div style="' + (m.isPlayer ? '' : 'flex:1;') + '">'
     + _statLine('ic-stat-exhaustion', 'var(--v-gold,#c4953a)', 'Exaustão:', '<b>' + (m.exh || 0) + '/6</b>')
@@ -14334,9 +14338,9 @@ function _shadowShowCrime(p){
             icon: t.icon, npc: 'O Vulto', title: t.name + ' — ' + tier.label,
             desc: '<b>Plano:</b> ' + t.desc + '<br>' +
                   '<b>3 testes</b> contra DC ' + tier.dc + '<br><br>' +
-                  '<b>Sucesso completo:</b> ' + tier.reward_min + '-' + tier.reward_max + ' V<br>' +
+                  '<b>Sucesso completo:</b> ' + tier.reward_min + '-' + tier.reward_max + ' <span class="vi vi-coin sm"></span><br>' +
                   '<b>Sucesso parcial:</b> metade da recompensa<br>' +
-                  '<b>Falha:</b> multa de ' + tier.fine + ' V (preso pela guarda)',
+                  '<b>Falha:</b> multa de ' + tier.fine + ' <span class="vi vi-coin sm"></span> (preso pela guarda)',
                     onConfirm: function(){
               var passes = 0;
               var rolls = [];
@@ -15110,7 +15114,7 @@ function _renderQuestDiary(bodyEl){
         + '<div class="qd-rewards" '
         + 'style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; '
         + 'font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">'
-        + (q.reward ? '<span style="color: var(--v-gold, #c4953a);">' + q.reward + ' V</span>' : '')
+        + (q.reward ? '<span style="color: var(--v-gold, #c4953a); display:inline-flex; align-items:center; gap:3px;">' + q.reward + '<span class="vi vi-coin sm"></span></span>' : '')
         + (q.xp ? '<span>+' + q.xp + ' XP</span>' : '')
         + '</div>'
 
@@ -26882,7 +26886,7 @@ function _squareShowGambleResult(p, stake, playerRoll, houseRoll, win, preGoldBe
   if (win){
     narrative = gt && gt.win_body
       ? gt.win_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, stake.payout).replace(/\n/g, '<br>')
-      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🎉 <b>VITÓRIA!</b> +' + stake.payout + ' V';
+      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🎉 <b>VITÓRIA!</b> +' + stake.payout + ' <span class="vi vi-coin sm"></span>';
   } else {
     narrative = gt && gt.lose_body
       ? gt.lose_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, stake.amount).replace(/\n/g, '<br>')
@@ -27266,7 +27270,7 @@ function _tavernShowGames(p){
       }
       _showConfirmPurchase({
         icon: g.icon, npc: 'Mesa de Jogos', title: 'Apostar em ' + g.name,
-        desc: introText + g.desc + '<br>Custo: ' + cost + ' V · Vitória: ' + payout + ' V',
+        desc: introText + g.desc + '<br>Custo: ' + cost + ' <span class="vi vi-coin sm"></span> · Vitória: ' + payout + ' <span class="vi vi-coin sm"></span>',
         cost: cost,
         onConfirm: function(){
           var preGold = p.gold;
@@ -31205,7 +31209,7 @@ function _tavernShowPitfight(p){
       _showConfirmPurchase({
         icon: _heralIco('ic-mochila'), npc: 'Mestre da Rinha', title: 'Apostar ' + b.label + ' em ' + opp,
         desc: '<i>Adversário: <b>' + opp + '</b></i><br><br>' +
-              '<b>Taxa entrada:</b> 25 <span class="vi vi-coin sm"></span> · <b>Aposta:</b> ' + b.amount + ' V · <b>Total:</b> ' + totalCost + ' V<br>' +
+              '<b>Taxa entrada:</b> 25 <span class="vi vi-coin sm"></span> · <b>Aposta:</b> ' + b.amount + ' <span class="vi vi-coin sm"></span> · <b>Total:</b> ' + totalCost + ' <span class="vi vi-coin sm"></span><br>' +
               '<b>3 testes:</b> FOR · DES · CON vs DC = 5 + 2d10<br>' +
               '<i>Vitória: paga 2× aposta + ganha XP. Derrota: aposta perdida + dano.</i>',
         cost: totalCost,
@@ -32526,8 +32530,8 @@ function _shopConfirmBuy(name, npcId){
   var basePrice = it.v || 0;
   var finalPrice = _haggleAdjustPrice(basePrice, p);
   var haggleNote = '';
-  if (finalPrice < basePrice) haggleNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">🤝 Pechincha aplicada: -' + (basePrice - finalPrice) + ' V</i>';
-  else if (finalPrice > basePrice) haggleNote = '<br><i style="color:var(--v-danger,#c44)">⚠️ Comerciante ofendido: +' + (finalPrice - basePrice) + ' V</i>';
+  if (finalPrice < basePrice) haggleNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">🤝 Pechincha aplicada: -' + (basePrice - finalPrice) + ' <span class="vi vi-coin sm"></span></i>';
+  else if (finalPrice > basePrice) haggleNote = '<br><i style="color:var(--v-danger,#c44)">⚠️ Comerciante ofendido: +' + (finalPrice - basePrice) + ' <span class="vi vi-coin sm"></span></i>';
   _showConfirmPurchase({
     icon: it.e || '🛒',
     npc: shop.npc,
@@ -34408,7 +34412,7 @@ function _bankWithdraw(p, amount){
     icon: _heralIco('ic-mochila'), npc: 'Aldwin — Banqueiro',
     title: 'Retirar ' + amount + ' Valdoritas',
     desc: '<i>' + promptLine + '</i><br><br>' +
-          'Taxa de 2%: <b>' + fee + ' V</b>. Recebe <b>' + net + ' V</b> líquidas.',
+          'Taxa de 2%: <b>' + fee + ' <span class="vi vi-coin sm"></span></b>. Recebe <b>' + net + ' <span class="vi vi-coin sm"></span></b> líquidas.',
     cost: net,
     creditMode: true,
     onConfirm: function(){
@@ -34422,7 +34426,7 @@ function _bankWithdraw(p, amount){
       _showServiceResultPopup({
         icon: _heralIco('ic-bolsa'), npc: 'Aldwin — Banqueiro',
         narrative: '<i>' + resultLine + '</i><br><br>' +
-                   '<b>Retirada</b>: ' + amount + ' V debitadas · <b>Taxa</b>: ' + fee + ' V · <b>Líquido</b>: ' + net + ' V.',
+                   '<b>Retirada</b>: ' + amount + ' <span class="vi vi-coin sm"></span> debitadas · <b>Taxa</b>: ' + fee + ' <span class="vi vi-coin sm"></span> · <b>Líquido</b>: ' + net + ' <span class="vi vi-coin sm"></span>.',
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, 1), bar: false },
           { type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(preBank, 1), bar: false }
@@ -34584,8 +34588,8 @@ function _bankShowLoans(p){
       icon: _heralIco('ic-mochila'), npc: 'Aldwin', title: 'Empréstimo Ativo',
       desc: '<i>Aldwin folheia o livro de dívidas.</i><br><br>' +
             '<b>' + l.name + '</b><br>' +
-            'Valor: ' + l.amount + ' V emprestado<br>' +
-            'A pagar: <b>' + l.total_due + ' V</b> (juros ' + Math.round(l.rate * 100) + '%)<br>' +
+            'Valor: ' + l.amount + ' <span class="vi vi-coin sm"></span> emprestado<br>' +
+            'A pagar: <b>' + l.total_due + ' <span class="vi vi-coin sm"></span></b> (juros ' + Math.round(l.rate * 100) + '%)<br>' +
             'Prazo: ' + l.due_turns + ' turnos<br><br>' +
             '<i>"Pague antes do prazo, sombra. Ninguém quer Aldwin atrás de si."</i>',
       onConfirm: function(){}
@@ -45531,10 +45535,18 @@ function serviceCard(svc) {
     card.appendChild(price);
   }
 
-  /* Badge */
+  /* Badge — 2026-05-11 (user request): auto-detect " V" trailing como
+     valdoritas e substitui pelo icone .vi-coin (era textContent literal
+     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V". */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
-    bdg.textContent = svc.badge;
+    var bs = String(svc.badge);
+    if (/\sV$/.test(bs)) {
+      bdg.textContent = bs.slice(0, -2) + ' ';
+      bdg.appendChild(coin('sm'));
+    } else {
+      bdg.textContent = bs;
+    }
     card.appendChild(bdg);
   }
 
