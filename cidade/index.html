@@ -6937,20 +6937,29 @@ body.perf-lite .vc-action-btn { transition: none; }
     'https://api.lendasdevaldoria.com.br'
   );
   function _cityLog(level, msg, extra){
+    // FIX 2026-05-10 v2: api espera FLAT format {area,env,level,msg,ts,ua,href,extra}
+    // (ver sim_log_routes.py linha 16-19). Antes eu enviava {entries:[...],env}
+    // (nested) — silenciosamente rejeitado. Agora FLAT igual server-log.js.
     try {
-      var payload = {entries:[{area:'cidade', level:level||'info', msg:msg||'', ts:Date.now(),
-        extra: extra || null,
+      var payload = {
+        area: 'cidade',
+        env: _envForLog,
+        level: level || 'info',
+        msg: msg || '',
+        ts: Date.now(),
         ua: (navigator && navigator.userAgent || '').slice(0, 200),
         href: (location.href || '').slice(0, 300),
-        tg_platform: (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '',
-        tg_initData_present: !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData)
-      }], env: _envForLog};
+        extra: Object.assign({
+          tg_platform: (window.Telegram && Telegram.WebApp && Telegram.WebApp.platform) || '',
+          tg_initData_present: !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData)
+        }, extra || {})
+      };
       var url = _apiHostForLog + '/api/sim/log';
       var body = JSON.stringify(payload);
       if (navigator && navigator.sendBeacon){
         navigator.sendBeacon(url, new Blob([body], {type: 'application/json'}));
       } else {
-        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: body, keepalive: true}).catch(function(){});
+        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: body, keepalive: true, credentials: 'omit'}).catch(function(){});
       }
     } catch(_e){}
   }
@@ -6958,28 +6967,52 @@ body.perf-lite .vc-action-btn { transition: none; }
   // === ERROR OVERLAY (USER REQUEST 2026-05-10) =================================
   // Quando o player abre cidade em PRODUCTION mas REMOTE auth falha, NUNCA
   // mostrar o mock "Aventureiro Mago Elfo Nv 5". Mostrar overlay claro.
+  // FIX v2: REPLACE body.innerHTML (nao appendChild) pra remover hub elements
+  // que poderiam renderizar mock por baixo. Tambem trata caso body nao-ready
+  // via DOMContentLoaded.
   function _showSessionErrorOverlay(reason, detail){
     _cityLog('critical', 'session_error_overlay_shown', {reason: reason, detail: detail || null});
-    try {
-      var ov = document.createElement('div');
-      ov.id = 'city-session-error';
-      ov.style.cssText = 'position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;';
-      ov.innerHTML = (
+    var html = (
+      '<div id="city-session-error" style="position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;">' +
         '<div style="max-width:340px">' +
         '<div style="font-size:28px;font-weight:700;letter-spacing:5px;color:#c4953a;text-shadow:0 0 25px rgba(196,149,58,0.5);margin-bottom:8px">VALDORIA</div>' +
         '<div style="font-size:14px;color:#c4953a;margin-bottom:20px;letter-spacing:3px">SESSAO EXPIRADA</div>' +
         '<div style="font-size:14px;line-height:1.6;margin-bottom:20px">' + (reason || 'Nao foi possivel carregar seu personagem.') + '</div>' +
         '<div style="font-size:13px;line-height:1.5;color:#a09484;margin-bottom:24px">Abra o jogo novamente pelo bot do Telegram (botao Jogar ou /start).</div>' +
         (detail ? '<div style="font-size:11px;color:#6a5a4e;margin-top:16px;font-family:monospace">' + detail + '</div>' : '') +
-        '</div>'
-      );
-      document.body.appendChild(ov);
-      // Halt: sem mock player, sem render do hub
-      window.__CITY_SESSION_ERROR = true;
-      throw new Error('cidade-session-error-halt');  // pula resto do JS
-    } catch(_e){
-      if (_e && _e.message === 'cidade-session-error-halt') throw _e;
+        '</div>' +
+      '</div>'
+    );
+    function _applyOverlay(){
+      try {
+        if (document.body){
+          // REPLACE body content — remove hub elements que poderiam mostrar mock
+          document.body.innerHTML = html;
+          document.body.style.cssText = 'margin:0;padding:0;background:#1a1510;color:#d4c8b0;overflow:hidden;height:100vh';
+          // Para qualquer script async que tenta render hub depois
+          window.__CITY_SESSION_ERROR = true;
+        }
+      } catch(_e){}
     }
+    _applyOverlay();
+    // Re-apply quando DOM ready (caso body ainda nao tivesse carregado)
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', _applyOverlay, {once: true});
+    }
+    // Re-apply periodicamente nos primeiros 3s pra cobrir scripts que rendem hub depois
+    var _reApplyCount = 0;
+    var _reApplyTimer = setInterval(function(){
+      _reApplyCount++;
+      if (_reApplyCount > 30) { clearInterval(_reApplyTimer); return; }  // 3s @ 100ms
+      if (document.body && document.body.querySelector('#city-session-error')){
+        // Overlay ainda presente — OK
+        return;
+      }
+      // Overlay foi removido por outro script — re-apply
+      _applyOverlay();
+    }, 100);
+    window.__CITY_SESSION_ERROR = true;
+    throw new Error('cidade-session-error-halt');  // pula resto do JS
   }
 
   // === REMOTE mode fetch (USER REQUEST 2026-05-04) ============================
