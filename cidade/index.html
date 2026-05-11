@@ -36486,7 +36486,10 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-missoes'), 'Ver localização', 'Floresta dos Lobos', 'quest_wolves_locate'],
       [_heralIco('ic-missoes'), 'Detalhes objetivos', 'requisitos', 'quest_wolves_details'],
-      [_heralIco('ic-missoes'), 'Reivindicar parcial', 'não disponível ainda', 'quest_wolves_partial']
+      [_heralIco('ic-missoes'), 'Reivindicar parcial', 'não disponível ainda', 'quest_wolves_partial'],
+      // 2026-05-11: consistência com quest_open_lyana — todas as missões
+      // ativas devem ter botão de abandono (com confirmação obrigatória).
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
   'quest_open_lyana': {
@@ -37470,89 +37473,19 @@ var ACTION_HANDLERS = {
   'quest_wolves_locate':    function(p){ vToast('📍 Localização: Floresta dos Lobos, 2km ao norte da cidade.'); },
   'quest_wolves_details':   function(p){ vToast('📜 Objetivo: matar 5 lobos cinzentos. Atual: 2/5. Recompensa: 50 Valdoritas + 80 XP.'); },
   'quest_wolves_partial':   function(p){ vToast('💰 Recompensa parcial não disponível. Termine os 5 lobos primeiro.'); },
-  // 2026-05-11 fix (user report bug crítico): "posso receber recompensa
-  // infinita repetindo a entrega — missão não some". Agora cada handler:
-  //  (1) checa se já foi completado/abandonado → bloqueia + warn
-  //  (2) registra estado no player (per-character via CITY_MOCK_PLAYER)
-  //  (3) splice de QUESTS_ACTIVE → move pra QUESTS_HISTORY ou descarta
-  //  (4) fecha popup
-  // renderSubScreen filtra QUESTS_ACTIVE pela completed_quests/abandoned_quests.
-  'quest_lyana_deliver':    function(p){
-    p.completed_quests = p.completed_quests || [];
-    if (p.completed_quests.indexOf('lyana') >= 0) {
-      vToast('⚠️ Essa missão já foi concluída.', 'warn');
-      if (typeof closeCityPopup === 'function') closeCityPopup();
-      return;
-    }
-    p.gold += 20;
-    _gainXp(p, 40);
-    p.completed_quests.push('lyana');
-    // Move QUESTS_ACTIVE['qa_lyana'] -> QUESTS_HISTORY com data de hoje
-    try {
-      if (typeof QUESTS_ACTIVE !== 'undefined') {
-        var idx = QUESTS_ACTIVE.findIndex(function(q){ return q && q.id === 'qa_lyana'; });
-        if (idx >= 0) {
-          var q = QUESTS_ACTIVE.splice(idx, 1)[0];
-          if (typeof QUESTS_HISTORY !== 'undefined') {
-            var d = new Date();
-            QUESTS_HISTORY.unshift({
-              id: 'qh_lyana', icon: q.icon, title: q.title,
-              date: d.toISOString().slice(0, 10),
-              reward: q.reward || 20, xp: q.xp || 40
-            });
-          }
-        }
-      }
-    } catch(e) { console.warn('[CIDADE] quest_lyana_deliver state update failed:', e); }
-    vToast('💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
-    refreshHud();
-    if (typeof closeCityPopup === 'function') closeCityPopup();
+  // 2026-05-11: handlers per-quest delegam pros helpers _deliverQuest /
+  // _abandonQuest (definidos ~linha 37670). Helpers fazem: check duplicate,
+  // state update em CITY_MOCK_PLAYER, splice em QUESTS_ACTIVE, push em
+  // QUESTS_HISTORY, refreshHud, closeCityPopup, confirmação para abandono.
+  'quest_lyana_deliver': function(p){
+    _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
   },
-  'quest_lyana_read':       function(p){ vToast('📜 Carta: "Lyana, encontre-me na fonte ao anoitecer. — Eirik"'); },
-  'quest_lyana_abandon':    function(p){
-    p.abandoned_quests = p.abandoned_quests || [];
-    p.completed_quests = p.completed_quests || [];
-    // Bloqueia re-abandono / abandono após conclusão
-    if (p.abandoned_quests.indexOf('lyana') >= 0) {
-      vToast('⚠️ Essa missão já foi abandonada.', 'warn');
-      if (typeof closeCityPopup === 'function') closeCityPopup();
-      return;
-    }
-    if (p.completed_quests.indexOf('lyana') >= 0) {
-      vToast('⚠️ Não dá pra abandonar — missão já foi concluída.', 'warn');
-      if (typeof closeCityPopup === 'function') closeCityPopup();
-      return;
-    }
-    // Confirmação obrigatória (user request: "ao clicar em abandonar sempre
-    // mostre um popup pedindo para confirmar")
-    var _doAbandon = function(){
-      p.abandoned_quests.push('lyana');
-      try {
-        if (typeof QUESTS_ACTIVE !== 'undefined') {
-          var idx = QUESTS_ACTIVE.findIndex(function(q){ return q && q.id === 'qa_lyana'; });
-          if (idx >= 0) QUESTS_ACTIVE.splice(idx, 1);
-        }
-      } catch(e) { console.warn('[CIDADE] quest_lyana_abandon state update failed:', e); }
-      vToast('❌ Missão abandonada. -5 afinidade com Lyana.', 'warn');
-      if (typeof closeCityPopup === 'function') closeCityPopup();
-    };
-    if (typeof _showInfoPopup === 'function') {
-      _showInfoPopup({
-        icon: '⚠️',
-        title: 'Abandonar Missão?',
-        desc: 'Tens certeza que queres abandonar <b>"Falar com Lyana"</b>?<br><br>'
-            + '<span style="color:#d4574a">Consequências:</span><br>'
-            + '• -5 afinidade com Lyana<br>'
-            + '• A missão sumirá das ativas<br>'
-            + '• Não poderás recebê-la novamente nessa sessão',
-        confirmLabel: 'Sim, abandonar',
-        cancelLabel: 'Cancelar',
-        onConfirm: _doAbandon
-      });
-    } else {
-      // Fallback se _showInfoPopup não disponível
-      _doAbandon();
-    }
+  'quest_lyana_read':    function(p){ vToast('📜 Carta: "Lyana, encontre-me na fonte ao anoitecer. — Eirik"'); },
+  'quest_lyana_abandon': function(p){
+    _abandonQuest('lyana', 'Falar com Lyana', '-5 afinidade com Lyana');
+  },
+  'quest_wolves_abandon': function(p){
+    _abandonQuest('wolves', 'Caçar Lobos Cinzentos', '-5 afinidade com Tavira (caçadora)');
   },
   'accept_q_goblins':       function(p){ vToast('🐺 Quest aceita: Caçar 3 goblins. Recompensa: 25 Valdoritas + 40 XP.'); },
   'accept_q_herbs':         function(p){ vToast('🌿 Quest aceita: Coletar ervas raras. Recompensa: 15 Valdoritas + 25 XP.'); },
@@ -37759,15 +37692,104 @@ function refreshHud(){
 
 // --- Renderer genérico de sub-screen ---
 // Listener delegado é attached UMA VEZ no bootstrap (via _wireSubScreenContentOnce).
-// 2026-05-11: helper pra checar se missão foi completada ou abandonada
-// nesta sessão (per-character via window.CITY_MOCK_PLAYER). Usado por
-// renderSubScreen pra filtrar botões + ACTION_HANDLERS pra bloquear
-// re-entrega infinita reportada pelo user.
+// 2026-05-11: helpers genéricos de quest state.
+// User report: "missão continua na lista após entregar/abandonar, pode
+// receber recompensa infinita". State per-character via window.CITY_MOCK_PLAYER
+// (.completed_quests / .abandoned_quests arrays). renderSubScreen filtra
+// botões com cb 'quest_open_<id>' baseado nessas listas. Handlers de
+// deliver/abandon pushe aqui antes de fechar popup.
+//
+// Cada questId é o sufixo do cb 'quest_open_<id>' (ex: 'lyana', 'wolves').
+// QUESTS_ACTIVE id correspondente é 'qa_<id>' (legacy).
 function _isQuestCompletedOrAbandoned(questId){
   var p = window.CITY_MOCK_PLAYER;
   if (!p || !questId) return false;
   return (p.completed_quests || []).indexOf(questId) >= 0
       || (p.abandoned_quests || []).indexOf(questId) >= 0;
+}
+
+// Entrega missão: pague gold/xp, mova p/ history, bloqueia re-entrega.
+// Args: questId ('lyana'), gold (number), xp (number), msg (string visível).
+function _deliverQuest(questId, gold, xp, msg){
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  p.completed_quests = p.completed_quests || [];
+  if (p.completed_quests.indexOf(questId) >= 0) {
+    vToast('⚠️ Essa missão já foi concluída.', 'warn');
+    if (typeof closeCityPopup === 'function') closeCityPopup();
+    return;
+  }
+  p.gold = (p.gold || 0) + (gold || 0);
+  if (typeof _gainXp === 'function' && xp) _gainXp(p, xp);
+  p.completed_quests.push(questId);
+  // Splice QUESTS_ACTIVE['qa_<id>'] -> push QUESTS_HISTORY com data atual
+  try {
+    if (typeof QUESTS_ACTIVE !== 'undefined') {
+      var qaId = 'qa_' + questId;
+      var idx = QUESTS_ACTIVE.findIndex(function(q){ return q && q.id === qaId; });
+      if (idx >= 0) {
+        var q = QUESTS_ACTIVE.splice(idx, 1)[0];
+        if (typeof QUESTS_HISTORY !== 'undefined') {
+          var d = new Date();
+          QUESTS_HISTORY.unshift({
+            id: 'qh_' + questId, icon: q.icon, title: q.title,
+            date: d.toISOString().slice(0, 10),
+            reward: q.reward || gold, xp: q.xp || xp
+          });
+        }
+      }
+    }
+  } catch(e) { console.warn('[CIDADE] _deliverQuest state update failed:', e); }
+  vToast(msg || ('✓ Missão completa! +' + gold + ' Valdoritas +' + xp + ' XP.'));
+  if (typeof refreshHud === 'function') refreshHud();
+  if (typeof closeCityPopup === 'function') closeCityPopup();
+}
+
+// Abandona missão: confirmação obrigatória + remove de QUESTS_ACTIVE.
+// Args: questId, displayName (string p/ popup), consequencia (string).
+function _abandonQuest(questId, displayName, consequencia){
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  p.abandoned_quests = p.abandoned_quests || [];
+  p.completed_quests = p.completed_quests || [];
+  if (p.abandoned_quests.indexOf(questId) >= 0) {
+    vToast('⚠️ Essa missão já foi abandonada.', 'warn');
+    if (typeof closeCityPopup === 'function') closeCityPopup();
+    return;
+  }
+  if (p.completed_quests.indexOf(questId) >= 0) {
+    vToast('⚠️ Não dá pra abandonar — missão já foi concluída.', 'warn');
+    if (typeof closeCityPopup === 'function') closeCityPopup();
+    return;
+  }
+  var _doIt = function(){
+    p.abandoned_quests.push(questId);
+    try {
+      if (typeof QUESTS_ACTIVE !== 'undefined') {
+        var qaId = 'qa_' + questId;
+        var idx = QUESTS_ACTIVE.findIndex(function(q){ return q && q.id === qaId; });
+        if (idx >= 0) QUESTS_ACTIVE.splice(idx, 1);
+      }
+    } catch(e) { console.warn('[CIDADE] _abandonQuest state update failed:', e); }
+    vToast('❌ Missão abandonada. ' + (consequencia || ''), 'warn');
+    if (typeof closeCityPopup === 'function') closeCityPopup();
+  };
+  if (typeof _showInfoPopup === 'function') {
+    _showInfoPopup({
+      icon: '⚠️',
+      title: 'Abandonar Missão?',
+      desc: 'Tens certeza que queres abandonar <b>"' + (displayName || questId) + '"</b>?<br><br>'
+          + '<span style="color:#d4574a">Consequências:</span><br>'
+          + (consequencia ? '• ' + consequencia + '<br>' : '')
+          + '• A missão sumirá das ativas<br>'
+          + '• Não poderás recebê-la novamente nessa sessão',
+      confirmLabel: 'Sim, abandonar',
+      cancelLabel: 'Cancelar',
+      onConfirm: _doIt
+    });
+  } else {
+    _doIt();
+  }
 }
 
 function renderSubScreen(el, key){
