@@ -33727,7 +33727,7 @@ function _renderExploracaoInventoryPopup() {
       html += '<div class="inv-item-card" data-item-idx="' + idx + '">'
         +   '<span class="inv-item-icon">' + ico + '</span>'
         +   '<div class="inv-item-name">' + name + '</div>'
-        +   '<div class="inv-item-count">×' + cnt + (it.value ? ' · ' + it.value + 'V' : '') + '</div>'
+        +   '<div class="inv-item-count">×' + cnt + (it.value ? ' · ' + it.value + ' <span class="vi vi-coin sm"></span>' : '') + '</div>'
         + '</div>';
     });
     html += '</div>';
