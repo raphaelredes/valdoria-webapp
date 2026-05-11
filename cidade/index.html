@@ -1011,7 +1011,11 @@ LOG SINK (Fase 7):
     .csp-body {
       flex: 1;
       overflow-y: auto;
-      padding: 14px 12px 100px;  /* bottom: espaço pro bottom-panel quando popup compartilha tela */
+      /* 2026-05-11: padding reduzido pra ficha caber no frame sem scroll.
+         100px bottom era pra bottom-panel quando popup compartilha tela —
+         agora popup eh full overlay (inset 0, z-index 9000), nao precisa
+         dessa margem gigante. */
+      padding: 8px 10px 12px;
     }
 
     /* === Inn Animation Overlay === */
@@ -10207,32 +10211,32 @@ function _showStatusPopup(memberIdx){
     + '</div>'
     + '</div>';
 
-  // === RECURSOS COM BARRAS ===
-  html += '<div class="ficha-section" style="padding: var(--v-space-md, 8px);">';
+  // === RECURSOS COM BARRAS (compact) — 2026-05-11 user request: caber tudo no frame ===
+  html += '<div class="ficha-section" style="padding: 5px 8px 4px;">';
   html += '<div class="ficha-section-title" '
-    + 'style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">'
+    + 'style="font-size: 10px; color: var(--v-gold, #c4953a); '
+    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">'
     + '◆ Recursos'
     + '</div>';
 
-  // Helper: bar com brasão heráldico SVG (HP/MP/XP via ic-stat-hp/mp/cha)
+  // Helper: bar compacto (margin-bottom 3px, label 10px, bar 5px)
   function _bar(iconId, iconColor, label, val, max, pct, barColor){
-    return '<div class="ficha-bar-row" style="margin-bottom: var(--v-space-sm, 6px);">'
-      + '<div style="display:flex; justify-content:space-between; align-items: center; font-size: var(--v-font-xs, 11px); margin-bottom: 2px;">'
-      + '<span style="display:inline-flex; align-items:center; gap:4px;">'
-      + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
+    return '<div class="ficha-bar-row" style="margin-bottom: 3px;">'
+      + '<div style="display:flex; justify-content:space-between; align-items: center; font-size: 10px; margin-bottom: 1px;">'
+      + '<span style="display:inline-flex; align-items:center; gap:3px;">'
+      + '<svg viewBox="0 0 120 120" style="width:11px;height:11px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
       + '<b>' + label + '</b></span>'
       + '<span style="color: var(--v-text-dim, #a09484);">' + val + '/' + max + '</span>'
       + '</div>'
-      + '<div style="height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; border: 1px solid var(--v-border, #4a3828);">'
+      + '<div style="height: 5px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; border: 1px solid var(--v-border, #4a3828);">'
       + '<div style="height: 100%; width: ' + pct + '%; background: ' + barColor + '; transition: width 0.3s; '
-      + 'box-shadow: 0 0 6px ' + barColor + ';"></div>'
+      + 'box-shadow: 0 0 4px ' + barColor + ';"></div>'
       + '</div></div>';
   }
-  // Helper: linha de stat com brasão (Bolsa/Exaustão/etc)
+  // Helper: linha de stat com brasão (Bolsa/Exaustão) — compact
   function _statLine(iconId, iconColor, label, valHtml){
-    return '<div style="display:inline-flex; align-items:center; gap:4px; font-size: var(--v-font-sm, 13px);">'
-      + '<svg viewBox="0 0 120 120" style="width:16px;height:16px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
+    return '<div style="display:inline-flex; align-items:center; gap:3px; font-size: 11px;">'
+      + '<svg viewBox="0 0 120 120" style="width:13px;height:13px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
       + label + ' ' + valHtml
       + '</div>';
   }
@@ -10241,9 +10245,9 @@ function _showStatusPopup(memberIdx){
   if (m.mpMax > 0) html += _bar('ic-stat-mp', '#5a9eff', 'Mana', m.mp, m.mpMax, mpPct, 'linear-gradient(90deg, #3d72c6, #6090f0)');
   if (m.xpNext) html += _bar('ic-stat-cha', 'var(--v-gold,#c4953a)', 'Experiência', m.xp || 0, m.xpNext, xpPct, 'linear-gradient(90deg, #c4953a, #e8c45a)');
 
-  // Bolsa + Exaustão (linha) com brasões heráldicos
-  html += '<div style="display:flex; justify-content: space-between; gap: var(--v-space-sm, 6px); '
-    + 'margin-top: var(--v-space-sm, 6px); padding-top: var(--v-space-sm, 6px); '
+  // Bolsa + Exaustão (linha compacta) com brasões heráldicos
+  html += '<div style="display:flex; justify-content: space-between; gap: 6px; '
+    + 'margin-top: 4px; padding-top: 4px; '
     + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));">';
   if (m.isPlayer) {
     html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:', '<b style="color: var(--v-gold, #c4953a);">' + (m.gold || 0) + ' V</b>');
@@ -10254,15 +10258,14 @@ function _showStatusPopup(memberIdx){
   html += '</div>';
   html += '</div>';
 
-  // === ATRIBUTOS D&D 5e — grid 3x2 com pedras ===
-  html += '<div class="ficha-section" style="padding: 0 var(--v-space-md, 8px) var(--v-space-md, 8px);">';
+  // === ATRIBUTOS D&D 5e — grid 3x2 com pedras compactas ===
+  html += '<div class="ficha-section" style="padding: 0 8px 4px;">';
   html += '<div class="ficha-section-title" '
-    + 'style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">'
+    + 'style="font-size: 10px; color: var(--v-gold, #c4953a); '
+    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">'
     + '◆ Atributos D&D 5e'
     + '</div>';
-  html += '<div class="ficha-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--v-space-xs, 2px);">';
-  // STATS_DATA com brasões heráldicos canonical (FOR/DES/CON/INT/SAB/CAR)
+  html += '<div class="ficha-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;">';
   var STATS_DATA = [
     { key: 'str', label: 'FOR', icon: 'ic-stat-str' },
     { key: 'dex', label: 'DES', icon: 'ic-stat-dex' },
@@ -10277,72 +10280,71 @@ function _showStatusPopup(memberIdx){
     var modColor = modVal > 0 ? '#7cdb7c' : (modVal < 0 ? '#e07c7c' : 'var(--v-text-dim, #a09484)');
     html += '<div class="ficha-stat-stone" '
       + 'style="background: linear-gradient(165deg, rgba(196,149,58,0.10) 0%, rgba(42,36,32,0.6) 100%); '
-      + 'border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); '
-      + 'padding: var(--v-space-sm, 6px); text-align: center;">'
-      + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; '
-      + 'display:inline-flex; align-items:center; gap:3px; justify-content:center;">'
-      + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:' + (HERALDIC_COLORS[s.icon] || '#8a7a6a') + ';"><use href="#' + s.icon + '"/></svg>'
+      + 'border: 1px solid var(--v-border, #4a3828); border-radius: 5px; '
+      + 'padding: 3px 4px; text-align: center; line-height: 1;">'
+      + '<div style="font-size: 9px; color: var(--v-text-dim, #a09484); letter-spacing: 0.5px; '
+      + 'display:inline-flex; align-items:center; gap:2px; justify-content:center;">'
+      + '<svg viewBox="0 0 120 120" style="width:11px;height:11px;color:' + (HERALDIC_COLORS[s.icon] || '#8a7a6a') + ';"><use href="#' + s.icon + '"/></svg>'
       + s.label + '</div>'
-      + '<div style="font-size: var(--v-font-display, 20px); font-weight: 700; color: var(--v-gold, #c4953a); line-height: 1.1; margin-top: 2px;">'
+      + '<div style="font-size: 16px; font-weight: 700; color: var(--v-gold, #c4953a); line-height: 1.1; margin-top: 1px;">'
       + val + '</div>'
-      + '<div style="font-size: var(--v-font-xs, 11px); color: ' + modColor + '; font-weight: 600;">'
+      + '<div style="font-size: 9px; color: ' + modColor + '; font-weight: 600; line-height: 1;">'
       + (modVal >= 0 ? '+' : '') + modVal + '</div>'
       + '</div>';
   });
   html += '</div></div>';
 
-  // === COMBATE — badges horizontais ===
-  html += '<div class="ficha-section" style="padding: 0 var(--v-space-md, 8px) var(--v-space-md, 8px);">';
+  // === COMBATE — badges horizontais 2x2 compactos ===
+  html += '<div class="ficha-section" style="padding: 0 8px 4px;">';
   html += '<div class="ficha-section-title" '
-    + 'style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">'
+    + 'style="font-size: 10px; color: var(--v-gold, #c4953a); '
+    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">'
     + '◆ Combate'
     + '</div>';
-  // COMBAT_DATA com brasões heráldicos canonical (CA/Atk/DC Mag./Prof.)
   var COMBAT_DATA = [
     { icon: 'ic-stat-ac',      label: 'CA',      value: ac },
     { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus },
     { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc },
     { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof }
   ];
-  html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--v-space-xs, 2px);">';
+  html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px;">';
   COMBAT_DATA.forEach(function(c){
     html += '<div class="ficha-combat-badge" '
-      + 'style="display: flex; align-items: center; justify-content: space-between; gap: var(--v-space-sm, 6px); '
+      + 'style="display: flex; align-items: center; justify-content: space-between; gap: 5px; '
       + 'background: rgba(196,149,58,0.06); border: 1px solid var(--v-border, #4a3828); '
-      + 'border-radius: var(--v-radius-sm, 6px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);">'
-      + '<span style="display:inline-flex; align-items:center; gap:4px; font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484);">'
-      + '<svg viewBox="0 0 120 120" style="width:16px;height:16px;color:' + (HERALDIC_COLORS[c.icon] || '#8a7a6a') + ';"><use href="#' + c.icon + '"/></svg>'
+      + 'border-radius: 5px; padding: 4px 6px;">'
+      + '<span style="display:inline-flex; align-items:center; gap:3px; font-size: 11px; color: var(--v-text-dim, #a09484);">'
+      + '<svg viewBox="0 0 120 120" style="width:13px;height:13px;color:' + (HERALDIC_COLORS[c.icon] || '#8a7a6a') + ';"><use href="#' + c.icon + '"/></svg>'
       + c.label + '</span>'
-      + '<span style="font-size: var(--v-font-md, 14px); font-weight: 700; color: var(--v-gold, #c4953a);">' + c.value + '</span>'
+      + '<span style="font-size: 12px; font-weight: 700; color: var(--v-gold, #c4953a);">' + c.value + '</span>'
       + '</div>';
   });
   html += '</div></div>';
 
-  // === SWITCHER (rodapé) — só se houver mais membros ===
+  // === SWITCHER (rodapé compacto) ===
   var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
   if (members.length > 1) {
-    html += '<div class="ficha-switcher" style="padding: var(--v-space-md, 8px); '
+    html += '<div class="ficha-switcher" style="padding: 5px 8px 4px; '
       + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12)); '
       + 'background: rgba(196,149,58,0.02);">'
-      + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); '
-      + 'text-align: center; margin-bottom: var(--v-space-sm, 6px); text-transform: uppercase; letter-spacing: 1px;">'
+      + '<div style="font-size: 9px; color: var(--v-text-dim, #a09484); '
+      + 'text-align: center; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px;">'
       + 'Trocar Membro'
       + '</div>'
-      + '<div style="display: flex; gap: var(--v-space-xs, 2px); justify-content: center; flex-wrap: wrap;">';
+      + '<div style="display: flex; gap: 3px; justify-content: center; flex-wrap: wrap;">';
     members.forEach(function(mm){
       var idx = mm.idx !== undefined ? mm.idx : (window.GROUP_MEMBERS || []).indexOf(mm);
       if (idx < 0) idx = 0;
       var active = idx === memberIdx;
       var hid = _classToHeraldic(mm.cls);
-      var hsvg = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink:0;"><use href="#' + hid + '"/></svg>';
+      var hsvg = '<svg viewBox="0 0 120 120" style="width: 13px; height: 13px; flex-shrink:0;"><use href="#' + hid + '"/></svg>';
       html += '<button class="ficha-switch-btn" data-idx="' + idx + '" '
-        + 'style="display: flex; align-items: center; gap: var(--v-space-xs, 4px); '
-        + 'padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
+        + 'style="display: flex; align-items: center; gap: 3px; '
+        + 'padding: 4px 8px; '
         + 'background: ' + (active ? 'rgba(196,149,58,0.15)' : 'rgba(196,149,58,0.04)') + '; '
         + 'border: 1px solid ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)') + '; '
-        + 'border-radius: var(--v-radius-sm, 6px); color: ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-text, #d4c8b0)') + '; '
-        + 'font-family: inherit; font-size: var(--v-font-xs, 11px); cursor: pointer;">'
+        + 'border-radius: 5px; color: ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-text, #d4c8b0)') + '; '
+        + 'font-family: inherit; font-size: 10px; cursor: pointer;">'
         + hsvg + ' ' + _titleCase(mm.name)
         + '</button>';
     });
