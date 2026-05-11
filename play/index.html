@@ -100,20 +100,152 @@ document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/scrip
   }
   function setStage(msg){ var el = document.getElementById('loading-stage'); if (el) el.textContent = msg || ''; }
   function setTip(msg){ var el = document.getElementById('loading-tip'); if (el) el.textContent = msg || ''; }
-  function setProgress(pct, msg){
-    var ctrl = _ensureController();
-    if (ctrl && ctrl.setProgress) ctrl.setProgress(pct, msg);
-    else setStage(msg);
+
+  // X-6.5.51AZ (2026-05-11): Epic AAA progress animator — 0→100% em pelo
+  // menos 5s mesmo se auth+state forem instantâneos, com easeOutCubic e
+  // contador visível. Antes setProgress(15) → setProgress(100) ocorria em
+  // <1s e player via "Pronto" antes da barra encher. Agora bar ganha
+  // protagonismo cinematográfico.
+  var _epicState = {
+    startTs: 0,
+    minMs: 5000,            // 5s mínimo
+    softCapMs: 9000,        // depois disso, libera 100% mesmo sem data
+    dataReady: false,       // true quando auth+state terminaram
+    redirectUrl: null,
+    currentPct: 0,
+    rafId: null,
+    pctEl: null,
+    barEl: null,
+    lastStageIdx: -1,
+    burstAt: { 25: false, 50: false, 75: false, 100: false }
+  };
+  // Estágios (label) por faixa de progresso — agnósticos ao destino.
+  var _epicStages = [
+    { from: 0,   to: 18,  label: 'Conectando aos ventos…' },
+    { from: 18,  to: 38,  label: 'Autenticando…' },
+    { from: 38,  to: 58,  label: 'Despertando runeiros…' },
+    { from: 58,  to: 78,  label: 'Restaurando jornada…' },
+    { from: 78,  to: 95,  label: 'Reunindo seu grupo…' },
+    { from: 95,  to: 101, label: 'Pronto…' }
+  ];
+  function _epicStageFor(pct){
+    for (var i = 0; i < _epicStages.length; i++){
+      var s = _epicStages[i];
+      if (pct >= s.from && pct < s.to) return { idx: i, label: s.label };
+    }
+    return { idx: _epicStages.length - 1, label: _epicStages[_epicStages.length - 1].label };
   }
-  function _doRedirect(url){
-    setProgress(100, 'Pronto…');
+  // Easing canonical (easeOutCubic — começo rápido, fim suave)
+  function _easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+  // Burst de partículas em milestones (25%, 50%, 75%, 100%)
+  function _milestoneBurst(pct){
+    var keys = [25, 50, 75, 100];
+    for (var i = 0; i < keys.length; i++){
+      var k = keys[i];
+      if (pct >= k && !_epicState.burstAt[k]){
+        _epicState.burstAt[k] = true;
+        var ov = document.getElementById('loading');
+        if (!ov) continue;
+        // 6 partículas saindo do centro da barra
+        var rect = ov.querySelector('.loading-progress-track');
+        if (!rect) continue;
+        for (var n = 0; n < 6; n++){
+          var sp = document.createElement('div');
+          sp.className = 'epic-burst';
+          sp.style.cssText = 'position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#ffe190,#c4953a 60%,transparent);pointer-events:none;'
+            + 'animation:epicBurst 0.8s ease-out forwards;'
+            + '--bx:' + (Math.cos(n * Math.PI / 3) * 80) + 'px;'
+            + '--by:' + (Math.sin(n * Math.PI / 3) * 80) + 'px;';
+          rect.appendChild(sp);
+          setTimeout((function(el){ return function(){ try { el.remove(); } catch(_){} }; })(sp), 900);
+        }
+      }
+    }
+  }
+  function _renderEpicProgress(pct){
+    pct = Math.max(0, Math.min(100, pct));
+    var ctrl = _ensureController();
+    var stage = _epicStageFor(pct);
+    // Atualiza stage text APENAS quando muda (evita re-trigger animation)
+    if (stage.idx !== _epicState.lastStageIdx){
+      _epicState.lastStageIdx = stage.idx;
+      if (ctrl && ctrl.setProgress) ctrl.setProgress(pct, stage.label);
+      else setStage(stage.label);
+    } else {
+      if (ctrl && ctrl.setProgress) ctrl.setProgress(pct);
+    }
+    // Atualiza % counter (criado em _showMagicCircle)
+    if (_epicState.pctEl){
+      _epicState.pctEl.textContent = Math.round(pct) + '%';
+    }
+    _epicState.currentPct = pct;
+    _milestoneBurst(pct);
+  }
+  function _startEpicTicker(){
+    if (_epicState.rafId) return;
+    _epicState.startTs = Date.now();
+    _epicState.pctEl = document.getElementById('epic-pct');
+    function tick(){
+      var elapsed = Date.now() - _epicState.startTs;
+      var minProgress = Math.min(1, elapsed / _epicState.minMs);
+      var softTimeout = elapsed >= _epicState.softCapMs;  // após 9s, libera mesmo sem data
+      var targetPct;
+      if (_epicState.dataReady || softTimeout){
+        // Data pronta OU softTimeout: pode ir até 100%, mas respeitando easing
+        // Curva: começa easeOutCubic até 90% pelo minMs, depois ramp suave 90→100
+        var t = Math.min(1, elapsed / _epicState.minMs);
+        var ease = _easeOutCubic(t);
+        if (t >= 1){
+          // Tempo mínimo já passou — vai pra 100% suavemente
+          targetPct = Math.min(100, _epicState.currentPct + 1.2);
+        } else {
+          targetPct = ease * 95; // cap em 95% até minMs completar
+        }
+      } else {
+        // Data NÃO pronta — segura em 90% máximo (espera state response)
+        var t2 = Math.min(1, elapsed / _epicState.minMs);
+        var ease2 = _easeOutCubic(t2);
+        targetPct = Math.min(90, ease2 * 95);
+      }
+      _renderEpicProgress(targetPct);
+      // Done?
+      if (_epicState.dataReady && _epicState.currentPct >= 99.5 && _epicState.redirectUrl){
+        _epicState.rafId = null;
+        // Pequeno hold em 100% pra player ler "Pronto…"
+        setTimeout(function(){ _doRedirectInner(_epicState.redirectUrl); }, 320);
+        return;
+      }
+      _epicState.rafId = requestAnimationFrame(tick);
+    }
+    _epicState.rafId = requestAnimationFrame(tick);
+  }
+  function _markDataReady(url){
+    _epicState.dataReady = true;
+    _epicState.redirectUrl = url;
+    sendLog('info', 'epic_data_ready', {elapsed: Date.now() - _epicState.startTs, currentPct: _epicState.currentPct});
+  }
+  function setProgress(pct, msg){
+    // Legacy compat — chamadas explícitas viram apenas hints, o ticker manda.
+    // setProgress(15) seta floor mínimo se ticker ainda não passou daí.
+    if (pct >= _epicState.currentPct){
+      // Avança o stage label imediatamente, mas mantém o pct sob controle do ticker.
+      var ctrl = _ensureController();
+      if (ctrl && ctrl.setProgress && msg) ctrl.setProgress(_epicState.currentPct, msg);
+      else if (msg) setStage(msg);
+    }
+  }
+  function _doRedirectInner(url){
+    var ctrl = _ensureController();
     var go = function(){
       window.__valdoria_transitioning = true;
       window.location.replace(url);
     };
-    var ctrl = _ensureController();
+    if (ctrl && ctrl.setProgress) ctrl.setProgress(100, 'Pronto…');
     if (ctrl && ctrl.hide) ctrl.hide(go);
     else setTimeout(go, 350);
+  }
+  function _doRedirect(url){
+    _markDataReady(url);
   }
 
   function _showMagicCircle(){
@@ -136,10 +268,43 @@ document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/scrip
       _overlay.style.display = '';  // remove display:none do placeholder
       _ld.parentNode.replaceChild(_overlay, _ld);
     }
+    // X-6.5.51AZ (2026-05-11): injeta % counter + CSS animations épicas
+    // (epicBurst pra partículas em milestones, epicPctGlow pra pulse do
+    // número). Inserido APÓS a track de progress pra player ver o número.
+    var newOv = document.getElementById('loading');
+    if (newOv){
+      // CSS animations injetadas inline (não dependem de loading.css)
+      var st = document.createElement('style');
+      st.textContent = ''
+        + '@keyframes epicBurst{0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) translate(var(--bx),var(--by)) scale(0.2);}}'
+        + '@keyframes epicPctGlow{0%,100%{text-shadow:0 0 8px rgba(196,149,58,0.6),0 0 18px rgba(255,200,90,0.35);}50%{text-shadow:0 0 14px rgba(255,215,140,0.85),0 0 28px rgba(255,180,90,0.55);}}'
+        + '@keyframes epicBarShimmer{0%{background-position:-200px 0;}100%{background-position:200px 0;}}'
+        + '#epic-pct{position:relative;font-family:var(--v-font-display,Cinzel,serif);font-size:28px;font-weight:700;color:#ffd070;letter-spacing:2px;text-align:center;margin-top:14px;animation:epicPctGlow 1.6s ease-in-out infinite;line-height:1;text-shadow:0 0 8px rgba(196,149,58,0.6);}'
+        + '#epic-pct::after{content:"";display:block;width:42px;height:2px;background:linear-gradient(90deg,transparent,#c4953a,transparent);margin:5px auto 0;opacity:0.7;}'
+        + '.loading-progress-track{position:relative;}'
+        + '.loading-progress-fill{background:linear-gradient(90deg,#8a5a20 0%,#c4953a 30%,#ffd700 60%,#ffe9a0 100%) !important;box-shadow:0 0 8px rgba(255,215,0,0.55),inset 0 1px 1px rgba(255,255,255,0.4) !important;position:relative;transition:width 0.18s linear !important;}'
+        + '.loading-progress-fill::after{content:"";position:absolute;top:0;right:0;width:14px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,235,160,0.9),transparent);animation:epicBarShimmer 1.6s linear infinite;filter:blur(2px);}'
+        ;
+      newOv.appendChild(st);
+      // % counter (após a track de progress)
+      var pctEl = document.createElement('div');
+      pctEl.id = 'epic-pct';
+      pctEl.textContent = '0%';
+      var track = newOv.querySelector('.loading-progress-wrap');
+      if (track && track.parentNode){
+        track.parentNode.insertBefore(pctEl, track.nextSibling);
+      } else {
+        newOv.appendChild(pctEl);
+      }
+    }
     // Inicializa o controller AGORA que .loading-stage e .loading-progress
     // existem no DOM. Sem isso, a barra fica em 0% e some de uma vez no
     // redirect (bug reportado pelo user 2026-05-10).
     _ensureController();
+    // X-6.5.51AZ: dispara o RAF ticker épico imediatamente após mostrar
+    // o magic-circle. Ticker roda em paralelo com auth+state e respeita
+    // tempo mínimo de 5s antes de fechar 100%.
+    _startEpicTicker();
   }
 
   function gotoCidade(extra){
