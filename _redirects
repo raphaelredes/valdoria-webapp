@@ -1,11 +1,16 @@
 # Cloudflare Pages redirects
 # Format: source destination status_code
 
-# Root -> /play/ (bot entry point) — 2026-05-10
-# Quem acessa https://jogo.lendasdevaldoria.com.br vai direto pra /play/
-# (que detecta env do hostname e redireciona pra cidade/exploracao/combate)
-/             /play/         301
-/index.html   /play/         301
+# Root -> /web/ (auth screen — Telegram OAuth + Google Sign-In) — 2026-05-11
+# User request: "jogo.* e dev.* devem sempre ter como padrao a tela para
+# autenticar via telegram ou google". Antes era / -> /play/ (que falhava
+# silenciosamente quando sem initData; agora /play/ continua sendo o ponto
+# de entrada do bot do Telegram via menu button — quem vier de la passa
+# direto. Browser users acessando "/" caem na auth page propria, escolhem
+# Telegram (popup login widget) ou Google (GSI), e dali sao roteados pra
+# cidade com sessao web criada.
+/             /web/         301
+/index.html   /web/         301
 
 # /web/dev and /web/dev.html redirect server-side to /web/?env=dev
 # This bypasses browser cache of the old dev.html content (2026-04-10 fix #63/#64)

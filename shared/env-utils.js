@@ -50,6 +50,35 @@ var ValdoriaEnv = (function() {
         return baseKey + '_' + _envId;
     }
 
+    /* 2026-05-11 (user request): adicionar classe `app-frame` em <html>
+       SOMENTE em hosts reais (jogo.* e dev.*). Isso ativa o "molde epico"
+       definido em valdoria-design.css (html.app-frame { ... }) — visivel
+       apenas em navegador desktop/tablet (via media query hover+pointer:fine
+       +min-width:700px). Simuladores file:// e qualquer outro contexto
+       NAO recebem a classe -> ficam sem o frame, preservando telas de debug
+       ao redor (regra soberana).
+
+       Hostnames reais:
+         - jogo.lendasdevaldoria.com.br (PROD)
+         - dev.lendasdevaldoria.com.br (DEV)
+         - prod.lendasdevaldoria.com.br (PROD tunnel atual) */
+    var _APP_FRAME_HOSTS = [
+        'jogo.lendasdevaldoria.com.br',
+        'dev.lendasdevaldoria.com.br',
+        'prod.lendasdevaldoria.com.br'
+    ];
+    if (_APP_FRAME_HOSTS.indexOf(_hostname) >= 0) {
+        try {
+            if (document.documentElement) {
+                document.documentElement.classList.add('app-frame');
+            } else if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    try { document.documentElement.classList.add('app-frame'); } catch (e) {}
+                }, { once: true });
+            }
+        } catch (e) { /* silent — frame e cosmetic */ }
+    }
+
     return {
         id: _envId,
         isProd: _isProd,

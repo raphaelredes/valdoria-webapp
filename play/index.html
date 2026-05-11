@@ -162,9 +162,25 @@ document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/scrip
     sendLog('info', 'initData_check', {present: !!initData, length: initData.length});
 
     if (!initData) {
-      setTip('Abra pelo bot do Telegram');
-      setProgress(35, 'Acesso direto…');
-      setTimeout(gotoCidade, 1200);
+      /* 2026-05-11 (user request): /play/ sem initData = navegador direto.
+         Redireciona pra /web/ (tela de autenticacao Telegram/Google) em vez
+         de tentar cidade sem sessao. Mantem suporte a links com ?token=&uid=
+         (gotoCidade) — se URL tiver token, segue pra cidade; sem token,
+         vai pra auth. */
+      var hasUrlToken = (new URLSearchParams(window.location.search)).get('token');
+      if (hasUrlToken) {
+        setTip('Restaurando sessao…');
+        setProgress(35, 'Restaurando sessao…');
+        setTimeout(gotoCidade, 1200);
+        return;
+      }
+      setTip('Entre via Telegram ou Google');
+      setProgress(35, 'Redirecionando para login…');
+      sendLog('info', 'no_initdata_redirect_to_web');
+      setTimeout(function () {
+        try { window.__valdoria_transitioning = true; } catch (e) {}
+        window.location.replace('/web/');
+      }, 700);
       return;
     }
 

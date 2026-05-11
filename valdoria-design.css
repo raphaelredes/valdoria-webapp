@@ -2037,11 +2037,16 @@ body::before {
 
    Deteccao: @media (hover: hover) and (pointer: fine) and (min-width: 700px)
    ============================================================================ */
+/* IMPORTANTE (2026-05-11): Todas as regras do frame requerem html.app-frame.
+   Essa classe e adicionada SOMENTE em hosts reais (jogo.* e dev.*) por
+   shared/env-utils.js (~L60+). Simuladores file:// e qualquer outro contexto
+   NAO recebem a classe -> nao sofrem o frame, mantendo telas de debug ao
+   redor. */
 @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
   /* HTML expande pra full viewport — vira o "molde" externo com bg epico.
      Background do html PROPAGA pro viewport (CSS spec quirk), entao preenche
      toda a area visivel mesmo com html caps. */
-  html {
+  html.app-frame {
     max-width: 100vw !important;
     max-height: 100vh !important;
     width: 100vw !important;
@@ -2060,7 +2065,7 @@ body::before {
   }
 
   /* HTML::before — sparkles dourados flutuantes ao redor do "phone" */
-  html::before {
+  html.app-frame::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -2078,7 +2083,7 @@ body::before {
   }
 
   /* Vinheta extra — escurece bordas do viewport pra destacar o phone central */
-  html::after {
+  html.app-frame::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -2092,7 +2097,7 @@ body::before {
   }
 
   /* BODY vira o "phone" centralizado — frame dourado + bordas arredondadas */
-  body {
+  html.app-frame body {
     max-width: 412px !important;
     width: 412px !important;
     max-height: min(100dvh - 32px, 892px) !important;
@@ -2119,8 +2124,8 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html::before { animation: none !important; }
+  html.app-frame::before { animation: none !important; }
 }
-body.perf-lite html::before {
+body.perf-lite html.app-frame::before {
   animation: none;
 }
