@@ -20,6 +20,8 @@ document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + v +
 document.write('<link rel="stylesheet" href="/shared/fonts.css?v=' + v + '">');
 document.write('<script src="/shared/loading-title.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>');
+document.write('<script src="/shared/loading-guard.js?v=' + v + '"><\/script>');
+document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/script>');
 </script>
 </head>
 <body>
@@ -71,8 +73,43 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
   window.addEventListener('unhandledrejection', function(e){ var r=e&&e.reason; sendLog('error', 'unhandled_rejection: '+(r&&(r.message||r)), {stack:r&&r.stack&&String(r.stack).slice(0,500)}); });
   sendLog('info', 'play_boot', {hostname:h, env:env, apiHost:apiHost, search:location.search});
 
+  // === Loading controller (barra animada + cinematic exit) ================
+  // Tips agnosticos ao destino — NUNCA dizer "cidade"/"exploracao"/"combate"
+  // (player pode estar voltando pra qualquer um deles, e a /play/ nao deve
+  // expor o destino antes da transicao).
+  function _ensureController(){
+    if (window._ctrl) return window._ctrl;
+    if (typeof window.ValdoriaLoadingController !== 'function') return null;
+    window._ctrl = window.ValdoriaLoadingController({
+      overlayId: 'loading',
+      tips: [
+        'Conectando aos ventos de Valdória…',
+        'Reunindo seu grupo…',
+        'Consultando o Mestre…',
+        'Despertando os runeiros…',
+        'Buscando o caminho…'
+      ],
+      allowOnRevisit: true  // /play/ é entry point, sempre mostrar
+    });
+    return window._ctrl;
+  }
   function setStage(msg){ var el = document.getElementById('loading-stage'); if (el) el.textContent = msg || ''; }
   function setTip(msg){ var el = document.getElementById('loading-tip'); if (el) el.textContent = msg || ''; }
+  function setProgress(pct, msg){
+    var ctrl = _ensureController();
+    if (ctrl && ctrl.setProgress) ctrl.setProgress(pct, msg);
+    else setStage(msg);
+  }
+  function _doRedirect(url){
+    setProgress(100, 'Pronto…');
+    var go = function(){
+      window.__valdoria_transitioning = true;
+      window.location.replace(url);
+    };
+    var ctrl = _ensureController();
+    if (ctrl && ctrl.hide) ctrl.hide(go);
+    else setTimeout(go, 350);
+  }
 
   function _showMagicCircle(){
     // Popular overlay com magic-circle canonical
@@ -94,6 +131,10 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
       _overlay.style.display = '';  // remove display:none do placeholder
       _ld.parentNode.replaceChild(_overlay, _ld);
     }
+    // Inicializa o controller AGORA que .loading-stage e .loading-progress
+    // existem no DOM. Sem isso, a barra fica em 0% e some de uma vez no
+    // redirect (bug reportado pelo user 2026-05-10).
+    _ensureController();
   }
 
   function gotoCidade(extra){
@@ -101,14 +142,16 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
     q.set('env', env);
     q.set('_cb', String(Date.now()));
     sendLog('info', 'redirect_cidade_fallback');
-    window.__valdoria_transitioning = true;
-    window.location.replace('/cidade/?' + q.toString());
+    _doRedirect('/cidade/?' + q.toString());
   }
 
   // === Auth + state + redirect (rodado depois de TOQUE PARA INICIAR) =======
+  // Stages SEMPRE agnosticos ao destino — o player pode estar voltando pra
+  // cidade/exploracao/combate/levelup/prologo, e a /play/ NAO deve expor isso
+  // antes da transicao (regra do user 2026-05-10).
   function runAuthAndRedirect(){
     _showMagicCircle();
-    setStage('Identificando…');
+    setProgress(15, 'Autenticando…');
 
     var tg = window.Telegram && window.Telegram.WebApp;
     if (tg && typeof tg.ready === 'function') {
@@ -120,12 +163,12 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
 
     if (!initData) {
       setTip('Abra pelo bot do Telegram');
-      setStage('Acesso direto — redirecionando…');
+      setProgress(35, 'Acesso direto…');
       setTimeout(gotoCidade, 1200);
       return;
     }
 
-    setStage('Autenticando…');
+    setProgress(30, 'Autenticando…');
     setTip('Conectando aos ventos de Valdória…');
     sendLog('info', 'init_session_request', {host: apiHost});
 
@@ -139,6 +182,7 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
     .then(function(r){
       sendLog('info', 'init_session_response', {status: r.status, ok: r.ok});
       if (!r.ok) throw new Error('init-session HTTP ' + r.status);
+      setProgress(50, 'Autenticando…');
       return r.json();
     })
     .then(function(auth){
@@ -147,7 +191,7 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
       if (auth.env && auth.env !== env) throw new Error('Cross-env: host=' + env + ' server=' + auth.env);
       var apiBase = (auth.api || apiHost).replace(/\/+$/, '');
 
-      setStage('Restaurando jornada…');
+      setProgress(65, 'Restaurando jornada…');
       setTip('Buscando seu personagem…');
       sendLog('info', 'state_request', {api_base: apiBase, uid: auth.user_id});
 
@@ -161,6 +205,7 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
       .then(function(r){
         sendLog('info', 'state_response', {status: r.status, ok: r.ok});
         if (!r.ok && r.status !== 204) throw new Error('state HTTP ' + r.status);
+        setProgress(85, 'Restaurando jornada…');
         if (r.status === 204) return null;
         return r.json();
       })
@@ -180,31 +225,28 @@ document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>
           var to = String(state.transition.to);
           var serverUrl = state.transition.url;
           if (serverUrl){
-            setStage('Continuando jornada…');
             sendLog('info', 'redirect_serverUrl', {url: serverUrl.slice(0, 200)});
-            window.__valdoria_transitioning = true;
-            window.location.replace(serverUrl);
+            _doRedirect(serverUrl);
             return;
           }
           var dest = null;
-          if (to === 'explore' || to === 'exploration') { dest = '/exploracao/exploracao.html'; setStage('Voltando à exploração…'); }
-          else if (to === 'combat' || to === 'combat2') { dest = '/combat2/combate.html'; setStage('Retornando ao combate…'); }
-          else if (to === 'levelup') { dest = '/levelup/'; setStage('Continuando level up…'); }
-          else if (to === 'prologue' || to === 'prologo') { dest = '/prologue/'; setStage('Continuando o prólogo…'); }
-          else if (to === 'cidade' || to === 'city') { dest = '/cidade/'; setStage('Voltando à cidade…'); }
+          // Stages NAO mencionam o destino — usuario pode estar voltando pra
+          // qualquer area. Mensagem fica generica ate o redirect.
+          if (to === 'explore' || to === 'exploration') dest = '/exploracao/exploracao.html';
+          else if (to === 'combat' || to === 'combat2') dest = '/combat2/combate.html';
+          else if (to === 'levelup') dest = '/levelup/';
+          else if (to === 'prologue' || to === 'prologo') dest = '/prologue/';
+          else if (to === 'cidade' || to === 'city') dest = '/cidade/';
           if (dest){
             sendLog('info', 'redirect_dest', {dest: dest, to: to});
-            window.__valdoria_transitioning = true;
-            window.location.replace(dest + '?' + qs.toString());
+            _doRedirect(dest + '?' + qs.toString());
             return;
           }
           sendLog('warn', 'unknown_transition_to', {to: to});
         }
 
-        setStage('Entrando na cidade…');
         sendLog('info', 'redirect_default_cidade');
-        window.__valdoria_transitioning = true;
-        window.location.replace('/cidade/?' + qs.toString());
+        _doRedirect('/cidade/?' + qs.toString());
       });
     })
     .catch(function(err){
