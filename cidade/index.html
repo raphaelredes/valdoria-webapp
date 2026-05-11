@@ -13741,6 +13741,62 @@ var GUILD_QUESTS_AVAILABLE = [
   { id: 'gq_defend',   icon: _heralIco('ic-portoes'),      title: 'Defender vila do leste',  reward: 500, xp: 400, diff: 'nv 10' }
 ];
 
+// X-6.5.51AV (2026-05-11): tabela completa de detalhes pras quests de guild.
+// Antes accept_q_* só mostrava toast. Agora _acceptQuest move pra QUESTS_ACTIVE
+// usando esses metadados (desc, progress, npc, location, lvlReq).
+// Adicionar nova quest = adicionar em GUILD_QUESTS_AVAILABLE + aqui.
+var GUILD_QUEST_DETAILS = {
+  goblins: {
+    qid: 'goblins', icon: _heralIco('ic-goblin'),
+    title: 'Caçar 3 goblins', desc: 'Goblins atacaram o moinho a oeste. Elimine 3 deles pra que o moleiro volte ao trabalho.',
+    npc: 'Capitão Helga', location: 'Moinho do Oeste (1km da cidade)',
+    flavor: 'Helga aperta o ombro: "Goblins de novo. Mate 3 — tomara que mostrem onde se escondem."',
+    reward: 25, xp: 40, lvlReq: 1, progress: '0/3'
+  },
+  herbs: {
+    qid: 'herbs', icon: _heralIco('ic-druida'),
+    title: 'Coletar ervas raras', desc: 'Mestra Sylvi precisa de 5 raízes-da-noite pra suas poções.',
+    npc: 'Mestra Sylvi', location: 'Bosque dos Sussurros',
+    flavor: 'Sylvi sorri: "Cresce só onde a lua bate forte. Cuidado com as criaturas que adoram folha noturna."',
+    reward: 15, xp: 25, lvlReq: 1, progress: '0/5'
+  },
+  escort: {
+    qid: 'escort', icon: _heralIco('ic-grupo'),
+    title: 'Escoltar caravana', desc: 'Caravana de comerciantes precisa de proteção até o Acampamento dos Veteranos.',
+    npc: 'Comerciante Brael', location: 'Estrada Norte → Valkrest',
+    flavor: 'Brael aponta pros carroções: "Bandidos andam soltos. Te pago bem se nada cair."',
+    reward: 50, xp: 60, lvlReq: 3, progress: '0/1'
+  },
+  ruin: {
+    qid: 'ruin', icon: _heralIco('ic-ach-erudito'),
+    title: 'Investigar ruína antiga', desc: 'Estudiosa Maeve quer mapas e relíquias da ruína de Karthal.',
+    npc: 'Estudiosa Maeve', location: 'Ruínas de Karthal',
+    flavor: 'Maeve esfrega os óculos: "Mortos-vivos guardam algo lá embaixo. Traga qualquer pergaminho ou estátua."',
+    reward: 80, xp: 80, lvlReq: 4, progress: '0/3'
+  },
+  bandit_lord: {
+    qid: 'bandit_lord', icon: _heralIco('ic-orc'),
+    title: 'Matar líder bandido', desc: 'Capitão Helga oferece recompensa pela cabeça de Vargrim, o Cicatriz.',
+    npc: 'Capitão Helga', location: 'Forte dos Bandidos',
+    flavor: 'Helga estende um cartaz: "Vargrim. Cicatriz no rosto, dois machados. Vivo ou morto — prefiro morto."',
+    reward: 150, xp: 150, lvlReq: 6, progress: '0/1'
+  },
+  dragonet: {
+    qid: 'dragonet', icon: _heralIco('ic-boss'),
+    title: 'Caçar dragonete', desc: 'Dragonete vermelha aterroriza a Cratera Vulcânica.',
+    npc: 'Conselheiro Aldric', location: 'Cratera Vulcânica',
+    flavor: 'Aldric baixa a voz: "Filhote, sim. Mas filhote de dragão queima rebanho inteiro num sopro."',
+    reward: 300, xp: 250, lvlReq: 8, progress: '0/1'
+  },
+  defend: {
+    qid: 'defend', icon: _heralIco('ic-portoes'),
+    title: 'Defender vila do leste', desc: 'Vila Aldeia-do-Lago sob ataque iminente de orcs do leste.',
+    npc: 'Capitão Helga', location: 'Aldeia-do-Lago',
+    flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. Vila precisa de heróis em 3 dias."',
+    reward: 500, xp: 400, lvlReq: 10, progress: '0/1'
+  }
+};
+
 // GUILD_RECRUITS — 4 mercenários com brasões de classe canonical
 var GUILD_RECRUITS = [
   { id: 'rc_korin', icon: _heralIco('ic-guerreiro'),   name: 'Korin Punho-Pesado', cls: 'Guerreiro nv 3',   cost: 60, desc: 'Tank confiável, especialista em armas pesadas.' },
@@ -14981,7 +15037,11 @@ function _normalizeQuests(){
       reward: q.reward || 0, xp: q.xp || 0,
       npc: '', date: '',
       level: lvl,
-      cb: 'quest_accept_' + (q.id || '').replace(/^gq_/, '')
+      // X-6.5.51AV (2026-05-11): convenção cb 'accept_q_<id>' (handler em ~37891).
+      // Antes era 'quest_accept_<id>' sem handler — clique no Quest Diary
+      // não fazia nada. Agora bate com handler accept_q_* que delega ao
+      // _acceptQuest (move AVAILABLE → ACTIVE com check de nível).
+      cb: 'accept_q_' + (q.id || '').replace(/^gq_/, '')
     });
   });
   (QUESTS_HISTORY || []).forEach(function(q){
@@ -36904,6 +36964,88 @@ var SUBSCREEN_DATA = {
     ]
   },
 
+  // X-6.5.51AV (2026-05-11): SUBSCREEN_DATA das 7 quests de guild.
+  // Antes só wolves/lyana tinham — accept_q_* não levava a tela alguma.
+  // Agora, após _acceptQuest, player pode navegar pra estas telas via
+  // QUESTS_ACTIVE → 'quest_open_<id>' (renderQuestDiary já constrói esse cb).
+  'quest_open_goblins': {
+    header: '🐺 Missão: Caçar 3 Goblins',
+    flavor: 'Goblins atacaram o moinho a oeste. Helga te mandou eliminar 3 pra restaurar a paz.',
+    npcInfo: '📋 Estágio 0/3 | NPC: Capitão Helga | Local: Moinho do Oeste | Recompensa: 25 <span class="vi vi-coin sm"></span> + 40 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Moinho do Oeste, 1km', 'quest_goblins_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
+      [_heralIco('ic-missoes'), 'Entregar provas a Helga', 'completar quest', 'quest_goblins_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
+    ]
+  },
+  'quest_open_herbs': {
+    header: '🌿 Missão: Coletar Ervas Raras',
+    flavor: 'Mestra Sylvi precisa de 5 raízes-da-noite do Bosque dos Sussurros pra suas poções.',
+    npcInfo: '📋 Estágio 0/5 | NPC: Mestra Sylvi | Local: Bosque dos Sussurros | Recompensa: 15 <span class="vi vi-coin sm"></span> + 25 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Bosque dos Sussurros', 'quest_herbs_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
+      [_heralIco('ic-missoes'), 'Entregar ervas a Sylvi', 'completar quest', 'quest_herbs_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
+    ]
+  },
+  'quest_open_escort': {
+    header: '🛡️ Missão: Escoltar Caravana',
+    flavor: 'Comerciante Brael precisa escolta até Valkrest. Bandidos rondam a Estrada Norte.',
+    npcInfo: '📋 Estágio 0/1 | NPC: Comerciante Brael | Local: Estrada Norte → Valkrest | Recompensa: 50 <span class="vi vi-coin sm"></span> + 60 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Estrada Norte → Valkrest', 'quest_escort_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Brael', 'completar quest', 'quest_escort_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
+    ]
+  },
+  'quest_open_ruin': {
+    header: '🏛️ Missão: Investigar Ruína Antiga',
+    flavor: 'Estudiosa Maeve quer mapas, pergaminhos e relíquias das ruínas de Karthal.',
+    npcInfo: '📋 Estágio 0/3 | NPC: Estudiosa Maeve | Local: Ruínas de Karthal | Recompensa: 80 <span class="vi vi-coin sm"></span> + 80 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Ruínas de Karthal', 'quest_ruin_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
+      [_heralIco('ic-missoes'), 'Entregar achados a Maeve', 'completar quest', 'quest_ruin_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
+    ]
+  },
+  'quest_open_bandit_lord': {
+    header: '👹 Missão: Matar Líder Bandido',
+    flavor: 'Vargrim, o Cicatriz, lidera os bandidos do Forte. Helga oferece recompensa pela cabeça dele.',
+    npcInfo: '📋 Estágio 0/1 | NPC: Capitão Helga | Local: Forte dos Bandidos | Recompensa: 150 <span class="vi vi-coin sm"></span> + 150 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
+      [_heralIco('ic-missoes'), 'Reportar cabeça a Helga', 'completar quest', 'quest_bandit_lord_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
+    ]
+  },
+  'quest_open_dragonet': {
+    header: '🐲 Missão: Caçar Dragonete',
+    flavor: 'Dragonete vermelha aterroriza a Cratera Vulcânica. Aldric te avisa do perigo.',
+    npcInfo: '📋 Estágio 0/1 | NPC: Conselheiro Aldric | Local: Cratera Vulcânica | Recompensa: 300 <span class="vi vi-coin sm"></span> + 250 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Cratera Vulcânica', 'quest_dragonet_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Aldric', 'completar quest', 'quest_dragonet_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
+    ]
+  },
+  'quest_open_defend': {
+    header: '🏰 Missão: Defender Vila do Leste',
+    flavor: 'Aldeia-do-Lago sob ataque iminente de orcs. Você tem 3 dias pra chegar.',
+    npcInfo: '📋 Estágio 0/1 | NPC: Capitão Helga | Local: Aldeia-do-Lago | Recompensa: 500 <span class="vi vi-coin sm"></span> + 400 XP',
+    buttons: [
+      [_heralIco('ic-missoes'), 'Ver localização', 'Aldeia-do-Lago', 'quest_defend_locate'],
+      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'defender a vila', 'quest_defend_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar quest', 'quest_defend_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
+    ]
+  },
+
   // bank_items_screen REMOVIDO na Fase 9.6.R1 (substituído por
   // _bankShowItemDepositPopup + _bankShowItemWithdrawPopup que rodam direto
   // como popup canonical, sem depender de SUBSCREEN_DATA).
@@ -37888,13 +38030,62 @@ var ACTION_HANDLERS = {
   'quest_wolves_abandon': function(p){
     _abandonQuest('wolves', 'Caçar Lobos Cinzentos', '-5 afinidade com Tavira (caçadora)');
   },
-  'accept_q_goblins':       function(p){ vToast('🐺 Quest aceita: Caçar 3 goblins. Recompensa: 25 Valdoritas + 40 XP.'); },
-  'accept_q_herbs':         function(p){ vToast('🌿 Quest aceita: Coletar ervas raras. Recompensa: 15 Valdoritas + 25 XP.'); },
-  'accept_q_escort':        function(p){ vToast('👥 Quest aceita: Escoltar caravana. Recompensa: 50 Valdoritas + 60 XP.'); },
-  'accept_q_ruin':          function(p){ vToast('📖 Quest aceita: Investigar ruína. Recompensa: 80 Valdoritas + 80 XP.'); },
-  'accept_q_bandit_lord':   function(p){ if (p.level < 6) { vToast('👹 Requer nv 6+.'); return; } vToast('👹 Quest aceita: Matar líder bandido. 150 Valdoritas + 150 XP.'); },
-  'accept_q_dragonet':      function(p){ if (p.level < 8) { vToast('🐲 Requer nv 8+.'); return; } vToast('🐲 Quest aceita: Caçar dragonete. 300 Valdoritas + 250 XP.'); },
-  'accept_q_defend':        function(p){ if (p.level < 10) { vToast('🏰 Requer nv 10+.'); return; } vToast('🏰 Quest aceita: Defender vila. 500 Valdoritas + 400 XP.'); },
+  // X-6.5.51AV (2026-05-11): handlers de accept delegam pro _acceptQuest helper.
+  // Antes só mostravam toast — agora MOVEM de GUILD_QUESTS_AVAILABLE para
+  // QUESTS_ACTIVE, com check de nível, duplicata e completed/abandoned.
+  'accept_q_goblins':       function(p){ _acceptQuest('goblins'); },
+  'accept_q_herbs':         function(p){ _acceptQuest('herbs'); },
+  'accept_q_escort':        function(p){ _acceptQuest('escort'); },
+  'accept_q_ruin':          function(p){ _acceptQuest('ruin'); },
+  'accept_q_bandit_lord':   function(p){ _acceptQuest('bandit_lord'); },
+  'accept_q_dragonet':      function(p){ _acceptQuest('dragonet'); },
+  'accept_q_defend':        function(p){ _acceptQuest('defend'); },
+
+  // X-6.5.51AV (2026-05-11): handlers DELIVER / ABANDON / LOCATE / DETAILS
+  // pra cada uma das 7 quests de guild. Padrão delegando ao _deliverQuest e
+  // _abandonQuest (helpers genéricos). Locate/details mostram toast informativo.
+  // GOBLINS
+  'quest_open_goblins':         function(p){ navigateTo('quest_open_goblins'); },
+  'quest_goblins_locate':       function(p){ vToast('📍 Moinho do Oeste, 1km da cidade.'); },
+  'quest_goblins_details':      function(p){ vToast('📜 Matar 3 goblins. Recompensa: 25 Valdoritas + 40 XP.'); },
+  'quest_goblins_deliver':      function(p){ _deliverQuest('goblins', 25, 40, '🐺 Helga aceita as provas. +25 Valdoritas +40 XP. Missão completa!'); },
+  'quest_goblins_abandon':      function(p){ _abandonQuest('goblins', 'Caçar 3 Goblins', '-5 afinidade com Capitão Helga'); },
+  // HERBS
+  'quest_open_herbs':           function(p){ navigateTo('quest_open_herbs'); },
+  'quest_herbs_locate':         function(p){ vToast('📍 Bosque dos Sussurros — cresce só onde a lua bate forte.'); },
+  'quest_herbs_details':        function(p){ vToast('📜 Coletar 5 raízes-da-noite. Recompensa: 15 Valdoritas + 25 XP.'); },
+  'quest_herbs_deliver':        function(p){ _deliverQuest('herbs', 15, 25, '🌿 Sylvi inspeciona as raízes e sorri. +15 Valdoritas +25 XP. Missão completa!'); },
+  'quest_herbs_abandon':        function(p){ _abandonQuest('herbs', 'Coletar Ervas Raras', '-5 afinidade com Mestra Sylvi'); },
+  // ESCORT
+  'quest_open_escort':          function(p){ navigateTo('quest_open_escort'); },
+  'quest_escort_locate':        function(p){ vToast('📍 Estrada Norte rumo a Valkrest. Bandidos rondam.'); },
+  'quest_escort_details':       function(p){ vToast('📜 Sobreviver à jornada até Valkrest. Recompensa: 50 Valdoritas + 60 XP.'); },
+  'quest_escort_deliver':       function(p){ _deliverQuest('escort', 50, 60, '🛡️ Brael agradece a escolta. +50 Valdoritas +60 XP. Missão completa!'); },
+  'quest_escort_abandon':       function(p){ _abandonQuest('escort', 'Escoltar Caravana', '-5 afinidade com Comerciante Brael'); },
+  // RUIN
+  'quest_open_ruin':            function(p){ navigateTo('quest_open_ruin'); },
+  'quest_ruin_locate':          function(p){ vToast('📍 Ruínas de Karthal — bioma graveyard, mortos-vivos guardam o local.'); },
+  'quest_ruin_details':         function(p){ vToast('📜 Trazer 3 relíquias ou pergaminhos. Recompensa: 80 Valdoritas + 80 XP.'); },
+  'quest_ruin_deliver':         function(p){ _deliverQuest('ruin', 80, 80, '🏛️ Maeve estuda as relíquias maravilhada. +80 Valdoritas +80 XP. Missão completa!'); },
+  'quest_ruin_abandon':         function(p){ _abandonQuest('ruin', 'Investigar Ruína Antiga', '-5 afinidade com Estudiosa Maeve'); },
+  // BANDIT LORD
+  'quest_open_bandit_lord':     function(p){ navigateTo('quest_open_bandit_lord'); },
+  'quest_bandit_lord_locate':   function(p){ vToast('📍 Forte dos Bandidos — Vargrim, o Cicatriz, comanda dali.'); },
+  'quest_bandit_lord_details':  function(p){ vToast('📜 Matar Vargrim, o Cicatriz. Recompensa: 150 Valdoritas + 150 XP.'); },
+  'quest_bandit_lord_deliver':  function(p){ _deliverQuest('bandit_lord', 150, 150, '👹 Helga conta a recompensa. +150 Valdoritas +150 XP. Vargrim morreu — missão completa!'); },
+  'quest_bandit_lord_abandon':  function(p){ _abandonQuest('bandit_lord', 'Matar Líder Bandido', '-5 afinidade com Capitão Helga'); },
+  // DRAGONET
+  'quest_open_dragonet':        function(p){ navigateTo('quest_open_dragonet'); },
+  'quest_dragonet_locate':      function(p){ vToast('📍 Cratera Vulcânica — Filhote queima rebanho num sopro.'); },
+  'quest_dragonet_details':     function(p){ vToast('📜 Matar a dragonete vermelha. Recompensa: 300 Valdoritas + 250 XP.'); },
+  'quest_dragonet_deliver':     function(p){ _deliverQuest('dragonet', 300, 250, '🐲 Aldric paga generosamente. +300 Valdoritas +250 XP. Cratera está segura!'); },
+  'quest_dragonet_abandon':     function(p){ _abandonQuest('dragonet', 'Caçar Dragonete', '-5 afinidade com Conselheiro Aldric'); },
+  // DEFEND
+  'quest_open_defend':          function(p){ navigateTo('quest_open_defend'); },
+  'quest_defend_locate':        function(p){ vToast('📍 Aldeia-do-Lago — 3 dias até o ataque dos orcs.'); },
+  'quest_defend_details':       function(p){ vToast('📜 Defender Aldeia-do-Lago dos orcs. Recompensa: 500 Valdoritas + 400 XP.'); },
+  'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, '🏰 Helga aperta tua mão. +500 Valdoritas +400 XP. Aldeia-do-Lago resistiu!'); },
+  'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Vila do Leste', '-5 afinidade com Capitão Helga'); },
   'q_history_1':            function(p){ vToast('📚 Tutorial completado em 2026-04-15. +50 XP.'); },
   'q_history_2':            function(p){ vToast('📚 Goblin no celeiro derrotado em 2026-04-16. +30 XP.'); },
   'q_history_3':            function(p){ vToast('📚 3 lobos pequenos caçados em 2026-04-18. +60 XP.'); },
@@ -38202,6 +38393,63 @@ function _abandonQuest(questId, displayName, consequencia){
   }
 }
 
+// X-6.5.51AV (2026-05-11): aceita uma quest do guild board.
+// Args: qid (sufixo cb 'accept_q_<qid>', ex: 'goblins', 'herbs')
+// Side effects:
+//   1) Valida nível mínimo (lvlReq)
+//   2) Checa duplicata (já em ACTIVE ou completed/abandoned)
+//   3) Move de GUILD_QUESTS_AVAILABLE → QUESTS_ACTIVE
+//   4) Toast + closeCityPopup + re-render hub
+// Antes: handlers accept_q_* só mostravam toast (não faziam nada de verdade).
+function _acceptQuest(qid){
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  var d = (typeof GUILD_QUEST_DETAILS !== 'undefined' && GUILD_QUEST_DETAILS[qid]) || null;
+  if (!d) {
+    vToast('⚠️ Missão indisponível: ' + qid, 'warn');
+    return;
+  }
+  // Nível mínimo
+  if ((p.level || 1) < (d.lvlReq || 1)) {
+    vToast('⚠️ Requer nível ' + d.lvlReq + ' (você é nível ' + (p.level || 1) + ').', 'warn');
+    return;
+  }
+  // Duplicata em ACTIVE
+  if (typeof QUESTS_ACTIVE !== 'undefined') {
+    var alreadyActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid; });
+    if (alreadyActive) {
+      vToast('⚠️ Essa missão já está nas ativas.', 'warn');
+      if (typeof closeCityPopup === 'function') closeCityPopup();
+      return;
+    }
+  }
+  // Já completada/abandonada nessa sessão
+  if (_isQuestCompletedOrAbandoned(qid)) {
+    vToast('⚠️ Essa missão já foi resolvida (concluída ou abandonada).', 'warn');
+    return;
+  }
+  // Adicionar a QUESTS_ACTIVE
+  if (typeof QUESTS_ACTIVE !== 'undefined') {
+    QUESTS_ACTIVE.push({
+      id: 'qa_' + qid, icon: d.icon,
+      title: d.title, desc: d.desc || '',
+      progress: d.progress || '0/1',
+      reward: d.reward || 0, xp: d.xp || 0,
+      npc: d.npc || ''
+    });
+  }
+  // Remover de GUILD_QUESTS_AVAILABLE
+  if (typeof GUILD_QUESTS_AVAILABLE !== 'undefined') {
+    var gqIdx = GUILD_QUESTS_AVAILABLE.findIndex(function(q){ return q && q.id === 'gq_' + qid; });
+    if (gqIdx >= 0) GUILD_QUESTS_AVAILABLE.splice(gqIdx, 1);
+  }
+  vToast('✅ Missão aceita: ' + d.title + '. +' + d.reward + ' V + ' + d.xp + ' XP ao concluir.');
+  if (typeof closeCityPopup === 'function') closeCityPopup();
+  if (typeof renderCurrentScreen === 'function' && _currentScreen === 'hub') {
+    setTimeout(function(){ renderCurrentScreen(); }, 60);
+  }
+}
+
 function renderSubScreen(el, key){
   var d = SUBSCREEN_DATA[key];
   if (!d) { el.textContent = 'Tela em construção: ' + key; return; }
@@ -38215,9 +38463,24 @@ function renderSubScreen(el, key){
   // se o player completou/abandonou esse quest.
   var buttons = (d.buttons || []).filter(function(b){
     var cb = b && b[3];
-    if (!cb || cb.indexOf('quest_open_') !== 0) return true;
-    var qid = cb.substring('quest_open_'.length);
-    return !_isQuestCompletedOrAbandoned(qid);
+    if (!cb) return true;
+    // Filtro 1: quest_open_<id> some se já completada/abandonada
+    if (cb.indexOf('quest_open_') === 0) {
+      var qid1 = cb.substring('quest_open_'.length);
+      return !_isQuestCompletedOrAbandoned(qid1);
+    }
+    // X-6.5.51AV (2026-05-11) Filtro 2: accept_q_<id> some se já em ACTIVE
+    // ou já completada/abandonada (depois de ter aceito + entregue).
+    if (cb.indexOf('accept_q_') === 0) {
+      var qid2 = cb.substring('accept_q_'.length);
+      if (_isQuestCompletedOrAbandoned(qid2)) return false;
+      if (typeof QUESTS_ACTIVE !== 'undefined') {
+        var inActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid2; });
+        if (inActive) return false;
+      }
+      return true;
+    }
+    return true;
   });
   // Atualiza header dinamicamente se for 'quests_active' (contador real)
   var header = d.header || '';
