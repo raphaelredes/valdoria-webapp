@@ -37,8 +37,11 @@
     if (REAL_HOSTS.indexOf(host) < 0) return;  // simulator file://, local dev, etc
 
     var path = String(location.pathname || '').toLowerCase();
-    /* Paths que NAO exigem auth (entry pages + utility) */
-    var SKIP_PATHS = ['/web/', '/play/', '/apoie/', '/legal/', '/docs/', '/_test/'];
+    /* Paths que NAO exigem auth — apenas a tela de autenticacao e paginas
+       publicas. /play/ AGORA tambem e gateado (user request 2026-05-11:
+       "literalmente tudo que vier depois de dev.com/ deve redirecionar
+       para tela de autenticacao caso nao esteja autenticado"). */
+    var SKIP_PATHS = ['/web/', '/apoie/', '/legal/', '/docs/', '/_test/'];
     for (var sp = 0; sp < SKIP_PATHS.length; sp++) {
         if (path.indexOf(SKIP_PATHS[sp]) === 0) return;
     }
@@ -60,25 +63,18 @@
         if (hasUid && hasAnyToken) return;
     } catch (e) { /* URLSearchParams indisponivel — segue */ }
 
-    /* Check 3: localStorage session web. Keys canonicas vem do web-auth.js
-       (~L45+): valdoria_web_token_<env> + valdoria_web_user_id_<env>. */
-    var env = host.indexOf('dev.') === 0 ? 'dev' : 'prod';
-    try {
-        var tokenKey = 'valdoria_web_token_' + env;
-        var userKey = 'valdoria_web_user_id_' + env;
-        var savedToken = localStorage.getItem(tokenKey);
-        var savedUser = localStorage.getItem(userKey);
-        if (savedToken && savedUser) return;  /* sessao web autenticada */
+    /* NAO ha mais Check 3 de localStorage standalone. Game pages precisam
+       de URL token pra funcionar (API client le do URL). localStorage soh
+       e usado por /web/'s checkExistingSession() que detecta sessao e
+       redireciona pra game com URL params via redirectToGame().
 
-        /* Fallback adicional: qualquer key v_<env>_session_* (sim/dev legacy) */
-        var len = localStorage.length || 0;
-        for (var i = 0; i < len; i++) {
-            var key = localStorage.key(i) || '';
-            if (key.indexOf('v_' + env + '_session_') === 0) {
-                return;
-            }
-        }
-    } catch (e) { /* localStorage bloqueado — segue pro redirect */ }
+       Resultado: usuario com localStorage mas sem URL token visita /cidade/
+       -> gate redireciona pra /web/ -> /web/ detecta localStorage -> faz
+       fetch /api/game/state -> redirect pra "tela salva no personagem" com
+       URL params completos. User-facing: 1 redirect extra mas garante que
+       o destino sempre routes pra last_screen_payload (atende user request
+       2026-05-11: "se estiver autenticado deve ir para a tela que esta
+       salvo no personagem"). */
 
     /* Nenhum contexto -> redireciona pra /web/ (auth screen) */
     try {

@@ -10,6 +10,11 @@
 <title>Lendas de Valdoria — Carregando…</title>
 <style>html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;height:100%;overflow:hidden}</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- 2026-05-11 (user request): "/play/ tambem deve redirecionar para tela de
+     autenticacao caso nao esteja autenticado". Auth gate roda ANTES da
+     logica de /play/ pra redirect instantaneo sem 700ms delay. Telegram
+     users com initData passam normalmente (check 1). -->
+<script src="/shared/auth-gate.js"></script>
 <script>
 // Carrega CSS canonical + scripts (loading-title.js para TOQUE PARA INICIAR,
 // loading-template.js para magic-circle overlay durante auth+state)
