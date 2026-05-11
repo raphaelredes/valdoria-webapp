@@ -38795,13 +38795,18 @@ function _travelToBiome(mapIdOrBiome, displayName){
     //   3. Hazards: dice 1d20+mod vs DC com Dice3D, dano em falha
     //   4. Player sobrevive → playTravelAnimation → redirect
     //   5. Player morre → defeat + voltar Portões
+    /* 2026-05-11 BUGFIX (descoberto via Chrome MCP testing):
+       biomeKey nao existe no escopo — refactor anterior renomeou pra mapId
+       mas esqueceu 3 referencias aqui dentro de _doAnim. Resultado:
+       ReferenceError: biomeKey is not defined ao clicar "Viajar pra
+       <destino>" — transicao cidade->exploracao QUEBRADA. */
     if (typeof startCityJourney === 'function') {
-      _logCity('city journey starting -> ' + biomeKey);
-      startCityJourney(biomeKey, displayName, url);
+      _logCity('city journey starting -> ' + mapId);
+      startCityJourney(mapId, displayName, url);
       return;
     }
     // Fallback (sem journey): direto pra anim
-    playTravelAnimation(biomeKey, displayName, function(){
+    playTravelAnimation(mapId, displayName, function(){
       _logCity('travel anim done -> redirect (no journey)');
       window.__valdoria_transitioning = true;
       window.location.href = url;
