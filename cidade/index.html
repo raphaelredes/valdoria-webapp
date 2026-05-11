@@ -10418,6 +10418,70 @@ function _showFichaPicker(){
 // FIX 2026-05-04: cards eram cliques mortos — agora abrem popups dedicados.
 // Replica heroes_wall_data.py + achievements_data.py canonical.
 
+// X-6.5.51AY (2026-05-11): helpers PT-BR pra todas as telas. Antes datas ISO
+// "2026-05-03" apareciam cruas — agora viram "Há 8 dias / Anteontem / Ontem
+// / Há 2 semanas / 03/05/2026". Tom de crônica medieval (Era do Reino) e
+// dias-da-semana em PT pra contexto histórico nos painéis de Sequência,
+// Abates, Conquistas e Liga.
+var _PT_MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+var _PT_MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+var _PT_DAYS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+var _PT_DAYS_SHORT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function _fmtDatePtBr(value, opts){
+  opts = opts || {};
+  if (value == null || value === '') return '';
+  // Já está em PT-BR (ex: "Hoje", "Ontem") — passa direto.
+  if (typeof value === 'string' && /^(hoje|ontem|anteontem|há\s|há\s)/i.test(value)) return value;
+  var d;
+  if (value instanceof Date) d = value;
+  else if (typeof value === 'string') d = new Date(value + (value.length === 10 ? 'T00:00:00' : ''));
+  else if (typeof value === 'number') d = new Date(value);
+  else return String(value);
+  if (!d || isNaN(d.getTime())) return String(value);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var target = new Date(d); target.setHours(0,0,0,0);
+  var diffDays = Math.floor((today - target) / 86400000);
+  // Relativo (padrão)
+  if (opts.relative !== false) {
+    if (diffDays === 0)  return 'Hoje';
+    if (diffDays === 1)  return 'Ontem';
+    if (diffDays === 2)  return 'Anteontem';
+    if (diffDays >= 3 && diffDays <= 6)   return 'Há ' + diffDays + ' dias';
+    if (diffDays >= 7 && diffDays <= 13)  return 'Há 1 semana';
+    if (diffDays >= 14 && diffDays <= 29) return 'Há ' + Math.floor(diffDays / 7) + ' semanas';
+    if (diffDays >= 30 && diffDays <= 59) return 'Há 1 mês';
+    if (diffDays >= 60 && diffDays <= 364) return 'Há ' + Math.floor(diffDays / 30) + ' meses';
+    if (diffDays >= 365 && diffDays <= 729) return 'Há 1 ano';
+    return 'Há ' + Math.floor(diffDays / 365) + ' anos';
+  }
+  // Absoluto PT-BR (com flags opcionais)
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  var yyyy = d.getFullYear();
+  if (opts.format === 'long') {
+    return d.getDate() + ' de ' + _PT_MONTHS[d.getMonth()] + ' de ' + yyyy;
+  }
+  if (opts.format === 'medium') {
+    return d.getDate() + ' ' + _PT_MONTHS_SHORT[d.getMonth()] + '. ' + yyyy;
+  }
+  return dd + '/' + mm + '/' + yyyy;  // default short
+}
+
+// Formato épico: "Quinta · Há 3 dias" — combina dia-da-semana + relativo.
+function _fmtDateEpicoPtBr(value){
+  if (value == null || value === '') return '';
+  if (typeof value === 'string' && /^(hoje|ontem|anteontem)/i.test(value)) return value;
+  var d;
+  if (value instanceof Date) d = value;
+  else if (typeof value === 'string') d = new Date(value + (value.length === 10 ? 'T00:00:00' : ''));
+  else d = new Date(value);
+  if (!d || isNaN(d.getTime())) return String(value);
+  var relative = _fmtDatePtBr(value);
+  if (relative === 'Hoje' || relative === 'Ontem' || relative === 'Anteontem') return relative;
+  return _PT_DAYS_SHORT[d.getDay()] + ' · ' + relative;
+}
+
 // canonical: league_data.py — 5 tiers (Bronze/Prata/Ouro/Platina/Mithril) + thresholds
 var LEAGUE_TIERS = [
   { id: 'bronze',   icon: 'ic-liga-bronze',  name: 'Bronze',   minXp: 0,     maxXp: 2500,  color: '#cd7f32' },
@@ -10443,19 +10507,37 @@ function _showLeaguePopup(p){
   pctInTier = Math.max(0, Math.min(100, pctInTier));
 
   var html = '<div class="lg-hub" style="padding: var(--v-space-md, 8px);">';
-  // Header com tier atual (icone heráldico ic-liga-X)
-  html += '<div style="padding: var(--v-space-md, 10px) var(--v-space-md, 8px); '
-    + 'background: linear-gradient(180deg, rgba(196,149,58,0.15) 0%, rgba(42,36,32,0.95) 100%); '
-    + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
-    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); '
+  // X-6.5.51AY (2026-05-11): header épico com medalha pendurada + pedestal
+  // ornamental. Antes era card simples — agora "trono cerimonial" com glow
+  // pulsante na cor do tier.
+  html += '<style>'
+    + '@keyframes vLgMedalGlow{0%,100%{filter:drop-shadow(0 0 8px ' + currentTier.color + '88);}50%{filter:drop-shadow(0 0 18px ' + currentTier.color + 'cc);}}'
+    + '@keyframes vLgRibbonSway{0%,100%{transform:rotate(-1deg);}50%{transform:rotate(1deg);}}'
+    + '.vLg-medal{animation:vLgMedalGlow 3.4s ease-in-out infinite;}'
+    + '.vLg-ribbon{animation:vLgRibbonSway 4s ease-in-out infinite; transform-origin: top center;}'
+    + '</style>';
+  // === HEADER ÉPICO: pedestal + medalha pendurada com brasão ===
+  html += '<div style="position:relative; padding: 16px 12px 14px; '
+    + 'background: radial-gradient(ellipse at 50% 30%, ' + currentTier.color + '38 0%, ' + currentTier.color + '12 35%, rgba(42,36,32,0.95) 75%); '
+    + 'border: 1px solid ' + currentTier.color + '; '
+    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;'
     + 'display: flex; flex-direction: column; align-items: center; gap: 4px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 60px; height: 60px; color: ' + currentTier.color + '; filter: drop-shadow(0 0 4px ' + currentTier.color + '55);"><use href="#' + currentTier.icon + '"/></svg>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-display, 18px); '
-    + 'color: ' + currentTier.color + '; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">'
+    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:' + currentTier.color + ';letter-spacing:2px;opacity:0.8;">◆ ORDEM DOS AVENTUREIROS ◆</div>'
+    // Fita decorativa no topo
+    + '<div class="vLg-ribbon" style="width: 14px; height: 18px; background: linear-gradient(180deg, ' + currentTier.color + ', ' + currentTier.color + '88); margin-bottom: -4px; clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);"></div>'
+    // Medalha
+    + '<svg class="vLg-medal" viewBox="0 0 120 120" style="width: 84px; height: 84px; color: ' + currentTier.color + ';"><use href="#' + currentTier.icon + '"/></svg>'
+    // Nome do tier
+    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 22px; '
+    + 'color: ' + currentTier.color + '; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px ' + currentTier.color + '88, 0 2px 4px rgba(0,0,0,0.5); margin-top: 6px;">'
     + currentTier.name
     + '</div>'
-    + '<div style="font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484);">'
-    + currentXp.toLocaleString('pt-BR') + ' XP'
+    // XP atual
+    + '<div style="display:inline-flex; align-items:center; gap:6px; padding: 4px 10px; background: rgba(0,0,0,0.4); border: 1px solid ' + currentTier.color + '66; border-radius: 12px; margin-top: 4px;">'
+    +   '<span style="font-family: var(--v-font-display,Cinzel,serif); font-size: 14px; color: ' + currentTier.color + '; font-weight: 700;">'
+    +     currentXp.toLocaleString('pt-BR')
+    +   '</span>'
+    +   '<span style="font-size: 10px; color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1.5px;">XP de Liga</span>'
     + '</div>'
     + '</div>';
 
@@ -10699,22 +10781,40 @@ function _showAchievementsPopup(p){
 
   var html = '<div class="ach-medals-hub" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; height: 100%;">';
 
-  // === HEADER compacto: contador + barra ===
-  html += '<div style="display:flex; align-items: center; gap: var(--v-space-sm, 6px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-    + 'background: linear-gradient(135deg, rgba(196,149,58,0.18) 0%, rgba(42,36,32,0.95) 100%); '
-    + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
-    + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: var(--v-space-sm, 6px);">'
-    + '<div style="display: flex; flex-direction: column; align-items: center; min-width: 54px;">'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 17px; color: var(--v-gold, #c4953a); font-weight: 700; line-height: 1;">' + doneTiers + '<span style="font-size: 11px; color: var(--v-text-dim, #a09484); font-weight: 400;">/' + totalTiers + '</span></div>'
-    + '<div style="font-size: 9px; color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">conquistas</div>'
+  // X-6.5.51AY (2026-05-11): header épico com brasão central + crown.
+  // Antes era barra compacta — agora "manuscrito iluminado" com mestre count
+  // em destaque pra valorizar o progresso do player.
+  html += '<style>'
+    + '@keyframes vCrownGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(255,215,0,0.45));}50%{filter:drop-shadow(0 0 14px rgba(255,235,140,0.75));}}'
+    + '.vAch-crown{animation:vCrownGlow 3.2s ease-in-out infinite;}'
+    + '</style>';
+  // === HEADER ÉPICO: brasão iluminado + stats ===
+  html += '<div style="position:relative; padding: 14px 12px 10px; '
+    + 'background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.20) 0%, rgba(196,149,58,0.10) 35%, rgba(42,36,32,0.95) 75%); '
+    + 'border: 1px solid var(--v-gold, #c4953a); '
+    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-sm, 6px); overflow:hidden;">'
+    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.75;">◆ MANUSCRITO DAS GLÓRIAS ◆</div>'
+    + '<div style="display:flex; align-items:center; gap: 12px;">'
+    // Brasão central
+    + '<div style="position:relative; min-width: 60px; height: 60px; display:grid; place-items:center;">'
+    +   '<svg class="vAch-crown" viewBox="0 0 120 120" style="width: 60px; height: 60px; color: #ffd700;"><use href="#ic-trofeu"/></svg>'
+    +   (masteredChains > 0 ? '<div style="position:absolute; top:-4px; right:-6px; background:linear-gradient(180deg,#ffd700,#c87a4a); color:#3a2a08; font-family:var(--v-font-display,Cinzel,serif); font-size:11px; font-weight:700; padding:2px 6px; border-radius:10px; border:1px solid rgba(0,0,0,0.5); box-shadow:0 2px 4px rgba(0,0,0,0.6);">★' + masteredChains + '</div>' : '')
     + '</div>'
-    + '<div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">'
-    + '<div style="display:flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--v-text-dim, #a09484);">'
-    + '<span>' + pct + '% concluído</span>'
-    + '<span style="color: var(--v-gold, #c4953a);">★ ' + masteredChains + ' mestre' + (masteredChains === 1 ? '' : 's') + '</span>'
-    + '</div>'
-    + '<div style="height: 5px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.4);">'
-    + '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, var(--v-gold-dim, #9a7530), var(--v-gold, #c4953a), #ffd700); box-shadow: 0 0 6px rgba(255,215,0,0.4);"></div>'
+    // Stats column
+    + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">'
+    +   '<div style="display:flex; align-items:baseline; gap:4px;">'
+    +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:26px; color:var(--v-gold,#c4953a); font-weight:700; line-height:1; text-shadow:0 0 10px rgba(255,215,0,0.4);">' + doneTiers + '</span>'
+    +     '<span style="font-size:13px; color:var(--v-text-dim,#a09484); font-weight:400;">/ ' + totalTiers + '</span>'
+    +     '<span style="margin-left:auto; font-size:11px; color:var(--v-gold,#c4953a); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;">' + pct + '%</span>'
+    +   '</div>'
+    +   '<div style="font-size:10px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1.5px;">conquistas registradas</div>'
+    // Barra ornamentada
+    +   '<div style="height: 8px; background: rgba(0,0,0,0.55); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,215,0,0.25); position:relative;">'
+    +     '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #8a5a20, #c4953a 50%, #ffd700); box-shadow: 0 0 8px rgba(255,215,0,0.6);"></div>'
+    +   '</div>'
+    +   (masteredChains > 0
+        ? '<div style="font-size: 10px; color: #ffd700; font-style: italic; margin-top: 2px;">⚜ ' + masteredChains + ' cadeia' + (masteredChains === 1 ? '' : 's') + ' dominada' + (masteredChains === 1 ? '' : 's') + ' ⚜</div>'
+        : '<div style="font-size: 10px; color: var(--v-text-dim, #a09484); font-style: italic; margin-top: 2px;">"Cada feito gravado em ouro eterno."</div>')
     + '</div>'
     + '</div>'
     + '</div>';
@@ -10961,39 +11061,73 @@ function _showKillsPopup(p){
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Abates';
   var total = KILLS_BY_TYPE.reduce(function(a, b){ return a + b.kills; }, 0);
-  var html = '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
-  // Header com brasão de espadas cruzadas (ic-ach-algoz reutilizado)
-  html += '<div style="text-align: center; padding: var(--v-space-md, 10px) var(--v-space-md, 8px); '
-    + 'background: linear-gradient(180deg, rgba(196,149,58,0.12) 0%, rgba(42,36,32,0.95) 100%); '
-    + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
-    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); '
-    + 'display: flex; flex-direction: column; align-items: center; gap: 4px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 48px; height: 48px; color: ' + (HERALDIC_COLORS['ic-ach-algoz'] || '#c43020') + ';"><use href="#ic-ach-algoz"/></svg>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-display, 24px); '
-    + 'color: var(--v-gold, #c4953a); font-weight: 700; line-height: 1;">' + total + '</div>'
-    + '<div style="font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">'
-    + 'inimigos abatidos'
+  var top = KILLS_BY_TYPE.slice().sort(function(a,b){return b.kills-a.kills;})[0] || {type:'—',kills:0};
+  // CR cor escalada (verde→amarelo→vermelho→roxo)
+  function _crColor(cr){
+    var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
+    if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
+    if (c >= 8) return '#a050e0';
+    if (c >= 4) return '#e85040';
+    if (c >= 2) return '#ffa040';
+    if (c >= 1) return '#ffd040';
+    return '#7cdb7c';
+  }
+  // X-6.5.51AY (2026-05-11): tela épica com sangue, troféus pendurados e
+  // hierarquia visual por CR. Substitui versão "tabela simples".
+  var html = '<style>'
+    + '@keyframes vBladeShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,80,40,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,140,80,0.7));}}'
+    + '.vKl-blades{animation:vBladeShimmer 2.8s ease-in-out infinite;}'
+    + '@keyframes vDripPulse{0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;}}'
+    + '.vKl-drip{animation:vDripPulse 1.6s ease-in-out infinite;}'
+    + '</style>';
+  html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
+  // === HEADER ÉPICO: espadas cruzadas + sangue + contador ===
+  html += '<div style="position:relative; text-align: center; padding: 18px 12px 14px; '
+    + 'background: radial-gradient(ellipse at 50% 0%, rgba(196,40,30,0.32) 0%, rgba(100,20,15,0.18) 35%, rgba(30,18,14,0.95) 75%); '
+    + 'border: 1px solid #c43020; '
+    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;">'
+    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:#e85040;letter-spacing:2px;opacity:0.75;">◆ HALL DE CAÇADA ◆</div>'
+    + '<svg class="vKl-blades" viewBox="0 0 120 120" style="width: 68px; height: 68px; color: #c43020; margin: 6px auto 4px;"><use href="#ic-ach-algoz"/></svg>'
+    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 42px; '
+    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 12px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6);">' + total + '</div>'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 11px; color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
+    + 'Inimigos Abatidos'
     + '</div>'
+    + (top && top.kills > 0
+      ? '<div style="font-size: 10px; color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 6px;">'
+        + 'Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> (' + top.kills + ')'
+      + '</div>'
+      : '')
     + '</div>';
-  // Lista por tipo
-  html += '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">◆ Por Tipo de Criatura</div>';
+  // === LISTA POR TIPO — cards com troféu + CR colorido ===
+  html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 12px 8px 8px; position:relative;">'
+    + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
   KILLS_BY_TYPE.forEach(function(k){
     var pct = Math.round(k.kills / total * 100);
-    html += '<div style="padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'background: rgba(196,149,58,0.04); border: 1px solid var(--v-border, #4a3828); '
-      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 2px;">'
-      + '<div style="display:flex; align-items: center; gap: var(--v-space-md, 8px); margin-bottom: 4px;">'
-      + '<svg viewBox="0 0 120 120" style="width: 22px; height: 22px; flex-shrink: 0; color: ' + (HERALDIC_COLORS[k.icon] || '#8a7a6a') + ';"><use href="#' + k.icon + '"/></svg>'
-      + '<span style="flex: 1; font-size: var(--v-font-md, 14px); color: var(--v-text-bright, #e8dcc8);">' + k.type + '</span>'
-      + '<span style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">CR ' + k.cr + '</span>'
-      + '<span style="font-size: var(--v-font-md, 14px); font-weight: 700; color: var(--v-gold, #c4953a); min-width: 24px; text-align: right;">' + k.kills + '</span>'
+    var crCol = _crColor(k.cr);
+    var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
+    html += '<div style="padding: 8px 10px; '
+      + 'background: linear-gradient(90deg, rgba(196,40,30,0.06) 0%, rgba(196,149,58,0.04) 100%); '
+      + 'border: 1px solid rgba(74,56,40,0.6); '
+      + 'border-left: 3px solid ' + crCol + '; '
+      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 4px;">'
+      + '<div style="display:flex; align-items: center; gap: 10px; margin-bottom: 5px;">'
+      + '<svg viewBox="0 0 120 120" style="width: 26px; height: 26px; flex-shrink: 0; color: ' + iconCol + ';"><use href="#' + k.icon + '"/></svg>'
+      + '<div style="flex:1; min-width:0;">'
+      +   '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + '</div>'
+      +   '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;">◆ Perigo ' + k.cr + '</div>'
       + '</div>'
-      + '<div style="height: 4px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden;">'
-      + '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #c63d3d, #f06060);"></div>'
+      + '<div style="text-align:right;">'
+      +   '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 20px; font-weight: 700; color: var(--v-gold, #c4953a);">' + k.kills + '</span>'
+      +   '<div style="font-size: 8px; color: var(--v-text-dim,#a09484); letter-spacing:1px; margin-top:-2px;">abates</div>'
+      + '</div>'
+      + '</div>'
+      + '<div style="height: 5px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.3);">'
+      + '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc); box-shadow: 0 0 6px ' + crCol + '66;"></div>'
       + '</div>'
       + '</div>';
   });
+  html += '</div>';
   html += '</div>';
   bodyEl.innerHTML = html;
   ov.classList.add('active');
@@ -11017,59 +11151,106 @@ function _showStreakPopup(p){
   if (titleEl) titleEl.textContent = 'Sequência';
   var current = STREAK_HISTORY.find(function(s){ return s.current; }) || { wins: 0 };
   var best = STREAK_HISTORY.find(function(s){ return s.best; }) || { wins: 0 };
-  var html = '<div class="st-hub" style="padding: var(--v-space-md, 8px);">';
-  // Header com streak atual (chama heráldica ic-ach-indomavel)
-  html += '<div style="text-align: center; padding: var(--v-space-md, 10px) var(--v-space-md, 8px); '
-    + 'background: linear-gradient(180deg, rgba(255,100,50,0.18) 0%, rgba(42,36,32,0.95) 100%); '
+  var totalWins = STREAK_HISTORY.reduce(function(a,b){return a+b.wins;}, 0);
+  // X-6.5.51AY (2026-05-11): tela épica com chamas animadas, pergaminho de
+  // crônica e datas em PT-BR relativas ("Há 8 dias" / "Anteontem" / "Hoje").
+  var html = '<style>'
+    + '@keyframes vFlameDance{0%,100%{transform:scale(1) rotate(-1deg);filter:drop-shadow(0 0 8px rgba(255,140,60,0.55)) drop-shadow(0 0 14px rgba(255,80,30,0.35));}50%{transform:scale(1.06) rotate(1deg);filter:drop-shadow(0 0 14px rgba(255,180,90,0.7)) drop-shadow(0 0 22px rgba(255,100,40,0.5));}}'
+    + '@keyframes vEmberFloat{0%{opacity:0;transform:translateY(0) scale(0.6);}40%{opacity:0.9;}100%{opacity:0;transform:translateY(-32px) scale(0.2);}}'
+    + '@keyframes vChroniclePulse{0%,100%{box-shadow:0 0 0 1px rgba(255,140,60,0.4), inset 0 0 22px rgba(255,80,30,0.18);}50%{box-shadow:0 0 0 1px rgba(255,180,90,0.6), inset 0 0 32px rgba(255,100,40,0.28);}}'
+    + '.vSt-flame{animation:vFlameDance 2.4s ease-in-out infinite;transform-origin:50% 70%;}'
+    + '.vSt-ember{position:absolute;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#ffd27a,#ff7a2a 70%,transparent);pointer-events:none;}'
+    + '.vSt-ember.e1{left:38%;bottom:30%;animation:vEmberFloat 2.6s ease-out infinite;}'
+    + '.vSt-ember.e2{left:55%;bottom:34%;animation:vEmberFloat 3.1s ease-out infinite 0.7s;}'
+    + '.vSt-ember.e3{left:47%;bottom:28%;animation:vEmberFloat 2.9s ease-out infinite 1.4s;}'
+    + '.vSt-chronicle{animation:vChroniclePulse 4s ease-in-out infinite;}'
+    + '</style>';
+  html += '<div class="st-hub" style="padding: var(--v-space-md, 8px);">';
+  // === HEADER ÉPICO: chama animada + número + labels heráldicos ===
+  html += '<div class="vSt-chronicle" style="position:relative;text-align: center; padding: 18px 12px 14px; '
+    + 'background: radial-gradient(ellipse at 50% 0%, rgba(255,140,60,0.28) 0%, rgba(255,80,30,0.10) 35%, rgba(42,28,20,0.95) 75%); '
     + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); '
-    + 'border: 1px solid #ff6432; '
-    + 'display: flex; flex-direction: column; align-items: center; gap: 4px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 54px; height: 54px; color: #ff8a4a; filter: drop-shadow(0 0 4px rgba(255,140,60,0.45));"><use href="#ic-ach-indomavel"/></svg>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-display, 28px); '
-    + 'color: #ff6432; font-weight: 700; line-height: 1;">' + current.wins + '</div>'
-    + '<div style="font-size: var(--v-font-sm, 13px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">'
-    + 'Vitórias consecutivas'
+    + 'border: 1px solid #ff6432; overflow:hidden;">'
+    // Embers animados
+    + '<span class="vSt-ember e1"></span>'
+    + '<span class="vSt-ember e2"></span>'
+    + '<span class="vSt-ember e3"></span>'
+    // Brasão decorativo top esquerdo
+    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:#ff8a4a;letter-spacing:2px;opacity:0.7;">◆ EM CURSO ◆</div>'
+    // Flama heráldica animada
+    + '<svg class="vSt-flame" viewBox="0 0 120 120" style="width: 72px; height: 72px; color: #ff8a4a; margin: 4px auto 6px;"><use href="#ic-ach-indomavel"/></svg>'
+    // Número grande
+    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 44px; '
+    + 'color: #ffb060; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,140,60,0.7), 0 2px 4px rgba(0,0,0,0.6);">' + current.wins + '</div>'
+    // Label
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 11px; color: #f5d8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
+    + 'Vitórias Consecutivas'
+    + '</div>'
+    + '<div style="font-size: 10px; color: var(--v-text-dim, #a09484); font-style: italic; margin-top: 6px;">'
+    + '"O fogo do guerreiro arde enquanto a espada vence."'
     + '</div>'
     + '</div>';
-  // Recorde + Total (com troféu heráldico)
+  // === RECORDE + TOTAL em cards ornamentados ===
   html += '<div style="display:flex; gap: var(--v-space-sm, 6px); margin-bottom: var(--v-space-md, 8px);">'
-    + '<div style="flex: 1; padding: var(--v-space-md, 8px); background: rgba(196,149,58,0.06); border-radius: var(--v-radius-sm, 6px); text-align: center;">'
-    + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">Recorde</div>'
-    + '<div style="display:flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px;">'
-    + '<svg viewBox="0 0 120 120" style="width: 20px; height: 20px; color: ' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>'
-    + '<span style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-lg, 18px); color: var(--v-gold, #c4953a); font-weight: 700;">' + best.wins + '</span>'
+    // Card RECORDE
+    + '<div style="flex: 1; padding: 10px 8px; background: linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(42,30,18,0.7) 100%); '
+    + 'border: 1px solid var(--v-gold, #c4953a); border-radius: var(--v-radius-sm, 6px); text-align: center; position:relative;">'
+    + '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);background:#1a1410;padding:0 6px;font-size:9px;color:var(--v-gold,#c4953a);letter-spacing:2px;">RECORDE</div>'
+    + '<div style="display:flex; align-items: center; justify-content: center; gap: 5px; margin-top: 4px;">'
+    + '<svg viewBox="0 0 120 120" style="width: 22px; height: 22px; color: #ffd700; filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));"><use href="#ic-trofeu"/></svg>'
+    + '<span style="font-family: var(--v-font-display, Cinzel, serif); font-size: 22px; color: #ffd700; font-weight: 700;">' + best.wins + '</span>'
     + '</div>'
+    + '<div style="font-size: 9px; color: var(--v-text-dim, #a09484); margin-top: 2px; text-transform:uppercase; letter-spacing:1px;">vitórias seguidas</div>'
     + '</div>'
-    + '<div style="flex: 1; padding: var(--v-space-md, 8px); background: rgba(196,149,58,0.06); border-radius: var(--v-radius-sm, 6px); text-align: center;">'
-    + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1px;">Total</div>'
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-lg, 18px); color: var(--v-gold, #c4953a); font-weight: 700; margin-top: 2px;">' + STREAK_HISTORY.reduce(function(a,b){return a+b.wins;}, 0) + '</div>'
+    // Card TOTAL
+    + '<div style="flex: 1; padding: 10px 8px; background: linear-gradient(180deg,rgba(124,219,124,0.10) 0%,rgba(20,40,28,0.7) 100%); '
+    + 'border: 1px solid #7cdb7c66; border-radius: var(--v-radius-sm, 6px); text-align: center; position:relative;">'
+    + '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);background:#1a1410;padding:0 6px;font-size:9px;color:#7cdb7c;letter-spacing:2px;">TOTAL</div>'
+    + '<div style="display:flex; align-items: center; justify-content: center; gap: 5px; margin-top: 4px;">'
+    + '<svg viewBox="0 0 120 120" style="width: 18px; height: 18px; color: #7cdb7c;"><use href="#ic-stat-attack"/></svg>'
+    + '<span style="font-family: var(--v-font-display, Cinzel, serif); font-size: 22px; color: #a8e8a8; font-weight: 700;">' + totalWins + '</span>'
+    + '</div>'
+    + '<div style="font-size: 9px; color: var(--v-text-dim, #a09484); margin-top: 2px; text-transform:uppercase; letter-spacing:1px;">batalhas vencidas</div>'
     + '</div>'
     + '</div>';
-  // Histórico (com mini-icones heráldicos por linha)
-  html += '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">◆ Histórico</div>';
-  STREAK_HISTORY.forEach(function(s){
-    var iconHtml;
+  // === CRÔNICA / HISTÓRICO em pergaminho ===
+  html += '<div style="background:linear-gradient(180deg,rgba(74,56,40,0.35) 0%, rgba(42,30,18,0.2) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 10px 8px; position:relative;">'
+    + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding:0 8px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Crônica do Guerreiro ◈</div>';
+  STREAK_HISTORY.forEach(function(s, idx){
+    var iconHtml, glow, badgeLabel, badgeColor, dateBadge;
     if (s.current) {
-      iconHtml = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink: 0; color: #ff8a4a;"><use href="#ic-ach-indomavel"/></svg>';
+      iconHtml = '<svg class="vSt-flame" viewBox="0 0 120 120" style="width: 22px; height: 22px; flex-shrink: 0; color: #ff8a4a;"><use href="#ic-ach-indomavel"/></svg>';
+      glow = 'rgba(255,100,50,0.12)';
+      badgeLabel = 'EM CURSO';
+      badgeColor = '#ff8a4a';
     } else if (s.best) {
-      iconHtml = '<svg viewBox="0 0 120 120" style="width: 16px; height: 16px; flex-shrink: 0; color: ' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>';
+      iconHtml = '<svg viewBox="0 0 120 120" style="width: 22px; height: 22px; flex-shrink: 0; color: #ffd700; filter: drop-shadow(0 0 3px rgba(255,215,0,0.5));"><use href="#ic-trofeu"/></svg>';
+      glow = 'rgba(255,215,0,0.08)';
+      badgeLabel = 'RECORDE';
+      badgeColor = '#ffd700';
     } else {
-      iconHtml = '<span style="width: 16px; flex-shrink: 0; text-align: center; color: var(--v-text-dim, #a09484); font-size: 14px; line-height: 1;">·</span>';
+      iconHtml = '<svg viewBox="0 0 120 120" style="width: 18px; height: 18px; flex-shrink: 0; color: var(--v-text-dim,#a09484); opacity:0.5;"><use href="#ic-stat-attack"/></svg>';
+      glow = 'transparent';
+      badgeLabel = '';
+      badgeColor = '';
     }
-    html += '<div style="display:flex; align-items: center; gap: var(--v-space-md, 8px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'background: ' + (s.current ? 'rgba(255,100,50,0.10)' : 'rgba(196,149,58,0.04)') + '; '
-      + 'border: 1px solid ' + (s.current ? '#ff6432' : (s.best ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)')) + '; '
-      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 2px;">'
+    // X-6.5.51AY: data em PT-BR épica (Quinta · Há 8 dias)
+    dateBadge = s.current ? 'Hoje' : _fmtDateEpicoPtBr(s.date);
+    html += '<div style="display:flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 4px; '
+      + 'background: ' + glow + '; '
+      + 'border: 1px solid ' + (s.current ? '#ff6432' : (s.best ? '#c4953a88' : 'rgba(74,56,40,0.55)')) + '; '
+      + 'border-radius: var(--v-radius-sm, 6px);">'
       + iconHtml
-      + '<span style="flex: 1; font-size: var(--v-font-md, 14px); color: var(--v-text-bright, #e8dcc8);">'
-      + s.date
-      + '</span>'
-      + '<span style="font-size: var(--v-font-md, 14px); font-weight: 700; color: ' + (s.current ? '#ff6432' : 'var(--v-gold, #c4953a)') + ';">'
-      + s.wins + 'W'
+      + '<div style="flex: 1; min-width: 0;">'
+      +   '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight: 600;">' + dateBadge + '</div>'
+      + (badgeLabel ? '<div style="font-size: 9px; color: ' + badgeColor + '; letter-spacing: 1.5px; margin-top: 1px;">◆ ' + badgeLabel + '</div>' : '')
+      + '</div>'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 18px; font-weight: 700; color: ' + (s.current ? '#ff8a4a' : (s.best ? '#ffd700' : 'var(--v-text-dim,#a09484)')) + '; min-width: 36px; text-align: right;">'
+      + s.wins + '<span style="font-size:11px;opacity:0.7;">×</span>'
       + '</span>'
       + '</div>';
   });
+  html += '</div>';
   html += '</div>';
   bodyEl.innerHTML = html;
   ov.classList.add('active');
