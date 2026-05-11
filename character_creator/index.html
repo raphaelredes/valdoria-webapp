@@ -2429,7 +2429,18 @@
             setupBackButton();
             // USER REQUEST 2026-05-04: init layout pixel-based (smartphone constraint)
             if (typeof _initLayout === 'function') _initLayout();
-            if (window._creatorLoadingCtrl) window._creatorLoadingCtrl.hide();
+            // 2026-05-11 fix: stub do controller (not-cold-boot) NAO tem .hide,
+            // so .hideQuick e .forceHide. Throw aqui haltava o script ANTES de
+            // var _SERVER_CLASS_TO_CLIENT = {...} (line ~2451) executar, fazendo
+            // randomize falhar com "undefined reading 'Guerreiro'".
+            try {
+                var _ctrl = window._creatorLoadingCtrl;
+                if (_ctrl) {
+                    if (typeof _ctrl.hide === 'function') _ctrl.hide();
+                    else if (typeof _ctrl.hideQuick === 'function') _ctrl.hideQuick();
+                    else if (typeof _ctrl.forceHide === 'function') _ctrl.forceHide();
+                }
+            } catch (eHide) { console.warn('[CHAR_CREATOR] loading hide failed:', eHide); }
         })();
 
         function haptic() { try { tg?.HapticFeedback?.impactOccurred('light'); } catch (e) { console.warn('[CHAR_CREATOR] haptic:', e); } }
