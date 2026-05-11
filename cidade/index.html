@@ -7569,6 +7569,26 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.gold != null) p.gold = picked.gold;
       if (picked.xp != null)   p.xp = picked.xp;
       if (picked.exhaustion != null) p.exh = picked.exhaustion;
+      /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
+         hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
+         descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
+         apareciam como "?" mesmo apos descobertos pq cidade.html usava
+         apenas o array LOCAL defaults de 5 chaves.
+         Mapping: server usa keys do world_init.py (city_gates, whispering_woods,
+         misty_marshes, golden_sands), CART_BIOMES usa keys legacy (plains,
+         forest, swamp, desert). Aliasamos pra coincidir. */
+      if (Array.isArray(picked.known_locations) && picked.known_locations.length > 0) {
+        var SERVER_TO_CART = {
+          'city_gates': 'plains',
+          'whispering_woods': 'forest',
+          'misty_marshes': 'swamp',
+          'golden_sands': 'desert'
+        };
+        p.known_locations = picked.known_locations.map(function(k){
+          return SERVER_TO_CART[k] || k;
+        });
+        console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
+      }
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
 
       // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
@@ -7690,6 +7710,20 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (picked.gold != null) p.gold = picked.gold;
         if (picked.xp != null)   p.xp = picked.xp;
         if (picked.exhaustion != null) p.exh = picked.exhaustion;
+        /* X-6.5.51AU (2026-05-11): aplica known_locations do server (fallback)
+           com mesmo alias map (server keys -> cart keys). */
+        if (Array.isArray(picked.known_locations) && picked.known_locations.length > 0) {
+          var SERVER_TO_CART_FB = {
+            'city_gates': 'plains',
+            'whispering_woods': 'forest',
+            'misty_marshes': 'swamp',
+            'golden_sands': 'desert'
+          };
+          p.known_locations = picked.known_locations.map(function(k){
+            return SERVER_TO_CART_FB[k] || k;
+          });
+          console.log('[CITY] known_locations hydrated from server (fallback):', p.known_locations.length, 'locations:', p.known_locations.join(','));
+        }
         // FIX v3: sincronizar GROUP_MEMBERS[0] tambem (player slot)
         if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
           window.GROUP_MEMBERS[0] = {
