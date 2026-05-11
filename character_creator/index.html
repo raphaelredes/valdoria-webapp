@@ -42,6 +42,25 @@
         document.write('<script src="../shared/server-log.js?v=' + v + '"><\/script>');
         /* Configurar área canonical antes do helper inicializar */
         window.SERVER_LOG_AREA = 'character_creator';
+        /* 2026-05-11: hook console.error/warn + window.error/unhandledrejection
+           pra capturar TUDO que acontece no character_creator. User reportou
+           "nao consigo sair da raca" e "aleatorio nao funciona" sem logs
+           visiveis — isso vai pegar qualquer JS error silencioso. */
+        document.write('<script>'
+          + 'window.addEventListener("error", function(e){'
+          + '  try { window.serverLog && window.serverLog("character_creator", "error", "window_error",'
+          + '    { msg: String(e && e.message), src: String(e && e.filename),'
+          + '      line: e && e.lineno, col: e && e.colno,'
+          + '      stack: String(e && e.error && e.error.stack || "").slice(0, 800) }); } catch(_) {}'
+          + '});'
+          + 'window.addEventListener("unhandledrejection", function(e){'
+          + '  var r = e && e.reason;'
+          + '  try { window.serverLog && window.serverLog("character_creator", "error", "unhandled_rejection",'
+          + '    { msg: String(r && (r.message || r)),'
+          + '      stack: String(r && r.stack || "").slice(0, 800) }); } catch(_) {}'
+          + '});'
+          + 'setTimeout(function(){ try { window.serverLog && window.serverLog.captureConsole && window.serverLog.captureConsole("character_creator"); } catch(_){} }, 100);'
+          + '<\/script>');
         document.write('<script src="data.js?v=' + v + '"><\/script>');
         document.write('<script src="personality_data.js?v=' + v + '"><\/script>');
         // X-6.5.51AL (2026-05-08) — em vez de REMOVER as resume keys (que matava
@@ -2466,6 +2485,37 @@
         }
 
         async function randomizeCharacter() {
+            // 2026-05-11 — wrap em try/catch + serverLog pra debugar bug "user
+            // clica Aleatorio e nada acontece". Sem isso, qualquer throw em
+            // buildSummary/_slideTrackTo silencia o flow.
+            try {
+                window.serverLog && window.serverLog('character_creator', 'info', 'randomize_start', {
+                    has_token: !!token, has_apiBase: !!apiBase, has_userId: !!userId,
+                });
+            } catch(_) {}
+            try {
+                await _randomizeCharacterImpl();
+                try {
+                    window.serverLog && window.serverLog('character_creator', 'info', 'randomize_done', {
+                        race: sel.race, subrace: sel.subrace, classKey: sel.classKey,
+                        bg: sel.bg, currentScreen: currentScreen,
+                    });
+                } catch(_) {}
+            } catch (e) {
+                console.error('[CHAR_CREATOR] randomize THREW:', e);
+                try {
+                    window.serverLog && window.serverLog('character_creator', 'error', 'randomize_threw', {
+                        error: String(e && e.message),
+                        name: String(e && e.name),
+                        stack: String(e && e.stack || '').slice(0, 800),
+                        race: sel.race, classKey: sel.classKey, bg: sel.bg,
+                    });
+                } catch(_) {}
+                _showValidation('Erro ao gerar personagem. Tente selecionar manualmente.');
+            }
+        }
+
+        async function _randomizeCharacterImpl() {
             haptic();
 
             // X-6.5.24 — fetch server-authoritative spec (primary fields)

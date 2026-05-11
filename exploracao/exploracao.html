@@ -39519,24 +39519,14 @@ function bindQuickActions() {
   // visual de cidade.html#_showInventoryPopup. User pediu "deve ser uma
   // mochila padrão, mesma fonte de design e funcionalidades abrindo como
   // popup na tela inteira em ambos html". Popup canonical aqui no HTML
-  // (#inv-overlay). REMOTE: ainda navega pra /inventory/ se preferir o
-  // sistema completo.
+  // (#inv-overlay).
+  // 2026-05-11: REMOVIDO branch REMOTE pra /inventory/ — user reportou que
+  // /inventory/ é a UI antiga sem icones heraldicos, e quer SEMPRE o popup
+  // canonical (3 colunas + ic-it-* SVG igual cidade.html#_renderInventoryPopup).
+  // Bonus: elimina 401 inventory->exploracao do transition handler que faltava
+  // case 'inventory' em _validate_source_session.
   document.getElementById('btn-inventory').addEventListener('click', function() {
-    if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN) {
-      // REMOTE: usa /inventory/ webapp SPA (sistema completo com 7 arquivos JS)
-      var params = new URLSearchParams();
-      params.set('token', window.__EXPLORE_TOKEN);
-      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
-      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
-      params.set('return', 'exploracao');
-      if (S && S.mapId) params.set('return_map', S.mapId);
-      params.set('_cb', String(Date.now()));
-      window.__valdoria_transitioning = true;
-      window.location.href = '/inventory/?' + params.toString();
-    } else {
-      // LOCAL (file://): popup inline canonical
-      _showExploracaoInventoryPopup();
-    }
+    _showExploracaoInventoryPopup();
   });
 
   // Wire close button + backdrop click
