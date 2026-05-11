@@ -425,7 +425,24 @@ window.ValdoriaLoadingController = function(config) {
             _realProgress = pct;
             _progress = _realProgress;
             if (progressEl) { progressEl.style.width = _progress + '%'; progressEl.setAttribute('aria-valuenow', Math.round(_progress)); }
-            if (stageEl && stageName){stageEl.textContent = stageName;if(window._loadDbg)_loadDbg('progress='+Math.round(pct)+'% stage='+stageName);}
+            if (stageEl && stageName) {
+                /* 2026-05-11 (user request): smooth crossfade quando stage text muda.
+                   Antes era textContent direto sem animacao — atualizava abruptamente.
+                   Agora faz fade-out (220ms) -> swap text -> fade-in (340ms). */
+                if (stageEl.textContent !== stageName) {
+                    stageEl.classList.remove('stage-enter');
+                    stageEl.classList.add('stage-exit');
+                    setTimeout(function(){
+                        stageEl.textContent = stageName;
+                        stageEl.classList.remove('stage-exit');
+                        stageEl.classList.add('stage-enter');
+                        setTimeout(function(){
+                            try { stageEl.classList.remove('stage-enter'); } catch(e){}
+                        }, 350);
+                    }, 220);
+                }
+                if (window._loadDbg) _loadDbg('progress='+Math.round(pct)+'% stage='+stageName);
+            }
             if (HAS_RING_ACCEL) _updateRingSpeed(_progress);
             if (HAS_GEM_PHASE) _updateGemPhase(_progress);
         },
