@@ -26427,6 +26427,122 @@ function _shopGetFilters(npcId){
 }
 // === CANONICAL_PACK15_INJECT — END ===
 
+/* X-6.5.51BM (2026-05-11): _renderEpicSquareHub — Praca Central AAA.
+   Substitui renderSquareHub generico pra esta tela especifica.
+   Componentes:
+   1. Hero panel: chao de pedra + fontainh ASCII central + tempo dia
+   2. Reputation banner (se houver) ornamentado com gold border
+   3. Buff active banner (se houver) com pulsing glow
+   4. Service grid 2-col com cards: heraldic icon + label + hover lift
+      + glow especifico quando badge "Novo!" ou contador
+   5. CSS injetado inline (sem dependencia de game-square.js classes
+      genericas). Tudo responsivo via clamp() pra Telegram Desktop 384px
+      e smartphones com viewports diferentes. */
+function _renderEpicSquareHub(container, data){
+  if (!container || !data) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+  var period = (typeof _squarePeriodKey === 'function') ? _squarePeriodKey() : 'day';
+  /* Tema de cor por periodo (dawn/day/dusk/night) */
+  var periodTheme = {
+    dawn:  { primary:'#e8a868', secondary:'#7a4a30', glow:'rgba(255,180,90,0.32)', label:'Amanhecer' },
+    day:   { primary:'#ffd070', secondary:'#c4953a', glow:'rgba(255,215,0,0.28)',  label:'Dia' },
+    dusk:  { primary:'#c4762a', secondary:'#5a2818', glow:'rgba(196,120,42,0.35)', label:'Crepúsculo' },
+    night: { primary:'#9a90c8', secondary:'#3a3060', glow:'rgba(120,100,200,0.32)',label:'Noite' }
+  };
+  var theme = periodTheme[period] || periodTheme.day;
+  var html = ''
+    /* CSS inline AAA (escopo .sqr-epic-wrap) */
+    + '<style>'
+    + '@keyframes sqrFountainSway{0%,100%{transform:scaleY(1) translateY(0);}50%{transform:scaleY(1.06) translateY(-1px);}}'
+    + '@keyframes sqrTorchFlicker{0%,100%{opacity:0.85;filter:drop-shadow(0 0 4px rgba(255,140,60,0.55));}45%{opacity:1;filter:drop-shadow(0 0 8px rgba(255,180,90,0.85));}55%{opacity:0.78;}}'
+    + '@keyframes sqrBuffPulse{0%,100%{box-shadow:0 0 8px ' + theme.glow + ', inset 0 0 8px rgba(255,215,0,0.18);}50%{box-shadow:0 0 18px ' + theme.glow + ', inset 0 0 14px rgba(255,215,0,0.28);}}'
+    + '@keyframes sqrCardSlide{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}'
+    + '.sqr-epic-wrap{padding:var(--v-space-md,8px);font-family:var(--v-font,serif);}'
+    /* Hero panel — pedra + chao + fontainh */
+    + '.sqr-hero{position:relative;padding:18px 14px 16px;margin-bottom:12px;'
+    + 'background:radial-gradient(ellipse at 50% 12%,' + theme.glow + ' 0%,rgba(74,56,40,0.25) 35%,rgba(30,22,16,0.92) 80%);'
+    + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;}'
+    + '.sqr-hero::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:' + theme.primary + ';letter-spacing:2px;opacity:0.75;}'
+    + '.sqr-period-badge{position:absolute;top:7px;left:10px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:' + theme.primary + ';letter-spacing:2px;text-transform:uppercase;opacity:0.85;}'
+    + '.sqr-torch{position:absolute;width:14px;height:18px;font-size:14px;line-height:1;animation:sqrTorchFlicker 1.8s ease-in-out infinite;}'
+    + '.sqr-torch.tl{top:4px;left:6px;}'
+    + '.sqr-torch.tr{top:4px;right:6px;}'
+    + '.sqr-fountain{display:flex;justify-content:center;margin:4px 0 6px;font-size:clamp(40px,9vw,52px);line-height:1;color:' + theme.primary + ';text-shadow:0 0 12px ' + theme.glow + ';animation:sqrFountainSway 3.6s ease-in-out infinite;}'
+    + '.sqr-title{text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:clamp(15px,3.8vw,17px);font-weight:700;letter-spacing:3px;color:' + theme.primary + ';text-shadow:0 0 10px ' + theme.glow + ';margin:2px 0 4px;text-transform:uppercase;}'
+    + '.sqr-flavor{text-align:center;font-size:clamp(11px,2.8vw,12px);line-height:1.5;color:#d4c8b0;font-style:italic;margin:6px 6px 0;}'
+    /* Reputation/buff banners */
+    + '.sqr-banner-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}'
+    + '.sqr-rep-banner,.sqr-buff-banner{flex:1;min-width:0;padding:8px 10px;border-radius:var(--v-radius-sm,6px);border:1px solid;font-size:clamp(10px,2.5vw,11px);text-align:center;letter-spacing:1px;font-family:var(--v-font-display,Cinzel,serif);}'
+    + '.sqr-rep-banner{background:rgba(196,149,58,0.10);border-color:rgba(196,149,58,0.45);color:var(--v-gold,#c4953a);}'
+    + '.sqr-buff-banner{background:rgba(255,215,0,0.10);border-color:rgba(255,215,0,0.55);color:#ffd700;animation:sqrBuffPulse 2.8s ease-in-out infinite;}'
+    /* Service grid 2-col */
+    + '.sqr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}'
+    + '.sqr-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px 10px;background:linear-gradient(180deg,rgba(74,56,40,0.32) 0%,rgba(42,30,18,0.20) 100%);border:1px solid rgba(196,149,58,0.30);border-radius:var(--v-radius-sm,6px);cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease,background 0.15s ease;text-align:center;animation:sqrCardSlide 0.4s ease-out backwards;}'
+    + '.sqr-card:hover{transform:translateY(-2px);border-color:var(--v-gold,#c4953a);background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.40) 100%);}'
+    + '.sqr-card-icon{width:32px;height:32px;color:var(--v-gold,#c4953a);}'
+    + '.sqr-card-label{font-family:var(--v-font-display,Cinzel,serif);font-size:clamp(11px,2.6vw,12px);font-weight:600;color:#e8dcc8;line-height:1.3;text-align:center;letter-spacing:0.5px;}'
+    + '.sqr-card-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:linear-gradient(180deg,#c4953a,#9a7530);border:1px solid rgba(0,0,0,0.4);color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:10px;font-weight:700;display:grid;place-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.4);}'
+    + '.sqr-card-badge.novo{background:linear-gradient(180deg,#ff8a4a,#c43020);color:#fff;border-color:rgba(0,0,0,0.5);text-shadow:0 1px 0 rgba(0,0,0,0.3);min-width:38px;font-size:9px;letter-spacing:0.5px;}'
+    + '.sqr-card-badge.done{background:linear-gradient(180deg,#7cdb7c,#3a8a3a);color:#fff;}'
+    + '</style>';
+  /* === HERO PANEL === */
+  html += '<div class="sqr-epic-wrap">'
+    + '<div class="sqr-hero">'
+    +   '<span class="sqr-torch tl">🔥</span><span class="sqr-torch tr">🔥</span>'
+    +   '<div class="sqr-period-badge">◆ ' + theme.label + ' ◆</div>'
+    +   '<div class="sqr-fountain">⛲</div>'
+    +   '<div class="sqr-title">Praça Central</div>';
+  if (data.flavor) {
+    html += '<div class="sqr-flavor">' + data.flavor + '</div>';
+  }
+  html += '</div>';
+  /* === BANNERS === */
+  if (data.rep_label || data.buff) {
+    html += '<div class="sqr-banner-row">';
+    if (data.rep_label) html += '<div class="sqr-rep-banner">' + data.rep_label + '</div>';
+    if (data.buff) html += '<div class="sqr-buff-banner">' + data.buff + '</div>';
+    html += '</div>';
+  }
+  /* === SERVICE GRID === */
+  if (data.services && data.services.length) {
+    html += '<div class="sqr-grid">';
+    data.services.forEach(function(s, idx){
+      var badgeHtml = '';
+      if (s.badge) {
+        var isNovo = /Novo|Nova/i.test(s.badge);
+        var isDone = /✓/.test(s.badge);
+        var cls = isNovo ? ' novo' : (isDone ? ' done' : '');
+        badgeHtml = '<span class="sqr-card-badge' + cls + '">' + s.badge + '</span>';
+      }
+      var iconHtml = s.icon || '';
+      /* Renderiza SVG do icone com class .sqr-card-icon (substitui o style inline do _heralIco) */
+      iconHtml = iconHtml.replace(/<svg([^>]*)style="[^"]*"/, '<svg$1class="sqr-card-icon"');
+      if (iconHtml.indexOf('class="sqr-card-icon"') < 0) {
+        iconHtml = iconHtml.replace(/<svg/, '<svg class="sqr-card-icon"');
+      }
+      html += '<button class="sqr-card" data-cb="' + s.cb + '" style="animation-delay:' + (0.05 * idx + 0.1) + 's;">'
+        +   badgeHtml
+        +   iconHtml
+        +   '<span class="sqr-card-label">' + s.label + '</span>'
+        + '</button>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+  /* Wire click delegation pros service cards */
+  container.querySelectorAll('.sqr-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var cb = card.getAttribute('data-cb');
+      if (cb && typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS[cb]) {
+        ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER);
+      } else if (cb && typeof navigateTo === 'function') {
+        navigateTo(cb);
+      }
+    });
+  });
+}
+
 function _buildSquareMockData(player){
   var period = _squarePeriodKey();
   // canonical: data/plaza_flavor_data.py PLAZA_FLAVOR_BY_PERIOD (5-6 textos por periodo)
@@ -36309,9 +36425,16 @@ function _renderCityPopup(key){
     }
     return;
   }
-  if (key === 'square' && typeof renderSquareHub === 'function') {
+  if (key === 'square') {
+    /* X-6.5.51BM (2026-05-11): user request — Praca AAA epic. Substituiu
+       o renderSquareHub generico (apenas flavor + list de services) por
+       _renderEpicSquareHub com:
+       - Hero panel com fontainh ASCII + tempo do dia animado
+       - Reputation banner ornamentado
+       - Service cards 2-col com hover lift + glow + badges destacados
+       - Decoracao parchment + tochas animadas nos cantos */
     if (titleEl) titleEl.textContent = 'Praça Central';
-    renderSquareHub(bodyEl, _buildSquareMockData(window.CITY_MOCK_PLAYER));
+    _renderEpicSquareHub(bodyEl, _buildSquareMockData(window.CITY_MOCK_PLAYER));
     return;
   }
   if (key === 'tavern' && typeof renderTavernHub === 'function') {
