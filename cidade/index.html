@@ -2214,16 +2214,16 @@ LOG SINK (Fase 7):
       filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.2));
     }
 
-    /* === Group Panel (ate 4 membros — V8 card 160x150 + extras abaixo) === */
-    /* 2026-05-11 v2: mudou de flex row pra grid 2x2 porque cada card agora
-       e 160x150 FIXED (literal igual ao combate). 4 cards em 1 linha = 640px,
-       nao cabe no frame 384/430. Grid 2x2 = 328px wide x ~400px tall, cabe. */
+    /* === Group Panel (ate 4 membros — V8 card compact 140x140) === */
+    /* 2026-05-11 v3 (user request): reduziu cards de 160x150 -> 140x140 e
+       moveu XP + Valdoritas pra DENTRO do card (em vez de cgp-extras
+       abaixo). Mais compacto, libera espaco vertical pro hub-screen. */
     #city-group-panel {
       flex-shrink: 0;
-      padding: 8px 8px;
+      padding: 6px 8px;
       display: grid !important;
-      grid-template-columns: repeat(2, 160px);
-      gap: 8px;
+      grid-template-columns: repeat(2, 140px);
+      gap: 6px;
       justify-content: center;
       background: rgba(26, 21, 16, 0.5);
       border-bottom: 1px solid rgba(196, 149, 58, 0.2);
@@ -2246,14 +2246,13 @@ LOG SINK (Fase 7):
     }
     .cgp-card:hover { border-color: #c4953a; box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
     .cgp-card.empty {
-      /* 2026-05-11 v2: empty placeholder matches V8 card dims (160x150) pra
-         manter o grid 2x2 uniforme. */
-      width: 160px;
-      min-width: 160px;
-      max-width: 160px;
-      height: 150px;
-      min-height: 150px;
-      max-height: 150px;
+      /* 2026-05-11 v3: empty placeholder matches V8 card dims (140x140) */
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
+      height: 140px;
+      min-height: 140px;
+      max-height: 140px;
       flex: none;
       opacity: 0.45;
       border: 2px dashed rgba(196, 149, 58, 0.32);
@@ -2450,7 +2449,11 @@ LOG SINK (Fase 7):
       opacity: 0.5;
     }
 
-    /* ===== CARD V8 — copia LITERAL do .cell.v8-card do combate ===== */
+    /* ===== CARD V8 — compact 140x140, all stats inside (2026-05-11 v3) =====
+       User request: "tamanho menor igual ao combate, e as informacoes de XP e
+       valdoritas estejam dentro do card tambem, logo abaixo da informacao
+       do recurso (MP/furia/etc)". Reducido de 160x150 -> 140x140 e XP +
+       Valdoritas movidos pra DENTRO do c-stats grid (rows 3-4 full width). */
     .cgp-card.v8-style {
       position: relative;
       background: var(--card-accent-dark, #1a1510);
@@ -2463,29 +2466,29 @@ LOG SINK (Fase 7):
         0 4px 14px rgba(0, 0, 0, 0.65),
         inset 0 0 0 1px rgba(255, 220, 140, 0.22);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      /* Dimensoes IDENTICAS ao combate: 160x150 FIXED */
-      width: 160px !important;
-      min-width: 160px !important;
-      max-width: 160px !important;
-      height: 150px !important;
-      min-height: 150px !important;
-      max-height: 150px !important;
+      /* Dimensoes compact: 140x140 (smaller que combate) */
+      width: 140px !important;
+      min-width: 140px !important;
+      max-width: 140px !important;
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 140px !important;
       flex: none !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
     }
 
-    /* ===== c-name (banner topo) — padding/font literal do combate ===== */
+    /* ===== c-name (banner topo) — padding compacto pra portrait 24x24 ===== */
     .cgp-card.v8-style .c-name {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       border-bottom: none;
-      padding: 7px 46px 2px 10px;  /* 46px right pra portrait 34x34 */
+      padding: 4px 30px 1px 7px;
       margin: 0;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 900;
-      font-size: 12px;
-      letter-spacing: 0.8px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
       text-align: left;
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
@@ -2500,12 +2503,12 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-class-tag {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      padding: 0 46px 7px 10px;
+      padding: 0 30px 4px 7px;
       margin: 0;
       border-bottom: 1px solid var(--v-gold, #c4953a);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 9px;
-      letter-spacing: 1.3px;
+      font-size: 8px;
+      letter-spacing: 1px;
       text-align: left;
       text-transform: uppercase;
       font-weight: 700;
@@ -2515,13 +2518,13 @@ LOG SINK (Fase 7):
       text-overflow: ellipsis;
     }
 
-    /* ===== c-portrait (heraldic SVG canto sup. direito) ===== */
+    /* ===== c-portrait (heraldic SVG canto sup. direito) — 24x24 ===== */
     .cgp-card.v8-style .c-portrait {
       position: absolute;
-      top: 6px;
-      right: 8px;
-      width: 34px;
-      height: 34px;
+      top: 4px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
       margin: 0;
       background: transparent;
       border: 0;
@@ -2544,48 +2547,61 @@ LOG SINK (Fase 7):
         drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
     }
 
-    /* ===== c-stats (grid 2-col: PV/Recurso esq + CA dir span rows) ===== */
+    /* ===== c-stats (grid 4 rows: PV/Recurso/XP/Gold + CA col2 span rows 1-2) ===== */
+    /* User request: "XP e valdoritas... logo abaixo da informacao do recurso".
+       Layout: linha 1 PV | CA, linha 2 Recurso | CA (CA span rows 1-2),
+       linha 3 XP full-width, linha 4 Gold full-width. */
     .cgp-card.v8-style .c-stats {
-      padding: 10px 10px;
+      padding: 5px 7px;
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       flex: 1 1 auto;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 3px 10px;
+      grid-template-rows: auto auto auto auto;
+      gap: 2px 6px;
       align-items: center;
-      align-content: center;
-      justify-items: start;
+      justify-items: stretch;
       overflow: hidden;
     }
-    .cgp-card.v8-style .c-stats .c-stat:last-child { justify-self: center; }
-    /* PV (linha 1 col 1) — Recurso (linha 2 col 1) — CA (col 2 span 1/-1) */
-    .cgp-card.v8-style .c-stats .c-stat:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: stretch; }
-    .cgp-card.v8-style .c-stats .c-stat:nth-child(2):not(:last-child) { grid-column: 1; grid-row: 2; justify-self: stretch; }
-    .cgp-card.v8-style .c-stats .c-stat:last-child { grid-column: 2; grid-row: 1 / -1; }
+    /* Class-based grid placement (independent of HTML order) */
+    .cgp-card.v8-style .c-stat--hp     { grid-column: 1; grid-row: 1; }
+    .cgp-card.v8-style .c-stat--mp,
+    .cgp-card.v8-style .c-stat--furia,
+    .cgp-card.v8-style .c-stat--vigor,
+    .cgp-card.v8-style .c-stat--energia,
+    .cgp-card.v8-style .c-stat--ki     { grid-column: 1; grid-row: 2; }
+    .cgp-card.v8-style .c-stat--ca     { grid-column: 2; grid-row: 1 / 3; justify-self: center; }
+    .cgp-card.v8-style .c-stat--xp     { grid-column: 1 / -1; grid-row: 3; }
+    .cgp-card.v8-style .c-stat--gold   { grid-column: 1 / -1; grid-row: 4; }
 
-    /* Cada c-stat: PV/Recurso = horizontal (label + valor inline com bar atras); CA = vertical */
+    /* Cada c-stat: horizontal (bar atras + label + val inline); CA vertical */
     .cgp-card.v8-style .c-stat {
       display: flex;
       flex-direction: row;
       align-items: baseline;
-      gap: 5px;
+      gap: 4px;
       line-height: 1;
       position: relative;
       overflow: hidden;
-      border-radius: 6px;
+      border-radius: 5px;
     }
-    .cgp-card.v8-style .c-stats .c-stat:last-child {
+    .cgp-card.v8-style .c-stat--ca {
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 1px;
+    }
+    /* Gold row: ouro alinhado direita, label esquerda */
+    .cgp-card.v8-style .c-stat--gold {
+      justify-content: flex-end;
+      gap: 3px;
     }
 
     .cgp-card.v8-style .c-stat-label {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
       opacity: 0.75;
-      font-size: 9px;
-      letter-spacing: 1px;
+      font-size: 8px;
+      letter-spacing: 0.6px;
       white-space: nowrap;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 700;
@@ -2595,7 +2611,7 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat-val {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.9);
-      font-size: 16px;
+      font-size: 12px;
       font-weight: 900;
       white-space: nowrap;
       font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -2607,9 +2623,30 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat-val--ca {
       color: #ffd688;
       text-shadow: 0 0 5px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0, 0, 0, 0.95);
+      font-size: 13px;
+    }
+    /* XP val gold + smaller */
+    .cgp-card.v8-style .c-stat--xp .c-stat-val,
+    .cgp-card.v8-style .c-stat--xp .c-stat-label {
+      color: var(--v-gold, #c4953a);
+    }
+    .cgp-card.v8-style .c-stat--xp .c-stat-val { font-size: 10px; }
+    /* Gold val + coin icon */
+    .cgp-card.v8-style .c-stat--gold .c-stat-val {
+      color: var(--v-gold, #c4953a);
+      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
+      width: 11px;
+      height: 11px;
+      border-width: 1px;
     }
 
-    /* Barras atras de c-stat-val (PV + Recurso) — fill behind */
+    /* Barras atras de c-stat-val (PV + Recurso + XP) — fill behind */
     .cgp-card.v8-style .c-stat-bar {
       position: absolute;
       inset: 0;
@@ -2634,6 +2671,7 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat-bar-fill--vigor   { --fill-from: #806820; --fill-to: #ffd060; }
     .cgp-card.v8-style .c-stat-bar-fill--energia { --fill-from: #208a78; --fill-to: #60e8d0; }
     .cgp-card.v8-style .c-stat-bar-fill--ki      { --fill-from: #603888; --fill-to: #c080ff; }
+    .cgp-card.v8-style .c-stat-bar-fill--xp      { --fill-from: var(--v-gold-dim, #8a6620); --fill-to: var(--v-gold, #c4953a); }
 
     /* Player border — gold full opacidade */
     .cgp-card.v8-style.player {
@@ -2647,98 +2685,6 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style.dead {
       filter: grayscale(0.85) brightness(0.65);
       opacity: 0.55;
-    }
-
-    /* ===== cgp-extras (logo abaixo do card — XP bar + Gold + Exh pips) ===== */
-    .cgp-extras {
-      width: 160px;
-      max-width: 160px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      padding: 0 2px;
-      box-sizing: border-box;
-    }
-    .cgp-xp-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .cgp-xp-label {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: var(--v-gold, #c4953a);
-      flex: 0 0 14px;
-      text-transform: uppercase;
-      opacity: 0.85;
-    }
-    .cgp-xp-bar {
-      flex: 1;
-      height: 6px;
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 3px;
-      overflow: hidden;
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(196, 149, 58, 0.25);
-    }
-    .cgp-xp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--v-gold-dim, #8a6620) 0%, var(--v-gold, #c4953a) 100%);
-      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 4px rgba(196, 149, 58, 0.4);
-    }
-    .cgp-xp-val {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 8px;
-      font-weight: 900;
-      color: var(--v-gold, #c4953a);
-      flex: 0 0 auto;
-      min-width: 32px;
-      text-align: right;
-      white-space: nowrap;
-      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
-    }
-    .cgp-gold-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-    }
-    .cgp-exh {
-      display: flex;
-      gap: 2px;
-      align-items: center;
-      flex: 1;
-    }
-    .cgp-exh-pip {
-      flex: 0 0 6px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      border: 1px solid rgba(160, 80, 60, 0.45);
-      background: rgba(40, 20, 15, 0.4);
-    }
-    .cgp-exh-pip.filled {
-      background: radial-gradient(circle at 30% 30%, #ff7a55, #a03828);
-      border-color: #c44a3a;
-      box-shadow: 0 0 3px rgba(200, 50, 40, 0.7);
-    }
-    .cgp-gold {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 10px;
-      font-weight: 900;
-      color: var(--v-gold, #c4953a);
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
-    }
-    .cgp-gold .vi-coin.sm {
-      width: 12px;
-      height: 12px;
-      border-width: 1px;
     }
 
     /* === Cartografia Canvas (Phase 5.2 + Fase 6.2 fullscreen) ===
@@ -38507,24 +38453,22 @@ function renderCityGroupPanel(){
     dead: false,
     isPlayer: true
   };
-  /* 2026-05-11 v2 (user request): markup literal do combate.
-     Combat .cell.v8-card tem: c-name, c-portrait, c-class-tag, c-stats
-     (grid 2-col com PV/Recurso esq + CA dir span). EXATAMENTE replicado
-     aqui. XP + Gold + Exh viram cgp-extras LOGO ABAIXO do card. */
+  /* 2026-05-11 v3 (user request): card compact 140x140 com XP + Valdoritas
+     DENTRO de c-stats (rows 3-4 full width), logo abaixo do recurso.
+     Layout grid: PV linha 1 col 1 + Recurso linha 2 col 1 + CA col 2 span
+     rows 1-2 + XP linha 3 full + Gold linha 4 full. */
   // Map cls do resource (mp/fury/energy/vigor/ki) -> bar-fill suffix (combate PT)
   var RES_BAR_MAP = { mp: 'mp', fury: 'furia', energy: 'energia', vigor: 'vigor', ki: 'ki' };
   var html = '';
   for (var i = 0; i < 4; i++) {
     var m = GROUP_MEMBERS[i];
     if (!m) {
-      // Slot vazio = só placeholder dashed (sem extras abaixo)
       html += '<div class="cgp-slot empty"><div class="cgp-card empty" data-empty-slot="' + i + '" aria-label="Slot livre"></div></div>';
       continue;
     }
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
     var xpPct = m.xpNext > 0 ? Math.round(100 * m.xp / m.xpNext) : 0;
-    // V8 HP threshold: high > 60%, mid 25-60%, low < 25% — mesmo do combate
     var hpThr = hpPct > 60 ? 'high' : (hpPct > 25 ? 'mid' : 'low');
     var deadCls = m.dead ? ' dead' : '';
     var playerCls = m.isPlayer ? ' player' : '';
@@ -38534,35 +38478,28 @@ function renderCityGroupPanel(){
     var res = _resForClass(m.cls);
     var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
 
-    // XSS guard
     var safeName = _hubEsc(_titleCase(m.name));
     var safeCls = _hubEsc(_titleCase(m.cls));
     var safeRace = _hubEsc(_titleCase(m.race || ''));
     var safeResName = _hubEsc(res.name);
 
-    // Compute mock CA (10 + dex mod). Sem stats reais — usar nivel/2+12 default
     var ac = (m.ac != null) ? m.ac : (10 + Math.floor((m.level || 1) / 4) + 2);
+    var goldStr = (m.gold || 0).toLocaleString('pt-BR');
 
-    // Exaustao pips (6 dots) para extras abaixo
-    var pipsHtml = '';
-    for (var pi = 0; pi < (m.exhMax || 6); pi++) {
-      pipsHtml += '<div class="cgp-exh-pip' + (pi < (m.exh || 0) ? ' filled' : '') + '"></div>';
-    }
-
-    // ===== Card V8 (combat-literal markup) =====
+    // ===== Card V8 compact — TODOS os stats dentro de c-stats =====
     html += '<div class="cgp-slot" data-slot="' + i + '">'
       + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
       + '    <div class="c-class-tag">' + safeCls + (safeRace ? ' ' + safeRace : '') + ' · Nv ' + m.level + '</div>'
       + '    <div class="c-stats">'
-      // PV (linha 1 col 1)
+      // Linha 1: PV (col 1)
       + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
       + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
       + '        <span class="c-stat-label">PV</span>'
       + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
       + '      </div>';
-    // Recurso (linha 2 col 1) — so se mmp > 0
+    // Linha 2: Recurso (col 1) — so se mmp > 0
     if (m.mpMax > 0) {
       html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
         + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
@@ -38570,28 +38507,23 @@ function renderCityGroupPanel(){
         + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
         + '      </div>';
     }
-    // CA (col 2 span rows) — sempre
+    // CA (col 2 span rows 1-2)
     html += '      <div class="c-stat c-stat--ca">'
       + '        <span class="c-stat-label">CA</span>'
       + '        <span class="c-stat-val c-stat-val--ca">' + ac + '</span>'
       + '      </div>'
+      // Linha 3: XP (full width)
+      + '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
+      + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
+      + '        <span class="c-stat-label">XP</span>'
+      + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
+      + '      </div>'
+      // Linha 4: Valdoritas (full width)
+      + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
+      + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
+      + '      </div>'
       + '    </div>'  // /c-stats
       + '  </div>'  // /cgp-card
-      // ===== EXTRAS (logo abaixo do card): XP bar + Gold + Exh =====
-      + '  <div class="cgp-extras">'
-      + '    <div class="cgp-xp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
-      + '      <span class="cgp-xp-label">XP</span>'
-      + '      <div class="cgp-xp-bar"><div class="cgp-xp-fill" style="width:' + xpPct + '%"></div></div>'
-      + '      <span class="cgp-xp-val">' + m.xp + '/' + m.xpNext + '</span>'
-      + '    </div>'
-      + '    <div class="cgp-gold-row">'
-      + '      <div class="cgp-exh" title="Exaustão ' + (m.exh || 0) + '/6">' + pipsHtml + '</div>'
-      + '      <span class="cgp-gold" title="' + (m.gold || 0) + ' Valdoritas">'
-      + (m.gold || 0).toLocaleString('pt-BR')
-      + '<span class="vi vi-coin sm"></span>'
-      + '      </span>'
-      + '    </div>'
-      + '  </div>'  // /cgp-extras
       + '</div>';  // /cgp-slot
   }
   el.innerHTML = html;
