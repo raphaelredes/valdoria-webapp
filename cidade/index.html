@@ -8144,31 +8144,61 @@ function buildMockHubScreen(player){
   // CTA sempre na primeira linha
   var rows = [[{ text: '⚔️ PARTIR PARA AVENTURA', cb: 'explore_main' }]];
 
+  // 2026-05-11 (AAA quest review): contador DINÂMICO baseado em QUESTS_ACTIVE
+  // real (após splice por _deliverQuest/_abandonQuest). Mostra (N) se N>0,
+  // sem badge se N=0. Sufixo "✅" se TODAS estão ready (✓ no progress).
+  var activeCount = (typeof QUESTS_ACTIVE !== 'undefined') ? QUESTS_ACTIVE.length : 0;
+  var readyCount = (typeof QUESTS_ACTIVE !== 'undefined')
+    ? QUESTS_ACTIVE.filter(function(q){ return (q.progress || '').indexOf('✓') >= 0; }).length
+    : 0;
+
   // Locations filtradas em pares de 2 por linha
   var pair = [];
   visible.forEach(function(item){
     var loc = item.loc;
     var label = loc.label;
-    // Missões keeps badge count (mock 3 ate API real)
-    if (loc.cb === 'action_quests') label = label + ' (3)';
+    // Badge missões dinâmico — count real + indicador visual de quest ready
+    if (loc.cb === 'action_quests' && activeCount > 0) {
+      label = label + ' (' + activeCount + (readyCount > 0 ? ' • ✅' : '') + ')';
+    }
     pair.push({ text: label, cb: loc.cb });
     if (pair.length === 2){ rows.push(pair); pair = []; }
   });
   if (pair.length) rows.push(pair);
 
+  // 2026-05-11 (AAA quest review): quest_tracker DINÂMICO baseado em QUESTS_ACTIVE
+  // (antes era hardcoded 2 quests). Mapeia QUESTS_ACTIVE → tracker format:
+  // - title, stage (parse '2/5' or 0 if '✓'), total, ready (✓ no progress), cb
+  function _buildQuestTrackerFromActive(){
+    if (typeof QUESTS_ACTIVE === 'undefined') return [];
+    return QUESTS_ACTIVE.map(function(q){
+      var progress = q.progress || '';
+      var ready = progress.indexOf('✓') >= 0;
+      var stage = 0, total = 1;
+      var m = progress.match(/(\d+)\s*\/\s*(\d+)/);
+      if (m) { stage = parseInt(m[1], 10); total = parseInt(m[2], 10); }
+      else if (ready) { stage = 1; total = 1; }
+      var qid = (q.id || '').replace(/^qa_/, '');
+      return {
+        title: q.title || 'Missão sem título',
+        stage: stage, total: total, ready: ready,
+        cb: 'quest_open_' + qid
+      };
+    });
+  }
+
   return {
-    suggested_action: { text: 'Há lobos rondando o caminho do norte. Talvez seja hora de partir.', cb: 'action_quests' },
+    suggested_action: (readyCount > 0
+      ? { text: '✦ Há missões prontas pra entregar! Visite a Praça pra concluí-las.', cb: 'action_quests' }
+      : (activeCount > 0
+        ? { text: 'Tens ' + activeCount + ' missão' + (activeCount > 1 ? 'ões' : '') + ' ativa' + (activeCount > 1 ? 's' : '') + '. Verifica o Diário.', cb: 'action_quests' }
+        : { text: 'Visite a Guilda dos Aventureiros pra aceitar novas missões.', cb: 'guild' })),
     buttons: rows,
     notifications: [],
     // Allies vazio: renderHubScreen pula a section "Grupo" quando lista é vazia.
     // Os cards de membros já são exibidos no #city-group-panel (HUD topo) — não precisa duplicar.
     allies: [],
-    quest_tracker: {
-      quests: [
-        { title: 'Caçar lobos cinzentos',   stage: 2, total: 5, ready: false, cb: 'quest_open_1' },
-        { title: 'Falar com Lyana na Praça', stage: 0, total: 1, ready: true,  cb: 'quest_open_2' }
-      ]
-    },
+    quest_tracker: { quests: _buildQuestTrackerFromActive() },
     progress_strip: {
       // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithril)
       league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
@@ -37743,6 +37773,11 @@ function _deliverQuest(questId, gold, xp, msg){
   vToast(msg || ('✓ Missão completa! +' + gold + ' Valdoritas +' + xp + ' XP.'));
   if (typeof refreshHud === 'function') refreshHud();
   if (typeof closeCityPopup === 'function') closeCityPopup();
+  // 2026-05-11 (AAA quest review): re-render hub p/ atualizar badge dinâmico
+  // de Missões (count). Sem isso, label "Missões (2)" fica stale após entrega.
+  if (typeof renderCurrentScreen === 'function' && _currentScreen === 'hub') {
+    setTimeout(function(){ renderCurrentScreen(); }, 60);
+  }
 }
 
 // Abandona missão: confirmação obrigatória + remove de QUESTS_ACTIVE.
@@ -37773,6 +37808,10 @@ function _abandonQuest(questId, displayName, consequencia){
     } catch(e) { console.warn('[CIDADE] _abandonQuest state update failed:', e); }
     vToast('❌ Missão abandonada. ' + (consequencia || ''), 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
+    // Re-render hub p/ atualizar badge dinâmico (mesma razão de _deliverQuest)
+    if (typeof renderCurrentScreen === 'function' && _currentScreen === 'hub') {
+      setTimeout(function(){ renderCurrentScreen(); }, 60);
+    }
   };
   if (typeof _showInfoPopup === 'function') {
     _showInfoPopup({

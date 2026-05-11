@@ -36014,6 +36014,12 @@ function startQuest(q) {
   if (!S.activeQuests) S.activeQuests = [];
   if (S.activeQuests.some(qq => qq.id === q.id)) { LOG('QUEST', 'already active — skip'); return false; }
   if (completedQuests.has(q.id)) { LOG('QUEST', 'already completed — skip'); return false; }
+  // 2026-05-11 (AAA quest review): bloqueia re-aceite de missão abandonada
+  // na sessão atual (paridade com cidade _abandonQuest).
+  if (window.abandonedQuests && window.abandonedQuests.has(q.id)) {
+    LOG('QUEST', 'already abandoned this session — skip');
+    return false;
+  }
   S.activeQuests.push(Object.assign({ started_at: Date.now(), progress: 'active' }, q));
   updateQuestIndicator();
   dmNarrate({ text: '📜 Nova missão: ' + q.title, type: 'event' });
@@ -36029,6 +36035,9 @@ function completeQuest(questId) {
   const q = S.activeQuests[idx];
   S.activeQuests.splice(idx, 1);
   completedQuests.add(questId);
+  // 2026-05-11 (AAA quest review): rich metadata pra journal exibir
+  // título/reward/data em vez de só ID. Persiste via saveGame/loadGame.
+  if (!window.completedQuestsData) window.completedQuestsData = {};
   let rewardTxt = '';
   if (q.reward) {
     if (q.reward.gold) { rewardTxt += '+' + q.reward.gold + ' Valdoritas '; }
@@ -36036,10 +36045,41 @@ function completeQuest(questId) {
     if (q.reward.item) { rewardTxt += '+' + q.reward.item + ' '; }
     if (q.reward.lore) { rewardTxt += '(Conhecimento: ' + q.reward.lore + ') '; }
   }
+  window.completedQuestsData[questId] = {
+    title: q.title || 'Missão',
+    rewardTxt: rewardTxt.trim(),
+    target_map: q.target_map || null,
+    completedAt: Date.now()
+  };
   updateQuestIndicator();
   dmNarrate({ text: '✦ Missão concluída: ' + q.title + (rewardTxt ? ' — ' + rewardTxt : ''), type: 'action' });
   updateHud();
   saveGame();
+  return true;
+}
+
+// 2026-05-11 (AAA quest review): abandonar missão ATIVA do journal.
+// Mostra confirmação inline (window.confirm) + remove de S.activeQuests
+// + adiciona a abandonedQuests Set (não-completable depois). Espelha
+// _abandonQuest da cidade com confirmação obrigatória.
+function abandonExplorationQuest(questId) {
+  if (!S.activeQuests) return false;
+  const idx = S.activeQuests.findIndex(q => q.id === questId);
+  if (idx === -1) return false;
+  const q = S.activeQuests[idx];
+  const ok = window.confirm('Abandonar a missão "' + q.title + '"?\n\nConsequências:\n• A missão sumirá das ativas\n• Não poderás recebê-la novamente nessa sessão');
+  if (!ok) { LOG('QUEST', 'abandon cancelled by user'); return false; }
+  S.activeQuests.splice(idx, 1);
+  if (!window.abandonedQuests) window.abandonedQuests = new Set();
+  window.abandonedQuests.add(questId);
+  LOG('QUEST', 'abandoned id=' + questId);
+  updateQuestIndicator();
+  dmNarrate({ text: '❌ Missão abandonada: ' + q.title, type: 'event' });
+  saveGame();
+  // Re-render journal (continua aberto)
+  if (document.getElementById('journal-overlay') && document.getElementById('journal-overlay').classList.contains('active')) {
+    openQuestJournal({ questsOnly: true });
+  }
   return true;
 }
 
@@ -36226,6 +36266,15 @@ function openQuestJournal(opts) {
         meta.textContent = '→ Ação: ' + q.target_action;
       }
       item.appendChild(meta);
+      // 2026-05-11 (AAA quest review): botão abandonar com confirmação
+      // (paridade com cidade _abandonQuest). User pode abandonar quest
+      // ativa direto do journal de exploration.
+      const abandonBtn = document.createElement('button');
+      abandonBtn.className = 'journal-abandon-btn';
+      abandonBtn.style.cssText = 'margin-top:8px;padding:4px 10px;background:rgba(154,64,48,0.15);border:1px solid #9a4030;border-radius:4px;color:#d47474;font-size:11px;cursor:pointer;font-family:inherit';
+      abandonBtn.textContent = '❌ Abandonar missão';
+      abandonBtn.onclick = function(e){ e.stopPropagation(); abandonExplorationQuest(q.id); };
+      item.appendChild(abandonBtn);
       list.appendChild(item);
     });
   }
@@ -36235,10 +36284,54 @@ function openQuestJournal(opts) {
     h.className = 'journal-section';
     h.textContent = 'Concluídas (' + completedQuests.size + ')';
     list.appendChild(h);
-    Array.from(completedQuests).slice(-5).forEach(id => {
+    // 2026-05-11 (AAA quest review): rich history (title + reward + date)
+    // em vez de só ID. Usa completedQuestsData populado em completeQuest.
+    // Fallback pra ID se metadata não disponível (quests antigas).
+    Array.from(completedQuests).slice(-10).reverse().forEach(id => {
+      const meta = (window.completedQuestsData || {})[id];
       const c = document.createElement('div');
       c.className = 'journal-item completed';
-      c.textContent = '✓ ' + id;
+      if (meta) {
+        const title = document.createElement('div');
+        title.className = 'journal-title';
+        title.style.color = '#7ae89a';
+        title.textContent = '✓ ' + (meta.title || id);
+        c.appendChild(title);
+        if (meta.rewardTxt) {
+          const rwd = document.createElement('div');
+          rwd.className = 'journal-desc';
+          rwd.style.color = '#a09484';
+          rwd.style.fontSize = '11px';
+          rwd.textContent = '🎁 ' + meta.rewardTxt;
+          c.appendChild(rwd);
+        }
+        if (meta.completedAt) {
+          const dt = document.createElement('div');
+          dt.className = 'journal-meta';
+          dt.style.color = '#6a5a4a';
+          dt.style.fontSize = '10px';
+          const d = new Date(meta.completedAt);
+          dt.textContent = '📅 ' + d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+          c.appendChild(dt);
+        }
+      } else {
+        c.textContent = '✓ ' + id;
+      }
+      list.appendChild(c);
+    });
+  }
+
+  // 2026-05-11 (AAA quest review): seção de Abandonadas (se houver)
+  if (window.abandonedQuests && window.abandonedQuests.size > 0) {
+    const h = document.createElement('div');
+    h.className = 'journal-section';
+    h.textContent = 'Abandonadas (' + window.abandonedQuests.size + ')';
+    list.appendChild(h);
+    Array.from(window.abandonedQuests).slice(-5).reverse().forEach(id => {
+      const c = document.createElement('div');
+      c.className = 'journal-item';
+      c.style.opacity = '0.6';
+      c.textContent = '❌ ' + id;
       list.appendChild(c);
     });
   }
@@ -36991,10 +37084,13 @@ const SAVE_KEY = 'valdoria_explore_v22';
 function saveGame() {
   try {
     const payload = {
-      v: '2.2',
+      v: '2.3',  // 2026-05-11: bump pra v2.3 com completedQuestsData + abandonedQuests
       ts: Date.now(),
       visitedMapIds: Array.from(visitedMapIds),
       completedQuests: Array.from(completedQuests),
+      // 2026-05-11 (AAA quest review): rich metadata + abandoned quests
+      completedQuestsData: window.completedQuestsData || {},
+      abandonedQuests: window.abandonedQuests ? Array.from(window.abandonedQuests) : [],
       enemiesEncountered: serializeSetMap(enemiesEncountered),
       enemyEncounterStats: enemyEncounterStats,
       materialsFound: serializeSetMap(materialsFound),
@@ -37037,6 +37133,9 @@ function loadGame() {
     LOG('LOAD', 'save parsed v=' + s.v + ' ts=' + new Date(s.ts).toISOString() + ' size=' + raw.length + 'B');
     if (s.visitedMapIds) visitedMapIds = new Set(s.visitedMapIds);
     if (s.completedQuests) completedQuests = new Set(s.completedQuests);
+    // 2026-05-11 (AAA quest review): restaura rich metadata + abandonadas
+    if (s.completedQuestsData) window.completedQuestsData = s.completedQuestsData;
+    if (s.abandonedQuests) window.abandonedQuests = new Set(s.abandonedQuests);
     if (s.enemiesEncountered) {
       enemiesEncountered = {};
       for (const k in s.enemiesEncountered) enemiesEncountered[k] = new Set(s.enemiesEncountered[k]);
@@ -37070,6 +37169,8 @@ function resetSave() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { LOGE('SAVE', 'removeItem failed', e.message); }
   visitedMapIds = new Set();
   completedQuests = new Set();
+  window.completedQuestsData = {};
+  window.abandonedQuests = new Set();
   enemiesEncountered = {};
   enemyEncounterStats = {};
   materialsFound = {};
