@@ -2210,12 +2210,17 @@ LOG SINK (Fase 7):
       filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.2));
     }
 
-    /* === Group Panel (até 4 membros — HUD expandido estilo hud-float) === */
+    /* === Group Panel (ate 4 membros — V8 card 160x150 + extras abaixo) === */
+    /* 2026-05-11 v2: mudou de flex row pra grid 2x2 porque cada card agora
+       e 160x150 FIXED (literal igual ao combate). 4 cards em 1 linha = 640px,
+       nao cabe no frame 384/430. Grid 2x2 = 328px wide x ~400px tall, cabe. */
     #city-group-panel {
       flex-shrink: 0;
       padding: 8px 8px;
-      display: flex;
-      gap: 5px;
+      display: grid !important;
+      grid-template-columns: repeat(2, 160px);
+      gap: 8px;
+      justify-content: center;
       background: rgba(26, 21, 16, 0.5);
       border-bottom: 1px solid rgba(196, 149, 58, 0.2);
     }
@@ -2237,8 +2242,18 @@ LOG SINK (Fase 7):
     }
     .cgp-card:hover { border-color: #c4953a; box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
     .cgp-card.empty {
-      opacity: 0.5;
-      border-style: dashed;
+      /* 2026-05-11 v2: empty placeholder matches V8 card dims (160x150) pra
+         manter o grid 2x2 uniforme. */
+      width: 160px;
+      min-width: 160px;
+      max-width: 160px;
+      height: 150px;
+      min-height: 150px;
+      max-height: 150px;
+      flex: none;
+      opacity: 0.45;
+      border: 2px dashed rgba(196, 149, 58, 0.32);
+      background: rgba(28, 22, 16, 0.45);
       align-items: center;
       justify-content: center;
       text-align: center;
@@ -2362,20 +2377,27 @@ LOG SINK (Fase 7):
     .cgp-empty-label { font-size: var(--v-font-xs, 11px); color: #a09484; font-style: italic; line-height: 1.4; }
 
     /* ==========================================================================
-       V8 HERALDIC STYLE pra .cgp-card (2026-05-11, user request:
-       "na cidade, mostrar os cards exatamente assim como sao mostrados no
-       combate, porem com informacoes adicionais como valdoritas, barra de XP
-       e pontos de exaustao").
+       V8 HERALDIC CARD MIRROR (2026-05-11 v2, user request):
+       "os cards do personagem e membros da cidade deve ser igual ao card do
+       combate, em tamanho e informacoes, porem logo abaixo um pouco ter
+       barra de XP e valdoritas... deve literalmente ter mesma formatacao
+       e tamanho".
 
-       Mirror direto do .cell.v8-card de simuladores/combate.html (~L1916+):
-       - Class-color theming via --card-accent
-       - Banner topo dark-class-color + nome uppercase + gold border-bottom
-       - Heraldic SVG portrait absolute top-right
-       - Stat bars com fill atras do valor (animated)
+       Estrutura final:
+         .cgp-slot   (grid item — wrapper de cada membro)
+           .cgp-card.v8-style.cls-X  (160x150 FIXED — copia LITERAL do
+                                       .cell.v8-card de combate.html)
+             .c-name        (banner topo, mesmo padding/font do combate)
+             .c-portrait    (heraldic SVG absolute top:6 right:8, 34x34)
+             .c-class-tag   (subtitle abaixo do nome, gold border-bottom)
+             .c-stats       (grid 2-col: PV/Recurso esq + CA dir span rows)
+               .c-stat--hp  (bar fill atras + label + valor)
+               .c-stat--mp/fury/etc
+               .c-stat--ca
+           .cgp-extras (logo abaixo do card — XP bar + Gold + Exh pips)
 
-       Adicionado em cidade: XP bar + Gold + Exhaustion pips (que combate
-       nao tem). Layout vertical (5 rows) porque cidade tem 4 cards-in-row
-       compactos (~88px cada em frame 384px).
+       Panel #city-group-panel passa de flex row pra grid 2x2 (4 membros
+       cabem em 2 colunas x 2 linhas = ~328x400 area, dentro do frame 384).
        ========================================================================== */
     :root {
       /* Class color tokens — espelham combate.html L1044-1056 */
@@ -2412,13 +2434,24 @@ LOG SINK (Fase 7):
     .cgp-card.cls-bruxo       { --card-accent: var(--class-bruxo);       --card-accent-dark: var(--class-bruxo-dark); }
     .cgp-card.cls-aliado      { --card-accent: var(--class-aliado);      --card-accent-dark: var(--class-aliado-dark); }
 
-    /* V8 visual reskin — overrides do .cgp-card legacy. Aplica APENAS quando
-       o card tem .v8-style (controlado pelo JS pra rollback fácil). */
+    /* Slot wrapper — cada membro tem 1 slot com card no topo + extras abaixo. */
+    .cgp-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .cgp-slot.empty {
+      opacity: 0.5;
+    }
+
+    /* ===== CARD V8 — copia LITERAL do .cell.v8-card do combate ===== */
     .cgp-card.v8-style {
+      position: relative;
       background: var(--card-accent-dark, #1a1510);
       border: 2px solid var(--v-gold, #c4953a);
       border-radius: 6px;
-      /* !important pra vencer .cgp-card padding/gap do @media compact (L729) */
       padding: 0 !important;
       gap: 0 !important;
       box-shadow:
@@ -2426,168 +2459,179 @@ LOG SINK (Fase 7):
         0 4px 14px rgba(0, 0, 0, 0.65),
         inset 0 0 0 1px rgba(255, 220, 140, 0.22);
       font-family: var(--v-font-display, 'Cinzel'), serif;
+      /* Dimensoes IDENTICAS ao combate: 160x150 FIXED */
+      width: 160px !important;
+      min-width: 160px !important;
+      max-width: 160px !important;
+      height: 150px !important;
+      min-height: 150px !important;
+      max-height: 150px !important;
+      flex: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
     }
-    .cgp-card.v8-style .cgp-head {
+
+    /* ===== c-name (banner topo) — padding/font literal do combate ===== */
+    .cgp-card.v8-style .c-name {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
-      padding: 5px 26px 4px 7px;  /* right padding pra portrait nao colidir */
-      border-bottom: 1px solid var(--v-gold, #c4953a);
+      border-bottom: none;
+      padding: 7px 46px 2px 10px;  /* 46px right pra portrait 34x34 */
       margin: 0;
-      position: relative;
-    }
-    .cgp-card.v8-style .cgp-name {
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 900;
-      font-size: var(--v-font-xs, 11px);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 25%, #fff 75%);
+      font-size: 12px;
+      letter-spacing: 0.8px;
+      text-align: left;
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
-      line-height: 1.15;
-    }
-    .cgp-card.v8-style .cgp-classrace {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-weight: 700;
-      font-size: 8px;
-      letter-spacing: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       text-transform: uppercase;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 35%, #fff 65%);
-      opacity: 0.85;
-      font-style: normal;
-      margin-top: 1px;
       line-height: 1.1;
-      max-height: none;
-      -webkit-line-clamp: 1;
+    }
+
+    /* ===== c-class-tag (subtitle abaixo do nome) ===== */
+    .cgp-card.v8-style .c-class-tag {
+      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
+      padding: 0 46px 7px 10px;
+      margin: 0;
+      border-bottom: 1px solid var(--v-gold, #c4953a);
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 9px;
+      letter-spacing: 1.3px;
+      text-align: left;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: 0.85;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .cgp-card.v8-style .cgp-level {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 8px;
-      letter-spacing: 1px;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 50%, #fff 50%);
-      opacity: 0.9;
-      margin-top: 1px;
-    }
-    /* Heraldic portrait — absolute top-right corner */
-    .cgp-card.v8-style .cgp-portrait {
+
+    /* ===== c-portrait (heraldic SVG canto sup. direito) ===== */
+    .cgp-card.v8-style .c-portrait {
       position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 22px;
-      height: 22px;
-      pointer-events: none;
+      top: 6px;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      margin: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
       color: color-mix(in srgb, var(--card-accent, #c4953a) 45%, #fff 55%);
-      filter:
-        drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
-        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
-      z-index: 2;
     }
-    .cgp-card.v8-style .cgp-portrait svg {
+    .cgp-card.v8-style .c-portrait svg {
       width: 100%;
       height: 100%;
       fill: currentColor;
       stroke: currentColor;
+      filter:
+        drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
+        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
     }
-    /* Stats container — vertical stack de rows compactos */
-    .cgp-card.v8-style .cgp-stats {
-      padding: 4px 5px 5px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+
+    /* ===== c-stats (grid 2-col: PV/Recurso esq + CA dir span rows) ===== */
+    .cgp-card.v8-style .c-stats {
+      padding: 10px 10px;
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
-    }
-    /* Cada row — bar com fill atras + label + valor */
-    .cgp-card.v8-style .cgp-row {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 0;
-      font-size: 9px;
-      line-height: 1.1;
-      min-height: 12px;
-    }
-    .cgp-card.v8-style .cgp-row .cgp-ico {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      opacity: 0.85;
-      flex: 0 0 18px;
-      text-align: left;
-      text-transform: uppercase;
-    }
-    .cgp-card.v8-style .cgp-row .cgp-bar {
-      flex: 1;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
-      overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-      position: relative;
-    }
-    .cgp-card.v8-style .cgp-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 0.9;
-    }
-    .cgp-card.v8-style .cgp-row-value {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-weight: 900;
-      font-size: 8px;
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-      flex: 0 0 auto;
-      min-width: 28px;
-      text-align: right;
-      white-space: nowrap;
+      flex: 1 1 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 3px 10px;
+      align-items: center;
+      align-content: center;
+      justify-items: start;
+      overflow: hidden;
     }
-    /* Exhaustion pips no estilo V8 — vermelho radial */
-    .cgp-card.v8-style .cgp-pips {
-      flex: 1;
+    .cgp-card.v8-style .c-stats .c-stat:last-child { justify-self: center; }
+    /* PV (linha 1 col 1) — Recurso (linha 2 col 1) — CA (col 2 span 1/-1) */
+    .cgp-card.v8-style .c-stats .c-stat:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: stretch; }
+    .cgp-card.v8-style .c-stats .c-stat:nth-child(2):not(:last-child) { grid-column: 1; grid-row: 2; justify-self: stretch; }
+    .cgp-card.v8-style .c-stats .c-stat:last-child { grid-column: 2; grid-row: 1 / -1; }
+
+    /* Cada c-stat: PV/Recurso = horizontal (label + valor inline com bar atras); CA = vertical */
+    .cgp-card.v8-style .c-stat {
       display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 5px;
+      line-height: 1;
+      position: relative;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+    .cgp-card.v8-style .c-stats .c-stat:last-child {
+      flex-direction: column;
+      align-items: center;
       gap: 2px;
-      align-items: center;
     }
-    .cgp-card.v8-style .cgp-pip {
-      flex: 1;
-      height: 6px;
-      border: 1px solid rgba(160, 80, 60, 0.5);
-      border-radius: 1px;
-      background: rgba(40, 20, 15, 0.4);
-    }
-    .cgp-card.v8-style .cgp-pip.filled {
-      background: radial-gradient(circle at 30% 30%, #ff7a55, #a03828);
-      border-color: #c44a3a;
-      box-shadow: 0 0 3px rgba(200, 50, 40, 0.7);
-    }
-    /* Gold + Exhaustion combinados em row final (lado a lado, compacto) */
-    .cgp-card.v8-style .cgp-row.cgp-row-gold {
-      gap: 6px;
-      padding-top: 2px;
-      margin-top: 1px;
-      border-top: 1px solid rgba(196, 149, 58, 0.18);
-      justify-content: space-between;
-    }
-    .cgp-card.v8-style .cgp-val-gold {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-weight: 900;
+
+    .cgp-card.v8-style .c-stat-label {
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
+      opacity: 0.75;
       font-size: 9px;
-      color: var(--v-gold, #c4953a);
-      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
     }
-    .cgp-card.v8-style .cgp-row.cgp-row-gold .vi-coin.sm {
-      width: 11px;
-      height: 11px;
-      border-width: 1px;
+    .cgp-card.v8-style .c-stat-val {
+      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.9);
+      font-size: 16px;
+      font-weight: 900;
+      white-space: nowrap;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      position: relative;
+      z-index: 1;
     }
-    /* Border-color sutil por classe (alem do gold padrao) */
+    .cgp-card.v8-style .c-stat-val--hp-low { animation: cgpHpLowBlink 1.2s ease-in-out infinite; }
+    @keyframes cgpHpLowBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.75; } }
+    .cgp-card.v8-style .c-stat-val--ca {
+      color: #ffd688;
+      text-shadow: 0 0 5px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Barras atras de c-stat-val (PV + Recurso) — fill behind */
+    .cgp-card.v8-style .c-stat-bar {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+    .cgp-card.v8-style .c-stat-bar-fill {
+      display: block;
+      height: 100%;
+      width: var(--bar-pct, 0%);
+      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.6;
+      background: linear-gradient(90deg, var(--fill-from, #5a8a3e), var(--fill-to, #8ab04e));
+    }
+    .cgp-card.v8-style .c-stat-bar-fill--hp-high { --fill-from: #5a8a3e; --fill-to: #8ab04e; }
+    .cgp-card.v8-style .c-stat-bar-fill--hp-mid  { --fill-from: #b08038; --fill-to: #d0a040; }
+    .cgp-card.v8-style .c-stat-bar-fill--hp-low  { --fill-from: #8a2a20; --fill-to: #c04030; }
+    .cgp-card.v8-style .c-stat-bar-fill--mp      { --fill-from: #2a6090; --fill-to: #70c0f0; }
+    .cgp-card.v8-style .c-stat-bar-fill--furia   { --fill-from: #8a3020; --fill-to: #ff6040; }
+    .cgp-card.v8-style .c-stat-bar-fill--vigor   { --fill-from: #806820; --fill-to: #ffd060; }
+    .cgp-card.v8-style .c-stat-bar-fill--energia { --fill-from: #208a78; --fill-to: #60e8d0; }
+    .cgp-card.v8-style .c-stat-bar-fill--ki      { --fill-from: #603888; --fill-to: #c080ff; }
+
+    /* Player border — gold full opacidade */
     .cgp-card.v8-style.player {
       border-color: var(--v-gold, #c4953a) !important;
       box-shadow:
@@ -2595,21 +2639,102 @@ LOG SINK (Fase 7):
         0 4px 16px color-mix(in srgb, var(--card-accent, #c4953a) 30%, transparent),
         inset 0 0 0 1px rgba(255, 220, 140, 0.3);
     }
-    /* HP bar fill: cores V8 (high/mid/low) — gradientes idênticos ao combate */
-    .cgp-card.v8-style .cgp-bar-fill.hp.hp-high { background: linear-gradient(90deg, #5a8a3e 0%, #8ab04e 100%); }
-    .cgp-card.v8-style .cgp-bar-fill.hp.hp-mid  { background: linear-gradient(90deg, #b08038 0%, #d0a040 100%); }
-    .cgp-card.v8-style .cgp-bar-fill.hp.hp-low  { background: linear-gradient(90deg, #8a2a20 0%, #c04030 100%); }
-    /* Resource fills */
-    .cgp-card.v8-style .cgp-bar-fill.mp     { background: linear-gradient(90deg, #2a6090 0%, #70c0f0 100%); box-shadow: 0 0 4px rgba(112, 192, 240, 0.35); }
-    .cgp-card.v8-style .cgp-bar-fill.fury   { background: linear-gradient(90deg, #8a3020 0%, #ff6040 100%); box-shadow: 0 0 4px rgba(255, 96, 64, 0.35); }
-    .cgp-card.v8-style .cgp-bar-fill.energy { background: linear-gradient(90deg, #208a78 0%, #60e8d0 100%); box-shadow: 0 0 4px rgba(96, 232, 208, 0.35); }
-    .cgp-card.v8-style .cgp-bar-fill.ki     { background: linear-gradient(90deg, #603888 0%, #c080ff 100%); box-shadow: 0 0 4px rgba(192, 128, 255, 0.35); }
-    .cgp-card.v8-style .cgp-bar-fill.vigor  { background: linear-gradient(90deg, #806820 0%, #ffd060 100%); box-shadow: 0 0 4px rgba(255, 208, 96, 0.35); }
-    .cgp-card.v8-style .cgp-bar-fill.xp     { background: linear-gradient(90deg, var(--v-gold-dim, #8a6620) 0%, var(--v-gold, #c4953a) 100%); box-shadow: 0 0 4px rgba(196, 149, 58, 0.4); }
-    /* Dead state — desaturate + lighten */
+    /* Dead state */
     .cgp-card.v8-style.dead {
       filter: grayscale(0.85) brightness(0.65);
       opacity: 0.55;
+    }
+
+    /* ===== cgp-extras (logo abaixo do card — XP bar + Gold + Exh pips) ===== */
+    .cgp-extras {
+      width: 160px;
+      max-width: 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 0 2px;
+      box-sizing: border-box;
+    }
+    .cgp-xp-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cgp-xp-label {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--v-gold, #c4953a);
+      flex: 0 0 14px;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+    .cgp-xp-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(196, 149, 58, 0.25);
+    }
+    .cgp-xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--v-gold-dim, #8a6620) 0%, var(--v-gold, #c4953a) 100%);
+      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 4px rgba(196, 149, 58, 0.4);
+    }
+    .cgp-xp-val {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 8px;
+      font-weight: 900;
+      color: var(--v-gold, #c4953a);
+      flex: 0 0 auto;
+      min-width: 32px;
+      text-align: right;
+      white-space: nowrap;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
+    }
+    .cgp-gold-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .cgp-exh {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      flex: 1;
+    }
+    .cgp-exh-pip {
+      flex: 0 0 6px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1px solid rgba(160, 80, 60, 0.45);
+      background: rgba(40, 20, 15, 0.4);
+    }
+    .cgp-exh-pip.filled {
+      background: radial-gradient(circle at 30% 30%, #ff7a55, #a03828);
+      border-color: #c44a3a;
+      box-shadow: 0 0 3px rgba(200, 50, 40, 0.7);
+    }
+    .cgp-gold {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 10px;
+      font-weight: 900;
+      color: var(--v-gold, #c4953a);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      text-shadow: 0 0 4px rgba(196, 149, 58, 0.55), 0 1px 1px rgba(0, 0, 0, 0.85);
+    }
+    .cgp-gold .vi-coin.sm {
+      width: 12px;
+      height: 12px;
+      border-width: 1px;
     }
 
     /* === Cartografia Canvas (Phase 5.2 + Fase 6.2 fullscreen) ===
@@ -38378,85 +38503,92 @@ function renderCityGroupPanel(){
     dead: false,
     isPlayer: true
   };
+  /* 2026-05-11 v2 (user request): markup literal do combate.
+     Combat .cell.v8-card tem: c-name, c-portrait, c-class-tag, c-stats
+     (grid 2-col com PV/Recurso esq + CA dir span). EXATAMENTE replicado
+     aqui. XP + Gold + Exh viram cgp-extras LOGO ABAIXO do card. */
+  // Map cls do resource (mp/fury/energy/vigor/ki) -> bar-fill suffix (combate PT)
+  var RES_BAR_MAP = { mp: 'mp', fury: 'furia', energy: 'energia', vigor: 'vigor', ki: 'ki' };
   var html = '';
   for (var i = 0; i < 4; i++) {
     var m = GROUP_MEMBERS[i];
     if (!m) {
-      // Card vazio cinza/apagado (sem texto/CTA — slot livre)
-      html += '<div class="cgp-card empty" data-empty-slot="' + i + '" aria-label="Slot livre"></div>';
+      // Slot vazio = só placeholder dashed (sem extras abaixo)
+      html += '<div class="cgp-slot empty"><div class="cgp-card empty" data-empty-slot="' + i + '" aria-label="Slot livre"></div></div>';
       continue;
     }
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
     var xpPct = m.xpNext > 0 ? Math.round(100 * m.xp / m.xpNext) : 0;
     // V8 HP threshold: high > 60%, mid 25-60%, low < 25% — mesmo do combate
-    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+    var hpThr = hpPct > 60 ? 'high' : (hpPct > 25 ? 'mid' : 'low');
     var deadCls = m.dead ? ' dead' : '';
     var playerCls = m.isPlayer ? ' player' : '';
     var clsKey = _cgpClsKey(m.cls);
     var clsModifier = ' cls-' + clsKey;
     var heraldicId = _cgpHeraldicIcon(m.cls);
     var res = _resForClass(m.cls);
+    var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
 
-    // XSS guard: name/cls/race vêm de ?param= da URL — escapar antes de
-    // concatenar em innerHTML. Helper _hubEsc usa textContent → innerHTML
-    // do browser pra HTML-encode &<>"'.
+    // XSS guard
     var safeName = _hubEsc(_titleCase(m.name));
     var safeCls = _hubEsc(_titleCase(m.cls));
     var safeRace = _hubEsc(_titleCase(m.race || ''));
     var safeResName = _hubEsc(res.name);
-    var safeResCls = _hubEsc(res.cls);
-    var safeResAbbr = (res.name || '').substring(0, 3).toUpperCase();
 
-    // Exaustão pips (6 dots)
+    // Compute mock CA (10 + dex mod). Sem stats reais — usar nivel/2+12 default
+    var ac = (m.ac != null) ? m.ac : (10 + Math.floor((m.level || 1) / 4) + 2);
+
+    // Exaustao pips (6 dots) para extras abaixo
     var pipsHtml = '';
     for (var pi = 0; pi < (m.exhMax || 6); pi++) {
-      pipsHtml += '<div class="cgp-pip' + (pi < (m.exh || 0) ? ' filled' : '') + '"></div>';
+      pipsHtml += '<div class="cgp-exh-pip' + (pi < (m.exh || 0) ? ' filled' : '') + '"></div>';
     }
 
-    // V8 markup: banner + portrait absoluto + stats vertical stack
-    html += '<div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
-      // Banner: nome + classe-raca-nv (cgp-head com look V8 .c-name)
-      + '  <div class="cgp-head">'
-      + '    <div class="cgp-name">' + safeName + '</div>'
-      + '    <div class="cgp-classrace">' + safeCls + (safeRace ? ' ' + safeRace : '') + ' · Nv ' + m.level + '</div>'
-      + '  </div>'
-      // Heraldic portrait canto sup. direito (sobre o banner)
-      + '  <div class="cgp-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-      // Stats container (V8 .c-stats look)
-      + '  <div class="cgp-stats">'
-      // Row 1: HP (sempre)
-      + '    <div class="cgp-row" title="HP ' + m.hp + '/' + m.hpMax + '">'
-      + '      <span class="cgp-ico">PV</span>'
-      + '      <div class="cgp-bar"><div class="cgp-bar-fill hp ' + hpCls + '" style="width:' + hpPct + '%"></div></div>'
-      + '      <span class="cgp-row-value">' + m.hp + '/' + m.hpMax + '</span>'
-      + '    </div>';
-    // Row 2: Recurso (so se max > 0)
+    // ===== Card V8 (combat-literal markup) =====
+    html += '<div class="cgp-slot" data-slot="' + i + '">'
+      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
+      + '    <div class="c-name">' + safeName + '</div>'
+      + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
+      + '    <div class="c-class-tag">' + safeCls + (safeRace ? ' ' + safeRace : '') + ' · Nv ' + m.level + '</div>'
+      + '    <div class="c-stats">'
+      // PV (linha 1 col 1)
+      + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
+      + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
+      + '        <span class="c-stat-label">PV</span>'
+      + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
+      + '      </div>';
+    // Recurso (linha 2 col 1) — so se mmp > 0
     if (m.mpMax > 0) {
-      html += '    <div class="cgp-row" title="' + safeResName + ' ' + m.mp + '/' + m.mpMax + '">'
-        + '      <span class="cgp-ico">' + safeResAbbr + '</span>'
-        + '      <div class="cgp-bar"><div class="cgp-bar-fill ' + safeResCls + '" style="width:' + mpPct + '%"></div></div>'
-        + '      <span class="cgp-row-value">' + m.mp + '/' + m.mpMax + '</span>'
-        + '    </div>';
+      html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
+        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
+        + '        <span class="c-stat-label">' + safeResName + '</span>'
+        + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
+        + '      </div>';
     }
-    // Row 3: XP
-    html += '    <div class="cgp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
-      + '      <span class="cgp-ico">XP</span>'
-      + '      <div class="cgp-bar"><div class="cgp-bar-fill xp" style="width:' + xpPct + '%"></div></div>'
-      + '      <span class="cgp-row-value">' + m.xp + '/' + m.xpNext + '</span>'
+    // CA (col 2 span rows) — sempre
+    html += '      <div class="c-stat c-stat--ca">'
+      + '        <span class="c-stat-label">CA</span>'
+      + '        <span class="c-stat-val c-stat-val--ca">' + ac + '</span>'
+      + '      </div>'
+      + '    </div>'  // /c-stats
+      + '  </div>'  // /cgp-card
+      // ===== EXTRAS (logo abaixo do card): XP bar + Gold + Exh =====
+      + '  <div class="cgp-extras">'
+      + '    <div class="cgp-xp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
+      + '      <span class="cgp-xp-label">XP</span>'
+      + '      <div class="cgp-xp-bar"><div class="cgp-xp-fill" style="width:' + xpPct + '%"></div></div>'
+      + '      <span class="cgp-xp-val">' + m.xp + '/' + m.xpNext + '</span>'
       + '    </div>'
-      // Row 4: Exaustao (pips 0-6)
-      + '    <div class="cgp-row" title="Exaustão ' + (m.exh || 0) + '/6">'
-      + '      <span class="cgp-ico">EX</span>'
-      + '      <div class="cgp-pips">' + pipsHtml + '</div>'
+      + '    <div class="cgp-gold-row">'
+      + '      <div class="cgp-exh" title="Exaustão ' + (m.exh || 0) + '/6">' + pipsHtml + '</div>'
+      + '      <span class="cgp-gold" title="' + (m.gold || 0) + ' Valdoritas">'
+      + (m.gold || 0).toLocaleString('pt-BR')
+      + '<span class="vi vi-coin sm"></span>'
+      + '      </span>'
       + '    </div>'
-      // Row 5: Valdoritas (gold) — separado por border-top, alinhado direita
-      + '    <div class="cgp-row cgp-row-gold" title="' + (m.gold || 0) + ' Valdoritas">'
-      + '      <span class="cgp-val-gold">' + (m.gold || 0).toLocaleString('pt-BR') + '</span>'
-      + '      <span class="vi vi-coin sm"></span>'
-      + '    </div>'
-      + '  </div>'  // /cgp-stats
-      + '</div>';  // /cgp-card
+      + '  </div>'  // /cgp-extras
+      + '</div>';  // /cgp-slot
   }
   el.innerHTML = html;
   // FIX 2026-05-04: cards do HUD topo clicáveis → abre ficha do membro
