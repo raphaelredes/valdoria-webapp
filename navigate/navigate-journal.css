@@ -1,7 +1,0 @@
-/* navigate-journal.css — minimal overlay-specific overrides
- * All diary styles live in shared/diary.css now.
- * This file only has performance overrides for the glow pseudo-element
- * that diary.css already handles — kept as safety net. */
-
-/* (diary.css already defines #diary-overlay::after glow + perf tiers) */
-/* No additional styles needed — shared/diary.css covers everything. */
