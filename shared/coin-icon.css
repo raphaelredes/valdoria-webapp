@@ -1,9 +1,10 @@
-/* Valdoria Coin Icon — moeda Valdorita PNG (Gemini AI + chroma key) */
-/* 2026-05-11: substituiu CSS gradient + "V" text por PNG real renderizado
-   pela Gemini AI (dourado celta gravado com V central + entrelacos).
-   Source: Gemini/moeda valdorita/valdorita.png (2048x2048)
-   Processed: scripts/_remove_green_bg_valdorita.py -> 512x512 alpha PNG.
-   Output: shared/img/valdorita.png (~515KB). */
+/* Valdoria Coin Icon — moeda Valdorita PNG (Gemini AI + chroma key v2) */
+/* 2026-05-11 v2: PNG otimizado 256x256 (~135KB, 75% menor que v1 515KB).
+   Bordas mais limpas via despill agressivo, V central agora em alto
+   contraste (preto/escuro sobre ouro) — leitura legivel ate em 14px.
+   Source: Gemini/moeda valdorita/valdorita.png (2048x2048 fundo verde)
+   Processed: scripts/_remove_green_bg_valdorita.py v2
+   Output: shared/img/valdorita.png (256x256, ~135KB). */
 
 /* Usage: <span class="vi vi-coin"></span> or .sm / .lg / .xl variants */
 
@@ -16,35 +17,50 @@
 }
 
 .vi-coin {
-  width: 14px;
-  height: 14px;
+  /* Default 16px (was 14) — moeda com detalhes celtas precisa de espaco */
+  width: 16px;
+  height: 16px;
   background-image: url('/shared/img/valdorita.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   /* Glow dourado sutil ao redor da moeda (destaque em UI escura) */
-  filter: drop-shadow(0 0 2px rgba(196, 149, 58, 0.45));
+  filter: drop-shadow(0 0 2px rgba(196, 149, 58, 0.5));
 }
 
 /* CSS gradient/border/text "V" antigos foram REMOVIDOS — agora o PNG da
-   moeda inclui o V em relevo + bordas celtas no proprio sprite. */
+   moeda inclui o V em alto-relevo + bordas celtas em entrelacos no proprio
+   sprite. Detalhe se mantem visivel a partir de 14px. */
 
-/* Small — inline em textos/custos */
+/* Small — inline em textos/custos (14px, era 12) */
 .vi-coin.sm {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
-/* Large — totais, destaques */
+/* Large — totais, destaques (22px, era 18) */
 .vi-coin.lg {
-  width: 18px;
-  height: 18px;
-  filter: drop-shadow(0 0 3px rgba(196, 149, 58, 0.55));
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 3px rgba(196, 149, 58, 0.6));
 }
 
-/* Extra-large — headers/banners (32px) */
+/* Extra-large — headers/banners (36px, era 32) */
 .vi-coin.xl {
-  width: 32px;
-  height: 32px;
-  filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.6));
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.65));
+}
+
+/* Hover effect — coin gentle pulse pra contextos clickaveis */
+.vi-coin.interactive,
+button .vi-coin,
+a .vi-coin {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.vi-coin.interactive:hover,
+button:hover .vi-coin,
+a:hover .vi-coin {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.75));
 }

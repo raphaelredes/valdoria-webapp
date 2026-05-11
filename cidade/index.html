@@ -2644,9 +2644,11 @@ LOG SINK (Fase 7):
       gap: 3px;
     }
     .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
-      width: 11px;
-      height: 11px;
-      border-width: 1px;
+      /* 2026-05-11 v5: removeu override 11x11 — agora usa default .vi-coin.sm
+         (14x14) do shared/coin-icon.css. Moeda detalhada precisa de espaco
+         pra mostrar bordas celtas + V central legivel. */
+      width: 14px;
+      height: 14px;
     }
 
     /* Barras atras de c-stat-val (PV + Recurso + XP) — fill behind */
