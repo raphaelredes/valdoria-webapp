@@ -10140,15 +10140,16 @@ function _showStatusPopup(memberIdx){
   var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
   var xpPct = m.xpNext > 0 ? Math.round(100 * (m.xp || 0) / m.xpNext) : 0;
 
-  // === HEADER ÉPICO: avatar heráldico canonical ===
-  // Regra "No NPC Emotes": NUNCA usar emoji de pessoa/face. Usar SVG heráldico ic-*
-  // (definidos em <symbol> no início do cidade.html). Mapping classe canonical:
+  // === HEADER COMPACTO: avatar heráldico canonical ===
+  // 2026-05-11 (user request): "diminua o tamanho do icone, nome, raca e
+  // classe. Tambem garanta que tudo esteja em PT-BR".
+  // Regra "No NPC Emotes": NUNCA usar emoji de pessoa/face. Usar SVG heráldico ic-*.
   function _classToHeraldic(cls){
     var k = (cls || '').toLowerCase().split(' ')[0];
     var MAP = {
       mago:        'ic-mago',
       guerreiro:   'ic-guerreiro',
-      sacerdotisa: 'ic-clerigo',  // sacerdotisa/sacerdote = clérigo
+      sacerdotisa: 'ic-clerigo',
       sacerdote:   'ic-clerigo',
       clerigo:     'ic-clerigo',
       ladino:      'ic-ladino',
@@ -10156,51 +10157,53 @@ function _showStatusPopup(memberIdx){
       paladino:    'ic-paladino',
       bardo:       'ic-bardo',
       druida:      'ic-druida',
-      monge:       'ic-monge'
+      monge:       'ic-monge',
+      barbaro:     'ic-barbaro',
+      'bárbaro':   'ic-barbaro',
+      feiticeiro:  'ic-feiticeiro',
+      feiticeira:  'ic-feiticeiro',
+      bruxo:       'ic-bruxo'
     };
     return MAP[k] || 'ic-guerreiro';
   }
+  /* PT-BR labels — _raceLabelPT/_classLabelPT estão definidos globalmente
+     (ver ~L38478+) pra serem usados também por renderCityGroupPanel. */
   var heraldicId = _classToHeraldic(m.cls);
-  var heraldicSvg = '<svg viewBox="0 0 120 120" style="width: 56px; height: 56px;">'
+  var heraldicSvg = '<svg viewBox="0 0 120 120" style="width: 32px; height: 32px;">'
     + '<use href="#' + heraldicId + '"/></svg>';
+  var raceLabel = _raceLabelPT(m.race);
+  var classLabel = _classLabelPT(m.cls);
 
   var html = '<div class="ficha-epica" style="padding: 0;">';
 
-  // === PORTRAIT FRAME ===
+  // === PORTRAIT FRAME (compact) ===
   html += '<div class="ficha-portrait" '
-    + 'style="position: relative; padding: var(--v-space-xl, 16px) var(--v-space-md, 8px); '
+    + 'style="position: relative; padding: var(--v-space-md, 8px) var(--v-space-md, 8px) var(--v-space-sm, 6px); '
     + 'background: linear-gradient(180deg, rgba(196,149,58,0.10) 0%, rgba(42,36,32,0.95) 100%); '
     + 'border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); text-align: center;">'
 
-    // Avatar circular dourado com brasão heráldico canonical
+    // Avatar circular dourado (48x48, era 72x72)
     + '<div class="ficha-avatar" '
-    + 'style="width: 72px; height: 72px; margin: 0 auto var(--v-space-sm, 6px); '
+    + 'style="width: 48px; height: 48px; margin: 0 auto 4px; '
     + 'background: radial-gradient(circle at 30% 30%, #fff4d0 0%, #e8c45a 25%, #c4953a 55%, #5a3e10 100%); '
     + 'border-radius: 50%; display: flex; align-items: center; justify-content: center; '
-    + 'box-shadow: 0 0 24px var(--v-gold-40, rgba(196,149,58,0.4)), inset 0 -4px 8px rgba(0,0,0,0.3); '
+    + 'box-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4)), inset 0 -3px 5px rgba(0,0,0,0.3); '
     + 'border: 2px solid var(--v-gold, #c4953a); color: #1a1410;">'
     + heraldicSvg
     + '</div>'
 
-    // Ornamental divider
-    + '<div style="display: flex; align-items: center; justify-content: center; gap: var(--v-space-sm, 6px); margin-bottom: var(--v-space-xs, 2px);">'
-    + '<span style="height:1px; background: var(--v-gold-50, rgba(196,149,58,0.5)); width: 30px;"></span>'
-    + '<span style="color: var(--v-gold, #c4953a); font-size: var(--v-font-md, 14px);">◆</span>'
-    + '<span style="height:1px; background: var(--v-gold-50, rgba(196,149,58,0.5)); width: 30px;"></span>'
-    + '</div>'
-
-    // Nome
+    // Nome (14px, era 18px; letter-spacing 1px era 2px)
     + '<div class="ficha-name" '
-    + 'style="font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-display, 18px); '
-    + 'font-weight: 700; color: var(--v-gold, #c4953a); letter-spacing: 2px; text-transform: uppercase; '
-    + 'text-shadow: 0 0 12px var(--v-gold-30, rgba(196,149,58,0.3));">'
+    + 'style="font-family: var(--v-font-display, Cinzel, serif); font-size: 14px; '
+    + 'font-weight: 700; color: var(--v-gold, #c4953a); letter-spacing: 1px; text-transform: uppercase; '
+    + 'text-shadow: 0 0 10px var(--v-gold-30, rgba(196,149,58,0.3)); line-height: 1.15;">'
     + _titleCase(m.name)
     + '</div>'
 
-    // Subtitle: classe + raça + nv
+    // Subtitle: classe + raça + nv (11px, era 13px) — em PT-BR via _raceLabelPT/_classLabelPT
     + '<div class="ficha-subtitle" '
-    + 'style="color: var(--v-text-dim, #a09484); font-size: var(--v-font-sm, 13px); margin-top: 2px; font-style: italic;">'
-    + _titleCase(m.cls) + ' ' + _titleCase(m.race) + ' · Nível ' + m.level
+    + 'style="color: var(--v-text-dim, #a09484); font-size: 11px; margin-top: 2px; font-style: italic;">'
+    + classLabel + ' ' + raceLabel + ' · Nível ' + m.level
     + '</div>'
     + '</div>';
 
@@ -38437,6 +38440,43 @@ function _cgpHeraldicIcon(cls){
   };
   return MAP[k] || 'ic-guerreiro';  // fallback aliado/desconhecido
 }
+/* 2026-05-11 (user request): "garanta que tudo esteja em PT-BR".
+   Traduz race + class de EN -> PT-BR canonical (per CLAUDE.md "Nomes de
+   Fantasia D&D"). Halfling/Tiefling/Dragonborn ja sao PT-BR consagrado. */
+function _raceLabelPT(r){
+  var k = (r || '').toLowerCase();
+  var MAP = {
+    dwarf: 'Anão', anao: 'Anão', 'anão': 'Anão',
+    elf: 'Elfo', elfo: 'Elfo',
+    human: 'Humano', humano: 'Humano',
+    halfling: 'Halfling',
+    tiefling: 'Tiefling',
+    gnome: 'Gnomo', gnomo: 'Gnomo',
+    halfelf: 'Meio-Elfo', 'half-elf': 'Meio-Elfo', 'meio-elfo': 'Meio-Elfo',
+    halforc: 'Meio-Orc', 'half-orc': 'Meio-Orc', 'meio-orc': 'Meio-Orc',
+    dragonborn: 'Draconato', draconato: 'Draconato'
+  };
+  return MAP[k] || (typeof _titleCase === 'function' ? _titleCase(r || '') : (r || ''));
+}
+function _classLabelPT(c){
+  var k = (c || '').toLowerCase().split(' ')[0];
+  var MAP = {
+    mage: 'Mago', wizard: 'Mago', mago: 'Mago',
+    warrior: 'Guerreiro', fighter: 'Guerreiro', guerreiro: 'Guerreiro',
+    cleric: 'Clérigo', clerigo: 'Clérigo', 'clérigo': 'Clérigo',
+    priest: 'Sacerdote', sacerdote: 'Sacerdote', sacerdotisa: 'Sacerdotisa',
+    rogue: 'Ladino', thief: 'Ladino', ladino: 'Ladino',
+    ranger: 'Patrulheiro', patrulheiro: 'Patrulheiro',
+    paladin: 'Paladino', paladino: 'Paladino',
+    bard: 'Bardo', bardo: 'Bardo',
+    druid: 'Druida', druida: 'Druida',
+    monk: 'Monge', monge: 'Monge',
+    sorcerer: 'Feiticeiro', feiticeiro: 'Feiticeiro', feiticeira: 'Feiticeira',
+    warlock: 'Bruxo', bruxo: 'Bruxo',
+    barbarian: 'Bárbaro', barbaro: 'Bárbaro', 'bárbaro': 'Bárbaro'
+  };
+  return MAP[k] || (typeof _titleCase === 'function' ? _titleCase(c || '') : (c || ''));
+}
 function renderCityGroupPanel(){
   var el = document.getElementById('city-group-panel');
   if (!el) return;
@@ -38479,8 +38519,10 @@ function renderCityGroupPanel(){
     var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
 
     var safeName = _hubEsc(_titleCase(m.name));
-    var safeCls = _hubEsc(_titleCase(m.cls));
-    var safeRace = _hubEsc(_titleCase(m.race || ''));
+    /* 2026-05-11: race + class agora vem em PT-BR canonical via _raceLabelPT
+       / _classLabelPT (garante "Anão" em vez de "Dwarf", etc). */
+    var safeCls = _hubEsc(_classLabelPT(m.cls));
+    var safeRace = _hubEsc(_raceLabelPT(m.race || ''));
     var safeResName = _hubEsc(res.name);
 
     var ac = (m.ac != null) ? m.ac : (10 + Math.floor((m.level || 1) / 4) + 2);
