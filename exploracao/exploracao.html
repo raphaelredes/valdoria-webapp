@@ -3395,11 +3395,17 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 /* ====== QUICK ACTIONS ================================================= */
 /* X-6.5.20: hud-quick desceu (bottom menor) pra liberar espaço vertical
    e evitar sobreposição com right-panel (minimap + zoom). Cartografia
-   ganhou margin-top extra pra descer um pouco mais. */
+   ganhou margin-top extra pra descer um pouco mais.
+   2026-05-12 USER REPORT FIX: btn-camp + btn-cartografia ficavam INVISÍVEIS
+   na tela delimitada porque hex-nav (movement controls, 188px de altura
+   ocupando bottom 0-188px) sobrepunha visualmente os ícones do hud-quick.
+   Bounding rects: hex-nav y=593-781, hud-quick y=387-651 → overlap y=593-651.
+   Fix: subir bottom de 140 → 200 pra hud-quick ficar totalmente acima do
+   hex-nav. Mantém z-index 15 (sem hack de empilhamento). */
 #hud-quick {
   position: absolute;
   right: 10px;
-  bottom: 140px;   /* era 160 — baixou 20px */
+  bottom: 200px;   /* 2026-05-12: era 140 — subido pra fim do overlap com hex-nav */
   z-index: 15;
   display: flex; flex-direction: column;
   gap: 8px;
@@ -4046,13 +4052,15 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
      pra ficar formato HEXAGONO real, nao quase-quadrado).
      2026-04-27 USER RULE: scale dinâmico (3 níveis: 0.6 / 0.78 / 1.0)
-     controlado pelos botões #btn-hex-size-dec/-inc. Default 0.78.
-     transform-origin:center pra encolher/aumentar simétrico em torno do
-     center. Estado salvo em localStorage 'valdoria_explore_hex_nav_scale_level'. */
+     controlado pelos botões #btn-hex-size-dec/-inc.
+     2026-05-12 USER REQUEST: default agora é MAX (1.0) — antes era 0.78.
+     "primeira vez no exploracao deve estar no tamanho maior, e ao mudar
+     ficar fixado no que escolheu" (como o volume). JS setupHexNavSizeButtons
+     trata isso e persiste em localStorage 'valdoria_explore_hex_nav_scale_level'. */
   position: relative;
   width: 240px; height: 188px;
   pointer-events: auto;
-  transform: scale(0.78);
+  transform: scale(1.0);  /* 2026-05-12: era 0.78 — agora max default */
   transform-origin: center center;
   transition: transform 0.2s ease;
 }
@@ -5006,13 +5014,17 @@ body.remote-mode #debug-hud { display: none !important; }
 .setup-start:active { transform: scale(0.98); }
 
 /* ====== CARTOGRAFIA OVERLAY (mapa de interligações) ================== */
+/* 2026-05-12 USER REPORT FIX: top-bar tem z-index 1000 !important e ficava
+   acima do cartography-overlay (z-index 250), escondendo o card de
+   destino + botão Voltar. Subimos pra 1100 pra overlay cobrir top-bar
+   sempre que estiver aberto. */
 #cartography-overlay {
   position: absolute; inset: 0;
   background: radial-gradient(ellipse at center, rgba(30, 22, 16, 0.92), rgba(10, 8, 6, 0.98));
   display: none;
   align-items: center; justify-content: center;
   padding: 16px;
-  z-index: 250;
+  z-index: 1100;   /* 2026-05-12: era 250 — agora acima do #top-bar (1000) */
   overflow-y: auto;
 }
 #cartography-overlay.visible { display: flex; }
@@ -33706,6 +33718,9 @@ function _exploracaoItemCategory(item) {
   if (name.indexOf('turquesa') >= 0 || name.indexOf('ametista') >= 0
       || name.indexOf('rubi') >= 0 || name.indexOf('esmeralda') >= 0
       || name.indexOf('diamante') >= 0 || name.indexOf('safira') >= 0) return 'gem';
+  // 2026-05-12 USER REQUEST: paridade com cidade — categoria 'rune' (runas
+  // de proteção/vigor/precisão/chamas/gelo/cura/fortuna/trovão/absorção/devastação)
+  if (name.indexOf('runa') >= 0 || name.indexOf('fragmento') >= 0) return 'rune';
   return 'misc';
 }
 
@@ -33768,7 +33783,8 @@ function _renderExploracaoInventoryPopup() {
 
   // Filtrar por categoria
   var filter = window._invFilterExp || 'all';
-  var counts = { all: 0, equip: 0, use: 0, gem: 0, misc: 0 };
+  // 2026-05-12: 'rune' adicionado pra paridade com cidade
+  var counts = { all: 0, equip: 0, use: 0, gem: 0, rune: 0, misc: 0 };
   inv.forEach(function(it) {
     var cat = _exploracaoItemCategory(it);
     counts.all += it.quantity || 0;
@@ -33782,16 +33798,21 @@ function _renderExploracaoInventoryPopup() {
   });
 
   // Header meta + filter pills
+  // 2026-05-12 USER REQUEST: alinhar com mochila da cidade.
+  // - Removida quantidade de Valdoritas duplicada (antes "Bolsa: 3287 V | 5 itens · 250 V",
+  //   agora "Bolsa: 3287 V | Inventário (5 itens)")
+  // - Filtros padronizados pra match cidade.html (Todos/Equip/Consum/Gemas/Runas/Outros)
   var html = ''
     + '<div class="inv-meta-bar">'
-    +   '<span>Bolsa: <span class="gold">' + gold + ' <span class="vi vi-coin sm"></span></span></span>'
-    +   '<span>' + totalCount + ' iten' + (totalCount === 1 ? '' : 's') + ' · ' + totalValue + ' <span class="vi vi-coin sm"></span></span>'
+    +   '<span style="float:left">Bolsa: ' + gold + ' <span class="vi vi-coin sm"></span></span>'
+    +   'Inventário (' + counts.all + ' iten' + (counts.all === 1 ? '' : 's') + ')'
     + '</div>'
     + '<div class="inv-filter-row">'
     +   '<span class="inv-filter-pill' + (filter === 'all' ? ' active' : '') + '" data-filter="all">Todos (' + counts.all + ')</span>'
     +   '<span class="inv-filter-pill' + (filter === 'equip' ? ' active' : '') + '" data-filter="equip">⚔️ Equip (' + counts.equip + ')</span>'
     +   '<span class="inv-filter-pill' + (filter === 'use' ? ' active' : '') + '" data-filter="use">🧪 Consum (' + counts.use + ')</span>'
     +   '<span class="inv-filter-pill' + (filter === 'gem' ? ' active' : '') + '" data-filter="gem">💎 Gemas (' + counts.gem + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'rune' ? ' active' : '') + '" data-filter="rune">✨ Runas (' + (counts.rune || 0) + ')</span>'
     +   '<span class="inv-filter-pill' + (filter === 'misc' ? ' active' : '') + '" data-filter="misc">📦 Outros (' + counts.misc + ')</span>'
     + '</div>';
 
@@ -39893,7 +39914,12 @@ function bindQuickActions() {
   // localStorage 'valdoria_explore_hex_nav_scale_level' (0..2).
   (function setupHexNavSizeButtons() {
     var SCALE_LEVELS = [0.6, 0.78, 1.0];
-    var DEFAULT_LEVEL = 1;  // index do scale 0.78 (default visual atual)
+    // 2026-05-12 USER REQUEST: "hex-nav esteja sempre no tamanho maior na
+    // primeira vez que o jogador acessar o exploracao, e quando mudar ficar
+    // fixado no que escolheu, assim como funciona com o volume".
+    // Default agora é MAX (1.0) — primeira vez sem localStorage → tamanho max.
+    // Após user clicar − / +, valor persiste em localStorage (já funcionava).
+    var DEFAULT_LEVEL = SCALE_LEVELS.length - 1;  // 2 = 1.0 (max)
     var STORAGE_KEY = 'valdoria_explore_hex_nav_scale_level';
     var inner = document.getElementById('hex-nav-inner');
     var btnDec = document.getElementById('btn-hex-size-dec');
