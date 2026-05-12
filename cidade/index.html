@@ -22403,6 +22403,19 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
       { id: 'help', label: '🍎 Ajudar a recolher', result: 'apply_now',
         effect: { xp: 3 },
         result_text: 'Você se ajoelha e ajuda a juntar as maçãs uma por uma. <i>A criança te olha agradecida — e duas senhoras que passavam param pra ajudar também.</i> Em um minuto a cesta está cheia de novo. <b>"Que Eldor te abençoe, moço."</b>' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — CHA pra inspirar criança / DEX pra recolher rápido
+      { id: 'cheer_up', label: '🗣️ [CAR 11] "Sua avó vai entender — vamos resolver juntos."',
+        result: 'skill_check', stat: 'charisma', dc: 11,
+        effect: { xp: 8 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você ajoelha ao lado dela e fala com tom de irmão mais velho. <i>A criança chora, ri, e começa a contar uma história sobre o gato dela enquanto vocês recolhem.</i> A cesta enche e ela te dá uma maçã polida. <b>"Toma. É a melhor da cesta. Pra você."</b>',
+        result_text_fail: 'A criança escuta polida, mas a tensão não passa. <i>Ela recolhe as maçãs em silêncio, ainda com lágrimas.</i> Você ajuda como pode, mas não consegue tirar o peso dela.' },
+      { id: 'quick_gather', label: '⚡ [DES 10] (Recolher tudo num pulo só)',
+        result: 'skill_check', stat: 'dexterity', dc: 10,
+        effect: { xp: 6, gold: 1 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você se move como gato — três pulos, mãos rápidas, e em segundos as maçãs voltam pra cesta. <i>A criança aplaude e te entrega uma moeda guardada no bolso.</i> <b>"Pega — minha vó vai falar que eu fui rápida. Mereceu."</b>',
+        result_text_fail: 'Você se atrapalha — uma maçã rola debaixo da banca e fica perdida. <i>A criança ainda agradece.</i> <b>"Tudo bem... ela só vai me xingar um pouquinho mais hoje."</b>' },
       { id: 'ignore', label: 'Seguir adiante', result: 'apply_now',
         effect: {},
         result_text: 'Você dá de ombros e segue caminhando pela praça movimentada. <i>A criança ainda está de joelhos atrás de você quando dobra a esquina.</i>' }
@@ -22420,6 +22433,19 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
       { id: 'donate', label: '🪙 Doar 1 valdorita', result: 'apply_now',
         effect: { gold: -1, xp: 5 },
         result_text: 'O mendigo segura a moeda como se fosse ouro puro. <i>Os olhos dele se enchem de lágrimas e ele beija a moeda antes de guardá-la na manga puída.</i> <b>"Que os deuses anciões te protejam pelas estradas, aventureiro. Não esqueço seu rosto."</b>' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — SAB pra detectar mentira / CAR pra arrancar história
+      { id: 'detect_lie', label: '👁️ [SAB 13] (Examinar as mãos e o rosto dele...)',
+        result: 'skill_check', stat: 'wisdom', dc: 13,
+        effect: { xp: 12, gold: 3 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você nota: as mãos são calejadas de espada, não de fome. <i>O "mendigo" percebe que você notou. Ele se ergue um palmo e baixa a voz.</i> <b>"Esperto. Sou informante da Guarda Negra, disfarçado. Toma três Valdoritas pela discrição. Se ouvir alguém falando do Forte... avisa o Aldric. Diz que foi o Mendigo."</b>',
+        result_text_fail: 'Você o examina mas não vê nada estranho. <i>Ele tosse de novo e estende a mão.</i> <b>"Não sou bicho, aventureiro... Só um homem com fome. Boa estrada."</b>' },
+      { id: 'ask_story', label: '🗣️ [CAR 12] "Como você chegou até aqui?"',
+        result: 'skill_check', stat: 'charisma', dc: 12,
+        effect: { xp: 10 },
+        effect_fail: { xp: 2 },
+        result_text: 'Ele baixa as mãos. <i>Pela primeira vez em meses, alguém perguntou.</i> <b>"Fui soldado dos Portões. Caí da muralha numa noite de geada — perna nunca mais foi a mesma. Sem pensão, sem família. Vou pra Praça pra não ser invisível. Obrigado por... me ver."</b> <i>O olhar dele ganha luz. Ele te conta dois rumores úteis do bairro pobre.</i>',
+        result_text_fail: 'Ele desvia o olhar. <i>Algumas histórias não saem em pedidos.</i> <b>"Histórias custam moedas, aventureiro. Sem moeda, sem história. Boa estrada."</b>' },
       { id: 'ignore', label: 'Seguir adiante', result: 'apply_now',
         effect: {},
         result_text: 'Você baixa o olhar e segue caminhando. <i>O homem não insiste — apenas recolhe as mãos lentamente e procura outro transeunte.</i> A multidão continua ao redor, indiferente.' }
@@ -22440,6 +22466,13 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
         effect_fail: { xp: 2 },
         result_text: 'Você se posiciona ao lado do guarda e empurra com tudo. <i>A barricada range, cede e desliza pra parede com um estrondo.</i> O guarda bate no seu ombro. <b>"Bom braço, aventureiro. Pega umas moedas — coisa pouca, mas é o que tenho. O comandante vai gostar de saber."</b>',
         result_text_fail: 'Você empurra com tudo, mas a barricada mal se move um palmo. <i>Os pés escorregam no calçamento molhado — você quase cai de bunda.</i> O guarda ri sem maldade. <b>"Tudo bem. Foi a intenção que conta. Vou esperar o ferreiro chegar."</b>' },
+      // 2026-05-12 PADRAO_ALDRIC second dice — INT pra plano alternativo de alavanca
+      { id: 'lever_plan', label: '🧠 [INT 12] "Espera — uma alavanca aqui resolve."',
+        result: 'skill_check', stat: 'intelligence', dc: 12,
+        effect: { xp: 8, gold: 3 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você encontra uma vara de ferro descartada e a posiciona como alavanca embaixo da barricada. <i>Um único impulso e a estrutura desliza limpa pra parede.</i> O guarda balança a cabeça impressionado. <b>"Mente de engenheiro! Toma três Valdoritas extras — você poupou meu ombro essa manhã. Cabo Aldric vai saber."</b>',
+        result_text_fail: 'A vara dobra antes da barricada ceder. <i>O guarda recupera a vara dobrada e ri.</i> <b>"Bom pensamento, mas a vara não aguentou. Volta a empurrar com músculo, então."</b>' },
       { id: 'refuse', label: 'Recusar e seguir', result: 'apply_now',
         effect: {},
         result_text: 'Você dá de ombros — não é seu problema. <i>O guarda murmura algo entre os dentes e chama outro transeunte.</i> Você segue pela praça.' }
@@ -22460,6 +22493,13 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
         effect_fail: { xp: 1 },
         result_text: 'Você se apoia numa caixa empilhada e sobe ágil pelo varal de cordas. <i>O gato se debate quando você se aproxima — mas você o segura pela escruff e descende de volta.</i> O mercador agarra o bicho. <b>"Mestre Bigodes, seu safado! Toma, aventureiro — foi uma moeda merecida."</b>',
         result_text_fail: 'Você sobe pela caixa, mas no momento de chegar perto do gato, ele se solta sozinho — assustado com a aproximação — e foge num pulo pelos telhados. <i>Você desce ofegante.</i> O mercador suspira. <b>"Pelo menos ele tá livre. Obrigado pela tentativa."</b>' },
+      // 2026-05-12 PADRAO_ALDRIC second dice — SAB pra acalmar o gato (Lidar com Animais)
+      { id: 'calm_cat', label: '🐾 [SAB 10] (Falar baixo e estender a mão...)',
+        result: 'skill_check', stat: 'wisdom', dc: 10,
+        effect: { xp: 6, gold: 2 },
+        effect_fail: { xp: 1 },
+        result_text: 'Você sobe devagar, sem olhar diretamente. <i>Murmura como se chamasse um cão velho.</i> O gato relaxa, lambe sua mão e se enrosca no seu braço. Você desce com ele ronronando. <b>"Olha só! Mestre Bigodes nunca foi assim com ninguém. Toma duas moedas — e se passar aqui, ele te respeita pra sempre."</b>',
+        result_text_fail: 'O gato bufa e arranha sua mão antes de você chegar perto. <i>Você desiste e desce com a mão sangrando.</i> <b>"Ele tá brabo hoje. Tenta amanhã, talvez."</b>' },
       { id: 'ignore', label: 'Ignorar', result: 'apply_now',
         effect: {},
         result_text: 'Você dá de ombros — gatos sempre se viram. <i>O mercador continua chamando por ajuda enquanto você segue.</i>' }
@@ -22562,8 +22602,12 @@ function _resolveInteractiveChoice(player, choice) {
                   max: hpMax, bar: true });
   }
   refreshHud();
+  // 2026-05-12: choice.npc_label e choice.icon permitem que CHANCE_ENCOUNTERS
+  // (Taverna, Portões, Mercado) reusem _resolveInteractiveChoice sem ficar
+  // rotulados como "Praça Central". Fallback mantém compatibilidade.
   _showServiceResultPopup({
-    icon: _heralIco('ic-praca'), npc: 'Praça Central',
+    icon: choice.icon || _heralIco('ic-praca'),
+    npc: choice.npc_label || 'Praça Central',
     narrative: rolledLine + narrative,
     deltas: deltas,
     rewards: rewards.length > 0 ? rewards : null,
@@ -42651,6 +42695,33 @@ var CHANCE_ENCOUNTERS = [
     choices: [
       { id: 'thank', label: 'Obrigado pela dica, Vorhan.', result: 'continue' },
       { id: 'goto_cart', label: '📜 Vou agora à Praça falar com Corvus', result: 'goto_cartographer' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Vorhan tavern first
+      // INT 12 — Investigação histórica: lore do Forte dos Bandidos
+      { id: 'lore_bandits', label: '🔍 [INT 12] "Conta mais sobre o Forte..."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'intelligence', dc: 12,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-guerreiro'),
+          effect: { xp: 15 },
+          effect_fail: { xp: 3 },
+          result_text: 'Você cruza dados das histórias antigas — o Forte foi construído como sentinela contra os ataques do leste, há três séculos. <i>Vorhan ergue a sobrancelha, impressionado.</i> <b>"Você presta atenção. Vargrim, o Cicatriz, lidera os bandidos hoje. Comando antigo, sangue novo. Cuidado com o pátio interno — armadilhas de cordel."</b>',
+          result_text_fail: 'Você tenta lembrar de algo sobre o Forte, mas a memória falha. <i>Vorhan bebe um gole e sorri.</i> <b>"Não se preocupa, moço. Eu nem lembro mais de tudo que vivi. O Forte é grande, vai descobrir andando por dentro."</b>'
+        }
+      },
+      // CAR 11 — Persuasão: ganhar confiança pra dica do Caçador
+      { id: 'persuade_garrick', label: '🗣️ [CAR 11] "Quem mais devo procurar?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'charisma', dc: 11,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-guerreiro'),
+          effect: { xp: 10, gold: 5 },
+          effect_fail: { xp: 2 },
+          result_text: 'Vorhan te mede com o olhar antes de baixar a voz. <i>Ele desliza uma moeda na mesa — pagamento de uma rodada que devia há anos.</i> <b>"Procura o Garrick nos Portões. Patrulheiro velho. Conhece atalhos que nem mapa marca. Diz que foi eu que mandei — ele te deve um favor."</b>',
+          result_text_fail: 'Vorhan dá de ombros, indiferente. <i>Ele volta a olhar para a janela.</i> <b>"Cada um descobre por si, moço. Andei demais pra entregar contatos pra qualquer um. Volta quando provar serventia."</b>'
+        }
+      },
       { id: 'later', label: 'Talvez mais tarde.', result: 'continue' }
     ],
     onDone: function(p){
@@ -42681,7 +42752,34 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: '— Obrigado, Aldric.', result: 'continue_to_cart' },
-      { id: 'goto_cart', label: '📜 Visitar Corvus agora', result: 'goto_cartographer' }
+      { id: 'goto_cart', label: '📜 Visitar Corvus agora', result: 'goto_cartographer' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Aldric first map
+      // SAB 12 — Insight: percebe que Aldric esconde algo
+      { id: 'insight_aldric', label: '👁️ [SAB 12] "Tem algo que você não me conta..."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'wisdom', dc: 12,
+          npc_label: 'Portões de Eldoria',
+          icon: _heralIco('ic-paladino'),
+          effect: { xp: 12 },
+          effect_fail: { xp: 2 },
+          result_text: 'Você nota o jeito como Aldric aperta o pergaminho — não é só desgaste, é tensão. <i>O guarda exala fundo e baixa a voz.</i> <b>"Há uma fenda na muralha sudeste. Pequena, ninguém percebe. Andei reforçando por dentro, mas tô velho demais pra escalar. Se um dia precisar entrar sem ser visto... você sabe."</b>',
+          result_text_fail: 'Aldric te encara firme, depois ri. <i>Ele bate no ombro do peitoral, fazendo um som metálico.</i> <b>"Aventureiro, eu sou guarda há quarenta invernos. Se eu escondesse alguma coisa, você não notaria. Cuida da sua vida, eu cuido da minha."</b>'
+        }
+      },
+      // CAR 13 — Persuasão: ganhar respeito de veterano
+      { id: 'persuade_aldric', label: '🗣️ [CAR 13] "Conta o que você viu nesses anos."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'charisma', dc: 13,
+          npc_label: 'Portões de Eldoria',
+          icon: _heralIco('ic-paladino'),
+          effect: { xp: 15, gold: 10 },
+          effect_fail: { xp: 3 },
+          result_text: 'Aldric te mede demoradamente. <i>Algo no seu jeito convence ele.</i> <b>"Te conto uma. Há dez anos, um aventureiro como você salvou a vila do Vale Vermelho — coisa que a guarda não conseguia. Te dou dez Valdoritas adiantadas, do meu bolso. Cuida das estradas como ele cuidou. E se voltar com a missão de patrulhar, fala que foi eu que te aprovou."</b>',
+          result_text_fail: 'Aldric te corta. <i>Ele endireita a postura e o olhar fica neutro.</i> <b>"Aventureiro, conselho de velho: não pede história de quem ainda tá vivo. Histórias secam o coração de quem conta. Vai, compra teu mapa. Eu fico de plantão."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -42708,7 +42806,34 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: 'Linda história. Obrigado, Silvana.', result: 'continue' },
-      { id: 'goto_cart', label: '📜 Ir à Praça falar com Corvus', result: 'goto_cartographer' }
+      { id: 'goto_cart', label: '📜 Ir à Praça falar com Corvus', result: 'goto_cartographer' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Silvana tavern rumor
+      // CAR 12 — Performance: cantar com a bardisa
+      { id: 'sing_along', label: '🎵 [CAR 12] "Posso cantar a próxima estrofe?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'charisma', dc: 12,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-bardo'),
+          effect: { xp: 10, gold: 8 },
+          effect_fail: { xp: 2 },
+          result_text: 'Você ergue a voz e acompanha Silvana na próxima estrofe — uma balada antiga sobre o Caçador da Lua. <i>A taverna inteira para de respirar. Quando termina, aplausos espontâneos.</i> Silvana ri de pura surpresa. <b>"Surpreendente! Toma — divide a gorjeta. Cantor com voz assim merece. Volta amanhã que ensaiamos juntos."</b>',
+          result_text_fail: 'Você abre a boca, perde a nota, e a melodia descarrila. <i>Risadas educadas; Silvana cobre o sorriso com a manga.</i> <b>"Ah, querido... fica com a poesia. Cada um com seu talento. Vou só seguir tocando — fica aí escutando, que dói menos."</b>'
+        }
+      },
+      // INT 13 — História: reconhecer canção pré-imperial
+      { id: 'history_song', label: '📜 [INT 13] "Essa balada... é pré-imperial?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'intelligence', dc: 13,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-bardo'),
+          effect: { xp: 14 },
+          effect_fail: { xp: 2 },
+          result_text: 'Silvana para os dedos sobre as cordas. <i>Os olhos dela brilham — não tinha esperado de você.</i> <b>"Pré-imperial sim. A balada vem de Karthal — capital queimada antes da fundação de Eldoria. Estudiosa Maeve tá catalogando essas ruínas na Academia. Procura ela se quiser saber mais — diz que foi eu que indiquei."</b>',
+          result_text_fail: 'Silvana acha graça. <i>Ela toca uma nota irônica.</i> <b>"Bem... toda canção é antiga pra quem não conhece. É uma balada da estrada. Se ela tem séculos ou se nasceu semana passada — só os deuses sabem. Toma um gole, descansa a cabeça."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -42735,7 +42860,34 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: 'Valeu, Thessil.', result: 'continue' },
-      { id: 'goto_cart', label: '📜 Levar o rumor a Corvus', result: 'goto_cartographer' }
+      { id: 'goto_cart', label: '📜 Levar o rumor a Corvus', result: 'goto_cartographer' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Thessil market caravan
+      // SAB 13 — Percepção: notar que ele esconde algo nos preços
+      { id: 'spot_lie', label: '👁️ [SAB 13] (Examinar a mercadoria que ele expõe...)',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'wisdom', dc: 13,
+          npc_label: 'Mercado de Eldoria',
+          icon: _heralIco('ic-ladino'),
+          effect: { xp: 12, gold: 6 },
+          effect_fail: { xp: 2 },
+          result_text: 'Você nota que dois sacos têm etiqueta dupla — preço de balcão e preço sussurrado. <i>Thessil te flagra olhando.</i> <b>"Vê, você é esperto! Toma — desconto de aventureiro nas próximas três compras. Vale 6 Valdoritas em qualquer item meu. E não fala isso pra ninguém, hein?"</b>',
+          result_text_fail: 'Você revira os sacos sem ver nada de errado. <i>Thessil ri internamente e bate no seu ombro.</i> <b>"Bom olho, mas tô limpo dessa vez. Tudo declarado. Volta quando precisar comprar — atendo você primeiro."</b>'
+        }
+      },
+      // CAR 14 — Engano: trocar histórias de viagem por info de caravana
+      { id: 'swap_story', label: '🗣️ [CAR 14] "Tenho uma história das Planícies pra trocar..."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'charisma', dc: 14,
+          npc_label: 'Mercado de Eldoria',
+          icon: _heralIco('ic-ladino'),
+          effect: { xp: 16, gold: 12 },
+          effect_fail: { xp: 3 },
+          result_text: 'Thessil para de mexer no chapéu e te encara. <i>Você inventa uma história tão convincente que ele acredita — e responde com uma verdadeira.</i> <b>"Você é dos meus! A caravana das Montanhas trouxe seda crua valendo o triplo. Tô vendendo manhã que vem, 12 Valdoritas adiantadas pra você. E se ouvir falar de uma carga sumida, fica calado — favor."</b>',
+          result_text_fail: 'Sua história engasga no meio. <i>Thessil escuta polido, mas você vê o ceticismo nele.</i> <b>"Interessante, interessante. Olha, eu tenho mais barracas pra atender. Mercado movimentado hoje. Boa sorte com Corvus, hein? Vai, vai."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -42761,7 +42913,34 @@ var CHANCE_ENCOUNTERS = [
     choices: [
       { id: 'interested', label: 'Estou interessado em estudar.', result: 'continue' },
       { id: 'goto_cart', label: '📜 Ir falar com Corvus primeiro', result: 'goto_cartographer' },
-      { id: 'later', label: 'Talvez quando estiver mais experiente.', result: 'continue' }
+      { id: 'later', label: 'Talvez quando estiver mais experiente.', result: 'continue' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Miriana square research
+      // INT 14 — Arcanismo: discutir runas cartográficas
+      { id: 'arcana_runes', label: '🔮 [INT 14] "Essas runas... seguem o padrão de Thelassar?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'intelligence', dc: 14,
+          npc_label: 'Praça Central',
+          icon: _heralIco('ic-mago'),
+          effect: { xp: 18 },
+          effect_fail: { xp: 3 },
+          result_text: 'Miriana quase derruba o livro. <i>Os olhos dela se acendem de excitação acadêmica.</i> <b>"Você reconhece! Thelassar foi o último cartógrafo do Império Karthal — registros dele estão sumindo. Te ensino as runas de graça. E mais: o Mapa Mestre exige cinco runas decifradas. Você já parte com uma de adiantamento."</b>',
+          result_text_fail: 'Você arrisca uma comparação que não faz sentido. <i>Miriana sorri pacientemente.</i> <b>"Ah, aventureiro... runas cartográficas são linguagem própria. Nem todo erudito atinge. Pode estudar comigo se quiser — vai do zero. Sem pressa."</b>'
+        }
+      },
+      // SAB 12 — Insight: notar a obsessão dela
+      { id: 'insight_obsession', label: '👁️ [SAB 12] "Você procura algo específico, não procura?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'wisdom', dc: 12,
+          npc_label: 'Praça Central',
+          icon: _heralIco('ic-mago'),
+          effect: { xp: 12 },
+          effect_fail: { xp: 2 },
+          result_text: 'Miriana fecha o livro de uma vez. <i>O sorriso acadêmico se quebra — ela respira fundo.</i> <b>"Procuro a tumba do meu bisavô, que foi cartógrafo de Karthal. Os mapas dele se perderam quando a cidade queimou. Se você encontrar um pergaminho com o selo da árvore-cega nas Ruínas... traz pra mim. Vale mais que ouro."</b>',
+          result_text_fail: 'Miriana ri sem desconforto. <i>Ela mantém o tom acadêmico polido.</i> <b>"Procuro conhecimento, aventureiro. Como qualquer pesquisador. Cartografia tem mil mistérios. Volta quando quiser estudar — a Academia aceita aprendizes."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -42787,7 +42966,34 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: 'Obrigado pela dica, velho.', result: 'continue' },
-      { id: 'goto_cart', label: '📜 Visitar Corvus na Praça', result: 'goto_cartographer' }
+      { id: 'goto_cart', label: '📜 Visitar Corvus na Praça', result: 'goto_cartographer' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Vorhan tavern recurring
+      // FOR 11 — Atletismo: braço-de-ferro com o veterano
+      { id: 'arm_wrestle', label: '💪 [FOR 11] "Que tal braço-de-ferro?"',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'strength', dc: 11,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-guerreiro'),
+          effect: { xp: 10, gold: 5 },
+          effect_fail: { xp: 3 },
+          result_text: 'Você apoia o cotovelo, prende o olhar dele, e em três batidas baixa a mão de Vorhan na mesa. <i>A taverna explode em aplausos. Ele ri alto, sem ressentimento.</i> <b>"Ha! O velho perdeu! Toma cinco moedas — paga uma rodada por mim. E agora você é conhecido aqui — fala que é amigo do Vorhan, te respeitam."</b>',
+          result_text_fail: 'Vorhan vence sem suar — vinte invernos de trabalho fizeram a diferença. <i>Ele bate na sua mão amistoso.</i> <b>"Não desanima, moço. Pratica. Eu aceito desafio sempre. Mas paga uma rodada — regra da casa."</b>'
+        }
+      },
+      // CAR 12 — Persuasão: contar uma façanha pra ganhar respeito
+      { id: 'tell_deed', label: '🗣️ [CAR 12] "Te conto o que vi nos Pântanos..."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'charisma', dc: 12,
+          npc_label: 'Taverna do Urso Cego',
+          icon: _heralIco('ic-guerreiro'),
+          effect: { xp: 14, hp_heal: 5 },
+          effect_fail: { xp: 2 },
+          result_text: 'Vorhan escuta sem piscar — você descreve a fera-da-névoa com detalhes que só quem viu poderia ter. <i>No fim ele empurra uma caneca de hidromel para você, sem dizer palavra.</i> <b>"Toma. Aventureiro de verdade merece. Recupera o ânimo. E volta sempre — agora você tem lugar marcado nessa mesa."</b>',
+          result_text_fail: 'Sua história soa decorada — Vorhan já ouviu cinquenta versões. <i>Ele te corta gentilmente.</i> <b>"Tudo bem, tudo bem. Cada um aventura do seu jeito. Pega tua caneca, mas paga ela — eu já tenho minha história pra contar essa noite."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -42814,7 +43020,34 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: 'Vou ficar de olho. Obrigado, Garrick.', result: 'continue' },
-      { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'continue' }
+      { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'continue' },
+      // 2026-05-12 PADRAO_ALDRIC dice rolls — Garrick gates routes
+      // SAB 13 — Sobrevivência: ler o tempo / rastros
+      { id: 'survival_weather', label: '🍃 [SAB 13] (Olhar pro céu e ler o tempo...)',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'wisdom', dc: 13,
+          npc_label: 'Portões de Eldoria',
+          icon: _heralIco('ic-patrulheiro'),
+          effect: { xp: 14, gold: 0 },
+          effect_fail: { xp: 3 },
+          result_text: 'Você nota a direção do vento, a forma das nuvens, o silêncio dos pássaros. <i>Garrick observa você observando.</i> <b>"Tempestade chega antes da meia-noite — você viu, eu vi. Olho de aventureiro de verdade. Toma esse conselho: estrada do leste fica intransitável amanhã. Vai pelo norte se tiver pressa."</b>',
+          result_text_fail: 'Você ergue o olhar pro céu e dá de ombros — parece um dia comum. <i>Garrick aponta as nuvens longe.</i> <b>"Nuvens negras subindo do sul. Tempestade hoje. Olha mais — leitura de céu é o primeiro passo. Volta amanhã, te ensino algumas coisas."</b>'
+        }
+      },
+      // DES 12 — Furtividade: mostrar habilidade pra abrir lore
+      { id: 'show_stealth', label: '🗡️ [DES 12] "Posso me mover assim — observa..."',
+        result: 'plaza_interactive',
+        _interactiveData: {
+          stat: 'dexterity', dc: 12,
+          npc_label: 'Portões de Eldoria',
+          icon: _heralIco('ic-patrulheiro'),
+          effect: { xp: 13, gold: 7 },
+          effect_fail: { xp: 2 },
+          result_text: 'Você desaparece atrás de uma carroça em dois passos silenciosos. <i>Quando reaparece ao lado dele, Garrick sorri.</i> <b>"Não é todo dia que vejo. Toma sete Valdoritas — eu apostava silenciosamente com Aldric que ninguém passava por mim. Você me fez perder. E ganhou minha confiança — pergunte sobre a Trilha das Sombras outro dia."</b>',
+          result_text_fail: 'Você dá um passo lateral, mas o calçamento range debaixo da bota. <i>Garrick ri sem maldade.</i> <b>"Treina mais, aventureiro. Furtividade não é só silêncio — é leitura do chão. Vem aqui um dia que te mostro técnica. Sem cobrar."</b>'
+        }
+      }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
