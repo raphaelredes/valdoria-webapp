@@ -46,14 +46,8 @@
         localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_web_user_id'));
         localStorage.removeItem(ValdoriaEnv.getEnvKey('valdoria_api_base'));
 
-        /* 3. Redirect to login page */
-        var base = window.location.pathname;
-        if (base.indexOf('app.html') >= 0) {
-            base = base.replace(/app\.html.*$/, 'web/');
-        } else {
-            base = base.replace(/\/[^\/]+\/index\.html.*$/, '/web/');
-        }
-        window.location.href = base;
+        /* 3. Redirect to login page (2026-05-12: app.html DELETED, sempre /web/) */
+        window.location.href = '/web/';
     }
 
     function _init() {

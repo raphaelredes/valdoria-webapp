@@ -121,12 +121,13 @@
         openLink: function (url) { window.open(url, "_blank"); },
         openTelegramLink: function (url) { window.open(url, "_blank"); },
 
-        // sendData - web mode: redirect back to game hub
+        // sendData - web mode: redirect back to canonical entry
+        // 2026-05-12: /game/index.html DELETED — usar /play/ que routa
+        // via last_screen_payload pra destino correto (cidade/explore/combat).
         sendData: function (data) {
-            console.info("[COMPAT] sendData intercepted, redirecting to game hub");
+            console.info("[COMPAT] sendData intercepted, redirecting to /play/");
             window.__valdoria_transitioning = true;
-            var gameUrl = window.location.pathname.replace(/\/[^\/]+\/index\.html.*$/, "/game/index.html");
-            window.location.replace(gameUrl);
+            window.location.replace("/play/");
         },
 
         // Events (no-op)
