@@ -14236,13 +14236,21 @@ function _marketShowTransient(p, npc){
 // === TRANSIENT_POOL CANONICAL — END ===
 
 function _buildMarketMockData(player){
-  // Verifica horário — mercado fechado entre 22h-6h
-  var h = new Date().getHours();
+  // 2026-05-12 BUG #18 fix: usar GAME TIME (não real time do dispositivo!)
+  // Antes: var h = new Date().getHours() — retornava hora do relógio real,
+  // causando mercado "fechado" em horários que o GAME mostrava como manhã/dia.
+  var h;
+  if (typeof _getCurrentGameTime === 'function') {
+    h = _getCurrentGameTime().hour;
+  } else {
+    h = new Date().getHours();  // fallback
+  }
+  // Mercado fecha 22h-6h game time (TIME_PERIOD_BOUNDS: 5-8 dawn, 8-17 day, 17-20 dusk, resto night)
   var closed = (h < 6 || h >= 22);
   if (closed) {
     return {
       type: 'closed',
-      message: '🌙 Mercado fechado (22h-6h). Volte de manhã.',
+      message: '🌙 Mercado fechado (22h-6h game time). Volte ao amanhecer.',
       extras: [
         { icon: _heralIco('ic-taverna'), label: 'Taverna está aberta', cb: 'open_tavern_redirect' }
       ]
@@ -16445,9 +16453,7 @@ function _showSharedNpcListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  // 2026-05-12 BUG #2: opts.icon pode vir de _heralIco() (string SVG) ou ser
-  // emoji simples. .textContent escapa HTML. Usar .innerHTML pra renderizar.
-  if (titleEl) titleEl.innerHTML = (opts.icon || '🔍') + ' ' + _hubEsc(opts.title);
+  if (titleEl) titleEl.textContent = (opts.icon || '🔍') + ' ' + opts.title;
   var html = '<div class="city-subscreen">';
   if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
   html += '<div class="bnk-item-list">';
@@ -26845,8 +26851,7 @@ function _bankShowItemListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  // 2026-05-12 BUG #2: opts.icon pode ser SVG via _heralIco(). Render via innerHTML.
-  if (titleEl) titleEl.innerHTML = (opts.icon || '') + ' ' + _hubEsc(opts.title);
+  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
   bodyEl.innerHTML = '';
   var html = '<div class="city-subscreen">'
     + '<p class="subscreen-flavor">' + (opts.flavor || '') + '</p>'
@@ -27064,8 +27069,7 @@ function _squareShowListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  // 2026-05-12 BUG #2: opts.icon pode ser SVG via _heralIco(). Render via innerHTML.
-  if (titleEl) titleEl.innerHTML = (opts.icon || '') + ' ' + _hubEsc(opts.title);
+  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
   bodyEl.innerHTML = '';
   var html = '<div class="city-subscreen">';
   if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
@@ -33274,10 +33278,7 @@ function _showShopPopup(npcId){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  // 2026-05-12 BUG #2: shop.icon vem de _heralIco() (string SVG) — .textContent
-  // escapava o HTML, fazendo SVG aparecer como texto literal "<svg viewBox..."
-  // no header. Usar .innerHTML pra renderizar SVG inline.
-  if (titleEl) titleEl.innerHTML = shop.icon + ' ' + _hubEsc(shop.npc) + ' — ' + _hubEsc(shop.role);
+  if (titleEl) titleEl.textContent = shop.icon + ' ' + shop.npc + ' — ' + shop.role;
   // Reset shop filter ao abrir uma loja diferente
   window._currentShopNpcId = npcId;
   _renderShopPopup();
@@ -33599,7 +33600,22 @@ function _guildShowRewards(p){
 }
 
 function _guildShowRecruits(p){
-  var items = GUILD_RECRUITS.map(function(r){
+  // 2026-05-12 BUG #19: lista FILTRADA por GROUP_MEMBERS — recrutas já no grupo somem.
+  // Antes a lista era estática (GUILD_RECRUITS direto), permitindo re-recrutar
+  // infinitamente o mesmo ally com perda de gold sem efeito.
+  var alreadyHired = (window.GROUP_MEMBERS || []).map(function(m){ return m.name; });
+  var available = GUILD_RECRUITS.filter(function(r){
+    return alreadyHired.indexOf(r.name) === -1;
+  });
+  if (available.length === 0) {
+    _squareShowListPopup({
+      stackKey: 'guild_recruits', icon: _heralIco('ic-grupo'), title: 'Recrutar Aliados',
+      flavor: '<i>Todos os recrutas disponíveis já estão no seu grupo. Volte em 12h para nova rotação.</i>',
+      items: [], onPick: function(){}
+    });
+    return;
+  }
+  var items = available.map(function(r){
     return { icon: r.icon, label: r.name + ' (' + r.cls + ')', badge: r.cost + ' V', _r: r };
   });
   _squareShowListPopup({
@@ -33608,6 +33624,12 @@ function _guildShowRecruits(p){
     items: items,
     onPick: function(item){
       var r = item._r;
+      // Bloqueia se grupo cheio (max 4: player + 3 allies)
+      var groupSize = (window.GROUP_MEMBERS || []).length;
+      if (groupSize >= 4) {
+        vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
+        return;
+      }
       _showConfirmPurchase({
         icon: r.icon, npc: r.name, title: 'Recrutar ' + r.name,
         desc: '<b>' + r.cls + '</b><br><i>' + r.desc + '</i><br><br>Custo: ' + r.cost + ' Valdoritas',
@@ -33615,9 +33637,32 @@ function _guildShowRecruits(p){
         onConfirm: function(){
           var preGold = p.gold;
           if (!_pay(p, r.cost)) return;
+          // 2026-05-12 BUG #19 fix: ADICIONA ally ao GROUP_MEMBERS canonical state
+          // Parse classe + nv de r.cls (formato "Patrulheira nv 2"):
+          var clsMatch = r.cls.match(/^(\w+)/);
+          var lvlMatch = r.cls.match(/nv\s*(\d+)/i);
+          var allyClass = (clsMatch ? clsMatch[1] : 'Aventureiro').toLowerCase();
+          var allyLvl = lvlMatch ? parseInt(lvlMatch[1], 10) : 2;
+          // PHB HP base por classe (d8 médio nv * 4.5 + CON 14):
+          var hpByClass = { guerreiro: 12, clerigo: 10, ladino: 9, mago: 8, druida: 10, patrulheiro: 10, patrulheira: 10, paladino: 12, clériga: 10, bárbaro: 14, monge: 9, bardo: 10, feiticeiro: 8, bruxo: 9 };
+          var baseHp = hpByClass[allyClass] || 10;
+          var allyHp = baseHp + Math.floor((allyLvl - 1) * (baseHp * 0.65));
+          window.GROUP_MEMBERS.push({
+            name: r.name, cls: allyClass, lvl: allyLvl,
+            hp: allyHp, hpMax: allyHp, mp: 12, mpMax: 12,
+            xp: 0, xpNext: 300, gold: 0,
+            icon: r.icon
+          });
+          // Sync CITY_MOCK_PLAYER.allies (compat)
+          if (window.CITY_MOCK_PLAYER) {
+            if (!CITY_MOCK_PLAYER.allies) CITY_MOCK_PLAYER.allies = [];
+            CITY_MOCK_PLAYER.allies.push({ name: r.name, cls: allyClass, lvl: allyLvl });
+          }
+          // Re-render group panel para mostrar novo membro
+          if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
           _showServiceResultPopup({
             icon: r.icon, npc: r.name,
-            narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + r.name + '</b> recrutado.',
+            narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + r.name + '</b> recrutado e adicionado ao grupo (' + (window.GROUP_MEMBERS.length - 1) + '/3 aliados).',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
@@ -44447,12 +44492,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
       // por página. 2026-05-05 update: revelação HORIZONTAL (clip-path
       // wipe esquerda→direita) com duração dinâmica via --reveal-dur.
       // Sensação de "narrador desenhando o texto" no rolo do pergaminho.
-      // 2026-05-12 BUG #7 defensive: adicionado word-break/overflow-wrap pra
-      // garantir que long words nunca cortam mid-character. Era falso positivo
-      // (visual era animação reveal mid-progress), mas defensive CSS evita
-      // edge case futuro em textos com URLs/IDs longos sem space.
       + '.enc-line{font-size:16px;line-height:1.65;color:#d4c8b0;'
-      + '  word-break:normal;overflow-wrap:break-word;hyphens:none;'
       + '  clip-path:inset(0 100% 0 0);-webkit-clip-path:inset(0 100% 0 0);'
       + '  animation:encReveal var(--reveal-dur,1400ms) cubic-bezier(0.55,0.08,0.3,1) forwards}'
       + '@keyframes encReveal{'
