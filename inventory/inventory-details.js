@@ -77,7 +77,21 @@ html+='<div class="detail-actions">';const favIcon=isFav(name)?vi_f('star',16):v
             style="flex:0 0 44px;padding:10px;">${favIcon}</button>`;const lockIcon=isLocked(name)?vi('lock',16):vi('unlock',16);const lockCls=isLocked(name)?'border-color:var(--v-gold-dim)!important;color:var(--v-gold);':'';html+=`<button class="btn-unequip" onclick="doToggleLock('${esc(name)}');openItemDetail('${esc(name)}')"
             style="flex:0 0 44px;padding:10px;${lockCls}">${lockIcon}</button>`;if(it.s){html+='<button class="btn-unequip" onclick="showCompareWith(\''+esc(name)+'\')" style="flex:0 0 auto;padding:10px 12px;font-size:12px;">'
 +vi('sword',12)+' vs</button>';}
-if(it.s&&!isProtected(tags)){const canEquip=checkProficiency(it,activeTarget,name);if(canEquip){html+=`<button class="btn-equip" onclick="showEquipConfirm('${esc(name)}')">${vi('sword', 13)} Equipar</button>`;}else{html+=`<button class="btn-disabled" disabled>${vi('lock', 13)} Sem proficiência</button>`;}}
+if(it.s&&!isProtected(tags)){
+  // 2026-05-12 BUG #17 fix: item ja equipado nesse slot → mostrar "Desequipar"
+  // em vez de "Equipar" (que era no-op + UX confusa). doUnequip recebe SLOT
+  // (nao name), entao passamos _slot resolvido. Modal fecha + reabre pra
+  // refletir novo estado.
+  const _eqMap=activeTarget==='player'?localEq:(localAllyEq[activeTarget]||{});
+  const _slot=resolveSlot(it);
+  const _isCurrentlyEquipped = _eqMap[_slot] === name;
+  if(_isCurrentlyEquipped){
+    html+=`<button class="btn-unequip" onclick="doUnequip('${esc(_slot)}');openItemDetail('${esc(name)}');">${vi('sword', 13)} Desequipar</button>`;
+  }else{
+    const canEquip=checkProficiency(it,activeTarget,name);
+    if(canEquip){html+=`<button class="btn-equip" onclick="showEquipConfirm('${esc(name)}')">${vi('sword', 13)} Equipar</button>`;}else{html+=`<button class="btn-disabled" disabled>${vi('lock', 13)} Sem proficiência</button>`;}
+  }
+}
 if(isConsumable(tags)&&qty>0){const isCamping=tags.includes('camping');const isFood=tags.includes('food');const isPotion=tags.includes('potion');const hasAllies=D.allies&&D.allies.length>0;if(isCamping){html+=`<button class="btn-use" onclick="showCampConfirm('${esc(name)}')">${vi('tent', 13)} Acampar ▸</button>`;}else if((isFood||isPotion)&&hasAllies){html+=`<button class="btn-use" onclick="showTargetPicker('${esc(name)}')">${vi('flask', 13)} Usar ▸</button>`;}else{html+=`<button class="btn-use" onclick="showUseConfirm('${esc(name)}')">${vi('flask', 13)} Usar</button>`;}}
 if(canSell(it,tags)&&qty>0&&!isEquippedAnywhere(name)&&!isLocked(name)){const sellPrice=Math.max(1,Math.floor((it.v||1)*0.5));html+=`<button class="btn-sell" onclick="showSellConfirm('${esc(name)}',${sellPrice})">${vi('coin', 13)} ${sellPrice} ${vi('coin', 11)}</button>`;}
 if(canDiscard(it,tags)&&qty>0&&!isEquippedAnywhere(name)&&!isLocked(name)){html+=`<button class="btn-discard" onclick="showDiscardConfirm('${esc(name)}')" style="flex:0 0 44px;padding:10px;">${vi('trash', 14)}</button>`;}
