@@ -1893,6 +1893,14 @@ html body .camp-screen {
   height: 100% !important;
   max-height: var(--sim-frame-h) !important;
 }
+/* 2026-05-12 USER REPORT FIX: explore-camp.css define .camp-screen com
+   position: fixed (anchora ao viewport). Override acima setava left:0
+   mas position continuava fixed -> camp-screen ia pro canto ESQUERDO do
+   browser, FORA do frame centralizado. Forcando position:absolute aqui
+   pra ficar relativo ao #frame parent (que tem position:relative). */
+html body .camp-screen {
+  position: absolute !important;
+}
 
 /* ====== MAP VIEWPORT (scrollável + canvas maior que a tela) =========== */
 #map-viewport {
