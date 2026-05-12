@@ -40239,6 +40239,9 @@ function _buildExploracaoSnap(mapId) {
     }
   }
   return {
+    name: p.name || 'Aventureiro',  // 2026-05-12: nome do player (Ryaiael etc) - sem isso exploracao usa nome random
+    race: (p.race || p.raca || 'humano').toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, ''),
     cls: clsKey,
     lvl: p.level || 1,
     hp: (typeof p.hp === 'number') ? p.hp : 28,
@@ -40255,9 +40258,25 @@ function _buildExploracaoSnap(mapId) {
     inv: Array.isArray(p.inventory) ? p.inventory.map(function(it){
       return { i: it.id || it.name || '?', q: it.count || it.qty || 1 };
     }) : [],
+    // 2026-05-12: quest details completos (era só {id, step}) pra exploracao
+    // renderizar o Diário de Missões com title/desc/npc/location/reward sem
+    // depender de lookup adicional. GUILD_QUEST_DETAILS tem location pra match.
     quests_active: Array.isArray(window.QUESTS_ACTIVE)
       ? window.QUESTS_ACTIVE.map(function(q){
-          return { id: (q.id || '').replace(/^qa_/, ''), step: q.step || 0 };
+          var qid = (q.id || '').replace(/^qa_/, '');
+          var det = (typeof GUILD_QUEST_DETAILS !== 'undefined' && GUILD_QUEST_DETAILS[qid]) || {};
+          return {
+            id: qid,
+            step: q.step || 0,
+            title: q.title || det.title || '',
+            desc: q.desc || det.desc || '',
+            progress: q.progress || det.progress || '',
+            reward: q.reward || det.reward || 0,
+            xp: q.xp || det.xp || 0,
+            npc: q.npc || det.npc || '',
+            location: det.location || '',
+            target_map: q.target_map || det.target_map || ''
+          };
         })
       : [],
     allies: allies,

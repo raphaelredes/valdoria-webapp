@@ -3026,23 +3026,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   50% { box-shadow: 0 2px 14px rgba(196, 149, 58, 0.55), 0 0 14px rgba(196, 149, 58, 0.7); }
 }
 
-#ally-indicator {
-  position: absolute;
-  /* X-6.5.51d: right -> left (idem #quest-indicator) */
-  top: 88px; left: 10px;
-  z-index: 15;
-  background: linear-gradient(180deg, rgba(60, 70, 90, 0.95), rgba(30, 38, 50, 0.95));
-  border: 1.5px solid #7aa0d8;
-  border-radius: 16px;
-  padding: 4px 10px;
-  display: flex; align-items: center; gap: 5px;
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: 12px;
-  font-weight: 700;
-  color: #c8d8e8;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(122, 160, 216, 0.3);
-}
+/* #ally-indicator removido 2026-05-12 (USER REQUEST) — btn-party é canonical pra ver grupo. */
 .ai-icon { font-size: 13px; }
 .ai-count {
   min-width: 14px;
@@ -3073,9 +3057,9 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   border: 1.5px solid var(--v-gold, #c4953a);
   border-radius: 10px;
   padding: 0;
-  width: calc(100% - 24px);
-  max-width: 360px;
-  max-height: calc(100% - 24px);
+  width: calc(100% - 16px);
+  max-width: none;
+  max-height: 96%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -3113,6 +3097,85 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   text-align: center;
   color: var(--v-text-dim, #a09484);
   margin: 0; letter-spacing: 0.8px;
+}
+/* 2026-05-12 USER REQUEST: banner do mapa atual no topo do Diário pra deixar
+   claro que as missões mostradas são relevantes ao mapa em exploração. */
+.journal-map-context {
+  margin: 8px 14px 0;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(196,149,58,0.08), rgba(196,149,58,0.18), rgba(196,149,58,0.08));
+  border: 1px solid rgba(196,149,58,0.35);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--v-font, MedievalSharp, serif);
+  font-size: 12px;
+  color: var(--v-text, #d4c8b0);
+}
+.journal-map-context .jmc-label {
+  display: inline-block;
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 10px;
+  margin-right: 6px;
+}
+.journal-map-context .jmc-map { font-weight: 700; color: #e8dcc8; }
+.journal-map-context .jmc-hint {
+  display: block;
+  margin-top: 3px;
+  font-style: italic;
+  font-size: 10px;
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.4px;
+}
+/* 2026-05-12: rich quest item — card detalhado estilo cidade (NPC + local + reward) */
+.jq-card {
+  background: linear-gradient(180deg, rgba(58,46,32,0.55), rgba(42,30,18,0.65));
+  border: 1px solid rgba(196,149,58,0.35);
+  border-left: 4px solid var(--v-gold, #c4953a);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.jq-card-title {
+  font-family: var(--v-font-display, Cinzel, serif);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--v-gold, #c4953a);
+  margin: 0 0 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.jq-card-desc {
+  font-size: 12px;
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+.jq-card-meta {
+  font-size: 11px;
+  color: var(--v-text-dim, #a09484);
+  display: flex; flex-wrap: wrap; gap: 4px 12px;
+  margin-top: 4px;
+}
+.jq-card-meta .jq-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.jq-card-meta .jq-progress {
+  color: #7cdb7c;
+  font-weight: 700;
+}
+.jq-card-meta .jq-reward {
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+}
+.jq-card.completable-here {
+  border-left-color: #7cdb7c;
+  background: linear-gradient(180deg, rgba(58,72,46,0.55), rgba(42,56,30,0.65));
+}
+.jq-card.completable-here .jq-card-title::before {
+  content: '★ ';
+  color: #7cdb7c;
 }
 .journal-body {
   flex: 1 1 auto;
@@ -8243,9 +8306,8 @@ window.__onIntroTap = function() {
   <div id="quest-indicator" style="display:none" title="Missões ativas">
     <span class="qi-icon">📜</span><span class="qi-count">0</span>
   </div>
-  <div id="ally-indicator" style="display:none" title="Aliados">
-    <span class="ai-icon">👥</span><span class="ai-count">0</span>
-  </div>
+  <!-- 2026-05-12 USER REQUEST: ally-indicator removido — btn-party (#hud-quick)
+       já serve pra ver o grupo todo. Indicador duplicado tirava espaço sem add valor. -->
 
   <div id="hud-quick">
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
@@ -21210,17 +21272,10 @@ function recruitAlly(ally) {
 }
 
 function updateAllyIndicator() {
-  const el = document.getElementById('ally-indicator');
-  if (!el) return;
-  const n = (S && S.allies) ? S.allies.length : 0;
-  if (n > 0) {
-    el.style.display = 'flex';
-    el.querySelector('.ai-count').textContent = n;
-    const names = S.allies.map(a => a.name).join(', ');
-    el.title = 'Aliados: ' + names;
-  } else {
-    el.style.display = 'none';
-  }
+  // 2026-05-12 USER REQUEST: ally-indicator removido — btn-party já mostra o
+  // grupo. Função mantida como no-op pra evitar quebrar call sites existentes
+  // (addAlly, hydrate, etc) sem precisar caçar todas as referências.
+  return;
 }
 
 // =============================================================================
@@ -36256,6 +36311,40 @@ var LORE_FLAGS_DB = {
       desc: 'A Tenda do Chefe Brakthar esta liberada. Sua lenda comeca aqui.' }
 };
 
+// 2026-05-12 USER REQUEST helpers + redesign
+function _isQuestCompletableHere(q) {
+  if (!q || !S) return false;
+  var curMap = S.mapId || '';
+  var curName = (S.mapDef && S.mapDef.name) || '';
+  var curBiome = (S.biome || '').toLowerCase();
+  if (q.target_map && q.target_map === curMap) return true;
+  var loc = (q.location || '').toLowerCase();
+  var title = (q.title || '').toLowerCase();
+  var desc = (q.desc || '').toLowerCase();
+  var name = (curName || '').toLowerCase();
+  if (loc && name && loc.indexOf(name) >= 0) return true;
+  if (name && loc.indexOf(name.split(' ')[0]) >= 0) return true;
+  // Heuristic biome match: quest with "floresta" em location + biome forest
+  var BIOME_HINTS = {
+    forest: ['floresta', 'bosque', 'mata', 'arvoredo', 'whispering'],
+    plains: ['planicie', 'campo', 'estrada', 'fronteira'],
+    swamp: ['pantano', 'brejo', 'lago'],
+    mountain: ['montanha', 'pico', 'caverna'],
+    cave: ['caverna', 'cova', 'gruta', 'subterraneo'],
+    desert: ['deserto', 'duna', 'cratera'],
+    snow: ['neve', 'gelo', 'frozen'],
+    graveyard: ['cemiterio', 'ruina', 'karthal', 'mortos-vivos'],
+    volcanic: ['vulcanic', 'cratera', 'lava']
+  };
+  var hints = BIOME_HINTS[curBiome] || [];
+  for (var i = 0; i < hints.length; i++) {
+    if (loc.indexOf(hints[i]) >= 0
+        || title.indexOf(hints[i]) >= 0
+        || desc.indexOf(hints[i]) >= 0) return true;
+  }
+  return false;
+}
+
 function openQuestJournal(opts) {
   opts = opts || {};
   const focus = opts.focus || 'quests';
@@ -36266,45 +36355,92 @@ function openQuestJournal(opts) {
   const list = document.getElementById('journal-list');
   clearChildren(list);
 
+  // 2026-05-12 USER REQUEST: header do mapa atual no topo do Diário pra
+  // deixar claro que a tela é específica do mapa em exploração.
+  var mapCtx = document.createElement('div');
+  mapCtx.className = 'journal-map-context';
+  var mapName = (S.mapDef && S.mapDef.name) || S.mapId || 'Mapa atual';
+  var biome = S.biome || '';
+  mapCtx.innerHTML = '<span class="jmc-label">Explorando</span>'
+    + '<span class="jmc-map">' + mapName + '</span>'
+    + '<span class="jmc-hint">Missões marcadas com ★ podem ser concluídas aqui</span>';
+  list.appendChild(mapCtx);
+
   // SECÇÃO 1 — MISSÕES
   const questHead = document.createElement('div');
   questHead.className = 'journal-section';
-  questHead.textContent = 'Missões Ativas';
+  var totalQ = (S.activeQuests || []).length;
+  var completableHere = (S.activeQuests || []).filter(_isQuestCompletableHere).length;
+  questHead.textContent = 'Missões Ativas (' + totalQ + (completableHere > 0 ? ' · ' + completableHere + ' aqui' : '') + ')';
   list.appendChild(questHead);
   if (!S.activeQuests || S.activeQuests.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'journal-empty';
-    empty.textContent = 'Nenhuma missão ativa. Converse com os moradores pra descobrir tarefas.';
+    empty.textContent = 'Nenhuma missão ativa. Volte à cidade pra conversar com os NPCs e aceitar tarefas na Guilda dos Aventureiros.';
     list.appendChild(empty);
   } else {
-    S.activeQuests.forEach(q => {
-      const item = document.createElement('div');
-      item.className = 'journal-item';
-      const t = document.createElement('div');
-      t.className = 'journal-title';
-      t.textContent = q.title;
+    // 2026-05-12 USER REQUEST: cards ricos estilo cidade — title + desc + NPC +
+    // location + reward + progress. Quests "completáveis aqui" recebem destaque
+    // verde com badge ★.
+    // Ordena: completáveis aqui primeiro, depois resto
+    var sortedQ = (S.activeQuests || []).slice().sort(function(a, b) {
+      var aHere = _isQuestCompletableHere(a) ? 0 : 1;
+      var bHere = _isQuestCompletableHere(b) ? 0 : 1;
+      return aHere - bHere;
+    });
+    sortedQ.forEach(function(q) {
+      var here = _isQuestCompletableHere(q);
+      var item = document.createElement('div');
+      item.className = 'jq-card' + (here ? ' completable-here' : '');
+      // Título
+      var t = document.createElement('div');
+      t.className = 'jq-card-title';
+      t.textContent = q.title || q.id || 'Missão';
       item.appendChild(t);
-      const d = document.createElement('div');
-      d.className = 'journal-desc';
-      d.textContent = q.desc;
-      item.appendChild(d);
-      const meta = document.createElement('div');
-      meta.className = 'journal-meta';
-      if (q.target_map && FIXED_MAPS[q.target_map]) {
-        meta.textContent = '→ Entregar em: ' + FIXED_MAPS[q.target_map].name;
-      } else if (q.target_action) {
-        meta.textContent = '→ Ação: ' + q.target_action;
+      // Descrição
+      if (q.desc) {
+        var d = document.createElement('div');
+        d.className = 'jq-card-desc';
+        d.textContent = q.desc;
+        item.appendChild(d);
+      }
+      // Meta: NPC + Local + Progresso + Recompensa
+      var meta = document.createElement('div');
+      meta.className = 'jq-card-meta';
+      if (q.npc) {
+        var tagNpc = document.createElement('span');
+        tagNpc.className = 'jq-tag';
+        tagNpc.innerHTML = '👤 ' + q.npc;
+        meta.appendChild(tagNpc);
+      }
+      if (q.location) {
+        var tagLoc = document.createElement('span');
+        tagLoc.className = 'jq-tag';
+        tagLoc.innerHTML = '📍 ' + q.location;
+        meta.appendChild(tagLoc);
+      }
+      if (q.progress) {
+        var tagProg = document.createElement('span');
+        tagProg.className = 'jq-tag jq-progress';
+        tagProg.innerHTML = '📊 ' + q.progress;
+        meta.appendChild(tagProg);
+      }
+      if (q.reward || q.xp) {
+        var tagRew = document.createElement('span');
+        tagRew.className = 'jq-tag jq-reward';
+        tagRew.innerHTML = '💰 ' + (q.reward || 0) + ' V · ' + (q.xp || 0) + ' XP';
+        meta.appendChild(tagRew);
+      }
+      // Hint extra quando completável aqui
+      if (here) {
+        var tagHere = document.createElement('span');
+        tagHere.className = 'jq-tag';
+        tagHere.style.color = '#7cdb7c';
+        tagHere.style.fontWeight = '700';
+        tagHere.innerHTML = '⚔️ Disponível neste mapa';
+        meta.appendChild(tagHere);
       }
       item.appendChild(meta);
-      // 2026-05-11 (AAA quest review): botão abandonar com confirmação
-      // (paridade com cidade _abandonQuest). User pode abandonar quest
-      // ativa direto do journal de exploration.
-      const abandonBtn = document.createElement('button');
-      abandonBtn.className = 'journal-abandon-btn';
-      abandonBtn.style.cssText = 'margin-top:8px;padding:4px 10px;background:rgba(154,64,48,0.15);border:1px solid #9a4030;border-radius:4px;color:#d47474;font-size:11px;cursor:pointer;font-family:inherit';
-      abandonBtn.textContent = '❌ Abandonar missão';
-      abandonBtn.onclick = function(e){ e.stopPropagation(); abandonExplorationQuest(q.id); };
-      item.appendChild(abandonBtn);
       list.appendChild(item);
     });
   }
@@ -36314,54 +36450,10 @@ function openQuestJournal(opts) {
     h.className = 'journal-section';
     h.textContent = 'Concluídas (' + completedQuests.size + ')';
     list.appendChild(h);
-    // 2026-05-11 (AAA quest review): rich history (title + reward + date)
-    // em vez de só ID. Usa completedQuestsData populado em completeQuest.
-    // Fallback pra ID se metadata não disponível (quests antigas).
-    Array.from(completedQuests).slice(-10).reverse().forEach(id => {
-      const meta = (window.completedQuestsData || {})[id];
+    Array.from(completedQuests).slice(-5).forEach(id => {
       const c = document.createElement('div');
       c.className = 'journal-item completed';
-      if (meta) {
-        const title = document.createElement('div');
-        title.className = 'journal-title';
-        title.style.color = '#7ae89a';
-        title.textContent = '✓ ' + (meta.title || id);
-        c.appendChild(title);
-        if (meta.rewardTxt) {
-          const rwd = document.createElement('div');
-          rwd.className = 'journal-desc';
-          rwd.style.color = '#a09484';
-          rwd.style.fontSize = '11px';
-          rwd.textContent = '🎁 ' + meta.rewardTxt;
-          c.appendChild(rwd);
-        }
-        if (meta.completedAt) {
-          const dt = document.createElement('div');
-          dt.className = 'journal-meta';
-          dt.style.color = '#6a5a4a';
-          dt.style.fontSize = '10px';
-          const d = new Date(meta.completedAt);
-          dt.textContent = '📅 ' + d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-          c.appendChild(dt);
-        }
-      } else {
-        c.textContent = '✓ ' + id;
-      }
-      list.appendChild(c);
-    });
-  }
-
-  // 2026-05-11 (AAA quest review): seção de Abandonadas (se houver)
-  if (window.abandonedQuests && window.abandonedQuests.size > 0) {
-    const h = document.createElement('div');
-    h.className = 'journal-section';
-    h.textContent = 'Abandonadas (' + window.abandonedQuests.size + ')';
-    list.appendChild(h);
-    Array.from(window.abandonedQuests).slice(-5).reverse().forEach(id => {
-      const c = document.createElement('div');
-      c.className = 'journal-item';
-      c.style.opacity = '0.6';
-      c.textContent = '❌ ' + id;
+      c.textContent = '✓ ' + id;
       list.appendChild(c);
     });
   }
