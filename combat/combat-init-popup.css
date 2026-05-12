@@ -73,7 +73,7 @@
 /* Subtitle */
 .init-popup-sub {
   padding: var(--v-space-sm, 6px) var(--v-space-xl, 20px);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   text-align: center;
@@ -106,7 +106,7 @@
 }
 
 .init-popup-dice-label {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   color: var(--v-text, #d4c8b0);
   font-weight: 600;
@@ -190,7 +190,7 @@
 }
 
 .init-popup-name {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   font-weight: 600;
   overflow: hidden;
@@ -222,7 +222,7 @@
   background: var(--v-gold-06, rgba(196, 149, 58, 0.06));
   border: 1px solid var(--v-gold-12, rgba(196, 149, 58, 0.12));
   border-radius: var(--v-radius, 8px);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   color: var(--v-gold, #c4953a);
   font-weight: 600;
@@ -233,7 +233,7 @@
   text-align: center;
   padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
   border-radius: var(--v-radius-sm, 6px);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
   margin-top: var(--v-space-sm, 6px);
 }

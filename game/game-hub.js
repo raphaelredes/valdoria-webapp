@@ -298,8 +298,7 @@ function renderHubScreen(el, screen) {
                 if (ps.ach_cb && typeof doAction === 'function') doAction(ps.ach_cb);
             });
             var achVal = _hubDiv('hp-val');
-            // 2026-05-06: cor natural do troféu via HERALDIC_COLORS lookup (gold OK pra ic-trofeu por canon).
-            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + ((typeof HERALDIC_COLORS !== "undefined" && HERALDIC_COLORS["ic-trofeu"]) || "#e8d878") + ';"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
+            achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
             achCard.appendChild(achVal);
             var achLbl = _hubDiv('hp-lbl');
             achLbl.textContent = 'Conquistas';
@@ -316,8 +315,7 @@ function renderHubScreen(el, screen) {
                 if (typeof doAction === 'function') doAction(pStats.kills_cb || 'kills_log');
             });
             var killVal = _hubDiv('hp-val');
-            // 2026-05-06: ic-ach-algoz cor natural sangue vermelho (#c43020).
-            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + ((typeof HERALDIC_COLORS !== "undefined" && HERALDIC_COLORS["ic-ach-algoz"]) || "#c43020") + ';"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
+            killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-ach-algoz'] || '#c43020') + ';"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
             killCard.appendChild(killVal);
             var killLbl = _hubDiv('hp-lbl');
             killLbl.textContent = 'Abates';
@@ -357,15 +355,8 @@ function renderHubScreen(el, screen) {
     }
 
     /* ── 9. DM Tip ───────────────────────────────────────────── */
-    var tip = screen.dm_tip;
-    if (tip) {
-        var dmEl = _hubDiv('hub-dm');
-        var dmIco = _hubSpan('hub-dm-ico', '\uD83D\uDCDC');
-        dmEl.appendChild(dmIco);
-        var dmText = document.createTextNode(' ' + tip);
-        dmEl.appendChild(dmText);
-        frag.appendChild(dmEl);
-    }
+    /* DM Tip REMOVIDO 2026-05-08 (X-6.5.51AQ): irrelevante, jogador n\u00E3o l\u00EA,
+       ocupava espa\u00E7o no hub. Conte\u00FAdo `_dm_tip` do backend \u00E9 ignorado. */
 
     /* Append everything to the container */
     el.appendChild(frag);

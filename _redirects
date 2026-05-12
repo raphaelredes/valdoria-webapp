@@ -71,3 +71,32 @@
 /workstation                  /play/                       301
 /workstation/                 /play/                       301
 /workstation/*                /play/                       301
+
+# 2026-05-12 DEEP CLEANUP — 115 arquivos legacy SPA orfaos deletados:
+# - 72 game/* SPA legacy (game-core.js, game-renderer.js, etc.)
+# - 12 combat/* SPA legacy
+# - 31 explore/* SPA legacy
+# /inventory/index.html — SPA standalone deletado (mochila canonical em /cidade/)
+# inventory-tabs.js mantido (usado por cidade)
+/inventory                    /cidade/                     301
+/inventory/                   /cidade/                     301
+/inventory/index.html         /cidade/                     301
+
+# /market/ — full pasta deletada (mercado canonical em /cidade/)
+/market                       /cidade/                     301
+/market/                      /cidade/                     301
+/market/*                     /cidade/                     301
+
+# /spa/ infrastructure inteira deletada (router/init/routes/nav/watchdog)
+/spa                          /play/                       301
+/spa/                         /play/                       301
+/spa/*                        /play/                       301
+
+# /mockups/, /mockups-diario.html, /_test/ — DEV-only deletados
+/mockups                      /play/                       301
+/mockups/                     /play/                       301
+/mockups/*                    /play/                       301
+/mockups-diario.html          /play/                       301
+/_test                        /play/                       301
+/_test/                       /play/                       301
+/_test/*                      /play/                       301

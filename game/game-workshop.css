@@ -68,7 +68,7 @@
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius, 8px);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   cursor: pointer;
   transition: all var(--v-transition-fast, 0.15s) ease;
@@ -107,7 +107,7 @@
   border: 1px solid rgba(100, 80, 180, 0.3);
   border-radius: var(--v-radius, 8px);
   color: #b0a0e0;
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   font-weight: 600;
   cursor: pointer;
@@ -133,7 +133,7 @@
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-base, 13px);
   cursor: pointer;
   transition: all var(--v-transition-fast, 0.15s) ease;

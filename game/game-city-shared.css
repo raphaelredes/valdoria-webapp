@@ -91,7 +91,7 @@
 }
 .vc-service-icon { font-size: var(--v-font-icon, 20px); line-height: 1; } /* HARDCODED: icon size, no exact token */
 .vc-service-name {
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text, #d4c8b0);
   line-height: 1.2;
@@ -215,7 +215,7 @@
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   cursor: pointer;
   text-align: left;

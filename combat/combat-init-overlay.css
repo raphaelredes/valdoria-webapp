@@ -141,7 +141,7 @@
     margin: var(--v-space-sm) auto 0;
     padding: var(--v-space-xs) var(--v-space-lg);
     display: inline-block;
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-xs, 11px);
     font-weight: 700;
     letter-spacing: 0.16em;
@@ -157,7 +157,7 @@
     flex-shrink: 0;
     margin: 0;
     padding: var(--v-space-md) var(--v-space-xl) var(--v-space-md);
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-md, 13px);
     color: var(--v-text-dim, #a09484);
     text-align: center;
@@ -174,7 +174,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     padding: var(--v-space-md) var(--v-space-xl);
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     scrollbar-width: thin;
     scrollbar-color: var(--v-border) transparent;
 }

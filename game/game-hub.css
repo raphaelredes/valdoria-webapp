@@ -89,7 +89,7 @@
   padding: 0 var(--v-space-lg, 12px);
   border: 1px dashed var(--v-gold-30, rgba(196, 149, 58, 0.3));
   border-radius: var(--v-radius-sm, 6px);
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-gold, #c4953a);
   background: var(--v-gold-04, rgba(196, 149, 58, 0.04));
@@ -146,7 +146,7 @@
   background: rgba(183, 28, 28, 0.1);
   border: 1px solid rgba(183, 28, 28, 0.25);
   border-radius: var(--v-radius-sm, 6px);
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-danger-light, #e08080);
 }
@@ -195,7 +195,7 @@
 
 /* name — readable size, truncated (#58 fix: xs→sm for readability) */
 .hub-ally .ha-name {
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   overflow: hidden;
@@ -234,7 +234,7 @@
   background: transparent;
   border: 1px dashed var(--v-border, #4a3828);
   border-radius: var(--v-radius-sm, 6px);
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-muted, #a08050);
   min-height: 32px;
@@ -351,7 +351,7 @@
   border: 1px solid var(--v-gold-10, rgba(196, 149, 58, 0.1));
   border-radius: var(--v-radius-sm, 6px);
   background: var(--v-gold-04, rgba(196, 149, 58, 0.04));
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text, #d4c8b0);
   min-height: 28px;
@@ -406,7 +406,7 @@
 }
 
 .hub-prog-card .hp-lbl {
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-xs, 10px);
   color: var(--v-text-muted, #a08050);
   text-transform: uppercase;
@@ -423,7 +423,7 @@
 /* Daily Challenge badge (below progress strip) */
 .hub-dc-badge {
   text-align: center;
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
+  font-family: var(--v-font, "Marcellus", "Cinzel", serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-gold, #c4953a);
   padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
@@ -435,19 +435,9 @@
 
 
 /* ----------------------------------------------------------
-   10. DM Narration Tip
+   10. DM Narration Tip — REMOVIDO 2026-05-08 (X-6.5.51AQ)
    ---------------------------------------------------------- */
-.hub-dm {
-  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-  border-left: 2px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
-  font-family: var(--v-font, "MedievalSharp", "Cinzel", serif);
-  font-size: var(--v-font-sm, 12px);
-  color: var(--v-text-dim, #a09484);
-  line-height: 1.5;
-  font-style: italic;
-}
+/* .hub-dm CSS removido — recurso eliminado por irrelevância (jogador não lê) */
 
 
 /* ----------------------------------------------------------
@@ -582,11 +572,9 @@
 
 
 /* ----------------------------------------------------------
-   16. DM Tip Icon
+   16. DM Tip Icon — REMOVIDO 2026-05-08 (X-6.5.51AQ)
    ---------------------------------------------------------- */
-.hub-dm-ico {
-  margin-right: var(--v-space-xs, 2px);
-}
+/* .hub-dm-ico removido — DM Tip eliminado por irrelevância */
 
 
 /* ----------------------------------------------------------

@@ -64,7 +64,7 @@
   border: 1px solid var(--v-border, #4a3828);
   border-radius: var(--v-radius, 8px);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'MedievalSharp', serif);
+  font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-body, 14px);
   cursor: pointer;
   transition: all var(--v-transition-fast, 0.15s) ease;

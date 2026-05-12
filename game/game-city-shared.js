@@ -143,12 +143,18 @@ function serviceCard(svc) {
     card.appendChild(price);
   }
 
-  /* Badge */
+  /* Badge — 2026-05-11 (user request): auto-detect " V" trailing como
+     valdoritas e substitui pelo icone .vi-coin (era textContent literal
+     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V". */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
-    /* FIX 2026-05-06: badge pode ser SVG markup heráldico */
-    if (typeof svc.badge === 'string' && svc.badge.charAt(0) === '<') bdg.innerHTML = svc.badge;
-    else bdg.textContent = svc.badge;
+    var bs = String(svc.badge);
+    if (/\sV$/.test(bs)) {
+      bdg.textContent = bs.slice(0, -2) + ' ';
+      bdg.appendChild(coin('sm'));
+    } else {
+      bdg.textContent = bs;
+    }
     card.appendChild(bdg);
   }
 
@@ -277,9 +283,7 @@ function actionList(items) {
       }
       if (item.badge) {
         var bdg = el('span', 'vc-badge');
-        /* FIX 2026-05-06: badge pode ser SVG markup heráldico */
-        if (typeof item.badge === 'string' && item.badge.charAt(0) === '<') bdg.innerHTML = item.badge;
-        else bdg.textContent = item.badge;
+        bdg.textContent = item.badge;
         btn.appendChild(bdg);
       }
       btn.addEventListener('click', function () { act(item.cb); });
@@ -302,9 +306,7 @@ function sectionLabel(text) {
 function badgeEl(text, type) {
   var b = el('span', 'vc-badge');
   if (type) b.classList.add('vc-badge--' + type);
-  /* FIX 2026-05-06: text pode ser SVG markup heráldico */
-  if (typeof text === 'string' && text.charAt(0) === '<') b.innerHTML = text;
-  else b.textContent = text;
+  b.textContent = text;
   return b;
 }
 

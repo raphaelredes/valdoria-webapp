@@ -849,7 +849,7 @@
         var(--v-bg-card, #2e2520) 0%,
         var(--arena-stone-1) 100%);
     color: var(--v-text, var(--v-text, #d4c8b0));
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 600;
     cursor: pointer;
