@@ -18,10 +18,13 @@
 /web/dev.html  /web/?env=dev  301
 /web/dev/      /web/?env=dev  301
 
-# 2026-05-12 LEGACY CITY REMOVED: /app/ era entry point do SPA antigo
-# (app.html + game/index.html) que carregava a cidade legacy com inventory
-# desincronizado da cidade canonical. Removido a pedido do user.
-# Redirects pra /play/ (entry canonical que routa via last_screen_payload).
+# 2026-05-12 LEGACY ROUTES REMOVED: 8 entradas legacy removidas a pedido
+# do user para "nunca mais voltar a tela antiga, so usar a tela mais nova".
+# Canonical entries: /play/, /cidade/, /exploracao/exploracao.html,
+# /combat2/combate.html, /levelup/, /prologue/, /character_creator/,
+# /web/, /apoie/, /pix/.
+
+# /app/ + /game/index.html (cidade legacy SPA) → /play/
 /app                /play/         301
 /app/               /play/         301
 /app/*              /play/:splat   301
@@ -29,3 +32,42 @@
 /game               /play/         301
 /game/              /play/         301
 /game/index.html    /play/         301
+
+# /combat/ (combat WebApp legacy, 162 linhas) → combat2 canonical
+# combat/combat-*.css ainda existe como utility usado por combat2/combate.html
+/combat                       /combat2/combate.html       301
+/combat/                      /combat2/combate.html       301
+/combat/index.html            /combat2/combate.html       301
+
+# /explore/ (explore WebApp legacy, 638 linhas) → exploracao canonical
+# explore/explore-*.js + *.css ainda existe como utility usado por
+# exploracao/exploracao.html e cidade/index.html (explore-travel.js)
+/explore                      /exploracao/exploracao.html  301
+/explore/                     /exploracao/exploracao.html  301
+/explore/index.html           /exploracao/exploracao.html  301
+
+# /dungeon/ — pasta inteira deletada (dungeon era SPA antigo nao usado)
+# Redirect pra exploracao (dungeons agora sao maps hex em FIXED_MAPS).
+/dungeon                      /exploracao/exploracao.html  301
+/dungeon/                     /exploracao/exploracao.html  301
+/dungeon/*                    /exploracao/exploracao.html  301
+
+# /guild/ — pasta inteira deletada (guilda agora canonical em /cidade/)
+/guild                        /cidade/                     301
+/guild/                       /cidade/                     301
+/guild/*                      /cidade/                     301
+
+# /codex/ — pasta inteira deletada (compendio agora canonical em /cidade/)
+/codex                        /cidade/                     301
+/codex/                       /cidade/                     301
+/codex/*                      /cidade/                     301
+
+# /guide/ — pasta inteira deletada (guide agora canonical em /cidade/)
+/guide                        /cidade/                     301
+/guide/                       /cidade/                     301
+/guide/*                      /cidade/                     301
+
+# /workstation/ — pasta DEV tool deletada
+/workstation                  /play/                       301
+/workstation/                 /play/                       301
+/workstation/*                /play/                       301
