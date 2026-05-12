@@ -2129,3 +2129,57 @@ body::before {
 body.perf-lite html.app-frame::before {
   animation: none;
 }
+
+/* ============================================================================
+   REAL DEVICE RESPONSIVE — fill viewport (2026-05-12, USER RULE)
+   ============================================================================
+   Quando o jogo abre num SMARTPHONE REAL (touch device em produção, html.app-frame
+   esta presente em jogo.* / dev.* / prod.* via shared/env-utils.js), o jogo
+   DEVE ocupar 100% da largura e altura do dispositivo — sem cap 480x960, sem
+   moldura, sem box-shadow. Identificacao: touch device = `hover: none and
+   pointer: coarse`.
+
+   Estado anterior (caps fixos):
+     html { max-width: min(100vw, 480px); height: min(100dvh, 960px) }
+     → iPhone 16 (393x852) → fills (393<480)
+     → Galaxy Z Fold 6 unfolded (673x814) → wastes 193px (clamp em 480)
+     → Tablet em modo retrato (768x1024) → wastes 288px
+     → iPad mini (744x1133) → wastes 264px
+
+   Estado novo (touch device + app-frame):
+     html.app-frame { max-width: 100vw; height: 100dvh } → fills entirely
+     body { max-height: 100dvh } → fills entirely
+     Sem box-shadow, sem border → look responsivo nativo
+
+   Simuladores file:// (sem html.app-frame): inalterados — mantem o frame
+   Telegram Desktop simulation (regra soberana — feedback_simulator_master_path.md).
+
+   Desktop browser com .app-frame: regra @media (hover: hover) and (pointer: fine)
+   and (min-width: 700px) continua valendo (mostra phone-frame 412x892 dourado).
+   ============================================================================ */
+@media (hover: none) and (pointer: coarse) {
+  html.app-frame {
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+  html.app-frame body {
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  /* Overlays globais tambem expandem (popups, loading, processing, travel) */
+  html.app-frame .v-popup-overlay,
+  html.app-frame .loading-overlay,
+  html.app-frame .processing-overlay,
+  html.app-frame #travel-overlay,
+  html.app-frame .displaced-overlay {
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+  }
+}
