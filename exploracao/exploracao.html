@@ -14630,10 +14630,27 @@ window.__applyExploreSnap = function(S, snap) {
   if (Array.isArray(snap.quests_active)) {
     S.activeQuests = snap.quests_active.map(function(q) { return { id: q.id, step: q.step }; });
   }
-  // Allies (substitui)
+  // Allies (substitui) — 2026-05-12: preserva name + level + hpMax + mp + race
+  // pra HUD/UI mostrar corretamente. Antes só salvava {id, cls, hp} e descartava
+  // o resto, causando "Aliado ?" em vez de "Sia Sunfire" nas telas.
   if (Array.isArray(snap.allies)) {
-    S.allies = snap.allies.map(function(a) { return { id: a.id, cls: a.cls, hp: a.hp }; });
+    S.allies = snap.allies.map(function(a) {
+      return {
+        id: a.id, cls: a.cls,
+        name: a.name || ('Aliado ' + (a.id || '?')),
+        hp: a.hp,
+        mhp: a.mhp || a.hp,
+        mp: a.mp || 0,
+        mmp: a.mmp || a.mp || 0,
+        level: a.level || 1,
+        race: a.race || 'humano'
+      };
+    });
   }
+  // 2026-05-12: player name do snap (Ryaiael etc) — sem isso, initState()
+  // gera nome random tipo "Kael" que sobrescreveria o player real.
+  if (snap.name) p.name = snap.name;
+  if (snap.race) p.race = snap.race;
   // Gold (só pra UI — o delta é acumulado em __exploreRewards.gold_gained)
   if (typeof snap.gold === 'number') S.gold = snap.gold;
   // X-6.5.51AT (2026-05-11): level + XP do player real (sem isso, HUD mostra
