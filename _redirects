@@ -17,3 +17,15 @@
 /web/dev       /web/?env=dev  301
 /web/dev.html  /web/?env=dev  301
 /web/dev/      /web/?env=dev  301
+
+# 2026-05-12 LEGACY CITY REMOVED: /app/ era entry point do SPA antigo
+# (app.html + game/index.html) que carregava a cidade legacy com inventory
+# desincronizado da cidade canonical. Removido a pedido do user.
+# Redirects pra /play/ (entry canonical que routa via last_screen_payload).
+/app                /play/         301
+/app/               /play/         301
+/app/*              /play/:splat   301
+/app.html           /play/         301
+/game               /play/         301
+/game/              /play/         301
+/game/index.html    /play/         301
