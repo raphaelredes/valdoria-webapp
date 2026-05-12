@@ -40195,6 +40195,76 @@ SUBSCREEN_DATA['city_more'] = {
 // progresso + texto região. 4.5s. Após onComplete, redirect pra exploracao.
 // FIX 2026-05-04: ALWAYS-anim — bloqueia se script não carregou (em vez de pular).
 //   Aguarda até 3s o script aparecer. Só pula se vReducedMotion=true (a11y).
+// 2026-05-12 USER REQUEST: builder de snap pra exploracao.html.
+// Converte CITY_MOCK_PLAYER + GROUP_MEMBERS para o formato esperado pelo
+// __applyExploreSnap (cls/ab/hp/mhp/mp/mmp/hd/exh/bg/align/inv/allies/gold/
+// lvl/xp). Sem isso, exploracao gera mock random "Aelric Ladino Nv 1".
+function _buildExploracaoSnap(mapId) {
+  var p = window.CITY_MOCK_PLAYER || null;
+  if (!p) return null;
+  // Normaliza cls: remove acentos (ex: "clérigo" → "clerigo")
+  var clsKey = (p.cls || 'guerreiro').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  // Ability scores — usa p.stats se existe, senão gera default por classe
+  var stats = p.stats || (typeof _genFichaStats === 'function' ? _genFichaStats({cls: clsKey}) : null) || {};
+  var ab = {
+    s: stats.str || stats.strength || 10,
+    d: stats.dex || stats.dexterity || 10,
+    c: stats.con || stats.constitution || 10,
+    i: stats.int || stats.intelligence || 10,
+    w: stats.wis || stats.wisdom || 10,
+    h: stats.cha || stats.charisma || 10
+  };
+  // Hit Dice — D&D 5e: cada nível dá 1 HD da classe. Total = level.
+  var hd = (typeof p.hd === 'number') ? p.hd : (p.level || 1);
+  var mhd = (typeof p.mhd === 'number') ? p.mhd : (p.level || 1);
+  // Allies — mapeia GROUP_MEMBERS (slot 0 é player) pros aliados vivos
+  var allies = [];
+  if (Array.isArray(window.GROUP_MEMBERS)) {
+    for (var i = 1; i < window.GROUP_MEMBERS.length; i++) {
+      var m = window.GROUP_MEMBERS[i];
+      if (!m || m.dead) continue;
+      var aClsKey = (m.cls || m.classe || 'guerreiro').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '');
+      allies.push({
+        id: m.id || ('ally_' + i),
+        cls: aClsKey,
+        name: m.name || ('Aliado ' + i),
+        hp: (typeof m.hp === 'number') ? m.hp : (m.hpMax || 20),
+        mhp: m.hpMax || m.mhp || 20,
+        mp: (typeof m.mp === 'number') ? m.mp : 0,
+        mmp: m.mpMax || m.mmp || 0,
+        level: m.level || 1,
+        race: m.race || 'humano'
+      });
+    }
+  }
+  return {
+    cls: clsKey,
+    lvl: p.level || 1,
+    hp: (typeof p.hp === 'number') ? p.hp : 28,
+    mhp: p.hpMax || p.mhp || 28,
+    mp: (typeof p.mp === 'number') ? p.mp : 0,
+    mmp: p.mpMax || p.mmp || 0,
+    hd: hd, mhd: mhd,
+    exh: p.exh || 0,
+    ab: ab,
+    bg: p.background || p.bg || 'folk_hero',
+    align: p.alignment || p.align || 'NG',
+    gold: p.gold || 0,
+    xp: p.xp || 0,
+    inv: Array.isArray(p.inventory) ? p.inventory.map(function(it){
+      return { i: it.id || it.name || '?', q: it.count || it.qty || 1 };
+    }) : [],
+    quests_active: Array.isArray(window.QUESTS_ACTIVE)
+      ? window.QUESTS_ACTIVE.map(function(q){
+          return { id: (q.id || '').replace(/^qa_/, ''), step: q.step || 0 };
+        })
+      : [],
+    allies: allies,
+    map_id: mapId || ''
+  };
+}
+
 function _travelToBiome(mapIdOrBiome, displayName){
   // 2026-05-11 fix: nome do parametro era enganoso. Aceitamos AGORA tanto
   // map_id especifico (green_fields, volcanic, orc_tribe) quanto biome
@@ -40246,8 +40316,34 @@ function _travelToBiome(mapIdOrBiome, displayName){
       if (v) qParams.set(k, v);
     }
   } catch (_e) { /* fallback: URL mínima sem token (LOCAL mode) */ }
+  // 2026-05-12 USER REQUEST FIX: exploracao.html espera ?snap=<base64> com
+  // dados do personagem real (cls/lvl/hp/mp/ab/allies/etc) — sem isso, o
+  // initState() do exploracao gera um MOCK random (ex: "Aelric Ladino Nv 1")
+  // em vez de manter o Ryaiael/Bardo/Nv4 do player real. Sintoma observado:
+  // S.player na exploração != CITY_MOCK_PLAYER, party vazia, HP/level errados.
+  // Fix: builder de snap a partir de CITY_MOCK_PLAYER + GROUP_MEMBERS + encode b64.
+  try {
+    var _snap = _buildExploracaoSnap(mapId);
+    if (_snap) {
+      var _snapJson = JSON.stringify(_snap);
+      // UTF-8 safe encode: TextEncoder bytes -> btoa via String.fromCharCode chunks
+      var _bytes = new TextEncoder().encode(_snapJson);
+      var _binStr = '';
+      for (var _bi = 0; _bi < _bytes.length; _bi += 1024) {
+        _binStr += String.fromCharCode.apply(null, _bytes.subarray(_bi, _bi + 1024));
+      }
+      var _b64 = btoa(_binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      qParams.set('snap', _b64);
+      _logCity('snap built: cls=' + _snap.cls + ' lvl=' + _snap.lvl
+        + ' hp=' + _snap.hp + '/' + _snap.mhp + ' allies=' + (_snap.allies || []).length
+        + ' b64_len=' + _b64.length);
+    }
+  } catch (_eSnap) {
+    _logCity('snap build failed: ' + (_eSnap && _eSnap.message));
+    // Não falha a transição — exploração vai pra mock fallback (degradação graceful)
+  }
   var url = basePath + '?' + qParams.toString();
-  _logCity('travel url has_token=' + qParams.has('token') + ' has_api=' + qParams.has('api'));
+  _logCity('travel url has_token=' + qParams.has('token') + ' has_api=' + qParams.has('api') + ' has_snap=' + qParams.has('snap'));
   function _doAnim(){
     if (window.vReducedMotion) {
       _logCity('reduced-motion: pulando anim, redirect direto');
