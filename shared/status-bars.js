@@ -1,2 +1,0 @@
-function vBarHpClass(current,max){var pct=max>0?Math.max(0,Math.min(1,current/max)):1;if(pct>0.60)return'hp';if(pct>0.25)return'hp-warn';return'hp-crit';}
-function vBarHpColor(current,max){var pct=max>0?Math.max(0,Math.min(1,current/max)):1;if(pct>0.60)return'#4caf50';if(pct>0.25)return'#f97316';return'#ef4444';}
