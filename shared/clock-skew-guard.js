@@ -187,7 +187,7 @@
     st.textContent = ''
       + '.vcsg-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;'
       + '  background:radial-gradient(ellipse at 50% 35%,#352818 0%,#1a1510 60%,#0a0805 100%);'
-      + '  font-family:var(--v-font,"MedievalSharp","Cinzel",serif);color:var(--v-text,#d4c8b0);padding:16px;'
+      + '  font-family:var(--v-font,"Marcellus","Cinzel",serif);color:var(--v-text,#d4c8b0);padding:16px;'
       + '  animation:vcsgFadeIn 0.4s ease-out}'
       + '@keyframes vcsgFadeIn{from{opacity:0}to{opacity:1}}'
       + '.vcsg-card{background:linear-gradient(180deg,#3a2e22 0%,#2a2218 100%);'

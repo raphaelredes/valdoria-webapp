@@ -184,7 +184,7 @@ body.wa-portal {
 }
 
 .wa-subtitle {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-body, 14px);
     color: var(--v-text-dim, #a09484);
     margin: 0;
@@ -237,7 +237,7 @@ body.wa-portal {
     padding: 12px var(--v-space-xl, 16px);
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 700;
     cursor: pointer;
@@ -341,7 +341,7 @@ body.wa-portal {
 }
 
 .wa-separator-text {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-base, 13px);
     color: var(--v-text-dim, #a09484);
     text-transform: lowercase;
@@ -521,7 +521,7 @@ body.wa-portal {
 }
 
 .wa-char-name {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-body, 14px);
     font-weight: 700;
     color: var(--v-text-bright, #e8dcc8);
@@ -617,7 +617,7 @@ body.wa-portal {
     background: transparent;
     border: 1px solid var(--v-border, #4a3828);
     border-radius: var(--v-radius, 10px);
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-base, 13px);
     color: var(--v-text-dim, #a09484);
     cursor: pointer;
@@ -648,7 +648,7 @@ body.wa-portal {
     background: var(--v-gold-06);
     border: 1px dashed var(--v-gold-25);
     border-radius: var(--v-radius, 10px);
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-base, 13px);
     color: var(--v-text-dim, #a09484);
     cursor: pointer;
@@ -774,7 +774,7 @@ body.wa-portal {
 }
 
 .wa-blocked-msg {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-body, 14px);
     color: var(--v-text, #d4c8b0);
     line-height: 1.6;
@@ -791,7 +791,7 @@ body.wa-portal {
 }
 
 .wa-blocked-note {
-    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-family: var(--v-font, 'Marcellus', serif);
     font-size: var(--v-font-sm, 11px);
     color: var(--v-text-dim, #a09484);
     line-height: 1.5;
