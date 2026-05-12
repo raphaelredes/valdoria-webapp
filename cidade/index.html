@@ -5080,6 +5080,13 @@ body.perf-lite .vc-action-btn { transition: none; }
   /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
     if (window.__introTitleSkip) { console.log('[INTRO] skip — flag set'); return; }
+    /* 2026-05-12 USER RULE: simuladores file:// NUNCA mostram TitleScreen.
+       TitleScreen e tela do bot DEV/PROD apenas. */
+    if (location.protocol === 'file:') {
+      window.__introTitleSkip = true;
+      console.info('[INTRO] skip — simulador file:// (TitleScreen e do bot DEV/PROD)');
+      return;
+    }
     var params = new URLSearchParams(location.search);
     if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
     var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
@@ -14346,6 +14353,11 @@ var GUILD_NPCS = [
 var GUILD_QUESTS_AVAILABLE = [
   { id: 'gq_goblins',  icon: _heralIco('ic-goblin'),       title: 'Caçar 3 goblins',         reward: 25,  xp: 40,  diff: 'nv 1' },
   { id: 'gq_herbs',    icon: _heralIco('ic-druida'),       title: 'Coletar ervas raras',     reward: 15,  xp: 25,  diff: 'nv 1' },
+  // 2026-05-12 BALANCING: gap nv 1 → nv 3 (de 65 XP pra 300 necessários pra subir
+  // de 1 → 2) era impossível só com quests. Adicionados 2 quests nv 2 (totalizando
+  // +180 XP, +75gp) que preenchem a curva natural pra nv 1+ → 2.
+  { id: 'gq_patrol',   icon: _heralIco('ic-patrulheiro'),  title: 'Patrulhar fronteira',     reward: 35,  xp: 80,  diff: 'nv 2' },
+  { id: 'gq_rat_den',  icon: _heralIco('ic-lobo'),         title: 'Limpar cova de ratos',    reward: 40,  xp: 100, diff: 'nv 2' },
   { id: 'gq_escort',   icon: _heralIco('ic-grupo'),        title: 'Escoltar caravana',       reward: 50,  xp: 60,  diff: 'nv 3' },
   { id: 'gq_ruin',     icon: _heralIco('ic-ach-erudito'),  title: 'Investigar ruína antiga', reward: 80,  xp: 80,  diff: 'nv 4' },
   { id: 'gq_bandit',   icon: _heralIco('ic-orc'),          title: 'Matar líder bandido',     reward: 150, xp: 150, diff: 'nv 6' },
@@ -14371,6 +14383,22 @@ var GUILD_QUEST_DETAILS = {
     npc: 'Mestra Sylvi', location: 'Bosque dos Sussurros',
     flavor: 'Sylvi sorri: "Cresce só onde a lua bate forte. Cuidado com as criaturas que adoram folha noturna."',
     reward: 15, xp: 25, lvlReq: 1, progress: '0/5'
+  },
+  // 2026-05-12 BALANCING: 2 quests nv 2 adicionados pra preencher gap entre nv 1
+  // (65 XP de quests) e nv 3 (precisa 300 XP). Total nv 2 = +180 XP, +75gp.
+  patrol: {
+    qid: 'patrol', icon: _heralIco('ic-patrulheiro'),
+    title: 'Patrulhar fronteira', desc: 'Vigia Tomás precisa de reforço pra patrulhar a estrada do leste por uma noite.',
+    npc: 'Vigia Tomás', location: 'Estrada do Leste',
+    flavor: 'Tomás aponta pra estrada: "Carroças sumiram nas últimas três noites. Anda comigo até o amanhecer e me ajuda a entender o que tá rondando."',
+    reward: 35, xp: 80, lvlReq: 2, progress: '0/1'
+  },
+  rat_den: {
+    qid: 'rat_den', icon: _heralIco('ic-lobo'),
+    title: 'Limpar cova de ratos', desc: 'Padeiro Erlan tem uma infestação de ratos-gigantes no porão da padaria.',
+    npc: 'Padeiro Erlan', location: 'Padaria do Distrito Velho',
+    flavor: 'Erlan limpa as mãos no avental: "Já matei dois. Tem pelo menos uns 4 lá embaixo, do tamanho de gatos. Mata todos e te pago bem."',
+    reward: 40, xp: 100, lvlReq: 2, progress: '0/4'
   },
   escort: {
     qid: 'escort', icon: _heralIco('ic-grupo'),
@@ -33440,7 +33468,9 @@ function _shopConfirmBuy(name, npcId){
       _showServiceResultPopup({
         icon: it.e || '🛒',
         npc: shop.npc,
-        narrative: '<i>"Tome. Bom uso."</i><br><br><b>' + name + '</b> adicionado à mochila.',
+        // 2026-05-12 BUG #4: "adicionado" forçava masculino mesmo pra item feminino
+        // (Espada, Cota). Reformulado pra forma genero-neutra "vai pra mochila".
+        narrative: '<i>"Tome. Bom uso."</i><br><br><b>' + name + '</b> vai pra mochila.',
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
         onContinue: function(){
           // Re-render shop popup com bolsa atualizada
@@ -37445,11 +37475,14 @@ var SUBSCREEN_DATA = {
     ]
   },
   'quests_available': {
-    header: '📜 Missões Disponíveis (7)',
+    header: '📜 Missões Disponíveis (9)',
     flavor: 'Aceita pra começar. Recompensa após conclusão.',
     buttons: [
       [_heralIco('ic-goblin'), 'Caçar 3 goblins', '🟢 nv 1 — 25 <span class="vi vi-coin sm"></span> + 40 XP', 'accept_q_goblins'],
       [_heralIco('ic-mochila'), 'Coletar ervas raras', '🟢 nv 1 — 15 <span class="vi vi-coin sm"></span> + 25 XP', 'accept_q_herbs'],
+      // 2026-05-12 BALANCING: 2 quests nv 2 adicionadas
+      [_heralIco('ic-patrulheiro'), 'Patrulhar fronteira', '🟢 nv 2 — 35 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_patrol'],
+      [_heralIco('ic-lobo'), 'Limpar cova de ratos', '🟢 nv 2 — 40 <span class="vi vi-coin sm"></span> + 100 XP', 'accept_q_rat_den'],
       [_heralIco('ic-mochila'), 'Escoltar caravana', '🟡 nv 3 — 50 <span class="vi vi-coin sm"></span> + 60 XP', 'accept_q_escort'],
       [_heralIco('ic-mochila'), 'Investigar ruína', '🟡 nv 4 — 80 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_ruin'],
       [_heralIco('ic-mochila'), 'Matar líder bandido', '🔴 nv 6 — 150 <span class="vi vi-coin sm"></span> + 150 XP', 'accept_q_bandit_lord'],
@@ -38886,6 +38919,9 @@ var ACTION_HANDLERS = {
   // QUESTS_ACTIVE, com check de nível, duplicata e completed/abandoned.
   'accept_q_goblins':       function(p){ _acceptQuest('goblins'); },
   'accept_q_herbs':         function(p){ _acceptQuest('herbs'); },
+  // 2026-05-12 BALANCING: 2 quests nv 2 novos
+  'accept_q_patrol':        function(p){ _acceptQuest('patrol'); },
+  'accept_q_rat_den':       function(p){ _acceptQuest('rat_den'); },
   'accept_q_escort':        function(p){ _acceptQuest('escort'); },
   'accept_q_ruin':          function(p){ _acceptQuest('ruin'); },
   'accept_q_bandit_lord':   function(p){ _acceptQuest('bandit_lord'); },
@@ -39918,9 +39954,24 @@ function _travelToBiome(mapIdOrBiome, displayName){
   // BUG REAL: cart_* handlers passavam b.biome (categoria) em vez de b.key
   // (map_id). User clicava "Viajar pra Cratera Vulcanica" e ia pra Portoes
   // de Valdoria toda vez.
+  // 2026-05-12 USER REPORT (gameplay test): cart_forest passava key='forest'
+  // mas FIXED_MAPS espera 'whispering_woods' → boot fail "Mapa desconhecido: forest".
+  // Mapeamento COMPLETO CART_BIOMES.key → FIXED_MAPS.id (8 categorias falhando):
+  //   forest → whispering_woods | cave → underground_passage
+  //   swamp → misty_swamps      | mountain → stone_peaks
+  //   desert → golden_sands     | graveyard → ancient_cemetery
+  //   snow → frozen_lands       | volcanic → burning_crater
   var BIOME_TO_DEFAULT_MAP = {
-    'plains': 'city_gates',  // biome plains hub → mapa origem
-    // outros biomas usam map_id direto (caller sabe qual mapa abrir)
+    'plains':    'city_gates',          // biome plains hub → mapa origem
+    'forest':    'whispering_woods',    // Floresta dos Sussurros
+    'cave':      'underground_passage', // Passagem Subterrânea
+    'swamp':     'misty_swamps',        // Pântano Nebuloso
+    'mountain':  'stone_peaks',         // Picos de Pedra
+    'desert':    'golden_sands',        // Deserto Dourado
+    'graveyard': 'ancient_cemetery',    // Cemitério Antigo
+    'snow':      'frozen_lands',        // Ermo Congelado
+    'volcanic':  'burning_crater',      // Cratera Vulcânica
+    // outros map_ids específicos (green_fields, orc_tribe, korthag, etc.) passam direto
   };
   var mapId = BIOME_TO_DEFAULT_MAP[mapIdOrBiome] || mapIdOrBiome;
   _logCity('travel -> ' + mapIdOrBiome + ' (resolved map_id=' + mapId + ')');
@@ -41086,6 +41137,56 @@ function _renderCityJourneyStep() {
   }
 }
 
+// 2026-05-12 BUG #8/#9 fix helpers — D&D 5e PHB skill check fidelity.
+// _statBaseForClass: stat default por classe quando player.stats não existe.
+// _classHasSkillProficiency: classe declara proficiência nessa skill?
+// Não pretende cobrir Background skills (esses customizam por jogador) —
+// só as proficiências base da classe que TODA build daquela classe ganha.
+function _statBaseForClass(cls, stat){
+  // PHB array padrão 15/14/13/12/10/8 distribuído por prioridade da classe.
+  // Stats nesse map sempre retornam 14 (+2) na ability primária / 13-12 nas
+  // secundárias, 10 nas terciárias, 8 onde a classe dump.
+  var c = (cls || '').toLowerCase();
+  var CLASS_STAT_MAP = {
+    'bardo':       { cha: 16, dex: 14, con: 12, wis: 11, int: 10, str: 8 },
+    'feiticeiro':  { cha: 16, con: 14, dex: 12, wis: 11, int: 10, str: 8 },
+    'mago':        { int: 16, dex: 14, con: 13, wis: 11, cha: 10, str: 8 },
+    'clerigo':     { wis: 16, con: 14, str: 13, cha: 11, dex: 10, int: 8 },
+    'druida':      { wis: 16, con: 14, dex: 13, int: 11, cha: 10, str: 8 },
+    'bruxo':       { cha: 16, con: 14, dex: 13, wis: 11, int: 10, str: 8 },
+    'paladino':    { str: 15, cha: 14, con: 14, wis: 11, dex: 10, int: 8 },
+    'patrulheiro': { dex: 16, wis: 14, con: 13, str: 11, int: 10, cha: 8 },
+    'guerreiro':   { str: 15, con: 14, dex: 14, wis: 11, cha: 10, int: 8 },
+    'barbaro':     { str: 15, con: 15, dex: 13, wis: 11, cha: 10, int: 8 },
+    'monge':       { dex: 15, wis: 14, con: 13, str: 11, int: 10, cha: 8 },
+    'ladino':      { dex: 16, cha: 13, con: 13, int: 12, wis: 11, str: 8 }
+  };
+  var map = CLASS_STAT_MAP[c];
+  if (!map) return 10;  // classe desconhecida → neutro
+  return map[stat] || 10;
+}
+function _classHasSkillProficiency(cls, stat, skill){
+  // Whitelist conservadora — só aplica proficiency se a skill é "canônica"
+  // pra classe (PHB skill choices típicas, não Background custom).
+  var c = (cls || '').toLowerCase();
+  // Bardos pegam QUALQUER 3 skills (PHB p.51) — assumir prof em TODAS.
+  if (c === 'bardo') return true;
+  // Ladinos: Acrobacia, Atletismo, Furtividade, Investigação, Percepção,
+  //          Perspicácia, Persuasão, Atuação, Enganação, Intimidação
+  if (c === 'ladino') return ['dex','int','wis','cha'].indexOf(stat) >= 0;
+  // Patrulheiro: Sobrevivência (wis), Percepção (wis), Furtividade (dex),
+  //              Athletics (str), Animal Handling (wis), Insight (wis)
+  if (c === 'patrulheiro') return ['dex','wis','str'].indexOf(stat) >= 0;
+  // Clérigo: History/Insight/Medicine/Persuasion/Religion (wis/int/cha)
+  if (c === 'clerigo') return ['wis','int','cha'].indexOf(stat) >= 0;
+  // Druida: Arcana/Animal/Insight/Medicine/Nature/Perception/Religion/Survival
+  if (c === 'druida') return ['wis','int'].indexOf(stat) >= 0;
+  // Guerreiro: Acrobacia/Animal/Athletics/History/Insight/Intimidation/Perception/Survival
+  if (c === 'guerreiro') return ['str','dex','wis'].indexOf(stat) >= 0;
+  // Outras classes — sem assumption (player declara skills via background)
+  return false;
+}
+
 function _resolveCityJourneyHazard(hazard, choice) {
   var checkEl = document.getElementById('journey-check');
   var narrEl = document.getElementById('journey-narration');
@@ -41095,13 +41196,21 @@ function _resolveCityJourneyHazard(hazard, choice) {
   var p = window.CITY_MOCK_PLAYER || {};
   var stat = choice.stat;
   var success = true;
-  var d20 = 0, mod = 0, total = 0;
+  var d20 = 0, mod = 0, profBonus = 0, total = 0;
   var hasCheck = !!(stat && choice.dc);
   if (hasCheck) {
-    var statVal = (p.stats && p.stats[stat]) || 10;
+    // 2026-05-12 BUG #8/#9: stat fallback agora considera classe-base PHB
+    // (Bardo CHA 14 = mod +2; Ladino DEX 14; Guerreiro STR/CON 14; etc.).
+    // Antes assumia 10 (mod 0) sem ler classe, fazendo TODA rolagem zerada.
+    var statVal = (p.stats && p.stats[stat]) || _statBaseForClass(p.cls, stat);
     mod = Math.floor((statVal - 10) / 2);
+    // 2026-05-12 BUG #8: proficiency bonus PHB (nv 1-4 = +2, 5-8 = +3, ...).
+    // Aplica se classe tem proficiency declarada nessa skill (whitelist abaixo).
+    var pLvl = p.level || 1;
+    var basePb = 2 + Math.floor((pLvl - 1) / 4);
+    if (_classHasSkillProficiency(p.cls, stat, choice.skill)) profBonus = basePb;
     d20 = Math.floor(Math.random() * 20) + 1;
-    total = d20 + mod;
+    total = d20 + mod + profBonus;
     success = total >= choice.dc;
   }
 
@@ -41110,8 +41219,9 @@ function _resolveCityJourneyHazard(hazard, choice) {
     if (hasCheck) {
       var sign = mod >= 0 ? '+' : '';
       var statName = CITY_STAT_NAMES_PT[stat] || stat.toUpperCase();
+      var profLabel = profBonus > 0 ? (' +' + profBonus + ' (proficiência)') : '';
       checkEl.innerHTML =
-        '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + statName + ') = ' + total + ' vs DC ' + choice.dc + '</div>' +
+        '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + statName + ')' + profLabel + ' = ' + total + ' vs DC ' + choice.dc + '</div>' +
         '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
         (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
     }
@@ -41122,13 +41232,18 @@ function _resolveCityJourneyHazard(hazard, choice) {
     _journeyAppendScriptLine(narrEl, { type: 'narration', text: narrative }, 0);
 
     if (!success) {
-      var dmg = choice.dmg || 3;
+      // 2026-05-12 BUG #5: choice.dmg || 3 fazia dmg=0 virar 3 (zero falsy!).
+      // Choices que explicitamente dizem "sem dano" (Aceitar gentileza) eram
+      // punidas com -3 HP. Agora preserva 0; default reduzido 3 → 1 (balanc.).
+      var dmg = (choice.dmg != null) ? choice.dmg : 1;
       if (p) p.hp = Math.max(0, (p.hp || 0) - dmg);
       if (typeof refreshHud === 'function') refreshHud();
-      var dmgDiv = document.createElement('div');
-      dmgDiv.style.cssText = 'margin-top:8px;color:#d85848;font-size:12px;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px';
-      dmgDiv.textContent = '−' + dmg + ' HP';
-      narrEl.appendChild(dmgDiv);
+      if (dmg > 0) {
+        var dmgDiv = document.createElement('div');
+        dmgDiv.style.cssText = 'margin-top:8px;color:#d85848;font-size:12px;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px';
+        dmgDiv.textContent = '−' + dmg + ' HP';
+        narrEl.appendChild(dmgDiv);
+      }
     }
     var nextDelay = _journeyRevealDur(narrative) + 400;
     setTimeout(function() {
