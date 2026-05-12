@@ -16445,7 +16445,9 @@ function _showSharedNpcListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = (opts.icon || '🔍') + ' ' + opts.title;
+  // 2026-05-12 BUG #2: opts.icon pode vir de _heralIco() (string SVG) ou ser
+  // emoji simples. .textContent escapa HTML. Usar .innerHTML pra renderizar.
+  if (titleEl) titleEl.innerHTML = (opts.icon || '🔍') + ' ' + _hubEsc(opts.title);
   var html = '<div class="city-subscreen">';
   if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
   html += '<div class="bnk-item-list">';
@@ -26843,7 +26845,8 @@ function _bankShowItemListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
+  // 2026-05-12 BUG #2: opts.icon pode ser SVG via _heralIco(). Render via innerHTML.
+  if (titleEl) titleEl.innerHTML = (opts.icon || '') + ' ' + _hubEsc(opts.title);
   bodyEl.innerHTML = '';
   var html = '<div class="city-subscreen">'
     + '<p class="subscreen-flavor">' + (opts.flavor || '') + '</p>'
@@ -27061,7 +27064,8 @@ function _squareShowListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
+  // 2026-05-12 BUG #2: opts.icon pode ser SVG via _heralIco(). Render via innerHTML.
+  if (titleEl) titleEl.innerHTML = (opts.icon || '') + ' ' + _hubEsc(opts.title);
   bodyEl.innerHTML = '';
   var html = '<div class="city-subscreen">';
   if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
@@ -33270,7 +33274,10 @@ function _showShopPopup(npcId){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = shop.icon + ' ' + shop.npc + ' — ' + shop.role;
+  // 2026-05-12 BUG #2: shop.icon vem de _heralIco() (string SVG) — .textContent
+  // escapava o HTML, fazendo SVG aparecer como texto literal "<svg viewBox..."
+  // no header. Usar .innerHTML pra renderizar SVG inline.
+  if (titleEl) titleEl.innerHTML = shop.icon + ' ' + _hubEsc(shop.npc) + ' — ' + _hubEsc(shop.role);
   // Reset shop filter ao abrir uma loja diferente
   window._currentShopNpcId = npcId;
   _renderShopPopup();
@@ -44440,7 +44447,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
       // por página. 2026-05-05 update: revelação HORIZONTAL (clip-path
       // wipe esquerda→direita) com duração dinâmica via --reveal-dur.
       // Sensação de "narrador desenhando o texto" no rolo do pergaminho.
+      // 2026-05-12 BUG #7 defensive: adicionado word-break/overflow-wrap pra
+      // garantir que long words nunca cortam mid-character. Era falso positivo
+      // (visual era animação reveal mid-progress), mas defensive CSS evita
+      // edge case futuro em textos com URLs/IDs longos sem space.
       + '.enc-line{font-size:16px;line-height:1.65;color:#d4c8b0;'
+      + '  word-break:normal;overflow-wrap:break-word;hyphens:none;'
       + '  clip-path:inset(0 100% 0 0);-webkit-clip-path:inset(0 100% 0 0);'
       + '  animation:encReveal var(--reveal-dur,1400ms) cubic-bezier(0.55,0.08,0.3,1) forwards}'
       + '@keyframes encReveal{'
