@@ -37827,22 +37827,26 @@ var SUBSCREEN_DATA = {
      - removido "Reivindicar parcial" (user request)
      - "Ver localização" agora abre cartografia com destaque
      - "Detalhes objetivos" agora abre modal completo */
+  // 2026-05-12 PADRAO_ALDRIC consistency pass: flavor em primeira pessoa do NPC
+  // (estilo diegético consistente com encounters da Praça/Taverna). Cada quest
+  // tem o mesmo formato de 4 botões: Ver localização / Detalhes / Entregar / Abandonar.
+  // npcInfo padronizado: "📋 Estágio X/Y · 👤 NPC · 📍 Local · 💰 Reward".
   'quest_open_wolves': {
     header: '🐺 Missão: Caçar Lobos Cinzentos',
-    flavor: 'Lobos atacam fazendeiros do norte. Mata 5 pra que a vila durma em paz.',
-    npcInfo: '📋 Estágio 2/5 — 2 lobos abatidos | Recompensa: 50 <span class="vi vi-coin sm"></span> + 80 XP',
+    flavor: '<i>Tavira ajusta o pergaminho do contrato.</i> "— Fazendeiros do norte mal dormem há semanas. Lobos cinzentos descem da floresta toda noite. Cinco abatidos e a alcateia recua — promessa antiga do meu pai."',
+    npcInfo: '📋 Estágio 2/5 · 👤 Tavira, a Mestra · 📍 Floresta dos Lobos · 💰 50 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Lobos', 'quest_wolves_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '5 lobos cinzentos', 'quest_wolves_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Tavira', 'completar quest', 'quest_wolves_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
   'quest_open_lyana': {
     header: '💬 Missão: Falar com Lyana',
-    flavor: 'Lyana, a herbalista, está na praça. Tens uma carta importante pra entregar.',
-    npcInfo: '✅ Pronta pra entregar | Recompensa: 20 <span class="vi vi-coin sm"></span> + 40 XP',
+    flavor: '<i>O pergaminho selado pesa no bolso.</i> "— Entrega esta carta nas próprias mãos de Lyana, na praça. Ela espera notícias da irmã há três luas. Não abre, não conta. Só entrega."',
+    npcInfo: '✅ Pronta pra entregar · 👤 Lyana, a Herbalista · 📍 Praça de Valdoria · 💰 20 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
-      /* X-6.5.51BH: Reler conteudo agora abre modal pergaminho com texto da carta */
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Praça de Valdoria', 'quest_lyana_locate'],
       [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
       [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar quest', 'quest_lyana_deliver'],
@@ -37850,83 +37854,105 @@ var SUBSCREEN_DATA = {
     ]
   },
 
-  // X-6.5.51AV (2026-05-11): SUBSCREEN_DATA das 7 quests de guild.
-  // Antes só wolves/lyana tinham — accept_q_* não levava a tela alguma.
-  // Agora, após _acceptQuest, player pode navegar pra estas telas via
-  // QUESTS_ACTIVE → 'quest_open_<id>' (renderQuestDiary já constrói esse cb).
+  // X-6.5.51AV (2026-05-11): SUBSCREEN_DATA das 7 quests de guild + 2 quests nv 2 (2026-05-12).
+  // PADRAO_ALDRIC v2 (2026-05-12): flavor em diálogo NPC primeira pessoa, npcInfo padronizado.
   'quest_open_goblins': {
     header: '🐺 Missão: Caçar 3 Goblins',
-    flavor: 'Goblins atacaram o moinho a oeste. Helga te mandou eliminar 3 pra restaurar a paz.',
-    npcInfo: '📋 Estágio 0/3 | NPC: Capitão Helga | Local: Moinho do Oeste | Recompensa: 25 <span class="vi vi-coin sm"></span> + 40 XP',
+    flavor: '<i>Capitã Helga aperta o ombro.</i> "— Goblins de novo. Moleiro do oeste já fala em fechar moinho. Mate três que servem de exemplo — tomara que os outros lembrem de fugir."',
+    npcInfo: '📋 Estágio 0/3 · 👤 Capitã Helga · 📍 Moinho do Oeste · 💰 25 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Moinho do Oeste, 1km', 'quest_goblins_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Moinho do Oeste, 1km', 'quest_goblins_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
       [_heralIco('ic-missoes'), 'Entregar provas a Helga', 'completar quest', 'quest_goblins_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
     ]
   },
   'quest_open_herbs': {
     header: '🌿 Missão: Coletar Ervas Raras',
-    flavor: 'Mestra Sylvi precisa de 5 raízes-da-noite do Bosque dos Sussurros pra suas poções.',
-    npcInfo: '📋 Estágio 0/5 | NPC: Mestra Sylvi | Local: Bosque dos Sussurros | Recompensa: 15 <span class="vi vi-coin sm"></span> + 25 XP',
+    flavor: '<i>Mestra Sylvi sorri abrindo um pequeno livro de folhas prensadas.</i> "— Raiz-da-noite. Cresce só onde a lua bate forte, no Bosque dos Sussurros. Cinco bastam pra meu próximo lote de poções. Cuidado com as criaturas que adoram folha noturna."',
+    npcInfo: '📋 Estágio 0/5 · 👤 Mestra Sylvi · 📍 Bosque dos Sussurros · 💰 15 <span class="vi vi-coin sm"></span> + 25 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Bosque dos Sussurros', 'quest_herbs_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Bosque dos Sussurros', 'quest_herbs_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
       [_heralIco('ic-missoes'), 'Entregar ervas a Sylvi', 'completar quest', 'quest_herbs_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
     ]
   },
+  // 2026-05-12 NOVA — quest nv 2 (preenche gap XP nv 1→2)
+  'quest_open_patrol': {
+    header: '👁️ Missão: Patrulhar Fronteira',
+    flavor: '<i>Vigia Tomás aponta pra estrada do leste com bastão de madeira.</i> "— Três carroças sumiram nas últimas noites. Não acho corpo, não acho roda. Caminha comigo até o amanhecer — preciso de outros olhos pra ver o que tá rondando."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Vigia Tomás · 📍 Estrada do Leste · 💰 35 <span class="vi vi-coin sm"></span> + 80 XP',
+    buttons: [
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Estrada do Leste', 'quest_patrol_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à patrulha', 'quest_patrol_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Tomás', 'completar quest', 'quest_patrol_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tomás', 'quest_patrol_abandon']
+    ]
+  },
+  // 2026-05-12 NOVA — quest nv 2 (preenche gap XP nv 1→2)
+  'quest_open_rat_den': {
+    header: '🐀 Missão: Limpar Cova de Ratos',
+    flavor: '<i>Padeiro Erlan limpa as mãos no avental coberto de farinha.</i> "— Já matei dois com pá. Restam quatro, do tamanho de gato grande. Porão da padaria virou ninho. Mata todos e te pago bem — quero meu forno de volta."',
+    npcInfo: '📋 Estágio 0/4 · 👤 Padeiro Erlan · 📍 Padaria do Distrito Velho · 💰 40 <span class="vi vi-coin sm"></span> + 100 XP',
+    buttons: [
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Padaria do Distrito Velho', 'quest_rat_den_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 4 ratos-gigantes', 'quest_rat_den_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Erlan', 'completar quest', 'quest_rat_den_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Erlan', 'quest_rat_den_abandon']
+    ]
+  },
   'quest_open_escort': {
     header: '🛡️ Missão: Escoltar Caravana',
-    flavor: 'Comerciante Brael precisa escolta até Valkrest. Bandidos rondam a Estrada Norte.',
-    npcInfo: '📋 Estágio 0/1 | NPC: Comerciante Brael | Local: Estrada Norte → Valkrest | Recompensa: 50 <span class="vi vi-coin sm"></span> + 60 XP',
+    flavor: '<i>Comerciante Brael aponta pra três carroções alinhados nos portões.</i> "— Bandidos andam soltos na Estrada Norte. Tenho mercadoria pra Valkrest que vale mais que minha vida. Te pago bem — se nada cair, nada se perde."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Comerciante Brael · 📍 Estrada Norte → Valkrest · 💰 50 <span class="vi vi-coin sm"></span> + 60 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Estrada Norte → Valkrest', 'quest_escort_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Estrada Norte → Valkrest', 'quest_escort_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
       [_heralIco('ic-missoes'), 'Reportar a Brael', 'completar quest', 'quest_escort_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
     ]
   },
   'quest_open_ruin': {
     header: '🏛️ Missão: Investigar Ruína Antiga',
-    flavor: 'Estudiosa Maeve quer mapas, pergaminhos e relíquias das ruínas de Karthal.',
-    npcInfo: '📋 Estágio 0/3 | NPC: Estudiosa Maeve | Local: Ruínas de Karthal | Recompensa: 80 <span class="vi vi-coin sm"></span> + 80 XP',
+    flavor: '<i>Estudiosa Maeve esfrega os óculos arredondados.</i> "— As ruínas de Karthal foram capital pré-imperial. Mortos-vivos guardam algo lá embaixo há séculos. Traga três relíquias ou pergaminhos — qualquer coisa serve pra catalogação."',
+    npcInfo: '📋 Estágio 0/3 · 👤 Estudiosa Maeve · 📍 Ruínas de Karthal · 💰 80 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Ruínas de Karthal', 'quest_ruin_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Ruínas de Karthal', 'quest_ruin_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
       [_heralIco('ic-missoes'), 'Entregar achados a Maeve', 'completar quest', 'quest_ruin_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
     ]
   },
   'quest_open_bandit_lord': {
     header: '👹 Missão: Matar Líder Bandido',
-    flavor: 'Vargrim, o Cicatriz, lidera os bandidos do Forte. Helga oferece recompensa pela cabeça dele.',
-    npcInfo: '📋 Estágio 0/1 | NPC: Capitão Helga | Local: Forte dos Bandidos | Recompensa: 150 <span class="vi vi-coin sm"></span> + 150 XP',
+    flavor: '<i>Capitã Helga estende um cartaz de procurado.</i> "— Vargrim, o Cicatriz. Dois machados, marca no rosto, lidera o Forte. Tenta vivo, mas prefiro morto — gente nesse calibre não acorda do mesmo jeito atrás das grades."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Forte dos Bandidos · 💰 150 <span class="vi vi-coin sm"></span> + 150 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
-      [_heralIco('ic-missoes'), 'Reportar cabeça a Helga', 'completar quest', 'quest_bandit_lord_deliver'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar quest', 'quest_bandit_lord_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
     ]
   },
   'quest_open_dragonet': {
     header: '🐲 Missão: Caçar Dragonete',
-    flavor: 'Dragonete vermelha aterroriza a Cratera Vulcânica. Aldric te avisa do perigo.',
-    npcInfo: '📋 Estágio 0/1 | NPC: Conselheiro Aldric | Local: Cratera Vulcânica | Recompensa: 300 <span class="vi vi-coin sm"></span> + 250 XP',
+    flavor: '<i>Conselheiro Aldric baixa a voz e olha pra cratera no horizonte.</i> "— Filhote, sim. Mas filhote de dragão queima rebanho inteiro num sopro. Cinco fazendas perdidas em duas luas. Antes que cresça e vire problema do reino — é seu agora."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Conselheiro Aldric · 📍 Cratera Vulcânica · 💰 300 <span class="vi vi-coin sm"></span> + 250 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Cratera Vulcânica', 'quest_dragonet_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Cratera Vulcânica', 'quest_dragonet_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
       [_heralIco('ic-missoes'), 'Reportar a Aldric', 'completar quest', 'quest_dragonet_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
     ]
   },
   'quest_open_defend': {
     header: '🏰 Missão: Defender Vila do Leste',
-    flavor: 'Aldeia-do-Lago sob ataque iminente de orcs. Você tem 3 dias pra chegar.',
-    npcInfo: '📋 Estágio 0/1 | NPC: Capitão Helga | Local: Aldeia-do-Lago | Recompensa: 500 <span class="vi vi-coin sm"></span> + 400 XP',
+    flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Aldeia-do-Lago, três dias de marcha. Orcs do leste avançam em força. Vila precisa de heróis até depois de amanhã — depois disso é cinzas."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Aldeia-do-Lago · 💰 500 <span class="vi vi-coin sm"></span> + 400 XP',
     buttons: [
-      [_heralIco('ic-missoes'), 'Ver localização', 'Aldeia-do-Lago', 'quest_defend_locate'],
-      [_heralIco('ic-missoes'), 'Detalhes objetivos', 'defender a vila', 'quest_defend_details'],
+      [_heralIco('ic-cartografia'), 'Ver localização', 'Aldeia-do-Lago', 'quest_defend_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a vila', 'quest_defend_details'],
       [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar quest', 'quest_defend_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
     ]
@@ -38963,6 +38989,12 @@ var ACTION_HANDLERS = {
   'quest_lyana_abandon': function(p){
     _abandonQuest('lyana', 'Falar com Lyana', '-5 afinidade com Lyana');
   },
+  // 2026-05-12 PADRAO_ALDRIC consistency: adicionado handler quest_wolves_deliver
+  // pra que o botão "Reportar a Tavira" funcione (era inconsistente — só wolves
+  // não tinha entregar, todas as outras quests tem).
+  'quest_wolves_deliver': function(p){
+    _deliverQuest('wolves', 50, 80, '🐺 Tavira aceita os trofeus dos lobos. +50 Valdoritas +80 XP. A alcateia recua. Missão completa!');
+  },
   'quest_wolves_abandon': function(p){
     _abandonQuest('wolves', 'Caçar Lobos Cinzentos', '-5 afinidade com Tavira (caçadora)');
   },
@@ -38995,6 +39027,18 @@ var ACTION_HANDLERS = {
   'quest_herbs_details':        function(p){ vToast('📜 Coletar 5 raízes-da-noite. Recompensa: 15 Valdoritas + 25 XP.'); },
   'quest_herbs_deliver':        function(p){ _deliverQuest('herbs', 15, 25, '🌿 Sylvi inspeciona as raízes e sorri. +15 Valdoritas +25 XP. Missão completa!'); },
   'quest_herbs_abandon':        function(p){ _abandonQuest('herbs', 'Coletar Ervas Raras', '-5 afinidade com Mestra Sylvi'); },
+  // 2026-05-12 PATROL — quest nv 2 nova (preenche gap XP nv 1→2)
+  'quest_open_patrol':          function(p){ navigateTo('quest_open_patrol'); },
+  'quest_patrol_locate':        function(p){ vToast('📍 Estrada do Leste — carroças sumindo nas noites.'); },
+  'quest_patrol_details':       function(p){ vToast('📜 Sobreviver à patrulha noturna. Recompensa: 35 Valdoritas + 80 XP.'); },
+  'quest_patrol_deliver':       function(p){ _deliverQuest('patrol', 35, 80, '👁️ Tomás aperta tua mão ao amanhecer. +35 Valdoritas +80 XP. Patrulha sobreviveu — missão completa!'); },
+  'quest_patrol_abandon':       function(p){ _abandonQuest('patrol', 'Patrulhar Fronteira', '-5 afinidade com Vigia Tomás'); },
+  // 2026-05-12 RAT_DEN — quest nv 2 nova (preenche gap XP nv 1→2)
+  'quest_open_rat_den':         function(p){ navigateTo('quest_open_rat_den'); },
+  'quest_rat_den_locate':       function(p){ vToast('📍 Padaria do Distrito Velho — porão virou ninho de ratos-gigantes.'); },
+  'quest_rat_den_details':      function(p){ vToast('📜 Matar 4 ratos-gigantes. Recompensa: 40 Valdoritas + 100 XP.'); },
+  'quest_rat_den_deliver':      function(p){ _deliverQuest('rat_den', 40, 100, '🐀 Erlan ri aliviado entregando o pagamento. +40 Valdoritas +100 XP. Forno limpo — missão completa!'); },
+  'quest_rat_den_abandon':      function(p){ _abandonQuest('rat_den', 'Limpar Cova de Ratos', '-5 afinidade com Padeiro Erlan'); },
   // ESCORT
   'quest_open_escort':          function(p){ navigateTo('quest_open_escort'); },
   'quest_escort_locate':        function(p){ vToast('📍 Estrada Norte rumo a Valkrest. Bandidos rondam.'); },
@@ -42549,6 +42593,37 @@ var RECURRING_NPCS = {
     name: 'Garrick, o Caçador',
     portrait: 'ic-patrulheiro',
     desc: 'Patrulheiro humano, capa de pele, arco às costas.'
+  },
+  // 2026-05-12 NPCs das missões da Guilda (PADRAO_ALDRIC consistency)
+  helga: {
+    name: 'Capitã Helga',
+    portrait: 'ic-guerreiro',
+    desc: 'Capitã da Guarda, voz firme, mão calejada. Veterana de três cercos.'
+  },
+  sylvi: {
+    name: 'Mestra Sylvi',
+    portrait: 'ic-druida',
+    desc: 'Herbalista de vestes verdes, dedos manchados de seiva. Conhece cada planta da floresta.'
+  },
+  brael: {
+    name: 'Comerciante Brael',
+    portrait: 'ic-ladino',
+    desc: 'Mercador rotineiro, mãos calosas das rédeas. Cinco carroções, três rotas.'
+  },
+  maeve: {
+    name: 'Estudiosa Maeve',
+    portrait: 'ic-mago',
+    desc: 'Erudita de óculos arredondados, pergaminhos sob o braço. Especialista em ruínas pré-imperiais.'
+  },
+  lyana: {
+    name: 'Lyana, a Herbalista',
+    portrait: 'ic-druida',
+    desc: 'Herbalista jovem, trança escura, cesto de raízes ao lado. Atende na praça pela manhã.'
+  },
+  tavira: {
+    name: 'Tavira, a Mestra',
+    portrait: 'ic-paladino',
+    desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.'
   }
 };
 
