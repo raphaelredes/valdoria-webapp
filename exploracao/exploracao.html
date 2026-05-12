@@ -38903,10 +38903,21 @@ function updateHud() {
     }
   }
   // X-6.5.51k: XP bar (level + progresso pro proximo nivel)
+  // 2026-05-12 BUG FIX: p.xp é CUMULATIVO (ex: 4468 pra um Nv 4), mas xpNext
+  // retorna a BAND WIDTH do nível atual (ex: 3800 entre Nv 4 e Nv 5).
+  // Antes mostrava "4468/300" (cumulativo vs band do Nv 1) — agora subtrai
+  // o threshold do nível atual pra ter o XP DENTRO do nível: "1768/3800".
   if (typeof p.level !== 'number') p.level = 1;
   if (typeof p.xp !== 'number') p.xp = 0;
+  // Auto-promote level se XP cumulativo passou do threshold do próximo nível
+  // (defesa contra estado dessincronizado vindo do backend/transition).
+  while (p.level < XP_THRESHOLDS.length - 1 && p.xp >= XP_THRESHOLDS[p.level]) {
+    p.level++;
+  }
+  const xpLevelBase = XP_THRESHOLDS[p.level - 1] || 0;
+  const xpInLevel = Math.max(0, p.xp - xpLevelBase);
   const xpNext = xpForNextLevel(p.level);
-  setBarFill('xp-fill', 'xp-val', p.xp, xpNext, 'xp');
+  setBarFill('xp-fill', 'xp-val', xpInLevel, xpNext, 'xp');
   const lvlEl = document.getElementById('hud-level');
   if (lvlEl) lvlEl.textContent = 'N' + p.level;
   // V2.5: gold visível no HUD (steps-val removido — steps-val element já não existe)

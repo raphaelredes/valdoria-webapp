@@ -2085,52 +2085,85 @@ LOG SINK (Fase 7):
     .inn-room-choice-btn:active { transform: scale(0.96); }
     .inn-room-choice-cancel { color: #a09484; border-color: #4a3828; font-size: var(--v-font-xs, 11px); }
 
-    /* === Inn Rest Tiles (3 quartos visuais — replica .inn-room-grid do bot DEV) === */
+    /* === Inn Rest Tiles (3 quartos visuais — replica .cloc-card do city hub) ===
+       2026-05-12: redesign pra alinhar com pattern dos cards do hub principal.
+       Mais respiráveis (padding maior), divider entre seções, badge de benefício. */
     .inn-rest-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin: 14px 0 18px;
+      gap: var(--v-space-md, 8px);
+      margin: var(--v-space-md, 8px) 0 var(--v-space-md-lg, 10px);
     }
     .inn-rest-tile {
-      background: linear-gradient(180deg, rgba(40,32,24,0.95), rgba(22,18,14,0.95));
-      border: 1.5px solid #4a3828;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--v-space-xs, 2px);
+      padding: var(--v-space-md-lg, 10px) var(--v-space-sm, 6px) var(--v-space-md, 8px);
+      background: linear-gradient(180deg,
+        rgba(58,46,32,0.55) 0%,
+        rgba(42,30,18,0.65) 100%);
+      border: 1px solid var(--v-border, #4a3828);
       border-radius: var(--v-radius, 10px);
-      padding: 14px 8px;
-      text-align: center;
       cursor: pointer;
-      transition: border-color 0.18s, transform 0.15s, box-shadow 0.18s;
+      transition: background var(--v-transition-fast, 0.15s) ease,
+                  border-color var(--v-transition-fast, 0.15s) ease,
+                  transform var(--v-transition-fast, 0.15s) ease,
+                  box-shadow var(--v-transition-fast, 0.15s) ease;
       position: relative;
+      min-height: 110px;
+      -webkit-tap-highlight-color: transparent;
+      text-align: center;
     }
     .inn-rest-tile:hover {
-      border-color: #c4953a;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(196,149,58,0.3);
+      background: linear-gradient(180deg,
+        rgba(74,56,40,0.65) 0%,
+        rgba(58,42,26,0.75) 100%);
+      border-color: var(--v-gold, #c4953a);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(196,149,58,0.25);
+    }
+    .inn-rest-tile:active {
+      transform: scale(0.97);
+      background: var(--v-bg-sel, #3a2e1a);
     }
     .inn-rest-tile-ico {
-      font-size: 32px;
-      margin-bottom: 8px;
-      filter: drop-shadow(0 0 6px rgba(196,149,58,0.3));
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--v-space-xs, 2px);
+      filter: drop-shadow(0 0 6px rgba(196,149,58,0.25));
     }
+    .inn-rest-tile-ico svg { width: 100%; height: 100%; }
     .inn-rest-tile-name {
-      font-family: 'Cinzel', serif;
-      color: #c4953a;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      color: var(--v-gold, #c4953a);
       font-size: var(--v-font-sm, 12px);
       letter-spacing: 0.08em;
-      margin-bottom: 4px;
+      font-weight: 700;
       text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .inn-rest-tile-divider {
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(196,149,58,0.35), transparent);
+      margin: 4px 0 2px;
     }
     .inn-rest-tile-cost {
-      color: #d4c8b0;
+      color: var(--v-text, #d4c8b0);
       font-size: var(--v-font-xs, 11px);
+      font-weight: 600;
     }
-    .inn-rest-tile-cost.free { color: #88c878; font-weight: 700; }
+    .inn-rest-tile-cost.free { color: #7cdb7c; font-weight: 700; }
     .inn-rest-tile-desc {
-      color: #a09484;
+      color: var(--v-text-dim, #a09484);
       font-style: italic;
       font-size: var(--v-font-micro, 10px);
-      margin-top: 6px;
-      line-height: 1.4;
+      margin-top: 2px;
+      line-height: 1.3;
     }
     /* Original footer-collapsible removido — substituído por #bottom-panel */
     #footer-collapsible { display: none; }
@@ -36675,6 +36708,8 @@ function _renderInnRestPopup(bodyEl, d){
     var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
     return '<svg viewBox="0 0 120 120" style="width:42px;height:42px;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
+  // 2026-05-12 USER REQUEST: redesign cards estilo .cloc-card do city hub
+  // (mais respiráveis, divider gold entre nome e custo, padding maior).
   bodyEl.innerHTML = ''
     + '<div class="city-subscreen">'
     + '  <p class="subscreen-flavor">' + (d.flavor || '') + '</p>'
@@ -36682,18 +36717,21 @@ function _renderInnRestPopup(bodyEl, d){
     + '    <div class="inn-rest-tile" data-room="stable">'
     + '      <div class="inn-rest-tile-ico">' + _innIco('ic-cavalo') + '</div>'
     + '      <div class="inn-rest-tile-name">Estábulo</div>'
+    + '      <div class="inn-rest-tile-divider"></div>'
     + '      <div class="inn-rest-tile-cost free">Grátis</div>'
     + '      <div class="inn-rest-tile-desc">Palha dura, mas seguro</div>'
     + '    </div>'
     + '    <div class="inn-rest-tile" data-room="common">'
     + '      <div class="inn-rest-tile-ico">' + _innIco('ic-estalagem') + '</div>'
     + '      <div class="inn-rest-tile-name">Comum</div>'
+    + '      <div class="inn-rest-tile-divider"></div>'
     + '      <div class="inn-rest-tile-cost">3 Valdoritas</div>'
     + '      <div class="inn-rest-tile-desc">Cama macia, padrão</div>'
     + '    </div>'
     + '    <div class="inn-rest-tile" data-room="royal">'
     + '      <div class="inn-rest-tile-ico">' + _innIco('ic-coroa') + '</div>'
     + '      <div class="inn-rest-tile-name">Suíte Real</div>'
+    + '      <div class="inn-rest-tile-divider"></div>'
     + '      <div class="inn-rest-tile-cost">10 Valdoritas</div>'
     + '      <div class="inn-rest-tile-desc">Descanso luxuoso</div>'
     + '    </div>'
@@ -36732,6 +36770,70 @@ function _hasLivingAllies(){
   return false;
 }
 
+// 2026-05-12 USER REQUEST: helper pra checar se TODOS do grupo (player + aliados
+// vivos) estão com HP cheio. Usado pra mostrar confirmação antes de reservar
+// quarto pra grupo (evita gasto de gold desnecessário).
+function _isAllPartyHpFull(){
+  if (typeof GROUP_MEMBERS === 'undefined') return false;
+  for (var i = 0; i < GROUP_MEMBERS.length; i++) {
+    var m = GROUP_MEMBERS[i];
+    if (!m || m.dead) continue;
+    var hp = (typeof m.hp === 'number') ? m.hp : 0;
+    var hpMax = (typeof m.hpMax === 'number') ? m.hpMax : hp;
+    var mp = (typeof m.mp === 'number') ? m.mp : 0;
+    var mpMax = (typeof m.mpMax === 'number') ? m.mpMax : mp;
+    var exh = (typeof m.exh === 'number') ? m.exh : 0;
+    if (hp < hpMax) return false;
+    if (mp < mpMax) return false;
+    if (exh > 0) return false;
+  }
+  return true;
+}
+
+// 2026-05-12 USER REQUEST: popup de confirmação quando jogador escolhe Grupo
+// no quarto, mas todos já estão com HP/MP cheio. Pergunta se quer mesmo gastar.
+function _confirmGroupRestHpFull(room){
+  if (typeof _showInfoPopup !== 'function') {
+    // Fallback se _showInfoPopup não existir (não deveria acontecer)
+    _onInnRestClick(room, 'group');
+    return;
+  }
+  var roomCosts = { stable: 0, common: 3, royal: 10 };
+  var roomNames = { stable: 'Estábulo', common: 'Quarto Comum', royal: 'Suíte Real' };
+  var cost = roomCosts[room] || 0;
+  var roomName = roomNames[room] || 'Quarto';
+  var costLine = cost > 0
+    ? '<div style="margin-top:8px;color:var(--v-text-dim,#a09484);">Custo: <b style="color:#c4953a;">' + cost + ' Valdoritas</b></div>'
+    : '<div style="margin-top:8px;color:var(--v-text-dim,#a09484);">Custo: <b style="color:#7cdb7c;">Grátis</b></div>';
+  // Lista dos membros — todos full
+  var memberLines = '';
+  for (var i = 0; i < GROUP_MEMBERS.length; i++) {
+    var m = GROUP_MEMBERS[i];
+    if (!m || m.dead) continue;
+    memberLines += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">'
+                +    '<span style="color:var(--v-text,#d4c8b0);">' + (m.name || '?') + '</span>'
+                +    '<span style="color:#7cdb7c;">' + (m.hp||0) + '/' + (m.hpMax||0) + ' HP</span>'
+                +  '</div>';
+  }
+  _showInfoPopup({
+    icon: _heralIco('ic-sono'),
+    npc: 'Martha — Estalagem Grifo Dourado',
+    title: 'Grupo já descansado?',
+    desc: '<div style="text-align:left;line-height:1.5;">'
+        + '<p style="margin:0 0 10px;color:var(--v-text,#d4c8b0);">'
+        + '<i>Martha levanta uma sobrancelha.</i> "Aventureiro... seu grupo todo já está descansado. HP cheio, MP cheio, sem exaustão. Tem certeza que precisa do <b>' + roomName + '</b> pra todo mundo?"'
+        + '</p>'
+        + '<div style="background:rgba(196,149,58,0.08);border:1px solid rgba(196,149,58,0.25);border-radius:6px;padding:8px 12px;margin:8px 0;">'
+        + memberLines
+        + '</div>'
+        + costLine
+        + '</div>',
+    confirmLabel: '✓ Sim, reservar mesmo assim',
+    cancelLabel: 'Voltar',
+    onConfirm: function(){ _onInnRestClick(room, 'group'); }
+  });
+}
+
 // Inline choice overlay dentro do tile (replica game-inn.js#_showRoomChoice).
 // Toggle: clica de novo no mesmo tile fecha; clica em outro tile fecha o atual.
 function _showRoomChoice(tile, room){
@@ -36762,7 +36864,14 @@ function _showRoomChoice(tile, room){
   group.addEventListener('click', function(e){
     e.stopPropagation();
     overlay.remove();
-    _onInnRestClick(room, 'group');
+    // 2026-05-12 USER REQUEST: se todos do grupo estão com HP cheio, confirma
+    // antes de reservar quarto pra grupo (evita desperdiço de gold).
+    var allFull = _isAllPartyHpFull();
+    if (allFull) {
+      _confirmGroupRestHpFull(room);
+    } else {
+      _onInnRestClick(room, 'group');
+    }
   });
   overlay.appendChild(group);
   // Cancelar
@@ -41061,6 +41170,122 @@ var CITY_STAT_NAMES_PT = {
   int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma'
 };
 
+// ═══════════════════════════════════════════════════════════════════════
+// CITY_JOURNEY_DEPARTURES v12.7 (2026-05-12) — narrativa épica de partida
+// ═══════════════════════════════════════════════════════════════════════
+// USER REQUEST: "a tela de ida a algum local que começa com título 'Rumo a
+// Campos Verdes' por exemplo ser mais épica ter narrativa no nivel PADRAO_ALDRIC".
+//
+// 2-3 linhas script[] PADRAO_ALDRIC por bioma, mostradas ANTES da primeira
+// etapa (transição cinematográfica saindo dos portões). Cada bioma tem 3
+// variantes pra evitar repetição. Após reveal completar, botão "Partir →"
+// inicia step 1 (hazard ou safe).
+var CITY_JOURNEY_DEPARTURES = {
+  forest: [
+    [
+      { type: 'narration', text: 'Os portões de Eldoria fecham-se atrás de vocês com um eco grave de ferro. À frente, a estrada serpenteia rumo à <b>linha verde</b> da floresta — antiga, viva, paciente.' },
+      { type: 'narration', text: 'Cheira a chuva no solo úmido, mesmo sem chuva caindo. O ar adoça nos pulmões; as copas distantes parecem respirar lentamente.' },
+      { type: 'narration', text: 'O caminho não promete velocidade — promete <i>encontros</i>. Vocês ajustam as mochilas, conferem armas, e seguem.' }
+    ],
+    [
+      { type: 'narration', text: 'A última muralha de Eldoria desbota nas suas costas. Você sente o peso do conforto urbano se afastar a cada passo.' },
+      { type: 'narration', text: 'A trilha cruza um campo aberto e mergulha num <i>corredor de carvalhos</i>. A luz muda — dourada para verde-musgo. O silêncio muda também: não é vazio, é <b>atenção</b>.' },
+      { type: 'narration', text: 'Algo na floresta sabe que vocês chegaram. Algo sempre sabe.' }
+    ],
+    [
+      { type: 'narration', text: 'Um sino tardio toca em algum templo da cidade — o último som humano que vocês ouvirão por horas.' },
+      { type: 'narration', text: 'A floresta engole o caminho aos poucos. Galhos baixos roçam capacetes. Raízes erguem o solo como dedos antigos pedindo passagem.' },
+      { type: 'narration', text: '<i>Cada aventureiro experiente para um instante aqui</i> — pra lembrar que o mato não esquece quem entra.' }
+    ]
+  ],
+  plains: [
+    [
+      { type: 'narration', text: 'Os portões ficam pra trás. À frente, o horizonte se estende plano como um pergaminho dourado — <b>Campos Verdes</b> não tem segredo, só distância.' },
+      { type: 'narration', text: 'O vento ondula o trigal em padrões hipnóticos. Camponeses distantes acenam de cabeça baixa, sem parar o trabalho.' },
+      { type: 'narration', text: 'A estrada é boa. Mas <i>boa estrada é onde bandidos esperam</i> — diziam os veteranos. Vocês mantêm a mão perto da empunhadura.' }
+    ],
+    [
+      { type: 'narration', text: 'Vocês cruzam a ponte de pedra que marca a fronteira da cidade. O rio corre baixo embaixo — promessa de água potável até o destino.' },
+      { type: 'narration', text: 'O céu é amplo demais aqui. Sem florestas que oprimam, sem montanhas que orientem — só a estrada, o sol e o canto distante das cotovias.' },
+      { type: 'narration', text: 'Liberdade tem um preço: vocês são <b>visíveis</b> a léguas de distância. Quem precisa se esconder, escolhe outras rotas.' }
+    ],
+    [
+      { type: 'narration', text: 'A última carroça de mercadores cruza vocês em direção à cidade. O carroceiro inclina o chapéu, mas o olhar é <i>de aviso</i>: "Cuidado com o leste."' },
+      { type: 'narration', text: 'A estrada se desenrola plana até onde a vista alcança. Marcadores de pedra antigos pontuam a trilha — alguns inteiros, outros caídos há gerações.' },
+      { type: 'narration', text: 'Vocês seguem em ritmo firme. As planícies não perdoam quem para sem motivo.' }
+    ]
+  ],
+  swamp: [
+    [
+      { type: 'narration', text: 'O solo muda sob os pés antes mesmo de vocês perceberem — terra firme dá lugar a <i>turfa fofa</i> que afunda um centímetro por passo.' },
+      { type: 'narration', text: 'O cheiro chega primeiro: barro doce de apodrecimento, água parada, algo orgânico que o cérebro identifica como "evitar".' },
+      { type: 'narration', text: 'A neblina não dissipa — só muda de altura. <b>Pântano</b>, dizem os antigos, <i>é a terra que se recusa a escolher entre água e terra</i>. Vocês entram.' }
+    ],
+    [
+      { type: 'narration', text: 'Os portões de Eldoria sumiram dentro de uma neblina baixa que não devia existir nessa hora. Pântano começa cedo aqui, vocês percebem.' },
+      { type: 'narration', text: 'Sapos calam quando vocês passam. Voltam a coaxar três metros depois. <i>Um sistema de aviso natural</i> — funcionando contra vocês.' },
+      { type: 'narration', text: 'A trilha some e reaparece entre raízes. Quem chega vivo aqui caminha devagar e ouve mais que olha.' }
+    ]
+  ],
+  mountain: [
+    [
+      { type: 'narration', text: 'A estrada inclina antes que vocês esperem. Em meia hora, Eldoria é um ponto distante de luz amarela ao pé do vale.' },
+      { type: 'narration', text: 'O ar fica fino. Cada respiração custa um pouco mais. As primeiras rochas das <b>Montanhas</b> assomam à frente como dentes velhos de um mundo antigo.' },
+      { type: 'narration', text: 'Águias circulam alto. Elas <i>já sabem</i> antes de vocês — sempre sabem.' }
+    ],
+    [
+      { type: 'narration', text: 'A trilha de cabras é estreita, mas firme. Vocês ajustam as mochilas — o que era confortável na cidade aqui castiga ombros.' },
+      { type: 'narration', text: 'Vento gélido desce dos picos mesmo agora. Capas tremulam, dedos engelidam. Cada metro de altitude é um grau a menos.' },
+      { type: 'narration', text: '<i>Montanhas não negociam.</i> Quem entra aceita os termos delas.' }
+    ]
+  ],
+  desert: [
+    [
+      { type: 'narration', text: 'Vocês atravessam o último oásis de palmeiras antes do <b>Deserto Dourado</b>. A última água por horas. Cada cantil é selado e contado.' },
+      { type: 'narration', text: 'O calor bate como uma porta. Areia entra na boca antes de qualquer fala. O sol é uma moeda branca pregada no céu azul-metal.' },
+      { type: 'narration', text: '<i>Não corra</i> — diz a regra antiga. <i>O deserto não vence quem caminha; vence quem corre.</i>' }
+    ],
+    [
+      { type: 'narration', text: 'A estrada de pedra termina onde a areia começa. A partir daqui, marcos são as <b>únicas referências</b> — esquecer um significa morrer.' },
+      { type: 'narration', text: 'Vocês embrulham rostos contra o vento abrasivo. A sombra própria é a única companhia constante; tudo mais aqui muda, evapora ou some.' },
+      { type: 'narration', text: 'Pegadas de camelos antigos cruzam a trilha — semanas, talvez meses. <i>Quem passou, passou inteiro?</i> O deserto não responde.' }
+    ]
+  ],
+  snow: [
+    [
+      { type: 'narration', text: 'A neve range sob as botas desde o primeiro passo fora dos portões. Capuzes erguidos, cachecóis amarrados, exalações brancas como pequenos fantasmas.' },
+      { type: 'narration', text: 'O céu é prata baixo e pesado. <i>Vai nevar antes do fim do dia</i>, vocês percebem juntos, sem palavras.' },
+      { type: 'narration', text: 'O frio aqui não é desconforto — é <b>predador</b>. Quem não anda, vira pedra.' }
+    ]
+  ],
+  cave: [
+    [
+      { type: 'narration', text: 'A entrada da caverna se abre como uma boca antiga. <b>Frio</b> que vem de dentro encontra <i>calor</i> que vem de fora — neblina nasce no limiar exato.' },
+      { type: 'narration', text: 'Tochas acesas. Olhares trocados. <i>Quem desce, desce inteiro?</i> A piada veterana cai sem graça hoje.' },
+      { type: 'narration', text: 'O som dos passos muda assim que vocês atravessam — agora ecoa contra paredes invisíveis. A caverna registra cada movimento.' }
+    ]
+  ],
+  graveyard: [
+    [
+      { type: 'narration', text: 'O caminho até o cemitério é silencioso por convenção. Não cantam, não conversam alto — <i>respeito</i>, dizem os ortodoxos. <b>Medo</b>, sabem os realistas.' },
+      { type: 'narration', text: 'Corvos pousam nas cercas baixas, contando os que entram. Não há sino, não há sentinela. Só o vento entre as lápides distantes.' },
+      { type: 'narration', text: 'O ar muda na fronteira do campo santo. Fica <i>denso</i>, como se respirasse pra fora do solo. Vocês ajustam armas e seguem.' }
+    ]
+  ],
+  volcanic: [
+    [
+      { type: 'narration', text: 'A trilha sobe entre rochas escuras. Cinzas finas começam a cair três quilômetros antes — neve negra que se acumula nos ombros.' },
+      { type: 'narration', text: 'O cheiro de enxofre já irrita os olhos. <b>Cratera Vulcânica</b> à frente, fumegando como uma ferida aberta da própria terra.' },
+      { type: 'narration', text: '<i>O calor vem de baixo</i> — é o que assusta. Não é sol, é o coração do mundo respirando.' }
+    ]
+  ]
+};
+
+function _pickCityDeparture(biome) {
+  var pool = CITY_JOURNEY_DEPARTURES[biome] || CITY_JOURNEY_DEPARTURES.forest;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 var _cityJourney = null;
 
 function startCityJourney(biome, displayName, finalUrl) {
@@ -41089,7 +41314,53 @@ function startCityJourney(biome, displayName, finalUrl) {
       _logCity('biome music started: ' + biome);
     }
   } catch (e) { _logCity('biome music failed: ' + e.message); }
-  _showCityJourneyStep();
+  // 2026-05-12 USER REQUEST: narrativa épica de partida PADRAO_ALDRIC antes
+  // do step 1 (saída cinematográfica dos portões). _showCityJourneyDeparture
+  // renderiza 2-3 linhas script[] com reveal sequencial + botão "Partir →".
+  _showCityJourneyDeparture();
+}
+
+// 2026-05-12 USER REQUEST: tela épica de partida — narração PADRAO_ALDRIC
+// antes da primeira etapa. Mostra 2-3 linhas com reveal cinematográfico
+// e botão "Partir →" que inicia step 1.
+function _showCityJourneyDeparture() {
+  var j = _cityJourney;
+  if (!j) return;
+  var subEl = document.getElementById('journey-subtitle');
+  if (subEl) subEl.textContent = 'Saída de Eldoria · Rumo desconhecido';
+  // Progress bar inicial (0%)
+  var pEl = document.getElementById('journey-progress');
+  if (pEl) {
+    var dots = '';
+    for (var i = 1; i <= j.totalSteps; i++) {
+      dots += '<div class="journey-progress-dot"></div>';
+    }
+    pEl.innerHTML =
+      '<div class="journey-progress-bar"><div class="journey-progress-fill" style="width:0%"></div></div>' +
+      '<div class="journey-progress-dots">' + dots + '</div>';
+  }
+  var narrEl = document.getElementById('journey-narration');
+  var checkEl = document.getElementById('journey-check');
+  var footEl = document.getElementById('journey-footer');
+  var diceEl = document.getElementById('journey-dice-wrap');
+  if (checkEl) checkEl.innerHTML = '';
+  if (footEl) footEl.innerHTML = '';
+  if (diceEl) { diceEl.classList.remove('active'); diceEl.innerHTML = ''; }
+  if (!narrEl) { _showCityJourneyStep(); return; }
+  // Badge "Partida" no topo
+  narrEl.innerHTML = '<div class="journey-step-badge safe">⚜ Partida</div>';
+  var script = _pickCityDeparture(j.biome);
+  var cumulativeDelay = 0;
+  script.forEach(function(line) {
+    var dur = _journeyAppendScriptLine(narrEl, line, cumulativeDelay);
+    cumulativeDelay += Math.round(dur * 0.55);
+  });
+  var totalReveal = cumulativeDelay + 250;
+  // Botão "Partir →" após reveal completar
+  setTimeout(function() {
+    _addCityJourneyBtn(footEl, '⚔️', 'Partir', 'Começar a jornada rumo a ' + j.displayName, '',
+      function() { _showCityJourneyStep(); });
+  }, totalReveal);
 }
 
 function _showCityJourneyStep() {
