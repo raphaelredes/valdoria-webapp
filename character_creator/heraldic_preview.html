@@ -5,6 +5,39 @@
 <title>Preview Heráldicos AAA — Raças</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<!--
+  ============================================================================
+  AGENTES IA — LEIA OBRIGATORIAMENTE ANTES DE EDITAR ESTE ARQUIVO
+  ============================================================================
+
+  📐 REGRAS DE CRIAÇÃO (geometria, paleta, anti-patterns, workflow):
+     → docs/sistemas/heraldic-icons-creation-rules.md
+
+  📚 INVENTÁRIO DE IDs JÁ EXISTENTES (reuso > criação):
+     → docs/sistemas/heraldic-icons-index.md
+
+  Companion: docs/sistemas/INDEX.md (entradas 36a + 36b)
+             MEMORY.md trigger: "icone heraldico" / "raça SVG"
+
+  REGRAS SOBERANAS (resumo):
+   ❌ Anel/disco/lua oval (rx≠ry) — usar <circle r=X>
+   ❌ Gold em todas as raças — cada raça tem paleta única (ver creation-rules.md)
+   ❌ Highlight tipo "blob" pequeno — usar arco curvo <path A>
+   ❌ Emoji como ícone heráldico — sempre SVG custom
+   ✅ viewBox "0 0 120 120" sempre (centro 60,60)
+   ✅ Naming raças/classes: ic-NOME (sem prefixo it-)
+   ✅ Paleta por raça:
+        Humano   → silver + sapphire
+        Anão     → stone + silver
+        Elfo     → emerald + silver
+        Halfling → bronze + emerald + silver
+        Gnomo    → bronze + violet + ciano
+        Meio-Elfo → bronze + silver
+        Tiefling → flame + crimson
+        Draconato → rust
+        Meio-Orc → silver + bone + rust
+  ============================================================================
+-->
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { background: #1a1410; }
