@@ -699,13 +699,19 @@ LOG SINK (Fase 7):
        Override html/body abaixo SUPLANTA o lock genérico do valdoria-design.css
        (480x960) com o lock específico do simulador (384x694 Telegram Desktop). */
     :root {
-      /* 2026-05-12 USER REQUEST: "telas da cidade, animação RUMO A PANTANO
-         NEBULOSO e outras localidades devem ser ilimitadas de altura, mas
-         sempre se adaptar ao limite da tela do dispositivo atual — responsiva".
-         Removido cap de 694px (Telegram Desktop minimum). Agora altura =
-         100dvh (viewport real do dispositivo) em todo browser/device.
-         Width permanece 430px (smartphone cap canonical). */
-      --sim-frame-w: min(100vw, 430px);
+      /* 2026-05-13 LOCKED USER RULE: viewport canonical uniforme entre cidade,
+         exploracao e combate. NUNCA alterar — preflight check
+         `check_simulator_viewport_locked` bloqueia regressão.
+           --sim-frame-w: min(100vw, 480px) — cap em 480px (smartphone mais largo
+             atual: iPhone 17 Pro Max 440px / Galaxy S25 Ultra 412px + folga).
+             NUNCA aumentar pra tablet/desktop width.
+           --sim-frame-h: 100dvh — altura real do viewport, sem cap. Telegram
+             Windows/Web redimensionado e dispositivos altos preenchem tudo.
+         User citou (2026-05-13): "garanta que nunca mais seja alterado esse
+         formato... cidade, exploracao e combate funcionem da mesma forma, com
+         responsividade para qualquer altura, mas para largura ser limitado ao
+         tamanho do smartphone mais largo existente atualmente". */
+      --sim-frame-w: min(100vw, 480px);
       --sim-frame-h: 100dvh;
     }
     /* Override html/body do valdoria-design.css com Telegram Desktop dims +
