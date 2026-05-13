@@ -699,13 +699,14 @@ LOG SINK (Fase 7):
        Override html/body abaixo SUPLANTA o lock genérico do valdoria-design.css
        (480x960) com o lock específico do simulador (384x694 Telegram Desktop). */
     :root {
-      /* 2026-05-10: bumpado de 384px (Telegram Desktop minimum) -> 430px
-         (cap canonical do design system "Smartphone-Only Layout") pra evitar
-         faixas pretas laterais quando o Telegram Desktop popup abre maior
-         que 384px (frequente em DPI alto / Telegram Web). 384px era o
-         MINIMUM teorico — viewport real pode ser maior. */
+      /* 2026-05-12 USER REQUEST: "telas da cidade, animação RUMO A PANTANO
+         NEBULOSO e outras localidades devem ser ilimitadas de altura, mas
+         sempre se adaptar ao limite da tela do dispositivo atual — responsiva".
+         Removido cap de 694px (Telegram Desktop minimum). Agora altura =
+         100dvh (viewport real do dispositivo) em todo browser/device.
+         Width permanece 430px (smartphone cap canonical). */
       --sim-frame-w: min(100vw, 430px);
-      --sim-frame-h: min(100dvh, 694px);
+      --sim-frame-h: 100dvh;
     }
     /* Override html/body do valdoria-design.css com Telegram Desktop dims +
        NO-SCROLL ABSOLUTE (regra soberana — NUNCA scroll em telas de jogo).
@@ -5109,6 +5110,10 @@ body.perf-lite .vc-action-btn { transition: none; }
        Walker test usa ?nointro=1.
        ==================================================================== -->
   <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+  <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
+       valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
+       duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+  <script>document.write('<script src="/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
   <script>
   /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
@@ -5121,7 +5126,15 @@ body.perf-lite .vc-action-btn { transition: none; }
       return;
     }
     var params = new URLSearchParams(location.search);
-    if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
+    if (params.get('nointro') === '1') {
+      window.__introTitleSkip = true;
+      /* 2026-05-13 USER REQUEST: nointro=1 = veio de transicao entre WebApps.
+         Mostra magic-circle imediato (mesma tela de TOQUE PARA INICIAR) ate
+         o conteudo renderizar. Auto-hide via window.load handler acima. */
+      window.__vTransitionLoaderShownAtBoot = true;
+      if (window._vTransitionLoader) window._vTransitionLoader.show('Carregando…');
+      return;
+    }
     var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
     if (resumeTs && (Date.now() - resumeTs) < 30000) { console.log('[INTRO] skip — resume <30s'); return; }
     /* Bloqueia audio auto-play até user tap (autoplay policy) */
@@ -40361,13 +40374,44 @@ function _travelToBiome(mapIdOrBiome, displayName){
     _logCity('snap build failed: ' + (_eSnap && _eSnap.message));
     // Não falha a transição — exploração vai pra mock fallback (degradação graceful)
   }
+  /* 2026-05-13 USER REQUEST: adiciona ?nointro=1 ao destino pra que a
+     exploracao boote direto no magic-circle loader (sem TitleScreen) e
+     cubra a transicao com loading "real". */
+  if (!qParams.has('nointro')) qParams.set('nointro', '1');
   var url = basePath + '?' + qParams.toString();
   _logCity('travel url has_token=' + qParams.has('token') + ' has_api=' + qParams.has('api') + ' has_snap=' + qParams.has('snap'));
+
+  /* 2026-05-12 USER REQUEST: "demorou muito abrir o mapa de exploração depois
+     que a animação da silhueta finalizou". Cache warmup: durante os 30-90s
+     da journey-overlay (3-5 etapas) + 4.5s da silhueta, o browser baixa o
+     HTML + JS + CSS de exploracao em background via <link rel="prefetch">.
+     Quando o redirect final acontecer, a página vem do cache, abre instantâneo.
+     Prefetch é safe: só faz GET do HTML, não consome o token nem cria sessão
+     (token só é consumido quando a página executa /api/auth/init-session). */
+  (function _prefetchTravelUrl() {
+    try {
+      // Remove prefetches anteriores pra evitar acumulação se user viajar
+      // pra múltiplos destinos sem completar a viagem
+      var oldPref = document.querySelector('link[data-travel-prefetch="1"]');
+      if (oldPref) oldPref.parentNode.removeChild(oldPref);
+      var linkP = document.createElement('link');
+      linkP.rel = 'prefetch';
+      linkP.as = 'document';
+      linkP.href = url;
+      linkP.setAttribute('data-travel-prefetch', '1');
+      document.head.appendChild(linkP);
+      _logCity('travel destination prefetch added (warmup cache)');
+    } catch (e) {
+      _logCity('travel prefetch failed: ' + (e && e.message));
+    }
+  })();
+
   function _doAnim(){
     if (window.vReducedMotion) {
       _logCity('reduced-motion: pulando anim, redirect direto');
+      if (window._vTransitionLoader) window._vTransitionLoader.show('Chegando ao destino…');
       window.__valdoria_transitioning = true;
-      window.location.href = url;
+      setTimeout(function(){ window.location.href = url; }, 30);
       return;
     }
     if (typeof playTravelAnimation !== 'function') {
@@ -40402,8 +40446,9 @@ function _travelToBiome(mapIdOrBiome, displayName){
     // Fallback (sem journey): direto pra anim
     playTravelAnimation(mapId, displayName, function(){
       _logCity('travel anim done -> redirect (no journey)');
+      if (window._vTransitionLoader) window._vTransitionLoader.show('Chegando ao destino…');
       window.__valdoria_transitioning = true;
-      window.location.href = url;
+      setTimeout(function(){ window.location.href = url; }, 30);
     });
   }
   _doAnim();
@@ -40912,7 +40957,7 @@ var CITY_JOURNEY_HAZARDS_EXTRA = {
           fNarr: 'Você é educado mas distante. Ele te indica o atalho mas avisa: "O caminho é teu, mas a floresta sente quem vem com pressa demais."', dmg: 0 },
         { i: '🪙', t: 'Pagar uma moeda', stat: null,
           desc: 'Transação direta, sem meias palavras.',
-          sNarr: 'Ele aceita a moeda com leve aceno. "Direita na primeira bifurcação após o carvalho rachado. Boa jornada." Atalho desbloqueado — você economiza uma etapa.',
+          sNarr: 'Ele aceita a moeda com leve aceno. "Direita na primeira bifurcação após o carvalho rachado. Boa jornada." A trilha indicada corta meia légua de mata fechada.',
           fNarr: '' },
         { i: '➡️', t: 'Ignorar e seguir', stat: 'wis', dc: 12,
           desc: 'Confiar na sua própria orientação, deixar o velho.',
@@ -40943,12 +40988,12 @@ var CITY_JOURNEY_HAZARDS_EXTRA = {
       script: [
         { type: 'narration', text: 'Uma luz dourada flutua à sua frente. Não é vagalume — tem forma humana minúscula, asas translúcidas batendo rápido.' },
         { type: 'speech', speaker: 'fairy', text: '— Aventureiro grandalhão! <i>(voz fina, ágil)</i> Tenho um pedido — e uma oferta. Decide rápido, tenho mais cinco trilhas pra cuidar essa noite.' },
-        { type: 'speech', speaker: 'fairy', text: '— Um sapo está preso numa raiz oca a vinte metros. Liberte-o e eu te guio até o destino, ganhando duas etapas. Recuse e eu sigo viagem — sem rancor, mas sem ajuda.' }
+        { type: 'speech', speaker: 'fairy', text: '— Um sapo está preso numa raiz oca a vinte metros. Liberte-o e eu te abro um atalho mágico até o destino — chega bem mais rápido. Recuse e eu sigo viagem — sem rancor, mas sem ajuda.' }
       ],
       choices: [
         { i: '🐸', t: 'Libertar o sapo', stat: 'dex', dc: 11,
           desc: 'Movimentos delicados, mãos pequenas, paciência.',
-          sNarr: 'Você se ajoelha e tira o sapo da raiz com cuidado. Ele coaxa agradecido e some na samambaia. A fada pisca rápido. "Combinado!" Atalho mágico revelado — você economiza muito tempo.',
+          sNarr: 'Você se ajoelha e tira o sapo da raiz com cuidado. Ele coaxa agradecido e some na samambaia. A fada pisca rápido. "Combinado!" Ela acena a varinha — luz dourada desenha no ar uma trilha curta que você não tinha visto. Você atravessa em minutos o que levaria horas.',
           sNarr_by_class: {
             druida: 'Você fala com o sapo enquanto solta. Ele explica como caiu. A fada se impressiona: "Druida raro. Volte aqui, sou Lirimel — devo-lhe três favores agora."'
           },
@@ -41859,16 +41904,21 @@ function _cityJourneyArrive() {
   var displayName = j.displayName;
   var url = j.finalUrl;
   _closeCityJourney();
+  /* 2026-05-13 USER REQUEST: cobre o gap silhueta->exploracao com loader.
+     Mostra magic-circle ANTES de location.href pra player ver carregamento
+     real em vez de tela parada. Destino tambem mostra loader via ?nointro=1. */
+  function _doRedirect() {
+    if (window._vTransitionLoader) window._vTransitionLoader.show('Chegando ao destino…');
+    _logCity('city journey complete -> redirect');
+    window.__valdoria_transitioning = true;
+    // Pequeno delay pra browser pintar o loader antes de unload
+    setTimeout(function(){ window.location.href = url; }, 30);
+  }
   // Agora dispara a anim canonical da silhueta + redirect
   if (typeof playTravelAnimation === 'function') {
-    playTravelAnimation(biome, displayName, function(){
-      _logCity('city journey complete -> redirect');
-      window.__valdoria_transitioning = true;
-      window.location.href = url;
-    });
+    playTravelAnimation(biome, displayName, _doRedirect);
   } else {
-    window.__valdoria_transitioning = true;
-    window.location.href = url;
+    _doRedirect();
   }
 }
 
