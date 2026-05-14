@@ -7871,14 +7871,48 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.name)       p.name = picked.name;
       if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
       if (picked.race)       p.race = String(picked.race).toLowerCase();
-      if (picked.level)      p.level = picked.level;
-      if (picked.hp)         p.hp = picked.hp;
-      if (picked.max_hp)     p.hpMax = picked.max_hp;
-      if (picked.mp != null) p.mp = picked.mp;
-      if (picked.max_mp)     p.mpMax = picked.max_mp;
-      if (picked.gold != null) p.gold = picked.gold;
-      if (picked.xp != null)   p.xp = picked.xp;
+      // USER REPORT 2026-05-14 #2 — usar `!= null` em lugar de truthy pra
+      // não perder valores legítimos zero (hp=0 = unconscious, gold=0, etc).
+      if (picked.level != null)  p.level = picked.level;
+      if (picked.hp != null)     p.hp = picked.hp;
+      if (picked.max_hp != null) p.hpMax = picked.max_hp;
+      if (picked.mp != null)     p.mp = picked.mp;
+      if (picked.max_mp != null) p.mpMax = picked.max_mp;
+      if (picked.gold != null)   p.gold = picked.gold;
+      if (picked.xp != null)     p.xp = picked.xp;
+      // USER REPORT 2026-05-14 — "Wilzen mostra 52473/2000 XP, não faz sentido".
+      // Antes o mock default xpNext=2000 nunca era sobrescrito pelo REMOTE,
+      // resultando em "<xp_real>/2000". Agora o server envia thresholds D&D 5e
+      // (PHB Tabela 1-2 via XP_THRESHOLDS). Card mostra cumulativo X/Y_next,
+      // barra calcula progresso relativo (xp - xpPrev) / (xpNext - xpPrev).
+      if (picked.xp_next != null) p.xpNext = picked.xp_next;
+      if (picked.xp_prev != null) p.xpPrev = picked.xp_prev;
       if (picked.exhaustion != null) p.exh = picked.exhaustion;
+      // USER REPORT 2026-05-14 #2 — Ficha + HUD usam dados REAIS do DB em vez
+      // de hardcoded por classe (_genFichaStats). Stats vêm direto, AC/Atk/DC
+      // vêm computados server-side via Player.get_armor_class/get_attack_bonus/
+      // get_spell_save_dc (D&D 5e PHB full, inclui armadura+escudo+gemas+buffs+
+      // skills+race). Proficiency_bonus, hit_dice, pending_skills/asi também.
+      if (picked.stats && typeof picked.stats === 'object') {
+        // Normaliza pra abreviação usada na Ficha (str/dex/con/int/wis/cha)
+        var _sx = picked.stats;
+        p.stats = {
+          str: _sx.strength != null ? _sx.strength : (_sx.str != null ? _sx.str : 10),
+          dex: _sx.dexterity != null ? _sx.dexterity : (_sx.dex != null ? _sx.dex : 10),
+          con: _sx.constitution != null ? _sx.constitution : (_sx.con != null ? _sx.con : 10),
+          int: _sx.intelligence != null ? _sx.intelligence : (_sx.int != null ? _sx.int : 10),
+          wis: _sx.wisdom != null ? _sx.wisdom : (_sx.wis != null ? _sx.wis : 10),
+          cha: _sx.charisma != null ? _sx.charisma : (_sx.cha != null ? _sx.cha : 10)
+        };
+      }
+      if (picked.armor_class != null)      p.ac = picked.armor_class;
+      if (picked.attack_bonus != null)     p.atk = picked.attack_bonus;
+      if (picked.spell_save_dc != null)    p.dc = picked.spell_save_dc;
+      if (picked.proficiency_bonus != null) p.prof = picked.proficiency_bonus;
+      if (picked.hit_dice != null)         p.hd = picked.hit_dice;
+      if (picked.max_hit_dice != null)     p.hdMax = picked.max_hit_dice;
+      if (picked.pending_skills != null)   p.pendingSkills = picked.pending_skills;
+      if (picked.pending_asi != null)      p.pendingAsi = picked.pending_asi;
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -7927,10 +7961,19 @@ body.perf-lite .vc-action-btn { transition: none; }
       console.log('[CITY] characters loaded:', window._mockCharacters.length);
       // Sincroniza index 0 do GROUP_MEMBERS (player slot)
       if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
+        // USER REPORT 2026-05-14 #2 — sincroniza TODOS os campos do DB
+        // (stats/ac/atk/dc/prof/hd/pending*) pro slot 0 (player) na party.
         window.GROUP_MEMBERS[0] = {
           name: p.name, cls: p.cls, race: p.race, level: p.level,
           hp: p.hp, hpMax: p.hpMax, mp: p.mp, mpMax: p.mpMax,
-          exh: p.exh, exhMax: 6, xp: p.xp, xpNext: p.xpNext, gold: p.gold,
+          exh: p.exh, exhMax: 6,
+          xp: p.xp, xpNext: p.xpNext, xpPrev: p.xpPrev || 0,
+          gold: p.gold,
+          stats: p.stats || null,
+          ac: p.ac, atk: p.atk, dc: p.dc, prof: p.prof,
+          hd: p.hd, hdMax: p.hdMax,
+          pendingSkills: p.pendingSkills || 0,
+          pendingAsi: p.pendingAsi || 0,
           dead: false
         };
       }
@@ -10469,6 +10512,9 @@ function _genFichaStats(member){
 function _getFichaMember(idx){
   if (idx === 0 || idx === undefined) {
     var p = window.CITY_MOCK_PLAYER || {};
+    // USER REPORT 2026-05-14 #2 — Ficha agora usa valores REAIS do server (DB)
+    // quando disponíveis (ac/atk/dc/prof/hd via picked.armor_class etc).
+    // Fallback ao mock só pra LOCAL mode (sem REMOTE state).
     return {
       idx: 0, isPlayer: true,
       name: p.name || 'Aventureiro',
@@ -10476,9 +10522,13 @@ function _getFichaMember(idx){
       level: p.level || 1,
       hp: p.hp || 28, hpMax: p.hpMax || 28,
       mp: p.mp || 12, mpMax: p.mpMax || 12,
-      xp: p.xp || 0, xpNext: p.xpNext || 100,
+      xp: p.xp || 0, xpNext: p.xpNext || 100, xpPrev: p.xpPrev || 0,
       gold: p.gold || 0,
       exh: p.exh || 0,
+      hd: p.hd, hdMax: p.hdMax,
+      ac: p.ac, atk: p.atk, dc: p.dc, prof: p.prof,
+      pendingSkills: p.pendingSkills || 0,
+      pendingAsi: p.pendingAsi || 0,
       stats: p.stats || _genFichaStats({cls: p.cls})
     };
   }
@@ -10505,15 +10555,24 @@ function _showStatusPopup(memberIdx){
 
   if (titleEl) titleEl.textContent = 'Ficha';
   var stats = m.stats;
-  var prof = Math.floor((m.level || 1) / 4) + 2;
   function _mod(s){ var v = Math.floor((s - 10) / 2); return v; }
   function _modStr(s){ var v = _mod(s); return (v >= 0 ? '+' : '') + v; }
-  var ac = 10 + _mod(stats.dex);
-  var attackBonus = prof + _mod(stats.str);
-  var spellDc = 8 + prof + _mod(stats.int);
+  // USER REPORT 2026-05-14 #2 — Quando o server envia valores canonicais
+  // (m.prof/ac/atk/dc — computados via Player.get_armor_class etc, D&D 5e
+  // PHB completo: armadura+escudo+gemas+buffs+skills+classe+race), USAR
+  // esses valores. Fallback ao cálculo local só para LOCAL/mock mode.
+  var prof = (m.prof != null) ? m.prof : (Math.floor((m.level || 1) / 4) + 2);
+  var ac = (m.ac != null) ? m.ac : (10 + _mod(stats.dex));
+  var attackBonus = (m.atk != null) ? m.atk : (prof + _mod(stats.str));
+  var spellDc = (m.dc != null) ? m.dc : (8 + prof + _mod(stats.int));
   var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
   var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
-  var xpPct = m.xpNext > 0 ? Math.round(100 * (m.xp || 0) / m.xpNext) : 0;
+  // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (PHB Tabela 1-2): barra
+  // mostra progresso DENTRO do nivel = (xp - xpPrev) / (xpNext - xpPrev).
+  var _fichaXpPrev = m.xpPrev || 0;
+  var _fichaXpSpan = (m.xpNext || 0) - _fichaXpPrev;
+  var _fichaXpInto = (m.xp || 0) - _fichaXpPrev;
+  var xpPct = _fichaXpSpan > 0 ? Math.max(0, Math.min(100, Math.round(100 * _fichaXpInto / _fichaXpSpan))) : 0;
 
   // === HEADER READABLE+FIT: avatar heráldico canonical ===
   // 2026-05-11 v4 (user feedback: "voltou a ficar com scrolling, gostaria que
@@ -39973,14 +40032,21 @@ function renderCityGroupPanel(){
   if (!el) return;
   var p = window.CITY_MOCK_PLAYER;
   // Slot 0 sempre é o player (sincronizado com CITY_MOCK_PLAYER)
+  // USER REPORT 2026-05-14 #2 — propaga TODOS os campos REAIS do DB
+  // (stats/ac/atk/dc/prof/hd/pending*) pro slot 0 da party.
   GROUP_MEMBERS[0] = {
     name: p.name, cls: p.cls, race: p.race, level: p.level,
     hp: p.hp, hpMax: p.hpMax,
     mp: p.mp, mpMax: p.mpMax,
     exh: p.exh != null ? p.exh : 0,
     exhMax: 6,
-    xp: p.xp, xpNext: p.xpNext,
+    xp: p.xp, xpNext: p.xpNext, xpPrev: p.xpPrev || 0,
     gold: p.gold,
+    stats: p.stats || null,
+    ac: p.ac, atk: p.atk, dc: p.dc, prof: p.prof,
+    hd: p.hd, hdMax: p.hdMax,
+    pendingSkills: p.pendingSkills || 0,
+    pendingAsi: p.pendingAsi || 0,
     dead: false,
     isPlayer: true
   };
@@ -39999,7 +40065,14 @@ function renderCityGroupPanel(){
     }
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
-    var xpPct = m.xpNext > 0 ? Math.round(100 * m.xp / m.xpNext) : 0;
+    // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (PHB Tabela 1-2): barra
+    // mostra progresso DENTRO do nível atual = (xp - xpPrev) / (xpNext - xpPrev).
+    // Ex: Wilzen L9, xp=52473, xpPrev=48000, xpNext=64000 → (4473/16000)=28%.
+    // Card title/val seguem mostrando "xp/xpNext" cumulativo (52473/64000).
+    var _xpPrev = m.xpPrev || 0;
+    var _xpSpan = (m.xpNext || 0) - _xpPrev;
+    var _xpInto = (m.xp || 0) - _xpPrev;
+    var xpPct = _xpSpan > 0 ? Math.max(0, Math.min(100, Math.round(100 * _xpInto / _xpSpan))) : 0;
     var hpThr = hpPct > 60 ? 'high' : (hpPct > 25 ? 'mid' : 'low');
     var deadCls = m.dead ? ' dead' : '';
     var playerCls = m.isPlayer ? ' player' : '';
