@@ -15,7 +15,9 @@
     'use strict';
 
     // ── Performance tier particle counts ─────────────────────────────────
-    var TIER_COUNTS = { full: 55, medium: 35, lite: 20 };
+    // X-6.5.51BS (2026-05-15): density +40% pra base mais densa de chama
+    // (user reportou "falta mais chama na base"). 55→78, 35→50, 20→30.
+    var TIER_COUNTS = { full: 78, medium: 50, lite: 30 };
 
     // ── Internal state ───────────────────────────────────────────────────
     var _canvas = null;
@@ -50,35 +52,34 @@
     }
 
     Particle.prototype.reset = function (W, H, baseSize, init) {
-        // Elliptical spawn at bottom centre
+        // X-6.5.51BS (2026-05-15): zona de spawn AMPLIADA pra base mais larga
+        // de chama (user pediu "mais chama na base"). 0.14 → 0.22 raio elíptico.
         var angle = Math.random() * Math.PI * 2;
-        var rx = Math.random() * (W * 0.14);
+        var rx = Math.random() * (W * 0.22);          // antes 0.14
         this.x = W * 0.5 + Math.cos(angle) * rx;
         this.y = H - (H * 0.11) + Math.random() * (H * 0.04);
-        // Spawn x reference pra sway sinusoidal (X-6.5.51BQ 2026-05-15)
         this.x0 = this.x;
 
-        // X-6.5.51BQ (2026-05-15): velocidades reduzidas pra animação mais
-        // realista (user reportou "muito acelerado"). vy ~50% mais lenta,
-        // maxLife ~2x maior — partícula sobe mais devagar e vive mais.
+        // X-6.5.51BS: velocidades reduzidas AINDA MAIS (user ainda reportou
+        // "muito rápido"). vy total -33% da versão anterior; maxLife +50%.
         // Velocity — mostly upward with slight drift
-        this.vx = (Math.random() - 0.5) * 0.30;       // antes 0.6
-        this.vy = -(Math.random() * 0.85 + 0.35);     // antes -(1.8+0.6); range -0.35 a -1.20
+        this.vx = (Math.random() - 0.5) * 0.20;       // antes 0.30
+        this.vy = -(Math.random() * 0.55 + 0.20);     // antes -(0.85+0.35); range -0.20 a -0.75
 
         // Life: stagger on first spawn so they don't all appear at once
-        this.life = init ? Math.random() * 70 : 0;    // antes *40
-        this.maxLife = 70 + Math.random() * 40;       // antes 32 + *22; range 70-110
+        this.life = init ? Math.random() * 110 : 0;   // antes *70
+        this.maxLife = 110 + Math.random() * 60;      // antes 70+*40; range 110-170
 
-        // Size proportional to canvas
-        this.size = baseSize + Math.random() * (baseSize * 1.4);
+        // X-6.5.51BS: TAMANHO BASE MAIOR pras partículas novas (mais densidade
+        // de chama na base). Curva 1.3-2.6 baseSize → muito mais "corpo".
+        this.size = baseSize * (1.3 + Math.random() * 1.3);
 
-        // Persistent micro-wind per particle
-        this.windX = (Math.random() - 0.5) * 0.025;    // antes 0.05
+        // Persistent micro-wind per particle (turbulência reduzida)
+        this.windX = (Math.random() - 0.5) * 0.018;    // antes 0.025
 
-        // X-6.5.51BQ: sway sinusoidal (oscilação horizontal natural).
-        // Fase e amplitude aleatórias por partícula pra organicidade.
-        this.swayAmp = 0.4 + Math.random() * 0.6;     // amplitude em pixels
-        this.swayFreq = 0.06 + Math.random() * 0.04;  // freq (rad/frame)
+        // Sway sinusoidal — frequência reduzida pra movimento mais calmo
+        this.swayAmp = 0.4 + Math.random() * 0.6;
+        this.swayFreq = 0.04 + Math.random() * 0.03;   // antes 0.06+0.04 (mais lento)
         this.swayPhase = Math.random() * Math.PI * 2;
     };
 
@@ -93,10 +94,11 @@
     Particle.prototype.update = function () {
         this.x += this.vx;
         this.y += this.vy;
-        this.vx += this.windX + (Math.random() - 0.5) * 0.05;  // antes 0.12 (turbulência reduzida)
-        this.vy -= 0.004;                                       // antes 0.008
+        // X-6.5.51BS: turbulência menor (mais calma) + decay vy ainda mais suave.
+        this.vx += this.windX + (Math.random() - 0.5) * 0.03;  // antes 0.05
+        this.vy -= 0.0025;                                       // antes 0.004 (acelera muito devagar)
         // Sway sinusoidal — adiciona oscilação horizontal sem afetar vx persistente
-        this.x += Math.sin(this.life * this.swayFreq + this.swayPhase) * this.swayAmp * 0.15;
+        this.x += Math.sin(this.life * this.swayFreq + this.swayPhase) * this.swayAmp * 0.12;
         this.life++;
         return this.life >= this.maxLife;
     };

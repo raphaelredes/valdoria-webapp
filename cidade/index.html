@@ -44671,12 +44671,16 @@ function _marthaGreeting(p){
 
 // Choices de retorno (oferece outros tópicos após resposta — chain de diálogo)
 function _marthaChoicesAfter(excludeIds, includeCellar){
+  // X-6.5.51BT BUG FIX (2026-05-15): _encounterRef precisa ser a CHAVE em
+  // MARTHA_ENCOUNTERS ('rumor', 'cellar', etc), não o ID completo
+  // ('martha_rumor'). Antes: lookup MARTHA_ENCOUNTERS['martha_rumor']
+  // retornava undefined → choices não funcionavam (silently broken).
   var all = [
-    { id: 'rumor',  label: 'Tem ouvido alguma novidade?',     result: 'goto_dialog', _encounterRef: 'martha_rumor' },
-    { id: 'cellar', label: 'O que tem no porão?',             result: 'goto_dialog', _encounterRef: 'martha_cellar' },
-    { id: 'local',  label: 'Algum conselho pra forasteiros?', result: 'goto_dialog', _encounterRef: 'martha_local' },
-    { id: 'gossip', label: 'O que comentam por aí?',          result: 'goto_dialog', _encounterRef: 'martha_gossip' },
-    { id: 'sleep',  label: 'Quero alugar um quarto.',         result: 'goto_dialog', _encounterRef: 'martha_sleep' }
+    { id: 'rumor',  label: 'Tem ouvido alguma novidade?',     result: 'goto_dialog', _encounterRef: 'rumor' },
+    { id: 'cellar', label: 'O que tem no porão?',             result: 'goto_dialog', _encounterRef: 'cellar' },
+    { id: 'local',  label: 'Algum conselho pra forasteiros?', result: 'goto_dialog', _encounterRef: 'local' },
+    { id: 'gossip', label: 'O que comentam por aí?',          result: 'goto_dialog', _encounterRef: 'gossip' },
+    { id: 'sleep',  label: 'Quero alugar um quarto.',         result: 'goto_dialog', _encounterRef: 'sleep' }
   ];
   var filtered = all.filter(function(c){ return excludeIds.indexOf(c.id) < 0; });
   filtered.push({ id: 'leave', label: 'Sem mais perguntas.', result: 'continue' });
@@ -46860,13 +46864,18 @@ function _renderEncounterPopup(enc, originalAction, player) {
     var st = document.createElement('style');
     st.id = 'encounter-style';
     st.textContent = ''
+      // X-6.5.51BT (2026-05-15): user pediu popup com TAMANHO FIXO desde o
+      // início (não crescer durante reveal/choices) e ocupar MÁX da tela.
+      // Card agora width 100% até cap 480px, height 100% até cap 100dvh.
+      // Frame da cidade limita visualmente a 480x100dvh (Viewport Lock).
       + '#encounter-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.85);'
-      + '  display:flex;align-items:center;justify-content:center;padding:16px;'
+      + '  display:flex;align-items:center;justify-content:center;padding:8px;'
       + '  animation:encFadeIn 0.4s ease-out}'
       + '@keyframes encFadeIn{from{opacity:0}to{opacity:1}}'
       + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
       + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
-      + '  max-width:440px;width:100%;max-height:90vh;overflow:hidden;'
+      + '  width:100%;max-width:min(100vw - 16px, 480px);'
+      + '  height:100%;max-height:calc(100dvh - 16px);overflow:hidden;'
       + '  display:flex;flex-direction:column;'
       + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
       + '.enc-header{display:flex;gap:12px;padding:14px 16px;'
@@ -46884,8 +46893,10 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '  letter-spacing:1.5px;flex-shrink:0;text-align:right;'
       + '  padding:6px 10px;border:1px solid rgba(196,149,58,0.3);border-radius:4px;'
       + '  background:rgba(15,12,8,0.45)}'
+      // X-6.5.51BT: body cresce pra preencher altura (flex:1) e tem min
+      // maior pra acomodar diálogos longos sem scroll prematuro.
       + '.enc-body{padding:18px 18px 14px;flex:1;display:flex;flex-direction:column;'
-      + '  gap:14px;overflow-y:auto;min-height:160px}'
+      + '  gap:14px;overflow-y:auto;min-height:260px}'
       // Phase 6.6.x dialogue pagination 2026-05-05: fonte maior + animação
       // por página. 2026-05-05 update: revelação HORIZONTAL (clip-path
       // wipe esquerda→direita) com duração dinâmica via --reveal-dur.
@@ -46928,8 +46939,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '  color:#1a1510;border-color:#c4953a}'
       + '.enc-nav-btn-next:hover:not(:disabled){background:linear-gradient(180deg,#d4a54a,#a78540);'
       + '  color:#1a1510}'
+      // X-6.5.51BT: actions sempre reserva ~6 botões de altura (240px). Quando
+      // ainda não há choices, fica vazio mas o espaço já está alocado — card
+      // não cresce no momento que choices aparecem.
       + '.enc-actions{padding:14px 16px;border-top:1px solid rgba(196,149,58,0.3);'
-      + '  background:rgba(15,12,8,0.4);flex-shrink:0;display:flex;flex-direction:column;gap:6px}'
+      + '  background:rgba(15,12,8,0.4);flex-shrink:0;display:flex;flex-direction:column;gap:6px;'
+      + '  min-height:240px;justify-content:flex-end}'
       + '.enc-btn{padding:10px 14px;background:rgba(74,56,40,0.45);'
       + '  border:1px solid rgba(196,149,58,0.45);border-radius:6px;'
       + '  color:#d4c8b0;font-family:Cinzel,serif;font-size:13px;letter-spacing:0.6px;'
@@ -47073,6 +47088,9 @@ function _renderEncounterPopup(enc, originalAction, player) {
     // duração da última (sua reveal completa) + 200ms breathing
     var totalDelay = cumulativeDelay - Math.round((lineDurations[lineDurations.length - 1] || 0) * 0.6)
                    + (lineDurations[lineDurations.length - 1] || 0) + 200;
+    // X-6.5.51BT: actionsEl SEMPRE visível (min-height 240px CSS reserva
+     // espaço). Antes display:flex/none → card crescia quando choices apareciam.
+     // Agora só popula conteúdo quando ready, espaço já está alocado.
     if (idx === pages.length - 1) {
       navEl.style.display = 'none';
       _encChoicesReadyTimer = setTimeout(function(){
@@ -47080,8 +47098,6 @@ function _renderEncounterPopup(enc, originalAction, player) {
         if (!_choicesShown) {
           _choicesShown = true;
           _renderEncounterChoices(enc, originalAction, player, actionsEl);
-        } else {
-          actionsEl.style.display = 'flex';
         }
       }, totalDelay);
     } else {
@@ -47089,7 +47105,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
          leve fade-in. Player apressado pode ja clicar ANTES da reveal
          terminar. Apertando na tela, pula reveal e libera o flow. */
       navEl.style.display = 'flex';
-      actionsEl.style.display = 'none';
+      // actionsEl permanece visível com espaço reservado (sem display:none).
       nextBtn.textContent = (idx === pages.length - 2) ? 'Continuar →' : 'Próximo →';
     }
   }

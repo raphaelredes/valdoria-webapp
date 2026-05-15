@@ -40,7 +40,53 @@ function _log(level, msg) {
     else console.info(prefix + msg);
 }
 
+/**
+ * X-6.5.51BR (2026-05-15): _buildOverlay agora retorna magic-circle
+ * (ValdoriaLoadingHTML) — mesma visual da tela "TOQUE PARA INICIAR" +
+ * /play/ + _vTransitionLoader. Antes era runa-ring pequena diferente.
+ *
+ * User pediu padronização: "o que tiver que ser carregado precisa
+ * NECESSARIAMENTE ser nessa tela de carregamento logo após a tela
+ * TOQUE PARA INICIAR e nas transições de cidade, exploracao e combate
+ * mostrar somente essa tela de progresso, precisa ser padronizado"
+ *
+ * IDs específicos do v-processing (vp-stage / vp-retry / vp-tip) pra
+ * evitar conflito com #loading-stage / #loading-retry da tela principal.
+ *
+ * Fallback _buildOverlayLegacy mantido se ValdoriaLoadingHTML faltar.
+ */
 function _buildOverlay() {
+    // PREFERRED: usar ValdoriaLoadingHTML (mesma estrutura da tela
+    // TOQUE PARA INICIAR + /play/ + transition-loader). Padronizado.
+    if (typeof window.ValdoriaLoadingHTML === 'function') {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = window.ValdoriaLoadingHTML({
+            overlayId: 'v-processing',
+            title: 'LENDAS DE VALDORIA',
+            stageId: 'vp-stage',
+            tipId: 'vp-tip',
+            retryId: 'vp-retry',
+            progressId: 'vp-progress',
+            defaultTip: 'Reunindo o grupo…',
+            hasStage: true,
+            hasRetry: true,
+            icon: 'magic-circle',
+            particleSet: 'standard',
+            tier: window._valdoriaPerformanceTier || 'full'
+        });
+        var magicEl = tmp.firstElementChild;
+        if (magicEl) {
+            magicEl.classList.add('v-processing');  // compat com CSS antigo
+            magicEl.style.display = 'none';
+            magicEl.style.background = '#1a1510';   // backdrop sólido
+            return magicEl;
+        }
+    }
+    // FALLBACK: runa ring legacy se loading-template.js não carregou
+    return _buildOverlayLegacy();
+}
+
+function _buildOverlayLegacy() {
     var el = document.createElement('div');
     el.id = 'v-processing';
     el.className = 'v-processing';
@@ -172,13 +218,19 @@ function _ensureDOM() {
     var el = _buildOverlay();
     document.body.appendChild(el);
     _overlayEl = el;
-    _textEl = document.getElementById('v-processing-text');
-    _retryEl = document.getElementById('v-processing-retry');
-    _retryEl.addEventListener('click', function() {
-        if (typeof haptic === 'function') haptic('light');
-        _log('info', 'retry clicked');
-        if (_onRetry) _onRetry();
-    });
+    // X-6.5.51BR: textEl/retryEl podem ser do magic-circle (vp-stage/vp-retry)
+    // OU do legacy (v-processing-text/v-processing-retry). Tenta ambos.
+    _textEl = el.querySelector('#vp-stage')
+           || el.querySelector('#v-processing-text');
+    _retryEl = el.querySelector('#vp-retry')
+            || el.querySelector('#v-processing-retry');
+    if (_retryEl) {
+        _retryEl.addEventListener('click', function() {
+            if (typeof haptic === 'function') haptic('light');
+            _log('info', 'retry clicked');
+            if (_onRetry) _onRetry();
+        });
+    }
 }
 
 function _clearTimers() {
