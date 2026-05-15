@@ -15233,6 +15233,15 @@ var GUILD_QUEST_DETAILS = {
     npc: 'Capitã Helga', location: 'Campos Verdes',
     flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. A região precisa de heróis em 3 dias."',
     reward: 500, xp: 400, lvlReq: 10, progress: '0/1'
+  },
+  // X-6.5.51BP (2026-05-15): Missão da Adega — ativada via diálogo PADRAO_ALDRIC com Martha
+  cellar: {
+    qid: 'cellar', icon: _heralIco('ic-estalagem'),
+    title: 'Investigar a Adega da Estalagem',
+    desc: 'Martha tem ouvido ruídos estranhos vindos do porão. Investigue e limpe o que estiver lá embaixo.',
+    npc: 'Martha — Estalajadeira', location: 'Portões de Valdoria',
+    flavor: 'Martha entrega a chave: "Tem algo lá embaixo que não devia estar. Volta pra mim quando tiver resolvido."',
+    reward: 60, xp: 80, lvlReq: 1, progress: '0/1'
   }
 };
 
@@ -36659,6 +36668,12 @@ function _registerDynamicHandlers(){
   RELATIONS_NPCS.forEach(function(r){
     ACTION_HANDLERS['rel_view_' + r.id] = (function(rr){ return function(p){ _relationsShow(p, rr.id); }; })(r);
   });
+  // X-6.5.51BP (2026-05-15): Martha usa PADRAO_ALDRIC em vez do diálogo Q&A
+  // legacy. Override DEPOIS do registro dinâmico (que setou _showSharedNpcDialogue).
+  // inn_cellar_quest agora entra direto no encounter da cellar (com choices
+  // accept/decline ativando _acceptQuest('cellar')).
+  ACTION_HANDLERS['inn_npc_inn_martha'] = function(p){ _openMarthaDialogue(p, 'greeting'); };
+  ACTION_HANDLERS['inn_cellar_quest']   = function(p){ _openMarthaDialogue(p, 'cellar'); };
 }
 _registerDynamicHandlers();
 
@@ -39386,6 +39401,18 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
     ]
   },
+  // X-6.5.51BP: Missão da Adega — ativada via diálogo PADRAO_ALDRIC com Martha
+  'quest_open_cellar': {
+    header: '🗝️ Missão: Investigar a Adega',
+    flavor: '<i>Martha guarda a chave do porão na mão calejada.</i> "— Ouço ruídos há semanas. Velharias batendo, passos pequenos demais pra ser ladrão. Mata o que tiver lá embaixo — recompenso bem, juro pelo nome do meu falecido."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Martha — Estalajadeira · 📍 Portões de Valdoria · 💰 60 <span class="vi vi-coin sm"></span> + 80 XP',
+    buttons: [
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_cellar_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'limpar a adega', 'quest_cellar_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Martha', 'completar missão', 'quest_cellar_deliver'],
+      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Martha', 'quest_cellar_abandon']
+    ]
+  },
 
   // bank_items_screen REMOVIDO na Fase 9.6.R1 (substituído por
   // _bankShowItemDepositPopup + _bankShowItemWithdrawPopup que rodam direto
@@ -40095,7 +40122,9 @@ var ACTION_HANDLERS = {
       onConfirm: function(){}
     });
   },
-  'inn_cellar_quest':       function(p){ vToast('🗝️ Martha sussurra: "A adega tem visitantes... estranhos. Investiga?" — Quest disponível!'); },
+  // X-6.5.51BP: 'inn_cellar_quest' agora abre Martha dialogue PADRAO_ALDRIC (cellar topic)
+  // via override em _registerDynamicHandlers. Stub abaixo é fallback raro.
+  'inn_cellar_quest':       function(p){ if (typeof _openMarthaDialogue === 'function') _openMarthaDialogue(p, 'cellar'); else vToast('🗝️ Martha sussurra sobre a adega...', 'warn'); },
 
   // Market misc
   'market_sell':            function(p){
@@ -40488,6 +40517,12 @@ var ACTION_HANDLERS = {
   'quest_defend_details':       function(p){ vToast('📜 Defender os Campos Verdes do avanço dos orcs. Recompensa: 500 Valdoritas + 400 XP.'); },
   'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, '🏰 Helga aperta tua mão. +500 Valdoritas +400 XP. Os Campos Verdes resistiram!'); },
   'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Campos Verdes', '-5 afinidade com Capitã Helga'); },
+  // X-6.5.51BP: CELLAR (Adega da Estalagem) — Martha
+  'quest_open_cellar':          function(p){ navigateTo('quest_open_cellar'); },
+  'quest_cellar_locate':        function(p){ _questGotoMap('cellar', 'Investigar a Adega'); },
+  'quest_cellar_details':       function(p){ vToast('📜 Investigar a Adega da Estalagem. Recompensa: 60 Valdoritas + 80 XP.'); },
+  'quest_cellar_deliver':       function(p){ _deliverQuest('cellar', 60, 80, '🗝️ Martha aperta sua mão. +60 Valdoritas +80 XP. A adega está limpa — missão completa!'); },
+  'quest_cellar_abandon':       function(p){ _abandonQuest('cellar', 'Investigar a Adega', '-5 afinidade com Martha'); },
   'q_history_1':            function(p){ vToast('📚 Tutorial completado em 2026-04-15. +50 XP.'); },
   'q_history_2':            function(p){ vToast('📚 Goblin no celeiro derrotado em 2026-04-16. +30 XP.'); },
   'q_history_3':            function(p){ vToast('📚 3 lobos pequenos caçados em 2026-04-18. +60 XP.'); },
@@ -40727,7 +40762,10 @@ var QUEST_MAP = {
   ruin:        { biomeKey: 'elven_ruins',     name: 'Ruínas Élficas' },
   bandit_lord: { biomeKey: 'bandit_fortress', name: 'Forte dos Bandidos' },
   dragonet:    { biomeKey: 'volcanic',        name: 'Cratera Vulcânica' },
-  defend:      { biomeKey: 'green_fields',    name: 'Campos Verdes' }
+  defend:      { biomeKey: 'green_fields',    name: 'Campos Verdes' },
+  // X-6.5.51BP: missão da adega — in-city (porão da Estalagem em Portões de Valdoria)
+  cellar:      { biomeKey: 'plains',          name: 'Portões de Valdoria', inCity: true,
+                 cityHint: 'A adega fica no porão da Estalagem do Grifo Dourado — dentro da cidade.' }
 };
 
 function _questMapEntry(questId){
@@ -44589,6 +44627,12 @@ var RECURRING_NPCS = {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.'
+  },
+  // X-6.5.51BP (2026-05-15): Martha — Estalajadeira PADRAO_ALDRIC
+  martha: {
+    name: 'Martha',
+    portrait: 'ic-estalajadeira',
+    desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   }
 };
 
@@ -44596,6 +44640,131 @@ var RECURRING_NPCS = {
 // PADRAO_ALDRIC v14 reference: este encounter é a fonte canonical do padrão.
 // script[] com {type: 'speech'|'narration', text, speaker?} é o formato alvo
 // pra qual outros sistemas migram. Server-side aldric_classifier porta esta lógica.
+// ============================================================================
+// === MARTHA — Diálogo PADRAO_ALDRIC (X-6.5.51BP 2026-05-15) ================
+// ============================================================================
+// Encounters da Estalajadeira no formato canonical script[] + choices[].
+// Greeting é o entry point; cada topic é um sub-encounter ligado via
+// result: 'goto_dialog' + _encounter. Inclui ativação da Quest da Adega
+// (result: 'accept_quest' + _questId).
+// ============================================================================
+function _marthaGreeting(p){
+  // Greeting rotativo por rep (canonical inn.py L83-94)
+  var rep = (p && p.metadata && p.metadata.inn_rep) || 0;
+  if (rep >= 50) {
+    return [
+      { type: 'narration', text: 'Martha sai de trás do balcão e te abraça como se fosse parente.' },
+      { type: 'speech', speaker: 'martha', text: '"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."' }
+    ];
+  }
+  if (rep >= 10) {
+    return [
+      { type: 'narration', text: 'Martha ergue uma sobrancelha enquanto seca um copo.' },
+      { type: 'speech', speaker: 'martha', text: '"De volta? Dorme aí, mas avisa se for sair na madrugada. Não gosto de portas abertas à noite."' }
+    ];
+  }
+  return [
+    { type: 'narration', text: 'Martha te olha de cima a baixo com desconfiança mal disfarçada.' },
+    { type: 'speech', speaker: 'martha', text: '"Quarto? Cinco Valdoritas. À vista. E nada de barulho até o galo cantar."' }
+  ];
+}
+
+// Choices de retorno (oferece outros tópicos após resposta — chain de diálogo)
+function _marthaChoicesAfter(excludeIds, includeCellar){
+  var all = [
+    { id: 'rumor',  label: 'Tem ouvido alguma novidade?',     result: 'goto_dialog', _encounterRef: 'martha_rumor' },
+    { id: 'cellar', label: 'O que tem no porão?',             result: 'goto_dialog', _encounterRef: 'martha_cellar' },
+    { id: 'local',  label: 'Algum conselho pra forasteiros?', result: 'goto_dialog', _encounterRef: 'martha_local' },
+    { id: 'gossip', label: 'O que comentam por aí?',          result: 'goto_dialog', _encounterRef: 'martha_gossip' },
+    { id: 'sleep',  label: 'Quero alugar um quarto.',         result: 'goto_dialog', _encounterRef: 'martha_sleep' }
+  ];
+  var filtered = all.filter(function(c){ return excludeIds.indexOf(c.id) < 0; });
+  filtered.push({ id: 'leave', label: 'Sem mais perguntas.', result: 'continue' });
+  return filtered;
+}
+
+var MARTHA_ENCOUNTERS = {
+  greeting: {
+    id: 'martha_greeting',
+    npc: 'martha',
+    script: [],  // populated dynamicamente em _openMarthaDialogue (rep-aware)
+    choices: []  // populated dynamicamente
+  },
+  rumor: {
+    id: 'martha_rumor',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Ela inclina a cabeça e baixa a voz, conferindo se ninguém escuta.' },
+      { type: 'speech', speaker: 'martha', text: '"Hoje cedo um mercador chegou apavorado. Disse que viu <i>fogueiras na Floresta dos Sussurros</i> — três pontos, em triângulo. <i>Não eram lenhadores.</i>"' }
+    ],
+    choices: _marthaChoicesAfter(['rumor'])
+  },
+  cellar: {
+    id: 'martha_cellar',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Martha hesita por um instante. Os olhos vão para a escada que desce pro porão.' },
+      { type: 'speech', speaker: 'martha', text: '"Velharias. Barris vazios. Coisas que o meu falecido marido guardou e nunca mais alguém olhou."' },
+      { type: 'narration', text: 'Ela limpa as mãos no avental.' },
+      { type: 'speech', speaker: 'martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' }
+    ],
+    choices: [
+      { id: 'accept_cellar',  label: '◆ Aceito investigar a adega', result: 'accept_quest', _questId: 'cellar' },
+      { id: 'decline_cellar', label: 'Talvez outra hora.',           result: 'goto_dialog', _encounterRef: 'martha_decline' }
+    ]
+  },
+  local: {
+    id: 'martha_local',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Ela enxuga as mãos no avental, ponderando.' },
+      { type: 'speech', speaker: 'martha', text: '"Não bebe da fonte do Templo sem deixar um gole pros antigos. E se o capitão Aldric oferece chá, <i>aceita</i> — significa que ele confia em você."' }
+    ],
+    choices: _marthaChoicesAfter(['local'])
+  },
+  gossip: {
+    id: 'martha_gossip',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Martha ri baixinho, soltando uma gargalhada contida.' },
+      { type: 'speech', speaker: 'martha', text: '"Que a guilda anda pagando mal. Que o ferreiro Thorne brigou de novo com a esposa. E que o templo está procurando alguém disposto a entrar na cripta. <i>Nada que não seja boato.</i>"' }
+    ],
+    choices: _marthaChoicesAfter(['gossip'])
+  },
+  sleep: {
+    id: 'martha_sleep',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Ela aponta a escada com o queixo.' },
+      { type: 'speech', speaker: 'martha', text: '"Segundo andar, terceira porta. Lençol limpo, água pra lavar o rosto. <i>Cinco Valdoritas se for ficar uma noite só.</i> Outras opções no menu de Quartos."' }
+    ],
+    choices: _marthaChoicesAfter(['sleep'])
+  },
+  decline: {
+    id: 'martha_decline',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Martha encolhe os ombros e volta a polir o copo.' },
+      { type: 'speech', speaker: 'martha', text: '"Tudo bem. <i>A chave fica onde está.</i> Quando mudar de ideia, é só pedir."' }
+    ],
+    choices: _marthaChoicesAfter(['cellar'])
+  }
+};
+
+function _openMarthaDialogue(p, encounterKey){
+  encounterKey = encounterKey || 'greeting';
+  var enc = MARTHA_ENCOUNTERS[encounterKey];
+  if (!enc) { console.warn('[MARTHA] unknown encounter:', encounterKey); return; }
+  // Greeting é dinâmico (rep-aware) — popula script + choices
+  if (encounterKey === 'greeting') {
+    enc.script = _marthaGreeting(p);
+    enc.choices = _marthaChoicesAfter([]);
+  }
+  if (typeof _renderEncounterPopup === 'function') {
+    _renderEncounterPopup(enc, 'inn_npc_inn_martha', p);
+  }
+}
+
 var CHANCE_ENCOUNTERS = [
   // ═══ ENCONTRO 1: Vorhan na Taverna ═══════════════════════════════
   {
@@ -47237,6 +47406,24 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // unlock via _advanceDiscoveryStage('unlock'). Mostra toast + re-render.
     if (typeof _advanceDiscoveryStage === 'function') {
       _advanceDiscoveryStage('unlock');
+    }
+  } else if (choice.result === 'goto_dialog') {
+    // X-6.5.51BP (2026-05-15): chain de diálogos NPC (PADRAO_ALDRIC).
+    // choice._encounterRef = key em MARTHA_ENCOUNTERS / outros NPC registries.
+    // Genérico: chama _openMarthaDialogue ou registry equivalente.
+    var encRef = choice._encounterRef;
+    if (encRef && typeof MARTHA_ENCOUNTERS !== 'undefined' && MARTHA_ENCOUNTERS[encRef]) {
+      setTimeout(function(){ _openMarthaDialogue(player, encRef); }, 80);
+    } else if (encRef && typeof window['_open' + encRef + 'Dialogue'] === 'function') {
+      setTimeout(function(){ window['_open' + encRef + 'Dialogue'](player); }, 80);
+    }
+  } else if (choice.result === 'accept_quest') {
+    // X-6.5.51BP (2026-05-15): aceita missão diretamente via diálogo NPC.
+    // choice._questId = id em GUILD_QUEST_DETAILS. Usa _acceptQuest canonical.
+    if (typeof _acceptQuest === 'function' && choice._questId) {
+      _acceptQuest(choice._questId);
+    } else if (typeof vToast === 'function') {
+      vToast('⚠️ Missão indisponível: ' + (choice._questId || '?'), 'warn');
     }
   } else if (choice.result === 'discovery_defer') {
     // Player adia a discovery — quest fica em estado in_progress pra
