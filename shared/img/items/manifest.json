@@ -1745,6 +1745,90 @@
       "cost": 0.004915000000000001,
       "quality": "low",
       "category": "jewelry"
+    },
+    "codice-decifrado": {
+      "timestamp": "2026-05-15T23:15:03.362304",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "insignia-da-guarda": {
+      "timestamp": "2026-05-15T23:15:16.019889",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "selo-do-mensageiro": {
+      "timestamp": "2026-05-15T23:15:27.837829",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "cinzas-abencoadas": {
+      "timestamp": "2026-05-15T23:15:42.697586",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "broche-de-gratidao": {
+      "timestamp": "2026-05-15T23:15:54.407566",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "copia-do-mapa-da-taverna": {
+      "timestamp": "2026-05-15T23:16:09.607686",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "contrato-de-halvrek": {
+      "timestamp": "2026-05-15T23:16:21.551612",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-de-veldrin": {
+      "timestamp": "2026-05-15T23:16:37.158909",
+      "cost": 0.004940000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "fragmento-de-runa": {
+      "timestamp": "2026-05-15T23:16:45.216365",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-do-crepusculo": {
+      "timestamp": "2026-05-15T23:17:11.094013",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-da-aurora": {
+      "timestamp": "2026-05-15T23:17:14.418855",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-do-abismo": {
+      "timestamp": "2026-05-15T23:17:25.300715",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-primordial": {
+      "timestamp": "2026-05-15T23:17:36.724532",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anel-do-alvorecer": {
+      "timestamp": "2026-05-15T23:17:49.166740",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
