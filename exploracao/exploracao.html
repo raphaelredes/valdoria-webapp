@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-15T01:32:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-15T10:32:35Z - do not edit directly, edit source -->
 
 
 <!--
@@ -805,16 +805,9 @@
 })();
 </script>
 
-<!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
-     window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
-     browser cache (CF Pages serves /shared/*.{js,css} as immutable). Must
-     load before any `var v = Date.now()` in the boot scripts below. -->
-<script src="/bundle-version.js"></script>
-
 <script>
 (function() {
-  // Tiered Cache: stable bundle hash for Bucket B asset query strings
-  var v = (window.VBUNDLE_HASH || Date.now());
+  var v = Date.now();
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
   ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css', '/shared/toast.css'].forEach(function(h) {
     var l = document.createElement('link');
@@ -13939,8 +13932,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 (function() {
-  // Tiered Cache: stable bundle hash for Bucket B asset query strings
-  var v = (window.VBUNDLE_HASH || Date.now());
+  var v = Date.now();
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
@@ -13959,8 +13951,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
      arquivo em /explore/. Browser ignora erro do que não existir. -->
 <script>
 (function() {
-  // Tiered Cache: stable bundle hash for Bucket B asset query strings
-  var v = (window.VBUNDLE_HASH || Date.now());
+  var v = Date.now();
   var s1 = document.createElement('script');
   s1.src = '../valdoria-webapp/explore/explore-camp-fire.js?v=' + v;
   s1.async = false;
@@ -33054,10 +33045,7 @@ var _weatherAmbient = {
   lastSfxVol: -1,     // último valor de SFX vol — pra detectar mudança e re-scale
   pollTimer: null     // timer que sincroniza com slider de SFX
 };
-// X-6.5.51BL (2026-05-14): URL relativa — funciona em DEV (dev.) e PROD
-// (jogo.) sem acoplar DEV à PROD. Audio é Tier A immutable em /shared/audio/
-// no mesmo CDN da página.
-var _AUDIO_BASE_URL = '/shared/audio/';
+var _AUDIO_BASE_URL = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
 var _AMBIENT_CROSSFADE_MS = 2500;  // 2.5s overlap — começa B antes de A acabar
 
 // 2026-04-27 USER FIX: ambient de chuva/tempestade/névoa agora é classificado
@@ -40774,16 +40762,19 @@ function boot() {
       try { LOG('BOOT', 'arrived from cidade biome=' + _arrKey); } catch (_) {}
       if (window.__BACK_TO_CIDADE) {
         // Fallback (sem from=cidade ou journey indisponível): toast simples
+        // X-6.5.51BJ (2026-05-15): nomes alinhados com CART_BIOMES canonical
+        // (valdoria-webapp/cidade/cartografia-shared.js). Antes 8 nomes
+        // divergentes (Floresta dos Lobos vs Sussurros, Khass vs Dourado, etc).
         var BIOME_DISPLAY_NAMES = {
-          plains: 'Planície de Valdoria',
-          forest: 'Floresta dos Lobos',
-          swamp: 'Pântano Sussurrante',
-          mountain: 'Montanha Gelada',
-          desert: 'Deserto de Khass',
-          snow: 'Tundra do Norte',
-          cave: 'Caverna dos Ecos',
-          volcanic: 'Vulcão Adormecido',
-          graveyard: 'Cemitério Esquecido'
+          plains: 'Portões de Valdoria',
+          forest: 'Floresta dos Sussurros',
+          swamp: 'Pântano Nebuloso',
+          mountain: 'Picos de Pedra',
+          desert: 'Deserto Dourado',
+          snow: 'Ermo Congelado',
+          cave: 'Passagem Subterrânea',
+          volcanic: 'Cratera Vulcânica',
+          graveyard: 'Cemitério Antigo'
         };
         var _arrLabel = BIOME_DISPLAY_NAMES[_arrKey] || _arrKey;
         setTimeout(function(){

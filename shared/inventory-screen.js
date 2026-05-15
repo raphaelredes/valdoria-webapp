@@ -25,7 +25,8 @@
  *   ~865   _buildDetailActions (Equipar/Desequipar/Usar/Vender/Largar)
  *   ~895   _filterItems / _matchesCategoryRaw / _primaryCategory
  *   ~930   _countByCategory / _sortItems
- *   ~975   _slotLabel / UI_ICONS / _uiIcon (SVG inline UI prefix vui-*)
+ *   ~975   _slotLabel / _tagLabel (PT-BR) / _resolveItemIcon (sprite-aware
+ *          + variantes slug + fallback ic-it-base-*) / UI_ICONS / _uiIcon
  *   ~1020  _esc / _slugify (utils)
  *
  * Ícones de items: SEMPRE via `<use href="#ic-it-{id}">` do sprite canônico
@@ -569,7 +570,7 @@
       var rarity = it.rarity || 'common';
       var equipped = !!it.equipped;
       var fav = !!it.favorite;
-      var iconId = it.iconId || ('ic-it-' + (it.id || _slugify(it.name)));
+      var iconId = _resolveItemIcon(it);
       var qtyBadge = (it.qty && it.qty > 1)
         ? '<span class="vinv-badge stack">×' + it.qty + '</span>'
         : '';
@@ -645,7 +646,7 @@
     slotDef.forEach(function (s) {
       var it = loadout[s.key];
       if (it) {
-        var iconId = it.iconId || ('ic-it-' + (it.id || _slugify(it.name)));
+        var iconId = _resolveItemIcon(it);
         var rarity = it.rarity || 'common';
         html += '<div class="vinv-slot filled r-' + rarity + '" data-slot="' + s.key + '">'
           +   '<div class="vinv-slot-icon"><svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg></div>'
@@ -847,7 +848,7 @@
     var card = _state.overlay.querySelector('[data-region="detail-card"]');
     if (!ov || !card) return;
 
-    var iconId = it.iconId || ('ic-it-' + (it.id || _slugify(it.name)));
+    var iconId = _resolveItemIcon(it);
     var rarity = it.rarity || 'common';
     var rarityLabel = {
       common: 'COMUM', uncommon: 'INCOMUM', rare: 'RARO',
@@ -868,7 +869,7 @@
     if (it.tags && it.tags.length) {
       tagsHtml = '<div class="vinv-detail-tags">'
         + it.tags.slice(0, 6).map(function (t) {
-            return '<span class="vinv-dtag">' + _esc(t) + '</span>';
+            return '<span class="vinv-dtag">' + _esc(_tagLabel(t)) + '</span>';
           }).join('')
         + '</div>';
     }
@@ -975,7 +976,7 @@
       html += '<div class="vinv-swap-tip">' + _esc(cost.tip) + '</div>';
     }
     alternatives.forEach(function (alt, i) {
-      var iconId = alt.iconId || ('ic-it-' + (alt.id || _slugify(alt.name)));
+      var iconId = _resolveItemIcon(alt);
       var altRarity = alt.rarity || 'common';
       html += '<div class="vinv-swap-row r-' + altRarity + (blocked ? ' blocked' : '') + '" data-swap-idx="' + i + '">'
         +   '<svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg>'
@@ -1165,6 +1166,184 @@
       ring: 'Anel', ring1: 'Anel I', ring2: 'Anel II',
       amulet: 'Amuleto', cloak: 'Capa', map: 'Mapa',
     })[slot] || slot;
+  }
+
+  var _TAG_LABELS = {
+    weapon: 'Arma', simple_weapon: 'Arma Simples', martial_weapon: 'Arma Marcial',
+    versatile: 'Versátil', finesse: 'Acuidade', light: 'Leve', heavy: 'Pesada',
+    two_handed: 'Duas Mãos', thrown: 'Arremesso', ranged: 'À Distância', reach: 'Alcance',
+    armor: 'Armadura', light_armor: 'Armadura Leve', medium_armor: 'Armadura Média',
+    heavy_armor: 'Armadura Pesada', shield: 'Escudo', clothing: 'Vestimenta',
+    consumable: 'Consumível', potion: 'Poção', healing: 'Cura', food: 'Comida',
+    forage: 'Forrageio', alchemy: 'Alquimia', antidote: 'Antídoto', poison: 'Veneno',
+    scroll: 'Pergaminho', field_kit: 'Kit de Campo',
+    camping: 'Acampamento', tool: 'Ferramenta', map: 'Mapa',
+    gem: 'Gema', socketable: 'Encaixável', valuable: 'Valioso',
+    magic: 'Mágico', arcane: 'Arcano', holy: 'Sagrado',
+    attunement: 'Sintonização', inscribable: 'Inscritível',
+    monster_part: 'Parte de Monstro', material: 'Material',
+    leather: 'Couro', bone: 'Osso', metal: 'Metal', wood: 'Madeira', fabric: 'Tecido',
+    junk: 'Sucata', trophy: 'Troféu', no_sell: 'Não Vendável', no_discard: 'Indispensável',
+    crafting: 'Artesanato', accessory: 'Acessório',
+    set: 'Conjunto',
+    set_lobo_selvagem: 'Conj. Lobo Selvagem',
+    set_protetor_ancestral: 'Conj. Protetor Ancestral',
+    set_arcanista: 'Conj. Arcanista',
+    rune: 'Runa', rune_fragment: 'Fragmento de Runa',
+    quest: 'Missão', unavailable: 'Indisponível', fairy: 'Feérico',
+  };
+  function _tagLabel(t) {
+    if (!t) return '';
+    var key = String(t).toLowerCase();
+    if (_TAG_LABELS[key]) return _TAG_LABELS[key];
+    return key.replace(/_/g, ' ');
+  }
+
+  // ============================================================
+  //  HELPERS — Resolução robusta de iconId vs sprite canonical
+  //  Bug histórico: adapters chamavam HeraldicItems.idFromName
+  //  (inexistente) e caíam num slug ingênuo que não bate com
+  //  alguns IDs do sprite (ex: "Poção de Cura" → "pocao-de-cura"
+  //  mas sprite tem "pocao-cura"). Centralizar aqui evita repetir
+  //  fix em 3 simuladores. Sempre reusa `ic-it-*` existente —
+  //  regra "Items Existentes — NUNCA recriar SVG novo".
+  // ============================================================
+  function _spriteHasIcon(id) {
+    if (!id) return false;
+    try { return !!document.getElementById(id); } catch (_) { return false; }
+  }
+  function _heraldicResolve(name) {
+    try {
+      if (window.HeraldicItems && typeof HeraldicItems.resolve === 'function') {
+        var r = HeraldicItems.resolve(name);
+        if (r) return r;
+      }
+    } catch (_) {}
+    return '';
+  }
+  function _slugVariants(name) {
+    if (!name) return [];
+    var base = _slugify(name);
+    if (!base) return [];
+    var v = [base];
+    // Remove artigos/preposições pt-br comuns ("de", "do", "da", "dos", "das", "em", "a", "o")
+    var stripped = base
+      .replace(/(^|-)(de|do|da|dos|das|em|a|o)-/g, '$1')
+      .replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (stripped && stripped !== base) v.push(stripped);
+    return v;
+  }
+  function _fallbackIconByName(name) {
+    if (!name) return '';
+    var n = String(name).toLowerCase();
+    // Keywords pt-BR canonical → ic-it-base-* mais próximo visualmente.
+    // Ordem importa: prefixos mais específicos primeiro.
+    if (/\bespada\s+longa\b/.test(n)) return 'ic-it-base-longsword';
+    if (/\bespada\s+curta\b/.test(n)) return 'ic-it-base-shortsword';
+    if (/\bmontante\b/.test(n)) return 'ic-it-base-greatsword';
+    if (/\bmachado\s+grande\b/.test(n)) return 'ic-it-base-greataxe';
+    if (/\bmachado\b/.test(n)) return 'ic-it-base-handaxe';
+    if (/\bmartelo\b/.test(n)) return 'ic-it-base-warhammer';
+    if (/\barco\b/.test(n)) return 'ic-it-base-shortbow';
+    if (/\bbesta\b/.test(n)) return 'ic-it-base-light-crossbow';
+    if (/\badaga\b/.test(n)) return 'ic-it-base-dagger';
+    if (/\bclava\b/.test(n)) return 'ic-it-base-club';
+    if (/\bmaça\b/.test(n) || /\bmaca\b/.test(n)) return 'ic-it-base-mace';
+    if (/\blança\b/.test(n) || /\blanca\b/.test(n)) return 'ic-it-base-spear';
+    if (/\bcajado\b/.test(n) || /\bbordão\b/.test(n) || /\bbordao\b/.test(n)) return 'ic-it-base-mage-staff';
+    if (/\bvarinha\b/.test(n)) return 'ic-it-base-wand';
+    if (/\bescudo\b/.test(n)) return 'ic-it-base-shield-round';
+    if (/\belmo\b/.test(n)) return 'ic-it-base-iron-helm';
+    if (/\bbotas\b/.test(n)) return 'ic-it-base-boot';
+    if (/\bcapa\b/.test(n) || /\bmanto\b/.test(n)) return 'ic-it-base-cloak';
+    if (/\bcota\b.*malha/.test(n)) return 'ic-it-base-chainmail-tunic';
+    if (/\bpeitoral\b|couraça|couraca/.test(n)) return 'ic-it-base-breastplate';
+    if (/\barmadura\b/.test(n)) return 'ic-it-base-padded-armor';
+    if (/\bpergaminho\b/.test(n)) return 'ic-it-base-scroll';
+    if (/\bgrimório\b|\bgrimorio\b|\btomo\b/.test(n)) return 'ic-it-base-tome';
+    if (/\bmapa\b/.test(n)) return 'ic-it-base-map';
+    if (/\bpoção\b|\bpocao\b/.test(n)) return 'ic-it-base-potion-vial';
+    if (/\banel\b/.test(n)) return 'ic-it-base-ring-band';
+    if (/\bamuleto\b|\bpingente\b/.test(n)) return 'ic-it-base-amulet';
+    if (/\btocha\b/.test(n)) return 'ic-it-base-torch';
+    if (/\bvela\b/.test(n)) return 'ic-it-base-candle';
+    if (/\bcorda\b/.test(n)) return 'ic-it-base-rope';
+    if (/\btenda\b|\bbarraca\b/.test(n)) return 'ic-it-base-tent';
+    if (/\bração\b|\bracao\b|\brações\b|\bracoes\b/.test(n)) return 'ic-it-base-bag-rations';
+    if (/\bpão\b|\bpao\b/.test(n)) return 'ic-it-base-bread';
+    if (/\bcarne\b/.test(n)) return 'ic-it-base-meat-cooked';
+    if (/\bchave\b/.test(n)) return 'ic-it-base-key';
+    if (/\bosso\b|\bcrânio\b|\bcranio\b/.test(n)) return 'ic-it-base-bone';
+    if (/\bgarra\b/.test(n)) return 'ic-it-base-claw';
+    if (/\bpresa\b|\bdente\b/.test(n)) return 'ic-it-base-fang';
+    if (/\borelha\b|\bolho\b/.test(n)) return 'ic-it-base-ear';
+    if (/\bpele\b|\bcouro\b/.test(n)) return 'ic-it-base-pelt';
+    if (/\berva\b/.test(n)) return 'ic-it-base-herb-leaf';
+    if (/\brubi|safira|esmeralda|ametista|turquesa|jade|ônix|onix|quartzo|topázio|topazio|pérola|perola/.test(n)) return 'ic-it-base-gem-faceted';
+    if (/\bgema\b|\bcristal\b/.test(n)) return 'ic-it-base-gem-faceted';
+    if (/\bruna\b/.test(n)) return 'ic-it-base-rune-stone';
+    if (/\bfragmento\b/.test(n)) return 'ic-it-base-rune-fragment';
+    if (/\borbe\b/.test(n)) return 'ic-it-base-orb';
+    if (/\bbussola\b|\bbússola\b/.test(n)) return 'ic-it-base-compass';
+    if (/\bluneta\b/.test(n)) return 'ic-it-base-spyglass';
+    if (/\bkit\b/.test(n)) return 'ic-it-base-lantern';
+    if (/\bmochila\b|\bsaco\b/.test(n)) return 'ic-it-base-coin-pouch';
+    return '';
+  }
+  function _fallbackIconByMeta(it) {
+    var byName = _fallbackIconByName(it.name);
+    if (byName && _spriteHasIcon(byName)) return byName;
+    var tags = (it.tags || []).join('|').toLowerCase();
+    var slot = (it.slot || '').toLowerCase();
+    // Slot tem prioridade — mais específico que tag genérica
+    if (slot === 'main_hand' || /\bweapon\b/.test(tags)) {
+      if (/\bsimple_weapon|martial_weapon\b/.test(tags) && /\bfinesse\b/.test(tags))
+        return 'ic-it-base-dagger';
+      if (/\branged\b/.test(tags)) return 'ic-it-base-shortbow';
+      if (/\btwo_handed\b/.test(tags)) return 'ic-it-base-greatsword';
+      return 'ic-it-base-shortsword';
+    }
+    if (slot === 'off_hand' || /\bshield\b/.test(tags)) return 'ic-it-base-shield-round';
+    if (slot === 'head') return 'ic-it-base-iron-helm';
+    if (slot === 'chest' || /\barmor\b/.test(tags)) {
+      if (/\bheavy_armor\b/.test(tags)) return 'ic-it-base-breastplate';
+      if (/\blight_armor\b/.test(tags)) return 'ic-it-base-hide-armor';
+      return 'ic-it-base-leather-chest';
+    }
+    if (slot === 'feet') return 'ic-it-base-boot';
+    if (slot === 'hands') return 'ic-it-base-glove';
+    if (slot === 'cloak') return 'ic-it-base-cloak';
+    if (slot === 'ring1' || slot === 'ring2' || slot === 'ring') return 'ic-it-base-ring-band';
+    if (slot === 'amulet' || slot === 'necklace') return 'ic-it-base-amulet';
+    if (/\bpotion|healing\b/.test(tags)) return 'ic-it-base-potion-vial';
+    if (/\bscroll\b/.test(tags)) return 'ic-it-base-scroll';
+    if (/\bfood|ration\b/.test(tags)) return 'ic-it-base-bread';
+    if (/\bgem|valuable\b/.test(tags)) return 'ic-it-base-gem-faceted';
+    if (/\brune_fragment\b/.test(tags)) return 'ic-it-base-rune-fragment';
+    if (/\brune\b/.test(tags)) return 'ic-it-base-rune-stone';
+    if (/\bmap\b/.test(tags)) return 'ic-it-base-map';
+    if (/\bbone|monster_part\b/.test(tags)) return 'ic-it-base-bone';
+    if (/\bcamping\b/.test(tags)) return 'ic-it-base-tent';
+    if (/\btool\b/.test(tags)) return 'ic-it-base-lantern';
+    if (/\bconsumable\b/.test(tags)) return 'ic-it-base-potion-vial';
+    return 'ic-it-base-coin-pouch';
+  }
+  function _resolveItemIcon(it) {
+    if (!it) return 'ic-it-base-coin-pouch';
+    // 1) Hint do adapter — só usa se o sprite realmente tem
+    var hinted = it.iconId;
+    if (hinted && _spriteHasIcon(hinted)) return hinted;
+    // 2) HeraldicItems.resolve(name) — conhece o set completo de IDs
+    var resolved = _heraldicResolve(it.name);
+    if (resolved && _spriteHasIcon(resolved)) return resolved;
+    // 3) Variantes de slug (drop "de"/"do"/"da")
+    var variants = _slugVariants(it.name);
+    for (var i = 0; i < variants.length; i++) {
+      var alt = 'ic-it-' + variants[i];
+      if (_spriteHasIcon(alt)) return alt;
+    }
+    // 4) Fallback por slot/tag — sempre retorna ic-it-base-* existente
+    return _fallbackIconByMeta(it);
   }
 
   // ============================================================

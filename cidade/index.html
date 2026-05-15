@@ -616,14 +616,9 @@ LOG SINK (Fase 7):
         }catch(e){}
     },100);
   </script>
-  <!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
-       window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
-       browser cache (CF Pages serves /shared/*.{js,css} as immutable). Falls
-       back to Date.now() if _bundle-hash.js is unavailable for any reason. -->
-  <script src="/bundle-version.js"></script>
   <script>
-    // Cache busting para CSS/JS imports — uses stable bundle hash when present
-    var v = (window.VBUNDLE_HASH || Date.now());
+    // Cache busting para CSS/JS imports
+    var v = Date.now();
     document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/game-hub.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/inn-animation.css?v=' + v + '">');
@@ -936,6 +931,10 @@ LOG SINK (Fase 7):
       padding-top: var(--v-space-xs, 2px);
       border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));
     }
+    /* X-6.5.51BH: footer-nav esvaziado desde X-6.5.51BG (5 botoes numa linha
+       só em footer-quick) — esconde a row vazia pra eliminar artefato visual
+       (border-top dourada acima de nada). */
+    .footer-row.footer-nav:empty { display: none; }
     .fb-btn {
       flex: 1;
       max-width: 100px;
@@ -961,10 +960,12 @@ LOG SINK (Fase 7):
     .fb-btn.fb-toggle:hover { color: var(--v-gold, #c4953a); }
     .fb-btn.fb-icon-only { flex: 0 0 32px; max-width: 32px; min-width: 32px; padding: 2px; }
     .fb-btn .fb-emoji { font-size: var(--v-font-md, 14px); }
-    /* Toggle (·) FORA do panel — flutua acima do bottom-panel (2026-05-04) */
+    /* Toggle (·) FORA do panel — flutua acima do bottom-panel (2026-05-04)
+       X-6.5.51BH (2026-05-15): footer agora é 1 linha só (~46px) desde X-6.5.51BG;
+       toggle voltou ao padrão antigo de 2 linhas (90px) — fix: alinhar à altura real. */
     #footer-collapse-toggle {
       position: absolute;
-      bottom: 90px;  /* logo acima do bottom-panel (~84px) */
+      bottom: 56px;  /* logo acima do bottom-panel 1-linha (~46px + 10 gap) */
       left: 50%;
       transform: translateX(-50%);
       z-index: var(--v-z-dropdown-high, 51);
@@ -5238,6 +5239,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       try {
         if (typeof refreshHud === 'function') refreshHud();
         if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+        /* X-6.5.51BH (2026-05-15): trigger Dádiva Diária (daily login reward).
+           Verifica localStorage['valdoria_daily'] vs hoje. Se for novo dia,
+           mostra popup AAA com recompensa progressiva (7-day cycle). */
+        if (typeof _maybeShowDailyLogin === 'function') _maybeShowDailyLogin();
       } catch(e){ console.warn('[INTRO] content refresh failed:', e); }
     }, 1800);
   };
@@ -7521,9 +7526,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     '})();<\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
-    // three.min.js: vendored lib pinned (no in-tree edits). Served immutable
-    // via _headers; query string stripped so browser cache key is path-only.
-    document.write('<script src="/shared/three.min.js"><\/script>');
+    document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders
@@ -11617,11 +11620,7 @@ function _showKillsPopup(p){
     +   '<div style="position:relative;display:inline-block;">'
     +     '<div class="vKl-orbit-ring"></div>'
     +     '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
-    /* X-6.5.51BL (2026-05-14): data-src removido até PNG ser criado.
-       JS de heuristic-load (~11700) skipa silenciosamente quando sem
-       data-src; SVG fallback (#ic-ach-algoz) continua mostrando.
-       Restaurar atributo quando hall-cacada-trophy.png for adicionado. */
-    +       '<div class="vKl-hero-png"></div>'
+    +       '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
     +       '<svg class="vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
     +     '</div>'
     /* Embers floating up around the pedestal */
@@ -11860,6 +11859,298 @@ function _showStreakPopup(p){
   bodyEl.innerHTML = html;
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'streak') _popupStack.push('streak');
+}
+
+// ============================================================================
+// === DÁDIVA DO ALVORECER — Daily Login Reward Popup (X-6.5.51BH 2026-05-15) ==
+// ============================================================================
+// canonical: src/game/system/daily_login.py — 7-day cycle progressive rewards.
+// Auto-trigger ao abrir o jogo num novo dia real (localStorage tracking).
+// Storage: localStorage 'valdoria_daily' = { last_date, streak, max_streak }
+// ============================================================================
+var DAILY_REWARDS = [
+  { day: 1, gold: 10,  xp: 25, item: null },
+  { day: 2, gold: 15,  xp: 30, item: null },
+  { day: 3, gold: 25,  xp: 40, item: { name: 'Poção de Cura', qty: 1, icon: 'ic-it-pocao-cura' } },
+  { day: 4, gold: 30,  xp: 35, item: null },
+  { day: 5, gold: 40,  xp: 45, item: null },
+  { day: 6, gold: 50,  xp: 50, item: null },
+  { day: 7, gold: 100, xp: 75, item: { name: 'Poção de Cura Maior', qty: 1, icon: 'ic-it-pocao-cura-maior' } }
+];
+
+function _dailyLoginData(){
+  try {
+    var raw = localStorage.getItem('valdoria_daily');
+    if (!raw) return { last_date: '', streak: 0, max_streak: 0, claimed_today: false };
+    var d = JSON.parse(raw);
+    return {
+      last_date: d.last_date || '',
+      streak: d.streak || 0,
+      max_streak: d.max_streak || 0,
+      claimed_today: !!d.claimed_today
+    };
+  } catch (_) {
+    return { last_date: '', streak: 0, max_streak: 0, claimed_today: false };
+  }
+}
+function _saveDailyLogin(data){
+  try { localStorage.setItem('valdoria_daily', JSON.stringify(data)); } catch (_) {}
+}
+function _todayIso(){
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function _checkDailyLogin(){
+  // Retorna { reward, streak } se houver dádiva disponível, null se já coletou.
+  var today = _todayIso();
+  var data = _dailyLoginData();
+  if (data.last_date === today && data.claimed_today) return null;
+
+  var streak = data.streak;
+  if (data.last_date) {
+    var last = new Date(data.last_date + 'T00:00:00');
+    var now = new Date(today + 'T00:00:00');
+    var diff = Math.floor((now - last) / 86400000);
+    if (diff === 0) {
+      // Mesmo dia, mas claimed_today=false → claim ainda disponível
+    } else if (diff === 1) {
+      streak += 1;  // Consecutivo
+    } else {
+      streak = 1;   // Quebrou (2+ dias) — recomeça
+    }
+  } else {
+    streak = 1;     // Primeiro login
+  }
+
+  var dayInCycle = ((streak - 1) % 7);
+  var reward = DAILY_REWARDS[dayInCycle];
+  var multiplier = streak >= 8 ? 1.5 : 1.0;
+  return {
+    streak: streak,
+    max_streak: Math.max(data.max_streak, streak),
+    day_in_cycle: dayInCycle + 1,
+    reward: reward,
+    multiplier: multiplier,
+    final_gold: Math.round(reward.gold * multiplier),
+    final_xp: Math.round(reward.xp * multiplier)
+  };
+}
+
+/**
+ * _showDailyLoginPopup — AAA daily reward overlay.
+ * Cinematic intro com pergaminho descendo, sol nascendo, 7 dias em arco,
+ * streak counter com chama animada, reward card com brilho dourado.
+ */
+function _showDailyLoginPopup(info){
+  if (!info) return;
+  // Cria overlay próprio (não usa city-subscreen-popup pq é tela bloqueante)
+  var existing = document.getElementById('daily-login-overlay');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'daily-login-overlay';
+  ov.style.cssText = 'position:absolute; inset:0; z-index:10500; '
+    + 'background:radial-gradient(ellipse at 50% 30%, rgba(255,180,80,0.20) 0%, rgba(20,12,6,0.92) 60%, rgba(8,5,3,0.96) 100%); '
+    + 'backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); '
+    + 'display:flex; align-items:center; justify-content:center; '
+    + 'animation:vDailyFadeIn 0.6s ease-out;';
+
+  var r = info.reward;
+  var streakBadge = info.streak >= 7 ? '★' : info.day_in_cycle;
+  var cyclesDone = Math.floor((info.streak - 1) / 7);
+
+  // === 7 dias em strip horizontal — dia atual em destaque com chama ===
+  var daysHtml = '<div style="display:flex; gap:4px; justify-content:center; align-items:flex-end; margin: 8px 0 14px;">';
+  for (var i = 1; i <= 7; i++) {
+    var rw = DAILY_REWARDS[i-1];
+    var isToday = (i === info.day_in_cycle);
+    var isDone = (i < info.day_in_cycle);
+    var hasItem = !!rw.item;
+
+    daysHtml += '<div class="vDl-day' + (isToday ? ' vDl-day-today' : '') + (isDone ? ' vDl-day-done' : '') + '" '
+      + 'style="flex:1; max-width:42px; min-width:30px; padding:6px 2px 4px; text-align:center; position:relative; '
+      + 'border-radius:6px; '
+      + 'background:' + (isToday ? 'radial-gradient(ellipse at 50% 40%, rgba(255,140,40,0.45), rgba(120,40,10,0.85))'
+                              : isDone ? 'linear-gradient(180deg, rgba(196,149,58,0.35), rgba(74,56,40,0.7))'
+                                       : 'linear-gradient(180deg, rgba(74,56,40,0.5), rgba(42,30,18,0.8))') + '; '
+      + 'border:1px solid ' + (isToday ? '#ff8a3a' : isDone ? '#c4953a' : '#4a3828') + '; '
+      + (isToday ? 'box-shadow: 0 0 14px rgba(255,140,40,0.6), inset 0 0 8px rgba(255,180,80,0.35);' : '') + '">'
+      // Dia
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:9px; font-weight:700; letter-spacing:1px; '
+      +   'color:' + (isToday ? '#ffd8a0' : isDone ? '#e8c050' : '#a09484') + ';">DIA ' + i + '</div>'
+      // Ícone do dia
+      + (hasItem
+          ? '<svg viewBox="0 0 120 120" style="width:22px; height:22px; margin:3px auto 1px; color:' + (isToday ? '#fff8d0' : isDone ? '#ffd700' : '#6a5e50') + '; display:block;"><use href="#' + rw.item.icon + '"/></svg>'
+          : '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:14px; font-weight:700; color:' + (isToday ? '#ffd8a0' : isDone ? '#ffd700' : '#6a5e50') + '; margin:3px 0 1px;">' + rw.gold + '</div>')
+      // Marca dia atual ou done
+      + (isToday
+          ? '<div style="font-size:10px; color:#ff6a2a;">◆</div>'
+          : isDone ? '<div style="font-size:10px; color:#7cdb7c;">✓</div>'
+                   : '<div style="font-size:9px; color:#6a5e50; opacity:0.5;">·</div>')
+      + '</div>';
+  }
+  daysHtml += '</div>';
+
+  // === Reward card (centro do popup) ===
+  var rewardHtml = '<div style="position:relative; padding: 14px 12px 12px; margin: 0 4px 12px; '
+    + 'background: linear-gradient(180deg, rgba(255,180,80,0.18) 0%, rgba(74,40,12,0.55) 100%); '
+    + 'border: 1.5px solid #c4953a; border-radius: 10px; '
+    + 'box-shadow: 0 0 22px rgba(255,180,80,0.25), inset 0 0 16px rgba(255,200,100,0.08); '
+    + 'text-align: center;">'
+    // Ornamento topo
+    + '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);'
+    +   'background:#1a1410; padding:0 10px; '
+    +   'font-family:var(--v-font-display,Cinzel,serif); font-size:9px; letter-spacing:2.5px; '
+    +   'color:#ffd8a0; text-shadow:0 0 6px rgba(255,180,80,0.6);">◈ DÁDIVA DE HOJE ◈</div>'
+    // Linha do gold
+    + '<div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px;">'
+    +   '<span class="vi vi-coin" style="width:24px;height:24px;font-size:14px;"></span>'
+    +   '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:32px; color:#ffd700; font-weight:700; '
+    +     'text-shadow:0 0 10px rgba(255,215,0,0.6), 0 2px 4px rgba(0,0,0,0.5); line-height:1;">'
+    +     '+' + info.final_gold
+    +   '</span>'
+    +   '<span style="font-size:11px; color:#a09484; letter-spacing:1.5px; text-transform:uppercase;">Valdoritas</span>'
+    + '</div>'
+    // XP
+    + '<div style="font-size:12px; color:#7cdb7c; margin-top:4px; font-family:var(--v-font-display,Cinzel,serif);">'
+    +   '+ ' + info.final_xp + ' XP'
+    + '</div>';
+  // Item (se houver)
+  if (r.item) {
+    rewardHtml += '<div style="display:flex; align-items:center; gap:8px; padding:8px 10px; margin-top:8px; '
+      + 'background:rgba(0,0,0,0.35); border:1px solid rgba(196,149,58,0.4); border-radius:6px;">'
+      + '<svg viewBox="0 0 120 120" style="width:36px; height:36px; color:#fff8d0; flex-shrink:0;"><use href="#' + r.item.icon + '"/></svg>'
+      + '<div style="flex:1; text-align:left;">'
+      +   '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:12px; color:#e8dcc8; font-weight:600;">' + r.item.name + '</div>'
+      +   '<div style="font-size:10px; color:#a09484;">×' + r.item.qty + ' (item raro)</div>'
+      + '</div>'
+      + '<div style="font-size:18px; color:#ffd700;">✦</div>'
+      + '</div>';
+  }
+  if (info.multiplier > 1) {
+    rewardHtml += '<div style="font-size:10px; color:#ff8a3a; margin-top:6px; font-style:italic; letter-spacing:1px;">'
+      + '◆ Bônus de ciclo completo: ×' + info.multiplier.toFixed(1) + ' ◆'
+      + '</div>';
+  }
+  rewardHtml += '</div>';
+
+  // === Streak counter (acima dos 7 dias) ===
+  var streakHtml = '<div style="text-align:center; padding: 6px 8px 4px; position:relative;">'
+    // Brasão de chama (animado) + número
+    + '<div style="display:inline-flex; align-items:center; gap:10px; position:relative;">'
+    +   '<svg class="vDl-flame" viewBox="0 0 120 120" style="width:38px; height:38px; color:#ff8a4a;"><use href="#ic-ach-indomavel"/></svg>'
+    +   '<div style="text-align:left;">'
+    +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:34px; color:#ffd8a0; font-weight:700; line-height:1; '
+    +       'text-shadow:0 0 12px rgba(255,140,40,0.65), 0 2px 4px rgba(0,0,0,0.6);">' + info.streak + '</div>'
+    +     '<div style="font-size:10px; color:#ff8a4a; letter-spacing:2px; text-transform:uppercase; margin-top:2px;">Dias Seguidos</div>'
+    +   '</div>'
+    + '</div>'
+    + (cyclesDone > 0
+        ? '<div style="font-size:10px; color:#ffd700; font-style:italic; margin-top:4px;">★ ' + cyclesDone + ' ciclo' + (cyclesDone === 1 ? '' : 's') + ' completo' + (cyclesDone === 1 ? '' : 's') + ' ★</div>'
+        : '')
+    + '</div>';
+
+  // === Card principal (pergaminho descendo) ===
+  ov.innerHTML = ''
+    + '<style>'
+    +   '@keyframes vDailyFadeIn{from{opacity:0;}to{opacity:1;}}'
+    +   '@keyframes vDailySlideDown{from{transform:translateY(-40px) scale(0.94);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}'
+    +   '@keyframes vDlFlameDance{0%,100%{transform:scale(1) rotate(-2deg);filter:drop-shadow(0 0 8px rgba(255,140,40,0.65));}50%{transform:scale(1.08) rotate(2deg);filter:drop-shadow(0 0 16px rgba(255,180,80,0.85));}}'
+    +   '@keyframes vDlSunrise{0%,100%{box-shadow:0 0 50px rgba(255,180,80,0.35), inset 0 0 30px rgba(255,200,100,0.10);}50%{box-shadow:0 0 80px rgba(255,200,100,0.55), inset 0 0 50px rgba(255,220,140,0.18);}}'
+    +   '@keyframes vDlEmberRise{0%{opacity:0;transform:translate(0,0) scale(0.5);}30%{opacity:0.9;}100%{opacity:0;transform:translate(var(--dx,8px), -60px) scale(0.2);}}'
+    +   '@keyframes vDlBtnPulse{0%,100%{transform:scale(1);box-shadow:0 0 18px rgba(255,180,80,0.4);}50%{transform:scale(1.03);box-shadow:0 0 28px rgba(255,200,100,0.7);}}'
+    +   '.vDl-card{animation:vDailySlideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both, vDlSunrise 4s ease-in-out infinite 0.7s;}'
+    +   '.vDl-flame{animation:vDlFlameDance 2.4s ease-in-out infinite;transform-origin:50% 70%;}'
+    +   '.vDl-ember{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#ffd27a,#ff7a2a 70%,transparent);pointer-events:none;animation:vDlEmberRise 3s ease-out infinite;}'
+    +   '.vDl-claim-btn{animation:vDlBtnPulse 2.2s ease-in-out infinite;cursor:pointer;}'
+    +   '.vDl-claim-btn:hover{transform:scale(1.05) !important;}'
+    +   '.vDl-claim-btn:active{transform:scale(0.96) !important;}'
+    + '</style>'
+    + '<div class="vDl-card" style="position:relative; width: calc(100% - 32px); max-width: 380px; '
+    +   'background: linear-gradient(180deg, #3a2a1a 0%, #221610 100%); '
+    +   'border: 2px solid #c4953a; border-radius: 14px; '
+    +   'padding: 16px 14px 14px; overflow: visible;">'
+    // Embers decorativos
+    +   '<span class="vDl-ember" style="left:18%; bottom:42%; --dx:-12px; animation-delay:0.2s;"></span>'
+    +   '<span class="vDl-ember" style="left:78%; bottom:38%; --dx:12px; animation-delay:1.0s;"></span>'
+    +   '<span class="vDl-ember" style="left:32%; bottom:50%; --dx:-6px; animation-delay:1.7s;"></span>'
+    +   '<span class="vDl-ember" style="left:65%; bottom:48%; --dx:8px; animation-delay:2.4s;"></span>'
+    // Cabeçalho cerimonial
+    +   '<div style="text-align:center; margin-bottom: 10px; position:relative;">'
+    +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 9px; letter-spacing: 4px; color:#c4953a; opacity:0.8;">◆ ALVORECER ◆</div>'
+    +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 22px; letter-spacing: 4px; color: #ffd8a0; '
+    +       'text-shadow: 0 0 14px rgba(255,180,80,0.5), 0 2px 4px rgba(0,0,0,0.6); margin-top: 2px;">DÁDIVA DIÁRIA</div>'
+    +     '<div style="font-size: 10px; color: #a09484; font-style: italic; margin-top: 4px; letter-spacing:0.5px;">'
+    +       '"O sol que nasce traz bênçãos aos fiéis."'
+    +     '</div>'
+    +   '</div>'
+    +   streakHtml
+    +   daysHtml
+    +   rewardHtml
+    // Botão CTA
+    +   '<button id="vDl-claim" class="vDl-claim-btn" '
+    +     'style="width:100%; padding: 13px; '
+    +     'background: linear-gradient(180deg, #ffd700 0%, #c4953a 50%, #8a5a20 100%); '
+    +     'border: 2px solid #ffd700; border-radius: 10px; '
+    +     'color: #1a1006; font-family: var(--v-font-display,Cinzel,serif); '
+    +     'font-size: 16px; font-weight: 800; letter-spacing: 3px; '
+    +     'text-shadow: 0 1px 0 rgba(255,255,255,0.35); '
+    +     'transition: transform 0.18s, box-shadow 0.18s;">'
+    +     '◆ RESGATAR DÁDIVA ◆'
+    +   '</button>'
+    + '</div>';
+
+  // Inserir dentro do #app (frame canonical do simulator)
+  var app = document.getElementById('app') || document.body;
+  app.appendChild(ov);
+
+  // Handler do claim
+  document.getElementById('vDl-claim').addEventListener('click', function(){
+    // Persist no localStorage
+    var today = _todayIso();
+    var data = _dailyLoginData();
+    _saveDailyLogin({
+      last_date: today,
+      streak: info.streak,
+      max_streak: info.max_streak,
+      claimed_today: true
+    });
+    // Aplica reward (mock player local)
+    if (window.CITY_MOCK_PLAYER) {
+      window.CITY_MOCK_PLAYER.gold = (window.CITY_MOCK_PLAYER.gold || 0) + info.final_gold;
+      window.CITY_MOCK_PLAYER.xp = (window.CITY_MOCK_PLAYER.xp || 0) + info.final_xp;
+      if (info.reward.item) {
+        // Item adicionado ao inventário mock se existir
+        if (typeof MOCK_PLAYER_INVENTORY !== 'undefined') {
+          var found = MOCK_PLAYER_INVENTORY.find(function(it){ return it.n === info.reward.item.name; });
+          if (found) found.q = (found.q || 0) + info.reward.item.qty;
+          else MOCK_PLAYER_INVENTORY.push({ n: info.reward.item.name, q: info.reward.item.qty });
+        }
+      }
+    }
+    // Fade out + remove
+    ov.style.transition = 'opacity 0.4s ease-out';
+    ov.style.opacity = '0';
+    setTimeout(function(){
+      if (ov.parentNode) ov.parentNode.removeChild(ov);
+      // Toast de confirmação
+      if (typeof vToast === 'function') {
+        vToast('◆ Dádiva recebida: +' + info.final_gold + ' Valdoritas, +' + info.final_xp + ' XP'
+          + (info.reward.item ? ', ' + info.reward.item.name : ''));
+      }
+      // Refresh hub HUD
+      if (typeof refreshHud === 'function') refreshHud();
+    }, 400);
+  });
+}
+
+function _maybeShowDailyLogin(){
+  // Chamado após intro tap. Espera 800ms pra cidade aparecer primeiro,
+  // depois mostra dádiva diária se houver.
+  setTimeout(function(){
+    var info = _checkDailyLogin();
+    if (info) _showDailyLoginPopup(info);
+  }, 800);
 }
 
 // === GRUPO de aliados (Party) — popup com aliados ativos ===
@@ -13144,6 +13435,219 @@ function _buildTavernMockData(player){
       { icon: _heralIco('ic-missoes'), label: 'Mural de Avisos',   cb: 'tavern_bulletin_open' }
     ]
   };
+}
+
+// ============================================================================
+// === ESTALAGEM — AAA renderer (X-6.5.51BJ 2026-05-15) =======================
+// ============================================================================
+// Reusa INN_NPCS[0] (Martha) + SUBSCREEN_DATA['inn'].buttons como base.
+// Identidade visual: lareira ardente central + cama dos quartos no fundo +
+// lavender drift. Diferente da Taverna (lanterna + placa balançando) — aqui
+// é "lar quente" pra descanso. Migração PADRAO_ALDRIC do diálogo Martha
+// fica deferred (continua via _showSharedNpcDialogue legado).
+// ============================================================================
+function _buildInnMockData(player){
+  var p = player || {};
+  // canonical: inn.py L83-94 — Martha greeting varia por rep tier
+  var rep = (p.metadata && p.metadata.inn_rep) || 0;
+  var greeting;
+  if (rep >= 50) {
+    greeting = 'Martha te abraça como se fosse parente. <i>"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."</i>';
+  } else if (rep >= 10) {
+    greeting = 'Martha ergue uma sobrancelha enquanto seca um copo. <i>"De volta? Dorme aí, mas avisa se for sair na madrugada."</i>';
+  } else {
+    greeting = 'Martha te olha de cima a baixo. <i>"Quarto? Cinco Valdoritas. À vista. Nada de barulho até o galo cantar."</i>';
+  }
+  return {
+    type: 'hub',
+    flavor: greeting,
+    npc: {
+      icon: '<svg viewBox="0 0 120 120"><use href="#ic-estalajadeira"/></svg>',
+      name: 'Martha',
+      role: 'Estalajadeira',
+      subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
+      cb: 'inn_npc_inn_martha'
+    },
+    services: [
+      // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
+      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos', cb: 'nav:inn_rest' },
+      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos', cb: 'nav:inn_meals' },
+      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',   cb: 'inn_short_rest' },
+      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 V',     cb: 'inn_relaxation' },
+      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',   cb: 'inn_allies' },
+      { icon: _heralIco('ic-missoes'),  label: 'Investigar adega',    badge: 'Quest',    cb: 'inn_cellar_quest' }
+    ]
+  };
+}
+
+/**
+ * _renderInnHubAAA — Estalagem AAA hub renderer (inline, sem JS shared).
+ * Estilo: lareira ardente + canopy bed silhouette + lavender drift.
+ * Performance: respeita perf-lite (animações desligam via classe body).
+ */
+function _renderInnHubAAA(container, data) {
+  if (!container || !data) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  function _fire(cb) {
+    if (typeof handleAction === 'function') { handleAction(cb); return; }
+    if (window.ACTION_HANDLERS && typeof window.ACTION_HANDLERS[cb] === 'function') {
+      window.ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER || {});
+    } else if (cb && cb.indexOf('nav:') === 0 && typeof navigateTo === 'function') {
+      navigateTo(cb.slice(4));
+    }
+  }
+
+  var root = document.createElement('div');
+  root.className = 'inn-hub-aaa';
+  root.innerHTML =
+    '<style>'
+    + '.inn-hub-aaa{display:flex;flex-direction:column;gap:10px;padding:6px 4px 10px;}'
+    // HERO: lareira + cama + lavender
+    + '.inn-hero{position:relative;height:120px;margin:0 -2px;border-radius:12px;overflow:hidden;'
+    +   'background:radial-gradient(ellipse at 50% 100%,rgba(255,160,80,0.32) 0%,rgba(60,30,15,0.0) 60%),'
+    +   'linear-gradient(180deg,#2a1a10 0%,#3a2618 55%,#1c1008 100%);'
+    +   'border:1px solid rgba(196,149,58,0.40);'
+    +   'box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 30px rgba(255,140,40,0.10);'
+    +   'animation:innHeroPulse 5s ease-in-out infinite;}'
+    // Cama silhouette (background decorativo)
+    + '.inn-bed{position:absolute;left:50%;top:18px;transform:translateX(-50%);width:64px;height:48px;'
+    +   'opacity:0.45;pointer-events:none;}'
+    + '.inn-bed::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:#3a2818;border-radius:4px 4px 0 0;}'  // canopy
+    + '.inn-bed::after{content:"";position:absolute;left:6px;right:6px;top:14px;bottom:0;background:linear-gradient(180deg,#6a4a30,#3a2818);border-radius:2px;border:1px solid #2a1a0e;}'
+    // Lareira (orange glow no rodapé)
+    + '.inn-fire{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:80px;height:36px;'
+    +   'background:radial-gradient(ellipse at 50% 100%,rgba(255,180,80,0.85) 0%,rgba(255,120,40,0.4) 35%,transparent 65%);'
+    +   'pointer-events:none;filter:blur(2px);animation:innFireFlicker 1.8s ease-in-out infinite;}'
+    + '.inn-fire::after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:16px;'
+    +   'background:radial-gradient(ellipse at 50% 100%,#fff4c0 0%,#ffb060 40%,transparent 70%);'
+    +   'filter:blur(1px);}'
+    // Título da estalagem
+    + '.inn-title{position:absolute;left:0;right:0;top:14px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);'
+    +   'font-size:14px;font-weight:700;letter-spacing:3px;color:#ffd8a0;'
+    +   'text-shadow:0 0 12px rgba(255,180,80,0.65),0 1px 2px rgba(0,0,0,0.7);z-index:2;}'
+    + '.inn-sub{position:absolute;left:0;right:0;top:32px;text-align:center;font-size:10px;color:#c4953a;letter-spacing:2px;opacity:0.85;z-index:2;}'
+    + '.inn-meta{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:9px;color:#a09484;letter-spacing:1.5px;opacity:0.7;z-index:2;}'
+    // Lavender drift (3 partículas)
+    + '.inn-lav{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#d8b5e8,#7a4a8a 70%,transparent);'
+    +   'pointer-events:none;animation:innLavDrift 6s ease-in-out infinite;}'
+    + '.inn-lav-1{left:18%;top:60%;animation-delay:0s;}'
+    + '.inn-lav-2{left:78%;top:55%;animation-delay:2s;}'
+    + '.inn-lav-3{left:48%;top:65%;animation-delay:4s;}'
+    // Greeting card
+    + '.inn-greeting{position:relative;padding:10px 14px 10px 32px;background:linear-gradient(180deg,rgba(74,56,40,0.32),rgba(42,30,18,0.22));'
+    +   'border:1px solid rgba(196,149,58,0.35);border-radius:8px;font-family:var(--v-font,MedievalSharp,Cinzel,serif);'
+    +   'font-size:13px;color:var(--v-text-bright,#e8dcc8);line-height:1.45;}'
+    + '.inn-greeting::before{content:"❝";position:absolute;left:10px;top:2px;font-size:24px;color:#c4953a;opacity:0.7;line-height:1;}'
+    // NPC card (Martha)
+    + '.inn-npc{display:flex;align-items:center;gap:11px;padding:9px 11px;background:linear-gradient(180deg,rgba(74,56,40,0.30),rgba(42,30,18,0.55));'
+    +   'border:1px solid rgba(196,149,58,0.40);border-radius:8px;cursor:pointer;text-align:left;width:100%;'
+    +   'font-family:inherit;color:var(--v-text,#d4c8b0);transition:border-color 0.18s,background 0.18s,transform 0.12s;}'
+    + '.inn-npc:hover{border-color:var(--v-gold,#c4953a);background:linear-gradient(180deg,rgba(196,149,58,0.18),rgba(74,56,40,0.55));}'
+    + '.inn-npc:active{transform:scale(0.98);}'
+    + '.inn-npc-portrait{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;'
+    +   'background:radial-gradient(circle at 35% 30%,rgba(255,220,160,0.22),rgba(20,12,6,0.7));'
+    +   'border:1px solid rgba(196,149,58,0.55);border-radius:50%;box-shadow:inset 0 0 12px rgba(0,0,0,0.5);}'
+    + '.inn-npc-portrait svg{width:30px;height:30px;color:var(--v-gold-bright,#e8c45a);}'
+    + '.inn-npc-info{flex:1;min-width:0;}'
+    + '.inn-npc-name{font-family:var(--v-font-display,Cinzel,serif);font-size:14px;font-weight:600;color:var(--v-text-bright,#e8dcc8);letter-spacing:0.5px;}'
+    + '.inn-npc-role{font-size:10px;color:#c4953a;letter-spacing:1px;text-transform:uppercase;margin-top:1px;}'
+    + '.inn-npc-sub{font-size:11px;color:var(--v-text-dim,#a09484);margin-top:2px;font-style:italic;'
+    +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+    + '.inn-npc-chev{flex:0 0 auto;font-size:16px;color:rgba(196,149,58,0.6);}'
+    // Section title
+    + '.inn-sec-title{font-family:var(--v-font-display,Cinzel,serif);font-size:11px;letter-spacing:2px;'
+    +   'text-transform:uppercase;color:var(--v-gold,#c4953a);padding:0 4px 2px;border-bottom:1px solid rgba(196,149,58,0.20);}'
+    // Service grid 2-col
+    + '.inn-svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;}'
+    + '.inn-svc{position:relative;display:flex;align-items:center;gap:8px;padding:9px 10px;'
+    +   'background:linear-gradient(180deg,#3a2a1c 0%,#26180e 100%);'
+    +   'border:1px solid rgba(196,149,58,0.32);border-radius:8px;font-family:inherit;'
+    +   'color:var(--v-text,#d4c8b0);cursor:pointer;text-align:left;font-size:12px;overflow:hidden;'
+    +   'transition:border-color 0.18s,background 0.18s,transform 0.12s;}'
+    + '.inn-svc::before{content:"";position:absolute;inset:0;'
+    +   'background:repeating-linear-gradient(180deg,transparent 0,transparent 7px,rgba(0,0,0,0.10) 7px,rgba(0,0,0,0.10) 8px);'
+    +   'pointer-events:none;opacity:0.55;}'
+    + '.inn-svc:hover{border-color:var(--v-gold,#c4953a);background:linear-gradient(180deg,#4a3220 0%,#26180e 100%);}'
+    + '.inn-svc:active{transform:scale(0.97);}'
+    + '.inn-svc-icon{flex:0 0 22px;width:22px;height:22px;color:var(--v-gold-bright,#e8c45a);}'
+    + '.inn-svc-icon svg{width:22px;height:22px;}'
+    + '.inn-svc-lbl{flex:1;min-width:0;font-family:var(--v-font-display,Cinzel,serif);font-size:11.5px;letter-spacing:0.3px;line-height:1.2;'
+    +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+    + '.inn-svc-badge{flex:0 0 auto;padding:1px 5px;font-size:9px;letter-spacing:1px;'
+    +   'background:rgba(196,149,58,0.20);color:var(--v-gold,#c4953a);border-radius:3px;}'
+    // Keyframes
+    + '@keyframes innHeroPulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 30px rgba(255,140,40,0.10);}50%{box-shadow:0 6px 24px rgba(0,0,0,0.55),inset 0 0 50px rgba(255,180,80,0.22);}}'
+    + '@keyframes innFireFlicker{0%,100%{opacity:0.85;transform:translateX(-50%) scaleY(1);}50%{opacity:1;transform:translateX(-50%) scaleY(1.18);}}'
+    + '@keyframes innLavDrift{0%{opacity:0;transform:translate(0,0) scale(0.6);}30%{opacity:0.85;}100%{opacity:0;transform:translate(8px,-40px) scale(0.3);}}'
+    + 'body.perf-lite .inn-hero,body.perf-lite .inn-fire,body.perf-lite .inn-lav{animation:none!important;}'
+    + 'body.perf-medium .inn-hero{animation-duration:8s;}'
+    + '@media (prefers-reduced-motion:reduce){.inn-hero,.inn-fire,.inn-lav{animation:none!important;}}'
+    + '</style>'
+    // HERO
+    + '<div class="inn-hero">'
+    +   '<div class="inn-bed"></div>'
+    +   '<div class="inn-fire"></div>'
+    +   '<span class="inn-lav inn-lav-1"></span>'
+    +   '<span class="inn-lav inn-lav-2"></span>'
+    +   '<span class="inn-lav inn-lav-3"></span>'
+    +   '<div class="inn-title">ESTALAGEM</div>'
+    +   '<div class="inn-sub">◆ Grifo Dourado ◆</div>'
+    +   '<div class="inn-meta">lareira acesa · lavanda nos lençóis</div>'
+    + '</div>';
+
+  // GREETING
+  if (data.flavor) {
+    var fl = document.createElement('div');
+    fl.className = 'inn-greeting';
+    fl.innerHTML = data.flavor;
+    root.appendChild(fl);
+  }
+
+  // NPC card
+  if (data.npc) {
+    var sec = document.createElement('div');
+    sec.className = 'tav-section';
+    sec.innerHTML = '<div class="inn-sec-title"><span style="color:#e8c45a;">◈</span> Estalajadeira</div>';
+    var card = document.createElement('button');
+    card.className = 'inn-npc';
+    card.type = 'button';
+    card.innerHTML =
+      '<div class="inn-npc-portrait">' + (data.npc.icon || '') + '</div>'
+      + '<div class="inn-npc-info">'
+      +   '<div class="inn-npc-name">' + (data.npc.name || 'Estalajadeira') + '</div>'
+      +   '<div class="inn-npc-role">' + (data.npc.role || '') + '</div>'
+      +   (data.npc.subtitle ? '<div class="inn-npc-sub">' + data.npc.subtitle + '</div>' : '')
+      + '</div>'
+      + '<div class="inn-npc-chev">›</div>';
+    card.addEventListener('click', function () { _fire(data.npc.cb); });
+    sec.appendChild(card);
+    root.appendChild(sec);
+  }
+
+  // Services
+  if (data.services && data.services.length) {
+    var sSec = document.createElement('div');
+    sSec.className = 'tav-section';
+    sSec.innerHTML = '<div class="inn-sec-title"><span style="color:#e8c45a;">◈</span> Serviços do Grifo</div>';
+    var grid = document.createElement('div');
+    grid.className = 'inn-svc-grid';
+    data.services.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'inn-svc';
+      b.type = 'button';
+      b.innerHTML =
+        '<div class="inn-svc-icon">' + (s.icon || '') + '</div>'
+        + '<div class="inn-svc-lbl">' + (s.label || '') + '</div>'
+        + (s.badge ? '<div class="inn-svc-badge">' + s.badge + '</div>' : '');
+      b.addEventListener('click', function () { _fire(s.cb); });
+      grid.appendChild(b);
+    });
+    sSec.appendChild(grid);
+    root.appendChild(sSec);
+  }
+
+  container.appendChild(root);
 }
 
 // ============================================================================
@@ -14547,15 +15051,15 @@ var GUILD_QUESTS_AVAILABLE = [
 var GUILD_QUEST_DETAILS = {
   goblins: {
     qid: 'goblins', icon: _heralIco('ic-goblin'),
-    title: 'Caçar 3 goblins', desc: 'Goblins atacaram o moinho a oeste. Elimine 3 deles pra que o moleiro volte ao trabalho.',
-    npc: 'Capitão Helga', location: 'Moinho do Oeste (1km da cidade)',
+    title: 'Caçar 3 goblins', desc: 'Goblins fizeram ninho ao norte. Elimine 3 deles pra que o caminho volte a ser seguro.',
+    npc: 'Capitã Helga', location: 'Ninho de Goblins',
     flavor: 'Helga aperta o ombro: "Goblins de novo. Mate 3 — tomara que mostrem onde se escondem."',
     reward: 25, xp: 40, lvlReq: 1, progress: '0/3'
   },
   herbs: {
     qid: 'herbs', icon: _heralIco('ic-druida'),
     title: 'Coletar ervas raras', desc: 'Mestra Sylvi precisa de 5 raízes-da-noite pra suas poções.',
-    npc: 'Mestra Sylvi', location: 'Bosque dos Sussurros',
+    npc: 'Mestra Sylvi', location: 'Floresta dos Sussurros',
     flavor: 'Sylvi sorri: "Cresce só onde a lua bate forte. Cuidado com as criaturas que adoram folha noturna."',
     reward: 15, xp: 25, lvlReq: 1, progress: '0/5'
   },
@@ -14563,36 +15067,36 @@ var GUILD_QUEST_DETAILS = {
   // (65 XP de quests) e nv 3 (precisa 300 XP). Total nv 2 = +180 XP, +75gp.
   patrol: {
     qid: 'patrol', icon: _heralIco('ic-patrulheiro'),
-    title: 'Patrulhar fronteira', desc: 'Vigia Tomás precisa de reforço pra patrulhar a estrada do leste por uma noite.',
-    npc: 'Vigia Tomás', location: 'Estrada do Leste',
-    flavor: 'Tomás aponta pra estrada: "Carroças sumiram nas últimas três noites. Anda comigo até o amanhecer e me ajuda a entender o que tá rondando."',
+    title: 'Patrulhar fronteira', desc: 'Vigia Tomás precisa de reforço pra patrulhar a trilha do pântano por uma noite.',
+    npc: 'Vigia Tomás', location: 'Pântano Nebuloso',
+    flavor: 'Tomás aponta pra trilha: "Carroças sumiram nas últimas três noites. Anda comigo até o amanhecer e me ajuda a entender o que tá rondando."',
     reward: 35, xp: 80, lvlReq: 2, progress: '0/1'
   },
   rat_den: {
     qid: 'rat_den', icon: _heralIco('ic-lobo'),
-    title: 'Limpar cova de ratos', desc: 'Padeiro Erlan tem uma infestação de ratos-gigantes no porão da padaria.',
-    npc: 'Padeiro Erlan', location: 'Padaria do Distrito Velho',
+    title: 'Limpar cova de ratos', desc: 'Padeiro Erlan tem uma infestação de ratos-gigantes no porão da padaria, dentro da cidade.',
+    npc: 'Padeiro Erlan', location: 'Portões de Valdoria',
     flavor: 'Erlan limpa as mãos no avental: "Já matei dois. Tem pelo menos uns 4 lá embaixo, do tamanho de gatos. Mata todos e te pago bem."',
     reward: 40, xp: 100, lvlReq: 2, progress: '0/4'
   },
   escort: {
     qid: 'escort', icon: _heralIco('ic-grupo'),
-    title: 'Escoltar caravana', desc: 'Caravana de comerciantes precisa de proteção até o Acampamento dos Veteranos.',
-    npc: 'Comerciante Brael', location: 'Estrada Norte → Valkrest',
+    title: 'Escoltar caravana', desc: 'Caravana de comerciantes precisa de proteção até Valkrest, o acampamento dos veteranos.',
+    npc: 'Comerciante Brael', location: 'Valkrest (Acampamento)',
     flavor: 'Brael aponta pros carroções: "Bandidos andam soltos. Te pago bem se nada cair."',
     reward: 50, xp: 60, lvlReq: 3, progress: '0/1'
   },
   ruin: {
     qid: 'ruin', icon: _heralIco('ic-ach-erudito'),
-    title: 'Investigar ruína antiga', desc: 'Estudiosa Maeve quer mapas e relíquias da ruína de Karthal.',
-    npc: 'Estudiosa Maeve', location: 'Ruínas de Karthal',
+    title: 'Investigar ruínas élficas', desc: 'Estudiosa Maeve quer mapas e relíquias resgatadas das Ruínas Élficas, restos de uma antiga civilização.',
+    npc: 'Estudiosa Maeve', location: 'Ruínas Élficas',
     flavor: 'Maeve esfrega os óculos: "Mortos-vivos guardam algo lá embaixo. Traga qualquer pergaminho ou estátua."',
     reward: 80, xp: 80, lvlReq: 4, progress: '0/3'
   },
   bandit_lord: {
     qid: 'bandit_lord', icon: _heralIco('ic-orc'),
-    title: 'Matar líder bandido', desc: 'Capitão Helga oferece recompensa pela cabeça de Vargrim, o Cicatriz.',
-    npc: 'Capitão Helga', location: 'Forte dos Bandidos',
+    title: 'Matar líder bandido', desc: 'Capitã Helga oferece recompensa pela cabeça de Vargrim, o Cicatriz.',
+    npc: 'Capitã Helga', location: 'Forte dos Bandidos',
     flavor: 'Helga estende um cartaz: "Vargrim. Cicatriz no rosto, dois machados. Vivo ou morto — prefiro morto."',
     reward: 150, xp: 150, lvlReq: 6, progress: '0/1'
   },
@@ -14605,9 +15109,9 @@ var GUILD_QUEST_DETAILS = {
   },
   defend: {
     qid: 'defend', icon: _heralIco('ic-portoes'),
-    title: 'Defender vila do leste', desc: 'Vila Aldeia-do-Lago sob ataque iminente de orcs do leste.',
-    npc: 'Capitão Helga', location: 'Aldeia-do-Lago',
-    flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. Vila precisa de heróis em 3 dias."',
+    title: 'Defender Campos Verdes', desc: 'Os Campos Verdes estão sob ameaça iminente de orcs do leste.',
+    npc: 'Capitã Helga', location: 'Campos Verdes',
+    flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. A região precisa de heróis em 3 dias."',
     reward: 500, xp: 400, lvlReq: 10, progress: '0/1'
   }
 };
@@ -15803,7 +16307,7 @@ function _buildCodexMockData(player){
 // Reusa GUILD_QUESTS_AVAILABLE pra "Disponíveis". Mock pra ativas/concluídas.
 // QUESTS_ACTIVE / QUESTS_HISTORY — brasões heráldicos canonical
 var QUESTS_ACTIVE = [
-  { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha do caminho norte.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira' },
+  { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha na Floresta dos Sussurros.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira' },
   { id: 'qa_lyana',  icon: _heralIco('ic-dialogo'), title: 'Falar com Lyana na Praça', desc: 'Entregar carta da mãe dela.',       progress: '✓ pronta', reward: 20, xp: 40, npc: 'Mãe de Lyana' }
 ];
 var QUESTS_HISTORY = [
@@ -34024,7 +34528,7 @@ function _marketShowSell(p){
     return _isItemSellable(it.n || it.name);
   });
   if (sellable.length === 0) {
-    vToast('💰 Nenhum item vendável (quest/único/mapa não vendem).');
+    vToast('💰 Nenhum item vendável (item de missão/único/mapa não vendem).');
     return;
   }
   var items = sellable.map(function(it){
@@ -37044,6 +37548,16 @@ function _renderCityPopup(key){
     renderTavernHub(bodyEl, _buildTavernMockData(window.CITY_MOCK_PLAYER));
     return;
   }
+  // X-6.5.51BJ (2026-05-15): Estalagem AAA renderer inline (sem JS shared dedicado).
+  // Constrói cenário "lareira + cama dos quartos + lavanda" com lanterna oscilante,
+  // chamas ardentes da lareira, lavender drift. Reutiliza SUBSCREEN_DATA['inn']
+  // pra serviços + INN_NPCS pra Martha. Dialogue Martha continua via
+  // _showSharedNpcDialogue (migração PADRAO_ALDRIC deferred).
+  if (key === 'inn' && typeof _renderInnHubAAA === 'function') {
+    if (titleEl) titleEl.textContent = 'Estalagem Grifo Dourado';
+    _renderInnHubAAA(bodyEl, _buildInnMockData(window.CITY_MOCK_PLAYER));
+    return;
+  }
   if (key === 'market' && typeof renderMarketHub === 'function') {
     if (titleEl) titleEl.textContent = 'Mercado de Eldoria';
     renderMarketHub(bodyEl, _buildMarketMockData(window.CITY_MOCK_PLAYER));
@@ -37807,8 +38321,8 @@ var SUBSCREEN_DATA = {
     header: '📜 Quadro de Avisos',
     flavor: 'Pergaminhos pregados na parede. Recompensas variam por nível.',
     buttons: [
-      [_heralIco('ic-lobo'), 'Caçar 3 lobos cinzentos', '20 <span class="vi vi-coin sm"></span> + 25 XP — nv 1-3', 'board_wolves'],
-      [_heralIco('ic-mochila'), 'Escoltar caravana', '40 <span class="vi vi-coin sm"></span> + 50 XP — nv 1-3', 'board_escort'],
+      [_heralIco('ic-lobo'), 'Caçar 3 lobos cinzentos', '50 <span class="vi vi-coin sm"></span> + 80 XP — nv 1-3', 'board_wolves'],
+      [_heralIco('ic-mochila'), 'Escoltar caravana', '50 <span class="vi vi-coin sm"></span> + 60 XP — nv 3', 'board_escort'],
       [_heralIco('ic-mochila'), 'Coletar 5 ervas raras', '15 <span class="vi vi-coin sm"></span> + 25 XP — nv 1-3', 'board_herbs']
     ]
   },
@@ -38118,8 +38632,8 @@ var SUBSCREEN_DATA = {
     header: '📋 Missões Ativas (2)',
     flavor: 'Em progresso. Volta pra entregar quando completas.',
     buttons: [
-      [_heralIco('ic-missoes'), 'Caçar lobos cinzentos', '2/5 mortes — 50 <span class="vi vi-coin sm"></span> + XP', 'quest_open_wolves'],
-      [_heralIco('ic-missoes'), 'Falar com Lyana', '✅ pronta — 20 <span class="vi vi-coin sm"></span> + XP', 'quest_open_lyana']
+      [_heralIco('ic-missoes'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves'],
+      [_heralIco('ic-missoes'), 'Falar com Lyana', '✅ pronta — 20 <span class="vi vi-coin sm"></span> + 40 XP', 'quest_open_lyana']
     ]
   },
   'quests_available': {
@@ -38128,14 +38642,14 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-goblin'), 'Caçar 3 goblins', '🟢 nv 1 — 25 <span class="vi vi-coin sm"></span> + 40 XP', 'accept_q_goblins'],
       [_heralIco('ic-mochila'), 'Coletar ervas raras', '🟢 nv 1 — 15 <span class="vi vi-coin sm"></span> + 25 XP', 'accept_q_herbs'],
-      // 2026-05-12 BALANCING: 2 quests nv 2 adicionadas
+      // 2026-05-12 BALANCING: 2 missões nv 2 adicionadas
       [_heralIco('ic-patrulheiro'), 'Patrulhar fronteira', '🟢 nv 2 — 35 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_patrol'],
       [_heralIco('ic-lobo'), 'Limpar cova de ratos', '🟢 nv 2 — 40 <span class="vi vi-coin sm"></span> + 100 XP', 'accept_q_rat_den'],
       [_heralIco('ic-mochila'), 'Escoltar caravana', '🟡 nv 3 — 50 <span class="vi vi-coin sm"></span> + 60 XP', 'accept_q_escort'],
-      [_heralIco('ic-mochila'), 'Investigar ruína', '🟡 nv 4 — 80 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_ruin'],
+      [_heralIco('ic-mochila'), 'Investigar ruínas élficas', '🟡 nv 4 — 80 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_ruin'],
       [_heralIco('ic-mochila'), 'Matar líder bandido', '🔴 nv 6 — 150 <span class="vi vi-coin sm"></span> + 150 XP', 'accept_q_bandit_lord'],
       [_heralIco('ic-boss'), 'Caçar dragonete', '🔴 nv 8 — 300 <span class="vi vi-coin sm"></span> + 250 XP', 'accept_q_dragonet'],
-      [_heralIco('ic-mochila'), 'Defender vila', '🔴 nv 10 — 500 <span class="vi vi-coin sm"></span> + 400 XP', 'accept_q_defend']
+      [_heralIco('ic-mochila'), 'Defender Campos Verdes', '🔴 nv 10 — 500 <span class="vi vi-coin sm"></span> + 400 XP', 'accept_q_defend']
     ]
   },
   'quests_history': {
@@ -38167,9 +38681,9 @@ var SUBSCREEN_DATA = {
     header: '🗺️ Locais (8/24)',
     flavor: 'Lugares que tu visitaste e que estão em tua memória.',
     buttons: [
-      [_heralIco('ic-lobo'), 'Floresta dos Lobos', 'visitado 6x', 'codex_loc_wolf_forest'],
-      [_heralIco('ic-mochila'), 'Caverna dos Ecos', 'visitado 3x', 'codex_loc_echo_cave'],
-      [_heralIco('ic-mochila'), 'Ruína de Karthal', 'visitado 1x', 'codex_loc_karthal'],
+      [_heralIco('ic-lobo'), 'Floresta dos Sussurros', 'visitado 6x', 'codex_loc_wolf_forest'],
+      [_heralIco('ic-mochila'), 'Passagem Subterrânea', 'visitado 3x', 'codex_loc_echo_cave'],
+      [_heralIco('ic-mochila'), 'Ruínas Élficas', 'visitado 1x', 'codex_loc_karthal'],
       [_heralIco('ic-mochila'), '???', 'não descoberto', 'codex_loc_locked']
     ]
   },
@@ -38429,60 +38943,61 @@ var SUBSCREEN_DATA = {
   // npcInfo padronizado: "📋 Estágio X/Y · 👤 NPC · 📍 Local · 💰 Reward".
   'quest_open_wolves': {
     header: '🐺 Missão: Caçar Lobos Cinzentos',
-    flavor: '<i>Tavira ajusta o pergaminho do contrato.</i> "— Fazendeiros do norte mal dormem há semanas. Lobos cinzentos descem da floresta toda noite. Cinco abatidos e a alcateia recua — promessa antiga do meu pai."',
-    npcInfo: '📋 Estágio 2/5 · 👤 Tavira, a Mestra · 📍 Floresta dos Lobos · 💰 50 <span class="vi vi-coin sm"></span> + 80 XP',
+    flavor: '<i>Tavira ajusta o pergaminho do contrato.</i> "— Fazendeiros do norte mal dormem há semanas. Lobos cinzentos descem da Floresta dos Sussurros toda noite. Três abatidos e a alcateia recua — promessa antiga do meu pai."',
+    npcInfo: '📋 Estágio 2/3 · 👤 Tavira, a Mestra · 📍 Floresta dos Sussurros · 💰 50 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Lobos', 'quest_wolves_locate'],
-      [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '5 lobos cinzentos', 'quest_wolves_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Tavira', 'completar quest', 'quest_wolves_deliver'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_wolves_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '3 lobos cinzentos', 'quest_wolves_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Tavira', 'completar missão', 'quest_wolves_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
   'quest_open_lyana': {
     header: '💬 Missão: Falar com Lyana',
     flavor: '<i>O pergaminho selado pesa no bolso.</i> "— Entrega esta carta nas próprias mãos de Lyana, na praça. Ela espera notícias da irmã há três luas. Não abre, não conta. Só entrega."',
-    npcInfo: '✅ Pronta pra entregar · 👤 Lyana, a Herbalista · 📍 Praça de Valdoria · 💰 20 <span class="vi vi-coin sm"></span> + 40 XP',
+    npcInfo: '✅ Pronta pra entregar · 👤 Lyana, a Herbalista · 📍 Portões de Valdoria · 💰 20 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Praça de Valdoria', 'quest_lyana_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_lyana_locate'],
       [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
-      [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar quest', 'quest_lyana_deliver'],
+      [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar missão', 'quest_lyana_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
     ]
   },
 
   // X-6.5.51AV (2026-05-11): SUBSCREEN_DATA das 7 quests de guild + 2 quests nv 2 (2026-05-12).
   // PADRAO_ALDRIC v2 (2026-05-12): flavor em diálogo NPC primeira pessoa, npcInfo padronizado.
+  // X-6.5.51BI (2026-05-15): locais canonical (CART_BIOMES) — todos válidos no mapa.
   'quest_open_goblins': {
     header: '🐺 Missão: Caçar 3 Goblins',
-    flavor: '<i>Capitã Helga aperta o ombro.</i> "— Goblins de novo. Moleiro do oeste já fala em fechar moinho. Mate três que servem de exemplo — tomara que os outros lembrem de fugir."',
-    npcInfo: '📋 Estágio 0/3 · 👤 Capitã Helga · 📍 Moinho do Oeste · 💰 25 <span class="vi vi-coin sm"></span> + 40 XP',
+    flavor: '<i>Capitã Helga aperta o ombro.</i> "— Goblins de novo. Eles armaram ninho ao norte da floresta. Mate três que servem de exemplo — tomara que os outros lembrem de fugir."',
+    npcInfo: '📋 Estágio 0/3 · 👤 Capitã Helga · 📍 Ninho de Goblins · 💰 25 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Moinho do Oeste, 1km', 'quest_goblins_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ninho de Goblins', 'quest_goblins_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
-      [_heralIco('ic-missoes'), 'Entregar provas a Helga', 'completar quest', 'quest_goblins_deliver'],
+      [_heralIco('ic-missoes'), 'Entregar provas a Helga', 'completar missão', 'quest_goblins_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
     ]
   },
   'quest_open_herbs': {
     header: '🌿 Missão: Coletar Ervas Raras',
-    flavor: '<i>Mestra Sylvi sorri abrindo um pequeno livro de folhas prensadas.</i> "— Raiz-da-noite. Cresce só onde a lua bate forte, no Bosque dos Sussurros. Cinco bastam pra meu próximo lote de poções. Cuidado com as criaturas que adoram folha noturna."',
-    npcInfo: '📋 Estágio 0/5 · 👤 Mestra Sylvi · 📍 Bosque dos Sussurros · 💰 15 <span class="vi vi-coin sm"></span> + 25 XP',
+    flavor: '<i>Mestra Sylvi sorri abrindo um pequeno livro de folhas prensadas.</i> "— Raiz-da-noite. Cresce só onde a lua bate forte, na Floresta dos Sussurros. Cinco bastam pra meu próximo lote de poções. Cuidado com as criaturas que adoram folha noturna."',
+    npcInfo: '📋 Estágio 0/5 · 👤 Mestra Sylvi · 📍 Floresta dos Sussurros · 💰 15 <span class="vi vi-coin sm"></span> + 25 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Bosque dos Sussurros', 'quest_herbs_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_herbs_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
-      [_heralIco('ic-missoes'), 'Entregar ervas a Sylvi', 'completar quest', 'quest_herbs_deliver'],
+      [_heralIco('ic-missoes'), 'Entregar ervas a Sylvi', 'completar missão', 'quest_herbs_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
     ]
   },
   // 2026-05-12 NOVA — quest nv 2 (preenche gap XP nv 1→2)
   'quest_open_patrol': {
     header: '👁️ Missão: Patrulhar Fronteira',
-    flavor: '<i>Vigia Tomás aponta pra estrada do leste com bastão de madeira.</i> "— Três carroças sumiram nas últimas noites. Não acho corpo, não acho roda. Caminha comigo até o amanhecer — preciso de outros olhos pra ver o que tá rondando."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Vigia Tomás · 📍 Estrada do Leste · 💰 35 <span class="vi vi-coin sm"></span> + 80 XP',
+    flavor: '<i>Vigia Tomás aponta pra trilha do pântano com bastão de madeira.</i> "— Três carroças sumiram nas últimas noites perto do Pântano Nebuloso. Não acho corpo, não acho roda. Caminha comigo até o amanhecer — preciso de outros olhos pra ver o que tá rondando."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Vigia Tomás · 📍 Pântano Nebuloso · 💰 35 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Estrada do Leste', 'quest_patrol_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Pântano Nebuloso', 'quest_patrol_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à patrulha', 'quest_patrol_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Tomás', 'completar quest', 'quest_patrol_deliver'],
+      [_heralIco('ic-missoes'), 'Reportar a Tomás', 'completar missão', 'quest_patrol_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tomás', 'quest_patrol_abandon']
     ]
   },
@@ -38490,33 +39005,33 @@ var SUBSCREEN_DATA = {
   'quest_open_rat_den': {
     header: '🐀 Missão: Limpar Cova de Ratos',
     flavor: '<i>Padeiro Erlan limpa as mãos no avental coberto de farinha.</i> "— Já matei dois com pá. Restam quatro, do tamanho de gato grande. Porão da padaria virou ninho. Mata todos e te pago bem — quero meu forno de volta."',
-    npcInfo: '📋 Estágio 0/4 · 👤 Padeiro Erlan · 📍 Padaria do Distrito Velho · 💰 40 <span class="vi vi-coin sm"></span> + 100 XP',
+    npcInfo: '📋 Estágio 0/4 · 👤 Padeiro Erlan · 📍 Portões de Valdoria · 💰 40 <span class="vi vi-coin sm"></span> + 100 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Padaria do Distrito Velho', 'quest_rat_den_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_rat_den_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 4 ratos-gigantes', 'quest_rat_den_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Erlan', 'completar quest', 'quest_rat_den_deliver'],
+      [_heralIco('ic-missoes'), 'Reportar a Erlan', 'completar missão', 'quest_rat_den_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Erlan', 'quest_rat_den_abandon']
     ]
   },
   'quest_open_escort': {
     header: '🛡️ Missão: Escoltar Caravana',
-    flavor: '<i>Comerciante Brael aponta pra três carroções alinhados nos portões.</i> "— Bandidos andam soltos na Estrada Norte. Tenho mercadoria pra Valkrest que vale mais que minha vida. Te pago bem — se nada cair, nada se perde."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Comerciante Brael · 📍 Estrada Norte → Valkrest · 💰 50 <span class="vi vi-coin sm"></span> + 60 XP',
+    flavor: '<i>Comerciante Brael aponta pra três carroções alinhados nos portões.</i> "— Bandidos andam soltos no caminho. Tenho mercadoria pra Valkrest que vale mais que minha vida. Te pago bem — se nada cair, nada se perde."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Comerciante Brael · 📍 Valkrest (Acampamento) · 💰 50 <span class="vi vi-coin sm"></span> + 60 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Estrada Norte → Valkrest', 'quest_escort_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Valkrest (Acampamento)', 'quest_escort_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Brael', 'completar quest', 'quest_escort_deliver'],
+      [_heralIco('ic-missoes'), 'Reportar a Brael', 'completar missão', 'quest_escort_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
     ]
   },
   'quest_open_ruin': {
-    header: '🏛️ Missão: Investigar Ruína Antiga',
-    flavor: '<i>Estudiosa Maeve esfrega os óculos arredondados.</i> "— As ruínas de Karthal foram capital pré-imperial. Mortos-vivos guardam algo lá embaixo há séculos. Traga três relíquias ou pergaminhos — qualquer coisa serve pra catalogação."',
-    npcInfo: '📋 Estágio 0/3 · 👤 Estudiosa Maeve · 📍 Ruínas de Karthal · 💰 80 <span class="vi vi-coin sm"></span> + 80 XP',
+    header: '🏛️ Missão: Investigar Ruínas Élficas',
+    flavor: '<i>Estudiosa Maeve esfrega os óculos arredondados.</i> "— As Ruínas Élficas guardam restos de uma civilização antiga. Mortos-vivos vigiam algo lá embaixo há séculos. Traga três relíquias ou pergaminhos — qualquer coisa serve pra catalogação."',
+    npcInfo: '📋 Estágio 0/3 · 👤 Estudiosa Maeve · 📍 Ruínas Élficas · 💰 80 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Ruínas de Karthal', 'quest_ruin_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ruínas Élficas', 'quest_ruin_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
-      [_heralIco('ic-missoes'), 'Entregar achados a Maeve', 'completar quest', 'quest_ruin_deliver'],
+      [_heralIco('ic-missoes'), 'Entregar achados a Maeve', 'completar missão', 'quest_ruin_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
     ]
   },
@@ -38525,9 +39040,9 @@ var SUBSCREEN_DATA = {
     flavor: '<i>Capitã Helga estende um cartaz de procurado.</i> "— Vargrim, o Cicatriz. Dois machados, marca no rosto, lidera o Forte. Tenta vivo, mas prefiro morto — gente nesse calibre não acorda do mesmo jeito atrás das grades."',
     npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Forte dos Bandidos · 💰 150 <span class="vi vi-coin sm"></span> + 150 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar quest', 'quest_bandit_lord_deliver'],
+      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar missão', 'quest_bandit_lord_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
     ]
   },
@@ -38536,20 +39051,20 @@ var SUBSCREEN_DATA = {
     flavor: '<i>Conselheiro Aldric baixa a voz e olha pra cratera no horizonte.</i> "— Filhote, sim. Mas filhote de dragão queima rebanho inteiro num sopro. Cinco fazendas perdidas em duas luas. Antes que cresça e vire problema do reino — é seu agora."',
     npcInfo: '📋 Estágio 0/1 · 👤 Conselheiro Aldric · 📍 Cratera Vulcânica · 💰 300 <span class="vi vi-coin sm"></span> + 250 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Cratera Vulcânica', 'quest_dragonet_locate'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Cratera Vulcânica', 'quest_dragonet_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Aldric', 'completar quest', 'quest_dragonet_deliver'],
+      [_heralIco('ic-missoes'), 'Reportar a Aldric', 'completar missão', 'quest_dragonet_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
     ]
   },
   'quest_open_defend': {
-    header: '🏰 Missão: Defender Vila do Leste',
-    flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Aldeia-do-Lago, três dias de marcha. Orcs do leste avançam em força. Vila precisa de heróis até depois de amanhã — depois disso é cinzas."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Aldeia-do-Lago · 💰 500 <span class="vi vi-coin sm"></span> + 400 XP',
+    header: '🏰 Missão: Defender Campos Verdes',
+    flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Os Campos Verdes serão atacados em três dias. Orcs vindos do leste avançam em força. A região precisa de heróis até depois de amanhã — depois disso é cinzas."',
+    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Campos Verdes · 💰 500 <span class="vi vi-coin sm"></span> + 400 XP',
     buttons: [
-      [_heralIco('ic-cartografia'), 'Ver localização', 'Aldeia-do-Lago', 'quest_defend_locate'],
-      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a vila', 'quest_defend_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar quest', 'quest_defend_deliver'],
+      [_heralIco('ic-cartografia'), 'Ver no mapa', 'Campos Verdes', 'quest_defend_locate'],
+      [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a região', 'quest_defend_details'],
+      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar missão', 'quest_defend_deliver'],
       [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
     ]
   },
@@ -38608,8 +39123,8 @@ var ACTION_HANDLERS = {
   'gather_treasure':    function(p){ if (!_pay(p, 5)) return; vToast('💎 Info: Anel de família perdido na floresta.'); },
   'gather_events':      function(p){ if (!_pay(p, 5)) return; vToast('📅 Info: Grupo bandido planeja ataque.'); },
   // Tavern board
-  'board_wolves':       function(p){ vToast('🐺 Aceitou: Caçar 3 lobos cinzentos. Recompensa 20 Valdoritas + 25 XP.'); },
-  'board_escort':       function(p){ vToast('👥 Aceitou: Escoltar caravana. Recompensa 40 Valdoritas + 50 XP.'); },
+  'board_wolves':       function(p){ vToast('🐺 Aceitou: Caçar 3 lobos cinzentos. Recompensa 50 Valdoritas + 80 XP.'); },
+  'board_escort':       function(p){ vToast('👥 Aceitou: Escoltar caravana. Recompensa 50 Valdoritas + 60 XP.'); },
   'board_herbs':        function(p){ vToast('🌿 Aceitou: Coletar 5 ervas raras. Recompensa 15 Valdoritas + 25 XP.'); },
   // Mercenários hire
   'hire_korin':         function(p){ if (!_pay(p, 50)) return; vToast('🛡️ Korin contratado por 1 aventura.'); },
@@ -39340,7 +39855,7 @@ var ACTION_HANDLERS = {
 
   // Guild — Bounties (aceitar)
   'bounty_wolf_fangs':      function(p){ vToast('🐺 Bounty aceita: Coletar 2 presas de lobo. Recompensa: 20 Valdoritas + 35 XP.'); },
-  'bounty_wolf_pack':       function(p){ vToast('🐺 Bounty aceita: Matar 3 lobos. Recompensa: 20 Valdoritas + 40 XP.'); },
+  'bounty_wolf_pack':       function(p){ vToast('🐺 Recompensa aceita: Matar 3 lobos cinzentos. Pagamento: 50 Valdoritas + 80 XP.'); },
   'bounty_goblin_ears':     function(p){ vToast('👹 Bounty aceita: Coletar 3 orelhas de goblin. Recompensa: 25 Valdoritas + 40 XP.'); },
 
   // Guild misc
@@ -39528,21 +40043,16 @@ var ACTION_HANDLERS = {
      quest_<id>_details abre _showInfoPopup com objetivo + progresso +
      recompensa em pergaminho.
      quest_lyana_read abre modal pergaminho com texto da carta. */
-  'quest_wolves_locate': function(p){
-    window._questFocusLoc = { key: 'forest', name: 'Floresta dos Lobos', questTitle: 'Caçar Lobos Cinzentos' };
-    closeCityPopup(true);
-    if (typeof navigateTo === 'function') navigateTo('cartografia');
-    setTimeout(function(){ vToast('📍 Floresta dos Lobos destacada no Mapa de Valdoria — toque pra viajar.'); }, 600);
-  },
+  'quest_wolves_locate': function(p){ _questGotoMap('wolves', 'Caçar 3 Lobos Cinzentos'); },
   'quest_wolves_details': function(p){
     _showInfoPopup({
       icon: _heralIco('ic-lobo'),
       npc: 'Tavira — Caçadora-Chefe',
-      title: 'Caçar 5 Lobos Cinzentos',
+      title: 'Caçar 3 Lobos Cinzentos',
       desc: '<div style="text-align:left;line-height:1.6;">'
-          + '<b style="color:#c4953a;">◆ Objetivo:</b><br>Eliminar <b style="color:#e85040;">5 lobos cinzentos</b> que atacam fazendeiros do norte.<br><br>'
-          + '<b style="color:#c4953a;">◆ Progresso atual:</b><br><b style="color:#7cdb7c;">2 / 5</b> abatidos<br><br>'
-          + '<b style="color:#c4953a;">◆ Localização:</b><br>Floresta dos Lobos · 2km ao norte<br><br>'
+          + '<b style="color:#c4953a;">◆ Objetivo:</b><br>Eliminar <b style="color:#e85040;">3 lobos cinzentos</b> que atacam fazendeiros do norte.<br><br>'
+          + '<b style="color:#c4953a;">◆ Progresso atual:</b><br><b style="color:#7cdb7c;">2 / 3</b> abatidos<br><br>'
+          + '<b style="color:#c4953a;">◆ Localização:</b><br>Floresta dos Sussurros · norte<br><br>'
           + '<b style="color:#c4953a;">◆ Recompensa:</b><br>50 <span class="vi vi-coin sm"></span> + 80 XP<br>+10 afinidade com Tavira<br><br>'
           + '<i style="color:#a09484;">"Esses lobos têm mordida pesada. Use suas Pontes de Mira."</i>'
           + '</div>',
@@ -39551,12 +40061,7 @@ var ACTION_HANDLERS = {
       onConfirm: function(){}
     });
   },
-  'quest_lyana_locate': function(p){
-    window._questFocusLoc = { key: 'plains', name: 'Praça de Valdoria', questTitle: 'Falar com Lyana' };
-    closeCityPopup(true);
-    if (typeof navigateTo === 'function') navigateTo('cartografia');
-    setTimeout(function(){ vToast('📍 Lyana está na Praça de Valdoria (Portões) — toque pra viajar.'); }, 600);
-  },
+  'quest_lyana_locate': function(p){ _questGotoMap('lyana', 'Falar com Lyana'); },
   'quest_lyana_deliver': function(p){
     _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
   },
@@ -39613,58 +40118,58 @@ var ACTION_HANDLERS = {
   // _abandonQuest (helpers genéricos). Locate/details mostram toast informativo.
   // GOBLINS
   'quest_open_goblins':         function(p){ navigateTo('quest_open_goblins'); },
-  'quest_goblins_locate':       function(p){ vToast('📍 Moinho do Oeste, 1km da cidade.'); },
+  'quest_goblins_locate':       function(p){ _questGotoMap('goblins', 'Caçar 3 Goblins'); },
   'quest_goblins_details':      function(p){ vToast('📜 Matar 3 goblins. Recompensa: 25 Valdoritas + 40 XP.'); },
   'quest_goblins_deliver':      function(p){ _deliverQuest('goblins', 25, 40, '🐺 Helga aceita as provas. +25 Valdoritas +40 XP. Missão completa!'); },
-  'quest_goblins_abandon':      function(p){ _abandonQuest('goblins', 'Caçar 3 Goblins', '-5 afinidade com Capitão Helga'); },
+  'quest_goblins_abandon':      function(p){ _abandonQuest('goblins', 'Caçar 3 Goblins', '-5 afinidade com Capitã Helga'); },
   // HERBS
   'quest_open_herbs':           function(p){ navigateTo('quest_open_herbs'); },
-  'quest_herbs_locate':         function(p){ vToast('📍 Bosque dos Sussurros — cresce só onde a lua bate forte.'); },
+  'quest_herbs_locate':         function(p){ _questGotoMap('herbs', 'Coletar Ervas Raras'); },
   'quest_herbs_details':        function(p){ vToast('📜 Coletar 5 raízes-da-noite. Recompensa: 15 Valdoritas + 25 XP.'); },
   'quest_herbs_deliver':        function(p){ _deliverQuest('herbs', 15, 25, '🌿 Sylvi inspeciona as raízes e sorri. +15 Valdoritas +25 XP. Missão completa!'); },
   'quest_herbs_abandon':        function(p){ _abandonQuest('herbs', 'Coletar Ervas Raras', '-5 afinidade com Mestra Sylvi'); },
   // 2026-05-12 PATROL — quest nv 2 nova (preenche gap XP nv 1→2)
   'quest_open_patrol':          function(p){ navigateTo('quest_open_patrol'); },
-  'quest_patrol_locate':        function(p){ vToast('📍 Estrada do Leste — carroças sumindo nas noites.'); },
+  'quest_patrol_locate':        function(p){ _questGotoMap('patrol', 'Patrulhar Fronteira'); },
   'quest_patrol_details':       function(p){ vToast('📜 Sobreviver à patrulha noturna. Recompensa: 35 Valdoritas + 80 XP.'); },
   'quest_patrol_deliver':       function(p){ _deliverQuest('patrol', 35, 80, '👁️ Tomás aperta tua mão ao amanhecer. +35 Valdoritas +80 XP. Patrulha sobreviveu — missão completa!'); },
   'quest_patrol_abandon':       function(p){ _abandonQuest('patrol', 'Patrulhar Fronteira', '-5 afinidade com Vigia Tomás'); },
   // 2026-05-12 RAT_DEN — quest nv 2 nova (preenche gap XP nv 1→2)
   'quest_open_rat_den':         function(p){ navigateTo('quest_open_rat_den'); },
-  'quest_rat_den_locate':       function(p){ vToast('📍 Padaria do Distrito Velho — porão virou ninho de ratos-gigantes.'); },
+  'quest_rat_den_locate':       function(p){ _questGotoMap('rat_den', 'Limpar Cova de Ratos'); },
   'quest_rat_den_details':      function(p){ vToast('📜 Matar 4 ratos-gigantes. Recompensa: 40 Valdoritas + 100 XP.'); },
   'quest_rat_den_deliver':      function(p){ _deliverQuest('rat_den', 40, 100, '🐀 Erlan ri aliviado entregando o pagamento. +40 Valdoritas +100 XP. Forno limpo — missão completa!'); },
   'quest_rat_den_abandon':      function(p){ _abandonQuest('rat_den', 'Limpar Cova de Ratos', '-5 afinidade com Padeiro Erlan'); },
   // ESCORT
   'quest_open_escort':          function(p){ navigateTo('quest_open_escort'); },
-  'quest_escort_locate':        function(p){ vToast('📍 Estrada Norte rumo a Valkrest. Bandidos rondam.'); },
+  'quest_escort_locate':        function(p){ _questGotoMap('escort', 'Escoltar Caravana'); },
   'quest_escort_details':       function(p){ vToast('📜 Sobreviver à jornada até Valkrest. Recompensa: 50 Valdoritas + 60 XP.'); },
   'quest_escort_deliver':       function(p){ _deliverQuest('escort', 50, 60, '🛡️ Brael agradece a escolta. +50 Valdoritas +60 XP. Missão completa!'); },
   'quest_escort_abandon':       function(p){ _abandonQuest('escort', 'Escoltar Caravana', '-5 afinidade com Comerciante Brael'); },
   // RUIN
   'quest_open_ruin':            function(p){ navigateTo('quest_open_ruin'); },
-  'quest_ruin_locate':          function(p){ vToast('📍 Ruínas de Karthal — bioma graveyard, mortos-vivos guardam o local.'); },
-  'quest_ruin_details':         function(p){ vToast('📜 Trazer 3 relíquias ou pergaminhos. Recompensa: 80 Valdoritas + 80 XP.'); },
+  'quest_ruin_locate':          function(p){ _questGotoMap('ruin', 'Investigar Ruínas Élficas'); },
+  'quest_ruin_details':         function(p){ vToast('📜 Trazer 3 relíquias ou pergaminhos das Ruínas Élficas. Recompensa: 80 Valdoritas + 80 XP.'); },
   'quest_ruin_deliver':         function(p){ _deliverQuest('ruin', 80, 80, '🏛️ Maeve estuda as relíquias maravilhada. +80 Valdoritas +80 XP. Missão completa!'); },
-  'quest_ruin_abandon':         function(p){ _abandonQuest('ruin', 'Investigar Ruína Antiga', '-5 afinidade com Estudiosa Maeve'); },
+  'quest_ruin_abandon':         function(p){ _abandonQuest('ruin', 'Investigar Ruínas Élficas', '-5 afinidade com Estudiosa Maeve'); },
   // BANDIT LORD
   'quest_open_bandit_lord':     function(p){ navigateTo('quest_open_bandit_lord'); },
-  'quest_bandit_lord_locate':   function(p){ vToast('📍 Forte dos Bandidos — Vargrim, o Cicatriz, comanda dali.'); },
+  'quest_bandit_lord_locate':   function(p){ _questGotoMap('bandit_lord', 'Matar Líder Bandido'); },
   'quest_bandit_lord_details':  function(p){ vToast('📜 Matar Vargrim, o Cicatriz. Recompensa: 150 Valdoritas + 150 XP.'); },
   'quest_bandit_lord_deliver':  function(p){ _deliverQuest('bandit_lord', 150, 150, '👹 Helga conta a recompensa. +150 Valdoritas +150 XP. Vargrim morreu — missão completa!'); },
-  'quest_bandit_lord_abandon':  function(p){ _abandonQuest('bandit_lord', 'Matar Líder Bandido', '-5 afinidade com Capitão Helga'); },
+  'quest_bandit_lord_abandon':  function(p){ _abandonQuest('bandit_lord', 'Matar Líder Bandido', '-5 afinidade com Capitã Helga'); },
   // DRAGONET
   'quest_open_dragonet':        function(p){ navigateTo('quest_open_dragonet'); },
-  'quest_dragonet_locate':      function(p){ vToast('📍 Cratera Vulcânica — Filhote queima rebanho num sopro.'); },
+  'quest_dragonet_locate':      function(p){ _questGotoMap('dragonet', 'Caçar Dragonete'); },
   'quest_dragonet_details':     function(p){ vToast('📜 Matar a dragonete vermelha. Recompensa: 300 Valdoritas + 250 XP.'); },
   'quest_dragonet_deliver':     function(p){ _deliverQuest('dragonet', 300, 250, '🐲 Aldric paga generosamente. +300 Valdoritas +250 XP. Cratera está segura!'); },
   'quest_dragonet_abandon':     function(p){ _abandonQuest('dragonet', 'Caçar Dragonete', '-5 afinidade com Conselheiro Aldric'); },
   // DEFEND
   'quest_open_defend':          function(p){ navigateTo('quest_open_defend'); },
-  'quest_defend_locate':        function(p){ vToast('📍 Aldeia-do-Lago — 3 dias até o ataque dos orcs.'); },
-  'quest_defend_details':       function(p){ vToast('📜 Defender Aldeia-do-Lago dos orcs. Recompensa: 500 Valdoritas + 400 XP.'); },
-  'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, '🏰 Helga aperta tua mão. +500 Valdoritas +400 XP. Aldeia-do-Lago resistiu!'); },
-  'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Vila do Leste', '-5 afinidade com Capitão Helga'); },
+  'quest_defend_locate':        function(p){ _questGotoMap('defend', 'Defender Vila do Leste'); },
+  'quest_defend_details':       function(p){ vToast('📜 Defender os Campos Verdes do avanço dos orcs. Recompensa: 500 Valdoritas + 400 XP.'); },
+  'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, '🏰 Helga aperta tua mão. +500 Valdoritas +400 XP. Os Campos Verdes resistiram!'); },
+  'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Vila do Leste', '-5 afinidade com Capitã Helga'); },
   'q_history_1':            function(p){ vToast('📚 Tutorial completado em 2026-04-15. +50 XP.'); },
   'q_history_2':            function(p){ vToast('📚 Goblin no celeiro derrotado em 2026-04-16. +30 XP.'); },
   'q_history_3':            function(p){ vToast('📚 3 lobos pequenos caçados em 2026-04-18. +60 XP.'); },
@@ -39678,9 +40183,9 @@ var ACTION_HANDLERS = {
   'codex_entry_spider':     function(p){ vToast('🕷️ Aranha-cripta — CR 1/2 | HP 26 | CA 14 | Mordida 1d6+1 + poison. Agilidade aranha.'); },
   'codex_entry_skeleton':   function(p){ vToast('💀 Esqueleto — CR 1/4 | HP 13 | CA 13 | Espada curta 1d6+2. Imune a veneno.'); },
   'codex_locked':           function(p){ vToast('❓ Não descoberto. Encontre em batalha pra desbloquear.'); },
-  'codex_loc_wolf_forest':  function(p){ vToast('🌲 Floresta dos Lobos — bioma forest, 2km norte. 12 hexes explorados.'); },
-  'codex_loc_echo_cave':    function(p){ vToast('🏔️ Caverna dos Ecos — bioma cave, 5km leste. 3 visitas registradas.'); },
-  'codex_loc_karthal':      function(p){ vToast('🏰 Ruína de Karthal — bioma graveyard. Ancestral, 1 visita.'); },
+  'codex_loc_wolf_forest':  function(p){ vToast('🌲 Floresta dos Sussurros — bioma forest, ao norte. 12 hexes explorados.'); },
+  'codex_loc_echo_cave':    function(p){ vToast('🏔️ Passagem Subterrânea — bioma cave, a oeste. 3 visitas registradas.'); },
+  'codex_loc_karthal':      function(p){ vToast('🏛️ Ruínas Élficas — bioma forest, ao norte. Resquícios de uma civilização ancestral.'); },
   'codex_loc_locked':       function(p){ vToast('❓ Local não descoberto.'); },
   'codex_item_sword':       function(p){ vToast('🗡️ Espada longa — 1d8 corte. Comum. Custo 15 Valdoritas.'); },
   'codex_item_chain':       function(p){ vToast('🛡️ Cota de malha — CA 16 (+DEX max 2). Comum. 75 Valdoritas.'); },
@@ -39881,6 +40386,118 @@ function _isQuestCompletedOrAbandoned(questId){
 
 // Entrega missão: pague gold/xp, mova p/ history, bloqueia re-entrega.
 // Args: questId ('lyana'), gold (number), xp (number), msg (string visível).
+// ============================================================================
+// === QUEST_MAP — registry canonical de localização por missão (X-6.5.51BI 2026-05-15)
+// ============================================================================
+// Cada missão aponta para um biomeKey REAL do CART_BIOMES (cartografia-shared.js).
+// inCity: true → missão dentro da cidade (player já está em 'plains' por default).
+// Quando o player abre "Ver no mapa": (1) valida que biome existe, (2) verifica
+// se ele JÁ ESTÁ no local — mostra popup informativo em vez de navegar.
+//
+// Regra: NENHUMA missão pode apontar para biome que não existe em CART_BIOMES.
+// ============================================================================
+var QUEST_MAP = {
+  wolves:      { biomeKey: 'forest',          name: 'Floresta dos Sussurros' },
+  lyana:       { biomeKey: 'plains',          name: 'Portões de Valdoria', inCity: true,
+                 cityHint: 'Lyana caminha entre as bancas da praça, próxima à fonte.' },
+  goblins:     { biomeKey: 'goblin_nest',     name: 'Ninho de Goblins' },
+  herbs:       { biomeKey: 'forest',          name: 'Floresta dos Sussurros' },
+  patrol:      { biomeKey: 'swamp',           name: 'Pântano Nebuloso' },
+  rat_den:     { biomeKey: 'plains',          name: 'Portões de Valdoria', inCity: true,
+                 cityHint: 'O porão da padaria fica nos becos do Distrito Velho — dentro da cidade.' },
+  escort:      { biomeKey: 'valkrest',        name: 'Valkrest (Acampamento)' },
+  ruin:        { biomeKey: 'elven_ruins',     name: 'Ruínas Élficas' },
+  bandit_lord: { biomeKey: 'bandit_fortress', name: 'Forte dos Bandidos' },
+  dragonet:    { biomeKey: 'volcanic',        name: 'Cratera Vulcânica' },
+  defend:      { biomeKey: 'green_fields',    name: 'Campos Verdes' }
+};
+
+function _questMapEntry(questId){
+  return QUEST_MAP[questId] || null;
+}
+
+function _biomeExists(key){
+  // Valida que biome key existe em CART_BIOMES (canonical). Usa CartShared se
+  // disponível; senão fallback no array global window.CART_BIOMES.
+  if (!key) return false;
+  var biomes = (window.CartShared && window.CartShared.CART_BIOMES) || window.CART_BIOMES || [];
+  for (var i = 0; i < biomes.length; i++) if (biomes[i].key === key) return true;
+  return false;
+}
+
+function _questGotoMap(questId, questTitle){
+  // Handler universal pro botão "Ver no mapa" de cada missão.
+  //  1) Se entry inexistente OU biome inválido → popup "local fora do mapa"
+  //  2) Se player JÁ está no biome → popup "você já está no local"
+  //  3) Senão → seta _questFocusLoc e navega pra cartografia
+  var entry = _questMapEntry(questId);
+  if (!entry || !_biomeExists(entry.biomeKey)) {
+    if (typeof _showInfoPopup === 'function') {
+      _showInfoPopup({
+        icon: '🗺️',
+        title: 'Local fora do mapa',
+        desc: 'Esta missão ainda não tem ponto cartografado em Valdoria.<br><br>'
+            + '<i>Consulte Corvus, o Cartógrafo, na Praça — talvez ele possa ajudar.</i>',
+        confirmLabel: 'Entendido', cancelLabel: 'Voltar', onConfirm: function(){}
+      });
+    } else {
+      vToast('🗺️ Esta missão ainda não tem ponto cartografado.', 'warn');
+    }
+    return;
+  }
+  var playerBiome = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
+  if (playerBiome === entry.biomeKey) {
+    // Player já no local — popup informativo (NÃO permite clique navegar)
+    if (typeof _showInfoPopup === 'function') {
+      _showInfoPopup({
+        icon: '📍',
+        title: 'Você já está aqui',
+        desc: entry.inCity
+          ? 'Esta missão acontece <b style="color:#c4953a;">' + entry.name + '</b>.<br><br>'
+            + (entry.cityHint || 'O alvo está nesta mesma região — não precisas viajar.')
+          : 'Estás em <b style="color:#c4953a;">' + entry.name + '</b>, o local da missão.<br><br>'
+            + '<i>Avance pela exploração ou interaja com os alvos diretamente daqui.</i>',
+        confirmLabel: 'Entendido', cancelLabel: 'Fechar', onConfirm: function(){}
+      });
+    } else {
+      vToast('📍 Você já está em ' + entry.name + '.');
+    }
+    return;
+  }
+  // Navegação normal
+  window._questFocusLoc = {
+    key: entry.biomeKey,
+    name: entry.name,
+    questTitle: questTitle || questId
+  };
+  if (typeof closeCityPopup === 'function') closeCityPopup(true);
+  if (typeof navigateTo === 'function') navigateTo('cartografia');
+  setTimeout(function(){
+    vToast('📍 ' + entry.name + ' destacada no Mapa de Valdoria — toque pra viajar.');
+    if (typeof _startQuestFocusTick === 'function') _startQuestFocusTick();
+  }, 600);
+}
+
+// === Verifica se missão tem progresso suficiente pra entregar ==============
+// QUESTS_ACTIVE.progress: string tipo "2/3", "✓ pronta", "0/5", ou flag livre.
+// Retorna { ready: bool, current: number|null, goal: number|null, raw: string }.
+function _isQuestReady(questId){
+  if (typeof QUESTS_ACTIVE === 'undefined') return { ready: true, raw: '' };
+  var qa = QUESTS_ACTIVE.find(function(q){ return q && q.id === 'qa_' + questId; });
+  if (!qa) return { ready: false, raw: '', notFound: true };
+  var prog = String(qa.progress || '');
+  // Flags textuais (ex: "✓ pronta", "✓ concluída")
+  if (prog.indexOf('✓') >= 0) return { ready: true, raw: prog };
+  // Formato "X/Y"
+  var m = prog.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
+  if (m) {
+    var cur = parseInt(m[1], 10), goal = parseInt(m[2], 10);
+    return { ready: cur >= goal, current: cur, goal: goal, raw: prog };
+  }
+  // Formato desconhecido — bloqueia por segurança
+  return { ready: false, raw: prog };
+}
+
 function _deliverQuest(questId, gold, xp, msg){
   var p = window.CITY_MOCK_PLAYER;
   if (!p) return;
@@ -39888,6 +40505,28 @@ function _deliverQuest(questId, gold, xp, msg){
   if (p.completed_quests.indexOf(questId) >= 0) {
     vToast('⚠️ Essa missão já foi concluída.', 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
+    return;
+  }
+  // X-6.5.51BI (2026-05-15): bloqueia entrega se objetivos não cumpridos.
+  // Antes: clicar "Reportar" sempre completava — agora exige progresso real.
+  var status = _isQuestReady(questId);
+  if (!status.ready) {
+    var detail = status.notFound
+      ? '<i>Aceita esta missão antes de tentar reportá-la.</i>'
+      : (status.current != null && status.goal != null
+          ? 'Progresso atual: <b style="color:#e8a042;">' + status.current + ' / ' + status.goal + '</b>.<br><br>'
+            + '<i>Volte quando tiver completado o objetivo.</i>'
+          : '<i>Os objetivos desta missão ainda não foram concluídos.</i>');
+    if (typeof _showInfoPopup === 'function') {
+      _showInfoPopup({
+        icon: '⏳',
+        title: 'Missão Incompleta',
+        desc: detail,
+        confirmLabel: 'Entendido', cancelLabel: 'Voltar', onConfirm: function(){}
+      });
+    } else {
+      vToast('⏳ Missão ainda não está pronta — ' + status.raw, 'warn');
+    }
     return;
   }
   p.gold = (p.gold || 0) + (gold || 0);
@@ -40565,8 +41204,8 @@ function _wireExitModalOnce(){
     var target = btn.dataset.target;
     closeCityExitModal();
     if (target === 'gates_planice') {
-      _logCity('exit -> portões/planície');
-      _travelToBiome('plains', 'Planície de Valdoria');
+      _logCity('exit -> portões');
+      _travelToBiome('plains', 'Portões de Valdoria');
     } else if (target === 'cartografia') {
       _logCity('exit -> cartografia');
       navigateTo('cartografia');
@@ -42483,6 +43122,83 @@ function renderCartographyCanvas(el){
   }, 600);
 }
 
+// === QUEST FOCUS HALO (X-6.5.51BJ 2026-05-15) ====================
+// Desenha anel dourado pulsante + label "Missão" no biome alvo selecionado
+// via "Ver no mapa" das missões. Anima via tick periódico enquanto ativo.
+function _drawQuestFocusHalo(ctx, biome, w, h, questTitle){
+  if (!biome) return;
+  var cx = biome.x * w;
+  var cy = biome.y * h;
+  // Pulse 0..1 baseado em time
+  var t = (performance.now ? performance.now() : Date.now()) / 600;
+  var pulse = 0.5 + 0.5 * Math.sin(t);
+  var rBase = 40;
+  var rOuter = rBase + 6 + pulse * 8;
+  // Anel exterior dourado pulsante
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  var grad = ctx.createRadialGradient(cx, cy, rBase * 0.6, cx, cy, rOuter);
+  grad.addColorStop(0, 'rgba(255,215,0,0)');
+  grad.addColorStop(0.55, 'rgba(255,200,80,' + (0.18 + pulse * 0.20) + ')');
+  grad.addColorStop(0.85, 'rgba(255,170,40,' + (0.32 + pulse * 0.28) + ')');
+  grad.addColorStop(1, 'rgba(255,140,30,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  // Anel discreto dourado contínuo
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,215,0,' + (0.65 + pulse * 0.25) + ')';
+  ctx.lineWidth = 2 + pulse * 1.2;
+  ctx.setLineDash([6, 4]);
+  ctx.lineDashOffset = -t * 8;
+  ctx.beginPath();
+  ctx.arc(cx, cy, rBase, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  // Badge "◆ MISSÃO ◆" acima do node
+  var label = '◆ MISSÃO ◆';
+  ctx.save();
+  ctx.font = 'bold 10px "Cinzel", Georgia, serif';
+  var metrics = ctx.measureText(label);
+  var bx = cx - metrics.width / 2 - 8;
+  var by = cy - rBase - 24;
+  var bw = metrics.width + 16;
+  var bh = 16;
+  ctx.fillStyle = 'rgba(20,12,6,0.88)';
+  ctx.strokeStyle = 'rgba(255,215,0,0.85)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(bx, by, bw, bh, 4);
+  else ctx.rect(bx, by, bw, bh);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ffd700';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, cx, by + bh / 2 + 0.5);
+  ctx.restore();
+}
+
+// Tick periódico pra animar o halo enquanto _questFocusLoc estiver ativo.
+// Stop automático quando _questFocusLoc clear (ex: closeCartLocationPopup
+// limpa, ou navegação pra outra tela). Evita loop infinito de redraws.
+var _questFocusTickId = null;
+function _startQuestFocusTick(){
+  if (_questFocusTickId) return;
+  _questFocusTickId = setInterval(function(){
+    if (!window._questFocusLoc) {
+      clearInterval(_questFocusTickId);
+      _questFocusTickId = null;
+      if (typeof _drawCart === 'function') _drawCart();
+      return;
+    }
+    if (typeof _drawCart === 'function') _drawCart();
+  }, 120);  // ~8 fps — suave + leve em perf
+}
+
 // === EVENTS ===
 function _wireCartEvents(){
   if (!_cartCanvas) return;
@@ -42957,6 +43673,13 @@ function _drawCart(){
   var playerBiomeKey = _cartGetPlayerBiome();
   var playerNode = CART_BIOMES.find(function(b){ return b.key === playerBiomeKey; });
   if (playerNode) _drawPlayerPin(ctx, playerNode, w, h);
+  // X-6.5.51BJ (2026-05-15): halo dourado pulsante no biome alvo da missão
+  // (escolhida via "Ver no mapa"). Antes _questFocusLoc era set mas nunca
+  // lido — toast "destacada" era vazio. Agora desenha ring + label.
+  if (window._questFocusLoc && window._questFocusLoc.key) {
+    var qfNode = CART_BIOMES.find(function(b){ return b.key === window._questFocusLoc.key; });
+    if (qfNode) _drawQuestFocusHalo(ctx, qfNode, w, h, window._questFocusLoc.questTitle || 'Missão');
+  }
   ctx.restore();
 
   // === STAGE 3: Compass rose top-right (FIXED) ===

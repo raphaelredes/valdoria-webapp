@@ -58,25 +58,46 @@
    2. OVERLAY (modal container)
    ================================================================ */
 .vinv-overlay {
+  /* 2026-05-15: confinar overlay ao frame canonical do simulador.
+     Antes: `inset: 0` cobria viewport inteiro do browser, e em monitores
+     largos a mochila aparecia centralizada no browser (não no frame de
+     480px do "celular virtual"). Solução: usar mesmo viewport canonical
+     do sim (--sim-frame-w/h) + centralizar via translate. Funciona tanto
+     em cidade/combate (body=frame) quanto em exploracao (body=viewport)
+     porque fixed se posiciona vs viewport e o frame visual já está
+     centralizado no viewport via html margin auto. */
   position: fixed;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Simulator (file://): --sim-frame-w=480px (cap smartphone canonical).
+     WebApp deploy: var indefinida, fallback=430px (valdoria-design.css
+     IMUTÁVEL html max-width). Em ambos, fixed se posiciona vs viewport
+     e o frame já está centralizado horizontalmente via html margin auto,
+     então o overlay alinha visualmente com o frame. */
+  width: var(--sim-frame-w, min(100vw, 430px));
+  height: var(--sim-frame-h, 100dvh);
   background: rgba(8, 5, 3, 0.7);
   backdrop-filter: blur(2px);
   display: none;
   align-items: center;
   justify-content: center;
   z-index: 9000;
-  padding: 20px;
+  /* Padding mínimo — painel ocupa ≥ 95% interno (regra: ≥90%) */
+  padding: 8px;
   font-family: var(--vinv-font);
   color: var(--vinv-text);
 }
 .vinv-overlay.active { display: flex; }
 
 .vinv-panel {
+  /* 2026-05-15: ocupa todo o frame menos padding (≥95% efetivo).
+     Antes: max-width 430px + max-height 720px deixavam o painel pequeno
+     em telas que poderiam comportar mais conteúdo. */
   width: 100%;
-  max-width: 430px;
+  max-width: 100%;
   height: 100%;
-  max-height: 720px;
+  max-height: 100%;
   background: var(--vinv-bg-mid);
   border: 1px solid var(--vinv-gold);
   border-radius: 14px;
