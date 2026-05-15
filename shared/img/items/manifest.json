@@ -725,6 +725,84 @@
       "cost": 0.004750000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "anel-de-prata": {
+      "timestamp": "2026-05-15T22:29:20.815695",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "default"
+    },
+    "periapto-de-cura": {
+      "timestamp": "2026-05-15T22:29:32.560383",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "peitoral-de-couro": {
+      "timestamp": "2026-05-15T22:30:06.967389",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "giboia-de-pele": {
+      "timestamp": "2026-05-15T22:30:17.591758",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cota-de-escamas": {
+      "timestamp": "2026-05-15T22:30:32.379941",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "ombreiras-de-couro": {
+      "timestamp": "2026-05-15T22:30:43.988199",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "luvas-de-couro": {
+      "timestamp": "2026-05-15T22:30:59.094800",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "luvas-de-tecido": {
+      "timestamp": "2026-05-15T22:31:07.403461",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "armor"
+    },
+    "perneiras-de-couro": {
+      "timestamp": "2026-05-15T22:31:21.628019",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "calcas-de-la": {
+      "timestamp": "2026-05-15T22:31:36.748787",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "armor"
+    },
+    "botas-de-couro": {
+      "timestamp": "2026-05-15T22:31:51.384843",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "sandalias-de-couro": {
+      "timestamp": "2026-05-15T22:32:05.537898",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "capa-de-viajante": {
+      "timestamp": "2026-05-15T22:32:17.292842",
+      "cost": 0.004745000000000001,
+      "quality": "low",
+      "category": "default"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
