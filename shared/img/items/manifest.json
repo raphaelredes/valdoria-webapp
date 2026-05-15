@@ -965,6 +965,84 @@
       "cost": 0.0048200000000000005,
       "quality": "low",
       "category": "magical"
+    },
+    "tunica-de-protecao": {
+      "timestamp": "2026-05-15T22:38:33.669434",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "veste-do-arcanista": {
+      "timestamp": "2026-05-15T22:38:51.198510",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "veste-do-sacerdote": {
+      "timestamp": "2026-05-15T22:39:05.171176",
+      "cost": 0.004855000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "capa-de-deslocamento": {
+      "timestamp": "2026-05-15T22:39:12.625558",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-do-morcego": {
+      "timestamp": "2026-05-15T22:39:27.602190",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "botas-de-velocidade": {
+      "timestamp": "2026-05-15T22:39:39.497569",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "botas-do-inverno": {
+      "timestamp": "2026-05-15T22:39:51.795665",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "sandalias-aladas": {
+      "timestamp": "2026-05-15T22:40:05.019878",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "magical"
+    },
+    "luvas-de-ladrao": {
+      "timestamp": "2026-05-15T22:40:20.579540",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "manoplas-de-forca-de-ogro": {
+      "timestamp": "2026-05-15T22:40:33.992448",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "braceletes-de-defesa": {
+      "timestamp": "2026-05-15T22:40:45.699437",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "cinturao-de-forca-do-gigante": {
+      "timestamp": "2026-05-15T22:40:59.741979",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "cinturao-de-destreza": {
+      "timestamp": "2026-05-15T22:41:19.811072",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
