@@ -100,6 +100,10 @@
       _state.selectedItem = null;
 
       if (!_state.overlay) _state.overlay = _buildOverlay();
+      // Fix 2026-05-14: reset detail state ao abrir mochila — evita modal
+      // persistir entre open() consecutivos (bug detectado em E2E test).
+      var detailEl = _state.overlay.querySelector('[data-region="detail"]');
+      if (detailEl) detailEl.classList.remove('active');
       _render();
       _state.overlay.classList.add('active');
       _state.open = true;
@@ -108,7 +112,12 @@
     close: function () {
       if (!_state.open) return;
       _state.open = false;
-      if (_state.overlay) _state.overlay.classList.remove('active');
+      if (_state.overlay) {
+        _state.overlay.classList.remove('active');
+        // Fix 2026-05-14: fecha detail junto pra evitar persistência
+        var detailEl = _state.overlay.querySelector('[data-region="detail"]');
+        if (detailEl) detailEl.classList.remove('active');
+      }
       var cfg = _state.config;
       if (cfg && typeof cfg.onClose === 'function') {
         try { cfg.onClose(); } catch (e) { console.error('[vInventory] onClose:', e); }
