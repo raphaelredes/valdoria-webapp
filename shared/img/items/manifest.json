@@ -635,6 +635,96 @@
       "cost": 0.004730000000000001,
       "quality": "low",
       "category": "default"
+    },
+    "elmo-enferrujado": {
+      "timestamp": "2026-05-15T22:26:21.289606",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cota-de-malha": {
+      "timestamp": "2026-05-15T22:26:33.959872",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "ombreiras-de-malha": {
+      "timestamp": "2026-05-15T22:26:41.906607",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "braceletes-de-ferro": {
+      "timestamp": "2026-05-15T22:26:59.434516",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "grevas-de-ferro": {
+      "timestamp": "2026-05-15T22:27:05.450904",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "botas-pesadas": {
+      "timestamp": "2026-05-15T22:27:21.241886",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cantil": {
+      "timestamp": "2026-05-15T22:27:32.680104",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "anel-de-protecao": {
+      "timestamp": "2026-05-15T22:27:42.758384",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "colar-de-ossos": {
+      "timestamp": "2026-05-15T22:28:08.583918",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "botas-de-levitacao": {
+      "timestamp": "2026-05-15T22:28:10.181238",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "rapieira-+1": {
+      "timestamp": "2026-05-15T22:28:19.082123",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "adaga-+1": {
+      "timestamp": "2026-05-15T22:28:31.480376",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "besta-leve-+1": {
+      "timestamp": "2026-05-15T22:28:48.358231",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "lanca-+1": {
+      "timestamp": "2026-05-15T22:28:55.566331",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machado-grande-+1": {
+      "timestamp": "2026-05-15T22:29:08.811430",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
