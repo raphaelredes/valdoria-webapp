@@ -327,11 +327,19 @@
   overflow-y: auto;
   padding: 10px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
+  /* 2 cols default (mobile-first — regra do user 2026-05-14: 3 cols ficava
+     espremido em Telegram Desktop ~430px). 3 cols só quando width >= 600px. */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
   align-content: start;
   scrollbar-width: thin;
   scrollbar-color: var(--vinv-border) transparent;
+}
+@media (min-width: 600px) {
+  .vinv-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+}
+@media (min-width: 900px) {
+  .vinv-grid { grid-template-columns: repeat(4, 1fr); }
 }
 .vinv-grid::-webkit-scrollbar { width: 4px; }
 .vinv-grid::-webkit-scrollbar-thumb { background: var(--vinv-border); border-radius: 2px; }

@@ -42,6 +42,29 @@
 
   if (window.vInventory && window.vInventory.__loaded) return;
 
+  // Registra grid + swap list no scroll-hint-arrow canonical (seta animada
+  // inferior pra indicar mais conteúdo abaixo). MutationObserver do
+  // shared/scroll-hint-arrow.js captura overlay automático quando criado.
+  function _vinvSetupScrollHint() {
+    try {
+      if (window.vScrollHint && typeof window.vScrollHint.register === 'function') {
+        window.vScrollHint.register('.vinv-grid');
+        window.vScrollHint.register('.vinv-swap-list');
+        window.vScrollHint.register('.vinv-detail-desc');
+        window.vScrollHint.register('.vinv-loadout');
+      }
+    } catch (_) { /* sem scroll hint = sem problema */ }
+  }
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _vinvSetupScrollHint);
+    } else {
+      _vinvSetupScrollHint();
+    }
+    // Retry em 1s caso vScrollHint ainda não carregou
+    setTimeout(_vinvSetupScrollHint, 1000);
+  }
+
   // ============================================================
   //  CATEGORIAS CANÔNICAS (4 tabs sem "Todos")
   //  Quando nenhuma ativa → mostra tudo (filtro é filtro, não tab).
@@ -107,6 +130,7 @@
       _render();
       _state.overlay.classList.add('active');
       _state.open = true;
+
     },
 
     close: function () {
