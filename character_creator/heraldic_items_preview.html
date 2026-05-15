@@ -22096,5 +22096,13 @@
   });
 </script>
 
+<!-- PNG_INTEGRATION — usa vItems.upgrade() do shared module -->
+<script src="../shared/items-resolver.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.vItems) vItems.upgrade();
+  });
+</script>
+
 </body>
 </html>

@@ -42,6 +42,20 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
+# AI-generated item PNGs (Tier C — ETag-revalidated, allows regen)
+# 540 items at slug-named filenames. Files may be regenerated when quality
+# issues are found; no-cache lets revisits get the new version via ETag.
+# CF Pages auto-ETag → unchanged file returns 304 (~200B revalidation only).
+/shared/img/items/*
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
+
+# Manifest of generated items — MUST always be fresh (updates as batch runs).
+# More specific than /shared/img/items/* but same cache policy (concatenates).
+/shared/img/items/manifest.json
+  Cache-Control: no-cache, must-revalidate
+  X-Content-Type-Options: nosniff
+
 # Character creator race portraits (9 PNGs ~3.77MB total)
 /character_creator/races/*
   Cache-Control: public, max-age=31536000, immutable
