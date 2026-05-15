@@ -1,0 +1,143 @@
+/* anim-fire.css — Fogueira padronizada reaproveitável (X-6.5.51BO 2026-05-15)
+ *
+ * Extraído de valdoria-webapp/explore/explore-camp.css (.camp-* classes).
+ * Reaproveita CampFire.init() de valdoria-webapp/explore/explore-camp-fire.js
+ * (mesmo sistema canvas particle additive-blend).
+ *
+ * USO:
+ *   var fire = vFire.attach(containerEl, { width: 40, height: 50, sparks: 4 });
+ *   // Quando fechar a tela: fire.destroy();
+ *
+ * Tamanho via CSS vars (caller controla):
+ *   --vfire-w  → largura visual (default 160px)
+ *   --vfire-h  → altura visual (default 180px)
+ *
+ * Estrutura HTML montada por vFire.attach():
+ *   .vfire-area
+ *     .vfire-ground-glow  (radial pulsante laranja no chão)
+ *     .vfire-logs         (3 toras CSS rotated + ember glow under)
+ *     .vfire-canvas       (CampFire particle system)
+ *     .vfire-embers       (faíscas subindo)
+ *
+ * Performance: respeitada via CampFire.init (tier-aware: 20/35/55 particles).
+ */
+
+.vfire-area {
+  --vfire-w: 160px;
+  --vfire-h: 180px;
+  position: relative;
+  width: var(--vfire-w);
+  height: var(--vfire-h);
+  pointer-events: none;
+}
+
+/* Brilho do chão (radial pulsante) — 150% da largura, posicionado abaixo */
+.vfire-ground-glow {
+  position: absolute;
+  bottom: -6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150%;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 120, 20, 0.20) 0%, transparent 70%);
+  animation: vfireGlowPulse 2s ease-in-out infinite alternate;
+}
+@keyframes vfireGlowPulse {
+  0%   { opacity: 0.55; transform: translateX(-50%) scaleX(1); }
+  100% { opacity: 1;    transform: translateX(-50%) scaleX(1.1); }
+}
+
+/* Toras (logs) — 3 retângulos rotated tipo lenha cruzada */
+.vfire-logs {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56%;
+  height: 12%;
+  z-index: 3;
+}
+.vfire-log {
+  position: absolute;
+  height: 45%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #3a2210, #5a3820, #3a2010);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.vfire-log:nth-child(1) { width: 67%;  bottom: 0;   left: 9%;  transform: rotate(-10deg); }
+.vfire-log:nth-child(2) { width: 61%;  bottom: 9%;  left: 24%; transform: rotate(14deg); }
+.vfire-log:nth-child(3) { width: 50%;  bottom: 36%; left: 20%; transform: rotate(-4deg); }
+.vfire-log-ember {
+  position: absolute;
+  bottom: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44%;
+  height: 36%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 100, 0, 0.55) 0%, transparent 80%);
+  animation: vfireLogGlow 1.5s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes vfireLogGlow {
+  0%   { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Canvas onde CampFire renderiza as partículas */
+.vfire-canvas {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 100%;
+  height: 89%;
+}
+
+/* Faíscas subindo (CSS-only — não usa o canvas) */
+.vfire-embers {
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 67%;
+  pointer-events: none;
+  z-index: 4;
+}
+.vfire-spark {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffaa20;
+  opacity: 0;
+  animation: vfireSparkRise ease-out infinite;
+}
+.vfire-spark:nth-child(1) { left: 20%; animation-duration: 2.4s; animation-delay: 0.0s; }
+.vfire-spark:nth-child(2) { left: 35%; animation-duration: 2.0s; animation-delay: 0.4s; }
+.vfire-spark:nth-child(3) { left: 50%; animation-duration: 2.6s; animation-delay: 0.9s; }
+.vfire-spark:nth-child(4) { left: 65%; animation-duration: 2.2s; animation-delay: 1.3s; }
+.vfire-spark:nth-child(5) { left: 78%; animation-duration: 2.4s; animation-delay: 1.7s; }
+.vfire-spark:nth-child(6) { left: 28%; animation-duration: 2.8s; animation-delay: 2.1s; }
+@keyframes vfireSparkRise {
+  0%   { opacity: 0;    transform: translate(0, 0)      scale(0.5); }
+  20%  { opacity: 0.9;  transform: translate(2px, -20%) scale(1);   }
+  100% { opacity: 0;    transform: translate(-3px, -100%) scale(0.3); }
+}
+
+/* Performance tier degradation */
+body.perf-lite .vfire-ground-glow,
+body.perf-lite .vfire-log-ember,
+body.perf-lite .vfire-spark { animation: none !important; }
+body.perf-lite .vfire-spark { display: none; }
+body.perf-medium .vfire-spark:nth-child(n+5) { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vfire-ground-glow,
+  .vfire-log-ember,
+  .vfire-spark { animation: none !important; }
+}
