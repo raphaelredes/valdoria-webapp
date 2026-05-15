@@ -28106,46 +28106,55 @@ function _aaaListSubScreen(opts){
   }
 }
 
+/**
+ * _squareShowListPopup — Legacy sub-screen renderer (X-6.5.51BV 2026-05-15).
+ *
+ * REFATORADO: wrapper que delega 100% para _aaaListSubScreen (AAA template).
+ * Motivo: 25+ call sites (Market/Guild/Temple/Bank/Square/Festival/Codex/Gates/
+ * Quests/Arena/Workshop/Runes etc.) usavam o template legacy "bnk-item-list"
+ * sem hero ornamentado. Esta migração unificada eleva TODOS os sub-screens ao
+ * padrão AAA visual da Taverna/Estalagem sem tocar nenhum caller individual.
+ *
+ * Auto-detect de tema baseado em stackKey (heurística por prefixo):
+ *   - 'arcane' (roxo místico): temple, bank, shrine, chapel, rune, scribe,
+ *                              arcane, alchemist, wizard, mage, prayer, altar
+ *   - 'inn'    (dourado quente): inn, martha, innkeeper, sleep, rest, bed, room
+ *   - 'tavern' (dourado padrão): default (market, guild, square, festival,
+ *                                gates, codex, quests, arena, workshop, etc.)
+ *
+ * Backward compat: callers que queiram override podem passar opts.theme direto.
+ * Pass-through campos: stackKey, title, subtitle, icon, flavor, npcInfo,
+ * sectionLabel, items, onPick.
+ */
 function _squareShowListPopup(opts){
-  var ov = document.getElementById('city-subscreen-popup');
-  var titleEl = document.getElementById('csp-title');
-  var bodyEl = document.getElementById('csp-body');
-  if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
-  bodyEl.innerHTML = '';
-  var html = '<div class="city-subscreen">';
-  if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
-  html += '<div class="bnk-item-list">';
-  opts.items.forEach(function(item, idx){
-    var badge = item.badge ? '<span class="sb-info">' + item.badge + '</span>' : '';
-    html += '<button class="subscreen-btn bnk-item-btn" data-idx="' + idx + '"' +
-            (item.disabled ? ' disabled' : '') + '>'
-      + '<span class="sb-icon">' + (item.icon || '·') + '</span>'
-      + '<span class="sb-text">' + (item.label || item.name || '') + '</span>'
-      + badge
-      + '</button>';
-  });
-  html += '</div>'
-    + '<div class="subscreen-back-row"><button class="subscreen-back" data-cb="__back">← Voltar</button></div>'
-    + '</div>';
-  bodyEl.innerHTML = html;
-  bodyEl.querySelectorAll('.bnk-item-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      if (btn.disabled) return;
-      var idx = parseInt(btn.dataset.idx, 10);
-      if (typeof opts.onPick === 'function') opts.onPick(opts.items[idx]);
-    });
-  });
-  bodyEl.querySelector('[data-cb="__back"]').addEventListener('click', navigateBack);
-  ov.classList.add('active');
-  // Push key + register restoreFn pra Voltar funcionar (Phase 9.8 infra)
-  if (opts.stackKey && typeof _popupStack !== 'undefined') {
-    if (_popupStack[_popupStack.length - 1] !== opts.stackKey) {
-      _popupStack.push(opts.stackKey);
+  if (!opts) return;
+  if (typeof _aaaListSubScreen !== 'function') return;  // safety net
+
+  // Auto-tema por stackKey (case-insensitive, prefix match)
+  var key = (opts.stackKey || '').toLowerCase();
+  var theme = opts.theme;
+  if (!theme) {
+    if (/^(temple|bank|shrine|chapel|prayer|altar|ritual|rune|scribe|arcane|alchemist|wizard|mage|codex)/.test(key)) {
+      theme = 'arcane';
+    } else if (/^(inn|martha|innkeeper|sleep|rest|bed|room)/.test(key)) {
+      theme = 'inn';
+    } else {
+      theme = 'tavern';  // default: market, guild, square, festival, gates, quest, arena, workshop, etc.
     }
-    if (!window._popupRestoreFns) window._popupRestoreFns = {};
-    window._popupRestoreFns[opts.stackKey] = function(){ _squareShowListPopup(opts); };
   }
+
+  _aaaListSubScreen({
+    stackKey: opts.stackKey,
+    title: opts.title,
+    subtitle: opts.subtitle,
+    icon: opts.icon,
+    flavor: opts.flavor,
+    npcInfo: opts.npcInfo,
+    sectionLabel: opts.sectionLabel,
+    items: opts.items || [],
+    onPick: opts.onPick,
+    theme: theme
+  });
 }
 
 // === 1. INVESTIGAR — lista de NPCs aleatórios usando infra compartilhada ===
