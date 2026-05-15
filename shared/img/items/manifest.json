@@ -2753,6 +2753,90 @@
       "cost": 0.004860000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "runa-de-gelo": {
+      "timestamp": "2026-05-15T23:51:28.629399",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-cura": {
+      "timestamp": "2026-05-15T23:51:36.855754",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-fortuna": {
+      "timestamp": "2026-05-15T23:51:51.943326",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-trovao": {
+      "timestamp": "2026-05-15T23:52:04.500404",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-absorcao": {
+      "timestamp": "2026-05-15T23:52:16.214418",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-devastacao": {
+      "timestamp": "2026-05-15T23:52:27.868695",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-runico-menor": {
+      "timestamp": "2026-05-15T23:52:45.384069",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-runico-maior": {
+      "timestamp": "2026-05-15T23:52:55.807544",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-runico-ancestral": {
+      "timestamp": "2026-05-15T23:53:11.508007",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "garras-do-lobo-selvagem": {
+      "timestamp": "2026-05-15T23:53:21.840869",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "gibao-do-lobo-selvagem": {
+      "timestamp": "2026-05-15T23:53:39.173840",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "botas-do-lobo-selvagem": {
+      "timestamp": "2026-05-15T23:53:49.677016",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "escudo-do-protetor-ancestral": {
+      "timestamp": "2026-05-15T23:54:04.424619",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "couraca-do-protetor-ancestral": {
+      "timestamp": "2026-05-15T23:54:15.347981",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
