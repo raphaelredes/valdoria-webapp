@@ -607,8 +607,8 @@
       "category": "weapon"
     },
     "grimorio-do-aprendiz": {
-      "timestamp": "2026-05-15T22:25:57.412874",
-      "cost": 0.004845,
+      "timestamp": "2026-05-15T23:05:37.234346",
+      "cost": 0.005005000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -1637,6 +1637,72 @@
       "cost": 0.0048400000000000006,
       "quality": "low",
       "category": "potion"
+    },
+    "frasco-de-acido": {
+      "timestamp": "2026-05-15T23:02:49.225453",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "agua-benta": {
+      "timestamp": "2026-05-15T23:03:03.308997",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "caixa-misteriosa": {
+      "timestamp": "2026-05-15T23:03:20.683733",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "antidoto-potente": {
+      "timestamp": "2026-05-15T23:03:27.800890",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "manto-surrado": {
+      "timestamp": "2026-05-15T23:03:42.149334",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "po-cegante": {
+      "timestamp": "2026-05-15T23:03:55.852411",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "elixir-de-vitalidade": {
+      "timestamp": "2026-05-15T23:04:21.197827",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "mapa-de-contrabandista": {
+      "timestamp": "2026-05-15T23:04:27.126346",
+      "cost": 0.004965000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-do-porao": {
+      "timestamp": "2026-05-15T23:04:33.584486",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "lamina-de-thorne": {
+      "timestamp": "2026-05-15T23:04:47.034545",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "bencao-de-vorenn": {
+      "timestamp": "2026-05-15T23:05:00.045878",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "sacred"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
