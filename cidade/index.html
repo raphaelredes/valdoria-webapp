@@ -11922,12 +11922,12 @@ function _checkDailyLogin(){
     streak = 1;     // Primeiro login
   }
 
-  // X-6.5.51BK (bugbot fix): defensive clamp. localStorage corrompido pode
-  // ter streak=0 e last_date=hoje (mesmo dia, claimed_today=false) → fluxo
-  // pula o increment e cai aqui com streak=0. (0-1) % 7 = -1 em JS (modulo
-  // preserva sinal, diferente de Python) → DAILY_REWARDS[-1] = undefined →
-  // crash na próxima linha. Clamp garante streak >= 1 sempre.
-  if (streak < 1) streak = 1;
+  // X-6.5.51BK (bugbot fix + revisão): coerção robusta. localStorage pode
+  // ter streak=0 (corrupted), NaN (após parseInt falho), ou string ("5"
+  // de dump antigo). `streak < 1` falha em NaN/string porque comparação
+  // NaN é sempre false. Math.floor garante int; `|| 1` cobre NaN/0;
+  // Math.max final garante >= 1 mesmo se negativo (-3 || 1 → -3).
+  streak = Math.max(1, Math.floor(Number(streak)) || 1);
   var dayInCycle = ((streak - 1) % 7);
   var reward = DAILY_REWARDS[dayInCycle];
   var multiplier = streak >= 8 ? 1.5 : 1.0;
@@ -12332,6 +12332,13 @@ function navigateBack(){
 function renderCurrentScreen(params){
   var contentEl = document.getElementById('content');
   if (!contentEl) return;
+  // X-6.5.51BK (revisão pós-bugbot): defesa em profundidade — limpa
+  // _questFocusLoc se a próxima tela NÃO é cartografia. Cobre navigateTo
+  // direto + qualquer caminho de troca de tela (não só navigateBack).
+  // O tick (_startQuestFocusTick) auto-encerra ao detectar !focusLoc.
+  if (_currentScreen !== 'cartografia' && window._questFocusLoc) {
+    window._questFocusLoc = null;
+  }
   if (_currentScreen === 'cartografia') {
     document.body.classList.add('state-cart');
     contentEl.innerHTML = '';
