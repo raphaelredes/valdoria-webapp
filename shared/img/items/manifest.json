@@ -1,0 +1,198 @@
+{
+  "generated": {
+    "carta-selada-real": {
+      "timestamp": "2026-05-15T21:18:42.690916",
+      "cost": 0.07149000000000001,
+      "quality": "medium",
+      "category": "scroll"
+    },
+    "escudo-do-bastiao": {
+      "timestamp": "2026-05-15T21:21:29.690093",
+      "cost": 0.005025000000000001,
+      "quality": "low",
+      "category": "legendary"
+    },
+    "pseudopode-preservado": {
+      "timestamp": "2026-05-15T21:14:33.333284",
+      "cost": 0.07108500000000001,
+      "quality": "medium",
+      "category": "magical"
+    },
+    "raizes-silvestres": {
+      "timestamp": "2026-05-15T21:29:57.198761",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "frutos-silvestres": {
+      "timestamp": "2026-05-15T21:30:32.415452",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "cogumelos-selvagens": {
+      "timestamp": "2026-05-15T21:31:09.826627",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "ervas-medicinais": {
+      "timestamp": "2026-05-15T21:31:46.080271",
+      "cost": 0.004855000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "pele-de-lobo": {
+      "timestamp": "2026-05-15T21:32:26.510384",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "presa-de-lobo": {
+      "timestamp": "2026-05-15T21:32:56.399293",
+      "cost": 0.004855000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "cauda-de-rato": {
+      "timestamp": "2026-05-15T21:33:33.121520",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "dente-de-rato": {
+      "timestamp": "2026-05-15T21:34:06.006154",
+      "cost": 0.004880000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "seda-de-aranha": {
+      "timestamp": "2026-05-15T21:35:45.397693",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "glandula-de-veneno": {
+      "timestamp": "2026-05-15T21:36:19.561775",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "orelha-de-goblin": {
+      "timestamp": "2026-05-15T21:36:59.189754",
+      "cost": 0.0048850000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "osso": {
+      "timestamp": "2026-05-15T21:37:28.675416",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "cranio-rachado": {
+      "timestamp": "2026-05-15T21:38:01.782171",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "pele-de-urso": {
+      "timestamp": "2026-05-15T21:38:32.586985",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "garra-de-urso": {
+      "timestamp": "2026-05-15T21:39:03.803960",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "esporo-violeta": {
+      "timestamp": "2026-05-15T21:39:34.818708",
+      "cost": 0.004880000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "residuo-acido": {
+      "timestamp": "2026-05-15T21:40:06.796160",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "carne-podre": {
+      "timestamp": "2026-05-15T21:40:42.208502",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "carne-de-carnical": {
+      "timestamp": "2026-05-15T21:41:12.525988",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "couro-de-javali": {
+      "timestamp": "2026-05-15T21:41:46.188411",
+      "cost": 0.004870000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "presa-de-javali": {
+      "timestamp": "2026-05-15T21:42:20.124580",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "proboscide": {
+      "timestamp": "2026-05-15T21:42:53.684886",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "pena-de-urso-coruja": {
+      "timestamp": "2026-05-15T21:43:26.779871",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "bico-de-urso-coruja": {
+      "timestamp": "2026-05-15T21:43:57.354473",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "garra-grande": {
+      "timestamp": "2026-05-15T21:44:27.687013",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "escama-de-kobold": {
+      "timestamp": "2026-05-15T21:44:56.587407",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "vela": {
+      "timestamp": "2026-05-15T21:45:26.514047",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "dente-de-gnoll": {
+      "timestamp": "2026-05-15T21:45:58.198344",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "lanca-quebrada": {
+      "timestamp": "2026-05-15T21:46:28.422801",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "tool"
+    }
+  },
+  "last_run": "2026-05-15T21:21:29.691346",
+  "total_cost": 0.7813900000000001
+}
