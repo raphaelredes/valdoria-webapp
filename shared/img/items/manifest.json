@@ -1217,6 +1217,90 @@
       "cost": 0.0048200000000000005,
       "quality": "low",
       "category": "weapon"
+    },
+    "topazio": {
+      "timestamp": "2026-05-15T22:47:55.054108",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "po-de-diamante": {
+      "timestamp": "2026-05-15T22:47:56.613575",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "lingote-de-ferro": {
+      "timestamp": "2026-05-15T22:48:05.940485",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "lingote-de-prata": {
+      "timestamp": "2026-05-15T22:48:16.240722",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "lingote-de-ouro": {
+      "timestamp": "2026-05-15T22:48:28.029485",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "default"
+    },
+    "lingote-de-mithral": {
+      "timestamp": "2026-05-15T22:48:42.969577",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "carvao": {
+      "timestamp": "2026-05-15T22:48:55.409039",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "engrenagem": {
+      "timestamp": "2026-05-15T22:49:11.078402",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "madeira-de-lei": {
+      "timestamp": "2026-05-15T22:49:19.493880",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "corda-de-linho": {
+      "timestamp": "2026-05-15T22:49:36.349863",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "couro-curtido": {
+      "timestamp": "2026-05-15T22:49:47.970588",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "cristal-bruto": {
+      "timestamp": "2026-05-15T22:50:00.865944",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "erva-curativa": {
+      "timestamp": "2026-05-15T22:50:19.100682",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "cogumelo-silvestre": {
+      "timestamp": "2026-05-15T22:50:27.058907",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "food"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
