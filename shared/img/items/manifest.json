@@ -1043,6 +1043,96 @@
       "cost": 0.004835000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "varinha-de-mago-de-guerra-+1": {
+      "timestamp": "2026-05-15T22:41:34.750732",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "orbe-arcano-+1": {
+      "timestamp": "2026-05-15T22:41:39.830457",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tomo-sombrio": {
+      "timestamp": "2026-05-15T22:41:51.033315",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "simbolo-sagrado-+1": {
+      "timestamp": "2026-05-15T22:42:04.162330",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "foco-druidico-+1": {
+      "timestamp": "2026-05-15T22:42:17.675293",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "escudo-de-aco-+1": {
+      "timestamp": "2026-05-15T22:42:28.108315",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-de-aco-+2": {
+      "timestamp": "2026-05-15T22:42:40.699943",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "elmo-de-protecao-+1": {
+      "timestamp": "2026-05-15T22:42:50.680428",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "elmo-anao": {
+      "timestamp": "2026-05-15T22:43:06.118647",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "manoplas-de-mithral": {
+      "timestamp": "2026-05-15T22:43:21.508178",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "legendary"
+    },
+    "grevas-de-mithral": {
+      "timestamp": "2026-05-15T22:43:33.251774",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "legendary"
+    },
+    "ombreiras-encantadas": {
+      "timestamp": "2026-05-15T22:43:45.030727",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "espada-enferrujada": {
+      "timestamp": "2026-05-15T22:43:55.942993",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-rachado": {
+      "timestamp": "2026-05-15T22:44:07.094403",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-quebrado": {
+      "timestamp": "2026-05-15T22:44:23.575419",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
