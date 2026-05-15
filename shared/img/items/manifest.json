@@ -1385,6 +1385,90 @@
       "cost": 0.004890000000000001,
       "quality": "low",
       "category": "potion"
+    },
+    "esferas-de-aco": {
+      "timestamp": "2026-05-15T22:53:41.198310",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "carne-crua": {
+      "timestamp": "2026-05-15T22:54:09.004968",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "brinquedo-mecanico": {
+      "timestamp": "2026-05-15T22:54:10.056208",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "mel-silvestre": {
+      "timestamp": "2026-05-15T22:54:25.101087",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "pao-fresco": {
+      "timestamp": "2026-05-15T22:54:34.678185",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "carne-seca": {
+      "timestamp": "2026-05-15T22:54:48.836483",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "refeicao-completa": {
+      "timestamp": "2026-05-15T22:55:05.150883",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "hidromel-fortificado": {
+      "timestamp": "2026-05-15T22:55:13.865857",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-estranha": {
+      "timestamp": "2026-05-15T22:55:29.223367",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-cura": {
+      "timestamp": "2026-05-15T22:55:39.431018",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pedra-de-afiar": {
+      "timestamp": "2026-05-15T22:55:52.905938",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "kit-de-reparo": {
+      "timestamp": "2026-05-15T22:56:07.040849",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "gazua-mestra": {
+      "timestamp": "2026-05-15T22:56:18.569453",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "corda-de-escalada": {
+      "timestamp": "2026-05-15T22:56:30.386283",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "tool"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
