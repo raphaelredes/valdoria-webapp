@@ -15,8 +15,8 @@
 #
 # When multiple rules match the same path, headers concatenate; most-
 # restrictive directive wins. Examples:
-#   /shared/_bundle-hash.js matches both /shared/*.js (immutable) AND
-#   /shared/_bundle-hash.js (no-cache, must-revalidate). Concatenated:
+#   /shared/bundle-version.js matches both /shared/*.js (immutable) AND
+#   /shared/bundle-version.js (no-cache, must-revalidate). Concatenated:
 #   "public, max-age=..., immutable, no-cache, must-revalidate".
 #   Browser: no-cache wins → always revalidates. CORRECT.
 #
@@ -65,7 +65,7 @@
 # Browser caches forever; HTMLs reference these as foo.js?v=<bundle-hash>.
 # When any Bucket B file changes, bundle hash regenerates, query string
 # rotates, URL key changes, cache miss forces re-download.
-# /shared/_bundle-hash.js exact rule below adds no-cache (concatenates;
+# /shared/bundle-version.js exact rule below adds no-cache (concatenates;
 # no-cache wins over immutable).
 # =======================================================================
 /shared/*.js
@@ -108,7 +108,7 @@
 # concat its `immutable` directive — CF Pages dedups Cache-Control and
 # strips `no-cache` when `immutable` is also present in the merged value.
 # Verified via curl + browser Performance API (2026-05-15).
-/_bundle-hash.js
+/bundle-version.js
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
 
