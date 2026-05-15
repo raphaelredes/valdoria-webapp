@@ -1829,6 +1829,90 @@
       "cost": 0.004875000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "manto-do-crepusculo": {
+      "timestamp": "2026-05-15T23:18:05.403089",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "orbe-do-abismo": {
+      "timestamp": "2026-05-15T23:18:17.991356",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "coroa-primordial": {
+      "timestamp": "2026-05-15T23:18:30.413629",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lagrima-cristalina": {
+      "timestamp": "2026-05-15T23:18:41.782379",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "contrato-da-guilda": {
+      "timestamp": "2026-05-15T23:19:00.065371",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "partitura-cifrada": {
+      "timestamp": "2026-05-15T23:19:14.052836",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-do-batedor": {
+      "timestamp": "2026-05-15T23:19:25.269261",
+      "cost": 0.004940000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "anotacoes-do-sonambulo": {
+      "timestamp": "2026-05-15T23:19:40.688852",
+      "cost": 0.004910000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-do-artista": {
+      "timestamp": "2026-05-15T23:19:58.067058",
+      "cost": 0.004940000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "bencao-da-compaixao": {
+      "timestamp": "2026-05-15T23:20:01.790766",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "reliquia-da-torre": {
+      "timestamp": "2026-05-15T23:20:14.688499",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "reliquia-musical": {
+      "timestamp": "2026-05-15T23:20:26.696442",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "insignia-de-reconhecimento": {
+      "timestamp": "2026-05-15T23:20:40.402274",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "artefato-do-vale": {
+      "timestamp": "2026-05-15T23:20:52.639185",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
