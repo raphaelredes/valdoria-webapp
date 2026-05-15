@@ -11617,7 +11617,11 @@ function _showKillsPopup(p){
     +   '<div style="position:relative;display:inline-block;">'
     +     '<div class="vKl-orbit-ring"></div>'
     +     '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
-    +       '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
+    /* X-6.5.51BL (2026-05-14): data-src removido até PNG ser criado.
+       JS de heuristic-load (~11700) skipa silenciosamente quando sem
+       data-src; SVG fallback (#ic-ach-algoz) continua mostrando.
+       Restaurar atributo quando hall-cacada-trophy.png for adicionado. */
+    +       '<div class="vKl-hero-png"></div>'
     +       '<svg class="vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
     +     '</div>'
     /* Embers floating up around the pedestal */
