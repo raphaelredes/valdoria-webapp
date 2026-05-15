@@ -1997,6 +1997,90 @@
       "cost": 0.004790000000000001,
       "quality": "low",
       "category": "food"
+    },
+    "corda-ignifuga": {
+      "timestamp": "2026-05-15T23:24:04.263753",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "tool"
+    },
+    "oleo-de-resist.-a-lava": {
+      "timestamp": "2026-05-15T23:24:23.799098",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "balsamo-de-cura": {
+      "timestamp": "2026-05-15T23:24:34.070500",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cerveja-negra-de-korthag": {
+      "timestamp": "2026-05-15T23:24:46.163926",
+      "cost": 0.005185,
+      "quality": "low",
+      "category": "potion"
+    },
+    "grogue-do-mineiro": {
+      "timestamp": "2026-05-15T23:24:58.766992",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "hidromel-de-pedra": {
+      "timestamp": "2026-05-15T23:25:17.447340",
+      "cost": 0.005065000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pergaminho-de-luz": {
+      "timestamp": "2026-05-15T23:25:35.264757",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-toque-gelado": {
+      "timestamp": "2026-05-15T23:25:40.274026",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-chama-sagrada": {
+      "timestamp": "2026-05-15T23:25:54.416250",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-prestidigitacao": {
+      "timestamp": "2026-05-15T23:26:08.108609",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-misseis-magicos": {
+      "timestamp": "2026-05-15T23:26:20.418404",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-curar-ferimentos": {
+      "timestamp": "2026-05-15T23:26:32.594426",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-escudo": {
+      "timestamp": "2026-05-15T23:26:42.908259",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-detectar-magia": {
+      "timestamp": "2026-05-15T23:26:59.850740",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
