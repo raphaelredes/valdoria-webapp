@@ -575,6 +575,66 @@
       "cost": 0.004815000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "cimitarra": {
+      "timestamp": "2026-05-15T22:23:37.848436",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-longa": {
+      "timestamp": "2026-05-15T22:24:08.993088",
+      "cost": 0.004950000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "martelo-de-guerra": {
+      "timestamp": "2026-05-15T22:24:51.108295",
+      "cost": 0.004935000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "foice": {
+      "timestamp": "2026-05-15T22:25:49.215575",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "besta-leve": {
+      "timestamp": "2026-05-15T22:25:50.417133",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "grimorio-do-aprendiz": {
+      "timestamp": "2026-05-15T22:25:57.412874",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tomo-de-conhecimento": {
+      "timestamp": "2026-05-15T22:26:01.457863",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "orbe-mistico": {
+      "timestamp": "2026-05-15T22:26:05.793451",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "elmo-de-couro": {
+      "timestamp": "2026-05-15T22:26:11.429508",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "capuz-de-tecido": {
+      "timestamp": "2026-05-15T22:26:17.099596",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "default"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
