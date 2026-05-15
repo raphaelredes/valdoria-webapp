@@ -33054,7 +33054,10 @@ var _weatherAmbient = {
   lastSfxVol: -1,     // último valor de SFX vol — pra detectar mudança e re-scale
   pollTimer: null     // timer que sincroniza com slider de SFX
 };
-var _AUDIO_BASE_URL = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
+// X-6.5.51BL (2026-05-14): URL relativa — funciona em DEV (dev.) e PROD
+// (jogo.) sem acoplar DEV à PROD. Audio é Tier A immutable em /shared/audio/
+// no mesmo CDN da página.
+var _AUDIO_BASE_URL = '/shared/audio/';
 var _AMBIENT_CROSSFADE_MS = 2500;  // 2.5s overlap — começa B antes de A acabar
 
 // 2026-04-27 USER FIX: ambient de chuva/tempestade/névoa agora é classificado
