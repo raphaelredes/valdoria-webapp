@@ -2081,6 +2081,90 @@
       "cost": 0.004835000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "pergaminho-de-imobilizar-pessoa": {
+      "timestamp": "2026-05-15T23:27:10.467727",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-invisibilidade": {
+      "timestamp": "2026-05-15T23:27:24.502688",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-raio-ardente": {
+      "timestamp": "2026-05-15T23:27:46.803054",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-restauracao-menor": {
+      "timestamp": "2026-05-15T23:27:53.599593",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-dissipar-magia": {
+      "timestamp": "2026-05-15T23:28:03.422401",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-revivificar": {
+      "timestamp": "2026-05-15T23:28:20.463689",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-relampago": {
+      "timestamp": "2026-05-15T23:28:35.777275",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "clava": {
+      "timestamp": "2026-05-15T23:28:41.241432",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "adaga": {
+      "timestamp": "2026-05-15T23:28:58.088467",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "maca": {
+      "timestamp": "2026-05-15T23:29:07.992242",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "bordao": {
+      "timestamp": "2026-05-15T23:29:19.153442",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "lanca": {
+      "timestamp": "2026-05-15T23:29:29.423147",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "martelo-leve": {
+      "timestamp": "2026-05-15T23:29:45.492542",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machadinha": {
+      "timestamp": "2026-05-15T23:29:57.894730",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
