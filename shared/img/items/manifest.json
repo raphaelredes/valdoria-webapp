@@ -191,6 +191,198 @@
       "cost": 0.004895000000000001,
       "quality": "low",
       "category": "tool"
+    },
+    "machado-de-pedra": {
+      "timestamp": "2026-05-15T21:46:58.862217",
+      "cost": 0.0049250000000000006,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "colar-de-dentes": {
+      "timestamp": "2026-05-15T21:47:33.101011",
+      "cost": 0.004900000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "machado-de-batalha-lascado": {
+      "timestamp": "2026-05-15T21:48:07.923950",
+      "cost": 0.004950000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "adaga-de-arremesso": {
+      "timestamp": "2026-05-15T21:48:39.856006",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pagina-de-ritual": {
+      "timestamp": "2026-05-15T21:49:15.144801",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "adaga-cerimonial": {
+      "timestamp": "2026-05-15T21:49:52.704014",
+      "cost": 0.004935000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "insignia-militar": {
+      "timestamp": "2026-05-15T21:50:26.485124",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "espada-longa-velha": {
+      "timestamp": "2026-05-15T21:50:57.349901",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "flecha-quebrada": {
+      "timestamp": "2026-05-15T21:51:27.447878",
+      "cost": 0.005105000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "tecido-rasgado": {
+      "timestamp": "2026-05-15T21:51:58.712673",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "tool"
+    },
+    "garras-fetidas": {
+      "timestamp": "2026-05-15T21:52:29.957071",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "ectoplasma-escuro": {
+      "timestamp": "2026-05-15T21:53:05.415713",
+      "cost": 0.004855000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "gravetos-secos": {
+      "timestamp": "2026-05-15T21:53:38.745960",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "seiva-pegajosa": {
+      "timestamp": "2026-05-15T21:54:08.936507",
+      "cost": 0.0048850000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "cogumelo-comestivel": {
+      "timestamp": "2026-05-15T21:54:41.533936",
+      "cost": 0.004910000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "pedra-polida": {
+      "timestamp": "2026-05-15T21:55:16.609377",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "clava-gigante": {
+      "timestamp": "2026-05-15T21:55:49.114384",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "dente-de-ogro": {
+      "timestamp": "2026-05-15T21:56:18.740676",
+      "cost": 0.0049050000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "saco-de-ouro-roubado": {
+      "timestamp": "2026-05-15T21:56:54.160021",
+      "cost": 0.0048850000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "bolsa-de-moedas-falsa": {
+      "timestamp": "2026-05-15T21:57:27.207754",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "bandana-suja": {
+      "timestamp": "2026-05-15T21:57:59.260367",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "tool"
+    },
+    "chave-antiga": {
+      "timestamp": "2026-05-15T21:58:32.258794",
+      "cost": 0.004900000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "mapa-da-masmorra": {
+      "timestamp": "2026-05-15T21:59:10.172432",
+      "cost": 0.005085000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-de-valdoria": {
+      "timestamp": "2026-05-15T21:59:51.458704",
+      "cost": 0.005085000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "fragmento-do-mapa": {
+      "timestamp": "2026-05-15T22:00:27.928165",
+      "cost": 0.005090000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-rabiscado": {
+      "timestamp": "2026-05-15T22:01:03.131979",
+      "cost": 0.005095000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "pergaminho-do-viajante": {
+      "timestamp": "2026-05-15T22:01:38.577592",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "amuleto-do-lobo": {
+      "timestamp": "2026-05-15T22:02:11.455853",
+      "cost": 0.004900000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "mapa-da-floresta": {
+      "timestamp": "2026-05-15T22:02:56.862820",
+      "cost": 0.005120000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-das-montanhas": {
+      "timestamp": "2026-05-15T22:03:33.175923",
+      "cost": 0.005115000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-do-pantano": {
+      "timestamp": "2026-05-15T22:04:08.726529",
+      "cost": 0.005115000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-do-deserto": {
+      "timestamp": "2026-05-15T22:04:46.554271",
+      "cost": 0.005105000000000001,
+      "quality": "low",
+      "category": "scroll"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
