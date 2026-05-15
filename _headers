@@ -102,10 +102,13 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
-# Bundle hash script — adds no-cache so a deploy that bumps the hash
-# reaches every player on next visit. no-cache wins over immutable via
-# concatenation precedence (no-cache is more restrictive per RFC 9111).
-/shared/_bundle-hash.js
+# Bundle hash script — MUST revalidate on every visit so a deploy that
+# bumps the hash reaches every player immediately. Lives at root path
+# (NOT inside /shared/) so the /shared/*.js wildcard above doesn't
+# concat its `immutable` directive — CF Pages dedups Cache-Control and
+# strips `no-cache` when `immutable` is also present in the merged value.
+# Verified via curl + browser Performance API (2026-05-15).
+/_bundle-hash.js
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
 

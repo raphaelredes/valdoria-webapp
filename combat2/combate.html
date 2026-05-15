@@ -478,7 +478,7 @@ html.sim-combat-root #app {
      window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
      browser cache (CF Pages serves /shared/*.{js,css} as immutable). Must
      load before any `var v = Date.now()` in the boot scripts below. -->
-<script src="/shared/_bundle-hash.js"></script>
+<script src="/_bundle-hash.js"></script>
 <script>
 /* X-6.5.51AG (2026-05-07): COMBAT NEEDS FULL MOTION — bypass prefers-reduced-motion.
    ════════════════════════════════════════════════════════════════════════════════
@@ -539,7 +539,7 @@ html.sim-combat-root #app {
     setTimeout(function(){ clearInterval(_waitVM); }, 5000);
 })();
 
-// Stable bundle hash when /shared/_bundle-hash.js loaded (Tiered Cache);
+// Stable bundle hash when /_bundle-hash.js loaded (Tiered Cache);
 // falls back to Date.now() if not yet defined.
 var v = (window.VBUNDLE_HASH || Date.now());
 var BASE = 'https://jogo.lendasdevaldoria.com.br';

@@ -28,7 +28,7 @@
     <!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
          window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
          browser cache (CF Pages serves /shared/*.{js,css} as immutable). -->
-    <script src="../shared/_bundle-hash.js"></script>
+    <script src="../_bundle-hash.js"></script>
     <script>
         // Tiered Cache: stable bundle hash for Bucket B asset query strings
         var v = (window.VBUNDLE_HASH || Date.now());
