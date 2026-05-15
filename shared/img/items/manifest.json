@@ -2501,6 +2501,90 @@
       "cost": 0.004780000000000001,
       "quality": "low",
       "category": "default"
+    },
+    "dente-de-mimic": {
+      "timestamp": "2026-05-15T23:42:21.018432",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "essencia-espectral": {
+      "timestamp": "2026-05-15T23:42:34.138628",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "garra-de-carnical": {
+      "timestamp": "2026-05-15T23:42:45.331568",
+      "cost": 0.004710000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "po-de-fogo-fatuo": {
+      "timestamp": "2026-05-15T23:42:59.790794",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lamina-tumular": {
+      "timestamp": "2026-05-15T23:43:15.060192",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "cursed"
+    },
+    "bandagem-de-mumia": {
+      "timestamp": "2026-05-15T23:43:25.853987",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "magical"
+    },
+    "joia-funeraria": {
+      "timestamp": "2026-05-15T23:43:38.727475",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "grito-cristalizado": {
+      "timestamp": "2026-05-15T23:43:50.496519",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "bico-de-axe-beak": {
+      "timestamp": "2026-05-15T23:44:01.333438",
+      "cost": 0.004700000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "pena-de-cocatrice": {
+      "timestamp": "2026-05-15T23:44:15.275831",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pena-de-hipogrifo": {
+      "timestamp": "2026-05-15T23:44:27.064613",
+      "cost": 0.004685000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "juba-de-leao": {
+      "timestamp": "2026-05-15T23:44:45.578061",
+      "cost": 0.004680000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "acido-de-anqueque": {
+      "timestamp": "2026-05-15T23:44:55.935843",
+      "cost": 0.004685000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "carapaca-de-anqueque": {
+      "timestamp": "2026-05-15T23:45:08.318222",
+      "cost": 0.004690000000000001,
+      "quality": "low",
+      "category": "default"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
