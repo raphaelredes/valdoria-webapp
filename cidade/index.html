@@ -11922,6 +11922,12 @@ function _checkDailyLogin(){
     streak = 1;     // Primeiro login
   }
 
+  // X-6.5.51BK (bugbot fix): defensive clamp. localStorage corrompido pode
+  // ter streak=0 e last_date=hoje (mesmo dia, claimed_today=false) → fluxo
+  // pula o increment e cai aqui com streak=0. (0-1) % 7 = -1 em JS (modulo
+  // preserva sinal, diferente de Python) → DAILY_REWARDS[-1] = undefined →
+  // crash na próxima linha. Clamp garante streak >= 1 sempre.
+  if (streak < 1) streak = 1;
   var dayInCycle = ((streak - 1) % 7);
   var reward = DAILY_REWARDS[dayInCycle];
   var multiplier = streak >= 8 ? 1.5 : 1.0;
@@ -12106,11 +12112,11 @@ function _showDailyLoginPopup(info){
 
   // Handler do claim
   document.getElementById('vDl-claim').addEventListener('click', function(){
-    // Persist no localStorage
-    var today = _todayIso();
-    var data = _dailyLoginData();
+    // X-6.5.51BK (bugbot fix): removida var data = _dailyLoginData() dead
+    // store. Os valores que importam (streak, max_streak) já vêm do closure
+    // `info` (computado por _checkDailyLogin antes do popup abrir).
     _saveDailyLogin({
-      last_date: today,
+      last_date: _todayIso(),
       streak: info.streak,
       max_streak: info.max_streak,
       claimed_today: true
@@ -12281,6 +12287,14 @@ function navigateTo(screen, params){
   _playAudioForScreen(screen);
 }
 function navigateBack(){
+  // X-6.5.51BK (bugbot fix): se vamos sair da cartografia, limpar
+  // window._questFocusLoc — o tick (_startQuestFocusTick) só para quando
+  // _questFocusLoc fica falsy. Sem essa limpeza, setInterval(120ms) corre
+  // pra sempre depois que player sai do mapa, chamando _drawCart() ~8x/s
+  // até reload. Bug pré-existente do consumer adicionado em X-6.5.51BJ.
+  if (_currentScreen === 'cartografia' && _popupStack.length === 0 && window._questFocusLoc) {
+    window._questFocusLoc = null;
+  }
   // Se popup aberto, fecha o topo (drill-down)
   if (_popupStack.length > 0) {
     var poppedKey = _popupStack.pop();
