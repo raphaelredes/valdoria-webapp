@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-10T18:58:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-15T01:32:58Z — do not edit directly, edit source -->
 
 
 <!--
@@ -76,16 +76,17 @@
   - valdoria-webapp/shared/dice-3d.js       window.Dice3D — 3D dice renderer
                                              (depende de THREE.js carregado antes)
   - https://cdn.jsdelivr.net/npm/three@0.160 THREE.js — dependencia do dice-3d
-  - valdoria-webapp/shared/fonts.css        Marcellus + Cinzel + outras (X-6.5.51AT)
+  - valdoria-webapp/shared/fonts.css        MedievalSharp + Cinzel
   - valdoria-webapp/shared/status-bars.css  Classes .fill-hp-high/mid/low
   - valdoria-webapp/shared/animations.css   Animacoes comuns
   - valdoria-webapp/combat/*.css            CSS do combate legado (19 arquivos)
                                              combat-battlefield, combat-turn-queue,
                                              combat-grid, combat-init-overlay, etc.
 
-  LEGADO DE COMBATE (preservado para referencia, nao mais usado):
-  - src/game/combat_legacy_backup/      78 arquivos Python backup do combat/
-  - valdoria-webapp/combat_legacy_backup/ 35 arquivos JS/CSS backup
+  LEGADO DE COMBATE (arquivado em quarentena 2026-05-08 — nao importar):
+  - _archive/combat_old/python_legacy_backup/      80 arquivos Python
+  - valdoria-webapp/_archive_combat_old/webapp_legacy_backup/ 35 arquivos JS/CSS
+  - _archive/combat_old/docs/                      8 docs (combate.md, combat-ai.md, etc.)
   - git tag: backup/combat-pre-rewrite-2026-04-14
 
   DOCS DO PROJETO:
@@ -157,7 +158,12 @@
          de skills por MP/BA/PHB p.202/requiresBuff/combatOnceUsed; substitui popups por UI disable)
   ~7821  _buildSkillListHtml (paginação: page + pageSize); 7882 _bindSkillListListeners
   ~7901  openSkillsPanel (dropdown filtros + paginação + _actionTaken reset no fechar)
-  ~8180+ openBagPanel, useItem
+  ~8180+ openBagPanel (delegate ao vInventory canonical desde 2026-05-14), useItem
+         └─ adapter combat → vInventory: _vinvCombatBuildConfig ~21075
+         └─ schema bag → schema canonical: _vinvCombatAdaptBagItem ~21055
+         └─ shared module imports: ~8981 (inventory-screen.{css,js} + sprite)
+         └─ inCombat:true ativa cost badges D&D 5e (PHB p.139/144/190)
+         └─ doc canonical: docs/sistemas/inventory-canonical.md
   ~8380+ Fuga (openFleeInfoOverlay/attemptFlee + _actionTaken reset no Desistir)
   ~8508  showHealTargetConfirm (aceita healSpell OU blessSpell/shieldSpell com targetAlly)
   ~8583  ensureCombatVfxRuntime
@@ -388,8 +394,8 @@
     }
   } catch (_) { /* fallback silencioso */ }
 </script>
-<!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
-<script src="/shared/auth-gate.js"></script>
+<!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
+<script src="../valdoria-webapp/shared/auth-gate.js"></script>
 
 <script>
 /* 2026-04-27 USER RULE: "o mesmo precisa acontecer para combate.html, nunca
@@ -460,66 +466,12 @@ html.sim-combat-root > body {
   padding: 0 !important;
   overflow: hidden !important;
 }
-/* X-6.5.51AX (2026-05-08): #app FIXADO no tamanho exato do Telegram Desktop
-   WebApp — 384x694 default; 480x100dvh em touch (--sim-frame-w/h tokens).
-   Antes era 100%/100% (depende da cadeia html→body, frágil); agora explícito. */
+/* X-6.5.50: #app override pra largura do simulator (era hardcoded 430px). */
 html.sim-combat-root #app {
-  width: var(--sim-frame-w) !important;
-  height: var(--sim-frame-h) !important;
-  max-width: var(--sim-frame-w) !important;
-  max-height: var(--sim-frame-h) !important;
-  margin: 0 auto !important;
-}
-/* X-6.5.51AS (2026-05-08): title-screen + loading-overlay DEVEM respeitar o
-   frame do simulador (384x694 default; 480x100dvh em touch). Loading-title.css
-   e loading.css usam position:fixed+inset:0 → escapam pra viewport do browser
-   inteiro quando viewport > frame. Override pra position:absolute (ancora em
-   body, que é position:relative + sim-frame size). Cobertura: #title-screen,
-   .title-screen, #loading, .loading-overlay, #processing-overlay, .v-popup. */
-html.sim-combat-root .title-screen,
-html.sim-combat-root #title-screen,
-html.sim-combat-root .loading-overlay,
-html.sim-combat-root #loading,
-html.sim-combat-root #processing-overlay,
-html.sim-combat-root .processing-overlay {
-  position: absolute !important;
-  inset: 0 !important;
   max-width: 100% !important;
   max-height: 100% !important;
   width: 100% !important;
   height: 100% !important;
-  margin: 0 !important;
-}
-
-/* X-6.5.51AV (2026-05-08): TODOS os overlays/popups/sheets do combate DEVEM
-   respeitar o frame 384x694 (Telegram Desktop) ou 480x100dvh (touch).
-   Usa max-width/max-height = sim-frame-w/h + left/right:0 + margin:auto pra
-   centralizar dentro do viewport, alinhado com html (que também usa margin:0 auto).
-   Funciona pra elementos appended em body, #app, ou qualquer ancestor. */
-html.sim-combat-root .v8-cond-popup-overlay,
-html.sim-combat-root .end-turn-confirm-overlay,
-html.sim-combat-root .mm-confirm-overlay,
-html.sim-combat-root .sim-action-backdrop {
-  position: fixed !important;
-  top: 0 !important;
-  bottom: auto !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  max-width: var(--sim-frame-w) !important;
-  height: 100% !important;
-  max-height: var(--sim-frame-h) !important;
-  margin: 0 auto !important;
-}
-/* Action sheet e dock — full-width controls fixados no bottom. Constrange
-   também à largura do frame (em viewport > frame iam invadir espaço fora). */
-html.sim-combat-root .sim-action-sheet,
-html.sim-combat-root .sim-action-dock {
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  max-width: var(--sim-frame-w) !important;
-  margin: 0 auto !important;
 }
 </style>
 <script>
@@ -596,30 +548,30 @@ function loadCSS(href) {
 document.write('<script src="' + BASE + '/shared/server-log.js?v=' + v + '"><\/script>');
 window.SERVER_LOG_AREA = 'combate';
 /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
-   window.fetch pra detectar maintenance em qualquer response. */
+   window.fetch pra detectar maintenance em qualquer response do servidor.
+   Pattern canonical do cidade.html — necessário pra sync_combate passar
+   no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
-(function(){
+setTimeout(function(){
     try{
+        if(!window.vMaintenance)return;
         var url=new URL(window.location.href);
         var apiBase=(url.searchParams.get('api')||'').replace(/\/$/,'');
         if(!apiBase)return;
         window._VALDORIA_API_BASE=apiBase;
-        setTimeout(function(){
-            if(!window.vMaintenance)return;
-            var ctrl=new AbortController();
-            var tid=setTimeout(function(){ctrl.abort();},5000);
-            fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
-                .then(function(r){clearTimeout(tid);return r.json();})
-                .then(function(data){
-                    if(data&&data.maintenance&&data.maintenance.active){
-                        console.warn('[MAINT] combate proactive guard detected maintenance');
-                        window.vMaintenance.show(data.maintenance);
-                    }
-                })
-                .catch(function(){clearTimeout(tid);});
-        },100);
+        var ctrl=new AbortController();
+        var tid=setTimeout(function(){ctrl.abort();},5000);
+        fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
+            .then(function(r){clearTimeout(tid);return r.json();})
+            .then(function(data){
+                if(data&&data.maintenance&&data.maintenance.active){
+                    console.warn('[MAINT] combate proactive guard detected maintenance');
+                    window.vMaintenance.show(data.maintenance);
+                }
+            })
+            .catch(function(){clearTimeout(tid);});
     }catch(e){}
-})();
+},100);
 loadCSS('/shared/fonts.css');
 loadCSS('/valdoria-design.css');
 
@@ -754,74 +706,22 @@ loadCSS('/combat/combat-vfx.css');
 /* [COMBAT 2026-04-21] Overrides específicos do simulador de combate.
    =================================================================== */
 
-/* X-6.5.51AU revisado (2026-05-08): user pediu padronização — combate usa o
-   MESMO `va-float-btn` do audio-manager.js (idêntico a cidade/exploracao).
-   Click no botão flutuante abre `va-popup` (card com sliders Música + Efeitos).
-   Re-parent dos 3 elementos (va-float / va-popup / va-backdrop) pra dentro de
-   #app é feito via JS após audio-manager.js carregar (~linha 10440).
-   Tentativa anterior de criar #sim-vol-panel SEMPRE visível foi REMOVIDA. */
+/* 1. Botão de volume CUSTOM no simulador (V1.7 2026-04-21 — reescrita).
+      Audio-manager.js cria .va-float mas no simulador ele é inconsistente
+      (às vezes não aparece, às vezes fica atrás do turn-queue). Solução:
+      ocultamos .va-float e criamos #sim-vol-btn próprio que:
+        · Fica fixed no canto superior direito (top:10px right:10px)
+        · Z-index 9000 — acima de turn-queue (1) e arena, abaixo de popups (9999)
+        · Usa API ValdoriaAudio.toggleMute() + sincronização de ícone
+        · Click também dispara click no #va-btn invisível pra abrir popup de sliders */
+
+/* Esconde o .va-float padrão no simulador — botão custom abaixo substitui */
+.va-float, #va-float {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
 .va-footer-btn { z-index: 1500; }
-
-/* X-6.5.51AY (2026-05-08): .va-float fica em body (NÃO re-parented em #app —
-   render(state) faria setHTML(app) e apagaria o button). body em combate é
-   position:relative + 100% das dims de html (384x694) — então position:absolute
-   anchora .va-float no canto inferior direito do FRAME visual.
-
-   Histórico:
-   · X-6.5.51AU v1 (errado): re-parent em #app → render() apagava
-   · X-6.5.51AY (correto): mantém em body, CSS faz absolute relativo a body
-   · Mesmo princípio de cidade.html, mas adaptado ao body de combate.
-
-   X-6.5.51AZ (2026-05-08): button DEVE ser PERSISTENTE em TODAS as telas —
-   loading, mochila, popups, overlays, vitória, etc. Audio-manager.js tem regra
-   `.loading:not(.hidden) ~ .va-float { opacity: 0 }` que esconde o button —
-   override explícito abaixo força visible em todos os contextos. */
-html.sim-combat-root body > .va-float,
-html.sim-combat-root #app .va-float {
-  position: absolute !important;
-  bottom: 8px !important;
-  right: 8px !important;
-  left: auto !important;
-  top: auto !important;
-  margin: 0 !important;
-  width: auto !important;
-  max-width: 44px !important;
-  justify-content: flex-start !important;
-  transform: none !important;
-  z-index: 100000 !important;
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-/* Sobrescreve as regras do audio-manager que escondem .va-float durante loading/
-   overlay/outcome. No simulador, o button DEVE ficar visível em todas as telas. */
-html.sim-combat-root .loading:not(.hidden) ~ .va-float,
-html.sim-combat-root .dm-overlay.active ~ .va-float,
-html.sim-combat-root .outcome-overlay.active ~ .va-float,
-html.sim-combat-root .loading-overlay ~ .va-float,
-html.sim-combat-root #loading ~ .va-float,
-html.sim-combat-root .title-screen ~ .va-float {
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: flex !important;
-  pointer-events: none !important; /* wrapper pass-through; .va-float-btn dentro tem pointer-events:auto */
-}
-/* O button interno SEMPRE clicável, mesmo sob overlays */
-html.sim-combat-root .va-float-btn {
-  pointer-events: auto !important;
-}
-html.sim-combat-root body > .va-popup,
-html.sim-combat-root #app .va-popup {
-  /* va-popup permanece position:fixed mas o auto-positioner JS (X-6.5.51AA)
-     reposiciona em runtime. Backup: garante z-index acima das overlays. */
-  z-index: 99999 !important;
-}
-html.sim-combat-root body > .va-backdrop,
-html.sim-combat-root #app .va-backdrop {
-  position: absolute !important;
-  inset: 0 !important;
-  margin: 0 !important;
-}
 
 /* X-6.5.51v (2026-04-25): va-popup alinhado ao frame usando MESMO PATTERN das
    outras overlays do combate (dice-overlay, iop-overlay, initiative-order — bloco
@@ -859,10 +759,96 @@ html body .va-backdrop {
     inset: auto !important;
 }
 
-/* X-6.5.51AU revisado (2026-05-08): #sim-vol-panel REMOVIDO. Combate agora usa
-   o `va-float-btn` padrão do audio-manager.js (mesma UX de cidade/exploracao):
-   click no botão flutuante → abre `va-popup-card` com sliders. Posicionamento
-   do popup permanece via auto-positioner JS (X-6.5.51AA) usando #app rect. */
+/* Botão de volume custom do simulador — DENTRO do frame #app (smartphone 430px).
+   REGRA SOBERANA (2026-04-21): TUDO que é adicionado à tela do simulador DEVE
+   aparecer dentro do frame limitado do smartphone (#app max-width:430px).
+   NADA vai pro body em elemento persistente/visível — body fica restrito ao
+   side-panel "Voltar ao setup" que intencionalmente está FORA do frame.
+
+   Técnica: position:fixed + append em #app. Como #app tem transform:translateZ(0)
+   (linha 707), ele vira containing block pra fixed dos filhos — logo o fixed
+   ancora no frame #app (não na viewport). Isso é o mesmo truque que dice-overlay
+   e intro popup usam.
+
+   POSITION 2026-04-21 (feedback autor): movido de top-right pra bottom-right,
+   ao lado do botão Agir (.sim-action-dock está em bottom:0). z-index 99999 >
+   action-dock (92200) > action-sheet (92100) — garante que o botão SEMPRE
+   fica por cima e clicável. pointer-events:auto !important também reforça a
+   captura de clique (solução pro bug "não clicável no bot DEV"). */
+#sim-vol-btn {
+    position: fixed !important;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 14px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2e2520));
+    border: 1px solid var(--v-border, #4a3828);
+    color: var(--v-gold, #c4953a);
+    cursor: pointer;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    box-shadow:
+        0 2px 10px rgba(0,0,0,.55),
+        0 0 14px rgba(196,149,58,.18),
+        inset 0 1px 0 rgba(220,200,150,.08);
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, opacity .18s ease;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+#sim-vol-btn:hover {
+    border-color: rgba(196,149,58,.55);
+    box-shadow:
+        0 3px 14px rgba(0,0,0,.6),
+        0 0 20px rgba(196,149,58,.4),
+        inset 0 1px 0 rgba(240,220,170,.14);
+    color: #fff;
+    transform: scale(1.08);
+}
+#sim-vol-btn:active {
+    transform: scale(0.95);
+}
+#sim-vol-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 3px currentColor);
+}
+#sim-vol-btn.muted {
+    color: var(--v-text-dim, #a09484);
+    opacity: 0.6;
+    border-color: rgba(128, 116, 96, .35);
+    box-shadow: 0 2px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(120,110,95,.05);
+}
+#sim-vol-btn.muted:hover {
+    color: var(--v-text, #d4c8b0);
+    opacity: 0.85;
+}
+#sim-vol-btn.playing {
+    animation: simVolPulse 2.5s ease-in-out infinite;
+}
+@keyframes simVolPulse {
+    0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 14px rgba(196,149,58,.18), inset 0 1px 0 rgba(220,200,150,.08); }
+    50%      { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 22px rgba(196,149,58,.35), inset 0 1px 0 rgba(240,220,170,.14); }
+}
+/* Tela muito estreita: botão menor */
+@media (max-height: 600px) {
+    #sim-vol-btn { width: 34px; height: 34px; top: 8px; right: 8px; }
+    #sim-vol-btn svg { width: 16px; height: 16px; }
+}
 
 /* 2. Popup "Combate Iniciado" (showIntroChoicePopup) — Opção 3 aprovada:
       ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor ❦ +
@@ -1034,16 +1020,17 @@ html body .va-backdrop {
 /* Ícone skip-init — removido (design 3 é texto limpo) */
 #intro-choice-popup .epic-cta-btn[data-act="skip-init"] .epic-cta-icon { display: none !important; }
 
-/* USER RULE 2026-05-08: simulator DEVE ser limitado ao tamanho do Telegram
-   Desktop WebApp (384x694) — MENOR que smartphone (480x960). Browser desktop
-   simula o pior caso (Telegram Desktop popup). Touch devices (smartphone
-   real) recebem viewport maior via media query abaixo.
-
-   Dims oficiais Telegram Desktop popup (tdesktop botWebViewPanelSize 384x694):
-     https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style */
+/* 2026-05-13 LOCKED USER RULE: viewport canonical uniforme entre cidade,
+   exploracao e combate. NUNCA alterar — preflight check
+   `check_simulator_viewport_locked` bloqueia regressão.
+     --sim-frame-w: min(100vw, 480px) — cap em 480px (smartphone mais largo
+       atual: iPhone 17 Pro Max 440px / Galaxy S25 Ultra 412px + folga).
+     --sim-frame-h: 100dvh — altura real do viewport, sem cap.
+   User citou (2026-05-13): "garanta que nunca mais seja alterado esse formato
+   ... cidade, exploracao e combate funcionem da mesma forma". */
 :root {
-  --sim-frame-w: min(100vw, 384px);
-  --sim-frame-h: min(100vh, 694px);
+  --sim-frame-w: min(100vw, 480px);
+  --sim-frame-h: 100dvh;
   /* ==== Class color identity (heraldic cards V8 — ver card-icons-heraldic.html) ==== */
   --class-guerreiro: #b06040;   --class-guerreiro-dark: #5a2a18;
   --class-mago: #4080c0;        --class-mago-dark: #1a3a66;
@@ -1095,8 +1082,8 @@ html body .va-backdrop {
   font-size: var(--v-font-micro, 10px) !important;
 }
 @supports (height: 100dvh) {
-  /* USER RULE 2026-05-08: 100dvh capped 694px (Telegram Desktop popup) */
-  :root { --sim-frame-h: min(100dvh, 694px); }
+  /* 2026-05-12 USER REQUEST: removido cap 960px, prefere 100dvh real */
+  :root { --sim-frame-h: 100dvh; }
 }
 /* X-6.5.51o (2026-04-25): RESPONSIVO touch-aware.
    Default acima = 384x694 (Telegram Desktop minimum). É o que browser desktop
@@ -1141,11 +1128,10 @@ html.sim-combat-root body.sim-combat-layout::after {
   display: none !important;
 }
 html.sim-combat-root #app {
-  /* X-6.5.51AX (2026-05-08): dims fixadas em --sim-frame-w/h (ver bloco em ~462).
-     width/height/max-* removidos daqui pra não conflitar — flex/display/position
-     mantidos pra layout interno. */
   flex: 1 1 auto !important;
   min-height: 0 !important;
+  max-height: 100% !important;
+  width: 100% !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1338,7 +1324,7 @@ html.sim-prod .sim-side-panel { display: none !important; }
   border: 1px solid rgba(255, 204, 119, 0.5);
   background: rgba(0, 0, 0, 0.35);
   color: var(--v-gold, #c4953a);
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: var(--v-font-xs, 11px);
   font-weight: 600;
   text-decoration: none;
@@ -1394,7 +1380,7 @@ html.sim-prod .sim-side-panel { display: none !important; }
   max-width: 100% !important;
 }
 /* Acima do .sim-side-panel (9999), do #vfxCanvas e do #app — rolagens sempre visiveis */
-.dice-overlay { background: radial-gradient(ellipse at center, rgba(42,36,32,.92), rgba(15,12,8,.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 101000; padding: 20px; text-align: center; font-family: var(--v-font, 'Marcellus', serif); animation: diceOvIn .3s ease; }
+.dice-overlay { background: radial-gradient(ellipse at center, rgba(42,36,32,.92), rgba(15,12,8,.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 101000; padding: 20px; text-align: center; font-family: var(--v-font, 'MedievalSharp', serif); animation: diceOvIn .3s ease; }
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
 body.sim-paused-bg, body.sim-paused-bg * { animation-play-state: paused !important; }
 body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confirm-overlay * { animation-play-state: running !important; }
@@ -1424,7 +1410,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   padding: 8px 8px 10px;  /* reduz padding lateral (original 14px) pra dar mais room texto */
 }
 .dice-combat-arena-meta {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   letter-spacing: 0.06em;
@@ -1534,7 +1520,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   max-width: 100%;
 }
 .dice-overlay-subtitle {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-weight: 400;
   font-style: italic;
   font-size: 11px;
@@ -1562,7 +1548,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 /* Scene legado (sem uso após refator, mas mantido pra não quebrar overlays antigos) */
 .dice-init-cell-scene { display: none; }
 .dice-result-label.dmg-result-stack { max-width: min(100%, 360px); gap: var(--v-space-md, 10px); }
-.dmg-dice-summary { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-label, 12px); color: var(--v-text, #d4c8b0); text-align: center; line-height: 1.45; width: 100%; padding: var(--v-space-sm, 8px) var(--v-space-md, 10px); background: rgba(15,12,8,.6); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 8px); box-sizing: border-box; }
+.dmg-dice-summary { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-label, 12px); color: var(--v-text, #d4c8b0); text-align: center; line-height: 1.45; width: 100%; padding: var(--v-space-sm, 8px) var(--v-space-md, 10px); background: rgba(15,12,8,.6); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 8px); box-sizing: border-box; }
 .dmg-dice-summary.is-crit { border-color: rgba(224,96,64,.55); box-shadow: 0 0 14px rgba(224,96,64,.18); }
 .dmg-dice-summary .dmg-sum-line { margin: 2px 0; letter-spacing: 0.3px; }
 .dmg-dice-summary .dmg-sum-em { font-weight: 700; color: var(--v-gold, #c4953a); font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-body, 14px); }
@@ -1595,7 +1581,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-overlay-combatant.dmg-header-target-pop { animation: dtcPop .45s cubic-bezier(.34,1.56,.64,1); }
 .dice-result-label.visible { opacity: 1; animation: resultPop .35s ease; }
 .dice-result-label .drl-big { font-size: 16px; letter-spacing: 2.5px; line-height: 1.2; }
-.dice-result-label .drl-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); font-weight: 400; color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; line-height: 1.45; max-width: 320px; margin: 0 auto; text-align: center; word-wrap: break-word; }
+.dice-result-label .drl-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); font-weight: 400; color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; line-height: 1.45; max-width: 320px; margin: 0 auto; text-align: center; word-wrap: break-word; }
 /* Destaque de números nas linhas de rolagem (ataque vs CA, dano, cura, d20 solto) */
 .dice-result-label .drl-sub .drl-num,
 .dice-result-label.drl-rollup .drl-num { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 12px; color: var(--v-text, #d4c8b0); padding: 1px 6px; margin: 0 1px; border-radius: var(--v-radius-sm, 6px); background: rgba(15,12,8,.65); border: 1px solid rgba(196,149,58,.4); box-shadow: 0 0 8px rgba(196,149,58,.15); vertical-align: baseline; display: inline-block; line-height: 1.35; }
@@ -1699,7 +1685,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-result-label .drl-miss-strong { color: #c06a3a; font-weight: 700; font-size: var(--v-font-sm, 12px); }
 .dice-result-label .drl-eq-label { font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2px; text-transform: uppercase; margin-right: 4px; }
 .dice-result-label .drl-paren-mod { font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); }
-.dice-result-label.drl-rollup { font-family: var(--v-font, 'Marcellus'), serif; font-size: 12px; color: var(--v-text-dim, #a09484); letter-spacing: 0.5px; line-height: 1.5; max-width: 300px; text-align: center; }
+.dice-result-label.drl-rollup { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 12px; color: var(--v-text-dim, #a09484); letter-spacing: 0.5px; line-height: 1.5; max-width: 300px; text-align: center; }
 .dmg-dice-summary .drl-num { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 12px; padding: 0 5px; margin: 0 2px; border-radius: var(--v-radius-sm, 6px); background: rgba(15,12,8,.55); border: 1px solid rgba(196,149,58,.35); color: var(--v-gold, #c4953a); }
 .dmg-dice-summary .drl-num--total { font-size: 13px; color: #e8a070; border-color: rgba(224,96,64,.45); }
 .dmg-dice-summary .drl-num--partial { color: var(--v-text, #d4c8b0); }
@@ -1727,7 +1713,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   border-color: rgba(90, 168, 110, .5);
   box-shadow: 0 0 14px rgba(74, 156, 106, .22);
 }
-.cell-heal-roll-breakdown { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); text-align: center; color: var(--v-text, #d4c8b0); line-height: 1.55; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); width: 100%; box-sizing: border-box; background: rgba(0,0,0,.4); border-radius: var(--v-radius-sm, 8px); border: 1px solid rgba(90,168,110,.4); }
+.cell-heal-roll-breakdown { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); text-align: center; color: var(--v-text, #d4c8b0); line-height: 1.55; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); width: 100%; box-sizing: border-box; background: rgba(0,0,0,.4); border-radius: var(--v-radius-sm, 8px); border: 1px solid rgba(90,168,110,.4); }
 .cell-heal-roll-breakdown .drl-num { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 12px; padding: 1px 5px; margin: 0 2px; border-radius: 6px; background: rgba(15,12,8,.55); border: 1px solid rgba(90,168,110,.45); color: #a8d898; }
 .cell-heal-roll-breakdown .drl-num--total { font-size: 13px; color: #bff0a8; border-color: rgba(138,176,78,.55); text-shadow: 0 0 8px rgba(138,176,78,.35); }
 .cell-heal-roll-breakdown .drl-num--mod { color: #c8e8b8; font-size: var(--v-font-sm, 12px); }
@@ -1760,10 +1746,10 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dtc-bar-fill.fill-hp-mid  { background: linear-gradient(90deg, #b08038, #d0a040); }
 .dtc-bar-fill.fill-hp-low  { background: linear-gradient(90deg, #8a2a20, #c04030); animation: dtcLowPulse 1s ease-in-out infinite; }
 @keyframes dtcLowPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
-.dtc-hp { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-align: right; font-weight: 600; }
+.dtc-hp { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-align: right; font-weight: 600; }
 .dtc-hp.fallen { color: #c06a3a; font-style: italic; }
 .dtc-hp.fallen::after { content: ' · caiu!'; color: #e06040; }
-.cell-heal-roll-note { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); text-align: center; letter-spacing: .5px; width: 100%; }
+.cell-heal-roll-note { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); text-align: center; letter-spacing: .5px; width: 100%; }
 @keyframes resultPop { 0% { transform: scale(.6); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA visual) — hover do dado:
    box-shadow retangular criava "quadrado iluminado" em volta do holder
@@ -1793,7 +1779,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-canvas-holder--dual { display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 24px; }
 .dice-canvas-holder--dual .adv-die-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; transition: transform .55s cubic-bezier(.22,1.2,.36,1), filter .55s ease, opacity .55s ease; transform-origin: center 55%; }
 .dice-canvas-holder--dual .adv-die-slot { width: 140px; height: 140px; position: relative; }
-.dice-canvas-holder--dual .adv-die-caption { font-family: var(--v-font, 'Marcellus'), serif; font-size: 16px; letter-spacing: 1px; padding: 3px 12px; border-radius: 8px; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18); color: #e9dfc5; font-weight: 700; min-width: 38px; text-align: center; opacity: 0; transform: translateY(-4px); transition: opacity .35s ease, transform .35s ease; }
+.dice-canvas-holder--dual .adv-die-caption { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 16px; letter-spacing: 1px; padding: 3px 12px; border-radius: 8px; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18); color: #e9dfc5; font-weight: 700; min-width: 38px; text-align: center; opacity: 0; transform: translateY(-4px); transition: opacity .35s ease, transform .35s ease; }
 .dice-canvas-holder--dual .adv-die-wrap.settled .adv-die-caption { opacity: 1; transform: translateY(0); }
 
 /* Estado do dado VENCEDOR (escolhido): glow pulsante, aura colorida, scale up */
@@ -2312,7 +2298,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   border-radius: 14px;
   box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   animation: v8CondCardIn 0.3s ease-out;
   position: relative;
 }
@@ -2882,7 +2868,7 @@ html.sim-combat-root .bf-pan-stage .battlefield {
   text-shadow: 0 0 14px currentColor, 0 2px 4px rgba(0,0,0,0.95);
 }
 .v-rein-precombat-overlay .vrp-flavor {
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: 14px;
   color: var(--v-text-dim, #a09484);
   text-align: center;
@@ -2902,7 +2888,7 @@ html.sim-combat-root .bf-pan-stage .battlefield {
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--v-gold, #c4953a);
   color: var(--v-gold, #c4953a);
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: 12px;
   padding: 8px 22px;
   border-radius: 6px;
@@ -2950,7 +2936,7 @@ body.perf-lite .v-rein-precombat-overlay {
   border: 1px solid rgba(196, 149, 58, 0.4);
   border-left: 5px solid var(--vrtb-source-color, #c4953a);
   border-radius: 4px;
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: 12px;
   font-weight: 600;
   color: #ffe080;
@@ -3128,7 +3114,7 @@ body.perf-lite .v-rein-fullscreen-flash { animation-duration: 0.5s; }
   border: 2px solid #c4953a;
   border-radius: 8px;
   padding: 10px 12px;
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: 12px;
   color: #ffe080;  /* Texto SEMPRE dourado claro */
   box-shadow:
@@ -3293,7 +3279,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   50% { opacity: 1; filter: brightness(1.12); }
 }
 .cell-heal-revive-line {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   text-align: center;
   color: #a8d898;
@@ -4031,7 +4017,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   line-height: 1.25;
 }
 .sim-death-save-banner .sds-lead {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   line-height: 1.5;
   color: var(--v-text, #d4c8b0);
@@ -4047,7 +4033,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   max-width: 34em;
 }
 .sim-death-save-banner .sds-rules li {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-label, 11px);
   line-height: 1.45;
   color: var(--v-text-dim, #a09484);
@@ -4064,7 +4050,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   font-weight: 700;
 }
 .sim-down-banner {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-body, 14px);
   color: var(--v-text-dim, #a09484);
   text-align: center;
@@ -4115,7 +4101,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   border: 1px solid rgba(196,149,58,.35);
   background: rgba(15,12,8,.65);
   color: var(--v-text-dim, #a09484);
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   letter-spacing: 0.3px;
 }
 .cell-status-chip.buff { border-color: rgba(138,176,78,.45); color: #b8d898; }
@@ -4137,8 +4123,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .udc-sfx-row.debuff { border-left-color: rgba(200,100,100,.75); }
 .udc-sfx-ico { font-size: 20px; line-height: 1; flex-shrink: 0; }
 .udc-sfx-name { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 12px; color: var(--v-gold, #c4953a); letter-spacing: 1px; }
-.udc-sfx-turns { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); margin-top: 2px; }
-.udc-sfx-rule { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); margin-top: 4px; line-height: 1.45; white-space: pre-wrap; }
+.udc-sfx-turns { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); margin-top: 2px; }
+.udc-sfx-rule { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); margin-top: 4px; line-height: 1.45; white-space: pre-wrap; }
 
 /* X-6.5.51AB (2026-04-26): seta animada indicando scroll disponivel.
    Aplicada via JS attachScrollHint() em popups com overflow vertical.
@@ -4209,11 +4195,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .udc-header.cls-monge { --card-accent: var(--class-monge); }
 .udc-header.cls-feiticeiro { --card-accent: var(--class-feiticeiro); }
 .udc-name { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 16px; color: var(--v-gold, #c4953a); letter-spacing: 1.5px; line-height: 1.2; }
-.udc-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+.udc-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
 .udc-section { margin-bottom: 12px; }
 .udc-section-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 6px; padding-left: 2px; }
 .udc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-.udc-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 8px; background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 6px; font-family: var(--v-font, 'Marcellus'), serif; }
+.udc-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 8px; background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 6px; font-family: var(--v-font, 'MedievalSharp'), serif; }
 .udc-stat-lbl { font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; text-transform: uppercase; }
 .udc-stat-val { font-size: 13px; color: var(--v-text, #d4c8b0); font-weight: 700; }
 .udc-stat-val.hp-high { color: #7ec060; }
@@ -4223,7 +4209,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .udc-stat-val.res.energia { color: #f0c060; }
 .udc-stat-val.res.vigor   { color: #d06060; }
 .udc-skills { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-.udc-skills li { padding: 5px 10px; background: rgba(15,12,8,.4); border-left: 2px solid var(--v-gold, #c4953a); border-radius: 0 4px 4px 0; font-family: var(--v-font, 'Marcellus'), serif; font-size: 12px; color: var(--v-text, #d4c8b0); line-height: 1.4; }
+.udc-skills li { padding: 5px 10px; background: rgba(15,12,8,.4); border-left: 2px solid var(--v-gold, #c4953a); border-radius: 0 4px 4px 0; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 12px; color: var(--v-text, #d4c8b0); line-height: 1.4; }
 /* X-6.5.51AB (2026-04-26): pager do popup de detalhe — espelha estilo do
    .lp-pager (skill list popup). User feedback: paginacao em vez de scroll
    no popup do card quando combatente tem muitas habilidades. */
@@ -4238,13 +4224,13 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .udc-sk-desc { color: var(--v-text-dim, #a09484); font-size: var(--v-font-sm, 12px); font-style: italic; }
 .udc-empty { font-style: italic; color: var(--v-text-dim, #a09484); font-size: var(--v-font-sm, 12px); padding: 4px 0; }
 .udc-conds { display: flex; flex-wrap: wrap; gap: 6px; }
-.udc-cond { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(15,12,8,.5); border: 1px solid rgba(196,149,58,.3); border-radius: 14px; font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); letter-spacing: 1px; }
+.udc-cond { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(15,12,8,.5); border: 1px solid rgba(196,149,58,.3); border-radius: 14px; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); letter-spacing: 1px; }
 
 /* Mensagens de combate (acerto/erro/dano/critico) */
 .combat-msg-overlay { background: radial-gradient(ellipse at center, rgba(15,12,8,.9), rgba(15,12,8,.97)); display: flex; align-items: center; justify-content: center; z-index: 9998; padding: 20px; animation: diceOvIn .3s ease; }
 .combat-msg-card { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 28px; background: linear-gradient(180deg, rgba(42,36,32,.96), rgba(15,12,8,.98)); border: 1px solid var(--v-border, #4a3828); border-radius: 14px; text-align: center; min-width: 260px; max-width: 340px; box-shadow: 0 10px 40px rgba(0,0,0,.7), 0 0 24px rgba(196,149,58,.12); animation: udcPop .35s cubic-bezier(.34,1.56,.64,1); }
 .combat-msg-text { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0,0,0,.9); line-height: 1.2; }
-.combat-msg-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: 12px; color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; max-width: 280px; line-height: 1.4; white-space: pre-line; }
+.combat-msg-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 12px; color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; max-width: 280px; line-height: 1.4; white-space: pre-line; }
 .sim-skip-summary-overlay { z-index: 101050; }
 .combat-msg-card.sim-skip-summary-card { max-width: min(calc(100vw - 24px), 380px); width: 100%; align-items: stretch; text-align: left; gap: var(--v-space-md, 10px); }
 .sim-skip-title { text-align: center; }
@@ -4252,7 +4238,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .sim-skip-page-body { max-height: min(52vh, 420px); overflow-y: auto; width: 100%; padding: 4px 2px 8px; border-top: 1px solid rgba(196,149,58,.2); border-bottom: 1px solid rgba(196,149,58,.15); }
 .sim-skip-entry { margin-bottom: var(--v-space-md, 10px); padding: 10px 12px; background: rgba(15,12,8,.55); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); border-left: 3px solid var(--v-gold, #c4953a); }
 .sim-skip-entry:last-child { margin-bottom: 0; }
-.sim-skip-line { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); line-height: 1.45; letter-spacing: 0.4px; white-space: pre-wrap; word-break: break-word; }
+.sim-skip-line { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); line-height: 1.45; letter-spacing: 0.4px; white-space: pre-wrap; word-break: break-word; }
 .sim-skip-line + .sim-skip-line { margin-top: 4px; color: var(--v-text-dim, #a09484); font-size: var(--v-font-xs, 11px); }
 .sim-skip-page-badge { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); letter-spacing: 2px; text-align: center; text-transform: uppercase; }
 .sim-skip-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--v-space-md, 10px); width: 100%; padding-top: 4px; }
@@ -4378,7 +4364,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   font-weight: 600;
 }
 .target-confirm-card--heal .tcc-phb-note {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-xs, 11px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.45;
@@ -4445,7 +4431,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   margin-bottom: 6px;
 }
 .tcc-rx-trigger-who {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: 13px;
   color: var(--v-text, #d4c8b0);
   line-height: 1.4;
@@ -4499,7 +4485,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   white-space: nowrap;
 }
 .tcc-rx-effect-body {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: 13px;
   line-height: 1.45;
   color: var(--v-text, #d4c8b0);
@@ -4508,7 +4494,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 }
 .tcc-rx-effect-body strong { color: #a0c8ff; }
 .tcc-rx-warn {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: 11px;
   color: rgba(255, 210, 130, .85);
   font-style: italic;
@@ -4633,7 +4619,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 }
 .etc-warn-state .etc-title { color: #f0b870; }
 .etc-subtitle {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: 12px;
   color: var(--v-text-dim, #a09484);
   letter-spacing: .5px;
@@ -4649,7 +4635,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   border: 1px solid rgba(196,149,58,.25);
   border-left-width: 3px;
   border-radius: 6px;
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: 12px;
   color: var(--v-text, #d4c8b0);
   line-height: 1.4;
@@ -4694,7 +4680,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .target-confirm-card--reaction .tcc-ico.tcc-ico--svg svg { filter: drop-shadow(0 0 10px rgba(160, 110, 220, .55)); }
 .tcc-info { flex: 1; min-width: 0; }
 .tcc-name { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 15px; color: #e06040; letter-spacing: 1.5px; line-height: 1.2; }
-.tcc-stats { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; margin-top: 3px; }
+.tcc-stats { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; margin-top: 3px; }
 .tcc-stats .hp-high { color: #7ec060; }
 .tcc-stats .hp-mid  { color: #e0b040; }
 .tcc-stats .hp-low  { color: #e06050; }
@@ -4732,7 +4718,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   margin: 0 0 var(--v-space-sm, 8px);
 }
 .sim-skip-confirm-msg {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-body, 14px);
   line-height: 1.55;
   color: var(--v-text, #d4c8b0);
@@ -4750,7 +4736,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   flex: 1;
   min-height: 44px;
   border-radius: var(--v-radius-sm, 6px);
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   font-weight: 600;
   cursor: pointer;
@@ -4775,7 +4761,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .flee-info-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 14px; color: var(--v-gold, #c4953a); letter-spacing: 0.14em; text-transform: uppercase; text-align: center; line-height: 1.25; }
 .flee-info-chance { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 13px; color: var(--v-text, #d4c8b0); text-align: center; padding: 8px 10px; background: rgba(15,12,8,.55); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; letter-spacing: 0.06em; }
 .flee-info-chance em { font-style: normal; color: var(--v-gold, #c4953a); }
-.flee-info-body { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-body, 14px); line-height: 1.55; color: var(--v-text-dim, #a09484); text-align: left; }
+.flee-info-body { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-body, 14px); line-height: 1.55; color: var(--v-text-dim, #a09484); text-align: left; }
 .flee-info-body p { margin: 0 0 8px; }
 .flee-info-body p:last-child { margin-bottom: 0; }
 .flee-info-body strong { color: var(--v-text, #d4c8b0); font-weight: 700; }
@@ -4783,7 +4769,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .flee-info-actions .action-btn { flex: 1; padding: 11px 8px; font-size: 12px; }
 /* Bloco de previsao de dano + reducoes */
 .tcc-dmg { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; margin-bottom: 12px; }
-.tcc-dmg-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); }
+.tcc-dmg-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); }
 .tcc-dmg-lbl { color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-transform: uppercase; font-size: var(--v-font-sm, 12px); }
 .tcc-dmg-val { color: var(--v-text, #d4c8b0); font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; letter-spacing: 1px; }
 .tcc-n-muted { font-size: var(--v-font-sm, 12px); font-weight: 600; color: var(--v-text-dim, #a09484); letter-spacing: 1px; }
@@ -4925,7 +4911,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   display: none;
   margin: var(--v-space-md, 10px) 0 0 0;
   width: 100%;
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   min-height: 44px;
   padding: var(--v-space-sm, 8px) var(--v-space-xs, 6px);
@@ -4970,7 +4956,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 /* Linha de ação: centralizada, com ponto decorativo à esquerda e separador suave.
    Remove borda em todas e usa divider entre irmãos (mais limpo). */
 .lp-log-line {
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-size: var(--v-font-sm, 12px);
   padding: 6px 12px;
   color: var(--v-text-dim, #a09484);
@@ -5150,7 +5136,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     /* X-6.5.51AT v3 (2026-05-08): força card a SEMPRE ocupar quase todo o
        overlay (igual ao max-height: ~94%). Sem isso o card colapsa pra
        altura do conteúdo (popup pequeno). Card preenchendo overlay = mais
-       espaço útil pra lista = mais skills por página (PAGE_SIZE bumped 5→7). */
+       espaço útil pra lista = mais skills por página. */
     height: calc(100% - 40px);
     max-height: calc(100% - 40px);
     overflow: hidden; /* scroll interno vai na .lp-list, não no card */
@@ -5343,7 +5329,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-help-body {
     position: relative;
     z-index: 3;
-    font-family: var(--v-font, 'Marcellus'), serif;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
     font-size: 16px;
     line-height: 1.7;
     color: #d4c8b0;
@@ -5456,7 +5442,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     text-shadow: 0 0 10px rgba(196,149,58,0.5);
 }
 .lp-help-lim-p {
-    font-family: var(--v-font, 'Marcellus'), serif;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
     font-size: 13.5px;
     line-height: 1.6;
     color: #d4c8b0;
@@ -5535,7 +5521,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 /* 2026-05-06: heraldic SVG no lp-title respeita a cor NATURAL do ícone via inline style. */
 .lp-title-ico { width: 22px; height: 22px; display: inline-block; vertical-align: middle; color: #7a5028; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); }
 .btn-glyph-ico { width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 6px; color: #7a5028; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.6)); }
-.lp-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 1px solid rgba(196,149,58,.2); }
+.lp-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; padding-bottom: 8px; border-bottom: 1px solid rgba(196,149,58,.2); }
 .lp-list { display: flex; flex-direction: column; gap: 6px; }
 /* ============================================================
    FILTER DROPDOWN — um único botão centralizado mostra o filtro
@@ -5850,14 +5836,12 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-empty { padding: 20px; text-align: center; color: var(--v-text-dim, #a09484); font-style: italic; font-size: 12px; }
 /* FIX 2026-04-20 v2: itens mais compactos pra caber 2 em Telegram DESKTOP
    viewport baseline 430x700. Padding 10→7, gap 10→8, ico 26→22/28. */
-.lp-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; cursor: pointer; text-align: left; font-family: var(--v-font, 'Marcellus'), serif; color: var(--v-text, #d4c8b0); transition: all .15s ease; }
+.lp-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; cursor: pointer; text-align: left; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text, #d4c8b0); transition: all .15s ease; }
 .lp-item:hover:not(.disabled) { border-color: rgba(212,200,176,.5); background: rgba(74,56,40,.4); transform: translateX(2px); }
 .lp-item:active:not(.disabled) { transform: scale(.98); }
 .lp-item.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.7); }
 .lp-item.disabled:hover { transform: none; border-color: var(--v-border, #4a3828); background: rgba(15,12,8,.5); }
-.lp-item-ico { font-size: 22px; flex-shrink: 0; width: 32px; min-width: 32px; height: 32px; text-align: center; display: flex; align-items: center; justify-content: center; }
-/* X-6.5.51AW (2026-05-08): heraldic SVG dentro do slot da mochila do combate. */
-.lp-item-ico svg.ic-it { width: 32px; height: 32px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+.lp-item-ico { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
 .lp-item-body { flex: 1; min-width: 0; }
 /* V1 Invocações Phase 4 (2026-04-19) — chip de razão por que skill está bloqueada.
    Aparece embaixo da descrição em itens .lp-item.disabled. UX: o jogador entende
@@ -6215,7 +6199,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .iop-card .iop-start-wrap { margin-top: var(--v-space-md, 12px); padding-top: var(--v-space-md, 12px); border-top: 1px solid var(--v-border, #4a3828); display: flex; justify-content: center; }
 .iop-card .iop-start-wrap .epic-cta-btn { margin: 0; animation: epicCtaFloat 2.8s ease-in-out infinite, epicCtaEntry .55s cubic-bezier(.34,1.56,.64,1) .15s both; }
 .iop-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 13px; color: var(--v-text, #d4c8b0); letter-spacing: 2.5px; text-transform: uppercase; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
-.iop-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-top: 3px; padding-bottom: 8px; border-bottom: 1px solid var(--v-border, #4a3828); }
+.iop-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; text-align: center; margin-top: 3px; padding-bottom: 8px; border-bottom: 1px solid var(--v-border, #4a3828); }
 /* Cabecalho profissional — popup Ataque / Animacoes puladas (espelha combat2.css) */
 .iop-head-batch { display: flex; flex-direction: row; align-items: flex-start; gap: var(--v-space-md, 12px); padding: var(--v-space-xs, 4px) var(--v-space-xs, 4px) var(--v-space-md, 12px); text-align: left; }
 .iop-head-batch__orn { flex-shrink: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: var(--v-font-xl, 20px); line-height: 1; border-radius: var(--v-radius, 10px); border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3)); background: linear-gradient(165deg, var(--v-gold-08, rgba(196, 149, 58, 0.08)) 0%, rgba(42, 36, 32, 0.55) 100%); box-shadow: inset 0 1px 0 var(--v-gold-06, rgba(196, 149, 58, 0.06)), 0 2px 8px rgba(0, 0, 0, 0.35); }
@@ -6224,11 +6208,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .iop-head-batch__title { margin: 0 0 var(--v-space-sm, 8px); padding: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--v-space-xs, 4px); border: none; background: none; }
 .iop-head-batch__line1 { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: clamp(15px, 4vw, 18px); letter-spacing: 0.14em; text-transform: uppercase; color: var(--v-gold-light, #dbb668); text-shadow: 0 0 14px var(--v-gold-20, rgba(196, 149, 58, 0.22)), 0 1px 2px rgba(0, 0, 0, 0.85); line-height: 1.15; }
 .iop-head-batch__line2 { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 600; font-size: var(--v-font-sm, 12px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--v-text, #d4c8b0); line-height: 1.2; border-left: 2px solid var(--v-gold-30, rgba(196, 149, 58, 0.35)); padding-left: var(--v-space-sm, 8px); }
-.iop-head-batch__sub { margin: 0; font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); font-weight: 400; line-height: 1.5; letter-spacing: 0.03em; color: var(--v-text-dim, #a09484); max-width: 32em; }
+.iop-head-batch__sub { margin: 0; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); font-weight: 400; line-height: 1.5; letter-spacing: 0.03em; color: var(--v-text-dim, #a09484); max-width: 32em; }
 .iop-head-batch__rule { height: 1px; margin: 0 0 var(--v-space-sm, 8px); background: linear-gradient(90deg, transparent 0%, var(--v-border, #4a3828) 12%, var(--v-gold-25, rgba(196, 149, 58, 0.25)) 50%, var(--v-border, #4a3828) 88%, transparent 100%); }
 .iop-card--batch-summary .iop-list { margin-top: var(--v-space-xs, 4px); }
 .iop-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-.iop-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 6px; font-family: var(--v-font, 'Marcellus'), serif; }
+.iop-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 6px; font-family: var(--v-font, 'MedievalSharp'), serif; }
 .iop-row.player { border-color: rgba(212,200,176,.4); background: rgba(74,56,40,.3); }
 .iop-pos { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); width: 18px; text-align: center; }
 .iop-row.player .iop-pos { color: var(--v-text, #d4c8b0); }
@@ -6274,7 +6258,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   max-width: 280px;
   margin: 0 auto;
 }
-.dice-hint { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-transform: uppercase; margin: 0; min-height: 14px; transition: color .2s; opacity: .85; }
+.dice-hint { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-transform: uppercase; margin: 0; min-height: 14px; transition: color .2s; opacity: .85; }
 .dice-hint.pulse { color: var(--v-gold, #c4953a); opacity: 1; animation: hintPulse .4s ease; text-shadow: 0 0 6px rgba(196,149,58,.5); }
 @keyframes hintPulse { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
 .dice-continue-btn { margin-top: 4px; padding: 10px 28px; font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 600; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(180deg, rgba(196,149,58,.3), rgba(139,100,32,.3)); border: 1px solid var(--v-gold, #c4953a); border-radius: 8px; color: var(--v-gold, #c4953a); cursor: pointer; text-shadow: 0 0 6px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.8); box-shadow: 0 0 14px rgba(196,149,58,.25), inset 0 0 8px rgba(196,149,58,.1); transition: all .2s ease; animation: continueEntry .4s cubic-bezier(.34,1.56,.64,1); }
@@ -6287,7 +6271,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   max-width: 280px;
   margin: 10px auto 0;
   padding: 9px 16px;
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   font-weight: 600;
   font-size: var(--v-font-sm, 12px);
   letter-spacing: 0.06em;
@@ -6630,7 +6614,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     text-shadow: 0 0 14px rgba(160,216,255,0.55), 0 0 28px rgba(80,140,220,0.3);
     filter: drop-shadow(0 0 8px rgba(130,200,255,0.6));
 }
-.mm-summary-row { font-family: var(--v-font,'Marcellus'),serif; font-size: 13px; color: #d4c8b0; padding: 2px 0; text-align: center; }
+.mm-summary-row { font-family: var(--v-font,'MedievalSharp'),serif; font-size: 13px; color: #d4c8b0; padding: 2px 0; text-align: center; }
 .mm-summary-total { font-family: var(--v-font-display,'Cinzel'),serif; font-weight: 700; font-size: 15px; letter-spacing: 2px; color: #f0d8ff; text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(200,140,255,.35); text-shadow: 0 0 12px rgba(200,140,255,.6); }
 
 /* Flying missile: reutiliza head/trail do orbit, mas voa do centro do dado até o card do alvo. */
@@ -8316,7 +8300,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
    Para MM (roxo arcano) existe variante explícita `--force`. */
 .mm-confirm-overlay { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88)); display: flex; align-items: center; justify-content: center; z-index: 9500; animation: mmConfOvIn 0.22s ease-out; }
 @keyframes mmConfOvIn { from { opacity: 0; } to { opacity: 1; } }
-.mm-confirm-card { width: min(92vw, 320px); padding: 16px 18px 14px; background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014)); border: 1px solid rgba(196,149,58,0.6); border-radius: 16px; box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75); color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'Marcellus'), serif; animation: mmConfCardIn 0.3s ease-out; }
+.mm-confirm-card { width: min(92vw, 320px); padding: 16px 18px 14px; background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014)); border: 1px solid rgba(196,149,58,0.6); border-radius: 16px; box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75); color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; animation: mmConfCardIn 0.3s ease-out; }
 @keyframes mmConfCardIn { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .mm-confirm-title {
     font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -8661,7 +8645,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 /* Banner epico do inicio do combate */
 .epic-banner { padding: 22px 16px 16px; text-align: center; border-bottom: 1px solid rgba(196,149,58,.3); background: radial-gradient(ellipse at center, rgba(196,149,58,.1), transparent); }
 .epic-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: clamp(18px, 5.2vw, 24px); letter-spacing: 4px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-shadow: 0 0 14px rgba(196,149,58,.5), 0 0 28px rgba(196,149,58,.25), 0 1px 3px rgba(0,0,0,.8); animation: simEpicTitlePulse 1.8s ease-in-out infinite; line-height: 1.2; }
-.epic-sub { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 5px; animation: simEpicSubIn 1s ease .3s both; }
+.epic-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 5px; animation: simEpicSubIn 1s ease .3s both; }
 /* Sem filter: brightness — compositing no WebView pode parecer “brilho” em toda a coluna de combate. */
 @keyframes simEpicTitlePulse {
   0%, 100% {
@@ -8897,12 +8881,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 .rr-xp { display: flex; flex-direction: column; gap: 5px; }
 .rr-xp-row { display: flex; justify-content: space-between; align-items: baseline; }
-.rr-xp-lbl { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; }
+.rr-xp-lbl { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; }
 .rr-xp-val { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 16px; color: #b0d068; text-shadow: 0 0 10px rgba(176,208,104,.6); animation: rrPop .5s cubic-bezier(.34,1.56,.64,1) .8s both; }
 @keyframes rrPop { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.25); } 100% { transform: scale(1); opacity: 1; } }
 .rr-xp-bar { height: 8px; background: rgba(0,0,0,.55); border: 1px solid var(--v-border, #4a3828); border-radius: 4px; overflow: hidden; }
 .rr-xp-fill { height: 100%; background: linear-gradient(90deg, #5a8a3e, #b0d068); transition: width 1.2s cubic-bezier(.4,0,.2,1); border-radius: 3px; box-shadow: 0 0 10px rgba(176,208,104,.5); }
-.rr-xp-meta { font-family: var(--v-font, 'Marcellus'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; text-align: right; }
+.rr-xp-meta { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; text-align: right; }
 .rr-levelup { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 14px; color: #ffcc44; letter-spacing: 4px; text-align: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,204,68,.15), rgba(196,149,58,.1)); border: 1px solid #ffcc44; border-radius: 8px; text-shadow: 0 0 14px rgba(255,204,68,.7), 0 0 28px rgba(255,204,68,.35); animation: rrLevelUp .6s cubic-bezier(.34,1.56,.64,1) 1.4s both, levelUpShimmer 2s ease-in-out 2s infinite; }
 @keyframes rrLevelUp { 0% { transform: scale(.4) rotate(-5deg); opacity: 0; } 60% { transform: scale(1.15) rotate(2deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
 @keyframes levelUpShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
@@ -8911,7 +8895,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 @keyframes rrLootIn { 0% { transform: translateX(-20px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 .rr-ico { font-size: 22px; flex-shrink: 0; width: 26px; text-align: center; filter: drop-shadow(0 0 6px rgba(196,149,58,.3)); display: flex; align-items: center; justify-content: center; }
 .rr-ico .vi.vi-coin { flex-shrink: 0; }
-.rr-name { flex: 1; font-family: var(--v-font, 'Marcellus'), serif; font-size: 13px; color: var(--v-text, #d4c8b0); letter-spacing: .5px; text-align: left; }
+.rr-name { flex: 1; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 13px; color: var(--v-text, #d4c8b0); letter-spacing: .5px; text-align: left; }
 .rr-qty { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: 13px; color: var(--v-gold, #c4953a); letter-spacing: 1.5px; padding: 3px 8px; background: rgba(15,12,8,.6); border: 1px solid rgba(196,149,58,.3); border-radius: 12px; }
 .rr-qty.rare-comum { color: var(--v-text-dim, #a09484); border-color: var(--v-border, #4a3828); font-size: var(--v-font-sm, 12px); text-transform: uppercase; }
 .rr-qty.rare-incomum { color: #80b0e0; border-color: rgba(128,176,224,.4); font-size: var(--v-font-sm, 12px); text-transform: uppercase; text-shadow: 0 0 6px rgba(128,176,224,.3); }
@@ -9002,17 +8986,13 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     if (document.getElementById('sim-combat-skin-last')) return;
     var st = document.createElement('style');
     st.id = 'sim-combat-skin-last';
-    /* X-6.5.51AX (2026-05-08): skin-last sincronizado com tokens canonicos.
-       html limita ao --sim-frame-w/h (384x694 desktop, 480x100dvh touch);
-       #app FIXADO em --sim-frame-w/h (não mais 100% — evita stretch). */
     st.textContent = [
-      'html.sim-combat-root{max-width:var(--sim-frame-w)!important;margin:0 auto!important;height:var(--sim-frame-h)!important;',
-      'max-height:var(--sim-frame-h)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
+      'html.sim-combat-root{max-width:min(100vw,480px)!important;margin:0 auto!important;height:min(100dvh,960px)!important;',
+      'max-height:min(100dvh,960px)!important;overflow:hidden!important;background:#2a2420!important;box-sizing:border-box!important;}',
       'html.sim-combat-root body.sim-combat-layout{contain:none!important;background-image:none!important;',
       'background-attachment:scroll!important;height:100%!important;max-height:100%!important;justify-content:flex-start!important;}',
       'html.sim-combat-root body.sim-combat-layout::before,html.sim-combat-root body.sim-combat-layout::after{content:none!important;display:none!important;}',
-      'html.sim-combat-root #app{flex:1 1 auto!important;min-height:0!important;width:var(--sim-frame-w)!important;height:var(--sim-frame-h)!important;',
-      'max-width:var(--sim-frame-w)!important;max-height:var(--sim-frame-h)!important;margin:0 auto!important;',
+      'html.sim-combat-root #app{flex:1 1 auto!important;min-height:0!important;max-height:100%!important;width:100%!important;',
       'overflow:hidden!important;display:flex!important;flex-direction:column!important;position:relative!important;',
       'transform:translateZ(0)!important;}'
     ].join('');
@@ -9030,6 +9010,11 @@ document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.c
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
 document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + _vti + '"><\/script>');
+/* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
+   openBagPanel local. inCombat:true ativa regras D&D 5e (PHB p.139/144/190). */
+document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body class="biome-forest sim-combat-layout">
@@ -9038,11 +9023,30 @@ document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' +
      Igual /app.html e cidade.html. Combate audio: combat track.
      ════════════════════════════════════════════════════════════════════════ -->
 <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+<!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
+     valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
+     duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+<script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
   if (window.__introTitleSkip) return;
+  /* 2026-05-12 USER RULE: simuladores file:// NUNCA mostram TitleScreen.
+     TitleScreen e tela do bot DEV/PROD apenas. Skip-flag + log diagnostico. */
+  if (location.protocol === 'file:') {
+    window.__introTitleSkip = true;
+    console.info('[INTRO] skip — simulador file:// (TitleScreen e do bot DEV/PROD)');
+    return;
+  }
   var params = new URLSearchParams(location.search);
-  if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
+  if (params.get('nointro') === '1') {
+    window.__introTitleSkip = true;
+    /* 2026-05-13 USER REQUEST: nointro=1 = veio de transicao entre WebApps.
+       Mostra magic-circle imediato (mesma tela de TOQUE PARA INICIAR) ate
+       o conteudo renderizar. Auto-hide via window.load handler acima. */
+    window.__vTransitionLoaderShownAtBoot = true;
+    if (window._vTransitionLoader) window._vTransitionLoader.show('Carregando…');
+    return;
+  }
   var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);
   if (resumeTs && (Date.now()-resumeTs) < 30000) return;
   window.__introBlocking = true;
@@ -10505,21 +10509,7 @@ window.__onIntroTap = function() {
        arquivos em /shared/audio/ (sfx_hit.mp3, sfx_crit.mp3, sfx_miss.mp3,
        sfx_fire.mp3, sfx_cold.mp3, etc.). Chamadas: ValdoriaAudio.play('combat')
        pra música; ValdoriaAudio.playSFX('sfx_hit') pra effects. */
-    /* X-6.5.51AU revisado (2026-05-08): força audio-manager a criar `.va-float`
-       imediatamente em vez de esperar 3s por `#footer-quick` (que não existe
-       no simulador de combate). Mesma flag usada por cidade/exploracao. */
-    document.write('<script>window.__audioForceFloat=true;<\/script>');
     document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
-    /* X-6.5.51AY (2026-05-08): re-parent REVERTIDO. .va-float fica em body —
-       render(state) do combate faz setHTML(app, html) e apagaria a button
-       a cada state change (problema documentado em X-6.5.51u). CSS override
-       em ~linha 740 alinha visualmente o button ao frame via viewport-relative
-       fixed + margin auto. */
-    /* X-6.5.51AW (2026-05-08): heraldic items sprite + name->icon mapping.
-       Mochila do combate usa HeraldicItems.iconSvg(it.n) em vez de emoji `it.ico`.
-       X-6.5.51BA: bundle JS injeta sprite via <script> (file:// sem CORS pra fetch). */
-    document.write('<script src="' + BASE + '/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
-    document.write('<script src="' + BASE + '/shared/heraldic-items.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
@@ -12413,58 +12403,8 @@ window.__COMBAT_ORIGIN_APP = (function () {
     } catch (e) { return ''; }
 })();
 window.__COMBAT_ENV = (function () {
-    try {
-        var q = new URLSearchParams(location.search);
-        var env = q.get('env');
-        if (env) return env;
-        // Fallback: infer from api param or hostname pattern
-        var api = q.get('api') || '';
-        if (api.indexOf('prod.lendasdevaldoria') >= 0) return 'prod';
-        if (api.indexOf('api.lendasdevaldoria') >= 0) return 'dev';
-        if (location.hostname.indexOf('jogo.') >= 0) return 'prod';
-        if (location.hostname.indexOf('dev.') >= 0) return 'dev';
-        return 'local';
-    } catch (e) { return 'local'; }
+    try { return new URLSearchParams(location.search).get('env') || 'dev'; } catch (e) { return 'dev'; }
 })();
-// CROSS-ENV ISOLATION 2026-05-10: valida data.env vs window.__COMBAT_ENV.
-// Server (env_response_middleware) injeta 'env' em toda response /api/* JSON dict.
-// Mismatch = contaminacao cross-env (URL antiga, cache stale, etc.) — abortamos
-// hard pra evitar render de DEV combate em PROD ou vice-versa.
-window.__combatCheckResponseEnv = function (data, source) {
-    if (!data || !data.env || !window.__COMBAT_ENV) return true;
-    if (data.env !== window.__COMBAT_ENV) {
-        console.error('[C-REM:CROSS-ENV] ' + source + ' expected=' + window.__COMBAT_ENV + ' got=' + data.env);
-        // BEACON 2026-05-10: server log CRITICAL pra alerta cross-env real-time.
-        try {
-            var _bMsg = '[CROSS_ENV_DETECTED] page=combate source=' + source +
-                ' expected_env=' + window.__COMBAT_ENV + ' got_env=' + data.env +
-                ' uid=' + (window.__COMBAT_USER_ID || 'unknown') +
-                ' href=' + location.href.substring(0, 200);
-            var _bPayload = JSON.stringify({entries: [{level: 'critical', msg: _bMsg}], uid: window.__COMBAT_USER_ID || 0});
-            var _bApi = window.__COMBAT_API_BASE;
-            if (navigator.sendBeacon && _bApi) navigator.sendBeacon(_bApi + '/api/game/log', new Blob([_bPayload], {type: 'application/json'}));
-            else if (_bApi) fetch(_bApi + '/api/game/log', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: _bPayload, keepalive: true}).catch(function () { });
-        } catch (_eb) { }
-        try {
-            if (window.EnvStorage) { EnvStorage.purgeOtherEnvs(); }
-            else {
-                var _xKeys = [];
-                for (var _xi = 0; _xi < localStorage.length; _xi++) {
-                    var _xk = localStorage.key(_xi);
-                    if (_xk && (_xk.indexOf('valdoria_session') === 0 ||
-                                _xk.indexOf('valdoria_game_screen') === 0)) _xKeys.push(_xk);
-                }
-                _xKeys.forEach(function(k){ try { localStorage.removeItem(k); } catch(_){} });
-            }
-        } catch (_xe) { }
-        try {
-            document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;text-align:center;padding:24px;z-index:2147483647"><div><h1 style="color:#c4953a;letter-spacing:3px">⚠ Sessao Invalida</h1><p style="margin-top:24px">Voce abriu este jogo a partir de outro ambiente.<br>Feche e abra novamente pelo bot correto.</p><p style="margin-top:16px;font-size:12px;opacity:0.7">env esperado: ' + window.__COMBAT_ENV + ' | env recebido: ' + data.env + '</p></div></div>';
-        } catch (_eh) { }
-        window.__valdoria_transitioning = true;
-        return false;
-    }
-    return true;
-};
 /* Phase 4 dungeons AAA (2026-04-26): from=exploracao identifica combate disparado
    pelo simulador exploracao.html (boss da masmorra). Resolution screen substitui
    "Novo Combate" por "Voltar a Exploracao", e ao clicar escreve sessionStorage
@@ -12475,27 +12415,6 @@ window.__COMBAT_FROM_EXPLORACAO = (function () {
 })();
 window.__COMBAT_PLAYER_CLS_KEY = (function () {
     try { return new URLSearchParams(location.search).get('pClass') || ''; } catch (e) { return ''; }
-})();
-// STARTUP BEACON 2026-05-10: server log INFO de toda carga de combate.html.
-(function () {
-    try {
-        var _sbMsg = '[WEBAPP_STARTUP] page=combate env=' + window.__COMBAT_ENV +
-            ' mode=' + window.__COMBAT_MODE +
-            ' has_token=' + !!window.__COMBAT_TOKEN +
-            ' has_api=' + !!window.__COMBAT_API_BASE +
-            ' uid=' + (window.__COMBAT_USER_ID || 0) +
-            ' has_initdata=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
-        var _sbApi = window.__COMBAT_API_BASE ||
-            (window.__COMBAT_ENV === 'prod' ? 'https://prod.lendasdevaldoria.com.br' :
-                (window.__COMBAT_ENV === 'dev' ? 'https://api.lendasdevaldoria.com.br' : ''));
-        if (_sbApi) {
-            fetch(_sbApi + '/api/game/log', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({entries: [{level: 'info', msg: _sbMsg}], uid: window.__COMBAT_USER_ID || 0}),
-                keepalive: true,
-            }).catch(function () { });
-        }
-    } catch (_es) { }
 })();
 window.__COMBAT_ENEMY_ID = (function () {
     try { return new URLSearchParams(location.search).get('enemy') || ''; } catch (e) { return ''; }
@@ -18681,7 +18600,8 @@ function __combatShowErrorOverlay(title, detailsHtml) {
             /* 2026-05-11 (Chrome MCP testing): tg.close() so funciona em
                Telegram WebApp real. Em browser, deixava tela vazia. Agora
                detecta contexto e faz fallback pra /cidade/ via URL preservando
-               token/uid/api/env/char. */
+               token/uid/api/env/char. Atende user: "FECHAR COMBATE em error
+               state -> tela vazia (nao redireciona)". */
             try {
                 var tg = window.Telegram && window.Telegram.WebApp;
                 if (tg && tg.initData && String(tg.initData).length > 0) {
@@ -18689,6 +18609,7 @@ function __combatShowErrorOverlay(title, detailsHtml) {
                     return;
                 }
             } catch (eC) {}
+            /* Browser fallback: redirect pra /cidade/ com URL params preservados */
             try {
                 var params = new URLSearchParams(location.search || '');
                 var carry = ['token', 'uid', 'user_id', 'api', 'api_base', 'env', 'char', 'char_id'];
@@ -18697,11 +18618,18 @@ function __combatShowErrorOverlay(title, detailsHtml) {
                     var v = params.get(carry[i]);
                     if (v) qp.set(carry[i], v);
                 }
+                /* 2026-05-13: nointro=1 pra destino bootar direto no magic-circle */
+                qp.set('nointro', '1');
                 var url = '/cidade/' + (qp.toString() ? '?' + qp.toString() : '');
+                if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à cidade…');
                 window.__valdoria_transitioning = true;
-                location.replace(url);
+                /* 2026-05-13 BUGBOT FIX (PR #90): delay 30ms pra browser pintar
+                   o loader antes de unload — sem isso, location.replace dispara
+                   sync e loader nunca aparece. Mesmo padrao da cidade.html. */
+                setTimeout(function(){ location.replace(url); }, 30);
             } catch (eF) {
-                location.href = '/cidade/';
+                if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à cidade…');
+                setTimeout(function(){ location.href = '/cidade/?nointro=1'; }, 30);
             }
         });
     } catch (eOv) {
@@ -18710,6 +18638,7 @@ function __combatShowErrorOverlay(title, detailsHtml) {
             var tg2 = window.Telegram && window.Telegram.WebApp;
             if (tg2 && tg2.initData) { tg2.close(); return; }
         } catch (eC) {}
+        /* Browser fallback se overlay nem montou */
         try { location.replace('/cidade/'); } catch (eFx) { location.href = '/cidade/'; }
     }
 }
@@ -18719,6 +18648,14 @@ function __combatShowErrorOverlay(title, detailsHtml) {
    já computou tudo; server só persiste. */
 async function __combatCompleteCanonical(result, origin) {
     console.info('[C-REM:PIVOT-COMPLETE] enter result=' + result + ' origin=' + origin);
+    /* 2026-05-13 USER REQUEST: mostra magic-circle ANTES de fetch+redirect.
+       Cobre o gap combate->origin (cidade/exploracao) com loader "real". */
+    if (window._vTransitionLoader) {
+        var _exitLabel = origin === 'exploracao'
+            ? 'Retornando à exploração…'
+            : (result === 'defeat' ? 'Levando você à cidade…' : 'Retornando à cidade…');
+        window._vTransitionLoader.show(_exitLabel);
+    }
     var s = currentState || {};
     var p = (s.order && s.p_idx != null) ? s.order[s.p_idx] : null;
     var rewards = (s.rewards && typeof s.rewards === 'object') ? {
@@ -18751,6 +18688,10 @@ async function __combatCompleteCanonical(result, origin) {
         });
         if (!r.ok) {
             console.error('[C-REM:PIVOT-COMPLETE] status=' + r.status);
+            /* 2026-05-13 BUGBOT FIX (PR #90): esconde loader antes do error
+               overlay pra player ver a mensagem em vez de ficar preso atras
+               do full-screen magic-circle. */
+            if (window._vTransitionLoader) window._vTransitionLoader.hide();
             /* X-6.5.45: msg amigavel; status fica no console.error pra agente IA. */
             __combatShowErrorOverlay(
                 'Algo deu errado',
@@ -18761,6 +18702,8 @@ async function __combatCompleteCanonical(result, origin) {
         var data = await r.json();
         if (!data || !data.url) {
             console.error('[C-REM:PIVOT-COMPLETE] no_url_in_response');
+            /* 2026-05-13 BUGBOT FIX (PR #90): same as above */
+            if (window._vTransitionLoader) window._vTransitionLoader.hide();
             __combatShowErrorOverlay(
                 'Algo deu errado',
                 'Tente novamente em poucos segundos.'
@@ -18775,11 +18718,22 @@ async function __combatCompleteCanonical(result, origin) {
                 targetUrl += curHash;
             }
         } catch (_eH) {}
+        /* 2026-05-13: adiciona ?nointro=1 ao URL retornado pelo servidor pra
+           que o destino (cidade/exploracao) boote direto no magic-circle. */
+        try {
+            var _tu = new URL(targetUrl, location.href);
+            if (!_tu.searchParams.has('nointro')) _tu.searchParams.set('nointro', '1');
+            targetUrl = _tu.toString();
+        } catch (_eU) { /* parsing falhou — usa data.url original */ }
         console.info('[C-REM:PIVOT-COMPLETE] redirecting to ' + targetUrl.slice(0, 100));
         location.replace(targetUrl);
     } catch (e) {
         /* X-6.5.45: e.message fica no console.error pra agente IA; UI clean. */
         console.error('[C-REM:PIVOT-COMPLETE] exception', e && e.message);
+        /* 2026-05-13 BUGBOT FIX (PR #90): esconde loader antes do error
+           overlay pra player ver mensagem em vez de ficar preso atras do
+           full-screen magic-circle. */
+        if (window._vTransitionLoader) window._vTransitionLoader.hide();
         __combatShowErrorOverlay(
             'Sem conexão',
             'Verifique sua internet e tente novamente.'
@@ -19336,7 +19290,18 @@ function onBtnClick(ev) {
         } catch (eRes) {
             console.warn('[BACK-EXPLORE] failed to read resume', eRes);
         }
-        window.location.href = 'exploracao.html' + resumeParams;
+        /* 2026-05-13: nointro=1 pra exploracao bootar direto no magic-circle.
+           E mostra loader local pra cobrir o gap até nova pagina renderizar. */
+        if (resumeParams.indexOf('nointro=') < 0) {
+            resumeParams += (resumeParams.indexOf('?') >= 0 ? '&' : '?') + 'nointro=1';
+        }
+        if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à exploração…');
+        window.__valdoria_transitioning = true;
+        /* 2026-05-13 BUGBOT FIX (PR #90): delay 30ms pra browser pintar loader
+           antes de unload — sem isso, location.href dispara sync e loader
+           nunca aparece. Mesmo padrao da cidade.html. */
+        var _backExploreUrl = 'exploracao.html' + resumeParams;
+        setTimeout(function(){ window.location.href = _backExploreUrl; }, 30);
         return;
     }
     /* [PIVOT 2026-04-21] close-remote: botão Continuar da tela de vitória em
@@ -20444,24 +20409,9 @@ function openSkillsPanel() {
        55px + pagination 40px + close 50px = ~430px — cabe com folga.
 
        FIX X-6.5.51AT (2026-05-08): lp-item-desc removido da row → cada skill
-       cai de ~95px pra ~50px (icon 32px + name 22px + padding 14px). Com
-       PAGE_SIZE=3: 3 × 50px + 225px fixos = ~375px — cabe sem scroll no
-       baseline 430x700. User pediu "pelo menos 3 habilidades por página".
-
-       FIX X-6.5.51AT v2 (2026-05-08, segunda iteração): card popup ganhou
-       height:80% forçado (antes colapsava pra altura do conteúdo). Com 80%
-       de 694 = ~555px - 265px fixos = ~290px pra lista. 5 skills × 50px +
-       4 gaps × 6px = ~274px — cabe com folga. User pediu "podendo ter mais
-       habilidades na mesma página".
-
-       FIX X-6.5.51AT v3 (2026-05-08, terceira iteração): card agora preenche
-       quase todo o overlay (~94% via height:calc(100% - 40px)). Com 654px de
-       card - 265px fixos = ~389px pra lista. 7 skills × 50px + 6 gaps × 6px =
-       386px — cabe sem scroll. User pediu "ainda dá pra aumentar a altura".
-
-       FIX X-6.5.51AT v4 (2026-05-08, quarta iteração): user pediu cap de
-       5 skills por página ("máximo de 5 habilidades por página"). Sobra
-       espaço útil pra cada item respirar — cards menos comprimidos. */
+       cai de ~95px pra ~50px. Card popup ganhou height:calc(100% - 40px) (~94%
+       do overlay). Com 654px - 265px fixos = 389px pra lista. 5 skills × 50px +
+       4 gaps × 6px = 274px — cabe com folga. User pediu cap em 5 por página. */
     var PAGE_SIZE = 5;
 
     function renderListBody() {
@@ -21132,7 +21082,129 @@ async function useSkill(skill, opts) {
 /* ============================================================
  * Mochila — popup de consumiveis
  * ============================================================ */
+
+// ===================================================================
+// V_INV ADAPTER (2026-05-14) — Mochila canonical em combate
+// Schema combate: p.bag = [{n, qty, ico, desc, effect:{hp,...}}]
+// inCombat=true ativa regras D&D 5e (PHB p.139/144/190).
+// ===================================================================
+function _vinvCombatSlug(s) {
+    return String(s || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+function _vinvCombatAdaptBagItem(bagItem, idx) {
+    var name = bagItem.n || '';
+    var meta = '';
+    if (bagItem.effect && bagItem.effect.hp) meta = 'Cura ' + bagItem.effect.hp;
+    else if (bagItem.effect && bagItem.effect.mp) meta = '+' + bagItem.effect.mp + ' PM';
+    return {
+        id: _vinvCombatSlug(name) + '-' + idx,  // sufixo idx pra unicidade
+        name: name,
+        qty: bagItem.qty || 0,
+        rarity: bagItem.rarity || 'common',
+        tags: ['consumable', 'potion'],  // bag em combate é só consumíveis
+        desc: bagItem.desc || '',
+        meta: meta,
+        iconId: 'ic-it-' + _vinvCombatSlug(name),
+        _bagIdx: idx,  // preserva idx pra useItem(idx)
+    };
+}
+/** 2026-05-14: lê loadout sincronizado pela cidade via localStorage.
+ *  Permite tab 'equip' em combate COM inCombat:true → cost badges D&D 5e
+ *  aparecem (Grátis/1 Ação/Impossível por slot). Read-only — sem swap. */
+function _vinvCombatReadLoadout() {
+    var loadout = {};
+    try {
+        var raw = localStorage.getItem('valdoria_shared_equipped_v1');
+        if (!raw) return loadout;
+        var equipped = JSON.parse(raw);
+        var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
+        Object.keys(equipped).forEach(function (slot) {
+            var name = equipped[slot];
+            if (!name) return;
+            var k = slotMap[slot] || slot;
+            loadout[k] = {
+                id: _vinvCombatSlug(name),
+                name: name,
+                qty: 1,
+                rarity: 'common',
+                equipped: true,
+                tags: [],
+                slot: k,
+                iconId: 'ic-it-' + _vinvCombatSlug(name),
+            };
+        });
+    } catch (_) { /* localStorage off */ }
+    return loadout;
+}
+function _vinvCombatReadStats() {
+    try {
+        var raw = localStorage.getItem('valdoria_shared_stats_v1');
+        if (!raw) return {};
+        var s = JSON.parse(raw);
+        return {
+            ca: s.ac || '—',
+            pv: (s.hp != null ? s.hp : '—') + ' / ' + (s.max_hp != null ? s.max_hp : '—'),
+            pm: (s.mp != null ? s.mp : '—') + ' / ' + (s.max_mp != null ? s.max_mp : '—'),
+        };
+    } catch (_) { return {}; }
+}
+
+function _vinvCombatBuildConfig() {
+    var p = currentState.order[currentState.p_idx];
+    if (!p || !p.bag) return null;
+    var items = (p.bag || [])
+        .map(_vinvCombatAdaptBagItem)
+        .filter(function (it) { return it.qty > 0; });
+    var loadout = _vinvCombatReadLoadout();
+    var hasLoadout = Object.keys(loadout).length > 0;
+    return {
+        title: 'USAR ITEM',
+        player: {
+            gold: p.gold || 0,
+            items: items,
+            loadout: loadout,
+            stats: _vinvCombatReadStats(),
+        },
+        // Tab equip ativada read-only se há loadout sincronizado.
+        // SEM onItemSwap → swap list só visualiza (cost badges aparecem).
+        tabs: hasLoadout ? ['items', 'equip'] : ['items'],
+        defaultCategory: 'consumables',
+        showSearch: false,           // combate é rápido, sem search
+        showSort: false,
+        inCombat: true,              // ativa cost badges D&D 5e
+        onItemUse: function (item) {
+            // Restaura comportamento original do useItem(idx)
+            window.vInventory && vInventory.close();
+            if (typeof useItem === 'function' && typeof item._bagIdx === 'number') {
+                useItem(item._bagIdx);
+            }
+        },
+        onClose: function () {
+            // Cancela: libera Agir (igual cliente legado)
+            window._actionTaken = false;
+            if (typeof render === 'function') render(currentState);
+        },
+        primaryAction: {
+            label: 'Cancelar',
+            onClick: function () { window.vInventory && vInventory.close(); }
+        },
+        secondaryAction: { label: 'Fechar', icon: 'close' },
+    };
+}
+
 function openBagPanel() {
+    // 2026-05-14: delegate à mochila canonical compartilhada (vInventory).
+    // Fallback ao popup legacy abaixo se módulo não carregou.
+    if (window.vInventory && window.vInventory.__loaded) {
+        try {
+            var cfg = _vinvCombatBuildConfig();
+            if (cfg) { window.vInventory.open(cfg); return; }
+        } catch (e) {
+            console.error('[vInventory] combate open falhou, usando legacy:', e);
+        }
+    }
     var p = currentState.order[currentState.p_idx];
     if (!p || !p.bag) return;
     var ov = document.createElement('div');
@@ -21145,12 +21217,8 @@ function openBagPanel() {
     if (!p.bag.length) html += '<div class="lp-empty">Mochila vazia</div>';
     p.bag.forEach(function (it, i) {
         var canUse = it.qty > 0;
-        /* X-6.5.51AW (2026-05-08): prefere ícone heráldico via HeraldicItems
-           (carregado por heraldic-items.js); fallback pra emoji legado `it.ico`. */
-        var heraldic = (window.HeraldicItems ? HeraldicItems.iconSvg(it.n, '32px') : '');
-        var icoHtml = heraldic || it.ico || '';
         html += '<button class="lp-item' + (canUse ? '' : ' disabled') + '" data-item="' + i + '"' + (canUse ? '' : ' disabled') + '>';
-        html += '<div class="lp-item-ico">' + icoHtml + '</div>';
+        html += '<div class="lp-item-ico">' + it.ico + '</div>';
         html += '<div class="lp-item-body">';
         html += '<div class="lp-item-name">' + escHtml(it.n) + '</div>';
         html += '<div class="lp-item-desc">' + escHtml(it.desc) + '</div>';
@@ -21183,19 +21251,6 @@ function openBagPanel() {
             useItem(i);
         });
     });
-    /* X-6.5.51AW (2026-05-08): se sprite heráldico ainda não carregou, atualiza
-       inline os .lp-item-ico ao terminar (sem reabrir popup). */
-    if (window.HeraldicItems && !HeraldicItems.ready()) {
-        HeraldicItems.onReady(function () {
-            if (!document.body.contains(ov)) return;
-            p.bag.forEach(function (it, i) {
-                var ico = card.querySelector('[data-item="' + i + '"] .lp-item-ico');
-                if (!ico) return;
-                var heraldic = HeraldicItems.iconSvg(it.n, '32px');
-                if (heraldic) ico.innerHTML = heraldic;
-            });
-        });
-    }
 }
 
 async function useItem(idx) {
@@ -27421,10 +27476,12 @@ function startSimAfterDiceBoot() {
     if (typeof startForceCombatMusic === 'function') {
         try { startForceCombatMusic(); } catch (_eF) { /* silent */ }
     }
-    /* X-6.5.51AU revisado (2026-05-08): chamada `simInstallVolumePanel()` REMOVIDA.
-       Combate agora usa o .va-float-btn padrão criado pelo audio-manager.js
-       (idêntico cidade/exploracao). Re-parent dos elementos pra dentro de #app
-       é feito via JS após audio-manager.js carregar (~linha 10440). */
+    /* V1.7 (2026-04-21) — Instala botão de volume CUSTOM no top-right do simulador.
+       Substitui o .va-float do audio-manager.js (que fica atrás do turn-queue
+       ou não aparece de forma consistente no sim). O botão custom usa
+       ValdoriaAudio.toggleMute() pra mute/unmute rápido + click disparando
+       popup de sliders via #va-btn invisível quando disponível. */
+    try { simInstallVolumeBtn(); } catch (_eVB) { /* silent */ }
 
     /* X-6.5.51u (2026-04-25): re-parent REVERTIDO. Tentativa anterior (X-6.5.51q)
        reparentava #va-popup + #va-backdrop pra dentro de #app, MAS render(s) chama
@@ -27487,8 +27544,6 @@ async function startCombatRemoteCanonical() {
             return;
         }
         var data = await r.json();
-        // CROSS-ENV ISOLATION 2026-05-10: aborta render se response veio de env errado.
-        if (!window.__combatCheckResponseEnv(data, '/api/combat2/prepare')) return;
         if (!data || !data.setup) {
             console.error('[C-REM:PIVOT-BOOT] prepare_no_setup');
             __combatShowErrorOverlay(
@@ -27706,12 +27761,165 @@ function stopForceCombatMusic() {
     }
 }
 
-/* X-6.5.51AU revisado (2026-05-08): bloco _simVolMakeRow / _simVolSyncPanel /
-   simInstallVolumePanel + boot calls REMOVIDOS. Combate agora usa o
-   .va-float-btn padrao do audio-manager.js (idêntico a cidade/exploracao).
-   Click no botao flutuante abre o va-popup com sliders. Re-parent dos 3
-   elementos (va-float / va-popup / va-backdrop) feito via JS apos audio-manager
-   carregar (~linha 10440). Auto-positioner X-6.5.51AA permanece abaixo. */
+/* V1.7 (2026-04-21) — Botão de volume custom do simulador (top-right).
+   Substitui o .va-float do audio-manager.js que é inconsistente no sim.
+   Cria elemento fixed no canto superior direito, sincroniza ícone com
+   estado de mute, e despacha click pro #va-btn quando disponível pra
+   abrir popup de sliders (ou usa toggleMute como fallback). */
+var _SIM_VOL_ICONS = {
+    high: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
+          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>' +
+          '<path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+    low:  '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
+          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
+    mute: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
+          '<line x1="23" y1="9" x2="17" y2="15"/>' +
+          '<line x1="17" y1="9" x2="23" y2="15"/></svg>'
+};
+function _simVolSyncIcon() {
+    var btn = document.getElementById('sim-vol-btn');
+    if (!btn) return;
+    var muted = false, vol = 1;
+    try {
+        if (window.ValdoriaAudio) {
+            muted = !!(ValdoriaAudio.isMuted && ValdoriaAudio.isMuted())
+                 || !!(ValdoriaAudio.isMusicMuted && ValdoriaAudio.isMusicMuted());
+            vol = ValdoriaAudio.getVolume ? ValdoriaAudio.getVolume() : 1;
+        }
+    } catch (_eI) {}
+    if (muted || vol <= 0) {
+        btn.innerHTML = _SIM_VOL_ICONS.mute;
+        btn.classList.add('muted');
+        btn.classList.remove('playing');
+        btn.setAttribute('title', 'Volume: silenciado');
+    } else if (vol < 0.5) {
+        btn.innerHTML = _SIM_VOL_ICONS.low;
+        btn.classList.remove('muted');
+        btn.classList.add('playing');
+        btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
+    } else {
+        btn.innerHTML = _SIM_VOL_ICONS.high;
+        btn.classList.remove('muted');
+        btn.classList.add('playing');
+        btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
+    }
+}
+function simInstallVolumeBtn() {
+    if (document.getElementById('sim-vol-btn')) {
+        _simVolSyncIcon();
+        return;
+    }
+    /* REGRA SOBERANA (2026-04-21): TUDO dentro do frame #app (smartphone).
+       #app tem transform:translateZ(0) → vira containing block pra position:fixed
+       dos FILHOS, ancorando o fixed ao frame do smartphone (não à viewport).
+       Isso é o mesmo truque usado por dice-overlay, intro popup e outros.
+       Append em body está PROIBIDO pra elementos persistentes do jogo. */
+    var appFrame = document.getElementById('app');
+    if (!appFrame) {
+        /* #app ainda não montado — retry com backoff até existir. */
+        console.info('[SIM-VOL] #app null; retrying in 150ms');
+        setTimeout(simInstallVolumeBtn, 150);
+        return;
+    }
+    var btn = document.createElement('button');
+    btn.id = 'sim-vol-btn';
+    btn.setAttribute('aria-label', 'Ajustar volume / som');
+    btn.setAttribute('type', 'button');
+    btn.innerHTML = _SIM_VOL_ICONS.high;
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        /* V1.7 (2026-04-21 v3) — TOGGLE robusto de popup de volume.
+           Comportamento: clicar abre popup; clicar de novo fecha (toggle).
+           Estratégia: dispatcha click em #va-btn (audio-manager.js toggla
+           internamente via _togglePopup). Se o toggle falhar (edge case),
+           força o estado via classList em #va-popup + #va-backdrop. */
+        var popup = document.getElementById('va-popup');
+        var wasOpen = !!(popup && popup.classList.contains('open'));
+        var vaBtn = document.getElementById('va-btn');
+        if (vaBtn && typeof vaBtn.click === 'function') {
+            try { vaBtn.click(); } catch (_eC) {
+                if (window.ValdoriaAudio && ValdoriaAudio.toggleMute) {
+                    try { ValdoriaAudio.toggleMute(); } catch (_eT) {}
+                }
+            }
+        } else if (window.ValdoriaAudio && ValdoriaAudio.toggleMute) {
+            try { ValdoriaAudio.toggleMute(); } catch (_eT) {}
+        }
+        /* Verify + force-correct se o toggle não tomou efeito (guard pro bug
+           "popup não fecha ao clicar de novo" 2026-04-21). */
+        setTimeout(function () {
+            var popupNow = document.getElementById('va-popup');
+            var backdropNow = document.getElementById('va-backdrop');
+            var isOpenNow = !!(popupNow && popupNow.classList.contains('open'));
+            if (wasOpen === isOpenNow) {
+                /* Toggle falhou — força o estado oposto no DOM. */
+                var targetOpen = !wasOpen;
+                console.warn('[SIM-VOL] vaBtn.click() did not toggle popup (wasOpen=' +
+                    wasOpen + ', isOpenNow=' + isOpenNow + ') \u2014 forcing to ' + targetOpen);
+                if (popupNow) popupNow.classList.toggle('open', targetOpen);
+                if (backdropNow) backdropNow.classList.toggle('open', targetOpen);
+            }
+            _simVolSyncIcon();
+        }, 80);
+        setTimeout(_simVolSyncIcon, 450);
+    });
+    appFrame.appendChild(btn);
+    console.info('[SIM-VOL] #sim-vol-btn mounted INSIDE #app frame (smartphone) at top:10 right:10 z-index:99999');
+    _simVolSyncIcon();
+    /* Sync periódico em caso de mudanças externas (popup abre sliders) */
+    if (!window._simVolSyncTimer) {
+        window._simVolSyncTimer = setInterval(_simVolSyncIcon, 800);
+    }
+    /* BUG 2026-04-21: render(s) faz setHTML(app, html) que apaga o botão.
+       MutationObserver detecta remoção e re-instala automaticamente.
+       Observa apenas direct children de #app (subtree:false) — eficiente. */
+    if (!window._simVolObserver) {
+        try {
+            var obs = new MutationObserver(function () {
+                if (!document.getElementById('sim-vol-btn')) {
+                    /* Botão foi apagado por render() — re-instala imediatamente.
+                       Como o botão vira child direto de #app, a flag
+                       _simVolObserver já existe → skip do setup de observer,
+                       mas o retry de createElement + appendChild roda. */
+                    simInstallVolumeBtn();
+                }
+            });
+            obs.observe(appFrame, { childList: true, subtree: false });
+            window._simVolObserver = obs;
+            console.info('[SIM-VOL] MutationObserver instalado em #app — botão vai se auto-reinstalar após cada render()');
+        } catch (_eO) {
+            console.warn('[SIM-VOL] MutationObserver falhou:', _eO);
+        }
+    }
+}
+
+/* V1.7 (2026-04-21 v2) — Instalação redundante pra garantir que o botão
+   SEMPRE aparece, independente de qual boot path rodar primeiro:
+   · DOMContentLoaded (early)
+   · load (depois de assets)
+   · setTimeout 500ms (fallback) */
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+            try { simInstallVolumeBtn(); } catch (_eV1) {}
+        });
+    } else {
+        setTimeout(function () {
+            try { simInstallVolumeBtn(); } catch (_eV2) {}
+        }, 0);
+    }
+    window.addEventListener('load', function () {
+        try { simInstallVolumeBtn(); } catch (_eV3) {}
+    });
+    setTimeout(function () {
+        try { simInstallVolumeBtn(); } catch (_eV4) {}
+    }, 500);
+}
+
 /* X-6.5.51AA (2026-04-25) — va-popup auto-positioner JS-driven.
    Problema: CSS calc()-only (Pattern A puro X-6.5.51u) confiava em viewport
    centering match com #app centering. Em viewport com #sim-log-panel à direita
@@ -27726,10 +27934,8 @@ function stopForceCombatMusic() {
    · Resize/orientationchange do viewport
    · Mudanças de layout via #app rect (a cada toggle)
 
-   Usa `#va-btn` (.va-float-btn dentro de .va-float) como anchor inferior
-   (X-6.5.51AU revisado 2026-05-08 — voltamos pro padrão audio-manager.js).
-   Re-parent feito após audio-manager carregar (ver bloco ~linha 10384).
-   Fallback: 56px do bottom do #app se botão ainda não existe. */
+   Usa `#sim-vol-btn` rect como anchor inferior (botão é fixed dentro do #app via
+   transform:translateZ(0) containing block — sempre alinhado ao frame visual). */
 (function () {
     var _alreadyInit = false;
     function _ensureInit() {
@@ -27742,15 +27948,14 @@ function stopForceCombatMusic() {
             var backdrop = document.getElementById('va-backdrop');
             if (!popup) return;
             var rect = app.getBoundingClientRect();
-            /* X-6.5.51AU revisado (2026-05-08): anchor = .va-float-btn (#va-btn)
-               do audio-manager.js. Re-parent feito após audio-manager carregar
-               (~linha 10384). Fallback 56px se botão ainda não existe. */
-            var anchor = document.getElementById('va-btn');
+            var btn = document.getElementById('sim-vol-btn');
             var bottomPx;
-            if (anchor) {
-                var br = anchor.getBoundingClientRect();
+            if (btn) {
+                var br = btn.getBoundingClientRect();
+                /* 8px de gap acima do botão */
                 bottomPx = window.innerHeight - br.top + 8;
             } else {
+                /* fallback: 56px do bottom do #app */
                 bottomPx = window.innerHeight - rect.bottom + 56;
             }
             popup.style.setProperty('left', rect.left + 'px', 'important');

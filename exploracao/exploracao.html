@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-10T18:58:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-15T01:32:58Z - do not edit directly, edit source -->
 
 
 <!--
@@ -75,6 +75,12 @@
   Quest indicator topbar                     updateQuestIndicator       32347
   Quest journal overlay                      openQuestJournal           32461
   Inventory add/remove                       addItem / removeItem       33215 / 33223
+  Mochila popup (vInventory canonical)       _showExploracaoInventoryPopup ~33710
+    └─ delegate ao shared module             vInventory.open() em ~33710
+    └─ adapter exploracao → vInventory       _vinvExpBuildConfig ~33680
+    └─ schema item → schema canonical        _vinvExpAdaptItem ~33655
+    └─ shared module imports                 ~6043 (inventory-screen.{css,js} + sprite)
+    └─ doc canonical                         docs/sistemas/inventory-canonical.md
   Reputation gain                            gainReputation             33234
   Bestiary record enemy                      recordEnemyEncounter       33712
   Material compendium                        recordMaterialFound        33735
@@ -708,8 +714,8 @@
     }
   } catch (_) { /* fallback silencioso */ }
 </script>
-<!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
-<script src="/shared/auth-gate.js"></script>
+<!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
+<script src="../valdoria-webapp/shared/auth-gate.js"></script>
 
 <!-- X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Exploração tem
      muitas animações (terreno, hex map, eventos, weather, fog) que o jogador
@@ -727,11 +733,11 @@
     document.write('<script src="../valdoria-webapp/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     window.SERVER_LOG_AREA = 'exploracao';
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
-       window.fetch pra detectar maintenance em qualquer response. */
+       window.fetch pra detectar maintenance em qualquer response do servidor.
+       Pattern canonical do cidade.html — necessário pra sync_exploracao passar
+       no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../valdoria-webapp/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    /* Proactive guard: hits /api/game/health imediatamente; se em manutenção
-       mostra overlay ANTES do resto do JS bootar. */
     setTimeout(function(){
         try{
             if(!window.vMaintenance)return;
@@ -819,7 +825,7 @@ html, body {
   margin: 0; padding: 0;
   background: var(--v-bg-deep, #1a1510);
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'Marcellus', 'Cinzel', serif);
+  font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
   overflow: hidden;
   -webkit-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -981,19 +987,15 @@ body {
      quando log panel ocupa o resto. */
   justify-content: flex-start;
   background: #0f0d0a;  /* fundo do dev-log-panel area */
-  overflow: hidden !important;  /* NO-SCROLL ABSOLUTO — regra soberana */
 }
-html { overflow: hidden !important; }  /* NO-SCROLL ABSOLUTO em html também */
-/* USER RULE 2026-05-08: simulator DEVE ser limitado ao tamanho do Telegram
-   Desktop WebApp (384x694) — MENOR que smartphone (480x960). Browser desktop
-   simula o pior caso (Telegram Desktop popup). Touch devices (smartphone
-   real) recebem viewport maior via media query abaixo.
-
-   Dims oficiais Telegram Desktop popup (tdesktop botWebViewPanelSize 384x694):
-     https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/payments/ui/payments.style */
+/* 2026-05-12 USER REQUEST: "mapa de exploração e outras localidades devem
+   ser ilimitados de altura, mas sempre se adaptar ao limite da tela do
+   dispositivo atual — responsiva". Removido cap de 960px. Agora altura =
+   100dvh (real do device) em qualquer browser/device. Width permanece
+   480px (smartphone cap canonical). */
 :root {
-  --sim-frame-w: min(100vw, 384px);
-  --sim-frame-h: min(100dvh, 694px);
+  --sim-frame-w: min(100vw, 480px);
+  --sim-frame-h: 100dvh;
 
   /* === Tile-Objects AAA #2 (Spec Apêndice A) === */
   /* Faction palettes */
@@ -1036,32 +1038,6 @@ html { overflow: hidden !important; }  /* NO-SCROLL ABSOLUTO em html também */
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(196,149,58,0.2);
-}
-
-/* X-6.5.51AS (2026-05-08): title-screen + loading-overlay DEVEM ficar dentro
-   do frame do simulador. shared/loading-title.css e shared/loading.css usam
-   position:fixed+inset:0 → escapam pra viewport do browser inteiro quando
-   viewport > frame (default 384x694).
-   exploracao.html é especial: body é flex-row 100vw x 100vh (acomoda #frame +
-   #sim-log-panel), então position:absolute em body preencheria o body inteiro
-   (errado). Solução: position:fixed com dim = --sim-frame-w/h + center via
-   left:50% / top:50% / transform translate. Cobre frame visualmente. */
-html body .title-screen,
-html body #title-screen,
-html body .loading-overlay,
-html body #loading,
-html body #processing-overlay,
-html body .processing-overlay {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: var(--sim-frame-w) !important;
-  height: var(--sim-frame-h) !important;
-  max-width: var(--sim-frame-w) !important;
-  max-height: var(--sim-frame-h) !important;
-  margin: 0 !important;
-  inset: auto !important;
 }
 
 /* 2026-04-27 USER RULE: sim-log-panel é DEV-ONLY. Default escondido em
@@ -1430,7 +1406,7 @@ html.sim-prod #frame { margin: 0 auto !important; }
   border-radius: 10px;
   padding: 22px 22px 18px;
   color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font, 'Marcellus', 'Cinzel', serif);
+  font-family: var(--v-font, 'MedievalSharp', 'Cinzel', serif);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(196, 149, 58, 0.2);
   animation: stub-card-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
   overflow-y: auto;
@@ -1895,8 +1871,8 @@ html body .camp-screen {
 }
 /* 2026-05-12 USER REPORT FIX: explore-camp.css define .camp-screen com
    position: fixed (anchora ao viewport). Override acima setava left:0
-   mas position continuava fixed -> camp-screen ia pro canto ESQUERDO do
-   browser, FORA do frame centralizado. Forcando position:absolute aqui
+   mas position continuava fixed → camp-screen ia pro canto ESQUERDO do
+   browser, FORA do frame centralizado. Forçando position:absolute aqui
    pra ficar relativo ao #frame parent (que tem position:relative). */
 html body .camp-screen {
   position: absolute !important;
@@ -2002,7 +1978,7 @@ html body .camp-screen {
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
-  font-family: var(--v-font, 'Marcellus'), serif;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
   color: var(--v-text, #d4c8b0);
   overflow: hidden;
 }
@@ -2444,7 +2420,7 @@ body.perf-lite #top-danger { animation: none !important; }
   background: rgba(0, 0, 0, 0.65);
   padding: 20px;
   box-sizing: border-box;
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
 }
 #boss-danger-popup.bdp-hidden { display: none !important; }
 .bdp-card {
@@ -2579,7 +2555,7 @@ body.perf-lite #top-danger { animation: none !important; }
   background: rgba(0, 0, 0, 0.75);
   padding: 20px;
   box-sizing: border-box;
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
 }
 #boss-danger-tech-popup.bdtp-hidden { display: none !important; }
 .bdtp-card {
@@ -2632,7 +2608,7 @@ body.perf-lite #top-danger { animation: none !important; }
 .bdtp-body {
   font-size: 12px;
   line-height: 1.7;
-  font-family: monospace, var(--v-font, 'Marcellus', serif);
+  font-family: monospace, var(--v-font, 'MedievalSharp', serif);
   color: var(--v-text, #d4c8b0);
 }
 .bdtp-body strong { color: var(--v-gold, #c4953a); }
@@ -3059,7 +3035,9 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 /* X-6.5.51j (2026-04-25): journal-card REFATORADO pro design system do jogo.
    Antes: parchment cream/brown (custom). Agora: dark + gold (--v-bg-raised,
    --v-gold, --v-text). User feedback: "faca a tela do Diario de missoes e a
-   tela de cartografia seguirem os padroes/regras CSS do jogo". */
+   tela de cartografia seguirem os padroes/regras CSS do jogo".
+   2026-05-12 USER REQUEST: full popup — width 100% do frame, max-height 96%.
+   Antes max-width:360px deixava popup estreito (1/3 da tela com bordas vazias). */
 .journal-card {
   background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
   border: 1.5px solid var(--v-gold, #c4953a);
@@ -3935,7 +3913,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   50% { box-shadow: 0 0 8px rgba(232, 184, 80, 0.8); }
 }
 .journey-narration {
-  font-family: 'Marcellus', 'Cinzel', serif;
+  font-family: 'MedievalSharp', 'Cinzel', serif;
   font-size: 13px;
   line-height: 1.55;
   color: var(--v-text, #d4c8b0);
@@ -4790,14 +4768,9 @@ body.perf-lite .event-text-line {
 }
 .inv-item-icon {
   font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
+  display: block;
   margin-bottom: 4px;
 }
-/* X-6.5.51AW (2026-05-08): heraldic SVG dentro do slot da mochila do explore. */
-.inv-item-icon svg.ic-it { width: 32px; height: 32px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
 .inv-item-name {
   font-family: serif;
   font-size: 11px;
@@ -4984,7 +4957,7 @@ body.remote-mode #debug-hud { display: none !important; }
   border: 1px solid rgba(196, 149, 58, 0.25);
   border-radius: 6px;
   padding: 8px 10px;
-  font-family: var(--v-font, 'Marcellus', serif);
+  font-family: var(--v-font, 'MedievalSharp', serif);
   font-size: 11px;
   color: var(--v-text, #d4c8b0);
   letter-spacing: 0.5px;
@@ -6101,6 +6074,11 @@ document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.c
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
 document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + _vti + '"><\/script>');
+/* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
+   _showExploracaoInventoryPopup local. Sprite ic-it-* (519 symbols) primeiro. */
+document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body>
@@ -6268,11 +6246,30 @@ document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' +
      state via /api/game/state → posiciona player exato.
      ════════════════════════════════════════════════════════════════════════ -->
 <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
+<!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
+     valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
+     duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+<script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
   if (window.__introTitleSkip) return;
+  /* 2026-05-12 USER RULE: simuladores file:// NUNCA mostram TitleScreen.
+     TitleScreen e tela do bot DEV/PROD apenas. Skip-flag + log diagnostico. */
+  if (location.protocol === 'file:') {
+    window.__introTitleSkip = true;
+    console.info('[INTRO] skip — simulador file:// (TitleScreen e do bot DEV/PROD)');
+    return;
+  }
   var params = new URLSearchParams(location.search);
-  if (params.get('nointro') === '1') { window.__introTitleSkip = true; return; }
+  if (params.get('nointro') === '1') {
+    window.__introTitleSkip = true;
+    /* 2026-05-13 USER REQUEST: nointro=1 = veio de transicao entre WebApps.
+       Mostra magic-circle imediato (mesma tela de TOQUE PARA INICIAR) ate
+       o conteudo renderizar. Auto-hide via window.load handler acima. */
+    window.__vTransitionLoaderShownAtBoot = true;
+    if (window._vTransitionLoader) window._vTransitionLoader.show('Carregando…');
+    return;
+  }
   var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);
   if (resumeTs && (Date.now()-resumeTs) < 30000) return;
   window.__introBlocking = true;
@@ -8329,6 +8326,7 @@ window.__onIntroTap = function() {
   <!-- 2026-05-12 USER REQUEST: ally-indicator removido — btn-party (#hud-quick)
        já serve pra ver o grupo todo. Indicador duplicado tirava espaço sem add valor. -->
 
+
   <div id="hud-quick">
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
          "remova o botao Diario de missoes". Quest journal agora e acessado
@@ -9861,20 +9859,7 @@ window.__onIntroTap = function() {
      LOCAL mode (file://): backup em localStorage pra sobreviver F5.
      REMOTE mode: persistência futura via /api/event/save_choice.
      ═══════════════════════════════════════════════════════════════════════ */
-  // CROSS-ENV ISOLATION 2026-05-10: env-prefix pra evitar choices DEV vazarem em PROD.
-  // Antes era 'valdoria_event_choices_v1' (compartilhado), agora 'valdoria_event_choices_v1_<env>'.
-  // Env derivado de URL ?env=, depois api param, depois hostname (fallback).
-  var EVENT_CHOICES_LS_KEY = (function(){
-    try {
-      var qs = new URLSearchParams(location.search);
-      var env = qs.get('env') ||
-        ((qs.get('api') || '').indexOf('prod.lendasdevaldoria') >= 0 ? 'prod' :
-         (qs.get('api') || '').indexOf('api.lendasdevaldoria') >= 0 ? 'dev' :
-         location.hostname.indexOf('jogo.') >= 0 ? 'prod' :
-         location.hostname.indexOf('dev.') >= 0 ? 'dev' : 'local');
-      return 'valdoria_event_choices_v1_' + env;
-    } catch(e) { return 'valdoria_event_choices_v1'; }
-  })();
+  var EVENT_CHOICES_LS_KEY = 'valdoria_event_choices_v1';
 
   function _getChoicesStore() {
     var p = (window.S && window.S.player) ? window.S.player : null;
@@ -13950,11 +13935,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
   var v = Date.now();
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
-  // X-6.5.51AW (2026-05-08): + heraldic-items.js (sprite 519 ícones para mochila)
-  // X-6.5.51BA (2026-05-08): heraldic-items-sprite.js (bundle JS) ANTES do helper
-  // — funciona em file:// onde fetch falha por CORS.
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
-   '/shared/heraldic-items-sprite.js', '/shared/heraldic-items.js',
    '/shared/toast.js', '/shared/state-checkpoint.js',
    '/shared/clock-skew-guard.js'].forEach(function(src) {
     var s = document.createElement('script');
@@ -14181,35 +14162,9 @@ body.perf-lite .stub-popup-voice { animation: none; }
   window.__EXPLORE_ORIGIN   = qs.get('o') || 'navigate';
   window.__EXPLORE_SNAP_B64 = qs.get('snap') || '';
   window.__EXPLORE_DELTA_B64 = qs.get('delta') || '';
-  // CROSS-ENV ISOLATION 2026-05-10: env esperado pra validar todas API responses.
-  window.__EXPLORE_ENV = qs.get('env') ||
-    ((window.__EXPLORE_API_BASE || '').indexOf('prod.lendasdevaldoria') >= 0 ? 'prod' :
-     (window.__EXPLORE_API_BASE || '').indexOf('api.lendasdevaldoria') >= 0 ? 'dev' :
-     location.hostname.indexOf('jogo.') >= 0 ? 'prod' :
-     location.hostname.indexOf('dev.') >= 0 ? 'dev' : 'local');
   // REMOTE só ativa se tiver token+api (não basta não ser file://)
   var hasRemoteCtx = !!(window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE);
   window.__EXPLORE_MODE = (location.protocol === 'file:' || !hasRemoteCtx) ? 'local' : 'remote';
-  // STARTUP BEACON 2026-05-10: server log INFO da carga de exploracao.html.
-  try {
-    var _sbMsg = '[WEBAPP_STARTUP] page=exploracao env=' + window.__EXPLORE_ENV +
-      ' mode=' + window.__EXPLORE_MODE +
-      ' has_token=' + !!window.__EXPLORE_TOKEN +
-      ' has_api=' + !!window.__EXPLORE_API_BASE +
-      ' uid=' + (window.__EXPLORE_USER_ID || 0) +
-      ' map_id=' + (window.__EXPLORE_MAP_ID || 'none') +
-      ' has_initdata=' + !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
-    var _sbApi = window.__EXPLORE_API_BASE ||
-      (window.__EXPLORE_ENV === 'prod' ? 'https://prod.lendasdevaldoria.com.br' :
-        (window.__EXPLORE_ENV === 'dev' ? 'https://api.lendasdevaldoria.com.br' : ''));
-    if (_sbApi) {
-      fetch(_sbApi + '/api/game/log', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({entries: [{level: 'info', msg: _sbMsg}], uid: window.__EXPLORE_USER_ID || 0}),
-        keepalive: true,
-      }).catch(function () { });
-    }
-  } catch (_es) { }
   console.info('[E-REM:MODE] mode=' + window.__EXPLORE_MODE
     + ' api=' + (window.__EXPLORE_API_BASE || '(none)')
     + ' uid=' + window.__EXPLORE_USER_ID
@@ -14352,47 +14307,6 @@ body.perf-lite .stub-popup-voice { animation: none; }
     return window.__EXPLORE_MOTOR_TOKEN || '';
   }
 
-  // CROSS-ENV ISOLATION 2026-05-10: valida data.env vs window.__EXPLORE_ENV.
-  // Server (env_response_middleware) injeta 'env' em toda response /api/* JSON dict.
-  // Mismatch = contaminacao cross-env (URL antiga, cache stale, etc.) — abortamos
-  // hard pra evitar render de DEV data em PROD ou vice-versa.
-  function _checkResponseEnv(data, source) {
-    if (!data || !data.env || !window.__EXPLORE_ENV) return true;
-    if (data.env !== window.__EXPLORE_ENV) {
-      console.error('[E-REM:CROSS-ENV] ' + source + ' expected=' + window.__EXPLORE_ENV + ' got=' + data.env);
-      // BEACON 2026-05-10: server log CRITICAL pra alerta cross-env real-time.
-      try {
-        var _bMsg = '[CROSS_ENV_DETECTED] page=exploracao source=' + source +
-          ' expected_env=' + window.__EXPLORE_ENV + ' got_env=' + data.env +
-          ' uid=' + (window.__EXPLORE_USER_ID || 'unknown') +
-          ' map_id=' + (window.__EXPLORE_MAP_ID || 'unknown') +
-          ' href=' + location.href.substring(0, 200);
-        var _bPayload = JSON.stringify({entries: [{level: 'critical', msg: _bMsg}], uid: window.__EXPLORE_USER_ID || 0});
-        if (navigator.sendBeacon && window.__EXPLORE_API_BASE) navigator.sendBeacon(window.__EXPLORE_API_BASE + '/api/game/log', new Blob([_bPayload], {type: 'application/json'}));
-        else if (window.__EXPLORE_API_BASE) fetch(window.__EXPLORE_API_BASE + '/api/game/log', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: _bPayload, keepalive: true}).catch(function () { });
-      } catch (_eb) { }
-      try {
-        if (window.EnvStorage) { EnvStorage.purgeOtherEnvs(); }
-        else {
-          var _xKeys = [];
-          for (var _xi = 0; _xi < localStorage.length; _xi++) {
-            var _xk = localStorage.key(_xi);
-            if (_xk && (_xk.indexOf('valdoria_session') === 0 ||
-                        _xk.indexOf('valdoria_game_screen') === 0 ||
-                        _xk.indexOf('valdoria_event_choices') === 0)) _xKeys.push(_xk);
-          }
-          _xKeys.forEach(function(k){ try { localStorage.removeItem(k); } catch(_){} });
-        }
-      } catch(_xe){}
-      try {
-        document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1510;color:#d4c8b0;font-family:Cinzel,serif;text-align:center;padding:24px;z-index:2147483647"><div><h1 style="color:#c4953a;letter-spacing:3px">⚠ Sessao Invalida</h1><p style="margin-top:24px">Voce abriu este jogo a partir de outro ambiente.<br>Feche e abra novamente pelo bot correto.</p><p style="margin-top:16px;font-size:12px;opacity:0.7">env esperado: ' + window.__EXPLORE_ENV + ' | env recebido: ' + data.env + '</p></div></div>';
-      } catch(_eh){}
-      window.__valdoria_transitioning = true;
-      return false;
-    }
-    return true;
-  }
-
   async function _post(path, body, authMode) {
     var t0 = performance.now();
     var headers;
@@ -14412,7 +14326,6 @@ body.perf-lite .stub-popup-voice { animation: none; }
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
-      if (!_checkResponseEnv(data, 'POST ' + path)) return { _cross_env: true, error: 'cross_env' };
       if (!resp.ok) {
         console.warn('[E-REM:API-ERROR] ' + path + ' status=' + resp.status
           + ' err=' + ((data && data.error) || '?') + ' ms=' + dt);
@@ -14438,7 +14351,6 @@ body.perf-lite .stub-popup-voice { animation: none; }
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
-      if (!_checkResponseEnv(data, 'GET ' + path)) return { _cross_env: true, error: 'cross_env' };
       if (!resp.ok) {
         console.warn('[E-REM:API-ERROR] ' + path + ' status=' + resp.status
           + ' err=' + ((data && data.error) || '?') + ' ms=' + dt);
@@ -14709,8 +14621,24 @@ window.__applyExploreSnap = function(S, snap) {
     S.inventory = snap.inv.map(function(it) { return { id: it.i, count: it.q }; });
   }
   // Quests ativas (substitui — snap tem autoritativo)
+  // 2026-05-12: preserva title/desc/npc/location/reward/xp/progress/target_map
+  // pra Diário de Missões na exploração mostrar info completa (antes só tinha
+  // {id, step} e renderizava "Missões Ativas" sem detalhes).
   if (Array.isArray(snap.quests_active)) {
-    S.activeQuests = snap.quests_active.map(function(q) { return { id: q.id, step: q.step }; });
+    S.activeQuests = snap.quests_active.map(function(q) {
+      return {
+        id: q.id,
+        step: q.step || 0,
+        title: q.title || '',
+        desc: q.desc || '',
+        progress: q.progress || '',
+        reward: q.reward || 0,
+        xp: q.xp || 0,
+        npc: q.npc || '',
+        location: q.location || '',
+        target_map: q.target_map || ''
+      };
+    });
   }
   // Allies (substitui) — 2026-05-12: preserva name + level + hpMax + mp + race
   // pra HUD/UI mostrar corretamente. Antes só salvava {id, cls, hp} e descartava
@@ -33732,19 +33660,14 @@ function _exploracaoItemCategory(item) {
   return 'misc';
 }
 
-// Ícone do item: prefere heráldico via HeraldicItems (X-6.5.51AW 2026-05-08),
-// fallback pra item.icon (storage), senão heurística por categoria com emoji.
+// Ícone do item (usa o do storage se disponível, senão heurística)
 function _exploracaoItemIcon(item) {
-  var name = (item && item.name) || _exploracaoItemName(item);
-  if (window.HeraldicItems) {
-    var heraldic = HeraldicItems.iconSvg(name, '32px');
-    if (heraldic) return heraldic;
-  }
   if (item && item.icon) return item.icon;
   var cat = _exploracaoItemCategory(item);
   if (cat === 'use') return '🧪';
   if (cat === 'equip') return '⚔️';
   if (cat === 'gem') return '💎';
+  if (cat === 'rune') return '✨';
   return '📦';
 }
 
@@ -33755,18 +33678,143 @@ function _exploracaoItemName(item) {
   return id.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
 }
 
+// ===================================================================
+// V_INV ADAPTER (2026-05-14) — Mochila canonical em exploração
+// Schema exploracao: {name, quantity, icon, value, id, ...}
+// Categoriza por nome (heurística string match) → tags vInventory.
+// ===================================================================
+function _vinvExpSlug(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+function _vinvExpCategoryToTags(cat) {
+  return ({
+    'use':   ['consumable'],
+    'equip': ['weapon'],  // genérico — pode ser arma OU armadura
+    'gem':   ['gem', 'valuable'],
+    'rune':  ['magic'],
+    'misc':  ['tool'],
+  })[cat] || [];
+}
+function _vinvExpAdaptItem(item) {
+  var name = item.name || item.id || '';
+  var qty  = item.quantity || 0;
+  var cat  = _exploracaoItemCategory(item);
+  var tags = item.tags || _vinvExpCategoryToTags(cat);
+  return {
+    id: item.id || _vinvExpSlug(name),
+    name: name,
+    qty: qty,
+    rarity: item.rarity || 'common',
+    tags: tags,
+    value: item.value || 0,
+    desc: item.desc || '',
+    iconId: 'ic-it-' + _vinvExpSlug(name),
+  };
+}
+/** 2026-05-14: lê MOCK_PLAYER_EQUIPPED sincronizado pela cidade via
+ *  localStorage 'valdoria_shared_equipped_v1'. Permite tab equip read-only
+ *  em exploração (sem onItemSwap → swap list bloqueada automaticamente). */
+function _vinvExpReadLoadout(allItems) {
+  var loadout = {};
+  try {
+    var raw = localStorage.getItem('valdoria_shared_equipped_v1');
+    if (!raw) return loadout;
+    var equipped = JSON.parse(raw);  // {slot: itemName}
+    var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
+    Object.keys(equipped).forEach(function (slot) {
+      var name = equipped[slot];
+      if (!name) return;
+      // Tenta achar o item no inventory adaptado primeiro
+      var found = (allItems || []).find(function (it) { return it.name === name; });
+      if (!found) {
+        // Item equipado não está no inventory exploração — cria stub mínimo
+        found = {
+          id: _vinvExpSlug(name),
+          name: name,
+          qty: 1,
+          rarity: 'common',
+          equipped: true,
+          tags: [],
+          slot: slotMap[slot] || slot,
+          iconId: 'ic-it-' + _vinvExpSlug(name),
+        };
+      } else {
+        found.equipped = true;
+        found.slot = found.slot || slotMap[slot] || slot;
+      }
+      loadout[slotMap[slot] || slot] = found;
+    });
+  } catch (_) { /* localStorage off / JSON inválido */ }
+  return loadout;
+}
+function _vinvExpReadStats() {
+  try {
+    var raw = localStorage.getItem('valdoria_shared_stats_v1');
+    if (!raw) return {};
+    var s = JSON.parse(raw);
+    return {
+      ca: s.ac || '—',
+      pv: (s.hp != null ? s.hp : '—') + ' / ' + (s.max_hp != null ? s.max_hp : '—'),
+      pm: (s.mp != null ? s.mp : '—') + ' / ' + (s.max_mp != null ? s.max_mp : '—'),
+    };
+  } catch (_) { return {}; }
+}
+
+function _vinvExpBuildConfig() {
+  var inv = _readSharedInventory();
+  var items = (inv || [])
+    .filter(function (e) { return (e.quantity || 0) > 0; })
+    .map(_vinvExpAdaptItem);
+  var gold = (typeof S !== 'undefined' && S.player && S.player.gold) || 0;
+  var loadout = _vinvExpReadLoadout(items);
+  var hasLoadout = Object.keys(loadout).length > 0;
+  return {
+    title: 'MOCHILA — TRILHA',
+    player: {
+      gold: gold,
+      items: items,
+      loadout: loadout,
+      stats: _vinvExpReadStats(),
+    },
+    // Tab equip ativada read-only quando há loadout sincronizado da cidade.
+    // SEM onItemSwap → swap list não aparece (apenas visualização).
+    tabs: hasLoadout ? ['items', 'equip'] : ['items'],
+    showSearch: true,
+    showSort: true,
+    inCombat: false,
+    onItemUse: function (item) {
+      if (typeof vToast === 'function') vToast('Usar ' + item.name + ' (em trilha)');
+      // TODO: simulador injeta lógica real (consome item, aplica efeito)
+    },
+    onItemDrop: function (item) {
+      if (typeof vToast === 'function') vToast('Largar ' + item.name + ' (perdido)');
+    },
+    onClose: function () { /* nada */ },
+    primaryAction: {
+      label: 'Continuar Trilha',
+      onClick: function () { window.vInventory && vInventory.close(); }
+    },
+    secondaryAction: { label: 'Voltar', icon: 'back' },
+  };
+}
+
 function _showExploracaoInventoryPopup() {
+  // 2026-05-14: delegate à mochila canonical compartilhada (vInventory).
+  // Fallback ao popup legacy abaixo se módulo não carregou.
+  if (window.vInventory && window.vInventory.__loaded) {
+    try {
+      window.vInventory.open(_vinvExpBuildConfig());
+      return;
+    } catch (e) {
+      console.error('[vInventory] exploracao open falhou, usando legacy:', e);
+    }
+  }
   var ov = document.getElementById('inv-overlay');
   if (!ov) return;
   _renderExploracaoInventoryPopup();
   ov.classList.add('show');
-  /* X-6.5.51AW (2026-05-08): se sprite heráldico ainda não carregou, re-renderiza
-     ao terminar pra trocar emoji por SVG `<use href="#ic-it-X">`. */
-  if (window.HeraldicItems && !HeraldicItems.ready()) {
-    HeraldicItems.onReady(function(){
-      if (ov.classList.contains('show')) _renderExploracaoInventoryPopup();
-    });
-  }
 }
 
 function _closeExploracaoInventoryPopup() {
@@ -33782,12 +33830,7 @@ function _renderExploracaoInventoryPopup() {
   var inv = _readSharedInventory();
   var totalCount = inv.reduce(function(sum, it){ return sum + (it.quantity || 0); }, 0);
   var totalValue = inv.reduce(function(sum, it){ return sum + (it.value || 0) * (it.quantity || 0); }, 0);
-  /* 2026-05-11 (Chrome MCP testing): Mochila mostrava "Bolsa: 0" pq lia
-     S.player.gold (nunca setado no boot do snap), enquanto HUD VALD lia
-     S.gold corretamente (snap.gold -> S.gold em L14638). Fix: usa S.gold
-     como source primaria, com fallback pra S.player.gold por compat. */
-  var gold = (S && typeof S.gold === 'number' ? S.gold :
-              (S && S.player && S.player.gold) || 0);
+  var gold = (S && S.player && S.player.gold) || 0;
 
   // Filtrar por categoria
   var filter = window._invFilterExp || 'all';
@@ -33807,8 +33850,9 @@ function _renderExploracaoInventoryPopup() {
 
   // Header meta + filter pills
   // 2026-05-12 USER REQUEST: alinhar com mochila da cidade.
-  // - Removida quantidade de Valdoritas duplicada (antes "Bolsa: 3287 V | 5 itens · 250 V",
+  // - Removida quantidade de Valdoritas duplicada (antes "Bolsa: 3287 V | 5 itens · 250V",
   //   agora "Bolsa: 3287 V | Inventário (5 itens)")
+  // - Usa ic-coin canonical SVG em vez de "V" texto
   // - Filtros padronizados pra match cidade.html (Todos/Equip/Consum/Gemas/Runas/Outros)
   var html = ''
     + '<div class="inv-meta-bar">'
@@ -33839,7 +33883,7 @@ function _renderExploracaoInventoryPopup() {
       html += '<div class="inv-item-card" data-item-idx="' + idx + '">'
         +   '<span class="inv-item-icon">' + ico + '</span>'
         +   '<div class="inv-item-name">' + name + '</div>'
-        +   '<div class="inv-item-count">×' + cnt + (it.value ? ' · ' + it.value + ' <span class="vi vi-coin sm"></span>' : '') + '</div>'
+        +   '<div class="inv-item-count">×' + cnt + (it.value ? ' · ' + it.value + 'V' : '') + '</div>'
         + '</div>';
     });
     html += '</div>';
@@ -35511,6 +35555,9 @@ async function triggerReturnToCity(opts) {
   S.ph = 'return';
 
   if (window.__EXPLORE_MODE === 'remote') {
+    /* 2026-05-13 USER REQUEST: mostra magic-circle ANTES do fetch+redirect
+       pra cobrir o gap retornando-para-cidade com loading "real". */
+    if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à cidade…');
     try {
       var data = await window.__postExploracaoTransition('completed');
       if (data && data.url) {
@@ -35522,7 +35569,15 @@ async function triggerReturnToCity(opts) {
         }
         // Limpa sessão volátil (regra Server-Only State aplica ao perfil persistente)
         try { localStorage.removeItem('valdoria_exploracao_session'); } catch (_) {}
-        window.location.replace(data.url);
+        /* 2026-05-13: adiciona ?nointro=1 ao URL retornado pelo servidor pra
+           que cidade boote direto no magic-circle (sem TitleScreen). */
+        var _ret = data.url;
+        try {
+          var _u = new URL(_ret, location.href);
+          if (!_u.searchParams.has('nointro')) _u.searchParams.set('nointro', '1');
+          _ret = _u.toString();
+        } catch(_eU) { /* URL parsing falhou — usa data.url original */ }
+        window.location.replace(_ret);
         return;
       }
       LOGW('RETURN', 'remote transition sem url — mostrando overlay inline como fallback');
@@ -35536,6 +35591,10 @@ async function triggerReturnToCity(opts) {
   // por erro). Mostre mensagem de erro + deixa user tentar de novo.
   if (window.__EXPLORE_MODE === 'remote') {
     LOGE('RETURN', 'remote transition failed — showing error toast (NOT defeat)');
+    /* 2026-05-13 BUGBOT FIX (PR #90): esconde loader pra player ver o
+       toast/erro e poder retomar o jogo. Sem isso, full-screen loader
+       fica preso e bloqueia interaction. */
+    if (window._vTransitionLoader) window._vTransitionLoader.hide();
     // Toast de erro (se vToast disponivel via shared) OU alert inline
     var msg = 'Falha ao retornar. Tente de novo ou feche o app.';
     if (typeof vToast === 'function') {
@@ -35854,6 +35913,9 @@ async function confirmEdgeTransition() {
   if (_isRemoteEdge && ed && ed.targetMap) {
     LOG('EDGE', 'remote edge_travel target=' + ed.targetMap);
     console.info('[E-REM:EDGE] travel_to_map target=' + ed.targetMap);
+    /* 2026-05-13 USER REQUEST: mostra magic-circle ANTES de fetch+redirect.
+       Cobre o gap fetch->location.replace->novo mapa boot com loading "real". */
+    if (window._vTransitionLoader) window._vTransitionLoader.show('Viajando para ' + (ed.label || 'novo mapa') + '…');
     try {
       // Flush log-relay + marca transitioning (anti close-beacon)
       if (window.__exploreLogRelay && window.__exploreLogRelay.forceFlushBeacon) {
@@ -35888,13 +35950,26 @@ async function confirmEdgeTransition() {
         LOG('EDGE', 'remote edge_travel OK — redirecting to new map');
         // Limpa sessão volátil do mapa antigo
         try { localStorage.removeItem('valdoria_exploracao_session'); } catch (_) {}
-        window.location.replace(data.url);
+        /* 2026-05-13: adiciona ?nointro=1 ao URL pra novo mapa bootar direto
+           no magic-circle (sem TitleScreen). */
+        var _edgeUrl = data.url;
+        try {
+          var _eU = new URL(_edgeUrl, location.href);
+          if (!_eU.searchParams.has('nointro')) _eU.searchParams.set('nointro', '1');
+          _edgeUrl = _eU.toString();
+        } catch(_eU2) { /* URL parsing falhou — usa data.url original */ }
+        window.location.replace(_edgeUrl);
         return;
       }
       LOGE('EDGE', 'remote edge_travel sem url — tentando fallback return');
     } catch (e) {
       LOGE('EDGE', 'remote edge_travel failed', (e && e.message) || e);
     }
+    /* 2026-05-13 BUGBOT FIX (PR #90): esconde loader antes do fallback pra
+       player ver UI de erro / nova tela em vez de ficar preso atras do
+       full-screen loader. triggerReturnToCity vai mostrar seu proprio loader
+       (se fluxo for bem-sucedido) ou seu proprio toast de erro. */
+    if (window._vTransitionLoader) window._vTransitionLoader.hide();
     // Fallback: se edge travel falhou, retorna à cidade
     window.__valdoria_transitioning = false;  // reset pra tentativa
     if (typeof triggerReturnToCity === 'function') {
@@ -36128,12 +36203,6 @@ function startQuest(q) {
   if (!S.activeQuests) S.activeQuests = [];
   if (S.activeQuests.some(qq => qq.id === q.id)) { LOG('QUEST', 'already active — skip'); return false; }
   if (completedQuests.has(q.id)) { LOG('QUEST', 'already completed — skip'); return false; }
-  // 2026-05-11 (AAA quest review): bloqueia re-aceite de missão abandonada
-  // na sessão atual (paridade com cidade _abandonQuest).
-  if (window.abandonedQuests && window.abandonedQuests.has(q.id)) {
-    LOG('QUEST', 'already abandoned this session — skip');
-    return false;
-  }
   S.activeQuests.push(Object.assign({ started_at: Date.now(), progress: 'active' }, q));
   updateQuestIndicator();
   dmNarrate({ text: '📜 Nova missão: ' + q.title, type: 'event' });
@@ -36149,9 +36218,6 @@ function completeQuest(questId) {
   const q = S.activeQuests[idx];
   S.activeQuests.splice(idx, 1);
   completedQuests.add(questId);
-  // 2026-05-11 (AAA quest review): rich metadata pra journal exibir
-  // título/reward/data em vez de só ID. Persiste via saveGame/loadGame.
-  if (!window.completedQuestsData) window.completedQuestsData = {};
   let rewardTxt = '';
   if (q.reward) {
     if (q.reward.gold) { rewardTxt += '+' + q.reward.gold + ' Valdoritas '; }
@@ -36159,41 +36225,10 @@ function completeQuest(questId) {
     if (q.reward.item) { rewardTxt += '+' + q.reward.item + ' '; }
     if (q.reward.lore) { rewardTxt += '(Conhecimento: ' + q.reward.lore + ') '; }
   }
-  window.completedQuestsData[questId] = {
-    title: q.title || 'Missão',
-    rewardTxt: rewardTxt.trim(),
-    target_map: q.target_map || null,
-    completedAt: Date.now()
-  };
   updateQuestIndicator();
   dmNarrate({ text: '✦ Missão concluída: ' + q.title + (rewardTxt ? ' — ' + rewardTxt : ''), type: 'action' });
   updateHud();
   saveGame();
-  return true;
-}
-
-// 2026-05-11 (AAA quest review): abandonar missão ATIVA do journal.
-// Mostra confirmação inline (window.confirm) + remove de S.activeQuests
-// + adiciona a abandonedQuests Set (não-completable depois). Espelha
-// _abandonQuest da cidade com confirmação obrigatória.
-function abandonExplorationQuest(questId) {
-  if (!S.activeQuests) return false;
-  const idx = S.activeQuests.findIndex(q => q.id === questId);
-  if (idx === -1) return false;
-  const q = S.activeQuests[idx];
-  const ok = window.confirm('Abandonar a missão "' + q.title + '"?\n\nConsequências:\n• A missão sumirá das ativas\n• Não poderás recebê-la novamente nessa sessão');
-  if (!ok) { LOG('QUEST', 'abandon cancelled by user'); return false; }
-  S.activeQuests.splice(idx, 1);
-  if (!window.abandonedQuests) window.abandonedQuests = new Set();
-  window.abandonedQuests.add(questId);
-  LOG('QUEST', 'abandoned id=' + questId);
-  updateQuestIndicator();
-  dmNarrate({ text: '❌ Missão abandonada: ' + q.title, type: 'event' });
-  saveGame();
-  // Re-render journal (continua aberto)
-  if (document.getElementById('journal-overlay') && document.getElementById('journal-overlay').classList.contains('active')) {
-    openQuestJournal({ questsOnly: true });
-  }
   return true;
 }
 
@@ -36340,7 +36375,11 @@ var LORE_FLAGS_DB = {
       desc: 'A Tenda do Chefe Brakthar esta liberada. Sua lenda comeca aqui.' }
 };
 
-// 2026-05-12 USER REQUEST helpers + redesign
+// 2026-05-12 USER REQUEST: helper pra determinar se uma quest é completável
+// no mapa atual de exploração. Tenta múltiplos heuristics:
+// 1. Match exato target_map === current map_id
+// 2. Match keyword da location na current map_name
+// 3. Match biome em palavras-chave do desc/title da quest
 function _isQuestCompletableHere(q) {
   if (!q || !S) return false;
   var curMap = S.mapId || '';
@@ -37315,12 +37354,24 @@ function _rollDie(sides) {
   return Math.floor(Math.random() * sides) + 1;
 }
 
+// 2026-05-13 USER REPORT FIX: "tentei fazer descanso curto e descanso longo
+// pelo Acampamento mas não está funcionando". Causa provável: HP já full
+// (rest aparenta no-op sem feedback claro) OU listener silencioso.
+// Fix: vToast SEMPRE dispara com resultado visível + serverLog pra diagnosticar
+// futuras reclamações + persistência imediata via __exploreRewards baseline.
 function doShortRest() {
   const p = S.player;
-  if (!p) return;
+  if (!p) {
+    try { window.serverLog && window.serverLog('exploracao', 'warn', 'camp_short_no_player'); } catch (_) {}
+    return;
+  }
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_start',
+    { hp: p.hp, mhp: p.mhp, hd: p.hd, mhd: p.mhd, exh: p.exh }); } catch (_) {}
   if ((p.hd || 0) <= 0) {
     const status = document.getElementById('camp-footer-status');
-    if (status) status.textContent = 'Sem Hit Dice. Use descanso longo.';
+    const msg = 'Sem Dado de Vida disponível. Use Descanso Longo.';
+    if (status) status.textContent = msg;
+    if (typeof vToast === 'function') vToast('💤 ' + msg, 'warn');
     return;
   }
   const dieSides = 8;
@@ -37331,12 +37382,15 @@ function doShortRest() {
   p.hp = Math.min(p.mhp, p.hp + heal);
   const actual = p.hp - preHp;
   p.hd = Math.max(0, (p.hd || 0) - 1);
+  const fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
   const status = document.getElementById('camp-footer-status');
-  if (status) {
-    status.textContent = '💤 Descanso Curto: rolou 1d' + dieSides + '=' + roll
-      + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
-      + ' HP. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
-  }
+  const msg = '💤 Descanso Curto: 1d' + dieSides + '=' + roll
+    + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
+    + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+  if (status) status.textContent = msg;
+  if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done',
+    { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
@@ -37344,7 +37398,12 @@ function doShortRest() {
 
 function doLongRest() {
   const p = S.player;
-  if (!p) return;
+  if (!p) {
+    try { window.serverLog && window.serverLog('exploracao', 'warn', 'camp_long_no_player'); } catch (_) {}
+    return;
+  }
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_long_start',
+    { hp: p.hp, mhp: p.mhp, mp: p.mp, mmp: p.mmp, hd: p.hd, mhd: p.mhd, exh: p.exh }); } catch (_) {}
   const preHp = p.hp;
   const preMp = p.mp;
   const preExh = p.exh || 0;
@@ -37356,11 +37415,20 @@ function doLongRest() {
   p.hd = Math.min((p.mhd || 2), preHd + hdRecover);
   const healHp = p.hp - preHp;
   const healMp = p.mp - preMp;
+  const hdGain = p.hd - preHd;
+  const fullNote = (healHp === 0 && healMp === 0 && hdGain === 0 && preExh === 0)
+    ? ' (já totalmente descansado)' : '';
   const status = document.getElementById('camp-footer-status');
-  if (status) {
-    status.textContent = '🌙 Descanso Longo: HP+' + healHp + ', MP+' + healMp
-      + ', HD+' + (p.hd - preHd) + ', Exaustão ' + (preExh > 0 ? '-1' : 'ok');
-  }
+  const msg = '🌙 Descanso Longo: HP+' + healHp + ', MP+' + healMp
+    + ', HD+' + hdGain + ', Exaustão ' + (preExh > 0 ? '-1' : 'ok') + fullNote;
+  if (status) status.textContent = msg;
+  // 2026-05-13 BUGBOT FIX (PR #90 cursor review): inclui preExh > 0 no check
+  // de "had effect" — descanso longo que so reduz exaustao tambem e success,
+  // nao info. Consistente com fullNote logic acima (preExh === 0 == 'já cheio').
+  const hadEffect = (healHp + healMp + hdGain) > 0 || preExh > 0;
+  if (typeof vToast === 'function') vToast(msg, hadEffect ? 'success' : 'info');
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_long_done',
+    { heal_hp: healHp, heal_mp: healMp, hd_gain: hdGain, exh_after: p.exh }); } catch (_) {}
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
@@ -37418,13 +37486,10 @@ const SAVE_KEY = 'valdoria_explore_v22';
 function saveGame() {
   try {
     const payload = {
-      v: '2.3',  // 2026-05-11: bump pra v2.3 com completedQuestsData + abandonedQuests
+      v: '2.2',
       ts: Date.now(),
       visitedMapIds: Array.from(visitedMapIds),
       completedQuests: Array.from(completedQuests),
-      // 2026-05-11 (AAA quest review): rich metadata + abandoned quests
-      completedQuestsData: window.completedQuestsData || {},
-      abandonedQuests: window.abandonedQuests ? Array.from(window.abandonedQuests) : [],
       enemiesEncountered: serializeSetMap(enemiesEncountered),
       enemyEncounterStats: enemyEncounterStats,
       materialsFound: serializeSetMap(materialsFound),
@@ -37467,9 +37532,6 @@ function loadGame() {
     LOG('LOAD', 'save parsed v=' + s.v + ' ts=' + new Date(s.ts).toISOString() + ' size=' + raw.length + 'B');
     if (s.visitedMapIds) visitedMapIds = new Set(s.visitedMapIds);
     if (s.completedQuests) completedQuests = new Set(s.completedQuests);
-    // 2026-05-11 (AAA quest review): restaura rich metadata + abandonadas
-    if (s.completedQuestsData) window.completedQuestsData = s.completedQuestsData;
-    if (s.abandonedQuests) window.abandonedQuests = new Set(s.abandonedQuests);
     if (s.enemiesEncountered) {
       enemiesEncountered = {};
       for (const k in s.enemiesEncountered) enemiesEncountered[k] = new Set(s.enemiesEncountered[k]);
@@ -37503,8 +37565,6 @@ function resetSave() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { LOGE('SAVE', 'removeItem failed', e.message); }
   visitedMapIds = new Set();
   completedQuests = new Set();
-  window.completedQuestsData = {};
-  window.abandonedQuests = new Set();
   enemiesEncountered = {};
   enemyEncounterStats = {};
   materialsFound = {};
@@ -39949,8 +40009,18 @@ function bindPinchZoom() {
 
 function bindQuickActions() {
   // X-6.5.14: camp modal (short/long rest) em vez de stub "[V2]"
+  // 2026-05-13 USER REPORT FIX: btn-camp silenciava quando phase != idle
+  // (durante eventos/combat/loading). User reportava "Acampamento não funciona"
+  // sem entender o porquê. Agora dá toast explicando.
   document.getElementById('btn-camp').addEventListener('click', () => {
-    if (S.ph !== 'idle') return;
+    if (S.ph !== 'idle') {
+      try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_blocked_by_phase',
+        { phase: S.ph }); } catch (_) {}
+      if (typeof vToast === 'function') {
+        vToast('⏳ Não é possível acampar agora — termine a ação atual primeiro.', 'warn');
+      }
+      return;
+    }
     openCampOverlay();
   });
   // X-6.5.19: IDs do HTML real portado de explore/index.html
@@ -39965,14 +40035,24 @@ function bindQuickActions() {
   // visual de cidade.html#_showInventoryPopup. User pediu "deve ser uma
   // mochila padrão, mesma fonte de design e funcionalidades abrindo como
   // popup na tela inteira em ambos html". Popup canonical aqui no HTML
-  // (#inv-overlay).
-  // 2026-05-11: REMOVIDO branch REMOTE pra /inventory/ — user reportou que
-  // /inventory/ é a UI antiga sem icones heraldicos, e quer SEMPRE o popup
-  // canonical (3 colunas + ic-it-* SVG igual cidade.html#_renderInventoryPopup).
-  // Bonus: elimina 401 inventory->exploracao do transition handler que faltava
-  // case 'inventory' em _validate_source_session.
+  // (#inv-overlay). REMOTE: ainda navega pra /inventory/ se preferir o
+  // sistema completo.
   document.getElementById('btn-inventory').addEventListener('click', function() {
-    _showExploracaoInventoryPopup();
+    if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN) {
+      // REMOTE: usa /inventory/ webapp SPA (sistema completo com 7 arquivos JS)
+      var params = new URLSearchParams();
+      params.set('token', window.__EXPLORE_TOKEN);
+      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
+      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
+      params.set('return', 'exploracao');
+      if (S && S.mapId) params.set('return_map', S.mapId);
+      params.set('_cb', String(Date.now()));
+      window.__valdoria_transitioning = true;
+      window.location.href = '/inventory/?' + params.toString();
+    } else {
+      // LOCAL (file://): popup inline canonical
+      _showExploracaoInventoryPopup();
+    }
   });
 
   // Wire close button + backdrop click
@@ -42243,7 +42323,7 @@ body.silhouettes-demo-mode #silhouettes-demo-layer { display: block; }
   transform: translateX(-50%);
   background: rgba(15, 12, 10, 0.92);
   color: #c4953a;
-  font-family: 'Cinzel', 'Marcellus', serif;
+  font-family: 'Cinzel', 'MedievalSharp', serif;
   font-size: 8px;
   font-weight: 700;
   padding: 1px 4px;
