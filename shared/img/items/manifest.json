@@ -383,6 +383,198 @@
       "cost": 0.005105000000000001,
       "quality": "low",
       "category": "scroll"
+    },
+    "mapa-do-ermo-gelado": {
+      "timestamp": "2026-05-15T22:05:33.354812",
+      "cost": 0.005105000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-vulcanico": {
+      "timestamp": "2026-05-15T22:06:10.760203",
+      "cost": 0.005105000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-das-planicies": {
+      "timestamp": "2026-05-15T22:06:46.370704",
+      "cost": 0.0051,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "luneta": {
+      "timestamp": "2026-05-15T22:07:24.602571",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "bussola-magica": {
+      "timestamp": "2026-05-15T22:08:00.905257",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "ferramentas-de-navegacao": {
+      "timestamp": "2026-05-15T22:08:36.527116",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "rotas-comerciais": {
+      "timestamp": "2026-05-15T22:09:15.816046",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "barraca": {
+      "timestamp": "2026-05-15T22:09:47.822643",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "kit-de-acampamento": {
+      "timestamp": "2026-05-15T22:10:23.059904",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "saco-de-dormir": {
+      "timestamp": "2026-05-15T22:10:55.561656",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "tool"
+    },
+    "corda-de-canhamo-(15m)": {
+      "timestamp": "2026-05-15T22:11:32.219676",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "isqueiro": {
+      "timestamp": "2026-05-15T22:12:07.987507",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "cantil-de-couro": {
+      "timestamp": "2026-05-15T22:12:39.941524",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "carne-assada": {
+      "timestamp": "2026-05-15T22:13:14.094160",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cogumelo-grelhado": {
+      "timestamp": "2026-05-15T22:13:50.434514",
+      "cost": 0.0049250000000000006,
+      "quality": "low",
+      "category": "potion"
+    },
+    "carne-chamuscada": {
+      "timestamp": "2026-05-15T22:14:20.735446",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "carne-purificada": {
+      "timestamp": "2026-05-15T22:14:54.590699",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "adaga-enferrujada": {
+      "timestamp": "2026-05-15T22:15:26.236140",
+      "cost": 0.0049700000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-curta": {
+      "timestamp": "2026-05-15T22:15:58.829246",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-longa-+1": {
+      "timestamp": "2026-05-15T22:16:30.806357",
+      "cost": 0.0049700000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machado-de-guerra-+1": {
+      "timestamp": "2026-05-15T22:17:03.832430",
+      "cost": 0.0048850000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "martelo-de-guerra-+1": {
+      "timestamp": "2026-05-15T22:17:38.104611",
+      "cost": 0.004940000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arma-magica-+1": {
+      "timestamp": "2026-05-15T22:18:10.048629",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-de-madeira": {
+      "timestamp": "2026-05-15T22:18:41.981671",
+      "cost": 0.004945000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cajado-de-aprendiz": {
+      "timestamp": "2026-05-15T22:19:12.324131",
+      "cost": 0.004955000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machado-de-batalha": {
+      "timestamp": "2026-05-15T22:19:43.408934",
+      "cost": 0.004910000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-de-treino": {
+      "timestamp": "2026-05-15T22:20:15.675693",
+      "cost": 0.00493,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cajado-de-salgueiro": {
+      "timestamp": "2026-05-15T22:20:50.326894",
+      "cost": 0.004965000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "adaga-balanceada": {
+      "timestamp": "2026-05-15T22:21:24.883011",
+      "cost": 0.004920000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-de-caca": {
+      "timestamp": "2026-05-15T22:21:55.525045",
+      "cost": 0.004955000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "maca-de-estrela": {
+      "timestamp": "2026-05-15T22:22:27.469737",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "rapieira": {
+      "timestamp": "2026-05-15T22:23:04.893081",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
