@@ -42,27 +42,69 @@
 
   if (window.vInventory && window.vInventory.__loaded) return;
 
-  // Registra grid + swap list no scroll-hint-arrow canonical (seta animada
-  // inferior pra indicar mais conteúdo abaixo). MutationObserver do
-  // shared/scroll-hint-arrow.js captura overlay automático quando criado.
-  function _vinvSetupScrollHint() {
-    try {
-      if (window.vScrollHint && typeof window.vScrollHint.register === 'function') {
-        window.vScrollHint.register('.vinv-grid');
-        window.vScrollHint.register('.vinv-swap-list');
-        window.vScrollHint.register('.vinv-detail-desc');
-        window.vScrollHint.register('.vinv-loadout');
+  /**
+   * Custom scroll arrow pro vInventory (não usa shared/scroll-hint-arrow.js).
+   *
+   * Motivo: shared insere arrow como child do scrolling container — arrow rola
+   * com o conteúdo. Aqui inserimos no PAINEL (position relative parent), absoluta
+   * acima do footer. Listener no grid muda direção:
+   *   - Topo/meio    → ▼ (anima bounce, não-clickable, indica "há mais abaixo")
+   *   - Bottom       → ▲ (clickable, scroll-to-top suave — timeline pattern)
+   *   - Sem overflow → oculta
+   *
+   * Regra do user 2026-05-14: "seta deve acompanhar o scrolling até não ter
+   * como fazer mais, e quando chegar no final mostrar seta pra cima que sobe
+   * toda a tela, assim como sites com timeline".
+   */
+  function _vinvAttachScrollArrow(scrollEl, panelEl) {
+    if (!scrollEl || !panelEl || panelEl.__vinvScrollArrow) return;
+    panelEl.__vinvScrollArrow = true;
+
+    var arrow = document.createElement('div');
+    arrow.className = 'vinv-scroll-arrow down hidden';
+    arrow.setAttribute('role', 'button');
+    arrow.setAttribute('aria-label', 'Rolar');
+    arrow.innerHTML = '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 12L2 6h12z" fill="currentColor"/></svg>';
+    panelEl.appendChild(arrow);
+
+    function update() {
+      if (!scrollEl.isConnected) return;
+      var atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 6;
+      var hasScroll = scrollEl.scrollHeight > scrollEl.clientHeight + 4;
+      if (!hasScroll) {
+        arrow.classList.add('hidden');
+        return;
       }
-    } catch (_) { /* sem scroll hint = sem problema */ }
-  }
-  if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', _vinvSetupScrollHint);
-    } else {
-      _vinvSetupScrollHint();
+      arrow.classList.remove('hidden');
+      if (atBottom) {
+        arrow.classList.remove('down');
+        arrow.classList.add('up');
+        arrow.setAttribute('aria-label', 'Voltar ao topo');
+      } else {
+        arrow.classList.remove('up');
+        arrow.classList.add('down');
+        arrow.setAttribute('aria-label', 'Há mais itens abaixo — rolar');
+      }
     }
-    // Retry em 1s caso vScrollHint ainda não carregou
-    setTimeout(_vinvSetupScrollHint, 1000);
+
+    arrow.addEventListener('click', function () {
+      if (arrow.classList.contains('up')) {
+        scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Down click: scroll down by a viewport
+        scrollEl.scrollBy({ top: scrollEl.clientHeight * 0.8, behavior: 'smooth' });
+      }
+    });
+
+    scrollEl.addEventListener('scroll', update, { passive: true });
+    try {
+      var ro = new ResizeObserver(update);
+      ro.observe(scrollEl);
+    } catch (_) { /* ok */ }
+
+    // Updates iniciais
+    setTimeout(update, 80);
+    setTimeout(update, 400);
   }
 
   // ============================================================
@@ -334,6 +376,11 @@
     }
 
     _renderFooter(root.querySelector('[data-region="footer"]'), cfg);
+
+    // Attach scroll arrow no painel uma vez (idempotente — flag interna).
+    // Listener é re-disparado pelo próprio scroll do gridEl.
+    var panelEl = root.querySelector('.vinv-panel');
+    _vinvAttachScrollArrow(gridEl, panelEl);
   }
 
   // ============================================================

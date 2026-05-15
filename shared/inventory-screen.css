@@ -951,6 +951,64 @@
 .vinv-lstat .vinv-v.bonus { color: var(--vinv-r-uncommon); }
 
 /* ================================================================
+   13b. SCROLL ARROW custom — sticky bottom do panel (não do grid).
+        Direção dinâmica: ▼ no meio (anima bounce, hint não-clickable),
+        ▲ no fim (clickable, scroll-to-top suave — timeline pattern).
+        Regra user 2026-05-14: arrow "acompanha o scrolling até não ter
+        como fazer mais, e quando chegar no final mostra seta pra cima".
+   ================================================================ */
+.vinv-scroll-arrow {
+  position: absolute;
+  bottom: 78px;  /* acima do footer (~58px) com folga */
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(180deg, rgba(15, 12, 8, 0.9), rgba(28, 20, 12, 0.96));
+  border: 1px solid rgba(196, 149, 58, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vinv-gold);
+  z-index: 10;
+  opacity: 0.92;
+  transform: translateX(-50%);
+  transition: opacity 0.25s ease, background 0.2s ease;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), 0 0 14px rgba(196, 149, 58, 0.3);
+}
+.vinv-scroll-arrow.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.vinv-scroll-arrow svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  transition: transform 0.3s ease;
+}
+/* ▲ no fim do scroll: flip via SVG transform */
+.vinv-scroll-arrow.up svg {
+  transform: rotate(180deg);
+}
+.vinv-scroll-arrow:hover {
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.25), rgba(28, 20, 12, 0.96));
+}
+/* Bounce animation só na direção descendente (indica "mais conteúdo abaixo") */
+@keyframes vinvScrollArrowBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(4px); }
+}
+.vinv-scroll-arrow.down {
+  animation: vinvScrollArrowBounce 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vinv-scroll-arrow { animation: none !important; }
+}
+
+/* ================================================================
    13. EMPTY STATE
    ================================================================ */
 .vinv-empty {
