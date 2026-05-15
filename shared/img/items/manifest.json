@@ -2333,6 +2333,90 @@
       "cost": 0.004785000000000001,
       "quality": "low",
       "category": "potion"
+    },
+    "pocao-de-cura-suprema": {
+      "timestamp": "2026-05-15T23:36:15.449467",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-heroismo": {
+      "timestamp": "2026-05-15T23:36:30.433990",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-resistencia-ao-fogo": {
+      "timestamp": "2026-05-15T23:36:42.192277",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-resistencia-ao-frio": {
+      "timestamp": "2026-05-15T23:36:58.306011",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-velocidade": {
+      "timestamp": "2026-05-15T23:37:08.249662",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-invisibilidade": {
+      "timestamp": "2026-05-15T23:37:20.878349",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "antidoto": {
+      "timestamp": "2026-05-15T23:37:36.658668",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "capa-de-protecao": {
+      "timestamp": "2026-05-15T23:37:50.282869",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "perola-do-poder": {
+      "timestamp": "2026-05-15T23:37:55.871029",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "bolsa-de-contencao": {
+      "timestamp": "2026-05-15T23:38:14.626572",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pedra-da-sorte": {
+      "timestamp": "2026-05-15T23:38:26.020552",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "botas-elficas": {
+      "timestamp": "2026-05-15T23:38:41.931252",
+      "cost": 0.004895000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-elfico": {
+      "timestamp": "2026-05-15T23:38:54.054601",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "amuleto-de-saude": {
+      "timestamp": "2026-05-15T23:39:07.867867",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
