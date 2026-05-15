@@ -104,12 +104,13 @@
 
 # Bundle hash script — MUST revalidate on every visit so a deploy that
 # bumps the hash reaches every player immediately. Lives at root path
-# (NOT inside /shared/) so the /shared/*.js wildcard above doesn't
-# concat its `immutable` directive — CF Pages dedups Cache-Control and
-# strips `no-cache` when `immutable` is also present in the merged value.
-# Verified via curl + browser Performance API (2026-05-15).
+# (NOT inside /shared/ + no underscore prefix) so neither the
+# /shared/*.js wildcard nor CF Pages reserved-path handling apply.
+# Uses bare `no-cache` (same syntax as /cidade/ which works), without
+# `must-revalidate` — CF Pages was honoring nosniff but ignoring our
+# Cache-Control when both were combined with must-revalidate.
 /bundle-version.js
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache
   X-Content-Type-Options: nosniff
 
 # =======================================================================
