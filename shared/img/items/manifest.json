@@ -1133,6 +1133,90 @@
       "cost": 0.004815000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "cota-de-malha-enferrujada": {
+      "timestamp": "2026-05-15T22:44:36.683040",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "elmo-de-ossos": {
+      "timestamp": "2026-05-15T22:44:48.400999",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "frasco-de-luz-estelar": {
+      "timestamp": "2026-05-15T22:45:17.050647",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "perneiras-reforcadas": {
+      "timestamp": "2026-05-15T22:45:18.823478",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "capa-da-meia-noite": {
+      "timestamp": "2026-05-15T22:45:35.092407",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "espada-longa-+2": {
+      "timestamp": "2026-05-15T22:45:44.320544",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-longa-flamejante": {
+      "timestamp": "2026-05-15T22:45:53.015641",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-longa-gelida": {
+      "timestamp": "2026-05-15T22:46:05.897480",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "espada-longa-trovejante": {
+      "timestamp": "2026-05-15T22:46:19.095937",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cota-de-malha-+1": {
+      "timestamp": "2026-05-15T22:46:50.848708",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cota-de-malha-+2": {
+      "timestamp": "2026-05-15T22:46:53.106000",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "armadura-de-couro-+1": {
+      "timestamp": "2026-05-15T22:47:00.806085",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo": {
+      "timestamp": "2026-05-15T22:47:15.033287",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "escudo-+1": {
+      "timestamp": "2026-05-15T22:47:26.486705",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
