@@ -803,6 +803,84 @@
       "cost": 0.004745000000000001,
       "quality": "low",
       "category": "default"
+    },
+    "manto-sombrio": {
+      "timestamp": "2026-05-15T22:32:33.830214",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "cinto-de-utilidades": {
+      "timestamp": "2026-05-15T22:32:44.589153",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "cinto-de-ferro": {
+      "timestamp": "2026-05-15T22:32:58.034542",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "anel-de-cobre": {
+      "timestamp": "2026-05-15T22:33:08.727096",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "default"
+    },
+    "amuleto-de-vitalidade": {
+      "timestamp": "2026-05-15T22:33:21.718984",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "veste-arcana": {
+      "timestamp": "2026-05-15T22:33:42.166914",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "braceletes-runicos": {
+      "timestamp": "2026-05-15T22:33:49.604664",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tiara-do-conhecimento": {
+      "timestamp": "2026-05-15T22:34:02.990702",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-magico": {
+      "timestamp": "2026-05-15T22:34:15.875049",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cimitarra-+1": {
+      "timestamp": "2026-05-15T22:34:39.722477",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-longo-+1": {
+      "timestamp": "2026-05-15T22:34:50.251525",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-curto-+1": {
+      "timestamp": "2026-05-15T22:35:05.288339",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "bordao-+1": {
+      "timestamp": "2026-05-15T22:35:18.387935",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
