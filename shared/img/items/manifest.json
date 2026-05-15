@@ -649,8 +649,8 @@
       "category": "weapon"
     },
     "ombreiras-de-malha": {
-      "timestamp": "2026-05-15T22:26:41.906607",
-      "cost": 0.004825000000000001,
+      "timestamp": "2026-05-15T23:06:13.306936",
+      "cost": 0.005020000000000001,
       "quality": "low",
       "category": "armor"
     },
@@ -739,8 +739,8 @@
       "category": "magical"
     },
     "peitoral-de-couro": {
-      "timestamp": "2026-05-15T22:30:06.967389",
-      "cost": 0.004750000000000001,
+      "timestamp": "2026-05-15T23:05:54.091625",
+      "cost": 0.005035000000000001,
       "quality": "low",
       "category": "armor"
     },
@@ -757,44 +757,44 @@
       "category": "weapon"
     },
     "ombreiras-de-couro": {
-      "timestamp": "2026-05-15T22:30:43.988199",
-      "cost": 0.004750000000000001,
+      "timestamp": "2026-05-15T23:06:00.943666",
+      "cost": 0.005020000000000001,
       "quality": "low",
       "category": "armor"
     },
     "luvas-de-couro": {
-      "timestamp": "2026-05-15T22:30:59.094800",
-      "cost": 0.00476,
+      "timestamp": "2026-05-15T23:06:25.650655",
+      "cost": 0.005030000000000001,
       "quality": "low",
       "category": "weapon"
     },
     "luvas-de-tecido": {
-      "timestamp": "2026-05-15T22:31:07.403461",
-      "cost": 0.0048000000000000004,
+      "timestamp": "2026-05-15T23:06:45.669494",
+      "cost": 0.005030000000000001,
       "quality": "low",
       "category": "armor"
     },
     "perneiras-de-couro": {
-      "timestamp": "2026-05-15T22:31:21.628019",
-      "cost": 0.004750000000000001,
+      "timestamp": "2026-05-15T23:06:55.200110",
+      "cost": 0.004965000000000001,
       "quality": "low",
       "category": "armor"
     },
     "calcas-de-la": {
-      "timestamp": "2026-05-15T22:31:36.748787",
-      "cost": 0.00476,
+      "timestamp": "2026-05-15T23:07:04.131522",
+      "cost": 0.005015,
       "quality": "low",
       "category": "armor"
     },
     "botas-de-couro": {
-      "timestamp": "2026-05-15T22:31:51.384843",
-      "cost": 0.00476,
+      "timestamp": "2026-05-15T23:07:19.191756",
+      "cost": 0.0049900000000000005,
       "quality": "low",
       "category": "weapon"
     },
     "sandalias-de-couro": {
-      "timestamp": "2026-05-15T22:32:05.537898",
-      "cost": 0.004750000000000001,
+      "timestamp": "2026-05-15T23:07:31.395116",
+      "cost": 0.0049050000000000005,
       "quality": "low",
       "category": "armor"
     },
@@ -1369,8 +1369,8 @@
       "category": "potion"
     },
     "ensopado-revigorante": {
-      "timestamp": "2026-05-15T22:53:03.352434",
-      "cost": 0.004805000000000001,
+      "timestamp": "2026-05-15T23:08:49.471694",
+      "cost": 0.005095000000000001,
       "quality": "low",
       "category": "potion"
     },
@@ -1703,6 +1703,24 @@
       "cost": 0.004845,
       "quality": "low",
       "category": "sacred"
+    },
+    "espada-curta-+1": {
+      "timestamp": "2026-05-15T23:07:43.015582",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "veneno-para-ratos-(missao)": {
+      "timestamp": "2026-05-15T23:07:58.366359",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "diario-de-edric": {
+      "timestamp": "2026-05-15T23:08:11.608446",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
