@@ -1369,8 +1369,8 @@
       "category": "potion"
     },
     "ensopado-revigorante": {
-      "timestamp": "2026-05-15T23:08:49.471694",
-      "cost": 0.005095000000000001,
+      "timestamp": "2026-05-15T22:53:03.352434",
+      "cost": 0.004805000000000001,
       "quality": "low",
       "category": "potion"
     },
@@ -1721,6 +1721,84 @@
       "cost": 0.004740000000000001,
       "quality": "low",
       "category": "default"
+    },
+    "receita-especial-de-martha": {
+      "timestamp": "2026-05-15T23:08:35.795335",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "adaga-das-sombras": {
+      "timestamp": "2026-05-15T23:08:36.699102",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "fragmento-de-obsidiana": {
+      "timestamp": "2026-05-15T23:08:52.187994",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "essencia-purificadora": {
+      "timestamp": "2026-05-15T23:09:08.029710",
+      "cost": 0.004910000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "selo-de-verdade": {
+      "timestamp": "2026-05-15T23:09:14.388505",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "lista-de-ingredientes": {
+      "timestamp": "2026-05-15T23:09:29.002093",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "amuleto-tribal": {
+      "timestamp": "2026-05-15T23:09:56.604582",
+      "cost": 0.004880000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "escudo-da-redencao": {
+      "timestamp": "2026-05-15T23:10:09.108358",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pagina-do-grimorio": {
+      "timestamp": "2026-05-15T23:10:37.808333",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-do-pacto": {
+      "timestamp": "2026-05-15T23:11:01.190151",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "partitura-elfica": {
+      "timestamp": "2026-05-15T23:11:17.254790",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "simbolo-purificado": {
+      "timestamp": "2026-05-15T23:11:28.854055",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "semente-da-cura": {
+      "timestamp": "2026-05-15T23:11:40.026824",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "jewelry"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
