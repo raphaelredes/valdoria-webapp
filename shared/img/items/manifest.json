@@ -1553,6 +1553,90 @@
       "cost": 0.0048200000000000005,
       "quality": "low",
       "category": "weapon"
+    },
+    "flechas-de-prata-(20)": {
+      "timestamp": "2026-05-15T22:59:46.322985",
+      "cost": 0.005005000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "manto-da-sombra": {
+      "timestamp": "2026-05-15T23:00:00.510476",
+      "cost": 0.0049250000000000006,
+      "quality": "low",
+      "category": "cursed"
+    },
+    "grimorio-menor": {
+      "timestamp": "2026-05-15T23:00:18.562111",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "engenhoca-aleatoria": {
+      "timestamp": "2026-05-15T23:00:27.147673",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "reliquia-antiga": {
+      "timestamp": "2026-05-15T23:00:42.587150",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "mercadoria-proibida": {
+      "timestamp": "2026-05-15T23:00:55.099727",
+      "cost": 0.004950000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lute-magico": {
+      "timestamp": "2026-05-15T23:01:04.887110",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "falcao-de-caca": {
+      "timestamp": "2026-05-15T23:01:19.675878",
+      "cost": 0.004920000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "racao-de-cavalo": {
+      "timestamp": "2026-05-15T23:01:33.182333",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "quinquilharia": {
+      "timestamp": "2026-05-15T23:01:44.399619",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "baralho-de-taro": {
+      "timestamp": "2026-05-15T23:02:05.949967",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "frasco-de-veneno": {
+      "timestamp": "2026-05-15T23:02:09.657460",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "bomba-de-fumaca": {
+      "timestamp": "2026-05-15T23:02:25.420197",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "fogo-alquimico": {
+      "timestamp": "2026-05-15T23:02:37.658343",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "potion"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
