@@ -1469,6 +1469,90 @@
       "cost": 0.004835000000000001,
       "quality": "low",
       "category": "tool"
+    },
+    "pergaminho-de-bola-de-fogo": {
+      "timestamp": "2026-05-15T22:56:47.262735",
+      "cost": 0.00493,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-cone-de-gelo": {
+      "timestamp": "2026-05-15T22:56:59.274099",
+      "cost": 0.00493,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-luz-ofuscante": {
+      "timestamp": "2026-05-15T22:57:27.355397",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-em-branco": {
+      "timestamp": "2026-05-15T22:57:28.038307",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "amuleto-da-sorte": {
+      "timestamp": "2026-05-15T22:57:38.662503",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cantil-magico": {
+      "timestamp": "2026-05-15T22:57:48.951945",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cha-do-vigor": {
+      "timestamp": "2026-05-15T22:58:07.150268",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "raiz-de-mana": {
+      "timestamp": "2026-05-15T22:58:17.149325",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "ervas-da-vitalidade": {
+      "timestamp": "2026-05-15T22:58:30.175240",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "antidoto-universal": {
+      "timestamp": "2026-05-15T22:58:42.306235",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "ataduras-medicinais": {
+      "timestamp": "2026-05-15T22:58:55.484827",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "veneno-refinado": {
+      "timestamp": "2026-05-15T22:59:06.829739",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "cerveja-forte": {
+      "timestamp": "2026-05-15T22:59:22.747983",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "escudo-pequeno": {
+      "timestamp": "2026-05-15T22:59:37.609734",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
