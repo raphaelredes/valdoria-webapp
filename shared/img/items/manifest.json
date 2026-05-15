@@ -2837,6 +2837,90 @@
       "cost": 0.004850000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "elmo-do-protetor-ancestral": {
+      "timestamp": "2026-05-15T23:54:25.931190",
+      "cost": 0.004995000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "manto-do-arcanista": {
+      "timestamp": "2026-05-15T23:54:42.614106",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chapeu-do-arcanista": {
+      "timestamp": "2026-05-15T23:54:57.191300",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "orbe-do-arcanista": {
+      "timestamp": "2026-05-15T23:55:07.469759",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-do-devoto-solar": {
+      "timestamp": "2026-05-15T23:55:19.781310",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "amuleto-do-devoto-solar": {
+      "timestamp": "2026-05-15T23:55:32.094150",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "luvas-do-devoto-solar": {
+      "timestamp": "2026-05-15T23:55:46.084553",
+      "cost": 0.0050100000000000006,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "arco-do-guardiao-silvestre": {
+      "timestamp": "2026-05-15T23:55:56.716429",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "capa-do-guardiao-silvestre": {
+      "timestamp": "2026-05-15T23:56:11.447387",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "grevas-do-guardiao-silvestre": {
+      "timestamp": "2026-05-15T23:56:23.850139",
+      "cost": 0.004995000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "machado-da-furia-das-montanhas": {
+      "timestamp": "2026-05-15T23:56:41.515237",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "peitoral-da-furia-das-montanhas": {
+      "timestamp": "2026-05-15T23:56:51.364860",
+      "cost": 0.005045000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cinto-da-furia-das-montanhas": {
+      "timestamp": "2026-05-15T23:57:04.749581",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lamina-do-lamento-sombrio": {
+      "timestamp": "2026-05-15T23:57:14.389995",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
