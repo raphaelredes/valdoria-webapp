@@ -13524,37 +13524,55 @@ function _renderInnHubAAA(container, data) {
   root.innerHTML =
     '<style>'
     + '.inn-hub-aaa{display:flex;flex-direction:column;gap:10px;padding:6px 4px 10px;}'
-    // HERO: lareira + cama + lavender
-    + '.inn-hero{position:relative;height:120px;margin:0 -2px;border-radius:12px;overflow:hidden;'
-    +   'background:radial-gradient(ellipse at 50% 100%,rgba(255,160,80,0.32) 0%,rgba(60,30,15,0.0) 60%),'
-    +   'linear-gradient(180deg,#2a1a10 0%,#3a2618 55%,#1c1008 100%);'
-    +   'border:1px solid rgba(196,149,58,0.40);'
-    +   'box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 30px rgba(255,140,40,0.10);'
-    +   'animation:innHeroPulse 5s ease-in-out infinite;}'
-    // Cama silhouette (background decorativo)
-    + '.inn-bed{position:absolute;left:50%;top:18px;transform:translateX(-50%);width:64px;height:48px;'
-    +   'opacity:0.45;pointer-events:none;}'
-    + '.inn-bed::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:#3a2818;border-radius:4px 4px 0 0;}'  // canopy
-    + '.inn-bed::after{content:"";position:absolute;left:6px;right:6px;top:14px;bottom:0;background:linear-gradient(180deg,#6a4a30,#3a2818);border-radius:2px;border:1px solid #2a1a0e;}'
-    // Lareira (orange glow no rodapé)
-    + '.inn-fire{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:80px;height:36px;'
-    +   'background:radial-gradient(ellipse at 50% 100%,rgba(255,180,80,0.85) 0%,rgba(255,120,40,0.4) 35%,transparent 65%);'
-    +   'pointer-events:none;filter:blur(2px);animation:innFireFlicker 1.8s ease-in-out infinite;}'
-    + '.inn-fire::after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:16px;'
-    +   'background:radial-gradient(ellipse at 50% 100%,#fff4c0 0%,#ffb060 40%,transparent 70%);'
-    +   'filter:blur(1px);}'
-    // Título da estalagem
-    + '.inn-title{position:absolute;left:0;right:0;top:14px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);'
-    +   'font-size:14px;font-weight:700;letter-spacing:3px;color:#ffd8a0;'
-    +   'text-shadow:0 0 12px rgba(255,180,80,0.65),0 1px 2px rgba(0,0,0,0.7);z-index:2;}'
-    + '.inn-sub{position:absolute;left:0;right:0;top:32px;text-align:center;font-size:10px;color:#c4953a;letter-spacing:2px;opacity:0.85;z-index:2;}'
-    + '.inn-meta{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:9px;color:#a09484;letter-spacing:1.5px;opacity:0.7;z-index:2;}'
-    // Lavender drift (3 partículas)
-    + '.inn-lav{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#d8b5e8,#7a4a8a 70%,transparent);'
-    +   'pointer-events:none;animation:innLavDrift 6s ease-in-out infinite;}'
-    + '.inn-lav-1{left:18%;top:60%;animation-delay:0s;}'
-    + '.inn-lav-2{left:78%;top:55%;animation-delay:2s;}'
-    + '.inn-lav-3{left:48%;top:65%;animation-delay:4s;}'
+    // HERO: parede de pedra + viga + lareira + janela noturna (X-6.5.51BL 2026-05-15)
+    + '.inn-hero{position:relative;height:140px;margin:0 -2px;border-radius:12px;overflow:hidden;'
+    +   'border:1px solid rgba(196,149,58,0.45);'
+    +   'box-shadow:0 6px 18px rgba(0,0,0,0.55),inset 0 0 24px rgba(0,0,0,0.4);}'
+    // Camada 1: parede de pedra (gradiente base + brick pattern)
+    + '.inn-stone{position:absolute;inset:0;'
+    +   'background:'
+    +     'linear-gradient(180deg,#1f140c 0%,#2a1a10 40%,#22150c 100%),'
+    +     'repeating-linear-gradient(0deg,transparent 0,transparent 18px,rgba(0,0,0,0.45) 18px,rgba(0,0,0,0.45) 19px),'
+    +     'repeating-linear-gradient(90deg,transparent 0,transparent 32px,rgba(0,0,0,0.35) 32px,rgba(0,0,0,0.35) 33px);'
+    +   'background-blend-mode:normal,multiply,multiply;opacity:0.92;}'
+    // Camada 2: viga de madeira no topo
+    + '.inn-beam{position:absolute;top:0;left:0;right:0;height:11px;'
+    +   'background:linear-gradient(180deg,#6a4a20 0%,#3a2410 50%,#221408 100%);'
+    +   'border-bottom:1px solid #1a0e06;box-shadow:0 2px 6px rgba(0,0,0,0.45);}'
+    // Camada 3: chão de madeira no rodapé
+    + '.inn-floor{position:absolute;bottom:0;left:0;right:0;height:14px;'
+    +   'background:'
+    +     'linear-gradient(180deg,#3a2410 0%,#1a0e06 100%),'
+    +     'repeating-linear-gradient(90deg,transparent 0,transparent 16px,rgba(0,0,0,0.35) 16px,rgba(0,0,0,0.35) 17px);'
+    +   'background-blend-mode:normal,multiply;'
+    +   'border-top:1px solid #0a0604;box-shadow:0 -1px 4px rgba(0,0,0,0.5);}'
+    // Camada 4: vinheta vermelha/dourada do fire glow (esquerda → centro)
+    + '.inn-fireglow{position:absolute;left:0;bottom:14px;width:55%;height:80px;pointer-events:none;'
+    +   'background:radial-gradient(ellipse at 22% 100%,rgba(255,180,80,0.42) 0%,rgba(255,120,40,0.18) 35%,transparent 70%);'
+    +   'animation:innGlowPulse 2.6s ease-in-out infinite;}'
+    // Hearth (lareira de pedra à esquerda — SVG)
+    + '.inn-hearth{position:absolute;left:14px;bottom:14px;width:42px;height:48px;}'
+    + '.inn-hearth svg{width:100%;height:100%;display:block;}'
+    + '.inn-flame{transform-origin:50% 100%;animation:innFlameDance 1.6s ease-in-out infinite;}'
+    // Window (arched + moon + stars — SVG à direita)
+    + '.inn-window{position:absolute;right:14px;top:18px;width:44px;height:64px;}'
+    + '.inn-window svg{width:100%;height:100%;display:block;'
+    +   'filter:drop-shadow(0 0 4px rgba(180,200,255,0.18));}'
+    + '.inn-star{animation:innStarTwinkle 3s ease-in-out infinite;}'
+    + '.inn-star-2{animation-delay:0.8s;animation-duration:4s;}'
+    + '.inn-star-3{animation-delay:1.7s;animation-duration:2.6s;}'
+    // Smoke wisp sutil acima da lareira
+    + '.inn-smoke{position:absolute;left:25px;bottom:54px;width:24px;height:30px;pointer-events:none;'
+    +   'background:radial-gradient(ellipse at 50% 100%,rgba(160,148,132,0.18) 0%,transparent 70%);'
+    +   'filter:blur(3px);animation:innSmokeRise 5s ease-in-out infinite;}'
+    // Título da estalagem (centro vertical)
+    + '.inn-title{position:absolute;left:0;right:0;top:36px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);'
+    +   'font-size:18px;font-weight:700;letter-spacing:5px;color:#ffd8a0;'
+    +   'text-shadow:0 0 16px rgba(255,180,80,0.65),0 2px 4px rgba(0,0,0,0.8);z-index:3;}'
+    + '.inn-sub{position:absolute;left:0;right:0;top:62px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);'
+    +   'font-size:10px;color:#c4953a;letter-spacing:3px;opacity:0.92;z-index:3;font-style:italic;}'
+    + '.inn-meta{position:absolute;left:0;right:0;top:80px;text-align:center;font-size:9px;color:#a09484;'
+    +   'letter-spacing:1.5px;opacity:0.65;z-index:3;}'
     // Greeting card
     + '.inn-greeting{position:relative;padding:10px 14px 10px 32px;background:linear-gradient(180deg,rgba(74,56,40,0.32),rgba(42,30,18,0.22));'
     +   'border:1px solid rgba(196,149,58,0.35);border-radius:8px;font-family:var(--v-font,MedievalSharp,Cinzel,serif);'
@@ -13598,23 +13616,76 @@ function _renderInnHubAAA(container, data) {
     + '.inn-svc-badge{flex:0 0 auto;padding:1px 5px;font-size:9px;letter-spacing:1px;'
     +   'background:rgba(196,149,58,0.20);color:var(--v-gold,#c4953a);border-radius:3px;}'
     // Keyframes
-    + '@keyframes innHeroPulse{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 30px rgba(255,140,40,0.10);}50%{box-shadow:0 6px 24px rgba(0,0,0,0.55),inset 0 0 50px rgba(255,180,80,0.22);}}'
-    + '@keyframes innFireFlicker{0%,100%{opacity:0.85;transform:translateX(-50%) scaleY(1);}50%{opacity:1;transform:translateX(-50%) scaleY(1.18);}}'
-    + '@keyframes innLavDrift{0%{opacity:0;transform:translate(0,0) scale(0.6);}30%{opacity:0.85;}100%{opacity:0;transform:translate(8px,-40px) scale(0.3);}}'
-    + 'body.perf-lite .inn-hero,body.perf-lite .inn-fire,body.perf-lite .inn-lav{animation:none!important;}'
-    + 'body.perf-medium .inn-hero{animation-duration:8s;}'
-    + '@media (prefers-reduced-motion:reduce){.inn-hero,.inn-fire,.inn-lav{animation:none!important;}}'
+    + '@keyframes innFlameDance{0%,100%{transform:scale(1) rotate(-2deg);}50%{transform:scale(1.12) rotate(2deg);}}'
+    + '@keyframes innGlowPulse{0%,100%{opacity:0.75;}50%{opacity:1;}}'
+    + '@keyframes innStarTwinkle{0%,100%{opacity:0.4;}50%{opacity:1;}}'
+    + '@keyframes innSmokeRise{0%{opacity:0;transform:translateY(0) scale(0.8);}40%{opacity:0.5;}100%{opacity:0;transform:translateY(-18px) scale(1.4);}}'
+    + 'body.perf-lite .inn-flame,body.perf-lite .inn-fireglow,body.perf-lite .inn-star,body.perf-lite .inn-smoke{animation:none!important;}'
+    + 'body.perf-medium .inn-fireglow{animation-duration:4s;}'
+    + '@media (prefers-reduced-motion:reduce){.inn-flame,.inn-fireglow,.inn-star,.inn-smoke{animation:none!important;}}'
     + '</style>'
-    // HERO
+    // HERO — cena medieval com SVG inline (parede de pedra + viga + lareira + janela noturna)
     + '<div class="inn-hero">'
-    +   '<div class="inn-bed"></div>'
-    +   '<div class="inn-fire"></div>'
-    +   '<span class="inn-lav inn-lav-1"></span>'
-    +   '<span class="inn-lav inn-lav-2"></span>'
-    +   '<span class="inn-lav inn-lav-3"></span>'
+    +   '<div class="inn-stone"></div>'
+    +   '<div class="inn-beam"></div>'
+    +   '<div class="inn-floor"></div>'
+    +   '<div class="inn-fireglow"></div>'
+    // Lareira de pedra (esquerda)
+    +   '<div class="inn-hearth">'
+    +     '<svg viewBox="0 0 42 48" aria-hidden="true">'
+    // Pedras laterais
+    +       '<rect x="0" y="14" width="6" height="34" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
+    +       '<rect x="36" y="14" width="6" height="34" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
+    // Arco superior
+    +       '<path d="M0 14 Q21 0 42 14 L42 18 Q21 6 0 18 Z" fill="#4a3424" stroke="#1a0e06" stroke-width="0.5"/>'
+    // Câmara interna (escura)
+    +       '<rect x="6" y="20" width="30" height="28" fill="#0a0604"/>'
+    // Lenha (toras)
+    +       '<rect x="9" y="40" width="24" height="3" fill="#5a3018" stroke="#2a1408" stroke-width="0.3"/>'
+    +       '<rect x="11" y="37" width="20" height="3" fill="#4a2814" stroke="#2a1408" stroke-width="0.3"/>'
+    // Chamas (path SVG mais orgânico que CSS radial)
+    +       '<g class="inn-flame">'
+    +         '<path d="M21 38 Q15 32 17 24 Q19 28 21 22 Q23 28 25 24 Q27 32 21 38" fill="#ff7028" opacity="0.92"/>'
+    +         '<path d="M21 38 Q17 33 19 27 Q20 30 21 25 Q22 30 23 27 Q25 33 21 38" fill="#ffb060" opacity="0.95"/>'
+    +         '<path d="M21 37 Q19 33 20 29 Q21 31 22 29 Q23 33 21 37" fill="#fff4c0"/>'
+    +       '</g>'
+    +     '</svg>'
+    +   '</div>'
+    // Janela arqueada noturna (direita)
+    +   '<div class="inn-window">'
+    +     '<svg viewBox="0 0 44 64" aria-hidden="true">'
+    +       '<defs>'
+    +         '<linearGradient id="inn-sky" x1="0%" y1="0%" x2="0%" y2="100%">'
+    +           '<stop offset="0%" stop-color="#0a1230"/>'
+    +           '<stop offset="55%" stop-color="#1a1844"/>'
+    +           '<stop offset="100%" stop-color="#2a1430"/>'
+    +         '</linearGradient>'
+    +       '</defs>'
+    // Frame de pedra arqueado
+    +       '<path d="M3 28 Q3 3 22 3 Q41 3 41 28 L41 60 L3 60 Z" fill="#1a0e06" stroke="#3a2818" stroke-width="1.5"/>'
+    // Vidro (céu noturno)
+    +       '<path d="M6 28 Q6 6 22 6 Q38 6 38 28 L38 58 L6 58 Z" fill="url(#inn-sky)"/>'
+    // Cruzeta da janela
+    +       '<line x1="22" y1="6" x2="22" y2="58" stroke="#3a2818" stroke-width="1.2"/>'
+    +       '<line x1="6" y1="30" x2="38" y2="30" stroke="#3a2818" stroke-width="1.2"/>'
+    // Lua crescente
+    +       '<circle cx="14" cy="16" r="4" fill="#fff8d0" opacity="0.95"/>'
+    +       '<circle cx="15.5" cy="14.5" r="3" fill="url(#inn-sky)"/>'
+    // Estrelas (3 piscando)
+    +       '<circle class="inn-star" cx="28" cy="11" r="0.7" fill="#fff8d0"/>'
+    +       '<circle class="inn-star inn-star-2" cx="32" cy="20" r="0.5" fill="#fff8d0"/>'
+    +       '<circle class="inn-star inn-star-3" cx="16" cy="42" r="0.5" fill="#fff8d0"/>'
+    // Brilho dourado de fundo (refletindo a vela)
+    +       '<rect x="6" y="33" width="32" height="25" fill="url(#inn-sky)"/>'
+    +       '<rect x="6" y="55" width="32" height="3" fill="rgba(196,149,58,0.25)"/>'
+    +     '</svg>'
+    +   '</div>'
+    // Fumaça sutil acima da lareira
+    +   '<div class="inn-smoke"></div>'
+    // Título centralizado
     +   '<div class="inn-title">ESTALAGEM</div>'
-    +   '<div class="inn-sub">◆ Grifo Dourado ◆</div>'
-    +   '<div class="inn-meta">lareira acesa · lavanda nos lençóis</div>'
+    +   '<div class="inn-sub">◆ do Grifo Dourado ◆</div>'
+    +   '<div class="inn-meta">lareira acesa · luar nas janelas</div>'
     + '</div>';
 
   // GREETING

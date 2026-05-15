@@ -72,7 +72,7 @@
       +   '<div class="tav-sign-plate">'
       +     '<svg class="tav-sign-icon" viewBox="0 0 120 120" aria-hidden="true"><use href="#ic-cerveja"/></svg>'
       +     '<div class="tav-sign-text">TAVERNA</div>'
-      +     '<div class="tav-sign-sub">◆ casa da palavra fácil ◆</div>'
+      +     '<div class="tav-sign-sub">◆ do Javali ◆</div>'
       +   '</div>'
       + '</div>'
       // embers + smoke
@@ -101,14 +101,28 @@
       data.npcs.forEach(function (n, idx) {
         var card = _el('button', 'tav-npc-card');
         card.type = 'button';
-        card.setAttribute('aria-label', (n.label || '').replace(/<[^>]+>/g, ''));
+        // 2026-05-15: auto-split "Nome — Papel" para evitar truncamento.
+        // _buildTavernMockData passa label = `${name} — ${role}` (incluindo
+        // <svg> no role). Antes: tudo numa única linha com ellipsis cortando
+        // "Grom Barba-Cinza — Tave..." Agora: nome em destaque + papel abaixo.
+        var fullLabel = n.label || 'Aventureiro';
+        var npcName = fullLabel;
+        var npcRole = n.subtitle || '';
+        if (!n.subtitle) {
+          var splitIdx = fullLabel.indexOf(' — ');
+          if (splitIdx > 0) {
+            npcName = fullLabel.slice(0, splitIdx);
+            npcRole = fullLabel.slice(splitIdx + 3);
+          }
+        }
+        card.setAttribute('aria-label', fullLabel.replace(/<[^>]+>/g, ''));
         card.innerHTML =
           '<div class="tav-npc-portrait">'
           +   (n.icon || '<svg viewBox="0 0 120 120"><use href="#ic-aldeao"/></svg>')
           + '</div>'
           + '<div class="tav-npc-info">'
-          +   '<div class="tav-npc-name">' + (n.label || 'Aventureiro') + '</div>'
-          + (n.subtitle ? '<div class="tav-npc-sub">' + n.subtitle + '</div>' : '')
+          +   '<div class="tav-npc-name">' + npcName + '</div>'
+          + (npcRole ? '<div class="tav-npc-sub">' + npcRole + '</div>' : '')
           + (n.badge ? '<div class="tav-npc-badge">' + n.badge + '</div>' : '')
           + '</div>'
           + '<div class="tav-npc-chevron">›</div>';
