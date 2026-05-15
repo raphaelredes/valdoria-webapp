@@ -2249,6 +2249,90 @@
       "cost": 0.004810000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "besta-pesada": {
+      "timestamp": "2026-05-15T23:33:15.028522",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "besta-de-mao": {
+      "timestamp": "2026-05-15T23:33:27.442678",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "armadura-acolchoada": {
+      "timestamp": "2026-05-15T23:33:39.242057",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "armadura-de-couro": {
+      "timestamp": "2026-05-15T23:33:54.395202",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "couro-batido": {
+      "timestamp": "2026-05-15T23:34:04.185724",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "gibao-de-peles": {
+      "timestamp": "2026-05-15T23:34:16.522931",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "brunea": {
+      "timestamp": "2026-05-15T23:34:30.499119",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "meia-placa": {
+      "timestamp": "2026-05-15T23:34:47.304847",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "brunea-de-aneis": {
+      "timestamp": "2026-05-15T23:34:59.383239",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cota-de-talas": {
+      "timestamp": "2026-05-15T23:35:12.848902",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "placa-completa": {
+      "timestamp": "2026-05-15T23:35:25.227868",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-de-aco": {
+      "timestamp": "2026-05-15T23:35:36.555189",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pocao-de-cura-maior": {
+      "timestamp": "2026-05-15T23:35:48.810433",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-cura-superior": {
+      "timestamp": "2026-05-15T23:36:03.860047",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "potion"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
