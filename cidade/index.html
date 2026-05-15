@@ -27871,6 +27871,160 @@ function _squareTxnReturnToHub(){
 // Renderer genérico: lista de items/NPCs/avisos como sub-popup
 // Auto-registra restoreFn pra Voltar funcionar voltando à lista mesmo após
 // drill-down (ex: clicar item → confirm → Voltar deve voltar à lista, não fechar).
+// ============================================================================
+// === _aaaListSubScreen — Template AAA universal pra sub-telas (X-6.5.51BM 2026-05-15)
+// ============================================================================
+// Drop-in replacement de _squareShowListPopup para Taverna/Estalagem.
+// API idêntica: { stackKey, icon, title, flavor, items, onPick, theme? }.
+// Diferenças visuais:
+//   - Hero strip cerimonial com icon + título + sub (estilo tavern/inn hub)
+//   - Flavor em pergaminho com aspas decorativas
+//   - Item cards com gradiente + hover lift + badges destacados
+//   - Back button estilizado
+// Themes: 'tavern' (gold) | 'inn' (warm amber) | 'arcane' (purple)
+// ============================================================================
+function _aaaListSubScreen(opts){
+  var ov = document.getElementById('city-subscreen-popup');
+  var titleEl = document.getElementById('csp-title');
+  var bodyEl = document.getElementById('csp-body');
+  if (!ov || !bodyEl) return;
+  if (titleEl) titleEl.textContent = opts.title || 'Tela';
+
+  // Theme colors
+  var themes = {
+    tavern: { primary: '#c4953a', glow: 'rgba(255,180,80,0.45)', heroGradient: 'linear-gradient(180deg,#3a2818 0%,#1a0e06 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,180,80,0.25) 0%,transparent 60%)' },
+    inn:    { primary: '#d4a850', glow: 'rgba(255,200,100,0.50)', heroGradient: 'linear-gradient(180deg,#2a1a10 0%,#1a0e06 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,200,100,0.28) 0%,transparent 65%)' },
+    arcane: { primary: '#9080d0', glow: 'rgba(144,128,208,0.45)', heroGradient: 'linear-gradient(180deg,#1a1830 0%,#0a0820 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(144,128,208,0.25) 0%,transparent 60%)' }
+  };
+  var th = themes[opts.theme] || themes.tavern;
+
+  var html = ''
+    + '<style>'
+    + '.aaa-sub{display:flex;flex-direction:column;gap:10px;padding:6px 4px 12px;}'
+    // Hero
+    + '.aaa-sub-hero{position:relative;padding:14px 12px 12px;border-radius:10px;overflow:hidden;text-align:center;'
+    +   'background:' + th.heroBg + ',' + th.heroGradient + ';'
+    +   'border:1px solid ' + th.primary + ';'
+    +   'box-shadow:0 4px 14px rgba(0,0,0,0.4),inset 0 0 18px rgba(0,0,0,0.3);}'
+    + '.aaa-sub-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.7;}'
+    + '.aaa-sub-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.4;}'
+    + '.aaa-sub-icon{width:36px;height:36px;margin:0 auto 4px;display:grid;place-items:center;color:' + th.primary + ';filter:drop-shadow(0 0 6px ' + th.glow + ');}'
+    + '.aaa-sub-icon svg{width:100%;height:100%;}'
+    + '.aaa-sub-title{font-family:var(--v-font-display,Cinzel,serif);font-size:16px;font-weight:700;letter-spacing:3px;color:#ffd8a0;'
+    +   'text-shadow:0 0 10px ' + th.glow + ',0 1px 2px rgba(0,0,0,0.6);text-transform:uppercase;}'
+    + '.aaa-sub-orn{font-size:10px;color:' + th.primary + ';letter-spacing:2px;opacity:0.7;margin-top:2px;}'
+    // Flavor pergaminho
+    + '.aaa-sub-flavor{position:relative;padding:10px 16px 10px 30px;background:linear-gradient(180deg,rgba(74,56,40,0.32),rgba(42,30,18,0.22));'
+    +   'border:1px solid rgba(196,149,58,0.30);border-radius:8px;'
+    +   'font-family:var(--v-font,MedievalSharp,Cinzel,serif);font-size:13px;color:var(--v-text-bright,#e8dcc8);'
+    +   'line-height:1.45;font-style:italic;}'
+    + '.aaa-sub-flavor::before{content:"❝";position:absolute;left:8px;top:2px;font-size:22px;color:' + th.primary + ';opacity:0.75;line-height:1;font-style:normal;}'
+    // NPC info bar (opcional — substitui o npcInfo do SUBSCREEN_DATA legacy)
+    + '.aaa-sub-npcinfo{padding:7px 10px;background:linear-gradient(90deg,rgba(196,149,58,0.05),rgba(196,149,58,0.12),rgba(196,149,58,0.05));'
+    +   'border:1px solid rgba(196,149,58,0.22);border-radius:6px;'
+    +   'font-size:11px;color:var(--v-text-dim,#a09484);text-align:center;letter-spacing:0.4px;line-height:1.5;}'
+    + '.aaa-sub-npcinfo b{color:' + th.primary + ';font-weight:600;}'
+    // Section title (optional, antes da lista)
+    + '.aaa-sub-sec{font-family:var(--v-font-display,Cinzel,serif);font-size:10px;letter-spacing:2.5px;'
+    +   'text-transform:uppercase;color:' + th.primary + ';padding:0 4px 2px;border-bottom:1px solid rgba(196,149,58,0.18);}'
+    // Item grid (1-col vertical com cards)
+    + '.aaa-sub-list{display:flex;flex-direction:column;gap:5px;}'
+    + '.aaa-sub-item{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;'
+    +   'background:linear-gradient(180deg,rgba(74,56,40,0.28),rgba(42,30,18,0.55));'
+    +   'border:1px solid rgba(196,149,58,0.30);border-radius:8px;font-family:inherit;'
+    +   'color:var(--v-text,#d4c8b0);cursor:pointer;text-align:left;width:100%;overflow:hidden;'
+    +   'transition:border-color 0.18s,background 0.18s,transform 0.12s,box-shadow 0.18s;'
+    +   'animation:aaaSubItemIn 0.4s ease-out both;}'
+    + '.aaa-sub-item:hover{border-color:' + th.primary + ';background:linear-gradient(180deg,rgba(196,149,58,0.16),rgba(74,56,40,0.55));'
+    +   'box-shadow:0 0 14px rgba(196,149,58,0.18);}'
+    + '.aaa-sub-item:active{transform:scale(0.98);}'
+    + '.aaa-sub-item[disabled]{opacity:0.45;cursor:not-allowed;}'
+    + '.aaa-sub-item[disabled]:hover{border-color:rgba(196,149,58,0.30);background:linear-gradient(180deg,rgba(74,56,40,0.28),rgba(42,30,18,0.55));box-shadow:none;}'
+    + '.aaa-sub-iico{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;color:' + th.primary + ';}'
+    + '.aaa-sub-iico svg{width:30px;height:30px;}'
+    + '.aaa-sub-itxt{flex:1;min-width:0;}'
+    + '.aaa-sub-ilbl{font-family:var(--v-font-display,Cinzel,serif);font-size:13px;font-weight:600;color:var(--v-text-bright,#e8dcc8);letter-spacing:0.4px;'
+    +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+    + '.aaa-sub-idesc{font-size:11px;color:var(--v-text-dim,#a09484);margin-top:2px;font-style:italic;'
+    +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+    + '.aaa-sub-ibadge{flex:0 0 auto;padding:3px 8px;font-size:10px;letter-spacing:1px;font-weight:600;'
+    +   'background:rgba(196,149,58,0.18);color:' + th.primary + ';border:1px solid rgba(196,149,58,0.35);border-radius:4px;'
+    +   'white-space:nowrap;}'
+    + '.aaa-sub-ichev{flex:0 0 auto;font-size:18px;color:' + th.primary + ';opacity:0.55;line-height:1;}'
+    // Back button
+    + '.aaa-sub-back{display:flex;justify-content:center;margin-top:8px;}'
+    + '.aaa-sub-back-btn{padding:9px 20px;background:linear-gradient(180deg,#3a2818,#1a0e06);'
+    +   'border:1px solid rgba(196,149,58,0.40);border-radius:6px;color:' + th.primary + ';'
+    +   'font-family:var(--v-font-display,Cinzel,serif);font-size:11px;letter-spacing:2px;cursor:pointer;'
+    +   'transition:border-color 0.18s,background 0.18s,transform 0.12s;}'
+    + '.aaa-sub-back-btn:hover{border-color:' + th.primary + ';background:linear-gradient(180deg,#4a3220,#1a0e06);}'
+    + '.aaa-sub-back-btn:active{transform:scale(0.97);}'
+    + '@keyframes aaaSubItemIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}'
+    + 'body.perf-lite .aaa-sub-item{animation:none!important;}'
+    + '@media (prefers-reduced-motion:reduce){.aaa-sub-item{animation:none!important;}}'
+    + '</style>'
+    // Hero
+    + '<div class="aaa-sub">'
+    +   '<div class="aaa-sub-hero">'
+    +     (opts.icon ? '<div class="aaa-sub-icon">' + opts.icon + '</div>' : '')
+    +     '<div class="aaa-sub-title">' + (opts.title || '') + '</div>'
+    +     (opts.subtitle ? '<div class="aaa-sub-orn">◆ ' + opts.subtitle + ' ◆</div>' : '')
+    +   '</div>';
+  // Flavor
+  if (opts.flavor) {
+    html += '<div class="aaa-sub-flavor">' + opts.flavor + '</div>';
+  }
+  // NPC info bar (estágio · NPC · local · reward — substitui npcInfo do legacy)
+  if (opts.npcInfo) {
+    html += '<div class="aaa-sub-npcinfo">' + opts.npcInfo + '</div>';
+  }
+  // Section label (opcional)
+  if (opts.sectionLabel) {
+    html += '<div class="aaa-sub-sec">' + opts.sectionLabel + '</div>';
+  }
+  // Item list
+  html += '<div class="aaa-sub-list">';
+  (opts.items || []).forEach(function(item, idx){
+    var desc = item.desc ? '<div class="aaa-sub-idesc">' + item.desc + '</div>' : '';
+    var badge = item.badge ? '<div class="aaa-sub-ibadge">' + item.badge + '</div>' : '';
+    var chev = item.disabled ? '' : '<div class="aaa-sub-ichev">›</div>';
+    html += '<button class="aaa-sub-item" data-idx="' + idx + '"'
+      + (item.disabled ? ' disabled' : '') + ' type="button"'
+      + ' style="animation-delay:' + (idx * 40) + 'ms">'
+      + '<div class="aaa-sub-iico">' + (item.icon || '·') + '</div>'
+      + '<div class="aaa-sub-itxt">'
+      +   '<div class="aaa-sub-ilbl">' + (item.label || item.name || '') + '</div>'
+      +   desc
+      + '</div>'
+      + badge
+      + chev
+      + '</button>';
+  });
+  html += '</div>';
+  // Back button
+  html += '<div class="aaa-sub-back"><button class="aaa-sub-back-btn" data-cb="__back" type="button">◆ VOLTAR ◆</button></div>';
+  html += '</div>';
+
+  bodyEl.innerHTML = html;
+  bodyEl.querySelectorAll('.aaa-sub-item').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if (btn.disabled) return;
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (typeof opts.onPick === 'function') opts.onPick(opts.items[idx]);
+    });
+  });
+  bodyEl.querySelector('[data-cb="__back"]').addEventListener('click', navigateBack);
+  ov.classList.add('active');
+  // Stack registration
+  if (opts.stackKey && typeof _popupStack !== 'undefined') {
+    if (_popupStack[_popupStack.length - 1] !== opts.stackKey) {
+      _popupStack.push(opts.stackKey);
+    }
+    if (!window._popupRestoreFns) window._popupRestoreFns = {};
+    window._popupRestoreFns[opts.stackKey] = function(){ _aaaListSubScreen(opts); };
+  }
+}
+
 function _squareShowListPopup(opts){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -28741,7 +28895,8 @@ function _tavernShowDrinks(p){
   var items = drinkList.map(function(d){
     return { icon: d.icon, label: d.name, badge: d.cost + ' V — ' + (d.effect || ''), _drink: d };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_drinks',
     icon: _heralIco('ic-cerveja'),
     title: 'Bebidas — Grom',
@@ -28919,7 +29074,8 @@ function _tavernShowGames(p){
     }
     return { icon: g.icon, label: labelStr, badge: badgeStr, _game: g, _locked: locked };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_games',
     icon: _heralIco('ic-cartas'), title: 'Mesa de Jogos',
     flavor: '<i>Algumas mesas no canto. Apostadores discutem em voz baixa.</i>',
@@ -29024,7 +29180,8 @@ function _tavernShowBulletin(p){
       _t: t, _title: title, _desc: desc, _enemy: enemy, _location: location
     };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_bulletin', icon: _heralIco('ic-missoes'), title: 'Quadro de Avisos',
     flavor: '<i>Pergaminhos pregados. Recompensa: ' + reward.gold_min + '-' + reward.gold_max + ' V + ' + reward.xp + ' XP (nível ' + tier + ').</i>',
     items: items,
@@ -32360,7 +32517,8 @@ function _tavernRumorBuy(p){
     return { icon: info.icon, label: 'Sobre ' + info.label, badge: '5 V', _enemy: key };
   });
   items.push({ icon: _heralIco('ic-dialogo'), label: 'Boato genérico (sorteado)', badge: '5 V', _enemy: null });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_rumor_choice', icon: _heralIco('ic-bolsa'), title: 'Comprar Boato (5 V)',
     flavor: '<i>"Cinco Valdoritas, e te conto algo útil. Sobre o que quer saber?"</i>',
     items: items,
@@ -32566,7 +32724,8 @@ function _tavernShowMercenaries(p){
   var items = pool.map(function(m){
     return { icon: m.icon, label: m.name + ' — ' + m.role, badge: m.cost + ' V', _m: m };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tav_mercenaries', icon: _heralIco('ic-stat-attack'), title: 'Contratar Mercenário',
     flavor: '<i>O Mestre dos Contratos folheia uma lista. "Estes estão livres hoje. Pagamento à vista, contrato vale por alguns combates."</i>',
     items: items,
@@ -32607,7 +32766,8 @@ function _tavernShowAdventurers(p){
   var items = pool.map(function(a){
     return { icon: a.icon, label: a.name + ' — ' + a.role, badge: a.cost + ' V', _a: a };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tav_adventurers', icon: _heralIco('ic-grupo'), title: 'Recrutar Aventureiro',
     flavor: '<i>"Estes não são mercenários — são aventureiros. Vão com você porque acreditam no propósito, não só pelo ouro. Mas ainda cobram."</i>',
     items: items,
@@ -32652,7 +32812,8 @@ function _tavernShowCarousing(p){
   var items = levels.map(function(l){
     return { icon: l.emoji || '🍻', label: l.label, badge: l.cost + ' V · DC ' + l.dc + ' CHA', _l: l };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_carousing', icon: _heralIco('ic-cerveja'), title: 'Socializar (Carousing)',
     flavor: '<i>XGtE p.128 — Socializar bebendo gera contatos. Custos altos = contatos importantes.</i>',
     items: items,
@@ -32731,7 +32892,8 @@ function _tavernShowGather(p){
   var items = topics.map(function(t){
     return { icon: t.icon, label: t.label, badge: t.cost + ' V · DC ' + t.dc, _t: t };
   });
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_gather', icon: _heralIco('ic-stat-wis'), title: 'Coletar Informações',
     flavor: '<i>' + intro + '</i><br><i>Cooldown: 5 turnos entre tentativas (canonical GATHER_COOLDOWN_TURNS).</i>',
     items: items,
@@ -32916,7 +33078,8 @@ function _tavernShowPitfight(p){
   var introLine = (canonExtraIntro && canonExtraIntro.length)
                   ? canonExtraIntro[Math.floor(Math.random() * canonExtraIntro.length)]
                   : 'Taxa de entrada: 25 Valdoritas + sua aposta.';
-  _squareShowListPopup({
+  _aaaListSubScreen({
+    theme: 'tavern',
     stackKey: 'tavern_pitfight', icon: _heralIco('ic-stat-attack'), title: 'Rinha — Aposte em ' + opp,
     flavor: '<i>' + introLine + '</i><br>' +
             '<i>3 testes (FOR · DES · CON) contra DC = 5 + 2d10 (XGtE p.131).</i><br>' +
@@ -37744,69 +37907,109 @@ function _renderCityPopup(key){
     _renderInnRestPopup(bodyEl, d);
     return;
   }
+  // X-6.5.51BM (2026-05-15): inn_meals AAA — converte SUBSCREEN_DATA legacy
+  // [icon,label,info,cb] tuples para _aaaListSubScreen items split em
+  // badge (cost) + desc (effect) via " — " separator.
+  if (key === 'inn_meals') {
+    _renderInnMealsPopup(bodyEl, d);
+    return;
+  }
   renderSubScreen(bodyEl, key);
 }
 
-// === Inn Rest popup customizado (replica game-inn.js#_buildRoomGrid + Confirm) ===
-// 3 tiles (estábulo/comum/real) + linha de descanso curto. Click → _innSleep.
+function _renderInnMealsPopup(bodyEl, d){
+  // Converte buttons tuples [icon, label, info, cb] → items[] AAA
+  var items = (d.buttons || []).map(function(btn){
+    var info = btn[2] || '';
+    var parts = info.split(' — ');
+    var badge = parts[0] || '';   // ex: "1 <coin>" ou "Grátis"
+    var desc  = parts.slice(1).join(' — ') || '';  // ex: "+3 HP / +1 ATK 30%"
+    return {
+      icon: btn[0],
+      label: btn[1],
+      badge: badge,
+      desc: desc,
+      _cb: btn[3]
+    };
+  });
+  _aaaListSubScreen({
+    theme: 'inn',
+    stackKey: 'inn_meals',
+    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-mochila"/></svg>',
+    title: 'CARDÁPIO · ESTALAGEM',
+    subtitle: 'pratos do dia',
+    flavor: d.flavor || '<i>"Cardápio rotativo do dia," diz Martha. "Tudo fresquinho."</i>',
+    items: items,
+    onPick: function(item){
+      var cb = item._cb;
+      if (window.ACTION_HANDLERS && typeof window.ACTION_HANDLERS[cb] === 'function') {
+        window.ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER || {});
+      } else if (cb && cb.indexOf('nav:') === 0 && typeof navigateTo === 'function') {
+        navigateTo(cb.slice(4));
+      }
+    }
+  });
+}
+
+// === Inn Rest popup AAA (X-6.5.51BM 2026-05-15) ===
+// Reescrito pra usar _aaaListSubScreen com tema 'inn'. 3 quartos + descanso curto.
+// Cada item: icon + label + desc + badge (custo). Click → _innSleep com aliados se houver.
 function _renderInnRestPopup(bodyEl, d){
-  // Helper: SVG heráldico no tile (substitui emojis 🐎/🛏️/👑/💤)
-  // 2026-05-06: cor natural do HERALDIC_COLORS (cavalo marrom, estalagem âmbar,
-  // coroa dourada — gold OK pra coroa real). Fallback neutro stone.
-  function _innIco(id){
+  function _innIco(id, size){
     var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
-    return '<svg viewBox="0 0 120 120" style="width:42px;height:42px;color:' + color + ';"><use href="#' + id + '"/></svg>';
+    var s = size || 36;
+    return '<svg viewBox="0 0 120 120" style="width:' + s + 'px;height:' + s + 'px;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
-  // 2026-05-12 USER REQUEST: redesign cards estilo .cloc-card do city hub
-  // (mais respiráveis, divider gold entre nome e custo, padding maior).
-  bodyEl.innerHTML = ''
-    + '<div class="city-subscreen">'
-    + '  <p class="subscreen-flavor">' + (d.flavor || '') + '</p>'
-    + '  <div class="inn-rest-grid">'
-    + '    <div class="inn-rest-tile" data-room="stable">'
-    + '      <div class="inn-rest-tile-ico">' + _innIco('ic-cavalo') + '</div>'
-    + '      <div class="inn-rest-tile-name">Estábulo</div>'
-    + '      <div class="inn-rest-tile-divider"></div>'
-    + '      <div class="inn-rest-tile-cost free">Grátis</div>'
-    + '      <div class="inn-rest-tile-desc">Palha dura, mas seguro</div>'
-    + '    </div>'
-    + '    <div class="inn-rest-tile" data-room="common">'
-    + '      <div class="inn-rest-tile-ico">' + _innIco('ic-estalagem') + '</div>'
-    + '      <div class="inn-rest-tile-name">Comum</div>'
-    + '      <div class="inn-rest-tile-divider"></div>'
-    + '      <div class="inn-rest-tile-cost">3 Valdoritas</div>'
-    + '      <div class="inn-rest-tile-desc">Cama macia, padrão</div>'
-    + '    </div>'
-    + '    <div class="inn-rest-tile" data-room="royal">'
-    + '      <div class="inn-rest-tile-ico">' + _innIco('ic-coroa') + '</div>'
-    + '      <div class="inn-rest-tile-name">Suíte Real</div>'
-    + '      <div class="inn-rest-tile-divider"></div>'
-    + '      <div class="inn-rest-tile-cost">10 Valdoritas</div>'
-    + '      <div class="inn-rest-tile-desc">Descanso luxuoso</div>'
-    + '    </div>'
-    + '  </div>'
-    + '  <button class="subscreen-btn" data-room="short">'
-    + '    <span class="sb-icon"><svg viewBox="0 0 120 120" style="width:18px;height:18px;color:' + (HERALDIC_COLORS['ic-sono'] || '#5a78a8') + ';"><use href="#ic-sono"/></svg></span>'
-    + '    <span class="sb-text">Descanso curto (1 HD)</span>'
-    + '    <span class="sb-info">+5 HP — Grátis</span>'
-    + '  </button>'
-    + '</div>';
-  // Wire up tile clicks — replica game-inn.js#_buildRoomGrid:
-  // se tem aliados, mostra inline choice "Só eu / Grupo" antes do descanso.
-  // Sem aliados, vai direto pro descanso solo.
-  bodyEl.querySelectorAll('.inn-rest-tile').forEach(function(tile){
-    tile.addEventListener('click', function(){
-      var room = tile.dataset.room;
-      if (_hasLivingAllies()) {
-        _showRoomChoice(tile, room);
+  var rooms = [
+    { _room: 'stable', icon: _innIco('ic-cavalo'),    label: 'Estábulo',     desc: 'Palha dura, mas seguro',     badge: 'Grátis' },
+    { _room: 'common', icon: _innIco('ic-estalagem'), label: 'Quarto Comum', desc: 'Cama macia, padrão',         badge: '3 V' },
+    { _room: 'royal',  icon: _innIco('ic-coroa'),     label: 'Suíte Real',   desc: 'Descanso luxuoso',           badge: '10 V' },
+    { _room: 'short',  icon: _innIco('ic-sono'),      label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis · PHB p.186' }
+  ];
+  _aaaListSubScreen({
+    theme: 'inn',
+    stackKey: 'inn_rest',
+    icon: _innIco('ic-estalagem', 36),
+    title: 'QUARTOS · ESTALAGEM',
+    subtitle: 'descanso longo & curto',
+    flavor: d.flavor || 'Martha aponta a escada com o queixo. <i>"Escolha onde dormir."</i>',
+    items: rooms,
+    onPick: function(item){
+      var room = item._room;
+      if (room === 'short') {
+        _onInnRestClick('short', 'solo');
+        return;
+      }
+      // Quarto longo: se tem aliados, abre popup choice; senão solo direto.
+      if (_hasLivingAllies() && typeof _showInfoPopup === 'function') {
+        var aliveCount = 1;
+        if (typeof GROUP_MEMBERS !== 'undefined') {
+          for (var i = 1; i < GROUP_MEMBERS.length; i++) {
+            if (GROUP_MEMBERS[i] && !GROUP_MEMBERS[i].dead) aliveCount++;
+          }
+        }
+        _showInfoPopup({
+          icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-grupo"/></svg>',
+          title: 'Quem descansa?',
+          desc: 'Reservar quarto <b style="color:#d4a850;">' + (item.label || room) + '</b>:<br><br>'
+              + '<b>◆ Só você</b> — custo individual<br>'
+              + '<b>◆ Grupo (' + aliveCount + ')</b> — multiplica custo por membros',
+          confirmLabel: 'Grupo (' + aliveCount + ')',
+          cancelLabel: 'Só eu',
+          onConfirm: function(){
+            if (typeof _isAllPartyHpFull === 'function' && _isAllPartyHpFull() && typeof _confirmGroupRestHpFull === 'function') {
+              _confirmGroupRestHpFull(room);
+            } else {
+              _onInnRestClick(room, 'group');
+            }
+          },
+          onCancel: function(){ _onInnRestClick(room, 'solo'); }
+        });
       } else {
         _onInnRestClick(room, 'solo');
       }
-    });
+    }
   });
-  // Descanso curto button (sem choice — sempre solo, é HD recovery curto)
-  var shortBtn = bodyEl.querySelector('.subscreen-btn[data-room="short"]');
-  if (shortBtn) shortBtn.addEventListener('click', function(){ _onInnRestClick('short', 'solo'); });
 }
 
 // Verifica se o jogador tem aliados vivos no GROUP_MEMBERS (slot 1+).
