@@ -23,8 +23,11 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
+    <!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
+    <script src="../shared/_bundle-hash.js"></script>
     <script>
-        var v = Date.now();
+        // Tiered Cache: stable bundle hash for Bucket B asset query strings
+        var v = (window.VBUNDLE_HASH || Date.now());
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">')
         document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + v + '">');
@@ -37,9 +40,11 @@
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     </script>
-    <!-- THREE.js: blocking load with local fallback on CDN failure -->
+    <!-- THREE.js: blocking load with local fallback on CDN failure.
+         Local fallback path served immutable via _headers; no query string
+         so browser cache key is path-only and repeat visits hit cache. -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
-            onerror="var s=document.createElement('script');s.src='../shared/three.min.js?v='+Date.now();document.head.appendChild(s);"></script>
+            onerror="var s=document.createElement('script');s.src='../shared/three.min.js';document.head.appendChild(s);"></script>
     <style>
 
         /* ─── DICE LOADING SCREEN ─── */

@@ -15,10 +15,13 @@
      logica de /play/ pra redirect instantaneo sem 700ms delay. Telegram
      users com initData passam normalmente (check 1). -->
 <script src="/shared/auth-gate.js"></script>
+<!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
+<script src="/shared/_bundle-hash.js"></script>
 <script>
 // Carrega CSS canonical + scripts (loading-title.js para TOQUE PARA INICIAR,
 // loading-template.js para magic-circle overlay durante auth+state)
-var v = Date.now();
+// Tiered Cache: stable bundle hash for Bucket B asset query strings
+var v = (window.VBUNDLE_HASH || Date.now());
 document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + v + '">');

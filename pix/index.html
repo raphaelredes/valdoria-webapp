@@ -22,8 +22,11 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
+    <!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
+    <script src="../shared/_bundle-hash.js"></script>
     <script>
-        var v = Date.now();
+        // Tiered Cache: stable bundle hash for Bucket B asset query strings
+        var v = (window.VBUNDLE_HASH || Date.now());
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
     </script>

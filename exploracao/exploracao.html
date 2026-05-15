@@ -805,9 +805,16 @@
 })();
 </script>
 
+<!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
+     window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
+     browser cache (CF Pages serves /shared/*.{js,css} as immutable). Must
+     load before any `var v = Date.now()` in the boot scripts below. -->
+<script src="/shared/_bundle-hash.js"></script>
+
 <script>
 (function() {
-  var v = Date.now();
+  // Tiered Cache: stable bundle hash for Bucket B asset query strings
+  var v = (window.VBUNDLE_HASH || Date.now());
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
   ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css', '/shared/toast.css'].forEach(function(h) {
     var l = document.createElement('link');
@@ -13932,7 +13939,8 @@ body.perf-lite .stub-popup-voice { animation: none; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 (function() {
-  var v = Date.now();
+  // Tiered Cache: stable bundle hash for Bucket B asset query strings
+  var v = (window.VBUNDLE_HASH || Date.now());
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
@@ -13951,7 +13959,8 @@ body.perf-lite .stub-popup-voice { animation: none; }
      arquivo em /explore/. Browser ignora erro do que não existir. -->
 <script>
 (function() {
-  var v = Date.now();
+  // Tiered Cache: stable bundle hash for Bucket B asset query strings
+  var v = (window.VBUNDLE_HASH || Date.now());
   var s1 = document.createElement('script');
   s1.src = '../valdoria-webapp/explore/explore-camp-fire.js?v=' + v;
   s1.async = false;

@@ -19,8 +19,11 @@
     <link rel="preload" href="shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="shared/fonts.css">
     <script src="shared/font-apply.js"></script>
+    <!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
+    <script src="shared/_bundle-hash.js"></script>
     <script>
-        var v = Date.now();
+        // Tiered Cache: stable bundle hash for Bucket B asset query strings
+        var v = (window.VBUNDLE_HASH || Date.now());
         var lk = document.createElement('link');
         lk.rel = 'stylesheet';
         lk.href = 'valdoria-design.css?v=' + v;

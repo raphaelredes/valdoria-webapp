@@ -616,9 +616,14 @@ LOG SINK (Fase 7):
         }catch(e){}
     },100);
   </script>
+  <!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
+       window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
+       browser cache (CF Pages serves /shared/*.{js,css} as immutable). Falls
+       back to Date.now() if _bundle-hash.js is unavailable for any reason. -->
+  <script src="/shared/_bundle-hash.js"></script>
   <script>
-    // Cache busting para CSS/JS imports
-    var v = Date.now();
+    // Cache busting para CSS/JS imports — uses stable bundle hash when present
+    var v = (window.VBUNDLE_HASH || Date.now());
     document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/game-hub.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/inn-animation.css?v=' + v + '">');
@@ -7516,7 +7521,9 @@ body.perf-lite .vc-action-btn { transition: none; }
     '})();<\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
-    document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
+    // three.min.js: vendored lib pinned (no in-tree edits). Served immutable
+    // via _headers; query string stripped so browser cache key is path-only.
+    document.write('<script src="/shared/three.min.js"><\/script>');
     document.write('<script src="/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders

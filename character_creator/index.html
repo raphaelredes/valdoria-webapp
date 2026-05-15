@@ -25,8 +25,13 @@
     <script src="../shared/auth-gate.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
+    <!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
+         window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
+         browser cache (CF Pages serves /shared/*.{js,css} as immutable). -->
+    <script src="../shared/_bundle-hash.js"></script>
     <script>
-        var v = Date.now();
+        // Tiered Cache: stable bundle hash for Bucket B asset query strings
+        var v = (window.VBUNDLE_HASH || Date.now());
         document.write('<link rel="stylesheet" href="../valdoria-design.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="creator.css?v=' + v + '">');
         document.write('<link rel="stylesheet" href="../shared/animations.css?v=' + v + '">');
@@ -80,7 +85,9 @@
         document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
         // USER REQUEST 2026-05-04: D20 3D real no onboarding slide 0
-        document.write('<script src="../shared/three.min.js?v=' + v + '"><\/script>');
+        // three.min.js: vendored lib pinned; served immutable via _headers.
+        // Query string stripped so browser cache key is path-only.
+        document.write('<script src="../shared/three.min.js"><\/script>');
         document.write('<script src="../shared/dice-3d.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/escape-key.js?v=' + v + '"><\/script>');
