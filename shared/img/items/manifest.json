@@ -2585,6 +2585,90 @@
       "cost": 0.004690000000000001,
       "quality": "low",
       "category": "default"
+    },
+    "espinho-de-manticora": {
+      "timestamp": "2026-05-15T23:45:20.885832",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pele-de-sapo-gigante": {
+      "timestamp": "2026-05-15T23:45:35.547955",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "escama-de-lagarto": {
+      "timestamp": "2026-05-15T23:45:46.306307",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "default"
+    },
+    "dente-de-crocodilo": {
+      "timestamp": "2026-05-15T23:45:57.384108",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "pele-de-cobra-gigante": {
+      "timestamp": "2026-05-15T23:46:20.790828",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "olho-de-bruxa-verde": {
+      "timestamp": "2026-05-15T23:46:28.009371",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "saco-de-ingredientes": {
+      "timestamp": "2026-05-15T23:46:43.587003",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "couro-de-ettin": {
+      "timestamp": "2026-05-15T23:46:53.313624",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "sangue-de-troll": {
+      "timestamp": "2026-05-15T23:47:07.279264",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pedra-de-gigante": {
+      "timestamp": "2026-05-15T23:47:18.001151",
+      "cost": 0.004675,
+      "quality": "low",
+      "category": "default"
+    },
+    "cabeca-de-chimera": {
+      "timestamp": "2026-05-15T23:47:34.503327",
+      "cost": 0.004680000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "ferrao-de-viverna": {
+      "timestamp": "2026-05-15T23:47:41.792178",
+      "cost": 0.004685000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "escama-de-dragao-branco": {
+      "timestamp": "2026-05-15T23:47:59.563929",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "gema-de-gelo-draconico": {
+      "timestamp": "2026-05-15T23:48:09.389692",
+      "cost": 0.0047350000000000005,
+      "quality": "low",
+      "category": "gem"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
