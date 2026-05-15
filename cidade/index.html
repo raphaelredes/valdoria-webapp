@@ -13491,12 +13491,13 @@ function _buildInnMockData(player){
     },
     services: [
       // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
-      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos', cb: 'nav:inn_rest' },
-      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos', cb: 'nav:inn_meals' },
-      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',   cb: 'inn_short_rest' },
-      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 V',     cb: 'inn_relaxation' },
-      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',   cb: 'inn_allies' },
-      { icon: _heralIco('ic-missoes'),  label: 'Investigar adega',    badge: 'Quest',    cb: 'inn_cellar_quest' }
+      // X-6.5.51BN: badges PT-BR + coin icon canonical (não "V" texto cru, não "Quest" em inglês).
+      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
+      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
+      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
+      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
+      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
+      { icon: _heralIco('ic-missoes'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
     ]
   };
 }
@@ -13551,9 +13552,19 @@ function _renderInnHubAAA(container, data) {
     +   'background:radial-gradient(ellipse at 22% 100%,rgba(255,180,80,0.42) 0%,rgba(255,120,40,0.18) 35%,transparent 70%);'
     +   'animation:innGlowPulse 2.6s ease-in-out infinite;}'
     // Hearth (lareira de pedra à esquerda — SVG)
-    + '.inn-hearth{position:absolute;left:14px;bottom:14px;width:42px;height:48px;}'
+    // X-6.5.51BN (2026-05-15): 4 camadas teardrop + ember glow + 3 brasas piscando
+    // Fases diferentes por layer pra dança realista (técnica do _drawCampfireAAA canvas).
+    + '.inn-hearth{position:absolute;left:14px;bottom:14px;width:52px;height:56px;}'
     + '.inn-hearth svg{width:100%;height:100%;display:block;}'
-    + '.inn-flame{transform-origin:50% 100%;animation:innFlameDance 1.6s ease-in-out infinite;}'
+    + '.inn-flame{transform-origin:50% 100%;}'
+    + '.inn-flame-1{animation:innFlame1 2.2s ease-in-out infinite;}'   // outer red — slow
+    + '.inn-flame-2{animation:innFlame2 1.7s ease-in-out infinite -0.3s;}'  // orange — medium
+    + '.inn-flame-3{animation:innFlame3 1.3s ease-in-out infinite -0.6s;}'  // yellow — faster
+    + '.inn-flame-4{animation:innFlame4 0.9s ease-in-out infinite -0.4s;}'  // core white — fastest
+    + '.inn-ember-glow{transform-origin:50% 100%;animation:innEmberGlow 2.4s ease-in-out infinite;}'
+    + '.inn-ember-dot{animation:innEmberDot 1.8s ease-in-out infinite;}'
+    + '.inn-ember-dot-2{animation-duration:1.4s;animation-delay:-0.5s;}'
+    + '.inn-ember-dot-3{animation-duration:2.2s;animation-delay:-1.1s;}'
     // Window (arched + moon + stars — SVG à direita)
     + '.inn-window{position:absolute;right:14px;top:18px;width:44px;height:64px;}'
     + '.inn-window svg{width:100%;height:100%;display:block;'
@@ -13616,13 +13627,21 @@ function _renderInnHubAAA(container, data) {
     + '.inn-svc-badge{flex:0 0 auto;padding:1px 5px;font-size:9px;letter-spacing:1px;'
     +   'background:rgba(196,149,58,0.20);color:var(--v-gold,#c4953a);border-radius:3px;}'
     // Keyframes
-    + '@keyframes innFlameDance{0%,100%{transform:scale(1) rotate(-2deg);}50%{transform:scale(1.12) rotate(2deg);}}'
+    // X-6.5.51BN: keyframes realistas (4 layers + ember + brasas) — técnica
+    // do _drawCampfireAAA. Cada layer dança em fase + amplitude diferentes.
+    + '@keyframes innFlame1{0%,100%{transform:scale(0.95,1.0) translateY(0);}25%{transform:scale(1.05,1.12) translateY(-0.5px);}50%{transform:scale(0.92,0.98) translateY(0.3px);}75%{transform:scale(1.08,1.06) translateY(-0.2px);}}'
+    + '@keyframes innFlame2{0%,100%{transform:scale(1.0,1.05);}33%{transform:scale(0.94,0.97);}66%{transform:scale(1.06,1.10);}}'
+    + '@keyframes innFlame3{0%,100%{transform:scale(0.96,1.02);}40%{transform:scale(1.10,1.14);}70%{transform:scale(0.92,0.96);}}'
+    + '@keyframes innFlame4{0%,100%{transform:scale(1.0,1.0);opacity:1;}30%{transform:scale(1.15,1.25);opacity:0.9;}60%{transform:scale(0.85,0.92);opacity:1;}}'
+    + '@keyframes innEmberGlow{0%,100%{opacity:0.7;transform:scale(0.95);}50%{opacity:1;transform:scale(1.08);}}'
+    + '@keyframes innEmberDot{0%,100%{opacity:0.55;}40%{opacity:1;}80%{opacity:0.75;}}'
     + '@keyframes innGlowPulse{0%,100%{opacity:0.75;}50%{opacity:1;}}'
     + '@keyframes innStarTwinkle{0%,100%{opacity:0.4;}50%{opacity:1;}}'
     + '@keyframes innSmokeRise{0%{opacity:0;transform:translateY(0) scale(0.8);}40%{opacity:0.5;}100%{opacity:0;transform:translateY(-18px) scale(1.4);}}'
-    + 'body.perf-lite .inn-flame,body.perf-lite .inn-fireglow,body.perf-lite .inn-star,body.perf-lite .inn-smoke{animation:none!important;}'
+    + 'body.perf-lite .inn-flame,body.perf-lite .inn-fireglow,body.perf-lite .inn-star,body.perf-lite .inn-smoke,body.perf-lite .inn-ember-glow,body.perf-lite .inn-ember-dot{animation:none!important;}'
     + 'body.perf-medium .inn-fireglow{animation-duration:4s;}'
-    + '@media (prefers-reduced-motion:reduce){.inn-flame,.inn-fireglow,.inn-star,.inn-smoke{animation:none!important;}}'
+    + 'body.perf-medium .inn-flame-1,body.perf-medium .inn-flame-2,body.perf-medium .inn-flame-3,body.perf-medium .inn-flame-4{animation-duration:3s;}'
+    + '@media (prefers-reduced-motion:reduce){.inn-flame,.inn-fireglow,.inn-star,.inn-smoke,.inn-ember-glow,.inn-ember-dot{animation:none!important;}}'
     + '</style>'
     // HERO — cena medieval com SVG inline (parede de pedra + viga + lareira + janela noturna)
     + '<div class="inn-hero">'
@@ -13630,25 +13649,51 @@ function _renderInnHubAAA(container, data) {
     +   '<div class="inn-beam"></div>'
     +   '<div class="inn-floor"></div>'
     +   '<div class="inn-fireglow"></div>'
-    // Lareira de pedra (esquerda)
+    // Lareira de pedra (esquerda) — X-6.5.51BN (2026-05-15): fogo realista
+    // inspirado no _drawCampfireAAA da exploracao (canvas). Adaptado pra SVG:
+    // 4 camadas teardrop bezier (dark red → orange → yellow → white core) com
+    // flicker offset (fases diferentes), ember glow pulsante, lenha X-cruzada.
+    // viewBox ampliado 42→52, height 48→56 pra acomodar chamas mais altas.
     +   '<div class="inn-hearth">'
-    +     '<svg viewBox="0 0 42 48" aria-hidden="true">'
-    // Pedras laterais
-    +       '<rect x="0" y="14" width="6" height="34" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
-    +       '<rect x="36" y="14" width="6" height="34" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
-    // Arco superior
-    +       '<path d="M0 14 Q21 0 42 14 L42 18 Q21 6 0 18 Z" fill="#4a3424" stroke="#1a0e06" stroke-width="0.5"/>'
+    +     '<svg viewBox="0 0 52 56" aria-hidden="true">'
+    +       '<defs>'
+    +         '<radialGradient id="inn-ember-grad" cx="50%" cy="100%" r="50%">'
+    +           '<stop offset="0%" stop-color="#ffb060" stop-opacity="0.95"/>'
+    +           '<stop offset="50%" stop-color="#ff7028" stop-opacity="0.65"/>'
+    +           '<stop offset="100%" stop-color="#a02010" stop-opacity="0"/>'
+    +         '</radialGradient>'
+    +       '</defs>'
+    // Pedras laterais (granito escuro)
+    +       '<rect x="0" y="16" width="7" height="40" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
+    +       '<rect x="45" y="16" width="7" height="40" fill="#3a2818" stroke="#1a0e06" stroke-width="0.5"/>'
+    +       '<rect x="0" y="50" width="52" height="6" fill="#2a1810" stroke="#1a0e06" stroke-width="0.5"/>'
+    // Arco superior (manteau de pedra)
+    +       '<path d="M0 16 Q26 0 52 16 L52 22 Q26 6 0 22 Z" fill="#4a3424" stroke="#1a0e06" stroke-width="0.5"/>'
     // Câmara interna (escura)
-    +       '<rect x="6" y="20" width="30" height="28" fill="#0a0604"/>'
-    // Lenha (toras)
-    +       '<rect x="9" y="40" width="24" height="3" fill="#5a3018" stroke="#2a1408" stroke-width="0.3"/>'
-    +       '<rect x="11" y="37" width="20" height="3" fill="#4a2814" stroke="#2a1408" stroke-width="0.3"/>'
-    // Chamas (path SVG mais orgânico que CSS radial)
-    +       '<g class="inn-flame">'
-    +         '<path d="M21 38 Q15 32 17 24 Q19 28 21 22 Q23 28 25 24 Q27 32 21 38" fill="#ff7028" opacity="0.92"/>'
-    +         '<path d="M21 38 Q17 33 19 27 Q20 30 21 25 Q22 30 23 27 Q25 33 21 38" fill="#ffb060" opacity="0.95"/>'
-    +         '<path d="M21 37 Q19 33 20 29 Q21 31 22 29 Q23 33 21 37" fill="#fff4c0"/>'
+    +       '<rect x="7" y="22" width="38" height="28" fill="#0a0604"/>'
+    // Ember glow base (radial pulsante)
+    +       '<ellipse class="inn-ember-glow" cx="26" cy="46" rx="16" ry="6" fill="url(#inn-ember-grad)"/>'
+    // Lenha X-cruzada (2 toras diagonais — inspirado no campfire AAA)
+    +       '<g stroke="#1a0e06" stroke-width="0.4">'
+    +         '<line x1="14" y1="48" x2="38" y2="42" stroke="#5a3018" stroke-width="3.5" stroke-linecap="round"/>'
+    +         '<line x1="14" y1="42" x2="38" y2="48" stroke="#4a2814" stroke-width="3.5" stroke-linecap="round"/>'
+    // Highlights nas toras
+    +         '<line x1="15" y1="47" x2="37" y2="41" stroke="#7a4828" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>'
+    +         '<line x1="15" y1="43" x2="37" y2="47" stroke="#6a3818" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>'
     +       '</g>'
+    // Pontos de brasa (carvão quente entre toras)
+    +       '<circle class="inn-ember-dot" cx="20" cy="46" r="0.9" fill="#ff8030"/>'
+    +       '<circle class="inn-ember-dot inn-ember-dot-2" cx="32" cy="44" r="0.7" fill="#ffb060"/>'
+    +       '<circle class="inn-ember-dot inn-ember-dot-3" cx="26" cy="48" r="1.1" fill="#ffd060"/>'
+    // === CHAMAS 4 CAMADAS (teardrop bezier — técnica do campfire AAA) ===
+    // Layer 1: outer dark red (#a02010) — biggest, slowest flicker
+    +       '<path class="inn-flame inn-flame-1" d="M26 44 C18 36 20 26 24 18 C25 23 26 16 26 12 C26 16 27 23 28 18 C32 26 34 36 26 44 Z" fill="#a02010" opacity="0.85"/>'
+    // Layer 2: orange #ff7028
+    +       '<path class="inn-flame inn-flame-2" d="M26 44 C20 38 22 30 25 22 C25.5 25 26 20 26 17 C26 20 26.5 25 27 22 C30 30 32 38 26 44 Z" fill="#ff7028" opacity="0.92"/>'
+    // Layer 3: yellow-orange #ffb060
+    +       '<path class="inn-flame inn-flame-3" d="M26 43 C22 38 23 33 25 26 C25.5 28 26 24 26 21 C26 24 26.5 28 27 26 C29 33 30 38 26 43 Z" fill="#ffb060" opacity="0.95"/>'
+    // Layer 4: white-yellow core #fff4c0
+    +       '<path class="inn-flame inn-flame-4" d="M26 42 C24 38 24.5 34 25.5 30 C26 31 26 28 26 26 C26 28 26 31 26.5 30 C27.5 34 28 38 26 42 Z" fill="#fff4c0"/>'
     +     '</svg>'
     +   '</div>'
     // Janela arqueada noturna (direita)
@@ -27951,14 +27996,9 @@ function _aaaListSubScreen(opts){
     +   'background:rgba(196,149,58,0.18);color:' + th.primary + ';border:1px solid rgba(196,149,58,0.35);border-radius:4px;'
     +   'white-space:nowrap;}'
     + '.aaa-sub-ichev{flex:0 0 auto;font-size:18px;color:' + th.primary + ';opacity:0.55;line-height:1;}'
-    // Back button
-    + '.aaa-sub-back{display:flex;justify-content:center;margin-top:8px;}'
-    + '.aaa-sub-back-btn{padding:9px 20px;background:linear-gradient(180deg,#3a2818,#1a0e06);'
-    +   'border:1px solid rgba(196,149,58,0.40);border-radius:6px;color:' + th.primary + ';'
-    +   'font-family:var(--v-font-display,Cinzel,serif);font-size:11px;letter-spacing:2px;cursor:pointer;'
-    +   'transition:border-color 0.18s,background 0.18s,transform 0.12s;}'
-    + '.aaa-sub-back-btn:hover{border-color:' + th.primary + ';background:linear-gradient(180deg,#4a3220,#1a0e06);}'
-    + '.aaa-sub-back-btn:active{transform:scale(0.97);}'
+    // X-6.5.51BN (2026-05-15): bottom back button removido — top-left "← Voltar"
+    // do popup header (csp-back-btn) já chama navigateBack que respeita _popupStack
+    // (hierarchical: sub-sub → sub → hub → cidade). Bottom button era redundante.
     + '@keyframes aaaSubItemIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}'
     + 'body.perf-lite .aaa-sub-item{animation:none!important;}'
     + '@media (prefers-reduced-motion:reduce){.aaa-sub-item{animation:none!important;}}'
@@ -28001,8 +28041,7 @@ function _aaaListSubScreen(opts){
       + '</button>';
   });
   html += '</div>';
-  // Back button
-  html += '<div class="aaa-sub-back"><button class="aaa-sub-back-btn" data-cb="__back" type="button">◆ VOLTAR ◆</button></div>';
+  // X-6.5.51BN: bottom back button removido (era redundante com csp-back-btn do header).
   html += '</div>';
 
   bodyEl.innerHTML = html;
@@ -28013,7 +28052,6 @@ function _aaaListSubScreen(opts){
       if (typeof opts.onPick === 'function') opts.onPick(opts.items[idx]);
     });
   });
-  bodyEl.querySelector('[data-cb="__back"]').addEventListener('click', navigateBack);
   ov.classList.add('active');
   // Stack registration
   if (opts.stackKey && typeof _popupStack !== 'undefined') {
@@ -37960,10 +37998,12 @@ function _renderInnRestPopup(bodyEl, d){
     var s = size || 36;
     return '<svg viewBox="0 0 120 120" style="width:' + s + 'px;height:' + s + 'px;color:' + color + ';"><use href="#' + id + '"/></svg>';
   }
+  // X-6.5.51BN (2026-05-15): badges com <span class="vi vi-coin sm"></span>
+  // canonical (substitui "V" texto cru). PT-BR padrão do projeto.
   var rooms = [
-    { _room: 'stable', icon: _innIco('ic-cavalo'),    label: 'Estábulo',     desc: 'Palha dura, mas seguro',     badge: 'Grátis' },
-    { _room: 'common', icon: _innIco('ic-estalagem'), label: 'Quarto Comum', desc: 'Cama macia, padrão',         badge: '3 V' },
-    { _room: 'royal',  icon: _innIco('ic-coroa'),     label: 'Suíte Real',   desc: 'Descanso luxuoso',           badge: '10 V' },
+    { _room: 'stable', icon: _innIco('ic-cavalo'),    label: 'Estábulo',       desc: 'Palha dura, mas seguro',       badge: 'Grátis' },
+    { _room: 'common', icon: _innIco('ic-estalagem'), label: 'Quarto Comum',   desc: 'Cama macia, padrão',           badge: '3 <span class="vi vi-coin sm"></span>' },
+    { _room: 'royal',  icon: _innIco('ic-coroa'),     label: 'Suíte Real',     desc: 'Descanso luxuoso',             badge: '10 <span class="vi vi-coin sm"></span>' },
     { _room: 'short',  icon: _innIco('ic-sono'),      label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis · PHB p.186' }
   ];
   _aaaListSubScreen({
