@@ -13473,6 +13473,75 @@ function _buildTavernMockData(player){
 // é "lar quente" pra descanso. Migração PADRAO_ALDRIC do diálogo Martha
 // fica deferred (continua via _showSharedNpcDialogue legado).
 // ============================================================================
+// X-6.5.51BU (2026-05-15): janela da Estalagem reflete o período do dia
+// canonical da cidade (_getCurrentGameTime + _getGamePeriod). Antes era
+// fixo noturno. 4 variações: dawn (pink/orange), day (céu azul + sol),
+// dusk (vermelho-laranja), night (azul escuro + lua + estrelas).
+function _innBuildWindowSVG(period){
+  var skies = {
+    dawn:  { c1: '#3a2848', c2: '#a05848', c3: '#e8a878', frame: '#2a1810' },
+    day:   { c1: '#5aa0e0', c2: '#a0d0f0', c3: '#dceaf8', frame: '#2a1810' },
+    dusk:  { c1: '#1a1030', c2: '#a03830', c3: '#d8682c', frame: '#2a1810' },
+    night: { c1: '#0a1230', c2: '#1a1844', c3: '#2a1430', frame: '#1a0e06' }
+  };
+  var sky = skies[period] || skies.night;
+  var celestial = '';
+  if (period === 'night') {
+    // Lua crescente + 3 estrelas piscando
+    celestial = ''
+      + '<circle cx="14" cy="16" r="4" fill="#fff8d0" opacity="0.95"/>'
+      + '<circle cx="15.5" cy="14.5" r="3" fill="url(#inn-sky)"/>'
+      + '<circle class="inn-star" cx="28" cy="11" r="0.7" fill="#fff8d0"/>'
+      + '<circle class="inn-star inn-star-2" cx="32" cy="20" r="0.5" fill="#fff8d0"/>'
+      + '<circle class="inn-star inn-star-3" cx="16" cy="42" r="0.5" fill="#fff8d0"/>';
+  } else if (period === 'day') {
+    // Sol no zênite + nuvens wispy
+    celestial = ''
+      + '<circle cx="14" cy="14" r="5" fill="#fff4a0" opacity="0.95"/>'
+      + '<circle cx="14" cy="14" r="3.5" fill="#fff8d8"/>'
+      // 2 nuvens wispy
+      + '<ellipse cx="28" cy="18" rx="6" ry="1.5" fill="#fff" opacity="0.45"/>'
+      + '<ellipse cx="20" cy="24" rx="4" ry="1.2" fill="#fff" opacity="0.35"/>';
+  } else if (period === 'dawn') {
+    // Sol nascendo no horizonte (baixo) + reflexo
+    celestial = ''
+      + '<circle cx="14" cy="22" r="4.5" fill="#ffd070" opacity="0.95"/>'
+      + '<circle cx="14" cy="22" r="3" fill="#fff4c0"/>'
+      // Raios horizontais sutis
+      + '<line x1="5" y1="22" x2="38" y2="22" stroke="#fff4c0" stroke-width="0.4" opacity="0.4"/>'
+      + '<line x1="5" y1="20" x2="38" y2="20" stroke="#ffe890" stroke-width="0.3" opacity="0.3"/>';
+  } else if (period === 'dusk') {
+    // Sol se pondo + 1 estrela tímida
+    celestial = ''
+      + '<circle cx="30" cy="22" r="4" fill="#ffa050" opacity="0.95"/>'
+      + '<circle cx="30" cy="22" r="2.5" fill="#ffc878"/>'
+      // Raio horizontal vermelho
+      + '<line x1="5" y1="22" x2="38" y2="22" stroke="#ff8848" stroke-width="0.4" opacity="0.45"/>'
+      // 1 estrela tímida no canto (Vésper)
+      + '<circle class="inn-star" cx="14" cy="12" r="0.5" fill="#fff8d0"/>';
+  }
+  return ''
+    + '<svg viewBox="0 0 44 64" aria-hidden="true">'
+    +   '<defs>'
+    +     '<linearGradient id="inn-sky" x1="0%" y1="0%" x2="0%" y2="100%">'
+    +       '<stop offset="0%" stop-color="' + sky.c1 + '"/>'
+    +       '<stop offset="55%" stop-color="' + sky.c2 + '"/>'
+    +       '<stop offset="100%" stop-color="' + sky.c3 + '"/>'
+    +     '</linearGradient>'
+    +   '</defs>'
+    // Frame de pedra arqueado
+    +   '<path d="M3 28 Q3 3 22 3 Q41 3 41 28 L41 60 L3 60 Z" fill="' + sky.frame + '" stroke="#3a2818" stroke-width="1.5"/>'
+    // Vidro (céu — gradiente por período)
+    +   '<path d="M6 28 Q6 6 22 6 Q38 6 38 28 L38 58 L6 58 Z" fill="url(#inn-sky)"/>'
+    // Cruzeta da janela
+    +   '<line x1="22" y1="6" x2="22" y2="58" stroke="#3a2818" stroke-width="1.2"/>'
+    +   '<line x1="6" y1="30" x2="38" y2="30" stroke="#3a2818" stroke-width="1.2"/>'
+    +   celestial
+    // Brilho dourado de fundo (refletindo a vela interior — mantém em todos os períodos)
+    +   '<rect x="6" y="55" width="32" height="3" fill="rgba(196,149,58,0.25)"/>'
+    + '</svg>';
+}
+
 function _buildInnMockData(player){
   var p = player || {};
   // canonical: inn.py L83-94 — Martha greeting varia por rep tier
@@ -13516,6 +13585,15 @@ function _buildInnMockData(player){
 function _renderInnHubAAA(container, data) {
   if (!container || !data) return;
   while (container.firstChild) container.removeChild(container.firstChild);
+
+  // X-6.5.51BU (2026-05-15): pega período da cidade pra refletir na janela
+  // (_getCurrentGameTime + _getGamePeriod são definidos antes neste arquivo).
+  var _innCurrentPeriod = 'night';
+  try {
+    if (typeof _getCurrentGameTime === 'function' && typeof _getGamePeriod === 'function') {
+      _innCurrentPeriod = _getGamePeriod(_getCurrentGameTime().hour);
+    }
+  } catch (_) { /* fallback noite */ }
 
   function _fire(cb) {
     if (typeof handleAction === 'function') { handleAction(cb); return; }
@@ -13667,35 +13745,8 @@ function _renderInnHubAAA(container, data) {
     // Container onde vFire vai injetar (logs + canvas + glow + sparks)
     +     '<div class="inn-hearth-fire" id="inn-hearth-fire"></div>'
     +   '</div>'
-    // Janela arqueada noturna (direita)
-    +   '<div class="inn-window">'
-    +     '<svg viewBox="0 0 44 64" aria-hidden="true">'
-    +       '<defs>'
-    +         '<linearGradient id="inn-sky" x1="0%" y1="0%" x2="0%" y2="100%">'
-    +           '<stop offset="0%" stop-color="#0a1230"/>'
-    +           '<stop offset="55%" stop-color="#1a1844"/>'
-    +           '<stop offset="100%" stop-color="#2a1430"/>'
-    +         '</linearGradient>'
-    +       '</defs>'
-    // Frame de pedra arqueado
-    +       '<path d="M3 28 Q3 3 22 3 Q41 3 41 28 L41 60 L3 60 Z" fill="#1a0e06" stroke="#3a2818" stroke-width="1.5"/>'
-    // Vidro (céu noturno)
-    +       '<path d="M6 28 Q6 6 22 6 Q38 6 38 28 L38 58 L6 58 Z" fill="url(#inn-sky)"/>'
-    // Cruzeta da janela
-    +       '<line x1="22" y1="6" x2="22" y2="58" stroke="#3a2818" stroke-width="1.2"/>'
-    +       '<line x1="6" y1="30" x2="38" y2="30" stroke="#3a2818" stroke-width="1.2"/>'
-    // Lua crescente
-    +       '<circle cx="14" cy="16" r="4" fill="#fff8d0" opacity="0.95"/>'
-    +       '<circle cx="15.5" cy="14.5" r="3" fill="url(#inn-sky)"/>'
-    // Estrelas (3 piscando)
-    +       '<circle class="inn-star" cx="28" cy="11" r="0.7" fill="#fff8d0"/>'
-    +       '<circle class="inn-star inn-star-2" cx="32" cy="20" r="0.5" fill="#fff8d0"/>'
-    +       '<circle class="inn-star inn-star-3" cx="16" cy="42" r="0.5" fill="#fff8d0"/>'
-    // Brilho dourado de fundo (refletindo a vela)
-    +       '<rect x="6" y="33" width="32" height="25" fill="url(#inn-sky)"/>'
-    +       '<rect x="6" y="55" width="32" height="3" fill="rgba(196,149,58,0.25)"/>'
-    +     '</svg>'
-    +   '</div>'
+    // Janela arqueada (dinâmica — reflete período da cidade: dawn/day/dusk/night)
+    +   '<div class="inn-window">' + _innBuildWindowSVG(_innCurrentPeriod) + '</div>'
     // Fumaça sutil acima da lareira
     +   '<div class="inn-smoke"></div>'
     // Título centralizado
@@ -41236,9 +41287,24 @@ var HOTBAR_FAVS = [
 var TIME_EPOCH_REAL = 1704067200;  // 2024-01-01 UTC
 var TIME_EPOCH_GAME_YEAR = 842;
 var TIME_GAME_SPEED = 6;
-var TIME_MONTHS = ['Gelorverno','Solnascente','Semeadura','Chuvamanta',
-  'Florescência','Meioano','Solalto','Ceifadura','Folhaqueda','Lunapodre',
-  'Nevefunda','Invermorto'];
+// X-6.5.51BU (2026-05-15): nomes originais Valdorianos (não-PT, lore-friendly).
+// Padrão fonético: latim-arcaico misturado com sufixos cunhados pra evocar
+// estações sem copiar referência real. Ordem: solstício de inverno (mês 0)
+// → primavera → verão → outono → solstício de inverno seguinte (mês 11).
+var TIME_MONTHS = [
+  'Caelumir',   // mês 1 — fim do inverno, céu prateado
+  'Vexilun',    // mês 2 — primeiros brotos
+  'Sylendor',   // mês 3 — floresta acorda
+  'Lyrathar',   // mês 4 — flores e canto
+  'Solvenar',   // mês 5 — sol ascendendo (pico primavera)
+  'Pyrelis',    // mês 6 — solstício de verão, calor zenital
+  'Aurenthal',  // mês 7 — colheita dourada
+  'Brunalith',  // mês 8 — folhagem ruiva
+  'Threnvar',   // mês 9 — últimas brasas do outono
+  'Korvelis',   // mês 10 — corvos, escuridão crescente
+  'Frostmar',   // mês 11 — geada profunda
+  'Mornhal'     // mês 12 — recolhimento, fim do ano
+];
 var TIME_PERIOD_BOUNDS = [[5,8,'dawn'],[8,17,'day'],[17,20,'dusk']];  // night = default
 var TIME_PERIOD_EMOJI = { dawn: '🌅', day: '☀️', dusk: '🌇', night: '🌙' };
 var TIME_PERIOD_LABEL = { dawn: 'Amanhecer', day: 'Dia', dusk: 'Entardecer', night: 'Noite' };
@@ -41296,9 +41362,10 @@ function renderCityTopBar(){
     + '<div class="ctb-icons">'
     + '  <span class="ctb-item"><span class="ctb-city">🏙️</span><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
     + '</div>'
-    + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ', Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
+    + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
     + '  <span class="ctb-item ctb-time">' + pemoji + ' ' + hh + ':' + mm + '</span>'
-    + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthName.substring(0, 4) + '</span>'
+    // X-6.5.51BU: nome do mês completo + ano (era substring(0,4) que cortava "Meioano"→"Meio")
+    + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthName + ' · ' + t.year + '</span>'
     + '  <span class="ctb-item ctb-weather">' + w.icon + ' ' + w.temp + '°</span>'
     + '</div>';
 }
