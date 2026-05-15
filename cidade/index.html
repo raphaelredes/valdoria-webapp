@@ -67,6 +67,48 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     grep "_registerDynamicHandlers" → auto-registro NPCs/festivals/arena/relations
 
   ═══════════════════════════════════════════════════════════════════
+  MOCHILA CANONICAL — vInventory (2026-05-14)
+  ═══════════════════════════════════════════════════════════════════
+  Shared module valdoria-webapp/shared/inventory-screen.{css,js} substitui
+  _showInventoryPopup local. Imports adicionados no <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+ (~612). Função
+  original mantida como fallback defensivo se módulo não carregar.
+
+  Adapter functions (~32490 a ~32700):
+    grep "function _vinvAdaptItem"     → schema cidade {n,q} → vInventory
+    grep "function _vinvBuildConfig"   → monta config completo
+    grep "function _vinvBuildLoadout"  → MOCK_PLAYER_EQUIPPED → loadout
+    grep "function _vinvSlotMap"       → ring_1→ring1, necklace→amulet
+    grep "function _vinvRarityMap"     → very_rare→epic
+    grep "function _vinvIconId"        → name → ic-it-* canonical
+    grep "function _vinvIsQuestItem"   → tags quest/no_sell/etc → rarity quest
+
+  Primitivas use/equip/sell/drop (~32490):
+    grep "function _useInventoryItem"  → consome qty + aplica efeito (heal)
+    grep "function _equipItem"         → MOCK_PLAYER_EQUIPPED[slot]=name
+    grep "function _unequipItem"       → delete loadout[slot]
+    grep "function _sellSingleItem"    → 60% PHB + gold + remove
+    grep "function _dropItem"          → no_discard/quest blocked
+
+  Tabs habilitadas em cidade: ['items', 'equip', 'allies']
+    - items:  grid 3-col com categorias (Armas/Armaduras/Consumíveis/Tesouros)
+    - equip:  loadout 3×3 slots clicáveis → detail + swap list
+    - allies: delegate a _renderAlliesTabHtml() + _wireAlliesTabEvents()
+
+  Toggle do footer cycle: items → equip → allies → items
+
+  D&D 5e cost badges (ativados via inCombat:true — false em cidade):
+    main_hand: Grátis (PHB p.190)
+    off_hand/ring/amulet/cloak: 1 Ação (PHB p.144, p.190)
+    head/chest/feet: Impossível (PHB p.144 — 1–10 min)
+
+  Doc canonical: docs/sistemas/inventory-canonical.md
+  ═══════════════════════════════════════════════════════════════════
+
+  ═══════════════════════════════════════════════════════════════════
   PADRAO_ALDRIC — DIÁLOGO/NARRATIVA CANÔNICO DO JOGO (2026-05-05)
   ═══════════════════════════════════════════════════════════════════
   REGRA SOBERANA: TODA narrativa/diálogo no jogo (encounters, NPCs,
@@ -265,10 +307,6 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     _squareShowEntryInteractive — popup de evento com escolhas + skill check
 
   HTML <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
 + <style> (linhas verificadas)
   ~110   <html>
   ~111   <head> (meta cache no-store + theme-color)
@@ -614,6 +652,13 @@ LOG SINK (Fase 7):
        não funcionar pro user (só logavam no console). */
     document.write('<link rel="stylesheet" href="/shared/toast.css?v=' + v + '">');
     document.write('<script src="/shared/toast.js?v=' + v + '"><\/script>');
+    /* 2026-05-14: vInventory canonical (shared/inventory-screen.{css,js}) — Mochila
+       redesign que substitui _showInventoryPopup local. Sprite ic-it-* (519 symbols)
+       carregado primeiro pra ser usado em qualquer item icon. Fallback automático
+       pro popup legacy se módulo não carregar (defensivo). */
+    document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + v + '">');
+    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
+    document.write('<script src="/shared/inventory-screen.js?v=' + v + '"><\/script>');
     /* City shared (.vc-alert / .vc-player-block / .vc-service-card / etc.) — usado
        por todos os renderers de área (templo/banco/etc). Estava faltando em
        cidade.html, fazendo .vc-alert--danger não estilizar. */
@@ -32478,7 +32523,316 @@ function _invGetFilterCounts(){
   return counts;
 }
 
+// ===================================================================
+// INVENTORY ACTIONS (2026-05-14) — Primitivas use/equip/sell/drop
+// Usadas pelos callbacks do vInventory. Mutam MOCK_PLAYER_INVENTORY +
+// MOCK_PLAYER_EQUIPPED + CITY_MOCK_PLAYER.gold com persistence sync.
+//
+// SHARED_EQUIPPED_KEY (2026-05-14): localStorage compartilhada com
+// exploracao.html e combate.html — permite tab 'equip' read-only nesses
+// simuladores sem refactor do state local.
+// ===================================================================
+var SHARED_EQUIPPED_KEY = 'valdoria_shared_equipped_v1';
+var SHARED_STATS_KEY    = 'valdoria_shared_stats_v1';
+function _syncEquippedToLocalStorage() {
+  try {
+    localStorage.setItem(SHARED_EQUIPPED_KEY, JSON.stringify(window.MOCK_PLAYER_EQUIPPED || {}));
+    if (window.CITY_MOCK_PLAYER) {
+      var p = window.CITY_MOCK_PLAYER;
+      var stats = {
+        gold: p.gold || 0,
+        ac: p.ac || p.armor_class || null,
+        hp: p.hp, max_hp: p.max_hp,
+        mp: p.mp, max_mp: p.max_mp,
+      };
+      localStorage.setItem(SHARED_STATS_KEY, JSON.stringify(stats));
+    }
+  } catch (_) { /* localStorage off / cota cheia */ }
+}
+// Sync inicial no boot
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _syncEquippedToLocalStorage);
+  } else {
+    _syncEquippedToLocalStorage();
+  }
+}
+
+function _itemSlotOf(name) {
+  var it = getItemData(name) || {};
+  return it.slot || null;
+}
+function _itemTagsOf(name) {
+  var it = getItemData(name) || {};
+  return it.t || [];
+}
+function _useInventoryItem(name) {
+  var tags = _itemTagsOf(name);
+  var it = getItemData(name) || {};
+  var canUse = tags.indexOf('consumable') !== -1
+    || tags.indexOf('potion') !== -1
+    || tags.indexOf('food') !== -1;
+  if (!canUse) {
+    if (typeof vToast === 'function') vToast('Esse item não é usável.');
+    return false;
+  }
+  // Aplica efeito básico: poção de cura → restaura HP até max
+  var p = window.CITY_MOCK_PLAYER || {};
+  if (tags.indexOf('potion') !== -1 && /cura/i.test(name)) {
+    var preHp = p.hp || 0;
+    var maxHp = p.max_hp || preHp;
+    var heal = (it.heal || 6);  // default 1d4+2 média = 6
+    p.hp = Math.min(maxHp, preHp + heal);
+    var gained = p.hp - preHp;
+    if (typeof vToast === 'function') {
+      vToast('Você bebe ' + name + ' — +' + gained + ' PV (' + p.hp + '/' + maxHp + ')');
+    }
+  } else {
+    if (typeof vToast === 'function') vToast('Você usa ' + name + '.');
+  }
+  _removeItemFromInventory(name, 1);
+  if (typeof refreshHud === 'function') refreshHud();
+  return true;
+}
+function _equipItem(name) {
+  var slot = _itemSlotOf(name);
+  if (!slot) {
+    if (typeof vToast === 'function') vToast('Esse item não pode ser equipado.');
+    return false;
+  }
+  if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') window.MOCK_PLAYER_EQUIPPED = {};
+  var current = MOCK_PLAYER_EQUIPPED[slot];
+  MOCK_PLAYER_EQUIPPED[slot] = name;
+  if (typeof vToast === 'function') {
+    if (current && current !== name) vToast(current + ' → ' + name + ' (' + slot + ')');
+    else vToast(name + ' equipado.');
+  }
+  if (typeof refreshHud === 'function') refreshHud();
+  _syncEquippedToLocalStorage();
+  return true;
+}
+function _unequipItem(name) {
+  if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') return false;
+  var found = null;
+  for (var slot in MOCK_PLAYER_EQUIPPED) {
+    if (MOCK_PLAYER_EQUIPPED[slot] === name) { found = slot; break; }
+  }
+  if (!found) {
+    if (typeof vToast === 'function') vToast(name + ' não está equipado.');
+    return false;
+  }
+  delete MOCK_PLAYER_EQUIPPED[found];
+  if (typeof vToast === 'function') vToast(name + ' desequipado.');
+  if (typeof refreshHud === 'function') refreshHud();
+  _syncEquippedToLocalStorage();
+  return true;
+}
+function _sellSingleItem(name) {
+  // canonical: PHB Ch.5 sell multiplier 60% + PROTECTED_SELL_TAGS
+  if (typeof _isItemSellable === 'function' && !_isItemSellable(name)) {
+    if (typeof vToast === 'function') vToast(name + ' não pode ser vendido.');
+    return false;
+  }
+  // Se equipado, desequipa antes
+  if (_isItemEquipped(name)) _unequipItem(name);
+  var it = getItemData(name) || {};
+  var val = Math.max(1, Math.floor((it.v || 1) * 0.6));
+  var removed = _removeItemFromInventory(name, 1);
+  if (removed <= 0) {
+    if (typeof vToast === 'function') vToast('Item não encontrado.');
+    return false;
+  }
+  if (window.CITY_MOCK_PLAYER) CITY_MOCK_PLAYER.gold = (CITY_MOCK_PLAYER.gold || 0) + val;
+  if (typeof vToast === 'function') vToast('Vendeu ' + name + ' por ' + val + ' V');
+  if (typeof refreshHud === 'function') refreshHud();
+  return true;
+}
+function _dropItem(name) {
+  var tags = _itemTagsOf(name);
+  if (tags.indexOf('no_discard') !== -1 || tags.indexOf('quest') !== -1) {
+    if (typeof vToast === 'function') vToast(name + ' não pode ser largado.');
+    return false;
+  }
+  if (_isItemEquipped(name)) _unequipItem(name);
+  var removed = _removeItemFromInventory(name, 1);
+  if (removed <= 0) {
+    if (typeof vToast === 'function') vToast('Item não encontrado.');
+    return false;
+  }
+  if (typeof vToast === 'function') vToast(name + ' largado.');
+  return true;
+}
+
+// ===================================================================
+// V_INV ADAPTER (2026-05-14) — Mochila canonical compartilhada
+// Converte items do schema cidade.html ({n, q} + getItemData()) pro
+// schema vInventory ({id, name, qty, rarity, tags, ...}) e delega
+// chamadas pra `valdoria-webapp/shared/inventory-screen.js`.
+//
+// Mapping:
+//   slot ring_1 → ring1, ring_2 → ring2, necklace → amulet
+//   rarity very_rare → epic (PHB-aligned)
+//   tags ['quest','no_sell','mission_item'] → rarity 'quest'
+// ===================================================================
+function _vinvSlotMap(slot) {
+  return ({ ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' })[slot] || slot;
+}
+function _vinvRarityMap(r) {
+  if (r === 'very_rare') return 'epic';
+  return r || 'common';
+}
+function _vinvIsQuestItem(it) {
+  var tags = it.t || [];
+  var Q = ['quest', 'mission_item', 'no_sell', 'no_discard', 'story_item', 'unique', 'starter_map'];
+  for (var i = 0; i < Q.length; i++) if (tags.indexOf(Q[i]) !== -1) return true;
+  return false;
+}
+function _vinvSlug(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+function _vinvIconId(name) {
+  // Usa HeraldicItems API se disponível, senão slugify
+  try {
+    if (window.HeraldicItems && typeof HeraldicItems.idFromName === 'function') {
+      var id = HeraldicItems.idFromName(name);
+      if (id) return id;
+    }
+  } catch (_) {}
+  return 'ic-it-' + _vinvSlug(name);
+}
+function _vinvAdaptItem(invEntry) {
+  var name = invEntry.n;
+  var qty = invEntry.q;
+  var it = getItemData(name) || {};
+  var tags = it.t || [];
+  var rarity = _vinvIsQuestItem(it) ? 'quest' : _vinvRarityMap(it.r);
+  return {
+    id: _vinvSlug(name),
+    name: name,
+    qty: qty,
+    rarity: rarity,
+    equipped: !!_isItemEquipped(name),
+    favorite: !!_isItemFav(name),
+    tags: tags,
+    slot: _vinvSlotMap(it.slot),
+    dmg_die: it.dd || it.dmg_die,
+    ac_bonus: it.ac || it.ac_bonus,
+    bonus: it.b || it.bonus,
+    value: it.v || 0,
+    weight: it.w || it.weight,
+    desc: it.desc || '',
+    iconId: _vinvIconId(name),
+  };
+}
+function _vinvBuildLoadout() {
+  var loadout = {};
+  (MOCK_PLAYER_INVENTORY || []).forEach(function (entry) {
+    if (entry.q <= 0) return;
+    if (!_isItemEquipped(entry.n)) return;
+    var adapted = _vinvAdaptItem(entry);
+    if (adapted.slot) loadout[adapted.slot] = adapted;
+  });
+  return loadout;
+}
+function _vinvBuildStats() {
+  var p = window.CITY_MOCK_PLAYER || {};
+  return {
+    ca: p.ac || p.armor_class || '—',
+    pv: ((p.hp != null) ? p.hp : '—') + ' / ' + ((p.max_hp != null) ? p.max_hp : '—'),
+    pm: ((p.mp != null) ? p.mp : '—') + ' / ' + ((p.max_mp != null) ? p.max_mp : '—'),
+  };
+}
+function _vinvBuildConfig() {
+  var items = (MOCK_PLAYER_INVENTORY || [])
+    .filter(function (e) { return e.q > 0; })
+    .map(_vinvAdaptItem);
+  return {
+    title: 'MOCHILA',
+    player: {
+      gold: (window.CITY_MOCK_PLAYER || {}).gold || 0,
+      items: items,
+      loadout: _vinvBuildLoadout(),
+      stats: _vinvBuildStats(),
+    },
+    tabs: ['items', 'equip', 'allies'],   // 3 tabs canonical cidade
+    showSearch: true,
+    showSort: true,
+    showBulkActions: { junk: true, fusion: true },
+    inCombat: false,
+    computeJunk: function () {
+      try { var info = _getJunkInventory(); return { count: info.count, gold: info.gold }; }
+      catch (_) { return { count: 0, gold: 0 }; }
+    },
+    computeFusions: function () {
+      try { return _getGemFusionsAvailable() || []; } catch (_) { return []; }
+    },
+    // Tab Aliados delegada ao renderer existente do cidade.html.
+    // renderAlliesTab → HTML. onAlliesRendered → wire de event handlers.
+    renderAlliesTab: function () {
+      try { return _renderAlliesTabHtml(); }
+      catch (e) { console.error('[vinv] renderAlliesTab:', e); return '<div class="vinv-empty">— Erro ao carregar aliados —</div>'; }
+    },
+    onAlliesRendered: function (el) {
+      try { if (typeof _wireAlliesTabEvents === 'function') _wireAlliesTabEvents(el); }
+      catch (e) { console.error('[vinv] onAlliesRendered:', e); }
+    },
+    onSellJunk: function () {
+      window.vInventory && vInventory.close();
+      try { _showJunkSellerModal(); } catch (e) { console.error('[vinv] junk:', e); }
+    },
+    onFuseGems: function () {
+      window.vInventory && vInventory.close();
+      try { _showGemFusionModal(); } catch (e) { console.error('[vinv] fusion:', e); }
+    },
+    onItemUse: function (item) {
+      if (typeof _useInventoryItem === 'function') _useInventoryItem(item.name);
+      else if (typeof vToast === 'function') vToast('Usar ' + item.name);
+    },
+    onItemEquip: function (item) {
+      if (typeof _equipItem === 'function') _equipItem(item.name);
+      else if (typeof vToast === 'function') vToast('Equipar ' + item.name);
+      window.vInventory && vInventory.refresh();
+    },
+    onItemUnequip: function (item) {
+      if (typeof _unequipItem === 'function') _unequipItem(item.name);
+      else if (typeof vToast === 'function') vToast('Desequipar ' + item.name);
+      window.vInventory && vInventory.refresh();
+    },
+    onItemSwap: function (oldItem, newItem, slot) {
+      if (typeof _equipItem === 'function') _equipItem(newItem.name);
+      else if (typeof vToast === 'function') {
+        vToast(oldItem ? ('Trocar ' + oldItem.name + ' → ' + newItem.name) : ('Equipar ' + newItem.name));
+      }
+      window.vInventory && vInventory.refresh();
+    },
+    onItemSell: function (item) {
+      if (typeof _sellSingleItem === 'function') _sellSingleItem(item.name);
+      else if (typeof vToast === 'function') vToast('Vender ' + item.name + ' por ' + (item.value || 0) + ' V');
+    },
+    onItemDrop: function (item) {
+      if (typeof _dropItem === 'function') _dropItem(item.name);
+      else if (typeof vToast === 'function') vToast('Largar ' + item.name);
+    },
+    onClose: function () { /* nada — popup fecha sozinho */ },
+  };
+}
+
 function _showInventoryPopup(){
+  // 2026-05-14: delegate à mochila canonical compartilhada (vInventory).
+  // Fallback ao popup legacy abaixo se o módulo não carregou.
+  if (window.vInventory && window.vInventory.__loaded) {
+    try {
+      window.vInventory.open(_vinvBuildConfig());
+      // Registra restore pra back-stack continuar funcionando
+      if (!window._popupRestoreFns) window._popupRestoreFns = {};
+      window._popupRestoreFns['inventory'] = function () { _showInventoryPopup(); };
+      return;
+    } catch (e) {
+      console.error('[vInventory] falha ao abrir, usando popup legacy:', e);
+    }
+  }
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
