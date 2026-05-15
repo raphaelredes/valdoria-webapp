@@ -1913,6 +1913,90 @@
       "cost": 0.004865000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "tesouro-selvagem": {
+      "timestamp": "2026-05-15T23:21:06.639788",
+      "cost": 0.004910000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "picareta-de-guerra": {
+      "timestamp": "2026-05-15T23:21:19.389314",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-de-pedra": {
+      "timestamp": "2026-05-15T23:21:31.228614",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machado-de-montanha": {
+      "timestamp": "2026-05-15T23:21:43.483173",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "elmo-de-ferro-bruto": {
+      "timestamp": "2026-05-15T23:21:58.873296",
+      "cost": 0.004985000000000001,
+      "quality": "low",
+      "category": "armor"
+    },
+    "colete-de-malha-rustica": {
+      "timestamp": "2026-05-15T23:22:12.679295",
+      "cost": 0.004855000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "minerio-de-ferro-puro": {
+      "timestamp": "2026-05-15T23:22:21.321846",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "kit-de-escalada": {
+      "timestamp": "2026-05-15T23:22:37.905295",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "lanterna-de-mineiro": {
+      "timestamp": "2026-05-15T23:22:50.537092",
+      "cost": 0.004770000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "racoes-de-ferro": {
+      "timestamp": "2026-05-15T23:23:02.264786",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "food"
+    },
+    "picareta-de-mineracao": {
+      "timestamp": "2026-05-15T23:23:18.147517",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "pocao-de-resist.-ao-fogo": {
+      "timestamp": "2026-05-15T23:23:27.893312",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "unguento-termico": {
+      "timestamp": "2026-05-15T23:23:42.609788",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "racoes-de-veterano": {
+      "timestamp": "2026-05-15T23:23:57.845942",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "food"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
