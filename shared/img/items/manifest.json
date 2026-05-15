@@ -2165,6 +2165,90 @@
       "cost": 0.004725000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "dardo": {
+      "timestamp": "2026-05-15T23:30:10.712352",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "foice-leve": {
+      "timestamp": "2026-05-15T23:30:23.236661",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-curto": {
+      "timestamp": "2026-05-15T23:30:36.779775",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "funda": {
+      "timestamp": "2026-05-15T23:30:49.439881",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "montante": {
+      "timestamp": "2026-05-15T23:31:03.030375",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "machado-grande": {
+      "timestamp": "2026-05-15T23:31:19.377278",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "malho": {
+      "timestamp": "2026-05-15T23:31:30.433128",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "alabarda": {
+      "timestamp": "2026-05-15T23:31:42.366661",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "mangual": {
+      "timestamp": "2026-05-15T23:31:55.457063",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "glaive": {
+      "timestamp": "2026-05-15T23:32:12.346457",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pique": {
+      "timestamp": "2026-05-15T23:32:20.314980",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "tridente": {
+      "timestamp": "2026-05-15T23:32:33.013327",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "chicote": {
+      "timestamp": "2026-05-15T23:32:47.417183",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "arco-longo": {
+      "timestamp": "2026-05-15T23:32:58.669019",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "weapon"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
