@@ -2417,6 +2417,90 @@
       "cost": 0.004785000000000001,
       "quality": "low",
       "category": "magical"
+    },
+    "pelo-de-texugo": {
+      "timestamp": "2026-05-15T23:39:15.158214",
+      "cost": 0.004675,
+      "quality": "low",
+      "category": "default"
+    },
+    "chifre-de-alce": {
+      "timestamp": "2026-05-15T23:39:30.935614",
+      "cost": 0.004745000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "galho-animado": {
+      "timestamp": "2026-05-15T23:39:44.552275",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "presa-de-worg": {
+      "timestamp": "2026-05-15T23:39:54.730109",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "folha-da-driade": {
+      "timestamp": "2026-05-15T23:40:13.579280",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tentaculo-de-pantera-sombria": {
+      "timestamp": "2026-05-15T23:40:22.562320",
+      "cost": 0.0049700000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pele-de-pantera-sombria": {
+      "timestamp": "2026-05-15T23:40:37.058524",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "antena-de-centopeia": {
+      "timestamp": "2026-05-15T23:40:45.535643",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "olho-de-grimlock": {
+      "timestamp": "2026-05-15T23:40:59.350177",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "membrana-de-manto-negro": {
+      "timestamp": "2026-05-15T23:41:13.670873",
+      "cost": 0.004745000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "antena-de-ferrugem": {
+      "timestamp": "2026-05-15T23:41:25.013406",
+      "cost": 0.004690000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "tentaculo-de-roper": {
+      "timestamp": "2026-05-15T23:41:43.974199",
+      "cost": 0.0049700000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "dente-de-roper": {
+      "timestamp": "2026-05-15T23:41:49.557688",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "adesivo-de-mimic": {
+      "timestamp": "2026-05-15T23:42:09.012707",
+      "cost": 0.004780000000000001,
+      "quality": "low",
+      "category": "default"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
