@@ -1301,6 +1301,90 @@
       "cost": 0.004765000000000001,
       "quality": "low",
       "category": "food"
+    },
+    "raiz-amarga": {
+      "timestamp": "2026-05-15T22:50:41.425274",
+      "cost": 0.004740000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "musgo-luminoso": {
+      "timestamp": "2026-05-15T22:50:56.505838",
+      "cost": 0.004745000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "agua-pura": {
+      "timestamp": "2026-05-15T22:51:06.737474",
+      "cost": 0.004725000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "enxofre-refinado": {
+      "timestamp": "2026-05-15T22:51:18.596170",
+      "cost": 0.004730000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "essencia-arcana": {
+      "timestamp": "2026-05-15T22:51:33.682431",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "magical"
+    },
+    "antitoxina": {
+      "timestamp": "2026-05-15T22:51:47.798600",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "veneno-basico": {
+      "timestamp": "2026-05-15T22:51:58.004336",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "amuleto-de-ouro": {
+      "timestamp": "2026-05-15T22:52:11.223299",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "gema-lapidada": {
+      "timestamp": "2026-05-15T22:52:24.262443",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "cataplasma-curativo": {
+      "timestamp": "2026-05-15T22:52:38.733076",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "racoes-de-viagem": {
+      "timestamp": "2026-05-15T22:52:50.816364",
+      "cost": 0.004775000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "ensopado-revigorante": {
+      "timestamp": "2026-05-15T22:53:03.352434",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "refeicao-fortificante": {
+      "timestamp": "2026-05-15T22:53:19.507117",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "estrepes": {
+      "timestamp": "2026-05-15T22:53:32.865087",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "potion"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
