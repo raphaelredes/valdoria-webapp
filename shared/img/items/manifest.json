@@ -881,6 +881,90 @@
       "cost": 0.004790000000000001,
       "quality": "low",
       "category": "weapon"
+    },
+    "maca-+1": {
+      "timestamp": "2026-05-15T22:35:31.048139",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "montante-+1": {
+      "timestamp": "2026-05-15T22:35:42.613034",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "alabarda-+1": {
+      "timestamp": "2026-05-15T22:35:55.952908",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "anel-de-resistencia": {
+      "timestamp": "2026-05-15T22:36:11.411597",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anel-de-escudo-mental": {
+      "timestamp": "2026-05-15T22:36:23.406317",
+      "cost": 0.0048400000000000006,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anel-de-ouro": {
+      "timestamp": "2026-05-15T22:36:34.543784",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "default"
+    },
+    "amuleto-de-armadura-natural": {
+      "timestamp": "2026-05-15T22:36:50.990361",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "medalhao-de-pensamentos": {
+      "timestamp": "2026-05-15T22:37:04.009566",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "magical"
+    },
+    "colar-de-bolas-de-fogo": {
+      "timestamp": "2026-05-15T22:37:16.296627",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "colar-de-ouro": {
+      "timestamp": "2026-05-15T22:37:36.729724",
+      "cost": 0.0047150000000000004,
+      "quality": "low",
+      "category": "default"
+    },
+    "circlet-da-explosao": {
+      "timestamp": "2026-05-15T22:37:41.843745",
+      "cost": 0.004830000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chapeu-de-disfarce": {
+      "timestamp": "2026-05-15T22:37:55.195094",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "elmo-da-telepatia": {
+      "timestamp": "2026-05-15T22:38:15.052256",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-da-resistencia": {
+      "timestamp": "2026-05-15T22:38:22.690215",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
