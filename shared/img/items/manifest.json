@@ -2669,6 +2669,90 @@
       "cost": 0.0047350000000000005,
       "quality": "low",
       "category": "gem"
+    },
+    "tentaculo-de-rastejante": {
+      "timestamp": "2026-05-15T23:48:26.338005",
+      "cost": 0.0049700000000000005,
+      "quality": "low",
+      "category": "default"
+    },
+    "turquesa": {
+      "timestamp": "2026-05-15T23:48:34.686689",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "quartzo": {
+      "timestamp": "2026-05-15T23:48:47.950903",
+      "cost": 0.004745000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "onix": {
+      "timestamp": "2026-05-15T23:49:01.347913",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "gem"
+    },
+    "ametista": {
+      "timestamp": "2026-05-15T23:49:15.363844",
+      "cost": 0.00476,
+      "quality": "low",
+      "category": "gem"
+    },
+    "jade": {
+      "timestamp": "2026-05-15T23:49:39.177765",
+      "cost": 0.004765000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "perola": {
+      "timestamp": "2026-05-15T23:49:40.229665",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "rubi": {
+      "timestamp": "2026-05-15T23:49:52.472801",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "safira": {
+      "timestamp": "2026-05-15T23:50:13.446869",
+      "cost": 0.004750000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "esmeralda": {
+      "timestamp": "2026-05-15T23:50:18.947544",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "runa-de-protecao": {
+      "timestamp": "2026-05-15T23:50:33.062772",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-vigor": {
+      "timestamp": "2026-05-15T23:50:48.313232",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-precisao": {
+      "timestamp": "2026-05-15T23:50:59.557946",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-chamas": {
+      "timestamp": "2026-05-15T23:51:15.485316",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
