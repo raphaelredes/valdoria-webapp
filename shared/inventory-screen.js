@@ -66,6 +66,17 @@
     arrow.setAttribute('role', 'button');
     arrow.setAttribute('aria-label', 'Rolar');
     arrow.innerHTML = '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 12L2 6h12z" fill="currentColor"/></svg>';
+
+  // Helper to render item icon — uses PNG (AI-generated) when manifest has it,
+  // fallback to SVG sprite. Requires items-resolver.js loaded (window.vItems).
+  // iconId format: "ic-it-{slug}" — slug extracted by removing "ic-it-" prefix.
+  function _iconSrc(iconId, altText) {
+    var slug = (iconId || '').replace(/^ic-it-/, '');
+    if (window.vItems && typeof window.vItems.iconHTML === 'function') {
+      return window.vItems.iconHTML(slug, altText || slug);
+    }
+    return '<svg viewBox="0 0 120 120"><use href="#' + iconId + '"/></svg>';
+  }
     panelEl.appendChild(arrow);
 
     function update() {
@@ -594,7 +605,7 @@
         +   qtyBadge
         +   (equipBadge || questBadge)
         +   favBadge
-        +   '<div class="vinv-icon" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg></div>'
+        +   '<div class="vinv-icon" aria-hidden="true">' + _iconSrc(iconId, it.name) + '</div>'
         +   '<div class="vinv-name">' + _esc(it.name) + '</div>'
         +   (metaHtml ? '<div class="vinv-meta">' + metaHtml + '</div>' : '')
         + '</div>';
@@ -649,7 +660,7 @@
         var iconId = _resolveItemIcon(it);
         var rarity = it.rarity || 'common';
         html += '<div class="vinv-slot filled r-' + rarity + '" data-slot="' + s.key + '">'
-          +   '<div class="vinv-slot-icon"><svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg></div>'
+          +   '<div class="vinv-slot-icon">' + _iconSrc(iconId, (it && it.name) || iconId) + '</div>'
           +   '<div class="vinv-slot-label">' + _esc(s.label) + '</div>'
           + '</div>';
       } else {
@@ -902,7 +913,7 @@
     card.innerHTML = ''
       + '<div class="vinv-detail-close" data-action="close-detail">' + _uiIcon('close', 13) + '</div>'
       + '<div class="vinv-detail-header">'
-      +   '<div class="vinv-detail-portrait"><svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg></div>'
+      +   '<div class="vinv-detail-portrait">' + _iconSrc(iconId, it.name) + '</div>'
       +   '<div class="vinv-detail-name">' + _esc(it.name) + '</div>'
       +   '<div class="vinv-detail-rarity ' + rarity + '">' + rarityLabel + '</div>'
       +   (it.equipped ? '<div style="margin-top:6px"><span class="vinv-cost-badge action" style="background:rgba(196,149,58,0.2);color:var(--vinv-gold);border:1px solid var(--vinv-gold)">EQUIPADO</span></div>' : '')
@@ -979,7 +990,7 @@
       var iconId = _resolveItemIcon(alt);
       var altRarity = alt.rarity || 'common';
       html += '<div class="vinv-swap-row r-' + altRarity + (blocked ? ' blocked' : '') + '" data-swap-idx="' + i + '">'
-        +   '<svg viewBox="0 0 120 120"><use href="#' + _esc(iconId) + '"/></svg>'
+        +   _iconSrc(iconId, (it && it.name) || iconId)
         +   '<div class="vinv-swap-info">'
         +     '<div class="vinv-swap-name">' + _esc(alt.name) + '</div>'
         +     '<div class="vinv-swap-meta">' + _buildMeta(alt) + '</div>'

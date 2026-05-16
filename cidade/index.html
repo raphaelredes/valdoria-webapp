@@ -658,6 +658,9 @@ LOG SINK (Fase 7):
        pro popup legacy se módulo não carregar (defensivo). */
     document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + v + '">');
     document.write('<script src="/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
+    // items-resolver: PNG-when-available with SVG fallback. Must load
+    // BEFORE inventory-screen.js so _iconSrc() can find window.vItems.
+    document.write('<script src="/shared/items-resolver.js?v=' + v + '"><\/script>');
     document.write('<script src="/shared/inventory-screen.js?v=' + v + '"><\/script>');
     /* X-6.5.51BO (2026-05-15): Fogueira reaproveitável (CampFire + vFire wrapper).
        Mesmo sistema canvas particle additive da tela do acampamento, agora padronizada

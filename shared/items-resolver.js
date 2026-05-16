@@ -162,4 +162,8 @@
     preloadManifest: loadManifest,
     _state: manifestState, // for debugging
   };
+
+  // Auto-preload manifest on script load so iconHTML() returns PNG
+  // on first inventory open without delay. Non-blocking — async fetch.
+  loadManifest();
 })(typeof window !== 'undefined' ? window : this);
