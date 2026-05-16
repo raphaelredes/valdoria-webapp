@@ -22,17 +22,31 @@
 
   var SVG_SPRITE_PREFIX = 'ic-it-';
 
-  // Detect base via script src (works on file:// and http://).
+  // Detect base via script src. Captured immediately on parse via
+  // document.currentScript (reliable across HTTP and file://). Fallback
+  // scans all script tags by name.
+  var _currentScript = (typeof document !== 'undefined' && document.currentScript) || null;
+
   function detectScriptBase() {
+    // Approach 1: document.currentScript (most reliable)
+    if (_currentScript && _currentScript.src) {
+      var clean = _currentScript.src.split('?')[0];
+      var idx = clean.indexOf('/shared/items-resolver.js');
+      if (idx >= 0) return clean.substring(0, idx + 1);
+    }
+    // Approach 2: scan all script tags (fallback if currentScript unavailable)
     var scripts = document.getElementsByTagName('script');
     for (var i = 0; i < scripts.length; i++) {
       var src = scripts[i].src || '';
       if (src.indexOf('items-resolver.js') !== -1) {
-        var clean = src.split('?')[0];
-        var idx = clean.indexOf('/shared/items-resolver.js');
-        if (idx >= 0) return clean.substring(0, idx + 1);
-        return clean.substring(0, clean.lastIndexOf('/') + 1).replace(/\/shared\/$/, '/');
+        var clean2 = src.split('?')[0];
+        var idx2 = clean2.indexOf('/shared/items-resolver.js');
+        if (idx2 >= 0) return clean2.substring(0, idx2 + 1);
       }
+    }
+    // Approach 3: hardcoded fallback for HTTP deployments
+    if (typeof location !== 'undefined' && location.origin) {
+      return location.origin + '/';
     }
     return '';
   }
