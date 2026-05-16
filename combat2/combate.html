@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-15T01:32:58Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T21:56:12Z — do not edit directly, edit source -->
 
 
 <!--
@@ -474,11 +474,6 @@ html.sim-combat-root #app {
   height: 100% !important;
 }
 </style>
-<!-- Tiered Cache (see docs/sistemas/cache-strategy.md): bundle hash defines
-     window.VBUNDLE_HASH used as ?v= for Bucket B assets so revisits hit the
-     browser cache (CF Pages serves /shared/*.{js,css} as immutable). Must
-     load before any `var v = Date.now()` in the boot scripts below. -->
-<script src="/bundle-version.js"></script>
 <script>
 /* X-6.5.51AG (2026-05-07): COMBAT NEEDS FULL MOTION — bypass prefers-reduced-motion.
    ════════════════════════════════════════════════════════════════════════════════
@@ -539,9 +534,7 @@ html.sim-combat-root #app {
     setTimeout(function(){ clearInterval(_waitVM); }, 5000);
 })();
 
-// Stable bundle hash when /bundle-version.js loaded (Tiered Cache);
-// falls back to Date.now() if not yet defined.
-var v = (window.VBUNDLE_HASH || Date.now());
+var v = Date.now();
 var BASE = 'https://jogo.lendasdevaldoria.com.br';
 function loadCSS(href) {
     var l = document.createElement('link');
@@ -9010,7 +9003,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 })();
 </script>
 <!-- Canonical title screen + loading libs (USER REQUEST 2026-05-05) -->
-<script>var _vti = (window.VBUNDLE_HASH || Date.now());
+<script>var _vti = Date.now();
 document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-title.css?v=' + _vti + '">');
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
 document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.css?v=' + _vti + '">');
@@ -9021,8 +9014,6 @@ document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' +
    openBagPanel local. inCombat:true ativa regras D&D 5e (PHB p.139/144/190). */
 document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + _vti + '">');
 document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
-// items-resolver: PNG-when-available with SVG fallback (must precede inventory-screen.js)
-document.write('<script src="../valdoria-webapp/shared/items-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 </script>
 </head>

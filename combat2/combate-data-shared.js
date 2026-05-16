@@ -452,7 +452,44 @@ var CHAR_CLASSES = [
             desc: 'Transmuta alvo em pedra (PHB p.247): TR CON ou PETRIFICADO 3 rodadas.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Transmutar em Pedra / Flesh to Stone (PHB p.247 — 6º nível): concentração até 1 min. Alvo carne-e-osso faz TR CON; em falha fica Contido. Ao final de cada turno deve repetir TR — 3 falhas consecutivas = PETRIFICADO (permanente sem dispel). 3 sucessos consecutivos = magia termina.\nPetrificado (PHB App.A): incapacitado, não pode ver/mover, atacantes com vantagem, auto-falha TRs FOR/DES, RESISTÊNCIA a TODO dano, imune a veneno/doença.\nArena stub: 0 dano + debuff Petrificado 3 rodadas (compressão) + repeatSave CON + concentração.',
-            afterAttackEnemyDebuff: { id: 'flesh_to_stone', turns: 3, n: 'Petrificado', ico: '🗿', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, resistAllDmg: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Petrificado (PHB App.A — Flesh to Stone)' } }
+            afterAttackEnemyDebuff: { id: 'flesh_to_stone', turns: 3, n: 'Petrificado', ico: '🗿', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, resistAllDmg: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Petrificado (PHB App.A — Flesh to Stone)' } },
+        /* V1.6 (2026-05-16) — Mão Arcana / Bigby's Hand (PHB p.226 — Mago nv 9 / 5th-level
+           spell). Conjura mão arcana flutuante. Stub: usa MESMA infra de Spiritual Weapon
+           (kind: 'summon_attached') com Clenched Fist como ataque BA recorrente. Difere
+           de SW: cast é AÇÃO (não BA), dano maior (2d8 force base — PHB original 4d8),
+           dura 1 min/concentração. Upcast: +2d8 a cada nível acima 5º. NÃO modelado:
+           Forceful Hand (push), Grasping Hand (grapple), Interposing Hand (cover) —
+           só Clenched Fist neste stub. */
+        { n: 'Mão Arcana', ico: '✋', cost: 5, kind: 'summon_attached', minLevel: 9,
+            desc: 'Conjura mão arcana (PHB p.226). Ação BÔNUS: Punho Cerrado — 2d8 force vs CA. 10 rounds, concentração.',
+            helpDnd5e: 'Mão Arcana / Bigby\'s Hand (PHB p.226 — Mago nv 9 / 5th-level spell): 1 action; concentração até 1 min. Conjura mão espectral média (5x5 ft) em 36m que age na sua iniciativa. PHB original: HP = caster max HP, CA 20, STR 26, FLY 60ft. 4 ações disponíveis via BA: ' +
+                       '(1) Punho Cerrado (Clenched Fist): atk mágico vs CA, 4d8 force; ' +
+                       '(2) Mão Forçosa (Forceful Hand): empurra alvo até 1,5m; ' +
+                       '(3) Mão Garra (Grasping Hand): grapple; ' +
+                       '(4) Mão Interpoente (Interposing Hand): meia cobertura (+2 CA) pra você. ' +
+                       'Upcast: +2d8 dano + 10 HP por nível acima do 5º. ' +
+                       'ARENA STUB (2026-05-16): reusa Spiritual Weapon infra (summon_attached). ' +
+                       'Só Clenched Fist modelado (BA repetir cada round): 2d8 force base (stub; ' +
+                       'PHB RAW é 4d8 mas mantemos 2d8 pra balance e progressão clara via upcast). ' +
+                       'Dura 10 rounds. Concentração ATIVA (pode quebrar). Modificações futuras: ' +
+                       'modos Push/Grasp/Interpose como ações BA alternativas.',
+            dndCondition: 'Mão Arcana ativa (1 min, concentração)',
+            summonSpec: {
+                id: 'arcane_hand',
+                name: 'Mão Arcana',
+                ico: '✋',
+                duration: 10,
+                attackKind: 'spell',
+                atkAttr: 'int',
+                damageSpec: { n: 2, d: 8, flat: 0, addCasterMod: true,
+                    /* Mão Arcana 5th-level spell — upcast +2d8/slot acima do 5º.
+                       Mago full caster: nv 9 (5th) 2d8 · nv 11 (6th) 4d8 · nv 13 (7th)
+                       6d8 · nv 15 (8th) 8d8 · nv 17 (9th) 10d8. PHB RAW seria 4d8 base,
+                       arena usa 2d8 pra equilibrar com Spiritual Weapon (1d8 base). */
+                    scaleByCasterLevel: { breakpoints: [[11, 2], [13, 4], [15, 6], [17, 8]] } },
+                dmgType: 'force',
+                concentration: true
+            } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '🗡️', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '⚡', max: 6 },
