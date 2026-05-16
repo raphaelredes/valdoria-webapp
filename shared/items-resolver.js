@@ -153,10 +153,21 @@
   function iconHTML(slug, altText, viewBox) {
     // Synchronous: requires manifest already loaded.
     // Returns the right HTML string (img or svg-use) for embedding.
-    if (manifestState.loaded && hasManifestSlug(slug)) {
+    // Auto-detects player gender from window.vPlayerGender (set by game).
+    // If F and {slug}-f.png exists in manifest, uses female version.
+    if (manifestState.loaded) {
       var alt = (altText || slug).replace(/"/g, '&quot;');
-      return '<img src="' + pngBase + slug + '.png" alt="' + alt +
-             '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '">';
+      // Try female variant if player is female
+      var gender = (typeof window !== 'undefined' && window.vPlayerGender) || 'M';
+      if (gender === 'F' && hasManifestSlug(slug + '-f')) {
+        return '<img src="' + pngBase + slug + '-f.png" alt="' + alt +
+               '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '-f">';
+      }
+      // Fallback to default (masculine) version
+      if (hasManifestSlug(slug)) {
+        return '<img src="' + pngBase + slug + '.png" alt="' + alt +
+               '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '">';
+      }
     }
     return '<svg viewBox="' + (viewBox || '0 0 120 120') +
            '"><use href="#' + SVG_SPRITE_PREFIX + slug + '"/></svg>';
