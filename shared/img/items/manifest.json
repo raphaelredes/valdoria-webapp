@@ -3239,6 +3239,234 @@
       "cost": 0.005,
       "quality": "low",
       "category": "magical"
+    },
+    "capa-de-deslocamento-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-do-devoto-solar-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "armadura-de-couro-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "capa-de-viajante-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-do-crepusculo-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "capa-do-guardiao-silvestre-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "capa-de-protecao-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-do-arcanista-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "capa-da-confianca-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-da-resistencia-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "tunica-de-protecao-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "membrana-de-manto-negro-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "peitoral-de-couro-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "gibao-do-lobo-selvagem-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "meia-placa-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "peitoral-da-furia-das-montanhas-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "veste-arcana-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "veste-do-arcanista-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-escamas-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-do-morcego-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "couraca-do-protetor-ancestral-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-elfico-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "armadura-de-couro-+1-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-surrado-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "veste-do-sacerdote-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-malha-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "gibao-de-peles-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-da-sombra-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "vestes-do-canto-estelar-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "amuleto-de-armadura-natural-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-malha-enferrujada-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-malha-+2-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "manto-sombrio-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "capa-da-meia-noite-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-malha-+1-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "cota-de-talas-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "placa-completa-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
+    },
+    "armadura-acolchoada-f": {
+      "timestamp": "2026-05-15T23:24:55.635065",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gender_variant"
     }
   },
   "last_run": "2026-05-16T02:22:45.017477",
