@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-  <title>Combat Icons AI — Inimigos & Invocações</title>
+  <title>Classes AI — Símbolos Heráldicos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=MedievalSharp&display=swap" rel="stylesheet">
@@ -75,24 +75,12 @@
       max-width: 1600px;
       margin: 0 auto;
     }
-    .section {
-      margin-bottom: 40px;
-    }
-    .section-title {
-      font-size: 18px;
-      color: var(--gold-bright);
-      letter-spacing: 3px;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-      text-transform: uppercase;
-    }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 20px;
     }
-    .icon-card {
+    .class-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -100,12 +88,12 @@
       text-align: center;
       transition: all 0.2s ease;
     }
-    .icon-card:hover {
+    .class-card:hover {
       border-color: var(--gold);
       transform: translateY(-2px);
       box-shadow: 0 8px 24px var(--shadow);
     }
-    .icon-wrap {
+    .class-icon-wrap {
       aspect-ratio: 1;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 10px;
@@ -118,27 +106,28 @@
       cursor: zoom-in;
       transition: all 0.2s ease;
     }
-    .icon-wrap:hover {
+    .class-icon-wrap:hover {
       border-color: var(--gold);
     }
-    .icon-wrap img {
+    .class-icon-wrap img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       padding: 10px;
     }
-    .icon-wrap.empty::before {
+    .class-icon-wrap.empty::before {
       content: '⏳';
       font-size: 48px;
       opacity: 0.4;
     }
-    .icon-name {
-      font-size: 14px;
+    .class-name {
+      font-size: 16px;
       font-weight: 700;
       color: var(--gold);
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
-    .icon-slug {
+    .class-slug {
       font-size: 10px;
       color: var(--text-dim);
       margin-top: 4px;
@@ -185,23 +174,15 @@
 </head>
 <body>
   <header>
-    <h1>COMBAT ICONS AI</h1>
-    <p class="subtitle">Inimigos · Invocações · ícones heráldicos AAA · clique para zoom</p>
+    <h1>CLASSES AI — SÍMBOLOS</h1>
+    <p class="subtitle">12 classes D&D 5e · ícones heráldicos AAA · clique para zoom</p>
     <div class="controls">
       <button class="ctrl-btn" id="refresh-btn">⟳ Refresh</button>
     </div>
   </header>
 
   <main>
-    <div class="section">
-      <h2 class="section-title">⚔️ Inimigos</h2>
-      <div class="grid" id="grid-combat"></div>
-    </div>
-
-    <div class="section">
-      <h2 class="section-title">✨ Invocações</h2>
-      <div class="grid" id="grid-summons"></div>
-    </div>
+    <div id="grid" class="grid"></div>
   </main>
 
   <div class="lightbox" id="lightbox">
@@ -213,38 +194,38 @@
   (function () {
     'use strict';
     var BASE = '../shared/img/combat/';
-    var ICONS = {
-      combat: [
-        { slug: 'inimigo', name: 'Inimigo' },
-        { slug: 'boss',    name: 'Boss / Chefe' }
-      ],
-      summons: [
-        { slug: 'spiritual-weapon',  name: 'Arma Espiritual' },
-        { slug: 'summon',            name: 'Invocação' },
-        { slug: 'familiar',          name: 'Familiar' },
-        { slug: 'sprite',            name: 'Sprite' },
-        { slug: 'find-steed',        name: 'Encontrar Montaria' },
-        { slug: 'animal-companion',  name: 'Companheiro Animal' }
-      ]
-    };
+    // 12 classes do D&D 5e — mesma ordem do simulador
+    var CLASSES = [
+      { slug: 'mago',         name: 'Mago' },
+      { slug: 'clerigo',      name: 'Clérigo' },
+      { slug: 'barbaro',      name: 'Bárbaro' },
+      { slug: 'ladino',       name: 'Ladino' },
+      { slug: 'guerreiro',    name: 'Guerreiro' },
+      { slug: 'patrulheiro',  name: 'Patrulheiro' },
+      { slug: 'paladino',     name: 'Paladino' },
+      { slug: 'bardo',        name: 'Bardo' },
+      { slug: 'druida',       name: 'Druida' },
+      { slug: 'monge',        name: 'Monge' },
+      { slug: 'feiticeiro',   name: 'Feiticeiro' },
+      { slug: 'bruxo',        name: 'Bruxo' }
+    ];
 
     function bust() { return '?v=' + Date.now(); }
 
     function renderCard(c) {
       var src = BASE + c.slug + '.png' + bust();
-      return '<div class="icon-card">' +
-        '<div class="icon-wrap" data-slug="' + c.slug + '" data-name="' + c.name + '">' +
+      return '<div class="class-card">' +
+        '<div class="class-icon-wrap" data-slug="' + c.slug + '" data-name="' + c.name + '">' +
           '<img src="' + src + '" alt="' + c.name + '" ' +
                 'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
         '</div>' +
-        '<div class="icon-name">' + c.name + '</div>' +
-        '<div class="icon-slug">' + c.slug + '</div>' +
+        '<div class="class-name">' + c.name + '</div>' +
+        '<div class="class-slug">' + c.slug + '</div>' +
       '</div>';
     }
 
     function render() {
-      document.getElementById('grid-combat').innerHTML = ICONS.combat.map(renderCard).join('');
-      document.getElementById('grid-summons').innerHTML = ICONS.summons.map(renderCard).join('');
+      document.getElementById('grid').innerHTML = CLASSES.map(renderCard).join('');
       bindLightbox();
     }
 
@@ -252,7 +233,7 @@
       var lightbox = document.getElementById('lightbox');
       var lbImg = document.getElementById('lightbox-img');
       var lbCap = document.getElementById('lightbox-caption');
-      document.querySelectorAll('.icon-wrap').forEach(function (wrap) {
+      document.querySelectorAll('.class-icon-wrap').forEach(function (wrap) {
         wrap.addEventListener('click', function () {
           var img = wrap.querySelector('img');
           if (!img || !img.src || img.style.display === 'none') return;

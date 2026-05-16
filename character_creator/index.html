@@ -2402,8 +2402,24 @@
         // Vantagens: arte AAA real, sem perda de tokens em strings SVG gigantes,
         // alpha transparency nativa, qualidade ~400KB cada (512×512).
         // Cache busting via Date.now() na 1ª load (img cacha por sessão, OK).
+        // 2026-05-16 (user request): cada raça usa SEU opt canônico escolhido
+        // pelo user no races_ai_preview.html. opt 1 = sem sufixo (Race.png),
+        // opt N>1 = Race_optN.png. Map RACE_OFFICIAL_OPT documenta as escolhas.
+        const RACE_OFFICIAL_OPT = {
+            Human:      3,
+            Elf:        3,
+            Dwarf:      2,
+            Halfling:   1,
+            Gnome:      1,
+            HalfElf:    4,
+            HalfOrc:    1,
+            Dragonborn: 4,
+            Tiefling:   6
+        };
         const _rhImg = function(key, alt){
-          return '<img src="races/' + key + '.png" class="rh-icon" alt="' + alt + '" loading="lazy">';
+          const opt = RACE_OFFICIAL_OPT[key] || 1;
+          const suffix = opt === 1 ? '' : '_opt' + opt;
+          return '<img src="races/' + key + suffix + '.png" class="rh-icon" alt="' + alt + '" loading="lazy">';
         };
         const RACE_HERALDIC_ICON = {
             Human:      _rhImg('Human', 'Humano'),
