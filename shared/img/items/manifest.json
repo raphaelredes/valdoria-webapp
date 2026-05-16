@@ -901,15 +901,15 @@
       "category": "weapon"
     },
     "anel-de-resistencia": {
-      "timestamp": "2026-05-16T00:45:53.300594",
-      "cost": 0.005235000000000001,
+      "timestamp": "2026-05-16T02:28:18.936694",
+      "cost": 0.005445000000000001,
       "quality": "low",
       "category": "magical"
     },
     "anel-de-escudo-mental": {
-      "timestamp": "2026-05-16T00:28:25.995481",
-      "cost": 0.0048000000000000004,
-      "quality": "low",
+      "timestamp": "2026-05-16T03:13:38.298191",
+      "cost": 0.07163000000000001,
+      "quality": "medium",
       "category": "magical"
     },
     "anel-de-ouro": {
@@ -1039,8 +1039,8 @@
       "category": "magical"
     },
     "cinturao-de-destreza": {
-      "timestamp": "2026-05-16T00:31:52.899922",
-      "cost": 0.004805000000000001,
+      "timestamp": "2026-05-16T03:02:20.492138",
+      "cost": 0.005190000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -1177,7 +1177,7 @@
       "category": "weapon"
     },
     "espada-longa-gelida": {
-      "timestamp": "2026-05-16T00:50:47.506804",
+      "timestamp": "2026-05-16T03:01:08.637944",
       "cost": 0.0048200000000000005,
       "quality": "low",
       "category": "weapon"
@@ -1549,8 +1549,8 @@
       "category": "potion"
     },
     "escudo-pequeno": {
-      "timestamp": "2026-05-15T22:59:37.609734",
-      "cost": 0.0048200000000000005,
+      "timestamp": "2026-05-16T03:03:08.627121",
+      "cost": 0.005115000000000001,
       "quality": "low",
       "category": "weapon"
     },
@@ -1585,8 +1585,8 @@
       "category": "sacred"
     },
     "mercadoria-proibida": {
-      "timestamp": "2026-05-15T23:00:55.099727",
-      "cost": 0.004950000000000001,
+      "timestamp": "2026-05-16T03:03:50.296486",
+      "cost": 0.005045000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -1843,8 +1843,8 @@
       "category": "sacred"
     },
     "pocao-do-alquimista": {
-      "timestamp": "2026-05-15T23:13:22.902402",
-      "cost": 0.004890000000000001,
+      "timestamp": "2026-05-16T03:09:44.510842",
+      "cost": 0.005080000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -1957,14 +1957,14 @@
       "category": "potion"
     },
     "escudo-de-pedra": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:48:48.239133",
+      "cost": 0.005450000000000001,
       "quality": "low",
       "category": "weapon"
     },
     "brunea-de-aneis": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:55:43.757326",
+      "cost": 0.005315000000000001,
       "quality": "low",
       "category": "weapon"
     },
@@ -1981,8 +1981,8 @@
       "category": "sacred"
     },
     "manto-elfico": {
-      "timestamp": "2026-05-16T02:19:21.888498",
-      "cost": 0.004910000000000001,
+      "timestamp": "2026-05-16T16:49:33.006955",
+      "cost": 0.005125000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -1999,8 +1999,8 @@
       "category": "sacred"
     },
     "capa-do-guardiao-silvestre": {
-      "timestamp": "2026-05-16T02:20:35.487228",
-      "cost": 0.004910000000000001,
+      "timestamp": "2026-05-16T16:48:05.829966",
+      "cost": 0.005070000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -2035,14 +2035,14 @@
       "category": "default"
     },
     "anel-de-gratidao": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:52:29.073458",
+      "cost": 0.005110000000000001,
       "quality": "low",
       "category": "magical"
     },
     "reliquia-da-torre": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:51:50.936189",
+      "cost": 0.005050000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -2059,14 +2059,14 @@
       "category": "weapon"
     },
     "artefato-do-vale": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:51:01.624258",
+      "cost": 0.0050550000000000005,
       "quality": "low",
       "category": "magical"
     },
     "pergaminho-de-imobilizar-pessoa": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:50:21.430229",
+      "cost": 0.0050750000000000005,
       "quality": "low",
       "category": "magical"
     },
@@ -2083,8 +2083,8 @@
       "category": "default"
     },
     "folha-da-driade": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:53:08.580721",
+      "cost": 0.005040000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -2119,8 +2119,8 @@
       "category": "default"
     },
     "perola-do-poder": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:46:35.604493",
+      "cost": 0.005210000000000001,
       "quality": "low",
       "category": "gem"
     },
@@ -2137,8 +2137,8 @@
       "category": "magical"
     },
     "saco-de-ingredientes": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:47:24.120365",
+      "cost": 0.004985000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -2161,8 +2161,8 @@
       "category": "magical"
     },
     "pergaminho-de-escudo": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:54:25.401978",
+      "cost": 0.0048000000000000004,
       "quality": "low",
       "category": "magical"
     },
@@ -2185,8 +2185,8 @@
       "category": "default"
     },
     "pergaminho-de-raio-ardente": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:53:46.263078",
+      "cost": 0.004750000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -2197,8 +2197,8 @@
       "category": "magical"
     },
     "adesivo-de-mimic": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:52:26.496615",
+      "cost": 0.005115000000000001,
       "quality": "low",
       "category": "default"
     },
@@ -2287,14 +2287,14 @@
       "category": "magical"
     },
     "manto-do-devoto-solar": {
-      "timestamp": "2026-05-16T02:20:23.420846",
-      "cost": 0.004900000000000001,
+      "timestamp": "2026-05-16T02:53:05.681891",
+      "cost": 0.005185,
       "quality": "low",
       "category": "magical"
     },
     "pergaminho-de-luz": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:53:46.594962",
+      "cost": 0.0050750000000000005,
       "quality": "low",
       "category": "magical"
     },
@@ -2377,8 +2377,8 @@
       "category": "magical"
     },
     "membrana-de-manto-negro": {
-      "timestamp": "2026-05-16T02:19:46.189969",
-      "cost": 0.004875000000000001,
+      "timestamp": "2026-05-16T02:54:27.381663",
+      "cost": 0.005185,
       "quality": "low",
       "category": "default"
     },
@@ -2641,8 +2641,8 @@
       "category": "weapon"
     },
     "partitura-cifrada": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:55:06.015241",
+      "cost": 0.005045000000000001,
       "quality": "low",
       "category": "scroll"
     },
@@ -2905,8 +2905,8 @@
       "category": "scroll"
     },
     "escudo-do-protetor-ancestral": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:55:46.312717",
+      "cost": 0.005295000000000001,
       "quality": "low",
       "category": "weapon"
     },
@@ -3001,8 +3001,8 @@
       "category": "weapon"
     },
     "cinto-da-furia-das-montanhas": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:56:26.703438",
+      "cost": 0.005195000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -3115,8 +3115,8 @@
       "category": "jewelry"
     },
     "coroa-primordial": {
-      "timestamp": "2026-05-16T02:22:02.637690",
-      "cost": 0.005170000000000001,
+      "timestamp": "2026-05-16T02:57:06.823228",
+      "cost": 0.005340000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -3145,8 +3145,8 @@
       "category": "weapon"
     },
     "brunea": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T16:55:03.891494",
+      "cost": 0.005315000000000001,
       "quality": "low",
       "category": "weapon"
     },
@@ -3169,8 +3169,8 @@
       "category": "armor"
     },
     "juba-de-leao": {
-      "timestamp": "2026-05-16T01:32:44.554198",
-      "cost": 0.005,
+      "timestamp": "2026-05-16T02:27:36.123584",
+      "cost": 0.005115000000000001,
       "quality": "low",
       "category": "default"
     },
@@ -3469,6 +3469,6 @@
       "category": "gender_variant"
     }
   },
-  "last_run": "2026-05-16T02:22:45.017477",
-  "total_cost": 1.129
+  "last_run": "2026-05-16T16:55:43.759814",
+  "total_cost": 1.5262449999999994
 }
