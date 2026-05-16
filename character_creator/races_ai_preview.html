@@ -76,7 +76,7 @@
     }
     main {
       padding: 24px 16px 80px;
-      max-width: 1600px;
+      max-width: 1800px;
       margin: 0 auto;
     }
     .empty-state {
@@ -86,46 +86,54 @@
       font-size: 16px;
     }
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
     }
     .race-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
+      border-radius: 12px;
+      padding: 24px;
       transition: all 0.25s ease;
     }
     .race-card:hover {
       background: var(--bg-card-hover);
       border-color: var(--gold);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px var(--shadow);
     }
     .race-name {
-      font-size: 18px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--gold);
-      margin: 0 0 12px 0;
-      letter-spacing: 2px;
+      margin: 0 0 20px 0;
+      letter-spacing: 3px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
     }
     .race-portraits {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
     }
     .portrait-wrap {
       aspect-ratio: 1;
       background: rgba(0, 0, 0, 0.3);
-      border-radius: 6px;
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       position: relative;
+      cursor: zoom-in;
+      transition: all 0.25s ease;
+    }
+    .portrait-wrap:hover {
+      border-color: var(--gold);
+      transform: scale(1.04);
+      box-shadow: 0 8px 24px var(--shadow);
+      z-index: 10;
     }
     .portrait-wrap img {
       width: 100%;
@@ -134,25 +142,58 @@
     }
     .portrait-wrap.empty::before {
       content: '⏳';
-      font-size: 32px;
+      font-size: 48px;
       opacity: 0.4;
     }
     .portrait-label {
       position: absolute;
-      bottom: 4px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.85);
       color: var(--gold);
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 5px;
       letter-spacing: 1px;
+      border: 1px solid var(--border);
+    }
+    /* LIGHTBOX for full-size view on click */
+    .lightbox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+    }
+    .lightbox-caption {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: var(--gold);
+      padding: 8px 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      letter-spacing: 2px;
     }
     @media (max-width: 768px) {
       header { padding: 16px 12px; }
       h1 { font-size: 20px; letter-spacing: 2px; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+      .race-portraits { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     }
   </style>
 </head>
@@ -169,6 +210,11 @@
     <div id="grid" class="grid"></div>
   </main>
 
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
   <script>
   (function () {
     'use strict';
@@ -177,30 +223,56 @@
       'Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome',
       'HalfElf', 'HalfOrc', 'Dragonborn', 'Tiefling',
     ];
+    var VARIANTS = ['default', 'warrior', 'noble', 'mystic', 'wild', 'veteran'];
+
+    function portraitImg(race, gender, variant) {
+      var variantSuffix = variant === 'default' ? '' : '_' + variant;
+      var genderSuffix = gender === 'F' ? '-f' : '';
+      var bust = Date.now();
+      var src = RACE_BASE + race + variantSuffix + genderSuffix + '.png?v=' + bust;
+      return '<div class="portrait-wrap">' +
+        '<img src="' + src + '" alt="' + race + ' ' + variant + ' ' + gender + '" ' +
+              'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
+        '<span class="portrait-label">' + gender + ' · ' + variant + '</span>' +
+      '</div>';
+    }
 
     function renderCard(race) {
-      var bust = Date.now();
+      var portraitsHtml = '';
+      VARIANTS.forEach(function (variant) {
+        portraitsHtml += portraitImg(race, 'M', variant);
+        portraitsHtml += portraitImg(race, 'F', variant);
+      });
       return '<div class="race-card">' +
-        '<div class="race-name">' + race + '</div>' +
+        '<div class="race-name">' + race + ' — 12 looks (M+F × 6 variantes)</div>' +
         '<div class="race-portraits">' +
-          '<div class="portrait-wrap">' +
-            '<img src="' + RACE_BASE + race + '.png?v=' + bust + '" ' +
-                  'alt="' + race + ' male" ' +
-                  'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
-            '<span class="portrait-label">M</span>' +
-          '</div>' +
-          '<div class="portrait-wrap">' +
-            '<img src="' + RACE_BASE + race + '-f.png?v=' + bust + '" ' +
-                  'alt="' + race + ' female" ' +
-                  'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
-            '<span class="portrait-label">F</span>' +
-          '</div>' +
+          portraitsHtml +
         '</div>' +
       '</div>';
     }
 
     function render() {
       document.getElementById('grid').innerHTML = RACES.map(renderCard).join('');
+      bindLightbox();
+    }
+
+    function bindLightbox() {
+      var lightbox = document.getElementById('lightbox');
+      var lbImg = document.getElementById('lightbox-img');
+      var lbCap = document.getElementById('lightbox-caption');
+      document.querySelectorAll('.portrait-wrap').forEach(function (wrap) {
+        wrap.addEventListener('click', function () {
+          var img = wrap.querySelector('img');
+          if (!img || !img.src) return;
+          lbImg.src = img.src;
+          var label = wrap.querySelector('.portrait-label');
+          lbCap.textContent = label ? label.textContent : '';
+          lightbox.classList.add('active');
+        });
+      });
+      lightbox.addEventListener('click', function () {
+        lightbox.classList.remove('active');
+      });
     }
 
     document.getElementById('refresh-btn').addEventListener('click', render);
