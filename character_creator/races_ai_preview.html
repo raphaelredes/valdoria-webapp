@@ -237,16 +237,21 @@
       '</div>';
     }
 
+    function symbolImg(race) {
+      var bust = Date.now();
+      var src = RACE_BASE + race + '.png?v=' + bust;
+      return '<div class="portrait-wrap" style="aspect-ratio:1">' +
+        '<img src="' + src + '" alt="' + race + ' symbol" ' +
+              'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
+        '<span class="portrait-label">' + race.toUpperCase() + '</span>' +
+      '</div>';
+    }
+
     function renderCard(race) {
-      var portraitsHtml = '';
-      VARIANTS.forEach(function (variant) {
-        portraitsHtml += portraitImg(race, 'M', variant);
-        portraitsHtml += portraitImg(race, 'F', variant);
-      });
       return '<div class="race-card">' +
-        '<div class="race-name">' + race + ' — 12 looks (M+F × 6 variantes)</div>' +
-        '<div class="race-portraits">' +
-          portraitsHtml +
+        '<div class="race-name">' + race + ' — symbol icon</div>' +
+        '<div class="race-portraits" style="grid-template-columns:1fr;max-width:400px;margin:0 auto">' +
+          symbolImg(race) +
         '</div>' +
       '</div>';
     }
