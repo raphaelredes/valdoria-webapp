@@ -237,21 +237,26 @@
       '</div>';
     }
 
-    function symbolImg(race) {
+    function symbolImg(race, option) {
       var bust = Date.now();
-      var src = RACE_BASE + race + '.png?v=' + bust;
+      var suffix = option === 1 ? '' : '_opt' + option;
+      var src = RACE_BASE + race + suffix + '.png?v=' + bust;
       return '<div class="portrait-wrap" style="aspect-ratio:1">' +
-        '<img src="' + src + '" alt="' + race + ' symbol" ' +
+        '<img src="' + src + '" alt="' + race + ' opt' + option + '" ' +
               'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
-        '<span class="portrait-label">' + race.toUpperCase() + '</span>' +
+        '<span class="portrait-label">OPT ' + option + '</span>' +
       '</div>';
     }
 
     function renderCard(race) {
+      var html = '';
+      for (var i = 1; i <= 6; i++) {
+        html += symbolImg(race, i);
+      }
       return '<div class="race-card">' +
-        '<div class="race-name">' + race + ' — symbol icon</div>' +
-        '<div class="race-portraits" style="grid-template-columns:1fr;max-width:400px;margin:0 auto">' +
-          symbolImg(race) +
+        '<div class="race-name">' + race + ' — 6 symbol options</div>' +
+        '<div class="race-portraits">' +
+          html +
         '</div>' +
       '</div>';
     }

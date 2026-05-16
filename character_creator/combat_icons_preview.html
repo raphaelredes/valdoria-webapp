@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <title>Combat Icons AI — Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c4953a;
+      --gold-bright: #e8c45a;
+      --text: #d4c8b0;
+      --border: #4a3828;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #1f1a14 0%, #1a1510 100%);
+      color: var(--text);
+      font-family: 'Cinzel', serif;
+      min-height: 100vh;
+    }
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26, 21, 16, 0.92);
+      backdrop-filter: blur(6px);
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      color: var(--gold);
+      letter-spacing: 4px;
+    }
+    main { padding: 24px 16px 80px; max-width: 1600px; margin: 0 auto; }
+    .section { margin-bottom: 40px; }
+    .section-title {
+      font-size: 18px;
+      color: var(--gold-bright);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .icon-card {
+      background: #2a2420;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .icon-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .icon-wrap {
+      aspect-ratio: 1;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .icon-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+    }
+    .icon-wrap.empty::before {
+      content: '⏳';
+      font-size: 32px;
+      opacity: 0.4;
+    }
+    .icon-name {
+      font-size: 13px;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>COMBAT ICONS AI</h1>
+  </header>
+  <main>
+    <div class="section">
+      <h2 class="section-title">CLASSES (12)</h2>
+      <div class="grid" id="grid-classes"></div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">COMBATE (2)</h2>
+      <div class="grid" id="grid-combat"></div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">INVOCAÇÕES (6)</h2>
+      <div class="grid" id="grid-summons"></div>
+    </div>
+  </main>
+  <script>
+    var ICONS = {
+      classes: ['mago', 'clerigo', 'barbaro', 'ladino', 'guerreiro',
+                'patrulheiro', 'paladino', 'bardo', 'druida', 'monge',
+                'feiticeiro', 'bruxo'],
+      combat: ['inimigo', 'boss'],
+      summons: ['spiritual-weapon', 'summon', 'familiar', 'sprite',
+                'find-steed', 'animal-companion'],
+    };
+    var BASE = '../shared/img/combat/';
+    function renderCard(slug) {
+      var bust = Date.now();
+      return '<div class="icon-card">' +
+        '<div class="icon-wrap">' +
+          '<img src="' + BASE + slug + '.png?v=' + bust + '" alt="' + slug + '" ' +
+                'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
+        '</div>' +
+        '<div class="icon-name">' + slug + '</div>' +
+      '</div>';
+    }
+    function render() {
+      document.getElementById('grid-classes').innerHTML = ICONS.classes.map(renderCard).join('');
+      document.getElementById('grid-combat').innerHTML = ICONS.combat.map(renderCard).join('');
+      document.getElementById('grid-summons').innerHTML = ICONS.summons.map(renderCard).join('');
+    }
+    render();
+  </script>
+</body>
+</html>
