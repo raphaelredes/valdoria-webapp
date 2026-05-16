@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T22:40:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T22:46:32Z — do not edit directly, edit source -->
 
 
 <!--
@@ -2037,6 +2037,17 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 }
 .cell.v8-card .c-portrait svg {
   width: 100%; height: 100%;
+  filter:
+    drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
+    drop-shadow(0 1px 2px rgba(0,0,0,0.85));
+  position: static; z-index: auto;
+}
+/* 2026-05-16: c-portrait-img (PNG AI variant) — herda dimensões do contêiner
+   .c-portrait, object-fit:contain pra preservar arte sem crop, mesma drop-shadow
+   colorida que o SVG (filtro funciona em <img> também). */
+.cell.v8-card .c-portrait img.c-portrait-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
   filter:
     drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
     drop-shadow(0 1px 2px rgba(0,0,0,0.85));
@@ -15792,6 +15803,38 @@ function _heraldicIconOf(u, utype) {
     if (utype === 'ally' || (u.t === 'a')) return 'ic-inimigo';
     return null;
 }
+/* 2026-05-16: Combat portrait helper — returns PNG (AI-generated) when
+   available, SVG sprite fallback otherwise.
+   PNGs live in valdoria-webapp/shared/img/combat/{slug}.png — 20 generated:
+     12 classes + 2 combat (inimigo/boss) + 6 invocações.
+   iconId format: 'ic-mago', 'ic-spiritual-weapon', etc — slug strips 'ic-'.
+   Invocações use hyphens in PNG filenames (find-steed.png) but the SVG IDs
+   use underscores (ic-find_steed) — normalize via slug.replace(/_/g, '-'). */
+var COMBAT_PNG_AVAILABLE = {
+    'mago': 1, 'clerigo': 1, 'barbaro': 1, 'ladino': 1, 'guerreiro': 1,
+    'patrulheiro': 1, 'paladino': 1, 'bardo': 1, 'druida': 1, 'monge': 1,
+    'feiticeiro': 1, 'bruxo': 1,
+    'inimigo': 1, 'boss': 1,
+    'spiritual-weapon': 1, 'summon': 1, 'familiar': 1, 'sprite': 1,
+    'find-steed': 1, 'animal-companion': 1
+};
+function _combatPortraitHTML(iconId) {
+    if (!iconId) return '';
+    var slug = String(iconId).replace(/^ic-/, '').replace(/_/g, '-');
+    if (COMBAT_PNG_AVAILABLE[slug]) {
+        var base = '/shared/img/combat/';
+        // file:// local fallback for master simulator
+        var loc = (typeof location !== 'undefined') ? location.href : '';
+        if (loc.indexOf('file://') === 0) {
+            base = '../valdoria-webapp/shared/img/combat/';
+        }
+        return '<img class="c-portrait-img" src="' + base + slug + '.png" ' +
+               'alt="" loading="lazy" ' +
+               'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>\'">';
+    }
+    return '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconId + '"/></svg>';
+}
+
 function _heraldicClsSlugOf(u, utype) {
     if (!u) return '';
     if (utype === 'enemy') return u.isBoss ? 'cls-boss' : 'cls-inimigo';
@@ -15961,7 +16004,7 @@ function buildCellInnerHTML(u, utype, opt, uid) {
         /* ======= V8 heráldico LITERAL (card-icons-heraldic.html): ======= */
         /*  c-name → c-portrait (crest SVG no canto) → c-class-tag (com borda dourada) */
         inner += '<div class="c-name">' + escHtml(u.n || u.cls || '—') + '</div>';
-        inner += '<div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconId + '"/></svg></div>';
+        inner += '<div class="c-portrait">' + _combatPortraitHTML(iconId) + '</div>';
         inner += '<div class="c-class-tag">' + escHtml(_v8ClassTagOf(u, utype)) + '</div>';
     } else {
         /* Fallback legado (unidades sem classe mapeada): unit-row simples */
