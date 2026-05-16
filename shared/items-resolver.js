@@ -20,23 +20,27 @@
 (function (global) {
   'use strict';
 
-  var MANIFEST_URL = '/shared/img/items/manifest.json';
-  var PNG_BASE = '/shared/img/items/';
   var SVG_SPRITE_PREFIX = 'ic-it-';
 
-  // Auto-detect base path if not on root (e.g. character_creator/, combat2/)
-  function detectBase() {
-    var path = location.pathname;
-    var depth = (path.match(/\//g) || []).length - 1;
-    if (depth <= 1) return ''; // Already at root
-    var prefix = '';
-    for (var i = 0; i < depth - 1; i++) prefix += '../';
-    return prefix;
+  // Detect base via script src (works on file:// and http://).
+  function detectScriptBase() {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('items-resolver.js') !== -1) {
+        var clean = src.split('?')[0];
+        var idx = clean.indexOf('/shared/items-resolver.js');
+        if (idx >= 0) return clean.substring(0, idx + 1);
+        return clean.substring(0, clean.lastIndexOf('/') + 1).replace(/\/shared\/$/, '/');
+      }
+    }
+    return '';
   }
 
-  var basePath = detectBase();
-  var manifestUrl = basePath + 'shared/img/items/manifest.json';
-  var pngBase = basePath + 'shared/img/items/';
+  var cfg = (typeof window !== 'undefined' && window.vItemsConfig) || {};
+  var scriptBase = detectScriptBase();
+  var manifestUrl = cfg.manifestUrl || (scriptBase + 'shared/img/items/manifest.json');
+  var pngBase = cfg.pngBase || (scriptBase + 'shared/img/items/');
 
   var manifestState = {
     loaded: false,
