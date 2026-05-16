@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T22:46:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T23:01:43Z — do not edit directly, edit source -->
 
 
 <!--
@@ -15805,11 +15805,17 @@ function _heraldicIconOf(u, utype) {
 }
 /* 2026-05-16: Combat portrait helper — returns PNG (AI-generated) when
    available, SVG sprite fallback otherwise.
-   PNGs live in valdoria-webapp/shared/img/combat/{slug}.png — 20 generated:
-     12 classes + 2 combat (inimigo/boss) + 6 invocações.
+
+   PNGs live in valdoria-webapp/shared/img/combat/:
+   - {slug}.png — 20 main icons: 12 classes + 2 combat + 6 invocações
+   - enemies/{slug}.png — 29 per-enemy portraits
+
    iconId format: 'ic-mago', 'ic-spiritual-weapon', etc — slug strips 'ic-'.
    Invocações use hyphens in PNG filenames (find-steed.png) but the SVG IDs
-   use underscores (ic-find_steed) — normalize via slug.replace(/_/g, '-'). */
+   use underscores (ic-find_steed) — normalize via slug.replace(/_/g, '-').
+
+   For ENEMIES, helper accepts optional unit (u) and looks up enemy-specific
+   PNG by slugified name (e.g. "Aranha Gigante" → aranha-gigante.png). */
 var COMBAT_PNG_AVAILABLE = {
     'mago': 1, 'clerigo': 1, 'barbaro': 1, 'ladino': 1, 'guerreiro': 1,
     'patrulheiro': 1, 'paladino': 1, 'bardo': 1, 'druida': 1, 'monge': 1,
@@ -15818,17 +15824,53 @@ var COMBAT_PNG_AVAILABLE = {
     'spiritual-weapon': 1, 'summon': 1, 'familiar': 1, 'sprite': 1,
     'find-steed': 1, 'animal-companion': 1
 };
-function _combatPortraitHTML(iconId) {
+/* Per-enemy PNG availability — keyed by SLUGIFIED enemy name.
+   Source: scripts/_inventory_combat_data.py logs/inventory_enemies.json
+   Includes Brakthar (dungeon boss) + 28 BESTIARY/ENEMIES_DB unique. */
+var ENEMY_PNG_AVAILABLE = {
+    'goblin': 1, 'orc': 1, 'esqueleto': 1, 'aranha-gigante': 1,
+    'sapo-gigante': 1, 'homem-lagarto': 1, 'crocodilo': 1,
+    'cobra-constritora-gigante': 1, 'bruxa-verde': 1, 'mimico': 1,
+    'acolito': 1, 'aprendiz-de-mago': 1, 'cultista-fanatico': 1,
+    'mago-hostil': 1, 'lobo': 1, 'bandido': 1, 'orc-guerreiro': 1,
+    'fogo-fatuo': 1, 'troll': 1, 'zumbi': 1, 'aguia-gigante': 1,
+    'escorpiao-gigante': 1, 'leao-da-areia': 1, 'yeti-congelado': 1,
+    'lobo-da-tundra': 1, 'troll-das-cavernas': 1, 'morcego-gigante': 1,
+    'elemental-de-lava-menor': 1, 'brakthar': 1
+};
+function _slugifyCombat(name) {
+    if (!name) return '';
+    return String(name)
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+}
+function _combatPortraitHTML(iconId, u, utype) {
+    /* Per-enemy PNG check (priority over generic tag-based PNG) */
+    if (utype === 'enemy' && u && u.n) {
+        var enemySlug = _slugifyCombat(u.n);
+        if (ENEMY_PNG_AVAILABLE[enemySlug]) {
+            var base = '/shared/img/combat/enemies/';
+            var loc = (typeof location !== 'undefined') ? location.href : '';
+            if (loc.indexOf('file://') === 0) {
+                base = '../valdoria-webapp/shared/img/combat/enemies/';
+            }
+            return '<img class="c-portrait-img" src="' + base + enemySlug + '.png" ' +
+                   'alt="" loading="lazy" ' +
+                   'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>\'">';
+        }
+    }
+    /* Generic PNG fallback (classes + invocações + tag brasões) */
     if (!iconId) return '';
     var slug = String(iconId).replace(/^ic-/, '').replace(/_/g, '-');
     if (COMBAT_PNG_AVAILABLE[slug]) {
-        var base = '/shared/img/combat/';
-        // file:// local fallback for master simulator
-        var loc = (typeof location !== 'undefined') ? location.href : '';
-        if (loc.indexOf('file://') === 0) {
-            base = '../valdoria-webapp/shared/img/combat/';
+        var base2 = '/shared/img/combat/';
+        var loc2 = (typeof location !== 'undefined') ? location.href : '';
+        if (loc2.indexOf('file://') === 0) {
+            base2 = '../valdoria-webapp/shared/img/combat/';
         }
-        return '<img class="c-portrait-img" src="' + base + slug + '.png" ' +
+        return '<img class="c-portrait-img" src="' + base2 + slug + '.png" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>\'">';
     }
@@ -16004,7 +16046,7 @@ function buildCellInnerHTML(u, utype, opt, uid) {
         /* ======= V8 heráldico LITERAL (card-icons-heraldic.html): ======= */
         /*  c-name → c-portrait (crest SVG no canto) → c-class-tag (com borda dourada) */
         inner += '<div class="c-name">' + escHtml(u.n || u.cls || '—') + '</div>';
-        inner += '<div class="c-portrait">' + _combatPortraitHTML(iconId) + '</div>';
+        inner += '<div class="c-portrait">' + _combatPortraitHTML(iconId, u, utype) + '</div>';
         inner += '<div class="c-class-tag">' + escHtml(_v8ClassTagOf(u, utype)) + '</div>';
     } else {
         /* Fallback legado (unidades sem classe mapeada): unit-row simples */
