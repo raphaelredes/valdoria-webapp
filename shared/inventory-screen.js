@@ -66,17 +66,6 @@
     arrow.setAttribute('role', 'button');
     arrow.setAttribute('aria-label', 'Rolar');
     arrow.innerHTML = '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 12L2 6h12z" fill="currentColor"/></svg>';
-
-  // Helper to render item icon — uses PNG (AI-generated) when manifest has it,
-  // fallback to SVG sprite. Requires items-resolver.js loaded (window.vItems).
-  // iconId format: "ic-it-{slug}" — slug extracted by removing "ic-it-" prefix.
-  function _iconSrc(iconId, altText) {
-    var slug = (iconId || '').replace(/^ic-it-/, '');
-    if (window.vItems && typeof window.vItems.iconHTML === 'function') {
-      return window.vItems.iconHTML(slug, altText || slug);
-    }
-    return '<svg viewBox="0 0 120 120"><use href="#' + iconId + '"/></svg>';
-  }
     panelEl.appendChild(arrow);
 
     function update() {
@@ -117,6 +106,23 @@
     // Updates iniciais
     setTimeout(update, 80);
     setTimeout(update, 400);
+  }
+
+  // ============================================================
+  //  ICON RESOLVER — PNG (AI-generated) when manifest has it,
+  //  fallback to SVG sprite. Requires items-resolver.js loaded (vItems).
+  //
+  //  FIX 2026-05-16: this function was previously nested INSIDE
+  //  _vinvAttachScrollArrow (block-scoped) — _renderGrid + _renderLoadout
+  //  couldn't access it → mochila ficava com SVG sprites velhos em vez dos
+  //  PNGs do items_ai_preview.html. Movido pra top-level do módulo.
+  // ============================================================
+  function _iconSrc(iconId, altText) {
+    var slug = (iconId || '').replace(/^ic-it-/, '');
+    if (window.vItems && typeof window.vItems.iconHTML === 'function') {
+      return window.vItems.iconHTML(slug, altText || slug);
+    }
+    return '<svg viewBox="0 0 120 120"><use href="#' + iconId + '"/></svg>';
   }
 
   // ============================================================
