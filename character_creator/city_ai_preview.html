@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <title>Cidade AI — Botões de Local</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=MedievalSharp&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a1510;
+      --bg-card: #2a2420;
+      --gold: #c4953a;
+      --gold-bright: #e8c45a;
+      --text: #d4c8b0;
+      --text-dim: #a09484;
+      --border: #4a3828;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --sector-convivio: #c47a3a;
+      --sector-comercio: #c4953a;
+      --sector-combate: #c43a3a;
+      --sector-espirito: #6a7ac4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #1f1a14 0%, #1a1510 100%);
+      color: var(--text);
+      font-family: 'Cinzel', 'MedievalSharp', serif;
+      min-height: 100vh;
+    }
+    header {
+      padding: 24px 32px;
+      background-color: rgba(26, 21, 16, 0.85);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-shadow: 0 0 24px rgba(196, 149, 58, 0.4);
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin: 0 0 8px 0;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { border-color: var(--gold); color: var(--gold); }
+    main { padding: 24px 16px 80px; max-width: 1600px; margin: 0 auto; }
+    .sector { margin-bottom: 40px; }
+    .sector-title {
+      font-size: 18px;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sector.convivio .sector-title { color: var(--sector-convivio); border-color: var(--sector-convivio); }
+    .sector.comercio .sector-title { color: var(--sector-comercio); border-color: var(--sector-comercio); }
+    .sector.combate .sector-title { color: var(--sector-combate); border-color: var(--sector-combate); }
+    .sector.espirito .sector-title { color: var(--sector-espirito); border-color: var(--sector-espirito); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .loc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .loc-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    .loc-wrap {
+      aspect-ratio: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      margin-bottom: 12px;
+      cursor: zoom-in;
+      transition: all 0.2s ease;
+    }
+    .loc-wrap:hover { border-color: var(--gold); }
+    .loc-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .loc-wrap.empty::before {
+      content: '⏳';
+      font-size: 48px;
+      opacity: 0.4;
+    }
+    .loc-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+    }
+    .loc-slug {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+    .loc-meta {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+    .loc-meta .lvl {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    /* LIGHTBOX */
+    .lightbox {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 90vw; max-height: 90vh;
+      object-fit: contain;
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      background: rgba(20, 16, 12, 0.6);
+    }
+    .lightbox-caption {
+      position: absolute; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8); color: var(--gold);
+      padding: 8px 20px; border-radius: 4px;
+      font-size: 14px; letter-spacing: 2px;
+    }
+    @media (max-width: 768px) {
+      header { padding: 16px 12px; }
+      h1 { font-size: 20px; letter-spacing: 2px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CIDADE — BOTÕES DE LOCAL</h1>
+    <p class="subtitle">16 locais da cidade, 4 setores · clique para zoom</p>
+    <div class="controls">
+      <button class="ctrl-btn" id="refresh-btn">⟳ Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="sectors"></div>
+  </main>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+    var BASE = '../shared/img/city/';
+    // 4 sectors × 16 locations
+    var SECTORS = [
+      { id: 'convivio', label: '🍻 Convívio', locations: [
+        { slug: 'tavern',         label: 'Taverna',    lvl: 1 },
+        { slug: 'inn',            label: 'Estalagem',  lvl: 1 },
+        { slug: 'rel_main',       label: 'Vínculos',   lvl: 1 },
+        { slug: 'action_quests',  label: 'Missões',    lvl: 1 }
+      ]},
+      { id: 'comercio', label: '💰 Comércio', locations: [
+        { slug: 'market',         label: 'Mercado',    lvl: 1 },
+        { slug: 'bank',           label: 'Banco',      lvl: 4 },
+        { slug: 'open_workshop',  label: 'Oficina',    lvl: 6 },
+        { slug: 'rune_scribe',    label: 'Runas',      lvl: 8 }
+      ]},
+      { id: 'combate', label: '⚔️ Combate', locations: [
+        { slug: 'guild',           label: 'Guilda',    lvl: 1 },
+        { slug: 'gates',           label: 'Portões',   lvl: 1 },
+        { slug: 'arena',           label: 'Arena',     lvl: 3 },
+        { slug: 'daily_challenge', label: 'Desafio',   lvl: 5 }
+      ]},
+      { id: 'espirito', label: '✨ Espírito', locations: [
+        { slug: 'temple',         label: 'Templo',    lvl: 1 },
+        { slug: 'square',         label: 'Praça',     lvl: 2 },
+        { slug: 'action_codex',   label: 'Compêndio', lvl: 5 },
+        { slug: 'festival',       label: 'Festival',  lvl: 7 }
+      ]}
+    ];
+
+    function bust() { return '?v=' + Date.now(); }
+
+    function renderCard(loc) {
+      var src = BASE + loc.slug + '.png' + bust();
+      return '<div class="loc-card">' +
+        '<div class="loc-wrap" data-slug="' + loc.slug + '" data-label="' + loc.label + '">' +
+          '<img src="' + src + '" alt="' + loc.label + '" ' +
+                'onerror="this.style.display=\'none\';this.parentElement.classList.add(\'empty\');">' +
+        '</div>' +
+        '<div class="loc-label">' + loc.label + '</div>' +
+        '<div class="loc-slug">' + loc.slug + '</div>' +
+        '<div class="loc-meta">Nível mínimo: <span class="lvl">' + loc.lvl + '</span></div>' +
+      '</div>';
+    }
+
+    function renderSector(s) {
+      var cards = s.locations.map(renderCard).join('');
+      return '<div class="sector ' + s.id + '">' +
+        '<h2 class="sector-title">' + s.label + '</h2>' +
+        '<div class="grid">' + cards + '</div>' +
+      '</div>';
+    }
+
+    function render() {
+      document.getElementById('sectors').innerHTML = SECTORS.map(renderSector).join('');
+      bindLightbox();
+    }
+
+    function bindLightbox() {
+      var lightbox = document.getElementById('lightbox');
+      var lbImg = document.getElementById('lightbox-img');
+      var lbCap = document.getElementById('lightbox-caption');
+      document.querySelectorAll('.loc-wrap').forEach(function (wrap) {
+        wrap.addEventListener('click', function () {
+          var img = wrap.querySelector('img');
+          if (!img || !img.src || img.style.display === 'none') return;
+          lbImg.src = img.src;
+          var label = wrap.getAttribute('data-label') || '';
+          var slug = wrap.getAttribute('data-slug') || '';
+          lbCap.textContent = label + ' · ' + slug;
+          lightbox.classList.add('active');
+        });
+      });
+      lightbox.addEventListener('click', function () { lightbox.classList.remove('active'); });
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', render);
+    render();
+  })();
+  </script>
+</body>
+</html>
