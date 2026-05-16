@@ -22097,7 +22097,7 @@
 </script>
 
 <!-- PNG_INTEGRATION — usa vItems.upgrade() do shared module -->
-<script src="../shared/items-resolver.js"></script>
+<script>document.write('<script src="../shared/items-resolver.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
   window.addEventListener('DOMContentLoaded', function () {
     if (window.vItems) vItems.upgrade();
