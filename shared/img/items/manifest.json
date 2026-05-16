@@ -1943,6 +1943,1302 @@
       "cost": 0.005085000000000001,
       "quality": "low",
       "category": "cursed"
+    },
+    "dente-de-mimic": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "cerveja-negra-de-korthag": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "escudo-de-pedra": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "brunea-de-aneis": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "placa-completa": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "luvas-do-devoto-solar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "manto-elfico": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "grito-cristalizado": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "cinzas-abencoadas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "capa-do-guardiao-silvestre": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pocao-de-velocidade": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "glaive": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escama-de-dragao-branco": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "orbe-do-arcanista": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "ferrao-de-viverna": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "anel-de-gratidao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "reliquia-da-torre": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chapeu-do-arcanista": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "garras-do-lobo-selvagem": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "artefato-do-vale": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-imobilizar-pessoa": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tiara-do-crepusculo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "olho-de-grimlock": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "folha-da-driade": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "elmo-do-protetor-ancestral": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "selo-do-mensageiro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "colete-de-malha-rustica": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "ametista": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "carapaca-de-anqueque": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "perola-do-poder": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "cabeca-de-chimera": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "fragmento-runico-menor": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "saco-de-ingredientes": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-chamas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "espinho-de-manticora": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "fragmento-de-runa": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-escudo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "machado-da-furia-das-montanhas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "armadura-de-couro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "bico-de-axe-beak": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pergaminho-de-raio-ardente": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-vigor": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "adesivo-de-mimic": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "dente-de-crocodilo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "hidromel-de-pedra": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "runa-de-absorcao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "picareta-de-guerra": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pergaminho-de-relampago": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "mapa-do-artista": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "lagrima-cristalina": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-trovao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "adaga": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pergaminho-de-prestidigitacao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "bencao-da-compaixao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "pocao-de-resistencia-ao-fogo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "lamina-cravejada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-runico-ancestral": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-do-devoto-solar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-luz": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-curar-ferimentos": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "atlas-de-valdoria": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "alaude-do-canto-estelar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "arco-curto": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "gema-de-gelo-draconico": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "amuleto-da-floresta": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "insignia-da-guarda": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "tridente": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "grevas-do-guardiao-silvestre": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pena-prateada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "tentaculo-de-roper": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "runa-de-fortuna": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-chama-sagrada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "membrana-de-manto-negro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "arco-do-guardiao-silvestre": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "mapa-do-batedor": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "cota-de-talas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escudo-de-aco": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "capa-de-protecao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "foice-leve": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "gema-purificada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "balsamo-de-cura": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "peitoral-da-furia-das-montanhas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "codice-decifrado": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "machadinha": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "chicote": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cajado-da-seiva-viva": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "racoes-de-ferro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "food"
+    },
+    "manto-do-crepusculo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "runa-de-protecao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "essencia-espectral": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anotacoes-do-sonambulo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "mapa-do-espolio": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "maca": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "caneca-de-grom": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "acido-de-anqueque": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "couro-de-fera-rara": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "mapa-de-veldrin": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "gibao-de-peles": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pocao-de-resistencia-ao-frio": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "runa-de-devastacao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "broche-de-gratidao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "jade": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "bolsa-de-contencao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pelo-de-texugo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "insignia-de-avaliador": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "chave-primordial": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "arco-longo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pique": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "meia-placa": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "racoes-de-veterano": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "food"
+    },
+    "pena-de-hipogrifo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "galho-animado": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lanterna-do-vigia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "dardo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "funda": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "couro-batido": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "partitura-cifrada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "grogue-do-mineiro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "runa-de-gelo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "runa-de-precisao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "garra-de-carnical": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "tentaculo-de-pantera-sombria": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "tesouro-selvagem": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "mochila-reforcada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "chifre-de-alce": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "botas-elficas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "elixir-experimental": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "olho-de-bruxa-verde": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "couraca-do-protetor-ancestral": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "bandagem-de-mumia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "minerio-de-ferro-puro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "reliquia-musical": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "joia-funeraria": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "gem"
+    },
+    "pergaminho-de-detectar-magia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-de-mapa-antigo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "pedra-de-gigante": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "oleo-de-resist.-a-lava": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-resistencia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "lamina-tumular": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "cursed"
+    },
+    "chave-do-abismo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-misseis-magicos": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "antena-de-centopeia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "montante": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pele-de-cobra-gigante": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "anel-do-alvorecer": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "bordao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "vestes-do-canto-estelar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "machado-grande": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pele-de-sapo-gigante": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pele-de-pantera-sombria": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "besta-pesada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cerveja-ancestral-de-grom": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "broche-da-guarda": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "runa-de-cura": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "botas-do-lobo-selvagem": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anel-do-canto-estelar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tentaculo-de-rastejante": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pedra-da-sorte": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pocao-de-cura-superior": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "contrato-da-guilda": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "escudo-do-protetor-ancestral": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pocao-de-heroismo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "lanterna-de-mineiro": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "pocao-de-cura-suprema": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "amuleto-de-saude": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "lamina-do-veterano": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "selo-do-mercador": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "dente-de-roper": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "lanca": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "armadura-acolchoada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "escama-de-lagarto": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "corda-ignifuga": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "picareta-de-mineracao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "besta-de-mao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "insignia-de-reconhecimento": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "alabarda": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "cinto-da-furia-das-montanhas": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "manto-do-arcanista": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tenda-do-artesao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "pergaminho-de-toque-gelado": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "mangual": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "clava": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "kit-de-escalada": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "tool"
+    },
+    "couro-de-ettin": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pocao-de-invisibilidade": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "fragmento-runico-maior": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-invisibilidade": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "contrato-de-halvrek": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "malho": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "pena-de-cocatrice": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-dissipar-magia": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "martelo-leve": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "copia-do-mapa-da-taverna": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "map"
+    },
+    "amuleto-do-devoto-solar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "coroa-de-espinhos-vivos": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "coroa-primordial": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "sangue-de-troll": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "antena-de-ferrugem": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "antidoto": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "gibao-do-lobo-selvagem": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "brunea": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "orbe-do-abismo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "pergaminho-de-revivificar": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "elmo-de-ferro-bruto": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "armor"
+    },
+    "juba-de-leao": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "bracelete-do-gladiador": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "pocao-de-cura-maior": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "presa-de-worg": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "default"
+    },
+    "unguento-termico": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "pocao-de-resist.-ao-fogo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "machado-de-montanha": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "receituario-de-mirena": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "capa-da-confianca": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "selo-da-alianca": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "bussola-de-corvus": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
+    },
+    "chave-do-crepusculo": {
+      "timestamp": "2026-05-16T01:32:44.554198",
+      "cost": 0.005,
+      "quality": "low",
+      "category": "magical"
     }
   },
   "last_run": "2026-05-16T01:04:36.265805",
