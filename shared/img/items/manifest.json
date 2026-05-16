@@ -2921,6 +2921,90 @@
       "cost": 0.0048400000000000006,
       "quality": "low",
       "category": "weapon"
+    },
+    "capuz-do-lamento-sombrio": {
+      "timestamp": "2026-05-15T23:57:28.499570",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "botas-do-lamento-sombrio": {
+      "timestamp": "2026-05-15T23:57:42.405892",
+      "cost": 0.004865000000000001,
+      "quality": "low",
+      "category": "cursed"
+    },
+    "alaude-do-canto-estelar": {
+      "timestamp": "2026-05-15T23:57:54.774945",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "vestes-do-canto-estelar": {
+      "timestamp": "2026-05-15T23:58:12.428012",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "anel-do-canto-estelar": {
+      "timestamp": "2026-05-15T23:58:19.412387",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "caneca-de-grom": {
+      "timestamp": "2026-05-15T23:58:34.272875",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "cerveja-ancestral-de-grom": {
+      "timestamp": "2026-05-15T23:58:50.390519",
+      "cost": 0.005185,
+      "quality": "low",
+      "category": "potion"
+    },
+    "bracelete-do-gladiador": {
+      "timestamp": "2026-05-15T23:59:01.511840",
+      "cost": 0.004720000000000001,
+      "quality": "low",
+      "category": "default"
+    },
+    "insignia-de-avaliador": {
+      "timestamp": "2026-05-15T23:59:20.640275",
+      "cost": 0.004785000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "capa-da-confianca": {
+      "timestamp": "2026-05-15T23:59:30.387937",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "selo-da-alianca": {
+      "timestamp": "2026-05-15T23:59:42.598659",
+      "cost": 0.004915000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "lanterna-do-vigia": {
+      "timestamp": "2026-05-15T23:59:55.285595",
+      "cost": 0.004825000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "broche-da-guarda": {
+      "timestamp": "2026-05-16T00:00:12.685052",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "sacred"
+    },
+    "amuleto-da-floresta": {
+      "timestamp": "2026-05-16T00:00:20.458864",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "jewelry"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
