@@ -3005,6 +3005,90 @@
       "cost": 0.004860000000000001,
       "quality": "low",
       "category": "jewelry"
+    },
+    "cajado-da-seiva-viva": {
+      "timestamp": "2026-05-16T00:00:30.030550",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "coroa-de-espinhos-vivos": {
+      "timestamp": "2026-05-16T00:00:44.133067",
+      "cost": 0.004805000000000001,
+      "quality": "low",
+      "category": "jewelry"
+    },
+    "pocao-de-resistencia": {
+      "timestamp": "2026-05-16T00:00:57.063640",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "potion"
+    },
+    "elixir-experimental": {
+      "timestamp": "2026-05-16T00:01:11.874468",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "receituario-de-mirena": {
+      "timestamp": "2026-05-16T00:01:25.212837",
+      "cost": 0.004860000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "bussola-de-corvus": {
+      "timestamp": "2026-05-16T00:01:39.853625",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "fragmento-de-mapa-antigo": {
+      "timestamp": "2026-05-16T00:01:49.953565",
+      "cost": 0.004940000000000001,
+      "quality": "low",
+      "category": "map"
+    },
+    "atlas-de-valdoria": {
+      "timestamp": "2026-05-16T00:02:08.216452",
+      "cost": 0.004870000000000001,
+      "quality": "low",
+      "category": "scroll"
+    },
+    "gema-purificada": {
+      "timestamp": "2026-05-16T00:02:12.991124",
+      "cost": 0.004810000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "anel-de-gratidao": {
+      "timestamp": "2026-05-16T00:02:28.016482",
+      "cost": 0.004890000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "tiara-do-crepusculo": {
+      "timestamp": "2026-05-16T00:02:42.131864",
+      "cost": 0.004815000000000001,
+      "quality": "low",
+      "category": "magical"
+    },
+    "mochila-reforcada": {
+      "timestamp": "2026-05-16T00:03:04.930065",
+      "cost": 0.004795000000000001,
+      "quality": "low",
+      "category": "tool"
+    },
+    "couro-de-fera-rara": {
+      "timestamp": "2026-05-16T00:03:06.617230",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "gem"
+    },
+    "tenda-do-artesao": {
+      "timestamp": "2026-05-16T00:03:22.248076",
+      "cost": 0.0047550000000000005,
+      "quality": "low",
+      "category": "tool"
     }
   },
   "last_run": "2026-05-15T21:21:29.691346",
