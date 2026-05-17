@@ -112,16 +112,52 @@
   //  ICON RESOLVER — PNG (AI-generated) when manifest has it,
   //  fallback to SVG sprite. Requires items-resolver.js loaded (vItems).
   //
-  //  FIX 2026-05-16: this function was previously nested INSIDE
+  //  FIX 2026-05-16 (a): this function was previously nested INSIDE
   //  _vinvAttachScrollArrow (block-scoped) — _renderGrid + _renderLoadout
-  //  couldn't access it → mochila ficava com SVG sprites velhos em vez dos
-  //  PNGs do items_ai_preview.html. Movido pra top-level do módulo.
+  //  couldn't access it. Movido pra top-level do módulo.
+  //
+  //  FIX 2026-05-16 (b): SLUG MISMATCH — sprite IDs (HeraldicItems) STRIP
+  //  connectives PT-BR ("de"/"do"/"da"). PNG manifest preserva. Ex:
+  //    item name      = "Poção de Cura"
+  //    sprite iconId  = "ic-it-pocao-cura"        (sem "de")
+  //    PNG manifest   = "pocao-de-cura"           (com "de")
+  //  Antigo fix: strip "ic-it-" → "pocao-cura" → MISS no manifest → fallback
+  //  pro SVG sprite (drawing antigo). Resultado: 80%+ items renderizando
+  //  os SVG velhos em vez dos PNGs novos (user reportou bug em DEV).
+  //  Novo fix: tenta MÚLTIPLOS slug candidatos:
+  //    1. slug do NOME (preserva connectives) — match com manifest
+  //    2. slug strippado do sprite iconId (também strip "ic-it-base-")
+  //    3. fallback SVG sprite com iconId original
   // ============================================================
   function _iconSrc(iconId, altText) {
-    var slug = (iconId || '').replace(/^ic-it-/, '');
-    if (window.vItems && typeof window.vItems.iconHTML === 'function') {
-      return window.vItems.iconHTML(slug, altText || slug);
+    var candidates = [];
+
+    // 1) Slug do item NAME (full — preserva "de"/"do"/"da" — bate com PNG manifest)
+    if (altText) {
+      var nameSlug = _slugify(altText);
+      if (nameSlug) candidates.push(nameSlug);
     }
+
+    // 2) Slug strippado do sprite iconId (Heraldic convention — sem connectives;
+    //    também strip "ic-it-base-" pra cobrir fallbacks genéricos)
+    if (iconId) {
+      var spriteSlug = String(iconId).replace(/^ic-it-(base-)?/, '');
+      if (spriteSlug && candidates.indexOf(spriteSlug) < 0) {
+        candidates.push(spriteSlug);
+      }
+    }
+
+    // 3) Tenta cada candidato contra o PNG manifest
+    if (window.vItems && typeof window.vItems.iconHTML === 'function'
+        && typeof window.vItems.has === 'function') {
+      for (var i = 0; i < candidates.length; i++) {
+        if (window.vItems.has(candidates[i])) {
+          return window.vItems.iconHTML(candidates[i], altText || candidates[i]);
+        }
+      }
+    }
+
+    // 4) Final fallback: SVG sprite com iconId original
     return '<svg viewBox="0 0 120 120"><use href="#' + iconId + '"/></svg>';
   }
 
