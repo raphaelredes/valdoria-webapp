@@ -49232,6 +49232,34 @@ function _buildHubAlly(a) {
 // === SYNC_TARGET END ===
 
 // === SYNC_TARGET: game-hub.js#_buildLocCell BEGIN ===
+/* 2026-05-17 — city PNG map (16 AI-generated location icons).
+   Keyed pelo callback name (btn.cb). PNGs em /shared/img/city/{cb}.png. */
+var CITY_LOC_PNG_AVAILABLE = {
+    'tavern': 1, 'inn': 1, 'rel_main': 1, 'action_quests': 1,
+    'market': 1, 'bank': 1, 'open_workshop': 1, 'rune_scribe': 1,
+    'guild': 1, 'gates': 1, 'arena': 1, 'daily_challenge': 1,
+    'temple': 1, 'square': 1, 'action_codex': 1, 'festival': 1
+};
+function _cityLocIconHTML(cb, fallbackIco) {
+    if (cb && CITY_LOC_PNG_AVAILABLE[cb]) {
+        var base = '/shared/img/city/';
+        var loc = (typeof location !== 'undefined') ? location.href : '';
+        if (loc.indexOf('file://') === 0) {
+            base = '../valdoria-webapp/shared/img/city/';
+        }
+        // onerror: fallback ao SVG sprite original (preserva fallbackIco)
+        var safeFallback = (typeof fallbackIco === 'string' && fallbackIco.indexOf('<svg') === 0)
+            ? fallbackIco.replace(/'/g, '&#39;').replace(/"/g, '&quot;')
+            : '';
+        return '<img class="hl-ico-img" src="' + base + cb + '.png" ' +
+               'alt="" loading="lazy" ' +
+               "onerror=\"this.onerror=null;this.outerHTML='" + safeFallback + "';\">";
+    }
+    if (typeof fallbackIco === 'string' && fallbackIco.indexOf('<svg') === 0) {
+        return fallbackIco;
+    }
+    return fallbackIco || '';
+}
 function _buildLocCell(ico, name, btn) {
     var cell = _hubDiv('hub-loc');
 
@@ -49239,12 +49267,13 @@ function _buildLocCell(ico, name, btn) {
        (evita "tudo gold" — cada local tem sua cor heráldica natural). */
     if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
-    /* Icon: heraldic SVG (canonical) ou emoji fallback */
+    /* Icon: PNG (AI-generated 2026-05-16) > SVG heraldic (canonical) > emoji fallback */
     var icoEl = _hubDiv('hl-ico');
-    if (typeof ico === 'string' && ico.indexOf('<svg') === 0) {
-        icoEl.innerHTML = ico;
+    var pngHtml = _cityLocIconHTML(btn && btn.cb, ico);
+    if (pngHtml.indexOf('<img') === 0 || pngHtml.indexOf('<svg') === 0) {
+        icoEl.innerHTML = pngHtml;
     } else {
-        icoEl.textContent = ico;
+        icoEl.textContent = pngHtml;
     }
     cell.appendChild(icoEl);
 
