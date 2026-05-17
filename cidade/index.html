@@ -661,6 +661,10 @@ LOG SINK (Fase 7):
     // items-resolver: PNG-when-available with SVG fallback. Must load
     // BEFORE inventory-screen.js so _iconSrc() can find window.vItems.
     document.write('<script src="/shared/items-resolver.js?v=' + v + '"><\/script>');
+    // 2026-05-17 USER REQUEST: asset-resolver substitui inline SVG <use href="#ic-X">
+    // por PNG <img> em TODA classe/combat icon (12 classes + boss/inimigo + 6 invocações).
+    // MutationObserver upgrade automático para conteúdo dinâmico (NPCs, ficha, mercenários).
+    document.write('<script src="/shared/asset-resolver.js?v=' + v + '"><\/script>');
     document.write('<script src="/shared/inventory-screen.js?v=' + v + '"><\/script>');
     /* X-6.5.51BO (2026-05-15): Fogueira reaproveitável (CampFire + vFire wrapper).
        Mesmo sistema canvas particle additive da tela do acampamento, agora padronizada
@@ -10668,8 +10672,11 @@ function _showStatusPopup(memberIdx){
   /* PT-BR labels — _raceLabelPT/_classLabelPT estão definidos globalmente
      (ver ~L38478+) pra serem usados também por renderCityGroupPanel. */
   var heraldicId = _classToHeraldic(m.cls);
-  var heraldicSvg = '<svg viewBox="0 0 120 120" style="width: 38px; height: 38px;">'
-    + '<use href="#' + heraldicId + '"/></svg>';
+  // 2026-05-17: tenta PNG AI primeiro (12 classes geradas), fallback SVG sprite.
+  // vAssets.classIconHTML retorna <img> com onerror revertendo pra SVG inline.
+  var heraldicSvg = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '38px')
+    : '<svg viewBox="0 0 120 120" style="width: 38px; height: 38px;"><use href="#' + heraldicId + '"/></svg>';
   var raceLabel = _raceLabelPT(m.race);
   var classLabel = _classLabelPT(m.cls);
 
