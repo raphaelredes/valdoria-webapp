@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T00:58:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T22:37:01Z — do not edit directly, edit source -->
 
 
 <!--
@@ -2042,16 +2042,50 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     drop-shadow(0 1px 2px rgba(0,0,0,0.85));
   position: static; z-index: auto;
 }
-/* 2026-05-16: c-portrait-img (PNG AI variant) — herda dimensões do contêiner
-   .c-portrait, object-fit:contain pra preservar arte sem crop, mesma drop-shadow
-   colorida que o SVG (filtro funciona em <img> também). */
+/* 2026-05-16: c-portrait-img (PNG AI variant) — herda dimensões do contêiner.
+   2026-05-17 USER REQUEST "efeito contornando os desenhos" — outline +
+   stronger glow pra melhor visualização contra background do card.
+   Múltiplos drop-shadow simulam um contorno (8 direções) + halo colorido
+   da accent + sombra inferior pra profundidade. */
 .cell.v8-card .c-portrait img.c-portrait-img {
   width: 100%; height: 100%;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 3px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
-    drop-shadow(0 1px 2px rgba(0,0,0,0.85));
+    /* contorno fino branco/dourado (8 direções pra cobrir todas as bordas) */
+    drop-shadow(1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(-1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(0 1px 0 rgba(0,0,0,0.95))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.95))
+    drop-shadow(1px 1px 0 rgba(0,0,0,0.9))
+    drop-shadow(-1px -1px 0 rgba(0,0,0,0.9))
+    /* halo dourado da accent da classe */
+    drop-shadow(0 0 6px color-mix(in srgb, var(--card-accent, #c4953a) 85%, transparent))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--card-accent, #c4953a) 40%, transparent))
+    /* sombra inferior pra profundidade */
+    drop-shadow(0 2px 4px rgba(0,0,0,0.9));
   position: static; z-index: auto;
+}
+/* Inimigos: contorno vermelho-ouro pra contrastar com cards red/dark */
+.cell.v8-card.cls-inimigo .c-portrait img.c-portrait-img {
+  filter:
+    drop-shadow(1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(-1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(0 1px 0 rgba(0,0,0,0.95))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.95))
+    drop-shadow(0 0 6px rgba(255,90,70,0.85))
+    drop-shadow(0 0 12px rgba(160,48,32,0.4))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.9));
+}
+/* Boss: halo dourado intenso */
+.cell.v8-card.cls-boss .c-portrait img.c-portrait-img {
+  filter:
+    drop-shadow(1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(-1px 0 0 rgba(0,0,0,0.95))
+    drop-shadow(0 1px 0 rgba(0,0,0,0.95))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.95))
+    drop-shadow(0 0 8px rgba(232,196,90,0.95))
+    drop-shadow(0 0 16px rgba(196,149,58,0.5))
+    drop-shadow(0 2px 5px rgba(0,0,0,0.9));
 }
 .cell.v8-card.cls-inimigo .c-portrait {
   color: color-mix(in srgb, var(--enemy-red, #a03020) 35%, #fff 65%);
@@ -15901,18 +15935,27 @@ function _slugifyCombat(name) {
         .replace(/(^-|-$)/g, '');
 }
 function _combatPortraitHTML(iconId, u, utype) {
-    /* Per-enemy PNG check (priority over generic tag-based PNG) */
-    if (utype === 'enemy' && u && u.n) {
-        var enemySlug = _slugifyCombat(u.n);
-        if (ENEMY_PNG_AVAILABLE[enemySlug]) {
-            var base = '/shared/img/combat/enemies/';
-            var loc = (typeof location !== 'undefined') ? location.href : '';
-            if (loc.indexOf('file://') === 0) {
-                base = '../valdoria-webapp/shared/img/combat/enemies/';
+    /* Per-enemy PNG check (priority over generic tag-based PNG).
+       2026-05-17 FIX: enemies podem ter NOME FANTASIA via ENEMY_NAME_POOLS
+       (ex: "Gnarl" = nome fantasia de Crocodilo). u.n=nome display vai
+       falhar lookup mas u.species=BESTIARY canonical resolve. Tenta NAME
+       primeiro (caso enemy seja boss/unique sem species), fallback species. */
+    if (utype === 'enemy' && u) {
+        var candidates = [];
+        if (u.n) candidates.push(_slugifyCombat(u.n));
+        if (u.species) candidates.push(_slugifyCombat(u.species));
+        for (var ci = 0; ci < candidates.length; ci++) {
+            var enemySlug = candidates[ci];
+            if (ENEMY_PNG_AVAILABLE[enemySlug]) {
+                var base = '/shared/img/combat/enemies/';
+                var loc = (typeof location !== 'undefined') ? location.href : '';
+                if (loc.indexOf('file://') === 0) {
+                    base = '../valdoria-webapp/shared/img/combat/enemies/';
+                }
+                return '<img class="c-portrait-img" src="' + base + enemySlug + '.png" ' +
+                       'alt="" loading="lazy" ' +
+                       'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>\'">';
             }
-            return '<img class="c-portrait-img" src="' + base + enemySlug + '.png" ' +
-                   'alt="" loading="lazy" ' +
-                   'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>\'">';
         }
     }
     /* Generic PNG fallback (classes + invocações + tag brasões) */
