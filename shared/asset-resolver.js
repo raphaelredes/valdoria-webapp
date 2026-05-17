@@ -322,13 +322,45 @@
         return upgradeAllIcons(rootEl);
     }
 
-    /* 2026-05-17: SMART UPGRADER — handles ALL slug types via resolveIconUrl.
+    /* 2026-05-17 SMART UPGRADER — handles ALL slug types via resolveIconUrl.
        Walks DOM for any <svg><use href="#ic-X"></svg>, tries each PNG category
-       map (combat/skills/cities/npcs/ui/items/achievements). Swaps for <img>
-       when a PNG matches; leaves SVG untouched otherwise.
+       map. Swaps for <img> when a PNG matches; leaves SVG untouched otherwise.
 
-       Inherits: alt text from data-name attr or null; size from SVG style/attrs.
-       Idempotent: marks data-asset-upgraded to prevent re-processing. */
+       Sizing strategy (BUG FIX 2026-05-17 user reported ícones gigantes):
+       1. getBoundingClientRect — actual rendered size from CSS+layout
+       2. Fallback: explicit width/height HTML attributes
+       3. Fallback: inline style width/height
+       4. SAFETY: if no size determinable, SKIP upgrade — better keep SVG than
+          render IMG at natural 1024×1024 size breaking layout.
+
+       Applies size via BOTH `img.width/height` HTML attrs (layout hint pre-load)
+       AND inline style (final). Defensive CSS in _injectDefensiveCSS() also
+       caps IMG at max-width/max-height of parent.
+
+       Idempotent: data-asset-upgraded marker prevents re-processing. */
+    function _getSvgRenderedSize(svgEl) {
+        var w = 0, h = 0;
+        try {
+            if (svgEl.getBoundingClientRect) {
+                var rect = svgEl.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    return { w: Math.round(rect.width), h: Math.round(rect.height) };
+                }
+            }
+        } catch (_) {}
+        // Fallback: HTML width/height attrs
+        var attrW = parseInt(svgEl.getAttribute && svgEl.getAttribute('width'), 10);
+        var attrH = parseInt(svgEl.getAttribute && svgEl.getAttribute('height'), 10);
+        if (attrW && attrH) return { w: attrW, h: attrH };
+        // Fallback: inline style
+        if (svgEl.style) {
+            var stylW = parseInt(svgEl.style.width, 10);
+            var stylH = parseInt(svgEl.style.height, 10);
+            if (stylW && stylH) return { w: stylW, h: stylH };
+        }
+        return null;  // no size — skip upgrade
+    }
+
     function upgradeAllIcons(rootEl) {
         rootEl = rootEl || document;
         if (!rootEl.querySelectorAll) return 0;
@@ -343,32 +375,50 @@
                 || useEl.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
             if (!href) continue;
             var iconId = href.replace(/^#/, '');
-            // Try to resolve via smart resolver (covers all 7 PNG categories)
             var url = resolveIconUrl(iconId);
             if (!url) continue;
             var svgEl = useEl.closest ? useEl.closest('svg') : null;
             if (!svgEl) {
-                // Fallback for environments without closest()
                 svgEl = useEl.parentNode;
                 while (svgEl && svgEl.tagName && svgEl.tagName.toLowerCase() !== 'svg') {
                     svgEl = svgEl.parentNode;
                 }
             }
             if (!svgEl || (svgEl.dataset && svgEl.dataset.assetUpgraded)) continue;
+
+            // CRITICAL: capture rendered size BEFORE swap
+            var size = _getSvgRenderedSize(svgEl);
+            if (!size) {
+                // SAFETY: no size determinable — skip upgrade, keep SVG.
+                // Better than rendering IMG at natural 1024×1024.
+                if (svgEl.dataset) svgEl.dataset.assetUpgraded = 'skipped-no-size';
+                continue;
+            }
+
             // Build replacement <img>
             var img = document.createElement('img');
             var svgClassName = (svgEl.className && svgEl.className.baseVal !== undefined)
-                ? svgEl.className.baseVal : (svgEl.getAttribute && svgEl.getAttribute('class')) || '';
+                ? svgEl.className.baseVal
+                : (svgEl.getAttribute && svgEl.getAttribute('class')) || '';
             img.className = 'v-asset-png ' + svgClassName;
             img.src = url;
             img.alt = '';
             img.loading = 'lazy';
-            if (img.dataset) img.dataset.assetUpgraded = '1';
-            // Preserve inline style (svg width/height) — IMG with object-fit:contain
-            // emulates SVG scaling behaviour.
+            // HTML attrs: layout hint BEFORE image loads (prevents huge flash)
+            img.setAttribute('width', size.w);
+            img.setAttribute('height', size.h);
+            // Inline style: explicit size + object-fit + display
             var svgStyle = (svgEl.getAttribute && svgEl.getAttribute('style')) || '';
             img.style.cssText = svgStyle
-                + ';object-fit:contain;display:inline-block;vertical-align:middle';
+                + ';width:' + size.w + 'px'
+                + ';height:' + size.h + 'px'
+                + ';object-fit:contain'
+                + ';display:inline-block'
+                + ';vertical-align:middle'
+                + ';max-width:100%'
+                + ';max-height:100%';
+            if (img.dataset) img.dataset.assetUpgraded = '1';
+
             // Fallback to original SVG on load error
             (function (origSvg) {
                 img.onerror = function () {
@@ -376,6 +426,7 @@
                     if (this.parentNode) this.parentNode.replaceChild(origSvg, this);
                 };
             })(svgEl.cloneNode(true));
+
             // Mark + swap
             if (svgEl.dataset) svgEl.dataset.assetUpgraded = '1';
             if (svgEl.parentNode) {
@@ -384,6 +435,20 @@
             }
         }
         return upgraded;
+    }
+
+    /* Defensive CSS — prevents IMG from exceeding container even if sizing
+       calculation fails. Belt-and-suspenders with explicit width/height attrs. */
+    function _injectDefensiveCSS() {
+        if (!document.head) return;
+        if (document.getElementById('v-asset-png-defensive-css')) return;
+        var style = document.createElement('style');
+        style.id = 'v-asset-png-defensive-css';
+        style.textContent =
+            'img.v-asset-png{max-width:100%;max-height:100%;}' +
+            'img.v-asset-png[width]:not([width="0"]){width:attr(width px);}' +
+            'img.v-asset-png[height]:not([height="0"]){height:attr(height px);}';
+        document.head.appendChild(style);
     }
 
     function upgradeAll(rootEl) {
@@ -449,9 +514,10 @@
         _basePath: _basePath
     };
 
-    // Auto-start: initial upgrade + observer for dynamic content
+    // Auto-start: defensive CSS + initial upgrade + observer for dynamic content
     function _init() {
         try {
+            _injectDefensiveCSS();
             upgradeAll();
             _startObserver();
         } catch (_) {}
