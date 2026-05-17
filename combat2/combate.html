@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-16T23:01:43Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T00:58:14Z — do not edit directly, edit source -->
 
 
 <!--
@@ -5853,6 +5853,13 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-item.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.7); }
 .lp-item.disabled:hover { transform: none; border-color: var(--v-border, #4a3828); background: rgba(15,12,8,.5); }
 .lp-item-ico { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
+/* 2026-05-16: skill PNGs (AI-generated). Renderiza no mesmo box do emoji. */
+.lp-item-ico img.skill-ico-img { width: 28px; height: 28px; object-fit: contain;
+    display: inline-block; vertical-align: middle;
+    filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.5)); }
+.udc-sk-ico img.skill-ico-img { width: 14px; height: 14px; object-fit: contain;
+    display: inline-block; vertical-align: middle;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5)); }
 .lp-item-body { flex: 1; min-width: 0; }
 /* V1 Invocações Phase 4 (2026-04-19) — chip de razão por que skill está bloqueada.
    Aparece embaixo da descrição em itens .lp-item.disabled. UX: o jogador entende
@@ -15838,6 +15845,51 @@ var ENEMY_PNG_AVAILABLE = {
     'lobo-da-tundra': 1, 'troll-das-cavernas': 1, 'morcego-gigante': 1,
     'elemental-de-lava-menor': 1, 'brakthar': 1
 };
+/* 2026-05-16: Skill icon PNG availability — 135 AI-generated skills.
+   Source: scripts/generate_skill_icons.py + logs/inventory_skills.json.
+   Keyed pela versão slugificada do nome (ex: "Bola de Fogo" → "bola-de-fogo"). */
+var SKILL_PNG_AVAILABLE = {
+    'acao-ardilosa': 1, 'agarrar': 1, 'arma-espiritual': 1, 'arma-magica': 1, 'armadura-de-agathys': 1, 'ataque-assassino': 1,
+    'ataque-brutal': 1, 'ataque-furtivo': 1, 'ataque-poderoso': 1, 'aura-de-protecao': 1, 'aura-de-vitalidade': 1, 'auto': 1,
+    'banir': 1, 'bencao': 1, 'bola-de-fogo': 1, 'bruxaria': 1, 'calmar-emocoes': 1, 'cancao-de-cura': 1,
+    'cegueira': 1, 'chama-sagrada': 1, 'chicote-espinhoso': 1, 'choque-eletrico': 1, 'chuva-de-espinhos': 1, 'cone-de-frio': 1,
+    'conjurar-animais': 1, 'contagio': 1, 'contramagica': 1, 'corpo-calmo': 1, 'crescimento-espinhoso': 1, 'cura': 1,
+    'cura-da-companhia': 1, 'cura-pelas-maos': 1, 'curar': 1, 'curar-ferimentos': 1, 'defesa-paciente': 1, 'desviar-projeteis': 1,
+    'disparo-rapido': 1, 'enfeiticar-monstros': 1, 'enfeiticar-pessoa': 1, 'enredar': 1, 'escudo-arcano': 1, 'escudo-da-fe': 1,
+    'espiritos-guardioes': 1, 'esquiva': 1, 'esquiva-sobrenatural': 1, 'estocada-mental': 1, 'explosao-arcana': 1, 'feixe-lunar': 1,
+    'flecha-de-acido': 1, 'forma-selvagem': 1, 'furia': 1, 'furia-devastadora': 1, 'golpe-arcano': 1, 'golpe-atordoante': 1,
+    'golpe-de-armadilha': 1, 'golpe-divino': 1, 'golpe-flamejante': 1, 'golpe-fulminante': 1, 'golpe-guidado': 1, 'golpe-irado': 1,
+    'golpe-marcante': 1, 'golpe-mortal': 1, 'golpe-preciso': 1, 'golpe-trovejante': 1, 'graxa': 1, 'grito-de-guerra': 1,
+    'hipnose': 1, 'imobilizar-pessoa': 1, 'infligir-ferimentos': 1, 'inspiracao': 1, 'investida': 1, 'investida-selvagem': 1,
+    'invisibilidade': 1, 'invisibilidade-maior': 1, 'invocar-lobo': 1, 'invocar-raio': 1, 'juramento-de-inimizade': 1, 'lamina-sombria': 1,
+    'lentidao': 1, 'lobo-espiritual': 1, 'maldicao': 1, 'maldicao-da-fraqueza': 1, 'mao-arcana': 1, 'maos-flamejantes': 1,
+    'marca-do-cacador': 1, 'massa-de-cura': 1, 'medo': 1, 'metamagia-acelerar': 1, 'metamagia-duplicar': 1, 'misseis-magicos': 1,
+    'missil-magico': 1, 'nevoa-ardente': 1, 'nuvem-toxica': 1, 'onda-de-trovao': 1, 'palavra-de-cura': 1, 'palavra-guia': 1,
+    'palavra-imperiosa': 1, 'palavra-poder-atordoar': 1, 'palavras-cortantes': 1, 'palavras-crueis': 1, 'passar-sem-rastro': 1, 'passo-brumoso': 1,
+    'passo-do-vento': 1, 'passo-oculto': 1, 'passos-silenciosos': 1, 'plaga-de-insetos': 1, 'postura-defensiva': 1, 'pressa': 1,
+    'produzir-chama': 1, 'protecao-contra-energia': 1, 'protecao-divina': 1, 'raio-caotico': 1, 'raio-de-enfraquecimento': 1, 'raio-de-fogo': 1,
+    'raio-doentio': 1, 'raio-gelido': 1, 'raio-guiador': 1, 'raio-relampejante': 1, 'rajada-de-flechas': 1, 'rajada-de-golpes': 1,
+    'recuperacao-rapida': 1, 'reflexos-evasivos': 1, 'relampago': 1, 'repreensao-divina': 1, 'repreensao-infernal': 1, 'rugido-feroz': 1,
+    'santuario': 1, 'segundo-folego': 1, 'sono': 1, 'surto-de-acao': 1, 'sussurros-dissonantes': 1, 'temerario': 1,
+    'tiro-certeiro': 1, 'tiro-preciso': 1, 'transmutar-em-pedra': 1
+};
+function _skillIconHTML(sk) {
+    if (!sk) return '';
+    if (sk.n) {
+        var slug = _slugifyCombat(sk.n);
+        if (SKILL_PNG_AVAILABLE[slug]) {
+            var base = '/shared/img/combat/skills/';
+            var loc = (typeof location !== 'undefined') ? location.href : '';
+            if (loc.indexOf('file://') === 0) {
+                base = '../valdoria-webapp/shared/img/combat/skills/';
+            }
+            return '<img class="skill-ico-img" src="' + base + slug + '.png" ' +
+                   'alt="" loading="lazy" ' +
+                   "onerror=\"this.onerror=null;this.replaceWith(document.createTextNode('" + (sk.ico || '?').replace(/'/g, "\\'") + "'));\">";
+        }
+    }
+    return sk.ico || '?';
+}
 function _slugifyCombat(name) {
     if (!name) return '';
     return String(name)
@@ -20424,7 +20476,7 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
             '" aria-hidden="true">' + resGlyph + '</span>';
         html += '<div class="lp-item-wrap" data-cat="' + cat + '">';
         html += '<button type="button" class="lp-item lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + (blockReason ? ' title="' + escHtml(blockReason) + '"' : '') + '>';
-        html += '<div class="lp-item-ico">' + sk.ico + '</div>';
+        html += '<div class="lp-item-ico">' + _skillIconHTML(sk) + '</div>';
         html += '<div class="lp-item-body">';
         html += '<div class="lp-item-name">' + escHtml(sk.n) + resBadgeHtml + '</div>';
         /* X-6.5.51AT (2026-05-08): lp-item-desc REMOVIDO daqui — descrição
@@ -25255,7 +25307,7 @@ function openUnitDetail(uid) {
     var udcTotalPages = Math.max(1, Math.ceil(skills.length / UDC_SKILLS_PER_PAGE));
     function _renderUdcSkillItem(sk) {
         if (typeof sk === 'string') return '<li>' + escHtml(sk) + '</li>';
-        return '<li><span class="udc-sk-ico">' + escHtml(sk.ico || '') + '</span> ' + escHtml(sk.n || '?') + (sk.desc ? ' <span class="udc-sk-desc">— ' + escHtml(sk.desc) + '</span>' : '') + '</li>';
+        return '<li><span class="udc-sk-ico">' + _skillIconHTML(sk) + '</span> ' + escHtml(sk.n || '?') + (sk.desc ? ' <span class="udc-sk-desc">— ' + escHtml(sk.desc) + '</span>' : '') + '</li>';
     }
     function _renderUdcSkillsPage(pageIdx) {
         var start = pageIdx * UDC_SKILLS_PER_PAGE;
