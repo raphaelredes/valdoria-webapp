@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T22:43:33Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T22:59:07Z — do not edit directly, edit source -->
 
 
 <!--
@@ -1344,6 +1344,40 @@ html.sim-prod .sim-side-panel { display: none !important; }
 #vfxCanvas,
 .dice-overlay,
 .unit-detail-overlay,
+/* 2026-05-17: USER REPORT — "popup COMBATE INICIADO não está ficando
+   centralizado, parece não estar responsivo ao tamanho da tela disponível...
+   na realidade parece estar considerando o tamanho total da tela".
+   ROOT CAUSE: position:fixed se ancora ao VIEWPORT do browser, não ao
+   simulator frame (#app). Em monitor wide, frame está centralizado mas
+   popup tomava entire viewport width/height.
+   FIX: position:absolute inset:0 — ocupa 100% do #app pai (que JÁ tem
+   max-width 480px max-height 100vh via #app CSS). */
+#app .combat-msg-overlay,
+#app .target-confirm-overlay,
+#app .sim-skip-confirm-overlay,
+#app .flee-info-overlay,
+#app .list-panel-overlay,
+#app .iop-overlay,
+#app .resolution,
+#app .skill-overlay,
+#app .target-overlay,
+#app .resolution-screen,
+#app .ds2-screen,
+#app .initiative-order-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+}
+/* Fallback (fora do simulator — quando não há #app ancestor): position fixed
+   no viewport com cap canonical, posicionado top-center. */
 .combat-msg-overlay,
 .target-confirm-overlay,
 .sim-skip-confirm-overlay,
@@ -1356,18 +1390,18 @@ html.sim-prod .sim-side-panel { display: none !important; }
 .resolution-screen,
 .ds2-screen,
 .initiative-order-overlay {
-  position: fixed !important;
-  inset: auto !important;
-  left: 0 !important;
-  right: 0 !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  top: 0 !important;
-  width: var(--sim-frame-w) !important; /* X-6.5.51o: responsivo via :root token */
-  max-width: 100% !important;
-  height: var(--sim-frame-h) !important;
-  max-height: var(--sim-frame-h) !important;
-  bottom: auto !important;
+  position: fixed;
+  inset: auto;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 0;
+  width: var(--sim-frame-w);
+  max-width: 100%;
+  height: var(--sim-frame-h);
+  max-height: var(--sim-frame-h);
+  bottom: auto;
 }
 /* .iop-overlay: posicao/dimensao vem do bloco fixed partilhado; fundo escuro e centro no CSS da secao iop */
 .initiative-order-overlay { min-height: 0 !important; }

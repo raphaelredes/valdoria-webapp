@@ -367,7 +367,20 @@
       +     '<div class="vinv-detail-card" data-region="detail-card"></div>'
       +   '</div>'
       + '</div>';
-    document.body.appendChild(ov);
+    // 2026-05-17: mount inside simulator frame container (#frame em exploracao,
+    // #app em combate/cidade) ao invés de body. Isso garante que a mochila fica
+    // CONFINADA ao frame visual do simulador, não centralizada no viewport do
+    // browser (issue: monitor wide, mochila aparecia fora do "celular virtual").
+    // Quando rodando como WebApp (sem #frame nem #app), fallback pra body.
+    var _vinvHost = document.getElementById('frame')
+                 || document.getElementById('app')
+                 || document.body;
+    _vinvHost.appendChild(ov);
+    // Marca o host pra CSS aplicar position:absolute quando overlay é child de #frame/#app
+    if (_vinvHost !== document.body) {
+      _vinvHost.classList.add('vinv-host');
+      ov.classList.add('vinv-overlay--contained');
+    }
 
     // Click no overlay externo → fecha
     ov.addEventListener('click', function (e) {

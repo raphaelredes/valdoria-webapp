@@ -58,23 +58,18 @@
    2. OVERLAY (modal container)
    ================================================================ */
 .vinv-overlay {
-  /* 2026-05-15: confinar overlay ao frame canonical do simulador.
-     Antes: `inset: 0` cobria viewport inteiro do browser, e em monitores
-     largos a mochila aparecia centralizada no browser (não no frame de
-     480px do "celular virtual"). Solução: usar mesmo viewport canonical
-     do sim (--sim-frame-w/h) + centralizar via translate. Funciona tanto
-     em cidade/combate (body=frame) quanto em exploracao (body=viewport)
-     porque fixed se posiciona vs viewport e o frame visual já está
-     centralizado no viewport via html margin auto. */
+  /* 2026-05-17: overlay confinado ao frame do simulador via mount no
+     #frame/#app (ver inventory-screen.js _vinvHost) com classe
+     .vinv-overlay--contained. Quando contained, usa position:absolute
+     inset:0 dentro do host. Quando NOT contained (webapp / body mount),
+     usa position:fixed centralizado no viewport (legacy fallback). */
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   /* Simulator (file://): --sim-frame-w=480px (cap smartphone canonical).
      WebApp deploy: var indefinida, fallback=430px (valdoria-design.css
-     IMUTÁVEL html max-width). Em ambos, fixed se posiciona vs viewport
-     e o frame já está centralizado horizontalmente via html margin auto,
-     então o overlay alinha visualmente com o frame. */
+     IMUTÁVEL html max-width). */
   width: var(--sim-frame-w, min(100vw, 430px));
   height: var(--sim-frame-h, 100dvh);
   background: rgba(8, 5, 3, 0.7);
@@ -89,6 +84,23 @@
   color: var(--vinv-text);
 }
 .vinv-overlay.active { display: flex; }
+
+/* 2026-05-17: Overlay CONTAINED (mounted inside #frame/#app simulator host).
+   Position:absolute + inset:0 = ocupa 100% do host (que JÁ está sized via
+   --sim-frame-w/h). Evita position:fixed escapar pro viewport do browser
+   em monitores wide. Host marca-se com .vinv-host (position:relative se não
+   tinha) pra estabelecer containing block. */
+.vinv-host { position: relative; }
+.vinv-overlay.vinv-overlay--contained {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  transform: none !important;
+}
 
 .vinv-panel {
   /* 2026-05-15: ocupa todo o frame menos padding (≥95% efetivo).
