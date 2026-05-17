@@ -52,7 +52,10 @@
         'fogo-fatuo': 1, 'troll': 1, 'zumbi': 1, 'aguia-gigante': 1,
         'escorpiao-gigante': 1, 'leao-da-areia': 1, 'yeti-congelado': 1,
         'lobo-da-tundra': 1, 'troll-das-cavernas': 1, 'morcego-gigante': 1,
-        'elemental-de-lava-menor': 1, 'brakthar': 1
+        'elemental-de-lava-menor': 1, 'brakthar': 1,
+        // 2026-05-17: enemies que têm name pool mas não tinham PNG
+        'ghoul': 1, 'urso': 1, 'urso-pardo': 1, 'lobo-atroz': 1,
+        'bandido-arqueiro': 1, 'capitao-bandido': 1
     };
 
     /* ========================================================
@@ -338,27 +341,56 @@
        caps IMG at max-width/max-height of parent.
 
        Idempotent: data-asset-upgraded marker prevents re-processing. */
+    /* Returns { w, h, source } — source ∈ 'rect' | 'attr' | 'style' | 'viewbox-default'.
+       If source === 'rect' or 'viewbox-default', the size came from CSS — caller
+       should NOT set inline width/height (let CSS rules on the IMG class match).
+       If source === 'attr' or 'style', size was explicit on SVG — caller SHOULD
+       preserve via inline style. Returns null if no usable size info. */
     function _getSvgRenderedSize(svgEl) {
-        var w = 0, h = 0;
+        // Try rendered (CSS-driven) first
         try {
             if (svgEl.getBoundingClientRect) {
                 var rect = svgEl.getBoundingClientRect();
                 if (rect.width > 0 && rect.height > 0) {
-                    return { w: Math.round(rect.width), h: Math.round(rect.height) };
+                    return { w: Math.round(rect.width), h: Math.round(rect.height),
+                             source: 'rect' };
                 }
             }
         } catch (_) {}
-        // Fallback: HTML width/height attrs
+        // HTML width/height attrs (explicit)
         var attrW = parseInt(svgEl.getAttribute && svgEl.getAttribute('width'), 10);
         var attrH = parseInt(svgEl.getAttribute && svgEl.getAttribute('height'), 10);
-        if (attrW && attrH) return { w: attrW, h: attrH };
-        // Fallback: inline style
+        if (attrW && attrH) return { w: attrW, h: attrH, source: 'attr' };
+        // Inline style (explicit)
         if (svgEl.style) {
             var stylW = parseInt(svgEl.style.width, 10);
             var stylH = parseInt(svgEl.style.height, 10);
-            if (stylW && stylH) return { w: stylW, h: stylH };
+            if (stylW && stylH) return { w: stylW, h: stylH, source: 'style' };
         }
-        return null;  // no size — skip upgrade
+        // 2026-05-17: viewBox + class-based default (handles hidden SVGs).
+        // Returns "default" size so IMG renders SOMETHING — CSS rules on the IMG
+        // class (preserved from SVG) will override if a better match exists.
+        var vbStr = svgEl.getAttribute && svgEl.getAttribute('viewBox');
+        if (vbStr) {
+            var vb = vbStr.split(/\s+/).map(parseFloat);
+            if (vb.length === 4 && vb[2] > 0 && vb[3] > 0) {
+                var aspect = vb[2] / vb[3];
+                var clsName = ((svgEl.getAttribute && svgEl.getAttribute('class')) || '').toLowerCase();
+                var defaultSize = 24;
+                if (/\b(qb|quick)-icon\b/.test(clsName)) defaultSize = 32;
+                if (/\b(lo|light)-icon\b/.test(clsName)) defaultSize = 28;
+                if (/\b(hud|stat)-(icon|ico)\b/.test(clsName)) defaultSize = 16;
+                if (/\binv-title-icon\b/.test(clsName)) defaultSize = 22;
+                if (/\bv-heraldic\b/.test(clsName)) defaultSize = 28;
+                if (/\bc-portrait\b/.test(clsName)) defaultSize = 38;
+                return {
+                    w: Math.round(defaultSize * aspect),
+                    h: defaultSize,
+                    source: 'viewbox-default'
+                };
+            }
+        }
+        return null;
     }
 
     function upgradeAllIcons(rootEl) {
@@ -390,7 +422,6 @@
             var size = _getSvgRenderedSize(svgEl);
             if (!size) {
                 // SAFETY: no size determinable — skip upgrade, keep SVG.
-                // Better than rendering IMG at natural 1024×1024.
                 if (svgEl.dataset) svgEl.dataset.assetUpgraded = 'skipped-no-size';
                 continue;
             }
@@ -404,19 +435,34 @@
             img.src = url;
             img.alt = '';
             img.loading = 'lazy';
-            // HTML attrs: layout hint BEFORE image loads (prevents huge flash)
+            // HTML attrs: layout hint BEFORE image loads (browser uses for reserving
+            // space; CSS rules on the class still override final size if present).
             img.setAttribute('width', size.w);
             img.setAttribute('height', size.h);
-            // Inline style: explicit size + object-fit + display
-            var svgStyle = (svgEl.getAttribute && svgEl.getAttribute('style')) || '';
-            img.style.cssText = svgStyle
-                + ';width:' + size.w + 'px'
-                + ';height:' + size.h + 'px'
+
+            // Inline style strategy depends on size source:
+            // - 'attr'/'style': SVG had explicit inline sizing → preserve via inline style
+            // - 'rect': CSS-driven sizing → DON'T set inline width/height (let CSS rules
+            //   on the preserved class match the IMG so it sizes correctly)
+            // - 'viewbox-default': best-effort default → DON'T set inline (let CSS try)
+            var origSvgStyle = (svgEl.getAttribute && svgEl.getAttribute('style')) || '';
+            // Strip ;color:X from origSvgStyle (IMG doesn't use it, was for SVG fill)
+            var cleanStyle = origSvgStyle.replace(/(^|;)\s*color\s*:[^;]+/gi, '$1');
+            var baseStyle = cleanStyle
                 + ';object-fit:contain'
                 + ';display:inline-block'
                 + ';vertical-align:middle'
                 + ';max-width:100%'
                 + ';max-height:100%';
+            if (size.source === 'attr' || size.source === 'style') {
+                // Explicit size → preserve via inline (overrides any CSS)
+                img.style.cssText = baseStyle
+                    + ';width:' + size.w + 'px'
+                    + ';height:' + size.h + 'px';
+            } else {
+                // CSS-driven → leave width/height to CSS class rules (preserved)
+                img.style.cssText = baseStyle;
+            }
             if (img.dataset) img.dataset.assetUpgraded = '1';
 
             // Fallback to original SVG on load error
