@@ -111,6 +111,38 @@
     };
 
     /* ========================================================
+     * NPC TYPE ICONS (2026-05-17) — keyed by slug (no prefix).
+     * Source: scripts/generate_ui_icons.py NPC_ICONS.
+     * Stored in /shared/img/npcs/{slug}.png
+     * ======================================================== */
+    var NPC_PNGS = {
+        'banqueiro': 1, 'aldeao': 1, 'escriba': 1, 'taverneiro': 1,
+        'estalajadeira': 1, 'ferreiro': 1, 'alquimista': 1, 'joalheiro': 1
+    };
+
+    /* ========================================================
+     * UI ICON PNGs (2026-05-17) — keyed by slug.
+     * Includes UI sprites + stat icons + small race indicators.
+     * Stored in /shared/img/ui/{slug}.png
+     * ======================================================== */
+    var UI_PNGS = {
+        'mochila': 1, 'tochas': 1, 'grupo': 1, 'cartografia': 1, 'acampamento': 1,
+        'stat-attack': 1, 'stat-hp': 1, 'stat-mp': 1,
+        'elfo': 1, 'anao': 1
+    };
+
+    /* ========================================================
+     * ACHIEVEMENT ICON PNGs (2026-05-17) — keyed by slug WITHOUT 'ach-' prefix.
+     * Stored in /shared/img/achievements/{slug}.png
+     * ======================================================== */
+    var ACHIEVEMENT_PNGS = {
+        'ach-algoz': 1, 'ach-indomavel': 1, 'ach-aventureiro': 1, 'ach-cacador': 1,
+        'ach-cartografo': 1, 'ach-cofreiro': 1, 'ach-colecionador': 1, 'ach-devoto': 1,
+        'ach-diplomata': 1, 'ach-erudito': 1, 'ach-forjador': 1, 'ach-mestre': 1,
+        'ach-sobrevivente': 1, 'ach-andarilho': 1, 'trofeu': 1
+    };
+
+    /* ========================================================
      * RACE OFFICIAL OPT (canonical opt per race, 2026-05-16 user choice)
      * ======================================================== */
     var RACE_OFFICIAL_OPT = {
@@ -164,6 +196,83 @@
         if (!COMBAT_PNGS[slug]) return null;
         return _basePath() + 'shared/img/combat/' + slug + '.png';
     }
+    function npcIconUrl(iconIdOrSlug) {
+        if (!iconIdOrSlug) return null;
+        var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
+        if (!NPC_PNGS[slug]) return null;
+        return _basePath() + 'shared/img/npcs/' + slug + '.png';
+    }
+    function uiIconUrl(iconIdOrSlug) {
+        if (!iconIdOrSlug) return null;
+        var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
+        if (!UI_PNGS[slug]) return null;
+        return _basePath() + 'shared/img/ui/' + slug + '.png';
+    }
+    function achievementIconUrl(iconIdOrSlug) {
+        if (!iconIdOrSlug) return null;
+        var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
+        if (!ACHIEVEMENT_PNGS[slug]) return null;
+        // trofeu lives at root (not ach-*); everything else under achievements/
+        return _basePath() + 'shared/img/achievements/' + slug + '.png';
+    }
+    function itemIconUrl(iconIdOrSlug, itemName) {
+        // Items use ic-it-* prefix. Try vItems manifest lookup with multiple
+        // slug candidates (name with connectives + sprite stripped).
+        if (!window.vItems || typeof window.vItems.has !== 'function') return null;
+        var candidates = [];
+        if (itemName) {
+            var nameSlug = _slugify(itemName);
+            if (nameSlug) candidates.push(nameSlug);
+        }
+        if (iconIdOrSlug) {
+            var spriteSlug = String(iconIdOrSlug).replace(/^ic-it-(base-)?/, '');
+            if (spriteSlug && candidates.indexOf(spriteSlug) < 0) {
+                candidates.push(spriteSlug);
+            }
+        }
+        for (var i = 0; i < candidates.length; i++) {
+            if (window.vItems.has(candidates[i])) {
+                return _basePath() + 'shared/img/items/' + candidates[i] + '.png';
+            }
+        }
+        return null;
+    }
+    /* Smart resolver — tries each category map until one matches.
+       Returns null if no PNG available for the iconId. */
+    function resolveIconUrl(iconId, altName) {
+        if (!iconId) return null;
+        var rest = String(iconId).replace(/^ic-/, '');
+        // Items: ic-it-* prefix
+        if (rest.indexOf('it-') === 0) {
+            return itemIconUrl(iconId, altName);
+        }
+        // Achievements: ic-ach-* prefix (try both — slug is stored WITH 'ach-' prefix)
+        if (rest.indexOf('ach-') === 0 || rest === 'trofeu') {
+            return achievementIconUrl(iconId);
+        }
+        // Skills: SKILL_PNGS uses raw slug (no prefix difference)
+        var skillSlug = rest.replace(/_/g, '-');
+        if (SKILL_PNGS[skillSlug]) {
+            return _basePath() + 'shared/img/combat/skills/' + skillSlug + '.png';
+        }
+        // City: CITY_LOC_PNGS uses callback name (matches slug)
+        if (CITY_LOC_PNGS[skillSlug]) {
+            return _basePath() + 'shared/img/city/' + skillSlug + '.png';
+        }
+        // Combat (classes, boss, inimigo, invocations)
+        if (COMBAT_PNGS[skillSlug]) {
+            return _basePath() + 'shared/img/combat/' + skillSlug + '.png';
+        }
+        // NPCs
+        if (NPC_PNGS[skillSlug]) {
+            return _basePath() + 'shared/img/npcs/' + skillSlug + '.png';
+        }
+        // UI (mochila, tochas, stats, race indicators)
+        if (UI_PNGS[skillSlug]) {
+            return _basePath() + 'shared/img/ui/' + skillSlug + '.png';
+        }
+        return null;
+    }
     function enemyIconUrl(enemyName) {
         if (!enemyName) return null;
         var slug = _slugify(enemyName);
@@ -209,50 +318,76 @@
      * when PNG is available. Idempotent — safe to call multiple times.
      * ======================================================== */
     function upgradeClassIcons(rootEl) {
+        // Backward-compat alias — delegates to full upgrader
+        return upgradeAllIcons(rootEl);
+    }
+
+    /* 2026-05-17: SMART UPGRADER — handles ALL slug types via resolveIconUrl.
+       Walks DOM for any <svg><use href="#ic-X"></svg>, tries each PNG category
+       map (combat/skills/cities/npcs/ui/items/achievements). Swaps for <img>
+       when a PNG matches; leaves SVG untouched otherwise.
+
+       Inherits: alt text from data-name attr or null; size from SVG style/attrs.
+       Idempotent: marks data-asset-upgraded to prevent re-processing. */
+    function upgradeAllIcons(rootEl) {
         rootEl = rootEl || document;
-        var uses = rootEl.querySelectorAll('svg use[href^="#ic-"], svg use[*|href^="#ic-"]');
+        if (!rootEl.querySelectorAll) return 0;
+        var uses;
+        try {
+            uses = rootEl.querySelectorAll('svg use[href^="#ic-"], svg use[*|href^="#ic-"]');
+        } catch (_) { return 0; }
         var upgraded = 0;
         for (var i = 0; i < uses.length; i++) {
             var useEl = uses[i];
-            var href = useEl.getAttribute('href') || useEl.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+            var href = useEl.getAttribute('href')
+                || useEl.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
             if (!href) continue;
             var iconId = href.replace(/^#/, '');
-            var slug = iconId.replace(/^ic-/, '').replace(/_/g, '-');
-            // Only upgrade icons that have a PNG (classes/combat/invocações)
-            if (!COMBAT_PNGS[slug]) continue;
-            var svgEl = useEl.closest('svg');
-            if (!svgEl || svgEl.dataset.assetUpgraded) continue;
+            // Try to resolve via smart resolver (covers all 7 PNG categories)
+            var url = resolveIconUrl(iconId);
+            if (!url) continue;
+            var svgEl = useEl.closest ? useEl.closest('svg') : null;
+            if (!svgEl) {
+                // Fallback for environments without closest()
+                svgEl = useEl.parentNode;
+                while (svgEl && svgEl.tagName && svgEl.tagName.toLowerCase() !== 'svg') {
+                    svgEl = svgEl.parentNode;
+                }
+            }
+            if (!svgEl || (svgEl.dataset && svgEl.dataset.assetUpgraded)) continue;
             // Build replacement <img>
             var img = document.createElement('img');
-            img.className = 'v-asset-png v-asset-class' + (svgEl.className.baseVal ? ' ' + svgEl.className.baseVal : '');
-            img.src = combatIconUrl(iconId);
+            var svgClassName = (svgEl.className && svgEl.className.baseVal !== undefined)
+                ? svgEl.className.baseVal : (svgEl.getAttribute && svgEl.getAttribute('class')) || '';
+            img.className = 'v-asset-png ' + svgClassName;
+            img.src = url;
             img.alt = '';
             img.loading = 'lazy';
-            img.dataset.assetUpgraded = '1';
-            // Preserve inline size from SVG
-            var svgStyle = svgEl.getAttribute('style') || '';
-            var w = svgEl.style.width || svgEl.getAttribute('width') || '';
-            var h = svgEl.style.height || svgEl.getAttribute('height') || '';
-            // If no inline size, infer from class context (use 100% / em scaling)
-            if (!w && !h) {
-                img.style.cssText = svgStyle + ';object-fit:contain;display:inline-block;vertical-align:middle';
-            } else {
-                img.style.cssText = svgStyle + ';object-fit:contain;display:inline-block;vertical-align:middle';
-            }
+            if (img.dataset) img.dataset.assetUpgraded = '1';
+            // Preserve inline style (svg width/height) — IMG with object-fit:contain
+            // emulates SVG scaling behaviour.
+            var svgStyle = (svgEl.getAttribute && svgEl.getAttribute('style')) || '';
+            img.style.cssText = svgStyle
+                + ';object-fit:contain;display:inline-block;vertical-align:middle';
             // Fallback to original SVG on load error
-            img.onerror = function (origSvg) {
-                return function () { this.onerror = null; this.parentNode.replaceChild(origSvg, this); };
-            }(svgEl.cloneNode(true));
+            (function (origSvg) {
+                img.onerror = function () {
+                    this.onerror = null;
+                    if (this.parentNode) this.parentNode.replaceChild(origSvg, this);
+                };
+            })(svgEl.cloneNode(true));
             // Mark + swap
-            svgEl.dataset.assetUpgraded = '1';
-            svgEl.parentNode.replaceChild(img, svgEl);
-            upgraded++;
+            if (svgEl.dataset) svgEl.dataset.assetUpgraded = '1';
+            if (svgEl.parentNode) {
+                svgEl.parentNode.replaceChild(img, svgEl);
+                upgraded++;
+            }
         }
         return upgraded;
     }
 
     function upgradeAll(rootEl) {
-        return upgradeClassIcons(rootEl);
+        return upgradeAllIcons(rootEl);
     }
 
     /* ========================================================
@@ -287,20 +422,28 @@
      * PUBLIC API
      * ======================================================== */
     global.vAssets = {
-        // URL builders
+        // URL builders (smart routing)
+        resolveIconUrl: resolveIconUrl,
         combatIconUrl: combatIconUrl,
         enemyIconUrl: enemyIconUrl,
         skillIconUrl: skillIconUrl,
         cityIconUrl: cityIconUrl,
         raceIconUrl: raceIconUrl,
+        npcIconUrl: npcIconUrl,
+        uiIconUrl: uiIconUrl,
+        achievementIconUrl: achievementIconUrl,
+        itemIconUrl: itemIconUrl,
         // HTML builders
         classIconHTML: classIconHTML,
         // DOM upgraders
-        upgradeClassIcons: upgradeClassIcons,
+        upgradeClassIcons: upgradeClassIcons,  // legacy alias → upgradeAllIcons
+        upgradeAllIcons: upgradeAllIcons,
         upgradeAll: upgradeAll,
         // Internals (debug)
         _maps: { COMBAT_PNGS: COMBAT_PNGS, ENEMY_PNGS: ENEMY_PNGS,
                  SKILL_PNGS: SKILL_PNGS, CITY_LOC_PNGS: CITY_LOC_PNGS,
+                 NPC_PNGS: NPC_PNGS, UI_PNGS: UI_PNGS,
+                 ACHIEVEMENT_PNGS: ACHIEVEMENT_PNGS,
                  RACE_OFFICIAL_OPT: RACE_OFFICIAL_OPT },
         _slugify: _slugify,
         _basePath: _basePath
@@ -318,4 +461,16 @@
     } else {
         _init();
     }
+
+    // Items use async-loaded manifest. Re-scan AFTER items-resolver finishes
+    // loading its manifest (typically ~100-500ms after page load) to catch
+    // any ic-it-* sprites that were rendered before vItems.has became truthy.
+    function _retryItemUpgrade() {
+        if (window.vItems && window.vItems._state && window.vItems._state.loaded) {
+            try { upgradeAll(); } catch (_) {}
+        } else {
+            setTimeout(_retryItemUpgrade, 200);
+        }
+    }
+    setTimeout(_retryItemUpgrade, 200);
 })(typeof window !== 'undefined' ? window : this);
