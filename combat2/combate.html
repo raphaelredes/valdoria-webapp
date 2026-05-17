@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T22:59:07Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T23:08:06Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12924,12 +12924,22 @@ function randomEnemies() {
            enfrentar este inimigo em combate solo. Heuristica simples
            baseada em HP + CA + bonus de ataque. */
         var sugLvl = Math.max(1, Math.round((b.hp + (b.ac - 10) * 2 + b.atk) / 10));
-        // 2026-04-27 USER RULE: nome fantasia em vez de "Orc 1, Orc 2".
-        // Pool de 8 nomes em ENEMY_NAME_POOLS (combate-data-shared.js).
-        // Fallback: se species não tem pool, usa "Species" puro (sem número).
+        // 2026-04-27: tentativa de nomes fantasia (Snik, Grarok, Drugaz...) via
+        // ENEMY_NAME_POOLS. Mantido como opt-in.
+        // 2026-05-17 USER FEEDBACK: nomes fantasia confundiam (CAIXUS pra
+        // mímico, etc). DISABLED por padrão — usa species + Roman numeral.
+        // Pra reativar fantasy names: window._ENEMY_FANTASY_NAMES_ENABLED = true.
+        var _ROMAN = ['', ' I', ' II', ' III', ' IV', ' V', ' VI', ' VII', ' VIII'];
         var _fName = (typeof _pickEnemyFantasyName === 'function')
             ? _pickEnemyFantasyName(b.n, i) : null;
-        var _displayName = (n > 1 && _fName) ? _fName : b.n;
+        var _displayName;
+        if (n > 1 && _fName) {
+            _displayName = _fName;  // opt-in fantasy name
+        } else if (n > 1) {
+            _displayName = b.n + (_ROMAN[i] || ' ' + (i + 1));  // "Orc I", "Orc II"
+        } else {
+            _displayName = b.n;  // single enemy: just "Orc"
+        }
         var enemy = { t: 'e', n: _displayName,
                   hp: b.hp, mhp: b.hp, ac: b.ac, atk: b.atk, die: b.die,
                   dmgMod: b.dmgMod || 0,
