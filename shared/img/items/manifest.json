@@ -3473,10 +3473,40 @@
       "cost": 0.07,
       "quality": "medium",
       "category": "auto-added 2026-05-16"
+    },
+    "anel-de-sorte": {
+      "timestamp": "2026-05-17T21:50:06.200497+00:00",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "mock-inventory"
+    },
+    "espada-elfica": {
+      "timestamp": "2026-05-17T21:50:32.289816+00:00",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "mock-inventory"
+    },
+    "pergaminho-antigo": {
+      "timestamp": "2026-05-17T21:50:57.184745+00:00",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "mock-inventory"
+    },
+    "racoes-de-7-dias": {
+      "timestamp": "2026-05-17T21:51:23.475793+00:00",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "mock-inventory"
+    },
+    "tochas-5": {
+      "timestamp": "2026-05-17T21:51:47.438681+00:00",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "mock-inventory"
     }
   },
   "last_run": "2026-05-16T21:44:15.864943",
   "total_cost": 3.4187799999999995,
   "last_updated": "2026-05-17T21:30:13.724922",
-  "count": 579
+  "count": 584
 }
