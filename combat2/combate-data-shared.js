@@ -40,8 +40,20 @@ var ENEMY_NAME_POOLS = {
 
 /* Helper: pick fantasy name from pool by species + index. Determinístico
    pra que same enemy index sempre tenha same name (consistência durante
-   reload). Fallback: usa species name puro se não tem pool. */
+   reload). Fallback: usa species name puro se não tem pool.
+
+   2026-05-17 USER REPORTOU: "porque os inimigos estão com nomes como
+   CAIXUS para um mímico, GRIZZLE para um GOBLIN, DRUGAZ para um orc"
+   — nomes fantasia ficavam confusos pro player que esperava ver
+   "Goblin" / "Orc" diretamente. Solução: DESABILITADO por padrão via
+   flag global. Caller usa species name + " I, II, III" (numeral roman)
+   quando há múltiplos enemies da mesma species.
+
+   Pra REATIVAR fantasy names: setar window._ENEMY_FANTASY_NAMES_ENABLED = true */
 function _pickEnemyFantasyName(species, idx) {
+    if (typeof window !== 'undefined' && !window._ENEMY_FANTASY_NAMES_ENABLED) {
+        return null;  // disabled by default — use species + Roman numeral
+    }
     var pool = ENEMY_NAME_POOLS[species];
     if (!pool || !pool.length) return null;
     return pool[idx % pool.length];
