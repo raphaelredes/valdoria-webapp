@@ -60,7 +60,7 @@ function renderTempleHub(container, data) {
 
   /* Services grid */
   if (data.services && data.services.length) {
-    root.appendChild(vCity.sectionLabel('Servicos disponíveis'));
+    root.appendChild(vCity.sectionLabel('Serviços disponíveis'));
     root.appendChild(vCity.serviceGrid(data.services));
   }
 

@@ -12,7 +12,7 @@ function renderBankHub(container, data) {
   /* Loan overdue alert */
   if (data.loan_overdue && data.loan_debt > 0) {
     root.appendChild(vCity.statusAlert(
-      'Emprestimo vencido: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> — servicos bloqueados',
+      'Empréstimo vencido: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> — serviços bloqueados',
       'danger'
     ));
   }
@@ -65,7 +65,7 @@ function renderBankHub(container, data) {
 
   /* Services grid */
   if (data.services && data.services.length) {
-    root.appendChild(vCity.sectionLabel('Servicos'));
+    root.appendChild(vCity.sectionLabel('Serviços'));
     root.appendChild(vCity.serviceGrid(data.services));
   }
 
