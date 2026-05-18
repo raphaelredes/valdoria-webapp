@@ -49831,13 +49831,20 @@ function serviceCard(svc) {
 
   /* Badge — 2026-05-11 (user request): auto-detect " V" trailing como
      valdoritas e substitui pelo icone .vi-coin (era textContent literal
-     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V". */
+     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V".
+     2026-05-18 BUG FIX: badges com SVG inline (reputation tiers Aliado/
+     Amigável/etc via _heralIco) eram renderizadas como texto literal
+     "<svg viewBox..." porque textContent escape HTML. Detecta < no início
+     ou ' <svg' interno e usa innerHTML (badges são canonical do código,
+     não user input — XSS safe). */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
     var bs = String(svc.badge);
     if (/\sV$/.test(bs)) {
       bdg.textContent = bs.slice(0, -2) + ' ';
       bdg.appendChild(coin('sm'));
+    } else if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+      bdg.innerHTML = bs;
     } else {
       bdg.textContent = bs;
     }
@@ -49969,7 +49976,14 @@ function actionList(items) {
       }
       if (item.badge) {
         var bdg = el('span', 'vc-badge');
-        bdg.textContent = item.badge;
+        /* 2026-05-18 BUG FIX: same as vc-service-card — badges com SVG
+           inline precisam de innerHTML, não textContent. */
+        var bs = String(item.badge);
+        if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+          bdg.innerHTML = bs;
+        } else {
+          bdg.textContent = bs;
+        }
         btn.appendChild(bdg);
       }
       btn.addEventListener('click', function () { act(item.cb); });
@@ -49992,7 +50006,13 @@ function sectionLabel(text) {
 function badgeEl(text, type) {
   var b = el('span', 'vc-badge');
   if (type) b.classList.add('vc-badge--' + type);
-  b.textContent = text;
+  /* 2026-05-18 BUG FIX: badges with SVG markup need innerHTML to render. */
+  var bs = String(text);
+  if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+    b.innerHTML = bs;
+  } else {
+    b.textContent = bs;
+  }
   return b;
 }
 
