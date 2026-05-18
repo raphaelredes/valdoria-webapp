@@ -17405,7 +17405,19 @@ function _showSharedNpcListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = (opts.icon || '🔍') + ' ' + opts.title;
+  /* USER REPORT 2026-05-17: header de Pessoas na Praça mostrava SVG escapado
+     como texto. Root cause: textContent escapa HTML. opts.icon contém SVG
+     HTML string. Fix: usar innerHTML pra renderizar o SVG corretamente.
+     Defensivo: detecta se opts.icon começa com '<' (HTML) vs emoji puro. */
+  if (titleEl) {
+    var iconStr = (opts.icon || '🔍');
+    var titleStr = opts.title || '';
+    if (iconStr && iconStr.indexOf('<') === 0) {
+      titleEl.innerHTML = iconStr + ' ' + titleStr;
+    } else {
+      titleEl.textContent = iconStr + ' ' + titleStr;
+    }
+  }
   var html = '<div class="city-subscreen">';
   if (opts.flavor) html += '<p class="subscreen-flavor">' + opts.flavor + '</p>';
   html += '<div class="bnk-item-list">';
