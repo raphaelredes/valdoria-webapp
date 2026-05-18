@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:00:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:47:47Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14742,7 +14742,12 @@ window.__applyExploreSnap = function(S, snap) {
   // X-6.5.51AT (2026-05-11): level + XP do player real (sem isso, HUD mostra
   // "{xp}/300" porque p.level fica em 1 fallback e xpForNextLevel(1)=300).
   // p.level também é referenciado em xpForNextLevel + display "N{p.level}".
-  if (typeof snap.lvl === 'number') p.level = snap.lvl;
+  // 2026-05-18 BUG FIX (Chrome MCP review): tambem hydratar p.lvl. 6 lugares
+  // do codigo leem S.player.lvl (encounter spawn, dificuldade, calc dano, etc)
+  // mas snap apenas setava p.level. Resultado: encounters geravam com lvl 3
+  // (default init) em vez do lvl real do player (5). Bug silent: tudo
+  // funciona mas dificuldade calculada errada.
+  if (typeof snap.lvl === 'number') { p.level = snap.lvl; p.lvl = snap.lvl; }
   if (typeof snap.xp === 'number') p.xp = snap.xp;
   // [R2 2026-04-23] Histórico de eventos persistente (cooldown cross-session)
   if (Array.isArray(snap.event_history)) {
