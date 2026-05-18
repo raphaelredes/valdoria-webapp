@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T18:11:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T19:40:13Z - do not edit directly, edit source -->
 
 
 <!--
@@ -5925,41 +5925,51 @@ body.remote-mode #debug-hud { display: none !important; }
 
 /* Silhueta da paisagem (camada atras da fogueira). Usa ::before do .camp-scene
    pra nao sujar o HTML existente. */
+/* 2026-05-18 USER REQUEST: removidas "meia elipses" toscas dos biomas.
+   Substituidas por silhueta horizontal unificada via linear-gradient
+   (sombra de horizonte) + acentos sutis. Linha de horizonte continua
+   visivel mas sem os blobs amadores. */
 .camp-screen .camp-scene::before {
   content: '';
   position: absolute;
-  left: 0; right: 0; bottom: 38%;
-  height: 32%;
+  left: 0; right: 0; bottom: 35%;
+  height: 28%;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 .camp-screen.biome-forest .camp-scene::before {
+  /* Linha de horizonte de floresta — gradient suave + tree top texture */
   background:
-    radial-gradient(ellipse 50px 70px at 18% 100%, #0a1810 50%, transparent 51%),
-    radial-gradient(ellipse 38px 55px at 30% 100%, #0e1c12 50%, transparent 51%),
-    radial-gradient(ellipse 60px 80px at 50% 100%, #0a1810 55%, transparent 56%),
-    radial-gradient(ellipse 42px 60px at 72% 100%, #0e1c12 50%, transparent 51%),
-    radial-gradient(ellipse 50px 70px at 88% 100%, #0a1810 50%, transparent 51%);
+    /* Tree tops jagged (silhouette of conifers/canopy) */
+    linear-gradient(180deg, transparent 0%, transparent 55%, #0a1408 65%, #050a04 100%),
+    /* Subtle horizontal variation for natural forest line */
+    repeating-linear-gradient(90deg,
+      transparent 0px, transparent 18px,
+      rgba(8,14,8,0.4) 18px, rgba(8,14,8,0.4) 22px,
+      transparent 22px, transparent 38px,
+      rgba(10,18,10,0.5) 38px, rgba(10,18,10,0.5) 44px);
+  mask-image: linear-gradient(180deg, transparent 0%, black 50%, black 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 50%, black 100%);
 }
 .camp-screen.biome-mountain .camp-scene::before {
-  background:
-    linear-gradient(45deg, transparent 30%, #1a1c24 30%, #1a1c24 60%, transparent 60%) 0% 100%/35% 80% no-repeat,
-    linear-gradient(-45deg, transparent 30%, #14161e 30%, #14161e 60%, transparent 60%) 35% 100%/40% 100% no-repeat,
-    linear-gradient(45deg, transparent 30%, #1a1c24 30%, #1a1c24 60%, transparent 60%) 70% 100%/35% 70% no-repeat;
+  /* Picos triangulares — substituido por silhueta limpa via clip-path */
+  background: linear-gradient(180deg, transparent 0%, #14161e 60%, #0a0c12 100%);
+  clip-path: polygon(0% 100%, 0% 75%, 10% 60%, 20% 70%, 30% 45%, 42% 65%, 50% 30%, 60% 55%, 72% 38%, 82% 62%, 92% 50%, 100% 70%, 100% 100%);
+  -webkit-clip-path: polygon(0% 100%, 0% 75%, 10% 60%, 20% 70%, 30% 45%, 42% 65%, 50% 30%, 60% 55%, 72% 38%, 82% 62%, 92% 50%, 100% 70%, 100% 100%);
 }
 .camp-screen.biome-desert .camp-scene::before {
-  background:
-    radial-gradient(ellipse 200px 30px at 50% 100%, #4a2818 50%, transparent 51%),
-    radial-gradient(ellipse 120px 25px at 20% 95%, #3a2018 50%, transparent 51%),
-    radial-gradient(ellipse 140px 22px at 80% 95%, #3a2018 50%, transparent 51%);
+  /* Dunas suaves — gradient sem ellipse blobs */
+  background: linear-gradient(180deg, transparent 0%, transparent 50%, #3a2018 70%, #2a1810 100%);
+  clip-path: polygon(0% 100%, 0% 85%, 12% 78%, 25% 84%, 40% 75%, 55% 82%, 70% 76%, 85% 83%, 100% 80%, 100% 100%);
+  -webkit-clip-path: polygon(0% 100%, 0% 85%, 12% 78%, 25% 84%, 40% 75%, 55% 82%, 70% 76%, 85% 83%, 100% 80%, 100% 100%);
 }
 .camp-screen.biome-snow .camp-scene::before {
-  background:
-    radial-gradient(ellipse 180px 35px at 50% 100%, #c8d8e8 60%, transparent 61%),
-    radial-gradient(ellipse 100px 25px at 20% 95%, #98a8c0 60%, transparent 61%),
-    radial-gradient(ellipse 120px 28px at 80% 95%, #98a8c0 60%, transparent 61%);
-  opacity: 0.7;
+  /* Neve compactada — gradient + suave wave */
+  background: linear-gradient(180deg, transparent 0%, transparent 55%, #c8d8e8 70%, #98a8c0 100%);
+  clip-path: polygon(0% 100%, 0% 78%, 14% 72%, 28% 76%, 42% 70%, 58% 76%, 72% 71%, 86% 75%, 100% 72%, 100% 100%);
+  -webkit-clip-path: polygon(0% 100%, 0% 78%, 14% 72%, 28% 76%, 42% 70%, 58% 76%, 72% 71%, 86% 75%, 100% 72%, 100% 100%);
+  opacity: 0.6;
 }
 .camp-screen.biome-graveyard .camp-scene::before {
   background:
@@ -5987,13 +5997,16 @@ body.remote-mode #debug-hud { display: none !important; }
   opacity: 0.6;
 }
 .camp-screen.biome-swamp .camp-scene::before {
+  /* 2026-05-18: removidas elipses tosas; substituido por silhueta unificada
+     + will-o-wisps verdes preservados como detalhes flutuantes. */
   background:
-    radial-gradient(ellipse 70px 60px at 20% 100%, #0e1c14 60%, transparent 61%),
-    radial-gradient(ellipse 55px 45px at 50% 100%, #0a1410 60%, transparent 61%),
-    radial-gradient(ellipse 80px 55px at 80% 100%, #0e1c14 60%, transparent 61%),
-    /* will-o-wisps verdes pequenos */
+    /* Will-o-wisps verdes pequenos (preservados) */
     radial-gradient(circle 4px at 35% 60%, rgba(120, 220, 100, 0.55), transparent 60%),
-    radial-gradient(circle 3px at 65% 70%, rgba(120, 220, 100, 0.45), transparent 60%);
+    radial-gradient(circle 3px at 65% 70%, rgba(120, 220, 100, 0.45), transparent 60%),
+    /* Silhueta de pantano */
+    linear-gradient(180deg, transparent 0%, transparent 55%, #0a1410 70%, #050a08 100%);
+  clip-path: polygon(0% 100%, 0% 78%, 15% 82%, 30% 76%, 45% 80%, 60% 74%, 75% 80%, 90% 76%, 100% 80%, 100% 100%);
+  -webkit-clip-path: polygon(0% 100%, 0% 78%, 15% 82%, 30% 76%, 45% 80%, 60% 74%, 75% 80%, 90% 76%, 100% 80%, 100% 100%);
 }
 .camp-screen.biome-plains .camp-scene::before {
   background:

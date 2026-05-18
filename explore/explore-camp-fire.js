@@ -104,70 +104,84 @@
     };
 
     /**
-     * X-6.5.51BQ (2026-05-15): paleta refinada — núcleo mais brilhante
-     * (quase branco puro), transição mais suave entre estágios, brasas
-     * mais escuras no fim pra contraste. Curva de alpha não-linear pra
-     * pico de brilho próximo do nascimento e fade gradual.
+     * 2026-05-18 (user request "melhore o efeito da chama"):
      *
-     *   0–10 %  branco puro     (núcleo hot — incandescente)
-     *  10–30 %  branco → ouro   (transição rápida)
-     *  30–55 %  ouro → laranja vivo
-     *  55–80 %  laranja → vermelho rubro
-     *  80–100% vermelho escuro → preto-cinza (cinza/smoke)
+     * Render improvements vs prior version:
+     * - Particles renderizadas como ELIPSE vertical-alongada (scaleY 1.6-2.2)
+     *   em vez de círculos perfeitos → silhueta de chama natural
+     * - Núcleo branco-quente com brilho boostado (alpha pico próximo de 1)
+     * - Halo radial gradient ao redor de cada partícula → glow + soft edges
+     * - Heat distortion sutil (offset horizontal por sin(y)) → fogo "subindo"
+     * - Curva de paleta refinada com transição mais rápida ouro→laranja
+     *   (pico de brilho mais visível) + ash/smoke residual no fim
      */
     Particle.prototype.draw = function (ctx) {
         var t = this.life / this.maxLife;
-        // Tamanho com curva mais natural — pico no meio, encolhe no fim.
-        var sizeCurve = 1 - Math.pow(t, 2.2) * 0.78;
+        // Tamanho com curva mais natural — pico no início, encolhe no fim.
+        // Boost size no início (0.05) pra pico de chama mais visível.
+        var sizeCurve;
+        if (t < 0.08) sizeCurve = 1.0 + (0.08 - t) * 1.5;  // pico até 1.12x
+        else sizeCurve = 1 - Math.pow((t - 0.08) / 0.92, 1.8) * 0.85;
         var r = this.size * sizeCurve;
-        if (r < 0.5) return;
+        if (r < 0.4) return;
 
-        // Alpha — não-linear: brilho cresce rápido até t=0.1, depois fade longo.
+        // Alpha — pico mais alto (0.92 em t=0.05) + fade longo
         var alpha;
-        if (t < 0.1) {
-            alpha = 0.6 + t * 1.5;  // 0.6 → 0.75 (forte e crescendo)
+        if (t < 0.05) {
+            alpha = 0.6 + t * 6.4;  // 0.6 → 0.92 (rápido e forte)
+        } else if (t < 0.15) {
+            alpha = 0.92 - (t - 0.05) * 0.3;  // 0.92 → 0.89 (sustain)
         } else {
-            // Fade quadrático a partir de t=0.1
-            var fadeT = (t - 0.1) / 0.9;
-            alpha = 0.75 * (1 - fadeT * fadeT);
+            // Fade quadrático a partir de t=0.15
+            var fadeT = (t - 0.15) / 0.85;
+            alpha = 0.89 * (1 - fadeT * fadeT);
         }
         var cr, cg, cb;
 
-        if (t < 0.10) {
-            // Núcleo branco puro incandescente
+        if (t < 0.08) {
+            // Núcleo branco puro incandescente (boost amarelo)
             cr = 255;
-            cg = 252 - t * 100;        // 252 → 242
-            cb = 230 - t * 600;        // 230 → 170
-        } else if (t < 0.30) {
-            // Branco → ouro brilhante
-            var p1 = (t - 0.10) / 0.20;
+            cg = 250 - t * 80;        // 250 → 244
+            cb = 235 - t * 700;        // 235 → 179
+        } else if (t < 0.25) {
+            // Branco → ouro brilhante (transição mais rápida)
+            var p1 = (t - 0.08) / 0.17;
             cr = 255;
-            cg = Math.max(190, 240 - p1 * 60);   // 240 → 190
-            cb = Math.max(70, 170 - p1 * 110);   // 170 → 70
-        } else if (t < 0.55) {
-            // Ouro → laranja vivo
-            var p2 = (t - 0.30) / 0.25;
+            cg = Math.max(195, 244 - p1 * 49);   // 244 → 195
+            cb = Math.max(80, 179 - p1 * 99);    // 179 → 80
+        } else if (t < 0.50) {
+            // Ouro → laranja vivo (mais saturado)
+            var p2 = (t - 0.25) / 0.25;
             cr = 255;
-            cg = Math.max(90, 190 - p2 * 110);   // 190 → 90
-            cb = Math.max(20, 70 - p2 * 60);     // 70 → 20
-        } else if (t < 0.80) {
+            cg = Math.max(95, 195 - p2 * 100);   // 195 → 95
+            cb = Math.max(15, 80 - p2 * 65);     // 80 → 15
+        } else if (t < 0.78) {
             // Laranja → vermelho rubro
-            var p3 = (t - 0.55) / 0.25;
-            cr = Math.max(160, 255 - p3 * 80);   // 255 → 160
-            cg = Math.max(30, 90 - p3 * 60);     // 90 → 30
-            cb = Math.max(10, 20 - p3 * 15);     // 20 → 10
+            var p3 = (t - 0.50) / 0.28;
+            cr = Math.max(155, 255 - p3 * 100);  // 255 → 155
+            cg = Math.max(28, 95 - p3 * 67);     // 95 → 28
+            cb = Math.max(8, 15 - p3 * 7);       // 15 → 8
         } else {
-            // Vermelho rubro → cinza-preto (smoke residual)
-            var p4 = (t - 0.80) / 0.20;
-            cr = Math.max(40, 160 - p4 * 110);   // 160 → 40
-            cg = Math.max(20, 30 - p4 * 12);     // 30 → 20
-            cb = Math.max(15, 10 + p4 * 8);      // 10 → 18 (toque azulado de smoke)
-            alpha *= (1 - p4 * 0.8);
+            // Vermelho → cinza/smoke residual
+            var p4 = (t - 0.78) / 0.22;
+            cr = Math.max(35, 155 - p4 * 120);   // 155 → 35
+            cg = Math.max(18, 28 - p4 * 10);     // 28 → 18
+            cb = Math.max(14, 8 + p4 * 10);      // 8 → 18 (azulado de smoke)
+            alpha *= (1 - p4 * 0.85);
         }
 
+        // Heat distortion sutil — offset horizontal baseado em altura
+        // (partículas mais altas têm sway maior, criando curl natural)
+        var heatPos = (this.y / _H);  // 1 base → 0 topo
+        var heatDx = Math.sin(this.life * 0.08 + this.swayPhase) * (1 - heatPos) * 0.8;
+        var drawX = this.x + heatDx;
+
+        // ELIPSE vertical-alongada (em vez de círculo) — formato de chama
+        // ScaleY 1.6-2.2 (mais alongado nas partículas mais altas/quentes)
+        var stretch = 1.6 + (1 - t) * 0.6;  // 2.2 no início → 1.6 no fim
         ctx.fillStyle = 'rgba(' + ~~cr + ',' + ~~cg + ',' + ~~cb + ',' + alpha.toFixed(3) + ')';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+        ctx.ellipse(drawX, this.y, r * 0.75, r * stretch * 0.75, 0, 0, Math.PI * 2);
         ctx.fill();
     };
 

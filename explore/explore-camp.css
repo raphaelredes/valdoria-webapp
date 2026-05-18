@@ -105,19 +105,38 @@
   height: 180px;
 }
 
+/* 2026-05-18 USER REQUEST "melhore o efeito da chama": ground glow mais
+   epico — brilho duplo (hot inner + warm outer) + pulse mais organico
+   + inner hot bed flicker via ::after */
 .camp-ground-glow {
   position: absolute;
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 240px; height: 50px;
+  width: 260px; height: 60px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255,120,20,0.12) 0%, transparent 70%);
-  animation: camp-glow-pulse 2s ease-in-out infinite alternate;
+  background:
+    radial-gradient(ellipse 50% 60% at 50% 55%, rgba(255,200,80,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse, rgba(255,120,20,0.16) 0%, rgba(255,80,10,0.08) 35%, transparent 75%);
+  animation: camp-glow-pulse 2.4s ease-in-out infinite alternate;
+  filter: blur(1px);
+}
+.camp-ground-glow::after {
+  content: '';
+  position: absolute;
+  top: 30%; left: 30%; right: 30%; bottom: 20%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,235,180,0.35) 0%, transparent 60%);
+  animation: camp-hot-flicker 0.8s ease-in-out infinite alternate;
 }
 @keyframes camp-glow-pulse {
-  0%   { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
-  100% { opacity: 1;   transform: translateX(-50%) scaleX(1.1); }
+  0%   { opacity: 0.65; transform: translateX(-50%) scaleX(0.95) scaleY(0.95); }
+  100% { opacity: 1;    transform: translateX(-50%) scaleX(1.12) scaleY(1.05); }
+}
+@keyframes camp-hot-flicker {
+  0%   { opacity: 0.65; transform: scale(0.9); }
+  50%  { opacity: 0.95; transform: scale(1.05); }
+  100% { opacity: 0.8;  transform: scale(1.1); }
 }
 
 /* Logs */
