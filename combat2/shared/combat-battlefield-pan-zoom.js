@@ -48,7 +48,23 @@
         }
 
         /* Auto-fit: calcula scale inicial pra que o stage (arena inteira) caiba no viewport.
-           Roda no attach + quando viewport muda de tamanho (rotação, resize). */
+           Roda no attach + quando viewport muda de tamanho (rotação, resize).
+
+           2026-05-18 USER REQUEST: combate com poucos combatentes (<=4 cards
+           ocupados visíveis na arena) deve dar zoom in pra focar — combate
+           1v1, 1v2, 2v2 ficavam minúsculos no viewport. Heurística:
+             - count occupied cells (.cell.occupied)
+             - <=4 cells: usar fit * 1.6 (mais focado, até MAX_FOCUS=1.6)
+             - >4 cells: comportamento atual (fit natural, fitX/fitY/1)
+           Jogador pode dar zoom out manualmente depois. */
+        var FOCUSED_ZOOM_BOOST = 1.6;
+        var FOCUSED_THRESHOLD = 4;
+        function _countOccupiedCells() {
+            try {
+                var occ = stage.querySelectorAll('.cell.occupied');
+                return occ ? occ.length : 0;
+            } catch (_) { return 0; }
+        }
         function fitToViewport() {
             var vw = viewport.clientWidth || 0;
             var vh = viewport.clientHeight || 0;
@@ -62,6 +78,11 @@
             var fitX = (vw - 16) / sw;
             var fitY = (vh - 16) / sh;
             var fit = Math.min(fitX, fitY, 1);
+            /* Combate com poucos inimigos → boost zoom pra focar. */
+            var occCount = _countOccupiedCells();
+            if (occCount > 0 && occCount <= FOCUSED_THRESHOLD) {
+                fit = Math.min(fit * FOCUSED_ZOOM_BOOST, MAX);
+            }
             if (fit < MIN) fit = MIN;
             scale = fit;
             /* centraliza horizontal e vertical */
@@ -278,6 +299,13 @@
             });
         }
         runFitIfNeeded();
+        /* 2026-05-18: expoe actions pra botoes UI (zoom in/out/fit). Cada attach()
+           sobrescreve — em re-mounts da arena, a viewport mais recente fica ativa. */
+        global.__bfPanActions = {
+            zoomIn: function () { zoomAtViewport(null, null, 1.25); },
+            zoomOut: function () { zoomAtViewport(null, null, 1 / 1.25); },
+            fit: function () { hasInitialFit = false; runFitIfNeeded(); }
+        };
         /* Resize da viewport (rotação, fullscreen) re-executa fit do zero — evento raro */
         var _ro = null;
         function onResize() {
@@ -312,5 +340,13 @@
 
     /* resetPanState: limpa o estado persistido (chamar no Restart pra voltar ao fit inicial) */
     function resetPanState() { global.__bfPanState = null; }
-    global.ValdoriaBattlefieldPanZoom = { attach: attach, resetPanState: resetPanState };
+    /* 2026-05-18 USER REQUEST: API publica pra integrar botoes UI (zoom in/out/fit).
+       Cada attach() expoe estes via __bfPanActions; ultima attach() vence. */
+    global.ValdoriaBattlefieldPanZoom = {
+        attach: attach,
+        resetPanState: resetPanState,
+        zoomIn: function () { try { global.__bfPanActions && global.__bfPanActions.zoomIn(); } catch (_) {} },
+        zoomOut: function () { try { global.__bfPanActions && global.__bfPanActions.zoomOut(); } catch (_) {} },
+        fit: function () { try { global.__bfPanActions && global.__bfPanActions.fit(); } catch (_) {} },
+    };
 })(typeof window !== 'undefined' ? window : this);

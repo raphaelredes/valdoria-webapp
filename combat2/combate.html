@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T11:54:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T12:34:04Z — do not edit directly, edit source -->
 
 
 <!--
@@ -2565,6 +2565,46 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
   height: 0 !important;
   display: none !important;
 }
+/* 2026-05-18 USER REQUEST: botoes UI zoom no canto superior direito da arena.
+   Mobile-first (36x36px touch target). Medieval style alinhado com xcart-ctrl-btn
+   da cartografia (mesma paleta gold). */
+.bf-zoom-controls {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: auto;
+}
+.bf-zoom-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(28,22,16,0.92);
+  border: 1.5px solid rgba(196,149,58,0.65);
+  color: #c4953a;
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  transition: all 0.15s;
+  touch-action: manipulation;
+  padding: 0;
+}
+.bf-zoom-btn:hover {
+  background: rgba(196,149,58,0.22);
+  border-color: #fbd770;
+  color: #fbd770;
+  transform: scale(1.05);
+}
+.bf-zoom-btn:active { transform: scale(0.92); }
 html.sim-combat-root .bf-pan-viewport:active { cursor: grabbing !important; }
 html.sim-combat-root .bf-pan-stage {
   width: 100% !important;
@@ -15705,6 +15745,11 @@ function appendDiceCombatArenaSide(parent, actor, metaLine) {
         icoBox.setAttribute('aria-hidden', 'true');
         icoBox.innerHTML = '<svg viewBox="0 0 120 120"><use href="#' + heraldId + '"/></svg>';
         wrap.appendChild(icoBox);
+        /* 2026-05-18 USER REPORT: dice screens "continuam usando icones antigos
+           (SVG)". asset-resolver tem MutationObserver mas pode perder timing de
+           re-renders. Force upgrade explicito apos append pra garantir PNG.
+           NO-OP se vAssets nao disponivel (file:// sem PNG, etc). */
+        try { if (window.vAssets && window.vAssets.upgradeAll) window.vAssets.upgradeAll(icoBox); } catch(_) {}
     }
     var title = document.createElement('div');
     title.className = 'dice-init-name';
@@ -15847,6 +15892,13 @@ function buildBattlefield(s) {
     if (active && active.alive) activeId = unitUidForOrderIndex(s, s.active_idx);
 
     var html = '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Área de combate — arraste para mover, pinça ou roda do mouse para zoom">';
+    /* 2026-05-18 USER REQUEST: 3 botões UI para zoom (mobile-friendly).
+       Touch já funciona via pinça, mas botões dão fallback explícito + acesso desktop. */
+    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da arena">';
+    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
+    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Ajustar tela" aria-label="Ajustar tela à arena">⌂</button>';
+    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
+    html += '</div>';
     html += '<div class="bf-pan-stage" data-bf-pan-stage>';
     var bfExtra = '';
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
@@ -17974,12 +18026,37 @@ function mountBattlefieldPanZoom() {
         stage.style.zoom = currentZoom;
         stage.style.transform = 'none';
     };
+    /* 2026-05-18 USER REQUEST: combate com poucos combatentes (<=4 cards
+       ocupados) ganha boost de zoom inicial pra focar. Threshold 4 cobre:
+       1v1 (2 cells), 1v2 (3 cells), 2v2 (4 cells). 5+ cells: zoom normal. */
+    var FOCUSED_THRESHOLD = 4;
+    var FOCUSED_BOOST = 1.6;
+    var countOccupied = function () {
+        try { return stage.querySelectorAll('.cell.occupied').length || 0; } catch (_) { return 0; }
+    };
     var fitAll = function () {
         var vpW = vp.clientWidth || 430;
         var z = Math.min(1, (vpW - 4) / STAGE_W);
-        applyZoom(Math.max(MIN_ZOOM, z));
+        z = Math.max(MIN_ZOOM, z);
+        var occ = countOccupied();
+        if (occ > 0 && occ <= FOCUSED_THRESHOLD) {
+            z = Math.min(MAX_ZOOM, z * FOCUSED_BOOST);
+        }
+        applyZoom(z);
     };
     fitAll();
+    /* 2026-05-18 USER REQUEST: botoes UI zoom in/out/fit. Bind aos botoes
+       renderizados em buildArenaHTML acima. */
+    var zoomBtns = vp.querySelectorAll('.bf-zoom-btn');
+    zoomBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var act = btn.getAttribute('data-bf-zoom-act');
+            if (act === 'zoomIn') applyZoom(currentZoom * 1.25);
+            else if (act === 'zoomOut') applyZoom(currentZoom / 1.25);
+            else if (act === 'fit') fitAll();
+        });
+    });
 
     /* === Desktop: Ctrl+wheel zoom === */
     var onWheel = function (e) {
