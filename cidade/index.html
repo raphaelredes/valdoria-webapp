@@ -45687,10 +45687,13 @@ function _merchantBuildTopicChoices(merchant){
     var icon = (opt.id === 'browse') ? '🛒'
              : (opt.cost) ? '🔧'
              : '◆';
+    // 2026-05-18: strip "(NN Valdoritas)" do opt.q quando cost é presente,
+    // pra evitar dup com o cost pill que adicionamos. Pattern: " (10 Valdoritas)".
+    var cleanQ = (opt.q || '').replace(/\s*\(\d+\s*Valdoritas?\)\s*$/i, '');
     var costSuffix = opt.cost ? ' <span class="enc-cost-pill">' + opt.cost + ' V</span>' : '';
     choices.push({
       id: opt.id,
-      label: icon + ' ' + opt.q + costSuffix,
+      label: icon + ' ' + cleanQ + costSuffix,
       result: 'goto_dialog',
       _encounterRef: 'mer_' + bjornFix + '_' + opt.id  // key em MARKET_MERCHANT_ENCOUNTERS após prefix
     });
