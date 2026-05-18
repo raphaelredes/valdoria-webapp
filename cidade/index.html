@@ -10721,13 +10721,29 @@ function _showStatusPopup(memberIdx){
   // paddings/margens MANTENDO fontes legiveis (val 20px, labels 11px+).
   // Regra "No NPC Emotes": NUNCA usar emoji de pessoa/face. Usar SVG heráldico ic-*.
   function _classToHeraldic(cls){
-    var k = (cls || '').toLowerCase().split(' ')[0];
+    /* USER REPORT 2026-05-17: Clovis (Clérigo mercenário) mostrava ic-guerreiro
+       na Ficha mas ic-clerigo no card. Causa: MAP duplicado aqui SEM accent
+       stripping ("Clérigo" virava "clérigo" lowercase → MAP lookup falhava →
+       fallback ic-guerreiro). O card usava _cgpHeraldicIcon() que tem
+       normalização via _cgpClsKey() (strip accents + aliases). Solução:
+       UNIFICAR — Ficha agora usa _cgpHeraldicIcon (single source of truth). */
+    if (typeof _cgpHeraldicIcon === 'function') {
+      return _cgpHeraldicIcon(cls);
+    }
+    /* Fallback se _cgpHeraldicIcon não estiver disponível (defensivo) — strip
+       accents igual a _cgpClsKey + MAP inline. */
+    var k = (cls || '').toLowerCase()
+      .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+      .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
+      .replace(/[\s].*/, '');
     var MAP = {
       mago:        'ic-mago',
       guerreiro:   'ic-guerreiro',
       sacerdotisa: 'ic-clerigo',
       sacerdote:   'ic-clerigo',
+      cleric:      'ic-clerigo',
       clerigo:     'ic-clerigo',
+      clerica:     'ic-clerigo',
       ladino:      'ic-ladino',
       patrulheiro: 'ic-patrulheiro',
       paladino:    'ic-paladino',
@@ -10735,7 +10751,6 @@ function _showStatusPopup(memberIdx){
       druida:      'ic-druida',
       monge:       'ic-monge',
       barbaro:     'ic-barbaro',
-      'bárbaro':   'ic-barbaro',
       feiticeiro:  'ic-feiticeiro',
       feiticeira:  'ic-feiticeiro',
       bruxo:       'ic-bruxo'
@@ -41480,10 +41495,21 @@ function _cgpClsKey(cls){
     .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
     .replace(/[\s].*/, '');  // primeiro token apenas
   // Aliases — match com seletores .cls-* do CSS V8
+  // USER REPORT 2026-05-17: adicionado 'cleriga' (feminino normalizado de
+  // 'Clériga' após strip de acento) → 'clerigo' pra reusar mesma key.
+  // Igual ja existe pra 'feiticeira' → 'feiticeiro'.
   var ALIASES = {
     sacerdote: 'sacerdotisa',  // sacerdote/sacerdotisa ambos viram clerigo no CSS
     cleric:    'clerigo',
+    clerica:   'clerigo',      // 'Clérica' (feminino arcaico) → 'clerigo'
+    cleriga:   'clerigo',      // 'Clériga' (feminino comum) → 'clerigo'
     feiticeira: 'feiticeiro',
+    paladina:  'paladino',     // 'Paladina' (feminino) → 'paladino'
+    druidesa:  'druida',       // 'Druidesa' (feminino arcaico) → 'druida'
+    monja:     'monge',        // 'Monja' (feminino) → 'monge'
+    bruxa:     'bruxo',        // 'Bruxa' (feminino) → 'bruxo'
+    barbara:   'barbaro',      // 'Bárbara' (feminino após strip) → 'barbaro'
+    ladra:     'ladino',       // 'Ladra' (feminino) → 'ladino'
     barbaro:   'barbaro',
     'meio-elfo': 'aliado'
   };
