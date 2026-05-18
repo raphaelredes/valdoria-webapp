@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:53:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T16:01:19Z - do not edit directly, edit source -->
 
 
 <!--
@@ -33848,7 +33848,10 @@ function _vinvExpBuildConfig() {
   var items = (inv || [])
     .filter(function (e) { return (e.quantity || 0) > 0; })
     .map(_vinvExpAdaptItem);
-  var gold = (typeof S !== 'undefined' && S.player && S.player.gold) || 0;
+  // 2026-05-18 BUG FIX (Chrome MCP review): wallet mostrava V0 quando player
+  // tinha 6574 valdoritas. Causa: S.player nao tem .gold (snap hidrata em
+  // S.gold direto). Fallback: tenta S.gold primeiro, S.player.gold depois.
+  var gold = (typeof S !== 'undefined' && (S.gold || (S.player && S.player.gold))) || 0;
   var loadout = _vinvExpReadLoadout(items);
   var hasLoadout = Object.keys(loadout).length > 0;
   return {
