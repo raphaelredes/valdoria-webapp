@@ -35337,8 +35337,12 @@ function _renderShopPopup(){
       var it = getItemData(name);
       var rarity = it.r || 'common';
       var basePrice = it.v || 0;
-      // canonical: aplica preço com haggle se flag setada
-      var displayPrice = _haggleAdjustPrice(basePrice, p);
+      // X-6.5.51CC (2026-05-18): preço D&D 5e canonical (CHA + reputação).
+      // Mostra modificador no card pra player saber se ta pagando melhor/pior.
+      var displayPrice = _marketCalculateBuyPrice(name, npcId, p);
+      if (p && p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
+        displayPrice = _haggleAdjustPrice(displayPrice, p);
+      }
       var canAfford = totalGold >= displayPrice;
       var stock = _shopGetStock(npcId, name);
       var meta = (it.dd ? it.dd : '') + (it.ac ? '+' + it.ac + ' CA' : '') + (it.b ? '+' + it.b + ' ATK' : '');
@@ -35458,17 +35462,27 @@ function _shopConfirmBuy(name, npcId){
   var p = window.CITY_MOCK_PLAYER;
   var shop = CANON_MARKET_SHOPS[npcId];
   if (!p || !it || !shop) return;
-  // canonical: haggle adjustment se flag setada na metadata
+  // X-6.5.51CC (2026-05-18): D&D 5e canonical pricing — CHA mod + rep tier.
+  // Backward-compat: haggle flag-based ainda funciona (legacy), mas agora
+  // o sistema novo aplica CHA + reputação por cima. Persuasão check opcional
+  // via botão "🎲 Pechinchar" (TODO Tier 2 — não bloqueante).
   var basePrice = it.v || 0;
-  var finalPrice = _haggleAdjustPrice(basePrice, p);
-  var haggleNote = '';
-  if (finalPrice < basePrice) haggleNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">🤝 Pechincha aplicada: -' + (basePrice - finalPrice) + ' <span class="vi vi-coin sm"></span></i>';
-  else if (finalPrice > basePrice) haggleNote = '<br><i style="color:var(--v-danger,#c44)">⚠️ Comerciante ofendido: +' + (finalPrice - basePrice) + ' <span class="vi vi-coin sm"></span></i>';
+  var finalPrice = _marketCalculateBuyPrice(name, npcId, p);
+  // Aplica haggle legacy também (compatibilidade com flags antigas)
+  if (p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
+    finalPrice = _haggleAdjustPrice(finalPrice, p);
+  }
+  var diff = finalPrice - basePrice;
+  var priceNote = '';
+  if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> (CHA/Reputação)</i>';
+  else if (diff > 0) priceNote = '<br><i style="color:var(--v-danger,#c44)">↑ +' + diff + ' <span class="vi vi-coin sm"></span> (CHA baixo / má reputação)</i>';
+  var breakdownHtml = _marketPriceBreakdown(name, npcId, p, 'buy');
   _showConfirmPurchase({
-    icon: it.e || '🛒',
+    icon: shop.icon || it.e || '🛒',
     npc: shop.npc,
     title: 'Comprar ' + name,
-    desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i>' + haggleNote + '<br><br><b>Preço:</b> ' + finalPrice + ' <span class="vi vi-coin sm"></span>',
+    desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br>' + breakdownHtml + priceNote
+          + '<br><b>Preço final:</b> ' + finalPrice + ' <span class="vi vi-coin sm"></span>',
     cost: finalPrice,
     onConfirm: function(){
       var preGold = p.gold;
@@ -35544,29 +35558,44 @@ function _shopConfirmBuy(name, npcId){
 //   ~_marketAtmosphereLine()   → flavor de entrada no hub por periodo do dia
 // =============================================================================
 
-// Precedence: items podem ter multiplas tags. A primeira regra que matchar ganha.
-// Ordem importante: tags mais especificas primeiro (gem antes de magic, etc).
+// D&D 5e PRICING CANONICAL — X-6.5.51CC (2026-05-18)
+// =============================================================================
+// PHB p.146: "undamaged weapons, armor, and other equipment fetch HALF (50%)
+//   their cost when sold in a market. Gems, jewelry, art, and similar items
+//   retain their FULL (100%) value."
+// XGtE p.130: Magic Item Offer Table (Persuasão check) — vide _marketRollPersuasion.
+// DMG p.135: Magic Item Base Prices canonical (100/400/4000/20000/100000 gp).
+//
+// Nosso sistema:
+//   1. base_pct = 0.50 (mundane) | 1.00 (gem/jewelry/art) | XGtE check (magic)
+//   2. specialist_bonus = +0.10 a +0.15 quando vende ao mercador especializado
+//   3. cha_pct = ±5% por ponto de mod (cap ±15%)
+//   4. rep_pct = Aliado +15% / Amigável +5% / Neutro 0 / Desconfiado -15% / Hostil -30%
+//   5. final = base_value × (base_pct + specialist_bonus) × cha_pct × rep_pct
+//
+// Categorias só roteiam pro especialista correto (UI), preço final segue regras canonical.
 var MARKET_SPECIALIST_RULES = [
-  // === Velithra (joalheira) — paga MELHOR em gemas e acessorios magicos ===
-  { tags: ['gem'],                        npc: 'velithra', mult: 0.70, cat: 'gem' },
-  { tags: ['jewelry', 'accessory'],       npc: 'velithra', mult: 0.65, cat: 'jewelry' },
-  // === Mirena (alquimista) — pocoes, alquimia, ervas, antidotos ===
-  { tags: ['potion', 'healing'],          npc: 'mirena',   mult: 0.65, cat: 'potion' },
-  { tags: ['consumable', 'alchemy'],      npc: 'mirena',   mult: 0.65, cat: 'alchemy' },
-  { tags: ['antidote'],                   npc: 'mirena',   mult: 0.65, cat: 'alchemy' },
-  // === Corvus (cartografo) — mapas, ferramentas de navegacao, pergaminhos ===
-  { tags: ['map'],                        npc: 'corvus',   mult: 0.65, cat: 'map' },
-  { tags: ['scroll'],                     npc: 'corvus',   mult: 0.60, cat: 'scroll' },
-  // === Bjorn (seleiro) — acampamento, couro cru, ferramentas de viagem ===
-  { tags: ['camping'],                    npc: 'bjorn',    mult: 0.65, cat: 'camping' },
-  { tags: ['leather', 'monster_part'],    npc: 'bjorn',    mult: 0.60, cat: 'material' },
-  // === Thorne (ferreiro) — armas, armaduras, escudos, metal, sucata ===
-  { tags: ['weapon', 'martial_weapon'],   npc: 'thorne',   mult: 0.65, cat: 'weapon' },
-  { tags: ['simple_weapon'],              npc: 'thorne',   mult: 0.65, cat: 'weapon' },
-  { tags: ['armor', 'shield'],            npc: 'thorne',   mult: 0.65, cat: 'armor' },
-  { tags: ['heavy_armor', 'medium_armor', 'light_armor'], npc: 'thorne', mult: 0.65, cat: 'armor' },
-  { tags: ['metal'],                      npc: 'thorne',   mult: 0.55, cat: 'metal' },
-  // === Fallback: mercador generico (60%) ===
+  // === Velithra (joalheira) — gemas têm valor FULL canonical (PHB) ===
+  // gem/jewelry: base_pct 1.00 (PHB regra), specialist Velithra recebe +5% bonus.
+  { tags: ['gem'],                        npc: 'velithra', specBonus: 0.05, cat: 'gem' },
+  { tags: ['jewelry', 'accessory'],       npc: 'velithra', specBonus: 0.05, cat: 'jewelry' },
+  // === Mirena (alquimista) ===
+  { tags: ['potion', 'healing'],          npc: 'mirena',   specBonus: 0.15, cat: 'potion' },
+  { tags: ['consumable', 'alchemy'],      npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
+  { tags: ['antidote'],                   npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
+  // === Corvus (cartografo) ===
+  { tags: ['map'],                        npc: 'corvus',   specBonus: 0.15, cat: 'map' },
+  { tags: ['scroll'],                     npc: 'corvus',   specBonus: 0.10, cat: 'scroll' },
+  // === Bjorn (seleiro) ===
+  { tags: ['camping'],                    npc: 'bjorn',    specBonus: 0.10, cat: 'camping' },
+  { tags: ['leather', 'monster_part'],    npc: 'bjorn',    specBonus: 0.05, cat: 'material' },
+  // === Thorne (ferreiro) — armas, armaduras ===
+  { tags: ['weapon', 'martial_weapon'],   npc: 'thorne',   specBonus: 0.15, cat: 'weapon' },
+  { tags: ['simple_weapon'],              npc: 'thorne',   specBonus: 0.10, cat: 'weapon' },
+  { tags: ['armor', 'shield'],            npc: 'thorne',   specBonus: 0.15, cat: 'armor' },
+  { tags: ['heavy_armor', 'medium_armor', 'light_armor'], npc: 'thorne', specBonus: 0.15, cat: 'armor' },
+  { tags: ['metal'],                      npc: 'thorne',   specBonus: 0.05, cat: 'metal' },
+  // === Fallback: mercador generico ===
 ];
 
 // Biblioteca canonical dos NPCs do mercado — fonte unica.
@@ -35791,7 +35820,165 @@ var MARKET_NPC_REACTIONS = {
   }
 };
 
-// Resolve item → especialista. Tags têm precedência ordenada (gem > magic > generic).
+// =============================================================================
+// D&D 5e CANONICAL PRICING HELPERS — X-6.5.51CC (2026-05-18)
+// =============================================================================
+// Helpers puros (sem side effect) que retornam multipliers normalizados.
+// Compoem o preço final via _marketCalculateSellPrice / _marketCalculateBuyPrice.
+
+// CHA mod ±5% por ponto, cap ±15%. Buying: CHA baixo = caro, alto = barato.
+// Selling: CHA baixo = barato (vende mal), alto = caro (vende bem).
+function _marketChaPriceMult(player, action){
+  if (!player || !player.stats) return 1.0;
+  var cha = player.stats.cha || 10;
+  var mod = Math.floor((cha - 10) / 2);
+  var clampedMod = Math.max(-3, Math.min(3, mod));  // cap ±15%
+  if (action === 'buy') return 1.0 - clampedMod * 0.05;   // ex: CHA 16 (+3) → 0.85 buy
+  if (action === 'sell') return 1.0 + clampedMod * 0.05;  // ex: CHA 16 (+3) → 1.15 sell
+  return 1.0;
+}
+
+// Rep tier modifica preço. Aliado paga melhor (compra/venda) que Hostil.
+function _marketRepPriceMult(npcKey, action){
+  var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
+  // Buying: Aliado -15% / Amigável -5% / Neutro 0 / Desconfiado +15% / Hostil +30%
+  // Selling: Aliado +15% / Amigável +5% / Neutro 0 / Desconfiado -15% / Hostil -30%
+  var buyMult;
+  if (rep >= 20) buyMult = 0.85;
+  else if (rep >= 10) buyMult = 0.95;
+  else if (rep <= -10) buyMult = 1.30;
+  else if (rep <= -1)  buyMult = 1.15;
+  else buyMult = 1.0;
+  if (action === 'buy') return buyMult;
+  // Selling = inverso
+  return 2.0 - buyMult;  // 0.85→1.15, 0.95→1.05, 1.0→1.0, 1.15→0.85, 1.30→0.70
+}
+
+// PHB rule: gemas/jewelry/art retêm valor FULL (100%).
+function _marketIsFullValueCategory(tags){
+  if (!tags) return false;
+  return tags.indexOf('gem') !== -1
+      || tags.indexOf('jewelry') !== -1
+      || tags.indexOf('art') !== -1
+      || tags.indexOf('valuable') !== -1;
+}
+
+// Detecta se item é magic (rare+ ou tag explícita).
+// Magic items requerem Persuasão check (XGtE) pra vender — não usa 50% base.
+function _marketIsMagicItem(itemName){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var tags = data.t || [];
+  if (tags.indexOf('magic') !== -1) return true;
+  if (tags.indexOf('scroll') !== -1) return true;  // scrolls são magic
+  var rarity = data.r || 'common';
+  return rarity === 'rare' || rarity === 'very_rare' || rarity === 'legendary';
+}
+
+// XGtE p.130 Magic Item Offer Table — roll d20 + CHA mod + (proficient ? prof : 0)
+// Retorna {roll, total, pct, label, narrative}.
+function _marketRollPersuasion(player, opts){
+  opts = opts || {};
+  var cha = (player && player.stats && player.stats.cha) || 10;
+  var chaMod = Math.floor((cha - 10) / 2);
+  var profBonus = (player && player.proficiency_bonus) || 2;
+  var isProficient = opts.proficient !== false;  // default: proficient
+  var bonus = chaMod + (isProficient ? profBonus : 0);
+  var roll = Math.floor(Math.random() * 20) + 1;
+  var total = roll + bonus;
+  // XGtE Magic Item Offer table
+  var pct, label, narrative;
+  if (total <= 5)       { pct = 0.00; label = 'Sem comprador'; narrative = '<i>O mercador balança a cabeça.</i> "Item interessante, mas não tenho como pagar hoje. Volte em outro dia."'; }
+  else if (total <= 9)  { pct = 0.25; label = 'Oferta baixa';  narrative = '<i>O mercador examina sem entusiasmo.</i> "Posso pagar um quarto do valor — não tenho clientes pra isso agora."'; }
+  else if (total <= 14) { pct = 0.50; label = 'Oferta razoável'; narrative = '<i>O mercador considera por um momento.</i> "Metade do valor é o que consigo. É justo pelo trabalho que vou ter pra revender."'; }
+  else if (total <= 19) { pct = 0.75; label = 'Boa oferta';     narrative = '<i>O mercador anui apreciativamente.</i> "Tem mercado pra isso. Setenta e cinco por cento — proposta firme."'; }
+  else if (total <= 24) { pct = 1.00; label = 'Valor integral'; narrative = '<i>Os olhos do mercador brilham.</i> "Cliente específico em mente. Pago o valor cheio — sem pechinchar."'; }
+  else if (total <= 29) { pct = 1.50; label = 'Oferta excepcional'; narrative = '<i>O mercador inclina-se sobre o balcão, voz baixa.</i> "Conheço alguém que paga acima do valor. Cento e cinquenta por cento — fechado."'; }
+  else                  { pct = 2.00; label = 'Oferta dobrada'; narrative = '<i>O mercador olha você como se tivesse trazido um tesouro perdido.</i> "Está vendendo isso? Pago o dobro — não pergunte de onde vem o ouro."'; }
+  return { roll: roll, bonus: bonus, total: total, pct: pct, label: label, narrative: narrative };
+}
+
+// Calcula preço de VENDA final aplicando todas as regras D&D 5e canonical.
+// opts.persuasionResult: se passar, força usar esse roll (pra magic items via XGtE)
+function _marketCalculateSellPrice(itemName, npcKey, player, opts){
+  opts = opts || {};
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var baseValue = data.v || 1;
+  var tags = data.t || [];
+
+  // Base percentage por categoria (PHB rule):
+  var basePct;
+  if (_marketIsFullValueCategory(tags)) basePct = 1.00;  // gem/jewelry: PHB FULL value
+  else if (opts.persuasionResult)        basePct = opts.persuasionResult.pct;  // XGtE magic
+  else                                    basePct = 0.50;  // PHB mundane 50%
+
+  // Specialist bonus (so vendedor especializado dá bonus)
+  var specBonus = 0;
+  var spec = _marketGetSpecialist(itemName);
+  if (spec.key === npcKey && spec.specBonus) specBonus = spec.specBonus;
+
+  // CHA + Reputation multipliers
+  var chaMult = _marketChaPriceMult(player, 'sell');
+  var repMult = _marketRepPriceMult(npcKey, 'sell');
+
+  var final = baseValue * (basePct + specBonus) * chaMult * repMult;
+  return Math.max(1, Math.floor(final));
+}
+
+// Calcula preço de COMPRA final aplicando todas as regras D&D 5e canonical.
+// opts.persuasionResult: se passar (haggle check sucedeu), aplica desconto.
+function _marketCalculateBuyPrice(itemName, npcKey, player, opts){
+  opts = opts || {};
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var baseValue = data.v || 1;
+
+  var basePct = 1.0;
+  // Haggle (Persuasão check) — apenas se passou pct override
+  if (opts.persuasionResult){
+    var pr = opts.persuasionResult;
+    // Haggle pra COMPRA: success melhora preço, fail piora
+    if (pr.total >= 20)      basePct = 0.80;  // crit success: -20%
+    else if (pr.total >= 15) basePct = 0.90;  // success: -10%
+    else if (pr.total >= 10) basePct = 1.00;  // neutro
+    else if (pr.total >= 5)  basePct = 1.10;  // fail: +10% (mercador ofendido)
+    else                     basePct = 1.25;  // crit fail: +25%
+  }
+
+  // CHA + Reputation
+  var chaMult = _marketChaPriceMult(player, 'buy');
+  var repMult = _marketRepPriceMult(npcKey, 'buy');
+
+  var final = baseValue * basePct * chaMult * repMult;
+  return Math.max(1, Math.floor(final));
+}
+
+// Helper para mostrar breakdown do preço (debug/transparência pro player).
+function _marketPriceBreakdown(itemName, npcKey, player, action){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var baseValue = data.v || 1;
+  var cha = (player && player.stats && player.stats.cha) || 10;
+  var chaMod = Math.floor((cha - 10) / 2);
+  var chaMult = _marketChaPriceMult(player, action);
+  var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
+  var repTier = (typeof _marketReputationTier === 'function') ? _marketReputationTier(rep) : null;
+  var repMult = _marketRepPriceMult(npcKey, action);
+  var lines = [];
+  lines.push('<b>Valor base:</b> ' + baseValue + ' <span class="vi vi-coin sm"></span>');
+  if (chaMod !== 0){
+    var chaPct = Math.round((chaMult - 1) * 100);
+    var chaSign = chaPct >= 0 ? '+' : '';
+    lines.push('<b>CHA</b> (' + (chaMod >= 0 ? '+' : '') + chaMod + '): ' + chaSign + chaPct + '%');
+  }
+  if (rep !== 0 && repTier){
+    var repPct = Math.round((repMult - 1) * 100);
+    var repSign = repPct >= 0 ? '+' : '';
+    lines.push('<b>Reputação</b> (' + repTier.label + '): ' + repSign + repPct + '%');
+  }
+  return lines.join('<br>');
+}
+
+// Resolve item → especialista. Tags têm precedência ordenada.
+// X-6.5.51CC (2026-05-18): retorna specBonus (não mult) — preço final via
+// _marketCalculateSellPrice que combina base_pct (PHB) + specBonus + CHA + rep.
 function _marketGetSpecialist(itemName){
   var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
   var tags = data.t || [];
@@ -35802,20 +35989,18 @@ function _marketGetSpecialist(itemName){
         var npc = MARKET_NPC_LIBRARY[rule.npc] || MARKET_NPC_LIBRARY.generic;
         return {
           key: rule.npc, npc: npc.npc, role: npc.role,
-          icon: npc.icon, mult: rule.mult, cat: rule.cat,
-          baseValue: data.v || 0,
-          sellPrice: Math.max(1, Math.floor((data.v || 1) * rule.mult))
+          icon: npc.icon, specBonus: rule.specBonus, cat: rule.cat,
+          baseValue: data.v || 0
         };
       }
     }
   }
-  // Fallback: mercador genérico 60%
+  // Fallback: mercador genérico (sem specBonus, paga 50% PHB base)
   var g = MARKET_NPC_LIBRARY.generic;
   return {
     key: 'generic', npc: g.npc, role: g.role, icon: g.icon,
-    mult: g.fallback_mult, cat: 'generic',
-    baseValue: data.v || 0,
-    sellPrice: Math.max(1, Math.floor((data.v || 1) * g.fallback_mult))
+    specBonus: 0, cat: 'generic',
+    baseValue: data.v || 0
   };
 }
 
@@ -35856,14 +36041,16 @@ function _marketAtmosphereLine(){
 // END MARKET AAA SYSTEM
 // =============================================================================
 
+// X-6.5.51CC (2026-05-18): D&D 5e canonical sell flow
+//   1. Mundane items (PHB): 50% base + specialist bonus
+//   2. Gems/jewelry (PHB p.146): 100% FULL value
+//   3. Magic items (XGtE p.130): Persuasão d20 check obrigatório → 0-200%
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
   if (inv.length === 0) {
     vToast('💰 Bolsa vazia — nada pra vender.');
     return;
   }
-  // canonical: market_transactions_sell.py PROTECTED_SELL_TAGS — filtra items
-  // não-vendáveis (quest/key/map/no_sell/unique/story_item/etc).
   var sellable = inv.filter(function(it){
     if (!it.q || it.q <= 0) return false;
     return _isItemSellable(it.n || it.name);
@@ -35872,45 +36059,66 @@ function _marketShowSell(p){
     vToast('💰 Nenhum item vendável (item de missão/único/mapa não vendem).');
     return;
   }
-  // X-6.5.51CB (2026-05-18): cada item roteado pro especialista correto.
-  // Specialist paga melhor (65-70%) que mercador generico (60%) — incentiva
-  // o player a vender no comerciante adequado. Badge mostra "+sellPrice (NPC)".
   var items = sellable.map(function(it){
     var spec = _marketGetSpecialist(it.n || it.name);
-    var sellPrice = spec.sellPrice;
-    var npcShort = spec.npc.split(' ')[0]; // primeiro nome (Thorne, Mirena, etc.)
+    var isMagic = _marketIsMagicItem(it.n || it.name);
+    var sellPrice;
+    var badgeExtra = '';
+    if (isMagic){
+      // Magic items: preço é "Persuasão" — mostra ?? até o check
+      sellPrice = '?';
+      badgeExtra = ' · 🎲'; // dado pra indicar negociação obrigatória
+    } else {
+      sellPrice = _marketCalculateSellPrice(it.n || it.name, spec.key, p);
+    }
+    var npcShort = spec.npc.split(' ')[0];
     return {
       icon: it.icon, label: it.name,
-      badge: '+' + sellPrice + ' <span class="vi vi-coin sm"></span> · ' + npcShort,
-      _it: it, _sell: sellPrice, _spec: spec
+      badge: (isMagic ? '~' : '+') + sellPrice + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
+      _it: it, _spec: spec, _isMagic: isMagic
     };
   });
   _squareShowListPopup({
     stackKey: 'market_sell', icon: _heralIco('ic-bolsa'), title: 'Vender Itens',
-    flavor: '<i>Cada item vai pro mercador certo — Thorne paga melhor em armas e armaduras; Mirena em poções; Velithra em gemas; Corvus em mapas; Bjorn em equipamento de viagem.</i>',
+    flavor: '<i>Mundane: 50% base (PHB). Gemas/joias: 100% valor (PHB). Mágicos: Persuasão d20 (XGtE).</i><br>'
+          + '<i>Cada item vai pro especialista certo — bonus de +5-15%. CHA e reputação modificam o preço final.</i>',
     items: items,
     onPick: function(item){
       var it = item._it;
-      var sellPrice = item._sell;
       var spec = item._spec;
-      // Bloqueia se item está equipado (proteção UX)
+      var isMagic = item._isMagic;
+
       if (_isItemEquipped(it.n)) {
         vToast('⚠️ Item equipado. Desequipe antes de vender.', 'warn');
         return;
       }
+
+      // ===== MAGIC ITEM SELL — XGtE Persuasion check =====
+      if (isMagic){
+        _marketSellMagicWithPersuasion(p, it, spec);
+        return;
+      }
+
+      // ===== MUNDANE / GEM SELL =====
+      var sellPrice = _marketCalculateSellPrice(it.n, spec.key, p);
+      var breakdown = _marketPriceBreakdown(it.n, spec.key, p, 'sell');
+      var isFullValue = _marketIsFullValueCategory((getItemData(it.n) || {}).t || []);
+      var basePctLabel = isFullValue ? '100% (gema/joia — PHB)' : '50% base (PHB)';
+      var specBonusLabel = spec.specBonus > 0 ? ' + ' + Math.round(spec.specBonus * 100) + '% (especialista)' : '';
       _showConfirmPurchase({
         icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
         title: 'Vender ' + it.name,
-        desc: '<b>' + it.name + '</b><br>' +
-              '<i>Valor base:</i> ' + it.value + ' <span class="vi vi-coin sm"></span><br>' +
-              '<i>' + spec.npc.split(' ')[0] + ' paga:</i> <b>' + sellPrice + '</b> <span class="vi vi-coin sm"></span> <i>(' + Math.round(spec.mult * 100) + '%)</i>',
+        desc: '<b>' + it.name + '</b><br>' + breakdown + '<br>'
+              + '<i>Regra D&D:</i> ' + basePctLabel + specBonusLabel + '<br>'
+              + '<b>Oferta final:</b> <b>' + sellPrice + '</b> <span class="vi vi-coin sm"></span>',
         cost: sellPrice, creditMode: true,
         onConfirm: function(){
           var preGold = p.gold;
           p.gold += sellPrice;
           _removeItemFromInventory(it.n, 1);
+          // Boa transação melhora reputação (+1, max +1 por sessão pra evitar farm)
+          _marketRepDelta(spec.key, 1);
           refreshHud();
-          // PADRAO_ALDRIC reaction line por especialista x categoria
           var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
           _showServiceResultPopup({
             icon: spec.icon, npc: spec.npc,
@@ -35922,6 +36130,86 @@ function _marketShowSell(p){
       });
     }
   });
+}
+
+// XGtE Magic Item Offer Table — flow: pré-roll info → confirm → roll d20 → resultado
+function _marketSellMagicWithPersuasion(p, it, spec){
+  var cha = (p.stats && p.stats.cha) || 10;
+  var chaMod = Math.floor((cha - 10) / 2);
+  var prof = p.proficiency_bonus || 2;
+  var bonus = chaMod + prof;
+  var bonusStr = (bonus >= 0 ? '+' : '') + bonus;
+
+  _showInfoPopup({
+    icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
+    title: 'Item Mágico: Negociar Venda',
+    desc: '<b>' + it.name + '</b><br>'
+        + '<i>Valor base:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
+        + '<i>Itens mágicos seguem a <b>Tabela de Oferta de Item Mágico (XGtE p.130)</b>:</i><br>'
+        + '• <b>d20 + CHA(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ')</b> = ' + bonusStr + ' bônus<br>'
+        + '• ≤5: sem comprador · 6-9: 25% · 10-14: 50%<br>'
+        + '• 15-19: 75% · 20-24: 100% · 25-29: 150% · 30+: 200%<br>'
+        + '<br><i>Falha não consome o item — pode tentar de novo amanhã.</i>',
+    confirmLabel: '🎲 Rolar Persuasão',
+    cancelLabel: 'Voltar',
+    onConfirm: function(){
+      var pr = _marketRollPersuasion(p, { proficient: true });
+      // Aplica o roll na fórmula canonical
+      var sellPrice = _marketCalculateSellPrice(it.n, spec.key, p, { persuasionResult: pr });
+      var rollColorClass = pr.total <= 5 ? 'no-buyer'
+        : (pr.total >= 25 ? 'crit' : (pr.total >= 20 ? 'great' : (pr.total >= 15 ? 'good' : 'meh')));
+      var rollHtml = '<div style="display:flex;align-items:center;gap:8px;margin:4px 0;justify-content:center;">'
+        + '<span style="font-size:14px;color:#a09484;">🎲 d20:</span> '
+        + '<span style="font-family:Cinzel,serif;font-size:20px;color:#c4953a;font-weight:700;">' + pr.roll + '</span>'
+        + '<span style="font-size:13px;color:#a09484;">' + bonusStr + ' = </span>'
+        + '<span style="font-family:Cinzel,serif;font-size:22px;color:#ffd700;font-weight:700;">' + pr.total + '</span>'
+        + '</div>'
+        + '<div style="text-align:center;font-family:Cinzel,serif;font-size:13px;color:#c4953a;letter-spacing:2px;margin-bottom:4px;">'
+        + '◆ ' + pr.label.toUpperCase() + ' · ' + Math.round(pr.pct * 100) + '% ◆</div>';
+
+      if (pr.pct === 0){
+        // Sem comprador — não vende
+        _showServiceResultPopup({
+          icon: spec.icon, npc: spec.npc,
+          narrative: rollHtml + pr.narrative + '<br><br><i>Item permanece na sua bolsa.</i>',
+          deltas: [], onContinue: function(){ navigateBack(); }
+        });
+        return;
+      }
+
+      // Confirma a oferta antes de executar a venda
+      _showConfirmPurchase({
+        icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
+        title: 'Aceitar oferta?',
+        desc: rollHtml + pr.narrative + '<br>'
+            + '<b>Oferta:</b> ' + sellPrice + ' <span class="vi vi-coin sm"></span> <i>(' + Math.round(pr.pct * 100) + '% de ' + (it.value || 0) + ')</i>',
+        cost: sellPrice, creditMode: true,
+        onConfirm: function(){
+          var preGold = p.gold;
+          p.gold += sellPrice;
+          _removeItemFromInventory(it.n, 1);
+          // Crit success melhora rep, crit fail piora
+          if (pr.total >= 25) _marketRepDelta(spec.key, 2);
+          else if (pr.total >= 15) _marketRepDelta(spec.key, 1);
+          refreshHud();
+          var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
+          _showServiceResultPopup({
+            icon: spec.icon, npc: spec.npc,
+            narrative: reactionLine + '<br><br><b>+' + sellPrice + ' Valdoritas</b>',
+            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
+            onContinue: function(){ navigateBack(); }
+          });
+        }
+      });
+    }
+  });
+}
+
+// Aplica delta de reputação. Cap em ±30 pra evitar overflow.
+function _marketRepDelta(npcKey, delta){
+  window._marketRep = window._marketRep || {};
+  var current = window._marketRep[npcKey] || 0;
+  window._marketRep[npcKey] = Math.max(-30, Math.min(30, current + delta));
 }
 
 // --- GUILDA ---
