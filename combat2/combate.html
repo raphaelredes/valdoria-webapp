@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T15:53:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T18:11:22Z — do not edit directly, edit source -->
 
 
 <!--
@@ -427,6 +427,10 @@
 })();
 </script>
 
+<!-- Tiered Cache (SUPREME RULE #0): bundle hash estável até qualquer Bucket B mudar.
+     Fallback Date.now() mantém compat caso bundle-version.js falhe a carregar. -->
+<script src="../bundle-version.js"></script>
+
 <style>
 /* valdoria-design.css (CDN, @layer) aplica em body: contain+::before/::after+background-attachment:fixed.
    No file:// isso faz o fundo inteiro “respirar” com text-shadow do titulo e quebra altura flex.
@@ -534,7 +538,7 @@ html.sim-combat-root #app {
     setTimeout(function(){ clearInterval(_waitVM); }, 5000);
 })();
 
-var v = Date.now();
+var v = (window.VBUNDLE_HASH || Date.now());
 var BASE = 'https://jogo.lendasdevaldoria.com.br';
 function loadCSS(href) {
     var l = document.createElement('link');

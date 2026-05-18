@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T16:32:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T18:11:23Z - do not edit directly, edit source -->
 
 
 <!--
@@ -805,9 +805,13 @@
 })();
 </script>
 
+<!-- Tiered Cache (SUPREME RULE #0): bundle hash estável até qualquer Bucket B mudar.
+     Fallback Date.now() mantém compat caso bundle-version.js falhe a carregar. -->
+<script src="../bundle-version.js"></script>
+
 <script>
 (function() {
-  var v = Date.now();
+  var v = (window.VBUNDLE_HASH || Date.now());
   var cdn = 'https://jogo.lendasdevaldoria.com.br';
   ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css', '/shared/toast.css'].forEach(function(h) {
     var l = document.createElement('link');
@@ -13986,7 +13990,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 (function() {
-  var v = Date.now();
+  var v = (window.VBUNDLE_HASH || Date.now());
   // X-6.5.51m: + heraldic-icons.js pro popup do grupo
   // 2026-05-04: + state-checkpoint.js (AAA persistence — heartbeat 30s + sendBeacon)
   ['/shared/dice-3d.js', '/shared/audio-manager.js', '/shared/heraldic-icons.js',
@@ -14005,7 +14009,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
      arquivo em /explore/. Browser ignora erro do que não existir. -->
 <script>
 (function() {
-  var v = Date.now();
+  var v = (window.VBUNDLE_HASH || Date.now());
   var s1 = document.createElement('script');
   s1.src = '../valdoria-webapp/explore/explore-camp-fire.js?v=' + v;
   s1.async = false;

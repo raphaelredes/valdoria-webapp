@@ -630,9 +630,12 @@ LOG SINK (Fase 7):
         }catch(e){}
     },100);
   </script>
+  <!-- Tiered Cache (SUPREME RULE #0): bundle hash estável até qualquer Bucket B mudar.
+       Fallback Date.now() mantém compat caso bundle-version.js falhe a carregar. -->
+  <script src="/bundle-version.js"></script>
   <script>
     // Cache busting para CSS/JS imports
-    var v = Date.now();
+    var v = (window.VBUNDLE_HASH || Date.now());
     document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/game-hub.css?v=' + v + '">');
     document.write('<link rel="stylesheet" href="/game/inn-animation.css?v=' + v + '">');
