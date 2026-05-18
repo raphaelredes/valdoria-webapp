@@ -25,6 +25,9 @@ if (_hostname === 'jogo.lendasdevaldoria.com.br' && _envOverride === 'dev') {
     console.warn('[WEB-AUTH] jogo.* + ?env=dev → redirecting to dev.lendasdevaldoria.com.br');
     try {
         var _devUrl = 'https://dev.lendasdevaldoria.com.br' + window.location.pathname + window.location.search + window.location.hash;
+        /* 2026-05-18 preflight fix (check_webapp_transition_flag): flag impede
+           close beacon dispar durante transicao entre hosts (jogo.* → dev.*). */
+        window.__valdoria_transitioning = true;
         window.location.replace(_devUrl);
     } catch (e) { /* noqa: preflight */ }
     _envOverride = null;
