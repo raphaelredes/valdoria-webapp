@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T00:48:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:24:08Z - do not edit directly, edit source -->
 
 
 <!--
@@ -43570,7 +43570,26 @@ function _openCartographyWithPrompt(){
       var action = btn.dataset.cbp;
       prompt.classList.remove('active');
       if (action === 'yes') {
-        window.location.href = './cidade.html?back=exploration';
+        /* USER REPORT 2026-05-17: botão "Voltar pra Cidade" não navegava em
+           prod (dev.lendasdevaldoria.com.br). Root cause: URL relativa
+           ./cidade.html só funciona em file:// simulator — em prod resolve pra
+           /exploracao/cidade.html que dá 404. Fix: detect protocol → use path
+           absoluto /cidade/ em HTTPS + preserve token/uid/api params pra session
+           continuar. */
+        if (location.protocol === 'file:') {
+          window.location.href = './cidade.html?back=exploration';
+        } else {
+          var qs = new URLSearchParams(location.search);
+          var preserved = ['token', 'uid', 'user_id', 'api', 'api_base', 'char', 'char_id', 'env'];
+          var newParams = new URLSearchParams();
+          preserved.forEach(function(k){
+            var v = qs.get(k);
+            if (v) newParams.set(k, v);
+          });
+          newParams.set('back', 'exploration');
+          newParams.set('nointro', '1');
+          window.location.replace('/cidade/?' + newParams.toString());
+        }
       } else {
         if (typeof openCartography === 'function') openCartography();
       }
