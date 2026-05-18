@@ -157,8 +157,9 @@
         console.warn('[CHECKPOINT] session expired');
         stop();
       } else if (j.saved) {
-        // Log debug-only — não polui console
-        // console.debug('[CHECKPOINT] saved');
+        // 2026-05-18 preflight fix: commented-out console.debug ainda
+        // triggava check_webapp_console_debug (regex match em comentario).
+        // Removida linha pra silenciar warning sem efeito funcional.
       }
     }).catch(function (e) {
       if (timeoutId) clearTimeout(timeoutId);

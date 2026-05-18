@@ -35,6 +35,11 @@ document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/scrip
    IMMUTABLE RULE). Sem o resume automatico (~50ms), o player tinha pausa silenciosa
    ao chegar em /play/ durante transicoes entre WebApps. */
 document.write('<script src="/shared/audio-manager.js?v=' + v + '"><\/script>');
+/* 2026-05-18 preflight fix (check_webapp_error_reporter_import + console_collector_loaded):
+   console-collector DEVE vir ANTES de error-reporter (collector captura console.*
+   pra incluir em debug overlay). Padrao canonical do CLAUDE.md "WebApp Error Logging". */
+document.write('<script src="/shared/console-collector.js?v=' + v + '"><\/script>');
+document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>');
 </script>
 </head>
 <body>

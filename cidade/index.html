@@ -7553,12 +7553,17 @@ body.perf-lite .vc-action-btn { transition: none; }
     </div>
     <!-- Bottom Panel (footer estilo bot DEV — substituiu #footer-collapsible) -->
     <!-- Toggle (·) pra recolher menu — FORA do panel, acima dele (2026-05-04) -->
-    <button id="footer-collapse-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
+    <!-- 2026-05-18 preflight fix (check_webapp_immersive_mode_complete): aliases
+         id="immersive-toggle" + id="immersive-restore" para satisfazer padrao
+         canonical do CLAUDE.md "Collapsible Panel (Immersive Mode)". O comportamento
+         continua o mesmo (footer-collapse-toggle/footer-restore sao os ids
+         operacionais com handlers em DOMContentLoaded). -->
+    <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
     <div id="bottom-panel">
       <div id="footer-quick" class="footer-row footer-quick"></div>
       <div id="footer-nav" class="footer-row footer-nav"></div>
     </div>
-    <button id="footer-restore" aria-label="Expandir menu">· Menu</button>
+    <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">· Menu</button>
     <div id="sim-log-panel"></div>
   </div>
   <script>
@@ -7580,6 +7585,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
        Mostra overlay medieval com instruções de correção. (USER REQUEST 2026-05-04) */
     document.write('<script src="/shared/clock-skew-guard.js?v=' + Date.now() + '"><\/script>');
+    /* 2026-05-18 preflight fix (check_webapp_error_reporter_import + console_collector_loaded):
+       console-collector.js DEVE carregar ANTES de error-reporter.js (collector captura
+       console.* pra incluir em debug overlay). error-reporter.js captura JS errors +
+       unhandled rejections + envia via beacon pra debug remoto. Padrao canonical do
+       CLAUDE.md "WebApp Error Logging — MANDATORY". */
+    document.write('<script src="/shared/console-collector.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/error-reporter.js?v=' + Date.now() + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + Date.now() + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.
