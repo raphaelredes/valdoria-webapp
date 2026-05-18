@@ -27584,6 +27584,55 @@ function _renderEpicSquareHub(container, data){
   });
 }
 
+/* === renderSquareHub — fallback inline (2026-05-18 BUG FIX) =================
+   game-square.js (canonical) usa vCity.* helpers que NAO sao carregados no
+   simulador. Sem este fallback, AREA_REGISTRY entries que delegam pra
+   renderSquareHub (relations/arena/daily_challenge/trade_board/shadow_alley/
+   travelers/heroes_wall) renderizam popup VAZIO.
+
+   Bug encontrado via Chrome MCP no dev/cidade/ clicando 'Vinculos':
+     [CITY] doAction: rel_main
+     [CITY] subscreen action (no handler): rel_main
+   Popup abria (popupVisible=true) mas body ficava com 0 bytes pq
+   `typeof renderSquareHub === 'function'` retornava false → fall-through pra
+   SUBSCREEN_DATA['relations'] (que tambem nao existe; e 'relationships').
+
+   Esta funcao replica game-square.js usando DOM nativo + classes subscreen-*
+   ja definidas em cidade.html (compat com _wireSubScreenContentOnce listener).
+   data shape: { flavor?, rep_label?, buff?, npc?, services: [{icon,label,cb,badge?,desc?}] }
+*/
+function renderSquareHub(container, data){
+  if (!container) return;
+  if (!data) { container.innerHTML = ''; return; }
+  while (container.firstChild) container.removeChild(container.firstChild);
+  var html = '<div class="subscreen">';
+  if (data.flavor)    html += '<p class="subscreen-flavor">' + data.flavor + '</p>';
+  if (data.npc)       html += '<div class="subscreen-npc">' + data.npc + '</div>';
+  if (data.rep_label) html += '<div class="subscreen-rep">' + data.rep_label + '</div>';
+  if (data.buff)      html += '<div class="subscreen-buff">' + data.buff + '</div>';
+  var services = data.services || [];
+  if (services.length === 0) {
+    html += '<div class="subscreen-flavor" style="text-align:center;padding:20px;color:#a09484">'
+         + 'Nada disponível no momento.</div>';
+  } else {
+    html += '<div class="subscreen-buttons">';
+    services.forEach(function(s){
+      var icon  = s.icon || '';
+      var label = s.label || '';
+      var cb    = s.cb || '';
+      var badge = s.badge || s.desc || '';
+      html += '<button class="subscreen-btn" data-cb="' + cb + '">'
+        + '<span class="sb-icon">' + icon + '</span>'
+        + '<span class="sb-text">' + label + '</span>'
+        + (badge ? '<span class="sb-info">' + badge + '</span>' : '')
+        + '</button>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function _buildSquareMockData(player){
   var period = _squarePeriodKey();
   // canonical: data/plaza_flavor_data.py PLAZA_FLAVOR_BY_PERIOD (5-6 textos por periodo)
