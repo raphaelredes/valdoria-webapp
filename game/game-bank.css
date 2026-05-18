@@ -1,4 +1,4 @@
-/* game-bank.css — Bank screen styles */
+/* game-bank.css — Bank screen styles AAA */
 /* Namespace: bnk- */
 
 .bnk-hub {
@@ -7,44 +7,93 @@
   gap: var(--v-space-md, 8px);
 }
 
+/* AAA variant: gold accents + medieval ledger feel */
+.bnk-hub-aaa {
+  padding: 4px 2px 8px;
+}
+
 .bnk-greeting {
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.5;
-  padding-left: var(--v-space-md, 8px);
-  border-left: 2px solid var(--v-gold-dim, rgba(196, 149, 58, 0.2));
+  padding: 8px 12px;
+  border-left: 3px solid var(--v-gold-40, rgba(196, 149, 58, 0.4));
+  background: linear-gradient(90deg, var(--v-gold-06), transparent 70%);
+  border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
+  font-style: italic;
 }
 
-/* Balance cards row */
+/* Balance cards row — AAA epic with gold borders + parchment background */
 .bnk-balance-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--v-space-sm, 6px);
+  gap: 10px;
+  margin: 6px 0 4px;
 }
 
 .bnk-balance-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--v-space-xs, 2px);
-  padding: var(--v-space-md, 8px);
-  background: var(--v-bg-raised, #332a22);
-  border: 1px solid var(--v-border, #4a3828);
-  border-radius: var(--v-radius-sm, 6px);
+  gap: 4px;
+  padding: 14px 8px 12px;
+  background: linear-gradient(165deg, var(--v-bg-card, var(--v-bg-card)) 0%, #241e18 100%);
+  border: 1.5px solid var(--v-gold-40);
+  border-radius: var(--v-radius, 10px);
   text-align: center;
+  position: relative;
+  box-shadow:
+    inset 0 1px 0 var(--v-gold-15, rgba(196,149,58,0.15)),
+    0 2px 8px rgba(0,0,0,0.35);
+  transition: border-color var(--v-transition-base), box-shadow var(--v-transition-base);
 }
 
-.bnk-balance-icon { font-size: 20px; line-height: 1; }
+.bnk-balance-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--v-gold-15, rgba(196,149,58,0.15));
+  border-radius: var(--v-radius-sm, 6px);
+  pointer-events: none;
+}
+
+.bnk-balance-card:hover {
+  border-color: var(--v-gold, #c4953a);
+  box-shadow:
+    inset 0 1px 0 var(--v-gold-25, rgba(196,149,58,0.25)),
+    0 4px 16px var(--v-gold-25);
+}
+
+.bnk-balance-icon {
+  font-size: 0;
+  line-height: 1;
+  margin-bottom: 2px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
 
 .bnk-balance-label {
+  font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: var(--v-font-xs, 10px);
-  color: var(--v-text-dim, #a09484);
+  color: var(--v-gold-dim, #a08050);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.8px;
+  font-weight: 600;
 }
 
 .bnk-balance-value {
-  font-size: var(--v-font-body, 14px);
-  color: var(--v-gold, #c4953a);
-  font-weight: 600;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xl, 18px);
+  color: var(--v-gold-light, #dbb668);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px var(--v-gold-25, rgba(196,149,58,0.25));
 }
+
+/* Card variant tints */
+.bnk-card-purse {
+  background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
+}
+.bnk-card-safe {
+  background: linear-gradient(165deg, #2a2218 0%, #1e1812 100%);
+}
+.bnk-card-safe .bnk-balance-icon { color: #dbb668; }

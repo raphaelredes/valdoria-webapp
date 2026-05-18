@@ -1,4 +1,4 @@
-/* game-bank.js — Bank popup renderer */
+/* game-bank.js — Bank popup renderer (AAA epic — 2026-05-18) */
 /* Uses vCity.* shared components */
 'use strict';
 
@@ -7,7 +7,7 @@ function renderBankHub(container, data) {
   console.warn('[CITY-BANK] renderBankHub gold=' + (data.gold || 0) + ' bank=' + (data.bank_gold || 0) + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
-  var root = vCity.el('div', 'bnk-hub');
+  var root = vCity.el('div', 'bnk-hub bnk-hub-aaa');
 
   /* Loan overdue alert */
   if (data.loan_overdue && data.loan_debt > 0) {
@@ -24,15 +24,16 @@ function renderBankHub(container, data) {
     root.appendChild(greet);
   }
 
-  /* Balance cards */
+  /* Balance cards — AAA: usa heraldic SVG (ic-bolsa / ic-cofre)
+     2026-05-18: removido emoji 💰 e 🔒 (regra Valdorita coin canonical) */
   var balances = vCity.el('div', 'bnk-balance-row');
 
-  var purse = vCity.el('div', 'bnk-balance-card');
+  var purse = vCity.el('div', 'bnk-balance-card bnk-card-purse');
   var purseIcon = vCity.el('div', 'bnk-balance-icon');
-  purseIcon.textContent = '\uD83D\uDCB0';
+  purseIcon.innerHTML = '<svg viewBox="0 0 120 120" style="width:40px;height:40px;color:#dbb668;display:block;margin:0 auto"><use href="#ic-bolsa"/></svg>';
   purse.appendChild(purseIcon);
   var purseLbl = vCity.el('div', 'bnk-balance-label');
-  purseLbl.textContent = 'Bolsa';
+  purseLbl.textContent = 'BOLSA';
   purse.appendChild(purseLbl);
   var purseVal = vCity.el('div', 'bnk-balance-value');
   purseVal.textContent = String(data.gold || 0) + ' ';
@@ -40,12 +41,13 @@ function renderBankHub(container, data) {
   purse.appendChild(purseVal);
   balances.appendChild(purse);
 
-  var safe = vCity.el('div', 'bnk-balance-card');
+  var safe = vCity.el('div', 'bnk-balance-card bnk-card-safe');
   var safeIcon = vCity.el('div', 'bnk-balance-icon');
-  safeIcon.textContent = '\uD83D\uDD12';
+  /* ic-cofre se existe no sprite; fallback graceful via SVG empty */
+  safeIcon.innerHTML = '<svg viewBox="0 0 120 120" style="width:40px;height:40px;color:#dbb668;display:block;margin:0 auto"><use href="#ic-cofre"/></svg>';
   safe.appendChild(safeIcon);
   var safeLbl = vCity.el('div', 'bnk-balance-label');
-  safeLbl.textContent = 'Cofre';
+  safeLbl.textContent = 'COFRE';
   safe.appendChild(safeLbl);
   var safeVal = vCity.el('div', 'bnk-balance-value');
   safeVal.textContent = String(data.bank_gold || 0) + ' ';
