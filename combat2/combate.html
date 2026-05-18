@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T12:34:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T14:08:26Z — do not edit directly, edit source -->
 
 
 <!--
@@ -2940,7 +2940,7 @@ html.sim-combat-root .bf-pan-stage .battlefield {
 }
 /* Phase 5b polish v7 (2026-04-26) — REINFORCEMENT BADGE v2.
    User feedback: "muito acima, precisa ser centralizado, cinza deveria ser
-   colorido (esta ATIVO), nao pode ser alvo de nada".
+   colorido (esta ATIVO), não pode ser alvo de nada".
    Mudancas:
    - Badge agora CENTRALIZADO no card (top:50% + transform translate)
    - Card NAO grayscale (cor original mantida) — soh um overlay vermelho sutil
@@ -4743,7 +4743,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .combat-msg-card.pre-npc .combat-msg-text { color: #e06040; text-shadow: 0 0 12px rgba(224,96,64,.5), 0 1px 3px rgba(0,0,0,.9); }
 
 /* X-6.5.51AB (2026-04-26): popup de confirmacao do "Encerrar Turno".
-   Lista superficialmente acoes ainda disponiveis e pede confirmacao.
+   Lista superficialmente acoes ainda disponíveis e pede confirmacao.
    z-index 99500 — acima do action-sheet (92100) e action-dock (92200).
    User reportou que popup ficava ATRAS do menu Agir (z-index 9999 era baixo). */
 .end-turn-confirm-overlay {
@@ -6567,7 +6567,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    Label agora pode ULTRAPASSAR largura do card e ficar ACIMA dele. Animation
    duration: 1.4s → 2.4s (más demorada, jogador absorve a info). */
 /* Phase 5b polish (2026-04-26): user feedback "label muito grande, pulsa muito".
-   Reduzido font-size 18->13, boss 22->14, duration 2.4s -> 1.0s (flash unico,
+   Reduzido font-size 18->13, boss 22->14, duration 2.4s -> 1.0s (flash único,
    sobe e some). Letter-spacing 3->1.5px. */
 .cell-skill-impact-label {
     position: fixed;
@@ -6622,7 +6622,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    - Card alvo com tremor/shake quando recebe
    ============================================================================ */
 /* Phase 5b polish v3 (2026-04-26): user feedback "barra vermelha tosca, faca
-   pegadas correndo nivel AAA". Substituido streak por footprint trail. */
+   pegadas correndo nível AAA". Substituido streak por footprint trail. */
 .boss-charge-footprint {
     position: fixed;
     z-index: 49;
@@ -9207,7 +9207,7 @@ document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' +
 <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
 <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
      valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
-     duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+     duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
 <script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
@@ -15499,7 +15499,7 @@ function checkEnd(s) {
 
 /* Loot/XP estilo D&D 5e simplificado:
    XP = soma(8 + sugLvl*4) por inimigo derrotado
-   Gold = rng baseado em nivel sugerido somado
+   Gold = rng baseado em nível sugerido somado
    Itens = chance de drop por inimigo, do pool de loot */
 var LOOT_POOL = [
     { n: 'Poção de Cura',    ico: '🧪', rare: 'comum' },
@@ -15748,7 +15748,7 @@ function appendDiceCombatArenaSide(parent, actor, metaLine) {
         /* 2026-05-18 USER REPORT: dice screens "continuam usando icones antigos
            (SVG)". asset-resolver tem MutationObserver mas pode perder timing de
            re-renders. Force upgrade explicito apos append pra garantir PNG.
-           NO-OP se vAssets nao disponivel (file:// sem PNG, etc). */
+           NO-OP se vAssets nao disponível (file:// sem PNG, etc). */
         try { if (window.vAssets && window.vAssets.upgradeAll) window.vAssets.upgradeAll(icoBox); } catch(_) {}
     }
     var title = document.createElement('div');
@@ -19481,9 +19481,9 @@ function onBtnClick(ev) {
         } else if (act === 'end-turn') {
             /* "Encerrar turno" — equivale a pass no server.
                X-6.5.51AB (2026-04-26): popup de confirmacao SEMPRE aparece,
-               listando acoes ainda disponiveis (se houver). User feedback:
+               listando acoes ainda disponíveis (se houver). User feedback:
                "ao clicar em encerrar turno sempre mostre um popup que verifica
-               e informa ao jogador caso ainda tenha possiveis acoes disponiveis". */
+               e informa ao jogador caso ainda tenha possiveis acoes disponíveis". */
             _showEndTurnConfirm(currentState, function () {
                 _actionSheetOpen = false;
                 render(currentState);
@@ -19918,7 +19918,7 @@ function onBtnClick(ev) {
         var pEt = sEt.order[sEt.p_idx];
         if (!pEt) return;
         /* X-6.5.51AB (2026-04-26): popup de confirmacao SEMPRE aparece. Lista
-           acoes ainda disponiveis (Acao Principal / Bonus). Confirmar segue o
+           acoes ainda disponíveis (Acao Principal / Bonus). Confirmar segue o
            flow original (passa turno sem agir vs encerra normalmente). */
         _showEndTurnConfirm(sEt, function () {
             if (!pEt.actionSpent && !pEt.bonusActionSpent) {
@@ -22251,7 +22251,7 @@ function playHitVFX(uid, crit, dmgType, opts) {
                 window._combatVfx.arrowVolley(fromEl, el, 3, dmgType, { crit: !!crit });
             } else if (skName === 'Investida Furiosa') {
                 /* Phase 5b polish v4 (2026-04-26) — user feedback "barra vermelha
-                   tosca, quero pegadas correndo nivel AAA". VFX REDESIGN:
+                   tosca, quero pegadas correndo nível AAA". VFX REDESIGN:
                      1. Rage flash actor 1000ms (boss enraivece)
                      2. Custom bossChargeVFX (footprint trail boss → alvo) t=500ms
                      3. UM slash forte no impacto (t=1050ms, sincronizado com shockwave)
@@ -24230,7 +24230,7 @@ function attachMagicMissileOrbit(container, count, darts, variant) {
 }
 
 /* X-6.5.51AB (2026-04-26): popup de confirmacao do "Encerrar Turno".
-   Detecta acoes ainda disponiveis no jogador (action / bonus action / skills
+   Detecta acoes ainda disponíveis no jogador (action / bonus action / skills
    utilizaveis / skill check de Mochila/Esquivar/Fugir) e lista superficialmente.
    Sempre aparece (mesmo sem acoes pendentes — confirma fim de turno). */
 function _showEndTurnConfirm(s, onConfirm) {
@@ -27341,7 +27341,7 @@ async function runNpcSegmentUntilPlayerTurn() {
         } else if (c && c.hp > 0 && c.alive && c.surprised) {
             /* Phase 5b polish v3 (2026-04-26) — SURPRESA (PHB p.189):
                Inimigo surpreso pelo player (apos passar skill check pre-combate)
-               nao pode mover/agir/reagir no primeiro turno. Consome a flag e
+               não pode mover/agir/reagir no primeiro turno. Consome a flag e
                loga o "perde o turno por surpresa". */
             c.surprised = false;
             s.log.push(c.n + ' foi pego de surpresa — perde o turno (PHB p.189).');
@@ -28093,7 +28093,7 @@ function sfxDamageType(dt) {
 function sfxPlayMusicVictory() { _vaPlayMusic('victory'); }
 function sfxPlayMusicDefeat() { _vaPlayMusic('defeat'); }
 /* X-6.5.51AB (2026-04-26): auto-detect boss → toca 'boss' (8 variantes
-   boss_battle.mp3 disponiveis) quando qualquer enemy tem isBoss:true.
+   boss_battle.mp3 disponíveis) quando qualquer enemy tem isBoss:true.
    Antes sempre tocava 'combat' generico — desperdicava music de boss.
    Brakthar e qualquer futuro boss agora ganham trilha epica diferenciada. */
 function _combatTrackKeyForCurrentState() {

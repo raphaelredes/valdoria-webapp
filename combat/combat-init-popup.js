@@ -203,7 +203,7 @@ function _rollSequence(turnOrder, initiative) {
                         idx++;
                         /* 2026-05-18 preflight fix (check_webapp_hardcoded_timeouts):
                            era setTimeout fixo 2000ms. Aplicado calcReadTime quando
-                           disponivel (max(MIN, words*250ms + bonus) per CLAUDE.md
+                           disponível (max(MIN, words*250ms + bonus) per CLAUDE.md
                            Human Reading Time rule). Fallback 2000ms se nao carregado. */
                         var _readMs = 2000;
                         try {

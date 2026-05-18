@@ -72,7 +72,7 @@ function _renderCraftMenu(container, data) {
         /* FIX 2026-05-03: bind click listener (data-action sozinho não dispara) */
         btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
       } else if (t.locked_level) {
-        btn.textContent = '🔒 Nivel ' + t.min_level + ' necessario';
+        btn.textContent = '🔒 Nível ' + t.min_level + ' necessario';
         btn.disabled = true;
         btn.classList.add('rns-craft-locked');
       } else {

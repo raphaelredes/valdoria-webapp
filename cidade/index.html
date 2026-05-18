@@ -637,7 +637,7 @@ LOG SINK (Fase 7):
        os WebApps pra botões padronizados. Estava faltando em cidade.html (Fase 9.5). */
     document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/popup.css?v=' + v + '">');
     /* Scroll Hint Arrow (2026-05-11, user request): seta animada inferior
-       central indicando scroll disponivel em popups (Diario, NPCs, Templo,
+       central indicando scroll disponível em popups (Diario, NPCs, Templo,
        Banco, etc). NOTA: aplicado direto aqui pra evitar sync wipe — manter
        em sync com simuladores/cidade.html (mesma adicao). */
     document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/scroll-hint-arrow.css?v=' + v + '">');
@@ -2396,7 +2396,7 @@ LOG SINK (Fase 7):
 
     /* === Group Panel (ate 4 membros — V8 card mini, 1 linha) === */
     /* 2026-05-11 v4 (user request): "diminua os 4 cards, para caber em uma
-       unica linha". Mudou de 2x2 grid 140x140 -> 1x4 grid responsive.
+       única linha". Mudou de 2x2 grid 140x140 -> 1x4 grid responsive.
        Cada card e fluido (grid 1fr) com height fixo de 120px. Em frame
        de 384px (TG Desktop min) cada card fica ~90px wide; em 430px (cidade
        sim cap) fica ~100px wide. */
@@ -2633,7 +2633,7 @@ LOG SINK (Fase 7):
     }
 
     /* ===== CARD V8 — MINI compact (2026-05-11 v4) =====
-       User request: "diminua os 4 cards, para caber em uma unica linha".
+       User request: "diminua os 4 cards, para caber em uma única linha".
        Mudou de 140x140 -> 100% width (responsive) x 120px tall.
        Em frame 384/430 com 4 cols, cada card fica ~88-100px wide. */
     .cgp-card.v8-style {
@@ -5255,7 +5255,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
   <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
        valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
-       duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+       duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
   <script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
   <script>
   /* Early title screen — show IMMEDIATELY, before content loads */
@@ -7995,7 +7995,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (_isProductionHost){
           _showSessionErrorOverlay(
             'Nenhum personagem encontrado em sua conta.',
-            'API retornou lista vazia — verifique se voce ja criou um personagem'
+            'API retornou lista vazia — verifique se você ja criou um personagem'
           );
         }
         return;
@@ -8762,7 +8762,7 @@ function _discoverySpeakerIcon(speaker) {
       || s.indexOf('curandeir') >= 0) return 'ic-clerigo';
   if (s.indexOf('bardo') >= 0 || s.indexOf('mendigo') >= 0 || s.indexOf('trovador') >= 0
       || s.indexOf('lyana') >= 0) return 'ic-bardo';
-  if (s.indexOf('você') >= 0 || s.indexOf('voce') >= 0 || s.indexOf('lendo') >= 0) return 'ic-cartografia';
+  if (s.indexOf('você') >= 0 || s.indexOf('você') >= 0 || s.indexOf('lendo') >= 0) return 'ic-cartografia';
   return 'ic-praca';  // default
 }
 
@@ -8861,7 +8861,7 @@ function _renderDiscoveryStage(){
       }
     }
     // Self-narration ("Você (lendo)") → narration; senão speech
-    if (spk.toLowerCase().indexOf('você') >= 0 || spk.toLowerCase().indexOf('voce') >= 0) {
+    if (spk.toLowerCase().indexOf('você') >= 0 || spk.toLowerCase().indexOf('você') >= 0) {
       script.push({ type: 'narration', text: stg.text });
     } else {
       script.push({ type: 'speech', speaker: spkKey, text: stg.text });
@@ -10237,7 +10237,7 @@ function _showCharSwitchConfirm(picked){
           /* X-6.5.51AP (2026-05-08) BUG FIX: limpar params de DADO DO PERSONAGEM
              (name, cls, race, level, hp, etc) ao trocar char. Antes carregava
              com nome/level do char ANTERIOR antes do /api/game/state aplicar
-             o snapshot do novo char — user via brevemente "Aventureiro nivel 5"
+             o snapshot do novo char — user via brevemente "Aventureiro nível 5"
              ou (pior) o nome/dados do char antigo enquanto cidade montava. */
           var newParams = new URLSearchParams(window.location.search);
           ['name','cls','race','level','hp','hpMax','mp','mpMax','gold','xp','exh','xpNext','_cb'].forEach(function(k){
@@ -13503,8 +13503,8 @@ var TAVERN_DRINKS = [
 // TAVERN_GAMES — 8 jogos com brasões canonical (substitui 🎲🐉⚔️🏆🍺🃏)
 // canonical: tavern_games.py L13-18 + sub-files (bones/challenges/tournament/drinking/xgte)
 var TAVERN_GAMES = [
-  { id: 'dice_10',    icon: _heralIco('ic-desafio'),     name: 'Dados — 10 <span class="vi vi-coin sm"></span>',            cost: 10,  payout: 20,  win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nivel/4)' },
-  { id: 'dice_50',    icon: _heralIco('ic-desafio'),     name: 'Dados — 50 <span class="vi vi-coin sm"></span>',            cost: 50,  payout: 100, win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nivel/4)' },
+  { id: 'dice_10',    icon: _heralIco('ic-desafio'),     name: 'Dados — 10 <span class="vi vi-coin sm"></span>',            cost: 10,  payout: 20,  win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nível/4)' },
+  { id: 'dice_50',    icon: _heralIco('ic-desafio'),     name: 'Dados — 50 <span class="vi vi-coin sm"></span>',            cost: 50,  payout: 100, win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nível/4)' },
   { id: 'dice_100',   icon: _heralIco('ic-desafio'),     name: 'Dados — 100 <span class="vi vi-coin sm"></span> (streak 3+)', cost: 100, payout: 200, win_chance: 0.50, desc: 'Tier desbloqueado com 3 vitórias seguidas' },
   { id: 'dice_200',   icon: _heralIco('ic-desafio'),     name: 'Dados — 200 <span class="vi vi-coin sm"></span> (streak 5+)', cost: 200, payout: 400, win_chance: 0.50, desc: 'Tier desbloqueado com 5 vitórias seguidas' },
   { id: 'bones',      icon: _heralIco('ic-boss'),        name: 'Ossos do Dragão (3d6)',          cost: 10, payout: 20,  win_chance: 0.45, desc: 'Hold/reroll. Bust se cair 1. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' },
@@ -16105,7 +16105,7 @@ var SHADOW_EVENT_POOL = [
     }
   },
   /* X-6.5.51AV (2026-05-08) — Sussurros Arcanos AAA. User pediu: "garantir
-     narrativa nivel PADRAO_ALDRIC com falas de NPCs sempre destacadas".
+     narrativa nível PADRAO_ALDRIC com falas de NPCs sempre destacadas".
      Antes era um popup simples. Agora: encounter PADRAO_ALDRIC com 2 NPCs
      conspirando (figuras encapuzadas), 4 falas em speech bubbles douradas,
      skill check Percepção (DC 13) com 3 escolhas. */
@@ -39674,8 +39674,8 @@ var ACTION_HANDLERS = {
     var rd = (typeof CANON_INN_RELAXATION !== 'undefined') ? CANON_INN_RELAXATION : null;
     var cost = rd ? rd.relaxation_cost_gp : 10;
     var introTexts = rd ? rd.intro_texts : ['Martha prepara um banho de ervas aromaticas.'];
-    var successTexts = rd ? rd.success_texts : ['Voce se sente renovado.'];
-    var noCondTexts = rd ? rd.no_condition_texts : ['Voce relaxa profundamente.'];
+    var successTexts = rd ? rd.success_texts : ['Você se sente renovado.'];
+    var noCondTexts = rd ? rd.no_condition_texts : ['Você relaxa profundamente.'];
     var introLine = introTexts[Math.floor(Math.random() * introTexts.length)];
     _showConfirmPurchase({
       icon: _heralIco('ic-mochila'), npc: 'Martha', title: 'Relaxar (XGtE p.131)',

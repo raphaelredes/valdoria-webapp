@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T11:54:11Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T14:08:26Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1030,7 +1030,7 @@ body {
   height: var(--sim-frame-h);
   max-height: var(--sim-frame-h);
   /* X-6.5.51f: margin-left auto centraliza frame horizontal quando log
-     panel cabe (>= 600px disponivel); senao panel some via media query. */
+     panel cabe (>= 600px disponível); senao panel some via media query. */
   margin: 0 auto 0 auto;
   flex-shrink: 0;
   position: relative;
@@ -3638,7 +3638,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 .light-opt:hover .lo-label { opacity: 1; }
 
 /* X-6.5.51k: PARTY POPUP — botao acima do btn-inventory abre popup com lista
-   resumida dos membros do grupo (cls + hp + mp + nivel). Mesmo layout 3-zonas
+   resumida dos membros do grupo (cls + hp + mp + nível). Mesmo layout 3-zonas
    das outras telas (header sticky + body scroll + footer sticky). */
 #party-popup {
   display: none;
@@ -6295,7 +6295,7 @@ document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' +
 <div id="loading" class="loading-overlay" style="display:none;background:#1a1510" aria-busy="true"></div>
 <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
      valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
-     duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
+     duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
 <script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
@@ -6791,7 +6791,7 @@ window.__onIntroTap = function() {
       <line x1="8" y1="5" x2="8" y2="8" stroke="#3a2818" stroke-width="0.45"/>
       <path d="M 8 5 L 5.5 6.2 L 8 7.4 Z" fill="#c4953a"/>
 
-      <!-- ════ Cavalo lateral direito com anatomia + nivel das rodas ════ -->
+      <!-- ════ Cavalo lateral direito com anatomia + nível das rodas ════ -->
       <!-- Sombra direta das patas -->
       <ellipse cx="22" cy="24.7" rx="3" ry="0.35" fill="#0a0810" opacity="0.7"/>
       <!-- Corpo orgânico (path curvo) -->
@@ -8345,7 +8345,7 @@ window.__onIntroTap = function() {
         <div class="hud-pips" id="exh-pips"></div>
         <span class="hud-val" id="exh-val">0/6</span>
       </div>
-      <!-- X-6.5.51k: barra de XP com nivel + progresso pro proximo -->
+      <!-- X-6.5.51k: barra de XP com nível + progresso pro proximo -->
       <div class="hud-row" title="Experiência (XP) e Nível">
         <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l2.1 4.5 4.9.5-3.7 3.4 1.1 4.8L8 11.7 3.6 14.2 4.7 9.4 1 6l4.9-.5z"/></svg>
         <span class="hud-lvl" id="hud-level">N1</span>
@@ -8594,7 +8594,7 @@ window.__onIntroTap = function() {
           <!-- X-6.5.51l: zoom controls + center on player -->
           <div class="cart-zoom-controls">
             <button type="button" class="cart-zoom-btn" id="cart-zoom-out" title="Diminuir zoom">−</button>
-            <button type="button" class="cart-zoom-btn cart-pin" id="cart-zoom-center" title="Centralizar onde voce esta">📍</button>
+            <button type="button" class="cart-zoom-btn cart-pin" id="cart-zoom-center" title="Centralizar onde você esta">📍</button>
             <button type="button" class="cart-zoom-btn" id="cart-zoom-in" title="Aumentar zoom">+</button>
           </div>
         </div>
@@ -19159,7 +19159,7 @@ const FIXED_MAPS = {
       '###########..#########',  // row 22 — bifurca outro lado
       '###########.##########',  // row 23
       '###########.##########',  // row 24
-      '###########E##########'   // row 25 — L26 = entrada/saida unica
+      '###########E##########'   // row 25 — L26 = entrada/saida única
     ],
     // Phase 2B: landmarks fixos (sprites desenhados sobre o tile base)
     landmarks: [
@@ -19231,7 +19231,7 @@ const FIXED_MAPS = {
           'A fogueira no centro do patio orc queima alta. As brasas convidam ' +
           'a parar e recuperar forcas — descansar curto pra firmar o folego, ' +
           'ou descansar longo pra refazer o corpo inteiro.\n\n' +
-          'Cuidado: enquanto descansa, voce esta vulneravel. Mas a fogueira ' +
+          'Cuidado: enquanto descansa, você esta vulneravel. Mas a fogueira ' +
           'tambem afasta inimigos pequenos.'
         ),
         flavor: 'Acampamento · K13 · Repouso',
@@ -19240,13 +19240,13 @@ const FIXED_MAPS = {
           { id: 'short_rest', label: '⏸ Descanso Curto (gasta 1 HD)',
             desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
             outcome_ok: { _short_rest: true,
-              text: 'Voce sente o vigor voltar parcialmente. As feridas menores fecham.' } },
+              text: 'Você sente o vigor voltar parcialmente. As feridas menores fecham.' } },
           { id: 'long_rest', label: '🌙 Descanso Longo (1× por masmorra)',
-            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'Voce dorme as 8 horas inteiras. Acorda renovado, pronto pra batalha.' } },
+              text: 'Você dorme as 8 horas inteiras. Acorda renovado, pronto pra batalha.' } },
           { id: 'leave_camp', label: '🚶 Sair do Acampamento',
-            outcome_ok: { text: 'Voce se afasta da fogueira, retornando a exploracao.' } }
+            outcome_ok: { text: 'Você se afasta da fogueira, retornando a exploracao.' } }
         ],
         // class_choices preservado pra extensoes futuras (Patrulheiro Conjurar
         // Animais, Druida Forma Selvagem, etc) sem quebrar schema.
@@ -19262,24 +19262,24 @@ const FIXED_MAPS = {
           { label: 'Avancar em silencio',
             skill: 'dex', dc: 12,
             desc: 'Destreza (Furtividade) CD 12 — passar sem ser notado',
-            outcome_ok: { text: 'Voce desliza pela vegetacao sem fazer ruido. A sentinela continua dormindo. Voce esta livre pra prosseguir ate o patio.', xp: 25, _flag: 'sentinel_passed' },
+            outcome_ok: { text: 'Você desliza pela vegetacao sem fazer ruido. A sentinela continua dormindo. Você esta livre pra prosseguir ate o patio.', xp: 25, _flag: 'sentinel_passed' },
             outcome_fail: { text: 'Sua bota crocheia um galho seco. A sentinela acorda gritando, lanca em punho. Combate inevitavel!', xp: 5, hp_loss: 2, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Eliminar em silencio',
             skill: 'dex', dc: 14,
             desc: 'Destreza (Furtividade) CD 14 — ataque preciso por tras',
-            outcome_ok: { text: 'Voce se aproxima por tras. Um corte limpo na garganta. A sentinela cai sem ruido. O acampamento permanece alheio. Voce ganha vantagem no proximo encontro.', xp: 35, _flag: 'sentinel_killed' },
+            outcome_ok: { text: 'Você se aproxima por tras. Um corte limpo na garganta. A sentinela cai sem ruido. O acampamento permanece alheio. Você ganha vantagem no proximo encontro.', xp: 35, _flag: 'sentinel_killed' },
             outcome_fail: { text: 'Ela acorda no ultimo segundo. Lanca cravando contra seu peito. Combate forcado.', xp: 8, hp_loss: 6, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Contornar pelo flanco',
             skill: 'wis', dc: 11,
             desc: 'Sabedoria (Sobrevivencia) CD 11 — rota lenta mas segura',
-            outcome_ok: { text: 'Voce le o terreno. Uma trilha paralela contorna a sentinela. Demora mais mas evita riscos completamente.', xp: 15, _flag: 'sentinel_avoided' },
+            outcome_ok: { text: 'Você le o terreno. Uma trilha paralela contorna a sentinela. Demora mais mas evita riscos completamente.', xp: 15, _flag: 'sentinel_avoided' },
             // X-6.5.51AB (2026-04-26): outcome_fail antes era "voce volta exausto"
             // sem combate — bug de design (encounter consumido, jogador
             // progredia sem enfrentar sentinela). Agora: ao voltar, sentinela
             // ouve seu movimento e acorda → combate forcado, mesmo enemy das
             // outras opcoes pra consistencia. _flag alarm_raised propaga
             // reforco como nas outras falhas.
-            outcome_fail: { text: 'O caminho que parecia seguro termina num penhasco. Voce volta exausto e desorientado — e nesse retorno, sua bota crocheia um galho. A sentinela acorda no ato, lanca em punho.', xp: 5, hp_loss: 2, exh_gain: 1, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
+            outcome_fail: { text: 'O caminho que parecia seguro termina num penhasco. Você volta exausto e desorientado — e nesse retorno, sua bota crocheia um galho. A sentinela acorda no ato, lanca em punho.', xp: 5, hp_loss: 2, exh_gain: 1, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
         ]
       },
       // ── 2. PATIO + 2 GUARDAS (entrada sul do patio externo) ──
@@ -19301,7 +19301,7 @@ const FIXED_MAPS = {
       //            C2) Estudar profundo (Int 14) -> SUCCESS lore COMPLETO / FAIL combat (caught)
       { id: 'patio_guards', col: 11, row: 17, _hex: 'L18',
         title: 'Patio Externo',
-        text: 'Voce chega ao patio externo. Dois orcs guardas cercam uma fogueira crepitante, machados nas costas, conversando em gutural. Banners tribais penduram cranios humanoides — trofeus de aldeias caidas. Sob uma pedra grande no flanco esquerdo, voce nota a borda de um caderno escondido. Eles ainda nao te viram, mas qualquer movimento errado dispara o alarme.',
+        text: 'Você chega ao patio externo. Dois orcs guardas cercam uma fogueira crepitante, machados nas costas, conversando em gutural. Banners tribais penduram cranios humanoides — trofeus de aldeias caidas. Sob uma pedra grande no flanco esquerdo, você nota a borda de um caderno escondido. Eles ainda nao te viram, mas qualquer movimento errado dispara o alarme.',
         flavor: 'Patio externo · 2 de 5',
         category: 'social',
         choices: [
@@ -19309,20 +19309,20 @@ const FIXED_MAPS = {
           { label: 'Atacar com surpresa',
             skill: 'str', dc: 13,
             desc: 'Forca (Atletismo) CD 13 — investida pesada antes que reajam',
-            outcome_ok: { text: 'Voce avanca silencioso e ataca. O machado quebra o cranio do primeiro guarda antes do grito. O segundo levanta a clava, mas voce ja domina a iniciativa.', xp: 30, hp_loss: 4, _flag: 'guards_killed', dungeon_combat: { enemy: 'orc_warrior', surprise: true } },
-            outcome_fail: { text: 'O som da sua bota raspa numa pedra. Os orcs reagem mais rapido — clavas no ar, voce esta no contra-ataque desde o primeiro segundo.', xp: 8, hp_loss: 8, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+            outcome_ok: { text: 'Você avanca silencioso e ataca. O machado quebra o cranio do primeiro guarda antes do grito. O segundo levanta a clava, mas você ja domina a iniciativa.', xp: 30, hp_loss: 4, _flag: 'guards_killed', dungeon_combat: { enemy: 'orc_warrior', surprise: true } },
+            outcome_fail: { text: 'O som da sua bota raspa numa pedra. Os orcs reagem mais rapido — clavas no ar, você esta no contra-ataque desde o primeiro segundo.', xp: 8, hp_loss: 8, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
           // ============ B) Mensageiro de Brakthar (Cha) -> chain ============
           { label: 'Mensageiro de Brakthar',
             skill: 'cha', dc: 14,
             desc: 'Carisma (Engano) CD 14 — postura de mensageiro com recado urgente',
             outcome_ok: {
-              text: '"Brakthar mandou eu trazer noticias urgentes do flanco norte." Voce mantem voz dura, postura militar. Os guardas trocam olhares incertos. O da esquerda baixa a guarda parcialmente. Voce tem uma janela curta agora.',
+              text: '"Brakthar mandou eu trazer noticias urgentes do flanco norte." Você mantem voz dura, postura militar. Os guardas trocam olhares incertos. O da esquerda baixa a guarda parcialmente. Você tem uma janela curta agora.',
               xp: 25,
               _flag: 'guards_persuaded',
               _chainTo: {
                 id: 'patio_guards_persuaded',
                 title: 'Conversando com os Guardas',
-                text: 'Os guardas estao parcialmente convencidos, mas atentos. Voce pode tentar arrancar mais informacao agora — ou seguir adiante mantendo o disfarce intacto.',
+                text: 'Os guardas estao parcialmente convencidos, mas atentos. Você pode tentar arrancar mais informacao agora — ou seguir adiante mantendo o disfarce intacto.',
                 flavor: 'Patio · estagio 2',
                 category: 'social',
                 choices: [
@@ -19330,44 +19330,44 @@ const FIXED_MAPS = {
                     skill: 'cha', dc: 12,
                     desc: 'Carisma (Persuasao) CD 12 — perguntar casual, sem despertar suspeita',
                     outcome_ok: { text: '"Como esta o chefe? Anda nervoso?" O guarda gunhe. "Anda. Diz que ve sombras no espelho. O xama renova as runas a cada lua nova mas... ele nao dorme." Intel valiosa sobre o estado mental do chefe.', xp: 25, _flag: 'lore_brakthar_paranoid' },
-                    outcome_fail: { text: '"Por que se importa, mensageiro?" Eles ficam desconfiados, maos voltam aos machados. Voce decide nao insistir e manter o disfarce.', xp: 8 } },
+                    outcome_fail: { text: '"Por que se importa, mensageiro?" Eles ficam desconfiados, maos voltam aos machados. Você decide nao insistir e manter o disfarce.', xp: 8 } },
                   { label: 'Seguir direto sem chamar atencao',
                     desc: 'Acao sem rolagem — manter o disfarce e prosseguir norte',
-                    outcome_ok: { text: 'Voce assente bruscamente e continua, postura militar firme. Os guardas voltam a fogueira, alheios.', xp: 15 },
+                    outcome_ok: { text: 'Você assente bruscamente e continua, postura militar firme. Os guardas voltam a fogueira, alheios.', xp: 15 },
                     outcome_fail: null }
                 ]
               }
             },
-            outcome_fail: { text: '"Brakthar nao usa mensageiros que se vestem como voce." O guarda da esquerda cospe e saca o machado. Foi uma boa tentativa.', xp: 5, hp_loss: 6, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+            outcome_fail: { text: '"Brakthar nao usa mensageiros que se vestem como você." O guarda da esquerda cospe e saca o machado. Foi uma boa tentativa.', xp: 5, hp_loss: 6, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
           // ============ C) Esgueirar-se ate o diario (Dex) -> chain ============
           { label: 'Esgueirar-se ate o diario',
             skill: 'dex', dc: 14,
             desc: 'Destreza (Furtividade) CD 14 — contornar pelos arbustos da esquerda',
             outcome_ok: {
-              text: 'Voce contorna o patio pela vegetacao da esquerda, agachado. Os guardas continuam absorvidos na conversa. Voce alcanca a pedra grande, ergue-a com cuidado: o caderno encadernado em couro humano esta ali. Manchas escuras, paginas amareladas. Agora precisa decidir como ler.',
+              text: 'Você contorna o patio pela vegetacao da esquerda, agachado. Os guardas continuam absorvidos na conversa. Você alcanca a pedra grande, ergue-a com cuidado: o caderno encadernado em couro humano esta ali. Manchas escuras, paginas amareladas. Agora precisa decidir como ler.',
               xp: 25,
               _flag: 'patio_evaded',
               _chainTo: {
                 id: 'patio_diary_read',
                 title: 'Diario do Prisioneiro',
-                text: 'O caderno esta nas suas maos. Voce pode escanear rapido pelas palavras-chave (mais seguro mas info parcial) ou estudar com cuidado a caligrafia umida (mais tempo no patio = risco maior, mas info completa).',
+                text: 'O caderno esta nas suas maos. Você pode escanear rapido pelas palavras-chave (mais seguro mas info parcial) ou estudar com cuidado a caligrafia umida (mais tempo no patio = risco maior, mas info completa).',
                 flavor: 'Diario · estagio 2',
                 category: 'mystery',
                 choices: [
                   { label: 'Ler superficialmente (rapido)',
                     skill: 'int', dc: 10,
                     desc: 'Inteligencia (Investigacao) CD 10 — capturar palavras-chave e fugir logo',
-                    outcome_ok: { text: 'Voce captura: "Brakthar... runas vermelhas... totens." Conhecimento parcial mas voce devolve o caderno e desliza pela mata sem ser visto.', xp: 25, _flag: 'lore_brakthar_totem_secret' },
-                    outcome_fail: { text: 'Caligrafia ilegivel a primeira vista. Voce capta apenas: "...sangue..." Inutil. Mas pelo menos sai sem alarme.', xp: 5 } },
+                    outcome_ok: { text: 'Você captura: "Brakthar... runas vermelhas... totens." Conhecimento parcial mas você devolve o caderno e desliza pela mata sem ser visto.', xp: 25, _flag: 'lore_brakthar_totem_secret' },
+                    outcome_fail: { text: 'Caligrafia ilegivel a primeira vista. Você capta apenas: "...sangue..." Inutil. Mas pelo menos sai sem alarme.', xp: 5 } },
                   { label: 'Estudar com cuidado (tempo extra)',
                     skill: 'int', dc: 14,
                     desc: 'Inteligencia (Investigacao) CD 14 — leitura profunda. Tempo extra = risco de ser visto',
-                    outcome_ok: { text: '"Brakthar nao come carne, apenas cranios. Patrulha sozinho a noite. Marcas no peito — runas rubras renovadas a cada lua nova pelo xama. O segredo esta nos totens: quebra-los enfraquece a magia que protege o chefe." Voce escapa silencioso, pleno de conhecimento.', xp: 50, _flags: ['lore_brakthar_totem_secret', 'lore_brakthar_full_diary'] },
-                    outcome_fail: { text: 'Voce demora demais nas paginas. Um dos guardas levanta-se pra urinar — e ve seu vulto na vegetacao. Combate inevitavel, mas voce conseguiu captar fragmentos: "...runas... totens..."', xp: 12, hp_loss: 4, _flag: 'guards_alerted', _flags: ['lore_brakthar_totem_secret'], dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
+                    outcome_ok: { text: '"Brakthar nao come carne, apenas cranios. Patrulha sozinho a noite. Marcas no peito — runas rubras renovadas a cada lua nova pelo xama. O segredo esta nos totens: quebra-los enfraquece a magia que protege o chefe." Você escapa silencioso, pleno de conhecimento.', xp: 50, _flags: ['lore_brakthar_totem_secret', 'lore_brakthar_full_diary'] },
+                    outcome_fail: { text: 'Você demora demais nas paginas. Um dos guardas levanta-se pra urinar — e ve seu vulto na vegetacao. Combate inevitavel, mas você conseguiu captar fragmentos: "...runas... totens..."', xp: 12, hp_loss: 4, _flag: 'guards_alerted', _flags: ['lore_brakthar_totem_secret'], dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
                 ]
               }
             },
-            outcome_fail: { text: 'Voce alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direcao — vista cruzada, alarme no ato. Voce mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
+            outcome_fail: { text: 'Você alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direcao — vista cruzada, alarme no ato. Você mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
         ]
       },
       // ── 3. CAMARA DOS TOTENS (3 totens em circulo, hex central E15) ──
@@ -19375,7 +19375,7 @@ const FIXED_MAPS = {
       // Quebrar -> 2 sub-acoes (resistir/absorver), Comungar -> 2 sub-acoes (favor/conhecimento).
       { id: 'totem_chamber', col: 4, row: 14, _hex: 'E15',
         title: 'Camara dos Totens',
-        text: 'Tres totens entalhados com runas tribais arcaicas formam um circulo sangrento. Aura vermelha pulsa em cada entalhe — voce sente a energia sufocante emanando deles. A magia que protege Brakthar emana daqui. Quebra-los, decifra-los ou comungar com eles tera consequencias.',
+        text: 'Tres totens entalhados com runas tribais arcaicas formam um circulo sangrento. Aura vermelha pulsa em cada entalhe — você sente a energia sufocante emanando deles. A magia que protege Brakthar emana daqui. Quebra-los, decifra-los ou comungar com eles tera consequencias.',
         flavor: 'Camara dos totens · 3 de 5',
         category: 'mystery',
         choices: [
@@ -19383,25 +19383,25 @@ const FIXED_MAPS = {
             skill: 'int', dc: 14,
             desc: 'Inteligencia (Historia) CD 14 — entender o ritual gravado',
             outcome_ok: {
-              text: 'Voce reconhece a estrutura: "Por sangue ergui esta tribo. Por sangue a manterei." E um ritual de fortificacao continuo. O xama renova a magia a cada lua nova.',
+              text: 'Você reconhece a estrutura: "Por sangue ergui esta tribo. Por sangue a manterei." E um ritual de fortificacao continuo. O xama renova a magia a cada lua nova.',
               xp: 25, _flag: 'totem_decoded',
               _chainTo: {
                 id: 'totem_chamber_decoded',
                 title: 'Compreendendo o Ritual',
-                text: 'Voce decifrou a estrutura geral. Pode aprofundar memorizando as variantes ou apenas captar o gesto-chave que disrupta a magia em combate.',
+                text: 'Você decifrou a estrutura geral. Pode aprofundar memorizando as variantes ou apenas captar o gesto-chave que disrupta a magia em combate.',
                 flavor: 'Camara · estagio 2',
                 category: 'mystery',
                 choices: [
                   { label: 'Memorizar as 3 variacoes completas',
                     skill: 'int', dc: 14,
                     desc: 'Inteligencia (Arcana) CD 14 — leitura profunda',
-                    outcome_ok: { text: 'Voce memoriza cada simbolo. Brakthar nao sera mais protegido pelos totens — voce sabe como cancelar a magia em combate.', xp: 40, _flag: 'totem_runes_memorized' },
-                    outcome_fail: { text: 'Voce apreende o conceito mas as runas embaralham na sua mente. Conhecimento parcial.', xp: 15 } },
+                    outcome_ok: { text: 'Você memoriza cada simbolo. Brakthar nao sera mais protegido pelos totens — você sabe como cancelar a magia em combate.', xp: 40, _flag: 'totem_runes_memorized' },
+                    outcome_fail: { text: 'Você apreende o conceito mas as runas embaralham na sua mente. Conhecimento parcial.', xp: 15 } },
                   { label: 'Apenas o gesto-chave (rapido)',
                     skill: 'cha', dc: 12,
                     desc: 'Carisma (Atuacao) CD 12 — replicar o gesto',
-                    outcome_ok: { text: 'Voce treina o gesto duas vezes. Pode replicar para interromper o ritual em combate.', xp: 25, _flag: 'can_disrupt_brakthar_chant' },
-                    outcome_fail: { text: 'O gesto exige forma especifica que voce nao captura. Tentativas em combate vao falhar.', xp: 8 } }
+                    outcome_ok: { text: 'Você treina o gesto duas vezes. Pode replicar para interromper o ritual em combate.', xp: 25, _flag: 'can_disrupt_brakthar_chant' },
+                    outcome_fail: { text: 'O gesto exige forma especifica que você nao captura. Tentativas em combate vao falhar.', xp: 8 } }
                 ]
               }
             },
@@ -19410,46 +19410,46 @@ const FIXED_MAPS = {
             skill: 'str', dc: 13,
             desc: 'Forca (Atletismo) CD 13 — destruir os 3 com forca bruta',
             outcome_ok: {
-              text: 'Voce racha os tres totens em sequencia. Energia rubra explode dos entalhes destruidos. O ar pesa como sangue derramado.',
+              text: 'Você racha os tres totens em sequencia. Energia rubra explode dos entalhes destruidos. O ar pesa como sangue derramado.',
               xp: 25, _flag: 'totem_broken',
               _chainTo: {
                 id: 'totem_chamber_burst',
                 title: 'Surto de Energia Rubra',
-                text: 'Energia ancestral escorre dos totens destruidos. Voce pode resistir ao surto ou aceitar o dano em troca de absorver fragmentos.',
+                text: 'Energia ancestral escorre dos totens destruidos. Você pode resistir ao surto ou aceitar o dano em troca de absorver fragmentos.',
                 flavor: 'Camara · estagio 2',
                 category: 'danger',
                 choices: [
                   { label: 'Resistir ao surto',
                     skill: 'con', dc: 12,
                     desc: 'Constituicao (save) CD 12 — segurar o impacto',
-                    outcome_ok: { text: 'Voce cerra os dentes. A energia passa por voce sem ferir. Os totens estao silenciosos agora — a magia de Brakthar foi quebrada.', xp: 20, _flag: 'totem_burst_resisted' },
+                    outcome_ok: { text: 'Você cerra os dentes. A energia passa por você sem ferir. Os totens estao silenciosos agora — a magia de Brakthar foi quebrada.', xp: 20, _flag: 'totem_burst_resisted' },
                     outcome_fail: { text: 'O surto te atinge — gritos ancestrais ecoam na sua mente. Mas os totens estao destruidos.', xp: 8, hp_loss: 3 } },
                   { label: 'Absorver fragmentos',
                     skill: 'wis', dc: 13,
                     desc: 'Sabedoria (Religion) CD 13 — captar essencia enquanto se desfaz',
-                    outcome_ok: { text: 'Voce abre a mente — uma faisca rubra entra em voce. Memorias dos clas caidos. Conhecimento ao custo de presenca.', xp: 35, _flags: ['totem_essence_absorbed', 'lore_clan_picoluno_known'], hp_loss: 2 },
-                    outcome_fail: { text: 'Voce tenta captar a essencia mas o impacto e demais. Voce cai de joelhos.', xp: 5, hp_loss: 5 } }
+                    outcome_ok: { text: 'Você abre a mente — uma faisca rubra entra em você. Memorias dos clas caidos. Conhecimento ao custo de presenca.', xp: 35, _flags: ['totem_essence_absorbed', 'lore_clan_picoluno_known'], hp_loss: 2 },
+                    outcome_fail: { text: 'Você tenta captar a essencia mas o impacto e demais. Você cai de joelhos.', xp: 5, hp_loss: 5 } }
                 ]
               }
             },
-            outcome_fail: { text: 'O machado quica na madeira encantada. Voce sente um zumbido nas maos. Os totens permanecem intactos.', xp: 5, hp_loss: 2 } },
+            outcome_fail: { text: 'O machado quica na madeira encantada. Você sente um zumbido nas maos. Os totens permanecem intactos.', xp: 5, hp_loss: 2 } },
           { label: 'Comungar com os espiritos',
             skill: 'wis', dc: 14,
             desc: 'Sabedoria (Religion) CD 14 — abrir-se as vozes ancestrais',
             outcome_ok: {
-              text: 'Voce fecha os olhos. Vozes em uma lingua antiga sussurram ao redor. Os espiritos dos clas mortos respondem.',
+              text: 'Você fecha os olhos. Vozes em uma lingua antiga sussurram ao redor. Os espiritos dos clas mortos respondem.',
               xp: 25, _flag: 'totem_communed',
               _chainTo: {
                 id: 'totem_chamber_spirits',
                 title: 'Vozes Ancestrais',
-                text: 'Os espiritos te oferecem dois favores. Voce so pode escolher um — eles desaparecerao apos a primeira escolha.',
+                text: 'Os espiritos te oferecem dois favores. Você só pode escolher um — eles desaparecerao apos a primeira escolha.',
                 flavor: 'Camara · estagio 2',
                 category: 'mystery',
                 choices: [
                   { label: 'Pedir bencao dos clas caidos',
                     skill: 'cha', dc: 13,
                     desc: 'Carisma (Persuasao) CD 13 — convencer os espiritos',
-                    outcome_ok: { text: 'Os espiritos consentem. No combate contra Brakthar, voce sentira o peso ancestral guiando seus golpes — vantagem na primeira rodada.', xp: 35, _flag: 'spirit_blessing' },
+                    outcome_ok: { text: 'Os espiritos consentem. No combate contra Brakthar, você sentira o peso ancestral guiando seus golpes — vantagem na primeira rodada.', xp: 35, _flag: 'spirit_blessing' },
                     outcome_fail: { text: 'Os espiritos hesitam. "Tu vens com armas mas sem oferenda." Apenas observam.', xp: 8 } },
                   { label: 'Pedir conhecimento sobre Brakthar',
                     skill: 'wis', dc: 13,
@@ -19459,7 +19459,7 @@ const FIXED_MAPS = {
                 ]
               }
             },
-            outcome_fail: { text: 'Voce fecha os olhos mas a aura rubra te repele. Os espiritos estao raivosos com sua presenca.', xp: 5, hp_loss: 3 } }
+            outcome_fail: { text: 'Você fecha os olhos mas a aura rubra te repele. Os espiritos estao raivosos com sua presenca.', xp: 5, hp_loss: 3 } }
         ]
       },
       // ── 4. MEMORIAL DOS CLAS + ORC JOVEM (O15) ──
@@ -19474,12 +19474,12 @@ const FIXED_MAPS = {
             skill: 'wis', dc: 13,
             desc: 'Sabedoria (Intuicao) CD 13 — reconhecer brasoes',
             outcome_ok: {
-              text: 'Voce reconhece o brasao do Cla Picoluno: lobo branco sobre montanha. Nao foram derrotados em guerra — foram traidos durante a paz. Brakthar invadiu sem honra.',
+              text: 'Você reconhece o brasao do Cla Picoluno: lobo branco sobre montanha. Nao foram derrotados em guerra — foram traidos durante a paz. Brakthar invadiu sem honra.',
               xp: 25, _flag: 'lore_clan_picoluno_known',
               _chainTo: {
                 id: 'memorial_orc_youth_observes',
                 title: 'O Orc Jovem te Observa',
-                text: 'Enquanto voce examinava o memorial, o orc jovem ergueu a cabeca. Os olhos dele parecem... resignados. Talvez ate gratos. Ele aguarda sua proxima acao.',
+                text: 'Enquanto você examinava o memorial, o orc jovem ergueu a cabeca. Os olhos dele parecem... resignados. Talvez ate gratos. Ele aguarda sua proxima acao.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
@@ -19491,22 +19491,22 @@ const FIXED_MAPS = {
                   { label: 'Curar a ferida e oferecer alianca',
                     skill: 'wis', dc: 13,
                     desc: 'Sabedoria (Medicina) CD 13 + persuasao implicita',
-                    outcome_ok: { text: 'Voce estanca o sangue. Ele cospe no chao, depois fala devagar: "Ele caira hoje, contigo ou sem ti." Ele se levanta e oferece luta lado a lado. Vantagem no primeiro ataque vs Brakthar.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
-                    outcome_fail: { text: 'Voce cura a ferida, mas as palavras erram o tom. O orc foge mancando, sem alianca.', xp: 15 } }
+                    outcome_ok: { text: 'Você estanca o sangue. Ele cospe no chao, depois fala devagar: "Ele caira hoje, contigo ou sem ti." Ele se levanta e oferece luta lado a lado. Vantagem no primeiro ataque vs Brakthar.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
+                    outcome_fail: { text: 'Você cura a ferida, mas as palavras erram o tom. O orc foge mancando, sem alianca.', xp: 15 } }
                 ]
               }
             },
-            outcome_fail: { text: 'Voce reconhece um brasao antigo, mas nao sabe a historia por tras dele.', xp: 8 } },
+            outcome_fail: { text: 'Você reconhece um brasao antigo, mas nao sabe a historia por tras dele.', xp: 8 } },
           { label: 'Estudar o cantico do xama',
             skill: 'cha', dc: 13,
             desc: 'Carisma (Atuacao) CD 13 — decifrar e replicar a melodia tribal',
             outcome_ok: {
-              text: 'Voce ousa cantar parte do cantico. A energia rubra dos totens distantes oscila — ela responde a sua voz. Voce pode interromper Brakthar 1 turno em combate.',
+              text: 'Você ousa cantar parte do cantico. A energia rubra dos totens distantes oscila — ela responde a sua voz. Você pode interromper Brakthar 1 turno em combate.',
               xp: 25, _flag: 'can_disrupt_brakthar_chant',
               _chainTo: {
                 id: 'memorial_after_chant',
                 title: 'O Cantico Atrai Atencao',
-                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou voce: "Tu nao deveria saber isso." A reacao dele decide muito.',
+                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou você: "Tu nao deveria saber isso." A reacao dele decide muito.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
@@ -19517,7 +19517,7 @@ const FIXED_MAPS = {
                     outcome_fail: { text: 'Ele desconfia. "Estranho aprende cantico sagrado em minutos. Algo nao bate." Permanece neutro.', xp: 8 } },
                   { label: 'Ignorar o orc e seguir',
                     desc: 'Sair do memorial mantendo so o cantico',
-                    outcome_ok: { text: 'Voce sai sem dialogo. O cantico esta com voce mas sem alianca.', xp: 12 },
+                    outcome_ok: { text: 'Você sai sem dialogo. O cantico esta com você mas sem alianca.', xp: 12 },
                     outcome_fail: null }
                 ]
               }
@@ -19526,26 +19526,26 @@ const FIXED_MAPS = {
           { label: 'Aproximar do orc jovem direto',
             desc: 'Acao sem rolagem — encarar o orc ferido',
             outcome_ok: {
-              text: 'Voce encara o orc. Ele ergue os olhos. "Faca o que tem que fazer."',
+              text: 'Você encara o orc. Ele ergue os olhos. "Faca o que tem que fazer."',
               _chainTo: {
                 id: 'memorial_orc_direct',
                 title: 'Cara a Cara com o Orc Jovem',
-                text: 'Ele esta indefeso. Voce escolhe.',
+                text: 'Ele esta indefeso. Você escolhe.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
                   { label: 'Curar e oferecer alianca',
                     skill: 'wis', dc: 13,
                     desc: 'Sabedoria (Medicina) CD 13 — estancar sangramento',
-                    outcome_ok: { text: 'Voce estanca o sangue. "Brakthar matou meu pai." Ele se levanta. Aliado.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
-                    outcome_fail: { text: 'Voce cura mas as palavras erram. Ele foge mancando.', xp: 15 } },
+                    outcome_ok: { text: 'Você estanca o sangue. "Brakthar matou meu pai." Ele se levanta. Aliado.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
+                    outcome_fail: { text: 'Você cura mas as palavras erram. Ele foge mancando.', xp: 15 } },
                   { label: 'Eliminar por seguranca',
                     desc: 'Acao sem rolagem — terminar o servico',
-                    outcome_ok: { text: 'Voce termina. Um lampejo cruza o rosto dele antes da queda — alivio? gratidao? Voce nunca sabera.', xp: 10, _flag: 'orc_youth_killed' },
+                    outcome_ok: { text: 'Você termina. Um lampejo cruza o rosto dele antes da queda — alivio? gratidao? Você nunca sabera.', xp: 10, _flag: 'orc_youth_killed' },
                     outcome_fail: null },
                   { label: 'Deixar vivo, seguir adiante',
                     desc: 'Acao sem rolagem — ignorar e prosseguir',
-                    outcome_ok: { text: 'Voce o deixa onde esta. Talvez sobreviva, talvez nao.', xp: 5, _flag: 'orc_youth_spared' },
+                    outcome_ok: { text: 'Você o deixa onde esta. Talvez sobreviva, talvez nao.', xp: 5, _flag: 'orc_youth_spared' },
                     outcome_fail: null }
                 ]
               }
@@ -19563,16 +19563,16 @@ const FIXED_MAPS = {
           { label: 'Ataque furtivo por tras',
             skill: 'dex', dc: 12,
             desc: 'Destreza (Furtividade) CD 12 — surpreender com vantagem',
-            outcome_ok: { text: 'Voce desliza pela mata e ataca por tras. Surpresa total. Combate com vantagem inicial.', xp: 20, _flag: 'patrol_south_ambushed', dungeon_combat: { enemy: 'orc_raider', surprise: true } },
+            outcome_ok: { text: 'Você desliza pela mata e ataca por tras. Surpresa total. Combate com vantagem inicial.', xp: 20, _flag: 'patrol_south_ambushed', dungeon_combat: { enemy: 'orc_raider', surprise: true } },
             outcome_fail: { text: 'Galho seco crocheia. Ele gira e ataca. Combate sem vantagem.', xp: 5, hp_loss: 3, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Esgueirar-se ao redor',
             skill: 'dex', dc: 14,
             desc: 'Destreza (Furtividade) CD 14 — evitar o encontro',
-            outcome_ok: { text: 'Voce contorna a area pela vegetacao. O orc nem percebe sua presenca.', xp: 25, _flag: 'patrol_south_evaded' },
+            outcome_ok: { text: 'Você contorna a area pela vegetacao. O orc nem percebe sua presenca.', xp: 25, _flag: 'patrol_south_evaded' },
             outcome_fail: { text: 'Movimento desajeitado. Combate inevitavel.', xp: 5, hp_loss: 2, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Combate direto',
             desc: 'Acao sem rolagem — confronto justo',
-            outcome_ok: { text: 'Voce avanca. O orc range dentes e levanta o machado.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
+            outcome_ok: { text: 'Você avanca. O orc range dentes e levanta o machado.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
             outcome_fail: null }
         ]
       },
@@ -19586,24 +19586,24 @@ const FIXED_MAPS = {
           { label: 'Lancar pedra para distrair',
             skill: 'dex', dc: 11,
             desc: 'Destreza (Atletismo) CD 11 — atirar pedra longe pra desviar atencao',
-            outcome_ok: { text: 'Pedra cai longe. O orc gira e investiga. Voce passa pelo lado oposto.', xp: 20, _flag: 'patrol_east_distracted' },
-            outcome_fail: { text: 'Pedra desviou. Ele localiza voce imediatamente. Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
+            outcome_ok: { text: 'Pedra cai longe. O orc gira e investiga. Você passa pelo lado oposto.', xp: 20, _flag: 'patrol_east_distracted' },
+            outcome_fail: { text: 'Pedra desviou. Ele localiza você imediatamente. Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Confronto frontal com forca',
             skill: 'str', dc: 13,
             desc: 'Forca (Atletismo) CD 13 — investida pesada',
-            outcome_ok: { text: 'Voce avanca com peso. Primeiro golpe certeiro. Combate com vantagem.', xp: 18, dungeon_combat: { enemy: 'orc_raider', surprise: true } },
+            outcome_ok: { text: 'Você avanca com peso. Primeiro golpe certeiro. Combate com vantagem.', xp: 18, dungeon_combat: { enemy: 'orc_raider', surprise: true } },
             outcome_fail: { text: 'Ele desvia do golpe inicial. Combate sem vantagem.', xp: 5, hp_loss: 3, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Recuar e contornar',
             skill: 'wis', dc: 12,
             desc: 'Sabedoria (Sobrevivencia) CD 12 — encontrar rota alternativa',
-            outcome_ok: { text: 'Voce recua silenciosamente e encontra uma trilha pela mata. O orc continua patrulhando alheio.', xp: 22, _flag: 'patrol_east_evaded' },
-            outcome_fail: { text: 'A trilha alternativa termina em mato denso. Voce demora demais e ele te ve.', xp: 5, exh_gain: 1, dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
+            outcome_ok: { text: 'Você recua silenciosamente e encontra uma trilha pela mata. O orc continua patrulhando alheio.', xp: 22, _flag: 'patrol_east_evaded' },
+            outcome_fail: { text: 'A trilha alternativa termina em mato denso. Você demora demais e ele te ve.', xp: 5, exh_gain: 1, dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
         ]
       },
       // ── 7. PATRULHA NW (H10) — orc proximo a entrada da tenda ──
       { id: 'patrol_nw', col: 7, row: 9, _hex: 'H10',
         title: 'Orc Guardando o Caminho',
-        text: 'Um orc bloqueia parcialmente o caminho noroeste, machado em punho, atento a qualquer som. Voce esta perto da entrada da tenda do chefe.',
+        text: 'Um orc bloqueia parcialmente o caminho noroeste, machado em punho, atento a qualquer som. Você esta perto da entrada da tenda do chefe.',
         flavor: 'Patrulha · zona NW',
         category: 'danger',
         choices: [
@@ -19615,11 +19615,11 @@ const FIXED_MAPS = {
           { label: 'Persuadir como mensageiro',
             skill: 'cha', dc: 13,
             desc: 'Carisma (Engano) CD 13 — fingir trazer recado de Brakthar',
-            outcome_ok: { text: '"Brakthar mandou recado urgente. Saia do caminho." Ele hesita, depois cede. Voce passa.', xp: 25, _flag: 'patrol_nw_persuaded' },
-            outcome_fail: { text: 'Ele saca o machado. "Brakthar nunca usaria voce." Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
+            outcome_ok: { text: '"Brakthar mandou recado urgente. Saia do caminho." Ele hesita, depois cede. Você passa.', xp: 25, _flag: 'patrol_nw_persuaded' },
+            outcome_fail: { text: 'Ele saca o machado. "Brakthar nunca usaria você." Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Combate direto',
             desc: 'Acao sem rolagem — confronto justo',
-            outcome_ok: { text: 'Voce avanca. O orc range dentes.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
+            outcome_ok: { text: 'Você avanca. O orc range dentes.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
             outcome_fail: null }
         ]
       },
@@ -19702,11 +19702,11 @@ const FIXED_MAPS = {
     ambient_tips: [
       'Banners manchados de sangue tremulam ao vento.',
       'Cranios humanoides pendem de totens entalhados com runas tribais.',
-      'A fogueira do patio crepita ao longe — voce ouve passos guturais.',
+      'A fogueira do patio crepita ao longe — você ouve passos guturais.',
       'Runas rubras pulsam nas paredes da tenda do chefe.',
       'O ar cheira a sangue seco e fumaca de carne assada.',
       'Tambores de guerra ressoam do norte — o ritual do xama.',
-      'Voce ve o brilho de um machado entre as sombras.'
+      'Você ve o brilho de um machado entre as sombras.'
     ],
     dungeons: [],
     edges: [
@@ -20783,7 +20783,7 @@ function showGameOverModal(defeatData) {
     id: 'game_over_temple',
     title: '☠ DERROTADO',
     text: (
-      'Voce caiu sob ' + bossName + '. A escuridao toma conta — ate uma luz dourada penetrar.\n\n' +
+      'Você caiu sob ' + bossName + '. A escuridao toma conta — ate uma luz dourada penetrar.\n\n' +
       'Sacerdotes de Valdoria carregaram seu corpo ate o templo. Atraves de cantico e bencao, ' +
       'sua alma retorna ao mundo dos vivos. O ritual cobra um preco: a maior parte das suas Valdoritas ' +
       'foi paga pelos servicos divinos, e seu corpo esta exausto.'
@@ -20794,7 +20794,7 @@ function showGameOverModal(defeatData) {
       { id: 'accept_resurrection',
         label: '🙏 Aceitar Bencao e Retornar a Valdoria',
         desc: 'HP ' + p.hp + '/' + p.mhp + ' (metade) · MP cheio · Exaustao +1 · -' + goldLost + ' Valdoritas (' + S.gold + ' restante)',
-        outcome_ok: { text: 'Voce respira fundo. O ar fresco do templo reabilita seu peito. Os sacerdotes te encaminham pra os portoes da cidade.',
+        outcome_ok: { text: 'Você respira fundo. O ar fresco do templo reabilita seu peito. Os sacerdotes te encaminham pra os portoes da cidade.',
           _game_over_to_templo: true } }
     ]
   };
@@ -35335,11 +35335,11 @@ function applyChoiceOutcome(choice, success, total, dc) {
       p.hd = Math.max(0, p.hd - 1);
       LOG('DUNGEON', 'short_rest applied roll=1d8(' + hdRoll + ')+CON(' + conMod
         + ')=' + hpGain + ' actualGain=' + actualGain + ' hp=' + p.hp + '/' + p.mhp + ' hd=' + p.hd);
-      S.event.resolved.text = 'Voce gasta 1 HD: rolou 1d8+CON = ' + hdRoll + '+' + conMod
+      S.event.resolved.text = 'Você gasta 1 HD: rolou 1d8+CON = ' + hdRoll + '+' + conMod
         + ' = +' + actualGain + ' HP (agora ' + p.hp + '/' + p.mhp + '). HD restantes: ' + p.hd + '/' + p.mhd + '.';
     } else {
       LOG('DUNGEON', 'short_rest skipped — no HD available');
-      S.event.resolved.text = 'Voce nao tem mais dados de vida pra gastar. Descanso longo e necessario.';
+      S.event.resolved.text = 'Você nao tem mais dados de vida pra gastar. Descanso longo e necessario.';
     }
   }
   if (outcome._long_rest) {
@@ -35590,7 +35590,7 @@ function closeEventModal() {
       // sao preservadas em S._dungeonState pra journal historico, mas a entrada
       // de masmorra fica resetada caso jogador volte e tente de novo).
       S._dungeonEncountersTriggered = {};
-      dmNarrate({ text: 'Os portoes de Valdoria se abrem. Voce esta de volta — vivo, mas marcado.', type: 'event' });
+      dmNarrate({ text: 'Os portoes de Valdoria se abrem. Você esta de volta — vivo, mas marcado.', type: 'event' });
       boot();
     }, 350);
   }
@@ -35748,7 +35748,7 @@ function triggerDungeonEntry(dg) {
         '⚔ Acampamento Hostil · Brakthar, Quebrador de Cranios' +
       '</div>' +
       '<p style="font-size:12px;color:#a09484;margin:0">' +
-        'Voce vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.' +
+        'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.' +
       '</p>' +
       '</div>';
     document.getElementById('dungeon-enter').textContent = '⚔ Adentrar';
@@ -35770,7 +35770,7 @@ function triggerDungeonEntry(dg) {
       'Masmorra em desenvolvimento' +
     '</div>' +
     '<p style="font-size:11px;color:#a09484">Mapa hexagonico proprio com encontros, ' +
-       'puzzles e tesouros vira em breve. Por enquanto, voce pode adentrar para ' +
+       'puzzles e tesouros vira em breve. Por enquanto, você pode adentrar para ' +
        'registrar a descoberta mas a aventura interna ainda nao esta implementada.</p>' +
     '</div>';
   document.getElementById('dungeon-enter').textContent = 'Adentrar (em dev)';
@@ -35803,13 +35803,13 @@ function maybeRollDungeonDiscovery() {
   S.event = {
     id: '_discover_' + candidate.id,
     title: 'Algo Estranho no Caminho',
-    text: 'Voce nota marcas suspeitas — pegadas convergentes, vegetacao pisoteada, talvez vozes distantes. Algo importante pode estar oculto por aqui.',
+    text: 'Você nota marcas suspeitas — pegadas convergentes, vegetacao pisoteada, talvez vozes distantes. Algo importante pode estar oculto por aqui.',
     choices: [
       { label: 'Investigar com cuidado', skill: 'wis', dc: 13, desc: 'Procurar pistas (Sabedoria/Percepcao)',
-        outcome_ok: { text: 'Voce descobre a entrada de "' + candidate.name + '"! O caminho oculto foi revelado no mapa.' },
-        outcome_fail: { text: 'Voce nao encontra nada de interessante. Talvez tenha sido sua imaginacao.' } },
+        outcome_ok: { text: 'Você descobre a entrada de "' + candidate.name + '"! O caminho oculto foi revelado no mapa.' },
+        outcome_fail: { text: 'Você nao encontra nada de interessante. Talvez tenha sido sua imaginacao.' } },
       { label: 'Seguir em frente', desc: 'Ignorar e continuar',
-        outcome_ok: { text: 'Voce decide nao se desviar. Sua jornada continua.' } }
+        outcome_ok: { text: 'Você decide nao se desviar. Sua jornada continua.' } }
     ],
     _isDungeonDiscovery: true,
     _dungeonId: candidate.id
@@ -35862,7 +35862,7 @@ function closeDungeonOverlay(entered) {
       } catch (eMu) { console.warn('[EXPLORACAO] dungeon music failed:', eMu); }
       setupChoices._fromMap = S.mapId;
       setupChoices.map = dg.id;
-      dmNarrate({ text: 'Voce adentra ' + dg.name + '.', type: 'action' });
+      dmNarrate({ text: 'Você adentra ' + dg.name + '.', type: 'action' });
       boot();
       return;
     }
@@ -35889,7 +35889,7 @@ function triggerEdgeTransition(ed) {
     const tgtNameDung = tgtDung && tgtDung.name ? tgtDung.name : ed.label;
     title = 'Sair de ' + S.mapDef.name;
     desc = '<div style="text-align:center;line-height:1.65;font-size:13px">' +
-           '<p style="margin:0 0 12px;color:#d4c8b0">Voce abandona <strong style="color:#c4953a">' + S.mapDef.name + '</strong> e retorna a <strong style="color:#c4953a">' + tgtNameDung + '</strong>.</p>' +
+           '<p style="margin:0 0 12px;color:#d4c8b0">Você abandona <strong style="color:#c4953a">' + S.mapDef.name + '</strong> e retorna a <strong style="color:#c4953a">' + tgtNameDung + '</strong>.</p>' +
            '<div style="background:rgba(196,49,49,0.12);border:1px solid rgba(196,49,49,0.4);padding:8px 12px;border-radius:6px;margin:10px 0;color:#d49595;font-size:11px;text-align:left">' +
              '<strong>⚠ Atencao:</strong> a masmorra permanece hostil. Inimigos voltarao a postos. Voltar mais tarde significa enfrentar tudo de novo.' +
            '</div>' +
@@ -36380,24 +36380,24 @@ var LORE_FLAGS_DB = {
       desc: '"Por sangue, eu Brakthar ergui esta tribo." Destruir os totens enfraquece o ritual de fortificacao do chefe.' },
   'totem_runes_memorized':
     { title: '🔮 Runas dos Totens Memorizadas',
-      desc: 'Voce memorizou cada simbolo. Brakthar nao sera mais protegido pelos totens — voce sabe como cancelar a magia em combate.' },
+      desc: 'Você memorizou cada simbolo. Brakthar nao sera mais protegido pelos totens — você sabe como cancelar a magia em combate.' },
   'totem_broken':
     { title: '🪓 Totem Quebrado',
-      desc: 'Voce racha o totem com forca bruta. Energia rubra escapa. O ritual esta enfraquecido.' },
+      desc: 'Você racha o totem com forca bruta. Energia rubra escapa. O ritual esta enfraquecido.' },
   'totem_burst_resisted':
     { title: '✊ Resistiu a Explosao Runica',
-      desc: 'Voce cerrou os dentes. A energia rubra passou sem ferir. Os totens estao silenciosos agora — a magia de Brakthar foi quebrada.' },
+      desc: 'Você cerrou os dentes. A energia rubra passou sem ferir. Os totens estao silenciosos agora — a magia de Brakthar foi quebrada.' },
   'totem_essence_absorbed':
     { title: '🌀 Essencia Rubra Absorvida',
-      desc: 'Voce abriu a mente — uma faisca rubra entrou em voce. Memorias dos clas caidos. Conhecimento ao custo de presenca.' },
+      desc: 'Você abriu a mente — uma faisca rubra entrou em você. Memorias dos clas caidos. Conhecimento ao custo de presenca.' },
   'totem_communed':
     { title: '🕯 Comunhao com os Totens',
-      desc: 'Os espiritos ancestrais reconheceram voce. As runas continuam ativas, mas nao mais hostis a sua aproximacao.' },
+      desc: 'Os espiritos ancestrais reconheceram você. As runas continuam ativas, mas nao mais hostis a sua aproximacao.' },
   'spirit_blessing':
     { title: '✨ Bencao dos Espiritos Caidos',
-      desc: 'Os espiritos dos clas caidos abencoaram seu caminho. No combate contra Brakthar, voce sentira o peso ancestral guiando seus golpes — vantagem na primeira rodada.' },
+      desc: 'Os espiritos dos clas caidos abencoaram seu caminho. No combate contra Brakthar, você sentira o peso ancestral guiando seus golpes — vantagem na primeira rodada.' },
   'can_disrupt_brakthar_chant':
-    { title: '🎤 Voce pode Cantar o Cantico',
+    { title: '🎤 Você pode Cantar o Cantico',
       desc: 'A energia rubra dos totens responde a sua voz. Cantar durante o boss fight pode fazer Brakthar hesitar (1 turno sem ataque).' },
   // ── CLA PICOLUNO (memorial) ──
   'lore_clan_picoluno_known':
@@ -36412,30 +36412,30 @@ var LORE_FLAGS_DB = {
       desc: '"O xama esta atras da tenda, mas Brakthar esta sozinho no trono."' },
   'orc_youth_spared':
     { title: '🚶 Orc Jovem Poupado',
-      desc: 'Voce o deixou onde estava. Pode sobreviver ou nao.' },
+      desc: 'Você o deixou onde estava. Pode sobreviver ou nao.' },
   'orc_youth_killed':
     { title: '⚔ Orc Jovem Morto',
-      desc: 'Voce executou o orc ferido. Um lampejo de alivio? gratidao? cruzou o rosto antes da queda.' },
+      desc: 'Você executou o orc ferido. Um lampejo de alivio? gratidao? cruzou o rosto antes da queda.' },
   // ── SENTINELA (3 outcomes) ──
   'sentinel_killed':
     { title: '🗡 Sentinela Morta',
       desc: 'A sentinela orc dormindo na trilha foi silenciada antes de despertar.' },
   'sentinel_passed':
     { title: '👤 Sentinela Burlada',
-      desc: 'Voce passou pela sentinela adormecida sem fazer ruido.' },
+      desc: 'Você passou pela sentinela adormecida sem fazer ruido.' },
   'sentinel_avoided':
     { title: '🌿 Sentinela Contornada',
-      desc: 'Voce leu o terreno e contornou a sentinela por uma trilha paralela. Sem combate.' },
+      desc: 'Você leu o terreno e contornou a sentinela por uma trilha paralela. Sem combate.' },
   // ── GUARDAS DO PATIO ──
   'patio_evaded':
     { title: '🌑 Patio Evitado',
-      desc: 'Voce contornou o patio principal sem alertar os guardas.' },
+      desc: 'Você contornou o patio principal sem alertar os guardas.' },
   'guards_killed':
     { title: '⚔ Guardas Eliminados',
-      desc: 'Voce avancou silencioso e abateu os guardas antes do grito. O patio esta limpo.' },
+      desc: 'Você avancou silencioso e abateu os guardas antes do grito. O patio esta limpo.' },
   'guards_persuaded':
     { title: '🗣 Guardas Enganados',
-      desc: 'Voce convenceu os guardas com lábia. Eles abriram passagem sem perceber a manipulacao.' },
+      desc: 'Você convenceu os guardas com lábia. Eles abriram passagem sem perceber a manipulacao.' },
   // ── ALARME ──
   'alarm_raised':
     { title: '🚨 Alarme Geral',
@@ -36446,10 +36446,10 @@ var LORE_FLAGS_DB = {
       desc: 'O chefe orc caiu. Os 5 clas que ele unificou pelo medo estao livres.' },
   'brakthar_spared':
     { title: '🤝 Brakthar Poupado',
-      desc: '"Tu tens coragem. Vai. Mas nao volte." Voce convenceu Brakthar a deixar voce sair sem combate. Recompensa minima — vida intacta.' },
+      desc: '"Tu tens coragem. Vai. Mas nao volte." Você convenceu Brakthar a deixar você sair sem combate. Recompensa minima — vida intacta.' },
   'brakthar_loot_taken':
     { title: '🪓 Pilhagem do Chefe',
-      desc: 'Voce removeu um item lendario do corpo de Brakthar — o trofeu da sua classe.' },
+      desc: 'Você removeu um item lendario do corpo de Brakthar — o trofeu da sua classe.' },
   'dungeon_completed':
     { title: '✓ Masmorra Completada',
       desc: 'A Tenda do Chefe Brakthar esta liberada. Sua lenda comeca aqui.' }

@@ -154,7 +154,7 @@ function updateNavBtn() {
 var btn = document.getElementById('btnNext');
 var backBtn = document.getElementById('btnBack');
 if (cur === screens.length - 1) {
-btn.textContent = '⚔️ Confirmar Evolucao';
+btn.textContent = '⚔️ Confirmar Evolução';
 } else {
 btn.textContent = 'Continuar ▶';
 }
@@ -239,10 +239,10 @@ return `${n + b}~${n * d + b}`;
 function buildSummary(el) {
 const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
 let html = `
-<div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Voce sente o poder fluindo...</div>
+<div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
 <div class="lvl-banner">
 <div class="lvl-banner-level">${P.level}</div>
-<div class="lvl-banner-title">Novo Nivel Alcancado!</div>
+<div class="lvl-banner-title">Novo Nível Alcançado!</div>
 <div class="lvl-banner-class">${info.name} &mdash; ${P.name}</div>
 <div class="lvl-gains">
 ${P.hp_gain ? `<div class="lvl-gain hp">\u2764\ufe0f +${P.hp_gain} HP</div>` : ''}
@@ -255,7 +255,7 @@ ${P.mp_gain ? `<div class="lvl-gain mp">\ud83d\udd37 +${P.mp_gain} ${info.resour
 if (P.needs_subclass) {
 html += `<div class="pending-item">
 <div class="pending-icon">\ud83c\udff0</div>
-<div class="pending-text"><b>Subclasse</b><small>Escolha obrigatoria no nivel 3+</small></div>
+<div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória no nível 3+</small></div>
 <div class="pending-badge">1</div>
 </div>`;
 }
@@ -279,13 +279,13 @@ el.innerHTML = html;
 function buildSubclass(el) {
 const subs = SUBCLASSES[P.hero_class] || {};
 const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
-let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializacao oferece poderes unicos...</div>
+let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especialização oferece poderes únicos...</div>
 <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
-<div class="hint">Escolha sua especializacao</div>
+<div class="hint">Escolha sua especialização</div>
 <div id="subclassList">`;
 const subEntries = Object.entries(subs);
 if (subEntries.length === 0) {
-html += '<div class="empty-msg">Subclasses nao disponiveis para este nivel.</div>';
+html += '<div class="empty-msg">Subclasses nao disponíveis para este nível.</div>';
 } else {
 for (const [scId, sc] of subEntries) {
 const isSel = sel.subclass === scId;
@@ -313,11 +313,11 @@ html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;l
 const feats = sc.features || {};
 const levels = Object.keys(feats).sort((a, b) => parseInt(a,10) - parseInt(b,10));
 if (levels.length > 0) {
-html += '<div class="section-title">Habilidades por Nivel</div>';
+html += '<div class="section-title">Habilidades por Nível</div>';
 for (const lv of levels) {
 const f = feats[lv];
 html += `<div class="sc-feature">
-<div class="sc-feature-level">Nivel ${lv}</div>
+<div class="sc-feature-level">Nível ${lv}</div>
 <div class="sc-feature-name">${f.name}</div>
 ${f.desc ? `<div class="sc-feature-desc">${f.desc}</div>` : ''}
 </div>`;
@@ -347,7 +347,7 @@ const allocated = Object.values(sel.asi).reduce((a, b) => a + b, 0);
 const remaining = asiPts - allocated;
 const availableFeats = getAvailableFeats();
 const hasFeats = Object.keys(availableFeats).length > 0 && totalPts >= 2;
-let html = '<div class="dm-bubble">Distribua sua experiencia adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
+let html = '<div class="dm-bubble">Distribua sua experiência adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
 if (hasFeats) {
 html += `<div class="mode-toggle">
 <button class="mode-toggle-btn${asiMode === 'asi' ? ' active' : ''}" onclick="setAsiMode('asi')">\ud83d\udcaa Atributos</button>
@@ -422,7 +422,7 @@ html += `<button class="v-btn v-btn-secondary" style="width:100%;margin-top:12px
 } else {
 const featEntries = Object.entries(availableFeats);
 if (featEntries.length === 0) {
-html += '<div class="empty-msg">Nenhum talento disponivel para sua classe.</div>';
+html += '<div class="empty-msg">Nenhum talento disponível para sua classe.</div>';
 } else {
 html += '<div class="feat-scroll-list">';
 for (const [fid, f] of featEntries) {
@@ -523,7 +523,7 @@ function buildSkills(el) {
 const available = getAvailableSkills();
 const needed = Math.min(P.pending_skills, available.length);
 const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
-let html = `<div class="dm-bubble">Novas tecnicas de combate estao ao seu alcance. Escolha com sabedoria.</div>`;
+let html = `<div class="dm-bubble">Novas técnicas de combate estao ao seu alcance. Escolha com sabedoria.</div>`;
 html += `<div class="section-title">\u26a1 Habilidades</div>`;
 html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
 for (const s of available) {
@@ -538,7 +538,7 @@ ${s.passive ? '<span class="choice-card-badge badge-passive">Passiva</span>' :
 </div>`;
 }
 if (available.length === 0) {
-html += '<div class="empty-msg">Nenhuma habilidade disponivel para escolher.</div>';
+html += '<div class="empty-msg">Nenhuma habilidade disponível para escolher.</div>';
 }
 el.innerHTML = html;
 }
@@ -556,7 +556,7 @@ html += '<span class="choice-card-badge badge-passive">Passiva</span>';
 } else {
 html += `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`;
 }
-html += `<span class="choice-card-badge badge-level">Nivel ${s.level}</span>`;
+html += `<span class="choice-card-badge badge-level">Nível ${s.level}</span>`;
 if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
 html += '</div>';
 if (s.effect) html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px">\u2728 ${s.effect}</div>`;
@@ -578,7 +578,7 @@ if (idx >= 0) {
 sel.skills.splice(idx, 1);
 } else {
 if (sel.skills.length >= needed) {
-_showValidation(`Voce so pode escolher ${needed} habilidade(s)`);
+_showValidation(`Você só pode escolher ${needed} habilidade(s)`);
 return;
 }
 sel.skills.push(sid);
@@ -595,8 +595,8 @@ return null;
 }
 function buildReview(el) {
 const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
-let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, nao ha como voltar.</div>`;
-html += `<div class="section-title">\ud83d\udcdc Resumo da Evolucao</div>`;
+let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, não há como voltar.</div>`;
+html += `<div class="section-title">\ud83d\udcdc Resumo da Evolução</div>`;
 html += `<div class="review-section">
 <div class="review-section-title">\u2764\ufe0f Vitalidade</div>`;
 if (P.hp_gain) {
@@ -661,14 +661,14 @@ html += `<div class="review-row"><span class="review-label">\u26a1</span>
 }
 html += '</div>';
 }
-html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolucao</div>';
+html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolução</div>';
 el.innerHTML = html;
 }
 function resetSubmitState() {
 _submitted = false;
 var btn = document.getElementById('btnNext');
 btn.disabled = false;
-btn.textContent = '⚔️ Confirmar Evolucao';
+btn.textContent = '⚔️ Confirmar Evolução';
 document.getElementById('loadingOverlay').classList.remove('active');
 }
 var _submitted = false;
@@ -727,11 +727,11 @@ return;
 } else if (tg && tg.close) {
 window.__valdoria_transitioning=true;tg.close();
 } else {
-alert('Evolucao confirmada!');
+alert('Evolução confirmada!');
 }
 } else {
 resetSubmitState();
-showFatalError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
+showFatalError('Erro ao aplicar evolução: ' + (data.error || 'Desconhecido'));
 }
 }).catch(function(e) {
 resetSubmitState();
@@ -750,7 +750,7 @@ if (document.visibilityState !== 'hidden') { resetSubmitState(); }
 if(window._dbg)console.debug('Level-up payload:', JSON.stringify(payload, null, 2));
 setTimeout(function() {
 resetSubmitState();
-alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+alert('Evolução confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
 }, 800);
 }
 } catch (e) {
