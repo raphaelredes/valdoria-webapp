@@ -47211,6 +47211,13 @@ function _renderEncounterPopup(enc, originalAction, player) {
   }
 
   // Build DOM
+  // 2026-05-18 BUG FIX (Chrome MCP review): remover overlays orfaos antes de
+  // criar novo. Sem isso, multiplas chamadas a _renderEncounterPopup empilham
+  // 2-3+ '#encounter-overlay' no DOM (cada um zindex 9500), criando confusao
+  // visual e leak de listeners. Reproducido: clicar Banco -> _cityCheckDiscovery
+  // dispara discovery popup; se ja havia um popup aberto, agora ha 2.
+  var _stale = document.querySelectorAll('#encounter-overlay');
+  if (_stale.length) _stale.forEach(function(el){ try { el.remove(); } catch(_){} });
   var ov = document.createElement('div');
   ov.id = 'encounter-overlay';
 
