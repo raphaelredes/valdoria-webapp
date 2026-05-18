@@ -25,7 +25,7 @@
   background-repeat: no-repeat;
   background-position: center;
   /* Glow dourado sutil ao redor da moeda (destaque em UI escura) */
-  filter: drop-shadow(0 0 2px rgba(196, 149, 58, 0.5));
+  filter: drop-shadow(0 0 2px var(--v-gold-50));
 }
 
 /* CSS gradient/border/text "V" antigos foram REMOVIDOS — agora o PNG da
@@ -42,7 +42,7 @@
 .vi-coin.lg {
   width: 22px;
   height: 22px;
-  filter: drop-shadow(0 0 3px rgba(196, 149, 58, 0.6));
+  filter: drop-shadow(0 0 3px var(--v-gold-60));
 }
 
 /* Extra-large — headers/banners (36px, era 32) */

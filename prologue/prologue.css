@@ -624,7 +624,7 @@
 
   text-align: left;
 
-  transition: transform 0.1s, border-color 0.15s, background 0.15s;
+  transition: transform var(--v-transition-fast), border-color var(--v-transition-fast), background var(--v-transition-fast);
 
   min-height: 44px;
 
@@ -870,7 +870,7 @@
 
   background: var(--v-gold-10);
 
-  transition: all 0.3s ease;
+  transition: all var(--v-transition-base);
 
 }
 
@@ -1280,7 +1280,7 @@
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  transition: all var(--v-transition);
 
   text-align: left;
 
@@ -1326,7 +1326,7 @@
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  transition: all var(--v-transition);
 
   text-transform: uppercase;
 
@@ -1390,7 +1390,7 @@
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  transition: all var(--v-transition);
 
 }
 
