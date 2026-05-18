@@ -12144,11 +12144,11 @@ function _showStreakPopup(p){
 var DAILY_REWARDS = [
   { day: 1, gold: 10,  xp: 25, item: null },
   { day: 2, gold: 15,  xp: 30, item: null },
-  { day: 3, gold: 25,  xp: 40, item: { name: 'Poção de Cura', qty: 1, icon: 'ic-it-poção-cura' } },
+  { day: 3, gold: 25,  xp: 40, item: { name: 'Poção de Cura', qty: 1, icon: 'ic-it-pocao-cura' } },
   { day: 4, gold: 30,  xp: 35, item: null },
   { day: 5, gold: 40,  xp: 45, item: null },
   { day: 6, gold: 50,  xp: 50, item: null },
-  { day: 7, gold: 100, xp: 75, item: { name: 'Poção de Cura Maior', qty: 1, icon: 'ic-it-poção-cura-maior' } }
+  { day: 7, gold: 100, xp: 75, item: { name: 'Poção de Cura Maior', qty: 1, icon: 'ic-it-pocao-cura-maior' } }
 ];
 
 function _dailyLoginData(){
@@ -15986,7 +15986,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',    name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric' },
   { id: 'rel_aldwin',  icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',    name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin' },
   { id: 'rel_elara',   icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',      name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara' },
-  { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>', name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne' },
+  { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-ach-forjador"/></svg>', name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne' },
   { id: 'rel_mirena',  icon: '<svg class="v-heraldic"><use href="#ic-druida"/></svg>',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena' },
   { id: 'rel_tavira',  icon: '<svg class="v-heraldic"><use href="#ic-paladino"/></svg>',  name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira' },
   { id: 'rel_eirik',   icon: '<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',      name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik' }
@@ -27556,7 +27556,7 @@ var CANON_MARKET_SHOPS = {
   thorne: {
     npc: 'Thorne Forja-de-Ferro',
     role: 'Ferreiro',
-    icon: _heralIco('ic-stat-attack'),
+    icon: _heralIco('ic-ach-forjador'),
     greeting: '"Aço novo? Tem o que precisa aqui." — Thorne larga o martelo.',
     // canonical: PHB Cap.5 — armas + armaduras + escudos disponíveis em mercado
     items: [
@@ -27588,7 +27588,7 @@ var CANON_MARKET_SHOPS = {
   mirena: {
     npc: 'Mirena Folha-Verde',
     role: 'Alquimista',
-    icon: _heralIco('ic-poção'),
+    icon: _heralIco('ic-druida'),
     greeting: '"Poções? Venenos? Diga seu mal." — Mirena ajusta os óculos.',
     // canonical: DMG Cap.7 — poções consumíveis com efeitos D&D 5e
     items: [
@@ -28200,7 +28200,14 @@ function _bankShowItemListPopup(opts){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = opts.icon + ' ' + opts.title;
+  // USER REPORT 2026-05-18: header escapa SVG via textContent.
+  // Mesmo padrao do _showShopPopup / _showInfoPopup (linha 17592).
+  if (titleEl) {
+    var iconStr = opts.icon || '';
+    var titleStr = opts.title || '';
+    if (iconStr && iconStr.indexOf('<') === 0) titleEl.innerHTML = iconStr + ' ' + titleStr;
+    else titleEl.textContent = iconStr + ' ' + titleStr;
+  }
   bodyEl.innerHTML = '';
   var html = '<div class="city-subscreen">'
     + '<p class="subscreen-flavor">' + (opts.flavor || '') + '</p>'
@@ -35109,19 +35116,21 @@ function _shopSortCompare(a, b){
 // Aliases hard-coded mapeiam casos especiais que não slugify trivialmente.
 var _HERALDIC_ITEM_ALIASES = {
   // Alias name → name in catalog (or direct ic-it-id)
-  'Couro Batido':           'Couro Batido',           // ic-it-couro-batido ✓ direto
-  'Giboia de Pele':         'Gibao de Peles',         // ic-it-gibao-peles
-  'Brunea de Aneis':        'Brunea Aneis',           // ic-it-brunea-aneis
-  'Peitoral de Mithril':    'ic-it-peitoral-furia-montanhas',  // sem peitoral mithril; usa furia montanhas
+  // X-6.5.51CA (2026-05-18): fix de aliases broken — direct IDs onde slug falha.
+  'Couro Batido':           'ic-it-couro-batido',
+  'Giboia de Pele':         'ic-it-gibao-peles',      // FIX: alias antigo apontava pra nome 'Gibao de Peles' que falhava slug
+  'Brunea de Aneis':        'ic-it-brunea-aneis',
+  'Brunea de Anéis':        'ic-it-brunea-aneis',     // FIX: variante com acento
+  'Peitoral de Mithril':    'ic-it-base-breastplate', // FIX: era furia-montanhas (visualmente errado pra mithril)
   'Cota de Talas':          'ic-it-cota-talas',
   'Cota de Escamas':        'ic-it-cota-escamas',
   'Cota de Malha':          'ic-it-cota-malha',
-  'Espada Élfica':          'ic-it-espada-longa',     // genérico élfica
-  'Espada de Mithril':      'ic-it-espada-longa-flamejante', // visualmente épica
+  'Espada Élfica':          'ic-it-espada-longa-gelida', // FIX: gelida (lamina azulada elfica) > longa generica
+  'Espada de Mithril':      'ic-it-espada-longa-trovejante', // FIX: trovejante (azul/silver eletrico) > flamejante
   'Elmo de Cavaleiro':      'ic-it-base-knight-helm',
-  'Manoplas de Ferro':      'ic-it-base-glove',       // luvas genéricas
+  'Manoplas de Ferro':      'ic-it-base-glove',
   'Botas Pesadas':          'ic-it-botas-pesadas',
-  'Grevas de Ferro':        'ic-it-base-boot',
+  'Grevas de Ferro':        'ic-it-base-splint-mail', // FIX: era base-boot (boot != grevas/leg-armor)
   'Pedra de Afiar':         'ic-it-pedra-afiar',
   'Kit de Reparo':          'ic-it-kit-reparo',
   // Mirena items
@@ -35221,7 +35230,14 @@ function _showShopPopup(npcId){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = shop.icon + ' ' + shop.npc + ' — ' + shop.role;
+  // USER REPORT 2026-05-18: header da loja mostrava marcacao SVG como texto literal.
+  // Root cause: textContent escapa HTML. shop.icon contem SVG via _heralIco().
+  // Fix: mesmo padrao do _showInfoPopup (linha 17592) — innerHTML quando icon tem '<'.
+  if (titleEl) {
+    var titleHtml = shop.icon + ' ' + shop.npc + ' — ' + shop.role;
+    if (shop.icon && shop.icon.indexOf('<') === 0) titleEl.innerHTML = titleHtml;
+    else titleEl.textContent = titleHtml;
+  }
   // Reset shop filter ao abrir uma loja diferente
   window._currentShopNpcId = npcId;
   _renderShopPopup();
@@ -39383,80 +39399,87 @@ var SUBSCREEN_DATA = {
   // ========== SUB-SUB-SCREENS — MERCADO (5 NPCs) ==========
   'market_thorne': {
     // canonical: market_npcs.py FIXED_NPCS['blacksmith'] — 12 itens
-    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-guerreiro"/></svg> Thorne — Ferreiro',
+    // X-6.5.51CA (2026-05-18): icones ic-it-* canonical do sprite. NUNCA usar
+    // ic-mochila ou ic-stat-attack genericos pra items — reusar catalogo de
+    // 519 IDs do heraldic-items-sprite.js. Ver heraldic-items-icons-index.md.
+    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-ach-forjador"/></svg> Thorne — Ferreiro',
     flavor: '"Aço bom não se forja sozinho, rapaz." — soa de bigornas + cheiro de metal aquecido.',
     buttons: [
-      [_heralIco('ic-mochila'), 'Pedra de Afiar', '100 <span class="vi vi-coin sm"></span> — +1 dano próx. ataque', 'buy_thorne_whetstone'],
-      [_heralIco('ic-mochila'), 'Kit de Reparo', '150 <span class="vi vi-coin sm"></span> — restaura 5 HP', 'buy_thorne_repair'],
-      [_heralIco('ic-stat-attack'), 'Espada de Treino', '15 <span class="vi vi-coin sm"></span> — 1d8 cortante', 'buy_thorne_sword'],
-      [_heralIco('ic-mochila'), 'Cajado de Salgueiro', '15 <span class="vi vi-coin sm"></span> — 1d6 contund. + arcano', 'buy_thorne_staff'],
-      [_heralIco('ic-mochila'), 'Adaga Balanceada', '12 <span class="vi vi-coin sm"></span> — 1d4 perfurante leve', 'buy_thorne_dagger'],
-      [_heralIco('ic-mochila'), 'Arco de Caça', '18 <span class="vi vi-coin sm"></span> — 1d6 perfurante 24/96m', 'buy_thorne_bow'],
-      [_heralIco('ic-mochila'), 'Espada Longa', '15 <span class="vi vi-coin sm"></span> — 1d8 versátil (1d10)', 'buy_thorne_longsword'],
-      [_heralIco('ic-mochila'), 'Martelo de Guerra', '15 <span class="vi vi-coin sm"></span> — 1d8 contund. versátil', 'buy_thorne_hammer'],
-      [_heralIco('ic-mochila'), 'Cota de Malha', '75 <span class="vi vi-coin sm"></span> — CA 16 pesada', 'buy_thorne_armor'],
-      [_heralIco('ic-mochila'), 'Giboia de Pele', '40 <span class="vi vi-coin sm"></span> — CA 12 + DES (máx +2)', 'buy_thorne_hide'],
-      [_heralIco('ic-mochila'), 'Elmo Enferrujado', '25 <span class="vi vi-coin sm"></span> — +2 CA cabeça', 'buy_thorne_helm'],
-      [_heralIco('ic-mochila'), 'Grevas de Ferro', '45 <span class="vi vi-coin sm"></span> — +2 CA pernas', 'buy_thorne_greaves'],
-      [_heralIco('ic-mochila'), 'Botas Pesadas', '35 <span class="vi vi-coin sm"></span> — +1 CA + estabilidade', 'buy_thorne_boots']
+      [_heralIco('ic-it-pedra-afiar'),       'Pedra de Afiar',     '100 <span class="vi vi-coin sm"></span> — +1 dano próx. ataque', 'buy_thorne_whetstone'],
+      [_heralIco('ic-it-kit-reparo'),        'Kit de Reparo',      '150 <span class="vi vi-coin sm"></span> — restaura 5 HP', 'buy_thorne_repair'],
+      [_heralIco('ic-it-espada-treino'),     'Espada de Treino',   '15 <span class="vi vi-coin sm"></span> — 1d8 cortante', 'buy_thorne_sword'],
+      [_heralIco('ic-it-cajado-salgueiro'),  'Cajado de Salgueiro','15 <span class="vi vi-coin sm"></span> — 1d6 contund. + arcano', 'buy_thorne_staff'],
+      [_heralIco('ic-it-adaga-balanceada'),  'Adaga Balanceada',   '12 <span class="vi vi-coin sm"></span> — 1d4 perfurante leve', 'buy_thorne_dagger'],
+      [_heralIco('ic-it-arco-caca'),         'Arco de Caça',       '18 <span class="vi vi-coin sm"></span> — 1d6 perfurante 24/96m', 'buy_thorne_bow'],
+      [_heralIco('ic-it-espada-longa'),      'Espada Longa',       '15 <span class="vi vi-coin sm"></span> — 1d8 versátil (1d10)', 'buy_thorne_longsword'],
+      [_heralIco('ic-it-martelo-guerra'),    'Martelo de Guerra',  '15 <span class="vi vi-coin sm"></span> — 1d8 contund. versátil', 'buy_thorne_hammer'],
+      [_heralIco('ic-it-cota-malha'),        'Cota de Malha',      '75 <span class="vi vi-coin sm"></span> — CA 16 pesada', 'buy_thorne_armor'],
+      [_heralIco('ic-it-gibao-peles'),       'Giboia de Pele',     '40 <span class="vi vi-coin sm"></span> — CA 12 + DES (máx +2)', 'buy_thorne_hide'],
+      [_heralIco('ic-it-elmo-enferrujado'),  'Elmo Enferrujado',   '25 <span class="vi vi-coin sm"></span> — +2 CA cabeça', 'buy_thorne_helm'],
+      [_heralIco('ic-it-base-splint-mail'),  'Grevas de Ferro',    '45 <span class="vi vi-coin sm"></span> — +2 CA pernas', 'buy_thorne_greaves'],
+      [_heralIco('ic-it-botas-pesadas'),     'Botas Pesadas',      '35 <span class="vi vi-coin sm"></span> — +1 CA + estabilidade', 'buy_thorne_boots']
     ]
   },
   'market_mirena': {
     // canonical: market_npcs.py FIXED_NPCS['alchemist'] — 7 itens (4 healing tiers + 3 combat)
+    // X-6.5.51CA (2026-05-18): icones ic-it-* canonical do sprite.
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-druida"/></svg> Mirena — Alquimista',
     flavor: '"Cuidado com os frascos! Eles são frágeis." — frascos coloridos + cheiro de ervas e enxofre.',
     buttons: [
-      [_heralIco('ic-poção'), 'Poção de Cura', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'buy_mirena_potion'],
-      [_heralIco('ic-poção'), 'Poção de Cura Maior', '150 <span class="vi vi-coin sm"></span> — 4d4+4 HP', 'buy_mirena_potion_great'],
-      [_heralIco('ic-poção'), 'Poção de Cura Superior', '450 <span class="vi vi-coin sm"></span> — 8d4+8 HP', 'buy_mirena_potion_superior'],
-      [_heralIco('ic-poção'), 'Poção de Cura Suprema', '1350 <span class="vi vi-coin sm"></span> — 10d4+20 HP radiante', 'buy_mirena_potion_suprema'],
-      [_heralIco('ic-mochila'), 'Fogo Alquímico', '50 <span class="vi vi-coin sm"></span> — 1d4 fogo + queima', 'buy_mirena_alchemist_fire'],
-      [_heralIco('ic-mochila'), 'Frasco de Ácido', '25 <span class="vi vi-coin sm"></span> — 2d6 ácido', 'buy_mirena_acid'],
-      [_heralIco('ic-mochila'), 'Água Benta', '25 <span class="vi vi-coin sm"></span> — 2d6 radiante undead', 'buy_mirena_holy_water']
+      [_heralIco('ic-it-pocao-cura'),          'Poção de Cura',         '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'buy_mirena_potion'],
+      [_heralIco('ic-it-pocao-cura-maior'),    'Poção de Cura Maior',   '150 <span class="vi vi-coin sm"></span> — 4d4+4 HP', 'buy_mirena_potion_great'],
+      [_heralIco('ic-it-pocao-cura-superior'), 'Poção de Cura Superior','450 <span class="vi vi-coin sm"></span> — 8d4+8 HP', 'buy_mirena_potion_superior'],
+      [_heralIco('ic-it-pocao-cura-suprema'),  'Poção de Cura Suprema', '1350 <span class="vi vi-coin sm"></span> — 10d4+20 HP radiante', 'buy_mirena_potion_suprema'],
+      [_heralIco('ic-it-fogo-alquimico'),      'Fogo Alquímico',        '50 <span class="vi vi-coin sm"></span> — 1d4 fogo + queima', 'buy_mirena_alchemist_fire'],
+      [_heralIco('ic-it-frasco-acido'),        'Frasco de Ácido',       '25 <span class="vi vi-coin sm"></span> — 2d6 ácido', 'buy_mirena_acid'],
+      [_heralIco('ic-it-agua-benta'),          'Água Benta',            '25 <span class="vi vi-coin sm"></span> — 2d6 radiante undead', 'buy_mirena_holy_water']
     ]
   },
   'market_corvus': {
-    header: '🗺️ Mestre Corvus — Cartógrafo',
+    // X-6.5.51CA (2026-05-18): icones ic-it-* canonical do sprite.
+    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-escriba"/></svg> Mestre Corvus — Cartógrafo',
     flavor: '<i>"Mapas simples das terras próximas, vendo a qualquer viajante. Mas regiões perigosas exigem que prove que sobreviverá pra usá-los."</i>',
     buttons: [
       // canonical: cartographer_data.py REGIONAL_MAP_CATALOG (7 mapas regionais por tier)
-      [_heralIco('ic-cartografia'), 'Mapa das Planícies', '30 <span class="vi vi-coin sm"></span> — campos e acampamentos', 'buy_corvus_map_plains'],
-      [_heralIco('ic-cartografia'), 'Mapa da Floresta', '35 <span class="vi vi-coin sm"></span> — florestas e ruínas', 'buy_corvus_map_forest'],
-      [_heralIco('ic-cartografia'), 'Mapa do Deserto', '20 <span class="vi vi-coin sm"></span> — areias e dunas', 'buy_corvus_map_desert'],
-      [_heralIco('ic-cartografia'), 'Mapa do Pântano', '40 <span class="vi vi-coin sm"></span> — exige SAB DC 10', 'buy_corvus_map_swamp'],
-      [_heralIco('ic-cartografia'), 'Mapa do Ermo Gelado', '30 <span class="vi vi-coin sm"></span> — exige CON DC 10', 'buy_corvus_map_frozen'],
-      [_heralIco('ic-cartografia'), 'Mapa das Montanhas', '60 <span class="vi vi-coin sm"></span> — picos e cavernas', 'buy_corvus_map_mountains'],
-      [_heralIco('ic-cartografia'), 'Mapa Vulcânico', '55 <span class="vi vi-coin sm"></span> — terras vulcânicas', 'buy_corvus_map_volcanic'],
-      [_heralIco('ic-cartografia'), 'Mapa-Mestre', '200 <span class="vi vi-coin sm"></span> — exige 5+ regionais + INT 15', 'buy_corvus_master_map'],
+      [_heralIco('ic-it-mapa-planicies'),    'Mapa das Planícies',   '30 <span class="vi vi-coin sm"></span> — campos e acampamentos', 'buy_corvus_map_plains'],
+      [_heralIco('ic-it-mapa-floresta'),     'Mapa da Floresta',     '35 <span class="vi vi-coin sm"></span> — florestas e ruínas', 'buy_corvus_map_forest'],
+      [_heralIco('ic-it-mapa-deserto'),      'Mapa do Deserto',      '20 <span class="vi vi-coin sm"></span> — areias e dunas', 'buy_corvus_map_desert'],
+      [_heralIco('ic-it-mapa-pantano'),      'Mapa do Pântano',      '40 <span class="vi vi-coin sm"></span> — exige SAB DC 10', 'buy_corvus_map_swamp'],
+      [_heralIco('ic-it-mapa-ermo-gelado'),  'Mapa do Ermo Gelado',  '30 <span class="vi vi-coin sm"></span> — exige CON DC 10', 'buy_corvus_map_frozen'],
+      [_heralIco('ic-it-mapa-montanhas'),    'Mapa das Montanhas',   '60 <span class="vi vi-coin sm"></span> — picos e cavernas', 'buy_corvus_map_mountains'],
+      [_heralIco('ic-it-mapa-vulcanico'),    'Mapa Vulcânico',       '55 <span class="vi vi-coin sm"></span> — terras vulcânicas', 'buy_corvus_map_volcanic'],
+      [_heralIco('ic-it-mapa-valdoria'),     'Mapa-Mestre',          '200 <span class="vi vi-coin sm"></span> — exige 5+ regionais + INT 15', 'buy_corvus_master_map'],
       // canonical: market_npcs.py FIXED_NPCS['cartographer'] — 4 shop items
-      [_heralIco('ic-mochila'), 'Rotas Comerciais', '75 <span class="vi vi-coin sm"></span> — revela 2 locais no mapa', 'buy_corvus_routes'],
-      [_heralIco('ic-mochila'), 'Ferramentas Navegação', '25 <span class="vi vi-coin sm"></span> — proficiência em terrenos', 'buy_corvus_navtools'],
-      [_heralIco('ic-mochila'), 'Luneta', '50 <span class="vi vi-coin sm"></span> — observa à distância', 'buy_corvus_spyglass'],
-      [_heralIco('ic-mochila'), 'Bússola Mágica', '120 <span class="vi vi-coin sm"></span> — não se perde em masmorra', 'buy_corvus_compass']
+      [_heralIco('ic-it-fragmento-mapa'),    'Rotas Comerciais',     '75 <span class="vi vi-coin sm"></span> — revela 2 locais no mapa', 'buy_corvus_routes'],
+      [_heralIco('ic-it-bussola-magica'),    'Ferramentas Navegação','25 <span class="vi vi-coin sm"></span> — proficiência em terrenos', 'buy_corvus_navtools'],
+      [_heralIco('ic-it-luneta'),            'Luneta',               '50 <span class="vi vi-coin sm"></span> — observa à distância', 'buy_corvus_spyglass'],
+      [_heralIco('ic-it-bussola-magica'),    'Bússola Mágica',       '120 <span class="vi vi-coin sm"></span> — não se perde em masmorra', 'buy_corvus_compass']
     ]
   },
   'market_velithra': {
     // canonical: market_npcs.py FIXED_NPCS['jeweler'] — 6 gemas (3 Tier 1 + 3 Tier 2)
-    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-banqueiro"/></svg> Velithra — Joalheira',
+    // X-6.5.51CA (2026-05-18): icones ic-it-* canonical do sprite.
+    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-ach-colecionador"/></svg> Velithra — Joalheira',
     flavor: '"Gemas raras e encaixes perfeitos. Cada pedra tem seu poder."',
     buttons: [
-      [_heralIco('ic-mochila'), 'Turquesa', '75 <span class="vi vi-coin sm"></span> — Gema Tier 1: +2 HP máximo', 'buy_velithra_turquoise'],
-      [_heralIco('ic-mochila'), 'Quartzo', '50 <span class="vi vi-coin sm"></span> — Gema Tier 1: +1 MP máximo', 'buy_velithra_quartzo'],
-      [_heralIco('ic-mochila'), 'Ônix', '100 <span class="vi vi-coin sm"></span> — Gema Tier 1: +1 saves', 'buy_velithra_onix'],
-      [_heralIco('ic-mochila'), 'Ametista', '250 <span class="vi vi-coin sm"></span> — Gema Tier 2: +3 HP máximo', 'buy_velithra_amethyst'],
-      [_heralIco('ic-mochila'), 'Jade', '200 <span class="vi vi-coin sm"></span> — Gema Tier 2: +2 MP máximo', 'buy_velithra_jade'],
-      [_heralIco('ic-mochila'), 'Pérola', '500 <span class="vi vi-coin sm"></span> — Gema Tier 2: +1 CA', 'buy_velithra_pearl']
+      [_heralIco('ic-it-turquesa'),  'Turquesa', '75 <span class="vi vi-coin sm"></span> — Gema Tier 1: +2 HP máximo', 'buy_velithra_turquoise'],
+      [_heralIco('ic-it-quartzo'),   'Quartzo',  '50 <span class="vi vi-coin sm"></span> — Gema Tier 1: +1 MP máximo', 'buy_velithra_quartzo'],
+      [_heralIco('ic-it-onix'),      'Ônix',     '100 <span class="vi vi-coin sm"></span> — Gema Tier 1: +1 saves', 'buy_velithra_onix'],
+      [_heralIco('ic-it-ametista'),  'Ametista', '250 <span class="vi vi-coin sm"></span> — Gema Tier 2: +3 HP máximo', 'buy_velithra_amethyst'],
+      [_heralIco('ic-it-jade'),      'Jade',     '200 <span class="vi vi-coin sm"></span> — Gema Tier 2: +2 MP máximo', 'buy_velithra_jade'],
+      [_heralIco('ic-it-perola'),    'Pérola',   '500 <span class="vi vi-coin sm"></span> — Gema Tier 2: +1 CA', 'buy_velithra_pearl']
     ]
   },
   'market_bjorn': {
-    header: _heralIco('ic-mochila', null, '20px') + ' Bjorn — Seleiro / Equipamento de Acampamento',
+    // X-6.5.51CA (2026-05-18): icones ic-it-* canonical do sprite.
+    header: '<svg class="v-heraldic v-h-banner"><use href="#ic-mochila"/></svg> Bjorn — Seleiro / Equipamento de Acampamento',
     flavor: 'Couros, cordas, barracas. Bjorn é taciturno mas sabe tudo sobre viajar.',
     buttons: [
-      [_heralIco('ic-mochila'), 'Barraca', '35 <span class="vi vi-coin sm"></span> — 5 usos LR', 'buy_bjorn_tent'],
-      [_heralIco('ic-mochila'), 'Saco de Dormir', '15 <span class="vi vi-coin sm"></span> — +1 HP em SR', 'buy_bjorn_sleeping'],
-      [_heralIco('ic-mochila'), 'Corda 15m', '10 <span class="vi vi-coin sm"></span> — +2 STR/DEX', 'buy_bjorn_rope'],
-      [_heralIco('ic-mochila'), 'Pederneira', '5 <span class="vi vi-coin sm"></span> — fazer fogo', 'buy_bjorn_flint'],
-      [_heralIco('ic-mochila'), 'Rações 7 dias', '10 <span class="vi vi-coin sm"></span> — viagem', 'buy_bjorn_rations']
+      [_heralIco('ic-it-barraca'),       'Barraca',        '35 <span class="vi vi-coin sm"></span> — 5 usos LR', 'buy_bjorn_tent'],
+      [_heralIco('ic-it-saco-dormir'),   'Saco de Dormir', '15 <span class="vi vi-coin sm"></span> — +1 HP em SR', 'buy_bjorn_sleeping'],
+      [_heralIco('ic-it-corda-canhamo'), 'Corda 15m',      '10 <span class="vi vi-coin sm"></span> — +2 STR/DEX', 'buy_bjorn_rope'],
+      [_heralIco('ic-it-isqueiro'),      'Pederneira',     '5 <span class="vi vi-coin sm"></span> — fazer fogo', 'buy_bjorn_flint'],
+      [_heralIco('ic-it-racoes-viagem'), 'Rações 7 dias',  '10 <span class="vi vi-coin sm"></span> — viagem', 'buy_bjorn_rations']
     ]
   },
 
@@ -40243,19 +40266,20 @@ var ACTION_HANDLERS = {
   },
 
   // Market — Thorne (ferreiro) — canonical: market_npcs.py FIXED_NPCS['blacksmith'] (12 itens)
-  'buy_thorne_whetstone':function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-attack'), npc: 'Thorne — Ferreiro', item: 'Pedra de Afiar',     desc: '<i>Consumível. Ação para aplicar. +1 dano no próximo ataque corpo-a-corpo.</i>',                              cost: 100 }); },
-  'buy_thorne_repair':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-engrenagem'), npc: 'Thorne — Ferreiro', item: 'Kit de Reparo',      desc: '<i>Restaura 5 HP fora de combate. 10min para usar.</i>',                                                       cost: 150, onApply: function(p){ _heal(p, 5, 0); }, resultMsg: '<i>Thorne aplica o kit. "Pronto."</i><br><br>+5 HP' }); },
-  'buy_thorne_sword':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-attack'), npc: 'Thorne — Ferreiro', item: 'Espada de Treino',   desc: '<i>Arma Marcial. 1d8 cortante. Versátil (1d10).</i>',                                                          cost: 15 }); },
-  'buy_thorne_staff':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-cha'), npc: 'Thorne — Ferreiro', item: 'Cajado de Salgueiro', desc: '<i>Arma Simples. 1d6 contundente. Versátil (1d8). Foco Arcano.</i>',                                          cost: 15 }); },
-  'buy_thorne_dagger':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-attack'), npc: 'Thorne — Ferreiro', item: 'Adaga Balanceada',    desc: '<i>Arma Simples. 1d4 perfurante. Acuidade, Leve, Arremesso (6/18m).</i>',                                  cost: 12 }); },
-  'buy_thorne_bow':      function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-patrulheiro'), npc: 'Thorne — Ferreiro', item: 'Arco de Caça',        desc: '<i>Arma Simples. 1d6 perfurante. Alcance 24/96m. Munição, Duas Mãos.</i>',                                 cost: 18 }); },
-  'buy_thorne_longsword':function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-attack'), npc: 'Thorne — Ferreiro', item: 'Espada Longa',        desc: '<i>Arma Marcial. 1d8 cortante. Versátil (1d10).</i>',                                                       cost: 15 }); },
-  'buy_thorne_hammer':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-oficina'), npc: 'Thorne — Ferreiro', item: 'Martelo de Guerra',  desc: '<i>Arma Marcial. 1d8 contundente. Versátil (1d10).</i>',                                                     cost: 15 }); },
-  'buy_thorne_armor':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-ac'), npc: 'Thorne — Ferreiro', item: 'Cota de Malha',       desc: '<i>Armadura Pesada. CA 16. Desvantagem Furtividade. Requer FOR 13.</i>',                                  cost: 75 }); },
-  'buy_thorne_hide':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-ac'), npc: 'Thorne — Ferreiro', item: 'Giboia de Pele',      desc: '<i>Armadura Média. CA 12 + Mod. DES (máx +2).</i>',                                                          cost: 40 }); },
-  'buy_thorne_helm':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-paladino'), npc: 'Thorne — Ferreiro', item: 'Elmo Enferrujado',    desc: '<i>Slot Cabeça. +2 CA. Aparência rústica, mas funcional.</i>',                                              cost: 25 }); },
-  'buy_thorne_greaves':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-ac'), npc: 'Thorne — Ferreiro', item: 'Grevas de Ferro',     desc: '<i>Slot Pernas. +2 CA. Sem penalidades.</i>',                                                                cost: 45 }); },
-  'buy_thorne_boots':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-ach-andarilho'), npc: 'Thorne — Ferreiro', item: 'Botas Pesadas',       desc: '<i>Slot Pés. +1 CA. Vantagem contra ser empurrado.</i>',                                                     cost: 35 }); },
+  // X-6.5.51CA (2026-05-18): _buyConfirm icone usa ic-it-* canonical do item especifico.
+  'buy_thorne_whetstone':function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-pedra-afiar'),      npc: 'Thorne — Ferreiro', item: 'Pedra de Afiar',     desc: '<i>Consumível. Ação para aplicar. +1 dano no próximo ataque corpo-a-corpo.</i>',                              cost: 100 }); },
+  'buy_thorne_repair':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-kit-reparo'),       npc: 'Thorne — Ferreiro', item: 'Kit de Reparo',      desc: '<i>Restaura 5 HP fora de combate. 10min para usar.</i>',                                                       cost: 150, onApply: function(p){ _heal(p, 5, 0); }, resultMsg: '<i>Thorne aplica o kit. "Pronto."</i><br><br>+5 HP' }); },
+  'buy_thorne_sword':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-espada-treino'),    npc: 'Thorne — Ferreiro', item: 'Espada de Treino',   desc: '<i>Arma Marcial. 1d8 cortante. Versátil (1d10).</i>',                                                          cost: 15 }); },
+  'buy_thorne_staff':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-cajado-salgueiro'), npc: 'Thorne — Ferreiro', item: 'Cajado de Salgueiro', desc: '<i>Arma Simples. 1d6 contundente. Versátil (1d8). Foco Arcano.</i>',                                          cost: 15 }); },
+  'buy_thorne_dagger':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-adaga-balanceada'), npc: 'Thorne — Ferreiro', item: 'Adaga Balanceada',    desc: '<i>Arma Simples. 1d4 perfurante. Acuidade, Leve, Arremesso (6/18m).</i>',                                  cost: 12 }); },
+  'buy_thorne_bow':      function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-arco-caca'),        npc: 'Thorne — Ferreiro', item: 'Arco de Caça',        desc: '<i>Arma Simples. 1d6 perfurante. Alcance 24/96m. Munição, Duas Mãos.</i>',                                 cost: 18 }); },
+  'buy_thorne_longsword':function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-espada-longa'),     npc: 'Thorne — Ferreiro', item: 'Espada Longa',        desc: '<i>Arma Marcial. 1d8 cortante. Versátil (1d10).</i>',                                                       cost: 15 }); },
+  'buy_thorne_hammer':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-martelo-guerra'),   npc: 'Thorne — Ferreiro', item: 'Martelo de Guerra',  desc: '<i>Arma Marcial. 1d8 contundente. Versátil (1d10).</i>',                                                     cost: 15 }); },
+  'buy_thorne_armor':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-cota-malha'),       npc: 'Thorne — Ferreiro', item: 'Cota de Malha',       desc: '<i>Armadura Pesada. CA 16. Desvantagem Furtividade. Requer FOR 13.</i>',                                  cost: 75 }); },
+  'buy_thorne_hide':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-gibao-peles'),      npc: 'Thorne — Ferreiro', item: 'Giboia de Pele',      desc: '<i>Armadura Média. CA 12 + Mod. DES (máx +2).</i>',                                                          cost: 40 }); },
+  'buy_thorne_helm':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-elmo-enferrujado'), npc: 'Thorne — Ferreiro', item: 'Elmo Enferrujado',    desc: '<i>Slot Cabeça. +2 CA. Aparência rústica, mas funcional.</i>',                                              cost: 25 }); },
+  'buy_thorne_greaves':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-base-splint-mail'), npc: 'Thorne — Ferreiro', item: 'Grevas de Ferro',     desc: '<i>Slot Pernas. +2 CA. Sem penalidades.</i>',                                                                cost: 45 }); },
+  'buy_thorne_boots':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-botas-pesadas'),    npc: 'Thorne — Ferreiro', item: 'Botas Pesadas',       desc: '<i>Slot Pés. +1 CA. Vantagem contra ser empurrado.</i>',                                                     cost: 35 }); },
   // Market — Mirena (alquimista) — canonical: market_npcs.py FIXED_NPCS['alchemist'] (7 itens)
   'buy_mirena_potion':           function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Mirena — Alquimista', item: 'Poção de Cura',           desc: '<i>2d4+2 HP. Ação Bônus pra beber. Líquido carmesim.</i>',     cost: 50,   extraComplication: true, onApply: function(p, ctx){ var roll = 2 + Math.floor(Math.random()*7) + Math.floor(Math.random()*4); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>Mirena entrega a poção.</i><br><br>+' + ctx.heal + ' HP'; } }); },
   'buy_mirena_potion_great':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cura'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Maior',     desc: '<i>4d4+4 HP. Líquido carmesim brilhante.</i>',                 cost: 150,  extraComplication: true, onApply: function(p, ctx){ var roll = 4 + Math.floor(Math.random()*13) + Math.floor(Math.random()*4); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>Mirena verifica o frasco. "Esta é especial."</i><br><br>+' + ctx.heal + ' HP'; } }); },
