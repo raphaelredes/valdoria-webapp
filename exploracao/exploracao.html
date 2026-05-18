@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:24:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:31:01Z - do not edit directly, edit source -->
 
 
 <!--
@@ -43571,11 +43571,24 @@ function _openCartographyWithPrompt(){
       prompt.classList.remove('active');
       if (action === 'yes') {
         /* USER REPORT 2026-05-17: botão "Voltar pra Cidade" não navegava em
-           prod (dev.lendasdevaldoria.com.br). Root cause: URL relativa
-           ./cidade.html só funciona em file:// simulator — em prod resolve pra
-           /exploracao/cidade.html que dá 404. Fix: detect protocol → use path
-           absoluto /cidade/ em HTTPS + preserve token/uid/api params pra session
-           continuar. */
+           prod (dev.lendasdevaldoria.com.br). 2 problemas:
+           1) URL relativa ./cidade.html só funciona em file:// — em prod
+              resolve pra /exploracao/cidade.html que dá 404 silencioso.
+           2) Mesmo navegando pra /cidade/, o server redirecionava DE VOLTA
+              pra /exploracao/ porque player.metadata.in_explore_webapp
+              ainda estava true (server-only state). Solução completa
+              requer CHAMAR /api/exploracao/finish que limpa flags +
+              destroi session.
+
+           Fix v2: file:// usa relativa (simulator testing), HTTPS chama
+           finish() ANTES de redirecionar pra /cidade/ — backend
+           (exploracao/http.py handle_finish) já limpa
+           in_explore_webapp/explore_payload/etc da metadata + destroi
+           session + persiste loot/xp/gold ganhos.
+
+           Defesa em profundidade: redirect acontece mesmo se finish
+           falhar (try/catch), pra não deixar player preso. Server cleanup
+           será aplicado na próxima reabertura. */
         if (location.protocol === 'file:') {
           window.location.href = './cidade.html?back=exploration';
         } else {
@@ -43588,7 +43601,34 @@ function _openCartographyWithPrompt(){
           });
           newParams.set('back', 'exploration');
           newParams.set('nointro', '1');
-          window.location.replace('/cidade/?' + newParams.toString());
+          var redirectUrl = '/cidade/?' + newParams.toString();
+
+          /* Tenta finish() pra limpar metadata.in_explore_webapp +
+             destruir session no server. Sem isso, server redireciona de
+             volta pra /exploracao/ no /api/game/state. */
+          var _doRedirect = function() {
+            window.location.replace(redirectUrl);
+          };
+          if (window.ExploracaoAPI && typeof window.ExploracaoAPI.finish === 'function') {
+            console.info('[VOLTAR_CIDADE] chamando ExploracaoAPI.finish() antes do redirect');
+            try {
+              window.ExploracaoAPI.finish().then(function(res){
+                console.info('[VOLTAR_CIDADE] finish ok, redirecting', res && res.ok);
+                _doRedirect();
+              }).catch(function(err){
+                console.warn('[VOLTAR_CIDADE] finish failed mas redirecting mesmo assim', err);
+                _doRedirect();
+              });
+              /* Failsafe: força redirect em 2s mesmo se finish() trava */
+              setTimeout(_doRedirect, 2000);
+            } catch (e) {
+              console.error('[VOLTAR_CIDADE] finish throw, redirect direto', e);
+              _doRedirect();
+            }
+          } else {
+            console.warn('[VOLTAR_CIDADE] ExploracaoAPI.finish ausente, redirect direto');
+            _doRedirect();
+          }
         }
       } else {
         if (typeof openCartography === 'function') openCartography();
