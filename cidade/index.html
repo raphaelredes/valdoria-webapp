@@ -38114,14 +38114,39 @@ function _renderCityPopup(key){
     renderSquareHub(bodyEl, _buildRelationsMockData(window.CITY_MOCK_PLAYER));
     return;
   }
-  if (key === 'gates' && typeof renderGatesHub === 'function') {
+  if (key === 'gates') {
     if (titleEl) titleEl.textContent = 'Portões da Cidade';
-    renderGatesHub(bodyEl, _buildGatesMockData(window.CITY_MOCK_PLAYER));
+    var gatesData = _buildGatesMockData(window.CITY_MOCK_PLAYER);
+    if (typeof renderGatesHub === 'function') {
+      renderGatesHub(bodyEl, gatesData);
+    } else if (typeof renderSquareHub === 'function') {
+      // 2026-05-18 BUG FIX (Chrome MCP review): renderGatesHub e canonical em
+      // valdoria-webapp/game/game-gates.js (vCity dependente, nao loaded no
+      // simulador). Fallback: usa renderSquareHub com data.actions -> services
+      // + wandering_npcs anexados na flavor. Garante que Portoes nao abra vazio.
+      var gatesAsSquare = {
+        flavor: gatesData.flavor || 'Portões da cidade.',
+        services: gatesData.actions || [],
+      };
+      if (gatesData.wandering_npcs && gatesData.wandering_npcs.length) {
+        gatesAsSquare.flavor += '<br><br><i>Viajantes:</i> ' + gatesData.wandering_npcs.map(function(n){ return n.label || n.name || '?'; }).join(' • ');
+      }
+      renderSquareHub(bodyEl, gatesAsSquare);
+    }
     return;
   }
-  if (key === 'codex' && typeof renderCodexScreen === 'function') {
+  if (key === 'codex') {
     if (titleEl) titleEl.textContent = 'Compêndio do Aventureiro';
-    renderCodexScreen(bodyEl, _buildCodexMockData(window.CITY_MOCK_PLAYER));
+    if (typeof renderCodexScreen === 'function') {
+      renderCodexScreen(bodyEl, _buildCodexMockData(window.CITY_MOCK_PLAYER));
+    } else if (typeof renderSquareHub === 'function' && typeof _buildCodexMockData === 'function') {
+      // Fallback igual ao gates: codex usa renderSquareHub-compat shape
+      var codexData = _buildCodexMockData(window.CITY_MOCK_PLAYER);
+      renderSquareHub(bodyEl, {
+        flavor: codexData.flavor || 'Compendio do aventureiro.',
+        services: codexData.services || codexData.actions || [],
+      });
+    }
     return;
   }
   if (key === 'quests') {
