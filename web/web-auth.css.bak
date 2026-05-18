@@ -1,0 +1,840 @@
+/* =============================================
+   Lendas de Valdoria — Web Login Portal v3
+   Epic medieval login with 3D Orb
+   ============================================= */
+
+/*
+ * Portal usa valdoria-design.css (viewport tipo celular 430×932).
+ * No navegador desktop isso deixava a coluna colada ao topo.
+ * Preenchemos a altura real da janela e centralizamos o card verticalmente.
+ */
+/* Viewport lock — same constraints as all game screens (valdoria-design.css) */
+html.wa-portal {
+  max-width: min(100vw, 430px);
+  height: 100vh;
+  height: min(100dvh, 932px);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #2a2420;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  border-left: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.3));
+  border-right: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.3));
+}
+
+body.wa-portal {
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  contain: layout;
+}
+
+/* ----- Screen / Full-page background ----- */
+
+.wa-screen {
+    display: none;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 15%, var(--v-gold-06) 0%, transparent 60%),
+        radial-gradient(ellipse 120% 80% at 50% 40%, var(--v-bg-raised, #3a3028) 0%, var(--v-bg, #2a2420) 40%, #1a1510 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.wa-screen.wa-active {
+    display: flex;
+}
+
+/* Portal screen fills available height within the viewport-locked body */
+.wa-portal .wa-screen {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Dark edge vignette */
+.wa-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 70% at 50% 45%, transparent 30%, rgba(10, 8, 5, 0.65) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Subtle stone texture */
+.wa-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(60, 45, 25, 0.02) 3px, rgba(60, 45, 25, 0.02) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(60, 45, 25, 0.015) 5px, rgba(60, 45, 25, 0.015) 6px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* =============================================
+   Login Card — dark parchment
+   ============================================= */
+
+.wa-login-card {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse 90% 50% at 50% 0%, rgba(70, 50, 30, 0.3) 0%, transparent 70%),
+        linear-gradient(170deg, #302418 0%, #261e14 40%, #1c1610 100%);
+    border-radius: var(--v-radius, 10px);
+    border: 1px solid var(--v-gold-25);
+    padding: 28px 16px 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.7),
+        0 0 80px var(--v-gold-10),
+        0 2px 20px var(--v-gold-08),
+        inset 0 1px 0 var(--v-gold-08);
+}
+
+/* Top gold inlay line */
+.wa-login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent,
+        var(--v-crimson, #7b2020) 15%,
+        var(--v-gold, #c4953a) 50%,
+        var(--v-crimson, #7b2020) 85%,
+        transparent);
+    border-radius: 2px;
+    z-index: 1;
+}
+
+/* Bottom gold inlay line */
+.wa-login-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        var(--v-gold-15) 30%,
+        var(--v-gold-25) 50%,
+        var(--v-gold-15) 70%,
+        transparent);
+    border-radius: 2px;
+}
+
+/* ----- 3D Orb Override (scaled for login card) ----- */
+
+.wa-orb-wrap {
+    margin: -8px auto var(--v-space-sm, 4px);
+}
+
+.wa-orb-wrap .title-orb-wrap {
+    transform: scale(0.6);
+    transform-origin: center center;
+    margin: 0 auto;
+    animation: titleOrbFloat 6s ease-in-out infinite;
+}
+
+/* ----- Title (Cinzel two-line) ----- */
+
+.wa-title {
+    margin: 0 0 var(--v-space-sm, 4px);
+    line-height: 1.15;
+    animation: wa-fadeIn 0.8s ease 0.2s both;
+}
+
+.wa-title-top {
+    display: block;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: 700;
+    font-size: clamp(20px, 6vw, 28px);
+    letter-spacing: 3px;
+    color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    text-shadow: 0 0 20px var(--v-gold-40), 0 0 40px var(--v-gold-20);
+}
+
+.wa-title-sub {
+    display: block;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-weight: 700;
+    font-size: clamp(26px, 8vw, 38px);
+    letter-spacing: 5px;
+    color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    text-shadow: 0 0 25px var(--v-gold-50), 0 0 50px var(--v-gold-25);
+}
+
+.wa-subtitle {
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text-dim, #a09484);
+    margin: 0;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    animation: wa-fadeIn 0.8s ease 0.3s both;
+}
+
+/* ----- Gold Divider with Gem ----- */
+
+.wa-gold-divider {
+    width: 60%;
+    max-width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-gold-dim, #9a7530), transparent);
+    margin: var(--v-space-lg, 12px) auto;
+    position: relative;
+    animation: wa-fadeIn 0.6s ease 0.35s both;
+}
+
+.wa-gold-divider-gem {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    color: var(--v-gold-dim, #9a7530);
+    background: #261e14;
+    padding: 0 var(--v-space-md, 8px);
+}
+
+/* ----- Auth Buttons Area ----- */
+
+.wa-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-lg, 12px);
+    width: 100%;
+    animation: wa-fadeIn 0.6s ease 0.4s both;
+}
+
+/* ----- Social Login Buttons (unified style) ----- */
+
+.wa-social-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-lg, 12px);
+    width: 100%;
+    padding: 12px var(--v-space-xl, 16px);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-body, 14px);
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
+    min-height: 48px;
+    box-sizing: border-box;
+    text-decoration: none;
+    position: relative;
+}
+
+.wa-social-btn:active {
+    transform: scale(0.97);
+}
+
+/* Telegram button — blue gradient */
+.wa-social-btn--telegram {
+    background: linear-gradient(135deg, #2aabee 0%, #229ed9 100%);
+    color: #fff;
+    border-color: rgba(42, 171, 238, 0.4);
+    box-shadow: 0 3px 14px rgba(42, 171, 238, 0.2);
+}
+
+.wa-social-btn--telegram:hover {
+    border-color: rgba(42, 171, 238, 0.7);
+    box-shadow: 0 4px 18px rgba(42, 171, 238, 0.3);
+}
+
+/* Google button — dark with subtle border (Google branding: filled_black) */
+.wa-social-btn--google {
+    background: linear-gradient(135deg, #302820 0%, #1c1610 100%);
+    color: var(--v-text, #d4c8b0);
+    border-color: var(--v-border, #4a3828);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
+}
+
+.wa-social-btn--google:hover {
+    border-color: var(--v-gold-30);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* Provider icon container */
+.wa-social-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wa-social-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Provider text */
+.wa-social-text {
+    flex: 1;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.wa-social-label {
+    display: block;
+    font-size: var(--v-font-body, 14px);
+}
+
+.wa-social-sub {
+    display: block;
+    font-size: var(--v-font-xs, 10px);
+    font-weight: 400;
+    opacity: 0.7;
+    margin-top: 1px;
+}
+
+/* Telegram native widget — shown inline when user clicks custom button */
+.wa-tg-widget {
+    display: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--v-space-md, 8px);
+}
+
+.wa-tg-widget iframe {
+    border-radius: var(--v-radius, 10px) !important;
+}
+
+/* ----- Separator ----- */
+
+.wa-separator {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-md, 8px);
+    width: 100%;
+}
+
+.wa-separator-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--v-border, #4a3828), transparent);
+}
+
+.wa-separator-text {
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    text-transform: lowercase;
+    letter-spacing: 1px;
+}
+
+/* ----- Error Message ----- */
+
+.wa-error {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-danger-light, #e57373);
+    font-size: var(--v-font-base, 13px);
+    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    margin-top: var(--v-space-lg, 12px);
+    line-height: 1.4;
+    width: 100%;
+}
+
+/* ----- Loading ----- */
+
+.wa-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--v-space-md, 8px);
+    margin-top: var(--v-space-lg, 12px);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+}
+
+.wa-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--v-border, #4a3828);
+    border-top-color: var(--v-gold, #c4953a);
+    border-radius: 50%;
+    animation: v-spin 0.8s linear infinite;
+}
+
+@keyframes v-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ----- Footer Note ----- */
+
+.wa-footer-note {
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    margin-top: var(--v-space-xl, 16px);
+    line-height: 1.4;
+    animation: wa-fadeIn 0.6s ease 0.5s both;
+}
+
+.wa-footer-note a {
+    color: var(--v-gold, #c4953a);
+    text-decoration: none;
+    border-bottom: 1px solid var(--v-gold-30);
+    transition: border-color var(--v-transition, 0.2s);
+}
+
+.wa-footer-note a:hover {
+    border-color: var(--v-gold, #c4953a);
+}
+
+/* =============================================
+   Character Selection Screen
+   ============================================= */
+
+.wa-chars-card {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(70, 50, 30, 0.25) 0%, transparent 70%),
+        linear-gradient(170deg, #302418 0%, #261e14 40%, #1c1610 100%);
+    border-radius: var(--v-radius, 10px);
+    border: 1px solid var(--v-border, #4a3828);
+    padding: 28px 20px 24px;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 var(--v-gold-08);
+}
+
+.wa-chars-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent,
+        var(--v-crimson, #7b2020) 15%,
+        var(--v-gold, #c4953a) 50%,
+        var(--v-crimson, #7b2020) 85%,
+        transparent);
+    border-radius: 2px;
+}
+
+.wa-chars-orb {
+    margin-bottom: var(--v-space-md, 8px);
+    filter: drop-shadow(0 0 12px var(--v-gold-40));
+}
+
+.wa-chars-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-xl, 16px);
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    text-align: center;
+    margin: 0 0 var(--v-space-xl, 16px);
+    text-shadow: 0 0 10px var(--v-gold-30);
+    letter-spacing: 1px;
+}
+
+/* ----- Character List ----- */
+
+.wa-char-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-md, 8px);
+    margin-bottom: var(--v-space-xl, 16px);
+    width: 100%;
+}
+
+.wa-char-card {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-lg, 12px);
+    background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, var(--v-bg-deep-card, #241e18) 100%);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
+    cursor: pointer;
+    transition: border-color var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s), transform var(--v-transition, 0.2s);
+    position: relative;
+}
+
+.wa-char-card:hover {
+    border-color: var(--v-gold-40);
+    box-shadow: 0 0 10px var(--v-gold-08);
+}
+
+.wa-char-card:active {
+    transform: scale(0.97);
+}
+
+.wa-char-card.selected {
+    border-color: var(--v-gold, #c4953a);
+    background: linear-gradient(165deg, #382a20 0%, #2a2018 100%);
+    box-shadow: 0 0 15px var(--v-gold-20), inset 0 1px 0 var(--v-gold-10);
+}
+
+.wa-char-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--v-gold-06);
+    border-radius: var(--v-radius-sm, 6px);
+    border: 1px solid var(--v-border, #4a3828);
+}
+
+.wa-char-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wa-char-name {
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-body, 14px);
+    font-weight: 700;
+    color: var(--v-text-bright, #e8dcc8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wa-char-meta {
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    margin-top: var(--v-space-xs, 2px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wa-char-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--v-border, #4a3828);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all var(--v-transition, 0.2s);
+    position: relative;
+}
+
+.wa-char-card.selected .wa-char-check {
+    border-color: var(--v-gold, #c4953a);
+    background: var(--v-gold, #c4953a);
+    box-shadow: 0 0 8px var(--v-gold-40);
+}
+
+.wa-char-card.selected .wa-char-check::after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--v-font-base, 13px);
+    font-weight: 700;
+    color: #1a1410;
+}
+
+.wa-char-empty {
+    text-align: center;
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text-dim, #a09484);
+    padding: var(--v-space-2xl, 24px) 0;
+}
+
+/* ----- Play Button ----- */
+
+.wa-btn-play {
+    display: block;
+    width: 100%;
+    padding: 14px var(--v-space-xl, 16px);
+    background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+    color: #1a1410;
+    border: none;
+    border-radius: var(--v-radius, 10px);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-lg, 15px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px var(--v-gold-30), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: opacity var(--v-transition, 0.2s), transform var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s);
+    min-height: 48px;
+    text-transform: uppercase;
+}
+
+.wa-btn-play:hover:not(:disabled) {
+    box-shadow: 0 4px 18px var(--v-gold-40), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.wa-btn-play:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.wa-btn-play:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ----- Logout Button ----- */
+
+.wa-btn-logout {
+    display: block;
+    width: 100%;
+    margin-top: var(--v-space-lg, 12px);
+    padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius, 10px);
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    cursor: pointer;
+    transition: border-color var(--v-transition, 0.2s), color var(--v-transition, 0.2s);
+    min-height: 44px;
+}
+
+.wa-btn-logout:hover {
+    border-color: var(--v-text-dim, #a09484);
+    color: var(--v-text, #d4c8b0);
+}
+
+.wa-btn-logout:active {
+    transform: scale(0.97);
+}
+
+/* ----- Google widget (hidden — auth handled by custom button) ----- */
+
+/* Google button — same style as other social buttons (handled by .wa-social-btn--google) */
+
+/* ----- DEV Login Button ----- */
+
+.wa-btn-dev {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    padding: 12px var(--v-space-xl, 16px);
+    background: var(--v-gold-06);
+    border: 1px dashed var(--v-gold-25);
+    border-radius: var(--v-radius, 10px);
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-base, 13px);
+    color: var(--v-text-dim, #a09484);
+    cursor: pointer;
+    transition: border-color var(--v-transition, 0.2s), color var(--v-transition, 0.2s), background var(--v-transition, 0.2s);
+    min-height: 44px;
+}
+
+.wa-btn-dev:hover {
+    border-color: var(--v-gold-dim, #9a7530);
+    color: var(--v-gold, #c4953a);
+    background: var(--v-gold-10);
+}
+
+.wa-btn-dev:active {
+    transform: scale(0.97);
+}
+
+/* =============================================
+   Ambient Floating Embers
+   ============================================= */
+
+/* Desktop decorative effects removed — Smartphone-Only Layout rule */
+
+.wa-hero-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.wa-ember {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--v-gold, #c4953a);
+    opacity: 0;
+    animation: wa-emberFloat 16s ease-in infinite;
+    box-shadow: 0 0 6px var(--v-gold-40), 0 0 12px var(--v-gold-20);
+}
+
+.wa-ember:nth-child(1) { left: 10%; bottom: -4px; width: 2px; height: 2px; animation-delay: 0s; animation-duration: 14s; }
+.wa-ember:nth-child(2) { left: 30%; bottom: -4px; width: 3px; height: 3px; animation-delay: 2s; animation-duration: 18s; }
+.wa-ember:nth-child(3) { left: 55%; bottom: -4px; width: 2px; height: 2px; animation-delay: 1s; animation-duration: 15s; }
+.wa-ember:nth-child(4) { left: 75%; bottom: -4px; width: 2px; height: 2px; animation-delay: 4s; animation-duration: 17s; }
+.wa-ember:nth-child(5) { left: 20%; bottom: -4px; width: 2px; height: 2px; animation-delay: 6s; animation-duration: 20s; }
+.wa-ember:nth-child(6) { left: 50%; bottom: -4px; width: 3px; height: 3px; animation-delay: 8s; animation-duration: 16s; }
+.wa-ember:nth-child(7) { left: 90%; bottom: -4px; width: 2px; height: 2px; animation-delay: 3s; animation-duration: 19s; }
+.wa-ember:nth-child(8) { left: 45%; bottom: -4px; width: 2px; height: 2px; animation-delay: 10s; animation-duration: 22s; }
+
+@keyframes wa-emberFloat {
+    0% { opacity: 0; transform: translateY(0) translateX(0); }
+    8% { opacity: 0.7; }
+    30% { opacity: 0.5; transform: translateY(-150px) translateX(15px); }
+    60% { opacity: 0.3; transform: translateY(-350px) translateX(-8px); }
+    85% { opacity: 0.1; }
+    100% { opacity: 0; transform: translateY(-500px) translateX(5px); }
+}
+
+/* ----- Fade-in animation ----- */
+
+@keyframes wa-fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   Blocked Screen (brute force detected)
+   ============================================= */
+
+.wa-blocked-card {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background:
+        radial-gradient(ellipse 90% 50% at 50% 0%, rgba(120, 30, 30, 0.15) 0%, transparent 70%),
+        linear-gradient(170deg, #302018 0%, #261814 40%, #1c1210 100%);
+    border-radius: var(--v-radius, 10px);
+    border: 1px solid rgba(180, 50, 50, 0.3);
+    padding: 32px 24px;
+    z-index: 1;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(180, 50, 50, 0.06),
+        inset 0 1px 0 rgba(180, 50, 50, 0.1);
+}
+
+/* Top red inlay line */
+.wa-blocked-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #7b2020 30%, #b03030 50%, #7b2020 70%, transparent);
+    border-radius: 2px;
+}
+
+.wa-blocked-icon {
+    font-size: 48px;
+    margin-bottom: var(--v-space-lg, 12px);
+    filter: drop-shadow(0 0 12px rgba(180, 50, 50, 0.4));
+    animation: wa-blocked-pulse 2s ease-in-out infinite;
+}
+
+@keyframes wa-blocked-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+.wa-blocked-title {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: clamp(18px, 5vw, 22px);
+    font-weight: 700;
+    color: #c44040;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 var(--v-space-lg, 12px);
+    text-shadow: 0 0 15px rgba(180, 50, 50, 0.4);
+}
+
+.wa-blocked-msg {
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-body, 14px);
+    color: var(--v-text, #d4c8b0);
+    line-height: 1.6;
+    margin: 0 0 var(--v-space-xl, 16px);
+}
+
+.wa-blocked-timer {
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-lg, 15px);
+    font-weight: 700;
+    color: #c44040;
+    margin: 0 0 var(--v-space-lg, 12px);
+    letter-spacing: 1px;
+}
+
+.wa-blocked-note {
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: var(--v-font-sm, 11px);
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ----- Env Badge (2026-05-04 USER FIX: prevenção de cross-env confusion) ----- */
+.wa-env-badge {
+    display: none; /* hidden until JS sets data-env */
+    margin: 8px auto 4px;
+    padding: 4px 14px;
+    border-radius: 14px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    width: fit-content;
+    text-transform: uppercase;
+}
+.wa-env-badge[data-env="dev"] {
+    display: block;
+    background: rgba(40, 200, 100, 0.15);
+    border: 1px solid rgba(80, 220, 130, 0.55);
+    color: #4ade80;
+    text-shadow: 0 0 6px rgba(80, 220, 130, 0.4);
+}
+.wa-env-badge[data-env="prod"] {
+    display: block;
+    background: rgba(196, 149, 58, 0.10);
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    color: var(--v-gold, #c4953a);
+}
+
+/* ----- Reduced motion ----- */
+
+@media (prefers-reduced-motion: reduce) {
+    .wa-ember { display: none; }
+    .wa-orb-wrap .title-orb-wrap { animation: none !important; }
+    .wa-title, .wa-subtitle, .wa-gold-divider, .wa-auth-buttons, .wa-footer-note {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .wa-screen::before, .wa-screen::after { display: none; }
+}
