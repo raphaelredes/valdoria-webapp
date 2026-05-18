@@ -164,7 +164,10 @@
       if (timeoutId) clearTimeout(timeoutId);
       // Network error — silencioso. Próximo heartbeat tenta de novo.
       if (e && e.name !== 'AbortError') {
-        console.debug('[CHECKPOINT] error:', e.message || e);
+        /* 2026-05-18 preflight fix (check_webapp_console_debug): trocado
+           console.debug por console.warn em prod. Erros de network silenciosos
+           passam batido — warn dá visibilidade sem poluir o console. */
+        console.warn('[CHECKPOINT] error:', e.message || e);
       }
     });
   }

@@ -100,7 +100,8 @@
     }).catch(function (e) {
       if (tid) clearTimeout(tid);
       // Network error — silencioso (pode ser offline, não cert error)
-      console.debug('[CLOCK-GUARD] check failed:', e && e.message);
+      // 2026-05-18 preflight fix: trocado console.debug por console.warn em prod.
+      console.warn('[CLOCK-GUARD] check failed:', e && e.message);
     });
   }
 
