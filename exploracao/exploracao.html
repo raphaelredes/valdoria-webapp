@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T00:30:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T00:48:28Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1049,47 +1049,41 @@ html.sim-prod body { justify-content: center !important; background: var(--v-bg,
 html.sim-prod #frame { margin: 0 auto !important; }
 
 /* ============================================================
-   2026-05-17 USER REQUEST: moldura igual à tela de auth (/web/) em
-   dev/prod hosts. Aplicada APENAS em html.sim-prod — simuladores
-   file:// (html.sim-dev) ficam com debug-panel preservado.
+   2026-05-17 USER REQUEST v2 (revisado): moldura ÉPICA visível em
+   dev/prod hosts. Versão anterior usava border 1px @ 25% opacity —
+   invisível em monitor desktop. Esta versão usa o padrão proven
+   do html.app-frame body (valdoria-design.css L2099-2118): border
+   2px gold + border-radius 18px + dark ring outer + gold glow.
 
-   Visual mimetizando .wa-login-card do web/web-auth.css:
-     html       → background dark com radial gold subtle ao redor do frame
-     #frame     → gold border + box-shadow dramático + cantos arredondados
-                   + gold inlay line no topo (assinatura visual da auth)
+   Dimensões matchando auth (/web/): max-width 430px, max-height
+   min(100dvh - 32px, 932px) — 16px margem top/bottom pra moldura
+   ser claramente visível.
+
+   Aplicada APENAS em html.sim-prod — simuladores file://
+   (html.sim-dev) ficam com debug-panel preservado.
    ============================================================ */
 @media (hover: hover) and (pointer: fine) {
   html.sim-prod {
+    /* Override CSS vars pra match auth dims */
+    --sim-frame-w: min(100vw, 430px) !important;
+    --sim-frame-h: min(100dvh - 32px, 932px) !important;
+    /* Background ÉPICO em torno do frame (mimetiza valdoria-design.css L2060) */
     background:
-      radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196, 149, 58, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%) !important;
+      radial-gradient(circle at 22% 18%, rgba(80, 50, 20, 0.55) 0%, transparent 45%),
+      radial-gradient(circle at 78% 82%, rgba(40, 30, 60, 0.55) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, #1a1208 0%, #050302 100%) !important;
   }
   html.sim-prod #frame {
-    border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25)) !important;
-    border-radius: 14px !important;
+    /* Frame ÉPICO — gold border 2px + radius 18px + dark ring + gold glow */
+    border: 2px solid var(--v-gold, #c4953a) !important;
+    border-radius: 18px !important;
     box-shadow:
-      0 8px 40px rgba(0, 0, 0, 0.7),
-      0 0 80px rgba(196, 149, 58, 0.1),
-      0 2px 20px rgba(196, 149, 58, 0.08),
-      inset 0 1px 0 rgba(196, 149, 58, 0.08) !important;
-  }
-  /* Top gold inlay line — assinatura visual da tela de auth */
-  html.sim-prod #frame::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 16px !important;
-    right: 16px !important;
-    height: 2px !important;
-    background: linear-gradient(90deg,
-      transparent,
-      var(--v-crimson, #7b2020) 15%,
-      var(--v-gold, #c4953a) 50%,
-      var(--v-crimson, #7b2020) 85%,
-      transparent) !important;
-    border-radius: 2px !important;
-    z-index: 9999 !important;
-    pointer-events: none !important;
+      0 0 0 4px rgba(0, 0, 0, 0.7),
+      0 0 60px rgba(196, 149, 58, 0.28),
+      0 16px 50px rgba(0, 0, 0, 0.85),
+      inset 0 0 0 1px rgba(255, 220, 140, 0.35) !important;
+    max-height: min(100dvh - 32px, 932px) !important;
+    height: min(100dvh - 32px, 932px) !important;
   }
 }
 /* Touch device (smartphone real): sem moldura — preenche full viewport. */
@@ -1099,7 +1093,6 @@ html.sim-prod #frame { margin: 0 auto !important; }
     border-radius: 0 !important;
     box-shadow: none !important;
   }
-  html.sim-prod #frame::before { display: none !important; }
 }
 
 /* X-6.5.51f: #sim-log-panel — replica visual do #dev-log-panel do
