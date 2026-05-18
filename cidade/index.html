@@ -7570,6 +7570,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<link rel="stylesheet" href="/shared/loading-reactive.css?v=' + Date.now() + '">');
     document.write('<script src="/shared/loading-title.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
+    /* 2026-05-18 preflight fix (check_loading_animation_speed): cidade tem
+       magic-circle (loading-template + loading-title) MAS faltava o guard.
+       loading-guard.js valida + corrige velocidades de animacao dos aneis
+       (.mc-outer >=25s, .mc-mid >=15s, .mc-inner >=20s) em runtime. */
+    document.write('<script src="/shared/loading-guard.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
