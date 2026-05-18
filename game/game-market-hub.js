@@ -20,6 +20,16 @@ function renderMarketHub(container, data) {
 
   var root = vCity.el('div', 'mkt-hub');
 
+  /* X-6.5.51CB (2026-05-18): atmosfera AAA — flavor line do horário do dia.
+     Renderizada como banner ornamentado pra integrar PADRAO_ALDRIC do hub
+     do mercado (consistente com taverna/estalagem). */
+  if (data.flavor) {
+    var flavorDiv = vCity.el('div', 'mkt-atmosphere');
+    flavorDiv.innerHTML = data.flavor;
+    flavorDiv.style.cssText = 'font-style:italic;color:var(--v-text-dim,#a09484);text-align:center;padding:8px 12px;margin:4px 8px 8px;border-left:2px solid var(--v-gold,#c4953a);border-right:2px solid var(--v-gold,#c4953a);background:linear-gradient(90deg,transparent,rgba(196,149,58,0.06),transparent);font-size:var(--v-font-sm,12px);line-height:1.55;';
+    root.appendChild(flavorDiv);
+  }
+
   /* Gold + items */
   var stats = vCity.el('div', 'mkt-stats');
   var goldSpan = vCity.el('span', '');

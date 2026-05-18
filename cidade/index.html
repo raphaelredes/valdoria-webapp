@@ -15429,10 +15429,18 @@ function _buildMarketMockData(player){
   }
   rumorEntries.forEach(function(r){ wandering.push(r); });
 
+  // X-6.5.51CB (2026-05-18): atmosfera AAA — flavor line do periodo do dia.
+  // Cada entrada no mercado tem uma linha de ambientação que muda com a hora.
+  // Pool em _marketAtmosphereLine() — dawn/day/dusk/night × 2-3 variantes.
+  var atmosphere = (typeof _marketAtmosphereLine === 'function')
+    ? _marketAtmosphereLine()
+    : '';
+
   return {
     type: 'hub',
     gold: player.gold,
     item_count: (window._bankItems || []).length,
+    flavor: atmosphere,
     merchants: presentMerchants,
     extras: [
       { icon: _heralIco('ic-bolsa'), label: 'Vender Itens', cb: 'market_sell_open' },
@@ -33186,11 +33194,44 @@ function _removeItemFromInventory(itemName, qty){
   return removed;
 }
 
+// X-6.5.51CB (2026-05-18): _buyConfirm agora usa PADRAO_ALDRIC reactions.
+// Cada compra dispara uma fala em personagem do NPC vendedor — Thorne fala
+// de aço/forja, Mirena de frascos, Velithra de pedras, etc. — em vez do
+// genérico "<i>{npc} entrega {item}.</i>". Categoria detectada via tags.
+//
+// opts.resultMsg ainda override prevalece (para casos canonical como Kit de
+// Reparo onde a narrativa precisa mencionar HP recuperado).
+//
+// opts.npcKey OPCIONAL: força reação de NPC específico (default: extrai
+// primeiro nome do opts.npc, ex: "Thorne — Ferreiro" → "thorne")
 function _buyConfirm(opts){
   var p = opts.p;
   var item = opts.item || 'Item';
   var icon = opts.icon || '🛒';
   var npc = opts.npc || 'Vendedor';
+
+  // Detecta NPC key pra reações canonical (PADRAO_ALDRIC)
+  var npcKey = opts.npcKey;
+  if (!npcKey){
+    var firstName = String(npc).split(/[\s—–-]/)[0].toLowerCase();
+    if (MARKET_NPC_LIBRARY[firstName]) npcKey = firstName;
+    else npcKey = 'generic';
+  }
+  // Detecta categoria do item via tags (pra reaction certa)
+  var itData = (typeof getItemData === 'function') ? (getItemData(item) || {}) : {};
+  var itTags = itData.t || [];
+  var itCat = 'generic';
+  if (itTags.indexOf('weapon') !== -1 || itTags.indexOf('martial_weapon') !== -1 || itTags.indexOf('simple_weapon') !== -1) itCat = 'weapon';
+  else if (itTags.indexOf('armor') !== -1 || itTags.indexOf('shield') !== -1) itCat = 'armor';
+  else if (itTags.indexOf('potion') !== -1 || itTags.indexOf('healing') !== -1) itCat = 'potion';
+  else if (itTags.indexOf('alchemy') !== -1 || itTags.indexOf('consumable') !== -1) itCat = 'alchemy';
+  else if (itTags.indexOf('gem') !== -1) itCat = 'gem';
+  else if (itTags.indexOf('jewelry') !== -1 || itTags.indexOf('accessory') !== -1) itCat = 'jewelry';
+  else if (itTags.indexOf('map') !== -1) itCat = 'map';
+  else if (itTags.indexOf('scroll') !== -1) itCat = 'scroll';
+  else if (itTags.indexOf('camping') !== -1) itCat = 'camping';
+  else if (itTags.indexOf('tool') !== -1) itCat = 'tool';
+
   _showConfirmPurchase({
     icon: icon, npc: npc, title: 'Comprar ' + item,
     desc: (opts.desc || ('<b>' + item + '</b>')) +
@@ -33217,10 +33258,17 @@ function _buyConfirm(opts){
       // ctx pode ser populado pelo onApply pra usar no resultMsg
       var ctx = {};
       if (typeof opts.onApply === 'function') opts.onApply(p, ctx);
-      // resultMsg pode ser string OU função(ctx)
+      // resultMsg pode ser string OU função(ctx) — override canonical mantido.
+      // Sem override: usa reação PADRAO_ALDRIC do NPC × categoria do item.
       var msg;
-      if (typeof opts.resultMsg === 'function') msg = opts.resultMsg(ctx, p);
-      else msg = opts.resultMsg || ('<i>' + npc + ' entrega ' + item + '.</i><br><br><b>' + item + '</b> adicionado à bolsa.');
+      if (typeof opts.resultMsg === 'function') {
+        msg = opts.resultMsg(ctx, p);
+      } else if (opts.resultMsg) {
+        msg = opts.resultMsg;
+      } else {
+        var reactionLine = _marketNpcLine(npcKey, 'buy', itCat);
+        msg = reactionLine + '<br><br><b>' + item + '</b> guardado na bolsa.';
+      }
       _showServiceResultPopup({
         icon: icon, npc: npc,
         narrative: msg,
@@ -35445,12 +35493,29 @@ function _shopConfirmBuy(name, npcId){
           get name(){ return this.n; }
         });
       }
+      // X-6.5.51CB (2026-05-18): reação PADRAO_ALDRIC por NPC x categoria do item.
+      // Substitui "<i>Tome. Bom uso.</i>" genérico por fala em personagem do NPC.
+      // npcId aqui já é a key canonical (thorne/mirena/velithra/corvus/bjorn).
+      var itTags2 = it.t || [];
+      var itCat2 = 'generic';
+      if (itTags2.indexOf('weapon') !== -1 || itTags2.indexOf('martial_weapon') !== -1 || itTags2.indexOf('simple_weapon') !== -1) itCat2 = 'weapon';
+      else if (itTags2.indexOf('armor') !== -1 || itTags2.indexOf('shield') !== -1) itCat2 = 'armor';
+      else if (itTags2.indexOf('potion') !== -1 || itTags2.indexOf('healing') !== -1) itCat2 = 'potion';
+      else if (itTags2.indexOf('alchemy') !== -1 || itTags2.indexOf('consumable') !== -1) itCat2 = 'alchemy';
+      else if (itTags2.indexOf('gem') !== -1) itCat2 = 'gem';
+      else if (itTags2.indexOf('jewelry') !== -1 || itTags2.indexOf('accessory') !== -1) itCat2 = 'jewelry';
+      else if (itTags2.indexOf('map') !== -1) itCat2 = 'map';
+      else if (itTags2.indexOf('scroll') !== -1) itCat2 = 'scroll';
+      else if (itTags2.indexOf('camping') !== -1) itCat2 = 'camping';
+      else if (itTags2.indexOf('tool') !== -1) itCat2 = 'tool';
+      var npcKey2 = (typeof MARKET_NPC_LIBRARY !== 'undefined' && MARKET_NPC_LIBRARY[npcId]) ? npcId : 'generic';
+      var reactionLine2 = (typeof _marketNpcLine === 'function')
+        ? _marketNpcLine(npcKey2, 'buy', itCat2)
+        : '<i>"Tome. Bom uso."</i>';
       _showServiceResultPopup({
-        icon: it.e || '🛒',
+        icon: shop.icon || it.e || '🛒',
         npc: shop.npc,
-        // 2026-05-12 BUG #4: "adicionado" forçava masculino mesmo pra item feminino
-        // (Espada, Cota). Reformulado pra forma genero-neutra "vai pra mochila".
-        narrative: '<i>"Tome. Bom uso."</i><br><br><b>' + name + '</b> vai pra mochila.',
+        narrative: reactionLine2 + '<br><br><b>' + name + '</b> vai pra mochila.',
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
         onContinue: function(){
           // Re-render shop popup com bolsa atualizada
@@ -35462,6 +35527,334 @@ function _shopConfirmBuy(name, npcId){
     }
   });
 }
+
+// =============================================================================
+// MARKET AAA SYSTEM — X-6.5.51CB (2026-05-18)
+// =============================================================================
+// Sistema canonical de especialização: cada item vendido é analisado por tags
+// e roteado pro especialista correto, que paga melhor que mercador generico.
+// Cada NPC tem voz propria em PADRAO_ALDRIC — falas reagem ao tipo de item.
+//
+// MAPA_IA pra agentes:
+//   ~MARKET_SPECIALIST_RULES   → tag → npc key mapping (precedence ordering)
+//   ~MARKET_NPC_LIBRARY        → 5 NPCs canonical (npc, role, icon, multiplier)
+//   ~MARKET_NPC_REACTIONS      → buy/sell narrative pools por NPC x categoria
+//   ~_marketGetSpecialist()    → resolver: item → {npc, icon, multiplier, key}
+//   ~_marketNpcLine()          → pick aleatoria de uma reação canonical
+//   ~_marketAtmosphereLine()   → flavor de entrada no hub por periodo do dia
+// =============================================================================
+
+// Precedence: items podem ter multiplas tags. A primeira regra que matchar ganha.
+// Ordem importante: tags mais especificas primeiro (gem antes de magic, etc).
+var MARKET_SPECIALIST_RULES = [
+  // === Velithra (joalheira) — paga MELHOR em gemas e acessorios magicos ===
+  { tags: ['gem'],                        npc: 'velithra', mult: 0.70, cat: 'gem' },
+  { tags: ['jewelry', 'accessory'],       npc: 'velithra', mult: 0.65, cat: 'jewelry' },
+  // === Mirena (alquimista) — pocoes, alquimia, ervas, antidotos ===
+  { tags: ['potion', 'healing'],          npc: 'mirena',   mult: 0.65, cat: 'potion' },
+  { tags: ['consumable', 'alchemy'],      npc: 'mirena',   mult: 0.65, cat: 'alchemy' },
+  { tags: ['antidote'],                   npc: 'mirena',   mult: 0.65, cat: 'alchemy' },
+  // === Corvus (cartografo) — mapas, ferramentas de navegacao, pergaminhos ===
+  { tags: ['map'],                        npc: 'corvus',   mult: 0.65, cat: 'map' },
+  { tags: ['scroll'],                     npc: 'corvus',   mult: 0.60, cat: 'scroll' },
+  // === Bjorn (seleiro) — acampamento, couro cru, ferramentas de viagem ===
+  { tags: ['camping'],                    npc: 'bjorn',    mult: 0.65, cat: 'camping' },
+  { tags: ['leather', 'monster_part'],    npc: 'bjorn',    mult: 0.60, cat: 'material' },
+  // === Thorne (ferreiro) — armas, armaduras, escudos, metal, sucata ===
+  { tags: ['weapon', 'martial_weapon'],   npc: 'thorne',   mult: 0.65, cat: 'weapon' },
+  { tags: ['simple_weapon'],              npc: 'thorne',   mult: 0.65, cat: 'weapon' },
+  { tags: ['armor', 'shield'],            npc: 'thorne',   mult: 0.65, cat: 'armor' },
+  { tags: ['heavy_armor', 'medium_armor', 'light_armor'], npc: 'thorne', mult: 0.65, cat: 'armor' },
+  { tags: ['metal'],                      npc: 'thorne',   mult: 0.55, cat: 'metal' },
+  // === Fallback: mercador generico (60%) ===
+];
+
+// Biblioteca canonical dos NPCs do mercado — fonte unica.
+// Atualizar AQUI substitui referencias em todo o mercado.
+var MARKET_NPC_LIBRARY = {
+  thorne: {
+    npc: 'Thorne Forja-de-Ferro', role: 'Ferreiro',
+    icon: _heralIco('ic-ach-forjador'),
+    fallback_mult: 0.60
+  },
+  mirena: {
+    npc: 'Mirena Folha-Verde', role: 'Alquimista',
+    icon: _heralIco('ic-druida'),
+    fallback_mult: 0.60
+  },
+  velithra: {
+    npc: 'Velithra Olho-de-Cristal', role: 'Joalheira',
+    icon: _heralIco('ic-ach-colecionador'),
+    fallback_mult: 0.55
+  },
+  corvus: {
+    npc: 'Corvus Mapa-Escuro', role: 'Cartógrafo',
+    icon: _heralIco('ic-escriba'),
+    fallback_mult: 0.55
+  },
+  bjorn: {
+    npc: 'Bjorn', role: 'Seleiro',
+    icon: _heralIco('ic-mochila'),
+    fallback_mult: 0.55
+  },
+  generic: {
+    npc: 'Mercador Ambulante', role: 'Comprador',
+    icon: _heralIco('ic-bolsa'),
+    fallback_mult: 0.60
+  }
+};
+
+// PADRAO_ALDRIC reactions — 1-2 linhas em personagem por NPC x ação x categoria.
+// Cada pool com 3+ variantes para evitar repetição. <i>...</i> vira aside cinza.
+var MARKET_NPC_REACTIONS = {
+  thorne: {
+    buy: {
+      weapon: [
+        '<i>Thorne pesa a lâmina, balança a cabeça.</i> "Aço bom devolve o cuidado que recebe. Não trate como ferramenta — trate como aliada."',
+        '<i>Bate uma vez a lâmina no balcão.</i> "Equilíbrio bom. Empunhadura firme. Cuide dela e ela cuida de você."',
+        '"Forjei essa peça pensando em quem precisa <i>voltar pra casa</i>. Faça valer o aço."'
+      ],
+      armor: [
+        '<i>Thorne ajeita a armadura no balcão, soa um tilintar grave.</i> "Pesada o suficiente pra parar lâmina. Leve o bastante pra correr. Use bem."',
+        '"Não é o ferro que segura o golpe — é o jeito de usar. Pratique antes da estrada."',
+        '<i>Olha você de cima a baixo.</i> "Cabe direito. Aperte as tiras antes de cada combate."'
+      ],
+      tool: [
+        '"Ferramenta certa salva mais que arma boa. Saiba quando usar."',
+        '<i>Thorne entrega com cuidado.</i> "Trate bem — ferramenta cuidada faz duas vidas."',
+        '"Pra uma mão experiente, isso vira diferença entre vida e morte."'
+      ],
+      generic: [
+        '"Aço novo no balcão sai. Boa estrada."',
+        '<i>Thorne aceita as moedas sem olhar.</i> "Volte se precisar de mais."',
+        '"Pronto. Use direito."'
+      ]
+    },
+    sell: {
+      weapon: [
+        '<i>Thorne examina a lâmina, segura à luz.</i> "Boa peça. Refundo se necessário — aço bom não morre."',
+        '"Aceito. <i>Aço usado conta histórias</i> — e eu sei ouvir."',
+        '<i>Aprova com um aceno.</i> "Vai pra alguém que precisa. Justo."'
+      ],
+      armor: [
+        '"Couro batido, ferro cansado. Reformo, vendo de novo. Negócio fechado."',
+        '<i>Thorne testa a malha entre os dedos.</i> "Ainda tem fibra. Aceito."',
+        '"Armadura que voltou pra forja já provou seu valor. Bom preço."'
+      ],
+      metal: [
+        '"Sucata? Vira ferro novo no martelo. Aceito tudo que tiver metal."',
+        '<i>Pesa a peça quebrada.</i> "Refundo na próxima fornalha. Justo."'
+      ],
+      generic: [
+        '"Trocava? Bom. Aceito."',
+        '<i>Thorne paga sem cerimônia.</i> "Volte quando quiser comprar."'
+      ]
+    }
+  },
+  mirena: {
+    buy: {
+      potion: [
+        '<i>Mirena selou o frasco com cera.</i> "Beba <i>antes</i> do desastre, não depois. Os deuses gostam de quem se prepara."',
+        '"Cuidado com a rolha — uma gota perdida vale uma vida na hora errada."',
+        '<i>Ajusta os óculos.</i> "Líquido vivo. Trate com respeito."'
+      ],
+      alchemy: [
+        '"Frasco frágil. Bolsa firme. Sem agitar até a hora — ou explode."',
+        '<i>Mirena cobre o frasco com pano.</i> "Luz baixa, calor controlado. Lembre disso."',
+        '"Cuidado — o efeito vem rápido. Use com precisão de cirurgião."'
+      ],
+      generic: [
+        '<i>Mirena entrega o frasco com luva.</i> "Que sirva ao seu propósito."',
+        '"Volte se precisar — sempre tem reserva nova."',
+        '"Cada frasco aqui vem de uma erva certa. Use bem."'
+      ]
+    },
+    sell: {
+      potion: [
+        '<i>Mirena destampa, cheira, aprova.</i> "Ainda viva. Aceito — vendo dobrado pra alguém com sorte."',
+        '"Cura é dom raro nesse mundo. Compro <i>todas</i> que tiver."',
+        '<i>Examina à luz.</i> "Cor certa. Aceito o frasco e o líquido."'
+      ],
+      alchemy: [
+        '"Reagente sempre vale. Aceito — entra no próximo lote."',
+        '<i>Mirena anota num livro de couro.</i> "Bom preparado. Pago justo."'
+      ],
+      generic: [
+        '"Material útil. Aceito."',
+        '<i>Mirena paga e estoca cuidadosamente.</i> "Volte com mais quando achar."'
+      ]
+    }
+  },
+  velithra: {
+    buy: {
+      gem: [
+        '<i>Velithra levanta a gema contra a chama da vela.</i> "Veja como ela <i>respira luz</i>. Trate com respeito."',
+        '"Gemas guardam estrelas presas. A sua agora carrega um pedaço do céu da minha vitrine."',
+        '<i>Embrulha em veludo.</i> "Encaixe com cuidado — uma pedra rachada perde a alma."'
+      ],
+      jewelry: [
+        '<i>Velithra ajusta o anel na luz.</i> "Cada peça aqui foi escolhida por <i>quem ela espera encontrar</i>. Hoje espera por você."',
+        '"Não é prata, não é ouro — é intenção forjada. Use com propósito."',
+        '"Joia boa muda quem usa. Tenha paciência com a sua."'
+      ],
+      generic: [
+        '<i>Velithra entrega com reverência.</i> "Bela escolha. As pedras te chamaram."',
+        '"Que ela floresça com você."'
+      ]
+    },
+    sell: {
+      gem: [
+        '<i>Velithra prende um lampejo na pedra com a lente.</i> "Tem fogo. Setenta por cento — vale mais do que parece."',
+        '"Esta vai pro fundo do mostruário. Aceito — gema com presença é raridade."',
+        '<i>Sussurra como se a gema escutasse.</i> "Bonita. Bem cuidada. Aceito."'
+      ],
+      jewelry: [
+        '"Acessório com história. Sempre interessa. Aceito sem pechinchar."',
+        '<i>Velithra ajusta o engaste com agulha fina.</i> "Reformo. Vendo de novo. Pagamento justo."'
+      ],
+      generic: [
+        '"Aceito. Vai pro pequeno mostruário lateral."',
+        '<i>Conta moedas com unha pintada de ouro.</i> "Boa escolha de vender aqui."'
+      ]
+    }
+  },
+  corvus: {
+    buy: {
+      map: [
+        '<i>Corvus desenrola o pergaminho com cuidado de quem teme rasgá-lo.</i> "Cada linha aqui custou suor de alguém. Honre o caminho que escolher."',
+        '"Olhos abertos nas trilhas. Mapa não substitui instinto."',
+        '<i>Aponta uma marca vermelha.</i> "Aqui — não pare ao anoitecer. Vai entender quando passar."'
+      ],
+      scroll: [
+        '"Tinta seca, runa firme. Use no momento certo — pergaminho não dá segunda chance."',
+        '<i>Corvus enrola e amarra com fita verde.</i> "Guarde longe da chuva."'
+      ],
+      generic: [
+        '<i>Corvus passa a peça por cima do balcão sem olhar.</i> "Boa sorte com isso."',
+        '"Volte se precisar marcar uma nova rota."'
+      ]
+    },
+    sell: {
+      map: [
+        '<i>Corvus desenrola o mapa devagar, lê marcas que só ele entende.</i> "Bom traçado. Aceito — copio antes de revender."',
+        '"Outra rota pro arquivo. Cada mapa que volta enriquece o próximo viajante."'
+      ],
+      scroll: [
+        '<i>Corvus examina a runa.</i> "Tinta original. Aceito — vou catalogar."',
+        '"Pergaminho com história sempre tem comprador."'
+      ],
+      generic: [
+        '"Aceito. Sempre tem espaço no arquivo."'
+      ]
+    }
+  },
+  bjorn: {
+    buy: {
+      camping: [
+        '<i>Bjorn ajeita o avental, voz grave.</i> "Estrada longa exige material confiável. Esse aí <i>aguenta noite gelada</i>."',
+        '"Já dormi sob chuva com material pior. Esse aqui te poupa enxaqueca."',
+        '"Use bem. Material de viajante sério não é brinquedo."'
+      ],
+      generic: [
+        '"Pronto. Boa estrada."',
+        '<i>Bjorn entrega sem cerimônia.</i> "Volte se precisar de mais."'
+      ]
+    },
+    sell: {
+      camping: [
+        '<i>Bjorn aperta o couro entre dedos calejados.</i> "Ainda dá pra estrada. Aceito — costuro o que precisar."',
+        '"Material recuperável. Pago justo — uns dias de costura e vira coisa nova."'
+      ],
+      material: [
+        '"Couro bruto vale. Aceito — vou curtir."',
+        '<i>Bjorn pesa o material com olho experiente.</i> "Bom estado. Aceito."'
+      ],
+      generic: [
+        '"Aceito."',
+        '<i>Bjorn paga em moedas pequenas, conta direito.</i> "Volte quando achar mais."'
+      ]
+    }
+  },
+  generic: {
+    buy: {
+      generic: [
+        '<i>O mercador entrega o item.</i> "Boa escolha."',
+        '"Pronto. Volte sempre."'
+      ]
+    },
+    sell: {
+      generic: [
+        '<i>O mercador examina, conta moedas, entrega bolsa.</i> "Aceito sem pechinchar."',
+        '"Item útil. Pago o que vale."'
+      ]
+    }
+  }
+};
+
+// Resolve item → especialista. Tags têm precedência ordenada (gem > magic > generic).
+function _marketGetSpecialist(itemName){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var tags = data.t || [];
+  for (var i = 0; i < MARKET_SPECIALIST_RULES.length; i++){
+    var rule = MARKET_SPECIALIST_RULES[i];
+    for (var j = 0; j < rule.tags.length; j++){
+      if (tags.indexOf(rule.tags[j]) !== -1){
+        var npc = MARKET_NPC_LIBRARY[rule.npc] || MARKET_NPC_LIBRARY.generic;
+        return {
+          key: rule.npc, npc: npc.npc, role: npc.role,
+          icon: npc.icon, mult: rule.mult, cat: rule.cat,
+          baseValue: data.v || 0,
+          sellPrice: Math.max(1, Math.floor((data.v || 1) * rule.mult))
+        };
+      }
+    }
+  }
+  // Fallback: mercador genérico 60%
+  var g = MARKET_NPC_LIBRARY.generic;
+  return {
+    key: 'generic', npc: g.npc, role: g.role, icon: g.icon,
+    mult: g.fallback_mult, cat: 'generic',
+    baseValue: data.v || 0,
+    sellPrice: Math.max(1, Math.floor((data.v || 1) * g.fallback_mult))
+  };
+}
+
+// Pega uma linha aleatoria da pool [npcKey][action][category] com fallback genérico
+function _marketNpcLine(npcKey, action, cat){
+  var npc = MARKET_NPC_REACTIONS[npcKey] || MARKET_NPC_REACTIONS.generic;
+  var actionPool = npc[action] || {};
+  var pool = actionPool[cat] || actionPool.generic || ['<i>O mercador aceita em silêncio.</i>'];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Atmosfera de entrada no mercado — varia com hora do dia (CITY_MOCK_TIME ou _squarePeriodKey)
+function _marketAtmosphereLine(){
+  var period = (typeof _squarePeriodKey === 'function') ? _squarePeriodKey() : 'day';
+  var pools = {
+    dawn:  [
+      '<i>Tochas ainda chiam — os primeiros mercadores armam suas mesas. Cheiro de pão recém-saído do forno.</i>',
+      '<i>A névoa da manhã se dissipa sobre o piso de pedra. Aprendizes desempacotam caixas em silêncio.</i>'
+    ],
+    day:   [
+      '<i>O mercado fervilha — pregões cruzam o ar, moedas batem em balcões, mercadores bradam ofertas.</i>',
+      '<i>Movimento intenso. Vendedores ajeitam mostruários, clientes se acotovelam entre as bancadas.</i>',
+      '<i>Sol forte sobre Eldoria. Sob toldos coloridos, os comerciantes negociam em meia dúzia de sotaques.</i>'
+    ],
+    dusk:  [
+      '<i>O sol desce vermelho. Lampiões se acendem um a um. Mercadores fecham os mais frágeis primeiro.</i>',
+      '<i>Vento frio entra pelas frestas. Alguns balcões já recolhem mostruários — a hora boa passou.</i>'
+    ],
+    night: [
+      '<i>Poucos balcões abertos. Tochas chiam sob o céu estrelado. Os que ficam vendem para quem precisa demais.</i>',
+      '<i>O frio mordisca. Mercadores com capas pesadas atendem em sussurros. A praça quase vazia.</i>'
+    ]
+  };
+  var pool = pools[period] || pools.day;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+// =============================================================================
+// END MARKET AAA SYSTEM
+// =============================================================================
 
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
@@ -35479,39 +35872,49 @@ function _marketShowSell(p){
     vToast('💰 Nenhum item vendável (item de missão/único/mapa não vendem).');
     return;
   }
+  // X-6.5.51CB (2026-05-18): cada item roteado pro especialista correto.
+  // Specialist paga melhor (65-70%) que mercador generico (60%) — incentiva
+  // o player a vender no comerciante adequado. Badge mostra "+sellPrice (NPC)".
   var items = sellable.map(function(it){
-    var sellPrice = Math.floor(it.value * 0.6);
-    return { icon: it.icon, label: it.name, badge: '+' + sellPrice + ' V', _it: it, _sell: sellPrice };
+    var spec = _marketGetSpecialist(it.n || it.name);
+    var sellPrice = spec.sellPrice;
+    var npcShort = spec.npc.split(' ')[0]; // primeiro nome (Thorne, Mirena, etc.)
+    return {
+      icon: it.icon, label: it.name,
+      badge: '+' + sellPrice + ' <span class="vi vi-coin sm"></span> · ' + npcShort,
+      _it: it, _sell: sellPrice, _spec: spec
+    };
   });
   _squareShowListPopup({
     stackKey: 'market_sell', icon: _heralIco('ic-bolsa'), title: 'Vender Itens',
-    flavor: '<i>Mercadores compram ao preço de 60% do valor base.</i>',
+    flavor: '<i>Cada item vai pro mercador certo — Thorne paga melhor em armas e armaduras; Mirena em poções; Velithra em gemas; Corvus em mapas; Bjorn em equipamento de viagem.</i>',
     items: items,
     onPick: function(item){
       var it = item._it;
       var sellPrice = item._sell;
+      var spec = item._spec;
+      // Bloqueia se item está equipado (proteção UX)
+      if (_isItemEquipped(it.n)) {
+        vToast('⚠️ Item equipado. Desequipe antes de vender.', 'warn');
+        return;
+      }
       _showConfirmPurchase({
-        icon: it.icon, npc: 'Mercador',
+        icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
         title: 'Vender ' + it.name,
-        desc: '<b>' + it.name + '</b> (valor base: ' + it.value + ' V)<br>' +
-              'Preço de venda: <b>' + sellPrice + ' Valdoritas</b>',
+        desc: '<b>' + it.name + '</b><br>' +
+              '<i>Valor base:</i> ' + it.value + ' <span class="vi vi-coin sm"></span><br>' +
+              '<i>' + spec.npc.split(' ')[0] + ' paga:</i> <b>' + sellPrice + '</b> <span class="vi vi-coin sm"></span> <i>(' + Math.round(spec.mult * 100) + '%)</i>',
         cost: sellPrice, creditMode: true,
         onConfirm: function(){
           var preGold = p.gold;
           p.gold += sellPrice;
-          // X-6.5.51AX (2026-05-11): remove 1 unidade do item após venda.
-          // Antes _marketShowSell creditava gold mas não removia o item da
-          // mochila — player podia vender o mesmo item infinitamente.
-          // Se item está equipado em algum slot, NÃO vende (proteção UX).
-          if (_isItemEquipped(it.n)) {
-            vToast('⚠️ Item equipado. Desequipe antes de vender.', 'warn');
-            return;
-          }
           _removeItemFromInventory(it.n, 1);
           refreshHud();
+          // PADRAO_ALDRIC reaction line por especialista x categoria
+          var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
           _showServiceResultPopup({
-            icon: it.icon, npc: 'Mercador',
-            narrative: '<i>Mercador examina, conta moedas, entrega bolsa.</i><br><br>Item vendido por <b>' + sellPrice + ' Valdoritas</b>.',
+            icon: spec.icon, npc: spec.npc,
+            narrative: reactionLine + '<br><br><b>+' + sellPrice + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
