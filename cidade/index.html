@@ -1325,6 +1325,71 @@ LOG SINK (Fase 7):
       align-items: center;
       gap: 4px;
     }
+    /* 2026-05-18 — Manual amount prompt (Depositar/Retirar valor customizado) */
+    .bnk-prompt {
+      display: flex; flex-direction: column;
+      gap: 10px; padding: 4px 0;
+    }
+    .bnk-prompt-info {
+      text-align: center;
+      color: var(--v-text, #d4c8b0);
+      font-size: var(--v-font-body, 14px);
+      line-height: 1.6;
+    }
+    .bnk-prompt-info .vi-coin { vertical-align: middle; margin-left: 2px; }
+    .bnk-tax-ok { color: #7cd47c; font-size: var(--v-font-sm, 12px); }
+    .bnk-tax-warn { color: #d4a050; font-size: var(--v-font-sm, 12px); }
+    .bnk-prompt-row {
+      display: flex; align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+    .bnk-prompt-row.bnk-prompt-presets { gap: 8px; }
+    .bnk-prompt-step, .bnk-prompt-preset {
+      background: rgba(196,149,58,0.12);
+      border: 1px solid var(--v-gold-40);
+      color: var(--v-gold, #c4953a);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: var(--v-font-sm, 12px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 6px 10px;
+      border-radius: var(--v-radius-sm, 6px);
+      cursor: pointer;
+      min-width: 44px; min-height: 36px;
+      transition: background var(--v-transition), border-color var(--v-transition);
+    }
+    .bnk-prompt-step:hover, .bnk-prompt-preset:hover {
+      background: rgba(196,149,58,0.22);
+      border-color: var(--v-gold, #c4953a);
+    }
+    .bnk-prompt-step:active, .bnk-prompt-preset:active {
+      background: rgba(196,149,58,0.30);
+      transform: scale(0.97);
+    }
+    #bnk-prompt-input {
+      flex: 1;
+      max-width: 140px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid var(--v-gold-40);
+      color: var(--v-gold-light, #dbb668);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: var(--v-font-xl, 18px);
+      font-weight: 700;
+      text-align: center;
+      padding: 8px 6px;
+      border-radius: var(--v-radius-sm, 6px);
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    #bnk-prompt-input::-webkit-outer-spin-button,
+    #bnk-prompt-input::-webkit-inner-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+    #bnk-prompt-input:focus {
+      border-color: var(--v-gold, #c4953a);
+      box-shadow: 0 0 12px var(--v-gold-30);
+    }
     .tmp-pay-icon { font-size: var(--v-font-lg, 15px); }
     .tmp-pay-label { letter-spacing: 0.08em; }
     .tmp-pay-warn {
@@ -5338,6 +5403,27 @@ body.perf-lite .vc-action-btn { transition: none; }
       } catch(e){ console.warn('[INTRO] content refresh failed:', e); }
     }, 1800);
   };
+
+  /* 2026-05-18 BUG FIX: Loading overlay stuck pos location.reload(true).
+     Quando o user reloada a pagina (F5), o intro pode ser pulado via
+     resumeTs check (intro skipped → __onIntroTap nao roda) MAS o loading
+     overlay pode ficar visivel devido a state stale. Defensive fallback:
+     se o DOM carregou e o loading nao foi escondido em 5s, esconder.
+     NAO interfere com fluxo normal (1.8s timeout no __onIntroTap). */
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var ld = document.getElementById('loading');
+      if (!ld) return;
+      var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
+      if (cs.display !== 'none' && cs.visibility !== 'hidden'){
+        var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
+        if (!introBlocking){
+          console.warn('[INTRO] safety hide loading overlay (stuck post-reload)');
+          ld.style.display = 'none';
+        }
+      }
+    }, 5000);
+  });
   </script>
   <!-- ====================================================================
        HERALDIC SPRITE (inline subset — regra Heraldic Icons Only)
@@ -17042,7 +17128,8 @@ var BANK_TIPS_ACTIVE_LOAN = [
 var BANK_TUTORIAL_TEXT = (
   '🔒 <b>Dica do Aventureiro:</b><br><br>' +
   'Você acumulou riquezas consideráveis! Sabia que o <b>Banco de Eldoria</b> oferece cofres seguros?<br><br>' +
-  '<span class="vi vi-coin sm"></span> <b>Depósito de Valdoritas:</b> Taxa de 5% (ex: depositar 100 → 95 guardadas)<br>' +
+  '<span class="vi vi-coin sm"></span> <b>Depósito de Valdoritas:</b> Sem taxa — guarda integral do valor.<br>' +
+  '<span class="vi vi-coin sm"></span> <b>Saque:</b> Taxa de 2% sobre o valor sacado.<br>' +
   '📦 <b>Guarda de Itens:</b> Seus pertences ficam protegidos mesmo se você cair em combate.<br><br>' +
   'Visite o Banco na cidade para proteger seus ganhos!'
 );
@@ -17718,6 +17805,30 @@ var SQUARE_NPCS = [
     talkOptions: [
       { id: 'help',   q: 'Ajudar',   a: '<i>Lia se anima.</i> "Perdi minha boneca... era da mamãe. Você ajuda eu procurar?"' },
       { id: 'ignore', q: 'Ignorar',  a: '<i>Você se afasta. Lia continua chorando.</i>' }
+    ]
+  },
+  // 2026-05-18 BUG FIX (BUG #3): Lyana ausente da Praça.
+  // Quest "Falar com Lyana na Praça" referencia ela mas nao estava em
+  // SQUARE_NPCS, apenas em RECURRING_NPCS (chance encounters). Movida pra
+  // ca pra que a quest seja completavel via Investigar (NPCs).
+  {
+    id: 'square_lyana',
+    icon: _heralIco('ic-bardo'),       // Lyana — bardo/herbalista
+    name: 'Lyana',
+    role: 'Bardo · Herbalista',
+    desc: 'Uma bardo de cabelos negros canta perto da fonte, com um cesto de ervas ao lado.',
+    greetings: [
+      '<i>Lyana levanta os olhos do alaúde e sorri.</i> "Bem-vindo à praça, viajante. Aqui não tem coroas, só conversa boa e a fonte que ouve."'
+    ],
+    talkOptions: [
+      { id: 'deliver_letter', q: 'Entregar carta da sua mãe',
+        a: '<i>Lyana recebe o pergaminho com mãos trêmulas.</i> "Mamãe... obrigada por trazer isso. Você não sabe o que isso significa."',
+        completes_quest: 'lyana' },
+      { id: 'ask_news', q: 'Pedir notícias da cidade',
+        a: '"Volte sempre que precisar de notícia — eu sei de quase tudo que se conta na cidade."' },
+      { id: 'listen_song', q: 'Ouvir uma canção (5 Valdoritas)',
+        a: '<i>Lyana canta uma balada antiga sobre dragões e portões esquecidos. A praça fica em silêncio por um momento.</i>',
+        cost: 5 }
     ]
   }
 ];
@@ -27805,10 +27916,95 @@ function _templePick(category, fallback, npcName){
   return fallback || '';
 }
 
+// 2026-05-18: prompt amount via DOM input — manual amount input
+// para Depositar / Retirar (user request: jogador define quanto movimentar)
+function _bankPromptAmount(p, mode){
+  var bank = window._bank || 0;
+  var maxAmt = (mode === 'deposit') ? p.gold : bank;
+  var labelMode = (mode === 'deposit') ? 'Depositar' : 'Retirar';
+  var taxNote = (mode === 'deposit')
+    ? '<span class="bnk-tax-ok">Sem taxa — guarda integral.</span>'
+    : '<span class="bnk-tax-warn">Taxa de 2% sobre o saque.</span>';
+  if (maxAmt <= 0){
+    vToast((mode === 'deposit' ? 'Bolsa' : 'Cofre') + ' vazio — nada para movimentar.');
+    return;
+  }
+  var ov = document.getElementById('confirm-purchase-overlay');
+  if (!ov){ vToast('Overlay não disponível.'); return; }
+  ov.classList.add('active');
+  var iconEl = document.getElementById('cpp-icon');
+  var titleEl = document.getElementById('cpp-title');
+  var npcEl = document.getElementById('cpp-npc');
+  var descEl = document.getElementById('cpp-desc');
+  var cancelEl = document.getElementById('cpp-cancel-btn');
+  var confirmEl = document.getElementById('cpp-confirm-btn');
+  if (iconEl) iconEl.innerHTML = _heralIco('ic-bolsa', null, '32px');
+  if (titleEl) titleEl.textContent = labelMode + ' valor customizado';
+  if (npcEl) npcEl.textContent = 'Aldwin — Banqueiro';
+  if (descEl) descEl.innerHTML = ''
+    + '<div class="bnk-prompt">'
+    +   '<div class="bnk-prompt-info">'
+    +     '<span>Disponível: <b>' + maxAmt + '</b> <span class="vi vi-coin sm"></span></span>'
+    +     '<br>' + taxNote
+    +   '</div>'
+    +   '<div class="bnk-prompt-row">'
+    +     '<button type="button" class="bnk-prompt-step" data-step="-100" aria-label="Menos 100">−100</button>'
+    +     '<button type="button" class="bnk-prompt-step" data-step="-10" aria-label="Menos 10">−10</button>'
+    +     '<input type="number" id="bnk-prompt-input" min="1" max="' + maxAmt + '" step="1" value="' + Math.min(50, maxAmt) + '" inputmode="numeric" />'
+    +     '<button type="button" class="bnk-prompt-step" data-step="10" aria-label="Mais 10">+10</button>'
+    +     '<button type="button" class="bnk-prompt-step" data-step="100" aria-label="Mais 100">+100</button>'
+    +   '</div>'
+    +   '<div class="bnk-prompt-row bnk-prompt-presets">'
+    +     '<button type="button" class="bnk-prompt-preset" data-pct="25">25%</button>'
+    +     '<button type="button" class="bnk-prompt-preset" data-pct="50">50%</button>'
+    +     '<button type="button" class="bnk-prompt-preset" data-pct="75">75%</button>'
+    +     '<button type="button" class="bnk-prompt-preset" data-pct="100">TUDO</button>'
+    +   '</div>'
+    + '</div>';
+  var input = document.getElementById('bnk-prompt-input');
+  function clamp(v){ v = Math.max(1, Math.min(maxAmt, Math.floor(v || 0))); return v; }
+  function updateConfirmLabel(){
+    var v = clamp(parseInt(input.value, 10));
+    if (input.value !== String(v)) input.value = v;
+    if (confirmEl) confirmEl.innerHTML = 'CONFIRMAR (' + v + ' <span class="vi vi-coin sm"></span>)';
+  }
+  if (input){
+    input.addEventListener('input', updateConfirmLabel);
+    input.addEventListener('change', updateConfirmLabel);
+  }
+  ov.querySelectorAll('.bnk-prompt-step').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var step = parseInt(btn.getAttribute('data-step'), 10) || 0;
+      input.value = clamp(parseInt(input.value, 10) + step);
+      updateConfirmLabel();
+    });
+  });
+  ov.querySelectorAll('.bnk-prompt-preset').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pct = parseInt(btn.getAttribute('data-pct'), 10) || 0;
+      input.value = clamp(Math.floor(maxAmt * pct / 100));
+      updateConfirmLabel();
+    });
+  });
+  updateConfirmLabel();
+  if (cancelEl){
+    cancelEl.onclick = function(){ ov.classList.remove('active'); };
+  }
+  if (confirmEl){
+    confirmEl.onclick = function(){
+      var v = clamp(parseInt(input.value, 10));
+      ov.classList.remove('active');
+      if (mode === 'deposit') _bankDeposit(p, v);
+      else _bankWithdraw(p, v);
+    };
+  }
+}
+
 function _bankDeposit(p, amountOrAll){
   var amt = (amountOrAll === 'all') ? p.gold : amountOrAll;
-  if (amt <= 0) { vToast('💰 Bolsa vazia — nada pra depositar.'); return; }
-  if (p.gold < amt) { vToast('💰 Bolsa insuficiente.'); return; }
+  // 2026-05-18: substituido emoji 💰 por icone vi-coin (regra Valdorita coin canonical)
+  if (amt <= 0) { vToast('Bolsa vazia — nada pra depositar.'); return; }
+  if (p.gold < amt) { vToast('Bolsa insuficiente.'); return; }
   // canonical: bank_dialogue.py ALDWIN_DEPOSIT_MENU + ALDWIN_DEPOSIT (post-confirm)
   var promptLine = _aldwinPick('aldwin_deposit_menu',
     'Aldwin abre o livro de registros com pena de pavão. "Sem taxa de depósito. Confirma o registro?"');
@@ -36924,7 +37120,8 @@ _registerDynamicHandlers();
 function _bankWithdraw(p, amount){
   var b = window._bank || 0;
   if (b < amount) {
-    vToast('💸 Saldo insuficiente no cofre (' + b + ' Valdoritas).');
+    // 2026-05-18: substituido emoji 💸 (regra Valdorita coin canonical)
+    vToast('Saldo insuficiente no cofre (' + b + ' Valdoritas).');
     return;
   }
   var net = Math.floor(amount * 0.98);
@@ -39115,9 +39312,10 @@ var SUBSCREEN_DATA = {
 
   // ========== SUB-SUB-SCREENS — BANCO ==========
   'bank_deposit': {
-    header: '💰 Depositar Moedas',
+    header: '<span class="vi vi-coin sm"></span> Depositar Moedas',
     flavor: 'Aldwin abre o livro. "Quanto deseja depositar hoje?"',
     buttons: [
+      [_heralIco('ic-mochila'), '<span class="vi vi-coin sm"></span> Valor customizado', 'Você decide quanto', 'deposit_custom'],
       [_heralIco('ic-mochila'), 'Depositar 10 <span class="vi vi-coin sm"></span>', '0 → 10 cofre', 'deposit_10'],
       [_heralIco('ic-mochila'), 'Depositar 50 <span class="vi vi-coin sm"></span>', '0 → 50 cofre', 'deposit_50'],
       [_heralIco('ic-mochila'), 'Depositar 100 <span class="vi vi-coin sm"></span>', '0 → 100 cofre', 'deposit_100'],
@@ -39125,9 +39323,10 @@ var SUBSCREEN_DATA = {
     ]
   },
   'bank_withdraw': {
-    header: '💸 Retirar Moedas',
+    header: '<span class="vi vi-coin sm"></span> Retirar Moedas',
     flavor: '"Taxa de 2% sobre o saque." Aldwin aguarda.',
     buttons: [
+      [_heralIco('ic-mochila'), '<span class="vi vi-coin sm"></span> Valor customizado', 'Você decide quanto', 'withdraw_custom'],
       [_heralIco('ic-mochila'), 'Retirar 10 <span class="vi vi-coin sm"></span>', '+ taxa 2%', 'withdraw_10'],
       [_heralIco('ic-mochila'), 'Retirar 50 <span class="vi vi-coin sm"></span>', '+ taxa 2%', 'withdraw_50'],
       [_heralIco('ic-mochila'), 'Retirar 100 <span class="vi vi-coin sm"></span>', '+ taxa 2%', 'withdraw_100']
@@ -40332,9 +40531,12 @@ var ACTION_HANDLERS = {
   'deposit_50':  function(p){ _bankDeposit(p, 50); },
   'deposit_100': function(p){ _bankDeposit(p, 100); },
   'deposit_all': function(p){ _bankDeposit(p, 'all'); },
+  // 2026-05-18: manual amount input (user request) — abre popup com numeric input
+  'deposit_custom': function(p){ _bankPromptAmount(p, 'deposit'); },
   'withdraw_10':  function(p){ _bankWithdraw(p, 10); },
   'withdraw_50':  function(p){ _bankWithdraw(p, 50); },
   'withdraw_100': function(p){ _bankWithdraw(p, 100); },
+  'withdraw_custom': function(p){ _bankPromptAmount(p, 'withdraw'); },
 
   // Festival
   'fest_food':    function(p){ if (!_pay(p, 5)) return; var w = Math.random() < 0.55; if (w) { _gainXp(p, 20); vToast('🍖 Venceu! +20 XP + 3 grãos.'); } else vToast('🍖 Perdeu. +5 XP consolação.'); },
