@@ -50052,10 +50052,12 @@ function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
 
-  /* Icon — suporta SVG heraldico (innerHTML) ou emoji (textContent) */
+  /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
+     2026-05-18 BUG FIX: <img> tag (merchant portraits AAA) era escapado como
+     texto literal. Fix: detectar <svg OU <img — qualquer HTML marker. */
   var ico = el('div', 'vc-service-icon');
   var icoStr = svc.icon || '';
-  if (icoStr.indexOf('<svg') >= 0) {
+  if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0 || icoStr.indexOf('<span') >= 0) {
     ico.innerHTML = icoStr;
   } else {
     ico.textContent = icoStr;
@@ -50214,7 +50216,8 @@ function actionList(items) {
       if (item.icon) {
         var ico = el('span', 'vc-action-ico');
         var icoStr = item.icon;
-        if (icoStr.indexOf('<svg') >= 0) {
+        /* 2026-05-18: detectar <img> + <span> alem de <svg> (portrait AAA) */
+        if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0 || icoStr.indexOf('<span') >= 0) {
           ico.innerHTML = icoStr;
         } else {
           ico.textContent = icoStr;
