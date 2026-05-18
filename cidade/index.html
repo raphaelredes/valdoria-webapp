@@ -7827,7 +7827,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       '<div id="city-session-error" style="position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;">' +
         '<div style="max-width:340px">' +
         '<div style="font-size:28px;font-weight:700;letter-spacing:5px;color:#c4953a;text-shadow:0 0 25px rgba(196,149,58,0.5);margin-bottom:8px">VALDORIA</div>' +
-        '<div style="font-size:14px;color:#c4953a;margin-bottom:20px;letter-spacing:3px">SESSAO EXPIRADA</div>' +
+        '<div style="font-size:14px;color:#c4953a;margin-bottom:20px;letter-spacing:3px">SESSÃO EXPIRADA</div>' +
         '<div style="font-size:14px;line-height:1.6;margin-bottom:20px">' + (reason || 'Nao foi possivel carregar seu personagem.') + '</div>' +
         '<div style="font-size:13px;line-height:1.5;color:#a09484;margin-bottom:24px">Abra o jogo novamente pelo bot do Telegram (botao Jogar ou /start).</div>' +
         (detail ? '<div style="font-size:11px;color:#6a5a4e;margin-top:16px;font-family:monospace">' + detail + '</div>' : '') +
@@ -7895,7 +7895,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   });
   if (_isProductionHost && (!_token || !_api || !_uid)){
     _showSessionErrorOverlay(
-      'Sessao expirada ou abertura direta sem autenticacao.',
+      'Sessão expirada ou abertura direta sem autenticacao.',
       'missing: ' + ([!_token && 'token', !_api && 'api', !_uid && 'uid'].filter(Boolean).join(', '))
     );
     return;  // halt — _showSessionErrorOverlay throws but pra garantir
@@ -8237,7 +8237,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
         if (_isProductionHost){
           _showSessionErrorOverlay(
-            'Erro de conexao ao carregar personagem.',
+            'Erro de conexão ao carregar personagem.',
             'state + characters fallback falharam: ' + String(e && e.message || e).slice(0, 100)
           );
         }
@@ -25234,7 +25234,7 @@ var CANON_FESTIVAL_FULL = {
       "name": "Semana da Forja",
       "icon": "🔨",
       "hub_text": "As bigornas cantam e o ferro brilha! Eldoria celebra a arte dos ferreiros.",
-      "intro": "O Distrito dos Ferreiros foi transformado em um espetaculo de fogo e metal. Forjadores de toda a regiao exibem suas melhores criações, e o som ritmico dos martelos ecoa como uma cancao ancestral.",
+      "intro": "O Distrito dos Ferreiros foi transformado em um espetaculo de fogo e metal. Forjadores de toda a regiao exibem suas melhores criações, e o som ritmico dos martelos ecoa como uma canção ancestral.",
       "real_start": [
         3,
         10
@@ -27590,7 +27590,7 @@ function _renderEpicSquareHub(container, data){
    renderSquareHub (relations/arena/daily_challenge/trade_board/shadow_alley/
    travelers/heroes_wall) renderizam popup VAZIO.
 
-   Bug encontrado via Chrome MCP no dev/cidade/ clicando 'Vinculos':
+   Bug encontrado via Chrome MCP no dev/cidade/ clicando 'Vínculos':
      [CITY] doAction: rel_main
      [CITY] subscreen action (no handler): rel_main
    Popup abria (popupVisible=true) mas body ficava com 0 bytes pq

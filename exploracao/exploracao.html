@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T14:18:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:00:13Z - do not edit directly, edit source -->
 
 
 <!--
@@ -35807,7 +35807,7 @@ function maybeRollDungeonDiscovery() {
     choices: [
       { label: 'Investigar com cuidado', skill: 'wis', dc: 13, desc: 'Procurar pistas (Sabedoria/Percepcao)',
         outcome_ok: { text: 'Você descobre a entrada de "' + candidate.name + '"! O caminho oculto foi revelado no mapa.' },
-        outcome_fail: { text: 'Você nao encontra nada de interessante. Talvez tenha sido sua imaginacao.' } },
+        outcome_fail: { text: 'Você nao encontra nada de interessante. Talvez tenha sido sua imaginação.' } },
       { label: 'Seguir em frente', desc: 'Ignorar e continuar',
         outcome_ok: { text: 'Você decide nao se desviar. Sua jornada continua.' } }
     ],
@@ -38840,7 +38840,7 @@ function _xcartWireEvents() {
   /* 2026-05-18 USER REQUEST (Chrome MCP testing): handler do botão "Voltar pra
      Cidade". Fluxo:
        1. Fecha cartografia overlay
-       2. Chama ExploracaoAPI.finish() pra liberar sessao server-side +
+       2. Chama ExploracaoAPI.finish() pra liberar sessão server-side +
           aplicar XP/loot/HP final ao Player
        3. Limpa explore flags localmente (window.__valdoria_transitioning=true
           evita close-beacon do error-reporter)
@@ -43226,7 +43226,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
        [CAMERA]       zoom/scroll mudou
        [TIER]         _valdoriaPerformanceTier mudou (raro)
 
-     Custo: ~150 logs/min em sessao normal. Acumula em _LOG_BUFFER e via
+     Custo: ~150 logs/min em sessão normal. Acumula em _LOG_BUFFER e via
      _logViaImage (mesmo sink dos outros logs). Pra desativar, remova
      ld_verbose=1 da URL.
 =========================================================================== -->

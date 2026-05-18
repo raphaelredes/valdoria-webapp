@@ -735,7 +735,7 @@ showFatalError('Erro ao aplicar evolução: ' + (data.error || 'Desconhecido'));
 }
 }).catch(function(e) {
 resetSubmitState();
-showFatalError('Erro de conexao com servidor.', e);
+showFatalError('Erro de conexão com servidor.', e);
 });
 }
 else if (tg && tg.sendData) {

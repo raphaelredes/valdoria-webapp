@@ -342,13 +342,13 @@ document.write('<script src="/shared/audio-manager.js?v=' + v + '"><\/script>');
     if (!initData) {
       /* 2026-05-11 (user request): /play/ sem initData = navegador direto.
          Redireciona pra /web/ (tela de autenticacao Telegram/Google) em vez
-         de tentar cidade sem sessao. Mantem suporte a links com ?token=&uid=
+         de tentar cidade sem sessão. Mantem suporte a links com ?token=&uid=
          (gotoCidade) — se URL tiver token, segue pra cidade; sem token,
          vai pra auth. */
       var hasUrlToken = (new URLSearchParams(window.location.search)).get('token');
       if (hasUrlToken) {
-        setTip('Restaurando sessao…');
-        setProgress(35, 'Restaurando sessao…');
+        setTip('Restaurando sessão…');
+        setProgress(35, 'Restaurando sessão…');
         setTimeout(gotoCidade, 1200);
         return;
       }
