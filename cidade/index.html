@@ -15400,7 +15400,7 @@ var GUILD_QUEST_DETAILS = {
     qid: 'defend', icon: _heralIco('ic-portoes'),
     title: 'Defender Campos Verdes', desc: 'Os Campos Verdes estão sob ameaça iminente de orcs do leste.',
     npc: 'Capitã Helga', location: 'Campos Verdes',
-    flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. A região precisa de heróis em 3 dias."',
+    flavor: 'Helga olha grave: "Mensageiro chegou meio-morto. A região precisa de aventureiros em 3 dias."',
     reward: 500, xp: 400, lvlReq: 10, progress: '0/1'
   },
   // X-6.5.51BP (2026-05-15): Missão da Adega — ativada via diálogo PADRAO_ALDRIC com Martha
@@ -17823,7 +17823,7 @@ var SQUARE_PLAZA_EVENTS = [
     desc: 'Uma placa de madeira de uma loja se solta e está prestes a cair sobre um pedestre!',
     choices: [
       { id: 'push_away', label: '🏃 Empurrar a Pessoa', stat: 'DES', dc: 10,
-        success: { text: 'Você salva o pedestre no último segundo! "Você é um herói!"', xp: 20, gold: 8 },
+        success: { text: 'Você salva o pedestre no último segundo! "Você é um aventureiro!"', xp: 20, gold: 8 },
         failure: { text: 'A placa erra por pouco. Você tropeça mas ninguém se machuca.', xp: 8 } },
       { id: 'shout', label: '📢 Gritar (sem rolagem)', stat: null,
         success: { text: '"CUIDADO!" A pessoa se esquiva a tempo. Alívio geral.', xp: 10 } }
@@ -17942,7 +17942,7 @@ var SQUARE_PLAZA_EVENTS = [
     desc: 'Uma seção do muro da praça está rachando. Pedras pequenas já caíram.',
     choices: [
       { id: 'reinforce', label: '🔨 Reforçar', stat: 'FOR', dc: 11,
-        success: { text: 'Você sustenta a parede até os pedreiros chegarem. Herói do dia!', xp: 15, gold: 8 },
+        success: { text: 'Você sustenta a parede até os pedreiros chegarem. Aventureiro do dia!', xp: 15, gold: 8 },
         failure: { text: 'O muro aguenta por enquanto. Alguém vai consertar depois.', xp: 5 } },
       { id: 'search_crack', label: '🔍 Procurar na Rachadura', stat: 'DES', dc: 12,
         success: { text: 'Na fenda do muro, você encontra um frasco antigo com líquido brilhante!', xp: 15 },
@@ -19615,7 +19615,7 @@ var CANON_PLAZA_EVENTS = [
         "stat": "dexterity",
         "dc": 10,
         "success": {
-          "text": "Você salva o pedestre no último segundo! \"Você é um herói!\"",
+          "text": "Você salva o pedestre no último segundo! \"Você é um aventureiro!\"",
           "xp": 20,
           "gold": [
             5,
@@ -19833,7 +19833,7 @@ var CANON_PLAZA_EVENTS = [
         "stat": "strength",
         "dc": 11,
         "success": {
-          "text": "Você sustenta a parede até os pedreiros chegarem. Herói do dia!",
+          "text": "Você sustenta a parede até os pedreiros chegarem. Aventureiro do dia!",
           "xp": 15,
           "gold": [
             5,
@@ -39657,7 +39657,7 @@ var SUBSCREEN_DATA = {
   },
   'quest_open_defend': {
     header: '🏰 Missão: Defender Campos Verdes',
-    flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Os Campos Verdes serão atacados em três dias. Orcs vindos do leste avançam em força. A região precisa de heróis até depois de amanhã — depois disso é cinzas."',
+    flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Os Campos Verdes serão atacados em três dias. Orcs vindos do leste avançam em força. A região precisa de aventureiros até depois de amanhã — depois disso é cinzas."',
     npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Campos Verdes · 💰 500 <span class="vi vi-coin sm"></span> + 400 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Campos Verdes', 'quest_defend_locate'],
