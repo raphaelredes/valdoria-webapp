@@ -15278,10 +15278,15 @@ function _marketShowTransient(p, npc){
     html += '<p class="subscreen-flavor" style="opacity:0.75"><i>' + chatLine + '</i></p>';
   }
   // Lista de items canonical
+  // 2026-05-18: mesmo _resolveItemIcon fix do shop popup — transient merchants
+  // têm items com .icon emoji que ficavam genéricos no fallback. Tenta SVG
+  // heráldico por nome (ic-it-*) primeiro, depois fallback pra .icon legado.
   html += '<div class="bnk-item-list">';
   npc.items.forEach(function(it){
+    var transIcon = (typeof _resolveItemIcon === 'function') ? _resolveItemIcon(it.name, '32px') : '';
+    if (!transIcon) transIcon = (it.icon || _heralIco("ic-mochila"));
     html += '<button class="subscreen-btn bnk-item-btn" data-key="' + it.key + '">'
-      + '<span class="sb-icon">' + (it.icon || _heralIco("ic-mochila")) + '</span>'
+      + '<span class="sb-icon">' + transIcon + '</span>'
       + '<span class="sb-text">' + it.name
       + '<br><span style="opacity:0.7;font-size:0.85em">' + (it.desc || '') + '</span>'
       + '</span>'
@@ -15306,8 +15311,11 @@ function _marketShowTransient(p, npc){
       var key = btn.dataset.key;
       var item = npc.items.find(function(x){ return x.key === key; });
       if (!item) return;
+      // 2026-05-18: _resolveItemIcon fix pra confirm + result popups
+      var purchaseIcon = (typeof _resolveItemIcon === 'function') ? _resolveItemIcon(item.name, '48px') : '';
+      if (!purchaseIcon) purchaseIcon = (item.icon || _heralIco("ic-mochila"));
       _showConfirmPurchase({
-        icon: item.icon || _heralIco("ic-mochila"),
+        icon: purchaseIcon,
         npc: npc.name,
         title: 'Comprar ' + item.name,
         desc: '<b>' + item.name + '</b><br>'
@@ -15318,7 +15326,7 @@ function _marketShowTransient(p, npc){
           var preGold = p.gold;
           if (!_pay(p, item.value)) return;
           _showServiceResultPopup({
-            icon: item.icon || _heralIco("ic-mochila"), npc: npc.name,
+            icon: purchaseIcon, npc: npc.name,
             narrative: '<i>' + npc.name + ' embrulha o item com cuidado.</i><br><br>'
                      + '<b>' + item.name + '</b> adicionado à sua bolsa.<br>'
                      + '<i>' + (item.desc || '') + '</i>',
