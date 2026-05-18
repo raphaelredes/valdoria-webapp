@@ -8057,17 +8057,30 @@ body.perf-lite .vc-action-btn { transition: none; }
     // em segunda .then via _savedState.
     var _savedState = null;
 
+    // 2026-05-18 DEBUG BYPASS: ?_skiprestore=1 pula a chamada /api/game/state
+    // e o redirect pra last_screen_payload. Util pra testes visuais via Chrome
+    // MCP quando player ficou preso em exploracao/combate. NAO afeta usuarios
+    // reais — apenas devs com query param explicito.
+    var _skipRestore = new URLSearchParams(window.location.search).get('_skiprestore') === '1';
+    if (_skipRestore) {
+      console.warn('[CITY] _skiprestore=1 — skipping /api/game/state + last_screen restore');
+    }
+
     // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
     // posição EXATA do player (last_screen_payload). Se player estava em
     // exploracao/combate, redireciona pra lá em vez de ficar na cidade.
-    fetch(_api.replace(/\/$/,'') + '/api/game/state', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + _token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: parseInt(_uid, 10) || _uid })
-    }).then(function(r){
-      if (!r.ok) throw new Error('state HTTP ' + r.status);
-      return r.json();
-    }).then(function(state){
+    // 2026-05-18: _skipRestore branch retorna state vazio direto (sem fetch).
+    var _statePromise = _skipRestore
+      ? Promise.resolve({transition: null, snap: null})
+      : fetch(_api.replace(/\/$/,'') + '/api/game/state', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + _token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: parseInt(_uid, 10) || _uid })
+        }).then(function(r){
+          if (!r.ok) throw new Error('state HTTP ' + r.status);
+          return r.json();
+        });
+    _statePromise.then(function(state){
       _savedState = state;  // FIX: salva pra acessar no proximo .then
       // X-6.5.51AM (2026-05-08) BUG FIX: detecta transition + usa state.transition.url
       // se servidor já construiu (PROLOGUE caso novo char). Antes tinha apenas
