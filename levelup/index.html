@@ -11,7 +11,7 @@
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420}</style>
     <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
-    <title>Evolucao - Lendas de Valdoria</title>
+    <title>Evolução - Lendas de Valdória</title>
     <link rel="stylesheet" href="../shared/fonts.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
@@ -808,7 +808,7 @@
     <!-- Submit loading (simple overlay, shown during apply) -->
     <div id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Confirmando evolucao...</div>
+        <div class="loading-text">Confirmando evolução...</div>
     </div>
 
     <div class="lu-backdrop" id="luBackdrop" style="display:none">
@@ -1009,7 +1009,7 @@
             var btn = document.getElementById('btnNext');
             var backBtn = document.getElementById('btnBack');
             if (cur === screens.length - 1) {
-                btn.textContent = '⚔️ Confirmar Evolucao';
+                btn.textContent = '⚔️ Confirmar Evolução';
             } else {
                 btn.textContent = 'Continuar ▶';
             }
@@ -1112,10 +1112,10 @@
         function buildSummary(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
             let html = `
-        <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Voce sente o poder fluindo...</div>
+        <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
         <div class="lvl-banner">
             <div class="lvl-banner-level">${P.level}</div>
-            <div class="lvl-banner-title">Novo Nivel Alcancado!</div>
+            <div class="lvl-banner-title">Novo Nível Alcançado!</div>
             <div class="lvl-banner-class">${info.name} &mdash; ${P.name}</div>
             <div class="lvl-gains">
                 ${P.hp_gain ? `<div class="lvl-gain hp">\u2764\ufe0f +${P.hp_gain} HP</div>` : ''}
@@ -1129,7 +1129,7 @@
             if (P.needs_subclass) {
                 html += `<div class="pending-item">
             <div class="pending-icon">\ud83c\udff0</div>
-            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatoria no nivel 3+</small></div>
+            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória no nível 3+</small></div>
             <div class="pending-badge">1</div>
         </div>`;
             }
@@ -1159,14 +1159,14 @@
             const subs = SUBCLASSES[P.hero_class] || {};
             const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
 
-            let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializacao oferece poderes unicos...</div>
+            let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializa\u00e7\u00e3o oferece poderes \u00fanicos...</div>
         <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
-        <div class="hint">Escolha sua especializacao</div>
+        <div class="hint">Escolha sua especializa\u00e7\u00e3o</div>
         <div id="subclassList">`;
 
             const subEntries = Object.entries(subs);
             if (subEntries.length === 0) {
-                html += '<div class="empty-msg">Subclasses nao disponiveis para este nivel.</div>';
+                html += '<div class="empty-msg">Subclasses não disponíveis para este nível.</div>';
             } else {
                 for (const [scId, sc] of subEntries) {
                     const isSel = sel.subclass === scId;
@@ -1198,11 +1198,11 @@
             const feats = sc.features || {};
             const levels = Object.keys(feats).sort((a, b) => parseInt(a) - parseInt(b));
             if (levels.length > 0) {
-                html += '<div class="section-title">Habilidades por Nivel</div>';
+                html += '<div class="section-title">Habilidades por Nível</div>';
                 for (const lv of levels) {
                     const f = feats[lv];
                     html += `<div class="sc-feature">
-                <div class="sc-feature-level">Nivel ${lv}</div>
+                <div class="sc-feature-level">Nível ${lv}</div>
                 <div class="sc-feature-name">${f.name}</div>
                 ${f.desc ? `<div class="sc-feature-desc">${f.desc}</div>` : ''}
             </div>`;
@@ -1243,7 +1243,7 @@
             const availableFeats = getAvailableFeats();
             const hasFeats = Object.keys(availableFeats).length > 0 && totalPts >= 2;
 
-            let html = '<div class="dm-bubble">Distribua sua experiencia adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
+            let html = '<div class="dm-bubble">Distribua sua experiência adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
 
             if (hasFeats) {
                 html += `<div class="mode-toggle">
@@ -1329,7 +1329,7 @@
             } else {
                 const featEntries = Object.entries(availableFeats);
                 if (featEntries.length === 0) {
-                    html += '<div class="empty-msg">Nenhum talento disponivel para sua classe.</div>';
+                    html += '<div class="empty-msg">Nenhum talento disponível para sua classe.</div>';
                 } else {
                     html += '<div class="feat-scroll-list">';
                     for (const [fid, f] of featEntries) {
@@ -1454,7 +1454,7 @@
             const needed = Math.min(P.pending_skills, available.length);
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
 
-            let html = `<div class="dm-bubble">Novas tecnicas de combate estao ao seu alcance. Escolha com sabedoria.</div>`;
+            let html = `<div class="dm-bubble">Novas técnicas de combate estão ao seu alcance. Escolha com sabedoria.</div>`;
             html += `<div class="section-title">\u26a1 Habilidades</div>`;
             html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
 
@@ -1471,7 +1471,7 @@
             }
 
             if (available.length === 0) {
-                html += '<div class="empty-msg">Nenhuma habilidade disponivel para escolher.</div>';
+                html += '<div class="empty-msg">Nenhuma habilidade disponível para escolher.</div>';
             }
 
             el.innerHTML = html;
@@ -1493,7 +1493,7 @@
             } else {
                 html += `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`;
             }
-            html += `<span class="choice-card-badge badge-level">Nivel ${s.level}</span>`;
+            html += `<span class="choice-card-badge badge-level">Nível ${s.level}</span>`;
             if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
             html += '</div>';
 
@@ -1520,7 +1520,7 @@
                 sel.skills.splice(idx, 1);
             } else {
                 if (sel.skills.length >= needed) {
-                    _showValidation(`Voce so pode escolher ${needed} habilidade(s)`);
+                    _showValidation(`Você só pode escolher ${needed} habilidade(s)`);
                     return;
                 }
                 sel.skills.push(sid);
@@ -1543,8 +1543,8 @@
         // ═══════════════════════════════════════════════
         function buildReview(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
-            let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, nao ha como voltar.</div>`;
-            html += `<div class="section-title">\ud83d\udcdc Resumo da Evolucao</div>`;
+            let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, n\u00e3o h\u00e1 como voltar.</div>`;
+            html += `<div class="section-title">\ud83d\udcdc Resumo da Evolu\u00e7\u00e3o</div>`;
 
             // HP/MP gains
             html += `<div class="review-section">
@@ -1616,7 +1616,7 @@
                 html += '</div>';
             }
 
-            html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolucao</div>';
+            html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolução</div>';
             el.innerHTML = html;
         }
 
@@ -1627,7 +1627,7 @@
             _submitted = false;
             var btn = document.getElementById('btnNext');
             btn.disabled = false;
-            btn.textContent = '⚔️ Confirmar Evolucao';
+            btn.textContent = '⚔️ Confirmar Evolução';
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
@@ -1690,11 +1690,11 @@
                                 } else if (tg && tg.close) {
                                     tg.close();
                                 } else {
-                                    alert('Evolucao confirmada!');
+                                    alert('Evolução confirmada!');
                                 }
                             } else {
                                 resetSubmitState();
-                                showFatalError('Erro ao aplicar evolucao: ' + (data.error || 'Desconhecido'));
+                                showFatalError('Erro ao aplicar evolução: ' + (data.error || 'Desconhecido'));
                             }
                         }).catch(function(e) {
                             resetSubmitState();
@@ -1714,7 +1714,7 @@
                     console.log('Level-up payload:', JSON.stringify(payload, null, 2));
                     setTimeout(function() {
                         resetSubmitState();
-                        alert('Evolucao confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+                        alert('Evolução confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
                     }, 800);
                 }
             } catch (e) {
