@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:35:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T11:54:11Z - do not edit directly, edit source -->
 
 
 <!--
@@ -34383,7 +34383,11 @@ function triggerCombatScreen(cfg) {
     pMmp:      p.mmp,
     pLvl:      p.lvl || 3,
     pBg:       p.background || 'folk_hero',
-    pAlign:    p.alignment || 'NG'
+    pAlign:    p.alignment || 'NG',
+    // 2026-05-18 BUG #2 FIX (User testing session, Chrome MCP):
+    // Sem pName, combate.html gera nome aleatorio (Hesper/Caelum) em vez
+    // do nome real do player (Ryaiael). Passa nome do S.player explicito.
+    pName:     p.name || 'Aventureiro'
   });
   if (godmode) params.set('godmode', '1');
   // Salva estado do explorer pra restaurar quando combate.html retornar
@@ -38680,6 +38684,11 @@ function openCartography() {
     + '  </div>'
     + '  <div class="xcart-back-row">'
     + '    <button class="xcart-back-btn" id="xcart-close-btn">← Voltar pra Exploração</button>'
+    // 2026-05-18 USER REQUEST (Chrome MCP testing session): adicionar opção de
+    // voltar para a CIDADE direto da cartografia. Antes só voltava pra
+    // exploração (mapa hex atual ou dungeon) — não havia saída direta pra
+    // cidade. Agora botão dedicado faz cleanup + redirect.
+    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">🏰 Voltar pra Cidade</button>'
     + '  </div>'
     + '</div>';
 
@@ -38828,6 +38837,58 @@ function _xcartWireEvents() {
   document.getElementById('xcart-zoom-out').onclick = function(){ _xcartSetZoom(_cartZoom * 0.8, _xcartW/2, _xcartH/2); };
   document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0; _xcartUpdateZoomInfo(); _xcartDraw(); };
   document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
+  /* 2026-05-18 USER REQUEST (Chrome MCP testing): handler do botão "Voltar pra
+     Cidade". Fluxo:
+       1. Fecha cartografia overlay
+       2. Chama ExploracaoAPI.finish() pra liberar sessao server-side +
+          aplicar XP/loot/HP final ao Player
+       3. Limpa explore flags localmente (window.__valdoria_transitioning=true
+          evita close-beacon do error-reporter)
+       4. Redirect para /cidade/ com mesmos token+uid+api+char params */
+  var cityBtn = document.getElementById('xcart-city-btn');
+  if (cityBtn) {
+    cityBtn.onclick = function(){
+      cityBtn.disabled = true;
+      cityBtn.textContent = '🏰 Voltando para a cidade...';
+      try { closeCartography(); } catch(_) {}
+      function _doRedirect() {
+        try {
+          // Preserva params essenciais pra cidade reconhecer player
+          var qs = new URLSearchParams(location.search);
+          var nqs = new URLSearchParams();
+          ['token','uid','user_id','api','api_base','char','char_id','env'].forEach(function(k){
+            var v = qs.get(k); if (v) nqs.set(k, v);
+          });
+          var url = '/cidade/?' + nqs.toString();
+          window.__valdoria_transitioning = true;
+          if (window._vTransitionLoader) {
+            try { window._vTransitionLoader.show('Voltando para a cidade...'); } catch(_) {}
+          }
+          setTimeout(function(){ window.location.href = url; }, 50);
+        } catch(eR) {
+          console.error('[CART-CITY] redirect failed:', eR);
+          alert('Não foi possível voltar para a cidade. Recarregue a página.');
+        }
+      }
+      // Tenta finish API se disponivel; nao bloqueia redirect se falhar
+      try {
+        if (typeof ExploracaoAPI !== 'undefined' && ExploracaoAPI.finish && ExploracaoAPI.hasToken && ExploracaoAPI.hasToken()) {
+          ExploracaoAPI.finish().then(function(r){
+            console.info('[CART-CITY] finish ok:', r && r.applied);
+            _doRedirect();
+          }).catch(function(e){
+            console.warn('[CART-CITY] finish failed, redirecting anyway:', e);
+            _doRedirect();
+          });
+        } else {
+          _doRedirect();
+        }
+      } catch(eF) {
+        console.warn('[CART-CITY] finish exception, redirecting anyway:', eF);
+        _doRedirect();
+      }
+    };
+  }
 }
 
 function _xcartTouchDist(touches){
@@ -42821,23 +42882,45 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   text-align: center;
   flex-shrink: 0;
   padding: 4px 0;
+  /* 2026-05-18: dois botões lado a lado (Voltar Exploração + Voltar Cidade) */
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .xcart-back-btn {
   background: transparent;
   border: 1px solid rgba(196,149,58,0.5);
   color: #c4953a;
-  padding: 8px 24px;
+  padding: 8px 18px;
   cursor: pointer;
   font-family: 'Cinzel', serif;
-  font-size: 13px;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  letter-spacing: 0.05em;
   border-radius: 6px;
   transition: all 0.15s;
+  /* min touch target */
+  min-height: 36px;
 }
 .xcart-back-btn:hover {
   border-color: #fbd770;
   color: #fbd770;
   box-shadow: 0 0 12px rgba(196,149,58,0.4);
+}
+.xcart-back-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* 2026-05-18: variant para "Voltar pra Cidade" — mais destacado pra
+   indicar saida final do explore (vs back-btn que volta pra exploracao). */
+.xcart-back-btn.xcart-city-btn {
+  background: rgba(196,149,58,0.15);
+  border-color: rgba(196,149,58,0.75);
+}
+.xcart-back-btn.xcart-city-btn:hover {
+  background: rgba(251,215,112,0.22);
+  border-color: #fbd770;
 }
 </style>
 <script>

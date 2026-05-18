@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T00:48:28Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T11:54:08Z — do not edit directly, edit source -->
 
 
 <!--
@@ -12564,6 +12564,12 @@ window.__COMBAT_ENEMY_ID = (function () {
 window.__COMBAT_PLAYER_LVL = (function () {
     try { return new URLSearchParams(location.search).get('pLvl') || ''; } catch (e) { return ''; }
 })();
+/* 2026-05-18 BUG #2 FIX (User testing session, Chrome MCP):
+   pName URL param do exploracao.html — usar nome real do player em vez
+   de pick(CHAR_NAMES) random. */
+window.__COMBAT_PLAYER_NAME = (function () {
+    try { return new URLSearchParams(location.search).get('pName') || ''; } catch (e) { return ''; }
+})();
 /* Phase 4 dungeons AAA (2026-04-26): godmode=1 URL param — DEV/QA one-shot kill.
    Patcha state.order apos buildCombat: enemies hp/mhp = 1, player hp/mhp = 9999.
    Redundancia com spec.hp_exact do SIM v1 (sessionStorage) — garante godmode
@@ -12951,7 +12957,10 @@ function randomPlayer() {
             if (psv.preCombatRitual) summonsInvokedDefault[psv.id] = true;
         });
     }
-    return { t: 'p', n: pick(CHAR_NAMES), cls: c.cls, subclass: subcls,
+    // 2026-05-18 BUG #2 FIX: usar pName URL param se vier do exploracao (nome
+    // real do player), senao pick(CHAR_NAMES) (compatibilidade com setup local).
+    var _playerName = window.__COMBAT_PLAYER_NAME || pick(CHAR_NAMES);
+    return { t: 'p', n: _playerName, cls: c.cls, subclass: subcls,
              summonsInvoked: summonsInvokedDefault, race: pick(CHAR_RACES), ico: c.ico,
              hp: hp, mhp: hp, ac: rng(c.ac[0], c.ac[1]),
              atk: rng(c.atk[0], c.atk[1]), die: c.die,
@@ -19582,8 +19591,20 @@ function onBtnClick(ev) {
         window.__valdoria_transitioning = true;
         /* 2026-05-13 BUGBOT FIX (PR #90): delay 30ms pra browser pintar loader
            antes de unload — sem isso, location.href dispara sync e loader
-           nunca aparece. Mesmo padrao da cidade.html. */
-        var _backExploreUrl = 'exploracao.html' + resumeParams;
+           nunca aparece. Mesmo padrao da cidade.html.
+
+           2026-05-18 BUG #1 FIX (User testing session, Chrome MCP):
+           URL relativa 'exploracao.html' resolvia a /combat2/exploracao.html
+           em PROD (404). Detectar protocolo:
+             - file:// (LOCAL/simulador): exploracao.html no mesmo dir → OK relativo
+             - https:// (PROD/DEV): combat2 está em /combat2/, exploracao em
+               /exploracao/ — precisa caminho absoluto. */
+        var _backExploreUrl;
+        if (location.protocol === 'file:') {
+            _backExploreUrl = 'exploracao.html' + resumeParams;
+        } else {
+            _backExploreUrl = '/exploracao/exploracao.html' + resumeParams;
+        }
         setTimeout(function(){ window.location.href = _backExploreUrl; }, 30);
         return;
     }
