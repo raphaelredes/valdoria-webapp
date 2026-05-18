@@ -3675,6 +3675,20 @@ body.perf-lite .cloc-card {
   display: block;
   margin: 0 auto;
 }
+/* 2026-05-18 BUG FIX: rumor list (NPCs ausentes) usa vc-action-ico — sem
+   CSS o portrait renderiza no tamanho natural (1024px) e estoura o card.
+   Aplica mesmo round 40x40 (menor pq lista lateral, nao destaque). */
+.vc-action-ico img.merchant-portrait {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--v-gold-30);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
 .vc-service-name {
   font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
