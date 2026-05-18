@@ -16,3 +16,4 @@ node_modules/
 .hash-manifest.json
 .bundle-manifest.json
 .wrangler/
+*.css.bak
