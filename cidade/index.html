@@ -35086,6 +35086,126 @@ function _shopSortCompare(a, b){
   return 0;
 }
 
+// 2026-05-18 PADRAO_ALDRIC items v2: smart resolver pra HeraldicItems.iconSvg.
+//
+// Problema: HeraldicItems.iconSvg(name) usa _slug() que preserva artigos PT-BR
+// ("de", "da", "do"), mas o catálogo `ic-it-*` (519 IDs) os omite. Itens como
+// "Espada de Treino", "Cota de Malha", "Machado de Batalha" falham resolução
+// direta — 83% dos items do Thorne caíam pro fallback emoji/<img> legado.
+//
+// Solução: tenta variantes em ordem:
+//   1. name direto (resolve "Adaga" → ic-it-adaga ✓)
+//   2. name sem artigos (resolve "Espada de Treino" → ic-it-espada-treino ✓)
+//   3. name sem artigos + sem "de Madeira"/etc descritivos comuns
+//
+// Aliases hard-coded mapeiam casos especiais que não slugify trivialmente.
+var _HERALDIC_ITEM_ALIASES = {
+  // Alias name → name in catalog (or direct ic-it-id)
+  'Couro Batido':           'Couro Batido',           // ic-it-couro-batido ✓ direto
+  'Giboia de Pele':         'Gibao de Peles',         // ic-it-gibao-peles
+  'Brunea de Aneis':        'Brunea Aneis',           // ic-it-brunea-aneis
+  'Peitoral de Mithril':    'ic-it-peitoral-furia-montanhas',  // sem peitoral mithril; usa furia montanhas
+  'Cota de Talas':          'ic-it-cota-talas',
+  'Cota de Escamas':        'ic-it-cota-escamas',
+  'Cota de Malha':          'ic-it-cota-malha',
+  'Espada Élfica':          'ic-it-espada-longa',     // genérico élfica
+  'Espada de Mithril':      'ic-it-espada-longa-flamejante', // visualmente épica
+  'Elmo de Cavaleiro':      'ic-it-base-knight-helm',
+  'Manoplas de Ferro':      'ic-it-base-glove',       // luvas genéricas
+  'Botas Pesadas':          'ic-it-botas-pesadas',
+  'Grevas de Ferro':        'ic-it-base-boot',
+  'Pedra de Afiar':         'ic-it-pedra-afiar',
+  'Kit de Reparo':          'ic-it-kit-reparo',
+  // Mirena items
+  'Poção de Cura':              'ic-it-pocao-cura',
+  'Poção de Cura Maior':        'ic-it-pocao-cura-maior',
+  'Poção de Cura Superior':     'ic-it-pocao-cura-superior',
+  'Poção de Cura Suprema':      'ic-it-pocao-cura-suprema',
+  'Poção de Heroísmo':          'ic-it-pocao-heroismo',
+  'Poção de Resistência ao Fogo': 'ic-it-pocao-resist-fogo',
+  'Poção de Resistência ao Frio': 'ic-it-pocao-resist-frio',
+  'Poção de Velocidade':        'ic-it-pocao-velocidade',
+  'Poção de Invisibilidade':    'ic-it-pocao-invisibilidade',
+  'Fogo Alquímico':             'ic-it-fogo-alquimico',
+  'Frasco de Ácido':            'ic-it-frasco-acido',
+  'Água Benta':                 'ic-it-agua-benta',
+  'Antídoto':                   'ic-it-antidoto',
+  'Antitoxina':                 'ic-it-antidoto',     // similar
+  'Erva Curativa':              'ic-it-erva-curativa',
+  // Velithra items
+  'Anel de Sorte':              'ic-it-anel-protecao',
+  'Amuleto de Proteção':        'ic-it-amuleto-saude',
+  // Corvus items
+  'Mapa das Planícies':         'ic-it-mapa-planicies',
+  'Mapa da Floresta':           'ic-it-mapa-floresta',
+  'Mapa do Deserto':            'ic-it-mapa-deserto',
+  'Mapa do Pântano':            'ic-it-mapa-pantano',
+  'Mapa do Ermo Gelado':        'ic-it-mapa-ermo-gelado',
+  'Mapa das Montanhas':         'ic-it-mapa-montanhas',
+  'Mapa Vulcânico':             'ic-it-mapa-vulcanico',
+  'Pergaminho em Branco':       'ic-it-pergaminho-branco',
+  'Luneta':                     'ic-it-luneta',
+  'Bússola Mágica':             'ic-it-bussola-magica',
+  // Bjorn items
+  'Mochila Reforçada':          'ic-it-base-coin-pouch',
+  'Tenda de Couro':             'ic-it-barraca',
+  'Saco de Dormir':             'ic-it-saco-dormir',
+  'Corda de Cânhamo 15m':       'ic-it-corda-canhamo',
+  'Pederneira':                 'ic-it-isqueiro',
+  'Kit de Escalada':            'ic-it-kit-escalada',
+  'Tochas (5)':                 'ic-it-tochas-5',
+  'Rações de 7 dias':           'ic-it-racoes-viagem',
+  'Capa do Vento':              'ic-it-capa-viajante'
+};
+
+// Strip artigos PT-BR de slug pra match catalog
+function _stripPortugueseArticles(slug){
+  return slug.replace(/-de-/g, '-')
+             .replace(/-da-/g, '-')
+             .replace(/-do-/g, '-')
+             .replace(/-das-/g, '-')
+             .replace(/-dos-/g, '-')
+             .replace(/-em-/g, '-')
+             .replace(/--+/g, '-')
+             .replace(/^-+|-+$/g, '');
+}
+
+function _resolveItemIcon(name, size){
+  if (!window.HeraldicItems || typeof HeraldicItems.iconSvg !== 'function') return '';
+  // 1) Alias hard-coded — usa direto se for um id ic-it-* completo
+  if (_HERALDIC_ITEM_ALIASES[name]){
+    var alias = _HERALDIC_ITEM_ALIASES[name];
+    if (alias.indexOf('ic-it-') === 0){
+      // É id completo — gera SVG manual
+      return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size +
+        ';display:inline-block;vertical-align:middle"><use href="#' + alias + '"/></svg>';
+    }
+    // É name alternativo — tenta resolver
+    var aliasSvg = HeraldicItems.iconSvg(alias, size);
+    if (aliasSvg) return aliasSvg;
+  }
+  // 2) Tenta direto (resolve "Adaga", "Cimitarra", etc.)
+  var direct = HeraldicItems.iconSvg(name, size);
+  if (direct) return direct;
+  // 3) Tenta nome sem artigos PT-BR
+  if (HeraldicItems.slug){
+    var slug = HeraldicItems.slug(name);
+    var stripped = _stripPortugueseArticles(slug);
+    if (stripped !== slug && HeraldicItems.knownIds){
+      var ids = HeraldicItems.knownIds();
+      var candidates = ['ic-it-' + stripped, 'ic-it-base-' + stripped];
+      for (var i = 0; i < candidates.length; i++){
+        if (ids.indexOf(candidates[i]) >= 0){
+          return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size +
+            ';display:inline-block;vertical-align:middle"><use href="#' + candidates[i] + '"/></svg>';
+        }
+      }
+    }
+  }
+  return '';
+}
+window._resolveItemIcon = _resolveItemIcon;
+
 function _showShopPopup(npcId){
   var shop = CANON_MARKET_SHOPS[npcId];
   if (!shop){ vToast('🛒 Loja não disponível.'); return; }
@@ -35153,13 +35273,13 @@ function _renderShopPopup(){
       var priceHtml = '<div class="shop-card-price' + (canAfford ? '' : ' too-expensive') + '">' + displayPrice + ' <span class="vi vi-coin sm"></span></div>';
       var stockHtml = stock <= 2 ? '<div class="shop-card-stock' + (stock === 1 ? ' last' : '') + '">' + stock + ' un.</div>' : '';
       // 2026-05-18: USER REPORT — "vários itens com desenho errado" no shop.
-      // Fix: usar HeraldicItems.iconSvg(name) que resolve via slugify pra um
-      // dos 519 IDs ic-it-* canonical, em vez do fallback genérico ic-mochila.
-      // Chain de fallback: (1) ic-it-* via HeraldicItems, (2) item.e legado,
-      // (3) ic-mochila último recurso. ic-mochila só aparece pra item sem
-      // catálogo nem .e — antes era 90%+ dos items.
-      var iconHtml = (window.HeraldicItems && typeof HeraldicItems.iconSvg === 'function')
-        ? HeraldicItems.iconSvg(name, '40px') : '';
+      // Fix v2: HeraldicItems.iconSvg(name) com auto-strip de artigos PT-BR.
+      // Diagnóstico: ic-it-* tem ~519 IDs slugificados sem artigos, mas item
+      // names tem "de"/"da"/"do" ("Espada de Treino", "Cota de Malha",
+      // "Machado de Batalha"). Slug direto falha em 83% dos itens. Solução:
+      // _resolveItemIcon tenta múltiplas variantes (direto, sem artigos,
+      // sem espaços) antes de cair pro fallback emoji/mochila.
+      var iconHtml = _resolveItemIcon(name, '40px');
       if (!iconHtml) iconHtml = (it.e || _heralIco("ic-mochila"));
       html += '<div class="inv-card r-' + rarity + (canAfford ? '' : ' shop-poor') + '" data-name="' + name.replace(/"/g, '&quot;') + '">'
         +   priceHtml
@@ -35236,11 +35356,9 @@ function _showShopItemDetail(name, npcId){
   }
   actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close">Fechar</button>';
   actionsHtml += '</div>';
-  // 2026-05-18: USER REPORT — items com desenho errado. Mesmo fix do shop card,
-  // aplicado ao detalhe do item (tamanho maior — 64px). HeraldicItems primeiro,
-  // depois fallback emoji/heraldic genérico.
-  var detailIcon = (window.HeraldicItems && typeof HeraldicItems.iconSvg === 'function')
-    ? HeraldicItems.iconSvg(name, '64px') : '';
+  // 2026-05-18 v2: usa _resolveItemIcon (strip de artigos PT-BR) mesma
+  // chain do shop card. Tamanho maior (64px) pro detalhe do item.
+  var detailIcon = _resolveItemIcon(name, '64px');
   if (!detailIcon) detailIcon = (it.e || _heralIco("ic-mochila"));
   card.innerHTML = ''
     + '<div class="inv-detail-emoji">' + detailIcon + '</div>'
