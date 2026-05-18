@@ -432,6 +432,18 @@ function _showLastRerollPopup(){
     ov.remove();
   });
 }
+
+/* SPA cleanup hook — remove overlays appended ao body se o router SPA trocar
+   de WebApp sem o user clicar "Entendido". Sem este hook, #reroll-limit-overlay
+   ficaria preso sob a próxima tela. Padrão definido em log-relay.js. */
+if (!window._spaCleanupFns) window._spaCleanupFns = [];
+window._spaCleanupFns.push(function() {
+  var ids = ['reroll-limit-overlay', 'reroll-limit-style'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  });
+});
 /* X-6.5.51AN (2026-05-08) anti-cheat helper: persiste escolha server-side
    IMEDIATAMENTE. Falha silenciosa (best-effort) — se rede cair, escolha
    ainda vai no /complete. Mas se servidor confirmar, /init futuro retorna

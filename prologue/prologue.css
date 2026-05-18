@@ -540,7 +540,7 @@
 
   padding: 12px 14px;
 
-  background: linear-gradient(165deg, #2e2520 0%, #241e18 100%);
+  background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
 
   border: 1px solid var(--v-gold-35);
 
@@ -1214,7 +1214,7 @@
 
   padding: 14px;
 
-  background: linear-gradient(165deg, #2e2520 0%, #241e18 100%);
+  background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
 
   border: 1px solid var(--v-gold-30);
 
@@ -1412,7 +1412,7 @@
 
   padding: 12px 14px;
 
-  background: linear-gradient(165deg, #2e2520 0%, #241e18 100%);
+  background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
 
   border: 1px solid var(--v-gold-35);
 
