@@ -35152,10 +35152,19 @@ function _renderShopPopup(){
       var meta = (it.dd ? it.dd : '') + (it.ac ? '+' + it.ac + ' CA' : '') + (it.b ? '+' + it.b + ' ATK' : '');
       var priceHtml = '<div class="shop-card-price' + (canAfford ? '' : ' too-expensive') + '">' + displayPrice + ' <span class="vi vi-coin sm"></span></div>';
       var stockHtml = stock <= 2 ? '<div class="shop-card-stock' + (stock === 1 ? ' last' : '') + '">' + stock + ' un.</div>' : '';
+      // 2026-05-18: USER REPORT — "vários itens com desenho errado" no shop.
+      // Fix: usar HeraldicItems.iconSvg(name) que resolve via slugify pra um
+      // dos 519 IDs ic-it-* canonical, em vez do fallback genérico ic-mochila.
+      // Chain de fallback: (1) ic-it-* via HeraldicItems, (2) item.e legado,
+      // (3) ic-mochila último recurso. ic-mochila só aparece pra item sem
+      // catálogo nem .e — antes era 90%+ dos items.
+      var iconHtml = (window.HeraldicItems && typeof HeraldicItems.iconSvg === 'function')
+        ? HeraldicItems.iconSvg(name, '40px') : '';
+      if (!iconHtml) iconHtml = (it.e || _heralIco("ic-mochila"));
       html += '<div class="inv-card r-' + rarity + (canAfford ? '' : ' shop-poor') + '" data-name="' + name.replace(/"/g, '&quot;') + '">'
         +   priceHtml
         +   stockHtml
-        +   '<div class="inv-card-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
+        +   '<div class="inv-card-emoji">' + iconHtml + '</div>'
         +   '<div class="inv-card-name r-' + rarity + '">' + name + '</div>'
         +   (meta ? '<div class="inv-card-meta">' + meta + '</div>' : '')
         + '</div>';
@@ -35227,8 +35236,14 @@ function _showShopItemDetail(name, npcId){
   }
   actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close">Fechar</button>';
   actionsHtml += '</div>';
+  // 2026-05-18: USER REPORT — items com desenho errado. Mesmo fix do shop card,
+  // aplicado ao detalhe do item (tamanho maior — 64px). HeraldicItems primeiro,
+  // depois fallback emoji/heraldic genérico.
+  var detailIcon = (window.HeraldicItems && typeof HeraldicItems.iconSvg === 'function')
+    ? HeraldicItems.iconSvg(name, '64px') : '';
+  if (!detailIcon) detailIcon = (it.e || _heralIco("ic-mochila"));
   card.innerHTML = ''
-    + '<div class="inv-detail-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
+    + '<div class="inv-detail-emoji">' + detailIcon + '</div>'
     + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + '</div>'
     + '<div class="inv-detail-divider"></div>'
