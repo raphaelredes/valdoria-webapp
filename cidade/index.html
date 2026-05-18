@@ -37180,6 +37180,17 @@ function _registerDynamicHandlers(){
   // accept/decline ativando _acceptQuest('cellar')).
   ACTION_HANDLERS['inn_npc_inn_martha'] = function(p){ _openMarthaDialogue(p, 'greeting'); };
   ACTION_HANDLERS['inn_cellar_quest']   = function(p){ _openMarthaDialogue(p, 'cellar'); };
+  // 2026-05-18: Mercadores fixos do Mercado migrados pra PADRAO_ALDRIC.
+  // Override DEPOIS do registro dinâmico (que setou _showSharedNpcDialogue
+  // com greetings/talkOptions legacy). Cada mercador abre _openMerchantDialogue
+  // (greeting rotativo + choices via topics).
+  if (typeof MARKET_MERCHANTS !== 'undefined' && Array.isArray(MARKET_MERCHANTS)){
+    MARKET_MERCHANTS.forEach(function(m){
+      ACTION_HANDLERS['market_npc_' + m.id] = (function(merchant){
+        return function(p){ _openMerchantDialogue(p, merchant.id, 'greeting'); };
+      })(m);
+    });
+  }
 }
 _registerDynamicHandlers();
 
@@ -45215,6 +45226,34 @@ var RECURRING_NPCS = {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
     desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
+  },
+  // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
+  // Usa portraitImg (PNG AI-generated gpt-image-2) em vez de heraldic SVG —
+  // identidade visual AAA. Fonte canonical das stats em MARKET_MERCHANTS.
+  mer_thorne: {
+    name: 'Thorne Forja-de-Ferro',
+    portraitImg: '/shared/img/merchants/thorne.png',
+    desc: 'Anão musculoso, avental queimado, martelo sempre na mão. Quarenta anos forjando aço — sabe ler o vento na lâmina.'
+  },
+  mer_mirena: {
+    name: 'Mirena Folha-Verde',
+    portraitImg: '/shared/img/merchants/mirena.png',
+    desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço. Aprendeu alquimia da Bruxa Veldrina — e sobreviveu pra contar.'
+  },
+  mer_velithra: {
+    name: 'Velithra Olho-de-Cristal',
+    portraitImg: '/shared/img/merchants/velithra.png',
+    desc: 'Elfa de meia-idade, dedos cobertos de anéis, voz suave como vento em pinheiros. Diz que gemas escolhem quem as porta.'
+  },
+  mer_corvus: {
+    name: 'Corvus Mapa-Escuro',
+    portraitImg: '/shared/img/merchants/corvus.png',
+    desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta. Vê estradas onde outros veem mato — e cobra caro pela visão.'
+  },
+  mer_bjorn: {
+    name: 'Bjorn, o Seleiro',
+    portraitImg: '/shared/img/merchants/bjorn.png',
+    desc: 'Artesão das terras altas. Costura suas próprias botas, tece suas próprias cordas, e responde a quem ousa duvidar com um sorriso de pelo.'
   }
 };
 
@@ -45349,6 +45388,349 @@ function _openMarthaDialogue(p, encounterKey){
   if (typeof _renderEncounterPopup === 'function') {
     _renderEncounterPopup(enc, 'inn_npc_inn_martha', p);
   }
+}
+
+// ============================================================================
+// === MERCADORES — Diálogos PADRAO_ALDRIC (2026-05-18) =======================
+// ============================================================================
+// Encounters dos 5 mercadores fixos do Mercado seguindo o canonical script[]
+// + choices[]. Cada mercador tem: (a) greeting rotativo rep-aware,
+// (b) topics (browse/origem/serviço extra) que viram sub-encounters via
+// goto_dialog, e (c) close (volta pro Mercado).
+//
+// Schema canonical:
+//   MARKET_MERCHANT_ENCOUNTERS[<merchant>_<topic>] = { id, npc, script, choices }
+//
+// Greetings são funções (rep-aware como Martha) — populadas no _openMerchantDialogue.
+// ============================================================================
+
+// Greeting rotativo por mercador (sem reputação por enquanto — pode-se evoluir)
+function _merchantGreeting(merchantId){
+  var GREETINGS = {
+    thorne: [
+      [
+        { type: 'narration', text: 'Thorne larga o martelo no balcão. O som ressoa como um sino grave.' },
+        { type: 'speech', speaker: 'mer_thorne', text: '"Aço novo? Tem o que precisa aqui."' }
+      ],
+      [
+        { type: 'narration', text: 'O ferreiro te encara enquanto enxuga a fronte com a manga manchada de fuligem.' },
+        { type: 'speech', speaker: 'mer_thorne', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
+      ],
+      [
+        { type: 'narration', text: 'Thorne bate uma peça quente no balcão. O metal ainda assobia.' },
+        { type: 'speech', speaker: 'mer_thorne', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
+      ]
+    ],
+    mirena: [
+      [
+        { type: 'narration', text: 'Mirena ajusta os óculos e fecha o livro de receitas com cuidado.' },
+        { type: 'speech', speaker: 'mer_mirena', text: '"Poções? Venenos? <i>Diga seu mal</i> — tenho cura pra quase tudo."' }
+      ],
+      [
+        { type: 'narration', text: 'A alquimista mexe um caldeirão. Vapor azul escapa em volutas que cheiram a hortelã e enxofre.' },
+        { type: 'speech', speaker: 'mer_mirena', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
+      ],
+      [
+        { type: 'narration', text: 'Mirena te estuda de cima a baixo, como quem examina um espécime curioso.' },
+        { type: 'speech', speaker: 'mer_mirena', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
+      ]
+    ],
+    velithra: [
+      [
+        { type: 'narration', text: 'Velithra sorri e ergue uma gema entre dois dedos finos. A luz atravessa e dança no balcão.' },
+        { type: 'speech', speaker: 'mer_velithra', text: '"Gemas brilham mais quando o sol se põe. <i>Veja por si mesmo</i>."' }
+      ],
+      [
+        { type: 'narration', text: 'A joalheira deixa um anel deslizar sobre o veludo escuro do mostruário.' },
+        { type: 'speech', speaker: 'mer_velithra', text: '"Esse aqui — turquesa do leste. <i>Olho de quem viaja muito</i>. Combina com você."' }
+      ],
+      [
+        { type: 'narration', text: 'Velithra organiza as peças com gestos precisos, como quem afina um instrumento.' },
+        { type: 'speech', speaker: 'mer_velithra', text: '"Aventureiros precisam de mais que aço. <i>Precisam de magia</i> — e ela vive em pedras como estas."' }
+      ]
+    ],
+    corvus: [
+      [
+        { type: 'narration', text: 'Corvus desenrola um pergaminho amarelado sobre a mesa. As bordas estão queimadas.' },
+        { type: 'speech', speaker: 'mer_corvus', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
+      ],
+      [
+        { type: 'narration', text: 'O cartógrafo te encara por cima dos pergaminhos. Os olhos são cinzentos, atentos.' },
+        { type: 'speech', speaker: 'mer_corvus', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
+      ],
+      [
+        { type: 'narration', text: 'Corvus aponta com um dedo manchado de tinta um traço sinuoso no pergaminho.' },
+        { type: 'speech', speaker: 'mer_corvus', text: '"Vê esse traço? <i>Lá tem dragão. Lá tem ouro.</i> Escolha bem."' }
+      ]
+    ],
+    bjorn: [
+      [
+        { type: 'narration', text: 'Bjorn ajusta o suporte de uma tenda armada no canto da loja. O tecido grosso range.' },
+        { type: 'speech', speaker: 'mer_bjorn', text: '"Equipamentos pra sobreviver nas terras selvagens! <i>Diga o que precisa, jovem.</i>"' }
+      ],
+      [
+        { type: 'narration', text: 'O seleiro testa a tensão de uma corda recém-trançada, esticando-a entre as mãos calejadas.' },
+        { type: 'speech', speaker: 'mer_bjorn', text: '"Aguenta três aventureiros pendurados. Quatro, se não comerem demais."' }
+      ]
+    ]
+  };
+  var pool = GREETINGS[merchantId] || GREETINGS.thorne;
+  // Reusa _pickNonRepeating se disponível pra evitar repetição
+  if (typeof _pickNonRepeating === 'function') {
+    return _pickNonRepeating('mer_greet_' + merchantId, pool, window._npcGreetingsHeard);
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Topics por mercador — cada um é um sub-encounter PADRAO_ALDRIC
+var MARKET_MERCHANT_ENCOUNTERS = {
+  // ═══ THORNE — Ferreiro ═════════════════════════════════════════
+  thorne_browse: {
+    id: 'mer_thorne_browse',
+    npc: 'mer_thorne',
+    _isBrowse: true,  // intercepta antes de renderizar: vai direto ao shop popup
+    script: [],
+    choices: []
+  },
+  thorne_metal: {
+    id: 'mer_thorne_metal',
+    npc: 'mer_thorne',
+    script: [
+      { type: 'narration', text: '<i>"Como conseguiu o mithril?"</i>' },
+      { type: 'speech', speaker: 'mer_thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithril, sobrevive."' }
+    ],
+    choices: 'auto'  // populated em _openMerchantDialogue
+  },
+  thorne_repair: {
+    id: 'mer_thorne_repair',
+    npc: 'mer_thorne',
+    script: [
+      { type: 'narration', text: '<i>"Conserta equipamento?"</i>' },
+      { type: 'speech', speaker: 'mer_thorne', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
+      { type: 'narration', text: 'Thorne examina suas armas com olhos de quem mede metal por som.' }
+    ],
+    _cost: 10,
+    _effect: { gold: -10, xp: 3 },
+    _result_text: 'Thorne empunha o martelo e trabalha em silêncio. Quando devolve teu equipamento, o aço brilha — não novo, mas pronto pra outra jornada.',
+    choices: 'auto_with_cost'
+  },
+  thorne_history: {
+    id: 'mer_thorne_history',
+    npc: 'mer_thorne',
+    script: [
+      { type: 'narration', text: '<i>"Há quanto tempo é ferreiro?"</i>' },
+      { type: 'speech', speaker: 'mer_thorne', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
+    ],
+    choices: 'auto'
+  },
+
+  // ═══ MIRENA — Alquimista ═══════════════════════════════════════
+  mirena_browse: {
+    id: 'mer_mirena_browse', npc: 'mer_mirena', _isBrowse: true, script: [], choices: []
+  },
+  mirena_craft: {
+    id: 'mer_mirena_craft',
+    npc: 'mer_mirena',
+    script: [
+      { type: 'narration', text: '<i>"Faz poções customizadas?"</i>' },
+      { type: 'speech', speaker: 'mer_mirena', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
+    ],
+    choices: 'auto'
+  },
+  mirena_origin: {
+    id: 'mer_mirena_origin',
+    npc: 'mer_mirena',
+    script: [
+      { type: 'narration', text: '<i>"De onde aprendeu alquimia?"</i>' },
+      { type: 'speech', speaker: 'mer_mirena', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
+      { type: 'narration', text: 'Os olhos de Mirena se desviam por um instante, perdidos em alguma memória.' },
+      { type: 'speech', speaker: 'mer_mirena', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
+    ],
+    choices: 'auto'
+  },
+
+  // ═══ VELITHRA — Joalheira ══════════════════════════════════════
+  velithra_browse: {
+    id: 'mer_velithra_browse', npc: 'mer_velithra', _isBrowse: true, script: [], choices: []
+  },
+  velithra_sockets: {
+    id: 'mer_velithra_sockets',
+    npc: 'mer_velithra',
+    script: [
+      { type: 'narration', text: '<i>"Como funcionam os encaixes?"</i>' },
+      { type: 'speech', speaker: 'mer_velithra', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
+    ],
+    choices: 'auto'
+  },
+  velithra_enchant: {
+    id: 'mer_velithra_enchant',
+    npc: 'mer_velithra',
+    script: [
+      { type: 'narration', text: '<i>"Encanta itens?"</i>' },
+      { type: 'speech', speaker: 'mer_velithra', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
+      { type: 'narration', text: 'Velithra sorri de lado, como quem oferece um jogo de azar elegante.' }
+    ],
+    _cost: 200,
+    _effect: { gold: -200, xp: 8 },
+    _result_text: 'Velithra murmura uma palavra antiga sobre teu equipamento. A gema absorve a luz por um segundo — depois devolve. Você sente o item mais... presente. <i>Como se tivesse uma alma.</i>',
+    choices: 'auto_with_cost'
+  },
+
+  // ═══ CORVUS — Cartógrafo ═══════════════════════════════════════
+  corvus_browse: {
+    id: 'mer_corvus_browse', npc: 'mer_corvus', _isBrowse: true, script: [], choices: []
+  },
+  corvus_custom: {
+    id: 'mer_corvus_custom',
+    npc: 'mer_corvus',
+    script: [
+      { type: 'narration', text: '<i>"Que tipo de mapa custom?"</i>' },
+      { type: 'speech', speaker: 'mer_corvus', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
+      { type: 'speech', speaker: 'mer_corvus', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
+    ],
+    choices: 'auto'
+  },
+  corvus_rare: {
+    id: 'mer_corvus_rare',
+    npc: 'mer_corvus',
+    script: [
+      { type: 'narration', text: '<i>"Tem mapas raros?"</i>' },
+      { type: 'narration', text: 'Corvus baixa a voz e olha rápido pra ambos os lados, como quem confessa pecado.' },
+      { type: 'speech', speaker: 'mer_corvus', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
+    ],
+    choices: 'auto'
+  },
+
+  // ═══ BJORN — Seleiro ═══════════════════════════════════════════
+  bjorn_browse: {
+    id: 'mer_bjorn_browse', npc: 'mer_bjorn', _isBrowse: true, script: [], choices: []
+  }
+};
+
+function _openMerchantDialogue(p, merchantId, topicKey){
+  // Encontra o merchant em MARKET_MERCHANTS pra ler talkOptions/role/desc
+  var merchant = (typeof MARKET_MERCHANTS !== 'undefined')
+    ? MARKET_MERCHANTS.filter(function(m){ return m.id === merchantId || m.id === merchantId.replace('mer_',''); })[0]
+    : null;
+  if (!merchant){
+    if (typeof vToast === 'function') vToast('Mercador desconhecido: ' + merchantId, 'warn');
+    return;
+  }
+  var npcKey = 'mer_' + merchant.id;
+  // Fallback se merchant é tentmaker (npc key = mer_bjorn, merchant id = tentmaker)
+  if (merchant.id === 'tentmaker') npcKey = 'mer_bjorn';
+
+  // Greeting (default) → encounter dinâmico
+  if (!topicKey || topicKey === 'greeting'){
+    var greetScript = _merchantGreeting(merchant.id === 'tentmaker' ? 'bjorn' : merchant.id);
+    var greetEnc = {
+      id: 'mer_' + merchant.id + '_greeting',
+      npc: npcKey,
+      script: greetScript,
+      choices: _merchantBuildTopicChoices(merchant)
+    };
+    if (typeof _renderEncounterPopup === 'function'){
+      _renderEncounterPopup(greetEnc, 'market_npc_' + merchant.id, p);
+    }
+    return;
+  }
+
+  // Topic encounter — lookup em MARKET_MERCHANT_ENCOUNTERS
+  // Map de keys legais (browse/metal/repair/history/etc) para o registry
+  var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
+  var encKey = bjornFix + '_' + topicKey;
+  var enc = MARKET_MERCHANT_ENCOUNTERS[encKey];
+  if (!enc){
+    if (typeof vToast === 'function') vToast('Tópico desconhecido: ' + encKey, 'warn');
+    return;
+  }
+
+  // _isBrowse: shortcut — fecha encounter e abre shop popup direto
+  if (enc._isBrowse){
+    var ov = document.getElementById('encounter-overlay');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+    window._encounterActive = false;
+    if (typeof _showShopPopup === 'function') {
+      // Mantém compat com NPCs que tem shop via CANON_MARKET_SHOPS por id original
+      _showShopPopup(merchant.id);
+    }
+    return;
+  }
+
+  // Topic com cost — confirma antes
+  if (enc._cost && enc._cost > 0){
+    var costEnc = _buildMerchantTopicEnc(enc, merchant, p, true);
+    if (typeof _renderEncounterPopup === 'function'){
+      _renderEncounterPopup(costEnc, 'market_npc_' + merchant.id, p);
+    }
+    return;
+  }
+
+  // Topic narrativo simples — marca como usado, renderiza com choices "Outra pergunta"/"Voltar"
+  if (typeof _npcMarkUsed === 'function') _npcMarkUsed(merchant.id, topicKey);
+  var topicEnc = _buildMerchantTopicEnc(enc, merchant, p, false);
+  if (typeof _renderEncounterPopup === 'function'){
+    _renderEncounterPopup(topicEnc, 'market_npc_' + merchant.id, p);
+  }
+}
+window._openMerchantDialogue = _openMerchantDialogue;
+
+// Constrói choices do greeting baseado em talkOptions ainda disponíveis
+function _merchantBuildTopicChoices(merchant){
+  var choices = [];
+  var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
+  (merchant.talkOptions || []).forEach(function(opt){
+    // Skip se já usada (exceto browse, que pode ser repetida)
+    if (opt.id !== 'browse' && typeof _npcIsUsed === 'function' && _npcIsUsed(merchant.id, opt.id)){
+      return;
+    }
+    var icon = (opt.id === 'browse') ? '🛒'
+             : (opt.cost) ? '🔧'
+             : '◆';
+    var costSuffix = opt.cost ? ' <span class="enc-cost-pill">' + opt.cost + ' V</span>' : '';
+    choices.push({
+      id: opt.id,
+      label: icon + ' ' + opt.q + costSuffix,
+      result: 'goto_dialog',
+      _encounterRef: 'mer_' + bjornFix + '_' + opt.id  // key em MARKET_MERCHANT_ENCOUNTERS após prefix
+    });
+  });
+  // Sempre mostra "voltar ao mercado"
+  choices.push({ id: 'close', label: '← Voltar ao Mercado', result: 'merchant_close' });
+  return choices;
+}
+
+// Constrói encounter de um topic (com ou sem cost)
+function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
+  var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
+  var choices;
+  if (isCostFlow){
+    // Choices: Aceitar (paga + aplica) / Recusar (volta ao greeting)
+    var label = '◆ Aceitar (' + srcEnc._cost + ' V)';
+    choices = [
+      {
+        id: 'pay', label: label, result: 'merchant_pay',
+        _merchantId: merchant.id, _cost: srcEnc._cost,
+        _effect: srcEnc._effect || {}, _result_text: srcEnc._result_text || '',
+        _topicKey: srcEnc.id.replace('mer_' + bjornFix + '_', '')
+      },
+      { id: 'no', label: 'Mais tarde.', result: 'goto_dialog',
+        _encounterRef: 'mer_' + bjornFix + '_greeting' }
+    ];
+  } else {
+    // Topic simples: oferece próxima pergunta ou volta ao mercado
+    choices = [
+      { id: 'more', label: '◆ Outra pergunta', result: 'goto_dialog',
+        _encounterRef: 'mer_' + bjornFix + '_greeting' },
+      { id: 'close', label: '← Voltar ao Mercado', result: 'merchant_close' }
+    ];
+  }
+  return {
+    id: srcEnc.id,
+    npc: srcEnc.npc,
+    script: srcEnc.script,
+    choices: choices
+  };
 }
 
 var CHANCE_ENCOUNTERS = [
@@ -47469,8 +47851,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '  align-items:center;flex-shrink:0}'
       + '.enc-portrait{width:48px;height:48px;flex-shrink:0;border-radius:50%;'
       + '  background:rgba(196,149,58,0.18);border:1px solid rgba(196,149,58,0.55);'
-      + '  display:flex;align-items:center;justify-content:center;color:#c4953a}'
+      + '  display:flex;align-items:center;justify-content:center;color:#c4953a;'
+      + '  overflow:hidden}'
       + '.enc-portrait svg{width:32px;height:32px}'
+      // 2026-05-18: support portraitImg (AI-generated PNG portraits — merchants,
+      // bank teller, future NPCs com AAA art). Imagem preenche o circle inteiro.
+      + '.enc-portrait img{width:100%;height:100%;object-fit:cover;border-radius:50%}'
       + '.enc-meta{flex:1;min-width:0}'
       + '.enc-name{font-family:Cinzel,serif;color:#c4953a;font-size:15px;font-weight:700;'
       + '  letter-spacing:1px;margin:0 0 2px;text-shadow:0 0 8px rgba(196,149,58,0.3)}'
@@ -47542,7 +47928,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '.enc-btn:active{transform:scale(0.97)}'
       + '.enc-btn-primary{background:linear-gradient(180deg,#c4953a,#9a7530);color:#1a1510;'
       + '  font-weight:700;border-color:#c4953a}'
-      + '.enc-btn-primary:hover{background:linear-gradient(180deg,#d4a54a,#a78540);color:#1a1510}';
+      + '.enc-btn-primary:hover{background:linear-gradient(180deg,#d4a54a,#a78540);color:#1a1510}'
+      // 2026-05-18 PADRAO_ALDRIC merchants: cost pill ao lado do label do choice
+      + '.enc-cost-pill{display:inline-block;margin-left:6px;padding:1px 8px;'
+      + '  background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.45);'
+      + '  border-radius:10px;font-size:11px;color:#c4953a;font-weight:700;'
+      + '  letter-spacing:0.5px;font-family:Cinzel,serif;vertical-align:middle}';
     document.head.appendChild(st);
   }
 
@@ -47557,7 +47948,15 @@ function _renderEncounterPopup(enc, originalAction, player) {
   var ov = document.createElement('div');
   ov.id = 'encounter-overlay';
 
-  var portraitSvg = (typeof _heralIco === 'function') ? _heralIco(npc.portrait) : '';
+  // 2026-05-18: PADRAO_ALDRIC portrait — prefere PNG AI-generated (portraitImg)
+  // sobre heraldic SVG (portrait). Permite NPCs com art AAA (mercadores, banco)
+  // mantendo o mesmo encounter renderer.
+  var portraitSvg;
+  if (npc.portraitImg) {
+    portraitSvg = '<img src="' + npc.portraitImg + '" alt="' + (npc.name || '') + '" loading="lazy" />';
+  } else {
+    portraitSvg = (typeof _heralIco === 'function') ? _heralIco(npc.portrait) : '';
+  }
 
   // Phase 6.6.x dialogue pagination 2026-05-05:
   // Agrupar script em "páginas" (1-2 linhas por página) e renderizar
@@ -47796,6 +48195,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
       npc: npcRef.name,
       desc: npcRef.desc,
       portrait: npcRef.portrait || 'ic-dialogo',
+      portraitImg: npcRef.portraitImg || null,
       script: (enc.script || []).slice(),
       choices: (enc.choices || []).map(function(c){ return c.label; })
     });
@@ -47847,7 +48247,11 @@ function _showDialogHistoryPopup(){
   hist.forEach(function(d){
     html += '<div class="dlg-hist-entry">';
     html += '<div class="dlg-hist-header">';
-    html += '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#' + (d.portrait || 'ic-dialogo') + '"/></svg>';
+    if (d.portraitImg) {
+      html += '<img src="' + d.portraitImg + '" alt="" loading="lazy" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold,#c4953a);"/>';
+    } else {
+      html += '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#' + (d.portrait || 'ic-dialogo') + '"/></svg>';
+    }
     html += '<span class="dlg-hist-name">' + (d.npc || 'Desconhecido') + '</span>';
     html += '<span class="dlg-hist-ts">' + _fmtTs(d.ts) + '</span>';
     html += '</div>';
@@ -47921,7 +48325,14 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
   enc.choices.forEach(function(c, idx){
     var btn = document.createElement('button');
     btn.className = 'enc-btn' + (c.result === 'goto_cartographer' ? ' enc-btn-primary' : '');
-    btn.textContent = c.label;
+    // 2026-05-18 PADRAO_ALDRIC merchants: cost pill em label tem HTML (<span>).
+    // Detecta marcadores HTML pra usar innerHTML; fallback textContent.
+    var lbl = c.label || '';
+    if (lbl.indexOf('<') >= 0){
+      btn.innerHTML = lbl;
+    } else {
+      btn.textContent = lbl;
+    }
     btn.onclick = function(){
       _onEncounterChoice(enc, c, originalAction, player);
     };
@@ -48024,10 +48435,62 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // choice._encounterRef = key em MARTHA_ENCOUNTERS / outros NPC registries.
     // Genérico: chama _openMarthaDialogue ou registry equivalente.
     var encRef = choice._encounterRef;
-    if (encRef && typeof MARTHA_ENCOUNTERS !== 'undefined' && MARTHA_ENCOUNTERS[encRef]) {
+    // 2026-05-18: detecta merchant encounter (prefix 'mer_<merchant>_<topic>')
+    // antes de testar Martha/genérico. Routing direto pra _openMerchantDialogue.
+    if (encRef && encRef.indexOf('mer_') === 0){
+      var parts = encRef.replace('mer_', '').split('_');
+      // merchantId pode ter underscore (raro, mas seguro): assume primeiro chunk
+      var mId = parts[0];
+      var tKey = parts.slice(1).join('_');
+      setTimeout(function(){ _openMerchantDialogue(player, mId, tKey); }, 80);
+    } else if (encRef && typeof MARTHA_ENCOUNTERS !== 'undefined' && MARTHA_ENCOUNTERS[encRef]) {
       setTimeout(function(){ _openMarthaDialogue(player, encRef); }, 80);
     } else if (encRef && typeof window['_open' + encRef + 'Dialogue'] === 'function') {
       setTimeout(function(){ window['_open' + encRef + 'Dialogue'](player); }, 80);
+    }
+  } else if (choice.result === 'merchant_close') {
+    // 2026-05-18 PADRAO_ALDRIC para mercadores: fecha encounter e volta ao
+    // hub do Mercado (renderiza a tela atual). Não dispara nova ação.
+    if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+  } else if (choice.result === 'merchant_pay') {
+    // 2026-05-18 PADRAO_ALDRIC para mercadores: choice de serviço pago
+    // (repair, enchant, etc). Cobra gold + aplica effect + mostra result popup.
+    var mId = choice._merchantId;
+    var cost = choice._cost || 0;
+    var effect = choice._effect || {};
+    var resultText = choice._result_text || 'Serviço prestado.';
+    var topicKey = choice._topicKey;
+    if (typeof _pay !== 'function' || !_pay(player, cost)){
+      // Sem gold suficiente — re-abre greeting com toast
+      if (typeof vToast === 'function') vToast('Valdoritas insuficientes.', 'warn');
+      setTimeout(function(){ _openMerchantDialogue(player, mId, 'greeting'); }, 80);
+      return;
+    }
+    // Apply effect (gold já debitado por _pay; aplica XP/HP/MP extras)
+    var preXp = player.xp || 0;
+    var preGold = player.gold;
+    var deltas = [];
+    if (effect.xp){
+      if (typeof _gainXp === 'function') _gainXp(player, effect.xp);
+      deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXp + effect.xp,
+                    max: (player.xpNext || 100), bar: false });
+    }
+    deltas.push({ type: 'gold', label: 'Bolsa', from: preGold + cost, to: preGold,
+                  max: Math.max(preGold + cost, 1), bar: false });
+    if (typeof _npcMarkUsed === 'function' && mId && topicKey) _npcMarkUsed(mId, topicKey);
+    if (typeof refreshHud === 'function') refreshHud();
+    var merchantRef = (typeof MARKET_MERCHANTS !== 'undefined')
+      ? MARKET_MERCHANTS.filter(function(m){ return m.id === mId; })[0] : null;
+    if (typeof _showServiceResultPopup === 'function'){
+      _showServiceResultPopup({
+        icon: _heralIco('ic-dialogo'),
+        npc: merchantRef ? (merchantRef.role + ' ' + merchantRef.name) : mId,
+        narrative: resultText,
+        deltas: deltas,
+        onContinue: function(){
+          _openMerchantDialogue(player, mId, 'greeting');
+        }
+      });
     }
   } else if (choice.result === 'accept_quest') {
     // X-6.5.51BP (2026-05-15): aceita missão diretamente via diálogo NPC.
