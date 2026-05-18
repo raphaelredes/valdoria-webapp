@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-17T23:08:06Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T00:30:50Z — do not edit directly, edit source -->
 
 
 <!--
@@ -1174,6 +1174,61 @@ html.sim-combat-root #app {
    precisa do espaço vazio "fora do frame" pra log). */
 html.sim-prod #sim-log-panel { display: none !important; }
 html.sim-prod .sim-side-panel { display: none !important; }
+
+/* ============================================================
+   2026-05-17 USER REQUEST: moldura igual à tela de auth (/web/) em
+   dev/prod hosts. Aplicada APENAS em html.sim-prod — simuladores
+   file:// (html.sim-dev) ficam com debug-panel preservado.
+
+   Combate.html usa html.sim-combat-root como o "frame" (max-width
+   constrained). Aqui sobreposicionamos com gold border + box-shadow
+   + glow auth-like ao detectar sim-prod (dev/prod hosts).
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+  html.sim-prod.sim-combat-root,
+  html.sim-prod {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196, 149, 58, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%) !important;
+  }
+  html.sim-prod.sim-combat-root {
+    border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25)) !important;
+    border-radius: 14px !important;
+    box-shadow:
+      0 8px 40px rgba(0, 0, 0, 0.7),
+      0 0 80px rgba(196, 149, 58, 0.1),
+      0 2px 20px rgba(196, 149, 58, 0.08),
+      inset 0 1px 0 rgba(196, 149, 58, 0.08) !important;
+    position: relative !important;
+  }
+  /* Top gold inlay line — assinatura visual da tela de auth */
+  html.sim-prod.sim-combat-root > body::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 16px !important;
+    right: 16px !important;
+    height: 2px !important;
+    background: linear-gradient(90deg,
+      transparent,
+      var(--v-crimson, #7b2020) 15%,
+      var(--v-gold, #c4953a) 50%,
+      var(--v-crimson, #7b2020) 85%,
+      transparent) !important;
+    border-radius: 2px !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+  }
+}
+/* Touch device (smartphone real): sem moldura — preenche full viewport. */
+@media (hover: none) and (pointer: coarse) {
+  html.sim-prod.sim-combat-root {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  html.sim-prod.sim-combat-root > body::before { display: none !important; }
+}
 
 /* X-6.5.51y (2026-04-25): #sim-log-panel — painel DIREITA do frame, espelha
    .sim-side-panel da esquerda. Mostra logs em tempo real (LOG/LOGW/LOGE +

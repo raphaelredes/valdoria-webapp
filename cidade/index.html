@@ -563,6 +563,21 @@ LOG SINK (Fase 7):
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#2a2420">
   <title>Simulador da Cidade — Lendas de Valdoria</title>
+  <!-- 2026-05-17 USER REQUEST: detector early de modo (file:// vs HTTPS) pra
+       aplicar moldura igual à tela de auth (/web/) em dev/prod, mantendo
+       simuladores file:// sem moldura (já tem debug structure). Mesmo
+       padrão usado em exploracao.html e combate.html. -->
+  <script>
+  (function() {
+    try {
+      var qs = new URLSearchParams(location.search);
+      var isDev = (location.protocol === 'file:') || qs.get('dev') === '1';
+      document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
+    } catch (_) {
+      document.documentElement.classList.add('sim-prod');
+    }
+  })();
+  </script>
   <!-- Telegram WebApp SDK: enableClosingConfirmation popup nativo de
        confirmação ao fechar. (USER REQUEST 2026-05-04) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -658,12 +673,8 @@ LOG SINK (Fase 7):
        pro popup legacy se módulo não carregar (defensivo). */
     document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + v + '">');
     document.write('<script src="/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
-    // items-resolver: PNG-when-available with SVG fallback. Must load
-    // BEFORE inventory-screen.js so _iconSrc() can find window.vItems.
+    // 2026-05-17: items-resolver + asset-resolver — PNGs AI substituem SVG sprites.
     document.write('<script src="/shared/items-resolver.js?v=' + v + '"><\/script>');
-    // 2026-05-17 USER REQUEST: asset-resolver substitui inline SVG <use href="#ic-X">
-    // por PNG <img> em TODA classe/combat icon (12 classes + boss/inimigo + 6 invocações).
-    // MutationObserver upgrade automático para conteúdo dinâmico (NPCs, ficha, mercenários).
     document.write('<script src="/shared/asset-resolver.js?v=' + v + '"><\/script>');
     document.write('<script src="/shared/inventory-screen.js?v=' + v + '"><\/script>');
     /* X-6.5.51BO (2026-05-15): Fogueira reaproveitável (CampFire + vFire wrapper).
@@ -698,6 +709,9 @@ LOG SINK (Fase 7):
     /* 2026-05-06 user req: NÃO forçar gold como fallback. Default neutro stone
        pra locations não mapeadas; .fb-heraldic agora pega cor inline natural. */
     .hub-loc .hl-ico svg { width: 30px; height: 30px; color: #8a7a6a; transition: color 0.25s ease; }
+    /* 2026-05-16: city location PNG icons (AI-generated). Mesmo tamanho do SVG. */
+    .hub-loc .hl-ico img.hl-ico-img { width: 36px; height: 36px; object-fit: contain;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
     /* .fb-btn .fb-heraldic — sem color override; cor vem inline do _heralB() via HERALDIC_COLORS */
 
     /* === Cores temáticas por local (heraldic palette diversa) === */
@@ -883,6 +897,65 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-body, 14px);
       line-height: 1.5;
       -webkit-text-size-adjust: 100%;
+    }
+
+    /* ============================================================
+       2026-05-17 USER REQUEST: moldura igual à tela de auth (/web/) em
+       dev/prod hosts. Aplicada APENAS em html.sim-prod — simuladores
+       file:// (html.sim-dev) ficam sem moldura preservando debug structure.
+
+       Visual mimetizando .wa-login-card do web/web-auth.css:
+         html       → background dark com radial gold subtle ao redor do frame
+         body       → o "frame" centralizado: gold border + box-shadow dramático
+                       + cantos arredondados + glow dourado externo
+
+       Detector: html.sim-prod adicionado pelo <script> early no <head>. */
+    @media (hover: hover) and (pointer: fine) {
+      html.sim-prod {
+        background:
+          radial-gradient(ellipse 80% 60% at 50% 15%, rgba(196, 149, 58, 0.06) 0%, transparent 60%),
+          radial-gradient(ellipse 120% 80% at 50% 40%, #3a3028 0%, #2a2420 40%, #1a1510 100%) !important;
+      }
+      html.sim-prod body {
+        border: 1px solid var(--v-gold-25, rgba(196, 149, 58, 0.25)) !important;
+        border-radius: 14px !important;
+        box-shadow:
+          0 8px 40px rgba(0, 0, 0, 0.7),
+          0 0 80px rgba(196, 149, 58, 0.1),
+          0 2px 20px rgba(196, 149, 58, 0.08),
+          inset 0 1px 0 rgba(196, 149, 58, 0.08) !important;
+        margin: 0 auto !important;
+        position: relative !important;
+        overflow: hidden !important;
+      }
+      /* Top gold inlay line — assinatura visual da tela de auth */
+      html.sim-prod body::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 16px !important;
+        right: 16px !important;
+        height: 2px !important;
+        background: linear-gradient(90deg,
+          transparent,
+          var(--v-crimson, #7b2020) 15%,
+          var(--v-gold, #c4953a) 50%,
+          var(--v-crimson, #7b2020) 85%,
+          transparent) !important;
+        border-radius: 2px !important;
+        z-index: 9999 !important;
+        pointer-events: none !important;
+      }
+    }
+    /* Touch device (smartphone real): sem moldura — preenche full viewport.
+       Override mantém regra "REAL DEVICE RESPONSIVE" (2026-05-12). */
+    @media (hover: none) and (pointer: coarse) {
+      html.sim-prod body {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      html.sim-prod body::before { display: none !important; }
     }
 
     /* ============================================================
@@ -10673,7 +10746,6 @@ function _showStatusPopup(memberIdx){
      (ver ~L38478+) pra serem usados também por renderCityGroupPanel. */
   var heraldicId = _classToHeraldic(m.cls);
   // 2026-05-17: tenta PNG AI primeiro (12 classes geradas), fallback SVG sprite.
-  // vAssets.classIconHTML retorna <img> com onerror revertendo pra SVG inline.
   var heraldicSvg = (window.vAssets && typeof vAssets.classIconHTML === 'function')
     ? vAssets.classIconHTML(heraldicId, '38px')
     : '<svg viewBox="0 0 120 120" style="width: 38px; height: 38px;"><use href="#' + heraldicId + '"/></svg>';
@@ -49232,8 +49304,8 @@ function _buildHubAlly(a) {
 // === SYNC_TARGET END ===
 
 // === SYNC_TARGET: game-hub.js#_buildLocCell BEGIN ===
-/* 2026-05-17 — city PNG map (16 AI-generated location icons).
-   Keyed pelo callback name (btn.cb). PNGs em /shared/img/city/{cb}.png. */
+/* 2026-05-16: city location PNG map — generated by scripts/generate_city_icons.py.
+   16 locais × 4 setores. Keyed por callback (loc.cb em CITY_LOCATIONS). */
 var CITY_LOC_PNG_AVAILABLE = {
     'tavern': 1, 'inn': 1, 'rel_main': 1, 'action_quests': 1,
     'market': 1, 'bank': 1, 'open_workshop': 1, 'rune_scribe': 1,
@@ -49245,15 +49317,11 @@ function _cityLocIconHTML(cb, fallbackIco) {
         var base = '/shared/img/city/';
         var loc = (typeof location !== 'undefined') ? location.href : '';
         if (loc.indexOf('file://') === 0) {
-            base = '../valdoria-webapp/shared/img/city/';
+            base = '/shared/img/city/';
         }
-        // onerror: fallback ao SVG sprite original (preserva fallbackIco)
-        var safeFallback = (typeof fallbackIco === 'string' && fallbackIco.indexOf('<svg') === 0)
-            ? fallbackIco.replace(/'/g, '&#39;').replace(/"/g, '&quot;')
-            : '';
         return '<img class="hl-ico-img" src="' + base + cb + '.png" ' +
                'alt="" loading="lazy" ' +
-               "onerror=\"this.onerror=null;this.outerHTML='" + safeFallback + "';\">";
+               'onerror="this.onerror=null;this.outerHTML=\'\'">';
     }
     if (typeof fallbackIco === 'string' && fallbackIco.indexOf('<svg') === 0) {
         return fallbackIco;
