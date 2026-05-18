@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:47:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T15:53:41Z - do not edit directly, edit source -->
 
 
 <!--
@@ -715,7 +715,7 @@
   } catch (_) { /* fallback silencioso */ }
 </script>
 <!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
-<script src="../valdoria-webapp/shared/auth-gate.js"></script>
+<script src="../shared/auth-gate.js"></script>
 
 <!-- X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Exploração tem
      muitas animações (terreno, hex map, eventos, weather, fog) que o jogador
@@ -727,17 +727,17 @@
     var __vEarly = Date.now();
     /* Carrega da CDN (production) com fallback local (file://). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="../valdoria-webapp/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* X-6.5.51AI: server-log canônico */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="../valdoria-webapp/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     window.SERVER_LOG_AREA = 'exploracao';
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor.
        Pattern canonical do cidade.html — necessário pra sync_exploracao passar
        no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="../valdoria-webapp/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     setTimeout(function(){
         try{
             if(!window.vMaintenance)return;
@@ -6115,17 +6115,17 @@ body.remote-mode #debug-hud { display: none !important; }
 <script src="./cartografia-shared.js"></script>
 <!-- Canonical title screen + loading libs (USER REQUEST 2026-05-05) -->
 <script>var _vti = Date.now();
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-title.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + _vti + '">');
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + _vti + '">');
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
-document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + _vti + '"><\/script>');
-document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
    _showExploracaoInventoryPopup local. Sprite ic-it-* (519 symbols) primeiro. */
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + _vti + '">');
-document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
-document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<script src="../shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body>
@@ -6296,7 +6296,7 @@ document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' +
 <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
      valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
      duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
-<script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="../shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
   if (window.__introTitleSkip) return;

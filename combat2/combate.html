@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T15:00:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T15:53:41Z — do not edit directly, edit source -->
 
 
 <!--
@@ -395,7 +395,7 @@
   } catch (_) { /* fallback silencioso */ }
 </script>
 <!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
-<script src="../valdoria-webapp/shared/auth-gate.js"></script>
+<script src="../shared/auth-gate.js"></script>
 
 <script>
 /* 2026-04-27 USER RULE: "o mesmo precisa acontecer para combate.html, nunca
@@ -9181,22 +9181,22 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 </script>
 <!-- Canonical title screen + loading libs (USER REQUEST 2026-05-05) -->
 <script>var _vti = Date.now();
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-title.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + _vti + '">');
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + _vti + '">');
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
-document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + _vti + '"><\/script>');
-document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
    openBagPanel local. inCombat:true ativa regras D&D 5e (PHB p.139/144/190).
    2026-05-16: items-resolver.js adicionado pra mochila resolver PNGs AI
    (manifest.json em /shared/img/items/) com fallback pro sprite SVG. */
-document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + _vti + '">');
-document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
-document.write('<script src="../valdoria-webapp/shared/items-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<script src="../shared/heraldic-items-sprite.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
 // 2026-05-17: asset-resolver — DOM upgrader pra SVG <use href="#ic-X"> → PNG.
-document.write('<script src="../valdoria-webapp/shared/asset-resolver.js?v=' + _vti + '"><\/script>');
-document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body class="biome-forest sim-combat-layout">
@@ -9208,7 +9208,7 @@ document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' +
 <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
      valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
      duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
-<script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="../shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 <script>
 (function(){
   if (window.__introTitleSkip) return;
@@ -16076,7 +16076,7 @@ function _skillIconHTML(sk) {
             var base = '/shared/img/combat/skills/';
             var loc = (typeof location !== 'undefined') ? location.href : '';
             if (loc.indexOf('file://') === 0) {
-                base = '../valdoria-webapp/shared/img/combat/skills/';
+                base = '../shared/img/combat/skills/';
             }
             return '<img class="skill-ico-img" src="' + base + slug + '.png" ' +
                    'alt="" loading="lazy" ' +
@@ -16109,7 +16109,7 @@ function _combatPortraitHTML(iconId, u, utype) {
                 var base = '/shared/img/combat/enemies/';
                 var loc = (typeof location !== 'undefined') ? location.href : '';
                 if (loc.indexOf('file://') === 0) {
-                    base = '../valdoria-webapp/shared/img/combat/enemies/';
+                    base = '../shared/img/combat/enemies/';
                 }
                 return '<img class="c-portrait-img" src="' + base + enemySlug + '.png" ' +
                        'alt="" loading="lazy" ' +
@@ -16124,7 +16124,7 @@ function _combatPortraitHTML(iconId, u, utype) {
         var base2 = '/shared/img/combat/';
         var loc2 = (typeof location !== 'undefined') ? location.href : '';
         if (loc2.indexOf('file://') === 0) {
-            base2 = '../valdoria-webapp/shared/img/combat/';
+            base2 = '../shared/img/combat/';
         }
         return '<img class="c-portrait-img" src="' + base2 + slug + '.png" ' +
                'alt="" loading="lazy" ' +
@@ -28901,7 +28901,7 @@ loadScript(_THREE_SRC, function (errThree) {
     var isFile = location.protocol === 'file:';
     try {
         if (isFile) {
-            diceLocal = new URL('../valdoria-webapp/shared/dice-3d.js', location.href).href + '?v=' + v;
+            diceLocal = new URL('../shared/dice-3d.js', location.href).href + '?v=' + v;
         }
     } catch (e0) { /* ignore */ }
     /* Quando rodando via file:// prioriza LOCAL (pra edições em dice-3d.js aplicarem no dev).
