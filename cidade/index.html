@@ -41353,6 +41353,13 @@ function _wireSubScreenContentOnce(){
   var handler = function(e){
     var btn = e.target.closest('[data-cb]');
     if (!btn) return;
+    // 2026-05-18 BUG FIX (Chrome MCP review): hub-loc cells em #content ja tem
+    // seu proprio listener (linha ~49458 em _buildLocCell) que chama doAction.
+    // Sem o skip abaixo, clicar em hub-loc dispara DUPLICADO:
+    //   1. cell.addEventListener -> doAction('bank') -> _cityCheckDiscovery
+    //   2. #content listener -> 'subscreen action (no handler): bank' + toast 'Ação: bank'
+    // O toast era ruido visivel ao player toda vez que clicava num location card.
+    if (btn.classList.contains('hub-loc') || btn.closest('.hub-loc')) return;
     var cb = btn.dataset.cb;
     if (cb === '__back') { navigateBack(); return; }
     // Nav prefix → sub-sub-screen (drill-down popup)
@@ -41363,7 +41370,18 @@ function _wireSubScreenContentOnce(){
       ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER);
       return;
     }
-    // Fallback toast (cb sem handler — sub-fluxo Fase 4)
+    // 2026-05-18: fallback agora delega pra doAction antes de mostrar toast,
+    // pra dar oportunidade dos handlers de CITY_CB_TO_SCREEN (popup areas)
+    // capturarem cbs como 'tavern', 'inn', 'market' etc.
+    if (typeof window.doAction === 'function') {
+      // Evita infinite loop (doAction chamando handler do mesmo nivel)
+      if (!window.__cityFromSubHandler) {
+        window.__cityFromSubHandler = true;
+        try { window.doAction(cb); } finally { window.__cityFromSubHandler = false; }
+        return;
+      }
+    }
+    // Fallback final (cb sem handler em nenhuma camada — sub-fluxo Fase 4)
     _logCity('subscreen action (no handler): ' + cb);
     vToast('Ação: ' + cb);
   };
