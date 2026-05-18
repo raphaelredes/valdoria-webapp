@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:31:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T01:35:27Z - do not edit directly, edit source -->
 
 
 <!--
@@ -14509,6 +14509,35 @@ body.perf-lite .stub-popup-voice { animation: none; }
       }
       // Consome o token localmente mesmo se server retornou erro
       window.__EXPLORE_MOTOR_TOKEN = '';
+      return res;
+    },
+
+    /* USER REPORT 2026-05-17: Long Rest persistence fix.
+       POST /api/exploracao/rest_long — server aplica D&D 5e Long Rest
+       no session state (HP cheio + MP cheio + -1 exhaustion). Necessário
+       porque doLongRest mutava S.player local mas server mantinha state
+       antigo, fazendo próximo /move reverter HP. */
+    restLong: async function() {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-REST_LONG] send motor_tok=' + tok.slice(0, 8) + '...');
+      var res = await _post('/api/exploracao/rest_long', { token: tok });
+      if (res && res.ok) {
+        console.info('[E-REM:API-REST_LONG] ok healed_hp=' + (res.healed && res.healed.hp)
+          + ' healed_mp=' + (res.healed && res.healed.mp));
+      }
+      return res;
+    },
+
+    /* USER REPORT 2026-05-17: Short Rest persistence (paralelo a restLong). */
+    restShort: async function() {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-REST_SHORT] send motor_tok=' + tok.slice(0, 8) + '...');
+      var res = await _post('/api/exploracao/rest_short', { token: tok });
+      if (res && res.ok) {
+        console.info('[E-REM:API-REST_SHORT] ok healed_hp=' + (res.healed && res.healed.hp));
+      }
       return res;
     },
 
@@ -37438,6 +37467,17 @@ function doShortRest() {
   if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
   try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done',
     { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
+
+  /* USER REPORT 2026-05-17: persist short rest no server (mesmo motivo de
+     doLongRest fix). Server simplifica pra cura fixa 6 HP (média 1d8+2). */
+  try {
+    if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restShort === 'function') {
+      window.ExploracaoAPI.restShort().then(function(res){
+        if (res && res.ok) console.info('[CAMP] rest_short server ok healed=' + (res.healed && res.healed.hp));
+      }).catch(function(err){ console.warn('[CAMP] rest_short server err:', err); });
+    }
+  } catch (e) { console.error('[CAMP] doShortRest server sync throw:', e); }
+
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
@@ -37463,6 +37503,30 @@ function doLongRest() {
   const healHp = p.hp - preHp;
   const healMp = p.mp - preMp;
   const hdGain = p.hd - preHd;
+
+  /* USER REPORT 2026-05-17 FIX: doLongRest atualizava S.player localmente
+     mas server (state.hp via session) mantinha valor antigo → próximo
+     /move retornava HP velho, revertendo o restore. Fix: chamar endpoint
+     server /api/exploracao/rest_long pra persistir HP/MP/exhaustion na
+     session state também. Sem await (fire-and-forget) — UI já mostrou o
+     restore, server sync ocorre em background. Se falhar, log apenas. */
+  try {
+    if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restLong === 'function') {
+      window.ExploracaoAPI.restLong().then(function(res){
+        if (res && res.ok) {
+          console.info('[CAMP] rest_long server ok healed_hp=' + (res.healed && res.healed.hp));
+        } else {
+          console.warn('[CAMP] rest_long server fail:', res);
+        }
+      }).catch(function(err){
+        console.warn('[CAMP] rest_long server error:', err);
+      });
+    } else {
+      console.warn('[CAMP] ExploracaoAPI.restLong não disponível — apenas local');
+    }
+  } catch (e) {
+    console.error('[CAMP] doLongRest server sync throw:', e);
+  }
   const fullNote = (healHp === 0 && healMp === 0 && hdGain === 0 && preExh === 0)
     ? ' (já totalmente descansado)' : '';
   const status = document.getElementById('camp-footer-status');
