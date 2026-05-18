@@ -201,8 +201,17 @@ function _rollSequence(turnOrder, initiative) {
                             diceLabel.textContent = (entry.ico || '') + ' ' + entry.n + ': ' + entry.v + ' (d20=' + rollVal + ' +' + mod + ')';
                         }
                         idx++;
-                        /* Pausa de 2s para o jogador ler o resultado antes do próximo rolar */
-                        setTimeout(rollNext, 2000);
+                        /* 2026-05-18 preflight fix (check_webapp_hardcoded_timeouts):
+                           era setTimeout fixo 2000ms. Aplicado calcReadTime quando
+                           disponivel (max(MIN, words*250ms + bonus) per CLAUDE.md
+                           Human Reading Time rule). Fallback 2000ms se nao carregado. */
+                        var _readMs = 2000;
+                        try {
+                            if (diceLabel && typeof window.calcReadTime === 'function') {
+                                _readMs = window.calcReadTime(diceLabel.textContent || '', 'overlay');
+                            }
+                        } catch(_) {}
+                        setTimeout(rollNext, _readMs);
                     });
                 } catch(e) {
                     console.warn('[INIT-POPUP] Dice3D roll failed', e);

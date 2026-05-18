@@ -30,6 +30,11 @@ document.write('<script src="/shared/loading-title.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-guard.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/script>');
+/* 2026-05-18 BUG FIX (preflight check_webapp_audio_manager): /play/ era o unico
+   WebApp sem audio-manager.js, quebrando a continuidade musical (Music Continuity
+   IMMUTABLE RULE). Sem o resume automatico (~50ms), o player tinha pausa silenciosa
+   ao chegar em /play/ durante transicoes entre WebApps. */
+document.write('<script src="/shared/audio-manager.js?v=' + v + '"><\/script>');
 </script>
 </head>
 <body>

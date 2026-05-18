@@ -70,11 +70,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   MOCHILA CANONICAL — vInventory (2026-05-14)
   ═══════════════════════════════════════════════════════════════════
   Shared module valdoria-webapp/shared/inventory-screen.{css,js} substitui
-  _showInventoryPopup local. Imports adicionados no <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
- (~612). Função
+  _showInventoryPopup local. Imports adicionados no <head> (~612). Função
   original mantida como fallback defensivo se módulo não carregar.
 
   Adapter functions (~32490 a ~32700):
@@ -594,21 +590,21 @@ LOG SINK (Fase 7):
   <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se nao houver contexto
        de autenticacao (Telegram WebApp initData / URL token+uid / session
        em localStorage). Skip em simulators file:// e paths public. -->
-  <script src="/shared/auth-gate.js"></script>
+  <script src="../valdoria-webapp/shared/auth-gate.js"></script>
   <script>
     /* X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Mesmo fix
        portado de combate.html via shared sim-full-motion.js. Carrega ANTES
        de qualquer outro script pra spoofar matchMedia + setar
        vReducedMotion=false ANTES de outros scripts checarem. */
     var __vEarly = Date.now();
-    document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/sim-full-motion.js?v=' + __vEarly + '"><\/script>');
     /* X-6.5.51AI (2026-05-07): server-log helper canônico — POST /api/sim/log
        persiste logs do client em logs/sim_cidade_<env>.<date>.jsonl. */
-    document.write('<script src="/shared/server-log.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/server-log.js?v=' + __vEarly + '"><\/script>');
     window.SERVER_LOG_AREA = 'cidade';
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor. */
-    document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
     /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
     setTimeout(function(){
         try{
@@ -635,17 +631,17 @@ LOG SINK (Fase 7):
     // Cache busting para CSS/JS imports
     var v = Date.now();
     document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-hub.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/inn-animation.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-hub.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/inn-animation.css?v=' + v + '">');
     /* Popup canonical (.v-popup-btn / .v-popup-btn--primary / etc.) — usado por todos
        os WebApps pra botões padronizados. Estava faltando em cidade.html (Fase 9.5). */
-    document.write('<link rel="stylesheet" href="/shared/popup.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/popup.css?v=' + v + '">');
     /* Scroll Hint Arrow (2026-05-11, user request): seta animada inferior
        central indicando scroll disponivel em popups (Diario, NPCs, Templo,
        Banco, etc). NOTA: aplicado direto aqui pra evitar sync wipe — manter
        em sync com simuladores/cidade.html (mesma adicao). */
-    document.write('<link rel="stylesheet" href="/shared/scroll-hint-arrow.css?v=' + v + '">');
-    document.write('<script src="/shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/scroll-hint-arrow.css?v=' + v + '">');
+    document.write('<script src="../valdoria-webapp/shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
     document.write('<script>'
       + 'document.addEventListener("DOMContentLoaded", function(){'
       + '  if (window.vScrollHint && window.vScrollHint.register) {'
@@ -660,46 +656,46 @@ LOG SINK (Fase 7):
     /* Coin icon canonical (.vi .vi-coin) — REGRA CLAUDE.md "Moeda Valdorita" exige
        isso em TODO WebApp que mostra valores monetários. Sem ele, ícone .vi-coin
        não renderiza e textos com 'g'/'gold' violam regra de moeda. */
-    document.write('<link rel="stylesheet" href="/shared/coin-icon.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/coin-icon.css?v=' + v + '">');
     /* 2026-05-11 fix (user report): toast canonical visível.
        Sem isso, window.vToast caía no fallback console-only (linha ~7682),
        e clicks nos botões de quest "Entregar/Reler/Abandonar" pareciam
        não funcionar pro user (só logavam no console). */
-    document.write('<link rel="stylesheet" href="/shared/toast.css?v=' + v + '">');
-    document.write('<script src="/shared/toast.js?v=' + v + '"><\/script>');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/toast.css?v=' + v + '">');
+    document.write('<script src="../valdoria-webapp/shared/toast.js?v=' + v + '"><\/script>');
     /* 2026-05-14: vInventory canonical (shared/inventory-screen.{css,js}) — Mochila
        redesign que substitui _showInventoryPopup local. Sprite ic-it-* (519 symbols)
        carregado primeiro pra ser usado em qualquer item icon. Fallback automático
        pro popup legacy se módulo não carregar (defensivo). */
-    document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + v + '">');
-    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/inventory-screen.css?v=' + v + '">');
+    document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
     // 2026-05-17: items-resolver + asset-resolver — PNGs AI substituem SVG sprites.
-    document.write('<script src="/shared/items-resolver.js?v=' + v + '"><\/script>');
-    document.write('<script src="/shared/asset-resolver.js?v=' + v + '"><\/script>');
-    document.write('<script src="/shared/inventory-screen.js?v=' + v + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/items-resolver.js?v=' + v + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/asset-resolver.js?v=' + v + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/inventory-screen.js?v=' + v + '"><\/script>');
     /* X-6.5.51BO (2026-05-15): Fogueira reaproveitável (CampFire + vFire wrapper).
        Mesmo sistema canvas particle additive da tela do acampamento, agora padronizada
        como anim-fire pra usar em Estalagem, eventos com fogueira, e outros locais. */
-    document.write('<link rel="stylesheet" href="/shared/anim-fire.css?v=' + v + '">');
-    document.write('<script src="/explore/explore-camp-fire.js?v=' + v + '"><\/script>');
-    document.write('<script src="/shared/anim-fire.js?v=' + v + '"><\/script>');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/anim-fire.css?v=' + v + '">');
+    document.write('<script src="../valdoria-webapp/explore/explore-camp-fire.js?v=' + v + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/anim-fire.js?v=' + v + '"><\/script>');
     /* City shared (.vc-alert / .vc-player-block / .vc-service-card / etc.) — usado
        por todos os renderers de área (templo/banco/etc). Estava faltando em
        cidade.html, fazendo .vc-alert--danger não estilizar. */
-    document.write('<link rel="stylesheet" href="/game/game-city-shared.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-city-shared.css?v=' + v + '">');
     /* === City Areas CSS canonical (cada área tem seu CSS dedicado) === */
-    document.write('<link rel="stylesheet" href="/game/game-temple.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-bank.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-square.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-tavern.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-market-hub.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-guild.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-workshop.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-rune-scribe.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-festival.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-arena.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-gates.css?v=' + v + '">');
-    document.write('<link rel="stylesheet" href="/game/game-codex.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-temple.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-bank.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-square.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-tavern.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-market-hub.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-guild.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-workshop.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-rune-scribe.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-festival.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-arena.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-gates.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/game/game-codex.css?v=' + v + '">');
   </script>
   <style>
     /* === BRASÕES HERÁLDICOS canonical em botões do hub (FIX 2026-05-04) ===
@@ -5260,7 +5256,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
        valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
        duplicadas em cidade/exploracao/combate. Bug fix unico vale pros 3. -->
-  <script>document.write('<script src="/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+  <script>document.write('<script src="../valdoria-webapp/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
   <script>
   /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
@@ -7565,21 +7561,21 @@ body.perf-lite .vc-action-btn { transition: none; }
     // === Canonical loading/title libs (USER REQUEST 2026-05-04) ===
     // ValdoriaTitleScreen (esfera bonita AAA com nebula + raios) +
     // ValdoriaLoadingController (carregamento AAA com particulas/runas/anel ardente)
-    document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + Date.now() + '">');
-    document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + Date.now() + '">');
-    document.write('<link rel="stylesheet" href="/shared/loading-reactive.css?v=' + Date.now() + '">');
-    document.write('<script src="/shared/loading-title.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-title.css?v=' + Date.now() + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading.css?v=' + Date.now() + '">');
+    document.write('<link rel="stylesheet" href="../valdoria-webapp/shared/loading-reactive.css?v=' + Date.now() + '">');
+    document.write('<script src="../valdoria-webapp/shared/loading-title.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
        Mostra overlay medieval com instruções de correção. (USER REQUEST 2026-05-04) */
-    document.write('<script src="/shared/clock-skew-guard.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/clock-skew-guard.js?v=' + Date.now() + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + Date.now() + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.
     // NUNCA recriar/duplicar — sempre usar este. Suporta tier poor/modest/wealthy.
-    document.write('<script src="/game/inn-animation.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/inn-animation.js?v=' + Date.now() + '"><\/script>');
     // ValdoriaAudio canonical — gerencia todos os sons do projeto (TRACKS dict).
     // Dice3D._playRollSfx() usa ValdoriaAudio.playSFX('sfx_dice_roll') automaticamente
     // quando carregado (escolhe entre sfx_dice_roll.mp3 e sfx_dice_roll_2.mp3 random).
@@ -7590,13 +7586,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     // não embedded no footer-quick (Mochila/Ficha/Grupo). audio-manager.js checa
     // window.__audioForceFloat antes de tentar embed.
     window.__audioForceFloat = true;
-    document.write('<script src="/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
     /* X-6.5.51AW (2026-05-08): heraldic items sprite (519 ícones) + name->icon
        mapping. X-6.5.51BA: bundle JS que injeta sprite via <script src> (file://
        não tem CORS pra fetch; <script> funciona). bundle DEVE carregar ANTES
        do helper pra setar window.__HERALDIC_ITEMS_SPRITE_SVG / __MAP. */
-    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/heraldic-items.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/heraldic-items-sprite.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/heraldic-items.js?v=' + Date.now() + '"><\/script>');
     /* X-6.5.51AR (2026-05-08): SOLUÇÃO DEFINITIVA — re-parenta .va-float +
        .va-popup + .va-backdrop pra dentro de #app (que tem position:relative
        + overflow:hidden + dims 384x694). audio-manager.js cria os 3 elementos
@@ -7616,23 +7612,23 @@ body.perf-lite .vc-action-btn { transition: none; }
     '})();<\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
-    document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/three.min.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders
     // em cidade.html geram a estrutura `data` igual à do serializer.py do backend.
-    document.write('<script src="/game/game-temple.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-bank.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-square.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-tavern.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-market-hub.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-guild.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-workshop.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-rune-scribe.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-festival.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-arena.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-gates.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-codex.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-temple.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-bank.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-square.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-tavern.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-market-hub.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-guild.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-workshop.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-rune-scribe.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-festival.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-arena.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-gates.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="../valdoria-webapp/game/game-codex.js?v=' + Date.now() + '"><\/script>');
     // cartografia-shared.js (Fase 7.3 — 2026-04-30): SINGLE SOURCE pra
     // funções de drawing + data. Mesmo código carregado por exploracao.html
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
@@ -11727,7 +11723,7 @@ function _showKillsPopup(p){
     +   '<div style="position:relative;display:inline-block;">'
     +     '<div class="vKl-orbit-ring"></div>'
     +     '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
-    +       '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
+    +       '<div class="vKl-hero-png" data-src="../valdoria-webapp/shared/img/hall-cacada-trophy.png"></div>'
     +       '<svg class="vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
     +     '</div>'
     /* Embers floating up around the pedestal */
@@ -17012,8 +17008,9 @@ var BANK_TIPS_NO_INSURANCE = [
   '<br><br>"Considere o seguro, {name}. É um investimento na sua tranquilidade." 💡'
 ];
 var BANK_TIPS_NO_INVEST = [
-  '<br><br>"Ouro parado no cofre? Posso fazê-lo render juros para você." 💡',
-  '<br><br>"Já pensou em investir, {name}? Seu ouro pode trabalhar por você." 💡'
+  /* 2026-05-18 preflight fix: 'Ouro' → 'Valdoritas' (Moeda Valdorita MANDATORY RULE) */
+  '<br><br>"Valdoritas paradas no cofre? Posso fazê-las render juros para você." 💡',
+  '<br><br>"Já pensou em investir, {name}? Suas Valdoritas podem trabalhar por você." 💡'
 ];
 var BANK_TIPS_ACTIVE_LOAN = [
   '<br><br>"Lembre-se do seu empréstimo, {name}. Pagar antes do prazo evita problemas." 💡',
@@ -17022,7 +17019,7 @@ var BANK_TIPS_ACTIVE_LOAN = [
 var BANK_TUTORIAL_TEXT = (
   '🔒 <b>Dica do Aventureiro:</b><br><br>' +
   'Você acumulou riquezas consideráveis! Sabia que o <b>Banco de Eldoria</b> oferece cofres seguros?<br><br>' +
-  '<span class="vi vi-coin sm"></span> <b>Depósito de Ouro:</b> Taxa de 5% (ex: depositar 100 → 95 guardados)<br>' +
+  '<span class="vi vi-coin sm"></span> <b>Depósito de Valdoritas:</b> Taxa de 5% (ex: depositar 100 → 95 guardadas)<br>' +
   '📦 <b>Guarda de Itens:</b> Seus pertences ficam protegidos mesmo se você cair em combate.<br><br>' +
   'Visite o Banco na cidade para proteger seus ganhos!'
 );
@@ -24625,7 +24622,7 @@ var CANON_BONUS_RUMORS = {
     "gold": {
       "key": "rumor_gold_bonus",
       "value": 0.15,
-      "label": "+15% Ouro de Combate",
+      "label": "+15% Valdoritas de Combate",
       "icon": "Valdoritas",
       "variants": [
         "Um ladrão reformado cochicha: 'Os monstros carregam mais ouro do que você imagina. O truque é saber onde revistar. Cintos, bolsos internos, mochilas escondidas... A maioria dos aventureiros só pega o que brilha no chão.'",
@@ -29454,7 +29451,7 @@ var TAVERN_BONUS_RUMORS = [
       "Um cavaleiro itinerante pousa o elmo no balcão: 'Sabe o que aprendi em vinte anos de torneios? O escudo não é pra bloquear — é pra desviar. Inclina a superfície e o golpe escorrega pro lado. Metade do esforço.'"
     ]
   },
-  { key: 'rumor_gold_bonus',  label: '+15% Ouro de Combate',       icon: _heralIco('ic-bolsa'),
+  { key: 'rumor_gold_bonus',  label: '+15% Valdoritas de Combate',       icon: _heralIco('ic-bolsa'),
     variants: [
       "Um ladrão reformado cochicha: 'Os monstros carregam mais ouro do que você imagina. O truque é saber onde revistar. Cintos, bolsos internos, mochilas escondidas... A maioria dos aventureiros só pega o que brilha no chão.'",
       "Grom seca um barril e diz baixo: 'Um saqueador de masmorras me contou que goblins escondem moedas nos sapatos. Orcs costuram ouro na bainha das capas. Até esqueletos às vezes carregam ouro nos ossos ocos.'",
@@ -49359,7 +49356,7 @@ function _cityLocIconHTML(cb, fallbackIco) {
         var base = '/shared/img/city/';
         var loc = (typeof location !== 'undefined') ? location.href : '';
         if (loc.indexOf('file://') === 0) {
-            base = '/shared/img/city/';
+            base = '../valdoria-webapp/shared/img/city/';
         }
         return '<img class="hl-ico-img" src="' + base + cb + '.png" ' +
                'alt="" loading="lazy" ' +

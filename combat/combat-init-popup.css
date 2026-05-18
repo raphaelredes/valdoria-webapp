@@ -9,7 +9,10 @@
   inset: 0;
   max-width: min(100vw, 430px);
   margin: 0 auto;
-  z-index: 5100; /* Above old initiativeOrderOverlay (5000) */
+  /* 2026-05-18 preflight fix (check_webapp_hardcoded_zindex): era 5100
+     hardcoded. Token canonical valdoria-design.css: --v-z-modal=5000.
+     calc(+100) mantem comportamento (acima de initiativeOrderOverlay). */
+  z-index: calc(var(--v-z-modal, 5000) + 100); /* Above old initiativeOrderOverlay */
   display: flex;
   align-items: center;
   justify-content: center;
