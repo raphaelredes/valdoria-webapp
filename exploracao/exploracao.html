@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T14:08:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-18T14:18:24Z - do not edit directly, edit source -->
 
 
 <!--
@@ -1985,7 +1985,7 @@ html body .camp-screen {
 /* X-6.5.51i (2026-04-25): tb-biome/weather/phase clicaveis (smartphones nao
    tem hover). User feedback: "smartphones nao tem mouse, entao nunca use
    configuracoes hover apenas; adicione um popup que fornece as informacoes,
-   pode aproveitar e informar o que essas condicoes atuais influenciam na
+   pode aproveitar e informar o que essas condições atuais influenciam na
    jogabilidade durante a exploracao". */
 .tb-biome, .tb-weather, .tb-phase {
   font-size: 18px;
@@ -3027,7 +3027,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 #quest-indicator {
   position: absolute;
   /* X-6.5.51d: right -> left (era right:10 sobrepondo zoom controls).
-     User feedback: "Missoes ativas" estava abaixo dos botoes
+     User feedback: "Missões ativas" estava abaixo dos botoes
      "Centralizar" e "Mais zoom" em vez de em outro lugar. */
   top: 56px; left: 10px;
   z-index: 15;
@@ -3081,7 +3081,7 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 
 /* X-6.5.51j (2026-04-25): journal-card REFATORADO pro design system do jogo.
    Antes: parchment cream/brown (custom). Agora: dark + gold (--v-bg-raised,
-   --v-gold, --v-text). User feedback: "faca a tela do Diario de missoes e a
+   --v-gold, --v-text). User feedback: "faca a tela do Diario de missões e a
    tela de cartografia seguirem os padroes/regras CSS do jogo".
    2026-05-12 USER REQUEST: full popup — width 100% do frame, max-height 96%.
    Antes max-width:360px deixava popup estreito (1/3 da tela com bordas vazias). */
@@ -8376,7 +8376,7 @@ window.__onIntroTap = function() {
 
   <div id="hud-quick">
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
-         "remova o botao Diario de missoes". Quest journal agora e acessado
+         "remova o botao Diario de missões". Quest journal agora e acessado
          clicando no #minimap-wrap inteiro (X-6.5.51e refator).
          X-6.5.51k (2026-04-25): btn-party adicionado ACIMA do btn-inventory.
          Abre popup com lista resumida dos membros do grupo (cls + hp + mp + lvl).
@@ -8664,7 +8664,7 @@ window.__onIntroTap = function() {
         <div class="journey-check" id="journey-check"></div>
       </div>
       <div class="journey-footer" id="journey-footer">
-        <!-- preenchido dinamicamente: 1-2 botoes de acao por etapa -->
+        <!-- preenchido dinamicamente: 1-2 botoes de ação por etapa -->
       </div>
     </div>
   </div>
@@ -8713,7 +8713,7 @@ window.__onIntroTap = function() {
   </div>
 
   <!-- Journal overlay (Missões) -->
-  <!-- X-6.5.51i: popup com info da condicao atual (biome/weather/phase) +
+  <!-- X-6.5.51i: popup com info da condição atual (biome/weather/phase) +
        como afeta exploracao. Aberto ao tocar nos icones do top-bar. -->
   <div id="tb-condition-popup" role="dialog" aria-label="Detalhes da condição">
     <div class="tb-cp-card">
@@ -19331,8 +19331,8 @@ const FIXED_MAPS = {
                     desc: 'Carisma (Persuasao) CD 12 — perguntar casual, sem despertar suspeita',
                     outcome_ok: { text: '"Como esta o chefe? Anda nervoso?" O guarda gunhe. "Anda. Diz que ve sombras no espelho. O xama renova as runas a cada lua nova mas... ele nao dorme." Intel valiosa sobre o estado mental do chefe.', xp: 25, _flag: 'lore_brakthar_paranoid' },
                     outcome_fail: { text: '"Por que se importa, mensageiro?" Eles ficam desconfiados, maos voltam aos machados. Você decide nao insistir e manter o disfarce.', xp: 8 } },
-                  { label: 'Seguir direto sem chamar atencao',
-                    desc: 'Acao sem rolagem — manter o disfarce e prosseguir norte',
+                  { label: 'Seguir direto sem chamar atenção',
+                    desc: 'Ação sem rolagem — manter o disfarce e prosseguir norte',
                     outcome_ok: { text: 'Você assente bruscamente e continua, postura militar firme. Os guardas voltam a fogueira, alheios.', xp: 15 },
                     outcome_fail: null }
                 ]
@@ -19367,7 +19367,7 @@ const FIXED_MAPS = {
                 ]
               }
             },
-            outcome_fail: { text: 'Você alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direcao — vista cruzada, alarme no ato. Você mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
+            outcome_fail: { text: 'Você alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direção — vista cruzada, alarme no ato. Você mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
         ]
       },
       // ── 3. CAMARA DOS TOTENS (3 totens em circulo, hex central E15) ──
@@ -19479,7 +19479,7 @@ const FIXED_MAPS = {
               _chainTo: {
                 id: 'memorial_orc_youth_observes',
                 title: 'O Orc Jovem te Observa',
-                text: 'Enquanto você examinava o memorial, o orc jovem ergueu a cabeca. Os olhos dele parecem... resignados. Talvez ate gratos. Ele aguarda sua proxima acao.',
+                text: 'Enquanto você examinava o memorial, o orc jovem ergueu a cabeca. Os olhos dele parecem... resignados. Talvez ate gratos. Ele aguarda sua proxima ação.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
@@ -19505,8 +19505,8 @@ const FIXED_MAPS = {
               xp: 25, _flag: 'can_disrupt_brakthar_chant',
               _chainTo: {
                 id: 'memorial_after_chant',
-                title: 'O Cantico Atrai Atencao',
-                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou você: "Tu nao deveria saber isso." A reacao dele decide muito.',
+                title: 'O Cantico Atrai Atenção',
+                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou você: "Tu nao deveria saber isso." A reação dele decide muito.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
@@ -19524,7 +19524,7 @@ const FIXED_MAPS = {
             },
             outcome_fail: { text: 'Sua voz desafina. A energia cintila mas nao responde.', xp: 8 } },
           { label: 'Aproximar do orc jovem direto',
-            desc: 'Acao sem rolagem — encarar o orc ferido',
+            desc: 'Ação sem rolagem — encarar o orc ferido',
             outcome_ok: {
               text: 'Você encara o orc. Ele ergue os olhos. "Faca o que tem que fazer."',
               _chainTo: {
@@ -19540,11 +19540,11 @@ const FIXED_MAPS = {
                     outcome_ok: { text: 'Você estanca o sangue. "Brakthar matou meu pai." Ele se levanta. Aliado.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
                     outcome_fail: { text: 'Você cura mas as palavras erram. Ele foge mancando.', xp: 15 } },
                   { label: 'Eliminar por seguranca',
-                    desc: 'Acao sem rolagem — terminar o servico',
+                    desc: 'Ação sem rolagem — terminar o servico',
                     outcome_ok: { text: 'Você termina. Um lampejo cruza o rosto dele antes da queda — alivio? gratidao? Você nunca sabera.', xp: 10, _flag: 'orc_youth_killed' },
                     outcome_fail: null },
                   { label: 'Deixar vivo, seguir adiante',
-                    desc: 'Acao sem rolagem — ignorar e prosseguir',
+                    desc: 'Ação sem rolagem — ignorar e prosseguir',
                     outcome_ok: { text: 'Você o deixa onde esta. Talvez sobreviva, talvez nao.', xp: 5, _flag: 'orc_youth_spared' },
                     outcome_fail: null }
                 ]
@@ -19571,7 +19571,7 @@ const FIXED_MAPS = {
             outcome_ok: { text: 'Você contorna a area pela vegetacao. O orc nem percebe sua presenca.', xp: 25, _flag: 'patrol_south_evaded' },
             outcome_fail: { text: 'Movimento desajeitado. Combate inevitavel.', xp: 5, hp_loss: 2, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Combate direto',
-            desc: 'Acao sem rolagem — confronto justo',
+            desc: 'Ação sem rolagem — confronto justo',
             outcome_ok: { text: 'Você avanca. O orc range dentes e levanta o machado.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
             outcome_fail: null }
         ]
@@ -19585,7 +19585,7 @@ const FIXED_MAPS = {
         choices: [
           { label: 'Lancar pedra para distrair',
             skill: 'dex', dc: 11,
-            desc: 'Destreza (Atletismo) CD 11 — atirar pedra longe pra desviar atencao',
+            desc: 'Destreza (Atletismo) CD 11 — atirar pedra longe pra desviar atenção',
             outcome_ok: { text: 'Pedra cai longe. O orc gira e investiga. Você passa pelo lado oposto.', xp: 20, _flag: 'patrol_east_distracted' },
             outcome_fail: { text: 'Pedra desviou. Ele localiza você imediatamente. Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Confronto frontal com forca',
@@ -19618,7 +19618,7 @@ const FIXED_MAPS = {
             outcome_ok: { text: '"Brakthar mandou recado urgente. Saia do caminho." Ele hesita, depois cede. Você passa.', xp: 25, _flag: 'patrol_nw_persuaded' },
             outcome_fail: { text: 'Ele saca o machado. "Brakthar nunca usaria você." Combate.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
           { label: 'Combate direto',
-            desc: 'Acao sem rolagem — confronto justo',
+            desc: 'Ação sem rolagem — confronto justo',
             outcome_ok: { text: 'Você avanca. O orc range dentes.', xp: 5, dungeon_combat: { enemy: 'orc_raider', surprise: false } },
             outcome_fail: null }
         ]
@@ -35891,7 +35891,7 @@ function triggerEdgeTransition(ed) {
     desc = '<div style="text-align:center;line-height:1.65;font-size:13px">' +
            '<p style="margin:0 0 12px;color:#d4c8b0">Você abandona <strong style="color:#c4953a">' + S.mapDef.name + '</strong> e retorna a <strong style="color:#c4953a">' + tgtNameDung + '</strong>.</p>' +
            '<div style="background:rgba(196,49,49,0.12);border:1px solid rgba(196,49,49,0.4);padding:8px 12px;border-radius:6px;margin:10px 0;color:#d49595;font-size:11px;text-align:left">' +
-             '<strong>⚠ Atencao:</strong> a masmorra permanece hostil. Inimigos voltarao a postos. Voltar mais tarde significa enfrentar tudo de novo.' +
+             '<strong>⚠ Atenção:</strong> a masmorra permanece hostil. Inimigos voltarao a postos. Voltar mais tarde significa enfrentar tudo de novo.' +
            '</div>' +
            '</div>';
     document.getElementById('dungeon-title').textContent = title;
@@ -39626,10 +39626,10 @@ function updateTopBar() {
 }
 
 /* X-6.5.51i (2026-04-25): popup contextual quando usuario toca icone do
-   top-bar (smartphone-friendly, substitui hover). Mostra info da condicao
+   top-bar (smartphone-friendly, substitui hover). Mostra info da condição
    atual + COMO afeta exploracao. User feedback: "smartphones nao tem mouse,
    entao nunca use configuracoes hover apenas; pode aproveitar e informar
-   o que essas condicoes atuais influenciam na jogabilidade durante a
+   o que essas condições atuais influenciam na jogabilidade durante a
    exploracao". */
 const TB_BIOME_INFO = {
   forest:    { ico: '🌲', name: 'Floresta',   desc: 'Carvalhos antigos, samambaias e vida selvagem por toda parte. Visibilidade limitada pela copa.', effects: ['Encontros de animais e bandidos comuns', 'Forragear (Sobrevivência DC 12) revela ervas e cogumelos', 'Movimento mais lento em mata densa', 'Vigília (Percepção) pra detectar emboscadas'] },
@@ -43211,8 +43211,8 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
        [VISITED]      novo hex visitado
        [INPUT-CLICK]  click no map-viewport ou canvas (com hex coord)
        [INPUT-KEY]    keypress (movement keys WASD/arrows etc)
-       [INPUT-NAV]    hex-nav button click (direcao N/NE/SE/S/SW/NW)
-       [HUD-EVT]      mudanca em HUD elements (vida, gold, missoes count)
+       [INPUT-NAV]    hex-nav button click (direção N/NE/SE/S/SW/NW)
+       [HUD-EVT]      mudanca em HUD elements (vida, gold, missões count)
        [POPUP-OPEN]   abertura de modal/popup detectada via mutation observer
        [POPUP-CLOSE]  fechamento detectado
        [VISIBILITY]   document.hidden true/false

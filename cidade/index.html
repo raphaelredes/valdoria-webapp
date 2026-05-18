@@ -6304,7 +6304,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   <rect x="58" y="74" width="4" height="20" fill="#ffd700"/>
 </symbol>
 
-<symbol id="ic-missoes" viewBox="0 0 120 120">
+<symbol id="ic-missões" viewBox="0 0 120 120">
   <!-- Pergaminho com selo -->
   <rect x="22" y="20" width="76" height="80" fill="currentColor" stroke="#0a0605" stroke-width="2" rx="2"/>
   <path d="M 32 40 L 88 40 M 32 52 L 80 52 M 32 64 L 88 64 M 32 76 L 75 76" stroke="#0a0605" stroke-width="1.2" opacity="0.6"/>
@@ -6391,7 +6391,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   </g>
 </symbol>
 
-<symbol id="ic-vinculos" viewBox="0 0 120 120">
+<symbol id="ic-vínculos" viewBox="0 0 120 120">
   <!-- Coração heráldico ornamentado -->
   <path d="M 60 100 Q 22 78 22 50 Q 22 30 38 28 Q 50 28 60 42 Q 70 28 82 28 Q 98 30 98 50 Q 98 78 60 100 Z" fill="currentColor" stroke="#0a0605" stroke-width="2.5"/>
   <path d="M 60 90 Q 32 72 32 52 Q 32 38 42 38 Q 52 38 60 50 Q 68 38 78 38 Q 88 38 88 52 Q 88 72 60 90 Z" fill="#ffd700" opacity="0.4"/>
@@ -7262,7 +7262,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   <text x="60" y="73" text-anchor="middle" font-family="serif" font-size="11" font-weight="bold" fill="#fff">V</text>
 </symbol>
 
-<symbol id="ic-pocao" viewBox="0 0 120 120">
+<symbol id="ic-poção" viewBox="0 0 120 120">
   <!-- Poção: frasco com líquido vermelho + brilho -->
   <rect x="48" y="14" width="24" height="14" fill="#5a3e10" stroke="#0a0605" stroke-width="2"/>
   <rect x="52" y="28" width="16" height="10" fill="currentColor" stroke="#0a0605" stroke-width="1.5"/>
@@ -7443,7 +7443,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           <div class="journey-dice-wrap" id="journey-dice-wrap"></div>
         </div>
         <div class="journey-footer" id="journey-footer">
-          <!-- preenchido dinamicamente: 1-2 botoes de acao por etapa -->
+          <!-- preenchido dinamicamente: 1-2 botoes de ação por etapa -->
         </div>
       </div>
     </div>
@@ -10390,7 +10390,7 @@ function _showSettingsPopup(){
     s.notif_general, 'valdoria_notif_general');
   if (s.notif_general) {
     // Sub-categorias só aparecem quando Geral=ON (cascade)
-    html += _toggleRow('ic-missoes', 'Missões Diárias',
+    html += _toggleRow('ic-missões', 'Missões Diárias',
       s.notif_daily_quests ? 'Ativado' : 'Desativado',
       s.notif_daily_quests, 'valdoria_notif_daily_quests');
     html += _toggleRow('ic-festival', 'Festivais',
@@ -11974,11 +11974,11 @@ function _showStreakPopup(p){
 var DAILY_REWARDS = [
   { day: 1, gold: 10,  xp: 25, item: null },
   { day: 2, gold: 15,  xp: 30, item: null },
-  { day: 3, gold: 25,  xp: 40, item: { name: 'Poção de Cura', qty: 1, icon: 'ic-it-pocao-cura' } },
+  { day: 3, gold: 25,  xp: 40, item: { name: 'Poção de Cura', qty: 1, icon: 'ic-it-poção-cura' } },
   { day: 4, gold: 30,  xp: 35, item: null },
   { day: 5, gold: 40,  xp: 45, item: null },
   { day: 6, gold: 50,  xp: 50, item: null },
-  { day: 7, gold: 100, xp: 75, item: { name: 'Poção de Cura Maior', qty: 1, icon: 'ic-it-pocao-cura-maior' } }
+  { day: 7, gold: 100, xp: 75, item: { name: 'Poção de Cura Maior', qty: 1, icon: 'ic-it-poção-cura-maior' } }
 ];
 
 function _dailyLoginData(){
@@ -12676,7 +12676,7 @@ var HERALDIC_COLORS = {
   'ic-festival':    '#d4663a',  // laranja festivo
   'ic-fonte':       '#4a78c4',  // azul água
   'ic-mercado':     '#8a5a3a',  // terracota comércio
-  'ic-missoes':     '#9a4030',  // vermelho aviso
+  'ic-missões':     '#9a4030',  // vermelho aviso
   'ic-oficina':     '#a04020',  // rubro forja
   'ic-portoes':     '#7a6a5a',  // pedra cinza
   'ic-praca':       '#8a7a6a',  // pedra neutra
@@ -12752,12 +12752,12 @@ var HERALDIC_COLORS = {
   'ic-grupo':       '#8a98a8',  // cinza-azul time
   'ic-mochila':     '#7a5028',  // couro escuro
   'ic-musica':      '#9050a0',  // púrpura
-  'ic-pocao':       '#5aa850',  // verde alquimia
+  'ic-poção':       '#5aa850',  // verde alquimia
   'ic-raio':        '#f0d040',  // amarelo elétrico
   'ic-sono':        '#5a78a8',  // azul-suave
   'ic-tochas':      '#e85020',  // laranja chama
   'ic-trofeu':      '#e8d878',  // dourado troféu (gold OK)
-  'ic-vinculos':    '#c43050',  // vermelho coração
+  'ic-vínculos':    '#c43050',  // vermelho coração
   // ─── UI / NAVEGAÇÃO (adicionados 2026-05-06 — anti-gold sweep) ─
   'ic-ficha':         '#c0b890',  // pergaminho (character sheet)
   'ic-portal':        '#7a6a5a',  // pedra/portão neutro
@@ -12849,7 +12849,7 @@ var TEMPLE_NPCS_DB = {
   },
   'cure_poison': {
     npc: 'Padre Aldric',         npc_id: 'npc_temple_aldric',
-    title: 'Purificar Veneno',   icon: _heralIco('ic-pocao'),
+    title: 'Purificar Veneno',   icon: _heralIco('ic-poção'),
     cost: 40,                    min_level: 1,
     desc: 'Remove venenos e doenças do corpo.'
   },
@@ -13496,7 +13496,7 @@ var TAVERN_NPCS = [
 var TAVERN_DRINKS = [
   { id: 'ale',   icon: _heralIco('ic-cerveja'), name: 'Cerveja Comum',     cost: 1, effect: '+1 HP', heal: 1, mp: 0 },
   { id: 'cider', icon: _heralIco('ic-cerveja'), name: 'Sidra de Maçã',     cost: 2, effect: '+2 HP', heal: 2, mp: 0 },
-  { id: 'mead',  icon: _heralIco('ic-pocao'),   name: 'Hidromel do Vale',  cost: 4, effect: '+2 MP', heal: 0, mp: 2 },
+  { id: 'mead',  icon: _heralIco('ic-poção'),   name: 'Hidromel do Vale',  cost: 4, effect: '+2 MP', heal: 0, mp: 2 },
   { id: 'stout', icon: _heralIco('ic-cerveja'), name: 'Stout Anã',         cost: 6, effect: '+3 HP / +1 MP', heal: 3, mp: 1 }
 ];
 
@@ -13556,7 +13556,7 @@ function _buildTavernMockData(player){
       { icon: _heralIco('ic-cerveja'), label: 'Socializar',        cb: 'tavern_carousing_open' },
       { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
       { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
-      { icon: _heralIco('ic-missoes'), label: 'Mural de Avisos',   cb: 'tavern_bulletin_open' }
+      { icon: _heralIco('ic-missões'), label: 'Mural de Avisos',   cb: 'tavern_bulletin_open' }
     ]
   };
 }
@@ -13669,7 +13669,7 @@ function _buildInnMockData(player){
       { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
       { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
       { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
-      { icon: _heralIco('ic-missoes'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
+      { icon: _heralIco('ic-missões'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
     ]
   };
 }
@@ -14111,7 +14111,7 @@ var MARKET_MERCHANTS = [
   },
   {
     id: 'mirena',
-    icon: _heralIco('ic-pocao'),
+    icon: _heralIco('ic-poção'),
     name: 'Mirena Folha-Verde',
     role: 'Alquimista',
     desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço.',
@@ -15428,7 +15428,7 @@ function _buildGuildMockData(player){
         desc: GUILD_RECRUITS.length + ' recrutas prontos para aventura',
         cb: 'guild_recruit_open',
         badge: GUILD_RECRUITS.length + '' },
-      { icon: _heralIco('ic-missoes'), label: 'Quadro de missões',
+      { icon: _heralIco('ic-missões'), label: 'Quadro de missões',
         desc: 'Contratos ativos da Guilda',
         cb: 'guild_quests_open',
         badge: GUILD_QUESTS_AVAILABLE.length + '' },
@@ -15458,7 +15458,7 @@ function _buildGuildMockData(player){
 // WORKSHOP_TOOLS — 8 categorias com brasões heráldicos canonical (substitui ⚔🧪🦬🪵💎🌿🍳🔧)
 var WORKSHOP_TOOLS = [
   { cb: 'workshop_smith',      emoji: _heralIco('ic-oficina'),         name: 'Forja (Smith)',      recipe_count: 12 },
-  { cb: 'workshop_alchemy',    emoji: _heralIco('ic-pocao'),           name: 'Alquimia',           recipe_count: 8 },
+  { cb: 'workshop_alchemy',    emoji: _heralIco('ic-poção'),           name: 'Alquimia',           recipe_count: 8 },
   { cb: 'workshop_leather',    emoji: _heralIco('ic-stat-ac'),         name: 'Curtume (Leather)',  recipe_count: 6 },
   { cb: 'workshop_carpentry',  emoji: _heralIco('ic-druida'),          name: 'Carpintaria (Wood)', recipe_count: 5 },
   { cb: 'workshop_jeweler',    emoji: _heralIco('ic-ach-colecionador'),name: 'Joalheria',          recipe_count: 4 },
@@ -15476,10 +15476,10 @@ var WORKSHOP_RECIPES = {
     { id: 'r_warhammer',  icon: _heralIco('ic-oficina'),     name: 'Martelo de Guerra (1d8)', cost_mat: '4 ferro', cost_g: 15, dc: 13 }
   ],
   workshop_alchemy: [
-    { id: 'r_pot_min',  icon: _heralIco('ic-pocao'),         name: 'Poção Menor (1d4 HP)',     cost_mat: '2 ervas',   cost_g: 10, dc: 11 },
+    { id: 'r_pot_min',  icon: _heralIco('ic-poção'),         name: 'Poção Menor (1d4 HP)',     cost_mat: '2 ervas',   cost_g: 10, dc: 11 },
     { id: 'r_pot_maj',  icon: _heralIco('ic-cura'),          name: 'Poção Maior (2d4+2 HP)',   cost_mat: '4 ervas',   cost_g: 30, dc: 14 },
     { id: 'r_alch_fire',icon: _heralIco('ic-ach-indomavel'), name: 'Fogo Alquímico (1d4 fogo)',cost_mat: '2 enxofre', cost_g: 25, dc: 13 },
-    { id: 'r_acid',     icon: _heralIco('ic-pocao'),         name: 'Frasco de Ácido (2d6)',    cost_mat: '2 ervas',   cost_g: 15, dc: 12 }
+    { id: 'r_acid',     icon: _heralIco('ic-poção'),         name: 'Frasco de Ácido (2d6)',    cost_mat: '2 ervas',   cost_g: 15, dc: 12 }
   ],
   workshop_leather: [
     { id: 'r_armor_l',  icon: _heralIco('ic-stat-ac'), name: 'Armadura de Couro (CA 12)', cost_mat: '4 couros',           cost_g: 20, dc: 12 },
@@ -15496,7 +15496,7 @@ var WORKSHOP_RECIPES = {
     { id: 'r_pendant',  icon: _heralIco('ic-stat-spelldc'),     name: 'Pingente Arcano',        cost_mat: '1 ouro + 1 cristal',   cost_g: 100, dc: 16 }
   ],
   workshop_herbalism: [
-    { id: 'r_antidote', icon: _heralIco('ic-pocao'), name: 'Antídoto',         cost_mat: '3 ervas', cost_g: 15, dc: 12 },
+    { id: 'r_antidote', icon: _heralIco('ic-poção'), name: 'Antídoto',         cost_mat: '3 ervas', cost_g: 15, dc: 12 },
     { id: 'r_balm',     icon: _heralIco('ic-cura'),  name: 'Bálsamo de Cura',  cost_mat: '2 ervas', cost_g: 10, dc: 11 },
     { id: 'r_tonic',    icon: _heralIco('ic-druida'),name: 'Tônico de Vigor',  cost_mat: '4 ervas', cost_g: 25, dc: 13 }
   ],
@@ -15777,7 +15777,7 @@ function _buildArenaMockData(player){
         disabled: locked
       };
     }).concat([
-      { icon: _heralIco('ic-missoes'), label: 'Histórico de Lutas', cb: 'arena_history' },
+      { icon: _heralIco('ic-missões'), label: 'Histórico de Lutas', cb: 'arena_history' },
       { icon: _heralIco('ic-trofeu'), label: 'Ranking do Dia',     cb: 'arena_ranking' }
     ])
   };
@@ -15852,7 +15852,7 @@ function _buildRelationsMockData(player){
 var TRADE_BOARD_OFFERS = [
   { id: 'tb_001', icon: _heralIco('ic-stat-attack'), item: 'Espada Curta +1',     price: 350, seller: 'Korin Folha-Ferida',     time: '2h atrás' },
   { id: 'tb_002', icon: _heralIco('ic-stat-ac'), item: 'Escudo de Aço',       price: 180, seller: 'Brand Pé-de-Pedra',      time: '5h atrás' },
-  { id: 'tb_003', icon: _heralIco('ic-pocao'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Tecelã-de-Ervas',   time: '7h atrás' },
+  { id: 'tb_003', icon: _heralIco('ic-poção'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Tecelã-de-Ervas',   time: '7h atrás' },
   { id: 'tb_004', icon: _heralIco('ic-escriba'), item: 'Pergaminho: Mísseis Mágicos', price: 220, seller: 'Velgar Tinta-Negra', time: '12h atrás' },
   { id: 'tb_005', icon: _heralIco('ic-ach-colecionador'), item: 'Anel de Proteção',    price: 800, seller: 'Sira Olho-de-Falcão',    time: '18h atrás' },
   { id: 'tb_006', icon: _heralIco('ic-patrulheiro'), item: 'Arco Longo Élfico',   price: 450, seller: 'Aenir Vento-Suave',      time: '22h atrás' },
@@ -15889,7 +15889,7 @@ function _buildTradeBoardMockData(player){
 // Canonical: condicional (rogues veem mais), Vulto NPC, SHADOW_ITEMS rotativos
 // SHADOW_ITEMS — 8 itens do mercado das sombras com brasões canonical
 var SHADOW_ITEMS = [
-  { id: 'sh_poison', icon: _heralIco('ic-pocao'),         name: 'Frasco de Veneno',         cost: 100, desc: '+1d4 veneno na arma (3 combates)' },
+  { id: 'sh_poison', icon: _heralIco('ic-poção'),         name: 'Frasco de Veneno',         cost: 100, desc: '+1d4 veneno na arma (3 combates)' },
   { id: 'sh_smoke',  icon: _heralIco('ic-ladino'),        name: 'Bomba de Fumaça',          cost: 75,  desc: 'Fuga garantida de combate' },
   { id: 'sh_anti',   icon: _heralIco('ic-cura'),          name: 'Antídoto Potente',         cost: 50,  desc: '+3 saves vs Veneno (3 combates)' },
   { id: 'sh_box',    icon: _heralIco('ic-mochila'),       name: 'Caixa Misteriosa',         cost: 200, desc: 'Pode conter lixo ou tesouro... 20% chance de algo bom' },
@@ -16503,7 +16503,7 @@ var GATES_PREP_ITEMS = [
   { id: 'rations', icon: _heralIco('ic-mochila'), name: 'Rações 7 dias',     cost: 10, desc: 'Sem fome em viagem longa.' },
   { id: 'torches', icon: _heralIco('ic-tochas'),  name: 'Tochas (5)',        cost: 5,  desc: 'Iluminam dungeons escuros.' },
   { id: 'rope',    icon: _heralIco('ic-cordas'),  name: 'Corda 15m',         cost: 10, desc: 'Útil pra escalar / amarrar.' },
-  { id: 'potion',  icon: _heralIco('ic-pocao'),   name: 'Poção emergência',  cost: 50, desc: 'Restaura 2d4+2 HP em combate.' }
+  { id: 'potion',  icon: _heralIco('ic-poção'),   name: 'Poção emergência',  cost: 50, desc: 'Restaura 2d4+2 HP em combate.' }
 ];
 
 // ============================================================================
@@ -16539,7 +16539,7 @@ var CODEX_DATA = {
     // Itens (34/120)
     { name: 'Espada Longa',         icon: _heralIco('ic-stat-attack'),    category: 'items', meta: 'Arma · 1d8',       unlocked: true, rarity: 'common' },
     { name: 'Cota de Malha',        icon: _heralIco('ic-stat-ac'),        category: 'items', meta: 'Armadura · CA 16', unlocked: true, rarity: 'common' },
-    { name: 'Poção de Cura',        icon: _heralIco('ic-pocao'),          category: 'items', meta: '2d4+2 HP',         unlocked: true, rarity: 'common' },
+    { name: 'Poção de Cura',        icon: _heralIco('ic-poção'),          category: 'items', meta: '2d4+2 HP',         unlocked: true, rarity: 'common' },
     { name: 'Espada Élfica',        icon: _heralIco('ic-elfo'),           category: 'items', meta: '1d8+1 mágico',     unlocked: true, rarity: 'uncommon' },
     { name: 'Cota de Mithril',      icon: _heralIco('ic-liga-mithril'),   category: 'items', meta: 'CA 18 leve',       unlocked: true, rarity: 'rare' },
     { name: 'Espada Flamejante',    icon: _heralIco('ic-ach-indomavel'),  category: 'items', meta: '1d8+2d6 fogo',     unlocked: false, rarity: 'very_rare' },
@@ -17716,7 +17716,7 @@ var SQUARE_AMBULANT_VENDORS = [
   { id: 'zephyra',  icon: _heralIco('ic-druida'),            name: 'Zephyra, a Herbalista',
     desc: 'Uma elfa com cestos cheios de ervas aromáticas.',
     items: [
-      { name: 'Poção de Cura',  value: 50, icon: _heralIco('ic-pocao'), desc: 'Recupera 2d4+2 HP fora de combate.' },
+      { name: 'Poção de Cura',  value: 50, icon: _heralIco('ic-poção'), desc: 'Recupera 2d4+2 HP fora de combate.' },
       { name: 'Antitoxina',     value: 35, icon: _heralIco('ic-cura'),  desc: 'Vantagem em saves contra veneno por 1 hora.' },
       { name: 'Erva Curativa',  value: 5,  icon: _heralIco('ic-druida'),desc: '+1 HP ao acampar.' }
     ] },
@@ -17748,12 +17748,12 @@ var SQUARE_AMBULANT_VENDORS = [
       { name: 'Kit de Reparo',      value: 40, icon: _heralIco('ic-engrenagem'),   desc: 'Restaura 5 HP em armadura/arma quebrada.' },
       { name: 'Corda de Escalada',  value: 30, icon: _heralIco('ic-cordas'),       desc: 'Vantagem pra subir penhascos.' }
     ] },
-  { id: 'grimshaw', icon: _heralIco('ic-pocao'),             name: 'Grimshaw, o Alquimista',
+  { id: 'grimshaw', icon: _heralIco('ic-poção'),             name: 'Grimshaw, o Alquimista',
     desc: 'Um gnomo com óculos grossos e frascos borbulhantes.',
     items: [
       { name: 'Fogo Alquímico',  value: 50,  icon: _heralIco('ic-ach-indomavel'), desc: 'Arremesso: 1d4 fogo, queima por 2 turnos.' },
-      { name: 'Frasco de Ácido', value: 25,  icon: _heralIco('ic-pocao'),         desc: 'Arremesso: 2d6 ácido (PHB p.148).' },
-      { name: 'Frasco de Veneno', value: 100, icon: _heralIco('ic-pocao'),        desc: 'Aplicar em arma: +1d4 veneno por 1 minuto.' }
+      { name: 'Frasco de Ácido', value: 25,  icon: _heralIco('ic-poção'),         desc: 'Arremesso: 2d6 ácido (PHB p.148).' },
+      { name: 'Frasco de Veneno', value: 100, icon: _heralIco('ic-poção'),        desc: 'Aplicar em arma: +1d4 veneno por 1 minuto.' }
     ] },
   { id: 'selindra', icon: _heralIco('ic-ach-colecionador'),  name: 'Selindra, a Joalheira',
     desc: 'Uma humana elegante com joias cintilando em cada dedo.',
@@ -26981,7 +26981,7 @@ var CANON_ITEMS_DB = {
   'Poção de Cura Superior':{e: _heralIco('ic-mochila'),v:450, r:'rare',   t:['consumable','potion','healing'],   hb:28, desc:'Recupera 8d4+8 HP fora de combate.'},
   'Poção de Cura Suprema':{e: _heralIco('ic-mochila'), v:1350,r:'very_rare',t:['consumable','potion','healing','magic'], hb:55, desc:'Recupera 10d4+20 HP. Brilho radiante divino.'},
   'Fogo Alquímico':       {e: _heralIco('ic-ach-indomavel'), v:50,  r:'common', t:['consumable','thrown'],             desc:'Arremesso (6m). 1d4 fogo + queima 1d4/turno.'},
-  'Frasco de Ácido':      {e: _heralIco('ic-pocao'), v:25,  r:'common', t:['consumable','thrown'],             desc:'Arremesso (6m). 2d6 dano de ácido.'},
+  'Frasco de Ácido':      {e: _heralIco('ic-poção'), v:25,  r:'common', t:['consumable','thrown'],             desc:'Arremesso (6m). 2d6 dano de ácido.'},
   'Água Benta':           {e: _heralIco('ic-ach-devoto'), v:25,  r:'common', t:['consumable','thrown','holy'],      desc:'2d6 radiante vs mortos-vivos/demônios.'},
   'Antitoxina':           {e: _heralIco('ic-mochila'), v:35,  r:'common', t:['consumable','antidote'],           desc:'Vantagem em saves contra veneno por 1h.'},
   'Erva Curativa':        {e: _heralIco('ic-druida'), v:5,   r:'common', t:['consumable','food','forage','alchemy'], hb:1, desc:'+1 HP ao acampar.'},
@@ -27378,7 +27378,7 @@ var CANON_MARKET_SHOPS = {
   mirena: {
     npc: 'Mirena Folha-Verde',
     role: 'Alquimista',
-    icon: _heralIco('ic-pocao'),
+    icon: _heralIco('ic-poção'),
     greeting: '"Poções? Venenos? Diga seu mal." — Mirena ajusta os óculos.',
     // canonical: DMG Cap.7 — poções consumíveis com efeitos D&D 5e
     items: [
@@ -28535,7 +28535,7 @@ function _squareShowObjectsPopup(p){
   var keys = Object.keys(CANON_PLAZA_OBJECTS);
   var ICONS = {
     fountain: _heralIco('ic-praca'),     // fonte → brasão da praça
-    board:    _heralIco('ic-missoes'),   // quadro de avisos
+    board:    _heralIco('ic-missões'),   // quadro de avisos
     statue:   _heralIco('ic-paladino')   // estátua de herói/cavaleiro
   };
   var items = keys.map(function(k){
@@ -28660,14 +28660,14 @@ function _squareShowBulletinPopup(p){
   // Announcement do dia
   var a = content.announce;
   items.push({
-    icon: _heralIco('ic-missoes'),
+    icon: _heralIco('ic-missões'),
     label: 'Aviso: ' + a,
     badge: '',
     _kind: 'announce', _data: a
   });
 
   _squareShowListPopup({
-    icon: _heralIco('ic-missoes'),
+    icon: _heralIco('ic-missões'),
     title: 'Quadro de Avisos',
     flavor: 'Pergaminhos pregados na parede de pedra. Conteúdo do dia.',
     items: items,
@@ -28768,7 +28768,7 @@ function _squareShowBulletinPopupLegacy(p){
     };
   });
   _squareShowListPopup({
-    icon: _heralIco('ic-missoes'),
+    icon: _heralIco('ic-missões'),
     title: 'Quadro de Avisos (legado)',
     flavor: 'Pergaminhos pregados na parede de pedra. Recompensas variam por dificuldade.',
     items: items,
@@ -29382,7 +29382,7 @@ function _tavernShowBulletin(p){
   });
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tavern_bulletin', icon: _heralIco('ic-missoes'), title: 'Quadro de Avisos',
+    stackKey: 'tavern_bulletin', icon: _heralIco('ic-missões'), title: 'Quadro de Avisos',
     flavor: '<i>Pergaminhos pregados. Recompensa: ' + reward.gold_min + '-' + reward.gold_max + ' V + ' + reward.xp + ' XP (nível ' + tier + ').</i>',
     items: items,
     onPick: function(item){
@@ -29459,7 +29459,7 @@ var TAVERN_BONUS_RUMORS = [
       "Um explorador de ruínas bate o pó das botas: 'Todo monstro que guarda território acumula espólios. Olhe em volta depois da luta — muros rachados, buracos no chão, pedras soltas. O tesouro tá perto do covil.'"
     ]
   },
-  { key: 'rumor_heal_bonus',  label: '+3 Cura de Poções',          icon: _heralIco('ic-pocao'),
+  { key: 'rumor_heal_bonus',  label: '+3 Cura de Poções',          icon: _heralIco('ic-poção'),
     variants: [
       "A aprendiz de alquimista no canto murmura: 'Quando beber uma poção de cura, segura o líquido embaixo da língua por três segundos antes de engolir. A absorção é mais rápida e o efeito se espalha melhor pelo corpo.'",
       "Grom serve uma dose dupla e sussurra: 'Uma curandeira anã me ensinou: aqueça o frasco entre as mãos antes de beber. Poção fria se perde no estômago. Morna, o sangue absorve tudo. Diferença entre viver e morrer.'",
@@ -35034,7 +35034,7 @@ function _guildShowQuests(p){
     return { icon: q.icon, label: q.title, badge: q.reward + 'V + ' + q.xp + 'XP · ' + q.diff, _q: q };
   });
   _squareShowListPopup({
-    stackKey: 'guild_quests', icon: _heralIco('ic-missoes'), title: 'Missões Disponíveis',
+    stackKey: 'guild_quests', icon: _heralIco('ic-missões'), title: 'Missões Disponíveis',
     flavor: '<i>Tavira aponta o quadro. "Escolha uma. Falha conta na sua reputação."</i>',
     items: items,
     onPick: function(item){
@@ -35954,7 +35954,7 @@ function _arenaLocked(p, tier){
 
 function _arenaShowHistory(p){
   _showInfoPopup({
-    icon: _heralIco('ic-missoes'), npc: 'Arquivo Arena', title: 'Histórico de Lutas',
+    icon: _heralIco('ic-missões'), npc: 'Arquivo Arena', title: 'Histórico de Lutas',
     desc: '<b>Suas lutas:</b><br>Vitórias: 0<br>Derrotas: 0<br>Maior streak: 0<br><br><i>Comece sua jornada nos tiers.</i>',
     onConfirm: function(){}
   });
@@ -38659,7 +38659,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-mochila'), 'Coletar informação', '5 <span class="vi vi-coin sm"></span> / tentativa', 'nav:tavern_gather'],
       [_heralIco('ic-taverna'), 'Conversar com Grom', 'fofocas', 'tavern_talk_grom'],
       [_heralIco('ic-taverna'), 'Ouvir bardos', 'inspiração', 'tavern_bard'],
-      [_heralIco('ic-missoes'), 'Quadro de avisos', '3 trabalhos', 'nav:tavern_board'],
+      [_heralIco('ic-missões'), 'Quadro de avisos', '3 trabalhos', 'nav:tavern_board'],
       [_heralIco('ic-mochila'), 'Mercenários', '4 disponíveis', 'nav:tavern_mercenaries'],
       [_heralIco('ic-taverna'), 'Mercado negro', 'apenas à noite', 'tavern_blackmarket']
     ]
@@ -38892,10 +38892,10 @@ var SUBSCREEN_DATA = {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-druida"/></svg> Mirena — Alquimista',
     flavor: '"Cuidado com os frascos! Eles são frágeis." — frascos coloridos + cheiro de ervas e enxofre.',
     buttons: [
-      [_heralIco('ic-pocao'), 'Poção de Cura', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'buy_mirena_potion'],
-      [_heralIco('ic-pocao'), 'Poção de Cura Maior', '150 <span class="vi vi-coin sm"></span> — 4d4+4 HP', 'buy_mirena_potion_great'],
-      [_heralIco('ic-pocao'), 'Poção de Cura Superior', '450 <span class="vi vi-coin sm"></span> — 8d4+8 HP', 'buy_mirena_potion_superior'],
-      [_heralIco('ic-pocao'), 'Poção de Cura Suprema', '1350 <span class="vi vi-coin sm"></span> — 10d4+20 HP radiante', 'buy_mirena_potion_suprema'],
+      [_heralIco('ic-poção'), 'Poção de Cura', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'buy_mirena_potion'],
+      [_heralIco('ic-poção'), 'Poção de Cura Maior', '150 <span class="vi vi-coin sm"></span> — 4d4+4 HP', 'buy_mirena_potion_great'],
+      [_heralIco('ic-poção'), 'Poção de Cura Superior', '450 <span class="vi vi-coin sm"></span> — 8d4+8 HP', 'buy_mirena_potion_superior'],
+      [_heralIco('ic-poção'), 'Poção de Cura Suprema', '1350 <span class="vi vi-coin sm"></span> — 10d4+20 HP radiante', 'buy_mirena_potion_suprema'],
       [_heralIco('ic-mochila'), 'Fogo Alquímico', '50 <span class="vi vi-coin sm"></span> — 1d4 fogo + queima', 'buy_mirena_alchemist_fire'],
       [_heralIco('ic-mochila'), 'Frasco de Ácido', '25 <span class="vi vi-coin sm"></span> — 2d6 ácido', 'buy_mirena_acid'],
       [_heralIco('ic-mochila'), 'Água Benta', '25 <span class="vi vi-coin sm"></span> — 2d6 radiante undead', 'buy_mirena_holy_water']
@@ -39135,8 +39135,8 @@ var SUBSCREEN_DATA = {
     header: '📋 Missões Ativas (2)',
     flavor: 'Em progresso. Volta pra entregar quando completas.',
     buttons: [
-      [_heralIco('ic-missoes'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves'],
-      [_heralIco('ic-missoes'), 'Falar com Lyana', '✅ pronta — 20 <span class="vi vi-coin sm"></span> + 40 XP', 'quest_open_lyana']
+      [_heralIco('ic-missões'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves'],
+      [_heralIco('ic-missões'), 'Falar com Lyana', '✅ pronta — 20 <span class="vi vi-coin sm"></span> + 40 XP', 'quest_open_lyana']
     ]
   },
   'quests_available': {
@@ -39196,7 +39196,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-mochila'), 'Espada longa', 'comum', 'codex_item_sword'],
       [_heralIco('ic-mochila'), 'Cota de malha', 'comum', 'codex_item_chain'],
-      [_heralIco('ic-pocao'), 'Poção de cura', 'comum', 'codex_item_potion'],
+      [_heralIco('ic-poção'), 'Poção de cura', 'comum', 'codex_item_potion'],
       [_heralIco('ic-ach-colecionador'), 'Turquesa', 'incomum', 'codex_item_turquoise'],
       [_heralIco('ic-elfo'), 'Espada Élfica', 'raro', 'codex_item_elven_blade']
     ]
@@ -39314,10 +39314,10 @@ var SUBSCREEN_DATA = {
     flavor: '"Tu sempre foste educada comigo. Aqui tens um quarto reservado."',
     npcInfo: '🟢 Afinidade 80 — feliz | 6D: Joy 0.8, Trust 0.7, Fear 0.1, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Conversa profunda', 'desbloquear história', 'rel_martha_deep_talk'],
-      [_heralIco('ic-vinculos'), 'Dar presente (10 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_martha_gift'],
-      [_heralIco('ic-vinculos'), 'Pedir favor', 'requer 70+ afinidade', 'rel_martha_favor'],
-      [_heralIco('ic-vinculos'), 'Ver memórias', 'encontros passados (12)', 'rel_martha_memories']
+      [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloquear história', 'rel_martha_deep_talk'],
+      [_heralIco('ic-vínculos'), 'Dar presente (10 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_martha_gift'],
+      [_heralIco('ic-vínculos'), 'Pedir favor', 'requer 70+ afinidade', 'rel_martha_favor'],
+      [_heralIco('ic-vínculos'), 'Ver memórias', 'encontros passados (12)', 'rel_martha_memories']
     ]
   },
   'rel_grom': {
@@ -39325,9 +39325,9 @@ var SUBSCREEN_DATA = {
     flavor: '"Mais uma rodada? A casa não pode dar de graça, sabes."',
     npcInfo: '🟡 Afinidade 60 — neutro | 6D: Joy 0.5, Trust 0.6, Fear 0.0, Surprise 0.1, Anger 0.2, Anticipation 0.3',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Conversa profunda', 'desbloq. fofocas', 'rel_grom_deep_talk'],
-      [_heralIco('ic-vinculos'), 'Beber juntos (5 <span class="vi vi-coin sm"></span>)', '+3 afinidade', 'rel_grom_drink'],
-      [_heralIco('ic-vinculos'), 'Pedir favor', 'requer 70+', 'rel_grom_favor']
+      [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloq. fofocas', 'rel_grom_deep_talk'],
+      [_heralIco('ic-vínculos'), 'Beber juntos (5 <span class="vi vi-coin sm"></span>)', '+3 afinidade', 'rel_grom_drink'],
+      [_heralIco('ic-vínculos'), 'Pedir favor', 'requer 70+', 'rel_grom_favor']
     ]
   },
   'rel_aldric': {
@@ -39335,9 +39335,9 @@ var SUBSCREEN_DATA = {
     flavor: '"Vês muito longe. Foi guerreiro um dia, eu também. Cuida-te lá fora."',
     npcInfo: '🟢 Afinidade 80 — confiante | 6D: Joy 0.6, Trust 0.9, Fear 0.0, Surprise 0.1, Anger 0.1, Anticipation 0.7',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Conversa de soldado', 'memórias de guerra', 'rel_aldric_war_talk'],
-      [_heralIco('ic-vinculos'), 'Dar presente (15 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_aldric_gift'],
-      [_heralIco('ic-vinculos'), 'Pedir info de viagem', 'rotas seguras', 'rel_aldric_route']
+      [_heralIco('ic-vínculos'), 'Conversa de soldado', 'memórias de guerra', 'rel_aldric_war_talk'],
+      [_heralIco('ic-vínculos'), 'Dar presente (15 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_aldric_gift'],
+      [_heralIco('ic-vínculos'), 'Pedir info de viagem', 'rotas seguras', 'rel_aldric_route']
     ]
   },
   'rel_elara': {
@@ -39345,8 +39345,8 @@ var SUBSCREEN_DATA = {
     flavor: '"Que a luz divina te ilumine, viajante."',
     npcInfo: '⚪ Afinidade 50 — distante | 6D: Joy 0.4, Trust 0.5, Fear 0.0, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Conversa espiritual', 'doutrinação', 'rel_elara_spirit'],
-      [_heralIco('ic-vinculos'), 'Doar ao templo (10 <span class="vi vi-coin sm"></span>)', '+4 afinidade', 'rel_elara_donate'],
+      [_heralIco('ic-vínculos'), 'Conversa espiritual', 'doutrinação', 'rel_elara_spirit'],
+      [_heralIco('ic-vínculos'), 'Doar ao templo (10 <span class="vi vi-coin sm"></span>)', '+4 afinidade', 'rel_elara_donate'],
       [_heralIco('ic-templo'), 'Pedir bênção (25 <span class="vi vi-coin sm"></span>)', 'mesmo que serviço', 'temple_bless']
     ]
   },
@@ -39355,9 +39355,9 @@ var SUBSCREEN_DATA = {
     flavor: '"Negócios acima de tudo. Sentimentos atrapalham contas."',
     npcInfo: '⚪ Afinidade 25 — frio | 6D: Joy 0.1, Trust 0.4, Fear 0.0, Surprise 0.1, Anger 0.3, Anticipation 0.6',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Investir 100 <span class="vi vi-coin sm"></span>', '+1 afinidade', 'rel_aldwin_invest'],
-      [_heralIco('ic-vinculos'), 'Discutir empréstimos', 'sem affinity gain', 'rel_aldwin_loans'],
-      [_heralIco('ic-vinculos'), 'Tentar amizade', 'requer 50+', 'rel_aldwin_friend']
+      [_heralIco('ic-vínculos'), 'Investir 100 <span class="vi vi-coin sm"></span>', '+1 afinidade', 'rel_aldwin_invest'],
+      [_heralIco('ic-vínculos'), 'Discutir empréstimos', 'sem affinity gain', 'rel_aldwin_loans'],
+      [_heralIco('ic-vínculos'), 'Tentar amizade', 'requer 50+', 'rel_aldwin_friend']
     ]
   },
   'rel_eirik': {
@@ -39365,9 +39365,9 @@ var SUBSCREEN_DATA = {
     flavor: '"Runas guardam segredos antigos. Tens fragmentos pra forjar?"',
     npcInfo: '⚪ Afinidade 40 — curioso | 6D: Joy 0.3, Trust 0.5, Fear 0.0, Surprise 0.4, Anger 0.0, Anticipation 0.8',
     buttons: [
-      [_heralIco('ic-vinculos'), 'Conversa sobre runas', 'lore arcano', 'rel_eirik_lore'],
+      [_heralIco('ic-vínculos'), 'Conversa sobre runas', 'lore arcano', 'rel_eirik_lore'],
       [_heralIco('ic-runas'), 'Forjar runa juntos', 'mesmo que craft', 'nav:runes_craft'],
-      [_heralIco('ic-vinculos'), 'Dar fragmento raro', '+10 afinidade', 'rel_eirik_gift']
+      [_heralIco('ic-vínculos'), 'Dar fragmento raro', '+10 afinidade', 'rel_eirik_gift']
     ]
   },
 
@@ -39379,7 +39379,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-mochila'), 'Rações 7 dias', '10 <span class="vi vi-coin sm"></span> — sem fome em viagem', 'prep_rations'],
       [_heralIco('ic-mochila'), 'Tochas (5)', '5 <span class="vi vi-coin sm"></span> — escuridão', 'prep_torches'],
       [_heralIco('ic-mochila'), 'Corda 15m', '10 <span class="vi vi-coin sm"></span> — escalar', 'prep_rope'],
-      [_heralIco('ic-pocao'), 'Poção emergência', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'prep_potion']
+      [_heralIco('ic-poção'), 'Poção emergência', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'prep_potion']
     ]
   },
 
@@ -39390,8 +39390,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 30 — sereno | Especialidade: cure poison',
     buttons: [
       [_heralIco('ic-templo'), 'Pedir cura de veneno', '40 <span class="vi vi-coin sm"></span> — purifica', 'temple_cure_poison'],
-      [_heralIco('ic-vinculos'), 'Conversa de doutrina', 'sabedoria', 'rel_temple_aldric_talk'],
-      [_heralIco('ic-vinculos'), 'Doação ao templo', '15 <span class="vi vi-coin sm"></span> — +affinity', 'rel_temple_aldric_donate']
+      [_heralIco('ic-vínculos'), 'Conversa de doutrina', 'sabedoria', 'rel_temple_aldric_talk'],
+      [_heralIco('ic-vínculos'), 'Doação ao templo', '15 <span class="vi vi-coin sm"></span> — +affinity', 'rel_temple_aldric_donate']
     ]
   },
   'rel_theron': {
@@ -39400,8 +39400,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 35 — entusiasmado | Especialidade: bless',
     buttons: [
       [_heralIco('ic-templo'), 'Pedir bênção', '25 <span class="vi vi-coin sm"></span> — +1d4 ataques', 'temple_bless'],
-      [_heralIco('ic-vinculos'), 'Conversa de aprendizes', 'sabedoria', 'rel_theron_talk'],
-      [_heralIco('ic-vinculos'), 'Doação', '10 <span class="vi vi-coin sm"></span> — +affinity', 'rel_theron_donate']
+      [_heralIco('ic-vínculos'), 'Conversa de aprendizes', 'sabedoria', 'rel_theron_talk'],
+      [_heralIco('ic-vínculos'), 'Doação', '10 <span class="vi vi-coin sm"></span> — +affinity', 'rel_theron_donate']
     ]
   },
   'rel_miriel': {
@@ -39410,8 +39410,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 40 — séria | Especialidade: remove curse | Min nv 5',
     buttons: [
       [_heralIco('ic-templo'), 'Remover maldição', '90 <span class="vi vi-coin sm"></span> — nv 5+', 'temple_remove_curse'],
-      [_heralIco('ic-vinculos'), 'Conversa sobre maldições', 'lore arcano', 'rel_miriel_talk'],
-      [_heralIco('ic-vinculos'), 'Doação', '25 <span class="vi vi-coin sm"></span> — +affinity', 'rel_miriel_donate']
+      [_heralIco('ic-vínculos'), 'Conversa sobre maldições', 'lore arcano', 'rel_miriel_talk'],
+      [_heralIco('ic-vínculos'), 'Doação', '25 <span class="vi vi-coin sm"></span> — +affinity', 'rel_miriel_donate']
     ]
   },
   'rel_varek': {
@@ -39420,8 +39420,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 45 — solene | Especialidade: greater restoration | Min nv 8',
     buttons: [
       [_heralIco('ic-templo'), 'Restauração maior', '450 <span class="vi vi-coin sm"></span> — nv 8+', 'temple_restoration'],
-      [_heralIco('ic-vinculos'), 'Conversa profunda', 'sermão', 'rel_varek_talk'],
-      [_heralIco('ic-vinculos'), 'Grande doação', '50 <span class="vi vi-coin sm"></span> — +affinity', 'rel_varek_donate']
+      [_heralIco('ic-vínculos'), 'Conversa profunda', 'sermão', 'rel_varek_talk'],
+      [_heralIco('ic-vínculos'), 'Grande doação', '50 <span class="vi vi-coin sm"></span> — +affinity', 'rel_varek_donate']
     ]
   },
   'rel_orenthia': {
@@ -39430,8 +39430,8 @@ var SUBSCREEN_DATA = {
     npcInfo: '⚪ Afinidade 50 — etérea | Especialidade: raise dead | Min nv 10',
     buttons: [
       [_heralIco('ic-templo'), 'Reviver os caídos', '1000 <span class="vi vi-coin sm"></span> — nv 10+', 'temple_raise_dead'],
-      [_heralIco('ic-vinculos'), 'Profecia', 'futuro incerto', 'rel_orenthia_prophecy'],
-      [_heralIco('ic-vinculos'), 'Oferenda sagrada', '100 <span class="vi vi-coin sm"></span> — +affinity', 'rel_orenthia_donate']
+      [_heralIco('ic-vínculos'), 'Profecia', 'futuro incerto', 'rel_orenthia_prophecy'],
+      [_heralIco('ic-vínculos'), 'Oferenda sagrada', '100 <span class="vi vi-coin sm"></span> — +affinity', 'rel_orenthia_donate']
     ]
   },
 
@@ -39451,8 +39451,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_wolves_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '3 lobos cinzentos', 'quest_wolves_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Tavira', 'completar missão', 'quest_wolves_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Tavira', 'completar missão', 'quest_wolves_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
   'quest_open_lyana': {
@@ -39462,8 +39462,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_lyana_locate'],
       [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
-      [_heralIco('ic-missoes'), 'Entregar carta a Lyana', 'completar missão', 'quest_lyana_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
+      [_heralIco('ic-missões'), 'Entregar carta a Lyana', 'completar missão', 'quest_lyana_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
     ]
   },
 
@@ -39477,8 +39477,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ninho de Goblins', 'quest_goblins_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
-      [_heralIco('ic-missoes'), 'Entregar provas a Helga', 'completar missão', 'quest_goblins_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
+      [_heralIco('ic-missões'), 'Entregar provas a Helga', 'completar missão', 'quest_goblins_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
     ]
   },
   'quest_open_herbs': {
@@ -39488,8 +39488,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_herbs_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
-      [_heralIco('ic-missoes'), 'Entregar ervas a Sylvi', 'completar missão', 'quest_herbs_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
+      [_heralIco('ic-missões'), 'Entregar ervas a Sylvi', 'completar missão', 'quest_herbs_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
     ]
   },
   // 2026-05-12 NOVA — quest nv 2 (preenche gap XP nv 1→2)
@@ -39500,8 +39500,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Pântano Nebuloso', 'quest_patrol_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à patrulha', 'quest_patrol_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Tomás', 'completar missão', 'quest_patrol_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Tomás', 'quest_patrol_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Tomás', 'completar missão', 'quest_patrol_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Tomás', 'quest_patrol_abandon']
     ]
   },
   // 2026-05-12 NOVA — quest nv 2 (preenche gap XP nv 1→2)
@@ -39512,8 +39512,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_rat_den_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 4 ratos-gigantes', 'quest_rat_den_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Erlan', 'completar missão', 'quest_rat_den_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Erlan', 'quest_rat_den_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Erlan', 'completar missão', 'quest_rat_den_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Erlan', 'quest_rat_den_abandon']
     ]
   },
   'quest_open_escort': {
@@ -39523,8 +39523,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Valkrest (Acampamento)', 'quest_escort_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Brael', 'completar missão', 'quest_escort_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Brael', 'completar missão', 'quest_escort_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
     ]
   },
   'quest_open_ruin': {
@@ -39534,8 +39534,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ruínas Élficas', 'quest_ruin_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
-      [_heralIco('ic-missoes'), 'Entregar achados a Maeve', 'completar missão', 'quest_ruin_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
+      [_heralIco('ic-missões'), 'Entregar achados a Maeve', 'completar missão', 'quest_ruin_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
     ]
   },
   'quest_open_bandit_lord': {
@@ -39545,8 +39545,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar missão', 'quest_bandit_lord_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Helga', 'completar missão', 'quest_bandit_lord_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
     ]
   },
   'quest_open_dragonet': {
@@ -39556,8 +39556,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Cratera Vulcânica', 'quest_dragonet_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Aldric', 'completar missão', 'quest_dragonet_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Aldric', 'completar missão', 'quest_dragonet_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
     ]
   },
   'quest_open_defend': {
@@ -39567,8 +39567,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Campos Verdes', 'quest_defend_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a região', 'quest_defend_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Helga', 'completar missão', 'quest_defend_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Helga', 'completar missão', 'quest_defend_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
     ]
   },
   // X-6.5.51BP: Missão da Adega — ativada via diálogo PADRAO_ALDRIC com Martha
@@ -39579,8 +39579,8 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_cellar_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'limpar a adega', 'quest_cellar_details'],
-      [_heralIco('ic-missoes'), 'Reportar a Martha', 'completar missão', 'quest_cellar_deliver'],
-      [_heralIco('ic-missoes'), 'Abandonar missão', '-afinidade com Martha', 'quest_cellar_abandon']
+      [_heralIco('ic-missões'), 'Reportar a Martha', 'completar missão', 'quest_cellar_deliver'],
+      [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Martha', 'quest_cellar_abandon']
     ]
   },
 
@@ -39620,7 +39620,7 @@ var ACTION_HANDLERS = {
   // Tavern drinks
   'buy_ale':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cerveja'), npc: 'Grom', item: 'Cerveja Comum',  desc: '<i>Gosto de cevada e poeira. Clássico.</i><br>💚 +1 HP', cost: 1, onApply: function(p){ _heal(p, 1, 0); }, resultMsg: '<i>Você vira a caneca. Um arroto satisfatório escapa.</i><br><br>+1 HP' }); },
   'buy_cider':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cerveja'), npc: 'Grom', item: 'Sidra de Maçã',  desc: '<i>Doce, fermentada em barris de carvalho.</i><br>💚 +2 HP', cost: 2, onApply: function(p){ _heal(p, 2, 0); }, resultMsg: '<i>Refrescante! O gosto de maçã é a melhor coisa do seu dia.</i><br><br>+2 HP' }); },
-  'buy_mead':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-pocao'), npc: 'Grom', item: 'Hidromel do Vale', desc: '<i>Mel puro e um soco no estômago.</i><br>💧 +2 MP', cost: 4, onApply: function(p){ _heal(p, 0, 2); }, resultMsg: '<i>Doce e quente. Você sente suas bochechas corarem.</i><br><br>+2 MP' }); },
+  'buy_mead':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Grom', item: 'Hidromel do Vale', desc: '<i>Mel puro e um soco no estômago.</i><br>💧 +2 MP', cost: 4, onApply: function(p){ _heal(p, 0, 2); }, resultMsg: '<i>Doce e quente. Você sente suas bochechas corarem.</i><br><br>+2 MP' }); },
   'buy_stout':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cerveja'), npc: 'Grom', item: 'Stout Anã',      desc: '<i>Escura, grossa e amarga. Para fortes.</i><br>💚 +3 HP / 💧 +1 MP', cost: 6, onApply: function(p){ _heal(p, 3, 1); }, resultMsg: '<i>É quase uma refeição. Você se sente mais resistente.</i><br><br>+3 HP / +1 MP' }); },
   // Tavern games (random win/lose)
   'play_dragon_bones':  function(p){ if (!_pay(p, 5)) return; var w = Math.random() < 0.45; if (w) { p.gold += 12; vToast('🎲 Ganhou! +12 Valdoritas líquido'); } else vToast('🎲 Perdeu. -5 Valdoritas'); refreshHud(); },
@@ -39741,12 +39741,12 @@ var ACTION_HANDLERS = {
   'buy_thorne_greaves':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-ac'), npc: 'Thorne — Ferreiro', item: 'Grevas de Ferro',     desc: '<i>Slot Pernas. +2 CA. Sem penalidades.</i>',                                                                cost: 45 }); },
   'buy_thorne_boots':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-ach-andarilho'), npc: 'Thorne — Ferreiro', item: 'Botas Pesadas',       desc: '<i>Slot Pés. +1 CA. Vantagem contra ser empurrado.</i>',                                                     cost: 35 }); },
   // Market — Mirena (alquimista) — canonical: market_npcs.py FIXED_NPCS['alchemist'] (7 itens)
-  'buy_mirena_potion':           function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-pocao'), npc: 'Mirena — Alquimista', item: 'Poção de Cura',           desc: '<i>2d4+2 HP. Ação Bônus pra beber. Líquido carmesim.</i>',     cost: 50,   extraComplication: true, onApply: function(p, ctx){ var roll = 2 + Math.floor(Math.random()*7) + Math.floor(Math.random()*4); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>Mirena entrega a poção.</i><br><br>+' + ctx.heal + ' HP'; } }); },
+  'buy_mirena_potion':           function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Mirena — Alquimista', item: 'Poção de Cura',           desc: '<i>2d4+2 HP. Ação Bônus pra beber. Líquido carmesim.</i>',     cost: 50,   extraComplication: true, onApply: function(p, ctx){ var roll = 2 + Math.floor(Math.random()*7) + Math.floor(Math.random()*4); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>Mirena entrega a poção.</i><br><br>+' + ctx.heal + ' HP'; } }); },
   'buy_mirena_potion_great':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cura'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Maior',     desc: '<i>4d4+4 HP. Líquido carmesim brilhante.</i>',                 cost: 150,  extraComplication: true, onApply: function(p, ctx){ var roll = 4 + Math.floor(Math.random()*13) + Math.floor(Math.random()*4); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>Mirena verifica o frasco. "Esta é especial."</i><br><br>+' + ctx.heal + ' HP'; } }); },
   'buy_mirena_potion_superior':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cura'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Superior',  desc: '<i>8d4+8 HP. Líquido dourado e luminoso.</i>',                 cost: 450,  extraComplication: true, onApply: function(p, ctx){ var roll = 8 + Math.floor(Math.random()*25) + Math.floor(Math.random()*8); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>O líquido dourado toca seus lábios. Calor divino.</i><br><br>+' + ctx.heal + ' HP'; } }); },
   'buy_mirena_potion_suprema':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-cha'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Suprema',   desc: '<i>10d4+20 HP. Brilho radiante divino.</i>',                   cost: 1350, extraComplication: true, onApply: function(p, ctx){ var roll = 20 + Math.floor(Math.random()*31); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>O frasco brilha como um pequeno sol. Você bebe e renasce.</i><br><br>+' + ctx.heal + ' HP' ; } }); },
   'buy_mirena_alchemist_fire':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-tochas'), npc: 'Mirena — Alquimista', item: 'Fogo Alquímico',          desc: '<i>Arremesso (6m). 1d4 fogo + Queimando (1d4 fogo/turno).</i>', cost: 50, extraComplication: true }); },
-  'buy_mirena_acid':             function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-pocao'), npc: 'Mirena — Alquimista', item: 'Frasco de Ácido',         desc: '<i>Arremesso (6m). 2d6 ácido (PHB p.148).</i>',                cost: 25,  extraComplication: true }); },
+  'buy_mirena_acid':             function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Mirena — Alquimista', item: 'Frasco de Ácido',         desc: '<i>Arremesso (6m). 2d6 ácido (PHB p.148).</i>',                cost: 25,  extraComplication: true }); },
   'buy_mirena_holy_water':       function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-mp'), npc: 'Mirena — Alquimista', item: 'Água Benta',              desc: '<i>Arremesso (6m). 2d6 radiante vs mortos-vivos/demônios.</i>',cost: 25,  extraComplication: true }); },
   // Market — Mestre Corvus (cartógrafo) — canonical: cartographer_data.py
   // Tier 1 (compra direta): plains, forest, desert
@@ -41824,14 +41824,14 @@ SUBSCREEN_DATA['city_more'] = {
     [_heralIco('ic-mochila'), 'Praça Central', 'NPCs + eventos', 'nav:square'],
     [_heralIco('ic-mochila'), 'Banco de Eldoria', 'Cofre, invest, empréstimo', 'nav:bank'],
     [_heralIco('ic-mochila'), 'Portões', 'Sair pra aventura', 'nav:gates'],
-    [_heralIco('ic-missoes'), 'Quadro de Missões', 'Ativas, disponíveis, histórico', 'nav:quests'],
+    [_heralIco('ic-missões'), 'Quadro de Missões', 'Ativas, disponíveis, histórico', 'nav:quests'],
     [_heralIco('ic-compendio'), 'Compêndio', 'Bestiário, locais, itens', 'nav:codex'],
     [_heralIco('ic-mochila'), 'Desafio Diário', 'Covil dos Lobos hoje', 'nav:daily_challenge'],
     [_heralIco('ic-oficina'), 'Oficina', 'Crafting + gather', 'nav:workshop'],
     [_heralIco('ic-mochila'), 'Escriba Rúnico', 'Forjar runas', 'nav:runes'],
     [_heralIco('ic-festival'), 'Festival da Colheita', '3 minigames', 'nav:festival'],
     [_heralIco('ic-mochila'), 'Vínculos', '10 NPCs (afinidade dinâmica)', 'nav:relations'],
-    [_heralIco('ic-missoes'), 'Quadro de Trocas', 'P2P trade · nv 3+ canonical', 'nav:trade_board'],
+    [_heralIco('ic-missões'), 'Quadro de Trocas', 'P2P trade · nv 3+ canonical', 'nav:trade_board'],
     [_heralIco('ic-mochila'), 'Beco Sombrio', 'Mercado das sombras (Vulto)', 'nav:shadow_alley'],
     [_heralIco('ic-mochila'), 'Diário de Viajantes', 'NPCs ambulantes encontrados', 'nav:travelers'],
     [_heralIco('ic-mochila'), 'Mural dos Aventureiros', 'Rankings + títulos + firsts', 'nav:heroes_wall']
@@ -49064,8 +49064,8 @@ var _LOC_MAP = (function(){
         'praca':            { ico: S('ic-praca'),    nm: 'Praca' },
         'bank':             { ico: S('ic-banco'),    nm: 'Banco' },
         'banco':            { ico: S('ic-banco'),    nm: 'Banco' },
-        'action_quests':    { ico: S('ic-missoes'),  nm: 'Missoes' },
-        'quests':           { ico: S('ic-missoes'),  nm: 'Missoes' },
+        'action_quests':    { ico: S('ic-missões'),  nm: 'Missões' },
+        'quests':           { ico: S('ic-missões'),  nm: 'Missões' },
         'daily_challenge':  { ico: S('ic-desafio'),  nm: 'Desafio' },
         'action_codex':     { ico: S('ic-compendio'),nm: 'Compendio' },
         'codex':            { ico: S('ic-compendio'),nm: 'Compendio' },
@@ -49073,7 +49073,7 @@ var _LOC_MAP = (function(){
         'league_':          { ico: S('ic-desafio'),  nm: 'Liga' },
         'manage_':          { ico: S('ic-grupo'),    nm: 'Contas' },
         'open_workshop':    { ico: S('ic-oficina'),  nm: 'Oficina' },
-        'rel_':             { ico: S('ic-vinculos'), nm: 'Vinculos' },
+        'rel_':             { ico: S('ic-vínculos'), nm: 'Vínculos' },
         'rune_scribe':      { ico: S('ic-runas'),    nm: 'Runas' },
         'shadow_alley':     { ico: S('ic-portoes'),  nm: 'Beco' },
         'workshop_':        { ico: S('ic-oficina'),  nm: 'Oficina' },

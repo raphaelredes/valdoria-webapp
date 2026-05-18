@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T14:08:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T14:18:24Z — do not edit directly, edit source -->
 
 
 <!--
@@ -3499,7 +3499,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   position: relative;
 }
 /* X-6.5.51AB (2026-04-26): pills sem borda/fundo — user feedback: "Ação,
-   Bonus e Reacao continuam com um contorno verde, remova, deixe somente
+   Bonus e Reação continuam com um contorno verde, remova, deixe somente
    os icones e palavras visiveis". Sem border, sem background, sem box —
    apenas glyph + label + state flutuando na barra. */
 .dnd-res-pill {
@@ -4743,7 +4743,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .combat-msg-card.pre-npc .combat-msg-text { color: #e06040; text-shadow: 0 0 12px rgba(224,96,64,.5), 0 1px 3px rgba(0,0,0,.9); }
 
 /* X-6.5.51AB (2026-04-26): popup de confirmacao do "Encerrar Turno".
-   Lista superficialmente acoes ainda disponíveis e pede confirmacao.
+   Lista superficialmente ações ainda disponíveis e pede confirmacao.
    z-index 99500 — acima do action-sheet (92100) e action-dock (92200).
    User reportou que popup ficava ATRAS do menu Agir (z-index 9999 era baixo). */
 .end-turn-confirm-overlay {
@@ -5099,7 +5099,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 /* Encerrar Turno destacado em dourado (ação importante de fim de turno).
    X-6.5.51AB (2026-04-26): SEMPRE visivel (era display:none + .visible toggle).
    Substituiu o "Passar turno" — agora cobre ambos cenarios: fim normal de
-   turno (com acao gasta) E pass turno sem agir. */
+   turno (com ação gasta) E pass turno sem agir. */
 .sim-action-sheet .end-turn-btn {
   display: block;
   margin-top: var(--v-space-md, 10px);
@@ -15809,7 +15809,7 @@ function buildTurnQueue(s) {
         if (entrySlug) cls += ' ' + entrySlug;
         if (origIdx === s.active_idx && (s.ph === 'active')) cls += ' active';
         /* Na fase ativa, os nao-ativos viram previsao em cinza (forecast)
-           — serao influenciaveis por condicoes/habilidades no futuro */
+           — serao influenciaveis por condições/habilidades no futuro */
         else if (s.ph === 'active') cls += ' forecast';
         if (entry.isDead || (entry.t === 'e' && !entry.alive)) cls += ' dead';
         else if ((entry.t === 'p' || entry.t === 'a') && entry.hp <= 0 && entry.dying && !entry.stable) cls += ' tl-dying';
@@ -16044,7 +16044,7 @@ var ENEMY_PNG_AVAILABLE = {
    Source: scripts/generate_skill_icons.py + logs/inventory_skills.json.
    Keyed pela versão slugificada do nome (ex: "Bola de Fogo" → "bola-de-fogo"). */
 var SKILL_PNG_AVAILABLE = {
-    'acao-ardilosa': 1, 'agarrar': 1, 'arma-espiritual': 1, 'arma-magica': 1, 'armadura-de-agathys': 1, 'ataque-assassino': 1,
+    'ação-ardilosa': 1, 'agarrar': 1, 'arma-espiritual': 1, 'arma-magica': 1, 'armadura-de-agathys': 1, 'ataque-assassino': 1,
     'ataque-brutal': 1, 'ataque-furtivo': 1, 'ataque-poderoso': 1, 'aura-de-protecao': 1, 'aura-de-vitalidade': 1, 'auto': 1,
     'banir': 1, 'bencao': 1, 'bola-de-fogo': 1, 'bruxaria': 1, 'calmar-emocoes': 1, 'cancao-de-cura': 1,
     'cegueira': 1, 'chama-sagrada': 1, 'chicote-espinhoso': 1, 'choque-eletrico': 1, 'chuva-de-espinhos': 1, 'cone-de-frio': 1,
@@ -16055,7 +16055,7 @@ var SKILL_PNG_AVAILABLE = {
     'flecha-de-acido': 1, 'forma-selvagem': 1, 'furia': 1, 'furia-devastadora': 1, 'golpe-arcano': 1, 'golpe-atordoante': 1,
     'golpe-de-armadilha': 1, 'golpe-divino': 1, 'golpe-flamejante': 1, 'golpe-fulminante': 1, 'golpe-guidado': 1, 'golpe-irado': 1,
     'golpe-marcante': 1, 'golpe-mortal': 1, 'golpe-preciso': 1, 'golpe-trovejante': 1, 'graxa': 1, 'grito-de-guerra': 1,
-    'hipnose': 1, 'imobilizar-pessoa': 1, 'infligir-ferimentos': 1, 'inspiracao': 1, 'investida': 1, 'investida-selvagem': 1,
+    'hipnose': 1, 'imobilizar-pessoa': 1, 'infligir-ferimentos': 1, 'inspiração': 1, 'investida': 1, 'investida-selvagem': 1,
     'invisibilidade': 1, 'invisibilidade-maior': 1, 'invocar-lobo': 1, 'invocar-raio': 1, 'juramento-de-inimizade': 1, 'lamina-sombria': 1,
     'lentidao': 1, 'lobo-espiritual': 1, 'maldicao': 1, 'maldicao-da-fraqueza': 1, 'mao-arcana': 1, 'maos-flamejantes': 1,
     'marca-do-cacador': 1, 'massa-de-cura': 1, 'medo': 1, 'metamagia-acelerar': 1, 'metamagia-duplicar': 1, 'misseis-magicos': 1,
@@ -16065,7 +16065,7 @@ var SKILL_PNG_AVAILABLE = {
     'produzir-chama': 1, 'protecao-contra-energia': 1, 'protecao-divina': 1, 'raio-caotico': 1, 'raio-de-enfraquecimento': 1, 'raio-de-fogo': 1,
     'raio-doentio': 1, 'raio-gelido': 1, 'raio-guiador': 1, 'raio-relampejante': 1, 'rajada-de-flechas': 1, 'rajada-de-golpes': 1,
     'recuperacao-rapida': 1, 'reflexos-evasivos': 1, 'relampago': 1, 'repreensao-divina': 1, 'repreensao-infernal': 1, 'rugido-feroz': 1,
-    'santuario': 1, 'segundo-folego': 1, 'sono': 1, 'surto-de-acao': 1, 'sussurros-dissonantes': 1, 'temerario': 1,
+    'santuario': 1, 'segundo-folego': 1, 'sono': 1, 'surto-de-ação': 1, 'sussurros-dissonantes': 1, 'temerario': 1,
     'tiro-certeiro': 1, 'tiro-preciso': 1, 'transmutar-em-pedra': 1
 };
 function _skillIconHTML(sk) {
@@ -18517,7 +18517,7 @@ function render(s) {
                    Familiar) RAW: "Your familiar can't attack". Sprite (Bardo Magical
                    Secrets) idem — passive summon que nao agride. Botao era confuso /
                    inutil. Beast Master Wolf usa botao separado "Comandar Companheiro"
-                   (que CONSOME acao principal — fluxo distinto). */
+                   (que CONSOME ação principal — fluxo distinto). */
                 html += '<div class="action-btns-grid action-btns-grid--bonus" id="bonus-action-grid"></div>';
                 /* F1 (escolha autor 2026-04-19) — PHB-fiel Beast Master:
                    botão "Comandar Companheiro" CONSOME a ação principal do Patrulheiro
@@ -19481,9 +19481,9 @@ function onBtnClick(ev) {
         } else if (act === 'end-turn') {
             /* "Encerrar turno" — equivale a pass no server.
                X-6.5.51AB (2026-04-26): popup de confirmacao SEMPRE aparece,
-               listando acoes ainda disponíveis (se houver). User feedback:
+               listando ações ainda disponíveis (se houver). User feedback:
                "ao clicar em encerrar turno sempre mostre um popup que verifica
-               e informa ao jogador caso ainda tenha possiveis acoes disponíveis". */
+               e informa ao jogador caso ainda tenha possiveis ações disponíveis". */
             _showEndTurnConfirm(currentState, function () {
                 _actionSheetOpen = false;
                 render(currentState);
@@ -19918,7 +19918,7 @@ function onBtnClick(ev) {
         var pEt = sEt.order[sEt.p_idx];
         if (!pEt) return;
         /* X-6.5.51AB (2026-04-26): popup de confirmacao SEMPRE aparece. Lista
-           acoes ainda disponíveis (Acao Principal / Bonus). Confirmar segue o
+           ações ainda disponíveis (Ação Principal / Bonus). Confirmar segue o
            flow original (passa turno sem agir vs encerra normalmente). */
         _showEndTurnConfirm(sEt, function () {
             if (!pEt.actionSpent && !pEt.bonusActionSpent) {
@@ -24230,9 +24230,9 @@ function attachMagicMissileOrbit(container, count, darts, variant) {
 }
 
 /* X-6.5.51AB (2026-04-26): popup de confirmacao do "Encerrar Turno".
-   Detecta acoes ainda disponíveis no jogador (action / bonus action / skills
+   Detecta ações ainda disponíveis no jogador (action / bonus action / skills
    utilizaveis / skill check de Mochila/Esquivar/Fugir) e lista superficialmente.
-   Sempre aparece (mesmo sem acoes pendentes — confirma fim de turno). */
+   Sempre aparece (mesmo sem ações pendentes — confirma fim de turno). */
 function _showEndTurnConfirm(s, onConfirm) {
     if (!s || !onConfirm) return;
     var p = s.order[s.p_idx];
@@ -27326,7 +27326,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                     c.initRolling = false;
                     c.initPending = false;
                 }
-                s.log.push(c.n + ' chegou ao campo (rolou iniciativa: ' + c.init + ') — entrou em acao!');
+                s.log.push(c.n + ' chegou ao campo (rolou iniciativa: ' + c.init + ') — entrou em ação!');
                 try {
                     var elArr = document.querySelector('[data-unit-id="' + (c.id || ('e_' + s.active_idx)) + '"]');
                     if (elArr && typeof spawnSkillImpactLabel === 'function') {
