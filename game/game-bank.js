@@ -24,13 +24,13 @@ function renderBankHub(container, data) {
     root.appendChild(greet);
   }
 
-  /* Balance cards — AAA: usa heraldic SVG (ic-bolsa / ic-cofre)
-     2026-05-18: removido emoji 💰 e 🔒 (regra Valdorita coin canonical) */
+  /* Balance cards — AAA: usa PNG AI-generated (bnk-bolsa.png + bnk-cofre.png)
+     2026-05-18: substituido SVG heraldic por imagens AAA via OpenAI gpt-image-2 */
   var balances = vCity.el('div', 'bnk-balance-row');
 
   var purse = vCity.el('div', 'bnk-balance-card bnk-card-purse');
   var purseIcon = vCity.el('div', 'bnk-balance-icon');
-  purseIcon.innerHTML = '<svg viewBox="0 0 120 120" style="width:40px;height:40px;color:#dbb668;display:block;margin:0 auto"><use href="#ic-bolsa"/></svg>';
+  purseIcon.innerHTML = '<img src="../shared/img/bank/bnk-bolsa.png" alt="Bolsa" loading="lazy" />';
   purse.appendChild(purseIcon);
   var purseLbl = vCity.el('div', 'bnk-balance-label');
   purseLbl.textContent = 'BOLSA';
@@ -43,8 +43,7 @@ function renderBankHub(container, data) {
 
   var safe = vCity.el('div', 'bnk-balance-card bnk-card-safe');
   var safeIcon = vCity.el('div', 'bnk-balance-icon');
-  /* ic-cofre se existe no sprite; fallback graceful via SVG empty */
-  safeIcon.innerHTML = '<svg viewBox="0 0 120 120" style="width:40px;height:40px;color:#dbb668;display:block;margin:0 auto"><use href="#ic-cofre"/></svg>';
+  safeIcon.innerHTML = '<img src="../shared/img/bank/bnk-cofre.png" alt="Cofre" loading="lazy" />';
   safe.appendChild(safeIcon);
   var safeLbl = vCity.el('div', 'bnk-balance-label');
   safeLbl.textContent = 'COFRE';

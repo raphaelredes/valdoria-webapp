@@ -3664,6 +3664,17 @@ body.perf-lite .cloc-card {
   pointer-events: none;
 }
 .vc-service-icon { font-size: var(--v-font-icon, 20px); line-height: 1; } /* HARDCODED: icon size, no exact token */
+/* 2026-05-18 AAA: merchant portraits PNG (gpt-image-2 generated) */
+.vc-service-icon img.merchant-portrait {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--v-gold-40);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 8px var(--v-gold-15);
+  display: block;
+  margin: 0 auto;
+}
 .vc-service-name {
   font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);
@@ -14222,10 +14233,17 @@ function _marketShowAbsentRumor(p, merchant, state){
 // _heralIco() definido em TEMPLE_NPCS_DB acima. Mapping:
 //   ⚔️ Ferreiro → ic-oficina (anvil+martelo) · 🧪 Alquimista → ic-pocao
 //   💎 Joalheira → ic-ach-colecionador · 📜 Cartógrafo → ic-cartografia · ⛺ Seleiro → ic-mochila
+// 2026-05-18 AAA UPGRADE: usa PNG portraits AI-generated (gpt-image-2)
+// em vez de heraldic SVG generic. Path: /shared/img/merchants/{id}.png
+// (5 portraits: thorne, mirena, velithra, corvus, bjorn).
+function _merchantPortrait(id){
+  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + id + '" class="merchant-portrait" loading="lazy" />';
+}
+
 var MARKET_MERCHANTS = [
   {
     id: 'thorne',
-    icon: _heralIco('ic-oficina'),
+    icon: _merchantPortrait('thorne'),
     name: 'Thorne Forja-de-Ferro',
     role: 'Ferreiro',
     desc: 'Anão musculoso, avental queimado, martelo sempre na mão.',
@@ -14243,7 +14261,7 @@ var MARKET_MERCHANTS = [
   },
   {
     id: 'mirena',
-    icon: _heralIco('ic-poção'),
+    icon: _merchantPortrait('mirena'),
     name: 'Mirena Folha-Verde',
     role: 'Alquimista',
     desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço.',
@@ -14260,7 +14278,7 @@ var MARKET_MERCHANTS = [
   },
   {
     id: 'velithra',
-    icon: _heralIco('ic-ach-colecionador'),
+    icon: _merchantPortrait('velithra'),
     name: 'Velithra Olho-de-Cristal',
     role: 'Joalheira',
     desc: 'Elfa de meia-idade, dedos cobertos de anéis, voz suave.',
@@ -14277,7 +14295,7 @@ var MARKET_MERCHANTS = [
   },
   {
     id: 'corvus',
-    icon: _heralIco('ic-cartografia'),
+    icon: _merchantPortrait('corvus'),
     name: 'Corvus Mapa-Escuro',
     role: 'Cartógrafo',
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta.',
@@ -14294,7 +14312,7 @@ var MARKET_MERCHANTS = [
   },
   {
     id: 'tentmaker',
-    icon: _heralIco('ic-mochila'),
+    icon: _merchantPortrait('bjorn'),
     name: 'Bjorn',                     // canonical: market_npcs.py L131 ('tentmaker', 'Bjorn')
     role: 'Seleiro e Artesão',          // canonical: market_npcs.py L131
     desc: 'Equipamentos para sobreviver nas terras selvagens! Mochilas reforçadas, cordas que aguentam três aventureiros pendurados, e botas que ele mesmo costura.',

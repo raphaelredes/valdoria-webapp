@@ -67,8 +67,17 @@
 .bnk-balance-icon {
   font-size: 0;
   line-height: 1;
-  margin-bottom: 2px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px var(--v-gold-30));
+  display: flex;
+  justify-content: center;
+}
+/* 2026-05-18: PNG AAA replaces SVG; need explicit sizing */
+.bnk-balance-icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  display: block;
 }
 
 .bnk-balance-label {
