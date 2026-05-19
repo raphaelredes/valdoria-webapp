@@ -35979,6 +35979,10 @@ function _shopConfirmBuy(name, npcId){
 //
 // Categorias só roteiam pro especialista correto (UI), preço final segue regras canonical.
 var MARKET_SPECIALIST_RULES = [
+  // === ORDEM CRITICA (2026-05-19): regras MAIS especificas ANTES de regras
+  // amplas como `consumable`. Sem isso, Pergaminho Magico (tags consumable
+  // +magic+scroll) ia pra Mirena alchemy em vez de Corvus scroll. Mesmo bug
+  // com Racoes de 7 dias (consumable+food+camping) -> Bjorn.
   // === Garlen (cambista) — trade goods têm preço estável (100% PHB) ===
   // trade_good: base_pct 1.00 via FullValueCategory, specBonus 0 (sem premium).
   { tags: ['trade_good'],                 npc: 'garlen',   specBonus: 0,    cat: 'trade_good' },
@@ -35986,16 +35990,19 @@ var MARKET_SPECIALIST_RULES = [
   // gem/jewelry: base_pct 1.00 (PHB regra), specialist Velithra recebe +5% bonus.
   { tags: ['gem'],                        npc: 'velithra', specBonus: 0.05, cat: 'gem' },
   { tags: ['jewelry', 'accessory'],       npc: 'velithra', specBonus: 0.05, cat: 'jewelry' },
-  // === Mirena (alquimista) ===
+  // === Mirena (alquimista) — poções/cura primeiro (mais específico) ===
   { tags: ['potion', 'healing'],          npc: 'mirena',   specBonus: 0.15, cat: 'potion' },
-  { tags: ['consumable', 'alchemy'],      npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
   { tags: ['antidote'],                   npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
-  // === Corvus (cartografo) ===
+  // === Corvus (cartografo) — scroll/map ANTES de consumable amplo ===
   { tags: ['map'],                        npc: 'corvus',   specBonus: 0.15, cat: 'map' },
   { tags: ['scroll'],                     npc: 'corvus',   specBonus: 0.10, cat: 'scroll' },
-  // === Bjorn (seleiro) ===
+  // === Bjorn (seleiro) — camping/food ANTES de consumable amplo ===
   { tags: ['camping'],                    npc: 'bjorn',    specBonus: 0.10, cat: 'camping' },
+  { tags: ['food'],                       npc: 'bjorn',    specBonus: 0.10, cat: 'camping' },
   { tags: ['leather', 'monster_part'],    npc: 'bjorn',    specBonus: 0.05, cat: 'material' },
+  // === Mirena alquimia genérico — só DEPOIS de scroll/camping (não captura tudo) ===
+  { tags: ['alchemy'],                    npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
+  { tags: ['consumable'],                 npc: 'mirena',   specBonus: 0.05, cat: 'alchemy' },
   // === Thorne (ferreiro) — armas, armaduras ===
   { tags: ['weapon', 'martial_weapon'],   npc: 'thorne',   specBonus: 0.15, cat: 'weapon' },
   { tags: ['simple_weapon'],              npc: 'thorne',   specBonus: 0.10, cat: 'weapon' },
