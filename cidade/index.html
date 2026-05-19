@@ -35423,14 +35423,39 @@ function _showShopItemDetail(name, npcId){
   if (p) statLines.push('<b>Sua bolsa:</b> ' + p.gold + ' <span class="vi vi-coin sm"></span>');
   // Build tags
   var tagHtml = (it.t || []).map(function(t){ return '<span class="inv-detail-tag">' + getTagLabel(t) + '</span>'; }).join('');
-  // Actions
-  var actionsHtml = '<div class="inv-detail-actions">';
+  // X-6.5.51CD (2026-05-18): D&D 5e skill checks AAA — Pechinchar/Intimidar/Avaliar
+  // Negotiation state per-item por sessão (1 tentativa de skill)
+  window._marketNegotiations = window._marketNegotiations || {};
+  var negKey = (npcId || 'shop') + ':' + name;
+  var negData = window._marketNegotiations[negKey];
+  var alreadyNegotiated = !!(negData && negData.attempted);
+  var negNote = '';
+  if (alreadyNegotiated){
+    var nr = negData.result;
+    if (nr && typeof nr === 'object' && nr.label){
+      var sign = (nr.priceDelta < 0) ? '↓' : (nr.priceDelta > 0 ? '↑' : '=');
+      var color = (nr.priceDelta < 0) ? 'var(--v-rarity-uncommon,#4caf50)' : (nr.priceDelta > 0 ? 'var(--v-danger,#c44)' : 'var(--v-text-dim,#a09484)');
+      negNote = '<div style="background:rgba(196,149,58,0.08);border:1px solid rgba(196,149,58,0.35);border-radius:4px;padding:6px 8px;margin-top:8px;color:' + color + ';font-size:11px;line-height:1.4;">'
+              + '<b>' + sign + ' ' + nr.label + '</b> · ' + Math.round(Math.abs(nr.priceDelta) * 100) + '% no preço'
+              + '</div>';
+    }
+  }
+
+  // Actions — 4 botões: Comprar / 🎲 Pechinchar / 💪 Intimidar / Fechar
+  var actionsHtml = '<div class="inv-detail-actions" style="display:flex;flex-direction:column;gap:6px;">';
   if (canAfford){
-    actionsHtml += '<button class="inv-detail-btn" id="shop-buy-btn">🛒 Comprar</button>';
+    actionsHtml += '<button class="inv-detail-btn" id="shop-buy-btn" style="background:linear-gradient(180deg,rgba(196,149,58,0.30),rgba(74,56,40,0.40));">🛒 Comprar</button>';
   } else {
     actionsHtml += '<button class="inv-detail-btn" disabled style="opacity:0.4;cursor:not-allowed">Sem ouro</button>';
   }
-  actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close">Fechar</button>';
+  // Negociação D&D 5e — só disponível se não tentou ainda
+  if (!alreadyNegotiated){
+    actionsHtml += '<div style="display:flex;gap:6px;">';
+    actionsHtml += '<button class="inv-detail-btn" id="shop-haggle-btn" style="flex:1;font-size:11px;">🎲 Pechinchar <span style="opacity:0.7;">(Persuasão DC ' + _dndHaggleDC(name) + ')</span></button>';
+    actionsHtml += '<button class="inv-detail-btn" id="shop-intimidate-btn" style="flex:1;font-size:11px;background:linear-gradient(180deg,rgba(196,40,30,0.18),rgba(74,30,20,0.40));border-color:rgba(196,40,30,0.45);">💪 Intimidar <span style="opacity:0.7;">(DC ' + (_dndHaggleDC(name) + 2) + ')</span></button>';
+    actionsHtml += '</div>';
+  }
+  actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close" style="font-size:11px;opacity:0.75;">Fechar</button>';
   actionsHtml += '</div>';
   // 2026-05-18 v2: usa _resolveItemIcon (strip de artigos PT-BR) mesma
   // chain do shop card. Tamanho maior (64px) pro detalhe do item.
@@ -35444,6 +35469,7 @@ function _showShopItemDetail(name, npcId){
     + '<div class="inv-detail-stats">' + statLines.join('<br>') + '</div>'
     + (it.desc ? '<div class="inv-detail-divider"></div><div class="inv-detail-stats" style="font-style:italic">' + it.desc + '</div>' : '')
     + (tagHtml ? '<div class="inv-detail-tags">' + tagHtml + '</div>' : '')
+    + negNote
     + actionsHtml;
   ov.classList.add('active');
   // Wire actions
@@ -35455,6 +35481,70 @@ function _showShopItemDetail(name, npcId){
     ov.classList.remove('active');
     _shopConfirmBuy(name, npcId);
   });
+  // X-6.5.51CD (2026-05-18): wiring dos botões D&D 5e skill checks
+  var haggleBtn = document.getElementById('shop-haggle-btn');
+  if (haggleBtn) haggleBtn.addEventListener('click', function(){
+    var res = _marketAttemptHaggle(name, npcId, p, 'persuasion');
+    if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
+    _marketShowHaggleResult(name, npcId, res, function(){
+      // re-render detail card pra mostrar negNote atualizado
+      _showShopItemDetail(name, npcId);
+    });
+  });
+  var intimBtn = document.getElementById('shop-intimidate-btn');
+  if (intimBtn) intimBtn.addEventListener('click', function(){
+    var res = _marketAttemptHaggle(name, npcId, p, 'intimidation');
+    if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
+    _marketShowHaggleResult(name, npcId, res, function(){
+      _showShopItemDetail(name, npcId);
+    });
+  });
+}
+
+// Mostra o resultado do skill check com dice 3D + narrativa PADRAO_ALDRIC
+function _marketShowHaggleResult(itemName, npcKey, res, onContinue){
+  var shop = CANON_MARKET_SHOPS[npcKey];
+  var npc = shop ? shop.npc : 'Mercador';
+  var icon = shop ? shop.icon : _heralIco('ic-bolsa');
+  var roll = res.roll;
+  if (!roll){
+    // Caso intimidação ofensiva contra Aliado (sem roll)
+    _showServiceResultPopup({
+      icon: icon, npc: npc,
+      narrative: res.narrative + '<br><br><i>Reputação: ' + (res.repDelta < 0 ? res.repDelta : '+'+res.repDelta) + '</i>',
+      deltas: [], onContinue: onContinue
+    });
+    return;
+  }
+  var rollColor = res.excellent ? '#7cdb7c' : (res.success ? '#c4953a' : (res.fumble ? '#c44020' : '#a09484'));
+  var rollHtml = '<div style="display:flex;align-items:center;gap:8px;margin:6px 0;justify-content:center;">'
+    + '<span style="font-size:13px;color:#a09484;">' + (res.mode === 'persuasion' ? '💬 Persuasão' : '💪 Intimidação') + ' d20:</span>'
+    + '<span style="font-family:Cinzel,serif;font-size:18px;color:#c4953a;font-weight:700;">' + roll.roll + '</span>'
+    + '<span style="font-size:12px;color:#a09484;">' + (roll.bonus >= 0 ? '+' : '') + roll.bonus + (roll.proficient ? ' (prof.)' : '') + ' = </span>'
+    + '<span style="font-family:Cinzel,serif;font-size:22px;color:' + rollColor + ';font-weight:700;">' + roll.total + '</span>'
+    + '<span style="font-size:11px;color:#a09484;">vs DC ' + res.dc + '</span>'
+    + '</div>'
+    + '<div style="text-align:center;font-family:Cinzel,serif;font-size:12px;color:' + rollColor + ';letter-spacing:2px;margin-bottom:4px;">'
+    + '◆ ' + res.label.toUpperCase() + ' ◆</div>';
+  var priceLine = '';
+  if (res.priceDelta !== 0){
+    var pct = Math.round(Math.abs(res.priceDelta) * 100);
+    var sign = res.priceDelta < 0 ? '−' : '+';
+    var color = res.priceDelta < 0 ? '#7cdb7c' : '#c44020';
+    priceLine = '<div style="margin-top:6px;text-align:center;color:' + color + ';font-weight:600;">'
+              + sign + pct + '% no preço de compra</div>';
+  }
+  var repLine = '';
+  if (res.repDelta){
+    var rsign = res.repDelta < 0 ? '' : '+';
+    var rcolor = res.repDelta < 0 ? '#c44020' : '#7cdb7c';
+    repLine = '<div style="text-align:center;color:' + rcolor + ';font-size:11px;margin-top:2px;">Reputação: ' + rsign + res.repDelta + '</div>';
+  }
+  _showServiceResultPopup({
+    icon: icon, npc: npc,
+    narrative: rollHtml + res.narrative + priceLine + repLine,
+    deltas: [], onContinue: onContinue
+  });
 }
 
 function _shopConfirmBuy(name, npcId){
@@ -35462,21 +35552,31 @@ function _shopConfirmBuy(name, npcId){
   var p = window.CITY_MOCK_PLAYER;
   var shop = CANON_MARKET_SHOPS[npcId];
   if (!p || !it || !shop) return;
-  // X-6.5.51CC (2026-05-18): D&D 5e canonical pricing — CHA mod + rep tier.
-  // Backward-compat: haggle flag-based ainda funciona (legacy), mas agora
-  // o sistema novo aplica CHA + reputação por cima. Persuasão check opcional
-  // via botão "🎲 Pechinchar" (TODO Tier 2 — não bloqueante).
+  // X-6.5.51CC/CD (2026-05-18): D&D 5e canonical pricing — CHA + rep + skill checks
   var basePrice = it.v || 0;
   var finalPrice = _marketCalculateBuyPrice(name, npcId, p);
-  // Aplica haggle legacy também (compatibilidade com flags antigas)
+  // Aplica haggle legacy (compat) + skill check Tier 2 (Persuasão/Intimidação)
   if (p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
     finalPrice = _haggleAdjustPrice(finalPrice, p);
   }
+  // Skill check de negociação (se foi tentado)
+  var negKey = npcId + ':' + name;
+  var negData = (window._marketNegotiations || {})[negKey];
+  var negNoteHtml = '';
+  if (negData && negData.attempted && negData.result && negData.result.priceDelta){
+    var pr = negData.result;
+    finalPrice = Math.max(1, Math.floor(finalPrice * (1 + pr.priceDelta)));
+    var negPct = Math.round(Math.abs(pr.priceDelta) * 100);
+    var negSign = pr.priceDelta < 0 ? '↓' : '↑';
+    var negColor = pr.priceDelta < 0 ? 'var(--v-rarity-uncommon,#4caf50)' : 'var(--v-danger,#c44)';
+    var modeLabel = pr.mode === 'persuasion' ? '🎲 Persuasão' : '💪 Intimidação';
+    negNoteHtml = '<br><i style="color:' + negColor + ';">' + negSign + negPct + '% (' + modeLabel + ': ' + pr.label + ')</i>';
+  }
   var diff = finalPrice - basePrice;
   var priceNote = '';
-  if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> (CHA/Reputação)</i>';
-  else if (diff > 0) priceNote = '<br><i style="color:var(--v-danger,#c44)">↑ +' + diff + ' <span class="vi vi-coin sm"></span> (CHA baixo / má reputação)</i>';
-  var breakdownHtml = _marketPriceBreakdown(name, npcId, p, 'buy');
+  if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> total (CHA/Reputação' + (negData ? '/Skill' : '') + ')</i>';
+  else if (diff > 0) priceNote = '<br><i style="color:var(--v-danger,#c44)">↑ +' + diff + ' <span class="vi vi-coin sm"></span> total</i>';
+  var breakdownHtml = _marketPriceBreakdown(name, npcId, p, 'buy') + negNoteHtml;
   _showConfirmPurchase({
     icon: shop.icon || it.e || '🛒',
     npc: shop.npc,
@@ -35874,6 +35974,77 @@ function _marketIsMagicItem(itemName){
   return rarity === 'rare' || rarity === 'very_rare' || rarity === 'legendary';
 }
 
+// =============================================================================
+// D&D 5e SKILL CHECKS — X-6.5.51CD (2026-05-18)
+// =============================================================================
+// Helpers genéricos pra rolar skills. Classe → proficiência canonical (PHB).
+// Cada NPC pode reagir diferente ao mesmo skill (Thorne aceita Intimidation,
+// Mirena prefere Insight, Velithra aprecia Persuasion).
+
+// PHB p.51-58: cada classe tem skills proficient. Mapeamento canonical:
+// - Bardo: qualquer 3 skills (assumimos Persuasion + Performance)
+// - Paladino: Athletics + Insight + Intimidation + Medicine + Persuasion + Religion (choose 2)
+// - Feiticeiro: Arcana + Deception + Insight + Intimidation + Persuasion + Religion (choose 2)
+// - Bruxo: Arcana + Deception + History + Intimidation + Investigation + Nature + Religion (choose 2)
+// - Ladino: 4 skills incluindo Persuasion/Insight/Deception/Intimidation
+// - Clérigo: History + Insight + Medicine + Persuasion + Religion (choose 2)
+// Simplificado: classes "sociais" tem +prof, outras só CHA mod
+var DND_CLASS_SOCIAL_SKILLS = {
+  'Bardo':       { persuasion: true,  intimidation: false, insight: false, deception: true  },
+  'Paladino':    { persuasion: true,  intimidation: true,  insight: true,  deception: false },
+  'Feiticeiro':  { persuasion: true,  intimidation: true,  insight: false, deception: true  },
+  'Bruxo':       { persuasion: false, intimidation: true,  insight: false, deception: true  },
+  'Ladino':      { persuasion: true,  intimidation: true,  insight: true,  deception: true  },
+  'Clerigo':     { persuasion: true,  intimidation: false, insight: true,  deception: false },
+  'Clérigo':     { persuasion: true,  intimidation: false, insight: true,  deception: false },
+  'Druida':      { persuasion: false, intimidation: false, insight: true,  deception: false },
+  'Guerreiro':   { persuasion: false, intimidation: true,  insight: false, deception: false },
+  'Bárbaro':     { persuasion: false, intimidation: true,  insight: false, deception: false },
+  'Barbaro':     { persuasion: false, intimidation: true,  insight: false, deception: false },
+  'Monge':       { persuasion: false, intimidation: false, insight: true,  deception: false },
+  'Mago':        { persuasion: false, intimidation: false, insight: false, deception: false },
+  'Patrulheiro': { persuasion: false, intimidation: false, insight: true,  deception: false }
+};
+
+// Pega se player é proficient na skill via classe (PHB)
+function _dndSkillIsProficient(player, skillName){
+  if (!player) return false;
+  var cls = player.hero_class || player.class || '';
+  var skills = DND_CLASS_SOCIAL_SKILLS[cls];
+  if (!skills) return false;
+  return !!skills[skillName];
+}
+
+// Roll genérico de skill: d20 + ability mod + (proficient ? proficiency : 0)
+function _dndSkillRoll(player, ability, skillName){
+  ability = ability || 'cha';
+  var score = (player && player.stats && player.stats[ability]) || 10;
+  var mod = Math.floor((score - 10) / 2);
+  var prof = (player && player.proficiency_bonus) || 2;
+  var isProficient = skillName ? _dndSkillIsProficient(player, skillName) : false;
+  var bonus = mod + (isProficient ? prof : 0);
+  var roll = Math.floor(Math.random() * 20) + 1;
+  return {
+    roll: roll, mod: mod, prof: prof, bonus: bonus,
+    total: roll + bonus, proficient: isProficient,
+    ability: ability, skill: skillName,
+    isCrit: roll === 20, isFumble: roll === 1
+  };
+}
+
+// DC por raridade pra haggle/intimidation/etc.
+function _dndHaggleDC(itemName){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var rarity = data.r || 'common';
+  if (rarity === 'common')   return 10;
+  if (rarity === 'uncommon') return 12;
+  if (rarity === 'rare')     return 15;
+  if (rarity === 'very_rare') return 18;
+  if (rarity === 'legendary') return 20;
+  return 12;
+}
+
+// =============================================================================
 // XGtE p.130 Magic Item Offer Table — roll d20 + CHA mod + (proficient ? prof : 0)
 // Retorna {roll, total, pct, label, narrative}.
 function _marketRollPersuasion(player, opts){
@@ -35949,6 +36120,180 @@ function _marketCalculateBuyPrice(itemName, npcKey, player, opts){
 
   var final = baseValue * basePct * chaMult * repMult;
   return Math.max(1, Math.floor(final));
+}
+
+// =============================================================================
+// HAGGLE — Persuasão / Intimidação on BUY (PHB social mechanics)
+// =============================================================================
+// X-6.5.51CD (2026-05-18). Player tenta pechinchar OU intimidar mercador
+// pra obter desconto. Cada tentativa = 1 roll d20 + ability mod + (prof?).
+// State em window._marketNegotiations[itemName+npcKey] = { attempts: N, result }
+// Limit: 1 attempt por item por sessão (anti-spam).
+//
+// PERSUASION (CHA):
+//   DC = 10/12/15/18/20 (common/uncommon/rare/very_rare/legendary)
+//   nat 20 / DC+10:  -20% (excellent)
+//   total >= DC:     -10% (sucesso)
+//   total >= DC-5:   0%   (neutro)
+//   total < DC-5:    +5%  (falhou, mercador irritado)
+//   nat 1 / DC-10:   +15% +-1 rep (fiasco)
+//
+// INTIMIDATION (CHA, alguns usam STR house rule):
+//   DC = mesma + 2 (intimidar é mais difícil em D&D)
+//   Sucesso: -15% MAS -2 rep
+//   Falha: mercador ofendido +20% e -5 rep (item locked X transações)
+//   Não funciona com NPCs aliados (rep >= 20 → "Estou ofendido. Não negocio.")
+
+function _marketAttemptHaggle(itemName, npcKey, player, mode){
+  // mode: 'persuasion' | 'intimidation'
+  window._marketNegotiations = window._marketNegotiations || {};
+  var key = npcKey + ':' + itemName;
+  // Limit: 1 tentativa por item por sessão
+  if (window._marketNegotiations[key] && window._marketNegotiations[key].attempted){
+    return {
+      blocked: true,
+      reason: 'Já tentou negociar este item. Volte outro dia.',
+      result: window._marketNegotiations[key].result
+    };
+  }
+  var dc = _dndHaggleDC(itemName);
+  if (mode === 'intimidation') dc += 2;  // PHB: intimidar é mais difícil
+
+  // Anti-pattern: intimidar Aliado é ofensivo
+  var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
+  if (mode === 'intimidation' && rep >= 20){
+    window._marketNegotiations[key] = { attempted: true, result: 'offended' };
+    return {
+      blocked: false, success: false, mode: 'intimidation',
+      narrative: '<i>O mercador cruza os braços.</i> "Depois de tudo que passamos juntos, você me ameaça? <b>Não negocio assim.</b>"',
+      priceDelta: 0.20,  // ofensa mantém preço cheio + extra
+      repDelta: -10,
+      label: 'Ofensa pessoal'
+    };
+  }
+
+  var skill = (mode === 'persuasion') ? 'persuasion' : 'intimidation';
+  var roll = _dndSkillRoll(player, 'cha', skill);
+  var success = roll.total >= dc;
+  var excellent = roll.isCrit || (roll.total >= dc + 10);
+  var fumble = roll.isFumble || (roll.total < dc - 10);
+  var neutral = !success && roll.total >= dc - 5;
+
+  var result = {
+    blocked: false, success: success, excellent: excellent, fumble: fumble,
+    neutral: neutral, mode: mode, dc: dc, roll: roll,
+    priceDelta: 0, repDelta: 0,
+    label: '', narrative: ''
+  };
+
+  if (mode === 'persuasion'){
+    if (excellent){
+      result.priceDelta = -0.20; result.repDelta = +1; result.label = 'Pechincha excepcional';
+      result.narrative = '<i>O mercador ri, surpreso pela elegância da argumentação.</i> "Está bem — vinte por cento de desconto. Falou bem."';
+    } else if (success){
+      result.priceDelta = -0.10; result.label = 'Pechincha aceita';
+      result.narrative = '<i>O mercador considera, depois assente.</i> "Tudo bem. Dez por cento menos — pelo bom papo."';
+    } else if (neutral){
+      result.priceDelta = 0; result.label = 'Sem efeito';
+      result.narrative = '<i>O mercador balança a cabeça.</i> "Argumento fraco. Preço é preço."';
+    } else if (fumble){
+      result.priceDelta = +0.15; result.repDelta = -1; result.label = 'Fiasco social';
+      result.narrative = '<i>O mercador ergue uma sobrancelha, ofendido.</i> "Você está me chamando de quê? <b>Quinze por cento a mais</b> — só pra lembrar quem aqui é o profissional."';
+    } else {
+      result.priceDelta = +0.05; result.label = 'Mercador irritado';
+      result.narrative = '<i>O mercador franze a testa.</i> "Cinco por cento a mais. Aprenda a negociar."';
+    }
+  } else {  // intimidation
+    if (excellent){
+      result.priceDelta = -0.20; result.repDelta = -2; result.label = 'Cedeu sob pressão';
+      result.narrative = '<i>O mercador empalidece, recua um passo.</i> "Está bem... está bem. Vinte por cento menos. Pegue e vá embora."';
+    } else if (success){
+      result.priceDelta = -0.15; result.repDelta = -2; result.label = 'Cedeu (a contragosto)';
+      result.narrative = '<i>O mercador respira fundo, controla a raiva.</i> "Quinze por cento menos. <b>Não volte assim.</b>"';
+    } else if (neutral){
+      result.priceDelta = 0; result.repDelta = -1; result.label = 'Encarou de volta';
+      result.narrative = '<i>O mercador endurece o olhar.</i> "Você não me assusta. Preço cheio. Compra ou some."';
+    } else if (fumble){
+      result.priceDelta = +0.30; result.repDelta = -5; result.label = 'Fiasco';
+      result.narrative = '<i>O mercador chama o guarda da porta.</i> "Este aqui está ameaçando. <b>Trinta por cento a mais — ou fora.</b>"';
+    } else {
+      result.priceDelta = +0.20; result.repDelta = -3; result.label = 'Ofendeu mercador';
+      result.narrative = '<i>O mercador cruza os braços, voz baixa e ameaçadora.</i> "Vinte por cento a mais. E não venha me ameaçar nunca mais."';
+    }
+  }
+
+  // Aplica delta de reputação canonical
+  if (result.repDelta) _marketRepDelta(npcKey, result.repDelta);
+
+  window._marketNegotiations[key] = { attempted: true, result: result };
+  return result;
+}
+
+// =============================================================================
+// IDENTIFY — Magic items unidentified (DMG p.136)
+// =============================================================================
+// X-6.5.51CD (2026-05-18). Magic items comprados começam unidentified.
+// State per-item via metadata.unidentified_items (set de item names).
+// Métodos pra identificar:
+//   1. Descanso curto (1h em contato com o item) — automático pós-rest
+//   2. Spell Identify (ritual 10min — qualquer Mago/Bardo/Clérigo de divinação)
+//   3. Pagar Mirena 50 Valdoritas (serviço)
+//
+// Aplicado APENAS em items comprados que são magic (rare+ ou tag 'magic').
+// Gemas/jewelry não precisam (não são magic).
+
+function _marketMarkUnidentified(player, itemName){
+  if (!_marketIsMagicItem(itemName)) return;  // só magic items
+  // Gemas mesmo se rare não precisam de identify
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var tags = data.t || [];
+  if (tags.indexOf('gem') !== -1 || tags.indexOf('jewelry') !== -1) return;
+
+  player.metadata = player.metadata || {};
+  player.metadata.unidentified_items = player.metadata.unidentified_items || {};
+  // increment count (player pode comprar múltiplos da mesma peça)
+  player.metadata.unidentified_items[itemName] = (player.metadata.unidentified_items[itemName] || 0) + 1;
+}
+
+function _marketIsUnidentified(player, itemName){
+  if (!player || !player.metadata || !player.metadata.unidentified_items) return false;
+  return (player.metadata.unidentified_items[itemName] || 0) > 0;
+}
+
+function _marketIdentifyItem(player, itemName){
+  if (!player.metadata || !player.metadata.unidentified_items) return false;
+  if (!player.metadata.unidentified_items[itemName]) return false;
+  player.metadata.unidentified_items[itemName]--;
+  if (player.metadata.unidentified_items[itemName] <= 0){
+    delete player.metadata.unidentified_items[itemName];
+  }
+  return true;
+}
+
+// =============================================================================
+// INSIGHT (WIS) — Detectar se oferta é justa (PHB Insight skill)
+// =============================================================================
+// X-6.5.51CD (2026-05-18). Player rola Insight pra ver se mercador ta
+// oferecendo preço justo (revela breakdown completo) ou está enganando.
+// DC = 10 + (sentido moral do NPC). Sucesso: revela detalhes. Falha: bluff.
+
+function _marketAttemptInsight(itemName, npcKey, player){
+  var roll = _dndSkillRoll(player, 'wis', 'insight');
+  var dc = 12;  // base DC
+  // Mercador Hostil mente mais (DC maior)
+  var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
+  if (rep <= -10) dc = 18;
+  else if (rep <= -1) dc = 15;
+  var success = roll.total >= dc;
+  var narrative;
+  if (success){
+    narrative = '<i>Você observa atentamente. O mercador está sendo <b>honesto</b> — preço reflete CHA, reputação e categoria.</i>';
+  } else if (roll.total >= dc - 5){
+    narrative = '<i>Você não consegue ler claramente. Pode estar ou não na média.</i>';
+  } else {
+    narrative = '<i>Você não tem certeza, mas algo <b>parece estranho</b> na oferta.</i>';
+  }
+  return { roll: roll, dc: dc, success: success, narrative: narrative };
 }
 
 // Helper para mostrar breakdown do preço (debug/transparência pro player).
