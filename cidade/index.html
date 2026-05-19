@@ -37104,7 +37104,9 @@ function _guildShowRecruits(p){
   // 2026-05-12 BUG #19: lista FILTRADA por GROUP_MEMBERS — recrutas já no grupo somem.
   // Antes a lista era estática (GUILD_RECRUITS direto), permitindo re-recrutar
   // infinitamente o mesmo ally com perda de gold sem efeito.
-  var alreadyHired = (window.GROUP_MEMBERS || []).map(function(m){ return m.name; });
+  // 2026-05-19 BUG #20 (Chrome MCP audit): GROUP_MEMBERS tem slots vazios = null
+  // (player + 3 slots null). .map(m => m.name) crashava em null. Fix: filter(Boolean).
+  var alreadyHired = (window.GROUP_MEMBERS || []).filter(Boolean).map(function(m){ return m.name; });
   var available = GUILD_RECRUITS.filter(function(r){
     return alreadyHired.indexOf(r.name) === -1;
   });
