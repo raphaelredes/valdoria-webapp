@@ -997,8 +997,8 @@
       "category": "magical"
     },
     "botas-de-velocidade": {
-      "timestamp": "2026-05-19T10:52:03.905288",
-      "cost": 0.005370000000000001,
+      "timestamp": "2026-05-19T11:50:51.379855",
+      "cost": 0.00561,
       "quality": "low",
       "category": "magical"
     },
@@ -1105,8 +1105,8 @@
       "category": "legendary"
     },
     "grevas-de-mithral": {
-      "timestamp": "2026-05-19T11:05:34.522015",
-      "cost": 0.005450000000000001,
+      "timestamp": "2026-05-19T11:53:41.412138",
+      "cost": 0.006150000000000001,
       "quality": "low",
       "category": "legendary"
     },
@@ -2179,8 +2179,8 @@
       "category": "weapon"
     },
     "bico-de-axe-beak": {
-      "timestamp": "2026-05-19T10:52:56.964140",
-      "cost": 0.005595000000000001,
+      "timestamp": "2026-05-19T11:52:09.643168",
+      "cost": 0.006215000000000001,
       "quality": "low",
       "category": "default"
     },
@@ -2239,8 +2239,8 @@
       "category": "map"
     },
     "lagrima-cristalina": {
-      "timestamp": "2026-05-19T10:52:25.888222",
-      "cost": 0.005390000000000001,
+      "timestamp": "2026-05-19T11:51:17.313063",
+      "cost": 0.005775000000000001,
       "quality": "low",
       "category": "magical"
     },
@@ -3637,8 +3637,8 @@
       "category": "base-template"
     }
   },
-  "last_run": "2026-05-19T11:46:16.389700",
-  "total_cost": 3.8892700000000002,
+  "last_run": "2026-05-19T11:53:41.414361",
+  "total_cost": 3.91883,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 606
 }
