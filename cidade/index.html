@@ -14294,9 +14294,20 @@ function _marketShowAbsentRumor(p, merchant, state){
 // em vez de heraldic SVG generic. Path: /shared/img/merchants/{id}.png
 // (6 portraits: thorne, mirena, velithra, corvus, bjorn, garlen).
 // X-6.5.51CJ (2026-05-18): zoom em tela cheia via vLightbox no toque/clique.
+// X-6.5.51CJ (2026-05-18): caption do lightbox usa nome amigável via MERCHANT_NAME_MAP
+var MERCHANT_NAME_MAP = {
+  thorne:   'Thorne Forja-de-Ferro · Ferreiro',
+  mirena:   'Mirena Folha-Verde · Alquimista',
+  velithra: 'Velithra Olho-de-Cristal · Joalheira',
+  corvus:   'Corvus Mapa-Escuro · Cartógrafo',
+  bjorn:    'Bjorn · Seleiro',
+  garlen:   'Garlen Pesa-Justo · Cambista'
+};
 function _merchantPortrait(id){
-  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + id +
-    '" class="merchant-portrait vlb-zoomable" loading="lazy" data-lb-alt="' + id + '" />';
+  var fullName = MERCHANT_NAME_MAP[id] || id;
+  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + fullName +
+    '" class="merchant-portrait vlb-zoomable" loading="lazy" ' +
+    'data-lb-caption="' + fullName.replace(/"/g, '&quot;') + '" title="Toque para ampliar" />';
 }
 
 // =============================================================================
