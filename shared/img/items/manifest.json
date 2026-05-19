@@ -3503,6 +3503,78 @@
       "cost": 0.04,
       "quality": "low",
       "category": "mock-inventory"
+    },
+    "sal-refinado": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "trigo": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "farinha": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "ferro-bruto": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "cobre-bruto": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "prata-bruta": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "ouro-bruto": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "linho": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "pelagem-lobo": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "madeira-lei": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "especiarias": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
+    },
+    "acafrao": {
+      "timestamp": "2026-05-18T23:04:45.340349",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "trade_good"
     }
   },
   "last_run": "2026-05-16T21:44:15.864943",
