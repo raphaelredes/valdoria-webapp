@@ -35965,9 +35965,14 @@ function _marketIsFullValueCategory(tags){
 
 // Detecta se item é magic (rare+ ou tag explícita).
 // Magic items requerem Persuasão check (XGtE) pra vender — não usa 50% base.
+// BUGFIX X-6.5.51CE (2026-05-18): gemas/joias têm tag 'magic' (mecanicamente
+// socketáveis) mas PHB p.146 diz que mantêm 100% valor → não devem disparar
+// XGtE check. Retorna false explicitamente para FullValueCategory items.
 function _marketIsMagicItem(itemName){
   var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
   var tags = data.t || [];
+  // Gemas/joias sempre 100% valor (PHB rule) — nunca disparam XGtE check
+  if (_marketIsFullValueCategory(tags)) return false;
   if (tags.indexOf('magic') !== -1) return true;
   if (tags.indexOf('scroll') !== -1) return true;  // scrolls são magic
   var rarity = data.r || 'common';
@@ -36162,14 +36167,18 @@ function _marketAttemptHaggle(itemName, npcKey, player, mode){
   // Anti-pattern: intimidar Aliado é ofensivo
   var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
   if (mode === 'intimidation' && rep >= 20){
-    window._marketNegotiations[key] = { attempted: true, result: 'offended' };
-    return {
+    // BUGFIX X-6.5.51CE (2026-05-18): aplicar rep delta ANTES de retornar
+    // (early-return estava pulando o _marketRepDelta no final da função).
+    _marketRepDelta(npcKey, -10);
+    var offendedResult = {
       blocked: false, success: false, mode: 'intimidation',
       narrative: '<i>O mercador cruza os braços.</i> "Depois de tudo que passamos juntos, você me ameaça? <b>Não negocio assim.</b>"',
-      priceDelta: 0.20,  // ofensa mantém preço cheio + extra
+      priceDelta: 0.20,
       repDelta: -10,
       label: 'Ofensa pessoal'
     };
+    window._marketNegotiations[key] = { attempted: true, result: offendedResult };
+    return offendedResult;
   }
 
   var skill = (mode === 'persuasion') ? 'persuasion' : 'intimidation';
