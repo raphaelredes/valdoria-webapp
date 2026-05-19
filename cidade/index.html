@@ -14387,6 +14387,33 @@ var MARKET_MERCHANTS = [
         '<b>Cantil de Couro</b> (5 <span class="vi vi-coin sm"></span>) — +2 CON vs calor (passivo)<br>' +
         '<b>Rações de Viagem</b> (5 <span class="vi vi-coin sm"></span>) — Comida para 1 dia"' }
     ]
+  },
+  // X-6.5.51CG (2026-05-18): Garlen Pesa-Justo — Cambista de Bens de Troca.
+  // Sexto mercador canonical. Vende commodities a 100% (preço estável PHB).
+  {
+    id: 'garlen',
+    icon: _heralIco('ic-banqueiro'),  // portrait PNG futuro: /shared/img/merchants/garlen.png
+    name: 'Garlen Pesa-Justo',
+    role: 'Cambista',
+    desc: 'Homem magro, dedos manchados de tinta, balança de bronze sempre à mão. Não negocia armas nem magia — só mercadoria de peso e fé.',
+    greetings: [
+      '<i>Garlen ajusta o contrapeso da balança.</i> "Mercadoria firme — preço de hoje é o de amanhã."',
+      '<i>O cambista anota algo num livro de couro.</i> "Aventureiro. Tem peso pra mim?"',
+      '<i>Garlen ergue um lingote contra a luz.</i> "Cobre puro. Ferro estelar. Sal do litoral. Tudo justo, tudo pesado."'
+    ],
+    talkOptions: [
+      { id: 'browse', q: 'Mostra a mercadoria', a:
+        '"Tenho de tudo que <i>não desvaloriza</i>:<br>' +
+        '<b>Sal Refinado</b> · <b>Trigo</b> · <b>Farinha</b> — alimentos firmes<br>' +
+        '<b>Ferro Bruto</b> · <b>Cobre Bruto</b> · <b>Prata Bruta</b> · <b>Ouro Bruto</b> — metais<br>' +
+        '<b>Linho</b> · <b>Couro Curtido</b> · <b>Pelagem de Lobo</b> · <b>Madeira de Lei</b> — fibras<br>' +
+        '<b>Especiarias</b> · <b>Açafrão</b> — exóticos.<br><br>' +
+        '<i>Preço cheio na compra, preço cheio na venda. Sem pechinchar.</i>"' },
+      { id: 'why', q: 'Por que preço fixo?', a:
+        '"Ouro flutua, gemas mudam de moda, magias quebram. Mas <i>uma saca de sal ou trigo</i> — sempre vale o que vale. Bem de troca é a moeda do mercador prudente."' },
+      { id: 'trade', q: 'Quanto vale uma vida?', a:
+        '<i>Garlen para de pesar, encara você.</i> "Pelas balanças do mundo? Pouco. Pela balança de Tyr? Tudo. Eu peso metal, não almas."' }
+    ]
   }
 ];
 
@@ -27284,6 +27311,24 @@ var CANON_ITEMS_DB = {
   'Pergaminho em Branco':{e: _heralIco('ic-escriba'),v:30,  r:'common',   t:['material'],                       desc:'Usado para inscrever feitiços.'},
   'Luneta':             {e: _heralIco('ic-cartografia'), v:50,  r:'uncommon', t:['tool'],                           desc:'Vê detalhes a 1.5km de distância.'},
   'Bússola Mágica':     {e: _heralIco('ic-cartografia'), v:120, r:'rare',     t:['tool','magic'],                   desc:'Aponta sempre o caminho de volta.'},
+  // === BENS DE TROCA — Garlen Cambista ===
+  // X-6.5.51CG (2026-05-18): commodities com preço estável (PHB p.143-144).
+  // Tag 'trade_good' faz sell rate = 100% via _marketIsFullValueCategory.
+  // Útil pra carregar valor estável entre cidades (futura mecânica de viagem).
+  'Sal Refinado':      {e: _heralIco('ic-mochila'), v:5,    r:'common', t:['trade_good','material'],                desc:'Sal cristalino do litoral. Conserva carnes e perfuma feridas.'},
+  'Trigo':             {e: _heralIco('ic-mochila'), v:1,    r:'common', t:['trade_good','food'],                    desc:'Saca de trigo. Base da farinha que alimenta cidades.'},
+  'Farinha':           {e: _heralIco('ic-mochila'), v:2,    r:'common', t:['trade_good','food'],                    desc:'Farinha branca, moída há poucos dias. Cheiro adocicado.'},
+  'Ferro Bruto':       {e: _heralIco('ic-mochila'), v:10,   r:'common', t:['trade_good','material','metal'],        desc:'Lingote de ferro bruto. Matéria-prima das forjas.'},
+  'Cobre Bruto':       {e: _heralIco('ic-mochila'), v:50,   r:'common', t:['trade_good','material','metal'],        desc:'Lingote de cobre avermelhado. Bom condutor — alquimistas pagam bem.'},
+  'Linho':             {e: _heralIco('ic-mochila'), v:5,    r:'common', t:['trade_good','material','cloth'],        desc:'Tecido de linho fino, pronto pra alfaiataria.'},
+  'Couro Curtido':     {e: _heralIco('ic-mochila'), v:8,    r:'common', t:['trade_good','material','leather'],      desc:'Couro tratado, maleável — para botas, cintos, encadernação.'},
+  'Especiarias':       {e: _heralIco('ic-mochila'), v:200,  r:'uncommon', t:['trade_good','food','exotic'],         desc:'Mistura de pimenta, cravo, canela. Sempre tem comprador.'},
+  'Açafrão':           {e: _heralIco('ic-mochila'), v:1500, r:'rare',   t:['trade_good','food','exotic','valuable'], desc:'Flor seca, dourada, perfumada. Pesa pouco — vale muito.'},
+  'Prata Bruta':       {e: _heralIco('ic-mochila'), v:500,  r:'uncommon', t:['trade_good','material','metal','valuable'], desc:'Lingote de prata. Reservado, pesado, brilho frio.'},
+  'Ouro Bruto':        {e: _heralIco('ic-mochila'), v:5000, r:'rare',   t:['trade_good','material','metal','valuable'], desc:'Lingote de ouro. Pesa o suficiente pra mudar a balança da feira.'},
+  'Pelagem de Lobo':   {e: _heralIco('ic-lobo'),    v:25,   r:'common', t:['trade_good','material','leather'],      desc:'Pele de lobo cinzento, curtida pra manto. Quente, durável.'},
+  'Madeira de Lei':    {e: _heralIco('ic-mochila'), v:30,   r:'uncommon', t:['trade_good','material','wood'],       desc:'Toras de madeira nobre — carvalho centenário ou mogno escuro.'},
+
   // === MISC ===
   'Anel de Sorte':      {e: _heralIco('ic-mochila'), v:200, r:'rare',     t:['accessory','magic'],   s:'ring_1', b:1, desc:'+1 em testes de habilidade.'},
   'Amuleto de Proteção':{e: _heralIco('ic-mochila'), v:300, r:'rare',     t:['accessory','magic'],   s:'necklace', ac:1, desc:'+1 CA. Incrustado com runa.'},
@@ -27676,6 +27721,21 @@ var CANON_MARKET_SHOPS = {
       'Mochila Reforçada', 'Tenda de Couro', 'Saco de Dormir',
       'Corda de Cânhamo 15m', 'Pederneira', 'Kit de Escalada',
       'Tochas (5)', 'Rações de 7 dias', 'Capa do Vento'
+    ]
+  },
+  // X-6.5.51CG (2026-05-18): Garlen Pesa-Justo — Cambista de Bens de Troca.
+  // Vende/compra commodities (PHB p.143-144) a 100% do valor base. Player
+  // pode usar trade goods como moeda estável entre cidades.
+  garlen: {
+    npc: 'Garlen Pesa-Justo',
+    role: 'Cambista',
+    icon: _heralIco('ic-banqueiro'),
+    greeting: '"Mercadorias firmes — preço de hoje é o de amanhã." — Garlen ajusta a balança.',
+    items: [
+      'Sal Refinado', 'Trigo', 'Farinha',
+      'Ferro Bruto', 'Cobre Bruto', 'Prata Bruta', 'Ouro Bruto',
+      'Linho', 'Couro Curtido', 'Pelagem de Lobo', 'Madeira de Lei',
+      'Especiarias', 'Açafrão'
     ]
   }
 };
@@ -35491,10 +35551,24 @@ function _showShopItemDetail(name, npcId){
   // chain do shop card. Tamanho maior (64px) pro detalhe do item.
   var detailIcon = _resolveItemIcon(name, '64px');
   if (!detailIcon) detailIcon = (it.e || _heralIco("ic-mochila"));
+  // X-6.5.51CH (2026-05-18): badges canonical D&D 5e — sinaliza items que
+  // requerem sintonização e items mágicos (que viram unidentified após compra).
+  var preBadges = '';
+  if (typeof _attunementRequired === 'function' && _attunementRequired(name)){
+    preBadges += '<div style="display:inline-block;background:linear-gradient(180deg,rgba(155,89,182,0.20),rgba(95,55,130,0.40));border:1px solid rgba(155,89,182,0.55);color:#d2a8f0;padding:3px 8px;border-radius:4px;font-size:10px;letter-spacing:1px;font-family:Cinzel,serif;margin:4px 4px 0 0;">✦ REQUER SINTONIZAÇÃO</div>';
+  }
+  if (typeof _marketIsMagicItem === 'function' && _marketIsMagicItem(name)){
+    preBadges += '<div style="display:inline-block;background:linear-gradient(180deg,rgba(74,144,226,0.20),rgba(40,80,130,0.40));border:1px solid rgba(74,144,226,0.55);color:#a8c8f0;padding:3px 8px;border-radius:4px;font-size:10px;letter-spacing:1px;font-family:Cinzel,serif;margin:4px 4px 0 0;">⚡ ITEM MÁGICO</div>';
+  }
+  if (preBadges){
+    preBadges = '<div style="text-align:center;margin:6px 0;">' + preBadges + '</div>';
+  }
+
   card.innerHTML = ''
     + '<div class="inv-detail-emoji">' + detailIcon + '</div>'
     + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + '</div>'
+    + preBadges
     + '<div class="inv-detail-divider"></div>'
     + '<div class="inv-detail-stats">' + statLines.join('<br>') + '</div>'
     + (it.desc ? '<div class="inv-detail-divider"></div><div class="inv-detail-stats" style="font-style:italic">' + it.desc + '</div>' : '')
@@ -35637,6 +35711,9 @@ function _shopConfirmBuy(name, npcId){
           get name(){ return this.n; }
         });
       }
+      // X-6.5.51CH (2026-05-18): magic items comprados começam não-identificados.
+      // Mirena oferece identificacao por 50V no templo/mercado.
+      if (typeof _marketMarkUnidentified === 'function') _marketMarkUnidentified(p, name);
       // X-6.5.51CB (2026-05-18): reação PADRAO_ALDRIC por NPC x categoria do item.
       // Substitui "<i>Tome. Bom uso.</i>" genérico por fala em personagem do NPC.
       // npcId aqui já é a key canonical (thorne/mirena/velithra/corvus/bjorn).
@@ -35705,6 +35782,9 @@ function _shopConfirmBuy(name, npcId){
 //
 // Categorias só roteiam pro especialista correto (UI), preço final segue regras canonical.
 var MARKET_SPECIALIST_RULES = [
+  // === Garlen (cambista) — trade goods têm preço estável (100% PHB) ===
+  // trade_good: base_pct 1.00 via FullValueCategory, specBonus 0 (sem premium).
+  { tags: ['trade_good'],                 npc: 'garlen',   specBonus: 0,    cat: 'trade_good' },
   // === Velithra (joalheira) — gemas têm valor FULL canonical ===
   // gem/jewelry: base_pct 1.00 (PHB regra), specialist Velithra recebe +5% bonus.
   { tags: ['gem'],                        npc: 'velithra', specBonus: 0.05, cat: 'gem' },
@@ -35755,6 +35835,11 @@ var MARKET_NPC_LIBRARY = {
     npc: 'Bjorn', role: 'Seleiro',
     icon: _heralIco('ic-mochila'),
     fallback_mult: 0.55
+  },
+  garlen: {
+    npc: 'Garlen Pesa-Justo', role: 'Cambista',
+    icon: _heralIco('ic-banqueiro'),
+    fallback_mult: 1.00  // trade goods sempre 100% (preço estável)
   },
   generic: {
     npc: 'Mercador Ambulante', role: 'Comprador',
@@ -35934,6 +36019,30 @@ var MARKET_NPC_REACTIONS = {
       ]
     }
   },
+  garlen: {
+    buy: {
+      trade_good: [
+        '<i>Garlen pesa o lote na balança de bronze.</i> "Mercadoria firme. Preço justo de hoje — vai durar o que precisar."',
+        '"Bens de troca não engordam ninguém — mas <i>nunca perdem valor</i>. Use bem."',
+        '<i>Garlen ajusta o contrapeso com precisão.</i> "Comprou bem. Carregue sem medo de prejuízo."'
+      ],
+      generic: [
+        '<i>Garlen entrega a mercadoria e o recibo.</i> "Negócio fechado. Que valha a viagem."',
+        '"Pronto. Saca, pesa, registra — assim funciona o comércio honesto."'
+      ]
+    },
+    sell: {
+      trade_good: [
+        '<i>Garlen pesa cuidadosamente, anota no livro de couro.</i> "Cem por cento do valor de mercado. Garantido."',
+        '"Bem cotado hoje. <i>Aceito pelo preço cheio</i> — mercadoria firme tem comprador certo."',
+        '<i>Conta moedas em pilhas pequenas, separadas por valor.</i> "Pronto. Negócio limpo."'
+      ],
+      generic: [
+        '"Aceito. Pago o que vale, sem rodeio."',
+        '<i>Garlen examina rápido, paga em moedas contadas.</i> "Bom estado. Comprado."'
+      ]
+    }
+  },
   generic: {
     buy: {
       generic: [
@@ -35984,13 +36093,16 @@ function _marketRepPriceMult(npcKey, action){
   return 2.0 - buyMult;  // 0.85→1.15, 0.95→1.05, 1.0→1.0, 1.15→0.85, 1.30→0.70
 }
 
-// PHB rule: gemas/jewelry/art retêm valor FULL (100%).
+// PHB rule: gemas/jewelry/art/trade_good retêm valor FULL (100%).
+// PHB p.143-144: Trade Goods são commodities com preço estável (ferro bruto,
+// peles, sal, especiarias, etc.) — vende/compra a 100% do valor base.
 function _marketIsFullValueCategory(tags){
   if (!tags) return false;
   return tags.indexOf('gem') !== -1
       || tags.indexOf('jewelry') !== -1
       || tags.indexOf('art') !== -1
-      || tags.indexOf('valuable') !== -1;
+      || tags.indexOf('valuable') !== -1
+      || tags.indexOf('trade_good') !== -1;
 }
 
 // Detecta se item é magic (rare+ ou tag explícita).
@@ -36307,6 +36419,123 @@ function _marketIdentifyItem(player, itemName){
     delete player.metadata.unidentified_items[itemName];
   }
   return true;
+}
+
+// =============================================================================
+// ATTUNEMENT — Sintonização de Itens Mágicos (DMG p.138)
+// =============================================================================
+// X-6.5.51CH (2026-05-18). Items com tag 'attunement' requerem sintonização
+// para aplicar bônus. Máx 3 attuned por personagem (regra canonical D&D 5e).
+//
+// State em player.metadata.attuned_items: Array de nomes (max 3).
+// Sintonização leva 1h (curto descanso) — simulado como ação imediata aqui.
+// Items unidentified NÃO podem ser attuned — precisam identify primeiro.
+
+var ATTUNEMENT_MAX = 3;
+
+// Item requer sintonização? (tag 'attunement' explícita)
+function _attunementRequired(itemName){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var tags = data.t || [];
+  return tags.indexOf('attunement') !== -1;
+}
+
+// Lista de items attuned (canonical — sempre Array)
+function _attunedItems(player){
+  if (!player || !player.metadata) return [];
+  if (!Array.isArray(player.metadata.attuned_items)) player.metadata.attuned_items = [];
+  return player.metadata.attuned_items;
+}
+
+// Já está attuned?
+function _isAttuned(player, itemName){
+  return _attunedItems(player).indexOf(itemName) !== -1;
+}
+
+// Quantos slots livres tem? (cap 3)
+function _attunementSlotsFree(player){
+  return ATTUNEMENT_MAX - _attunedItems(player).length;
+}
+
+// Tenta sintonizar. Retorna {ok, reason}.
+function _attuneItem(player, itemName){
+  if (!_attunementRequired(itemName)){
+    return { ok: false, reason: 'Este item não exige sintonização.' };
+  }
+  if (_marketIsUnidentified(player, itemName)){
+    return { ok: false, reason: 'Identifique o item primeiro — não é possível sintonizar com um item desconhecido.' };
+  }
+  if (_isAttuned(player, itemName)){
+    return { ok: false, reason: 'Você já está sintonizado com este item.' };
+  }
+  if (_attunementSlotsFree(player) <= 0){
+    return {
+      ok: false,
+      reason: 'Limite de 3 sintonizações atingido. Quebre o vínculo com outro item primeiro.'
+    };
+  }
+  _attunedItems(player).push(itemName);
+  return { ok: true };
+}
+
+// Quebra a sintonização (libera slot)
+function _unattuneItem(player, itemName){
+  var list = _attunedItems(player);
+  var idx = list.indexOf(itemName);
+  if (idx === -1) return false;
+  list.splice(idx, 1);
+  return true;
+}
+
+// Item efetivo (bônus aplica)? Items attunement só aplicam se attuned.
+// Items sem attunement aplicam normalmente quando equipados.
+function _itemBonusActive(player, itemName){
+  if (!_attunementRequired(itemName)) return true;
+  return _isAttuned(player, itemName);
+}
+
+// =============================================================================
+// SETTLEMENT — Tamanho da Cidade afeta disponibilidade de Items Mágicos
+// =============================================================================
+// X-6.5.51CI (2026-05-18). DMG Table 6-13: tamanho da povoação limita
+// raridade dos items mágicos vendidos. Eldoria = "Cidade Pequena" (5k-12k hab).
+//
+// Cidade Pequena disponibilidade:
+//   • common:    sempre (sem limite)
+//   • uncommon:  rotação semanal
+//   • rare:      no máximo 1 por vez (rotação semanal)
+//   • very_rare: requer quest/contato especial (não vende livre)
+//   • legendary: indisponível (apenas via missão épica)
+
+var SETTLEMENT_INFO = {
+  name: 'Eldoria',
+  size: 'small_city',       // small_village/large_village/town/small_city/large_city/metropolis
+  size_label: 'Cidade Pequena',
+  population: 8500,
+  availability: {
+    common:     'unlimited',
+    uncommon:   'weekly',
+    rare:       'limited',
+    very_rare:  'quest_only',
+    legendary:  'unavailable'
+  }
+};
+
+// Item está disponível pra venda dado tamanho da settlement?
+function _settlementAllowsItem(itemName){
+  var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
+  var rarity = data.r || 'common';
+  var avail = SETTLEMENT_INFO.availability[rarity] || 'unlimited';
+  if (avail === 'unavailable') return false;
+  if (avail === 'quest_only') return false;  // requer quest pra desbloquear
+  return true;
+}
+
+// Label do mercado info (mostrado pra player entender oferta limitada)
+function _settlementMarketInfo(){
+  return '<i>' + SETTLEMENT_INFO.name + ' é uma ' + SETTLEMENT_INFO.size_label.toLowerCase() +
+         ' (~' + (SETTLEMENT_INFO.population / 1000) + 'k habitantes). ' +
+         'Itens raros são limitados. Itens muito raros e lendários requerem missões especiais.</i>';
 }
 
 // =============================================================================
