@@ -877,8 +877,8 @@
       "category": "weapon"
     },
     "bordao-+1": {
-      "timestamp": "2026-05-16T00:56:19.745005",
-      "cost": 0.005205000000000001,
+      "timestamp": "2026-05-19T11:46:16.387109",
+      "cost": 0.005895000000000001,
       "quality": "low",
       "category": "weapon"
     },
@@ -3637,8 +3637,8 @@
       "category": "base-template"
     }
   },
-  "last_run": "2026-05-19T11:08:06.909543",
-  "total_cost": 3.883375,
+  "last_run": "2026-05-19T11:46:16.389700",
+  "total_cost": 3.8892700000000002,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 606
 }
