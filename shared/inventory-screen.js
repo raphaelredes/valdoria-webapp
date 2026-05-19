@@ -29,8 +29,8 @@
  *          + variantes slug + fallback ic-it-base-*) / UI_ICONS / _uiIcon
  *   ~1020  _esc / _slugify (utils)
  *
- * Ícones de items: SEMPRE via `<use href="#ic-it-{id}">` do sprite canônico
- * (valdoria-webapp/shared/heraldic-items-sprite.js). NUNCA criar SVG novo.
+ * Ícones de items: 2026-05-19 — SVG sprite REMOVIDO. PNGs OpenAI direto via
+ * `<img src="/shared/img/items/{slug}.png">` (items-resolver.js + manifest).
  *
  * Regras CLAUDE.md aplicadas:
  *  - "Items Existentes — NUNCA recriar SVG novo (2026-05-14)"

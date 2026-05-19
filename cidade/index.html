@@ -687,7 +687,7 @@ LOG SINK (Fase 7):
        carregado primeiro pra ser usado em qualquer item icon. Fallback automático
        pro popup legacy se módulo não carregar (defensivo). */
     document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + v + '">');
-    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + v + '"><\/script>');
+    // 2026-05-19: heraldic-items-sprite.js REMOVIDO. PNGs OpenAI usados em tudo.
     // 2026-05-17: items-resolver + asset-resolver — PNGs AI substituem SVG sprites.
     document.write('<script src="/shared/items-resolver.js?v=' + v + '"><\/script>');
     document.write('<script src="/shared/asset-resolver.js?v=' + v + '"><\/script>');
@@ -7765,10 +7765,8 @@ body.perf-lite .vc-action-btn { transition: none; }
     window.__audioForceFloat = true;
     document.write('<script src="/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
     /* X-6.5.51AW (2026-05-08): heraldic items sprite (519 ícones) + name->icon
-       mapping. X-6.5.51BA: bundle JS que injeta sprite via <script src> (file://
-       não tem CORS pra fetch; <script> funciona). bundle DEVE carregar ANTES
-       do helper pra setar window.__HERALDIC_ITEMS_SPRITE_SVG / __MAP. */
-    document.write('<script src="/shared/heraldic-items-sprite.js?v=' + Date.now() + '"><\/script>');
+       2026-05-19: sprite REMOVIDO. heraldic-items.js v2 retorna <img> PNG
+       direto, sem precisar do sprite SVG. items-resolver.js já carregado. */
     document.write('<script src="/shared/heraldic-items.js?v=' + Date.now() + '"><\/script>');
     /* X-6.5.51AR (2026-05-08): SOLUÇÃO DEFINITIVA — re-parenta .va-float +
        .va-popup + .va-backdrop pra dentro de #app (que tem position:relative
