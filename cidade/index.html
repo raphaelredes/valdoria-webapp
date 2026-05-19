@@ -97,9 +97,9 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   Toggle do footer cycle: items → equip → allies → items
 
   D&D 5e cost badges (ativados via inCombat:true — false em cidade):
-    main_hand: Grátis (PHB p.190)
-    off_hand/ring/amulet/cloak: 1 Ação (PHB p.144, p.190)
-    head/chest/feet: Impossível (PHB p.144 — 1–10 min)
+    main_hand: Grátis
+    off_hand/ring/amulet/cloak: 1 Ação 
+    head/chest/feet: Impossível 
 
   Doc canonical: docs/sistemas/inventory-canonical.md
   ═══════════════════════════════════════════════════════════════════
@@ -210,8 +210,8 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   TOURNAMENT_TIERS (bronze/silver/gold com min_level) + tavern_rumors_data BONUS_RUMORS (5
   categorias) + tavern_gather_info_data (4 GATHER_TOPICS + skills + cooldown) +
   tavern_adventurers_data EXPLORER_DEPARTURE_LINES (23 linhas) + tavern_black_market_crime_data
-  (XGtE p.130 — 3 CRIME_TYPES x 3 CRIME_TIERS — NOVO sistema) + temple_data (FLAVORS +
-  AMBIENT + ABSENCE + DEBT_BLOCK) + temple_downtime_data RELIGIOUS_SERVICES (XGtE p.131).
+   + temple_data (FLAVORS +
+  AMBIENT + ABSENCE + DEBT_BLOCK) + temple_downtime_data RELIGIOUS_SERVICES .
   Marker: grep "// === CANONICAL_PACK5_INJECT ===" pra achar bloco injetado.
 
   Pacote Canonical 6 (2026-05-03): textos extras de pit fight (INTRO_LINES + RESULTS +
@@ -257,14 +257,14 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   Globals do Pacote 5 (grep direto):
     CANON_CAROUSING_EXTRA      — tiers + contacts + complications canonical
     CANON_DRINKS_DB            — bebidas com chance_effect (buff/debuff)
-    CANON_XGTE                 — XGtE p.130 cards (BET_TIERS, CHECKS, RESULT_TABLE)
+    CANON_XGTE                 — cards (BET_TIERS, CHECKS, RESULT_TABLE)
     CANON_TOURNAMENT           — bronze/silver tiers com min_level
     CANON_BONUS_RUMORS         — 5 categorias (defense/gold/heal/save/atk)
     CANON_GATHER_INFO          — XGtE Gather Info (4 topics + skills)
     CANON_ADVENTURERS          — EXPLORER_DEPARTURE_LINES (23)
-    CANON_CRIME                — XGtE p.130 Crime Downtime (3 types x 3 tiers)
+    CANON_CRIME                — Crime Downtime (3 types x 3 tiers)
     CANON_TEMPLE_DATA          — flavors/ambient/absence/debt_block
-    CANON_TEMPLE_DOWNTIME      — RELIGIOUS_SERVICES XGtE p.131
+    CANON_TEMPLE_DOWNTIME      — RELIGIOUS_SERVICES 
 
   Globals do Pacote 4 (grep direto):
     CANON_FLAVORS_POOLS       — pools por evento (chat/listen/observe/watch/greet)
@@ -8194,7 +8194,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // USER REPORT 2026-05-14 — "Wilzen mostra 52473/2000 XP, não faz sentido".
       // Antes o mock default xpNext=2000 nunca era sobrescrito pelo REMOTE,
       // resultando em "<xp_real>/2000". Agora o server envia thresholds D&D 5e
-      // (PHB Tabela 1-2 via XP_THRESHOLDS). Card mostra cumulativo X/Y_next,
+      // ( via XP_THRESHOLDS). Card mostra cumulativo X/Y_next,
       // barra calcula progresso relativo (xp - xpPrev) / (xpNext - xpPrev).
       if (picked.xp_next != null) p.xpNext = picked.xp_next;
       if (picked.xp_prev != null) p.xpPrev = picked.xp_prev;
@@ -10878,7 +10878,7 @@ function _showStatusPopup(memberIdx){
   var spellDc = (m.dc != null) ? m.dc : (8 + prof + _mod(stats.int));
   var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
   var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
-  // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (PHB Tabela 1-2): barra
+  // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (): barra
   // mostra progresso DENTRO do nivel = (xp - xpPrev) / (xpNext - xpPrev).
   var _fichaXpPrev = m.xpPrev || 0;
   var _fichaXpSpan = (m.xpNext || 0) - _fichaXpPrev;
@@ -11012,7 +11012,7 @@ function _showStatusPopup(memberIdx){
     /* 2026-05-11 (user request): "V" literal -> icone .vi-coin canonical */
     html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:',
       '<b style="color: var(--v-gold, #c4953a); display:inline-flex; align-items:center; gap:4px;">'
-      + (m.gold || 0)
+      + _fmtV(m.gold || 0)
       + '<span class="vi vi-coin sm"></span></b>');
   }
   html += '<div style="' + (m.isPlayer ? '' : 'flex:1;') + '">'
@@ -13010,12 +13010,44 @@ function _heralIco(id, color, size){
   return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size + ';color:' + color + ';vertical-align:middle;display:inline-block;"><use href="#' + id + '"/></svg>';
 }
 
+// =============================================================================
+// FORMAT VALDORITAS — X-6.5.51CF (2026-05-18)
+// =============================================================================
+// USER REQUEST: ao atingir 1000 ou mais Valdoritas, usar nomenclatura "k"
+// pra indicar milhares (ex: 1500 → "1.5k", 13584 → "13.5k", 100000 → "100k").
+//
+// Regras:
+//   < 1000:        valor cheio ("999", "850", "1", "0")
+//   >= 1000 < 10k: 1 decimal ("1.5k", "9.8k", "3.0k")
+//   >= 10k:        sem decimal ("10k", "55k", "1500k")
+//   números exatos (múltiplos de 1000): "1k", "2k", "10k" (sem decimal mesmo < 10k)
+//
+// Use _fmtV(amount) em qualquer display player-facing de Valdoritas.
+// NUNCA aplique em cálculos internos — só em display.
+function _fmtV(amount){
+  if (amount == null || isNaN(amount)) return '0';
+  var n = Math.floor(Math.abs(Number(amount)));
+  var sign = amount < 0 ? '-' : '';
+  if (n < 1000) return sign + n;
+  if (n < 10000){
+    // 1.5k, 9.8k, 1.0k → mostra decimal se houver
+    var rounded = Math.round(n / 100) / 10;  // 1500 → 1.5
+    if (rounded === Math.floor(rounded)){
+      return sign + Math.floor(rounded) + 'k';  // 1000 → "1k"
+    }
+    return sign + rounded + 'k';
+  }
+  // >= 10k: sem decimal
+  return sign + Math.round(n / 1000) + 'k';
+}
+window._fmtV = _fmtV;  // expor globalmente
+
 var TEMPLE_NPCS_DB = {
   'heal': {
     npc: 'Irmã Elara',           npc_id: 'npc_temple_elara',
     title: 'Curar Ferimentos',   icon: _heralIco('ic-cura'),
     cost: 30,                    min_level: 1,
-    desc: 'Cura ferimentos via magia divina (1d8+3 HP). PHB p.230.'
+    desc: 'Cura ferimentos via magia divina (1d8+3 HP).'
   },
   'cure_poison': {
     npc: 'Padre Aldric',         npc_id: 'npc_temple_aldric',
@@ -13027,7 +13059,7 @@ var TEMPLE_NPCS_DB = {
     npc: 'Acólito Theron',       npc_id: 'npc_temple_theron',
     title: 'Benção da Clareza',  icon: _heralIco('ic-stat-spelldc'),
     cost: 25,                    min_level: 1,
-    desc: 'Conc. 1 min. +1d4 em ataques e saves. PHB p.219.'
+    desc: 'Conc. 1 min. +1d4 em ataques e saves.'
   },
   'remove_curse': {
     npc: 'Sacerdotisa Miriel',   npc_id: 'npc_temple_miriel',
@@ -13039,13 +13071,13 @@ var TEMPLE_NPCS_DB = {
     npc: 'Sumo-Sacerdote Varek', npc_id: 'npc_temple_varek',
     title: 'Restauração Maior',  icon: _heralIco('ic-stat-cha'),
     cost: 450,                   min_level: 8,
-    desc: 'Remove 1 condição: exaustão, petrificação, maldição, encantamento ou veneno. PHB p.246.'
+    desc: 'Remove 1 condição: exaustão, petrificação, maldição, encantamento ou veneno.'
   },
   'raise_dead': {
     npc: 'Oráculo Orenthia',     npc_id: 'npc_temple_orenthia',
     title: 'Reviver os Caídos',  icon: _heralIco('ic-esqueleto'),
     cost: 1000,                  min_level: 10,
-    desc: 'Ressuscita aliado caído com 1 HP. -4 em d20 por 4 long rests. PHB p.270.'
+    desc: 'Ressuscita aliado caído com 1 HP. -4 em d20 por 4 long rests.'
   }
 };
 
@@ -13681,7 +13713,7 @@ var TAVERN_GAMES = [
   { id: 'challenge',  icon: _heralIco('ic-stat-attack'), name: 'Desafios (Atributos)',           cost: 10, payout: 20,  win_chance: 0.50, desc: '3 desafios FOR/DES/CON/INT vs DC. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' },
   { id: 'tournament', icon: _heralIco('ic-trofeu'),      name: 'Torneio Bronze (3 rounds)',      cost: 30, payout: 150, win_chance: 0.30, desc: 'Inscrição 30 <span class="vi vi-coin sm"></span> — prêmio 150 <span class="vi vi-coin sm"></span> se vencer 3 rounds seguidos.' },
   { id: 'drinking',   icon: _heralIco('ic-cerveja'),     name: 'Concurso de Bebida',             cost: 15, payout: 30,  win_chance: 0.55, desc: 'CON save crescente por rodada. Aposta 15 <span class="vi vi-coin sm"></span> — paga 2:1.' },
-  { id: 'xgte',       icon: _heralIco('ic-cartas'),      name: 'Cartas XGtE (Three Dragon Ante)', cost: 10, payout: 20,  win_chance: 0.45, desc: 'INT/CHA checks vs adversário. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' }
+  { id: 'xgte',       icon: _heralIco('ic-cartas'),      name: 'Três Dragões (Cartas)', cost: 10, payout: 20,  win_chance: 0.45, desc: 'INT/CHA checks vs adversário. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' }
 ];
 
 // canonical: tavern_notice_board_data.py — 16 NOTICE_TEMPLATES (4 por tipo)
@@ -15118,7 +15150,7 @@ var MARKET_TRANSIENT_POOL = [
         "value": 50,
         "icon": "🎁",
         "desc": "Item aleatório",
-        "fullDesc": "Bugigangas. Rola na tabela de Quinquilharias do PHB. Pode ter valor sentimental ou pista de aventura."
+        "fullDesc": "Bugigangas. Rola na tabela de Quinquilharias Pode ter valor sentimental ou pista de aventura."
       }
     ],
     "greeting": "Ando estrada há vinte anos. Tudo que carrego cabe nesta mochila. Cada item tem uma história — quer ouvir alguma?",
@@ -16155,7 +16187,7 @@ var SHADOW_CRIME_TIERS = [
 ];
 
 function _shadowShowCrime(p){
-  // canonical: tavern_black_market_crime_data.py XGtE p.130 Crime Downtime via CANON_CRIME
+  // canonical: tavern_black_market_crime_data.py Crime Downtime via CANON_CRIME
   // crime_types (theft/robbery/smuggling), crime_tiers (simple/risky/audacious),
   // crime_complications (5), crime_intro_texts (5), crime_success_texts (4), crime_failure_texts (4)
   var canon = (typeof CANON_CRIME !== 'undefined') ? CANON_CRIME : null;
@@ -16194,7 +16226,7 @@ function _shadowShowCrime(p){
   // canonical intro line para o flavor do menu
   var introLine = canonIntros ? pickFrom(canonIntros) : 'O Vulto desenha um mapa tosco na parede com carvão. "Tenho trabalho sujo pra quem tem coragem. Escolha o tipo — depois falamos de risco."';
   _squareShowListPopup({
-    icon: _heralIco('ic-mochila'), stackKey: 'shadow_crime', title: 'Trabalho Sujo (XGtE p.130)',
+    icon: _heralIco('ic-mochila'), stackKey: 'shadow_crime', title: 'Trabalho Sujo ',
     flavor: '<i>' + introLine + '</i>',
     items: typeItems,
     onPick: function(item){
@@ -17955,7 +17987,7 @@ var SQUARE_AMBULANT_VENDORS = [
   { id: 'brokk',    icon: _heralIco('ic-stat-ac'),           name: 'Brokk, o Armeiro',
     desc: 'Um meio-orc musculoso com armaduras leves pendendo de ganchos.',
     items: [
-      { name: 'Escudo de Madeira', value: 30, icon: _heralIco('ic-stat-ac'),  desc: '+2 CA (PHB p.144).' },
+      { name: 'Escudo de Madeira', value: 30, icon: _heralIco('ic-stat-ac'),  desc: '+2 CA.' },
       { name: 'Elmo de Couro',     value: 15, icon: _heralIco('ic-stat-ac'),  desc: '+1 CA contra acertos críticos.' },
       { name: 'Peitoral de Couro', value: 50, icon: _heralIco('ic-stat-ac'),  desc: 'Armadura leve, CA 11 + DES.' }
     ] },
@@ -17970,13 +18002,13 @@ var SQUARE_AMBULANT_VENDORS = [
     desc: 'Um gnomo com óculos grossos e frascos borbulhantes.',
     items: [
       { name: 'Fogo Alquímico',  value: 50,  icon: _heralIco('ic-ach-indomavel'), desc: 'Arremesso: 1d4 fogo, queima por 2 turnos.' },
-      { name: 'Frasco de Ácido', value: 25,  icon: _heralIco('ic-poção'),         desc: 'Arremesso: 2d6 ácido (PHB p.148).' },
+      { name: 'Frasco de Ácido', value: 25,  icon: _heralIco('ic-poção'),         desc: 'Arremesso: 2d6 ácido.' },
       { name: 'Frasco de Veneno', value: 100, icon: _heralIco('ic-poção'),        desc: 'Aplicar em arma: +1d4 veneno por 1 minuto.' }
     ] },
   { id: 'selindra', icon: _heralIco('ic-ach-colecionador'),  name: 'Selindra, a Joalheira',
     desc: 'Uma humana elegante com joias cintilando em cada dedo.',
     items: [
-      { name: 'Anel de Proteção',      value: 200, icon: _heralIco('ic-ach-colecionador'),  desc: '+1 CA e em todos os saves (DMG).' },
+      { name: 'Anel de Proteção',      value: 200, icon: _heralIco('ic-ach-colecionador'),  desc: '+1 CA e em todos os saves.' },
       { name: 'Amuleto de Vitalidade', value: 300, icon: _heralIco('ic-stat-hp'),           desc: 'CON 19 enquanto usado.' },
       { name: 'Amuleto da Sorte',      value: 250, icon: _heralIco('ic-stat-cha'),          desc: 'Refazer 1 d20 falho por dia.' }
     ] }
@@ -18001,7 +18033,7 @@ var SQUARE_ARTIST_BUFFS = [
 var SQUARE_ARTIST_BUFF_CHANCE = 0.40;
 var SQUARE_TIP_COST = 5;
 
-// Trabalhos diários — replica canonical WORK_TASKS (XGtE p.134, town_square_work_data.py)
+// Trabalhos diários — replica canonical WORK_TASKS 
 // 6 tarefas com ability+skill check, recompensa baseada em sucessos.
 var SQUARE_JOBS = [
   { id: 'carrier',     icon: _heralIco('ic-mochila'), label: 'Carregador',          desc: 'Descarregar carroças de mercadores no mercado.',           stat: 'STR', dc: 12, reward: 10, xp: 10 },
@@ -23044,7 +23076,7 @@ var CANON_GAMBLE_TEXTS = {
 };
 
 // canonical: inn_relaxation_data.py
-// Textos narrativos de Martha durante Relaxar (XGtE p.131).
+// Textos narrativos de Martha durante Relaxar .
 // 5 intro + 4 success + 3 no_condition. Stress threshold 50, reduction 30.
 var CANON_INN_RELAXATION = {
   "relaxation_cost_gp": 10,
@@ -24324,7 +24356,7 @@ var CANON_INVESTMENT_TIERS = [
   }
 ];
 
-// canonical: tavern_carousing_data.py — XGtE p.128 Farra (3 tiers).
+// canonical: tavern_carousing_data.py — Farra (3 tiers).
 var CANON_CAROUSING = {
   "carousing_tiers": [
     {
@@ -24354,7 +24386,7 @@ var CANON_CAROUSING = {
   ]
 };
 
-// canonical: tavern_pit_fight_data.py — XGtE p.131 Pit Fighting.
+// canonical: tavern_pit_fight_data.py — Pit Fighting.
 var CANON_PIT_FIGHT = {
   "pit_fight_cooldown_turns": 3,
   "pit_fight_entry_fee": 25,
@@ -24567,7 +24599,7 @@ var CANON_NOTICE_BOARD = {
 // + bonus rumors + gather info + adventurers lines + crime downtime + temple data
 // MAPA_IA: grep "CANON_CAROUSING_EXTRA" / "CANON_DRINKS_DB" / "CANON_XGTE" / etc.
 
-// canonical: tavern_carousing_data.py — XGtE p.128 (tiers ja em pack 4 +
+// canonical: tavern_carousing_data.py — (tiers ja em pack 4 +
 // CONTACTS 10 nomes e COMPLICATIONS 6 entries 10% chance).
 var CANON_CAROUSING_EXTRA = {
   "tiers": [
@@ -24725,7 +24757,7 @@ var CANON_DRINKS_DB = {
   }
 };
 
-// canonical: tavern_games_xgte_data.py — XGtE p.130 cartas (3 checks vs DC).
+// canonical: tavern_games_xgte_data.py — cartas (3 checks vs DC).
 var CANON_XGTE = {
   "xgte_bet_tiers": [
     [
@@ -24992,7 +25024,7 @@ var CANON_ADVENTURERS = {
   ]
 };
 
-// canonical: tavern_black_market_crime_data.py — XGtE p.130 Crime Downtime
+// canonical: tavern_black_market_crime_data.py — Crime Downtime
 // (3 types x 3 tiers + complications + intro/success/failure texts).
 var CANON_CRIME = {
   "crime_types": {
@@ -25166,7 +25198,7 @@ var CANON_TEMPLE_DATA = {
   ]
 };
 
-// canonical: temple_downtime_data.py RELIGIOUS_SERVICES (XGtE p.131).
+// canonical: temple_downtime_data.py RELIGIOUS_SERVICES .
 var CANON_TEMPLE_DOWNTIME = {
   "religious_services": [
     {
@@ -25358,7 +25390,7 @@ var CANON_TEMPLE_DOWNTIME_EXTRA = {
       "name": "Cura Divina",
       "emoji": "💚",
       "cost": 1,
-      "desc": "Receba cura gratuita no templo (1d8+3 HP). PHB Cure Wounds."
+      "desc": "Receba cura gratuita no templo (1d8+3 HP). "
     },
     "blessing": {
       "name": "Bênção Sagrada",
@@ -26871,7 +26903,7 @@ var CANON_NPC_TIERS = {
 // canonical: pacote 9 FINAL — guild_research + plaza_npc_walk + inn_rest_frames.
 // MAPA_IA: grep "CANON_RESEARCH" / "CANON_WALK" / "CANON_REST_FRAMES".
 
-// canonical: guild_research_data.py — XGtE p.132 Research Downtime.
+// canonical: guild_research_data.py — Research Downtime.
 var CANON_RESEARCH = {
   "research_cost_gp": 50,
   "research_dc": 15,
@@ -27206,17 +27238,17 @@ var CANON_ITEMS_DB = {
   'Rações de 7 dias':     {e: _heralIco('ic-cerveja'), v:10,  r:'common', t:['consumable','food','camping'],     desc:'Pão duro, queijo curado, carne seca. 7 dias.'},
   // === GEMAS — Velithra Joalheira (canonical: src/game/economy/gem_data.py GEM_ITEMS) ===
   // Tier 1 (comum, level 3+ loot)
-  'Turquesa':  {e: _heralIco('ic-mochila'), v:75,   r:'common',   t:['gem','socketable','magic'], hb:2,             desc:'DMG p.134 (10 V gem). Encaixada: +2 HP máximo.'},
-  'Quartzo':   {e: _heralIco('ic-mochila'), v:50,   r:'common',   t:['gem','socketable','magic'], mb:1,             desc:'DMG p.134 (50 V gem). Encaixada: +1 MP máximo.'},
-  'Ônix':      {e: _heralIco('ic-mochila'), v:100,  r:'common',   t:['gem','socketable','magic'],                   desc:'DMG p.134 (50 V gem). Encaixada: +1 em testes de resistência.'},
+  'Turquesa':  {e: _heralIco('ic-mochila'), v:75,   r:'common',   t:['gem','socketable','magic'], hb:2,             desc:'Encaixada: +2 HP máximo.'},
+  'Quartzo':   {e: _heralIco('ic-mochila'), v:50,   r:'common',   t:['gem','socketable','magic'], mb:1,             desc:'Encaixada: +1 MP máximo.'},
+  'Ônix':      {e: _heralIco('ic-mochila'), v:100,  r:'common',   t:['gem','socketable','magic'],                   desc:'Encaixada: +1 em testes de resistência.'},
   // Tier 2 (incomum, level 5+ loot)
-  'Ametista':  {e: _heralIco('ic-mochila'), v:250,  r:'uncommon', t:['gem','socketable','magic'], hb:3,             desc:'DMG p.134 (100 V gem). Encaixada: +3 HP máximo.'},
-  'Jade':      {e: _heralIco('ic-mochila'), v:200,  r:'uncommon', t:['gem','socketable','magic'], mb:2,             desc:'DMG p.134 (100 V gem). Encaixada: +2 MP máximo.'},
-  'Pérola':    {e: _heralIco('ic-mochila'), v:500,  r:'uncommon', t:['gem','socketable','magic'], ac:1,             desc:'DMG p.134 (100 V gem). Encaixada: +1 CA.'},
+  'Ametista':  {e: _heralIco('ic-mochila'), v:250,  r:'uncommon', t:['gem','socketable','magic'], hb:3,             desc:'Encaixada: +3 HP máximo.'},
+  'Jade':      {e: _heralIco('ic-mochila'), v:200,  r:'uncommon', t:['gem','socketable','magic'], mb:2,             desc:'Encaixada: +2 MP máximo.'},
+  'Pérola':    {e: _heralIco('ic-mochila'), v:500,  r:'uncommon', t:['gem','socketable','magic'], ac:1,             desc:'Encaixada: +1 CA.'},
   // Tier 3 (raro, level 7+ loot only — não vendido pela Velithra)
-  'Rubi':      {e: _heralIco('ic-mochila'), v:1000, r:'rare',   t:['gem','socketable','magic'], hb:5, b:1,         desc:'DMG p.134 (5000 V gem). Encaixada: +5 HP e +1 ataque/dano.'},
-  'Safira':    {e: _heralIco('ic-mochila'), v:800,  r:'rare',     t:['gem','socketable','magic'], mb:3,             desc:'DMG p.134 (1000 V gem). Encaixada: +3 MP e +1 save.'},
-  'Esmeralda': {e: _heralIco('ic-mochila'), v:1500, r:'rare',     t:['gem','socketable','magic'], ac:1,             desc:'DMG p.134 (1000 V gem). Encaixada: +1 CA e +1 save.'},
+  'Rubi':      {e: _heralIco('ic-mochila'), v:1000, r:'rare',   t:['gem','socketable','magic'], hb:5, b:1,         desc:'Encaixada: +5 HP e +1 ataque/dano.'},
+  'Safira':    {e: _heralIco('ic-mochila'), v:800,  r:'rare',     t:['gem','socketable','magic'], mb:3,             desc:'Encaixada: +3 MP e +1 save.'},
+  'Esmeralda': {e: _heralIco('ic-mochila'), v:1500, r:'rare',     t:['gem','socketable','magic'], ac:1,             desc:'Encaixada: +1 CA e +1 save.'},
   // === MAPAS — Corvus Cartógrafo ===
   'Mapa das Planícies':    {e: _heralIco('ic-cartografia'), v:30,  r:'common',  t:['map','tool'], desc:'Rotas e acampamentos da região central.'},
   'Mapa da Floresta':       {e: _heralIco('ic-cartografia'), v:35,  r:'common',  t:['map','tool'], desc:'Florestas densas e ruínas escondidas.'},
@@ -27272,68 +27304,68 @@ var CANON_ITEMS_DB = {
   'Cetro do Arcanista':    {e: _heralIco('ic-mochila'), v:750, r:'rare', t:['weapon','set','set_arcanista','arcane'], s:'main_hand', dd:'1d6', mb:3, si:'arcanista', desc:'Cetro de cristal arcano. Peça do Conjunto do Arcanista.'},
   'Pingente do Arcanista': {e: _heralIco('ic-mochila'), v:400, r:'rare', t:['accessory','set','set_arcanista','magic'], s:'necklace', mb:2, si:'arcanista', desc:'Pingente que canaliza arcano. Peça do Conjunto do Arcanista.'},
   // === STAGE 9: Items SRD canonical D&D 5e (PHB Cap.5 + DMG Cap.7) ===
-  // === ARMAS SIMPLES (PHB) ===
-  'Clava':         {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','wood'],         s:'main_hand', dd:'1d4', desc:'PHB. Arma simples de madeira. Dano contundente.'},
-  'Adaga':         {e: _heralIco('ic-ladino'), v:2,  r:'common', t:['weapon','simple_weapon','metal','finesse','thrown','light'], s:'main_hand', dd:'1d4', desc:'PHB. Lâmina pequena. Acuidade + arremesso.'},
-  'Maça':          {e: _heralIco('ic-barbaro'), v:5,  r:'common', t:['weapon','simple_weapon','metal'],        s:'main_hand', dd:'1d6', desc:'PHB. Arma simples de combate. Dano contundente.'},
-  'Bordão':        {e: _heralIco('ic-mago'), v:2,  r:'common', t:['weapon','simple_weapon','wood','versatile'], s:'main_hand', dd:'1d6', desc:'PHB. Cajado simples. Versátil (1d8 com 2 mãos).'},
-  'Lança':         {e: _heralIco('ic-stat-attack'), v:1,  r:'common', t:['weapon','simple_weapon','metal','thrown','versatile'], s:'main_hand', dd:'1d6', desc:'PHB. Lança curta. Versátil + arremesso.'},
-  'Martelo Leve':  {e: _heralIco('ic-barbaro'), v:2,  r:'common', t:['weapon','simple_weapon','metal','thrown','light'], s:'main_hand', dd:'1d4', desc:'PHB. Martelo de uma mão. Arremesso.'},
-  'Machadinha':    {e: _heralIco('ic-mochila'), v:5,  r:'common', t:['weapon','simple_weapon','metal','thrown','light'], s:'main_hand', dd:'1d6', desc:'PHB. Machado pequeno. Arremesso + leve.'},
-  'Dardo':         {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','metal','finesse','thrown'], s:'main_hand', dd:'1d4', desc:'PHB. Lança pequena de arremesso.'},
-  'Foice Leve':    {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','metal','light'], s:'main_hand', dd:'1d4', desc:'PHB. Foice de uma mão.'},
-  'Besta Leve':    {e: _heralIco('ic-patrulheiro'), v:25, r:'common', t:['weapon','simple_weapon','wood','ranged','two_handed'], s:'main_hand', dd:'1d8', desc:'PHB. Besta de duas mãos.'},
-  'Arco Curto':    {e: _heralIco('ic-patrulheiro'), v:25, r:'common', t:['weapon','simple_weapon','wood','ranged','two_handed'], s:'main_hand', dd:'1d6', desc:'PHB. Arco rápido para curtas distâncias.'},
-  'Funda':         {e: _heralIco('ic-patrulheiro'), v:1,  r:'common', t:['weapon','simple_weapon','ranged'],       s:'main_hand', dd:'1d4', desc:'PHB. Arma de bolso. Lança pedras.'},
-  // === ARMAS MARCIAIS (PHB) ===
-  'Espada Curta':  {e: _heralIco('ic-mochila'), v:10, r:'common', t:['weapon','martial_weapon','metal','finesse','light'], s:'main_hand', dd:'1d6', desc:'PHB. Lâmina curta. Acuidade + leve.'},
-  'Rapieira':      {e: _heralIco('ic-ladino'), v:25, r:'common', t:['weapon','martial_weapon','metal','finesse'], s:'main_hand', dd:'1d8', desc:'PHB. Lâmina elegante. Acuidade.'},
-  'Cimitarra':     {e: _heralIco('ic-ladino'), v:25, r:'common', t:['weapon','martial_weapon','metal','finesse','light'], s:'main_hand', dd:'1d6', desc:'PHB. Lâmina curva. Acuidade + leve.'},
-  'Montante':      {e: _heralIco('ic-mochila'), v:50, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'2d6', desc:'PHB. Espada gigante. 2 mãos + pesada.'},
-  'Machado de Batalha':{e: _heralIco('ic-barbaro'), v:10, r:'common', t:['weapon','martial_weapon','metal','versatile'], s:'main_hand', dd:'1d8', desc:'PHB. Machado de uma mão. Versátil (1d10).'},
-  'Machado Grande':{e: _heralIco('ic-barbaro'), v:30, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'1d12', desc:'PHB. Machado de duas mãos. Pesado.'},
-  'Malho':         {e: _heralIco('ic-barbaro'), v:10, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'2d6', desc:'PHB. Marreta enorme. 2 mãos + pesada.'},
-  'Alabarda':      {e: _heralIco('ic-stat-attack'), v:20, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'PHB. Lâmina longa em haste. Alcance + 2 mãos.'},
-  'Mangual':       {e: _heralIco('ic-mochila'), v:10, r:'common', t:['weapon','martial_weapon','metal'],        s:'main_hand', dd:'1d8', desc:'PHB. Bola com correntes em haste.'},
-  'Glaive':        {e: _heralIco('ic-stat-attack'), v:20, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'PHB. Lâmina em cabo longo. Alcance.'},
-  'Pique':         {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'PHB. Lança longa. Alcance + 2 mãos.'},
-  'Tridente':      {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','thrown','versatile'], s:'main_hand', dd:'1d6', desc:'PHB. Lança de 3 pontas. Versátil + arremesso.'},
-  'Picareta de Guerra':{e: _heralIco('ic-mochila'), v:5, r:'common', t:['weapon','martial_weapon','metal'],     s:'main_hand', dd:'1d8', desc:'PHB. Picareta militar.'},
-  'Chicote':       {e: _heralIco('ic-mochila'), v:2,  r:'common', t:['weapon','martial_weapon','finesse','reach'], s:'main_hand', dd:'1d4', desc:'PHB. Chicote longo. Acuidade + alcance.'},
-  'Arco Longo':    {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d8', desc:'PHB. Arco de batalha. Pesado.'},
-  'Besta Pesada':  {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d10', desc:'PHB. Besta militar. 2 mãos + pesada.'},
-  // === ARMADURAS LEVES (PHB) ===
-  'Armadura Acolchoada':{e: _heralIco('ic-mochila'), v:5,  r:'common', t:['armor','light_armor','fabric'],     s:'chest', ac:1, desc:'PHB. Armadura básica. Penalidade em Furtividade.'},
-  'Armadura de Couro':  {e: _heralIco('ic-lobo'), v:10, r:'common', t:['armor','light_armor','leather'],    s:'chest', ac:1, desc:'PHB. Couro reforçado.'},
-  'Couro Batido':       {e: _heralIco('ic-lobo'), v:45, r:'common', t:['armor','light_armor','leather'],    s:'chest', ac:2, desc:'PHB. Couro tratado mais resistente.'},
-  // === ARMADURAS MÉDIAS (PHB) ===
-  'Gibão de Peles':     {e: _heralIco('ic-lobo'), v:10, r:'common', t:['armor','medium_armor','leather'],    s:'chest', ac:2, desc:'PHB. Couro grosso. Bárbaros e exploradores.'},
-  'Cota de Escamas':    {e: _heralIco('ic-trofeu'), v:50, r:'common', t:['armor','medium_armor','metal'],     s:'chest', ac:4, desc:'PHB. Escamas sobrepostas. Furtividade desvantagem.'},
-  'Brunea':             {e: _heralIco('ic-runas'), v:400,r:'uncommon',t:['armor','medium_armor','metal'],   s:'chest', ac:4, desc:'PHB. Cota completa. Cara mas resistente.'},
-  'Meia-Placa':         {e: _heralIco('ic-mochila'), v:750,r:'rare',  t:['armor','medium_armor','metal'],     s:'chest', ac:5, desc:'PHB. Placa parcial. Furtividade desvantagem.'},
-  // === ARMADURAS PESADAS (PHB) ===
-  'Brunea de Anéis':    {e: _heralIco('ic-runas'), v:30, r:'common', t:['armor','heavy_armor','metal'],     s:'chest', ac:4, desc:'PHB. Cota com anéis reforçados. FOR 13 mín.'},
-  'Cota de Talas':      {e: _heralIco('ic-mochila'), v:200,r:'uncommon',t:['armor','heavy_armor','metal'],    s:'chest', ac:7, desc:'PHB. Talas de aço. FOR 15 mín.'},
-  'Placa Completa':     {e: _heralIco('ic-mochila'), v:1500,r:'rare', t:['armor','heavy_armor','metal'],     s:'chest', ac:8, desc:'PHB. Armadura definitiva. FOR 15 mín.'},
-  // === ESCUDOS (PHB) ===
-  'Escudo de Madeira':  {e: _heralIco('ic-mochila'), v:10, r:'common', t:['armor','shield','wood'],           s:'off_hand', ac:2, desc:'PHB. Escudo de madeira reforçado.'},
-  'Escudo de Aço':      {e: _heralIco('ic-mochila'), v:25, r:'common', t:['armor','shield','metal'],          s:'off_hand', ac:2, desc:'PHB. Escudo de metal pleno.'},
-  // === POÇÕES MÁGICAS (DMG) ===
-  'Poção de Heroísmo':         {e: _heralIco('ic-mochila'), v:180,r:'uncommon', t:['consumable','potion','magic'], desc:'DMG. +10 HP temporário e Abençoar por 1h.'},
-  'Poção de Resistência ao Fogo':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'DMG. Resistência a fogo por 1h.'},
-  'Poção de Resistência ao Frio':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'DMG. Resistência a frio por 1h.'},
-  'Poção de Velocidade':       {e: _heralIco('ic-mochila'), v:400,r:'rare',     t:['consumable','potion','magic'], desc:'DMG. +2 CA, vantagem DEX, ação extra. 1 min.'},
-  'Poção de Invisibilidade':   {e: _heralIco('ic-mochila'), v:500,r:'rare',     t:['consumable','potion','magic'], desc:'DMG. Invisível por 1h ou até atacar/conjurar.'},
-  'Antídoto':                  {e: _heralIco('ic-mochila'), v:50, r:'common',   t:['consumable','potion'],         desc:'PHB. Remove condição envenenado.'},
-  // === ITENS MÁGICOS COMUNS (DMG) ===
-  'Anel de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['accessory','magic','attunement'], s:'ring_1', ac:1, desc:'DMG. +1 CA e +1 saves. Sintonização.'},
-  'Capa de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['clothing','magic','attunement'],  s:'cloak',  ac:1, desc:'DMG. +1 CA e +1 saves. Sintonização.'},
-  'Pérola do Poder':   {e: _heralIco('ic-mochila'), v:1000,r:'uncommon', t:['accessory','magic','attunement'], s:'ring_1', desc:'DMG. Recupera 1 espaço de magia/dia.'},
-  'Bolsa de Contenção':{e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['tool','magic'],                   desc:'DMG. Carrega 250kg em interior maior que exterior.'},
-  'Pedra da Sorte':    {e: _heralIco('ic-mochila'), v:4200,r:'uncommon', t:['accessory','magic','attunement'], desc:'DMG. +1 testes habilidade e saves.'},
-  'Botas Élficas':     {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'feet', desc:'DMG. Passos silenciosos. Vantagem em Furtividade.'},
-  'Manto Élfico':      {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'cloak', desc:'DMG. Vantagem em Furtividade ao se esconder.'},
-  'Amuleto de Saúde':  {e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['accessory','magic','attunement'], s:'necklace', desc:'DMG. Imune a condição doente.'},
+  // === ARMAS SIMPLES ===
+  'Clava':         {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','wood'],         s:'main_hand', dd:'1d4', desc:'Arma simples de madeira. Dano contundente.'},
+  'Adaga':         {e: _heralIco('ic-ladino'), v:2,  r:'common', t:['weapon','simple_weapon','metal','finesse','thrown','light'], s:'main_hand', dd:'1d4', desc:'Lâmina pequena. Acuidade + arremesso.'},
+  'Maça':          {e: _heralIco('ic-barbaro'), v:5,  r:'common', t:['weapon','simple_weapon','metal'],        s:'main_hand', dd:'1d6', desc:'Arma simples de combate. Dano contundente.'},
+  'Bordão':        {e: _heralIco('ic-mago'), v:2,  r:'common', t:['weapon','simple_weapon','wood','versatile'], s:'main_hand', dd:'1d6', desc:'Cajado simples. Versátil (1d8 com 2 mãos).'},
+  'Lança':         {e: _heralIco('ic-stat-attack'), v:1,  r:'common', t:['weapon','simple_weapon','metal','thrown','versatile'], s:'main_hand', dd:'1d6', desc:'Lança curta. Versátil + arremesso.'},
+  'Martelo Leve':  {e: _heralIco('ic-barbaro'), v:2,  r:'common', t:['weapon','simple_weapon','metal','thrown','light'], s:'main_hand', dd:'1d4', desc:'Martelo de uma mão. Arremesso.'},
+  'Machadinha':    {e: _heralIco('ic-mochila'), v:5,  r:'common', t:['weapon','simple_weapon','metal','thrown','light'], s:'main_hand', dd:'1d6', desc:'Machado pequeno. Arremesso + leve.'},
+  'Dardo':         {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','metal','finesse','thrown'], s:'main_hand', dd:'1d4', desc:'Lança pequena de arremesso.'},
+  'Foice Leve':    {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','metal','light'], s:'main_hand', dd:'1d4', desc:'Foice de uma mão.'},
+  'Besta Leve':    {e: _heralIco('ic-patrulheiro'), v:25, r:'common', t:['weapon','simple_weapon','wood','ranged','two_handed'], s:'main_hand', dd:'1d8', desc:'Besta de duas mãos.'},
+  'Arco Curto':    {e: _heralIco('ic-patrulheiro'), v:25, r:'common', t:['weapon','simple_weapon','wood','ranged','two_handed'], s:'main_hand', dd:'1d6', desc:'Arco rápido para curtas distâncias.'},
+  'Funda':         {e: _heralIco('ic-patrulheiro'), v:1,  r:'common', t:['weapon','simple_weapon','ranged'],       s:'main_hand', dd:'1d4', desc:'Arma de bolso. Lança pedras.'},
+  // === ARMAS MARCIAIS ===
+  'Espada Curta':  {e: _heralIco('ic-mochila'), v:10, r:'common', t:['weapon','martial_weapon','metal','finesse','light'], s:'main_hand', dd:'1d6', desc:'Lâmina curta. Acuidade + leve.'},
+  'Rapieira':      {e: _heralIco('ic-ladino'), v:25, r:'common', t:['weapon','martial_weapon','metal','finesse'], s:'main_hand', dd:'1d8', desc:'Lâmina elegante. Acuidade.'},
+  'Cimitarra':     {e: _heralIco('ic-ladino'), v:25, r:'common', t:['weapon','martial_weapon','metal','finesse','light'], s:'main_hand', dd:'1d6', desc:'Lâmina curva. Acuidade + leve.'},
+  'Montante':      {e: _heralIco('ic-mochila'), v:50, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'2d6', desc:'Espada gigante. 2 mãos + pesada.'},
+  'Machado de Batalha':{e: _heralIco('ic-barbaro'), v:10, r:'common', t:['weapon','martial_weapon','metal','versatile'], s:'main_hand', dd:'1d8', desc:'Machado de uma mão. Versátil (1d10).'},
+  'Machado Grande':{e: _heralIco('ic-barbaro'), v:30, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'1d12', desc:'Machado de duas mãos. Pesado.'},
+  'Malho':         {e: _heralIco('ic-barbaro'), v:10, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy'], s:'main_hand', dd:'2d6', desc:'Marreta enorme. 2 mãos + pesada.'},
+  'Alabarda':      {e: _heralIco('ic-stat-attack'), v:20, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'Lâmina longa em haste. Alcance + 2 mãos.'},
+  'Mangual':       {e: _heralIco('ic-mochila'), v:10, r:'common', t:['weapon','martial_weapon','metal'],        s:'main_hand', dd:'1d8', desc:'Bola com correntes em haste.'},
+  'Glaive':        {e: _heralIco('ic-stat-attack'), v:20, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'Lâmina em cabo longo. Alcance.'},
+  'Pique':         {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'Lança longa. Alcance + 2 mãos.'},
+  'Tridente':      {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','thrown','versatile'], s:'main_hand', dd:'1d6', desc:'Lança de 3 pontas. Versátil + arremesso.'},
+  'Picareta de Guerra':{e: _heralIco('ic-mochila'), v:5, r:'common', t:['weapon','martial_weapon','metal'],     s:'main_hand', dd:'1d8', desc:'Picareta militar.'},
+  'Chicote':       {e: _heralIco('ic-mochila'), v:2,  r:'common', t:['weapon','martial_weapon','finesse','reach'], s:'main_hand', dd:'1d4', desc:'Chicote longo. Acuidade + alcance.'},
+  'Arco Longo':    {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d8', desc:'Arco de batalha. Pesado.'},
+  'Besta Pesada':  {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d10', desc:'Besta militar. 2 mãos + pesada.'},
+  // === ARMADURAS LEVES ===
+  'Armadura Acolchoada':{e: _heralIco('ic-mochila'), v:5,  r:'common', t:['armor','light_armor','fabric'],     s:'chest', ac:1, desc:'Armadura básica. Penalidade em Furtividade.'},
+  'Armadura de Couro':  {e: _heralIco('ic-lobo'), v:10, r:'common', t:['armor','light_armor','leather'],    s:'chest', ac:1, desc:'Couro reforçado.'},
+  'Couro Batido':       {e: _heralIco('ic-lobo'), v:45, r:'common', t:['armor','light_armor','leather'],    s:'chest', ac:2, desc:'Couro tratado mais resistente.'},
+  // === ARMADURAS MÉDIAS ===
+  'Gibão de Peles':     {e: _heralIco('ic-lobo'), v:10, r:'common', t:['armor','medium_armor','leather'],    s:'chest', ac:2, desc:'Couro grosso. Bárbaros e exploradores.'},
+  'Cota de Escamas':    {e: _heralIco('ic-trofeu'), v:50, r:'common', t:['armor','medium_armor','metal'],     s:'chest', ac:4, desc:'Escamas sobrepostas. Furtividade desvantagem.'},
+  'Brunea':             {e: _heralIco('ic-runas'), v:400,r:'uncommon',t:['armor','medium_armor','metal'],   s:'chest', ac:4, desc:'Cota completa. Cara mas resistente.'},
+  'Meia-Placa':         {e: _heralIco('ic-mochila'), v:750,r:'rare',  t:['armor','medium_armor','metal'],     s:'chest', ac:5, desc:'Placa parcial. Furtividade desvantagem.'},
+  // === ARMADURAS PESADAS ===
+  'Brunea de Anéis':    {e: _heralIco('ic-runas'), v:30, r:'common', t:['armor','heavy_armor','metal'],     s:'chest', ac:4, desc:'Cota com anéis reforçados. FOR 13 mín.'},
+  'Cota de Talas':      {e: _heralIco('ic-mochila'), v:200,r:'uncommon',t:['armor','heavy_armor','metal'],    s:'chest', ac:7, desc:'Talas de aço. FOR 15 mín.'},
+  'Placa Completa':     {e: _heralIco('ic-mochila'), v:1500,r:'rare', t:['armor','heavy_armor','metal'],     s:'chest', ac:8, desc:'Armadura definitiva. FOR 15 mín.'},
+  // === ESCUDOS ===
+  'Escudo de Madeira':  {e: _heralIco('ic-mochila'), v:10, r:'common', t:['armor','shield','wood'],           s:'off_hand', ac:2, desc:'Escudo de madeira reforçado.'},
+  'Escudo de Aço':      {e: _heralIco('ic-mochila'), v:25, r:'common', t:['armor','shield','metal'],          s:'off_hand', ac:2, desc:'Escudo de metal pleno.'},
+  // === POÇÕES MÁGICAS ===
+  'Poção de Heroísmo':         {e: _heralIco('ic-mochila'), v:180,r:'uncommon', t:['consumable','potion','magic'], desc:'+10 HP temporário e Abençoar por 1h.'},
+  'Poção de Resistência ao Fogo':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'Resistência a fogo por 1h.'},
+  'Poção de Resistência ao Frio':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'Resistência a frio por 1h.'},
+  'Poção de Velocidade':       {e: _heralIco('ic-mochila'), v:400,r:'rare',     t:['consumable','potion','magic'], desc:'+2 CA, vantagem DEX, ação extra. 1 min.'},
+  'Poção de Invisibilidade':   {e: _heralIco('ic-mochila'), v:500,r:'rare',     t:['consumable','potion','magic'], desc:'Invisível por 1h ou até atacar/conjurar.'},
+  'Antídoto':                  {e: _heralIco('ic-mochila'), v:50, r:'common',   t:['consumable','potion'],         desc:'Remove condição envenenado.'},
+  // === ITENS MÁGICOS COMUNS ===
+  'Anel de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['accessory','magic','attunement'], s:'ring_1', ac:1, desc:'+1 CA e +1 saves. Sintonização.'},
+  'Capa de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['clothing','magic','attunement'],  s:'cloak',  ac:1, desc:'+1 CA e +1 saves. Sintonização.'},
+  'Pérola do Poder':   {e: _heralIco('ic-mochila'), v:1000,r:'uncommon', t:['accessory','magic','attunement'], s:'ring_1', desc:'Recupera 1 espaço de magia/dia.'},
+  'Bolsa de Contenção':{e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['tool','magic'],                   desc:'Carrega 250kg em interior maior que exterior.'},
+  'Pedra da Sorte':    {e: _heralIco('ic-mochila'), v:4200,r:'uncommon', t:['accessory','magic','attunement'], desc:'+1 testes habilidade e saves.'},
+  'Botas Élficas':     {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'feet', desc:'Passos silenciosos. Vantagem em Furtividade.'},
+  'Manto Élfico':      {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'cloak', desc:'Vantagem em Furtividade ao se esconder.'},
+  'Amuleto de Saúde':  {e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['accessory','magic','attunement'], s:'necklace', desc:'Imune a condição doente.'},
   // === MONSTER DROPS (canonical loot) ===
   'Pelo de Texugo':       {e: _heralIco('ic-lobo'), v:3,   r:'common', t:['monster_part','material'],       desc:'Material loot.'},
   'Chifre de Alce':       {e: _heralIco('ic-trofeu'), v:8,   r:'common', t:['monster_part','bone','trophy'],  desc:'Troféu loot.'},
@@ -27353,7 +27385,7 @@ var CANON_ITEMS_DB = {
   'Escama de Dragão Branco':{e: _heralIco('ic-trofeu'), v:150,r:'rare',  t:['monster_part','material','magic'], desc:'Escama lendária. Material para armaduras élite.'},
 
   // === RUNAS (canonical: src/game/economy/rune_data.py RUNE_ITEMS) ===
-  // Adaptação inspirada DMG p.209-213 (magia rúnica opcional). 3 fragmentos = 1 runa aleatória do tier.
+  // Adaptação inspirada -213 (magia rúnica opcional). 3 fragmentos = 1 runa aleatória do tier.
   // ─── Tier 1 (Level 3+) ──────────────────────────────────────
   'Runa de Proteção':  {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_hit_taken', chance:0.10, effect:'reduce_damage', dice:'1d4'}, desc:'Inscrição rúnica protetora. Ao ser atingido, 10% de chance de reduzir o dano em 1d4. (Inspirado em Shield of Faith, SRD 5.1)'},
   'Runa de Vigor':     {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_kill', chance:1.0, effect:'heal', dice:'1d4'}, desc:'Inscrição rúnica vital. Ao derrotar um inimigo, restaura 1d4 HP. (Inspirado em Vampiric Touch, SRD 5.1)'},
@@ -27603,7 +27635,7 @@ var CANON_MARKET_SHOPS = {
       // Poções de cura (4 tiers PHB)
       'Poção de Cura', 'Poção de Cura Maior', 'Poção de Cura Superior',
       'Poção de Cura Suprema',
-      // Poções utilitárias (DMG)
+      // Poções utilitárias
       'Poção de Heroísmo', 'Poção de Resistência ao Fogo',
       'Poção de Resistência ao Frio', 'Poção de Velocidade',
       'Poção de Invisibilidade', 'Antídoto',
@@ -33038,7 +33070,7 @@ var TAVERN_EXPLORER_DEPARTURE_LINES = [
 ];
 
 // canonical: market_complications_data.py MAGIC_ITEM_COMPLICATIONS (8)
-// 10% chance ao comprar/vender item mágico no mercado (XGtE p.126, p.133)
+// 10% chance ao comprar/vender item mágico no mercado 
 var MARKET_MAGIC_COMPLICATIONS = [
   { text: 'O item emite uma aura sombria que atrai olhares suspeitos.',           effect: 'Guardas investigam suas compras.',          flag: 'market_guard_suspicion' },
   { text: 'O vendedor revela que o item pode estar amaldiçoado.',                 effect: 'Dúvida sobre a procedência do item.',       flag: 'market_cursed_doubt' },
@@ -33396,7 +33428,7 @@ function _tavernShowAdventurers(p){
 }
 
 function _tavernShowCarousing(p){
-  // canonical: tavern_carousing_data.py — XGtE p.128.
+  // canonical: tavern_carousing_data.py — 
   // CAROUSING_TIERS (lower/middle/upper) + CONTACTS (10) + COMPLICATIONS (6) 10% chance.
   var canon = (typeof CANON_CAROUSING_EXTRA !== 'undefined') ? CANON_CAROUSING_EXTRA : null;
   var levels = (canon && canon.tiers && canon.tiers.length)
@@ -33414,7 +33446,7 @@ function _tavernShowCarousing(p){
   _aaaListSubScreen({
     theme: 'tavern',
     stackKey: 'tavern_carousing', icon: _heralIco('ic-cerveja'), title: 'Socializar (Carousing)',
-    flavor: '<i>XGtE p.128 — Socializar bebendo gera contatos. Custos altos = contatos importantes.</i>',
+    flavor: '<i>— Socializar bebendo gera contatos. Custos altos = contatos importantes.</i>',
     items: items,
     onPick: function(item){
       var l = item._l;
@@ -33653,7 +33685,7 @@ function _tavernShowBard(p){
 }
 
 function _tavernShowPitfight(p){
-  // canonical: tavern_pit_fight_data.py — XGtE p.131 Pit Fighting.
+  // canonical: tavern_pit_fight_data.py — Pit Fighting.
   // PIT_FIGHT_ENTRY_FEE = 25, COOLDOWN = 3 turnos, BET_TIERS [10,25,50,100],
   // 12 opponents canonical, 3 checks STR/DEX/CON vs DC = 5 + 2d10.
   var canonPit = (typeof CANON_PIT_FIGHT !== 'undefined') ? CANON_PIT_FIGHT : null;
@@ -33681,7 +33713,7 @@ function _tavernShowPitfight(p){
     theme: 'tavern',
     stackKey: 'tavern_pitfight', icon: _heralIco('ic-stat-attack'), title: 'Rinha — Aposte em ' + opp,
     flavor: '<i>' + introLine + '</i><br>' +
-            '<i>3 testes (FOR · DES · CON) contra DC = 5 + 2d10 (XGtE p.131).</i><br>' +
+            '<i>3 testes (FOR · DES · CON) contra DC = 5 + 2d10 .</i><br>' +
             '<i>Cooldown: 3 turnos entre rinhas.</i>',
     items: items,
     onPick: function(item){
@@ -34238,7 +34270,7 @@ function _renderInventoryPopup(){
     + '<button class="inv-tab' + (window._invTab === 'allies' ? ' active' : '') + '" data-tab="allies">👥 Aliados (' + alliesCount + ')</button>'
     + '</div>';
   var metaHtml = '<div class="inv-meta-bar">'
-    + '<span style="float:left">Bolsa: ' + totalGold + ' <span class="vi vi-coin sm"></span></span>'
+    + '<span style="float:left">Bolsa: ' + _fmtV(totalGold) + ' <span class="vi vi-coin sm"></span></span>'
     + 'Inventário (' + counts.all + ' itens)'
     + '</div>';
   if (window._invTab === 'equip'){
@@ -35346,7 +35378,7 @@ function _renderShopPopup(){
       var canAfford = totalGold >= displayPrice;
       var stock = _shopGetStock(npcId, name);
       var meta = (it.dd ? it.dd : '') + (it.ac ? '+' + it.ac + ' CA' : '') + (it.b ? '+' + it.b + ' ATK' : '');
-      var priceHtml = '<div class="shop-card-price' + (canAfford ? '' : ' too-expensive') + '">' + displayPrice + ' <span class="vi vi-coin sm"></span></div>';
+      var priceHtml = '<div class="shop-card-price' + (canAfford ? '' : ' too-expensive') + '">' + _fmtV(displayPrice) + ' <span class="vi vi-coin sm"></span></div>';
       var stockHtml = stock <= 2 ? '<div class="shop-card-stock' + (stock === 1 ? ' last' : '') + '">' + stock + ' un.</div>' : '';
       // 2026-05-18: USER REPORT — "vários itens com desenho errado" no shop.
       // Fix v2: HeraldicItems.iconSvg(name) com auto-strip de artigos PT-BR.
@@ -35420,7 +35452,7 @@ function _showShopItemDetail(name, npcId){
   if (it.mb) statLines.push('<b>MP:</b> +' + it.mb);
   if (it.sk) statLines.push('<b>Slots de Gema:</b> ' + it.sk);
   statLines.push('<b>Preço:</b> ' + (it.v || 0) + ' <span class="vi vi-coin sm"></span>');
-  if (p) statLines.push('<b>Sua bolsa:</b> ' + p.gold + ' <span class="vi vi-coin sm"></span>');
+  if (p) statLines.push('<b>Sua bolsa:</b> ' + _fmtV(p.gold) + ' <span class="vi vi-coin sm"></span>');
   // Build tags
   var tagHtml = (it.t || []).map(function(t){ return '<span class="inv-detail-tag">' + getTagLabel(t) + '</span>'; }).join('');
   // X-6.5.51CD (2026-05-18): D&D 5e skill checks AAA — Pechinchar/Intimidar/Avaliar
@@ -35582,7 +35614,7 @@ function _shopConfirmBuy(name, npcId){
     npc: shop.npc,
     title: 'Comprar ' + name,
     desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br>' + breakdownHtml + priceNote
-          + '<br><b>Preço final:</b> ' + finalPrice + ' <span class="vi vi-coin sm"></span>',
+          + '<br><b>Preço final:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
     cost: finalPrice,
     onConfirm: function(){
       var preGold = p.gold;
@@ -35660,11 +35692,11 @@ function _shopConfirmBuy(name, npcId){
 
 // D&D 5e PRICING CANONICAL — X-6.5.51CC (2026-05-18)
 // =============================================================================
-// PHB p.146: "undamaged weapons, armor, and other equipment fetch HALF (50%)
+// : "undamaged weapons, armor, and other equipment fetch HALF (50%)
 //   their cost when sold in a market. Gems, jewelry, art, and similar items
 //   retain their FULL (100%) value."
-// XGtE p.130: Magic Item Offer Table (Persuasão check) — vide _marketRollPersuasion.
-// DMG p.135: Magic Item Base Prices canonical (100/400/4000/20000/100000 gp).
+// : Magic Item Offer Table (Persuasão check) — vide _marketRollPersuasion.
+// : Magic Item Base Prices canonical (100/400/4000/20000/100000 gp).
 //
 // Nosso sistema:
 //   1. base_pct = 0.50 (mundane) | 1.00 (gem/jewelry/art) | XGtE check (magic)
@@ -35675,7 +35707,7 @@ function _shopConfirmBuy(name, npcId){
 //
 // Categorias só roteiam pro especialista correto (UI), preço final segue regras canonical.
 var MARKET_SPECIALIST_RULES = [
-  // === Velithra (joalheira) — gemas têm valor FULL canonical (PHB) ===
+  // === Velithra (joalheira) — gemas têm valor FULL canonical ===
   // gem/jewelry: base_pct 1.00 (PHB regra), specialist Velithra recebe +5% bonus.
   { tags: ['gem'],                        npc: 'velithra', specBonus: 0.05, cat: 'gem' },
   { tags: ['jewelry', 'accessory'],       npc: 'velithra', specBonus: 0.05, cat: 'jewelry' },
@@ -35964,9 +35996,9 @@ function _marketIsFullValueCategory(tags){
 }
 
 // Detecta se item é magic (rare+ ou tag explícita).
-// Magic items requerem Persuasão check (XGtE) pra vender — não usa 50% base.
+// Magic items requerem Persuasão check pra vender — não usa 50% base.
 // BUGFIX X-6.5.51CE (2026-05-18): gemas/joias têm tag 'magic' (mecanicamente
-// socketáveis) mas PHB p.146 diz que mantêm 100% valor → não devem disparar
+// socketáveis) mas diz que mantêm 100% valor → não devem disparar
 // XGtE check. Retorna false explicitamente para FullValueCategory items.
 function _marketIsMagicItem(itemName){
   var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
@@ -35982,11 +36014,11 @@ function _marketIsMagicItem(itemName){
 // =============================================================================
 // D&D 5e SKILL CHECKS — X-6.5.51CD (2026-05-18)
 // =============================================================================
-// Helpers genéricos pra rolar skills. Classe → proficiência canonical (PHB).
+// Helpers genéricos pra rolar skills. Classe → proficiência canonical.
 // Cada NPC pode reagir diferente ao mesmo skill (Thorne aceita Intimidation,
 // Mirena prefere Insight, Velithra aprecia Persuasion).
 
-// PHB p.51-58: cada classe tem skills proficient. Mapeamento canonical:
+// -58: cada classe tem skills proficient. Mapeamento canonical:
 // - Bardo: qualquer 3 skills (assumimos Persuasion + Performance)
 // - Paladino: Athletics + Insight + Intimidation + Medicine + Persuasion + Religion (choose 2)
 // - Feiticeiro: Arcana + Deception + Insight + Intimidation + Persuasion + Religion (choose 2)
@@ -36011,7 +36043,7 @@ var DND_CLASS_SOCIAL_SKILLS = {
   'Patrulheiro': { persuasion: false, intimidation: false, insight: true,  deception: false }
 };
 
-// Pega se player é proficient na skill via classe (PHB)
+// Pega se player é proficient na skill via classe
 function _dndSkillIsProficient(player, skillName){
   if (!player) return false;
   var cls = player.hero_class || player.class || '';
@@ -36050,7 +36082,7 @@ function _dndHaggleDC(itemName){
 }
 
 // =============================================================================
-// XGtE p.130 Magic Item Offer Table — roll d20 + CHA mod + (proficient ? prof : 0)
+// Magic Item Offer Table — roll d20 + CHA mod + (proficient ? prof : 0)
 // Retorna {roll, total, pct, label, narrative}.
 function _marketRollPersuasion(player, opts){
   opts = opts || {};
@@ -36239,7 +36271,7 @@ function _marketAttemptHaggle(itemName, npcKey, player, mode){
 }
 
 // =============================================================================
-// IDENTIFY — Magic items unidentified (DMG p.136)
+// IDENTIFY — Magic items unidentified
 // =============================================================================
 // X-6.5.51CD (2026-05-18). Magic items comprados começam unidentified.
 // State per-item via metadata.unidentified_items (set de item names).
@@ -36316,7 +36348,7 @@ function _marketPriceBreakdown(itemName, npcKey, player, action){
   var repTier = (typeof _marketReputationTier === 'function') ? _marketReputationTier(rep) : null;
   var repMult = _marketRepPriceMult(npcKey, action);
   var lines = [];
-  lines.push('<b>Valor base:</b> ' + baseValue + ' <span class="vi vi-coin sm"></span>');
+  lines.push('<b>Valor base:</b> ' + _fmtV(baseValue) + ' <span class="vi vi-coin sm"></span>');
   if (chaMod !== 0){
     var chaPct = Math.round((chaMult - 1) * 100);
     var chaSign = chaPct >= 0 ? '+' : '';
@@ -36332,7 +36364,7 @@ function _marketPriceBreakdown(itemName, npcKey, player, action){
 
 // Resolve item → especialista. Tags têm precedência ordenada.
 // X-6.5.51CC (2026-05-18): retorna specBonus (não mult) — preço final via
-// _marketCalculateSellPrice que combina base_pct (PHB) + specBonus + CHA + rep.
+// _marketCalculateSellPrice que combina base_pct + specBonus + CHA + rep.
 function _marketGetSpecialist(itemName){
   var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
   var tags = data.t || [];
@@ -36396,9 +36428,9 @@ function _marketAtmosphereLine(){
 // =============================================================================
 
 // X-6.5.51CC (2026-05-18): D&D 5e canonical sell flow
-//   1. Mundane items (PHB): 50% base + specialist bonus
-//   2. Gems/jewelry (PHB p.146): 100% FULL value
-//   3. Magic items (XGtE p.130): Persuasão d20 check obrigatório → 0-200%
+//   1. Mundane items: 50% base + specialist bonus
+//   2. Gems/jewelry: 100% FULL value
+//   3. Magic items : Persuasão d20 check obrigatório → 0-200%
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
   if (inv.length === 0) {
@@ -36428,14 +36460,14 @@ function _marketShowSell(p){
     var npcShort = spec.npc.split(' ')[0];
     return {
       icon: it.icon, label: it.name,
-      badge: (isMagic ? '~' : '+') + sellPrice + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
+      badge: (isMagic ? '~' : '+') + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
       _it: it, _spec: spec, _isMagic: isMagic
     };
   });
   _squareShowListPopup({
     stackKey: 'market_sell', icon: _heralIco('ic-bolsa'), title: 'Vender Itens',
-    flavor: '<i>Mundane: 50% base (PHB). Gemas/joias: 100% valor (PHB). Mágicos: Persuasão d20 (XGtE).</i><br>'
-          + '<i>Cada item vai pro especialista certo — bonus de +5-15%. CHA e reputação modificam o preço final.</i>',
+    flavor: '<i>Equipamento comum vende a metade do valor. Gemas e joias mantêm o valor cheio. Itens mágicos exigem negociação.</i><br>'
+          + '<i>Cada item vai pro mercador certo — especialistas pagam melhor. Sua reputação e charme afetam o preço final.</i>',
     items: items,
     onPick: function(item){
       var it = item._it;
@@ -36457,14 +36489,14 @@ function _marketShowSell(p){
       var sellPrice = _marketCalculateSellPrice(it.n, spec.key, p);
       var breakdown = _marketPriceBreakdown(it.n, spec.key, p, 'sell');
       var isFullValue = _marketIsFullValueCategory((getItemData(it.n) || {}).t || []);
-      var basePctLabel = isFullValue ? '100% (gema/joia — PHB)' : '50% base (PHB)';
-      var specBonusLabel = spec.specBonus > 0 ? ' + ' + Math.round(spec.specBonus * 100) + '% (especialista)' : '';
+      var basePctLabel = isFullValue ? '100% (gema mantém valor cheio)' : '50% (equipamento usado)';
+      var specBonusLabel = spec.specBonus > 0 ? ' + ' + Math.round(spec.specBonus * 100) + '% (especialista no ramo)' : '';
       _showConfirmPurchase({
         icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
         title: 'Vender ' + it.name,
         desc: '<b>' + it.name + '</b><br>' + breakdown + '<br>'
-              + '<i>Regra D&D:</i> ' + basePctLabel + specBonusLabel + '<br>'
-              + '<b>Oferta final:</b> <b>' + sellPrice + '</b> <span class="vi vi-coin sm"></span>',
+              + '<i>Base:</i> ' + basePctLabel + specBonusLabel + '<br>'
+              + '<b>Oferta final:</b> <b>' + _fmtV(sellPrice) + '</b> <span class="vi vi-coin sm"></span>',
         cost: sellPrice, creditMode: true,
         onConfirm: function(){
           var preGold = p.gold;
@@ -36476,7 +36508,7 @@ function _marketShowSell(p){
           var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
           _showServiceResultPopup({
             icon: spec.icon, npc: spec.npc,
-            narrative: reactionLine + '<br><br><b>+' + sellPrice + ' Valdoritas</b>',
+            narrative: reactionLine + '<br><br><b>+' + _fmtV(sellPrice) + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
@@ -36498,12 +36530,10 @@ function _marketSellMagicWithPersuasion(p, it, spec){
     icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
     title: 'Item Mágico: Negociar Venda',
     desc: '<b>' + it.name + '</b><br>'
-        + '<i>Valor base:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
-        + '<i>Itens mágicos seguem a <b>Tabela de Oferta de Item Mágico (XGtE p.130)</b>:</i><br>'
-        + '• <b>d20 + CHA(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ')</b> = ' + bonusStr + ' bônus<br>'
-        + '• ≤5: sem comprador · 6-9: 25% · 10-14: 50%<br>'
-        + '• 15-19: 75% · 20-24: 100% · 25-29: 150% · 30+: 200%<br>'
-        + '<br><i>Falha não consome o item — pode tentar de novo amanhã.</i>',
+        + '<i>Valor estimado:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
+        + '<i>Itens mágicos exigem negociação cuidadosa. O mercador pesa cada peça antes de fazer uma oferta.</i><br><br>'
+        + '<b>Teste de Persuasão:</b> d20 + CHA(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ') = ' + bonusStr + ' bônus<br>'
+        + '<br><i>"O resultado decide o quanto ele paga — de uma fração até o dobro do valor. Se ninguém quiser comprar hoje, volte outro dia."</i>',
     confirmLabel: '🎲 Rolar Persuasão',
     cancelLabel: 'Voltar',
     onConfirm: function(){
@@ -36536,7 +36566,7 @@ function _marketSellMagicWithPersuasion(p, it, spec){
         icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
         title: 'Aceitar oferta?',
         desc: rollHtml + pr.narrative + '<br>'
-            + '<b>Oferta:</b> ' + sellPrice + ' <span class="vi vi-coin sm"></span> <i>(' + Math.round(pr.pct * 100) + '% de ' + (it.value || 0) + ')</i>',
+            + '<b>Oferta:</b> ' + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span>',
         cost: sellPrice, creditMode: true,
         onConfirm: function(){
           var preGold = p.gold;
@@ -36549,7 +36579,7 @@ function _marketSellMagicWithPersuasion(p, it, spec){
           var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
           _showServiceResultPopup({
             icon: spec.icon, npc: spec.npc,
-            narrative: reactionLine + '<br><br><b>+' + sellPrice + ' Valdoritas</b>',
+            narrative: reactionLine + '<br><br><b>+' + _fmtV(sellPrice) + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
@@ -36690,7 +36720,7 @@ function _guildShowRecruits(p){
 }
 
 function _guildShowResearch(p){
-  // canonical: guild_research_data.py XGtE p.132 Research Downtime via CANON_RESEARCH
+  // canonical: guild_research_data.py Research Downtime via CANON_RESEARCH
   // RESEARCH_COST_GP=50, RESEARCH_DC=15, 4 topics × bonus_key/value=2/duration=5 turnos
   // 3 skills (investigation/history/arcana — todas INT)
   // Sucesso: aplica buff metadata.research_bonus_<topic>; +30 XP
@@ -36723,7 +36753,7 @@ function _guildShowResearch(p){
     return { icon: t.icon, label: t.label, badge: t.cost + ' V · DC ' + t.dc + ' INT', _t: t };
   });
   _squareShowListPopup({
-    stackKey: 'guild_research', icon: _heralIco('ic-mochila'), title: 'Pesquisa (XGtE)',
+    stackKey: 'guild_research', icon: _heralIco('ic-mochila'), title: 'Pesquisa',
     flavor: '<i>' + introLine + '</i><br><i>Cada tópico: teste DC ' + canonDC + ' + buff +' + (canonTopics ? 2 : 1) + ' por 5 turnos.</i>',
     items: items,
     onPick: function(item){
@@ -39154,7 +39184,7 @@ function _showAllyLoanResultPopup(lendersDetailed, onContinue){
 // USO:
 //   _showConfirmPurchase({
 //     icon: _heralIco('ic-cura'), npc: 'Irmã Elara', title: 'Curar Ferimentos',
-//     desc: 'Cura ferimentos via magia divina (1d8+3 HP). PHB p.230.',
+//     desc: 'Cura ferimentos via magia divina (1d8+3 HP).',
 //     cost: 30,
 //     onConfirm: function(){ /* paga + processa */ },
 //     onCancel: function(){}  // opcional
@@ -39181,9 +39211,9 @@ function _showConfirmPurchase(opts){
   if (costLabel) costLabel.textContent = creditMode ? 'A receber:' : 'Custo:';
   // Cost + gold como innerHTML pra renderizar ícone .vi-coin canonical (regra Moeda Valdorita)
   var coinIco = '<span class="vi vi-coin sm"></span>';
-  document.getElementById('cpp-cost').innerHTML = opts.cost + ' ' + coinIco;
+  document.getElementById('cpp-cost').innerHTML = _fmtV(opts.cost) + ' ' + coinIco;
   var goldEl = document.getElementById('cpp-gold');
-  goldEl.innerHTML = p.gold + ' ' + coinIco;
+  goldEl.innerHTML = _fmtV(p.gold) + ' ' + coinIco;
   goldEl.classList.toggle('insufficient', !canAfford);
   var warnEl = document.getElementById('cpp-warning');
   if (!canAfford) {
@@ -39192,7 +39222,7 @@ function _showConfirmPurchase(opts){
       if (GROUP_MEMBERS[i] && !GROUP_MEMBERS[i].dead) allyTotal += (GROUP_MEMBERS[i].gold || 0);
     }
     var canCoverWithAllies = (p.gold + allyTotal) >= opts.cost;
-    var warningHtml = '⚠️ Sem Valdoritas suficientes. <br>Faltam <b>' + (opts.cost - p.gold) + ' ' + coinIco + '</b>';
+    var warningHtml = '⚠️ Sem Valdoritas suficientes. <br>Faltam <b>' + _fmtV(opts.cost - p.gold) + ' ' + coinIco + '</b>';
     if (canCoverWithAllies) {
       warningHtml += ' — clique em "Pedir empréstimo" pra usar Valdoritas dos aliados.';
     } else if (opts.allowDebt) {
@@ -39215,9 +39245,9 @@ function _showConfirmPurchase(opts){
   var canDebt = !canAfford && opts.allowDebt;
   if (canAfford) {
     if (creditMode) {
-      confirmBtn.innerHTML = 'Confirmar (recebe ' + opts.cost + ' ' + coinIco + ')';
+      confirmBtn.innerHTML = 'Confirmar (recebe ' + _fmtV(opts.cost) + ' ' + coinIco + ')';
     } else {
-      confirmBtn.innerHTML = 'Confirmar (' + opts.cost + ' ' + coinIco + ')';
+      confirmBtn.innerHTML = 'Confirmar (' + _fmtV(opts.cost) + ' ' + coinIco + ')';
     }
     confirmBtn.disabled = false;
     confirmBtn.classList.remove('disabled');
@@ -39226,7 +39256,7 @@ function _showConfirmPurchase(opts){
     confirmBtn.disabled = false;
     confirmBtn.classList.remove('disabled');
   } else if (canDebt) {
-    confirmBtn.innerHTML = 'Pagar depois (' + opts.cost + ' ' + coinIco + ' em dívida)';
+    confirmBtn.innerHTML = 'Pagar depois (' + _fmtV(opts.cost) + ' ' + coinIco + ' em dívida)';
     confirmBtn.disabled = false;
     confirmBtn.classList.remove('disabled');
   } else {
@@ -39747,7 +39777,7 @@ function _renderInnRestPopup(bodyEl, d){
     { _room: 'stable', icon: _innIco('ic-cavalo'),    label: 'Estábulo',       desc: 'Palha dura, mas seguro',       badge: 'Grátis' },
     { _room: 'common', icon: _innIco('ic-estalagem'), label: 'Quarto Comum',   desc: 'Cama macia, padrão',           badge: '3 <span class="vi vi-coin sm"></span>' },
     { _room: 'royal',  icon: _innIco('ic-coroa'),     label: 'Suíte Real',     desc: 'Descanso luxuoso',             badge: '10 <span class="vi vi-coin sm"></span>' },
-    { _room: 'short',  icon: _innIco('ic-sono'),      label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis · PHB p.186' }
+    { _room: 'short',  icon: _innIco('ic-sono'),      label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis' }
   ];
   _aaaListSubScreen({
     theme: 'inn',
@@ -40248,8 +40278,8 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-estalagem'), 'Conversar com Martha', 'NPC dialogue', 'inn_npc_inn_martha'],
       [_heralIco('ic-sono'), 'Quartos / Descanso', '3 tipos (Long Rest)', 'nav:inn_rest'],
       [_heralIco('ic-mochila'), 'Comer Algo', '7 pratos no cardápio', 'nav:inn_meals'],
-      [_heralIco('ic-estalagem'), 'Descanso Curto', 'Grátis · PHB p.186', 'inn_short_rest'],
-      [_heralIco('ic-estalagem'), 'Relaxar', '10 <span class="vi vi-coin sm"></span> · XGtE p.131', 'inn_relaxation'],
+      [_heralIco('ic-estalagem'), 'Descanso Curto', 'Grátis', 'inn_short_rest'],
+      [_heralIco('ic-estalagem'), 'Relaxar', '10 <span class="vi vi-coin sm"></span>', 'inn_relaxation'],
       [_heralIco('ic-estalagem'), 'Aliados na sala', '0 reservados', 'inn_allies'],
       [_heralIco('ic-estalagem'), 'Investigar adega', 'Quest Martha', 'inn_cellar_quest']
     ]
@@ -40377,7 +40407,7 @@ var SUBSCREEN_DATA = {
     ]
   },
   'tavern_carousing': {
-    header: '🍻 Socializar (Carousing — XGtE)',
+    header: '🍻 Socializar na Taverna',
     flavor: 'Beber com pessoas pode render contatos importantes. Escolhe teu nível social.',
     buttons: [
       [_heralIco('ic-mochila'), 'Humilde', '10 <span class="vi vi-coin sm"></span> — DC 10 CHA', 'carouse_low'],
@@ -41262,7 +41292,7 @@ var ACTION_HANDLERS = {
     var noCondTexts = rd ? rd.no_condition_texts : ['Você relaxa profundamente.'];
     var introLine = introTexts[Math.floor(Math.random() * introTexts.length)];
     _showConfirmPurchase({
-      icon: _heralIco('ic-mochila'), npc: 'Martha', title: 'Relaxar (XGtE p.131)',
+      icon: _heralIco('ic-mochila'), npc: 'Martha', title: 'Relaxar ',
       desc: '<i>"' + introLine + '"</i><br><br>' +
             '<b>Efeito:</b> Remove condições negativas (Envenenado, Amedrontado, Encantado).<br>' +
             '<b>Custo:</b> ' + cost + ' Valdoritas',
@@ -41285,12 +41315,12 @@ var ACTION_HANDLERS = {
     });
   },
   'inn_short_rest':     function(p){
-    // Replica canonical PHB p.186 Short Rest — 1h, gasta Hit Dice pra recuperar HP. Grátis.
+    // Replica canonical Short Rest — 1h, gasta Hit Dice pra recuperar HP. Grátis.
     var hpRoll = 1 + Math.floor(Math.random() * 8);  // 1d8 (mock — varia por classe)
     var preHp = p.hp || 0;
     var preHpMax = p.hpMax || (preHp + 10);
     _showInfoPopup({
-      icon: _heralIco('ic-sono'), npc: 'Martha', title: 'Descanso Curto (PHB p.186)',
+      icon: _heralIco('ic-sono'), npc: 'Martha', title: 'Descanso Curto',
       desc: 'Hora de descanso. Gasta 1 Hit Die para recuperar HP.<br><br>' +
             '<b>Tempo:</b> 1 hora · <b>Custo:</b> Grátis<br>' +
             '<b>Recuperação:</b> 1d8 + CON modifier',
@@ -41331,7 +41361,7 @@ var ACTION_HANDLERS = {
   'buy_mirena_potion_superior':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cura'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Superior',  desc: '<i>8d4+8 HP. Líquido dourado e luminoso.</i>',                 cost: 450,  extraComplication: true, onApply: function(p, ctx){ var roll = 8 + Math.floor(Math.random()*25) + Math.floor(Math.random()*8); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>O líquido dourado toca seus lábios. Calor divino.</i><br><br>+' + ctx.heal + ' HP'; } }); },
   'buy_mirena_potion_suprema':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-cha'), npc: 'Mirena — Alquimista', item: 'Poção de Cura Suprema',   desc: '<i>10d4+20 HP. Brilho radiante divino.</i>',                   cost: 1350, extraComplication: true, onApply: function(p, ctx){ var roll = 20 + Math.floor(Math.random()*31); _heal(p, roll, 0); ctx.heal = roll; }, resultMsg: function(ctx){ return '<i>O frasco brilha como um pequeno sol. Você bebe e renasce.</i><br><br>+' + ctx.heal + ' HP' ; } }); },
   'buy_mirena_alchemist_fire':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-tochas'), npc: 'Mirena — Alquimista', item: 'Fogo Alquímico',          desc: '<i>Arremesso (6m). 1d4 fogo + Queimando (1d4 fogo/turno).</i>', cost: 50, extraComplication: true }); },
-  'buy_mirena_acid':             function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Mirena — Alquimista', item: 'Frasco de Ácido',         desc: '<i>Arremesso (6m). 2d6 ácido (PHB p.148).</i>',                cost: 25,  extraComplication: true }); },
+  'buy_mirena_acid':             function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-poção'), npc: 'Mirena — Alquimista', item: 'Frasco de Ácido',         desc: '<i>Arremesso (6m). 2d6 ácido.</i>',                cost: 25,  extraComplication: true }); },
   'buy_mirena_holy_water':       function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-stat-mp'), npc: 'Mirena — Alquimista', item: 'Água Benta',              desc: '<i>Arremesso (6m). 2d6 radiante vs mortos-vivos/demônios.</i>',cost: 25,  extraComplication: true }); },
   // Market — Mestre Corvus (cartógrafo) — canonical: cartographer_data.py
   // Tier 1 (compra direta): plains, forest, desert
@@ -41738,7 +41768,7 @@ var ACTION_HANDLERS = {
       });
       return;
     }
-    // canonical: temple_downtime_data.py RELIGIOUS_SERVICES via CANON_TEMPLE_DOWNTIME (XGtE p.131)
+    // canonical: temple_downtime_data.py RELIGIOUS_SERVICES via CANON_TEMPLE_DOWNTIME 
     // Estrutura canonical: id, name, emoji, desc, check_type (religion/medicine/persuasion), ability (intelligence/wisdom/charisma)
     var canonSvc = (typeof CANON_TEMPLE_DOWNTIME !== 'undefined' && CANON_TEMPLE_DOWNTIME.religious_services)
                    ? CANON_TEMPLE_DOWNTIME.religious_services : null;
@@ -41775,7 +41805,7 @@ var ACTION_HANDLERS = {
     });
     _squareShowListPopup({
       stackKey: 'temple_downtime', icon: _heralIco('ic-mochila'), title: 'Serviço Religioso',
-      flavor: '<i>Os sacerdotes oferecem três formas de servir hoje. Escolha conforme suas habilidades — cada uma testa uma perícia diferente. PHB p.230 / XGtE p.131.</i>',
+      flavor: '<i>Os sacerdotes oferecem três formas de servir hoje. Escolha conforme suas habilidades — cada uma testa uma perícia diferente. </i>',
       items: items,
       onPick: function(item){
         var s = item._s;
@@ -41786,7 +41816,7 @@ var ACTION_HANDLERS = {
         if (success){
           _gainXp(p, 25);
         }
-        // canonical: temple_downtime_data.py XGtE p.131 — d20 + skill check + reward block
+        // canonical: temple_downtime_data.py — d20 + skill check + reward block
         // Dice3D obrigatório (rule: tudo que envolve rolagem de dados mostra animação 3D)
         var rewards = success ? [{ type:'xp', amount: 25, label: 'XP' }] : [];
         _showServiceResultPopup({
@@ -41900,7 +41930,7 @@ var ACTION_HANDLERS = {
       ['❓ Sem categoria', '50% (default)']
     ].map(function(r){ return '<b>' + r[0] + '</b> — ' + r[1]; }).join('<br>');
     _showInfoPopup({
-      icon: _heralIco('ic-mochila'), npc: 'Mercado', title: 'Tabela de Venda (PHB Ch.5)',
+      icon: _heralIco('ic-mochila'), npc: 'Mercado', title: 'Tabela de Venda',
       desc: '<i>Sua bolsa está vazia agora — nada pra vender. Mas eis a tabela canonical:</i><br><br>' +
             rows + '<br><br>' +
             '<b>Taxa do mercado:</b> 10% sobre o total bruto (descontada na venda).',
@@ -42303,11 +42333,11 @@ var ACTION_HANDLERS = {
   'codex_item_potion':      function(p){ vToast('🧪 Poção de cura — restaura 2d4+2 HP. Comum. 50 Valdoritas.'); },
   'codex_item_turquoise':   function(p){ vToast('💎 Turquesa — gema +2 HP. Incomum. 75 Valdoritas.'); },
   'codex_item_elven_blade': function(p){ vToast('🌟 Espada Élfica — 1d8+1 corte, vantagem vs criaturas escuras. Raro.'); },
-  'codex_class_fighter':    function(p){ vToast('⚔️ Guerreiro — Mestre do combate. PHB p.70. Action Surge, Second Wind.'); },
-  'codex_class_ranger':     function(p){ vToast('🏹 Patrulheiro — Caçador da natureza. PHB p.89. Favored Enemy, Tracking.'); },
-  'codex_class_wizard':     function(p){ vToast('🔮 Mago — Estudioso arcano. PHB p.112. Spellbook, Arcane Recovery.'); },
-  'codex_class_cleric':     function(p){ vToast('✨ Clérigo — Servo divino. PHB p.56. Channel Divinity, Domains.'); },
-  'codex_class_rogue':      function(p){ vToast('🗡️ Ladino — Especialista furtivo. PHB p.94. Sneak Attack, Cunning Action.'); },
+  'codex_class_fighter':    function(p){ vToast('⚔️ Guerreiro — Mestre do combate. Action Surge, Second Wind.'); },
+  'codex_class_ranger':     function(p){ vToast('🏹 Patrulheiro — Caçador da natureza. Favored Enemy, Tracking.'); },
+  'codex_class_wizard':     function(p){ vToast('🔮 Mago — Estudioso arcano. Spellbook, Arcane Recovery.'); },
+  'codex_class_cleric':     function(p){ vToast('✨ Clérigo — Servo divino. Channel Divinity, Domains.'); },
+  'codex_class_rogue':      function(p){ vToast('🗡️ Ladino — Especialista furtivo. Sneak Attack, Cunning Action.'); },
   'codex_race_human':       function(p){ vToast('Humano — versátil. +1 todos atributos OU 2 atributos +1 + skill + feat.'); },
   'codex_race_elf':         function(p){ vToast('🧝 Elfo — gracioso, longevo. +2 DEX. Trance (4h sleep). Darkvision. Fey ancestry.'); },
   'codex_race_dwarf':       function(p){ vToast('Anão — robusto, leal. +2 CON. Darkvision. Resistência veneno. Stonecunning.'); },
@@ -43228,7 +43258,7 @@ function renderCityGroupPanel(){
     }
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
-    // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (PHB Tabela 1-2): barra
+    // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (): barra
     // mostra progresso DENTRO do nível atual = (xp - xpPrev) / (xpNext - xpPrev).
     // Ex: Wilzen L9, xp=52473, xpPrev=48000, xpNext=64000 → (4473/16000)=28%.
     // Card title/val seguem mostrando "xp/xpNext" cumulativo (52473/64000).
@@ -43253,7 +43283,8 @@ function renderCityGroupPanel(){
     var safeCls = _hubEsc(_classLabelPT(m.cls));
     var safeResName = _hubEsc(res.name);
 
-    var goldStr = (m.gold || 0).toLocaleString('pt-BR');
+    // USER 2026-05-18: formato 'k' para milhares — _fmtV substitui toLocaleString
+    var goldStr = _fmtV(m.gold || 0);
 
     // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
     html += '<div class="cgp-slot" data-slot="' + i + '">'
@@ -44982,7 +45013,7 @@ function _classHasSkillProficiency(cls, stat, skill){
   // Whitelist conservadora — só aplica proficiency se a skill é "canônica"
   // pra classe (PHB skill choices típicas, não Background custom).
   var c = (cls || '').toLowerCase();
-  // Bardos pegam QUALQUER 3 skills (PHB p.51) — assumir prof em TODAS.
+  // Bardos pegam QUALQUER 3 skills — assumir prof em TODAS.
   if (c === 'bardo') return true;
   // Ladinos: Acrobacia, Atletismo, Furtividade, Investigação, Percepção,
   //          Perspicácia, Persuasão, Atuação, Enganação, Intimidação
