@@ -564,14 +564,27 @@ LOG SINK (Fase 7):
   <title>Simulador da Cidade — Lendas de Valdoria</title>
   <!-- 2026-05-17 USER REQUEST: detector early de modo (file:// vs HTTPS) pra
        aplicar moldura igual à tela de auth (/web/) em dev/prod, mantendo
-       simuladores file:// sem moldura (já tem debug structure). Mesmo
-       padrão usado em exploracao.html e combate.html. -->
+       simuladores file:// sem moldura (já tem debug structure).
+       2026-05-18 BUG FIX (CRITICAL): moldura desktop NUNCA pode aparecer
+       dentro do Telegram WebApp. Detecta Telegram pre-SDK via:
+         1) location.hash contém tgWebAppPlatform (injetado pelo client TG)
+         2) navigator.userAgent contém 'Telegram'
+         3) window.TelegramWebviewProxy / TelegramWebviewProxyProto
+       Quando Telegram detectado → classe `sim-tg` (mesmo viewport, SEM
+       moldura épica). CSS abaixo usa `html.sim-prod:not(.sim-tg)` pra
+       moldura. Mesmo padrão em exploracao.html e combate.html. -->
   <script>
   (function() {
     try {
       var qs = new URLSearchParams(location.search);
       var isDev = (location.protocol === 'file:') || qs.get('dev') === '1';
-      document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
+      var isTG = (location.hash || '').indexOf('tgWebApp') >= 0
+                 || /Telegram/i.test(navigator.userAgent || '')
+                 || !!window.TelegramWebviewProxy
+                 || !!window.TelegramWebviewProxyProto;
+      var cls = isDev ? 'sim-dev' : 'sim-prod';
+      document.documentElement.classList.add(cls);
+      if (isTG) document.documentElement.classList.add('sim-tg');
     } catch (_) {
       document.documentElement.classList.add('sim-prod');
     }
@@ -913,10 +926,12 @@ LOG SINK (Fase 7):
        max-height min(100dvh - 32px, 932px) — 16px margem
        top/bottom pra moldura ser claramente visível.
 
-       Aplicada APENAS em html.sim-prod — simuladores file://
-       (html.sim-dev) ficam sem moldura preservando debug structure. */
+       Aplicada APENAS em html.sim-prod:not(.sim-tg) — simuladores file://
+       (html.sim-dev) ficam sem moldura preservando debug structure.
+       Telegram WebApp (html.sim-tg) tambem fica SEM moldura — preenche frame
+       inteiro do TG client. (2026-05-18 CRITICAL FIX). */
     @media (hover: hover) and (pointer: fine) {
-      html.sim-prod {
+      html.sim-prod:not(.sim-tg) {
         /* Override CSS vars do simulador pra match auth dims */
         --sim-frame-w: min(100vw, 430px) !important;
         --sim-frame-h: min(100dvh - 32px, 932px) !important;
@@ -934,7 +949,7 @@ LOG SINK (Fase 7):
         place-items: center !important;
         overflow: hidden !important;
       }
-      html.sim-prod body {
+      html.sim-prod:not(.sim-tg) body {
         /* Frame ÉPICO — gold border 2px + radius 18px + dark ring + gold glow */
         max-width: min(100vw, 430px) !important;
         width: min(100vw, 430px) !important;
@@ -5365,13 +5380,18 @@ body.perf-lite .vc-action-btn { transition: none; }
       return;
     }
     var params = new URLSearchParams(location.search);
-    if (params.get('nointro') === '1') {
+    /* 2026-05-18 CRITICAL FIX: Telegram WebApp NUNCA deve mostrar segunda
+       tela de loading. /play/ ja fez o loading completo com progress 0-100%.
+       Detecta via classe `sim-tg` (early detector acima). */
+    var isTG = document.documentElement.classList.contains('sim-tg');
+    if (params.get('nointro') === '1' || isTG) {
       window.__introTitleSkip = true;
-      /* 2026-05-13 USER REQUEST: nointro=1 = veio de transicao entre WebApps.
-         Mostra magic-circle imediato (mesma tela de TOQUE PARA INICIAR) ate
-         o conteudo renderizar. Auto-hide via window.load handler acima. */
-      window.__vTransitionLoaderShownAtBoot = true;
-      if (window._vTransitionLoader) window._vTransitionLoader.show('Carregando…');
+      /* Tela DENTRO do Telegram OU vindo de /play/: NUNCA mostrar magic-circle
+         redundante. O placeholder dark (#1a1510) ja esta visivel — conteudo
+         renderiza por cima dele direto. Sem "Buscando o caminho…" travado.
+         (Removido: __vTransitionLoaderShownAtBoot + _vTransitionLoader.show) */
+      var ld = document.getElementById('loading');
+      if (ld) ld.style.display = 'none';
       return;
     }
     var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);

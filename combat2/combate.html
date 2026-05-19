@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-18T18:11:22Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
 
 <!--
@@ -413,8 +413,18 @@
     // mesmo com ?dev=1. Bot DEV simula jogo pro jogador real — proibido expor.
     var inTg = !!(window.Telegram && window.Telegram.WebApp
                   && window.Telegram.WebApp.initData);
-    var isDev = !inTg && ((location.protocol === 'file:') || qs.get('dev') === '1');
+    // FIX 2026-05-18 (CRITICAL): Telegram SDK pode não ter carregado ainda no
+    // momento desse early-script. Detecta Telegram WebApp via hash/UA/proxy.
+    var isTGEarly = (location.hash || '').indexOf('tgWebApp') >= 0
+                    || /Telegram/i.test(navigator.userAgent || '')
+                    || !!window.TelegramWebviewProxy
+                    || !!window.TelegramWebviewProxyProto;
+    var isTG = inTg || isTGEarly;
+    var isDev = !isTG && ((location.protocol === 'file:') || qs.get('dev') === '1');
     document.documentElement.classList.add(isDev ? 'sim-dev' : 'sim-prod');
+    // Marca `sim-tg` quando dentro do Telegram → CSS desabilita moldura épica
+    // via `html.sim-prod:not(.sim-tg)`.
+    if (isTG) document.documentElement.classList.add('sim-tg');
     if (!isDev) {
       document.addEventListener('DOMContentLoaded', function() {
         var p = document.getElementById('sim-log-panel');
@@ -1191,12 +1201,13 @@ html.sim-prod .sim-side-panel { display: none !important; }
      - dark ring + gold glow ao redor
      - background epico em torno
 
-   Aplicada APENAS em html.sim-prod — simuladores file:// ficam
-   sem moldura preservando debug-panel.
+   Aplicada APENAS em html.sim-prod:not(.sim-tg) — simuladores file://
+   (html.sim-dev) e Telegram WebApp (html.sim-tg) ficam sem moldura.
+   (2026-05-18 CRITICAL FIX: moldura nunca dentro do Telegram WebApp).
    ============================================================ */
 @media (hover: hover) and (pointer: fine) {
-  html.sim-prod.sim-combat-root,
-  html.sim-prod {
+  html.sim-prod:not(.sim-tg).sim-combat-root,
+  html.sim-prod:not(.sim-tg) {
     --sim-frame-w: min(100vw, 430px) !important;
     --sim-frame-h: min(100dvh - 32px, 932px) !important;
     background:
@@ -1204,7 +1215,7 @@ html.sim-prod .sim-side-panel { display: none !important; }
       radial-gradient(circle at 78% 82%, rgba(40, 30, 60, 0.55) 0%, transparent 50%),
       radial-gradient(ellipse at 50% 50%, #1a1208 0%, #050302 100%) !important;
   }
-  html.sim-prod.sim-combat-root {
+  html.sim-prod:not(.sim-tg).sim-combat-root {
     max-width: min(100vw, 430px) !important;
     max-height: min(100dvh - 32px, 932px) !important;
     height: min(100dvh - 32px, 932px) !important;
@@ -9224,13 +9235,16 @@ document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/sc
     return;
   }
   var params = new URLSearchParams(location.search);
-  if (params.get('nointro') === '1') {
+  /* 2026-05-18 CRITICAL FIX: Telegram WebApp NUNCA mostra segunda tela de
+     loading. /play/ ja fez o loading completo com progress 0-100%. */
+  var isTG = document.documentElement.classList.contains('sim-tg');
+  if (params.get('nointro') === '1' || isTG) {
     window.__introTitleSkip = true;
-    /* 2026-05-13 USER REQUEST: nointro=1 = veio de transicao entre WebApps.
-       Mostra magic-circle imediato (mesma tela de TOQUE PARA INICIAR) ate
-       o conteudo renderizar. Auto-hide via window.load handler acima. */
-    window.__vTransitionLoaderShownAtBoot = true;
-    if (window._vTransitionLoader) window._vTransitionLoader.show('Carregando…');
+    /* Tela DENTRO do Telegram OU vindo de /play/: NUNCA mostrar magic-circle
+       redundante. Placeholder dark (#1a1510) ja visivel — conteudo renderiza
+       por cima dele direto. Sem "Buscando o caminho…" travado. */
+    var ld = document.getElementById('loading');
+    if (ld) ld.style.display = 'none';
     return;
   }
   var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);
