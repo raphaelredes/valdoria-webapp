@@ -3575,10 +3575,70 @@
       "cost": 0.04,
       "quality": "low",
       "category": "trade_good"
+    },
+    "totem-druidico": {
+      "timestamp": "2026-05-19T03:17:46.440156",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "folha-magica": {
+      "timestamp": "2026-05-19T03:17:46.440172",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "rolo-de-couro": {
+      "timestamp": "2026-05-19T03:17:46.440175",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "marreta": {
+      "timestamp": "2026-05-19T03:17:46.440177",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "picareta-mineiro": {
+      "timestamp": "2026-05-19T03:17:46.440178",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "mangual-estrela": {
+      "timestamp": "2026-05-19T03:17:46.440180",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "pote-de-po-magico": {
+      "timestamp": "2026-05-19T03:17:46.440182",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "florete": {
+      "timestamp": "2026-05-19T03:17:46.440184",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "espigao-de-ferro": {
+      "timestamp": "2026-05-19T03:17:46.440185",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
+    },
+    "goma-grude": {
+      "timestamp": "2026-05-19T03:17:46.440187",
+      "cost": 0.04,
+      "quality": "low",
+      "category": "base-template"
     }
   },
-  "last_run": "2026-05-16T21:44:15.864943",
-  "total_cost": 3.4187799999999995,
+  "last_run": "2026-05-19T03:17:46.440230",
+  "total_cost": 3.8188,
   "last_updated": "2026-05-17T21:30:13.724922",
-  "count": 584
+  "count": 606
 }
