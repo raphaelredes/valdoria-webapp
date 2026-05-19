@@ -13017,10 +13017,9 @@ function _heralIco(id, color, size){
 // pra indicar milhares (ex: 1500 → "1.5k", 13584 → "13.5k", 100000 → "100k").
 //
 // Regras:
-//   < 1000:        valor cheio ("999", "850", "1", "0")
-//   >= 1000 < 10k: 1 decimal ("1.5k", "9.8k", "3.0k")
-//   >= 10k:        sem decimal ("10k", "55k", "1500k")
-//   números exatos (múltiplos de 1000): "1k", "2k", "10k" (sem decimal mesmo < 10k)
+//   < 1000:         valor cheio ("999", "850", "1", "0")
+//   >= 1000 < 100k:  1 decimal quando há ("1.5k", "13.5k", "99.9k"; "1k" se exato)
+//   >= 100k:         sem decimal ("100k", "550k", "1500k")
 //
 // Use _fmtV(amount) em qualquer display player-facing de Valdoritas.
 // NUNCA aplique em cálculos internos — só em display.
@@ -13029,15 +13028,14 @@ function _fmtV(amount){
   var n = Math.floor(Math.abs(Number(amount)));
   var sign = amount < 0 ? '-' : '';
   if (n < 1000) return sign + n;
-  if (n < 10000){
-    // 1.5k, 9.8k, 1.0k → mostra decimal se houver
-    var rounded = Math.round(n / 100) / 10;  // 1500 → 1.5
+  if (n < 100000){
+    // 1.5k, 13.5k, 99.9k → mostra decimal se houver; 13000 → "13k"
+    var rounded = Math.round(n / 100) / 10;
     if (rounded === Math.floor(rounded)){
-      return sign + Math.floor(rounded) + 'k';  // 1000 → "1k"
+      return sign + Math.floor(rounded) + 'k';
     }
     return sign + rounded + 'k';
   }
-  // >= 10k: sem decimal
   return sign + Math.round(n / 1000) + 'k';
 }
 window._fmtV = _fmtV;  // expor globalmente
