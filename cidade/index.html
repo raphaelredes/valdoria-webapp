@@ -46949,6 +46949,14 @@ var RECURRING_NPCS = {
     name: 'Bjorn, o Seleiro',
     portraitImg: '/shared/img/merchants/bjorn.png',
     desc: 'Artesão das terras altas. Costura suas próprias botas, tece suas próprias cordas, e responde a quem ousa duvidar com um sorriso de pelo.'
+  },
+  // 2026-05-19: Garlen estava faltando em RECURRING_NPCS — _openMerchantDialogue
+  // falhava silenciosamente (encActive=false). Adicionado com portraitImg
+  // (PNG AI-generated v3 sem balança).
+  mer_garlen: {
+    name: 'Garlen Pesa-Justo',
+    portraitImg: '/shared/img/merchants/garlen.png',
+    desc: 'Cambista veterano, pesa cada moeda com precisão de joalheiro. Conhece o valor real de qualquer trade good — sal, especiarias, ferro bruto. Lida com cofre e câmbio honesto.'
   }
 };
 
@@ -47299,6 +47307,36 @@ var MARKET_MERCHANT_ENCOUNTERS = {
   // ═══ BJORN — Seleiro ═══════════════════════════════════════════
   bjorn_browse: {
     id: 'mer_bjorn_browse', npc: 'mer_bjorn', _isBrowse: true, script: [], choices: []
+  },
+
+  // ═══ GARLEN — Cambista (X-6.5.51EE 2026-05-19) ═════════════════
+  // Garlen estava faltando em RECURRING_NPCS — _openMerchantDialogue
+  // falhava silenciosamente (encActive=false). Adicionado encounter
+  // browse + topic 'trade' (mecânica trade goods PHB).
+  garlen_browse: {
+    id: 'mer_garlen_browse', npc: 'mer_garlen', _isBrowse: true, script: [], choices: []
+  },
+  garlen_trade: {
+    id: 'mer_garlen_trade',
+    npc: 'mer_garlen',
+    script: [
+      { type: 'narration', text: '<i>"Como funciona o câmbio?"</i>' },
+      { type: 'narration', text: 'Garlen pesa uma moeda na palma da mão, depois outra. Sorri sem alegria.' },
+      { type: 'speech', speaker: 'mer_garlen', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
+      { type: 'speech', speaker: 'mer_garlen', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
+    ],
+    choices: 'auto'
+  },
+  garlen_history: {
+    id: 'mer_garlen_history',
+    npc: 'mer_garlen',
+    script: [
+      { type: 'narration', text: '<i>"Há quanto tempo faz câmbio?"</i>' },
+      { type: 'speech', speaker: 'mer_garlen', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
+      { type: 'narration', text: 'Garlen ergue uma sobrancelha, ajeita o pince-nez.' },
+      { type: 'speech', speaker: 'mer_garlen', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
+    ],
+    choices: 'auto'
   }
 };
 
