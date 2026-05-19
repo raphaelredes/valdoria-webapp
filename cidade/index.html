@@ -14292,10 +14292,175 @@ function _marketShowAbsentRumor(p, merchant, state){
 //   💎 Joalheira → ic-ach-colecionador · 📜 Cartógrafo → ic-cartografia · ⛺ Seleiro → ic-mochila
 // 2026-05-18 AAA UPGRADE: usa PNG portraits AI-generated (gpt-image-2)
 // em vez de heraldic SVG generic. Path: /shared/img/merchants/{id}.png
-// (5 portraits: thorne, mirena, velithra, corvus, bjorn).
+// (6 portraits: thorne, mirena, velithra, corvus, bjorn, garlen).
+// X-6.5.51CJ (2026-05-18): zoom em tela cheia via vLightbox no toque/clique.
 function _merchantPortrait(id){
-  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + id + '" class="merchant-portrait" loading="lazy" />';
+  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + id +
+    '" class="merchant-portrait vlb-zoomable" loading="lazy" data-lb-alt="' + id + '" />';
 }
+
+// =============================================================================
+// V LIGHTBOX — Modal de zoom para imagens (X-6.5.51CJ 2026-05-18)
+// =============================================================================
+// USER REQUEST: tocar/clicar em portrait/item abre tela cheia com a imagem
+// no maior tamanho responsivo (max-width/height do viewport, mantém aspect).
+// Fecha ao tocar fora, ESC, ou botão X.
+//
+// API: vLightbox.open(src, opts) onde opts = { caption, alt }
+//      vLightbox.close()
+//
+// Wire automático: qualquer <img class="vlb-zoomable"> recebe click handler
+// que abre o lightbox com a própria src. Mobile-first: touch-action manipulation,
+// max 92vw / 92vh, lazy load image full-res, no scroll lock cosmético.
+
+(function(global){
+  if (global.vLightbox) return;
+  var overlay = null;
+  var imgEl = null;
+  var capEl = null;
+  var closeBtn = null;
+
+  function _ensureDom(){
+    if (overlay) return;
+    overlay = document.createElement('div');
+    overlay.id = 'v-lightbox';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'background:rgba(15,12,8,0.92)',
+      'display:none', 'align-items:center', 'justify-content:center',
+      'flex-direction:column', 'z-index:99999', 'padding:4vh 4vw',
+      'cursor:pointer', 'touch-action:manipulation',
+      'opacity:0', 'transition:opacity 0.2s ease'
+    ].join(';');
+
+    // Container interno (não fecha ao tocar na imagem)
+    var card = document.createElement('div');
+    card.style.cssText = 'max-width:92vw;max-height:92vh;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:default;pointer-events:auto;';
+    card.onclick = function(e){ e.stopPropagation(); };
+
+    imgEl = document.createElement('img');
+    imgEl.style.cssText = 'max-width:92vw;max-height:80vh;object-fit:contain;border:2px solid var(--v-gold,#c4953a);border-radius:8px;box-shadow:0 0 40px rgba(196,149,58,0.3),inset 0 0 20px rgba(0,0,0,0.5);background:linear-gradient(135deg,rgba(30,22,16,0.85),rgba(60,44,28,0.85));';
+    imgEl.setAttribute('decoding', 'async');
+    card.appendChild(imgEl);
+
+    capEl = document.createElement('div');
+    capEl.style.cssText = 'font-family:Cinzel,serif;font-size:14px;letter-spacing:2px;color:#c4953a;text-align:center;padding:6px 12px;background:rgba(15,12,8,0.85);border-radius:4px;display:none;';
+    card.appendChild(capEl);
+
+    closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.setAttribute('aria-label', 'Fechar');
+    closeBtn.style.cssText = 'position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:rgba(74,56,40,0.85);border:1px solid rgba(196,149,58,0.55);color:#e8dcc8;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;';
+    closeBtn.onmouseover = function(){ closeBtn.style.background='rgba(196,40,30,0.85)'; closeBtn.style.borderColor='#c44020'; };
+    closeBtn.onmouseout = function(){ closeBtn.style.background='rgba(74,56,40,0.85)'; closeBtn.style.borderColor='rgba(196,149,58,0.55)'; };
+    closeBtn.onclick = close;
+
+    overlay.appendChild(card);
+    overlay.appendChild(closeBtn);
+    overlay.onclick = close;
+    document.body.appendChild(overlay);
+
+    // ESC closes
+    document.addEventListener('keydown', function(e){
+      if (overlay && overlay.style.display !== 'none' && e.key === 'Escape') close();
+    });
+  }
+
+  function open(src, opts){
+    opts = opts || {};
+    _ensureDom();
+    imgEl.src = src;
+    imgEl.alt = opts.alt || '';
+    imgEl.style.display = '';
+    // Remove SVG container se existir
+    var existingSvgWrap = overlay.querySelector('.vlb-svg-wrap');
+    if (existingSvgWrap) existingSvgWrap.remove();
+    if (opts.caption){
+      capEl.textContent = opts.caption;
+      capEl.style.display = '';
+    } else {
+      capEl.style.display = 'none';
+    }
+    overlay.style.display = 'flex';
+    overlay.offsetHeight;
+    overlay.style.opacity = '1';
+  }
+
+  // openSvg: mostra SVG markup em tamanho grande (para items heráldicos vetoriais)
+  function openSvg(svgHtml, opts){
+    opts = opts || {};
+    _ensureDom();
+    imgEl.style.display = 'none';  // esconde IMG
+    // Cria/recria SVG wrap
+    var card = imgEl.parentElement;
+    var existingSvgWrap = overlay.querySelector('.vlb-svg-wrap');
+    if (existingSvgWrap) existingSvgWrap.remove();
+    var svgWrap = document.createElement('div');
+    svgWrap.className = 'vlb-svg-wrap';
+    svgWrap.style.cssText = 'width:min(85vw,85vh);height:min(85vw,85vh);max-width:85vw;max-height:80vh;display:flex;align-items:center;justify-content:center;border:2px solid var(--v-gold,#c4953a);border-radius:8px;box-shadow:0 0 40px rgba(196,149,58,0.3),inset 0 0 20px rgba(0,0,0,0.5);background:linear-gradient(135deg,rgba(30,22,16,0.85),rgba(60,44,28,0.85));padding:6vh 6vw;';
+    svgWrap.innerHTML = svgHtml;
+    // Force SVG to fill the container
+    var svg = svgWrap.querySelector('svg');
+    if (svg){
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.style.maxWidth = '100%';
+      svg.style.maxHeight = '100%';
+    }
+    card.insertBefore(svgWrap, capEl);
+    if (opts.caption){
+      capEl.textContent = opts.caption;
+      capEl.style.display = '';
+    } else {
+      capEl.style.display = 'none';
+    }
+    overlay.style.display = 'flex';
+    overlay.offsetHeight;
+    overlay.style.opacity = '1';
+  }
+
+  function close(){
+    if (!overlay) return;
+    overlay.style.opacity = '0';
+    setTimeout(function(){ overlay.style.display = 'none'; }, 200);
+  }
+
+  global.vLightbox = { open: open, openSvg: openSvg, close: close };
+
+  // Delegação global click:
+  // - <img class="vlb-zoomable"> → openLightbox(src) — para PNGs (portraits/items)
+  // - <div/span class="vlb-zoomable-svg"> → openSvg(innerHTML) — para SVG items
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (!t) return;
+    // IMG path
+    var img = (t.tagName === 'IMG') ? t : (t.closest ? t.closest('img.vlb-zoomable') : null);
+    if (img && img.classList && img.classList.contains('vlb-zoomable')){
+      e.preventDefault(); e.stopPropagation();
+      var src = img.getAttribute('data-lb-src') || img.src;
+      var caption = img.getAttribute('data-lb-caption') || img.alt || '';
+      open(src, { caption: caption, alt: img.alt });
+      return;
+    }
+    // SVG wrapper path
+    var svgWrap = t.closest ? t.closest('.vlb-zoomable-svg') : null;
+    if (svgWrap){
+      e.preventDefault(); e.stopPropagation();
+      var svgInner = svgWrap.innerHTML;
+      var svgCaption = svgWrap.getAttribute('data-lb-caption') || '';
+      openSvg(svgInner, { caption: svgCaption });
+      return;
+    }
+  }, true);  // capture phase pra evitar conflito com handlers do shop card
+
+  // Cursor + hover hint pra zoomable elements
+  var style = document.createElement('style');
+  style.textContent = '.vlb-zoomable, .vlb-zoomable-svg{cursor:zoom-in;transition:transform 0.15s ease;}'
+    + '.vlb-zoomable:hover, .vlb-zoomable-svg:hover{transform:scale(1.04);filter:brightness(1.1);}'
+    + '@media (hover:none){.vlb-zoomable:hover, .vlb-zoomable-svg:hover{transform:none;filter:none;}}';
+  document.head.appendChild(style);
+})(window);
 
 var MARKET_MERCHANTS = [
   {
@@ -14392,7 +14557,7 @@ var MARKET_MERCHANTS = [
   // Sexto mercador canonical. Vende commodities a 100% (preço estável PHB).
   {
     id: 'garlen',
-    icon: _heralIco('ic-banqueiro'),  // portrait PNG futuro: /shared/img/merchants/garlen.png
+    icon: _merchantPortrait('garlen'),
     name: 'Garlen Pesa-Justo',
     role: 'Cambista',
     desc: 'Homem magro, dedos manchados de tinta, balança de bronze sempre à mão. Não negocia armas nem magia — só mercadoria de peso e fé.',
@@ -35565,7 +35730,8 @@ function _showShopItemDetail(name, npcId){
   }
 
   card.innerHTML = ''
-    + '<div class="inv-detail-emoji">' + detailIcon + '</div>'
+    // X-6.5.51CJ (2026-05-18): vlb-zoomable-svg → tocar/clicar abre lightbox em tela cheia
+    + '<div class="inv-detail-emoji vlb-zoomable-svg" data-lb-caption="' + name.replace(/"/g, '&quot;') + '" title="Toque para ampliar">' + detailIcon + '</div>'
     + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + '</div>'
     + preBadges
