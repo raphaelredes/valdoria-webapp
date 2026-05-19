@@ -35979,36 +35979,49 @@ function _shopConfirmBuy(name, npcId){
 //
 // Categorias só roteiam pro especialista correto (UI), preço final segue regras canonical.
 var MARKET_SPECIALIST_RULES = [
-  // === ORDEM CRITICA (2026-05-19): regras MAIS especificas ANTES de regras
-  // amplas como `consumable`. Sem isso, Pergaminho Magico (tags consumable
-  // +magic+scroll) ia pra Mirena alchemy em vez de Corvus scroll. Mesmo bug
-  // com Racoes de 7 dias (consumable+food+camping) -> Bjorn.
+  // === ORDEM CRITICA (2026-05-19 v2): regras MAIS especificas ANTES de
+  // regras amplas. Items podem ter multiplas tags (ex: 'consumable+food+
+  // alchemy'). Roteador retorna no PRIMEIRO match. Sem ordem correta:
+  //   - Pergaminho Magico (consumable+scroll) -> Mirena (BUG, era Corvus)
+  //   - Racoes 7d (consumable+food+camping) -> Mirena (BUG, era Bjorn)
+  //   - Erva Curativa (consumable+food+forage+alchemy) -> Bjorn (BUG,
+  //     era Mirena pois e ingrediente alquimico)
+  //
+  // Hierarquia (top = mais especifico, sobrescreve mais geral):
+  //   1. trade_good -> Garlen
+  //   2. gem/jewelry -> Velithra (PHB: gem retain full value)
+  //   3. potion/healing/antidote -> Mirena (mais especifico que alchemy)
+  //   4. alchemy -> Mirena (ANTES de food/camping/monster_part — Erva,
+  //      Folha Driade, etc. sao ingredientes alquimicos)
+  //   5. scroll/map -> Corvus
+  //   6. food/camping -> Bjorn (Racoes, Tochas)
+  //   7. leather/monster_part -> Bjorn (couro/troféus)
+  //   8. weapon/armor/shield/metal -> Thorne
+  //   9. consumable generico -> Mirena (catch-all)
   // === Garlen (cambista) — trade goods têm preço estável (100% PHB) ===
-  // trade_good: base_pct 1.00 via FullValueCategory, specBonus 0 (sem premium).
   { tags: ['trade_good'],                 npc: 'garlen',   specBonus: 0,    cat: 'trade_good' },
-  // === Velithra (joalheira) — gemas têm valor FULL canonical ===
-  // gem/jewelry: base_pct 1.00 (PHB regra), specialist Velithra recebe +5% bonus.
+  // === Velithra (joalheira) — gemas têm valor FULL canonical (PHB) ===
   { tags: ['gem'],                        npc: 'velithra', specBonus: 0.05, cat: 'gem' },
   { tags: ['jewelry', 'accessory'],       npc: 'velithra', specBonus: 0.05, cat: 'jewelry' },
-  // === Mirena (alquimista) — poções/cura primeiro (mais específico) ===
+  // === Mirena (alquimista) — poções/cura/alquimia (ANTES de food/camping) ===
   { tags: ['potion', 'healing'],          npc: 'mirena',   specBonus: 0.15, cat: 'potion' },
   { tags: ['antidote'],                   npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
-  // === Corvus (cartografo) — scroll/map ANTES de consumable amplo ===
+  { tags: ['alchemy'],                    npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
+  // === Corvus (cartografo) — scroll/map ANTES de consumable ===
   { tags: ['map'],                        npc: 'corvus',   specBonus: 0.15, cat: 'map' },
   { tags: ['scroll'],                     npc: 'corvus',   specBonus: 0.10, cat: 'scroll' },
-  // === Bjorn (seleiro) — camping/food ANTES de consumable amplo ===
+  // === Bjorn (seleiro) — camping/food/leather (apenas se NAO alchemy) ===
   { tags: ['camping'],                    npc: 'bjorn',    specBonus: 0.10, cat: 'camping' },
   { tags: ['food'],                       npc: 'bjorn',    specBonus: 0.10, cat: 'camping' },
   { tags: ['leather', 'monster_part'],    npc: 'bjorn',    specBonus: 0.05, cat: 'material' },
-  // === Mirena alquimia genérico — só DEPOIS de scroll/camping (não captura tudo) ===
-  { tags: ['alchemy'],                    npc: 'mirena',   specBonus: 0.10, cat: 'alchemy' },
-  { tags: ['consumable'],                 npc: 'mirena',   specBonus: 0.05, cat: 'alchemy' },
   // === Thorne (ferreiro) — armas, armaduras ===
   { tags: ['weapon', 'martial_weapon'],   npc: 'thorne',   specBonus: 0.15, cat: 'weapon' },
   { tags: ['simple_weapon'],              npc: 'thorne',   specBonus: 0.10, cat: 'weapon' },
   { tags: ['armor', 'shield'],            npc: 'thorne',   specBonus: 0.15, cat: 'armor' },
   { tags: ['heavy_armor', 'medium_armor', 'light_armor'], npc: 'thorne', specBonus: 0.15, cat: 'armor' },
   { tags: ['metal'],                      npc: 'thorne',   specBonus: 0.05, cat: 'metal' },
+  // === Mirena catch-all consumable (depois de tudo especifico) ===
+  { tags: ['consumable'],                 npc: 'mirena',   specBonus: 0.05, cat: 'alchemy' },
   // === Fallback: mercador generico ===
 ];
 
@@ -36271,9 +36284,16 @@ var MARKET_NPC_REACTIONS = {
 
 // CHA mod ±5% por ponto, cap ±15%. Buying: CHA baixo = caro, alto = barato.
 // Selling: CHA baixo = barato (vende mal), alto = caro (vende bem).
+// 2026-05-19 BUG FIX: suportar AMBAS estruturas — mock player usa player.ab.h,
+// player REMOTE usa player.stats.cha. Antes a funcao retornava 1.0 (sem mod)
+// se nao houver player.stats — bug detectado via Chrome MCP test (CHA 4 a 18
+// resultava em preco identico). Fix: fallback chain ab.h -> stats.cha -> 10.
 function _marketChaPriceMult(player, action){
-  if (!player || !player.stats) return 1.0;
-  var cha = player.stats.cha || 10;
+  if (!player) return 1.0;
+  var cha;
+  if (player.ab && typeof player.ab.h === 'number') cha = player.ab.h;
+  else if (player.stats && typeof player.stats.cha === 'number') cha = player.stats.cha;
+  else cha = 10;
   var mod = Math.floor((cha - 10) / 2);
   var clampedMod = Math.max(-3, Math.min(3, mod));  // cap ±15%
   if (action === 'buy') return 1.0 - clampedMod * 0.05;   // ex: CHA 16 (+3) → 0.85 buy
@@ -36400,7 +36420,8 @@ function _dndHaggleDC(itemName){
 // Retorna {roll, total, pct, label, narrative}.
 function _marketRollPersuasion(player, opts){
   opts = opts || {};
-  var cha = (player && player.stats && player.stats.cha) || 10;
+  var cha = (player && player.ab && typeof player.ab.h === 'number') ? player.ab.h
+            : (player && player.stats && typeof player.stats.cha === 'number') ? player.stats.cha : 10;
   var chaMod = Math.floor((cha - 10) / 2);
   var profBonus = (player && player.proficiency_bonus) || 2;
   var isProficient = opts.proficient !== false;  // default: proficient
@@ -36772,7 +36793,8 @@ function _marketAttemptInsight(itemName, npcKey, player){
 function _marketPriceBreakdown(itemName, npcKey, player, action){
   var data = (typeof getItemData === 'function') ? (getItemData(itemName) || {}) : {};
   var baseValue = data.v || 1;
-  var cha = (player && player.stats && player.stats.cha) || 10;
+  var cha = (player && player.ab && typeof player.ab.h === 'number') ? player.ab.h
+            : (player && player.stats && typeof player.stats.cha === 'number') ? player.stats.cha : 10;
   var chaMod = Math.floor((cha - 10) / 2);
   var chaMult = _marketChaPriceMult(player, action);
   var rep = (window._marketRep && window._marketRep[npcKey]) || 0;
@@ -36951,7 +36973,8 @@ function _marketShowSell(p){
 
 // XGtE Magic Item Offer Table — flow: pré-roll info → confirm → roll d20 → resultado
 function _marketSellMagicWithPersuasion(p, it, spec){
-  var cha = (p.stats && p.stats.cha) || 10;
+  var cha = (p && p.ab && typeof p.ab.h === 'number') ? p.ab.h
+            : (p && p.stats && typeof p.stats.cha === 'number') ? p.stats.cha : 10;
   var chaMod = Math.floor((cha - 10) / 2);
   var prof = p.proficiency_bonus || 2;
   var bonus = chaMod + prof;
