@@ -7182,8 +7182,8 @@ body.perf-lite .vc-action-btn { transition: none; }
   <path d="M 50 22 L 56 28 L 52 32 L 46 26 Z" fill="#fff" opacity="0.7"/>
 </symbol>
 
-<symbol id="ic-liga-mithril" viewBox="0 0 120 120">
-  <!-- Mithril: estrela 8 pontas com cristal central -->
+<symbol id="ic-liga-mithral" viewBox="0 0 120 120">
+  <!-- Mithral: estrela 8 pontas com cristal central -->
   <!-- Estrela base 8-pontas -->
   <path d="M 60 8 L 68 44 L 100 36 L 76 60 L 100 84 L 68 76 L 60 112 L 52 76 L 20 84 L 44 60 L 20 36 L 52 44 Z" fill="currentColor" stroke="#0a0605" stroke-width="1.8"/>
   <!-- Cristal central -->
@@ -9258,7 +9258,7 @@ function buildMockHubScreen(player){
     allies: [],
     quest_tracker: { quests: _buildQuestTrackerFromActive() },
     progress_strip: {
-      // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithril)
+      // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithral)
       league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
       // ach_unlocked/ach_total computados dinamicamente — sistema progressivo (14 cadeias × 5 tiers = 70)
       ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
@@ -11205,13 +11205,13 @@ function _fmtDateEpicoPtBr(value){
   return _PT_DAYS_SHORT[d.getDay()] + ' · ' + relative;
 }
 
-// canonical: league_data.py — 5 tiers (Bronze/Prata/Ouro/Platina/Mithril) + thresholds
+// canonical: league_data.py — 5 tiers (Bronze/Prata/Ouro/Platina/Mithral) + thresholds
 var LEAGUE_TIERS = [
   { id: 'bronze',   icon: 'ic-liga-bronze',  name: 'Bronze',   minXp: 0,     maxXp: 2500,  color: '#cd7f32' },
   { id: 'silver',   icon: 'ic-liga-prata',   name: 'Prata',    minXp: 2500,  maxXp: 5000,  color: '#c0c0c0' },
   { id: 'gold',     icon: 'ic-liga-ouro',    name: 'Ouro',     minXp: 5000,  maxXp: 10000, color: '#ffd700' },
   { id: 'platinum', icon: 'ic-liga-platina', name: 'Platina',  minXp: 10000, maxXp: 20000, color: '#e5e4e2' },
-  { id: 'mithril',  icon: 'ic-liga-mithril', name: 'Mithril',  minXp: 20000, maxXp: 50000, color: '#b9d4f2' }
+  { id: 'mithral',  icon: 'ic-liga-mithral', name: 'Mithral',  minXp: 20000, maxXp: 50000, color: '#b9d4f2' }
 ];
 
 function _showLeaguePopup(p){
@@ -12955,11 +12955,11 @@ var HERALDIC_COLORS = {
   'ic-enemy-monstrosity': '#5a3030',  // vermelho-marrom monstro
   'ic-enemy-undead':      '#d8d0c0',  // osso undead
 
-  // ─── LIGAS (literais — bronze/prata/ouro/mithril) ───────────────
+  // ─── LIGAS (literais — bronze/prata/ouro/mithral) ───────────────
   'ic-liga-bronze':   '#8a5028',  // bronze
   'ic-liga-prata':    '#a8a8b0',  // prata
   'ic-liga-ouro':     '#e8c850',  // ouro (literal — gold OK)
-  'ic-liga-mithril':  '#a8d8e8'   // azul-claro mithril
+  'ic-liga-mithral':  '#a8d8e8'   // azul-claro mithral
 };
 
 // 2026-05-06: auto-colorize de TODAS as `<svg class="v-heraldic">` no DOM.
@@ -14486,8 +14486,8 @@ var MARKET_MERCHANTS = [
       '<i>Thorne bate uma peça no balcão.</i> "Acabou de sair da forja. Quente ainda."'
     ],
     talkOptions: [
-      { id: 'browse', q: 'Mostra o catálogo', a: '"Espadas de 15 a 300 Valdoritas. Cota de malha 75. Mithril? Tenho um peitoral por 500 — mas só vende pra quem prova valor."' },
-      { id: 'metal', q: 'Como conseguiu o mithril?', a: '"Caravana do norte. Caro. Mas a qualidade compensa. Quem usa mithril, sobrevive."' },
+      { id: 'browse', q: 'Mostra o catálogo', a: '"Espadas de 15 a 300 Valdoritas. Cota de malha 75. Mithral? Tenho um peitoral por 500 — mas só vende pra quem prova valor."' },
+      { id: 'metal', q: 'Como conseguiu o mithral?', a: '"Caravana do norte. Caro. Mas a qualidade compensa. Quem usa mithral, sobrevive."' },
       { id: 'repair', q: 'Conserta equipamento? (10 Valdoritas)', a: '<i>Thorne examina.</i> "Pequenos amassados. Conserto sim."', cost: 10 },
       { id: 'history', q: 'Há quanto tempo é ferreiro?', a: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. Forjei pra dois reis e três bandidos. Bandidos pagaram melhor."' }
     ]
@@ -16174,7 +16174,7 @@ var ARENA_TIERS = [
     { name: 'Kael Ferrolento',         cls: 'Paladino',   icon: _heralIco('ic-paladino'),     flavor: 'Sua armadura carrega os símbolos de uma ordem esquecida.' },
     { name: 'Zhenari Passos-do-Vento', cls: 'Monge',      icon: _heralIco('ic-monge'),        flavor: 'Move-se como o vento — você só percebe o golpe quando já é tarde.' }
   ]},
-  { id: 'mythril', icon: _heralIco('ic-liga-mithril', '#b9d4f2'), name: 'Tier Mithril', entry: 200, xp: 500, reward_min: 400, reward_max: 800, min_lvl: 17, enemies: [
+  { id: 'mythril', icon: _heralIco('ic-liga-mithral', '#b9d4f2'), name: 'Tier Mithral', entry: 200, xp: 500, reward_min: 400, reward_max: 800, min_lvl: 17, enemies: [
     { name: 'Aldrakar o Inquebrável',  cls: 'Guerreiro', icon: _heralIco('ic-guerreiro'),  flavor: 'Lenda viva da arena. Dizem que nunca sangrou em combate singular.' },
     { name: 'Velastra Cinza-Eterna',   cls: 'Maga',      icon: _heralIco('ic-mago'),       flavor: 'Mestra de magia arcana, seus feitiços reescrevem a realidade.' },
     { name: 'Gorvath Punho-Sagrado',   cls: 'Paladino',  icon: _heralIco('ic-paladino'),   flavor: 'Cavaleiro abençoado por uma divindade de guerra. Seu brilho cega.' },
@@ -16967,7 +16967,7 @@ var CODEX_DATA = {
     { name: 'Cota de Malha',        icon: _heralIco('ic-stat-ac'),        category: 'items', meta: 'Armadura · CA 16', unlocked: true, rarity: 'common' },
     { name: 'Poção de Cura',        icon: _heralIco('ic-poção'),          category: 'items', meta: '2d4+2 HP',         unlocked: true, rarity: 'common' },
     { name: 'Espada Élfica',        icon: _heralIco('ic-elfo'),           category: 'items', meta: '1d8+1 mágico',     unlocked: true, rarity: 'uncommon' },
-    { name: 'Cota de Mithril',      icon: _heralIco('ic-liga-mithril'),   category: 'items', meta: 'CA 18 leve',       unlocked: true, rarity: 'rare' },
+    { name: 'Cota de Mithral',      icon: _heralIco('ic-liga-mithral'),   category: 'items', meta: 'CA 18 leve',       unlocked: true, rarity: 'rare' },
     { name: 'Espada Flamejante',    icon: _heralIco('ic-ach-indomavel'),  category: 'items', meta: '1d8+2d6 fogo',     unlocked: false, rarity: 'very_rare' },
     // Classes (5/12) — todas as 12 D&D 5e (12 brasões existem!)
     { name: 'Guerreiro',  icon: _heralIco('ic-guerreiro'),   category: 'classes', meta: 'Mestre em armas',         unlocked: true, rarity: 'common' },
@@ -25872,7 +25872,7 @@ var CANON_FESTIVAL_FULL = {
     "smithing_trivia": {
       "name": "Quiz dos Ferreiros",
       "icon": "🔨",
-      "desc": "Um mestre ferreiro de cabelos grisalhos faz perguntas sobre metais e forja. \"Mostre que sabe a diferenca entre aco e mithril!\"",
+      "desc": "Um mestre ferreiro de cabelos grisalhos faz perguntas sobre metais e forja. \"Mostre que sabe a diferenca entre aco e mithral!\"",
       "cost": 5,
       "check": {
         "stat": "intelligence",
@@ -25887,7 +25887,7 @@ var CANON_FESTIVAL_FULL = {
         ]
       },
       "fail": {
-        "text": "\"Mithril não é um tipo de cobre, jovem.\" O mestre suspira e balança a cabeça.",
+        "text": "\"Mithral não é um tipo de cobre, jovem.\" O mestre suspira e balança a cabeça.",
         "xp": 5
       }
     },
@@ -27414,11 +27414,11 @@ var CANON_ITEMS_DB = {
   'Espada Longa':       {e: _heralIco('ic-mochila'), v:15,  r:'common',   t:['weapon','martial_weapon','versatile'], s:'main_hand', dd:'1d8', desc:'Aço forjado para guerreiros experientes.'},
   'Martelo de Guerra':  {e: _heralIco('ic-barbaro'), v:15,  r:'common',   t:['weapon','martial_weapon','versatile'], s:'main_hand', dd:'1d8', desc:'Cabeça pesada de aço temperado.'},
   'Espada Élfica':      {e: _heralIco('ic-elfo'), v:300, r:'rare',     t:['weapon','martial_weapon','finesse'], s:'main_hand', dd:'1d8', b:1, desc:'Forjada por elfos do Bosque Antigo. +1 ataque.'},
-  'Espada de Mithril':  {e: _heralIco('ic-liga-mithril'), v:500, r:'very_rare',t:['weapon','martial_weapon','versatile','magic'], s:'main_hand', dd:'1d8', b:2, desc:'Lâmina de mithril azulado. +2 ataque, leve como pluma.'},
+  'Espada de Mithral':  {e: _heralIco('ic-liga-mithral'), v:500, r:'very_rare',t:['weapon','martial_weapon','versatile','magic'], s:'main_hand', dd:'1d8', b:2, desc:'Lâmina de mithral azulado. +2 ataque, leve como pluma.'},
   // === ARMADURAS — Thorne ===
   'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','medium_armor'],            s:'chest',     ac:5,  desc:'Cota de malha de ferro. CA base 16.'},
   'Giboia de Pele':     {e: _heralIco('ic-lobo'), v:40,  r:'common',  t:['armor','light_armor'],             s:'chest',     ac:3,  desc:'Couro reforçado. CA base 12 + DES (máx +2).'},
-  'Peitoral de Mithril':{e: _heralIco('ic-liga-mithril'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:6, b:1, desc:'Peitoral leve e impenetrável de mithril forjado.'},
+  'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:6, b:1, desc:'Peitoral leve e impenetrável de mithral forjado.'},
   'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor'],                            s:'head',      ac:1,  desc:'Elmo simples de ferro. +1 CA.'},
   'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor'],                            s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
   'Grevas de Ferro':    {e: _heralIco('ic-mochila'), v:45,  r:'common',  t:['armor'],                            s:'legs',      ac:1,  desc:'Proteções de pernas em ferro. +1 CA.'},
@@ -27827,7 +27827,7 @@ var CANON_MARKET_SHOPS = {
       'Cajado de Salgueiro', 'Adaga Balanceada', 'Arco de Caça',
       'Arco Longo', 'Besta Leve', 'Tridente',
       // Armas de elite
-      'Espada Élfica', 'Espada de Mithril', 'Montante', 'Machado Grande', 'Alabarda',
+      'Espada Élfica', 'Espada de Mithral', 'Montante', 'Machado Grande', 'Alabarda',
       // Escudos
       'Escudo de Madeira', 'Escudo de Aço',
       // Armaduras leves
@@ -27837,7 +27837,7 @@ var CANON_MARKET_SHOPS = {
       // Armaduras pesadas
       'Brunea de Anéis',
       // Armaduras elite
-      'Peitoral de Mithril', 'Meia-Placa', 'Cota de Talas',
+      'Peitoral de Mithral', 'Meia-Placa', 'Cota de Talas',
       // Outros
       'Elmo Enferrujado', 'Elmo de Cavaleiro', 'Grevas de Ferro',
       'Botas Pesadas', 'Manoplas de Ferro',
@@ -35435,12 +35435,12 @@ var _HERALDIC_ITEM_ALIASES = {
   'Giboia de Pele':         'ic-it-gibao-peles',      // FIX: alias antigo apontava pra nome 'Gibao de Peles' que falhava slug
   'Brunea de Aneis':        'ic-it-brunea-aneis',
   'Brunea de Anéis':        'ic-it-brunea-aneis',     // FIX: variante com acento
-  'Peitoral de Mithril':    'ic-it-base-breastplate', // FIX: era furia-montanhas (visualmente errado pra mithril)
+  'Peitoral de Mithral':    'ic-it-base-breastplate', // FIX: era furia-montanhas (visualmente errado pra mithral)
   'Cota de Talas':          'ic-it-cota-talas',
   'Cota de Escamas':        'ic-it-cota-escamas',
   'Cota de Malha':          'ic-it-cota-malha',
   'Espada Élfica':          'ic-it-espada-longa-gelida', // FIX: gelida (lamina azulada elfica) > longa generica
-  'Espada de Mithril':      'ic-it-espada-longa-trovejante', // FIX: trovejante (azul/silver eletrico) > flamejante
+  'Espada de Mithral':      'ic-it-espada-longa-trovejante', // FIX: trovejante (azul/silver eletrico) > flamejante
   'Elmo de Cavaleiro':      'ic-it-base-knight-helm',
   'Manoplas de Ferro':      'ic-it-base-glove',
   'Botas Pesadas':          'ic-it-botas-pesadas',
@@ -40734,7 +40734,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-mochila'), 'Tier Bronze', '4 oponentes — 25 <span class="vi vi-coin sm"></span>', 'nav:arena_bronze'],
       [_heralIco('ic-mochila'), 'Tier Prata', '4 oponentes — 50 <span class="vi vi-coin sm"></span>', 'nav:arena_silver'],
       [_heralIco('ic-banco'), 'Tier Ouro', '4 oponentes — 100 <span class="vi vi-coin sm"></span>', 'nav:arena_gold'],
-      [_heralIco('ic-mochila'), 'Tier Mithril', '4 oponentes — 200 <span class="vi vi-coin sm"></span>', 'nav:arena_mithril'],
+      [_heralIco('ic-mochila'), 'Tier Mithral', '4 oponentes — 200 <span class="vi vi-coin sm"></span>', 'nav:arena_mithril'],
       [_heralIco('ic-arena'), 'Histórico', '23 vitórias', 'arena_history'],
       [_heralIco('ic-arena'), 'Ranking geral', 'pos. 47', 'arena_leaderboard']
     ]
@@ -41138,7 +41138,7 @@ var SUBSCREEN_DATA = {
     ]
   },
   'arena_mithril': {
-    header: '💎 Arena — Tier Mithril (nv 17-20)',
+    header: '💎 Arena — Tier Mithral (nv 17-20)',
     flavor: 'Mítico. Lutadores com nomes que fazem reis tremer.',
     buttons: [
       [_heralIco('ic-arena'), 'Drakhul Coração-de-Aço nv 17', '200 <span class="vi vi-coin sm"></span> — +300 XP / 400-800 <span class="vi vi-coin sm"></span>', 'arena_fight_drakhul'],
@@ -41840,7 +41840,7 @@ var ACTION_HANDLERS = {
     }
     var successMsg = _pickNonRepeating('cartographer_t2_success', CANON_CARTOGRAPHER.tier2_success, (window._cartographerHeard = window._cartographerHeard || {}));
     var buyMsg = _pickNonRepeating('cartographer_buy_t2', CANON_CARTOGRAPHER.buy_success_tier2, (window._cartographerHeard = window._cartographerHeard || {}));
-    _buyConfirm({ p: p, icon: _heralIco('ic-liga-mithril'), npc: 'Mestre Corvus', item: 'Mapa do Ermo Gelado',
+    _buyConfirm({ p: p, icon: _heralIco('ic-liga-mithral'), npc: 'Mestre Corvus', item: 'Mapa do Ermo Gelado',
                   desc: intro.replace(/\n/g, '<br>') + '<br><br>' +
                         '<b>CON:</b> d20=' + roll + (mod>=0?'+':'') + mod + ' = ' + total + ' vs DC ' + dc + ' ✅<br><br>' +
                         '<i>' + successMsg.replace(/\n/g, '<br>') + '</i>',
@@ -42398,7 +42398,7 @@ var ACTION_HANDLERS = {
   'bounty_goblin_ears':     function(p){ vToast('👹 Bounty aceita: Coletar 3 orelhas de goblin. Recompensa: 25 Valdoritas + 40 XP.'); },
 
   // Guild misc
-  'guild_equipment':        function(p){ vToast('⚔️ Equipamento da guilda: Espada Élfica (300 Valdoritas), Cota de Mithril (500 Valdoritas), Anel de Proteção (250 Valdoritas).'); },
+  'guild_equipment':        function(p){ vToast('⚔️ Equipamento da guilda: Espada Élfica (300 Valdoritas), Cota de Mithral (500 Valdoritas), Anel de Proteção (250 Valdoritas).'); },
   'guild_ranking':          function(p){ vToast('🏆 Ranking guilda — Posição #47 / 142 membros ativos. Top 33%.'); },
 
   // Temple misc
@@ -47141,8 +47141,8 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_thorne_metal',
     npc: 'mer_thorne',
     script: [
-      { type: 'narration', text: '<i>"Como conseguiu o mithril?"</i>' },
-      { type: 'speech', speaker: 'mer_thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithril, sobrevive."' }
+      { type: 'narration', text: '<i>"Como conseguiu o mithral?"</i>' },
+      { type: 'speech', speaker: 'mer_thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
     ],
     choices: 'auto'  // populated em _openMerchantDialogue
   },
