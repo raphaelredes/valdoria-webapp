@@ -359,4 +359,66 @@
   // Auto-preload manifest on script load so iconHTML() returns PNG
   // on first inventory open without delay. Non-blocking — async fetch.
   loadManifest();
+
+  /* ============================================================
+   * 2026-05-19: AUTO-SWAP via MutationObserver — garante que TODO
+   * novo <svg><use href="#ic-it-X"/> adicionado dinamicamente ao
+   * DOM seja substituído por PNG se o manifest tem o slug.
+   *
+   * Elimina necessidade de chamar vItems.upgrade() manualmente
+   * em cada popup/render. User pediu "garanta que nenhum local
+   * use mais os SVGs" — esta é a única forma robusta.
+   * ============================================================ */
+  function tryAutoSwapNode(node) {
+    if (!node || node.nodeType !== 1) return;
+    if (node.tagName === 'USE' || node.localName === 'use') {
+      swapSvgUseToPng(node);
+      return;
+    }
+    // Element node — varre <use> dentro
+    var uses = node.querySelectorAll && node.querySelectorAll('svg use');
+    if (uses && uses.length) {
+      for (var i = 0; i < uses.length; i++) {
+        swapSvgUseToPng(uses[i]);
+      }
+    }
+  }
+
+  function startAutoSwapObserver() {
+    if (typeof MutationObserver === 'undefined' || !document.body) {
+      // body ainda não pronto — adiar
+      if (typeof document !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', startAutoSwapObserver, { once: true });
+      }
+      return;
+    }
+    // Varre o DOM atual uma vez (cobre estado inicial)
+    loadManifest().then(function () {
+      tryAutoSwapNode(document.body);
+    });
+
+    var observer = new MutationObserver(function (mutations) {
+      // Throttle: agrupa mutations e processa após manifest pronto
+      if (!manifestState.loaded) return;
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.addedNodes && m.addedNodes.length) {
+          for (var j = 0; j < m.addedNodes.length; j++) {
+            tryAutoSwapNode(m.addedNodes[j]);
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    global.vItems._observer = observer;
+    console.info('[items-resolver] MutationObserver auto-swap active');
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startAutoSwapObserver, { once: true });
+    } else {
+      startAutoSwapObserver();
+    }
+  }
 })(typeof window !== 'undefined' ? window : this);
