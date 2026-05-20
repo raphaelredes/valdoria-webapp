@@ -84,25 +84,45 @@ var SERVICE_DIALOGUES_TAVERN = {
       // task #62 (2026-05-20) — backend_cb declarado para bot DEV chamar
       // tavern_drinks.buy_drink() server-side (charge gold, apply HP/MP).
       // Backend canonical: src/game/city/tavern_drinks.py:151 "tavern_buy_drink_<id>"
-      { id: 'ale',   label: '🍺 Cerveja Comum · 1 V (+1 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_ale' },
-      { id: 'cider', label: '🍎 Sidra de Maçã · 2 V (+2 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_cider' },
-      { id: 'mead',  label: '🍯 Hidromel do Vale · 4 V (+2 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_mead' },
-      { id: 'stout', label: '🍺 Stout Anã · 6 V (+3 HP/+1 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_stout' },
+      // task #84 (2026-05-20): resultText específico por bebida (cohesão).
+      { id: 'ale',   label: '🍺 Cerveja Comum · 1 V (+1 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_ale',
+        resultNarration: 'Grom serve a cerveja em caneca de prata e empurra na sua direção.',
+        resultText: '"Ao primeiro gole, o cansaço já alivia." <i>(sorri)</i> "<b>+1 HP recuperado.</b> Boa rodada."' },
+      { id: 'cider', label: '🍎 Sidra de Maçã · 2 V (+2 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_cider',
+        resultNarration: 'Grom pega um copo de cristal e despeja a sidra dourada, perfumada de maçã.',
+        resultText: '"Da pomareira da viúva Helga, esta. <i>(olhar de aprovação)</i> Tem doçura honesta. <b>+2 HP recuperado.</b>"' },
+      { id: 'mead',  label: '🍯 Hidromel do Vale · 4 V (+2 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_mead',
+        resultNarration: 'Grom puxa do barril de carvalho selado e serve o hidromel em copo de chifre lavrado.',
+        resultText: '"Mel selvagem da Cordilheira Etérea. <i>(passa o pano nas mãos)</i> Limpa a mente, abre caminho pra magia. <b>+2 MP recuperado.</b> Bebe devagar."' },
+      { id: 'stout', label: '🍺 Stout Anã · 6 V (+3 HP/+1 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_stout',
+        resultNarration: 'Grom abre o barril mais escuro com cuidado ritual. O cheiro de malte tostado preenche o ar.',
+        resultText: '"Stout Anã, de Karak Norn. <i>(serve em caneca de cobre)</i> Cura o corpo <b>e</b> a alma. <b>+3 HP, +1 MP recuperado.</b> Vai com calma — derruba quem não respeita."' },
       { id: 'back',  label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
 
   rumor: {
+    /* task #84 (2026-05-20) — DIALOGUE COHESION: cada choice traz resultText
+       específico (rumor real sobre o inimigo escolhido) em vez de cair no
+       generic "Anotado. Bom proveito" que era incoerente. */
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Cinco moedas, e te conto algo útil. <i>(estende a mão calejada)</i> Sobre o que quer saber?' },
       { type: 'narration', text: 'Você sente o peso da bolsa de moedas. Grom não vende rumor barato — o que ele conta vale a peça de prata.' }
     ],
     choices: [
-      { id: 'goblin', label: '👹 Sobre Goblins · 5 V (+2 dano vs)', cb: 'rumor-confirm' },
-      { id: 'wolf',   label: '🐺 Sobre Lobos · 5 V', cb: 'rumor-confirm' },
-      { id: 'troll',  label: '👹 Sobre Trolls · 5 V', cb: 'rumor-confirm' },
-      { id: 'random', label: '🎲 Boato genérico · 5 V', cb: 'rumor-confirm' },
+      { id: 'goblin', label: '👹 Sobre Goblins · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_goblin',
+        resultNarration: 'Grom recolhe as moedas e abaixa o tom. <i>(olha em volta antes de falar)</i>',
+        resultText: '"Goblins. Pequenos, covardes em combate justo, mortais em emboscada. <i>(faz gesto com a mão)</i> Atacam em bando, dez ou mais. Atire flechas longas — eles falham em moral quando perdem o líder. Apontar pro maior primeiro, sempre. <b>Bônus: +2 de dano contra goblins até o próximo descanso longo. PHB p.198.</b>"' },
+      { id: 'wolf',   label: '🐺 Sobre Lobos · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_wolf',
+        resultNarration: 'Grom apoia os cotovelos no balcão e respira fundo.',
+        resultText: '"Lobos. Caçam em alcateia de seis ou oito, raramente sós. <i>(passa o dedo pela mesa, marcando um círculo)</i> Têm Tactics — flanqueiam pra ganhar Vantagem em ataques. Fique de costas pra uma parede ou árvore. Fogo afugenta, mas eles voltam quando a chama some. <b>+2 de dano contra lobos até o próximo descanso longo. MM p.341.</b>"' },
+      { id: 'troll',  label: '👹 Sobre Trolls · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_troll',
+        resultNarration: 'Grom enxuga as mãos e fica sério. <i>(pega uma caneca de cerveja, bebe um gole)</i>',
+        resultText: '"Trolls. <i>(suspira)</i> Esses são osso duro. Regeneração de dez por turno — qualquer ferida que não seja ácido ou fogo se fecha. Se vir um, leve tocha ou óleo. Sem isso, ele não morre — só fica chateado. <b>+2 de dano contra trolls até o próximo descanso longo. MM p.291.</b>"' },
+      { id: 'random', label: '🎲 Boato genérico · 5 V (bônus aleatório)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_random',
+        resultNarration: 'Grom dá uma olhada discreta pelas mesas. <i>(volta-se, sussurrando)</i>',
+        resultText: '"Boato fresco da estrada. <i>(estala a língua)</i> Aventureiros voltaram falando de runas brilhantes no antigo templo a leste. Quem leu disse que aumentou a sorte de combate. <i>(dá de ombros)</i> Pode ser conversa de bêbado, ou pode ser informação real. Você decide. <b>Bônus mecânico aleatório aplicado (ataque, defesa, save, cura, ou ouro) até o próximo descanso longo. Detalhe: tavern_rumors_data.py.</b>"' },
       { id: 'back',   label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
@@ -116,9 +136,16 @@ var SERVICE_DIALOGUES_TAVERN = {
     ],
     choices: [
       // task #62: backend_cb = src/game/city/tavern_carousing.py:111 "tavern_carouse_do_<tier_id>"
-      { id: 'lower',  label: '🍺 Farra Humilde · 10 V · DC 10', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_lower' },
-      { id: 'middle', label: '🍷 Festa Refinada · 50 V · DC 15', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_middle' },
-      { id: 'upper',  label: '👑 Banquete Nobre · 250 V · DC 20', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_upper' },
+      // task #84: resultText específico por tier (cohesão).
+      { id: 'lower',  label: '🍺 Farra Humilde · 10 V · DC 10', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_lower',
+        resultNarration: 'Grom acena pra um grupo de carregadores e estaleiros. <i>(faz sinal pra trazerem mais um banco)</i>',
+        resultText: '"Senta com eles, Vossa Senhoria. Bebe a primeira rodada e escuta. <i>(sorri torto)</i> Aqui se faz contato com gente que conhece a estrada — barcos, cargas, atalhos. Carisma DC 10. <b>XGtE p.128 — Lower Class Carousing.</b>"' },
+      { id: 'middle', label: '🍷 Festa Refinada · 50 V · DC 15', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_middle',
+        resultNarration: 'Grom te leva pra sala privada nos fundos. Mercadores de tecido riem em volta de um tabuleiro de Conquista.',
+        resultText: '"Esses são mercadores médios — vinho importado e mãos que sabem contar moedas. <i>(piscar de olho)</i> Boa conversa abre portas pra contratos. Carisma DC 15. <b>XGtE p.128 — Middle Class Carousing.</b>"' },
+      { id: 'upper',  label: '👑 Banquete Nobre · 250 V · DC 20', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_upper',
+        resultNarration: 'Grom faz um gesto solene e abre a porta da Sala Alta. Dentro, três nobres ajustam casacos bordados.',
+        resultText: '"Vossa Senhoria precisa lembrar de cada nome, cada título. <i>(voz baixa)</i> Eles testam etiqueta antes de ouvir negócio. Carisma DC 20. Quem passa fica conhecido nas Casas. <b>XGtE p.128 — Upper Class Carousing.</b>"' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
   },
@@ -131,10 +158,19 @@ var SERVICE_DIALOGUES_TAVERN = {
     ],
     choices: [
       // task #62: backend_cb = src/game/city/tavern_pit_fight.py:89 "tavern_pitfight_bet_<amount>"
-      { id: 'bet10',  label: '👊 Apostar 10 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_10' },
-      { id: 'bet25',  label: '👊 Apostar 25 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_25' },
-      { id: 'bet50',  label: '👊 Apostar 50 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_50' },
-      { id: 'bet100', label: '👊 Apostar 100 V (alto risco)', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_100' },
+      // task #84: resultText específico por aposta (cohesão).
+      { id: 'bet10',  label: '👊 Apostar 10 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_10',
+        resultNarration: 'Grom anota a aposta de dez moedas no caderno de pedra. <i>(fecha o livro com som seco)</i>',
+        resultText: '"Aposta modesta — risco baixo. <i>(serve uma cerveja antes do combate)</i> Vitória paga vinte. Bom pra começar."' },
+      { id: 'bet25',  label: '👊 Apostar 25 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_25',
+        resultNarration: 'Grom estuda Vossa Senhoria com olhar de avaliador. <i>(anota a aposta no livro)</i>',
+        resultText: '"Vinte e cinco. <i>(sorri com cinismo)</i> Aposta de quem confia nos punhos. Cinquenta de retorno se sobreviver — desconto se cair no segundo round."' },
+      { id: 'bet50',  label: '👊 Apostar 50 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_50',
+        resultNarration: 'Grom assobia baixo. Outros apostadores em volta giram a cabeça. <i>(carrega o anel de prata)</i>',
+        resultText: '"Cinquenta. <i>(faz gesto de respeito)</i> Vossa Senhoria está confiante. Cem se vencer dois rounds. Se for derrotado cedo, eu cuido das despesas do curandeiro."' },
+      { id: 'bet100', label: '👊 Apostar 100 V (alto risco)', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_100',
+        resultNarration: 'Grom faz uma pausa longa, dedos tamborilando no balcão. <i>(troca olhares com o juiz da arena)</i>',
+        resultText: '"Cem moedas. <i>(volta-se)</i> Aposta de quem ou ganha ou se arrepende muito. Duzentas pra Vossa Senhoria se vencer. <i>(voz mais baixa)</i> Se perder... bem, melhor não pensar nisso."' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
   },
@@ -182,8 +218,13 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>Inspiração 1d6 (PHB p.53).</b>' }
     ],
     choices: [
-      { id: 'tip_1', label: '🎵 Gorjeta 1 V · só ouvir', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_1' },
-      { id: 'tip_5', label: '🎵 Gorjeta 5 V · Inspiração 1d6', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_5', renownDelta: 1 },
+      // task #84: resultText por gorjeta — cohesão.
+      { id: 'tip_1', label: '🎵 Gorjeta 1 V · só ouvir', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_1',
+        resultNarration: 'Lyra olha pra Vossa Senhoria com gratidão silenciosa. <i>(aceita a moeda, guarda no broche de pena)</i>',
+        resultText: '"Obrigada. <i>(começa a tocar uma balada melancólica)</i> Não é toda noite que se ouve com atenção." <i>Você relaxa enquanto a melodia preenche a taverna.</i>' },
+      { id: 'tip_5', label: '🎵 Gorjeta 5 V · Inspiração 1d6', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_5', renownDelta: 1,
+        resultNarration: 'Lyra ergue os olhos, focada em Vossa Senhoria. <i>(troca a melodia pra algo mais íntimo e poderoso)</i>',
+        resultText: '"Para Vossa Senhoria. <i>(canta com voz cristalina)</i> Que a coragem te acompanhe quando o silêncio falar mais alto que o aço." <b>+1d6 Inspiração Bardica até o próximo descanso longo (PHB p.53). +1 Renown da Taverna.</b>' },
       { id: 'flirt', label: '💬 "Toca algo só pra mim?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
       { id: 'request', label: '🎭 "Conhece a Balada de Korrigan?" · História DC 12', cb: 'dice:history:12:+0' },
       { id: 'back',  label: '↩ "Talvez depois."', cb: 'close' }
@@ -200,7 +241,10 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Mas Vossa Senhoria pode pechinchar. <i>(sorri torto)</i> Se souber falar bonito — ou se for amigo de quem aqui já é casa.' }
     ],
     choices: [
-      { id: 'browse', label: '⚔ Ver lista de mercenários', cb: 'mercenaries-confirm', backend_cb: 'tavern_mercenaries_open' },
+      // task #84: resultText específico (cohesão).
+      { id: 'browse', label: '⚔ Ver lista de mercenários', cb: 'mercenaries-confirm', backend_cb: 'tavern_mercenaries_open',
+        resultNarration: 'Grom abre a porta lateral. Os três mercenários enfileiram-se, prontos pra apresentação.',
+        resultText: '"Primeiro, Drelya — orca, martelo de duas mãos, vinte moedas o dia. Atrás dela, Karn — espadachim humano, quinze. Por último, Tarn-Sombra — halfling escarmecedor, dezoito. <i>(cruza os braços)</i> Contrato semanal padrão. Vossa Senhoria escolhe."' },
       { id: 'negotiate', label: '💬 "Desconto, Grom?" · Persuasão DC 15', cb: 'dice:persuasion:15:+2' },
       { id: 'insight', label: '🔍 "Quem aqui é confiável?" · Intuição DC 13', cb: 'dice:insight:13:+1' },
       { id: 'rude',   label: '"Vendendo pessoas, Grom?"', cb: 'opinion-rude', renownDelta: -2 },
@@ -218,7 +262,10 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'A taxa não é barata. Quarenta moedas o dia base, mais bônus de risco. Mas se Vossa Senhoria vai longe — vale cada Valdorita.' }
     ],
     choices: [
-      { id: 'browse', label: '🗺 Ver exploradores disponíveis', cb: 'adventurers-confirm', backend_cb: 'tavern_adventurers_open' },
+      // task #84: resultText específico (cohesão).
+      { id: 'browse', label: '🗺 Ver exploradores disponíveis', cb: 'adventurers-confirm', backend_cb: 'tavern_adventurers_open',
+        resultNarration: 'Grom abre a pasta e organiza os pergaminhos sobre o balcão. <i>(aponta um a um)</i>',
+        resultText: '"Yorath, batedor de Vale-Cinza, conhece as Marcas e a Floresta do Norte. Sira-Vento, anã das montanhas — mapeia minas e túneis. <i>(folha o terceiro)</i> Os outros dois saíram pra missão, voltam em três dias. Quarenta moedas o dia, mais quinze por terra hostil. <b>XGtE p.131.</b>"' },
       { id: 'persuade', label: '💬 "Vale meio do preço?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'history', label: '📜 "Algum já desbravou as Marcas?" · História DC 14', cb: 'dice:history:14:+1' },
       { id: 'back',   label: '↩ "Penso bem."', cb: 'close' }
@@ -234,7 +281,10 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Apostas variam. <i>(sorri com cinismo gentil)</i> Ossos do Dragão são o clássico — proficiência em Dice Set (<b>PHB p.154</b>) dá vantagem. Cartas requer Engano <b>ou</b> Percepção pra não ser enganado. Bebida... bem, Constituição contra Constituição até alguém cair.' }
     ],
     choices: [
-      { id: 'bones',     label: '🐉 Ossos do Dragão · 5 V', cb: 'games-confirm', backend_cb: 'tavern_bones_menu' },
+      // task #84: resultText específico pra ossos (cohesão).
+      { id: 'bones',     label: '🐉 Ossos do Dragão · 5 V', cb: 'games-confirm', backend_cb: 'tavern_bones_menu',
+        resultNarration: 'Grom te conduz à mesa de Ossos do Dragão. Quatro jogadores abrem espaço com olhares curiosos.',
+        resultText: '"Cinco moedas pela entrada — devolvidas em parte se ficar até o final da rodada. <i>(coloca o copo de couro sobre a mesa)</i> Três dados de seis lados. Aposta acompanha. <b>PHB p.154 Dice Set proficiency dá Vantagem em uma rolagem.</b>"' },
       { id: 'cards',     label: '🃏 Cartas · Engano DC 13', cb: 'dice:deception:13:+1' },
       { id: 'drinking',  label: '🍺 Concurso de Bebida · CON DC 15', cb: 'dice:constitution:15:+0' },
       { id: 'observe',   label: '👁 Apenas observar · Intuição DC 11', cb: 'dice:insight:11:+0' },

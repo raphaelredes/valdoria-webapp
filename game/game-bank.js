@@ -81,10 +81,19 @@ var SERVICE_DIALOGUES_BANK = {
     ],
     choices: [
       // task #64 (2026-05-20): backend canonical bank.py:298-307 "bank_deposit_gold_<amount>"
-      { id: 'd_50',   label: '🪙 Depositar 50 V · taxa 0V',  cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_50', renownDelta: +1 },
-      { id: 'd_100',  label: '🪙 Depositar 100 V · taxa 1V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_100', renownDelta: +1 },
-      { id: 'd_500',  label: '💰 Depositar 500 V · taxa 3V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_500', renownDelta: +2 },
-      { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3 },
+      // task #84 (2026-05-20): resultText específico por valor (cohesão).
+      { id: 'd_50',   label: '🪙 Depositar 50 V · taxa 0V',  cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_50', renownDelta: +1,
+        resultNarration: 'Aldwin pesa as cinquenta Valdoritas na balança de prato. <i>(anota o lance no livro-razão com caligrafia precisa)</i>',
+        resultText: '"Cinquenta — sem taxa, isento até cem como cortesia da Casa." <i>(carimba o lacre)</i> "Recibo emitido. <b>+1 Renown.</b>"' },
+      { id: 'd_100',  label: '🪙 Depositar 100 V · taxa 1V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_100', renownDelta: +1,
+        resultNarration: 'Aldwin abre a gaveta superior e separa noventa e nove Valdoritas pra Cofre. Uma moeda fica de lado — a taxa.',
+        resultText: '"Cem depositadas, uma Valdorita de taxa. <i>(sorri ligeiro)</i> Padrão da Casa." <b>+1 Renown.</b> "Recibo selado e lacrado."' },
+      { id: 'd_500',  label: '💰 Depositar 500 V · taxa 3V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_500', renownDelta: +2,
+        resultNarration: 'Aldwin chama um segundo banqueiro pra pesar quinhentas moedas. <i>(rituais maiores exigem testemunha)</i>',
+        resultText: '"Quinhentas — taxa de três Valdoritas, abaixo do meio por cento padrão. <i>(carimba duplo)</i> Cliente significativo merece tarifa privilegiada." <b>+2 Renown.</b>' },
+      { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3,
+        resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Cobre Vossa Senhoria com olhar de respeito profundo. Dois guardas escoltam o cofre interno.',
+        resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renown. Acesso a investimentos premium liberado.</b>' },
       { id: 'd_persuade', label: '💬 "Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
@@ -97,10 +106,19 @@ var SERVICE_DIALOGUES_BANK = {
     ],
     choices: [
       // task #64: backend canonical bank.py:361-372 "bank_withdraw_gold_<amount>"
-      { id: 'w_50',   label: '🪙 Retirar 50 V · taxa 1V',   cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_50', renownDelta: 0 },
-      { id: 'w_100',  label: '🪙 Retirar 100 V · taxa 2V',  cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_100', renownDelta: 0 },
-      { id: 'w_500',  label: '💰 Retirar 500 V · taxa 10V', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_500', renownDelta: 0 },
-      { id: 'w_max',  label: '💰 Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0 },
+      // task #84: resultText específico por valor (cohesão).
+      { id: 'w_50',   label: '🪙 Retirar 50 V · taxa 1V',   cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_50', renownDelta: 0,
+        resultNarration: 'Aldwin retira do cofre uma bolsa de couro selada com o brasão da Casa. <i>(conta 50 Valdoritas em silêncio)</i>',
+        resultText: '"Cinquenta menos uma de taxa. <i>(empurra a bolsa pelo balcão)</i> Vossa Senhoria conferiu? A Casa não devolve depois do selo aberto."' },
+      { id: 'w_100',  label: '🪙 Retirar 100 V · taxa 2V',  cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_100', renownDelta: 0,
+        resultNarration: 'Aldwin conta as moedas em pilhas de dez. Anota no livro-razão com tinta sépia.',
+        resultText: '"Cem menos dois — noventa e oito Valdoritas em mão. <i>(carimba o lacre da bolsa)</i> Selo da Casa garante peso correto até a porta. Depois, é Vossa Senhoria que conta."' },
+      { id: 'w_500',  label: '💰 Retirar 500 V · taxa 10V', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_500', renownDelta: 0,
+        resultNarration: 'Aldwin chama o guarda da entrada e pede testemunha pra retirada. Quinhentas moedas ocupam meia gaveta interna.',
+        resultText: '"Quatrocentas e noventa nas mãos. <i>(testemunha assinada)</i> Aviso: andar com tanto no bolso atrai bandidos. Posso emprestar guarda até o portão por mais cinco?"' },
+      { id: 'w_max',  label: '💰 Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0,
+        resultNarration: 'Aldwin pausa um momento. <i>(olha por cima dos óculos meia-lua)</i> Fechar conta é decisão séria.',
+        resultText: '"Saldo total, descontados dois por cento. <i>(empurra a bolsa cheia)</i> A conta fica suspensa por seis meses — se voltar antes, retomamos sem taxa de reabertura. Boa jornada, Vossa Senhoria."' },
       { id: 'w_persuade', label: '💬 "Taxa menor pra cliente fiel?" · Persuasão DC 15', cb: 'dice:persuasion:15:+1' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
@@ -113,9 +131,16 @@ var SERVICE_DIALOGUES_BANK = {
     ],
     choices: [
       // task #64: backend canonical bank_loans.py:247 "bank_loan_take_<tier_id>"
-      { id: 'l_100',  label: '📜 Pedir 100 V · 30 dias · juros 10V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_small', renownDelta: 0 },
-      { id: 'l_500',  label: '📜 Pedir 500 V · 30 dias · juros 50V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_medium', renownDelta: 0 },
-      { id: 'l_1000', label: '📜 Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', backend_cb: 'bank_loan_take_large', renownDelta: 0 },
+      // task #84: resultText específico por tier de empréstimo (cohesão).
+      { id: 'l_100',  label: '📜 Pedir 100 V · 30 dias · juros 10V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_small', renownDelta: 0,
+        resultNarration: 'Aldwin escolhe o primeiro contrato — o mais simples, dos três. <i>(carimba duas vezes)</i>',
+        resultText: '"Cem Valdoritas emprestadas, juros simples de dez por cento ao mês. <i>(empurra o contrato)</i> Trinta dias pra pagar tudo, ou principal mais juros. Atraso traz multa de vinte por cento, e a terceira falta vai à Justiça." <b>Empréstimo registrado.</b>' },
+      { id: 'l_500',  label: '📜 Pedir 500 V · 30 dias · juros 50V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_medium', renownDelta: 0,
+        resultNarration: 'Aldwin escolhe o segundo contrato. <i>(pede testemunha — um banqueiro júnior aparece e assina)</i>',
+        resultText: '"Quinhentas Valdoritas, cinquenta de juros. <i>(passa a pena pro contrato)</i> Vossa Senhoria assina aqui, e aqui — duas vias. Trinta dias. <b>Empréstimo registrado.</b> Espero não ver Vossa Senhoria de volta sem o pagamento."' },
+      { id: 'l_1000', label: '📜 Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', backend_cb: 'bank_loan_take_large', renownDelta: 0,
+        resultNarration: 'Aldwin pausa antes de pegar o terceiro contrato. <i>(estuda Vossa Senhoria por um momento longo)</i>',
+        resultText: '"Mil Valdoritas. <i>(traz o contrato selado de cera vermelha)</i> Sessenta dias, duzentos de juros. <b>Empréstimo registrado.</b> Se falhar duas vezes, o brasão da Casa vai à porta do Castelo. Eu, pessoalmente, espero não ter que enviar."' },
       { id: 'l_insight', label: '🔍 "Quais os termos exatos?" · Intuição DC 13', cb: 'dice:insight:13:+1' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]

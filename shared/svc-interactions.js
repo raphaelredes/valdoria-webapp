@@ -172,21 +172,45 @@
 
   /**
    * Confirma purchase/serviço + aplica Renown delta + mostra mensagem do NPC.
+   *
    * task #62 (2026-05-20): se ch.backend_cb declarado, chama vCity.act
    * pra aplicar effect real no Player server-side (bot DEV).
+   *
+   * task #84 (2026-05-20) — DIALOGUE COHESION FIX:
+   * Antes: TODAS as choices `-confirm` mostravam a mesma mensagem genérica
+   * (confirmMsgs.generic), causando incoerência (player escolhe "Sobre Lobos"
+   * e vê "Anotado. Bom proveito" — texto de pedido de bebida).
+   *
+   * Agora: choice pode declarar `resultText` (speech específico) e/ou
+   * `resultNarration` (narração específica) que sobrescrevem o genérico.
+   * Quando ausentes, usa fallback genérico (back-compat).
+   *
+   * User reportou: "diálogos da cidade estão com resultado sem coesão".
    */
   window._showPurchaseConfirm = function(npc, optionLabel, renownDelta, ch) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var confirmMsgs = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs) || {};
     var defaultMsg = 'NPC registra a transação. <i>(gesto pragmático)</i> "Combinado. Boa jornada, viajante."';
-    var msg = confirmMsgs.generic || defaultMsg;
+
+    /* Choice-specific overrides — preferido (cohesão) */
+    var specificNarration = (ch && ch.resultNarration) || confirmMsgs.narration || 'NPC anota o valor com gesto preciso.';
+    var specificMsg = (ch && ch.resultText) || confirmMsgs.generic || defaultMsg;
+
+    /* Script multi-segment: aceita ch.resultScript (array de {type, text})
+       pra cenas mais ricas (ex: rumor com múltiplas linhas). */
+    var script;
+    if (ch && Array.isArray(ch.resultScript) && ch.resultScript.length > 0) {
+      script = ch.resultScript;
+    } else {
+      script = [
+        { type: 'narration', text: specificNarration },
+        { type: 'speech', speaker: npc.name, text: specificMsg }
+      ];
+    }
 
     _renderViaCanonical({
       npc: npc,
-      script: [
-        { type: 'narration', text: confirmMsgs.narration || 'NPC anota o valor com gesto preciso.' },
-        { type: 'speech', speaker: npc.name, text: msg }
-      ],
+      script: script,
       choices: [{ id: 'continue', label: '↩ Voltar', cb: 'close' }]
     });
     window._applyRenownDelta(faction, renownDelta);
