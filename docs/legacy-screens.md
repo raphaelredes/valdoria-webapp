@@ -1,25 +1,25 @@
 
-# Telas Legadas & DependÍncias do Telegram Native
+# Telas Legadas & Depend√™ncias do Telegram Native
 
-Em conformidade com a Regra Suprema de "Zero Texto Formatado para Telegram Native" (ver `CLAUDE.md`), todos os fluxos do jogo agora assumem que o formato principal  È puramente WebApp.
+Em conformidade com a Regra Suprema de "Zero Texto Formatado para Telegram Native" (ver `CLAUDE.md`), todos os fluxos do jogo agora assumem que o formato principal  √© puramente WebApp.
 
-Algumas telas ainda sofrem de resquÌcios de arquitetura antiga que gerava conte˙do e design voltado a balıes de chat inline do Telegram via strings formatadas de HTML (`format_msg`). Elas devem ser convertidas ‡ medida que forem sendo atualizadas.
+Algumas telas ainda sofrem de resqu√≠cios de arquitetura antiga que gerava conte√∫do e design voltado a bal√µes de chat inline do Telegram via strings formatadas de HTML (`format_msg`). Elas devem ser convertidas √† medida que forem sendo atualizadas.
 
 ## Lista de Telas Obsoletas (Usando apenas texto pass-through)
 
 1. **Atividades na Cidade**
    - Banco (`bank.py` e rotas anexas)
    - Estalagem (`inn.py` e rotas anexas)
-   - Templo / Taverna (A interatividade j· pode ser tabulada ou enviada em structs JSON mas frequentemente reverte para strings formatadas).
+   - Templo / Taverna (A interatividade j√° pode ser tabulada ou enviada em structs JSON mas frequentemente reverte para strings formatadas).
 
 2. **Rankings e Registros Externos**
-   - Mural dos Aventureiros (`heroes_wall.py`): Gera ranking interpolando HTML `<b>` e Ìcones `??`. Precisar· de reestruturaÁ„o para devolver endpoints JSON para o hub.
+   - Mural dos Aventureiros (`heroes_wall.py`): Gera ranking interpolando HTML `<b>` e √≠cones `??`. Precisar√° de reestrutura√ß√£o para devolver endpoints JSON para o hub.
 
-## EstratÈgia de MigraÁ„o ObrigatÛria
-Quando tocar nestes mÛdulos, a orientaÁ„o principal de refatoraÁ„o ser·:
-1. Eliminar constructos string intensivos formatados de resposta no core das mec‚nicas.
-2. Inserir dicion·rios brutos em keys reservadas do dicion·rio `result` (e.g., `_heroes_wall = [{pos: 1, name: "Legolas", score: 50}]`).
-3. Construir arquivos de design puro (`css`/`js`) em `valdoria-webapp` atrelados ‡ rota para renderizar com visual rico e alinhado ao *Valdoria Design System*.
+## Estrat√©gia de Migra√ß√£o Obrigat√≥ria
+Quando tocar nestes m√≥dulos, a orienta√ß√£o principal de refatora√ß√£o ser√°:
+1. Eliminar constructos string intensivos formatados de resposta no core das mec√¢nicas.
+2. Inserir dicion√°rios brutos em keys reservadas do dicion√°rio `result` (e.g., `_heroes_wall = [{pos: 1, name: "Legolas", score: 50}]`).
+3. Construir arquivos de design puro (`css`/`js`) em `valdoria-webapp` atrelados √† rota para renderizar com visual rico e alinhado ao *Valdoria Design System*.
 
-> O texto gerado (ex: `result["text"]`) deve tender a zero, substituÌdo completamente pelos blocos estÈticos nas requisiÁıes Frontend.
+> O texto gerado (ex: `result["text"]`) deve tender a zero, substitu√≠do completamente pelos blocos est√©ticos nas requisi√ß√µes Frontend.
 
