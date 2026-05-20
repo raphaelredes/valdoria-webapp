@@ -80,10 +80,12 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Depósito é direito de cidadão, não favor. <i>(prepara a balança de prato)</i> A Casa cobra meio por cento sobre cada cem Valdoritas — taxa que mantém o cofre selado, os guardas pagos, e o ferro das portas afiado. Quanto Vossa Senhoria deseja confiar a nós hoje?' }
     ],
     choices: [
-      { id: 'd_50',   label: '🪙 Depositar 50 V · taxa 0V',  cb: 'deposit-confirm', renownDelta: +1 },
-      { id: 'd_100',  label: '🪙 Depositar 100 V · taxa 1V', cb: 'deposit-confirm', renownDelta: +1 },
-      { id: 'd_500',  label: '💰 Depositar 500 V · taxa 3V', cb: 'deposit-confirm', renownDelta: +2 },
-      { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', renownDelta: +3 },
+      // task #64 (2026-05-20): backend canonical bank.py:298-307 "bank_deposit_gold_<amount>"
+      { id: 'd_50',   label: '🪙 Depositar 50 V · taxa 0V',  cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_50', renownDelta: +1 },
+      { id: 'd_100',  label: '🪙 Depositar 100 V · taxa 1V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_100', renownDelta: +1 },
+      { id: 'd_500',  label: '💰 Depositar 500 V · taxa 3V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_500', renownDelta: +2 },
+      { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3 },
+      { id: 'd_persuade', label: '💬 "Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },
@@ -94,10 +96,12 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Dois por cento de taxa em retiradas — política da Casa, não decisão minha. <i>(coloca o carimbo sobre o lacre)</i> Quanto Vossa Senhoria precisa hoje? O cofre não fecha até a oitava hora.' }
     ],
     choices: [
-      { id: 'w_50',   label: '🪙 Retirar 50 V · taxa 1V',   cb: 'withdraw-confirm', renownDelta: 0 },
-      { id: 'w_100',  label: '🪙 Retirar 100 V · taxa 2V',  cb: 'withdraw-confirm', renownDelta: 0 },
-      { id: 'w_500',  label: '💰 Retirar 500 V · taxa 10V', cb: 'withdraw-confirm', renownDelta: 0 },
-      { id: 'w_max',  label: '💰 Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', renownDelta: 0 },
+      // task #64: backend canonical bank.py:361-372 "bank_withdraw_gold_<amount>"
+      { id: 'w_50',   label: '🪙 Retirar 50 V · taxa 1V',   cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_50', renownDelta: 0 },
+      { id: 'w_100',  label: '🪙 Retirar 100 V · taxa 2V',  cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_100', renownDelta: 0 },
+      { id: 'w_500',  label: '💰 Retirar 500 V · taxa 10V', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_500', renownDelta: 0 },
+      { id: 'w_max',  label: '💰 Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0 },
+      { id: 'w_persuade', label: '💬 "Taxa menor pra cliente fiel?" · Persuasão DC 15', cb: 'dice:persuasion:15:+1' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },
@@ -108,9 +112,11 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Empréstimo é coisa séria, Vossa Senhoria. <i>(separa os três contratos sobre o mármore)</i> A Casa cobra dez por cento ao mês sobre o principal — juros simples, não compostos. Atraso paga vinte por cento de multa, e a terceira falta significa que o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde.' }
     ],
     choices: [
-      { id: 'l_100',  label: '📜 Pedir 100 V · 30 dias · juros 10V',   cb: 'loan-confirm', renownDelta: 0 },
-      { id: 'l_500',  label: '📜 Pedir 500 V · 30 dias · juros 50V',   cb: 'loan-confirm', renownDelta: 0 },
-      { id: 'l_1000', label: '📜 Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', renownDelta: 0 },
+      // task #64: backend canonical bank_loans.py:247 "bank_loan_take_<tier_id>"
+      { id: 'l_100',  label: '📜 Pedir 100 V · 30 dias · juros 10V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_small', renownDelta: 0 },
+      { id: 'l_500',  label: '📜 Pedir 500 V · 30 dias · juros 50V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_medium', renownDelta: 0 },
+      { id: 'l_1000', label: '📜 Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', backend_cb: 'bank_loan_take_large', renownDelta: 0 },
+      { id: 'l_insight', label: '🔍 "Quais os termos exatos?" · Intuição DC 13', cb: 'dice:insight:13:+1' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },
