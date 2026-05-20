@@ -250,14 +250,34 @@
         window._npcDispatchCascadeChoice(cb, dialogue);
       }
       if (ch.continueDialogue && dialogues && dialogues[ch.continueDialogue]) {
-        window._renderEncounterPopup(dialogues[ch.continueDialogue]);
+        // task #68 fix: prefer canonical engine
+        if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+          window.vEncounter.render(dialogues[ch.continueDialogue], { dialogues: dialogues });
+        } else if (typeof window._renderEncounterPopup === 'function') {
+          window._renderEncounterPopup(dialogues[ch.continueDialogue]);
+        }
       } else {
-        ov.classList.remove('active');
+        if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+          window.vEncounter.close();
+        } else if (ov) {
+          ov.classList.remove('active');
+        }
       }
       return true;
     }
+    // task #68 (2026-05-20) CRITICAL FIX — user reportou: click em choice do
+    // greeting (ex: Grom "Uma cerveja, por favor") NÃO FUNCIONAVA. Root cause:
+    // _renderEncounterPopup é LEGACY cidade-only, espera enc.npc como string
+    // key em RECURRING_NPCS. Mas SERVICE_DIALOGUES_X têm enc.npc como OBJETO
+    // ({name, desc, portrait}). Lookup falha → early return → nada acontece.
+    // Fix: prefer vEncounter.render (canonical, aceita npc como objeto direto).
     if (dialogues && dialogues[ch.id]) {
-      window._renderEncounterPopup(dialogues[ch.id]);
+      if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+        // Preserve opts.dialogues pra chain continuar funcionando
+        window.vEncounter.render(dialogues[ch.id], { dialogues: dialogues });
+      } else if (typeof window._renderEncounterPopup === 'function') {
+        window._renderEncounterPopup(dialogues[ch.id]); // legacy fallback
+      }
       return true;
     }
     return false;
