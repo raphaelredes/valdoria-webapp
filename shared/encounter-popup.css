@@ -16,7 +16,11 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  animation: encFadeIn 0.4s ease-out;
+  /* 2026-05-20: opacity:1 base + animation-fill-mode:forwards. Sem isso, em alguns
+     browsers a animação encFadeIn termina e o opacity volta pra default. Garante
+     que o popup fica visível mesmo se a animação for skipada/throttled. */
+  opacity: 1;
+  animation: encFadeIn 0.4s ease-out forwards;
 }
 #encounter-overlay.active { display: flex; }
 @keyframes encFadeIn {
