@@ -66,9 +66,16 @@ var SERVICE_DIALOGUES_INN = {
       { type: 'speech', speaker: 'Martha', text: 'Três quartos disponíveis hoje, aventureiro. <i>(coloca o monóculo)</i> Comum: cinco moedas a noite, dormitório compartilhado. Privado: vinte moedas, com fechadura e janela. Real: cem moedas, cama de penas e banheira própria. <b>Descanso Longo restaura HP/MP completo (PHB p.186)</b> — mas só se dormires oito horas sem interrupção.' }
     ],
     choices: [
-      { id: 's_common', label: '🛏 Comum · 5V · Long Rest básico', cb: 'sleep-confirm', backend_cb: 'inn_sleep_common', renownDelta: 0 },
-      { id: 's_private', label: '🛏 Privado · 20V · Long Rest seguro', cb: 'sleep-confirm', backend_cb: 'inn_sleep_private', renownDelta: 1 },
-      { id: 's_royal', label: '👑 Real · 100V · Long Rest + buff', cb: 'sleep-confirm', backend_cb: 'inn_sleep_royal', renownDelta: 3 },
+      // task #84: resultText específico por quarto (cohesão).
+      { id: 's_common', label: '🛏 Comum · 5V · Long Rest básico', cb: 'sleep-confirm', backend_cb: 'inn_sleep_common', renownDelta: 0,
+        resultNarration: 'Martha te entrega uma chave de ferro simples. <i>(aponta a escada estreita)</i> O dormitório fica no andar de cima.',
+        resultText: '"Cinco moedas, quarto comum — dois beliches, lençóis limpos. <i>(sorri honesta)</i> Não é luxo, mas é seguro." <b>Descanso Longo completo. HP/MP restaurados. PHB p.186.</b>' },
+      { id: 's_private', label: '🛏 Privado · 20V · Long Rest seguro', cb: 'sleep-confirm', backend_cb: 'inn_sleep_private', renownDelta: 1,
+        resultNarration: 'Martha pega a chave de bronze com selo da casa. <i>(sobe a escada à frente, mostrando o caminho)</i>',
+        resultText: '"Vinte moedas — quarto privado, segundo andar, janela pra Praça. Fechadura nova, instalada esse ano." <i>(entrega a chave com leve sorriso)</i> <b>Descanso Longo completo + segurança garantida. +1 Renown.</b>' },
+      { id: 's_royal', label: '👑 Real · 100V · Long Rest + buff', cb: 'sleep-confirm', backend_cb: 'inn_sleep_royal', renownDelta: 3,
+        resultNarration: 'Martha curva-se ligeiramente — gesto raro. Chama Joana pra preparar o quarto Real com banho de pétalas e lençóis de seda.',
+        resultText: '"Cem moedas, o melhor da casa. <i>(serve um vinho de cortesia)</i> Cama de penas, banheira própria, lareira acesa. Vossa Senhoria desperta com vigor extra amanhã." <b>Long Rest + Inspiração 1d6 ao acordar (PHB p.125). +3 Renown.</b>' },
       { id: 's_persuade', label: '💬 "Sou amigo da casa, Martha?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
       { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
     ]
@@ -81,9 +88,16 @@ var SERVICE_DIALOGUES_INN = {
       { type: 'speech', speaker: 'Martha', text: 'Cozinha simples, mas honesta. <i>(começa a esfregar a tábua de cortar)</i> Sopa do dia, três moedas. Ensopado de carneiro, oito. Banquete completo com vinho do Vale, vinte. <b>Refeição farta recupera 1 hit die imediatamente (mecânica caseira D&D 5e DMG p.267 alimentação heroica).</b>' }
     ],
     choices: [
-      { id: 'm_soup', label: '🍲 Sopa do Dia · 3V · +1 HP', cb: 'meal-confirm', backend_cb: 'inn_meal_soup', renownDelta: 0 },
-      { id: 'm_stew', label: '🍖 Ensopado · 8V · +1 hit die', cb: 'meal-confirm', backend_cb: 'inn_meal_stew', renownDelta: 1 },
-      { id: 'm_feast', label: '🍷 Banquete · 20V · +2 hit dice + vinho', cb: 'meal-confirm', backend_cb: 'inn_meal_feast', renownDelta: 2 },
+      // task #84: resultText específico por refeição (cohesão).
+      { id: 'm_soup', label: '🍲 Sopa do Dia · 3V · +1 HP', cb: 'meal-confirm', backend_cb: 'inn_meal_soup', renownDelta: 0,
+        resultNarration: 'Joana traz uma tigela de barro com a sopa fumegante — caldo claro com legumes da horta e farro.',
+        resultText: '"Sopa simples, mas faz bem. <i>(coloca pão na lateral)</i> Come com calma, aventureiro." <b>+1 HP recuperado.</b>' },
+      { id: 'm_stew', label: '🍖 Ensopado · 8V · +1 hit die', cb: 'meal-confirm', backend_cb: 'inn_meal_stew', renownDelta: 1,
+        resultNarration: 'Joana traz uma travessa de barro grande — ensopado de carneiro com cebolas caramelizadas, pão preto fresco e uma jarra de cerveja escura.',
+        resultText: '"Ensopado da nossa casa. <i>(sorri orgulhosa)</i> Carne marinada três dias em ervas. Vai te recuperar bem." <b>+1 hit die recuperado (DMG p.267).</b>' },
+      { id: 'm_feast', label: '🍷 Banquete · 20V · +2 hit dice + vinho', cb: 'meal-confirm', backend_cb: 'inn_meal_feast', renownDelta: 2,
+        resultNarration: 'Martha em pessoa supervisiona o banquete. Joana traz três pratos: peixe assado com ervas, leitão recheado, e bolo de mel. Vinho do Vale em copo de cristal.',
+        resultText: '"Vossa Senhoria honra a casa com esse pedido. <i>(serve o vinho)</i> Vai comer como nobre essa noite." <b>+2 hit dice recuperados + Inspiração 1d4 do vinho do Vale. +2 Renown.</b>' },
       { id: 'm_taste', label: '👃 "Está temperado bem?" · Investigação DC 11', cb: 'dice:investigation:11:+0' },
       { id: 'back',   label: '↩ "Não, obrigado."', cb: 'close' }
     ]
@@ -96,8 +110,13 @@ var SERVICE_DIALOGUES_INN = {
       { type: 'speech', speaker: 'Martha', text: 'Banho quente em vinte minutos. <i>(pega uma toalha)</i> Cinco moedas inclui sabão de lavanda e óleo de mirra. Cuidado especial — mais cinco, com Joana esfregando as costas. <b>Banho quente concede inspiração 1d4 ao próximo teste por sentir-se renovado (homebrew baseado em PHB Inspiration p.125).</b>' }
     ],
     choices: [
-      { id: 'b_basic', label: '🛁 Banho simples · 5V · limpa exhaustion', cb: 'bath-confirm', backend_cb: 'inn_bath_basic', renownDelta: 0 },
-      { id: 'b_lux',   label: '🛁 Banho de luxo · 10V · +Inspiração 1d4', cb: 'bath-confirm', backend_cb: 'inn_bath_luxury', renownDelta: 1 },
+      // task #84: resultText específico por banho (cohesão).
+      { id: 'b_basic', label: '🛁 Banho simples · 5V · limpa exhaustion', cb: 'bath-confirm', backend_cb: 'inn_bath_basic', renownDelta: 0,
+        resultNarration: 'Joana enche a banheira de cobre com água quente. Sabão de lavanda e óleo de mirra perfumam o ar.',
+        resultText: '"Pronto, aventureiro. <i>(estende toalha branca)</i> Vinte minutos no calor — vai sair outra pessoa." <b>Um nível de Exaustão removido (PHB p.291).</b>' },
+      { id: 'b_lux',   label: '🛁 Banho de luxo · 10V · +Inspiração 1d4', cb: 'bath-confirm', backend_cb: 'inn_bath_luxury', renownDelta: 1,
+        resultNarration: 'Joana esfrega tuas costas com escova de cerdas macias, massagem inclusa. Pétalas de rosa flutuam na água quente. Velas perfumadas ardem na borda.',
+        resultText: '"Tratamento completo, Vossa Senhoria. <i>(sorri educada)</i> Pernas leves, mente limpa. Pra próximo desafio." <b>Exaustão removida + Inspiração 1d4 (PHB p.125). +1 Renown.</b>' },
       { id: 'b_insight', label: '👁 "Algo me diz pra ficar atento..." · Intuição DC 12', cb: 'dice:insight:12:+1' },
       { id: 'back',    label: '↩ "Fica pra próxima."', cb: 'close' }
     ]
@@ -113,7 +132,9 @@ var SERVICE_DIALOGUES_INN = {
       { id: 'r_politics', label: '👑 Política do Conde · História DC 13', cb: 'dice:history:13:+1' },
       { id: 'r_trade',    label: '💰 Movimento de mercadores · Persuasão DC 12', cb: 'dice:persuasion:12:+1' },
       { id: 'r_missing',  label: '👤 Pessoas desaparecidas · Intuição DC 14', cb: 'dice:insight:14:+0' },
-      { id: 'r_pay',      label: '🪙 "Toma 5V pelo seu tempo."', cb: 'rumors-confirm', backend_cb: 'inn_rumors_pay', renownDelta: 2 },
+      { id: 'r_pay',      label: '🪙 "Toma 5V pelo seu tempo."', cb: 'rumors-confirm', backend_cb: 'inn_rumors_pay', renownDelta: 2,
+        resultNarration: 'Martha recolhe as cinco Valdoritas com o gesto comum dos donos de hospedaria. Olha em volta, baixa a voz outra vez.',
+        resultText: '"Bem, ouvi essa semana três coisas que valem cinco. <i>(esfrega o balcão, sussurrando)</i> Caravana de gnomos chega quinta. Conde está doente. Garota da pousada do leste sumiu — terceira em dois meses." <b>+2 Renown da Estalagem. Conjuntos de informação registrados.</b>' },
       { id: 'back',       label: '↩ "Não preciso saber agora."', cb: 'close' }
     ]
   }
