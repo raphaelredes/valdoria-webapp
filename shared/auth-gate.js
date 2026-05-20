@@ -63,18 +63,50 @@
         if (hasUid && hasAnyToken) return;
     } catch (e) { /* URLSearchParams indisponivel — segue */ }
 
-    /* NAO ha mais Check 3 de localStorage standalone. Game pages precisam
-       de URL token pra funcionar (API client le do URL). localStorage soh
-       e usado por /web/'s checkExistingSession() que detecta sessao e
-       redireciona pra game com URL params via redirectToGame().
+    /* Check 3 (task #77, 2026-05-20): localStorage v_dev_session / v_prod_session.
+       Game pages (cidade/exploracao/combat/play) escrevem essa key apos auth
+       bem-sucedida. Formato: {token, apiBase, uid, charId, env, ts}.
 
-       Resultado: usuario com localStorage mas sem URL token visita /cidade/
-       -> gate redireciona pra /web/ -> /web/ detecta localStorage -> faz
-       fetch /api/game/state -> redirect pra "tela salva no personagem" com
-       URL params completos. User-facing: 1 redirect extra mas garante que
-       o destino sempre routes pra last_screen_payload (atende user request
-       2026-05-11: "se estiver autenticado deve ir para a tela que esta
-       salvo no personagem"). */
+       User reportou (2026-05-20): "/web/ aparece mesmo já autenticado".
+       Diagnóstico Chrome MCP: user tem v_dev_session válido (token+uid+apiBase)
+       mas web-auth.js só checa WEB_TOKEN_KEY (chave legada diferente).
+
+       Fix: detectamos v_*_session AQUI. Se presente E não-expired, REDIRECT
+       direto pra /cidade/?token=...&uid=... (skip /web/ login screen).
+
+       v_dev_session é canonical pra DEV; v_prod_session pra PROD. Detecção
+       baseada em hostname (host=='dev.lendasdevaldoria.com.br' -> dev). */
+    try {
+        var envPrefix = host === 'dev.lendasdevaldoria.com.br' ? 'v_dev_session' : 'v_prod_session';
+        var rawSession = localStorage.getItem(envPrefix);
+        if (rawSession) {
+            var sess = JSON.parse(rawSession);
+            // Valid session: token + uid + apiBase present, NOT older than 30 days
+            var ageMs = Date.now() - (sess.ts || 0);
+            var maxAge = 30 * 24 * 60 * 60 * 1000;  // 30 days
+            if (sess.token && sess.uid && sess.apiBase && ageMs < maxAge) {
+                // Redirect direto pra cidade com URL params (game pages lêem do URL)
+                var url = '/cidade/?token=' + encodeURIComponent(sess.token)
+                    + '&api=' + encodeURIComponent(sess.apiBase)
+                    + '&uid=' + encodeURIComponent(String(sess.uid))
+                    + '&env=' + encodeURIComponent(sess.env || (host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod'))
+                    + (sess.charId ? '&char=' + encodeURIComponent(sess.charId) : '')
+                    + '&_cb=' + Date.now();
+                // Se já estamos em /cidade/, /exploracao/, etc, NAO redirect (deixa página carregar)
+                if (path === '/play/' || path === '/play') {
+                    try { console.info('[AUTH-GATE] localStorage v_*_session detectada — redirect /play/ -> /cidade/ com URL params'); } catch(_){}
+                    try { window.__valdoria_transitioning = true; } catch(_){}
+                    location.replace(url);
+                    return;
+                }
+                // Em outras game pages, deixa página carregar (já é destino válido)
+                try { console.info('[AUTH-GATE] localStorage v_*_session detectada — permite carregar', path); } catch(_){}
+                return;
+            }
+        }
+    } catch (e) {
+        try { console.warn('[AUTH-GATE] localStorage v_*_session check falhou', e); } catch(_){}
+    }
 
     /* Nenhum contexto -> redireciona pra /web/ (auth screen) */
     try {
