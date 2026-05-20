@@ -39997,6 +39997,21 @@ function openCityPopup(key, params){
     _logCity('openCityPopup MISS key=' + key);
     return;
   }
+  // task #47 (2026-05-20): dismiss any active encounter-overlay (z=9500) before
+  // opening city popup (z=9000) — encounter-overlay tem z-index MAIOR e fica
+  // SOBRE o city popup, causando overlay visual confuso ("tela sem informações"
+  // reportado pelo user, na verdade era encounter cobrindo o estabelecimento).
+  try {
+    if (typeof vEncounter !== 'undefined' && typeof vEncounter.close === 'function') {
+      vEncounter.close();
+    }
+    var encOverlay = document.getElementById('encounter-overlay');
+    if (encOverlay && encOverlay.classList.contains('active')) {
+      encOverlay.classList.remove('active');
+      encOverlay.style.display = 'none';
+    }
+    window._encounterActive = false;
+  } catch(_e) { /* non-fatal */ }
   _popupStack.push(key);
   _renderCityPopup(key);
   var popup = document.getElementById('city-subscreen-popup');
