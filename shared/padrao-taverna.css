@@ -1,0 +1,354 @@
+/* ============================================================================
+ * padrao-taverna.css — PADRAO_TAVERNA canonical CSS for ALL city hubs
+ * ============================================================================
+ *
+ * Extracted from simuladores/banco-cofre-final.html (sessão #13, 2026-05-19).
+ * User mandato: "todas as telas e subtelas da cidade DEVEM ficar no
+ * PADRAO_TAVERNA" — esta CSS é a fonte canonical UNICA pra todas as 9 telas
+ * de estabelecimento (Banco, Templo, Taverna, Estalagem, Mercado, Guilda,
+ * Arena, Oficina, Runas).
+ *
+ * Classes canonical (use raw names, sem prefixo):
+ *   .cenario, .cenario-bg, .cenario-brasao, .cenario-titulo, .cenario-titulo .name, .cenario-titulo .sub
+ *   .candle-glow, .candle-glow.l, .candle-glow.r
+ *   .row-npc, .npc-portrait, .npc-info, .npc-info .name, .npc-info .quote, .npc-chev
+ *   .rep-bar, .rep-bar .label, .rep-bar .bar, .rep-bar .fill, .rep-bar .value
+ *   .pt-section-label  (renamed from .section-label to evitar conflito)
+ *   .services, .svc, .svc-ico, .svc-text, .svc-name, .svc-meta, .svc-badge
+ *
+ * Doc canonical:
+ *   memory/feedback_centralize_in_canonical_webapps.md
+ *   simuladores/banco-cofre-final.html (mockup source)
+ * ============================================================================ */
+
+/* ============ HERO CENARIO (banner + brasão + título) ============ */
+.cenario {
+  position: relative;
+  width: 100%;
+  height: 165px;
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 2;
+}
+.cenario-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  filter: brightness(0.7) saturate(1.15);
+  z-index: 1;
+}
+.cenario::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #c4953a 20%, #f4d896 50%, #c4953a 80%, transparent 100%);
+  box-shadow: 0 0 14px rgba(196, 149, 58, 0.7);
+  z-index: 5;
+}
+.cenario::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 105px;
+  background: linear-gradient(180deg, transparent 0%, rgba(28, 22, 16, 0.65) 35%, rgba(10, 8, 4, 0.96) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+.cenario-brasao {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  z-index: 4;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 18px rgba(255, 180, 80, 0.7)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
+  animation: ptCrestGlow 3s ease-in-out infinite;
+}
+@keyframes ptCrestGlow {
+  0%, 100% { filter: drop-shadow(0 0 18px rgba(255, 180, 80, 0.7)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95)); }
+  50%      { filter: drop-shadow(0 0 28px rgba(255, 200, 100, 0.95)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95)); }
+}
+.cenario-titulo {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 12px;
+  text-align: center;
+  z-index: 4;
+  padding: 0 16px;
+}
+.cenario-titulo .name {
+  font-family: 'Georgia', serif;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #f4d896;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 22px rgba(255, 180, 80, 0.85),
+    0 0 4px rgba(0, 0, 0, 1),
+    0 2px 5px rgba(0, 0, 0, 1);
+  line-height: 1.05;
+  margin-bottom: 4px;
+}
+.cenario-titulo .sub {
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: #c4953a;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 1);
+}
+.cenario-titulo .sub::before { content: '◆ '; opacity: 0.7; margin-right: 2px; }
+.cenario-titulo .sub::after  { content: ' ◆'; opacity: 0.7; margin-left: 2px; }
+
+/* Candle glow (atmosphere) */
+.candle-glow {
+  position: absolute;
+  top: 18px;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(255, 180, 80, 0.55), transparent 60%);
+  border-radius: 50%;
+  filter: blur(3px);
+  z-index: 3;
+  animation: ptCandleFlicker 1.8s ease-in-out infinite;
+}
+.candle-glow.l { left: 80px; }
+.candle-glow.r { right: 80px; animation-delay: 0.6s; }
+@keyframes ptCandleFlicker {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  33%      { opacity: 0.55; transform: scale(0.9); }
+  66%      { opacity: 1; transform: scale(1.12); }
+}
+
+/* ============ NPC ROW (canonical card clicável) ============ */
+.row-npc {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 8px 11px 8px 8px;
+  background: linear-gradient(90deg, rgba(196, 149, 58, 0.1), rgba(80, 40, 20, 0.18));
+  border: 1px solid rgba(196, 149, 58, 0.38);
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 200, 140, 0.08);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.row-npc:hover {
+  background: linear-gradient(90deg, rgba(196, 149, 58, 0.18), rgba(120, 60, 30, 0.28));
+  border-color: #c4953a;
+  transform: translateX(2px);
+  box-shadow: 0 0 14px rgba(196, 149, 58, 0.25);
+}
+.row-npc .npc-portrait {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5a3018, #2a1810);
+  border: 2px solid #c4953a;
+  box-shadow: 0 0 10px rgba(196, 149, 58, 0.5), inset 0 1px 0 rgba(255, 180, 80, 0.3);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.row-npc .npc-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.row-npc .npc-info { flex: 1; min-width: 0; }
+.row-npc .npc-info .name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #f4d896;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+.row-npc .npc-info .quote {
+  font-size: 12px;
+  font-style: italic;
+  color: #c8b090;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.row-npc .npc-chev {
+  flex-shrink: 0;
+  color: rgba(196, 149, 58, 0.7);
+  font-size: 20px;
+  margin-left: 4px;
+}
+
+/* ============ Reputation Bar ============ */
+.rep-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px;
+}
+.rep-bar .label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #c4953a;
+  text-transform: uppercase;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.rep-bar .bar {
+  flex: 1;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.rep-bar .fill {
+  height: 100%;
+  width: 72%;  /* default — override via inline style */
+  background: linear-gradient(90deg, #8a5a18 0%, #c4953a 60%, #f4d896 100%);
+  box-shadow: 0 0 8px rgba(196, 149, 58, 0.6);
+  border-radius: 3px;
+}
+.rep-bar .value {
+  font-size: 11px;
+  color: #f4d896;
+  font-weight: 800;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+/* ============ Section Label (com ornamentos) ============ */
+/* NB: renamed .section-label → .pt-section-label pra evitar conflito com */
+/* vCity.sectionLabel() existente em game-city-shared.js que usa .vc-section-label */
+.pt-section-label {
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  color: rgba(196, 149, 58, 0.85);
+  text-transform: uppercase;
+  font-weight: 700;
+  text-align: center;
+  margin: 2px 0 0;
+  flex-shrink: 0;
+  position: relative;
+}
+.pt-section-label::before,
+.pt-section-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 149, 58, 0.5));
+}
+.pt-section-label::before { left: 36px; transform: rotate(180deg); }
+.pt-section-label::after  { right: 36px; }
+
+/* ============ Services Grid (cards 2-col) ============ */
+.services {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  flex-shrink: 0;
+}
+.svc {
+  position: relative;
+  padding: 8px 9px 8px 10px;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.07) 0%, rgba(40, 20, 10, 0.45) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  min-height: 44px;
+}
+.svc::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(196, 149, 58, 0.18), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.svc:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2) 0%, rgba(80, 40, 20, 0.5) 100%);
+  border-color: #c4953a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 12px rgba(196, 149, 58, 0.3);
+}
+.svc:hover::before { opacity: 1; }
+.svc:active { transform: translateY(0) scale(0.98); }
+.svc.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+.svc-ico {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(40, 20, 10, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  box-shadow: 0 0 4px rgba(196, 149, 58, 0.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.svc-ico img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.svc:hover .svc-ico {
+  border-color: #c4953a;
+  box-shadow: 0 0 10px rgba(196, 149, 58, 0.5);
+}
+.svc-text { flex: 1; min-width: 0; }
+.svc-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #f0dab0;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svc-meta {
+  font-size: 10px;
+  color: #9a8470;
+  letter-spacing: 0.3px;
+  line-height: 1.25;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svc-badge {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  background: linear-gradient(180deg, #f4d896, #8a5a18);
+  color: #1a0a05;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  border: 1px solid #f4d896;
+  box-shadow: 0 0 6px rgba(255, 200, 100, 0.4);
+}

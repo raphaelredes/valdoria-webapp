@@ -1,32 +1,30 @@
 /* ============================================================================
- * game-bank.js — Banco AAA renderer (FULL PADRAO_TAVERNA + PADRAO_ALDRIC)
+ * game-bank.js — Banco AAA renderer (FULL PADRAO_TAVERNA canonical)
  * ============================================================================
  *
- * Task #23 (sessão #13, 2026-05-19) — Banco POC do porting REAL:
- *   - Hero panel canonical (.cenario / .cenario-* classes) com banner + crest
- *   - NPC row clicável que abre encounter PADRAO_ALDRIC
- *   - SERVICE_DIALOGUES inline (8 svc dialogues PADRAO_ALDRIC com dice + Renown)
- *   - Cascade demo NPC Living System (about_tavira → desbloqueia Tavira)
- *   - vEncounter.render() (shared/encounter-popup.js) renderiza tudo
+ * Task #23 sessão #13 (2026-05-19) — REFATORADO p/ usar PADRAO_TAVERNA canonical:
+ * classes .cenario, .row-npc, .rep-bar, .services, .svc (sem mais bnk-* custom).
  *
- * NÃO usa game-bank.css legacy bnk-* — usa .cenario canonical de PADRAO_TAVERNA
- * + grid de services inline.
+ * User mandato: "todas as telas da cidade DEVEM ficar no PADRAO_TAVERNA".
+ * CSS canonical em shared/padrao-taverna.css (extraído do mockup banco-cofre-final.html).
  *
  * MAPA_IA:
- *   ~50    _SVC_CONFIG_BANK (faction + reactions canonical)
- *   ~75    ALDWIN_DIALOGUE (greeting principal)
- *   ~110   SERVICE_DIALOGUES_BANK (8 dialogues: deposit/withdraw/loan/estate/
- *          store_item/retrieve_item/invest/insurance + cascade about_tavira/corvus)
- *   ~290   _bnkBuildCenario(data) — hero panel canonical PADRAO_TAVERNA
- *   ~350   _bnkBuildNpcRow(data) — NPC row clicável
- *   ~390   _bnkBuildServiceGrid(services) — grid com PADRAO_ALDRIC clicks
- *   ~440   renderBankHub(container, data) — entry point
+ *   ~30    _SVC_CONFIG_BANK (faction + reactions canonical)
+ *   ~55    ALDWIN_DIALOGUE (greeting principal)
+ *   ~90    SERVICE_DIALOGUES_BANK (10 dialogues PADRAO_ALDRIC inline)
+ *   ~260   BANK_CB_TO_DIALOGUE (backend cb → dialogue key map)
+ *   ~290   BANK_SVC_META (svc icon path + meta text canonical)
+ *   ~320   _bnkBuildCenario(data) — hero canonical PADRAO_TAVERNA
+ *   ~370   _bnkBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
+ *   ~420   _bnkBuildServices(services) — .services + .svc canonical
+ *   ~490   renderBankHub(container, data) — entry point
  *
  * Doc canonical:
  *   memory/feedback_centralize_in_canonical_webapps.md (porting pattern)
  *   memory/reference_npc_personalities_canonical.md §2 Aldwin
  *   memory/reference_npc_living_system.md (NPC Living API)
  *   simuladores/banco-cofre-final.html (mockup source)
+ *   shared/padrao-taverna.css (CSS canonical compartilhado)
  * ============================================================================ */
 
 'use strict';
@@ -73,7 +71,7 @@ var ALDWIN_DIALOGUE = {
   ]
 };
 
-/* === SERVICE_DIALOGUES_BANK — 8 svc dialogues PADRAO_ALDRIC ============== */
+/* === SERVICE_DIALOGUES_BANK — 10 svc dialogues PADRAO_ALDRIC ============ */
 var SERVICE_DIALOGUES_BANK = {
   deposit: {
     npc: ALDWIN_DIALOGUE.npc,
@@ -194,7 +192,7 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin pausa, ajusta os óculos meia-lua com gesto vagaroso e olha para um ponto no balcão de carvalho — não para você, mas para uma marca de pena antiga incrustada na madeira, como se rememorasse a assinatura de outra época.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Tavira veio aqui antes da Guilda dos Aventureiros ter aquele nome. <i>(toque suave de melancolia)</i> Uma aventureira de couro queimado, olhar de aço, cicatriz vertical no olho direito que ainda não tinha. Bom cliente. Pagava todas as dívidas no prazo — e nenhuma vez sem ler cada cláusula duas vezes.' },
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Tavira veio aqui antes da Guilda dos Aventureiros ter aquele nome. <i>(toque suave de melancolia)</i> Uma aventureira de couro queimado, olhar de aço, cicatriz vertical no olho direito que ainda não tinha. Bom cliente. Pagava todas as dívidas no prazo.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Hoje ela é Mestra da Guilda. Se a procurar, mencione que <i>velhos clientes guardam memórias</i>. <i>(volta o monóculo ao bolso)</i> Ela vai entender.' }
     ],
     choices: [
@@ -219,103 +217,7 @@ var SERVICE_DIALOGUES_BANK = {
   }
 };
 
-/* === Hero panel canonical PADRAO_TAVERNA — .cenario / .cenario-* ======== */
-function _bnkBuildCenario(data) {
-  var hero = vCity.el('div', 'cenario bnk-cenario');
-  /* Inline styles temporários — futuro: mover pra game-bank.css com .bnk-cenario.
-     Por ora inline pra evitar dependência cross-file. */
-  hero.style.cssText = [
-    'position:relative',
-    'padding:14px 14px 12px',
-    'margin:0 -2px 12px',
-    'border-radius:12px',
-    'overflow:hidden',
-    'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.22) 0%,rgba(74,56,40,0.30) 45%,rgba(30,20,12,0.95) 100%)',
-    'border:1px solid rgba(196,149,58,0.4)',
-    'text-align:center'
-  ].join(';');
-
-  /* Brasão (crest) opcional — se PNG canonical existe */
-  var crest = vCity.el('div', 'cenario-brasao');
-  crest.style.cssText = 'width:48px;height:48px;margin:0 auto 6px;border-radius:50%;background:rgba(196,149,58,0.15);border:1.5px solid rgba(196,149,58,0.55);display:flex;align-items:center;justify-content:center;';
-  crest.innerHTML = '<img src="../shared/img/bank/bnk-cofre.png" alt="" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display=\'none\';">';
-  hero.appendChild(crest);
-
-  var titulo = vCity.el('div', 'cenario-titulo');
-  var nameEl = vCity.el('div', 'name');
-  nameEl.textContent = 'Banco de Eldoria';
-  nameEl.style.cssText = 'font-family:Georgia,serif;font-size:18px;font-weight:800;color:#c4953a;letter-spacing:2px;text-shadow:0 0 12px rgba(196,149,58,0.5);text-transform:uppercase;';
-  titulo.appendChild(nameEl);
-  var subEl = vCity.el('div', 'sub');
-  subEl.textContent = 'Casa de Tholram · Cofre Real';
-  subEl.style.cssText = 'font-family:Georgia,serif;font-size:11px;color:#b8a888;letter-spacing:1.5px;margin-top:2px;font-style:italic;';
-  titulo.appendChild(subEl);
-  hero.appendChild(titulo);
-
-  return hero;
-}
-
-/* === NPC row clicável — open ALDWIN_DIALOGUE encounter ================== */
-function _bnkBuildNpcRow(data) {
-  var row = vCity.el('div', 'bnk-npc-row');
-  row.style.cssText = [
-    'display:flex',
-    'align-items:center',
-    'gap:10px',
-    'padding:9px 11px',
-    'margin-bottom:10px',
-    'background:rgba(74,56,40,0.25)',
-    'border:1px solid rgba(196,149,58,0.35)',
-    'border-radius:9px',
-    'cursor:pointer',
-    'transition:all 0.15s ease'
-  ].join(';');
-  row.addEventListener('mouseenter', function(){
-    row.style.background = 'rgba(196,149,58,0.18)';
-    row.style.borderColor = '#c4953a';
-  });
-  row.addEventListener('mouseleave', function(){
-    row.style.background = 'rgba(74,56,40,0.25)';
-    row.style.borderColor = 'rgba(196,149,58,0.35)';
-  });
-
-  var portrait = vCity.el('img');
-  portrait.src = '../shared/img/npcs/banqueiro.png';
-  portrait.alt = 'Aldwin de Tholram';
-  portrait.loading = 'lazy';
-  portrait.style.cssText = 'width:46px;height:46px;border-radius:50%;border:1.5px solid #c4953a;object-fit:cover;flex-shrink:0;';
-  portrait.onerror = function(){ this.style.display = 'none'; };
-  row.appendChild(portrait);
-
-  var info = vCity.el('div');
-  info.style.cssText = 'flex:1;min-width:0;';
-  var name = vCity.el('div');
-  name.textContent = 'Aldwin de Tholram';
-  name.style.cssText = 'font-weight:700;font-size:13px;color:#d4c8b0;letter-spacing:0.5px;';
-  info.appendChild(name);
-  var quote = vCity.el('div');
-  quote.innerHTML = '"Bem-vindo, cliente. O cofre real abre na quarta hora."';
-  quote.style.cssText = 'font-size:11px;color:#a09484;font-style:italic;line-height:1.4;margin-top:2px;';
-  info.appendChild(quote);
-  row.appendChild(info);
-
-  var chev = vCity.el('div');
-  chev.textContent = '›';
-  chev.style.cssText = 'font-size:20px;color:#c4953a;font-weight:700;flex-shrink:0;';
-  row.appendChild(chev);
-
-  row.addEventListener('click', function(){
-    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      // Set _SVC_CONFIG (svc-interactions dispatch lê do global)
-      window._SVC_CONFIG = window._SVC_CONFIG_BANK;
-      window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: SERVICE_DIALOGUES_BANK });
-    }
-  });
-
-  return row;
-}
-
-/* === CB to dialogue mapping (backend usa cbs no formato bank_<svc>_menu) === */
+/* === Backend cb → dialogue key ============================================ */
 var BANK_CB_TO_DIALOGUE = {
   'bank_deposit_menu':       'deposit',
   'bank_withdraw_menu':      'withdraw',
@@ -327,72 +229,175 @@ var BANK_CB_TO_DIALOGUE = {
   'bank_property_menu':      'estate'
 };
 
-/* === Service grid com PADRAO_ALDRIC clicks (substitui vCity.serviceGrid) === */
-function _bnkBuildServiceGrid(services) {
-  var grid = vCity.el('div', 'bnk-svc-grid');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,1fr);gap:8px;';
-  (services || []).forEach(function(svc) {
-    var card = vCity.el('div', 'bnk-svc-card');
-    card.style.cssText = [
-      'display:flex',
-      'flex-direction:column',
-      'align-items:center',
-      'gap:4px',
-      'padding:10px 8px',
-      'background:rgba(74,56,40,0.25)',
-      'border:1px solid rgba(196,149,58,0.35)',
-      'border-radius:8px',
-      'cursor:pointer',
-      'text-align:center',
-      'transition:all 0.15s ease'
-    ].join(';');
-    if (svc.disabled) {
-      card.style.opacity = '0.4';
-      card.style.cursor = 'default';
-    }
-    card.addEventListener('mouseenter', function(){
-      if (svc.disabled) return;
-      card.style.background = 'rgba(196,149,58,0.18)';
-      card.style.borderColor = '#c4953a';
-    });
-    card.addEventListener('mouseleave', function(){
-      card.style.background = 'rgba(74,56,40,0.25)';
-      card.style.borderColor = 'rgba(196,149,58,0.35)';
-    });
+/* === Svc icon + meta canonical (PADRAO_TAVERNA — mockup banco-cofre-final) === */
+var BANK_SVC_META = {
+  'bank_deposit_menu':       { icon: '../shared/img/services/svc-depositar.png',  meta: 'Cofre Real' },
+  'bank_withdraw_menu':      { icon: '../shared/img/services/svc-retirar.png',    meta: '2% taxa' },
+  'bank_deposit_item_menu':  { icon: '../shared/img/services/svc-guardar.png',    meta: '5V/semana' },
+  'bank_withdraw_item_menu': { icon: '../shared/img/services/svc-recuperar.png',  meta: 'Chave + selo' },
+  'bank_insurance_menu':     { icon: '../shared/img/services/svc-seguro.png',     meta: 'Carta selada' },
+  'bank_invest_menu':        { icon: '../shared/img/services/svc-investir.png',   meta: 'Juros mensais', badge: '5%' },
+  'bank_loans_menu':         { icon: '../shared/img/services/svc-emprestimo.png', meta: '10% ao mês' },
+  'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.png',    meta: 'DMG p.157' }
+};
 
-    /* Icon */
-    var ico = vCity.el('div');
-    ico.style.cssText = 'width:32px;height:32px;display:flex;align-items:center;justify-content:center;';
-    var icoStr = svc.icon || '';
-    if (icoStr.indexOf('<svg') >= 0) {
-      ico.innerHTML = icoStr;
-    } else {
-      ico.style.fontSize = '24px';
-      ico.textContent = icoStr;
+/* === Hero CENARIO canonical (PADRAO_TAVERNA — usa .cenario CSS classes) ===
+ * Estrutura: .cenario > .cenario-bg img + .candle-glow.l/r + .cenario-brasao img + .cenario-titulo
+ * CSS canonical em shared/padrao-taverna.css. */
+function _bnkBuildCenario(data) {
+  var hero = vCity.el('div', 'cenario');
+
+  // Banner background (PNG canonical do mockup)
+  var bg = vCity.el('img', 'cenario-bg');
+  bg.src = '../shared/img/bank/banco-banner.png';
+  bg.alt = '';
+  bg.loading = 'lazy';
+  bg.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(bg);
+
+  // Candle glows (atmosfera)
+  hero.appendChild(vCity.el('div', 'candle-glow l'));
+  hero.appendChild(vCity.el('div', 'candle-glow r'));
+
+  // Brasão (crest)
+  var crest = vCity.el('img', 'cenario-brasao');
+  crest.src = '../shared/img/bank/banco-crest.png';
+  crest.alt = 'Brasão do Banco de Eldoria';
+  crest.loading = 'lazy';
+  crest.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(crest);
+
+  // Título
+  var titulo = vCity.el('div', 'cenario-titulo');
+  var nameEl = vCity.el('div', 'name');
+  nameEl.textContent = 'Banco de Eldoria';
+  titulo.appendChild(nameEl);
+  var subEl = vCity.el('div', 'sub');
+  subEl.textContent = 'Casa de Tholram · Cofre Real';
+  titulo.appendChild(subEl);
+  hero.appendChild(titulo);
+
+  return hero;
+}
+
+/* === NPC row canonical (PADRAO_TAVERNA — .row-npc CSS) ====================
+ * Estrutura: .row-npc > .npc-portrait img + .npc-info (.name, .quote) + .npc-chev
+ * Click abre ALDWIN_DIALOGUE encounter PADRAO_ALDRIC. */
+function _bnkBuildNpcRow(data) {
+  var row = vCity.el('div', 'row-npc');
+
+  // Portrait
+  var portraitWrap = vCity.el('div', 'npc-portrait');
+  var img = vCity.el('img');
+  img.src = '../shared/img/npcs/banqueiro.png';
+  img.alt = 'Aldwin de Tholram';
+  img.loading = 'lazy';
+  img.onerror = function(){ this.style.display = 'none'; };
+  portraitWrap.appendChild(img);
+  row.appendChild(portraitWrap);
+
+  // Info (nome + quote)
+  var info = vCity.el('div', 'npc-info');
+  var name = vCity.el('div', 'name');
+  name.textContent = 'Aldwin de Tholram';
+  info.appendChild(name);
+  var quote = vCity.el('div', 'quote');
+  quote.textContent = '"Bem-vindo, cliente. O cofre real abre na quarta hora."';
+  info.appendChild(quote);
+  row.appendChild(info);
+
+  // Chevron
+  var chev = vCity.el('div', 'npc-chev');
+  chev.textContent = '›';
+  row.appendChild(chev);
+
+  // Click → open encounter PADRAO_ALDRIC
+  row.addEventListener('click', function(){
+    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+      window._SVC_CONFIG = window._SVC_CONFIG_BANK;
+      window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: SERVICE_DIALOGUES_BANK });
+    }
+  });
+
+  return row;
+}
+
+/* === Reputation bar canonical (.rep-bar — D&D 5e Renown DMG p.22) ======== */
+function _bnkBuildRepBar(data) {
+  // Compute renown
+  var renown = 0;
+  if (data && data.renown && typeof data.renown.bank === 'number') renown = data.renown.bank;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.bank === 'number') renown = window._PLAYER_RENOWN.bank;
+
+  // Tier label (DMG p.22)
+  var tier = 'NEUTRO';
+  if (renown >= 25) tier = 'AMIGÁVEL';
+  else if (renown >= 10) tier = 'CORDIAL';
+  else if (renown < 0 && renown >= -10) tier = 'FRIO';
+  else if (renown < -10) tier = 'HOSTIL';
+
+  // Bar fill % (clamp 0-100, mapping [-10, +30] → [0, 100])
+  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+
+  var bar = vCity.el('div', 'rep-bar');
+  var lbl = vCity.el('span', 'label');
+  lbl.textContent = 'Reputação';
+  bar.appendChild(lbl);
+  var track = vCity.el('div', 'bar');
+  var fill = vCity.el('div', 'fill');
+  fill.style.width = pct + '%';
+  track.appendChild(fill);
+  bar.appendChild(track);
+  var val = vCity.el('span', 'value');
+  val.textContent = tier + ' · ' + renown;
+  bar.appendChild(val);
+  return bar;
+}
+
+/* === Services canonical (.services + .svc PADRAO_TAVERNA) ================
+ * Click no svc abre PADRAO_ALDRIC dialogue via vEncounter.render. */
+function _bnkBuildServices(services) {
+  var grid = vCity.el('div', 'services');
+  (services || []).forEach(function(svc) {
+    var card = vCity.el('div', 'svc');
+    if (svc.disabled) card.classList.add('disabled');
+    card.setAttribute('data-svc', svc.cb || '');
+
+    // Lookup meta canonical
+    var meta = BANK_SVC_META[svc.cb] || {};
+
+    // Badge (top-right)
+    if (meta.badge) {
+      var badge = vCity.el('div', 'svc-badge');
+      badge.textContent = meta.badge;
+      card.appendChild(badge);
+    }
+
+    // Icon (.svc-ico)
+    var ico = vCity.el('div', 'svc-ico');
+    if (meta.icon) {
+      var img = vCity.el('img');
+      img.src = meta.icon;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.onerror = function(){ this.style.display = 'none'; };
+      ico.appendChild(img);
     }
     card.appendChild(ico);
 
-    var name = vCity.el('div');
+    // Text block (.svc-text > .svc-name + .svc-meta)
+    var txt = vCity.el('div', 'svc-text');
+    var name = vCity.el('div', 'svc-name');
     name.textContent = svc.label || '';
-    name.style.cssText = 'font-size:12px;font-weight:600;color:#d4c8b0;letter-spacing:0.3px;';
-    card.appendChild(name);
+    txt.appendChild(name);
+    var metaTxt = vCity.el('div', 'svc-meta');
+    metaTxt.textContent = meta.meta || (svc.cost !== undefined ? (svc.cost === 0 ? 'Grátis' : String(svc.cost) + ' V') : '');
+    txt.appendChild(metaTxt);
+    card.appendChild(txt);
 
-    if (svc.cost !== undefined && svc.cost !== null) {
-      var price = vCity.el('div');
-      price.style.cssText = 'font-size:10px;color:' + (svc.cost === 0 ? '#7ad06b' : '#c4953a') + ';';
-      if (svc.cost === 0) {
-        price.textContent = 'Grátis';
-      } else {
-        price.textContent = String(svc.cost) + ' V';
-      }
-      card.appendChild(price);
-    }
-
-    /* Click — abre PADRAO_ALDRIC se SERVICE_DIALOGUES_BANK match, senão default vCity.act */
+    // Click handler — abre PADRAO_ALDRIC dialogue ou fallback vCity.act
     if (svc.cb && !svc.disabled) {
       card.addEventListener('click', function(){
-        // Map backend cb (bank_<svc>_menu) → dialogue key via BANK_CB_TO_DIALOGUE,
-        // OU direto se cb já é uma key do SERVICE_DIALOGUES_BANK (raw)
         var dialogueKey = BANK_CB_TO_DIALOGUE[svc.cb] || svc.cb;
         var dialogue = SERVICE_DIALOGUES_BANK[dialogueKey];
         if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
@@ -404,15 +409,17 @@ function _bnkBuildServiceGrid(services) {
         }
       });
     }
+
     grid.appendChild(card);
   });
   return grid;
 }
 
-/* === renderBankHub — entry point canonical =============================== */
+/* === renderBankHub — entry point canonical ===============================
+ * Estrutura PADRAO_TAVERNA: .cenario + .row-npc + .rep-bar + .pt-section-label + .services */
 function renderBankHub(container, data) {
   if (!container || !data) return;
-  console.warn('[CITY-BANK] renderBankHub gold=' + (data.gold || 0)
+  console.warn('[CITY-BANK] renderBankHub (PADRAO_TAVERNA) gold=' + (data.gold || 0)
     + ' bank=' + (data.bank_gold || 0)
     + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
@@ -424,70 +431,47 @@ function renderBankHub(container, data) {
     }
   } catch (e) { console.warn('[CITY-BANK] _npcMarkVisit fail:', e); }
 
-  var root = vCity.el('div', 'bnk-hub bnk-hub-aaa');
+  var root = vCity.el('div', 'bnk-hub');
 
-  /* 1. Hero cenário (canonical PADRAO_TAVERNA — substitui banner antigo) */
+  /* 1. Hero CENARIO (PADRAO_TAVERNA canonical) */
   root.appendChild(_bnkBuildCenario(data));
 
-  /* 2. NPC row clicável → opens encounter PADRAO_ALDRIC */
-  root.appendChild(_bnkBuildNpcRow(data));
+  /* 2. Body container (PADRAO_TAVERNA — padding + gap canonical) */
+  var body = vCity.el('div', 'bnk-body');
+  body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* 3. Loan overdue alert */
+  /* 2a. NPC row */
+  body.appendChild(_bnkBuildNpcRow(data));
+
+  /* 2b. Rep bar (Reputação canonical) */
+  body.appendChild(_bnkBuildRepBar(data));
+
+  /* 2c. Loan overdue alert (se houver) */
   if (data.loan_overdue && data.loan_debt > 0) {
-    root.appendChild(vCity.statusAlert(
+    body.appendChild(vCity.statusAlert(
       'Empréstimo vencido: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> — serviços bloqueados',
       'danger'
     ));
   }
 
-  /* 4. NPC greeting (canonical Aldwin de BANK_GREETINGS em cidade/index.html) */
-  if (data.greeting) {
-    var greet = vCity.el('div', 'bnk-greeting');
-    greet.style.cssText = 'padding:10px 12px;margin-bottom:12px;background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.5);font-style:italic;color:#b8a888;font-size:12px;line-height:1.5;';
-    greet.textContent = vCity.stripTags(data.greeting);
-    root.appendChild(greet);
+  /* 2d. Section label */
+  var sectionLbl = vCity.el('div', 'pt-section-label');
+  sectionLbl.textContent = '⚜ Serviços do Banco ⚜';
+  body.appendChild(sectionLbl);
+
+  /* 2e. Services grid (PADRAO_TAVERNA canonical) */
+  if (data.services && data.services.length) {
+    body.appendChild(_bnkBuildServices(data.services));
   }
 
-  /* 5. Balance cards (Bolsa + Cofre) */
-  var balances = vCity.el('div', 'bnk-balance-row');
-  balances.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;';
-
-  function _balanceCard(label, value, img) {
-    var c = vCity.el('div');
-    c.style.cssText = 'padding:10px 8px;background:rgba(74,56,40,0.25);border:1px solid rgba(196,149,58,0.35);border-radius:8px;text-align:center;';
-    if (img) {
-      var i = vCity.el('div');
-      i.innerHTML = '<img src="' + img + '" style="width:36px;height:36px;object-fit:contain;" loading="lazy" onerror="this.style.display=\'none\';">';
-      c.appendChild(i);
-    }
-    var lbl = vCity.el('div');
-    lbl.textContent = label;
-    lbl.style.cssText = 'font-size:10px;color:#a09484;letter-spacing:1.5px;margin-top:4px;';
-    c.appendChild(lbl);
-    var val = vCity.el('div');
-    val.textContent = String(value) + ' ';
-    val.appendChild(vCity.coin('sm'));
-    val.style.cssText = 'font-size:15px;font-weight:700;color:#c4953a;margin-top:2px;';
-    c.appendChild(val);
-    return c;
-  }
-  balances.appendChild(_balanceCard('BOLSA', data.gold || 0, '../shared/img/bank/bnk-bolsa.png'));
-  balances.appendChild(_balanceCard('COFRE', data.bank_gold || 0, '../shared/img/bank/bnk-cofre.png'));
-  root.appendChild(balances);
-
-  /* 6. Loan debt indicator (non-overdue) */
+  /* 2f. Loan debt indicator (non-overdue) */
   if (data.loan_debt > 0 && !data.loan_overdue) {
-    root.appendChild(vCity.statusAlert(
+    body.appendChild(vCity.statusAlert(
       'Empréstimo ativo: ' + data.loan_debt + ' <span class="vi vi-coin sm"></span> restantes',
       'warn'
     ));
   }
 
-  /* 7. Services grid com PADRAO_ALDRIC clicks */
-  if (data.services && data.services.length) {
-    root.appendChild(vCity.sectionLabel('⚜ Serviços do Banco ⚜'));
-    root.appendChild(_bnkBuildServiceGrid(data.services));
-  }
-
+  root.appendChild(body);
   container.appendChild(root);
 }
