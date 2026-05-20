@@ -315,6 +315,18 @@ function _bnkBuildNpcRow(data) {
   return row;
 }
 
+/* === CB to dialogue mapping (backend usa cbs no formato bank_<svc>_menu) === */
+var BANK_CB_TO_DIALOGUE = {
+  'bank_deposit_menu':       'deposit',
+  'bank_withdraw_menu':      'withdraw',
+  'bank_deposit_item_menu':  'store_item',
+  'bank_withdraw_item_menu': 'retrieve_item',
+  'bank_insurance_menu':     'insurance',
+  'bank_invest_menu':        'invest',
+  'bank_loans_menu':         'loan',
+  'bank_property_menu':      'estate'
+};
+
 /* === Service grid com PADRAO_ALDRIC clicks (substitui vCity.serviceGrid) === */
 function _bnkBuildServiceGrid(services) {
   var grid = vCity.el('div', 'bnk-svc-grid');
@@ -379,14 +391,15 @@ function _bnkBuildServiceGrid(services) {
     /* Click — abre PADRAO_ALDRIC se SERVICE_DIALOGUES_BANK match, senão default vCity.act */
     if (svc.cb && !svc.disabled) {
       card.addEventListener('click', function(){
-        // Match cb diretamente ou strip prefix 'bank_' (backend usa bank_deposit, etc.)
-        var key = svc.cb;
-        var stripped = key.indexOf('bank_') === 0 ? key.substring(5) : key;
-        var dialogue = SERVICE_DIALOGUES_BANK[key] || SERVICE_DIALOGUES_BANK[stripped];
+        // Map backend cb (bank_<svc>_menu) → dialogue key via BANK_CB_TO_DIALOGUE,
+        // OU direto se cb já é uma key do SERVICE_DIALOGUES_BANK (raw)
+        var dialogueKey = BANK_CB_TO_DIALOGUE[svc.cb] || svc.cb;
+        var dialogue = SERVICE_DIALOGUES_BANK[dialogueKey];
         if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
           window._SVC_CONFIG = window._SVC_CONFIG_BANK;
           window.vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_BANK });
         } else if (typeof vCity.act === 'function') {
+          console.warn('[BANK] no dialogue mapped for cb=' + svc.cb + ', fallback vCity.act');
           vCity.act(svc.cb);
         }
       });
