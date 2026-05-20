@@ -6164,6 +6164,13 @@ document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' 
 document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+
+/* task #48 (2026-05-20) — PADRAO_ALDRIC canonical: encounter-popup.{js,css}
+   pra exploracao usar vEncounter.openChoices() AAA (sub-overlay reabrivel)
+   nos eventos tile. Mesma fonte/engine que cidade — diferenca zero de
+   animacao/funcionamento entre webapps. */
+document.write('<link rel="stylesheet" href="../shared/encounter-popup.css?v=' + _vti + '">');
+document.write('<script src="../shared/encounter-popup.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body>
@@ -10327,30 +10334,89 @@ window.__onIntroTap = function() {
     if (!container) return;
     container.innerHTML = '';
     container.style.pointerEvents = '';
-    for (var i = 0; i < rt.choices.length; i++) {
-      var c = rt.choices[i];
+
+    var choices = rt.choices || [];
+    if (choices.length === 0) return;
+
+    /* task #48 (2026-05-20) — PADRAO_ALDRIC canonical: se vEncounter.openChoices
+       disponivel E houver 2+ choices, renderiza UM botao primary "⚔ Escolher
+       acao" no popup; click abre sub-overlay AAA (z=9700) reabrivel.
+       Fallback: inline buttons (1 choice OU vEncounter sem suporte). */
+    var useOverlay = (choices.length >= 2)
+                  && (window.vEncounter && typeof window.vEncounter.openChoices === 'function');
+
+    if (useOverlay) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'stub-popup-choice';
-      btn.setAttribute('data-choice-id', c.id);
-      var labelSpan = document.createElement('span');
-      labelSpan.textContent = c.label;
-      btn.appendChild(labelSpan);
-      if (c.skill && typeof c.dc === 'number') {
-        var badge = document.createElement('span');
-        badge.className = 'stub-popup-choice-badge';
-        // PT-BR display: skill em português + CD (não DC) para consistência com
-        // o resto do jogo (formula do dice overlay já usa "vs CD"). Sem
-        // brackets — visual limpo, gameplay info no border do badge.
-        var skillKey = String(c.skill || '').toLowerCase();
-        var skillLabel = SKILL_LABELS_PTBR[skillKey] || skillKey.toUpperCase();
-        badge.textContent = skillLabel + ' · CD ' + c.dc;
-        btn.appendChild(badge);
-      }
-      (function (choice, runtime) {
-        btn.addEventListener('click', function () { _onChoiceClickEnhanced(choice, runtime); });
-      })(c, rt);
+      btn.className = 'stub-popup-choice stub-popup-choice-primary';
+      btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
+                      '<span class="enc-btn-choose-label">Escolher ação</span>' +
+                      '<span class="enc-btn-choose-count">' + choices.length + '</span>';
+      btn.addEventListener('click', function() {
+        var normChoices = choices.map(function(c){
+          var n = {
+            id: c.id || '',
+            label: c.label || '',
+            desc: c.desc || c.outcome_hint || '',
+            cb: c.id || ''
+          };
+          if (c.skill && typeof c.dc === 'number') {
+            var skillKey = String(c.skill || '').toLowerCase();
+            var skillLabel = (typeof SKILL_LABELS_PTBR !== 'undefined' && SKILL_LABELS_PTBR[skillKey])
+                             ? SKILL_LABELS_PTBR[skillKey] : skillKey.toUpperCase();
+            n.dc = c.dc;
+            n.skill = skillLabel;
+          }
+          if (c.cost) n.cost = c.cost;
+          n._original = c;
+          return n;
+        });
+        // Try to derive NPC name from runtime (fallback empty)
+        var npcName = '';
+        try {
+          if (rt && rt.event && rt.event.npc_data && rt.event.npc_data.name) {
+            npcName = rt.event.npc_data.name;
+          } else if (rt && rt.npc && rt.npc.name) {
+            npcName = rt.npc.name;
+          }
+        } catch(_e) {}
+        window.vEncounter.openChoices(normChoices, {
+          title: 'Escolher ação',
+          npcName: npcName,
+          onChoice: function(normCh) {
+            var original = normCh._original || normCh;
+            _onChoiceClickEnhanced(original, rt);
+          }
+        });
+      });
       container.appendChild(btn);
+    } else {
+      // Fallback: inline buttons (legacy)
+      for (var i = 0; i < choices.length; i++) {
+        var c = choices[i];
+        var btnInline = document.createElement('button');
+        btnInline.type = 'button';
+        btnInline.className = 'stub-popup-choice';
+        btnInline.setAttribute('data-choice-id', c.id);
+        var labelSpan = document.createElement('span');
+        labelSpan.textContent = c.label;
+        btnInline.appendChild(labelSpan);
+        if (c.skill && typeof c.dc === 'number') {
+          var badge = document.createElement('span');
+          badge.className = 'stub-popup-choice-badge';
+          // PT-BR display: skill em português + CD (não DC) para consistência com
+          // o resto do jogo (formula do dice overlay já usa "vs CD"). Sem
+          // brackets — visual limpo, gameplay info no border do badge.
+          var skillKey = String(c.skill || '').toLowerCase();
+          var skillLabel = SKILL_LABELS_PTBR[skillKey] || skillKey.toUpperCase();
+          badge.textContent = skillLabel + ' · CD ' + c.dc;
+          btnInline.appendChild(badge);
+        }
+        (function (choice, runtime) {
+          btnInline.addEventListener('click', function () { _onChoiceClickEnhanced(choice, runtime); });
+        })(c, rt);
+        container.appendChild(btnInline);
+      }
     }
   }
 
