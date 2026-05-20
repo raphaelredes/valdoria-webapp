@@ -1134,13 +1134,14 @@ LOG SINK (Fase 7):
       display: none;
       flex-direction: column;
       background: linear-gradient(180deg, #2a2420 0%, #1a1510 100%);
-      animation: csp-in 0.18s ease-out;
+      /* 2026-05-20 CRITICAL FIX: animação csp-in REMOVIDA. Chromium do Telegram
+         WebApp (Desktop) congela a timeline de animation em display:none → display:flex
+         transitions — popup ficava opacity:0 indefinidamente (BLANK no Telegram).
+         Mesmo bug do encounter-overlay (commit dd7ae566). Opacity:1 base garante
+         popup sempre visível ao adicionar .active. */
+      opacity: 1;
     }
     #city-subscreen-popup.active { display: flex; }
-    @keyframes csp-in {
-      from { opacity: 0; transform: scale(0.98); }
-      to   { opacity: 1; transform: scale(1); }
-    }
     .csp-header {
       flex-shrink: 0;
       display: flex;
