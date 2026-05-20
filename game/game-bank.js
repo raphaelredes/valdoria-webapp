@@ -152,9 +152,16 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Guardar item é diferente de guardar ouro. <i>(ajusta o monóculo)</i> Item ocupa espaço — cinco Valdoritas por semana, independente do valor. <i>(tamborila dedos)</i> O cofre é selado com o anel da Casa. Apenas Vossa Senhoria, portando o selo correspondente, pode abri-lo.' }
     ],
     choices: [
-      { id: 's_short', label: '🗝️ Guardar 1 semana · 5V', cb: 'store-confirm', renownDelta: 0 },
-      { id: 's_month', label: '🗝️ Guardar 1 mês · 18V (10% desconto)', cb: 'store-confirm', renownDelta: +1 },
-      { id: 's_year',  label: '🗝️ Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3 },
+      // task #84: resultText específico por prazo (cohesão).
+      { id: 's_short', label: '🗝️ Guardar 1 semana · 5V', cb: 'store-confirm', renownDelta: 0,
+        resultNarration: 'Aldwin gira a chave de bronze na porta do cofre menor. <i>(deposita o item na bandeja de veludo)</i>',
+        resultText: '"Uma semana, cinco Valdoritas. <i>(sela a porta)</i> O item fica guardado até o sétimo dia. Após isso, Vossa Senhoria pode renovar ou retirar." <b>Item armazenado no Cofre Comum.</b>' },
+      { id: 's_month', label: '🗝️ Guardar 1 mês · 18V (10% desconto)', cb: 'store-confirm', renownDelta: +1,
+        resultNarration: 'Aldwin escolhe um cofre médio, no segundo nível. <i>(testa as três fechaduras antes de selar)</i>',
+        resultText: '"Trinta dias, dezoito Valdoritas — desconto da fidelidade. <i>(carimba o recibo)</i> O item fica em cofre mais seguro, com duas chaves auxiliares." <b>Item armazenado. +1 Renown.</b>' },
+      { id: 's_year',  label: '🗝️ Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3,
+        resultNarration: 'Aldwin curva-se levemente. Conduz Vossa Senhoria à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
+        resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renown.</b>' },
       { id: 's_persuade', label: '🎲 "Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'back', label: '↩ Voltar', cb: 'close' }
     ]
@@ -166,9 +173,16 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'A taxa de retirada é uma Valdorita por item — política da Casa, não decisão minha. <i>(sorri com cortesia medida)</i> Se há mais de um item, posso fazer combo de cinco itens por três Valdoritas.' }
     ],
     choices: [
-      { id: 'r_single', label: '🗝️ Retirar 1 item · 1V', cb: 'retrieve-confirm', renownDelta: 0 },
-      { id: 'r_bundle', label: '🗝️ Retirar até 5 itens · 3V', cb: 'retrieve-confirm', renownDelta: +1 },
-      { id: 'r_all',    label: '🗝️ Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0 },
+      // task #84: resultText específico (cohesão).
+      { id: 'r_single', label: '🗝️ Retirar 1 item · 1V', cb: 'retrieve-confirm', renownDelta: 0,
+        resultNarration: 'Aldwin destrava o cofre correspondente. <i>(devolve o item em bandeja de veludo)</i>',
+        resultText: '"Item retirado, uma Valdorita de taxa. <i>(confere o lacre)</i> Vossa Senhoria deseja inspecionar antes de selar a operação?" <b>Item devolvido.</b>' },
+      { id: 'r_bundle', label: '🗝️ Retirar até 5 itens · 3V', cb: 'retrieve-confirm', renownDelta: +1,
+        resultNarration: 'Aldwin abre dois cofres pequenos lado a lado. <i>(organiza os itens em bandeja maior)</i>',
+        resultText: '"Cinco itens, três Valdoritas — combo da Casa. <i>(carimba a folha de retirada)</i> Pode conferir cada um antes de sair. +1 Renown pela operação." <b>Itens devolvidos.</b>' },
+      { id: 'r_all',    label: '🗝️ Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0,
+        resultNarration: 'Aldwin escolta Vossa Senhoria pessoalmente à câmara dos cofres. Dois guardas testemunham.',
+        resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Vossa Senhoria fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
       { id: 'r_insight', label: '🎲 "Você confere por dentro também?" · Insight DC 12', cb: 'dice:insight:12:+1' },
       { id: 'back', label: '↩ Voltar', cb: 'close' }
     ]
@@ -180,9 +194,16 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Investir é confiar prudência ao tempo. <i>(ajusta óculos meia-lua)</i> A Casa oferece três modalidades: rendimento conservador (cinco por cento ao mês, sem risco), médio (dez por cento, risco moderado — caravana de comércio), e alto (vinte por cento, mas com risco real).' }
     ],
     choices: [
-      { id: 'i_safe', label: '📜 Conservador · 100V × 5% mês',  cb: 'invest-confirm', renownDelta: +1 },
-      { id: 'i_med',  label: '📜 Médio · 500V × 10% (caravana)', cb: 'invest-confirm', renownDelta: +2 },
-      { id: 'i_high', label: '📜 Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2 },
+      // task #84: resultText específico por tier de investimento (cohesão).
+      { id: 'i_safe', label: '📜 Conservador · 100V × 5% mês',  cb: 'invest-confirm', renownDelta: +1,
+        resultNarration: 'Aldwin assina o contrato Conservador. <i>(carimba duas vezes — uma vermelha, uma dourada)</i>',
+        resultText: '"Cem Valdoritas em Conservador, cinco por cento ao mês — pago em moeda viva, no primeiro de cada mês. <i>(arquiva o contrato)</i> Sem risco. Sem promessas de riqueza. Apenas certeza." <b>+5V/mês em renda passiva. +1 Renown.</b>' },
+      { id: 'i_med',  label: '📜 Médio · 500V × 10% (caravana)', cb: 'invest-confirm', renownDelta: +2,
+        resultNarration: 'Aldwin chama um banqueiro júnior pra preparar o contrato Médio — caravana de comércio Sul-Vale. <i>(seleciona pergaminho específico)</i>',
+        resultText: '"Quinhentas Valdoritas, dez por cento ao mês — atrelado à caravana de Marin Albert. <i>(assina junto)</i> Há risco de atraso ou perda parcial. Cinquenta Valdoritas mensais quando tudo corre bem." <b>+50V/mês expected. +2 Renown.</b>' },
+      { id: 'i_high', label: '📜 Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2,
+        resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda Vossa Senhoria)</i> Volta com pergaminho selado em cera vermelha-sangue.',
+        resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renown.</b>' },
       { id: 'i_persuade', label: '🎲 "Posso ter taxa preferencial?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'about_tavira', label: '"E os bons clientes antigos? Como a Mestra Tavira?"', cb: 'about_tavira' },
       { id: 'i_rude', label: '"Cinco por cento é miséria. Você está roubando."', cb: 'opinion-rude', renownDelta: -2 },
@@ -196,7 +217,10 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O Seguro de Aventureiros não é luxo — é sabedoria. <i>(toca o lacre real)</i> Cinquenta Valdoritas mensais. Em caso de morte verificada, a Casa contrata Revivify no Templo (até 300V em diamante), e o que sobra é entregue ao herdeiro nomeado. Carta selada pelo próprio Conde.' }
     ],
     choices: [
-      { id: 'in_buy', label: '✉ Adquirir Seguro · 50V/mês · 3 meses min.', cb: 'insurance-confirm', renownDelta: +3 },
+      // task #84: resultText específico (cohesão).
+      { id: 'in_buy', label: '✉ Adquirir Seguro · 50V/mês · 3 meses min.', cb: 'insurance-confirm', renownDelta: +3,
+        resultNarration: 'Aldwin pega o pergaminho selado com a marca do Conde. <i>(testemunha do banqueiro júnior chamada)</i>',
+        resultText: '"Seguro de Aventureiros ativado. Cinquenta Valdoritas mensais, mínimo de três meses. <i>(empurra pergaminho assinado)</i> Em caso de morte verificada por testemunha, a Casa contrata Revivify no Templo (até 300V em diamante), e o herdeiro nomeado recebe o resíduo." <b>Seguro ativo. +3 Renown da Casa.</b>' },
       { id: 'in_test', label: '🎲 "Confio em você, não em papéis" · Engano DC 15', cb: 'dice:deception:15:+0' },
       { id: 'in_insight', label: '🎲 "Já houve fraude com este Seguro?" · Insight DC 14', cb: 'dice:insight:14:+2' },
       { id: 'in_rude', label: '"Vocês banqueiros só vendem medo."', cb: 'opinion-rude', renownDelta: -3 },
@@ -210,9 +234,16 @@ var SERVICE_DIALOGUES_BANK = {
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Comprar terreno é investir em pedra que dura mais que a memória. <i>(aponta quatro regiões marcadas)</i> Casa modesta na cidade baixa, mil Valdoritas. Quinta nas margens, cinco mil. Torre fortificada, quinze mil — leva cem dias. Stronghold completo no Quarteirão dos Cravos, cinquenta mil, quatrocentos dias.' }
     ],
     choices: [
-      { id: 'e_house',  label: '🏠 Casa (Hovel) · 1000V (DMG p.157)', cb: 'estate-confirm', renownDelta: +2 },
-      { id: 'e_farm',   label: '🌾 Quinta (Cottage) · 5000V', cb: 'estate-confirm', renownDelta: +3 },
-      { id: 'e_tower',  label: '🗼 Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3 },
+      // task #84: resultText específico por tipo de propriedade (cohesão).
+      { id: 'e_house',  label: '🏠 Casa (Hovel) · 1000V (DMG p.157)', cb: 'estate-confirm', renownDelta: +2,
+        resultNarration: 'Aldwin marca no mapa a Casa modesta na cidade baixa — duas portas, lareira pequena, jardim de ervas. <i>(passa a escritura assinada pelo Conde)</i>',
+        resultText: '"Mil Valdoritas, Casa registrada em nome de Vossa Senhoria. <i>(carimba o pergaminho)</i> Cidade baixa, perto do mercado. <b>DMG p.157 — Hovel: lareira modesta, dois cômodos. Geração: 1 sp/dia. +2 Renown da Casa.</b>"' },
+      { id: 'e_farm',   label: '🌾 Quinta (Cottage) · 5000V', cb: 'estate-confirm', renownDelta: +3,
+        resultNarration: 'Aldwin marca a Quinta nas margens do rio — três hectares, casa principal, celeiro, dois empregados inclusos.',
+        resultText: '"Cinco mil Valdoritas. Quinta nas margens do Vale do Cervo. <i>(entrega escritura selada)</i> Empregados pagos, colheita garantida. <b>Cottage DMG p.157: 5 cômodos. Geração: 2 sp/dia. +3 Renown da Casa.</b>"' },
+      { id: 'e_tower',  label: '🗼 Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3,
+        resultNarration: 'Aldwin entrega plantas arquitetônicas — torre fortificada com porão de cofre, três andares, salão de audiência. <i>(prazo de cem dias de construção)</i>',
+        resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower DMG p.157. +3 Renown da Casa.</b>"' },
       { id: 'e_stronghold', label: '🏰 Stronghold · 50000V · 400 dias · DC 20 Persuasão', cb: 'dice:persuasion:20:+3' },
       { id: 'back',     label: '↩ Voltar', cb: 'close' }
     ]

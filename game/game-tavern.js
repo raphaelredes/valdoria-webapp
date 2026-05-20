@@ -302,7 +302,10 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lê os avisos. Aceita o que cabe na tua espada. <b>Renome sobe com job entregue</b>, cai com prazo quebrado. Casa é firme com a palavra.' }
     ],
     choices: [
-      { id: 'read', label: '📋 Ler avisos do Mural', cb: 'bulletin-confirm', backend_cb: 'tavern_bulletin_open' },
+      // task #84: resultText específico (cohesão).
+      { id: 'read', label: '📋 Ler avisos do Mural', cb: 'bulletin-confirm', backend_cb: 'tavern_bulletin_open',
+        resultNarration: 'Grom acompanha Vossa Senhoria até o Mural. <i>(arruma os pergaminhos pra deixar à vista)</i> Dezenas de oportunidades — algumas urgentes, outras esperando há semanas.',
+        resultText: '"Lê com calma. <i>(passa o dedo por cinco selos diferentes)</i> Tem trabalho de escolta, caça à recompensa, retorno de criança perdida, e três do selo nobre que ninguém ainda teve coragem. Quem aceita um, o nome fica registrado na Casa. <b>Avisos do Mural carregados — escolha contrato pra aceitar.</b>"' },
       { id: 'investigate', label: '🔍 "Algum cheira a armadilha?" · Investigação DC 14', cb: 'dice:investigation:14:+1' },
       { id: 'noble', label: '👑 "Conta-me do selo nobre." · História DC 13', cb: 'dice:history:13:+0' },
       { id: 'back', label: '↩ "Depois eu leio."', cb: 'close' }
