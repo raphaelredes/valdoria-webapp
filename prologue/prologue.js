@@ -492,7 +492,25 @@ async function onRoadChoice(key){
   if(key==='fight'){await doFight();}else{await doDistract();}
 }
 async function doDistract(){try{const result=await apiCall('/api/prologue/distract');choices.distract=result;showDiceRoll(result);}catch(e){showError('Erro no teste de habilidade.',e);}}
-function onDistractSuccess(){document.getElementById('diceOverlay').classList.remove('active');nextScreen(renderAftermath());}
+function onDistractSuccess(){
+  document.getElementById('diceOverlay').classList.remove('active');
+  /* === FASE C (sessão #11, 2026-05-19) — NPC Living System hooks ============
+     Thorne é Armeiro canonical do Mercado (memory/reference_npc_personalities_canonical.md
+     §13). Salvar a vida do filho dele no prólogo desbloqueia gossip especial
+     quando jogador encontrá-lo em mercado-eldoria-final.html (Mercado).
+     Renown +3 com facção market (escala DMG p.22: feito notável). */
+  try {
+    if (typeof window._npcMarkVisit === 'function') {
+      window._npcMarkVisit('thorne', 'prologue_save');
+      window._npcRemember('thorne', 'rescued_from_wolves', true);
+      window._npcUnlockDialogue('thorne', 'gossip_prologue_rescue');
+    }
+    if (typeof window._applyRenownDelta === 'function') {
+      window._applyRenownDelta('market', +3);
+    }
+  } catch(e){ console.warn('[PROLOGUE] NPC living hook err:', e); }
+  nextScreen(renderAftermath());
+}
 async function onDistractFail(){document.getElementById('diceOverlay').classList.remove('active');await doFight();}
 async function doFight(){try{if(window._prologueInitLoading){window._prologueInitLoading.show();}else{var _ld=document.getElementById('loading');if(_ld){_ld.style.display='flex';_ld.classList.remove('hidden');}}const result=await apiCall('/api/prologue/fight',{});if(result.combat_url||result.arena_url){window.__valdoria_transitioning=true;valdoriaSpaNav(result.combat_url||result.arena_url);}else{showError('Erro ao iniciar combate.');}}catch(e){showError('Erro ao iniciar combate.',e);}}
 function onAftermathDone(){nextScreen(renderGate());}
