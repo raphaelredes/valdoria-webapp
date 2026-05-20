@@ -1074,6 +1074,22 @@ LOG SINK (Fase 7):
     .fb-btn.fb-toggle:hover { color: var(--v-gold, #c4953a); }
     .fb-btn.fb-icon-only { flex: 0 0 32px; max-width: 32px; min-width: 32px; padding: 2px; }
     .fb-btn .fb-emoji { font-size: var(--v-font-md, 14px); }
+    /* task #88 (2026-05-20) — CRITICAL fix: .fb-ico-img CSS faltava no cidade.
+       PNGs naturais são 1024x1024 → sem constraint, renderizavam em natural
+       size, fazendo footer-quick e bottom-panel ocuparem a tela TODA.
+       Replica .fb-btn .fb-ico-img de simuladores/taverna-javali-final.html. */
+    .fb-btn .fb-ico-img {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+    }
+    .fb-btn .fb-ico {
+      font-size: 14px;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+    }
     /* Toggle (·) FORA do panel — flutua acima do bottom-panel (2026-05-04)
        X-6.5.51BH (2026-05-15): footer agora é 1 linha só (~46px) desde X-6.5.51BG;
        toggle voltou ao padrão antigo de 2 linhas (90px) — fix: alinhar à altura real. */
