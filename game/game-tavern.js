@@ -148,15 +148,23 @@ var SERVICE_DIALOGUES_TAVERN = {
 };
 
 /* === Backend cb → dialogue key map ====================================
- * Backend envia cb = "tavern_drink_menu", "tavern_rumor" etc. (tavern.py:153-165) */
+ * task #59 (2026-05-20): FIX cb keys mismatch. Audit via Chrome MCP descobriu
+ * que backend envia cb com sufixo "_open" / "_buy" (não "_menu"):
+ *   'tavern_drinks_open', 'tavern_rumor_buy', 'tavern_carousing_open',
+ *   'tavern_pitfight_open', 'tavern_gather_open'
+ * Antes mapeavam pra keys ANTIGAS ('tavern_drink_menu', 'tavern_rumor', etc)
+ * que NUNCA batiam. Resultado: TODOS os svc cards caíam no fallback vCity.act
+ * (legacy drill-down) em vez de abrirem PADRAO_ALDRIC encounter.
+ * Backend tavern.py:153-165 confirma os cb codes corretos. */
 var TAVERN_CB_TO_DIALOGUE = {
-  'tavern_drink_menu':       'drinks',
-  'tavern_rumor':            'rumor',
-  'tavern_carousing_menu':   'carousing',
-  'tavern_pitfight_menu':    'pitfight',
-  'tavern_gather_menu':      'gossip'
-  // Outros services (mercenaries, adventurers, games, board, bard) ainda usam
-  // fallback vCity.act (backend handler tradicional). Migração incremental.
+  'tavern_drinks_open':      'drinks',
+  'tavern_rumor_buy':        'rumor',
+  'tavern_carousing_open':   'carousing',
+  'tavern_pitfight_open':    'pitfight',
+  'tavern_gather_open':      'gossip'
+  // Outros services (mercenaries, adventurers, games, bulletin, bard) ainda
+  // usam fallback vCity.act (sem dialogue PADRAO_ALDRIC ainda). Migração
+  // incremental — adicionar entry aqui + dialogue em SERVICE_DIALOGUES_TAVERN.
 };
 
 /* === Service icon meta ================================================== */
