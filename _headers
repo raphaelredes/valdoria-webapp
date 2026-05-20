@@ -208,7 +208,9 @@
   X-Content-Type-Options: nosniff
 
 # /game/*.js — renderers de produção (game-bank, game-temple, etc.)
-# no-cache pra evitar stale após push (CF Pages edge cache de 4h era um problema).
+# 2026-05-20: bare `no-cache` (sem `must-revalidate`). CF Pages estava ignorando
+# Cache-Control quando combinado com must-revalidate (per CLAUDE.md / bundle-version.js
+# precedent). Resultado: CDN cacheava /game/*.js por 4h e player via versão stale.
 /game/*.js
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache
   X-Content-Type-Options: nosniff
