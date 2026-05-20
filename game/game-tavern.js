@@ -177,9 +177,9 @@ var TAVERN_SVC_META = {
 function _tavBuildCenario(data) {
   var hero = vCity.el('div', 'cenario');
 
-  // Banner background — fallback CSS-only if PNG missing
+  // Banner background — filename canonical: javali-negro-banner.png
   var bg = vCity.el('img', 'cenario-bg');
-  bg.src = '../shared/img/taverna/taverna-banner.png';
+  bg.src = '../shared/img/taverna/javali-negro-banner.png';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -188,9 +188,9 @@ function _tavBuildCenario(data) {
   hero.appendChild(vCity.el('div', 'candle-glow l'));
   hero.appendChild(vCity.el('div', 'candle-glow r'));
 
-  // Brasão
+  // Brasão — filename canonical: javali-negro-crest.png
   var crest = vCity.el('img', 'cenario-brasao');
-  crest.src = '../shared/img/taverna/taverna-crest.png';
+  crest.src = '../shared/img/taverna/javali-negro-crest.png';
   crest.alt = 'Brasão do Javali Negro';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
