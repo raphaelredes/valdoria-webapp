@@ -17,6 +17,9 @@
 <script src="/shared/auth-gate.js"></script>
 <!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
 <script src="/bundle-version.js"></script>
+<!-- Version Check (task #31, 2026-05-20): auto-detect new deploys + force reload.
+     LGPD-compliant: localStorage só pra timestamps técnicos, sem PII. -->
+<script src="/shared/version-check.js"></script>
 <script>
 // Carrega CSS canonical + scripts (loading-title.js para TOQUE PARA INICIAR,
 // loading-template.js para magic-circle overlay durante auth+state)
