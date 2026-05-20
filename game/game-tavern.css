@@ -3,7 +3,7 @@
  *
  * Layout:
  *   .tav-hub-aaa   — container vertical
- *   .tav-hero      — cabeçalho cerimonial com placa pendurada + lanternas + embers
+ *   .tav-cenario      — cabeçalho cerimonial com placa pendurada + lanternas + embers
  *   .tav-flavor    — pergaminho com quote/mood (rotação por rep tier)
  *   .tav-section   — agrupador (Presentes / No balcão e na sala)
  *   .tav-npc-grid  — lista vertical de NPC portrait cards
@@ -31,7 +31,7 @@
 }
 
 /* --- HERO: tavern sign cerimonial -------------------------------------- */
-.tav-hero {
+.tav-cenario {
   position: relative;
   height: 110px;
   margin: 0 -2px;
@@ -44,7 +44,7 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 140, 40, 0.08);
   animation: tavHeroPulse 5.5s ease-in-out infinite;
 }
-.tav-hero-bg {
+.tav-cenario-bg {
   position: absolute; inset: 0;
   background-image:
     /* wood planks horizontais */
@@ -323,10 +323,10 @@
 /* === Performance tier degradation ===================================== */
 body.perf-lite .tav-lantern,
 body.perf-lite .tav-sign-plate { animation: none; }
-body.perf-lite .tav-hero { animation: none; }
+body.perf-lite .tav-cenario { animation: none; }
 body.perf-lite .tav-ember { display: none; }
-body.perf-medium .tav-hero { animation-duration: 8s; }
+body.perf-medium .tav-cenario { animation-duration: 8s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tav-hero, .tav-lantern, .tav-sign-plate, .tav-ember, .tav-npc-card, .tav-svc-card { animation: none !important; }
+  .tav-cenario, .tav-lantern, .tav-sign-plate, .tav-ember, .tav-npc-card, .tav-svc-card { animation: none !important; }
 }

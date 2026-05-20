@@ -1,6 +1,6 @@
 /* game-guild.css — Guild V4 NPC Dialog layout (2026-04-11)
 
- * Immersive RPG dialog with Tavira (Mestra da Guilda): hero scene,
+ * Immersive RPG dialog with Tavira (Mestra da Guilda): cenario scene,
 
  * speech bubble, dialogue choices, and status bar.
 
@@ -26,7 +26,7 @@
 
 
 
-/* ===== SCENE: hero NPC portrait ===== */
+/* ===== SCENE: cenario NPC portrait ===== */
 
 .gld-scene {
 
@@ -502,7 +502,7 @@
 
 }
 
-.gld-adv-hero {
+.gld-adv-cenario {
 
   min-height: 118px;
 
@@ -528,7 +528,7 @@
 
 }
 
-.gld-adv-hero::before {
+.gld-adv-cenario::before {
 
   content: "";
 
@@ -572,7 +572,7 @@
 
 }
 
-.gld-adv-hero-text {
+.gld-adv-cenario-texto {
 
   flex: 1;
 

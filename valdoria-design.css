@@ -916,7 +916,7 @@
   }
   .v-popup-btn:active,
   .btn-action:active,
-  .btn-hero:active,
+  .btn-principal:active,
   .btn-choice:active,
   .action-btn:active,
   .feedback-btn-primary:active,
@@ -930,7 +930,7 @@
   }
   .v-popup-btn,
   .btn-action,
-  .btn-hero,
+  .btn-principal,
   .btn-choice,
   .action-btn,
   .v-toggle-item,
@@ -1390,7 +1390,7 @@
   .dice-overlay,
   .v-card,
   .btn-action,
-  .btn-hero,
+  .btn-principal,
   .screen,
   .immersive-toggle,
   .immersive-restore,

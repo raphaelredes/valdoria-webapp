@@ -11858,8 +11858,8 @@ function _showKillsPopup(p){
     + '.vKl-pedestal-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;margin:2px 0 4px;}'
     + '.vKl-chains{position:relative;width:64px;height:14px;display:flex;justify-content:space-between;transform-origin:top center;animation:vKlChainSway 3.4s ease-in-out infinite;}'
     + '.vKl-chain-link{width:2px;height:14px;background:linear-gradient(180deg,rgba(74,56,40,0.4),rgba(196,149,58,0.8));border-radius:1px;box-shadow:0 0 3px rgba(196,149,58,0.4);}'
-    + '.vKl-hero-pedestal{position:relative;width:clamp(96px,24vw,118px);height:clamp(96px,24vw,118px);margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 32%,rgba(255,80,40,0.22) 0%,rgba(80,18,12,0.65) 60%,rgba(20,10,8,0.92) 100%);border:1px solid rgba(196,40,30,0.65);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
-    + '.vKl-hero-pedestal::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(196,40,30,0.22);pointer-events:none;}'
+    + '.vKl-cenario-pedestal{position:relative;width:clamp(96px,24vw,118px);height:clamp(96px,24vw,118px);margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 32%,rgba(255,80,40,0.22) 0%,rgba(80,18,12,0.65) 60%,rgba(20,10,8,0.92) 100%);border:1px solid rgba(196,40,30,0.65);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
+    + '.vKl-cenario-pedestal::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(196,40,30,0.22);pointer-events:none;}'
     /* Orbital ring (rotating runes orbit) */
     + '.vKl-orbit-ring{position:absolute;top:50%;left:50%;width:130%;height:130%;border-radius:50%;border:1px dashed rgba(196,40,30,0.45);transform:translate(-50%,-50%);pointer-events:none;animation:vKlOrbitRing 16s linear infinite;}'
     + '.vKl-orbit-ring::before,.vKl-orbit-ring::after{content:"◆";position:absolute;font-size:9px;color:#e85040;text-shadow:0 0 6px rgba(255,80,40,0.7);}'
@@ -11886,10 +11886,10 @@ function _showKillsPopup(p){
     /* Counter pulse no remount (chamado quando contador termina) */
     + '.vKl-counter-pulse{animation:vKlCounterPulse 0.45s ease-out;}'
     /* SVG fallback skull com eye glow */
-    + '.vKl-hero-fallback{width:64%;height:64%;color:#c43020;animation:vKlSkullEye 1.8s ease-in-out infinite;}'
-    + '.vKl-hero-png{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:50%;}'
-    + '.vKl-hero-png[data-src]{background-image:var(--v-trophy-img,none);}'
-    + '.vKl-hero-pedestal[data-has-png="1"] .vKl-hero-fallback{display:none;}'
+    + '.vKl-cenario-fallback{width:64%;height:64%;color:#c43020;animation:vKlSkullEye 1.8s ease-in-out infinite;}'
+    + '.vKl-cenario-png{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:50%;}'
+    + '.vKl-cenario-png[data-src]{background-image:var(--v-trophy-img,none);}'
+    + '.vKl-cenario-pedestal[data-has-png="1"] .vKl-cenario-fallback{display:none;}'
     /* Bestiary cards com stagger entry + medal badges */
     + '.vKl-beast-card{position:relative;animation:vKlCardSlideIn 0.5s ease-out backwards;overflow:hidden;}'
     + '.vKl-beast-card:hover{transform:translateX(2px);transition:transform 0.15s ease-out;}'
@@ -11919,9 +11919,9 @@ function _showKillsPopup(p){
     +   '<div class="vKl-chains"><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span></div>'
     +   '<div style="position:relative;display:inline-block;">'
     +     '<div class="vKl-orbit-ring"></div>'
-    +     '<div class="vKl-hero-pedestal" id="vKl-hero-pedestal">'
-    +       '<div class="vKl-hero-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
-    +       '<svg class="vKl-hero-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
+    +     '<div class="vKl-cenario-pedestal" id="vKl-cenario-pedestal">'
+    +       '<div class="vKl-cenario-png" data-src="/shared/img/hall-cacada-trophy.png"></div>'
+    +       '<svg class="vKl-cenario-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
     +     '</div>'
     /* Embers floating up around the pedestal */
     +     '<span class="vKl-ember e1"></span>'
@@ -11998,9 +11998,9 @@ function _showKillsPopup(p){
   setTimeout(function(){
     // 1) Heuristica de PNG: tenta carregar trophy.png, fallback SVG fica
     try {
-      var ped = document.getElementById('vKl-hero-pedestal');
+      var ped = document.getElementById('vKl-cenario-pedestal');
       if (ped) {
-        var slot = ped.querySelector('.vKl-hero-png');
+        var slot = ped.querySelector('.vKl-cenario-png');
         if (slot) {
           var src = slot.getAttribute('data-src');
           if (src) {
@@ -13934,7 +13934,7 @@ function _renderInnHubAAA(container, data) {
     '<style>'
     + '.inn-hub-aaa{display:flex;flex-direction:column;gap:10px;padding:6px 4px 10px;}'
     // HERO: parede de pedra + viga + lareira + janela noturna (X-6.5.51BL 2026-05-15)
-    + '.inn-hero{position:relative;height:140px;margin:0 -2px;border-radius:12px;overflow:hidden;'
+    + '.inn-cenario{position:relative;height:140px;margin:0 -2px;border-radius:12px;overflow:hidden;'
     +   'border:1px solid rgba(196,149,58,0.45);'
     +   'box-shadow:0 6px 18px rgba(0,0,0,0.55),inset 0 0 24px rgba(0,0,0,0.4);}'
     // Camada 1: parede de pedra (gradiente base + brick pattern)
@@ -14044,7 +14044,7 @@ function _renderInnHubAAA(container, data) {
     + '@media (prefers-reduced-motion:reduce){.inn-fireglow,.inn-star,.inn-smoke{animation:none!important;}}'
     + '</style>'
     // HERO — cena medieval com SVG inline (parede de pedra + viga + lareira + janela noturna)
-    + '<div class="inn-hero">'
+    + '<div class="inn-cenario">'
     +   '<div class="inn-stone"></div>'
     +   '<div class="inn-beam"></div>'
     +   '<div class="inn-floor"></div>'
@@ -28011,10 +28011,10 @@ function _renderEpicSquareHub(container, data){
     + '@keyframes sqrCardSlide{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}'
     + '.sqr-epic-wrap{padding:var(--v-space-md,8px);font-family:var(--v-font,serif);}'
     /* Hero panel — pedra + chao + fontainh */
-    + '.sqr-hero{position:relative;padding:18px 14px 16px;margin-bottom:12px;'
+    + '.sqr-cenario{position:relative;padding:18px 14px 16px;margin-bottom:12px;'
     + 'background:radial-gradient(ellipse at 50% 12%,' + theme.glow + ' 0%,rgba(74,56,40,0.25) 35%,rgba(30,22,16,0.92) 80%);'
     + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;}'
-    + '.sqr-hero::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:' + theme.primary + ';letter-spacing:2px;opacity:0.75;}'
+    + '.sqr-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:' + theme.primary + ';letter-spacing:2px;opacity:0.75;}'
     + '.sqr-period-badge{position:absolute;top:7px;left:10px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:' + theme.primary + ';letter-spacing:2px;text-transform:uppercase;opacity:0.85;}'
     + '.sqr-torch{position:absolute;width:14px;height:18px;font-size:14px;line-height:1;animation:sqrTorchFlicker 1.8s ease-in-out infinite;}'
     + '.sqr-torch.tl{top:4px;left:6px;}'
@@ -28039,7 +28039,7 @@ function _renderEpicSquareHub(container, data){
     + '</style>';
   /* === HERO PANEL === */
   html += '<div class="sqr-epic-wrap">'
-    + '<div class="sqr-hero">'
+    + '<div class="sqr-cenario">'
     +   '<span class="sqr-torch tl">🔥</span><span class="sqr-torch tr">🔥</span>'
     +   '<div class="sqr-period-badge">◆ ' + theme.label + ' ◆</div>'
     +   '<div class="sqr-fountain">⛲</div>'
@@ -28752,12 +28752,12 @@ function _aaaListSubScreen(opts){
     + '<style>'
     + '.aaa-sub{display:flex;flex-direction:column;gap:10px;padding:6px 4px 12px;}'
     // Hero
-    + '.aaa-sub-hero{position:relative;padding:14px 12px 12px;border-radius:10px;overflow:hidden;text-align:center;'
+    + '.aaa-sub-cenario{position:relative;padding:14px 12px 12px;border-radius:10px;overflow:hidden;text-align:center;'
     +   'background:' + th.heroBg + ',' + th.heroGradient + ';'
     +   'border:1px solid ' + th.primary + ';'
     +   'box-shadow:0 4px 14px rgba(0,0,0,0.4),inset 0 0 18px rgba(0,0,0,0.3);}'
-    + '.aaa-sub-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.7;}'
-    + '.aaa-sub-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.4;}'
+    + '.aaa-sub-cenario::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.7;}'
+    + '.aaa-sub-cenario::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.4;}'
     + '.aaa-sub-icon{width:36px;height:36px;margin:0 auto 4px;display:grid;place-items:center;color:' + th.primary + ';filter:drop-shadow(0 0 6px ' + th.glow + ');}'
     + '.aaa-sub-icon svg{width:100%;height:100%;}'
     + '.aaa-sub-title{font-family:var(--v-font-display,Cinzel,serif);font-size:16px;font-weight:700;letter-spacing:3px;color:#ffd8a0;'
@@ -28810,7 +28810,7 @@ function _aaaListSubScreen(opts){
     + '</style>'
     // Hero
     + '<div class="aaa-sub">'
-    +   '<div class="aaa-sub-hero">'
+    +   '<div class="aaa-sub-cenario">'
     +     (opts.icon ? '<div class="aaa-sub-icon">' + opts.icon + '</div>' : '')
     +     '<div class="aaa-sub-title">' + (opts.title || '') + '</div>'
     +     (opts.subtitle ? '<div class="aaa-sub-orn">◆ ' + opts.subtitle + ' ◆</div>' : '')
@@ -43321,9 +43321,9 @@ function renderSubScreen(el, key){
   if (isQuestOpen) {
     /* Pergaminho hero — flavor + npcInfo combinados num cartao ornamentado */
     html += '<style>'
-      + '.cs-quest-hero{position:relative;margin:6px 0 12px;padding:14px 12px 12px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.25) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;}'
-      + '.cs-quest-hero::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
-      + '.cs-quest-hero::after{content:"◆";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
+      + '.cs-quest-cenario{position:relative;margin:6px 0 12px;padding:14px 12px 12px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.25) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;}'
+      + '.cs-quest-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
+      + '.cs-quest-cenario::after{content:"◆";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
       + '.cs-quest-flavor{font-family:var(--v-font,serif);font-size:13px;line-height:1.55;color:#e8dcc8;text-align:center;font-style:italic;margin:4px 0 10px;}'
       + '.cs-quest-npc{font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);text-align:center;letter-spacing:1px;padding:8px 6px;border-top:1px dashed rgba(196,149,58,0.3);}'
       + '@keyframes csQuestBtnGlow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}50%{box-shadow:0 2px 12px rgba(196,149,58,0.35),inset 0 1px 0 rgba(255,255,255,0.08);}}'
@@ -43338,7 +43338,7 @@ function renderSubScreen(el, key){
       + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]{border-color:rgba(255,215,0,0.45);animation:csQuestBtnGlow 2.4s ease-in-out infinite;}'
       + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]:hover{border-color:#ffd700;background:linear-gradient(180deg,rgba(255,215,0,0.18) 0%,rgba(196,149,58,0.3) 100%);}'
       + '</style>';
-    html += '<div class="cs-quest-hero">';
+    html += '<div class="cs-quest-cenario">';
     if (d.flavor) html += '<div class="cs-quest-flavor">' + d.flavor + '</div>';
     if (d.npcInfo) html += '<div class="cs-quest-npc">' + d.npcInfo + '</div>';
     html += '</div>';

@@ -235,7 +235,7 @@
    TIER HERO — Imposing laurel wreath medallion
    ═══════════════════════════════════════════════════════════════ */
 
-.arena-tier-hero {
+.arena-tier-cabecalho {
     display: flex;
     justify-content: center;
     padding: var(--v-space-md, 8px) 0 var(--v-space-sm, 4px);
@@ -1189,7 +1189,7 @@
 
 /* Trophy / Skull crown icon */
 .arena-result-crown {
-    font-size: 64px; /* HARDCODED: trophy crown icon — hero element */
+    font-size: 64px; /* HARDCODED: trophy crown icon — cabecalho element */
     line-height: 1;
     position: relative;
     display: inline-block;

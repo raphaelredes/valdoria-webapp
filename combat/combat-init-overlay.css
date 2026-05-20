@@ -200,13 +200,13 @@
         0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
-.initiative-order-body .init-hero-area {
+.initiative-order-body .init-cenario-area {
     gap: var(--v-space-md);
     padding: var(--v-space-md) 0 var(--v-space-sm);
     min-height: 0;
 }
 
-.initiative-order-body .init-hero-btn {
+.initiative-order-body .init-cenario-btn {
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
@@ -214,7 +214,7 @@
     padding: var(--v-space-md-lg) var(--v-space-2xl);
 }
 
-.initiative-order-body .init-hero-subtitle {
+.initiative-order-body .init-cenario-subtitle {
     font-style: normal;
     font-size: var(--v-font-md, 12px);
     color: var(--v-text-dim, #a09484);

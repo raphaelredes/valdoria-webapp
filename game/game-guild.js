@@ -133,7 +133,7 @@ function renderGuildHub(container, data) {
 
 /* ============================================================
  * ADVENTURER DETAIL — V1 Hero Portrait (2026-04-11)
- * Shows full NPC sheet with hero scene, stats grid, HP/MP bars,
+ * Shows full NPC sheet with cenario scene, stats grid, HP/MP bars,
  * spells list, lore, and hire CTA. Uses DOM methods only, no
  * innerHTML. Money always via .vi.vi-coin.
  * ============================================================ */
@@ -156,19 +156,19 @@ function renderGuildAdventurer(container, data) {
   var root = _gldEl('div', 'gld-adv-v1');
 
   /* Hero scene: avatar (left) + text block (right) — horizontal compact */
-  var hero = _gldEl('div', 'gld-adv-hero');
+  var cenario = _gldEl('div', 'gld-adv-cenario');
   var av = _gldEl('div', 'gld-adv-avatar ' + _gldClassSlug(data.class_name));
   av.innerHTML = data.class_icon || '⚔';
-  hero.appendChild(av);
-  var heroText = _gldEl('div', 'gld-adv-hero-text');
-  heroText.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
-  heroText.appendChild(_gldEl('div', 'gld-adv-cls', '✧ ' + (data.class_name || '') + ' ✧'));
+  cenario.appendChild(av);
+  var cenarioTexto = _gldEl('div', 'gld-adv-cenario-texto');
+  cenarioTexto.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
+  cenarioTexto.appendChild(_gldEl('div', 'gld-adv-cls', '✧ ' + (data.class_name || '') + ' ✧'));
   var chips = _gldEl('div', 'gld-adv-chips');
   chips.appendChild(_gldEl('span', 'gld-adv-chip', 'Nv. ' + (data.level || 1)));
   if (data.race) chips.appendChild(_gldEl('span', 'gld-adv-chip', data.race));
-  heroText.appendChild(chips);
-  hero.appendChild(heroText);
-  root.appendChild(hero);
+  cenarioTexto.appendChild(chips);
+  cenario.appendChild(cenarioTexto);
+  root.appendChild(cenario);
 
   /* Content body */
   var body = _gldEl('div', 'gld-adv-content');

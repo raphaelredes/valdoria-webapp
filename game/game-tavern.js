@@ -44,10 +44,10 @@
 
     var root = _el('div', 'tav-hub-aaa');
 
-    // === 1) HERO: tavern sign + atmosphere ===
-    var hero = _el('div', 'tav-hero');
-    hero.innerHTML =
-      '<div class="tav-hero-bg"></div>'
+    // === 1) CENARIO: tavern sign + atmosphere ===
+    var cenario = _el('div', 'tav-cenario');
+    cenario.innerHTML =
+      '<div class="tav-cenario-bg"></div>'
       // lanternas penduradas nas pontas
       + '<div class="tav-lantern tav-lantern-l">'
       +   '<svg viewBox="0 0 24 36" aria-hidden="true">'
@@ -80,7 +80,7 @@
       + '<span class="tav-ember tav-ember-2"></span>'
       + '<span class="tav-ember tav-ember-3"></span>'
       + '<div class="tav-smoke"></div>';
-    root.appendChild(hero);
+    root.appendChild(cenario);
 
     // === 2) FLAVOR (mood quote, parchment look) ===
     if (data.flavor) {

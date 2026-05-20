@@ -66,7 +66,7 @@ function _renderArenaMain(el, d) {
     frag.appendChild(_arenaBackdrop());
 
     /* Hero tier badge — imposing laurel wreath */
-    var tierWrap = _div('arena-tier-hero');
+    var tierWrap = _div('arena-tier-cabecalho');
     var laurel = _div('arena-tier-laurel');
     var tierId = tier.id || 'iron';
     var badge = _div('arena-tier-medallion');
