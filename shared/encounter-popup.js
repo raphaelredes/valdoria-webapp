@@ -58,19 +58,41 @@
      conflicts estruturalmente. Mantém API pública compatível. */
   function _ensureOverlay() {
     var ov = document.getElementById(OVERLAY_ID);
+    var isNew = false;
     if (ov) {
       // Migration: if exists as <div> from old code, replace with <dialog>
       if (ov.tagName.toLowerCase() !== 'dialog') {
         var newOv = document.createElement('dialog');
         newOv.id = OVERLAY_ID;
         ov.parentNode.replaceChild(newOv, ov);
-        return newOv;
+        ov = newOv;
+        isNew = true;
+      } else {
+        return ov; // already migrated, listeners already attached
       }
-      return ov;
+    } else {
+      ov = document.createElement('dialog');
+      ov.id = OVERLAY_ID;
+      document.body.appendChild(ov);
+      isNew = true;
     }
-    ov = document.createElement('dialog');
-    ov.id = OVERLAY_ID;
-    document.body.appendChild(ov);
+    if (isNew) {
+      // task #69: ESC key triggers cancel event → call our close() for clean
+      // state teardown (stops active typewriters, clears _currentRenderState).
+      // Without this, native <dialog> default close leaks running setTimeouts.
+      ov.addEventListener('cancel', function(e) {
+        e.preventDefault();
+        close();
+      });
+      // task #69: defensive close listener — if dialog closes via any path
+      // (programmatic .close(), ESC default fallback, etc.), ensure state cleanup.
+      ov.addEventListener('close', function() {
+        if (_currentRenderState && _currentRenderState.activeTypewriters) {
+          _currentRenderState.activeTypewriters.forEach(function(tw){ try { tw.skip && tw.skip(); } catch(e){} });
+        }
+        _currentRenderState = null;
+      });
+    }
     return ov;
   }
 
@@ -653,6 +675,11 @@
 
   function close() {
     var ov = document.getElementById(OVERLAY_ID);
+    // task #69: idempotent state cleanup (also covers edge case where .close()
+    // is called but dialog already closed — close event won't fire then).
+    if (_currentRenderState && _currentRenderState.activeTypewriters) {
+      _currentRenderState.activeTypewriters.forEach(function(tw){ try { tw.skip && tw.skip(); } catch(e){} });
+    }
     // task #69: use <dialog>.close() nativo (libera top-layer, restaura focus)
     _closeOverlay(ov);
     _currentRenderState = null;
