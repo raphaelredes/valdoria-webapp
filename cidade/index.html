@@ -17923,9 +17923,15 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     // Sem custo — marca usado, mostra resposta, volta pra dialogue
     _npcMarkUsed(npc.id, opt.id);
     // canonical: town_square_events_resolve._resolve_unique_npc — increment visit count
+    // task #80 (2026-05-20): persiste em localStorage char-namespaced.
+    // Antes era in-memory only → refresh resetava → intro voltava.
     if (npc._isCanonUnique && npc._canonKey){
       window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
       window._uniqueNpcsVisitCount[npc._canonKey] = (window._uniqueNpcsVisitCount[npc._canonKey] || 0) + 1;
+      try {
+        var vcKey = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
+        localStorage.setItem(vcKey, JSON.stringify(window._uniqueNpcsVisitCount));
+      } catch(_){}
     }
     // canonical: quest progression flags — town_lia_helped quando jogador clica "Ajudar" Lia.
     // Próxima visita usa CANON_PLAZA_LIA_OVERRIDE (estado pós-quest).
@@ -29089,6 +29095,24 @@ window._persistUniqueFinished = function(){
     localStorage.setItem(key, JSON.stringify(window._uniqueNpcsFinished));
   } catch(_){}
 };
+// Hidrata visit counts pra UNIQUE NPCs (task #80, 2026-05-20)
+window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
+(function _hydrateUniqueNpcsVisits(){
+  try {
+    var key = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
+    var raw = localStorage.getItem(key);
+    if (raw) {
+      var data = JSON.parse(raw);
+      if (data && typeof data === 'object') {
+        for (var k in data){
+          if (Object.prototype.hasOwnProperty.call(data, k) && typeof data[k] === 'number') {
+            window._uniqueNpcsVisitCount[k] = data[k];
+          }
+        }
+      }
+    }
+  } catch(_){}
+})();
 
 // Adapta REGULAR_NPC canonical pra formato simulator (talkOptions[]).
 // Resposta vem de CANON_INTERACTION_RESULTS[npc_key][interaction_id] (lista de variantes).
