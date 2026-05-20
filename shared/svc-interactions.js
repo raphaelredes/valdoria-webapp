@@ -129,7 +129,22 @@
     return false;
   }
 
-  window._showOpinionReaction = function(npc, optionLabel, renownDelta) {
+  /* task #62 (2026-05-20) — Backend dispatch: choices *-confirm + opinion-*
+     agora chamam vCity.act(ch.backend_cb) (se disponivel) pra aplicar effect
+     real no Player server-side (charge gold, +HP, +Renown, save no DB).
+     Simulador/Chrome MCP: vCity.act é no-op → so UX feedback.
+     Bot DEV/PROD: vCity.act envia ação pro backend que aplica efeito. */
+  function _dispatchBackendAction(ch) {
+    if (!ch) return;
+    var backendCb = ch.backend_cb;
+    if (!backendCb) return; // sem backend_cb declarado, apenas UX
+    if (typeof window.vCity !== 'object' || typeof window.vCity.act !== 'function') return;
+    try {
+      window.vCity.act(backendCb);
+    } catch(_) { /* non-fatal: simulator/chrome-mcp sem backend */ }
+  }
+
+  window._showOpinionReaction = function(npc, optionLabel, renownDelta, ch) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
     var resp;
@@ -148,6 +163,7 @@
       choices: [{ id: 'continue', label: '↩ Voltar', cb: 'close' }]
     });
     window._applyRenownDelta(faction, renownDelta);
+    _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
       var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
       setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renown · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
@@ -156,8 +172,10 @@
 
   /**
    * Confirma purchase/serviço + aplica Renown delta + mostra mensagem do NPC.
+   * task #62 (2026-05-20): se ch.backend_cb declarado, chama vCity.act
+   * pra aplicar effect real no Player server-side (bot DEV).
    */
-  window._showPurchaseConfirm = function(npc, optionLabel, renownDelta) {
+  window._showPurchaseConfirm = function(npc, optionLabel, renownDelta, ch) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var confirmMsgs = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs) || {};
     var defaultMsg = 'NPC registra a transação. <i>(gesto pragmático)</i> "Combinado. Boa jornada, viajante."';
@@ -172,6 +190,7 @@
       choices: [{ id: 'continue', label: '↩ Voltar', cb: 'close' }]
     });
     window._applyRenownDelta(faction, renownDelta);
+    _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
       var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
       setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renown · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
@@ -215,11 +234,11 @@
       return true;
     }
     if (cb.indexOf('opinion-') === 0) {
-      window._showOpinionReaction(dialogue.npc, ch.label, ch.renownDelta || 0);
+      window._showOpinionReaction(dialogue.npc, ch.label, ch.renownDelta || 0, ch);
       return true;
     }
     if (cb.indexOf('-confirm') > 0) {
-      window._showPurchaseConfirm(dialogue.npc, ch.label, ch.renownDelta || 0);
+      window._showPurchaseConfirm(dialogue.npc, ch.label, ch.renownDelta || 0, ch);
       return true;
     }
     // === FASE B (sessão #11, 2026-05-19) — NPC Living System cascade ===========

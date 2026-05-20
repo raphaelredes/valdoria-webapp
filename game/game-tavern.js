@@ -81,10 +81,13 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Cerveja comum por uma moeda, sidra de maçã por duas. Hidromel do vale custa quatro — fermentação de mel selvagem. Stout Anã, seis. <i>(sorri)</i> Essa última vai te derrubar se não souber respirar.' }
     ],
     choices: [
-      { id: 'ale',   label: '🍺 Cerveja Comum · 1 V (+1 HP)', cb: 'drinks-confirm' },
-      { id: 'cider', label: '🍎 Sidra de Maçã · 2 V (+2 HP)', cb: 'drinks-confirm' },
-      { id: 'mead',  label: '🍯 Hidromel do Vale · 4 V (+2 MP)', cb: 'drinks-confirm' },
-      { id: 'stout', label: '🍺 Stout Anã · 6 V (+3 HP/+1 MP)', cb: 'drinks-confirm' },
+      // task #62 (2026-05-20) — backend_cb declarado para bot DEV chamar
+      // tavern_drinks.buy_drink() server-side (charge gold, apply HP/MP).
+      // Backend canonical: src/game/city/tavern_drinks.py:151 "tavern_buy_drink_<id>"
+      { id: 'ale',   label: '🍺 Cerveja Comum · 1 V (+1 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_ale' },
+      { id: 'cider', label: '🍎 Sidra de Maçã · 2 V (+2 HP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_cider' },
+      { id: 'mead',  label: '🍯 Hidromel do Vale · 4 V (+2 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_mead' },
+      { id: 'stout', label: '🍺 Stout Anã · 6 V (+3 HP/+1 MP)', cb: 'drinks-confirm', backend_cb: 'tavern_buy_drink_stout' },
       { id: 'back',  label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
@@ -112,9 +115,10 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Sucesso depende de CARISMA. <i>(aponta o livro)</i> A regra é antiga — Xanathar página 128.' }
     ],
     choices: [
-      { id: 'lower',  label: '🍺 Farra Humilde · 10 V · DC 10', cb: 'carousing-confirm' },
-      { id: 'middle', label: '🍷 Festa Refinada · 50 V · DC 15', cb: 'carousing-confirm' },
-      { id: 'upper',  label: '👑 Banquete Nobre · 250 V · DC 20', cb: 'carousing-confirm' },
+      // task #62: backend_cb = src/game/city/tavern_carousing.py:111 "tavern_carouse_do_<tier_id>"
+      { id: 'lower',  label: '🍺 Farra Humilde · 10 V · DC 10', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_lower' },
+      { id: 'middle', label: '🍷 Festa Refinada · 50 V · DC 15', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_middle' },
+      { id: 'upper',  label: '👑 Banquete Nobre · 250 V · DC 20', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_upper' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
   },
@@ -126,10 +130,11 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Pit fighting? <i>(sorri torto)</i> Entrada vinte e cinco moedas. Aposta sua escolha. Três rounds — Força, Destreza, Constituição. Você ganha dois dos três, leva o prêmio. Perde mais que dois, sai pelos próprios pés.' }
     ],
     choices: [
-      { id: 'bet10',  label: '👊 Apostar 10 V', cb: 'pitfight-confirm' },
-      { id: 'bet25',  label: '👊 Apostar 25 V', cb: 'pitfight-confirm' },
-      { id: 'bet50',  label: '👊 Apostar 50 V', cb: 'pitfight-confirm' },
-      { id: 'bet100', label: '👊 Apostar 100 V (alto risco)', cb: 'pitfight-confirm' },
+      // task #62: backend_cb = src/game/city/tavern_pit_fight.py:89 "tavern_pitfight_bet_<amount>"
+      { id: 'bet10',  label: '👊 Apostar 10 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_10' },
+      { id: 'bet25',  label: '👊 Apostar 25 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_25' },
+      { id: 'bet50',  label: '👊 Apostar 50 V', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_50' },
+      { id: 'bet100', label: '👊 Apostar 100 V (alto risco)', cb: 'pitfight-confirm', backend_cb: 'tavern_pitfight_bet_100' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
   },
