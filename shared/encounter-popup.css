@@ -319,11 +319,15 @@
   50% { transform: rotate(3deg) translateY(-2px); }
 }
 
-/* Choice sub-overlay container (full screen). */
+/* Choice sub-overlay container (full screen).
+   task #58 (2026-05-20) — z=9750 (era 9700, mas conflita com travel-overlay
+   + city-medieval-overlay + corv-confirm que também usam 9700). 9750 garante
+   que choice-overlay SEMPRE fique acima desses overlays "de cena". Lightbox
+   (z=10500) continua acima quando user clica portrait dentro do choice. */
 #enc-choices-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9700;
+  z-index: 9750;
   display: none;
   align-items: center;
   justify-content: center;
