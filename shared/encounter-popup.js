@@ -438,12 +438,22 @@
       var nextBtn = document.getElementById('enc-next');
       if (nextBtn) {
         if (idx === pages.length - 1) {
-          nextBtn.textContent = 'Escolher ↓';
+          /* task #53 (2026-05-20) — user pediu: remover "Escolher ↓" duplicado
+             da nav-row. O botao "⚔ ESCOLHER ACAO" no actions panel ja serve
+             a mesma funcao (e mais claro/AAA). Esconde next btn na ultima pagina.
+             Mantém prev btn pra back navigation. */
+          nextBtn.style.visibility = 'hidden';
           renderActions();
         } else {
+          nextBtn.style.visibility = 'visible';
           nextBtn.textContent = 'Continuar →';
           actions.style.display = 'none';
         }
+      }
+      // Hide entire nav row if only 1 page (no point in showing "← Anterior" alone)
+      var navRow = card.querySelector('.enc-nav');
+      if (navRow) {
+        navRow.style.display = (pages.length === 1) ? 'none' : '';
       }
     }
 
