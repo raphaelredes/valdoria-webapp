@@ -5462,20 +5462,55 @@ body.perf-lite .vc-action-btn { transition: none; }
      resumeTs check (intro skipped → __onIntroTap nao roda) MAS o loading
      overlay pode ficar visivel devido a state stale. Defensive fallback:
      se o DOM carregou e o loading nao foi escondido em 5s, esconder.
-     NAO interfere com fluxo normal (1.8s timeout no __onIntroTap). */
+     NAO interfere com fluxo normal (1.8s timeout no __onIntroTap).
+
+     task #66 (2026-05-20) — CRITICAL fix: user reportou tela em branco
+     RECORRENTE pos Voltar. Root cause: version-check force-reload
+     (`?_v=<ts>` na URL) recarrega pagina, intro skipped por resumeTs,
+     __onIntroTap NUNCA fira → loading overlay STUCK visivel coberto
+     conteudo. Fix: reduz safety timeout 5s→2s + force-hide INCONDICIONAL
+     se loading nao tem content (innerLen=0 = state inconsistente). */
   window.addEventListener('load', function(){
-    setTimeout(function(){
+    // Pass 1: force-hide imediato se nao tem intro ativa + sem content
+    function forceHideIfStuck() {
       var ld = document.getElementById('loading');
-      if (!ld) return;
+      if (!ld) return false;
       var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
-      if (cs.display !== 'none' && cs.visibility !== 'hidden'){
-        var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
-        if (!introBlocking){
-          console.warn('[INTRO] safety hide loading overlay (stuck post-reload)');
-          ld.style.display = 'none';
-        }
+      if (cs.display === 'none') return false; // ja escondido
+      var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
+      var emptyContent = !ld.innerHTML || ld.innerHTML.trim() === '';
+      // FORCE-HIDE incondicional se:
+      // - intro nao bloqueia E
+      // - (loading vazio = nao foi populado por __onIntroTap) OU (passou 2s desde load)
+      if (!introBlocking && emptyContent) {
+        console.warn('[INTRO] force-hide loading: empty + no intro active');
+        ld.style.display = 'none';
+        ld.style.opacity = '0';
+        ld.style.visibility = 'hidden';
+        return true;
       }
-    }, 5000);
+      return false;
+    }
+    // Try immediately
+    if (forceHideIfStuck()) return;
+    // Then 800ms (catches version-check force-reload state)
+    setTimeout(function(){ if (forceHideIfStuck()) return;
+      // Then 2s (catches slow setup)
+      setTimeout(function(){
+        var ld = document.getElementById('loading');
+        if (!ld) return;
+        var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
+        if (cs.display !== 'none' && cs.visibility !== 'hidden'){
+          var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
+          if (!introBlocking){
+            console.warn('[INTRO] safety hide loading overlay (stuck post-reload, 2s)');
+            ld.style.display = 'none';
+            ld.style.opacity = '0';
+            ld.style.visibility = 'hidden';
+          }
+        }
+      }, 1200);
+    }, 800);
   });
   </script>
   <!-- ====================================================================
@@ -40076,6 +40111,8 @@ function closeCityPopup(silent){
   // choice-overlay (z=9700) ficavam ATIVOS sobre city popup quando user
   // clicava Voltar sem fechar dialogue primeiro. Fix: dismissar TODOS os
   // overlays acima quando city popup fecha.
+  // task #66 (2026-05-20) — TAMBÉM force-hide loading-overlay se estiver
+  // visível com innerHTML vazio (state stale pos version-check reload).
   try {
     if (typeof vEncounter !== 'undefined') {
       if (typeof vEncounter.closeChoices === 'function') vEncounter.closeChoices();
@@ -40091,6 +40128,17 @@ function closeCityPopup(silent){
       choOverlay.classList.remove('active');
       choOverlay.classList.remove('open');
       choOverlay.classList.remove('opening');
+    }
+    // task #66: force-hide loading-overlay se stale (empty + visible)
+    var ld = document.getElementById('loading');
+    if (ld) {
+      var cs = getComputedStyle(ld);
+      var emptyContent = !ld.innerHTML || ld.innerHTML.trim() === '';
+      if (cs.display !== 'none' && emptyContent) {
+        ld.style.display = 'none';
+        ld.style.opacity = '0';
+        ld.style.visibility = 'hidden';
+      }
     }
     window._encounterActive = false;
   } catch(_e) { /* non-fatal */ }
