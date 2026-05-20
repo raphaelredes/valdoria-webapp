@@ -42,11 +42,76 @@ var MARTHA_DIALOGUE = {
     { type: 'speech', speaker: 'Martha', text: 'Bem-vindo ao Grifo Dourado, aventureiro. <i>(fecha o livro de couro)</i> Aqui se descansa em paz, come-se bem, e ninguém pergunta de onde tu vens — só pra onde vais. O que te trouxe a esta hora?' }
   ],
   choices: [
-    { id: 'sleep',   label: '🛏 "Preciso de um quarto."', cb: 'inn_sleep' },
-    { id: 'meal',    label: '🍲 "Uma refeição quente."', cb: 'inn_meal' },
-    { id: 'bath',    label: '🛁 "Banho quente, por favor."', cb: 'inn_bath' },
+    { id: 'sleep',   label: '🛏 "Preciso de um quarto."', cb: 'sleep' },
+    { id: 'meal',    label: '🍲 "Uma refeição quente."', cb: 'meal' },
+    { id: 'bath',    label: '🛁 "Banho quente, por favor."', cb: 'bath' },
+    { id: 'rumors',  label: '💬 "Que histórias circulam por aqui?"', cb: 'rumors' },
     { id: 'leave',   label: '↩ "Volto depois, Martha."', cb: 'close' }
   ]
+};
+
+/* task #64 (2026-05-20) — SERVICE_DIALOGUES_INN com mecânicas D&D 5e:
+   Long Rest (PHB p.186) — recupera HP, hit dice, spell slots em 8h sono.
+   Cada tier de quarto modifica qualidade do descanso (gold pps por turno). */
+var SERVICE_DIALOGUES_INN = {
+  sleep: {
+    npc: MARTHA_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Martha abre o livro de hóspedes — pergaminho amarelado encadernado em couro castanho, ferrolho de prata gasto pelos dedos. Folheia até a página em branco e pega a pena de ganso do tinteiro. As escadas de madeira range ao fundo conforme outro hóspede sobe pro quarto.' },
+      { type: 'speech', speaker: 'Martha', text: 'Três quartos disponíveis hoje, aventureiro. <i>(coloca o monóculo)</i> Comum: cinco moedas a noite, dormitório compartilhado. Privado: vinte moedas, com fechadura e janela. Real: cem moedas, cama de penas e banheira própria. <b>Descanso Longo restaura HP/MP completo (PHB p.186)</b> — mas só se dormires oito horas sem interrupção.' }
+    ],
+    choices: [
+      { id: 's_common', label: '🛏 Comum · 5V · Long Rest básico', cb: 'sleep-confirm', backend_cb: 'inn_sleep_common', renownDelta: 0 },
+      { id: 's_private', label: '🛏 Privado · 20V · Long Rest seguro', cb: 'sleep-confirm', backend_cb: 'inn_sleep_private', renownDelta: 1 },
+      { id: 's_royal', label: '👑 Real · 100V · Long Rest + buff', cb: 'sleep-confirm', backend_cb: 'inn_sleep_royal', renownDelta: 3 },
+      { id: 's_persuade', label: '💬 "Sou amigo da casa, Martha?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
+      { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
+    ]
+  },
+
+  meal: {
+    npc: MARTHA_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Vindo da cozinha aos fundos, o cheiro do ensopado de carneiro com cebola e pão fresco. Martha aponta o quadro de menu encostado na parede — três pratos do dia, escritos a giz amarelo com a caligrafia caprichada do filho mais novo.' },
+      { type: 'speech', speaker: 'Martha', text: 'Cozinha simples, mas honesta. <i>(começa a esfregar a tábua de cortar)</i> Sopa do dia, três moedas. Ensopado de carneiro, oito. Banquete completo com vinho do Vale, vinte. <b>Refeição farta recupera 1 hit die imediatamente (mecânica caseira D&D 5e DMG p.267 alimentação heroica).</b>' }
+    ],
+    choices: [
+      { id: 'm_soup', label: '🍲 Sopa do Dia · 3V · +1 HP', cb: 'meal-confirm', backend_cb: 'inn_meal_soup', renownDelta: 0 },
+      { id: 'm_stew', label: '🍖 Ensopado · 8V · +1 hit die', cb: 'meal-confirm', backend_cb: 'inn_meal_stew', renownDelta: 1 },
+      { id: 'm_feast', label: '🍷 Banquete · 20V · +2 hit dice + vinho', cb: 'meal-confirm', backend_cb: 'inn_meal_feast', renownDelta: 2 },
+      { id: 'm_taste', label: '👃 "Está temperado bem?" · Investigação DC 11', cb: 'dice:investigation:11:+0' },
+      { id: 'back',   label: '↩ "Não, obrigado."', cb: 'close' }
+    ]
+  },
+
+  bath: {
+    npc: MARTHA_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Martha aponta a porta lateral que dá pro pátio dos fundos. Vapores se erguem de uma fonte de cobre — banheira aquecida por brasas, com toalhas brancas dobradas em pilha sobre um banco de carvalho. O cheiro de sabão de lavanda e mirra é evidente.' },
+      { type: 'speech', speaker: 'Martha', text: 'Banho quente em vinte minutos. <i>(pega uma toalha)</i> Cinco moedas inclui sabão de lavanda e óleo de mirra. Cuidado especial — mais cinco, com Joana esfregando as costas. <b>Banho quente concede inspiração 1d4 ao próximo teste por sentir-se renovado (homebrew baseado em PHB Inspiration p.125).</b>' }
+    ],
+    choices: [
+      { id: 'b_basic', label: '🛁 Banho simples · 5V · limpa exhaustion', cb: 'bath-confirm', backend_cb: 'inn_bath_basic', renownDelta: 0 },
+      { id: 'b_lux',   label: '🛁 Banho de luxo · 10V · +Inspiração 1d4', cb: 'bath-confirm', backend_cb: 'inn_bath_luxury', renownDelta: 1 },
+      { id: 'b_insight', label: '👁 "Algo me diz pra ficar atento..." · Intuição DC 12', cb: 'dice:insight:12:+1' },
+      { id: 'back',    label: '↩ "Fica pra próxima."', cb: 'close' }
+    ]
+  },
+
+  rumors: {
+    npc: MARTHA_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Martha abaixa a voz, joga um olhar pra mesa do canto onde dois mercadores conversam baixo. Pega um pano e finge limpar o balcão enquanto fala — gesto ensaiado, anos de prática.' },
+      { type: 'speech', speaker: 'Martha', text: 'Hospedaria ouve mais que qualquer taverna. <i>(esfrega o balcão devagar)</i> Cama recolhe sussurros. <b>Gather Information (PHB p.178 Investigation/Persuasion)</b> — eu te conto o que ouvi essa semana, mas o que te interessa? Política do Conde? Movimento de mercadores? Ou pessoas desaparecidas?' }
+    ],
+    choices: [
+      { id: 'r_politics', label: '👑 Política do Conde · História DC 13', cb: 'dice:history:13:+1' },
+      { id: 'r_trade',    label: '💰 Movimento de mercadores · Persuasão DC 12', cb: 'dice:persuasion:12:+1' },
+      { id: 'r_missing',  label: '👤 Pessoas desaparecidas · Intuição DC 14', cb: 'dice:insight:14:+0' },
+      { id: 'r_pay',      label: '🪙 "Toma 5V pelo seu tempo."', cb: 'rumors-confirm', backend_cb: 'inn_rumors_pay', renownDelta: 2 },
+      { id: 'back',       label: '↩ "Não preciso saber agora."', cb: 'close' }
+    ]
+  }
 };
 
 function _innEl(tag, cls, text) {
@@ -106,7 +171,9 @@ function renderInnHub(container, data) {
   npcRow.addEventListener('click', function(){
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_INN;
-      window.vEncounter.render(MARTHA_DIALOGUE);
+      // task #64 (2026-05-20): passa SERVICE_DIALOGUES_INN para chain via cb
+      // ('sleep', 'meal', 'bath', 'rumors' agora abrem sub-dialogues PADRAO_ALDRIC).
+      window.vEncounter.render(MARTHA_DIALOGUE, { dialogues: SERVICE_DIALOGUES_INN });
     }
   });
   body.appendChild(npcRow);
