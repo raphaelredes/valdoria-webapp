@@ -5471,12 +5471,29 @@ body.perf-lite .vc-action-btn { transition: none; }
      conteudo. Fix: reduz safety timeout 5s→2s + force-hide INCONDICIONAL
      se loading nao tem content (innerLen=0 = state inconsistente). */
   window.addEventListener('load', function(){
+    // task #86 (2026-05-20) — CRITICAL fix: DISABLE FOUC safety da loading-guard.js
+    // pra cidade. User reportou tela escura após F5 reload. ROOT CAUSE:
+    // loading-guard.js linha 35 tem setTimeout 10s que FORCE loading-overlay
+    // visível se display==='none' E sem classe 'hidden'. Como a cidade hide
+    // via inline `display:none` (sem classe), o FOUC safety re-mostra o loading
+    // 10s após page load, COBRINDO o hub que já tinha renderizado.
+    //
+    // Fix: set _loadingGuardBypass=true (já checkado por loading-guard.js linha 35)
+    // após cidade inicializar. Desabilita o FOUC safety pra esta página.
+    window._loadingGuardBypass = true;
+    // Também adiciona classe 'hidden' como belt-and-suspenders (loading-guard
+    // já skipa quando .hidden está presente).
+
     // Pass 1: force-hide imediato se nao tem intro ativa + sem content
     function forceHideIfStuck() {
       var ld = document.getElementById('loading');
       if (!ld) return false;
       var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
-      if (cs.display === 'none') return false; // ja escondido
+      if (cs.display === 'none') {
+        // task #86: garante classe 'hidden' pra loading-guard FOUC safety skipar
+        ld.classList.add('hidden');
+        return false; // ja escondido
+      }
       var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
       var emptyContent = !ld.innerHTML || ld.innerHTML.trim() === '';
       // FORCE-HIDE incondicional se:
@@ -5487,6 +5504,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         ld.style.display = 'none';
         ld.style.opacity = '0';
         ld.style.visibility = 'hidden';
+        ld.classList.add('hidden'); // task #86: previne FOUC safety re-show
         return true;
       }
       return false;
@@ -5507,6 +5525,7 @@ body.perf-lite .vc-action-btn { transition: none; }
             ld.style.display = 'none';
             ld.style.opacity = '0';
             ld.style.visibility = 'hidden';
+            ld.classList.add('hidden'); // task #86: previne FOUC safety re-show
           }
         }
       }, 1200);
@@ -7779,6 +7798,15 @@ body.perf-lite .vc-action-btn { transition: none; }
        loading-guard.js valida + corrige velocidades de animacao dos aneis
        (.mc-outer >=25s, .mc-mid >=15s, .mc-inner >=20s) em runtime. */
     document.write('<script src="/shared/loading-guard.js?v=' + Date.now() + '"><\/script>');
+    /* task #86 (2026-05-20) — CRITICAL fix: DISABLE FOUC safety da loading-guard.js
+       PRA CIDADE. User reportou tela escura após F5 reload na cidade.
+       ROOT CAUSE: loading-guard.js linha 35 tem setTimeout 10s que FORCE
+       .loading-overlay visível se display==='none' E sem classe 'hidden'.
+       Cidade hide loading via inline style (display:none) sem .hidden class,
+       então após 10s o FOUC safety RE-SHOW o loading, cobrindo o hub que já
+       renderizou. Fix: set _loadingGuardBypass=true IMEDIATAMENTE pra que o
+       FOUC safety SKIP esta página inteiramente. */
+    document.write('<script>window._loadingGuardBypass = true;<\/script>');
     document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
