@@ -45,82 +45,88 @@ if (!window._SVC_CONFIG_MARKET) {
 /* === MERCHANT NPCS — 6 mercadores fixos do mockup =========================
  * Cada NPC tem dialogue PADRAO_ALDRIC próprio + cb que mapeia a backend.
  * Backend pode sobrescrever via data.merchants se quiser ordem/seleção custom. */
+/* task #70 (2026-05-20): cb's alinhadas com backend canonical em market_ui.py.
+   Backend usa pattern `market_interact_menu_<role>`. Roles canonical:
+   blacksmith, alchemist, jeweler, tentmaker, cartographer.
+   Renderer NPCs mapeiam por descrição/categoria mais próxima. Onde mapping
+   é ambíguo (Mirena armadureira, Corvus livreiro), usa close + label
+   ajustado pra indicar que dialogue é narrativo (acessar via hub cards). */
 var MERCHANT_NPCS_MARKET = {
   thorne: {
     npc: { name: 'Thorne', desc: 'Armeiro · vende lâminas há trinta e cinco anos', portrait: '../shared/img/npcs/thorne-armeiro.png' },
     quote: '"Aço carbono de Eldoria. Sem desconto."',
-    cb: 'market_thorne',
+    cb: 'market_interact_menu_blacksmith',
     script: [
       { type: 'narration', text: 'A barraca de Thorne é uma parede de aço polido — espadas suspensas em pregos longos, adagas em fileira sobre veludo vermelho, machados de duas mãos pendurados das vigas. O cheiro é de óleo de armas e suor honesto.' },
       { type: 'speech', speaker: 'Thorne', text: 'Tudo do meu estoque corta osso sem entortar. <i>(ergue uma espada longa)</i> Adaga, cinco. Espada longa, vinte. Machado de duas mãos, trinta. Sem desconto.' }
     ],
     choices: [
-      { id: 'weapons', label: '⚔ Ver inventário de armas', cb: 'market_weapons' },
+      { id: 'weapons', label: '⚔ Ver inventário de armas', cb: 'market_interact_menu_blacksmith' },
       { id: 'leave',   label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
   mirena: {
     npc: { name: 'Mirena', desc: 'Armadureira · alfaiata de couro e malha por vinte anos', portrait: '../shared/img/npcs/mirena-armadureira.png' },
     quote: '"Sob medida, sai pelo dobro. Mas dura o triplo."',
-    cb: 'market_mirena',
+    cb: 'market_interact_menu_alchemist',
     script: [
       { type: 'narration', text: 'Mirena empilha placas de couro batido, gibões reforçados, peitorais de bronze polido. Ela mede você com o olhar — ombro, peito, braços — em silêncio, antes mesmo de cumprimentar.' },
       { type: 'speech', speaker: 'Mirena', text: 'Couro batido, dez Valdoritas. Cota de malha, cinquenta. Peitoral de bronze, cento e cinquenta. <i>(toca seu braço pra estimar tamanho)</i> Sob medida, sai pelo dobro. Mas dura o triplo.' }
     ],
     choices: [
-      { id: 'armor', label: '🛡 Ver armaduras disponíveis', cb: 'market_armor' },
+      { id: 'armor', label: '🛡 Ver armaduras disponíveis', cb: 'market_interact_menu_alchemist' },
       { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
   velithra: {
     npc: { name: 'Velithra', desc: 'Alquimista · três gerações de alquímia', portrait: '../shared/img/npcs/velithra-alquimista.png' },
     quote: '"Esta… só tu sabes pra que serve."',
-    cb: 'market_velithra',
+    cb: 'market_interact_menu_jeweler',
     script: [
       { type: 'narration', text: 'A barraca de Velithra é toda frascos coloridos. Estantes com vidros borbulhantes em violeta, esmeralda, rubi. Aroma denso de ervas secas, enxofre, e algo doce que faz a pele formigar.' },
       { type: 'speech', speaker: 'Velithra', text: 'Cura simples, vinte e cinco Valdoritas. Antídoto, quarenta. Heroísmo temporário, oitenta. <i>(ergue um frasco roxo)</i> Esta… só tu sabes pra que serve. Cento e vinte, sem perguntas.' }
     ],
     choices: [
-      { id: 'potions', label: '🧪 Ver poções', cb: 'market_potions' },
+      { id: 'potions', label: '🧪 Ver poções', cb: 'market_interact_menu_jeweler' },
       { id: 'leave',   label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
   corvus: {
     npc: { name: 'Corvus', desc: 'Livreiro · colecionador de tomos por trinta anos', portrait: '../shared/img/npcs/corvus-livreiro.png' },
     quote: '"Tenho dois grimórios menores, se Vossa Senhoria for mago."',
-    cb: 'market_corvus',
+    cb: 'market_interact_menu_cartographer',
     script: [
       { type: 'narration', text: 'Corvus mantém uma barraca improvavelmente alta, empilhada com livros encadernados em couro de várias cores. Pergaminhos enrolados em cilindros de osso. Pena de corvo no tinteiro.' },
       { type: 'speech', speaker: 'Corvus', text: 'Livro comum, dez Valdoritas. Tomo raro, cinquenta. Pergaminho mágico, varia muito. <i>(toca uma lombada gasta)</i> Tenho dois grimórios menores, se Vossa Senhoria for mago e tiver aval do Escriba Thessil.' }
     ],
     choices: [
-      { id: 'books', label: '📚 Ver livros e tomos', cb: 'market_books' },
+      { id: 'books', label: '📚 Ver livros e tomos', cb: 'market_interact_menu_cartographer' },
       { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
   bjorn: {
     npc: { name: 'Bjorn', desc: 'Mantimentos · padeiro e açougueiro do bairro Norte', portrait: '../shared/img/npcs/bjorn-comerciante.png' },
     quote: '"Prova primeiro — se não gostar, não vendo."',
-    cb: 'market_bjorn',
+    cb: 'market_interact_menu_tentmaker',
     script: [
       { type: 'narration', text: 'Bjorn enche o ar com cheiro de pão recém-saído do forno e queijo curado pendurado em ganchos de cobre. Atrás dele, barris de azeitona, sacos de farinha, pirâmides de maçãs vermelhas.' },
       { type: 'speech', speaker: 'Bjorn', text: 'Pão fresco, três cobres. Queijo curado, uma Valdorita. Ração de viagem (sete dias), cinco. <i>(corta o queijo num gesto rápido)</i> Prova primeiro — se não gostar, não vendo. Honestidade é meu único capital.' }
     ],
     choices: [
-      { id: 'food',  label: '🍞 Ver mantimentos', cb: 'market_food' },
+      { id: 'food',  label: '🍞 Ver mantimentos', cb: 'market_interact_menu_tentmaker' },
       { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
   garlen: {
     npc: { name: 'Garlen', desc: 'Cartógrafo · mapeou do Vale às Montanhas do Norte', portrait: '../shared/img/npcs/garlen-cartografo.png' },
     quote: '"Masmorra Antiga (com armadilhas marcadas), cento e vinte."',
-    cb: 'market_garlen',
+    cb: 'market_interact_menu_cartographer',
     script: [
       { type: 'narration', text: 'Garlen tem uma barraca menor que as outras, mas mais ordenada. Mapas enrolados em tubos de couro etiquetados. Bússolas de bronze polido alinhadas. Lupa de cristal sobre uma carta da Floresta Esquecida desdobrada, marcada com X vermelhos.' },
       { type: 'speech', speaker: 'Garlen', text: 'Mapas variam por região. <i>(consulta o estoque)</i> Floresta Esquecida, vinte. Montanhas do Norte, cinquenta. Masmorra Antiga (com armadilhas marcadas), cento e vinte. Contratos antigos, valor negociado.' }
     ],
     choices: [
-      { id: 'maps',  label: '🗺 Ver mapas disponíveis', cb: 'market_maps' },
+      { id: 'maps',  label: '🗺 Ver mapas disponíveis', cb: 'market_interact_menu_cartographer' },
       { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
     ]
   }
