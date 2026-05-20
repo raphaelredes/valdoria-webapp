@@ -113,6 +113,22 @@
    * Mostra reação do NPC a uma opinião do jogador + aplica Renown delta.
    * NPC reactions vêm de _SVC_CONFIG.reactions (positive/negative/neutral).
    */
+  /* task #52 (2026-05-20) — UNIFY: prefer vEncounter.render (canonical, shared
+     pra cidade + exploracao + futuro) sobre _renderEncounterPopup (legacy,
+     cidade-only). Fallback ao legacy mantido pra compat com mockups antigos. */
+  function _renderViaCanonical(dialogue) {
+    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render(dialogue);
+      return true;
+    }
+    if (typeof window._renderEncounterPopup === 'function') {
+      window._renderEncounterPopup(dialogue);
+      return true;
+    }
+    console.warn('[svc-interactions] No dialogue renderer available');
+    return false;
+  }
+
   window._showOpinionReaction = function(npc, optionLabel, renownDelta) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
@@ -123,7 +139,7 @@
     else if (renownDelta > 0) resp = reactions.positive || 'NPC acena com aprovação contida. "Bem dito."';
     else resp = reactions.neutral || 'NPC mantém o olhar neutro. "Anotado."';
 
-    window._renderEncounterPopup({
+    _renderViaCanonical({
       npc: npc,
       script: [
         { type: 'narration', text: '<b>Vossa Senhoria:</b> "' + optionLabel.replace(/^"|"$/g,'') + '"' },
@@ -147,7 +163,7 @@
     var defaultMsg = 'NPC registra a transação. <i>(gesto pragmático)</i> "Combinado. Boa jornada, viajante."';
     var msg = confirmMsgs.generic || defaultMsg;
 
-    window._renderEncounterPopup({
+    _renderViaCanonical({
       npc: npc,
       script: [
         { type: 'narration', text: confirmMsgs.narration || 'NPC anota o valor com gesto preciso.' },
