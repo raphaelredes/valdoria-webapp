@@ -16,13 +16,17 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  /* 2026-05-20: opacity:1 base + animation-fill-mode:forwards. Sem isso, em alguns
-     browsers a animação encFadeIn termina e o opacity volta pra default. Garante
-     que o popup fica visível mesmo se a animação for skipada/throttled. */
   opacity: 1;
-  animation: encFadeIn 0.4s ease-out forwards;
 }
-#encounter-overlay.active { display: flex; }
+/* 2026-05-20: animação encFadeIn era aplicada no base rule (sempre running mesmo
+   com display:none), mas Chromium congela a timeline quando element começa
+   display:none. Resultado: opacity stuck em 0. Solução: animação SÓ quando .active.
+   Como a regra usa animação que vai 0→1, o opacity inicia visível (base=1) e a
+   animação faz o fade-in suave quando .active é adicionado. */
+#encounter-overlay.active {
+  display: flex;
+  animation: encFadeIn 0.25s ease-out forwards;
+}
 @keyframes encFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
