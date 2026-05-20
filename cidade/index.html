@@ -38768,10 +38768,17 @@ function _travelerArcView(p, traveler){
     return;
   }
   // Tracking de progresso (mock)
-  window._npcDialoguesUsed = window._npcDialoguesUsed || {};
-  window._npcDialoguesUsed['wnp_' + traveler.id] = window._npcDialoguesUsed['wnp_' + traveler.id] || [];
-  if (window._npcDialoguesUsed['wnp_' + traveler.id].indexOf(chapter.intro || '') < 0){
-    window._npcDialoguesUsed['wnp_' + traveler.id].push(chapter.intro || '_chapter_seen_');
+  // task #80 (2026-05-20): usa _npcMarkUsed pra triggerar persistência
+  // automática (localStorage char-namespaced). Antes era mutação direta,
+  // sem persistência → chapter intros voltavam em todo refresh.
+  if (typeof _npcMarkUsed === 'function') {
+    _npcMarkUsed('wnp_' + traveler.id, chapter.intro || '_chapter_seen_');
+  } else {
+    window._npcDialoguesUsed = window._npcDialoguesUsed || {};
+    window._npcDialoguesUsed['wnp_' + traveler.id] = window._npcDialoguesUsed['wnp_' + traveler.id] || [];
+    if (window._npcDialoguesUsed['wnp_' + traveler.id].indexOf(chapter.intro || '') < 0){
+      window._npcDialoguesUsed['wnp_' + traveler.id].push(chapter.intro || '_chapter_seen_');
+    }
   }
   var loc = (traveler.activity || '');
   var fmt = function(s){ return s ? s.replace(/\{location_activity\}/g, loc).replace(/\{player_name\}/g, p.name || 'Aventureiro') : ''; };
@@ -38845,11 +38852,18 @@ function _travelerGiftApply(p, traveler, item, tags){
   // Affinity boost por tier
   var affGain = { loved: 5, liked: 3, neutral: 1, disliked: 0, hated: -3 }[tier] || 0;
   // Mock: incrementa interactions count
+  // task #80 (2026-05-20): triggera persistência via _npcMarkUsed.
   if (affGain > 0){
-    window._npcDialoguesUsed = window._npcDialoguesUsed || {};
-    window._npcDialoguesUsed['wnp_' + traveler.id] = window._npcDialoguesUsed['wnp_' + traveler.id] || [];
-    for (var i = 0; i < affGain; i++) {
-      window._npcDialoguesUsed['wnp_' + traveler.id].push('_gift_' + Date.now() + '_' + i);
+    if (typeof _npcMarkUsed === 'function') {
+      for (var i = 0; i < affGain; i++) {
+        _npcMarkUsed('wnp_' + traveler.id, '_gift_' + Date.now() + '_' + i);
+      }
+    } else {
+      window._npcDialoguesUsed = window._npcDialoguesUsed || {};
+      window._npcDialoguesUsed['wnp_' + traveler.id] = window._npcDialoguesUsed['wnp_' + traveler.id] || [];
+      for (var j = 0; j < affGain; j++) {
+        window._npcDialoguesUsed['wnp_' + traveler.id].push('_gift_' + Date.now() + '_' + j);
+      }
     }
   }
   var TIER_ICONS = { loved: '💖', liked: '😊', neutral: '😐', disliked: '😕', hated: '😠' };
