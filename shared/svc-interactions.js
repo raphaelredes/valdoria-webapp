@@ -164,7 +164,19 @@
 
   /**
    * Choice handler dispatcher canonical — chamado dentro de _renderEncounterPopup.
-   * Reconhece cb patterns: 'close', 'dice:*', 'opinion-*', '*-confirm', chain dialogue.
+   * Reconhece cb patterns:
+   *   - 'close'                                → fecha overlay
+   *   - 'dice:<ability>:<dc>:<mod>'            → _diceCheckSvc
+   *   - 'opinion-*'                            → _showOpinionReaction
+   *   - '*-confirm'                            → _showPurchaseConfirm
+   *   - 'cascade:<targetNpc>:<dialogueId>'     → desbloqueia diálogo em outro NPC
+   *   - 'memory:<key>:<value>'                 → grava memória do NPC atual
+   *   - 'visit:<topic>'                        → registra tópico de visita
+   *   - <id de outro dialogue em dialogues{}>  → chain (re-renderiza)
+   *
+   * Cascade/memory/visit suportam continuação via ch.continueDialogue (id) —
+   * útil pra "depois do cascade, Aldwin diz: <fala canonical>" sem fechar overlay.
+   *
    * @returns {boolean} true se interceptou; caller pode return.
    */
   window._dispatchSvcChoice = function(ch, dialogue, dialogues) {
@@ -194,6 +206,21 @@
       window._showPurchaseConfirm(dialogue.npc, ch.label, ch.renownDelta || 0);
       return true;
     }
+    // === FASE B (sessão #11, 2026-05-19) — NPC Living System cascade ===========
+    // cb prefix 'cascade:' / 'memory:' / 'visit:' delegate to _npcDispatchCascadeChoice.
+    // After dispatching, optionally chain to ch.continueDialogue (id em dialogues{})
+    // pra continuação da conversa; senão fecha overlay.
+    if (cb.indexOf('cascade:') === 0 || cb.indexOf('memory:') === 0 || cb.indexOf('visit:') === 0) {
+      if (typeof window._npcDispatchCascadeChoice === 'function') {
+        window._npcDispatchCascadeChoice(cb, dialogue);
+      }
+      if (ch.continueDialogue && dialogues && dialogues[ch.continueDialogue]) {
+        window._renderEncounterPopup(dialogues[ch.continueDialogue]);
+      } else {
+        ov.classList.remove('active');
+      }
+      return true;
+    }
     if (dialogues && dialogues[ch.id]) {
       window._renderEncounterPopup(dialogues[ch.id]);
       return true;
@@ -201,5 +228,5 @@
     return false;
   };
 
-  console.log('[svc-interactions] PADRAO loaded — _diceCheckSvc, _showOpinionReaction, _showPurchaseConfirm, _dispatchSvcChoice');
+  console.log('[svc-interactions] PADRAO loaded — _diceCheckSvc, _showOpinionReaction, _showPurchaseConfirm, _dispatchSvcChoice (+ FASE B cascade/memory/visit)');
 })();
