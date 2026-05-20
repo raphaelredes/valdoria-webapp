@@ -7798,6 +7798,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<script src="/shared/npc-relations-data.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/npc-living-system.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/svc-interactions.js?v=' + Date.now() + '"><\/script>');
+    // === PADRAO_ALDRIC dialogue engine (Task #23 centralização, 2026-05-19) ====
+    // Extraído de simuladores/banco-cofre-final.html — agora reusável por TODOS
+    // os renderers de estabelecimento (cada um carrega seu SERVICE_DIALOGUES e
+    // chama vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_X }).
+    // Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
+    document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + Date.now() + '">');
+    document.write('<script src="/shared/encounter-popup.js?v=' + Date.now() + '"><\/script>');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders
     // em cidade.html geram a estrutura `data` igual à do serializer.py do backend.
