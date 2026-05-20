@@ -49704,6 +49704,11 @@ function _renderEncounterPopup(enc, originalAction, player) {
   if (_stale.length) _stale.forEach(function(el){ try { el.remove(); } catch(_){} });
   var ov = document.createElement('div');
   ov.id = 'encounter-overlay';
+  // 2026-05-20: shared/encounter-popup.css define `#encounter-overlay { display:none }`
+  // por default e `.active { display:flex }` (contract da nova engine vEncounter).
+  // Sem `.active` o overlay legacy criado aqui ficava invisível mesmo com conteúdo
+  // correto (bug do clique do Banco — discovery popup nunca aparecia).
+  ov.classList.add('active');
 
   // 2026-05-18: PADRAO_ALDRIC portrait — prefere PNG AI-generated (portraitImg)
   // sobre heraldic SVG (portrait). Permite NPCs com art AAA (mercadores, banco)
