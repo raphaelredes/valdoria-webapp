@@ -7909,6 +7909,11 @@ body.perf-lite .vc-action-btn { transition: none; }
   };
   var params = new URLSearchParams(window.location.search);
 
+  // task #61 (2026-05-20) — expor char_id global pra localStorage namespacing
+  // (bank tutorial once + NOVO tag once por personagem). Fallback 'default'
+  // garante que mockup/simulador também tenha namespace consistente.
+  window._charId = params.get('char') || params.get('char_id') || 'default';
+
   // === HOSTNAME-FORCED ENV (DEFESA CROSS-ENV 2026-05-10) ==================
   // Telegram WebView pode cachear URL antiga do menu button com ?env errado
   // (ex: jogo.lendasdevaldoria.com.br/cidade/?env=dev). Para impedir
@@ -8916,6 +8921,11 @@ var CITY_DISCOVERY_QUESTS = {
 };
 
 // Estado helpers
+// task #61 (2026-05-20) — user pediu: "tag NOVO para novos locais aparece
+// somente UMA VEZ, com o diálogo referente aparecendo somente UMA VEZ tambem".
+// p.seen_locations agora hidrata de localStorage no init + persiste a cada
+// _markLocationSeen (LGPD: UX pref via CLAUDE.md regra Server-Only State).
+// char_id namespacing pra isolar por personagem.
 function _ensureCityState(){
   var p = window.CITY_MOCK_PLAYER;
   if (!p) return null;
@@ -8923,6 +8933,22 @@ function _ensureCityState(){
   if (!p.discovered_locations) p.discovered_locations = [];
   if (!p.completed_locations)  p.completed_locations = [];
   if (!p.active_discovery)     p.active_discovery = null;
+  // Hydrate seen_locations from localStorage (uma vez por sessão)
+  if (!p._seenLocationsHydrated) {
+    p._seenLocationsHydrated = true;
+    try {
+      var key = 'valdoria_seen_locations_' + (window._charId || 'default');
+      var stored = localStorage.getItem(key);
+      if (stored) {
+        var arr = JSON.parse(stored);
+        if (Array.isArray(arr)) {
+          arr.forEach(function(cb){
+            if (p.seen_locations.indexOf(cb) < 0) p.seen_locations.push(cb);
+          });
+        }
+      }
+    } catch(_){}
+  }
   return p;
 }
 window._currentSector = window._currentSector || 'convivio';
@@ -8959,6 +8985,12 @@ function _markLocationSeen(cb){
   if (!p) return false;
   if (p.seen_locations.indexOf(cb) >= 0) return false;
   p.seen_locations.push(cb);
+  // task #61 (2026-05-20) — persiste em localStorage por char_id pra NOVO
+  // tag aparecer só uma vez por personagem mesmo apos reload do webapp.
+  try {
+    var key = 'valdoria_seen_locations_' + (window._charId || 'default');
+    localStorage.setItem(key, JSON.stringify(p.seen_locations));
+  } catch(_){}
   return true;
 }
 
@@ -40093,12 +40125,18 @@ function _renderCityPopup(key){
     renderBankHub(bodyEl, _buildBankMockData(window.CITY_MOCK_PLAYER));
     // canonical: bank_dialogue.py — BANK_TUTORIAL_TEXT mostrado uma única vez
     // quando jogador chega no banco com >100 Valdoritas pela primeira vez.
-    // Persiste flag em window._bankTutorialSeen (sim usa memória de sessão;
-    // bot DEV usa player.metadata.bank_tutorial_seen).
+    // task #61 (2026-05-20) — user pediu: "Dica do Aventureiro aparece somente
+    // UMA VEZ para cada jogador". Persistência via localStorage (LGPD: UX pref,
+    // permitido por CLAUDE.md regra Server-Only State). char_id namespacing
+    // garante isolamento por personagem (cada PJ vê a Dica uma vez).
     var p = window.CITY_MOCK_PLAYER;
-    if (p && (p.gold || 0) > 100 && !window._bankTutorialSeen
+    var tutKey = 'valdoria_bank_tutorial_seen_' + (window._charId || 'default');
+    var tutSeen = false;
+    try { tutSeen = localStorage.getItem(tutKey) === '1'; } catch(_){}
+    if (p && (p.gold || 0) > 100 && !tutSeen && !window._bankTutorialSeen
         && typeof BANK_TUTORIAL_TEXT === 'string' && typeof _showConfirmPurchase === 'function'){
       window._bankTutorialSeen = true;
+      try { localStorage.setItem(tutKey, '1'); } catch(_){}
       // Pequeno delay pro renderBankHub assentar antes do popup sobrepor
       setTimeout(function(){
         _showInfoPopup({
