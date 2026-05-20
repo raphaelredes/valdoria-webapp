@@ -13678,12 +13678,31 @@ function _processTempleServiceOnDebt(p, sid, debtAmount){
 
 // Helper drill-down: abre NPC dialogue de um service do templo (Fase 9.3)
 function _showTempleNpcDialogue(sid){
+  // task #85 (2026-05-20): MIGRADO de _showNpcDialoguePopup (legacy) para
+  // PADRAO_ALDRIC. Garante que QUALQUER path para Templo NPC dialogues
+  // (svc click, action handler, etc.) abre o mesmo encounter PADRAO_ALDRIC
+  // — mesmo comportamento que Taverna/Banco/Mercado.
+  //
+  // ROOT CAUSE original (bug user 2026-05-20): clique em Padre Aldric
+  // abria npc-dialogue-overlay (legacy) em vez do encounter PADRAO_ALDRIC.
+  // Sistema diferente quebrava UX uniforme.
+  //
+  // Tentativa preferida: usar SERVICE_DIALOGUES_TEMPLE[sid] do game-temple.js.
+  // Fallback: keep legacy code path (TEMPLE_NPCS_DB) caso PADRAO_ALDRIC
+  // não esteja carregado.
+  var dialogue = window.SERVICE_DIALOGUES_TEMPLE && window.SERVICE_DIALOGUES_TEMPLE[sid];
+  if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
+    // Set _SVC_CONFIG_TEMPLE pra que _dispatchSvcChoice use as reactions corretas
+    window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
+    window.vEncounter.render(dialogue, { dialogues: window.SERVICE_DIALOGUES_TEMPLE });
+    return;
+  }
+  // Fallback legacy — usado APENAS se PADRAO_ALDRIC não carregou (defesa).
   var npc = TEMPLE_NPCS_DB[sid];
   var diag = TEMPLE_NPC_DIALOGUES[sid];
   if (!npc || !diag) return;
-  var iconCls = 'ic-clerigo';  // todos NPCs do templo são clérigos
+  var iconCls = 'ic-clerigo';
   var p = window.CITY_MOCK_PLAYER;
-  // Disabled state — bless cooldown, debt, etc.
   var disabled = false;
   var cooldownLabel = null;
   if (sid === 'bless' && _isLongRestCooldownActive('CITY_TEMPLE_BLESS_AT_REST')) {
@@ -13700,21 +13719,18 @@ function _showTempleNpcDialogue(sid){
     greeting: diag.greeting,
     services: [{
       icon: npc.icon,
-      // title já está limpo (sem emoji prefix) após Fase heráldica
       title: npc.title,
       desc: npc.desc,
       cost: npc.cost,
       disabled: disabled,
       cooldownLabel: cooldownLabel,
       onSelect: function(){
-        // Click no service do dialogue → chama o handler temple_svc_<sid>
-        // que abre confirm popup → process → result
         if (ACTION_HANDLERS['temple_svc_' + sid]) {
           ACTION_HANDLERS['temple_svc_' + sid](p);
         }
       }
     }],
-    talkOptions: diag.talkOptions  // Fase 9.4: perguntas únicas (D2)
+    talkOptions: diag.talkOptions
   });
 }
 
