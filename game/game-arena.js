@@ -32,7 +32,7 @@ if (!window._SVC_CONFIG_ARENA) {
   };
 }
 
-var GARRICK_DIALOGUE = {
+var VORHAN_DIALOGUE = {
   npc: {
     name: 'Mestre Vorhan',
     desc: 'Mestre de Armas \u00B7 vinte anos no coliseu',
@@ -154,7 +154,7 @@ function _renderArenaMain(el, d) {
     npcRow.addEventListener('click', function(){
         if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
             window._SVC_CONFIG = window._SVC_CONFIG_ARENA;
-            window.vEncounter.render(GARRICK_DIALOGUE);
+            window.vEncounter.render(VORHAN_DIALOGUE);
         }
     });
     frag.appendChild(npcRow);
