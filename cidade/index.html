@@ -50112,22 +50112,75 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
   // (botão fica redundante e poluente após todas as linhas mostradas).
   var skipBtn = document.getElementById('enc-skip');
   if (skipBtn) skipBtn.style.display = 'none';
-  enc.choices.forEach(function(c, idx){
+
+  var choices = enc.choices || [];
+  if (choices.length === 0) {
+    actionsEl.style.display = 'none';
+    return;
+  }
+
+  /* task #49 (2026-05-20) — PADRAO_ALDRIC v2: se vEncounter.openChoices estiver
+     disponível E houver 2+ choices, renderiza UM botão primário "⚔ Escolher
+     ação" no encounter; click abre choice sub-overlay AAA (z=9700) reabrível.
+     Fallback: inline buttons (1 choice única OU vEncounter não loaded). */
+  var useOverlay = (choices.length >= 2)
+                && (window.vEncounter && typeof window.vEncounter.openChoices === 'function');
+
+  if (useOverlay) {
     var btn = document.createElement('button');
-    btn.className = 'enc-btn' + (c.result === 'goto_cartographer' ? ' enc-btn-primary' : '');
-    // 2026-05-18 PADRAO_ALDRIC merchants: cost pill em label tem HTML (<span>).
-    // Detecta marcadores HTML pra usar innerHTML; fallback textContent.
-    var lbl = c.label || '';
-    if (lbl.indexOf('<') >= 0){
-      btn.innerHTML = lbl;
-    } else {
-      btn.textContent = lbl;
-    }
-    btn.onclick = function(){
-      _onEncounterChoice(enc, c, originalAction, player);
+    btn.className = 'enc-btn enc-btn-primary enc-btn-choose';
+    btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
+                    '<span class="enc-btn-choose-label">Escolher ação</span>' +
+                    '<span class="enc-btn-choose-count">' + choices.length + '</span>';
+    btn.onclick = function() {
+      // Normaliza choices pra contrato openChoices (id, label, icon, desc, dc, skill, cost, renownDelta)
+      var normChoices = choices.map(function(c){
+        var n = {
+          id: c.id || '',
+          label: c.label || '',
+          desc: c.desc || c.result_hint || '',
+          cb: c.cb || c.result || ''
+        };
+        // skill check: c.dc + c.skill OR c.check {dc, skill}
+        if (c.dc && c.skill) { n.dc = c.dc; n.skill = c.skill; }
+        else if (c.check && c.check.dc) { n.dc = c.check.dc; n.skill = c.check.skill || ''; }
+        if (c.cost) n.cost = c.cost;
+        if (c.icon) n.icon = c.icon;
+        // Effect badge: renown delta inferido de c.effect.renown (D&D 5e Renown)
+        if (c.effect && typeof c.effect.renown === 'number') n.renownDelta = c.effect.renown;
+        n._original = c; // preserva ref pro dispatch
+        return n;
+      });
+      window.vEncounter.openChoices(normChoices, {
+        title: 'Escolher ação',
+        npcName: (enc.npc_data && enc.npc_data.name) || (enc.npc && (typeof RECURRING_NPCS !== 'undefined' && RECURRING_NPCS[enc.npc]) && RECURRING_NPCS[enc.npc].name) || '',
+        onChoice: function(normCh) {
+          // Dispatch usando o choice ORIGINAL (preserva todos os campos legacy)
+          var original = normCh._original || normCh;
+          _onEncounterChoice(enc, original, originalAction, player);
+        }
+      });
     };
     actionsEl.appendChild(btn);
-  });
+  } else {
+    // Fallback: inline buttons (1 choice única ou vEncounter sem suporte)
+    choices.forEach(function(c, idx){
+      var btn = document.createElement('button');
+      btn.className = 'enc-btn' + (c.result === 'goto_cartographer' ? ' enc-btn-primary' : '');
+      // 2026-05-18 PADRAO_ALDRIC merchants: cost pill em label tem HTML (<span>).
+      // Detecta marcadores HTML pra usar innerHTML; fallback textContent.
+      var lbl = c.label || '';
+      if (lbl.indexOf('<') >= 0){
+        btn.innerHTML = lbl;
+      } else {
+        btn.textContent = lbl;
+      }
+      btn.onclick = function(){
+        _onEncounterChoice(enc, c, originalAction, player);
+      };
+      actionsEl.appendChild(btn);
+    });
+  }
 }
 
 function _onEncounterChoice(enc, choice, originalAction, player) {

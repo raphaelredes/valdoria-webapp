@@ -159,6 +159,131 @@
     return html;
   }
 
+  // ──────────────────────────────────────────────────────────────────────
+  // Choice sub-overlay AAA (task #49) — module-level public API.
+  // Reabrível, fechável via ✕ / ESC / backdrop / botão Voltar.
+  // z-index 9700 (acima do encounter 9500 e city popup 9000).
+  // ──────────────────────────────────────────────────────────────────────
+
+  function _iconForChoice(ch) {
+    if (ch.cb && /dice|check|skill/.test(ch.cb)) return '🎲';
+    if (ch.cb && /close|leave|skip/.test(ch.cb)) return '←';
+    if (ch.cb && /confirm|pay|deposit|invest/.test(ch.cb)) return '✓';
+    if (ch.cb && /attack|fight|duel/.test(ch.cb)) return '⚔';
+    if (ch.cb && /talk|chat|gossip/.test(ch.cb)) return '💬';
+    if (ch.result && /goto_cartographer/.test(ch.result)) return '🗺';
+    return '◆';
+  }
+
+  /* Ensure choice sub-overlay DOM exists (singleton). */
+  function _ensureChoicesOverlay() {
+    var sub = document.getElementById('enc-choices-overlay');
+    if (sub) return sub;
+    sub = document.createElement('div');
+    sub.id = 'enc-choices-overlay';
+    sub.innerHTML =
+      '<div class="enc-cho-backdrop"></div>' +
+      '<div class="enc-cho-card" role="dialog" aria-modal="true">' +
+        '<button class="enc-cho-close" aria-label="Fechar" type="button">✕</button>' +
+        '<div class="enc-cho-title"></div>' +
+        '<div class="enc-cho-divider"><span class="enc-cho-divider-gem">◆</span></div>' +
+        '<div class="enc-cho-list"></div>' +
+        '<button class="enc-cho-back" type="button">← Voltar à narrativa</button>' +
+      '</div>';
+    document.body.appendChild(sub);
+    // Wire close interactions
+    var closeBtn = sub.querySelector('.enc-cho-close');
+    var backBtn = sub.querySelector('.enc-cho-back');
+    var backdrop = sub.querySelector('.enc-cho-backdrop');
+    if (closeBtn) closeBtn.addEventListener('click', closeChoices);
+    if (backBtn) backBtn.addEventListener('click', closeChoices);
+    if (backdrop) backdrop.addEventListener('click', closeChoices);
+    // ESC key (global, mas só fecha se overlay tiver open)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sub.classList.contains('open')) {
+        closeChoices();
+      }
+    });
+    return sub;
+  }
+
+  /* Public API: openChoices(choices, opts).
+     - choices: array de { id, label, icon?, desc?, dc?, skill?, cost?, renownDelta?, cb? }
+     - opts.title: titulo do sub-overlay (default "Escolher ação")
+     - opts.npcName: nome do NPC mostrado abaixo do titulo (opcional)
+     - opts.onChoice(ch): callback quando user clica numa choice */
+  function openChoices(choices, opts) {
+    opts = opts || {};
+    if (!choices || choices.length === 0) return;
+    var sub = _ensureChoicesOverlay();
+    var listEl = sub.querySelector('.enc-cho-list');
+    var titleEl = sub.querySelector('.enc-cho-title');
+    listEl.innerHTML = '';
+
+    var title = opts.title || 'Escolher ação';
+    var ctxName = opts.npcName || '';
+    titleEl.innerHTML = '<span class="enc-cho-title-orn">✦</span>' +
+                        '<span class="enc-cho-title-text">' + title + '</span>' +
+                        '<span class="enc-cho-title-orn">✦</span>' +
+                        (ctxName ? '<div class="enc-cho-title-sub">' + ctxName + '</div>' : '');
+
+    choices.forEach(function(ch, idx) {
+      var row = document.createElement('button');
+      row.className = 'enc-cho-row';
+      row.style.setProperty('--idx', idx);
+      var icon = ch.icon || _iconForChoice(ch);
+      var dcBadge = '';
+      if (ch.dc && ch.skill) {
+        dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + '</span>';
+      } else if (ch.cost) {
+        dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' V</span>';
+      } else if (ch.renownDelta) {
+        var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
+        dcBadge = '<span class="enc-cho-dc enc-cho-renown">Renome ' + rd + '</span>';
+      }
+      // label e desc podem ter HTML inline simples (<span>, <i>)
+      row.innerHTML =
+        '<span class="enc-cho-row-icon">' + icon + '</span>' +
+        '<span class="enc-cho-row-body">' +
+          '<span class="enc-cho-row-label">' + (ch.label || '') + '</span>' +
+          (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
+        '</span>' +
+        (dcBadge ? '<span class="enc-cho-row-side">' + dcBadge + '</span>' : '') +
+        '<span class="enc-cho-row-chev">›</span>';
+      row.addEventListener('click', function() {
+        closeChoices(); // sempre fecha primeiro pra UX consistente
+        if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+      });
+      listEl.appendChild(row);
+    });
+
+    // Activate animations
+    sub.classList.add('active');
+    void sub.offsetWidth; // force reflow
+    sub.classList.add('opening');
+    setTimeout(function() {
+      sub.classList.remove('opening');
+      sub.classList.add('open');
+    }, 50);
+  }
+
+  function closeChoices() {
+    var sub = document.getElementById('enc-choices-overlay');
+    if (!sub || !sub.classList.contains('active')) return;
+    sub.classList.add('closing');
+    sub.classList.remove('open');
+    setTimeout(function() {
+      sub.classList.remove('active');
+      sub.classList.remove('closing');
+      sub.classList.remove('opening');
+    }, 280);
+  }
+
+  function isChoicesOpen() {
+    var sub = document.getElementById('enc-choices-overlay');
+    return !!(sub && sub.classList.contains('open'));
+  }
+
   /* Main entry: vEncounter.render(dialogue, opts) */
   function render(dialogue, opts) {
     opts = opts || {};
@@ -374,7 +499,7 @@
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
           btn.textContent = ch.label;
-          btn.addEventListener('click', function() { _handleChoice(ch); });
+          btn.addEventListener('click', function() { _handleChoiceInternal(ch); });
           actions.appendChild(btn);
         });
       } else {
@@ -385,16 +510,20 @@
                         '<span class="enc-btn-choose-label">Escolher ação</span>' +
                         '<span class="enc-btn-choose-count">' + choices.length + '</span>';
         btn.addEventListener('click', function() {
-          _openChoicesOverlay(choices, dialogue);
+          openChoices(choices, {
+            title: 'Escolher ação',
+            npcName: (dialogue.npc && dialogue.npc.name) || '',
+            onChoice: _handleChoiceInternal
+          });
         });
         actions.appendChild(btn);
       }
       actions.style.display = '';
     }
 
-    /* Dispatch único: delega pra svc-interactions ou fallback. */
-    function _handleChoice(ch) {
-      _closeChoicesOverlay(); /* fecha sub-overlay antes de dispatch */
+    /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
+    function _handleChoiceInternal(ch) {
+      closeChoices(); /* fecha sub-overlay antes de dispatch */
       if (typeof window._dispatchSvcChoice === 'function') {
         var handled = window._dispatchSvcChoice(ch, dialogue, opts.dialogues || {});
         if (handled) return;
@@ -412,115 +541,6 @@
       }
       close();
     }
-
-    /* Choice sub-overlay AAA: parchment unroll + cards cascading reveal. */
-    function _openChoicesOverlay(choices, sourceDialogue) {
-      var sub = _ensureChoicesOverlay();
-      var card = sub.querySelector('.enc-cho-card');
-      var listEl = sub.querySelector('.enc-cho-list');
-      var titleEl = sub.querySelector('.enc-cho-title');
-
-      listEl.innerHTML = '';
-
-      // Title from dialogue context (NPC name or generic)
-      var ctxName = (sourceDialogue.npc && sourceDialogue.npc.name) || '';
-      titleEl.innerHTML = '<span class="enc-cho-title-orn">✦</span>' +
-                          '<span class="enc-cho-title-text">Escolher ação</span>' +
-                          '<span class="enc-cho-title-orn">✦</span>' +
-                          (ctxName ? '<div class="enc-cho-title-sub">' + ctxName + '</div>' : '');
-
-      choices.forEach(function(ch, idx) {
-        var row = document.createElement('button');
-        row.className = 'enc-cho-row';
-        row.style.setProperty('--idx', idx);
-        var icon = ch.icon || _iconForChoice(ch);
-        var dcBadge = '';
-        if (ch.dc && ch.skill) {
-          dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + '</span>';
-        } else if (ch.cost) {
-          dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' V</span>';
-        } else if (ch.renownDelta) {
-          var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
-          dcBadge = '<span class="enc-cho-dc enc-cho-renown">Renome ' + rd + '</span>';
-        }
-        row.innerHTML =
-          '<span class="enc-cho-row-icon">' + icon + '</span>' +
-          '<span class="enc-cho-row-body">' +
-            '<span class="enc-cho-row-label">' + (ch.label || '') + '</span>' +
-            (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
-          '</span>' +
-          (dcBadge ? '<span class="enc-cho-row-side">' + dcBadge + '</span>' : '') +
-          '<span class="enc-cho-row-chev">›</span>';
-        row.addEventListener('click', function() { _handleChoice(ch); });
-        listEl.appendChild(row);
-      });
-
-      // Activate animations
-      sub.classList.add('active');
-      // Force reflow then trigger entering class
-      void sub.offsetWidth;
-      sub.classList.add('opening');
-      setTimeout(function() {
-        sub.classList.remove('opening');
-        sub.classList.add('open');
-      }, 50);
-    }
-
-    function _iconForChoice(ch) {
-      if (ch.cb && /dice|check|skill/.test(ch.cb)) return '🎲';
-      if (ch.cb && /close|leave|skip/.test(ch.cb)) return '←';
-      if (ch.cb && /confirm|pay|deposit|invest/.test(ch.cb)) return '✓';
-      if (ch.cb && /attack|fight|duel/.test(ch.cb)) return '⚔';
-      if (ch.cb && /talk|chat|gossip/.test(ch.cb)) return '💬';
-      return '◆';
-    }
-
-    /* Ensure choice sub-overlay DOM exists. */
-    function _ensureChoicesOverlay() {
-      var sub = document.getElementById('enc-choices-overlay');
-      if (sub) return sub;
-      sub = document.createElement('div');
-      sub.id = 'enc-choices-overlay';
-      sub.innerHTML =
-        '<div class="enc-cho-backdrop"></div>' +
-        '<div class="enc-cho-card" role="dialog" aria-modal="true">' +
-          '<button class="enc-cho-close" aria-label="Fechar" type="button">✕</button>' +
-          '<div class="enc-cho-title"></div>' +
-          '<div class="enc-cho-divider"><span class="enc-cho-divider-gem">◆</span></div>' +
-          '<div class="enc-cho-list"></div>' +
-          '<button class="enc-cho-back" type="button">← Voltar à narrativa</button>' +
-        '</div>';
-      document.body.appendChild(sub);
-      // Wire close interactions
-      var closeBtn = sub.querySelector('.enc-cho-close');
-      var backBtn = sub.querySelector('.enc-cho-back');
-      var backdrop = sub.querySelector('.enc-cho-backdrop');
-      if (closeBtn) closeBtn.addEventListener('click', _closeChoicesOverlay);
-      if (backBtn) backBtn.addEventListener('click', _closeChoicesOverlay);
-      if (backdrop) backdrop.addEventListener('click', _closeChoicesOverlay);
-      // ESC key
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && sub.classList.contains('open')) {
-          _closeChoicesOverlay();
-        }
-      });
-      return sub;
-    }
-
-    function _closeChoicesOverlay() {
-      var sub = document.getElementById('enc-choices-overlay');
-      if (!sub || !sub.classList.contains('active')) return;
-      sub.classList.add('closing');
-      sub.classList.remove('open');
-      setTimeout(function() {
-        sub.classList.remove('active');
-        sub.classList.remove('closing');
-        sub.classList.remove('opening');
-      }, 280);
-    }
-
-    // Expose close for external callers (e.g., openCityPopup dismiss flow)
-    if (!window._vEncChoicesClose) window._vEncChoicesClose = _closeChoicesOverlay;
 
     var prevBtn = document.getElementById('enc-prev');
     var nextBtn = document.getElementById('enc-next');
@@ -549,8 +569,16 @@
   window.vEncounter = {
     render: render,
     close: close,
-    isOpen: isOpen
+    isOpen: isOpen,
+    /* task #49 (2026-05-20) — Choice sub-overlay AAA: módulo público
+       pra reuso por _renderEncounterPopup legacy + qualquer outro renderer. */
+    openChoices: openChoices,
+    closeChoices: closeChoices,
+    isChoicesOpen: isChoicesOpen
   };
 
-  console.log('[encounter-popup] PADRAO_ALDRIC engine loaded — vEncounter.render(dialogue, opts) ready');
+  /* Compat: alias usado por cidade openCityPopup (task #47 dismiss flow). */
+  window._vEncChoicesClose = closeChoices;
+
+  console.log('[encounter-popup] PADRAO_ALDRIC engine loaded — vEncounter.{render,openChoices,close} ready');
 })();
