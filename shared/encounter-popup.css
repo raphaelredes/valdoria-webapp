@@ -7,23 +7,39 @@
  * Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
  * ============================================================================ */
 
+/* task #69 (2026-05-20) — MIGRATION HTML <dialog>:
+   #encounter-overlay agora é <dialog>. Native top-layer rendering substitui
+   z-index manual. Reset dos defaults (margin, padding, border, max-w/h).
+   .active class mantida como FALLBACK pra browsers sem suporte (Safari < 15.4).
+   ::backdrop pseudo-element substitui background: rgba(0,0,0,0.88) manual. */
 #encounter-overlay {
+  /* Reset <dialog> defaults */
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  /* Layout */
   position: fixed;
   inset: 0;
-  z-index: 9500;
-  background: rgba(0, 0, 0, 0.88);
+  z-index: 9500; /* fallback se browser não suporta top-layer */
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 12px;
   opacity: 1;
 }
-/* 2026-05-20: animação encFadeIn REMOVIDA. Mesmo com forwards + duration baixa,
-   Chromium congela a timeline em display:none → display:flex transitions.
-   Trade-off: popup aparece sem fade (instant) vs. popup nunca aparece. Optamos
-   por aparecer. UX impact mínimo (~250ms de fade que ninguém vai sentir falta). */
+/* <dialog>[open] is the native attribute set by .showModal() */
+#encounter-overlay[open],
 #encounter-overlay.active {
   display: flex;
+}
+/* ::backdrop pseudo-element — substitui background manual */
+#encounter-overlay::backdrop {
+  background: rgba(0, 0, 0, 0.88);
 }
 
 .enc-card {
@@ -319,24 +335,48 @@
   50% { transform: rotate(3deg) translateY(-2px); }
 }
 
-/* Choice sub-overlay container (full screen).
-   task #58 (2026-05-20) — z=9750 (era 9700, mas conflita com travel-overlay
-   + city-medieval-overlay + corv-confirm que também usam 9700). 9750 garante
-   que choice-overlay SEMPRE fique acima desses overlays "de cena". Lightbox
-   (z=10500) continua acima quando user clica portrait dentro do choice. */
+/* task #69 (2026-05-20) — MIGRATION HTML <dialog>:
+   #enc-choices-overlay agora é <dialog>. Native top-layer rendering elimina
+   conflitos z-index estruturalmente (top-layer fica acima de TODO z-index page).
+   ::backdrop substitui .enc-cho-backdrop manual.
+   z-index 9750 mantido como FALLBACK pra browsers sem suporte. */
 #enc-choices-overlay {
+  /* Reset <dialog> defaults */
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  /* Layout */
   position: fixed;
   inset: 0;
-  z-index: 9750;
+  z-index: 9750; /* fallback se browser não suporta top-layer */
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 12px;
   pointer-events: none;
 }
+#enc-choices-overlay[open],
 #enc-choices-overlay.active { display: flex; pointer-events: auto; }
 
-/* Backdrop — dark gold radial glow. */
+/* ::backdrop pseudo-element — substitui .enc-cho-backdrop manual.
+   Animação opacity via dialog state ([open]) é nativa. */
+#enc-choices-overlay::backdrop {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(196, 149, 58, 0.12), transparent 60%),
+    rgba(8, 6, 4, 0.92);
+  opacity: 0;
+  transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+#enc-choices-overlay[open]::backdrop { opacity: 1; }
+#enc-choices-overlay.closing::backdrop { opacity: 0; }
+
+/* Legacy .enc-cho-backdrop (fallback se _ensureChoicesOverlay rodar antes do
+   browser suportar <dialog>) — graceful no-op se não existir no DOM. */
 .enc-cho-backdrop {
   position: absolute;
   inset: 0;
@@ -347,9 +387,8 @@
   transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 #enc-choices-overlay.opening .enc-cho-backdrop,
-#enc-choices-overlay.open .enc-cho-backdrop {
-  opacity: 1;
-}
+#enc-choices-overlay.open .enc-cho-backdrop,
+#enc-choices-overlay[open] .enc-cho-backdrop { opacity: 1; }
 #enc-choices-overlay.closing .enc-cho-backdrop { opacity: 0; }
 
 /* Card — "Pergaminho" parchment look with runic gold border + glow. */
@@ -377,7 +416,8 @@
     opacity 220ms ease-out;
 }
 #enc-choices-overlay.opening .enc-cho-card,
-#enc-choices-overlay.open .enc-cho-card {
+#enc-choices-overlay.open .enc-cho-card,
+#enc-choices-overlay[open] .enc-cho-card {
   transform: scaleY(1) translateY(0);
   opacity: 1;
 }

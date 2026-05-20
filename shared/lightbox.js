@@ -33,14 +33,26 @@
 
   function _ensureLightbox() {
     var lb = document.getElementById(LIGHTBOX_ID);
-    if (lb) return lb;
-    lb = document.createElement('div');
-    lb.id = LIGHTBOX_ID;
-    lb.setAttribute('role', 'dialog');
-    lb.setAttribute('aria-modal', 'true');
+    if (lb) {
+      // task #69: migrate legacy <div> to <dialog> if needed
+      if (lb.tagName.toLowerCase() !== 'dialog') {
+        var newLb = document.createElement('dialog');
+        newLb.id = LIGHTBOX_ID;
+        lb.parentNode.replaceChild(newLb, lb);
+        lb = newLb;
+      } else {
+        return lb;
+      }
+    } else {
+      lb = document.createElement('dialog');
+      lb.id = LIGHTBOX_ID;
+    }
+    // task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
+    // Native top-layer rendering (acima de TODO z-index) + ::backdrop +
+    // ESC nativo + inert background automatic.
     lb.setAttribute('aria-label', 'Visualização ampliada');
+    // <dialog> has native ::backdrop — no manual .v-lb-backdrop needed
     lb.innerHTML =
-      '<div class="v-lb-backdrop"></div>' +
       '<div class="v-lb-card">' +
         '<button class="v-lb-close" type="button" aria-label="Fechar">✕</button>' +
         '<div class="v-lb-img-wrap">' +
@@ -55,24 +67,35 @@
 
     // Wire close interactions
     var closeBtn = lb.querySelector('.v-lb-close');
-    var backdrop = lb.querySelector('.v-lb-backdrop');
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-    if (backdrop) backdrop.addEventListener('click', closeLightbox);
-
-    // ESC closes
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && _isOpen) closeLightbox();
+    // Click on backdrop (clicking outside card) closes
+    lb.addEventListener('click', function(e) {
+      if (e.target === lb) closeLightbox();
+    });
+    // <dialog> native cancel event (ESC key)
+    lb.addEventListener('cancel', function(e) {
+      e.preventDefault();
+      closeLightbox();
     });
 
     // Inject CSS once
     if (!document.getElementById('v-lightbox-style')) {
       var st = document.createElement('style');
       st.id = 'v-lightbox-style';
+      // task #69: <dialog> element CSS — reset defaults + ::backdrop + native top-layer
       st.textContent = ''
-        + '#v-lightbox{position:fixed;inset:0;z-index:10500;display:none;'
-        +   'align-items:center;justify-content:center;padding:12px;'
+        + '#v-lightbox{margin:0;padding:12px;border:0;background:transparent;'
+        +   'color:inherit;max-width:none;max-height:none;width:100%;height:100%;'
+        +   'position:fixed;inset:0;z-index:10500;display:none;'
+        +   'align-items:center;justify-content:center;'
         +   'pointer-events:none}'
-        + '#v-lightbox.active{display:flex;pointer-events:auto}'
+        + '#v-lightbox[open],#v-lightbox.active{display:flex;pointer-events:auto}'
+        + '#v-lightbox::backdrop{background:radial-gradient('
+        +   'circle at 50% 50%, rgba(196,149,58,0.15), transparent 70%),'
+        +   'rgba(6,4,2,0.94);opacity:0;'
+        +   'transition:opacity 200ms ease-out}'
+        + '#v-lightbox[open]::backdrop{opacity:1}'
+        + '#v-lightbox.closing::backdrop{opacity:0}'
         + '.v-lb-backdrop{position:absolute;inset:0;background:radial-gradient('
         +   'circle at 50% 50%, rgba(196,149,58,0.15), transparent 70%),'
         +   'rgba(6,4,2,0.94);opacity:0;transition:opacity 200ms ease-out;'
@@ -86,7 +109,8 @@
         +   'transition:transform 320ms cubic-bezier(0.16,1.08,0.32,1),opacity 220ms ease-out;'
         +   'pointer-events:auto}'
         + '#v-lightbox.opening .v-lb-card,'
-        + '#v-lightbox.open .v-lb-card{transform:scale(1);opacity:1}'
+        + '#v-lightbox.open .v-lb-card,'
+        + '#v-lightbox[open] .v-lb-card{transform:scale(1);opacity:1}'
         + '#v-lightbox.closing .v-lb-card{transform:scale(0.92);opacity:0;'
         +   'transition:transform 200ms ease-in,opacity 180ms ease-in}'
         + '.v-lb-close{position:absolute;top:-14px;right:-14px;width:38px;height:38px;'
@@ -156,8 +180,13 @@
       descEl.innerHTML = desc || '';
       descEl.style.display = desc ? '' : 'none';
     }
-    // Activate with animation sequence
-    lb.classList.add('active');
+    // task #69: activate via showModal() — native top-layer
+    if (lb.tagName.toLowerCase() === 'dialog' && typeof lb.showModal === 'function') {
+      try { if (!lb.open) lb.showModal(); }
+      catch(e) { lb.classList.add('active'); }
+    } else {
+      lb.classList.add('active');
+    }
     void lb.offsetWidth; // force reflow
     lb.classList.add('opening');
     setTimeout(function() {
@@ -169,10 +198,18 @@
 
   function closeLightbox() {
     var lb = document.getElementById(LIGHTBOX_ID);
-    if (!lb || !lb.classList.contains('active')) return;
+    if (!lb) return;
+    // task #69: check open via <dialog>.open OR .active class (compat)
+    var isOpenNow = (lb.tagName.toLowerCase() === 'dialog' && lb.open) ||
+                    lb.classList.contains('active');
+    if (!isOpenNow) return;
     lb.classList.add('closing');
     lb.classList.remove('open');
     setTimeout(function() {
+      // task #69: close <dialog> via .close() if available
+      if (lb.tagName.toLowerCase() === 'dialog' && typeof lb.close === 'function') {
+        try { if (lb.open) lb.close(); } catch(e){}
+      }
       lb.classList.remove('active');
       lb.classList.remove('closing');
       lb.classList.remove('opening');

@@ -50,13 +50,55 @@
   var OVERLAY_ID = 'encounter-overlay';
   var _currentRenderState = null;
 
+  /* task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
+     Pesquisa em 4 fontes (MDN, caniuse 95.48%, LogRocket, dev.to) confirma
+     <dialog> + showModal() é solução definitiva pra z-index conflicts.
+     Browser support 95.48% (Chrome 37+, Safari 15.4+, FF 98+, Edge 79+).
+     Telegram WebView (Chromium) suporta. Top-layer rendering elimina
+     conflicts estruturalmente. Mantém API pública compatível. */
   function _ensureOverlay() {
     var ov = document.getElementById(OVERLAY_ID);
-    if (ov) return ov;
-    ov = document.createElement('div');
+    if (ov) {
+      // Migration: if exists as <div> from old code, replace with <dialog>
+      if (ov.tagName.toLowerCase() !== 'dialog') {
+        var newOv = document.createElement('dialog');
+        newOv.id = OVERLAY_ID;
+        ov.parentNode.replaceChild(newOv, ov);
+        return newOv;
+      }
+      return ov;
+    }
+    ov = document.createElement('dialog');
     ov.id = OVERLAY_ID;
     document.body.appendChild(ov);
     return ov;
+  }
+
+  /* task #69: helpers pra mudar entre <dialog> API e classList (backward compat).
+     showOverlay/closeOverlay usam .showModal()/.close() nativos quando dialog,
+     fallback pra classList.add('active')/.remove('active') pra elementos antigos. */
+  function _showOverlay(ov) {
+    if (!ov) return;
+    if (ov.tagName.toLowerCase() === 'dialog' && typeof ov.showModal === 'function') {
+      try { if (!ov.open) ov.showModal(); }
+      catch(e) { ov.classList.add('active'); } // fallback se showModal falhar
+    } else {
+      ov.classList.add('active');
+    }
+  }
+  function _closeOverlay(ov) {
+    if (!ov) return;
+    if (ov.tagName.toLowerCase() === 'dialog' && typeof ov.close === 'function') {
+      try { if (ov.open) ov.close(); } catch(e){}
+    }
+    ov.classList.remove('active'); // sempre remove .active pra compat
+    // Also force hide for any edge cases
+    ov.style.display = '';
+  }
+  function _isOverlayOpen(ov) {
+    if (!ov) return false;
+    if (ov.tagName.toLowerCase() === 'dialog') return !!ov.open;
+    return ov.classList.contains('active');
   }
 
   /* Quebra texto em FRASES pra typewriter por sentence.
@@ -175,15 +217,30 @@
     return '◆';
   }
 
-  /* Ensure choice sub-overlay DOM exists (singleton). */
+  /* Ensure choice sub-overlay DOM exists (singleton).
+     task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
+     Native top-layer rendering elimina conflitos z-index estruturalmente.
+     ::backdrop pseudo-element substitui .enc-cho-backdrop manual.
+     ESC key + inert background tratados nativamente pelo browser. */
   function _ensureChoicesOverlay() {
     var sub = document.getElementById('enc-choices-overlay');
-    if (sub) return sub;
-    sub = document.createElement('div');
-    sub.id = 'enc-choices-overlay';
+    if (sub) {
+      // Migrate legacy <div> to <dialog> if necessary
+      if (sub.tagName.toLowerCase() !== 'dialog') {
+        var newSub = document.createElement('dialog');
+        newSub.id = 'enc-choices-overlay';
+        sub.parentNode.replaceChild(newSub, sub);
+        sub = newSub;
+      } else {
+        return sub;
+      }
+    } else {
+      sub = document.createElement('dialog');
+      sub.id = 'enc-choices-overlay';
+    }
+    // <dialog> has native ::backdrop — no need for manual .enc-cho-backdrop element
     sub.innerHTML =
-      '<div class="enc-cho-backdrop"></div>' +
-      '<div class="enc-cho-card" role="dialog" aria-modal="true">' +
+      '<div class="enc-cho-card" role="document">' +
         '<button class="enc-cho-close" aria-label="Fechar" type="button">✕</button>' +
         '<div class="enc-cho-title"></div>' +
         '<div class="enc-cho-divider"><span class="enc-cho-divider-gem">◆</span></div>' +
@@ -194,15 +251,17 @@
     // Wire close interactions
     var closeBtn = sub.querySelector('.enc-cho-close');
     var backBtn = sub.querySelector('.enc-cho-back');
-    var backdrop = sub.querySelector('.enc-cho-backdrop');
     if (closeBtn) closeBtn.addEventListener('click', closeChoices);
     if (backBtn) backBtn.addEventListener('click', closeChoices);
-    if (backdrop) backdrop.addEventListener('click', closeChoices);
-    // ESC key (global, mas só fecha se overlay tiver open)
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && sub.classList.contains('open')) {
-        closeChoices();
-      }
+    // Click on backdrop (clicking outside the card) closes
+    sub.addEventListener('click', function(e) {
+      // event.target is the <dialog> itself when clicking on ::backdrop
+      if (e.target === sub) closeChoices();
+    });
+    // <dialog> native cancel event (ESC key)
+    sub.addEventListener('cancel', function(e) {
+      e.preventDefault(); // prevent default close, use our animation
+      closeChoices();
     });
     return sub;
   }
@@ -257,8 +316,13 @@
       listEl.appendChild(row);
     });
 
-    // Activate animations
-    sub.classList.add('active');
+    // task #69: activate via showModal() — native top-layer rendering
+    if (sub.tagName.toLowerCase() === 'dialog' && typeof sub.showModal === 'function') {
+      try { if (!sub.open) sub.showModal(); }
+      catch(e) { sub.classList.add('active'); }
+    } else {
+      sub.classList.add('active');
+    }
     void sub.offsetWidth; // force reflow
     sub.classList.add('opening');
     setTimeout(function() {
@@ -269,10 +333,18 @@
 
   function closeChoices() {
     var sub = document.getElementById('enc-choices-overlay');
-    if (!sub || !sub.classList.contains('active')) return;
+    if (!sub) return;
+    // task #69: check open via <dialog>.open OR .active class (compat)
+    var isOpen = (sub.tagName.toLowerCase() === 'dialog' && sub.open) ||
+                 sub.classList.contains('active');
+    if (!isOpen) return;
     sub.classList.add('closing');
     sub.classList.remove('open');
     setTimeout(function() {
+      // task #69: close <dialog> via .close() if available
+      if (sub.tagName.toLowerCase() === 'dialog' && typeof sub.close === 'function') {
+        try { if (sub.open) sub.close(); } catch(e){}
+      }
       sub.classList.remove('active');
       sub.classList.remove('closing');
       sub.classList.remove('opening');
@@ -281,7 +353,10 @@
 
   function isChoicesOpen() {
     var sub = document.getElementById('enc-choices-overlay');
-    return !!(sub && sub.classList.contains('open'));
+    if (!sub) return false;
+    // task #69: <dialog>.open is canonical, .open class is fallback
+    if (sub.tagName.toLowerCase() === 'dialog') return !!sub.open;
+    return sub.classList.contains('open');
   }
 
   /* Main entry: vEncounter.render(dialogue, opts) */
@@ -344,7 +419,8 @@
     card.appendChild(actions);
 
     ov.appendChild(card);
-    ov.classList.add('active');
+    // task #69: use <dialog>.showModal() (top-layer, inert background, focus trap)
+    _showOverlay(ov);
 
     function renderPage(idx) {
       if (_currentRenderState && _currentRenderState.activeTypewriters) {
@@ -577,13 +653,15 @@
 
   function close() {
     var ov = document.getElementById(OVERLAY_ID);
-    if (ov) ov.classList.remove('active');
+    // task #69: use <dialog>.close() nativo (libera top-layer, restaura focus)
+    _closeOverlay(ov);
     _currentRenderState = null;
   }
 
   function isOpen() {
     var ov = document.getElementById(OVERLAY_ID);
-    return !!(ov && ov.classList.contains('active'));
+    // task #69: check <dialog>.open OR .active class (compat)
+    return _isOverlayOpen(ov);
   }
 
   // === Public API ===========================================================
