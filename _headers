@@ -206,3 +206,9 @@
 /asset-manifest.json
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
+
+# /game/*.js — renderers de produção (game-bank, game-temple, etc.)
+# no-cache pra evitar stale após push (CF Pages edge cache de 4h era um problema).
+/game/*.js
+  Cache-Control: no-cache, must-revalidate
+  X-Content-Type-Options: nosniff
