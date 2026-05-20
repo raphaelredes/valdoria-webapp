@@ -120,8 +120,12 @@
   font-size: 14px;
   line-height: 1.55;
   color: #d4c8b0;
-  visibility: hidden;
 }
+/* 2026-05-20: visibility:hidden default REMOVIDO. Legacy renderer em
+   cidade/index.html usa clip-path (não typing-started class) e o conteúdo
+   ficava invisível. A engine nova (encounter-popup.js) adiciona .typing-started
+   mas isso era redundante mesmo. clip-path da animação já cria o efeito visual
+   de typewriter sem precisar de visibility toggle. */
 .enc-line.typing-started {
   visibility: visible;
 }
