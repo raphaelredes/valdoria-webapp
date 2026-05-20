@@ -149,6 +149,96 @@ var SERVICE_DIALOGUES_TAVERN = {
       { id: 'ask',  label: '🔍 "O que você sabe sobre eles?"', cb: 'gather_info' },
       { id: 'leave','label': '↩ "Deixa pra lá."', cb: 'close' }
     ]
+  },
+
+  /* task #63 (2026-05-20) — 5 dialogues PADRAO_ALDRIC novos pra svc legacy.
+     Cada um segue mecânicas D&D 5e canonical com narrativa imersiva. */
+
+  bard: {
+    /* Bardic Inspiration — PHB p.53 — bard performs, listener may gain
+       inspiration die. Tip 1V/5V escala chance. */
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'No canto da taverna, sobre um tablado modesto, uma jovem de cabelos cor-de-fogo afina o alaúde. Ela usa um broche de prata em forma de pena — símbolo do Conservatório de Eldoria. Suas mãos têm calos diferentes de quem trabalha o metal: marcas de cordas, mistura de violão e harpa.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lyra Cantarriba. <i>(passa o pano pela caneca)</i> Estudou no Conservatório, voltou ano passado quando o avô caiu doente. Toca pra pagar o quarto. Sabe Inspirar — coisa de bardo de verdade, não dessas balada de cantar Birthday Happy.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>Inspiração 1d6 (PHB p.53).</b>' }
+    ],
+    choices: [
+      { id: 'tip_1', label: '🎵 Gorjeta 1 V · só ouvir', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_1' },
+      { id: 'tip_5', label: '🎵 Gorjeta 5 V · Inspiração 1d6', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_5', renownDelta: 1 },
+      { id: 'flirt', label: '💬 "Toca algo só pra mim?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
+      { id: 'request', label: '🎭 "Conhece a Balada de Korrigan?" · História DC 12', cb: 'dice:history:12:+0' },
+      { id: 'back',  label: '↩ "Talvez depois."', cb: 'close' }
+    ]
+  },
+
+  mercenaries: {
+    /* Hireling Mercenary — XGtE p.130 — hire NPC by day rate. Costs vary
+       by skill (Skilled vs Unskilled hireling DMG p.159). */
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Grom aponta a porta lateral que dá pro pátio. Lá fora, três figuras esperam encostadas no muro — um homem de couro escuro e olhar paciente, uma orca de armadura escamada com martelo nas costas, e um halfling de capa cinza que ninguém olha duas vezes (que é exatamente o ponto).' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Os três tão livres pra serviço. <i>(aponta o livro de tarja)</i> Hireling padrão. <b>XGtE página 130</b> — taxa diária varia por habilidade. Skilled custa duas, unskilled meio.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Mas Vossa Senhoria pode pechinchar. <i>(sorri torto)</i> Se souber falar bonito — ou se for amigo de quem aqui já é casa.' }
+    ],
+    choices: [
+      { id: 'browse', label: '⚔ Ver lista de mercenários', cb: 'mercenaries-confirm', backend_cb: 'tavern_mercenaries_open' },
+      { id: 'negotiate', label: '💬 "Desconto, Grom?" · Persuasão DC 15', cb: 'dice:persuasion:15:+2' },
+      { id: 'insight', label: '🔍 "Quem aqui é confiável?" · Intuição DC 13', cb: 'dice:insight:13:+1' },
+      { id: 'rude',   label: '"Vendendo pessoas, Grom?"', cb: 'opinion-rude', renownDelta: -2 },
+      { id: 'back',   label: '↩ "Outro dia."', cb: 'close' }
+    ]
+  },
+
+  adventurers: {
+    /* Hire Adventuring NPC — XGtE p.131 — skilled hireling com classes.
+       Pagamento em dia + lealdade based on treat (Renown). */
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Grom abre uma gaveta lateral e retira uma pasta encadernada em couro com selo do Conservatório dos Mapas. Dentro, quatro pergaminhos cuidadosamente catalogados — cada um com perfil de um Explorador veterano disponível pra contrato semanal.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Exploradores são diferentes de mercenários. <i>(folha o primeiro pergaminho)</i> Conhecem mapas, sabem ler trilhas, e — o que importa — voltam vivos. <b>XGtE página 131</b>: hireling especializado em wilderness travel.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'A taxa não é barata. Quarenta moedas o dia base, mais bônus de risco. Mas se Vossa Senhoria vai longe — vale cada Valdorita.' }
+    ],
+    choices: [
+      { id: 'browse', label: '🗺 Ver exploradores disponíveis', cb: 'adventurers-confirm', backend_cb: 'tavern_adventurers_open' },
+      { id: 'persuade', label: '💬 "Vale meio do preço?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
+      { id: 'history', label: '📜 "Algum já desbravou as Marcas?" · História DC 14', cb: 'dice:history:14:+1' },
+      { id: 'back',   label: '↩ "Penso bem."', cb: 'close' }
+    ]
+  },
+
+  games: {
+    /* Gaming Set proficiency — PHB p.154 — Dice / Cards / Drinking contest.
+       Gambling = DC-based check com loss/win por dado. */
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Grom estende o braço pro lado direito da sala. Quatro mesas ocupadas — duas com Ossos do Dragão (dados clássicos), uma com baralho marcado de prata, e outra com fileiras de canecas cheias e olhares determinados.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Apostas variam. <i>(sorri com cinismo gentil)</i> Ossos do Dragão são o clássico — proficiência em Dice Set (<b>PHB p.154</b>) dá vantagem. Cartas requer Engano <b>ou</b> Percepção pra não ser enganado. Bebida... bem, Constituição contra Constituição até alguém cair.' }
+    ],
+    choices: [
+      { id: 'bones',     label: '🐉 Ossos do Dragão · 5 V', cb: 'games-confirm', backend_cb: 'tavern_bones_menu' },
+      { id: 'cards',     label: '🃏 Cartas · Engano DC 13', cb: 'dice:deception:13:+1' },
+      { id: 'drinking',  label: '🍺 Concurso de Bebida · CON DC 15', cb: 'dice:constitution:15:+0' },
+      { id: 'observe',   label: '👁 Apenas observar · Intuição DC 11', cb: 'dice:insight:11:+0' },
+      { id: 'back',      label: '↩ "Outra hora."', cb: 'close' }
+    ]
+  },
+
+  bulletin: {
+    /* Notice Board / Job board — typical fantasy quest hook + Renown gain
+       via accepted jobs. */
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'narration', text: 'Grom aponta a parede de cortiça envelhecida ao lado da lareira. Dezenas de pergaminhos pregados ali — alguns com selo de cera lacrada, outros rabiscados a carvão. Os mais antigos têm marcas circulares de canecas de cerveja.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'O Mural. <i>(coça a barba ruiva)</i> Aqui se cola tudo: fazendeiro que perdeu vaca, viúva precisando escolta, comerciante atrás de guarda noturno. <i>(aponta um pergaminho dourado no canto)</i> Esse aí ali, do selo nobre, paga bem — mas não vou jurar que voltam todos vivos.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lê os avisos. Aceita o que cabe na tua espada. <b>Renome sobe com job entregue</b>, cai com prazo quebrado. Casa é firme com a palavra.' }
+    ],
+    choices: [
+      { id: 'read', label: '📋 Ler avisos do Mural', cb: 'bulletin-confirm', backend_cb: 'tavern_bulletin_open' },
+      { id: 'investigate', label: '🔍 "Algum cheira a armadilha?" · Investigação DC 14', cb: 'dice:investigation:14:+1' },
+      { id: 'noble', label: '👑 "Conta-me do selo nobre." · História DC 13', cb: 'dice:history:13:+0' },
+      { id: 'back', label: '↩ "Depois eu leio."', cb: 'close' }
+    ]
   }
 };
 
@@ -162,13 +252,20 @@ var SERVICE_DIALOGUES_TAVERN = {
  * (legacy drill-down) em vez de abrirem PADRAO_ALDRIC encounter.
  * Backend tavern.py:153-165 confirma os cb codes corretos. */
 var TAVERN_CB_TO_DIALOGUE = {
-  'tavern_drinks_open':      'drinks',
-  'tavern_rumor_buy':        'rumor',
-  'tavern_carousing_open':   'carousing',
-  'tavern_pitfight_open':    'pitfight',
-  'tavern_gather_open':      'gossip'
-  // Outros services (mercenaries, adventurers, games, bulletin, bard) ainda
-  // usam fallback vCity.act (sem dialogue PADRAO_ALDRIC ainda). Migração
+  'tavern_drinks_open':         'drinks',
+  'tavern_rumor_buy':           'rumor',
+  'tavern_carousing_open':      'carousing',
+  'tavern_pitfight_open':       'pitfight',
+  'tavern_gather_open':         'gossip',
+  // task #63 (2026-05-20) — migration completa: 5 svc legacy agora PADRAO_ALDRIC.
+  // Cada dialogue tem narrativa imersiva + skill check choices (dice:*) +
+  // mecânicas D&D 5e canonical (PHB/XGtE refs nos comments).
+  'tavern_bard_open':           'bard',
+  'tavern_mercenaries_open':    'mercenaries',
+  'tavern_adventurers_open':    'adventurers',
+  'tavern_games_open':          'games',
+  'tavern_bulletin_open':       'bulletin'
+  // Migração
   // incremental — adicionar entry aqui + dialogue em SERVICE_DIALOGUES_TAVERN.
 };
 
