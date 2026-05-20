@@ -40039,6 +40039,29 @@ function closeCityPopup(silent){
   var popup = document.getElementById('city-subscreen-popup');
   if (popup) popup.classList.remove('active');
   _popupStack = [];
+  // task #56 (2026-05-20) — CRITICAL FIX: user reportou Voltar da Taverna
+  // trava tela em branco. Root cause: encounter-overlay (z=9500) ou
+  // choice-overlay (z=9700) ficavam ATIVOS sobre city popup quando user
+  // clicava Voltar sem fechar dialogue primeiro. Fix: dismissar TODOS os
+  // overlays acima quando city popup fecha.
+  try {
+    if (typeof vEncounter !== 'undefined') {
+      if (typeof vEncounter.closeChoices === 'function') vEncounter.closeChoices();
+      if (typeof vEncounter.close === 'function') vEncounter.close();
+    }
+    var encOverlay = document.getElementById('encounter-overlay');
+    if (encOverlay) {
+      encOverlay.classList.remove('active');
+      encOverlay.style.display = 'none';
+    }
+    var choOverlay = document.getElementById('enc-choices-overlay');
+    if (choOverlay) {
+      choOverlay.classList.remove('active');
+      choOverlay.classList.remove('open');
+      choOverlay.classList.remove('opening');
+    }
+    window._encounterActive = false;
+  } catch(_e) { /* non-fatal */ }
   // USER REQUEST 2026-05-04: restaurar track salvo se Hall mudou pra character_creation
   try {
     if (window._hallPrevAudioTrack && typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play){
