@@ -146,8 +146,26 @@ var SERVICE_DIALOGUES_TAVERN = {
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Aqueles? <i>(volta-se pra você, baixo)</i> Vem aqui três vezes por semana. Dizem que são mercadores de tecidos, mas paga em moedas de prata pura — e mercador raramente carrega prata pura. <i>(estala os dedos)</i> Aqui se aprende rápido que nem tudo é o que parece.' }
     ],
     choices: [
-      { id: 'ask',  label: '🔍 "O que você sabe sobre eles?"', cb: 'gather_info' },
+      // task #70 review (2026-05-20): gather_info era dead-end (no backend
+      // handler). Agora chain pra gossip_deep (sub-dialogue PADRAO_ALDRIC
+      // com Investigação check + lore real). Aproveita o universal fallback.
+      { id: 'gossip_deep',  label: '🔍 "O que você sabe sobre eles?"' },
       { id: 'leave','label': '↩ "Deixa pra lá."', cb: 'close' }
+    ]
+  },
+
+  /* task #70 review: gossip_deep — sub-dialogue chain do gossip.
+     Implementa "investigar" com Investigação DC 13 (PHB p.178). */
+  gossip_deep: {
+    npc: GROM_DIALOGUE.npc,
+    script: [
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Discrição, antes. <i>(limpa caneca devagar, voz baixa)</i> Eles têm sotaque de Vale-do-Norte mas usam moeda de Eldoria pré-Cisma. <i>(estala dedos)</i> Velho demais pra ser troca normal. E nunca pediram comida — só vinho e mesa no canto.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Se quer mais que isso, vai precisar olhar com cuidado próprio. <i>(devolve caneca à prateleira)</i> Não me envolvo no que não me cabe.' }
+    ],
+    choices: [
+      { id: 'investigate', label: '🔎 "Vou olhar de perto." · Investigação DC 13', cb: 'dice:investigation:13:+1' },
+      { id: 'persuade',    label: '💬 "Me conta mais — fica entre nós." · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
+      { id: 'leave',       label: '↩ "Outra hora, Grom."', cb: 'close' }
     ]
   },
 
