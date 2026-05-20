@@ -62,9 +62,15 @@
  *     }
  *   }
  *
- * Persiste APENAS em memória (sessão atual). NÃO usa localStorage (game state
- * é server-side; este é state efêmero de UI). Reset ao fechar tab/refresh.
- * Para persistir entre sessões: chamar API de backend (ainda não implementado).
+ * Persistência (atualizada 2026-05-20 — sessão #16, task #80):
+ * - Hidrata `_NPC_MEMORY` de localStorage no boot (char-namespaced).
+ * - Persiste a cada mutação relevante (`_npcRemember`, `_npcUnlockDialogue`,
+ *   `_npcMarkVisit`, `_npcRecordInteraction`) com debounce 200ms.
+ * - Chave: `valdoria_npc_memory_<charId>` (window._charId || 'default').
+ * - LGPD: state de UI/dedup (não é game state). Permitido por CLAUDE.md
+ *   regra Server-Only State (preferências de UI exceção).
+ * - Backend authoritative (quando existir): vai sobrepor localStorage no
+ *   próximo hydrate via `applyServerNpcMemory(snap)`.
  *
  * ============================================================================ */
 
@@ -349,9 +355,133 @@
     return false;
   };
 
+  // === LocalStorage Persistence (2026-05-20, task #80) ======================
+  // Hidrata _NPC_MEMORY no boot + persiste após cada mutação (debounce 200ms).
+  // Char-namespaced — cada personagem mantém memória independente.
+  //
+  // RATIONALE (user 2026-05-20): "identifique todo diálogo que precisa ser
+  // único, não repetir, e garanta que não apareçam mais nenhuma vez". Sem
+  // persistência, NPC unique tinha intro repetido em todo refresh — bug.
+  //
+  // LGPD: state efêmero de UI/dedup (não é game state). Permitido por CLAUDE.md
+  // Server-Only State (exceção para preferências de UI).
+  //
+  // INVARIANTS:
+  //   - charId pode mudar (switch char) → _NPC_MEMORY rehidrata de outro key
+  //   - localStorage indisponível (private mode) → fallback in-memory silencioso
+  //   - Cap em JSON.stringify size (50KB) → não persiste se exceder
+
+  const LS_PREFIX = 'valdoria_npc_memory_';
+  const LS_MAX_SIZE = 50 * 1024;  // 50KB cap
+  let _persistTimer = null;
+  let _lastHydratedChar = null;
+
+  function _lsKey(){
+    const charId = (window._charId || 'default') + '';
+    return LS_PREFIX + charId;
+  }
+
+  function _hydrateFromLocalStorage(){
+    try {
+      const charId = (window._charId || 'default') + '';
+      if (_lastHydratedChar === charId) return;  // already loaded
+      const raw = localStorage.getItem(_lsKey());
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          // Merge: localStorage authoritative ONLY for previously persisted
+          // NPCs. Em-memory data atual (boot) é mantida se não tem persistência.
+          for (const k in data) {
+            if (Object.prototype.hasOwnProperty.call(data, k)) {
+              window._NPC_MEMORY[k] = data[k];
+            }
+          }
+          if (typeof window._logCity === 'function') {
+            window._logCity('[NPC-LIVING] hydrated ' + Object.keys(data).length
+                            + ' NPCs from localStorage (char=' + charId + ')');
+          }
+        }
+      }
+      _lastHydratedChar = charId;
+    } catch (e) {
+      // localStorage bloqueado ou JSON malformado — fallback silencioso
+      try { console.warn('[NPC-LIVING] hydrate failed:', e); } catch(_){}
+    }
+  }
+
+  function _persistToLocalStorage(){
+    try {
+      const json = JSON.stringify(window._NPC_MEMORY || {});
+      if (json.length > LS_MAX_SIZE) {
+        try { console.warn('[NPC-LIVING] memory exceeds 50KB cap, skipping persist'); } catch(_){}
+        return;
+      }
+      localStorage.setItem(_lsKey(), json);
+    } catch (e) {
+      try { console.warn('[NPC-LIVING] persist failed:', e); } catch(_){}
+    }
+  }
+
+  function _schedulePersist(){
+    if (_persistTimer) return;
+    _persistTimer = setTimeout(function(){
+      _persistTimer = null;
+      _persistToLocalStorage();
+    }, 200);
+  }
+
+  // Re-hidrata se charId mudar (switch char no mesmo session)
+  window._npcReloadMemory = function(){
+    _lastHydratedChar = null;  // force re-hydrate
+    window._NPC_MEMORY = {};   // clear current
+    _hydrateFromLocalStorage();
+  };
+
+  // Wrappers que disparam persist após mutação. Preservam a API original.
+  const _origRemember = window._npcRemember;
+  window._npcRemember = function(npcId, key, value){
+    _origRemember(npcId, key, value);
+    _schedulePersist();
+  };
+
+  const _origUnlockDialogue = window._npcUnlockDialogue;
+  window._npcUnlockDialogue = function(npcId, dialogueId){
+    const result = _origUnlockDialogue(npcId, dialogueId);
+    if (result) _schedulePersist();  // só persiste se foi novo unlock
+    return result;
+  };
+
+  const _origMarkVisit = window._npcMarkVisit;
+  window._npcMarkVisit = function(npcId, topic){
+    _origMarkVisit(npcId, topic);
+    _schedulePersist();
+  };
+
+  const _origRecordInteraction = window._npcRecordInteraction;
+  window._npcRecordInteraction = function(npcId, choiceLabel){
+    _origRecordInteraction(npcId, choiceLabel);
+    _schedulePersist();
+  };
+
+  // Hydrate na boot (e a cada hub navigate via setTimeout, caso _charId chegue depois)
+  _hydrateFromLocalStorage();
+  setTimeout(_hydrateFromLocalStorage, 100);   // após URL params parse
+  setTimeout(_hydrateFromLocalStorage, 1000);  // safety net p/ slow boot
+
+  // Persist on beforeunload (failsafe — debounce pode estar pendente)
+  try {
+    window.addEventListener('beforeunload', function(){
+      if (_persistTimer) {
+        clearTimeout(_persistTimer);
+        _persistTimer = null;
+      }
+      _persistToLocalStorage();
+    });
+  } catch(e){}
+
   // === Bootstrap log ========================================================
   if (typeof window._logCity === 'function') {
-    window._logCity('[NPC-LIVING] npc-living-system.js loaded — API ready');
+    window._logCity('[NPC-LIVING] npc-living-system.js loaded — API ready (with localStorage persistence)');
   }
 
 })();

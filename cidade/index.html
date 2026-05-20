@@ -10172,7 +10172,9 @@ function _doRestoreChar(charId, charName){
 //   - Steps: cada step define {selector, title, description, position}
 // ============================================================================
 
-var TUTORIAL_STORAGE_KEY = 'valdoria_first_city_tutorial_seen';
+// task #80 (2026-05-20): char-namespaced para que cada personagem novo
+// veja o tutorial uma vez. Antes era global — alt char não via tutorial.
+var TUTORIAL_STORAGE_KEY = 'valdoria_first_city_tutorial_seen_' + (window._charId || 'default');
 var TUTORIAL_STEPS = [
   {
     selector: null,  // welcome screen (no spotlight)
@@ -17693,10 +17695,45 @@ window._npcGreetingsHeard = window._npcGreetingsHeard || {};
 window._marketWalkHeard   = window._marketWalkHeard   || {};
 window._marketChatHeard   = window._marketChatHeard   || {};
 
+// PERSISTENCE (task #80, 2026-05-20): hidrata + persist debounced 200ms.
+// Char-namespaced. Cada NPC talk option só aparece uma vez por personagem.
+// User pedido literal (2026-05-20): "identifique todo diálogo que precisa ser
+// único, não repetir, e garanta que não apareçam mais nenhuma vez".
+(function _hydrateNpcDialoguesUsed(){
+  try {
+    var key = 'valdoria_npc_talkopts_used_' + (window._charId || 'default');
+    var raw = localStorage.getItem(key);
+    if (raw) {
+      var data = JSON.parse(raw);
+      if (data && typeof data === 'object') {
+        for (var k in data){
+          if (Object.prototype.hasOwnProperty.call(data, k) && Array.isArray(data[k])) {
+            window._npcDialoguesUsed[k] = data[k];
+          }
+        }
+      }
+    }
+  } catch(_){ /* localStorage indisponível */ }
+})();
+var _persistTalkoptsTimer = null;
+window._persistNpcTalkoptsUsed = function(){
+  if (_persistTalkoptsTimer) return;
+  _persistTalkoptsTimer = setTimeout(function(){
+    _persistTalkoptsTimer = null;
+    try {
+      var key = 'valdoria_npc_talkopts_used_' + (window._charId || 'default');
+      localStorage.setItem(key, JSON.stringify(window._npcDialoguesUsed));
+    } catch(_){}
+  }, 200);
+};
+
 function _npcMarkUsed(npcId, optId){
   if (!window._npcDialoguesUsed[npcId]) window._npcDialoguesUsed[npcId] = [];
   if (window._npcDialoguesUsed[npcId].indexOf(optId) === -1) {
     window._npcDialoguesUsed[npcId].push(optId);
+    if (typeof window._persistNpcTalkoptsUsed === 'function') {
+      window._persistNpcTalkoptsUsed();
+    }
   }
 }
 
@@ -17926,8 +17963,13 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
         msgExtra = '<br><br>' + rewardLines.join('<br>');
       }
       // Marca finalizado (canonical: town_unique_<id>_finished flag)
+      // task #80 (2026-05-20): persiste em localStorage char-namespaced
+      // pra NUNCA repetir intro/finish em refresh/relog.
       if (npc._canonKey){
         window._uniqueNpcsFinished[npc._canonKey] = true;
+        if (typeof window._persistUniqueFinished === 'function') {
+          window._persistUniqueFinished();
+        }
       }
       refreshHud();
     }
@@ -29017,7 +29059,36 @@ function _squareShowListPopup(opts){
 // 'finished' por jogador) + REGULAR_NPCS (~50) + SQUARE_NPCS legacy (4 hardcoded).
 // Daily seed determinístico — ven o mesmo pool no mesmo dia.
 // MAPA_IA: grep "_adaptCanonicalRegularNpc" / "_adaptCanonicalUniqueNpc"
+//
+// PERSISTENCE (task #80, 2026-05-20):
+//   - _uniqueNpcsFinished hidrata de localStorage no boot (char-namespaced)
+//   - Sempre que set, persiste via _persistUniqueFinished()
+//   - User reportou (2026-05-20): "identifique todo diálogo que precisa ser
+//     único, não repetir, e garanta que não apareçam mais nenhuma vez".
+//     Sem persistência, UNIQUE NPCs eram resetados em todo refresh — bug.
 window._uniqueNpcsFinished = window._uniqueNpcsFinished || {};
+(function _hydrateUniqueNpcsFinished(){
+  try {
+    var key = 'valdoria_unique_npcs_finished_' + (window._charId || 'default');
+    var raw = localStorage.getItem(key);
+    if (raw) {
+      var data = JSON.parse(raw);
+      if (data && typeof data === 'object') {
+        for (var k in data){
+          if (Object.prototype.hasOwnProperty.call(data, k) && data[k] === true) {
+            window._uniqueNpcsFinished[k] = true;
+          }
+        }
+      }
+    }
+  } catch(_){ /* localStorage indisponível */ }
+})();
+window._persistUniqueFinished = function(){
+  try {
+    var key = 'valdoria_unique_npcs_finished_' + (window._charId || 'default');
+    localStorage.setItem(key, JSON.stringify(window._uniqueNpcsFinished));
+  } catch(_){}
+};
 
 // Adapta REGULAR_NPC canonical pra formato simulator (talkOptions[]).
 // Resposta vem de CANON_INTERACTION_RESULTS[npc_key][interaction_id] (lista de variantes).
@@ -44398,7 +44469,9 @@ function _travelToBiome(mapIdOrBiome, displayName){
 // User: "garanta que não se repitam mesmo se o jogador fizer a viagem
 // para o mesmo destino 10 vezes seguidas em um mesmo dia real".
 // Tracking via localStorage com TTL 24h (reset diário automático).
-var JOURNEY_USAGE_KEY = 'valdoria_journey_used_v1';
+// task #80 (2026-05-20): char-namespaced — cada PJ tem própria deduplicação de
+// viagem (alt char começa sem hazards consumidos). Antes era global.
+var JOURNEY_USAGE_KEY = 'valdoria_journey_used_v1_' + (window._charId || 'default');
 function _getJourneyUsage() {
   try {
     var raw = localStorage.getItem(JOURNEY_USAGE_KEY);
