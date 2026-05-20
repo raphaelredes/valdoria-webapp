@@ -98,12 +98,22 @@
 
   /* task #69: helpers pra mudar entre <dialog> API e classList (backward compat).
      showOverlay/closeOverlay usam .showModal()/.close() nativos quando dialog,
-     fallback pra classList.add('active')/.remove('active') pra elementos antigos. */
+     fallback pra classList.add('active')/.remove('active') pra elementos antigos.
+     IMPORTANTE — REGRESSION GUARD (revisão task #69):
+     cidade/index.html line ~49748 injeta inline <style id="encounter-style"> com
+     `#encounter-overlay { display:flex }` HARDCODED, SEM [open]/.active selector.
+     Esse inline CSS é parseado DEPOIS do shared encounter-popup.css → mesma
+     specificity, cascade ordering vence → legacy CSS ganha. Sem força bruta
+     via inline style.display='none', o dialog ficaria visível mesmo após close()
+     (sem [open], legacy CSS ainda diz display:flex). _closeOverlay agora SEMPRE
+     força display:none via inline style (specificity inline > qualquer CSS). */
   function _showOverlay(ov) {
     if (!ov) return;
+    // Clear inline 'none' from previous close (deixa CSS [open] rule kick in)
+    ov.style.display = '';
     if (ov.tagName.toLowerCase() === 'dialog' && typeof ov.showModal === 'function') {
       try { if (!ov.open) ov.showModal(); }
-      catch(e) { ov.classList.add('active'); } // fallback se showModal falhar
+      catch(e) { ov.classList.add('active'); ov.style.display = 'flex'; } // fallback
     } else {
       ov.classList.add('active');
     }
@@ -114,8 +124,9 @@
       try { if (ov.open) ov.close(); } catch(e){}
     }
     ov.classList.remove('active'); // sempre remove .active pra compat
-    // Also force hide for any edge cases
-    ov.style.display = '';
+    // FORCE hide via inline style — overrides legacy inline CSS hardcoded display:flex
+    // (cidade/index.html line ~49748 injects `#encounter-overlay { display:flex }`)
+    ov.style.display = 'none';
   }
   function _isOverlayOpen(ov) {
     if (!ov) return false;
