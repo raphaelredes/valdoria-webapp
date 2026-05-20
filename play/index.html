@@ -15,11 +15,10 @@
      logica de /play/ pra redirect instantaneo sem 700ms delay. Telegram
      users com initData passam normalmente (check 1). -->
 <script src="/shared/auth-gate.js"></script>
-<!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
-<script src="/bundle-version.js"></script>
-<!-- Version Check (task #31, 2026-05-20): auto-detect new deploys + force reload.
-     LGPD-compliant: localStorage só pra timestamps técnicos, sem PII. -->
-<script src="/shared/version-check.js"></script>
+<!-- Tiered Cache + Version Check (task #31, 2026-05-20): cache-bust em ambos
+     scripts pra browser sempre fetch fresh (evita stale max-age=14400). -->
+<script>document.write('<script src="/bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="/shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
 <script>
 // Carrega CSS canonical + scripts (loading-title.js para TOQUE PARA INICIAR,
 // loading-template.js para magic-circle overlay durante auth+state)

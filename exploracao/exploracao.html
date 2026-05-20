@@ -815,12 +815,12 @@
 </script>
 
 <!-- Tiered Cache (SUPREME RULE #0): bundle hash estável até qualquer Bucket B mudar.
-     Fallback Date.now() mantém compat caso bundle-version.js falhe a carregar. -->
-<script src="../bundle-version.js"></script>
-<!-- Version Check (2026-05-20, task #31): polling automático que detecta novos
-     deploys e força reload. Resolve cache agressivo do Telegram WebApp.
-     LGPD-compliant — só usa localStorage para timestamps técnicos, sem PII. -->
-<script src="../shared/version-check.js"></script>
+     2026-05-20 task #31: cache-bust em bundle-version.js + version-check.js pra
+     evitar browser cache stale (max-age=14400 default CF Pages). -->
+<script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+<!-- Version Check (2026-05-20, task #31): auto-detect deploys + force reload.
+     LGPD-compliant — só localStorage técnico, sem PII. -->
+<script>document.write('<script src="../shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
 
 <script>
 (function() {
