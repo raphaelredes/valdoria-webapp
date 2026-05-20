@@ -8,6 +8,11 @@
  * ============================================================================ */
 'use strict';
 
+/* task #75 (2026-05-20): IIFE wrap pra prevenir colisões de globais entre
+   renderers (regra estabelecida após bug Garrick/Vorhan task #70). Apenas
+   renderWorkshopHub é exposto via window no final. */
+(function() {
+
 if (!window._SVC_CONFIG_WORKSHOP) {
   window._SVC_CONFIG_WORKSHOP = {
     faction: 'workshop',
@@ -214,3 +219,8 @@ function renderWorkshopHub(container, data) {
   root.appendChild(body);
   container.appendChild(root);
 }
+
+/* task #75: expose public API. Privadas: GARRICK_DIALOGUE, _wksEl. */
+window.renderWorkshopHub = renderWorkshopHub;
+
+})(); /* end IIFE task #75 */

@@ -8,6 +8,11 @@
  * ============================================================================ */
 'use strict';
 
+/* task #75 (2026-05-20): IIFE wrap pra prevenir colisões de globais entre
+   renderers (regra estabelecida após bug Garrick/Vorhan task #70). Apenas
+   renderRuneScribe é exposto via window no final. */
+(function() {
+
 if (!window._SVC_CONFIG_RUNES) {
   window._SVC_CONFIG_RUNES = {
     faction: 'runes',
@@ -223,3 +228,8 @@ function renderRuneScribe(container, data) {
   root.appendChild(body);
   container.appendChild(root);
 }
+
+/* task #75: expose public API. Privadas: THESSIL_DIALOGUE, _rnsEl. */
+window.renderRuneScribe = renderRuneScribe;
+
+})(); /* end IIFE task #75 */

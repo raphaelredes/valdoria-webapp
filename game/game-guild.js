@@ -10,6 +10,11 @@
  */
 'use strict';
 
+/* task #75 (2026-05-20): IIFE wrap pra prevenir colisões de globais entre
+   renderers (regra estabelecida após bug Garrick/Vorhan task #70). Apenas
+   render* functions expostas via window no final. */
+(function() {
+
 function _gldEl(tag, cls, text) {
   var el = document.createElement(tag);
   if (cls) el.className = cls;
@@ -535,3 +540,11 @@ function renderGuildHireSuccess(container, data) {
   root.appendChild(content);
   container.appendChild(root);
 }
+
+/* task #75: expose public API. Privadas: TAVIRA_DIALOGUE, _gldEl, _gldSpeech, _gldClassSlug. */
+window.renderGuildHub = renderGuildHub;
+window.renderGuildAdventurer = renderGuildAdventurer;
+window.renderGuildHireConfirm = renderGuildHireConfirm;
+window.renderGuildHireSuccess = renderGuildHireSuccess;
+
+})(); /* end IIFE task #75 */

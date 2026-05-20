@@ -11,6 +11,11 @@
    Safe DOM: todos os elementos construidos via createElement/textContent.
    ═══════════════════════════════════════════════════════════════ */
 
+/* task #75 (2026-05-20): IIFE wrap pra prevenir colis\u00F5es de globais entre
+   renderers (regra estabelecida ap\u00F3s bug Garrick/Vorhan task #70). Apenas
+   renderArenaScreen \u00E9 exposto via window no final. */
+(function() {
+
 var _ARENA_MEDALS = {1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49'};
 
 /* === PADRAO_TAVERNA canonical (task #34, 2026-05-20) === */
@@ -772,3 +777,11 @@ function _makeChoiceCard(icon, title, subtitle, cb, extraCls) {
     });
     return card;
 }
+
+/* task #75: expose public API. Privadas: VORHAN_DIALOGUE, _ARENA_MEDALS,
+   _coinEl, _arenaBackdrop, _renderArenaMain, _renderArenaHpWarning,
+   _renderArenaResult, _renderArenaLeaderboard, _div, _dividerEl,
+   _statBadgeEl, _cStat, _makeBtn, _makeChoiceCard. */
+window.renderArenaScreen = renderArenaScreen;
+
+})(); /* end IIFE task #75 */

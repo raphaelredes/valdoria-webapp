@@ -13,6 +13,11 @@
  * ============================================================================ */
 'use strict';
 
+/* task #75 (2026-05-20): IIFE wrap pra prevenir colisões de globais entre
+   renderers (regra estabelecida após bug Garrick/Vorhan task #70). Apenas
+   renderInnHub é exposto via window. */
+(function() {
+
 if (!window._SVC_CONFIG_INN) {
   window._SVC_CONFIG_INN = {
     faction: 'inn',
@@ -275,3 +280,5 @@ function renderInnHub(container, data) {
 }
 
 window.renderInnHub = renderInnHub;
+
+})(); /* end IIFE task #75 */
