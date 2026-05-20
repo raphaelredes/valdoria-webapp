@@ -13,6 +13,43 @@
 
 var _ARENA_MEDALS = {1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49'};
 
+/* === PADRAO_TAVERNA canonical (task #34, 2026-05-20) === */
+if (!window._SVC_CONFIG_ARENA) {
+  window._SVC_CONFIG_ARENA = {
+    faction: 'arena',
+    factionLabel: 'Arena de Eldoria',
+    reactions: {
+      very_negative: 'Vorhan cospe no ch\u00E3o. <i>(volta-se para a multid\u00E3o)</i> "Pr\u00F3ximo!"',
+      negative: 'Vorhan aperta os olhos, descrente. <i>(co\u00E7a a cicatriz no queixo)</i> "Trouxa."',
+      neutral: 'Vorhan anota o resultado no escudo de couro. <i>(n\u00E3o te olha)</i> "Hmm."',
+      positive: 'Vorhan assente, satisfeito. <i>(bate o punho sobre o peito)</i> "Lutaste bem. A multid\u00E3o lembrar\u00E1."',
+      very_positive: 'Vorhan estende a m\u00E3o calejada. <i>(rara mostra de respeito)</i> "Honraste o coliseu. A Arena reconhece os bravos."'
+    },
+    confirmMsgs: {
+      narration: 'Vorhan marca o resultado na tabela de combate. <i>(tom de bronze ressoa pelos corredores)</i>',
+      generic: '"Registrado. Pr\u00F3ximo combate em breve."'
+    }
+  };
+}
+
+var GARRICK_DIALOGUE = {
+  npc: {
+    name: 'Mestre Vorhan',
+    desc: 'Mestre de Armas \u00B7 vinte anos no coliseu',
+    portrait: '../shared/img/npcs/mestre-vorhan.png'
+  },
+  script: [
+    { type: 'narration', text: 'Vorhan \u00E9 colossal \u2014 dois metros, cicatrizes desenhando mapas em seu rosto, armadura de couro batido suja do sangue de mil combates. Atr\u00E1s dele, o coliseu zumbe com a multid\u00E3o. Ele te mede com o olhar de quem j\u00E1 viu mil aventureiros prometer e n\u00E3o cumprir.' },
+    { type: 'speech', speaker: 'Mestre Vorhan', text: 'Vens lutar ou tagarelar? <i>(cruza os bra\u00E7os calejados)</i> A Arena n\u00E3o tolera covardes. Ganha duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perde mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
+  ],
+  choices: [
+    { id: 'fight',   label: '\u2694 "Vim lutar."', cb: 'arena_fight' },
+    { id: 'rules',   label: '\uD83D\uDCDC "Explica as regras."', cb: 'arena_rules' },
+    { id: 'rank',    label: '\uD83C\uDFC6 "Mostra o ranking."', cb: 'arena_leaderboard' },
+    { id: 'leave',   label: '\u21A9 "Outra hora, Mestre."', cb: 'close' }
+  ]
+};
+
 /**
  * Renders the Arena screen inside a popup body element.
  * @param {HTMLElement} el - Container element (popup body)
@@ -61,6 +98,88 @@ function _renderArenaMain(el, d) {
     var reward = d.reward || {};
 
     var frag = document.createDocumentFragment();
+
+    /* === PADRAO_TAVERNA canonical: Hero CENARIO + NPC row + Rep bar (task #34) === */
+    var hero = _div('cenario');
+    var bg = document.createElement('img');
+    bg.className = 'cenario-bg';
+    bg.src = '../shared/img/arena/arena-banner.png';
+    bg.loading = 'lazy';
+    bg.onerror = function(){ this.style.display = 'none'; };
+    hero.appendChild(bg);
+    hero.appendChild(_div('candle-glow l'));
+    hero.appendChild(_div('candle-glow r'));
+    var crest = document.createElement('img');
+    crest.className = 'cenario-brasao';
+    crest.src = '../shared/img/arena/arena-crest.png';
+    crest.alt = 'Brasão da Arena';
+    crest.loading = 'lazy';
+    crest.onerror = function(){ this.style.display = 'none'; };
+    hero.appendChild(crest);
+    var heroTitulo = _div('cenario-titulo');
+    var heroName = _div('name');
+    heroName.textContent = 'Arena de Eldoria';
+    heroTitulo.appendChild(heroName);
+    var heroSub = _div('sub');
+    heroSub.textContent = 'Coliseu Real · Tier ' + ((tier.name || 'Ferro').toUpperCase());
+    heroTitulo.appendChild(heroSub);
+    hero.appendChild(heroTitulo);
+    frag.appendChild(hero);
+
+    /* NPC row: Vorhan */
+    var npcRow = _div('row-npc');
+    var portraitWrap = _div('npc-portrait');
+    var npcImg = document.createElement('img');
+    npcImg.src = '../shared/img/npcs/mestre-vorhan.png';
+    npcImg.alt = 'Mestre Vorhan';
+    npcImg.loading = 'lazy';
+    npcImg.onerror = function(){ this.style.display = 'none'; };
+    portraitWrap.appendChild(npcImg);
+    npcRow.appendChild(portraitWrap);
+    var npcInfo = _div('npc-info');
+    var npcName = _div('name');
+    npcName.textContent = 'Mestre Vorhan';
+    npcInfo.appendChild(npcName);
+    var npcQuote = _div('quote');
+    npcQuote.textContent = '"Vens lutar ou tagarelar?"';
+    npcInfo.appendChild(npcQuote);
+    npcRow.appendChild(npcInfo);
+    var chev = _div('npc-chev');
+    chev.textContent = '›';
+    npcRow.appendChild(chev);
+    npcRow.addEventListener('click', function(){
+        if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+            window._SVC_CONFIG = window._SVC_CONFIG_ARENA;
+            window.vEncounter.render(GARRICK_DIALOGUE);
+        }
+    });
+    frag.appendChild(npcRow);
+
+    /* Rep bar */
+    var renown = 0;
+    if (d.renown && typeof d.renown.arena === 'number') renown = d.renown.arena;
+    else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.arena === 'number') renown = window._PLAYER_RENOWN.arena;
+    var tierLbl = 'NEUTRO';
+    if (renown >= 25) tierLbl = 'AMIGÁVEL';
+    else if (renown >= 10) tierLbl = 'CORDIAL';
+    else if (renown < 0 && renown >= -10) tierLbl = 'FRIO';
+    else if (renown < -10) tierLbl = 'HOSTIL';
+    var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+    var repBar = _div('rep-bar');
+    var repLbl = document.createElement('span');
+    repLbl.className = 'label';
+    repLbl.textContent = 'Reputação';
+    repBar.appendChild(repLbl);
+    var repTrack = _div('bar');
+    var repFill = _div('fill');
+    repFill.style.width = pct + '%';
+    repTrack.appendChild(repFill);
+    repBar.appendChild(repTrack);
+    var repVal = document.createElement('span');
+    repVal.className = 'value';
+    repVal.textContent = tierLbl + ' · ' + renown;
+    repBar.appendChild(repVal);
+    frag.appendChild(repBar);
 
     /* Coliseum backdrop with torches + crowd silhouette */
     frag.appendChild(_arenaBackdrop());

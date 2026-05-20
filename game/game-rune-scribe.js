@@ -1,105 +1,214 @@
-/* game-rune-scribe.js — Rune Scribe popup renderer */
-/* Uses vCity.* shared components */
+/* ============================================================================
+ * game-rune-scribe.js — Escriba Rúnico (PADRAO_TAVERNA canonical)
+ * ============================================================================
+ *
+ * Task #36 sessão #14 (2026-05-20) — REFATORADO p/ PADRAO_TAVERNA canonical.
+ * NPC: Mestre Thessil (Escriba Rúnico).
+ * Source: simuladores/escriba-runico-final.html
+ * ============================================================================ */
 'use strict';
+
+if (!window._SVC_CONFIG_RUNES) {
+  window._SVC_CONFIG_RUNES = {
+    faction: 'runes',
+    factionLabel: 'Câmara do Escriba',
+    reactions: {
+      very_negative: 'Thessil fecha o livro de glifos com um clack ressonante. <i>(volta-se para a parede de runas)</i> "Não."',
+      negative: 'Thessil suspira, decepcionado. <i>(continua escrevendo)</i> "Cada palavra tem peso. As tuas perderam o seu."',
+      neutral: 'Thessil acena com leveza. <i>(volta ao manuscrito)</i> "Sigamos."',
+      positive: 'Thessil sorri discretamente. <i>(traça um pequeno glifo no ar)</i> "Há sabedoria em ti que poucos cultivam."',
+      very_positive: 'Thessil curva-se levemente. <i>(rara cortesia entre arcanistas)</i> "És dos poucos que entendem o peso de cada runa. A Câmara honra teu nome."'
+    },
+    confirmMsgs: {
+      narration: 'Thessil traça o glifo no pergaminho com pena de corvo. <i>(murmura uma sílaba em língua antiga)</i>',
+      generic: '"Selado em runa." <i>(toca a runa com a ponta do indicador)</i>'
+    }
+  };
+}
+
+var THESSIL_DIALOGUE = {
+  npc: {
+    name: 'Mestre Thessil',
+    desc: 'Escriba Rúnico · trinta e dois anos decifrando glifos antigos',
+    portrait: '../shared/img/npcs/mestre-thessil.png'
+  },
+  script: [
+    { type: 'narration', text: 'A câmara de Thessil é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Thessil ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
+    { type: 'speech', speaker: 'Mestre Thessil', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trazes fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. O que precisas?' }
+  ],
+  choices: [
+    { id: 'craft',   label: '🔮 "Quero forjar runas."', cb: 'rune_craft' },
+    { id: 'inspect', label: '📜 "Examina este pergaminho."', cb: 'rune_inspect' },
+    { id: 'learn',   label: '✨ "Ensina-me um glifo."', cb: 'rune_learn' },
+    { id: 'leave',   label: '↩ "Volto outra hora, Mestre."', cb: 'close' }
+  ]
+};
+
+function _rnsEl(tag, cls, text) {
+  var el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (text != null) el.textContent = text;
+  return el;
+}
 
 function renderRuneScribe(container, data) {
   if (!container || !data) return;
-  console.warn('[CITY-RUNE] renderRuneScribe type=' + data.type);
+  console.warn('[CITY-RUNE] renderRuneScribe (PADRAO_TAVERNA) type=' + data.type);
   while (container.firstChild) container.removeChild(container.firstChild);
 
-  if (data.type === 'craft_menu') return _renderCraftMenu(container, data);
-}
-
-function _renderCraftMenu(container, data) {
   var root = vCity.el('div', 'rns-hub');
 
-  /* NPC header */
-  var npc = vCity.el('div', 'rns-npc');
-  var npcIcon = vCity.el('div', 'rns-npc-icon');
-  npcIcon.innerHTML = data.npc_emoji || '🔮';
-  npc.appendChild(npcIcon);
-  var npcName = vCity.el('div', 'rns-npc-name');
-  npcName.textContent = data.npc_name || 'Eirik';
-  npc.appendChild(npcName);
-  var npcRole = vCity.el('div', 'rns-npc-role');
-  npcRole.textContent = data.npc_role || 'Escriba Runico';
-  npc.appendChild(npcRole);
-  root.appendChild(npc);
+  /* === 1. Hero CENARIO canonical === */
+  var hero = vCity.el('div', 'cenario');
+  var bg = _rnsEl('img', 'cenario-bg');
+  bg.src = '../shared/img/runas/runas-banner.png';
+  bg.loading = 'lazy';
+  bg.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(bg);
+  hero.appendChild(vCity.el('div', 'candle-glow l'));
+  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  var crest = _rnsEl('img', 'cenario-brasao');
+  crest.src = '../shared/img/runas/runas-crest.png';
+  crest.alt = 'Brasão do Escriba';
+  crest.loading = 'lazy';
+  crest.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(crest);
+  var titulo = vCity.el('div', 'cenario-titulo');
+  titulo.appendChild(_rnsEl('div', 'name', 'Câmara do Escriba'));
+  titulo.appendChild(_rnsEl('div', 'sub', 'Mestre Thessil · Guardião dos Glifos'));
+  hero.appendChild(titulo);
+  root.appendChild(hero);
 
-  /* Recipe info */
-  var recipe = vCity.el('div', 'rns-recipe');
-  recipe.textContent = '📜 Receita: 3 fragmentos do mesmo tier = 1 runa aleatoria';
-  root.appendChild(recipe);
+  /* === 2. Body container === */
+  var body = vCity.el('div', 'rns-body');
+  body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* Tier cards */
-  if (data.tiers && data.tiers.length) {
-    root.appendChild(vCity.sectionLabel('Fragmentos'));
-    for (var i = 0; i < data.tiers.length; i++) {
-      var t = data.tiers[i];
-      var card = vCity.el('div', 'rns-tier-card');
+  /* === 2a. NPC row Thessil === */
+  var npcRow = vCity.el('div', 'row-npc');
+  var portraitWrap = vCity.el('div', 'npc-portrait');
+  var img = _rnsEl('img');
+  img.src = '../shared/img/npcs/mestre-thessil.png';
+  img.alt = 'Mestre Thessil';
+  img.loading = 'lazy';
+  img.onerror = function(){ this.style.display = 'none'; };
+  portraitWrap.appendChild(img);
+  npcRow.appendChild(portraitWrap);
+  var info = vCity.el('div', 'npc-info');
+  info.appendChild(_rnsEl('div', 'name', 'Mestre Thessil'));
+  info.appendChild(_rnsEl('div', 'quote', '"Trazes fragmentos? Três do mesmo tier forjam uma runa."'));
+  npcRow.appendChild(info);
+  npcRow.appendChild(_rnsEl('div', 'npc-chev', '›'));
+  npcRow.addEventListener('click', function(){
+    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+      window._SVC_CONFIG = window._SVC_CONFIG_RUNES;
+      window.vEncounter.render(THESSIL_DIALOGUE);
+    }
+  });
+  body.appendChild(npcRow);
 
-      var hdr = vCity.el('div', 'rns-tier-header');
-      var emoji = vCity.el('span', 'rns-tier-emoji');
-      emoji.innerHTML = t.frag_emoji;
-      hdr.appendChild(emoji);
-      var name = vCity.el('span', 'rns-tier-name');
-      name.textContent = t.frag_name;
-      hdr.appendChild(name);
-      var badge = vCity.el('span', 'rns-tier-badge');
-      badge.textContent = 'Tier ' + t.tier;
-      hdr.appendChild(badge);
-      card.appendChild(hdr);
+  /* === 2b. Rep bar === */
+  var renown = (data.renown && typeof data.renown.runes === 'number') ? data.renown.runes : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.runes) || 0;
+  var tierLbl = 'NEUTRO';
+  if (renown >= 25) tierLbl = 'AMIGÁVEL';
+  else if (renown >= 10) tierLbl = 'CORDIAL';
+  else if (renown < 0 && renown >= -10) tierLbl = 'FRIO';
+  else if (renown < -10) tierLbl = 'HOSTIL';
+  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var repBar = vCity.el('div', 'rep-bar');
+  repBar.appendChild(_rnsEl('span', 'label', 'Reputação'));
+  var track = vCity.el('div', 'bar');
+  var fill = vCity.el('div', 'fill');
+  fill.style.width = pct + '%';
+  track.appendChild(fill);
+  repBar.appendChild(track);
+  repBar.appendChild(_rnsEl('span', 'value', tierLbl + ' · ' + renown));
+  body.appendChild(repBar);
 
-      /* Progress */
-      var progRow = vCity.el('div', 'rns-tier-progress');
-      var progText = vCity.el('span', 'rns-tier-count');
-      progText.textContent = t.count + '/' + t.cost;
-      progRow.appendChild(progText);
-      var progBar = vCity.el('div', 'rns-progress-wrap');
-      var progFill = vCity.el('div', 'rns-progress-fill');
-      progFill.style.width = Math.min(100, Math.floor(t.count / t.cost * 100)) + '%';
-      if (t.can_craft) progFill.classList.add('rns-ready');
-      progBar.appendChild(progFill);
-      progRow.appendChild(progBar);
-      card.appendChild(progRow);
+  /* === 2c. Recipe info === */
+  var recipe = _rnsEl('div', 'rns-recipe', '📜 Receita: 3 fragmentos do mesmo tier = 1 runa aleatória');
+  recipe.style.cssText = 'text-align:center;font-style:italic;font-size:12px;color:#a09484;padding:6px 8px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
+  body.appendChild(recipe);
 
-      /* Craft button */
-      var btn = vCity.el('button', 'rns-craft-btn');
-      btn.setAttribute('data-action', t.cb);
-      if (t.can_craft) {
-        btn.textContent = '✅ Forjar Runa Tier ' + t.tier;
-        btn.classList.add('rns-craft-ready');
-        /* FIX 2026-05-03: bind click listener (data-action sozinho não dispara) */
-        btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
-      } else if (t.locked_level) {
-        btn.textContent = '🔒 Nível ' + t.min_level + ' necessario';
-        btn.disabled = true;
-        btn.classList.add('rns-craft-locked');
-      } else {
-        btn.textContent = '🔒 Faltam ' + Math.max(0, t.cost - t.count) + ' fragmentos';
-        btn.disabled = true;
-        btn.classList.add('rns-craft-locked');
+  if (data.type === 'craft_menu') {
+    /* === 2d. Section: Fragmentos === */
+    var sectionLbl = vCity.el('div', 'pt-section-label');
+    sectionLbl.textContent = '⚜ Fragmentos & Forja ⚜';
+    body.appendChild(sectionLbl);
+
+    /* === 2e. Tier cards === */
+    if (data.tiers && data.tiers.length) {
+      var grid = vCity.el('div', 'services');
+      grid.style.cssText = 'grid-template-columns:1fr;'; // 1 column for tier cards (more info per row)
+      for (var i = 0; i < data.tiers.length; i++) {
+        var t = data.tiers[i];
+        var card = vCity.el('div', 'svc');
+        card.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;padding:10px;';
+
+        var hdr = _rnsEl('div', '');
+        hdr.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        var emoji = _rnsEl('span', '');
+        emoji.innerHTML = t.frag_emoji;
+        emoji.style.cssText = 'font-size:18px;';
+        hdr.appendChild(emoji);
+        var name = _rnsEl('span', 'svc-name', t.frag_name);
+        name.style.flex = '1';
+        hdr.appendChild(name);
+        var badge = _rnsEl('span', 'svc-badge', 'Tier ' + t.tier);
+        hdr.appendChild(badge);
+        card.appendChild(hdr);
+
+        /* Progress bar */
+        var progWrap = _rnsEl('div', '');
+        progWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        var progBar = _rnsEl('div', '');
+        progBar.style.cssText = 'flex:1;height:8px;background:rgba(0,0,0,0.4);border-radius:4px;overflow:hidden;border:1px solid rgba(196,149,58,0.3);';
+        var progFill = _rnsEl('div', '');
+        var fillPct = Math.min(100, Math.floor(t.count / t.cost * 100));
+        progFill.style.cssText = 'height:100%;background:linear-gradient(90deg,#c4953a,#f4d896);width:' + fillPct + '%;transition:width 0.3s;';
+        progBar.appendChild(progFill);
+        progWrap.appendChild(progBar);
+        var progText = _rnsEl('span', '', t.count + '/' + t.cost);
+        progText.style.cssText = 'font-size:11px;color:#a09484;min-width:40px;text-align:right;';
+        progWrap.appendChild(progText);
+        card.appendChild(progWrap);
+
+        /* Craft button */
+        var btn = vCity.el('button', 'v-popup-btn');
+        if (t.can_craft) {
+          btn.textContent = '✅ Forjar Runa Tier ' + t.tier;
+          btn.classList.add('v-popup-btn--primary');
+          btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
+        } else if (t.locked_level) {
+          btn.textContent = '🔒 Nível ' + t.min_level + ' necessário';
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        } else {
+          btn.textContent = '🔒 Faltam ' + Math.max(0, t.cost - t.count) + ' fragmentos';
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        }
+        card.appendChild(btn);
+        grid.appendChild(card);
       }
-      card.appendChild(btn);
+      body.appendChild(grid);
+    }
 
-      root.appendChild(card);
+    /* === 2f. Quick actions === */
+    if (data.actions && data.actions.length) {
+      var qRow = vCity.el('div', 'rns-actions-row');
+      qRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;';
+      for (var a = 0; a < data.actions.length; a++) {
+        var act = data.actions[a];
+        var aBtn = vCity.el('button', 'v-popup-btn');
+        aBtn.style.cssText = 'flex:1;font-size:11px;padding:6px 8px;';
+        aBtn.innerHTML = act.icon + ' ' + act.label;
+        aBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(act.cb));
+        qRow.appendChild(aBtn);
+      }
+      body.appendChild(qRow);
     }
   }
 
-  /* Quick actions */
-  if (data.actions && data.actions.length) {
-    var qRow = vCity.el('div', 'rns-actions-row');
-    for (var a = 0; a < data.actions.length; a++) {
-      var act = data.actions[a];
-      var aBtn = vCity.el('button', 'rns-action-btn');
-      aBtn.setAttribute('data-action', act.cb);
-      aBtn.innerHTML = act.icon + ' ' + act.label;
-      /* FIX 2026-05-03: bind click listener */
-      aBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(act.cb));
-      qRow.appendChild(aBtn);
-    }
-    root.appendChild(qRow);
-  }
-
+  root.appendChild(body);
   container.appendChild(root);
 }

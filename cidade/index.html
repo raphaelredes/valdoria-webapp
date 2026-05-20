@@ -7825,6 +7825,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<script src="/game/game-bank.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/game/game-square.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/game/game-tavern.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/game/game-inn.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/game/game-market-hub.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/game/game-guild.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/game/game-workshop.js?v=' + Date.now() + '"><\/script>');
@@ -40072,15 +40073,18 @@ function _renderCityPopup(key){
     renderTavernHub(bodyEl, _buildTavernMockData(window.CITY_MOCK_PLAYER));
     return;
   }
-  // X-6.5.51BJ (2026-05-15): Estalagem AAA renderer inline (sem JS shared dedicado).
-  // Constrói cenário "lareira + cama dos quartos + lavanda" com lanterna oscilante,
-  // chamas ardentes da lareira, lavender drift. Reutiliza SUBSCREEN_DATA['inn']
-  // pra serviços + INN_NPCS pra Martha. Dialogue Martha continua via
-  // _showSharedNpcDialogue (migração PADRAO_ALDRIC deferred).
-  if (key === 'inn' && typeof _renderInnHubAAA === 'function') {
+  // 2026-05-20 task #37: Estalagem migrada para PADRAO_TAVERNA canonical (game-inn.js).
+  // Prefere renderInnHub (novo, separado), fallback pra _renderInnHubAAA inline (legacy).
+  if (key === 'inn') {
     if (titleEl) titleEl.textContent = 'Estalagem Grifo Dourado';
-    _renderInnHubAAA(bodyEl, _buildInnMockData(window.CITY_MOCK_PLAYER));
-    return;
+    if (typeof renderInnHub === 'function') {
+      renderInnHub(bodyEl, _buildInnMockData(window.CITY_MOCK_PLAYER));
+      return;
+    }
+    if (typeof _renderInnHubAAA === 'function') {
+      _renderInnHubAAA(bodyEl, _buildInnMockData(window.CITY_MOCK_PLAYER));
+      return;
+    }
   }
   if (key === 'market' && typeof renderMarketHub === 'function') {
     if (titleEl) titleEl.textContent = 'Mercado de Eldoria';

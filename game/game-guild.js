@@ -37,97 +37,195 @@ function _gldSpeech(partyCount, partyMax, available, rotationHours) {
   return parts.join('');
 }
 
+/* === PADRAO_TAVERNA canonical SVC config (task #33, 2026-05-20) === */
+if (!window._SVC_CONFIG_GUILD) {
+  window._SVC_CONFIG_GUILD = {
+    faction: 'guild',
+    factionLabel: 'Guilda dos Aventureiros',
+    reactions: {
+      very_negative: 'Tavira cruza os braços, olhar duro. <i>(suspira longo)</i> "A Guilda não tolera comportamento assim. Vai pensar antes de voltar."',
+      negative: 'Tavira balança a cabeça. <i>(volta ao caderno)</i> "Cada um tem seu jeito. Mas a Guilda também."',
+      neutral: 'Tavira anota algo no caderno. <i>(mantém o tom profissional)</i> "Registrado."',
+      positive: 'Tavira ergue uma sobrancelha em aprovação. <i>(sorri de canto)</i> "Esse é o tipo de aventureiro que a Guilda precisa."',
+      very_positive: 'Tavira inclina a cabeça em respeito. <i>(estende a mão)</i> "És dos melhores. A Guilda sempre lembra dos seus."'
+    },
+    confirmMsgs: {
+      narration: 'Tavira anota o registro no livro da Guilda. <i>(passa a pena no tinteiro)</i>',
+      generic: '"Registrado e selado." <i>(fecha o livro)</i> Que tua jornada honre o nome da Guilda.'
+    }
+  };
+}
+
+/* === TAVIRA_DIALOGUE (greeting principal — opens on NPC row click) ====== */
+var TAVIRA_DIALOGUE = {
+  npc: {
+    name: 'Mestra Tavira',
+    desc: 'Guardiã da Guilda · dezoito anos liderando o Salão dos Aventureiros',
+    portrait: '../shared/img/npcs/mestra-tavira.png'
+  },
+  script: [
+    { type: 'narration', text: 'O Salão dos Aventureiros respira lenta. Tochas de óleo pendem das vigas, iluminando o brasão da Guilda — espada cruzada com pena — entalhado no mármore atrás do balcão. Tavira ergue os olhos do registro, reconhece você, sorri de canto.' },
+    { type: 'speech', speaker: 'Mestra Tavira', text: 'Bem-vindo de volta, aventureiro. <i>(fecha o livro com um clique seco)</i> O Salão sempre tem trabalho pra quem busca. Diz o que precisa.' }
+  ],
+  choices: [
+    { id: 'view_quests',  label: '📜 "Quero ver os contratos."', cb: 'guild_quests' },
+    { id: 'recruit',      label: '⚔ "Vim recrutar aventureiros."', cb: 'guild_recruit' },
+    { id: 'rest_party',   label: '🛌 "Como descansa meu grupo?"', cb: 'guild_rest' },
+    { id: 'leave',        label: '↩ "Volto depois, Mestra."', cb: 'close' }
+  ]
+};
+
 function renderGuildHub(container, data) {
   if (!container || !data) return;
-  console.warn('[CITY-GUILD] renderGuildHub party=' + (data.party_count || 0) + '/' + (data.party_max || 3) + ' services=' + (data.services ? data.services.length : 0));
+  console.warn('[CITY-GUILD] renderGuildHub (PADRAO_TAVERNA) party=' + (data.party_count || 0) + '/' + (data.party_max || 3) + ' services=' + (data.services ? data.services.length : 0));
   while (container.firstChild) container.removeChild(container.firstChild);
 
-  var root = _gldEl('div', 'gld-hub gld-hub-v4');
+  var root = _gldEl('div', 'gld-hub');
 
-  /* ===== SCENE: NPC portrait + name ===== */
-  var scene = _gldEl('div', 'gld-scene');
-  scene.appendChild(_gldEl('div', 'gld-scene-banner', '✦ Salão dos Aventureiros ✦'));
-  var npcAv = _gldEl('div', 'gld-npc-avatar');
-  npcAv.textContent = '🧙‍♀️';
-  scene.appendChild(npcAv);
-  scene.appendChild(_gldEl('div', 'gld-npc-name', 'Tavira, a Mestra'));
-  scene.appendChild(_gldEl('div', 'gld-npc-title', 'Guardiã da Guilda'));
-  root.appendChild(scene);
+  /* === 1. Hero CENARIO canonical === */
+  var hero = _gldEl('div', 'cenario');
+  var bg = _gldEl('img', 'cenario-bg');
+  bg.src = '../shared/img/guilda/guilda-banner.png';
+  bg.alt = '';
+  bg.loading = 'lazy';
+  bg.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(bg);
+  hero.appendChild(_gldEl('div', 'candle-glow l'));
+  hero.appendChild(_gldEl('div', 'candle-glow r'));
+  var crest = _gldEl('img', 'cenario-brasao');
+  crest.src = '../shared/img/guilda/guilda-crest.png';
+  crest.alt = 'Brasão da Guilda';
+  crest.loading = 'lazy';
+  crest.onerror = function(){ this.style.display = 'none'; };
+  hero.appendChild(crest);
+  var titulo = _gldEl('div', 'cenario-titulo');
+  titulo.appendChild(_gldEl('div', 'name', 'Guilda dos Aventureiros'));
+  titulo.appendChild(_gldEl('div', 'sub', 'Salão de Mestra Tavira · Coração de Eldoria'));
+  hero.appendChild(titulo);
+  root.appendChild(hero);
 
-  /* ===== DIALOGUE AREA ===== */
-  var dlg = _gldEl('div', 'gld-dlg');
+  /* === 2. Body container === */
+  var body = _gldEl('div', 'gld-body');
+  body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* Speech bubble */
-  var speech = _gldEl('div', 'gld-dlg-speech');
-  var speechText = _gldEl('div', 'gld-dlg-text');
-  var speechContent = _gldSpeech(
-    data.party_count || 0,
-    data.party_max || 3,
-    data.recruit_available || 0,
-    data.rotation_hours || 12
-  );
-  speechText.textContent = speechContent;
-  speech.appendChild(speechText);
-  dlg.appendChild(speech);
+  /* === 2a. NPC row (Tavira main entry) === */
+  var npcRow = _gldEl('div', 'row-npc');
+  var portraitWrap = _gldEl('div', 'npc-portrait');
+  var img = _gldEl('img');
+  img.src = '../shared/img/npcs/mestra-tavira.png';
+  img.alt = 'Mestra Tavira';
+  img.loading = 'lazy';
+  img.onerror = function(){ this.style.display = 'none'; };
+  portraitWrap.appendChild(img);
+  npcRow.appendChild(portraitWrap);
+  var info = _gldEl('div', 'npc-info');
+  info.appendChild(_gldEl('div', 'name', 'Mestra Tavira'));
+  var vagasMsg = '';
+  var vagas = Math.max(0, (data.party_max || 3) - (data.party_count || 0));
+  if (vagas > 0) {
+    vagasMsg = '"Teu grupo ainda tem ' + vagas + ' vaga' + (vagas !== 1 ? 's' : '') + '."';
+  } else {
+    vagasMsg = '"Teu grupo está completo — ' + (data.party_count || 0) + ' de ' + (data.party_max || 3) + '."';
+  }
+  info.appendChild(_gldEl('div', 'quote', vagasMsg));
+  npcRow.appendChild(info);
+  npcRow.appendChild(_gldEl('div', 'npc-chev', '›'));
+  npcRow.addEventListener('click', function(){
+    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+      window._SVC_CONFIG = window._SVC_CONFIG_GUILD;
+      window.vEncounter.render(TAVIRA_DIALOGUE);
+    }
+  });
+  body.appendChild(npcRow);
 
-  /* Show fallen ally warning if any */
+  /* === 2b. Reputation bar canonical === */
+  var renown = 0;
+  if (data.renown && typeof data.renown.guild === 'number') renown = data.renown.guild;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.guild === 'number') renown = window._PLAYER_RENOWN.guild;
+  var tier = 'NEUTRO';
+  if (renown >= 25) tier = 'AMIGÁVEL';
+  else if (renown >= 10) tier = 'CORDIAL';
+  else if (renown < 0 && renown >= -10) tier = 'FRIO';
+  else if (renown < -10) tier = 'HOSTIL';
+  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var repBar = _gldEl('div', 'rep-bar');
+  repBar.appendChild(_gldEl('span', 'label', 'Reputação'));
+  var track = _gldEl('div', 'bar');
+  var fill = _gldEl('div', 'fill');
+  fill.style.width = pct + '%';
+  track.appendChild(fill);
+  repBar.appendChild(track);
+  repBar.appendChild(_gldEl('span', 'value', tier + ' · ' + renown));
+  body.appendChild(repBar);
+
+  /* === 2c. Fallen ally warning === */
   if (data.fallen_count > 0) {
     var fallenBox = _gldEl('div', 'gld-fallen-warn');
+    fallenBox.style.cssText = 'padding:8px 12px;background:rgba(180,40,40,0.15);border-left:3px solid #b42828;border-radius:4px;color:#e8b08c;font-size:12px;';
     fallenBox.textContent = '⚠ ' + data.fallen_count + ' aliado(s) caído(s) em teu grupo';
-    dlg.appendChild(fallenBox);
+    body.appendChild(fallenBox);
   }
 
-  /* Dialogue choices (from services list) */
-  var choices = _gldEl('div', 'gld-choices');
-  if (data.services && data.services.length) {
-    data.services.forEach(function (svc) {
-      var choice = _gldEl('button', 'gld-choice');
-      choice.setAttribute('data-cb', svc.cb || '');
-      choice.addEventListener('click', function () {
-        if (typeof doAction === 'function' && svc.cb) doAction(svc.cb);
-      });
-      choice.appendChild(_gldEl('span', 'gld-choice-ic', svc.icon || '▸'));
-      var txt = _gldEl('div', 'gld-choice-text');
-      txt.appendChild(_gldEl('div', 'gld-choice-lbl', svc.label || ''));
-      if (svc.desc) txt.appendChild(_gldEl('div', 'gld-choice-desc', svc.desc));
-      choice.appendChild(txt);
-      if (svc.badge) {
-        var badge = _gldEl('span', 'gld-choice-badge', svc.badge);
-        choice.appendChild(badge);
-      }
-      choices.appendChild(choice);
-    });
-  }
-  dlg.appendChild(choices);
-  root.appendChild(dlg);
-
-  /* ===== STATUS BAR (bottom): Party / Gold / Rotation ===== */
-  var statusBar = _gldEl('div', 'gld-status-bar');
-
-  var statusParty = _gldEl('div', 'gld-status-item');
-  statusParty.appendChild(_gldEl('div', 'gld-status-lbl', 'Grupo'));
-  statusParty.appendChild(_gldEl('div', 'gld-status-val', (data.party_count || 0) + ' / ' + (data.party_max || 3)));
-  statusBar.appendChild(statusParty);
-
-  var statusGold = _gldEl('div', 'gld-status-item');
-  statusGold.appendChild(_gldEl('div', 'gld-status-lbl', 'Valdoritas'));
-  var goldVal = _gldEl('div', 'gld-status-val gld-status-gold');
-  /* V-coin icon + number (NEVER money-bag emoji) */
-  var coin = _gldEl('span', 'vi vi-coin sm');
-  goldVal.appendChild(coin);
-  goldVal.appendChild(document.createTextNode(' ' + (data.gold || 0)));
-  statusGold.appendChild(goldVal);
-  statusBar.appendChild(statusGold);
-
+  /* === 2d. Status info (party / gold / rotation) === */
+  var stats = _gldEl('div', 'gld-stats');
+  stats.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:12px;color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
+  stats.appendChild(_gldEl('span', '', '👥 Grupo: ' + (data.party_count || 0) + '/' + (data.party_max || 3)));
+  var goldSpan = _gldEl('span', '');
+  goldSpan.textContent = '🪙 ' + (data.gold || 0) + ' V';
+  stats.appendChild(goldSpan);
   if (data.rotation_hours != null) {
-    var statusRot = _gldEl('div', 'gld-status-item');
-    statusRot.appendChild(_gldEl('div', 'gld-status-lbl', 'Rotação'));
-    statusRot.appendChild(_gldEl('div', 'gld-status-val', data.rotation_hours + 'h'));
-    statusBar.appendChild(statusRot);
+    stats.appendChild(_gldEl('span', '', '⏰ ' + data.rotation_hours + 'h'));
+  }
+  body.appendChild(stats);
+
+  /* === 2e. Section label === */
+  var sectionLbl = _gldEl('div', 'pt-section-label');
+  sectionLbl.textContent = '⚜ Serviços da Guilda ⚜';
+  body.appendChild(sectionLbl);
+
+  /* === 2f. Services grid (.services + .svc canonical) === */
+  if (data.services && data.services.length) {
+    var grid = _gldEl('div', 'services');
+    data.services.forEach(function(svc) {
+      var card = _gldEl('div', 'svc');
+      if (svc.disabled) card.classList.add('disabled');
+      card.setAttribute('data-svc', svc.cb || '');
+
+      var ico = _gldEl('div', 'svc-ico');
+      ico.textContent = svc.icon || '▸';
+      ico.style.cssText = 'font-size:20px;';
+      card.appendChild(ico);
+
+      var txt = _gldEl('div', 'svc-text');
+      txt.appendChild(_gldEl('div', 'svc-name', svc.label || ''));
+      if (svc.desc) txt.appendChild(_gldEl('div', 'svc-meta', svc.desc));
+      card.appendChild(txt);
+
+      if (svc.badge) {
+        var badge = _gldEl('div', 'svc-badge', svc.badge);
+        card.appendChild(badge);
+      }
+
+      if (svc.cb && !svc.disabled) {
+        card.addEventListener('click', function() {
+          if (typeof doAction === 'function') doAction(svc.cb);
+          else if (typeof vCity !== 'undefined' && typeof vCity.act === 'function') vCity.act(svc.cb);
+        });
+      }
+      grid.appendChild(card);
+    });
+    body.appendChild(grid);
   }
 
-  root.appendChild(statusBar);
+  /* === 2g. Recruit info (extras) === */
+  if (data.recruit_available && data.recruit_available > 0) {
+    var rec = _gldEl('div', 'gld-recruit-info');
+    rec.style.cssText = 'text-align:center;padding:6px;color:#c4953a;font-size:11px;font-style:italic;';
+    rec.textContent = '⚔ ' + data.recruit_available + ' aventureiro(s) disponível(eis) hoje';
+    body.appendChild(rec);
+  }
 
+  root.appendChild(body);
   container.appendChild(root);
 }
 
