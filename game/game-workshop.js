@@ -52,7 +52,14 @@ var GARRICK_DIALOGUE = {
 function _wksEl(tag, cls, text) {
   var el = document.createElement(tag);
   if (cls) el.className = cls;
-  if (text != null) el.textContent = text;
+  // task #70 review (2026-05-20): suporta HTML inline (e.g. badge com vi-coin).
+  if (text != null) {
+    if (typeof text === 'string' && /<(span|b|i|em|strong|br)\b[^>]*>/.test(text)) {
+      el.innerHTML = text;
+    } else {
+      el.textContent = text;
+    }
+  }
   return el;
 }
 

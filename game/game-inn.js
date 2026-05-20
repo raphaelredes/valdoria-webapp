@@ -117,7 +117,18 @@ var SERVICE_DIALOGUES_INN = {
 function _innEl(tag, cls, text) {
   var el = document.createElement(tag);
   if (cls) el.className = cls;
-  if (text != null) el.textContent = text;
+  // task #70 review (2026-05-20): se text contém tag HTML inline, usar innerHTML.
+  // Bug reportado em Chrome MCP — badge "Relaxar" mostrava
+  // `10 <span class="vi vi-coin sm"></span>` como texto literal porque backend
+  // envia HTML inline (vi-coin span) mas _innEl forçava textContent.
+  // Detect via regex de tag inline conhecida (span, b, i, em, strong, br).
+  if (text != null) {
+    if (typeof text === 'string' && /<(span|b|i|em|strong|br)\b[^>]*>/.test(text)) {
+      el.innerHTML = text;
+    } else {
+      el.textContent = text;
+    }
+  }
   return el;
 }
 

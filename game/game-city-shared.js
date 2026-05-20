@@ -145,11 +145,15 @@ function serviceCard(svc) {
 
   /* Badge — 2026-05-11 (user request): auto-detect " V" trailing como
      valdoritas e substitui pelo icone .vi-coin (era textContent literal
-     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V". */
+     mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V".
+     task #70 review (2026-05-20): suporta HTML inline (e.g. backend manda
+     "10 <span class=\"vi vi-coin sm\"></span>"). */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
     var bs = String(svc.badge);
-    if (/\sV$/.test(bs)) {
+    if (/<(span|b|i|em|strong|br)\b[^>]*>/.test(bs)) {
+      bdg.innerHTML = bs;
+    } else if (/\sV$/.test(bs)) {
       bdg.textContent = bs.slice(0, -2) + ' ';
       bdg.appendChild(coin('sm'));
     } else {
