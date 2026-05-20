@@ -1,280 +1,280 @@
-/* DEV Debug Panel v3.0 — Iframe Architecture
- * Parent window contains: <iframe> (430px game) + #dev-log-panel (fills rest).
- * Layout is injected by JS (_initAsHost) — this CSS only styles the panel itself.
- * Only activates when <html class="dev-panel-active"> is set by JS.
- */
-
-/* ---- Panel default (hidden) ---- */
-#dev-log-panel {
-    display: none;
-    flex-direction: column;
-    flex: 1;
-    height: 100dvh;
-    min-width: 0;
-    background: #1a1510;
-    border-left: 1px solid var(--v-border, #4a3828);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 10px;
-    line-height: 1.3;
-    color: var(--v-text, #d4c8b0);
-    overflow: hidden;
-}
-
-html.dev-panel-active #dev-log-panel {
-    display: flex;
-}
-
-/* ---- Embedded Mode: inner panel fills the host container ---- */
-.dev-log-inner {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    min-width: 0;
-    background: var(--v-bg-deep, #1a1510);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 10px;
-    line-height: 1.3;
-    color: var(--v-text, #d4c8b0);
-    overflow: hidden;
-}
-
-/* ---- Header bar ---- */
-.dev-panel-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
-    background: var(--v-bg, #2a2420);
-    border-bottom: 1px solid var(--v-border, #4a3828);
-    flex-shrink: 0;
-}
-
-/* ---- SSE status dot ---- */
-.dev-sse-status {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--v-text-dim, #a09484);
-    flex-shrink: 0;
-    margin-left: var(--v-space-xs, 2px);
-    transition: background var(--v-transition, 0.2s) ease;
-}
-
-.dev-sse-status.connected {
-    background: var(--v-success, #4caf50);
-    box-shadow: 0 0 4px var(--v-success, #4caf50);
-}
-
-.dev-sse-status.error {
-    background: var(--v-danger, #e74c3c);
-    box-shadow: 0 0 4px var(--v-danger, #e74c3c);
-}
-
-/* ---- Spacer ---- */
-.dev-panel-spacer {
-    flex: 1;
-}
-
-/* ---- Control buttons ---- */
-.dev-ctrl-btn {
-    padding: 2px var(--v-space-md, 8px);
-    background: transparent;
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-sm, 6px);
-    color: var(--v-text-dim, #a09484);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 10px;
-    cursor: pointer;
-    transition: color var(--v-transition-fast, 0.15s) ease, border-color var(--v-transition-fast, 0.15s) ease;
-    white-space: nowrap;
-    min-height: 22px;
-}
-
-.dev-ctrl-btn:hover {
-    color: var(--v-text, #d4c8b0);
-    border-color: var(--v-text-dim, #a09484);
-}
-
-.dev-ctrl-btn.active {
-    color: var(--v-warning, #f39c12);
-    border-color: var(--v-warning, #f39c12);
-}
-
-/* ---- Filter bar ---- */
-.dev-panel-filter {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--v-space-sm, 4px);
-    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
-    background: var(--v-bg, #2a2420);
-    border-bottom: 1px solid var(--v-border, #4a3828);
-    flex-shrink: 0;
-}
-
-.dev-panel-filter input {
-    flex: 1;
-    min-width: 0;
-    background: var(--v-bg-card, #2e2520);
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-sm, 6px);
-    color: var(--v-text, #d4c8b0);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    /* B3: mesmo no painel DEV — evita zoom iOS e alinha com design-system */
-    font-size: max(16px, var(--v-font-body));
-    padding: 2px var(--v-space-sm, 4px);
-    outline: none;
-}
-
-.dev-panel-filter input:focus {
-    border-color: var(--v-gold-25, rgba(196,149,58,0.25));
-}
-
-/* B2: outline:none no estado base vence o bloco global — repetir foco teclado */
-.dev-panel-filter input:focus-visible {
-    outline: 2px solid var(--v-gold, #c4953a);
-    outline-offset: 2px;
-}
-
-.dev-panel-filter input:focus:not(:focus-visible) {
-    outline: none;
-}
-
-/* ---- Level toggle buttons ---- */
-.dev-lvl-btn {
-    padding: 1px 5px;
-    background: transparent;
-    border: 1px solid var(--v-border, #4a3828);
-    border-radius: var(--v-radius-xs, 4px);
-    font-family: var(--v-font-mono, "Courier New", monospace);
-    font-size: 9px;
-    cursor: pointer;
-    transition: opacity var(--v-transition-fast, 0.15s) ease;
-    min-height: 18px;
-    line-height: 1;
-}
-
-.dev-lvl-btn[data-level="error"]  { color: #e57373; border-color: #e57373; }
-.dev-lvl-btn[data-level="warn"]   { color: #ffd54f; border-color: #ffd54f; }
-.dev-lvl-btn[data-level="info"]   { color: var(--v-text, #d4c8b0); border-color: var(--v-border, #4a3828); }
-.dev-lvl-btn[data-level="debug"]  { color: #7a6e5e; border-color: #4a3828; }
-
-.dev-lvl-btn.hidden-level {
-    opacity: 0.3;
-}
-
-/* ---- Split view: both panels visible ---- */
-.dev-log-split {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-}
-
-.dev-log-pane {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    border-bottom: 1px solid var(--v-border, #4a3828);
-}
-
-.dev-log-pane:last-child {
-    border-bottom: none;
-}
-
-.dev-pane-label {
-    padding: 2px var(--v-space-md, 8px);
-    background: var(--v-bg, #2a2420);
-    border-bottom: 1px solid var(--v-border, #4a3828);
-    font-size: 9px;
-    color: var(--v-gold, #c4953a);
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
-
-/* ---- Log scroll area ---- */
-.dev-log-scroll {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: var(--v-space-xs, 2px) 0;
-    scroll-behavior: auto;
-    min-height: 0;
-}
-
-/* Thin scrollbar for the log */
-.dev-log-scroll::-webkit-scrollbar {
-    width: 4px;
-}
-.dev-log-scroll::-webkit-scrollbar-track {
-    background: var(--v-bg, #2a2420);
-}
-.dev-log-scroll::-webkit-scrollbar-thumb {
-    background: var(--v-border, #4a3828);
-    border-radius: 2px;
-}
-
-/* ---- Log lines ---- */
-.dev-log-line {
-    display: block;
-    padding: 1px var(--v-space-md, 8px);
-    white-space: pre-wrap;
-    word-break: break-all;
-    border-bottom: none;
-}
-
-.dev-log-line:hover {
-    background: var(--v-bg-raised, #332a22);
-}
-
-.dev-log-line[data-level="error"] { color: #e57373; }
-.dev-log-line[data-level="warn"]  { color: #ffd54f; }
-.dev-log-line[data-level="info"]  { color: var(--v-text, #d4c8b0); }
-.dev-log-line[data-level="debug"] { color: #7a6e5e; }
-
-/* Hidden when level button is toggled off */
-.dev-log-line.level-hidden {
-    display: none;
-}
-
-/* ---- Timestamp and level label inside each line ---- */
-.dev-log-ts {
-    color: #5a4e3e;
-    margin-right: 3px;
-    user-select: none;
-}
-
-.dev-log-lvl {
-    margin-right: 4px;
-    font-weight: bold;
-    user-select: none;
-}
-
-.dev-log-line[data-level="error"] .dev-log-lvl { color: #e57373; }
-.dev-log-line[data-level="warn"]  .dev-log-lvl { color: #ffd54f; }
-.dev-log-line[data-level="info"]  .dev-log-lvl { color: var(--v-gold-dim, #9a7530); }
-.dev-log-line[data-level="debug"] .dev-log-lvl { color: #5a4e3e; }
-
-/* ---- Empty-state message ---- */
-.dev-log-empty {
-    padding: var(--v-space-xl, 16px);
-    color: #5a4e3e;
-    text-align: center;
-    font-style: normal;
-}
-
-/* ---- Reduced motion ---- */
-@media (prefers-reduced-motion: reduce) {
-    .dev-ctrl-btn,
-    .dev-lvl-btn,
-    .dev-sse-status {
-        transition: none;
-    }
-}
+/* DEV Debug Panel v3.0 — Iframe Architecture
+ * Parent window contains: <iframe> (430px game) + #dev-log-panel (fills rest).
+ * Layout is injected by JS (_initAsHost) — this CSS only styles the panel itself.
+ * Only activates when <html class="dev-panel-active"> is set by JS.
+ */
+
+/* ---- Panel default (hidden) ---- */
+#dev-log-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    height: 100dvh;
+    min-width: 0;
+    background: #1a1510;
+    border-left: 1px solid var(--v-border, #4a3828);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: var(--v-font-xs);
+    line-height: 1.3;
+    color: var(--v-text, #d4c8b0);
+    overflow: hidden;
+}
+
+html.dev-panel-active #dev-log-panel {
+    display: flex;
+}
+
+/* ---- Embedded Mode: inner panel fills the host container ---- */
+.dev-log-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    background: var(--v-bg-deep, #1a1510);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: var(--v-font-xs);
+    line-height: 1.3;
+    color: var(--v-text, #d4c8b0);
+    overflow: hidden;
+}
+
+/* ---- Header bar ---- */
+.dev-panel-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    flex-shrink: 0;
+}
+
+/* ---- SSE status dot ---- */
+.dev-sse-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--v-text-dim, #a09484);
+    flex-shrink: 0;
+    margin-left: var(--v-space-xs, 2px);
+    transition: background var(--v-transition, 0.2s) ease;
+}
+
+.dev-sse-status.connected {
+    background: var(--v-success, #4caf50);
+    box-shadow: 0 0 4px var(--v-success, #4caf50);
+}
+
+.dev-sse-status.error {
+    background: var(--v-danger, #e74c3c);
+    box-shadow: 0 0 4px var(--v-danger, #e74c3c);
+}
+
+/* ---- Spacer ---- */
+.dev-panel-spacer {
+    flex: 1;
+}
+
+/* ---- Control buttons ---- */
+.dev-ctrl-btn {
+    padding: 2px var(--v-space-md, 8px);
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text-dim, #a09484);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: var(--v-font-xs);
+    cursor: pointer;
+    transition: color var(--v-transition-fast, 0.15s) ease, border-color var(--v-transition-fast, 0.15s) ease;
+    white-space: nowrap;
+    min-height: 22px;
+}
+
+.dev-ctrl-btn:hover {
+    color: var(--v-text, #d4c8b0);
+    border-color: var(--v-text-dim, #a09484);
+}
+
+.dev-ctrl-btn.active {
+    color: var(--v-warning, #f39c12);
+    border-color: var(--v-warning, #f39c12);
+}
+
+/* ---- Filter bar ---- */
+.dev-panel-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--v-space-sm, 4px);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    flex-shrink: 0;
+}
+
+.dev-panel-filter input {
+    flex: 1;
+    min-width: 0;
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-sm, 6px);
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    /* B3: mesmo no painel DEV — evita zoom iOS e alinha com design-system */
+    font-size: max(16px, var(--v-font-body));
+    padding: 2px var(--v-space-sm, 4px);
+    outline: none;
+}
+
+.dev-panel-filter input:focus {
+    border-color: var(--v-gold-25, rgba(196,149,58,0.25));
+}
+
+/* B2: outline:none no estado base vence o bloco global — repetir foco teclado */
+.dev-panel-filter input:focus-visible {
+    outline: 2px solid var(--v-gold, #c4953a);
+    outline-offset: 2px;
+}
+
+.dev-panel-filter input:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ---- Level toggle buttons ---- */
+.dev-lvl-btn {
+    padding: 1px 5px;
+    background: transparent;
+    border: 1px solid var(--v-border, #4a3828);
+    border-radius: var(--v-radius-xs, 4px);
+    font-family: var(--v-font-mono, "Courier New", monospace);
+    font-size: 9px;
+    cursor: pointer;
+    transition: opacity var(--v-transition-fast, 0.15s) ease;
+    min-height: 18px;
+    line-height: 1;
+}
+
+.dev-lvl-btn[data-level="error"]  { color: #e57373; border-color: #e57373; }
+.dev-lvl-btn[data-level="warn"]   { color: #ffd54f; border-color: #ffd54f; }
+.dev-lvl-btn[data-level="info"]   { color: var(--v-text, #d4c8b0); border-color: var(--v-border, #4a3828); }
+.dev-lvl-btn[data-level="debug"]  { color: #7a6e5e; border-color: #4a3828; }
+
+.dev-lvl-btn.hidden-level {
+    opacity: 0.3;
+}
+
+/* ---- Split view: both panels visible ---- */
+.dev-log-split {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.dev-log-pane {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border-bottom: 1px solid var(--v-border, #4a3828);
+}
+
+.dev-log-pane:last-child {
+    border-bottom: none;
+}
+
+.dev-pane-label {
+    padding: 2px var(--v-space-md, 8px);
+    background: var(--v-bg, #2a2420);
+    border-bottom: 1px solid var(--v-border, #4a3828);
+    font-size: 9px;
+    color: var(--v-gold, #c4953a);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+/* ---- Log scroll area ---- */
+.dev-log-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--v-space-xs, 2px) 0;
+    scroll-behavior: auto;
+    min-height: 0;
+}
+
+/* Thin scrollbar for the log */
+.dev-log-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+.dev-log-scroll::-webkit-scrollbar-track {
+    background: var(--v-bg, #2a2420);
+}
+.dev-log-scroll::-webkit-scrollbar-thumb {
+    background: var(--v-border, #4a3828);
+    border-radius: 2px;
+}
+
+/* ---- Log lines ---- */
+.dev-log-line {
+    display: block;
+    padding: 1px var(--v-space-md, 8px);
+    white-space: pre-wrap;
+    word-break: break-all;
+    border-bottom: none;
+}
+
+.dev-log-line:hover {
+    background: var(--v-bg-raised, #332a22);
+}
+
+.dev-log-line[data-level="error"] { color: #e57373; }
+.dev-log-line[data-level="warn"]  { color: #ffd54f; }
+.dev-log-line[data-level="info"]  { color: var(--v-text, #d4c8b0); }
+.dev-log-line[data-level="debug"] { color: #7a6e5e; }
+
+/* Hidden when level button is toggled off */
+.dev-log-line.level-hidden {
+    display: none;
+}
+
+/* ---- Timestamp and level label inside each line ---- */
+.dev-log-ts {
+    color: #5a4e3e;
+    margin-right: 3px;
+    user-select: none;
+}
+
+.dev-log-lvl {
+    margin-right: 4px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.dev-log-line[data-level="error"] .dev-log-lvl { color: #e57373; }
+.dev-log-line[data-level="warn"]  .dev-log-lvl { color: #ffd54f; }
+.dev-log-line[data-level="info"]  .dev-log-lvl { color: var(--v-gold-dim, #9a7530); }
+.dev-log-line[data-level="debug"] .dev-log-lvl { color: #5a4e3e; }
+
+/* ---- Empty-state message ---- */
+.dev-log-empty {
+    padding: var(--v-space-xl, 16px);
+    color: #5a4e3e;
+    text-align: center;
+    font-style: normal;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+    .dev-ctrl-btn,
+    .dev-lvl-btn,
+    .dev-sse-status {
+        transition: none;
+    }
+}
