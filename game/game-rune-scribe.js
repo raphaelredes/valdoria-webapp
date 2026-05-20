@@ -58,26 +58,26 @@ function renderRuneScribe(container, data) {
 
   var root = vCity.el('div', 'rns-hub');
 
-  /* === 1. Hero CENARIO canonical === */
-  var hero = vCity.el('div', 'cenario');
+  /* === 1. Cenario canonical === */
+  var cenarioEl = vCity.el('div', 'cenario');
   var bg = _rnsEl('img', 'cenario-bg');
   bg.src = '../shared/img/runas/runas-banner.png';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(bg);
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _rnsEl('img', 'cenario-brasao');
   crest.src = '../shared/img/runas/runas-crest.png';
   crest.alt = 'Brasão do Escriba';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
   titulo.appendChild(_rnsEl('div', 'name', 'Câmara do Escriba'));
   titulo.appendChild(_rnsEl('div', 'sub', 'Mestre Thessil · Guardião dos Glifos'));
-  hero.appendChild(titulo);
-  root.appendChild(hero);
+  cenarioEl.appendChild(titulo);
+  root.appendChild(cenarioEl);
 
   /* === 2. Body container === */
   var body = vCity.el('div', 'rns-body');

@@ -14,7 +14,7 @@
  *   ~80   SERVICE_DIALOGUES_TEMPLE (6 dialogues PADRAO_ALDRIC inline)
  *   ~280  TEMPLE_CB_TO_DIALOGUE (backend cb → dialogue key map)
  *   ~310  TEMPLE_SVC_META (svc icon path + meta text canonical)
- *   ~340  _tmpBuildCenario(data) — hero canonical PADRAO_TAVERNA
+ *   ~340  _tmpBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~390  _tmpBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
  *   ~440  _tmpBuildRepBar(data) — Renown DMG p.22
  *   ~470  _tmpBuildServices(services) — .services + .svc canonical
@@ -222,9 +222,9 @@ var TEMPLE_SVC_META = {
   'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.png',  meta: 'PHB p.270' }
 };
 
-/* === Hero CENARIO canonical (PADRAO_TAVERNA — usa .cenario CSS classes) === */
+/* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) === */
 function _tmpBuildCenario(data) {
-  var hero = vCity.el('div', 'cenario');
+  var cenarioEl = vCity.el('div', 'cenario');
 
   // Banner background
   var bg = vCity.el('img', 'cenario-bg');
@@ -232,11 +232,11 @@ function _tmpBuildCenario(data) {
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
+  cenarioEl.appendChild(bg);
 
   // Candle glows (atmosfera)
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
 
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
@@ -244,7 +244,7 @@ function _tmpBuildCenario(data) {
   crest.alt = 'Brasão do Templo dos Quatro';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
 
   // Título
   var titulo = vCity.el('div', 'cenario-titulo');
@@ -254,9 +254,9 @@ function _tmpBuildCenario(data) {
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Santuário de Eldoria · Casa dos Deuses';
   titulo.appendChild(subEl);
-  hero.appendChild(titulo);
+  cenarioEl.appendChild(titulo);
 
-  return hero;
+  return cenarioEl;
 }
 
 /* === NPC row canonical (.row-npc — Padre Aldric main entry) =============== */
@@ -396,7 +396,7 @@ function renderTempleHub(container, data) {
 
   var root = vCity.el('div', 'tmp-hub');
 
-  /* 1. Hero CENARIO (PADRAO_TAVERNA) */
+  /* 1. Cenário canonical (PADRAO_TAVERNA) */
   root.appendChild(_tmpBuildCenario(data));
 
   /* 2. Body container */

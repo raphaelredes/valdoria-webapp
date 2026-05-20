@@ -1,7 +1,7 @@
 /* game-guild.js — Guild popup renderer
  *
  * V4 NPC Dialog redesign (2026-04-11):
- * Hero NPC scene (Tavira, a Mestra) with speech bubble + dialogue
+ * NPC principal scene (Tavira, a Mestra) with speech bubble + dialogue
  * choices. Uses createElement/textContent only (no innerHTML) to
  * avoid XSS vectors with user-controlled quest names.
  *
@@ -82,27 +82,27 @@ function renderGuildHub(container, data) {
 
   var root = _gldEl('div', 'gld-hub');
 
-  /* === 1. Hero CENARIO canonical === */
-  var hero = _gldEl('div', 'cenario');
+  /* === 1. Cenario canonical === */
+  var cenarioEl = _gldEl('div', 'cenario');
   var bg = _gldEl('img', 'cenario-bg');
   bg.src = '../shared/img/guilda/guilda-banner.png';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
-  hero.appendChild(_gldEl('div', 'candle-glow l'));
-  hero.appendChild(_gldEl('div', 'candle-glow r'));
+  cenarioEl.appendChild(bg);
+  cenarioEl.appendChild(_gldEl('div', 'candle-glow l'));
+  cenarioEl.appendChild(_gldEl('div', 'candle-glow r'));
   var crest = _gldEl('img', 'cenario-brasao');
   crest.src = '../shared/img/guilda/guilda-crest.png';
   crest.alt = 'Brasão da Guilda';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
   var titulo = _gldEl('div', 'cenario-titulo');
   titulo.appendChild(_gldEl('div', 'name', 'Guilda dos Aventureiros'));
   titulo.appendChild(_gldEl('div', 'sub', 'Salão de Mestra Tavira · Coração de Eldoria'));
-  hero.appendChild(titulo);
-  root.appendChild(hero);
+  cenarioEl.appendChild(titulo);
+  root.appendChild(cenarioEl);
 
   /* === 2. Body container === */
   var body = _gldEl('div', 'gld-body');
@@ -230,7 +230,7 @@ function renderGuildHub(container, data) {
 }
 
 /* ============================================================
- * ADVENTURER DETAIL — V1 Hero Portrait (2026-04-11)
+ * ADVENTURER DETAIL — V1 Retrato principal (2026-04-11)
  * Shows full NPC sheet with cenario scene, stats grid, HP/MP bars,
  * spells list, lore, and hire CTA. Uses DOM methods only, no
  * innerHTML. Money always via .vi.vi-coin.
@@ -253,7 +253,7 @@ function renderGuildAdventurer(container, data) {
 
   var root = _gldEl('div', 'gld-adv-v1');
 
-  /* Hero scene: avatar (left) + text block (right) — horizontal compact */
+  /* Cena principal: avatar (left) + text block (right) — horizontal compact */
   var cenario = _gldEl('div', 'gld-adv-cenario');
   var av = _gldEl('div', 'gld-adv-avatar ' + _gldClassSlug(data.class_name));
   av.innerHTML = data.class_icon || '⚔';

@@ -155,7 +155,7 @@ function _buildPopupBody(data) {
         return el;
     }
 
-    // Guild: adventurer detail (V1 Hero Portrait)
+    // Guild: adventurer detail (V1 Retrato principal)
     if (data._guild_adventurer && typeof renderGuildAdventurer === 'function') {
         renderGuildAdventurer(el, data._guild_adventurer);
         return el;

@@ -14,7 +14,7 @@
  *   ~80   SERVICE_DIALOGUES_TAVERN (5 dialogues PADRAO_ALDRIC inline)
  *   ~240  TAVERN_CB_TO_DIALOGUE (backend cb → dialogue key map)
  *   ~270  TAVERN_SVC_META (svc icon path + meta text canonical)
- *   ~310  _tavBuildCenario(data) — hero canonical PADRAO_TAVERNA
+ *   ~310  _tavBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~360  _tavBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
  *   ~410  _tavBuildRepBar(data) — D&D 5e Renown DMG p.22
  *   ~440  _tavBuildServices(services) — .services + .svc canonical
@@ -173,9 +173,9 @@ var TAVERN_SVC_META = {
   'tavern_bard_listen':        { icon: '../shared/img/services/svc-bardo.png',        meta: 'inspiration 1d6' }
 };
 
-/* === Hero CENARIO canonical ============================================== */
+/* === Cenário canonical ============================================== */
 function _tavBuildCenario(data) {
-  var hero = vCity.el('div', 'cenario');
+  var cenarioEl = vCity.el('div', 'cenario');
 
   // Banner background — filename canonical: javali-negro-banner.png
   var bg = vCity.el('img', 'cenario-bg');
@@ -183,10 +183,10 @@ function _tavBuildCenario(data) {
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
+  cenarioEl.appendChild(bg);
 
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
 
   // Brasão — filename canonical: javali-negro-crest.png
   var crest = vCity.el('img', 'cenario-brasao');
@@ -194,7 +194,7 @@ function _tavBuildCenario(data) {
   crest.alt = 'Brasão do Javali Negro';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
 
   // Título
   var titulo = vCity.el('div', 'cenario-titulo');
@@ -204,9 +204,9 @@ function _tavBuildCenario(data) {
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Estabelecimento de Grom Barba-Cinza · Bairro do Mercado';
   titulo.appendChild(subEl);
-  hero.appendChild(titulo);
+  cenarioEl.appendChild(titulo);
 
-  return hero;
+  return cenarioEl;
 }
 
 /* === NPC row canonical — Grom main entry =================================== */
@@ -346,7 +346,7 @@ function renderTavernHub(container, data) {
 
   var root = vCity.el('div', 'tav-hub');
 
-  /* 1. Hero CENARIO (PADRAO_TAVERNA) */
+  /* 1. Cenário canonical (PADRAO_TAVERNA) */
   root.appendChild(_tavBuildCenario(data));
 
   /* 2. Body container */

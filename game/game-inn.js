@@ -63,26 +63,26 @@ function renderInnHub(container, data) {
 
   var root = vCity.el('div', 'inn-hub');
 
-  /* === 1. Hero CENARIO canonical === */
-  var hero = vCity.el('div', 'cenario');
+  /* === 1. Cenario canonical === */
+  var cenarioEl = vCity.el('div', 'cenario');
   var bg = _innEl('img', 'cenario-bg');
   bg.src = '../shared/img/estalagem/estalagem-banner.png';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(bg);
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _innEl('img', 'cenario-brasao');
   crest.src = '../shared/img/estalagem/estalagem-crest.png';
   crest.alt = 'Brasão do Grifo Dourado';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
   titulo.appendChild(_innEl('div', 'name', 'Grifo Dourado'));
   titulo.appendChild(_innEl('div', 'sub', 'Estalagem de Martha · Praça Central'));
-  hero.appendChild(titulo);
-  root.appendChild(hero);
+  cenarioEl.appendChild(titulo);
+  root.appendChild(cenarioEl);
 
   /* === 2. Body container === */
   var body = vCity.el('div', 'inn-body');

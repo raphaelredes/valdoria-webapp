@@ -331,7 +331,7 @@ function _drawEnemySprite(ctx,cx,cy,color,ts,sprite){const sway=Math.sin(ts*0.00
 function drawTapFeedback(ctx,timestamp){for(let i=_tapFeedbacks.length-1;i>=0;i--){const f=_tapFeedbacks[i];const elapsed=timestamp-f.start;const duration=700;if(elapsed>duration){_tapFeedbacks.splice(i,1);continue;}
 const t=elapsed/duration;const radius=f.radius+(f.maxRadius-f.radius)*t;const alpha=f.alpha*(1-t);ctx.strokeStyle=`rgba(196,149,58,${alpha.toFixed(2)})`;ctx.lineWidth=2*(1-t*0.5);ctx.beginPath();ctx.arc(f.x,f.y,radius,0,Math.PI*2);ctx.stroke();}}
 function _smoothCameraFollow(){const viewport=document.getElementById('map-viewport');if(!viewport)return;const targetX=playerScreenX-viewport.clientWidth/2;const targetY=playerScreenY-viewport.clientHeight/2;const curX=viewport.scrollLeft;const curY=viewport.scrollTop;
-/* Adaptive lerp: tighter tracking during movement, gentler when idle (Fire Emblem Heroes) */
+/* Adaptive lerp: tighter tracking during movement, gentler when idle (Fire Emblem mobile) */
 var moving=typeof isMoving==='function'&&isMoving();var lerp=moving?0.22:0.12;var dx=targetX-curX;var dy=targetY-curY;
 /* Snap when delta < 1.5px to avoid infinite micro-corrections */
 if(Math.abs(dx)<1.5&&Math.abs(dy)<1.5){viewport.scrollLeft=Math.max(0,targetX);viewport.scrollTop=Math.max(0,targetY);return;}

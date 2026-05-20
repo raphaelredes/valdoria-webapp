@@ -59,26 +59,26 @@ function renderWorkshopHub(container, data) {
 
   var root = vCity.el('div', 'wks-hub');
 
-  /* === 1. Hero CENARIO canonical === */
-  var hero = vCity.el('div', 'cenario');
+  /* === 1. Cenario canonical === */
+  var cenarioEl = vCity.el('div', 'cenario');
   var bg = _wksEl('img', 'cenario-bg');
   bg.src = '../shared/img/oficina/oficina-banner.png';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(bg);
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _wksEl('img', 'cenario-brasao');
   crest.src = '../shared/img/oficina/oficina-crest.png';
   crest.alt = 'Brasão da Oficina';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
   titulo.appendChild(_wksEl('div', 'name', 'Oficina da Bigorna'));
   titulo.appendChild(_wksEl('div', 'sub', 'Forja de Mestre Garrick · Bairro do Ferro'));
-  hero.appendChild(titulo);
-  root.appendChild(hero);
+  cenarioEl.appendChild(titulo);
+  root.appendChild(cenarioEl);
 
   /* === 2. Body container === */
   var body = vCity.el('div', 'wks-body');

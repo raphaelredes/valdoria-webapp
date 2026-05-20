@@ -12,7 +12,7 @@
  * MAPA_IA:
  *   ~30   _SVC_CONFIG_MARKET (faction market + reactions)
  *   ~55   MERCHANT_NPCS_MARKET (6 NPCs: Thorne/Mirena/Velithra/Corvus/Bjorn/Garlen)
- *   ~250  _mktBuildCenario(data) — hero panel canonical
+ *   ~250  _mktBuildCenario(data) — cenario panel canonical
  *   ~300  _mktBuildMerchantRow(npc) — .row-npc clicável por mercador
  *   ~340  _mktBuildRepBar(data) — D&D 5e Renown
  *   ~370  renderMarketHub(container, data) — entry point
@@ -126,26 +126,26 @@ var MERCHANT_NPCS_MARKET = {
   }
 };
 
-/* === Hero CENARIO canonical ============================================== */
+/* === Cenário canonical ============================================== */
 function _mktBuildCenario(data) {
-  var hero = vCity.el('div', 'cenario');
+  var cenarioEl = vCity.el('div', 'cenario');
 
   var bg = vCity.el('img', 'cenario-bg');
   bg.src = '../shared/img/mercado/mercado-banner.png';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
+  cenarioEl.appendChild(bg);
 
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
 
   var crest = vCity.el('img', 'cenario-brasao');
   crest.src = '../shared/img/mercado/mercado-crest.png';
   crest.alt = 'Brasão do Mercado de Eldoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
 
   var titulo = vCity.el('div', 'cenario-titulo');
   var nameEl = vCity.el('div', 'name');
@@ -154,9 +154,9 @@ function _mktBuildCenario(data) {
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Praça Central · Seis Mercadores Fiéis';
   titulo.appendChild(subEl);
-  hero.appendChild(titulo);
+  cenarioEl.appendChild(titulo);
 
-  return hero;
+  return cenarioEl;
 }
 
 /* === Merchant row canonical — .row-npc clickable por mercador ============= */

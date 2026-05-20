@@ -42,7 +42,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     9.11 — Audit Guilda/Workshop/Runas/Festival/Arena
     9.12 — Vínculos afinidade dinâmica + Estalagem audit (Martha NPC + Short Rest)
     9.13 — 4 áreas extras canonical do bot DEV (Trade Board / Shadow Alley /
-           Travelers / Heroes Wall) — refs city_hub_locations.py L117-138 +
+           Travelers / Mural dos Aventureiros) — refs city_hub_locations.py L117-138 +
            heroes_wall.py + tavern_black_market.py + wandering_npcs.py
     9.14 — Sub-systems Tavern: Bardo (tavern_bard.py) + 4 jogos extras
            (Bones/Challenges/Tournament/Drinking/XGtE) totalizando 8 vs
@@ -1002,7 +1002,7 @@ LOG SINK (Fase 7):
       --v-font-lg:    15px;     /* sub-headings */
       --v-font-xl:    16px;     /* section headings */
       --v-font-2xl:   18px;     /* screen titles */
-      --v-font-3xl:   22px;     /* hero/display */
+      --v-font-3xl:   22px;     /* display title */
       /* Touch targets mobile-first */
       --v-btn-h-sm:   30px;     /* compact UI (zoom +/-) */
       --v-btn-h:      36px;     /* default mobile touch */
@@ -3378,7 +3378,7 @@ LOG SINK (Fase 7):
 }
 @keyframes clp-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 .clp-icon {
-  font-size: 56px;  /* HARDCODED: hero popup icon, fora da escala (>3xl=22px) — candidato a SVG heráldico */
+  font-size: 56px;  /* HARDCODED: popup icon principal, fora da escala (>3xl=22px) — candidato a SVG heráldico */
   margin-bottom: 6px;
   filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
   line-height: 1;
@@ -11685,10 +11685,10 @@ function _showAchievementDetailPopup(chainId, p){
 
   var html = '<div class="ach-detail" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; gap: var(--v-space-sm, 6px); height: 100%;">';
 
-  // === HERO MEDALHA GRANDE ===
+  // === MEDALHA GRANDE PRINCIPAL ===
   // Cores compartilhadas com a grid (matte gold, sem brilho exagerado)
   var heroMedalColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#3a342e');
-  var heroIconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
+  var cenarioIconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
   var heroGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.55));' : '';
 
   html += '<div style="display: flex; flex-direction: column; align-items: center; padding: var(--v-space-md, 10px) var(--v-space-md, 8px) var(--v-space-sm, 6px); '
@@ -11701,7 +11701,7 @@ function _showAchievementDetailPopup(chainId, p){
     + '<svg viewBox="0 0 100 100" style="grid-area: 1/1; width: 100%; height: 100%; color: ' + heroMedalColor + ';">'
     + '<use href="#medal-bg"/>'
     + '</svg>'
-    + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 50px; height: 50px; color: ' + heroIconColor + '; pointer-events: none;">'
+    + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 50px; height: 50px; color: ' + cenarioIconColor + '; pointer-events: none;">'
     + '<use href="#' + chain.icon + '"/>'
     + '</svg>'
     + '</div>'
@@ -11875,7 +11875,7 @@ function _showKillsPopup(p){
     + '@keyframes vKlChainSway{0%,100%{transform:translateX(-50%) rotate(-1.2deg);}50%{transform:translateX(-50%) rotate(1.2deg);}}'
     /* Header epico — animation entry */
     + '.vKl-header{animation:vKlHeaderInk 0.55s ease-out;}'
-    /* Pedestal hero hangs from chains; orbiting ring; embers behind */
+    /* Pedestal principal hangs from chains; orbiting ring; embers behind */
     + '.vKl-pedestal-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;margin:2px 0 4px;}'
     + '.vKl-chains{position:relative;width:64px;height:14px;display:flex;justify-content:space-between;transform-origin:top center;animation:vKlChainSway 3.4s ease-in-out infinite;}'
     + '.vKl-chain-link{width:2px;height:14px;background:linear-gradient(180deg,rgba(74,56,40,0.4),rgba(196,149,58,0.8));border-radius:1px;box-shadow:0 0 3px rgba(196,149,58,0.4);}'
@@ -13954,7 +13954,7 @@ function _renderInnHubAAA(container, data) {
   root.innerHTML =
     '<style>'
     + '.inn-hub-aaa{display:flex;flex-direction:column;gap:10px;padding:6px 4px 10px;}'
-    // HERO: parede de pedra + viga + lareira + janela noturna (X-6.5.51BL 2026-05-15)
+    // CENÁRIO: parede de pedra + viga + lareira + janela noturna (X-6.5.51BL 2026-05-15)
     + '.inn-cenario{position:relative;height:140px;margin:0 -2px;border-radius:12px;overflow:hidden;'
     +   'border:1px solid rgba(196,149,58,0.45);'
     +   'box-shadow:0 6px 18px rgba(0,0,0,0.55),inset 0 0 24px rgba(0,0,0,0.4);}'
@@ -14064,7 +14064,7 @@ function _renderInnHubAAA(container, data) {
     + 'body.perf-medium .inn-fireglow{animation-duration:4s;}'
     + '@media (prefers-reduced-motion:reduce){.inn-fireglow,.inn-star,.inn-smoke{animation:none!important;}}'
     + '</style>'
-    // HERO — cena medieval com SVG inline (parede de pedra + viga + lareira + janela noturna)
+    // CENÁRIO — cena medieval com SVG inline (parede de pedra + viga + lareira + janela noturna)
     + '<div class="inn-cenario">'
     +   '<div class="inn-stone"></div>'
     +   '<div class="inn-beam"></div>'
@@ -16314,9 +16314,9 @@ function _buildRelationsMockData(player){
 // Reusa SUBSCREEN_DATA['gates'] legacy buttons (Partir aventura, Mapa, Desafio,
 // Preparar viagem) + Aldric NPC com talkOptions únicos.
 // ============================================================================
-// === FASE 9.13 — Áreas extras canonical (Trade/Shadow/Travelers/Heroes) ====
+// === FASE 9.13 — Áreas extras canonical (Trade/Shadow/Travelers/Mural) ====
 // ============================================================================
-// Replica city_hub_locations.py L117-138: 3 áreas conditional + Heroes Wall
+// Replica city_hub_locations.py L117-138: 3 áreas conditional + Mural dos Aventureiros
 // (acessado via Praça mural).
 
 // === TRADE BOARD (📋 Quadro de Trocas) — trade_board.py ===
@@ -16820,11 +16820,11 @@ function _buildTravelersMockData(player){
   };
 }
 
-// === HEROES WALL — heroes_wall.py rankings + titles ===
+// === MURAL DOS AVENTUREIROS — heroes_wall.py rankings + titles ===
 // canonical: heroes_wall_data.py — RANKING_CATEGORIES (5: level/gold/monsters/items/locations,
 // top_n=10) + TITLES (11 títulos com check + threshold ou achievement_id) + RANKING_CACHE_TTL=300s.
 // Top names mostrados são mock representando o feed do DB (cache 5min do bot DEV).
-var HEROES_WALL_RANKINGS = {
+var MURAL_RANKINGS = {
   level: {
     label: '🏆 Nível Mais Alto', desc: 'Os aventureiros mais experientes de Valdoria',
     top: [
@@ -16878,9 +16878,9 @@ var HEROES_WALL_RANKINGS = {
 };
 
 // canonical: heroes_wall_data.py L8-87 — TITLES (11 entries copiadas literalmente)
-// HEROES_WALL_TITLES — 11 títulos com brasões heráldicos canonical
+// MURAL_TITLES — 11 títulos com brasões heráldicos canonical
 // Mapping pra brasões existentes no sprite (regra Heraldic Icons Only)
-var HEROES_WALL_TITLES = [
+var MURAL_TITLES = [
   { id: 'aprendiz',          icon: _heralIco('ic-ach-erudito'),     label: 'Aprendiz',           desc: 'Colecionou 5+ itens únicos' },
   { id: 'colecionador',      icon: _heralIco('ic-ach-colecionador'),label: 'Colecionador',       desc: 'Colecionou 15+ itens únicos' },
   { id: 'cacador_reliquias', icon: _heralIco('ic-ach-cacador'),     label: 'Caçador de Relíquias', desc: 'Possui 3+ itens raros equipados simultaneamente' },
@@ -16898,9 +16898,9 @@ function _buildHeroesWallMockData(player){
   return {
     type: 'hub',
     flavor: '<i>Mural de pedra negra na Praça Central, nomes gravados em ouro. Aqui ficam os mais notáveis aventureiros de Valdoria — quem subiu mais alto, quem matou mais monstros, quem juntou mais ouro, quem viu mais do mundo.</i>',
-    rep_label: '🏛️ 5 categorias de ranking · Top 10 por categoria · ' + HEROES_WALL_TITLES.length + ' títulos por conquista',
-    services: Object.keys(HEROES_WALL_RANKINGS).map(function(k){
-      var r = HEROES_WALL_RANKINGS[k];
+    rep_label: '🏛️ 5 categorias de ranking · Top 10 por categoria · ' + MURAL_TITLES.length + ' títulos por conquista',
+    services: Object.keys(MURAL_RANKINGS).map(function(k){
+      var r = MURAL_RANKINGS[k];
       return {
         icon: r.label.split(' ')[0],
         label: r.label.replace(/^[^\s]+ /, ''),
@@ -25723,7 +25723,7 @@ var CANON_TEMPLE_DATA_EXTRA = {
 // === CANONICAL_PACK6_INJECT — END ===
 
 // === CANONICAL_PACK7_INJECT — START ===
-// canonical: pacote 7 — festival + heroes wall + bard + black market + market greetings.
+// canonical: pacote 7 — festival + mural aventureiros + bard + black market + market greetings.
 // MAPA_IA: grep "CANON_FESTIVAL_FULL" / "CANON_HEROES_FULL" / "CANON_BARD_FULL" / etc.
 
 // canonical: festival_data.py — FESTIVALS (4) + FESTIVAL_EVENTS (12).
@@ -28003,7 +28003,7 @@ function _shopGetFilters(npcId){
 /* X-6.5.51BM (2026-05-11): _renderEpicSquareHub — Praca Central AAA.
    Substitui renderSquareHub generico pra esta tela especifica.
    Componentes:
-   1. Hero panel: chao de pedra + fontainh ASCII central + tempo dia
+   1. Cenário principal: chao de pedra + fontainh ASCII central + tempo dia
    2. Reputation banner (se houver) ornamentado com gold border
    3. Buff active banner (se houver) com pulsing glow
    4. Service grid 2-col com cards: heraldic icon + label + hover lift
@@ -28031,7 +28031,7 @@ function _renderEpicSquareHub(container, data){
     + '@keyframes sqrBuffPulse{0%,100%{box-shadow:0 0 8px ' + theme.glow + ', inset 0 0 8px rgba(255,215,0,0.18);}50%{box-shadow:0 0 18px ' + theme.glow + ', inset 0 0 14px rgba(255,215,0,0.28);}}'
     + '@keyframes sqrCardSlide{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}'
     + '.sqr-epic-wrap{padding:var(--v-space-md,8px);font-family:var(--v-font,serif);}'
-    /* Hero panel — pedra + chao + fontainh */
+    /* Cenário principal — pedra + chao + fontainh */
     + '.sqr-cenario{position:relative;padding:18px 14px 16px;margin-bottom:12px;'
     + 'background:radial-gradient(ellipse at 50% 12%,' + theme.glow + ' 0%,rgba(74,56,40,0.25) 35%,rgba(30,22,16,0.92) 80%);'
     + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;}'
@@ -28058,7 +28058,7 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-card-badge.novo{background:linear-gradient(180deg,#ff8a4a,#c43020);color:#fff;border-color:rgba(0,0,0,0.5);text-shadow:0 1px 0 rgba(0,0,0,0.3);min-width:38px;font-size:9px;letter-spacing:0.5px;}'
     + '.sqr-card-badge.done{background:linear-gradient(180deg,#7cdb7c,#3a8a3a);color:#fff;}'
     + '</style>';
-  /* === HERO PANEL === */
+  /* === CENÁRIO PRINCIPAL === */
   html += '<div class="sqr-epic-wrap">'
     + '<div class="sqr-cenario">'
     +   '<span class="sqr-torch tl">🔥</span><span class="sqr-torch tr">🔥</span>'
@@ -28748,7 +28748,7 @@ function _squareTxnReturnToHub(){
 // Drop-in replacement de _squareShowListPopup para Taverna/Estalagem.
 // API idêntica: { stackKey, icon, title, flavor, items, onPick, theme? }.
 // Diferenças visuais:
-//   - Hero strip cerimonial com icon + título + sub (estilo tavern/inn hub)
+//   - Cenário cerimonial com icon + título + sub (estilo tavern/inn hub)
 //   - Flavor em pergaminho com aspas decorativas
 //   - Item cards com gradiente + hover lift + badges destacados
 //   - Back button estilizado
@@ -28763,18 +28763,18 @@ function _aaaListSubScreen(opts){
 
   // Theme colors
   var themes = {
-    tavern: { primary: '#c4953a', glow: 'rgba(255,180,80,0.45)', heroGradient: 'linear-gradient(180deg,#3a2818 0%,#1a0e06 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,180,80,0.25) 0%,transparent 60%)' },
-    inn:    { primary: '#d4a850', glow: 'rgba(255,200,100,0.50)', heroGradient: 'linear-gradient(180deg,#2a1a10 0%,#1a0e06 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,200,100,0.28) 0%,transparent 65%)' },
-    arcane: { primary: '#9080d0', glow: 'rgba(144,128,208,0.45)', heroGradient: 'linear-gradient(180deg,#1a1830 0%,#0a0820 100%)', heroBg: 'radial-gradient(ellipse at 50% 0%,rgba(144,128,208,0.25) 0%,transparent 60%)' }
+    tavern: { primary: '#c4953a', glow: 'rgba(255,180,80,0.45)', cenarioGradient: 'linear-gradient(180deg,#3a2818 0%,#1a0e06 100%)', cenarioBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,180,80,0.25) 0%,transparent 60%)' },
+    inn:    { primary: '#d4a850', glow: 'rgba(255,200,100,0.50)', cenarioGradient: 'linear-gradient(180deg,#2a1a10 0%,#1a0e06 100%)', cenarioBg: 'radial-gradient(ellipse at 50% 0%,rgba(255,200,100,0.28) 0%,transparent 65%)' },
+    arcane: { primary: '#9080d0', glow: 'rgba(144,128,208,0.45)', cenarioGradient: 'linear-gradient(180deg,#1a1830 0%,#0a0820 100%)', cenarioBg: 'radial-gradient(ellipse at 50% 0%,rgba(144,128,208,0.25) 0%,transparent 60%)' }
   };
   var th = themes[opts.theme] || themes.tavern;
 
   var html = ''
     + '<style>'
     + '.aaa-sub{display:flex;flex-direction:column;gap:10px;padding:6px 4px 12px;}'
-    // Hero
+    // Cenário
     + '.aaa-sub-cenario{position:relative;padding:14px 12px 12px;border-radius:10px;overflow:hidden;text-align:center;'
-    +   'background:' + th.heroBg + ',' + th.heroGradient + ';'
+    +   'background:' + th.cenarioBg + ',' + th.cenarioGradient + ';'
     +   'border:1px solid ' + th.primary + ';'
     +   'box-shadow:0 4px 14px rgba(0,0,0,0.4),inset 0 0 18px rgba(0,0,0,0.3);}'
     + '.aaa-sub-cenario::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.7;}'
@@ -28829,7 +28829,7 @@ function _aaaListSubScreen(opts){
     + 'body.perf-lite .aaa-sub-item{animation:none!important;}'
     + '@media (prefers-reduced-motion:reduce){.aaa-sub-item{animation:none!important;}}'
     + '</style>'
-    // Hero
+    // Cenário
     + '<div class="aaa-sub">'
     +   '<div class="aaa-sub-cenario">'
     +     (opts.icon ? '<div class="aaa-sub-icon">' + opts.icon + '</div>' : '')
@@ -28895,7 +28895,7 @@ function _aaaListSubScreen(opts){
  * REFATORADO: wrapper que delega 100% para _aaaListSubScreen (AAA template).
  * Motivo: 25+ call sites (Market/Guild/Temple/Bank/Square/Festival/Codex/Gates/
  * Quests/Arena/Workshop/Runes etc.) usavam o template legacy "bnk-item-list"
- * sem hero ornamentado. Esta migração unificada eleva TODOS os sub-screens ao
+ * sem cenário ornamentado. Esta migração unificada eleva TODOS os sub-screens ao
  * padrão AAA visual da Taverna/Estalagem sem tocar nenhum caller individual.
  *
  * Auto-detect de tema baseado em stackKey (heurística por prefixo):
@@ -29648,7 +29648,7 @@ function _squareShowVendorPopup(p){
   });
 }
 
-// === 6. MURAL — abre Heroes Wall (rankings + títulos) ========================
+// === 6. MURAL — abre Mural dos Aventureiros (rankings + títulos) ========================
 function _squareShowMuralPopup(p){
   navigateTo('heroes_wall');
 }
@@ -38294,7 +38294,7 @@ function _dailyShowRewards(p){
   });
 }
 
-// === Áreas extras (Trade Board / Shadow Alley / Travelers / Heroes Wall) ===
+// === Áreas extras (Trade Board / Shadow Alley / Travelers / Mural dos Aventureiros) ===
 
 // --- TRADE BOARD — comprar oferta P2P ---
 function _tradeShowOffer(p, offer){
@@ -38697,7 +38697,7 @@ function _travelerGiftApply(p, traveler, item, tags){
   });
 }
 
-// --- HEROES WALL ---
+// --- MURAL DOS AVENTUREIROS ---
 // canonical: mapa class → ic-* (heraldic-icons rule)
 var CLASS_TO_HERALDIC = {
   'Mago': 'ic-mago', 'Maga': 'ic-mago',
@@ -38719,7 +38719,7 @@ function _heraldicForClass(cls){
 }
 
 function _heroesShowRanking(p, key){
-  var r = HEROES_WALL_RANKINGS[key];
+  var r = MURAL_RANKINGS[key];
   if (!r) return;
   var rows = (r.top || []).map(function(e){
     var ic = _heraldicForClass(e.cls);
@@ -38736,7 +38736,7 @@ function _heroesShowRanking(p, key){
 
 function _heroesShowTitles(p){
   // canonical: heroes_wall_data.py TITLES via CANON_HEROES_FULL.titles (11 entries).
-  // Fallback: HEROES_WALL_TITLES legacy se canonical nao tiver entry.
+  // Fallback: MURAL_TITLES legacy se canonical nao tiver entry.
   var canon = (typeof CANON_HEROES_FULL !== 'undefined' && CANON_HEROES_FULL.titles)
               ? CANON_HEROES_FULL.titles : null;
   var titlesArr;
@@ -38749,7 +38749,7 @@ function _heroesShowTitles(p){
       return { id: k, icon: t.icon || '🎖️', label: t.label, desc: t.description || '', threshold: t.threshold };
     }).filter(function(x){ return !!x.label; });
   } else {
-    titlesArr = HEROES_WALL_TITLES;
+    titlesArr = MURAL_TITLES;
   }
   var rows = titlesArr.map(function(t){
     return t.icon + ' <b>' + t.label + '</b>' +
@@ -38859,8 +38859,8 @@ function _registerDynamicHandlers(){
       };
     })(m);
   });
-  // Heroes Wall rankings
-  Object.keys(HEROES_WALL_RANKINGS).forEach(function(k){
+  // Mural dos Aventureiros rankings
+  Object.keys(MURAL_RANKINGS).forEach(function(k){
     ACTION_HANDLERS['heroes_rank_' + k] = (function(key){
       return function(p){ _heroesShowRanking(p, key); };
     })(k);
@@ -40060,7 +40060,7 @@ function _renderCityPopup(key){
     /* X-6.5.51BM (2026-05-11): user request — Praca AAA epic. Substituiu
        o renderSquareHub generico (apenas flavor + list de services) por
        _renderEpicSquareHub com:
-       - Hero panel com fontainh ASCII + tempo do dia animado
+       - Cenário panel com fontainh ASCII + tempo do dia animado
        - Reputation banner ornamentado
        - Service cards 2-col com hover lift + glow + badges destacados
        - Decoracao parchment + tochas animadas nos cantos */
@@ -42624,7 +42624,7 @@ var ACTION_HANDLERS = {
   'arena_history':        function(p){ _arenaShowHistory(p); },
   'arena_ranking':        function(p){ _arenaShowRanking(p); },
 
-  // === Áreas extras (Trade Board / Shadow Alley / Travelers / Heroes Wall) ===
+  // === Áreas extras (Trade Board / Shadow Alley / Travelers / Mural dos Aventureiros) ===
   // TRADE BOARD — ofertas P2P
   'trade_create':         function(p){ _tradeCreateOffer(p); },
   'trade_mine':           function(p){ _tradeShowMine(p); },
@@ -42635,7 +42635,7 @@ var ACTION_HANDLERS = {
   'shadow_event_open':    function(p){ _shadowShowEvent(p); },
   // TRAVELERS DIARY — entradas individuais auto-registered via 'travelers_view_' prefix
   'travelers_info':       function(p){ _travelersShowInfo(p); },
-  // HEROES WALL — rankings auto-registered via 'heroes_rank_' prefix
+  // MURAL DOS AVENTUREIROS — rankings auto-registered via 'heroes_rank_' prefix
   'heroes_titles':        function(p){ _heroesShowTitles(p); },
   // PORTÕES
   'gates_prep_open':      function(p){ _gatesShowPrep(p); },
@@ -43337,13 +43337,13 @@ function renderSubScreen(el, key){
     header = '📋 Missões Ativas (' + buttons.length + ')';
   }
   /* X-6.5.51BJ (2026-05-11): quest_open_* recebe renderizacao epica AAA
-     com hero header pergaminho + npc-banner ornamentado + botoes maiores
+     com cenário header pergaminho + npc-banner ornamentado + botoes maiores
      com hover lift + bordas douradas pulsantes. Outras subscreens mantem
      layout legacy. */
   var isQuestOpen = (key && key.indexOf('quest_open_') === 0);
   var html = '<div class="city-subscreen' + (isQuestOpen ? ' city-subscreen--quest' : '') + '">';
   if (isQuestOpen) {
-    /* Pergaminho hero — flavor + npcInfo combinados num cartao ornamentado */
+    /* Pergaminho cenário — flavor + npcInfo combinados num cartao ornamentado */
     html += '<style>'
       + '.cs-quest-cenario{position:relative;margin:6px 0 12px;padding:14px 12px 12px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.25) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;}'
       + '.cs-quest-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'

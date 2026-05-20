@@ -14,7 +14,7 @@
  *   ~90    SERVICE_DIALOGUES_BANK (10 dialogues PADRAO_ALDRIC inline)
  *   ~260   BANK_CB_TO_DIALOGUE (backend cb → dialogue key map)
  *   ~290   BANK_SVC_META (svc icon path + meta text canonical)
- *   ~320   _bnkBuildCenario(data) — hero canonical PADRAO_TAVERNA
+ *   ~320   _bnkBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~370   _bnkBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
  *   ~420   _bnkBuildServices(services) — .services + .svc canonical
  *   ~490   renderBankHub(container, data) — entry point
@@ -241,11 +241,11 @@ var BANK_SVC_META = {
   'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.png',    meta: 'DMG p.157' }
 };
 
-/* === Hero CENARIO canonical (PADRAO_TAVERNA — usa .cenario CSS classes) ===
+/* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) ===
  * Estrutura: .cenario > .cenario-bg img + .candle-glow.l/r + .cenario-brasao img + .cenario-titulo
  * CSS canonical em shared/padrao-taverna.css. */
 function _bnkBuildCenario(data) {
-  var hero = vCity.el('div', 'cenario');
+  var cenarioEl = vCity.el('div', 'cenario');
 
   // Banner background (PNG canonical do mockup — /banco/ não /bank/)
   var bg = vCity.el('img', 'cenario-bg');
@@ -253,11 +253,11 @@ function _bnkBuildCenario(data) {
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(bg);
+  cenarioEl.appendChild(bg);
 
   // Candle glows (atmosfera)
-  hero.appendChild(vCity.el('div', 'candle-glow l'));
-  hero.appendChild(vCity.el('div', 'candle-glow r'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
+  cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
 
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
@@ -265,7 +265,7 @@ function _bnkBuildCenario(data) {
   crest.alt = 'Brasão do Banco de Eldoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
-  hero.appendChild(crest);
+  cenarioEl.appendChild(crest);
 
   // Título
   var titulo = vCity.el('div', 'cenario-titulo');
@@ -275,9 +275,9 @@ function _bnkBuildCenario(data) {
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Casa de Tholram · Cofre Real';
   titulo.appendChild(subEl);
-  hero.appendChild(titulo);
+  cenarioEl.appendChild(titulo);
 
-  return hero;
+  return cenarioEl;
 }
 
 /* === NPC row canonical (PADRAO_TAVERNA — .row-npc CSS) ====================
@@ -433,7 +433,7 @@ function renderBankHub(container, data) {
 
   var root = vCity.el('div', 'bnk-hub');
 
-  /* 1. Hero CENARIO (PADRAO_TAVERNA canonical) */
+  /* 1. Cenário canonical (PADRAO_TAVERNA) */
   root.appendChild(_bnkBuildCenario(data));
 
   /* 2. Body container (PADRAO_TAVERNA — padding + gap canonical) */

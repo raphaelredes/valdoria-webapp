@@ -99,23 +99,23 @@ function _renderArenaMain(el, d) {
 
     var frag = document.createDocumentFragment();
 
-    /* === PADRAO_TAVERNA canonical: Hero CENARIO + NPC row + Rep bar (task #34) === */
-    var hero = _div('cenario');
+    /* === PADRAO_TAVERNA canonical: Cenário + NPC row + Rep bar (task #34) === */
+    var cenarioEl = _div('cenario');
     var bg = document.createElement('img');
     bg.className = 'cenario-bg';
     bg.src = '../shared/img/arena/arena-banner.png';
     bg.loading = 'lazy';
     bg.onerror = function(){ this.style.display = 'none'; };
-    hero.appendChild(bg);
-    hero.appendChild(_div('candle-glow l'));
-    hero.appendChild(_div('candle-glow r'));
+    cenarioEl.appendChild(bg);
+    cenarioEl.appendChild(_div('candle-glow l'));
+    cenarioEl.appendChild(_div('candle-glow r'));
     var crest = document.createElement('img');
     crest.className = 'cenario-brasao';
     crest.src = '../shared/img/arena/arena-crest.png';
     crest.alt = 'Brasão da Arena';
     crest.loading = 'lazy';
     crest.onerror = function(){ this.style.display = 'none'; };
-    hero.appendChild(crest);
+    cenarioEl.appendChild(crest);
     var heroTitulo = _div('cenario-titulo');
     var heroName = _div('name');
     heroName.textContent = 'Arena de Eldoria';
@@ -123,8 +123,8 @@ function _renderArenaMain(el, d) {
     var heroSub = _div('sub');
     heroSub.textContent = 'Coliseu Real · Tier ' + ((tier.name || 'Ferro').toUpperCase());
     heroTitulo.appendChild(heroSub);
-    hero.appendChild(heroTitulo);
-    frag.appendChild(hero);
+    cenarioEl.appendChild(heroTitulo);
+    frag.appendChild(cenarioEl);
 
     /* NPC row: Vorhan */
     var npcRow = _div('row-npc');
@@ -184,7 +184,7 @@ function _renderArenaMain(el, d) {
     /* Coliseum backdrop with torches + crowd silhouette */
     frag.appendChild(_arenaBackdrop());
 
-    /* Hero tier badge — imposing laurel wreath */
+    /* Tier badge — imposing laurel wreath */
     var tierWrap = _div('arena-tier-cabecalho');
     var laurel = _div('arena-tier-laurel');
     var tierId = tier.id || 'iron';
