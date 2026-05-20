@@ -669,6 +669,19 @@
         opts.onChoice(ch, dialogue);
         return;
       }
+      // task #70 (2026-05-20) — BACKEND DISPATCH FALLBACK
+      // Quando cb não é 'close', dice:, opinion-, *-confirm, cascade:, memory:,
+      // visit:, ou key em opts.dialogues — dispatcha pro backend via vCity.act.
+      // Resolve bug: choices em greeting dialogues (Guild, Arena, Workshop,
+      // Market merchants, RuneScribe) tinham cb's ('guild_quests', 'arena_fight',
+      // 'workshop_forge', etc.) que não eram dispatched → clique apenas fechava
+      // overlay. Agora cb não-roteado vai pra backend (que pode reconhecer
+      // como cb canonical de hub menu).
+      if (cb && typeof window.vCity === 'object' && typeof window.vCity.act === 'function') {
+        try { window.vCity.act(cb); } catch(_e) { /* non-fatal */ }
+        close();
+        return;
+      }
       close();
     }
 

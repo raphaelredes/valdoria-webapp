@@ -43,9 +43,13 @@ var GARRICK_DIALOGUE = {
     { type: 'speech', speaker: 'Mestre Vorhan', text: 'Vens lutar ou tagarelar? <i>(cruza os bra\u00E7os calejados)</i> A Arena n\u00E3o tolera covardes. Ganha duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perde mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
   ],
   choices: [
-    { id: 'fight',   label: '\u2694 "Vim lutar."', cb: 'arena_fight' },
+    // task #70 (2026-05-20): cb's alinhadas com backend canonical em arena_manager.py.
+    // Antes: 'arena_fight'/'arena_leaderboard' \u2192 n\u00E3o dispatched (silent close).
+    // Agora: backend handlers reais \u2192 'arena_challenge' abre tier selection;
+    // 'arena_daily_board' abre ranking. 'rules' ainda no-op (sem backend handler).
+    { id: 'fight',   label: '\u2694 "Vim lutar."', cb: 'arena_challenge' },
     { id: 'rules',   label: '\uD83D\uDCDC "Explica as regras."', cb: 'arena_rules' },
-    { id: 'rank',    label: '\uD83C\uDFC6 "Mostra o ranking."', cb: 'arena_leaderboard' },
+    { id: 'rank',    label: '\uD83C\uDFC6 "Mostra o ranking."', cb: 'arena_daily_board' },
     { id: 'leave',   label: '\u21A9 "Outra hora, Mestre."', cb: 'close' }
   ]
 };

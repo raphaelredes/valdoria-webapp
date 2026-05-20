@@ -68,9 +68,12 @@ var TAVIRA_DIALOGUE = {
     { type: 'speech', speaker: 'Mestra Tavira', text: 'Bem-vindo de volta, aventureiro. <i>(fecha o livro com um clique seco)</i> O Salão sempre tem trabalho pra quem busca. Diz o que precisa.' }
   ],
   choices: [
-    { id: 'view_quests',  label: '📜 "Quero ver os contratos."', cb: 'guild_quests' },
-    { id: 'recruit',      label: '⚔ "Vim recrutar aventureiros."', cb: 'guild_recruit' },
-    { id: 'rest_party',   label: '🛌 "Como descansa meu grupo?"', cb: 'guild_rest' },
+    // task #70 (2026-05-20): cb's alinhadas com backend canonical em guild.py:151-178.
+    // Antes: 'guild_quests'/'guild_recruit'/'guild_rest' → não dispatched (silent close).
+    // Agora: backend handlers reais → abre quest board / recruit menu / party menu.
+    { id: 'view_quests',  label: '📜 "Quero ver os contratos."', cb: 'guild_quest_board' },
+    { id: 'recruit',      label: '⚔ "Vim recrutar aventureiros."', cb: 'guild_recruit_menu' },
+    { id: 'manage_party', label: '👥 "Como gerencio meu grupo?"', cb: 'guild_party_menu' },
     { id: 'leave',        label: '↩ "Volto depois, Mestra."', cb: 'close' }
   ]
 };

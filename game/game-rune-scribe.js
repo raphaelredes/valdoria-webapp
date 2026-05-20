@@ -37,9 +37,13 @@ var THESSIL_DIALOGUE = {
     { type: 'speech', speaker: 'Mestre Thessil', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trazes fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. O que precisas?' }
   ],
   choices: [
-    { id: 'craft',   label: '🔮 "Quero forjar runas."', cb: 'rune_craft' },
-    { id: 'inspect', label: '📜 "Examina este pergaminho."', cb: 'rune_inspect' },
-    { id: 'learn',   label: '✨ "Ensina-me um glifo."', cb: 'rune_learn' },
+    // task #70 (2026-05-20): cb's alinhadas com backend canonical em market_rune_scribe.py.
+    // Antes: 'rune_craft'/'rune_inspect'/'rune_learn' → não dispatched (silent close).
+    // Agora: 'rune_scribe_menu' (hub), 'rune_scribe_catalog' (lista runas),
+    // 'rune_scribe_intro_1' (tutorial). Backend canonical handlers.
+    { id: 'craft',   label: '🔮 "Quero forjar runas."', cb: 'rune_scribe_menu' },
+    { id: 'catalog', label: '📜 "Mostra o catálogo de runas."', cb: 'rune_scribe_catalog' },
+    { id: 'learn',   label: '✨ "Ensina-me sobre os glifos."', cb: 'rune_scribe_intro_1' },
     { id: 'leave',   label: '↩ "Volto outra hora, Mestre."', cb: 'close' }
   ]
 };

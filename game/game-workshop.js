@@ -38,9 +38,13 @@ var GARRICK_DIALOGUE = {
     { type: 'speech', speaker: 'Mestre Garrick', text: 'Faço seis coisas. <i>(conta nos dedos calejados)</i> Forjo arma nova. Reparo dano. Aprimoro o que tu tem. Encanto se trouxeres a runa. Desconstruo se for desperdício. E faço comissão se pagares bem.' }
   ],
   choices: [
-    { id: 'forge',    label: '🔨 "Quero forjar algo novo."', cb: 'workshop_forge' },
-    { id: 'upgrade',  label: '✨ "Vim aprimorar um item."', cb: 'workshop_upgrade' },
-    { id: 'repair',   label: '🛡 "Preciso de reparo urgente."', cb: 'workshop_repair' },
+    // task #70 (2026-05-20): cb's alinhadas com backend canonical em crafting_ui.py.
+    // Antes: 'workshop_forge'/'workshop_upgrade'/'workshop_repair' → não dispatched.
+    // Agora: 'workshop_recipes' (lista receitas), 'workshop_materials' (materiais),
+    // 'workshop_main' (hub geral). upgrade/repair caem no hub geral.
+    { id: 'forge',    label: '🔨 "Quero forjar algo novo."', cb: 'workshop_recipes' },
+    { id: 'materials', label: '📦 "Mostra meus materiais."', cb: 'workshop_materials' },
+    { id: 'browse',   label: '🛠 "Mostra a oficina toda."', cb: 'workshop_main' },
     { id: 'leave',    label: '↩ "Volto outra hora, Mestre."', cb: 'close' }
   ]
 };
