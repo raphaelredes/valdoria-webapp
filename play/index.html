@@ -13,8 +13,11 @@
 <!-- 2026-05-11 (user request): "/play/ tambem deve redirecionar para tela de
      autenticacao caso nao esteja autenticado". Auth gate roda ANTES da
      logica de /play/ pra redirect instantaneo sem 700ms delay. Telegram
-     users com initData passam normalmente (check 1). -->
-<script src="/shared/auth-gate.js"></script>
+     users com initData passam normalmente (check 1).
+     2026-05-20 (task #77): cache-bust com Date.now() pois auth-gate carrega
+     ANTES do bundle-version.js. Garante que fix do v_*_session detection
+     chega ao browser sem precisar force-reload. -->
+<script>document.write('<script src="/shared/auth-gate.js?_=' + Date.now() + '"><\/script>');</script>
 <!-- Tiered Cache + Version Check (task #31, 2026-05-20): cache-bust em ambos
      scripts pra browser sempre fetch fresh (evita stale max-age=14400). -->
 <script>document.write('<script src="/bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
