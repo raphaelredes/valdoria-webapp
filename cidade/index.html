@@ -7789,6 +7789,15 @@ body.perf-lite .vc-action-btn { transition: none; }
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
     document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
+    // === NPC Living System libraries (sessão #13, Task #19, 2026-05-19) ============
+    //  - npc-relations-data.js: NPC_IDS (18 slugs) + NPC_RELATIONS matrix + NPC_EVENTS_TIMELINE
+    //  - npc-living-system.js: memory + cascade + mood + dispatcher (window._npcMarkVisit/etc.)
+    //  - svc-interactions.js: _diceCheckSvc + _showOpinionReaction + _showPurchaseConfirm +
+    //                          _dispatchSvcChoice (reconhece cb cascade:/memory:/visit:)
+    // Doc canonical: memory/reference_npc_living_system.md
+    document.write('<script src="/shared/npc-relations-data.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/npc-living-system.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/svc-interactions.js?v=' + Date.now() + '"><\/script>');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders
     // em cidade.html geram a estrutura `data` igual à do serializer.py do backend.
