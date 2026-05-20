@@ -247,9 +247,9 @@ var BANK_SVC_META = {
 function _bnkBuildCenario(data) {
   var hero = vCity.el('div', 'cenario');
 
-  // Banner background (PNG canonical do mockup)
+  // Banner background (PNG canonical do mockup — /banco/ não /bank/)
   var bg = vCity.el('img', 'cenario-bg');
-  bg.src = '../shared/img/bank/banco-banner.png';
+  bg.src = '../shared/img/banco/banco-banner.png';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -261,7 +261,7 @@ function _bnkBuildCenario(data) {
 
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
-  crest.src = '../shared/img/bank/banco-crest.png';
+  crest.src = '../shared/img/banco/banco-crest.png';
   crest.alt = 'Brasão do Banco de Eldoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
