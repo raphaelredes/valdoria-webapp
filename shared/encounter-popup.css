@@ -18,18 +18,12 @@
   padding: 12px;
   opacity: 1;
 }
-/* 2026-05-20: animação encFadeIn era aplicada no base rule (sempre running mesmo
-   com display:none), mas Chromium congela a timeline quando element começa
-   display:none. Resultado: opacity stuck em 0. Solução: animação SÓ quando .active.
-   Como a regra usa animação que vai 0→1, o opacity inicia visível (base=1) e a
-   animação faz o fade-in suave quando .active é adicionado. */
+/* 2026-05-20: animação encFadeIn REMOVIDA. Mesmo com forwards + duration baixa,
+   Chromium congela a timeline em display:none → display:flex transitions.
+   Trade-off: popup aparece sem fade (instant) vs. popup nunca aparece. Optamos
+   por aparecer. UX impact mínimo (~250ms de fade que ninguém vai sentir falta). */
 #encounter-overlay.active {
   display: flex;
-  animation: encFadeIn 0.25s ease-out forwards;
-}
-@keyframes encFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .enc-card {
