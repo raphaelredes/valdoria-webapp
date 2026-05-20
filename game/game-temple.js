@@ -237,12 +237,22 @@ var SERVICE_DIALOGUES_TEMPLE = {
  * Backend envia cb = "temple_interact_menu_npc_temple_<X>" (temple.py:224)
  * Mapeia npc_id → dialogue service key. */
 var TEMPLE_CB_TO_DIALOGUE = {
+  // Backend cb pattern (canonical via Bot)
   'temple_interact_menu_npc_temple_elara':     'heal',
   'temple_interact_menu_npc_temple_aldric':    'cure_poison',
   'temple_interact_menu_npc_temple_theron':    'bless',
   'temple_interact_menu_npc_temple_miriel':    'remove_curse',
   'temple_interact_menu_npc_temple_varek':     'greater_restoration',
-  'temple_interact_menu_npc_temple_orenthia':  'raise_dead'
+  'temple_interact_menu_npc_temple_orenthia':  'raise_dead',
+  // task #85 (2026-05-20): Simulador uses temple_dialogue_<sid> pattern.
+  // Aliases pra rotear svc clicks direto pra PADRAO_ALDRIC em vez de cair
+  // no legacy _showNpcDialoguePopup via ACTION_HANDLERS.
+  'temple_dialogue_heal':                      'heal',
+  'temple_dialogue_cure_poison':               'cure_poison',
+  'temple_dialogue_bless':                     'bless',
+  'temple_dialogue_remove_curse':              'remove_curse',
+  'temple_dialogue_greater_restoration':       'greater_restoration',
+  'temple_dialogue_raise_dead':                'raise_dead'
 };
 
 /* === Service icon meta ================================================== */
