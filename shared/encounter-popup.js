@@ -391,7 +391,8 @@
         stropheIdx: 0,
         sentenceIdx: 0,
         activeTypewriters: [],
-        skipped: false
+        skipped: false,
+        isLastPage: idx === pages.length - 1 // task #55: gate pra renderActions
       };
       _currentRenderState = state;
 
@@ -404,6 +405,9 @@
         if (state.stropheIdx >= state.strophes.length) {
           state.skipped = true;
           body.classList.add('revealed');
+          // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
+          // terminar (natural ou skip). Na última página, renderActions só agora.
+          if (state.isLastPage) renderActions();
           return;
         }
         var sd = state.strophes[state.stropheIdx];
@@ -441,9 +445,13 @@
           /* task #53 (2026-05-20) — user pediu: remover "Escolher ↓" duplicado
              da nav-row. O botao "⚔ ESCOLHER ACAO" no actions panel ja serve
              a mesma funcao (e mais claro/AAA). Esconde next btn na ultima pagina.
-             Mantém prev btn pra back navigation. */
+             Mantém prev btn pra back navigation.
+
+             task #55 (2026-05-20) — actions NÃO renderiza aqui na entrada do
+             page; só APÓS typewriter completar (natural ou via _instantReveal).
+             Garante UX: user lê dialogue antes de ver opções. */
           nextBtn.style.visibility = 'hidden';
-          renderActions();
+          actions.style.display = 'none'; // garante que começa escondido
         } else {
           nextBtn.style.visibility = 'visible';
           nextBtn.textContent = 'Continuar →';
@@ -481,6 +489,9 @@
         st.sentenceIdx = 0;
       }
       body.classList.add('revealed');
+      // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
+      // terminar. Em click-to-skip também precisa mostrar actions.
+      if (st.isLastPage) renderActions();
     }
     body.addEventListener('click', function(e) {
       if (e.target.closest('button, a')) return;
