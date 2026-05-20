@@ -38,9 +38,13 @@
   var _config = {
     bundleUrl: '/bundle-version.js',
     pollIntervalMs: 60 * 1000,           // Check every 1 min when active
-    initialDelayMs: 5 * 1000,            // First check 5s after load
+    initialDelayMs: 8 * 1000,            // First check 8s after load (was 5s — give page time to settle)
     autoReloadDelayMs: 10 * 1000,        // Auto-reload 10s after banner shown
-    reloadLoopProtectionMs: 30 * 1000,   // Don't auto-reload more than once per 30s
+    reloadLoopProtectionMs: 120 * 1000,  // Don't auto-reload more than once per 2min (was 30s)
+    consecutiveMismatchesRequired: 2,    // task #45 (2026-05-20): require N=2 consecutive mismatches
+                                          // before reload — filtra edge inconsistencies do CF Pages
+                                          // (diferentes edge nodes podem retornar hashes diferentes
+                                          // durante propagação de deploy)
     bannerId: 'v-update-banner',
     storageKey: {
       lastReloadTs: 'valdoria_last_reload_ts',
@@ -52,7 +56,9 @@
     clientHash: null,
     isReloading: false,
     pollerId: null,
-    bannerShownAt: null
+    bannerShownAt: null,
+    consecutiveMismatches: 0,            // task #45: contador pra filtrar transient inconsistencies
+    lastMismatchHash: null               // task #45: hash visto na última detecção
   };
 
   /* === Fetch server version (no-cache, no-store) ===
@@ -87,12 +93,37 @@
 
     return _checkServerVersion().then(function(server) {
       if (!server) return 'fetch-error';
-      if (server.hash === _state.clientHash) return 'fresh';
+      if (server.hash === _state.clientHash) {
+        // Reset consecutive counter — hash matches now
+        if (_state.consecutiveMismatches > 0) {
+          console.log('[VERSION-CHECK] mismatch reset (edge inconsistency resolved)');
+          _state.consecutiveMismatches = 0;
+          _state.lastMismatchHash = null;
+        }
+        return 'fresh';
+      }
 
-      // Mismatch detected
-      console.warn('[VERSION-CHECK] mismatch — client=' + _state.clientHash + ' server=' + server.hash);
+      // Mismatch detected — increment counter
+      // task #45: N=2 consecutive mismatches required pra filtrar
+      // edge inconsistency do CF Pages durante deploy propagation
+      if (_state.lastMismatchHash === server.hash) {
+        _state.consecutiveMismatches += 1;
+      } else {
+        // Different hash than last mismatch — reset counter (transient)
+        _state.consecutiveMismatches = 1;
+        _state.lastMismatchHash = server.hash;
+      }
 
-      // Reload loop protection: don't auto-reload twice in 30s
+      console.warn('[VERSION-CHECK] mismatch ' + _state.consecutiveMismatches + '/' +
+                   _config.consecutiveMismatchesRequired +
+                   ' — client=' + _state.clientHash + ' server=' + server.hash);
+
+      // Require N=2 consecutive mismatches with SAME server hash before reload
+      if (_state.consecutiveMismatches < _config.consecutiveMismatchesRequired) {
+        return 'stale-tentative';
+      }
+
+      // Reload loop protection: don't auto-reload twice in 2min (was 30s)
       var lastReload = parseInt(localStorage.getItem(_config.storageKey.lastReloadTs) || '0', 10);
       var sinceLastReload = Date.now() - lastReload;
       if (sinceLastReload < _config.reloadLoopProtectionMs) {
