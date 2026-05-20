@@ -9444,14 +9444,57 @@ function renderFooter(){
      Agora: TUDO em quick (5 botoes 1 linha), nav vazio.
      Layout: [Mochila][Ficha][Personagens][Ajuda][Settings]
      fb-icon-only pra Ajuda e Settings (compactos), labels nos outros 3. */
+  // task #87 (2026-05-20) — PADRAO_MENU canonical: usar PNG images como o mockup
+  // taverna-javali-final.html. User reportou: "o footer-quick da cidade deveria
+  // ser na realidade o bottom-panel do taverna-javali-final.html".
+  // Mockup canonical usa <img class="fb-ico-img" src="..."> em vez de SVG inline.
   quickEl.innerHTML = ''
-    + '<button class="fb-btn" data-action="inventory">' + _heralB('ic-mochila') + 'Mochila</button>'
-    + '<button class="fb-btn" data-action="status">'    + _heralB('ic-ficha') + 'Ficha</button>'
-    + '<button class="fb-btn" data-action="characters">' + _heralB('ic-portal') + 'Hall</button>'
-    + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">' + _heralB('ic-ajuda') + '</button>'
-    + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">' + _heralB('ic-engrenagem') + '</button>';
+    + '<button class="fb-btn" data-action="inventory">'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.png" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
+    + '</button>'
+    + '<button class="fb-btn" data-action="status">'
+    +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.png" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
+    + '</button>'
+    + '<button class="fb-btn" data-action="characters">'
+    +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.png" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
+    + '</button>'
+    + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
+    +   '<span class="fb-ico">❓</span>'
+    + '</button>'
+    + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
+    +   '<span class="fb-ico">⚙</span>'
+    + '</button>';
   // Nav row agora vazio (todos botoes movidos pra quick em linha unica)
   navEl.innerHTML = '';
+
+  // task #87 (2026-05-20) — PADRAO_VOLUME: força re-embed do va-btn no footer-quick.
+  // ROOT CAUSE: audio-manager.js inicializa ANTES de renderFooter rodar. Se
+  // footer-quick estava vazio na hora do init, audio-manager fallback pra
+  // _createFloatingBtn (#va-float). Mas user pediu: "PADRAO_MENU deveria
+  // substituir tanto footer-quick quanto va-float". Fix: AGORA que footer-quick
+  // está populado, remove va-float existente e trigger re-embed.
+  try {
+    var floatEl = document.getElementById('va-float');
+    if (floatEl) {
+      // Remove floating fallback
+      floatEl.remove();
+      // Remove the (floating) va-btn so audio-manager.js MutationObserver
+      // detects the missing button and re-embeds em footer-quick (já populated).
+      var oldBtn = document.getElementById('va-btn');
+      if (oldBtn) oldBtn.remove();
+      // Trigger DOM mutation pra observer detectar
+      // (audio-manager.js linha 300 watcha removal of va-btn dentro de footer-quick;
+      // mas como va-btn não estava lá, vamos forçar via re-call do embed indireto)
+      if (window.ValdoriaAudio && typeof window.ValdoriaAudio.embedInFooter === 'function') {
+        window.ValdoriaAudio.embedInFooter(quickEl);
+      } else {
+        // Fallback: dispara mutation manual (adiciona+remove span dummy)
+        var dummy = document.createElement('span');
+        quickEl.appendChild(dummy);
+        setTimeout(function(){ try { quickEl.removeChild(dummy); } catch(_){} }, 50);
+      }
+    }
+  } catch(_e){ /* defensive: nao quebra renderFooter se audio-manager nao carregou */ }
 }
 function _toggleFooter(){
   _footerCollapsed = !_footerCollapsed;
