@@ -10301,7 +10301,8 @@ var TUTORIAL_STEPS = [
                 + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
   },
   {
-    selector: '.hub-cta-explore, .hub-action-explore, [data-cb="explore_main"], [data-cb="gates_explore"]',
+    /* 2026-05-21: selector corrigido vs DOM real (linha 52320: _hubBtn('hub-cta',...)). */
+    selector: '.hub-cta',
     title: '⚔️ Partir para Aventura',
     description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
                 + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, ouro e itens.'
@@ -10355,15 +10356,21 @@ var TUTORIAL_STEPS = [
                 + 'Bom lugar para ouvir boatos sobre o mundo.'
   },
   {
-    selector: '#hotbar, .v-hotbar, [data-screen-footer]',
+    /* 2026-05-21: corrigido vs DOM real — bottom-panel canonical (Fase 8)
+       com footer-quick (Mochila/Ficha/Grupo) + footer-nav (Voltar/Help/etc). */
+    selector: '#bottom-panel, .footer-row.footer-quick',
     title: '⚡ Atalhos rápidos',
-    description: 'Barra inferior com atalhos pros locais mais usados. Clique para ir direto.'
+    description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> e <b>Grupo</b> — atalhos pros recursos mais usados. '
+                + 'O botão <b>· Menu</b> recolhe pra ganhar mais espaço de tela.'
   },
   {
-    selector: '#hud, .v-hud, [data-hud]',
-    title: '❤️ Sua barra de status',
-    description: '<b>HP</b> (vida), <b>MP</b> (mana/fé/vigor), <b>XP</b> (progresso de nível), <b>Valdoritas</b> '
-                + '(ouro). Quando HP fica vermelho, descanse na estalagem ou cure no templo.'
+    /* 2026-05-21: corrigido vs DOM real — hub-party é o grid de cards de
+       personagem no topo (Ryaiael/SIA/JOEL/QUADE), mostra HP/MP/XP/Gold. */
+    selector: '.hub-party',
+    title: '❤️ Cards do seu grupo',
+    description: 'Topo da tela: cards de cada personagem com <b>HP</b> (vida vermelha), <b>MP</b> (mana/fé/vigor), '
+                + '<b>XP</b> (progresso de nível) e <b>Valdoritas</b> (moeda). Quando HP fica baixo, descanse na '
+                + 'estalagem ou cure no templo.'
   },
   {
     selector: null,  // closing slide
@@ -10508,6 +10515,13 @@ function _showFirstTimeTutorial(stepIdx){
   var spotlight = document.getElementById('first-tut-spotlight');
   var mask = document.getElementById('first-tut-mask');
   var card = document.getElementById('first-tut-card');
+  /* 2026-05-21 BUG FIX (#tutorial-inline-persist): SEMPRE limpar inline styles
+     do card antes de re-posicionar. Antes: estilos inline (top/bottom) de step
+     anterior persistiam, sobrescrevendo a class .center quando next step
+     caia em fallback. Resultado: card aparecia em posição inválida (Atalhos
+     rápidos cortado embaixo porque step anterior setou bottom:24px). */
+  card.style.top = '';
+  card.style.bottom = '';
   if (step.selector) {
     /* 2026-05-21 BUG FIX (#tutorial-mercado): trocar tab automaticamente se target
        estiver em uma aba não-default. Mercado/Templo/Banco etc são em outras tabs
