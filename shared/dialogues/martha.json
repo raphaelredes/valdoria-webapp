@@ -1,0 +1,4251 @@
+{
+  "npc_inn_martha": {
+    "timeline": [
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "met_martha"
+        }
+      },
+      {
+        "node": "act1_trusted",
+        "conditions": {
+          "flag": "completed_martha_cellar"
+        }
+      },
+      {
+        "node": "act2_past",
+        "conditions": {
+          "flags": [
+            "completed_martha_cellar",
+            "asked_about_martha"
+          ],
+          "min_rep": [
+            {
+              "faction": "inn",
+              "value": 10
+            }
+          ]
+        }
+      },
+      {
+        "node": "act2_past_revealed",
+        "conditions": {
+          "flag": "martha_past_revealed"
+        }
+      },
+      {
+        "node": "act3_shadow",
+        "conditions": {
+          "flags": [
+            "martha_past_revealed",
+            "completed_martha_journal"
+          ]
+        }
+      },
+      {
+        "node": "act4_legacy",
+        "conditions": {
+          "flags": [
+            "completed_shadow_quest"
+          ],
+          "min_rep": [
+            {
+              "faction": "inn",
+              "value": 15
+            }
+          ]
+        }
+      }
+    ],
+    "nodes": {
+      "start": {
+        "text": [
+          "Bem-vindo à Estalagem Descanso do Viajante, querido. É raro ver rostos novos por Eldoria ultimamente. Como posso te ajudar?",
+          "Ah, entre, entre! Tira esse peso dos ombros. Minha estalagem é seu refúgio.",
+          "Você parece exausto, meu jovem. O Grifo tem camas macias e sopa quente esperando por você.",
+          "Sente-se onde quiser, querido. Aqui todos são família. O que Martha pode fazer por você hoje?",
+          "O mundo lá fora é frio, mas aqui dentro mantemos o fogo aceso. Aceita algo para beber?"
+        ],
+        "choices": [
+          {
+            "text": "Conte-me, como anda a cidade?",
+            "target": "city_rumors",
+            "once": true,
+            "impact": {
+              "flags": {
+                "met_martha": true
+              }
+            }
+          },
+          {
+            "text": "🎲 Você parece preocupada. Aconteceu algo?",
+            "target": "martha_confides",
+            "conditions": {
+              "flags": [
+                "!accepted_martha_cellar_quest",
+                "!cleared_martha_cellar",
+                "!completed_martha_cellar",
+                "!martha_wisdom_failed"
+              ]
+            },
+            "check": {
+              "skill": "wisdom",
+              "difficulty": 12,
+              "success": "martha_confides",
+              "failure": "martha_deflected",
+              "failure_impact": {
+                "flags": {
+                  "martha_wisdom_failed": true
+                }
+              }
+            },
+            "impact": {
+              "flags": {
+                "met_martha": true
+              }
+            }
+          },
+          {
+            "text": "Martha, sobre o que te preocupava antes...",
+            "target": "martha_confides_gentle",
+            "conditions": {
+              "flags": [
+                "martha_wisdom_failed",
+                "!accepted_martha_cellar_quest",
+                "!cleared_martha_cellar",
+                "!completed_martha_cellar"
+              ]
+            },
+            "impact": {
+              "flags": {
+                "met_martha": true
+              }
+            }
+          },
+          {
+            "text": "[Ladino] Sobre 'negócios escuros'...",
+            "target": "martha_secret_preview",
+            "conditions": {
+              "class": "Ladino",
+              "flags": [
+                "!martha_rogue_tip"
+              ]
+            }
+          },
+          {
+            "text": "[Ladino] Lembra dos contatos noturnos?",
+            "target": "martha_secret_reminder",
+            "conditions": {
+              "class": "Ladino",
+              "flags": [
+                "martha_rogue_tip"
+              ]
+            }
+          },
+          {
+            "text": "🐀 Limpei o porão. Os ratos se foram.",
+            "target": "martha_finish_quest",
+            "conditions": {
+              "flags": [
+                "cleared_martha_cellar",
+                "!completed_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "🧪 Coloquei o veneno no porão. Os ratos sumiram!",
+            "target": "martha_poison_complete",
+            "conditions": {
+              "flags": [
+                "martha_poison_applied",
+                "!completed_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "Preciso de um lugar para dormir.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "impact": {
+              "flags": {
+                "met_martha": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bem-vindo à Estalagem Descanso do Viajante, querido."
+          },
+          {
+            "type": "narration",
+            "text": "É raro ver rostos novos por Eldoria ultimamente."
+          },
+          {
+            "type": "narration",
+            "text": "Como posso te ajudar?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, entre, entre!"
+          },
+          {
+            "type": "narration",
+            "text": "Tira esse peso dos ombros."
+          },
+          {
+            "type": "narration",
+            "text": "Minha estalagem é seu refúgio."
+          },
+          {
+            "type": "narration",
+            "text": "Você parece exausto, meu jovem."
+          },
+          {
+            "type": "narration",
+            "text": "O Grifo tem camas macias e sopa quente esperando por você."
+          },
+          {
+            "type": "narration",
+            "text": "Sente-se onde quiser, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui todos são família."
+          },
+          {
+            "type": "narration",
+            "text": "O que Martha pode fazer por você hoje?"
+          },
+          {
+            "type": "narration",
+            "text": "O mundo lá fora é frio, mas aqui dentro mantemos o fogo aceso."
+          },
+          {
+            "type": "narration",
+            "text": "Aceita algo para beber?"
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "Ah, bem-vindo de volta, querido! Precisa do seu quarto habitual ou apenas de um prato quente?",
+          "Olha só quem voltou! Estava preocupada com você lá fora. Venha, sente-se.",
+          "Meu hóspede favorito! A estalagem fica mais alegre com você por aqui.",
+          "Já coloquei a água para ferver. Vai querer o ensopado de hoje?",
+          "Como foi a jornada, meu bem? Espero que não tenha se machucado."
+        ],
+        "choices": [
+          {
+            "text": "Alguma novidade?",
+            "target": "city_rumors"
+          },
+          {
+            "text": "🎲 Você parece preocupada. Aconteceu algo?",
+            "target": "martha_confides",
+            "conditions": {
+              "flags": [
+                "!accepted_martha_cellar_quest",
+                "!cleared_martha_cellar",
+                "!completed_martha_cellar",
+                "!martha_wisdom_failed"
+              ]
+            },
+            "check": {
+              "skill": "wisdom",
+              "difficulty": 12,
+              "success": "martha_confides",
+              "failure": "martha_deflected",
+              "failure_impact": {
+                "flags": {
+                  "martha_wisdom_failed": true
+                }
+              }
+            }
+          },
+          {
+            "text": "Martha, sobre o que te preocupava antes...",
+            "target": "martha_confides_gentle",
+            "conditions": {
+              "flags": [
+                "martha_wisdom_failed",
+                "!accepted_martha_cellar_quest",
+                "!cleared_martha_cellar",
+                "!completed_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "[Ladino] Algo novo nas sombras?",
+            "target": "martha_secret",
+            "conditions": {
+              "class": "Ladino",
+              "flags": [
+                "!martha_rogue_tip"
+              ]
+            }
+          },
+          {
+            "text": "[Ladino] Lembra dos contatos noturnos?",
+            "target": "martha_secret_reminder",
+            "conditions": {
+              "class": "Ladino",
+              "flags": [
+                "martha_rogue_tip"
+              ]
+            }
+          },
+          {
+            "text": "🐀 Sobre o porão... está limpo.",
+            "target": "martha_finish_quest",
+            "conditions": {
+              "flags": [
+                "cleared_martha_cellar",
+                "!completed_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "🧪 Coloquei o veneno no porão. Os ratos sumiram!",
+            "target": "martha_poison_complete",
+            "conditions": {
+              "flags": [
+                "martha_poison_applied",
+                "!completed_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, bem-vindo de volta, querido!"
+          },
+          {
+            "type": "narration",
+            "text": "Precisa do seu quarto habitual ou apenas de um prato quente?"
+          },
+          {
+            "type": "narration",
+            "text": "Olha só quem voltou!"
+          },
+          {
+            "type": "narration",
+            "text": "Estava preocupada com você lá fora."
+          },
+          {
+            "type": "narration",
+            "text": "Venha, sente-se."
+          },
+          {
+            "type": "narration",
+            "text": "Meu hóspede favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "A estalagem fica mais alegre com você por aqui."
+          },
+          {
+            "type": "narration",
+            "text": "Já coloquei a água para ferver."
+          },
+          {
+            "type": "narration",
+            "text": "Vai querer o ensopado de hoje?"
+          },
+          {
+            "type": "narration",
+            "text": "Como foi a jornada, meu bem?"
+          },
+          {
+            "type": "narration",
+            "text": "Espero que não tenha se machucado."
+          }
+        ]
+      },
+      "city_rumors": {
+        "text": "Eldoria já foi mais calma. Agora, com os desaparecimentos na floresta, as pessoas trancam as portas mais cedo. O capitão da guarda anda com os nervos à flor da pele.",
+        "choices": [
+          {
+            "text": "❗ Desaparecimentos? Quem sumiu?",
+            "target": "disappearances",
+            "conditions": {
+              "flags": [
+                "!knows_about_thorne_son",
+                "!accepted_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "Entendi. Vou ficar atento.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Eldoria já foi mais calma."
+          },
+          {
+            "type": "narration",
+            "text": "Agora, com os desaparecimentos na floresta, as pessoas trancam as portas mais cedo."
+          },
+          {
+            "type": "narration",
+            "text": "O capitão da guarda anda com os nervos à flor da pele."
+          }
+        ]
+      },
+      "disappearances": {
+        "text": "O filho do ferreiro, Thorne, sumiu faz três noites. Ele foi buscar lenha na floresta e nunca mais voltou. O pobre homem está inconsolável no mercado.",
+        "choices": [
+          {
+            "text": "📜 Talvez eu possa falar com ele.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "knows_about_thorne_son": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O filho do ferreiro, Thorne, sumiu faz três noites."
+          },
+          {
+            "type": "narration",
+            "text": "Ele foi buscar lenha na floresta e nunca mais voltou."
+          },
+          {
+            "type": "narration",
+            "text": "O pobre homem está inconsolável no mercado."
+          }
+        ]
+      },
+      "martha_confides": {
+        "text": "Você tem olhos atentos... Sim, ando sem dormir. Meus estoques de comida no porão andam sumindo, e ouço barulhos estranhos lá embaixo à noite. Mas não tenho ninguém com coragem de olhar.",
+        "choices": [
+          {
+            "text": "📜❗ Eu posso investigar o porão para você (Persuasão DC 10)",
+            "target": "martha_quest_accepted",
+            "conditions": {
+              "flags": [
+                "!martha_persuasion_failed"
+              ]
+            },
+            "check": {
+              "skill": "charisma",
+              "difficulty": 10,
+              "success": "martha_quest_accepted",
+              "failure": "martha_skeptical",
+              "failure_impact": {
+                "flags": {
+                  "martha_persuasion_failed": true
+                }
+              }
+            }
+          },
+          {
+            "text": "Martha, eu sei que posso ajudar. Me dê uma chance.",
+            "target": "martha_quest_reluctant",
+            "conditions": {
+              "flags": [
+                "martha_persuasion_failed"
+              ]
+            }
+          },
+          {
+            "text": "🧪 [INT 12+] Posso preparar veneno para os ratos.",
+            "target": "martha_poison_plan",
+            "conditions": {
+              "stat_check": {
+                "stat": "intelligence",
+                "min": 12
+              }
+            }
+          },
+          {
+            "text": "Parece perigoso. Melhor chamar a guarda.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Você tem olhos atentos..."
+          },
+          {
+            "type": "narration",
+            "text": "Sim, ando sem dormir."
+          },
+          {
+            "type": "narration",
+            "text": "Meus estoques de comida no porão andam sumindo, e ouço barulhos estranhos lá embaixo à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não tenho ninguém com coragem de olhar."
+          }
+        ]
+      },
+      "martha_poison_plan": {
+        "text": "Envenenar os ratos? (Ela pensa por um momento) Hm, Irmã Elara no templo sabe fazer veneno para pestes. Se você conseguir o veneno e colocar no porão, talvez não precise arriscar sua pele lá embaixo!",
+        "choices": [
+          {
+            "text": "📜 Considere feito. Buscarei o veneno.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_martha_cellar_quest": true,
+                "martha_poison_path": true
+              },
+              "random_set_flag": {
+                "elara_poison_var": {
+                  "min": 1,
+                  "max": 8
+                }
+              },
+              "quests": [
+                "quest_martha_cellar"
+              ],
+              "reputation": {
+                "inn": 3
+              }
+            }
+          },
+          {
+            "text": "Pensando melhor, prefiro descer pessoalmente.",
+            "target": "martha_quest_accepted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Envenenar os ratos? (Ela pensa por um momento) Hm, Irmã Elara no templo sabe fazer veneno para pestes."
+          },
+          {
+            "type": "narration",
+            "text": "Se você conseguir o veneno e colocar no porão, talvez não precise arriscar sua pele lá embaixo!"
+          }
+        ]
+      },
+      "martha_deflected": {
+        "text": "(Martha desvia o olhar, mas suas mãos tremem enquanto segura a caneca.)\n\nOh, é apenas o cansaço, querido. Muitos clientes e pouco tempo, você sabe como é.\n\n(Você nota que ela olha nervosamente para a porta dos fundos.)",
+        "choices": [
+          {
+            "text": "Martha, suas mãos estão tremendo. Pode confiar em mim.",
+            "target": "martha_confides_gentle"
+          },
+          {
+            "text": "Entendo. Se precisar de algo, estarei aqui.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha desvia o olhar, mas suas mãos tremem enquanto segura a caneca.)\n\nOh, é apenas o cansaço, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Muitos clientes e pouco tempo, você sabe como é.\n\n(Você nota que ela olha nervosamente para a porta dos fundos.)"
+          }
+        ]
+      },
+      "martha_confides_gentle": {
+        "text": "(Martha para, suspira, e finalmente deixa os ombros caírem.)\n\nVocê tem razão... não adianta esconder. Meus estoques de comida no porão andam sumindo, e ouço barulhos estranhos lá embaixo à noite. Mas não tenho ninguém com coragem de olhar.\n\n(Ela te olha com gratidão.) Obrigada por insistir, querido.",
+        "choices": [
+          {
+            "text": "📜❗ Eu posso investigar o porão para você (Persuasão DC 10)",
+            "target": "martha_quest_accepted",
+            "conditions": {
+              "flags": [
+                "!martha_persuasion_failed"
+              ]
+            },
+            "check": {
+              "skill": "charisma",
+              "difficulty": 10,
+              "success": "martha_quest_accepted",
+              "failure": "martha_skeptical",
+              "failure_impact": {
+                "flags": {
+                  "martha_persuasion_failed": true
+                }
+              }
+            }
+          },
+          {
+            "text": "Martha, eu sei que posso ajudar. Me dê uma chance.",
+            "target": "martha_quest_reluctant",
+            "conditions": {
+              "flags": [
+                "martha_persuasion_failed"
+              ]
+            }
+          },
+          {
+            "text": "🧪 [INT 12+] Posso preparar veneno para os ratos.",
+            "target": "martha_poison_plan",
+            "conditions": {
+              "stat_check": {
+                "stat": "intelligence",
+                "min": 12
+              }
+            }
+          },
+          {
+            "text": "Parece perigoso. Melhor chamar a guarda.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha para, suspira, e finalmente deixa os ombros caírem.)\n\nVocê tem razão... não adianta esconder."
+          },
+          {
+            "type": "narration",
+            "text": "Meus estoques de comida no porão andam sumindo, e ouço barulhos estranhos lá embaixo à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não tenho ninguém com coragem de olhar.\n\n(Ela te olha com gratidão.) Obrigada por insistir, querido."
+          }
+        ]
+      },
+      "martha_quest_accepted": {
+        "text": "Sério? Oh, que os deuses te abençoem! Se você livrar meu porão do que quer que esteja lá, terá um quarto grátis por uma semana!",
+        "choices": [
+          {
+            "text": "📜 Considere feito. Voltarei logo.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_martha_cellar_quest": true
+              },
+              "quests": [
+                "quest_martha_cellar"
+              ],
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Sério?"
+          },
+          {
+            "type": "narration",
+            "text": "Oh, que os deuses te abençoem!"
+          },
+          {
+            "type": "narration",
+            "text": "Se você livrar meu porão do que quer que esteja lá, terá um quarto grátis por uma semana!"
+          }
+        ]
+      },
+      "martha_quest_reluctant": {
+        "text": "(Martha hesita, mas o desespero vence o ceticismo.)\n\nOlha... eu não tenho opção, tá bem? Ninguém mais se ofereceu. O porão fica atrás da cozinha. A porta está trancada, mas aqui está a chave.\n\n(Ela te entrega uma chave enferrujada sem olhar nos seus olhos.) Só... não quebre nada lá embaixo.",
+        "choices": [
+          {
+            "text": "📜 Não vai se arrepender, Martha.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_martha_cellar_quest": true
+              },
+              "quests": [
+                "quest_martha_cellar"
+              ],
+              "reputation": {
+                "inn": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha hesita, mas o desespero vence o ceticismo.)\n\nOlha... eu não tenho opção, tá bem?"
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém mais se ofereceu."
+          },
+          {
+            "type": "narration",
+            "text": "O porão fica atrás da cozinha."
+          },
+          {
+            "type": "narration",
+            "text": "A porta está trancada, mas aqui está a chave.\n\n(Ela te entrega uma chave enferrujada sem olhar nos seus olhos.) Só... não quebre nada lá embaixo."
+          }
+        ]
+      },
+      "martha_secret": {
+        "text": "(Ela abaixa a voz e te olha de cima a baixo) Você fala como quem conhece as sombras. Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos depois da meia-noite. Alguns 'comerciantes noturnos' ainda frequentam a região.",
+        "choices": [
+          {
+            "text": "Entendi. Ficarei atento.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "knows_thieves_cant": true,
+                "martha_rogue_tip": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ela abaixa a voz e te olha de cima a baixo) Você fala como quem conhece as sombras."
+          },
+          {
+            "type": "narration",
+            "text": "Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos depois da meia-noite."
+          },
+          {
+            "type": "narration",
+            "text": "Alguns 'comerciantes noturnos' ainda frequentam a região."
+          }
+        ]
+      },
+      "martha_secret_preview": {
+        "text": "🗣️ <i>Você se inclina sobre o balcão e abaixa a voz:</i>\n\n\"Ouvi dizer que você sabe quem procurar para 'negócios escuros'.\"",
+        "choices": [
+          {
+            "text": "✅ Dizer isso",
+            "target": "martha_secret",
+            "impact": {
+              "flags": {
+                "met_martha": true
+              }
+            }
+          },
+          {
+            "text": "Melhor não...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "🗣️ <i>Você se inclina sobre o balcão e abaixa a voz:</i>\n\n\"Ouvi dizer que você sabe quem procurar para 'negócios escuros'.\""
+          }
+        ]
+      },
+      "martha_secret_reminder": {
+        "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos depois da meia-noite. Os 'comerciantes noturnos' ainda frequentam a região. O velho Barnaby se foi há semanas, mas os contatos dele continuam operando por lá. Fique esperto.",
+        "choices": [
+          {
+            "text": "Certo. Obrigado pela lembrança.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos depois da meia-noite."
+          },
+          {
+            "type": "narration",
+            "text": "Os 'comerciantes noturnos' ainda frequentam a região."
+          },
+          {
+            "type": "narration",
+            "text": "O velho Barnaby se foi há semanas, mas os contatos dele continuam operando por lá."
+          },
+          {
+            "type": "narration",
+            "text": "Fique esperto."
+          }
+        ]
+      },
+      "martha_skeptical": {
+        "text": "(Martha te olha de cima a baixo, cética, mas há desespero em seus olhos.)\n\nVocê? Ora, parece que mal consegue segurar essa arma. Melhor deixar isso para os profissionais.\n\n(Mas seus olhos voltam para a porta do porão. Ela não tem mais ninguém a quem recorrer.)",
+        "choices": [
+          {
+            "text": "Não preciso provar nada. Me diga onde fica o porão.",
+            "target": "martha_quest_reluctant"
+          },
+          {
+            "text": "Talvez tenha razão.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te olha de cima a baixo, cética, mas há desespero em seus olhos.)\n\nVocê?"
+          },
+          {
+            "type": "narration",
+            "text": "Ora, parece que mal consegue segurar essa arma."
+          },
+          {
+            "type": "narration",
+            "text": "Melhor deixar isso para os profissionais.\n\n(Mas seus olhos voltam para a porta do porão."
+          },
+          {
+            "type": "narration",
+            "text": "Ela não tem mais ninguém a quem recorrer.)"
+          }
+        ]
+      },
+      "martha_poison_complete": {
+        "text": "O veneno funcionou? (Ela desce ao porão e volta com um sorriso aliviado) Nem um rato à vista! Inteligente, muito inteligente. Aqui, não é muito, mas é o que posso oferecer.",
+        "choices": [
+          {
+            "text": "Fico feliz em ajudar, Martha.",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "inn": 7
+              },
+              "complete_quests": [
+                "quest_martha_cellar"
+              ],
+              "flags": {
+                "completed_martha_cellar": true,
+                "inn_free_modest_stays": 7,
+                "inn_free_wealthy_stays": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O veneno funcionou? (Ela desce ao porão e volta com um sorriso aliviado) Nem um rato à vista!"
+          },
+          {
+            "type": "narration",
+            "text": "Inteligente, muito inteligente."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui, não é muito, mas é o que posso oferecer."
+          }
+        ]
+      },
+      "martha_finish_quest": {
+        "text": "Você conseguiu? Pelos deuses! O silêncio lá embaixo é música para meus ouvidos. Aqui, pegue isto como agradecimento. E como prometido, você tem uma semana de estadia no quarto comum por minha conta! Ah, e reservei uma noite na suíte especial para você descansar como um rei!",
+        "choices": [
+          {
+            "text": "Fico feliz em ajudar, Martha.",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "inn": 10
+              },
+              "complete_quests": [
+                "quest_martha_cellar"
+              ],
+              "flags": {
+                "completed_martha_cellar": true,
+                "inn_free_modest_stays": 7,
+                "inn_free_wealthy_stays": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Você conseguiu?"
+          },
+          {
+            "type": "narration",
+            "text": "Pelos deuses!"
+          },
+          {
+            "type": "narration",
+            "text": "O silêncio lá embaixo é música para meus ouvidos."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui, pegue isto como agradecimento."
+          },
+          {
+            "type": "narration",
+            "text": "E como prometido, você tem uma semana de estadia no quarto comum por minha conta!"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, e reservei uma noite na suíte especial para você descansar como um rei!"
+          }
+        ]
+      },
+      "act1_trusted": {
+        "text": [
+          "Ah, {player_name}! Meu herói favorito! A estalagem fica mais segura quando você está por perto. Sente-se, precisa de algo?",
+          "Olha só quem apareceu! Já estava preparando seu ensopado favorito. Intuição de estalajadeira.",
+          "Bem-vindo de volta, querido! Desde que você limpou o porão, tenho dormido como uma pedra. O que posso fazer por você?",
+          "O Grifo está de pé graças a você, {player_name}. Considere esta estalagem sua segunda casa.",
+          "Ah, meu salvador! Os hóspedes ainda comentam sobre como você enfrentou aqueles ratos. Você é uma lenda por aqui!"
+        ],
+        "choices": [
+          {
+            "text": "Como anda a estalagem sem os ratos?",
+            "target": "act1_cellar_aftermath_combat",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "!martha_poison_path"
+              ]
+            }
+          },
+          {
+            "text": "Como anda a estalagem depois do veneno?",
+            "target": "act1_cellar_aftermath_poison",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "martha_poison_path"
+              ]
+            }
+          },
+          {
+            "text": "Alguma novidade pela cidade?",
+            "target": "act1_city_news"
+          },
+          {
+            "text": "Me fale sobre você, Martha.",
+            "target": "act1_about_martha",
+            "once": true,
+            "impact": {
+              "flags": {
+                "asked_about_martha": true
+              }
+            }
+          },
+          {
+            "text": "[Ladino] Algum 'movimento' nos becos ultimamente?",
+            "target": "act1_rogue_intel",
+            "once": true,
+            "conditions": {
+              "class": "Ladino"
+            }
+          },
+          {
+            "text": "[Clérigo] Os deuses abençoaram esta estalagem.",
+            "target": "act1_faith_talk",
+            "once": true,
+            "conditions": {
+              "class": "Clérigo"
+            }
+          },
+          {
+            "text": "[Paladino] Sinto uma paz verdadeira aqui dentro.",
+            "target": "act1_faith_talk_paladin",
+            "once": true,
+            "conditions": {
+              "class": "Paladino"
+            }
+          },
+          {
+            "text": "💜 Martha, posso te pedir um conselho pessoal?",
+            "target": "martha_personal_counsel",
+            "once": true,
+            "conditions": {
+              "min_affinity": 70,
+              "npc_emotion": {
+                "trust": 0.55
+              }
+            }
+          },
+          {
+            "text": "O que acha do Thorne?",
+            "target": "about_thorne",
+            "once": true
+          },
+          {
+            "text": "O que acha da Mirena?",
+            "target": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "O que acha do Corvus?",
+            "target": "about_corvus",
+            "once": true
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, {player_name}!"
+          },
+          {
+            "type": "narration",
+            "text": "Meu herói favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "A estalagem fica mais segura quando você está por perto."
+          },
+          {
+            "type": "narration",
+            "text": "Sente-se, precisa de algo?"
+          },
+          {
+            "type": "narration",
+            "text": "Olha só quem apareceu!"
+          },
+          {
+            "type": "narration",
+            "text": "Já estava preparando seu ensopado favorito."
+          },
+          {
+            "type": "narration",
+            "text": "Intuição de estalajadeira."
+          },
+          {
+            "type": "narration",
+            "text": "Bem-vindo de volta, querido!"
+          },
+          {
+            "type": "narration",
+            "text": "Desde que você limpou o porão, tenho dormido como uma pedra."
+          },
+          {
+            "type": "narration",
+            "text": "O que posso fazer por você?"
+          },
+          {
+            "type": "narration",
+            "text": "O Grifo está de pé graças a você, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Considere esta estalagem sua segunda casa."
+          },
+          {
+            "type": "narration",
+            "text": "Ah, meu salvador!"
+          },
+          {
+            "type": "narration",
+            "text": "Os hóspedes ainda comentam sobre como você enfrentou aqueles ratos."
+          },
+          {
+            "type": "narration",
+            "text": "Você é uma lenda por aqui!"
+          }
+        ]
+      },
+      "act1_cellar_aftermath_combat": {
+        "text": "Está impecável! Os hóspedes nem acreditam que havia ratos lá embaixo. Até reformei as prateleiras. O estoque está crescendo de novo e os preços dos quartos desceram. Tudo graças a você!",
+        "choices": [
+          {
+            "text": "Fico feliz em ouvir isso.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Está impecável!"
+          },
+          {
+            "type": "narration",
+            "text": "Os hóspedes nem acreditam que havia ratos lá embaixo."
+          },
+          {
+            "type": "narration",
+            "text": "Até reformei as prateleiras."
+          },
+          {
+            "type": "narration",
+            "text": "O estoque está crescendo de novo e os preços dos quartos desceram."
+          },
+          {
+            "type": "narration",
+            "text": "Tudo graças a você!"
+          }
+        ]
+      },
+      "act1_cellar_aftermath_poison": {
+        "text": "Funcionou perfeitamente! Ainda sinto um cheiro químico sutil lá embaixo, mas nem sinal de roedores. Inteligente da sua parte — sem sangue, sem bagunça. A Irmã Elara sabe o que faz.",
+        "choices": [
+          {
+            "text": "O importante é que está resolvido.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Funcionou perfeitamente!"
+          },
+          {
+            "type": "narration",
+            "text": "Ainda sinto um cheiro químico sutil lá embaixo, mas nem sinal de roedores."
+          },
+          {
+            "type": "narration",
+            "text": "Inteligente da sua parte — sem sangue, sem bagunça."
+          },
+          {
+            "type": "narration",
+            "text": "A Irmã Elara sabe o que faz."
+          }
+        ]
+      },
+      "act1_city_news": {
+        "text": [
+          "As coisas andam agitadas. O mercado está mais caro, os viajantes estão mais raros, e Aldric dobrou as patrulhas.",
+          "Eldoria muda a cada semana. Novas caras, novos problemas. Mas enquanto minha estalagem tiver sopa quente, tudo fica bem.",
+          "Ouvi que os comerciantes do sul estão evitando as estradas. Algo os assusta por lá.",
+          "O mundo anda inquieto. Até os pássaros migram mais cedo este ano."
+        ],
+        "choices": [
+          {
+            "text": "O ferreiro Thorne parece diferente.",
+            "target": "act1_thorne_gossip",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "completed_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "E a Irmã Elara?",
+            "target": "act1_elara_gossip",
+            "once": true
+          },
+          {
+            "text": "Tem havido mais viajantes estranhos?",
+            "target": "act1_travelers",
+            "once": true
+          },
+          {
+            "text": "Entendi. Obrigado, Martha.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "As coisas andam agitadas."
+          },
+          {
+            "type": "narration",
+            "text": "O mercado está mais caro, os viajantes estão mais raros, e Aldric dobrou as patrulhas."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria muda a cada semana."
+          },
+          {
+            "type": "narration",
+            "text": "Novas caras, novos problemas."
+          },
+          {
+            "type": "narration",
+            "text": "Mas enquanto minha estalagem tiver sopa quente, tudo fica bem."
+          },
+          {
+            "type": "narration",
+            "text": "Ouvi que os comerciantes do sul estão evitando as estradas."
+          },
+          {
+            "type": "narration",
+            "text": "Algo os assusta por lá."
+          },
+          {
+            "type": "narration",
+            "text": "O mundo anda inquieto."
+          },
+          {
+            "type": "narration",
+            "text": "Até os pássaros migram mais cedo este ano."
+          }
+        ]
+      },
+      "act1_thorne_gossip": {
+        "text": "Desde que Aris voltou, Thorne é outro homem! Sorri pela primeira vez em semanas. Ele forjou uma lâmina especial em agradecimento — disse que é para 'o herói que trouxe meu filho de volta'. Você merece, querido.",
+        "choices": [
+          {
+            "text": "Thorne é um bom homem.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_told_thorne_story": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Desde que Aris voltou, Thorne é outro homem!"
+          },
+          {
+            "type": "narration",
+            "text": "Sorri pela primeira vez em semanas."
+          },
+          {
+            "type": "narration",
+            "text": "Ele forjou uma lâmina especial em agradecimento — disse que é para 'o herói que trouxe meu filho de volta'."
+          },
+          {
+            "type": "narration",
+            "text": "Você merece, querido."
+          }
+        ]
+      },
+      "act1_elara_gossip": {
+        "text": "Elara anda com uma expressão estranha. Mais tensa que o normal. Ela é minha amiga mais antiga em Eldoria, e me preocupo. Passa horas no templo rezando... mais do que o habitual. Algo a perturba, mas ela não me conta.",
+        "choices": [
+          {
+            "text": "Vou ficar de olho nela.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_told_elara_story": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Elara anda com uma expressão estranha."
+          },
+          {
+            "type": "narration",
+            "text": "Mais tensa que o normal."
+          },
+          {
+            "type": "narration",
+            "text": "Ela é minha amiga mais antiga em Eldoria, e me preocupo."
+          },
+          {
+            "type": "narration",
+            "text": "Passa horas no templo rezando... mais do que o habitual."
+          },
+          {
+            "type": "narration",
+            "text": "Algo a perturba, mas ela não me conta."
+          }
+        ]
+      },
+      "act1_travelers": {
+        "text": "Agora que você mencionou... uma figura encapuzada ficou aqui uma noite, semana passada. Pagou com moedas de ouro antigas — de um reino que não existe mais. Partiu antes do amanhecer sem dizer uma palavra. Me deu arrepios.",
+        "choices": [
+          {
+            "text": "Estranho. Vou prestar atenção.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_mentioned_stranger": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Agora que você mencionou... uma figura encapuzada ficou aqui uma noite, semana passada."
+          },
+          {
+            "type": "narration",
+            "text": "Pagou com moedas de ouro antigas — de um reino que não existe mais."
+          },
+          {
+            "type": "narration",
+            "text": "Partiu antes do amanhecer sem dizer uma palavra."
+          },
+          {
+            "type": "narration",
+            "text": "Me deu arrepios."
+          }
+        ]
+      },
+      "act1_about_martha": {
+        "text": "(Martha ri, secando as mãos no avental) Oh, não tem nada interessante sobre esta velha estalajadeira... Vim para Eldoria há muitos anos, de muito longe. Meu marido construiu o primeiro quarto desta estalagem com as próprias mãos.",
+        "choices": [
+          {
+            "text": "Seu marido? Onde ele está?",
+            "target": "act1_husband_hint",
+            "once": true
+          },
+          {
+            "text": "Você parece saber muito sobre o mundo.",
+            "target": "act1_worldly",
+            "once": true
+          },
+          {
+            "text": "Entendo. Vamos mudar de assunto.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha ri, secando as mãos no avental) Oh, não tem nada interessante sobre esta velha estalajadeira..."
+          },
+          {
+            "type": "narration",
+            "text": "Vim para Eldoria há muitos anos, de muito longe."
+          },
+          {
+            "type": "narration",
+            "text": "Meu marido construiu o primeiro quarto desta estalagem com as próprias mãos."
+          }
+        ]
+      },
+      "act1_husband_hint": {
+        "text": "(Os olhos de Martha ficam distantes) Edric... ele se foi há muitos anos. A estrada leva, mas nem sempre traz de volta. (Ela limpa uma lágrima discretamente e muda de assunto)",
+        "choices": [
+          {
+            "text": "Sinto muito, Martha.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "knows_about_edric": true
+              },
+              "reputation": {
+                "inn": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Os olhos de Martha ficam distantes) Edric... ele se foi há muitos anos."
+          },
+          {
+            "type": "narration",
+            "text": "A estrada leva, mas nem sempre traz de volta. (Ela limpa uma lágrima discretamente e muda de assunto)"
+          }
+        ]
+      },
+      "act1_worldly": {
+        "text": "(Martha ri) Quando se vive numa estalagem, ouve-se de tudo. Comerciantes, bardos, soldados... todos contam histórias. E eu tenho boa memória para histórias.",
+        "choices": [
+          {
+            "text": "Imagino que sim.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_worldly_hint": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha ri) Quando se vive numa estalagem, ouve-se de tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Comerciantes, bardos, soldados... todos contam histórias."
+          },
+          {
+            "type": "narration",
+            "text": "E eu tenho boa memória para histórias."
+          }
+        ]
+      },
+      "act1_rogue_intel": {
+        "text": "(Martha abaixa a voz) Já que você provou ser de confiança... Uma operação de contrabando passa pelo portão sul nas noites sem lua. O contato se chama 'Dedo Torto'. Não diga que foi eu quem contou.",
+        "choices": [
+          {
+            "text": "Meus lábios estão selados.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_rogue_smuggler_tip": true,
+                "knows_dedo_torto": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha abaixa a voz) Já que você provou ser de confiança..."
+          },
+          {
+            "type": "narration",
+            "text": "Uma operação de contrabando passa pelo portão sul nas noites sem lua."
+          },
+          {
+            "type": "narration",
+            "text": "O contato se chama 'Dedo Torto'."
+          },
+          {
+            "type": "narration",
+            "text": "Não diga que foi eu quem contou."
+          }
+        ]
+      },
+      "act1_faith_talk": {
+        "text": "(Martha sorri, tocando um pequeno amuleto no pescoço) Eu rezo para Deméter todas as manhãs. A deusa da vida e da colheita. Acho que ela abençoa este lugar — nunca faltou comida na minha mesa. Meu... meu marido também servia os deuses, à sua própria maneira.",
+        "choices": [
+          {
+            "text": "A fé é um refúgio poderoso.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_faith_discussion": true
+              },
+              "reputation": {
+                "inn": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha sorri, tocando um pequeno amuleto no pescoço) Eu rezo para Deméter todas as manhãs."
+          },
+          {
+            "type": "narration",
+            "text": "A deusa da vida e da colheita."
+          },
+          {
+            "type": "narration",
+            "text": "Acho que ela abençoa este lugar — nunca faltou comida na minha mesa."
+          },
+          {
+            "type": "narration",
+            "text": "Meu... meu marido também servia os deuses, à sua própria maneira."
+          }
+        ]
+      },
+      "act1_faith_talk_paladin": {
+        "text": "(Martha te observa com admiração) Um Paladino... faz tempo que não vejo alguém com esse brilho nos olhos. Edric — meu marido — tinha o mesmo senso de dever. Ele dizia que proteger os fracos era o único chamado verdadeiro.",
+        "choices": [
+          {
+            "text": "Seu marido era um homem honorável.",
+            "target": "act1_trusted",
+            "impact": {
+              "flags": {
+                "martha_faith_discussion": true,
+                "knows_about_edric": true
+              },
+              "reputation": {
+                "inn": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te observa com admiração) Um Paladino... faz tempo que não vejo alguém com esse brilho nos olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Edric — meu marido — tinha o mesmo senso de dever."
+          },
+          {
+            "type": "narration",
+            "text": "Ele dizia que proteger os fracos era o único chamado verdadeiro."
+          }
+        ]
+      },
+      "act2_past": {
+        "text": [
+          "(Martha te observa por um longo momento, com um olhar que você nunca viu antes) Você me lembra alguém... alguém que eu conheci há muito tempo.",
+          "(Os olhos de Martha estão distantes enquanto ela limpa o balcão) Sabe, {player_name}... às vezes olho para você e vejo fantasmas do passado.",
+          "(Martha para o que está fazendo e te observa) Você tem algo... uma chama nos olhos. Me lembra de uma época que tentei esquecer.",
+          "(Martha suspira, olhando pela janela) Os anos passam, mas certas memórias nunca desbotam..."
+        ],
+        "choices": [
+          {
+            "text": "De quem você está falando, Martha?",
+            "target": "act2_memory_gate",
+            "conditions": {
+              "flags": [
+                "!martha_past_revealed"
+              ]
+            }
+          },
+          {
+            "text": "Alguma novidade pela cidade?",
+            "target": "act1_city_news"
+          },
+          {
+            "text": "🎲 [SAB 14+] Você está pensando no passado, não está?",
+            "target": "act2_wisdom_insight",
+            "once": true,
+            "conditions": {
+              "stat_check": {
+                "stat": "wisdom",
+                "min": 14
+              }
+            }
+          },
+          {
+            "text": "[Bardo] Posso tocar algo para animar você?",
+            "target": "act2_bard_song",
+            "once": true,
+            "conditions": {
+              "class": "Bardo"
+            }
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te observa por um longo momento, com um olhar que você nunca viu antes) Você me lembra alguém... alguém que eu conheci há muito tempo."
+          },
+          {
+            "type": "narration",
+            "text": "(Os olhos de Martha estão distantes enquanto ela limpa o balcão) Sabe, {player_name}... às vezes olho para você e vejo fantasmas do passado."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha para o que está fazendo e te observa) Você tem algo... uma chama nos olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Me lembra de uma época que tentei esquecer."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha suspira, olhando pela janela) Os anos passam, mas certas memórias nunca desbotam..."
+          }
+        ]
+      },
+      "act2_memory_gate": {
+        "text": "(Martha hesita, as mãos apertando o pano de prato) É... complicado. São coisas antigas. De antes de eu vir para Eldoria.",
+        "choices": [
+          {
+            "text": "🎲 [Persuasão DC 12] Martha, você pode confiar em mim.",
+            "target": "act2_confession",
+            "conditions": {
+              "flags": [
+                "!martha_past_check_failed"
+              ]
+            },
+            "check": {
+              "skill": "charisma",
+              "difficulty": 12,
+              "success": "act2_confession",
+              "failure": "act2_deflects",
+              "failure_impact": {
+                "flags": {
+                  "martha_past_check_failed": true
+                }
+              }
+            }
+          },
+          {
+            "text": "Eu entendo que dói. Mas preciso saber para poder te proteger.",
+            "target": "act2_confession",
+            "conditions": {
+              "flags": [
+                "martha_past_check_failed"
+              ]
+            }
+          },
+          {
+            "text": "Tudo bem, não precisa me contar.",
+            "target": "act2_past",
+            "once": true,
+            "impact": {
+              "flags": {
+                "respected_martha_privacy": true
+              },
+              "reputation": {
+                "inn": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha hesita, as mãos apertando o pano de prato) É... complicado."
+          },
+          {
+            "type": "narration",
+            "text": "São coisas antigas."
+          },
+          {
+            "type": "narration",
+            "text": "De antes de eu vir para Eldoria."
+          }
+        ]
+      },
+      "act2_deflects": {
+        "text": "(Martha força um sorriso) São apenas memórias de uma velha, querido. Nada que deva te preocupar. Talvez um dia eu conte... quando estiver pronta.",
+        "choices": [
+          {
+            "text": "Estarei aqui quando quiser conversar.",
+            "target": "act2_past",
+            "impact": {
+              "flags": {
+                "martha_deflected_past": true
+              },
+              "reputation": {
+                "inn": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha força um sorriso) São apenas memórias de uma velha, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Nada que deva te preocupar."
+          },
+          {
+            "type": "narration",
+            "text": "Talvez um dia eu conte... quando estiver pronta."
+          }
+        ]
+      },
+      "act2_confession": {
+        "text": "(Martha fecha os olhos e respira fundo) Você merece saber. Eu não fui sempre uma estalajadeira, {player_name}. Antes de Eldoria... eu era uma <b>Barda</b>. Me chamavam de <b>Rouxinol do Norte</b>.\n\nEu viajava com um grupo: Edric, meu marido — um Guerreiro destemido. Lysara, uma Maga brilhante. E Gareth, o melhor Ranger que já conheci.\n\nNós éramos famosos nos reinos do norte. Até que... (a voz dela falha) Edric morreu lutando contra um dragão jovem. Ele se sacrificou para que o resto de nós escapasse. Depois disso, eu pendurei meu alaúde e vim para cá. Começar de novo.",
+        "choices": [
+          {
+            "text": "Eu sinto muito, Martha. Edric era um herói.",
+            "target": "act2_edric_honored",
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true,
+                "knows_about_lysara": true,
+                "knows_about_gareth": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          },
+          {
+            "text": "[Bardo] Você era uma Barda?! Eu sabia que havia algo especial!",
+            "target": "act2_bard_recognition",
+            "conditions": {
+              "class": "Bardo"
+            },
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true,
+                "knows_about_lysara": true,
+                "knows_about_gareth": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          },
+          {
+            "text": "[Guerreiro] Morrer protegendo os companheiros... é a morte de um verdadeiro guerreiro.",
+            "target": "act2_warrior_respect",
+            "conditions": {
+              "class": "Guerreiro"
+            },
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true,
+                "warrior_bond_martha": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          },
+          {
+            "text": "[Bárbaro] Um guerreiro de verdade morre em pé. Edric tinha honra.",
+            "target": "act2_warrior_respect_barb",
+            "conditions": {
+              "class": "Bárbaro"
+            },
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true,
+                "warrior_bond_martha": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha fecha os olhos e respira fundo) Você merece saber."
+          },
+          {
+            "type": "narration",
+            "text": "Eu não fui sempre uma estalajadeira, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Antes de Eldoria... eu era uma <b>Barda</b>."
+          },
+          {
+            "type": "narration",
+            "text": "Me chamavam de <b>Rouxinol do Norte</b>."
+          },
+          {
+            "type": "narration",
+            "text": "Eu viajava com um grupo: Edric, meu marido — um Guerreiro destemido."
+          },
+          {
+            "type": "narration",
+            "text": "Lysara, uma Maga brilhante."
+          },
+          {
+            "type": "narration",
+            "text": "E Gareth, o melhor Ranger que já conheci."
+          },
+          {
+            "type": "narration",
+            "text": "Nós éramos famosos nos reinos do norte."
+          },
+          {
+            "type": "narration",
+            "text": "Até que... (a voz dela falha) Edric morreu lutando contra um dragão jovem."
+          },
+          {
+            "type": "narration",
+            "text": "Ele se sacrificou para que o resto de nós escapasse."
+          },
+          {
+            "type": "narration",
+            "text": "Depois disso, eu pendurei meu alaúde e vim para cá."
+          },
+          {
+            "type": "narration",
+            "text": "Começar de novo."
+          }
+        ]
+      },
+      "act2_wisdom_insight": {
+        "text": "(Martha arregala os olhos) Como você... sim. Você tem olhos que vêem além. (Ela suspira profundamente) Eu fui uma aventureira, {player_name}. Uma Barda. O Rouxinol do Norte, me chamavam. Meu marido Edric morreu numa missão... e eu enterrei essa vida junto com ele.",
+        "choices": [
+          {
+            "text": "Obrigado por confiar em mim, Martha.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true
+              },
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha arregala os olhos) Como você... sim."
+          },
+          {
+            "type": "narration",
+            "text": "Você tem olhos que vêem além. (Ela suspira profundamente) Eu fui uma aventureira, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Uma Barda."
+          },
+          {
+            "type": "narration",
+            "text": "O Rouxinol do Norte, me chamavam."
+          },
+          {
+            "type": "narration",
+            "text": "Meu marido Edric morreu numa missão... e eu enterrei essa vida junto com ele."
+          }
+        ]
+      },
+      "act2_bard_song": {
+        "text": "(Você começa a tocar uma melodia suave. Martha congela. Seus olhos se enchem de lágrimas.) Essa música... onde você aprendeu? (A voz dela treme) Eu... eu costumava tocar algo parecido. Há muito tempo.",
+        "choices": [
+          {
+            "text": "Você reconhece? É uma canção antiga do norte.",
+            "target": "act2_bard_reveal",
+            "once": true
+          },
+          {
+            "text": "Apenas uma canção de estrada. Nada especial.",
+            "target": "act2_past"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Você começa a tocar uma melodia suave."
+          },
+          {
+            "type": "narration",
+            "text": "Martha congela."
+          },
+          {
+            "type": "narration",
+            "text": "Seus olhos se enchem de lágrimas.) Essa música... onde você aprendeu? (A voz dela treme) Eu... eu costumava tocar algo parecido."
+          },
+          {
+            "type": "narration",
+            "text": "Há muito tempo."
+          }
+        ]
+      },
+      "act2_bard_reveal": {
+        "text": "(Martha limpa os olhos e ri, meio envergonhada) Eu... eu tocava alaúde. Uma vida inteira atrás. Me chamavam de Rouxinol do Norte. (Ela olha para você com uma ternura nova) Um Bardo reconhece outro, não é?",
+        "choices": [
+          {
+            "text": "O Rouxinol do Norte! Eu conheço as lendas!",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "martha_past_revealed": true,
+                "knows_martha_was_bard": true,
+                "knows_about_edric": true,
+                "martha_bard_moment": true
+              },
+              "reputation": {
+                "inn": 4
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha limpa os olhos e ri, meio envergonhada) Eu... eu tocava alaúde."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vida inteira atrás."
+          },
+          {
+            "type": "narration",
+            "text": "Me chamavam de Rouxinol do Norte. (Ela olha para você com uma ternura nova) Um Bardo reconhece outro, não é?"
+          }
+        ]
+      },
+      "act2_edric_honored": {
+        "text": "(Martha chora suavemente) Obrigada... faz tanto tempo que alguém fala dele com respeito. Edric ficaria orgulhoso de saber que aventureiros como você ainda existem.",
+        "choices": [
+          {
+            "text": "A memória dele vive através de você, Martha.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "honored_edric": true
+              },
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha chora suavemente) Obrigada... faz tanto tempo que alguém fala dele com respeito."
+          },
+          {
+            "type": "narration",
+            "text": "Edric ficaria orgulhoso de saber que aventureiros como você ainda existem."
+          }
+        ]
+      },
+      "act2_bard_recognition": {
+        "text": "(Martha ri entre lágrimas) Uma Barda reconhece outra! Sim... eu era o Rouxinol do Norte. Já ouviu as canções? (Ela canta um trecho baixinho, e a voz ainda é bonita apesar dos anos) Há muito tempo que não cantava...",
+        "choices": [
+          {
+            "text": "Sua voz ainda é linda, Martha.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "knows_martha_nightingale": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha ri entre lágrimas) Uma Barda reconhece outra!"
+          },
+          {
+            "type": "narration",
+            "text": "Sim... eu era o Rouxinol do Norte."
+          },
+          {
+            "type": "narration",
+            "text": "Já ouviu as canções? (Ela canta um trecho baixinho, e a voz ainda é bonita apesar dos anos) Há muito tempo que não cantava..."
+          }
+        ]
+      },
+      "act2_warrior_respect": {
+        "text": "(Martha aperta um pingente no pescoço) Edric falaria exatamente assim. Você carrega o mesmo fogo nos olhos, {player_name}. Ele teria gostado de você.",
+        "choices": [
+          {
+            "text": "Seria uma honra ter lutado ao lado dele.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha aperta um pingente no pescoço) Edric falaria exatamente assim."
+          },
+          {
+            "type": "narration",
+            "text": "Você carrega o mesmo fogo nos olhos, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Ele teria gostado de você."
+          }
+        ]
+      },
+      "act2_warrior_respect_barb": {
+        "text": "(Martha sorri com nostalgia) Edric não era tão grande quanto você, mas tinha o mesmo espírito indomável. Quando ele gritava seu grito de guerra, até os dragões hesitavam.",
+        "choices": [
+          {
+            "text": "Um guerreiro digno de respeito.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha sorri com nostalgia) Edric não era tão grande quanto você, mas tinha o mesmo espírito indomável."
+          },
+          {
+            "type": "narration",
+            "text": "Quando ele gritava seu grito de guerra, até os dragões hesitavam."
+          }
+        ]
+      },
+      "act2_past_revealed": {
+        "text": [
+          "(Martha parece mais leve, como se um peso tivesse sido tirado dos ombros) Faz bem falar sobre o passado de vez em quando. O que você precisa, querido?",
+          "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Eldoria. Isso me faz confiar mais em você.",
+          "(Os olhos de Martha brilham) Sabe, desde que contei minha história, sinto que esta estalagem ficou mais acolhedora. O que posso fazer por você?",
+          "(Martha te recebe com um abraço) Meu confidente favorito! Em que posso ajudar?"
+        ],
+        "choices": [
+          {
+            "text": "Me conte mais sobre suas aventuras.",
+            "target": "act2_adventure_stories",
+            "once": true
+          },
+          {
+            "text": "O que aconteceu com os outros do grupo?",
+            "target": "act2_party_fate",
+            "once": true
+          },
+          {
+            "text": "Edric deixou algo para você? Uma lembrança?",
+            "target": "act2_journal_hook",
+            "conditions": {
+              "flags": [
+                "knows_about_edric",
+                "!accepted_martha_journal"
+              ],
+              "min_level": 3
+            }
+          },
+          {
+            "text": "Martha, seus suprimentos estão chegando normalmente?",
+            "target": "act2_supply_quest",
+            "conditions": {
+              "flags": [
+                "!accepted_martha_supply"
+              ],
+              "min_level": 3
+            }
+          },
+          {
+            "text": "📜 Martha, encontrei o diário de Edric!",
+            "target": "act2_journal_complete",
+            "conditions": {
+              "flags": [
+                "accepted_martha_journal",
+                "found_edric_journal",
+                "!completed_martha_journal"
+              ]
+            }
+          },
+          {
+            "text": "📜 Martha, encontrei seus suprimentos!",
+            "target": "act2_supply_complete",
+            "conditions": {
+              "flags": [
+                "accepted_martha_supply",
+                "found_martha_supply",
+                "!completed_martha_supply"
+              ]
+            }
+          },
+          {
+            "text": "Alguma novidade pela cidade?",
+            "target": "act1_city_news"
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha parece mais leve, como se um peso tivesse sido tirado dos ombros) Faz bem falar sobre o passado de vez em quando."
+          },
+          {
+            "type": "narration",
+            "text": "O que você precisa, querido?"
+          },
+          {
+            "type": "narration",
+            "text": "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Isso me faz confiar mais em você."
+          },
+          {
+            "type": "narration",
+            "text": "(Os olhos de Martha brilham) Sabe, desde que contei minha história, sinto que esta estalagem ficou mais acolhedora."
+          },
+          {
+            "type": "narration",
+            "text": "O que posso fazer por você?"
+          },
+          {
+            "type": "narration",
+            "text": "(Martha te recebe com um abraço) Meu confidente favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Em que posso ajudar?"
+          }
+        ]
+      },
+      "act2_journal_complete": {
+        "text": "(Martha pega o diário com mãos trêmulas. Abre a primeira página e ri entre lágrimas ao ver a caligrafia de Edric.)\n\nA letra dele... eu reconheceria em qualquer lugar. (Ela passa os dedos pelos desenhos antigos) Aqui está o mapa das Colinas de Ferro... e aqui, um rascunho do meu rosto. Ele sempre dizia que não sabia desenhar, mas olhe só.\n\nVocê me devolveu uma parte de Edric que eu achei que tinha perdido para sempre, {player_name}. Obrigada. De coração.",
+        "choices": [
+          {
+            "text": "Ele gostaria que você tivesse isso.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "completed_martha_journal": true
+              },
+              "complete_quests": [
+                "quest_martha_journal"
+              ],
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha pega o diário com mãos trêmulas."
+          },
+          {
+            "type": "narration",
+            "text": "Abre a primeira página e ri entre lágrimas ao ver a caligrafia de Edric.)\n\nA letra dele... eu reconheceria em qualquer lugar. (Ela passa os dedos pelos desenhos antigos) Aqui está o mapa das Colinas de Ferro... e aqui, um rascunho do meu rosto."
+          },
+          {
+            "type": "narration",
+            "text": "Ele sempre dizia que não sabia desenhar, mas olhe só."
+          },
+          {
+            "type": "narration",
+            "text": "Você me devolveu uma parte de Edric que eu achei que tinha perdido para sempre, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada."
+          },
+          {
+            "type": "narration",
+            "text": "De coração."
+          }
+        ]
+      },
+      "act2_supply_complete": {
+        "text": "(Martha suspira de alívio) Graças aos deuses! Sem esses suprimentos, eu teria que fechar a cozinha esta semana. Você salvou não só a mim, mas todos os hóspedes que dependem de uma refeição quente.\n\n(Ela te entrega um papel amarelado) Tome, minha receita especial de ensopado. Edric dizia que esse prato curava qualquer ferida da alma.",
+        "choices": [
+          {
+            "text": "Sempre que precisar, Martha.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "completed_martha_supply": true
+              },
+              "complete_quests": [
+                "quest_martha_supply"
+              ],
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha suspira de alívio) Graças aos deuses!"
+          },
+          {
+            "type": "narration",
+            "text": "Sem esses suprimentos, eu teria que fechar a cozinha esta semana."
+          },
+          {
+            "type": "narration",
+            "text": "Você salvou não só a mim, mas todos os hóspedes que dependem de uma refeição quente.\n\n(Ela te entrega um papel amarelado) Tome, minha receita especial de ensopado."
+          },
+          {
+            "type": "narration",
+            "text": "Edric dizia que esse prato curava qualquer ferida da alma."
+          }
+        ]
+      },
+      "act2_adventure_stories": {
+        "text": "(Os olhos de Martha brilham) Ah, a maior vitória foi nas Colinas de Ferro. Uma fortaleza goblin inteira — três andares! Edric derrubou o portão com um único golpe de ombro. Lysara incendiou as torres com Bolas de Fogo. Gareth abateu o líder goblin com uma flecha a 200 metros. E eu? Eu cantei a Canção do Valor, e nenhum de nós sentiu medo.\n\n(Ela ri) Bons tempos. Terríveis, perigosos... mas bons.",
+        "choices": [
+          {
+            "text": "Uma história incrível!",
+            "target": "act2_past_revealed"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Os olhos de Martha brilham) Ah, a maior vitória foi nas Colinas de Ferro."
+          },
+          {
+            "type": "narration",
+            "text": "Uma fortaleza goblin inteira — três andares!"
+          },
+          {
+            "type": "narration",
+            "text": "Edric derrubou o portão com um único golpe de ombro."
+          },
+          {
+            "type": "narration",
+            "text": "Lysara incendiou as torres com Bolas de Fogo."
+          },
+          {
+            "type": "narration",
+            "text": "Gareth abateu o líder goblin com uma flecha a 200 metros."
+          },
+          {
+            "type": "narration",
+            "text": "E eu?"
+          },
+          {
+            "type": "narration",
+            "text": "Eu cantei a Canção do Valor, e nenhum de nós sentiu medo.\n\n(Ela ri) Bons tempos."
+          },
+          {
+            "type": "narration",
+            "text": "Terríveis, perigosos... mas bons."
+          }
+        ]
+      },
+      "act2_party_fate": {
+        "text": "(Martha suspira) Lysara voltou para a Torre dos Magos, no leste. É uma arquímaga agora, dizem. Gareth... desapareceu nas florestas do norte. Há quem diga que ele vive entre os elfos agora. E eu vim para cá. Cada um encontrou seu refúgio.",
+        "choices": [
+          {
+            "text": "Talvez um dia vocês se reencontrem.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "knows_lysara_tower": true,
+                "knows_gareth_forest": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha suspira) Lysara voltou para a Torre dos Magos, no leste."
+          },
+          {
+            "type": "narration",
+            "text": "É uma arquímaga agora, dizem."
+          },
+          {
+            "type": "narration",
+            "text": "Gareth... desapareceu nas florestas do norte."
+          },
+          {
+            "type": "narration",
+            "text": "Há quem diga que ele vive entre os elfos agora."
+          },
+          {
+            "type": "narration",
+            "text": "E eu vim para cá."
+          },
+          {
+            "type": "narration",
+            "text": "Cada um encontrou seu refúgio."
+          }
+        ]
+      },
+      "act2_journal_hook": {
+        "text": "(Martha abre um baú atrás do balcão e tira um pedago de couro velho) Edric mantinha um diário de todas as nossas aventuras. Ele desenhava mapas, anotava segredos de masmorras, receitas de poções... Era seu tesouro.\n\nMas eu o perdi. Anos atrás, bandidos atacaram uma caravana que levava meus pertences. O diário estava lá. (Ela engole em seco) Ouvi rumores de que apareceu com um mercador na estrada da floresta.\n\nSe você algum dia encontrar... significaria o mundo para mim.",
+        "choices": [
+          {
+            "text": "📜 Eu vou procurar o diário de Edric. É uma promessa.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_martha_journal": true
+              },
+              "quests": [
+                "quest_martha_journal"
+              ],
+              "reputation": {
+                "inn": 5
+              }
+            }
+          },
+          {
+            "text": "Se eu encontrar, trarei para você.",
+            "target": "act2_past_revealed",
+            "impact": {
+              "flags": {
+                "knows_journal_exists": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha abre um baú atrás do balcão e tira um pedago de couro velho) Edric mantinha um diário de todas as nossas aventuras."
+          },
+          {
+            "type": "narration",
+            "text": "Ele desenhava mapas, anotava segredos de masmorras, receitas de poções..."
+          },
+          {
+            "type": "narration",
+            "text": "Era seu tesouro."
+          },
+          {
+            "type": "narration",
+            "text": "Mas eu o perdi."
+          },
+          {
+            "type": "narration",
+            "text": "Anos atrás, bandidos atacaram uma caravana que levava meus pertences."
+          },
+          {
+            "type": "narration",
+            "text": "O diário estava lá. (Ela engole em seco) Ouvi rumores de que apareceu com um mercador na estrada da floresta."
+          },
+          {
+            "type": "narration",
+            "text": "Se você algum dia encontrar... significaria o mundo para mim."
+          }
+        ]
+      },
+      "act2_supply_quest": {
+        "text": "(Martha frança a testa) Agora que você mencionou... a carroça de suprimentos do sul não chega há duas semanas. Sem farinha, sem carne salgada, sem especiarias. Estou vivendo das reservas. Se continuar assim, vou ter que subir os preços.\n\nAs estradas andam perigosas, mas sem suprimentos esta estalagem não sobrevive.",
+        "choices": [
+          {
+            "text": "📜 Eu verifico a estrada para você.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_martha_supply": true
+              },
+              "quests": [
+                "quest_martha_supply"
+              ],
+              "reputation": {
+                "inn": 3
+              }
+            }
+          },
+          {
+            "text": "Espero que cheguem logo.",
+            "target": "act2_past_revealed"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha frança a testa) Agora que você mencionou... a carroça de suprimentos do sul não chega há duas semanas."
+          },
+          {
+            "type": "narration",
+            "text": "Sem farinha, sem carne salgada, sem especiarias."
+          },
+          {
+            "type": "narration",
+            "text": "Estou vivendo das reservas."
+          },
+          {
+            "type": "narration",
+            "text": "Se continuar assim, vou ter que subir os preços."
+          },
+          {
+            "type": "narration",
+            "text": "As estradas andam perigosas, mas sem suprimentos esta estalagem não sobrevive."
+          }
+        ]
+      },
+      "act3_shadow": {
+        "text": [
+          "(Martha te puxa para um canto, com o rosto pálido) {player_name}... preciso falar com você. Tem um homem que chegou ontem. Ele... ele me reconheceu. Me chamou pelo meu antigo nome.",
+          "(Martha está visivelmente abalada, as mãos tremendo) Graças aos deuses que você veio. Há um estranho na cidade que me deixou aterrorizada.",
+          "(Martha fecha a porta do balcão e sussurra) {player_name}, estou com medo. Alguém do meu passado apareceu."
+        ],
+        "choices": [
+          {
+            "text": "Quem é esse homem?",
+            "target": "act3_stranger_info",
+            "once": true
+          },
+          {
+            "text": "Você está em perigo?",
+            "target": "act3_danger_check",
+            "once": true
+          },
+          {
+            "text": "🎲 [INT 13+] Alguém do seu passado de aventureira?",
+            "target": "act3_smart_guess",
+            "once": true,
+            "conditions": {
+              "stat_check": {
+                "stat": "intelligence",
+                "min": 13
+              }
+            }
+          },
+          {
+            "text": "[Ladino] Quer que eu investigue discretamente?",
+            "target": "act3_rogue_approach",
+            "once": true,
+            "conditions": {
+              "class": "Ladino"
+            }
+          },
+          {
+            "text": "📜 Martha, lidei com o agente da Guilda.",
+            "target": "act3_shadow_complete",
+            "conditions": {
+              "flags": [
+                "accepted_shadow_quest",
+                "defeated_shadow_agent",
+                "!completed_shadow_quest"
+              ]
+            }
+          },
+          {
+            "text": "Como você está se sentindo, Martha?",
+            "target": "act3_martha_state",
+            "conditions": {
+              "flags": [
+                "accepted_shadow_quest"
+              ]
+            }
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te puxa para um canto, com o rosto pálido) {player_name}... preciso falar com você."
+          },
+          {
+            "type": "narration",
+            "text": "Tem um homem que chegou ontem."
+          },
+          {
+            "type": "narration",
+            "text": "Ele... ele me reconheceu."
+          },
+          {
+            "type": "narration",
+            "text": "Me chamou pelo meu antigo nome."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha está visivelmente abalada, as mãos tremendo) Graças aos deuses que você veio."
+          },
+          {
+            "type": "narration",
+            "text": "Há um estranho na cidade que me deixou aterrorizada."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha fecha a porta do balcão e sussurra) {player_name}, estou com medo."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém do meu passado apareceu."
+          }
+        ]
+      },
+      "act3_shadow_complete": {
+        "text": "(Martha te abraça com força, chorando) Acabou? De verdade? (Ela se afasta e segura seu rosto com as mãos) Você fez mais por mim do que qualquer aventureiro que já cruzou essas portas.\n\nEdric teria ficado orgulhoso. Você tem o mesmo coração que ele tinha.\n\n(Ela limpa as lágrimas e força um sorriso) Pela primeira vez em décadas, posso dormir sem medo. Obrigada, {player_name}. Obrigada.",
+        "choices": [
+          {
+            "text": "Agora você está segura. É o que importa.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "impact": {
+              "flags": {
+                "completed_shadow_quest": true
+              },
+              "complete_quests": [
+                "quest_martha_shadow"
+              ],
+              "reputation": {
+                "inn": 5
+              },
+              "xp": 100
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te abraça com força, chorando) Acabou?"
+          },
+          {
+            "type": "narration",
+            "text": "De verdade? (Ela se afasta e segura seu rosto com as mãos) Você fez mais por mim do que qualquer aventureiro que já cruzou essas portas."
+          },
+          {
+            "type": "narration",
+            "text": "Edric teria ficado orgulhoso."
+          },
+          {
+            "type": "narration",
+            "text": "Você tem o mesmo coração que ele tinha.\n\n(Ela limpa as lágrimas e força um sorriso) Pela primeira vez em décadas, posso dormir sem medo."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada."
+          }
+        ]
+      },
+      "act3_martha_state": {
+        "text": [
+          "(Martha aperta as mãos nervosamente) Estou tentando manter a calma. Os hóspedes não podem perceber nada. Mas toda vez que a porta abre, meu coração dispara.",
+          "(Martha olha pela janela) Cada sombra me assusta. Tenho dormido com uma faca debaixo do travesseiro. Coisa que não fazia desde os tempos de aventura.",
+          "(Martha suspira) Estou rezando para Deméter todas as noites. E rezando para você voltar com boas notícias.",
+          "(Martha força um sorriso) Estou bem, querido. Enquanto você estiver cuidando disso, eu tenho esperança."
+        ],
+        "choices": [
+          {
+            "text": "Vou resolver isso logo, Martha.",
+            "target": "act3_shadow"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha aperta as mãos nervosamente) Estou tentando manter a calma."
+          },
+          {
+            "type": "narration",
+            "text": "Os hóspedes não podem perceber nada."
+          },
+          {
+            "type": "narration",
+            "text": "Mas toda vez que a porta abre, meu coração dispara."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha olha pela janela) Cada sombra me assusta."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho dormido com uma faca debaixo do travesseiro."
+          },
+          {
+            "type": "narration",
+            "text": "Coisa que não fazia desde os tempos de aventura."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha suspira) Estou rezando para Deméter todas as noites."
+          },
+          {
+            "type": "narration",
+            "text": "E rezando para você voltar com boas notícias."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha força um sorriso) Estou bem, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Enquanto você estiver cuidando disso, eu tenho esperança."
+          }
+        ]
+      },
+      "act3_stranger_info": {
+        "text": "(Martha descreve em voz baixa) Um homem de capa escura, com uma cicatriz no rosto. Carrega um símbolo que eu reconheço — a <b>Guilda das Sombras</b>. Eles vêm fazendo perguntas sobre 'o Rouxinol'. Sobre <b>mim</b>.",
+        "choices": [
+          {
+            "text": "Eu vou falar com ele.",
+            "target": "act3_confront_choice",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild": true
+              }
+            }
+          },
+          {
+            "text": "Devemos avisar a guarda.",
+            "target": "act3_guard_path",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha descreve em voz baixa) Um homem de capa escura, com uma cicatriz no rosto."
+          },
+          {
+            "type": "narration",
+            "text": "Carrega um símbolo que eu reconheço — a <b>Guilda das Sombras</b>."
+          },
+          {
+            "type": "narration",
+            "text": "Eles vêm fazendo perguntas sobre 'o Rouxinol'."
+          },
+          {
+            "type": "narration",
+            "text": "Sobre <b>mim</b>."
+          }
+        ]
+      },
+      "act3_danger_check": {
+        "text": "(Martha treme) Não sei... talvez. Esse grupo... a <b>Guilda das Sombras</b>... eles não esquecem. E não perdoam.",
+        "choices": [
+          {
+            "text": "🎲 [Persuasão DC 13] Martha, me conte tudo. Cada detalhe.",
+            "target": "act3_full_truth",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 13,
+              "success": "act3_full_truth",
+              "failure": "act3_partial_truth"
+            }
+          },
+          {
+            "text": "Não se preocupe. Eu cuido disso.",
+            "target": "act3_confront_choice",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha treme) Não sei... talvez."
+          },
+          {
+            "type": "narration",
+            "text": "Esse grupo... a <b>Guilda das Sombras</b>... eles não esquecem."
+          },
+          {
+            "type": "narration",
+            "text": "E não perdoam."
+          }
+        ]
+      },
+      "act3_smart_guess": {
+        "text": "(Martha arregala os olhos) Como você... sim. Do passado. Da época que tentei esquecer. A Guilda das Sombras nos caçava desde que... desde que roubamos algo deles. Algo que eles querem de volta a qualquer custo.",
+        "choices": [
+          {
+            "text": "O que vocês roubaram?",
+            "target": "act3_full_truth",
+            "impact": {
+              "flags": {
+                "martha_trust_deep": true,
+                "knows_shadow_guild": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha arregala os olhos) Como você... sim."
+          },
+          {
+            "type": "narration",
+            "text": "Do passado."
+          },
+          {
+            "type": "narration",
+            "text": "Da época que tentei esquecer."
+          },
+          {
+            "type": "narration",
+            "text": "A Guilda das Sombras nos caçava desde que... desde que roubamos algo deles."
+          },
+          {
+            "type": "narration",
+            "text": "Algo que eles querem de volta a qualquer custo."
+          }
+        ]
+      },
+      "act3_full_truth": {
+        "text": "(Martha respira fundo) O grupo de Edric roubou uma <b>relíquia</b> da Guilda das Sombras — um orbe de obsidiana que eles usavam em rituais sombrios. Edric disse que era perigoso demais para ficar nas mãos deles.\n\nEle morreu protegendo essa relíquia. A Guilda vem caçando os sobreviventes desde então. Lysara está segura na torre dela, mas eu... eu estou exposta aqui.",
+        "choices": [
+          {
+            "text": "📜 Eu vou confrontar esse agente e proteger você.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild_full": true,
+                "knows_stolen_relic": true
+              }
+            }
+          },
+          {
+            "text": "Precisamos de um plano.",
+            "target": "act3_plan",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild_full": true,
+                "knows_stolen_relic": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha respira fundo) O grupo de Edric roubou uma <b>relíquia</b> da Guilda das Sombras — um orbe de obsidiana que eles usavam em rituais sombrios."
+          },
+          {
+            "type": "narration",
+            "text": "Edric disse que era perigoso demais para ficar nas mãos deles."
+          },
+          {
+            "type": "narration",
+            "text": "Ele morreu protegendo essa relíquia."
+          },
+          {
+            "type": "narration",
+            "text": "A Guilda vem caçando os sobreviventes desde então."
+          },
+          {
+            "type": "narration",
+            "text": "Lysara está segura na torre dela, mas eu... eu estou exposta aqui."
+          }
+        ]
+      },
+      "act3_partial_truth": {
+        "text": "(Martha dá uma versão vaga) São inimigos antigos. Do tempo de Edric. Eles querem algo que nós tínhamos. Não quero te envolver mais do que o necessário.",
+        "choices": [
+          {
+            "text": "Mesmo assim, quero ajudar.",
+            "target": "act3_confront_choice",
+            "impact": {
+              "flags": {
+                "knows_shadow_guild": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha dá uma versão vaga) São inimigos antigos."
+          },
+          {
+            "type": "narration",
+            "text": "Do tempo de Edric."
+          },
+          {
+            "type": "narration",
+            "text": "Eles querem algo que nós tínhamos."
+          },
+          {
+            "type": "narration",
+            "text": "Não quero te envolver mais do que o necessário."
+          }
+        ]
+      },
+      "act3_rogue_approach": {
+        "text": "(Martha acena com aprovação) Você sabe lidar com sombras. O homem está hospedado no <b>Urso Cego</b> — a taberna do Grom. Ele bebe sozinho no canto todas as noites. Se alguém pode investigar sem levantar suspeitas, é você.",
+        "choices": [
+          {
+            "text": "📜 Vou investigar no Urso Cego.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "rogue_shadow_investigation": true,
+                "martha_trust_deep": true,
+                "shadow_rogue_path": true,
+                "knows_shadow_guild": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha acena com aprovação) Você sabe lidar com sombras."
+          },
+          {
+            "type": "narration",
+            "text": "O homem está hospedado no <b>Urso Cego</b> — a taberna do Grom."
+          },
+          {
+            "type": "narration",
+            "text": "Ele bebe sozinho no canto todas as noites."
+          },
+          {
+            "type": "narration",
+            "text": "Se alguém pode investigar sem levantar suspeitas, é você."
+          }
+        ]
+      },
+      "act3_guard_path": {
+        "text": "(Martha entra em pânico) Não! A guarda não pode saber sobre meu passado! Aldric é justo, mas inflexível. Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Eldoria! Esta estalagem é tudo que eu tenho!",
+        "choices": [
+          {
+            "text": "Entendo. Vou resolver sozinho.",
+            "target": "act3_confront_choice"
+          },
+          {
+            "text": "[Paladino] A lei deve ser respeitada, Martha.",
+            "target": "act3_paladin_dilemma",
+            "conditions": {
+              "class": "Paladino"
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha entra em pânico) Não!"
+          },
+          {
+            "type": "narration",
+            "text": "A guarda não pode saber sobre meu passado!"
+          },
+          {
+            "type": "narration",
+            "text": "Aldric é justo, mas inflexível."
+          },
+          {
+            "type": "narration",
+            "text": "Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Eldoria!"
+          },
+          {
+            "type": "narration",
+            "text": "Esta estalagem é tudo que eu tenho!"
+          }
+        ]
+      },
+      "act3_paladin_dilemma": {
+        "text": "(Martha te olha com olhos suplicantes) Por favor... eu sei que seu juramento é sagrado. Mas a misericórdia também é uma virtude, não é? Eu não roubei por ganho. Nós <b>salvamos</b> aquela relíquia das mãos de pessoas terríveis.\n\nVocê condena quem rouba para proteger os inocentes?",
+        "choices": [
+          {
+            "text": "A misericórdia também é justiça. Guardarei seu segredo.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "paladin_showed_mercy": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          },
+          {
+            "text": "Vou falar com Aldric, mas pedirei clemência.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "paladin_reported_martha": true
+              },
+              "reputation": {
+                "inn": -3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te olha com olhos suplicantes) Por favor... eu sei que seu juramento é sagrado."
+          },
+          {
+            "type": "narration",
+            "text": "Mas a misericórdia também é uma virtude, não é?"
+          },
+          {
+            "type": "narration",
+            "text": "Eu não roubei por ganho."
+          },
+          {
+            "type": "narration",
+            "text": "Nós <b>salvamos</b> aquela relíquia das mãos de pessoas terríveis."
+          },
+          {
+            "type": "narration",
+            "text": "Você condena quem rouba para proteger os inocentes?"
+          }
+        ]
+      },
+      "act3_confront_choice": {
+        "text": "Como você quer lidar com isso?",
+        "choices": [
+          {
+            "text": "📜 Vou ao Urso Cego enfrentar esse agente de frente.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "shadow_direct_path": true
+              }
+            }
+          },
+          {
+            "text": "📜 Primeiro, preciso saber mais sobre essa Guilda.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "shadow_investigate_path": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Como você quer lidar com isso?"
+          }
+        ]
+      },
+      "act3_plan": {
+        "text": "(Martha acena) Você tem razão. Não podemos agir sem pensar. O agente está no Urso Cego. É o único lugar além daqui onde hóspedes se hospedam em Eldoria.",
+        "choices": [
+          {
+            "text": "📜 Vou confrontá-lo diretamente.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "shadow_direct_path": true
+              }
+            }
+          },
+          {
+            "text": "📜 Vou investigar primeiro, discretamente.",
+            "target": "act3_quest_accept",
+            "impact": {
+              "flags": {
+                "shadow_investigate_path": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha acena) Você tem razão."
+          },
+          {
+            "type": "narration",
+            "text": "Não podemos agir sem pensar."
+          },
+          {
+            "type": "narration",
+            "text": "O agente está no Urso Cego."
+          },
+          {
+            "type": "narration",
+            "text": "É o único lugar além daqui onde hóspedes se hospedam em Eldoria."
+          }
+        ]
+      },
+      "act3_quest_accept": {
+        "text": "(Martha segura suas mãos com força) Tenha cuidado. Esses homens são perigosos. Leve isto... (Ela tira um broche antigo do pescoço) Era de Edric. Ele dizia que traça sorte. Quero que você o use.",
+        "choices": [
+          {
+            "text": "Voltarei com boas notícias, Martha.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_shadow_quest": true
+              },
+              "quests": [
+                "quest_martha_shadow"
+              ],
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha segura suas mãos com força) Tenha cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "Esses homens são perigosos."
+          },
+          {
+            "type": "narration",
+            "text": "Leve isto... (Ela tira um broche antigo do pescoço) Era de Edric."
+          },
+          {
+            "type": "narration",
+            "text": "Ele dizia que traça sorte."
+          },
+          {
+            "type": "narration",
+            "text": "Quero que você o use."
+          }
+        ]
+      },
+      "act4_legacy": {
+        "text": [
+          "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer herói das canções que eu cantava.",
+          "(Martha tem os olhos brilhando de orgulho) Meu herói, meu protetor, meu amigo. A estalagem nunca esteve tão segura. O que precisa?",
+          "(Martha sorri com uma paz que você nunca viu nela) Sabe, pela primeira vez em anos, eu sinto que posso dormir em paz. Tudo graças a você.",
+          "(Martha prepara seu prato favorito sem você pedir) Eu sabia que você viria hoje. Intuição de velha aventureira."
+        ],
+        "choices": [
+          {
+            "text": "Martha, você mudou minha vida tanto quanto eu mudei a sua.",
+            "target": "act4_mutual_bond",
+            "once": true
+          },
+          {
+            "text": "Tem algo que você nunca me contou?",
+            "target": "act4_final_secret",
+            "once": true,
+            "conditions": {
+              "min_rep": [
+                {
+                  "faction": "inn",
+                  "value": 18
+                }
+              ]
+            }
+          },
+          {
+            "text": "Preciso de conselhos para a estrada.",
+            "target": "act4_advice"
+          },
+          {
+            "text": "[Bardo] Quer cantar uma canção juntos?",
+            "target": "act4_duet",
+            "once": true,
+            "conditions": {
+              "class": "Bardo"
+            }
+          },
+          {
+            "text": "📜 Martha, a relíquia foi destruida. Acabou.",
+            "target": "act4_relic_complete_destroy",
+            "conditions": {
+              "flags": [
+                "accepted_relic_quest",
+                "relic_destroy_path",
+                "relic_destroyed",
+                "!completed_martha_relic"
+              ]
+            }
+          },
+          {
+            "text": "📜 Martha, entreguei o orbe ao Templo de Vorenn.",
+            "target": "act4_relic_complete_temple",
+            "conditions": {
+              "flags": [
+                "accepted_relic_quest",
+                "relic_temple_path",
+                "relic_delivered",
+                "!completed_martha_relic"
+              ]
+            }
+          },
+          {
+            "text": "📜 Martha, vendi o orbe. Aqui está sua parte.",
+            "target": "act4_relic_complete_sell",
+            "conditions": {
+              "flags": [
+                "accepted_relic_quest",
+                "relic_sell_path",
+                "relic_sold",
+                "!completed_martha_relic"
+              ]
+            }
+          },
+          {
+            "text": "Alguma novidade pela cidade?",
+            "target": "act1_city_news"
+          },
+          {
+            "text": "Preciso descansar.",
+            "target": "exit",
+            "exit_callback": "open_inn"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer herói das canções que eu cantava."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha tem os olhos brilhando de orgulho) Meu herói, meu protetor, meu amigo."
+          },
+          {
+            "type": "narration",
+            "text": "A estalagem nunca esteve tão segura."
+          },
+          {
+            "type": "narration",
+            "text": "O que precisa?"
+          },
+          {
+            "type": "narration",
+            "text": "(Martha sorri com uma paz que você nunca viu nela) Sabe, pela primeira vez em anos, eu sinto que posso dormir em paz."
+          },
+          {
+            "type": "narration",
+            "text": "Tudo graças a você."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha prepara seu prato favorito sem você pedir) Eu sabia que você viria hoje."
+          },
+          {
+            "type": "narration",
+            "text": "Intuição de velha aventureira."
+          }
+        ]
+      },
+      "act4_relic_complete_destroy": {
+        "text": "(Martha fecha os olhos e respira fundo. Quando os abre, há lágrimas, mas também paz.)\n\nAcabou. Depois de todos esses anos... finalmente acabou. Edric pode descansar agora. E eu também.\n\n(Ela tira o alaúde da parede do quarto secreto) Acho que está na hora de voltar a tocar. Edric ia querer que eu vivesse, não apenas sobrevivesse.",
+        "choices": [
+          {
+            "text": "Edric ficaria orgulhoso de você, Martha.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "completed_martha_relic": true,
+                "martha_at_peace": true
+              },
+              "complete_quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": 10
+              },
+              "xp": 200
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha fecha os olhos e respira fundo."
+          },
+          {
+            "type": "narration",
+            "text": "Quando os abre, há lágrimas, mas também paz.)\n\nAcabou."
+          },
+          {
+            "type": "narration",
+            "text": "Depois de todos esses anos... finalmente acabou."
+          },
+          {
+            "type": "narration",
+            "text": "Edric pode descansar agora."
+          },
+          {
+            "type": "narration",
+            "text": "E eu também.\n\n(Ela tira o alaúde da parede do quarto secreto) Acho que está na hora de voltar a tocar."
+          },
+          {
+            "type": "narration",
+            "text": "Edric ia querer que eu vivesse, não apenas sobrevivesse."
+          }
+        ]
+      },
+      "act4_relic_complete_temple": {
+        "text": "(Martha suspira de alívio) Elara vai saber o que fazer. Ela sempre foi a mais sábia de nós todos. O orbe estará seguro lá.\n\n(Ela olha para o espaço vazio no baú) Estranho como algo tão pequeno causou tanta dor. Mas agora está em boas mãos. Obrigada, {player_name}.",
+        "choices": [
+          {
+            "text": "O templo vai proteger esse artefato.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "completed_martha_relic": true,
+                "martha_at_peace": true
+              },
+              "complete_quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": 7
+              },
+              "xp": 200
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha suspira de alívio) Elara vai saber o que fazer."
+          },
+          {
+            "type": "narration",
+            "text": "Ela sempre foi a mais sábia de nós todos."
+          },
+          {
+            "type": "narration",
+            "text": "O orbe estará seguro lá.\n\n(Ela olha para o espaço vazio no baú) Estranho como algo tão pequeno causou tanta dor."
+          },
+          {
+            "type": "narration",
+            "text": "Mas agora está em boas mãos."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada, {player_name}."
+          }
+        ]
+      },
+      "act4_relic_complete_sell": {
+        "text": "(Martha aceita o ouro com mãos tremendo, mas não sorri) Ouro... não era assim que eu queria que terminasse. Edric morreu para manter isso longe de mãos gananciosas.\n\n(Ela guarda as moedas sem contar) Que os deuses nos perdoem pelo que fizemos.",
+        "choices": [
+          {
+            "text": "Foi o melhor que eu pude fazer.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "completed_martha_relic": true
+              },
+              "complete_quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": -3
+              },
+              "xp": 150
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha aceita o ouro com mãos tremendo, mas não sorri) Ouro... não era assim que eu queria que terminasse."
+          },
+          {
+            "type": "narration",
+            "text": "Edric morreu para manter isso longe de mãos gananciosas.\n\n(Ela guarda as moedas sem contar) Que os deuses nos perdoem pelo que fizemos."
+          }
+        ]
+      },
+      "act4_mutual_bond": {
+        "text": "(Martha limpa as lágrimas) Você é o filho que eu gostaria de ter mantido perto, {player_name}. O mundo me tirou Edric, mas me deu você. E eu sou grata por cada dia.\n\n(Ela coloca a mão sobre a sua) Prometa-me que vai se cuidar lá fora. Eu não suportaria perder mais alguém.",
+        "choices": [
+          {
+            "text": "Eu prometo, Martha.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "martha_family_bond": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha limpa as lágrimas) Você é o filho que eu gostaria de ter mantido perto, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "O mundo me tirou Edric, mas me deu você."
+          },
+          {
+            "type": "narration",
+            "text": "E eu sou grata por cada dia.\n\n(Ela coloca a mão sobre a sua) Prometa-me que vai se cuidar lá fora."
+          },
+          {
+            "type": "narration",
+            "text": "Eu não suportaria perder mais alguém."
+          }
+        ]
+      },
+      "act4_final_secret": {
+        "text": "(Martha olha ao redor, certificando-se de que estão sozinhos. Depois, desce ao porão e abre uma passagem escondida atrás de uma parede falsa.)\n\nAlém do porão que você limpou, existe outro cômodo. Eu o escondi quando construímos a estalagem.\n\n(Dentro há equipamentos de aventura empoeirados, um alaúde pendurado na parede, um escudo com o brasão de Edric, e um baú trancado que pulsa com uma energia escura.)",
+        "choices": [
+          {
+            "text": "O que está nesse baú?",
+            "target": "act4_chest_reveal"
+          },
+          {
+            "text": "Este lugar é incrível...",
+            "target": "act4_room_lore",
+            "once": true
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha olha ao redor, certificando-se de que estão sozinhos."
+          },
+          {
+            "type": "narration",
+            "text": "Depois, desce ao porão e abre uma passagem escondida atrás de uma parede falsa.)\n\nAlém do porão que você limpou, existe outro cômodo."
+          },
+          {
+            "type": "narration",
+            "text": "Eu o escondi quando construímos a estalagem.\n\n(Dentro há equipamentos de aventura empoeirados, um alaúde pendurado na parede, um escudo com o brasão de Edric, e um baú trancado que pulsa com uma energia escura.)"
+          }
+        ]
+      },
+      "act4_room_lore": {
+        "text": "(Martha passa a mão pelo alaúde) Este é 'A Voz do Rouxinol'. Meu instrumento. Não toco há décadas. (Ela aponta para o escudo) Aquele era de Edric — o Escudo do Leão Dourado. Mapas, cartas, diários de aventura... tudo está aqui. Uma vida inteira guardada nesta sala.",
+        "choices": [
+          {
+            "text": "E o baú?",
+            "target": "act4_chest_reveal"
+          },
+          {
+            "text": "Obrigado por compartilhar isso comigo.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "saw_martha_relics": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha passa a mão pelo alaúde) Este é 'A Voz do Rouxinol'."
+          },
+          {
+            "type": "narration",
+            "text": "Meu instrumento."
+          },
+          {
+            "type": "narration",
+            "text": "Não toco há décadas. (Ela aponta para o escudo) Aquele era de Edric — o Escudo do Leão Dourado."
+          },
+          {
+            "type": "narration",
+            "text": "Mapas, cartas, diários de aventura... tudo está aqui."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vida inteira guardada nesta sala."
+          }
+        ]
+      },
+      "act4_chest_reveal": {
+        "text": "(Martha abre o baú com mãos tremendo. Lá dentro, um pequeno orbe de obsidiana pulsa com uma energia escura e fria.)\n\n<b>Esta é a razão de tudo.</b> Edric morreu por isso. A Guilda das Sombras matou por isso. E agora... eu preciso que você decida o que fazer com ele.\n\nEu sou velha demais para carregar esse fardo. Mas você... você pode dar um fim nessa história.",
+        "choices": [
+          {
+            "text": "📜 Vou destruir essa relíquia. De uma vez por todas.",
+            "target": "act4_destroy_path"
+          },
+          {
+            "text": "📜 Vou entregá-la ao Templo de Vorenn. Elara saberá o que fazer.",
+            "target": "act4_temple_path"
+          },
+          {
+            "text": "[Ladino] Isso vale uma fortuna no mercado negro...",
+            "target": "act4_sell_temptation",
+            "conditions": {
+              "class": "Ladino"
+            }
+          },
+          {
+            "text": "[Bruxo] Sinto o poder nesse orbe... é fascinante.",
+            "target": "act4_warlock_temptation",
+            "conditions": {
+              "class": "Bruxo"
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha abre o baú com mãos tremendo."
+          },
+          {
+            "type": "narration",
+            "text": "Lá dentro, um pequeno orbe de obsidiana pulsa com uma energia escura e fria.)\n\n<b>Esta é a razão de tudo.</b> Edric morreu por isso."
+          },
+          {
+            "type": "narration",
+            "text": "A Guilda das Sombras matou por isso."
+          },
+          {
+            "type": "narration",
+            "text": "E agora... eu preciso que você decida o que fazer com ele."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sou velha demais para carregar esse fardo."
+          },
+          {
+            "type": "narration",
+            "text": "Mas você... você pode dar um fim nessa história."
+          }
+        ]
+      },
+      "act4_destroy_path": {
+        "text": "(Martha acena solenemente) Edric teria desejado isso. Que ninguém mais morra por causa dessa maldição. Vá, {player_name}. Acabe com isso.",
+        "choices": [
+          {
+            "text": "Voltarei quando estiver feito.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_relic_quest": true,
+                "relic_destroy_path": true
+              },
+              "quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha acena solenemente) Edric teria desejado isso."
+          },
+          {
+            "type": "narration",
+            "text": "Que ninguém mais morra por causa dessa maldição."
+          },
+          {
+            "type": "narration",
+            "text": "Vá, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Acabe com isso."
+          }
+        ]
+      },
+      "act4_temple_path": {
+        "text": "(Martha concorda) Elara é a pessoa mais sábia que conheço. Se alguém sabe como lidar com essa escuridão, é ela. Você está fazendo a coisa certa.",
+        "choices": [
+          {
+            "text": "O templo guardará essa relíquia em segurança.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_relic_quest": true,
+                "relic_temple_path": true
+              },
+              "quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha concorda) Elara é a pessoa mais sábia que conheço."
+          },
+          {
+            "type": "narration",
+            "text": "Se alguém sabe como lidar com essa escuridão, é ela."
+          },
+          {
+            "type": "narration",
+            "text": "Você está fazendo a coisa certa."
+          }
+        ]
+      },
+      "act4_sell_temptation": {
+        "text": "(Martha te olha com decepção) Vender? Edric <b>morreu</b> para tirar isso das mãos erradas, e você quer entregar para o maior lance?",
+        "choices": [
+          {
+            "text": "🎲 [Persuasão DC 15] Com o ouro, posso comprar proteção permanente para você.",
+            "target": "act4_sell_accepted",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 15,
+              "success": "act4_sell_accepted",
+              "failure": "act4_sell_refused"
+            }
+          },
+          {
+            "text": "Você tem razão. Desculpe.",
+            "target": "act4_chest_reveal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te olha com decepção) Vender?"
+          },
+          {
+            "type": "narration",
+            "text": "Edric <b>morreu</b> para tirar isso das mãos erradas, e você quer entregar para o maior lance?"
+          }
+        ]
+      },
+      "act4_sell_accepted": {
+        "text": "(Martha hesita longamente, depois suspira) Se é o que você acha melhor... mas saiba que tudo tem consequências, querido. Edric não aprovaria.",
+        "choices": [
+          {
+            "text": "Eu sei o que estou fazendo.",
+            "target": "exit",
+            "exit_callback": "open_inn",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_relic_quest": true,
+                "relic_sell_path": true
+              },
+              "quests": [
+                "quest_martha_relic"
+              ],
+              "reputation": {
+                "inn": -5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha hesita longamente, depois suspira) Se é o que você acha melhor... mas saiba que tudo tem consequências, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Edric não aprovaria."
+          }
+        ]
+      },
+      "act4_sell_refused": {
+        "text": "(Martha bate no balcão) Não! Isso <b>não</b> está à venda. Edric morreu por isso. Eu não vou deixar que seu sacrifício seja vendido no mercado negro.",
+        "choices": [
+          {
+            "text": "Entendi. Vou pensar em outra solução.",
+            "target": "act4_chest_reveal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha bate no balcão) Não!"
+          },
+          {
+            "type": "narration",
+            "text": "Isso <b>não</b> está à venda."
+          },
+          {
+            "type": "narration",
+            "text": "Edric morreu por isso."
+          },
+          {
+            "type": "narration",
+            "text": "Eu não vou deixar que seu sacrifício seja vendido no mercado negro."
+          }
+        ]
+      },
+      "act4_warlock_temptation": {
+        "text": "(Martha recua) Não! Esse poder é o que a Guilda das Sombras desejava. Você... você não pode deixar que isso te seduza!",
+        "choices": [
+          {
+            "text": "🎲 [SAB DC 14] (Resistir ao sussurro do orbe)",
+            "target": "act4_chest_reveal",
+            "check": {
+              "skill": "wisdom",
+              "difficulty": 14,
+              "success": "act4_warlock_resists",
+              "failure": "act4_warlock_corruption"
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha recua) Não!"
+          },
+          {
+            "type": "narration",
+            "text": "Esse poder é o que a Guilda das Sombras desejava."
+          },
+          {
+            "type": "narration",
+            "text": "Você... você não pode deixar que isso te seduza!"
+          }
+        ]
+      },
+      "act4_warlock_resists": {
+        "text": "(Você fecha os olhos e afasta a mão do orbe. O sussurro se cala.) Martha tem razão. Esse poder não é para ser controlado.",
+        "choices": [
+          {
+            "text": "Precisamos nos livrar disso.",
+            "target": "act4_chest_reveal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Você fecha os olhos e afasta a mão do orbe."
+          },
+          {
+            "type": "narration",
+            "text": "O sussurro se cala.) Martha tem razão."
+          },
+          {
+            "type": "narration",
+            "text": "Esse poder não é para ser controlado."
+          }
+        ]
+      },
+      "act4_warlock_corruption": {
+        "text": "(O orbe pulsa, e você sente um sussurro gelado na mente. Por um instante, vê visões de poder ilimitado. Martha grita seu nome.)\n\n(Você volta a si, mas algo mudou. O orbe te reconheceu.)",
+        "choices": [
+          {
+            "text": "Você tem razão. Isso precisa ser destruído.",
+            "target": "act4_destroy_path",
+            "impact": {
+              "flags": {
+                "relic_corruption_touched": true
+              }
+            }
+          },
+          {
+            "text": "Eu... eu posso controlar isso.",
+            "target": "act4_destroy_path",
+            "impact": {
+              "flags": {
+                "relic_corruption_touched": true,
+                "warlock_relic_desire": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(O orbe pulsa, e você sente um sussurro gelado na mente."
+          },
+          {
+            "type": "narration",
+            "text": "Por um instante, vê visões de poder ilimitado."
+          },
+          {
+            "type": "narration",
+            "text": "Martha grita seu nome.)\n\n(Você volta a si, mas algo mudou."
+          },
+          {
+            "type": "narration",
+            "text": "O orbe te reconheceu.)"
+          }
+        ]
+      },
+      "act4_advice": {
+        "text": [
+          "(Martha te olha com carinho maternal) Nunca subestime a importância de um bom descanso. Os melhores guerreiros que conheci dormiam bem antes de cada batalha.",
+          "Meu conselho? Carregue sempre uma poção extra. Edric dizia que a diferença entre um herói morto e um vivo é uma poção de cura no bolso.",
+          "Se o inimigo é forte demais, não há vergonha em recuar. Vergonha é morrer por orgulho quando há gente esperando você voltar.",
+          "Conheça seus aliados. Nas Colinas de Ferro, sobrevivemos porque cada um confiava no outro cegamente.",
+          "A escuridão nem sempre é inimiga. Às vezes, a melhor estratégia é se esconder e observar antes de agir.",
+          "Lembre-se: o ouro vai e vem, mas a reputação é para sempre. Trate as pessoas com respeito, e portas se abrirão."
+        ],
+        "choices": [
+          {
+            "text": "Obrigado, Martha. Vou me lembrar disso.",
+            "target": "act4_legacy"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te olha com carinho maternal) Nunca subestime a importância de um bom descanso."
+          },
+          {
+            "type": "narration",
+            "text": "Os melhores guerreiros que conheci dormiam bem antes de cada batalha."
+          },
+          {
+            "type": "narration",
+            "text": "Meu conselho?"
+          },
+          {
+            "type": "narration",
+            "text": "Carregue sempre uma poção extra."
+          },
+          {
+            "type": "narration",
+            "text": "Edric dizia que a diferença entre um herói morto e um vivo é uma poção de cura no bolso."
+          },
+          {
+            "type": "narration",
+            "text": "Se o inimigo é forte demais, não há vergonha em recuar."
+          },
+          {
+            "type": "narration",
+            "text": "Vergonha é morrer por orgulho quando há gente esperando você voltar."
+          },
+          {
+            "type": "narration",
+            "text": "Conheça seus aliados."
+          },
+          {
+            "type": "narration",
+            "text": "Nas Colinas de Ferro, sobrevivemos porque cada um confiava no outro cegamente."
+          },
+          {
+            "type": "narration",
+            "text": "A escuridão nem sempre é inimiga."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes, a melhor estratégia é se esconder e observar antes de agir."
+          },
+          {
+            "type": "narration",
+            "text": "Lembre-se: o ouro vai e vem, mas a reputação é para sempre."
+          },
+          {
+            "type": "narration",
+            "text": "Trate as pessoas com respeito, e portas se abrirão."
+          }
+        ]
+      },
+      "act4_duet": {
+        "text": "(Martha hesita, depois desce ao porão secreto e volta com o alaúde empoeirado. Ela o afina com mãos tremendo.)\n\nVocê começa a tocar. Martha fecha os olhos e se junta com uma melodia simples. Sua voz é rouca pelo desuso, mas a emoção é pura.\n\n<i>Os hóspedes da estalagem param o que estão fazendo. Um silencio respeitoso toma conta do salão. Algumas lágrimas correm em rostos desconhecidos.</i>\n\nQuando a música acaba, Martha abraça o alaúde como se abraçasse um velho amigo.\n\n\"Faz... faz <b>trinta anos</b> que eu não cantava. Obrigada, {player_name}. Obrigada.\"",
+        "choices": [
+          {
+            "text": "A música nunca te abandonou, Martha.",
+            "target": "act4_legacy",
+            "impact": {
+              "flags": {
+                "martha_sang_again": true,
+                "performed_duet": true
+              },
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha hesita, depois desce ao porão secreto e volta com o alaúde empoeirado."
+          },
+          {
+            "type": "narration",
+            "text": "Ela o afina com mãos tremendo.)\n\nVocê começa a tocar."
+          },
+          {
+            "type": "narration",
+            "text": "Martha fecha os olhos e se junta com uma melodia simples."
+          },
+          {
+            "type": "narration",
+            "text": "Sua voz é rouca pelo desuso, mas a emoção é pura.\n\n<i>Os hóspedes da estalagem param o que estão fazendo."
+          },
+          {
+            "type": "narration",
+            "text": "Um silencio respeitoso toma conta do salão."
+          },
+          {
+            "type": "narration",
+            "text": "Algumas lágrimas correm em rostos desconhecidos.</i>\n\nQuando a música acaba, Martha abraça o alaúde como se abraçasse um velho amigo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Faz... faz <b>trinta anos</b> que eu não cantava."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada.\""
+          }
+        ]
+      },
+      "about_thorne": {
+        "text": [
+          "(Martha sorri com carinho) Thorne é um bom homem. Calado demais pro meu gosto, mas tem o coração do tamanho daquela bigorna dele. Desde que Aris voltou, ele anda até mais leve — vi ele rindo no mercado outro dia. Rindo! Quase caí da cadeira.",
+          "(Martha seca as mãos no avental, pensativa) O ferreiro é daqueles que carregam o mundo nas costas sem reclamar. Me preocupo com ele — trabalha demais, come de menos. Sempre mando Aris buscar sopa daqui quando o pai esquece de jantar.",
+          "Thorne? Ah, querido, aquele homem é puro aço por fora e manteiga por dentro. Uma vez trouxe uma panela rachada pra ele consertar. Disse que não era funileiro. Consertou mesmo assim, no dia seguinte, sem cobrar nada."
+        ],
+        "choices": [
+          {
+            "text": "Você cuida de todo mundo, Martha.",
+            "target": "about_thorne_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha sorri com carinho) Thorne é um bom homem."
+          },
+          {
+            "type": "narration",
+            "text": "Calado demais pro meu gosto, mas tem o coração do tamanho daquela bigorna dele."
+          },
+          {
+            "type": "narration",
+            "text": "Desde que Aris voltou, ele anda até mais leve — vi ele rindo no mercado outro dia."
+          },
+          {
+            "type": "narration",
+            "text": "Rindo!"
+          },
+          {
+            "type": "narration",
+            "text": "Quase caí da cadeira."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha seca as mãos no avental, pensativa) O ferreiro é daqueles que carregam o mundo nas costas sem reclamar."
+          },
+          {
+            "type": "narration",
+            "text": "Me preocupo com ele — trabalha demais, come de menos."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre mando Aris buscar sopa daqui quando o pai esquece de jantar."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, querido, aquele homem é puro aço por fora e manteiga por dentro."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez trouxe uma panela rachada pra ele consertar."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que não era funileiro."
+          },
+          {
+            "type": "narration",
+            "text": "Consertou mesmo assim, no dia seguinte, sem cobrar nada."
+          }
+        ]
+      },
+      "about_thorne_detail": {
+        "text": "(Martha ri baixo) Cuido porque alguém precisa. Thorne nunca pediria ajuda — orgulho de ferreiro. Mas eu vejo as olheiras, os ombros caídos depois de um dia longo. Então mando comida, finjo que é sobra. Ele finge que acredita. Funciona pra nós dois.",
+        "choices": [
+          {
+            "text": "Você é a mãe de Eldoria, Martha.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha ri baixo) Cuido porque alguém precisa."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne nunca pediria ajuda — orgulho de ferreiro."
+          },
+          {
+            "type": "narration",
+            "text": "Mas eu vejo as olheiras, os ombros caídos depois de um dia longo."
+          },
+          {
+            "type": "narration",
+            "text": "Então mando comida, finjo que é sobra."
+          },
+          {
+            "type": "narration",
+            "text": "Ele finge que acredita."
+          },
+          {
+            "type": "narration",
+            "text": "Funciona pra nós dois."
+          }
+        ]
+      },
+      "about_mirena": {
+        "text": [
+          "(Martha balança a cabeça com um sorriso enviesado) Mirena? Esperta demais para o próprio bem. Quando chegou em Eldoria, mal falava com ninguém — só queria seus frascos e seus experimentos. Mas tem bom coração, no fundo. Bem no fundo.",
+          "A alquimista é como um ensopado forte demais: impressiona, mas nem todo mundo aguenta. (Martha ri) Outro dia ela me explicou por que o pão cresce usando palavras que eu nunca ouvi na vida. Eu disse: 'Querida, eu sei FAZER o pão. Não preciso entender a química.'",
+          "(Martha abaixa a voz) Mirena é prima da Elara, sabia? As duas são como água e fogo. Uma cura com fé, outra com ciência. Mas quando precisam, trabalham juntas sem reclamar. Sangue é sangue."
+        ],
+        "choices": [
+          {
+            "text": "Ela parece um pouco... intensa.",
+            "target": "about_mirena_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha balança a cabeça com um sorriso enviesado) Mirena?"
+          },
+          {
+            "type": "narration",
+            "text": "Esperta demais para o próprio bem."
+          },
+          {
+            "type": "narration",
+            "text": "Quando chegou em Eldoria, mal falava com ninguém — só queria seus frascos e seus experimentos."
+          },
+          {
+            "type": "narration",
+            "text": "Mas tem bom coração, no fundo."
+          },
+          {
+            "type": "narration",
+            "text": "Bem no fundo."
+          },
+          {
+            "type": "narration",
+            "text": "A alquimista é como um ensopado forte demais: impressiona, mas nem todo mundo aguenta. (Martha ri) Outro dia ela me explicou por que o pão cresce usando palavras que eu nunca ouvi na vida."
+          },
+          {
+            "type": "narration",
+            "text": "Eu disse: 'Querida, eu sei FAZER o pão."
+          },
+          {
+            "type": "narration",
+            "text": "Não preciso entender a química.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Martha abaixa a voz) Mirena é prima da Elara, sabia?"
+          },
+          {
+            "type": "narration",
+            "text": "As duas são como água e fogo."
+          },
+          {
+            "type": "narration",
+            "text": "Uma cura com fé, outra com ciência."
+          },
+          {
+            "type": "narration",
+            "text": "Mas quando precisam, trabalham juntas sem reclamar."
+          },
+          {
+            "type": "narration",
+            "text": "Sangue é sangue."
+          }
+        ]
+      },
+      "about_mirena_detail": {
+        "text": "Intensa? (Martha gargalha) Essa é a palavra educada, querido. Mirena é um tornado com avental. Mas sabe o que eu gosto nela? Nunca mente. Se a poção é ruim, ela diz. Se você está errado, ela diz. Num mundo cheio de gente que finge, isso vale ouro.",
+        "choices": [
+          {
+            "text": "Sinceridade é rara mesmo.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Intensa? (Martha gargalha) Essa é a palavra educada, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Mirena é um tornado com avental."
+          },
+          {
+            "type": "narration",
+            "text": "Mas sabe o que eu gosto nela?"
+          },
+          {
+            "type": "narration",
+            "text": "Nunca mente."
+          },
+          {
+            "type": "narration",
+            "text": "Se a poção é ruim, ela diz."
+          },
+          {
+            "type": "narration",
+            "text": "Se você está errado, ela diz."
+          },
+          {
+            "type": "narration",
+            "text": "Num mundo cheio de gente que finge, isso vale ouro."
+          }
+        ]
+      },
+      "about_corvus": {
+        "text": [
+          "(Martha sorri) Corvus? Um rapaz educado. Sempre pede 'por favor' e 'obrigado' — você não faz ideia de como isso é raro numa estalagem. Come bem, paga em dia, e nunca reclama do colchão.",
+          "O cartógrafo é quieto, mas observador. Uma vez me disse que o ângulo das janelas da minha estalagem era 'geometricamente ineficiente'. Eu disse que eram bonitas. Ele pensou por um minuto e concordou.",
+          "(Martha limpa um copo, pensativa) Corvus carrega uma tristeza antiga — eu reconheço os sinais. Perda. Solidão. Mas desde que Bjorn apareceu, ele melhorou muito. Uma boa amizade cura mais que qualquer poção."
+        ],
+        "choices": [
+          {
+            "text": "Ele janta aqui com frequência?",
+            "target": "about_corvus_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha sorri) Corvus?"
+          },
+          {
+            "type": "narration",
+            "text": "Um rapaz educado."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre pede 'por favor' e 'obrigado' — você não faz ideia de como isso é raro numa estalagem."
+          },
+          {
+            "type": "narration",
+            "text": "Come bem, paga em dia, e nunca reclama do colchão."
+          },
+          {
+            "type": "narration",
+            "text": "O cartógrafo é quieto, mas observador."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez me disse que o ângulo das janelas da minha estalagem era 'geometricamente ineficiente'."
+          },
+          {
+            "type": "narration",
+            "text": "Eu disse que eram bonitas."
+          },
+          {
+            "type": "narration",
+            "text": "Ele pensou por um minuto e concordou."
+          },
+          {
+            "type": "narration",
+            "text": "(Martha limpa um copo, pensativa) Corvus carrega uma tristeza antiga — eu reconheço os sinais."
+          },
+          {
+            "type": "narration",
+            "text": "Perda."
+          },
+          {
+            "type": "narration",
+            "text": "Solidão."
+          },
+          {
+            "type": "narration",
+            "text": "Mas desde que Bjorn apareceu, ele melhorou muito."
+          },
+          {
+            "type": "narration",
+            "text": "Uma boa amizade cura mais que qualquer poção."
+          }
+        ]
+      },
+      "about_corvus_detail": {
+        "text": "Toda terça e sexta. Sempre o mesmo prato: ensopado de carneiro com pão de centeio. Senta no canto perto da janela, abre os mapas na mesa e anota coisas enquanto come. Bjorn aparece depois e os dois ficam até tarde discutindo rotas. É bom ver gente feliz na minha estalagem.",
+        "choices": [
+          {
+            "text": "Sua estalagem é o coração de Eldoria.",
+            "target": "act1_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Toda terça e sexta."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre o mesmo prato: ensopado de carneiro com pão de centeio."
+          },
+          {
+            "type": "narration",
+            "text": "Senta no canto perto da janela, abre os mapas na mesa e anota coisas enquanto come."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn aparece depois e os dois ficam até tarde discutindo rotas."
+          },
+          {
+            "type": "narration",
+            "text": "É bom ver gente feliz na minha estalagem."
+          }
+        ]
+      },
+      "martha_personal_counsel": {
+        "text": "(Martha te olha com uma ternura profunda e puxa uma cadeira para perto) Venha, sente-se aqui do meu lado. Quando alguém que eu confio tanto me pede conselho... é porque algo pesa no coração. Pode me contar tudo, querido. Estas paredes já ouviram mais segredos que o próprio templo.",
+        "choices": [
+          {
+            "text": "Às vezes me pergunto se estou no caminho certo...",
+            "target": "martha_counsel_path",
+            "once": true
+          },
+          {
+            "text": "Obrigado, Martha. Só queria saber que posso contar com você.",
+            "target": "act1_trusted",
+            "impact": {
+              "reputation": {
+                "inn": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha te olha com uma ternura profunda e puxa uma cadeira para perto) Venha, sente-se aqui do meu lado."
+          },
+          {
+            "type": "narration",
+            "text": "Quando alguém que eu confio tanto me pede conselho... é porque algo pesa no coração."
+          },
+          {
+            "type": "narration",
+            "text": "Pode me contar tudo, querido."
+          },
+          {
+            "type": "narration",
+            "text": "Estas paredes já ouviram mais segredos que o próprio templo."
+          }
+        ]
+      },
+      "martha_counsel_path": {
+        "text": "(Martha segura sua mão com firmeza) Ouviça uma velha estalajadeira: o caminho certo é aquele que você escolhe com o coração limpo. Não existe destino perfeito — existe o destino que você constrói a cada passo. E você, meu querido, tem dado passos bonitos. Esta cidade é melhor porque você está nela.",
+        "choices": [
+          {
+            "text": "Obrigado, Martha. Precisava ouvir isso.",
+            "target": "act1_trusted",
+            "impact": {
+              "reputation": {
+                "inn": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Martha segura sua mão com firmeza) Ouviça uma velha estalajadeira: o caminho certo é aquele que você escolhe com o coração limpo."
+          },
+          {
+            "type": "narration",
+            "text": "Não existe destino perfeito — existe o destino que você constrói a cada passo."
+          },
+          {
+            "type": "narration",
+            "text": "E você, meu querido, tem dado passos bonitos."
+          },
+          {
+            "type": "narration",
+            "text": "Esta cidade é melhor porque você está nela."
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Olá, viajante! Precisa de uma cama quente ou um prato de sopa?",
+        "Cansado da estrada? Você veio ao lugar certo.",
+        "Sinta-se em casa, mas mantenha as botas longe das cadeiras.",
+        "O Grifo espera por você com os braços abertos. Como posso servir?",
+        "Um rosto novo! Temos quartos vagos, entre.",
+        "O ensopado está quase pronto. Quer esperar ou prefere um quarto?",
+        "As noites de Eldoria podem ser perigosas sem um teto. Venha.",
+        "Nada de brigas no meu salão. Fora isso, é bem-vindo."
+      ],
+      "friendly": [
+        "Minha nossa, veja só quem voltou! Como você está?",
+        "O melhor quarto já está pronto para você, querido.",
+        "Fiz aquela torta que você gosta, quer um pedaço?",
+        "Sente-se aqui perto da lareira, conte-me suas aventuras.",
+        "Você é como um filho para mim. Se cuide lá fora.",
+        "Martha sempre terá um lugar para você. Minha estalagem é sua casa."
+      ],
+      "hostile": [
+        "Pague adiantado e não me cause transtornos.",
+        "Estou de olho em você. Nada de grainhas.",
+        "Quartos para você agora são mais caros. É política da casa.",
+        "Vá para a taverna se quiser fazer bagunça. Aqui é lugar de gente decente.",
+        "Não me faça chamar o Aldric. Rápido com isso."
+      ]
+    },
+    "chat": [
+      "O mercado anda agitado, mas caro. Os preços subiram desde que as estradas ficaram perigosas.",
+      "O ferreiro Thorne é um bom homem, mas muito reservado. Desde que Aris sumiu, mal sai da forja.",
+      "Minha família fundou esta estalagem gerações atrás. Já abrigamos reis e ladrões. Às vezes os dois na mesma noite.",
+      "Se vir o bardo, diga que ele ainda me deve três canecas e meia. A meia conta porque ele derrubou no chão.",
+      "O hidromel do Urso Cego é forte demais para mim. Grom coloca alguma coisa a mais ali, tenho certeza.",
+      "As noites são longas quando se está sozinha. Por isso eu gosto quando os aventureiros passam por aqui.",
+      "Cuidado com os becos escuros à meia-noite. Já vi coisas... e fingi que não vi.",
+      "Elara no templo anda com uma expressão estranha. Algo a preocupa, mas ela não me conta.",
+      "Os aventureiros costumam trazer moedas de ouro antigas. Algumas são de reinos que nem existem mais.",
+      "O clima está mudando, sinto isso em meus ossos. As estrelas dizem que tempos difíceis virão.",
+      "Nunca subestime um inimigo pequeno. Aprendi isso com os ratos do meu porão.",
+      "O pão de Eldoria é o melhor do reino! Uso a receita da minha avó. O segredo é o mel silvestre.",
+      "Meu marido costumava dizer que a coragem não é a ausência do medo, mas a decisão de enfrentar o medo.",
+      "Já viajei muito antes de me estabelecer aqui. Cada cidade tem seu próprio sabor de perigo.",
+      "As estrelas contam histórias para quem sabe ouvir. Uma amiga maga me ensinou isso.",
+      "Se você encontrar um alaúde quebrado na estrada, não o descarte. Instrumentos têm alma.",
+      "Os melhores aventureiros que já hospedei eram os mais humildes. Os arrogantes nunca voltavam.",
+      "Cuidado com promessas feitas à noite. A luz do dia muda tudo.",
+      "O mel silvestre deste ano está diferente. Os apicultores dizem que as abelhas estão inquietas.",
+      "As paredes desta estalagem guardam mais segredos do que os diários de qualquer nobre.",
+      "Nunca confie em quem sorri demais num jogo de cartas. Isso vale para a vida também.",
+      "A cerveja de Grom é forte, mas meu ensopado é melhor para a alma.",
+      "Cada cicatriz conta uma história. Algumas valem a pena ser contadas.",
+      "Os viajantes trazem moedas, mas também trazem notícias. E as notícias são mais valiosas."
+    ],
+    "insult": {
+      "neutral": [
+        "Como ousa falar assim comigo? Saia da minha estalagem!",
+        "Você deveria aprender a respeitar quem te dá abrigo.",
+        "Sua má educação me impressiona."
+      ],
+      "friendly": [
+        "Pensei que éramos amigos. Que decepção vinda de você...",
+        "Isso doeu. Sua imagem mudou drasticamente em meus olhos.",
+        "Como você pôde dizer algo assim, querido?"
+      ],
+      "hostile": [
+        "Cale a boca! Vou chamar a guarda agora mesmo!",
+        "Não sei como o Aldric te deixou entrar nos portões.",
+        "Sua existência é um insulto a esta cidade!"
+      ]
+    }
+  }
+}

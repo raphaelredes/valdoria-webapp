@@ -7970,6 +7970,12 @@ body.perf-lite .vc-action-btn { transition: none; }
     // Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
     document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + Date.now() + '">');
     document.write('<script src="/shared/encounter-popup.js?v=' + Date.now() + '"><\/script>');
+    // 2026-05-22: NPC dialogue engine foundation (skeleton — wiring NPC-a-NPC pendente).
+    // npc-affinity: store centralizado em player.metadata.npc_affinity + reputation + memory.
+    // dialogue-engine: loader JSON + evalConditions + skill check + impact apply.
+    // Doc canonical: docs/sistemas/npc-dialogue-engine.md
+    document.write('<script src="/shared/npc-affinity.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/dialogue-engine.js?v=' + Date.now() + '"><\/script>');
     // === PADRAO_LIGHTBOX (task #55, 2026-05-20) — clicar nas imagens de NPCs
     // pra ver maior. Engine carrega aqui pra estar disponivel pro encounter-popup
     // (PADRAO_ALDRIC, ja wireada) E delegation global pra .npc-portrait

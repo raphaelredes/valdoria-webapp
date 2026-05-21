@@ -1,0 +1,1038 @@
+{
+  "npc_herbalist_lyra": {
+    "name": "Lyra",
+    "role": "Herborista",
+    "trading": {
+      "buys": [
+        "herb",
+        "flower",
+        "monster_part",
+        "poisons"
+      ],
+      "multiplier": 1.1,
+      "refusals": [
+        "Não tenho uso para isso, viajante.",
+        "Isso não tem propriedades medicinais que eu conheça.",
+        "Apenas materiais naturais, por favor."
+      ]
+    },
+    "timeline": [
+      {
+        "node": "start_trusted",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_herbalist_lyra",
+              "value": 15
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_regular",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_herbalist_lyra",
+              "value": 8
+            }
+          ]
+        }
+      }
+    ],
+    "nodes": {
+      "start": {
+        "text": "O aroma de ervas secas e flores silvestres preenche a tenda. Lyra está moendo folhas em um pilão, mas para e sorri ao vê-lo.\n\n\"Saudações. Você busca cura para o corpo ou apenas suprimentos para a estrada?\"",
+        "choices": [
+          {
+            "text": "🌿 Ver suas mercadorias",
+            "action": "trade",
+            "script": [
+              {
+                "type": "narration",
+                "text": "🌿 Ver suas mercadorias"
+              }
+            ]
+          },
+          {
+            "text": "💬 O que você faz aqui?",
+            "next": "job_desc"
+          },
+          {
+            "text": "🌿 Me fale sobre suas ervas.",
+            "next": "about_herbs",
+            "once": true
+          },
+          {
+            "text": "😟 Você parece preocupada...",
+            "next": "plague_intro",
+            "req_reputation": 0
+          },
+          {
+            "text": "👋 Adeus",
+            "action": "exit",
+            "script": [
+              {
+                "type": "narration",
+                "text": "👋 Adeus"
+              }
+            ]
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O aroma de ervas secas e flores silvestres preenche a tenda."
+          },
+          {
+            "type": "narration",
+            "text": "Lyra está moendo folhas em um pilão, mas para e sorri ao vê-lo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Saudações."
+          },
+          {
+            "type": "narration",
+            "text": "Você busca cura para o corpo ou apenas suprimentos para a estrada?\""
+          }
+        ]
+      },
+      "start_regular": {
+        "text": [
+          "Lyra ergue os olhos do pilão e acena.\n\n\"Ah, você voltou. Guardei amostras que podem te interessar.\"",
+          "\"Já conheço esse passo. O que precisa desta vez?\"",
+          "\"A floresta me contou que você andou por terras distantes. Trouxe algo para mim?\""
+        ],
+        "choices": [
+          {
+            "text": "🌿 Ver suas mercadorias",
+            "action": "trade",
+            "script": [
+              {
+                "type": "narration",
+                "text": "🌿 Ver suas mercadorias"
+              }
+            ]
+          },
+          {
+            "text": "🌲 Como está a floresta?",
+            "next": "about_forest",
+            "once": true
+          },
+          {
+            "text": "💧 O Pântano está avançando?",
+            "next": "about_swamp",
+            "once": true
+          },
+          {
+            "text": "⚗️ O que acha da alquimista?",
+            "next": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "🏪 E a Martha da estalagem?",
+            "next": "about_martha",
+            "once": true
+          },
+          {
+            "text": "👋 Até mais, Lyra.",
+            "action": "exit",
+            "script": [
+              {
+                "type": "narration",
+                "text": "👋 Até mais, Lyra."
+              }
+            ]
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra ergue os olhos do pilão e acena."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ah, você voltou."
+          },
+          {
+            "type": "narration",
+            "text": "Guardei amostras que podem te interessar.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Já conheço esse passo."
+          },
+          {
+            "type": "narration",
+            "text": "O que precisa desta vez?\""
+          },
+          {
+            "type": "narration",
+            "text": "\"A floresta me contou que você andou por terras distantes."
+          },
+          {
+            "type": "narration",
+            "text": "Trouxe algo para mim?\""
+          }
+        ]
+      },
+      "start_trusted": {
+        "text": [
+          "Lyra te oferece chá de camomila silvestre sem que você precise pedir.\n\n\"Sente-se. Tenho coisas para te contar.\"",
+          "\"Meu amigo das trilhas! A floresta me soprou que você viria. Ou talvez eu tenha visto suas pegadas na lama da entrada.\"",
+          "\"Há poucas pessoas em Eldoria com quem eu divido meu chá. Você é uma delas.\""
+        ],
+        "choices": [
+          {
+            "text": "🌿 Ver suas mercadorias",
+            "action": "trade",
+            "script": [
+              {
+                "type": "narration",
+                "text": "🌿 Ver suas mercadorias"
+              }
+            ]
+          },
+          {
+            "text": "🌀 Me conte sobre seu círculo.",
+            "next": "about_circle",
+            "once": true
+          },
+          {
+            "text": "🌲 Novídades da floresta?",
+            "next": "about_forest",
+            "once": true
+          },
+          {
+            "text": "💧 O Pântano te preocupa?",
+            "next": "about_swamp",
+            "once": true
+          },
+          {
+            "text": "⚗️ O que acha da Mirena?",
+            "next": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "👋 Até logo, Lyra.",
+            "action": "exit",
+            "script": [
+              {
+                "type": "narration",
+                "text": "👋 Até logo, Lyra."
+              }
+            ]
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra te oferece chá de camomila silvestre sem que você precise pedir."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sente-se."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho coisas para te contar.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Meu amigo das trilhas!"
+          },
+          {
+            "type": "narration",
+            "text": "A floresta me soprou que você viria."
+          },
+          {
+            "type": "narration",
+            "text": "Ou talvez eu tenha visto suas pegadas na lama da entrada.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Há poucas pessoas em Eldoria com quem eu divido meu chá."
+          },
+          {
+            "type": "narration",
+            "text": "Você é uma delas.\""
+          }
+        ]
+      },
+      "job_desc": {
+        "text": "\"Eu sou a guardiã dos remédios naturais de Eldoria. O Templo cura com preces, a alquimista cura com fórmulas, e eu curo com o que a terra nos dá. Preparo poções, cataplasmas e antídotos para os aventureiros que ousam entrar na floresta.\"",
+        "choices": [
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Eu sou a guardiã dos remédios naturais de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "O Templo cura com preces, a alquimista cura com fórmulas, e eu curo com o que a terra nos dá."
+          },
+          {
+            "type": "narration",
+            "text": "Preparo poções, cataplasmas e antídotos para os aventureiros que ousam entrar na floresta.\""
+          }
+        ]
+      },
+      "about_herbs": {
+        "text": [
+          "Lyra pega um ramo seco e o gira entre os dedos.\n\n\"Ervas não são ingredientes. São seres vivos com memória. Uma raiz de valeriana colhida ao amanhecer acalma três vezes mais que uma colhida ao meio-dia. O momento importa. A intenção importa.\"",
+          "\"A diferença entre ervas e poções? Respeito. A alquimista destila e pressiona. Eu escuto a planta e peço que compartilhe suas propriedades. O resultado é mais suave, mais duradouro, e não explode.\""
+        ],
+        "choices": [
+          {
+            "text": "Mas poções não curam mais rápido?",
+            "next": "herbs_vs_potions"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra pega um ramo seco e o gira entre os dedos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ervas não são ingredientes."
+          },
+          {
+            "type": "narration",
+            "text": "São seres vivos com memória."
+          },
+          {
+            "type": "narration",
+            "text": "Uma raiz de valeriana colhida ao amanhecer acalma três vezes mais que uma colhida ao meio-dia."
+          },
+          {
+            "type": "narration",
+            "text": "O momento importa."
+          },
+          {
+            "type": "narration",
+            "text": "A intenção importa.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"A diferença entre ervas e poções?"
+          },
+          {
+            "type": "narration",
+            "text": "Respeito."
+          },
+          {
+            "type": "narration",
+            "text": "A alquimista destila e pressiona."
+          },
+          {
+            "type": "narration",
+            "text": "Eu escuto a planta e peço que compartilhe suas propriedades."
+          },
+          {
+            "type": "narration",
+            "text": "O resultado é mais suave, mais duradouro, e não explode.\""
+          }
+        ]
+      },
+      "herbs_vs_potions": {
+        "text": "\"Poções forçam a cura. Cataplasmas convidam o corpo a se curar. Um guerreiro com o braço quebrado bebe uma poção e sente o osso fundir em segundos — eficaz, mas brutal. Meu emplastro de consolda leva horas, mas o osso volta mais forte. Cada caminho tem seu lugar.\"",
+        "choices": [
+          {
+            "text": "Faz sentido. Obrigado.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Poções forçam a cura."
+          },
+          {
+            "type": "narration",
+            "text": "Cataplasmas convidam o corpo a se curar."
+          },
+          {
+            "type": "narration",
+            "text": "Um guerreiro com o braço quebrado bebe uma poção e sente o osso fundir em segundos — eficaz, mas brutal."
+          },
+          {
+            "type": "narration",
+            "text": "Meu emplastro de consolda leva horas, mas o osso volta mais forte."
+          },
+          {
+            "type": "narration",
+            "text": "Cada caminho tem seu lugar.\""
+          }
+        ]
+      },
+      "about_forest": {
+        "text": [
+          "\"A Floresta Negra está mudando. As árvores-sentinela no norte perderam metade das folhas fora de estação. Os cervos migraram cedo demais. E encontrei líquens arcanos onde nunca houve magia.\"",
+          "\"Passo três dias por semana coletando. Conheço cada trilha. E posso te dizer: algo está empurrando os animais para fora. Não é um predador. É algo no próprio solo.\""
+        ],
+        "choices": [
+          {
+            "text": "Você acha que é o Pântano?",
+            "next": "forest_corruption"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"A Floresta Negra está mudando."
+          },
+          {
+            "type": "narration",
+            "text": "As árvores-sentinela no norte perderam metade das folhas fora de estação."
+          },
+          {
+            "type": "narration",
+            "text": "Os cervos migraram cedo demais."
+          },
+          {
+            "type": "narration",
+            "text": "E encontrei líquens arcanos onde nunca houve magia.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Passo três dias por semana coletando."
+          },
+          {
+            "type": "narration",
+            "text": "Conheço cada trilha."
+          },
+          {
+            "type": "narration",
+            "text": "E posso te dizer: algo está empurrando os animais para fora."
+          },
+          {
+            "type": "narration",
+            "text": "Não é um predador."
+          },
+          {
+            "type": "narration",
+            "text": "É algo no próprio solo.\""
+          }
+        ]
+      },
+      "forest_corruption": {
+        "text": "\"Em parte. Mas há algo mais. Encontrei círculos de cogumelos perfeitos — anéis de fadas — em lugares que visitava há anos sem ver nenhum. Como se a floresta tentasse se proteger de algo subterrâneo. Cogumelos são a resposta imunológica da terra. Quando uma floresta milenar reage com desespero, é hora de prestar atenção.\"",
+        "choices": [
+          {
+            "text": "Obrigado pelo aviso.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Em parte."
+          },
+          {
+            "type": "narration",
+            "text": "Mas há algo mais."
+          },
+          {
+            "type": "narration",
+            "text": "Encontrei círculos de cogumelos perfeitos — anéis de fadas — em lugares que visitava há anos sem ver nenhum."
+          },
+          {
+            "type": "narration",
+            "text": "Como se a floresta tentasse se proteger de algo subterrâneo."
+          },
+          {
+            "type": "narration",
+            "text": "Cogumelos são a resposta imunológica da terra."
+          },
+          {
+            "type": "narration",
+            "text": "Quando uma floresta milenar reage com desespero, é hora de prestar atenção.\""
+          }
+        ]
+      },
+      "about_circle": {
+        "text": "Lyra fecha os olhos. Quando os abre, há dor neles.\n\n\"O Círculo de Valdren. Nove druidas dedicados ao equilíbrio. Eu era a mais jovem. Até que três dos nossos começaram a estudar magia de corrupção — diziam que para entendê-la e combatê-la. Mentiam.\"",
+        "choices": [
+          {
+            "text": "O que aconteceu?",
+            "next": "circle_fall"
+          },
+          {
+            "text": "Não precisa contar se não quiser.",
+            "next": "circle_gratitude"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra fecha os olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Quando os abre, há dor neles."
+          },
+          {
+            "type": "narration",
+            "text": "\"O Círculo de Valdren."
+          },
+          {
+            "type": "narration",
+            "text": "Nove druidas dedicados ao equilíbrio."
+          },
+          {
+            "type": "narration",
+            "text": "Eu era a mais jovem."
+          },
+          {
+            "type": "narration",
+            "text": "Até que três dos nossos começaram a estudar magia de corrupção — diziam que para entendê-la e combatê-la."
+          },
+          {
+            "type": "narration",
+            "text": "Mentiam.\""
+          }
+        ]
+      },
+      "circle_fall": {
+        "text": [
+          "\"Corromperam o bosque sagrado. A árvore-mãe — um carvalho de dois mil anos — sangrou seiva negra. Os animais fugiram. A terra ficou estéril. Quando confrontei o líder, Thalvek, ele me chamou de fraca. Disse que o verdadeiro druidismo exigia dominar TODAS as formas de poder natural.\"",
+          "\"Saí sozinha, com as mãos tremendo e um voto de nunca mais pertencer a um círculo. Dois anos depois, ouvi que o bosque morreu. E Thalvek desapareceu.\""
+        ],
+        "choices": [
+          {
+            "text": "Você acha que ele está vivo?",
+            "next": "circle_thalvek"
+          },
+          {
+            "text": "Sinto muito, Lyra.",
+            "next": "circle_gratitude"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Corromperam o bosque sagrado."
+          },
+          {
+            "type": "narration",
+            "text": "A árvore-mãe — um carvalho de dois mil anos — sangrou seiva negra."
+          },
+          {
+            "type": "narration",
+            "text": "Os animais fugiram."
+          },
+          {
+            "type": "narration",
+            "text": "A terra ficou estéril."
+          },
+          {
+            "type": "narration",
+            "text": "Quando confrontei o líder, Thalvek, ele me chamou de fraca."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que o verdadeiro druidismo exigia dominar TODAS as formas de poder natural.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Saí sozinha, com as mãos tremendo e um voto de nunca mais pertencer a um círculo."
+          },
+          {
+            "type": "narration",
+            "text": "Dois anos depois, ouvi que o bosque morreu."
+          },
+          {
+            "type": "narration",
+            "text": "E Thalvek desapareceu.\""
+          }
+        ]
+      },
+      "circle_thalvek": {
+        "text": "\"Às vezes, quando vejo os veios roxos nas raízes corrompidas do Pântano, reconheço o padrão. A mesma técnica que Thalvek usou no bosque. Pode ser coincidência. Pode ser paranoia. Mas meu instinto diz que ele está vivo. E mais perto do que eu gostaria.\"",
+        "choices": [
+          {
+            "text": "Se eu encontrar algo, aviso você.",
+            "next": "circle_gratitude"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Às vezes, quando vejo os veios roxos nas raízes corrompidas do Pântano, reconheço o padrão."
+          },
+          {
+            "type": "narration",
+            "text": "A mesma técnica que Thalvek usou no bosque."
+          },
+          {
+            "type": "narration",
+            "text": "Pode ser coincidência."
+          },
+          {
+            "type": "narration",
+            "text": "Pode ser paranoia."
+          },
+          {
+            "type": "narration",
+            "text": "Mas meu instinto diz que ele está vivo."
+          },
+          {
+            "type": "narration",
+            "text": "E mais perto do que eu gostaria.\""
+          }
+        ]
+      },
+      "circle_gratitude": {
+        "text": "Lyra respira fundo e força um sorriso.\n\n\"Obrigada por ouvir. Não conto isso para ninguém. A maioria ouve 'druida' e pensa em velhos dançando em volta de árvores. Não entendem o peso que carregamos.\"",
+        "choices": [
+          {
+            "text": "Seu segredo está seguro comigo.",
+            "next": "start_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra respira fundo e força um sorriso."
+          },
+          {
+            "type": "narration",
+            "text": "\"Obrigada por ouvir."
+          },
+          {
+            "type": "narration",
+            "text": "Não conto isso para ninguém."
+          },
+          {
+            "type": "narration",
+            "text": "A maioria ouve 'druida' e pensa em velhos dançando em volta de árvores."
+          },
+          {
+            "type": "narration",
+            "text": "Não entendem o peso que carregamos.\""
+          }
+        ]
+      },
+      "about_swamp": {
+        "text": "\"O Pântano de Valdoria está comendo a floresta. Três anos atrás, a borda ficava a dois quilômetros da minha rota norte. Agora está a oitocentos metros. As raízes das árvores apodrecem por baixo — parecem saudáveis por fora, mas por dentro já são lama.\"",
+        "choices": [
+          {
+            "text": "Você investigou a causa?",
+            "next": "swamp_cause"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"O Pântano de Valdoria está comendo a floresta."
+          },
+          {
+            "type": "narration",
+            "text": "Três anos atrás, a borda ficava a dois quilômetros da minha rota norte."
+          },
+          {
+            "type": "narration",
+            "text": "Agora está a oitocentos metros."
+          },
+          {
+            "type": "narration",
+            "text": "As raízes das árvores apodrecem por baixo — parecem saudáveis por fora, mas por dentro já são lama.\""
+          }
+        ]
+      },
+      "swamp_cause": {
+        "text": "\"Coletei amostras da água. Resíduos de energia arcana que não deveria existir. Levei para a Mirena — ela confirmou: essência necrótica destilada. Pantanos naturais não produzem isso. Alguém está alimentando aquilo deliberadamente.\"",
+        "choices": [
+          {
+            "text": "Posso ajudar a investigar?",
+            "next": "swamp_help"
+          },
+          {
+            "text": "Preocupante. Obrigado.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Coletei amostras da água."
+          },
+          {
+            "type": "narration",
+            "text": "Resíduos de energia arcana que não deveria existir."
+          },
+          {
+            "type": "narration",
+            "text": "Levei para a Mirena — ela confirmou: essência necrótica destilada."
+          },
+          {
+            "type": "narration",
+            "text": "Pantanos naturais não produzem isso."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém está alimentando aquilo deliberadamente.\""
+          }
+        ]
+      },
+      "swamp_help": {
+        "text": "\"Se for até a borda do Pântano, procure árvores com raízes expostas de veios roxos. Traga uma amostra — com luvas, por favor. A última pessoa que tocou numa daquelas raízes ficou com a mão dormente por dois dias. Não fatal, mas desagradável.\"",
+        "choices": [
+          {
+            "text": "Farei isso.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Se for até a borda do Pântano, procure árvores com raízes expostas de veios roxos."
+          },
+          {
+            "type": "narration",
+            "text": "Traga uma amostra — com luvas, por favor."
+          },
+          {
+            "type": "narration",
+            "text": "A última pessoa que tocou numa daquelas raízes ficou com a mão dormente por dois dias."
+          },
+          {
+            "type": "narration",
+            "text": "Não fatal, mas desagradável.\""
+          }
+        ]
+      },
+      "about_mirena": {
+        "text": "Lyra revira os olhos, mas há respeito por trás.\n\n\"Mirena? Brilhante. Arrogante. As duas em doses iguais. Ela acha que pode meter a natureza num frasco e controlá-la. Eu acho que a natureza é quem decide o que vai pro frasco. Mas devo admitir: quando juntamos nossos conhecimentos, o resultado é superior.\"",
+        "choices": [
+          {
+            "text": "Vocês trabalham juntas?",
+            "next": "mirena_collab"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Lyra revira os olhos, mas há respeito por trás."
+          },
+          {
+            "type": "narration",
+            "text": "\"Mirena?"
+          },
+          {
+            "type": "narration",
+            "text": "Brilhante."
+          },
+          {
+            "type": "narration",
+            "text": "Arrogante."
+          },
+          {
+            "type": "narration",
+            "text": "As duas em doses iguais."
+          },
+          {
+            "type": "narration",
+            "text": "Ela acha que pode meter a natureza num frasco e controlá-la."
+          },
+          {
+            "type": "narration",
+            "text": "Eu acho que a natureza é quem decide o que vai pro frasco."
+          },
+          {
+            "type": "narration",
+            "text": "Mas devo admitir: quando juntamos nossos conhecimentos, o resultado é superior.\""
+          }
+        ]
+      },
+      "mirena_collab": {
+        "text": "\"Quando a necessidade aperta. Ela me traz frascos, eu lhe trago ervas que só eu sei onde encontrar. Ela me chama de 'empírica' como se fosse insulto. Eu a chamo de 'destiladora' pelo mesmo motivo. Funciona. Só não diga a ela que eu disse isso.\"",
+        "choices": [
+          {
+            "text": "Entendo. Mudando de assunto...",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Quando a necessidade aperta."
+          },
+          {
+            "type": "narration",
+            "text": "Ela me traz frascos, eu lhe trago ervas que só eu sei onde encontrar."
+          },
+          {
+            "type": "narration",
+            "text": "Ela me chama de 'empírica' como se fosse insulto."
+          },
+          {
+            "type": "narration",
+            "text": "Eu a chamo de 'destiladora' pelo mesmo motivo."
+          },
+          {
+            "type": "narration",
+            "text": "Funciona."
+          },
+          {
+            "type": "narration",
+            "text": "Só não diga a ela que eu disse isso.\""
+          }
+        ]
+      },
+      "about_martha": {
+        "text": "\"Martha é uma bênção para Eldoria. Fornecemos ervas uma para a outra — eu dou camomila e hortelã para os chás dela, ela me dá sementes de mostarda e açafrão dos mercadores. O caldo de galinha que ela faz com minhas ervas cura resfriados melhor que qualquer poção. Já disse isso pra Mirena, ela ficou furiosa.\"",
+        "choices": [
+          {
+            "text": "Martha parece gostar de você.",
+            "next": "martha_bond"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Martha é uma bênção para Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Fornecemos ervas uma para a outra — eu dou camomila e hortelã para os chás dela, ela me dá sementes de mostarda e açafrão dos mercadores."
+          },
+          {
+            "type": "narration",
+            "text": "O caldo de galinha que ela faz com minhas ervas cura resfriados melhor que qualquer poção."
+          },
+          {
+            "type": "narration",
+            "text": "Já disse isso pra Mirena, ela ficou furiosa.\""
+          }
+        ]
+      },
+      "martha_bond": {
+        "text": "\"É a pessoa mais próxima de uma mãe que tenho nesta cidade. Sempre me traz sopa quando passo dias na floresta e volto parecendo um espantalho. 'Você vai definhar, menina', ela diz. E eu como tudo sem reclamar, porque ela tem razão.\"",
+        "choices": [
+          {
+            "text": "É bom ter alguém que se importa.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"É a pessoa mais próxima de uma mãe que tenho nesta cidade."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre me traz sopa quando passo dias na floresta e volto parecendo um espantalho."
+          },
+          {
+            "type": "speech",
+            "text": "'Você vai definhar, menina', ela diz.",
+            "speaker": "Lyra"
+          },
+          {
+            "type": "narration",
+            "text": "E eu como tudo sem reclamar, porque ela tem razão.\""
+          }
+        ]
+      },
+      "plague_intro": {
+        "text": "Ela suspira e aponta para uma cesta de raízes escurecidas no canto.\n\n\"Você tem olhos atentos. Sim, algo está errado na Floresta das Sombras. As raízes de *Mandrágora* que meus coletores trazem... elas têm veios roxos pulsantes. Nunca vi nada igual em vinte anos de herbologia.\"",
+        "choices": [
+          {
+            "text": "🟣 Veios roxos? (Lore)",
+            "next": "plague_lore"
+          },
+          {
+            "text": "⚔️ Posso ajudar?",
+            "next": "plague_quest_hint"
+          },
+          {
+            "text": "🔙 Mudar de assunto",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ela suspira e aponta para uma cesta de raízes escurecidas no canto."
+          },
+          {
+            "type": "narration",
+            "text": "\"Você tem olhos atentos."
+          },
+          {
+            "type": "narration",
+            "text": "Sim, algo está errado na Floresta das Sombras."
+          },
+          {
+            "type": "narration",
+            "text": "As raízes de *Mandrágora* que meus coletores trazem... elas têm veios roxos pulsantes."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca vi nada igual em vinte anos de herbologia.\""
+          }
+        ]
+      },
+      "plague_lore": {
+        "text": "\"Isso me lembra as histórias da 'Praga de Sombracal'. Dizem que corrompe a vida a partir do solo, transformando plantas medicinais em venenos potentes. Se isso se espalhar para as plantações da cidade... teremos fome e doença, não apenas monstros.\"",
+        "choices": [
+          {
+            "text": "😨 Isso soa perigoso. Posso ajudar?",
+            "next": "plague_quest_hint"
+          },
+          {
+            "text": "🔙 Voltar",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "speech",
+            "text": "\"Isso me lembra as histórias da 'Praga de Sombracal'.",
+            "speaker": "Lyra"
+          },
+          {
+            "type": "narration",
+            "text": "Dizem que corrompe a vida a partir do solo, transformando plantas medicinais em venenos potentes."
+          },
+          {
+            "type": "narration",
+            "text": "Se isso se espalhar para as plantações da cidade... teremos fome e doença, não apenas monstros.\""
+          }
+        ]
+      },
+      "plague_quest_hint": {
+        "text": "\"Se você for viajar para o Norte, fique atento a qualquer fonte de corrupção. Não posso pagar muito, mas pagarei o dobro por qualquer amostra de planta corrompida que você trouxer. Preciso estudá-las para criar um antídoto antes que seja tarde.\"",
+        "choices": [
+          {
+            "text": "✅ Farei isso se encontrar algo.",
+            "next": "start",
+            "effect": "add_reputation_5"
+          },
+          {
+            "text": "💰 Só trabalho com pagamento adiantado.",
+            "next": "start",
+            "effect": "sub_reputation_2"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Se você for viajar para o Norte, fique atento a qualquer fonte de corrupção."
+          },
+          {
+            "type": "narration",
+            "text": "Não posso pagar muito, mas pagarei o dobro por qualquer amostra de planta corrompida que você trouxer."
+          },
+          {
+            "type": "narration",
+            "text": "Preciso estudá-las para criar um antídoto antes que seja tarde.\""
+          }
+        ]
+      }
+    },
+    "greet": {
+      "neutral": [
+        "O aroma das ervas te trouxe até aqui? Ou foi a necessidade?",
+        "Bem-vindo à minha tenda. Cuidado com as raízes no chão.",
+        "A natureza provê tudo que precisamos, se soubermos onde olhar.",
+        "Procura remédios ou ingredientes? Tenho ambos.",
+        "Poucos aventureiros valorizam a herbologia. Você parece diferente.",
+        "A floresta está inquieta hoje. Mas minha tenda é segura.",
+        "O vento mudou de direção hoje. Isso sempre traz visitantes.",
+        "Cuidado onde pisa — os frascos de óleo no chão são frágeis."
+      ],
+      "friendly": [
+        "Ah, meu coletor favorito! Trouxe algo interessante das estradas?",
+        "Sua presença sempre traz boas raízes. E boas notícias também, espero.",
+        "Preparei um tônico especial só para você. Cortesia da casa.",
+        "A floresta fala bem de você. E a floresta nunca mente.",
+        "Sempre um prazer. As plantas parecem mais vivas quando você está por perto."
+      ],
+      "hostile": [
+        "Não toque em nada. Você já causou problemas suficientes.",
+        "Meus remédios não são para gente como você.",
+        "A natureza tem memória. E ela não perdoa.",
+        "Saia antes que as ervas de proteção reajam à sua presença."
+      ]
+    },
+    "chat": [
+      "A Irmã Elara reza pela cura, a alquimista destila, e eu colho. Três caminhos para o mesmo fim. Mas só o meu não machuca a terra.",
+      "As raízes de Mandrágora desta região são as mais potentes que já encontrei. Pelo menos eram, antes da corrupção.",
+      "Já notou que os pássaros não cantam mais perto do pântano? Os animais sentem antes de nós.",
+      "Minha mãe me ensinou herbologia em Greenmere. Aqui em Eldoria, as plantas são diferentes. Mais resistentes, mas também mais voláteis.",
+      "A erva-da-lua só floresce sob lua cheia. Uma única pétala pode curar febre por três dias.",
+      "Cuidado com cogumelos roxos na floresta. Parecem inofensivos, mas uma mordida e você dorme por uma semana.",
+      "O solo perto do pântano está mudando de cor. A corrupção avança devagar, mas não para.",
+      "Thorne me pediu um unguento para as queimaduras da forja. Homem forte, mas teimoso demais para ir ao templo.",
+      "A alquimista me acha primitiva. Eu a acho arrogante. Mas quando uma praga chegar, ela vai precisar das minhas ervas.",
+      "Vi pegadas de urso-coruja perto da trilha leste ontem. Se for para aquele lado, ande com cuidado.",
+      "Martha me traz sopa quando volto da floresta tarde demais. Em troca, deixo sachets de lavanda na estalagem.",
+      "As samambaias perto do riacho norte mudaram de cor — de verde para azulado. Pode ser minério no solo, ou algo pior.",
+      "Toda planta venenosa tem uma irmã curadora crescendo a menos de dez passos. A natureza é equilibrada assim.",
+      "Corvus me pediu um mapa das ervas comestíveis da região. Desenhei um. Ele tentou comer o mapa. Cartógrafos são estranhos.",
+      "Bjorn parou aqui pedindo tônico para ressaca. Dei chá de boldo e cobrei preço de poção rara. Pagou sem pestanejar.",
+      "O orvalho da madrugada nas pétalas de rósea-valdoriana tem propriedades regenerativas. Mas a luz solar destrói a essência em minutos.",
+      "Plantei um canteiro atrás da tenda. Os brotos crescem rápido demais. Velocidade antinatural é sinal de solo saturado de magia."
+    ],
+    "chat_class": {
+      "Druida": [
+        "Lyra fecha os olhos e respira fundo. \"Sinto o vínculo que você tem com a terra. É raro encontrar outro guardião aqui em Eldoria.\"",
+        "\"Seu círculo lhe ensinou a ouvir as raízes? O meu me ensinou a ouvir o silêncio entre elas. É aí que mora a verdade.\"",
+        "\"Entre druidas, não há segredos — só conhecimento compartilhado. Me conte o que a floresta lhe sussurrou hoje.\""
+      ],
+      "Patrulheiro": [
+        "\"Suas botas contam histórias — lama do norte, pólen do vale, seiva de pinheiro. Você andou longe. Precisa de suprimentos para a próxima trilha?\"",
+        "Lyra acena com respeito. \"Patrulheiros sabem que a floresta dá e cobra em igual medida. Trouxe algo interessante das suas andanças?\""
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "A natureza não tolera grosseria. Nem eu.",
+        "Saia antes que eu prepare algo especial para você.",
+        "Palavras venenosas de uma mente doente.",
+        "Tenho antídotos para venenos, mas não para a ignorância."
+      ],
+      "friendly": [
+        "Não esperava isso de você. A floresta se decepciona.",
+        "Pensava que havíamos construído confiança.",
+        "Suas palavras machucam como espinhos.",
+        "Vou precisar de um chá forte para esquecer o que você disse."
+      ],
+      "hostile": [
+        "Saia! E não volte nunca mais!",
+        "Você é mais tóxico que qualquer planta que eu conheço.",
+        "A floresta vai te encontrar. E não será gentil.",
+        "Conheço treze tipos de espinheiros. Todos menos dolorosos que você."
+      ]
+    }
+  }
+}

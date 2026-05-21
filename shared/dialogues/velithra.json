@@ -1,0 +1,1027 @@
+{
+  "npc_jeweler_velithra": {
+    "timeline": [
+      {
+        "node": "velithra_suspicious",
+        "conditions": {
+          "flag": "met_velithra",
+          "npc_emotion": [
+            {
+              "emotion": "trust",
+              "max": 0.25
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_trusted",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_jeweler_velithra",
+              "value": 8
+            }
+          ],
+          "min_affinity": 60
+        }
+      },
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "met_velithra"
+        }
+      },
+      {
+        "node": "quest_velithra_offer",
+        "conditions": {
+          "flags": [
+            "met_velithra",
+            "!accepted_velithra_gem"
+          ],
+          "min_level": 2
+        }
+      }
+    ],
+    "nodes": {
+      "velithra_suspicious": {
+        "text": [
+          "(Velithra te observa com olhos estreitos) 'Você de novo. Espero que não esteja aqui para... pechinchar.' Ela guarda uma gema rara no bolso. 'Meus preços são justos.'",
+          "(A joalheira cruza os braços ao te ver) 'Hmm. Vou ser direta: não confio em quem toca nas gemas antes de perguntar o preço. O que quer?'"
+        ],
+        "choices": [
+          {
+            "text": "Só vim olhar, prometo não tocar.",
+            "target": "exit",
+            "exit_callback": "market_visit_jeweler",
+            "impact": {
+              "flags": {
+                "met_velithra": true
+              }
+            }
+          },
+          {
+            "text": "Entendo. Volto outra hora.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_jeweler"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Velithra te observa com olhos estreitos) 'Você de novo."
+          },
+          {
+            "type": "narration",
+            "text": "Espero que não esteja aqui para... pechinchar.' Ela guarda uma gema rara no bolso."
+          },
+          {
+            "type": "speech",
+            "text": "'Meus preços são justos.'",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "(A joalheira cruza os braços ao te ver) 'Hmm."
+          },
+          {
+            "type": "narration",
+            "text": "Vou ser direta: não confio em quem toca nas gemas antes de perguntar o preço."
+          },
+          {
+            "type": "narration",
+            "text": "O que quer?'"
+          }
+        ]
+      },
+      "start": {
+        "text": [
+          "Velithra ergue os olhos do trabalho. Seus dedos seguram uma gema minúscula com precisão cirúrgica.\n\n\"Olhe com os olhos, não com as mãos. Cada peça aqui vale mais do que parece. E algumas... valem mais do que você imagina.\"",
+          "A luz das velas dança sobre dezenas de gemas dispostas em veludo negro.\n\n\"Se procura bijuteria barata, a feira é na praça. Se procura algo com alma... está no lugar certo.\"",
+          "Velithra examina uma gema contra a luz com um monóculo de prata.\n\n\"Hmm. Quartzo comum tentando se passar por topázio. O mundo está cheio de falsificações.\" Ela guarda a pedra e te olha. \"Posso ajudá-lo?\"",
+          "\"Cada gema conta uma história de milênios. Pressão, calor, escuridão... e então, luz.\" Velithra organiza pedras por cor com movimentos lentos e precisos. \"O que o traz à minha bancada?\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas gemas.",
+            "target": "exit",
+            "exit_callback": "market_visit_jeweler",
+            "impact": {
+              "flags": {
+                "met_velithra": true
+              }
+            }
+          },
+          {
+            "text": "Como identifica gemas de qualidade?",
+            "target": "about_gems",
+            "impact": {
+              "flags": {
+                "met_velithra": true
+              }
+            }
+          },
+          {
+            "text": "Até logo.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_jeweler",
+            "impact": {
+              "flags": {
+                "met_velithra": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra ergue os olhos do trabalho."
+          },
+          {
+            "type": "narration",
+            "text": "Seus dedos seguram uma gema minúscula com precisão cirúrgica."
+          },
+          {
+            "type": "narration",
+            "text": "\"Olhe com os olhos, não com as mãos."
+          },
+          {
+            "type": "narration",
+            "text": "Cada peça aqui vale mais do que parece."
+          },
+          {
+            "type": "narration",
+            "text": "E algumas... valem mais do que você imagina.\""
+          },
+          {
+            "type": "narration",
+            "text": "A luz das velas dança sobre dezenas de gemas dispostas em veludo negro."
+          },
+          {
+            "type": "narration",
+            "text": "\"Se procura bijuteria barata, a feira é na praça."
+          },
+          {
+            "type": "narration",
+            "text": "Se procura algo com alma... está no lugar certo.\""
+          },
+          {
+            "type": "narration",
+            "text": "Velithra examina uma gema contra a luz com um monóculo de prata."
+          },
+          {
+            "type": "narration",
+            "text": "\"Hmm."
+          },
+          {
+            "type": "narration",
+            "text": "Quartzo comum tentando se passar por topázio."
+          },
+          {
+            "type": "narration",
+            "text": "O mundo está cheio de falsificações.\" Ela guarda a pedra e te olha."
+          },
+          {
+            "type": "speech",
+            "text": "\"Posso ajudá-lo?\"",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "\"Cada gema conta uma história de milênios."
+          },
+          {
+            "type": "narration",
+            "text": "Pressão, calor, escuridão... e então, luz.\" Velithra organiza pedras por cor com movimentos lentos e precisos."
+          },
+          {
+            "type": "speech",
+            "text": "\"O que o traz à minha bancada?\"",
+            "speaker": "Velithra"
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "\"Ah, você voltou.\" Velithra arruma uma fileira de gemas sem levantar os olhos. \"Pelo menos demonstra bom gosto. Ou persistência. Ambos servem.\"",
+          "\"O viajante de olhos curiosos. Espero que tenha trazido algo mais interessante que conversa fiada desta vez.\"",
+          "Velithra te reconhece com um leve aceno. \"Ainda inteiro? Impressionante, dado o que se ouve sobre as estradas ultimamente.\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas gemas.",
+            "target": "exit",
+            "exit_callback": "market_visit_jeweler"
+          },
+          {
+            "text": "Aquele diamante que você carrega... é especial?",
+            "target": "about_diamond",
+            "once": true
+          },
+          {
+            "text": "Como identifica gemas de qualidade?",
+            "target": "about_gems"
+          },
+          {
+            "text": "Até logo, Velithra.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_jeweler"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Ah, você voltou.\" Velithra arruma uma fileira de gemas sem levantar os olhos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Pelo menos demonstra bom gosto."
+          },
+          {
+            "type": "narration",
+            "text": "Ou persistência."
+          },
+          {
+            "type": "narration",
+            "text": "Ambos servem.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"O viajante de olhos curiosos."
+          },
+          {
+            "type": "narration",
+            "text": "Espero que tenha trazido algo mais interessante que conversa fiada desta vez.\""
+          },
+          {
+            "type": "narration",
+            "text": "Velithra te reconhece com um leve aceno."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ainda inteiro?"
+          },
+          {
+            "type": "narration",
+            "text": "Impressionante, dado o que se ouve sobre as estradas ultimamente.\""
+          }
+        ]
+      },
+      "start_trusted": {
+        "text": [
+          "Os olhos de Velithra se iluminam — algo raro. \"Ah, é você. Guarde um segredo: separei uma peça especial. Ninguém mais viu ainda.\"",
+          "\"Que bom que veio.\" Velithra serve chá sem perguntar — sinal claro de confiança. \"Martha trouxe este blend de ervas esta manhã. Diz que acalma os nervos.\"",
+          "\"Meu cliente favorito.\" Velithra quase sorri. Quase. \"Sente-se. Tenho novidades sobre uma carga de gemas do sul.\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas gemas.",
+            "target": "exit",
+            "exit_callback": "market_visit_jeweler"
+          },
+          {
+            "text": "De onde você veio, Velithra?",
+            "target": "about_fallen_city",
+            "once": true
+          },
+          {
+            "text": "O que acha do trabalho de Thorne?",
+            "target": "about_thorne"
+          },
+          {
+            "text": "Até logo, Velithra.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_jeweler"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Os olhos de Velithra se iluminam — algo raro."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ah, é você."
+          },
+          {
+            "type": "narration",
+            "text": "Guarde um segredo: separei uma peça especial."
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém mais viu ainda.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Que bom que veio.\" Velithra serve chá sem perguntar — sinal claro de confiança."
+          },
+          {
+            "type": "narration",
+            "text": "\"Martha trouxe este blend de ervas esta manhã."
+          },
+          {
+            "type": "narration",
+            "text": "Diz que acalma os nervos.\""
+          },
+          {
+            "type": "speech",
+            "text": "\"Meu cliente favorito.\" Velithra quase sorri.",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "Quase."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sente-se."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho novidades sobre uma carga de gemas do sul.\""
+          }
+        ]
+      },
+      "about_gems": {
+        "text": [
+          "Velithra ergue uma pedra translúcida contra a chama de uma vela.\n\n\"A pureza é tudo. Vê esta inclusão aqui? Uma agulha de rutilo. Para a maioria, é uma falha. Para mim, é uma impressão digital. Cada gema é única, como as pessoas. Mas ao contrário das pessoas, gemas não mentem.\"\n\nEla coloca a pedra de volta com reverência.\n\n\"A luz revela a verdade. Se uma gema brilha sob qualquer ângulo, é genuína. Se precisa de ângulo certo para parecer bonita... desconfie. De gemas e de gente.\"",
+          "\"Três coisas definem uma gema: clareza, cor e corte.\" Velithra gira uma ametista entre os dedos. \"A natureza cuida das duas primeiras. O corte... esse é o toque do artesão. Um corte errado destrói milênios de trabalho da terra. Um corte perfeito liberta a luz que estava presa dentro da pedra.\"\n\nEla te olha nos olhos.\n\n\"Poucos entendem que lapidar é um ato de libertação, não de moldagem.\""
+        ],
+        "choices": [
+          {
+            "text": "Fascinante. Quero ver o que tem para venda.",
+            "target": "exit",
+            "exit_callback": "market_visit_jeweler"
+          },
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra ergue uma pedra translúcida contra a chama de uma vela."
+          },
+          {
+            "type": "narration",
+            "text": "\"A pureza é tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Vê esta inclusão aqui?"
+          },
+          {
+            "type": "narration",
+            "text": "Uma agulha de rutilo."
+          },
+          {
+            "type": "narration",
+            "text": "Para a maioria, é uma falha."
+          },
+          {
+            "type": "narration",
+            "text": "Para mim, é uma impressão digital."
+          },
+          {
+            "type": "narration",
+            "text": "Cada gema é única, como as pessoas."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ao contrário das pessoas, gemas não mentem.\"\n\nEla coloca a pedra de volta com reverência."
+          },
+          {
+            "type": "narration",
+            "text": "\"A luz revela a verdade."
+          },
+          {
+            "type": "narration",
+            "text": "Se uma gema brilha sob qualquer ângulo, é genuína."
+          },
+          {
+            "type": "narration",
+            "text": "Se precisa de ângulo certo para parecer bonita... desconfie."
+          },
+          {
+            "type": "narration",
+            "text": "De gemas e de gente.\""
+          },
+          {
+            "type": "speech",
+            "text": "\"Três coisas definem uma gema: clareza, cor e corte.\" Velithra gira uma ametista entre os dedos.",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "\"A natureza cuida das duas primeiras."
+          },
+          {
+            "type": "narration",
+            "text": "O corte... esse é o toque do artesão."
+          },
+          {
+            "type": "narration",
+            "text": "Um corte errado destrói milênios de trabalho da terra."
+          },
+          {
+            "type": "narration",
+            "text": "Um corte perfeito liberta a luz que estava presa dentro da pedra.\"\n\nEla te olha nos olhos."
+          },
+          {
+            "type": "speech",
+            "text": "\"Poucos entendem que lapidar é um ato de libertação, não de moldagem.\"",
+            "speaker": "Velithra"
+          }
+        ]
+      },
+      "about_diamond": {
+        "text": "Velithra congela por um instante. Seus dedos tocam instintivamente um bolso interno.\n\n\"Você tem olhos atentos.\" Sua voz é cuidadosa. \"Sim, carrego um diamante bruto. Não está à venda. Nunca estará.\"\n\nEla hesita.\n\n\"É... a última coisa que restou da minha cidade. Da minha vida anterior. Meu mestre me deu antes de... antes de tudo acabar. Disse que dentro dele há uma memória. Uma luz que não pode ser apagada.\"\n\nSeus olhos ficam distantes.\n\n\"Nunca o lapidei. Tenho medo de que, ao cortá-lo, a memória se perca.\"",
+        "choices": [
+          {
+            "text": "[Carisma] Talvez a memória não esteja na pedra, mas em você.",
+            "target": "diamond_insight",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 12,
+              "success": "diamond_insight",
+              "failure": "diamond_deflect",
+              "flavor": "Você tenta encontrar as palavras certas para uma ferida antiga..."
+            }
+          },
+          {
+            "text": "Respeito sua decisão. Não precisa dizer mais nada.",
+            "target": "diamond_respect"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra congela por um instante."
+          },
+          {
+            "type": "narration",
+            "text": "Seus dedos tocam instintivamente um bolso interno."
+          },
+          {
+            "type": "speech",
+            "text": "\"Você tem olhos atentos.\" Sua voz é cuidadosa.",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "\"Sim, carrego um diamante bruto."
+          },
+          {
+            "type": "narration",
+            "text": "Não está à venda."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca estará.\"\n\nEla hesita."
+          },
+          {
+            "type": "narration",
+            "text": "\"É... a última coisa que restou da minha cidade."
+          },
+          {
+            "type": "narration",
+            "text": "Da minha vida anterior."
+          },
+          {
+            "type": "narration",
+            "text": "Meu mestre me deu antes de... antes de tudo acabar."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que dentro dele há uma memória."
+          },
+          {
+            "type": "narration",
+            "text": "Uma luz que não pode ser apagada.\"\n\nSeus olhos ficam distantes."
+          },
+          {
+            "type": "narration",
+            "text": "\"Nunca o lapidei."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho medo de que, ao cortá-lo, a memória se perca.\""
+          }
+        ]
+      },
+      "diamond_insight": {
+        "text": "Velithra te olha como se a tivessem atingido. Depois, algo muda em seus olhos. Algo amolece.\n\n\"Ninguém... nunca disse isso.\" Ela segura o diamante bruto na palma da mão, olhando para ele como se o visse pela primeira vez.\n\n\"Talvez tenha razão. Talvez eu tenha medo de seguir em frente, não de perder a memória.\"\n\nEla guarda a pedra com cuidado.\n\n\"Obrigada. De verdade.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_jeweler_velithra": 4
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra te olha como se a tivessem atingido."
+          },
+          {
+            "type": "narration",
+            "text": "Depois, algo muda em seus olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Algo amolece."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ninguém... nunca disse isso.\" Ela segura o diamante bruto na palma da mão, olhando para ele como se o visse pela primeira vez."
+          },
+          {
+            "type": "narration",
+            "text": "\"Talvez tenha razão."
+          },
+          {
+            "type": "narration",
+            "text": "Talvez eu tenha medo de seguir em frente, não de perder a memória.\"\n\nEla guarda a pedra com cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "\"Obrigada."
+          },
+          {
+            "type": "narration",
+            "text": "De verdade.\""
+          }
+        ]
+      },
+      "diamond_deflect": {
+        "text": "Velithra ergue uma sobrancelha.\n\n\"Palavras bonitas, mas vazias.\" Ela guarda o diamante. \"Não se preocupe. Não é fácil entender. Poucos entendem.\"\n\nSeu tom volta ao profissional.\n\n\"Vamos falar de coisas que posso vender, sim?\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_jeweler_velithra": 1
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra ergue uma sobrancelha."
+          },
+          {
+            "type": "speech",
+            "text": "\"Palavras bonitas, mas vazias.\" Ela guarda o diamante.",
+            "speaker": "Velithra"
+          },
+          {
+            "type": "narration",
+            "text": "\"Não se preocupe."
+          },
+          {
+            "type": "narration",
+            "text": "Não é fácil entender."
+          },
+          {
+            "type": "narration",
+            "text": "Poucos entendem.\"\n\nSeu tom volta ao profissional."
+          },
+          {
+            "type": "speech",
+            "text": "\"Vamos falar de coisas que posso vender, sim?\"",
+            "speaker": "Velithra"
+          }
+        ]
+      },
+      "diamond_respect": {
+        "text": "Velithra assente lentamente, e algo quente cruza seu olhar frio.\n\n\"Poucos respeitam limites. A maioria quer saber, cutucar, desenterrar.\" Ela faz uma pausa.\n\n\"Você é diferente. Obrigada por isso.\"\n\nEla volta ao trabalho, mas há menos tensão em seus ombros.",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_jeweler_velithra": 3
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra assente lentamente, e algo quente cruza seu olhar frio."
+          },
+          {
+            "type": "narration",
+            "text": "\"Poucos respeitam limites."
+          },
+          {
+            "type": "narration",
+            "text": "A maioria quer saber, cutucar, desenterrar.\" Ela faz uma pausa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Você é diferente."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigada por isso.\"\n\nEla volta ao trabalho, mas há menos tensão em seus ombros."
+          }
+        ]
+      },
+      "about_fallen_city": {
+        "text": "Velithra olha ao redor para garantir que estão sozinhos. Baixa a voz.\n\n\"Minha cidade se chamava Lithvael. Cidade dos Espelhos, diziam, porque os prédios eram feitos de quartzo polido. Quando o sol batia, a cidade inteira brilhava.\"\n\nSeus olhos ficam úmidos, mas a voz não treme.\n\n\"Uma noite, sombras vieram. Não metáforas — sombras reais. Engoliam a luz, engoliam as pessoas. O quartzo escureceu. Meu mestre me empurrou para um túnel e disse para não olhar para trás.\"\n\nEla fecha os olhos.\n\n\"Eu olhei. Às vezes ainda vejo. A cidade inteira... apagando.\"\n\nQuando abre os olhos, são duros como diamante.\n\n\"É por isso que trabalho com gemas. Cada pedra que eu lapido é uma pequena luz contra a escuridão. Nunca mais vou deixar a luz se apagar.\"",
+        "choices": [
+          {
+            "text": "Sua história é de uma força incrível, Velithra.",
+            "target": "city_response"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra olha ao redor para garantir que estão sozinhos."
+          },
+          {
+            "type": "narration",
+            "text": "Baixa a voz."
+          },
+          {
+            "type": "narration",
+            "text": "\"Minha cidade se chamava Lithvael."
+          },
+          {
+            "type": "narration",
+            "text": "Cidade dos Espelhos, diziam, porque os prédios eram feitos de quartzo polido."
+          },
+          {
+            "type": "narration",
+            "text": "Quando o sol batia, a cidade inteira brilhava.\"\n\nSeus olhos ficam úmidos, mas a voz não treme."
+          },
+          {
+            "type": "narration",
+            "text": "\"Uma noite, sombras vieram."
+          },
+          {
+            "type": "narration",
+            "text": "Não metáforas — sombras reais."
+          },
+          {
+            "type": "narration",
+            "text": "Engoliam a luz, engoliam as pessoas."
+          },
+          {
+            "type": "narration",
+            "text": "O quartzo escureceu."
+          },
+          {
+            "type": "narration",
+            "text": "Meu mestre me empurrou para um túnel e disse para não olhar para trás.\"\n\nEla fecha os olhos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eu olhei."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes ainda vejo."
+          },
+          {
+            "type": "narration",
+            "text": "A cidade inteira... apagando.\"\n\nQuando abre os olhos, são duros como diamante."
+          },
+          {
+            "type": "narration",
+            "text": "\"É por isso que trabalho com gemas."
+          },
+          {
+            "type": "narration",
+            "text": "Cada pedra que eu lapido é uma pequena luz contra a escuridão."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca mais vou deixar a luz se apagar.\""
+          }
+        ]
+      },
+      "city_response": {
+        "text": "\"Força?\" Velithra dá um riso curto. \"Sobrevivência. Não é a mesma coisa. Mas obrigada.\"\n\nEla respira fundo.\n\n\"Martha é uma das poucas que sabe. Não a história toda, mas o suficiente. Ela me trouxe chá no primeiro inverno, quando eu dormia debaixo de uma barraca que Bjorn costurou às pressas. Nunca esqueci.\"\n\nEla endireita os ombros.\n\n\"Eldoria não é Lithvael. Mas é minha casa agora. E eu protejo o que é meu.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_trusted"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_jeweler_velithra": 2
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Força?\" Velithra dá um riso curto."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sobrevivência."
+          },
+          {
+            "type": "narration",
+            "text": "Não é a mesma coisa."
+          },
+          {
+            "type": "narration",
+            "text": "Mas obrigada.\"\n\nEla respira fundo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Martha é uma das poucas que sabe."
+          },
+          {
+            "type": "narration",
+            "text": "Não a história toda, mas o suficiente."
+          },
+          {
+            "type": "narration",
+            "text": "Ela me trouxe chá no primeiro inverno, quando eu dormia debaixo de uma barraca que Bjorn costurou às pressas."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca esqueci.\"\n\nEla endireita os ombros."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eldoria não é Lithvael."
+          },
+          {
+            "type": "narration",
+            "text": "Mas é minha casa agora."
+          },
+          {
+            "type": "narration",
+            "text": "E eu protejo o que é meu.\""
+          }
+        ]
+      },
+      "about_thorne": {
+        "text": [
+          "\"Thorne?\" Os lábios de Velithra se curvam num quase-sorriso. \"O único ferreiro que conheço que trata o metal como eu trato gemas — com respeito. Os engastes que ele forja para minhas peças são impecáveis. Milimétricos.\"\n\nEla ergue um anel com um engaste de prata elaborado.\n\n\"Vê isto? Qualquer ferreiro comum faria a gema escorregar em uma semana. Os engastes de Thorne duram décadas. O homem entende que o metal deve abraçar a pedra, não prendê-la.\"",
+          "\"Thorne é sério, calado e teimoso. Exatamente o tipo de artesão em quem confio.\" Velithra arruma suas ferramentas. \"Já vi ferreiros que falam demais — seus martelos erram. Thorne fala pouco e cada batida é certeira.\"\n\nEla acrescenta, quase como um pensamento: \"Ele perguntou pelo filho uma vez. A dor nos olhos dele... reconheço essa dor. Cada um carrega suas sombras.\""
+        ],
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_trusted"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Thorne?\" Os lábios de Velithra se curvam num quase-sorriso."
+          },
+          {
+            "type": "narration",
+            "text": "\"O único ferreiro que conheço que trata o metal como eu trato gemas — com respeito."
+          },
+          {
+            "type": "narration",
+            "text": "Os engastes que ele forja para minhas peças são impecáveis."
+          },
+          {
+            "type": "narration",
+            "text": "Milimétricos.\"\n\nEla ergue um anel com um engaste de prata elaborado."
+          },
+          {
+            "type": "narration",
+            "text": "\"Vê isto?"
+          },
+          {
+            "type": "narration",
+            "text": "Qualquer ferreiro comum faria a gema escorregar em uma semana."
+          },
+          {
+            "type": "narration",
+            "text": "Os engastes de Thorne duram décadas."
+          },
+          {
+            "type": "narration",
+            "text": "O homem entende que o metal deve abraçar a pedra, não prendê-la.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Thorne é sério, calado e teimoso."
+          },
+          {
+            "type": "narration",
+            "text": "Exatamente o tipo de artesão em quem confio.\" Velithra arruma suas ferramentas."
+          },
+          {
+            "type": "narration",
+            "text": "\"Já vi ferreiros que falam demais — seus martelos erram."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne fala pouco e cada batida é certeira.\"\n\nEla acrescenta, quase como um pensamento: \"Ele perguntou pelo filho uma vez."
+          },
+          {
+            "type": "narration",
+            "text": "A dor nos olhos dele... reconheço essa dor."
+          },
+          {
+            "type": "narration",
+            "text": "Cada um carrega suas sombras.\""
+          }
+        ]
+      },
+      "quest_velithra_offer": {
+        "text": "Velithra puxa uma caixa forrada de veludo e a abre com cuidado. Dentro, uma gema do tamanho de um punho pulsa com uma luz azulada irregular.\n\n\"Chegou ontem de um minerador do norte. Veja esta inclusão — não é mineral. Algo vivo pulsa lá dentro. Nunca vi nada parecido em décadas de ofício.\"\n\nEla hesita.\n\n\"Não vou trabalhar com algo que não entendo. Preciso que alguém investigue a origem desta gema. Mirena talvez saiba algo sobre a energia. Você topa?\"",
+        "choices": [
+          {
+            "text": "📜 Aceitar: investigar a gema misteriosa.",
+            "target": "quest_velithra_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_velithra_gem": true
+              },
+              "quests": [
+                "quest_velithra_gem"
+              ],
+              "reputation": {
+                "npc_jeweler_velithra": 2
+              }
+            }
+          },
+          {
+            "text": "Não agora, Velithra.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra puxa uma caixa forrada de veludo e a abre com cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "Dentro, uma gema do tamanho de um punho pulsa com uma luz azulada irregular."
+          },
+          {
+            "type": "narration",
+            "text": "\"Chegou ontem de um minerador do norte."
+          },
+          {
+            "type": "narration",
+            "text": "Veja esta inclusão — não é mineral."
+          },
+          {
+            "type": "narration",
+            "text": "Algo vivo pulsa lá dentro."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca vi nada parecido em décadas de ofício.\"\n\nEla hesita."
+          },
+          {
+            "type": "narration",
+            "text": "\"Não vou trabalhar com algo que não entendo."
+          },
+          {
+            "type": "narration",
+            "text": "Preciso que alguém investigue a origem desta gema."
+          },
+          {
+            "type": "narration",
+            "text": "Mirena talvez saiba algo sobre a energia."
+          },
+          {
+            "type": "narration",
+            "text": "Você topa?\""
+          }
+        ]
+      },
+      "quest_velithra_accepted": {
+        "text": "Velithra assente, aliviada.\n\n\"Bom. Comece pelos arredores — o minerador disse que encontrou a gema numa caverna ao norte, perto de um veio de quartzo que brilhava sozinho. Depois, procure Mirena. Se alguém entende de energia presa em cristais, é ela.\"\n\nEla embrulha uma amostra menor da gema e te entrega.\n\n\"Leve este fragmento. Mostre a Mirena. E... tenha cuidado. Coisas que pulsam dentro de pedras raramente são inofensivas.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Velithra assente, aliviada."
+          },
+          {
+            "type": "narration",
+            "text": "\"Bom."
+          },
+          {
+            "type": "narration",
+            "text": "Comece pelos arredores — o minerador disse que encontrou a gema numa caverna ao norte, perto de um veio de quartzo que brilhava sozinho."
+          },
+          {
+            "type": "narration",
+            "text": "Depois, procure Mirena."
+          },
+          {
+            "type": "narration",
+            "text": "Se alguém entende de energia presa em cristais, é ela.\"\n\nEla embrulha uma amostra menor da gema e te entrega."
+          },
+          {
+            "type": "narration",
+            "text": "\"Leve este fragmento."
+          },
+          {
+            "type": "narration",
+            "text": "Mostre a Mirena."
+          },
+          {
+            "type": "narration",
+            "text": "E... tenha cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "Coisas que pulsam dentro de pedras raramente são inofensivas.\""
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Olhe com os olhos. Não toque.",
+        "Gemas e encaixes. Algo específico?",
+        "A luz revela a verdade. O que procura?",
+        "Cada pedra tem seu preço. E seu valor.",
+        "Se procura qualidade, está no lugar certo.",
+        "Não vendo ilusões. Apenas clareza cristalizada."
+      ],
+      "friendly": [
+        "Que bom vê-lo. Separei algo que pode interessar.",
+        "Ah, um rosto familiar. Martha trouxe chá fresco — aceita?",
+        "Entre. Para você, as melhores peças ficam reservadas.",
+        "Seu olho para gemas está melhorando. Percebo essas coisas.",
+        "Sempre bom conversar com quem aprecia o ofício.",
+        "Bem-vindo de volta. A luz hoje está perfeita para examinar peças."
+      ],
+      "hostile": [
+        "Não tenho nada para você. Nem gemas, nem paciência.",
+        "Saia antes que eu chame a guarda. Ou pior.",
+        "Sua presença obscurece minha bancada. Literalmente.",
+        "Aprenda a respeitar artesãos antes de entrar em suas lojas.",
+        "Conheço pedras mais agradáveis que você. Todas elas."
+      ]
+    },
+    "chat": [
+      "O jade de Valdoria tem uma tonalidade verde-profundo única. Diz-se que absorve emoções negativas. Bobagem, claro. Mas vende bem.",
+      "Thorne forjou meus melhores engastes de prata. Nunca vi um ferreiro com mãos tão firmes. É como se o metal obedecesse.",
+      "Martha me traz chá de camomila toda manhã. Diz que acalma. Não acredito em ervas calmantes, mas o gesto... esse sim acalma.",
+      "A alquimista Mirena me vende um ácido suave para polimento de cristais. Funciona perfeitamente, apesar do cheiro terrível.",
+      "Corvus me perguntou sobre depósitos minerais uma vez. Respondi vagamente. Alguns segredos protegem vidas, não apenas negócios.",
+      "Gemas falsas são um insulto ao ofício. Cada vez que identifico uma falsificação, sinto vontade de quebrar algo. Geralmente a falsificação.",
+      "Antes de Eldoria, trabalhei em Lithvael. Uma cidade que brilhava como diamante ao sol. Agora é só escuridão. Não gosto de falar sobre isso.",
+      "Bjorn fez a cobertura de couro para minha bancada de trabalho. Rústico, mas funcional. Como ele.",
+      "Pérolas de água doce são subestimadas. Têm um brilho lunar que nenhuma gema terrestre consegue imitar.",
+      "Desconfie de quem vende gemas baratas. Na melhor das hipóteses, são quartzo pintado. Na pior... melhor nem saber."
+    ],
+    "chat_class": {
+      "Mago": [
+        "Velithra ergue um cristal contra a luz. \"Sente a ressonância? Praticantes das artes arcanas percebem o pulso das gemas. Cada uma vibra numa frequência diferente — como notas de uma melodia invisível.\"",
+        "\"Gemas como foco arcano são subestimadas. Um rubi bem lapidado canaliza evocação melhor que qualquer cajado de madeira. A maioria dos magos não sabe disso.\""
+      ],
+      "Feiticeiro": [
+        "\"Poder inato é como uma gema bruta — cheio de potencial, mas sem direção.\" Velithra te examina. \"Talvez um cristal canalizador ajude a refinar essa energia selvagem.\"",
+        "\"Já notou como gemas reagem perto de você? Feiticeiros emitem uma ressonância natural. Algumas pedras até mudam de cor na sua presença.\""
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "Velithra olha por cima dos óculos: 'Interessante. Conheço pedras com mais brilho e carisma que você.'",
+        "Velithra suspira: 'Algumas pessoas são como inclusões numa gema perfeita. Indesejáveis, mas inevitáveis.'",
+        "Velithra volta ao trabalho: 'Se sua intenção era me irritar, parabéns. Se era me impressionar, tente de novo em outra era geológica.'"
+      ],
+      "friendly": [
+        "Velithra quase ri: 'Grosseria com charme. Você me lembra Grom, só que com menos barba e mais dentes.'",
+        "Velithra ergue uma sobrancelha: 'Para alguém que diz coisas assim, você volta bastante. Devo ser irresistível.'",
+        "Velithra dá de ombros: 'Já ouvi piores. De gente melhor. Mas valeu o esforço.'"
+      ],
+      "hostile": [
+        "Velithra guarda as gemas lentamente: 'Sabe o que um diamante faz com pressão? Fica mais duro. Sabe o que eu faço? A mesma coisa. Saia.'",
+        "O olhar de Velithra congela: 'Minha paciência acabou como água no deserto. E no deserto, pessoas morrem de sede.'",
+        "Velithra aponta para a porta sem dizer nada. Seu silêncio é mais cortante que qualquer palavra."
+      ]
+    }
+  }
+}

@@ -1,0 +1,3082 @@
+{
+  "npc_tavern_grom": {
+    "timeline": [
+      {
+        "node": "start_grom_angry",
+        "conditions": {
+          "flag": "met_grom",
+          "npc_emotion": [
+            {
+              "emotion": "anger",
+              "min": 0.4
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_grom_happy",
+        "conditions": {
+          "flag": "met_grom",
+          "npc_emotion": [
+            {
+              "emotion": "joy",
+              "min": 0.5
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_confidant",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_tavern_grom",
+              "value": 15
+            }
+          ],
+          "min_affinity": 65
+        }
+      },
+      {
+        "node": "start_friend",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_tavern_grom",
+              "value": 8
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "met_grom"
+        }
+      }
+    ],
+    "nodes": {
+      "start_grom_angry": {
+        "text": [
+          "(Grom bate a caneca no balcão ao te ver) 'Você de novo? Não estou com humor pra conversa, aventureiro.'",
+          "(O taverneiro te fuzila com o olhar) 'Se veio causar problemas, a porta é ali. Não vou repetir.'"
+        ],
+        "choices": [
+          {
+            "text": "Calma, Grom. Só vim pela bebida.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          },
+          {
+            "text": "Entendido. Volto outra hora.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom bate a caneca no balcão ao te ver) 'Você de novo?"
+          },
+          {
+            "type": "narration",
+            "text": "Não estou com humor pra conversa, aventureiro.'"
+          },
+          {
+            "type": "narration",
+            "text": "(O taverneiro te fuzila com o olhar) 'Se veio causar problemas, a porta é ali."
+          },
+          {
+            "type": "narration",
+            "text": "Não vou repetir.'"
+          }
+        ]
+      },
+      "start_grom_happy": {
+        "text": [
+          "(Grom abre um sorriso e bate no balcão) 'Ei! Meu aventureiro favorito! Senta aí, a primeira caneca é por minha conta!'",
+          "(O taverneiro ri alto) '{player_name}! Hoje estou de bom humor — e isso é raro. Aproveite antes que passe!'"
+        ],
+        "choices": [
+          {
+            "text": "Uma caneca por conta da casa? Aceito!",
+            "target": "rumors_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 1
+              },
+              "flags": {
+                "met_grom": true
+              }
+            }
+          },
+          {
+            "text": "Bom te ver assim, Grom. O que tem de novo?",
+            "target": "start_confidant",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abre um sorriso e bate no balcão) 'Ei!"
+          },
+          {
+            "type": "narration",
+            "text": "Meu aventureiro favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Senta aí, a primeira caneca é por minha conta!'"
+          },
+          {
+            "type": "narration",
+            "text": "(O taverneiro ri alto) '{player_name}!"
+          },
+          {
+            "type": "narration",
+            "text": "Hoje estou de bom humor — e isso é raro."
+          },
+          {
+            "type": "narration",
+            "text": "Aproveite antes que passe!'"
+          }
+        ]
+      },
+      "start": {
+        "text": [
+          "O que você quer no meu balcão? Beber, apostar ou só gastar meu tempo?",
+          "Se não tiver ouro, dê meia volta. Não sou instituição de caridade.",
+          "Hmpf. Mais um aventureiro com cara de quem vai causar problemas.",
+          "Fale logo ou saia. Minha paciência é curta hoje.",
+          "Veio pelo hidromel ou para levar um soco? Escolha rápido."
+        ],
+        "choices": [
+          {
+            "text": "Conte-me rumores das estradas.",
+            "target": "rumors",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          },
+          {
+            "text": "[Bárbaro] Se você me servir um barril, eu te mostro como um guerreiro bebe!",
+            "target": "grom_impressed",
+            "conditions": {
+              "class": "Bárbaro"
+            }
+          },
+          {
+            "text": "[Ladino] Belo estabelecimento... Quanto rende por noite?",
+            "target": "rogue_gambit",
+            "conditions": {
+              "class": "Ladino"
+            },
+            "once": true
+          },
+          {
+            "text": "[Bardo] Uma taverna precisa de música! Posso tocar algo?",
+            "target": "bard_challenge",
+            "conditions": {
+              "class": "Bardo"
+            },
+            "once": true
+          },
+          {
+            "text": "Até logo, Grom.",
+            "target": "exit",
+            "exit_callback": "open_tavern",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O que você quer no meu balcão?"
+          },
+          {
+            "type": "narration",
+            "text": "Beber, apostar ou só gastar meu tempo?"
+          },
+          {
+            "type": "narration",
+            "text": "Se não tiver ouro, dê meia volta."
+          },
+          {
+            "type": "narration",
+            "text": "Não sou instituição de caridade."
+          },
+          {
+            "type": "narration",
+            "text": "Hmpf."
+          },
+          {
+            "type": "narration",
+            "text": "Mais um aventureiro com cara de quem vai causar problemas."
+          },
+          {
+            "type": "narration",
+            "text": "Fale logo ou saia."
+          },
+          {
+            "type": "narration",
+            "text": "Minha paciência é curta hoje."
+          },
+          {
+            "type": "narration",
+            "text": "Veio pelo hidromel ou para levar um soco?"
+          },
+          {
+            "type": "narration",
+            "text": "Escolha rápido."
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "De volta? Espero que tenha trazido ouro desta vez.",
+          "Ah, é você. Tente não quebrar nada.",
+          "Ainda vivo? Eldoria está ficando mole.",
+          "Se vai ficar, sente-se e cale a boca. Se não, a porta é ali."
+        ],
+        "choices": [
+          {
+            "text": "⚔️ Resolvi o problema das brigas.",
+            "target": "quest_brawl_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_brawl",
+                "found_brawl_leader",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "Grom, parece que você tem um problema...",
+            "target": "quest_brawl_offer",
+            "conditions": {
+              "flags": [
+                "completed_martha_cellar",
+                "!accepted_grom_brawl",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "Conte-me rumores das estradas.",
+            "target": "rumors"
+          },
+          {
+            "text": "Quero saber sobre as pessoas da cidade.",
+            "target": "ask_people_menu"
+          },
+          {
+            "text": "[Bárbaro] Outro barril, Grom?",
+            "target": "grom_impressed",
+            "conditions": {
+              "class": "Bárbaro"
+            }
+          },
+          {
+            "text": "[Ladino] Belo estabelecimento... Quanto rende por noite?",
+            "target": "rogue_gambit",
+            "conditions": {
+              "class": "Ladino"
+            },
+            "once": true
+          },
+          {
+            "text": "[Bardo] Uma taverna precisa de música! Posso tocar algo?",
+            "target": "bard_challenge",
+            "conditions": {
+              "class": "Bardo"
+            },
+            "once": true
+          },
+          {
+            "text": "[Paladino] Um lugar como este poderia usar mais ordem.",
+            "target": "paladin_tension",
+            "conditions": {
+              "class": "Paladino"
+            },
+            "once": true
+          },
+          {
+            "text": "Adeus.",
+            "target": "exit",
+            "exit_callback": "open_tavern"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "De volta?"
+          },
+          {
+            "type": "narration",
+            "text": "Espero que tenha trazido ouro desta vez."
+          },
+          {
+            "type": "narration",
+            "text": "Ah, é você."
+          },
+          {
+            "type": "narration",
+            "text": "Tente não quebrar nada."
+          },
+          {
+            "type": "narration",
+            "text": "Ainda vivo?"
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria está ficando mole."
+          },
+          {
+            "type": "narration",
+            "text": "Se vai ficar, sente-se e cale a boca."
+          },
+          {
+            "type": "narration",
+            "text": "Se não, a porta é ali."
+          }
+        ]
+      },
+      "start_friend": {
+        "text": [
+          "Ei! Olha quem apareceu. Senta aí, já pego sua caneca.",
+          "(Grom acena com a cabeça) Bom te ver, {player_name}. Tempo sem aparecer... ou só pareceu?",
+          "Achei que tinha desistido desta espelunca! Senta, senta. A noite é longa.",
+          "Meu olho bom reconhece os bons de longe. Sente-se, {player_name}."
+        ],
+        "choices": [
+          {
+            "text": "⚔️ Resolvi o problema das brigas.",
+            "target": "quest_brawl_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_brawl",
+                "found_brawl_leader",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "🍺 Trouxe os ingredientes, Grom.",
+            "target": "quest_brewer_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_brewer",
+                "found_sacred_water",
+                "!completed_grom_brewer"
+              ]
+            }
+          },
+          {
+            "text": "Grom, parece que você tem um problema...",
+            "target": "quest_brawl_offer",
+            "conditions": {
+              "flags": [
+                "completed_martha_cellar",
+                "!accepted_grom_brawl",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "Grom, aquela receita que você mencionou...",
+            "target": "quest_brewer_offer",
+            "conditions": {
+              "flags": [
+                "completed_grom_brawl",
+                "!accepted_grom_brewer",
+                "!completed_grom_brewer"
+              ]
+            }
+          },
+          {
+            "text": "Conte-me os rumores de hoje.",
+            "target": "rumors_friend"
+          },
+          {
+            "text": "Quero saber sobre as pessoas da cidade.",
+            "target": "ask_people_menu"
+          },
+          {
+            "text": "Como você virou taverneiro?",
+            "target": "backstory_tavern",
+            "once": true
+          },
+          {
+            "text": "[Intimidação] Me dê uma bebida por conta da casa.",
+            "target": "intimidate_success",
+            "check": {
+              "skill": "intimidation",
+              "difficulty": 14,
+              "success": "intimidate_success",
+              "failure": "intimidate_failure",
+              "flavor": "Grom te encara com o olho bom..."
+            },
+            "once": true
+          },
+          {
+            "text": "[Mago] Um mago chamado Halvek... já ouviu falar?",
+            "target": "wizard_curiosity",
+            "conditions": {
+              "class": "Mago"
+            },
+            "once": true
+          },
+          {
+            "text": "Até mais, Grom.",
+            "target": "exit",
+            "exit_callback": "open_tavern"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ei!"
+          },
+          {
+            "type": "narration",
+            "text": "Olha quem apareceu."
+          },
+          {
+            "type": "narration",
+            "text": "Senta aí, já pego sua caneca."
+          },
+          {
+            "type": "narration",
+            "text": "(Grom acena com a cabeça) Bom te ver, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Tempo sem aparecer... ou só pareceu?"
+          },
+          {
+            "type": "narration",
+            "text": "Achei que tinha desistido desta espelunca!"
+          },
+          {
+            "type": "narration",
+            "text": "Senta, senta."
+          },
+          {
+            "type": "narration",
+            "text": "A noite é longa."
+          },
+          {
+            "type": "narration",
+            "text": "Meu olho bom reconhece os bons de longe."
+          },
+          {
+            "type": "narration",
+            "text": "Sente-se, {player_name}."
+          }
+        ]
+      },
+      "start_confidant": {
+        "text": [
+          "(Grom já desliza uma caneca cheia pelo balcão antes de você sentar) 'Não precisa pedir. Eu sei o que você bebe, {player_name}.'",
+          "(O taverneiro abre um sorriso torto) 'Meu melhor cliente! Se eu tivesse dez como você, aposentava feliz.'",
+          "'Ei, {player_name}! Os outros podem ir pro inferno — essa rodada é sua, por conta da casa.'",
+          "(Grom sai de trás do balcão para te dar um tapa nas costas) 'Estava te esperando! Tenho uma história boa pra hoje.'"
+        ],
+        "choices": [
+          {
+            "text": "⚔️ Resolvi o problema das brigas.",
+            "target": "quest_brawl_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_brawl",
+                "found_brawl_leader",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "🍺 Trouxe os ingredientes, Grom.",
+            "target": "quest_brewer_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_brewer",
+                "found_sacred_water",
+                "!completed_grom_brewer"
+              ]
+            }
+          },
+          {
+            "text": "⚔️ Investiguei o tal Varnok.",
+            "target": "quest_past_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_grom_past",
+                "resolved_varnok",
+                "!completed_grom_past"
+              ]
+            }
+          },
+          {
+            "text": "Grom, parece que você tem um problema...",
+            "target": "quest_brawl_offer",
+            "conditions": {
+              "flags": [
+                "completed_martha_cellar",
+                "!accepted_grom_brawl",
+                "!completed_grom_brawl"
+              ]
+            }
+          },
+          {
+            "text": "Grom, aquela receita que você mencionou...",
+            "target": "quest_brewer_offer",
+            "conditions": {
+              "flags": [
+                "completed_grom_brawl",
+                "!accepted_grom_brewer",
+                "!completed_grom_brewer"
+              ]
+            }
+          },
+          {
+            "text": "Grom, você parece tenso hoje...",
+            "target": "quest_past_offer",
+            "conditions": {
+              "flags": [
+                "completed_grom_brewer",
+                "!accepted_grom_past",
+                "!completed_grom_past"
+              ]
+            }
+          },
+          {
+            "text": "O que tem de novo nas estradas?",
+            "target": "rumors_confidant"
+          },
+          {
+            "text": "Me fale das pessoas da cidade.",
+            "target": "ask_people_menu"
+          },
+          {
+            "text": "Me conte sobre aquela cicatriz no olho.",
+            "target": "backstory_eye",
+            "once": true
+          },
+          {
+            "text": "Por que a taverna se chama 'O Javali Bêbado'?",
+            "target": "backstory_name",
+            "once": true
+          },
+          {
+            "text": "[Persuasão] Grom, eu sei que você sabe de coisas... Beco Sombrio.",
+            "target": "persuade_secret_success",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 16,
+              "success": "persuade_secret_success",
+              "failure": "persuade_secret_failure",
+              "flavor": "Grom te olha com o olho bom, medindo sua intenção..."
+            },
+            "once": true
+          },
+          {
+            "text": "Até logo, velho amigo.",
+            "target": "exit",
+            "exit_callback": "open_tavern"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom já desliza uma caneca cheia pelo balcão antes de você sentar) 'Não precisa pedir."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sei o que você bebe, {player_name}.'"
+          },
+          {
+            "type": "narration",
+            "text": "(O taverneiro abre um sorriso torto) 'Meu melhor cliente!"
+          },
+          {
+            "type": "narration",
+            "text": "Se eu tivesse dez como você, aposentava feliz.'"
+          },
+          {
+            "type": "narration",
+            "text": "'Ei, {player_name}!"
+          },
+          {
+            "type": "narration",
+            "text": "Os outros podem ir pro inferno — essa rodada é sua, por conta da casa.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Grom sai de trás do balcão para te dar um tapa nas costas) 'Estava te esperando!"
+          },
+          {
+            "type": "narration",
+            "text": "Tenho uma história boa pra hoje.'"
+          }
+        ]
+      },
+      "rumors": {
+        "text": [
+          "Dizem que o orc no mercado anda vendendo sucata como se fosse aço de anão. E que Martha anda vendo fantasmas no porão. Hah!",
+          "Goblins nas estradas do sul. Nada que um bom machado não resolva, mas os mercadores choram como bebês.",
+          "O Capitão da guarda está recrutando. Carne fresca para o moedor, se quer saber minha opinião.",
+          "Há boatos de um tesouro nas ruínas ao norte. Mas só tolos vão lá. Muitos não voltam."
+        ],
+        "choices": [
+          {
+            "text": "Goblins ao sul? Quantos?",
+            "target": "rumors_goblins_detail"
+          },
+          {
+            "text": "Ruínas ao norte... vale o risco?",
+            "target": "rumors_ruins_detail"
+          },
+          {
+            "text": "Voltar ao assunto.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Dizem que o orc no mercado anda vendendo sucata como se fosse aço de anão."
+          },
+          {
+            "type": "narration",
+            "text": "E que Martha anda vendo fantasmas no porão."
+          },
+          {
+            "type": "narration",
+            "text": "Hah!"
+          },
+          {
+            "type": "narration",
+            "text": "Goblins nas estradas do sul."
+          },
+          {
+            "type": "narration",
+            "text": "Nada que um bom machado não resolva, mas os mercadores choram como bebês."
+          },
+          {
+            "type": "narration",
+            "text": "O Capitão da guarda está recrutando."
+          },
+          {
+            "type": "narration",
+            "text": "Carne fresca para o moedor, se quer saber minha opinião."
+          },
+          {
+            "type": "narration",
+            "text": "Há boatos de um tesouro nas ruínas ao norte."
+          },
+          {
+            "type": "narration",
+            "text": "Mas só tolos vão lá."
+          },
+          {
+            "type": "narration",
+            "text": "Muitos não voltam."
+          }
+        ]
+      },
+      "rumors_friend": {
+        "text": [
+          "(Grom se inclina e abaixa a voz) 'Entre nós... os guardas encontraram marcas de garras enormes na muralha norte. Ninguém sabe de que criatura. O capitão mandou abafar.'",
+          "'Sabe aquela caravana que estava atrasada? Chegou ontem à noite. Só o cocheiro sobreviveu. Não consegue parar de tremer. Algo os atacou na Floresta dos Sussurros.'",
+          "'O ferreiro, Thorne, tá agindo estranho. Tranca a forja mais cedo, sai de madrugada. Acho que tem a ver com aquele filho dele que desapareceu.'",
+          "'Ouvi uma coisa interessante na noite passada. Um bêbado da guarda deixou escapar que o Lorde está pensando em fechar os portões à noite. Medo de algo vindo do pântano.'"
+        ],
+        "choices": [
+          {
+            "text": "Garras na muralha? Que criatura?",
+            "target": "rumors_claw_detail"
+          },
+          {
+            "text": "Thorne agindo estranho... o filho?",
+            "target": "rumors_thorne_detail"
+          },
+          {
+            "text": "Vou ficar alerta. Obrigado.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom se inclina e abaixa a voz) 'Entre nós... os guardas encontraram marcas de garras enormes na muralha norte."
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém sabe de que criatura."
+          },
+          {
+            "type": "narration",
+            "text": "O capitão mandou abafar.'"
+          },
+          {
+            "type": "narration",
+            "text": "'Sabe aquela caravana que estava atrasada?"
+          },
+          {
+            "type": "narration",
+            "text": "Chegou ontem à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Só o cocheiro sobreviveu."
+          },
+          {
+            "type": "narration",
+            "text": "Não consegue parar de tremer."
+          },
+          {
+            "type": "narration",
+            "text": "Algo os atacou na Floresta dos Sussurros.'"
+          },
+          {
+            "type": "narration",
+            "text": "'O ferreiro, Thorne, tá agindo estranho."
+          },
+          {
+            "type": "narration",
+            "text": "Tranca a forja mais cedo, sai de madrugada."
+          },
+          {
+            "type": "narration",
+            "text": "Acho que tem a ver com aquele filho dele que desapareceu.'"
+          },
+          {
+            "type": "narration",
+            "text": "'Ouvi uma coisa interessante na noite passada."
+          },
+          {
+            "type": "narration",
+            "text": "Um bêbado da guarda deixou escapar que o Lorde está pensando em fechar os portões à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Medo de algo vindo do pântano.'"
+          }
+        ]
+      },
+      "rumors_confidant": {
+        "text": [
+          "(Grom serve duas canecas e senta ao seu lado) 'Escuta, {player_name}. Tem coisa acontecendo debaixo da cidade. Os esgotos... alguém ouviu cânticos. Não é rato, não é mendigo. É algo pior.'",
+          "(Ele olha em volta antes de falar) 'Aquela mulher de capuz que vem toda quinta-feira? Ela paga em moedas que não são de Valdoria. Moedas antigas, com símbolos que eu nunca vi. E ela nunca come nada.'",
+          "'Meu fornecedor de lúpulo do sul mandou uma mensagem. Disse que os mortos estão inquietos no Cemitério Antigo. Túmulos abertos pela manhã, terra revolvida. Mas ninguém vê nada à noite.'",
+          "'Não conte pra ninguém, mas... a guilda mandou três veteranos investigar a Cratera Vulcânica semana passada. Nenhum voltou. Braun tá com uma cara que eu conheço bem — a cara de quem já perdeu gente demais.'"
+        ],
+        "choices": [
+          {
+            "text": "Cânticos nos esgotos? Isso é sério.",
+            "target": "rumors_sewer_detail"
+          },
+          {
+            "text": "Três veteranos desapareceram?",
+            "target": "rumors_crater_detail"
+          },
+          {
+            "text": "Obrigado pela confiança, Grom.",
+            "target": "start_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom serve duas canecas e senta ao seu lado) 'Escuta, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Tem coisa acontecendo debaixo da cidade."
+          },
+          {
+            "type": "narration",
+            "text": "Os esgotos... alguém ouviu cânticos."
+          },
+          {
+            "type": "narration",
+            "text": "Não é rato, não é mendigo."
+          },
+          {
+            "type": "narration",
+            "text": "É algo pior.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele olha em volta antes de falar) 'Aquela mulher de capuz que vem toda quinta-feira?"
+          },
+          {
+            "type": "narration",
+            "text": "Ela paga em moedas que não são de Valdoria."
+          },
+          {
+            "type": "narration",
+            "text": "Moedas antigas, com símbolos que eu nunca vi."
+          },
+          {
+            "type": "narration",
+            "text": "E ela nunca come nada.'"
+          },
+          {
+            "type": "narration",
+            "text": "'Meu fornecedor de lúpulo do sul mandou uma mensagem."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que os mortos estão inquietos no Cemitério Antigo."
+          },
+          {
+            "type": "narration",
+            "text": "Túmulos abertos pela manhã, terra revolvida."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ninguém vê nada à noite.'"
+          },
+          {
+            "type": "narration",
+            "text": "'Não conte pra ninguém, mas... a guilda mandou três veteranos investigar a Cratera Vulcânica semana passada."
+          },
+          {
+            "type": "narration",
+            "text": "Nenhum voltou."
+          },
+          {
+            "type": "narration",
+            "text": "Braun tá com uma cara que eu conheço bem — a cara de quem já perdeu gente demais.'"
+          }
+        ]
+      },
+      "rumors_goblins_detail": {
+        "text": "(Grom coça o queixo) 'Quantos? Depende de quem pergunta. Os mercadores falam em \"hordas\". A guarda fala em \"batedores isolados.\"'\n\n'Eu? Conversei com um tropeiro que perdeu metade da carga. Disse que eram uns quinze, talvez vinte. Organizados. Não é bando solto — alguém tá comandando eles.'\n\n'Se eu fosse você, ficaria de olho nas estradas ao sul. Ouro fácil pra quem sabe brandir uma arma.'",
+        "choices": [
+          {
+            "text": "Vinte goblins organizados... bom saber.",
+            "target": "start_recognized"
+          },
+          {
+            "text": "E as ruínas ao norte?",
+            "target": "rumors_ruins_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom coça o queixo) 'Quantos?"
+          },
+          {
+            "type": "narration",
+            "text": "Depende de quem pergunta."
+          },
+          {
+            "type": "narration",
+            "text": "Os mercadores falam em \"hordas\"."
+          },
+          {
+            "type": "speech",
+            "text": "A guarda fala em \"batedores isolados.\"'\n\n'Eu?",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Conversei com um tropeiro que perdeu metade da carga."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que eram uns quinze, talvez vinte."
+          },
+          {
+            "type": "narration",
+            "text": "Organizados."
+          },
+          {
+            "type": "narration",
+            "text": "Não é bando solto — alguém tá comandando eles.'\n\n'Se eu fosse você, ficaria de olho nas estradas ao sul."
+          },
+          {
+            "type": "narration",
+            "text": "Ouro fácil pra quem sabe brandir uma arma.'"
+          }
+        ]
+      },
+      "rumors_ruins_detail": {
+        "text": "(Grom abaixa a voz) 'As ruínas? Hah. Todo aventureiro novato faz essa pergunta.'\n\n'São ruínas élficas, dizem. Antigas. A última expedição que foi lá perdeu dois homens pra armadilhas e voltou com as mãos vazias. Mas um dos sobreviventes... ele estava diferente. Olhar vazio, murmurava coisas em élfico.'\n\n'Se for, vá preparado. E com gente de confiança. Ir sozinho é suicídio.'",
+        "choices": [
+          {
+            "text": "Vou me preparar antes de ir.",
+            "target": "start_recognized"
+          },
+          {
+            "text": "E os goblins ao sul?",
+            "target": "rumors_goblins_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abaixa a voz) 'As ruínas?"
+          },
+          {
+            "type": "narration",
+            "text": "Hah."
+          },
+          {
+            "type": "narration",
+            "text": "Todo aventureiro novato faz essa pergunta.'\n\n'São ruínas élficas, dizem."
+          },
+          {
+            "type": "narration",
+            "text": "Antigas."
+          },
+          {
+            "type": "narration",
+            "text": "A última expedição que foi lá perdeu dois homens pra armadilhas e voltou com as mãos vazias."
+          },
+          {
+            "type": "narration",
+            "text": "Mas um dos sobreviventes... ele estava diferente."
+          },
+          {
+            "type": "narration",
+            "text": "Olhar vazio, murmurava coisas em élfico.'\n\n'Se for, vá preparado."
+          },
+          {
+            "type": "narration",
+            "text": "E com gente de confiança."
+          },
+          {
+            "type": "narration",
+            "text": "Ir sozinho é suicídio.'"
+          }
+        ]
+      },
+      "rumors_claw_detail": {
+        "text": "(Grom olha pros lados e abaixa mais a voz) 'As marcas... eu vi um desenho que um guarda fez escondido. Garras enormes, espaçadas como minha mão aberta. Cinco marcas profundas na pedra.'\n\n'Não é urso. Não é ogro. Nenhum bicho que eu conheço faz marcas assim em pedra. E o pior — as marcas estavam a quatro metros de altura na muralha.'\n\n'Se eu fosse capitão, não mandaria abafar. Mandava todo mundo se armar.'",
+        "choices": [
+          {
+            "text": "Quatro metros? Isso é enorme.",
+            "target": "start_friend",
+            "impact": {
+              "flags": {
+                "grom_claw_rumor": true
+              }
+            }
+          },
+          {
+            "text": "E o Thorne, agindo estranho?",
+            "target": "rumors_thorne_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom olha pros lados e abaixa mais a voz) 'As marcas... eu vi um desenho que um guarda fez escondido."
+          },
+          {
+            "type": "narration",
+            "text": "Garras enormes, espaçadas como minha mão aberta."
+          },
+          {
+            "type": "narration",
+            "text": "Cinco marcas profundas na pedra.'\n\n'Não é urso."
+          },
+          {
+            "type": "narration",
+            "text": "Não é ogro."
+          },
+          {
+            "type": "narration",
+            "text": "Nenhum bicho que eu conheço faz marcas assim em pedra."
+          },
+          {
+            "type": "narration",
+            "text": "E o pior — as marcas estavam a quatro metros de altura na muralha.'\n\n'Se eu fosse capitão, não mandaria abafar."
+          },
+          {
+            "type": "narration",
+            "text": "Mandava todo mundo se armar.'"
+          }
+        ]
+      },
+      "rumors_thorne_detail": {
+        "text": "(Grom suspira) 'Thorne... coitado. Ele não dorme direito desde que o Aris sumiu. Mas ultimamente tá diferente. Não é só preocupação — é medo.'\n\n'Outro dia ele veio aqui, pediu um hidromel e ficou olhando pro nada. Quando perguntei, disse que encontrou alguma coisa na forja. Algo que não deveria estar lá. Não quis dizer o quê.'\n\n'Se eu fosse você, passaria na forja. Thorne é duro, mas tá precisando de ajuda.'",
+        "choices": [
+          {
+            "text": "Vou falar com o Thorne.",
+            "target": "start_friend",
+            "impact": {
+              "flags": {
+                "grom_thorne_rumor": true
+              }
+            }
+          },
+          {
+            "text": "E as garras na muralha?",
+            "target": "rumors_claw_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom suspira) 'Thorne... coitado."
+          },
+          {
+            "type": "narration",
+            "text": "Ele não dorme direito desde que o Aris sumiu."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ultimamente tá diferente."
+          },
+          {
+            "type": "narration",
+            "text": "Não é só preocupação — é medo.'\n\n'Outro dia ele veio aqui, pediu um hidromel e ficou olhando pro nada."
+          },
+          {
+            "type": "narration",
+            "text": "Quando perguntei, disse que encontrou alguma coisa na forja."
+          },
+          {
+            "type": "narration",
+            "text": "Algo que não deveria estar lá."
+          },
+          {
+            "type": "narration",
+            "text": "Não quis dizer o quê.'\n\n'Se eu fosse você, passaria na forja."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne é duro, mas tá precisando de ajuda.'"
+          }
+        ]
+      },
+      "rumors_sewer_detail": {
+        "text": "(Grom se aproxima tanto que você sente o cheiro de hidromel) 'Os cânticos... um mendigo que dorme perto da grade do esgoto veio contar. Disse que achou que era alucinação da bebida, mas outro mendigo ouviu a mesma coisa.'\n\n'Vozes em coro. Em alguma língua que não é Comum. Todo quarto crescente, depois da meia-noite.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}. E ritual feito em esgoto nunca é coisa boa.'",
+        "choices": [
+          {
+            "text": "Ritual em esgoto... vou investigar.",
+            "target": "start_confidant",
+            "impact": {
+              "flags": {
+                "grom_sewer_rumor": true
+              }
+            }
+          },
+          {
+            "text": "E os veteranos na Cratera?",
+            "target": "rumors_crater_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom se aproxima tanto que você sente o cheiro de hidromel) 'Os cânticos... um mendigo que dorme perto da grade do esgoto veio contar."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que achou que era alucinação da bebida, mas outro mendigo ouviu a mesma coisa.'\n\n'Vozes em coro."
+          },
+          {
+            "type": "narration",
+            "text": "Em alguma língua que não é Comum."
+          },
+          {
+            "type": "narration",
+            "text": "Todo quarto crescente, depois da meia-noite.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "E ritual feito em esgoto nunca é coisa boa.'"
+          }
+        ]
+      },
+      "rumors_crater_detail": {
+        "text": "(Grom olha pro canto onde Braun costuma sentar) 'Três veteranos. Gente boa. O tipo que não morre fácil. Tavira mandou eles investigar atividade estranha na Cratera Vulcânica.'\n\n'Faz duas semanas. Nenhuma mensagem, nenhum sinal. Braun quer ir atrás deles, mas Tavira não autoriza mais expedições.'\n\n(Ele bate no balcão) 'Conheço aquele olhar do Braun. Ele vai ir sozinho. E aí vamos perder mais um.'",
+        "choices": [
+          {
+            "text": "Alguém precisa ir até a Cratera.",
+            "target": "start_confidant",
+            "impact": {
+              "flags": {
+                "grom_crater_rumor": true
+              }
+            }
+          },
+          {
+            "text": "E os cânticos nos esgotos?",
+            "target": "rumors_sewer_detail"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom olha pro canto onde Braun costuma sentar) 'Três veteranos."
+          },
+          {
+            "type": "narration",
+            "text": "Gente boa."
+          },
+          {
+            "type": "narration",
+            "text": "O tipo que não morre fácil."
+          },
+          {
+            "type": "narration",
+            "text": "Tavira mandou eles investigar atividade estranha na Cratera Vulcânica.'\n\n'Faz duas semanas."
+          },
+          {
+            "type": "narration",
+            "text": "Nenhuma mensagem, nenhum sinal."
+          },
+          {
+            "type": "narration",
+            "text": "Braun quer ir atrás deles, mas Tavira não autoriza mais expedições.'\n\n(Ele bate no balcão) 'Conheço aquele olhar do Braun."
+          },
+          {
+            "type": "narration",
+            "text": "Ele vai ir sozinho."
+          },
+          {
+            "type": "narration",
+            "text": "E aí vamos perder mais um.'"
+          }
+        ]
+      },
+      "ask_people_menu": {
+        "text": [
+          "(Grom ergue uma sobrancelha) 'Quer saber das pessoas? Bom, eu fico atrás deste balcão a noite toda. Sei mais do que deveria.'",
+          "(Ele apoia os cotovelos no balcão) 'Perguntas sobre os moradores? Pode falar. Eu conheço todo mundo nesta cidade — e os segredos de metade deles.'"
+        ],
+        "choices": [
+          {
+            "text": "O que acha de Martha, a estalajadeira?",
+            "target": "ask_martha"
+          },
+          {
+            "text": "Conhece Thorne, o ferreiro?",
+            "target": "ask_thorne"
+          },
+          {
+            "text": "E sobre Tavira, da guilda?",
+            "target": "ask_tavira"
+          },
+          {
+            "text": "Já ouviu falar do Braun, o Marcado?",
+            "target": "ask_braun",
+            "conditions": {
+              "min_rep": [
+                {
+                  "faction": "npc_tavern_grom",
+                  "value": 5
+                }
+              ],
+              "npc_emotion": [
+                {
+                  "emotion": "trust",
+                  "min": 0.45
+                }
+              ]
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom ergue uma sobrancelha) 'Quer saber das pessoas?"
+          },
+          {
+            "type": "narration",
+            "text": "Bom, eu fico atrás deste balcão a noite toda."
+          },
+          {
+            "type": "narration",
+            "text": "Sei mais do que deveria.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele apoia os cotovelos no balcão) 'Perguntas sobre os moradores?"
+          },
+          {
+            "type": "narration",
+            "text": "Pode falar."
+          },
+          {
+            "type": "narration",
+            "text": "Eu conheço todo mundo nesta cidade — e os segredos de metade deles.'"
+          }
+        ]
+      },
+      "ask_martha": {
+        "text": [
+          "(Grom para de limpar a caneca e olha para longe) 'Martha? Aquela mulher vale mais que toda esta cidade junta. Cuida de todo mundo, mas ninguém cuida dela.'",
+          "(Ele bufa e depois suaviza) 'Martha é a alma de Eldoria. Sem a estalagem dela, metade desses bêbados dormiriam na rua. Inclusive eu, nos velhos tempos.'"
+        ],
+        "choices": [
+          {
+            "text": "Vocês parecem próximos.",
+            "target": "martha_friendship",
+            "once": true
+          },
+          {
+            "text": "Voltar.",
+            "target": "ask_people_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom para de limpar a caneca e olha para longe) 'Martha?"
+          },
+          {
+            "type": "narration",
+            "text": "Aquela mulher vale mais que toda esta cidade junta."
+          },
+          {
+            "type": "narration",
+            "text": "Cuida de todo mundo, mas ninguém cuida dela.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele bufa e depois suaviza) 'Martha é a alma de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Sem a estalagem dela, metade desses bêbados dormiriam na rua."
+          },
+          {
+            "type": "narration",
+            "text": "Inclusive eu, nos velhos tempos.'"
+          }
+        ]
+      },
+      "martha_friendship": {
+        "text": "(Grom hesita, depois enche duas canecas) 'Próximos? Heh. Martha me salvou quando eu era um mercenário bêbado sem teto. Me deu comida, um canto quente, e um sermão que durou três horas. Nunca vou esquecer aquele sermão.'\n\n(Ele toma um gole longo) 'Ela se preocupa demais, é verdade. Outro dia veio me dizer que eu bebo muito. Ora, essa é minha profissão! Mas... quando ela não aparece por um dia, eu noto. E fico preocupado. Não diga isso pra ela.'",
+        "choices": [
+          {
+            "text": "Seu segredo está seguro comigo.",
+            "target": "ask_people_menu",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              },
+              "flags": {
+                "grom_martha_story": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom hesita, depois enche duas canecas) 'Próximos?"
+          },
+          {
+            "type": "narration",
+            "text": "Heh."
+          },
+          {
+            "type": "narration",
+            "text": "Martha me salvou quando eu era um mercenário bêbado sem teto."
+          },
+          {
+            "type": "narration",
+            "text": "Me deu comida, um canto quente, e um sermão que durou três horas."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca vou esquecer aquele sermão.'\n\n(Ele toma um gole longo) 'Ela se preocupa demais, é verdade."
+          },
+          {
+            "type": "narration",
+            "text": "Outro dia veio me dizer que eu bebo muito."
+          },
+          {
+            "type": "narration",
+            "text": "Ora, essa é minha profissão!"
+          },
+          {
+            "type": "narration",
+            "text": "Mas... quando ela não aparece por um dia, eu noto."
+          },
+          {
+            "type": "narration",
+            "text": "E fico preocupado."
+          },
+          {
+            "type": "narration",
+            "text": "Não diga isso pra ela.'"
+          }
+        ]
+      },
+      "ask_thorne": {
+        "text": [
+          "(Grom bate no balcão com aprovação) 'Thorne? Único ferreiro decente em cem léguas. A espada que forjou pro capitão da guarda? Uma obra de arte. Não que eu entenda de forja, mas minha faca nunca falhou.'",
+          "(Ele coça a cicatriz) 'Thorne é duro como o aço que trabalha. Não fala muito, não ri muito, mas quando faz algo, faz direito. Respeito isso.'"
+        ],
+        "choices": [
+          {
+            "text": "Ele parece preocupado ultimamente...",
+            "target": "thorne_worried",
+            "conditions": {
+              "min_rep": [
+                {
+                  "faction": "npc_tavern_grom",
+                  "value": 5
+                }
+              ]
+            },
+            "once": true
+          },
+          {
+            "text": "Voltar.",
+            "target": "ask_people_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom bate no balcão com aprovação) 'Thorne?"
+          },
+          {
+            "type": "narration",
+            "text": "Único ferreiro decente em cem léguas."
+          },
+          {
+            "type": "narration",
+            "text": "A espada que forjou pro capitão da guarda?"
+          },
+          {
+            "type": "narration",
+            "text": "Uma obra de arte."
+          },
+          {
+            "type": "narration",
+            "text": "Não que eu entenda de forja, mas minha faca nunca falhou.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele coça a cicatriz) 'Thorne é duro como o aço que trabalha."
+          },
+          {
+            "type": "narration",
+            "text": "Não fala muito, não ri muito, mas quando faz algo, faz direito."
+          },
+          {
+            "type": "narration",
+            "text": "Respeito isso.'"
+          }
+        ]
+      },
+      "thorne_worried": {
+        "text": "(Grom abaixa a voz) 'Preocupado? Mais do que preocupado. O filho dele, Aris, sumiu há um tempo. Thorne não fala sobre isso, mas eu vejo ele saindo de madrugada, procurando nas estradas.'\n\n'Ele precisa beber mais e martelar menos. Mas cada um lida com a dor do seu jeito. Eu bebo. Ele marreta ferro até o braço tremer.'",
+        "choices": [
+          {
+            "text": "Vou ficar de olho se souber de algo sobre o Aris.",
+            "target": "ask_people_menu",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 1
+              },
+              "flags": {
+                "grom_thorne_aris": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abaixa a voz) 'Preocupado?"
+          },
+          {
+            "type": "narration",
+            "text": "Mais do que preocupado."
+          },
+          {
+            "type": "narration",
+            "text": "O filho dele, Aris, sumiu há um tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne não fala sobre isso, mas eu vejo ele saindo de madrugada, procurando nas estradas.'\n\n'Ele precisa beber mais e martelar menos."
+          },
+          {
+            "type": "narration",
+            "text": "Mas cada um lida com a dor do seu jeito."
+          },
+          {
+            "type": "narration",
+            "text": "Eu bebo."
+          },
+          {
+            "type": "narration",
+            "text": "Ele marreta ferro até o braço tremer.'"
+          }
+        ]
+      },
+      "ask_tavira": {
+        "text": [
+          "(Grom revira o olho) 'Tavira? Aquela é toda negócios. Nunca aceita uma cerveja na casa. \"Discrição profissional\", diz ela. Minha taverna não é extensão da guilda!'",
+          "(Ele bufa) 'Tavira mandou um aventureiro me perguntar sobre contratos outro dia. Como se eu fosse secretário dela. Mas admito — quando ela diz que um contrato paga bem, paga bem mesmo.'"
+        ],
+        "choices": [
+          {
+            "text": "Ela parece eficiente.",
+            "target": "tavira_opinion",
+            "once": true
+          },
+          {
+            "text": "Voltar.",
+            "target": "ask_people_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom revira o olho) 'Tavira?"
+          },
+          {
+            "type": "narration",
+            "text": "Aquela é toda negócios."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca aceita uma cerveja na casa."
+          },
+          {
+            "type": "speech",
+            "text": "\"Discrição profissional\", diz ela.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Minha taverna não é extensão da guilda!'"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele bufa) 'Tavira mandou um aventureiro me perguntar sobre contratos outro dia."
+          },
+          {
+            "type": "narration",
+            "text": "Como se eu fosse secretário dela."
+          },
+          {
+            "type": "narration",
+            "text": "Mas admito — quando ela diz que um contrato paga bem, paga bem mesmo.'"
+          }
+        ]
+      },
+      "tavira_opinion": {
+        "text": "'Eficiente?' (Grom ri) 'Eficiente é apelido bonito pra alguém que nunca sorri. Mas vou te dizer — a guilda antes dela era uma bagunça. Contratos perdidos, pagamentos atrasados, aventureiros reclamando.'\n\n'Tavira chegou e em um mês tava tudo funcionando. Fria como gelo, mas justa. Nunca trapaceou ninguém que eu saiba. E nesta cidade, isso já é raro.'",
+        "choices": [
+          {
+            "text": "Bom saber.",
+            "target": "ask_people_menu",
+            "impact": {
+              "flags": {
+                "grom_tavira_opinion": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "'Eficiente?' (Grom ri) 'Eficiente é apelido bonito pra alguém que nunca sorri."
+          },
+          {
+            "type": "narration",
+            "text": "Mas vou te dizer — a guilda antes dela era uma bagunça."
+          },
+          {
+            "type": "narration",
+            "text": "Contratos perdidos, pagamentos atrasados, aventureiros reclamando.'\n\n'Tavira chegou e em um mês tava tudo funcionando."
+          },
+          {
+            "type": "narration",
+            "text": "Fria como gelo, mas justa."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca trapaceou ninguém que eu saiba."
+          },
+          {
+            "type": "narration",
+            "text": "E nesta cidade, isso já é raro.'"
+          }
+        ]
+      },
+      "ask_braun": {
+        "text": [
+          "(Grom abaixa a voz instintivamente) 'Braun? O Marcado?' (Ele olha para a caneca) 'Aquele é o homem mais duro que já cruzou aquela porta. E eu já vi muitos durões.'",
+          "(Grom olha em volta antes de falar) 'Braun bebe sozinho no canto da guilda toda noite. Tenho pena dele, mas nunca vou dizer isso na cara dele. Gosto dos meus dentes onde estão.'"
+        ],
+        "choices": [
+          {
+            "text": "Vocês se conhecem há muito tempo?",
+            "target": "braun_friendship",
+            "once": true
+          },
+          {
+            "text": "Voltar.",
+            "target": "ask_people_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abaixa a voz instintivamente) 'Braun?"
+          },
+          {
+            "type": "narration",
+            "text": "O Marcado?' (Ele olha para a caneca) 'Aquele é o homem mais duro que já cruzou aquela porta."
+          },
+          {
+            "type": "narration",
+            "text": "E eu já vi muitos durões.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Grom olha em volta antes de falar) 'Braun bebe sozinho no canto da guilda toda noite."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho pena dele, mas nunca vou dizer isso na cara dele."
+          },
+          {
+            "type": "narration",
+            "text": "Gosto dos meus dentes onde estão.'"
+          }
+        ]
+      },
+      "braun_friendship": {
+        "text": "(Grom enche a própria caneca antes de falar) 'Muito tempo? Heh. Braun frequenta esta taverna desde antes de eu ser dono dela. Às vezes ele fica a noite inteira sem dizer uma palavra. Outras vezes... outras vezes a bebida solta a língua dele.'\n\n(Ele abaixa a voz) 'Uma noite, ele me contou sobre Os Cinco. O grupo dele. Quatro amigos que não voltaram. Cada um perdido numa região diferente de Valdoria. Desde então, ele vem aqui, senta no mesmo canto, e bebe olhando pra porta.'\n\n'Sabe o que é o pior? Eu sei exatamente como ele se sente. Perdi meu olho numa luta contra um ogro no desfiladeiro de Krath. Braun perdeu o dele pra um Ettin. Dois caolhos velhos bebendo juntos. Se não fosse triste, seria engraçado.'",
+        "choices": [
+          {
+            "text": "Obrigado por compartilhar isso, Grom.",
+            "target": "ask_people_menu",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 3
+              },
+              "flags": {
+                "grom_braun_story": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom enche a própria caneca antes de falar) 'Muito tempo?"
+          },
+          {
+            "type": "narration",
+            "text": "Heh."
+          },
+          {
+            "type": "narration",
+            "text": "Braun frequenta esta taverna desde antes de eu ser dono dela."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes ele fica a noite inteira sem dizer uma palavra."
+          },
+          {
+            "type": "narration",
+            "text": "Outras vezes... outras vezes a bebida solta a língua dele.'\n\n(Ele abaixa a voz) 'Uma noite, ele me contou sobre Os Cinco."
+          },
+          {
+            "type": "narration",
+            "text": "O grupo dele."
+          },
+          {
+            "type": "narration",
+            "text": "Quatro amigos que não voltaram."
+          },
+          {
+            "type": "narration",
+            "text": "Cada um perdido numa região diferente de Valdoria."
+          },
+          {
+            "type": "narration",
+            "text": "Desde então, ele vem aqui, senta no mesmo canto, e bebe olhando pra porta.'\n\n'Sabe o que é o pior?"
+          },
+          {
+            "type": "narration",
+            "text": "Eu sei exatamente como ele se sente."
+          },
+          {
+            "type": "narration",
+            "text": "Perdi meu olho numa luta contra um ogro no desfiladeiro de Krath."
+          },
+          {
+            "type": "narration",
+            "text": "Braun perdeu o dele pra um Ettin."
+          },
+          {
+            "type": "narration",
+            "text": "Dois caolhos velhos bebendo juntos."
+          },
+          {
+            "type": "narration",
+            "text": "Se não fosse triste, seria engraçado.'"
+          }
+        ]
+      },
+      "grom_impressed": {
+        "text": "Hahaha! Você tem espírito! Um Bárbaro de verdade! Tome essa por conta da casa.",
+        "choices": [
+          {
+            "text": "Saúde!",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 5
+              },
+              "patience": 2
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Hahaha!"
+          },
+          {
+            "type": "narration",
+            "text": "Você tem espírito!"
+          },
+          {
+            "type": "narration",
+            "text": "Um Bárbaro de verdade!"
+          },
+          {
+            "type": "narration",
+            "text": "Tome essa por conta da casa."
+          }
+        ]
+      },
+      "rogue_gambit": {
+        "text": "(Grom para de limpar a caneca e te olha com o olho bom) 'Quanto rende? Heh. Mais do que você pensa e menos do que eu mereço.'\n\n(Ele se inclina) 'Mas eu notei seus dedos, ladino. Rápidos demais pra um turista. Se eu te pegar roubando aqui, vou te pendurar pela orelha na placa lá fora. Entendido?'",
+        "choices": [
+          {
+            "text": "[Prestidigitação] Roubar? Eu? (Tenta pegar uma moeda do balcão)",
+            "target": "rogue_sleight_success",
+            "check": {
+              "skill": "sleight_of_hand",
+              "difficulty": 15,
+              "success": "rogue_sleight_success",
+              "failure": "rogue_sleight_failure",
+              "flavor": "Seus dedos se movem rápido, mas Grom tem o olho treinado..."
+            }
+          },
+          {
+            "text": "Calma, velhão. Só estava sendo educado.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom para de limpar a caneca e te olha com o olho bom) 'Quanto rende?"
+          },
+          {
+            "type": "narration",
+            "text": "Heh."
+          },
+          {
+            "type": "narration",
+            "text": "Mais do que você pensa e menos do que eu mereço.'\n\n(Ele se inclina) 'Mas eu notei seus dedos, ladino."
+          },
+          {
+            "type": "narration",
+            "text": "Rápidos demais pra um turista."
+          },
+          {
+            "type": "narration",
+            "text": "Se eu te pegar roubando aqui, vou te pendurar pela orelha na placa lá fora."
+          },
+          {
+            "type": "narration",
+            "text": "Entendido?'"
+          }
+        ]
+      },
+      "rogue_sleight_success": {
+        "text": "(Seus dedos são rápidos como sombras. Uma moeda desaparece do balcão sem que Grom perceba.)\n\n(Grom bufa) 'Tá vendo? Comportado. Eu sei reconhecer gente decente.' (Ele não faz ideia.)",
+        "choices": [
+          {
+            "text": "(Guardar a moeda e sorrir)",
+            "target": "start",
+            "impact": {
+              "gold": 5,
+              "flags": {
+                "met_grom": true,
+                "stole_from_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Seus dedos são rápidos como sombras."
+          },
+          {
+            "type": "narration",
+            "text": "Uma moeda desaparece do balcão sem que Grom perceba.)\n\n(Grom bufa) 'Tá vendo?"
+          },
+          {
+            "type": "narration",
+            "text": "Comportado."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sei reconhecer gente decente.' (Ele não faz ideia.)"
+          }
+        ]
+      },
+      "rogue_sleight_failure": {
+        "text": "(Grom agarra seu pulso com uma velocidade surpreendente para um caolho) 'EU SABIA! Ladino imundo!'\n\n(Ele torce seu braço e te empurra para trás) 'Devolveu a moeda? Bom. Agora sente aí e pague sua bebida como gente honesta, ou desapareça.'",
+        "choices": [
+          {
+            "text": "Foi só uma brincadeira...",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": -3
+              },
+              "patience": -2,
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom agarra seu pulso com uma velocidade surpreendente para um caolho) 'EU SABIA!"
+          },
+          {
+            "type": "speech",
+            "text": "Ladino imundo!'\n\n(Ele torce seu braço e te empurra para trás) 'Devolveu a moeda?",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Bom."
+          },
+          {
+            "type": "narration",
+            "text": "Agora sente aí e pague sua bebida como gente honesta, ou desapareça.'"
+          }
+        ]
+      },
+      "bard_challenge": {
+        "text": "(Grom cruza os braços) 'Música? O último bardo que tocou aqui fugiu com a filha do mercador. E não pagou a conta.'\n\n(Ele aponta para um banquinho no canto) 'Mas tá certo. Toque. Se for bom, ganha uma bebida. Se for ruim, ganha um tapa na orelha.'",
+        "choices": [
+          {
+            "text": "[Atuação] (Tocar uma balada épica de aventureiros)",
+            "target": "bard_success",
+            "check": {
+              "skill": "performance",
+              "difficulty": 12,
+              "success": "bard_success",
+              "failure": "bard_failure",
+              "flavor": "Você dedilha as primeiras notas... a taverna silencia..."
+            }
+          },
+          {
+            "text": "Pensando bem, talvez outro dia.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom cruza os braços) 'Música?"
+          },
+          {
+            "type": "narration",
+            "text": "O último bardo que tocou aqui fugiu com a filha do mercador."
+          },
+          {
+            "type": "speech",
+            "text": "E não pagou a conta.'\n\n(Ele aponta para um banquinho no canto) 'Mas tá certo.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Toque."
+          },
+          {
+            "type": "narration",
+            "text": "Se for bom, ganha uma bebida."
+          },
+          {
+            "type": "narration",
+            "text": "Se for ruim, ganha um tapa na orelha.'"
+          }
+        ]
+      },
+      "bard_success": {
+        "text": "(A taverna inteira silencia. As primeiras notas ecoam, e até os bêbados mais barulhentos param para ouvir. Quando a última nota morre, há um momento de silêncio perfeito... e então os aplausos explodem.)\n\n(Grom limpa algo do olho — o bom, não o tapa-olho) 'Droga, garoto(a). Fazia tempo que não ouviam algo assim neste chiqueiro. Toma — hidromel da reserva especial. Você merece.'",
+        "choices": [
+          {
+            "text": "(Fazer uma reverência e aceitar a bebida)",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 5
+              },
+              "patience": 3,
+              "flags": {
+                "met_grom": true,
+                "bard_played_tavern": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(A taverna inteira silencia."
+          },
+          {
+            "type": "narration",
+            "text": "As primeiras notas ecoam, e até os bêbados mais barulhentos param para ouvir."
+          },
+          {
+            "type": "narration",
+            "text": "Quando a última nota morre, há um momento de silêncio perfeito... e então os aplausos explodem.)\n\n(Grom limpa algo do olho — o bom, não o tapa-olho) 'Droga, garoto(a)."
+          },
+          {
+            "type": "narration",
+            "text": "Fazia tempo que não ouviam algo assim neste chiqueiro."
+          },
+          {
+            "type": "narration",
+            "text": "Toma — hidromel da reserva especial."
+          },
+          {
+            "type": "narration",
+            "text": "Você merece.'"
+          }
+        ]
+      },
+      "bard_failure": {
+        "text": "(Você começa a tocar, mas uma corda estala no meio da balada. A taverna ri. Alguém joga um pedaço de pão.)\n\n(Grom balança a cabeça) 'Isso foi... algo. Não sei o quê, mas foi algo. Fica a dica: afine o instrumento antes de se exibir, bardinho.'",
+        "choices": [
+          {
+            "text": "(Recolher os restos da dignidade e sentar)",
+            "target": "start",
+            "impact": {
+              "patience": -1,
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Você começa a tocar, mas uma corda estala no meio da balada."
+          },
+          {
+            "type": "narration",
+            "text": "A taverna ri."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém joga um pedaço de pão.)\n\n(Grom balança a cabeça) 'Isso foi... algo."
+          },
+          {
+            "type": "narration",
+            "text": "Não sei o quê, mas foi algo."
+          },
+          {
+            "type": "narration",
+            "text": "Fica a dica: afine o instrumento antes de se exibir, bardinho.'"
+          }
+        ]
+      },
+      "paladin_tension": {
+        "text": "(Grom bufa alto o suficiente para metade da taverna ouvir) 'Ordem? ORDEM? Minha taverna, minhas regras. Se quer ordem, vá pro quartel da guarda.'\n\n(Ele te mede de cima a baixo) 'Paladinos. Sempre achando que sabem o que é melhor pra todo mundo. Sabe o que eu acho de cavaleiros sagrados?'",
+        "choices": [
+          {
+            "text": "Não quis ofender. Todo estabelecimento precisa de padrões.",
+            "target": "paladin_diplomatic",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              },
+              "flags": {
+                "met_grom": true
+              }
+            }
+          },
+          {
+            "text": "Acho que começamos com o pé errado. Uma rodada por minha conta?",
+            "target": "paladin_peace",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 3
+              },
+              "flags": {
+                "met_grom": true
+              }
+            }
+          },
+          {
+            "text": "Não me importo com sua opinião.",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": -3
+              },
+              "patience": -2,
+              "flags": {
+                "met_grom": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom bufa alto o suficiente para metade da taverna ouvir) 'Ordem?"
+          },
+          {
+            "type": "narration",
+            "text": "ORDEM?"
+          },
+          {
+            "type": "narration",
+            "text": "Minha taverna, minhas regras."
+          },
+          {
+            "type": "narration",
+            "text": "Se quer ordem, vá pro quartel da guarda.'\n\n(Ele te mede de cima a baixo) 'Paladinos."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre achando que sabem o que é melhor pra todo mundo."
+          },
+          {
+            "type": "narration",
+            "text": "Sabe o que eu acho de cavaleiros sagrados?'"
+          }
+        ]
+      },
+      "paladin_diplomatic": {
+        "text": "(Grom te encara por um longo momento, depois dá um meio sorriso) 'Hm. Pelo menos esse aí tem modos. A maioria dos paladinos que entram aqui já começa apontando o dedo e citando mandamentos.'\n\n'Tá certo, cavaleiro. Bem-vindo ao Javali Bêbado. Não quebre nada e não pregue pra ninguém, e nos daremos bem.'",
+        "choices": [
+          {
+            "text": "Combinado.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom te encara por um longo momento, depois dá um meio sorriso) 'Hm."
+          },
+          {
+            "type": "narration",
+            "text": "Pelo menos esse aí tem modos."
+          },
+          {
+            "type": "narration",
+            "text": "A maioria dos paladinos que entram aqui já começa apontando o dedo e citando mandamentos.'\n\n'Tá certo, cavaleiro."
+          },
+          {
+            "type": "narration",
+            "text": "Bem-vindo ao Javali Bêbado."
+          },
+          {
+            "type": "narration",
+            "text": "Não quebre nada e não pregue pra ninguém, e nos daremos bem.'"
+          }
+        ]
+      },
+      "paladin_peace": {
+        "text": "(Grom abre os olhos — o olho — bem aberto) 'Uma rodada? POR SUA CONTA?' (Ele ri alto) 'Agora sim! Um paladino que entende a linguagem universal!'\n\n(Ele serve dois hidroméis e ergue a caneca) 'À saúde! Talvez nem todos os cavaleiros sagrados sejam insuportáveis!'",
+        "choices": [
+          {
+            "text": "À saúde, Grom!",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abre os olhos — o olho — bem aberto) 'Uma rodada?"
+          },
+          {
+            "type": "narration",
+            "text": "POR SUA CONTA?' (Ele ri alto) 'Agora sim!"
+          },
+          {
+            "type": "narration",
+            "text": "Um paladino que entende a linguagem universal!'\n\n(Ele serve dois hidroméis e ergue a caneca) 'À saúde!"
+          },
+          {
+            "type": "narration",
+            "text": "Talvez nem todos os cavaleiros sagrados sejam insuportáveis!'"
+          }
+        ]
+      },
+      "wizard_curiosity": {
+        "text": "(Grom para no meio do gesto. A caneca treme na mão dele.) 'Halvek? Como você... de onde ouviu esse nome?'\n\n(Ele olha em volta e abaixa a voz) 'Halvek era mago. Um dos Cinco — o grupo do velho Braun. Dizem que foi consumido pelo próprio poder na Cratera Vulcânica.'\n\n'Braun não fala nisso. Mas uma noite, bêbado, ele murmurou: \"Halvek quis saber demais. E o fogo não perdoa curiosidade.\" Nunca esqueci essas palavras.'",
+        "choices": [
+          {
+            "text": "Fogo não perdoa curiosidade... Vou lembrar disso.",
+            "target": "start_friend",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              },
+              "flags": {
+                "grom_halvek_story": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom para no meio do gesto."
+          },
+          {
+            "type": "narration",
+            "text": "A caneca treme na mão dele.) 'Halvek?"
+          },
+          {
+            "type": "narration",
+            "text": "Como você... de onde ouviu esse nome?'\n\n(Ele olha em volta e abaixa a voz) 'Halvek era mago."
+          },
+          {
+            "type": "narration",
+            "text": "Um dos Cinco — o grupo do velho Braun."
+          },
+          {
+            "type": "narration",
+            "text": "Dizem que foi consumido pelo próprio poder na Cratera Vulcânica.'\n\n'Braun não fala nisso."
+          },
+          {
+            "type": "narration",
+            "text": "Mas uma noite, bêbado, ele murmurou: \"Halvek quis saber demais."
+          },
+          {
+            "type": "narration",
+            "text": "E o fogo não perdoa curiosidade.\" Nunca esqueci essas palavras.'"
+          }
+        ]
+      },
+      "backstory_tavern": {
+        "text": "(Grom serve duas canecas e empurra uma na sua direção) 'Taverneiro? Hah. Isso não era o plano.'\n\n'Eu era mercenário. Trinta anos batendo em gente por ouro. Bom nisso? Sim. Feliz? Nem perto.'\n\n(Ele mostra a mão esquerda — faltam dois dedos) 'Um dia, num trabalho no norte, levei um golpe de machado que quase levou a mão inteira. Fiquei três meses numa estalagem me recuperando. E descobri algo.'\n\n'Descobri que eu gostava mais de servir cerveja do que de cortar gargantas. Comprei este buraco com minhas economias, dei o nome mais estúpido que consegui pensar, e nunca mais olhei pra trás.'\n\n(Ele ergue a caneca) 'E cá estou. Grom, o Caolho, taverneiro. Melhor emprego que já tive.'",
+        "choices": [
+          {
+            "text": "Uma boa decisão. À saúde, Grom.",
+            "target": "start_friend",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 3
+              },
+              "flags": {
+                "grom_backstory_tavern": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom serve duas canecas e empurra uma na sua direção) 'Taverneiro?"
+          },
+          {
+            "type": "narration",
+            "text": "Hah."
+          },
+          {
+            "type": "narration",
+            "text": "Isso não era o plano.'\n\n'Eu era mercenário."
+          },
+          {
+            "type": "narration",
+            "text": "Trinta anos batendo em gente por ouro."
+          },
+          {
+            "type": "narration",
+            "text": "Bom nisso?"
+          },
+          {
+            "type": "narration",
+            "text": "Sim."
+          },
+          {
+            "type": "narration",
+            "text": "Feliz?"
+          },
+          {
+            "type": "narration",
+            "text": "Nem perto.'\n\n(Ele mostra a mão esquerda — faltam dois dedos) 'Um dia, num trabalho no norte, levei um golpe de machado que quase levou a mão inteira."
+          },
+          {
+            "type": "narration",
+            "text": "Fiquei três meses numa estalagem me recuperando."
+          },
+          {
+            "type": "narration",
+            "text": "E descobri algo.'\n\n'Descobri que eu gostava mais de servir cerveja do que de cortar gargantas."
+          },
+          {
+            "type": "narration",
+            "text": "Comprei este buraco com minhas economias, dei o nome mais estúpido que consegui pensar, e nunca mais olhei pra trás.'\n\n(Ele ergue a caneca) 'E cá estou."
+          },
+          {
+            "type": "narration",
+            "text": "Grom, o Caolho, taverneiro."
+          },
+          {
+            "type": "narration",
+            "text": "Melhor emprego que já tive.'"
+          }
+        ]
+      },
+      "backstory_eye": {
+        "text": "(Grom toca o tapa-olho com a ponta dos dedos) 'Essa? Todo mundo quer saber dessa.'\n\n'Desfiladeiro de Krath. Vinte anos atrás. Um ogro de quase três metros de altura — pele cinza, dentes amarelos, e um tacape do tamanho de uma árvore.'\n\n(Ele se anima ao contar) 'Éramos cinco mercenários. O ogro matou dois antes de eu conseguir chegar perto. Enfiei minha espada na barriga dele, mas o desgraçado me acertou na cara com as costas da mão.'\n\n(Ele bate no balcão) 'PAFT! Senti o olho estourar. Dor que você não imagina. Mas sabe o que eu fiz? Levantei, peguei a espada do chão com a mão que ainda funcionava, e enfiei no olho DELE. Um por um. Justo, não?'\n\n(Grom ri alto) 'O maldito caiu como uma torre. Eu caí junto. Acordei três dias depois, com metade da visão e o dobro da fama. Valeu a troca? Pergunta pro ogro. Ah, espera — não pode.'",
+        "choices": [
+          {
+            "text": "(Rir junto) Você é louco, Grom.",
+            "target": "start_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 3
+              },
+              "flags": {
+                "grom_backstory_eye": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom toca o tapa-olho com a ponta dos dedos) 'Essa?"
+          },
+          {
+            "type": "narration",
+            "text": "Todo mundo quer saber dessa.'\n\n'Desfiladeiro de Krath."
+          },
+          {
+            "type": "narration",
+            "text": "Vinte anos atrás."
+          },
+          {
+            "type": "narration",
+            "text": "Um ogro de quase três metros de altura — pele cinza, dentes amarelos, e um tacape do tamanho de uma árvore.'\n\n(Ele se anima ao contar) 'Éramos cinco mercenários."
+          },
+          {
+            "type": "narration",
+            "text": "O ogro matou dois antes de eu conseguir chegar perto."
+          },
+          {
+            "type": "narration",
+            "text": "Enfiei minha espada na barriga dele, mas o desgraçado me acertou na cara com as costas da mão.'\n\n(Ele bate no balcão) 'PAFT!"
+          },
+          {
+            "type": "narration",
+            "text": "Senti o olho estourar."
+          },
+          {
+            "type": "narration",
+            "text": "Dor que você não imagina."
+          },
+          {
+            "type": "narration",
+            "text": "Mas sabe o que eu fiz?"
+          },
+          {
+            "type": "narration",
+            "text": "Levantei, peguei a espada do chão com a mão que ainda funcionava, e enfiei no olho DELE."
+          },
+          {
+            "type": "narration",
+            "text": "Um por um."
+          },
+          {
+            "type": "narration",
+            "text": "Justo, não?'\n\n(Grom ri alto) 'O maldito caiu como uma torre."
+          },
+          {
+            "type": "narration",
+            "text": "Eu caí junto."
+          },
+          {
+            "type": "narration",
+            "text": "Acordei três dias depois, com metade da visão e o dobro da fama."
+          },
+          {
+            "type": "narration",
+            "text": "Valeu a troca?"
+          },
+          {
+            "type": "narration",
+            "text": "Pergunta pro ogro."
+          },
+          {
+            "type": "narration",
+            "text": "Ah, espera — não pode.'"
+          }
+        ]
+      },
+      "backstory_name": {
+        "text": "(Grom abre um sorriso largo — o mais genuíno que você já viu nele) 'O nome? Hahaha! Boa pergunta.'\n\n'Quando comprei este lugar, não tinha nome nenhum. Era só \"a taverna perto do portão\". Precisava de algo. Algo que as pessoas lembrassem.'\n\n(Ele serve mais uma rodada) 'Na primeira noite que abri, um javali — um javali DE VERDADE — entrou pela porta. Não sei como. Talvez o cheiro da cerveja. O bicho foi direto pro barril de hidromel, derrubou, e começou a beber do chão.'\n\n'Tentei tirar ele. Ele me mordeu. Tentei empurrar. Ele me derrubou. No final, sentei ao lado dele e bebi junto.'\n\n(Grom ri até as lágrimas) 'Na manhã seguinte, o javali estava roncando debaixo de uma mesa. Os poucos clientes que viram acharam hilário. E alguém disse: \"Se até o javali fica bêbado aqui, o nome tá óbvio.\"'\n\n'O Javali Bêbado. Perfeito. O javali voltou mais três vezes antes de sumir. Às vezes acho que ele ainda mora por aí, esperando outra rodada grátis.'",
+        "choices": [
+          {
+            "text": "(Gargalhar) Essa é a melhor história de nome de taverna que já ouvi!",
+            "target": "start_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              },
+              "flags": {
+                "grom_backstory_name": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abre um sorriso largo — o mais genuíno que você já viu nele) 'O nome?"
+          },
+          {
+            "type": "narration",
+            "text": "Hahaha!"
+          },
+          {
+            "type": "narration",
+            "text": "Boa pergunta.'\n\n'Quando comprei este lugar, não tinha nome nenhum."
+          },
+          {
+            "type": "speech",
+            "text": "Era só \"a taverna perto do portão\".",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Precisava de algo."
+          },
+          {
+            "type": "narration",
+            "text": "Algo que as pessoas lembrassem.'\n\n(Ele serve mais uma rodada) 'Na primeira noite que abri, um javali — um javali DE VERDADE — entrou pela porta."
+          },
+          {
+            "type": "narration",
+            "text": "Não sei como."
+          },
+          {
+            "type": "narration",
+            "text": "Talvez o cheiro da cerveja."
+          },
+          {
+            "type": "narration",
+            "text": "O bicho foi direto pro barril de hidromel, derrubou, e começou a beber do chão.'\n\n'Tentei tirar ele."
+          },
+          {
+            "type": "narration",
+            "text": "Ele me mordeu."
+          },
+          {
+            "type": "narration",
+            "text": "Tentei empurrar."
+          },
+          {
+            "type": "narration",
+            "text": "Ele me derrubou."
+          },
+          {
+            "type": "narration",
+            "text": "No final, sentei ao lado dele e bebi junto.'\n\n(Grom ri até as lágrimas) 'Na manhã seguinte, o javali estava roncando debaixo de uma mesa."
+          },
+          {
+            "type": "narration",
+            "text": "Os poucos clientes que viram acharam hilário."
+          },
+          {
+            "type": "speech",
+            "text": "E alguém disse: \"Se até o javali fica bêbado aqui, o nome tá óbvio.\"'\n\n'O Javali Bêbado.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Perfeito."
+          },
+          {
+            "type": "narration",
+            "text": "O javali voltou mais três vezes antes de sumir."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes acho que ele ainda mora por aí, esperando outra rodada grátis.'"
+          }
+        ]
+      },
+      "intimidate_attempt": {
+        "text": "",
+        "choices": []
+      },
+      "intimidate_success": {
+        "text": "(Grom te encara por um longo momento. Seu olho bom não pisca. Depois, lentamente, ele pega uma caneca limpa e serve um hidromel escuro.)\n\n'...Tá. Essa é por conta da casa. Mas só porque eu respeito gente que tem coragem de pedir.' (Ele empurra a caneca) 'Não se acostume.'",
+        "choices": [
+          {
+            "text": "(Aceitar o hidromel com um sorriso)",
+            "target": "start_friend",
+            "impact": {
+              "patience": 1,
+              "flags": {
+                "grom_free_drink": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom te encara por um longo momento."
+          },
+          {
+            "type": "narration",
+            "text": "Seu olho bom não pisca."
+          },
+          {
+            "type": "narration",
+            "text": "Depois, lentamente, ele pega uma caneca limpa e serve um hidromel escuro.)\n\n'...Tá."
+          },
+          {
+            "type": "narration",
+            "text": "Essa é por conta da casa."
+          },
+          {
+            "type": "narration",
+            "text": "Mas só porque eu respeito gente que tem coragem de pedir.' (Ele empurra a caneca) 'Não se acostume.'"
+          }
+        ]
+      },
+      "intimidate_failure": {
+        "text": "(Grom NÃO se impressiona. Ele se inclina sobre o balcão, e de repente você percebe como ele é GRANDE.)\n\n'Tá tentando me intimidar? EU?' (Ele aponta pro tapa-olho) 'Perdi o olho pra um ogro e arranquei os dois dele. Acha que VOCÊ me assusta?'\n\n(Ele bate o pano molhado no balcão) 'Compre sua bebida como todo mundo, valente.'",
+        "choices": [
+          {
+            "text": "...Entendido. Quanto custa o hidromel?",
+            "target": "start_friend",
+            "impact": {
+              "patience": -2
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom NÃO se impressiona."
+          },
+          {
+            "type": "narration",
+            "text": "Ele se inclina sobre o balcão, e de repente você percebe como ele é GRANDE.)\n\n'Tá tentando me intimidar?"
+          },
+          {
+            "type": "narration",
+            "text": "EU?' (Ele aponta pro tapa-olho) 'Perdi o olho pra um ogro e arranquei os dois dele."
+          },
+          {
+            "type": "narration",
+            "text": "Acha que VOCÊ me assusta?'\n\n(Ele bate o pano molhado no balcão) 'Compre sua bebida como todo mundo, valente.'"
+          }
+        ]
+      },
+      "persuade_attempt": {
+        "text": "",
+        "choices": []
+      },
+      "persuade_secret_success": {
+        "text": "(Grom te olha por um longo momento. Depois olha em volta. Depois te olha de novo.)\n\n'Beco Sombrio, hein?' (Ele abaixa a voz até ser quase inaudível) 'Tá, escuta. Eu vejo muita coisa daqui. Gente que entra, gente que sai, gente que desaparece.'\n\n'Tem um cara — chamam de Vulto. Nunca vi o rosto dele. Ele opera no Beco, depois da meia-noite. Vende coisas que não deveria existir. Armas, venenos, informação.'\n\n'Se quiser encontrá-lo, procure a marca de uma adaga na parede da terceira viela à esquerda depois do mercado. Mas {player_name}...' (Ele te agarra pelo braço) '...cuidado. O que entra naquele beco nem sempre sai.'",
+        "choices": [
+          {
+            "text": "Obrigado, Grom. Vou ter cuidado.",
+            "target": "start_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              },
+              "flags": {
+                "grom_shadow_secret": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom te olha por um longo momento."
+          },
+          {
+            "type": "narration",
+            "text": "Depois olha em volta."
+          },
+          {
+            "type": "narration",
+            "text": "Depois te olha de novo.)\n\n'Beco Sombrio, hein?' (Ele abaixa a voz até ser quase inaudível) 'Tá, escuta."
+          },
+          {
+            "type": "narration",
+            "text": "Eu vejo muita coisa daqui."
+          },
+          {
+            "type": "narration",
+            "text": "Gente que entra, gente que sai, gente que desaparece.'\n\n'Tem um cara — chamam de Vulto."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca vi o rosto dele."
+          },
+          {
+            "type": "narration",
+            "text": "Ele opera no Beco, depois da meia-noite."
+          },
+          {
+            "type": "narration",
+            "text": "Vende coisas que não deveria existir."
+          },
+          {
+            "type": "narration",
+            "text": "Armas, venenos, informação.'\n\n'Se quiser encontrá-lo, procure a marca de uma adaga na parede da terceira viela à esquerda depois do mercado."
+          },
+          {
+            "type": "narration",
+            "text": "Mas {player_name}...' (Ele te agarra pelo braço) '...cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "O que entra naquele beco nem sempre sai.'"
+          }
+        ]
+      },
+      "persuade_secret_failure": {
+        "text": "(Grom te encara com o olho bom. Depois faz que não com a cabeça.)\n\n'Beco Sombrio? Não sei do que você tá falando.' (O tom muda completamente — fechado, frio.) 'E mesmo que soubesse, não iria contar pra ninguém. Esse tipo de informação tem preço, e não é em ouro.'\n\n(Ele volta a limpar canecas) 'Compre mais uma rodada. Quem sabe na terceira eu me lembre de algo.'",
+        "choices": [
+          {
+            "text": "...Entendi a mensagem.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom te encara com o olho bom."
+          },
+          {
+            "type": "narration",
+            "text": "Depois faz que não com a cabeça.)\n\n'Beco Sombrio?"
+          },
+          {
+            "type": "narration",
+            "text": "Não sei do que você tá falando.' (O tom muda completamente — fechado, frio.) 'E mesmo que soubesse, não iria contar pra ninguém."
+          },
+          {
+            "type": "narration",
+            "text": "Esse tipo de informação tem preço, e não é em ouro.'\n\n(Ele volta a limpar canecas) 'Compre mais uma rodada."
+          },
+          {
+            "type": "narration",
+            "text": "Quem sabe na terceira eu me lembre de algo.'"
+          }
+        ]
+      },
+      "quest_brawl_offer": {
+        "text": "(Grom bate no balcão com irritação) 'Escuta, tô com um problema sério. Uns desgraçados andam provocando brigas aqui toda noite. Mesas quebradas, sangue no chão, clientes fugindo.'\n\n(Ele aponta para uma mesa rachada ao meio) 'Vê aquilo? Terceira mesa esta semana. Se continuar assim, vou falir antes do inverno. Preciso de alguém que descubra quem tá por trás disso.'",
+        "choices": [
+          {
+            "text": "Posso investigar pra você.",
+            "target": "quest_brawl_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_grom_brawl"
+              ],
+              "flags": {
+                "accepted_grom_brawl": true
+              },
+              "reputation": {
+                "npc_tavern_grom": 2
+              }
+            }
+          },
+          {
+            "text": "Não é da minha conta, Grom.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom bate no balcão com irritação) 'Escuta, tô com um problema sério."
+          },
+          {
+            "type": "narration",
+            "text": "Uns desgraçados andam provocando brigas aqui toda noite."
+          },
+          {
+            "type": "narration",
+            "text": "Mesas quebradas, sangue no chão, clientes fugindo.'\n\n(Ele aponta para uma mesa rachada ao meio) 'Vê aquilo?"
+          },
+          {
+            "type": "narration",
+            "text": "Terceira mesa esta semana."
+          },
+          {
+            "type": "narration",
+            "text": "Se continuar assim, vou falir antes do inverno."
+          },
+          {
+            "type": "narration",
+            "text": "Preciso de alguém que descubra quem tá por trás disso.'"
+          }
+        ]
+      },
+      "quest_brawl_accepted": {
+        "text": "(Grom abre um sorriso aliviado) 'Sabia que podia contar contigo. Fica de olho nos tipos que chegam depois da meia-noite. O líder deles tem uma cicatriz no queixo — sempre senta no canto mais escuro.'\n\n'Não sei se é briga por diversão ou se tem alguém pagando pra destruir meu negócio. Descubra isso e eu te devo uma grande.'",
+        "choices": [
+          {
+            "text": "Vou ficar de olho.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom abre um sorriso aliviado) 'Sabia que podia contar contigo."
+          },
+          {
+            "type": "narration",
+            "text": "Fica de olho nos tipos que chegam depois da meia-noite."
+          },
+          {
+            "type": "narration",
+            "text": "O líder deles tem uma cicatriz no queixo — sempre senta no canto mais escuro.'\n\n'Não sei se é briga por diversão ou se tem alguém pagando pra destruir meu negócio."
+          },
+          {
+            "type": "narration",
+            "text": "Descubra isso e eu te devo uma grande.'"
+          }
+        ]
+      },
+      "quest_brawl_turnin": {
+        "text": "(Grom larga o pano de limpar e te encara com expectativa) 'E então? Descobriu quem tava por trás das brigas?'",
+        "choices": [
+          {
+            "text": "Acabei com eles. Não vão mais incomodar.",
+            "target": "quest_brawl_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_grom_brawl"
+              ],
+              "reputation": {
+                "npc_tavern_grom": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom larga o pano de limpar e te encara com expectativa) 'E então?"
+          },
+          {
+            "type": "narration",
+            "text": "Descobriu quem tava por trás das brigas?'"
+          }
+        ]
+      },
+      "quest_brawl_complete": {
+        "text": "(Grom bate na mesa com a palma aberta — desta vez de alegria) 'HAH! Eu sabia! Sabia que você dava conta!'\n\n(Ele puxa uma caneca especial de debaixo do balcão — entalhada com um javali) 'Toma. Minha caneca pessoal de reserva. Quem bebe nela é amigo de Grom pra vida toda.'\n\n'E a próxima rodada? Por minha conta. Hoje e sempre.'",
+        "choices": [
+          {
+            "text": "Obrigado, Grom. À saúde!",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom bate na mesa com a palma aberta — desta vez de alegria) 'HAH!"
+          },
+          {
+            "type": "narration",
+            "text": "Eu sabia!"
+          },
+          {
+            "type": "speech",
+            "text": "Sabia que você dava conta!'\n\n(Ele puxa uma caneca especial de debaixo do balcão — entalhada com um javali) 'Toma.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Minha caneca pessoal de reserva."
+          },
+          {
+            "type": "narration",
+            "text": "Quem bebe nela é amigo de Grom pra vida toda.'\n\n'E a próxima rodada?"
+          },
+          {
+            "type": "narration",
+            "text": "Por minha conta."
+          },
+          {
+            "type": "narration",
+            "text": "Hoje e sempre.'"
+          }
+        ]
+      },
+      "quest_brewer_offer": {
+        "text": "(Grom olha em volta e se inclina sobre o balcão, baixando a voz) 'Ei, {player_name}. Tenho um favor pra te pedir. Um favor... pessoal.'\n\n(Ele puxa um pergaminho amarelado) 'Meu mestre cervejeiro — o velho Tormund — tinha uma receita lendária. A melhor cerveja que já existiu em Valdoria. Mas preciso de dois ingredientes que eu não consigo achar aqui.'\n\n'Lúpulo selvagem dourado, que só cresce nas planícies. E água da fonte sagrada nas colinas. Se me trouxer isso... vou recriar a cerveja que fez a fama dele.'",
+        "choices": [
+          {
+            "text": "Eu busco os ingredientes.",
+            "target": "quest_brewer_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_grom_brewer"
+              ],
+              "flags": {
+                "accepted_grom_brewer": true
+              },
+              "reputation": {
+                "npc_tavern_grom": 2
+              }
+            }
+          },
+          {
+            "text": "Agora não, Grom.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom olha em volta e se inclina sobre o balcão, baixando a voz) 'Ei, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho um favor pra te pedir."
+          },
+          {
+            "type": "narration",
+            "text": "Um favor... pessoal.'\n\n(Ele puxa um pergaminho amarelado) 'Meu mestre cervejeiro — o velho Tormund — tinha uma receita lendária."
+          },
+          {
+            "type": "narration",
+            "text": "A melhor cerveja que já existiu em Valdoria."
+          },
+          {
+            "type": "narration",
+            "text": "Mas preciso de dois ingredientes que eu não consigo achar aqui.'\n\n'Lúpulo selvagem dourado, que só cresce nas planícies."
+          },
+          {
+            "type": "narration",
+            "text": "E água da fonte sagrada nas colinas."
+          },
+          {
+            "type": "narration",
+            "text": "Se me trouxer isso... vou recriar a cerveja que fez a fama dele.'"
+          }
+        ]
+      },
+      "quest_brewer_accepted": {
+        "text": "(O olho bom de Grom brilha) 'De verdade? Hah! Você é ouro, {player_name}. Ouro puro.'\n\n'O lúpulo dourado cresce entre a relva alta das planícies — procure onde o vento sopra mais forte. A fonte sagrada fica nas colinas ao sudeste, entre pedras cobertas de musgo.'\n\n(Ele guarda o pergaminho com cuidado) 'Traga os dois e eu faço a cerveja. E você vai ser o primeiro a provar.'",
+        "choices": [
+          {
+            "text": "Volto com tudo. Aguarde.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(O olho bom de Grom brilha) 'De verdade?"
+          },
+          {
+            "type": "narration",
+            "text": "Hah!"
+          },
+          {
+            "type": "narration",
+            "text": "Você é ouro, {player_name}."
+          },
+          {
+            "type": "narration",
+            "text": "Ouro puro.'\n\n'O lúpulo dourado cresce entre a relva alta das planícies — procure onde o vento sopra mais forte."
+          },
+          {
+            "type": "narration",
+            "text": "A fonte sagrada fica nas colinas ao sudeste, entre pedras cobertas de musgo.'\n\n(Ele guarda o pergaminho com cuidado) 'Traga os dois e eu faço a cerveja."
+          },
+          {
+            "type": "narration",
+            "text": "E você vai ser o primeiro a provar.'"
+          }
+        ]
+      },
+      "quest_brewer_turnin": {
+        "text": "(Grom larga tudo quando te vê) 'Os ingredientes! Trouxe?!'",
+        "choices": [
+          {
+            "text": "Lúpulo dourado e água sagrada. Tudo aqui.",
+            "target": "quest_brewer_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_grom_brewer"
+              ],
+              "reputation": {
+                "npc_tavern_grom": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom larga tudo quando te vê) 'Os ingredientes!"
+          },
+          {
+            "type": "narration",
+            "text": "Trouxe?!'"
+          }
+        ]
+      },
+      "quest_brewer_complete": {
+        "text": "(Grom pega os ingredientes com as mãos tremendo — não de medo, de emoção)\n\n'Por Vorenn... o cheiro desse lúpulo... é exatamente como o velho Tormund descreveu.' (Ele cheira a água sagrada e fecha o olho) 'Perfeito.'\n\n(Ele puxa um barril pequeno de debaixo do balcão) 'Dá pra começar a fermentação hoje. Em três dias, vai estar pronta. E você, {player_name}, vai provar a primeira caneca.'\n\n(Ele te entrega uma garrafa escura) 'Enquanto isso, toma. A última garrafa da safra antiga. Pra quem merece.'",
+        "choices": [
+          {
+            "text": "Mal posso esperar pela nova safra.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom pega os ingredientes com as mãos tremendo — não de medo, de emoção)\n\n'Por Vorenn... o cheiro desse lúpulo... é exatamente como o velho Tormund descreveu.' (Ele cheira a água sagrada e fecha o olho) 'Perfeito.'\n\n(Ele puxa um barril pequeno de debaixo do balcão) 'Dá pra começar a fermentação hoje."
+          },
+          {
+            "type": "narration",
+            "text": "Em três dias, vai estar pronta."
+          },
+          {
+            "type": "narration",
+            "text": "E você, {player_name}, vai provar a primeira caneca.'\n\n(Ele te entrega uma garrafa escura) 'Enquanto isso, toma."
+          },
+          {
+            "type": "narration",
+            "text": "A última garrafa da safra antiga."
+          },
+          {
+            "type": "narration",
+            "text": "Pra quem merece.'"
+          }
+        ]
+      },
+      "quest_past_offer": {
+        "text": "(Grom está diferente hoje. Quieto. Ele olha pra porta como se esperasse alguém.)\n\n(Quando percebe você, puxa uma cadeira e senta do seu lado — algo que nunca faz) '{player_name}... preciso te contar uma coisa. Antes de ser taverneiro, eu era gladiador. Nas arenas de Krath.'\n\n(Ele mostra cicatrizes nos braços que normalmente esconde) 'Tinha um rival. Varnok. Nós nos enfrentamos seis vezes na arena. Três vitórias cada. E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Eldoria. Alguém o viu nos portões. E eu sei que não é coincidência.'",
+        "choices": [
+          {
+            "text": "Vou investigar esse Varnok.",
+            "target": "quest_past_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_grom_past"
+              ],
+              "flags": {
+                "accepted_grom_past": true
+              },
+              "reputation": {
+                "npc_tavern_grom": 3
+              }
+            }
+          },
+          {
+            "text": "Isso é perigoso, Grom. Cuidado.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom está diferente hoje."
+          },
+          {
+            "type": "narration",
+            "text": "Quieto."
+          },
+          {
+            "type": "narration",
+            "text": "Ele olha pra porta como se esperasse alguém.)\n\n(Quando percebe você, puxa uma cadeira e senta do seu lado — algo que nunca faz) '{player_name}... preciso te contar uma coisa."
+          },
+          {
+            "type": "narration",
+            "text": "Antes de ser taverneiro, eu era gladiador."
+          },
+          {
+            "type": "speech",
+            "text": "Nas arenas de Krath.'\n\n(Ele mostra cicatrizes nos braços que normalmente esconde) 'Tinha um rival.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Varnok."
+          },
+          {
+            "type": "narration",
+            "text": "Nós nos enfrentamos seis vezes na arena."
+          },
+          {
+            "type": "narration",
+            "text": "Três vitórias cada."
+          },
+          {
+            "type": "narration",
+            "text": "E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém o viu nos portões."
+          },
+          {
+            "type": "narration",
+            "text": "E eu sei que não é coincidência.'"
+          }
+        ]
+      },
+      "quest_past_accepted": {
+        "text": "(Grom aperta sua mão com força — mão de quem já empunhou espada por décadas) 'Obrigado. De verdade.'\n\n'Varnok é perigoso. Corpo enorme, cicatrizes por toda parte, e uma raiva que nunca apaga. Pergunte nos portões — Aldric pode ter visto algo.'\n\n(Ele volta pro balcão) 'E {player_name}... se ele perguntar por mim, não diga onde me encontrar. Ainda não.'",
+        "choices": [
+          {
+            "text": "Confie em mim, Grom.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom aperta sua mão com força — mão de quem já empunhou espada por décadas) 'Obrigado."
+          },
+          {
+            "type": "narration",
+            "text": "De verdade.'\n\n'Varnok é perigoso."
+          },
+          {
+            "type": "narration",
+            "text": "Corpo enorme, cicatrizes por toda parte, e uma raiva que nunca apaga."
+          },
+          {
+            "type": "narration",
+            "text": "Pergunte nos portões — Aldric pode ter visto algo.'\n\n(Ele volta pro balcão) 'E {player_name}... se ele perguntar por mim, não diga onde me encontrar."
+          },
+          {
+            "type": "narration",
+            "text": "Ainda não.'"
+          }
+        ]
+      },
+      "quest_past_turnin": {
+        "text": "(Grom te vê e se levanta do banco — nervoso, ansioso) 'E então? Varnok... o que descobriu?'",
+        "choices": [
+          {
+            "text": "Está resolvido. A taverna está segura.",
+            "target": "quest_past_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_grom_past"
+              ],
+              "reputation": {
+                "npc_tavern_grom": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom te vê e se levanta do banco — nervoso, ansioso) 'E então?"
+          },
+          {
+            "type": "narration",
+            "text": "Varnok... o que descobriu?'"
+          }
+        ]
+      },
+      "quest_past_complete": {
+        "text": "(Grom fica em silêncio por um longo momento. Depois respira fundo.)\n\n'Resolvido...' (Ele toca o tapa-olho) 'Vinte anos carregando isso. Vinte anos olhando pra porta esperando o dia que ele viria. E agora...'\n\n(Ele enche duas canecas com a melhor reserva) '{player_name}. Você não é só meu melhor cliente. É meu melhor amigo.'\n\n(Ele te entrega um bracelete de couro gasto — dele mesmo) 'Usei isso na arena. Toda luta. É a única coisa que restou daquele tempo. Agora é sua.'",
+        "choices": [
+          {
+            "text": "Obrigado, Grom. Esse bracelete significa muito.",
+            "target": "start_confidant",
+            "impact": {
+              "reputation": {
+                "npc_tavern_grom": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Grom fica em silêncio por um longo momento."
+          },
+          {
+            "type": "narration",
+            "text": "Depois respira fundo.)\n\n'Resolvido...' (Ele toca o tapa-olho) 'Vinte anos carregando isso."
+          },
+          {
+            "type": "narration",
+            "text": "Vinte anos olhando pra porta esperando o dia que ele viria."
+          },
+          {
+            "type": "speech",
+            "text": "E agora...'\n\n(Ele enche duas canecas com a melhor reserva) '{player_name}.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Você não é só meu melhor cliente."
+          },
+          {
+            "type": "speech",
+            "text": "É meu melhor amigo.'\n\n(Ele te entrega um bracelete de couro gasto — dele mesmo) 'Usei isso na arena.",
+            "speaker": "Grom"
+          },
+          {
+            "type": "narration",
+            "text": "Toda luta."
+          },
+          {
+            "type": "narration",
+            "text": "É a única coisa que restou daquele tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Agora é sua.'"
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "O que vai ser? Rápido.",
+        "Pagando, você pode ficar. Não pagando, caia fora.",
+        "Minha taverna, minhas regras. O que quer?",
+        "Beba ou saia. Não quero brigas hoje.",
+        "Sua cara me lembra alguém que eu odeio. Mas tudo bem, pague e sente.",
+        "O Javali Bêbado nunca dorme. Infelizmente, eu também não.",
+        "Sua presença não me agrada, mas seu ouro sim.",
+        "Nada de magia, ou te jogo na rua. O que vai pedir?",
+        "Hmpf. Sente-se e não cause problemas.",
+        "Outro dia, outro aventureiro. O de sempre?"
+      ],
+      "friendly": [
+        "Ah, o aventureiro chegou! A primeira caneca é por minha conta.",
+        "Sente-se, amigo. O melhor hidromel está reservado pra você.",
+        "O salão ganha vida com sua presença. Conte-me o que aconteceu lá fora.",
+        "Bom te ver inteiro, viajante. Alguma nova cicatriz gloriosa?",
+        "Ninguém mexe com meus amigos no meu balcão. Sente.",
+        "A hospitalidade de Grom é só para poucos. E você é um deles.",
+        "(Grom já está enchendo sua caneca favorita antes de você sentar.)",
+        "Meu olho bom brilha quando vejo um rosto amigo. Senta aí!"
+      ],
+      "hostile": [
+        "Dê o fora antes que eu use meu machado.",
+        "Não servimos escória como você.",
+        "Pague o que deve e suma daqui.",
+        "As regras do Javali Bêbado dizem: nada de ratos. Saia.",
+        "Torça para eu não te encontrar lá fora.",
+        "Minha paciência acabou. A porta é ali."
+      ]
+    },
+    "chat": [
+      "O orc no mercado é um trapaceiro. Vi ele tingindo cobre pra parecer bronze com meus próprios olhos. Bom, olho.",
+      "Martha é uma boa mulher, mas vive preocupada demais. Agora jura que ouve barulhos no porão da estalagem.",
+      "O capitão da guarda deveria beber mais e reclamar menos. Um homem tenso desses vai ter um derrame antes dos quarenta.",
+      "Perdi este olho numa luta contra um ogro, no desfiladeiro de Krath. Fiz ele perder os dois. Valeu a troca.",
+      "Eldoria já foi o centro do comércio há décadas. Agora é só eu, meu balcão e um punhado de bêbados.",
+      "A vida de taverneiro é ouvir segredos e esquecê-los. A maioria não vale o preço da cerveja.",
+      "O bardo que morava aqui fugiu com a filha do mercador. Não tive tempo de cobrar a conta dele.",
+      "Thorne é o único que sabe lidar com aço de verdade nesta cidade. Os outros são uma vergonha.",
+      "Andam dizendo que o templo está escondendo algo. A Irmã Elara anda com uma cara de enterro ultimamente.",
+      "Se vir alguém com capuz preto nos becos depois da meia-noite, finja que não viu. Conselho de graça.",
+      "Meu olho perdido ainda dói quando vai chover. Melhor previsão do tempo que qualquer mago oferece.",
+      "Este balcão de carvalho aguentou mais brigas que as muralhas. E ainda está de pé. Como eu.",
+      "Braun, o Marcado, bebe aqui toda semana. Um olho só, como eu. Dois caolhos numa taverna — começamos um clube.",
+      "Tavira da guilda nunca aceita uma cerveja na casa. Diz que é 'profissional'. Eu chamo de chato.",
+      "A joalheira Velithra é a mais discreta do mercado. Chega cedo, sai cedo, nunca fofoca. Respeito isso."
+    ],
+    "insult": {
+      "neutral": [
+        "Cuidado com o que diz, ou vai engolir seus dentes.",
+        "Quer ser chutado pra fora agora ou daqui a pouco?",
+        "Você é patético."
+      ],
+      "friendly": [
+        "Pensei que tivéssemos um acordo de respeito. Enganei-me.",
+        "Grom não gosta de piadas de mau gosto. Melhor se retratar.",
+        "Sua amizade acabou de sofrer um golpe seco."
+      ],
+      "hostile": [
+        "Verme desgraçado! Vou te pendurar pelo pescoço!",
+        "Sumir com você seria um serviço público!",
+        "Vá arder com os diabos!"
+      ]
+    }
+  }
+}

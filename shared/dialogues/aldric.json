@@ -1,0 +1,1565 @@
+{
+  "npc_gate_aldric": {
+    "timeline": [
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "identified_to_aldric"
+        }
+      },
+      {
+        "node": "start_internal",
+        "conditions": {
+          "location": "city"
+        }
+      },
+      {
+        "node": "start_wounded",
+        "conditions": {
+          "hp_below": 50
+        }
+      },
+      {
+        "node": "start_hostile",
+        "conditions": {
+          "patience_below": 1
+        }
+      }
+    ],
+    "nodes": {
+      "start": {
+        "text": [
+          "⚜️ <b>Eldoria</b> ⚜️\n\nIdentifique-se. Eldoria não acolhe quem carrega sombras no coração.",
+          "⚜️ <b>Eldoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo. Desrespeite-as e encontrará minha lâmina.",
+          "⚜️ <b>Eldoria</b> ⚜️\n\nDeclare suas intenções, viajante. Os portões de Eldoria são a fronteira entre a civilização e o caos.",
+          "⚜️ <b>Eldoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn? Declare-se ou recue."
+        ],
+        "options": [
+          {
+            "text": "Diga-me as leis da cidade.",
+            "next": "city_laws",
+            "once": true
+          },
+          {
+            "text": "[Persuasão] Sou apenas um aventureiro buscando abrigo e trabalho.",
+            "next": "aldric_persuaded",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 10,
+              "success": "aldric_welcome",
+              "failure": "aldric_suspicious"
+            },
+            "once": true
+          },
+          {
+            "text": "Não lhe devo satisfações! [Intimidação]",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 15,
+              "success": "aldric_cowed",
+              "failure": "aldric_hostile"
+            },
+            "script": [
+              {
+                "type": "narration",
+                "text": "Não lhe devo satisfações! [Intimidação]"
+              }
+            ]
+          },
+          {
+            "text": "Entrar na Cidade",
+            "next": "exit",
+            "exit_callback": "action_city_entry"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nIdentifique-se."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria não acolhe quem carrega sombras no coração."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo."
+          },
+          {
+            "type": "narration",
+            "text": "Desrespeite-as e encontrará minha lâmina."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nDeclare suas intenções, viajante."
+          },
+          {
+            "type": "narration",
+            "text": "Os portões de Eldoria são a fronteira entre a civilização e o caos."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn?"
+          },
+          {
+            "type": "narration",
+            "text": "Declare-se ou recue."
+          }
+        ]
+      },
+      "start_hostile": {
+        "text": "⚜️ <b>Custódia do Portão</b> ⚜️\n\nVocê de novo? Já avisei que ratos insolentes não são bem-vindos. Circule antes que eu chame a carroça dos prisioneiros!",
+        "options": [
+          {
+            "text": "Tsc. Estou indo.",
+            "next": "exit",
+            "exit_callback": "action_city_entry"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Custódia do Portão</b> ⚜️\n\nVocê de novo?"
+          },
+          {
+            "type": "narration",
+            "text": "Já avisei que ratos insolentes não são bem-vindos."
+          },
+          {
+            "type": "narration",
+            "text": "Circule antes que eu chame a carroça dos prisioneiros!"
+          }
+        ]
+      },
+      "start_internal": {
+        "text": [
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nCaminhe na luz, cidadão. O crime floresce onde a vigilância falha.",
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nTyr observa seus passos. Espero que eles sejam justos.",
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nMantenha a ordem. Eldoria é um bastião de civilização neste mundo selvagem.",
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nReporte qualquer irregularidade ao Capitão. Segurança é dever de todos."
+        ],
+        "options": [
+          {
+            "text": "⚔️ Peguei os contrabandistas.",
+            "next": "quest_smugglers_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_smugglers",
+                "caught_smugglers",
+                "!completed_aldric_smugglers"
+              ]
+            }
+          },
+          {
+            "text": "⚔️ Encontrei o desertor.",
+            "next": "quest_deserter_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_deserter",
+                "resolved_deserter",
+                "!completed_aldric_deserter"
+              ]
+            }
+          },
+          {
+            "text": "⚔️ Explorei as colinas. Tenho informações.",
+            "next": "quest_siege_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_siege",
+                "organized_defense",
+                "!completed_aldric_siege"
+              ]
+            }
+          },
+          {
+            "text": "Aldric, preciso falar de contrabando.",
+            "next": "quest_smugglers_offer",
+            "conditions": {
+              "flags": [
+                "identified_to_aldric",
+                "!accepted_aldric_smugglers",
+                "!completed_aldric_smugglers"
+              ]
+            }
+          },
+          {
+            "text": "Aldric, sobre aquele seu colega...",
+            "next": "quest_deserter_offer",
+            "conditions": {
+              "flags": [
+                "completed_aldric_smugglers",
+                "!accepted_aldric_deserter",
+                "!completed_aldric_deserter"
+              ]
+            }
+          },
+          {
+            "text": "Aldric, os relatórios das colinas...",
+            "next": "quest_siege_offer",
+            "conditions": {
+              "flags": [
+                "completed_aldric_deserter",
+                "!accepted_aldric_siege",
+                "!completed_aldric_siege"
+              ]
+            }
+          },
+          {
+            "text": "Alguma novidade das muralhas?",
+            "next": "aldric_news"
+          },
+          {
+            "text": "Quero relatar uma atividade suspeita.",
+            "next": "aldric_report"
+          },
+          {
+            "text": "Guarda, confio em você. Preciso de um conselho.",
+            "next": "aldric_trusted_counsel",
+            "conditions": {
+              "npc_emotion": {
+                "trust": 0.5
+              }
+            }
+          },
+          {
+            "text": "Voltar aos afazeres",
+            "next": "exit",
+            "exit_callback": "action_city_entry"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nCaminhe na luz, cidadão."
+          },
+          {
+            "type": "narration",
+            "text": "O crime floresce onde a vigilância falha."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nTyr observa seus passos."
+          },
+          {
+            "type": "narration",
+            "text": "Espero que eles sejam justos."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nMantenha a ordem."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria é um bastião de civilização neste mundo selvagem."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nReporte qualquer irregularidade ao Capitão."
+          },
+          {
+            "type": "narration",
+            "text": "Segurança é dever de todos."
+          }
+        ]
+      },
+      "aldric_trusted_counsel": {
+        "text": "Conselho? Hah, não sou sacerdote... mas escuto. Se vai se aventurar pelas estradas, lembre-se: nunca acampe perto de rios à noite — os predadores vêm beber água. E se encontrar bandidos, não negocie. Aço resolve mais rápido que palavras. É o que aprendi em vinte anos nestes portões.",
+        "options": [
+          {
+            "text": "Sábias palavras. Obrigado, Aldric.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Conselho?"
+          },
+          {
+            "type": "narration",
+            "text": "Hah, não sou sacerdote... mas escuto."
+          },
+          {
+            "type": "narration",
+            "text": "Se vai se aventurar pelas estradas, lembre-se: nunca acampe perto de rios à noite — os predadores vêm beber água."
+          },
+          {
+            "type": "narration",
+            "text": "E se encontrar bandidos, não negocie."
+          },
+          {
+            "type": "narration",
+            "text": "Aço resolve mais rápido que palavras."
+          },
+          {
+            "type": "narration",
+            "text": "É o que aprendi em vinte anos nestes portões."
+          }
+        ]
+      },
+      "aldric_news": {
+        "text": [
+          "As estradas ao sul estão infestadas de goblins, mas Eldoria permanece segura. Nosso aço é forte o suficiente para qualquer ameaça. Porém... ultimamente os mercadores reclamam de sombras nos portões à noite.",
+          "Os batedores detectaram movimentação de criaturas ao norte. Nada confirmado, mas o Capitão mandou reforçar as rondas. E entre nós... notei algo estranho nos portões nas últimas noites.",
+          "Goblins ao sul, lobos ao norte, bandidos a leste. As estradas nunca foram seguras, mas ultimamente estão piores. E aqui dentro? Bem... nem tudo é o que parece."
+        ],
+        "options": [
+          {
+            "text": "Sombras nos portões? O que viu?",
+            "next": "aldric_news_detail"
+          },
+          {
+            "text": "Precisa de ajuda com algo?",
+            "next": "aldric_news_help"
+          },
+          {
+            "text": "Vou manter os olhos abertos.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "As estradas ao sul estão infestadas de goblins, mas Eldoria permanece segura."
+          },
+          {
+            "type": "narration",
+            "text": "Nosso aço é forte o suficiente para qualquer ameaça."
+          },
+          {
+            "type": "narration",
+            "text": "Porém... ultimamente os mercadores reclamam de sombras nos portões à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Os batedores detectaram movimentação de criaturas ao norte."
+          },
+          {
+            "type": "narration",
+            "text": "Nada confirmado, mas o Capitão mandou reforçar as rondas."
+          },
+          {
+            "type": "narration",
+            "text": "E entre nós... notei algo estranho nos portões nas últimas noites."
+          },
+          {
+            "type": "narration",
+            "text": "Goblins ao sul, lobos ao norte, bandidos a leste."
+          },
+          {
+            "type": "narration",
+            "text": "As estradas nunca foram seguras, mas ultimamente estão piores."
+          },
+          {
+            "type": "narration",
+            "text": "E aqui dentro?"
+          },
+          {
+            "type": "narration",
+            "text": "Bem... nem tudo é o que parece."
+          }
+        ]
+      },
+      "aldric_news_detail": {
+        "text": "(Aldric olha em volta e baixa a voz) 'Carroças passando depois do toque de recolher. Marcas de rodas na lama fora do portão lateral. E um cheiro... cheiro de especiarias exóticas que não são vendidas no mercado.'\n\n'Não tenho provas suficientes pro Capitão, mas alguém está usando os portões pra passar mercadoria ilegal. Eu sei.'",
+        "options": [
+          {
+            "text": "Posso vigiar à noite pra você.",
+            "next": "quest_smugglers_offer",
+            "conditions": {
+              "flags": [
+                "identified_to_aldric",
+                "!accepted_aldric_smugglers",
+                "!completed_aldric_smugglers"
+              ]
+            }
+          },
+          {
+            "text": "Vou ficar atento a isso.",
+            "next": "start_internal",
+            "impact": {
+              "flags": {
+                "aldric_smuggler_hint": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric olha em volta e baixa a voz) 'Carroças passando depois do toque de recolher."
+          },
+          {
+            "type": "narration",
+            "text": "Marcas de rodas na lama fora do portão lateral."
+          },
+          {
+            "type": "narration",
+            "text": "E um cheiro... cheiro de especiarias exóticas que não são vendidas no mercado.'\n\n'Não tenho provas suficientes pro Capitão, mas alguém está usando os portões pra passar mercadoria ilegal."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sei.'"
+          }
+        ]
+      },
+      "aldric_news_help": {
+        "text": [
+          "(Aldric te mede com o olhar) 'Ajuda? Não costumo pedir ajuda a civis. Mas... você não é um civil comum, é?'\n\n'Se quer ser útil, mantenha os olhos abertos nas estradas. E se notar algo estranho nos portões à noite... venha me contar. Discretamente.'",
+          "(Aldric hesita) 'Ajuda... Hm. O Capitão diria que assuntos da guarda são da guarda. Mas há coisas que um homem em armadura não consegue fazer. Coisas que exigem alguém mais... discreto.'"
+        ],
+        "options": [
+          {
+            "text": "Pode contar comigo.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te mede com o olhar) 'Ajuda?"
+          },
+          {
+            "type": "narration",
+            "text": "Não costumo pedir ajuda a civis."
+          },
+          {
+            "type": "narration",
+            "text": "Mas... você não é um civil comum, é?'\n\n'Se quer ser útil, mantenha os olhos abertos nas estradas."
+          },
+          {
+            "type": "narration",
+            "text": "E se notar algo estranho nos portões à noite... venha me contar."
+          },
+          {
+            "type": "narration",
+            "text": "Discretamente.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Aldric hesita) 'Ajuda..."
+          },
+          {
+            "type": "narration",
+            "text": "Hm."
+          },
+          {
+            "type": "narration",
+            "text": "O Capitão diria que assuntos da guarda são da guarda."
+          },
+          {
+            "type": "narration",
+            "text": "Mas há coisas que um homem em armadura não consegue fazer."
+          },
+          {
+            "type": "narration",
+            "text": "Coisas que exigem alguém mais... discreto.'"
+          }
+        ]
+      },
+      "aldric_report": {
+        "text": "(Aldric endireita a postura) 'O Capitão apreciará sua diligência. Onde você viu essa irregularidade?'\n\n(Ele anota mentalmente) 'Hm... investigaremos isso imediatamente. Um cidadão vigilante é o melhor aliado da guarda.'",
+        "options": [
+          {
+            "text": "Qualquer coisa, estou por perto.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          },
+          {
+            "text": "Posso ajudar na investigação?",
+            "next": "aldric_report_help"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric endireita a postura) 'O Capitão apreciará sua diligência."
+          },
+          {
+            "type": "narration",
+            "text": "Onde você viu essa irregularidade?'\n\n(Ele anota mentalmente) 'Hm... investigaremos isso imediatamente."
+          },
+          {
+            "type": "narration",
+            "text": "Um cidadão vigilante é o melhor aliado da guarda.'"
+          }
+        ]
+      },
+      "aldric_report_help": {
+        "text": [
+          "(Aldric te olha com respeito renovado) 'Investigação? Essa é uma palavra forte. O Capitão não gosta de voluntários não treinados...'\n\n'Mas entre nós — tem coisas acontecendo que a guarda sozinha não dá conta. Se realmente quer ajudar, fale comigo quando eu estiver nos portões. Às vezes... preciso de olhos que não usam armadura.'",
+          "(Aldric faz um aceno discreto) 'Investigação oficial, não. Mas... vigilância não oficial? Isso eu posso aceitar. Procure-me nos portões quando tiver um momento.'"
+        ],
+        "options": [
+          {
+            "text": "Entendido. Até lá, Aldric.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te olha com respeito renovado) 'Investigação?"
+          },
+          {
+            "type": "narration",
+            "text": "Essa é uma palavra forte."
+          },
+          {
+            "type": "narration",
+            "text": "O Capitão não gosta de voluntários não treinados...'\n\n'Mas entre nós — tem coisas acontecendo que a guarda sozinha não dá conta."
+          },
+          {
+            "type": "narration",
+            "text": "Se realmente quer ajudar, fale comigo quando eu estiver nos portões."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes... preciso de olhos que não usam armadura.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Aldric faz um aceno discreto) 'Investigação oficial, não."
+          },
+          {
+            "type": "narration",
+            "text": "Mas... vigilância não oficial?"
+          },
+          {
+            "type": "narration",
+            "text": "Isso eu posso aceitar."
+          },
+          {
+            "type": "narration",
+            "text": "Procure-me nos portões quando tiver um momento.'"
+          }
+        ]
+      },
+      "city_laws": {
+        "text": "As leis são simples: Não roube, não mate plebeus e não use magia ofensiva dentro das muralhas. Caso contrário, conhecerá as nossas masmorras.",
+        "options": [
+          {
+            "text": "Entendido.",
+            "next": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "As leis são simples: Não roube, não mate plebeus e não use magia ofensiva dentro das muralhas."
+          },
+          {
+            "type": "narration",
+            "text": "Caso contrário, conhecerá as nossas masmorras."
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nAh, você retornou. Que seus atos lá fora tenham honrado nossa cidade.",
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nBem-vindo de volta, aventureiro. A guarda reconhece seus esforços. Alguma novidade das estradas?",
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nOs portões se abrem para os conhecidos. Entre e descanse, você parece ter visto muita coisa hoje.",
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos. O mundo lá fora parece ficar mais perigoso a cada dia.",
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas. Bem-vindo de volta.",
+          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora. Siga para a cidade, aventureiro."
+        ],
+        "options": [
+          {
+            "text": "⚔️ Peguei os contrabandistas.",
+            "next": "quest_smugglers_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_smugglers",
+                "caught_smugglers",
+                "!completed_aldric_smugglers"
+              ]
+            }
+          },
+          {
+            "text": "⚔️ Encontrei o desertor.",
+            "next": "quest_deserter_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_deserter",
+                "resolved_deserter",
+                "!completed_aldric_deserter"
+              ]
+            }
+          },
+          {
+            "text": "⚔️ Explorei as colinas. Tenho informações.",
+            "next": "quest_siege_turnin",
+            "conditions": {
+              "flags": [
+                "accepted_aldric_siege",
+                "organized_defense",
+                "!completed_aldric_siege"
+              ]
+            }
+          },
+          {
+            "text": "Aldric, notei algo estranho nos portões...",
+            "next": "quest_smugglers_offer",
+            "conditions": {
+              "flags": [
+                "identified_to_aldric",
+                "!accepted_aldric_smugglers",
+                "!completed_aldric_smugglers"
+              ]
+            }
+          },
+          {
+            "text": "Relatar novidades da estrada.",
+            "next": "aldric_road_report"
+          },
+          {
+            "text": "✅ Encontrei o filho do ferreiro.",
+            "next": "aldric_aris_reaction",
+            "once": true,
+            "conditions": {
+              "flag": "completed_thorne_son_quest"
+            }
+          },
+          {
+            "text": "Aldric, algo me preocupa sobre as estradas...",
+            "next": "aldric_patrol_secret",
+            "conditions": {
+              "min_affinity": 65
+            }
+          },
+          {
+            "text": "Entrar na Cidade",
+            "next": "exit",
+            "exit_callback": "action_city_entry"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nAh, você retornou."
+          },
+          {
+            "type": "narration",
+            "text": "Que seus atos lá fora tenham honrado nossa cidade."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nBem-vindo de volta, aventureiro."
+          },
+          {
+            "type": "narration",
+            "text": "A guarda reconhece seus esforços."
+          },
+          {
+            "type": "narration",
+            "text": "Alguma novidade das estradas?"
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nOs portões se abrem para os conhecidos."
+          },
+          {
+            "type": "narration",
+            "text": "Entre e descanse, você parece ter visto muita coisa hoje."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos."
+          },
+          {
+            "type": "narration",
+            "text": "O mundo lá fora parece ficar mais perigoso a cada dia."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas."
+          },
+          {
+            "type": "narration",
+            "text": "Bem-vindo de volta."
+          },
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora."
+          },
+          {
+            "type": "narration",
+            "text": "Siga para a cidade, aventureiro."
+          }
+        ]
+      },
+      "aldric_patrol_secret": {
+        "text": "Hm... já que confia em mim, vou ser direto. Nossas patrulhas detectaram movimentações estranhas a leste — pegadas enormes, árvores quebradas. O Capitão mandou reforçar os turnos noturnos, mas entre nós... acho que algo grande está vindo. Fique atento lá fora.",
+        "options": [
+          {
+            "text": "Obrigado pela confiança, Aldric.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Hm... já que confia em mim, vou ser direto."
+          },
+          {
+            "type": "narration",
+            "text": "Nossas patrulhas detectaram movimentações estranhas a leste — pegadas enormes, árvores quebradas."
+          },
+          {
+            "type": "narration",
+            "text": "O Capitão mandou reforçar os turnos noturnos, mas entre nós... acho que algo grande está vindo."
+          },
+          {
+            "type": "narration",
+            "text": "Fique atento lá fora."
+          }
+        ]
+      },
+      "aldric_road_report": {
+        "text": [
+          "(Aldric ouve atentamente, com expressão séria) 'Entendo... monstros e perigos em todo canto. Informarei o Capitão sobre essas movimentações. Eldoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim. Nem todo relatório precisa passar pelo Capitão.'",
+          "(Aldric cruza os braços, pensativo) 'As estradas estão cada vez piores. Há dois meses era seguro até a floresta. Agora, nem os mercadores com escolta se arriscam sozinhos.'\n\n'Obrigado pelo relato. Você é mais útil do que metade dos batedores que temos.'"
+        ],
+        "options": [
+          {
+            "text": "Eldoria pode contar comigo.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 2
+              }
+            }
+          },
+          {
+            "text": "Entrar na Cidade",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric ouve atentamente, com expressão séria) 'Entendo... monstros e perigos em todo canto."
+          },
+          {
+            "type": "narration",
+            "text": "Informarei o Capitão sobre essas movimentações."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim."
+          },
+          {
+            "type": "narration",
+            "text": "Nem todo relatório precisa passar pelo Capitão.'"
+          },
+          {
+            "type": "narration",
+            "text": "(Aldric cruza os braços, pensativo) 'As estradas estão cada vez piores."
+          },
+          {
+            "type": "narration",
+            "text": "Há dois meses era seguro até a floresta."
+          },
+          {
+            "type": "narration",
+            "text": "Agora, nem os mercadores com escolta se arriscam sozinhos.'\n\n'Obrigado pelo relato."
+          },
+          {
+            "type": "narration",
+            "text": "Você é mais útil do que metade dos batedores que temos.'"
+          }
+        ]
+      },
+      "start_wounded": {
+        "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nPor Vorenn! Você parece ter passado por um moedor de carne lá fora. Entre logo, antes que desmaie no meu portão e manche as lajes da cidade!",
+        "options": [
+          {
+            "text": "Obrigado... preciso de um médico.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 1
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nPor Vorenn!"
+          },
+          {
+            "type": "narration",
+            "text": "Você parece ter passado por um moedor de carne lá fora."
+          },
+          {
+            "type": "narration",
+            "text": "Entre logo, antes que desmaie no meu portão e manche as lajes da cidade!"
+          }
+        ]
+      },
+      "aldric_aris_reaction": {
+        "text": "Soube que você trouxe o garoto de volta. A floresta raramente devolve o que toma. Você tem sorte... ou habilidade. Eldoria agradece.",
+        "options": [
+          {
+            "text": "Obrigado, Guarda.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Soube que você trouxe o garoto de volta."
+          },
+          {
+            "type": "narration",
+            "text": "A floresta raramente devolve o que toma."
+          },
+          {
+            "type": "narration",
+            "text": "Você tem sorte... ou habilidade."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria agradece."
+          }
+        ]
+      },
+      "aldric_welcome": {
+        "text": "Bem, você parece honesto o suficiente. Eldoria precisa de braços fortes. Entre e apresente-se na estalagem do Grifo.",
+        "options": [
+          {
+            "text": "Obrigado, Guarda.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": 2
+              },
+              "flags": {
+                "identified_to_aldric": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bem, você parece honesto o suficiente."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria precisa de braços fortes."
+          },
+          {
+            "type": "narration",
+            "text": "Entre e apresente-se na estalagem do Grifo."
+          }
+        ]
+      },
+      "aldric_cowed": {
+        "text": "Certo, certo! Não precisa ser tão... contundente. Passe logo, Eldoria tem problemas maiores que você.",
+        "options": [
+          {
+            "text": "Assim é melhor.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "flags": {
+                "identified_to_aldric": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Certo, certo!"
+          },
+          {
+            "type": "narration",
+            "text": "Não precisa ser tão... contundente."
+          },
+          {
+            "type": "narration",
+            "text": "Passe logo, Eldoria tem problemas maiores que você."
+          }
+        ]
+      },
+      "aldric_persuaded": {
+        "text": "Aventureiros... sempre com as mesmas histórias. Sorte sua que Eldoria está precisando de braços fortes. Passe logo.",
+        "options": [
+          {
+            "text": "Obrigado, Guarda.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "flags": {
+                "identified_to_aldric": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Aventureiros... sempre com as mesmas histórias."
+          },
+          {
+            "type": "narration",
+            "text": "Sorte sua que Eldoria está precisando de braços fortes."
+          },
+          {
+            "type": "narration",
+            "text": "Passe logo."
+          }
+        ]
+      },
+      "aldric_suspicious": {
+        "text": "Honesto? Hah! Ouvi essa história mil vezes. Estarei de olho em você. Qualquer passo fora da linha e você conhecerá o Capitão.",
+        "options": [
+          {
+            "text": "Como desejar.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": -2
+              },
+              "patience": -1
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Honesto?"
+          },
+          {
+            "type": "narration",
+            "text": "Hah!"
+          },
+          {
+            "type": "narration",
+            "text": "Ouvi essa história mil vezes."
+          },
+          {
+            "type": "narration",
+            "text": "Estarei de olho em você."
+          },
+          {
+            "type": "narration",
+            "text": "Qualquer passo fora da linha e você conhecerá o Capitão."
+          }
+        ]
+      },
+      "aldric_hostile": {
+        "text": "Você tem muita coragem pro seu próprio bem, rato! Mais uma palavra e você dorme na cela do Portão Sul!",
+        "options": [
+          {
+            "text": "Tsc. Vou entrar logo.",
+            "next": "exit",
+            "exit_callback": "action_city_entry",
+            "impact": {
+              "reputation": {
+                "guards": -10
+              },
+              "patience": -5,
+              "flags": {
+                "aldric_hostile_encounter": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Você tem muita coragem pro seu próprio bem, rato!"
+          },
+          {
+            "type": "narration",
+            "text": "Mais uma palavra e você dorme na cela do Portão Sul!"
+          }
+        ]
+      },
+      "quest_smugglers_offer": {
+        "text": "(Aldric olha em volta, garantindo que nenhum outro guarda ouve) 'Escute... há semanas que suspeito de contrabando nos portões. Carroças passam à noite, o portão lateral fica entreaberto, e encontrei marcas de rodas frescas toda manhã.'\n\n'Não posso vigiar sozinho — tenho meu turno durante o dia. Preciso de alguém que fique à espreita depois do toque de recolher. Alguém de fora da guarda, que não levante suspeitas.'\n\n(Ele te olha nos olhos) 'Você me parece capaz. Topa me ajudar?'",
+        "options": [
+          {
+            "text": "Posso vigiar à noite pra você.",
+            "next": "quest_smugglers_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_aldric_smugglers"
+              ],
+              "flags": {
+                "accepted_aldric_smugglers": true
+              },
+              "reputation": {
+                "guards": 2
+              }
+            }
+          },
+          {
+            "text": "Não me envolvo nisso.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric olha em volta, garantindo que nenhum outro guarda ouve) 'Escute... há semanas que suspeito de contrabando nos portões."
+          },
+          {
+            "type": "narration",
+            "text": "Carroças passam à noite, o portão lateral fica entreaberto, e encontrei marcas de rodas frescas toda manhã.'\n\n'Não posso vigiar sozinho — tenho meu turno durante o dia."
+          },
+          {
+            "type": "narration",
+            "text": "Preciso de alguém que fique à espreita depois do toque de recolher."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém de fora da guarda, que não levante suspeitas.'\n\n(Ele te olha nos olhos) 'Você me parece capaz."
+          },
+          {
+            "type": "narration",
+            "text": "Topa me ajudar?'"
+          }
+        ]
+      },
+      "quest_smugglers_accepted": {
+        "text": "(Aldric relaxa os ombros — pela primeira vez, parece aliviado) 'Bom. Muito bom.'\n\n'O portão lateral fica a sudoeste das muralhas. Observe entre a meia-noite e as duas horas da manhã. Se ver carroças ou figuras encapuzadas, siga-as. Descubra o que carregam e de onde vem.'\n\n(Ele te entrega uma lanterna pequena) 'Tome. Lanterna de vigia. Luz fraca, alcance curto — perfeita pra não ser notado. E lembre-se: observe primeiro, aja depois.'",
+        "options": [
+          {
+            "text": "Entendido. Vigiarei os portões.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric relaxa os ombros — pela primeira vez, parece aliviado) 'Bom."
+          },
+          {
+            "type": "narration",
+            "text": "Muito bom.'\n\n'O portão lateral fica a sudoeste das muralhas."
+          },
+          {
+            "type": "narration",
+            "text": "Observe entre a meia-noite e as duas horas da manhã."
+          },
+          {
+            "type": "narration",
+            "text": "Se ver carroças ou figuras encapuzadas, siga-as."
+          },
+          {
+            "type": "narration",
+            "text": "Descubra o que carregam e de onde vem.'\n\n(Ele te entrega uma lanterna pequena) 'Tome."
+          },
+          {
+            "type": "narration",
+            "text": "Lanterna de vigia."
+          },
+          {
+            "type": "narration",
+            "text": "Luz fraca, alcance curto — perfeita pra não ser notado."
+          },
+          {
+            "type": "narration",
+            "text": "E lembre-se: observe primeiro, aja depois.'"
+          }
+        ]
+      },
+      "quest_smugglers_turnin": {
+        "text": "(Aldric se aproxima imediatamente) 'Os contrabandistas — o que descobriu?'",
+        "options": [
+          {
+            "text": "Interceptei a operação toda.",
+            "next": "quest_smugglers_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_aldric_smugglers"
+              ],
+              "reputation": {
+                "guards": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "speech",
+            "text": "(Aldric se aproxima imediatamente) 'Os contrabandistas — o que descobriu?'",
+            "speaker": "Padre Aldric"
+          }
+        ]
+      },
+      "quest_smugglers_complete": {
+        "text": "(Aldric bate com o punho na couraça — saudação militar) 'Excepcional. Vou levar isso ao Capitão imediatamente. Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Eldoria. A guarda não esquece quem ajuda.'\n\n(Ele te entrega a lanterna de vigia, agora com o brasão da cidade gravado) 'Fique com ela. Você a usou melhor do que qualquer recruta que já tive.'",
+        "options": [
+          {
+            "text": "Foi um prazer ajudar, Aldric.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric bate com o punho na couraça — saudação militar) 'Excepcional."
+          },
+          {
+            "type": "narration",
+            "text": "Vou levar isso ao Capitão imediatamente."
+          },
+          {
+            "type": "narration",
+            "text": "Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Eldoria."
+          },
+          {
+            "type": "speech",
+            "text": "A guarda não esquece quem ajuda.'\n\n(Ele te entrega a lanterna de vigia, agora com o brasão da cidade gravado) 'Fique com ela.",
+            "speaker": "Padre Aldric"
+          },
+          {
+            "type": "narration",
+            "text": "Você a usou melhor do que qualquer recruta que já tive.'"
+          }
+        ]
+      },
+      "quest_deserter_offer": {
+        "text": "(Aldric está mais sombrio que o normal. Ele olha para as planícies ao sul) 'Preciso de outro favor. Mas este é... pessoal.'\n\n'Kael. Um ex-guarda. Meu parceiro de patrulha por cinco anos. Ele desertou semana passada. Fugiu pras planícies ao sul sem explicação.'\n\n(Ele aperta o punho) 'O Capitão o declarou traidor. A ordem é capturá-lo. Mas conheço o Kael — ele não desertaria sem motivo. Algo o forçou a fugir.'\n\n'Preciso que você o encontre. Descubra a verdade antes que a guarda mande um pelotão atrás dele.'",
+        "options": [
+          {
+            "text": "Eu o rastreio nas planícies.",
+            "next": "quest_deserter_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_aldric_deserter"
+              ],
+              "flags": {
+                "accepted_aldric_deserter": true
+              },
+              "reputation": {
+                "guards": 2
+              }
+            }
+          },
+          {
+            "text": "Isso não é prioridade agora.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric está mais sombrio que o normal."
+          },
+          {
+            "type": "narration",
+            "text": "Ele olha para as planícies ao sul) 'Preciso de outro favor."
+          },
+          {
+            "type": "narration",
+            "text": "Mas este é... pessoal.'\n\n'Kael."
+          },
+          {
+            "type": "narration",
+            "text": "Um ex-guarda."
+          },
+          {
+            "type": "narration",
+            "text": "Meu parceiro de patrulha por cinco anos."
+          },
+          {
+            "type": "narration",
+            "text": "Ele desertou semana passada."
+          },
+          {
+            "type": "narration",
+            "text": "Fugiu pras planícies ao sul sem explicação.'\n\n(Ele aperta o punho) 'O Capitão o declarou traidor."
+          },
+          {
+            "type": "narration",
+            "text": "A ordem é capturá-lo."
+          },
+          {
+            "type": "narration",
+            "text": "Mas conheço o Kael — ele não desertaria sem motivo."
+          },
+          {
+            "type": "narration",
+            "text": "Algo o forçou a fugir.'\n\n'Preciso que você o encontre."
+          },
+          {
+            "type": "narration",
+            "text": "Descubra a verdade antes que a guarda mande um pelotão atrás dele.'"
+          }
+        ]
+      },
+      "quest_deserter_accepted": {
+        "text": "(Aldric te passa um pedaço de tecido — um emblema de guarda rasgado) 'Encontrei isso no portão sul na manhã da fuga. Kael deixou isso de propósito. Ele queria que alguém o seguisse.'\n\n'Siga para as planícies ao sul. Procure acampamentos recentes — Kael é metódico, sempre acampa perto de água. E se o encontrar... ouça-o primeiro. Por favor.'\n\n(O olhar de Aldric é o de um homem dividido entre o dever e a amizade)'",
+        "options": [
+          {
+            "text": "Vou encontrá-lo. E ouvirei.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te passa um pedaço de tecido — um emblema de guarda rasgado) 'Encontrei isso no portão sul na manhã da fuga."
+          },
+          {
+            "type": "narration",
+            "text": "Kael deixou isso de propósito."
+          },
+          {
+            "type": "narration",
+            "text": "Ele queria que alguém o seguisse.'\n\n'Siga para as planícies ao sul."
+          },
+          {
+            "type": "narration",
+            "text": "Procure acampamentos recentes — Kael é metódico, sempre acampa perto de água."
+          },
+          {
+            "type": "narration",
+            "text": "E se o encontrar... ouça-o primeiro."
+          },
+          {
+            "type": "speech",
+            "text": "Por favor.'\n\n(O olhar de Aldric é o de um homem dividido entre o dever e a amizade)'",
+            "speaker": "Padre Aldric"
+          }
+        ]
+      },
+      "quest_deserter_turnin": {
+        "text": "(Aldric te vê e vem imediatamente ao seu encontro) 'Kael — você o encontrou? O que aconteceu?'",
+        "options": [
+          {
+            "text": "Está resolvido. Kael tinha seus motivos.",
+            "next": "quest_deserter_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_aldric_deserter"
+              ],
+              "reputation": {
+                "guards": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te vê e vem imediatamente ao seu encontro) 'Kael — você o encontrou?"
+          },
+          {
+            "type": "narration",
+            "text": "O que aconteceu?'"
+          }
+        ]
+      },
+      "quest_deserter_complete": {
+        "text": "(Aldric ouve seu relato em silêncio. Quando termina, ele respira fundo.)\n\n'Eu sabia. Sabia que Kael não fugiria por covardia.' (Ele guarda o emblema rasgado) 'Vou falar com o Capitão. Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Eldoria) 'Tome. Não sou dado a sentimentalismos, mas... você merece. Broche da Guarda — poucos civis já receberam um.'",
+        "options": [
+          {
+            "text": "Honrarei esse broche, Aldric.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric ouve seu relato em silêncio."
+          },
+          {
+            "type": "narration",
+            "text": "Quando termina, ele respira fundo.)\n\n'Eu sabia."
+          },
+          {
+            "type": "narration",
+            "text": "Sabia que Kael não fugiria por covardia.' (Ele guarda o emblema rasgado) 'Vou falar com o Capitão."
+          },
+          {
+            "type": "speech",
+            "text": "Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Eldoria) 'Tome.",
+            "speaker": "Padre Aldric"
+          },
+          {
+            "type": "narration",
+            "text": "Não sou dado a sentimentalismos, mas... você merece."
+          },
+          {
+            "type": "narration",
+            "text": "Broche da Guarda — poucos civis já receberam um.'"
+          }
+        ]
+      },
+      "quest_siege_offer": {
+        "text": "(Aldric te puxa para um canto, longe dos outros guardas. Sua voz é tensa.) 'Os relatórios são alarmantes. Batedores avistaram uma força hostil se reunindo nas colinas ao sul. Não são goblins — é algo organizado.'\n\n'O Capitão quer mandar um pelotão, mas isso deixaria os portões desguarnecidos. Preciso de alguém que vá até as colinas e avalie o tamanho e a natureza da ameaça.'\n\n(Ele te olha com gravidade) 'Se o que os batedores dizem for verdade... Eldoria pode estar em perigo real.'",
+        "options": [
+          {
+            "text": "Eu exploro as colinas.",
+            "next": "quest_siege_accepted",
+            "once": true,
+            "impact": {
+              "quests": [
+                "quest_aldric_siege"
+              ],
+              "flags": {
+                "accepted_aldric_siege": true
+              },
+              "reputation": {
+                "guards": 3
+              }
+            }
+          },
+          {
+            "text": "Isso é grande demais pra mim.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te puxa para um canto, longe dos outros guardas."
+          },
+          {
+            "type": "narration",
+            "text": "Sua voz é tensa.) 'Os relatórios são alarmantes."
+          },
+          {
+            "type": "narration",
+            "text": "Batedores avistaram uma força hostil se reunindo nas colinas ao sul."
+          },
+          {
+            "type": "narration",
+            "text": "Não são goblins — é algo organizado.'\n\n'O Capitão quer mandar um pelotão, mas isso deixaria os portões desguarnecidos."
+          },
+          {
+            "type": "narration",
+            "text": "Preciso de alguém que vá até as colinas e avalie o tamanho e a natureza da ameaça.'\n\n(Ele te olha com gravidade) 'Se o que os batedores dizem for verdade..."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria pode estar em perigo real.'"
+          }
+        ]
+      },
+      "quest_siege_accepted": {
+        "text": "(Aldric aperta seu ombro — gesto raro para ele) 'Você tem coragem. Eldoria precisa disso agora.'\n\n'As colinas ficam ao sudeste. Siga a trilha antiga dos mineradores — ela leva ao ponto de observação mais alto. De lá, você verá qualquer acampamento.'\n\n'Avalie números, armamento, e qualquer estandarte ou símbolo. Se for grande demais pra enfrentar, VOLTE. Informação vale mais que heroísmo inútil.'\n\n(Ele bate no peito com o punho) 'Que Vorenn guie seus passos.'",
+        "options": [
+          {
+            "text": "Voltarei com informações.",
+            "next": "start_internal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric aperta seu ombro — gesto raro para ele) 'Você tem coragem."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria precisa disso agora.'\n\n'As colinas ficam ao sudeste."
+          },
+          {
+            "type": "narration",
+            "text": "Siga a trilha antiga dos mineradores — ela leva ao ponto de observação mais alto."
+          },
+          {
+            "type": "narration",
+            "text": "De lá, você verá qualquer acampamento.'\n\n'Avalie números, armamento, e qualquer estandarte ou símbolo."
+          },
+          {
+            "type": "narration",
+            "text": "Se for grande demais pra enfrentar, VOLTE."
+          },
+          {
+            "type": "narration",
+            "text": "Informação vale mais que heroísmo inútil.'\n\n(Ele bate no peito com o punho) 'Que Vorenn guie seus passos.'"
+          }
+        ]
+      },
+      "quest_siege_turnin": {
+        "text": "(Aldric te vê e praticamente corre em sua direção) 'As colinas — o que encontrou?!'",
+        "options": [
+          {
+            "text": "Tenho todas as informações. A defesa está organizada.",
+            "next": "quest_siege_complete",
+            "impact": {
+              "complete_quests": [
+                "quest_aldric_siege"
+              ],
+              "reputation": {
+                "guards": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric te vê e praticamente corre em sua direção) 'As colinas — o que encontrou?!'"
+          }
+        ]
+      },
+      "quest_siege_complete": {
+        "text": "(Aldric lê seu relatório. Suas mãos tremem — não de medo, de urgência.)\n\n'Por Vorenn... isso é pior do que temíamos. Mas graças a você, temos tempo. Tempo pra preparar.'\n\n(Ele se vira para os guardas) 'PORTÕES EM ALERTA MÁXIMO! Convoquem o Capitão! AGORA!'\n\n(Voltando-se para você) '{player_name}. Você acaba de salvar vidas. Muitas vidas. Eldoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião. Usei-o por quinze anos nestes portões. Agora é seu. Que proteja você como protegeu Eldoria.'",
+        "options": [
+          {
+            "text": "Defenderei Eldoria com honra.",
+            "next": "start_internal",
+            "impact": {
+              "reputation": {
+                "guards": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Aldric lê seu relatório."
+          },
+          {
+            "type": "narration",
+            "text": "Suas mãos tremem — não de medo, de urgência.)\n\n'Por Vorenn... isso é pior do que temíamos."
+          },
+          {
+            "type": "narration",
+            "text": "Mas graças a você, temos tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Tempo pra preparar.'\n\n(Ele se vira para os guardas) 'PORTÕES EM ALERTA MÁXIMO!"
+          },
+          {
+            "type": "narration",
+            "text": "Convoquem o Capitão!"
+          },
+          {
+            "type": "speech",
+            "text": "AGORA!'\n\n(Voltando-se para você) '{player_name}.",
+            "speaker": "Padre Aldric"
+          },
+          {
+            "type": "narration",
+            "text": "Você acaba de salvar vidas."
+          },
+          {
+            "type": "narration",
+            "text": "Muitas vidas."
+          },
+          {
+            "type": "speech",
+            "text": "Eldoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião.",
+            "speaker": "Padre Aldric"
+          },
+          {
+            "type": "narration",
+            "text": "Usei-o por quinze anos nestes portões."
+          },
+          {
+            "type": "narration",
+            "text": "Agora é seu."
+          },
+          {
+            "type": "narration",
+            "text": "Que proteja você como protegeu Eldoria.'"
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "options": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Pare. Identifique-se.",
+        "Eldoria não acolhe vagabundos.",
+        "O que traz você aos portões?",
+        "Mantenha as mãos onde eu possa vê-las."
+      ],
+      "friendly": [
+        "Ah, é você. Entre, amigo.",
+        "Bom ver um rosto confiável por aqui.",
+        "Tudo calmo nos portões hoje."
+      ],
+      "hostile": [
+        "Saia da minha frente antes que eu te prenda.",
+        "Vagabundo metido a aventureiro...",
+        "Se eu te ver cauasando problemas, você é o primeiro a ir pra cela."
+      ]
+    },
+    "chat": {
+      "neutral": [
+        "Ser um guarda do portão requer paciência.",
+        "O capitão diz que a ordem é a base de tudo."
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "Mantenha a língua na boca ou eu a corto.",
+        "Sua insolência terá um preço."
+      ],
+      "friendly": [
+        "Esperava mais de você...",
+        "Sua amizade tem limites, viajante."
+      ],
+      "hostile": [
+        "Seu lixo humano!",
+        "Vou adorar ver você na masmorra."
+      ]
+    }
+  }
+}

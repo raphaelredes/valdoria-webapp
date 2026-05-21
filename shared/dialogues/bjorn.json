@@ -1,0 +1,1501 @@
+{
+  "npc_tentmaker_bjorn": {
+    "timeline": [
+      {
+        "node": "bjorn_cheerful",
+        "conditions": {
+          "flag": "met_bjorn",
+          "npc_emotion": [
+            {
+              "emotion": "joy",
+              "min": 0.45
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_friend",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_tentmaker_bjorn",
+              "value": 8
+            }
+          ],
+          "min_affinity": 55
+        }
+      },
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "met_bjorn"
+        }
+      },
+      {
+        "node": "quest_bjorn_offer",
+        "conditions": {
+          "flags": [
+            "met_bjorn",
+            "!accepted_bjorn_caravan"
+          ],
+          "min_level": 2
+        }
+      }
+    ],
+    "nodes": {
+      "bjorn_cheerful": {
+        "text": [
+          "(Bjorn ri alto e bate a mão de madeira no balcão) 'Ei, meu aventureiro preferido! Sabe, hoje tive uma manhã ótima — consegui costurar uma tenda inteira com uma mão só! Bom, com uma e meia.' Ele pisca.",
+          "'Ha! Você chegou num bom momento!' Bjorn está de excelente humor. 'Acabei de fechar um negócio que me deixou gordo de ouro. Que tal dar uma olhada? Posso ser generoso hoje!'"
+        ],
+        "choices": [
+          {
+            "text": "Bom te ver assim, Bjorn! Mostra o que tem.",
+            "target": "exit",
+            "exit_callback": "market_visit_tentmaker",
+            "impact": {
+              "flags": {
+                "met_bjorn": true
+              }
+            }
+          },
+          {
+            "text": "Conta essa história da tenda!",
+            "target": "camping_tips",
+            "impact": {
+              "flags": {
+                "met_bjorn": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Bjorn ri alto e bate a mão de madeira no balcão) 'Ei, meu aventureiro preferido!"
+          },
+          {
+            "type": "narration",
+            "text": "Sabe, hoje tive uma manhã ótima — consegui costurar uma tenda inteira com uma mão só!"
+          },
+          {
+            "type": "narration",
+            "text": "Bom, com uma e meia.' Ele pisca."
+          },
+          {
+            "type": "narration",
+            "text": "'Ha!"
+          },
+          {
+            "type": "narration",
+            "text": "Você chegou num bom momento!' Bjorn está de excelente humor."
+          },
+          {
+            "type": "narration",
+            "text": "'Acabei de fechar um negócio que me deixou gordo de ouro."
+          },
+          {
+            "type": "narration",
+            "text": "Que tal dar uma olhada?"
+          },
+          {
+            "type": "narration",
+            "text": "Posso ser generoso hoje!'"
+          }
+        ]
+      },
+      "start": {
+        "text": [
+          "Um homem grande com uma mão de madeira ergue uma barraca com agilidade surpreendente.\n\n\"Ha! Mais um aventureiro! Aposto dez moedas que sua última noite ao relento foi miserável. Estou certo?\" Ele ri alto. \"Bjorn, seleiro e artesão. Tudo que você precisa para não morrer de frio, fome ou tédio no ermo!\"",
+          "\"Bem-vindo, bem-vindo!\" Bjorn gesticula animadamente com sua mão de madeira. \"Já dormiu numa pedra usando o braço como travesseiro? Não? Então PRECISA dos meus produtos!\"",
+          "Bjorn está costurando uma correia de couro com sua mão boa enquanto segura o material com a prótese de madeira.\n\n\"Ah, entre! Estava justamente testando um novo nó de amarração. Aguentou o peso de um veado inteiro! Quer ver?\"",
+          "\"Ei, você! Parece que já dormiu ao relento uma ou duas vezes.\" Bjorn aperta os olhos avaliando você. \"Postura torta, olheiras, manchas de grama na bota. Clássico. Tenho a solução!\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver seus equipamentos.",
+            "target": "exit",
+            "exit_callback": "market_visit_tentmaker",
+            "impact": {
+              "flags": {
+                "met_bjorn": true
+              }
+            }
+          },
+          {
+            "text": "Alguma dica de sobrevivência?",
+            "target": "camping_tips",
+            "impact": {
+              "flags": {
+                "met_bjorn": true
+              }
+            }
+          },
+          {
+            "text": "Até logo.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_tentmaker",
+            "impact": {
+              "flags": {
+                "met_bjorn": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Um homem grande com uma mão de madeira ergue uma barraca com agilidade surpreendente."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ha!"
+          },
+          {
+            "type": "narration",
+            "text": "Mais um aventureiro!"
+          },
+          {
+            "type": "narration",
+            "text": "Aposto dez moedas que sua última noite ao relento foi miserável."
+          },
+          {
+            "type": "narration",
+            "text": "Estou certo?\" Ele ri alto."
+          },
+          {
+            "type": "narration",
+            "text": "\"Bjorn, seleiro e artesão."
+          },
+          {
+            "type": "narration",
+            "text": "Tudo que você precisa para não morrer de frio, fome ou tédio no ermo!\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Bem-vindo, bem-vindo!\" Bjorn gesticula animadamente com sua mão de madeira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Já dormiu numa pedra usando o braço como travesseiro?"
+          },
+          {
+            "type": "narration",
+            "text": "Não?"
+          },
+          {
+            "type": "narration",
+            "text": "Então PRECISA dos meus produtos!\""
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn está costurando uma correia de couro com sua mão boa enquanto segura o material com a prótese de madeira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ah, entre!"
+          },
+          {
+            "type": "narration",
+            "text": "Estava justamente testando um novo nó de amarração."
+          },
+          {
+            "type": "narration",
+            "text": "Aguentou o peso de um veado inteiro!"
+          },
+          {
+            "type": "narration",
+            "text": "Quer ver?\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Ei, você!"
+          },
+          {
+            "type": "narration",
+            "text": "Parece que já dormiu ao relento uma ou duas vezes.\" Bjorn aperta os olhos avaliando você."
+          },
+          {
+            "type": "narration",
+            "text": "\"Postura torta, olheiras, manchas de grama na bota."
+          },
+          {
+            "type": "narration",
+            "text": "Clássico."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho a solução!\""
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "\"Ei, ei, ei! Olha quem voltou!\" Bjorn bate palmas — o som de madeira contra pele. \"Ainda de pé? Ótimo! Meus equipamentos são bons, mas a sorte ajuda!\"",
+          "\"Ah, meu aventureiro favorito! Quer dizer, meu CLIENTE favorito. Não, espera — os dois.\" Bjorn ri da própria piada.",
+          "\"De volta do ermo, hein? Vamos ver... botas intactas, sem mordidas visíveis, todos os dedos presentes. Bom começo!\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver seus equipamentos.",
+            "target": "exit",
+            "exit_callback": "market_visit_tentmaker"
+          },
+          {
+            "text": "Como perdeu a mão, Bjorn?",
+            "target": "about_hand",
+            "once": true
+          },
+          {
+            "text": "Alguma dica de sobrevivência?",
+            "target": "camping_tips"
+          },
+          {
+            "text": "Até logo, Bjorn!",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_tentmaker"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Ei, ei, ei!"
+          },
+          {
+            "type": "narration",
+            "text": "Olha quem voltou!\" Bjorn bate palmas — o som de madeira contra pele."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ainda de pé?"
+          },
+          {
+            "type": "narration",
+            "text": "Ótimo!"
+          },
+          {
+            "type": "narration",
+            "text": "Meus equipamentos são bons, mas a sorte ajuda!\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Ah, meu aventureiro favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Quer dizer, meu CLIENTE favorito."
+          },
+          {
+            "type": "narration",
+            "text": "Não, espera — os dois.\" Bjorn ri da própria piada."
+          },
+          {
+            "type": "narration",
+            "text": "\"De volta do ermo, hein?"
+          },
+          {
+            "type": "narration",
+            "text": "Vamos ver... botas intactas, sem mordidas visíveis, todos os dedos presentes."
+          },
+          {
+            "type": "narration",
+            "text": "Bom começo!\""
+          }
+        ]
+      },
+      "start_friend": {
+        "text": [
+          "\"AMIGO!\" Bjorn te puxa para um abraço de urso antes que você possa reagir. \"Corvus e eu voltamos das Colinas ontem. Trouxe umas histórias INCRÍVEIS pra você!\"",
+          "\"Ah, que bom! Senta aqui, acabei de assar uns peixes no braseiro. Martha me ensinou o tempero — não conte a ela que eu queimei a primeira leva.\"",
+          "\"Ei, parceiro! Grom acabou de me desafiar pra ver quem monta uma barraca mais rápido. Aceita ser juiz? Ha! Brincadeira. Eu sempre ganho.\""
+        ],
+        "choices": [
+          {
+            "text": "Quero ver seus equipamentos.",
+            "target": "exit",
+            "exit_callback": "market_visit_tentmaker"
+          },
+          {
+            "text": "Conte sobre o Corvus.",
+            "target": "about_corvus"
+          },
+          {
+            "text": "Que feras você já encontrou?",
+            "target": "about_beasts"
+          },
+          {
+            "text": "Dica de sobrevivência do dia?",
+            "target": "camping_tips"
+          },
+          {
+            "text": "O que acha do Thorne?",
+            "target": "about_thorne",
+            "once": true
+          },
+          {
+            "text": "O que acha da Velithra?",
+            "target": "about_velithra",
+            "once": true
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"AMIGO!\" Bjorn te puxa para um abraço de urso antes que você possa reagir."
+          },
+          {
+            "type": "narration",
+            "text": "\"Corvus e eu voltamos das Colinas ontem."
+          },
+          {
+            "type": "narration",
+            "text": "Trouxe umas histórias INCRÍVEIS pra você!\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Ah, que bom!"
+          },
+          {
+            "type": "narration",
+            "text": "Senta aqui, acabei de assar uns peixes no braseiro."
+          },
+          {
+            "type": "narration",
+            "text": "Martha me ensinou o tempero — não conte a ela que eu queimei a primeira leva.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Ei, parceiro!"
+          },
+          {
+            "type": "narration",
+            "text": "Grom acabou de me desafiar pra ver quem monta uma barraca mais rápido."
+          },
+          {
+            "type": "narration",
+            "text": "Aceita ser juiz?"
+          },
+          {
+            "type": "narration",
+            "text": "Ha!"
+          },
+          {
+            "type": "narration",
+            "text": "Brincadeira."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sempre ganho.\""
+          }
+        ]
+      },
+      "camping_tips": {
+        "text": [
+          "Bjorn ergue um dedo (de madeira).\n\n\"Regra número um: NUNCA monte acampamento num leito seco de rio. Parece seguro, plano, bonito... até chover nas montanhas e você acordar boiando.\" Ele bate na mesa. \"Procure terreno elevado, abrigado do vento, com visão da trilha. E SEMPRE amarre a barraca. SEMPRE.\"",
+          "\"Quer saber o segredo pra sobreviver no frio?\" Bjorn se inclina como se fosse contar um segredo de estado. \"Camadas. Não uma capa grossa — três camadas finas. Ar preso entre elas. O ar é o isolante, não o tecido.\" Ele pisca. \"Aprendi quando quase perdi os dedos do pé num inverno. Os que me restam, pelo menos.\"",
+          "\"Fogo!\" Bjorn bate na bancada. \"Fogo é vida no ermo. Mas não qualquer fogo — um fogo BEM FEITO. Madeira seca, protegida do vento, com pedras ao redor pra refletir calor. E nunca, NUNCA durma sem apagar as brasas. A não ser que queira acordar em chamas. Literalmente.\"",
+          "\"Água.\" Bjorn fica sério por um segundo. \"Parece básico, mas metade dos aventureiros que conheço quase morreram de sede. Sempre saiba onde está a água mais próxima. Se não sabe, siga os pássaros ao amanhecer — eles sempre vão beber primeiro.\"",
+          "\"Corda!\" Bjorn ergue um rolo de corda grossa. \"Nunca subestime uma boa corda. Serve pra escalar, amarrar, fazer abrigo, armar armadilha, pescar, secar roupa, marcar trilha... Sério, se eu pudesse levar só UMA coisa pro ermo, levava corda. E um cantil. Tá, duas coisas.\""
+        ],
+        "choices": [
+          {
+            "text": "Boa dica! Quero ver seus equipamentos.",
+            "target": "exit",
+            "exit_callback": "market_visit_tentmaker"
+          },
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_tentmaker_bjorn": 1
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn ergue um dedo (de madeira)."
+          },
+          {
+            "type": "narration",
+            "text": "\"Regra número um: NUNCA monte acampamento num leito seco de rio."
+          },
+          {
+            "type": "narration",
+            "text": "Parece seguro, plano, bonito... até chover nas montanhas e você acordar boiando.\" Ele bate na mesa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Procure terreno elevado, abrigado do vento, com visão da trilha."
+          },
+          {
+            "type": "narration",
+            "text": "E SEMPRE amarre a barraca."
+          },
+          {
+            "type": "narration",
+            "text": "SEMPRE.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Quer saber o segredo pra sobreviver no frio?\" Bjorn se inclina como se fosse contar um segredo de estado."
+          },
+          {
+            "type": "narration",
+            "text": "\"Camadas."
+          },
+          {
+            "type": "narration",
+            "text": "Não uma capa grossa — três camadas finas."
+          },
+          {
+            "type": "narration",
+            "text": "Ar preso entre elas."
+          },
+          {
+            "type": "narration",
+            "text": "O ar é o isolante, não o tecido.\" Ele pisca."
+          },
+          {
+            "type": "narration",
+            "text": "\"Aprendi quando quase perdi os dedos do pé num inverno."
+          },
+          {
+            "type": "narration",
+            "text": "Os que me restam, pelo menos.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Fogo!\" Bjorn bate na bancada."
+          },
+          {
+            "type": "narration",
+            "text": "\"Fogo é vida no ermo."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não qualquer fogo — um fogo BEM FEITO."
+          },
+          {
+            "type": "narration",
+            "text": "Madeira seca, protegida do vento, com pedras ao redor pra refletir calor."
+          },
+          {
+            "type": "narration",
+            "text": "E nunca, NUNCA durma sem apagar as brasas."
+          },
+          {
+            "type": "narration",
+            "text": "A não ser que queira acordar em chamas."
+          },
+          {
+            "type": "narration",
+            "text": "Literalmente.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Água.\" Bjorn fica sério por um segundo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Parece básico, mas metade dos aventureiros que conheço quase morreram de sede."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre saiba onde está a água mais próxima."
+          },
+          {
+            "type": "narration",
+            "text": "Se não sabe, siga os pássaros ao amanhecer — eles sempre vão beber primeiro.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Corda!\" Bjorn ergue um rolo de corda grossa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Nunca subestime uma boa corda."
+          },
+          {
+            "type": "narration",
+            "text": "Serve pra escalar, amarrar, fazer abrigo, armar armadilha, pescar, secar roupa, marcar trilha..."
+          },
+          {
+            "type": "narration",
+            "text": "Sério, se eu pudesse levar só UMA coisa pro ermo, levava corda."
+          },
+          {
+            "type": "narration",
+            "text": "E um cantil."
+          },
+          {
+            "type": "narration",
+            "text": "Tá, duas coisas.\""
+          }
+        ]
+      },
+      "about_hand": {
+        "text": "Bjorn olha para a prótese de madeira e faz um gesto dramático.\n\n\"Esta belezinha? Fiz eu mesmo!\" Ele bate a mão de madeira na mesa com orgulho. \"A original? Perdida numa armadilha de urso nas Montanhas Rubras. Quatorze anos atrás.\"\n\nEle se senta, e por um momento raro, fica quieto.\n\n\"Eu era batedor. Bom nisso. Rastreava qualquer coisa — lobos, cervos, bandidos. Naquela noite, estava seguindo rastros de urso pardo perto de um riacho. Não vi a armadilha de caçadores furtivos. Quando percebi... já era.\"\n\nEle ergue a prótese.\n\n\"Dois dias sozinho na floresta, com a mão presa, sangrando. No terceiro dia, tomei uma decisão. Usei minha faca de campo e... bem.\" Ele faz um gesto cortante. \"Cauterizei com brasas. Caminhei três dias até Eldoria.\"\n\nEle abre um sorriso largo.\n\n\"E aqui estou! Não posso mais empunhar uma espada direito, mas posso costurar o melhor couro que você já viu. A vida te tira uma coisa e te dá outra. Basta saber aceitar.\"",
+        "choices": [
+          {
+            "text": "[Força] Isso é a coisa mais impressionante que já ouvi.",
+            "target": "hand_impressed",
+            "check": {
+              "skill": "strength",
+              "difficulty": 10,
+              "success": "hand_impressed",
+              "failure": "hand_awkward",
+              "flavor": "Você tenta mostrar admiração genuína por sua resiliência..."
+            }
+          },
+          {
+            "text": "Sinto muito, Bjorn. Isso deve ter sido terrível.",
+            "target": "hand_comfort"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn olha para a prótese de madeira e faz um gesto dramático."
+          },
+          {
+            "type": "narration",
+            "text": "\"Esta belezinha?"
+          },
+          {
+            "type": "narration",
+            "text": "Fiz eu mesmo!\" Ele bate a mão de madeira na mesa com orgulho."
+          },
+          {
+            "type": "narration",
+            "text": "\"A original?"
+          },
+          {
+            "type": "narration",
+            "text": "Perdida numa armadilha de urso nas Montanhas Rubras."
+          },
+          {
+            "type": "narration",
+            "text": "Quatorze anos atrás.\"\n\nEle se senta, e por um momento raro, fica quieto."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eu era batedor."
+          },
+          {
+            "type": "narration",
+            "text": "Bom nisso."
+          },
+          {
+            "type": "narration",
+            "text": "Rastreava qualquer coisa — lobos, cervos, bandidos."
+          },
+          {
+            "type": "narration",
+            "text": "Naquela noite, estava seguindo rastros de urso pardo perto de um riacho."
+          },
+          {
+            "type": "narration",
+            "text": "Não vi a armadilha de caçadores furtivos."
+          },
+          {
+            "type": "narration",
+            "text": "Quando percebi... já era.\"\n\nEle ergue a prótese."
+          },
+          {
+            "type": "narration",
+            "text": "\"Dois dias sozinho na floresta, com a mão presa, sangrando."
+          },
+          {
+            "type": "narration",
+            "text": "No terceiro dia, tomei uma decisão."
+          },
+          {
+            "type": "narration",
+            "text": "Usei minha faca de campo e... bem.\" Ele faz um gesto cortante."
+          },
+          {
+            "type": "narration",
+            "text": "\"Cauterizei com brasas."
+          },
+          {
+            "type": "narration",
+            "text": "Caminhei três dias até Eldoria.\"\n\nEle abre um sorriso largo."
+          },
+          {
+            "type": "narration",
+            "text": "\"E aqui estou!"
+          },
+          {
+            "type": "narration",
+            "text": "Não posso mais empunhar uma espada direito, mas posso costurar o melhor couro que você já viu."
+          },
+          {
+            "type": "narration",
+            "text": "A vida te tira uma coisa e te dá outra."
+          },
+          {
+            "type": "narration",
+            "text": "Basta saber aceitar.\""
+          }
+        ]
+      },
+      "hand_impressed": {
+        "text": "Os olhos de Bjorn brilham.\n\n\"HA! Finalmente alguém que entende!\" Ele bate a mão boa na sua costas com força de fazer você cambalear. \"A maioria das pessoas me olha com pena. PENA! Eu cortei minha própria mão, caminhei três dias sangrando e construí uma prótese funcional com um canivete e um galho de carvalho!\"\n\nEle ergue a mão de madeira orgulhosamente.\n\n\"Isso não é tragédia, amigo. Isso é a melhor história de taverna que existe!\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_tentmaker_bjorn": 4
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Os olhos de Bjorn brilham."
+          },
+          {
+            "type": "narration",
+            "text": "\"HA!"
+          },
+          {
+            "type": "narration",
+            "text": "Finalmente alguém que entende!\" Ele bate a mão boa na sua costas com força de fazer você cambalear."
+          },
+          {
+            "type": "narration",
+            "text": "\"A maioria das pessoas me olha com pena."
+          },
+          {
+            "type": "narration",
+            "text": "PENA!"
+          },
+          {
+            "type": "narration",
+            "text": "Eu cortei minha própria mão, caminhei três dias sangrando e construí uma prótese funcional com um canivete e um galho de carvalho!\"\n\nEle ergue a mão de madeira orgulhosamente."
+          },
+          {
+            "type": "narration",
+            "text": "\"Isso não é tragédia, amigo."
+          },
+          {
+            "type": "narration",
+            "text": "Isso é a melhor história de taverna que existe!\""
+          }
+        ]
+      },
+      "hand_awkward": {
+        "text": "Bjorn cai na gargalhada.\n\n\"Sua cara de espanto vale mais que ouro! Não precisa ficar impressionado, amigo. Todo mundo tem suas cicatrizes. As minhas só são mais... visíveis.\"\n\nEle balança a mão de madeira.\n\n\"Além do mais, esta prótese é ÓTIMA pra bater em coisas. Não sente dor!\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_tentmaker_bjorn": 2
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn cai na gargalhada."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sua cara de espanto vale mais que ouro!"
+          },
+          {
+            "type": "narration",
+            "text": "Não precisa ficar impressionado, amigo."
+          },
+          {
+            "type": "narration",
+            "text": "Todo mundo tem suas cicatrizes."
+          },
+          {
+            "type": "narration",
+            "text": "As minhas só são mais... visíveis.\"\n\nEle balança a mão de madeira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Além do mais, esta prótese é ÓTIMA pra bater em coisas."
+          },
+          {
+            "type": "narration",
+            "text": "Não sente dor!\""
+          }
+        ]
+      },
+      "hand_comfort": {
+        "text": "Bjorn balança a cabeça, mas sem tristeza.\n\n\"Terrível? No momento, sim. Três dias depois? Também.\" Ele ri baixo. \"Mas sabe o que aprendi? Que o corpo é mais forte do que pensamos. E a mente é mais teimosa ainda.\"\n\nEle pega uma correia de couro e começa a costurar com sua mão boa, a prótese segurando firme.\n\n\"Martha me disse uma vez: 'As piores noites fazem as melhores histórias.' Ela tem razão. Como sempre.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_tentmaker_bjorn": 3
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn balança a cabeça, mas sem tristeza."
+          },
+          {
+            "type": "narration",
+            "text": "\"Terrível?"
+          },
+          {
+            "type": "narration",
+            "text": "No momento, sim."
+          },
+          {
+            "type": "narration",
+            "text": "Três dias depois?"
+          },
+          {
+            "type": "narration",
+            "text": "Também.\" Ele ri baixo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Mas sabe o que aprendi?"
+          },
+          {
+            "type": "narration",
+            "text": "Que o corpo é mais forte do que pensamos."
+          },
+          {
+            "type": "narration",
+            "text": "E a mente é mais teimosa ainda.\"\n\nEle pega uma correia de couro e começa a costurar com sua mão boa, a prótese segurando firme."
+          },
+          {
+            "type": "narration",
+            "text": "\"Martha me disse uma vez: 'As piores noites fazem as melhores histórias.' Ela tem razão."
+          },
+          {
+            "type": "narration",
+            "text": "Como sempre.\""
+          }
+        ]
+      },
+      "about_corvus": {
+        "text": [
+          "O rosto de Bjorn se ilumina.\n\n\"Corvus! O homem é um gênio com mapas. Sério. Ele olha pra uma montanha e calcula a altitude pelo ângulo da sombra. EU olho pra uma montanha e penso 'vou escalar isso'.\"\n\nEle ri.\n\n\"É por isso que funcionamos tão bem juntos. Ele planeja, eu executo. Ele calcula riscos, eu ignoro os cálculos. Ele anota tudo num caderninho, eu perco o caderninho.\"\n\nSeu tom fica mais suave.\n\n\"Quando o conheci, ele era um fantasma. Sério. Magro, calado, olhos de quem perdeu tudo. Não perguntei o que aconteceu — só disse: 'Tem umas colinas a oeste que ninguém mapeou. Quer ir?' E fomos. Dois dias depois, ele estava desenhando o pôr-do-sol no caderno. Aí soube que ia ficar tudo bem.\"",
+          "\"Corvus é o cara mais inteligente que conheço. E o mais distraído. Uma vez ele estava tão concentrado medindo o ângulo de um desfiladeiro que quase andou direto pra dentro do desfiladeiro.\" Bjorn cai na gargalhada.\n\n\"Eu agarrei ele pela gola na última hora. Desde então, ele diz que eu sou seu 'sistema de segurança'. Eu digo que sou seu babá.\"\n\nEle pisca.\n\n\"Mas no fundo... ele salvou a mim também. Depois de perder a mão, eu não sabia o que fazer da vida. Corvus me mostrou que explorar não precisa ser sobre lutar. Pode ser sobre ver, entender, registrar. Ele me deu um propósito novo.\""
+        ],
+        "choices": [
+          {
+            "text": "Bela amizade. Voltar ao início.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O rosto de Bjorn se ilumina."
+          },
+          {
+            "type": "narration",
+            "text": "\"Corvus!"
+          },
+          {
+            "type": "narration",
+            "text": "O homem é um gênio com mapas."
+          },
+          {
+            "type": "narration",
+            "text": "Sério."
+          },
+          {
+            "type": "narration",
+            "text": "Ele olha pra uma montanha e calcula a altitude pelo ângulo da sombra."
+          },
+          {
+            "type": "narration",
+            "text": "EU olho pra uma montanha e penso 'vou escalar isso'.\"\n\nEle ri."
+          },
+          {
+            "type": "narration",
+            "text": "\"É por isso que funcionamos tão bem juntos."
+          },
+          {
+            "type": "narration",
+            "text": "Ele planeja, eu executo."
+          },
+          {
+            "type": "narration",
+            "text": "Ele calcula riscos, eu ignoro os cálculos."
+          },
+          {
+            "type": "narration",
+            "text": "Ele anota tudo num caderninho, eu perco o caderninho.\"\n\nSeu tom fica mais suave."
+          },
+          {
+            "type": "narration",
+            "text": "\"Quando o conheci, ele era um fantasma."
+          },
+          {
+            "type": "narration",
+            "text": "Sério."
+          },
+          {
+            "type": "narration",
+            "text": "Magro, calado, olhos de quem perdeu tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Não perguntei o que aconteceu — só disse: 'Tem umas colinas a oeste que ninguém mapeou."
+          },
+          {
+            "type": "narration",
+            "text": "Quer ir?' E fomos."
+          },
+          {
+            "type": "narration",
+            "text": "Dois dias depois, ele estava desenhando o pôr-do-sol no caderno."
+          },
+          {
+            "type": "narration",
+            "text": "Aí soube que ia ficar tudo bem.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Corvus é o cara mais inteligente que conheço."
+          },
+          {
+            "type": "narration",
+            "text": "E o mais distraído."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez ele estava tão concentrado medindo o ângulo de um desfiladeiro que quase andou direto pra dentro do desfiladeiro.\" Bjorn cai na gargalhada."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eu agarrei ele pela gola na última hora."
+          },
+          {
+            "type": "narration",
+            "text": "Desde então, ele diz que eu sou seu 'sistema de segurança'."
+          },
+          {
+            "type": "narration",
+            "text": "Eu digo que sou seu babá.\"\n\nEle pisca."
+          },
+          {
+            "type": "narration",
+            "text": "\"Mas no fundo... ele salvou a mim também."
+          },
+          {
+            "type": "narration",
+            "text": "Depois de perder a mão, eu não sabia o que fazer da vida."
+          },
+          {
+            "type": "narration",
+            "text": "Corvus me mostrou que explorar não precisa ser sobre lutar."
+          },
+          {
+            "type": "narration",
+            "text": "Pode ser sobre ver, entender, registrar."
+          },
+          {
+            "type": "narration",
+            "text": "Ele me deu um propósito novo.\""
+          }
+        ]
+      },
+      "about_beasts": {
+        "text": [
+          "Os olhos de Bjorn brilham como fogueira.\n\n\"Feras? Quer saber de feras? Certa vez, nas Colinas Etéreas, eu e Corvus encontramos pegadas de algo que não estava em nenhum bestiário. Três garras, fundo no barro, espaçadas como se a criatura fosse do tamanho de um cavalo.\"\n\nEle se inclina.\n\n\"Nunca descobrimos o que era. As pegadas simplesmente... paravam. No meio de um campo aberto. Como se a coisa tivesse voado ou desaparecido. Corvus anotou tudo. Eu ainda sonho com aquilo.\"",
+          "\"Ursos? Respeitáveis. Lobos? Previsíveis se você entende a matilha. Mas sabe o que me assusta DE VERDADE?\" Bjorn baixa a voz. \"Javalis. JAVALIS. Trezentos quilos de músculo com presas e raiva. Não fogem, não negociam, não param. Se um javali decide que você é o problema, melhor subir na árvore mais próxima e rezar.\"\n\nEle mostra uma cicatriz no antebraço.\n\n\"Essa? Javali. Quase arrancou meu braço. O bom, pelo menos.\"",
+          "\"Uma vez encontrei um ninho de aranhas tecelãs na Floresta Negra. Não aranhas normais — do tamanho de um cão. As teias eram tão grossas que pareciam cordas. Usei minha faca pra cortar caminho, mas uma teia me pegou na perna.\"\n\nBjorn balança a mão de madeira.\n\n\"Escapei, claro. Mas levei uma semana pra tirar a cola grudenta da bota. Corvus ficou medindo as teias e anotando. Disse que era 'fascinante do ponto de vista estrutural'. Eu disse que era 'nojento'.\""
+        ],
+        "choices": [
+          {
+            "text": "Histórias incríveis! Voltar ao início.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Os olhos de Bjorn brilham como fogueira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Feras?"
+          },
+          {
+            "type": "narration",
+            "text": "Quer saber de feras?"
+          },
+          {
+            "type": "narration",
+            "text": "Certa vez, nas Colinas Etéreas, eu e Corvus encontramos pegadas de algo que não estava em nenhum bestiário."
+          },
+          {
+            "type": "narration",
+            "text": "Três garras, fundo no barro, espaçadas como se a criatura fosse do tamanho de um cavalo.\"\n\nEle se inclina."
+          },
+          {
+            "type": "narration",
+            "text": "\"Nunca descobrimos o que era."
+          },
+          {
+            "type": "narration",
+            "text": "As pegadas simplesmente... paravam."
+          },
+          {
+            "type": "narration",
+            "text": "No meio de um campo aberto."
+          },
+          {
+            "type": "narration",
+            "text": "Como se a coisa tivesse voado ou desaparecido."
+          },
+          {
+            "type": "narration",
+            "text": "Corvus anotou tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Eu ainda sonho com aquilo.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Ursos?"
+          },
+          {
+            "type": "narration",
+            "text": "Respeitáveis."
+          },
+          {
+            "type": "narration",
+            "text": "Lobos?"
+          },
+          {
+            "type": "narration",
+            "text": "Previsíveis se você entende a matilha."
+          },
+          {
+            "type": "narration",
+            "text": "Mas sabe o que me assusta DE VERDADE?\" Bjorn baixa a voz."
+          },
+          {
+            "type": "narration",
+            "text": "\"Javalis."
+          },
+          {
+            "type": "narration",
+            "text": "JAVALIS."
+          },
+          {
+            "type": "narration",
+            "text": "Trezentos quilos de músculo com presas e raiva."
+          },
+          {
+            "type": "narration",
+            "text": "Não fogem, não negociam, não param."
+          },
+          {
+            "type": "narration",
+            "text": "Se um javali decide que você é o problema, melhor subir na árvore mais próxima e rezar.\"\n\nEle mostra uma cicatriz no antebraço."
+          },
+          {
+            "type": "narration",
+            "text": "\"Essa?"
+          },
+          {
+            "type": "narration",
+            "text": "Javali."
+          },
+          {
+            "type": "narration",
+            "text": "Quase arrancou meu braço."
+          },
+          {
+            "type": "narration",
+            "text": "O bom, pelo menos.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Uma vez encontrei um ninho de aranhas tecelãs na Floresta Negra."
+          },
+          {
+            "type": "narration",
+            "text": "Não aranhas normais — do tamanho de um cão."
+          },
+          {
+            "type": "narration",
+            "text": "As teias eram tão grossas que pareciam cordas."
+          },
+          {
+            "type": "narration",
+            "text": "Usei minha faca pra cortar caminho, mas uma teia me pegou na perna.\"\n\nBjorn balança a mão de madeira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Escapei, claro."
+          },
+          {
+            "type": "narration",
+            "text": "Mas levei uma semana pra tirar a cola grudenta da bota."
+          },
+          {
+            "type": "narration",
+            "text": "Corvus ficou medindo as teias e anotando."
+          },
+          {
+            "type": "speech",
+            "text": "Disse que era 'fascinante do ponto de vista estrutural'.",
+            "speaker": "Bjorn"
+          },
+          {
+            "type": "narration",
+            "text": "Eu disse que era 'nojento'.\""
+          }
+        ]
+      },
+      "about_thorne": {
+        "text": [
+          "Bjorn bate a mão de madeira na mesa com entusiasmo.\n\n\"Thorne! O homem é uma FORJA ambulante! Fez as fivelas de bronze das minhas correias — olha isso!\" Ele mostra uma fivela reluzente. \"Firme como rocha, bonita como prata. E ele fez em uma tarde!\"",
+          "\"O ferreiro? Ah, Thorne é daqueles que falam pouco e fazem muito. Me lembra os batedores antigos — sem conversa fiada, só resultado.\" Bjorn ri. \"Só que ele é mais quieto que uma pedra. Uma pedra MUITO habilidosa.\"",
+          "\"Thorne me entende porque somos parecidos — trabalhamos com as mãos, suamos no ofício, e odiamos enrolação. A diferença é que eu falo pelos cotovelos e ele mal abre a boca. Mas quando abre, cada palavra pesa como uma bigorna.\""
+        ],
+        "choices": [
+          {
+            "text": "Vocês se ajudam no trabalho?",
+            "target": "about_thorne_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn bate a mão de madeira na mesa com entusiasmo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Thorne!"
+          },
+          {
+            "type": "narration",
+            "text": "O homem é uma FORJA ambulante!"
+          },
+          {
+            "type": "narration",
+            "text": "Fez as fivelas de bronze das minhas correias — olha isso!\" Ele mostra uma fivela reluzente."
+          },
+          {
+            "type": "narration",
+            "text": "\"Firme como rocha, bonita como prata."
+          },
+          {
+            "type": "narration",
+            "text": "E ele fez em uma tarde!\""
+          },
+          {
+            "type": "narration",
+            "text": "\"O ferreiro?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, Thorne é daqueles que falam pouco e fazem muito."
+          },
+          {
+            "type": "narration",
+            "text": "Me lembra os batedores antigos — sem conversa fiada, só resultado.\" Bjorn ri."
+          },
+          {
+            "type": "narration",
+            "text": "\"Só que ele é mais quieto que uma pedra."
+          },
+          {
+            "type": "narration",
+            "text": "Uma pedra MUITO habilidosa.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Thorne me entende porque somos parecidos — trabalhamos com as mãos, suamos no ofício, e odiamos enrolação."
+          },
+          {
+            "type": "narration",
+            "text": "A diferença é que eu falo pelos cotovelos e ele mal abre a boca."
+          },
+          {
+            "type": "narration",
+            "text": "Mas quando abre, cada palavra pesa como uma bigorna.\""
+          }
+        ]
+      },
+      "about_thorne_detail": {
+        "text": "\"Ajudar? Mais que isso — dependemos um do outro!\" Bjorn ergue um cinto com peças metálicas. \"Eu faço o couro, ele faz o metal. Minhas barracas têm estacas de aço Thorne. Minhas correias têm fivelas Thorne. Meus cantis têm reforço Thorne. Sem ele, metade do meu estoque seria medíocre.\"\n\nEle abaixa a voz com um sorriso.\n\n\"E sem mim, as bainhas dele seriam um desastre de couro. Mas ele nunca vai admitir isso.\"",
+        "choices": [
+          {
+            "text": "Uma parceria perfeita!",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Ajudar?"
+          },
+          {
+            "type": "narration",
+            "text": "Mais que isso — dependemos um do outro!\" Bjorn ergue um cinto com peças metálicas."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eu faço o couro, ele faz o metal."
+          },
+          {
+            "type": "narration",
+            "text": "Minhas barracas têm estacas de aço Thorne."
+          },
+          {
+            "type": "narration",
+            "text": "Minhas correias têm fivelas Thorne."
+          },
+          {
+            "type": "narration",
+            "text": "Meus cantis têm reforço Thorne."
+          },
+          {
+            "type": "narration",
+            "text": "Sem ele, metade do meu estoque seria medíocre.\"\n\nEle abaixa a voz com um sorriso."
+          },
+          {
+            "type": "narration",
+            "text": "\"E sem mim, as bainhas dele seriam um desastre de couro."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ele nunca vai admitir isso.\""
+          }
+        ]
+      },
+      "about_velithra": {
+        "text": [
+          "Bjorn coça a barba pensativo.\n\n\"Velithra? Boa vizinha de bancada. Quieta, concentrada, não reclama do barulho que eu faço — e olha que eu faço MUITO barulho.\" Ele ri. \"Ofícios diferentes, mas o respeito é o mesmo. Ela faz coisas delicadas com gemas, eu faço coisas brutas com couro. Juntos, cobrimos todo o espectro.\"",
+          "\"A joalheira trabalha com uma precisão que me fascina. Eu costuro couro com uma mão e meia, ela lapida gemas com dedos de cirurgião. São mundos diferentes, mas ambos exigem paciência e habilidade.\"",
+          "\"Velithra me presenteou com um amuleto de quartzo quando perdi a segunda prótese. Disse que dá sorte. Bom... desde então não perdi mais nenhuma mão, então talvez funcione!\" Bjorn cai na gargalhada."
+        ],
+        "choices": [
+          {
+            "text": "Vocês conversam muito?",
+            "target": "about_velithra_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Bjorn coça a barba pensativo."
+          },
+          {
+            "type": "narration",
+            "text": "\"Velithra?"
+          },
+          {
+            "type": "narration",
+            "text": "Boa vizinha de bancada."
+          },
+          {
+            "type": "narration",
+            "text": "Quieta, concentrada, não reclama do barulho que eu faço — e olha que eu faço MUITO barulho.\" Ele ri."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ofícios diferentes, mas o respeito é o mesmo."
+          },
+          {
+            "type": "narration",
+            "text": "Ela faz coisas delicadas com gemas, eu faço coisas brutas com couro."
+          },
+          {
+            "type": "narration",
+            "text": "Juntos, cobrimos todo o espectro.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"A joalheira trabalha com uma precisão que me fascina."
+          },
+          {
+            "type": "narration",
+            "text": "Eu costuro couro com uma mão e meia, ela lapida gemas com dedos de cirurgião."
+          },
+          {
+            "type": "narration",
+            "text": "São mundos diferentes, mas ambos exigem paciência e habilidade.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Velithra me presenteou com um amuleto de quartzo quando perdi a segunda prótese."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que dá sorte."
+          },
+          {
+            "type": "narration",
+            "text": "Bom... desde então não perdi mais nenhuma mão, então talvez funcione!\" Bjorn cai na gargalhada."
+          }
+        ]
+      },
+      "about_velithra_detail": {
+        "text": "\"Conversar? Eu converso, ela ouve.\" Bjorn ri. \"Na verdade, quando ela fala, vale a pena prestar atenção. Sabe muito sobre pedras, minerais, cristais... Uma vez me explicou por que certas pedras mudam de cor com a temperatura. Não entendi metade, mas fingi que sim.\"\n\nEle pisca.\n\n\"O que mais gosto nela é que não julga. Nunca olhou pra minha mão de madeira com pena. Só disse: 'Funcional e criativa.' Melhor elogio que já recebi.\"",
+        "choices": [
+          {
+            "text": "Ela parece uma boa pessoa.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Conversar?"
+          },
+          {
+            "type": "narration",
+            "text": "Eu converso, ela ouve.\" Bjorn ri."
+          },
+          {
+            "type": "narration",
+            "text": "\"Na verdade, quando ela fala, vale a pena prestar atenção."
+          },
+          {
+            "type": "narration",
+            "text": "Sabe muito sobre pedras, minerais, cristais..."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez me explicou por que certas pedras mudam de cor com a temperatura."
+          },
+          {
+            "type": "narration",
+            "text": "Não entendi metade, mas fingi que sim.\"\n\nEle pisca."
+          },
+          {
+            "type": "narration",
+            "text": "\"O que mais gosto nela é que não julga."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca olhou pra minha mão de madeira com pena."
+          },
+          {
+            "type": "narration",
+            "text": "Só disse: 'Funcional e criativa.' Melhor elogio que já recebi.\""
+          }
+        ]
+      },
+      "quest_bjorn_offer": {
+        "text": "O sorriso habitual de Bjorn está ausente. Ele olha para a estrada além do mercado com preocupação.\n\n\"Escuta, tenho um problema sério. Uma caravana de suprimentos — couro, cordas, ferramentas — deveria ter chegado há três dias. Era uma carga importante e cara. Nada.\"\n\nEle bate a mão de madeira no balcão.\n\n\"A rota passa pelas planícies a leste. Pode ter sido bandidos, feras, ou simplesmente uma roda quebrada. Mas preciso saber o que aconteceu. Pago bem por notícias — e melhor ainda se trouxer os suprimentos de volta.\"",
+        "choices": [
+          {
+            "text": "📜 Vou investigar, Bjorn. Pode contar comigo.",
+            "target": "quest_bjorn_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_bjorn_caravan": true
+              },
+              "quests": [
+                "quest_bjorn_caravan"
+              ],
+              "reputation": {
+                "npc_tentmaker_bjorn": 2
+              }
+            }
+          },
+          {
+            "text": "Não posso agora. Talvez depois.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O sorriso habitual de Bjorn está ausente."
+          },
+          {
+            "type": "narration",
+            "text": "Ele olha para a estrada além do mercado com preocupação."
+          },
+          {
+            "type": "narration",
+            "text": "\"Escuta, tenho um problema sério."
+          },
+          {
+            "type": "narration",
+            "text": "Uma caravana de suprimentos — couro, cordas, ferramentas — deveria ter chegado há três dias."
+          },
+          {
+            "type": "narration",
+            "text": "Era uma carga importante e cara."
+          },
+          {
+            "type": "narration",
+            "text": "Nada.\"\n\nEle bate a mão de madeira no balcão."
+          },
+          {
+            "type": "narration",
+            "text": "\"A rota passa pelas planícies a leste."
+          },
+          {
+            "type": "narration",
+            "text": "Pode ter sido bandidos, feras, ou simplesmente uma roda quebrada."
+          },
+          {
+            "type": "narration",
+            "text": "Mas preciso saber o que aconteceu."
+          },
+          {
+            "type": "narration",
+            "text": "Pago bem por notícias — e melhor ainda se trouxer os suprimentos de volta.\""
+          }
+        ]
+      },
+      "quest_bjorn_accepted": {
+        "text": "O rosto de Bjorn se ilumina.\n\n\"HA! Sabia que podia contar com você!\" Ele te dá um tapa nas costas que quase te derruba.\n\n\"A caravana saiu de Solhaven pela estrada das planícies. O condutor é um sujeito chamado Rendal — barba ruiva, voz de trovão. Impossível confundir. Siga a rota principal e fique de olho nos rastros de carroça.\"\n\nEle fica sério por um momento.\n\n\"Se encontrar os suprimentos, traga o que puder. Se encontrar o Rendal... espero que esteja vivo. Boa sorte lá fora.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O rosto de Bjorn se ilumina."
+          },
+          {
+            "type": "narration",
+            "text": "\"HA!"
+          },
+          {
+            "type": "narration",
+            "text": "Sabia que podia contar com você!\" Ele te dá um tapa nas costas que quase te derruba."
+          },
+          {
+            "type": "narration",
+            "text": "\"A caravana saiu de Solhaven pela estrada das planícies."
+          },
+          {
+            "type": "narration",
+            "text": "O condutor é um sujeito chamado Rendal — barba ruiva, voz de trovão."
+          },
+          {
+            "type": "narration",
+            "text": "Impossível confundir."
+          },
+          {
+            "type": "narration",
+            "text": "Siga a rota principal e fique de olho nos rastros de carroça.\"\n\nEle fica sério por um momento."
+          },
+          {
+            "type": "narration",
+            "text": "\"Se encontrar os suprimentos, traga o que puder."
+          },
+          {
+            "type": "narration",
+            "text": "Se encontrar o Rendal... espero que esteja vivo."
+          },
+          {
+            "type": "narration",
+            "text": "Boa sorte lá fora.\""
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Barracas, cordas, cantis! Tudo que um aventureiro precisa!",
+        "Já dormiu ao relento? Eu resolvo isso!",
+        "Se vai pro ermo, passe aqui primeiro. Sério.",
+        "Bem-vindo! Posso melhorar sua próxima viagem!",
+        "Equipamento de campo é a diferença entre viver e virar comida de lobo!",
+        "Artesanato rústico, mas funcional. Como eu!"
+      ],
+      "friendly": [
+        "Ei, amigo! Acabei de terminar uma barraca nova. Quer testar?",
+        "Meu aventureiro favorito! Sentou na pedra errada de novo?",
+        "Ha! Que bom vê-lo! Corvus mandou lembranças. Acho. Ele estava distraído.",
+        "Amigo! Grom abriu um barril novo ontem. Depois a gente comemora, hein?",
+        "Olha quem voltou inteiro! Meus equipamentos funcionam, né? HA!",
+        "Entre, entre! Martha me deu um bolo e eu preciso de alguém pra dividir."
+      ],
+      "hostile": [
+        "Ah. Você. Meus equipamentos merecem clientes melhores.",
+        "Se veio reclamar, a porta serve pra entrar E pra sair.",
+        "Não tenho paciência pra grosseria. Nem minha mão de madeira tem.",
+        "Volte quando aprender maneiras. Até os ursos são mais educados.",
+        "Bom equipamento requer bom caráter. Você não tem nenhum dos dois."
+      ]
+    },
+    "chat": [
+      "Corvus e eu voltamos das Colinas Etéreas semana passada. Achamos uma caverna que ninguém tinha mapeado. Ele ficou EXTASIADO. Eu fiquei com dor nas costas.",
+      "Grom me desafiou pra uma queda de braço ontem. Ganhei. Com a mão de madeira. Ele não aceitou, mas a taverna inteira viu!",
+      "Martha me lembra minha mãe. Não pela aparência — pelo jeito de olhar e saber exatamente o que você precisa antes de você pedir.",
+      "Thorne me fez as fivelas de bronze para minhas correias. O homem é um artista do metal. Silencioso como uma pedra, mas um artista.",
+      "Esta mão de madeira? Terceira versão. As duas primeiras quebraram em situações que prefiro não descrever. Esta é de carvalho tratado com óleo de pinheiro.",
+      "A alquimista Mirena me vendeu uma pomada que curou uma queimadura em dois dias. Dois! Cheira mal, mas funciona.",
+      "Velithra é uma boa vizinha de bancada. Quieta, focada, não reclama do barulho dos meus martelos. Eu gosto disso. Pessoa educada.",
+      "Nunca acampe perto de um formigueiro. Confie em mim. Já cometi esse erro. Três vezes. Aprendo devagar.",
+      "Meu sonho é fazer uma barraca que aguente qualquer tempestade. Já estou na décima segunda versão do projeto. Corvus diz que 'treze é o número da sorte'. Mentira. Mas vou tentar.",
+      "Se alguém te oferecer 'couro de dragão' por menos de mil moedas, é mentira. É couro de lagarto grande tingido com ferrugem. Já caí nessa."
+    ],
+    "chat_class": {
+      "Patrulheiro": [
+        "Bjorn bate no couro esticado. \"Para quem vive na trilha, este aqui é o melhor investimento. Leve, silencioso e à prova d'água. Fiz pensando em gente como você.\"",
+        "\"Patrulheiro, certo? Conheço o tipo — precisa de equipamento que não atrapalhe e não faça barulho. Tenho bolsas com fechos de corda, sem metal nenhum.\""
+      ],
+      "Bárbaro": [
+        "Bjorn te olha de cima a baixo e assobia. \"Vou precisar de MUITO couro para cobrir esses ombros. Deixa eu pegar as peças reforçadas do fundo.\"",
+        "\"Para alguém do seu tamanho, costuras normais não aguentam. Uso corda de tripas e costura dupla — resiste até a uma investida de javali.\""
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "Bjorn ri alto: 'Isso foi uma ofensa? Pensei que fosse um espirro. Precisa de um lenço?'",
+        "Bjorn ergue a mão de madeira: 'Vou anotar sua opinião. Ah, espere — não tenho onde escrever. Que pena.'",
+        "Bjorn dá de ombros: 'Já sobrevivi a ursos, javalis e três invernos nas montanhas. Acha que PALAVRAS vão me machucar?'"
+      ],
+      "friendly": [
+        "Bjorn gargalha: 'HA! Essa foi boa! Grom ia adorar. Vou contar pra ele, tá? Vai virar história de taverna!'",
+        "Bjorn bate nas costas de você com força: 'Amigo, se insultar fosse profissão, você seria aprendiz. Mas com potencial!'",
+        "Bjorn pisca: 'Corvus diz coisas piores sobre meus mapas desenhados à mão. E ele é MEU AMIGO!'"
+      ],
+      "hostile": [
+        "O sorriso de Bjorn desaparece: 'Já parti uma mesa de carvalho com esta mão de madeira. Quer ver se funciona em queixos também?'",
+        "Bjorn cruza os braços: 'Sabe por que sobrevivi no ermo quinze anos? Porque aprendi a eliminar ameaças. Não me teste.'",
+        "Bjorn aponta para a porta com a prótese: 'Fora. Agora. E reze pra não nos encontrarmos nas estradas.'"
+      ]
+    }
+  }
+}

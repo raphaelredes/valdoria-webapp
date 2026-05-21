@@ -1,0 +1,1262 @@
+{
+  "npc_cartographer_corvus": {
+    "timeline": [
+      {
+        "node": "corvus_excited",
+        "conditions": {
+          "flag": "met_corvus",
+          "npc_emotion": [
+            {
+              "emotion": "joy",
+              "min": 0.5
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_friend",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_cartographer_corvus",
+              "value": 8
+            }
+          ],
+          "min_affinity": 60
+        }
+      },
+      {
+        "node": "start_recognized",
+        "conditions": {
+          "flag": "met_corvus"
+        }
+      },
+      {
+        "node": "quest_corvus_offer",
+        "conditions": {
+          "flags": [
+            "met_corvus",
+            "!accepted_corvus_survey"
+          ],
+          "min_level": 2
+        }
+      }
+    ],
+    "nodes": {
+      "corvus_excited": {
+        "text": [
+          "(Os olhos de Corvus brilham ao te ver) 'Perfeito! Você chegou na hora certa! Acabei de decifrar uma rota antiga que ninguém mapeou em séculos. Venha ver!'",
+          "(Corvus praticamente pula da cadeira) 'Meu explorador favorito! Tenho algo incrível para te mostrar — um mapa que mudaria o preço de qualquer expedição!'"
+        ],
+        "choices": [
+          {
+            "text": "Me mostre esse mapa!",
+            "target": "about_maps",
+            "impact": {
+              "reputation": {
+                "npc_cartographer_corvus": 1
+              },
+              "flags": {
+                "met_corvus": true
+              }
+            }
+          },
+          {
+            "text": "Quero ver suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_cartographer"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Os olhos de Corvus brilham ao te ver) 'Perfeito!"
+          },
+          {
+            "type": "narration",
+            "text": "Você chegou na hora certa!"
+          },
+          {
+            "type": "narration",
+            "text": "Acabei de decifrar uma rota antiga que ninguém mapeou em séculos."
+          },
+          {
+            "type": "narration",
+            "text": "Venha ver!'"
+          },
+          {
+            "type": "narration",
+            "text": "(Corvus praticamente pula da cadeira) 'Meu explorador favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Tenho algo incrível para te mostrar — um mapa que mudaria o preço de qualquer expedição!'"
+          }
+        ]
+      },
+      "start": {
+        "text": [
+          "Hmm? Ah, um visitante. Perdão, estava calculando a distância entre o Pico Etelar e o Desfiladeiro Cinza. São exatamente trezentas e quarenta e duas braças, caso se pergunte. O que posso fazer por você?",
+          "Não pise nos mapas! Estão secando. A tinta de carvalho leva três dias para fixar no pergaminho. Enfim... precisa de algo?",
+          "Se está procurando direções, veio ao lugar certo. Se está procurando conversa barata, a taverna é na outra rua. Mas se está procurando conhecimento... sente-se.",
+          "Cada linha neste mapa representa semanas de caminhada, acampamentos sob chuva e ao menos um encontro com algo que queria me comer. O que traz você aqui?"
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_cartographer",
+            "impact": {
+              "flags": {
+                "met_corvus": true
+              }
+            }
+          },
+          {
+            "text": "Conte-me sobre seus mapas.",
+            "target": "about_maps",
+            "impact": {
+              "flags": {
+                "met_corvus": true
+              }
+            }
+          },
+          {
+            "text": "Você não parece daqui. De onde veio?",
+            "target": "about_sea",
+            "once": true,
+            "impact": {
+              "flags": {
+                "met_corvus": true
+              },
+              "reputation": {
+                "npc_cartographer_corvus": 1
+              }
+            }
+          },
+          {
+            "text": "Até logo.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_cartographer",
+            "impact": {
+              "flags": {
+                "met_corvus": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Hmm?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, um visitante."
+          },
+          {
+            "type": "narration",
+            "text": "Perdão, estava calculando a distância entre o Pico Etelar e o Desfiladeiro Cinza."
+          },
+          {
+            "type": "narration",
+            "text": "São exatamente trezentas e quarenta e duas braças, caso se pergunte."
+          },
+          {
+            "type": "narration",
+            "text": "O que posso fazer por você?"
+          },
+          {
+            "type": "narration",
+            "text": "Não pise nos mapas!"
+          },
+          {
+            "type": "narration",
+            "text": "Estão secando."
+          },
+          {
+            "type": "narration",
+            "text": "A tinta de carvalho leva três dias para fixar no pergaminho."
+          },
+          {
+            "type": "narration",
+            "text": "Enfim... precisa de algo?"
+          },
+          {
+            "type": "narration",
+            "text": "Se está procurando direções, veio ao lugar certo."
+          },
+          {
+            "type": "narration",
+            "text": "Se está procurando conversa barata, a taverna é na outra rua."
+          },
+          {
+            "type": "narration",
+            "text": "Mas se está procurando conhecimento... sente-se."
+          },
+          {
+            "type": "narration",
+            "text": "Cada linha neste mapa representa semanas de caminhada, acampamentos sob chuva e ao menos um encontro com algo que queria me comer."
+          },
+          {
+            "type": "narration",
+            "text": "O que traz você aqui?"
+          }
+        ]
+      },
+      "start_recognized": {
+        "text": [
+          "Ah, o viajante curioso voltou. Descobri três novas trilhas desde a última vez. Quer dar uma olhada?",
+          "Bem-vindo de volta. Seu senso de direção melhorou desde a última visita, ou ainda precisa dos meus mapas?",
+          "Ah, você. Bom vê-lo vivo. As estradas andam perigosas — segundo minhas anotações, ataques aumentaram doze por cento este mês."
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_cartographer"
+          },
+          {
+            "text": "O que há de novo nas rotas?",
+            "target": "rumors"
+          },
+          {
+            "text": "Conte-me sobre seus mapas.",
+            "target": "about_maps"
+          },
+          {
+            "text": "Até logo, Corvus.",
+            "target": "exit",
+            "exit_callback": "market_interact_menu_cartographer"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, o viajante curioso voltou."
+          },
+          {
+            "type": "narration",
+            "text": "Descobri três novas trilhas desde a última vez."
+          },
+          {
+            "type": "narration",
+            "text": "Quer dar uma olhada?"
+          },
+          {
+            "type": "narration",
+            "text": "Bem-vindo de volta."
+          },
+          {
+            "type": "narration",
+            "text": "Seu senso de direção melhorou desde a última visita, ou ainda precisa dos meus mapas?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, você."
+          },
+          {
+            "type": "narration",
+            "text": "Bom vê-lo vivo."
+          },
+          {
+            "type": "narration",
+            "text": "As estradas andam perigosas — segundo minhas anotações, ataques aumentaram doze por cento este mês."
+          }
+        ]
+      },
+      "start_friend": {
+        "text": [
+          "Meu explorador favorito! Sente-se, acabei de preparar chá de ervas. Bjorn trouxe umas folhas excelentes da última expedição.",
+          "Ah, que bom que veio! Preciso de uma opinião sobre este mapa — acho que errei a escala do vale, mas Bjorn jura que está certo.",
+          "Amigo! Tenho novidades. Encontrei referências a uma rota antiga que pode encurtar a viagem até as Montanhas Rubras pela metade."
+        ],
+        "choices": [
+          {
+            "text": "Quero ver suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_cartographer"
+          },
+          {
+            "text": "Conte sobre o Bjorn.",
+            "target": "about_bjorn"
+          },
+          {
+            "text": "O que sabe sobre a cidade?",
+            "target": "about_city"
+          },
+          {
+            "text": "O que há de novo nas rotas?",
+            "target": "rumors"
+          },
+          {
+            "text": "O que acha do Thorne?",
+            "target": "about_thorne",
+            "once": true
+          },
+          {
+            "text": "O que acha da Velithra?",
+            "target": "about_velithra",
+            "once": true
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Meu explorador favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Sente-se, acabei de preparar chá de ervas."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn trouxe umas folhas excelentes da última expedição."
+          },
+          {
+            "type": "narration",
+            "text": "Ah, que bom que veio!"
+          },
+          {
+            "type": "narration",
+            "text": "Preciso de uma opinião sobre este mapa — acho que errei a escala do vale, mas Bjorn jura que está certo."
+          },
+          {
+            "type": "narration",
+            "text": "Amigo!"
+          },
+          {
+            "type": "narration",
+            "text": "Tenho novidades."
+          },
+          {
+            "type": "narration",
+            "text": "Encontrei referências a uma rota antiga que pode encurtar a viagem até as Montanhas Rubras pela metade."
+          }
+        ]
+      },
+      "about_maps": {
+        "text": [
+          "Cada mapa que faço é único. Não copio — eu caminho, meço, anoto. Às vezes quase morro no processo, mas o resultado vale a pena.",
+          "Conheço cada trilha num raio de cem léguas. As que são seguras, as que são perigosas, e as que simplesmente... desaparecem. Sim, trilhas podem desaparecer. Não pergunte como.",
+          "Meus mapas incluem notas de campo: onde encontrar água limpa, onde os lobos caçam, onde o terreno é traiçoeiro. Informação que pode salvar sua vida."
+        ],
+        "choices": [
+          {
+            "text": "Impressionante. Quero ver o que tem para venda.",
+            "target": "exit",
+            "exit_callback": "market_visit_cartographer"
+          },
+          {
+            "text": "Voltar ao início.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Cada mapa que faço é único."
+          },
+          {
+            "type": "narration",
+            "text": "Não copio — eu caminho, meço, anoto."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes quase morro no processo, mas o resultado vale a pena."
+          },
+          {
+            "type": "narration",
+            "text": "Conheço cada trilha num raio de cem léguas."
+          },
+          {
+            "type": "narration",
+            "text": "As que são seguras, as que são perigosas, e as que simplesmente... desaparecem."
+          },
+          {
+            "type": "narration",
+            "text": "Sim, trilhas podem desaparecer."
+          },
+          {
+            "type": "narration",
+            "text": "Não pergunte como."
+          },
+          {
+            "type": "narration",
+            "text": "Meus mapas incluem notas de campo: onde encontrar água limpa, onde os lobos caçam, onde o terreno é traiçoeiro."
+          },
+          {
+            "type": "narration",
+            "text": "Informação que pode salvar sua vida."
+          }
+        ]
+      },
+      "about_sea": {
+        "text": "Corvus para de desenhar e olha para longe, como se visse algo além das paredes.\n\n\"Eu era navegador da Frota Mercante de Solhaven. Dez navios, cento e vinte homens. Cruzávamos o Mar de Vidro como se fosse um lago.\"\n\nEle engole em seco.\n\n\"Uma tempestade nos pegou na Passagem dos Ventos. Não uma tempestade comum — os marinheiros velhos diziam que o próprio mar estava com raiva. Perdi tudo. Todos. Acordei numa praia a dois dias de Eldoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas.\n\n\"Agora mapeio terra firme. O mar pode ficar com seus segredos.\"",
+        "choices": [
+          {
+            "text": "[Sabedoria] A terra tem seus próprios perigos, mas ao menos podemos ver o horizonte.",
+            "target": "sea_comfort",
+            "check": {
+              "skill": "wisdom",
+              "difficulty": 10,
+              "success": "sea_comfort",
+              "failure": "sea_awkward",
+              "flavor": "Você busca as palavras certas para um homem que perdeu tudo..."
+            }
+          },
+          {
+            "text": "Sinto muito. Não quis trazer más lembranças.",
+            "target": "sea_respect"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus para de desenhar e olha para longe, como se visse algo além das paredes."
+          },
+          {
+            "type": "narration",
+            "text": "\"Eu era navegador da Frota Mercante de Solhaven."
+          },
+          {
+            "type": "narration",
+            "text": "Dez navios, cento e vinte homens."
+          },
+          {
+            "type": "narration",
+            "text": "Cruzávamos o Mar de Vidro como se fosse um lago.\"\n\nEle engole em seco."
+          },
+          {
+            "type": "narration",
+            "text": "\"Uma tempestade nos pegou na Passagem dos Ventos."
+          },
+          {
+            "type": "narration",
+            "text": "Não uma tempestade comum — os marinheiros velhos diziam que o próprio mar estava com raiva."
+          },
+          {
+            "type": "narration",
+            "text": "Perdi tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Todos."
+          },
+          {
+            "type": "narration",
+            "text": "Acordei numa praia a dois dias de Eldoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas."
+          },
+          {
+            "type": "narration",
+            "text": "\"Agora mapeio terra firme."
+          },
+          {
+            "type": "narration",
+            "text": "O mar pode ficar com seus segredos.\""
+          }
+        ]
+      },
+      "sea_comfort": {
+        "text": "Corvus te olha com surpresa, depois dá um sorriso cansado.\n\n\"Ver o horizonte... sim. No mar, a linha entre céu e água se confunde. Aqui, cada montanha é uma certeza. Cada rio tem uma margem. Talvez seja por isso que fiquei.\"\n\nEle anota algo no canto de um mapa.\n\n\"Obrigado. Faz tempo que alguém diz algo que realmente faz sentido.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_cartographer_corvus": 3
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus te olha com surpresa, depois dá um sorriso cansado."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ver o horizonte... sim."
+          },
+          {
+            "type": "narration",
+            "text": "No mar, a linha entre céu e água se confunde."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui, cada montanha é uma certeza."
+          },
+          {
+            "type": "narration",
+            "text": "Cada rio tem uma margem."
+          },
+          {
+            "type": "narration",
+            "text": "Talvez seja por isso que fiquei.\"\n\nEle anota algo no canto de um mapa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Obrigado."
+          },
+          {
+            "type": "narration",
+            "text": "Faz tempo que alguém diz algo que realmente faz sentido.\""
+          }
+        ]
+      },
+      "sea_awkward": {
+        "text": "Corvus ergue uma sobrancelha.\n\n\"Boa tentativa. Mas não é tão simples assim.\" Ele dá de ombros. \"Enfim, o passado é o passado. Vamos falar de mapas, que é o que sei fazer.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_cartographer_corvus": 1
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus ergue uma sobrancelha."
+          },
+          {
+            "type": "narration",
+            "text": "\"Boa tentativa."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não é tão simples assim.\" Ele dá de ombros."
+          },
+          {
+            "type": "narration",
+            "text": "\"Enfim, o passado é o passado."
+          },
+          {
+            "type": "narration",
+            "text": "Vamos falar de mapas, que é o que sei fazer.\""
+          }
+        ]
+      },
+      "sea_respect": {
+        "text": "Corvus balança a cabeça.\n\n\"Não se preocupe. Se eu não quisesse falar, não teria falado. É bom lembrar de onde viemos, mesmo que doa. Me mantém... preciso.\"\n\nEle bate na mesa com os dedos.\n\n\"Agora, vamos falar de coisas mais úteis. Precisa de algum mapa?\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "impact": {
+          "reputation": {
+            "npc_cartographer_corvus": 2
+          }
+        },
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus balança a cabeça."
+          },
+          {
+            "type": "narration",
+            "text": "\"Não se preocupe."
+          },
+          {
+            "type": "narration",
+            "text": "Se eu não quisesse falar, não teria falado."
+          },
+          {
+            "type": "narration",
+            "text": "É bom lembrar de onde viemos, mesmo que doa."
+          },
+          {
+            "type": "narration",
+            "text": "Me mantém... preciso.\"\n\nEle bate na mesa com os dedos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Agora, vamos falar de coisas mais úteis."
+          },
+          {
+            "type": "narration",
+            "text": "Precisa de algum mapa?\""
+          }
+        ]
+      },
+      "about_bjorn": {
+        "text": [
+          "Corvus ri, algo raro para ele.\n\n\"Bjorn? Aquele grandalhão é a melhor companhia que um cartógrafo pode ter. Eu meço, ele monta o acampamento. Eu anoto, ele conta histórias tão absurdas que espantam até os ursos.\"\n\nEle aponta para um mapa cheio de anotações em duas caligrafias diferentes.\n\n\"Vê essas notas? As letras bonitas são minhas. Os borrões com desenhos de peixes são dele. Perdeu a mão direita, mas desenha com a esquerda como se nascesse assim.\"",
+          "Corvus aponta para um mapa na parede.\n\n\"Cada marca vermelha neste mapa é um lugar onde Bjorn quase morreu de alguma forma criativa. São... muitas marcas. Mas ele sempre volta rindo e perguntando quando é a próxima expedição.\"\n\nEle sorri.\n\n\"Se não fosse por ele, eu provavelmente teria me perdido nas Colinas Etéreas no primeiro inverno. O homem sabe sobreviver como ninguém.\""
+        ],
+        "choices": [
+          {
+            "text": "Vocês parecem bons amigos.",
+            "target": "bjorn_friendship"
+          },
+          {
+            "text": "Voltar ao início.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus ri, algo raro para ele."
+          },
+          {
+            "type": "narration",
+            "text": "\"Bjorn?"
+          },
+          {
+            "type": "narration",
+            "text": "Aquele grandalhão é a melhor companhia que um cartógrafo pode ter."
+          },
+          {
+            "type": "narration",
+            "text": "Eu meço, ele monta o acampamento."
+          },
+          {
+            "type": "narration",
+            "text": "Eu anoto, ele conta histórias tão absurdas que espantam até os ursos.\"\n\nEle aponta para um mapa cheio de anotações em duas caligrafias diferentes."
+          },
+          {
+            "type": "narration",
+            "text": "\"Vê essas notas?"
+          },
+          {
+            "type": "narration",
+            "text": "As letras bonitas são minhas."
+          },
+          {
+            "type": "narration",
+            "text": "Os borrões com desenhos de peixes são dele."
+          },
+          {
+            "type": "narration",
+            "text": "Perdeu a mão direita, mas desenha com a esquerda como se nascesse assim.\""
+          },
+          {
+            "type": "narration",
+            "text": "Corvus aponta para um mapa na parede."
+          },
+          {
+            "type": "narration",
+            "text": "\"Cada marca vermelha neste mapa é um lugar onde Bjorn quase morreu de alguma forma criativa."
+          },
+          {
+            "type": "narration",
+            "text": "São... muitas marcas."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ele sempre volta rindo e perguntando quando é a próxima expedição.\"\n\nEle sorri."
+          },
+          {
+            "type": "narration",
+            "text": "\"Se não fosse por ele, eu provavelmente teria me perdido nas Colinas Etéreas no primeiro inverno."
+          },
+          {
+            "type": "narration",
+            "text": "O homem sabe sobreviver como ninguém.\""
+          }
+        ]
+      },
+      "bjorn_friendship": {
+        "text": "\"Amigos?\" Corvus pondera. \"Suponho que sim. Mas é mais que isso. Bjorn entende que explorar não é só sobre destinos — é sobre o caminho. A maioria das pessoas quer saber para onde ir. Bjorn quer saber o que há entre aqui e lá.\"\n\nEle fecha um caderno com cuidado.\n\n\"Quando perdi minha frota, perdi minha identidade. Bjorn nunca me perguntou sobre o mar. Só disse: 'Tem umas colinas a oeste que ninguém mapeou. Quer ir?' E fomos.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Amigos?\" Corvus pondera."
+          },
+          {
+            "type": "narration",
+            "text": "\"Suponho que sim."
+          },
+          {
+            "type": "narration",
+            "text": "Mas é mais que isso."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn entende que explorar não é só sobre destinos — é sobre o caminho."
+          },
+          {
+            "type": "narration",
+            "text": "A maioria das pessoas quer saber para onde ir."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn quer saber o que há entre aqui e lá.\"\n\nEle fecha um caderno com cuidado."
+          },
+          {
+            "type": "narration",
+            "text": "\"Quando perdi minha frota, perdi minha identidade."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn nunca me perguntou sobre o mar."
+          },
+          {
+            "type": "narration",
+            "text": "Só disse: 'Tem umas colinas a oeste que ninguém mapeou."
+          },
+          {
+            "type": "speech",
+            "text": "Quer ir?' E fomos.\"",
+            "speaker": "Corvus"
+          }
+        ]
+      },
+      "about_city": {
+        "text": [
+          "\"Eldoria é fascinante do ponto de vista cartográfico. Construída sobre ruínas mais antigas — se você observar os ângulos das ruas, não combinam. A cidade velha seguia um padrão radial, como uma teia de aranha. A nova foi construída por cima, em grade. Isso cria becos sem saída e cruzamentos estranhos.\"\n\nEle aponta para um mapa detalhado da cidade.\n\n\"O Templo está exatamente no centro da cidade antiga. Coincidência? Duvido.\"",
+          "\"Sabe o que é curioso sobre Eldoria? As muralhas são altas demais para o tamanho da cidade. Foram feitas para proteger algo maior. Ou algo que os construtores temiam fosse vir de fora.\"\n\nCorvus toca uma rachadura no mapa.\n\n\"Thorne me disse que encontrou pedras fundacionais sob a forja que não são da mesma época. Martha mencionou algo parecido sobre o porão da estalagem. Camadas sobre camadas.\""
+        ],
+        "choices": [
+          {
+            "text": "Interessante. Voltar ao início.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Eldoria é fascinante do ponto de vista cartográfico."
+          },
+          {
+            "type": "narration",
+            "text": "Construída sobre ruínas mais antigas — se você observar os ângulos das ruas, não combinam."
+          },
+          {
+            "type": "narration",
+            "text": "A cidade velha seguia um padrão radial, como uma teia de aranha."
+          },
+          {
+            "type": "narration",
+            "text": "A nova foi construída por cima, em grade."
+          },
+          {
+            "type": "narration",
+            "text": "Isso cria becos sem saída e cruzamentos estranhos.\"\n\nEle aponta para um mapa detalhado da cidade."
+          },
+          {
+            "type": "narration",
+            "text": "\"O Templo está exatamente no centro da cidade antiga."
+          },
+          {
+            "type": "narration",
+            "text": "Coincidência?"
+          },
+          {
+            "type": "narration",
+            "text": "Duvido.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Sabe o que é curioso sobre Eldoria?"
+          },
+          {
+            "type": "narration",
+            "text": "As muralhas são altas demais para o tamanho da cidade."
+          },
+          {
+            "type": "narration",
+            "text": "Foram feitas para proteger algo maior."
+          },
+          {
+            "type": "narration",
+            "text": "Ou algo que os construtores temiam fosse vir de fora.\"\n\nCorvus toca uma rachadura no mapa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Thorne me disse que encontrou pedras fundacionais sob a forja que não são da mesma época."
+          },
+          {
+            "type": "narration",
+            "text": "Martha mencionou algo parecido sobre o porão da estalagem."
+          },
+          {
+            "type": "narration",
+            "text": "Camadas sobre camadas.\""
+          }
+        ]
+      },
+      "rumors": {
+        "text": [
+          "Corvus puxa um mapa cheio de marcações recentes.\n\n\"As trilhas ao norte estão mais perigosas. Marcas de garras em árvores a três metros de altura. Não são ursos — as garras são finas demais. Algo está se movendo pelas florestas que não deveria estar lá.\"",
+          "\"Uma caravana relatou tremores perto das Minas Abandonadas. Não sísmicos — rítmicos. Como passos. Passos de algo muito grande.\"\n\nCorvus marca um X no mapa.\n\n\"Evite essa rota até que eu possa investigar.\"",
+          "\"Achei vestígios de um acampamento antigo no Passo Verdejante. Fogueiras apagadas, ossos de animais, e um símbolo gravado em pedra que não reconheço. Bjorn disse que parecia com marcas de clã, mas nenhum clã que eu conheça.\"\n\nEle franze a testa.\n\n\"Alguém esteve lá antes de nós. E recentemente.\"",
+          "\"Viajantes relatam uma névoa estranha no Vale das Sombras que não se dissipa nem ao meio-dia. Os que passaram por ela dizem ter ouvido vozes falando em uma língua morta.\"\n\nCorvus anota em seu caderno.\n\n\"Não é normal. Nada sobre aquele vale é normal.\""
+        ],
+        "choices": [
+          {
+            "text": "Obrigado pelo aviso.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus puxa um mapa cheio de marcações recentes."
+          },
+          {
+            "type": "narration",
+            "text": "\"As trilhas ao norte estão mais perigosas."
+          },
+          {
+            "type": "narration",
+            "text": "Marcas de garras em árvores a três metros de altura."
+          },
+          {
+            "type": "narration",
+            "text": "Não são ursos — as garras são finas demais."
+          },
+          {
+            "type": "narration",
+            "text": "Algo está se movendo pelas florestas que não deveria estar lá.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Uma caravana relatou tremores perto das Minas Abandonadas."
+          },
+          {
+            "type": "narration",
+            "text": "Não sísmicos — rítmicos."
+          },
+          {
+            "type": "narration",
+            "text": "Como passos."
+          },
+          {
+            "type": "narration",
+            "text": "Passos de algo muito grande.\"\n\nCorvus marca um X no mapa."
+          },
+          {
+            "type": "speech",
+            "text": "\"Evite essa rota até que eu possa investigar.\"",
+            "speaker": "Corvus"
+          },
+          {
+            "type": "narration",
+            "text": "\"Achei vestígios de um acampamento antigo no Passo Verdejante."
+          },
+          {
+            "type": "narration",
+            "text": "Fogueiras apagadas, ossos de animais, e um símbolo gravado em pedra que não reconheço."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn disse que parecia com marcas de clã, mas nenhum clã que eu conheça.\"\n\nEle franze a testa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Alguém esteve lá antes de nós."
+          },
+          {
+            "type": "narration",
+            "text": "E recentemente.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"Viajantes relatam uma névoa estranha no Vale das Sombras que não se dissipa nem ao meio-dia."
+          },
+          {
+            "type": "narration",
+            "text": "Os que passaram por ela dizem ter ouvido vozes falando em uma língua morta.\"\n\nCorvus anota em seu caderno."
+          },
+          {
+            "type": "narration",
+            "text": "\"Não é normal."
+          },
+          {
+            "type": "narration",
+            "text": "Nada sobre aquele vale é normal.\""
+          }
+        ]
+      },
+      "about_thorne": {
+        "text": [
+          "Corvus ergue uma sobrancelha apreciativa.\n\n\"Thorne? Um artesão de primeira ordem. Fez as penas de metal que uso para desenhar — finas como um fio de cabelo, mas resistentes como uma adaga. O homem entende de ligas como eu entendo de coordenadas.\"",
+          "\"O ferreiro é um homem de poucas palavras e muitas marteladas. Respeito isso. Uma vez pedi que forjasse um compasso de aço temperado. Ele entregou em dois dias — perfeito ao milímetro.\"",
+          "Corvus aponta para uma bússola no canto da mesa.\n\n\"Vê esta bússola? Thorne a fez sob encomenda. A agulha é tão precisa que detecta variações magnéticas de um grau. O homem é um gênio com metal, mesmo que ele nunca admita.\""
+        ],
+        "choices": [
+          {
+            "text": "Vocês trocam serviços com frequência?",
+            "target": "about_thorne_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus ergue uma sobrancelha apreciativa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Thorne?"
+          },
+          {
+            "type": "narration",
+            "text": "Um artesão de primeira ordem."
+          },
+          {
+            "type": "narration",
+            "text": "Fez as penas de metal que uso para desenhar — finas como um fio de cabelo, mas resistentes como uma adaga."
+          },
+          {
+            "type": "narration",
+            "text": "O homem entende de ligas como eu entendo de coordenadas.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"O ferreiro é um homem de poucas palavras e muitas marteladas."
+          },
+          {
+            "type": "narration",
+            "text": "Respeito isso."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez pedi que forjasse um compasso de aço temperado."
+          },
+          {
+            "type": "narration",
+            "text": "Ele entregou em dois dias — perfeito ao milímetro.\""
+          },
+          {
+            "type": "narration",
+            "text": "Corvus aponta para uma bússola no canto da mesa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Vê esta bússola?"
+          },
+          {
+            "type": "narration",
+            "text": "Thorne a fez sob encomenda."
+          },
+          {
+            "type": "narration",
+            "text": "A agulha é tão precisa que detecta variações magnéticas de um grau."
+          },
+          {
+            "type": "narration",
+            "text": "O homem é um gênio com metal, mesmo que ele nunca admita.\""
+          }
+        ]
+      },
+      "about_thorne_detail": {
+        "text": "\"Com frequência? Não diria isso. Mas quando preciso de algo em metal, não há outro em Eldoria. E em troca, já lhe dei mapas de depósitos minerais que encontrei nas colinas. Ele nunca agradece com palavras — mas no dia seguinte, sempre aparece uma peça nova na minha porta. É a linguagem dele.\"",
+        "choices": [
+          {
+            "text": "Uma troca silenciosa, mas honesta.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Com frequência?"
+          },
+          {
+            "type": "narration",
+            "text": "Não diria isso."
+          },
+          {
+            "type": "narration",
+            "text": "Mas quando preciso de algo em metal, não há outro em Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "E em troca, já lhe dei mapas de depósitos minerais que encontrei nas colinas."
+          },
+          {
+            "type": "narration",
+            "text": "Ele nunca agradece com palavras — mas no dia seguinte, sempre aparece uma peça nova na minha porta."
+          },
+          {
+            "type": "narration",
+            "text": "É a linguagem dele.\""
+          }
+        ]
+      },
+      "about_velithra": {
+        "text": [
+          "Corvus se inclina para frente, os olhos brilhando.\n\n\"Velithra é fascinante. Ela trabalha com gemas e minerais de uma forma que beira a ciência pura. Uma vez me mostrou como identificar a origem geográfica de um rubi pela refração da luz. Eu anotei tudo, claro.\"",
+          "\"A joalheira conhece cada mineral num raio de cem léguas. Nossas conversas sobre depósitos rochosos e formações cristalinas rendem horas. Bjorn diz que somos 'dois malucos que gostam de pedras'. Ele não está errado.\"",
+          "Corvus toca um pequeno cristal que usa como peso de papel.\n\n\"Velithra me deu isto — um quartzo rosa das cavernas ao norte. Disse que traz clareza mental. Não sei se acredito, mas desde que coloquei na mesa, meus mapas ficaram mais precisos. Coincidência? Talvez.\""
+        ],
+        "choices": [
+          {
+            "text": "Vocês trocam conhecimento?",
+            "target": "about_velithra_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus se inclina para frente, os olhos brilhando."
+          },
+          {
+            "type": "narration",
+            "text": "\"Velithra é fascinante."
+          },
+          {
+            "type": "narration",
+            "text": "Ela trabalha com gemas e minerais de uma forma que beira a ciência pura."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez me mostrou como identificar a origem geográfica de um rubi pela refração da luz."
+          },
+          {
+            "type": "narration",
+            "text": "Eu anotei tudo, claro.\""
+          },
+          {
+            "type": "narration",
+            "text": "\"A joalheira conhece cada mineral num raio de cem léguas."
+          },
+          {
+            "type": "narration",
+            "text": "Nossas conversas sobre depósitos rochosos e formações cristalinas rendem horas."
+          },
+          {
+            "type": "speech",
+            "text": "Bjorn diz que somos 'dois malucos que gostam de pedras'.",
+            "speaker": "Corvus"
+          },
+          {
+            "type": "narration",
+            "text": "Ele não está errado.\""
+          },
+          {
+            "type": "narration",
+            "text": "Corvus toca um pequeno cristal que usa como peso de papel."
+          },
+          {
+            "type": "narration",
+            "text": "\"Velithra me deu isto — um quartzo rosa das cavernas ao norte."
+          },
+          {
+            "type": "narration",
+            "text": "Disse que traz clareza mental."
+          },
+          {
+            "type": "narration",
+            "text": "Não sei se acredito, mas desde que coloquei na mesa, meus mapas ficaram mais precisos."
+          },
+          {
+            "type": "narration",
+            "text": "Coincidência?"
+          },
+          {
+            "type": "narration",
+            "text": "Talvez.\""
+          }
+        ]
+      },
+      "about_velithra_detail": {
+        "text": "\"Constantemente. Eu lhe mostro onde encontrei formações minerais incomuns, ela me explica o que são e quanto valem. É uma troca justa — meus mapas ganham valor com anotações geológicas, e ela descobre novos veios sem precisar sair da oficina.\"\n\nCorvus sorri discretamente.\n\n\"Poucos apreciam a beleza dos dados brutos como ela. É... refrescante.\"",
+        "choices": [
+          {
+            "text": "Parece uma boa parceria.",
+            "target": "start_friend"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Constantemente."
+          },
+          {
+            "type": "narration",
+            "text": "Eu lhe mostro onde encontrei formações minerais incomuns, ela me explica o que são e quanto valem."
+          },
+          {
+            "type": "narration",
+            "text": "É uma troca justa — meus mapas ganham valor com anotações geológicas, e ela descobre novos veios sem precisar sair da oficina.\"\n\nCorvus sorri discretamente."
+          },
+          {
+            "type": "narration",
+            "text": "\"Poucos apreciam a beleza dos dados brutos como ela."
+          },
+          {
+            "type": "narration",
+            "text": "É... refrescante.\""
+          }
+        ]
+      },
+      "quest_corvus_offer": {
+        "text": "Corvus ergue os olhos de um mapa cheio de marcações e te observa com interesse.\n\n\"Sabe, tenho um problema. Meus mapas dos vales a leste estão desatualizados — as últimas anotações têm dois anos. Trilhas mudam, rios desviam, e a Guilda dos Exploradores está me cobrando dados atualizados.\"\n\nEle bate o dedo no mapa.\n\n\"Preciso de alguém que vá até lá, marque pontos de referência e traga anotações precisas. Pago bem, e você ficaria com uma das minhas bússolas como bônus. Interesse?\"",
+        "choices": [
+          {
+            "text": "📜 Pode contar comigo, Corvus.",
+            "target": "quest_corvus_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_corvus_survey": true
+              },
+              "quests": [
+                "quest_corvus_survey"
+              ],
+              "reputation": {
+                "npc_cartographer_corvus": 2
+              }
+            }
+          },
+          {
+            "text": "Não agora. Talvez depois.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus ergue os olhos de um mapa cheio de marcações e te observa com interesse."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sabe, tenho um problema."
+          },
+          {
+            "type": "narration",
+            "text": "Meus mapas dos vales a leste estão desatualizados — as últimas anotações têm dois anos."
+          },
+          {
+            "type": "narration",
+            "text": "Trilhas mudam, rios desviam, e a Guilda dos Exploradores está me cobrando dados atualizados.\"\n\nEle bate o dedo no mapa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Preciso de alguém que vá até lá, marque pontos de referência e traga anotações precisas."
+          },
+          {
+            "type": "narration",
+            "text": "Pago bem, e você ficaria com uma das minhas bússolas como bônus."
+          },
+          {
+            "type": "narration",
+            "text": "Interesse?\""
+          }
+        ]
+      },
+      "quest_corvus_accepted": {
+        "text": "Corvus abre um sorriso raro e entrega um rolo de pergaminho.\n\n\"Excelente. Aqui está o que sei: siga a estrada leste até o Cruzamento das Pedras, depois desvie para o sul pelo vale. Há formações rochosas que servem como marcos naturais — anote tudo.\"\n\nEle aponta para marcações antigas no mapa.\n\n\"Quando voltar, traga suas anotações e eu atualizo o mapa oficial. A Guilda paga por precisão, não por velocidade. Tome cuidado lá fora.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start_recognized"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Corvus abre um sorriso raro e entrega um rolo de pergaminho."
+          },
+          {
+            "type": "narration",
+            "text": "\"Excelente."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui está o que sei: siga a estrada leste até o Cruzamento das Pedras, depois desvie para o sul pelo vale."
+          },
+          {
+            "type": "narration",
+            "text": "Há formações rochosas que servem como marcos naturais — anote tudo.\"\n\nEle aponta para marcações antigas no mapa."
+          },
+          {
+            "type": "narration",
+            "text": "\"Quando voltar, traga suas anotações e eu atualizo o mapa oficial."
+          },
+          {
+            "type": "narration",
+            "text": "A Guilda paga por precisão, não por velocidade."
+          },
+          {
+            "type": "narration",
+            "text": "Tome cuidado lá fora.\""
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Cuidado com os mapas no chão. Estão secando.",
+        "Mais um viajante. Espero que saiba ler um mapa.",
+        "Hmm? Ah, sim. Mapas, rotas, coordenadas. Fale.",
+        "Se não tem pressa, posso mostrar algo interessante.",
+        "O mundo é grande e pouco mapeado. Posso ajudar com isso.",
+        "Entre, mas não toque nas bússolas. São calibradas."
+      ],
+      "friendly": [
+        "Bom vê-lo! Acabei de traçar uma rota nova que vai te interessar.",
+        "Ah, meu explorador favorito! O chá está quente, sente-se.",
+        "Amigo! Bjorn e eu voltamos das colinas ontem. Tenho novidades.",
+        "Entre, entre! Guardei um mapa especial para você.",
+        "Sempre um prazer. Pessoas que valorizam mapas são raras.",
+        "Que bom que veio! Preciso de alguém inteligente para opinar sobre uma rota."
+      ],
+      "hostile": [
+        "Você de novo? Pensei que tivesse se perdido. Pena.",
+        "Meus mapas não são para quem não sabe respeitá-los.",
+        "A porta é estreita. Use-a na direção certa — para fora.",
+        "Se veio causar problemas, a guarda fica a cento e vinte passos daqui.",
+        "Não tenho tempo para gente que não valoriza conhecimento."
+      ]
+    },
+    "chat": [
+      "A tinta de carvalho é a melhor para pergaminhos. A de nogueira borra com umidade. Aprendí isso da pior forma possível.",
+      "Bjorn insiste que ursos são previsíveis. Diz que é só observar os rastros. Fácil pra ele falar — ele já perdeu uma mão e ainda acha que são 'previsíveis'.",
+      "Martha me deixa pendurar mapas na parede da estalagem. Diz que os viajantes gostam. Na verdade, acho que ela só gosta de ver desenhos bonitos.",
+      "Thorne me fez uma bússola com agulha de aço temperado. A melhor que já tive. O homem pode ser calado, mas suas mãos falam por ele.",
+      "A alquimista Mirena me vendeu uma tinta que brilha no escuro. Útil para mapas de cavernas. Pena que também atrai mariposas gigantes.",
+      "Grom diz que eu passo tempo demais desenhando. Digo que ele passa tempo demais servindo cerveja. Ambos estamos certos.",
+      "Conheço cada trilha num raio de cinquenta léguas. As seguras, as perigosas, e as três que desaparecem dependendo da lua.",
+      "Antes de ser cartógrafo, eu era navegador. A diferença? No mar, os erros são irreversíveis. Em terra, você pode voltar. Na maioria das vezes.",
+      "Velithra me perguntou uma vez sobre depósitos minerais nas montanhas. Eu sabia a resposta, mas o olhar dela me fez pensar duas vezes antes de falar.",
+      "Se alguém te disser que conhece todas as rotas de Eldoria, está mentindo. Até eu descubro caminhos novos toda semana."
+    ],
+    "insult": {
+      "neutral": [
+        "Corvus ergue uma sobrancelha sem tirar os olhos do mapa: 'Fascinante. Posso medir a envergadura do seu ego, se quiser. Parece considerável.'",
+        "Corvus anota algo: 'Acabei de cartografar o ponto mais baixo da minha paciência. Você está exatamente em cima dele.'",
+        "Corvus suspira: 'Se sua navegação social é tão ruim quanto parece, recomendo evitar cruzamentos.'"
+      ],
+      "friendly": [
+        "Corvus ri: 'Ah, isso foi quase uma ofensa! Quase. Precisa calibrar sua pontaria verbal, amigo.'",
+        "Corvus balança a cabeça sorrindo: 'Bjorn diz coisas piores antes do café da manhã. Tente de novo quando tiver mais prática.'",
+        "Corvus pisca: 'Se eu me ofendesse com isso, não teria sobrevivido a cinco anos de tavernas portuárias.'"
+      ],
+      "hostile": [
+        "Corvus guarda os mapas com cuidado e te olha friamente: 'Sabe qual é o lugar mais distante de mim que você pode estar? Descubra. Agora.'",
+        "Corvus fecha o caderno: 'Pessoas como você são a razão pela qual algumas rotas nos meus mapas estão marcadas como perigosas.'",
+        "Corvus aponta para a porta: 'A saída fica a exatamente sete passos. Sugiro que os dê rapidamente.'"
+      ]
+    }
+  }
+}

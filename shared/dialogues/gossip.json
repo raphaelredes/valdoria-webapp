@@ -1,0 +1,1102 @@
+{
+  "dialogues": [
+    {
+      "category": "funny",
+      "text": "{speaker} ri alto: 'Ah, {target}? Provavelmente está dormindo em cima de um barril de hidromel!'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} ri alto: 'Ah, {target}?"
+        },
+        {
+          "type": "narration",
+          "text": "Provavelmente está dormindo em cima de um barril de hidromel!'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} dá uma risadinha: '{target} disse que ia caçar dragões... ou era ratos? Não lembro.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} dá uma risadinha: '{target} disse que ia caçar dragões... ou era ratos?"
+        },
+        {
+          "type": "narration",
+          "text": "Não lembro.'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} sorri: 'Acho que {target} comeu algo estragado na taverna. Melhor não chegar perto hoje.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} sorri: 'Acho que {target} comeu algo estragado na taverna."
+        },
+        {
+          "type": "narration",
+          "text": "Melhor não chegar perto hoje.'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} pisca para você: '{target} está fugindo de um cliente insatisfeito. Shhh!'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} pisca para você: '{target} está fugindo de um cliente insatisfeito."
+        },
+        {
+          "type": "narration",
+          "text": "Shhh!'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} gargalha: 'A última vez que vi {target}, estava tentando ensinar um gato a latir.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} gargalha: 'A última vez que vi {target}, estava tentando ensinar um gato a latir.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} balança a cabeça rindo: '{target} perdeu uma aposta e está proibido de aparecer hoje.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} balança a cabeça rindo: '{target} perdeu uma aposta e está proibido de aparecer hoje.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} sussurra rindo: 'Dizem que {target} arrumou um encontro amoroso. Duvido muito!'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} sussurra rindo: 'Dizem que {target} arrumou um encontro amoroso."
+        },
+        {
+          "type": "narration",
+          "text": "Duvido muito!'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} ironiza: '{target} está trabalhando... em sua técnica de ronco.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} ironiza: '{target} está trabalhando... em sua técnica de ronco.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} brinca: '{target} foi abduzido por duendes. De novo.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} brinca: '{target} foi abduzido por duendes."
+        },
+        {
+          "type": "narration",
+          "text": "De novo.'"
+        }
+      ]
+    },
+    {
+      "category": "funny",
+      "text": "{speaker} zomba: '{target} esqueceu como abrir a própria loja. Acontece.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} zomba: '{target} esqueceu como abrir a própria loja."
+        },
+        {
+          "type": "narration",
+          "text": "Acontece.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} franze a testa: 'Não vi {target} hoje. Espero que esteja tudo bem.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} franze a testa: 'Não vi {target} hoje."
+        },
+        {
+          "type": "narration",
+          "text": "Espero que esteja tudo bem.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} olha em volta: '{target} nunca se atrasa. Isso é muito estranho.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} olha em volta: '{target} nunca se atrasa."
+        },
+        {
+          "type": "narration",
+          "text": "Isso é muito estranho.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} suspira: 'Estou preocupado com {target}. Ouviu algum boato sobre problemas?'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} suspira: 'Estou preocupado com {target}."
+        },
+        {
+          "type": "narration",
+          "text": "Ouviu algum boato sobre problemas?'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} parece ansioso: '{target} parecia doente ontem. Talvez tenha piorado.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} parece ansioso: '{target} parecia doente ontem."
+        },
+        {
+          "type": "narration",
+          "text": "Talvez tenha piorado.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} baixa a voz: 'Há rumores estranhos sobre o sumiço de {target}. Tenha cuidado.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} baixa a voz: 'Há rumores estranhos sobre o sumiço de {target}."
+        },
+        {
+          "type": "narration",
+          "text": "Tenha cuidado.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} comenta sério: '{target} sumiu sem deixar recado. Isso não é bom sinal.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} comenta sério: '{target} sumiu sem deixar recado."
+        },
+        {
+          "type": "narration",
+          "text": "Isso não é bom sinal.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} pergunta: 'Você viu {target}? Ninguém viu hoje. Estou ficando nervoso.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} pergunta: 'Você viu {target}?"
+        },
+        {
+          "type": "narration",
+          "text": "Ninguém viu hoje."
+        },
+        {
+          "type": "narration",
+          "text": "Estou ficando nervoso.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} murmura: 'Espero que {target} não tenha se metido com a guilda dos ladrões.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} murmura: 'Espero que {target} não tenha se metido com a guilda dos ladrões.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} diz sombriamente: 'A loja de {target} não abriu. Mau presságio.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} diz sombriamente: 'A loja de {target} não abriu."
+        },
+        {
+          "type": "narration",
+          "text": "Mau presságio.'"
+        }
+      ]
+    },
+    {
+      "category": "worried",
+      "text": "{speaker} lamenta: 'Pobre {target}... espero que seja apenas um resfriado.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} lamenta: 'Pobre {target}... espero que seja apenas um resfriado.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} revira os olhos: '{target}? Provavelmente vadiando por aí.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} revira os olhos: '{target}?"
+        },
+        {
+          "type": "narration",
+          "text": "Provavelmente vadiando por aí.'"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} bufa: '{target} nunca cumpre os horários. Típico.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} bufa: '{target} nunca cumpre os horários."
+        },
+        {
+          "type": "narration",
+          "text": "Típico.'"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} reclama: 'Aquele preguiçoso do {target} deve estar dormindo até tarde.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} reclama: 'Aquele preguiçoso do {target} deve estar dormindo até tarde.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} bate na mesa: 'Eu precisava falar com {target}, mas claro que não está aqui!'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} bate na mesa: 'Eu precisava falar com {target}, mas claro que não está aqui!'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} resmunga: '{target} não leva o trabalho a sério. Diferente de mim.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} resmunga: '{target} não leva o trabalho a sério."
+        },
+        {
+          "type": "narration",
+          "text": "Diferente de mim.'"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} cruza os braços: 'Se ver {target}, diga que estou esperando meu dinheiro!'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} cruza os braços: 'Se ver {target}, diga que estou esperando meu dinheiro!'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} diz secamente: '{target} é uma vergonha para o mercado.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} diz secamente: '{target} é uma vergonha para o mercado.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} faz uma careta: 'Não perca seu tempo procurando {target}. Inútil.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} faz uma careta: 'Não perca seu tempo procurando {target}."
+        },
+        {
+          "type": "narration",
+          "text": "Inútil.'"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} comenta azedo: '{target} deve estar bebendo. De novo.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} comenta azedo: '{target} deve estar bebendo."
+        },
+        {
+          "type": "narration",
+          "text": "De novo.'"
+        }
+      ]
+    },
+    {
+      "category": "annoyed",
+      "text": "{speaker} avisa: 'Não conte com {target} para nada. Nunca está quando precisa.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} avisa: 'Não conte com {target} para nada."
+        },
+        {
+          "type": "narration",
+          "text": "Nunca está quando precisa.'"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} sussurra: '{target} foi em busca de ingredientes raros nas montanhas.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} sussurra: '{target} foi em busca de ingredientes raros nas montanhas.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} olha para os lados: '{target} está em uma missão secreta. Não faça perguntas.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} olha para os lados: '{target} está em uma missão secreta."
+        },
+        {
+          "type": "narration",
+          "text": "Não faça perguntas.'"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} diz enigmaticamente: 'As sombras chamaram {target} hoje. Melhor não interferir.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} diz enigmaticamente: 'As sombras chamaram {target} hoje."
+        },
+        {
+          "type": "narration",
+          "text": "Melhor não interferir.'"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} sorri misteriosamente: '{target} está onde precisa estar. O destino quis assim.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} sorri misteriosamente: '{target} está onde precisa estar."
+        },
+        {
+          "type": "narration",
+          "text": "O destino quis assim.'"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} murmura: 'Coisas estranhas acontecem quando {target} some...'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} murmura: 'Coisas estranhas acontecem quando {target} some...'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} avisa: '{target} está lidando com forças além da sua compreensão.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} avisa: '{target} está lidando com forças além da sua compreensão.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} comenta baixo: 'Dizem que {target} encontrou um mapa do tesouro.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} comenta baixo: 'Dizem que {target} encontrou um mapa do tesouro.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} insinua: '{target} tem negócios que não podem ser feitos à luz do dia.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} insinua: '{target} tem negócios que não podem ser feitos à luz do dia.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} pisca: '{target} foi ver um oráculo. Voltará mudado.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} pisca: '{target} foi ver um oráculo."
+        },
+        {
+          "type": "narration",
+          "text": "Voltará mudado.'"
+        }
+      ]
+    },
+    {
+      "category": "mysterious",
+      "text": "{speaker} diz vago: '{target} seguiu o chamado do vento.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} diz vago: '{target} seguiu o chamado do vento.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} dá de ombros: '{target} foi reabastecer o estoque na cidade vizinha.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} dá de ombros: '{target} foi reabastecer o estoque na cidade vizinha.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} limpa o balcão: '{target} tirou o dia de folga. Merecido.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} limpa o balcão: '{target} tirou o dia de folga."
+        },
+        {
+          "type": "narration",
+          "text": "Merecido.'"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} comenta casualmente: '{target} foi visitar a família.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} comenta casualmente: '{target} foi visitar a família.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} aponta: '{target} saiu para pescar, eu acho.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} aponta: '{target} saiu para pescar, eu acho.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} diz simples: '{target} foi ao médico.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} diz simples: '{target} foi ao médico.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} informa: '{target} está consertando o telhado de casa.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} informa: '{target} está consertando o telhado de casa.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} lembra: 'Ah, é aniversário de {target} hoje. Não vem.'",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{speaker} lembra: 'Ah, é aniversário de {target} hoje."
+        },
+        {
+          "type": "narration",
+          "text": "Não vem.'"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} explica: '{target} foi resolver burocracia com a guarda.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} explica: '{target} foi resolver burocracia com a guarda.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} diz: '{target} foi comprar suprimentos.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} diz: '{target} foi comprar suprimentos.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    },
+    {
+      "category": "mundane",
+      "text": "{speaker} comenta: '{target} está ajudando na colheita.'",
+      "script": [
+        {
+          "type": "speech",
+          "text": "{speaker} comenta: '{target} está ajudando na colheita.'",
+          "speaker": "Fofoca"
+        }
+      ]
+    }
+  ],
+  "preambles": [
+    "",
+    "Vi agora pouco e... ",
+    "É engraçado você perguntar... ",
+    "Hmmm... "
+  ],
+  "suffixes": [
+    "",
+    " Volte amanhã.",
+    " Tente mais tarde.",
+    " É a vida."
+  ],
+  "dynamic_gossip": [
+    {
+      "text": "Dizem que {player_name} encontrou o filho perdido do ferreiro. A cidade inteira está comentando.",
+      "conditions": {
+        "has_memory": [
+          "quest_complete:quest_thorne_son"
+        ]
+      },
+      "category": "heroic",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Dizem que {player_name} encontrou o filho perdido do ferreiro."
+        },
+        {
+          "type": "narration",
+          "text": "A cidade inteira está comentando."
+        }
+      ]
+    },
+    {
+      "text": "Thorne tem uma forja nova e diz que deve tudo a {player_name}. Bons tempos para o comércio de armas.",
+      "conditions": {
+        "has_memory": [
+          "quest_complete:quest_thorne_forge"
+        ]
+      },
+      "category": "mundane",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Thorne tem uma forja nova e diz que deve tudo a {player_name}."
+        },
+        {
+          "type": "narration",
+          "text": "Bons tempos para o comércio de armas."
+        }
+      ]
+    },
+    {
+      "text": "Ouvi que {player_name} já não é mais um novato. Nível 5 não é para qualquer um.",
+      "conditions": {
+        "has_memory": [
+          "level_up:5"
+        ]
+      },
+      "category": "heroic",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Ouvi que {player_name} já não é mais um novato."
+        },
+        {
+          "type": "narration",
+          "text": "Nível 5 não é para qualquer um."
+        }
+      ]
+    },
+    {
+      "text": "Um aventureiro de nível 10 caminha entre nós. {player_name} está se tornando uma lenda.",
+      "conditions": {
+        "has_memory": [
+          "level_up:10"
+        ]
+      },
+      "category": "heroic",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Um aventureiro de nível 10 caminha entre nós. {player_name} está se tornando uma lenda."
+        }
+      ]
+    },
+    {
+      "text": "A guarda respira mais aliviada desde que {player_name} limpou as criaturas do pântano.",
+      "conditions": {
+        "has_memory": [
+          "quest_complete:quest_swamp_threat"
+        ]
+      },
+      "category": "mundane",
+      "script": [
+        {
+          "type": "narration",
+          "text": "A guarda respira mais aliviada desde que {player_name} limpou as criaturas do pântano."
+        }
+      ]
+    },
+    {
+      "text": "Dizem que a floresta mudou depois que {player_name} passou por lá. As árvores parecem mais calmas.",
+      "conditions": {
+        "has_memory": [
+          "quest_complete:quest_forest_spirit"
+        ]
+      },
+      "category": "mysterious",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Dizem que a floresta mudou depois que {player_name} passou por lá."
+        },
+        {
+          "type": "narration",
+          "text": "As árvores parecem mais calmas."
+        }
+      ]
+    },
+    {
+      "text": "Os comerciantes estão impressionados com {player_name}. Boa reputação abre muitas portas.",
+      "conditions": {
+        "min_rep": [
+          {
+            "faction": "blacksmith",
+            "value": 10
+          }
+        ]
+      },
+      "category": "social",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Os comerciantes estão impressionados com {player_name}."
+        },
+        {
+          "type": "narration",
+          "text": "Boa reputação abre muitas portas."
+        }
+      ]
+    },
+    {
+      "text": "Mirena anda elogiando {player_name} para quem quiser ouvir. A alquimista raramente faz isso.",
+      "conditions": {
+        "min_rep": [
+          {
+            "faction": "alchemist",
+            "value": 15
+          }
+        ]
+      },
+      "category": "social",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Mirena anda elogiando {player_name} para quem quiser ouvir."
+        },
+        {
+          "type": "narration",
+          "text": "A alquimista raramente faz isso."
+        }
+      ]
+    },
+    {
+      "text": "{player_name} derrotou um chefe terrível nos ermos. Os viajantes se sentem mais seguros agora.",
+      "conditions": {
+        "has_memory": [
+          "combat_victory:Troll do Pântano"
+        ]
+      },
+      "category": "heroic",
+      "script": [
+        {
+          "type": "narration",
+          "text": "{player_name} derrotou um chefe terrível nos ermos."
+        },
+        {
+          "type": "narration",
+          "text": "Os viajantes se sentem mais seguros agora."
+        }
+      ]
+    },
+    {
+      "text": "Sussurram que {player_name} tem amigos poderosos. Corvus e Thorne falam bem do aventureiro.",
+      "conditions": {
+        "min_rep": [
+          {
+            "faction": "blacksmith",
+            "value": 10
+          },
+          {
+            "faction": "cartographer",
+            "value": 10
+          }
+        ]
+      },
+      "category": "social",
+      "script": [
+        {
+          "type": "narration",
+          "text": "Sussurram que {player_name} tem amigos poderosos."
+        },
+        {
+          "type": "narration",
+          "text": "Corvus e Thorne falam bem do aventureiro."
+        }
+      ]
+    }
+  ],
+  "personalities": {
+    "npc_blacksmith_thorne": [
+      "annoyed",
+      "mundane",
+      "worried"
+    ],
+    "npc_temple_elara": [
+      "worried",
+      "mundane",
+      "mysterious"
+    ],
+    "npc_alchemist_mirena": [
+      "mysterious",
+      "worried"
+    ],
+    "npc_tavern_grom": [
+      "funny",
+      "annoyed",
+      "mundane"
+    ],
+    "npc_inn_martha": [
+      "worried",
+      "mundane",
+      "funny"
+    ],
+    "npc_herbalist_lyra": [
+      "worried",
+      "mysterious",
+      "mundane"
+    ],
+    "npc_cartographer_corvus": [
+      "mysterious",
+      "mundane",
+      "worried"
+    ],
+    "npc_jeweler_velithra": [
+      "mysterious",
+      "annoyed",
+      "mundane"
+    ],
+    "npc_tentmaker_bjorn": [
+      "funny",
+      "mundane",
+      "worried"
+    ],
+    "default": [
+      "mundane",
+      "funny"
+    ]
+  },
+  "npc_pair_gossip": {
+    "npc_tavern_grom": {
+      "npc_inn_martha": [
+        "Grom para de limpar o balcão e sua voz amolece: 'Martha? Aquela mulher vale mais que toda essa cidade junta. Se algo acontecer a ela, eu queimo Eldoria inteira.'",
+        "Grom olha para o lado: 'Martha me trouxe sopa quando eu estava doente uma vez. Nunca contei pra ninguém. Nem conte você.'",
+        "Grom bufa, mas está sorrindo: 'Martha reclama do meu hidromel. Diz que é forte demais. Claro que é — é pra ser.'"
+      ],
+      "npc_blacksmith_thorne": [
+        "Grom bate no balcão: 'Thorne é o único ferreiro decente num raio de cem léguas. Pena que é teimoso como uma porta.'",
+        "Grom ergue a caneca: 'Thorne forjou minha melhor faca de cozinha. Não diga a ele — vai querer cobrar mais na próxima.'"
+      ],
+      "npc_guild_braun": [
+        "Grom abaixa a voz: 'Braun é o homem mais duro que já entrou nesta taverna. E o mais triste. As duas coisas andam juntas.'",
+        "Grom limpa um copo devagar: 'Braun bebe aqui toda noite. Sempre a mesma mesa. Sempre olhando pra porta. Não pergunto mais por quê.'"
+      ],
+      "npc_guild_tavira": [
+        "Grom revira o olho: 'Tavira? Toda negócios, aquela. Nunca aceita uma cerveja. Quem não bebe, eu não confio.'",
+        "Grom ri: 'Tavira veio aqui uma vez, pediu água. ÁGUA. Na MINHA taverna. Quase a expulsei.'"
+      ],
+      "npc_alchemist_mirena": [
+        "Grom coça o queixo: 'A alquimista? Faz umas poções que cheiram pior que meu porão. Mas funcionam, isso eu admito.'"
+      ],
+      "npc_temple_elara": [
+        "Grom dá de ombros: 'A curandeira do templo? Boa gente. Me curou uma ressaca terrível uma vez e não cobrou nada.'"
+      ],
+      "npc_cartographer_corvus": [
+        "Grom bufa: 'Corvus? O sujeito desenha mapas no MEU balcão. Com a MINHA tinta. Mas pelo menos paga a cerveja em dia.'",
+        "Grom ri: 'O cartógrafo quase caiu num fosso semana passada porque estava medindo o ângulo de uma montanha. Bjorn teve que puxar ele pela gola. De novo.'"
+      ],
+      "npc_tentmaker_bjorn": [
+        "Grom ergue a caneca: 'Bjorn? O grandalhão é meu parceiro de bebida favorito. Perde toda queda de braço, mas jura que ganha com a mão de madeira. Eu deixo ele acreditar.'",
+        "Grom abaixa a voz rindo: 'Bjorn conta histórias tão absurdas que os bêbados ficam sóbrios de espanto. E o pior? São todas verdadeiras.'"
+      ],
+      "npc_jeweler_velithra": [
+        "Grom coça a barba: 'Velithra? Nunca aceita uma cerveja. Nunca ri. Nunca fala alto. Me dá arrepios, aquela mulher.'",
+        "Grom dá de ombros: 'A joalheira é quieta como um gato. Mas Martha gosta dela, então deve ter algo de bom ali dentro.'"
+      ]
+    },
+    "npc_blacksmith_thorne": {
+      "npc_tavern_grom": [
+        "Thorne limpa o suor: 'Grom é grosso, barulhento e bebe demais. Mas é o homem mais honesto que eu conheço.'",
+        "Thorne bate o martelo: 'Se precisar de informação em Eldoria, pergunte ao Grom. Ele sabe de tudo que acontece.'"
+      ],
+      "npc_inn_martha": [
+        "Thorne suaviza a voz: 'Martha cuida de todos nós sem pedir nada em troca. Essa cidade não a merece.'",
+        "Thorne olha para longe: 'Martha me lembra... alguém. Não importa. É uma boa mulher.'"
+      ],
+      "npc_guild_braun": [
+        "Thorne faz uma pausa na forja: 'Braun? Já forjei armas pra ele. O homem entende de aço. Respeito isso.'",
+        "Thorne abaixa a voz: 'As cicatrizes de Braun contam histórias que ele nunca vai falar. Algumas armas que forjei pra ele nunca voltaram.'"
+      ],
+      "npc_alchemist_mirena": [
+        "Thorne bufa: 'A alquimista vive pedindo metais raros. Sempre tem pressa. Nunca explica pra quê.'"
+      ],
+      "npc_guild_tavira": [
+        "Thorne aprova com a cabeça: 'Tavira é justa. Paga o que deve, no dia certo. Gente assim eu respeito.'"
+      ],
+      "npc_cartographer_corvus": [
+        "Thorne bate o martelo: 'Corvus é o único que entende que uma boa bússola precisa de agulha temperada. Homem de conhecimento.'",
+        "Thorne assente: 'O cartógrafo me encomendou três compassos este mês. Trabalho fino, paga bem. Bom cliente.'"
+      ],
+      "npc_jeweler_velithra": [
+        "Thorne faz uma pausa: 'Velithra entende o metal como poucos. Os engastes que ela pede são difíceis, mas o resultado... vale cada gota de suor.'",
+        "Thorne abaixa a voz: 'Tem algo nos olhos daquela elfa. Uma dor antiga. Reconheço porque vejo a mesma coisa no espelho.'"
+      ],
+      "npc_tentmaker_bjorn": [
+        "Thorne quase sorri: 'Bjorn é barulhento como uma forja em dia de tempera. Mas as fivelas que eu forjo pra ele? Nunca voltaram reclamadas.'",
+        "Thorne assente devagar: 'O seleiro perdeu a mão e construiu outra de madeira. Com uma mão. Isso é mais coragem do que metade dos guerreiros que conheço.'"
+      ]
+    },
+    "npc_inn_martha": {
+      "npc_tavern_grom": [
+        "Martha suspira: 'Grom precisa cuidar melhor de si. Bebe demais, come mal. Mas tem um coração enorme embaixo daquela armadura de grosseria.'",
+        "Martha sorri: 'Grom finge que não se importa com ninguém. Mas quando alguém passa fome, a cerveja vira sopa sem ninguém pedir.'"
+      ],
+      "npc_blacksmith_thorne": [
+        "Martha ajeita o avental: 'Thorne é um bom homem, apesar da cara fechada. Sempre conserta as coisas da estalagem de graça.'",
+        "Martha ri baixinho: 'Thorne é tímido como um garoto quando não está na frente da forja. Até gagueja.'"
+      ],
+      "npc_guild_braun": [
+        "Martha abaixa os olhos: 'Braun... aquele homem carrega o peso do mundo. Às vezes deixo um prato de comida perto da guilda. Ele nunca agradece, mas o prato sempre volta vazio.'",
+        "Martha fala devagar: 'Conheci os Cinco de Valdoria quando eram jovens. Braun sorria naquela época. Faz tempo que não vejo aquele sorriso.'"
+      ],
+      "npc_temple_elara": [
+        "Martha sorri: 'Irmã Elara é uma benção. Cuida dos feridos sem cobrar uma moeda. O templo tem sorte de tê-la.'"
+      ],
+      "npc_guild_tavira": [
+        "Martha pondera: 'Tavira é séria demais pra idade dela. Mas alguém precisa manter a ordem na guilda, e ela faz bem esse trabalho.'"
+      ],
+      "npc_cartographer_corvus": [
+        "Martha sorri: 'Corvus é um bom rapaz. Quieto, educado, e faz mapas lindos. Deixo ele pendurar na parede da estalagem — os viajantes adoram.'",
+        "Martha suspira: 'Corvus perdeu tudo no mar. Mas nunca reclama. Só desenha e mede. Às vezes acho que os mapas são o jeito dele de colocar ordem num mundo que tirou tudo dele.'"
+      ],
+      "npc_jeweler_velithra": [
+        "Martha baixa a voz: 'Velithra carrega uma dor que poucos enxergam. Levo chá toda manhã. Ela nunca pede, mas sempre aceita. É o nosso jeito.'",
+        "Martha ajeita o cabelo: 'A joalheira veio de longe. De uma cidade que não existe mais. Não peça detalhes — ela conta quando estiver pronta.'"
+      ],
+      "npc_tentmaker_bjorn": [
+        "Martha ri com carinho: 'Bjorn me lembra um urso que alguém ensinou a costurar. Grande, barulhento e desajeitado, mas com um coração do tamanho do mundo.'",
+        "Martha olha pela janela: 'Bjorn me chama de mãe às vezes. Sem querer. Fica vermelho, pede desculpa. Eu finjo que não ouvi, mas... me faz bem.'"
+      ]
+    },
+    "npc_temple_elara": {
+      "npc_inn_martha": [
+        "Irmã Elara junta as mãos: 'Martha tem uma bondade natural que poucos possuem. Se mais gente fosse como ela, eu teria menos trabalho.'"
+      ],
+      "npc_tavern_grom": [
+        "Irmã Elara franze a testa: 'O taverneiro? Um homem rude, mas já o vi compartilhar sua comida com mendigos quando achava que ninguém via.'"
+      ],
+      "npc_guild_braun": [
+        "Irmã Elara suspira: 'Braun vem ao templo às vezes. Nunca reza. Só senta e olha para as velas. Acho que está conversando com fantasmas.'"
+      ]
+    },
+    "npc_alchemist_mirena": {
+      "npc_blacksmith_thorne": [
+        "Mestra Mirena ajusta os óculos: 'Thorne é um artesão competente. Grosso, mas competente. Os metais que ele trabalha são de primeira.'"
+      ],
+      "npc_tavern_grom": [
+        "Mestra Mirena franze o nariz: 'O taverneiro? Um desperdício de talento culinário afogado em álcool. Mas seus caldos são surpreendentemente medicinais.'"
+      ],
+      "npc_inn_martha": [
+        "Mestra Mirena suaviza o tom: 'Martha é a alma de Eldoria. Sem ela, esta cidade seria só pedras e gente mal-humorada.'"
+      ]
+    },
+    "npc_guild_braun": {
+      "npc_tavern_grom": [
+        "Braun olha para a caneca: 'Grom perdeu o olho pra um ogro no desfiladeiro. Como eu perdi o meu pra um Ettin. Somos do mesmo tipo.'",
+        "Braun dá um meio sorriso: 'Grom é o único que não faz perguntas quando encho a caneca pela décima vez.'"
+      ],
+      "npc_inn_martha": [
+        "Braun desvia o olhar: 'Martha... aquela mulher guarda segredos que fariam sua cabeça girar. Mas nunca vai contar. É leal demais.'",
+        "Braun fala baixo: 'Martha conheceu os Cinco. Sabe o que aconteceu de verdade. Nunca contou a ninguém. Respeito isso.'"
+      ],
+      "npc_blacksmith_thorne": [
+        "Braun toca uma cicatriz: 'Thorne forjou minha última espada. A mesma que... não importa. Bom ferreiro.'"
+      ],
+      "npc_guild_tavira": [
+        "Braun pondera: 'Tavira é competente. Fria, mas justa. Lembra a Dris — a mesma eficiência. Espero que tenha mais sorte.'"
+      ]
+    },
+    "npc_cartographer_corvus": {
+      "npc_tentmaker_bjorn": [
+        "Corvus sorri, algo raro: 'Bjorn é meu sistema de segurança. Literalmente. Sem ele, eu já teria caído em pelo menos quatro desfiladeiros.'",
+        "Corvus ajusta os óculos: 'Bjorn desenha peixes nos meus mapas quando eu não estou olhando. Tecnicamente é vandalismo cartográfico. Mas os peixes são... surpreendentemente precisos.'"
+      ],
+      "npc_tavern_grom": [
+        "Corvus dá de ombros: 'Grom reclama que eu desenho no balcão dele. Mas nunca me cobra a tinta. Acho que, no fundo, gosta dos mapas.'",
+        "Corvus anota algo: 'O taverneiro sabe de tudo que acontece em Eldoria. É como um mapa vivo da cidade. Só que mais barulhento.'"
+      ],
+      "npc_blacksmith_thorne": [
+        "Corvus examina uma bússola: 'Thorne forja as melhores agulhas de bússola que já usei. Precisas como cirurgia. O homem entende metais como eu entendo coordenadas.'"
+      ],
+      "npc_inn_martha": [
+        "Corvus olha para um mapa na parede: 'Martha me deixou pendurar mapas na estalagem no meu primeiro inverno em Eldoria. Ninguém mais me deu espaço. Nunca esqueci isso.'"
+      ],
+      "npc_jeweler_velithra": [
+        "Corvus hesita: 'Velithra me perguntou sobre depósitos minerais uma vez. Respondi vagamente. Alguns lugares nos meus mapas são perigosos demais para qualquer gema valer o risco.'"
+      ]
+    },
+    "npc_jeweler_velithra": {
+      "npc_blacksmith_thorne": [
+        "Velithra examina um engaste: 'Thorne é o único ferreiro que faz engastes dignos do meu trabalho. Milimétricos. Exatos. Como deve ser.'",
+        "Velithra assente: 'O ferreiro entende que o metal deve servir à pedra, não o contrário. Artesãos assim são raros.'"
+      ],
+      "npc_inn_martha": [
+        "Velithra suaviza o tom: 'Martha me trouxe chá no meu primeiro inverno, quando eu dormia sob uma lona. Não perguntou nada. Só trouxe o chá e ficou até eu beber tudo.'",
+        "Velithra olha para as gemas: 'Martha é como um diamante bruto. Sem pretensão, sem polimento. Mas com uma luz interior que não se apaga.'"
+      ],
+      "npc_cartographer_corvus": [
+        "Velithra ergue uma sobrancelha: 'O cartógrafo sabe de depósitos que eu preciso. Mas é cauteloso. Bom — prefiro gente que pensa antes de falar.'"
+      ],
+      "npc_alchemist_mirena": [
+        "Velithra limpa uma gema: 'A alquimista me vende ácido de polimento excelente. Cheira mal, funciona perfeitamente. Como quase tudo naquele laboratório.'"
+      ],
+      "npc_tentmaker_bjorn": [
+        "Velithra dá um quase-sorriso: 'Bjorn fez a cobertura de couro da minha bancada. Rústico, mas surpreendentemente funcional. Como ele, suponho.'"
+      ]
+    },
+    "npc_tentmaker_bjorn": {
+      "npc_cartographer_corvus": [
+        "Bjorn ri alto: 'Corvus! O cara mais inteligente e mais distraído que já conheci. Uma vez quase andou pra dentro de um rio porque estava medindo a largura dele.'",
+        "Bjorn fica mais quieto: 'Corvus me salvou, sabia? Depois de perder a mão, eu não sabia o que fazer da vida. Ele disse: tem umas colinas que ninguém mapeou. E fomos. Simples assim.'"
+      ],
+      "npc_tavern_grom": [
+        "Bjorn bate na mesa: 'Grom é meu parceiro de bebida! Ele finge que não gosta de ninguém, mas já vi ele dar sopa de graça pra três mendigos numa noite fria.'",
+        "Bjorn gargalha: 'Eu e Grom fizemos uma aposta de queda de braço. Eu ganhei. Com a mão de madeira. Ele diz que não conta, mas a taverna inteira viu!'"
+      ],
+      "npc_blacksmith_thorne": [
+        "Bjorn ergue uma fivela: 'Thorne forjou cada fivela e cada gancho que uso nos meus equipamentos. O homem é silencioso como uma pedra, mas trabalha como um vulcão.'",
+        "Bjorn assente sério: 'Thorne perdeu o filho. Ou quase perdeu. Conheço dor assim. Quando alguém te arranca um pedaço, o que sobra dói mais.'"
+      ],
+      "npc_inn_martha": [
+        "Bjorn fica vermelho: 'Martha me lembra minha mãe. Não pela aparência — pelo jeito. Aquele olhar que sabe o que você precisa antes de você mesmo saber.'",
+        "Bjorn sorri: 'Martha me ensinou a temperar peixe. Queimei a primeira leva, mas a segunda ficou decente. Ela disse que fiquei melhor que o Grom. Duvido, mas aceitei o elogio.'"
+      ],
+      "npc_jeweler_velithra": [
+        "Bjorn coça a cabeça: 'Velithra é quieta. Muito quieta. Mas quando lapida uma gema, é como assistir magia. Cada corte é perfeito. Meio assustador, na verdade.'",
+        "Bjorn abaixa a voz: 'Costurei uma cobertura pra bancada dela quando chegou em Eldoria. Ela não agradeceu com palavras, mas no dia seguinte tinha uma pedra de quartzo na minha oficina. Sem bilhete. É o jeito dela.'"
+      ],
+      "npc_alchemist_mirena": [
+        "Bjorn ergue um frasco: 'A alquimista me vende uma pomada que cura queimaduras em dois dias. Cheira a pântano podre, mas funciona como milagre!'"
+      ]
+    }
+  }
+}

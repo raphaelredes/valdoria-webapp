@@ -1,0 +1,1286 @@
+{
+  "npc_temple_elara": {
+    "trading": {
+      "buys": [
+        "alchemy",
+        "plant",
+        "magic",
+        "monster_part"
+      ],
+      "multiplier": 1.1,
+      "refusals": [
+        "O templo não negocia armas de guerra.",
+        "Isso não tem utilidade para nossas poções.",
+        "Sinto muito, não posso aceitar isso."
+      ]
+    },
+    "timeline": [
+      {
+        "node": "swamp_hero",
+        "conditions": {
+          "flag": "defeated_swamp_horror"
+        }
+      }
+    ],
+    "nodes": {
+      "start": {
+        "text": [
+          "A paz de Vorenn esteja com você, viajante. Busca conforto espiritual ou a cura para suas feridas?",
+          "Eu vi você chegando... as sombras dançam diferente ao seu redor. O que procura no templo?",
+          "O incenso queima mais rápido hoje. Um presságio, talvez? Diga-me, o que aflige sua alma?",
+          "Vorenn observa a todos, mas poucos sentem Seu olhar. Você sente, não é?",
+          "As portas do templo estão abertas, mas é o seu coração que deve permitir a entrada da Luz."
+        ],
+        "choices": [
+          {
+            "text": "Conte-me sobre Vorenn.",
+            "target": "about_tyr",
+            "once": true
+          },
+          {
+            "text": "Sinto uma sombra nestas muralhas... [Religião DC 12]",
+            "target": "temple_secrets",
+            "conditions": {
+              "flags": [
+                "!accepted_elara_swamp_quest"
+              ],
+              "min_turns_since_flag": {
+                "flag": "timer_elara_check_failed",
+                "turns": 20
+              }
+            },
+            "check": {
+              "skill": "intelligence",
+              "difficulty": 12,
+              "success": "elara_secrets_success",
+              "failure": "elara_secrets_failure"
+            }
+          },
+          {
+            "text": "O filho de Thorne está a salvo.",
+            "target": "elara_aris_reaction",
+            "once": true,
+            "conditions": {
+              "flag": "completed_thorne_son_quest"
+            }
+          },
+          {
+            "text": "🧪 Martha me enviou. Preciso de veneno para ratos.",
+            "target": "elara_poison_request",
+            "conditions": {
+              "flags": [
+                "martha_poison_path",
+                "!has_elara_poison",
+                "!cleared_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "📜 Trago o Orbe de Obsidiana. Martha pediu que eu o entregasse ao templo.",
+            "target": "elara_receive_relic",
+            "conditions": {
+              "flags": [
+                "accepted_relic_quest",
+                "relic_temple_path",
+                "!relic_delivered"
+              ]
+            }
+          },
+          {
+            "text": "✨ Elara, sinto uma conexão especial com este templo...",
+            "target": "elara_trust_blessing",
+            "once": true,
+            "conditions": {
+              "min_affinity": 65,
+              "npc_emotion": {
+                "trust": 0.5,
+                "joy": 0.4
+              }
+            }
+          },
+          {
+            "text": "O que acha da sua prima Mirena?",
+            "target": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "O que acha da Martha?",
+            "target": "about_martha",
+            "once": true
+          },
+          {
+            "text": "Preciso de ajuda com meus ferimentos.",
+            "target": "exit",
+            "exit_callback": "temple_heal"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "A paz de Vorenn esteja com você, viajante."
+          },
+          {
+            "type": "narration",
+            "text": "Busca conforto espiritual ou a cura para suas feridas?"
+          },
+          {
+            "type": "narration",
+            "text": "Eu vi você chegando... as sombras dançam diferente ao seu redor."
+          },
+          {
+            "type": "narration",
+            "text": "O que procura no templo?"
+          },
+          {
+            "type": "narration",
+            "text": "O incenso queima mais rápido hoje."
+          },
+          {
+            "type": "narration",
+            "text": "Um presságio, talvez?"
+          },
+          {
+            "type": "narration",
+            "text": "Diga-me, o que aflige sua alma?"
+          },
+          {
+            "type": "narration",
+            "text": "Vorenn observa a todos, mas poucos sentem Seu olhar."
+          },
+          {
+            "type": "narration",
+            "text": "Você sente, não é?"
+          },
+          {
+            "type": "narration",
+            "text": "As portas do templo estão abertas, mas é o seu coração que deve permitir a entrada da Luz."
+          }
+        ]
+      },
+      "elara_poison_request": {
+        "text": "...",
+        "choices": [
+          {
+            "text": "...",
+            "target": "elara_poison_var_1",
+            "conditions": {
+              "flags": [
+                "!elara_poison_var"
+              ]
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_1",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 1
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_2",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 2
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_3",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 3
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_4",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 4
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_5",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 5
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_6",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 6
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_7",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 7
+            }
+          },
+          {
+            "text": "...",
+            "target": "elara_poison_var_8",
+            "conditions": {
+              "flag": "elara_poison_var",
+              "value": 8
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "..."
+          }
+        ]
+      },
+      "elara_poison_give_item": {
+        "text": "Aqui está. Uma fórmula potente. Use com cuidado no porão e lave bem as mãos depois.",
+        "choices": [
+          {
+            "text": "Obrigado, Irmã Elara.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "has_elara_poison": true
+              },
+              "items": [
+                "Veneno para Ratos (Missão)"
+              ]
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Aqui está."
+          },
+          {
+            "type": "narration",
+            "text": "Uma fórmula potente."
+          },
+          {
+            "type": "narration",
+            "text": "Use com cuidado no porão e lave bem as mãos depois."
+          }
+        ]
+      },
+      "elara_poison_var_1": {
+        "text": "(Elara suspira, limpando as mãos num pano) Veneno para ratos? Martha e seus problemas terrenos... Às vezes acho que ela esquece que sou uma sacerdotisa, não uma exterminadora. Mas, pela segurança da estalagem, farei isso.",
+        "choices": [
+          {
+            "text": "Agradeço a ajuda.",
+            "target": "elara_poison_give_item"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara suspira, limpando as mãos num pano) Veneno para ratos?"
+          },
+          {
+            "type": "narration",
+            "text": "Martha e seus problemas terrenos..."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes acho que ela esquece que sou uma sacerdotisa, não uma exterminadora."
+          },
+          {
+            "type": "narration",
+            "text": "Mas, pela segurança da estalagem, farei isso."
+          }
+        ]
+      },
+      "elara_poison_var_2": {
+        "text": "(Elara está de joelhos, em transe profundo diante do altar. Você espera respeitosamente por quase dez minutos até que ela se levante, parecendo tonta.)\n\nAh... desculpe. A comunhão foi intensa hoje. O que você dizia? Veneno? Sim, claro. Vorenn protege a vida, mas até Ele entende a necessidade de livrar os celeiros de pragas.",
+        "choices": [
+          {
+            "text": "Não queria incomodar suas preces.",
+            "target": "elara_poison_give_item"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara está de joelhos, em transe profundo diante do altar."
+          },
+          {
+            "type": "narration",
+            "text": "Você espera respeitosamente por quase dez minutos até que ela se levante, parecendo tonta.)\n\nAh... desculpe."
+          },
+          {
+            "type": "narration",
+            "text": "A comunhão foi intensa hoje."
+          },
+          {
+            "type": "narration",
+            "text": "O que você dizia?"
+          },
+          {
+            "type": "narration",
+            "text": "Veneno?"
+          },
+          {
+            "type": "narration",
+            "text": "Sim, claro."
+          },
+          {
+            "type": "narration",
+            "text": "Vorenn protege a vida, mas até Ele entende a necessidade de livrar os celeiros de pragas."
+          }
+        ]
+      },
+      "elara_poison_var_3": {
+        "text": "(Elara franze a testa revirando frascos) Raiz-de-ferro... bile de sapo... Ah, pelos deuses! Falta <b>Raiz Amarga</b>. Sem isso, a mistura é só uma sopa ruim.\n\nEspere... acho que vi um pouco no jardim dos fundos. Volto em um instante.\n\n(Ela sai apressada e volta com as mãos sujas de terra) Consegui a última.",
+        "choices": [
+          {
+            "text": "Obrigado pelo esforço extra.",
+            "target": "elara_poison_give_item"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara franze a testa revirando frascos) Raiz-de-ferro... bile de sapo..."
+          },
+          {
+            "type": "narration",
+            "text": "Ah, pelos deuses!"
+          },
+          {
+            "type": "narration",
+            "text": "Falta <b>Raiz Amarga</b>."
+          },
+          {
+            "type": "narration",
+            "text": "Sem isso, a mistura é só uma sopa ruim."
+          },
+          {
+            "type": "narration",
+            "text": "Espere... acho que vi um pouco no jardim dos fundos."
+          },
+          {
+            "type": "narration",
+            "text": "Volto em um instante.\n\n(Ela sai apressada e volta com as mãos sujas de terra) Consegui a última."
+          }
+        ]
+      },
+      "elara_poison_var_4": {
+        "text": "(Elara te olha com desconfiança) Veneno? É uma ferramenta perigosa em mãos erradas. Como sei que você não vai usar isso para 'remover' um rival de Martha?",
+        "choices": [
+          {
+            "text": "🎲 [Persuasão DC 12] Minha intenção é apenas limpar o porão.",
+            "target": "elara_poison_give_item",
+            "check": {
+              "skill": "charisma",
+              "difficulty": 12,
+              "success": "elara_poison_give_item",
+              "failure": "elara_poison_denied"
+            }
+          },
+          {
+            "text": "Não tenho tempo para isso. Esqueça.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara te olha com desconfiança) Veneno?"
+          },
+          {
+            "type": "narration",
+            "text": "É uma ferramenta perigosa em mãos erradas."
+          },
+          {
+            "type": "narration",
+            "text": "Como sei que você não vai usar isso para 'remover' um rival de Martha?"
+          }
+        ]
+      },
+      "elara_poison_denied": {
+        "text": "Não vejo verdade em seus olhos. Vorenn não abençoa o engano. Saia.",
+        "choices": [
+          {
+            "text": "...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Não vejo verdade em seus olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Vorenn não abençoa o engano."
+          },
+          {
+            "type": "narration",
+            "text": "Saia."
+          }
+        ]
+      },
+      "elara_poison_var_5": {
+        "text": "Veneno tem um custo, viajante. Os ingredientes são caros e o Templo vive de doações. Para preparar isso, peço uma contribuição para os órfãos da guerra.",
+        "choices": [
+          {
+            "text": "💰 [Doar 10 Valdoritas] É por uma boa causa.",
+            "target": "elara_poison_give_item",
+            "impact": {
+              "gold": -10,
+              "reputation": {
+                "temple": 1
+              }
+            },
+            "conditions": {
+              "gold": 10
+            }
+          },
+          {
+            "text": "Não tenho ouro para isso agora.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Veneno tem um custo, viajante."
+          },
+          {
+            "type": "narration",
+            "text": "Os ingredientes são caros e o Templo vive de doações."
+          },
+          {
+            "type": "narration",
+            "text": "Para preparar isso, peço uma contribuição para os órfãos da guerra."
+          }
+        ]
+      },
+      "elara_poison_var_6": {
+        "text": "(Elara começa a preparar a mistura, mas fala sem parar) Você sabe por que os ratos invadem? Desequilíbrio. Matamos as cobras, os ratos crescem. É o ciclo. Estamos interferindo, você entende? Mas suponho que Martha não queira uma aula de ecologia agora.",
+        "choices": [
+          {
+            "text": "Só o veneno está bom, obrigado.",
+            "target": "elara_poison_give_item"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara começa a preparar a mistura, mas fala sem parar) Você sabe por que os ratos invadem?"
+          },
+          {
+            "type": "narration",
+            "text": "Desequilíbrio."
+          },
+          {
+            "type": "narration",
+            "text": "Matamos as cobras, os ratos crescem."
+          },
+          {
+            "type": "narration",
+            "text": "É o ciclo."
+          },
+          {
+            "type": "narration",
+            "text": "Estamos interferindo, você entende?"
+          },
+          {
+            "type": "narration",
+            "text": "Mas suponho que Martha não queira uma aula de ecologia agora."
+          }
+        ]
+      },
+      "elara_poison_var_7": {
+        "text": "(Elara está visivelmente cansada. Ela derruba um frasco, que estilhaça) Maldição! Estou tão exausta... (Ela respira fundo) Desculpe. Vou limpar isso e preparar outro. Só preciso de um minuto.",
+        "choices": [
+          {
+            "text": "Sem pressa. Você precisa de ajuda?",
+            "target": "elara_poison_give_item",
+            "impact": {
+              "reputation": {
+                "temple": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara está visivelmente cansada."
+          },
+          {
+            "type": "narration",
+            "text": "Ela derruba um frasco, que estilhaça) Maldição!"
+          },
+          {
+            "type": "narration",
+            "text": "Estou tão exausta... (Ela respira fundo) Desculpe."
+          },
+          {
+            "type": "narration",
+            "text": "Vou limpar isso e preparar outro."
+          },
+          {
+            "type": "narration",
+            "text": "Só preciso de um minuto."
+          }
+        ]
+      },
+      "elara_poison_var_8": {
+        "text": "(Elara toca sua testa antes de responder) Sinto uma sombra sobre a estalagem. Esses ratos... não são naturais. Vou adicionar Água Benta à mistura. Isso deve queimar qualquer influência malígna que eles carreguem.",
+        "choices": [
+          {
+            "text": "Isso parece prudente. Obrigado.",
+            "target": "elara_poison_give_item"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara toca sua testa antes de responder) Sinto uma sombra sobre a estalagem."
+          },
+          {
+            "type": "narration",
+            "text": "Esses ratos... não são naturais."
+          },
+          {
+            "type": "narration",
+            "text": "Vou adicionar Água Benta à mistura."
+          },
+          {
+            "type": "narration",
+            "text": "Isso deve queimar qualquer influência malígna que eles carreguem."
+          }
+        ]
+      },
+      "elara_receive_relic": {
+        "text": "(Elara recua ao sentir a energia do orbe. Seus olhos se arregalam.)\n\nPelos deuses... então é isso que a Guilda das Sombras buscava. (Ela estende as mãos com cuidado, murmurando uma prece de proteção.)\n\nEsta relíquia será selada nas catacumbas do templo, protegida pelos selos de Vorenn. Ninguém mais tocará neste objeto amaldiçoado.\n\n(Ela toca o orbe e uma luz dourada o envolve. A energia escura recua, contida.)\n\nEstá feito. Martha pode dormir em paz. E Edric pode finalmente descansar.",
+        "choices": [
+          {
+            "text": "Que Vorenn guarde esta relíquia para sempre.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "relic_delivered": true
+              },
+              "reputation": {
+                "temple": 10
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara recua ao sentir a energia do orbe."
+          },
+          {
+            "type": "narration",
+            "text": "Seus olhos se arregalam.)\n\nPelos deuses... então é isso que a Guilda das Sombras buscava. (Ela estende as mãos com cuidado, murmurando uma prece de proteção.)\n\nEsta relíquia será selada nas catacumbas do templo, protegida pelos selos de Vorenn."
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém mais tocará neste objeto amaldiçoado.\n\n(Ela toca o orbe e uma luz dourada o envolve."
+          },
+          {
+            "type": "narration",
+            "text": "A energia escura recua, contida.)\n\nEstá feito."
+          },
+          {
+            "type": "narration",
+            "text": "Martha pode dormir em paz."
+          },
+          {
+            "type": "narration",
+            "text": "E Edric pode finalmente descansar."
+          }
+        ]
+      },
+      "elara_aris_reaction": {
+        "text": "Louvado seja Vorenn! Saber que o jovem Aris escapou das garras da floresta aquece meu coração. Você fez um ato sagrado hoje, criança.",
+        "choices": [
+          {
+            "text": "Foi apenas o certo a se fazer.",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "temple": 2
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Louvado seja Vorenn!"
+          },
+          {
+            "type": "narration",
+            "text": "Saber que o jovem Aris escapou das garras da floresta aquece meu coração."
+          },
+          {
+            "type": "narration",
+            "text": "Você fez um ato sagrado hoje, criança."
+          }
+        ]
+      },
+      "about_tyr": {
+        "text": "Vorenn é o Mutilado, o deus da justiça e do dever. Ele sacrificou sua própria mão para prender o lobo Fenrir, provando que a justiça exige sacríficio pessoal. Ele observa Eldoria e guia aqueles que buscam o caminho reto.",
+        "choices": [
+          {
+            "text": "Entendido. Obrigado, Irmã.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Vorenn é o Mutilado, o deus da justiça e do dever."
+          },
+          {
+            "type": "narration",
+            "text": "Ele sacrificou sua própria mão para prender o lobo Fenrir, provando que a justiça exige sacríficio pessoal."
+          },
+          {
+            "type": "narration",
+            "text": "Ele observa Eldoria e guia aqueles que buscam o caminho reto."
+          }
+        ]
+      },
+      "temple_secrets": {
+        "text": "Seus olhos buscam a verdade divina. Sim, as catacumbas sob o templo emitem um sussurro que não condiz com Vorenn.",
+        "choices": [
+          {
+            "text": "Posso investigar?",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "unlocked_temple_catacombs": true
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Seus olhos buscam a verdade divina."
+          },
+          {
+            "type": "narration",
+            "text": "Sim, as catacumbas sob o templo emitem um sussurro que não condiz com Vorenn."
+          }
+        ]
+      },
+      "elara_secrets_success": {
+        "text": "(Ela baixa a voz) Você é abençoado com percepção. Algo antigo despertou no Pântano e suas raízes tentam penetrar nosso solo sagrado.",
+        "choices": [
+          {
+            "text": "📜 Eu vou deter isso.",
+            "target": "elara_swamp_accept",
+            "once": true,
+            "impact": {
+              "flags": {
+                "knows_about_swamp_threat": true,
+                "accepted_elara_swamp_quest": true
+              },
+              "quests": [
+                "quest_elara_swamp"
+              ],
+              "reputation": {
+                "temple": 5
+              },
+              "random_set_flag": {
+                "swamp_ritual_var": {
+                  "min": 1,
+                  "max": 3
+                }
+              }
+            }
+          },
+          {
+            "text": "🙏 [SAB 14+] Posso usar um ritual de purificação?",
+            "target": "elara_ritual_hint",
+            "conditions": {
+              "flags": [
+                "unlocked_temple_catacombs"
+              ],
+              "stat_check": {
+                "stat": "wisdom",
+                "min": 14
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ela baixa a voz) Você é abençoado com percepção."
+          },
+          {
+            "type": "narration",
+            "text": "Algo antigo despertou no Pântano e suas raízes tentam penetrar nosso solo sagrado."
+          }
+        ]
+      },
+      "elara_swamp_accept": {
+        "text": "(Elara segura suas mãos com firmeza, os olhos brilhando com gratidão)\n\n\"Que a luz de Vorenn guie sua lâmina na escuridão. Vá com cuidado, campeão. O pântano não perdoa os imprudentes.\"",
+        "choices": [
+          {
+            "text": "Voltarei com boas notícias.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara segura suas mãos com firmeza, os olhos brilhando com gratidão)\n\n\"Que a luz de Vorenn guie sua lâmina na escuridão."
+          },
+          {
+            "type": "narration",
+            "text": "Vá com cuidado, campeão."
+          },
+          {
+            "type": "narration",
+            "text": "O pântano não perdoa os imprudentes.\""
+          }
+        ]
+      },
+      "elara_ritual_hint": {
+        "text": "(Seus olhos se arregalem) Você conhece as catacumbas? Sim... existe um ritual antigo de purificação de Vorenn que pode banir entidades corrompidas sem combate direto. Mas requer concentração absoluta e uma fé inabalável.",
+        "choices": [
+          {
+            "text": "📜 Minha fé é forte. Irei ao pântano com o ritual.",
+            "target": "elara_swamp_accept",
+            "once": true,
+            "impact": {
+              "flags": {
+                "knows_about_swamp_threat": true,
+                "accepted_elara_swamp_quest": true
+              },
+              "quests": [
+                "quest_elara_swamp"
+              ],
+              "reputation": {
+                "temple": 8
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Seus olhos se arregalem) Você conhece as catacumbas?"
+          },
+          {
+            "type": "narration",
+            "text": "Sim... existe um ritual antigo de purificação de Vorenn que pode banir entidades corrompidas sem combate direto."
+          },
+          {
+            "type": "narration",
+            "text": "Mas requer concentração absoluta e uma fé inabalável."
+          }
+        ]
+      },
+      "elara_secrets_failure": {
+        "text": "Toda cidade tem suas sombras, filho. Mas não deve se preocupar com o que não entende.",
+        "choices": [
+          {
+            "text": "Tudo bem...",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "timer_elara_check_failed": "__CURRENT_TURN__"
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Toda cidade tem suas sombras, filho."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não deve se preocupar com o que não entende."
+          }
+        ]
+      },
+      "swamp_hero": {
+        "text": [
+          "Você... você conseguiu! A sombra no pântano foi purificada. Vorenn olha para você com favor, campeão.",
+          "A escuridão foi afastada por suas mãos. O templo está em débito eterno com você.",
+          "Sinto a luz fluindo mais forte desde que você destruiu aquela abominação. Seja abençoado!",
+          "O Horror do Pântano finalmente pereceu. Eldoria respira mais leve graças a você.",
+          "Campeão de Vorenn! Sua coragem purificou terras corrompidas. Como posso servi-lo?"
+        ],
+        "choices": [
+          {
+            "text": "O que era aquela criatura?",
+            "target": "swamp_explanation",
+            "once": true,
+            "impact": {
+              "complete_quests": [
+                "quest_elara_swamp"
+              ]
+            }
+          },
+          {
+            "text": "🧪 Martha me enviou. Preciso de veneno para ratos.",
+            "target": "elara_poison_request",
+            "conditions": {
+              "flags": [
+                "martha_poison_path",
+                "!has_elara_poison",
+                "!cleared_martha_cellar"
+              ]
+            }
+          },
+          {
+            "text": "📜 Trago o Orbe de Obsidiana. Martha pediu que eu o entregasse ao templo.",
+            "target": "elara_receive_relic",
+            "conditions": {
+              "flags": [
+                "accepted_relic_quest",
+                "relic_temple_path",
+                "!relic_delivered"
+              ]
+            }
+          },
+          {
+            "text": "O que acha da sua prima Mirena?",
+            "target": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "O que acha da Martha?",
+            "target": "about_martha",
+            "once": true
+          },
+          {
+            "text": "Preciso de ajuda com meus ferimentos.",
+            "target": "exit",
+            "exit_callback": "open_temple"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Você... você conseguiu!"
+          },
+          {
+            "type": "narration",
+            "text": "A sombra no pântano foi purificada."
+          },
+          {
+            "type": "narration",
+            "text": "Vorenn olha para você com favor, campeão."
+          },
+          {
+            "type": "narration",
+            "text": "A escuridão foi afastada por suas mãos."
+          },
+          {
+            "type": "narration",
+            "text": "O templo está em débito eterno com você."
+          },
+          {
+            "type": "narration",
+            "text": "Sinto a luz fluindo mais forte desde que você destruiu aquela abominação."
+          },
+          {
+            "type": "narration",
+            "text": "Seja abençoado!"
+          },
+          {
+            "type": "narration",
+            "text": "O Horror do Pântano finalmente pereceu."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria respira mais leve graças a você."
+          },
+          {
+            "type": "narration",
+            "text": "Campeão de Vorenn!"
+          },
+          {
+            "type": "narration",
+            "text": "Sua coragem purificou terras corrompidas."
+          },
+          {
+            "type": "narration",
+            "text": "Como posso servi-lo?"
+          }
+        ]
+      },
+      "swamp_explanation": {
+        "text": "Uma entidade da Feywild corrompida, presa entre os planos. Suas raízes buscavam drenar a essência sagrada de Eldoria. Você salvou mais do que imagina.",
+        "choices": [
+          {
+            "text": "Fico feliz em ajudar.",
+            "target": "exit",
+            "exit_callback": "open_temple",
+            "impact": {
+              "reputation": {
+                "temple": 10
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Uma entidade da Feywild corrompida, presa entre os planos."
+          },
+          {
+            "type": "narration",
+            "text": "Suas raízes buscavam drenar a essência sagrada de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Você salvou mais do que imagina."
+          }
+        ]
+      },
+      "about_mirena": {
+        "text": [
+          "(Os olhos de Elara se suavizam, mas há uma tensão sutil) Mirena... minha prima. Crescemos juntas nos campos ao norte. Ela sempre foi brilhante — curiosa demais para o conforto de qualquer sacerdote. Enquanto eu rezava, ela desmontava relicários para ver como funcionavam.",
+          "(Elara toca o símbolo de Vorenn no peito) Minha prima escolheu o caminho da ciência, eu escolhi o da fé. Não concordamos em quase nada... mas o sangue nos une. Quando ela ficou doente no primeiro inverno em Eldoria, passei três noites no laboratório dela cuidando da febre.",
+          "Mirena é como uma chama — ilumina e queima ao mesmo tempo. Suas poções salvam vidas, não nego. Mas ela confia demais na razão e pouco na fé. Há mistérios que a lógica não alcança."
+        ],
+        "choices": [
+          {
+            "text": "Vocês brigam muito?",
+            "target": "about_mirena_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Os olhos de Elara se suavizam, mas há uma tensão sutil) Mirena... minha prima."
+          },
+          {
+            "type": "narration",
+            "text": "Crescemos juntas nos campos ao norte."
+          },
+          {
+            "type": "narration",
+            "text": "Ela sempre foi brilhante — curiosa demais para o conforto de qualquer sacerdote."
+          },
+          {
+            "type": "narration",
+            "text": "Enquanto eu rezava, ela desmontava relicários para ver como funcionavam."
+          },
+          {
+            "type": "narration",
+            "text": "(Elara toca o símbolo de Vorenn no peito) Minha prima escolheu o caminho da ciência, eu escolhi o da fé."
+          },
+          {
+            "type": "narration",
+            "text": "Não concordamos em quase nada... mas o sangue nos une."
+          },
+          {
+            "type": "narration",
+            "text": "Quando ela ficou doente no primeiro inverno em Eldoria, passei três noites no laboratório dela cuidando da febre."
+          },
+          {
+            "type": "narration",
+            "text": "Mirena é como uma chama — ilumina e queima ao mesmo tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Suas poções salvam vidas, não nego."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ela confia demais na razão e pouco na fé."
+          },
+          {
+            "type": "narration",
+            "text": "Há mistérios que a lógica não alcança."
+          }
+        ]
+      },
+      "about_mirena_detail": {
+        "text": "(Elara deixa escapar um riso inesperado) Brigar? Nós discutimos sobre TUDO. Ela diz que a cura divina é 'efeito placebo glorificado'. Eu digo que as poções dela são 'sopa com pretensão'. Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Eldoria, ela apareceu no templo com três frascos de antitoxina. Sem pedir nada em troca. Sem fazer piada. Só disse: 'Cuida de você, prima.' É... é assim que somos.",
+        "choices": [
+          {
+            "text": "Família é família, apesar de tudo.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara deixa escapar um riso inesperado) Brigar?"
+          },
+          {
+            "type": "narration",
+            "text": "Nós discutimos sobre TUDO."
+          },
+          {
+            "type": "narration",
+            "text": "Ela diz que a cura divina é 'efeito placebo glorificado'."
+          },
+          {
+            "type": "narration",
+            "text": "Eu digo que as poções dela são 'sopa com pretensão'."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Eldoria, ela apareceu no templo com três frascos de antitoxina."
+          },
+          {
+            "type": "narration",
+            "text": "Sem pedir nada em troca."
+          },
+          {
+            "type": "narration",
+            "text": "Sem fazer piada."
+          },
+          {
+            "type": "narration",
+            "text": "Só disse: 'Cuida de você, prima.' É... é assim que somos."
+          }
+        ]
+      },
+      "about_martha": {
+        "text": [
+          "(Elara sorri com ternura) Martha é a rocha de Eldoria. Quando cheguei a este templo, jovem e insegura, foi ela quem me trouxe chá na primeira noite. Disse: 'Os deuses cuidam da alma, mas alguém precisa cuidar do estômago.' Nunca esqueci.",
+          "Martha carrega mais peso do que mostra. Perder Edric a marcou profundamente, mas ela transformou a dor em força. Cada prato que serve, cada hóspede que acolhe — é a forma dela de honrar a memória dele.",
+          "(Elara junta as mãos em reflexão) Eu guio almas no templo, mas Martha guia corações na estalagem. Às vezes penso que o trabalho dela é mais sagrado que o meu."
+        ],
+        "choices": [
+          {
+            "text": "Vocês são amigas íntimas?",
+            "target": "about_martha_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara sorri com ternura) Martha é a rocha de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Quando cheguei a este templo, jovem e insegura, foi ela quem me trouxe chá na primeira noite."
+          },
+          {
+            "type": "speech",
+            "text": "Disse: 'Os deuses cuidam da alma, mas alguém precisa cuidar do estômago.' Nunca esqueci.",
+            "speaker": "Irma Elara"
+          },
+          {
+            "type": "narration",
+            "text": "Martha carrega mais peso do que mostra."
+          },
+          {
+            "type": "narration",
+            "text": "Perder Edric a marcou profundamente, mas ela transformou a dor em força."
+          },
+          {
+            "type": "narration",
+            "text": "Cada prato que serve, cada hóspede que acolhe — é a forma dela de honrar a memória dele."
+          },
+          {
+            "type": "narration",
+            "text": "(Elara junta as mãos em reflexão) Eu guio almas no templo, mas Martha guia corações na estalagem."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes penso que o trabalho dela é mais sagrado que o meu."
+          }
+        ]
+      },
+      "about_martha_detail": {
+        "text": "Íntimas? Martha é a pessoa mais próxima de uma irmã que já tive. Nas noites de tempestade, ela sobe ao templo com uma garrafa de hidromel e conversamos até o amanhecer. Ela me conta sobre os viajantes, eu conto sobre as estrelas.\n\n(Elara baixa a voz) Ela é mais forte do que parece. Já a vi enfrentar três bêbados armados com nada além de uma concha de sopa e um olhar que gelaria o próprio Fenrir. Ninguém mexe com Martha no Grifo.",
+        "choices": [
+          {
+            "text": "Ela é realmente especial.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Íntimas?"
+          },
+          {
+            "type": "narration",
+            "text": "Martha é a pessoa mais próxima de uma irmã que já tive."
+          },
+          {
+            "type": "narration",
+            "text": "Nas noites de tempestade, ela sobe ao templo com uma garrafa de hidromel e conversamos até o amanhecer."
+          },
+          {
+            "type": "narration",
+            "text": "Ela me conta sobre os viajantes, eu conto sobre as estrelas.\n\n(Elara baixa a voz) Ela é mais forte do que parece."
+          },
+          {
+            "type": "narration",
+            "text": "Já a vi enfrentar três bêbados armados com nada além de uma concha de sopa e um olhar que gelaria o próprio Fenrir."
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém mexe com Martha no Grifo."
+          }
+        ]
+      },
+      "elara_trust_blessing": {
+        "text": "(Elara fecha os olhos e sorri, tocando o símbolo de Vorenn no peito) Eu sinto também. Quando alguém de coração puro entra neste lugar... a luz responde. (Ela estende as mãos) Permita-me compartilhar uma bênção antiga. Não é algo que ofeço a qualquer um — apenas àqueles em quem confio verdadeiramente.",
+        "choices": [
+          {
+            "text": "Aceito sua bênção com gratidão.",
+            "target": "elara_blessing_granted",
+            "once": true
+          },
+          {
+            "text": "Obrigado, Elara. Isso significa muito.",
+            "target": "start",
+            "impact": {
+              "reputation": {
+                "temple": 3
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara fecha os olhos e sorri, tocando o símbolo de Vorenn no peito) Eu sinto também."
+          },
+          {
+            "type": "narration",
+            "text": "Quando alguém de coração puro entra neste lugar... a luz responde. (Ela estende as mãos) Permita-me compartilhar uma bênção antiga."
+          },
+          {
+            "type": "narration",
+            "text": "Não é algo que ofeço a qualquer um — apenas àqueles em quem confio verdadeiramente."
+          }
+        ]
+      },
+      "elara_blessing_granted": {
+        "text": "(Elara murmura uma oração silenciosa. Uma luz dourada emana de suas mãos e envolve você por um breve momento) A Bênção do Além está sobre você agora. Se cair em combate, a luz de Vorenn te erguerá com mais força. Cuide-se, aventureiro. O mundo precisa de você.",
+        "choices": [
+          {
+            "text": "Obrigado, Elara. Não esquecerei disso.",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "spirit_blessing": true
+              },
+              "reputation": {
+                "temple": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Elara murmura uma oração silenciosa."
+          },
+          {
+            "type": "narration",
+            "text": "Uma luz dourada emana de suas mãos e envolve você por um breve momento) A Bênção do Além está sobre você agora."
+          },
+          {
+            "type": "narration",
+            "text": "Se cair em combate, a luz de Vorenn te erguerá com mais força."
+          },
+          {
+            "type": "narration",
+            "text": "Cuide-se, aventureiro."
+          },
+          {
+            "type": "narration",
+            "text": "O mundo precisa de você."
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Que a luz de Vorenn ilumine seu caminho.",
+        "Bem-vindo ao solo sagrado. Busca redenção ou orientação?",
+        "Sente o aroma do incenso? É a presença do Divino.",
+        "O templo está aberto a todos os corações puros.",
+        "O Mutilado conhece seu sacríficio. Como posso auxiliar?",
+        "A paz seja com você, filho das estrelas.",
+        "Traga suas dúvidas para o altar.",
+        "Sua jornada o trouxe até aqui por uma razão."
+      ],
+      "friendly": [
+        "Filho de Vorenn, é uma alegria vê-lo novamente!",
+        "Sua presença traz uma aura de paz ao templo.",
+        "Fico grata por sua ajuda à Eldoria. Precisa de uma bênção?",
+        "Martha diz que você tem um coração de ouro. Eu concordo.",
+        "A justiça é feita através de suas mãos. Vorenn te abençoe!",
+        "Sempre haverá um lugar para você em nossa mesa."
+      ],
+      "hostile": [
+        "Vorenn repudia suas ações, ímpio.",
+        "Não manche este solo sagrado com sua presença.",
+        "Busque o arrependimento antes que seja tarde.",
+        "Sinto a mácula em seu espírito. Afaste-se do altar.",
+        "A paciência de Vorenn é vasta, mas não infinita."
+      ]
+    },
+    "chat": [
+      "A justiça exige sacríficio, assim como Vorenn sacrificou sua mão para prender Fenrir. Não existe dever sem dor.",
+      "Andamos percebendo uma inquietação nos animais da floresta. Os corvos não cantam mais ao amanhecer.",
+      "Thorne no mercado tem uma fé surpreendente para um ferreiro. Reza todas as noites por Aris, mesmo que nunca pise aqui.",
+      "Martha é uma serva dedicada da comunidade. Sem ela, muitos passariam fome nos invernos duros.",
+      "O templo guarda registros de séculos de história. Já encontrei menções a esta corrupção nos pergaminhos antigos.",
+      "A cura começa de dentro para fora. Nenhuma poção substitui a paz de espírito.",
+      "Minha prima no mercado cura com alquimia, eu curo com fé. Ambos os caminhos têm mérito, por mais que ela discorde.",
+      "Eldoria é protegida por mais do que muros de pedra. Há selos antigos nas fundações deste templo.",
+      "A natureza e a divindade estão mais próximas do que parecem. Cada flor que desabrocha é uma oração.",
+      "O solo perto do pântano está escurecendo. Algo drena a vida da terra e se aproxima da cidade.",
+      "A retidão não é o caminho mais fácil, mas o único correto. Vejo isso nos aventureiros que sobrevivem.",
+      "A paz interior é o maior tesouro de um guerreiro. Sem ela, até a espada mais afiada falha."
+    ],
+    "insult": {
+      "neutral": [
+        "Sua blasfêmia é um insulto aos Deuses. Não proferirá tais palavras em meu templo!",
+        "Vorenn te perdoe, pois eu não posso.",
+        "Afaste-se de mim. Sua pequenez de espírito é deprimênte."
+      ],
+      "friendly": [
+        "Pensei que a luz estivesse em você. Quão decepcionada estou.",
+        "Suas palavras ferem mais que espadas. O que aconteceu com você?",
+        "Não foi isso que Vorenn te ensinou."
+      ],
+      "hostile": [
+        "Cale a boca, infiel!",
+        "Vá arder com os demônios que serve!",
+        "Sua existência é uma afronta a tudo que é sagrado!"
+      ]
+    }
+  }
+}

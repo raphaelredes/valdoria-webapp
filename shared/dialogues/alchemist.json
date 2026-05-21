@@ -1,0 +1,1861 @@
+{
+  "npc_alchemist_mirena": {
+    "timeline": [
+      {
+        "node": "mirena_curious",
+        "conditions": {
+          "flag": "met_mirena",
+          "npc_emotion": [
+            {
+              "emotion": "anticipation",
+              "min": 0.45
+            }
+          ]
+        }
+      },
+      {
+        "node": "start_confidant",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_alchemist_mirena",
+              "value": 15
+            }
+          ],
+          "min_affinity": 60
+        }
+      },
+      {
+        "node": "start_familiar",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "npc_alchemist_mirena",
+              "value": 8
+            }
+          ]
+        }
+      },
+      {
+        "node": "quest_mirena_offer",
+        "conditions": {
+          "flag": "!accepted_mirena_reagents",
+          "min_level": 2
+        }
+      },
+      {
+        "node": "quest_plague_offer",
+        "conditions": {
+          "flags": [
+            "met_mirena",
+            "!accepted_plague_cure"
+          ],
+          "min_level": 5
+        }
+      }
+    ],
+    "nodes": {
+      "mirena_curious": {
+        "text": [
+          "(Mirena se vira animada ao te ver) 'Ah, você! Perfeito! Estava justamente pensando... nas suas viagens, você encontrou algum ingrediente raro? Cogumelos luminescentes? Seiva de árvore espectral?'",
+          "(Os olhos de Mirena brilham com antecipação) 'Aventureiro! Tenho uma teoria sobre um novo elixir, mas preciso de componentes que só existem nas trilhas. Você pode me ajudar?'"
+        ],
+        "choices": [
+          {
+            "text": "Talvez eu tenha algo. O que procura?",
+            "target": "about_research",
+            "impact": {
+              "flags": {
+                "met_mirena": true
+              },
+              "reputation": {
+                "npc_alchemist_mirena": 1
+              }
+            }
+          },
+          {
+            "text": "Quero ver suas poções primeiro.",
+            "target": "exit",
+            "exit_callback": "market_visit_alchemist"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Mirena se vira animada ao te ver) 'Ah, você!"
+          },
+          {
+            "type": "narration",
+            "text": "Perfeito!"
+          },
+          {
+            "type": "narration",
+            "text": "Estava justamente pensando... nas suas viagens, você encontrou algum ingrediente raro?"
+          },
+          {
+            "type": "narration",
+            "text": "Cogumelos luminescentes?"
+          },
+          {
+            "type": "narration",
+            "text": "Seiva de árvore espectral?'"
+          },
+          {
+            "type": "narration",
+            "text": "(Os olhos de Mirena brilham com antecipação) 'Aventureiro!"
+          },
+          {
+            "type": "narration",
+            "text": "Tenho uma teoria sobre um novo elixir, mas preciso de componentes que só existem nas trilhas."
+          },
+          {
+            "type": "narration",
+            "text": "Você pode me ajudar?'"
+          }
+        ]
+      },
+      "start": {
+        "text": [
+          "Seja bem-vindo ao meu laboratório improvisado. Cuidado onde pisa, alguns desses extratos são... voláteis. Procura algo para curar o corpo ou expandir a mente?",
+          "Ah, um visitante! Não encoste no frasco azul. Ou no verde. Na verdade, não encoste em nada. O que precisa?",
+          "O cheiro forte? É enxofre destilado. Perfeitamente seguro. Para mim, pelo menos. O que traz você aqui?",
+          "Se veio reclamar de efeitos colaterais, leia o rótulo da próxima vez. Se veio comprar, estou ouvindo."
+        ],
+        "choices": [
+          {
+            "text": "O que você tem para vender?",
+            "target": "exit",
+            "exit_callback": "market_visit_alchemist"
+          },
+          {
+            "text": "O que é alquimia, exatamente?",
+            "target": "about_alchemy",
+            "once": true
+          },
+          {
+            "text": "Você conhece a Irmã Elara do templo?",
+            "target": "about_cousin",
+            "once": true
+          },
+          {
+            "text": "Até mais, alquimista.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Seja bem-vindo ao meu laboratório improvisado."
+          },
+          {
+            "type": "narration",
+            "text": "Cuidado onde pisa, alguns desses extratos são... voláteis."
+          },
+          {
+            "type": "narration",
+            "text": "Procura algo para curar o corpo ou expandir a mente?"
+          },
+          {
+            "type": "narration",
+            "text": "Ah, um visitante!"
+          },
+          {
+            "type": "narration",
+            "text": "Não encoste no frasco azul."
+          },
+          {
+            "type": "narration",
+            "text": "Ou no verde."
+          },
+          {
+            "type": "narration",
+            "text": "Na verdade, não encoste em nada."
+          },
+          {
+            "type": "narration",
+            "text": "O que precisa?"
+          },
+          {
+            "type": "narration",
+            "text": "O cheiro forte?"
+          },
+          {
+            "type": "narration",
+            "text": "É enxofre destilado."
+          },
+          {
+            "type": "narration",
+            "text": "Perfeitamente seguro."
+          },
+          {
+            "type": "narration",
+            "text": "Para mim, pelo menos."
+          },
+          {
+            "type": "narration",
+            "text": "O que traz você aqui?"
+          },
+          {
+            "type": "narration",
+            "text": "Se veio reclamar de efeitos colaterais, leia o rótulo da próxima vez."
+          },
+          {
+            "type": "narration",
+            "text": "Se veio comprar, estou ouvindo."
+          }
+        ]
+      },
+      "start_familiar": {
+        "text": [
+          "Ah, você de novo. Sabia que viria — preparei reagentes frescos hoje. O que precisa?",
+          "Meu cliente mais persistente! Ainda com todos os órgãos no lugar? Ótimo sinal.",
+          "Reconheço esse passo. Deixa eu adivinhar... poção de cura? Ou algo mais... ousado?",
+          "Bem-vindo de volta. Seus olhos estão menos injetados que da última vez. Progresso."
+        ],
+        "choices": [
+          {
+            "text": "O que você tem para vender?",
+            "target": "exit",
+            "exit_callback": "market_visit_alchemist"
+          },
+          {
+            "text": "Como andam as pesquisas?",
+            "target": "about_research",
+            "once": true
+          },
+          {
+            "text": "O que você acha do Pântano?",
+            "target": "about_swamp",
+            "once": true
+          },
+          {
+            "text": "O que acha do Thorne?",
+            "target": "about_thorne",
+            "once": true
+          },
+          {
+            "text": "E o Grom da taverna?",
+            "target": "about_grom",
+            "once": true
+          },
+          {
+            "text": "Até mais, Mirena.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, você de novo."
+          },
+          {
+            "type": "narration",
+            "text": "Sabia que viria — preparei reagentes frescos hoje."
+          },
+          {
+            "type": "narration",
+            "text": "O que precisa?"
+          },
+          {
+            "type": "narration",
+            "text": "Meu cliente mais persistente!"
+          },
+          {
+            "type": "narration",
+            "text": "Ainda com todos os órgãos no lugar?"
+          },
+          {
+            "type": "narration",
+            "text": "Ótimo sinal."
+          },
+          {
+            "type": "narration",
+            "text": "Reconheço esse passo."
+          },
+          {
+            "type": "narration",
+            "text": "Deixa eu adivinhar... poção de cura?"
+          },
+          {
+            "type": "narration",
+            "text": "Ou algo mais... ousado?"
+          },
+          {
+            "type": "narration",
+            "text": "Bem-vindo de volta."
+          },
+          {
+            "type": "narration",
+            "text": "Seus olhos estão menos injetados que da última vez."
+          },
+          {
+            "type": "narration",
+            "text": "Progresso."
+          }
+        ]
+      },
+      "start_confidant": {
+        "text": [
+          "Ah, meu colega de ciência favorito! Sente-se, tenho uma garrafa de tônico de hortelã reservada para ocasiões especiais.",
+          "Você é a única pessoa nesta cidade que não me olha como se eu fosse explodir a qualquer momento. Aprecio isso.",
+          "Sabia que sentiria seu cheiro — de batalha e estrada. Meus frascos tremem de empolgação. Ou é o ácido. Enfim, entre!",
+          "Estou contente de te ver. Não diga a ninguém que eu disse isso — tenho uma reputação a manter."
+        ],
+        "choices": [
+          {
+            "text": "O que você tem para vender?",
+            "target": "exit",
+            "exit_callback": "market_visit_alchemist"
+          },
+          {
+            "text": "Mirena... como você acabou em Eldoria?",
+            "target": "about_past",
+            "once": true
+          },
+          {
+            "text": "Ouvi uns rumores por aí...",
+            "target": "rumors_menu"
+          },
+          {
+            "text": "O Pântano me preocupa. Você notou algo?",
+            "target": "about_swamp",
+            "once": true
+          },
+          {
+            "text": "Até logo, amiga.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, meu colega de ciência favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Sente-se, tenho uma garrafa de tônico de hortelã reservada para ocasiões especiais."
+          },
+          {
+            "type": "narration",
+            "text": "Você é a única pessoa nesta cidade que não me olha como se eu fosse explodir a qualquer momento."
+          },
+          {
+            "type": "narration",
+            "text": "Aprecio isso."
+          },
+          {
+            "type": "narration",
+            "text": "Sabia que sentiria seu cheiro — de batalha e estrada."
+          },
+          {
+            "type": "narration",
+            "text": "Meus frascos tremem de empolgação."
+          },
+          {
+            "type": "narration",
+            "text": "Ou é o ácido."
+          },
+          {
+            "type": "narration",
+            "text": "Enfim, entre!"
+          },
+          {
+            "type": "narration",
+            "text": "Estou contente de te ver."
+          },
+          {
+            "type": "narration",
+            "text": "Não diga a ninguém que eu disse isso — tenho uma reputação a manter."
+          }
+        ]
+      },
+      "about_alchemy": {
+        "text": "Alquimia não é magia. Magia dobra a realidade com força de vontade. Alquimia a entende, a desmonta e a reconstrói. Um mago lança uma bola de fogo; eu destilo a essência do fogo e a coloco num frasco. Qual é mais elegante? Exatamente.",
+        "choices": [
+          {
+            "text": "Então você não usa magia?",
+            "target": "alchemy_vs_magic"
+          },
+          {
+            "text": "Interessante. Voltando ao assunto...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Alquimia não é magia."
+          },
+          {
+            "type": "narration",
+            "text": "Magia dobra a realidade com força de vontade."
+          },
+          {
+            "type": "narration",
+            "text": "Alquimia a entende, a desmonta e a reconstrói."
+          },
+          {
+            "type": "narration",
+            "text": "Um mago lança uma bola de fogo; eu destilo a essência do fogo e a coloco num frasco."
+          },
+          {
+            "type": "narration",
+            "text": "Qual é mais elegante?"
+          },
+          {
+            "type": "narration",
+            "text": "Exatamente."
+          }
+        ]
+      },
+      "alchemy_vs_magic": {
+        "text": [
+          "Eu uso princípios arcanos, sim. Mas como ferramenta, não como muleta. A diferença entre um alquimista e um mago é que eu entendo POR QUE funciona. O mago só sabe que funciona. É como a diferença entre um engenheiro e alguém que aperta botões.",
+          "Uso essência arcana como catalisador, claro. Mas cada reação segue leis naturais. Na Academia me chamavam de 'empírica'. Como se fosse insulto. Não era."
+        ],
+        "choices": [
+          {
+            "text": "Você estudou numa Academia?",
+            "target": "about_academy_hint",
+            "once": true
+          },
+          {
+            "text": "Faz sentido. Obrigado.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Eu uso princípios arcanos, sim."
+          },
+          {
+            "type": "narration",
+            "text": "Mas como ferramenta, não como muleta."
+          },
+          {
+            "type": "narration",
+            "text": "A diferença entre um alquimista e um mago é que eu entendo POR QUE funciona."
+          },
+          {
+            "type": "narration",
+            "text": "O mago só sabe que funciona."
+          },
+          {
+            "type": "narration",
+            "text": "É como a diferença entre um engenheiro e alguém que aperta botões."
+          },
+          {
+            "type": "narration",
+            "text": "Uso essência arcana como catalisador, claro."
+          },
+          {
+            "type": "narration",
+            "text": "Mas cada reação segue leis naturais."
+          },
+          {
+            "type": "narration",
+            "text": "Na Academia me chamavam de 'empírica'."
+          },
+          {
+            "type": "narration",
+            "text": "Como se fosse insulto."
+          },
+          {
+            "type": "narration",
+            "text": "Não era."
+          }
+        ]
+      },
+      "about_academy_hint": {
+        "text": "Sim. A Academia Arcana de Thal'varen. Faz... muitos anos. Não saiu como eu esperava. Mas aprendi o suficiente para sobreviver por conta própria. Às vezes, a melhor educação é a que te expulsa.",
+        "choices": [
+          {
+            "text": "Expulsa? O que aconteceu?",
+            "target": "academy_deflect"
+          },
+          {
+            "text": "Não precisa falar sobre isso.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Sim."
+          },
+          {
+            "type": "narration",
+            "text": "A Academia Arcana de Thal'varen."
+          },
+          {
+            "type": "narration",
+            "text": "Faz... muitos anos."
+          },
+          {
+            "type": "narration",
+            "text": "Não saiu como eu esperava."
+          },
+          {
+            "type": "narration",
+            "text": "Mas aprendi o suficiente para sobreviver por conta própria."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes, a melhor educação é a que te expulsa."
+          }
+        ]
+      },
+      "academy_deflect": {
+        "text": "Essa história requer mais confiança do que temos... por enquanto. Volte quando nos conhecermos melhor. Tenho pólvora para misturar.",
+        "choices": [
+          {
+            "text": "Entendo. Mudando de assunto...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Essa história requer mais confiança do que temos... por enquanto."
+          },
+          {
+            "type": "narration",
+            "text": "Volte quando nos conhecermos melhor."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho pólvora para misturar."
+          }
+        ]
+      },
+      "about_past": {
+        "text": "Thal'varen. A Academia Arcana. Eu era a aluna mais brilhante da minha turma. E a mais problemática. Experimentei com alquimia transmutativa — o tipo que eles proibiam. Não porque fosse perigoso. Porque funcionava BEM DEMAIS. Os mestres tinham medo do que eu poderia criar.",
+        "choices": [
+          {
+            "text": "O que você criou?",
+            "target": "past_creation"
+          },
+          {
+            "text": "E eles te expulsaram por isso?",
+            "target": "past_expulsion"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Thal'varen."
+          },
+          {
+            "type": "narration",
+            "text": "A Academia Arcana."
+          },
+          {
+            "type": "narration",
+            "text": "Eu era a aluna mais brilhante da minha turma."
+          },
+          {
+            "type": "narration",
+            "text": "E a mais problemática."
+          },
+          {
+            "type": "narration",
+            "text": "Experimentei com alquimia transmutativa — o tipo que eles proibiam."
+          },
+          {
+            "type": "narration",
+            "text": "Não porque fosse perigoso."
+          },
+          {
+            "type": "narration",
+            "text": "Porque funcionava BEM DEMAIS."
+          },
+          {
+            "type": "narration",
+            "text": "Os mestres tinham medo do que eu poderia criar."
+          }
+        ]
+      },
+      "past_creation": {
+        "text": "Um elixir que acelerava a regeneração celular. Curava feridas em minutos. Ossos em horas. Mas tinha efeitos... imprevisíveis, em doses altas. Um dos cobaias — voluntário, devo dizer — ficou com a pele azul por duas semanas. Perfeitamente saudável, mas azul. O Conselho não achou graça.",
+        "choices": [
+          {
+            "text": "E eles te expulsaram por isso?",
+            "target": "past_expulsion"
+          },
+          {
+            "text": "A pele voltou ao normal?",
+            "target": "past_blue_skin"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Um elixir que acelerava a regeneração celular."
+          },
+          {
+            "type": "narration",
+            "text": "Curava feridas em minutos."
+          },
+          {
+            "type": "narration",
+            "text": "Ossos em horas."
+          },
+          {
+            "type": "narration",
+            "text": "Mas tinha efeitos... imprevisíveis, em doses altas."
+          },
+          {
+            "type": "narration",
+            "text": "Um dos cobaias — voluntário, devo dizer — ficou com a pele azul por duas semanas."
+          },
+          {
+            "type": "narration",
+            "text": "Perfeitamente saudável, mas azul."
+          },
+          {
+            "type": "narration",
+            "text": "O Conselho não achou graça."
+          }
+        ]
+      },
+      "past_blue_skin": {
+        "text": "Sim, sim. Depois de quatorze dias e muita reclamação. Ele até gostou no final — disse que combinava com os olhos. Mas o Conselho já estava procurando desculpas para se livrar de mim. Uma alquimista que desafia dogmas é perigosa. Para egos, pelo menos.",
+        "choices": [
+          {
+            "text": "Você sente falta da Academia?",
+            "target": "past_regret"
+          },
+          {
+            "text": "Mudando de assunto...",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Sim, sim."
+          },
+          {
+            "type": "narration",
+            "text": "Depois de quatorze dias e muita reclamação."
+          },
+          {
+            "type": "narration",
+            "text": "Ele até gostou no final — disse que combinava com os olhos."
+          },
+          {
+            "type": "narration",
+            "text": "Mas o Conselho já estava procurando desculpas para se livrar de mim."
+          },
+          {
+            "type": "narration",
+            "text": "Uma alquimista que desafia dogmas é perigosa."
+          },
+          {
+            "type": "narration",
+            "text": "Para egos, pelo menos."
+          }
+        ]
+      },
+      "past_expulsion": {
+        "text": "\"Conduta incompatível com os princípios da instituição.\" Foi o que escreveram. O que queriam dizer era: 'Você nos assusta.' Saí com uma mochila, três frascos de reagente e uma raiva que durou anos. Depois a raiva virou determinação. É um catalisador melhor.",
+        "choices": [
+          {
+            "text": "Você sente falta da Academia?",
+            "target": "past_regret"
+          },
+          {
+            "text": "E como veio parar em Eldoria?",
+            "target": "past_eldoria"
+          }
+        ],
+        "script": [
+          {
+            "type": "speech",
+            "text": "\"Conduta incompatível com os princípios da instituição.\" Foi o que escreveram.",
+            "speaker": "Alquimista"
+          },
+          {
+            "type": "narration",
+            "text": "O que queriam dizer era: 'Você nos assusta.' Saí com uma mochila, três frascos de reagente e uma raiva que durou anos."
+          },
+          {
+            "type": "narration",
+            "text": "Depois a raiva virou determinação."
+          },
+          {
+            "type": "narration",
+            "text": "É um catalisador melhor."
+          }
+        ]
+      },
+      "past_regret": {
+        "text": [
+          "Mirena fica em silêncio por um momento, mexendo num frasco sem olhar para você. \"Sinto falta da biblioteca. Tinham textos que não existem em nenhum outro lugar. E do meu mestre, Archon Delvaris. Ele era o único que me entendia. Soube que morreu dois invernos depois que saí.\" Ela limpa uma gota invisível do balcão. \"Às vezes me pergunto se eu tivesse ficado... se ele teria...\" Ela sacude a cabeça. \"Não importa. O passado não se destila.\"",
+          "Saudade não é um reagente útil. Me deixa imprecisa. Então... não, não sinto falta. Eu minto bem, não?"
+        ],
+        "choices": [
+          {
+            "text": "Você não precisa ser forte o tempo todo.",
+            "target": "past_vulnerable"
+          },
+          {
+            "text": "Mudando de assunto...",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena fica em silêncio por um momento, mexendo num frasco sem olhar para você."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sinto falta da biblioteca."
+          },
+          {
+            "type": "narration",
+            "text": "Tinham textos que não existem em nenhum outro lugar."
+          },
+          {
+            "type": "narration",
+            "text": "E do meu mestre, Archon Delvaris."
+          },
+          {
+            "type": "narration",
+            "text": "Ele era o único que me entendia."
+          },
+          {
+            "type": "narration",
+            "text": "Soube que morreu dois invernos depois que saí.\" Ela limpa uma gota invisível do balcão."
+          },
+          {
+            "type": "speech",
+            "text": "\"Às vezes me pergunto se eu tivesse ficado... se ele teria...\" Ela sacude a cabeça.",
+            "speaker": "Alquimista"
+          },
+          {
+            "type": "narration",
+            "text": "\"Não importa."
+          },
+          {
+            "type": "narration",
+            "text": "O passado não se destila.\""
+          },
+          {
+            "type": "narration",
+            "text": "Saudade não é um reagente útil."
+          },
+          {
+            "type": "narration",
+            "text": "Me deixa imprecisa."
+          },
+          {
+            "type": "narration",
+            "text": "Então... não, não sinto falta."
+          },
+          {
+            "type": "narration",
+            "text": "Eu minto bem, não?"
+          }
+        ]
+      },
+      "past_vulnerable": {
+        "text": "Mirena pisca rápido, desviando o olhar. \"Não me faça chorar perto do ácido fórmico. Seria uma péssima combinação.\" Ela ri com os olhos úmidos. \"Obrigada. De verdade. Agora vá embora antes que eu me arrependa de ter aberto a boca.\"",
+        "choices": [
+          {
+            "text": "Obrigado por confiar em mim.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena pisca rápido, desviando o olhar."
+          },
+          {
+            "type": "narration",
+            "text": "\"Não me faça chorar perto do ácido fórmico."
+          },
+          {
+            "type": "narration",
+            "text": "Seria uma péssima combinação.\" Ela ri com os olhos úmidos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Obrigada."
+          },
+          {
+            "type": "narration",
+            "text": "De verdade."
+          },
+          {
+            "type": "narration",
+            "text": "Agora vá embora antes que eu me arrependa de ter aberto a boca.\""
+          }
+        ]
+      },
+      "past_eldoria": {
+        "text": "Viajei por três anos vendendo poções de estrada em estrada. Quando cheguei aqui, senti o solo. Rico em minerais alquímicos — pirita, enxofre nativo, sal-gema em veios profundos. E minha prima trabalhava no templo. Foi o mais perto de 'lar' que encontrei desde Thal'varen.",
+        "choices": [
+          {
+            "text": "Você e a Irmã Elara se dão bem?",
+            "target": "about_cousin"
+          },
+          {
+            "text": "Obrigado por compartilhar. Voltemos aos negócios.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Viajei por três anos vendendo poções de estrada em estrada."
+          },
+          {
+            "type": "narration",
+            "text": "Quando cheguei aqui, senti o solo."
+          },
+          {
+            "type": "narration",
+            "text": "Rico em minerais alquímicos — pirita, enxofre nativo, sal-gema em veios profundos."
+          },
+          {
+            "type": "narration",
+            "text": "E minha prima trabalhava no templo."
+          },
+          {
+            "type": "narration",
+            "text": "Foi o mais perto de 'lar' que encontrei desde Thal'varen."
+          }
+        ]
+      },
+      "about_cousin": {
+        "text": [
+          "Minha prima. Ela cuida das almas com orações, eu cuido do sangue com alquimia. Ela me acha herege, eu a acho ingênua. Mas quando um guarda chegou com o braço destroçado, foi ela quem rezou enquanto eu costurava. Funcionou. Caminhos diferentes para o mesmo fim.",
+          "A Irmã Elara é tudo que eu não sou: paciente, devota, gentil. E tudo que eu admiro em segredo. Se você contar isso a ela, vou negar e colocar laxante na sua próxima poção."
+        ],
+        "choices": [
+          {
+            "text": "Parece que se importa com ela, no fundo.",
+            "target": "cousin_affection"
+          },
+          {
+            "text": "Entendo. Mudando de assunto...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Minha prima."
+          },
+          {
+            "type": "narration",
+            "text": "Ela cuida das almas com orações, eu cuido do sangue com alquimia."
+          },
+          {
+            "type": "narration",
+            "text": "Ela me acha herege, eu a acho ingênua."
+          },
+          {
+            "type": "narration",
+            "text": "Mas quando um guarda chegou com o braço destroçado, foi ela quem rezou enquanto eu costurava."
+          },
+          {
+            "type": "narration",
+            "text": "Funcionou."
+          },
+          {
+            "type": "narration",
+            "text": "Caminhos diferentes para o mesmo fim."
+          },
+          {
+            "type": "narration",
+            "text": "A Irmã Elara é tudo que eu não sou: paciente, devota, gentil."
+          },
+          {
+            "type": "narration",
+            "text": "E tudo que eu admiro em segredo."
+          },
+          {
+            "type": "narration",
+            "text": "Se você contar isso a ela, vou negar e colocar laxante na sua próxima poção."
+          }
+        ]
+      },
+      "cousin_affection": {
+        "text": "Mirena cruza os braços. \"Importar é uma palavra forte. Digamos que... prefiro um mundo onde ela existe. Pronto. É o máximo que vai arrancar de mim.\"",
+        "choices": [
+          {
+            "text": "Guardei segredo. Voltando...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena cruza os braços."
+          },
+          {
+            "type": "narration",
+            "text": "\"Importar é uma palavra forte."
+          },
+          {
+            "type": "narration",
+            "text": "Digamos que... prefiro um mundo onde ela existe."
+          },
+          {
+            "type": "narration",
+            "text": "Pronto."
+          },
+          {
+            "type": "narration",
+            "text": "É o máximo que vai arrancar de mim.\""
+          }
+        ]
+      },
+      "about_swamp": {
+        "text": [
+          "O Pântano de Valdoria está doente. Não como uma pessoa fica doente — como um organismo inteiro entra em colapso. As raízes têm veios roxos que pulsam. A água cristaliza em padrões hexagonais. E os cogumelos... os cogumelos estão crescendo rápido demais.",
+          "Coletei amostras do Pântano. Analisei a água, o solo, as raízes. A corrupção não é natural. Segue um padrão. Como se alguém — ou algo — estivesse alimentando-a deliberadamente."
+        ],
+        "choices": [
+          {
+            "text": "Você acha que alguém está fazendo isso de propósito?",
+            "target": "swamp_theory"
+          },
+          {
+            "text": "Preocupante. Mudando de assunto...",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O Pântano de Valdoria está doente."
+          },
+          {
+            "type": "narration",
+            "text": "Não como uma pessoa fica doente — como um organismo inteiro entra em colapso."
+          },
+          {
+            "type": "narration",
+            "text": "As raízes têm veios roxos que pulsam."
+          },
+          {
+            "type": "narration",
+            "text": "A água cristaliza em padrões hexagonais."
+          },
+          {
+            "type": "narration",
+            "text": "E os cogumelos... os cogumelos estão crescendo rápido demais."
+          },
+          {
+            "type": "narration",
+            "text": "Coletei amostras do Pântano."
+          },
+          {
+            "type": "narration",
+            "text": "Analisei a água, o solo, as raízes."
+          },
+          {
+            "type": "narration",
+            "text": "A corrupção não é natural."
+          },
+          {
+            "type": "narration",
+            "text": "Segue um padrão."
+          },
+          {
+            "type": "narration",
+            "text": "Como se alguém — ou algo — estivesse alimentando-a deliberadamente."
+          }
+        ]
+      },
+      "swamp_theory": {
+        "text": "Não tenho provas. Mas a dispersão segue um eixo — de noroeste para sudeste, como se houvesse uma fonte. E certas amostras contêm traços de essência necrótica. Não o tipo que ocorre naturalmente. O tipo que é destilado. Por alguém que sabe o que está fazendo. Me preocupo, porque reconheço a técnica.",
+        "choices": [
+          {
+            "text": "Reconhece a técnica? Como assim?",
+            "target": "swamp_connection"
+          },
+          {
+            "text": "Vou ficar de olho. Obrigado.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Não tenho provas."
+          },
+          {
+            "type": "narration",
+            "text": "Mas a dispersão segue um eixo — de noroeste para sudeste, como se houvesse uma fonte."
+          },
+          {
+            "type": "narration",
+            "text": "E certas amostras contêm traços de essência necrótica."
+          },
+          {
+            "type": "narration",
+            "text": "Não o tipo que ocorre naturalmente."
+          },
+          {
+            "type": "narration",
+            "text": "O tipo que é destilado."
+          },
+          {
+            "type": "narration",
+            "text": "Por alguém que sabe o que está fazendo."
+          },
+          {
+            "type": "narration",
+            "text": "Me preocupo, porque reconheço a técnica."
+          }
+        ]
+      },
+      "swamp_connection": {
+        "text": "Mirena hesita. \"Na Academia... havia um departamento proibido. Transmutação Orgânica. Eu nunca fui lá — oficialmente. Mas as notas de campo que analisei do Pântano... lembram aquela escola. Alguém formado em Thal'varen pode estar por trás disso.\" Ela aperta os lábios. \"Ou eu estou paranóica. Também é possível.\"",
+        "choices": [
+          {
+            "text": "Se eu encontrar algo no Pântano, aviso você.",
+            "target": "swamp_promise"
+          },
+          {
+            "text": "Melhor não especular sem provas.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena hesita."
+          },
+          {
+            "type": "narration",
+            "text": "\"Na Academia... havia um departamento proibido."
+          },
+          {
+            "type": "narration",
+            "text": "Transmutação Orgânica."
+          },
+          {
+            "type": "narration",
+            "text": "Eu nunca fui lá — oficialmente."
+          },
+          {
+            "type": "narration",
+            "text": "Mas as notas de campo que analisei do Pântano... lembram aquela escola."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém formado em Thal'varen pode estar por trás disso.\" Ela aperta os lábios."
+          },
+          {
+            "type": "narration",
+            "text": "\"Ou eu estou paranóica."
+          },
+          {
+            "type": "narration",
+            "text": "Também é possível.\""
+          }
+        ]
+      },
+      "swamp_promise": {
+        "text": "Faça isso. Traga amostras se puder — raízes, água, cogumelos. Qualquer coisa anômala. Se minha teoria estiver certa, Eldoria precisa saber. E se eu estiver errada... bem, ganho ingredientes grátis.",
+        "choices": [
+          {
+            "text": "Combinado.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Faça isso."
+          },
+          {
+            "type": "narration",
+            "text": "Traga amostras se puder — raízes, água, cogumelos."
+          },
+          {
+            "type": "narration",
+            "text": "Qualquer coisa anômala."
+          },
+          {
+            "type": "narration",
+            "text": "Se minha teoria estiver certa, Eldoria precisa saber."
+          },
+          {
+            "type": "narration",
+            "text": "E se eu estiver errada... bem, ganho ingredientes grátis."
+          }
+        ]
+      },
+      "about_research": {
+        "text": [
+          "Estou trabalhando num estabilizador para poções de mana. O problema é a cristalização prematura — uma gota a mais de essência arcana e o frasco todo solidifica. Mas estou perto de uma solução usando extrato de samambaia-lunar.",
+          "Descobri que cinzas vulcânicas misturadas com seiva de carvalho-negro criam uma base térmica que mantém poções estáveis por três vezes mais tempo. Thorne quase teve um infarto quando pedi acesso à forja dele para testar temperaturas."
+        ],
+        "choices": [
+          {
+            "text": "Você acha que vai conseguir?",
+            "target": "research_optimism"
+          },
+          {
+            "text": "Interessante. Voltemos ao comércio.",
+            "target": "start_familiar"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Estou trabalhando num estabilizador para poções de mana."
+          },
+          {
+            "type": "narration",
+            "text": "O problema é a cristalização prematura — uma gota a mais de essência arcana e o frasco todo solidifica."
+          },
+          {
+            "type": "narration",
+            "text": "Mas estou perto de uma solução usando extrato de samambaia-lunar."
+          },
+          {
+            "type": "narration",
+            "text": "Descobri que cinzas vulcânicas misturadas com seiva de carvalho-negro criam uma base térmica que mantém poções estáveis por três vezes mais tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne quase teve um infarto quando pedi acesso à forja dele para testar temperaturas."
+          }
+        ]
+      },
+      "research_optimism": {
+        "text": "Se não conseguir, expludo tentando. De qualquer forma, a ciência avança. Meu mestre dizia: 'Não existe experimento fracassado. Existe experimento que ensina a não repetir.' Sábio. E parcialmente careca por causa dos próprios conselhos.",
+        "choices": [
+          {
+            "text": "Admiro sua determinação.",
+            "target": "start_familiar"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Se não conseguir, expludo tentando."
+          },
+          {
+            "type": "narration",
+            "text": "De qualquer forma, a ciência avança."
+          },
+          {
+            "type": "narration",
+            "text": "Meu mestre dizia: 'Não existe experimento fracassado."
+          },
+          {
+            "type": "narration",
+            "text": "Existe experimento que ensina a não repetir.' Sábio."
+          },
+          {
+            "type": "narration",
+            "text": "E parcialmente careca por causa dos próprios conselhos."
+          }
+        ]
+      },
+      "about_thorne": {
+        "text": "Thorne? Competente. Grosso como lixa, mas competente. O aço que ele tempera é de primeira qualidade — uso nas minhas destilações. Já discutimos sobre temperatura ideal de fusão por três horas. Eu ganhei. Ele nega até hoje.",
+        "choices": [
+          {
+            "text": "Vocês são amigos, então?",
+            "target": "thorne_friendship"
+          },
+          {
+            "text": "Voltando ao assunto...",
+            "target": "start_familiar"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Thorne?"
+          },
+          {
+            "type": "narration",
+            "text": "Competente."
+          },
+          {
+            "type": "narration",
+            "text": "Grosso como lixa, mas competente."
+          },
+          {
+            "type": "narration",
+            "text": "O aço que ele tempera é de primeira qualidade — uso nas minhas destilações."
+          },
+          {
+            "type": "narration",
+            "text": "Já discutimos sobre temperatura ideal de fusão por três horas."
+          },
+          {
+            "type": "narration",
+            "text": "Eu ganhei."
+          },
+          {
+            "type": "narration",
+            "text": "Ele nega até hoje."
+          }
+        ]
+      },
+      "thorne_friendship": {
+        "text": "\"Amigos\" é forte. Colegas de ofício que se respeitam. Ele forja, eu destilo. Juntos somos a infraestrutura alquímico-metalúrgica de Eldoria. Parece importante quando digo assim, não?",
+        "choices": [
+          {
+            "text": "Com certeza. Mudando de assunto...",
+            "target": "start_familiar"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "\"Amigos\" é forte."
+          },
+          {
+            "type": "narration",
+            "text": "Colegas de ofício que se respeitam."
+          },
+          {
+            "type": "narration",
+            "text": "Ele forja, eu destilo."
+          },
+          {
+            "type": "narration",
+            "text": "Juntos somos a infraestrutura alquímico-metalúrgica de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Parece importante quando digo assim, não?"
+          }
+        ]
+      },
+      "about_grom": {
+        "text": "O taverneiro? Um desperdício de talento culinário afogado em álcool. Mas seus caldos de carne têm propriedades surpreendentemente medicinais. Já usei como base para um tônico restaurador. Ele ficou lisonjeado. Depois me cobrou pelo caldo. Típico.",
+        "choices": [
+          {
+            "text": "Pelo menos funciona!",
+            "target": "start_familiar"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O taverneiro?"
+          },
+          {
+            "type": "narration",
+            "text": "Um desperdício de talento culinário afogado em álcool."
+          },
+          {
+            "type": "narration",
+            "text": "Mas seus caldos de carne têm propriedades surpreendentemente medicinais."
+          },
+          {
+            "type": "narration",
+            "text": "Já usei como base para um tônico restaurador."
+          },
+          {
+            "type": "narration",
+            "text": "Ele ficou lisonjeado."
+          },
+          {
+            "type": "narration",
+            "text": "Depois me cobrou pelo caldo."
+          },
+          {
+            "type": "narration",
+            "text": "Típico."
+          }
+        ]
+      },
+      "rumors_menu": {
+        "text": "Rumores? Tenho frascos cheios deles. Qual categoria: estranho, preocupante, ou potencialmente fatal?",
+        "choices": [
+          {
+            "text": "Me conte algo estranho.",
+            "target": "rumor_strange",
+            "once": true
+          },
+          {
+            "text": "O que é preocupante?",
+            "target": "rumor_concerning",
+            "once": true
+          },
+          {
+            "text": "O fatal, por favor.",
+            "target": "rumor_dangerous",
+            "once": true
+          },
+          {
+            "text": "Deixa pra lá.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Rumores?"
+          },
+          {
+            "type": "narration",
+            "text": "Tenho frascos cheios deles."
+          },
+          {
+            "type": "narration",
+            "text": "Qual categoria: estranho, preocupante, ou potencialmente fatal?"
+          }
+        ]
+      },
+      "rumor_strange": {
+        "text": "Os ratos do esgoto estão ficando maiores. Não \"um pouco maiores\" — do tamanho de gatos. E mais espertos. Um deles derrubou meu frasco de essência de prata na semana passada. Essência de prata! Aquilo custa uma fortuna. Juro que o rato me olhou com satisfação.",
+        "choices": [
+          {
+            "text": "Ratos inteligentes? Isso é normal?",
+            "target": "rumor_rats_detail"
+          },
+          {
+            "text": "Mais algum rumor?",
+            "target": "rumors_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Os ratos do esgoto estão ficando maiores."
+          },
+          {
+            "type": "narration",
+            "text": "Não \"um pouco maiores\" — do tamanho de gatos."
+          },
+          {
+            "type": "narration",
+            "text": "E mais espertos."
+          },
+          {
+            "type": "narration",
+            "text": "Um deles derrubou meu frasco de essência de prata na semana passada."
+          },
+          {
+            "type": "narration",
+            "text": "Essência de prata!"
+          },
+          {
+            "type": "narration",
+            "text": "Aquilo custa uma fortuna."
+          },
+          {
+            "type": "narration",
+            "text": "Juro que o rato me olhou com satisfação."
+          }
+        ]
+      },
+      "rumor_rats_detail": {
+        "text": "Normal para Eldoria? Não. Normal para uma cidade sobre solo alquímico ativo, perto de um pântano corrupto, com ruínas anômalas nas colinas? ...Talvez. Este lugar é um barril de pólvora disfarçado de cidadezinha. E eu adoro pólvora.",
+        "choices": [
+          {
+            "text": "Reconfortante. Mais algum rumor?",
+            "target": "rumors_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Normal para Eldoria?"
+          },
+          {
+            "type": "narration",
+            "text": "Não."
+          },
+          {
+            "type": "narration",
+            "text": "Normal para uma cidade sobre solo alquímico ativo, perto de um pântano corrupto, com ruínas anômalas nas colinas? ...Talvez."
+          },
+          {
+            "type": "narration",
+            "text": "Este lugar é um barril de pólvora disfarçado de cidadezinha."
+          },
+          {
+            "type": "narration",
+            "text": "E eu adoro pólvora."
+          }
+        ]
+      },
+      "rumor_concerning": {
+        "text": "Os guardas encontraram símbolos gravados nas pedras perto do portão sul. Padrões que se parecem com circuitos alquímicos antigos. O capitão mandou cobrir com argamassa. Eu teria mandado estudar. Mas ninguém me pergunta nada.",
+        "choices": [
+          {
+            "text": "Que tipo de circuitos?",
+            "target": "rumor_symbols_detail"
+          },
+          {
+            "text": "Mais algum rumor?",
+            "target": "rumors_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Os guardas encontraram símbolos gravados nas pedras perto do portão sul."
+          },
+          {
+            "type": "narration",
+            "text": "Padrões que se parecem com circuitos alquímicos antigos."
+          },
+          {
+            "type": "narration",
+            "text": "O capitão mandou cobrir com argamassa."
+          },
+          {
+            "type": "narration",
+            "text": "Eu teria mandado estudar."
+          },
+          {
+            "type": "narration",
+            "text": "Mas ninguém me pergunta nada."
+          }
+        ]
+      },
+      "rumor_symbols_detail": {
+        "text": "Do tipo que eram usados para canalizar energia entre pontos fixos. Se os símbolos formam uma rede... alguém estava construindo um condutor. Para quê, não sei. Mas não é coisa de amador.",
+        "choices": [
+          {
+            "text": "Vou investigar. Mais algum rumor?",
+            "target": "rumors_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Do tipo que eram usados para canalizar energia entre pontos fixos."
+          },
+          {
+            "type": "narration",
+            "text": "Se os símbolos formam uma rede... alguém estava construindo um condutor."
+          },
+          {
+            "type": "narration",
+            "text": "Para quê, não sei."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não é coisa de amador."
+          }
+        ]
+      },
+      "rumor_dangerous": {
+        "text": "Mirena abaixa a voz. \"Lyra, a herborista, me trouxe uma raiz que não deveria existir. Veios prateados, pulsação rítmica, e quando cortei... sangrou. A raiz sangrou. Não seiva. Sangue. Mandei ela não voltar àquela parte da floresta.\"",
+        "choices": [
+          {
+            "text": "Uma raiz que sangra? Onde foi isso?",
+            "target": "rumor_root_location"
+          },
+          {
+            "text": "Isso é perturbador. Mais algum rumor?",
+            "target": "rumors_menu"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena abaixa a voz."
+          },
+          {
+            "type": "narration",
+            "text": "\"Lyra, a herborista, me trouxe uma raiz que não deveria existir."
+          },
+          {
+            "type": "narration",
+            "text": "Veios prateados, pulsação rítmica, e quando cortei... sangrou."
+          },
+          {
+            "type": "narration",
+            "text": "A raiz sangrou."
+          },
+          {
+            "type": "narration",
+            "text": "Não seiva."
+          },
+          {
+            "type": "narration",
+            "text": "Sangue."
+          },
+          {
+            "type": "narration",
+            "text": "Mandei ela não voltar àquela parte da floresta.\""
+          }
+        ]
+      },
+      "rumor_root_location": {
+        "text": "Na borda norte da Floresta Negra, perto de onde o Pântano começa a invadir. A fronteira entre os dois biomas está se movendo. Lentamente, mas está. E onde se encontram... a natureza faz coisas que não deveria.",
+        "choices": [
+          {
+            "text": "Vou ficar atento.",
+            "target": "start_confidant"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Na borda norte da Floresta Negra, perto de onde o Pântano começa a invadir."
+          },
+          {
+            "type": "narration",
+            "text": "A fronteira entre os dois biomas está se movendo."
+          },
+          {
+            "type": "narration",
+            "text": "Lentamente, mas está."
+          },
+          {
+            "type": "narration",
+            "text": "E onde se encontram... a natureza faz coisas que não deveria."
+          }
+        ]
+      },
+      "quest_mirena_offer": {
+        "text": "Mirena está debruçada sobre um frasco borbulhante, mas ergue os olhos ao te ver. Há uma urgência incomum no seu olhar.\n\n\"Preciso de ajuda. Estou desenvolvendo um elixir de resistência, mas faltam os ingredientes cruciais: cogumelos luminescentes. Crescem nas profundezas do pântano, em troncos apodrecidos. Brilham com uma luz azulada.\"\n\nEla cruza os braços.\n\n\"O problema? A coleta é perigosa. Os esporos são tóxicos, e as criaturas do pântano não gostam de visitantes. Eu iria pessoalmente, mas...\" Ela gesticula para os frascos ao redor. \"Se eu parar, tudo isso cristaliza. Pago bem e você fica com uma Poção de Resistência como bônus.\"",
+        "choices": [
+          {
+            "text": "📜 Considere feito, Mirena.",
+            "target": "quest_mirena_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_mirena_reagents": true
+              },
+              "quests": [
+                "quest_mirena_reagents"
+              ],
+              "reputation": {
+                "npc_alchemist_mirena": 2
+              }
+            }
+          },
+          {
+            "text": "Não agora. Talvez depois.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena está debruçada sobre um frasco borbulhante, mas ergue os olhos ao te ver."
+          },
+          {
+            "type": "narration",
+            "text": "Há uma urgência incomum no seu olhar."
+          },
+          {
+            "type": "narration",
+            "text": "\"Preciso de ajuda."
+          },
+          {
+            "type": "narration",
+            "text": "Estou desenvolvendo um elixir de resistência, mas faltam os ingredientes cruciais: cogumelos luminescentes."
+          },
+          {
+            "type": "narration",
+            "text": "Crescem nas profundezas do pântano, em troncos apodrecidos."
+          },
+          {
+            "type": "narration",
+            "text": "Brilham com uma luz azulada.\"\n\nEla cruza os braços."
+          },
+          {
+            "type": "narration",
+            "text": "\"O problema?"
+          },
+          {
+            "type": "narration",
+            "text": "A coleta é perigosa."
+          },
+          {
+            "type": "narration",
+            "text": "Os esporos são tóxicos, e as criaturas do pântano não gostam de visitantes."
+          },
+          {
+            "type": "narration",
+            "text": "Eu iria pessoalmente, mas...\" Ela gesticula para os frascos ao redor."
+          },
+          {
+            "type": "narration",
+            "text": "\"Se eu parar, tudo isso cristaliza."
+          },
+          {
+            "type": "narration",
+            "text": "Pago bem e você fica com uma Poção de Resistência como bônus.\""
+          }
+        ]
+      },
+      "quest_plague_offer": {
+        "text": "Mirena ergue os olhos de um caldeirão borbulhante, o rosto tenso.\n\n\"Um mensageiro chegou ao amanhecer. Um vilarejo ao sul está sendo devastado por uma praga — febre negra, pústulas, morte em dias. A única cura conhecida usa Raiz de Lua.\"\n\nEla aponta para três frascos selados na prateleira.\n\n\"Aquilo ali é meu estoque inteiro. Já prometi essas doses para três pacientes terminais aqui em Eldoria. Se eu usar para o vilarejo, eles morrem. Se não usar...\" Ela esfrega os olhos. \"Dezenas morrem lá fora.\"\n\nMirena te olha com urgência.\n\n\"Preciso de alguém que investigue a origem dessa praga. Talvez haja outra solução que eu não esteja vendo. Você topa?\"",
+        "choices": [
+          {
+            "text": "📜 Aceitar: investigar a praga no vilarejo.",
+            "target": "quest_plague_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_plague_cure": true
+              },
+              "quests": [
+                "quest_moral_plague_cure"
+              ],
+              "reputation": {
+                "npc_alchemist_mirena": 2
+              }
+            }
+          },
+          {
+            "text": "Não posso ajudar agora.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena ergue os olhos de um caldeirão borbulhante, o rosto tenso."
+          },
+          {
+            "type": "narration",
+            "text": "\"Um mensageiro chegou ao amanhecer."
+          },
+          {
+            "type": "narration",
+            "text": "Um vilarejo ao sul está sendo devastado por uma praga — febre negra, pústulas, morte em dias."
+          },
+          {
+            "type": "narration",
+            "text": "A única cura conhecida usa Raiz de Lua.\"\n\nEla aponta para três frascos selados na prateleira."
+          },
+          {
+            "type": "narration",
+            "text": "\"Aquilo ali é meu estoque inteiro."
+          },
+          {
+            "type": "narration",
+            "text": "Já prometi essas doses para três pacientes terminais aqui em Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Se eu usar para o vilarejo, eles morrem."
+          },
+          {
+            "type": "narration",
+            "text": "Se não usar...\" Ela esfrega os olhos."
+          },
+          {
+            "type": "narration",
+            "text": "\"Dezenas morrem lá fora.\"\n\nMirena te olha com urgência."
+          },
+          {
+            "type": "narration",
+            "text": "\"Preciso de alguém que investigue a origem dessa praga."
+          },
+          {
+            "type": "narration",
+            "text": "Talvez haja outra solução que eu não esteja vendo."
+          },
+          {
+            "type": "narration",
+            "text": "Você topa?\""
+          }
+        ]
+      },
+      "quest_plague_accepted": {
+        "text": "Mirena suspira, aliviada por ter ajuda.\n\n\"O vilarejo fica ao sul, no limite do pântano. Comece investigando a fonte d'água — pragas assim costumam ter origem contaminante. Converse com os sobreviventes, veja se algo mudou recentemente.\"\n\nEla entrega um frasco pequeno com líquido âmbar.\n\n\"Isso é um antisséptico. Não cura a praga, mas protege você enquanto investiga. E... tente encontrar uma alternativa à Raiz de Lua. Não quero ter que escolher quem vive e quem morre.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena suspira, aliviada por ter ajuda."
+          },
+          {
+            "type": "narration",
+            "text": "\"O vilarejo fica ao sul, no limite do pântano."
+          },
+          {
+            "type": "narration",
+            "text": "Comece investigando a fonte d'água — pragas assim costumam ter origem contaminante."
+          },
+          {
+            "type": "narration",
+            "text": "Converse com os sobreviventes, veja se algo mudou recentemente.\"\n\nEla entrega um frasco pequeno com líquido âmbar."
+          },
+          {
+            "type": "narration",
+            "text": "\"Isso é um antisséptico."
+          },
+          {
+            "type": "narration",
+            "text": "Não cura a praga, mas protege você enquanto investiga."
+          },
+          {
+            "type": "narration",
+            "text": "E... tente encontrar uma alternativa à Raiz de Lua."
+          },
+          {
+            "type": "narration",
+            "text": "Não quero ter que escolher quem vive e quem morre.\""
+          }
+        ]
+      },
+      "quest_mirena_accepted": {
+        "text": "Mirena abre um sorriso satisfeito.\n\n\"Sabia que você tinha bom senso. Ou falta dele — o que dá no mesmo para meus propósitos.\"\n\nEla puxa um pergaminho com anotações.\n\n\"Os cogumelos crescem em troncos podres, na parte mais profunda do pântano. Procure áreas onde a água tem reflexos azulados. E não respire os esporos diretamente — cubra o nariz com um pano úmido.\"\n\nEla te entrega um frasco vazio.\n\n\"Colete o máximo que puder e traga aqui. E... sobreviva. Reagentes são reponiveis. Bons assistentes, nem tanto.\"",
+        "choices": [
+          {
+            "text": "Voltar ao início.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Mirena abre um sorriso satisfeito."
+          },
+          {
+            "type": "narration",
+            "text": "\"Sabia que você tinha bom senso."
+          },
+          {
+            "type": "narration",
+            "text": "Ou falta dele — o que dá no mesmo para meus propósitos.\"\n\nEla puxa um pergaminho com anotações."
+          },
+          {
+            "type": "narration",
+            "text": "\"Os cogumelos crescem em troncos podres, na parte mais profunda do pântano."
+          },
+          {
+            "type": "narration",
+            "text": "Procure áreas onde a água tem reflexos azulados."
+          },
+          {
+            "type": "narration",
+            "text": "E não respire os esporos diretamente — cubra o nariz com um pano úmido.\"\n\nEla te entrega um frasco vazio."
+          },
+          {
+            "type": "narration",
+            "text": "\"Colete o máximo que puder e traga aqui."
+          },
+          {
+            "type": "narration",
+            "text": "E... sobreviva."
+          },
+          {
+            "type": "narration",
+            "text": "Reagentes são reponiveis."
+          },
+          {
+            "type": "narration",
+            "text": "Bons assistentes, nem tanto.\""
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "greet": {
+      "neutral": [
+        "Cuidado com os frascos! Um deles explode se você respirar perto demais.",
+        "Sente o cheiro do enxofre? É o aroma do progresso.",
+        "Alquimia requer precisão. O que você requer?",
+        "Não toque nas cubetas! A última pessoa que fez isso perdeu as sobrancelhas.",
+        "A ciência cura o que a fé esquece. Posso ajudar?",
+        "A curiosidade é o primeiro passo para a sabedoria... ou para a explosão.",
+        "Seus olhos sugerem que precisa de um tônico. Ou de sono. Ou de ambos.",
+        "Bem-vindo ao reino dos elixires. Manuseie com cuidado."
+      ],
+      "friendly": [
+        "Ah, meu assistente favorito! Novos ingredientes para mim?",
+        "Para você, as misturas são sempre as mais frescas. Sem cobaia.",
+        "Bom te ver. Quer testar uma nova fórmula? Prometo que é quase segura.",
+        "Sua inteligência brilha como ouro transmutado. O que precisa?",
+        "Alguma nova descoberta nas estradas? Traga amostras!",
+        "Fiz um desconto especial pela sua fidelidade. E por não ter me processado."
+      ],
+      "hostile": [
+        "Saia daqui antes que eu use você como cobaia.",
+        "Sua presença contamina minha atmosfera controlada.",
+        "Eldoria ficaria melhor se você fosse transmutado em chumbo.",
+        "Mais um passo e eu te mostro o efeito de uma bomba de fumaça.",
+        "Sua vida é tão instável quanto nitroglicerina. Saia."
+      ]
+    },
+    "chat": [
+      "Os frascos de cristal são importados das montanhas de gelo. Cada um custa o preço de uma armadura completa.",
+      "Minha prima no templo, a Irmã Elara, é uma boa pessoa, mas muito presa a dogmas. Oração não cura ossos quebrados.",
+      "A alquimia é superior à medicina tradicional em 80% dos casos. Nos outros 20%, a explosão é apenas um efeito colateral.",
+      "Andamos percebendo mutações estranhas na flora local. As raízes têm veios roxos que pulsam como veias.",
+      "O ouro pode ser criado, mas o custo em reagentes torna a transmutação economicamente inútil. Acredite, eu tentei.",
+      "O orc do mercado me deve por alguns reagentes raros. Se você o vir, lembre-o disso.",
+      "Sinto que o Pântano está tentando nos dizer algo através das plantas. A corrupção segue um padrão, como uma fórmula.",
+      "Poções de mana são as mais difíceis de estabilizar. Uma gota a mais de essência arcana e o frasco inteiro cristaliza.",
+      "A cor violeta em um extrato indica pureza extrema... ou veneno imediato. A diferença está na temperatura de preparo.",
+      "Não confunda alquimia com feitiçaria. Feitiçaria quebra as leis da natureza. Alquimia as entende e as usa.",
+      "A destilação fracionada permite separar a essência da alma... ou do álcool. Ambos têm aplicações interessantes.",
+      "Eldoria tem um solo rico em minerais alquímicos. É o único motivo pelo qual monto minha barraca nesta cidadezinha.",
+      "Thorne me emprestou uma bigorna semana passada. Eu precisava moer pirita. Ele quase teve um colapso quando viu as marcas. Vou devolver. Eventualmente.",
+      "Bjorn me trouxe um pedido especial: uma pomada que cura queimaduras E cheira bem. Impossível. Queimaduras precisam de enxofre, e enxofre cheira a ovo podre. É a ciência.",
+      "Corvus me pediu tinta que brilha no escuro para seus mapas de caverna. Funcionou perfeitamente. Só atraiu algumas mariposas. Gigantes. Ele não voltou para reclamar, então considero um sucesso.",
+      "Martha me traz chá toda manhã. Diz que é para minha saúde. Eu sei que é para verificar se eu não explodi durante a noite. Aprecio a preocupação.",
+      "Na Academia, meu mestre dizia que todo alquimista precisa de três coisas: paciência, precisão e um bom seguro contra incêndios.",
+      "As cinzas do vulcão Drakenspire são o catalisador perfeito para poções de resistência ao fogo. Pena que o vulcão também tenta te matar quando você coleta.",
+      "Já tentei ensinar alquimia para o aprendiz do Thorne. Desisti quando ele confundiu ácido sulfúrico com suco de limão. Quase.",
+      "Se algum dia eu desaparecer, não procure no meu laboratório. Siga o cheiro. Se for enxofre, estou trabalhando. Se for água de rosas, algo deu muito errado."
+    ],
+    "chat_class": {
+      "Mago": [
+        "\"Então você também estudou as artes arcanas? A diferença entre nós é que eu coloco os resultados num frasco. Mais prático, menos exibicionista.\"",
+        "\"Me diga, seu grimoire tem alguma anotação sobre estabilização de essência arcana em solução aquosa? Estou travada num problema há semanas.\"",
+        "Mirena cruza os braços. \"Magos acham que sabem tudo sobre reagentes. Prove que não é como os outros — me diga o ponto de ebulição do mercurío alquímico.\""
+      ],
+      "Feiticeiro": [
+        "\"Magia no sangue... intrigante do ponto de vista científico. Seus fluidos corporais devem ter propriedades únicas como catalisador.\"",
+        "Mirena te observa com fascinação clínica. \"Feiticeiros são como reagentes vivos. Instáveis, poderosos, e potencialmente explosivos. Meu tipo favorito de fenômeno.\""
+      ],
+      "Bruxo": [
+        "\"Pactos com entidades de outros planos... Você sabe que isso deixa resíduos arcanos no seu organismo, não sabe? Posso preparar um purgante. Barato. Quase indolor.\"",
+        "Mirena baixa a voz. \"Já destilei essência de pacto uma vez. O frasco derreteu. Se seu patrono te der problemas, eu tenho... soluções.\""
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "Cuidado, ou sua próxima poção pode ter um efeito... permanente.",
+        "Não insulte quem conhece os segredos do veneno!",
+        "Você é um erro experimental.",
+        "Interessante. Anoto essa hostilidade como dado clínico.",
+        "A ignorância é curável. A estupidez, nem meus elixires resolvem."
+      ],
+      "friendly": [
+        "Pensei que sua mente fosse mais aberta. Que decepção.",
+        "Minha boa vontade com você evaporou. Literalmente.",
+        "Isso foi uma reação inesperada e indesejável.",
+        "E eu que achava que éramos aliados. Os dados sugerem o contrário.",
+        "Vou precisar de um tônico para esquecer essa ofensa. Obrigada pela despesa extra."
+      ],
+      "hostile": [
+        "Escória molecular! Vou te dissolver em ácido!",
+        "Sua existência é um subproduto indesejado do universo!",
+        "Vá arder nos gases tóxicos!",
+        "Tenho treze tipos de veneno ao alcance da mão. Continue falando.",
+        "O ácido fórmico corroi metal. Imagine o que faz com egos inflados."
+      ]
+    }
+  }
+}

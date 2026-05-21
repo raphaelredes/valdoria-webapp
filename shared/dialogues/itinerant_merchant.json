@@ -1,0 +1,526 @@
+{
+  "itinerant_merchant": {
+    "timeline": [
+      {
+        "node": "start_regular",
+        "conditions": {
+          "min_rep": [
+            {
+              "faction": "itinerant_merchant",
+              "value": 8
+            }
+          ]
+        }
+      }
+    ],
+    "greet": {
+      "neutral": [
+        "Novidades de terras distantes! O que procura?",
+        "Minha caravana acabou de chegar. Veja o que trouxe.",
+        "Interessado em mercadorias exóticas? Não encontrará nada parecido nas lojas locais.",
+        "Relíquias do oriente, especiarias do deserto! Aproveite, pois amanhã estarei longe.",
+        "Busca algo específico ou apenas curiosidade? Tenho ambos.",
+        "Meus cavalos precisam de descanso, mas meus negócios não. O que deseja?",
+        "Mercadorias raras para aventureiros destemidos! Venha ver.",
+        "Viajei mil léguas para estar aqui hoje. Não perca a chance."
+      ],
+      "friendly": [
+        "Meu amigo favorito! Para você, faço um preço especial.",
+        "Sua fama o precede nas estradas do sul! Reservei peças especiais.",
+        "Sempre bom ver um rosto amigo em terras estranhas. Olhe o que trouxe.",
+        "Fico feliz em te encontrar novamente em Eldoria. Deseja ver minha 'coleção privada'?",
+        "A prosperidade te siga! Fiz uma pechincha e pensei em você.",
+        "Sempre vibrante em suas negociações! Que sua bolsa esteja sempre cheia."
+      ],
+      "hostile": [
+        "Ou paga ou sai da frente. Não tenho tempo para ratos.",
+        "Sua presença afasta meus clientes de verdade. Suma.",
+        "Mantenha as mãos longe das minhas mercadorias.",
+        "Vá pechinchar com o orc, se ele te aguentar.",
+        "Minha paciência é tão curta quanto o tempo até minha partida."
+      ]
+    },
+    "chat": [
+      "As estradas para o sul estão infestadas de bandidos. Perdi um cavalo na última viagem.",
+      "Ouvi dizer que o Reino do Oriente está em guerra. Bom para o comércio de armas, ruim para todo o resto.",
+      "É difícil manter cavalos saudáveis nestas viagens longas. O deserto cobra um preço alto.",
+      "O mercado de Eldoria é pequeno, mas promissor. Suas moedas de ouro são as mais bonitas que já vi.",
+      "A vida de mercador itinerante é solitária e perigosa. Mas o lucro é doce.",
+      "Nunca aceite uma joia sem testar sua pureza. Aprendi isso da pior maneira em Valorian.",
+      "O comércio é a alma de qualquer reino civilizado. Sem mercadores, até reis passam fome.",
+      "Em Valorian, o aço é mais barato que a água. Aqui, o contrário. É disso que vivo.",
+      "Sempre carregue um mapa. O último aventureiro que não levou sumiu perto das ruínas do norte.",
+      "Compro aço de Thorne sempre que passo por Eldoria. Bom metal, preço justo. Revendo no triplo duas cidades adiante.",
+      "O taverneiro Grom é a melhor fonte de rumóres em cem léguas. Pague uma cerveja e ele fala por horas.",
+      "Martha, da estalagem, é a única que me deixa estacionar a caravana no pátio dos fundos. Cama limpa, sopa quente. Não se acha isso na estrada.",
+      "Corvus, o cartógrafo, me vendeu um mapa das rotas do deserto. Valeu cada moeda. Nunca mais me perdi no Passo Vermelho.",
+      "Cuidado com as feras noturnas nas planícies. Elas não caçam pela fome — caçam por diversão. Já perdi dois guardas assim.",
+      "Todo mercador conhece a regra de ouro: compre onde sobra, venda onde falta. Simples na teoria, mortal na prática."
+    ],
+    "nodes": {
+      "start": {
+        "text": [
+          "O que procura, viajante? Minhas mercadorias são raras e não ficarei aqui por muito tempo.",
+          "Tenho itens de todos os cantos do reino. Aproveite enquanto estou na cidade.",
+          "Cada peça aqui tem uma história. Quer ouvir ou quer comprar?"
+        ],
+        "choices": [
+          {
+            "text": "Ver mercadorias",
+            "target": "exit"
+          },
+          {
+            "text": "Conte-me sobre suas viagens",
+            "target": "chat"
+          },
+          {
+            "text": "Como estão as estradas?",
+            "target": "about_roads"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O que procura, viajante?"
+          },
+          {
+            "type": "narration",
+            "text": "Minhas mercadorias são raras e não ficarei aqui por muito tempo."
+          },
+          {
+            "type": "narration",
+            "text": "Tenho itens de todos os cantos do reino."
+          },
+          {
+            "type": "narration",
+            "text": "Aproveite enquanto estou na cidade."
+          },
+          {
+            "type": "narration",
+            "text": "Cada peça aqui tem uma história."
+          },
+          {
+            "type": "narration",
+            "text": "Quer ouvir ou quer comprar?"
+          }
+        ]
+      },
+      "start_regular": {
+        "text": [
+          "Ah, meu cliente favorito! Separei umas peças especiais só para você. A estrada é dura, mas ver um rosto conhecido faz tudo valer a pena.",
+          "Olá, amigo! Meus cavalos já reconhecem o caminho até Eldoria. Acho que é por sua causa.",
+          "Sempre bom voltar a Eldoria sabendo que tem alguém que aprecia mercadoria de qualidade."
+        ],
+        "choices": [
+          {
+            "text": "Ver mercadorias",
+            "target": "exit"
+          },
+          {
+            "text": "Conte-me sobre suas viagens",
+            "target": "chat"
+          },
+          {
+            "text": "O que vendem bem nas outras cidades?",
+            "target": "about_trade"
+          },
+          {
+            "text": "Como estão as estradas?",
+            "target": "about_roads"
+          },
+          {
+            "text": "O que acha de Eldoria?",
+            "target": "about_eldoria"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ah, meu cliente favorito!"
+          },
+          {
+            "type": "narration",
+            "text": "Separei umas peças especiais só para você."
+          },
+          {
+            "type": "narration",
+            "text": "A estrada é dura, mas ver um rosto conhecido faz tudo valer a pena."
+          },
+          {
+            "type": "narration",
+            "text": "Olá, amigo!"
+          },
+          {
+            "type": "narration",
+            "text": "Meus cavalos já reconhecem o caminho até Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Acho que é por sua causa."
+          },
+          {
+            "type": "narration",
+            "text": "Sempre bom voltar a Eldoria sabendo que tem alguém que aprecia mercadoria de qualidade."
+          }
+        ]
+      },
+      "chat": {
+        "text": [
+          "As estradas são perigosas, mas lucrativas. Vi dragões voando sobre as montanhas do norte na última passagem.",
+          "Em Valorian, o aço é mais barato que a água. Aqui é o contrário. É por isso que eu viajo.",
+          "A caravana que vinha do oriente foi atacada por goblins. Só eu e dois guias sobrevivemos."
+        ],
+        "choices": [
+          {
+            "text": "Voltar",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "As estradas são perigosas, mas lucrativas."
+          },
+          {
+            "type": "narration",
+            "text": "Vi dragões voando sobre as montanhas do norte na última passagem."
+          },
+          {
+            "type": "narration",
+            "text": "Em Valorian, o aço é mais barato que a água."
+          },
+          {
+            "type": "narration",
+            "text": "Aqui é o contrário."
+          },
+          {
+            "type": "narration",
+            "text": "É por isso que eu viajo."
+          },
+          {
+            "type": "narration",
+            "text": "A caravana que vinha do oriente foi atacada por goblins."
+          },
+          {
+            "type": "narration",
+            "text": "Só eu e dois guias sobrevivemos."
+          }
+        ]
+      },
+      "about_roads": {
+        "text": [
+          "(O mercador abaixa a voz e olha em volta) As rotas ao sul estão cada vez piores. Bandidos organizados — não são ladrões comuns, usam armaduras e táticas de emboscada. Alguém está financiando esses grupos.",
+          "O Passo Vermelho, que era seguro há dois meses, agora tem lobos medonhos que atacam de dia. Não é comportamento normal. Corvus me disse que os mapas dele já marcam a rota como perigosa.",
+          "As planícies do leste são as mais tranquilas no momento, mas a viagem é longa e sem abrigo. Perdi um guarda de frio na última passagem. O deserto é forno de dia e gelo de noite."
+        ],
+        "choices": [
+          {
+            "text": "Que tipo de monstros você já encontrou?",
+            "target": "road_monsters",
+            "once": true
+          },
+          {
+            "text": "Voltar",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(O mercador abaixa a voz e olha em volta) As rotas ao sul estão cada vez piores."
+          },
+          {
+            "type": "narration",
+            "text": "Bandidos organizados — não são ladrões comuns, usam armaduras e táticas de emboscada."
+          },
+          {
+            "type": "narration",
+            "text": "Alguém está financiando esses grupos."
+          },
+          {
+            "type": "narration",
+            "text": "O Passo Vermelho, que era seguro há dois meses, agora tem lobos medonhos que atacam de dia."
+          },
+          {
+            "type": "narration",
+            "text": "Não é comportamento normal."
+          },
+          {
+            "type": "narration",
+            "text": "Corvus me disse que os mapas dele já marcam a rota como perigosa."
+          },
+          {
+            "type": "narration",
+            "text": "As planícies do leste são as mais tranquilas no momento, mas a viagem é longa e sem abrigo."
+          },
+          {
+            "type": "narration",
+            "text": "Perdi um guarda de frio na última passagem."
+          },
+          {
+            "type": "narration",
+            "text": "O deserto é forno de dia e gelo de noite."
+          }
+        ]
+      },
+      "road_monsters": {
+        "text": [
+          "(Ele conta nos dedos) Goblins são os mais frequentes — aparecem em bandos, roubam o que podem e fogem. Lobos medonhos caçam à noite, mas se você mantiver uma fogueira grande, pensam duas vezes. Ogros são raros, mas quando aparecem... (ele engole em seco) ...você só reza.",
+          "Uma vez, perto do Desfiladeiro Cinza, meus guardas juraram ter visto uma Wyvern sobrevoando. Nunca desceu, graças aos deuses. Mas o tamanho daquela sombra... não durmo direito desde então."
+        ],
+        "choices": [
+          {
+            "text": "Voltar",
+            "target": "about_roads"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele conta nos dedos) Goblins são os mais frequentes — aparecem em bandos, roubam o que podem e fogem."
+          },
+          {
+            "type": "narration",
+            "text": "Lobos medonhos caçam à noite, mas se você mantiver uma fogueira grande, pensam duas vezes."
+          },
+          {
+            "type": "narration",
+            "text": "Ogros são raros, mas quando aparecem... (ele engole em seco) ...você só reza."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez, perto do Desfiladeiro Cinza, meus guardas juraram ter visto uma Wyvern sobrevoando."
+          },
+          {
+            "type": "narration",
+            "text": "Nunca desceu, graças aos deuses."
+          },
+          {
+            "type": "narration",
+            "text": "Mas o tamanho daquela sombra... não durmo direito desde então."
+          }
+        ]
+      },
+      "about_trade": {
+        "text": [
+          "(Ele esfrega as mãos com um brilho nos olhos) O segredo do comércio é simples: cada cidade tem o que a outra precisa. Eldoria produz boas armas graças ao Thorne, mas não tem especiarias. Valorian é cheia de especiarias, mas faminta por aço. Eu sou a ponte.",
+          "Poções de cura vendem bem em qualquer lugar. Quem viaja pelas estradas sabe que um frasco pode ser a diferença entre vida e morte. Mas cuidado com falsificações — já vi gente vendendo água com corante como 'poção rara'."
+        ],
+        "choices": [
+          {
+            "text": "O que está vendendo bem agora?",
+            "target": "trade_trends",
+            "once": true
+          },
+          {
+            "text": "Voltar",
+            "target": "start_regular"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele esfrega as mãos com um brilho nos olhos) O segredo do comércio é simples: cada cidade tem o que a outra precisa."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria produz boas armas graças ao Thorne, mas não tem especiarias."
+          },
+          {
+            "type": "narration",
+            "text": "Valorian é cheia de especiarias, mas faminta por aço."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sou a ponte."
+          },
+          {
+            "type": "narration",
+            "text": "Poções de cura vendem bem em qualquer lugar."
+          },
+          {
+            "type": "narration",
+            "text": "Quem viaja pelas estradas sabe que um frasco pode ser a diferença entre vida e morte."
+          },
+          {
+            "type": "narration",
+            "text": "Mas cuidado com falsificações — já vi gente vendendo água com corante como 'poção rara'."
+          }
+        ]
+      },
+      "trade_trends": {
+        "text": "(Ele se inclina conspiradoramente) Runas e gemas estão com preço alto em todas as cidades. Desde que os ataques nas estradas aumentaram, aventureiros estão comprando tudo que dá vantagem em combate. Minhas gemas de encantamento esgotam antes de eu chegar na segunda cidade da rota.\n\nOutra coisa: equipamento leve. Ninguém quer carregar armadura pesada numa fuga de emboscada. Couro reforçado está valendo ouro. E pergaminhos mágicos... bom, esses sempre vendem, mas ando com dificuldade em encontrar fornecedores confiáveis.",
+        "choices": [
+          {
+            "text": "Boas dicas. Obrigado.",
+            "target": "start_regular"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele se inclina conspiradoramente) Runas e gemas estão com preço alto em todas as cidades."
+          },
+          {
+            "type": "narration",
+            "text": "Desde que os ataques nas estradas aumentaram, aventureiros estão comprando tudo que dá vantagem em combate."
+          },
+          {
+            "type": "narration",
+            "text": "Minhas gemas de encantamento esgotam antes de eu chegar na segunda cidade da rota."
+          },
+          {
+            "type": "narration",
+            "text": "Outra coisa: equipamento leve."
+          },
+          {
+            "type": "narration",
+            "text": "Ninguém quer carregar armadura pesada numa fuga de emboscada."
+          },
+          {
+            "type": "narration",
+            "text": "Couro reforçado está valendo ouro."
+          },
+          {
+            "type": "narration",
+            "text": "E pergaminhos mágicos... bom, esses sempre vendem, mas ando com dificuldade em encontrar fornecedores confiáveis."
+          }
+        ]
+      },
+      "about_eldoria": {
+        "text": [
+          "(Ele olha em volta com ar avaliador) Eldoria é uma cidade curiosa. Pequena, mas resistente. Já passei por reinos ricos que caíram por menos do que esta cidade já aguentou. As muralhas são fortes, o ferreiro é excelente, e a estalagem da Martha é a mais acolhedora em cinco dias de viagem.",
+          "Sabe o que falta a Eldoria? Concorrência. Só tem um ferreiro, uma estalagem, uma taverna. É bom pra eles — monopólio, preços firmes. Ruim pra mim — menos margem de negociação. Mas não reclamo. Cidade honesta num mundo de vigaristas."
+        ],
+        "choices": [
+          {
+            "text": "O que as pessoas falam de Eldoria lá fora?",
+            "target": "eldoria_reputation",
+            "once": true
+          },
+          {
+            "text": "Voltar",
+            "target": "start_regular"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele olha em volta com ar avaliador) Eldoria é uma cidade curiosa."
+          },
+          {
+            "type": "narration",
+            "text": "Pequena, mas resistente."
+          },
+          {
+            "type": "narration",
+            "text": "Já passei por reinos ricos que caíram por menos do que esta cidade já aguentou."
+          },
+          {
+            "type": "narration",
+            "text": "As muralhas são fortes, o ferreiro é excelente, e a estalagem da Martha é a mais acolhedora em cinco dias de viagem."
+          },
+          {
+            "type": "narration",
+            "text": "Sabe o que falta a Eldoria?"
+          },
+          {
+            "type": "narration",
+            "text": "Concorrência."
+          },
+          {
+            "type": "narration",
+            "text": "Só tem um ferreiro, uma estalagem, uma taverna."
+          },
+          {
+            "type": "narration",
+            "text": "É bom pra eles — monopólio, preços firmes."
+          },
+          {
+            "type": "narration",
+            "text": "Ruim pra mim — menos margem de negociação."
+          },
+          {
+            "type": "narration",
+            "text": "Mas não reclamo."
+          },
+          {
+            "type": "narration",
+            "text": "Cidade honesta num mundo de vigaristas."
+          }
+        ]
+      },
+      "eldoria_reputation": {
+        "text": "(Ele coça o queixo) Depende de quem você pergunta. Mercadores a conhecem como parada segura com bom aço. Aventureiros ouvem falar das ruínas próximas e dos contratos da guilda. Bandidos... bom, bandidos sabem que a guarda daqui não brinca.\n\nMas tem uma coisa que todo mundo comenta: algo está mudando nas terras ao redor. Monstros mais agressivos, estradas menos seguras, mercadores desaparecendo. Eldoria pode ser o último ponto estável antes do caos.\n\nSe eu fosse você, protegeria este lugar. Quando a última cidade segura cai, não sobra nada.",
+        "choices": [
+          {
+            "text": "Vou manter isso em mente.",
+            "target": "start_regular"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele coça o queixo) Depende de quem você pergunta."
+          },
+          {
+            "type": "narration",
+            "text": "Mercadores a conhecem como parada segura com bom aço."
+          },
+          {
+            "type": "narration",
+            "text": "Aventureiros ouvem falar das ruínas próximas e dos contratos da guilda."
+          },
+          {
+            "type": "narration",
+            "text": "Bandidos... bom, bandidos sabem que a guarda daqui não brinca."
+          },
+          {
+            "type": "narration",
+            "text": "Mas tem uma coisa que todo mundo comenta: algo está mudando nas terras ao redor."
+          },
+          {
+            "type": "narration",
+            "text": "Monstros mais agressivos, estradas menos seguras, mercadores desaparecendo."
+          },
+          {
+            "type": "narration",
+            "text": "Eldoria pode ser o último ponto estável antes do caos."
+          },
+          {
+            "type": "narration",
+            "text": "Se eu fosse você, protegeria este lugar."
+          },
+          {
+            "type": "narration",
+            "text": "Quando a última cidade segura cai, não sobra nada."
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      }
+    },
+    "insult": {
+      "neutral": [
+        "Cuidado com essa língua. Já vi mercadores matarem por menos.",
+        "Grosserias não me abalam. Mas seus preços acabam de subir.",
+        "Continue assim e você não vai encontrar nada para comprar nesta cidade.",
+        "Nas estradas, palavras assim custam dentes. Tenha cuidado."
+      ],
+      "friendly": [
+        "Não esperava isso de um aliado. Que decepção.",
+        "Seus descontos acabaram. Todos eles.",
+        "Pensei que fôssemos parceiros de negócios.",
+        "Depois de tudo que negociamos juntos? Isso dói mais que uma emboscada."
+      ],
+      "hostile": [
+        "Seus insultos são tão baratos quanto você!",
+        "Saia antes que eu chame meus guias. Eles não são tão pacíficos.",
+        "Você não vale o pó da estrada.",
+        "Já enfrentei goblins mais educados que você. E cheiravam melhor."
+      ]
+    }
+  }
+}

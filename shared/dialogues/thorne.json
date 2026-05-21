@@ -1,0 +1,1093 @@
+{
+  "npc_blacksmith_thorne": {
+    "trading": {
+      "buys": [
+        "metal",
+        "weapon",
+        "armor",
+        "tool",
+        "bone",
+        "leather"
+      ],
+      "multiplier": 1.0,
+      "refusals": [
+        "Não compro isso. Traga-me metal ou couro.",
+        "Isso não serve para a forja.",
+        "Não sou mercador de quinquilharias."
+      ]
+    },
+    "timeline": [
+      {
+        "conditions": {
+          "flag": "completed_thorne_son_quest"
+        },
+        "node": "hero_welcome"
+      },
+      {
+        "conditions": {
+          "flags": [
+            "thorne_shop_established",
+            "!completed_thorne_son_quest"
+          ]
+        },
+        "node": "start"
+      }
+    ],
+    "nodes": {
+      "start": {
+        "text": [
+          "O fogo nunca descansa, e nem eu. O que você quer? Aço novo ou reparos?",
+          "O metal não mente. Só quebra se for fraco. O que traz você à minha forja?",
+          "Estou ocupado. Se não for sobre armas ou armaduras, saia.",
+          "Cada martelada conta uma história. Qual será a sua?",
+          "Minha bigorna ouviu mais segredos que o templo. Fale logo."
+        ],
+        "choices": [
+          {
+            "text": "✅ Encontrei seu filho, Thorne! Ele está seguro.",
+            "target": "thorne_complete",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "aris_rescued",
+                "!completed_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "💀 Thorne... tenho notícias sobre Aris.",
+            "target": "thorne_complete_dead",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "aris_dead",
+                "!completed_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "⏳ Ainda estou procurando Aris...",
+            "target": "thorne_encouragement",
+            "conditions": {
+              "flags": [
+                "accepted_thorne_son_quest",
+                "!found_aris",
+                "!completed_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "❗ Ouvi dizer que seu filho desapareceu...",
+            "target": "thorne_son",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "knows_about_thorne_son",
+                "!accepted_thorne_son_quest",
+                "!completed_thorne_son_quest"
+              ]
+            }
+          },
+          {
+            "text": "Mostre-me suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_blacksmith"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "O fogo nunca descansa, e nem eu."
+          },
+          {
+            "type": "narration",
+            "text": "O que você quer?"
+          },
+          {
+            "type": "narration",
+            "text": "Aço novo ou reparos?"
+          },
+          {
+            "type": "narration",
+            "text": "O metal não mente."
+          },
+          {
+            "type": "narration",
+            "text": "Só quebra se for fraco."
+          },
+          {
+            "type": "narration",
+            "text": "O que traz você à minha forja?"
+          },
+          {
+            "type": "narration",
+            "text": "Estou ocupado."
+          },
+          {
+            "type": "narration",
+            "text": "Se não for sobre armas ou armaduras, saia."
+          },
+          {
+            "type": "narration",
+            "text": "Cada martelada conta uma história."
+          },
+          {
+            "type": "narration",
+            "text": "Qual será a sua?"
+          },
+          {
+            "type": "narration",
+            "text": "Minha bigorna ouviu mais segredos que o templo."
+          },
+          {
+            "type": "narration",
+            "text": "Fale logo."
+          }
+        ]
+      },
+      "thorne_encouragement": {
+        "text": [
+          "(Thorne segura o martelo com força, sem bater) Eu sei que é perigoso lá fora... Mas a cada dia que passa, meu coração pesa mais. Procure na Floresta dos Sussurros, por favor. Qualquer pista, qualquer sinal dele...",
+          "(Ele para e olha para o fogo) Aris é tudo que tenho. Se ouvir qualquer coisa na floresta... sons estranhos, pegadas... siga-os. Ele pode estar escondido, assustado.",
+          "(Thorne limpa os olhos com o avental de couro) Cada noite eu imagino ele sozinho naquela escuridão. Não desista, aventureiro. Por favor."
+        ],
+        "choices": [
+          {
+            "text": "Não vou desistir, Thorne. Vou encontrá-lo.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne segura o martelo com força, sem bater) Eu sei que é perigoso lá fora..."
+          },
+          {
+            "type": "narration",
+            "text": "Mas a cada dia que passa, meu coração pesa mais."
+          },
+          {
+            "type": "narration",
+            "text": "Procure na Floresta dos Sussurros, por favor."
+          },
+          {
+            "type": "narration",
+            "text": "Qualquer pista, qualquer sinal dele..."
+          },
+          {
+            "type": "narration",
+            "text": "(Ele para e olha para o fogo) Aris é tudo que tenho."
+          },
+          {
+            "type": "narration",
+            "text": "Se ouvir qualquer coisa na floresta... sons estranhos, pegadas... siga-os."
+          },
+          {
+            "type": "narration",
+            "text": "Ele pode estar escondido, assustado."
+          },
+          {
+            "type": "narration",
+            "text": "(Thorne limpa os olhos com o avental de couro) Cada noite eu imagino ele sozinho naquela escuridão."
+          },
+          {
+            "type": "narration",
+            "text": "Não desista, aventureiro."
+          },
+          {
+            "type": "narration",
+            "text": "Por favor."
+          }
+        ]
+      },
+      "thorne_complete_dead": {
+        "text": "(O martelo cai no chão com um som oco. Thorne olha para você com os olhos vazios, como aço frio.) Não... não diga isso. (Ele se apoia na bigorna, tremendo.) Meu menino... meu pequeno Aris... (Após um longo silêncio, ele fala com a voz quebrada.) Você tentou. Eu sei que tentou. Obrigado por... por trazer a verdade. É melhor do que a incerteza.",
+        "choices": [
+          {
+            "text": "Sinto muito, Thorne. Fiz o que pude.",
+            "target": "hero_welcome",
+            "impact": {
+              "flags": {
+                "completed_thorne_son_quest": true
+              },
+              "complete_quests": [
+                "quest_thorne_son"
+              ]
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(O martelo cai no chão com um som oco."
+          },
+          {
+            "type": "narration",
+            "text": "Thorne olha para você com os olhos vazios, como aço frio.) Não... não diga isso. (Ele se apoia na bigorna, tremendo.) Meu menino... meu pequeno Aris... (Após um longo silêncio, ele fala com a voz quebrada.) Você tentou."
+          },
+          {
+            "type": "narration",
+            "text": "Eu sei que tentou."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigado por... por trazer a verdade."
+          },
+          {
+            "type": "narration",
+            "text": "É melhor do que a incerteza."
+          }
+        ]
+      },
+      "hero_welcome": {
+        "text": [
+          "Olha quem voltou! O herói de Eldoria! Aris não para de falar de você.",
+          "Minha forja está sempre aberta para você, amigo. O que precisa?",
+          "Graças a você, esta oficina tem vida novamente. Como posso ajudar?",
+          "Aço especial para um cliente especial! Escolha o que quiser."
+        ],
+        "choices": [
+          {
+            "text": "Mostre-me suas mercadorias.",
+            "target": "exit",
+            "exit_callback": "market_visit_blacksmith"
+          },
+          {
+            "text": "Como está o Aris?",
+            "target": "chat_aris_safe",
+            "once": true,
+            "conditions": {
+              "flags": [
+                "aris_rescued"
+              ],
+              "min_turns_since_quest": {
+                "quest_id": "quest_thorne_son",
+                "turns": 50
+              }
+            }
+          },
+          {
+            "text": "🔥 Thorne, me ensine um segredo da forja.",
+            "target": "thorne_forge_secret",
+            "once": true,
+            "conditions": {
+              "min_affinity": 60,
+              "npc_emotion": {
+                "trust": 0.5
+              }
+            }
+          },
+          {
+            "text": "O que acha da Mirena?",
+            "target": "about_mirena",
+            "once": true
+          },
+          {
+            "text": "O que acha do Corvus?",
+            "target": "about_corvus",
+            "once": true
+          },
+          {
+            "text": "O que acha do Bjorn?",
+            "target": "about_bjorn",
+            "once": true
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Olha quem voltou!"
+          },
+          {
+            "type": "narration",
+            "text": "O herói de Eldoria!"
+          },
+          {
+            "type": "narration",
+            "text": "Aris não para de falar de você."
+          },
+          {
+            "type": "narration",
+            "text": "Minha forja está sempre aberta para você, amigo."
+          },
+          {
+            "type": "narration",
+            "text": "O que precisa?"
+          },
+          {
+            "type": "narration",
+            "text": "Graças a você, esta oficina tem vida novamente."
+          },
+          {
+            "type": "narration",
+            "text": "Como posso ajudar?"
+          },
+          {
+            "type": "narration",
+            "text": "Aço especial para um cliente especial!"
+          },
+          {
+            "type": "narration",
+            "text": "Escolha o que quiser."
+          }
+        ]
+      },
+      "chat_aris_safe": {
+        "text": "Ele está ótimo! Um pouco assustado ainda, mas está aprendendo a temperar o aço comigo. Um dia ele será um ferreiro melhor que o pai.",
+        "choices": [
+          {
+            "text": "Fico feliz em ouvir isso.",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Ele está ótimo!"
+          },
+          {
+            "type": "narration",
+            "text": "Um pouco assustado ainda, mas está aprendendo a temperar o aço comigo."
+          },
+          {
+            "type": "narration",
+            "text": "Um dia ele será um ferreiro melhor que o pai."
+          }
+        ]
+      },
+      "thorne_son": {
+        "text": "(Ele para de martelar e te olha com olhos marejados) Meu pequeno Aris... Ele sumiu na floresta. A guarda diz que é perigoso demais procurar à noite. Meus braços são fortes para o ferro, mas fracos contra as sombras.",
+        "choices": [
+          {
+            "text": "📜 Vou encontra-lo para você, Thorne. Eu prometo.",
+            "target": "thorne_thankful",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_thorne_son_quest": true
+              },
+              "quests": [
+                "quest_thorne_son"
+              ],
+              "random_set_flag": {
+                "aris_location_var": {
+                  "min": 1,
+                  "max": 3
+                }
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Ele para de martelar e te olha com olhos marejados) Meu pequeno Aris..."
+          },
+          {
+            "type": "narration",
+            "text": "Ele sumiu na floresta."
+          },
+          {
+            "type": "narration",
+            "text": "A guarda diz que é perigoso demais procurar à noite."
+          },
+          {
+            "type": "narration",
+            "text": "Meus braços são fortes para o ferro, mas fracos contra as sombras."
+          }
+        ]
+      },
+      "thorne_thankful": {
+        "text": [
+          "(Os olhos do ferreiro se enchem de lágrimas) Você... você faria isso? Pelos deuses, que a forja abençoe seus passos! Não tenho palavras para agradecer, estranho. Traga meu Aris de volta e tudo que forjei será seu!",
+          "(Ele larga o martelo, tremendo) Esperança... faz dias que não sinto isso. Obrigado, viajante. Que Moradin guie sua lâmina na escuridão daquela floresta maldita."
+        ],
+        "choices": [
+          {
+            "text": "Farei o possível.",
+            "target": "start"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Os olhos do ferreiro se enchem de lágrimas) Você... você faria isso?"
+          },
+          {
+            "type": "narration",
+            "text": "Pelos deuses, que a forja abençoe seus passos!"
+          },
+          {
+            "type": "narration",
+            "text": "Não tenho palavras para agradecer, estranho."
+          },
+          {
+            "type": "narration",
+            "text": "Traga meu Aris de volta e tudo que forjei será seu!"
+          },
+          {
+            "type": "narration",
+            "text": "(Ele larga o martelo, tremendo) Esperança... faz dias que não sinto isso."
+          },
+          {
+            "type": "narration",
+            "text": "Obrigado, viajante."
+          },
+          {
+            "type": "narration",
+            "text": "Que Moradin guie sua lâmina na escuridão daquela floresta maldita."
+          }
+        ]
+      },
+      "about_mirena": {
+        "text": [
+          "(Thorne bufa, mas com um meio sorriso) Mirena? Arrogante como poucos, mas o trabalho dela é impecável. Usa meus cadinhos de aço para destilar venenos e poções — e nunca devolveu um sequer rachado. Isso diz muito.",
+          "(Thorne limpa as mãos no avental) A alquimista vive me pedindo ligas especiais. 'Thorne, preciso de aço que resista a ácido.' 'Thorne, preciso de um recipiente hermético.' Nunca explica pra quê, mas paga sem reclamar.",
+          "Mirena é daquelas pessoas que acham que sabem tudo. O problema é que ela realmente sabe quase tudo. Isso me irrita e me impressiona ao mesmo tempo."
+        ],
+        "choices": [
+          {
+            "text": "Vocês trabalham juntos?",
+            "target": "about_mirena_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne bufa, mas com um meio sorriso) Mirena?"
+          },
+          {
+            "type": "narration",
+            "text": "Arrogante como poucos, mas o trabalho dela é impecável."
+          },
+          {
+            "type": "narration",
+            "text": "Usa meus cadinhos de aço para destilar venenos e poções — e nunca devolveu um sequer rachado."
+          },
+          {
+            "type": "narration",
+            "text": "Isso diz muito."
+          },
+          {
+            "type": "narration",
+            "text": "(Thorne limpa as mãos no avental) A alquimista vive me pedindo ligas especiais."
+          },
+          {
+            "type": "speech",
+            "text": "'Thorne, preciso de aço que resista a ácido.' 'Thorne, preciso de um recipiente hermético.' Nunca explica pra quê, mas paga sem reclamar.",
+            "speaker": "Thorne"
+          },
+          {
+            "type": "narration",
+            "text": "Mirena é daquelas pessoas que acham que sabem tudo."
+          },
+          {
+            "type": "narration",
+            "text": "O problema é que ela realmente sabe quase tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Isso me irrita e me impressiona ao mesmo tempo."
+          }
+        ]
+      },
+      "about_mirena_detail": {
+        "text": "Trabalhar juntos? Não é bem assim. Ela encomenda, eu forjo. Às vezes discutimos sobre temperatura de fusão — ela jura que sabe mais que eu sobre metal. Uma alquimista! Mas admito... as observações dela sobre ligas cristalinas me fizeram repensar algumas técnicas. Não conte a ela que eu disse isso.",
+        "choices": [
+          {
+            "text": "Seu segredo está guardado.",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Trabalhar juntos?"
+          },
+          {
+            "type": "narration",
+            "text": "Não é bem assim."
+          },
+          {
+            "type": "narration",
+            "text": "Ela encomenda, eu forjo."
+          },
+          {
+            "type": "narration",
+            "text": "Às vezes discutimos sobre temperatura de fusão — ela jura que sabe mais que eu sobre metal."
+          },
+          {
+            "type": "narration",
+            "text": "Uma alquimista!"
+          },
+          {
+            "type": "narration",
+            "text": "Mas admito... as observações dela sobre ligas cristalinas me fizeram repensar algumas técnicas."
+          },
+          {
+            "type": "narration",
+            "text": "Não conte a ela que eu disse isso."
+          }
+        ]
+      },
+      "about_corvus": {
+        "text": [
+          "(Thorne apoia o martelo no ombro) Corvus? Um sujeito meticuloso. Fez uma bússola sob encomenda para mim — a agulha mais precisa que já vi. Respeito qualquer homem que leva seu ofício a sério, mesmo que o ofício dele seja desenhar linhas em pergaminho.",
+          "O cartógrafo é bom no que faz. Quieto, observador, preciso. Mas mapas não param uma espada. Se ele passasse menos tempo medindo montanhas e mais tempo treinando o braço, seria útil numa luta.",
+          "Corvus apareceu um dia querendo saber a composição exata das minhas lâminas. Perguntou sobre o teor de carbono, a temperatura de têmpera, o ângulo do fio. O homem anota tudo. Tudo."
+        ],
+        "choices": [
+          {
+            "text": "Ele parece respeitar seu trabalho.",
+            "target": "about_corvus_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne apoia o martelo no ombro) Corvus?"
+          },
+          {
+            "type": "narration",
+            "text": "Um sujeito meticuloso."
+          },
+          {
+            "type": "narration",
+            "text": "Fez uma bússola sob encomenda para mim — a agulha mais precisa que já vi."
+          },
+          {
+            "type": "narration",
+            "text": "Respeito qualquer homem que leva seu ofício a sério, mesmo que o ofício dele seja desenhar linhas em pergaminho."
+          },
+          {
+            "type": "narration",
+            "text": "O cartógrafo é bom no que faz."
+          },
+          {
+            "type": "narration",
+            "text": "Quieto, observador, preciso."
+          },
+          {
+            "type": "narration",
+            "text": "Mas mapas não param uma espada."
+          },
+          {
+            "type": "narration",
+            "text": "Se ele passasse menos tempo medindo montanhas e mais tempo treinando o braço, seria útil numa luta."
+          },
+          {
+            "type": "narration",
+            "text": "Corvus apareceu um dia querendo saber a composição exata das minhas lâminas."
+          },
+          {
+            "type": "narration",
+            "text": "Perguntou sobre o teor de carbono, a temperatura de têmpera, o ângulo do fio."
+          },
+          {
+            "type": "narration",
+            "text": "O homem anota tudo."
+          },
+          {
+            "type": "narration",
+            "text": "Tudo."
+          }
+        ]
+      },
+      "about_corvus_detail": {
+        "text": "Respeitar? Acho que sim. Uma vez me pediu que forjasse penas de metal para suas canetas. Fiz três — finas como cabelo, mas resistentes. Ele disse que foram as melhores que já usou. Depois me pagou com um mapa detalhado das minas ao sul. Negócio justo.",
+        "choices": [
+          {
+            "text": "Um bom acordo entre artesãos.",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Respeitar?"
+          },
+          {
+            "type": "narration",
+            "text": "Acho que sim."
+          },
+          {
+            "type": "narration",
+            "text": "Uma vez me pediu que forjasse penas de metal para suas canetas."
+          },
+          {
+            "type": "narration",
+            "text": "Fiz três — finas como cabelo, mas resistentes."
+          },
+          {
+            "type": "narration",
+            "text": "Ele disse que foram as melhores que já usou."
+          },
+          {
+            "type": "narration",
+            "text": "Depois me pagou com um mapa detalhado das minas ao sul."
+          },
+          {
+            "type": "narration",
+            "text": "Negócio justo."
+          }
+        ]
+      },
+      "about_bjorn": {
+        "text": [
+          "(Thorne dá um raro sorriso) Bjorn? Aquele grandalhão é durão como couro curtido. Perdeu a mão e continuou trabalhando como se nada tivesse acontecido. Isso é respeito, não admiração — respeito de ferreiro pra ferreiro.",
+          "O seleiro fez as melhores fivelas e correias que já vi. Eu forjo o metal, ele trabalha o couro. Juntos, equipamos metade dos aventureiros de Eldoria.",
+          "Bjorn é barulhento demais pro meu gosto, mas é honesto. E na forja, honestidade vale mais que habilidade. Sorte que ele tem as duas."
+        ],
+        "choices": [
+          {
+            "text": "Vocês trocam materiais?",
+            "target": "about_bjorn_detail",
+            "once": true
+          },
+          {
+            "text": "🔙 Voltar",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne dá um raro sorriso) Bjorn?"
+          },
+          {
+            "type": "narration",
+            "text": "Aquele grandalhão é durão como couro curtido."
+          },
+          {
+            "type": "narration",
+            "text": "Perdeu a mão e continuou trabalhando como se nada tivesse acontecido."
+          },
+          {
+            "type": "narration",
+            "text": "Isso é respeito, não admiração — respeito de ferreiro pra ferreiro."
+          },
+          {
+            "type": "narration",
+            "text": "O seleiro fez as melhores fivelas e correias que já vi."
+          },
+          {
+            "type": "narration",
+            "text": "Eu forjo o metal, ele trabalha o couro."
+          },
+          {
+            "type": "narration",
+            "text": "Juntos, equipamos metade dos aventureiros de Eldoria."
+          },
+          {
+            "type": "narration",
+            "text": "Bjorn é barulhento demais pro meu gosto, mas é honesto."
+          },
+          {
+            "type": "narration",
+            "text": "E na forja, honestidade vale mais que habilidade."
+          },
+          {
+            "type": "narration",
+            "text": "Sorte que ele tem as duas."
+          }
+        ]
+      },
+      "about_bjorn_detail": {
+        "text": "Toda semana ele me traz couro para trocar por fivelas e rebites. Eu faço as peças de metal, ele monta as correias e cintos. É uma parceria simples — sem contratos, sem promessas. Só dois artesãos que confiam no trabalho um do outro. É assim que deveria ser.",
+        "choices": [
+          {
+            "text": "Parceria honesta. Gosto disso.",
+            "target": "hero_welcome"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Toda semana ele me traz couro para trocar por fivelas e rebites."
+          },
+          {
+            "type": "narration",
+            "text": "Eu faço as peças de metal, ele monta as correias e cintos."
+          },
+          {
+            "type": "narration",
+            "text": "É uma parceria simples — sem contratos, sem promessas."
+          },
+          {
+            "type": "narration",
+            "text": "Só dois artesãos que confiam no trabalho um do outro."
+          },
+          {
+            "type": "narration",
+            "text": "É assim que deveria ser."
+          }
+        ]
+      },
+      "thorne_forge_secret": {
+        "text": "(Thorne para o martelo e te olha por um longo momento. Depois acena com a cabeça, decidido) Você me provou que merece. Vou te contar algo que meu mestre me ensinou — o Segredo da Têmpera Sombria. A maioria dos ferreiros usa água ou óleo para temperar. Mas se você adicionar cinza de carvalho negro à água e temperar sob a lua minguante... o aço absorve algo a mais. Fica mais leve, mais resistente. Poucos sabem disso.",
+        "choices": [
+          {
+            "text": "Obrigado pela confiança, Thorne. Guardarei este segredo.",
+            "target": "hero_welcome",
+            "impact": {
+              "flags": {
+                "thorne_forge_secret_learned": true
+              },
+              "reputation": {
+                "blacksmith": 5
+              }
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne para o martelo e te olha por um longo momento."
+          },
+          {
+            "type": "narration",
+            "text": "Depois acena com a cabeça, decidido) Você me provou que merece."
+          },
+          {
+            "type": "narration",
+            "text": "Vou te contar algo que meu mestre me ensinou — o Segredo da Têmpera Sombria."
+          },
+          {
+            "type": "narration",
+            "text": "A maioria dos ferreiros usa água ou óleo para temperar."
+          },
+          {
+            "type": "narration",
+            "text": "Mas se você adicionar cinza de carvalho negro à água e temperar sob a lua minguante... o aço absorve algo a mais."
+          },
+          {
+            "type": "narration",
+            "text": "Fica mais leve, mais resistente."
+          },
+          {
+            "type": "narration",
+            "text": "Poucos sabem disso."
+          }
+        ]
+      },
+      "exit": {
+        "text": "",
+        "choices": []
+      },
+      "thorne_complete": {
+        "text": "Aris?! Pelos deuses... (Ele larga o martelo e te abraça com força, cobrindo sua armadura de fuligem). Você trouxe a luz de volta para esta oficina. Pegue isto, é o mínimo que posso fazer.",
+        "choices": [
+          {
+            "text": "Fico feliz em ajudar, Thorne.",
+            "target": "hero_welcome",
+            "impact": {
+              "flags": {
+                "completed_thorne_son_quest": true
+              },
+              "complete_quests": [
+                "quest_thorne_son"
+              ]
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "Aris?!"
+          },
+          {
+            "type": "narration",
+            "text": "Pelos deuses... (Ele larga o martelo e te abraça com força, cobrindo sua armadura de fuligem)."
+          },
+          {
+            "type": "narration",
+            "text": "Você trouxe a luz de volta para esta oficina."
+          },
+          {
+            "type": "narration",
+            "text": "Pegue isto, é o mínimo que posso fazer."
+          }
+        ]
+      },
+      "thorne_forge_request": {
+        "text": "(Thorne aparece ofegante, com Aris atrás dele) Ei, você! Lembra de nós? Da estrada? Precisamos de ajuda. Encontrei um espaço perfeito no mercado para a forja, mas preciso de materiais — ferro bruto e carvão. Nas planícies ao sul há uma mina abandonada onde dá para encontrar. Me ajudaria mais uma vez?",
+        "choices": [
+          {
+            "text": "📜 Claro, Thorne! Vou buscar os materiais.",
+            "target": "thorne_forge_accepted",
+            "once": true,
+            "impact": {
+              "flags": {
+                "accepted_thorne_forge_quest": true
+              },
+              "quests": [
+                "quest_thorne_forge"
+              ]
+            }
+          },
+          {
+            "text": "Agora não posso, talvez depois.",
+            "target": "thorne_forge_later"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne aparece ofegante, com Aris atrás dele) Ei, você!"
+          },
+          {
+            "type": "narration",
+            "text": "Lembra de nós?"
+          },
+          {
+            "type": "narration",
+            "text": "Da estrada?"
+          },
+          {
+            "type": "narration",
+            "text": "Precisamos de ajuda."
+          },
+          {
+            "type": "narration",
+            "text": "Encontrei um espaço perfeito no mercado para a forja, mas preciso de materiais — ferro bruto e carvão."
+          },
+          {
+            "type": "narration",
+            "text": "Nas planícies ao sul há uma mina abandonada onde dá para encontrar."
+          },
+          {
+            "type": "narration",
+            "text": "Me ajudaria mais uma vez?"
+          }
+        ]
+      },
+      "thorne_forge_accepted": {
+        "text": [
+          "(Thorne bate no seu ombro com tanta força que você quase perde o equilíbrio) Sabia que podia contar com você! Procure nas planícies ao sul — uma velha mina abandonada. O ferro lá é de boa qualidade. Traga o que puder e eu cuido do resto!",
+          "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Eldoria, você vai ver! Papai já está desenhando a bigorna!"
+        ],
+        "choices": [
+          {
+            "text": "Deixa comigo!",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne bate no seu ombro com tanta força que você quase perde o equilíbrio) Sabia que podia contar com você!"
+          },
+          {
+            "type": "narration",
+            "text": "Procure nas planícies ao sul — uma velha mina abandonada."
+          },
+          {
+            "type": "narration",
+            "text": "O ferro lá é de boa qualidade."
+          },
+          {
+            "type": "narration",
+            "text": "Traga o que puder e eu cuido do resto!"
+          },
+          {
+            "type": "narration",
+            "text": "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Eldoria, você vai ver!"
+          },
+          {
+            "type": "narration",
+            "text": "Papai já está desenhando a bigorna!"
+          }
+        ]
+      },
+      "thorne_forge_later": {
+        "text": "(Thorne acena compreensivo) Sem pressa, aventureiro. Estaremos por aqui quando puder ajudar. Aris e eu vamos sobrevivendo vendendo pequenos reparos.",
+        "choices": [
+          {
+            "text": "Até logo, Thorne.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne acena compreensivo) Sem pressa, aventureiro."
+          },
+          {
+            "type": "narration",
+            "text": "Estaremos por aqui quando puder ajudar."
+          },
+          {
+            "type": "narration",
+            "text": "Aris e eu vamos sobrevivendo vendendo pequenos reparos."
+          }
+        ]
+      },
+      "thorne_forge_progress": {
+        "text": [
+          "(Thorne ergue a cabeça, esperançoso) Alguma novidade? Encontrou ferro na mina ao sul? Preciso de um bom carregamento para começar a forja!",
+          "(Aris puxa sua manga) Já encontrou os materiais? Papai não para de falar sobre a forja nova!"
+        ],
+        "choices": [
+          {
+            "text": "Ainda estou procurando. Volto em breve.",
+            "target": "exit"
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne ergue a cabeça, esperançoso) Alguma novidade?"
+          },
+          {
+            "type": "narration",
+            "text": "Encontrou ferro na mina ao sul?"
+          },
+          {
+            "type": "narration",
+            "text": "Preciso de um bom carregamento para começar a forja!"
+          },
+          {
+            "type": "narration",
+            "text": "(Aris puxa sua manga) Já encontrou os materiais?"
+          },
+          {
+            "type": "narration",
+            "text": "Papai não para de falar sobre a forja nova!"
+          }
+        ]
+      },
+      "thorne_forge_complete": {
+        "text": "(Thorne examina os materiais com olhos brilhantes) Ferro estelar! E carvão de qualidade! Com isso eu monto a melhor forja que Eldoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo. Primeiro na estrada, agora aqui. A partir de hoje, minha forja é sua casa. E tome — um presente pela sua generosidade.",
+        "choices": [
+          {
+            "text": "Fico feliz em ajudar, Thorne!",
+            "target": "start",
+            "impact": {
+              "flags": {
+                "thorne_shop_established": true,
+                "completed_thorne_forge_quest": true
+              },
+              "complete_quests": [
+                "quest_thorne_forge"
+              ]
+            }
+          }
+        ],
+        "script": [
+          {
+            "type": "narration",
+            "text": "(Thorne examina os materiais com olhos brilhantes) Ferro estelar!"
+          },
+          {
+            "type": "narration",
+            "text": "E carvão de qualidade!"
+          },
+          {
+            "type": "narration",
+            "text": "Com isso eu monto a melhor forja que Eldoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo."
+          },
+          {
+            "type": "narration",
+            "text": "Primeiro na estrada, agora aqui."
+          },
+          {
+            "type": "narration",
+            "text": "A partir de hoje, minha forja é sua casa."
+          },
+          {
+            "type": "narration",
+            "text": "E tome — um presente pela sua generosidade."
+          }
+        ]
+      }
+    },
+    "greet": {
+      "neutral": [
+        "O fole está soprando, o que precisa?",
+        "Aço frio não ganha batalha. O que busca?",
+        "Thorne ao seu serviço. Fale rápido, o ferro esfria.",
+        "Cuidado com as faíscas. O que deseja?",
+        "Mais um aventureiro com a espada cega?",
+        "Sente o cheiro do ferro quente? É aqui que nasce a melhor arma de Eldoria.",
+        "Meu martelo está ocupado, mas meus ouvidos não.",
+        "Não toque nas ferramentas. O que quer?"
+      ],
+      "friendly": [
+        "Ah, meu amigo! Sua espada ainda está afiada?",
+        "Bom te ver. Quer que eu verifique seu equipamento?",
+        "Para você, o aço é de primeira! O que precisa hoje?",
+        "A fornalha brilha mais quando você chega! Brincadeira. Mas quase.",
+        "Fico feliz em te ver inteiro. Alguma nova missão no horizonte?",
+        "Obrigado por tudo que fez por Eldoria. O que posso forjar?"
+      ],
+      "hostile": [
+        "Saia da minha oficina antes que eu te use como sucata.",
+        "Não faço aço para ratos. Vá embora.",
+        "Sua presença esfria minha forja. Suma.",
+        "Vá comprar lixo no orc do mercado.",
+        "Mais um passo e eu te mostro o peso do meu martelo."
+      ]
+    },
+    "chat": [
+      "O carvão está ficando caro em Eldoria. Os mercadores do sul cobram o triplo do que cobravam no ano passado.",
+      "Meu filho Aris era o meu braço direito na forja. Agora o silêncio desta oficina pesa mais que o ferro.",
+      "As espadas da guarda são funcionais, mas sem alma. O Capitão não entende a diferença entre cortar e cortar com estilo.",
+      "Andam vindo mercadores do oriente com metais estranhos. Um trouxe algo que chamou de 'aço vivo'. Vibrava no meu toque.",
+      "O ferro de anão é o melhor que existe, mas o nosso é honesto. Meu pai aprendeu a forjar com um anão honorário. Me deixou este martelo.",
+      "O orc do mercado não sabe a diferença entre cobre e bronze. Já vi ele vendendo sucata como 'aço de anão'. Vergonha.",
+      "O aço damasquino exige um padrão de dobras que poucos dominam. São 200 camadas de dobra, e cada uma precisa da temperatura exata.",
+      "Sempre verifique o equilíbrio da lâmina antes da batalha. Uma espada desequilibrada te mata mais rápido que o inimigo.",
+      "A têmpera em óleo de oliva dá um tom azulado ao metal. É a minha marca registrada.",
+      "Proteja o que é precioso. O aço pode ser reforjado, mas um filho não pode.",
+      "A forja é o coração de Eldoria. Sem armas, estas muralhas são apenas pedra bonita.",
+      "Amolar uma adaga é como afinar um alaúde, exige ouvido. Se o som mudar, você está tirando metal demais.",
+      "Sabe, Aris e eu viemos de Miravel. Tivemos que sair às pressas quando o Lorde de lá exigiu que eu forjasse armas amaldiçoadas. Recusei. Quase nos custou a vida.",
+      "Eldoria nos acolheu quando ninguém mais quis. Esta cidade merece o melhor aço que eu posso forjar.",
+      "Mirena, a alquimista, vive me pedindo metais raros. Sempre com pressa, nunca explica pra quê. Mas paga em dia, então não reclamo.",
+      "Martha me trouxe uma panela rachada semana passada. Eu disse que sou ferreiro, não funileiro. Consertei mesmo assim. A mulher tem um jeito de pedir que não aceita 'não'.",
+      "Bjorn fez as fivelas de bronze das minhas correias. Trabalho honesto, resistente. O homem entende de couro como eu entendo de aço."
+    ],
+    "chat_class": {
+      "Guerreiro": [
+        "\"Sua espada tem marcas de combate real. Gosto disso. Um guerreiro que usa a arma é melhor que cem que só a exibem.\"",
+        "\"Postura firme, guarda alta... dá pra ver que você leva o ofício a sério. Deixa eu verificar o fio dessa lâmina.\"",
+        "\"A diferença entre um soldado e um guerreiro é que o guerreiro cuida da própria arma. Pelo estado da sua, vejo que é do segundo tipo.\""
+      ],
+      "Paladino": [
+        "\"Aço consagrado exige um trato especial. A bênção protege a lâmina, mas o suor a corrói igual. Traga para manutenção quando puder.\"",
+        "Thorne abaixa a voz com respeito. \"Forjar para um paladino é uma honra. O aço sabe quando serve a uma causa justa.\""
+      ],
+      "Bárbaro": [
+        "Thorne olha para seus braços e ri. \"Com essa força, qualquer lâmina vira arma letal. Mas imagina o estrago com uma FORJADA POR MIM.\"",
+        "\"Nada de enfeites, nada de frescura. Lâmina grossa, cabo firme e peso na pancada. É assim que forjo para o seu tipo.\""
+      ]
+    },
+    "insult": {
+      "neutral": [
+        "Cuidado, ou sua cabeça vai encontrar minha bigorna.",
+        "Não insulte um homem armado com um martelo!",
+        "Você é um desperdício do meu tempo."
+      ],
+      "friendly": [
+        "Esperava mais de alguém que eu respeitava.",
+        "Isso foi desnecessário, aventureiro. Retire-se da minha forja.",
+        "Minha boa vontade com você acabou."
+      ],
+      "hostile": [
+        "Verme insolente! Vou te derreter nesta fornalha!",
+        "Sua existência é um erro metalúrgico!",
+        "Vá para o inferno, escória imunda!"
+      ]
+    }
+  }
+}
