@@ -110,11 +110,17 @@ function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
 
-  /* Icon — suporta SVG heraldico (innerHTML) ou emoji (textContent) */
+  /* Icon — suporta SVG heraldico, IMG (PNG canonical) ou emoji (textContent)
+     2026-05-21: adicionado suporte a <img> (MARKET_SVC_META + similares). */
   var ico = el('div', 'vc-service-icon');
   var icoStr = svc.icon || '';
-  if (icoStr.indexOf('<svg') >= 0) {
+  if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0) {
     ico.innerHTML = icoStr;
+    /* Estiliza <img> pra caber no container */
+    var iconImg = ico.querySelector('img');
+    if (iconImg) {
+      iconImg.style.cssText = 'width:38px;height:38px;object-fit:contain;';
+    }
   } else {
     ico.textContent = icoStr;
   }

@@ -24,6 +24,23 @@
 
 (function() {
 
+/* 2026-05-21 — MARKET_SVC_META map svc.cb -> PNG path canonical.
+   Service icons via PNGs gerados OpenAI ao invés de emoji/SVG fallback.
+   Cobre extras canônicos enviados por src/game/city/market_ui.py:213-219:
+   - market_sell_menu / market_gossip_general / rune_scribe_menu */
+var MARKET_SVC_META = {
+  'market_sell_menu':      { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
+  'market_gossip_general': { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
+  'rune_scribe_menu':      { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' },
+  /* Aliases pra robustez */
+  'market_sell':           { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
+  'sell':                  { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
+  'market_gossip':         { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
+  'rumores':               { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
+  'rune_scribe':           { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' },
+  'escriba':               { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' }
+};
+
 if (!window._SVC_CONFIG_MARKET) {
   window._SVC_CONFIG_MARKET = {
     faction: 'market',
@@ -340,15 +357,59 @@ function renderMarketHub(container, data) {
     var extrasLbl = vCity.el('div', 'pt-section-label');
     extrasLbl.textContent = '⚜ Outros Serviços ⚜';
     body.appendChild(extrasLbl);
-    body.appendChild(vCity.serviceGrid(data.extras));
+    /* 2026-05-21 — substitui emoji icon por PNG canonical via MARKET_SVC_META. */
+    var extrasWithPng = data.extras.map(function(svc){
+      var meta = MARKET_SVC_META[svc.cb];
+      if (meta && meta.icon) {
+        var copy = {}; for (var k in svc) copy[k] = svc[k];
+        copy.icon = meta.icon;
+        return copy;
+      }
+      return svc;
+    });
+    body.appendChild(vCity.serviceGrid(extrasWithPng));
   }
 
-  /* Wandering NPCs */
+  /* 2026-05-21 USER FIX: separar "Ausente hoje" do bloco Viajantes.
+     Antes: lista única misturava NPCs presentes (clicáveis) + ausentes
+     (não-clicáveis) — user reportou "não mostre os mercadores ausentes
+     no mesmo local dos viajantes". Agora: split em 2 listas, presentes
+     em "🚶 Viajantes" (clicáveis), ausentes opcionalmente em
+     "⌛ Ausentes hoje" dimmed visualmente. */
   if (data.wandering_npcs && data.wandering_npcs.length) {
-    var wnLbl = vCity.el('div', 'pt-section-label');
-    wnLbl.textContent = '🚶 Viajantes';
-    body.appendChild(wnLbl);
-    body.appendChild(vCity.actionList(data.wandering_npcs));
+    var presentes = [], ausentes = [];
+    for (var wi = 0; wi < data.wandering_npcs.length; wi++) {
+      var npc = data.wandering_npcs[wi];
+      var lbl = String(npc.label || npc.text || npc.name || '');
+      var sub = String(npc.sub || npc.desc || npc.subtitle || '');
+      var combined = (lbl + ' ' + sub).toLowerCase();
+      var isAbsent = /ausente|aus[êe]ncia|fora hoje|n[ãa]o est[áa]/.test(combined) || !!npc.absent;
+      if (isAbsent) ausentes.push(npc); else presentes.push(npc);
+    }
+    if (presentes.length) {
+      var wnLbl = vCity.el('div', 'pt-section-label');
+      wnLbl.textContent = '🚶 Viajantes';
+      body.appendChild(wnLbl);
+      body.appendChild(vCity.actionList(presentes));
+    }
+    if (ausentes.length) {
+      var auLbl = vCity.el('div', 'pt-section-label');
+      auLbl.textContent = '⌛ Ausentes hoje';
+      auLbl.style.cssText = 'opacity:0.6;margin-top:14px;';
+      body.appendChild(auLbl);
+      /* Render ausentes desabilitados visualmente (opacity, no-click) */
+      var auWrap = vCity.el('div', 'market-absent-list');
+      auWrap.style.cssText = 'opacity:0.5;pointer-events:none;font-size:11px;padding:0 12px;';
+      for (var ai = 0; ai < ausentes.length; ai++) {
+        var aN = ausentes[ai];
+        var aRow = vCity.el('div', 'market-absent-row');
+        aRow.style.cssText = 'padding:6px 8px;color:#a09484;font-style:italic;';
+        aRow.textContent = '· ' + (aN.label || aN.text || aN.name || '?');
+        if (aN.sub || aN.desc) aRow.textContent += ' — ' + (aN.sub || aN.desc);
+        auWrap.appendChild(aRow);
+      }
+      body.appendChild(auWrap);
+    }
   }
 
   root.appendChild(body);
