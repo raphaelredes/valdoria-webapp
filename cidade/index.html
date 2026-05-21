@@ -10675,13 +10675,31 @@ function _showFirstTimeTutorial(stepIdx){
     if (step.expandFooter && document.body.classList.contains('footer-collapsed')) {
       try { document.body.classList.remove('footer-collapsed'); } catch(_eF){ /* noqa: preflight */ }
     }
-    /* Aguarda DOM update do tab switch / footer expand antes de medir target */
-    setTimeout(function(){
+    /* 2026-05-21 fix v3 (#tutorial-center-popup-banco-praca): em mobile/Telegram
+       WebApp o viewport é menor + tab-switch animation pode levar >320ms. Target
+       rect 0×0 fazia fallback .center (popup no meio da tela bloqueando). Agora:
+       wait inicial + RETRY até 5x (intervals de 150ms) procurando target válido. */
+    var _measureRetries = 0;
+    var _MAX_RETRIES = 5;
+    function _measureAndPosition() {
       var target = document.querySelector(step.selector);
-      /* 2026-05-21 fix v2: target pode existir mas ter rect 0×0 (display:none,
-         ancestor hidden, etc). Tratar como "não encontrado" → fallback center. */
       var targetRect = target ? target.getBoundingClientRect() : null;
       var hasValidRect = targetRect && targetRect.width > 0 && targetRect.height > 0;
+      if (!target || !hasValidRect) {
+        if (_measureRetries < _MAX_RETRIES) {
+          _measureRetries++;
+          setTimeout(_measureAndPosition, 150);
+          return;
+        }
+        /* Retries esgotados — fallback .center */
+        card.style.top = '';
+        card.style.bottom = '';
+        spotlight.classList.remove('visible');
+        mask.style.clipPath = 'none';
+        mask.style.webkitClipPath = 'none';
+        card.classList.add('center');
+        return;
+      }
       if (target && hasValidRect) {
         var rect = targetRect;  /* já calculado acima */
         var pad = 6;
@@ -10731,17 +10749,11 @@ function _showFirstTimeTutorial(stepIdx){
         card.classList.remove('center');
         /* Scroll element into view if off-screen */
         try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
-      } else {
-        /* Fallback center: limpa inline ANTES de adicionar .center pra que
-           a CSS class possa aplicar bottom:50% sem inline override */
-        card.style.top = '';
-        card.style.bottom = '';
-        spotlight.classList.remove('visible');
-        mask.style.clipPath = 'none';
-        mask.style.webkitClipPath = 'none';
-        card.classList.add('center');
       }
-    }, targetTab ? 320 : 0); /* dá tempo da tab fazer fade-in */
+    } /* end _measureAndPosition */
+    /* Wait inicial pra tab-switch + footer expand iniciarem (320ms cobre maioria),
+       depois _measureAndPosition retries até 5× (150ms cada) se rect ainda 0×0. */
+    setTimeout(_measureAndPosition, targetTab || step.expandFooter ? 320 : 0);
   } else {
     /* Welcome/Closing screens — center mode. Limpa inline pra .center aplicar. */
     card.style.top = '';
