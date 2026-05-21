@@ -624,6 +624,10 @@ LOG SINK (Fase 7):
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor. */
     document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
+    /* SPA-NAV-COMPAT shim (sessão #18, 2026-05-21) — restaura helpers
+       window.valdoriaSpaNav que a SPA shell removida em maio quebrou. Sem
+       ele, prologue.js doFight + combat.js transitions + creator-app.js apply +
+       session-heartbeat.js jogam ReferenceError silencioso. NÃO REMOVER. */
     document.write('<script src="/shared/spa-nav-compat.js?v=' + __vEarly + '"><\/script>');
     /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
     setTimeout(function(){
@@ -8943,9 +8947,7 @@ var CITY_SECTOR_ORDER = ['convivio','comercio','combate','espirito'];
    Lv 1: tavern, market, action_quests, temple — core gameplay loop
    Lv 2: inn, rel_main — desbloqueados após primeira missão completa
    Lv 3: guild, gates — desbloqueados quando jogador tem XP/equip básico
-   (Maiores levelReq mantidos: bank 4, square 2, arena 3, etc.)
-   Mini-tutorial single-step disparado quando novo local aparece (ver
-   _maybeShowLocationUnlockedTutorial). */
+   Mini-tutorial single-step disparado quando novo local aparece. */
 var CITY_LOCATIONS = {
   // === CONVÍVIO === (essenciais + tier 2)
   tavern:        { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Taverna',    cb:'tavern' },
@@ -8962,7 +8964,7 @@ var CITY_LOCATIONS = {
   gates:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_gates',    label:'Portões',   cb:'gates' },
   arena:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_arena',    label:'Arena',     cb:'arena' },
   daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',   cb:'daily_challenge' },
-  // === ESPÍRITO === (templo livre, lore-locked)
+  // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
   action_codex:  { sector:'espirito', levelReq:5, discoveryQuestId:'q_disc_codex',    label:'Compêndio', cb:'action_codex' },
@@ -9034,6 +9036,38 @@ var CITY_DISCOVERY_QUESTS = {
     { id:'s2', speaker:'Sumo Sacerdote',
       text:'Jogos, mercado especial, blessing dos deuses, e a oportunidade rara de ganhar Selos do Festival — moeda única. Voltarei a te chamar quando as luas se alinharem.',
       choices:[{ label:'Aguardarei o sinal.', next:'unlock' }] }
+  ]},
+  q_disc_inn: { id:'q_disc_inn', name:'O Quarto Reservado', targetCb:'inn', stages:[
+    { id:'s1', speaker:'Grom Barba-Cinza, taverneiro',
+      text:'Vejo nos teus olhos quem dormiu no chão da estrada, forasteiro. Cerveja e calor eu sirvo, mas cama de verdade só a Martha dá — Estalagem da Pena-Dourada, a quatro portas daqui.',
+      choices:[{ label:'Onde fica?', next:'s2' }] },
+    { id:'s2', speaker:'Grom Barba-Cinza, taverneiro',
+      text:'Sai pela praça, vira na rua de paralelepípedos, segue o cheiro de pão fresco. Martha tem quartos limpos, banho quente e bom desjejum. Cobra justo. Diz que eu te mandei — talvez ela desconte uma moeda.',
+      choices:[{ label:'Vou procurar Martha.', next:'unlock' }] }
+  ]},
+  q_disc_rel: { id:'q_disc_rel', name:'Os Laços que Sustentam', targetCb:'rel_main', stages:[
+    { id:'s1', speaker:'Padre Aldric',
+      text:'Aventureiro… percebo que ainda caminhas sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram contigo. Os teus vínculos precisam ser cultivados.',
+      choices:[{ label:'Como cultivo esses laços?', next:'s2' }] },
+    { id:'s2', speaker:'Padre Aldric',
+      text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem te acompanhou, a quem deves favor, quem prometeu retornar. Anota lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
+      choices:[{ label:'Vou ao Pavilhão.', next:'unlock' }] }
+  ]},
+  q_disc_guild: { id:'q_disc_guild', name:'O Brasão Bordado', targetCb:'guild', stages:[
+    { id:'s1', speaker:'Caçadora itinerante',
+      text:'Andas só, forasteiro? Já vi muitos terminarem suas histórias por isso. A Guilda dos Aventureiros é a teia que segura quem caminha por fora dos muros — missões, ouro, ombros pra confiar. Devias procurar a Mestra Tavira.',
+      choices:[{ label:'Onde fica a Guilda?', next:'s2' }] },
+    { id:'s2', speaker:'Caçadora itinerante',
+      text:'Ao norte da arena, prédio com o brasão da águia bordado em vermelho. Bate três vezes na porta lateral. Não tenta impressioná-la com bravata: Tavira cheira mentira a três pedras de distância.',
+      choices:[{ label:'Vou à Guilda.', next:'unlock' }] }
+  ]},
+  q_disc_gates: { id:'q_disc_gates', name:'A Estrada Aberta', targetCb:'gates', stages:[
+    { id:'s1', speaker:'Sentinela do portão',
+      text:'Para, forasteiro. Vais sair de Valdoria, é? Os portões abrem ao amanhecer, fecham antes do crepúsculo. Antes de pisar a estrada, fala com o Capitão Drennar — ele anota teu nome, teu destino, e os perigos da semana.',
+      choices:[{ label:'Onde encontro o Capitão?', next:'s2' }] },
+    { id:'s2', speaker:'Sentinela do portão',
+      text:'Na guarita ao lado do portão norte. Sentado num banco de carvalho, lista nas mãos. Diz a ele o rumo — Floresta, Pântano, Estradas — e ele te informa o que esperar. Sem isso, sai por tua conta e risco.',
+      choices:[{ label:'Vou falar com o Capitão.', next:'unlock' }] }
   ]}
 };
 
@@ -10308,7 +10342,7 @@ var TUTORIAL_STEPS = [
                 + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
   },
   {
-    /* 2026-05-21: selector corrigido vs DOM real (linha 52320: _hubBtn('hub-cta',...)). */
+    /* 2026-05-21: selector corrigido vs DOM real (linha ~52320: _hubBtn('hub-cta',...)). */
     selector: '.hub-cta',
     title: '⚔️ Partir para Aventura',
     description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
@@ -10366,15 +10400,13 @@ var TUTORIAL_STEPS = [
     /* 2026-05-21 (fix v2): footer está collapsed por default (body.footer-collapsed),
        #bottom-panel display:none. Auto-expand antes de medir + pointar pro panel. */
     selector: '#bottom-panel, .footer-row.footer-quick',
-    expandFooter: true,  /* flag — JS remove body.footer-collapsed antes de medir */
+    expandFooter: true,
     title: '⚡ Atalhos rápidos',
     description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> e <b>Grupo</b> — atalhos pros recursos mais usados. '
                 + 'O botão <b>· Menu</b> recolhe pra ganhar mais espaço de tela.'
   },
   {
-    /* 2026-05-21 (fix v2): cards de personagem estão em #city-group-panel (verificado
-     * via DOM live walker — tag DIV id city-group-panel, 426×133px, contém todos
-     * cards Ryaiael/SIA/JOEL/QUADE com HP/MP/XP). */
+    /* 2026-05-21 (fix v2): cards estão em #city-group-panel (verificado DOM live). */
     selector: '#city-group-panel',
     title: '❤️ Cards do seu grupo',
     description: 'Topo da tela: cards de cada personagem com <b>HP</b> (vida vermelha), <b>MP</b> (mana/fé/vigor), '
@@ -10416,15 +10448,12 @@ function _showFirstTimeTutorial(stepIdx){
     var st = document.createElement('style');
     st.id = 'first-tut-style';
     st.textContent = ''
-      /* Overlay base */
       + '#first-tut-overlay{position:fixed;inset:0;z-index:11000;'
       + '  pointer-events:auto;animation:ftFadeIn 0.5s ease-out}'
       + '@keyframes ftFadeIn{from{opacity:0}to{opacity:1}}'
-      /* Mask com gradiente radial sutil + transição suave */
       + '#first-tut-mask{position:absolute;inset:0;'
       + '  background:radial-gradient(circle at 50% 40%,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.88) 100%);'
       + '  transition:clip-path 0.6s cubic-bezier(0.4,0.0,0.2,1)}'
-      /* Spotlight com pulse + diamante flutuante acima + shimmer */
       + '#first-tut-spotlight{position:absolute;border:2px solid rgba(196,149,58,0.95);'
       + '  border-radius:10px;'
       + '  box-shadow:0 0 0 4px rgba(196,149,58,0.25),0 0 30px rgba(196,149,58,0.55),'
@@ -10445,7 +10474,6 @@ function _showFirstTimeTutorial(stepIdx){
       + '    0 0 100px rgba(196,149,58,0.45),inset 0 0 30px rgba(196,149,58,0.22)}}'
       + '@keyframes ftFloat{0%,100%{transform:translateX(-50%) translateY(0)}'
       + '  50%{transform:translateX(-50%) translateY(-5px)}}'
-      /* Card AAA com cantos ornamentais + glow gold ambiente */
       + '#first-tut-card{position:fixed;left:50%;transform:translateX(-50%);'
       + '  bottom:24px;'
       + '  background:'
@@ -10456,9 +10484,7 @@ function _showFirstTimeTutorial(stepIdx){
       + '  box-shadow:0 12px 48px rgba(0,0,0,0.85),0 0 40px rgba(196,149,58,0.22),'
       + '    inset 0 1px 0 rgba(196,149,58,0.18);'
       + '  z-index:11001;'
-      /* 2026-05-21: transition para mover suavemente entre steps (igual spotlight).
-         top/bottom para reposicionamento vertical; transform mantém centralização
-         horizontal sem snap. cubic-bezier(0.4,0,0.2,1) = mesma curva do spotlight. */
+      /* 2026-05-21: transition para mover suavemente entre steps (igual spotlight). */
       + '  transition:top 0.5s cubic-bezier(0.4,0,0.2,1),'
       + '    bottom 0.5s cubic-bezier(0.4,0,0.2,1),'
       + '    transform 0.5s cubic-bezier(0.4,0,0.2,1);'
@@ -10471,13 +10497,11 @@ function _showFirstTimeTutorial(stepIdx){
       + '@keyframes ftCardEnterCenter{'
       + '  from{opacity:0;transform:translate(-50%,50%) scale(0.92)}'
       + '  to{opacity:1;transform:translate(-50%,50%) scale(1)}}'
-      /* Cantos ornamentais — diamantes gold nos 4 cantos */
       + '#first-tut-card::before,#first-tut-card::after{'
       + '  content:"";position:absolute;width:14px;height:14px;'
       + '  border:1.5px solid rgba(196,149,58,0.7);pointer-events:none}'
       + '#first-tut-card::before{top:8px;left:8px;border-right:0;border-bottom:0;border-top-left-radius:8px}'
       + '#first-tut-card::after{bottom:8px;right:8px;border-left:0;border-top:0;border-bottom-right-radius:8px}'
-      /* Step dots — 13 diamonds (1 active + done + pending) */
       + '#first-tut-step{display:flex;justify-content:center;gap:5px;margin-bottom:14px;'
       + '  padding:0 2px}'
       + '.ft-step-dot{width:7px;height:7px;border-radius:50%;'
@@ -10488,20 +10512,17 @@ function _showFirstTimeTutorial(stepIdx){
       + '  box-shadow:0 0 10px rgba(196,149,58,0.85),0 0 20px rgba(196,149,58,0.4);'
       + '  animation:ftDotPulse 1.6s ease-in-out infinite}'
       + '@keyframes ftDotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}'
-      /* Title épico Cinzel uppercase com glow */
       + '#first-tut-title{font-family:Cinzel,serif;font-size:17px;'
       + '  font-weight:700;color:#c4953a;letter-spacing:2px;'
       + '  text-align:center;margin:0 0 4px;'
       + '  text-shadow:0 0 14px rgba(196,149,58,0.55),0 2px 4px rgba(0,0,0,0.9);'
       + '  text-transform:uppercase}'
-      /* Divider ornamental com diamante central */
       + '.ft-divider{display:flex;align-items:center;gap:8px;'
       + '  margin:6px auto 14px;width:75%;justify-content:center}'
       + '.ft-divider::before,.ft-divider::after{content:"";flex:1;height:1px;'
       + '  background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55),transparent)}'
       + '.ft-divider span{color:#c4953a;font-size:8px;opacity:0.85;'
       + '  text-shadow:0 0 6px rgba(196,149,58,0.6)}'
-      /* Description com fade-in suave */
       + '#first-tut-desc{color:#d4c8b0;font-size:13px;line-height:1.65;'
       + '  margin:0 0 18px;font-family:MedievalSharp,serif;'
       + '  text-align:center;'
@@ -10511,7 +10532,6 @@ function _showFirstTimeTutorial(stepIdx){
       + '#first-tut-desc b{color:#c4953a;font-weight:700;'
       + '  text-shadow:0 0 6px rgba(196,149,58,0.4)}'
       + '#first-tut-desc em{color:#9b8e7c;font-style:italic}'
-      /* Buttons AAA com gradient + hover glow */
       + '#first-tut-nav{display:flex;gap:8px;align-items:center}'
       + '.ft-btn{flex:1;padding:11px 12px;'
       + '  background:linear-gradient(180deg,rgba(74,56,40,0.55),rgba(58,46,34,0.85));'
@@ -10543,7 +10563,6 @@ function _showFirstTimeTutorial(stepIdx){
       + '    inset 0 1px 0 rgba(255,255,255,0.3)}'
       + '.ft-btn-skip{background:transparent;border-color:rgba(196,149,58,0.22);'
       + '  color:#a09484;font-size:11px;flex:0 0 auto;padding:11px 14px}'
-      /* Welcome/Closing screens — centered card mais cinematográfico */
       + '#first-tut-card.center #first-tut-title{font-size:22px;letter-spacing:3px;margin-bottom:8px}'
       + '#first-tut-card.center #first-tut-desc{font-size:14px;line-height:1.7}'
       ;
@@ -10554,7 +10573,6 @@ function _showFirstTimeTutorial(stepIdx){
   if (!ov) {
     ov = document.createElement('div');
     ov.id = 'first-tut-overlay';
-    /* 13 step dots populated dynamically each render */
     var dotsHtml = '';
     for (var di = 0; di < TUTORIAL_STEPS.length; di++) {
       dotsHtml += '<div class="ft-step-dot" data-i="' + di + '"></div>';
@@ -10628,12 +10646,11 @@ function _showFirstTimeTutorial(stepIdx){
   var mask = document.getElementById('first-tut-mask');
   var card = document.getElementById('first-tut-card');
   /* 2026-05-21 BUG FIX (#tutorial-snap-then-move): NÃO limpar inline styles
-     upfront. Antes: clear top/bottom='' fazia card snap pra CSS default
-     bottom:24px durante o setTimeout 320ms da tab-switch, depois transition
-     animava de baixo pro destino — user via "aparecer embaixo e mover".
-     Agora: inline styles SÓ são alterados quando temos a posição final
-     calculada (target measured OR fallback decidido), no callback do timeout.
-     Transition cubic-bezier 0.5s anima do POSIÇÃO ANTERIOR pra nova direto. */
+     upfront. Antes: clear fazia card snap pra CSS default bottom:24px durante
+     o setTimeout 320ms, depois transition animava de baixo pro destino. User
+     reportou "popup aparece embaixo e depois é movido". Agora: clear SÓ no
+     fallback (target não found / no selector). Transition anima de POSIÇÃO
+     ANTERIOR para nova direto, sem snap intermediário. */
   if (step.selector) {
     /* 2026-05-21 BUG FIX (#tutorial-mercado): trocar tab automaticamente se target
        estiver em uma aba não-default. Mercado/Templo/Banco etc são em outras tabs
@@ -10668,9 +10685,6 @@ function _showFirstTimeTutorial(stepIdx){
     };
     var targetTab = TAB_OF_LOC[step_cb];
     if (targetTab && window._currentSector !== targetTab) {
-      /* 2026-05-21 fix: tabs reais usam classe .city-sector-tab (sem data-tab attr).
-         Seta diretamente window._currentSector + renderCurrentScreen (mesma coisa
-         que o click handler em linha ~9338-9343 faria). */
       try {
         window._currentSector = targetTab;
         if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
@@ -10683,9 +10697,8 @@ function _showFirstTimeTutorial(stepIdx){
       try { document.body.classList.remove('footer-collapsed'); } catch(_eF){ /* noqa: preflight */ }
     }
     /* 2026-05-21 fix v3 (#tutorial-center-popup-banco-praca): em mobile/Telegram
-       WebApp o viewport é menor + tab-switch animation pode levar >320ms. Target
-       rect 0×0 fazia fallback .center (popup no meio da tela bloqueando). Agora:
-       wait inicial + RETRY até 5x (intervals de 150ms) procurando target válido. */
+       viewport menor + tab-switch >320ms. Retry até 5x (150ms cada) buscando rect
+       válido antes de fallback .center (popup no meio bloqueando). */
     var _measureRetries = 0;
     var _MAX_RETRIES = 5;
     function _measureAndPosition() {
@@ -10698,25 +10711,19 @@ function _showFirstTimeTutorial(stepIdx){
           setTimeout(_measureAndPosition, 150);
           return;
         }
-        /* 2026-05-21 fix v4 (#tutorial-skip-locked-locations): retries esgotados
-           significa target não está no DOM — provavelmente locked por levelReq
-           (ex: Banco lv 4, Praça lv 2 NÃO existem pra lv 1) OU discoveryQuestId
-           não concluído. AUTO-SKIP pro próximo step ao invés de mostrar popup
-           .center bloqueando. Welcome/Closing têm selector=null e não chegam
-           aqui — só steps com selector que não casa caem nesse skip. */
+        /* 2026-05-21 fix v4: target locked (levelReq não atingido) → SKIP step. */
         console.info('[FT-TUT] step ' + stepIdx + ' skipped — target ' +
           step.selector + ' not found (locked/unavailable)');
         if (stepIdx + 1 < TUTORIAL_STEPS.length) {
           _showFirstTimeTutorial(stepIdx + 1);
         } else {
-          /* Era o último step e não tem target — finaliza tutorial */
           _markTutorialSeen();
           ov.remove();
         }
         return;
       }
       if (target && hasValidRect) {
-        var rect = targetRect;  /* já calculado acima */
+        var rect = targetRect;
         var pad = 6;
         spotlight.style.left = (rect.left - pad) + 'px';
         spotlight.style.top = (rect.top - pad) + 'px';
@@ -10725,8 +10732,8 @@ function _showFirstTimeTutorial(stepIdx){
         spotlight.classList.add('visible');
         card.classList.remove('center');
         /* 2026-05-21 BUG FIX (#tutorial-mask-dark): clip-path corta hole no mask
-           pra revelar o target. Antes a mask escura cobria o spotlight tornando
-           o local destacado também escuro. Polygon evenodd cria janela rect. */
+           pra revelar target. Antes a mask escura cobria o spotlight tornando o
+           local destacado também escuro. Polygon evenodd cria janela rect. */
         var L = rect.left - pad, T = rect.top - pad;
         var R = L + rect.width + pad * 2, B = T + rect.height + pad * 2;
         var clip = 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ' +
@@ -10739,38 +10746,30 @@ function _showFirstTimeTutorial(stepIdx){
         mask.style.webkitClipPath = clip;
         /* 2026-05-21 BUG FIX (#tutorial-card-cut): card positioning robusto.
            Mede altura real do card + viewport, escolhe posição que NÃO sobrepõe
-           o target NEM sai do viewport. Fallback: centro vertical se target
-           ocupa middle 60% da tela. */
+           o target NEM sai do viewport. */
         var vh = window.innerHeight;
-        var cardH = card.offsetHeight || 260; /* fallback se ainda não rendered */
+        var cardH = card.offsetHeight || 260;
         var marginV = 24;
         var spaceAbove = rect.top - marginV;
         var spaceBelow = vh - (rect.top + rect.height) - marginV;
         if (spaceBelow >= cardH + marginV) {
-          /* Cabe abaixo do target */
           card.style.top = 'auto';
           card.style.bottom = marginV + 'px';
         } else if (spaceAbove >= cardH + marginV) {
-          /* Cabe acima do target */
           card.style.bottom = 'auto';
           card.style.top = marginV + 'px';
         } else {
-          /* Não cabe em cima nem embaixo — centro absoluto, target NÃO visível */
           card.style.top = 'auto';
           card.style.bottom = marginV + 'px';
-          /* Esconde spotlight pra não competir com card no espaço apertado */
           spotlight.classList.remove('visible');
         }
         card.classList.remove('center');
-        /* Scroll element into view if off-screen */
         try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
       }
     } /* end _measureAndPosition */
-    /* Wait inicial pra tab-switch + footer expand iniciarem (320ms cobre maioria),
-       depois _measureAndPosition retries até 5× (150ms cada) se rect ainda 0×0. */
-    setTimeout(_measureAndPosition, targetTab || step.expandFooter ? 320 : 0);
+    setTimeout(_measureAndPosition, (targetTab || step.expandFooter) ? 320 : 0);
   } else {
-    /* Welcome/Closing screens — center mode. Limpa inline pra .center aplicar. */
+    /* Welcome/Closing — center mode. Limpa inline pra .center aplicar. */
     card.style.top = '';
     card.style.bottom = '';
     spotlight.classList.remove('visible');
@@ -10778,163 +10777,6 @@ function _showFirstTimeTutorial(stepIdx){
     mask.style.webkitClipPath = 'none';
     card.classList.add('center');
   }
-}
-
-// ============================================================================
-// MINI-TUTORIAL DE NOVO LOCAL DESBLOQUEADO (2026-05-21)
-// ============================================================================
-// User pediu: "para novos locais mostre o tutorial separadamente, uma tela
-// diferente, mas seguindo mesmo design, mesma fonte de design".
-//
-// Detecta locais que apareceram pela primeira vez na cidade (após level up
-// ou discovery quest) e mostra mini-tutorial single-step focado naquele
-// local, reusando #first-tut-overlay (mesmo CSS AAA medieval).
-//
-// State: localStorage 'valdoria_loc_seen_<charId>' = JSON array de cb seen.
-// ============================================================================
-
-/* Dicionário de mini-tutoriais por cb. Texto curto, focado no que o local oferece. */
-var LOC_UNLOCKED_TUTORIALS = {
-  'tavern':        { title: '🍺 Taverna', desc: 'Bebida, boatos sobre tesouros, jogos de dados. Coração social da cidade — comece aqui pra ouvir o mundo.' },
-  'action_quests': { title: '📜 Missões', desc: 'Diário de missões disponíveis. <b>Diárias</b> resetam, <b>História</b> recompensam épico, <b>Secundárias</b> vêm de NPCs.' },
-  'market':        { title: '🏪 Mercado', desc: 'Compre poções, armas, armaduras. Venda itens. Mercadores fixos + viajantes com itens raros (rotação periódica).' },
-  'temple':        { title: '⛪ Templo', desc: 'Cure ferimentos graves, remova venenos. Sacerdotes oferecem bênçãos divinas. Doe ouro pra ganhar favor dos deuses.' },
-  'inn':           { title: '🛏️ Estalagem desbloqueada!', desc: 'Descanso longo restaura <b>HP/MP totais</b> + remove exaustão. Quartos melhores = recuperação maior. Após primeira aventura você precisará disso.' },
-  'rel_main':      { title: '💞 Vínculos desbloqueados!', desc: 'Conecte-se com NPCs marcantes. Afinidade alta libera diálogos, descontos, missões secretas. Relacionamentos importam.' },
-  'guild':         { title: '🛡️ Guilda dos Aventureiros!', desc: 'Recrute aliados (mercenários, especialistas). Aceite contratos lucrativos. Suba de rank pra missões mais épicas.' },
-  'gates':         { title: '⚔️ Portões de Valdoria!', desc: 'Saída pra exploração. Fale com a guarda Aldric pra obter mapas. Atravesse Valdoria — bosques, montanhas, ruínas.' },
-  'bank':          { title: '🏦 Banco aberto!', desc: 'Guarde Valdoritas com segurança (não perde ao morrer). Empréstimos pra emergências, investimentos pra ganho passivo.' },
-  'arena':         { title: '⚔️ Arena de Combate!', desc: 'Duelos solo ou em equipe. Suba o ranking, ganhe glória e ouro. Torneios sazonais com prêmios épicos.' },
-  'square':        { title: '⛲ Praça Central!', desc: 'Quadro de avisos, jogos de aposta, vendedor ambulante, eventos aleatórios. Centro nervoso da cidade.' },
-  'open_workshop': { title: '🔨 Oficina aberta!', desc: 'Crie itens com materiais coletados. Forja, alquimia, encantamento. Suas próprias receitas, suas armas.' },
-  'rune_scribe':   { title: '✨ Escriba Rúnico!', desc: 'Decifre runas antigas, encante equipamentos, traduza pergaminhos místicos. Magia rara e poderosa.' },
-  'action_codex':  { title: '📚 Compêndio', desc: 'Sua enciclopédia de criaturas, locais, lores. Conhecimento desbloqueia bônus contra inimigos catalogados.' },
-  'daily_challenge': { title: '🏆 Desafio Diário!', desc: 'Encontro especial diferente todos os dias. Recompensa épica garantida — mas a dificuldade escala com seu nível.' },
-  'festival':      { title: '🎭 Festival sazonal!', desc: 'Evento limitado com competições, recompensas exclusivas, NPCs únicos. Não perca — só acontece em datas específicas.' }
-};
-
-function _miniTutStorageKey() {
-  return 'valdoria_loc_seen_' + (window._charId || 'default');
-}
-
-function _getLocSeenList() {
-  try {
-    var raw = localStorage.getItem(_miniTutStorageKey()) || '[]';
-    var arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch(e) { return []; }
-}
-
-function _markLocSeen(cb) {
-  if (!cb) return;
-  var seen = _getLocSeenList();
-  if (seen.indexOf(cb) >= 0) return;
-  seen.push(cb);
-  try { localStorage.setItem(_miniTutStorageKey(), JSON.stringify(seen)); } catch(_){}
-}
-
-/* Detecta locais novos no DOM que não estão na lista seen + mostra mini-tutorial.
-   Chamado após renderCurrentScreen do hub. Espera tutorial principal NÃO estar
-   ativo (não interrompe fluxo de primeiro acesso). */
-function _maybeShowLocationUnlockedTutorial() {
-  /* Não roda se tutorial principal está ativo */
-  if (document.getElementById('first-tut-overlay')) return;
-  /* Não roda se tutorial inicial ainda não foi visto */
-  try {
-    if (localStorage.getItem(TUTORIAL_STORAGE_KEY) !== '1') return;
-  } catch(_){ return; }
-  /* Não roda se já tem mini-tutorial ativo */
-  if (document.getElementById('mini-tut-overlay')) return;
-  /* Cuidado: só dispara em sector default 'convivio' pra não cobrir cards
-     em sectors que o jogador pode estar inspecionando ativamente. */
-  if (window._currentSector && window._currentSector !== 'convivio') return;
-  var seen = _getLocSeenList();
-  var allCards = document.querySelectorAll('.hub-loc[data-cb]');
-  var newCbs = [];
-  for (var i = 0; i < allCards.length; i++) {
-    var cb = allCards[i].getAttribute('data-cb');
-    if (cb && seen.indexOf(cb) < 0 && LOC_UNLOCKED_TUTORIALS[cb]) newCbs.push(cb);
-  }
-  if (!newCbs.length) return;
-  /* Mostra mini-tutorial do PRIMEIRO novo local. Se houver mais, queue-up
-     (chama recursivo após Entendido). */
-  _showMiniTutorial(newCbs[0]);
-}
-
-function _showMiniTutorial(cb) {
-  var info = LOC_UNLOCKED_TUTORIALS[cb];
-  if (!info) return;
-  /* Garante CSS do first-tut está injetado (reusamos #first-tut-style) */
-  if (!document.getElementById('first-tut-style')) {
-    /* Cria overlay temporário pra forçar injection do CSS, depois remove */
-    _showFirstTimeTutorial(0);
-    var tmp = document.getElementById('first-tut-overlay');
-    if (tmp) tmp.remove();
-  }
-  /* Build mini overlay reusando mesmas IDs/classes mas com sufixo 'mini'.
-     Pra reaproveitar 100% do CSS, usamos id="first-tut-overlay" e adicionamos
-     class extra 'mini-tut'. Removemos no Entendido. */
-  var ov = document.createElement('div');
-  ov.id = 'mini-tut-overlay';
-  ov.className = 'first-tut-mini-wrap'; /* placeholder pra evitar conflito */
-  /* Replicamos estrutura mas IDs sufixados pra não conflitar */
-  ov.innerHTML = ''
-    + '<div id="first-tut-mask" class="mt-mask"></div>'
-    + '<div id="first-tut-spotlight" class="mt-spot"></div>'
-    + '<div id="first-tut-card" class="mt-card">'
-    + '  <div class="ft-divider" style="margin-bottom:14px"><span>◆ NOVO LOCAL ◆</span></div>'
-    + '  <h3 id="first-tut-title"></h3>'
-    + '  <div class="ft-divider"><span>◆</span></div>'
-    + '  <p id="first-tut-desc"></p>'
-    + '  <div id="first-tut-nav">'
-    + '    <button class="ft-btn ft-btn-primary" id="mt-ok">✓ Entendido</button>'
-    + '  </div>'
-    + '</div>';
-  /* Aplica styles inline pra mascarar id conflict — overlay próprio  */
-  ov.style.cssText = 'position:fixed;inset:0;z-index:11000;pointer-events:auto;animation:ftFadeIn 0.5s ease-out';
-  var mask = ov.querySelector('.mt-mask');
-  mask.style.cssText = 'position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.88) 100%);transition:clip-path 0.6s cubic-bezier(0.4,0,0.2,1)';
-  var spot = ov.querySelector('.mt-spot');
-  spot.style.cssText = 'position:absolute;border:2px solid rgba(196,149,58,0.95);border-radius:10px;box-shadow:0 0 0 4px rgba(196,149,58,0.25),0 0 30px rgba(196,149,58,0.55),0 0 60px rgba(196,149,58,0.3),inset 0 0 20px rgba(196,149,58,0.12);pointer-events:none;animation:ftSpotPulse 2.4s ease-in-out infinite';
-  document.body.appendChild(ov);
-  /* Title + desc */
-  ov.querySelector('#first-tut-title').textContent = info.title;
-  ov.querySelector('#first-tut-desc').innerHTML = info.desc;
-  /* Spotlight no target */
-  var target = document.querySelector('.hub-loc[data-cb="' + cb + '"]');
-  if (target) {
-    var r = target.getBoundingClientRect();
-    var pad = 6;
-    spot.style.left = (r.left - pad) + 'px';
-    spot.style.top = (r.top - pad) + 'px';
-    spot.style.width = (r.width + pad * 2) + 'px';
-    spot.style.height = (r.height + pad * 2) + 'px';
-    /* clip-path corta hole no mask */
-    var L = r.left - pad, T = r.top - pad, R = L + r.width + pad * 2, B = T + r.height + pad * 2;
-    var clip = 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ' + L + 'px ' + T + 'px, ' + R + 'px ' + T + 'px, ' + R + 'px ' + B + 'px, ' + L + 'px ' + B + 'px, ' + L + 'px ' + T + 'px)';
-    mask.style.clipPath = clip;
-    mask.style.webkitClipPath = clip;
-  } else {
-    spot.style.display = 'none';
-  }
-  /* Card position: bottom 24px (sempre — não tem retry porque target ja medido) */
-  var card = ov.querySelector('.mt-card');
-  card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:radial-gradient(ellipse at top,rgba(196,149,58,0.12) 0%,transparent 60%),linear-gradient(180deg,rgba(58,46,34,0.97),rgba(42,34,24,0.99));border:1px solid rgba(196,149,58,0.7);border-radius:14px;padding:22px 20px 16px;width:calc(100% - 32px);max-width:380px;box-shadow:0 12px 48px rgba(0,0,0,0.85),0 0 40px rgba(196,149,58,0.22),inset 0 1px 0 rgba(196,149,58,0.18);z-index:11001;animation:ftCardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1)';
-  /* Cantos ornamentais (replicam ::before/::after via spans) */
-  var cornerTL = document.createElement('div');
-  cornerTL.style.cssText = 'position:absolute;width:14px;height:14px;border:1.5px solid rgba(196,149,58,0.7);border-right:0;border-bottom:0;border-top-left-radius:8px;top:8px;left:8px;pointer-events:none';
-  card.appendChild(cornerTL);
-  var cornerBR = document.createElement('div');
-  cornerBR.style.cssText = 'position:absolute;width:14px;height:14px;border:1.5px solid rgba(196,149,58,0.7);border-left:0;border-top:0;border-bottom-right-radius:8px;bottom:8px;right:8px;pointer-events:none';
-  card.appendChild(cornerBR);
-  /* Entendido click */
-  ov.querySelector('#mt-ok').addEventListener('click', function(){
-    haptic('medium');
-    _markLocSeen(cb);
-    ov.remove();
-    /* Recursivo: se há mais locais novos, mostra próximo */
-    setTimeout(_maybeShowLocationUnlockedTutorial, 300);
-  });
 }
 
 // USER REQUEST 2026-05-04: AAA orb (mesma DOM de shared/loading-title.js#_buildDOM)
@@ -13281,12 +13123,6 @@ function renderCurrentScreen(params){
   try {
     if (_currentScreen === 'hub' && typeof _maybeShowFirstTimeTutorial === 'function') {
       setTimeout(_maybeShowFirstTimeTutorial, 800);
-    }
-    /* 2026-05-21: mini-tutoriais de novos locais (após tutorial inicial visto).
-       Delay 1400ms — depois do tutorial principal poder iniciar primeiro (800ms),
-       garante que dispara só se o tutorial inicial JÁ foi visto OU finalizou. */
-    if (_currentScreen === 'hub' && typeof _maybeShowLocationUnlockedTutorial === 'function') {
-      setTimeout(_maybeShowLocationUnlockedTutorial, 1400);
     }
   } catch(e){ console.warn('[CITY] tutorial trigger:', e); }
 }
@@ -43481,7 +43317,6 @@ var ACTION_HANDLERS = {
      lyana-herbalista.png gerada via scripts/_gen_inn_lyana_pngs.py. */
   'quest_lyana_deliver': function(p){
     if (typeof window.vEncounter !== 'object' || !window.vEncounter.render) {
-      /* Fallback: vEncounter não disponível */
       _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
       return;
     }
@@ -43489,7 +43324,7 @@ var ACTION_HANDLERS = {
       npc: {
         name: 'Lyana, a Herbalista',
         desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
-        portrait: '../shared/img/npcs/lyana-herbalista.png'
+        portrait: '/shared/img/npcs/lyana-herbalista.png'
       },
       script: [
         { type: 'narration', text: 'A Praça respira no fim da tarde — comerciantes recolhem bancas, sinos do templo soam graves. Lyana está agachada perto da fonte, separando raízes de mandrágora num pano azul claro. Cabelos castanhos soltos pelas costas, vestido de linho verde-musgo, mãos manchadas de seiva. Ao te ver aproximar, ela ergue o rosto — olhos verdes inquietos, sobrancelhas franzidas pela expectativa de três luas.' },
