@@ -387,6 +387,13 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
                + adiciona _cb pra cache-bust + remove `route` (já consumido). */
             _qs.delete('route');
             if (!_qs.get('_cb')) _qs.set('_cb', String(Date.now()));
+            /* 2026-05-21 FIX LOOP "Toque para Iniciar": adiciona nointro=1 ao
+               redirect — vindo do /play/ ou char_creator confirmation, o audio
+               já foi desbloqueado E não faz sentido mostrar TitleScreen 2x. */
+            _qs.set('nointro', '1');
+            /* Marca audio resume timestamp pra cobrir caso /play/ -> /cidade/
+               navegação ANTES do JS de loading-title carregar. */
+            try { localStorage.setItem('valdoria_audio_resume_ts', String(Date.now())); } catch(_eLS){}
             window.location.replace(destPath + '?' + _qs.toString());
           }, 600);
           return;
