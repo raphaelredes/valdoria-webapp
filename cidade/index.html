@@ -11943,6 +11943,27 @@ var LEAGUE_TIERS = [
   { id: 'mithral',  icon: 'ic-liga-mithral', name: 'Mithral',  minXp: 20000, maxXp: 50000, color: '#b9d4f2' }
 ];
 
+/* 2026-05-22 — LIGA ÉPICA v2 "Ordem dos Aventureiros" =======================
+   User: "Revise a liga dos aventureiros e melhore de maneira épica o visual."
+   Mudanças vs v1:
+   - Header cerimonial com 3 layers de glow pulsantes + light rays radial
+   - Coroa de louros (laurel wreath) em ::before/::after ornamentando medalha
+   - 6 partículas flutuantes ao redor da medalha (animadas)
+   - Tier path HORIZONTAL — 5 medalhas conectadas por linha (jornada visual)
+   - Inscription card: "Por feitos heroicos, glória e ouro"
+   - Benefícios do tier atual (3 chips)
+   - Posição mockup "X aventureiro da ordem"
+   ========================================================================== */
+
+// Benefícios por tier (lore-friendly). canonical: pode vir de league_data.py futuramente.
+var LEAGUE_BENEFITS = {
+  bronze:   ['Acesso à Guilda',   'Bandeira da Ordem',    'Insígnia de Bronze'],
+  silver:   ['10% desconto loja', 'Convite aos torneios', 'Capa prateada'],
+  gold:     ['Cavalaria dourada', 'Câmara da Ordem',      'Brasão personalizado'],
+  platinum: ['Acesso a contratos elite', 'Conselheiro real', 'Manto platina'],
+  mithral:  ['Vassalo do Trono',  'Lenda viva',           'Insígnia mithral']
+};
+
 function _showLeaguePopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -11954,83 +11975,268 @@ function _showLeaguePopup(p){
   for (var i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
     if (currentXp >= LEAGUE_TIERS[i].minXp) { currentTier = LEAGUE_TIERS[i]; break; }
   }
-  var nextTier = LEAGUE_TIERS[Math.min(LEAGUE_TIERS.indexOf(currentTier) + 1, LEAGUE_TIERS.length - 1)];
+  var currentTierIdx = LEAGUE_TIERS.indexOf(currentTier);
+  var nextTier = LEAGUE_TIERS[Math.min(currentTierIdx + 1, LEAGUE_TIERS.length - 1)];
   var pctInTier = (currentXp - currentTier.minXp) / (currentTier.maxXp - currentTier.minXp) * 100;
   pctInTier = Math.max(0, Math.min(100, pctInTier));
+  var atMax = (nextTier === currentTier);
+  var tColor = currentTier.color;
+  var rankMock = 1234 - currentXp; // mock posição global "menor é melhor"
+  var currentBenefits = LEAGUE_BENEFITS[currentTier.id] || [];
 
-  var html = '<div class="lg-hub" style="padding: var(--v-space-md, 8px);">';
-  // X-6.5.51AY (2026-05-11): header épico com medalha pendurada + pedestal
-  // ornamental. Antes era card simples — agora "trono cerimonial" com glow
-  // pulsante na cor do tier.
+  var html = '<div class="lg-hub" style="position:relative; padding:0; overflow:hidden;">';
+
+  // === STYLES — keyframes para todas as animações épicas ===
   html += '<style>'
-    + '@keyframes vLgMedalGlow{0%,100%{filter:drop-shadow(0 0 8px ' + currentTier.color + '88);}50%{filter:drop-shadow(0 0 18px ' + currentTier.color + 'cc);}}'
-    + '@keyframes vLgRibbonSway{0%,100%{transform:rotate(-1deg);}50%{transform:rotate(1deg);}}'
-    + '.vLg-medal{animation:vLgMedalGlow 3.4s ease-in-out infinite;}'
+    + '@keyframes vLgMedalPulse{0%,100%{filter:drop-shadow(0 0 10px ' + tColor + 'aa) drop-shadow(0 0 22px ' + tColor + '66);}50%{filter:drop-shadow(0 0 18px ' + tColor + 'ee) drop-shadow(0 0 36px ' + tColor + '99);}}'
+    + '@keyframes vLgMedalFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}'
+    + '@keyframes vLgRayRotate{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}'
+    + '@keyframes vLgAuraPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.55;}50%{transform:translate(-50%,-50%) scale(1.15);opacity:0.85;}}'
+    + '@keyframes vLgAuraPulse2{0%,100%{transform:translate(-50%,-50%) scale(1.1);opacity:0.30;}50%{transform:translate(-50%,-50%) scale(1.35);opacity:0.55;}}'
+    + '@keyframes vLgParticle{0%{transform:translate(-50%,-50%) translateY(0) translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translate(-50%,-50%) translateY(-60px) translateX(var(--lg-px,0px));opacity:0;}}'
+    + '@keyframes vLgRibbonSway{0%,100%{transform:rotate(-1.5deg);}50%{transform:rotate(1.5deg);}}'
+    + '@keyframes vLgRuneShine{0%,100%{opacity:0.55;text-shadow:0 0 4px ' + tColor + '88;}50%{opacity:1;text-shadow:0 0 12px ' + tColor + 'cc;}}'
+    + '.vLg-medal-anim{animation:vLgMedalPulse 3.4s ease-in-out infinite, vLgMedalFloat 5s ease-in-out infinite;}'
+    + '.vLg-rays{animation:vLgRayRotate 30s linear infinite;}'
+    + '.vLg-aura{animation:vLgAuraPulse 3.4s ease-in-out infinite;}'
+    + '.vLg-aura2{animation:vLgAuraPulse2 3.4s ease-in-out infinite;}'
     + '.vLg-ribbon{animation:vLgRibbonSway 4s ease-in-out infinite; transform-origin: top center;}'
+    + '.vLg-particle{animation:vLgParticle 5s ease-in-out infinite;}'
+    + '.vLg-rune{animation:vLgRuneShine 2.8s ease-in-out infinite; display:inline-block;}'
+    + '.vLg-path-medal{transition:transform 0.25s ease;cursor:pointer;}'
+    + '.vLg-path-medal:hover{transform:scale(1.12);}'
+    + '.vLg-path-medal.is-current{animation:vLgMedalPulse 3.4s ease-in-out infinite;}'
+    + 'body.perf-lite .vLg-medal-anim,body.perf-lite .vLg-rays,body.perf-lite .vLg-aura,body.perf-lite .vLg-aura2,body.perf-lite .vLg-particle,body.perf-lite .vLg-rune,body.perf-lite .vLg-path-medal.is-current{animation:none;}'
+    + '@media (prefers-reduced-motion:reduce){.vLg-medal-anim,.vLg-rays,.vLg-aura,.vLg-aura2,.vLg-particle,.vLg-ribbon,.vLg-rune,.vLg-path-medal.is-current{animation:none;}}'
     + '</style>';
-  // === HEADER ÉPICO: pedestal + medalha pendurada com brasão ===
-  html += '<div style="position:relative; padding: 16px 12px 14px; '
-    + 'background: radial-gradient(ellipse at 50% 30%, ' + currentTier.color + '38 0%, ' + currentTier.color + '12 35%, rgba(42,36,32,0.95) 75%); '
-    + 'border: 1px solid ' + currentTier.color + '; '
-    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;'
-    + 'display: flex; flex-direction: column; align-items: center; gap: 4px;">'
-    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:9px;color:' + currentTier.color + ';letter-spacing:2px;opacity:0.8;">◆ ORDEM DOS AVENTUREIROS ◆</div>'
-    // Fita decorativa no topo
-    + '<div class="vLg-ribbon" style="width: 14px; height: 18px; background: linear-gradient(180deg, ' + currentTier.color + ', ' + currentTier.color + '88); margin-bottom: -4px; clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);"></div>'
-    // Medalha
-    + '<svg class="vLg-medal" viewBox="0 0 120 120" style="width: 84px; height: 84px; color: ' + currentTier.color + ';"><use href="#' + currentTier.icon + '"/></svg>'
-    // Nome do tier
-    + '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 22px; '
-    + 'color: ' + currentTier.color + '; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px ' + currentTier.color + '88, 0 2px 4px rgba(0,0,0,0.5); margin-top: 6px;">'
+
+  // === HEADER ÉPICO CERIMONIAL ===
+  html += '<div style="position:relative; padding: 18px 12px 18px; overflow:hidden;'
+    + 'background:radial-gradient(ellipse at 50% 35%,' + tColor + '40 0%,' + tColor + '15 35%,rgba(42,36,32,0.95) 75%);'
+    + 'border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin:8px 8px 6px;">'
+
+    // Banner topo "ORDEM DOS AVENTUREIROS" com decorações laterais
+    + '<div style="position:relative; z-index:3; display:flex; align-items:center; justify-content:center; gap:8px;'
+    + 'font-family:var(--v-font-display,Cinzel,serif); font-size:9px;'
+    + 'color:' + tColor + '; letter-spacing:3px; text-transform:uppercase; margin-bottom:6px;">'
+    + '<span style="flex:0 0 30px; height:1px; background:linear-gradient(90deg,transparent,' + tColor + '88);"></span>'
+    + '<span class="vLg-rune">◆</span>'
+    + '<span style="opacity:0.95;">Ordem dos Aventureiros</span>'
+    + '<span class="vLg-rune">◆</span>'
+    + '<span style="flex:0 0 30px; height:1px; background:linear-gradient(90deg,' + tColor + '88,transparent);"></span>'
+    + '</div>'
+
+    // Container da medalha + auras + rays + partículas (140px area)
+    + '<div style="position:relative; width:140px; height:140px; margin:0 auto 10px;">'
+
+    // Light rays rotativos (atrás de tudo)
+    + '<svg class="vLg-rays" viewBox="0 0 200 200" style="position:absolute; top:50%; left:50%; width:200px; height:200px; transform:translate(-50%,-50%); opacity:0.25; pointer-events:none;">'
+    + '<defs><linearGradient id="lgRay" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="' + tColor + '" stop-opacity="0.7"/><stop offset="100%" stop-color="' + tColor + '" stop-opacity="0"/></linearGradient></defs>'
+    + '<g fill="url(#lgRay)">'
+    +   '<polygon points="100,100 95,5 105,5"/><polygon points="100,100 195,95 195,105"/>'
+    +   '<polygon points="100,100 105,195 95,195"/><polygon points="100,100 5,105 5,95"/>'
+    +   '<polygon points="100,100 30,30 38,22"/><polygon points="100,100 170,30 178,38"/>'
+    +   '<polygon points="100,100 170,170 178,162"/><polygon points="100,100 30,170 22,162"/>'
+    + '</g></svg>'
+
+    // 3 auras pulsantes (outer/mid/inner)
+    + '<div class="vLg-aura2" style="position:absolute; top:50%; left:50%; width:140px; height:140px; border-radius:50%;'
+    + 'background:radial-gradient(circle,' + tColor + '44 0%,transparent 70%); pointer-events:none;"></div>'
+    + '<div class="vLg-aura" style="position:absolute; top:50%; left:50%; width:110px; height:110px; border-radius:50%;'
+    + 'background:radial-gradient(circle,' + tColor + '66 0%,transparent 65%); pointer-events:none;"></div>'
+
+    // Coroa de louros (laurel wreath) — folhas em volta
+    + '<svg viewBox="0 0 140 140" style="position:absolute; top:50%; left:50%; width:140px; height:140px; transform:translate(-50%,-50%); opacity:0.7; pointer-events:none; color:' + tColor + ';">'
+    + '<g fill="currentColor" opacity="0.65">'
+    // Folhas laterais esquerdas
+    +   '<ellipse cx="18" cy="70" rx="11" ry="5" transform="rotate(-30 18 70)"/>'
+    +   '<ellipse cx="24" cy="55" rx="10" ry="4.5" transform="rotate(-50 24 55)"/>'
+    +   '<ellipse cx="34" cy="40" rx="10" ry="4.5" transform="rotate(-70 34 40)"/>'
+    +   '<ellipse cx="48" cy="28" rx="9" ry="4" transform="rotate(-90 48 28)"/>'
+    +   '<ellipse cx="24" cy="85" rx="10" ry="4.5" transform="rotate(-150 24 85)"/>'
+    +   '<ellipse cx="34" cy="100" rx="10" ry="4.5" transform="rotate(-130 34 100)"/>'
+    +   '<ellipse cx="48" cy="112" rx="9" ry="4" transform="rotate(-110 48 112)"/>'
+    // Folhas laterais direitas
+    +   '<ellipse cx="122" cy="70" rx="11" ry="5" transform="rotate(30 122 70)"/>'
+    +   '<ellipse cx="116" cy="55" rx="10" ry="4.5" transform="rotate(50 116 55)"/>'
+    +   '<ellipse cx="106" cy="40" rx="10" ry="4.5" transform="rotate(70 106 40)"/>'
+    +   '<ellipse cx="92" cy="28" rx="9" ry="4" transform="rotate(90 92 28)"/>'
+    +   '<ellipse cx="116" cy="85" rx="10" ry="4.5" transform="rotate(150 116 85)"/>'
+    +   '<ellipse cx="106" cy="100" rx="10" ry="4.5" transform="rotate(130 106 100)"/>'
+    +   '<ellipse cx="92" cy="112" rx="9" ry="4" transform="rotate(110 92 112)"/>'
+    + '</g>'
+    // Frutos no topo central
+    + '<circle cx="65" cy="20" r="3" fill="currentColor"/>'
+    + '<circle cx="75" cy="20" r="3" fill="currentColor"/>'
+    + '<circle cx="70" cy="14" r="2.5" fill="currentColor"/>'
+    + '</svg>'
+
+    // Fita decorativa pendurada (acima da medalha)
+    + '<div class="vLg-ribbon" style="position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:2;'
+    + 'width:16px; height:22px; background:linear-gradient(180deg,' + tColor + ',' + tColor + '99);'
+    + 'clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%); box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>'
+
+    // Medalha principal (100px)
+    + '<svg class="vLg-medal-anim" viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2;"><use href="#' + currentTier.icon + '"/></svg>'
+
+    // 6 partículas flutuantes ao redor (gradient bg, tier color)
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:18px; animation-delay:0s; box-shadow:0 0 8px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:-22px; animation-delay:0.8s; box-shadow:0 0 6px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:30px; animation-delay:1.6s; box-shadow:0 0 8px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:3px; height:3px; border-radius:50%; background:' + tColor + '; --lg-px:-12px; animation-delay:2.4s; box-shadow:0 0 5px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:24px; animation-delay:3.2s; box-shadow:0 0 6px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:-28px; animation-delay:4.0s; box-shadow:0 0 8px ' + tColor + ';"></div>'
+
+    + '</div>'  // /medalha-container
+
+    // Nome do tier (28px Cinzel grande com text-shadow épico)
+    + '<div style="text-align:center; font-family:var(--v-font-display,Cinzel,serif); font-size:28px;'
+    + 'color:' + tColor + '; font-weight:700; letter-spacing:5px; text-transform:uppercase;'
+    + 'text-shadow:0 0 14px ' + tColor + 'aa,0 0 28px ' + tColor + '55,0 3px 6px rgba(0,0,0,0.6); margin-bottom:6px; position:relative; z-index:3;">'
     + currentTier.name
     + '</div>'
-    // XP atual
-    + '<div style="display:inline-flex; align-items:center; gap:6px; padding: 4px 10px; background: rgba(0,0,0,0.4); border: 1px solid ' + currentTier.color + '66; border-radius: 12px; margin-top: 4px;">'
-    +   '<span style="font-family: var(--v-font-display,Cinzel,serif); font-size: 14px; color: ' + currentTier.color + '; font-weight: 700;">'
-    +     currentXp.toLocaleString('pt-BR')
-    +   '</span>'
-    +   '<span style="font-size: 10px; color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 1.5px;">XP de Liga</span>'
+
+    // XP em ornate bordered card
+    + '<div style="position:relative; z-index:3; display:inline-flex; align-items:center; gap:8px;'
+    + 'padding:6px 14px; background:rgba(0,0,0,0.55); border:1px solid ' + tColor + '88; border-radius:18px;'
+    + 'box-shadow:0 0 12px ' + tColor + '44, inset 0 0 6px rgba(0,0,0,0.4);'
+    + 'margin:0 auto; display:flex; max-width:fit-content;">'
+    +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:10px;">◆</span>'
+    +   '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:18px; color:' + tColor + ';'
+    +   'font-weight:700; text-shadow:0 0 8px ' + tColor + '88;">' + currentXp.toLocaleString('pt-BR') + '</span>'
+    +   '<span style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:2px;">XP de Liga</span>'
+    +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:10px;">◆</span>'
+    + '</div>'
+
+    + '</div>';  // /header
+
+  // === INSCRIPTION CARD — "Por feitos heroicos..." ===
+  html += '<div style="margin:0 8px 8px; padding:8px 12px;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.08) 0%,rgba(42,36,32,0.4) 100%);'
+    + 'border:1px solid rgba(196,149,58,0.20); border-radius:6px; text-align:center;'
+    + 'position:relative;">'
+    + '<div style="font-family:var(--v-font,MedievalSharp,serif); font-size:13px; color:var(--v-text,#d4c8b0); font-style:italic; line-height:1.5;">'
+    + '"Por feitos heroicos, glória e ouro, ergue-se o nome do aventureiro entre as estrelas."'
+    + '</div>'
+    + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-top:4px; letter-spacing:1px;">'
+    + '— Crônica de Eldoria, Cap. III'
     + '</div>'
     + '</div>';
 
-  // Progress bar pra próximo tier
-  if (nextTier !== currentTier) {
+  // === PROGRESS BAR pra próximo tier (decorado com runes) ===
+  if (!atMax) {
     var xpToNext = nextTier.minXp - currentXp;
-    html += '<div style="background: rgba(196,149,58,0.06); padding: var(--v-space-md, 8px); border-radius: var(--v-radius-sm, 6px); margin-bottom: var(--v-space-md, 8px);">'
-      + '<div style="display:flex; justify-content:space-between; font-size: var(--v-font-xs, 11px); margin-bottom: 4px;">'
-      + '<span>Progresso para <b>' + nextTier.name + '</b></span>'
-      + '<span style="color: var(--v-gold, #c4953a);">' + Math.round(pctInTier) + '%</span>'
+    html += '<div style="margin:0 8px 8px; padding:8px 10px;'
+      + 'background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828);'
+      + 'border-radius:6px;">'
+      // Header com from/to medalhas
+      + '<div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:6px;">'
+      +   '<span style="display:inline-flex; align-items:center; gap:4px;">'
+      +     '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:' + tColor + ';"><use href="#' + currentTier.icon + '"/></svg>'
+      +     '<span>Progresso para <b style="color:' + nextTier.color + ';">' + nextTier.name + '</b></span>'
+      +   '</span>'
+      +   '<span style="color:var(--v-gold,#c4953a); font-weight:700;">' + Math.round(pctInTier) + '%</span>'
       + '</div>'
-      + '<div style="height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; border: 1px solid var(--v-border, #4a3828);">'
-      + '<div style="height: 100%; width: ' + pctInTier + '%; background: linear-gradient(90deg, ' + currentTier.color + ', ' + nextTier.color + ');"></div>'
+      // Bar com runes nas extremidades
+      + '<div style="position:relative; display:flex; align-items:center; gap:6px;">'
+      +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:11px;">◆</span>'
+      +   '<div style="flex:1; height:10px; background:rgba(0,0,0,0.45); border-radius:5px; overflow:hidden;'
+      +   'border:1px solid var(--v-border,#4a3828); box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);">'
+      +     '<div style="height:100%; width:' + pctInTier + '%; background:linear-gradient(90deg,' + tColor + ',' + nextTier.color + ');'
+      +     'transition:width 0.5s ease; box-shadow:0 0 8px ' + nextTier.color + ',inset 0 1px 0 rgba(255,255,255,0.2);"></div>'
+      +   '</div>'
+      +   '<span class="vLg-rune" style="color:' + nextTier.color + '; font-size:11px;">◆</span>'
       + '</div>'
-      + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: 4px; text-align: center;">'
-      + 'Faltam <b>' + xpToNext.toLocaleString('pt-BR') + ' XP</b> para subir'
+      + '<div style="font-size:11px; color:var(--v-text-dim,#a09484); margin-top:6px; text-align:center; font-style:italic;">'
+      + 'Faltam <b style="color:var(--v-gold,#c4953a); font-style:normal;">' + xpToNext.toLocaleString('pt-BR') + ' XP</b> para ascender'
       + '</div>'
+      + '</div>';
+  } else {
+    // Já no tier máximo (Mithral)
+    html += '<div style="margin:0 8px 8px; padding:8px 10px;'
+      + 'background:linear-gradient(90deg,rgba(185,212,242,0.10),rgba(196,149,58,0.10));'
+      + 'border:1px solid ' + tColor + '88; border-radius:6px; text-align:center;'
+      + 'font-family:var(--v-font-display,Cinzel,serif); font-size:11px; color:' + tColor + '; letter-spacing:2px;">'
+      + '<span class="vLg-rune">◆</span> Lenda viva — Pináculo da Ordem <span class="vLg-rune">◆</span>'
       + '</div>';
   }
 
-  // Lista de tiers (cada um com seu brasão)
-  html += '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 6px);">◆ Tiers</div>';
-  LEAGUE_TIERS.forEach(function(t){
+  // === TIER PATH HORIZONTAL — 5 medalhas conectadas (jornada visual) ===
+  html += '<div style="margin:0 8px 8px;">'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:10px; color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; text-align:center;">'
+    + '<span class="vLg-rune">◆</span> Caminho da Ordem <span class="vLg-rune">◆</span>'
+    + '</div>'
+    + '<div style="position:relative; display:grid; grid-template-columns:repeat(5,1fr); gap:0; padding:8px 4px 6px;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(42,36,32,0.4) 100%);'
+    + 'border:1px solid rgba(196,149,58,0.18); border-radius:8px;">';
+
+  // Linha conectora (atrás dos dots)
+  html += '<div style="position:absolute; top:24px; left:12%; right:12%; height:2px; pointer-events:none;'
+    + 'background:linear-gradient(90deg,';
+  LEAGUE_TIERS.forEach(function(t, idx){
     var unlocked = currentXp >= t.minXp;
-    var current = t === currentTier;
-    html += '<div style="display:flex; align-items:center; gap: var(--v-space-md, 8px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'background: ' + (current ? 'rgba(196,149,58,0.15)' : 'rgba(196,149,58,0.04)') + '; '
-      + 'border: 1px solid ' + (current ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)') + '; '
-      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 2px; '
-      + (unlocked ? '' : 'opacity: 0.45;') + '">'
-      + '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + t.color + ';"><use href="#' + t.icon + '"/></svg>'
-      + '<div style="flex: 1;">'
-      + '<div style="color: ' + t.color + '; font-weight: 600;">' + t.name + (current ? ' (atual)' : '') + '</div>'
-      + '<div style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">'
-      + t.minXp.toLocaleString('pt-BR') + ' – ' + t.maxXp.toLocaleString('pt-BR') + ' XP'
+    var colorAt = unlocked ? t.color : 'rgba(80,68,56,0.5)';
+    html += colorAt + (idx < LEAGUE_TIERS.length - 1 ? ',' : '');
+  });
+  html += ');"></div>';
+
+  LEAGUE_TIERS.forEach(function(t, idx){
+    var unlocked = currentXp >= t.minXp;
+    var current = (idx === currentTierIdx);
+    var medalSize = current ? '36px' : '28px';
+    var opacity = unlocked ? '1' : '0.4';
+    html += '<div style="position:relative; display:flex; flex-direction:column; align-items:center; z-index:2;">'
+      + '<div class="vLg-path-medal' + (current ? ' is-current' : '') + '" '
+      + 'style="position:relative; width:' + medalSize + '; height:' + medalSize + ';'
+      + 'background:' + (unlocked ? 'radial-gradient(circle,' + t.color + '22,transparent 70%)' : 'transparent') + ';'
+      + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
+      + 'opacity:' + opacity + ';">'
+      + '<svg viewBox="0 0 120 120" style="width:100%; height:100%; color:' + t.color + ';'
+      + (current ? 'filter:drop-shadow(0 0 6px ' + t.color + ');' : '') + '"><use href="#' + t.icon + '"/></svg>'
       + '</div>'
-      + '</div>'
-      + (unlocked ? '<span style="color: #7cdb7c;">✓</span>' : '<span style="color: var(--v-text-dim, #a09484);">🔒</span>')
+      // Label nome
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:9px; margin-top:4px; line-height:1;'
+      + 'color:' + (current ? t.color : (unlocked ? 'var(--v-text,#d4c8b0)' : 'var(--v-text-dim,#a09484)')) + ';'
+      + 'font-weight:' + (current ? '700' : '500') + '; letter-spacing:0.5px; text-transform:uppercase;'
+      + (current ? 'text-shadow:0 0 6px ' + t.color + '88;' : '') + '">'
+      + t.name + '</div>'
+      // XP range mini
+      + '<div style="font-size:8px; color:var(--v-text-dim,#a09484); margin-top:1px; opacity:' + (unlocked ? '0.9' : '0.5') + ';">'
+      + (t.minXp >= 1000 ? (t.minXp/1000) + 'k' : t.minXp) + '+</div>'
       + '</div>';
   });
+  html += '</div></div>';
+
+  // === BENEFITS — chips do tier atual ===
+  if (currentBenefits.length) {
+    html += '<div style="margin:0 8px 8px;">'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:10px; color:' + tColor + ';'
+      + 'text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; text-align:center;">'
+      + '<span class="vLg-rune">◆</span> Privilégios — ' + currentTier.name + ' <span class="vLg-rune">◆</span>'
+      + '</div>'
+      + '<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;">';
+    currentBenefits.forEach(function(b){
+      html += '<div style="padding:4px 10px; background:' + tColor + '12; border:1px solid ' + tColor + '55;'
+        + 'border-radius:12px; font-size:11px; color:var(--v-text,#d4c8b0); display:inline-flex; align-items:center; gap:4px;">'
+        + '<span style="color:' + tColor + ';">✦</span> ' + b
+        + '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // === POSIÇÃO NA ORDEM — mock stat ===
+  html += '<div style="margin:0 8px 10px; padding:6px 10px;'
+    + 'background:rgba(196,149,58,0.04); border:1px solid rgba(196,149,58,0.15); border-radius:6px;'
+    + 'display:flex; justify-content:space-between; align-items:center; font-size:11px;">'
+    + '<span style="color:var(--v-text-dim,#a09484); display:inline-flex; align-items:center; gap:6px;">'
+    + '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>'
+    + 'Posição na Ordem'
+    + '</span>'
+    + '<span style="font-family:var(--v-font-display,Cinzel,serif); color:var(--v-gold,#c4953a); font-weight:700;">'
+    + rankMock.toLocaleString('pt-BR') + 'º</span>'
+    + '</div>';
+
   html += '</div>';
   bodyEl.innerHTML = html;
   ov.classList.add('active');
