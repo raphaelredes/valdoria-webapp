@@ -200,7 +200,14 @@ function renderGuildHub(container, data) {
       card.setAttribute('data-svc', svc.cb || '');
 
       var ico = _gldEl('div', 'svc-ico');
-      ico.textContent = svc.icon || '▸';
+      // 2026-05-20: bug-fix — svc.icon pode ser HTML SVG (heraldico) ou emoji
+      // textContent renderia literal "<svg>...</svg>" como texto. innerHTML resolve.
+      var icoStr = svc.icon || '▸';
+      if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0) {
+        ico.innerHTML = icoStr;
+      } else {
+        ico.textContent = icoStr;
+      }
       ico.style.cssText = 'font-size:20px;';
       card.appendChild(ico);
 
