@@ -18,6 +18,31 @@
    renderInnHub é exposto via window. */
 (function() {
 
+/* 2026-05-20 — INN_SVC_META map svc.cb -> PNG path canonical (mesma estratégia
+   de TAVERN_SVC_META do task #91). Usar PNG dedicado quando exists, fallback
+   pro emoji em svc.icon. Cobre todos os 6 serviços principais da Estalagem +
+   os 4 tipos de quarto do sub-menu Quartos/Descanso. */
+var INN_SVC_META = {
+  // === Menu principal ===
+  'inn_room_menu':       { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
+  'inn_meal_menu':       { icon: '<img src="../shared/img/services/svc-comer.png" alt="">' },
+  'inn_short_rest':      { icon: '<img src="../shared/img/services/svc-descanso-curto.png" alt="">' },
+  'inn_relaxation_menu': { icon: '<img src="../shared/img/services/svc-relaxar.png" alt="">' },
+  'inn_allies_menu':     { icon: '<img src="../shared/img/services/svc-aliados.png" alt="">' },
+  'inn_cellar_menu':     { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
+  'inn_investigate_cellar': { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
+  // === Tipos de quarto (sub-menu Quartos/Descanso) ===
+  'inn_room_stable':     { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
+  'inn_room_common':     { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
+  'inn_room_modest':     { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
+  'inn_room_wealthy':    { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
+  'inn_room_royal':      { icon: '<img src="../shared/img/services/svc-dormir-real.png" alt="">' },
+  'inn_sleep_common':    { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
+  'inn_sleep_private':   { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
+  'inn_sleep_royal':     { icon: '<img src="../shared/img/services/svc-dormir-real.png" alt="">' }
+};
+
+
 if (!window._SVC_CONFIG_INN) {
   window._SVC_CONFIG_INN = {
     faction: 'inn',
@@ -256,8 +281,19 @@ function renderInnHub(container, data) {
       card.setAttribute('data-svc', svc.cb || '');
 
       var ico = vCity.el('div', 'svc-ico');
-      ico.innerHTML = svc.icon || '🛏';
-      ico.style.cssText = 'font-size:20px;';
+      /* 2026-05-20: INN_SVC_META map cb -> PNG path (igual TAVERN_SVC_META).
+         PNG canonical OpenAI quality=low gerado em scripts/_gen_inn_lyana_pngs.py.
+         Fallback pro emoji em svc.icon quando META não tem entry. */
+      var _innMeta = INN_SVC_META[svc.cb || ''];
+      if (_innMeta && _innMeta.icon) {
+        ico.innerHTML = _innMeta.icon;
+        ico.style.cssText = 'width:42px;height:42px;display:flex;align-items:center;justify-content:center;';
+        var _innMetaImg = ico.querySelector('img');
+        if (_innMetaImg) _innMetaImg.style.cssText = 'width:38px;height:38px;object-fit:contain;';
+      } else {
+        ico.innerHTML = svc.icon || '🛏';
+        ico.style.cssText = 'font-size:20px;';
+      }
       card.appendChild(ico);
 
       var txt = vCity.el('div', 'svc-text');

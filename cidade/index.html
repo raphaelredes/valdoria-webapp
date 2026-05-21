@@ -43068,8 +43068,56 @@ var ACTION_HANDLERS = {
     });
   },
   'quest_lyana_locate': function(p){ _questGotoMap('lyana', 'Falar com Lyana'); },
+  /* 2026-05-20: upgrade PADRAO_ALDRIC — antes era _deliverQuest direto (toast
+     simples). Agora abre encounter completo: Lyana recebe carta com typewriter,
+     emoções por estrofe, e só completa quest após clicar "Entregar". PNG canonical
+     lyana-herbalista.png gerada via scripts/_gen_inn_lyana_pngs.py. */
   'quest_lyana_deliver': function(p){
-    _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
+    if (typeof window.vEncounter !== 'object' || !window.vEncounter.render) {
+      /* Fallback: vEncounter não disponível */
+      _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
+      return;
+    }
+    var LYANA_DIALOGUE = {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
+        portrait: '../shared/img/npcs/lyana-herbalista.png'
+      },
+      script: [
+        { type: 'narration', text: 'A Praça respira no fim da tarde — comerciantes recolhem bancas, sinos do templo soam graves. Lyana está agachada perto da fonte, separando raízes de mandrágora num pano azul claro. Cabelos castanhos soltos pelas costas, vestido de linho verde-musgo, mãos manchadas de seiva. Ao te ver aproximar, ela ergue o rosto — olhos verdes inquietos, sobrancelhas franzidas pela expectativa de três luas.' },
+        { type: 'speech', speaker: 'Lyana', text: '<i>(levanta-se devagar, esfrega as mãos no avental)</i> Tu... tu vens da estrada? <b>Trazes notícias?</b> O que era pra ser um recado de uma semana virou silêncio de três luas. Por favor — qualquer coisa, fala.' },
+        { type: 'narration', text: 'Tu entregas o pergaminho selado. Os dedos dela tremem ao reconhecer a tinta — a caligrafia firme do pai, Eirik, o Runeiro. Ela rompe o selo de cera com cuidado, como se temesse o som. Olhos correm pelas linhas, lábios mexem em silêncio, e algo entre alívio e angústia atravessa o rosto.' },
+        { type: 'speech', speaker: 'Lyana', text: '<i>(dobra o pergaminho e aperta contra o peito)</i> Ele está vivo. <b>Vivo.</b> Mas escreveu sobre as runas de novo — aquelas que sangram na lua nova. Pediu o cristal... <i>(pausa, respira fundo)</i> Tu não imaginas o peso que tiraste das minhas costas hoje, aventureiro. Aceita o que tenho — não é muito, mas é de coração.' }
+      ],
+      choices: [
+        { id: 'accept', label: '🤝 "Aceito. Que teu pai retorne em paz."', cb: 'lyana-confirm-deliver' },
+        { id: 'modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."', cb: 'lyana-confirm-deliver-modest' },
+        { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', cb: 'dice:investigation:13:+0' }
+      ]
+    };
+    var LYANA_SUB = {
+      'lyana-confirm-deliver': {
+        npc: LYANA_DIALOGUE.npc,
+        script: [
+          { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e ungüentos. Coloca-as na tua mão e fecha teus dedos por cima.' },
+          { type: 'speech', speaker: 'Lyana', text: '<i>(sorri pela primeira vez em três luas)</i> Se voltares à Praça e precisar de uma poção, vem aqui primeiro. A casa é tua agora.' }
+        ],
+        choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+        onClose: function(){ _deliverQuest('lyana', 20, 40, '💬 Lyana abraça a carta. +20 Valdoritas +40 XP. Missão completa!'); }
+      },
+      'lyana-confirm-deliver-modest': {
+        npc: LYANA_DIALOGUE.npc,
+        script: [
+          { type: 'narration', text: 'Lyana hesita, depois assente com um aceno breve. Não insiste — entende que alguns gestos não se compram com prata.' },
+          { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se ligeiramente)</i> Que os ventos do Pai te guardem na próxima estrada. <b>Não esquecerei.</b>' }
+        ],
+        choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+        onClose: function(){ _deliverQuest('lyana', 30, 50, '💬 Lyana grava teu rosto. +30 Valdoritas +50 XP (+10 afinidade). Missão completa!'); }
+      }
+    };
+    window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
+    window.vEncounter.render(LYANA_DIALOGUE, { dialogues: LYANA_SUB });
   },
   'quest_lyana_read': function(p){
     _showInfoPopup({
