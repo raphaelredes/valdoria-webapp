@@ -395,6 +395,22 @@ function handleLoginSuccess(data) {
 function showCharacterSelect() {
     document.getElementById('screen-login').classList.remove('wa-active');
     document.getElementById('screen-chars').classList.add('wa-active');
+    /* Sessao #19 (2026-05-21): user pediu remover botao Sair quando aberto
+       pelo Telegram WebApp. No Telegram so existe auth Telegram (initData)
+       — nao ha Google login pra alternar conta. Botao Sair so faz sentido
+       em browser desktop. _isInsideTelegram() ja existe (line 915). */
+    try {
+        var logoutBtn = document.querySelector('.wa-btn-logout');
+        if (logoutBtn) {
+            if (_isInsideTelegram()) {
+                logoutBtn.style.display = 'none';
+                logoutBtn.setAttribute('aria-hidden', 'true');
+            } else {
+                logoutBtn.style.display = '';
+                logoutBtn.removeAttribute('aria-hidden');
+            }
+        }
+    } catch (e) { /* non-fatal */ }
     renderCharacterList();
 }
 
