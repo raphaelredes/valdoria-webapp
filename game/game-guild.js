@@ -15,6 +15,27 @@
    render* functions expostas via window no final. */
 (function() {
 
+/* 2026-05-21 — GUILD_SVC_META map cb -> PNG canonical.
+   Cobre cb da Guilda enviados pelo backend (src/game/system/guild/*.py). */
+var GUILD_SVC_META = {
+  'guild_quest_board':    { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
+  'guild_quests':         { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
+  'guild_contracts':      { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
+  'guild_recruit_menu':   { icon: '<img src="../shared/img/services/svc-inscrever-guilda.png" alt="">' },
+  'guild_recruit':        { icon: '<img src="../shared/img/services/svc-inscrever-guilda.png" alt="">' },
+  'guild_party_menu':     { icon: '<img src="../shared/img/services/svc-mercenarios.png" alt="">' },
+  'guild_party':          { icon: '<img src="../shared/img/services/svc-mercenarios.png" alt="">' },
+  'guild_bounty_tavira':  { icon: '<img src="../shared/img/services/svc-missoes.png" alt="">' },
+  'guild_research_menu':  { icon: '<img src="../shared/img/services/svc-livros.png" alt="">' },
+  'guild_research':       { icon: '<img src="../shared/img/services/svc-livros.png" alt="">' },
+  'guild_training_menu':  { icon: '<img src="../shared/img/services/svc-treino.png" alt="">' },
+  'guild_training':       { icon: '<img src="../shared/img/services/svc-treino.png" alt="">' },
+  'guild_veteran':        { icon: '<img src="../shared/img/services/svc-mentoria.png" alt="">' },
+  'guild_mentor':         { icon: '<img src="../shared/img/services/svc-mentoria.png" alt="">' },
+  'guild_ranking':        { icon: '<img src="../shared/img/services/svc-ranking-guilda.png" alt="">' }
+};
+window._GUILD_SVC_META = GUILD_SVC_META;
+
 function _gldEl(tag, cls, text) {
   var el = document.createElement(tag);
   if (cls) el.className = cls;
@@ -200,11 +221,13 @@ function renderGuildHub(container, data) {
       card.setAttribute('data-svc', svc.cb || '');
 
       var ico = _gldEl('div', 'svc-ico');
-      // 2026-05-20: bug-fix — svc.icon pode ser HTML SVG (heraldico) ou emoji
-      // textContent renderia literal "<svg>...</svg>" como texto. innerHTML resolve.
-      var icoStr = svc.icon || '▸';
+      // 2026-05-21: GUILD_SVC_META overrides emoji por PNG canonical quando cb match.
+      var _gMeta = GUILD_SVC_META[svc.cb || ''];
+      var icoStr = (_gMeta && _gMeta.icon) || svc.icon || '▸';
       if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0) {
         ico.innerHTML = icoStr;
+        var _gimg = ico.querySelector('img');
+        if (_gimg) _gimg.style.cssText = 'width:38px;height:38px;object-fit:contain;';
       } else {
         ico.textContent = icoStr;
       }

@@ -16,6 +16,22 @@
    renderArenaScreen \u00E9 exposto via window no final. */
 (function() {
 
+/* 2026-05-21 \u2014 ARENA_SVC_META map cb -> PNG path canonical.
+   Cobre cb Arena enviados pelo backend + aliases. */
+var ARENA_SVC_META = {
+  'arena_challenge':   { icon: '<img src="../shared/img/services/svc-duelo.png" alt="">' },
+  'arena_duel':        { icon: '<img src="../shared/img/services/svc-duelo.png" alt="">' },
+  'arena_solo':        { icon: '<img src="../shared/img/services/svc-combate-solo.png" alt="">' },
+  'arena_team':        { icon: '<img src="../shared/img/services/svc-combate-equipe.png" alt="">' },
+  'arena_tournament':  { icon: '<img src="../shared/img/services/svc-torneio.png" alt="">' },
+  'arena_training':    { icon: '<img src="../shared/img/services/svc-treino-arena.png" alt="">' },
+  'arena_train':       { icon: '<img src="../shared/img/services/svc-treino-arena.png" alt="">' },
+  'arena_ranking':     { icon: '<img src="../shared/img/services/svc-ranking-arena.png" alt="">' },
+  'arena_daily_board': { icon: '<img src="../shared/img/services/svc-ranking-arena.png" alt="">' },
+  'arena_rules':       { icon: '<img src="../shared/img/services/svc-informacoes.png" alt="">' }
+};
+window._ARENA_SVC_META = ARENA_SVC_META;
+
 var _ARENA_MEDALS = {1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49'};
 
 /* === PADRAO_TAVERNA canonical (task #34, 2026-05-20) === */
