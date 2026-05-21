@@ -4940,6 +4940,49 @@ body.perf-lite .vc-action-btn { transition: none; }
       .hub-loc--new::after { animation: none !important; }
     }
 
+    /* Sessão #19 (2026-05-21): cells fade in escalonado ao trocar sector.
+       Antes: switch tab = hard cut (cells aparecem instantaneamente).
+       Agora: cada cell faz fade+slide 280ms com stagger 40ms (waterfall suave).
+       Não-intrusivo — só roda no mount inicial da grid (cada renderHubScreen).
+       perf-lite + prefers-reduced-motion fallback: snap (sem anim). */
+    @keyframes hubLocEnter {
+      from { opacity: 0; transform: translateY(6px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .hub-loc-grid .hub-loc {
+      animation: hubLocEnter 280ms cubic-bezier(0.16, 1.08, 0.32, 1) backwards;
+    }
+    .hub-loc-grid .hub-loc:nth-child(1) { animation-delay: 0ms; }
+    .hub-loc-grid .hub-loc:nth-child(2) { animation-delay: 40ms; }
+    .hub-loc-grid .hub-loc:nth-child(3) { animation-delay: 80ms; }
+    .hub-loc-grid .hub-loc:nth-child(4) { animation-delay: 120ms; }
+    .hub-loc-grid .hub-loc:nth-child(n+5) { animation-delay: 160ms; }
+    body.perf-lite .hub-loc-grid .hub-loc,
+    .hub-loc.discovering {
+      /* discovering anim (sparkle) takes precedence over hubLocEnter */
+      animation-name: none, hubLocEnter;
+    }
+    body.perf-lite .hub-loc-grid .hub-loc { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .hub-loc-grid .hub-loc { animation: none !important; }
+    }
+
+    /* Sessão #19: sector tab switch — gentle slide accent on active tab change.
+       Tab já tem transition: all 0.2s ease (line ~4866). Adicionar pulse leve
+       no momento que tab fica .active. */
+    @keyframes citySectorTabActivate {
+      0%   { box-shadow: 0 0 0 var(--v-gold-20, rgba(196, 149, 58, 0.2)); }
+      50%  { box-shadow: 0 0 16px var(--v-gold-40, rgba(196, 149, 58, 0.4)); }
+      100% { box-shadow: 0 0 8px var(--v-gold-20, rgba(196, 149, 58, 0.2)); }
+    }
+    .city-sector-tab.active {
+      animation: citySectorTabActivate 360ms ease-out;
+    }
+    body.perf-lite .city-sector-tab.active,
+    @media (prefers-reduced-motion: reduce) {
+      .city-sector-tab.active { animation: none; }
+    }
+
     /* === Discovery Quest Popup (multi-stage com lore) ============== */
     .city-discovery-overlay {
       position: fixed;
