@@ -10404,6 +10404,19 @@ var TUTORIAL_STEPS = [
                 + 'tesouros escondidos, ou jogue dados com outros para ganhar (ou perder) ouro.'
   },
   {
+    /* 2026-05-22: novo step ensinando o tab bar (sector tabs).
+       User reportou que sem isso o player não sabe que precisa clicar
+       Comércio/Combate/Espírito pra ver outras locations. Inserido depois
+       de Taverna (último step default da aba Convívio) e antes de Estalagem/
+       Mercado (steps que auto-switch pra outras abas). Spotlight em
+       .city-sector-tabs (sempre presente no DOM em todas as abas). */
+    selector: '.city-sector-tabs',
+    title: '🗂️ Setores da Cidade',
+    description: 'A cidade está dividida em <b>4 áreas</b>: <b>Convívio</b> (taverna, missões), '
+                + '<b>Comércio</b> (mercado, banco), <b>Combate</b> (guilda, arena) e '
+                + '<b>Espírito</b> (templo, praça). Clique nas abas para ver os locais de cada área.'
+  },
+  {
     /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.inn (line ~8995).
        Sem filtro, popup flasha 750ms e some (target hidden no DOM). */
     selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
