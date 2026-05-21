@@ -10404,67 +10404,155 @@ function _markTutorialSeen(){
 }
 
 function _showFirstTimeTutorial(stepIdx){
-  /* Inject CSS once */
+  /* Inject CSS once — AAA epic medieval style (2026-05-21 visual upgrade) */
   if (!document.getElementById('first-tut-style')) {
     var st = document.createElement('style');
     st.id = 'first-tut-style';
     st.textContent = ''
+      /* Overlay base */
       + '#first-tut-overlay{position:fixed;inset:0;z-index:11000;'
-      + '  pointer-events:auto;animation:ftFadeIn 0.4s ease-out}'
+      + '  pointer-events:auto;animation:ftFadeIn 0.5s ease-out}'
       + '@keyframes ftFadeIn{from{opacity:0}to{opacity:1}}'
+      /* Mask com gradiente radial sutil + transição suave */
       + '#first-tut-mask{position:absolute;inset:0;'
-      + '  background:rgba(0,0,0,0.78);transition:clip-path 0.4s ease}'
-      + '#first-tut-spotlight{position:absolute;border:2px solid #c4953a;'
-      + '  border-radius:8px;box-shadow:0 0 0 6px rgba(196,149,58,0.3),'
-      + '    0 0 30px rgba(196,149,58,0.5);'
-      + '  pointer-events:none;transition:all 0.4s ease;'
-      + '  display:none}'
+      + '  background:radial-gradient(circle at 50% 40%,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.88) 100%);'
+      + '  transition:clip-path 0.6s cubic-bezier(0.4,0.0,0.2,1)}'
+      /* Spotlight com pulse + diamante flutuante acima + shimmer */
+      + '#first-tut-spotlight{position:absolute;border:2px solid rgba(196,149,58,0.95);'
+      + '  border-radius:10px;'
+      + '  box-shadow:0 0 0 4px rgba(196,149,58,0.25),0 0 30px rgba(196,149,58,0.55),'
+      + '    0 0 60px rgba(196,149,58,0.3),inset 0 0 20px rgba(196,149,58,0.12);'
+      + '  pointer-events:none;'
+      + '  transition:left 0.5s cubic-bezier(0.4,0,0.2,1),top 0.5s cubic-bezier(0.4,0,0.2,1),'
+      + '    width 0.5s cubic-bezier(0.4,0,0.2,1),height 0.5s cubic-bezier(0.4,0,0.2,1);'
+      + '  display:none;animation:ftSpotPulse 2.4s ease-in-out infinite}'
       + '#first-tut-spotlight.visible{display:block}'
+      + '#first-tut-spotlight::before{content:"◆";position:absolute;top:-18px;left:50%;'
+      + '  transform:translateX(-50%);color:#c4953a;font-size:14px;'
+      + '  animation:ftFloat 2s ease-in-out infinite;'
+      + '  text-shadow:0 0 12px rgba(196,149,58,0.9),0 0 24px rgba(196,149,58,0.5)}'
+      + '@keyframes ftSpotPulse{'
+      + '  0%,100%{box-shadow:0 0 0 4px rgba(196,149,58,0.25),0 0 30px rgba(196,149,58,0.55),'
+      + '    0 0 60px rgba(196,149,58,0.3),inset 0 0 20px rgba(196,149,58,0.12)}'
+      + '  50%{box-shadow:0 0 0 6px rgba(196,149,58,0.4),0 0 50px rgba(196,149,58,0.75),'
+      + '    0 0 100px rgba(196,149,58,0.45),inset 0 0 30px rgba(196,149,58,0.22)}}'
+      + '@keyframes ftFloat{0%,100%{transform:translateX(-50%) translateY(0)}'
+      + '  50%{transform:translateX(-50%) translateY(-5px)}}'
+      /* Card AAA com cantos ornamentais + glow gold ambiente */
       + '#first-tut-card{position:fixed;left:50%;transform:translateX(-50%);'
-      + '  bottom:24px;background:linear-gradient(180deg,#3a2e22,#2a2218);'
-      + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
-      + '  padding:18px 18px 14px;width:calc(100% - 32px);max-width:380px;'
-      + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.2);'
-      + '  z-index:11001}'
+      + '  bottom:24px;'
+      + '  background:'
+      + '    radial-gradient(ellipse at top,rgba(196,149,58,0.12) 0%,transparent 60%),'
+      + '    linear-gradient(180deg,rgba(58,46,34,0.97),rgba(42,34,24,0.99));'
+      + '  border:1px solid rgba(196,149,58,0.7);border-radius:14px;'
+      + '  padding:22px 20px 16px;width:calc(100% - 32px);max-width:380px;'
+      + '  box-shadow:0 12px 48px rgba(0,0,0,0.85),0 0 40px rgba(196,149,58,0.22),'
+      + '    inset 0 1px 0 rgba(196,149,58,0.18);'
+      + '  z-index:11001;'
+      + '  animation:ftCardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1)}'
+      + '@keyframes ftCardEnter{'
+      + '  from{opacity:0;transform:translateX(-50%) translateY(18px) scale(0.96)}'
+      + '  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}'
       + '#first-tut-card.center{bottom:50%;transform:translate(-50%,50%)}'
-      + '#first-tut-step{font-family:Cinzel,serif;font-size:11px;'
-      + '  color:#a09484;letter-spacing:1.5px;text-align:center;'
-      + '  margin-bottom:6px}'
-      + '#first-tut-title{font-family:Cinzel,serif;font-size:16px;'
-      + '  font-weight:700;color:#c4953a;letter-spacing:1px;'
-      + '  text-align:center;margin:0 0 12px;'
-      + '  text-shadow:0 0 8px rgba(196,149,58,0.4)}'
-      + '#first-tut-desc{color:#d4c8b0;font-size:13px;line-height:1.6;'
-      + '  margin:0 0 14px;font-family:MedievalSharp,serif}'
-      + '#first-tut-desc b{color:#c4953a}'
+      + '#first-tut-card.center{animation:ftCardEnterCenter 0.5s cubic-bezier(0.34,1.56,0.64,1)}'
+      + '@keyframes ftCardEnterCenter{'
+      + '  from{opacity:0;transform:translate(-50%,50%) scale(0.92)}'
+      + '  to{opacity:1;transform:translate(-50%,50%) scale(1)}}'
+      /* Cantos ornamentais — diamantes gold nos 4 cantos */
+      + '#first-tut-card::before,#first-tut-card::after{'
+      + '  content:"";position:absolute;width:14px;height:14px;'
+      + '  border:1.5px solid rgba(196,149,58,0.7);pointer-events:none}'
+      + '#first-tut-card::before{top:8px;left:8px;border-right:0;border-bottom:0;border-top-left-radius:8px}'
+      + '#first-tut-card::after{bottom:8px;right:8px;border-left:0;border-top:0;border-bottom-right-radius:8px}'
+      /* Step dots — 13 diamonds (1 active + done + pending) */
+      + '#first-tut-step{display:flex;justify-content:center;gap:5px;margin-bottom:14px;'
+      + '  padding:0 2px}'
+      + '.ft-step-dot{width:7px;height:7px;border-radius:50%;'
+      + '  background:rgba(196,149,58,0.22);transition:all 0.4s ease;flex-shrink:0}'
+      + '.ft-step-dot.done{background:rgba(196,149,58,0.55);'
+      + '  box-shadow:0 0 4px rgba(196,149,58,0.3)}'
+      + '.ft-step-dot.active{background:#c4953a;width:9px;height:9px;'
+      + '  box-shadow:0 0 10px rgba(196,149,58,0.85),0 0 20px rgba(196,149,58,0.4);'
+      + '  animation:ftDotPulse 1.6s ease-in-out infinite}'
+      + '@keyframes ftDotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}'
+      /* Title épico Cinzel uppercase com glow */
+      + '#first-tut-title{font-family:Cinzel,serif;font-size:17px;'
+      + '  font-weight:700;color:#c4953a;letter-spacing:2px;'
+      + '  text-align:center;margin:0 0 4px;'
+      + '  text-shadow:0 0 14px rgba(196,149,58,0.55),0 2px 4px rgba(0,0,0,0.9);'
+      + '  text-transform:uppercase}'
+      /* Divider ornamental com diamante central */
+      + '.ft-divider{display:flex;align-items:center;gap:8px;'
+      + '  margin:6px auto 14px;width:75%;justify-content:center}'
+      + '.ft-divider::before,.ft-divider::after{content:"";flex:1;height:1px;'
+      + '  background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55),transparent)}'
+      + '.ft-divider span{color:#c4953a;font-size:8px;opacity:0.85;'
+      + '  text-shadow:0 0 6px rgba(196,149,58,0.6)}'
+      /* Description com fade-in suave */
+      + '#first-tut-desc{color:#d4c8b0;font-size:13px;line-height:1.65;'
+      + '  margin:0 0 18px;font-family:MedievalSharp,serif;'
+      + '  text-align:center;'
+      + '  animation:ftDescFade 0.6s ease-out 0.15s both}'
+      + '@keyframes ftDescFade{from{opacity:0;transform:translateY(6px)}'
+      + '  to{opacity:1;transform:translateY(0)}}'
+      + '#first-tut-desc b{color:#c4953a;font-weight:700;'
+      + '  text-shadow:0 0 6px rgba(196,149,58,0.4)}'
       + '#first-tut-desc em{color:#9b8e7c;font-style:italic}'
-      + '#first-tut-nav{display:flex;gap:6px;align-items:center}'
-      + '.ft-btn{flex:1;padding:10px;background:rgba(74,56,40,0.45);'
-      + '  border:1px solid rgba(196,149,58,0.45);border-radius:6px;'
+      /* Buttons AAA com gradient + hover glow */
+      + '#first-tut-nav{display:flex;gap:8px;align-items:center}'
+      + '.ft-btn{flex:1;padding:11px 12px;'
+      + '  background:linear-gradient(180deg,rgba(74,56,40,0.55),rgba(58,46,34,0.85));'
+      + '  border:1px solid rgba(196,149,58,0.5);border-radius:8px;'
       + '  color:#d4c8b0;font-family:Cinzel,serif;font-size:12px;'
-      + '  font-weight:700;letter-spacing:0.6px;cursor:pointer;'
-      + '  min-height:40px;transition:transform 0.1s,background 0.15s}'
-      + '.ft-btn:hover:not(:disabled){background:rgba(196,149,58,0.18);'
-      + '  border-color:#c4953a;color:#c4953a}'
+      + '  font-weight:700;letter-spacing:0.8px;cursor:pointer;'
+      + '  min-height:42px;'
+      + '  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);'
+      + '  position:relative;overflow:hidden}'
+      + '.ft-btn::after{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;'
+      + '  background:linear-gradient(90deg,transparent,rgba(196,149,58,0.2),transparent);'
+      + '  transition:left 0.6s}'
+      + '.ft-btn:hover:not(:disabled){'
+      + '  background:linear-gradient(180deg,rgba(196,149,58,0.22),rgba(155,118,48,0.32));'
+      + '  border-color:#c4953a;color:#f4e5b8;'
+      + '  box-shadow:0 0 18px rgba(196,149,58,0.45),inset 0 1px 0 rgba(196,149,58,0.25);'
+      + '  transform:translateY(-1px)}'
+      + '.ft-btn:hover:not(:disabled)::after{left:100%}'
+      + '.ft-btn:active:not(:disabled){transform:translateY(0);'
+      + '  box-shadow:0 0 12px rgba(196,149,58,0.3)}'
       + '.ft-btn:disabled{opacity:0.3;cursor:default}'
-      + '.ft-btn-primary{background:linear-gradient(180deg,#c4953a,#9a7530);'
-      + '  color:#1a1410;border-color:#c4953a}'
-      + '.ft-btn-primary:hover{background:linear-gradient(180deg,#d4a54a,#a78540)}'
-      + '.ft-btn-skip{background:transparent;border-color:rgba(196,149,58,0.25);'
-      + '  color:#a09484;font-size:11px;flex:0 0 auto;padding:10px 14px}';
+      + '.ft-btn-primary{background:linear-gradient(180deg,#d4a54a,#9a7530);'
+      + '  color:#1a1410;border-color:#e4b75a;font-weight:800;'
+      + '  text-shadow:0 1px 0 rgba(255,255,255,0.25);'
+      + '  box-shadow:0 4px 12px rgba(196,149,58,0.4),inset 0 1px 0 rgba(255,255,255,0.2)}'
+      + '.ft-btn-primary:hover:not(:disabled){'
+      + '  background:linear-gradient(180deg,#e4b75a,#a78540);color:#1a1410;'
+      + '  box-shadow:0 0 26px rgba(196,149,58,0.7),0 4px 16px rgba(196,149,58,0.5),'
+      + '    inset 0 1px 0 rgba(255,255,255,0.3)}'
+      + '.ft-btn-skip{background:transparent;border-color:rgba(196,149,58,0.22);'
+      + '  color:#a09484;font-size:11px;flex:0 0 auto;padding:11px 14px}'
+      /* Welcome/Closing screens — centered card mais cinematográfico */
+      + '#first-tut-card.center #first-tut-title{font-size:22px;letter-spacing:3px;margin-bottom:8px}'
+      + '#first-tut-card.center #first-tut-desc{font-size:14px;line-height:1.7}'
+      ;
     document.head.appendChild(st);
   }
-  /* Build overlay if not exists */
+  /* Build overlay if not exists — AAA epic visual layout v2 2026-05-21 */
   var ov = document.getElementById('first-tut-overlay');
   if (!ov) {
     ov = document.createElement('div');
     ov.id = 'first-tut-overlay';
+    /* 13 step dots populated dynamically each render */
+    var dotsHtml = '';
+    for (var di = 0; di < TUTORIAL_STEPS.length; di++) {
+      dotsHtml += '<div class="ft-step-dot" data-i="' + di + '"></div>';
+    }
     ov.innerHTML = ''
       + '<div id="first-tut-mask"></div>'
       + '<div id="first-tut-spotlight"></div>'
       + '<div id="first-tut-card">'
-      + '  <div id="first-tut-step"></div>'
+      + '  <div id="first-tut-step">' + dotsHtml + '</div>'
       + '  <h3 id="first-tut-title"></h3>'
+      + '  <div class="ft-divider"><span>◆</span></div>'
       + '  <p id="first-tut-desc"></p>'
       + '  <div id="first-tut-nav">'
       + '    <button class="ft-btn ft-btn-skip" id="ft-skip">Pular</button>'
@@ -10505,7 +10593,16 @@ function _showFirstTimeTutorial(stepIdx){
     return;
   }
   ov.setAttribute('data-step', String(stepIdx));
-  document.getElementById('first-tut-step').textContent = 'Passo ' + (stepIdx + 1) + ' de ' + TUTORIAL_STEPS.length;
+  /* 2026-05-21 — dots visuais ao invés de "Passo X de Y" text */
+  var dotsContainer = document.getElementById('first-tut-step');
+  if (dotsContainer) {
+    var dots = dotsContainer.querySelectorAll('.ft-step-dot');
+    for (var dotI = 0; dotI < dots.length; dotI++) {
+      dots[dotI].classList.remove('active', 'done');
+      if (dotI < stepIdx) dots[dotI].classList.add('done');
+      else if (dotI === stepIdx) dots[dotI].classList.add('active');
+    }
+  }
   document.getElementById('first-tut-title').textContent = step.title;
   document.getElementById('first-tut-desc').innerHTML = step.description;
   /* Nav state */
