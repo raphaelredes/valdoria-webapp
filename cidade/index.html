@@ -10524,10 +10524,13 @@ function _showFirstTimeTutorial(stepIdx){
       'quests': 'convivio', 'action_quests': 'convivio'
     };
     var targetTab = TAB_OF_LOC[step_cb];
-    if (targetTab) {
+    if (targetTab && window._currentSector !== targetTab) {
+      /* 2026-05-21 fix: tabs reais usam classe .city-sector-tab (sem data-tab attr).
+         Seta diretamente window._currentSector + renderCurrentScreen (mesma coisa
+         que o click handler em linha ~9338-9343 faria). */
       try {
-        var tabBtn = document.querySelector('.tab-pill[data-tab="' + targetTab + '"], .tab[data-tab="' + targetTab + '"], [data-tab="' + targetTab + '"]');
-        if (tabBtn && typeof tabBtn.click === 'function') tabBtn.click();
+        window._currentSector = targetTab;
+        if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
       } catch(_e){ /* noqa: preflight */ }
     }
     /* Aguarda DOM update do tab switch antes de medir target */
