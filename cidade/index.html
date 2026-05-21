@@ -10620,13 +10620,13 @@ function _showFirstTimeTutorial(stepIdx){
   var spotlight = document.getElementById('first-tut-spotlight');
   var mask = document.getElementById('first-tut-mask');
   var card = document.getElementById('first-tut-card');
-  /* 2026-05-21 BUG FIX (#tutorial-inline-persist): SEMPRE limpar inline styles
-     do card antes de re-posicionar. Antes: estilos inline (top/bottom) de step
-     anterior persistiam, sobrescrevendo a class .center quando next step
-     caia em fallback. Resultado: card aparecia em posição inválida (Atalhos
-     rápidos cortado embaixo porque step anterior setou bottom:24px). */
-  card.style.top = '';
-  card.style.bottom = '';
+  /* 2026-05-21 BUG FIX (#tutorial-snap-then-move): NÃO limpar inline styles
+     upfront. Antes: clear top/bottom='' fazia card snap pra CSS default
+     bottom:24px durante o setTimeout 320ms da tab-switch, depois transition
+     animava de baixo pro destino — user via "aparecer embaixo e mover".
+     Agora: inline styles SÓ são alterados quando temos a posição final
+     calculada (target measured OR fallback decidido), no callback do timeout.
+     Transition cubic-bezier 0.5s anima do POSIÇÃO ANTERIOR pra nova direto. */
   if (step.selector) {
     /* 2026-05-21 BUG FIX (#tutorial-mercado): trocar tab automaticamente se target
        estiver em uma aba não-default. Mercado/Templo/Banco etc são em outras tabs
@@ -10728,9 +10728,14 @@ function _showFirstTimeTutorial(stepIdx){
           /* Esconde spotlight pra não competir com card no espaço apertado */
           spotlight.classList.remove('visible');
         }
+        card.classList.remove('center');
         /* Scroll element into view if off-screen */
         try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
       } else {
+        /* Fallback center: limpa inline ANTES de adicionar .center pra que
+           a CSS class possa aplicar bottom:50% sem inline override */
+        card.style.top = '';
+        card.style.bottom = '';
         spotlight.classList.remove('visible');
         mask.style.clipPath = 'none';
         mask.style.webkitClipPath = 'none';
@@ -10738,6 +10743,9 @@ function _showFirstTimeTutorial(stepIdx){
       }
     }, targetTab ? 320 : 0); /* dá tempo da tab fazer fade-in */
   } else {
+    /* Welcome/Closing screens — center mode. Limpa inline pra .center aplicar. */
+    card.style.top = '';
+    card.style.bottom = '';
     spotlight.classList.remove('visible');
     mask.style.clipPath = 'none';
     mask.style.webkitClipPath = 'none';
