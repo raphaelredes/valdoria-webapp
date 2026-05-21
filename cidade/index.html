@@ -10977,11 +10977,44 @@ function _showCharSwitchConfirm(picked){
           ['name','cls','race','level','hp','hpMax','mp','mpMax','gold','xp','exh','xpNext','_cb'].forEach(function(k){
             newParams.delete(k);
           });
-          newParams.set('token', data.token || token);
+          var newToken = data.token || token;
+          newParams.set('token', newToken);
           newParams.set('char', picked.id);
           newParams.set('_cb', String(Date.now()));  /* cache bust pra evitar cidade.html stale */
-          window.__valdoria_transitioning = true;
-          window.location.replace(window.location.pathname + '?' + newParams.toString());
+          /* 2026-05-22 FIX (#401-hall-switcher): valida que o novo token funciona
+             ANTES do redirect. User reportou "sessão expirada / state + characters
+             fallback falharam: HTTP 401" ao trocar personagem; fechando+reabrindo
+             WebApp resolvia (timing de session commit server-side).
+             Estratégia: ping /api/game/state com novo token. Se 200 → redirect.
+             Se 401 → retry até 3× com 500ms backoff (cobre janela de commit).
+             Se 4× falham → redirect mesmo assim (cidade tem fallback chain própria). */
+          function _doRedirect(){
+            window.__valdoria_transitioning = true;
+            window.location.replace(window.location.pathname + '?' + newParams.toString());
+          }
+          function _validateNewToken(retriesLeft){
+            fetch(api.replace(/\/$/,'') + '/api/game/state', {
+              method: 'GET',
+              headers: { 'Authorization': 'Bearer ' + newToken }
+            }).then(function(r){
+              if (r.status === 401 && retriesLeft > 0) {
+                // Sessão ainda não commitada server-side — wait + retry
+                console.warn('[CITY] new token 401 — retrying in 500ms (retries left: ' + retriesLeft + ')');
+                setTimeout(function(){ _validateNewToken(retriesLeft - 1); }, 500);
+              } else {
+                // 200 ok ou esgotamos retries — segue redirect
+                if (r.status === 401) {
+                  console.error('[CITY] new token still 401 after 3 retries — redirecting anyway (cidade fallback chain ativa)');
+                }
+                _doRedirect();
+              }
+            }).catch(function(_e){
+              // Network/CORS error — redirect mesmo (cidade fallback chain cobre)
+              console.warn('[CITY] validate-token network err:', _e);
+              _doRedirect();
+            });
+          }
+          _validateNewToken(3);
         }).catch(function(err){
           if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
           vToast('Falha ao trocar personagem: ' + (err.message || err));
