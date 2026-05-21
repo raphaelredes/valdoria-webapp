@@ -492,6 +492,17 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
       sendLog('error', 'auto_load_failed: ' + msg, {stack: err && err.stack && String(err.stack).slice(0, 500)});
       setStage('Falha ao restaurar');
       setTip(msg);
+      /* 2026-05-21 USER FIX: NUNCA fazer fallback para /web/ ou gotoCidade quando
+         estamos em contexto Telegram (initData presente). Se init-session falhou,
+         o jogador NÃO deve ver tela de login com opção Google — deve ver mensagem
+         clara para fechar+reabrir pelo bot. */
+      var _isTg = !!initData;
+      if (_isTg) {
+        setStage('Sessão expirou');
+        setTip('Feche este WebApp e abra novamente pelo /start do bot.');
+        return;  /* Trava aqui — bot vai reabrir o WebApp com initData fresco */
+      }
+      /* Browser puro sem Telegram — pode tentar cidade via cookie session */
       setTimeout(gotoCidade, 1800);
     });
   }

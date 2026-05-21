@@ -1026,11 +1026,24 @@ async function _initWebAuth() {
         } catch (_) { /* noqa: preflight */ }
         var silentOk = await _tryTelegramInitAuth();
         if (silentOk) return;
-        /* Fallback: restaura a tela de login se o silent auth falhou. */
+        /* 2026-05-21 USER FIX: NUNCA mostrar opção Google quando estamos em
+           Telegram WebApp. Se silent auth falhou: esconder Google + separator,
+           mostrar APENAS botão Telegram com mensagem clara pra retry. */
         try {
+            var _googleBtn = document.getElementById('btn-google');
+            if (_googleBtn) _googleBtn.style.display = 'none';
+            var _separator = document.querySelector('.wa-separator');
+            if (_separator) _separator.style.display = 'none';
+            var _errBox = document.getElementById('auth-error');
+            if (_errBox) {
+                _errBox.textContent = 'Sessão expirou. Feche e abra novamente pelo /start do bot.';
+                _errBox.style.display = 'block';
+            }
             var _lsRestore = document.getElementById('screen-login');
             if (_lsRestore) _lsRestore.style.visibility = '';
         } catch (_) { /* noqa: preflight */ }
+        /* Não retorna — deixa loadTelegramWidget e checkExistingSession rodarem
+           pra tentar reauth via Telegram (mas Google fica escondido). */
     }
 
     /* BUG (2026-04-11): When ?env=dev is present but nodevpanel=1 is NOT,

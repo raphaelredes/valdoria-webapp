@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-21T10:02:05Z — do not edit directly, edit source -->
+
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
 
@@ -567,7 +569,6 @@ window.SERVER_LOG_AREA = 'combate';
    Pattern canonical do cidade.html — necessário pra sync_combate passar
    no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
-document.write('<script src="' + BASE + '/shared/spa-nav-compat.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;
@@ -13489,6 +13490,67 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
     return enemy;
 }
 
+/* 2026-05-21 ANTI-CHEAT — checkpoint mid-battle persistence (bug #9).
+   POST /api/combat2/checkpoint após cada damage event para travar reset por
+   reload. applyBattleCheckpoint() restaura state a partir do snapshot do server.
+   Helpers idempotentes — safe em mode LOCAL (no-op se sem token). */
+function _gatherCheckpointSnapshot(state) {
+    if (!state || !state.order) return null;
+    var allies = [], enemies = [];
+    state.order.forEach(function(c) {
+        if (!c) return;
+        var snap = { id: c.id || '', hp: c.hp | 0, conditions: (c.conditions || []).slice() };
+        if (c.t === 'p' || c.t === 'a') {
+            snap.mp = c.mp | 0;
+            allies.push(snap);
+        } else {
+            enemies.push(snap);
+        }
+    });
+    return {
+        turn: state.turn | 0,
+        allies: allies,
+        enemies: enemies,
+        action_used: !!(state.actionUsed || state.action_used),
+        bonus_used: !!(state.bonusUsed || state.bonus_used),
+        reaction_used: !!(state.reactionUsed || state.reaction_used),
+        log_lines: (state.log || []).slice(-20).map(function(l){ return String(l).slice(0, 200); })
+    };
+}
+function sendBattleCheckpoint(state) {
+    if (!window.__COMBAT_IS_REMOTE_SESSION) return;
+    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) return;
+    var snap = _gatherCheckpointSnapshot(state);
+    if (!snap) return;
+    try {
+        fetch(window.__COMBAT_API_BASE + '/api/combat2/checkpoint', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + window.__COMBAT_TOKEN, 'Content-Type': 'application/json' },
+            body: JSON.stringify(snap)
+        }).catch(function(e){ console.warn('[C-REM:CP] checkpoint send fail', e); });
+    } catch (e) { console.warn('[C-REM:CP] checkpoint send sync fail', e); }
+}
+function applyBattleCheckpoint(state, cp) {
+    if (!state || !state.order || !cp) return false;
+    var allyMap = {}, enemyMap = {};
+    (cp.allies || []).forEach(function(a){ if(a && a.id) allyMap[a.id] = a; });
+    (cp.enemies || []).forEach(function(e){ if(e && e.id) enemyMap[e.id] = e; });
+    state.order.forEach(function(c) {
+        if (!c || !c.id) return;
+        var match = (c.t === 'p' || c.t === 'a') ? allyMap[c.id] : enemyMap[c.id];
+        if (!match) return;
+        if (typeof match.hp === 'number') c.hp = Math.max(0, Math.min(match.hp, c.mhp || c.maxHp || c.hp));
+        if (typeof match.mp === 'number' && (c.t === 'p' || c.t === 'a')) c.mp = Math.max(0, Math.min(match.mp, c.mmp || c.maxMp || c.mp));
+        if (Array.isArray(match.conditions)) c.conditions = match.conditions.slice();
+    });
+    if (typeof cp.turn === 'number') state.turn = cp.turn;
+    state.actionUsed = !!cp.action_used;
+    state.bonusUsed = !!cp.bonus_used;
+    state.reactionUsed = !!cp.reaction_used;
+    if (Array.isArray(cp.log_lines)) state.log = cp.log_lines.slice();
+    return true;
+}
+
 /** Monta estado inicial a partir do JSON gravado pela página de setup (testes de frontend). */
 function newCombatFromSetup(cfg) {
     var fillAll = cfg.fillMode !== 'per_slot';
@@ -18199,8 +18261,22 @@ function mountBattlefieldPanZoom() {
     };
 }
 
+/* 2026-05-21 ANTI-CHEAT: debounced checkpoint dispatch. render() roda múltiplas
+   vezes por segundo durante animações — debounce para 1 POST a cada 2s.
+   _lastCheckpointAt prev. dup-suppression durante a mesma frame. */
+var _lastCheckpointAt = 0;
+function _maybeDispatchCheckpoint(s) {
+    if (!window.__COMBAT_IS_REMOTE_SESSION || !s) return;
+    if (s.ph === 'victory' || s.ph === 'defeat' || s.ph === 'fled') return;
+    var now = Date.now();
+    if (now - _lastCheckpointAt < 2000) return;
+    _lastCheckpointAt = now;
+    try { sendBattleCheckpoint(s); } catch (_e) {}
+}
+
 function render(s) {
     currentState = s;
+    _maybeDispatchCheckpoint(s);
     /* X-6.5.51AC: log mudança de fase (só quando muda — render é chamada toda hora) */
     try {
         if (s && s.ph !== window._simLastPh) {
@@ -27964,6 +28040,17 @@ async function startCombatRemoteCanonical() {
         /* Engine LOCAL assume daqui em diante — idêntico ao simulator file://. */
         currentState = newCombatFromSetup(data.setup);
         if (data.setup.biome) currentState.bio = data.setup.biome;
+        /* 2026-05-21 ANTI-CHEAT: restaurar checkpoint mid-battle se servidor
+           enviou. Bloqueia farming por reload (combate resetava de inicio).
+           Checkpoint contém HP/MP/turn/conditions snapshot do estado atual. */
+        if (data.resume === true && data.checkpoint && typeof applyBattleCheckpoint === 'function') {
+            try {
+                applyBattleCheckpoint(currentState, data.checkpoint);
+                console.info('[C-REM:PIVOT-BOOT] CHECKPOINT RESUMED turn=' + data.checkpoint.turn);
+            } catch (_eCp) {
+                console.error('[C-REM:PIVOT-BOOT] checkpoint_apply_fail', _eCp);
+            }
+        }
         render(currentState);
         /* Sub-projeto #1 (2026-04-26) — Pre-combat banner se houver waves */
         try {
