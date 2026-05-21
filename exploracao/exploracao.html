@@ -35223,6 +35223,10 @@ function _remoteShowOutcome(ch, oc) {
       try {
         var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
           || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
+        /* Sessão #20 (2026-05-21): anti close-beacon — cross-WebApp redirect
+           deve setar transitioning flag. Sem isso beforeunload do error-reporter
+           dispara /api/game/close. */
+        window.__valdoria_transitioning = true;
         window.location.href = redir;
       } catch (_) {}
     }, 2000);
@@ -43856,6 +43860,12 @@ function _openCartographyWithPrompt(){
            Defesa em profundidade: redirect acontece mesmo se finish
            falhar (try/catch), pra não deixar player preso. Server cleanup
            será aplicado na próxima reabertura. */
+        /* Sessão #20 (2026-05-21): marca transition ANTES de qualquer redirect
+           pra suprimir close beacon. Regra "Cross-WebApp Transition Safety"
+           em CLAUDE.md exige __valdoria_transitioning=true antes de
+           location.replace/href de cross-WebApp. Sem isso o beforeunload
+           do error-reporter.js dispara /api/game/close → mensagem Telegram. */
+        window.__valdoria_transitioning = true;
         if (location.protocol === 'file:') {
           window.location.href = './cidade.html?back=exploration';
         } else {

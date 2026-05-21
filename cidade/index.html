@@ -10043,6 +10043,17 @@ function _showCharactersPopup(){
     window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');
+  // Sessão #20 (2026-05-21): oculta Sair quando Hall aberto via Telegram WebApp.
+  // Mesmo padrão de web/web-auth.js (commit 8ec7c6fb) — no Telegram só existe
+  // auth Telegram (initData), não há Google login pra alternar conta.
+  try {
+    var _tg = window.Telegram && window.Telegram.WebApp;
+    var _insideTg = !!(_tg && typeof _tg.initData === 'string' && _tg.initData.length > 0);
+    if (logoutBtn && _insideTg) {
+      logoutBtn.style.display = 'none';
+      logoutBtn.setAttribute('aria-hidden', 'true');
+    }
+  } catch (_e) { /* non-fatal */ }
   if (logoutBtn) logoutBtn.addEventListener('click', function(){
     vToast('🚪 Logout: encerra sessão e volta à tela de login.');
   });
