@@ -18004,7 +18004,6 @@ function _renderQuestDiary(bodyEl){
     if (counts[q.status] !== undefined) counts[q.status]++;
     if (q.status === 'ready') counts.active++;  // ready conta também como active
   });
-  // ready = active com progress ✓
   counts.ready = allQuests.filter(function(q){ return q.status === 'ready'; }).length;
 
   // Filtro por tab
@@ -18032,123 +18031,251 @@ function _renderQuestDiary(bodyEl){
     return 0;
   });
 
-  // === BUILD HTML ===
-  // FIX 2026-05-04: removido tab 'Todas' (user pediu)
+  /* === 2026-05-22 QUEST DIARY AAA v2 ============================================
+     User pediu: "melhorar o visual do sistema de missões para ficar épico.
+     Padrão de qualidade jogo triplo a."
+     Mudanças vs v1:
+     - Banner header ornamentado "◆ Diário de Missões ◆" (mesmo pattern Ficha/Liga)
+     - Inscription card flavor ("Pergaminhos do diário se desenrolam...")
+     - Tabs como banners stylized (não pill chato)
+     - Cards com ornaments + cantos decorativos + entrance stagger
+     - Progress bar visual para quests Em Progresso (parse X/Y)
+     - Ready cards: pulse glow verde-dourado animado
+     - NPC name destacado em estilo italic
+     - Empty state ilustrado (scroll + flavor lore)
+     - Hover lift effect em cards
+  ============================================================================= */
   var TABS = [
-    { id: 'ready',      label: 'Prontas',      emoji: '✅', count: counts.ready },
-    { id: 'active',     label: 'Ativas',       emoji: '⚔️', count: counts.active },
-    { id: 'available',  label: 'Disponíveis',  emoji: '📋', count: counts.available },
-    { id: 'history',    label: 'Concluídas',   emoji: '📚', count: counts.history }
+    { id: 'ready',      label: 'Prontas',      icon: '✓', count: counts.ready,     color: '#7cdb7c' },
+    { id: 'active',     label: 'Ativas',       icon: '⚔', count: counts.active,    color: '#c4953a' },
+    { id: 'available',  label: 'Disponíveis',  icon: '◈', count: counts.available, color: '#9b8e7c' },
+    { id: 'history',    label: 'Crônica',      icon: '✦', count: counts.history,   color: '#7d705e' }
   ];
 
-  var html = '<div class="qd-hub" style="padding: var(--v-space-md, 8px) 0 0;">';
+  // CSS keyframes (style tag — mesmo pattern Liga/Ficha)
+  var qdStyles = '<style id="qd-aaa-anims-v2">'
+    + '@keyframes qdReadyPulse{0%,100%{box-shadow:inset 0 0 12px rgba(124,219,124,0.10),0 0 16px rgba(124,219,124,0.20);}50%{box-shadow:inset 0 0 18px rgba(124,219,124,0.20),0 0 28px rgba(124,219,124,0.40);}}'
+    + '@keyframes qdRunePulse{0%,100%{opacity:0.6;text-shadow:0 0 4px rgba(196,149,58,0.5);}50%{opacity:1;text-shadow:0 0 10px rgba(196,149,58,0.85);}}'
+    + '@keyframes qdCardEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}'
+    + '@keyframes qdProgFill{from{width:0%;}}'
+    + '@keyframes qdShimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}'
+    + '.qd-rune{animation:qdRunePulse 2.6s ease-in-out infinite;display:inline-block;color:var(--v-gold,#c4953a);}'
+    + '.qd-card{animation:qdCardEnter 0.32s cubic-bezier(0.34,1.56,0.64,1) both;transition:transform 0.18s ease,box-shadow 0.18s ease;}'
+    + '.qd-card.qd-ready{animation:qdCardEnter 0.32s cubic-bezier(0.34,1.56,0.64,1) both,qdReadyPulse 2.8s ease-in-out infinite 0.4s;}'
+    + '.qd-card.qd-clickable{cursor:pointer;}'
+    + '.qd-card.qd-clickable:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,0.4),0 0 20px rgba(196,149,58,0.25);}'
+    + '.qd-card.qd-clickable:active{transform:translateY(0);}'
+    + '.qd-tab-banner{transition:transform 0.16s ease,box-shadow 0.16s ease;}'
+    + '.qd-tab-banner:hover{transform:translateY(-1px);}'
+    + '.qd-prog-fill{animation:qdProgFill 0.6s cubic-bezier(0.4,0,0.2,1) both;}'
+    + 'body.perf-lite .qd-card,body.perf-lite .qd-rune,body.perf-lite .qd-card.qd-ready{animation:none;}'
+    + '@media (prefers-reduced-motion:reduce){.qd-card,.qd-rune,.qd-card.qd-ready,.qd-prog-fill,.qd-tab-banner{animation:none;transition:none;}}'
+    + '</style>';
 
-  // Header — flavor
-  html += '<div class="qd-flavor" '
-    + 'style="padding: 0 var(--v-space-md, 8px) var(--v-space-md, 8px); '
-    + 'color: var(--v-text-dim, #a09484); font-style: italic; font-size: var(--v-font-sm, 13px); text-align: center;">'
-    + 'Pergaminhos do diário se desenrolam. Você revê suas missões.'
-    + '</div>';
+  // Parse progresso "2/3" → { cur, max, pct } para barra visual
+  function _parseProgress(prog){
+    if (!prog) return null;
+    var m = prog.match(/(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    var cur = parseInt(m[1], 10);
+    var max = parseInt(m[2], 10);
+    if (max <= 0) return null;
+    return { cur: cur, max: max, pct: Math.round(cur / max * 100) };
+  }
 
-  // === TABS BAR (sticky) ===
-  html += '<div class="qd-tabs" '
-    + 'style="display:flex; gap: var(--v-space-xs, 2px); padding: 0 var(--v-space-sm, 6px) var(--v-space-sm, 6px); '
-    + 'overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;">';
+  var html = qdStyles + '<div class="qd-hub" style="position:relative;padding:0;">';
+
+  // === BANNER HEADER ===
+  html += '<div style="position:relative;padding:6px 12px 5px;text-align:center;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0) 100%);'
+    + 'border-bottom:1px solid rgba(196,149,58,0.18);">'
+    + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;'
+    + 'font-family:var(--v-font-display,Cinzel,serif);font-size:10px;'
+    + 'color:var(--v-gold,#c4953a);letter-spacing:3px;text-transform:uppercase;">'
+    + '<span style="flex:0 0 26px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55));"></span>'
+    + '<span class="qd-rune">◆</span>'
+    + '<span>Diário de Missões</span>'
+    + '<span class="qd-rune">◆</span>'
+    + '<span style="flex:0 0 26px;height:1px;background:linear-gradient(90deg,rgba(196,149,58,0.55),transparent);"></span>'
+    + '</div></div>';
+
+  // === INSCRIPTION CARD — flavor lore ===
+  html += '<div style="margin:8px 10px 6px;padding:7px 12px;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.08) 0%,rgba(42,36,32,0.4) 100%);'
+    + 'border:1px solid rgba(196,149,58,0.20);border-radius:6px;text-align:center;">'
+    + '<div style="font-family:var(--v-font,MedievalSharp,serif);font-size:12px;'
+    + 'color:var(--v-text,#d4c8b0);font-style:italic;line-height:1.5;">'
+    + '"Os pergaminhos do diário se desenrolam. <i>Cada feito, uma página. Cada promessa, um juramento.</i>"'
+    + '</div></div>';
+
+  // === TABS BANNER ===
+  html += '<div class="qd-tabs" style="display:flex;gap:4px;padding:0 10px 6px;'
+    + 'overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">';
   TABS.forEach(function(t){
     var active = state.tab === t.id;
-    html += '<button class="qd-tab" data-tab="' + t.id + '" '
-      + 'style="flex-shrink: 0; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'border: 1px solid ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)') + '; '
-      + 'background: ' + (active ? 'rgba(196,149,58,0.15)' : 'rgba(196,149,58,0.04)') + '; '
-      + 'color: ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-text, #d4c8b0)') + '; '
-      + 'border-radius: var(--v-radius-pill, 20px); '
-      + 'font-family: inherit; font-size: var(--v-font-xs, 11px); cursor: pointer; '
-      + 'white-space: nowrap; min-height: 28px;">'
-      + t.emoji + ' ' + t.label + ' <span style="opacity:0.7;">(' + t.count + ')</span>'
+    var tColor = active ? t.color : 'var(--v-border,#4a3828)';
+    html += '<button class="qd-tab qd-tab-banner" data-tab="' + t.id + '" '
+      + 'style="flex:1;min-width:0;padding:6px 4px;'
+      + 'border:1px solid ' + tColor + ';'
+      + 'background:' + (active
+          ? 'linear-gradient(180deg,' + t.color + '24,rgba(42,36,32,0.6))'
+          : 'linear-gradient(180deg,rgba(196,149,58,0.04),rgba(42,36,32,0.2))') + ';'
+      + 'color:' + (active ? t.color : 'var(--v-text-dim,#a09484)') + ';'
+      + 'border-radius:5px 5px 8px 8px;'  // shield-style
+      + 'font-family:var(--v-font-display,Cinzel,serif);font-size:10px;cursor:pointer;'
+      + 'letter-spacing:1px;text-transform:uppercase;font-weight:700;'
+      + (active ? 'box-shadow:0 0 12px ' + t.color + '44,inset 0 1px 0 ' + t.color + '40;' : '')
+      + '">'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">'
+      + '<span style="font-size:12px;">' + t.icon + '</span>'
+      + '<span>' + t.label + '</span>'
+      + '</div>'
+      + '<div style="font-size:9px;margin-top:2px;opacity:' + (active ? '0.9' : '0.7') + ';font-weight:400;">'
+      + '(' + t.count + ')</div>'
       + '</button>';
   });
   html += '</div>';
 
-  // === SEARCH + SORT bar ===
-  html += '<div class="qd-toolbar" '
-    + 'style="display:flex; gap: var(--v-space-xs, 2px); padding: 0 var(--v-space-md, 8px) var(--v-space-sm, 6px);">';
-  // 2026-05-11 (user request): removido dropdown de sort. Apenas busca textual.
-  // Sort default mantido em state.sort='level' pra consistência interna —
-  // lista ainda fica ordenada por nível, só não exposto na UI.
-  html += '<input type="search" class="qd-search" placeholder="🔍 Buscar missão..." '
+  // === SEARCH ===
+  html += '<div class="qd-toolbar" style="display:flex;padding:0 10px 8px;">'
+    + '<input type="search" class="qd-search" placeholder="🔍 Buscar missão..." '
     + 'value="' + (state.search || '').replace(/"/g, '&quot;') + '" '
-    + 'style="flex:1; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-    + 'background: rgba(196,149,58,0.04); border: 1px solid var(--v-border, #4a3828); '
-    + 'border-radius: var(--v-radius-sm, 6px); color: var(--v-text, #d4c8b0); '
-    + 'font-family: inherit; font-size: var(--v-font-sm, 13px); min-height: 32px;">';
-  html += '</div>';
+    + 'style="flex:1;padding:6px 10px;'
+    + 'background:rgba(196,149,58,0.06);border:1px solid var(--v-border,#4a3828);'
+    + 'border-radius:6px;color:var(--v-text,#d4c8b0);'
+    + 'font-family:inherit;font-size:12px;min-height:30px;outline:none;">'
+    + '</div>';
 
-  // === LISTA de quests ===
+  // === LISTA / EMPTY STATE ===
   if (filtered.length === 0) {
-    html += '<div class="qd-empty" '
-      + 'style="text-align: center; padding: var(--v-space-2xl, 24px) var(--v-space-md, 8px); '
-      + 'color: var(--v-text-dim, #a09484); font-style: italic; font-size: var(--v-font-sm, 13px);">'
-      + 'Nenhuma missão ' + (state.search ? 'encontrada para "' + state.search + '"' : 'nesta categoria') + '.'
+    var emptyMsg = state.search
+      ? 'Nenhuma missão encontrada para <b style="color:var(--v-gold,#c4953a);">"' + state.search + '"</b>'
+      : (state.tab === 'available'
+          ? 'Toda missão começa com um chamado. <i>Visite a Guilda dos Aventureiros para buscar novos contratos.</i>'
+          : state.tab === 'history'
+            ? 'Sua crônica ainda começa a ser escrita. <i>Complete missões para construir seu legado.</i>'
+            : state.tab === 'ready'
+              ? 'Nenhuma missão pronta para entrega. <i>Continue suas aventuras para concluí-las.</i>'
+              : 'Nenhuma missão ativa. <i>Aceite contratos na Guilda para começar.</i>');
+    html += '<div class="qd-empty" style="text-align:center;padding:32px 16px;'
+      + 'color:var(--v-text-dim,#a09484);font-style:italic;font-size:13px;line-height:1.5;">'
+      + '<div style="font-size:42px;margin-bottom:10px;opacity:0.5;color:var(--v-gold,#c4953a);">📜</div>'
+      + '<div>' + emptyMsg + '</div>'
       + '</div>';
   } else {
-    html += '<div class="qd-list" style="display: flex; flex-direction: column; gap: var(--v-space-xs, 2px); '
-      + 'padding: 0 var(--v-space-md, 8px) var(--v-space-md, 8px);">';
-    filtered.forEach(function(q){
+    html += '<div class="qd-list" style="display:flex;flex-direction:column;gap:6px;padding:0 10px 12px;">';
+    filtered.forEach(function(q, qIdx){
       var statusColor = {
-        ready:     '#7cdb7c',  // verde
-        active:    '#c4953a',  // gold
-        available: '#a09484',  // dim
-        history:   '#5a4f44'   // muito dim
+        ready:     '#7cdb7c', active: '#c4953a', available: '#a09484', history: '#7d705e'
       }[q.status] || 'var(--v-text)';
       var statusLabel = {
-        ready:     '✓ Pronta para concluir',
-        active:    'Em progresso · ' + q.progress,
-        available: 'Disponível' + (q.level ? ' (nv ' + q.level + ')' : ''),
+        ready:     '<span class="qd-rune" style="font-size:10px;">◆</span> Pronta para entregar',
+        active:    'Em progresso',
+        available: 'Disponível' + (q.level ? ' · Nível ' + q.level : ''),
         history:   '✓ Concluída' + (q.date ? ' · ' + q.date : '')
       }[q.status] || '';
       var clickable = q.cb && q.status !== 'history';
+      var prog = _parseProgress(q.progress);
+      // Border gradient color baseado em status
+      var borderColor = q.status === 'ready' ? '#7cdb7c'
+                      : q.status === 'history' ? 'rgba(74,56,40,0.5)'
+                      : 'rgba(196,149,58,0.35)';
+      var bgGradient = q.status === 'ready'
+        ? 'linear-gradient(180deg,rgba(124,219,124,0.10) 0%,rgba(42,36,32,0.4) 100%)'
+        : q.status === 'history'
+          ? 'linear-gradient(180deg,rgba(80,68,58,0.20) 0%,rgba(42,36,32,0.4) 100%)'
+          : 'linear-gradient(180deg,rgba(196,149,58,0.08) 0%,rgba(42,36,32,0.4) 100%)';
 
-      html += '<div class="qd-card" data-cb="' + q.cb + '" '
-        + 'style="display: flex; gap: var(--v-space-sm, 6px); padding: var(--v-space-md, 8px); '
-        + 'background: ' + (q.status === 'ready' ? 'rgba(124,219,124,0.06)' : 'rgba(196,149,58,0.04)') + '; '
-        + 'border: 1px solid ' + (q.status === 'ready' ? '#7cdb7c' : 'var(--v-border, #4a3828)') + '; '
-        + 'border-radius: var(--v-radius-sm, 6px); '
-        + (clickable ? 'cursor: pointer;' : 'opacity: 0.7;')
-        + '">'
+      // Card classes condicionais
+      var cardClasses = 'qd-card';
+      if (q.status === 'ready') cardClasses += ' qd-ready';
+      if (clickable) cardClasses += ' qd-clickable';
 
-        // Ícone
-        + '<div class="qd-icon" '
-        + 'style="font-size: var(--v-font-xl, 18px); flex-shrink: 0; width: 32px; height: 32px; '
-        + 'display: flex; align-items: center; justify-content: center; '
-        + 'background: var(--v-gold-06, rgba(196,149,58,0.06)); border-radius: var(--v-radius-sm, 6px);">'
-        + (q.icon || '📜')
-        + '</div>'
+      html += '<div class="' + cardClasses + '" data-cb="' + q.cb + '" '
+        + 'style="position:relative;display:flex;gap:8px;padding:9px 10px;'
+        + 'background:' + bgGradient + ';'
+        + 'border:1px solid ' + borderColor + ';'
+        + 'border-radius:6px;'
+        + (q.status === 'history' ? 'opacity:0.65;' : '')
+        + 'animation-delay:' + (qIdx * 0.04) + 's;'
+        + '">';
 
-        // Info
-        + '<div class="qd-info" style="flex:1; min-width:0;">'
-        + '<div class="qd-title" '
-        + 'style="font-size: var(--v-font-md, 14px); color: var(--v-text-bright, #e8dcc8); '
-        + 'font-weight: 600; line-height: 1.2; margin-bottom: 2px;">'
-        + q.title
-        + '</div>'
-        + '<div class="qd-status" '
-        + 'style="font-size: var(--v-font-xs, 11px); color: ' + statusColor + '; line-height: 1.3;">'
-        + statusLabel
-        + '</div>'
-        + (q.desc
-          ? '<div class="qd-desc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: 2px; line-height: 1.3;">' + q.desc + '</div>'
-          : '')
-        + '</div>'
-
-        // Rewards
-        + '<div class="qd-rewards" '
-        + 'style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; '
-        + 'font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">'
-        + (q.reward ? '<span style="color: var(--v-gold, #c4953a); display:inline-flex; align-items:center; gap:3px;">' + q.reward + '<span class="vi vi-coin sm"></span></span>' : '')
-        + (q.xp ? '<span>+' + q.xp + ' XP</span>' : '')
-        + '</div>'
-
+      // Ícone com moldura ornate
+      html += '<div class="qd-icon" '
+        + 'style="flex-shrink:0;width:38px;height:38px;'
+        + 'display:flex;align-items:center;justify-content:center;'
+        + 'background:radial-gradient(circle,' + (q.status === 'ready' ? 'rgba(124,219,124,0.20)' : 'rgba(196,149,58,0.18)') + ' 0%,rgba(42,36,32,0.6) 100%);'
+        + 'border:1px solid ' + borderColor + ';border-radius:6px;'
+        + 'box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);">'
+        + (q.icon || '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#ic-dialogo"/></svg>')
         + '</div>';
+
+      // Info column
+      html += '<div class="qd-info" style="flex:1;min-width:0;">';
+      // Title
+      html += '<div class="qd-title" '
+        + 'style="font-family:var(--v-font-display,Cinzel,serif);font-size:13px;'
+        + 'color:' + (q.status === 'history' ? 'var(--v-text-dim,#a09484)' : 'var(--v-gold,#c4953a)') + ';'
+        + 'font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.15;'
+        + 'text-shadow:0 0 6px rgba(196,149,58,0.25);margin-bottom:3px;">'
+        + q.title
+        + '</div>';
+      // Status
+      html += '<div class="qd-status" '
+        + 'style="font-size:11px;color:' + statusColor + ';line-height:1.3;font-weight:500;">'
+        + statusLabel
+        + '</div>';
+      // Description
+      if (q.desc) {
+        html += '<div class="qd-desc" '
+          + 'style="font-size:11px;color:var(--v-text-dim,#a09484);margin-top:2px;line-height:1.35;font-style:italic;">'
+          + q.desc
+          + '</div>';
+      }
+      // NPC name destaque
+      if (q.npc) {
+        html += '<div class="qd-npc" style="font-size:10px;color:var(--v-gold-dim,#8f7338);margin-top:2px;letter-spacing:0.3px;">'
+          + '<span style="opacity:0.7;">por</span> <b style="color:var(--v-gold,#c4953a);font-style:italic;">' + q.npc + '</b>'
+          + '</div>';
+      }
+      // Progress bar visual (só para active com X/Y)
+      if (prog && q.status === 'active') {
+        html += '<div class="qd-prog" style="margin-top:5px;">'
+          + '<div style="display:flex;justify-content:space-between;font-size:9px;'
+          + 'color:var(--v-text-dim,#a09484);margin-bottom:2px;letter-spacing:0.5px;text-transform:uppercase;">'
+          + '<span>Progresso</span>'
+          + '<span style="color:var(--v-gold,#c4953a);font-weight:700;">' + prog.cur + ' / ' + prog.max + '</span>'
+          + '</div>'
+          + '<div style="position:relative;height:5px;background:rgba(0,0,0,0.45);'
+          + 'border-radius:3px;overflow:hidden;border:1px solid var(--v-border,#4a3828);'
+          + 'box-shadow:inset 0 1px 2px rgba(0,0,0,0.4);">'
+          + '<div class="qd-prog-fill" style="height:100%;width:' + prog.pct + '%;'
+          + 'background:linear-gradient(90deg,#9a7530,#c4953a,#e8c45a);'
+          + 'box-shadow:0 0 4px #c4953a;"></div>'
+          + '</div></div>';
+      }
+      html += '</div>';
+
+      // Rewards column
+      html += '<div class="qd-rewards" '
+        + 'style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px;'
+        + 'font-size:10px;color:var(--v-text-dim,#a09484);min-width:54px;">';
+      if (q.reward) {
+        html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 5px;'
+          + 'background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.30);'
+          + 'border-radius:10px;color:var(--v-gold,#c4953a);font-weight:700;'
+          + 'box-shadow:0 0 6px rgba(196,149,58,0.15);">'
+          + q.reward + '<span class="vi vi-coin sm"></span></span>';
+      }
+      if (q.xp) {
+        html += '<span style="display:inline-flex;align-items:center;gap:2px;padding:2px 6px;'
+          + 'background:rgba(124,180,219,0.08);border:1px solid rgba(124,180,219,0.25);'
+          + 'border-radius:10px;color:#7cb4db;font-weight:600;">'
+          + '✦ +' + q.xp + '</span>';
+      }
+      html += '</div>';
+
+      html += '</div>';  // /card
     });
     html += '</div>';
   }
