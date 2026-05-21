@@ -10502,36 +10502,96 @@ function _showFirstTimeTutorial(stepIdx){
   nextBtn.textContent = (stepIdx === TUTORIAL_STEPS.length - 1) ? '✓ Entendido' : 'Próximo →';
   /* Spotlight */
   var spotlight = document.getElementById('first-tut-spotlight');
+  var mask = document.getElementById('first-tut-mask');
   var card = document.getElementById('first-tut-card');
   if (step.selector) {
-    var target = document.querySelector(step.selector);
-    if (target) {
-      var rect = target.getBoundingClientRect();
-      var pad = 6;
-      spotlight.style.left = (rect.left - pad) + 'px';
-      spotlight.style.top = (rect.top - pad) + 'px';
-      spotlight.style.width = (rect.width + pad * 2) + 'px';
-      spotlight.style.height = (rect.height + pad * 2) + 'px';
-      spotlight.classList.add('visible');
-      card.classList.remove('center');
-      /* Position card to avoid overlap with target */
-      var cardOnTop = rect.top > window.innerHeight / 2;
-      if (cardOnTop) {
-        card.style.bottom = 'auto';
-        card.style.top = '24px';
-      } else {
-        card.style.top = 'auto';
-        card.style.bottom = '24px';
-      }
-      /* Scroll element into view if off-screen */
-      try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
-    } else {
-      /* selector missed — center card, no spotlight */
-      spotlight.classList.remove('visible');
-      card.classList.add('center');
+    /* 2026-05-21 BUG FIX (#tutorial-mercado): trocar tab automaticamente se target
+       estiver em uma aba não-default. Mercado/Templo/Banco etc são em outras tabs
+       (Comércio/Espírito), default é Convívio. Sem isso, querySelector retorna
+       elemento HIDDEN (rect 0x0), spotlight some e card vai pra posição inválida. */
+    var step_cb_match = (step.selector || '').match(/data-cb="([a-z_]+)"/);
+    var step_cb = step_cb_match ? step_cb_match[1] : '';
+    var TAB_OF_LOC = {
+      'market': 'comercio', 'mercado': 'comercio',
+      'bank': 'comercio', 'banco': 'comercio',
+      'oficina': 'comercio', 'workshop': 'comercio',
+      'temple': 'espirito', 'templo': 'espirito',
+      'runas': 'espirito', 'rune': 'espirito',
+      'arena': 'combate', 'guild': 'combate', 'guilda': 'combate',
+      'taverna': 'convivio', 'tavern': 'convivio',
+      'estalagem': 'convivio', 'inn': 'convivio',
+      'praca': 'convivio', 'square': 'convivio',
+      'quests': 'convivio', 'action_quests': 'convivio'
+    };
+    var targetTab = TAB_OF_LOC[step_cb];
+    if (targetTab) {
+      try {
+        var tabBtn = document.querySelector('.tab-pill[data-tab="' + targetTab + '"], .tab[data-tab="' + targetTab + '"], [data-tab="' + targetTab + '"]');
+        if (tabBtn && typeof tabBtn.click === 'function') tabBtn.click();
+      } catch(_e){ /* noqa: preflight */ }
     }
+    /* Aguarda DOM update do tab switch antes de medir target */
+    setTimeout(function(){
+      var target = document.querySelector(step.selector);
+      if (target) {
+        var rect = target.getBoundingClientRect();
+        var pad = 6;
+        spotlight.style.left = (rect.left - pad) + 'px';
+        spotlight.style.top = (rect.top - pad) + 'px';
+        spotlight.style.width = (rect.width + pad * 2) + 'px';
+        spotlight.style.height = (rect.height + pad * 2) + 'px';
+        spotlight.classList.add('visible');
+        card.classList.remove('center');
+        /* 2026-05-21 BUG FIX (#tutorial-mask-dark): clip-path corta hole no mask
+           pra revelar o target. Antes a mask escura cobria o spotlight tornando
+           o local destacado também escuro. Polygon evenodd cria janela rect. */
+        var L = rect.left - pad, T = rect.top - pad;
+        var R = L + rect.width + pad * 2, B = T + rect.height + pad * 2;
+        var clip = 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ' +
+                   L + 'px ' + T + 'px, ' +
+                   R + 'px ' + T + 'px, ' +
+                   R + 'px ' + B + 'px, ' +
+                   L + 'px ' + B + 'px, ' +
+                   L + 'px ' + T + 'px)';
+        mask.style.clipPath = clip;
+        mask.style.webkitClipPath = clip;
+        /* 2026-05-21 BUG FIX (#tutorial-card-cut): card positioning robusto.
+           Mede altura real do card + viewport, escolhe posição que NÃO sobrepõe
+           o target NEM sai do viewport. Fallback: centro vertical se target
+           ocupa middle 60% da tela. */
+        var vh = window.innerHeight;
+        var cardH = card.offsetHeight || 260; /* fallback se ainda não rendered */
+        var marginV = 24;
+        var spaceAbove = rect.top - marginV;
+        var spaceBelow = vh - (rect.top + rect.height) - marginV;
+        if (spaceBelow >= cardH + marginV) {
+          /* Cabe abaixo do target */
+          card.style.top = 'auto';
+          card.style.bottom = marginV + 'px';
+        } else if (spaceAbove >= cardH + marginV) {
+          /* Cabe acima do target */
+          card.style.bottom = 'auto';
+          card.style.top = marginV + 'px';
+        } else {
+          /* Não cabe em cima nem embaixo — centro absoluto, target NÃO visível */
+          card.style.top = 'auto';
+          card.style.bottom = marginV + 'px';
+          /* Esconde spotlight pra não competir com card no espaço apertado */
+          spotlight.classList.remove('visible');
+        }
+        /* Scroll element into view if off-screen */
+        try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+      } else {
+        spotlight.classList.remove('visible');
+        mask.style.clipPath = 'none';
+        mask.style.webkitClipPath = 'none';
+        card.classList.add('center');
+      }
+    }, targetTab ? 320 : 0); /* dá tempo da tab fazer fade-in */
   } else {
     spotlight.classList.remove('visible');
+    mask.style.clipPath = 'none';
+    mask.style.webkitClipPath = 'none';
     card.classList.add('center');
   }
 }
