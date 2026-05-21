@@ -32,6 +32,10 @@
         /* X-6.5.51AQ (2026-05-08): loading-title.css for AAA orb fallback in
            PADRAO_ALDRIC card header (when no NPC icon — narration-only scenes). */
         document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + v + '">');
+        /* Sessão #19 (2026-05-21): encounter-popup.css — PADRAO_ALDRIC v2
+           canonical engine (char-by-char typewriter + cursor + paginação +
+           sub-overlay choice picker). Shared com cidade/exploracao. */
+        document.write('<link rel="stylesheet" href="../shared/encounter-popup.css?v=' + v + '">');
     </script>
     <script>
     document.write('<script src="../shared/orientation-gate.js?v=' + v + '"><\/script>');
@@ -182,6 +186,9 @@
         document.write('<link rel="stylesheet" href="../shared/popup.css?v=' + v + '">');
         document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
+        /* Sessão #19 (2026-05-21): PADRAO_ALDRIC v2 engine. DEVE carregar ANTES
+           de prologue.js (que chama vEncounter.render). */
+        document.write('<script src="../shared/encounter-popup.js?v=' + v + '"><\/script>');
         document.write('<script src="prologue.js?v=' + v + '"><\/script>');
     </script>
 <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("PROLOGUE")</script>
