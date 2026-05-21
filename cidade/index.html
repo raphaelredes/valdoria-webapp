@@ -10691,13 +10691,21 @@ function _showFirstTimeTutorial(stepIdx){
           setTimeout(_measureAndPosition, 150);
           return;
         }
-        /* Retries esgotados — fallback .center */
-        card.style.top = '';
-        card.style.bottom = '';
-        spotlight.classList.remove('visible');
-        mask.style.clipPath = 'none';
-        mask.style.webkitClipPath = 'none';
-        card.classList.add('center');
+        /* 2026-05-21 fix v4 (#tutorial-skip-locked-locations): retries esgotados
+           significa target não está no DOM — provavelmente locked por levelReq
+           (ex: Banco lv 4, Praça lv 2 NÃO existem pra lv 1) OU discoveryQuestId
+           não concluído. AUTO-SKIP pro próximo step ao invés de mostrar popup
+           .center bloqueando. Welcome/Closing têm selector=null e não chegam
+           aqui — só steps com selector que não casa caem nesse skip. */
+        console.info('[FT-TUT] step ' + stepIdx + ' skipped — target ' +
+          step.selector + ' not found (locked/unavailable)');
+        if (stepIdx + 1 < TUTORIAL_STEPS.length) {
+          _showFirstTimeTutorial(stepIdx + 1);
+        } else {
+          /* Era o último step e não tem target — finaliza tutorial */
+          _markTutorialSeen();
+          ov.remove();
+        }
         return;
       }
       if (target && hasValidRect) {
