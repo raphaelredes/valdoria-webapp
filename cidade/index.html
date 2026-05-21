@@ -7826,6 +7826,33 @@ body.perf-lite .vc-action-btn { transition: none; }
        renderizou. Fix: set _loadingGuardBypass=true IMEDIATAMENTE pra que o
        FOUC safety SKIP esta página inteiramente. */
     document.write('<script>window._loadingGuardBypass = true;<\/script>');
+    /* task (2026-05-20) — file:// img path rewriter
+       Em master simuladores/cidade.html (file://), JS strings em renderers webapp
+       (game-tavern.js et al) usam paths como `../shared/img/...` que resolvem
+       relativos ao DOCUMENTO. No webapp doc=cidade/index.html → `..` = webapp root.
+       No master doc=simuladores/cidade.html → `..` = lendas-de-valdoria/ (sobe demais).
+       Mesma situação para `/shared/...` (resolve para raiz do filesystem em file://).
+       Fix: intercepta HTMLImageElement.src setter e reescreve em file:// mode. */
+    document.write('<script>' +
+        'if (location.protocol === "file:") {' +
+            'var __vImgDesc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");' +
+            'var __vDirsRE = /^(\\.\\.\\/|\\/)(shared|game|explore|combat2|web|character_creator|inventory|exploracao|apoie)\\//;' +
+            'Object.defineProperty(HTMLImageElement.prototype, "src", {' +
+                'configurable: true,' +
+                'get: __vImgDesc.get,' +
+                'set: function(v) {' +
+                    'if (typeof v === "string") {' +
+                        'var m = v.match(__vDirsRE);' +
+                        'if (m) {' +
+                            'if (m[1] === "../") v = "/" + v.substring(3);' +
+                            'else v = "../valdoria-webapp" + v;' +
+                        '}' +
+                    '}' +
+                    'return __vImgDesc.set.call(this, v);' +
+                '}' +
+            '});' +
+        '}' +
+    '<\/script>');
     document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
     document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
