@@ -10515,17 +10515,30 @@ function _showFirstTimeTutorial(stepIdx){
        elemento HIDDEN (rect 0x0), spotlight some e card vai pra posição inválida. */
     var step_cb_match = (step.selector || '').match(/data-cb="([a-z_]+)"/);
     var step_cb = step_cb_match ? step_cb_match[1] : '';
+    /* 2026-05-21 corrigido: map cb -> sector canonical (cross-ref CITY_SECTORS
+       linha ~8944-8962). Erros anteriores: praca era 'convivio' (correto
+       'espirito'), runas era 'espirito' (correto 'comercio'). */
     var TAB_OF_LOC = {
+      // Convivio
+      'tavern': 'convivio', 'taverna': 'convivio',
+      'inn': 'convivio', 'estalagem': 'convivio',
+      'rel_main': 'convivio', 'vinculos': 'convivio',
+      'action_quests': 'convivio', 'quests': 'convivio',
+      // Comercio
       'market': 'comercio', 'mercado': 'comercio',
       'bank': 'comercio', 'banco': 'comercio',
-      'oficina': 'comercio', 'workshop': 'comercio',
+      'open_workshop': 'comercio', 'oficina': 'comercio', 'workshop': 'comercio',
+      'rune_scribe': 'comercio', 'runas': 'comercio', 'rune': 'comercio',
+      // Combate
+      'guild': 'combate', 'guilda': 'combate',
+      'gates': 'combate', 'portoes': 'combate',
+      'arena': 'combate',
+      'daily_challenge': 'combate', 'desafio': 'combate',
+      // Espirito
       'temple': 'espirito', 'templo': 'espirito',
-      'runas': 'espirito', 'rune': 'espirito',
-      'arena': 'combate', 'guild': 'combate', 'guilda': 'combate',
-      'taverna': 'convivio', 'tavern': 'convivio',
-      'estalagem': 'convivio', 'inn': 'convivio',
-      'praca': 'convivio', 'square': 'convivio',
-      'quests': 'convivio', 'action_quests': 'convivio'
+      'square': 'espirito', 'praca': 'espirito',
+      'action_codex': 'espirito', 'codex': 'espirito', 'compendio': 'espirito',
+      'festival': 'espirito'
     };
     var targetTab = TAB_OF_LOC[step_cb];
     if (targetTab && window._currentSector !== targetTab) {
