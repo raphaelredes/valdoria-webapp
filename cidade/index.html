@@ -40344,13 +40344,71 @@ function _showServiceResultPopup(opts){
     narrativeEl.style.opacity = '';
     narrativeEl.style.transition = '';
   }
-  // Helper: revela narrativa com fade in suave (chamado pós-dice).
+  // 2026-05-22 v2 (user feedback): "Sobre as escolhas durante os diálogos do
+  // padrão Aldric, faça com que o dado seja rolado, o resultado seja mostrado,
+  // mas o diálogo não seja mostrado na mesma tela que o dado. O jogador vai
+  // precisar apertar pra continuar o diálogo e aí vai aparecer a fala do NPC
+  // como se tivesse sendo escrito cada palavra."
+  // FLUXO 2-STAGE: dado rola → resultado + botão "Continuar →" → click → typewriter.
+  var _srpPendingNarrative = hasDice;
+  var _srpTypewriterDone = false;
+  var _srpTypewriterTimer = null;
+  // Helper Stage 1: marca que narrativa está PENDENTE (não revela ainda).
+  // Atualiza botão para sinalizar próximo passo.
   function _srpRevealNarrative(){
     if (!narrativeEl) return;
-    narrativeEl.innerHTML = opts.narrative || '';
-    // Force reflow pra transition disparar
-    void narrativeEl.offsetWidth;
+    var contBtn = document.getElementById('srp-continue-btn');
+    if (contBtn) contBtn.textContent = 'Continuar →';
+  }
+  // Helper Stage 2: typewriter char-by-char (canonical PADRAO_ALDRIC 28ms/char).
+  // Chamado ao clicar "Continuar →" no botão (stage 1 → 2).
+  function _srpTypewriterNarrative(){
+    if (!narrativeEl) return;
+    var text = opts.narrative || '';
     narrativeEl.style.opacity = '1';
+    narrativeEl.innerHTML = '';
+    // Tokeniza preservando tags HTML
+    var tokens = [];
+    var ti = 0;
+    while (ti < text.length) {
+      var c = text[ti];
+      if (c === '<') {
+        var end = text.indexOf('>', ti);
+        if (end > 0) { tokens.push({type:'tag', content: text.substring(ti, end+1)}); ti = end+1; continue; }
+      }
+      if (c === '&') {
+        var sc = text.indexOf(';', ti);
+        if (sc > 0 && sc - ti < 10) { tokens.push({type:'entity', content: text.substring(ti, sc+1)}); ti = sc+1; continue; }
+      }
+      tokens.push({type:'char', content: c});
+      ti++;
+    }
+    var idx = 0;
+    var html = '';
+    function step(){
+      if (idx >= tokens.length) {
+        _srpTypewriterDone = true;
+        var b = document.getElementById('srp-continue-btn');
+        if (b) b.textContent = 'Continuar ✓';
+        return;
+      }
+      var tok = tokens[idx++];
+      html += tok.content;
+      narrativeEl.innerHTML = html;
+      var delay = 28;
+      if (tok.type === 'tag') delay = 0;
+      if (tok.type === 'tag' && /^<\s*(i|em)\s*[^>]*>$/i.test(tok.content)) delay = 350;
+      _srpTypewriterTimer = setTimeout(step, delay);
+    }
+    step();
+  }
+  // Force-complete: skip typewriter se user clica novamente durante o digitar.
+  function _srpForceCompleteTypewriter(){
+    if (_srpTypewriterTimer) { clearTimeout(_srpTypewriterTimer); _srpTypewriterTimer = null; }
+    if (narrativeEl) narrativeEl.innerHTML = opts.narrative || '';
+    _srpTypewriterDone = true;
+    var b = document.getElementById('srp-continue-btn');
+    if (b) b.textContent = 'Continuar ✓';
   }
   // Dice (opcional) — usa Dice3D canonical se disponível, fallback CSS pill
   var diceEl   = document.getElementById('srp-dice');
@@ -40545,15 +40603,31 @@ function _showServiceResultPopup(opts){
       rewardsEl.style.display = 'none';
     }
   }
-  // Botão Continuar
+  // Botão Continuar — 2026-05-22 v2: 2-stage flow quando hasDice.
+  // Stage 1 (após dado settled): click → typewriter narrativa
+  // Stage 1.5 (durante typewriter): click → force-complete
+  // Stage 2 (typewriter pronto): click → close popup
   var btn = document.getElementById('srp-continue-btn');
   btn.onclick = function(){
+    // hasDice: 2-stage flow
+    if (_srpPendingNarrative) {
+      // Stage 1 → 2: revelar narrativa typewriter
+      _srpPendingNarrative = false;
+      _srpTypewriterNarrative();
+      return;
+    }
+    // Click durante typewriter ainda em progresso → skip pro final
+    if (hasDice && !_srpTypewriterDone) {
+      _srpForceCompleteTypewriter();
+      return;
+    }
+    // Default (sem dice OU typewriter completo): close popup
     ov.classList.remove('active');
-    // Dispose Dice3D pra liberar memória/canvas
     if (window._srpDice3dInstance) {
       try { window._srpDice3dInstance.dispose(); } catch(_e){}
       window._srpDice3dInstance = null;
     }
+    if (_srpTypewriterTimer) { clearTimeout(_srpTypewriterTimer); _srpTypewriterTimer = null; }
     if (typeof opts.onContinue === 'function') opts.onContinue();
   };
   ov.classList.add('active');
