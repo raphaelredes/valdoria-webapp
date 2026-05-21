@@ -40162,7 +40162,29 @@ function _showServiceResultPopup(opts){
   // Fallback ✨ é emoji puro, igualmente seguro como innerHTML.
   document.getElementById('srp-icon').innerHTML       = opts.icon || '✨';
   document.getElementById('srp-npc').textContent      = (opts.npc || '').toUpperCase();
-  document.getElementById('srp-narrative').innerHTML  = opts.narrative || '';
+  // 2026-05-22 FIX (user feedback): "Tem que finalizar a animação da rolagem
+  // de dado, e somente depois disso que o NPC mostra o diálogo dele."
+  // Quando há dice, narrative é ESCONDIDA inicialmente. Aparece com fade in
+  // APÓS rolagem completar (no callback do instance.roll). Sem dice → mostra imediato.
+  var narrativeEl = document.getElementById('srp-narrative');
+  var hasDice = !!(opts.dice && opts.dice.formula);
+  if (hasDice) {
+    narrativeEl.innerHTML = '';
+    narrativeEl.style.opacity = '0';
+    narrativeEl.style.transition = 'opacity 0.4s ease';
+  } else {
+    narrativeEl.innerHTML = opts.narrative || '';
+    narrativeEl.style.opacity = '';
+    narrativeEl.style.transition = '';
+  }
+  // Helper: revela narrativa com fade in suave (chamado pós-dice).
+  function _srpRevealNarrative(){
+    if (!narrativeEl) return;
+    narrativeEl.innerHTML = opts.narrative || '';
+    // Force reflow pra transition disparar
+    void narrativeEl.offsetWidth;
+    narrativeEl.style.opacity = '1';
+  }
   // Dice (opcional) — usa Dice3D canonical se disponível, fallback CSS pill
   var diceEl   = document.getElementById('srp-dice');
   var dice3dEl = document.getElementById('srp-dice-3d');
@@ -40172,7 +40194,7 @@ function _showServiceResultPopup(opts){
     window._srpDice3dInstance = null;
   }
   if (dice3dEl) dice3dEl.innerHTML = '';
-  if (opts.dice && opts.dice.formula) {
+  if (hasDice) {
     var sides = opts.dice.sides || 20;
     var dieType = 'd' + sides;
     var canUse3D = (typeof Dice3D !== 'undefined' && Dice3D !== null && typeof THREE !== 'undefined');
@@ -40199,6 +40221,8 @@ function _showServiceResultPopup(opts){
                 document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
                 document.getElementById('srp-dice-total').textContent   = opts.dice.total;
                 diceEl.style.display = '';
+                // 2026-05-22: revela narrativa SÓ AGORA que dado terminou
+                _srpRevealNarrative();
               }, 400);
             });
           } catch(eR){
@@ -40208,6 +40232,7 @@ function _showServiceResultPopup(opts){
             document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
             document.getElementById('srp-dice-total').textContent   = opts.dice.total;
             diceEl.style.display = '';
+            _srpRevealNarrative();
           }
         }, 350);
       } catch(eC){
@@ -40216,6 +40241,7 @@ function _showServiceResultPopup(opts){
         document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
         document.getElementById('srp-dice-total').textContent   = opts.dice.total;
         diceEl.style.display = '';
+        _srpRevealNarrative();
       }
     } else {
       // Fallback CSS pill quando THREE.js/Dice3D não carregaram
@@ -40225,6 +40251,9 @@ function _showServiceResultPopup(opts){
       diceEl.style.animation = 'none';
       diceEl.offsetHeight;
       diceEl.style.animation = '';
+      // 2026-05-22: aguarda 1200ms da animação CSS-pill antes de revelar narrativa
+      // (mantém ordering: dado primeiro, diálogo depois).
+      setTimeout(_srpRevealNarrative, 1200);
     }
   } else {
     diceEl.style.display = 'none';
