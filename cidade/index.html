@@ -10377,6 +10377,10 @@ function _maybeShowFirstTimeTutorial(){
   try {
     if (localStorage.getItem(TUTORIAL_STORAGE_KEY) === '1') return;
   } catch(e){ /* localStorage indisponível — segue mesmo assim */ }
+  /* 2026-05-21 BUG FIX: se overlay JÁ existe (tutorial em progresso), NÃO
+     reinicia. Antes: tab-switch (step 6 Mercado) chamava renderCurrentScreen
+     que re-invocava esta função e voltava pro step 0 "Bem-vindo a Eldoria". */
+  if (document.getElementById('first-tut-overlay')) return;
   /* Defer if popup already open (eg encounter, audio, etc) */
   var anyPopup = document.querySelector('.city-popup-overlay.active, #city-subscreen-popup.active');
   if (anyPopup) {
