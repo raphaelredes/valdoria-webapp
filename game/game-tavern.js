@@ -342,16 +342,19 @@ var TAVERN_CB_TO_DIALOGUE = {
 
 /* === Service icon meta ================================================== */
 var TAVERN_SVC_META = {
-  'tavern_drink_menu':         { icon: '../shared/img/services/svc-bebidas.png',      meta: '+1-3 HP/MP' },
-  'tavern_rumor':              { icon: '../shared/img/services/svc-rumores.png',      meta: '5 V · info útil' },
-  'tavern_mercenaries_menu':   { icon: '../shared/img/services/svc-mercenarios.png',  meta: 'XGtE p.130' },
-  'tavern_adventurers_menu':   { icon: '../shared/img/services/svc-exploradores.png', meta: 'XGtE p.131' },
-  'tavern_games_menu':         { icon: '../shared/img/services/svc-dados.png',        meta: 'XGtE p.128' },
-  'tavern_carousing_menu':     { icon: '../shared/img/services/svc-socializar.png',   meta: 'XGtE p.128' },
-  'tavern_gather_menu':        { icon: '../shared/img/services/svc-informacoes.png',  meta: 'DC 10/15/20' },
-  'tavern_pitfight_menu':      { icon: '../shared/img/services/svc-rinha.png',        meta: 'apostas' },
-  'tavern_board_menu':         { icon: '../shared/img/services/svc-mural.png',        meta: 'jobs locais' },
-  'tavern_bard_listen':        { icon: '../shared/img/services/svc-bardo.png',        meta: 'inspiration 1d6' }
+  /* 2026-05-20: keys MATCH actual svc.cb values em renderTavernHub (verified via Chrome MCP).
+     Keys antigas (tavern_drink_menu, tavern_rumor, etc) eram mismatch — meta.icon undefined,
+     img nunca era criado, svc-ico ficava vazio (sem PNG). */
+  'tavern_drinks_open':        { icon: '../shared/img/services/svc-bebidas.png',      meta: '+1-3 HP/MP' },
+  'tavern_rumor_buy':          { icon: '../shared/img/services/svc-rumores.png',      meta: '5 V · info útil' },
+  'tavern_mercenaries_open':   { icon: '../shared/img/services/svc-mercenarios.png',  meta: 'XGtE p.130' },
+  'tavern_adventurers_open':   { icon: '../shared/img/services/svc-exploradores.png', meta: 'XGtE p.131' },
+  'tavern_games_open':         { icon: '../shared/img/services/svc-dados.png',        meta: 'XGtE p.128' },
+  'tavern_carousing_open':     { icon: '../shared/img/services/svc-socializar.png',   meta: 'XGtE p.128' },
+  'tavern_gather_open':        { icon: '../shared/img/services/svc-informacoes.png',  meta: 'DC 10/15/20' },
+  'tavern_pitfight_open':      { icon: '../shared/img/services/svc-rinha.png',        meta: 'apostas' },
+  'tavern_bulletin_open':      { icon: '../shared/img/services/svc-mural.png',        meta: 'jobs locais' },
+  'tavern_bard_open':          { icon: '../shared/img/services/svc-bardo.png',        meta: 'inspiration 1d6' }
 };
 
 /* === Cenário canonical ============================================== */
