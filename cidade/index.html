@@ -624,6 +624,7 @@ LOG SINK (Fase 7):
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor. */
     document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script src="/shared/spa-nav-compat.js?v=' + __vEarly + '"><\/script>');
     /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
     setTimeout(function(){
         try{

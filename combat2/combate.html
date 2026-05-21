@@ -567,6 +567,7 @@ window.SERVER_LOG_AREA = 'combate';
    Pattern canonical do cidade.html — necessário pra sync_combate passar
    no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/spa-nav-compat.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;

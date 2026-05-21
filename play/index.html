@@ -355,8 +355,42 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
          de tentar cidade sem sessão. Mantem suporte a links com ?token=&uid=
          (gotoCidade) — se URL tiver token, segue pra cidade; sem token,
          vai pra auth. */
-      var hasUrlToken = (new URLSearchParams(window.location.search)).get('token');
+      var _qs = new URLSearchParams(window.location.search);
+      var hasUrlToken = _qs.get('token');
       if (hasUrlToken) {
+        /* 2026-05-20 fix: honrar param `route` se presente (char_creator manda
+           /play/?route=prologue&token=X após confirmar). Antes caía em gotoCidade
+           sem preservar token → /cidade/ sem auth → /web/. Agora redireciona
+           direto pra rota correta preservando TODOS os params da URL. */
+        var routeParam = (_qs.get('route') || '').toLowerCase();
+        var ROUTE_MAP = {
+          'prologue': '/prologue/',
+          'prologo':  '/prologue/',
+          'combat':   '/combat2/combate.html',
+          'combat2':  '/combat2/combate.html',
+          'explore':  '/exploracao/exploracao.html',
+          'exploration': '/exploracao/exploracao.html',
+          'levelup':  '/levelup/',
+          'navigate': '/navigate/',
+          'world':    '/navigate/',
+          'cidade':   '/cidade/',
+          'city':     '/cidade/'
+        };
+        var destPath = ROUTE_MAP[routeParam];
+        if (destPath) {
+          setTip('Restaurando sessão…');
+          setProgress(50, 'Abrindo ' + routeParam + '…');
+          sendLog('info', 'route_redirect_with_token', { route: routeParam, dest: destPath });
+          setTimeout(function(){
+            try { window.__valdoria_transitioning = true; } catch(_e){}
+            /* Preserva todos os params (token, api, uid, env, char_id, new, etc)
+               + adiciona _cb pra cache-bust + remove `route` (já consumido). */
+            _qs.delete('route');
+            if (!_qs.get('_cb')) _qs.set('_cb', String(Date.now()));
+            window.location.replace(destPath + '?' + _qs.toString());
+          }, 600);
+          return;
+        }
         setTip('Restaurando sessão…');
         setProgress(35, 'Restaurando sessão…');
         setTimeout(gotoCidade, 1200);
