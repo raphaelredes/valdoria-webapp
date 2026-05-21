@@ -10356,17 +10356,19 @@ var TUTORIAL_STEPS = [
                 + 'Bom lugar para ouvir boatos sobre o mundo.'
   },
   {
-    /* 2026-05-21: corrigido vs DOM real — bottom-panel canonical (Fase 8)
-       com footer-quick (Mochila/Ficha/Grupo) + footer-nav (Voltar/Help/etc). */
+    /* 2026-05-21 (fix v2): footer está collapsed por default (body.footer-collapsed),
+       #bottom-panel display:none. Auto-expand antes de medir + pointar pro panel. */
     selector: '#bottom-panel, .footer-row.footer-quick',
+    expandFooter: true,  /* flag — JS remove body.footer-collapsed antes de medir */
     title: '⚡ Atalhos rápidos',
     description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> e <b>Grupo</b> — atalhos pros recursos mais usados. '
                 + 'O botão <b>· Menu</b> recolhe pra ganhar mais espaço de tela.'
   },
   {
-    /* 2026-05-21: corrigido vs DOM real — hub-party é o grid de cards de
-       personagem no topo (Ryaiael/SIA/JOEL/QUADE), mostra HP/MP/XP/Gold. */
-    selector: '.hub-party',
+    /* 2026-05-21 (fix v2): cards de personagem estão em #city-group-panel (verificado
+     * via DOM live walker — tag DIV id city-group-panel, 426×133px, contém todos
+     * cards Ryaiael/SIA/JOEL/QUADE com HP/MP/XP). */
+    selector: '#city-group-panel',
     title: '❤️ Cards do seu grupo',
     description: 'Topo da tela: cards de cada personagem com <b>HP</b> (vida vermelha), <b>MP</b> (mana/fé/vigor), '
                 + '<b>XP</b> (progresso de nível) e <b>Valdoritas</b> (moeda). Quando HP fica baixo, descanse na '
@@ -10564,11 +10566,21 @@ function _showFirstTimeTutorial(stepIdx){
         if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
       } catch(_e){ /* noqa: preflight */ }
     }
-    /* Aguarda DOM update do tab switch antes de medir target */
+    /* 2026-05-21 fix v2: alguns steps (Atalhos rápidos) precisam que o footer
+       esteja EXPANDIDO pra ter rect válido. Body.footer-collapsed esconde
+       #bottom-panel (display:none, rect 0×0). Expand temporariamente. */
+    if (step.expandFooter && document.body.classList.contains('footer-collapsed')) {
+      try { document.body.classList.remove('footer-collapsed'); } catch(_eF){ /* noqa: preflight */ }
+    }
+    /* Aguarda DOM update do tab switch / footer expand antes de medir target */
     setTimeout(function(){
       var target = document.querySelector(step.selector);
-      if (target) {
-        var rect = target.getBoundingClientRect();
+      /* 2026-05-21 fix v2: target pode existir mas ter rect 0×0 (display:none,
+         ancestor hidden, etc). Tratar como "não encontrado" → fallback center. */
+      var targetRect = target ? target.getBoundingClientRect() : null;
+      var hasValidRect = targetRect && targetRect.width > 0 && targetRect.height > 0;
+      if (target && hasValidRect) {
+        var rect = targetRect;  /* já calculado acima */
         var pad = 6;
         spotlight.style.left = (rect.left - pad) + 'px';
         spotlight.style.top = (rect.top - pad) + 'px';
