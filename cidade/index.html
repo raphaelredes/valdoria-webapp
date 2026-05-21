@@ -10449,6 +10449,12 @@ function _showFirstTimeTutorial(stepIdx){
       + '  box-shadow:0 12px 48px rgba(0,0,0,0.85),0 0 40px rgba(196,149,58,0.22),'
       + '    inset 0 1px 0 rgba(196,149,58,0.18);'
       + '  z-index:11001;'
+      /* 2026-05-21: transition para mover suavemente entre steps (igual spotlight).
+         top/bottom para reposicionamento vertical; transform mantém centralização
+         horizontal sem snap. cubic-bezier(0.4,0,0.2,1) = mesma curva do spotlight. */
+      + '  transition:top 0.5s cubic-bezier(0.4,0,0.2,1),'
+      + '    bottom 0.5s cubic-bezier(0.4,0,0.2,1),'
+      + '    transform 0.5s cubic-bezier(0.4,0,0.2,1);'
       + '  animation:ftCardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1)}'
       + '@keyframes ftCardEnter{'
       + '  from{opacity:0;transform:translateX(-50%) translateY(18px) scale(0.96)}'
