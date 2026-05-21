@@ -11501,83 +11501,151 @@ function _showStatusPopup(memberIdx){
   var raceLabel = _raceLabelPT(m.race);
   var classLabel = _classLabelPT(m.cls);
 
-  var html = '<div class="ficha-epica" style="padding: 0;">';
+  /* 2026-05-22 — EPIC FICHA v5 "Pergaminho Lendário" =========================
+     User: "Melhore o visual da ficha do personagem. Quero que fique épico."
+     Mudanças vs v4:
+     - Banner header ornamentado "◆ Ficha do Aventureiro ◆"
+     - Portrait épico: avatar 84px com double-ring + 4 ornamentos cardeais + halo
+     - Nome 22px Cinzel + divider ◆ + subtitle italic gold
+     - Recursos: bars 8px com glow, HP critical pulse (<25%)
+     - Atributos: pedras gravadas com depth shadow + carved numbers
+     - Combate: shield badges com fEp-shield glow animado
+     - NOVO: Histórico do Aventureiro (Liga + Abates + Conquistas + Sequência)
+     - Switcher: cards com avatar + active glow ============================= */
 
-  // === PORTRAIT (avatar 54x54, nome 16px, padding compacto) ===
-  html += '<div class="ficha-portrait" '
-    + 'style="position: relative; padding: 6px 10px 5px; '
-    + 'background: linear-gradient(180deg, rgba(196,149,58,0.10) 0%, rgba(42,36,32,0.95) 100%); '
-    + 'border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); text-align: center;">'
+  // CSS keyframes (injetado uma vez via style tag — mesmo pattern do Liga popup)
+  var fEpStyles = '<style id="ficha-ep-anims-v5">'
+    + '@keyframes fEpAvatarPulse{0%,100%{box-shadow:0 0 18px rgba(196,149,58,0.5),0 0 36px rgba(196,149,58,0.22);}50%{box-shadow:0 0 28px rgba(196,149,58,0.75),0 0 56px rgba(196,149,58,0.38);}}'
+    + '@keyframes fEpHpCritical{0%,100%{filter:drop-shadow(0 0 4px #c63d3d);}50%{filter:drop-shadow(0 0 10px #f06060);}}'
+    + '@keyframes fEpRunePulse{0%,100%{opacity:0.6;text-shadow:0 0 4px rgba(196,149,58,0.5);}50%{opacity:1;text-shadow:0 0 10px rgba(196,149,58,0.85);}}'
+    + '@keyframes fEpShieldGlow{0%,100%{box-shadow:inset 0 0 8px rgba(196,149,58,0.08),0 0 0 1px rgba(196,149,58,0.20);}50%{box-shadow:inset 0 0 14px rgba(196,149,58,0.18),0 0 0 1px rgba(196,149,58,0.45);}}'
+    + '@keyframes fEpAmbient{0%,100%{opacity:0.04;}50%{opacity:0.10;}}'
+    + '.fEp-avatar-anim{animation:fEpAvatarPulse 3.4s ease-in-out infinite;}'
+    + '.fEp-hp-critical{animation:fEpHpCritical 1.2s ease-in-out infinite;}'
+    + '.fEp-rune{animation:fEpRunePulse 2.6s ease-in-out infinite;display:inline-block;color:var(--v-gold,#c4953a);}'
+    + '.fEp-shield{animation:fEpShieldGlow 4s ease-in-out infinite;}'
+    + '.fEp-ambient{animation:fEpAmbient 6s ease-in-out infinite;}'
+    + '.fEp-clickable{cursor:pointer;transition:transform 0.18s ease, box-shadow 0.18s ease;}'
+    + '.fEp-clickable:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(196,149,58,0.25);}'
+    + '.fEp-clickable:active{transform:translateY(0);}'
+    + 'body.perf-lite .fEp-avatar-anim,body.perf-lite .fEp-rune,body.perf-lite .fEp-shield,body.perf-lite .fEp-ambient{animation:none;}'
+    + '@media (prefers-reduced-motion:reduce){.fEp-avatar-anim,.fEp-hp-critical,.fEp-rune,.fEp-shield,.fEp-ambient{animation:none;}}'
+    + '</style>';
 
-    // Avatar circular dourado (54x54)
-    + '<div class="ficha-avatar" '
-    + 'style="width: 54px; height: 54px; margin: 0 auto 3px; '
-    + 'background: radial-gradient(circle at 30% 30%, #fff4d0 0%, #e8c45a 25%, #c4953a 55%, #5a3e10 100%); '
-    + 'border-radius: 50%; display: flex; align-items: center; justify-content: center; '
-    + 'box-shadow: 0 0 16px var(--v-gold-40, rgba(196,149,58,0.4)), inset 0 -3px 5px rgba(0,0,0,0.3); '
-    + 'border: 2px solid var(--v-gold, #c4953a); color: #1a1410;">'
-    + heraldicSvg
+  // Avatar grande pro hero portrait (64px dentro do ring 84px)
+  var heroAvatarSvg = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '64px')
+    : '<svg viewBox="0 0 120 120" style="width: 64px; height: 64px;"><use href="#' + heraldicId + '"/></svg>';
+  var hpCritical = hpPct < 25;
+
+  var html = fEpStyles + '<div class="ficha-epica" style="position:relative; padding: 0; overflow: hidden;">';
+
+  // Textura ambient (parchment subtle)
+  html += '<div class="fEp-ambient" style="position:absolute; inset:0; pointer-events:none; z-index:0;'
+    + 'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.08) 0%,transparent 55%),'
+    + 'radial-gradient(ellipse at 50% 100%,rgba(196,149,58,0.04) 0%,transparent 70%);"></div>';
+
+  // === BANNER HEADER — "◆ Ficha do Aventureiro ◆" ===
+  html += '<div style="position:relative; z-index:1; padding: 7px 12px 5px; text-align:center;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0) 100%);'
+    + 'border-bottom:1px solid rgba(196,149,58,0.18);">'
+    + '<div style="display:flex; align-items:center; justify-content:center; gap:8px;'
+    + 'font-family:var(--v-font-display,Cinzel,serif); font-size:10px;'
+    + 'color:var(--v-gold,#c4953a); letter-spacing:3px; text-transform:uppercase;">'
+    + '<span style="flex:0 0 26px; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55));"></span>'
+    + '<span class="fEp-rune">◆</span>'
+    + '<span>Ficha do Aventureiro</span>'
+    + '<span class="fEp-rune">◆</span>'
+    + '<span style="flex:0 0 26px; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.55),transparent);"></span>'
+    + '</div></div>';
+
+  // === HERO PORTRAIT — avatar 84px ornamentado + nome 22px + divider ===
+  html += '<div class="ficha-portrait" style="position:relative; z-index:1; padding: 14px 12px 10px;'
+    + 'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(42,36,32,0.95) 60%);'
+    + 'border-bottom:1px solid var(--v-gold-30,rgba(196,149,58,0.3)); text-align:center;">'
+    // Halo radial atrás do avatar
+    + '<div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:240px; height:120px;'
+    + 'background:radial-gradient(ellipse at center top,rgba(196,149,58,0.28) 0%,transparent 60%); pointer-events:none;"></div>'
+    // Container avatar 96px (double-ring + 4 ornamentos)
+    + '<div style="position:relative; width:96px; height:96px; margin:0 auto 10px; z-index:2;">'
+    // Ring externo decoração
+    + '<div style="position:absolute; inset:0; border-radius:50%;'
+    + 'border:2px solid var(--v-gold-50,rgba(196,149,58,0.5));'
+    + 'box-shadow:0 0 20px rgba(196,149,58,0.4);"></div>'
+    // Avatar circular (84px dentro do ring 96px)
+    + '<div class="ficha-avatar fEp-avatar-anim" style="position:absolute; inset:6px;'
+    + 'background:radial-gradient(circle at 30% 30%,#fff4d0 0%,#e8c45a 25%,#c4953a 55%,#5a3e10 100%);'
+    + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
+    + 'border:2px solid var(--v-gold,#c4953a); color:#1a1410;">'
+    + heroAvatarSvg
     + '</div>'
-
-    // Nome (16px — legível mas compacto)
-    + '<div class="ficha-name" '
-    + 'style="font-family: var(--v-font-display, Cinzel, serif); font-size: 16px; '
-    + 'font-weight: 700; color: var(--v-gold, #c4953a); letter-spacing: 1.2px; text-transform: uppercase; '
-    + 'text-shadow: 0 0 8px var(--v-gold-30, rgba(196,149,58,0.3)); line-height: 1.1;">'
+    // 4 ornamentos cardeais (◆ N/S/E/W)
+    + '<div style="position:absolute; top:-9px; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 8px rgba(196,149,58,0.7);">◆</div>'
+    + '<div style="position:absolute; bottom:-9px; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 8px rgba(196,149,58,0.7);">◆</div>'
+    + '<div style="position:absolute; top:50%; left:-9px; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 8px rgba(196,149,58,0.7);">◆</div>'
+    + '<div style="position:absolute; top:50%; right:-9px; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 8px rgba(196,149,58,0.7);">◆</div>'
+    + '</div>'
+    // Nome 22px Cinzel
+    + '<div class="ficha-name" style="font-family:var(--v-font-display,Cinzel,serif); font-size:22px;'
+    + 'font-weight:700; color:var(--v-gold,#c4953a); letter-spacing:3px; text-transform:uppercase;'
+    + 'text-shadow:0 0 14px rgba(196,149,58,0.55),0 2px 4px rgba(0,0,0,0.9); line-height:1.1; margin-bottom:4px;">'
     + _titleCase(m.name)
     + '</div>'
-
-    // Subtitle (11px — legível)
-    + '<div class="ficha-subtitle" '
-    + 'style="color: var(--v-text-dim, #a09484); font-size: 11px; margin-top: 1px; font-style: italic;">'
-    + classLabel + ' ' + raceLabel + ' · Nível ' + m.level
+    // Divider ◆
+    + '<div style="display:flex; align-items:center; justify-content:center; gap:8px; margin:4px auto 6px; width:70%;">'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent);"></span>'
+    + '<span style="color:var(--v-gold,#c4953a); font-size:9px; text-shadow:0 0 6px rgba(196,149,58,0.6);">◆</span>'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent);"></span>'
+    + '</div>'
+    // Subtitle
+    + '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:12px; font-style:italic; letter-spacing:0.5px;">'
+    + classLabel + ' ' + raceLabel + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
     + '</div>'
     + '</div>';
 
-  // === RECURSOS (compactado V4 — fonts legíveis, paddings tight) ===
-  html += '<div class="ficha-section" style="padding: 5px 10px 4px;">';
-  html += '<div class="ficha-section-title" '
-    + 'style="font-size: 11px; color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">'
-    + '◆ Recursos'
+  // === RECURSOS — bars 8px com glow, HP critical pulse ===
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 6px 10px 5px;">';
+  html += '<div class="ficha-section-title" style="font-size:11px; color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">'
+    + '<span class="fEp-rune" style="font-size:9px;">◆</span> Recursos'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
 
-  // Helper: bar (margin 4px, label 12px, bar 6px — legível mas tight)
-  function _bar(iconId, iconColor, label, val, max, pct, barColor){
-    return '<div class="ficha-bar-row" style="margin-bottom: 4px;">'
-      + '<div style="display:flex; justify-content:space-between; align-items: center; font-size: 12px; margin-bottom: 2px;">'
-      + '<span style="display:inline-flex; align-items:center; gap:4px;">'
-      + '<svg viewBox="0 0 120 120" style="width:13px;height:13px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
-      + '<b>' + label + '</b></span>'
-      + '<span style="color: var(--v-text-dim, #a09484);">' + val + '/' + max + '</span>'
+  // Helper enhanced: bar com rune endcaps + critical class
+  function _barEpic(iconId, iconColor, label, val, max, pct, barColor, critical){
+    return '<div class="ficha-bar-row" style="margin-bottom:5px;">'
+      + '<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:3px;">'
+      + '<span style="display:inline-flex; align-items:center; gap:5px;">'
+      + '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
+      + '<b style="letter-spacing:0.5px;">' + label + '</b></span>'
+      + '<span style="color:var(--v-text-dim,#a09484); font-variant-numeric:tabular-nums;">' + val + '/' + max + '</span>'
       + '</div>'
-      + '<div style="height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; border: 1px solid var(--v-border, #4a3828);">'
-      + '<div style="height: 100%; width: ' + pct + '%; background: ' + barColor + '; transition: width 0.3s; '
-      + 'box-shadow: 0 0 4px ' + barColor + ';"></div>'
+      // Bar container 8px com rune endcaps
+      + '<div style="position:relative; height:8px; background:rgba(0,0,0,0.45); border-radius:4px; overflow:hidden;'
+      + 'border:1px solid var(--v-border,#4a3828); box-shadow:inset 0 1px 3px rgba(0,0,0,0.4);">'
+      + '<div ' + (critical ? 'class="fEp-hp-critical" ' : '') + 'style="height:100%; width:' + pct + '%; background:' + barColor + ';'
+      + 'transition:width 0.4s ease; box-shadow:0 0 6px ' + iconColor + ',inset 0 1px 0 rgba(255,255,255,0.18);"></div>'
       + '</div></div>';
   }
-  // Helper: linha de stat com brasão (Bolsa/Exaustão)
+  // Helper enhanced: stat line inline (Bolsa/Exaustão)
   function _statLine(iconId, iconColor, label, valHtml){
-    return '<div style="display:inline-flex; align-items:center; gap:4px; font-size: 12px;">'
+    return '<div style="display:inline-flex; align-items:center; gap:5px; font-size:12px;">'
       + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:' + iconColor + ';"><use href="#' + iconId + '"/></svg>'
-      + label + ' ' + valHtml
+      + '<span style="color:var(--v-text-dim,#a09484);">' + label + '</span> ' + valHtml
       + '</div>';
   }
 
-  html += _bar('ic-stat-hp', '#c63d3d', 'Vida', m.hp, m.hpMax, hpPct, 'linear-gradient(90deg, #c63d3d, #f06060)');
-  if (m.mpMax > 0) html += _bar('ic-stat-mp', '#5a9eff', 'Mana', m.mp, m.mpMax, mpPct, 'linear-gradient(90deg, #3d72c6, #6090f0)');
-  if (m.xpNext) html += _bar('ic-stat-cha', 'var(--v-gold,#c4953a)', 'Experiência', m.xp || 0, m.xpNext, xpPct, 'linear-gradient(90deg, #c4953a, #e8c45a)');
+  html += _barEpic('ic-stat-hp', '#c63d3d', 'Vida', m.hp, m.hpMax, hpPct, 'linear-gradient(90deg,#9a2828,#c63d3d,#f06060)', hpCritical);
+  if (m.mpMax > 0) html += _barEpic('ic-stat-mp', '#5a9eff', 'Mana', m.mp, m.mpMax, mpPct, 'linear-gradient(90deg,#2c5cb0,#3d72c6,#6090f0)', false);
+  if (m.xpNext) html += _barEpic('ic-stat-cha', 'var(--v-gold,#c4953a)', 'Experiência', m.xp || 0, m.xpNext, xpPct, 'linear-gradient(90deg,#9a7530,#c4953a,#e8c45a)', false);
 
-  // Bolsa + Exaustão (linha)
-  html += '<div style="display:flex; justify-content: space-between; gap: 6px; '
-    + 'margin-top: 4px; padding-top: 4px; '
-    + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));">';
+  // Bolsa + Exaustão linha
+  html += '<div style="display:flex; justify-content:space-between; gap:8px; margin-top:6px; padding-top:5px;'
+    + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.12));">';
   if (m.isPlayer) {
-    /* 2026-05-11 (user request): "V" literal -> icone .vi-coin canonical */
     html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:',
-      '<b style="color: var(--v-gold, #c4953a); display:inline-flex; align-items:center; gap:4px;">'
-      + _fmtV(m.gold || 0)
-      + '<span class="vi vi-coin sm"></span></b>');
+      '<b style="color:var(--v-gold,#c4953a); display:inline-flex; align-items:center; gap:4px;">'
+      + _fmtV(m.gold || 0) + '<span class="vi vi-coin sm"></span></b>');
   }
   html += '<div style="' + (m.isPlayer ? '' : 'flex:1;') + '">'
     + _statLine('ic-stat-exhaustion', 'var(--v-gold,#c4953a)', 'Exaustão:', '<b>' + (m.exh || 0) + '/6</b>')
@@ -11585,14 +11653,14 @@ function _showStatusPopup(memberIdx){
   html += '</div>';
   html += '</div>';
 
-  // === ATRIBUTOS D&D 5e — grid 3x2 (padding tight, val 20px) ===
-  html += '<div class="ficha-section" style="padding: 0 10px 4px;">';
-  html += '<div class="ficha-section-title" '
-    + 'style="font-size: 11px; color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">'
-    + '◆ Atributos D&D 5e'
+  // === ATRIBUTOS — pedras gravadas com depth shadow ===
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 10px 5px;">';
+  html += '<div class="ficha-section-title" style="font-size:11px; color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">'
+    + '<span class="fEp-rune" style="font-size:9px;">◆</span> Atributos D&D 5e'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
-  html += '<div class="ficha-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">';
+  html += '<div class="ficha-stats-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:5px;">';
   var STATS_DATA = [
     { key: 'str', label: 'FOR', icon: 'ic-stat-str' },
     { key: 'dex', label: 'DES', icon: 'ic-stat-dex' },
@@ -11604,29 +11672,39 @@ function _showStatusPopup(memberIdx){
   STATS_DATA.forEach(function(s){
     var val = stats[s.key];
     var modVal = _mod(val);
-    var modColor = modVal > 0 ? '#7cdb7c' : (modVal < 0 ? '#e07c7c' : 'var(--v-text-dim, #a09484)');
-    html += '<div class="ficha-stat-stone" '
-      + 'style="background: linear-gradient(165deg, rgba(196,149,58,0.10) 0%, rgba(42,36,32,0.6) 100%); '
-      + 'border: 1px solid var(--v-border, #4a3828); border-radius: 5px; '
-      + 'padding: 4px 3px; text-align: center; line-height: 1.05;">'
-      + '<div style="font-size: 10px; color: var(--v-text-dim, #a09484); letter-spacing: 0.5px; '
-      + 'display:inline-flex; align-items:center; gap:2px; justify-content:center;">'
-      + '<svg viewBox="0 0 120 120" style="width:12px;height:12px;color:' + (HERALDIC_COLORS[s.icon] || '#8a7a6a') + ';"><use href="#' + s.icon + '"/></svg>'
+    var modGlow = modVal > 0 ? '0 0 6px rgba(124,219,124,0.7)' : (modVal < 0 ? '0 0 6px rgba(224,124,124,0.6)' : '0 0 4px rgba(160,148,132,0.4)');
+    var modColor = modVal > 0 ? '#7cdb7c' : (modVal < 0 ? '#e07c7c' : 'var(--v-text-dim,#a09484)');
+    var iconCol = HERALDIC_COLORS[s.icon] || '#8a7a6a';
+    html += '<div class="ficha-stat-stone" style="position:relative;'
+      // Pedra gravada: gradient com depth
+      + 'background:linear-gradient(165deg,rgba(80,62,40,0.45) 0%,rgba(42,34,24,0.85) 100%);'
+      + 'border:1px solid var(--v-border,#4a3828); border-radius:6px;'
+      + 'padding:5px 3px 4px; text-align:center; line-height:1.05;'
+      + 'box-shadow:inset 0 1px 0 rgba(196,149,58,0.18),inset 0 -1px 2px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.4);">'
+      // Label com icon
+      + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); letter-spacing:0.5px;'
+      + 'display:inline-flex; align-items:center; gap:3px; justify-content:center;">'
+      + '<svg viewBox="0 0 120 120" style="width:12px;height:12px;color:' + iconCol + ';"><use href="#' + s.icon + '"/></svg>'
       + s.label + '</div>'
-      + '<div style="font-size: 20px; font-weight: 700; color: var(--v-gold, #c4953a); line-height: 1; margin-top: 1px;">'
+      // Número (carved depth)
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:22px; font-weight:700;'
+      + 'color:var(--v-gold,#c4953a); line-height:1; margin-top:2px;'
+      + 'text-shadow:0 1px 0 rgba(0,0,0,0.6),0 0 8px rgba(196,149,58,0.35);">'
       + val + '</div>'
-      + '<div style="font-size: 11px; color: ' + modColor + '; font-weight: 600; line-height: 1; margin-top: 1px;">'
+      // Modifier (glowing)
+      + '<div style="font-size:11px; color:' + modColor + '; font-weight:600; line-height:1; margin-top:2px;'
+      + 'text-shadow:' + modGlow + ';">'
       + (modVal >= 0 ? '+' : '') + modVal + '</div>'
       + '</div>';
   });
   html += '</div></div>';
 
-  // === COMBATE — badges 2x2 tight ===
-  html += '<div class="ficha-section" style="padding: 0 10px 4px;">';
-  html += '<div class="ficha-section-title" '
-    + 'style="font-size: 11px; color: var(--v-gold, #c4953a); '
-    + 'text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">'
-    + '◆ Combate'
+  // === COMBATE — shield badges com fEp-shield glow ===
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 10px 5px;">';
+  html += '<div class="ficha-section-title" style="font-size:11px; color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">'
+    + '<span class="fEp-rune" style="font-size:9px;">◆</span> Combate'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
   var COMBAT_DATA = [
     { icon: 'ic-stat-ac',      label: 'CA',      value: ac },
@@ -11634,45 +11712,117 @@ function _showStatusPopup(memberIdx){
     { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc },
     { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof }
   ];
-  html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">';
+  html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:5px;">';
   COMBAT_DATA.forEach(function(c){
-    html += '<div class="ficha-combat-badge" '
-      + 'style="display: flex; align-items: center; justify-content: space-between; gap: 6px; '
-      + 'background: rgba(196,149,58,0.06); border: 1px solid var(--v-border, #4a3828); '
-      + 'border-radius: 5px; padding: 5px 8px;">'
-      + '<span style="display:inline-flex; align-items:center; gap:4px; font-size: 12px; color: var(--v-text-dim, #a09484);">'
-      + '<svg viewBox="0 0 120 120" style="width:14px;height:14px;color:' + (HERALDIC_COLORS[c.icon] || '#8a7a6a') + ';"><use href="#' + c.icon + '"/></svg>'
+    var iconCol = HERALDIC_COLORS[c.icon] || '#8a7a6a';
+    html += '<div class="ficha-combat-badge fEp-shield" style="position:relative;'
+      + 'display:flex; align-items:center; justify-content:space-between; gap:6px;'
+      // Shield-style: top corners square, bottom corners rounded
+      + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0.6) 100%);'
+      + 'border:1px solid rgba(196,149,58,0.30); border-radius:5px 5px 8px 8px;'
+      + 'padding:6px 9px;">'
+      + '<span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--v-text-dim,#a09484);">'
+      + '<svg viewBox="0 0 120 120" style="width:15px;height:15px;color:' + iconCol + ';"><use href="#' + c.icon + '"/></svg>'
       + c.label + '</span>'
-      + '<span style="font-size: 14px; font-weight: 700; color: var(--v-gold, #c4953a);">' + c.value + '</span>'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:15px; font-weight:700;'
+      + 'color:var(--v-gold,#c4953a); text-shadow:0 0 8px rgba(196,149,58,0.35);">' + c.value + '</span>'
       + '</div>';
   });
   html += '</div></div>';
 
-  // === SWITCHER (rodapé compacto) ===
+  // === HISTÓRICO DO AVENTUREIRO — Liga + Abates + Conquistas + Sequência ===
+  // Mostra apenas para player (não para allies — eles não têm league/kills/etc).
+  if (m.isPlayer) {
+    // Pull data: player metadata > CITY_MOCK_PLAYER > fallback defaults
+    var p = window.CITY_MOCK_PLAYER || {};
+    var leagueXp = p.league_xp || 1240;
+    var leagueName = p.league_name || 'Bronze';
+    var leagueIcon = p.league_icon || 'ic-liga-bronze';
+    var leagueColor = p.league_color || '#cd7f32';
+    var killsCount = (p.player_stats && p.player_stats.kills) || p.kills || 23;
+    var streakCount = (p.player_stats && p.player_stats.streak) || p.streak || 3;
+    var achUnlocked = (p.progress_strip && p.progress_strip.ach_unlocked) || p.ach_unlocked || 20;
+    var achTotal = (p.progress_strip && p.progress_strip.ach_total) || p.ach_total || 70;
+
+    html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 10px 6px;">';
+    html += '<div class="ficha-section-title" style="font-size:11px; color:var(--v-gold,#c4953a);'
+      + 'text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; display:flex; align-items:center; gap:6px;">'
+      + '<span class="fEp-rune" style="font-size:9px;">◆</span> Histórico do Aventureiro'
+      + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
+      + '</div>';
+    html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:5px;">';
+
+    // Card helper — clickable card com icon + label + value
+    function _histCard(cb, iconHtml, label, value, accentColor){
+      return '<div class="ficha-hist-card fEp-clickable" data-cb="' + cb + '" style="position:relative;'
+        + 'display:flex; align-items:center; gap:7px;'
+        + 'background:linear-gradient(180deg,' + accentColor + '14 0%,rgba(42,36,32,0.6) 100%);'
+        + 'border:1px solid ' + accentColor + '44; border-radius:5px; padding:6px 8px;">'
+        + '<div style="flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center;">' + iconHtml + '</div>'
+        + '<div style="flex:1; min-width:0;">'
+        + '<div style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px; line-height:1;">' + label + '</div>'
+        + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:14px; font-weight:700;'
+        + 'color:' + accentColor + '; line-height:1.1; margin-top:2px;'
+        + 'text-shadow:0 0 6px ' + accentColor + '66;">' + value + '</div>'
+        + '</div></div>';
+    }
+
+    // Liga (medalha em cor do tier)
+    html += _histCard('league_main',
+      '<svg viewBox="0 0 120 120" style="width:24px;height:24px;color:' + leagueColor + ';filter:drop-shadow(0 0 6px ' + leagueColor + '99);"><use href="#' + leagueIcon + '"/></svg>',
+      'Liga', leagueName, leagueColor);
+    // Conquistas
+    html += _histCard('ach_main',
+      '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#ic-conquistas"/></svg>',
+      'Conquistas', achUnlocked + '/' + achTotal, 'var(--v-gold,#c4953a)');
+    // Abates
+    html += _histCard('kills_log',
+      '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:#c66a3d;"><use href="#ic-stat-attack"/></svg>',
+      'Abates', killsCount, '#d27a4a');
+    // Sequência
+    html += _histCard('streak_log',
+      '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:#e07c3d;"><use href="#ic-streak"/></svg>',
+      'Sequência', streakCount, '#e89858');
+
+    html += '</div></div>';
+  }
+
+  // === SWITCHER — cards com avatar + active glow ===
   var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
   if (members.length > 1) {
-    html += '<div class="ficha-switcher" style="padding: 5px 10px 5px; '
-      + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12)); '
-      + 'background: rgba(196,149,58,0.02);">'
-      + '<div style="font-size: 10px; color: var(--v-text-dim, #a09484); '
-      + 'text-align: center; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px;">'
+    html += '<div class="ficha-switcher" style="position:relative; z-index:1; padding: 8px 10px 8px;'
+      + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.18));'
+      + 'background:linear-gradient(180deg,rgba(196,149,58,0.05) 0%,rgba(196,149,58,0.02) 100%);">'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:10px;'
+      + 'color:var(--v-gold,#c4953a); text-align:center; margin-bottom:6px;'
+      + 'text-transform:uppercase; letter-spacing:2px;">'
+      + '<span class="fEp-rune" style="font-size:8px; margin-right:6px;">◆</span>'
       + 'Trocar Membro'
+      + '<span class="fEp-rune" style="font-size:8px; margin-left:6px;">◆</span>'
       + '</div>'
-      + '<div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">';
+      + '<div style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap;">';
     members.forEach(function(mm){
       var idx = mm.idx !== undefined ? mm.idx : (window.GROUP_MEMBERS || []).indexOf(mm);
       if (idx < 0) idx = 0;
       var active = idx === memberIdx;
       var hid = _classToHeraldic(mm.cls);
-      var hsvg = '<svg viewBox="0 0 120 120" style="width: 14px; height: 14px; flex-shrink:0;"><use href="#' + hid + '"/></svg>';
-      html += '<button class="ficha-switch-btn" data-idx="' + idx + '" '
-        + 'style="display: flex; align-items: center; gap: 4px; '
-        + 'padding: 5px 10px; '
-        + 'background: ' + (active ? 'rgba(196,149,58,0.15)' : 'rgba(196,149,58,0.04)') + '; '
-        + 'border: 1px solid ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)') + '; '
-        + 'border-radius: 5px; color: ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-text, #d4c8b0)') + '; '
-        + 'font-family: inherit; font-size: 11px; cursor: pointer;">'
-        + hsvg + ' ' + _titleCase(mm.name)
+      // Mini-avatar circular dourado
+      var avSvg = '<div style="width:20px; height:20px; border-radius:50%; flex-shrink:0;'
+        + 'background:radial-gradient(circle at 30% 30%,#fff4d0 0%,#e8c45a 30%,#c4953a 70%,#5a3e10 100%);'
+        + 'display:flex; align-items:center; justify-content:center;'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.5)') + ';'
+        + 'box-shadow:0 0 ' + (active ? '8px rgba(196,149,58,0.6)' : '0 transparent') + ';">'
+        + '<svg viewBox="0 0 120 120" style="width:13px; height:13px; color:#1a1410;"><use href="#' + hid + '"/></svg>'
+        + '</div>';
+      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + idx + '" '
+        + 'style="display:flex; align-items:center; gap:6px; padding:5px 10px 5px 5px;'
+        + 'background:' + (active ? 'rgba(196,149,58,0.18)' : 'rgba(196,149,58,0.04)') + ';'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'var(--v-border,#4a3828)') + ';'
+        + 'border-radius:14px;'
+        + 'color:' + (active ? 'var(--v-gold,#c4953a)' : 'var(--v-text,#d4c8b0)') + ';'
+        + 'font-family:inherit; font-size:11px; cursor:pointer;'
+        + (active ? 'box-shadow:0 0 10px rgba(196,149,58,0.35);' : '') + '">'
+        + avSvg + '<span>' + _titleCase(mm.name) + '</span>'
         + '</button>';
     });
     html += '</div></div>';
@@ -11686,6 +11836,21 @@ function _showStatusPopup(memberIdx){
     btn.addEventListener('click', function(){
       var idx = parseInt(btn.getAttribute('data-idx'), 10);
       _showStatusPopup(idx);
+    });
+  });
+
+  // 2026-05-22: Wire history cards (Liga/Conquistas/Abates/Sequência) → abre popup respectivo
+  bodyEl.querySelectorAll('.ficha-hist-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var cb = card.getAttribute('data-cb');
+      if (!cb) return;
+      if (typeof haptic === 'function') { try { haptic('light'); } catch(_e){} }
+      // Roteia pros popups existentes (já implementados no progress_strip do hub)
+      if (cb === 'league_main' && typeof _showLeaguePopup === 'function') _showLeaguePopup();
+      else if (cb === 'ach_main' && typeof _showAchievementsPopup === 'function') _showAchievementsPopup();
+      else if (cb === 'kills_log' && typeof _showKillsPopup === 'function') _showKillsPopup();
+      else if (cb === 'streak_log' && typeof _showStreakPopup === 'function') _showStreakPopup();
+      else if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS[cb]) ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER);
     });
   });
 
