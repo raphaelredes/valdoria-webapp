@@ -10043,17 +10043,6 @@ function _showCharactersPopup(){
     window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');
-  // Sessão #20 (2026-05-21): oculta Sair quando Hall aberto via Telegram WebApp.
-  // Mesmo padrão de web/web-auth.js (commit 8ec7c6fb) — no Telegram só existe
-  // auth Telegram (initData), não há Google login pra alternar conta.
-  try {
-    var _tg = window.Telegram && window.Telegram.WebApp;
-    var _insideTg = !!(_tg && typeof _tg.initData === 'string' && _tg.initData.length > 0);
-    if (logoutBtn && _insideTg) {
-      logoutBtn.style.display = 'none';
-      logoutBtn.setAttribute('aria-hidden', 'true');
-    }
-  } catch (_e) { /* non-fatal */ }
   if (logoutBtn) logoutBtn.addEventListener('click', function(){
     vToast('🚪 Logout: encerra sessão e volta à tela de login.');
   });
@@ -10415,10 +10404,13 @@ var TUTORIAL_STEPS = [
                 + 'tesouros escondidos, ou jogue dados com outros para ganhar (ou perder) ouro.'
   },
   {
+    /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.inn (line ~8995).
+       Sem filtro, popup flasha 750ms e some (target hidden no DOM). */
     selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
     title: '🛏️ Estalagem',
     description: 'Descanso longo (recupera HP/MP totais + remove exaustão). Custa Valdoritas, mas é '
-                + 'essencial após aventuras pesadas. Quartos melhores recuperam mais.'
+                + 'essencial após aventuras pesadas. Quartos melhores recuperam mais.',
+    levelReq: 2
   },
   {
     selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
@@ -10433,22 +10425,28 @@ var TUTORIAL_STEPS = [
                 + 'Doações geram favor com os deuses (e ganhos passivos).'
   },
   {
+    /* 2026-05-22: levelReq:4 — cross-ref CITY_LOCATIONS.bank (line ~8999). */
     selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
     title: '🏦 Banco',
     description: 'Guarde Valdoritas com segurança (não perde ao morrer). Empréstimos para emergências, '
-                + 'investimentos para ganho passivo. Empreste com sabedoria — juros são reais.'
+                + 'investimentos para ganho passivo. Empreste com sabedoria — juros são reais.',
+    levelReq: 4
   },
   {
+    /* 2026-05-22: levelReq:3 — cross-ref CITY_LOCATIONS.guild (line ~9003). */
     selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
     title: '🛡️ Guilda dos Aventureiros',
     description: 'Recrute aliados (mercenários, especialistas) para suas aventuras. Suba de rank na guilda '
-                + 'desbloqueando contratos mais lucrativos.'
+                + 'desbloqueando contratos mais lucrativos.',
+    levelReq: 3
   },
   {
+    /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.square (line ~9009). */
     selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
     title: '⛲ Praça Central',
     description: 'O coração social da cidade. NPCs falando, eventos aleatórios, festivais ocasionais. '
-                + 'Bom lugar para ouvir boatos sobre o mundo.'
+                + 'Bom lugar para ouvir boatos sobre o mundo.',
+    levelReq: 2
   },
   {
     /* 2026-05-21 (fix v2): footer está collapsed por default (body.footer-collapsed),
@@ -10489,6 +10487,16 @@ function _maybeShowFirstTimeTutorial(){
     setTimeout(_maybeShowFirstTimeTutorial, 1500);
     return;
   }
+  /* 2026-05-22 BUG FIX (#tutorial-flash-locked-locations): filtra steps por
+     level do player. Estalagem/Praça (lv2), Guilda (lv3), Banco (lv4) ficavam
+     ocultos no DOM mas o tutorial renderizava o card e auto-skipa após 750ms
+     (5×150ms retries no _measureAndPosition). User reportou "Estalagem aparece
+     e some sozinho". Solução: filtrar antes do tour começar. Locais novos
+     ganham mini-tutorial via 'newly_available' sparkle quando desbloqueiam. */
+  var _pLevel = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 1;
+  window._activeTutorialSteps = TUTORIAL_STEPS.filter(function(s){
+    return !s.levelReq || s.levelReq <= _pLevel;
+  });
   _showFirstTimeTutorial(0);
 }
 
@@ -10497,6 +10505,10 @@ function _markTutorialSeen(){
 }
 
 function _showFirstTimeTutorial(stepIdx){
+  /* 2026-05-22: STEPS = subset filtrado por levelReq (set em _maybeShowFirstTimeTutorial).
+     Usado em vez de TUTORIAL_STEPS dentro desta função pra pular locais que o
+     player ainda não pode acessar (sem flash de popup-then-skip). */
+  var STEPS = window._activeTutorialSteps || TUTORIAL_STEPS;
   /* Inject CSS once — AAA epic medieval style (2026-05-21 visual upgrade) */
   if (!document.getElementById('first-tut-style')) {
     var st = document.createElement('style');
@@ -10628,7 +10640,7 @@ function _showFirstTimeTutorial(stepIdx){
     ov = document.createElement('div');
     ov.id = 'first-tut-overlay';
     var dotsHtml = '';
-    for (var di = 0; di < TUTORIAL_STEPS.length; di++) {
+    for (var di = 0; di < STEPS.length; di++) {
       dotsHtml += '<div class="ft-step-dot" data-i="' + di + '"></div>';
     }
     ov.innerHTML = ''
@@ -10661,7 +10673,7 @@ function _showFirstTimeTutorial(stepIdx){
     document.getElementById('ft-next').addEventListener('click', function(){
       haptic('medium');
       var cur = parseInt(ov.getAttribute('data-step') || '0', 10);
-      if (cur < TUTORIAL_STEPS.length - 1) {
+      if (cur < STEPS.length - 1) {
         _showFirstTimeTutorial(cur + 1);
       } else {
         _markTutorialSeen();
@@ -10671,7 +10683,7 @@ function _showFirstTimeTutorial(stepIdx){
     });
   }
   /* Render current step */
-  var step = TUTORIAL_STEPS[stepIdx];
+  var step = STEPS[stepIdx];
   if (!step) {
     _markTutorialSeen();
     ov.remove();
@@ -10694,7 +10706,7 @@ function _showFirstTimeTutorial(stepIdx){
   var prevBtn = document.getElementById('ft-prev');
   var nextBtn = document.getElementById('ft-next');
   prevBtn.disabled = (stepIdx === 0);
-  nextBtn.textContent = (stepIdx === TUTORIAL_STEPS.length - 1) ? '✓ Entendido' : 'Próximo →';
+  nextBtn.textContent = (stepIdx === STEPS.length - 1) ? '✓ Entendido' : 'Próximo →';
   /* Spotlight */
   var spotlight = document.getElementById('first-tut-spotlight');
   var mask = document.getElementById('first-tut-mask');
@@ -10765,10 +10777,12 @@ function _showFirstTimeTutorial(stepIdx){
           setTimeout(_measureAndPosition, 150);
           return;
         }
-        /* 2026-05-21 fix v4: target locked (levelReq não atingido) → SKIP step. */
+        /* 2026-05-21 fix v4: target locked (levelReq não atingido) → SKIP step.
+           2026-05-22: STEPS filtrado já remove maioria dos casos; este é
+           fallback defensivo (ex: location oculta por discovery quest). */
         console.info('[FT-TUT] step ' + stepIdx + ' skipped — target ' +
           step.selector + ' not found (locked/unavailable)');
-        if (stepIdx + 1 < TUTORIAL_STEPS.length) {
+        if (stepIdx + 1 < STEPS.length) {
           _showFirstTimeTutorial(stepIdx + 1);
         } else {
           _markTutorialSeen();
