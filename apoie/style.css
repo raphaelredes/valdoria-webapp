@@ -218,3 +218,16 @@ html{max-width:none!important;height:auto!important;overflow:auto!important;scro
 
 @keyframes apAuthFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes apAuthSlideIn{from{opacity:0;transform:translateY(20px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* === Telegram auth waiting panel (token+polling) === */
+.ap-auth-waiting{margin-top:12px;padding:14px 16px;background:linear-gradient(180deg,rgba(90,181,232,0.10),rgba(90,181,232,0.04));border:1px solid rgba(90,181,232,0.4);border-radius:var(--v-radius,10px);animation:apAuthFadeIn 200ms ease-out}
+.ap-auth-waiting-header{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--v-text,#d4c8b0);margin-bottom:8px}
+.ap-auth-waiting-info{font-size:12px;color:var(--v-text-dim,#a09484);line-height:1.5;margin-bottom:12px}
+.ap-auth-waiting-info b{color:#5ab5e8}
+.ap-auth-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(90,181,232,0.25);border-top-color:#5ab5e8;border-radius:50%;animation:apAuthSpin 0.9s linear infinite}
+.ap-auth-waiting-actions{display:flex;justify-content:flex-end}
+.ap-auth-cancel-btn{padding:6px 14px;background:transparent;border:1px solid var(--v-border,rgba(196,149,58,0.2));border-radius:var(--v-radius-pill,20px);color:var(--v-text-dim,#a09484);font-family:var(--v-font,'Marcellus',serif);font-size:12px;cursor:pointer;transition:all var(--v-transition-base,0.2s)}
+.ap-auth-cancel-btn:hover{border-color:#e05555;color:#e05555}
+.ap-auth-waiting-timeout{margin-top:10px;padding:10px;background:rgba(224,85,85,0.10);border:1px solid rgba(224,85,85,0.3);border-radius:8px;font-size:12px;color:var(--v-text,#d4c8b0)}
+.ap-auth-waiting-timeout b{color:#e05555}
+@keyframes apAuthSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}

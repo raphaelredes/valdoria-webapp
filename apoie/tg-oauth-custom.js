@@ -32,15 +32,20 @@
         googleClientId: '',
         user: null,
         onAuth: null,
+        tgAuthToken: null,
+        tgPollTimer: null,
     };
 
     var ui = {
         container: null,  // #ap-tg-login-container
         status: null,     // #ap-tg-status
         btnsWrap: null,
+        waitingPanel: null,
     };
 
     var STORAGE_KEY = 'apDonorIdentity';
+    var TG_POLL_INTERVAL_MS = 2000;
+    var TG_POLL_MAX_ATTEMPTS = 90;  // 90 * 2s = 3 minutos
 
     // ─── Utilities ───────────────────────────────────────────
 
@@ -139,92 +144,144 @@
         else _renderButtons();
     }
 
-    // ─── Telegram (deep-link) ──────────────────────────────
+    // ─── Telegram (token + polling — autenticacao REAL via bot) ─────
+    // Fluxo:
+    //   1. POST /api/auth/tg/start -> recebe token + bot_url
+    //   2. Abre bot_url em nova aba (t.me/<bot>?start=auth_<token>)
+    //   3. Bot processa /start auth_<token> -> chama worker /api/auth/tg/confirm
+    //      com user_id, first_name, etc.
+    //   4. Frontend polling em /api/auth/tg/check?token=X detecta linked
+    //   5. Identity salva com user_id REAL do Telegram
 
     function connectTelegram() {
-        if (!state.botUsername) {
-            console.warn('[AUTH] botUsername not configured');
-            return;
-        }
-
-        var link = 'https://t.me/' + state.botUsername + '?start=apoiar';
-        // Open bot in new tab
-        var win = window.open(link, '_blank', 'noopener,noreferrer');
-        if (!win) {
-            // Popup blocked — show inline
-            window.location.href = link;
-            return;
-        }
-
-        // Show confirmation modal
-        _openTelegramConfirmModal();
+        // POST para gerar token
+        fetch('/api/auth/tg/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{}',
+        })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (!data || !data.ok || !data.token || !data.bot_url) {
+                    console.warn('[AUTH] /api/auth/tg/start retornou dados invalidos:', data);
+                    alert('Erro ao iniciar autenticacao Telegram. Tente novamente.');
+                    return;
+                }
+                state.tgAuthToken = data.token;
+                // Abre bot em nova aba
+                var win = window.open(data.bot_url, '_blank', 'noopener');
+                if (!win) {
+                    // Popup blocked — same-tab fallback
+                    window.location.href = data.bot_url;
+                    return;
+                }
+                // Mostra waiting panel + inicia polling
+                _showWaitingPanel(data.token);
+                _startTgPolling(data.token);
+            })
+            .catch(function(e) {
+                console.error('[AUTH] /api/auth/tg/start falhou:', e);
+                alert('Erro de conexao. Tente novamente.');
+            });
     }
 
-    function _openTelegramConfirmModal() {
-        var modal = document.createElement('div');
-        modal.className = 'ap-auth-modal';
-        modal.innerHTML =
-            '<div class="ap-auth-modal-backdrop"></div>' +
-            '<div class="ap-auth-modal-card">' +
-            '<div class="ap-auth-modal-icon">' + ICON_TELEGRAM + '</div>' +
-            '<h3>Bot Telegram aberto</h3>' +
-            '<p class="ap-auth-modal-hint">Confirme no bot que voce quer apoiar.' +
-            ' Apos pagar o PIX, suas recompensas chegam automaticamente ao seu personagem.</p>' +
-            '<div class="ap-auth-modal-info">' +
-            '<div><b>Como funciona:</b></div>' +
-            '<ol>' +
-            '<li>Bot abriu numa nova aba</li>' +
-            '<li>Toque em <b>Iniciar</b> ou envie <code>/apoiar</code></li>' +
-            '<li>Volte aqui e gere o QR Code PIX</li>' +
-            '<li>Pague o PIX (codigo VLD-XXXXX vai na descricao)</li>' +
-            '<li>Recompensas no jogo em ate 24h</li>' +
-            '</ol></div>' +
-            '<div class="ap-auth-modal-fields">' +
-            '<label>Seu @username Telegram (opcional, para acelerar)' +
-            '<input type="text" id="ap-tg-username" maxlength="40" placeholder="@seu_usuario" autocomplete="off"></label>' +
-            '<label>Seu nome (como quer ser identificado)' +
-            '<input type="text" id="ap-tg-name" maxlength="60" placeholder="Ex: Alex" required></label>' +
+    function _showWaitingPanel(token) {
+        if (!ui.container) return;
+        if (ui.waitingPanel) {
+            try { ui.waitingPanel.remove(); } catch (_) {}
+        }
+        var wrap = document.createElement('div');
+        wrap.className = 'ap-auth-waiting';
+        wrap.innerHTML =
+            '<div class="ap-auth-waiting-header">' +
+            '<span class="ap-auth-spinner"></span>' +
+            '<b>Aguardando confirmacao no Telegram...</b>' +
             '</div>' +
-            '<div class="ap-auth-modal-actions">' +
-            '<button type="button" class="ap-auth-modal-cancel">Cancelar</button>' +
-            '<button type="button" class="ap-auth-modal-ok">Confirmar identificacao</button>' +
-            '</div></div>';
-        document.body.appendChild(modal);
+            '<div class="ap-auth-waiting-info">' +
+            'Abrimos o bot numa nova aba. Toque em <b>Iniciar</b> ou <b>Start</b> ' +
+            'no bot e volte aqui &mdash; vamos detectar automaticamente.' +
+            '</div>' +
+            '<div class="ap-auth-waiting-actions">' +
+            '<button type="button" class="ap-auth-cancel-btn">Cancelar</button>' +
+            '</div>';
+        // Hide buttons, show waiting panel
+        if (ui.btnsWrap) ui.btnsWrap.style.display = 'none';
+        ui.container.appendChild(wrap);
+        ui.waitingPanel = wrap;
 
-        var btnCancel = modal.querySelector('.ap-auth-modal-cancel');
-        var btnOk = modal.querySelector('.ap-auth-modal-ok');
-        var bd = modal.querySelector('.ap-auth-modal-backdrop');
-        function close() { try { modal.remove(); } catch (_) {} }
-        btnCancel.addEventListener('click', close);
-        bd.addEventListener('click', close);
+        var cancelBtn = wrap.querySelector('.ap-auth-cancel-btn');
+        if (cancelBtn) cancelBtn.addEventListener('click', _cancelTgAuth);
+    }
 
-        btnOk.addEventListener('click', function() {
-            var usernameRaw = (modal.querySelector('#ap-tg-username').value || '').trim();
-            var nameRaw = (modal.querySelector('#ap-tg-name').value || '').trim();
-            if (!nameRaw) {
-                alert('Informe seu nome.');
+    function _cancelTgAuth() {
+        if (state.tgPollTimer) {
+            clearInterval(state.tgPollTimer);
+            state.tgPollTimer = null;
+        }
+        state.tgAuthToken = null;
+        if (ui.waitingPanel) {
+            try { ui.waitingPanel.remove(); } catch (_) {}
+            ui.waitingPanel = null;
+        }
+        if (ui.btnsWrap) ui.btnsWrap.style.display = '';
+    }
+
+    function _startTgPolling(token) {
+        if (state.tgPollTimer) clearInterval(state.tgPollTimer);
+        var attempts = 0;
+        state.tgPollTimer = setInterval(function() {
+            attempts++;
+            if (attempts > TG_POLL_MAX_ATTEMPTS) {
+                clearInterval(state.tgPollTimer);
+                state.tgPollTimer = null;
+                if (ui.waitingPanel) {
+                    var hint = document.createElement('div');
+                    hint.className = 'ap-auth-waiting-timeout';
+                    hint.innerHTML =
+                        '<b>Tempo esgotado.</b> Cancele e tente novamente, ' +
+                        'ou continue como anonimo.';
+                    ui.waitingPanel.appendChild(hint);
+                }
                 return;
             }
-            var username = usernameRaw.replace(/^@/, '');
-            var identity = {
-                provider: 'telegram',
-                name: nameRaw.substring(0, 60),
-                telegram_username: username ? '@' + username.substring(0, 40) : '',
-                created_at: Date.now(),
-            };
-            _save(identity);
-            state.user = identity;
-            _renderConnected(identity);
-            if (typeof state.onAuth === 'function') {
-                try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
-            }
-            close();
-        });
-
-        setTimeout(function() {
-            var n = modal.querySelector('#ap-tg-name');
-            if (n) n.focus();
-        }, 80);
+            fetch('/api/auth/tg/check?token=' + encodeURIComponent(token))
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(data) {
+                    if (!data) return;
+                    if (data.linked && data.user) {
+                        // SUCCESS!
+                        clearInterval(state.tgPollTimer);
+                        state.tgPollTimer = null;
+                        var fullName = (data.user.first_name || '') +
+                            (data.user.last_name ? ' ' + data.user.last_name : '');
+                        fullName = fullName.trim() || data.user.username || 'Apoiador';
+                        var identity = {
+                            provider: 'telegram',
+                            name: fullName.substring(0, 60),
+                            telegram_user_id: data.user.id,
+                            telegram_username: data.user.username
+                                ? '@' + data.user.username.substring(0, 40) : '',
+                            telegram_first_name: data.user.first_name || '',
+                            telegram_last_name: data.user.last_name || '',
+                            verified: true,
+                            created_at: Date.now(),
+                        };
+                        _save(identity);
+                        state.user = identity;
+                        // Remove waiting panel
+                        if (ui.waitingPanel) {
+                            try { ui.waitingPanel.remove(); } catch (_) {}
+                            ui.waitingPanel = null;
+                        }
+                        _renderConnected(identity);
+                        if (typeof state.onAuth === 'function') {
+                            try { state.onAuth(_toLegacyUser(identity)); }
+                            catch (e) { console.warn('[AUTH] onAuth error:', e); }
+                        }
+                    }
+                })
+                .catch(function() { /* ignore network errors */ });
+        }, TG_POLL_INTERVAL_MS);
     }
 
     // ─── Google OAuth 2.0 (implicit flow — redirect) ─────────
@@ -413,6 +470,16 @@
     function logout() {
         state.user = null;
         _clear();
+        // Cancel any pending Telegram polling
+        if (state.tgPollTimer) {
+            clearInterval(state.tgPollTimer);
+            state.tgPollTimer = null;
+        }
+        state.tgAuthToken = null;
+        if (ui.waitingPanel) {
+            try { ui.waitingPanel.remove(); } catch (_) {}
+            ui.waitingPanel = null;
+        }
         _renderDisconnected();
         if (typeof state.onAuth === 'function') {
             try { state.onAuth(null); } catch (_) {}

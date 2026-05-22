@@ -150,10 +150,13 @@ async function generatePix() {
             : null;
         if (identity) {
             if (identity.provider === 'telegram') {
-                // Backward compat: send telegram_user object
+                // Backward compat: send telegram_user object com id REAL quando verificado
                 body.telegram_user = {
-                    first_name: (identity.name || '').split(' ')[0] || identity.name,
-                    last_name: (identity.name || '').split(' ').slice(1).join(' '),
+                    id: identity.telegram_user_id || undefined,
+                    first_name: identity.telegram_first_name
+                        || ((identity.name || '').split(' ')[0] || identity.name),
+                    last_name: identity.telegram_last_name
+                        || ((identity.name || '').split(' ').slice(1).join(' ')),
                     username: identity.telegram_username
                         ? identity.telegram_username.replace(/^@/, '')
                         : '',
@@ -163,7 +166,9 @@ async function generatePix() {
                 provider: identity.provider,
                 name: identity.name,
                 email: identity.email || '',
+                telegram_user_id: identity.telegram_user_id || null,
                 telegram_username: identity.telegram_username || '',
+                verified: !!identity.verified,
             };
         } else if (telegramUser) {
             body.telegram_user = telegramUser;
