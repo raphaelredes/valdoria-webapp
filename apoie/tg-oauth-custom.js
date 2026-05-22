@@ -227,75 +227,118 @@
         }, 80);
     }
 
-    // ─── Google ──────────────────────────────────────────────
+    // ─── Google OAuth 2.0 (implicit flow — redirect) ─────────
+    // Mesmo fluxo usado em jogo.lendasdevaldoria.com.br/web/ (web-auth.js).
+    // Sem GSI/One Tap — implicit redirect e mais confiavel em mobile e iframes.
 
     function connectGoogle() {
-        if (state.googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
-            try {
-                // Google Identity Services — One Tap prompt
-                window.google.accounts.id.prompt(function(notification) {
-                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                        // Fallback to email modal
-                        _openEmailModal();
-                    }
-                });
-                return;
-            } catch (e) {
-                console.warn('[AUTH] Google prompt failed:', e);
-            }
+        if (!state.googleClientId) {
+            // No client id — fallback to email modal
+            _openEmailModal();
+            return;
         }
-        // No Google client id — fallback to email modal
-        _openEmailModal();
-    }
-
-    function _initGoogleSdk(clientId) {
-        if (!clientId) return;
-        function tryInit() {
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                try {
-                    window.google.accounts.id.initialize({
-                        client_id: clientId,
-                        callback: _handleGoogleCredential,
-                        auto_select: false,
-                        cancel_on_tap_outside: true,
-                    });
-                } catch (e) {
-                    console.warn('[AUTH] Google init error:', e);
-                }
-            } else {
-                setTimeout(tryInit, 400);
-            }
-        }
-        tryInit();
-    }
-
-    function _handleGoogleCredential(response) {
         try {
-            var jwt = response.credential;
-            var parts = jwt.split('.');
-            var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            var pad = b64.length % 4;
-            if (pad) b64 += '='.repeat(4 - pad);
-            var payload = JSON.parse(decodeURIComponent(atob(b64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join('')));
+            var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            try { sessionStorage.setItem('ap_google_nonce', nonce); } catch (_) {}
+
+            // Redirect URI = a propria pagina apoie (sem path adicional)
+            var redirectUri = window.location.origin + '/';
+            var url = 'https://accounts.google.com/o/oauth2/v2/auth' +
+                '?client_id=' + encodeURIComponent(state.googleClientId) +
+                '&redirect_uri=' + encodeURIComponent(redirectUri) +
+                '&response_type=id_token' +
+                '&scope=' + encodeURIComponent('openid email profile') +
+                '&nonce=' + encodeURIComponent(nonce) +
+                '&prompt=select_account';
+
+            console.info('[AUTH] Redirecting to Google OAuth (implicit flow)');
+            // Flag para suprimir close beacon durante a transicao
+            window.__valdoria_transitioning = true;
+            window.location.href = url;
+        } catch (e) {
+            console.error('[AUTH] Google redirect error:', e);
+            _openEmailModal();
+        }
+    }
+
+    function _decodeJwtPayload(jwt) {
+        var parts = jwt.split('.');
+        if (parts.length !== 3) throw new Error('Invalid JWT format');
+        var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        var pad = b64.length % 4;
+        if (pad) b64 += '='.repeat(4 - pad);
+        return JSON.parse(decodeURIComponent(atob(b64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')));
+    }
+
+    function _checkGoogleRedirectCallback() {
+        // Detecta retorno do Google OAuth — id_token vem no hash fragment.
+        var hash = window.location.hash || '';
+        if (hash.indexOf('id_token=') === -1) return false;
+
+        var params;
+        try {
+            params = new URLSearchParams(hash.replace(/^#/, ''));
+        } catch (_) {
+            return false;
+        }
+        var idToken = params.get('id_token');
+        if (!idToken) return false;
+
+        // Limpa o hash imediatamente para evitar re-processamento
+        try {
+            var clean = window.location.pathname + window.location.search;
+            history.replaceState({}, document.title, clean);
+        } catch (_) {}
+
+        try {
+            var payload = _decodeJwtPayload(idToken);
+
+            // Verifica nonce (CSRF)
+            var savedNonce;
+            try { savedNonce = sessionStorage.getItem('ap_google_nonce'); } catch (_) {}
+            if (savedNonce && payload.nonce !== savedNonce) {
+                console.warn('[AUTH] Google nonce mismatch — possible CSRF, ignoring');
+                return false;
+            }
+            try { sessionStorage.removeItem('ap_google_nonce'); } catch (_) {}
+
+            // Verifica expiracao
+            if (payload.exp && payload.exp * 1000 < Date.now()) {
+                console.warn('[AUTH] Google token expired');
+                return false;
+            }
+
+            // Verifica issuer (deve ser do Google)
+            var iss = payload.iss || '';
+            if (iss !== 'https://accounts.google.com' && iss !== 'accounts.google.com') {
+                console.warn('[AUTH] Google issuer invalid:', iss);
+                return false;
+            }
+
+            // Verifica audience (deve bater com o client id)
+            if (state.googleClientId && payload.aud !== state.googleClientId) {
+                console.warn('[AUTH] Google audience mismatch:',
+                    payload.aud, '!=', state.googleClientId);
+                return false;
+            }
+
             var identity = {
                 provider: 'google',
                 name: payload.name || payload.email || 'Apoiador',
                 email: payload.email,
                 sub: payload.sub,
                 picture: payload.picture,
+                email_verified: !!payload.email_verified,
                 created_at: Date.now(),
             };
             _save(identity);
             state.user = identity;
-            _renderConnected(identity);
-            if (typeof state.onAuth === 'function') {
-                try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
-            }
+            return true;
         } catch (e) {
-            console.error('[AUTH] Google credential parse error:', e);
-            _openEmailModal();
+            console.error('[AUTH] Google callback parse error:', e);
+            return false;
         }
     }
 
@@ -398,18 +441,23 @@
 
         _renderButtons();
 
-        // Try to initialize Google SDK if client id provided
-        if (state.googleClientId) {
-            _initGoogleSdk(state.googleClientId);
-        }
+        // Detecta retorno do Google OAuth (id_token no hash fragment)
+        var camFromGoogle = _checkGoogleRedirectCallback();
 
-        // Restore saved identity
-        var saved = _load();
+        // Restore saved identity (do redirect Google OU sessao anterior)
+        var saved = state.user || _load();
         if (saved && saved.provider && saved.name) {
             state.user = saved;
             _renderConnected(saved);
             if (typeof state.onAuth === 'function') {
                 try { state.onAuth(_toLegacyUser(saved)); } catch (_) {}
+            }
+            // Se veio do Google, rola pra area de doacao pra o usuario ver o badge
+            if (camFromGoogle) {
+                setTimeout(function() {
+                    var d = document.getElementById('donate');
+                    if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 250);
             }
         }
     }

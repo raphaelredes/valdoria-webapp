@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://jogo.lendasdevaldoria.com.br https://static.cloudflareinsights.com https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://jogo.lendasdevaldoria.com.br https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://jogo.lendasdevaldoria.com.br; img-src 'self' data: blob: https://telegra.ph https://jogo.lendasdevaldoria.com.br https://lh3.googleusercontent.com; media-src 'self' https://jogo.lendasdevaldoria.com.br; connect-src 'self' https: wss:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://jogo.lendasdevaldoria.com.br https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://jogo.lendasdevaldoria.com.br; font-src 'self' https://fonts.gstatic.com https://jogo.lendasdevaldoria.com.br; img-src 'self' data: blob: https://telegra.ph https://jogo.lendasdevaldoria.com.br https://lh3.googleusercontent.com; media-src 'self' https://jogo.lendasdevaldoria.com.br; connect-src 'self' https: wss:; form-action 'self' https://accounts.google.com; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -460,13 +460,13 @@
         document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
     </script>
-    <!-- Google Identity Services (opcional) — habilita login com Google quando GOOGLE_CLIENT_ID estiver configurado -->
+    <!-- Google OAuth 2.0 (implicit flow) — mesmo Client ID usado em jogo.lendasdevaldoria.com.br/web/
+         Authorized JS Origins precisa incluir: https://apoie.lendasdevaldoria.com.br
+         Authorized Redirect URIs precisa incluir: https://apoie.lendasdevaldoria.com.br/
+         Console: https://console.cloud.google.com/apis/credentials -->
     <script>
-        // Configure aqui um Client ID do Google Cloud Console (Authorized JS Origin: https://apoie.lendasdevaldoria.com.br)
-        // Quando vazio, o botao 'Conectar com Google' cai automaticamente para modal de email simples.
-        window.GOOGLE_CLIENT_ID = '';
+        window.GOOGLE_CLIENT_ID = '717031857989-gu6hh4h9mgl3gikua705ov1fnbm57lg9.apps.googleusercontent.com';
     </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="tg-oauth-custom.js"></script>
     <script src="apoie.js"></script>
     <script>
