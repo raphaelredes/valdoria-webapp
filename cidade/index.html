@@ -9205,6 +9205,9 @@ function _isCTA(btn) {
         else if (typeof navigateBack === 'function') navigateBack();
         if (typeof vToast === 'function') vToast(window._fLsIsUpdate ? '✓ Atualização aceita.' : '✨ Boa aventura, aventureiro!');
         window._fLsIsUpdate = false;
+        // Sessão #23 v7: dispatch event pra desbloquear daily login + outros
+        // popups que estavam adiados aguardando aceite LGPD.
+        try { document.dispatchEvent(new Event('lgpd-accepted')); } catch(_){}
       });
     }
     return true;
@@ -14026,10 +14029,41 @@ function _showDailyLoginPopup(info){
 function _maybeShowDailyLogin(){
   // Chamado após intro tap. Espera 800ms pra cidade aparecer primeiro,
   // depois mostra dádiva diária se houver.
-  setTimeout(function(){
+  // Sessão #23 v7 (2026-05-22): LGPD compliance — NUNCA mostrar dádiva
+  // sobre splash de privacidade. Se splash aberto OU não aceito ainda,
+  // adia dádiva até aceite (event 'lgpd-accepted' dispatched).
+  function _tryShow(){
+    // Splash aberto? Adia
+    var ov = document.getElementById('city-subscreen-popup');
+    if (ov && ov.classList.contains('active')) {
+      var title = document.getElementById('csp-title');
+      if (title && (title.textContent === 'Política de Privacidade' || title.textContent === 'Política Atualizada')) {
+        // Re-tenta quando splash fechar
+        document.addEventListener('lgpd-accepted', _tryShow, { once: true });
+        return;
+      }
+    }
+    // LGPD não aceito? Adia (defensa: caso splash não tenha aberto por bug)
+    try {
+      var ver = window.PRIVACY_POLICY_VERSION || '1.1';
+      var pp = new URLSearchParams(window.location.search);
+      var uid = pp.get('uid') || 'anon';
+      var key = 'valdoria_privacy_v' + ver + '_' + uid;
+      var raw = localStorage.getItem(key);
+      var accepted = false;
+      if (raw === '1') accepted = true;
+      else if (raw && raw.charAt(0) === '{') {
+        try { var parsed = JSON.parse(raw); accepted = parsed && parsed.accepted === true; } catch(_){}
+      }
+      if (!accepted) {
+        document.addEventListener('lgpd-accepted', _tryShow, { once: true });
+        return;
+      }
+    } catch(_){}
     var info = _checkDailyLogin();
     if (info) _showDailyLoginPopup(info);
-  }, 800);
+  }
+  setTimeout(_tryShow, 800);
 }
 
 // === GRUPO de aliados (Party) — popup com aliados ativos ===
