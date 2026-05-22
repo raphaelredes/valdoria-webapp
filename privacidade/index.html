@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a2420">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <title>Política de Privacidade — Lendas de Valdoria</title>
+    <meta name="description" content="Política de Privacidade do Lendas de Valdoria — conformidade com LGPD (Lei 13.709/2018). Zero coleta de PII.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <link rel="stylesheet" href="../valdoria-design.css">
+    <style>
+        body {
+            background: var(--v-bg, #2a2420);
+            color: var(--v-text, #d4c8b0);
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-size: var(--v-font-body, 14px);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .priv-container {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+        .priv-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            margin-bottom: 24px;
+        }
+        .priv-header h1 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: clamp(20px, 5vw, 28px);
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 0 0 8px;
+            text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4));
+        }
+        .priv-header .priv-subtitle {
+            font-size: 12px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        .priv-header .priv-decoration {
+            font-size: 14px;
+            color: var(--v-gold, #c4953a);
+            margin: 10px 0;
+            opacity: 0.6;
+        }
+        section {
+            margin: 28px 0;
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(196,149,58,0.05) 0%, rgba(42,36,32,0.4) 100%);
+            border: 1px solid var(--v-border, #4a3828);
+            border-left: 3px solid var(--v-gold, #c4953a);
+            border-radius: 6px;
+        }
+        section h2 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 16px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        section h2 .priv-section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--v-gold, #c4953a);
+            color: #1a1410;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+        }
+        section p {
+            margin: 8px 0;
+        }
+        section ul {
+            margin: 8px 0;
+            padding-left: 18px;
+        }
+        section li {
+            margin: 6px 0;
+        }
+        .priv-highlight {
+            color: var(--v-gold, #c4953a);
+            font-weight: 600;
+        }
+        .priv-data-box {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 12px;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(74,56,40,0.25);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .priv-data-key {
+            color: var(--v-gold, #c4953a);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .priv-data-val {
+            color: var(--v-text, #d4c8b0);
+        }
+        .priv-no-collect {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(125,186,91,0.08);
+            border: 1px solid #7dba5b66;
+            border-left: 3px solid #7dba5b;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+        .priv-no-collect-icon {
+            font-size: 18px;
+            color: #7dba5b;
+        }
+        .priv-rights-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .priv-right {
+            padding: 10px 12px;
+            background: rgba(196,149,58,0.06);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 5px;
+        }
+        .priv-right-name {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c4953a);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .priv-right-desc {
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            line-height: 1.5;
+        }
+        .priv-footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            margin-top: 28px;
+            border-top: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+        }
+        .priv-footer .priv-version {
+            margin-top: 8px;
+            color: var(--v-gold, #c4953a);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            letter-spacing: 1px;
+        }
+        .priv-cta {
+            display: inline-block;
+            margin: 14px 0 0;
+            padding: 8px 18px;
+            background: linear-gradient(180deg, var(--v-gold, #c4953a), #8a6420);
+            color: #1a1410;
+            border: 1px solid var(--v-gold, #c4953a);
+            border-radius: 4px;
+            text-decoration: none;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .priv-cta:hover { background: linear-gradient(180deg, #d4a55a, #9a7430); }
+        a { color: var(--v-gold, #c4953a); text-decoration: underline; }
+        .priv-legal {
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="priv-container">
+        <header class="priv-header">
+            <div class="priv-decoration">◆ ◆ ◆</div>
+            <h1>Política de Privacidade</h1>
+            <div class="priv-subtitle">Lendas de Valdoria · LGPD compliant</div>
+            <div class="priv-decoration">◆ ◆ ◆</div>
+        </header>
+
+        <section>
+            <h2><span class="priv-section-num">1</span> Quem Somos</h2>
+            <p>
+                <span class="priv-highlight">Lendas de Valdoria</span> é um RPG medieval de fantasia inspirado em D&amp;D 5e, distribuído via Telegram Mini App. O jogo é gratuito e desenvolvido independentemente.
+            </p>
+            <p>
+                Esta Política de Privacidade descreve quais dados o jogo armazena, com qual finalidade, e os direitos do jogador conforme a <span class="priv-highlight">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</span>.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">2</span> Dados Armazenados Localmente</h2>
+            <p>
+                O jogo armazena no <span class="priv-highlight">dispositivo do jogador</span> (localStorage do navegador) apenas dados estritamente necessários ao funcionamento:
+            </p>
+            <div class="priv-data-box">
+                <div class="priv-data-key">Progresso</div>
+                <div class="priv-data-val">Personagem, level, inventário, conquistas, missões</div>
+                <div class="priv-data-key">Preferências</div>
+                <div class="priv-data-val">Som on/off, volume, fonte, tema, idioma</div>
+                <div class="priv-data-key">Sessão</div>
+                <div class="priv-data-val">Token efêmero do Telegram (expira em horas)</div>
+                <div class="priv-data-key">UI State</div>
+                <div class="priv-data-val">Telas vistas, tutoriais completados, último diálogo</div>
+            </div>
+            <p class="priv-legal">
+                Base legal: <span class="priv-highlight">LGPD Art. 7º IX</span> — "cookies estritamente necessários ao funcionamento da aplicação". Estes dados não requerem consentimento explícito conforme entendimento da ANPD.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">3</span> Dados Que NÃO Coletamos</h2>
+            <div class="priv-no-collect">
+                <span class="priv-no-collect-icon">✓</span>
+                <div>
+                    <strong>Zero PII coletada.</strong> Não pedimos nome real, email, telefone, endereço, CPF, dados de pagamento, ou qualquer informação pessoalmente identificável.
+                </div>
+            </div>
+            <p>O jogo opera com o ID do Telegram (número único e pseudônimo) para persistir progresso entre sessões. Nenhum dado pessoal do Telegram (nome, foto, número) é armazenado em nossos servidores.</p>
+            <ul>
+                <li>Não rastreamos comportamento entre sites (no cross-site tracking)</li>
+                <li>Não usamos cookies de terceiros para publicidade</li>
+                <li>Não vendemos ou compartilhamos dados com terceiros</li>
+                <li>Não usamos serviços de analytics que coletam PII (Google Analytics, etc.)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">4</span> Cookies e Cache</h2>
+            <p>O jogo utiliza apenas <span class="priv-highlight">cookies estritamente necessários</span> ao funcionamento (categoria isenta de consentimento conforme LGPD Art. 7º IX e CNPDP Lei 13.709/2018):</p>
+            <ul>
+                <li><strong>localStorage</strong>: progresso do jogo + preferências de UI</li>
+                <li><strong>sessionStorage</strong>: token de autenticação Telegram (temporário)</li>
+                <li><strong>Cache HTTP</strong>: assets do jogo (imagens, sons, fontes) para performance</li>
+            </ul>
+            <p class="priv-legal">
+                O jogador pode limpar estes dados a qualquer momento via configurações do navegador. A limpeza apaga o progresso local (sem cópia em servidor).
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">5</span> Conexões Externas</h2>
+            <p>O jogo se conecta apenas a:</p>
+            <ul>
+                <li><strong>API do jogo</strong> (<code>api.lendasdevaldoria.com.br</code>): autenticação Telegram + persistência server-side opcional</li>
+                <li><strong>CDN próprio</strong> (<code>jogo.lendasdevaldoria.com.br</code>): assets do jogo via Cloudflare Pages</li>
+                <li><strong>Telegram</strong> (<code>telegram.org</code>): plataforma de distribuição (verifica autenticação do usuário)</li>
+            </ul>
+            <p class="priv-legal">Nenhuma conexão externa coleta PII ou rastreia o jogador entre sessões.</p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">6</span> Seus Direitos (LGPD Art. 18)</h2>
+            <p>Conforme a LGPD, o titular dos dados (você, jogador) tem direito a:</p>
+            <div class="priv-rights-grid">
+                <div class="priv-right">
+                    <div class="priv-right-name">⚖ Confirmação e Acesso</div>
+                    <div class="priv-right-desc">Confirmar se há tratamento de dados e obter cópia. Todos seus dados estão no localStorage do seu dispositivo — você os acessa diretamente.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">✎ Correção</div>
+                    <div class="priv-right-desc">Corrigir dados incompletos ou inexatos. Edite seu personagem dentro do jogo.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">⌫ Anonimização ou Eliminação</div>
+                    <div class="priv-right-desc">Deletar dados a qualquer momento. Limpe o localStorage do seu navegador para apagar progresso local.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">⇆ Portabilidade</div>
+                    <div class="priv-right-desc">Exportar seus dados em formato legível. Use ferramentas do navegador para extrair o localStorage.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">⛔ Revogação de Consentimento</div>
+                    <div class="priv-right-desc">Como usamos apenas cookies estritamente necessários (Art. 7º IX), consentimento não é requisito — mas você pode parar de jogar a qualquer momento.</div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">7</span> Segurança</h2>
+            <p>Adotamos medidas técnicas razoáveis para proteger dados:</p>
+            <ul>
+                <li>Toda comunicação client-server usa <span class="priv-highlight">HTTPS/TLS</span> (criptografia em trânsito)</li>
+                <li>Tokens de sessão expiram em horas (não persistem indefinidamente)</li>
+                <li>Isolamento DEV/PROD: ambientes não compartilham dados</li>
+                <li>Headers de segurança: CSP, X-Content-Type-Options, X-Frame-Options</li>
+                <li>Sem dependências de terceiros que coletam PII (no Google Analytics, no Facebook Pixel)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">8</span> Menores de Idade</h2>
+            <p>O jogo é classificado como apropriado para <span class="priv-highlight">12 anos ou mais</span> devido a temática de fantasia medieval e combate estilizado.</p>
+            <p>Não coletamos dados pessoais de menores. Como zero PII é coletada, não há tratamento diferenciado por idade. Conforme LGPD Art. 14, o tratamento de dados de crianças e adolescentes seria realizado em seu melhor interesse — mas como não tratamos PII, essa cláusula não se aplica.</p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">9</span> Alterações desta Política</h2>
+            <p>Esta política pode ser atualizada quando houver mudanças no funcionamento do jogo ou em legislação aplicável. Mudanças significativas serão comunicadas via splash de boas-vindas dentro do jogo.</p>
+            <p class="priv-legal">Versão atual e data ao final desta página.</p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">10</span> Contato</h2>
+            <p>Dúvidas ou exercício de direitos LGPD:</p>
+            <ul>
+                <li><strong>Email</strong>: <a href="mailto:suporte@lendasdevaldoria.com.br">suporte@lendasdevaldoria.com.br</a></li>
+                <li><strong>Telegram</strong>: <a href="https://t.me/LendasDeValdoriaBOT">@LendasDeValdoriaBOT</a> (comando <code>/ticket</code>)</li>
+                <li><strong>Site</strong>: <a href="https://lendasdevaldoria.com.br">lendasdevaldoria.com.br</a></li>
+            </ul>
+            <p class="priv-legal">
+                ANPD: a Autoridade Nacional de Proteção de Dados pode ser contatada via <a href="https://www.gov.br/anpd/" target="_blank" rel="noopener">www.gov.br/anpd</a>.
+            </p>
+        </section>
+
+        <footer class="priv-footer">
+            <div>
+                <a href="javascript:history.back()" class="priv-cta">↩ Voltar ao jogo</a>
+            </div>
+            <div class="priv-version">
+                Versão 1.0 · Atualizado em 22/05/2026
+            </div>
+            <div style="margin-top: 8px;">
+                Conforme LGPD (Lei 13.709/2018) e diretrizes da ANPD.
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
