@@ -378,6 +378,41 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
         };
         var destPath = ROUTE_MAP[routeParam];
         if (destPath) {
+          /* Sessão #26 (2026-05-22) BUG FIX anti-loop:
+             User report: clica Voltar pra Cidade em cartografia exploracao,
+             aparece Toque para Iniciar e fica em loop. ROOT CAUSE: /cidade/
+             redireciona pra /play/?route=levelup baseado em stale
+             last_screen_payload, /play/ vai pra /levelup/, /levelup/ falha
+             auth com token stale (não tem sendData em browser), bounces
+             back pra /play/.
+
+             DEFENSE: detecta re-entry em /play/?route=X dentro de 30s da
+             última tentativa (sessionStorage flag). Se loop detectado, dropa
+             route + redireciona pra /cidade/?_skiprestore=1 (cidade pula
+             state restore + não re-dispara o redirect). */
+          try {
+            var loopKey = 'play_route_attempt_' + routeParam;
+            var lastTs = parseInt(sessionStorage.getItem(loopKey) || '0', 10);
+            var nowTs = Date.now();
+            if (lastTs && (nowTs - lastTs) < 30000) {
+              sendLog('warn', 'route_loop_detected', { route: routeParam, gap_ms: nowTs - lastTs });
+              sessionStorage.removeItem(loopKey);
+              setTip('Restaurando sessão…');
+              setProgress(50, 'Recuperando da sessão anterior…');
+              setTimeout(function(){
+                try { window.__valdoria_transitioning = true; } catch(_e){}
+                // Goto cidade with _skiprestore=1 to break loop
+                _qs.delete('route');
+                _qs.delete('p');
+                _qs.set('_skiprestore', '1');
+                if (!_qs.get('_cb')) _qs.set('_cb', String(Date.now()));
+                window.location.replace('/cidade/?' + _qs.toString());
+              }, 500);
+              return;
+            }
+            sessionStorage.setItem(loopKey, String(nowTs));
+          } catch(_eLoop) {}
+
           setTip('Restaurando sessão…');
           setProgress(50, 'Abrindo ' + routeParam + '…');
           sendLog('info', 'route_redirect_with_token', { route: routeParam, dest: destPath });
