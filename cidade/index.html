@@ -2530,6 +2530,7 @@ LOG SINK (Fase 7):
     }
     .cgp-card {
       flex: 1;
+      position: relative;  /* sessão #23: para chat-btn overlay */
       background: linear-gradient(180deg, rgba(28,22,16,0.94), rgba(14,11,8,0.92));
       border: 1px solid rgba(196, 149, 58, 0.28);
       border-radius: 6px;
@@ -2545,6 +2546,30 @@ LOG SINK (Fase 7):
       font-family: 'Cinzel', serif;
     }
     .cgp-card:hover { border-color: #c4953a; box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
+    /* Sessão #23 (2026-05-22): chat button overlay nos cards de aliados — PADRAO_ALDRIC dialogue */
+    .cgp-chat-btn {
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 22px; height: 22px;
+      padding: 0;
+      background: rgba(28, 22, 16, 0.92);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      border-radius: 50%;
+      color: #c4953a;
+      font-size: 11px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+    .cgp-chat-btn:hover {
+      background: rgba(196, 149, 58, 0.2);
+      border-color: #c4953a;
+      transform: scale(1.12);
+    }
+    .cgp-chat-btn:active { transform: scale(0.92); }
     .cgp-card.empty {
       /* 2026-05-11 v4: empty placeholder responsivo (largura 100% do grid cell) */
       width: 100%;
@@ -45401,6 +45426,205 @@ function _classLabelPT(c){
   };
   return MAP[k] || (typeof _titleCase === 'function' ? _titleCase(c || '') : (c || ''));
 }
+// === Sessão #23 (2026-05-22): ALLY_DIALOGUE_TEMPLATES — PADRAO_ALDRIC por classe ===
+// Cada template tem: script (1 narration + 1 speech in character) + choices (positive/
+// neutral/leave). Vocabulário e tom específicos da classe. {name} substitui pelo
+// nome do aliado em runtime via _showAllyDialogue.
+var ALLY_DIALOGUE_TEMPLATES = {
+  clerigo: {
+    desc: 'Sacerdotisa · serva dos Quatro',
+    script: [
+      { type: 'narration', text: '{name} está sentado(a) sobre um banco de pedra na praça, um símbolo sagrado nas mãos, sussurrando uma prece. Ergue o olhar ao te ver — sorriso paciente.' },
+      { type: 'speech', text: 'Que os Quatro guiem nossos passos, irmão. <i>(beija o símbolo sagrado)</i> Há ferimentos que só a fé cura — e há feridas que só o tempo. Qual te preocupa hoje?' }
+    ],
+    choices: [
+      { id: 'pray',  label: '🕯️ "Reza por nós antes do próximo combate."',  renown: 2 },
+      { id: 'ask',   label: '📜 "Conta-me sobre tua devoção."',              renown: 1 },
+      { id: 'leave', label: '↩ "Continue tua prece, irmã."',                renown: 0 }
+    ]
+  },
+  guerreiro: {
+    desc: 'Veterano · centenas de batalhas',
+    script: [
+      { type: 'narration', text: '{name} está afiando a espada num banco de madeira, atento ao gume contra o sol. Não levanta o olhar — só assente brevemente reconhecendo tua presença.' },
+      { type: 'speech', text: 'A lâmina avisa antes de quebrar — basta escutar. <i>(passa o dedo pela base do gume)</i> Marcha sem pressa, irmão. Quem corre na guerra morre cedo.' }
+    ],
+    choices: [
+      { id: 'tactics', label: '⚔️ "Que tática usamos no próximo combate?"', renown: 2 },
+      { id: 'story',   label: '🪨 "Conta uma batalha que te marcou."',       renown: 1 },
+      { id: 'leave',   label: '↩ "Termine de afiar a lâmina."',              renown: 0 }
+    ]
+  },
+  mago: {
+    desc: 'Estudioso · biblioteca ambulante',
+    script: [
+      { type: 'narration', text: '{name} folheia um grimório encadernado em couro, dedos manchados de tinta. Um lápis preso atrás da orelha. Ergue o olhar dos pergaminhos com a paciência de quem foi interrompido muitas vezes.' },
+      { type: 'speech', text: 'Toda magia é traduzir o impossível em palavras. <i>(fecha o livro com gesto comedido)</i> Diz-me — preferes uma chama sob controle ou uma trovoada arriscada?' }
+    ],
+    choices: [
+      { id: 'spell',  label: '✨ "Que magia preparaste pra hoje?"',           renown: 2 },
+      { id: 'theory', label: '📚 "Explica-me a Trama Arcana."',               renown: 1 },
+      { id: 'leave',  label: '↩ "Volta aos teus estudos."',                  renown: 0 }
+    ]
+  },
+  ladino: {
+    desc: 'Sombra · dedos rápidos, mente afiada',
+    script: [
+      { type: 'narration', text: '{name} aparece silenciosamente ao teu lado — como se sempre estivera ali. Mãos enluvadas, olhar atento, e um sorriso que combina ironia com cumplicidade.' },
+      { type: 'speech', text: 'A cidade tem mais segredos do que ruas, irmão. <i>(verifica brevemente a multidão)</i> O truque é saber o que NÃO perguntar. Aprendi isso da pior forma.' }
+    ],
+    choices: [
+      { id: 'rumor',  label: '👂 "Ouviste algum rumor interessante?"',        renown: 2 },
+      { id: 'past',   label: '🗝️ "De onde vieste?"',                          renown: 0 },
+      { id: 'leave',  label: '↩ "Volta a observar a multidão."',             renown: 0 }
+    ]
+  },
+  patrulheiro: {
+    desc: 'Trilheiro · conhece cada raiz do bosque',
+    script: [
+      { type: 'narration', text: '{name} está agachado(a) inspecionando pegadas no chão de terra batida da praça. Um arco compacto ao ombro, faca curva no cinto. Levanta-se ao te ver — silencioso, atento.' },
+      { type: 'speech', text: 'A floresta sussurra antes de morder, irmão. <i>(aponta vagamente pro norte)</i> Vi rastros de lobos perto do portão na hora da aurora — três adultos, talvez quatro. Movem-se em padrão de caça.' }
+    ],
+    choices: [
+      { id: 'track',  label: '🐺 "Pode rastrear esses lobos comigo?"',         renown: 2 },
+      { id: 'nature', label: '🌲 "Fala-me da floresta do norte."',             renown: 1 },
+      { id: 'leave',  label: '↩ "Continua a leitura dos rastros."',            renown: 0 }
+    ]
+  },
+  paladino: {
+    desc: 'Juramento Sagrado · luz contra trevas',
+    script: [
+      { type: 'narration', text: '{name} ergue-se ao te ver, armadura impecável, símbolo sagrado no peito. Mão sobre o punho da espada — não em ameaça, mas em juramento renovado a cada amanhecer.' },
+      { type: 'speech', text: 'O juramento não se quebra mesmo quando a noite é mais funda, irmão. <i>(coloca punho sobre o coração)</i> Caminhamos juntos enquanto a luz nos guiar.' }
+    ],
+    choices: [
+      { id: 'bless', label: '✨ "Renova-me o juramento de combate."',         renown: 2 },
+      { id: 'oath',  label: '⚜️ "Conta-me como fizeste teu juramento."',      renown: 1 },
+      { id: 'leave', label: '↩ "Que tua luz te guie."',                       renown: 0 }
+    ]
+  },
+  bardo: {
+    desc: 'Contador de histórias · alaúde na mão',
+    script: [
+      { type: 'narration', text: '{name} dedilha o alaúde sob o telhado de uma barraca, voz baixa testando uma melodia. Sorri largamente ao te ver — recebido como público novo.' },
+      { type: 'speech', text: 'Toda guerra termina virando canção, irmão. <i>(toca um acorde alegre)</i> A nossa precisa só de uma estrofe boa pra ficar imortal. Tens preferência?' }
+    ],
+    choices: [
+      { id: 'inspire', label: '🎵 "Toca-me Inspiração antes da batalha."',     renown: 2 },
+      { id: 'tale',    label: '📖 "Conta a melhor história da estrada."',      renown: 1 },
+      { id: 'leave',   label: '↩ "Continua a compor."',                       renown: 0 }
+    ]
+  },
+  druida: {
+    desc: 'Voz da natureza · guardião do equilíbrio',
+    script: [
+      { type: 'narration', text: '{name} alimenta um pardal com migalhas de pão na borda da fonte. O pequeno pássaro come da palma sem medo. Ergue o olhar ao te ver — verde como musgo úmido, atento.' },
+      { type: 'speech', text: 'Toda vida tem direito à floresta, irmão. <i>(o pardal voa)</i> Mesmo os lobos que atacam fazendeiros têm fome. A questão não é matar — é entender por que caçam.' }
+    ],
+    choices: [
+      { id: 'commune', label: '🌿 "Comunga com a natureza por nós."',          renown: 2 },
+      { id: 'animal',  label: '🦅 "Que forma animal prefere assumir?"',        renown: 1 },
+      { id: 'leave',   label: '↩ "Volta aos teus pequenos."',                  renown: 0 }
+    ]
+  },
+  monge: {
+    desc: 'Disciplina · corpo e mente em harmonia',
+    script: [
+      { type: 'narration', text: '{name} está em postura de meditação no canto sombreado da praça — pernas cruzadas, mãos apoiadas nos joelhos, respiração lenta. Olhos se abrem devagar ao perceber-te.' },
+      { type: 'speech', text: 'O ki flui onde a mente permite, irmão. <i>(controla a respiração)</i> A tempestade lá fora começa aqui dentro. Está em paz hoje?' }
+    ],
+    choices: [
+      { id: 'train', label: '👊 "Treina comigo antes da aventura."',          renown: 2 },
+      { id: 'wisdom', label: '☯️ "Compartilha um ensinamento."',              renown: 1 },
+      { id: 'leave',  label: '↩ "Continua a meditar."',                       renown: 0 }
+    ]
+  },
+  barbaro: {
+    desc: 'Fúria selvagem · sangue da tribo',
+    script: [
+      { type: 'narration', text: '{name} está sentado(a) sobre uma pilha de barris improvisada, machado apoiado contra a perna, devorando um pedaço de carne seca. Olha-te com olhos que combinam tribo e tempestade.' },
+      { type: 'speech', text: 'Sangue precisa correr ou apodrece, irmão. <i>(cospe casca no chão)</i> Hoje vi guardas tremendo com um pardal. Diga-me onde está o inimigo que eu vou lá agora.' }
+    ],
+    choices: [
+      { id: 'rage',  label: '💢 "Solta a fúria contigo no próximo combate."', renown: 2 },
+      { id: 'tribe', label: '🪓 "Fala-me da tua tribo."',                     renown: 1 },
+      { id: 'leave', label: '↩ "Termine a refeição."',                       renown: 0 }
+    ]
+  },
+  feiticeiro: {
+    desc: 'Sangue arcano · magia natural',
+    script: [
+      { type: 'narration', text: '{name} faz pequenas faíscas brincarem entre os dedos enquanto observa transeuntes da praça. Curiosidade no rosto, magia leve no ar — sem esforço aparente.' },
+      { type: 'speech', text: 'A magia nasce comigo, irmão — não preciso de livros. <i>(uma faísca azul flutua brevemente)</i> Mas mesmo o fogo de dentro tem o seu humor. Hoje está... inquieto.' }
+    ],
+    choices: [
+      { id: 'show',   label: '🔥 "Mostra-me um truque novo."',                 renown: 2 },
+      { id: 'origin', label: '🩸 "De onde vem teu poder?"',                    renown: 0 },
+      { id: 'leave',  label: '↩ "Continua a brincar com fagulhas."',           renown: 0 }
+    ]
+  },
+  bruxo: {
+    desc: 'Pacto sombrio · ouvinte de vozes antigas',
+    script: [
+      { type: 'narration', text: '{name} está encostado(a) numa parede de pedra, longe da multidão. Capuz baixo cobrindo metade do rosto. Pareces estar sendo observado(a) antes mesmo de teres notado a presença.' },
+      { type: 'speech', text: 'Há vozes que falam quando o silêncio é fundo o bastante, irmão. <i>(toca um amuleto sob a roupa)</i> O Patrono cobra preço — e o preço é sempre maior do que parece à primeira vista.' }
+    ],
+    choices: [
+      { id: 'pact',  label: '🌑 "Conta-me sobre teu Patrono."',                renown: 0 },
+      { id: 'gift',  label: '🔮 "Pede um favor sombrio pra próxima luta."',   renown: 2 },
+      { id: 'leave', label: '↩ "Volta às tuas sombras."',                     renown: 0 }
+    ]
+  }
+};
+
+function _allyTplKey(cls){
+  var k = (cls || '').toLowerCase()
+    .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+    .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
+    .replace(/[\s].*/, '');
+  var ALIASES = {
+    sacerdotisa: 'clerigo', sacerdote: 'clerigo', cleric: 'clerigo',
+    clerica: 'clerigo',
+    feiticeira: 'feiticeiro',
+    barbara: 'barbaro'
+  };
+  return ALIASES[k] || k;
+}
+
+// _showAllyDialogue(memberIdx) — abre PADRAO_ALDRIC dialogue com aliado
+function _showAllyDialogue(idx){
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return;
+  var cls = _allyTplKey(m.cls);
+  var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
+  // Personaliza {name} no script
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var personalizedScript = tpl.script.map(function(line){
+    var copy = { type: line.type, text: (line.text || '').replace(/\{name\}/g, displayName) };
+    if (line.type === 'speech') copy.speaker = displayName;
+    return copy;
+  });
+  // Heraldic icon based on class
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var dlg = {
+    npc: {
+      name: displayName,
+      desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level,
+      portrait: heraldicId
+    },
+    script: personalizedScript,
+    choices: tpl.choices.map(function(c){
+      return { id: c.id, label: c.label.replace(/\{name\}/g, displayName), cb: 'close', renownDelta: c.renown };
+    })
+  };
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, {});
+  } else {
+    if (typeof vToast === 'function') vToast('💬 ' + displayName + ': "' + (personalizedScript[1] || personalizedScript[0]).text + '"');
+  }
+}
+window._showAllyDialogue = _showAllyDialogue;
+
 function renderCityGroupPanel(){
   var el = document.getElementById('city-group-panel');
   if (!el) return;
@@ -45468,9 +45692,12 @@ function renderCityGroupPanel(){
     var goldStr = _fmtV(m.gold || 0);
 
     // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
+    // Sessão #23 (2026-05-22): chat-btn aparece em aliados (não player, não dead) — PADRAO_ALDRIC dialogue
+    var chatBtnHtml = (!m.isPlayer && !m.dead) ? '<button class="cgp-chat-btn" data-chat-idx="' + i + '" title="Conversar com ' + safeName + '" aria-label="Conversar">💬</button>' : '';
     html += '<div class="cgp-slot" data-slot="' + i + '">'
       + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
+      + chatBtnHtml
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
       + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>'
       + '    <div class="c-stats">'
@@ -45510,6 +45737,14 @@ function renderCityGroupPanel(){
     card.addEventListener('click', function(){
       var idx = parseInt(card.getAttribute('data-member'), 10);
       if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
+    });
+  });
+  // Sessão #23 (2026-05-22): chat button wire → _showAllyDialogue (stop propagation pra não abrir Ficha)
+  el.querySelectorAll('.cgp-chat-btn').forEach(function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      var idx = parseInt(btn.getAttribute('data-chat-idx'), 10);
+      if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx);
     });
   });
 }
