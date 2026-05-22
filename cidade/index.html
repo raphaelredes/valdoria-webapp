@@ -11933,6 +11933,20 @@ var LEAGUE_BENEFITS = {
   mithral:  ['Vassalo do Trono',  'Lenda viva',           'Insígnia mithral']
 };
 
+// 2026-05-22 user feedback: explica o que significa "Posição na Ordem".
+function _showLeagueRankInfo(){
+  if (typeof _showInfoPopup !== 'function') return;
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>',
+    npc: 'Ordem dos Aventureiros',
+    title: 'Posição na Ordem',
+    desc: '<i>O ranking da Ordem é uma classificação <b>global</b> entre todos os aventureiros de Valdoria.</i><br><br>'
+      + 'Quanto <b>maior seu XP de Liga</b> (acumulado completando missões, abates, conquistas e feitos), <b>menor</b> seu número de posição — ou seja, mais próximo do <b>1º lugar</b>.<br><br>'
+      + '<i>Aventureiros lendários como Vorhan, Tavira e Silvana ocupam o topo do ranking. Sua jornada determina onde você se firma na Ordem.</i>',
+    onConfirm: function(){}
+  });
+}
+
 function _showLeaguePopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -11958,7 +11972,10 @@ function _showLeaguePopup(p){
   // === STYLES — keyframes para todas as animações épicas ===
   html += '<style>'
     + '@keyframes vLgMedalPulse{0%,100%{filter:drop-shadow(0 0 10px ' + tColor + 'aa) drop-shadow(0 0 22px ' + tColor + '66);}50%{filter:drop-shadow(0 0 18px ' + tColor + 'ee) drop-shadow(0 0 36px ' + tColor + '99);}}'
-    + '@keyframes vLgMedalFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}'
+    /* 2026-05-22 FIX: keyframes incluem translate(-50%,-50%) pra não sobrescrever
+       centering. Antes: float aplicava translateY(0) puro → medalha pulava pro topo-left.
+       Agora: composição correta, medalha permanece centralizada + flutua sutilmente. */
+    + '@keyframes vLgMedalFloat{0%,100%{transform:translate(-50%,calc(-50% + 0px));}50%{transform:translate(-50%,calc(-50% - 4px));}}'
     + '@keyframes vLgRayRotate{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}'
     + '@keyframes vLgAuraPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.55;}50%{transform:translate(-50%,-50%) scale(1.15);opacity:0.85;}}'
     + '@keyframes vLgAuraPulse2{0%,100%{transform:translate(-50%,-50%) scale(1.1);opacity:0.30;}50%{transform:translate(-50%,-50%) scale(1.35);opacity:0.55;}}'
@@ -11998,56 +12015,24 @@ function _showLeaguePopup(p){
     // Container da medalha + auras + rays + partículas (140px area)
     + '<div style="position:relative; width:140px; height:140px; margin:0 auto 10px;">'
 
-    // Light rays rotativos (atrás de tudo)
-    + '<svg class="vLg-rays" viewBox="0 0 200 200" style="position:absolute; top:50%; left:50%; width:200px; height:200px; transform:translate(-50%,-50%); opacity:0.25; pointer-events:none;">'
-    + '<defs><linearGradient id="lgRay" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="' + tColor + '" stop-opacity="0.7"/><stop offset="100%" stop-color="' + tColor + '" stop-opacity="0"/></linearGradient></defs>'
-    + '<g fill="url(#lgRay)">'
-    +   '<polygon points="100,100 95,5 105,5"/><polygon points="100,100 195,95 195,105"/>'
-    +   '<polygon points="100,100 105,195 95,195"/><polygon points="100,100 5,105 5,95"/>'
-    +   '<polygon points="100,100 30,30 38,22"/><polygon points="100,100 170,30 178,38"/>'
-    +   '<polygon points="100,100 170,170 178,162"/><polygon points="100,100 30,170 22,162"/>'
-    + '</g></svg>'
+    /* 2026-05-22 SIMPLIFICAÇÃO (user feedback): removidos overlays que conflitavam
+       com a medalha PNG (que já tem ribbon, ornamentos, design rich).
+       - REMOVIDO: light rays SVG 200×200 (overflow do container 140)
+       - REMOVIDO: laurel wreath SVG (leaves invadiam centro da medalha)
+       - REMOVIDO: CSS ribbon (PNG já tem ribbon próprio)
+       - REDUZIDO: 6→3 partículas (menos visual noise)
+       - MANTIDO: 2 auras pulsantes (efeito glow sutil que destaca a medalha)
+       - FIX: medal float keyframe não sobrescreve mais centering transform */
 
-    // 3 auras pulsantes (outer/mid/inner)
+    // 2 auras pulsantes (outer/inner) — apenas glow sutil
     + '<div class="vLg-aura2" style="position:absolute; top:50%; left:50%; width:140px; height:140px; border-radius:50%;'
-    + 'background:radial-gradient(circle,' + tColor + '44 0%,transparent 70%); pointer-events:none;"></div>'
+    + 'background:radial-gradient(circle,' + tColor + '33 0%,transparent 70%); pointer-events:none;'
+    + 'transform:translate(-50%,-50%);"></div>'
     + '<div class="vLg-aura" style="position:absolute; top:50%; left:50%; width:110px; height:110px; border-radius:50%;'
-    + 'background:radial-gradient(circle,' + tColor + '66 0%,transparent 65%); pointer-events:none;"></div>'
+    + 'background:radial-gradient(circle,' + tColor + '55 0%,transparent 65%); pointer-events:none;'
+    + 'transform:translate(-50%,-50%);"></div>'
 
-    // Coroa de louros (laurel wreath) — folhas em volta
-    + '<svg viewBox="0 0 140 140" style="position:absolute; top:50%; left:50%; width:140px; height:140px; transform:translate(-50%,-50%); opacity:0.7; pointer-events:none; color:' + tColor + ';">'
-    + '<g fill="currentColor" opacity="0.65">'
-    // Folhas laterais esquerdas
-    +   '<ellipse cx="18" cy="70" rx="11" ry="5" transform="rotate(-30 18 70)"/>'
-    +   '<ellipse cx="24" cy="55" rx="10" ry="4.5" transform="rotate(-50 24 55)"/>'
-    +   '<ellipse cx="34" cy="40" rx="10" ry="4.5" transform="rotate(-70 34 40)"/>'
-    +   '<ellipse cx="48" cy="28" rx="9" ry="4" transform="rotate(-90 48 28)"/>'
-    +   '<ellipse cx="24" cy="85" rx="10" ry="4.5" transform="rotate(-150 24 85)"/>'
-    +   '<ellipse cx="34" cy="100" rx="10" ry="4.5" transform="rotate(-130 34 100)"/>'
-    +   '<ellipse cx="48" cy="112" rx="9" ry="4" transform="rotate(-110 48 112)"/>'
-    // Folhas laterais direitas
-    +   '<ellipse cx="122" cy="70" rx="11" ry="5" transform="rotate(30 122 70)"/>'
-    +   '<ellipse cx="116" cy="55" rx="10" ry="4.5" transform="rotate(50 116 55)"/>'
-    +   '<ellipse cx="106" cy="40" rx="10" ry="4.5" transform="rotate(70 106 40)"/>'
-    +   '<ellipse cx="92" cy="28" rx="9" ry="4" transform="rotate(90 92 28)"/>'
-    +   '<ellipse cx="116" cy="85" rx="10" ry="4.5" transform="rotate(150 116 85)"/>'
-    +   '<ellipse cx="106" cy="100" rx="10" ry="4.5" transform="rotate(130 106 100)"/>'
-    +   '<ellipse cx="92" cy="112" rx="9" ry="4" transform="rotate(110 92 112)"/>'
-    + '</g>'
-    // Frutos no topo central
-    + '<circle cx="65" cy="20" r="3" fill="currentColor"/>'
-    + '<circle cx="75" cy="20" r="3" fill="currentColor"/>'
-    + '<circle cx="70" cy="14" r="2.5" fill="currentColor"/>'
-    + '</svg>'
-
-    // Fita decorativa pendurada (acima da medalha)
-    + '<div class="vLg-ribbon" style="position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:2;'
-    + 'width:16px; height:22px; background:linear-gradient(180deg,' + tColor + ',' + tColor + '99);'
-    + 'clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%); box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>'
-
-    // Medalha principal (100px)
-    // 2026-05-22: medalha PNG épica (gerada via OpenAI low) + click-to-zoom via PADRAO_LIGHTBOX.
-    // Fallback SVG sprite caso PNG falhe (compatibility).
+    // Medalha PNG principal (100px) — centro-centro
     + '<img class="vLg-medal-anim vLg-medal-img" '
     +    'src="/shared/img/medals/' + currentTier.id + '.png" '
     +    'alt="Medalha ' + currentTier.name + '" '
@@ -12056,15 +12041,12 @@ function _showLeaguePopup(p){
     +    'style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" '
     +    'onerror="this.style.display=\'none\';if(this.nextSibling){this.nextSibling.style.display=\'\'}" '
     +    'onclick="if(window.showLightbox)window.showLightbox(this.src,this.dataset.medalName,this.dataset.medalDesc);">'
-    + '<svg class="vLg-medal-anim" viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2; display:none;"><use href="#' + currentTier.icon + '"/></svg>'
+    + '<svg viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2; display:none;"><use href="#' + currentTier.icon + '"/></svg>'
 
-    // 6 partículas flutuantes ao redor (gradient bg, tier color)
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:18px; animation-delay:0s; box-shadow:0 0 8px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:-22px; animation-delay:0.8s; box-shadow:0 0 6px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:30px; animation-delay:1.6s; box-shadow:0 0 8px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:3px; height:3px; border-radius:50%; background:' + tColor + '; --lg-px:-12px; animation-delay:2.4s; box-shadow:0 0 5px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:24px; animation-delay:3.2s; box-shadow:0 0 6px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:-28px; animation-delay:4.0s; box-shadow:0 0 8px ' + tColor + ';"></div>'
+    // 3 partículas flutuantes (reduzido de 6) — efeito sparkle discreto
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:18px; animation-delay:0s; box-shadow:0 0 6px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:3px; height:3px; border-radius:50%; background:' + tColor + '; --lg-px:-22px; animation-delay:1.5s; box-shadow:0 0 5px ' + tColor + ';"></div>'
+    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:24px; animation-delay:3.0s; box-shadow:0 0 6px ' + tColor + ';"></div>'
 
     + '</div>'  // /medalha-container
 
@@ -12217,13 +12199,19 @@ function _showLeaguePopup(p){
     html += '</div></div>';
   }
 
-  // === POSIÇÃO NA ORDEM — mock stat ===
-  html += '<div style="margin:0 8px 10px; padding:6px 10px;'
+  // === POSIÇÃO NA ORDEM — clicável com tooltip explicativo ===
+  // 2026-05-22 user feedback: "não entendi o que que é a posição na ordem.
+  // Faço com que, ao clicar, informe o que significa".
+  html += '<div class="vLg-rank-card" style="margin:0 8px 10px; padding:6px 10px;'
     + 'background:rgba(196,149,58,0.04); border:1px solid rgba(196,149,58,0.15); border-radius:6px;'
-    + 'display:flex; justify-content:space-between; align-items:center; font-size:11px;">'
+    + 'display:flex; justify-content:space-between; align-items:center; font-size:11px;'
+    + 'cursor:pointer; transition:background 0.18s ease,border-color 0.18s ease;"'
+    + ' onmouseover="this.style.background=\'rgba(196,149,58,0.10)\';this.style.borderColor=\'rgba(196,149,58,0.35)\';"'
+    + ' onmouseout="this.style.background=\'rgba(196,149,58,0.04)\';this.style.borderColor=\'rgba(196,149,58,0.15)\';"'
+    + ' onclick="if(typeof _showLeagueRankInfo===\'function\')_showLeagueRankInfo();">'
     + '<span style="color:var(--v-text-dim,#a09484); display:inline-flex; align-items:center; gap:6px;">'
     + '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>'
-    + 'Posição na Ordem'
+    + 'Posição na Ordem <span style="opacity:0.5;font-size:13px;">ⓘ</span>'
     + '</span>'
     + '<span style="font-family:var(--v-font-display,Cinzel,serif); color:var(--v-gold,#c4953a); font-weight:700;">'
     + rankMock.toLocaleString('pt-BR') + 'º</span>'
@@ -18297,9 +18285,11 @@ function _renderQuestDiary(bodyEl){
           + q.reward + '<span class="vi vi-coin sm"></span></span>';
       }
       if (q.xp) {
+        // 2026-05-22 user feedback: XP em AMARELO/DOURADO (padrão dos cards da cidade),
+        // não azul. Mantém consistência visual.
         html += '<span style="display:inline-flex;align-items:center;gap:2px;padding:2px 6px;'
-          + 'background:rgba(124,180,219,0.08);border:1px solid rgba(124,180,219,0.25);'
-          + 'border-radius:10px;color:#7cb4db;font-weight:600;">'
+          + 'background:rgba(196,149,58,0.10);border:1px solid rgba(196,149,58,0.30);'
+          + 'border-radius:10px;color:var(--v-gold,#c4953a);font-weight:600;">'
           + '✦ +' + q.xp + '</span>';
       }
       html += '</div>';
@@ -41256,6 +41246,18 @@ function openCityPopup(key, params){
     }
     window._encounterActive = false;
   } catch(_e) { /* non-fatal */ }
+  // 2026-05-22 user feedback fix: evita push duplicado no _popupStack.
+  // User reportou: clicar Voltar em quest detail RECARREGA mesmo screen, 2º click volta.
+  // Root cause provável: doAction → ACTION_HANDLER quest_open_X → navigateTo → openCityPopup
+  // sendo chamado 2× per click (event bubble ou duplicate trigger) → stack duplica → Voltar
+  // precisa pop 2× pra sair do screen. Solução: skip push se top já é o mesmo key (idempotente).
+  if (_popupStack.length > 0 && _popupStack[_popupStack.length - 1] === key) {
+    _logCity('popup open -> ' + key + ' DEDUP (already on top)');
+    _renderCityPopup(key);
+    var popup0 = document.getElementById('city-subscreen-popup');
+    if (popup0) popup0.classList.add('active');
+    return;
+  }
   _popupStack.push(key);
   _renderCityPopup(key);
   var popup = document.getElementById('city-subscreen-popup');
@@ -44691,25 +44693,67 @@ function renderSubScreen(el, key){
   var isQuestOpen = (key && key.indexOf('quest_open_') === 0);
   var html = '<div class="city-subscreen' + (isQuestOpen ? ' city-subscreen--quest' : '') + '">';
   if (isQuestOpen) {
-    /* Pergaminho cenário — flavor + npcInfo combinados num cartao ornamentado */
+    /* 2026-05-22 USER FEEDBACK: "Essa parte de selecionar a missão pra ver os
+       detalhes da descrição da missão... mapa, detalhes objetivo, reportar ou
+       abandonar a missão, precisa de melhorias épicas."
+       AAA v2: banner header ◆ MISSÃO ◆, pergaminho mais ornamentado, botões
+       categorizados por cor (mapa=azul, objetivo=pergaminho, entregar=ouro,
+       abandonar=vermelho), runes pulsantes nas bordas. */
     html += '<style>'
-      + '.cs-quest-cenario{position:relative;margin:6px 0 12px;padding:14px 12px 12px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.25) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;}'
-      + '.cs-quest-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
-      + '.cs-quest-cenario::after{content:"◆";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.7;}'
-      + '.cs-quest-flavor{font-family:var(--v-font,serif);font-size:13px;line-height:1.55;color:#e8dcc8;text-align:center;font-style:italic;margin:4px 0 10px;}'
-      + '.cs-quest-npc{font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);text-align:center;letter-spacing:1px;padding:8px 6px;border-top:1px dashed rgba(196,149,58,0.3);}'
-      + '@keyframes csQuestBtnGlow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}50%{box-shadow:0 2px 12px rgba(196,149,58,0.35),inset 0 1px 0 rgba(255,255,255,0.08);}}'
-      + '.city-subscreen--quest .subscreen-btn{background:linear-gradient(180deg,rgba(74,56,40,0.45) 0%,rgba(42,30,18,0.55) 100%);border:1px solid rgba(196,149,58,0.35);padding:12px 14px;margin-bottom:6px;transition:transform 0.15s ease,border-color 0.15s ease,background 0.15s ease;}'
-      + '.city-subscreen--quest .subscreen-btn:hover{transform:translateX(2px);background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.4) 100%);border-color:var(--v-gold,#c4953a);}'
-      + '.city-subscreen--quest .subscreen-btn .sb-icon{font-size:22px;width:30px;}'
-      + '.city-subscreen--quest .subscreen-btn .sb-text{font-family:var(--v-font-display,Cinzel,serif);font-weight:600;color:#e8dcc8;}'
-      + '.city-subscreen--quest .subscreen-btn .sb-info{color:#a09484;font-size:10px;}'
-      /* Botoes especiais: abandonar = vermelho, deliver = dourado */
-      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]{border-color:rgba(196,40,30,0.4);}'
-      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]:hover{border-color:#c43020;background:linear-gradient(180deg,rgba(196,40,30,0.18) 0%,rgba(74,30,20,0.5) 100%);}'
-      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]{border-color:rgba(255,215,0,0.45);animation:csQuestBtnGlow 2.4s ease-in-out infinite;}'
-      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]:hover{border-color:#ffd700;background:linear-gradient(180deg,rgba(255,215,0,0.18) 0%,rgba(196,149,58,0.3) 100%);}'
+      + '@keyframes csQuestRunePulse{0%,100%{opacity:0.5;text-shadow:0 0 4px rgba(196,149,58,0.4);}50%{opacity:1;text-shadow:0 0 10px rgba(196,149,58,0.85);}}'
+      + '@keyframes csQuestSealRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}'
+      + '@keyframes csQuestBtnGlow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}50%{box-shadow:0 2px 16px rgba(255,215,0,0.5),inset 0 1px 0 rgba(255,255,255,0.12);}}'
+      + '@keyframes csQuestEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}'
+      + '.cs-quest-rune{display:inline-block;color:var(--v-gold,#c4953a);animation:csQuestRunePulse 2.6s ease-in-out infinite;}'
+      /* Banner header ornamentado */
+      + '.cs-quest-banner{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 12px;margin:4px 0 10px;font-family:var(--v-font-display,Cinzel,serif);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--v-gold,#c4953a);background:linear-gradient(180deg,rgba(196,149,58,0.12) 0%,rgba(42,36,32,0) 100%);border-bottom:1px solid rgba(196,149,58,0.25);border-top:1px solid rgba(196,149,58,0.25);}'
+      + '.cs-quest-banner .cs-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.6),transparent);}'
+      /* Pergaminho cenário ornamentado */
+      + '.cs-quest-cenario{position:relative;margin:0 0 12px;padding:16px 14px 14px;background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.22) 0%,rgba(74,56,40,0.30) 45%,rgba(30,20,12,0.95) 100%);border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius,10px);overflow:hidden;animation:csQuestEnter 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}'
+      /* 4 ornamentos cardeais */
+      + '.cs-quest-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--v-gold,#c4953a);text-shadow:0 0 6px rgba(196,149,58,0.7);}'
+      + '.cs-quest-cenario::after{content:"◆";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--v-gold,#c4953a);text-shadow:0 0 6px rgba(196,149,58,0.7);}'
+      /* Flavor (NPC speech) */
+      + '.cs-quest-flavor{font-family:var(--v-font,MedievalSharp,serif);font-size:14px;line-height:1.6;color:#e8dcc8;text-align:center;font-style:italic;margin:6px 8px 12px;padding:0 4px;}'
+      + '.cs-quest-flavor b{color:var(--v-gold,#c4953a);font-style:normal;text-shadow:0 0 6px rgba(196,149,58,0.35);}'
+      /* NPC info card (selo do contratante) */
+      + '.cs-quest-npc{font-family:var(--v-font-display,Cinzel,serif);font-size:10px;color:var(--v-gold,#c4953a);text-align:center;letter-spacing:1.2px;padding:10px 8px 4px;border-top:1px dashed rgba(196,149,58,0.4);margin-top:6px;line-height:1.7;}'
+      /* Botões épicos com entrance stagger */
+      + '.city-subscreen--quest .subscreen-buttons{display:flex;flex-direction:column;gap:6px;}'
+      + '.city-subscreen--quest .subscreen-btn{position:relative;background:linear-gradient(180deg,rgba(74,56,40,0.50) 0%,rgba(42,30,18,0.65) 100%);border:1px solid rgba(196,149,58,0.35);border-radius:8px;padding:12px 14px;transition:transform 0.18s ease,border-color 0.18s ease,background 0.18s ease,box-shadow 0.18s ease;animation:csQuestEnter 0.32s cubic-bezier(0.34,1.56,0.64,1) both;}'
+      + '.city-subscreen--quest .subscreen-btn:nth-child(1){animation-delay:0.05s;}'
+      + '.city-subscreen--quest .subscreen-btn:nth-child(2){animation-delay:0.10s;}'
+      + '.city-subscreen--quest .subscreen-btn:nth-child(3){animation-delay:0.15s;}'
+      + '.city-subscreen--quest .subscreen-btn:nth-child(4){animation-delay:0.20s;}'
+      + '.city-subscreen--quest .subscreen-btn:hover{transform:translateY(-1px);background:linear-gradient(180deg,rgba(196,149,58,0.20) 0%,rgba(74,56,40,0.5) 100%);border-color:var(--v-gold,#c4953a);box-shadow:0 4px 14px rgba(196,149,58,0.30);}'
+      + '.city-subscreen--quest .subscreen-btn .sb-icon{font-size:22px;width:32px;display:flex;align-items:center;justify-content:center;}'
+      + '.city-subscreen--quest .subscreen-btn .sb-text{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;color:#e8dcc8;font-size:13px;letter-spacing:0.8px;text-transform:uppercase;}'
+      + '.city-subscreen--quest .subscreen-btn .sb-info{color:#a09484;font-size:10px;font-style:italic;letter-spacing:0.3px;}'
+      /* Botões categorizados por cor de ação:
+         _locate (azul/mapa) — informativo
+         _details/_read (pergaminho/dourado) — informativo
+         _deliver (ouro brilhante + pulse) — CTA principal
+         _abandon (vermelho) — destrutivo */
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_locate"]{border-color:rgba(124,180,219,0.45);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_locate"]:hover{border-color:#7cb4db;background:linear-gradient(180deg,rgba(124,180,219,0.18) 0%,rgba(40,68,90,0.5) 100%);box-shadow:0 4px 14px rgba(124,180,219,0.35);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_details"],.city-subscreen--quest .subscreen-btn[data-cb$="_read"]{border-color:rgba(196,149,58,0.40);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]{border-color:rgba(196,40,30,0.45);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_abandon"]:hover{border-color:#c43020;background:linear-gradient(180deg,rgba(196,40,30,0.20) 0%,rgba(74,30,20,0.5) 100%);box-shadow:0 4px 14px rgba(196,40,30,0.35);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]{border-color:rgba(255,215,0,0.55);animation:csQuestEnter 0.32s cubic-bezier(0.34,1.56,0.64,1) both,csQuestBtnGlow 2.4s ease-in-out infinite 0.5s;}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"]:hover{border-color:#ffd700;background:linear-gradient(180deg,rgba(255,215,0,0.22) 0%,rgba(196,149,58,0.35) 100%);box-shadow:0 4px 18px rgba(255,215,0,0.50);}'
+      + '.city-subscreen--quest .subscreen-btn[data-cb$="_deliver"] .sb-text{color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5);}'
+      /* Reduced motion */
+      + '@media (prefers-reduced-motion:reduce){.city-subscreen--quest .subscreen-btn,.cs-quest-cenario,.cs-quest-rune{animation:none!important;}}'
+      + 'body.perf-lite .city-subscreen--quest .subscreen-btn,body.perf-lite .cs-quest-cenario,body.perf-lite .cs-quest-rune{animation:none!important;}'
       + '</style>';
+    // Banner header ornamental
+    html += '<div class="cs-quest-banner">'
+      + '<span class="cs-line"></span>'
+      + '<span class="cs-quest-rune">◆</span>'
+      + '<span>Missão Ativa</span>'
+      + '<span class="cs-quest-rune">◆</span>'
+      + '<span class="cs-line"></span>'
+      + '</div>';
     html += '<div class="cs-quest-cenario">';
     if (d.flavor) html += '<div class="cs-quest-flavor">' + d.flavor + '</div>';
     if (d.npcInfo) html += '<div class="cs-quest-npc">' + d.npcInfo + '</div>';
