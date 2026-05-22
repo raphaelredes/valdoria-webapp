@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-22T10:52:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-22T23:31:08Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -40329,24 +40329,16 @@ function bindQuickActions() {
   // visual de cidade.html#_showInventoryPopup. User pediu "deve ser uma
   // mochila padrão, mesma fonte de design e funcionalidades abrindo como
   // popup na tela inteira em ambos html". Popup canonical aqui no HTML
-  // (#inv-overlay). REMOTE: ainda navega pra /inventory/ se preferir o
-  // sistema completo.
+  // (#inv-overlay).
+  //
+  // Sessão #26 (2026-05-22) BUG FIX: /inventory/ webapp SPA foi DELETADO em
+  // commit 1937a383 (deep cleanup legacy SPA). Navegação REMOTE pra /inventory/
+  // resultava em 301 redirect → /cidade/ → tela sem dados → bounce back.
+  // FIX: ambos LOCAL e REMOTE agora usam popup inline canonical (vInventory
+  // shared module). S.player + S.inventory são hidratados via API em REMOTE,
+  // popup mostra dados reais.
   document.getElementById('btn-inventory').addEventListener('click', function() {
-    if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN) {
-      // REMOTE: usa /inventory/ webapp SPA (sistema completo com 7 arquivos JS)
-      var params = new URLSearchParams();
-      params.set('token', window.__EXPLORE_TOKEN);
-      if (window.__EXPLORE_API_BASE) params.set('api', window.__EXPLORE_API_BASE);
-      if (window.__EXPLORE_USER_ID) params.set('uid', String(window.__EXPLORE_USER_ID));
-      params.set('return', 'exploracao');
-      if (S && S.mapId) params.set('return_map', S.mapId);
-      params.set('_cb', String(Date.now()));
-      window.__valdoria_transitioning = true;
-      window.location.href = '/inventory/?' + params.toString();
-    } else {
-      // LOCAL (file://): popup inline canonical
-      _showExploracaoInventoryPopup();
-    }
+    _showExploracaoInventoryPopup();
   });
 
   // Wire close button + backdrop click
