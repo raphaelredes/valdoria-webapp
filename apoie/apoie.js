@@ -1,81 +1,667 @@
-'use strict';const WORKER_URL='https://valdoria-apoie.lendas-de-valdoria.workers.dev';const BOT_USERNAME='LendasDeValdoriaBOT';let selectedAmount=0;let telegramUser=null;function onSliderInput(slider){var val=parseInt(slider.value, 10);selectedAmount=val;document.getElementById('slider-display').textContent=formatBrl(val);document.querySelectorAll('.ap-amount-btn').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.dataset.amount, 10)===val);});document.getElementById('custom-amount').value='';updatePreview();}
-const TIERS=[{id:'supporter',name:'Apoiador',icon:'\u{1F91D}',min:100,max:499,gold:50,items:['1x Poção de Cura'],exclusive:null,exclusiveImg:null,title:null},{id:'copper',name:'Patrono de Cobre',icon:'\u{1F7E4}',min:500,max:1499,gold:200,items:['2x Poção de Cura'],exclusive:null,exclusiveImg:null,title:'\u{1F7E4} Patrono de Cobre'},{id:'silver',name:'Patrono de Prata',icon:'\u26AA',min:1500,max:2999,gold:750,items:['3x Poção de Cura'],exclusive:'\u{1F48D} Anel do Patrono',exclusiveImg:'img/items/anel_patrono.webp',title:'\u26AA Patrono de Prata'},{id:'gold',name:'Patrono de Ouro',icon:'\u{1F7E1}',min:3000,max:4999,gold:2000,items:['5x Poção de Cura'],exclusive:'\u{1F458} Manto do Benfeitor',exclusiveImg:'img/items/manto_benfeitor.webp',title:'\u{1F7E1} Patrono de Ouro'},{id:'platinum',name:'Patrono de Platina',icon:'\u{1F48E}',min:5000,max:999999,gold:5000,items:['5x Poção de Cura Superior'],exclusive:'\u{1F5E1}\uFE0F Lâmina da Generosidade',exclusiveImg:'img/items/lamina_generosidade.webp',title:'\u{1F48E} Patrono de Platina'},];function getTier(centavos){return TIERS.find(t=>centavos>=t.min&&centavos<=t.max)||null;}
-function formatBrl(centavos){return'R$ '+(centavos/100).toFixed(2).replace('.',',');}
-function selectAmount(centavos){selectedAmount=centavos;document.querySelectorAll('.ap-amount-btn').forEach(btn=>{btn.classList.toggle('active',parseInt(btn.dataset.amount, 10)===centavos);});document.getElementById('custom-amount').value='';updatePreview();}
-function onCustomAmount(input){const val=parseFloat(input.value);if(val&&val>=1){selectedAmount=Math.round(val*100);}else{selectedAmount=0;}
-document.querySelectorAll('.ap-amount-btn').forEach(btn=>btn.classList.remove('active'));updatePreview();}
-function updatePreview(){const preview=document.getElementById('tier-preview');const btn=document.getElementById('btn-generate');if(selectedAmount<100){preview.innerHTML='<div style="font-size:13px;color:var(--v-text-dim)">Selecione um valor para ver as recompensas</div>';btn.disabled=true;return;}
-const tier=getTier(selectedAmount);if(!tier){preview.innerHTML='<div style="font-size:13px;color:var(--v-text-dim)">Valor abaixo do mínimo (R$ 1,00)</div>';btn.disabled=true;return;}
-let html='<div class="ap-tier-preview-title">'+tier.icon+' '+tier.name+' \u2014 '+formatBrl(selectedAmount)+'</div>';html+='<div class="ap-tier-preview-list">';html+='\u{1F4B0} +'+tier.gold.toLocaleString()+' GP<br>';tier.items.forEach(item=>{html+='\u{1F392} '+item+'<br>';});if(tier.exclusive){html+='<strong>'+tier.exclusive+'</strong> (exclusivo)<br>';if(tier.exclusiveImg)html+='<img class="ap-item-thumb" src="'+tier.exclusiveImg+'" alt="'+tier.exclusive.replace(/<[^>]*>/g,'')+'" style="margin:6px auto;display:block">';}
-if(tier.title)html+='\u{1F3C5} Título: '+tier.title;html+='</div>';preview.innerHTML=html;btn.disabled=false;}
-window.onTelegramAuth=function(user){telegramUser=user;const status=document.getElementById('tg-status');const name=user.first_name+(user.last_name?' '+user.last_name:'');status.innerHTML='<div class="ap-tg-badge">\u2705 Conectado como '+vEsc(name)+'</div>';const widget=document.getElementById('tg-widget');if(widget)widget.style.display='none';};function loadTelegramWidget(){const container=document.getElementById('tg-widget');if(!container)return;const script=document.createElement('script');script.async=true;script.src='https://telegram.org/js/telegram-widget.js?23';script.setAttribute('data-telegram-login',BOT_USERNAME);script.setAttribute('data-size','large');script.setAttribute('data-onauth','onTelegramAuth(user)');script.setAttribute('data-request-access','write');script.setAttribute('data-userpic','true');container.appendChild(script);const status=document.getElementById('tg-status');status.innerHTML='<div class="ap-tg-badge ap-tg-badge-anon" style="margin-top:12px">'+'\u{1F464} Sem login = doação anônima. Para recompensas no jogo, entre com Telegram.</div>';}
-async function generatePix(){if(selectedAmount<100)return;const btn=document.getElementById('btn-generate');const resultDiv=document.getElementById('qr-result');btn.disabled=true;btn.innerHTML='<span class="ap-spinner"></span>Gerando...';try{const body={amount_brl:selectedAmount};if(telegramUser){body.telegram_user=telegramUser;}
-const resp=await fetchT(WORKER_URL+'/api/donate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),});if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error||'Erro ao gerar PIX');}
-const data=await resp.json();showQrResult(data);}catch(e){console.error('[APOIE] Erro ao gerar PIX',e);resultDiv.style.display='block';resultDiv.innerHTML='<div class="ap-qr-result" style="border-color:var(--v-danger)">'+'<div style="color:var(--v-danger);font-size:14px;margin-bottom:8px">\u274C '+vEsc(e.message)+'</div>'+'<div style="font-size:12px;color:var(--v-text-dim)">Verifique sua conexão e tente novamente.</div></div>';}finally{btn.disabled=false;btn.textContent='Gerar QR Code PIX';}}
-function showQrResult(data){const resultDiv=document.getElementById('qr-result');resultDiv.style.display='block';let html='<div class="ap-qr-result">';html+='<div class="ap-qr-wrapper"><div id="qr-container"></div></div>';html+='<div style="font-size:12px;color:var(--v-text-dim);margin:8px 0">Aponte a câmera do app do banco para o QR acima</div>';html+='<div class="ap-qr-amount">'+vEsc(data.amount_display)+'</div>';html+='<div class="ap-qr-info">';if(data.key_type&&data.key_display){html+='Chave PIX ('+vEsc(data.key_type)+'): '+vEsc(data.key_display)+'<br>';}
-html+='Referência: <strong>'+vEsc(data.txid)+'</strong>';if(!data.linked){html+='<br><em>Guarde este código para vincular ao bot</em>';}
-html+='</div>';html+='<div class="ap-code-box" id="brcode-text">'+vEsc(data.brcode)+'</div>';html+='<button class="ap-btn-copy" onclick="copyBrcode()">Copiar Código PIX</button>';if(data.linked){html+='<div class="ap-qr-note">\u2705 Vinculado a sua conta Telegram. Recompensas serão entregues automaticamente após verificação.</div>';}else{html+='<div class="ap-qr-note">\u{1F464} Doação anônima. Para receber recompensas no jogo, use o comando <strong>/apoiar '+vEsc(data.txid)+'</strong> no bot do Telegram.</div>';}
-html+='</div>';resultDiv.innerHTML=html;resultDiv.scrollIntoView({behavior:'smooth',block:'center'});try{new QRCode(document.getElementById('qr-container'),{text:data.brcode,width:200,height:200,colorDark:'#2a2420',colorLight:'#f5f0e0',correctLevel:QRCode.CorrectLevel.M,});}catch(e){console.error('[APOIE] Erro QR',e);document.getElementById('qr-container').innerHTML='<div style="color:var(--v-danger);font-size:12px;padding:20px">Erro ao gerar QR. Use o código abaixo.</div>';}
-window._currentBrcode=data.brcode;}
-function copyBrcode(){if(!window._currentBrcode)return;const btn=document.querySelector('.ap-btn-copy');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(window._currentBrcode).then(()=>showCopied(btn)).catch(()=>fallbackCopy(btn));}else{fallbackCopy(btn);}}
-function fallbackCopy(btn){const ta=document.createElement('textarea');ta.value=window._currentBrcode;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showCopied(btn);}catch{btn.textContent='Erro ao copiar';}
-document.body.removeChild(ta);}
-function showCopied(btn){btn.textContent='Copiado!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copiar Código PIX';btn.classList.remove('copied');},2000)/*animation*/;}
-async function loadGoals(){const container=document.getElementById('goals-list');let goals;try{const resp=await fetchT(WORKER_URL+'/api/goals').catch(()=>null);if(resp&&resp.ok){goals=await resp.json();}else{const local=await fetchT('goals.json');if(!local.ok)throw new Error('HTTP '+local.status);goals=await local.json();}}catch{const local=await fetchT('goals.json');goals=await local.json();}
-container.innerHTML=goals.map(g=>{const pct=g.target_brl>0?Math.min(100,Math.round((g.current_brl/g.target_brl)*100)):0;const current=formatBrl(g.current_brl);const target=formatBrl(g.target_brl);return'<div class="ap-goal-card'+(g.completed?' ap-completed':'')+' ap-reveal">'+'<div class="ap-goal-header">'+'<span class="ap-goal-icon">'+g.icon+'</span>'+'<span class="ap-goal-name">'+vEsc(g.name)+'</span>'+'</div>'+'<div class="ap-goal-desc">'+vEsc(g.desc)+'</div>'+'<div class="ap-progress-track">'+'<div class="ap-progress-fill" data-pct="'+pct+'"></div>'+'</div>'+'<div class="ap-progress-info">'+'<span class="ap-progress-pct">'+pct+'%</span>'+'<span class="ap-progress-amounts">'+current+' / '+target+'</span>'+'</div></div>';}).join('');observeReveals();}
-async function loadStats(){try{const resp=await fetchT(WORKER_URL+'/api/stats').catch(()=>null);if(!resp||!resp.ok)return;const data=await resp.json();const supEl=document.getElementById('stat-supporters');const raisedEl=document.getElementById('stat-raised');if(supEl&&data.total_supporters!=null){supEl.dataset.count=data.total_supporters;}
-if(raisedEl&&data.total_raised_brl!=null){raisedEl.dataset.count=data.total_raised_brl;raisedEl.dataset.prefix='R$ ';raisedEl.dataset.divide='100';}
-if(supEl&&data.total_supporters>0){animateCounter(supEl,data.total_supporters);}
-if(raisedEl&&data.total_raised_brl>0){animateCounter(raisedEl,data.total_raised_brl);}}catch(e){console.warn('[APOIE] Stats load failed',e);}}
-async function loadRecentDonors(){var container=document.getElementById('donors-list');if(!container)return;try{var resp=await fetchT(WORKER_URL+'/api/recent').catch(function(){return null;});if(!resp||!resp.ok){container.innerHTML='';return;}
-var donors=await resp.json();if(!donors||!donors.length){container.innerHTML='<div class="ap-donors-empty">Seja o primeiro aventureiro a apoiar Valdoria!</div>';return;}
-var html='';donors.forEach(function(d){var name=d.name||'An\u00f4nimo';var tier=d.tier||'supporter';var tierIcon={supporter:'\u{1F91D}',copper:'\u{1F7E4}',silver:'\u26AA',gold:'\u{1F7E1}',platinum:'\u{1F48E}'};var tierName={supporter:'Apoiador',copper:'Patrono de Cobre',silver:'Patrono de Prata',gold:'Patrono de Ouro',platinum:'Patrono de Platina'};var icon=tierIcon[tier]||'\u{1F91D}';var label=tierName[tier]||'Apoiador';var timeAgo=d.time_ago||'';html+='<div class="ap-donor-card ap-reveal" data-tier="'+tier+'">'+'<span class="ap-donor-icon">'+icon+'</span>'+'<div class="ap-donor-info">'+'<span class="ap-donor-name">'+vEsc(name)+'</span>'+'<span class="ap-donor-tier">'+label+'</span>'+'</div>'+
-(timeAgo?'<span class="ap-donor-time">'+vEsc(timeAgo)+'</span>':'')+'</div>';});container.innerHTML=html;observeReveals();}catch(e){console.warn('[APOIE] Recent donors load failed',e);container.innerHTML='';}}
-function animateCounter(el,target,duration){duration=duration||2000;const prefix=el.dataset.prefix||'';const divide=parseFloat(el.dataset.divide)||1;const start=performance.now();function easeOutCubic(t){return 1-Math.pow(1-t,3);}
-function tick(now){const elapsed=now-start;const progress=Math.min(elapsed/duration,1);const value=Math.round(easeOutCubic(progress)*target);const display=divide>1?(value/divide).toFixed(2).replace('.',','):value.toLocaleString('pt-BR');el.textContent=prefix+display;if(progress<1)requestAnimationFrame(tick);}
-requestAnimationFrame(tick);}
-let _revealObserver=null;function observeReveals(){if(!_revealObserver){_revealObserver=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('ap-visible');const fill=entry.target.querySelector('.ap-progress-fill');if(fill){fill.style.width=fill.dataset.pct+'%';}
-const impBar=entry.target.querySelector('.ap-impact-bar');if(impBar){impBar.style.setProperty('--bar-width',impBar.dataset.pct+'%');impBar.classList.add('ap-bar-animated');}
-const impPct=entry.target.querySelector('.ap-impact-pct');if(impPct){const text=impPct.textContent.trim();const match=text.match(/(\d+)/);if(match){const target=parseInt(match[1], 10);const prefix=text.startsWith('~')?'~':'';const suffix='%';animateCounter(impPct,target,1500);impPct.dataset.count=target;impPct.dataset.prefix=prefix;impPct.textContent=prefix+'0'+suffix;}}
-const counter=entry.target.querySelector('[data-count]');if(counter){const target=parseInt(counter.dataset.count, 10);if(target>0)animateCounter(counter,target);}
-_revealObserver.unobserve(entry.target);}});},{threshold:0.15});}
-document.querySelectorAll('.ap-story-grid, .ap-impact-grid, .ap-tiers-grid, .ap-goals-list, .ap-timeline').forEach(container=>{const children=container.querySelectorAll('.ap-reveal:not(.ap-visible)');children.forEach((child,i)=>{child.style.setProperty('--ap-delay',(i*0.12)+'s');});});document.querySelectorAll('.ap-reveal:not(.ap-visible)').forEach(el=>{_revealObserver.observe(el);});}
-function setupNavbar(){const nav=document.getElementById('ap-nav');const backTop=document.getElementById('back-top');const scrollHint=document.getElementById('scroll-hint');if(!nav)return;let ticking=false;window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(()=>{const y=window.scrollY;nav.classList.toggle('ap-nav-scrolled',y>60);if(backTop)backTop.classList.toggle('visible',y>400);if(scrollHint)scrollHint.style.opacity=Math.max(0,1-y/300);ticking=false;});ticking=true;}},{passive:true});const sections=['cenario','story','tiers','goals','donate'];const links=document.querySelectorAll('.ap-nav-link');const sectionObserver=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;links.forEach(link=>{const href=link.getAttribute('href');link.classList.toggle('active',href==='#'+id);});}});},{threshold:0.3,rootMargin:'-80px 0px -50% 0px'});sections.forEach(id=>{const el=document.getElementById(id);if(el)sectionObserver.observe(el);});}
-function setupParallax(){const layers=document.querySelectorAll('.ap-parallax-layer');if(!layers.length)return;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;if(window.matchMedia('(max-width: 600px)').matches)return;const speeds=[0.1,0.3,0.5,0.65];let ticking=false;window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(()=>{const y=window.scrollY;layers.forEach((layer,i)=>{const speed=speeds[i]||0.3;layer.style.transform='translateY('+(y*speed)+'px)';});ticking=false;});ticking=true;}},{passive:true});}
-/* X-6.5.51BL (2026-05-14): URL absoluta INTENCIONAL. apoie.js é servido
-   em duas origens: (a) jogo.lendasdevaldoria.com.br/apoie/ (CF Pages, audio
-   same-origin) e (b) apoie.lendasdevaldoria.com.br (Worker, NÃO serve
-   /shared/audio/). Absolute URL ao CDN PROD funciona em ambos. NÃO trocar
-   por relativa — quebra audio no Worker. */
-const _AP_AUDIO_BASE='https://jogo.lendasdevaldoria.com.br/shared/audio/';const _AP_TRACKS={'Taverna':['tavern_ambient.mp3','tavern_ambient_2.mp3','tavern_ambient_3.mp3','tavern_ambient_4.mp3','tavern_ambient_5.mp3','tavern_ambient_6.mp3','tavern_ambient_7.mp3','tavern_ambient_8.mp3'],'Cidade':['city_day.mp3','city_day_2.mp3','city_day_3.mp3','city_day_4.mp3','city_day_5.mp3','city_day_6.mp3','city_day_7.mp3','city_day_8.mp3'],'Floresta':['forest_explore.mp3','forest_explore_2.mp3','forest_explore_3.mp3','forest_explore_4.mp3','forest_explore_5.mp3','forest_explore_6.mp3','forest_explore_7.mp3','forest_explore_8.mp3'],'Combate':['combat_tense.mp3','combat_tense_2.mp3','combat_tense_3.mp3','combat_tense_4.mp3','combat_tense_5.mp3','combat_tense_6.mp3','combat_tense_7.mp3','combat_tense_8.mp3'],'Deserto':['desert_wind.mp3','desert_wind_2.mp3','desert_wind_3.mp3','desert_wind_4.mp3','desert_wind_5.mp3','desert_wind_6.mp3','desert_wind_7.mp3','desert_wind_8.mp3'],'Masmorra':['dungeon_dark.mp3','dungeon_dark_2.mp3','dungeon_dark_3.mp3','dungeon_dark_4.mp3','dungeon_dark_5.mp3','dungeon_dark_6.mp3','dungeon_dark_7.mp3','dungeon_dark_8.mp3'],'Pantano':['swamp_mist.mp3','swamp_mist_2.mp3','swamp_mist_3.mp3','swamp_mist_4.mp3','swamp_mist_5.mp3','swamp_mist_6.mp3','swamp_mist_7.mp3','swamp_mist_8.mp3'],'Montanha':['mountain_wind.mp3','mountain_wind_2.mp3','mountain_wind_3.mp3','mountain_wind_4.mp3','mountain_wind_5.mp3','mountain_wind_6.mp3','mountain_wind_7.mp3','mountain_wind_8.mp3'],'Neve':['snow_silence.mp3','snow_silence_2.mp3','snow_silence_3.mp3','snow_silence_4.mp3','snow_silence_5.mp3','snow_silence_6.mp3','snow_silence_7.mp3','snow_silence_8.mp3'],'Prologo':['prologue_theme.mp3','prologue_theme_2.mp3','prologue_theme_3.mp3','prologue_theme_4.mp3','prologue_theme_5.mp3','prologue_theme_6.mp3','prologue_theme_7.mp3','prologue_theme_8.mp3'],'Boss':['boss_battle.mp3','boss_battle_2.mp3','boss_battle_3.mp3','boss_battle_4.mp3','boss_battle_5.mp3','boss_battle_6.mp3','boss_battle_7.mp3','boss_battle_8.mp3'],};const _apAllTracks=[];for(const[name,files]of Object.entries(_AP_TRACKS)){for(const f of files)_apAllTracks.push({name:name,file:f});}
-let _apAudio=null;let _apPlaying=false;let _apLastFile='';let _apRafId=null;let _apPreloadedTrack=null;let _apPreloadedAudio=null;function _apPickRandom(){let pool=_apAllTracks;let pick;do{pick=pool[Math.floor(Math.random()*pool.length)];}
-while(pick.file===_apLastFile&&pool.length>1);_apLastFile=pick.file;return pick;}
-function _apPreloadOne(){if(_apPreloadedAudio)return;var track=_apPickRandom();_apPreloadedTrack=track;var audio=new Audio(_AP_AUDIO_BASE+track.file);audio.preload='auto';audio.volume=0.25;_apPreloadedAudio=audio;audio.addEventListener('error',function(){_apPreloadedAudio=null;_apPreloadedTrack=null;});}
-function togglePlayer(){if(_apPlaying&&_apAudio){_apAudio.pause();_apPlaying=false;_apUpdateUI();return;}
-if(_apAudio&&_apAudio.paused&&_apAudio.src&&_apAudio.currentTime>0){_apAudio.play().catch(function(e){/* autoplay restriction expected */});_apPlaying=true;_apUpdateUI();_apAnimateBar();return;}
-if(_apPreloadedAudio&&_apPreloadedTrack){_apUsePreloaded();}else{_apPlayRandom();}}
-function _apPlayRandom(){var track=_apPickRandom();_apTrackHistory=[track];_apHistoryIdx=0;_apPlayTrack(track);}
-/* USER REQUEST 2026-05-04: ap-track-name removido \u2014 m\u00FAsicas n\u00E3o t\u00EAm nome.
-   Helper: setTrackName \u00E9 no-op com null-guard pra compat com elementos legacy. */
-function _apSetTrackName(_t){var el=document.getElementById('ap-track-name');if(el)el.textContent='';}
-function _apUsePreloaded(){var track=_apPreloadedTrack;var audio=_apPreloadedAudio;_apPreloadedTrack=null;_apPreloadedAudio=null;_apDestroyAudio();_apCurrentTrack=track;_apLastFile=track.file;_apAudio=audio;_apTrackHistory=[track];_apHistoryIdx=0;var _errorCount=0;audio.onended=function(){if(audio!==_apAudio)return;_apNextTrack();};audio.onerror=function(){if(audio!==_apAudio)return;_errorCount++;console.warn('[APOIE] Audio error:',track.file,'(attempt '+_errorCount+')');if(_errorCount<3){setTimeout(function(){if(audio===_apAudio)_apNextTrack();},1000);}else{console.error('[APOIE] Too many audio errors, stopping player');_apPlaying=false;_apUpdateUI();}};audio.play().then(function(){if(audio!==_apAudio)return;_apPlaying=true;_apSetTrackName(track.name);_apUpdateUI();_apAnimateBar();}).catch(function(e){console.warn('[APOIE] Preloaded play blocked, falling back:',e.message);_apPlayRandom();});}
-function _apUpdateUI(){document.getElementById('ap-icon-play').style.display=_apPlaying?'none':'block';document.getElementById('ap-icon-pause').style.display=_apPlaying?'block':'none';var btn=document.getElementById('ap-play-btn');if(btn)btn.classList.toggle('playing',_apPlaying);var wave=document.getElementById('ap-wave');if(wave)wave.classList.toggle('active',_apPlaying);if(!_apPlaying){_apSetTrackName('');}}
-function _apAnimateBar(){if(_apRafId)cancelAnimationFrame(_apRafId);function tick(){if(!_apAudio||!_apPlaying){_apRafId=null;return;}
-var pct=_apAudio.duration?(_apAudio.currentTime/_apAudio.duration*100):0;var bar=document.getElementById('ap-progress-bar');if(bar)bar.style.width=pct+'%';_apRafId=requestAnimationFrame(tick);}
-_apRafId=requestAnimationFrame(tick);}
-let _apTrackHistory=[];let _apHistoryIdx=-1;let _apCurrentTrack=null;function _apNextTrack(){if(!_apPlaying&&!_apAudio)return;if(_apHistoryIdx<_apTrackHistory.length-1){_apHistoryIdx++;_apPlayTrack(_apTrackHistory[_apHistoryIdx]);}else{var track=_apPickRandom();_apTrackHistory.push(track);_apHistoryIdx=_apTrackHistory.length-1;_apPlayTrack(track);}}
-function _apPrevTrack(){if(!_apPlaying&&!_apAudio)return;if(_apAudio&&_apAudio.currentTime>3){_apAudio.currentTime=0;return;}
-if(_apHistoryIdx>0){_apHistoryIdx--;_apPlayTrack(_apTrackHistory[_apHistoryIdx]);}else if(_apAudio){_apAudio.currentTime=0;}}
-function _apDestroyAudio(){if(_apAudio){_apAudio.onended=null;_apAudio.onerror=null;_apAudio.pause();try{_apAudio.src='';_apAudio.load();}catch(e){console.warn('[APOIE]',e);}
-_apAudio=null;}
-if(_apPreloadedAudio){try{_apPreloadedAudio.src='';_apPreloadedAudio.load();}catch(e){console.warn('[APOIE]',e);}
-_apPreloadedAudio=null;_apPreloadedTrack=null;}}
-function _apPlayTrack(track){_apDestroyAudio();_apCurrentTrack=track;_apLastFile=track.file;var audio=new Audio(_AP_AUDIO_BASE+track.file);audio.volume=0.25;_apAudio=audio;var _errorCount=0;audio.onended=function(){if(audio!==_apAudio)return;_apNextTrack();};audio.onerror=function(){if(audio!==_apAudio)return;_errorCount++;console.warn('[APOIE] Audio error:',track.file,'(attempt '+_errorCount+')');if(_errorCount<3){setTimeout(function(){if(audio===_apAudio)_apNextTrack();},1000);}else{console.error('[APOIE] Too many audio errors, stopping player');_apPlaying=false;_apUpdateUI();}};audio.play().then(function(){if(audio!==_apAudio)return;_apPlaying=true;_apSetTrackName(track.name);_apUpdateUI();_apAnimateBar();}).catch(function(e){console.warn('[APOIE] Play blocked:',e.message);});}
-/* showToast removed - use vToast from shared/toast.js */
-function setupTimelineAnimation(){const timeline=document.querySelector('.ap-timeline');if(!timeline)return;const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('ap-timeline-active');observer.unobserve(entry.target);}});},{threshold:0.2});observer.observe(timeline);}
-function checkCookieConsent(){var consent=localStorage.getItem('valdoria_cookies');if(!consent){var banner=document.getElementById('cookie-banner');if(banner)banner.style.display='block';return false;}
-return consent==='accepted';}
-function acceptCookies(){try{localStorage.setItem('valdoria_cookies','accepted');}catch(e){console.warn('[APOIE]',e);}var banner=document.getElementById('cookie-banner');if(banner){banner.style.opacity='0';banner.style.transform='translateY(100%)';banner.style.transition='opacity var(--v-transition-base), transform var(--v-transition-base)';setTimeout(function(){banner.style.display='none';},300);}
-loadTelegramWidget();}
-function rejectCookies(){try{localStorage.setItem('valdoria_cookies','rejected');}catch(e){console.warn('[APOIE]',e);}var banner=document.getElementById('cookie-banner');if(banner){banner.style.opacity='0';banner.style.transform='translateY(100%)';banner.style.transition='opacity var(--v-transition-base), transform var(--v-transition-base)';setTimeout(function(){banner.style.display='none';},300);}}
-if('scrollRestoration'in history)history.scrollRestoration='manual';document.addEventListener('DOMContentLoaded',()=>{window.scrollTo(0,0);var cookiesOk=checkCookieConsent();if(cookiesOk)loadTelegramWidget();loadGoals();loadStats();loadRecentDonors();setupNavbar();setupParallax();observeReveals();setupTimelineAnimation();setTimeout(_apPreloadOne,3000)/*delay*/;requestAnimationFrame(()=>{const cenarioEl=document.querySelector('.ap-cinematic');if(cenarioEl){setTimeout(()=>cenarioEl.classList.add('ap-scene-ready'),100);}});});
+/* apoie.js — sessao #23 v9 (2026-05-22): redesign AAA pedido pelo user.
+ * Mantém player musica existente, melhora donation com slider + input direto,
+ * delega Telegram OAuth pra tg-oauth-custom.js (substitui widget bugado).
+ */
+'use strict';
+
+const WORKER_URL = '';  // same-origin (apoie.lendasdevaldoria.com.br)
+const BOT_USERNAME = 'LendasDeValdoriaBOT';
+
+let selectedAmount = 0;
+let telegramUser = null;
+
+// Tiers (canonical em contribution_data.py)
+const TIERS = [
+    {id:'supporter',name:'Apoiador',icon:'🤝',color:'#9c8d6a',min:100,max:499,gold:50,items:['1× Poção de Cura'],exclusive:null,exclusiveImg:null,title:null},
+    {id:'copper',name:'Patrono de Cobre',icon:'🟤',color:'#b87333',min:500,max:1499,gold:200,items:['2× Poção de Cura'],exclusive:null,exclusiveImg:null,title:'🟤 Patrono de Cobre'},
+    {id:'silver',name:'Patrono de Prata',icon:'⚪',color:'#c0c0c0',min:1500,max:2999,gold:750,items:['3× Poção de Cura'],exclusive:'💍 Anel do Patrono',exclusiveImg:'img/items/anel_patrono.webp',title:'⚪ Patrono de Prata'},
+    {id:'gold',name:'Patrono de Ouro',icon:'🟡',color:'#c4953a',min:3000,max:4999,gold:2000,items:['5× Poção de Cura'],exclusive:'👘 Manto do Benfeitor',exclusiveImg:'img/items/manto_benfeitor.webp',title:'🟡 Patrono de Ouro'},
+    {id:'platinum',name:'Patrono de Platina',icon:'💎',color:'#7dd3fc',min:5000,max:999999,gold:5000,items:['5× Poção de Cura Superior'],exclusive:'⚔ Lâmina da Generosidade',exclusiveImg:'img/items/lamina_generosidade.webp',title:'💎 Patrono de Platina'},
+];
+
+function getTier(centavos) {
+    return TIERS.find(t => centavos >= t.min && centavos <= t.max) || null;
+}
+
+function formatBrl(centavos) {
+    var reais = centavos / 100;
+    var s = reais.toFixed(2);
+    var parts = s.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return 'R$ ' + parts.join(',');
+}
+
+// === Donation amount (slider + input syncados) ===
+function setAmount(centavos) {
+    centavos = Math.max(0, Math.floor(centavos));
+    if (centavos > 100000) centavos = 100000;  // cap R$ 1000
+    selectedAmount = centavos;
+
+    var slider = document.getElementById('amount-slider');
+    var input = document.getElementById('custom-amount');
+    var display = document.getElementById('slider-display');
+
+    if (slider && parseInt(slider.value, 10) !== centavos) {
+        slider.value = String(Math.min(centavos, parseInt(slider.max, 10)));
+    }
+    if (input && document.activeElement !== input) {
+        input.value = (centavos / 100).toFixed(2);
+    }
+    if (display) display.textContent = formatBrl(centavos);
+
+    document.querySelectorAll('.ap-amount-btn').forEach(function(btn) {
+        var v = parseInt(btn.dataset.amount, 10);
+        btn.classList.toggle('active', v === centavos);
+    });
+
+    updatePreview();
+
+    var btn = document.getElementById('btn-generate');
+    if (btn) btn.disabled = centavos < 100;
+}
+
+function selectAmount(centavos) { setAmount(centavos); }
+
+function onSliderInput(slider) {
+    setAmount(parseInt(slider.value, 10));
+}
+
+function onCustomAmount(input) {
+    var raw = (input.value || '').replace(',', '.').trim();
+    var reais = parseFloat(raw);
+    if (isNaN(reais) || reais < 0) reais = 0;
+    setAmount(Math.round(reais * 100));
+}
+
+function updatePreview() {
+    var preview = document.getElementById('tier-preview');
+    var btn = document.getElementById('btn-generate');
+    if (!preview) return;
+
+    if (selectedAmount < 100) {
+        preview.innerHTML = '<div class="ap-tier-preview-empty">' +
+            '<span class="ap-tier-preview-icon">✦</span>' +
+            'Selecione um valor (mínimo R$ 1,00) para ver as recompensas' +
+            '</div>';
+        if (btn) btn.disabled = true;
+        return;
+    }
+
+    var tier = getTier(selectedAmount);
+    if (!tier) {
+        preview.innerHTML = '<div class="ap-tier-preview-empty">Valor fora do range.</div>';
+        if (btn) btn.disabled = true;
+        return;
+    }
+
+    var html = '<div class="ap-tier-preview-card" style="--tier-color:' + tier.color + '">' +
+        '<div class="ap-tier-preview-header">' +
+            '<span class="ap-tier-preview-tier-icon" style="color:' + tier.color + '">' + tier.icon + '</span>' +
+            '<div class="ap-tier-preview-info">' +
+                '<div class="ap-tier-preview-label">Você se tornará</div>' +
+                '<div class="ap-tier-preview-name">' + tier.name + '</div>' +
+            '</div>' +
+            '<div class="ap-tier-preview-amount">' + formatBrl(selectedAmount) + '</div>' +
+        '</div>' +
+        '<div class="ap-tier-preview-divider"></div>' +
+        '<div class="ap-tier-preview-rewards">' +
+            '<div class="ap-tier-preview-reward">💰 <b>+' + tier.gold.toLocaleString('pt-BR') + '</b> Valdoritas</div>' +
+            tier.items.map(function(it) { return '<div class="ap-tier-preview-reward">🧪 ' + it + '</div>'; }).join('');
+
+    if (tier.exclusive) {
+        html += '<div class="ap-tier-preview-reward ap-tier-preview-exclusive">' +
+            (tier.exclusiveImg ? '<img src="' + tier.exclusiveImg + '" alt="" class="ap-tier-preview-itemimg" onerror="this.style.display=\'none\'">' : '') +
+            '<span>⭐ <b>' + tier.exclusive + '</b> <em>(item exclusivo)</em></span>' +
+            '</div>';
+    }
+    if (tier.title) {
+        html += '<div class="ap-tier-preview-reward">🏅 Título: <b>' + tier.title + '</b></div>';
+    }
+    html += '</div>' +
+        '<div class="ap-tier-preview-footer">✦ Recompensas entregues a TODOS personagens do seu Telegram</div>' +
+        '</div>';
+
+    preview.innerHTML = html;
+    if (btn) btn.disabled = false;
+}
+
+// === Telegram OAuth (via tg-oauth-custom.js) ===
+window.onTelegramAuth = function(user) {
+    telegramUser = user;
+    var status = document.getElementById('ap-tg-status') || document.getElementById('tg-status');
+    if (!status) return;
+    var name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+    status.innerHTML = '<div class="ap-tg-badge ap-tg-connected">✅ Conectado como ' + vEsc(name) + '</div>';
+};
+
+// === Generate PIX ===
+async function generatePix() {
+    if (selectedAmount < 100) return;
+    var btn = document.getElementById('btn-generate');
+    var resultDiv = document.getElementById('qr-result');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="ap-spinner"></span>Gerando QR Code…';
+
+    try {
+        var body = { amount_brl: selectedAmount };
+        if (telegramUser) body.telegram_user = telegramUser;
+
+        var resp = await fetchT(WORKER_URL + '/api/donate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+            var err = await resp.json().catch(function() { return {}; });
+            throw new Error(err.error || 'Erro ao gerar PIX');
+        }
+        var data = await resp.json();
+        showQrResult(data);
+    } catch (e) {
+        console.error('[APOIE] Erro ao gerar PIX', e);
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="ap-qr-result" style="border-color:var(--v-danger,#e05555)">' +
+            '<div style="color:#e05555;font-size:14px;margin-bottom:8px">❌ ' + vEsc(e.message) + '</div>' +
+            '<div style="font-size:12px;color:var(--v-text-dim,#a09484)">Verifique sua conexão e tente novamente.</div>' +
+            '</div>';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Gerar QR Code PIX';
+    }
+}
+
+function showQrResult(data) {
+    var resultDiv = document.getElementById('qr-result');
+    resultDiv.style.display = 'block';
+
+    var html = '<div class="ap-qr-result">' +
+        '<div class="ap-qr-title">✦ QR Code PIX Gerado</div>' +
+        '<div class="ap-qr-amount">' + vEsc(data.amount_display) + '</div>' +
+        '<div class="ap-qr-wrapper"><div id="qr-container"></div></div>' +
+        '<div style="font-size:12px;color:var(--v-text-dim,#a09484);margin:8px 0;text-align:center">' +
+        'Aponte a câmera do app do banco para o QR acima' +
+        '</div>';
+
+    if (data.key_type && data.key_display) {
+        html += '<div class="ap-qr-info">Chave PIX (' + vEsc(data.key_type) + '): <b>' + vEsc(data.key_display) + '</b></div>';
+    }
+
+    html += '<div class="ap-qr-info">Referência: <b>' + vEsc(data.txid) + '</b></div>' +
+        '<div class="ap-code-box" id="brcode-text">' + vEsc(data.brcode) + '</div>' +
+        '<button class="ap-btn-copy" onclick="copyBrcode()">📋 Copiar Código PIX</button>';
+
+    if (data.linked) {
+        html += '<div class="ap-qr-note">✅ Vinculado a sua conta Telegram. Recompensas serão entregues automaticamente após verificação.</div>';
+    } else {
+        html += '<div class="ap-qr-note">👤 Doação anônima. Para receber recompensas no jogo, use <b>/apoiar ' + vEsc(data.txid) + '</b> no bot Telegram.</div>';
+    }
+
+    html += '<button class="ap-qr-new-btn" onclick="resetDonation()">↺ Nova Doação</button>' +
+        '</div>';
+
+    resultDiv.innerHTML = html;
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    try {
+        new QRCode(document.getElementById('qr-container'), {
+            text: data.brcode,
+            width: 200,
+            height: 200,
+            colorDark: '#2a2420',
+            colorLight: '#f5f0e0',
+            correctLevel: QRCode.CorrectLevel.M,
+        });
+    } catch (e) {
+        console.error('[APOIE] Erro QR', e);
+        document.getElementById('qr-container').innerHTML =
+            '<div style="color:#e05555;font-size:12px;padding:20px">Erro ao gerar QR. Use o código abaixo.</div>';
+    }
+
+    window._currentBrcode = data.brcode;
+}
+
+function resetDonation() {
+    var qr = document.getElementById('qr-result');
+    if (qr) { qr.style.display = 'none'; qr.innerHTML = ''; }
+    window.scrollTo({ top: document.getElementById('donate').offsetTop - 60, behavior: 'smooth' });
+}
+
+function copyBrcode() {
+    if (!window._currentBrcode) return;
+    var btn = document.querySelector('.ap-btn-copy');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window._currentBrcode)
+            .then(function() { showCopied(btn); })
+            .catch(function() { fallbackCopy(btn); });
+    } else {
+        fallbackCopy(btn);
+    }
+}
+
+function fallbackCopy(btn) {
+    var ta = document.createElement('textarea');
+    ta.value = window._currentBrcode;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showCopied(btn); } catch { btn.textContent = 'Erro ao copiar'; }
+    document.body.removeChild(ta);
+}
+
+function showCopied(btn) {
+    if (!btn) return;
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = '📋 Copiar Código PIX'; btn.classList.remove('copied'); }, 2000);
+}
+
+// === Goals + Stats + Donors ===
+async function loadGoals() {
+    var container = document.getElementById('goals-list');
+    if (!container) return;
+    var goals;
+    try {
+        var resp = await fetchT(WORKER_URL + '/api/goals').catch(function() { return null; });
+        if (resp && resp.ok) {
+            goals = await resp.json();
+        } else {
+            var local = await fetchT('goals.json');
+            if (!local.ok) throw new Error('HTTP ' + local.status);
+            goals = await local.json();
+        }
+    } catch {
+        var local2 = await fetchT('goals.json');
+        goals = await local2.json();
+    }
+
+    container.innerHTML = goals.map(function(g) {
+        var pct = g.target_brl > 0 ? Math.min(100, Math.round((g.current_brl / g.target_brl) * 100)) : 0;
+        return '<div class="ap-goal-card' + (g.completed ? ' ap-completed' : '') + ' ap-reveal">' +
+            '<div class="ap-goal-header">' +
+                '<span class="ap-goal-icon">' + g.icon + '</span>' +
+                '<span class="ap-goal-name">' + vEsc(g.name) + '</span>' +
+                (g.completed ? '<span class="ap-goal-check">✓</span>' : '') +
+            '</div>' +
+            '<div class="ap-goal-desc">' + vEsc(g.desc) + '</div>' +
+            '<div class="ap-progress-track"><div class="ap-progress-fill" data-pct="' + pct + '"></div></div>' +
+            '<div class="ap-progress-info">' +
+                '<span class="ap-progress-pct">' + pct + '%</span>' +
+                '<span class="ap-progress-amounts">' + formatBrl(g.current_brl) + ' / ' + formatBrl(g.target_brl) + '</span>' +
+            '</div></div>';
+    }).join('');
+    observeReveals();
+}
+
+async function loadStats() {
+    try {
+        var resp = await fetchT(WORKER_URL + '/api/stats').catch(function() { return null; });
+        if (!resp || !resp.ok) return;
+        var data = await resp.json();
+        var supEl = document.getElementById('stat-supporters');
+        var raisedEl = document.getElementById('stat-raised');
+        if (supEl && data.total_supporters != null) {
+            supEl.dataset.count = data.total_supporters;
+            if (data.total_supporters > 0) animateCounter(supEl, data.total_supporters);
+        }
+        if (raisedEl && data.total_raised_brl != null) {
+            raisedEl.dataset.count = data.total_raised_brl;
+            raisedEl.dataset.prefix = 'R$ ';
+            raisedEl.dataset.divide = '100';
+            if (data.total_raised_brl > 0) animateCounter(raisedEl, data.total_raised_brl);
+        }
+        // Global progress bar (header)
+        var progressFill = document.getElementById('global-progress-fill');
+        var progressLabel = document.getElementById('global-progress-label');
+        var target = 200000;  // R$ 2000 default
+        if (progressFill && data.total_raised_brl != null) {
+            var pct = Math.min(100, Math.round((data.total_raised_brl / target) * 100));
+            progressFill.style.width = pct + '%';
+        }
+        if (progressLabel && data.total_raised_brl != null) {
+            progressLabel.textContent = formatBrl(data.total_raised_brl) + ' / ' + formatBrl(target);
+        }
+    } catch (e) {
+        console.warn('[APOIE] Stats load failed', e);
+    }
+}
+
+async function loadRecentDonors() {
+    var container = document.getElementById('donors-list');
+    if (!container) return;
+    try {
+        var resp = await fetchT(WORKER_URL + '/api/recent').catch(function() { return null; });
+        if (!resp || !resp.ok) {
+            container.innerHTML = '<div class="ap-donors-empty">Carregando...</div>';
+            return;
+        }
+        var donors = await resp.json();
+        if (!donors || !donors.length) {
+            container.innerHTML = '<div class="ap-donors-empty">' +
+                '<span class="ap-donors-empty-icon">✦</span>' +
+                'Seja o primeiro aventureiro a apoiar Valdoria!<br>' +
+                '<small>Sua contribuição abre o caminho para muitas outras.</small>' +
+                '</div>';
+            return;
+        }
+        var tierIcon = {supporter:'🤝',copper:'🟤',silver:'⚪',gold:'🟡',platinum:'💎'};
+        var tierColor = {supporter:'#9c8d6a',copper:'#b87333',silver:'#c0c0c0',gold:'#c4953a',platinum:'#7dd3fc'};
+        container.innerHTML = donors.map(function(d, i) {
+            var tier = d.tier || 'supporter';
+            return '<div class="ap-donor-card ap-reveal" data-tier="' + tier + '" style="animation-delay:' + (i * 0.05) + 's">' +
+                '<div class="ap-donor-initial" style="color:' + (tierColor[tier] || '#c4953a') + '">' + vEsc(d.initial || '?') + '</div>' +
+                '<div class="ap-donor-info">' +
+                    '<div class="ap-donor-tier" style="color:' + (tierColor[tier] || '#c4953a') + '">' +
+                        (d.tier_icon || tierIcon[tier] || '✦') + ' ' + vEsc(d.tier_name || 'Apoiador') +
+                    '</div>' +
+                    '<div class="ap-donor-amount">' + vEsc(d.amount_display || '—') + '</div>' +
+                '</div></div>';
+        }).join('');
+    } catch (e) {
+        console.warn('[APOIE] Recent donors load failed', e);
+        container.innerHTML = '<div class="ap-donors-empty">Erro ao carregar.</div>';
+    }
+}
+
+function animateCounter(el, target, duration) {
+    duration = duration || 1500;
+    var prefix = el.dataset.prefix || '';
+    var divide = parseFloat(el.dataset.divide) || 1;
+    var start = performance.now();
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function tick(now) {
+        var elapsed = now - start;
+        var progress = Math.min(elapsed / duration, 1);
+        var value = Math.round(easeOutCubic(progress) * target);
+        var display = divide > 1
+            ? formatBrl(value)
+            : value.toLocaleString('pt-BR');
+        el.textContent = divide > 1 ? display : (prefix + display);
+        if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+// === Reveal on scroll ===
+var _revealObserver = null;
+function observeReveals() {
+    if (!_revealObserver) {
+        _revealObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('ap-visible');
+                    var fill = entry.target.querySelector('.ap-progress-fill');
+                    if (fill) fill.style.width = fill.dataset.pct + '%';
+                    var impBar = entry.target.querySelector('.ap-impact-bar');
+                    if (impBar) {
+                        impBar.style.setProperty('--bar-width', impBar.dataset.pct + '%');
+                        impBar.classList.add('ap-bar-animated');
+                    }
+                    var counter = entry.target.querySelector('[data-count]');
+                    if (counter) {
+                        var target = parseInt(counter.dataset.count, 10);
+                        if (target > 0) animateCounter(counter, target);
+                    }
+                    _revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+    }
+    document.querySelectorAll('.ap-reveal:not(.ap-visible)').forEach(function(el) {
+        _revealObserver.observe(el);
+    });
+}
+
+// === Nav scroll + back-to-top ===
+function setupNavbar() {
+    var nav = document.getElementById('ap-nav');
+    var backTop = document.getElementById('back-top');
+    var scrollHint = document.getElementById('scroll-hint');
+    if (!nav) return;
+    var ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                var y = window.scrollY;
+                nav.classList.toggle('ap-nav-scrolled', y > 60);
+                if (backTop) backTop.classList.toggle('visible', y > 400);
+                if (scrollHint) scrollHint.style.opacity = Math.max(0, 1 - y / 300);
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+
+    var sections = ['cenario-section', 'story', 'how', 'tiers', 'goals', 'donate'];
+    var links = document.querySelectorAll('.ap-nav-link');
+    var sectionObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                var id = entry.target.id;
+                links.forEach(function(link) {
+                    var href = link.getAttribute('href');
+                    link.classList.toggle('active', href === '#' + id);
+                });
+            }
+        });
+    }, { threshold: 0.3, rootMargin: '-80px 0px -50% 0px' });
+    sections.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+    });
+}
+
+// === MUSIC PLAYER (mantido do existente) ===
+const _AP_AUDIO_BASE = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
+const _AP_TRACKS = {
+    'Tema da Cidade': ['city_day.mp3', 'city_day_2.mp3', 'city_day_3.mp3', 'city_day_4.mp3'],
+    'Tema da Taverna': ['tavern_ambient.mp3', 'tavern_ambient_2.mp3', 'tavern_ambient_3.mp3'],
+    'Floresta': ['forest_explore.mp3', 'forest_explore_2.mp3', 'forest_explore_3.mp3'],
+    'Estradas': ['mountain_wind.mp3', 'mountain_wind_2.mp3'],
+    'Deserto': ['desert_wind.mp3', 'desert_wind_2.mp3'],
+    'Pântano': ['swamp_mist.mp3', 'swamp_mist_2.mp3'],
+    'Masmorra': ['dungeon_dark.mp3', 'dungeon_dark_2.mp3'],
+    'Combate': ['combat_tense.mp3', 'combat_tense_2.mp3'],
+    'Prólogo': ['prologue_theme.mp3'],
+};
+const _apAllTracks = [];
+for (const [name, files] of Object.entries(_AP_TRACKS)) {
+    for (const f of files) _apAllTracks.push({ name: name, file: f });
+}
+
+let _apAudio = null;
+let _apPlaying = false;
+let _apLastFile = '';
+let _apRafId = null;
+let _apTrackHistory = [];
+let _apHistoryIdx = -1;
+let _apCurrentTrack = null;
+
+function _apPickRandom() {
+    var pick;
+    do { pick = _apAllTracks[Math.floor(Math.random() * _apAllTracks.length)]; }
+    while (pick.file === _apLastFile && _apAllTracks.length > 1);
+    _apLastFile = pick.file;
+    return pick;
+}
+
+function togglePlayer() {
+    if (_apPlaying && _apAudio) {
+        _apAudio.pause();
+        _apPlaying = false;
+        _apUpdateUI();
+        return;
+    }
+    if (_apAudio && _apAudio.paused && _apAudio.src && _apAudio.currentTime > 0) {
+        _apAudio.play().catch(function() {});
+        _apPlaying = true;
+        _apUpdateUI();
+        _apAnimateBar();
+        return;
+    }
+    _apPlayRandom();
+}
+
+function _apPlayRandom() {
+    var track = _apPickRandom();
+    _apTrackHistory = [track];
+    _apHistoryIdx = 0;
+    _apPlayTrack(track);
+}
+
+function _apPlayTrack(track) {
+    _apDestroyAudio();
+    _apCurrentTrack = track;
+    _apLastFile = track.file;
+    var audio = new Audio(_AP_AUDIO_BASE + track.file);
+    audio.volume = 0.25;
+    _apAudio = audio;
+    audio.onended = function() { if (audio === _apAudio) _apNextTrack(); };
+    audio.onerror = function() {
+        if (audio === _apAudio) setTimeout(function() { if (audio === _apAudio) _apNextTrack(); }, 1000);
+    };
+    audio.play().then(function() {
+        if (audio !== _apAudio) return;
+        _apPlaying = true;
+        _apSetTrackName(track.name);
+        _apUpdateUI();
+        _apAnimateBar();
+    }).catch(function() {});
+}
+
+function _apNextTrack() {
+    if (!_apPlaying && !_apAudio) return;
+    if (_apHistoryIdx < _apTrackHistory.length - 1) {
+        _apHistoryIdx++;
+        _apPlayTrack(_apTrackHistory[_apHistoryIdx]);
+    } else {
+        var track = _apPickRandom();
+        _apTrackHistory.push(track);
+        _apHistoryIdx = _apTrackHistory.length - 1;
+        _apPlayTrack(track);
+    }
+}
+
+function _apPrevTrack() {
+    if (_apAudio && _apAudio.currentTime > 3) { _apAudio.currentTime = 0; return; }
+    if (_apHistoryIdx > 0) {
+        _apHistoryIdx--;
+        _apPlayTrack(_apTrackHistory[_apHistoryIdx]);
+    } else if (_apAudio) {
+        _apAudio.currentTime = 0;
+    }
+}
+
+function _apDestroyAudio() {
+    if (_apAudio) {
+        _apAudio.onended = null;
+        _apAudio.onerror = null;
+        _apAudio.pause();
+        try { _apAudio.src = ''; _apAudio.load(); } catch {}
+        _apAudio = null;
+    }
+}
+
+function _apUpdateUI() {
+    var iconPlay = document.getElementById('ap-icon-play');
+    var iconPause = document.getElementById('ap-icon-pause');
+    if (iconPlay) iconPlay.style.display = _apPlaying ? 'none' : 'block';
+    if (iconPause) iconPause.style.display = _apPlaying ? 'block' : 'none';
+    var btn = document.getElementById('ap-play-btn');
+    if (btn) btn.classList.toggle('playing', _apPlaying);
+    var wave = document.getElementById('ap-wave');
+    if (wave) wave.classList.toggle('active', _apPlaying);
+    if (!_apPlaying) _apSetTrackName('');
+}
+
+function _apSetTrackName(name) {
+    var el = document.getElementById('ap-track-name');
+    if (el) el.textContent = name || '';
+}
+
+function _apAnimateBar() {
+    if (_apRafId) cancelAnimationFrame(_apRafId);
+    function tick() {
+        if (!_apAudio || !_apPlaying) { _apRafId = null; return; }
+        var pct = _apAudio.duration ? (_apAudio.currentTime / _apAudio.duration * 100) : 0;
+        var bar = document.getElementById('ap-progress-bar');
+        if (bar) bar.style.width = pct + '%';
+        _apRafId = requestAnimationFrame(tick);
+    }
+    _apRafId = requestAnimationFrame(tick);
+}
+
+// === Cookie consent ===
+function checkCookieConsent() {
+    var consent = null;
+    try { consent = localStorage.getItem('valdoria_cookies'); } catch {}
+    if (!consent) {
+        var banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'block';
+    }
+}
+
+function acceptCookies() {
+    try { localStorage.setItem('valdoria_cookies', 'accepted'); } catch {}
+    var banner = document.getElementById('cookie-banner');
+    if (banner) banner.style.display = 'none';
+    // Trigger Telegram OAuth loading now
+    if (window.ApTgOAuth && typeof window.ApTgOAuth.init === 'function') {
+        window.ApTgOAuth.init(BOT_USERNAME, function(user) { telegramUser = user; });
+    }
+}
+
+function rejectCookies() {
+    try { localStorage.setItem('valdoria_cookies', 'rejected'); } catch {}
+    var banner = document.getElementById('cookie-banner');
+    if (banner) banner.style.display = 'none';
+}
+
+// === Bootstrap ===
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.scrollTo(0, 0);
+
+    // Cookies first
+    checkCookieConsent();
+
+    // Telegram OAuth (only if cookies accepted)
+    var cookiesOk;
+    try { cookiesOk = localStorage.getItem('valdoria_cookies') === 'accepted'; } catch { cookiesOk = false; }
+    if (cookiesOk && window.ApTgOAuth && typeof window.ApTgOAuth.init === 'function') {
+        window.ApTgOAuth.init(BOT_USERNAME, function(user) { telegramUser = user; });
+    }
+
+    loadGoals();
+    loadStats();
+    loadRecentDonors();
+    setupNavbar();
+    observeReveals();
+    updatePreview();
+
+    // Slider/input listeners
+    var slider = document.getElementById('amount-slider');
+    if (slider) slider.addEventListener('input', function() { onSliderInput(slider); });
+    var input = document.getElementById('custom-amount');
+    if (input) input.addEventListener('input', function() { onCustomAmount(input); });
+
+    // Reveal animations + scene-ready
+    requestAnimationFrame(function() {
+        var cenarioEl = document.querySelector('.ap-cinematic');
+        if (cenarioEl) setTimeout(function() { cenarioEl.classList.add('ap-scene-ready'); }, 100);
+    });
+});
+
+// Export to window for HTML onclick handlers
+window.selectAmount = selectAmount;
+window.onSliderInput = onSliderInput;
+window.onCustomAmount = onCustomAmount;
+window.generatePix = generatePix;
+window.copyBrcode = copyBrcode;
+window.resetDonation = resetDonation;
+window.acceptCookies = acceptCookies;
+window.rejectCookies = rejectCookies;
+window.togglePlayer = togglePlayer;
+window._apNextTrack = _apNextTrack;
+window._apPrevTrack = _apPrevTrack;

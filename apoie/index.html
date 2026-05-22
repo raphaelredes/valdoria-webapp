@@ -8,11 +8,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Apoie Lendas de Valdoria - RPG Medieval via Telegram</title>
-    <meta name="description" content="Apoie o desenvolvimento do Lendas de Valdoria, um RPG medieval de fantasia D&D 5e via Telegram. Contribua via PIX e receba recompensas exclusivas.">
-    <meta name="keywords" content="RPG, Telegram, D&D, medieval, fantasia, PIX, apoiar, Valdoria">
-    <meta property="og:title" content="Apoie Lendas de Valdoria">
-    <meta property="og:description" content="RPG medieval D&D 5e via Telegram. Contribua via PIX e receba recompensas exclusivas no jogo.">
+    <title>Apoiar Lendas de Valdoria — RPG Medieval D&amp;D 5e</title>
+    <meta name="description" content="Apoie o desenvolvimento do Lendas de Valdoria, um RPG medieval de fantasia D&amp;D 5e via Telegram. Contribua via PIX e receba recompensas exclusivas.">
+    <meta name="keywords" content="RPG, Telegram, D&amp;D, medieval, fantasia, PIX, apoiar, Valdoria">
+    <meta property="og:title" content="Apoiar Lendas de Valdoria">
+    <meta property="og:description" content="RPG medieval D&amp;D 5e via Telegram. Contribua via PIX e receba recompensas exclusivas no jogo.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="pt_BR">
     <meta property="og:url" content="https://apoie.lendasdevaldoria.com.br">
@@ -27,52 +27,50 @@
     <link rel="stylesheet" href="../valdoria-design.css">
     <link rel="stylesheet" href="../shared/toast.css">
     <link rel="stylesheet" href="style.css">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Lendas de Valdoria",
-        "description": "RPG medieval D&D 5e via Telegram com combate 3D, explora\u00e7\u00e3o, NPCs com IA e trilha sonora original.",
-        "applicationCategory": "Game",
-        "operatingSystem": "Telegram",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "BRL",
-            "description": "Gratuito para jogar. Apoie via PIX para recompensas exclusivas."
-        },
-        "potentialAction": {
-            "@type": "DonateAction",
-            "name": "Apoiar Valdoria via PIX",
-            "recipient": {
-                "@type": "Organization",
-                "name": "Lendas de Valdoria"
-            }
-        }
-    }
-    </script>
 </head>
 <body>
-    <!-- Navigation Bar -->
+
+    <!-- Nav Bar with global progress -->
     <nav class="ap-nav" id="ap-nav">
         <div class="ap-nav-inner">
-            <a href="#cenario-section" class="ap-nav-brand"><svg class="ap-nav-orb" width="20" height="20" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="no" cx="38%" cy="35%" r="55%"><stop offset="0%" stop-color="#fff4d0"/><stop offset="20%" stop-color="#e8c45a"/><stop offset="50%" stop-color="#c4953a"/><stop offset="80%" stop-color="#8b6420"/><stop offset="100%" stop-color="#5a3e10"/></radialGradient></defs><circle cx="14" cy="14" r="12" fill="url(#no)"/><ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/></svg><span>VALDORIA</span></a>
+            <a href="#cenario-section" class="ap-nav-brand">
+                <svg class="ap-nav-orb" width="20" height="20" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                    <defs><radialGradient id="no" cx="38%" cy="35%" r="55%">
+                        <stop offset="0%" stop-color="#fff4d0"/>
+                        <stop offset="20%" stop-color="#e8c45a"/>
+                        <stop offset="50%" stop-color="#c4953a"/>
+                        <stop offset="80%" stop-color="#8b6420"/>
+                        <stop offset="100%" stop-color="#5a3e10"/>
+                    </radialGradient></defs>
+                    <circle cx="14" cy="14" r="12" fill="url(#no)"/>
+                    <ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/>
+                </svg>
+                <span>VALDORIA</span>
+            </a>
             <button class="ap-nav-toggle" id="nav-toggle" aria-label="Menu"
                 onclick="document.querySelector('.ap-nav-links').classList.toggle('open'); this.classList.toggle('active')">
                 <span></span><span></span><span></span>
             </button>
             <div class="ap-nav-links">
                 <a href="#story" class="ap-nav-link">História</a>
+                <a href="#how" class="ap-nav-link">Como Funciona</a>
                 <a href="#tiers" class="ap-nav-link">Recompensas</a>
                 <a href="#goals" class="ap-nav-link">Metas</a>
                 <a href="#donate" class="ap-nav-link active">Apoiar</a>
             </div>
         </div>
+        <!-- Global progress bar -->
+        <div class="ap-nav-progress">
+            <div class="ap-nav-progress-track">
+                <div class="ap-nav-progress-fill" id="global-progress-fill"></div>
+            </div>
+            <div class="ap-nav-progress-label" id="global-progress-label">Carregando…</div>
+        </div>
     </nav>
 
     <button class="ap-back-top" id="back-top" aria-label="Voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#x25B2;</button>
 
-    <!-- Minimalist Cenário — Orb of Valdoria -->
+    <!-- Hero: Orb of Valdoria + Music Player -->
     <section class="ap-cenario ap-cinematic" id="cenario-section">
         <div class="ap-cenario-vignette"></div>
         <div class="ap-cenario-content">
@@ -101,11 +99,12 @@
             <h1 class="ap-cenario-title">Valdoria</h1>
             <div class="ap-cenario-divider"><span class="ap-cenario-divider-line"></span><span class="ap-cenario-divider-gem">&#x25C6;</span><span class="ap-cenario-divider-line"></span></div>
             <div class="ap-cenario-subtitle">Um mundo inteiro precisa de você</div>
-            <div class="ap-cenario-stats" id="cenario-stats">
+            <div class="ap-cenario-stats">
                 <div class="ap-cenario-stat">
                     <div class="ap-cenario-stat-value" data-count="0" id="stat-supporters">0</div>
                     <div class="ap-cenario-stat-label">Apoiadores</div>
                 </div>
+                <div class="ap-cenario-stat-sep">&#x25C6;</div>
                 <div class="ap-cenario-stat">
                     <div class="ap-cenario-stat-value" data-count="0" id="stat-raised">R$ 0</div>
                     <div class="ap-cenario-stat-label">Arrecadado</div>
@@ -117,26 +116,26 @@
                 <span class="ap-cenario-trust-sep">&#x25C6;</span>
                 <span>&#x1F4B0; Sem taxas</span>
                 <span class="ap-cenario-trust-sep">&#x25C6;</span>
-                <span>&#x2694;&#xFE0F; D&D 5e</span>
+                <span>&#x2694;&#xFE0F; D&amp;D 5e</span>
             </div>
         </div>
+
+        <!-- Music Player (minimalist at hero) -->
         <div class="ap-player" id="ap-player">
             <div class="ap-player-label">&#x266B; Trilha Sonora Original</div>
             <div class="ap-player-controls">
-                <button class="ap-ctrl-prev" onclick="event.stopPropagation(); _apPrevTrack()" aria-label="Faixa anterior">
+                <button class="ap-ctrl-prev" onclick="event.stopPropagation(); _apPrevTrack()" aria-label="Anterior">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="3" height="14"/><polygon points="21 5 10 12 21 19"/></svg>
                 </button>
-                <button class="ap-player-btn" id="ap-play-btn" onclick="togglePlayer()" aria-label="Tocar trilha sonora">
+                <button class="ap-player-btn" id="ap-play-btn" onclick="togglePlayer()" aria-label="Tocar trilha">
                     <svg id="ap-icon-play" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg>
                     <svg id="ap-icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
                 </button>
-                <button class="ap-ctrl-next" onclick="event.stopPropagation(); _apNextTrack()" aria-label="Próxima faixa">
+                <button class="ap-ctrl-next" onclick="event.stopPropagation(); _apNextTrack()" aria-label="Próxima">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="3 5 14 12 3 19"/><rect x="18" y="5" width="3" height="14"/></svg>
                 </button>
                 <div class="ap-player-meta">
-                    <!-- USER REQUEST 2026-05-04: ap-track-name removido — músicas
-                         não têm nome, ocupava espaço sem valor. Mantido apenas a
-                         barra de progresso. -->
+                    <div class="ap-track-name" id="ap-track-name"></div>
                     <div class="ap-player-bar-wrap"><div class="ap-player-bar" id="ap-progress-bar"></div></div>
                 </div>
                 <div class="ap-player-wave" id="ap-wave">
@@ -144,13 +143,14 @@
                 </div>
             </div>
         </div>
+
         <div class="ap-scroll-hint" id="scroll-hint">
             <span>Descubra a história</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" opacity="0.6"><path d="M10 14l-5-5 1.4-1.4L10 11.2l3.6-3.6L15 9z"/></svg>
         </div>
     </section>
 
-    <!-- Chapter 1: The Story -->
+    <!-- Story -->
     <section class="ap-section ap-chapter" id="story">
         <div class="ap-ornament">&#x2726; &#x2726; &#x2726;</div>
         <div class="ap-section-title ap-reveal">A História de Valdoria</div>
@@ -164,55 +164,183 @@
             <div class="ap-story-card ap-reveal">
                 <div class="ap-story-img"><img src="img/story/aventura.webp" alt="A Aventura" loading="lazy"></div>
                 <div class="ap-story-title">A Aventura</div>
-                <div class="ap-story-text">Crie seu personagem entre 12 classes e 9 raças de D&D 5e. Explore, lute, negocie e forje sua lenda &mdash; tudo direto no Telegram.</div>
+                <div class="ap-story-text">Crie seu personagem entre 12 classes e 9 raças de D&amp;D 5e. Explore, lute, negocie e forje sua lenda — tudo direto no Telegram.</div>
             </div>
             <div class="ap-story-card ap-reveal">
-                <div class="ap-story-img"><img src="img/story/experiência.webp" alt="A Experiência" loading="lazy"></div>
+                <div class="ap-story-img"><img src="img/story/experi%C3%AAncia.webp" alt="A Experiência" loading="lazy"></div>
                 <div class="ap-story-title">A Experiência</div>
-                <div class="ap-story-text">WebApps imersivas com mapa interativo, combate com dados 3D, sistema de clima, NPCs com IA e trilha sonora original &mdash; um RPG completo no bolso.</div>
+                <div class="ap-story-text">WebApps imersivas com mapa interativo, combate com dados 3D, sistema de clima, NPCs com IA e trilha sonora original.</div>
             </div>
         </div>
     </section>
     <div class="ap-divider"></div>
 
-    <!-- Chapter 2: Impact -->
+    <!-- How It Works -->
+    <section class="ap-section ap-chapter" id="how">
+        <div class="ap-section-title ap-reveal">Como Funciona</div>
+        <div class="ap-section-subtitle ap-reveal">Processo simples e transparente</div>
+        <div class="ap-timeline">
+            <div class="ap-timeline-step ap-reveal">
+                <div class="ap-timeline-dot">1</div>
+                <div class="ap-timeline-icon">&#x1F4B0;</div>
+                <div class="ap-timeline-title">Escolha o valor</div>
+                <div class="ap-timeline-desc">Slider épico de R$1 a R$1000 OU digite valor exato. Veja em tempo real qual tier você desbloqueia.</div>
+            </div>
+            <div class="ap-timeline-step ap-reveal">
+                <div class="ap-timeline-dot">2</div>
+                <div class="ap-timeline-icon">&#x1F4F1;</div>
+                <div class="ap-timeline-title">Pague via PIX</div>
+                <div class="ap-timeline-desc">Escaneie o QR Code com o app do seu banco ou copie o código PIX Copia e Cola.</div>
+            </div>
+            <div class="ap-timeline-step ap-reveal">
+                <div class="ap-timeline-dot">3</div>
+                <div class="ap-timeline-icon">&#x2705;</div>
+                <div class="ap-timeline-title">Verificação rápida</div>
+                <div class="ap-timeline-desc">O administrador verifica o pagamento. Prazo de até 24 horas.</div>
+            </div>
+            <div class="ap-timeline-step ap-reveal">
+                <div class="ap-timeline-dot">4</div>
+                <div class="ap-timeline-icon">&#x1F381;</div>
+                <div class="ap-timeline-title">Receba recompensas</div>
+                <div class="ap-timeline-desc">Valdoritas, itens exclusivos e título de patrono são entregues automaticamente no jogo.</div>
+            </div>
+        </div>
+    </section>
+    <div class="ap-divider"></div>
+
+    <!-- Impact -->
     <section class="ap-section ap-chapter" id="impact">
         <div class="ap-section-title ap-reveal">Como Seu Apoio Transforma Valdoria</div>
         <div class="ap-section-subtitle ap-reveal">Cada contribuição é investida diretamente no jogo</div>
         <div class="ap-impact-grid">
-            <div class="ap-impact-card ap-reveal"><div class="ap-impact-icon"><img src="img/impact/servidor.webp" alt="Servidor" loading="lazy"></div><div class="ap-impact-bar" data-pct="60"></div><div class="ap-impact-name">Servidor 24h</div><div class="ap-impact-pct">~60%</div><div class="ap-impact-desc">Cloud Run + banco de dados sempre online</div></div>
-            <div class="ap-impact-card ap-reveal"><div class="ap-impact-icon"><img src="img/impact/infraestrutura.webp" alt="Infraestrutura" loading="lazy"></div><div class="ap-impact-bar" data-pct="15"></div><div class="ap-impact-name">Infraestrutura</div><div class="ap-impact-pct">~15%</div><div class="ap-impact-desc">Domínio, Workers, tunnels, ferramentas</div></div>
-            <div class="ap-impact-card ap-reveal"><div class="ap-impact-icon"><img src="img/impact/desenvolvimento.webp" alt="Desenvolvimento" loading="lazy"></div><div class="ap-impact-bar" data-pct="15"></div><div class="ap-impact-name">Desenvolvimento</div><div class="ap-impact-pct">~15%</div><div class="ap-impact-desc">APIs de IA, testes, CI/CD</div></div>
-            <div class="ap-impact-card ap-reveal"><div class="ap-impact-icon"><img src="img/impact/arte.webp" alt="Arte e Assets" loading="lazy"></div><div class="ap-impact-bar" data-pct="10"></div><div class="ap-impact-name">Arte e Assets</div><div class="ap-impact-pct">~10%</div><div class="ap-impact-desc">Ilustrações, música, efeitos sonoros</div></div>
+            <div class="ap-impact-card ap-reveal">
+                <div class="ap-impact-icon"><img src="img/impact/servidor.webp" alt="Servidor" loading="lazy"></div>
+                <div class="ap-impact-bar" data-pct="60"></div>
+                <div class="ap-impact-name">Servidor 24h</div>
+                <div class="ap-impact-pct">~60%</div>
+                <div class="ap-impact-desc">Cloud Run + banco de dados sempre online</div>
+            </div>
+            <div class="ap-impact-card ap-reveal">
+                <div class="ap-impact-icon"><img src="img/impact/infraestrutura.webp" alt="Infraestrutura" loading="lazy"></div>
+                <div class="ap-impact-bar" data-pct="15"></div>
+                <div class="ap-impact-name">Infraestrutura</div>
+                <div class="ap-impact-pct">~15%</div>
+                <div class="ap-impact-desc">Domínio, Workers, tunnels, ferramentas</div>
+            </div>
+            <div class="ap-impact-card ap-reveal">
+                <div class="ap-impact-icon"><img src="img/impact/desenvolvimento.webp" alt="Desenvolvimento" loading="lazy"></div>
+                <div class="ap-impact-bar" data-pct="15"></div>
+                <div class="ap-impact-name">Desenvolvimento</div>
+                <div class="ap-impact-pct">~15%</div>
+                <div class="ap-impact-desc">APIs de IA, testes, CI/CD, hospedagem</div>
+            </div>
+            <div class="ap-impact-card ap-reveal">
+                <div class="ap-impact-icon"><img src="img/impact/arte.webp" alt="Arte e Assets" loading="lazy"></div>
+                <div class="ap-impact-bar" data-pct="10"></div>
+                <div class="ap-impact-name">Arte e Assets</div>
+                <div class="ap-impact-pct">~10%</div>
+                <div class="ap-impact-desc">Ilustrações, música, efeitos sonoros, OpenAI gpt-image</div>
+            </div>
         </div>
-        <div class="ap-impact-note ap-reveal">Lendas de Valdoria é 100% gratuito, independente e sem fins lucrativos. O valor que você envia via PIX é exatamente o que recebemos &mdash; sem taxas.</div>
+        <div class="ap-impact-note ap-reveal">Lendas de Valdoria é 100% gratuito, independente e sem fins lucrativos. O valor que você envia via PIX é exatamente o que recebemos — sem taxas.</div>
     </section>
     <div class="ap-divider"></div>
 
-    <!-- Chapter 3: Tiers -->
+    <!-- Tiers -->
     <section class="ap-section ap-chapter" id="tiers">
         <div class="ap-section-title ap-reveal">Recompensas do Patrono</div>
         <div class="ap-section-subtitle ap-reveal">Cada contribuição desbloqueia tesouros exclusivos no jogo</div>
         <div class="ap-tiers-grid">
-            <div class="ap-tier-card ap-reveal" data-tier="supporter"><div class="ap-tier-header"><span class="ap-tier-icon"><img src="img/crests/apoiador.webp" alt="Apoiador"></span><span class="ap-tier-name">Apoiador</span></div><span class="ap-tier-range">R$ 1,00 &ndash; R$ 4,99</span><ul class="ap-tier-rewards"><li>&#x1F4B0; +50 GP (ouro)</li><li>&#x1F392; 1x Poção de Cura</li></ul></div>
-            <div class="ap-tier-card ap-reveal" data-tier="copper"><div class="ap-tier-header"><span class="ap-tier-icon"><img src="img/crests/cobre.webp" alt="Patrono de Cobre"></span><span class="ap-tier-name">Patrono de Cobre</span></div><span class="ap-tier-range">R$ 5,00 &ndash; R$ 14,99</span><ul class="ap-tier-rewards"><li>&#x1F4B0; +200 GP</li><li>&#x1F392; 2x Poção de Cura</li><li>&#x1F3C5; Título: &#x1F7E4; Patrono de Cobre</li></ul></div>
-            <div class="ap-tier-card ap-reveal" data-tier="silver"><div class="ap-tier-popular">POPULAR</div><div class="ap-tier-header"><span class="ap-tier-icon"><img src="img/crests/prata.webp" alt="Patrono de Prata"></span><span class="ap-tier-name">Patrono de Prata</span></div><span class="ap-tier-range">R$ 15,00 &ndash; R$ 29,99</span><ul class="ap-tier-rewards"><li>&#x1F4B0; +750 GP</li><li>&#x1F392; 3x Poção de Cura</li><li class="ap-exclusive">&#x1F48D; Anel do Patrono (exclusivo)<img class="ap-item-thumb" src="img/items/anel_patrono.webp" alt="Anel do Patrono" loading="lazy"><span class="ap-item-desc">Irradia uma aura de carisma. +1 CHA.</span></li><li>&#x1F3C5; Título: &#x26AA; Patrono de Prata</li></ul></div>
-            <div class="ap-tier-card ap-reveal" data-tier="gold"><div class="ap-tier-header"><span class="ap-tier-icon"><img src="img/crests/ouro.webp" alt="Patrono de Ouro"></span><span class="ap-tier-name">Patrono de Ouro</span></div><span class="ap-tier-range">R$ 30,00 &ndash; R$ 49,99</span><ul class="ap-tier-rewards"><li>&#x1F4B0; +2.000 GP</li><li>&#x1F392; 5x Poção de Cura</li><li class="ap-exclusive">&#x1F458; Manto do Benfeitor (exclusivo)<img class="ap-item-thumb" src="img/items/manto_benfeitor.webp" alt="Manto do Benfeitor" loading="lazy"><span class="ap-item-desc">Protege contra golpes. +1 AC.</span></li><li>&#x1F3C5; Título: &#x1F7E1; Patrono de Ouro</li></ul></div>
-            <div class="ap-tier-card ap-reveal" data-tier="platinum"><div class="ap-tier-header"><span class="ap-tier-icon"><img src="img/crests/platina.webp" alt="Patrono de Platina"></span><span class="ap-tier-name">Patrono de Platina</span></div><span class="ap-tier-range">R$ 50,00+</span><ul class="ap-tier-rewards"><li>&#x1F4B0; +5.000 GP</li><li>&#x1F392; 5x Poção de Cura Superior</li><li class="ap-exclusive">&#x1F5E1;&#xFE0F; Lâmina da Generosidade (exclusiva)<img class="ap-item-thumb" src="img/items/lamina_generosidade.webp" alt="Lâmina da Generosidade" loading="lazy"><span class="ap-item-desc">Espada dourada que brilha com gratidão. 1d8+1 dano.</span></li><li>&#x1F3C5; Título: &#x1F48E; Patrono de Platina</li></ul></div>
+            <div class="ap-tier-card ap-reveal" data-tier="supporter">
+                <div class="ap-tier-header">
+                    <span class="ap-tier-icon"><img src="img/crests/apoiador.webp" alt="Apoiador" onerror="this.style.display='none'"></span>
+                    <span class="ap-tier-name">Apoiador</span>
+                </div>
+                <span class="ap-tier-range">R$ 1,00 — R$ 4,99</span>
+                <ul class="ap-tier-rewards">
+                    <li>&#x1F4B0; +50 Valdoritas</li>
+                    <li>&#x1F9EA; 1× Poção de Cura</li>
+                </ul>
+            </div>
+            <div class="ap-tier-card ap-reveal" data-tier="copper">
+                <div class="ap-tier-header">
+                    <span class="ap-tier-icon"><img src="img/crests/cobre.webp" alt="Patrono de Cobre" onerror="this.style.display='none'"></span>
+                    <span class="ap-tier-name">Patrono de Cobre</span>
+                </div>
+                <span class="ap-tier-range">R$ 5,00 — R$ 14,99</span>
+                <ul class="ap-tier-rewards">
+                    <li>&#x1F4B0; +200 Valdoritas</li>
+                    <li>&#x1F9EA; 2× Poção de Cura</li>
+                    <li>&#x1F3C5; Título: &#x1F7E4; Patrono de Cobre</li>
+                </ul>
+            </div>
+            <div class="ap-tier-card ap-reveal" data-tier="silver">
+                <div class="ap-tier-popular">POPULAR</div>
+                <div class="ap-tier-header">
+                    <span class="ap-tier-icon"><img src="img/crests/prata.webp" alt="Patrono de Prata" onerror="this.style.display='none'"></span>
+                    <span class="ap-tier-name">Patrono de Prata</span>
+                </div>
+                <span class="ap-tier-range">R$ 15,00 — R$ 29,99</span>
+                <ul class="ap-tier-rewards">
+                    <li>&#x1F4B0; +750 Valdoritas</li>
+                    <li>&#x1F9EA; 3× Poção de Cura</li>
+                    <li class="ap-exclusive">
+                        &#x1F48D; Anel do Patrono (exclusivo)
+                        <img class="ap-item-thumb" src="img/items/anel_patrono.webp" alt="Anel do Patrono" loading="lazy" onerror="this.style.display='none'">
+                        <span class="ap-item-desc">Irradia uma aura de carisma. +1 CHA.</span>
+                    </li>
+                    <li>&#x1F3C5; Título: &#x26AA; Patrono de Prata</li>
+                </ul>
+            </div>
+            <div class="ap-tier-card ap-reveal" data-tier="gold">
+                <div class="ap-tier-header">
+                    <span class="ap-tier-icon"><img src="img/crests/ouro.webp" alt="Patrono de Ouro" onerror="this.style.display='none'"></span>
+                    <span class="ap-tier-name">Patrono de Ouro</span>
+                </div>
+                <span class="ap-tier-range">R$ 30,00 — R$ 49,99</span>
+                <ul class="ap-tier-rewards">
+                    <li>&#x1F4B0; +2.000 Valdoritas</li>
+                    <li>&#x1F9EA; 5× Poção de Cura</li>
+                    <li class="ap-exclusive">
+                        &#x1F458; Manto do Benfeitor (exclusivo)
+                        <img class="ap-item-thumb" src="img/items/manto_benfeitor.webp" alt="Manto do Benfeitor" loading="lazy" onerror="this.style.display='none'">
+                        <span class="ap-item-desc">Protege contra golpes. +1 AC.</span>
+                    </li>
+                    <li>&#x1F3C5; Título: &#x1F7E1; Patrono de Ouro</li>
+                </ul>
+            </div>
+            <div class="ap-tier-card ap-reveal" data-tier="platinum">
+                <div class="ap-tier-header">
+                    <span class="ap-tier-icon"><img src="img/crests/platina.webp" alt="Patrono de Platina" onerror="this.style.display='none'"></span>
+                    <span class="ap-tier-name">Patrono de Platina</span>
+                </div>
+                <span class="ap-tier-range">R$ 50,00+</span>
+                <ul class="ap-tier-rewards">
+                    <li>&#x1F4B0; +5.000 Valdoritas</li>
+                    <li>&#x1F9EA; 5× Poção de Cura Superior</li>
+                    <li class="ap-exclusive">
+                        &#x2694; Lâmina da Generosidade (exclusiva)
+                        <img class="ap-item-thumb" src="img/items/lamina_generosidade.webp" alt="Lâmina da Generosidade" loading="lazy" onerror="this.style.display='none'">
+                        <span class="ap-item-desc">Espada dourada que brilha com gratidão. 1d8+1 dano.</span>
+                    </li>
+                    <li>&#x1F3C5; Título: &#x1F48E; Patrono de Platina</li>
+                </ul>
+            </div>
         </div>
     </section>
     <div class="ap-divider"></div>
 
-    <!-- Chapter 4: Goals -->
+    <!-- Goals -->
     <section class="ap-section ap-chapter" id="goals">
         <div class="ap-section-title ap-reveal">Metas da Comunidade</div>
         <div class="ap-section-subtitle ap-reveal">Juntos, construímos Valdoria</div>
-        <div class="ap-goals-list" id="goals-list"></div>
+        <div class="ap-goals-list" id="goals-list">
+            <div class="ap-goals-empty">Carregando metas...</div>
+        </div>
     </section>
     <div class="ap-divider"></div>
 
-
-    <!-- Chapter 4.5: Recent Donors -->
+    <!-- Recent Donors -->
     <section class="ap-section ap-chapter" id="donors">
         <div class="ap-section-title ap-reveal">Apoiadores Recentes</div>
         <div class="ap-section-subtitle ap-reveal">Aventureiros que acreditam em Valdoria</div>
@@ -222,37 +350,69 @@
     </section>
     <div class="ap-divider"></div>
 
-    <!-- Chapter 5: Donate -->
+    <!-- DONATE - Hero of the page -->
     <section class="ap-section ap-chapter ap-donate" id="donate">
         <div class="ap-section-title ap-reveal">Apoiar Valdoria</div>
-        <div class="ap-section-subtitle ap-reveal">Escolha o valor e gere o QR Code instantaneamente</div>
+        <div class="ap-section-subtitle ap-reveal">Escolha o valor — slider épico ou digite exato</div>
+
         <div class="ap-donate-box">
-            <div class="ap-tg-login" id="tg-login-area"><div id="tg-widget"></div><div id="tg-status"></div></div>
+            <!-- Telegram OAuth area (custom, replaces buggy widget) -->
+            <div class="ap-tg-login">
+                <div class="ap-tg-help">
+                    <span class="ap-tg-help-icon">&#x1F4A1;</span>
+                    <span>Conecte seu Telegram para receber recompensas vinculadas automaticamente ao seu personagem.</span>
+                </div>
+                <div id="ap-tg-login-container"></div>
+                <div id="ap-tg-status" class="ap-tg-status-row"></div>
+            </div>
+
+            <!-- Preset amount buttons -->
             <div class="ap-amount-grid">
                 <button class="ap-amount-btn" data-amount="500" onclick="selectAmount(500)">R$ 5</button>
                 <button class="ap-amount-btn" data-amount="1500" onclick="selectAmount(1500)">R$ 15</button>
                 <button class="ap-amount-btn" data-amount="3000" onclick="selectAmount(3000)">R$ 30</button>
                 <button class="ap-amount-btn" data-amount="5000" onclick="selectAmount(5000)">R$ 50</button>
+                <button class="ap-amount-btn" data-amount="10000" onclick="selectAmount(10000)">R$ 100</button>
             </div>
-            <div class="ap-amount-custom"><label for="custom-amount">Outro valor:</label><input type="number" id="custom-amount" min="1" max="1000" step="0.01" placeholder="R$ 0,00" oninput="onCustomAmount(this)"></div>
-            <div class="ap-trust-row"><span class="ap-trust-badge">&#x1F512; PIX seguro</span><span class="ap-trust-badge">&#x26A1; Instantâneo</span><span class="ap-trust-badge">&#x1F4B0; Sem taxas</span></div>
-            <div class="ap-tier-preview" id="tier-preview"><div style="font-size:13px;color:var(--v-text-dim)">Selecione um valor para ver as recompensas</div></div>
+
+            <!-- Slider épico + input -->
+            <div class="ap-amount-slider-wrap">
+                <div class="ap-amount-slider-header">
+                    <span class="ap-amount-slider-label">Escolha o valor</span>
+                    <span class="ap-amount-slider-display" id="slider-display">R$ 0,00</span>
+                </div>
+                <input type="range" id="amount-slider" min="0" max="20000" step="100" value="0" class="ap-amount-slider">
+                <div class="ap-amount-slider-ticks">
+                    <span>R$ 0</span>
+                    <span>R$ 50</span>
+                    <span>R$ 100</span>
+                    <span>R$ 150</span>
+                    <span>R$ 200</span>
+                </div>
+                <div class="ap-amount-custom">
+                    <label for="custom-amount">Ou digite valor exato (R$):</label>
+                    <input type="number" id="custom-amount" min="0" max="1000" step="0.01" placeholder="0,00" inputmode="decimal">
+                </div>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="ap-trust-row">
+                <span class="ap-trust-badge">&#x1F512; PIX seguro</span>
+                <span class="ap-trust-badge">&#x26A1; Instantâneo</span>
+                <span class="ap-trust-badge">&#x1F4B0; Sem taxas</span>
+            </div>
+
+            <!-- Tier preview (live) -->
+            <div class="ap-tier-preview" id="tier-preview">
+                <div class="ap-tier-preview-empty">
+                    <span class="ap-tier-preview-icon">✦</span>
+                    Selecione um valor (mínimo R$ 1,00) para ver as recompensas
+                </div>
+            </div>
+
             <button class="ap-generate-btn" id="btn-generate" onclick="generatePix()" disabled>Gerar QR Code PIX</button>
             <div class="ap-guarantee">&#x1F6E1;&#xFE0F; Sem taxas. O valor integral vai para o projeto.</div>
             <div id="qr-result" style="display:none"></div>
-        </div>
-    </section>
-    <div class="ap-divider"></div>
-
-    <!-- Chapter 6: How It Works -->
-    <section class="ap-section ap-chapter" id="how">
-        <div class="ap-section-title ap-reveal">Como Funciona</div>
-        <div class="ap-section-subtitle ap-reveal">Processo simples e transparente</div>
-        <div class="ap-timeline">
-            <div class="ap-timeline-step ap-reveal"><div class="ap-timeline-dot">1</div><div class="ap-timeline-icon">&#x1F4B0;</div><div class="ap-timeline-title">Escolha o valor</div><div class="ap-timeline-desc">Selecione um valor predefinido ou digite quanto deseja contribuir. A partir de R$ 1,00.</div></div>
-            <div class="ap-timeline-step ap-reveal"><div class="ap-timeline-dot">2</div><div class="ap-timeline-icon">&#x1F4F1;</div><div class="ap-timeline-title">Pague via PIX</div><div class="ap-timeline-desc">Escaneie o QR Code com o app do seu banco ou copie o código PIX Copia e Cola.</div></div>
-            <div class="ap-timeline-step ap-reveal"><div class="ap-timeline-dot">3</div><div class="ap-timeline-icon">&#x2705;</div><div class="ap-timeline-title">Verificação do admin</div><div class="ap-timeline-desc">O administrador verifica o pagamento. Prazo de até 24 horas.</div></div>
-            <div class="ap-timeline-step ap-reveal"><div class="ap-timeline-dot">4</div><div class="ap-timeline-icon">&#x1F381;</div><div class="ap-timeline-title">Receba suas recompensas</div><div class="ap-timeline-desc">Ouro, itens exclusivos e título de patrono são entregues automaticamente no jogo.</div></div>
         </div>
     </section>
 
@@ -260,18 +420,22 @@
     <footer class="ap-footer">
         <div class="ap-divider" style="margin-bottom:28px"></div>
         <div class="ap-footer-brand">Lendas de Valdoria</div>
-        <div class="ap-footer-tagline">Um mundo inteiro espera por voc&#xEA;</div>
+        <div class="ap-footer-tagline">Um mundo inteiro espera por você</div>
         <div class="ap-footer-links">
             <a href="https://t.me/LendasDeValdoriaBOT" target="_blank">&#x1F916; Jogar no Telegram</a>
             <span class="ap-footer-sep">&#x25C6;</span>
             <a href="https://t.me/lendasdevaldoria" target="_blank">&#x1F4AC; Canal de Notícias</a>
+            <span class="ap-footer-sep">&#x25C6;</span>
+            <a href="https://jogo.lendasdevaldoria.com.br/privacidade/" target="_blank">&#x1F512; Privacidade</a>
+            <span class="ap-footer-sep">&#x25C6;</span>
+            <a href="https://jogo.lendasdevaldoria.com.br/termos/" target="_blank">&#x1F4DC; Termos</a>
         </div>
-        <div class="ap-footer-text" style="margin-top:12px">Feito com dedica&#xE7;&#xE3;o para a comunidade</div>
-        <div class="ap-footer-text">RPG Medieval D&D 5e via Telegram</div>
-        <div class="ap-footer-version">v2.1</div>
+        <div class="ap-footer-text" style="margin-top:12px">Feito com dedicação para a comunidade</div>
+        <div class="ap-footer-text">RPG Medieval D&amp;D 5e via Telegram</div>
+        <div class="ap-footer-version">v3.0</div>
     </footer>
 
-    <!-- Cookie Consent Banner -->
+    <!-- Cookie Banner -->
     <div class="ap-cookie-banner" id="cookie-banner" style="display:none">
         <div class="ap-cookie-inner">
             <div class="ap-cookie-text">
@@ -285,23 +449,24 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-var v = Date.now();
-    document.write('<script src="../shared/orientation-gate.js?v=' + v + '"><\/script>');
-document.write('<script src="../shared/escape.js?v=' + v + '"><\/script>');
-document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
-document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
-</script>
-<script src="apoie.js"></script>
+        var v = Date.now();
+        document.write('<script src="../shared/orientation-gate.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/escape.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
+    </script>
+    <script src="tg-oauth-custom.js"></script>
+    <script src="apoie.js"></script>
     <script>
-    var v = Date.now();
-    document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
-    document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
-    document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        var v = Date.now();
+        document.write('<script src="../shared/loading-guard.js?v=' + v + '"><\/script>');
+        document.write('<link rel="stylesheet" href="../shared/connection-overlay.css?v=' + v + '">');
+        document.write('<script src="../shared/connection-overlay.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
     </script>
     <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("APOIE")</script>
 </body>
