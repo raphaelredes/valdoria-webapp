@@ -43021,6 +43021,9 @@ var SUBSCREEN_DATA = {
 //     refreshHud()      — re-renderiza cliente após mutation
 // ============================================================================
 var ACTION_HANDLERS = {
+  // 2026-05-22 B1 PoC: trigger pra testar Aldric JSON dialogue end-to-end.
+  // Uso: doAction('test_aldric_dialog') via console ou button dev.
+  'test_aldric_dialog': function(p){ if (typeof window._openAldricGuardDialog === 'function') window._openAldricGuardDialog(p); },
   // Tavern drinks
   'buy_ale':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cerveja'), npc: 'Grom', item: 'Cerveja Comum',  desc: '<i>Gosto de cevada e poeira. Clássico.</i><br>💚 +1 HP', cost: 1, onApply: function(p){ _heal(p, 1, 0); }, resultMsg: '<i>Você vira a caneca. Um arroto satisfatório escapa.</i><br><br>+1 HP' }); },
   'buy_cider':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-cerveja'), npc: 'Grom', item: 'Sidra de Maçã',  desc: '<i>Doce, fermentada em barris de carvalho.</i><br>💚 +2 HP', cost: 2, onApply: function(p){ _heal(p, 2, 0); }, resultMsg: '<i>Refrescante! O gosto de maçã é a melhor coisa do seu dia.</i><br><br>+2 HP' }); },
@@ -48894,6 +48897,110 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
     script: srcEnc.script,
     choices: choices
   };
+}
+
+/* 2026-05-22 B1 PoC: dialogue engine wiring — Aldric (gate guard) end-to-end.
+   Carrega aldric.json via dialogueEngine.load() + resolveStartNode based em
+   timeline (conditions de hp/affinity/flags) + render via vEncounter typewriter.
+   Foundation pronta de turn anterior (npc-affinity.js + dialogue-engine.js).
+   Trigger: callback 'test_aldric_json_dialogue' OU subsequent gates visits
+   (after aldric_first_map já aconteceu). */
+window._openAldricGuardDialog = function(player){
+  if (typeof window.dialogueEngine === 'undefined' || typeof window.vEncounter === 'undefined') {
+    if (typeof vToast === 'function') vToast('Dialogue engine não disponível');
+    return;
+  }
+  var p = player || window.CITY_MOCK_PLAYER;
+  if (!p) {
+    if (typeof vToast === 'function') vToast('Player não disponível');
+    return;
+  }
+  window.dialogueEngine.load('aldric').then(function(data){
+    if (!data) {
+      if (typeof vToast === 'function') vToast('aldric.json não carregou');
+      return;
+    }
+    var npcKey = 'aldric';
+    // Marca visit (NPC memory)
+    if (window.npcAffinity && window.npcAffinity.markVisit) window.npcAffinity.markVisit(p, npcKey);
+    // Resolve qual node começar baseado em timeline + conditions
+    var nodeId = window.dialogueEngine.resolveStartNode(data.timeline, p, npcKey, 'start');
+    _renderAldricNode(p, data, nodeId, npcKey);
+  });
+};
+
+function _renderAldricNode(player, dialogueData, nodeId, npcKey){
+  var dialogue = window.dialogueEngine.buildVEncounterDialogue(npcKey, nodeId, dialogueData, player);
+  if (!dialogue) {
+    if (typeof vToast === 'function') vToast('Node "' + nodeId + '" não encontrado');
+    return;
+  }
+  // Adiciona npc.id pra affinity badge funcionar (B3)
+  dialogue.npc.id = npcKey;
+  // Override portrait com PNG se existir
+  if (!dialogue.npc.portrait) {
+    dialogue.npc.portrait = '/shared/img/npcs/aldric.png';
+  }
+  dialogue.npc.name = dialogue.npc.name || 'Guarda Aldric';
+  dialogue.npc.desc = dialogue.npc.desc || 'Veterano dos portões de Valdoria';
+
+  window.vEncounter.render(dialogue, {
+    player: player,
+    onChoice: function(choice, _dialogue){
+      var original = choice._original || {};
+      // Mark once flag (impede re-uso de opções `once: true`)
+      if (original.once && window.npcAffinity && window.npcAffinity.setFlag) {
+        var flagName = '_once_' + (original.next || original.text);
+        window.npcAffinity.setFlag(player, npcKey, flagName, true);
+      }
+      // Aplica impact (reputation/affinity/flag/xp/gold)
+      if (original.impact && window.dialogueEngine.applyImpact) {
+        window.dialogueEngine.applyImpact(original.impact, player, npcKey);
+      }
+      // Skill check?
+      if (original.check && window.dialogueEngine.rollSkillCheck) {
+        var rollResult = window.dialogueEngine.rollSkillCheck(original, player);
+        if (rollResult) {
+          // Mostra resultado do dado via _showServiceResultPopup (2-stage: dado → continuar → next node)
+          if (typeof _showServiceResultPopup === 'function') {
+            var STAT_ABBR = {strength:'FOR', dexterity:'DES', constitution:'CON', intelligence:'INT', wisdom:'SAB', charisma:'CAR'};
+            var abbr = STAT_ABBR[rollResult.skill] || rollResult.skill.toUpperCase();
+            var narrativeText = '🎲 ' + abbr + ': ' + rollResult.roll
+              + (rollResult.mod >= 0 ? '+' : '') + rollResult.mod
+              + ' = <b>' + rollResult.total + '</b> vs DC ' + rollResult.dc
+              + ' — ' + (rollResult.success ? '✅ Sucesso' : '❌ Falha');
+            _showServiceResultPopup({
+              icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#ic-paladino"/></svg>',
+              npc: 'Guarda Aldric',
+              narrative: narrativeText,
+              dice: { formula: '1d20+' + rollResult.mod, sides: 20, value: rollResult.roll, total: rollResult.total },
+              onContinue: function(){
+                // Após dado + continuar, renderiza next node
+                if (rollResult.nextNode) _renderAldricNode(player, dialogueData, rollResult.nextNode, npcKey);
+              }
+            });
+            return;
+          }
+        }
+      }
+      // exit_callback → ação custom (ex: action_city_entry)
+      if (original.exit_callback && typeof doAction === 'function') {
+        if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
+        doAction(original.exit_callback);
+        return;
+      }
+      // next node?
+      if (original.next === 'exit') {
+        if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
+        return;
+      }
+      if (original.next) {
+        _renderAldricNode(player, dialogueData, original.next, npcKey);
+      } else {
+        if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
+      }
+    }
+  });
 }
 
 var CHANCE_ENCOUNTERS = [
