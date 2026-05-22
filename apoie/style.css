@@ -100,10 +100,21 @@ body::after{display:none!important}.ap-nav{position:fixed;top:0;left:0;right:0;z
 .ap-amount-slider-thumb-orb.ap-orb-pulse{animation:apOrbPulse 1.6s ease-in-out infinite}
 @keyframes apOrbPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,210,90,0.4))}50%{filter:drop-shadow(0 0 12px rgba(255,210,90,0.8))}}
 
-/* === Mini-orb realistic para o nav (topo da pagina) === */
-.ap-nav-realistic-orb{display:inline-block;width:36px;height:36px;position:relative;vertical-align:middle;flex-shrink:0}
-.ap-nav-realistic-orb .ap-cenario-orb-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.225);transform-origin:center;margin:0;width:160px;height:100px}
-.ap-nav-realistic-orb:hover .ap-cenario-orb-wrap{transform:translate(-50%,-50%) scale(0.25);transition:transform 0.25s ease}
+/* === Mini-orb realistic para o nav (topo da pagina) ===
+ * Sessao #24 v18: pequeno (22x22) com clip absoluto na esquerda de VALDORIA.
+ * Tecnica: container 22x22 com overflow:hidden CLIPA o wrap interno scaled,
+ * impedindo que o glow vaze pro layout vizinho.
+ * Hide rays/ambient/floor (camadas grandes de glow desnecessarias em 22px).
+ * Posicionado a esquerda de VALDORIA via flex-order natural do HTML. */
+.ap-nav-realistic-orb{display:inline-block;width:22px;height:22px;position:relative;vertical-align:middle;flex-shrink:0;margin-right:6px;overflow:visible;line-height:0}
+.ap-nav-realistic-orb .ap-cenario-orb-wrap{position:absolute;top:50%;left:50%;width:160px;height:100px;margin:0;transform:translate(-50%,-50%) scale(0.135);transform-origin:center center;pointer-events:none;animation:none !important}
+/* Forca tamanho do orb interno para nao depender do wrap padrao */
+.ap-nav-realistic-orb .ap-cenario-orb{animation:none !important}
+/* Esconde camadas de glow agressivas no contexto nav (small icon) */
+.ap-nav-realistic-orb .ap-cenario-orb-rays,
+.ap-nav-realistic-orb .ap-cenario-orb-ambient,
+.ap-nav-realistic-orb .ap-cenario-orb-floor{display:none !important}
+.ap-nav-realistic-orb:hover .ap-cenario-orb-wrap{transform:translate(-50%,-50%) scale(0.155);transition:transform 0.25s ease}
 
 /* === Scrollbar VISIVEL na pagina apoie (override global hide do valdoria-design.css) === */
 html{scrollbar-width:thin !important;scrollbar-color:#c4953a rgba(26,20,16,0.6) !important;-ms-overflow-style:auto !important}
