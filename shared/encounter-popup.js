@@ -410,12 +410,22 @@
     var npcPortrait = (dialogue.npc && dialogue.npc.portrait) || '';
     var npcName = (dialogue.npc && dialogue.npc.name) || '';
     var npcDesc = (dialogue.npc && dialogue.npc.desc) || '';
+    // 2026-05-22 B3: affinity badge no header (NPC dialogue engine integration).
+    // Renderiza tier visual se player + npc_id + npcAffinity disponíveis.
+    var npcId = (dialogue.npc && (dialogue.npc.id || dialogue.npc.key)) || '';
+    var affinityBadge = '';
+    if (npcId && window.npcAffinity && typeof window.npcAffinity.renderBadgeHTML === 'function') {
+      var _p = (opts && opts.player) || window.CITY_MOCK_PLAYER || null;
+      if (_p) {
+        try { affinityBadge = window.npcAffinity.renderBadgeHTML(_p, npcId); } catch(_e){}
+      }
+    }
     header.innerHTML =
       '<div class="enc-portrait" title="Clique pra ampliar">' +
         (npcPortrait ? '<img src="' + npcPortrait + '" alt="">' : '') +
       '</div>' +
       '<div class="enc-meta">' +
-        '<div class="enc-name">' + npcName + '</div>' +
+        '<div class="enc-name">' + npcName + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +
         '<div class="enc-desc">' + npcDesc + '</div>' +
       '</div>' +
       '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>';

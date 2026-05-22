@@ -228,8 +228,31 @@
   // ──────────────────────────────────────────────────────────────────────
 
   function _onDocClick(e) {
+    // 2026-05-22 A2b: extensão pra .v-zoomable selector genérico (medals, items,
+    // banners, qualquer imagem). User pediu "revisão de todas imagens... possam
+    // ter sistema de apertar pra ver mais de perto".
+    // Selectors suportados (em ordem de especificidade):
+    //   .v-zoomable      → genérico (qualquer img que receba a class)
+    //   .npc-portrait    → PADRAO_TAVERNA NPC cards (com .row-npc parent)
+    //   .enc-portrait    → PADRAO_ALDRIC encounters (já tem handler próprio)
+    var target = e.target;
+    if (!target.closest) return;
+
+    // Check .v-zoomable first (genérico — image OR container with image)
+    var zoomable = target.closest('.v-zoomable');
+    if (zoomable) {
+      var img2 = zoomable.tagName === 'IMG' ? zoomable : zoomable.querySelector('img');
+      if (!img2 || !img2.src) return;
+      var name2 = zoomable.dataset.zoomName || zoomable.dataset.medalName || img2.alt || '';
+      var desc2 = zoomable.dataset.zoomDesc || zoomable.dataset.medalDesc || '';
+      e.stopPropagation();
+      e.preventDefault();
+      showLightbox(img2.src, name2, desc2);
+      return;
+    }
+
     // Find closest .npc-portrait OR .enc-portrait (PADRAO_ALDRIC encounter)
-    var portrait = e.target.closest && e.target.closest('.npc-portrait, .enc-portrait');
+    var portrait = target.closest('.npc-portrait, .enc-portrait');
     if (!portrait) return;
 
     // .enc-portrait JÁ tem seu próprio click handler na encounter-popup.js que
