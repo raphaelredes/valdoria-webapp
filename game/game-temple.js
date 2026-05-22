@@ -82,7 +82,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Irmã Elara vem ao teu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos quentes te observam com a paciência maternal de quem cura há décadas.' },
-      { type: 'speech', speaker: 'Irmã Elara', text: 'Mostre-me onde dói, irmão. <i>(coloca a bacia sobre uma pedra plana, pega tua mão com firmeza gentil)</i> Os Quatro ouvem mesmo o suspiro do mais humilde — e a magia divina não pergunta dívidas antes de fluir. Cura Maior, dois dados de oito mais Sabedoria. PHB página duzentos e trinta.' }
+      { type: 'speech', speaker: 'Irmã Elara', text: 'Mostre-me onde dói, irmão. <i>(coloca a bacia sobre uma pedra plana, pega tua mão com firmeza gentil)</i> Os Quatro ouvem mesmo o suspiro do mais humilde — e a magia divina não pergunta dívidas antes de fluir. Cura Maior, dois dados de oito mais Sabedoria.' }
     ],
     choices: [
       // task #64 (2026-05-20) — backend_cb canonical: temple_services.py:46 "temple_pay_<service>"
@@ -92,7 +92,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"Os Quatro escutam." <i>(murmura prece de cura)</i> <b>+1d8+3 HP recuperado.</b> "Que o sangue circule e a carne se feche, em nome da Mãe-Auroral."' },
       { id: 'h_mass',  label: '❤️ Mass Cure 5º · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
         resultNarration: 'Irmã Elara ergue ambas as mãos. Uma onda dourada se expande do altar — atinge todos os feridos ao alcance.',
-        resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos. PHB p.207.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
+        resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
       { id: 'h_pray',  label: '🙏 Tentar prece pessoal · Religião DC 14', cb: 'dice:religion:14:+1' },
       { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
     ]
@@ -102,7 +102,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: ALDRIC_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Padre Aldric pede que te sentes no banco de pedra ao lado do altar. Ele acende ervas secas num pequeno braseiro de bronze — fumaça branca e adocicada se ergue, ondulando contra os vitrais. Murmura uma prece em língua antiga enquanto coloca a palma da mão sobre tua testa.' },
-      { type: 'speech', speaker: 'Padre Aldric', text: 'Veneno é traição da natureza — o corpo se torna inimigo de si mesmo. <i>(traça o sinal sagrado em tua testa)</i> Purificação Menor, magia de segundo círculo, quarenta Valdoritas. Em cinco minutos, o veneno se torna mais leve que a fumaça. PHB página duzentos e quarenta e cinco.' }
+      { type: 'speech', speaker: 'Padre Aldric', text: 'Veneno é traição da natureza — o corpo se torna inimigo de si mesmo. <i>(traça o sinal sagrado em tua testa)</i> Purificação Menor, magia de segundo círculo, quarenta Valdoritas. Em cinco minutos, o veneno se torna mais leve que a fumaça.' }
     ],
     choices: [
       { id: 'p_pay',   label: '🧪 Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
@@ -121,15 +121,15 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Theron tem dezesseis anos, talvez dezessete — magro, espinhento, vestido com manto branco de iniciado que ainda lhe fica largo nos ombros. Quando você se aproxima, ele endireita-se nervoso, força um sorriso forçado, e tenta parecer mais experiente do que é.' },
-      { type: 'speech', speaker: 'Acólito Theron', text: 'B-bênção da Clareza, irmão! <i>(consulta um pergaminho dobrado, depois enrola apressado)</i> A Irmã Elara me ensinou ontem. Magia de primeiro círculo, concentração, vinte e cinco Valdoritas. Adiciona um dado de quatro a teus ataques e tuas salvaguardas, por um minuto. PHB página duzentos e dezenove.' }
+      { type: 'speech', speaker: 'Acólito Theron', text: 'B-bênção da Clareza, irmão! <i>(consulta um pergaminho dobrado, depois enrola apressado)</i> A Irmã Elara me ensinou ontem. Magia de primeiro círculo, concentração, vinte e cinco Valdoritas. Adiciona um dado de quatro a teus ataques e tuas salvaguardas, por um minuto.' }
     ],
     choices: [
       { id: 'b_pay',   label: '✨ Pagar 25V — Bênção (+1d4 atk/save 1min)', cb: 'bless-confirm', backend_cb: 'temple_pay_bless', renownDelta: 1,
         resultNarration: 'Theron sussurra a prece três vezes — uma pra cada Quatro menos o Silencioso. Uma luz pálida pousa sobre teus ombros.',
-        resultText: '"P-pronto! <i>(suspira aliviado)</i> Pela primeira vez deu certo!" <b>+1d4 em ataques e salvaguardas por 1 minuto (até 3 rolagens). PHB p.219.</b>' },
+        resultText: '"P-pronto! <i>(suspira aliviado)</i> Pela primeira vez deu certo!" <b>+1d4 em ataques e salvaguardas por 1 minuto (até 3 rolagens).</b>' },
       { id: 'b_guide', label: '✨ Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
         resultNarration: 'Theron passa o polegar úmido sobre tua testa, deixando um sinal que reluz brevemente.',
-        resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar. PHB p.248.</b>' },
+        resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar.</b>' },
       { id: 'b_persuade', label: '💬 "Bênção a um irmão?" · Persuasão DC 13', cb: 'dice:persuasion:13:+1' },
       { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
     ]
@@ -143,12 +143,12 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos teus olhos.' },
-      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remove Curse, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre. PHB página duzentos e quarenta e seis.' }
+      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remove Curse, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre.' }
     ],
     choices: [
       { id: 'rc_pay', label: '🔮 Pagar 90V — Remove Curse', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
         resultNarration: 'Miriel sela a câmara com runas douradas no chão. Tua pele formiga — depois queima. As runas pulsam em sincronia com teu coração.',
-        resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida. PHB p.246.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
+        resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
       { id: 'rc_arcana', label: '📖 "Que tipo de maldição?" · Arcana DC 15', cb: 'dice:arcana:15:+2' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
@@ -162,12 +162,12 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Sumo-Sacerdote Varek aparece raramente no salão público — sua presença significa que algo grave foi pedido. Ele se aproxima do altar trazendo um cetro de prata e ônix. As vestes púrpura debruadas em fio de platina arrastam-se solenes contra o mármore.' },
-      { type: 'speech', speaker: 'Sumo-Sacerdote Varek', text: 'Restauração Maior é magia de quinto círculo. <i>(ergue o cetro contra a luz dos vitrais)</i> Quatrocentas e cinquenta Valdoritas. Remove uma condição: exaustão, petrificação, maldição, encantamento, ou redução de atributo. Os Quatro não devolvem o que jamais foi tirado — apenas restauram o que ainda pode ser. PHB página duzentos e quarenta e seis.' }
+      { type: 'speech', speaker: 'Sumo-Sacerdote Varek', text: 'Restauração Maior é magia de quinto círculo. <i>(ergue o cetro contra a luz dos vitrais)</i> Quatrocentas e cinquenta Valdoritas. Remove uma condição: exaustão, petrificação, maldição, encantamento, ou redução de atributo. Os Quatro não devolvem o que jamais foi tirado — apenas restauram o que ainda pode ser.' }
     ],
     choices: [
       { id: 'gr_pay', label: '🌟 Pagar 450V — Greater Restoration', cb: 'greater_restoration-confirm', backend_cb: 'temple_pay_greater_restoration', renownDelta: 3,
         resultNarration: 'Varek ergue o cetro de prata e ônix ao alto. Os vitrais de cima da câmara reagem — luz colorida pousa em ti como manto de seda.',
-        resultText: '"Os Quatro restauram o que ainda pode ser." <i>(toca tua fronte com o cetro)</i> <b>Uma condição removida: exaustão, petrificação, maldição, encantamento, ou redução de atributo. PHB p.246.</b> "Vai com cautela — magia desta ordem deixa marcas no espírito."' },
+        resultText: '"Os Quatro restauram o que ainda pode ser." <i>(toca tua fronte com o cetro)</i> <b>Uma condição removida: exaustão, petrificação, maldição, encantamento, ou redução de atributo.</b> "Vai com cautela — magia desta ordem deixa marcas no espírito."' },
       { id: 'back',   label: '↩ "Vou ponderar."', cb: 'close' }
     ]
   },
@@ -180,12 +180,12 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Oráculo Orenthia espera-te na cripta sob o Templo. Velas de cera negra ardem em silêncio. Ela traz uma máscara de prata sem olhos — apenas duas fendas verticais por onde algo brilha. Seu vestido é de linho cinzento, sem ornamentos. Ela não fala alto — sua voz parece vir de longe.' },
-      { type: 'speech', speaker: 'Oráculo Orenthia', text: 'Reviver os caídos é privilégio dos Quatro, não direito dos vivos. <i>(toca tua testa com dedos gélidos)</i> Mil Valdoritas. O corpo deve estar diante de mim, e a alma ainda não dispersa. O caído retorna com penalidade de menos quatro em todas as rolagens por quatro descansos longos — o preço de cruzar a porta duas vezes. PHB página duzentos e setenta.' }
+      { type: 'speech', speaker: 'Oráculo Orenthia', text: 'Reviver os caídos é privilégio dos Quatro, não direito dos vivos. <i>(toca tua testa com dedos gélidos)</i> Mil Valdoritas. O corpo deve estar diante de mim, e a alma ainda não dispersa. O caído retorna com penalidade de menos quatro em todas as rolagens por quatro descansos longos — o preço de cruzar a porta duas vezes.' }
     ],
     choices: [
       { id: 'rd_pay', label: '💀 Pagar 1000V — Raise Dead', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
         resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eternos.',
-        resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos. PHB p.270.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
+        resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
       { id: 'rd_insight', label: '🔮 "Ela voltará... a mesma?" · Intuição DC 16', cb: 'dice:insight:16:+1' },
       { id: 'back',   label: '↩ "Não estou pronto."', cb: 'close' }
     ]
@@ -257,12 +257,14 @@ var TEMPLE_CB_TO_DIALOGUE = {
 
 /* === Service icon meta ================================================== */
 var TEMPLE_SVC_META = {
-  'temple_interact_menu_npc_temple_elara':    { icon: '../shared/img/services/svc-cura.png',         meta: 'PHB p.230' },
-  'temple_interact_menu_npc_temple_aldric':   { icon: '../shared/img/services/svc-pocoes.png',       meta: 'PHB p.245' },
-  'temple_interact_menu_npc_temple_theron':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'PHB p.219' },
-  'temple_interact_menu_npc_temple_miriel':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'PHB p.246' },
-  'temple_interact_menu_npc_temple_varek':    { icon: '../shared/img/services/svc-bencao.png',       meta: 'PHB p.246' },
-  'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.png',  meta: 'PHB p.270' }
+  // Sessão #23 (2026-05-22): refs PHB removidas (regra "D&D refs sweep player-visible").
+  // Meta agora descreve o serviço em PT-BR pra clareza ao jogador.
+  'temple_interact_menu_npc_temple_elara':    { icon: '../shared/img/services/svc-cura.png',         meta: 'Cura ferimentos divinos' },
+  'temple_interact_menu_npc_temple_aldric':   { icon: '../shared/img/services/svc-pocoes.png',       meta: 'Purifica veneno e doenças' },
+  'temple_interact_menu_npc_temple_theron':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'Bênção arcana de combate' },
+  'temple_interact_menu_npc_temple_miriel':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'Liberta de maldições' },
+  'temple_interact_menu_npc_temple_varek':    { icon: '../shared/img/services/svc-bencao.png',       meta: 'Remove condições graves' },
+  'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.png',  meta: 'Reviver dos caídos' }
 };
 
 /* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) === */

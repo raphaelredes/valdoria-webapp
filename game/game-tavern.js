@@ -113,7 +113,7 @@ var SERVICE_DIALOGUES_TAVERN = {
     choices: [
       { id: 'goblin', label: '👹 Sobre Goblins · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_goblin',
         resultNarration: 'Grom recolhe as moedas e abaixa o tom. <i>(olha em volta antes de falar)</i>',
-        resultText: '"Goblins. Pequenos, covardes em combate justo, mortais em emboscada. <i>(faz gesto com a mão)</i> Atacam em bando, dez ou mais. Atire flechas longas — eles falham em moral quando perdem o líder. Apontar pro maior primeiro, sempre. <b>Bônus: +2 de dano contra goblins até o próximo descanso longo. PHB p.198.</b>"' },
+        resultText: '"Goblins. Pequenos, covardes em combate justo, mortais em emboscada. <i>(faz gesto com a mão)</i> Atacam em bando, dez ou mais. Atire flechas longas — eles falham em moral quando perdem o líder. Apontar pro maior primeiro, sempre. <b>Bônus: +2 de dano contra goblins até o próximo descanso longo.</b>"' },
       { id: 'wolf',   label: '🐺 Sobre Lobos · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_wolf',
         resultNarration: 'Grom apoia os cotovelos no balcão e respira fundo.',
         resultText: '"Lobos. Caçam em alcateia de seis ou oito, raramente sós. <i>(passa o dedo pela mesa, marcando um círculo)</i> Têm Tactics — flanqueiam pra ganhar Vantagem em ataques. Fique de costas pra uma parede ou árvore. Fogo afugenta, mas eles voltam quando a chama some. <b>+2 de dano contra lobos até o próximo descanso longo. MM p.341.</b>"' },
@@ -191,7 +191,7 @@ var SERVICE_DIALOGUES_TAVERN = {
   },
 
   /* task #70 review: gossip_deep — sub-dialogue chain do gossip.
-     Implementa "investigar" com Investigação DC 13 (PHB p.178). */
+     Implementa "investigar" com Investigação DC 13. */
   gossip_deep: {
     npc: GROM_DIALOGUE.npc,
     script: [
@@ -215,7 +215,7 @@ var SERVICE_DIALOGUES_TAVERN = {
     script: [
       { type: 'narration', text: 'No canto da taverna, sobre um tablado modesto, uma jovem de cabelos cor-de-fogo afina o alaúde. Ela usa um broche de prata em forma de pena — símbolo do Conservatório de Eldoria. Suas mãos têm calos diferentes de quem trabalha o metal: marcas de cordas, mistura de violão e harpa.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lyra Cantarriba. <i>(passa o pano pela caneca)</i> Estudou no Conservatório, voltou ano passado quando o avô caiu doente. Toca pra pagar o quarto. Sabe Inspirar — coisa de bardo de verdade, não dessas balada de cantar Birthday Happy.' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>Inspiração 1d6 (PHB p.53).</b>' }
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>Inspiração 1d6.</b>' }
     ],
     choices: [
       // task #84: resultText por gorjeta — cohesão.
@@ -224,7 +224,7 @@ var SERVICE_DIALOGUES_TAVERN = {
         resultText: '"Obrigada. <i>(começa a tocar uma balada melancólica)</i> Não é toda noite que se ouve com atenção." <i>Você relaxa enquanto a melodia preenche a taverna.</i>' },
       { id: 'tip_5', label: '🎵 Gorjeta 5 V · Inspiração 1d6', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_5', renownDelta: 1,
         resultNarration: 'Lyra ergue os olhos, focada em Vossa Senhoria. <i>(troca a melodia pra algo mais íntimo e poderoso)</i>',
-        resultText: '"Para Vossa Senhoria. <i>(canta com voz cristalina)</i> Que a coragem te acompanhe quando o silêncio falar mais alto que o aço." <b>+1d6 Inspiração Bardica até o próximo descanso longo (PHB p.53). +1 Renown da Taverna.</b>' },
+        resultText: '"Para Vossa Senhoria. <i>(canta com voz cristalina)</i> Que a coragem te acompanhe quando o silêncio falar mais alto que o aço." <b>+1d6 Inspiração Bardica até o próximo descanso longo. +1 Renown da Taverna.</b>' },
       { id: 'flirt', label: '💬 "Toca algo só pra mim?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
       { id: 'request', label: '🎭 "Conhece a Balada de Korrigan?" · História DC 12', cb: 'dice:history:12:+0' },
       { id: 'back',  label: '↩ "Talvez depois."', cb: 'close' }
@@ -278,13 +278,13 @@ var SERVICE_DIALOGUES_TAVERN = {
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Grom estende o braço pro lado direito da sala. Quatro mesas ocupadas — duas com Ossos do Dragão (dados clássicos), uma com baralho marcado de prata, e outra com fileiras de canecas cheias e olhares determinados.' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Apostas variam. <i>(sorri com cinismo gentil)</i> Ossos do Dragão são o clássico — proficiência em Dice Set (<b>PHB p.154</b>) dá vantagem. Cartas requer Engano <b>ou</b> Percepção pra não ser enganado. Bebida... bem, Constituição contra Constituição até alguém cair.' }
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Apostas variam. <i>(sorri com cinismo gentil)</i> Ossos do Dragão são o clássico — proficiência em Dice Set () dá vantagem. Cartas requer Engano <b>ou</b> Percepção pra não ser enganado. Bebida... bem, Constituição contra Constituição até alguém cair.' }
     ],
     choices: [
       // task #84: resultText específico pra ossos (cohesão).
       { id: 'bones',     label: '🐉 Ossos do Dragão · 5 V', cb: 'games-confirm', backend_cb: 'tavern_bones_menu',
         resultNarration: 'Grom te conduz à mesa de Ossos do Dragão. Quatro jogadores abrem espaço com olhares curiosos.',
-        resultText: '"Cinco moedas pela entrada — devolvidas em parte se ficar até o final da rodada. <i>(coloca o copo de couro sobre a mesa)</i> Três dados de seis lados. Aposta acompanha. <b>PHB p.154 Dice Set proficiency dá Vantagem em uma rolagem.</b>"' },
+        resultText: '"Cinco moedas pela entrada — devolvidas em parte se ficar até o final da rodada. <i>(coloca o copo de couro sobre a mesa)</i> Três dados de seis lados. Aposta acompanha. <b>Proficiência em conjunto de dados concede Vantagem em uma rolagem.</b>"' },
       { id: 'cards',     label: '🃏 Cartas · Engano DC 13', cb: 'dice:deception:13:+1' },
       { id: 'drinking',  label: '🍺 Concurso de Bebida · CON DC 15', cb: 'dice:constitution:15:+0' },
       { id: 'observe',   label: '👁 Apenas observar · Intuição DC 11', cb: 'dice:insight:11:+0' },

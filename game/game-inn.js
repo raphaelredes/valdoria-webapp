@@ -88,26 +88,26 @@ var MARTHA_DIALOGUE = {
 };
 
 /* task #64 (2026-05-20) — SERVICE_DIALOGUES_INN com mecânicas D&D 5e:
-   Long Rest (PHB p.186) — recupera HP, hit dice, spell slots em 8h sono.
+   Long Rest — recupera HP, hit dice, spell slots em 8h sono.
    Cada tier de quarto modifica qualidade do descanso (gold pps por turno). */
 var SERVICE_DIALOGUES_INN = {
   sleep: {
     npc: MARTHA_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Martha abre o livro de hóspedes — pergaminho amarelado encadernado em couro castanho, ferrolho de prata gasto pelos dedos. Folheia até a página em branco e pega a pena de ganso do tinteiro. As escadas de madeira range ao fundo conforme outro hóspede sobe pro quarto.' },
-      { type: 'speech', speaker: 'Martha', text: 'Três quartos disponíveis hoje, aventureiro. <i>(coloca o monóculo)</i> Comum: cinco moedas a noite, dormitório compartilhado. Privado: vinte moedas, com fechadura e janela. Real: cem moedas, cama de penas e banheira própria. <b>Descanso Longo restaura HP/MP completo (PHB p.186)</b> — mas só se dormires oito horas sem interrupção.' }
+      { type: 'speech', speaker: 'Martha', text: 'Três quartos disponíveis hoje, aventureiro. <i>(coloca o monóculo)</i> Comum: cinco moedas a noite, dormitório compartilhado. Privado: vinte moedas, com fechadura e janela. Real: cem moedas, cama de penas e banheira própria. <b>Descanso Longo restaura HP/MP completo</b> — mas só se dormires oito horas sem interrupção.' }
     ],
     choices: [
       // task #84: resultText específico por quarto (cohesão).
       { id: 's_common', label: '🛏 Comum · 5V · Long Rest básico', cb: 'sleep-confirm', backend_cb: 'inn_sleep_common', renownDelta: 0,
         resultNarration: 'Martha te entrega uma chave de ferro simples. <i>(aponta a escada estreita)</i> O dormitório fica no andar de cima.',
-        resultText: '"Cinco moedas, quarto comum — dois beliches, lençóis limpos. <i>(sorri honesta)</i> Não é luxo, mas é seguro." <b>Descanso Longo completo. HP/MP restaurados. PHB p.186.</b>' },
+        resultText: '"Cinco moedas, quarto comum — dois beliches, lençóis limpos. <i>(sorri honesta)</i> Não é luxo, mas é seguro." <b>Descanso Longo completo. HP/MP restaurados.</b>' },
       { id: 's_private', label: '🛏 Privado · 20V · Long Rest seguro', cb: 'sleep-confirm', backend_cb: 'inn_sleep_private', renownDelta: 1,
         resultNarration: 'Martha pega a chave de bronze com selo da casa. <i>(sobe a escada à frente, mostrando o caminho)</i>',
         resultText: '"Vinte moedas — quarto privado, segundo andar, janela pra Praça. Fechadura nova, instalada esse ano." <i>(entrega a chave com leve sorriso)</i> <b>Descanso Longo completo + segurança garantida. +1 Renown.</b>' },
       { id: 's_royal', label: '👑 Real · 100V · Long Rest + buff', cb: 'sleep-confirm', backend_cb: 'inn_sleep_royal', renownDelta: 3,
         resultNarration: 'Martha curva-se ligeiramente — gesto raro. Chama Joana pra preparar o quarto Real com banho de pétalas e lençóis de seda.',
-        resultText: '"Cem moedas, o melhor da casa. <i>(serve um vinho de cortesia)</i> Cama de penas, banheira própria, lareira acesa. Vossa Senhoria desperta com vigor extra amanhã." <b>Long Rest + Inspiração 1d6 ao acordar (PHB p.125). +3 Renown.</b>' },
+        resultText: '"Cem moedas, o melhor da casa. <i>(serve um vinho de cortesia)</i> Cama de penas, banheira própria, lareira acesa. Vossa Senhoria desperta com vigor extra amanhã." <b>Long Rest + Inspiração 1d6 ao acordar. +3 Renown.</b>' },
       { id: 's_persuade', label: '💬 "Sou amigo da casa, Martha?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
       { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
     ]
@@ -139,16 +139,16 @@ var SERVICE_DIALOGUES_INN = {
     npc: MARTHA_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Martha aponta a porta lateral que dá pro pátio dos fundos. Vapores se erguem de uma fonte de cobre — banheira aquecida por brasas, com toalhas brancas dobradas em pilha sobre um banco de carvalho. O cheiro de sabão de lavanda e mirra é evidente.' },
-      { type: 'speech', speaker: 'Martha', text: 'Banho quente em vinte minutos. <i>(pega uma toalha)</i> Cinco moedas inclui sabão de lavanda e óleo de mirra. Cuidado especial — mais cinco, com Joana esfregando as costas. <b>Banho quente concede inspiração 1d4 ao próximo teste por sentir-se renovado (homebrew baseado em PHB Inspiration p.125).</b>' }
+      { type: 'speech', speaker: 'Martha', text: 'Banho quente em vinte minutos. <i>(pega uma toalha)</i> Cinco moedas inclui sabão de lavanda e óleo de mirra. Cuidado especial — mais cinco, com Joana esfregando as costas. <b>Banho quente concede inspiração 1d4 ao próximo teste por sentir-se renovado.</b>' }
     ],
     choices: [
       // task #84: resultText específico por banho (cohesão).
       { id: 'b_basic', label: '🛁 Banho simples · 5V · limpa exhaustion', cb: 'bath-confirm', backend_cb: 'inn_bath_basic', renownDelta: 0,
         resultNarration: 'Joana enche a banheira de cobre com água quente. Sabão de lavanda e óleo de mirra perfumam o ar.',
-        resultText: '"Pronto, aventureiro. <i>(estende toalha branca)</i> Vinte minutos no calor — vai sair outra pessoa." <b>Um nível de Exaustão removido (PHB p.291).</b>' },
+        resultText: '"Pronto, aventureiro. <i>(estende toalha branca)</i> Vinte minutos no calor — vai sair outra pessoa." <b>Um nível de Exaustão removido.</b>' },
       { id: 'b_lux',   label: '🛁 Banho de luxo · 10V · +Inspiração 1d4', cb: 'bath-confirm', backend_cb: 'inn_bath_luxury', renownDelta: 1,
         resultNarration: 'Joana esfrega tuas costas com escova de cerdas macias, massagem inclusa. Pétalas de rosa flutuam na água quente. Velas perfumadas ardem na borda.',
-        resultText: '"Tratamento completo, Vossa Senhoria. <i>(sorri educada)</i> Pernas leves, mente limpa. Pra próximo desafio." <b>Exaustão removida + Inspiração 1d4 (PHB p.125). +1 Renown.</b>' },
+        resultText: '"Tratamento completo, Vossa Senhoria. <i>(sorri educada)</i> Pernas leves, mente limpa. Pra próximo desafio." <b>Exaustão removida + Inspiração 1d4. +1 Renown.</b>' },
       { id: 'b_insight', label: '👁 "Algo me diz pra ficar atento..." · Intuição DC 12', cb: 'dice:insight:12:+1' },
       { id: 'back',    label: '↩ "Fica pra próxima."', cb: 'close' }
     ]
@@ -158,7 +158,7 @@ var SERVICE_DIALOGUES_INN = {
     npc: MARTHA_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Martha abaixa a voz, joga um olhar pra mesa do canto onde dois mercadores conversam baixo. Pega um pano e finge limpar o balcão enquanto fala — gesto ensaiado, anos de prática.' },
-      { type: 'speech', speaker: 'Martha', text: 'Hospedaria ouve mais que qualquer taverna. <i>(esfrega o balcão devagar)</i> Cama recolhe sussurros. <b>Gather Information (PHB p.178 Investigation/Persuasion)</b> — eu te conto o que ouvi essa semana, mas o que te interessa? Política do Conde? Movimento de mercadores? Ou pessoas desaparecidas?' }
+      { type: 'speech', speaker: 'Martha', text: 'Hospedaria ouve mais que qualquer taverna. <i>(esfrega o balcão devagar)</i> Cama recolhe sussurros. <b>Gather Information (Investigation/Persuasion)</b> — eu te conto o que ouvi essa semana, mas o que te interessa? Política do Conde? Movimento de mercadores? Ou pessoas desaparecidas?' }
     ],
     choices: [
       { id: 'r_politics', label: '👑 Política do Conde · História DC 13', cb: 'dice:history:13:+1' },

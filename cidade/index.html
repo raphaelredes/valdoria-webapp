@@ -12753,13 +12753,14 @@ function _showAchievementDetailPopup(chainId, p){
   if (typeof _popupStack !== 'undefined') _popupStack.push('ach_detail_' + chainId);
 }
 
-// canonical: bestiary stats — kills por tipo de inimigo (icones heráldicos)
+// canonical: bestiary stats — kills por tipo de inimigo
+// Sessão #23 (2026-05-22): PNGs canonical do combat (preferidos), SVG icon como fallback
 var KILLS_BY_TYPE = [
-  { type: 'Lobo Cinzento',  icon: 'ic-lobo',      kills: 8, cr: '1/4' },
-  { type: 'Goblin',          icon: 'ic-goblin',    kills: 6, cr: '1/4' },
-  { type: 'Esqueleto',       icon: 'ic-esqueleto', kills: 4, cr: '1/4' },
-  { type: 'Aranha Gigante',  icon: 'ic-aranha',    kills: 3, cr: '1' },
-  { type: 'Orc Guerreiro',   icon: 'ic-orc',       kills: 2, cr: '1' }
+  { type: 'Lobo Cinzento',  icon: 'ic-lobo',      png: '/shared/img/combat/enemies/lobo.png',           kills: 8, cr: '1/4' },
+  { type: 'Goblin',          icon: 'ic-goblin',    png: '/shared/img/combat/enemies/goblin.png',         kills: 6, cr: '1/4' },
+  { type: 'Esqueleto',       icon: 'ic-esqueleto', png: '/shared/img/combat/enemies/esqueleto.png',      kills: 4, cr: '1/4' },
+  { type: 'Aranha Gigante',  icon: 'ic-aranha',    png: '/shared/img/combat/enemies/aranha-gigante.png', kills: 3, cr: '1' },
+  { type: 'Orc Guerreiro',   icon: 'ic-orc',       png: '/shared/img/combat/enemies/orc-guerreiro.png',  kills: 2, cr: '1' }
 ];
 
 function _showKillsPopup(p){
@@ -12909,9 +12910,21 @@ function _showKillsPopup(p){
      cards. Numeros romanos sobre partes dos monstros + tampando textos.
      Solucao: highlight no rank #1 via border-left dourado mais grosso +
      glow extra no numero de abates. Sem badge sobreposta. */
+  // CR descriptor PT-BR (sessão #23 — clareza pro player sobre "Perigo X/Y")
+  function _crLabel(cr){
+    var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
+    if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
+    if (c >= 16) return 'Épico';
+    if (c >= 8)  return 'Lendário';
+    if (c >= 4)  return 'Elite';
+    if (c >= 2)  return 'Veterano';
+    if (c >= 1)  return 'Novato';
+    return 'Iniciante';
+  }
   KILLS_BY_TYPE.forEach(function(k, idx){
     var pct = Math.round(k.kills / total * 100);
     var crCol = _crColor(k.cr);
+    var crLbl = _crLabel(k.cr);
     var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
     var rank = rankMap[k.type] || 99;
     var isTop = rank === 1;
@@ -12919,6 +12932,11 @@ function _showKillsPopup(p){
     var borderLeftW = isTop ? '4px' : '3px';
     var killNumCol = isTop ? '#ffd700' : 'var(--v-gold, #c4953a)';
     var killNumGlow = isTop ? '0 0 12px rgba(255,215,0,0.55)' : '0 0 8px rgba(255,215,0,0.3)';
+    // Sessão #23: prefere PNG canonical do combat (k.png), SVG fallback
+    var enemyArt = k.png
+      ? '<img src="' + k.png + '" alt="" loading="lazy" style="width: 32px; height: 32px; flex-shrink: 0; object-fit: cover; border-radius: 50%; border: 1px solid ' + iconCol + '55; filter: drop-shadow(0 0 4px ' + iconCol + '55);" onerror="this.style.display=\'none\';this.nextElementSibling&&(this.nextElementSibling.style.display=\'\');">'
+        + '<svg viewBox="0 0 120 120" style="display:none;width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>'
+      : '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>';
     html += '<div class="vKl-beast-card" style="padding: 9px 10px 8px; '
       + 'background: linear-gradient(90deg, rgba(196,40,30,0.08) 0%, rgba(196,149,58,0.05) 100%); '
       + 'border: 1px solid ' + (isTop ? 'rgba(255,215,0,0.45)' : 'rgba(74,56,40,0.7)') + '; '
@@ -12926,10 +12944,10 @@ function _showKillsPopup(p){
       + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: 4px; '
       + 'animation-delay:' + (0.08 * idx + 0.15) + 's;">'
       + '<div style="display:flex; align-items: center; gap: 10px; margin-bottom: 6px;">'
-      +   '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>'
+      +   enemyArt
       +   '<div style="flex:1; min-width:0;">'
       +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: 13px; color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + (isTop ? ' <span style="color:#ffd700;font-size:11px;letter-spacing:1px;">· LÍDER</span>' : '') + '</div>'
-      +     '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;">◆ Perigo ' + k.cr + '</div>'
+      +     '<div style="font-size: 9px; color: ' + crCol + '; letter-spacing:1px; margin-top:1px;" title="Classificação de Desafio (D&D 5e) — quanto maior o CR, mais perigoso é o inimigo">◆ Perigo <b style="font-weight:600;">' + crLbl + '</b> · CR ' + k.cr + '</div>'
       +   '</div>'
       +   '<div style="text-align:right;">'
       +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: 22px; font-weight: 700; color: ' + killNumCol + '; text-shadow:' + killNumGlow + ';">' + k.kills + '</span>'
