@@ -8913,6 +8913,78 @@ function _isCTA(btn) {
     // Vibração leve em notif (se vibração ON)
     if (window.vHaptic) window.vHaptic('light');
   };
+
+  // === Sessão #23 (2026-05-22): Gameplay heartbeat + Avaliar Jogo auto-popup ===
+  // Tracking persistente em localStorage. Quando atinge 5h (300 min) cumulativo,
+  // dispara popup convidando user a avaliar (1x apenas). Storage:
+  //   'valdoria_gameplay_minutes' — minutos acumulados
+  //   'valdoria_rating_prompt_seen' — '1' se já mostrou popup (não mostrar de novo)
+  //   'valdoria_last_rating' — última nota dada (1-5★)
+  var _gpLastTick = Date.now();
+  setInterval(function(){
+    try {
+      var nowTs = Date.now();
+      var elapsed = (nowTs - _gpLastTick) / 60000;  // em minutos
+      _gpLastTick = nowTs;
+      if (document.hidden || elapsed > 5 || elapsed <= 0) return;  // skip se aba oculta ou anormal
+      var cur = parseFloat(_pref('valdoria_gameplay_minutes', '0')) || 0;
+      cur += elapsed;
+      try { localStorage.setItem('valdoria_gameplay_minutes', cur.toFixed(2)); } catch(_) {}
+      // Auto-trigger Avaliar Jogo ao atingir 300 min (5h) — uma vez só
+      var seen = _pref('valdoria_rating_prompt_seen', '0') === '1';
+      if (cur >= 300 && !seen) {
+        try { localStorage.setItem('valdoria_rating_prompt_seen', '1'); } catch(_) {}
+        // Aguarda 4s pra não atrapalhar transição/loading em curso
+        setTimeout(function(){
+          if (typeof window._showRatingPromptPopup === 'function') {
+            window._showRatingPromptPopup();
+          }
+        }, 4000);
+      }
+    } catch(_e){}
+  }, 30000);  // tick a cada 30s pra ser leve
+
+  // Função global de popup (chamada pelo heartbeat OU manualmente via extras_feedback)
+  window._showRatingPromptPopup = function(){
+    if (typeof window._showInfoPopup !== 'function') return;
+    var stored = _pref('valdoria_last_rating', null);
+    if (stored && _pref('valdoria_rating_prompt_seen', '0') === '1') {
+      // Já avaliou antes — não re-prompt
+      return;
+    }
+    window._showInfoPopup({
+      icon: 'ic-stat-cha',
+      npc: '✨ Aldric',
+      title: 'Cinco horas pela aventura!',
+      desc: '<p style="text-align:center; font-style:italic; color:var(--v-text-dim,#a09484); margin-bottom:10px;">"Já vimos juntos cinco horas de aventura, irmão. <i>(pousa o terço sobre a mesa)</i> Que tal compartilhar tua experiência? Tua palavra ajuda o Templo a guiar os próximos."</p>'
+          + '<div style="display:flex; gap:6px; justify-content:center; padding:10px 0;" id="rating-stars-auto">'
+          + [1,2,3,4,5].map(function(n){
+              return '<button class="rating-star" data-rating="' + n + '" '
+                   + 'style="background:none; border:1px solid var(--v-border,#4a3828); '
+                   + 'border-radius:50%; width:42px; height:42px; cursor:pointer; '
+                   + 'color:var(--v-gold,#c4953a); font-size:20px;">★</button>';
+            }).join('')
+          + '</div>'
+          + '<i style="color:var(--v-text-dim,#a09484); font-size:11px; display:block; text-align:center;">5★ = "Adoro!" · 1★ = "Tem o que melhorar"</i>',
+      onConfirm: function(){ /* fecha popup naturalmente */ }
+    });
+    // Wire estrelas (mesmo pattern do extras_feedback)
+    setTimeout(function(){
+      document.querySelectorAll('#rating-stars-auto .rating-star').forEach(function(b){
+        b.addEventListener('click', function(){
+          var r = b.getAttribute('data-rating');
+          try { localStorage.setItem('valdoria_last_rating', r); } catch(_) {}
+          if (typeof vToast === 'function') vToast('Avaliação registrada: ' + r + '★ — obrigado!');
+          if (typeof closeCityPopup === 'function') {
+            setTimeout(function(){
+              var top = (window._popupStack || [])[((window._popupStack || []).length - 1)];
+              if (top && top.indexOf('info_') === 0 && typeof navigateBack === 'function') navigateBack();
+            }, 600);
+          }
+        });
+      });
+    }, 100);
+  };
 })();
 
 (function setupMocks(){
