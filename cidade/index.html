@@ -15650,16 +15650,39 @@ function _buildInnMockData(player){
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
       cb: 'inn_npc_inn_martha'
     },
-    services: [
+    services: (function(){
       // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
       // X-6.5.51BN: badges PT-BR + coin icon canonical (não "V" texto cru, não "Quest" em inglês).
-      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
-      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
-      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
-      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
-      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
-      { icon: _heralIco('ic-missões'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
-    ]
+      // Task #72 (2026-05-22): item da Adega muda label/cb conforme estado da quest:
+      //   - Não aceito  → 'Investigar adega' / cb='inn_cellar_quest' (abre diálogo)
+      //   - Em andamento → 'Adega · em andamento' / cb='quest_cellar_progress'
+      //   - Já completo → item removido
+      var arr = [
+        { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
+        { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
+        { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
+        { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
+        { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' }
+      ];
+      // Cellar quest state: check QUESTS_ACTIVE + completed list
+      var cellarActive = false, cellarDone = false;
+      try {
+        if (typeof QUESTS_ACTIVE !== 'undefined') {
+          cellarActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_cellar'; });
+        }
+        if (typeof _isQuestCompletedOrAbandoned === 'function') {
+          cellarDone = _isQuestCompletedOrAbandoned('cellar');
+        }
+      } catch(_e){}
+      if (cellarDone) {
+        // Quest concluída → não mostra mais (limpa o slot)
+      } else if (cellarActive) {
+        arr.push({ icon: _heralIco('ic-missões'), label: 'Adega · em andamento', badge: 'Concluir', cb: 'quest_cellar_progress' });
+      } else {
+        arr.push({ icon: _heralIco('ic-missões'), label: 'Investigar adega', badge: 'Missão', cb: 'inn_cellar_quest' });
+      }
+      return arr;
+    })()
   };
 }
 
@@ -26528,10 +26551,11 @@ var CANON_MEALS_DB = {
   "pao_mel": {
     "name": "Pão com Mel",
     "emoji": "🍞",
-    "cost": 2,
+    "cost": 0,
     "hp": 1,
     "mp": 1,
-    "desc": "Pão fresco da manhã com mel silvestre. Simples e reconfortante.",
+    "free_daily": true,
+    "desc": "Pão fresco da manhã com mel silvestre. Cortesia de Martha — 1× por descanso longo.",
     "flavor_good": "O mel é doce e o pão é macio. Um pedaço de conforto na vida de aventureiro.",
     "flavor_great": "O mel tem notas florais incríveis. Você se sente mais confiante e cativante.",
     "flavor_bad": "O pão está levemente duro, mas o mel compensa. Quase.",
@@ -42832,7 +42856,11 @@ function _innShowDreamPopup(player, tier, allies){
     if (player.metadata.raise_dead_penalty <= 0) delete player.metadata.raise_dead_penalty;
   }
   // canonical: inn_execute.py L54 — reset meal cooldown
-  if (player.metadata) delete player.metadata.inn_meal_eaten;
+  if (player.metadata) {
+    delete player.metadata.inn_meal_eaten;
+    // Task #73 (2026-05-22): reset cortesia refeição free_daily a cada descanso longo
+    delete player.metadata.inn_free_meal_used;
+  }
 
   var className = (player.class || player.cls || 'Guerreiro');
   var classDreams = INN_CLASS_DREAMS[className];
@@ -42885,6 +42913,16 @@ function _innConsumeMeal(p, mealKey){
   }
   var meal = meals[mealKey];
   var cost = meal.cost || 0;
+  // Task #73 (2026-05-22): free_daily refeições limitadas a 1x por descanso longo.
+  // Flag em p.metadata.inn_free_meal_used resetada no _innRestLong via delete.
+  if (meal.free_daily) {
+    p.metadata = p.metadata || {};
+    if (p.metadata.inn_free_meal_used) {
+      if (typeof vToast === 'function') vToast('🍞 Você já comeu sua refeição cortesia. Outra opção apenas com descanso longo.', 'warn');
+      return;
+    }
+    p.metadata.inn_free_meal_used = true;
+  }
   if (cost > 0 && !_pay(p, cost)) return;
   var preGold = p.gold;
   var preHp = p.hp || 0;
@@ -45268,6 +45306,8 @@ var ACTION_HANDLERS = {
   'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Campos Verdes', '-5 afinidade com Capitã Helga'); },
   // X-6.5.51BP: CELLAR (Adega da Estalagem) — Martha
   'quest_open_cellar':          function(p){ navigateTo('quest_open_cellar'); },
+  // Task #72 (2026-05-22): atalho via menu da estalagem quando quest em andamento
+  'quest_cellar_progress':      function(p){ navigateTo('quest_open_cellar'); },
   'quest_cellar_locate':        function(p){ _questGotoMap('cellar', 'Investigar a Adega'); },
   'quest_cellar_details':       function(p){ vToast('📜 Investigar a Adega da Estalagem. Recompensa: 60 Valdoritas + 80 XP.'); },
   'quest_cellar_deliver':       function(p){ _deliverQuest('cellar', 60, 80, '🗝️ Martha aperta sua mão. +60 Valdoritas +80 XP. A adega está limpa — missão completa!'); },
@@ -49634,6 +49674,7 @@ var RECURRING_NPCS = {
   aldric: {
     name: 'Guarda Aldric',
     portrait: 'ic-paladino',
+    portraitImg: '/shared/img/npcs/padre-aldric.png',
     desc: 'Veterano dos portões. Olho atento, voz grave.'
   },
   silvana: {
@@ -49688,11 +49729,13 @@ var RECURRING_NPCS = {
   lyana: {
     name: 'Lyana, a Herbalista',
     portrait: 'ic-druida',
+    portraitImg: '/shared/img/npcs/lyana-herbalista.png',
     desc: 'Herbalista jovem, trança escura, cesto de raízes ao lado. Atende na praça pela manhã.'
   },
   tavira: {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
+    portraitImg: '/shared/img/npcs/mestra-tavira.png',
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
     legendary: true,
     title: 'Lança-Justa · Reformadora da Guilda',
@@ -49705,9 +49748,11 @@ var RECURRING_NPCS = {
     related_quests: ['quest_tavira_recruit', 'quest_tavira_traitor', 'quest_tavira_alliance']
   },
   // X-6.5.51BP (2026-05-15): Martha — Estalajadeira PADRAO_ALDRIC
+  // Task #70/#74 (2026-05-22): portraitImg para PNG + lightbox em todos os diálogos
   martha: {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
+    portraitImg: '/shared/img/npcs/estalajadeira.png',
     desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
