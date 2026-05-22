@@ -48899,13 +48899,33 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
   };
 }
 
-/* 2026-05-22 B1 PoC: dialogue engine wiring — Aldric (gate guard) end-to-end.
-   Carrega aldric.json via dialogueEngine.load() + resolveStartNode based em
+/* 2026-05-22 B1+B2: dialogue engine wiring — genérico para QUALQUER NPC JSON.
+   Carrega <npc>.json via dialogueEngine.load() + resolveStartNode baseado em
    timeline (conditions de hp/affinity/flags) + render via vEncounter typewriter.
    Foundation pronta de turn anterior (npc-affinity.js + dialogue-engine.js).
-   Trigger: callback 'test_aldric_json_dialogue' OU subsequent gates visits
-   (after aldric_first_map já aconteceu). */
-window._openAldricGuardDialog = function(player){
+
+   Suporta 13 JSONs: aldric, martha, grom, elara, thorne, mirena, velithra,
+   corvus, bjorn, alchemist, gossip, npc_herbalist_lyra, itinerant_merchant. */
+
+// Mapa de defaults por NPC (name/desc/portrait/icon fallback)
+var _NPC_DEFAULTS = {
+  aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/aldric.png',  icon: 'ic-paladino' },
+  martha:      { name: 'Martha',              desc: 'Estalajadeira do Grifo Dourado',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
+  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
+  elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Eldoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
+  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Eldoria',                portrait: '/shared/img/merchants/thorne.png',   icon: 'ic-guerreiro' },
+  mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.png',   icon: 'ic-druida' },
+  velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.png', icon: 'ic-mago' },
+  corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.png',   icon: 'ic-ladino' },
+  bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Mestre selador e coureiro',          portrait: '/shared/img/merchants/bjorn.png',    icon: 'ic-patrulheiro' },
+  alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/npcs/alchemist.png',     icon: 'ic-feiticeiro' },
+  gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
+  npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '/shared/img/npcs/lyra.png',         icon: 'ic-druida' },
+  itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/itinerant.png',    icon: 'ic-ladino' }
+};
+
+/** GENÉRICO: abre dialogue JSON de qualquer NPC suportado. */
+window._openNpcDialogue = function(npcKey, player){
   if (typeof window.dialogueEngine === 'undefined' || typeof window.vEncounter === 'undefined') {
     if (typeof vToast === 'function') vToast('Dialogue engine não disponível');
     return;
@@ -48915,45 +48935,45 @@ window._openAldricGuardDialog = function(player){
     if (typeof vToast === 'function') vToast('Player não disponível');
     return;
   }
-  window.dialogueEngine.load('aldric').then(function(data){
+  window.dialogueEngine.load(npcKey).then(function(data){
     if (!data) {
-      if (typeof vToast === 'function') vToast('aldric.json não carregou');
+      if (typeof vToast === 'function') vToast(npcKey + '.json não carregou');
       return;
     }
-    var npcKey = 'aldric';
-    // Marca visit (NPC memory)
     if (window.npcAffinity && window.npcAffinity.markVisit) window.npcAffinity.markVisit(p, npcKey);
-    // Resolve qual node começar baseado em timeline + conditions
     var nodeId = window.dialogueEngine.resolveStartNode(data.timeline, p, npcKey, 'start');
-    _renderAldricNode(p, data, nodeId, npcKey);
+    _renderNpcNode(p, data, nodeId, npcKey);
   });
 };
 
-function _renderAldricNode(player, dialogueData, nodeId, npcKey){
+// Wrapper retro-compat pra Aldric (B1 PoC)
+window._openAldricGuardDialog = function(player){
+  return window._openNpcDialogue('aldric', player);
+};
+
+function _renderNpcNode(player, dialogueData, nodeId, npcKey){
   var dialogue = window.dialogueEngine.buildVEncounterDialogue(npcKey, nodeId, dialogueData, player);
   if (!dialogue) {
-    if (typeof vToast === 'function') vToast('Node "' + nodeId + '" não encontrado');
+    if (typeof vToast === 'function') vToast('Node "' + nodeId + '" não encontrado em ' + npcKey);
     return;
   }
-  // Adiciona npc.id pra affinity badge funcionar (B3)
+  // npc.id pra affinity badge (B3)
   dialogue.npc.id = npcKey;
-  // Override portrait com PNG se existir
-  if (!dialogue.npc.portrait) {
-    dialogue.npc.portrait = '/shared/img/npcs/aldric.png';
-  }
-  dialogue.npc.name = dialogue.npc.name || 'Guarda Aldric';
-  dialogue.npc.desc = dialogue.npc.desc || 'Veterano dos portões de Valdoria';
+  var defaults = _NPC_DEFAULTS[npcKey] || {};
+  if (!dialogue.npc.portrait) dialogue.npc.portrait = defaults.portrait || '';
+  dialogue.npc.name = dialogue.npc.name || defaults.name || npcKey;
+  dialogue.npc.desc = dialogue.npc.desc || defaults.desc || '';
 
   window.vEncounter.render(dialogue, {
     player: player,
     onChoice: function(choice, _dialogue){
       var original = choice._original || {};
-      // Mark once flag (impede re-uso de opções `once: true`)
+      // Mark once flag
       if (original.once && window.npcAffinity && window.npcAffinity.setFlag) {
         var flagName = '_once_' + (original.next || original.text);
         window.npcAffinity.setFlag(player, npcKey, flagName, true);
       }
-      // Aplica impact (reputation/affinity/flag/xp/gold)
+      // Aplica impact
       if (original.impact && window.dialogueEngine.applyImpact) {
         window.dialogueEngine.applyImpact(original.impact, player, npcKey);
       }
@@ -48961,7 +48981,6 @@ function _renderAldricNode(player, dialogueData, nodeId, npcKey){
       if (original.check && window.dialogueEngine.rollSkillCheck) {
         var rollResult = window.dialogueEngine.rollSkillCheck(original, player);
         if (rollResult) {
-          // Mostra resultado do dado via _showServiceResultPopup (2-stage: dado → continuar → next node)
           if (typeof _showServiceResultPopup === 'function') {
             var STAT_ABBR = {strength:'FOR', dexterity:'DES', constitution:'CON', intelligence:'INT', wisdom:'SAB', charisma:'CAR'};
             var abbr = STAT_ABBR[rollResult.skill] || rollResult.skill.toUpperCase();
@@ -48969,21 +48988,21 @@ function _renderAldricNode(player, dialogueData, nodeId, npcKey){
               + (rollResult.mod >= 0 ? '+' : '') + rollResult.mod
               + ' = <b>' + rollResult.total + '</b> vs DC ' + rollResult.dc
               + ' — ' + (rollResult.success ? '✅ Sucesso' : '❌ Falha');
+            var iconId = (_NPC_DEFAULTS[npcKey] && _NPC_DEFAULTS[npcKey].icon) || 'ic-aldeao';
             _showServiceResultPopup({
-              icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#ic-paladino"/></svg>',
-              npc: 'Guarda Aldric',
+              icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#' + iconId + '"/></svg>',
+              npc: dialogue.npc.name,
               narrative: narrativeText,
               dice: { formula: '1d20+' + rollResult.mod, sides: 20, value: rollResult.roll, total: rollResult.total },
               onContinue: function(){
-                // Após dado + continuar, renderiza next node
-                if (rollResult.nextNode) _renderAldricNode(player, dialogueData, rollResult.nextNode, npcKey);
+                if (rollResult.nextNode) _renderNpcNode(player, dialogueData, rollResult.nextNode, npcKey);
               }
             });
             return;
           }
         }
       }
-      // exit_callback → ação custom (ex: action_city_entry)
+      // exit_callback → ação custom
       if (original.exit_callback && typeof doAction === 'function') {
         if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
         doAction(original.exit_callback);
@@ -48995,12 +49014,17 @@ function _renderAldricNode(player, dialogueData, nodeId, npcKey){
         return;
       }
       if (original.next) {
-        _renderAldricNode(player, dialogueData, original.next, npcKey);
+        _renderNpcNode(player, dialogueData, original.next, npcKey);
       } else {
         if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
       }
     }
   });
+}
+
+// Wrapper retro-compat (interno)
+function _renderAldricNode(player, dialogueData, nodeId, npcKey){
+  return _renderNpcNode(player, dialogueData, nodeId, npcKey);
 }
 
 var CHANCE_ENCOUNTERS = [
