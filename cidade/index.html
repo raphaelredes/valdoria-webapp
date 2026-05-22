@@ -40972,12 +40972,15 @@ function _relationsShow(p, relId){
   // visual gradiente gold + status colorido por tier.
   var iconHtml = r.icon;
   if (r.portraitImg) {
+    // Sessão #26 fix: onerror só esconde IMG se PNG falhar (sem replace HTML —
+    // double-quotes do SVG breaks onerror attribute parser. Fallback aceitável:
+    // user vê broken-image hint se PNG 404, mas todos PNGs já validados existir).
     iconHtml = '<img src="' + r.portraitImg + '" alt="' + r.name + '" ' +
                'style="width:96px;height:96px;border-radius:50%;object-fit:cover;' +
                'border:2px solid var(--v-gold,#c4953a);' +
                'box-shadow:0 0 14px rgba(196,149,58,0.45),0 4px 14px rgba(0,0,0,0.5);" ' +
                'loading="lazy" ' +
-               'onerror="this.outerHTML=\'' + r.icon.replace(/'/g, "\\'") + '\'"/>';
+               'onerror="this.style.display=\'none\'"/>';
   }
   var tierColor = tier.affinity >= 5 ? '#ffd700' :
                   tier.affinity >= 4 ? '#c4953a' :
