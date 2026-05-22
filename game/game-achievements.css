@@ -15,8 +15,8 @@
   margin: 0 0 12px 0;
   background: linear-gradient(180deg,
     rgba(196,149,58,0.18) 0%,
-    rgba(196,149,58,0.06) 100%);
-  border: 1px solid rgba(196,149,58,0.4);
+    var(--v-gold-06) 100%);
+  border: 1px solid var(--v-gold-40);
   border-radius: var(--v-radius, 10px);
   position: relative;
 }
@@ -24,10 +24,10 @@
 .v-ach-banner-title {
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-weight: 700;
-  font-size: clamp(20px, 5vw, 26px);
+  font-size: clamp(var(--v-font-2xl, 18px), 5vw, 26px);
   color: var(--v-gold, #c4953a);
   letter-spacing: 2px;
-  text-shadow: 0 0 14px rgba(196,149,58,0.4);
+  text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4));
 }
 
 .v-ach-banner-sub {
@@ -44,7 +44,7 @@
   border-radius: 4px;
   margin-top: 10px;
   overflow: hidden;
-  border: 1px solid rgba(196,149,58,0.25);
+  border: 1px solid var(--v-gold-25);
 }
 
 .v-ach-progress-fill {
@@ -53,8 +53,8 @@
     var(--v-gold, #c4953a) 0%,
     #ffd95b 50%,
     var(--v-gold, #c4953a) 100%);
-  transition: width 0.4s ease-out;
-  box-shadow: 0 0 8px rgba(196,149,58,0.6);
+  transition: width var(--v-transition-slow, 0.4s) ease-out;
+  box-shadow: 0 0 8px var(--v-gold-60);
 }
 
 /* ── GRID DE CATEGORIAS ────────────────────────────────────────── */
@@ -75,7 +75,7 @@
   font-family: var(--v-font, 'MedievalSharp', serif);
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all var(--v-transition, 0.2s ease);
 }
 
 .v-ach-cat-card:active {
@@ -123,14 +123,14 @@
 
 .v-ach-cat-bar-fill {
   height: 100%;
-  transition: width 0.4s ease-out;
+  transition: width var(--v-transition-slow, 0.4s) ease-out;
 }
 
 .v-ach-cat-crown {
   position: absolute;
   top: -8px;
   right: -8px;
-  font-size: 18px;
+  font-size: var(--v-font-2xl);
   text-shadow: 0 0 6px rgba(255,215,0,0.8);
   filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
 }
@@ -188,7 +188,7 @@
   border: 1.5px solid rgba(74,56,40,0.5);
   border-radius: var(--v-radius, 10px);
   position: relative;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color var(--v-transition, 0.2s), box-shadow var(--v-transition, 0.2s);
 }
 
 .v-ach-item.v-ach-unlocked {
@@ -253,7 +253,7 @@
   position: absolute;
   bottom: 2px;
   right: 2px;
-  font-size: 14px;
+  font-size: var(--v-font-body);
   background: rgba(0,0,0,0.7);
   border-radius: 50%;
   width: 22px;
@@ -313,5 +313,5 @@
 @media (max-width: 380px) {
   .v-ach-art { width: 64px; height: 64px; }
   .v-ach-cat-emoji { font-size: 24px; }
-  .v-ach-banner-title { font-size: 18px; }
+  .v-ach-banner-title { font-size: var(--v-font-2xl); }
 }

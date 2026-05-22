@@ -65,7 +65,7 @@
   margin: 4px 0 12px 0;
   background: rgba(0,0,0,0.18);
   border-radius: var(--v-radius, 10px);
-  border: 1px solid rgba(196,149,58,0.2);
+  border: 1px solid var(--v-gold-20);
 }
 
 .v-league-path-node {
@@ -117,7 +117,7 @@
 .v-league-path-conn {
   width: 12px;
   height: 2px;
-  background: rgba(196,149,58,0.3);
+  background: var(--v-gold-30);
   margin-top: -10px;
 }
 
@@ -128,7 +128,7 @@
 /* ── WEEKLY XP CARD ────────────────────────────────────────────── */
 .v-league-xp-card {
   background: rgba(58,40,30,0.4);
-  border: 1.5px solid rgba(196,149,58,0.4);
+  border: 1.5px solid var(--v-gold-40);
   border-radius: var(--v-radius, 10px);
   padding: 12px;
   text-align: center;
@@ -147,14 +147,14 @@
   font-size: clamp(20px, 5vw, 24px);
   color: var(--v-gold, #c4953a);
   margin-top: 4px;
-  text-shadow: 0 0 10px rgba(196,149,58,0.3);
+  text-shadow: 0 0 10px var(--v-gold-30);
 }
 
 /* ── PENDING REWARD CARD ─────────────────────────────────────── */
 .v-league-reward-card {
   background: linear-gradient(135deg,
     rgba(255,215,0,0.16) 0%,
-    rgba(196,149,58,0.1) 100%);
+    var(--v-gold-10) 100%);
   border: 1.5px solid rgba(255,215,0,0.5);
   border-radius: var(--v-radius, 10px);
   padding: 12px;
@@ -316,7 +316,7 @@
 .v-league-rank-xp-fill {
   height: 100%;
   background: var(--v-gold, #c4953a);
-  transition: width 0.4s ease-out;
+  transition: width var(--v-transition-slow, 0.4s) ease-out;
 }
 
 .v-league-empty {
