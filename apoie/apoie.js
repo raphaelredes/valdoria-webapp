@@ -467,7 +467,20 @@ function setupNavbar() {
             requestAnimationFrame(function() {
                 var y = window.scrollY;
                 nav.classList.toggle('ap-nav-scrolled', y > 60);
-                if (backTop) backTop.classList.toggle('visible', y > 400);
+                if (backTop) {
+                    // Sessao #24 v14: botao topo aparece apenas PERTO DO FIM da pagina.
+                    // Threshold: ultimos 800px (suficiente p/ ver botoes/forms relevantes)
+                    // OU se rolou >80% (caso pagina seja curta).
+                    var docH = Math.max(
+                        document.documentElement.scrollHeight,
+                        document.body.scrollHeight
+                    );
+                    var winH = window.innerHeight;
+                    var scrolled = y + winH;
+                    var nearEnd = (docH - scrolled) <= 800;
+                    var pastEighty = (scrolled / docH) >= 0.80;
+                    backTop.classList.toggle('visible', nearEnd || pastEighty);
+                }
                 if (scrollHint) scrollHint.style.opacity = Math.max(0, 1 - y / 300);
                 ticking = false;
             });
