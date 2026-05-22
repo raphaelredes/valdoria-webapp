@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lendasdevaldoria.com.br; object-src 'none'; base-uri 'self'; form-action 'self' https://api.lendasdevaldoria.com.br">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache">
@@ -332,6 +332,96 @@
             }
         }
 
+        /* ── Formulário de contato (substitui mailto:) ────────────── */
+        .priv-form {
+            margin-top: 16px;
+            padding: 18px;
+            background: rgba(28,22,16,0.5);
+            border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            border-radius: 6px;
+        }
+        .priv-form-row { margin-bottom: 14px; }
+        .priv-form-row label {
+            display: block;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 12px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .priv-form-row .priv-form-hint {
+            display: block;
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-size: 11px;
+            font-style: italic;
+            color: var(--v-text-dim, #a09484);
+            text-transform: none;
+            letter-spacing: 0;
+            margin-top: 2px;
+            margin-bottom: 4px;
+        }
+        .priv-form-row input,
+        .priv-form-row select,
+        .priv-form-row textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 11px;
+            background: rgba(15,12,8,0.7);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 4px;
+            color: var(--v-text, #d4c8b0);
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .priv-form-row textarea { min-height: 120px; resize: vertical; }
+        .priv-form-row input:focus,
+        .priv-form-row select:focus,
+        .priv-form-row textarea:focus {
+            outline: none;
+            border-color: var(--v-gold, #c4953a);
+            box-shadow: 0 0 8px var(--v-gold-30, rgba(196,149,58,0.3));
+        }
+        .priv-form-row .priv-charcount {
+            font-size: 10px;
+            color: var(--v-text-dim, #a09484);
+            text-align: right;
+            margin-top: 2px;
+        }
+        .priv-form-submit {
+            display: inline-block;
+            padding: 11px 28px;
+            background: linear-gradient(180deg, var(--v-gold, #c4953a), #8a6420);
+            color: #1a1410;
+            border: 1px solid var(--v-gold, #c4953a);
+            border-radius: 5px;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--v-gold-40, rgba(196,149,58,0.4));
+        }
+        .priv-form-submit:hover { background: linear-gradient(180deg, #d4a55a, #9a7430); }
+        .priv-form-submit:disabled { opacity: 0.5; cursor: wait; }
+        .priv-form-result {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            line-height: 1.5;
+            display: none;
+        }
+        .priv-form-result.ok { background: rgba(125,186,91,0.10); border: 1px solid #7dba5b88; color: #b8e090; display: block; }
+        .priv-form-result.err { background: rgba(186,91,75,0.10); border: 1px solid #ba5b4b88; color: #e09080; display: block; }
+        @media (min-width: 600px) {
+            .priv-form { padding: 22px 24px; }
+            .priv-form-row { margin-bottom: 16px; }
+            .priv-form-row input, .priv-form-row select, .priv-form-row textarea { padding: 10px 13px; font-size: 14px; }
+        }
+
         /* Print stylesheet (impressão / PDF) */
         @media print {
             body { background: white; color: black; }
@@ -339,6 +429,7 @@
             a { color: #444; text-decoration: underline; }
             .priv-cta { background: white !important; color: black !important; border: 1px solid black; }
             section h2, .priv-data-key, .priv-right-name, .priv-version { color: #8a6420; }
+            .priv-form { display: none; }
         }
     </style>
 </head>
@@ -379,8 +470,8 @@
             <div class="priv-data-box">
                 <div class="priv-data-key">DPO</div>
                 <div class="priv-data-val">Equipe Lendas de Valdoria (DPO formalmente designado)</div>
-                <div class="priv-data-key">Email DPO</div>
-                <div class="priv-data-val"><a href="mailto:dpo@lendasdevaldoria.com.br">dpo@lendasdevaldoria.com.br</a></div>
+                <div class="priv-data-key">Canal oficial</div>
+                <div class="priv-data-val"><a href="#contato">Formulário de contato</a> (categoria <strong>"Solicitação LGPD"</strong>)</div>
                 <div class="priv-data-key">Prazo de resposta</div>
                 <div class="priv-data-val">15 dias úteis (conforme LGPD Art. 19)</div>
             </div>
@@ -584,7 +675,7 @@
                 </div>
             </div>
             <p class="priv-legal" style="margin-top:12px;">
-                <strong>Para exercer qualquer direito:</strong> envie email para <a href="mailto:dpo@lendasdevaldoria.com.br">dpo@lendasdevaldoria.com.br</a> com seu pedido. Identificação requerida (proteção contra solicitação por terceiros não autorizados).
+                <strong>Para exercer qualquer direito:</strong> utilize o <a href="#contato">formulário de contato</a> no final desta página (selecione a categoria <strong>"Solicitação LGPD"</strong>). Pode ser necessária identificação adicional via Telegram para confirmar sua titularidade dos dados.
             </p>
         </section>
 
@@ -699,16 +790,55 @@
             </ul>
         </section>
 
-        <section>
+        <section id="contato">
             <h2><span class="priv-section-num">16</span> Contato e Fiscalização</h2>
-            <p>Dúvidas ou exercício de direitos LGPD:</p>
-            <ul>
-                <li><strong>DPO (Encarregado)</strong>: <a href="mailto:dpo@lendasdevaldoria.com.br">dpo@lendasdevaldoria.com.br</a> — para exercício de direitos Art. 18</li>
-                <li><strong>Suporte geral</strong>: <a href="mailto:suporte@lendasdevaldoria.com.br">suporte@lendasdevaldoria.com.br</a></li>
-                <li><strong>Telegram</strong>: <a href="https://t.me/LendasDeValdoriaBOT">@LendasDeValdoriaBOT</a> (comando <code>/ticket</code>)</li>
-                <li><strong>Site</strong>: <a href="https://lendasdevaldoria.com.br">lendasdevaldoria.com.br</a></li>
-            </ul>
-            <h3 style="font-family:var(--v-font-display,'Cinzel',serif); color:var(--v-gold,#c4953a); font-size:13px; letter-spacing:1px; margin:12px 0 6px;">ANPD — Autoridade Nacional de Proteção de Dados</h3>
+            <p>
+                Para exercer direitos LGPD (Art. 18), enviar solicitação ao DPO ou tirar dúvidas sobre tratamento de dados, utilize <strong>exclusivamente o formulário abaixo</strong>. Não utilizamos e-mail para contato — este é o único canal oficial.
+            </p>
+            <p>
+                <strong>Importante:</strong> não inclua dados sensíveis (senha, CPF, dados bancários, documentos) — você não precisa fornecê-los para identificar-se. A identificação ocorre via Telegram OAuth dentro do bot. Se preferir, você também pode usar o comando <code>/ticket</code> em <a href="https://t.me/LendasDeValdoriaBOT">@LendasDeValdoriaBOT</a>.
+            </p>
+
+            <form id="priv-contact-form" class="priv-form" novalidate>
+                <div class="priv-form-row">
+                    <label for="pcf-category">Categoria <span style="color:#e09080">*</span></label>
+                    <select id="pcf-category" name="category" required>
+                        <option value="privacy_request">Solicitação LGPD (direitos do titular)</option>
+                        <option value="general">Suporte Geral</option>
+                        <option value="ban_appeal">Recurso de Banimento</option>
+                        <option value="bug_report">Relato de Bug</option>
+                    </select>
+                </div>
+
+                <div class="priv-form-row">
+                    <label for="pcf-subject">Assunto <span style="color:#e09080">*</span></label>
+                    <input id="pcf-subject" name="subject" type="text" maxlength="120" placeholder="Resuma sua solicitação em uma frase" required>
+                </div>
+
+                <div class="priv-form-row" id="pcf-noticed-row" style="display:none">
+                    <label for="pcf-noticed">Data e hora que você percebeu o banimento <span style="color:#e09080">*</span></label>
+                    <span class="priv-form-hint">Pode incluir como soube — ex.: "22/05/2026 às 14:30, tentei abrir o bot e vi a mensagem".</span>
+                    <input id="pcf-noticed" name="noticed_at" type="text" maxlength="60" placeholder="22/05/2026 14:30 — como soube">
+                </div>
+
+                <div class="priv-form-row">
+                    <label for="pcf-char">Personagem ou apelido <small style="opacity:0.7">(opcional)</small></label>
+                    <span class="priv-form-hint">Nos ajuda a localizar seu registro mais rápido. Não use seu nome real.</span>
+                    <input id="pcf-char" name="char_name" type="text" maxlength="32" placeholder="ex.: Ryaiael, Vorhan">
+                </div>
+
+                <div class="priv-form-row">
+                    <label for="pcf-message">Sua mensagem <span style="color:#e09080">*</span></label>
+                    <span class="priv-form-hint">Descreva sua solicitação. Mínimo 10 caracteres, máximo 5000.</span>
+                    <textarea id="pcf-message" name="message" maxlength="5000" minlength="10" placeholder="Descreva sua dúvida, solicitação LGPD, ou contestação..." required></textarea>
+                    <div class="priv-charcount"><span id="pcf-charcount">0</span> / 5000</div>
+                </div>
+
+                <button type="submit" id="pcf-submit" class="priv-form-submit">📨 Enviar Mensagem</button>
+                <div id="pcf-result" class="priv-form-result" aria-live="polite"></div>
+            </form>
+
+            <h3 style="font-family:var(--v-font-display,'Cinzel',serif); color:var(--v-gold,#c4953a); font-size:13px; letter-spacing:1px; margin:18px 0 6px;">ANPD — Autoridade Nacional de Proteção de Dados</h3>
             <p>
                 Caso entenda que seus direitos LGPD não foram atendidos adequadamente, você pode acionar diretamente a ANPD:
             </p>
@@ -720,6 +850,121 @@
                 <strong>Atualização 2026:</strong> com a <span class="priv-highlight">Lei 15.352/2026</span>, a ANPD tornou-se agência reguladora autônoma, com poder de investigar, autuar e bloquear operações de empresas que descumpram a LGPD. Seus 4 eixos prioritários de fiscalização em 2026 são: <strong>(1) direitos dos titulares, (2) tratamento de dados de crianças e adolescentes, (3) tratamento pelo Poder Público, (4) IA e tecnologias emergentes</strong>.
             </p>
         </section>
+
+        <script>
+        (function(){
+            'use strict';
+            var form = document.getElementById('priv-contact-form');
+            if (!form) return;
+            var $cat = document.getElementById('pcf-category');
+            var $subj = document.getElementById('pcf-subject');
+            var $noticedRow = document.getElementById('pcf-noticed-row');
+            var $noticed = document.getElementById('pcf-noticed');
+            var $char = document.getElementById('pcf-char');
+            var $msg = document.getElementById('pcf-message');
+            var $count = document.getElementById('pcf-charcount');
+            var $submit = document.getElementById('pcf-submit');
+            var $result = document.getElementById('pcf-result');
+
+            var API_BASE = 'https://api.lendasdevaldoria.com.br';
+            var SUBMIT_URL = API_BASE + '/api/support/submit';
+
+            function toggleNoticed(){
+                var show = $cat.value === 'ban_appeal';
+                $noticedRow.style.display = show ? '' : 'none';
+                $noticed.required = show;
+            }
+            $cat.addEventListener('change', toggleNoticed);
+            toggleNoticed();
+
+            try {
+                var qp = new URLSearchParams(location.search);
+                var prefCat = qp.get('cat') || qp.get('category');
+                if (prefCat && Array.from($cat.options).some(function(o){return o.value === prefCat;})) {
+                    $cat.value = prefCat;
+                    toggleNoticed();
+                }
+            } catch(_){}
+
+            $msg.addEventListener('input', function(){
+                $count.textContent = String($msg.value.length);
+            });
+
+            form.addEventListener('submit', function(ev){
+                ev.preventDefault();
+                $result.className = 'priv-form-result';
+                $result.textContent = '';
+
+                var payload = {
+                    category: $cat.value,
+                    subject: ($subj.value || '').trim(),
+                    message: ($msg.value || '').trim(),
+                    noticed_at: ($noticed.value || '').trim(),
+                    char_name: ($char.value || '').trim(),
+                    browser: navigator.userAgent || ''
+                };
+
+                if (!payload.subject || payload.subject.length < 3) {
+                    $result.className = 'priv-form-result err';
+                    $result.textContent = 'Por favor, informe um assunto (mínimo 3 caracteres).';
+                    return;
+                }
+                if (!payload.message || payload.message.length < 10) {
+                    $result.className = 'priv-form-result err';
+                    $result.textContent = 'A mensagem precisa ter pelo menos 10 caracteres.';
+                    return;
+                }
+                if (payload.category === 'ban_appeal' && !payload.noticed_at) {
+                    $result.className = 'priv-form-result err';
+                    $result.textContent = 'Para Recurso de Banimento, informe data e hora em que você percebeu o banimento.';
+                    return;
+                }
+
+                $submit.disabled = true;
+                $submit.textContent = '⏳ Enviando...';
+
+                fetch(SUBMIT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    credentials: 'omit'
+                })
+                .then(function(r){ return r.json().then(function(j){ return { status: r.status, body: j }; }); })
+                .then(function(res){
+                    if (res.status === 200 && res.body && res.body.ok) {
+                        $result.className = 'priv-form-result ok';
+                        $result.innerHTML = '✓ <strong>Mensagem recebida.</strong> ' +
+                            (res.body.message || 'Vamos analisar e responder em breve.') +
+                            ' <br><small>ID do ticket: <code>#' + (res.body.ticket_id || '?') + '</code> — guarde este número para acompanhamento.</small>';
+                        form.reset();
+                        $count.textContent = '0';
+                        toggleNoticed();
+                    } else {
+                        $result.className = 'priv-form-result err';
+                        var msg = res.body && res.body.error ? res.body.error : 'Erro desconhecido';
+                        if (res.status === 429) {
+                            var retry = res.body && res.body.retry_after_seconds ? res.body.retry_after_seconds : 60;
+                            msg = 'Aguarde ' + retry + ' segundos antes de enviar outra mensagem.';
+                        } else if (res.status === 400) {
+                            msg = 'Dados inválidos: ' + msg;
+                        } else if (res.status === 503) {
+                            msg = 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.';
+                        }
+                        $result.textContent = '✗ ' + msg;
+                    }
+                })
+                .catch(function(err){
+                    $result.className = 'priv-form-result err';
+                    $result.textContent = '✗ Falha ao enviar. Verifique sua conexão e tente novamente.';
+                    if (window.console && console.error) console.error('[ContactForm]', err);
+                })
+                .then(function(){
+                    $submit.disabled = false;
+                    $submit.textContent = '📨 Enviar Mensagem';
+                });
+            });
+        })();
+        </script>
 
         <section>
             <h2><span class="priv-section-num">15</span> Termos de Uso (Documento Separado)</h2>
