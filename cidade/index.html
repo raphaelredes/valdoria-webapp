@@ -8888,7 +8888,15 @@ function _isCTA(btn) {
   // vNotify(category, message, opts?) — respeita Settings/Notificações
   // category: 'general' | 'daily_quests' | 'festivals' | 'auction' | 'trade'
   // Se Geral=OFF, suprime tudo. Se Geral=ON, cada sub-categoria controla.
-  // Render: vToast com prefixo de categoria.
+  // Sessão #23 (2026-05-22): rich notifications — prefixo visual por categoria.
+  // Cada categoria tem ícone + cor accent que dá hierarquia visual no toast.
+  var _NOTIF_META = {
+    'general':      { icon: '🔔', accent: '#c4953a', label: 'Aviso' },
+    'daily_quests': { icon: '📜', accent: '#7dba5b', label: 'Missão' },
+    'festivals':    { icon: '🎉', accent: '#ffb84d', label: 'Festival' },
+    'auction':      { icon: '⚖️', accent: '#9050a0', label: 'Leilão' },
+    'trade':        { icon: '🪙', accent: '#5b9dba', label: 'Comércio' }
+  };
   window.vNotify = function(category, message, opts){
     opts = opts || {};
     var general = _pref('valdoria_notif_general', '1') === '1';
@@ -8896,7 +8904,12 @@ function _isCTA(btn) {
     var subKey = 'valdoria_notif_' + category;
     var subOn = _pref(subKey, '1') === '1';
     if (!subOn && !opts.force) return;
-    if (typeof window.vToast === 'function') window.vToast(message);
+    if (typeof window.vToast === 'function') {
+      var meta = _NOTIF_META[category] || _NOTIF_META.general;
+      // Rich: ícone + label colorido + mensagem
+      var rich = '<span style="color:' + meta.accent + ';font-weight:700;letter-spacing:0.5px;">' + meta.icon + ' ' + meta.label + ':</span> ' + message;
+      window.vToast(rich, opts.type || 'ok', opts.duration);
+    }
     // Vibração leve em notif (se vibração ON)
     if (window.vHaptic) window.vHaptic('light');
   };
@@ -51765,7 +51778,8 @@ function _renderEncounterPopup(enc, originalAction, player) {
       script: (enc.script || []).slice(),
       choices: (enc.choices || []).map(function(c){ return c.label; })
     });
-    if (existing.length > 3) existing = existing.slice(0, 3);
+    // Sessão #23 (2026-05-22): cap aumentado de 3 → 15 (suporte a filtros)
+    if (existing.length > 15) existing = existing.slice(0, 15);
     try { localStorage.setItem(charKey, JSON.stringify(existing)); } catch(_e2){}
     /* Tambem em memoria pra fallback em modo private/incognito */
     window._dialogHistory = existing;
@@ -51774,8 +51788,10 @@ function _renderEncounterPopup(enc, originalAction, player) {
   _renderPage(0);
 }
 
-/* X-6.5.51BL (2026-05-11): _showDialogHistoryPopup — exibe os 3 ultimos
-   dialogos do player num popup. Acessivel via settings (ou comando). */
+/* X-6.5.51BL (2026-05-11): _showDialogHistoryPopup — exibe os ultimos
+   dialogos do player num popup. Acessivel via settings (ou comando).
+   Sessão #23 (2026-05-22): adicionado filtros (período/quantidade) +
+   cap aumentado pra 15 entries. */
 function _showDialogHistoryPopup(){
   var charKey = ((window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'player') + '_dialog_history';
   var hist = [];
@@ -51789,19 +51805,9 @@ function _showDialogHistoryPopup(){
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = '📜 Diálogos Recentes';
-  var html = '<style>'
-    + '.dlg-hist-entry{margin-bottom:14px;padding:12px;background:linear-gradient(180deg,rgba(74,56,40,0.35) 0%,rgba(42,30,18,0.25) 100%);border:1px solid rgba(196,149,58,0.3);border-radius:8px;}'
-    + '.dlg-hist-header{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(196,149,58,0.2);margin-bottom:8px;}'
-    + '.dlg-hist-name{font-family:var(--v-font-display,Cinzel,serif);font-size:13px;color:var(--v-gold,#c4953a);font-weight:700;}'
-    + '.dlg-hist-ts{font-size:10px;color:var(--v-text-dim,#a09484);margin-left:auto;}'
-    + '.dlg-hist-line{margin:6px 0;font-size:12px;line-height:1.5;color:#d4c8b0;}'
-    + '.dlg-hist-line.speech{padding:6px 8px;border-left:2px solid var(--v-gold,#c4953a);background:rgba(196,149,58,0.08);}'
-    + '.dlg-hist-line.narration{font-style:italic;color:#9b8e7c;padding-left:8px;}'
-    + '.dlg-hist-speaker{display:block;font-family:var(--v-font-display,Cinzel,serif);font-size:10px;color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1px;margin-bottom:2px;}'
-    + '.dlg-hist-empty{text-align:center;color:var(--v-text-dim,#a09484);padding:20px;font-style:italic;}'
-    + '</style>'
-    + '<div style="padding:8px;">'
-    + '<p style="font-size:11px;color:var(--v-text-dim,#a09484);font-style:italic;text-align:center;margin-bottom:12px;">Os últimos ' + hist.length + ' diálogo' + (hist.length === 1 ? '' : 's') + ' do dia ficam registrados no teu diário.</p>';
+
+  // Filter state (persisted across re-render via window scope; reset on close)
+  if (!window._dlgFilters) window._dlgFilters = { period: 'all', limit: 5 };
   function _fmtTs(ts){
     var d = new Date(ts);
     var elapsed = Date.now() - ts;
@@ -51810,29 +51816,97 @@ function _showDialogHistoryPopup(){
     if (elapsed < 86400000) return Math.floor(elapsed/3600000) + 'h';
     return d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
   }
-  hist.forEach(function(d){
-    html += '<div class="dlg-hist-entry">';
-    html += '<div class="dlg-hist-header">';
-    if (d.portraitImg) {
-      html += '<img src="' + d.portraitImg + '" alt="" loading="lazy" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold,#c4953a);"/>';
-    } else {
-      html += '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#' + (d.portrait || 'ic-dialogo') + '"/></svg>';
-    }
-    html += '<span class="dlg-hist-name">' + (d.npc || 'Desconhecido') + '</span>';
-    html += '<span class="dlg-hist-ts">' + _fmtTs(d.ts) + '</span>';
-    html += '</div>';
-    (d.script || []).forEach(function(line){
-      if (line.type === 'speech') {
-        var spkr = (RECURRING_NPCS[line.speaker] && RECURRING_NPCS[line.speaker].name) || d.npc;
-        html += '<div class="dlg-hist-line speech"><span class="dlg-hist-speaker">' + spkr + '</span>' + (line.text || '') + '</div>';
-      } else {
-        html += '<div class="dlg-hist-line narration">' + (line.text || '') + '</div>';
-      }
+  function _applyFilters(all){
+    var f = window._dlgFilters;
+    var now = Date.now();
+    var filtered = all.filter(function(d){
+      if (f.period === 'today') return (now - d.ts) < 86400000;
+      if (f.period === 'week')  return (now - d.ts) < 7 * 86400000;
+      return true;  // 'all'
     });
+    return filtered.slice(0, f.limit);
+  }
+  function _render(){
+    var filtered = _applyFilters(hist);
+    var html = '<style>'
+      + '.dlg-hist-entry{margin-bottom:14px;padding:12px;background:linear-gradient(180deg,rgba(74,56,40,0.35) 0%,rgba(42,30,18,0.25) 100%);border:1px solid rgba(196,149,58,0.3);border-radius:8px;}'
+      + '.dlg-hist-header{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(196,149,58,0.2);margin-bottom:8px;}'
+      + '.dlg-hist-name{font-family:var(--v-font-display,Cinzel,serif);font-size:13px;color:var(--v-gold,#c4953a);font-weight:700;}'
+      + '.dlg-hist-ts{font-size:10px;color:var(--v-text-dim,#a09484);margin-left:auto;}'
+      + '.dlg-hist-line{margin:6px 0;font-size:12px;line-height:1.5;color:#d4c8b0;}'
+      + '.dlg-hist-line.speech{padding:6px 8px;border-left:2px solid var(--v-gold,#c4953a);background:rgba(196,149,58,0.08);}'
+      + '.dlg-hist-line.narration{font-style:italic;color:#9b8e7c;padding-left:8px;}'
+      + '.dlg-hist-speaker{display:block;font-family:var(--v-font-display,Cinzel,serif);font-size:10px;color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1px;margin-bottom:2px;}'
+      + '.dlg-hist-empty{text-align:center;color:var(--v-text-dim,#a09484);padding:20px;font-style:italic;}'
+      // Filtros (sessão #23)
+      + '.dlg-filters{display:flex;flex-direction:column;gap:6px;padding:8px 10px;background:rgba(42,36,32,0.6);border:1px solid var(--v-border,#4a3828);border-radius:8px;margin-bottom:12px;}'
+      + '.dlg-filter-row{display:flex;align-items:center;gap:6px;font-size:10px;}'
+      + '.dlg-filter-label{color:var(--v-gold,#c4953a);text-transform:uppercase;letter-spacing:1px;min-width:60px;}'
+      + '.dlg-filter-btns{display:flex;gap:4px;flex:1;}'
+      + '.dlg-filter-btn{flex:1;padding:4px 6px;background:rgba(196,149,58,0.06);border:1px solid var(--v-border,#4a3828);border-radius:4px;color:var(--v-text-dim,#a09484);font-size:10px;font-family:var(--v-font,MedievalSharp,serif);cursor:pointer;transition:all 0.15s;}'
+      + '.dlg-filter-btn:hover{background:rgba(196,149,58,0.12);color:var(--v-text,#d4c8b0);}'
+      + '.dlg-filter-btn.active{background:linear-gradient(180deg,#c4953a,#8a6420);color:#1a1410;border-color:#ffd700;font-weight:700;}'
+      + '</style>'
+      + '<div style="padding:8px;">'
+      // Filter bar
+      + '<div class="dlg-filters">'
+      +   '<div class="dlg-filter-row"><span class="dlg-filter-label">Período</span><div class="dlg-filter-btns">'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'today' ? 'active' : '') + '" data-period="today">Hoje</button>'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'week' ? 'active' : '') + '" data-period="week">7 dias</button>'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'all' ? 'active' : '') + '" data-period="all">Todos</button>'
+      +   '</div></div>'
+      +   '<div class="dlg-filter-row"><span class="dlg-filter-label">Quantos</span><div class="dlg-filter-btns">'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 3 ? 'active' : '') + '" data-limit="3">3</button>'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 5 ? 'active' : '') + '" data-limit="5">5</button>'
+      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 15 ? 'active' : '') + '" data-limit="15">Todos</button>'
+      +   '</div></div>'
+      + '</div>'
+      + '<p style="font-size:11px;color:var(--v-text-dim,#a09484);font-style:italic;text-align:center;margin-bottom:12px;">Mostrando ' + filtered.length + ' de ' + hist.length + ' diálogo' + (hist.length === 1 ? '' : 's') + ' registrado' + (hist.length === 1 ? '' : 's') + '.</p>';
+
+    if (filtered.length === 0) {
+      html += '<div class="dlg-hist-empty">Nenhum diálogo no período selecionado.</div>';
+    } else {
+      filtered.forEach(function(d){
+        html += '<div class="dlg-hist-entry">';
+        html += '<div class="dlg-hist-header">';
+        if (d.portraitImg) {
+          html += '<img src="' + d.portraitImg + '" alt="" loading="lazy" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold,#c4953a);"/>';
+        } else {
+          html += '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#' + (d.portrait || 'ic-dialogo') + '"/></svg>';
+        }
+        html += '<span class="dlg-hist-name">' + (d.npc || 'Desconhecido') + '</span>';
+        html += '<span class="dlg-hist-ts">' + _fmtTs(d.ts) + '</span>';
+        html += '</div>';
+        (d.script || []).forEach(function(line){
+          if (line.type === 'speech') {
+            var spkr = (RECURRING_NPCS[line.speaker] && RECURRING_NPCS[line.speaker].name) || d.npc;
+            html += '<div class="dlg-hist-line speech"><span class="dlg-hist-speaker">' + spkr + '</span>' + (line.text || '') + '</div>';
+          } else {
+            html += '<div class="dlg-hist-line narration">' + (line.text || '') + '</div>';
+          }
+        });
+        html += '</div>';
+      });
+    }
     html += '</div>';
-  });
-  html += '</div>';
-  bodyEl.innerHTML = html;
+    bodyEl.innerHTML = html;
+
+    // Wire filter buttons (re-rendering on click)
+    bodyEl.querySelectorAll('.dlg-filter-btn[data-period]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        window._dlgFilters.period = btn.getAttribute('data-period');
+        _render();
+      });
+    });
+    bodyEl.querySelectorAll('.dlg-filter-btn[data-limit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        window._dlgFilters.limit = parseInt(btn.getAttribute('data-limit'), 10);
+        _render();
+      });
+    });
+  }
+
+  _render();
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'dialog_history') _popupStack.push('dialog_history');
 }
