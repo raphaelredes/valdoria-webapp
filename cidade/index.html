@@ -12013,6 +12013,10 @@ function _showSettingsPopup(){
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'settings') {
     _popupStack.push('settings');
   }
+  // Sessão #23 v8: registra restoreFn pra Voltar de sub-popups (Diálogos
+  // Recentes etc) conseguir voltar pra Settings sem tela em branco.
+  if (!window._popupRestoreFns) window._popupRestoreFns = {};
+  window._popupRestoreFns['settings'] = function(){ _showSettingsPopup(); };
 }
 
 // _onSelectCharacter REMOVIDO 2026-05-04: substituído por _showCharSwitchConfirm
@@ -52846,14 +52850,11 @@ function _showDialogHistoryPopup(){
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = '📜 Diálogos Recentes';
   // Sessão #23 v8 (2026-05-22): user reportou Voltar -> tela branca.
-  // Fix: push 'dialog_history' no stack + restoreFn que reabre Settings.
+  // Fix: push 'dialog_history' no stack. restoreFn['settings'] (registrada
+  // em _showSettingsPopup) re-abre Settings ao voltar.
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'dialog_history') {
     _popupStack.push('dialog_history');
   }
-  if (!window._popupRestoreFns) window._popupRestoreFns = {};
-  window._popupRestoreFns['dialog_history'] = function(){
-    if (typeof _showSettingsPopup === 'function') _showSettingsPopup();
-  };
 
   // Filter state (persisted across re-render via window scope; reset on close)
   if (!window._dlgFilters) window._dlgFilters = { period: 'all', limit: 5 };
