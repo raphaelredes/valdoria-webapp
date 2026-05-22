@@ -9035,12 +9035,11 @@ function _isCTA(btn) {
       + '<span style="flex:0 0 50px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
       + '</div>'
 
-      // PNG do livro + fallback SVG
+      // PNG do livro (sem SVG fallback — vAssets auto-converte <use> em PNG mesmo com display:none)
       + '<div style="position:relative; width:120px; height:120px; margin:0 auto 14px;">'
       + '<img class="fLs-icon-anim" src="../shared/img/ui/splash-welcome.png" alt="Livro de Aventuras"'
       + ' style="width:100%; height:100%; object-fit:contain;"'
-      + ' onerror="this.style.display=\'none\'; if(this.nextSibling) this.nextSibling.style.display=\'inline-block\';">'
-      + '<svg viewBox="0 0 120 120" style="display:none; width:100%; height:100%; color:var(--v-gold,#c4953a);"><use href="#ic-trofeu"/></svg>'
+      + ' onerror="this.style.opacity=\'0.5\';">'
       + '</div>'
 
       // Título principal animado
