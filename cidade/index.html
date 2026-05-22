@@ -9019,7 +9019,13 @@ function _isCTA(btn) {
     var titleEl = document.getElementById('csp-title');
     var bodyEl = document.getElementById('csp-body');
     if (!ov || !bodyEl) return false;
-    if (titleEl) titleEl.textContent = window._fLsIsUpdate ? 'Política Atualizada' : 'Política de Privacidade';
+    if (titleEl) {
+      titleEl.textContent = window._fLsIsUpdate ? 'Política Atualizada' : 'Política de Privacidade';
+      // Sessão #23 v6: remove padding-right (compensa back-btn ausente)
+      // pra título ficar VERDADEIRAMENTE centralizado quando Voltar oculto
+      titleEl.setAttribute('data-fLs-pr-restore', titleEl.style.paddingRight || '');
+      titleEl.style.paddingRight = '0';
+    }
     // Sessão #23 v3: ESCONDE botão Voltar (exceção LGPD — jogador só prossegue
     // ao aceitar políticas). Salva display original pra restaurar no fechamento.
     var backBtn = document.getElementById('csp-back-btn') || ov.querySelector('.csp-back-btn');
@@ -9118,7 +9124,7 @@ function _isCTA(btn) {
       + '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">'
       + '<span style="font-size:15px; color:#7dba5b;">🔒</span>'
       + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:12px; color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase;">'
-      + 'Privacidade · LGPD · v' + window.PRIVACY_POLICY_VERSION
+      + 'Privacidade · LGPD'
       + '</span>'
       + '</div>'
 
@@ -9190,9 +9196,11 @@ function _isCTA(btn) {
         try { localStorage.setItem(_privacyKey(), acceptRecord); } catch(_) {}
         // Limpa flag legada se existir (cleanup)
         try { localStorage.removeItem('valdoria_first_launch_seen'); } catch(_) {}
-        // Restaura botão Voltar (foi escondido pelo splash)
+        // Restaura botão Voltar + padding-right do título (foram alterados pelo splash)
         var bb = document.getElementById('csp-back-btn') || (ov && ov.querySelector('.csp-back-btn'));
         if (bb) bb.style.display = bb.getAttribute('data-fLs-restore') || '';
+        var tl = document.getElementById('csp-title');
+        if (tl) tl.style.paddingRight = tl.getAttribute('data-fLs-pr-restore') || '';
         if (typeof closeCityPopup === 'function') closeCityPopup();
         else if (typeof navigateBack === 'function') navigateBack();
         if (typeof vToast === 'function') vToast(window._fLsIsUpdate ? '✓ Atualização aceita.' : '✨ Boa aventura, aventureiro!');
