@@ -44351,11 +44351,12 @@ var ACTION_HANDLERS = {
       // Marca como visto antes de renderizar (idempotente)
       try { localStorage.setItem(introKey, '1'); } catch(_) {}
       // PADRAO_ALDRIC dialogue: aventureiro ferido voltou do covil
+      // Sessão #23 (2026-05-22): PNG gerado via OpenAI quality=low ($0.04)
       var dlg = {
         npc: {
-          name: 'Aventureiro Ferido',
-          desc: 'Ranger · escapou do covil — barba suja, capa rasgada',
-          portrait: 'ic-patrulheiro'
+          name: 'Caçador Ferido',
+          desc: 'Patrulheiro · escapou do covil — barba suja, capa rasgada',
+          portrait: '../shared/img/npcs/aventureiro-ferido.png'
         },
         script: [
           { type: 'narration', text: 'Você cruza a praça quando percebe um movimento estranho perto da fonte. Um aventureiro — capa de couro rasgada, faixas ensanguentadas no braço esquerdo, expressão grave — está apoiado contra a borda de pedra. Reconhece teu brasão. Faz sinal pra te aproximares.' },
