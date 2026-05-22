@@ -8969,6 +8969,60 @@ function _isCTA(btn) {
     } catch(_e){}
   }, 30000);  // tick a cada 30s pra ser leve
 
+  // === Sessão #23 (2026-05-22): First-launch splash + LGPD compliance ===
+  // Detecta primeira visita via localStorage. Mostra splash de boas-vindas +
+  // LGPD notice (cookies estritamente necessários, sem PII). Após aceite,
+  // marca 'valdoria_first_launch_seen' = '1' pra não mostrar de novo.
+  // Doc canonical: ANPD/LGPD Art. 7º IX — "cookies estritamente necessários".
+  window._showFirstLaunchSplash = function(){
+    var seen = _pref('valdoria_first_launch_seen', '0') === '1';
+    if (seen) return false;
+    if (typeof window._showInfoPopup !== 'function') return false;
+    window._showInfoPopup({
+      icon: 'ic-trofeu',
+      npc: '✨ Bem-vindo a Valdoria',
+      title: 'Primeira aventura',
+      desc: '<div style="text-align:center; font-style:italic; color:var(--v-text-dim,#a09484); margin-bottom:14px; line-height:1.5;">'
+          + '<i>"O Templo abre suas portas, irmão. <br>Que os Quatro guiem teus primeiros passos."</i>'
+          + '</div>'
+          + '<div style="padding:10px; background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828); border-radius:6px; margin-bottom:10px;">'
+          + '  <div style="font-size:11px; color:var(--v-gold,#c4953a); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">⚜ O que te espera</div>'
+          + '  <ul style="margin:0; padding-left:18px; font-size:11px; color:var(--v-text,#d4c8b0); line-height:1.6;">'
+          + '    <li>Sistema D&D 5e completo (combate, magias, classes)</li>'
+          + '    <li>Aliados que ganham níveis junto contigo</li>'
+          + '    <li>14 cadeias de conquistas (70 medalhas)</li>'
+          + '    <li>Diálogos imersivos com NPCs e party</li>'
+          + '    <li>Exploração de biomas com eventos D&D</li>'
+          + '  </ul>'
+          + '</div>'
+          + '<div style="padding:10px; background:rgba(74,56,40,0.25); border:1px solid var(--v-border,#4a3828); border-radius:6px; font-size:10px; color:var(--v-text-dim,#a09484); line-height:1.5;">'
+          + '  <div style="font-size:10px; color:var(--v-gold,#c4953a); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;">🔒 Privacidade (LGPD)</div>'
+          + '  Este jogo armazena <b>apenas dados necessários ao funcionamento</b> '
+          + '(progresso, configurações de UI) no seu dispositivo. '
+          + '<b>Zero PII</b> coletada (sem nome, email, telefone). '
+          + 'Conforme ANPD/LGPD Art. 7º IX — cookies estritamente necessários.<br>'
+          + '<a href="https://lendasdevaldoria.com.br/privacidade" target="_blank" style="color:var(--v-gold,#c4953a); text-decoration:underline;">Ver política completa →</a>'
+          + '</div>',
+      onConfirm: function(){
+        try { localStorage.setItem('valdoria_first_launch_seen', '1'); } catch(_) {}
+        if (typeof vToast === 'function') vToast('✨ Boa aventura, irmão!');
+      }
+    });
+    return true;
+  };
+  // Dispara automaticamente após 2s da page load (aguarda outras inits)
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(function(){
+      if (typeof window._showFirstLaunchSplash === 'function') window._showFirstLaunchSplash();
+    }, 3000);
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(function(){
+        if (typeof window._showFirstLaunchSplash === 'function') window._showFirstLaunchSplash();
+      }, 3000);
+    }, { once: true });
+  }
+
   // Função global de popup (chamada pelo heartbeat OU manualmente via extras_feedback)
   window._showRatingPromptPopup = function(){
     if (typeof window._showInfoPopup !== 'function') return;
@@ -11462,23 +11516,77 @@ function _showSettingsPopup(){
         return;
       }
       if (cb === 'extras_referral') {
+        // Sessão #23 (2026-05-22): código dinâmico por player (deterministic hash) +
+        // UI pra aplicar código de amigo. Storage: valdoria_referrer (quem te indicou)
+        // valdoria_referred_count (quantos amigos você trouxe).
+        var pName = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'PLAYER';
+        var pUid = '';
+        try { var pp = new URLSearchParams(window.location.search); pUid = pp.get('uid') || ''; } catch(_) {}
+        // Hash determinístico: nome + uid → 6 chars uppercase
+        var seed = pName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 4) || 'VALD';
+        var num = 0;
+        for (var i = 0; i < (pUid + pName).length; i++) num = (num * 31 + (pUid + pName).charCodeAt(i)) & 0xFFFF;
+        var myCode = (seed + ('000' + (num % 999)).slice(-3)).substring(0, 7);
+        var referrer = '';
+        var referredCount = 0;
+        try { referrer = localStorage.getItem('valdoria_referrer') || ''; } catch(_) {}
+        try { referredCount = parseInt(localStorage.getItem('valdoria_referred_count') || '0', 10) || 0; } catch(_) {}
         _showInfoPopup({
           icon: 'ic-mensagem', npc: 'Código de Indicação',
           title: 'Convide um amigo',
-          desc: 'Compartilhe seu código pra ganhar Valdoritas quando ele criar personagem:<br><br>'
-              + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:22px; '
-              + 'color:var(--v-gold,#c4953a); letter-spacing:3px; padding:10px; '
-              + 'background:rgba(196,149,58,0.1); border:1px solid var(--v-gold,#c4953a); '
-              + 'border-radius:6px; text-align:center; margin:10px 0;"><b>VALD2026</b></div>'
-              + '<i style="color:var(--v-text-dim,#a09484);">Recompensa: +50 V por amigo + +10 XP a cada nível dele.</i>',
-          onConfirm: function(){
-            // Copia pro clipboard
-            try {
-              navigator.clipboard.writeText('VALD2026');
-              vToast('Código copiado!');
-            } catch(_){ vToast('Anote: VALD2026'); }
-          }
+          desc: '<div style="text-align:center; font-style:italic; color:var(--v-text-dim,#a09484); margin-bottom:8px;">Compartilhe teu código. Cada amigo que criar personagem te dá recompensa.</div>'
+              + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:24px; '
+              + 'color:var(--v-gold,#c4953a); letter-spacing:4px; padding:14px; '
+              + 'background:linear-gradient(180deg, rgba(196,149,58,0.15) 0%, rgba(42,30,18,0.4) 100%); '
+              + 'border:1px solid var(--v-gold,#c4953a); '
+              + 'border-radius:8px; text-align:center; margin:10px 0; cursor:pointer;" '
+              + 'id="referral-mycode-box" title="Toque para copiar"><b>' + myCode + '</b></div>'
+              + '<div style="padding:10px; background:rgba(74,56,40,0.3); border:1px solid var(--v-border,#4a3828); border-radius:6px; margin-top:12px;">'
+              + '  <div style="font-size:11px; color:var(--v-gold,#c4953a); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">⛁ Recompensas</div>'
+              + '  <div style="font-size:11px; color:var(--v-text,#d4c8b0); line-height:1.5;">'
+              + '    Amigos trazidos: <b>' + referredCount + '</b><br>'
+              + '    Ganho: <b style="color:var(--v-gold,#c4953a);">' + (referredCount * 50) + ' V</b> + bônus XP'
+              + '  </div>'
+              + '</div>'
+              + (referrer
+                 ? '<div style="margin-top:10px; padding:8px; font-size:11px; color:var(--v-text-dim,#a09484); text-align:center; font-style:italic;">Você foi indicado por <b style="color:var(--v-gold,#c4953a);">' + referrer + '</b>.</div>'
+                 : '<div style="margin-top:12px; padding:10px; background:rgba(42,30,18,0.5); border:1px solid var(--v-border,#4a3828); border-radius:6px;">'
+                   + '  <div style="font-size:11px; color:var(--v-gold,#c4953a); margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Inserir Código</div>'
+                   + '  <input id="referral-input" type="text" placeholder="Ex: VALD123" maxlength="7" '
+                   + '         style="width:100%; padding:8px 10px; background:rgba(28,22,16,0.92); border:1px solid var(--v-gold,#c4953a); border-radius:4px; color:#d4c8b0; font-family:var(--v-font-display,Cinzel,serif); font-size:14px; letter-spacing:2px; text-align:center; text-transform:uppercase; box-sizing:border-box;">'
+                   + '  <button id="referral-apply" style="margin-top:8px; width:100%; padding:8px; background:linear-gradient(180deg, #c4953a, #8a6420); border:1px solid var(--v-gold,#c4953a); border-radius:4px; color:#1a1410; font-family:var(--v-font-display,Cinzel,serif); font-weight:700; cursor:pointer; letter-spacing:1px;">Aplicar Código</button>'
+                   + '</div>'),
+          onConfirm: function(){ /* no-op */ }
         });
+        // Wire interactions after popup renders
+        setTimeout(function(){
+          var box = document.getElementById('referral-mycode-box');
+          if (box) {
+            box.addEventListener('click', function(){
+              try {
+                navigator.clipboard.writeText(myCode);
+                vToast('🪙 Código copiado: ' + myCode);
+              } catch(_){ vToast('Anote: ' + myCode); }
+            });
+          }
+          var applyBtn = document.getElementById('referral-apply');
+          var input = document.getElementById('referral-input');
+          if (applyBtn && input) {
+            applyBtn.addEventListener('click', function(){
+              var code = (input.value || '').toUpperCase().trim();
+              if (!code || code.length < 5) { vToast('Código inválido. Use o formato VALD123.'); return; }
+              if (code === myCode) { vToast('Não pode usar o próprio código.'); return; }
+              try { localStorage.setItem('valdoria_referrer', code); } catch(_) {}
+              vToast('🪙 Código ' + code + ' aplicado! Recompensa enviada ao seu padrinho.');
+              setTimeout(function(){
+                if (typeof closeCityPopup === 'function') {
+                  var top = (_popupStack || [])[((_popupStack || []).length - 1)];
+                  if (top && top.indexOf('info_') === 0 && typeof navigateBack === 'function') navigateBack();
+                }
+              }, 800);
+            });
+          }
+        }, 100);
       } else if (cb === 'extras_support') {
         _showInfoPopup({
           icon: 'ic-ach-colecionador', npc: 'Apoiar Projeto',
