@@ -14,7 +14,7 @@
  *   ~55   MERCHANT_NPCS_MARKET (6 NPCs: Thorne/Mirena/Velithra/Corvus/Bjorn/Garlen)
  *   ~250  _mktBuildCenario(data) — cenario panel canonical
  *   ~300  _mktBuildMerchantRow(npc) — .row-npc clicável por mercador
- *   ~340  _mktBuildRepBar(data) — D&D 5e Renown
+ *   ~340  _mktBuildRepBar(data) — D&D 5e Renome
  *   ~370  renderMarketHub(container, data) — entry point
  *
  * Source: simuladores/mercado-eldoria-final.html (1815L)
@@ -230,17 +230,17 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
 
 /* === Reputation bar canonical (.rep-bar) ================================== */
 function _mktBuildRepBar(data) {
-  var renown = 0;
-  if (data && data.renown && typeof data.renown.market === 'number') renown = data.renown.market;
-  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.market === 'number') renown = window._PLAYER_RENOWN.market;
+  var renome = 0;
+  if (data && data.renome && typeof data.renome.market === 'number') renome = data.renome.market;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.market === 'number') renome = window._PLAYER_RENOWN.market;
 
   var tier = 'NEUTRO';
-  if (renown >= 25) tier = 'AMIGÁVEL';
-  else if (renown >= 10) tier = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tier = 'FRIO';
-  else if (renown < -10) tier = 'HOSTIL';
+  if (renome >= 25) tier = 'AMIGÁVEL';
+  else if (renome >= 10) tier = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tier = 'FRIO';
+  else if (renome < -10) tier = 'HOSTIL';
 
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
 
   var bar = vCity.el('div', 'rep-bar');
   var lbl = vCity.el('span', 'label');
@@ -252,7 +252,7 @@ function _mktBuildRepBar(data) {
   track.appendChild(fill);
   bar.appendChild(track);
   var val = vCity.el('span', 'value');
-  val.textContent = tier + ' · ' + renown;
+  val.textContent = tier + ' · ' + renome;
   bar.appendChild(val);
   return bar;
 }

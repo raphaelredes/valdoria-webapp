@@ -50,7 +50,7 @@
     card.style.textAlign = 'center';
     card.innerHTML =
       '<div style="font-size:11px;letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;">Teste de ' + (opts.ability||'Atributo') + '</div>'
-      + '<div style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">DC ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (opts.mod>=0?'+':'') + opts.mod + '</div>'
+      + '<div style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">Classe de Dificuldade ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (opts.mod>=0?'+':'') + opts.mod + '</div>'
       + '<div id="dice-mount" style="width:160px;height:160px;margin:0 auto 12px;"></div>'
       + '<div id="dice-result" style="min-height:48px;font-size:15px;color:#f4d896;letter-spacing:1px;line-height:1.6;"></div>'
       + '<div id="dice-actions" style="display:flex;gap:10px;justify-content:center;margin-top:14px;opacity:0;transition:opacity 0.4s;"></div>';
@@ -72,7 +72,7 @@
       else if (success) { statusTxt = '✓ SUCESSO'; statusColor = '#7ad06b'; }
       else { statusTxt = '✗ FALHA'; statusColor = '#d04848'; }
       resEl.innerHTML =
-        '<div style="font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;">Rolagem d20 ' + rawD20 + ' ' + (opts.mod>=0?'+':'') + opts.mod + ' = <b>' + total + '</b> vs DC ' + opts.dc + '</div>'
+        '<div style="font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;">Rolagem d20 ' + rawD20 + ' ' + (opts.mod>=0?'+':'') + opts.mod + ' = <b>' + total + '</b> vs CD ' + opts.dc + '</div>'
         + '<div style="font-size:18px;color:' + statusColor + ';font-weight:700;letter-spacing:2px;">' + statusTxt + '</div>';
 
       var deltaR = critSuccess ? +3 : success ? +1 : critFail ? -2 : -1;
@@ -86,7 +86,7 @@
           ov.classList.remove('active');
           if (typeof window.vToast === 'function') {
             var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
-            window.vToast((deltaR>=0?'+':'')+deltaR+' Renown · '+facLabel, deltaR>=0?'gold':'warn');
+            window.vToast((deltaR>=0?'+':'')+deltaR+' Renome · '+facLabel, deltaR>=0?'gold':'warn');
           }
         });
       }, 600);

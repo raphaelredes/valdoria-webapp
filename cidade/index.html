@@ -11943,16 +11943,32 @@ function _showSettingsPopup(){
           }
         }, 100);
       } else if (cb === 'extras_support') {
+        // Sessão #23 v8 (2026-05-22): user pediu remover PIX email exposto +
+        // redirecionar ao apoie.lendasdevaldoria.com.br (single source).
+        // Recompensas automatizadas requerem Telegram OAuth no site.
         _showInfoPopup({
-          icon: _heralIco('ic-ach-colecionador', null, '32px'), npc: 'Apoiar Projeto',
-          title: 'Lendas de Valdoria',
-          desc: 'Este projeto é desenvolvido por uma pessoa só, gratuitamente. '
-              + 'Seu apoio mantém os servidores de pé e novas masmorras chegando.<br><br>'
-              + '<b>Como apoiar:</b><br>'
-              + '• <b>PIX</b>: apoie@lendasdevaldoria.com.br<br>'
-              + '• <b>Site</b>: apoie.lendasdevaldoria.com.br<br>'
-              + '• <b>Mercenário Permanente</b>: doadores ganham aliado bonus + título exclusivo<br><br>'
-              + '<i style="color:var(--v-gold,#c4953a);">Toda contribuição vira combustível pro próximo update.</i>',
+          icon: _heralIco('ic-ach-colecionador', null, '32px'), npc: 'Apoiar o Projeto',
+          title: 'Sustente a Aventura',
+          desc: '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);margin:6px 0 12px;line-height:1.55;font-size:12px;">"Cada moeda dada ao mestre da forja transforma-se em nova lâmina." — provérbio antigo</div>'
+              + '<div style="font-size:12px;color:var(--v-text,#d4c8b0);line-height:1.6;margin-bottom:12px;">'
+              + 'Lendas de Valdoria é desenvolvido por uma só pessoa, gratuitamente. Seu apoio mantém servidores de pé, novos biomas em construção e narrativas vivas.'
+              + '</div>'
+              + '<div style="margin:12px 0;padding:12px 14px;background:linear-gradient(180deg, rgba(196,149,58,0.06) 0%, rgba(42,30,18,0.5) 100%);border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);border-radius:6px;">'
+              + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;text-align:center;">Recompensas automáticas</div>'
+              + '  <div style="font-size:11px;color:var(--v-text,#d4c8b0);line-height:1.55;">'
+              + '    Cada contribuição via PIX desbloqueia recompensas no jogo automaticamente — basta autenticar com Telegram no site de apoio.'
+              + '  </div>'
+              + '  <div style="font-size:10px;color:var(--v-text-dim,#a09484);line-height:1.5;margin-top:6px;font-style:italic;">'
+              + '    Aliado permanente, títulos honoríficos, cosméticos heráldicos.'
+              + '  </div>'
+              + '</div>'
+              + '<a href="https://apoie.lendasdevaldoria.com.br" target="_blank" rel="noopener" '
+              + 'style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;margin-top:14px;background:linear-gradient(180deg, var(--v-gold,#c4953a), #8a6420);color:#1a1410;border:1px solid var(--v-gold,#c4953a);border-radius:6px;font-family:var(--v-font-display,Cinzel,serif);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;box-shadow:0 2px 10px var(--v-gold-40,rgba(196,149,58,0.4));">'
+              + '  <span>✦ Acessar Portal de Apoio</span>'
+              + '</a>'
+              + '<div style="font-size:10px;color:var(--v-text-dim,#a09484);text-align:center;margin-top:8px;line-height:1.4;">'
+              + 'Faça login com Telegram para vincular sua contribuição ao seu personagem.'
+              + '</div>',
           onConfirm: function(){ vToast('Obrigado por considerar!'); }
         });
       } else if (cb === 'extras_feedback') {

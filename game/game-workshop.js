@@ -124,13 +124,13 @@ function renderWorkshopHub(container, data) {
   body.appendChild(npcRow);
 
   /* === 2b. Rep bar === */
-  var renown = (data.renown && typeof data.renown.workshop === 'number') ? data.renown.workshop : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.workshop) || 0;
+  var renome = (data.renome && typeof data.renome.workshop === 'number') ? data.renome.workshop : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.workshop) || 0;
   var tierLbl = 'NEUTRO';
-  if (renown >= 25) tierLbl = 'AMIGÁVEL';
-  else if (renown >= 10) tierLbl = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tierLbl = 'FRIO';
-  else if (renown < -10) tierLbl = 'HOSTIL';
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  if (renome >= 25) tierLbl = 'AMIGÁVEL';
+  else if (renome >= 10) tierLbl = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tierLbl = 'FRIO';
+  else if (renome < -10) tierLbl = 'HOSTIL';
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
   var repBar = vCity.el('div', 'rep-bar');
   repBar.appendChild(_wksEl('span', 'label', 'Reputação'));
   var track = vCity.el('div', 'bar');
@@ -138,7 +138,7 @@ function renderWorkshopHub(container, data) {
   fill.style.width = pct + '%';
   track.appendChild(fill);
   repBar.appendChild(track);
-  repBar.appendChild(_wksEl('span', 'value', tierLbl + ' · ' + renown));
+  repBar.appendChild(_wksEl('span', 'value', tierLbl + ' · ' + renome));
   body.appendChild(repBar);
 
   /* === 2c. No tools — early exit === */

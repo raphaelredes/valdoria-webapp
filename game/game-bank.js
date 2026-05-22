@@ -84,16 +84,16 @@ var SERVICE_DIALOGUES_BANK = {
       // task #84 (2026-05-20): resultText específico por valor (cohesão).
       { id: 'd_50',   label: '🪙 Depositar 50 V · taxa 0V',  cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_50', renownDelta: +1,
         resultNarration: 'Aldwin pesa as cinquenta Valdoritas na balança de prato. <i>(anota o lance no livro-razão com caligrafia precisa)</i>',
-        resultText: '"Cinquenta — sem taxa, isento até cem como cortesia da Casa." <i>(carimba o lacre)</i> "Recibo emitido. <b>+1 Renown.</b>"' },
+        resultText: '"Cinquenta — sem taxa, isento até cem como cortesia da Casa." <i>(carimba o lacre)</i> "Recibo emitido. <b>+1 Renome.</b>"' },
       { id: 'd_100',  label: '🪙 Depositar 100 V · taxa 1V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_100', renownDelta: +1,
         resultNarration: 'Aldwin abre a gaveta superior e separa noventa e nove Valdoritas pra Cofre. Uma moeda fica de lado — a taxa.',
-        resultText: '"Cem depositadas, uma Valdorita de taxa. <i>(sorri ligeiro)</i> Padrão da Casa." <b>+1 Renown.</b> "Recibo selado e lacrado."' },
+        resultText: '"Cem depositadas, uma Valdorita de taxa. <i>(sorri ligeiro)</i> Padrão da Casa." <b>+1 Renome.</b> "Recibo selado e lacrado."' },
       { id: 'd_500',  label: '💰 Depositar 500 V · taxa 3V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_500', renownDelta: +2,
         resultNarration: 'Aldwin chama um segundo banqueiro pra pesar quinhentas moedas. <i>(rituais maiores exigem testemunha)</i>',
-        resultText: '"Quinhentas — taxa de três Valdoritas, abaixo do meio por cento padrão. <i>(carimba duplo)</i> Cliente significativo merece tarifa privilegiada." <b>+2 Renown.</b>' },
+        resultText: '"Quinhentas — taxa de três Valdoritas, abaixo do meio por cento padrão. <i>(carimba duplo)</i> Cliente significativo merece tarifa privilegiada." <b>+2 Renome.</b>' },
       { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3,
         resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Cobre Vossa Senhoria com olhar de respeito profundo. Dois guardas escoltam o cofre interno.',
-        resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renown. Acesso a investimentos premium liberado.</b>' },
+        resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renome. Acesso a investimentos premium liberado.</b>' },
       { id: 'd_persuade', label: '💬 "Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
@@ -158,10 +158,10 @@ var SERVICE_DIALOGUES_BANK = {
         resultText: '"Uma semana, cinco Valdoritas. <i>(sela a porta)</i> O item fica guardado até o sétimo dia. Após isso, Vossa Senhoria pode renovar ou retirar." <b>Item armazenado no Cofre Comum.</b>' },
       { id: 's_month', label: '🗝️ Guardar 1 mês · 18V (10% desconto)', cb: 'store-confirm', renownDelta: +1,
         resultNarration: 'Aldwin escolhe um cofre médio, no segundo nível. <i>(testa as três fechaduras antes de selar)</i>',
-        resultText: '"Trinta dias, dezoito Valdoritas — desconto da fidelidade. <i>(carimba o recibo)</i> O item fica em cofre mais seguro, com duas chaves auxiliares." <b>Item armazenado. +1 Renown.</b>' },
+        resultText: '"Trinta dias, dezoito Valdoritas — desconto da fidelidade. <i>(carimba o recibo)</i> O item fica em cofre mais seguro, com duas chaves auxiliares." <b>Item armazenado. +1 Renome.</b>' },
       { id: 's_year',  label: '🗝️ Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3,
         resultNarration: 'Aldwin curva-se levemente. Conduz Vossa Senhoria à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
-        resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renown.</b>' },
+        resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renome.</b>' },
       { id: 's_persuade', label: '🎲 "Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'back', label: '↩ Voltar', cb: 'close' }
     ]
@@ -179,7 +179,7 @@ var SERVICE_DIALOGUES_BANK = {
         resultText: '"Item retirado, uma Valdorita de taxa. <i>(confere o lacre)</i> Vossa Senhoria deseja inspecionar antes de selar a operação?" <b>Item devolvido.</b>' },
       { id: 'r_bundle', label: '🗝️ Retirar até 5 itens · 3V', cb: 'retrieve-confirm', renownDelta: +1,
         resultNarration: 'Aldwin abre dois cofres pequenos lado a lado. <i>(organiza os itens em bandeja maior)</i>',
-        resultText: '"Cinco itens, três Valdoritas — combo da Casa. <i>(carimba a folha de retirada)</i> Pode conferir cada um antes de sair. +1 Renown pela operação." <b>Itens devolvidos.</b>' },
+        resultText: '"Cinco itens, três Valdoritas — combo da Casa. <i>(carimba a folha de retirada)</i> Pode conferir cada um antes de sair. +1 Renome pela operação." <b>Itens devolvidos.</b>' },
       { id: 'r_all',    label: '🗝️ Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0,
         resultNarration: 'Aldwin escolta Vossa Senhoria pessoalmente à câmara dos cofres. Dois guardas testemunham.',
         resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Vossa Senhoria fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
@@ -197,13 +197,13 @@ var SERVICE_DIALOGUES_BANK = {
       // task #84: resultText específico por tier de investimento (cohesão).
       { id: 'i_safe', label: '📜 Conservador · 100V × 5% mês',  cb: 'invest-confirm', renownDelta: +1,
         resultNarration: 'Aldwin assina o contrato Conservador. <i>(carimba duas vezes — uma vermelha, uma dourada)</i>',
-        resultText: '"Cem Valdoritas em Conservador, cinco por cento ao mês — pago em moeda viva, no primeiro de cada mês. <i>(arquiva o contrato)</i> Sem risco. Sem promessas de riqueza. Apenas certeza." <b>+5V/mês em renda passiva. +1 Renown.</b>' },
+        resultText: '"Cem Valdoritas em Conservador, cinco por cento ao mês — pago em moeda viva, no primeiro de cada mês. <i>(arquiva o contrato)</i> Sem risco. Sem promessas de riqueza. Apenas certeza." <b>+5V/mês em renda passiva. +1 Renome.</b>' },
       { id: 'i_med',  label: '📜 Médio · 500V × 10% (caravana)', cb: 'invest-confirm', renownDelta: +2,
         resultNarration: 'Aldwin chama um banqueiro júnior pra preparar o contrato Médio — caravana de comércio Sul-Vale. <i>(seleciona pergaminho específico)</i>',
-        resultText: '"Quinhentas Valdoritas, dez por cento ao mês — atrelado à caravana de Marin Albert. <i>(assina junto)</i> Há risco de atraso ou perda parcial. Cinquenta Valdoritas mensais quando tudo corre bem." <b>+50V/mês expected. +2 Renown.</b>' },
+        resultText: '"Quinhentas Valdoritas, dez por cento ao mês — atrelado à caravana de Marin Albert. <i>(assina junto)</i> Há risco de atraso ou perda parcial. Cinquenta Valdoritas mensais quando tudo corre bem." <b>+50V/mês expected. +2 Renome.</b>' },
       { id: 'i_high', label: '📜 Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2,
         resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda Vossa Senhoria)</i> Volta com pergaminho selado em cera vermelha-sangue.',
-        resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renown.</b>' },
+        resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renome.</b>' },
       { id: 'i_persuade', label: '🎲 "Posso ter taxa preferencial?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'about_tavira', label: '"E os bons clientes antigos? Como a Mestra Tavira?"', cb: 'about_tavira' },
       { id: 'i_rude', label: '"Cinco por cento é miséria. Você está roubando."', cb: 'opinion-rude', renownDelta: -2 },
@@ -220,7 +220,7 @@ var SERVICE_DIALOGUES_BANK = {
       // task #84: resultText específico (cohesão).
       { id: 'in_buy', label: '✉ Adquirir Seguro · 50V/mês · 3 meses min.', cb: 'insurance-confirm', renownDelta: +3,
         resultNarration: 'Aldwin pega o pergaminho selado com a marca do Conde. <i>(testemunha do banqueiro júnior chamada)</i>',
-        resultText: '"Seguro de Aventureiros ativado. Cinquenta Valdoritas mensais, mínimo de três meses. <i>(empurra pergaminho assinado)</i> Em caso de morte verificada por testemunha, a Casa contrata Revivify no Templo (até 300V em diamante), e o herdeiro nomeado recebe o resíduo." <b>Seguro ativo. +3 Renown da Casa.</b>' },
+        resultText: '"Seguro de Aventureiros ativado. Cinquenta Valdoritas mensais, mínimo de três meses. <i>(empurra pergaminho assinado)</i> Em caso de morte verificada por testemunha, a Casa contrata Revivify no Templo (até 300V em diamante), e o herdeiro nomeado recebe o resíduo." <b>Seguro ativo. +3 Renome da Casa.</b>' },
       { id: 'in_test', label: '🎲 "Confio em você, não em papéis" · Engano DC 15', cb: 'dice:deception:15:+0' },
       { id: 'in_insight', label: '🎲 "Já houve fraude com este Seguro?" · Insight DC 14', cb: 'dice:insight:14:+2' },
       { id: 'in_rude', label: '"Vocês banqueiros só vendem medo."', cb: 'opinion-rude', renownDelta: -3 },
@@ -235,15 +235,15 @@ var SERVICE_DIALOGUES_BANK = {
     ],
     choices: [
       // task #84: resultText específico por tipo de propriedade (cohesão).
-      { id: 'e_house',  label: '🏠 Casa (Hovel) · 1000V (DMG p.157)', cb: 'estate-confirm', renownDelta: +2,
+      { id: 'e_house',  label: '🏠 Casa (Hovel) · 1000V', cb: 'estate-confirm', renownDelta: +2,
         resultNarration: 'Aldwin marca no mapa a Casa modesta na cidade baixa — duas portas, lareira pequena, jardim de ervas. <i>(passa a escritura assinada pelo Conde)</i>',
-        resultText: '"Mil Valdoritas, Casa registrada em nome de Vossa Senhoria. <i>(carimba o pergaminho)</i> Cidade baixa, perto do mercado. <b>DMG p.157 — Hovel: lareira modesta, dois cômodos. Geração: 1 sp/dia. +2 Renown da Casa.</b>"' },
+        resultText: '"Mil Valdoritas, Casa registrada em nome de Vossa Senhoria. <i>(carimba o pergaminho)</i> Cidade baixa, perto do mercado. <b> — Hovel: lareira modesta, dois cômodos. Geração: 1 sp/dia. +2 Renome da Casa.</b>"' },
       { id: 'e_farm',   label: '🌾 Quinta (Cottage) · 5000V', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin marca a Quinta nas margens do rio — três hectares, casa principal, celeiro, dois empregados inclusos.',
-        resultText: '"Cinco mil Valdoritas. Quinta nas margens do Vale do Cervo. <i>(entrega escritura selada)</i> Empregados pagos, colheita garantida. <b>Cottage DMG p.157: 5 cômodos. Geração: 2 sp/dia. +3 Renown da Casa.</b>"' },
+        resultText: '"Cinco mil Valdoritas. Quinta nas margens do Vale do Cervo. <i>(entrega escritura selada)</i> Empregados pagos, colheita garantida. <b>Cottage: 5 cômodos. Geração: 2 sp/dia. +3 Renome da Casa.</b>"' },
       { id: 'e_tower',  label: '🗼 Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin entrega plantas arquitetônicas — torre fortificada com porão de cofre, três andares, salão de audiência. <i>(prazo de cem dias de construção)</i>',
-        resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower DMG p.157. +3 Renown da Casa.</b>"' },
+        resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
       { id: 'e_stronghold', label: '🏰 Stronghold · 50000V · 400 dias · DC 20 Persuasão', cb: 'dice:persuasion:20:+3' },
       { id: 'back',     label: '↩ Voltar', cb: 'close' }
     ]
@@ -300,7 +300,7 @@ var BANK_SVC_META = {
   'bank_insurance_menu':     { icon: '../shared/img/services/svc-seguro.png',     meta: 'Carta selada' },
   'bank_invest_menu':        { icon: '../shared/img/services/svc-investir.png',   meta: 'Juros mensais', badge: '5%' },
   'bank_loans_menu':         { icon: '../shared/img/services/svc-emprestimo.png', meta: '10% ao mês' },
-  'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.png',    meta: 'DMG p.157' }
+  'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.png',    meta: '' }
 };
 
 /* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) ===
@@ -384,22 +384,22 @@ function _bnkBuildNpcRow(data) {
   return row;
 }
 
-/* === Reputation bar canonical (.rep-bar — D&D 5e Renown DMG p.22) ======== */
+/* === Reputation bar canonical (.rep-bar — D&D 5e Renome ======== */
 function _bnkBuildRepBar(data) {
-  // Compute renown
-  var renown = 0;
-  if (data && data.renown && typeof data.renown.bank === 'number') renown = data.renown.bank;
-  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.bank === 'number') renown = window._PLAYER_RENOWN.bank;
+  // Compute renome
+  var renome = 0;
+  if (data && data.renome && typeof data.renome.bank === 'number') renome = data.renome.bank;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.bank === 'number') renome = window._PLAYER_RENOWN.bank;
 
-  // Tier label (DMG p.22)
+  // Tier label
   var tier = 'NEUTRO';
-  if (renown >= 25) tier = 'AMIGÁVEL';
-  else if (renown >= 10) tier = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tier = 'FRIO';
-  else if (renown < -10) tier = 'HOSTIL';
+  if (renome >= 25) tier = 'AMIGÁVEL';
+  else if (renome >= 10) tier = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tier = 'FRIO';
+  else if (renome < -10) tier = 'HOSTIL';
 
   // Bar fill % (clamp 0-100, mapping [-10, +30] → [0, 100])
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
 
   var bar = vCity.el('div', 'rep-bar');
   var lbl = vCity.el('span', 'label');
@@ -411,7 +411,7 @@ function _bnkBuildRepBar(data) {
   track.appendChild(fill);
   bar.appendChild(track);
   var val = vCity.el('span', 'value');
-  val.textContent = tier + ' · ' + renown;
+  val.textContent = tier + ' · ' + renome;
   bar.appendChild(val);
   return bar;
 }

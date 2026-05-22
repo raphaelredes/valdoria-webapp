@@ -16,7 +16,7 @@
  *   ~310  TEMPLE_SVC_META (svc icon path + meta text canonical)
  *   ~340  _tmpBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~390  _tmpBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
- *   ~440  _tmpBuildRepBar(data) — Renown DMG p.22
+ *   ~440  _tmpBuildRepBar(data) — Renome
  *   ~470  _tmpBuildServices(services) — .services + .svc canonical
  *   ~530  renderTempleHub(container, data) — entry point
  *
@@ -203,7 +203,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"Vai em paz, irmão." <i>(traça o sinal sobre tua testa)</i> <b>Vantagem em salvaguardas de Sabedoria por 30 dias.</b> "Volta sempre que precisar — a porta do confessionário não se fecha pra ninguém."' },
       { id: 'c_donate', label: '💰 Pagar 10V — Confissão + reputação', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_devout', renownDelta: 3,
         resultNarration: 'Padre Aldric abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois te abençoa com prece dobrada.',
-        resultText: '"Tua oferta é lembrada, e tua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renown do Templo.</b> "O Sumo-Sacerdote saberá teu nome."' },
+        resultText: '"Tua oferta é lembrada, e tua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renome do Templo.</b> "O Sumo-Sacerdote saberá teu nome."' },
       { id: 'back',     label: '↩ "Outra hora."', cb: 'close' }
     ]
   },
@@ -221,13 +221,13 @@ var SERVICE_DIALOGUES_TEMPLE = {
     choices: [
       { id: 'd_5',    label: '🪙 Doar 5V — oferta humilde', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_5', renownDelta: 1,
         resultNarration: 'Theron coloca as cinco moedas no cesto e te dá um sorriso emocionado. Irmã Elara observa de longe, satisfeita.',
-        resultText: '"Os pobres do bairro vão ter pão essa semana, irmão!" <i>(curva-se desajeitado)</i> <b>+1 Renown do Templo.</b> "Os Quatro lembrarão."' },
+        resultText: '"Os pobres do bairro vão ter pão essa semana, irmão!" <i>(curva-se desajeitado)</i> <b>+1 Renome do Templo.</b> "Os Quatro lembrarão."' },
       { id: 'd_25',   label: '🪙 Doar 25V — oferta digna', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_25', renownDelta: 2,
         resultNarration: 'Theron quase deixa o cesto cair quando as vinte e cinco moedas tilintam dentro. Irmã Elara aproxima-se, sorrindo discreta.',
-        resultText: '"V-Vinte e cinco! <i>(emocionado)</i> Vai pagar o ferreiro de manter o sino da Capela em ordem por um ano!" <b>+2 Renown do Templo.</b>' },
+        resultText: '"V-Vinte e cinco! <i>(emocionado)</i> Vai pagar o ferreiro de manter o sino da Capela em ordem por um ano!" <b>+2 Renome do Templo.</b>' },
       { id: 'd_100',  label: '🪙 Doar 100V — oferta generosa', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_100', renownDelta: 5,
         resultNarration: 'Irmã Elara intervém pessoalmente — toca o braço de Theron com gentileza e assume o cesto. As cem Valdoritas brilham como rio de prata.',
-        resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Vossa Senhoria honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renown do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
+        resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Vossa Senhoria honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renome do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
       { id: 'back',   label: '↩ "Outra hora."', cb: 'close' }
     ]
   }
@@ -344,19 +344,19 @@ function _tmpBuildNpcRow(data) {
   return row;
 }
 
-/* === Reputation bar canonical (.rep-bar — D&D 5e Renown DMG p.22) ========== */
+/* === Reputation bar canonical (.rep-bar — D&D 5e Renome ========== */
 function _tmpBuildRepBar(data) {
-  var renown = 0;
-  if (data && data.renown && typeof data.renown.temple === 'number') renown = data.renown.temple;
-  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.temple === 'number') renown = window._PLAYER_RENOWN.temple;
+  var renome = 0;
+  if (data && data.renome && typeof data.renome.temple === 'number') renome = data.renome.temple;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.temple === 'number') renome = window._PLAYER_RENOWN.temple;
 
   var tier = 'NEUTRO';
-  if (renown >= 25) tier = 'AMIGÁVEL';
-  else if (renown >= 10) tier = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tier = 'FRIO';
-  else if (renown < -10) tier = 'HOSTIL';
+  if (renome >= 25) tier = 'AMIGÁVEL';
+  else if (renome >= 10) tier = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tier = 'FRIO';
+  else if (renome < -10) tier = 'HOSTIL';
 
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
 
   var bar = vCity.el('div', 'rep-bar');
   var lbl = vCity.el('span', 'label');
@@ -368,7 +368,7 @@ function _tmpBuildRepBar(data) {
   track.appendChild(fill);
   bar.appendChild(track);
   var val = vCity.el('span', 'value');
-  val.textContent = tier + ' · ' + renown;
+  val.textContent = tier + ' · ' + renome;
   bar.appendChild(val);
   return bar;
 }

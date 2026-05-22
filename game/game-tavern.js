@@ -16,7 +16,7 @@
  *   ~270  TAVERN_SVC_META (svc icon path + meta text canonical)
  *   ~310  _tavBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~360  _tavBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
- *   ~410  _tavBuildRepBar(data) — D&D 5e Renown DMG p.22
+ *   ~410  _tavBuildRepBar(data) — D&D 5e Renome
  *   ~440  _tavBuildServices(services) — .services + .svc canonical
  *   ~500  renderTavernHub(container, data) — entry point
  *
@@ -116,10 +116,10 @@ var SERVICE_DIALOGUES_TAVERN = {
         resultText: '"Goblins. Pequenos, covardes em combate justo, mortais em emboscada. <i>(faz gesto com a mão)</i> Atacam em bando, dez ou mais. Atire flechas longas — eles falham em moral quando perdem o líder. Apontar pro maior primeiro, sempre. <b>Bônus: +2 de dano contra goblins até o próximo descanso longo.</b>"' },
       { id: 'wolf',   label: '🐺 Sobre Lobos · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_wolf',
         resultNarration: 'Grom apoia os cotovelos no balcão e respira fundo.',
-        resultText: '"Lobos. Caçam em alcateia de seis ou oito, raramente sós. <i>(passa o dedo pela mesa, marcando um círculo)</i> Têm Tactics — flanqueiam pra ganhar Vantagem em ataques. Fique de costas pra uma parede ou árvore. Fogo afugenta, mas eles voltam quando a chama some. <b>+2 de dano contra lobos até o próximo descanso longo. MM p.341.</b>"' },
+        resultText: '"Lobos. Caçam em alcateia de seis ou oito, raramente sós. <i>(passa o dedo pela mesa, marcando um círculo)</i> Têm Tactics — flanqueiam pra ganhar Vantagem em ataques. Fique de costas pra uma parede ou árvore. Fogo afugenta, mas eles voltam quando a chama some. <b>+2 de dano contra lobos até o próximo descanso longo.</b>"' },
       { id: 'troll',  label: '👹 Sobre Trolls · 5 V (+2 dano vs)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_troll',
         resultNarration: 'Grom enxuga as mãos e fica sério. <i>(pega uma caneca de cerveja, bebe um gole)</i>',
-        resultText: '"Trolls. <i>(suspira)</i> Esses são osso duro. Regeneração de dez por turno — qualquer ferida que não seja ácido ou fogo se fecha. Se vir um, leve tocha ou óleo. Sem isso, ele não morre — só fica chateado. <b>+2 de dano contra trolls até o próximo descanso longo. MM p.291.</b>"' },
+        resultText: '"Trolls. <i>(suspira)</i> Esses são osso duro. Regeneração de dez por turno — qualquer ferida que não seja ácido ou fogo se fecha. Se vir um, leve tocha ou óleo. Sem isso, ele não morre — só fica chateado. <b>+2 de dano contra trolls até o próximo descanso longo.</b>"' },
       { id: 'random', label: '🎲 Boato genérico · 5 V (bônus aleatório)', cb: 'rumor-confirm', backend_cb: 'tavern_rumor_buy_random',
         resultNarration: 'Grom dá uma olhada discreta pelas mesas. <i>(volta-se, sussurrando)</i>',
         resultText: '"Boato fresco da estrada. <i>(estala a língua)</i> Aventureiros voltaram falando de runas brilhantes no antigo templo a leste. Quem leu disse que aumentou a sorte de combate. <i>(dá de ombros)</i> Pode ser conversa de bêbado, ou pode ser informação real. Você decide. <b>Bônus mecânico aleatório aplicado (ataque, defesa, save, cura, ou ouro) até o próximo descanso longo. Detalhe: tavern_rumors_data.py.</b>"' },
@@ -209,7 +209,7 @@ var SERVICE_DIALOGUES_TAVERN = {
      Cada um segue mecânicas D&D 5e canonical com narrativa imersiva. */
 
   bard: {
-    /* Bardic Inspiration — PHB p.53 — bard performs, listener may gain
+    /* Bardic Inspiration — — bard performs, listener may gain
        inspiration die. Tip 1V/5V escala chance. */
     npc: GROM_DIALOGUE.npc,
     script: [
@@ -224,7 +224,7 @@ var SERVICE_DIALOGUES_TAVERN = {
         resultText: '"Obrigada. <i>(começa a tocar uma balada melancólica)</i> Não é toda noite que se ouve com atenção." <i>Você relaxa enquanto a melodia preenche a taverna.</i>' },
       { id: 'tip_5', label: '🎵 Gorjeta 5 V · Inspiração 1d6', cb: 'bard-confirm', backend_cb: 'tavern_bard_tip_5', renownDelta: 1,
         resultNarration: 'Lyra ergue os olhos, focada em Vossa Senhoria. <i>(troca a melodia pra algo mais íntimo e poderoso)</i>',
-        resultText: '"Para Vossa Senhoria. <i>(canta com voz cristalina)</i> Que a coragem te acompanhe quando o silêncio falar mais alto que o aço." <b>+1d6 Inspiração Bardica até o próximo descanso longo. +1 Renown da Taverna.</b>' },
+        resultText: '"Para Vossa Senhoria. <i>(canta com voz cristalina)</i> Que a coragem te acompanhe quando o silêncio falar mais alto que o aço." <b>+1d6 Inspiração Bardica até o próximo descanso longo. +1 Renome da Taverna.</b>' },
       { id: 'flirt', label: '💬 "Toca algo só pra mim?" · Persuasão DC 14', cb: 'dice:persuasion:14:+1' },
       { id: 'request', label: '🎭 "Conhece a Balada de Korrigan?" · História DC 12', cb: 'dice:history:12:+0' },
       { id: 'back',  label: '↩ "Talvez depois."', cb: 'close' }
@@ -232,8 +232,8 @@ var SERVICE_DIALOGUES_TAVERN = {
   },
 
   mercenaries: {
-    /* Hireling Mercenary — XGtE p.130 — hire NPC by day rate. Costs vary
-       by skill (Skilled vs Unskilled hireling DMG p.159). */
+    /* Hireling Mercenary — — hire NPC by day rate. Costs vary
+       by skill (Skilled vs Unskilled hireling */
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Grom aponta a porta lateral que dá pro pátio. Lá fora, três figuras esperam encostadas no muro — um homem de couro escuro e olhar paciente, uma orca de armadura escamada com martelo nas costas, e um halfling de capa cinza que ninguém olha duas vezes (que é exatamente o ponto).' },
@@ -253,8 +253,8 @@ var SERVICE_DIALOGUES_TAVERN = {
   },
 
   adventurers: {
-    /* Hire Adventuring NPC — XGtE p.131 — skilled hireling com classes.
-       Pagamento em dia + lealdade based on treat (Renown). */
+    /* Hire Adventuring NPC — — skilled hireling com classes.
+       Pagamento em dia + lealdade based on treat (Renome). */
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Grom abre uma gaveta lateral e retira uma pasta encadernada em couro com selo do Conservatório dos Mapas. Dentro, quatro pergaminhos cuidadosamente catalogados — cada um com perfil de um Explorador veterano disponível pra contrato semanal.' },
@@ -273,7 +273,7 @@ var SERVICE_DIALOGUES_TAVERN = {
   },
 
   games: {
-    /* Gaming Set proficiency — PHB p.154 — Dice / Cards / Drinking contest.
+    /* Gaming Set proficiency — — Dice / Cards / Drinking contest.
        Gambling = DC-based check com loss/win por dado. */
     npc: GROM_DIALOGUE.npc,
     script: [
@@ -293,7 +293,7 @@ var SERVICE_DIALOGUES_TAVERN = {
   },
 
   bulletin: {
-    /* Notice Board / Job board — typical fantasy quest hook + Renown gain
+    /* Notice Board / Job board — typical fantasy quest hook + Renome gain
        via accepted jobs. */
     npc: GROM_DIALOGUE.npc,
     script: [
@@ -437,17 +437,17 @@ function _tavBuildNpcRow(data) {
 
 /* === Reputation bar canonical (.rep-bar) ================================== */
 function _tavBuildRepBar(data) {
-  var renown = 0;
-  if (data && data.renown && typeof data.renown.tavern === 'number') renown = data.renown.tavern;
-  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.tavern === 'number') renown = window._PLAYER_RENOWN.tavern;
+  var renome = 0;
+  if (data && data.renome && typeof data.renome.tavern === 'number') renome = data.renome.tavern;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.tavern === 'number') renome = window._PLAYER_RENOWN.tavern;
 
   var tier = 'NEUTRO';
-  if (renown >= 25) tier = 'AMIGÁVEL';
-  else if (renown >= 10) tier = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tier = 'FRIO';
-  else if (renown < -10) tier = 'HOSTIL';
+  if (renome >= 25) tier = 'AMIGÁVEL';
+  else if (renome >= 10) tier = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tier = 'FRIO';
+  else if (renome < -10) tier = 'HOSTIL';
 
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
 
   var bar = vCity.el('div', 'rep-bar');
   var lbl = vCity.el('span', 'label');
@@ -459,7 +459,7 @@ function _tavBuildRepBar(data) {
   track.appendChild(fill);
   bar.appendChild(track);
   var val = vCity.el('span', 'value');
-  val.textContent = tier + ' · ' + renown;
+  val.textContent = tier + ' · ' + renome;
   bar.appendChild(val);
   return bar;
 }

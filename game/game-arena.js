@@ -181,15 +181,15 @@ function _renderArenaMain(el, d) {
     frag.appendChild(npcRow);
 
     /* Rep bar */
-    var renown = 0;
-    if (d.renown && typeof d.renown.arena === 'number') renown = d.renown.arena;
-    else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.arena === 'number') renown = window._PLAYER_RENOWN.arena;
+    var renome = 0;
+    if (d.renome && typeof d.renome.arena === 'number') renome = d.renome.arena;
+    else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.arena === 'number') renome = window._PLAYER_RENOWN.arena;
     var tierLbl = 'NEUTRO';
-    if (renown >= 25) tierLbl = 'AMIGÁVEL';
-    else if (renown >= 10) tierLbl = 'CORDIAL';
-    else if (renown < 0 && renown >= -10) tierLbl = 'FRIO';
-    else if (renown < -10) tierLbl = 'HOSTIL';
-    var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+    if (renome >= 25) tierLbl = 'AMIGÁVEL';
+    else if (renome >= 10) tierLbl = 'CORDIAL';
+    else if (renome < 0 && renome >= -10) tierLbl = 'FRIO';
+    else if (renome < -10) tierLbl = 'HOSTIL';
+    var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
     var repBar = _div('rep-bar');
     var repLbl = document.createElement('span');
     repLbl.className = 'label';
@@ -202,7 +202,7 @@ function _renderArenaMain(el, d) {
     repBar.appendChild(repTrack);
     var repVal = document.createElement('span');
     repVal.className = 'value';
-    repVal.textContent = tierLbl + ' · ' + renown;
+    repVal.textContent = tierLbl + ' · ' + renome;
     repBar.appendChild(repVal);
     frag.appendChild(repBar);
 

@@ -168,15 +168,15 @@ function renderGuildHub(container, data) {
   body.appendChild(npcRow);
 
   /* === 2b. Reputation bar canonical === */
-  var renown = 0;
-  if (data.renown && typeof data.renown.guild === 'number') renown = data.renown.guild;
-  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.guild === 'number') renown = window._PLAYER_RENOWN.guild;
+  var renome = 0;
+  if (data.renome && typeof data.renome.guild === 'number') renome = data.renome.guild;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.guild === 'number') renome = window._PLAYER_RENOWN.guild;
   var tier = 'NEUTRO';
-  if (renown >= 25) tier = 'AMIGÁVEL';
-  else if (renown >= 10) tier = 'CORDIAL';
-  else if (renown < 0 && renown >= -10) tier = 'FRIO';
-  else if (renown < -10) tier = 'HOSTIL';
-  var pct = Math.max(0, Math.min(100, Math.round((renown + 10) / 40 * 100)));
+  if (renome >= 25) tier = 'AMIGÁVEL';
+  else if (renome >= 10) tier = 'CORDIAL';
+  else if (renome < 0 && renome >= -10) tier = 'FRIO';
+  else if (renome < -10) tier = 'HOSTIL';
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
   var repBar = _gldEl('div', 'rep-bar');
   repBar.appendChild(_gldEl('span', 'label', 'Reputação'));
   var track = _gldEl('div', 'bar');
@@ -184,7 +184,7 @@ function renderGuildHub(container, data) {
   fill.style.width = pct + '%';
   track.appendChild(fill);
   repBar.appendChild(track);
-  repBar.appendChild(_gldEl('span', 'value', tier + ' · ' + renown));
+  repBar.appendChild(_gldEl('span', 'value', tier + ' · ' + renome));
   body.appendChild(repBar);
 
   /* === 2c. Fallen ally warning === */
