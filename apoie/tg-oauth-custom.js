@@ -1,244 +1,440 @@
-/* Custom Telegram OAuth flow — substitui widget que mostra "Bot domain invalid"
- * Sessao #23 v9 (2026-05-22).
+/* Donor identification — v10 (2026-05-22)
  *
- * Problema: o widget oficial Telegram Login (telegram-widget.js) renderiza
- * "Bot domain invalid" se o bot nao tem o dominio cadastrado via /setdomain
- * no @BotFather. Mesmo quando o widget falha, ele ocupa espaco visual com
- * a mensagem feia.
+ * Substitui o Telegram Login Widget bugado ("Bot domain invalid" quando
+ * /setdomain nao foi configurado no @BotFather). Em vez disso, oferece:
  *
- * Solucao: botao custom que tenta widget primeiro; se falhar OU se
- * usuario clicar diretamente no botao, abre popup OAuth manual.
+ *   1) Telegram: deep-link para t.me/<bot>?start=apoiar
+ *      - Funciona SEMPRE (nao depende de /setdomain)
+ *      - Usuario abre o bot, confirma com /apoiar <TXID> apos pagar
  *
- * Fluxos suportados:
- *   1) Widget oficial carrega OK -> usa onTelegramAuth(user) tradicional
- *   2) Widget falha -> mostra botao custom 'Conectar Telegram'
- *   3) Click botao -> abre oauth.telegram.org/auth?bot_id=... em popup
- *   4) Popup callback -> postMessage chama onTelegramAuth(user)
+ *   2) Google: Google Identity Services (se GOOGLE_CLIENT_ID configurado)
+ *      - Fallback: modal de email simples (sem OAuth real)
  *
- * Public API (window.ApTgOAuth):
- *   - init(botUsername, onAuthCallback)
- *   - openLoginPopup()
+ *   3) Anonimo: padrao se nao identificar
+ *
+ * Compat com codigo legado:
+ *   - window.onTelegramAuth(user) ainda funciona (chamado por callback Google tambem)
+ *   - window.ApTgOAuth.init() mantido (chama o novo ApAuth.init internamente)
+ *
+ * Public API (window.ApAuth):
+ *   - init(opts: { botUsername, googleClientId, onAuth })
+ *   - connectTelegram()    -> opens t.me deep-link + saves intent
+ *   - connectGoogle()      -> Google OAuth or email modal
  *   - logout()
  *   - getUser()
+ *   - getIdentity()        -> {provider, name, email?, telegram?} or null
  */
-(function(){
+(function() {
     'use strict';
 
     var state = {
         botUsername: '',
-        botId: null,
+        googleClientId: '',
         user: null,
         onAuth: null,
-        widgetLoaded: false,
-        widgetFailed: false,
     };
 
     var ui = {
-        container: null,
-        btnCustom: null,
-        status: null,
-        widgetSlot: null,
+        container: null,  // #ap-tg-login-container
+        status: null,     // #ap-tg-status
+        btnsWrap: null,
     };
 
-    function _bootstrapBotId(botUsername){
-        // Bot id pode ser extraido do username se for numeric, senão
-        // requer chamada API. Pra simplicidade, deixamos null e o popup
-        // usa username diretamente.
-        return null;
+    var STORAGE_KEY = 'apDonorIdentity';
+
+    // ─── Utilities ───────────────────────────────────────────
+
+    function _escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
     }
 
-    function _renderConnectedUI(user){
+    function _save(identity) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(identity)); } catch (_) {}
+    }
+
+    function _load() {
+        try {
+            var s = localStorage.getItem(STORAGE_KEY);
+            return s ? JSON.parse(s) : null;
+        } catch (_) { return null; }
+    }
+
+    function _clear() {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    }
+
+    // ─── Icons ───────────────────────────────────────────────
+
+    var ICON_TELEGRAM =
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>' +
+        '</svg>';
+
+    var ICON_GOOGLE =
+        '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>' +
+        '<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>' +
+        '<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>' +
+        '<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>' +
+        '</svg>';
+
+    var ICON_CHECK =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-2px;margin-right:4px">' +
+        '<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+
+    // ─── Rendering ───────────────────────────────────────────
+
+    function _renderButtons() {
+        if (!ui.container) return;
+        // Clear previous
+        ui.container.innerHTML = '';
+
+        ui.btnsWrap = document.createElement('div');
+        ui.btnsWrap.className = 'ap-auth-buttons';
+
+        // Telegram
+        var btnTg = document.createElement('button');
+        btnTg.type = 'button';
+        btnTg.className = 'ap-auth-btn ap-auth-btn-tg';
+        btnTg.innerHTML = ICON_TELEGRAM + '<span>Conectar com Telegram</span>';
+        btnTg.addEventListener('click', connectTelegram);
+
+        // Google
+        var btnGoogle = document.createElement('button');
+        btnGoogle.type = 'button';
+        btnGoogle.className = 'ap-auth-btn ap-auth-btn-google';
+        btnGoogle.innerHTML = ICON_GOOGLE + '<span>Conectar com Google</span>';
+        btnGoogle.addEventListener('click', connectGoogle);
+
+        ui.btnsWrap.appendChild(btnTg);
+        ui.btnsWrap.appendChild(btnGoogle);
+        ui.container.appendChild(ui.btnsWrap);
+    }
+
+    function _renderConnected(identity) {
         if (!ui.status) return;
-        var name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        var safe = String(name).replace(/[<>"]/g, '');
+        var icon = identity.provider === 'telegram' ? ICON_TELEGRAM :
+                   identity.provider === 'google' ? ICON_GOOGLE : ICON_CHECK;
+        var label = identity.provider === 'telegram' ? 'via Telegram' :
+                    identity.provider === 'google' ? 'via Google' : 'via Email';
         ui.status.innerHTML =
-            '<div class="ap-tg-badge ap-tg-connected">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>' +
-            'Conectado como <b>' + safe + '</b>' +
-            '<button class="ap-tg-logout" type="button">desconectar</button>' +
+            '<div class="ap-auth-badge ap-auth-connected">' +
+            '<span class="ap-auth-badge-icon">' + icon + '</span>' +
+            '<span class="ap-auth-badge-text">' + ICON_CHECK +
+            'Identificado: <b>' + _escapeHtml(identity.name) + '</b> <em>' + label + '</em></span>' +
+            '<button class="ap-auth-logout" type="button" aria-label="Desconectar">desconectar</button>' +
             '</div>';
-        var logoutBtn = ui.status.querySelector('.ap-tg-logout');
-        if (logoutBtn) logoutBtn.addEventListener('click', logout);
-        if (ui.btnCustom) ui.btnCustom.style.display = 'none';
-        if (ui.widgetSlot) ui.widgetSlot.style.display = 'none';
+        var btn = ui.status.querySelector('.ap-auth-logout');
+        if (btn) btn.addEventListener('click', logout);
+
+        // Hide buttons
+        if (ui.btnsWrap) ui.btnsWrap.style.display = 'none';
     }
 
-    function _renderDisconnectedUI(){
-        if (!ui.status) return;
-        ui.status.innerHTML =
-            '<div class="ap-tg-badge ap-tg-anon">' +
-            '<span style="opacity:0.75">Sem login = doação anônima. Para recompensas no jogo, entre com Telegram.</span>' +
-            '</div>';
-        if (ui.btnCustom) ui.btnCustom.style.display = '';
+    function _renderDisconnected() {
+        if (ui.status) ui.status.innerHTML = '';
+        if (ui.btnsWrap) ui.btnsWrap.style.display = '';
+        else _renderButtons();
     }
 
-    function _onAuthSuccess(user){
-        state.user = user;
-        try { localStorage.setItem('apTgUser', JSON.stringify(user)); } catch(_){}
-        _renderConnectedUI(user);
-        if (typeof state.onAuth === 'function') {
-            try { state.onAuth(user); } catch(e){ console.warn('[TG_OAUTH] onAuth error:', e); }
-        }
-    }
+    // ─── Telegram (deep-link) ──────────────────────────────
 
-    function logout(){
-        state.user = null;
-        try { localStorage.removeItem('apTgUser'); } catch(_){}
-        _renderDisconnectedUI();
-        if (typeof state.onAuth === 'function') {
-            try { state.onAuth(null); } catch(_){}
-        }
-    }
-
-    function _tryLoadWidget(){
-        // Se BotFather tiver dominio configurado, widget funciona normal.
-        // Carrega como antes mas com timeout pra detectar falha.
-        if (!ui.widgetSlot) return;
-        var script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://telegram.org/js/telegram-widget.js?23';
-        script.setAttribute('data-telegram-login', state.botUsername);
-        script.setAttribute('data-size', 'large');
-        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-        script.setAttribute('data-request-access', 'write');
-        script.setAttribute('data-userpic', 'true');
-        script.onload = function(){
-            // Verifica apos delay se widget renderizou (ele insere iframe)
-            setTimeout(function(){
-                var iframe = ui.widgetSlot.querySelector('iframe');
-                if (iframe) {
-                    state.widgetLoaded = true;
-                    if (ui.btnCustom) ui.btnCustom.style.display = 'none';
-                } else {
-                    state.widgetFailed = true;
-                    // Esconde slot do widget (que pode estar mostrando "Bot domain invalid")
-                    ui.widgetSlot.style.display = 'none';
-                }
-            }, 800);
-        };
-        script.onerror = function(){
-            state.widgetFailed = true;
-            if (ui.widgetSlot) ui.widgetSlot.style.display = 'none';
-        };
-        ui.widgetSlot.appendChild(script);
-    }
-
-    function _hideWidgetErrorAfterDelay(){
-        // Telegram widget mostra "Bot domain invalid" em iframe — o iframe é
-        // dominio cross-origin e nao podemos ler conteudo. Apos 1.5s checamos
-        // se ha auth bem-sucedida; se nao, escondemos o iframe.
-        setTimeout(function(){
-            if (state.user) return;  // Auth foi feita
-            if (state.widgetFailed) return;
-            var iframe = ui.widgetSlot && ui.widgetSlot.querySelector('iframe');
-            if (iframe) {
-                // Renderiza ao lado, mas escondemos o iframe que pode mostrar erro
-                // Em vez de remover, deixamos disponivel pra quando user clica
-                // o iframe ja existir.
-                // Se nao tiver iframe, fallback pro custom button.
-            } else {
-                if (ui.widgetSlot) ui.widgetSlot.style.display = 'none';
-                if (ui.btnCustom) ui.btnCustom.style.display = '';
-            }
-        }, 1500);
-    }
-
-    function openLoginPopup(){
-        // Abre popup OAuth Telegram diretamente. Funciona mesmo sem
-        // /setdomain configurado no BotFather (mas requer permissao do user).
-        var redirectUri = window.location.origin + window.location.pathname;
-        var url = 'https://oauth.telegram.org/auth' +
-            '?bot_id=' + encodeURIComponent(state.botUsername) +
-            '&origin=' + encodeURIComponent(window.location.origin) +
-            '&request_access=write' +
-            '&return_to=' + encodeURIComponent(redirectUri);
-        var popup = window.open(url, 'tg_oauth', 'width=550,height=520,scrollbars=yes');
-        if (!popup) {
-            alert('Por favor, permita popups para conectar com Telegram. Ou continue como anônimo.');
+    function connectTelegram() {
+        if (!state.botUsername) {
+            console.warn('[AUTH] botUsername not configured');
             return;
         }
-        // Escuta postMessage do popup
-        var listener = function(ev){
-            if (ev.origin !== 'https://oauth.telegram.org') return;
-            try {
-                var data = JSON.parse(ev.data);
-                if (data && data.id && data.first_name) {
-                    _onAuthSuccess(data);
-                    window.removeEventListener('message', listener);
-                    if (!popup.closed) popup.close();
-                }
-            } catch(_){}
-        };
-        window.addEventListener('message', listener);
-        // Cleanup se popup fechar sem auth
-        var pollTimer = setInterval(function(){
-            if (popup.closed) {
-                clearInterval(pollTimer);
-                window.removeEventListener('message', listener);
+
+        var link = 'https://t.me/' + state.botUsername + '?start=apoiar';
+        // Open bot in new tab
+        var win = window.open(link, '_blank', 'noopener,noreferrer');
+        if (!win) {
+            // Popup blocked — show inline
+            window.location.href = link;
+            return;
+        }
+
+        // Show confirmation modal
+        _openTelegramConfirmModal();
+    }
+
+    function _openTelegramConfirmModal() {
+        var modal = document.createElement('div');
+        modal.className = 'ap-auth-modal';
+        modal.innerHTML =
+            '<div class="ap-auth-modal-backdrop"></div>' +
+            '<div class="ap-auth-modal-card">' +
+            '<div class="ap-auth-modal-icon">' + ICON_TELEGRAM + '</div>' +
+            '<h3>Bot Telegram aberto</h3>' +
+            '<p class="ap-auth-modal-hint">Confirme no bot que voce quer apoiar.' +
+            ' Apos pagar o PIX, suas recompensas chegam automaticamente ao seu personagem.</p>' +
+            '<div class="ap-auth-modal-info">' +
+            '<div><b>Como funciona:</b></div>' +
+            '<ol>' +
+            '<li>Bot abriu numa nova aba</li>' +
+            '<li>Toque em <b>Iniciar</b> ou envie <code>/apoiar</code></li>' +
+            '<li>Volte aqui e gere o QR Code PIX</li>' +
+            '<li>Pague o PIX (codigo VLD-XXXXX vai na descricao)</li>' +
+            '<li>Recompensas no jogo em ate 24h</li>' +
+            '</ol></div>' +
+            '<div class="ap-auth-modal-fields">' +
+            '<label>Seu @username Telegram (opcional, para acelerar)' +
+            '<input type="text" id="ap-tg-username" maxlength="40" placeholder="@seu_usuario" autocomplete="off"></label>' +
+            '<label>Seu nome (como quer ser identificado)' +
+            '<input type="text" id="ap-tg-name" maxlength="60" placeholder="Ex: Alex" required></label>' +
+            '</div>' +
+            '<div class="ap-auth-modal-actions">' +
+            '<button type="button" class="ap-auth-modal-cancel">Cancelar</button>' +
+            '<button type="button" class="ap-auth-modal-ok">Confirmar identificacao</button>' +
+            '</div></div>';
+        document.body.appendChild(modal);
+
+        var btnCancel = modal.querySelector('.ap-auth-modal-cancel');
+        var btnOk = modal.querySelector('.ap-auth-modal-ok');
+        var bd = modal.querySelector('.ap-auth-modal-backdrop');
+        function close() { try { modal.remove(); } catch (_) {} }
+        btnCancel.addEventListener('click', close);
+        bd.addEventListener('click', close);
+
+        btnOk.addEventListener('click', function() {
+            var usernameRaw = (modal.querySelector('#ap-tg-username').value || '').trim();
+            var nameRaw = (modal.querySelector('#ap-tg-name').value || '').trim();
+            if (!nameRaw) {
+                alert('Informe seu nome.');
+                return;
             }
-        }, 500);
+            var username = usernameRaw.replace(/^@/, '');
+            var identity = {
+                provider: 'telegram',
+                name: nameRaw.substring(0, 60),
+                telegram_username: username ? '@' + username.substring(0, 40) : '',
+                created_at: Date.now(),
+            };
+            _save(identity);
+            state.user = identity;
+            _renderConnected(identity);
+            if (typeof state.onAuth === 'function') {
+                try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
+            }
+            close();
+        });
+
+        setTimeout(function() {
+            var n = modal.querySelector('#ap-tg-name');
+            if (n) n.focus();
+        }, 80);
     }
 
-    function _renderCustomButton(){
-        if (!ui.container || ui.btnCustom) return;
-        ui.btnCustom = document.createElement('button');
-        ui.btnCustom.type = 'button';
-        ui.btnCustom.className = 'ap-tg-custom-btn';
-        ui.btnCustom.innerHTML =
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
-            '<path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>' +
-            '</svg>' +
-            '<span>Conectar com Telegram</span>';
-        ui.btnCustom.addEventListener('click', openLoginPopup);
-        ui.container.appendChild(ui.btnCustom);
+    // ─── Google ──────────────────────────────────────────────
+
+    function connectGoogle() {
+        if (state.googleClientId && window.google && window.google.accounts && window.google.accounts.id) {
+            try {
+                // Google Identity Services — One Tap prompt
+                window.google.accounts.id.prompt(function(notification) {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        // Fallback to email modal
+                        _openEmailModal();
+                    }
+                });
+                return;
+            } catch (e) {
+                console.warn('[AUTH] Google prompt failed:', e);
+            }
+        }
+        // No Google client id — fallback to email modal
+        _openEmailModal();
     }
 
-    function init(botUsername, onAuthCallback){
-        state.botUsername = botUsername;
-        state.botId = _bootstrapBotId(botUsername);
-        state.onAuth = onAuthCallback;
+    function _initGoogleSdk(clientId) {
+        if (!clientId) return;
+        function tryInit() {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                try {
+                    window.google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: _handleGoogleCredential,
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                    });
+                } catch (e) {
+                    console.warn('[AUTH] Google init error:', e);
+                }
+            } else {
+                setTimeout(tryInit, 400);
+            }
+        }
+        tryInit();
+    }
+
+    function _handleGoogleCredential(response) {
+        try {
+            var jwt = response.credential;
+            var parts = jwt.split('.');
+            var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            var pad = b64.length % 4;
+            if (pad) b64 += '='.repeat(4 - pad);
+            var payload = JSON.parse(decodeURIComponent(atob(b64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+            var identity = {
+                provider: 'google',
+                name: payload.name || payload.email || 'Apoiador',
+                email: payload.email,
+                sub: payload.sub,
+                picture: payload.picture,
+                created_at: Date.now(),
+            };
+            _save(identity);
+            state.user = identity;
+            _renderConnected(identity);
+            if (typeof state.onAuth === 'function') {
+                try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
+            }
+        } catch (e) {
+            console.error('[AUTH] Google credential parse error:', e);
+            _openEmailModal();
+        }
+    }
+
+    function _openEmailModal() {
+        var modal = document.createElement('div');
+        modal.className = 'ap-auth-modal';
+        modal.innerHTML =
+            '<div class="ap-auth-modal-backdrop"></div>' +
+            '<div class="ap-auth-modal-card">' +
+            '<div class="ap-auth-modal-icon">' + ICON_GOOGLE + '</div>' +
+            '<h3>Identificacao por email</h3>' +
+            '<p class="ap-auth-modal-hint">Preencha nome e email — vamos notificar quando sua doacao for confirmada. Sem login Google real necessario.</p>' +
+            '<div class="ap-auth-modal-fields">' +
+            '<label>Nome <input type="text" id="ap-em-name" maxlength="60" placeholder="Como gostaria de ser identificado" required></label>' +
+            '<label>Email <input type="email" id="ap-em-email" maxlength="120" placeholder="voce@exemplo.com" required></label>' +
+            '</div>' +
+            '<div class="ap-auth-modal-actions">' +
+            '<button type="button" class="ap-auth-modal-cancel">Cancelar</button>' +
+            '<button type="button" class="ap-auth-modal-ok">Confirmar</button>' +
+            '</div></div>';
+        document.body.appendChild(modal);
+
+        var bd = modal.querySelector('.ap-auth-modal-backdrop');
+        var btnCancel = modal.querySelector('.ap-auth-modal-cancel');
+        var btnOk = modal.querySelector('.ap-auth-modal-ok');
+        function close() { try { modal.remove(); } catch (_) {} }
+        btnCancel.addEventListener('click', close);
+        bd.addEventListener('click', close);
+
+        btnOk.addEventListener('click', function() {
+            var name = (modal.querySelector('#ap-em-name').value || '').trim();
+            var email = (modal.querySelector('#ap-em-email').value || '').trim().toLowerCase();
+            if (!name) { alert('Informe seu nome.'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Email invalido.'); return; }
+            var identity = {
+                provider: 'email',
+                name: name.substring(0, 60),
+                email: email.substring(0, 120),
+                created_at: Date.now(),
+            };
+            _save(identity);
+            state.user = identity;
+            _renderConnected(identity);
+            if (typeof state.onAuth === 'function') {
+                try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
+            }
+            close();
+        });
+
+        setTimeout(function() {
+            var n = modal.querySelector('#ap-em-name');
+            if (n) n.focus();
+        }, 80);
+    }
+
+    // ─── Common ─────────────────────────────────────────────
+
+    function _toLegacyUser(identity) {
+        // Convert internal identity -> shape expected by old onTelegramAuth callback
+        if (!identity) return null;
+        var parts = String(identity.name || '').split(' ');
+        return {
+            provider: identity.provider,
+            first_name: parts[0] || identity.name,
+            last_name: parts.slice(1).join(' '),
+            username: identity.telegram_username ? identity.telegram_username.replace(/^@/, '') : '',
+            email: identity.email,
+            // donate API expects "telegram_user" object — only passes through when provider=telegram
+        };
+    }
+
+    function logout() {
+        state.user = null;
+        _clear();
+        _renderDisconnected();
+        if (typeof state.onAuth === 'function') {
+            try { state.onAuth(null); } catch (_) {}
+        }
+    }
+
+    function getUser() { return state.user; }
+
+    function getIdentity() {
+        return state.user ? Object.assign({}, state.user) : null;
+    }
+
+    function init(opts) {
+        opts = opts || {};
+        state.botUsername = opts.botUsername || '';
+        state.googleClientId = opts.googleClientId || window.GOOGLE_CLIENT_ID || '';
+        state.onAuth = opts.onAuth || null;
 
         ui.container = document.getElementById('ap-tg-login-container');
-        if (!ui.container) return;
-
-        // Build inner structure
-        ui.widgetSlot = document.createElement('div');
-        ui.widgetSlot.id = 'ap-tg-widget-slot';
-        ui.container.appendChild(ui.widgetSlot);
-
-        _renderCustomButton();
-
         ui.status = document.getElementById('ap-tg-status');
 
-        // Restore previous session
-        try {
-            var saved = localStorage.getItem('apTgUser');
-            if (saved) {
-                var u = JSON.parse(saved);
-                if (u && u.id) {
-                    _onAuthSuccess(u);
-                    return;
-                }
+        if (!ui.container) {
+            console.warn('[AUTH] container #ap-tg-login-container not found');
+            return;
+        }
+
+        _renderButtons();
+
+        // Try to initialize Google SDK if client id provided
+        if (state.googleClientId) {
+            _initGoogleSdk(state.googleClientId);
+        }
+
+        // Restore saved identity
+        var saved = _load();
+        if (saved && saved.provider && saved.name) {
+            state.user = saved;
+            _renderConnected(saved);
+            if (typeof state.onAuth === 'function') {
+                try { state.onAuth(_toLegacyUser(saved)); } catch (_) {}
             }
-        } catch(_){}
-
-        _renderDisconnectedUI();
-
-        // Expose global onTelegramAuth (widget calls this)
-        window.onTelegramAuth = function(user){
-            _onAuthSuccess(user);
-        };
-
-        // Try widget first
-        _tryLoadWidget();
-        _hideWidgetErrorAfterDelay();
+        }
     }
 
-    function getUser(){ return state.user; }
+    // ─── Public API ─────────────────────────────────────────
 
-    window.ApTgOAuth = {
+    window.ApAuth = {
         init: init,
-        openLoginPopup: openLoginPopup,
+        connectTelegram: connectTelegram,
+        connectGoogle: connectGoogle,
+        logout: logout,
+        getUser: getUser,
+        getIdentity: getIdentity,
+    };
+
+    // Backward-compat shim for apoie.js calling ApTgOAuth.init(botUsername, callback)
+    window.ApTgOAuth = {
+        init: function(botUsername, onAuthCallback) {
+            init({
+                botUsername: botUsername,
+                googleClientId: window.GOOGLE_CLIENT_ID || '',
+                onAuth: onAuthCallback,
+            });
+        },
+        openLoginPopup: connectTelegram,
         logout: logout,
         getUser: getUser,
     };

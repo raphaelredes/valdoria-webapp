@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://telegram.org https://jogo.lendasdevaldoria.com.br https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://jogo.lendasdevaldoria.com.br; font-src 'self' https://fonts.gstatic.com https://jogo.lendasdevaldoria.com.br; img-src 'self' data: blob: https://telegra.ph https://jogo.lendasdevaldoria.com.br; media-src 'self' https://jogo.lendasdevaldoria.com.br; connect-src 'self' https: wss:; frame-src https://oauth.telegram.org; object-src 'none'; base-uri 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://jogo.lendasdevaldoria.com.br https://static.cloudflareinsights.com https://accounts.google.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://jogo.lendasdevaldoria.com.br https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://jogo.lendasdevaldoria.com.br; img-src 'self' data: blob: https://telegra.ph https://jogo.lendasdevaldoria.com.br https://lh3.googleusercontent.com; media-src 'self' https://jogo.lendasdevaldoria.com.br; connect-src 'self' https: wss:; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2a2420">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -356,11 +356,13 @@
         <div class="ap-section-subtitle ap-reveal">Escolha o valor — slider épico ou digite exato</div>
 
         <div class="ap-donate-box">
-            <!-- Telegram OAuth area (custom, replaces buggy widget) -->
+            <!-- Donor identification (opcional) — Telegram (deep-link) ou Google/email -->
             <div class="ap-tg-login">
                 <div class="ap-tg-help">
-                    <span class="ap-tg-help-icon">&#x1F4A1;</span>
-                    <span>Conecte seu Telegram para receber recompensas vinculadas automaticamente ao seu personagem.</span>
+                    <svg class="ap-tg-help-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                    </svg>
+                    <span><b>Identificar (opcional)</b> &mdash; receba recompensas vinculadas ao seu personagem no jogo. Sem login = doacao anonima.</span>
                 </div>
                 <div id="ap-tg-login-container"></div>
                 <div id="ap-tg-status" class="ap-tg-status-row"></div>
@@ -458,6 +460,13 @@
         document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/fetch-utils.js?v=' + v + '"><\/script>');
     </script>
+    <!-- Google Identity Services (opcional) — habilita login com Google quando GOOGLE_CLIENT_ID estiver configurado -->
+    <script>
+        // Configure aqui um Client ID do Google Cloud Console (Authorized JS Origin: https://apoie.lendasdevaldoria.com.br)
+        // Quando vazio, o botao 'Conectar com Google' cai automaticamente para modal de email simples.
+        window.GOOGLE_CLIENT_ID = '';
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="tg-oauth-custom.js"></script>
     <script src="apoie.js"></script>
     <script>

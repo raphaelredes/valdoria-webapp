@@ -125,13 +125,13 @@ function updatePreview() {
     if (btn) btn.disabled = false;
 }
 
-// === Telegram OAuth (via tg-oauth-custom.js) ===
+// === Donor Identification (via tg-oauth-custom.js / ApAuth) ===
+// O modulo ApAuth gerencia tres provedores: telegram (deep-link), google (Identity Services),
+// email (modal fallback). Callback recebe um objeto compativel com o legado onTelegramAuth.
+// O proprio modulo ja renderiza o badge "Conectado como X" — nao precisamos duplicar aqui.
 window.onTelegramAuth = function(user) {
-    telegramUser = user;
-    var status = document.getElementById('ap-tg-status') || document.getElementById('tg-status');
-    if (!status) return;
-    var name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-    status.innerHTML = '<div class="ap-tg-badge ap-tg-connected">✅ Conectado como ' + vEsc(name) + '</div>';
+    telegramUser = user || null;
+    // ApAuth gerencia o badge sozinho; nao tocamos no DOM aqui.
 };
 
 // === Generate PIX ===
@@ -144,7 +144,30 @@ async function generatePix() {
 
     try {
         var body = { amount_brl: selectedAmount };
-        if (telegramUser) body.telegram_user = telegramUser;
+        // Identification — multi-provider via ApAuth
+        var identity = (window.ApAuth && typeof window.ApAuth.getIdentity === 'function')
+            ? window.ApAuth.getIdentity()
+            : null;
+        if (identity) {
+            if (identity.provider === 'telegram') {
+                // Backward compat: send telegram_user object
+                body.telegram_user = {
+                    first_name: (identity.name || '').split(' ')[0] || identity.name,
+                    last_name: (identity.name || '').split(' ').slice(1).join(' '),
+                    username: identity.telegram_username
+                        ? identity.telegram_username.replace(/^@/, '')
+                        : '',
+                };
+            }
+            body.donor_identity = {
+                provider: identity.provider,
+                name: identity.name,
+                email: identity.email || '',
+                telegram_username: identity.telegram_username || '',
+            };
+        } else if (telegramUser) {
+            body.telegram_user = telegramUser;
+        }
 
         var resp = await fetchT(WORKER_URL + '/api/donate', {
             method: 'POST',
@@ -191,9 +214,24 @@ function showQrResult(data) {
         '<button class="ap-btn-copy" onclick="copyBrcode()">📋 Copiar Código PIX</button>';
 
     if (data.linked) {
-        html += '<div class="ap-qr-note">✅ Vinculado a sua conta Telegram. Recompensas serão entregues automaticamente após verificação.</div>';
+        html += '<div class="ap-qr-note ap-qr-note-ok">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>' +
+            'Vinculado a sua conta. Recompensas serao entregues automaticamente apos verificacao.</div>';
     } else {
-        html += '<div class="ap-qr-note">👤 Doação anônima. Para receber recompensas no jogo, use <b>/apoiar ' + vEsc(data.txid) + '</b> no bot Telegram.</div>';
+        // Anonima: oferecer vinculacao pos-PIX via deep-link com o TXID
+        var tgLink = 'https://t.me/' + BOT_USERNAME + '?start=apoiar_' + encodeURIComponent(data.txid);
+        html += '<div class="ap-qr-note ap-qr-note-link">' +
+            '<div style="margin-bottom:8px"><b>Quer vincular esta doacao ao seu personagem?</b></div>' +
+            '<div style="font-size:12px;color:var(--v-text-dim,#a09484);margin-bottom:10px">' +
+            'Apos pagar o PIX, abra o bot e confirme — recompensas no jogo em ate 24h.' +
+            '</div>' +
+            '<a class="ap-btn-tg-link" href="' + tgLink + '" target="_blank" rel="noopener">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-3px;margin-right:6px"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>' +
+            'Abrir bot e vincular agora' +
+            '</a>' +
+            '<div style="font-size:11px;color:var(--v-text-dim,#a09484);margin-top:8px">' +
+            'Ou no bot, envie: <code>/apoiar ' + vEsc(data.txid) + '</code>' +
+            '</div></div>';
     }
 
     html += '<button class="ap-qr-new-btn" onclick="resetDonation()">↺ Nova Doação</button>' +
@@ -605,10 +643,7 @@ function acceptCookies() {
     try { localStorage.setItem('valdoria_cookies', 'accepted'); } catch {}
     var banner = document.getElementById('cookie-banner');
     if (banner) banner.style.display = 'none';
-    // Trigger Telegram OAuth loading now
-    if (window.ApTgOAuth && typeof window.ApTgOAuth.init === 'function') {
-        window.ApTgOAuth.init(BOT_USERNAME, function(user) { telegramUser = user; });
-    }
+    // Auth buttons ja foram renderizados no bootstrap — nao precisamos re-init.
 }
 
 function rejectCookies() {
@@ -626,10 +661,10 @@ function _bootstrap() {
     // Cookies first
     checkCookieConsent();
 
-    // Telegram OAuth (only if cookies accepted)
-    var cookiesOk;
-    try { cookiesOk = localStorage.getItem('valdoria_cookies') === 'accepted'; } catch { cookiesOk = false; }
-    if (cookiesOk && window.ApTgOAuth && typeof window.ApTgOAuth.init === 'function') {
+    // Donor identification — sempre disponivel (botoes nao carregam tracking
+    // ate o usuario clicar; Google SDK so dispara cookie apos prompt()).
+    // O dialogo de cookies continua independente, mas nao bloqueia a UI.
+    if (window.ApTgOAuth && typeof window.ApTgOAuth.init === 'function') {
         window.ApTgOAuth.init(BOT_USERNAME, function(user) { telegramUser = user; });
     }
 
