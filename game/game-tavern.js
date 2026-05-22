@@ -132,20 +132,20 @@ var SERVICE_DIALOGUES_TAVERN = {
     script: [
       { type: 'narration', text: 'Grom esfrega o queixo, pensativo. Ele conhece três tipos de festa: a dos trabalhadores honestos, a da classe média comerciante, e a dos nobres que fingem não te ver até pagarem por ti.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Carousing, hein? <i>(ri baixo)</i> Sim, posso te apresentar. Noite na taverna humilde, dez moedas. Festa burguesa, cinquenta. Banquete nobre… duzentos e cinquenta, e ainda precisa fingir que sabe etiqueta.' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Sucesso depende de CARISMA. <i>(aponta o livro)</i> A regra é antiga — Xanathar página 128.' }
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Sucesso depende de CARISMA. <i>(aponta o livro)</i> A regra é antiga — os mestres de salão a conhecem há séculos.' }
     ],
     choices: [
       // task #62: backend_cb = src/game/city/tavern_carousing.py:111 "tavern_carouse_do_<tier_id>"
       // task #84: resultText específico por tier (cohesão).
       { id: 'lower',  label: '🍺 Farra Humilde · 10 V · DC 10', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_lower',
         resultNarration: 'Grom acena pra um grupo de carregadores e estaleiros. <i>(faz sinal pra trazerem mais um banco)</i>',
-        resultText: '"Senta com eles, Vossa Senhoria. Bebe a primeira rodada e escuta. <i>(sorri torto)</i> Aqui se faz contato com gente que conhece a estrada — barcos, cargas, atalhos. Carisma DC 10. <b>XGtE p.128 — Lower Class Carousing.</b>"' },
+        resultText: '"Senta com eles, Vossa Senhoria. Bebe a primeira rodada e escuta. <i>(sorri torto)</i> Aqui se faz contato com gente que conhece a estrada — barcos, cargas, atalhos. Teste de Carisma — Classe de Dificuldade 10."' },
       { id: 'middle', label: '🍷 Festa Refinada · 50 V · DC 15', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_middle',
         resultNarration: 'Grom te leva pra sala privada nos fundos. Mercadores de tecido riem em volta de um tabuleiro de Conquista.',
-        resultText: '"Esses são mercadores médios — vinho importado e mãos que sabem contar moedas. <i>(piscar de olho)</i> Boa conversa abre portas pra contratos. Carisma DC 15. <b>XGtE p.128 — Middle Class Carousing.</b>"' },
+        resultText: '"Esses são mercadores médios — vinho importado e mãos que sabem contar moedas. <i>(piscar de olho)</i> Boa conversa abre portas pra contratos. Teste de Carisma — Classe de Dificuldade 15."' },
       { id: 'upper',  label: '👑 Banquete Nobre · 250 V · DC 20', cb: 'carousing-confirm', backend_cb: 'tavern_carouse_do_upper',
         resultNarration: 'Grom faz um gesto solene e abre a porta da Sala Alta. Dentro, três nobres ajustam casacos bordados.',
-        resultText: '"Vossa Senhoria precisa lembrar de cada nome, cada título. <i>(voz baixa)</i> Eles testam etiqueta antes de ouvir negócio. Carisma DC 20. Quem passa fica conhecido nas Casas. <b>XGtE p.128 — Upper Class Carousing.</b>"' },
+        resultText: '"Vossa Senhoria precisa lembrar de cada nome, cada título. <i>(voz baixa)</i> Eles testam etiqueta antes de ouvir negócio. Teste de Carisma — Classe de Dificuldade 20. Quem passa fica conhecido nas Casas."' },
       { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
     ]
   },
@@ -215,7 +215,7 @@ var SERVICE_DIALOGUES_TAVERN = {
     script: [
       { type: 'narration', text: 'No canto da taverna, sobre um tablado modesto, uma jovem de cabelos cor-de-fogo afina o alaúde. Ela usa um broche de prata em forma de pena — símbolo do Conservatório de Eldoria. Suas mãos têm calos diferentes de quem trabalha o metal: marcas de cordas, mistura de violão e harpa.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lyra Cantarriba. <i>(passa o pano pela caneca)</i> Estudou no Conservatório, voltou ano passado quando o avô caiu doente. Toca pra pagar o quarto. Sabe Inspirar — coisa de bardo de verdade, não dessas balada de cantar Birthday Happy.' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>Inspiração 1d6.</b>' }
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>+1d6 no próximo teste.</b>' }
     ],
     choices: [
       // task #84: resultText por gorjeta — cohesão.
@@ -237,7 +237,7 @@ var SERVICE_DIALOGUES_TAVERN = {
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Grom aponta a porta lateral que dá pro pátio. Lá fora, três figuras esperam encostadas no muro — um homem de couro escuro e olhar paciente, uma orca de armadura escamada com martelo nas costas, e um halfling de capa cinza que ninguém olha duas vezes (que é exatamente o ponto).' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Os três tão livres pra serviço. <i>(aponta o livro de tarja)</i> Hireling padrão. <b>XGtE página 130</b> — taxa diária varia por habilidade. Skilled custa duas, unskilled meio.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Os três tão livres pra serviço. <i>(aponta o livro de tarja)</i> Contratação padrão da cidade — taxa diária varia por habilidade. Os com ofício custam duas, sem ofício metade.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Mas Vossa Senhoria pode pechinchar. <i>(sorri torto)</i> Se souber falar bonito — ou se for amigo de quem aqui já é casa.' }
     ],
     choices: [
@@ -258,14 +258,14 @@ var SERVICE_DIALOGUES_TAVERN = {
     npc: GROM_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Grom abre uma gaveta lateral e retira uma pasta encadernada em couro com selo do Conservatório dos Mapas. Dentro, quatro pergaminhos cuidadosamente catalogados — cada um com perfil de um Explorador veterano disponível pra contrato semanal.' },
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Exploradores são diferentes de mercenários. <i>(folha o primeiro pergaminho)</i> Conhecem mapas, sabem ler trilhas, e — o que importa — voltam vivos. <b>XGtE página 131</b>: hireling especializado em wilderness travel.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Exploradores são diferentes de mercenários. <i>(folha o primeiro pergaminho)</i> Conhecem mapas, sabem ler trilhas, e — o que importa — voltam vivos. São especialistas em viagem por terras selvagens.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'A taxa não é barata. Quarenta moedas o dia base, mais bônus de risco. Mas se Vossa Senhoria vai longe — vale cada Valdorita.' }
     ],
     choices: [
       // task #84: resultText específico (cohesão).
       { id: 'browse', label: '🗺 Ver exploradores disponíveis', cb: 'adventurers-confirm', backend_cb: 'tavern_adventurers_open',
         resultNarration: 'Grom abre a pasta e organiza os pergaminhos sobre o balcão. <i>(aponta um a um)</i>',
-        resultText: '"Yorath, batedor de Vale-Cinza, conhece as Marcas e a Floresta do Norte. Sira-Vento, anã das montanhas — mapeia minas e túneis. <i>(folha o terceiro)</i> Os outros dois saíram pra missão, voltam em três dias. Quarenta moedas o dia, mais quinze por terra hostil. <b>XGtE p.131.</b>"' },
+        resultText: '"Yorath, batedor de Vale-Cinza, conhece as Marcas e a Floresta do Norte. Sira-Vento, anã das montanhas — mapeia minas e túneis. <i>(folha o terceiro)</i> Os outros dois saíram pra missão, voltam em três dias. Quarenta moedas o dia, mais quinze por terra hostil."' },
       { id: 'persuade', label: '💬 "Vale meio do preço?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
       { id: 'history', label: '📜 "Algum já desbravou as Marcas?" · História DC 14', cb: 'dice:history:14:+1' },
       { id: 'back',   label: '↩ "Penso bem."', cb: 'close' }
@@ -341,20 +341,22 @@ var TAVERN_CB_TO_DIALOGUE = {
 };
 
 /* === Service icon meta ================================================== */
+/* Sessão #23 (2026-05-22): user pediu remover XGtE p.XXX e termos em inglês
+   visíveis. Refs D&D mantidas SOMENTE em comentários, NUNCA em meta player-facing. */
 var TAVERN_SVC_META = {
   /* 2026-05-20: keys MATCH actual svc.cb values em renderTavernHub (verified via Chrome MCP).
      Keys antigas (tavern_drink_menu, tavern_rumor, etc) eram mismatch — meta.icon undefined,
      img nunca era criado, svc-ico ficava vazio (sem PNG). */
-  'tavern_drinks_open':        { icon: '../shared/img/services/svc-bebidas.png',      meta: '+1-3 HP/MP' },
-  'tavern_rumor_buy':          { icon: '../shared/img/services/svc-rumores.png',      meta: '5 V · info útil' },
-  'tavern_mercenaries_open':   { icon: '../shared/img/services/svc-mercenarios.png',  meta: 'XGtE p.130' },
-  'tavern_adventurers_open':   { icon: '../shared/img/services/svc-exploradores.png', meta: 'XGtE p.131' },
-  'tavern_games_open':         { icon: '../shared/img/services/svc-dados.png',        meta: 'XGtE p.128' },
-  'tavern_carousing_open':     { icon: '../shared/img/services/svc-socializar.png',   meta: 'XGtE p.128' },
-  'tavern_gather_open':        { icon: '../shared/img/services/svc-informacoes.png',  meta: 'DC 10/15/20' },
-  'tavern_pitfight_open':      { icon: '../shared/img/services/svc-rinha.png',        meta: 'apostas' },
-  'tavern_bulletin_open':      { icon: '../shared/img/services/svc-mural.png',        meta: 'jobs locais' },
-  'tavern_bard_open':          { icon: '../shared/img/services/svc-bardo.png',        meta: 'inspiration 1d6' }
+  'tavern_drinks_open':        { icon: '../shared/img/services/svc-bebidas.png',      meta: 'Recupera HP/MP' },
+  'tavern_rumor_buy':          { icon: '../shared/img/services/svc-rumores.png',      meta: '5 V · pistas' },
+  'tavern_mercenaries_open':   { icon: '../shared/img/services/svc-mercenarios.png',  meta: 'Contratar por dia' },
+  'tavern_adventurers_open':   { icon: '../shared/img/services/svc-exploradores.png', meta: 'Especialistas de campo' },
+  'tavern_games_open':         { icon: '../shared/img/services/svc-dados.png',        meta: 'Apostar nos dados' },
+  'tavern_carousing_open':     { icon: '../shared/img/services/svc-socializar.png',   meta: 'Fazer contatos' },
+  'tavern_gather_open':        { icon: '../shared/img/services/svc-informacoes.png',  meta: 'Investigar boatos' },
+  'tavern_pitfight_open':      { icon: '../shared/img/services/svc-rinha.png',        meta: 'Combate de aposta' },
+  'tavern_bulletin_open':      { icon: '../shared/img/services/svc-mural.png',        meta: 'Tarefas locais' },
+  'tavern_bard_open':          { icon: '../shared/img/services/svc-bardo.png',        meta: 'Inspiração: +1d6' }
 };
 
 /* === Cenário canonical ============================================== */
