@@ -55,9 +55,28 @@ function setAmount(centavos) {
     });
 
     updatePreview();
+    updateSliderOrbPosition();
 
     var btn = document.getElementById('btn-generate');
     if (btn) btn.disabled = centavos < 100;
+}
+
+// Sessao #24 v16: posiciona o orb realistic v5 que e o thumb do slider.
+// Slider thumb nativo e transparent; orb DOM e o visual real.
+function updateSliderOrbPosition() {
+    var slider = document.getElementById('amount-slider');
+    var orb = document.getElementById('amount-slider-thumb-orb');
+    if (!slider || !orb) return;
+    var min = parseFloat(slider.min) || 0;
+    var max = parseFloat(slider.max) || 100;
+    var val = parseFloat(slider.value) || 0;
+    var pct = max > min ? (val - min) / (max - min) : 0;
+    var trackWidth = slider.offsetWidth;
+    if (!trackWidth) return;
+    // Thumb nativo tem 32px; centro do thumb fica em [16, trackWidth - 16].
+    var thumbHalf = 16;
+    var orbX = pct * (trackWidth - 2 * thumbHalf) + thumbHalf;
+    orb.style.left = orbX + 'px';
 }
 
 function selectAmount(centavos) { setAmount(centavos); }
@@ -698,6 +717,11 @@ function _bootstrap() {
     if (slider) slider.addEventListener('input', function() { onSliderInput(slider); });
     var input = document.getElementById('custom-amount');
     if (input) input.addEventListener('input', function() { onCustomAmount(input); });
+
+    // Orb thumb: reposicionar no resize + apos layout estavel
+    window.addEventListener('resize', updateSliderOrbPosition);
+    setTimeout(updateSliderOrbPosition, 100);
+    setTimeout(updateSliderOrbPosition, 500);
 
     // Reveal animations + scene-ready
     // Sessao #23 v9.1: setTimeout direto (rAF nao firava em alguns contextos).
