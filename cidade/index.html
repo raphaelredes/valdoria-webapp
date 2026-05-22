@@ -11056,9 +11056,27 @@ function _showCharSwitchConfirm(picked){
 //   ⚔️ Jogo: Temporizadores / Modo de Combate / Navegação
 //   🔔 Notificações: 5 categorias (daily_quests/festivals/auction/trade/general)
 //   🔊 Som: Música mute + volume / SFX mute + volume
-//   🔤 Fonte: 5 opções (MedievalSharp / Cinzel / IM Fell / Crimson / EB Garamond)
+//   🔤 Tamanho de Fonte: A- / A / A+ (sem família — fonte fixa MedievalSharp/Cinzel)
 //   📩 Extras: Código indicação / Apoiar / Avaliar
 // Persistência: localStorage 'valdoria_*' (regra Server-Only State para UI prefs).
+
+// 2026-05-21: aplicar font-size salvo no boot (antes do popup abrir).
+// Evita "flash" entre normal e pref do user.
+(function _initFontSizeOnBoot(){
+  try {
+    var sz = localStorage.getItem('valdoria_font_size') || 'normal';
+    var scaleMap = { small: '0.9', normal: '1.0', large: '1.1' };
+    var scale = scaleMap[sz] || '1.0';
+    document.documentElement.style.setProperty('--v-font-scale', scale);
+    if (document.body) document.body.setAttribute('data-font-size', sz);
+    else {
+      document.addEventListener('DOMContentLoaded', function(){
+        document.body.setAttribute('data-font-size', sz);
+      }, { once: true });
+    }
+  } catch(e) { /* ignore */ }
+})();
+
 function _showSettingsPopup(){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -11086,7 +11104,7 @@ function _showSettingsPopup(){
     notif_auction:      _getPref('valdoria_notif_auction', '1') === '1',
     notif_trade:        _getPref('valdoria_notif_trade', '1') === '1',
     music_muted: false, sfx_muted: false, music_vol: 15, sfx_vol: 15,
-    font: _getPref('valdoria_font', 'medieval'),
+    fontSize: _getPref('valdoria_font_size', 'normal'),
   };
   // Lê valores reais de ValdoriaAudio se disponível
   if (typeof ValdoriaAudio !== 'undefined') {
@@ -11192,26 +11210,26 @@ function _showSettingsPopup(){
     !s.sfx_muted, 'audio_sfx_muted');
   html += _sliderRow('ic-som', 'Volume Efeitos', s.sfx_vol, 'audio_sfx_vol');
 
-  // SEÇÃO 4: Fonte (ic-fonte — letra A serif)
-  html += _sectionHeader('ic-fonte', 'Fonte do Jogo');
-  var FONTS = [
-    { id: 'medieval',  name: 'Marcellus', family: "'Marcellus', cursive" },
-    { id: 'cinzel',    name: 'Cinzel',        family: "'Cinzel', serif" },
-    { id: 'imfell',    name: 'IM Fell',       family: "'IM Fell English', serif" },
-    { id: 'crimson',   name: 'Crimson',       family: "'Crimson Pro', serif" },
-    { id: 'garamond',  name: 'EB Garamond',   family: "'EB Garamond', serif" }
+  // SEÇÃO 4: Tamanho de Fonte (ic-fonte — letra A serif)
+  // 2026-05-21: User pediu REMOVER picker de família de fonte (fonte fixa Cinzel/MedievalSharp).
+  // Em vez disso: oferecer tamanho A- / A / A+ (sem quebrar layout — só body text scale ±10%).
+  var FONT_SIZES = [
+    { id: 'small',  label: 'A',  scale: '0.9',  font: '12px' },
+    { id: 'normal', label: 'A',  scale: '1.0',  font: '14px' },
+    { id: 'large',  label: 'A',  scale: '1.1',  font: '16px' }
   ];
-  html += '<div class="font-picker-grid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--v-space-sm, 6px);">';
-  FONTS.forEach(function(f){
-    var active = f.id === s.font;
-    html += '<button data-font="' + f.id + '" '
+  html += _sectionHeader('ic-fonte', 'Tamanho da Fonte');
+  html += '<div class="font-size-picker" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--v-space-sm, 6px);">';
+  FONT_SIZES.forEach(function(fs){
+    var active = fs.id === (s.fontSize || 'normal');
+    html += '<button data-font-size="' + fs.id + '" '
       + 'style="padding: var(--v-space-md, 8px); border-radius: var(--v-radius-sm, 6px); '
       + 'background: ' + (active ? 'rgba(196,149,58,0.15)' : 'rgba(196,149,58,0.04)') + '; '
       + 'border: 1px solid ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-border, #4a3828)') + '; '
       + 'color: ' + (active ? 'var(--v-gold, #c4953a)' : 'var(--v-text, #d4c8b0)') + '; '
-      + 'font-family: ' + f.family + '; font-size: var(--v-font-base, 13px); cursor:pointer; '
-      + 'min-height: 36px;">'
-      + (active ? '✓ ' : '') + f.name
+      + 'font-family: var(--v-font, MedievalSharp, serif); font-size: ' + fs.font + '; cursor:pointer; '
+      + 'min-height: 36px; font-weight: 700;">'
+      + fs.label
       + '</button>';
   });
   html += '</div>';
@@ -11249,16 +11267,21 @@ function _showSettingsPopup(){
       var key = row.getAttribute('data-setting');
 
       // Música ON/OFF — fala com ValdoriaAudio canonical
+      // BUG FIX 2026-05-21: function era toggleMusicMute() (não existe).
+      // Correto: toggleMusic() ou toggleMute() (global). User pediu que ao
+      // desativar som suma TUDO (música + efeitos), então usamos toggleMute
+      // global que mata música E bloqueia playSFX().
       if (key === 'audio_music_muted' && typeof ValdoriaAudio !== 'undefined') {
-        try { ValdoriaAudio.toggleMusicMute(); } catch(e){ _logCity('audio mute err: ' + e); }
+        try { ValdoriaAudio.toggleMusic(); } catch(e){ _logCity('audio mute err: ' + e); }
         if (window.vHaptic) window.vHaptic('light');
         _showSettingsPopup();
         return;
       }
       // SFX ON/OFF — fala com ValdoriaAudio canonical
+      // BUG FIX 2026-05-21: function era toggleSFXMute() (não existe). Correto: toggleSFX().
       if (key === 'audio_sfx_muted' && typeof ValdoriaAudio !== 'undefined') {
         try {
-          ValdoriaAudio.toggleSFXMute();
+          ValdoriaAudio.toggleSFX();
           // Toca som de confirmação se ligando (feedback imediato)
           if (!ValdoriaAudio.isSFXMuted()) ValdoriaAudio.playSFX('sfx_confirm');
         } catch(e){ _logCity('sfx mute err: ' + e); }
@@ -11303,12 +11326,18 @@ function _showSettingsPopup(){
     });
   });
 
-  // === WIRE FONT PICKER ===
-  bodyEl.querySelectorAll('button[data-font]').forEach(function(btn){
+  // === WIRE FONT SIZE PICKER ===
+  // 2026-05-21: User pediu substituir picker de família (Marcellus/Cinzel/IMFell/etc) por
+  // picker de TAMANHO (small/normal/large). Aplica via CSS var --v-font-scale no body.
+  bodyEl.querySelectorAll('button[data-font-size]').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var font = btn.getAttribute('data-font');
-      _setPref('valdoria_font', font);
-      document.body.setAttribute('data-font', font);
+      var size = btn.getAttribute('data-font-size');
+      var scaleMap = { small: '0.9', normal: '1.0', large: '1.1' };
+      var scale = scaleMap[size] || '1.0';
+      _setPref('valdoria_font_size', size);
+      document.body.setAttribute('data-font-size', size);
+      document.documentElement.style.setProperty('--v-font-scale', scale);
+      if (window.vHaptic) window.vHaptic('light');
       _showSettingsPopup();
     });
   });
@@ -18070,7 +18099,7 @@ function _renderQuestDiary(bodyEl){
     { id: 'ready',      label: 'Prontas',      icon: '✓', count: counts.ready,     color: '#7cdb7c' },
     { id: 'active',     label: 'Ativas',       icon: '⚔', count: counts.active,    color: '#c4953a' },
     { id: 'available',  label: 'Disponíveis',  icon: '◈', count: counts.available, color: '#9b8e7c' },
-    { id: 'history',    label: 'Crônica',      icon: '✦', count: counts.history,   color: '#7d705e' }
+    { id: 'history',    label: 'Concluídas',   icon: '✦', count: counts.history,   color: '#7d705e' }
   ];
 
   // CSS keyframes (style tag — mesmo pattern Liga/Ficha)

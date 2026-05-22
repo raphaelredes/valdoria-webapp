@@ -149,6 +149,10 @@
     --v-font-icon: 28px;
     --v-font-icon-lg: 32px;
     --v-font-icon-xl: 48px;
+    /* 2026-05-21: User pediu picker tamanho de fonte. Aplicado SCOPED em narrative/desc
+       text — não no layout (buttons/badges/headers ficam em px fixos). Valor controlado
+       por data-font-size attribute no body via cidade.html settings popup. */
+    --v-font-scale: 1.0;
     --v-bar-height: 8px;
     --v-bar-height-sm: 6px;
     --v-bar-height-mini: 4px;
@@ -2182,4 +2186,25 @@ body.perf-lite html.app-frame::before {
     max-width: 100vw !important;
     max-height: 100dvh !important;
   }
+}
+
+/* ── Font-size scoped scaling (data-font-size on <body>) ───────────────────
+   2026-05-21: scale apenas em narrative text, sem afetar layout fixo.
+   Targets: descriptions, narrations, dialogue body, popup body texto,
+   tooltip text. NÃO afeta: buttons, badges, headers, status bars, icons. */
+body[data-font-size="small"]  { --v-font-scale: 0.9; }
+body[data-font-size="normal"] { --v-font-scale: 1.0; }
+body[data-font-size="large"]  { --v-font-scale: 1.1; }
+
+/* Apply scale only to safe text containers (paragraph-like content) */
+body[data-font-size] .v-popup-body p,
+body[data-font-size] .v-popup-body .v-narration,
+body[data-font-size] .v-popup-body .v-dialogue-text,
+body[data-font-size] .v-encounter-body,
+body[data-font-size] .v-encounter-text,
+body[data-font-size] .v-flavor,
+body[data-font-size] .screen-content > p,
+body[data-font-size] .description {
+  font-size: calc(var(--v-font-body, 14px) * var(--v-font-scale, 1));
+  line-height: 1.6;
 }
