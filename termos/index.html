@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a2420">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <title>Termos de Uso — Lendas de Valdoria</title>
+    <meta name="description" content="Termos de Uso do Lendas de Valdoria — RPG medieval D&D 5e via Telegram. Conduta, conta, propriedade intelectual, banimento e isenções.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../shared/fonts.css">
+    <link rel="stylesheet" href="../valdoria-design.css">
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           Página /termos/ — RESPONSIVA (mobile + tablet + desktop)
+           Mesmo padrão da /privacidade/ — exceção legítima ao Smartphone-Only
+           ═══════════════════════════════════════════════════════════════ */
+
+        html, body {
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--v-bg, #2a2420);
+            color: var(--v-text, #d4c8b0);
+            font-family: var(--v-font, 'MedievalSharp', serif);
+            font-size: var(--v-font-body, 14px);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ── BASE / MOBILE (≤599px) ────────────────────────────────── */
+        .priv-container {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+        .priv-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            margin-bottom: 24px;
+        }
+        .priv-header h1 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: clamp(20px, 5vw, 28px);
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 0 0 8px;
+            text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4));
+        }
+        .priv-header .priv-subtitle {
+            font-size: 12px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        .priv-header .priv-decoration {
+            font-size: 14px;
+            color: var(--v-gold, #c4953a);
+            margin: 10px 0;
+            opacity: 0.6;
+        }
+        section {
+            margin: 28px 0;
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(196,149,58,0.05) 0%, rgba(42,36,32,0.4) 100%);
+            border: 1px solid var(--v-border, #4a3828);
+            border-left: 3px solid var(--v-gold, #c4953a);
+            border-radius: 6px;
+        }
+        section h2 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 16px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        section h2 .priv-section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--v-gold, #c4953a);
+            color: #1a1410;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+        }
+        section h3 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c4953a);
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin: 14px 0 6px;
+        }
+        section p { margin: 8px 0; }
+        section ul { margin: 8px 0; padding-left: 18px; }
+        section li { margin: 6px 0; }
+        .priv-highlight {
+            color: var(--v-gold, #c4953a);
+            font-weight: 600;
+        }
+        .priv-data-box {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 12px;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(74,56,40,0.25);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .priv-data-key {
+            color: var(--v-gold, #c4953a);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .priv-data-val { color: var(--v-text, #d4c8b0); }
+        .priv-no-collect {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(125,186,91,0.08);
+            border: 1px solid #7dba5b66;
+            border-left: 3px solid #7dba5b;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+        .priv-no-collect-icon { font-size: 18px; color: #7dba5b; }
+        .priv-warn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(196,80,40,0.10);
+            border: 1px solid rgba(196,80,40,0.5);
+            border-left: 3px solid #c45028;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+        .priv-warn-icon { font-size: 18px; color: #e07050; }
+        .priv-rights-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .priv-right {
+            padding: 10px 12px;
+            background: rgba(196,149,58,0.06);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 5px;
+        }
+        .priv-right-name {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c4953a);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .priv-right-desc {
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            line-height: 1.5;
+        }
+        .priv-footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            margin-top: 28px;
+            border-top: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+        }
+        .priv-footer .priv-version {
+            margin-top: 8px;
+            color: var(--v-gold, #c4953a);
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            letter-spacing: 1px;
+        }
+        .priv-cta {
+            display: inline-block;
+            margin: 14px 0 0;
+            padding: 8px 18px;
+            background: linear-gradient(180deg, var(--v-gold, #c4953a), #8a6420);
+            color: #1a1410;
+            border: 1px solid var(--v-gold, #c4953a);
+            border-radius: 4px;
+            text-decoration: none;
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .priv-cta:hover { background: linear-gradient(180deg, #d4a55a, #9a7430); }
+        a { color: var(--v-gold, #c4953a); text-decoration: underline; }
+        .priv-legal {
+            font-size: 11px;
+            color: var(--v-text-dim, #a09484);
+            font-style: italic;
+        }
+
+        /* ── TABLET (≥600px) ─────────────────────────────────────────── */
+        @media (min-width: 600px) {
+            .priv-container { max-width: 720px; padding: 32px 28px 56px; }
+            body { font-size: 15px; line-height: 1.65; }
+            .priv-header { padding: 28px 0; margin-bottom: 32px; }
+            .priv-header h1 { font-size: clamp(28px, 4vw, 36px); letter-spacing: 4px; }
+            .priv-header .priv-subtitle { font-size: 14px; }
+            section { padding: 22px 24px; margin: 32px 0; }
+            section h2 { font-size: 18px; }
+            section h2 .priv-section-num { width: 28px; height: 28px; font-size: 13px; }
+            section h3 { font-size: 16px; }
+            .priv-data-box { font-size: 13px; padding: 16px; gap: 10px 16px; }
+            .priv-data-key { font-size: 12px; }
+            .priv-no-collect, .priv-warn { font-size: 13px; padding: 12px 16px; }
+            .priv-right { padding: 14px 16px; }
+            .priv-right-name { font-size: 13px; }
+            .priv-right-desc { font-size: 12px; }
+            .priv-legal { font-size: 12px; }
+            .priv-cta { font-size: 13px; padding: 10px 24px; }
+        }
+
+        /* ── DESKTOP (≥1024px) ───────────────────────────────────────── */
+        @media (min-width: 1024px) {
+            .priv-container { max-width: 920px; padding: 48px 40px 64px; }
+            body { font-size: 15.5px; }
+            .priv-header h1 { font-size: clamp(32px, 3.5vw, 42px); letter-spacing: 5px; }
+            section { padding: 28px 32px; }
+            section h2 { font-size: 20px; }
+            section h3 { font-size: 17px; }
+            .priv-rights-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .priv-data-box { padding: 18px 22px; font-size: 14px; }
+        }
+
+        /* Print stylesheet */
+        @media print {
+            body { background: white; color: black; }
+            section { border: 1px solid #ccc; break-inside: avoid; }
+            a { color: #444; text-decoration: underline; }
+            .priv-cta { background: white !important; color: black !important; border: 1px solid black; }
+            section h2, .priv-data-key, .priv-right-name, .priv-version { color: #8a6420; }
+        }
+    </style>
+</head>
+<body>
+    <div class="priv-container">
+        <header class="priv-header">
+            <div class="priv-decoration">⚔ ⚔ ⚔</div>
+            <h1>Termos de Uso</h1>
+            <div class="priv-subtitle">Lendas de Valdoria · RPG medieval via Telegram</div>
+            <div class="priv-decoration">⚔ ⚔ ⚔</div>
+        </header>
+
+        <section>
+            <h2><span class="priv-section-num">1</span> Aceite dos Termos</h2>
+            <p>
+                Ao acessar ou utilizar o jogo <span class="priv-highlight">Lendas de Valdoria</span> ("Jogo"), você concorda integralmente com estes Termos de Uso ("Termos") e com a nossa <a href="https://jogo.lendasdevaldoria.com.br/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>.
+            </p>
+            <p>
+                Se você não concorda com qualquer cláusula destes Termos, por favor não utilize o Jogo. Caso já tenha começado a usar, encerre sua sessão e remova seus dados conforme orientações da Política de Privacidade.
+            </p>
+            <p class="priv-legal">
+                O aceite é manifestado de forma expressa ao clicar em "Aceitar e Entrar" no splash de boas-vindas, ou de forma implícita ao continuar utilizando o Jogo após mudanças significativas comunicadas via splash de atualização.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">2</span> Descrição do Serviço</h2>
+            <p>
+                <span class="priv-highlight">Lendas de Valdoria</span> é um RPG medieval de fantasia inspirado no sistema D&amp;D 5e (Dungeons &amp; Dragons 5ª Edição), distribuído gratuitamente via Telegram Mini App e navegador web.
+            </p>
+            <div class="priv-data-box">
+                <div class="priv-data-key">Categoria</div>
+                <div class="priv-data-val">Jogo de RPG single-player com elementos sociais</div>
+                <div class="priv-data-key">Modelo</div>
+                <div class="priv-data-val">Free-to-play (gratuito, sem cobrança obrigatória)</div>
+                <div class="priv-data-key">Plataforma</div>
+                <div class="priv-data-val">Telegram Mini App (smartphone) + navegador web (desktop/tablet)</div>
+                <div class="priv-data-key">Idade recomendada</div>
+                <div class="priv-data-val">12 anos ou mais (fantasia + combate estilizado)</div>
+            </div>
+            <p>
+                O Jogo é desenvolvido por um projeto independente e sua disponibilidade é oferecida "como está". Não garantimos disponibilidade 24/7 — manutenções programadas e atualizações podem causar indisponibilidade temporária.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">3</span> Elegibilidade</h2>
+            <p>
+                Para utilizar o Jogo, você deve atender aos seguintes requisitos:
+            </p>
+            <ul>
+                <li><strong>Idade mínima:</strong> 12 anos. Menores entre 12-18 anos devem ter ciência dos pais/responsáveis.</li>
+                <li><strong>Capacidade civil:</strong> ter capacidade legal para celebrar contrato eletrônico (Código Civil Art. 3º e 4º).</li>
+                <li><strong>Boa-fé:</strong> intenção genuína de jogar, sem fins de exploração de bugs, fraude ou prejuízo a outros jogadores.</li>
+                <li><strong>Conformidade:</strong> não estar banido de versões anteriores do Jogo ou de plataformas relacionadas.</li>
+            </ul>
+            <p class="priv-legal">
+                <strong>Menores de 12 anos:</strong> o Jogo não é destinado a esta faixa etária. Caso seja responsável legal e identifique uso por menor de 12, solicite remoção imediata via DPO (ver Política de Privacidade § 12).
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">4</span> Conta de Usuário</h2>
+            <p>
+                O Jogo opera com autenticação por meio de plataformas externas. Não criamos contas próprias com senha.
+            </p>
+            <div class="priv-rights-grid">
+                <div class="priv-right">
+                    <div class="priv-right-name">📱 Telegram (Mini App)</div>
+                    <div class="priv-right-desc">Autenticação automática via Telegram. Seu personagem fica vinculado ao seu ID Telegram (pseudônimo numérico).</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">🔑 Google OAuth (browser)</div>
+                    <div class="priv-right-desc">Opção alternativa para acesso via navegador web. Vincula personagem ao seu Google ID (pseudônimo).</div>
+                </div>
+            </div>
+            <p>
+                Você é o único responsável pela segurança da conta na plataforma externa (Telegram/Google). Não compartilhe seu acesso e mantenha autenticação de dois fatores ativada nas plataformas.
+            </p>
+            <p class="priv-legal">
+                <strong>Detalhes técnicos de tratamento de dados</strong> via Telegram e Google estão na <a href="https://jogo.lendasdevaldoria.com.br/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>, seções 8 e 9.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">5</span> Conduta Esperada</h2>
+            <p>
+                Ao utilizar o Jogo, você se compromete a:
+            </p>
+            <div class="priv-no-collect">
+                <span class="priv-no-collect-icon">✓</span>
+                <div>
+                    <strong>Jogar de boa-fé:</strong> respeitar regras, outros jogadores e o ecossistema do Jogo.
+                </div>
+            </div>
+            <h3>Você concorda em NÃO:</h3>
+            <ul>
+                <li>Explorar bugs ou falhas técnicas para ganho indevido (gold, XP, itens)</li>
+                <li>Usar bots, scripts ou ferramentas automatizadas para jogar em seu lugar</li>
+                <li>Tentar acessar contas de outros jogadores ou áreas restritas do sistema</li>
+                <li>Realizar engenharia reversa, decompilação ou modificação do código do Jogo</li>
+                <li>Vender ou comprar contas, personagens, itens, gold ou qualquer ativo do Jogo por dinheiro real ou criptomoeda</li>
+                <li>Criar nomes de personagem ofensivos, discriminatórios ou que violem direitos de terceiros</li>
+                <li>Difamar, ameaçar ou assediar outros jogadores em qualquer canal vinculado ao Jogo</li>
+                <li>Publicar conteúdo ilegal, pornográfico, violento ou que incite ódio</li>
+                <li>Realizar DDoS, scraping em massa ou ações que prejudiquem a estabilidade do serviço</li>
+                <li>Distribuir cópias modificadas do Jogo ou criar versões derivadas sem autorização</li>
+            </ul>
+            <div class="priv-warn">
+                <span class="priv-warn-icon">⚠</span>
+                <div>
+                    Violações podem resultar em <strong>suspensão temporária ou banimento permanente</strong>, sem prévio aviso e sem direito a reembolso de eventuais contribuições (ver § 9).
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">6</span> Propriedade Intelectual</h2>
+            <p>
+                Todo o conteúdo do Jogo — incluindo código, arte, narrativa, design, sistemas de jogo, personagens, locais, música — é protegido por direitos autorais e demais leis aplicáveis.
+            </p>
+            <div class="priv-data-box">
+                <div class="priv-data-key">Nosso</div>
+                <div class="priv-data-val">Código, narrativa, arte original, mecânicas de jogo customizadas, nomes próprios (Valdoria, Eldoria, NPCs originais)</div>
+                <div class="priv-data-key">D&amp;D 5e SRD</div>
+                <div class="priv-data-val">Mecânicas D&amp;D 5e SRD (CC-BY-4.0) — Wizards of the Coast. Adaptações respeitam a licença.</div>
+                <div class="priv-data-key">Telegram</div>
+                <div class="priv-data-val">Plataforma e marca do Telegram pertencem ao Telegram FZ-LLC</div>
+                <div class="priv-data-key">Música/Sons</div>
+                <div class="priv-data-val">Trilha sonora original ou licenciada para uso no Jogo</div>
+            </div>
+            <h3>O que VOCÊ pode fazer:</h3>
+            <ul>
+                <li>Jogar e divertir-se livremente</li>
+                <li>Compartilhar screenshots e vídeos do gameplay em redes sociais (com crédito)</li>
+                <li>Criar fan art baseada no Jogo (com crédito ao projeto)</li>
+                <li>Discutir o Jogo em comunidades, blogs, vídeos</li>
+            </ul>
+            <h3>O que VOCÊ NÃO pode fazer:</h3>
+            <ul>
+                <li>Copiar, redistribuir ou modificar o código-fonte sem autorização</li>
+                <li>Usar nossos ativos (arte, narrativa) em outros projetos comerciais</li>
+                <li>Alegar autoria do Jogo ou suas mecânicas</li>
+                <li>Criar "clones" usando nossa arte, narrativa ou design originais</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">7</span> Moeda Virtual (Valdoritas)</h2>
+            <p>
+                O Jogo utiliza uma moeda interna chamada <span class="priv-highlight">Valdoritas (V)</span> para transações entre personagens e NPCs.
+            </p>
+            <div class="priv-warn">
+                <span class="priv-warn-icon">⚠</span>
+                <div>
+                    <strong>Valdoritas NÃO são dinheiro real.</strong> Não têm valor monetário fora do Jogo, não podem ser sacadas, vendidas, transferidas para outros jogadores ou trocadas por dinheiro real ou criptomoeda. Não constituem investimento ou aplicação financeira.
+                </div>
+            </div>
+            <p>
+                <strong>Doações via PIX (opcional):</strong> jogadores podem contribuir voluntariamente via PIX (página <code>apoie.lendasdevaldoria.com.br</code>) para apoiar o desenvolvimento. Contribuições são <span class="priv-highlight">doações sem direito a reembolso</span> e podem render recompensas simbólicas no Jogo (Valdoritas extras, título cosmético) — mas não conferem direitos ou benefícios contratuais.
+            </p>
+            <p class="priv-legal">
+                Em caso de banimento por violação de conduta, eventuais doações não são reembolsadas (ver § 9).
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">8</span> Conteúdo Gerado pelo Usuário</h2>
+            <p>
+                Você pode criar conteúdo dentro do Jogo (nome de personagem, escolhas em diálogos, configurações). Sobre este conteúdo:
+            </p>
+            <ul>
+                <li><strong>Propriedade:</strong> permanece com você (autoria preservada)</li>
+                <li><strong>Licença que nos concede:</strong> licença gratuita e não-exclusiva para usar, armazenar e exibir seu conteúdo dentro do Jogo, exclusivamente para fins de funcionamento</li>
+                <li><strong>Moderação:</strong> reservamos o direito de remover/anonimizar conteúdo que viole estes Termos (ex: nome ofensivo)</li>
+                <li><strong>Responsabilidade:</strong> você é responsável pelo conteúdo que criar — não publique conteúdo de terceiros sem autorização</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">9</span> Suspensão e Banimento</h2>
+            <p>
+                Reservamos o direito de suspender temporariamente ou banir permanentemente contas que violem estes Termos ou que prejudiquem o ecossistema do Jogo.
+            </p>
+            <div class="priv-rights-grid">
+                <div class="priv-right">
+                    <div class="priv-right-name">⏸ Suspensão Temporária</div>
+                    <div class="priv-right-desc">Restrição de acesso por período definido (24h, 7d, 30d). Aplicável a violações leves de conduta ou primeira ocorrência.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">⛔ Banimento Permanente</div>
+                    <div class="priv-right-desc">Encerramento definitivo da conta. Aplicável a violações graves: cheats, vendas externas, ataques ao sistema, conteúdo ilegal.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">🔄 Reset de Progresso</div>
+                    <div class="priv-right-desc">Em casos específicos (exploit massivo), podemos resetar ganhos indevidos sem encerrar a conta.</div>
+                </div>
+                <div class="priv-right">
+                    <div class="priv-right-name">📧 Direito de Defesa</div>
+                    <div class="priv-right-desc">Você pode contestar a decisão via <a href="mailto:suporte@lendasdevaldoria.com.br">suporte@lendasdevaldoria.com.br</a> em até 30 dias após notificação.</div>
+                </div>
+            </div>
+            <p class="priv-legal" style="margin-top:12px;">
+                <strong>Banimentos não geram direito a reembolso</strong> de eventuais doações realizadas via PIX (§ 7). Doações são contribuições voluntárias ao desenvolvimento, não pagamento por serviço.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">10</span> Modificações do Jogo e dos Termos</h2>
+            <p>
+                O Jogo é um projeto vivo e está em constante evolução. Podemos a qualquer momento:
+            </p>
+            <ul>
+                <li>Adicionar, modificar ou remover funcionalidades do Jogo</li>
+                <li>Ajustar balanceamento de classes, magias, inimigos, recompensas</li>
+                <li>Alterar valores de Valdoritas, custos de itens, fórmulas de combate</li>
+                <li>Encerrar funcionalidades que não tenham mais propósito (sunset)</li>
+                <li>Suspender o serviço temporariamente para manutenção</li>
+                <li>Encerrar definitivamente o Jogo (com aviso prévio mínimo de 30 dias quando viável)</li>
+            </ul>
+            <h3>Mudanças nestes Termos</h3>
+            <p>
+                Quando houver alterações significativas nestes Termos, comunicaremos via splash de boas-vindas no próprio Jogo, com banner "Termos Atualizados". O continuar utilizando o Jogo após a comunicação constitui aceite das novas condições.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">11</span> Isenção de Garantias e Limitação de Responsabilidade</h2>
+            <p>
+                O Jogo é fornecido <span class="priv-highlight">"como está" (AS IS)</span>, sem garantias expressas ou implícitas de adequação a uma finalidade específica.
+            </p>
+            <h3>Não nos responsabilizamos por:</h3>
+            <ul>
+                <li>Perda de progresso causada por falhas técnicas (apesar de fazer backup regular)</li>
+                <li>Indisponibilidade temporária do serviço por manutenção ou falha de infraestrutura</li>
+                <li>Conflitos entre jogadores em canais externos (Telegram groups, Discord não-oficiais)</li>
+                <li>Conteúdo gerado por outros jogadores que viole estes Termos antes da moderação</li>
+                <li>Ataques cibernéticos a despeito de medidas razoáveis de segurança (ver Política de Privacidade § 11)</li>
+                <li>Decisões pessoais ou financeiras tomadas com base em conteúdo do Jogo (é um jogo de entretenimento, não orientação)</li>
+            </ul>
+            <h3>Limitação financeira</h3>
+            <p>
+                Em caso de eventual responsabilidade civil, a indenização máxima fica limitada ao <strong>valor total de doações realizadas pelo usuário nos 12 meses anteriores ao incidente</strong>, observados os limites legais aplicáveis no Brasil.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">12</span> Encerramento da Conta pelo Usuário</h2>
+            <p>
+                Você pode encerrar sua conta a qualquer momento:
+            </p>
+            <ul>
+                <li><strong>Telegram:</strong> bloquear o bot ou parar de usar o Mini App. Seus dados locais (localStorage) ficam no seu dispositivo até você limpar.</li>
+                <li><strong>Google OAuth:</strong> revogar permissão em <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
+                <li><strong>Deletar dados:</strong> ver Política de Privacidade § 10 (Direito IV — Eliminação) para apagar progresso e logs.</li>
+            </ul>
+            <p class="priv-legal">
+                Após encerramento, eventuais doações realizadas via PIX não são reembolsadas (§ 7) e o progresso é perdido permanentemente (sem possibilidade de restauração).
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">13</span> Lei Aplicável e Foro</h2>
+            <p>
+                Estes Termos são regidos pelas leis da <span class="priv-highlight">República Federativa do Brasil</span>. Aplicam-se especialmente:
+            </p>
+            <ul>
+                <li><strong>Código de Defesa do Consumidor</strong> (Lei 8.078/1990) — para relação de consumo</li>
+                <li><strong>Lei Geral de Proteção de Dados (LGPD)</strong> (Lei 13.709/2018)</li>
+                <li><strong>Marco Civil da Internet</strong> (Lei 12.965/2014)</li>
+                <li><strong>Estatuto da Criança e do Adolescente (ECA)</strong> (Lei 8.069/1990) + ECA Digital (Lei 15.352/2026)</li>
+                <li><strong>Código Civil Brasileiro</strong> (Lei 10.406/2002)</li>
+            </ul>
+            <p>
+                Para a resolução de quaisquer disputas oriundas destes Termos, fica eleito o <span class="priv-highlight">foro da Comarca onde reside o usuário</span> (Art. 101 CDC) — quando o usuário é consumidor pessoa física residente no Brasil. Em demais hipóteses, foro de São Paulo/SP, Brasil.
+            </p>
+            <p>
+                Preferimos sempre a resolução amigável via canais de suporte antes de qualquer ação judicial.
+            </p>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">14</span> Disposições Gerais</h2>
+            <ul>
+                <li><strong>Independência das cláusulas:</strong> se alguma cláusula destes Termos for considerada inválida, as demais permanecem em vigor</li>
+                <li><strong>Não-renúncia:</strong> nossa eventual tolerância com violações não constitui renúncia de direitos</li>
+                <li><strong>Integralidade:</strong> estes Termos + Política de Privacidade constituem o acordo completo entre as partes</li>
+                <li><strong>Cessão:</strong> você não pode ceder seus direitos sob estes Termos a terceiros; podemos ceder após aviso público</li>
+                <li><strong>Idioma:</strong> em caso de divergência entre versões (PT-BR/EN), prevalece a versão em <strong>português brasileiro</strong></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2><span class="priv-section-num">15</span> Contato</h2>
+            <p>Dúvidas sobre estes Termos ou exercício de direitos:</p>
+            <ul>
+                <li><strong>Suporte</strong>: <a href="mailto:suporte@lendasdevaldoria.com.br">suporte@lendasdevaldoria.com.br</a></li>
+                <li><strong>DPO</strong> (para questões de privacidade): <a href="mailto:dpo@lendasdevaldoria.com.br">dpo@lendasdevaldoria.com.br</a></li>
+                <li><strong>Telegram</strong>: <a href="https://t.me/LendasDeValdoriaBOT">@LendasDeValdoriaBOT</a> (comando <code>/ticket</code>)</li>
+                <li><strong>Site</strong>: <a href="https://lendasdevaldoria.com.br">lendasdevaldoria.com.br</a></li>
+            </ul>
+            <p>
+                <strong>Documento relacionado:</strong> <a href="https://jogo.lendasdevaldoria.com.br/privacidade/" target="_blank" rel="noopener">📋 Política de Privacidade</a>
+            </p>
+        </section>
+
+        <footer class="priv-footer">
+            <div>
+                <a href="javascript:history.back()" class="priv-cta">↩ Voltar</a>
+            </div>
+            <div class="priv-version">
+                Versão <strong>1.0</strong> · Atualizado em 22/05/2026
+            </div>
+            <div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-top:6px; font-style:italic;">
+                15 seções · Conformidade CDC + Marco Civil + LGPD + ECA Digital
+            </div>
+            <div style="margin-top: 8px;">
+                © 2026 Lendas de Valdoria. Todos os direitos reservados.<br>
+                Mecânicas inspiradas em D&amp;D 5e SRD (Wizards of the Coast, CC-BY-4.0).
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
