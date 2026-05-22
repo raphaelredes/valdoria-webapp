@@ -42304,10 +42304,11 @@ var SUBSCREEN_DATA = {
     header: '🔍 Coletar Informações',
     flavor: 'Grom inclina a cabeça. "Tens algo em mente? Cinco moedas e te conto o que sei."',
     buttons: [
-      [_heralIco('ic-mochila'), 'Sobre pessoas', '5 <span class="vi vi-coin sm"></span> — Insight', 'gather_people'],
-      [_heralIco('ic-mochila'), 'Sobre locais', '5 <span class="vi vi-coin sm"></span> — Investigation', 'gather_places'],
-      [_heralIco('ic-banco'), 'Sobre tesouros', '5 <span class="vi vi-coin sm"></span> — Insight', 'gather_treasure'],
-      [_heralIco('ic-mochila'), 'Sobre eventos', '5 <span class="vi vi-coin sm"></span> — Deception', 'gather_events']
+      // 2026-05-21 BUG FIX: user pediu PT-BR em toda interface — skills estavam em inglês
+      [_heralIco('ic-mochila'), 'Sobre pessoas', '5 <span class="vi vi-coin sm"></span> — Intuição', 'gather_people'],
+      [_heralIco('ic-mochila'), 'Sobre locais', '5 <span class="vi vi-coin sm"></span> — Investigação', 'gather_places'],
+      [_heralIco('ic-banco'), 'Sobre tesouros', '5 <span class="vi vi-coin sm"></span> — Intuição', 'gather_treasure'],
+      [_heralIco('ic-mochila'), 'Sobre eventos', '5 <span class="vi vi-coin sm"></span> — Enganação', 'gather_events']
     ]
   },
   'tavern_board': {
@@ -43717,7 +43718,23 @@ var ACTION_HANDLERS = {
           dice: { formula: '1d20', sides: 20, value: roll, total: roll },
           rewards: rewards,
           deltas: success ? [_lastXpDelta(p)] : [],
-          onContinue: function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); }
+          // BUG FIX 2026-05-21: user reportou que Continuar não funcionava após
+          // dice success. Causa: condicional checava 'temple' como top da stack,
+          // mas top era 'temple_downtime' (list popup). Result popup fechava
+          // mas usuario via temple_downtime list (popup sublinha). Fix: re-render
+          // o topo da stack se houver (preserva contexto) ou voltar pra temple.
+          onContinue: function(){
+            var top = (_popupStack && _popupStack.length > 0) ? _popupStack[_popupStack.length-1] : null;
+            if (top === 'temple_downtime') {
+              // Re-abre o list popup pra escolher outro serviço
+              if (typeof ACTION_HANDLERS['temple_downtime'] === 'function') {
+                ACTION_HANDLERS['temple_downtime'](p);
+              }
+            } else if (top === 'temple') {
+              _renderCityPopup('temple');
+            }
+            // Se nenhum dos dois: usuario já saiu do contexto, deixa estar
+          }
         });
       }
     });
@@ -51313,9 +51330,16 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '.enc-speech{color:#e6dac0;padding:12px 14px;background:rgba(74,56,40,0.32);'
       + '  border-radius:7px;border-left:3px solid #c4953a;'
       + '  box-shadow:0 2px 8px rgba(0,0,0,0.25)}'
-      + '.enc-speech::before{content:attr(data-speaker);color:#c4953a;font-weight:700;'
+      // BUG FIX 2026-05-21: nome do speaker aparecia INSTANTLY (CSS ::before)
+      // antes do typewriter começar. User pediu: nome + fala devem aparecer
+      // JUNTOS no momento da animação. Solução: ::before só renderiza quando
+      // .enc-typing OR .enc-tw-done classe presente (controlado por _encTypewriter).
+      + '.enc-speech::before{content:"";color:#c4953a;font-weight:700;'
       + '  font-family:Cinzel,serif;display:block;font-size:12px;letter-spacing:1.2px;'
-      + '  margin-bottom:5px;text-shadow:0 0 6px rgba(196,149,58,0.4)}'
+      + '  margin-bottom:5px;text-shadow:0 0 6px rgba(196,149,58,0.4);'
+      + '  opacity:0;transition:opacity 0.3s ease}'
+      + '.enc-speech.enc-typing::before,.enc-speech.enc-tw-done::before{'
+      + '  content:attr(data-speaker);opacity:1}'
       // Phase 6.6.x dialogue inline italics (pausas / aside / sotaque):
       // dentro de speech ficam cinza claro pra contraste com gold da fala
       + '.enc-speech i,.enc-speech em{color:#9b8e7c;font-style:italic;'
@@ -51466,6 +51490,10 @@ function _renderEncounterPopup(enc, originalAction, player) {
     function step() {
       if (idx >= tokens.length) {
         element.classList.remove('enc-typing');
+        // BUG FIX 2026-05-21: marca .enc-tw-done para CSS continuar mostrando
+        // o data-speaker (nome do NPC) após o typewriter completar. Antes:
+        // ::before só ficava visível durante .enc-typing → nome sumia ao acabar.
+        element.classList.add('enc-tw-done');
         if (onDone) onDone();
         return;
       }
@@ -51536,6 +51564,8 @@ function _renderEncounterPopup(enc, originalAction, player) {
         var full = l.getAttribute('data-fulltext');
         if (full) l.innerHTML = full;
         l.classList.remove('enc-typing');
+        // 2026-05-21: também marca .enc-tw-done para preservar speaker name
+        l.classList.add('enc-tw-done');
       }
     });
     return lines.length > 0;
@@ -52060,9 +52090,25 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // badge do local (se mudar).
     if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
   } else {
-    // Continue: re-dispara doAction original SEM passar pelo interceptor de novo
-    // (nesse momento _encountered_npcs já registrou que o encontro aconteceu)
-    if (typeof window.doAction === 'function') window.doAction(originalAction);
+    // BUG FIX 2026-05-21: user reportou que "Volto mais tarde", "Sem mais perguntas",
+    // "Obrigado, X" (todos com result: 'continue') estavam REABRINDO o menu de
+    // diálogo do NPC em vez de fechar. Comportamento esperado: estas opções
+    // significam "encerrar conversa" — devem fechar o popup completamente.
+    //
+    // Antes: window.doAction(originalAction) → re-disparava o entry handler →
+    //         reabria o popup do mesmo NPC (frustrante: usuário tentava sair).
+    //
+    // Agora: popup já fechado em linha 51931 (ov.parentNode.removeChild). Apenas
+    //         restaurar contexto previo se houver popup-stack pra preservar
+    //         (ex: usuário estava em menu da Taverna antes do diálogo).
+    var top = (typeof _popupStack !== 'undefined' && _popupStack.length > 0)
+              ? _popupStack[_popupStack.length-1] : null;
+    if (top && typeof _renderCityPopup === 'function') {
+      // Re-render do popup background (ex: Taverna list) — assim o usuário
+      // volta pro estado de onde abriu o diálogo. NÃO reabre o diálogo.
+      _renderCityPopup(top);
+    }
+    // Sem stack → diálogo fechado, user volta pro hub.
   }
 }
 
