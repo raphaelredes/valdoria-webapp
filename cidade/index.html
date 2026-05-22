@@ -17311,6 +17311,92 @@ function _marketTransientIcon(npc){
 // abre inventário com items canonical, cada item com confirm popup → _pay → result.
 window._marketTransientChatIdx = window._marketTransientChatIdx || {};
 function _marketShowTransient(p, npc){
+  // Sessão #23 v8 (2026-05-22): user pediu VIAJANTES PADRAO_ALDRIC + PNGs
+  // zoomable. Migrado de popup simples pra vEncounter.render quando disponível.
+  // PNGs já existem em /shared/img/npcs/{npc.id}.png (38 NPCs cobertos).
+  var npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.png';
+  var _isWebApp = location.protocol.indexOf('http') === 0;
+  if (_isWebApp) npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.png';
+
+  // Se vEncounter disponível, usar PADRAO_ALDRIC (header + portrait + zoom)
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var walkLine = _pickNonRepeatingWalk(npc.id);
+    var chat = npc.chat || [];
+    var chatLine = chat.length ? _pickNonRepeatingChat(npc.id, chat) : '';
+    var script = [];
+    if (walkLine) script.push({ type: 'narration', text: walkLine });
+    script.push({ type: 'speech', speaker: npc.name, text: npc.greeting || '...' });
+    if (chatLine) script.push({ type: 'speech', speaker: npc.name, text: chatLine });
+
+    var dialogueChoices = [];
+    npc.items.forEach(function(it){
+      dialogueChoices.push({
+        id: 'buy_' + it.key,
+        label: '⚒ ' + it.name + ' · ' + it.value + ' V',
+        cb: 'transient-buy:' + npc.id + ':' + it.key
+      });
+    });
+    if (chat.length > 1) {
+      dialogueChoices.push({ id: 'next_chat', label: '💬 Trocar de assunto', cb: 'transient-next-chat:' + npc.id });
+    }
+    dialogueChoices.push({ id: 'leave', label: '↩ "Outra hora."', cb: 'close' });
+
+    var dialogue = {
+      npc: {
+        id: 'transient_' + npc.id,
+        name: npc.name,
+        desc: npc.role,
+        portrait: npcPng
+      },
+      script: script,
+      choices: dialogueChoices
+    };
+
+    window.vEncounter.render(dialogue, {
+      onChoice: function(ch, _dlg){
+        var cb = ch.cb || '';
+        if (cb.indexOf('transient-buy:') === 0) {
+          var parts = cb.split(':');
+          var itemKey = parts[2];
+          var item = npc.items.find(function(x){ return x.key === itemKey; });
+          if (!item) return;
+          var purchaseIcon = (typeof _resolveItemIcon === 'function') ? _resolveItemIcon(item.name, '48px') : '';
+          if (!purchaseIcon) purchaseIcon = (item.icon || _heralIco("ic-mochila"));
+          _showConfirmPurchase({
+            icon: purchaseIcon,
+            npc: npc.name,
+            title: 'Comprar ' + item.name,
+            desc: '<b>' + item.name + '</b><br>'
+                + '<i>' + (item.fullDesc || item.desc || '') + '</i><br><br>'
+                + '<b>Preço:</b> ' + item.value + ' <span class="vi vi-coin sm"></span>',
+            cost: item.value,
+            onConfirm: function(){
+              var preGold = p.gold;
+              if (!_pay(p, item.value)) return;
+              _showServiceResultPopup({
+                icon: purchaseIcon, npc: npc.name,
+                narrative: '<i>' + npc.name + ' embrulha o item com cuidado.</i><br><br>'
+                         + '<b>' + item.name + '</b> adicionado à sua bolsa.',
+                deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+                onContinue: function(){ _marketShowTransient(p, npc); }
+              });
+            }
+          });
+          return;
+        }
+        if (cb.indexOf('transient-next-chat:') === 0) {
+          window._marketTransientChatIdx[npc.id] = ((window._marketTransientChatIdx[npc.id] || 0) + 1) % (npc.chat || []).length;
+          _marketShowTransient(p, npc);
+          return;
+        }
+        // 'close' / default — fecha overlay
+        if (window.vEncounter.close) window.vEncounter.close();
+      }
+    });
+    return;
+  }
+
+  // Fallback (vEncounter não disponível) — render legacy simples
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
@@ -17319,15 +17405,19 @@ function _marketShowTransient(p, npc){
   if (titleEl) titleEl.innerHTML = icon + ' ' + npc.name + ' <span style="opacity:.65;font-size:.85em">(' + npc.role + ')</span>';
 
   var html = '<div class="city-subscreen">';
-  // canonical: data/plaza_npc_walk_data.py MARKET_WALK_DESCRIPTIONS via CANON_PLAZA_WALK
-  // Mostra o que o mercador esta fazendo (caminhando/observando/etc) — non-repeating per NPC.
   var walkLine = _pickNonRepeatingWalk(npc.id);
   if (walkLine){
     html += '<p class="subscreen-flavor" style="opacity:0.85;color:#a09484"><i>📍 ' + walkLine + '</i></p>';
   }
-  // Greeting canonical (primeira fala)
+  // Portrait zoomable (mesmo no fallback)
+  html += '<div style="text-align:center;margin:10px 0;">'
+        + '<img src="' + npcPng + '" alt="' + npc.name + '" class="vlb-zoomable" '
+        + 'style="width:96px;height:96px;border-radius:8px;border:2px solid var(--v-gold,#c4953a);object-fit:cover;cursor:pointer;" '
+        + 'onerror="this.style.display=\'none\'" '
+        + 'data-lb-caption="' + npc.name + ' · ' + npc.role + '" '
+        + 'title="Toque para ampliar"/>'
+        + '</div>';
   html += '<p class="subscreen-flavor"><i>"' + (npc.greeting || '...') + '"</i></p>';
-  // Chat ambiente — non-repeating (cicla apenas quando todas usadas)
   var chat = npc.chat || [];
   if (chat.length){
     var chatLine = _pickNonRepeatingChat(npc.id, chat);
