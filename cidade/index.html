@@ -8974,7 +8974,7 @@ function _isCTA(btn) {
   // página /privacidade/ (data tratada, base legal, novos sub-processadores,
   // categorias de cookies, etc.). User será re-prompted ao bump.
   // Conformidade LGPD Art. 8º §6 (revogação/nova coleta de consentimento).
-  window.PRIVACY_POLICY_VERSION = '1.0';
+  window.PRIVACY_POLICY_VERSION = '1.1';
 
   // Storage strategy: per-player + per-version
   //   Key format: 'valdoria_privacy_v<VERSION>_<uid>'  (uid do Telegram)
@@ -8992,16 +8992,16 @@ function _isCTA(btn) {
   // + animações (glow pulse, rune shine) + frase adaptada ao lore "Aurora".
   window._showFirstLaunchSplash = function(){
     var key = _privacyKey();
-    var seen = _pref(key, '0') === '1';
+    var raw = _pref(key, '');
+    // v5: aceita formatos legacy ('1') OU JSON ({accepted, timestamp, version})
+    var seen = false;
+    if (raw === '1') seen = true;
+    else if (raw && raw.charAt(0) === '{') {
+      try { var parsed = JSON.parse(raw); seen = parsed && parsed.accepted === true; } catch(_){}
+    }
     if (seen) return false;
     // Backward compat: flag legada 'valdoria_first_launch_seen' (sem version,
-    // sem per-player). Se já tinha aceitado a v1.0, migrar pra nova key e skip.
-    var legacy = _pref('valdoria_first_launch_seen', '0') === '1';
-    if (legacy && window.PRIVACY_POLICY_VERSION === '1.0') {
-      try { localStorage.setItem(key, '1'); } catch(_) {}
-      try { localStorage.removeItem('valdoria_first_launch_seen'); } catch(_) {}
-      return false;  // já aceitou v1.0 antes (na key antiga) — não re-prompt
-    }
+    // sem per-player). NÃO migra automaticamente em v1.1 (mudança relevante exige re-aceite).
     // Detectar re-prompt por mudança de versão (qualquer key antiga aceita?)
     var isUpdate = false;
     try {
@@ -9180,8 +9180,14 @@ function _isCTA(btn) {
     var btn = document.getElementById('fLs-accept-btn');
     if (btn) {
       btn.addEventListener('click', function(){
-        // Sessão #23 v4: salva aceite na chave versionada per-player
-        try { localStorage.setItem(_privacyKey(), '1'); } catch(_) {}
+        // Sessão #23 v5: salva aceite com TIMESTAMP ISO 8601 + version
+        // (auditoria LGPD Art. 6º X — Responsabilização)
+        var acceptRecord = JSON.stringify({
+          accepted: true,
+          timestamp: new Date().toISOString(),
+          version: window.PRIVACY_POLICY_VERSION
+        });
+        try { localStorage.setItem(_privacyKey(), acceptRecord); } catch(_) {}
         // Limpa flag legada se existir (cleanup)
         try { localStorage.removeItem('valdoria_first_launch_seen'); } catch(_) {}
         // Restaura botão Voltar (foi escondido pelo splash)
