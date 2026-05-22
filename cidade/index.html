@@ -40950,7 +40950,9 @@ function _relationsShow(p, relId){
             : interactions >= 8
               ? '<i>Vínculo no nível máximo. ' + r.name + ' confia plenamente em você.</i>'
               : '<i>Próximo tier "' + nextTier.name + '" em ' + Math.max(0, [0,2,4,6,8][tier.affinity + 1] - interactions) + ' diálogos.</i>'),
-    onConfirm: function(){ /* informativo */ }
+    // Sessão #26 (2026-05-22) P0 #75: popup informativo (read-only) — esconde Confirmar redundante
+    singleButton: true,
+    cancelLabel: 'Voltar'
   });
 }
 
@@ -42085,24 +42087,41 @@ function _showInfoPopup(opts){
   costRows.forEach(function(r){ r.style.display = 'none'; });
   if (warnEl) warnEl.style.display = 'none';
   // Botão Confirmar simples (sem custo)
+  // Sessão #26 (2026-05-22): suporte a opts.singleButton — popups informativos
+  // (Vínculos, etc.) escondem Confirmar e mostram só Voltar (regra UX P0 #75).
   var confirmBtn = document.getElementById('cpp-confirm-btn');
-  confirmBtn.textContent = opts.confirmLabel || 'Confirmar';
-  confirmBtn.disabled = false;
-  confirmBtn.classList.remove('disabled');
-  confirmBtn.onclick = function(){
-    ov.classList.remove('active');
-    // Re-show rows pra próxima chamada de _showConfirmPurchase
-    costRows.forEach(function(r){ r.style.display = ''; });
-    if (typeof opts.onConfirm === 'function') opts.onConfirm();
-  };
-  // Botão Voltar/Cancelar
   var cancelBtn = document.getElementById('cpp-cancel-btn');
-  cancelBtn.textContent = opts.cancelLabel || 'Voltar';
-  cancelBtn.onclick = function(){
-    ov.classList.remove('active');
-    costRows.forEach(function(r){ r.style.display = ''; });
-    if (typeof opts.onCancel === 'function') opts.onCancel();
-  };
+  if (opts.singleButton) {
+    confirmBtn.style.display = 'none';
+    // Botão Voltar fica largura total + cor confirm pra ser o CTA principal
+    cancelBtn.textContent = opts.cancelLabel || 'Fechar';
+    cancelBtn.style.flex = '1 1 100%';
+    cancelBtn.onclick = function(){
+      ov.classList.remove('active');
+      costRows.forEach(function(r){ r.style.display = ''; });
+      confirmBtn.style.display = '';
+      cancelBtn.style.flex = '';
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+  } else {
+    confirmBtn.style.display = '';
+    confirmBtn.textContent = opts.confirmLabel || 'Confirmar';
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove('disabled');
+    confirmBtn.onclick = function(){
+      ov.classList.remove('active');
+      // Re-show rows pra próxima chamada de _showConfirmPurchase
+      costRows.forEach(function(r){ r.style.display = ''; });
+      if (typeof opts.onConfirm === 'function') opts.onConfirm();
+    };
+    cancelBtn.textContent = opts.cancelLabel || 'Voltar';
+    cancelBtn.style.flex = '';
+    cancelBtn.onclick = function(){
+      ov.classList.remove('active');
+      costRows.forEach(function(r){ r.style.display = ''; });
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+  }
   ov.classList.add('active');
 }
 
