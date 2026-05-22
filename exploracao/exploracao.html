@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-22T23:31:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-22T23:43:53Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -38981,6 +38981,12 @@ function _xcartWireEvents() {
           ['token','uid','user_id','api','api_base','char','char_id','env'].forEach(function(k){
             var v = qs.get(k); if (v) nqs.set(k, v);
           });
+          // Sessão #26 (2026-05-22) BUG FIX: _skiprestore=1 previne /cidade/
+          // de fetchar /api/game/state e detectar stale last_screen_payload
+          // (ex: pending levelup de sessão anterior) que redirecionaria pro
+          // /play/?route=levelup em loop. Usuário clicou EXPLICITAMENTE em
+          // "Voltar pra Cidade" — quer ir pra cidade, não retomar fluxo pendente.
+          nqs.set('_skiprestore', '1');
           var url = '/cidade/?' + nqs.toString();
           window.__valdoria_transitioning = true;
           if (window._vTransitionLoader) {
