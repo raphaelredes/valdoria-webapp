@@ -620,7 +620,7 @@ function rejectCookies() {
 // === Bootstrap ===
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-document.addEventListener('DOMContentLoaded', function() {
+function _bootstrap() {
     window.scrollTo(0, 0);
 
     // Cookies first
@@ -647,11 +647,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (input) input.addEventListener('input', function() { onCustomAmount(input); });
 
     // Reveal animations + scene-ready
-    requestAnimationFrame(function() {
-        var cenarioEl = document.querySelector('.ap-cinematic');
-        if (cenarioEl) setTimeout(function() { cenarioEl.classList.add('ap-scene-ready'); }, 100);
-    });
-});
+    // Sessao #23 v9.1: setTimeout direto (rAF nao firava em alguns contextos).
+    var cenarioEl = document.querySelector('.ap-cinematic');
+    if (cenarioEl) {
+        // Add immediately so transitions can run
+        setTimeout(function() {
+            cenarioEl.classList.add('ap-scene-ready');
+        }, 50);
+    }
+}
+
+// Sessao #23 v9 fix: bootstrap roda imediato se DOM ja carregado
+// (script inlined no worker carrega APOS DOMContentLoaded — listener nunca fira).
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _bootstrap);
+} else {
+    setTimeout(_bootstrap, 10);
+}
 
 // Export to window for HTML onclick handlers
 window.selectAmount = selectAmount;
