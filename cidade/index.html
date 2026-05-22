@@ -12603,7 +12603,12 @@ function _showAchievementDetailPopup(chainId, p){
   var cenarioIconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
   var heroGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.55));' : '';
 
-  html += '<div style="display: flex; flex-direction: column; align-items: center; padding: var(--v-space-md, 10px) var(--v-space-md, 8px) var(--v-space-sm, 6px); '
+  // Compute reward totals (USER REQUEST 2026-05-22: clareza do que está em jogo)
+  var totalChainXp = chain.tiers.reduce(function(s, t){ return s + (t.xp || 0); }, 0);
+  var earnedXp = chain.tiers.reduce(function(s, t){ return s + (st.progress >= t.goal ? (t.xp || 0) : 0); }, 0);
+  var earnedCount = chain.tiers.filter(function(t){ return st.progress >= t.goal; }).length;
+
+  html += '<div style="display: flex; flex-direction: column; align-items: center; padding: var(--v-space-md, 12px) var(--v-space-md, 10px); '
     + 'background: linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(42,36,32,0.95) 100%); '
     + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
     + 'border-radius: var(--v-radius, 10px); position: relative;">'
@@ -12617,13 +12622,13 @@ function _showAchievementDetailPopup(chainId, p){
     + '<use href="#' + chain.icon + '"/>'
     + '</svg>'
     + '</div>'
-    // Faixa do tier
-    + '<div style="margin-top: -10px; '
+    // Faixa do tier — SEPARADA da medalha (FIX 2026-05-22: era margin-top: -10px causando overlap)
+    + '<div style="margin-top: var(--v-space-md, 10px); '
     + 'background: ' + (st.mastered ? 'linear-gradient(180deg, #ffd700, #c87a4a)' : (st.done > 0 ? 'linear-gradient(180deg, #c63d3d, #8a2828)' : '#5a5048')) + '; '
     + 'color: #fff; '
     + 'font-family: var(--v-font-display, Cinzel, serif); '
-    + 'font-weight: 700; font-size: 11px; '
-    + 'padding: 2px 12px; '
+    + 'font-weight: 700; font-size: 12px; '
+    + 'padding: 3px 14px; '
     + 'border-radius: 3px; '
     + 'border: 1px solid rgba(0,0,0,0.6); '
     + 'box-shadow: 0 1px 3px rgba(0,0,0,0.5); '
@@ -12631,11 +12636,27 @@ function _showAchievementDetailPopup(chainId, p){
     + 'letter-spacing: 1px;">'
     + (st.mastered ? '★ MESTRE ★' : st.active.label + ' — ' + st.active.name)
     + '</div>'
-    // Flavor
-    + '<div style="margin-top: var(--v-space-sm, 6px); '
+    // Flavor (descrição do que conta para a cadeia)
+    + '<div style="margin-top: var(--v-space-sm, 8px); '
     + 'font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); '
     + 'text-align: center; line-height: 1.4; max-width: 280px; font-style: italic;">'
     + chain.flavor
+    + '</div>'
+    + '</div>';
+
+  // === RECOMPENSAS DESBLOQUEÁVEIS (USER REQUEST 2026-05-22: clareza do ganho) ===
+  html += '<div style="padding: var(--v-space-sm, 6px) var(--v-space-md, 10px); '
+    + 'background: rgba(196,149,58,0.05); '
+    + 'border: 1px solid var(--v-border, #4a3828); '
+    + 'border-radius: var(--v-radius-sm, 6px);">'
+    + '<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">'
+    + '<span style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px;">⛁ Recompensas</span>'
+    + '<span style="font-size: 11px; color: var(--v-text-bright, #e8dcc8); font-weight: 700;">'
+    + earnedCount + ' / ' + chain.tiers.length + '</span>'
+    + '</div>'
+    + '<div style="font-size: 11px; color: var(--v-text, #d4c8b0); line-height: 1.4;">'
+    + 'Conquistado: <b style="color: var(--v-gold, #c4953a);">+' + earnedXp + ' XP</b>'
+    + (earnedXp < totalChainXp ? ' · A ganhar: <b style="color: var(--v-text-dim, #a09484);">+' + (totalChainXp - earnedXp) + ' XP</b>' : ' · <b style="color: #7cdb7c;">cadeia completa</b>')
     + '</div>'
     + '</div>';
 
