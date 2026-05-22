@@ -9661,6 +9661,28 @@ function _discoverySpeakerIcon(speaker) {
   return 'ic-praca';  // default
 }
 
+// Sessão #26 (2026-05-22) P0 #71: descoberta usava só ic-* SVG.
+// Agora também tenta PNG portrait pra speakers conhecidos (Padre Aldric, Tavira,
+// Lyana, Irmã Elara) — fallback pro SVG se PNG não existir.
+function _discoverySpeakerPortrait(speaker) {
+  var s = String(speaker || '').toLowerCase();
+  // Personagens nominais (PNGs dedicados)
+  if (s.indexOf('aldric') >= 0 && s.indexOf('padre') >= 0) return '/shared/img/npcs/padre-aldric.png';
+  if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.png';
+  if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.png';
+  if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.png';
+  if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.png';
+  if (s.indexOf('corvus') >= 0)  return '/shared/img/npcs/corvus-livreiro.png';
+  if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.png';
+  // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
+  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.png';
+  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.png';
+  if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.png';
+  if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.png';
+  if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.png';
+  return null;
+}
+
 // Sanitiza HTML mantendo apenas <i>/<em>/<b>/<strong> (mesma whitelist do
 // PADRAO_ALDRIC pra inline aside cinza italic)
 function _discoverySanitize(s) {
@@ -9729,13 +9751,16 @@ function _renderDiscoveryStage(){
   var stages = quest.stages;
 
   // NPC primário = speaker da primeira stage (registro inline)
+  // Sessão #26 (2026-05-22) P0 #71: prefere PNG portraitImg quando disponível
   var primarySpeaker = stages[0].speaker || 'Eldoria';
   var primaryNpcKey = 'discovery_' + quest.id + '_' + primarySpeaker.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   if (!RECURRING_NPCS[primaryNpcKey]) {
+    var primaryPng = _discoverySpeakerPortrait(primarySpeaker);
     RECURRING_NPCS[primaryNpcKey] = {
       name: primarySpeaker,
       desc: quest.name,
-      portrait: _discoverySpeakerIcon(primarySpeaker)
+      portrait: _discoverySpeakerIcon(primarySpeaker),
+      portraitImg: primaryPng || null
     };
   }
 
@@ -9748,10 +9773,12 @@ function _renderDiscoveryStage(){
     if (spk !== primarySpeaker) {
       spkKey = 'discovery_' + quest.id + '_' + spk.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       if (!RECURRING_NPCS[spkKey]) {
+        var altPng = _discoverySpeakerPortrait(spk);
         RECURRING_NPCS[spkKey] = {
           name: spk,
           desc: quest.name,
-          portrait: _discoverySpeakerIcon(spk)
+          portrait: _discoverySpeakerIcon(spk),
+          portraitImg: altPng || null
         };
       }
     }

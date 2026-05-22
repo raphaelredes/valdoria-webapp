@@ -39,7 +39,7 @@ var INN_SVC_META = {
   'inn_cellar_menu':        { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
   'inn_investigate_cellar': { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
   // === Tipos de quarto (sub-menu Quartos/Descanso) ===
-  'inn_room_stable':        { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
+  'inn_room_stable':        { icon: '<img src="../shared/img/services/svc-estabulo.png" alt="">' },
   'inn_room_common':        { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
   'inn_room_modest':        { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
   'inn_room_wealthy':       { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
