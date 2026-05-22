@@ -12193,19 +12193,111 @@ var LEAGUE_BENEFITS = {
 
 // 2026-05-22 user feedback: explica o que significa "Posição na Ordem".
 // 2026-05-21: expandido com mini-lore dos 3 lendários (user pediu).
+// Sessão #23 (2026-05-22): visual revamp épico — header banner, zonas
+// de ranking visualizadas, cards dos lendários, dicas "Como subir".
 function _showLeagueRankInfo(){
   if (typeof _showInfoPopup !== 'function') return;
+  // Mock player position (em PROD: player.metadata.league_rank)
+  var playerRank = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_rank) || 487;
+  var playerTier = playerRank <= 10 ? 'mithral'
+                 : playerRank <= 100 ? 'platinum'
+                 : playerRank <= 1000 ? 'gold'
+                 : playerRank <= 10000 ? 'silver'
+                 : 'bronze';
+  var TIER_COLORS = { bronze: '#c87a4a', silver: '#c8c4c0', gold: '#ffd700', platinum: '#e8eef5', mithral: '#a8e4f0' };
+
+  function _zoneRow(label, range, tierId, isPlayerZone){
+    var col = TIER_COLORS[tierId] || '#c4953a';
+    return '<div style="display:flex; align-items:center; gap:8px; padding:6px 10px; '
+      + 'background:' + (isPlayerZone ? 'linear-gradient(90deg, ' + col + '22, transparent)' : 'rgba(74,56,40,0.18)') + '; '
+      + 'border:1px solid ' + (isPlayerZone ? col : 'rgba(74,56,40,0.5)') + '; '
+      + 'border-left:3px solid ' + col + '; border-radius:5px; margin-bottom:3px;">'
+      + '<span style="font-size:9px; color:' + col + '; letter-spacing:1px; text-transform:uppercase; min-width:50px; font-weight:700;">' + range + '</span>'
+      + '<span style="flex:1; font-size:11px; color:var(--v-text,#d4c8b0); font-family:var(--v-font-display,Cinzel,serif);">' + label + '</span>'
+      + (isPlayerZone ? '<span style="font-size:9px; color:' + col + '; letter-spacing:1px; font-weight:700;">VOCÊ</span>' : '')
+      + '</div>';
+  }
+
+  function _legendaryCard(name, title, lore){
+    return '<div style="display:flex; gap:8px; padding:8px; '
+      + 'background:linear-gradient(135deg, rgba(196,149,58,0.08), rgba(42,36,32,0.4)); '
+      + 'border:1px solid var(--v-gold-30,rgba(196,149,58,0.30)); '
+      + 'border-left:3px solid var(--v-gold,#c4953a); '
+      + 'border-radius:5px; margin-bottom:4px;">'
+      + '<div style="font-size:18px; line-height:1; align-self:center;">★</div>'
+      + '<div style="flex:1; min-width:0;">'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:12px; color:var(--v-gold,#c4953a); font-weight:700; letter-spacing:0.5px;">' + name + '</div>'
+      + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); font-style:italic; margin-top:1px;">' + title + '</div>'
+      + '<div style="font-size:10px; color:var(--v-text,#d4c8b0); line-height:1.4; margin-top:3px;">' + lore + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  function _tipRow(num, text){
+    return '<div style="display:flex; gap:8px; align-items:flex-start; padding:5px 0;">'
+      + '<span style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; border-radius:50%; '
+      + 'background:var(--v-gold,#c4953a); color:#1a1410; font-size:10px; font-weight:700; font-family:var(--v-font-display,Cinzel,serif);">' + num + '</span>'
+      + '<span style="flex:1; font-size:11px; color:var(--v-text,#d4c8b0); line-height:1.5;">' + text + '</span>'
+      + '</div>';
+  }
+
+  var html = ''
+    // === HEADER BANNER cerimonial ===
+    + '<div style="position:relative; margin:-12px -12px 10px; padding:14px 12px 12px; '
+    + 'background:radial-gradient(ellipse at 50% 0%, rgba(196,149,58,0.28) 0%, rgba(74,56,40,0.6) 60%, rgba(42,36,32,0.95) 100%); '
+    + 'border-bottom:1px solid var(--v-gold-40,rgba(196,149,58,0.4)); text-align:center;">'
+    + '<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:4px;">'
+    + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(90deg, transparent, var(--v-gold,#c4953a));"></span>'
+    + '<svg viewBox="0 0 120 120" style="width:32px; height:32px; color:var(--v-gold,#c4953a); filter:drop-shadow(0 0 8px var(--v-gold-60,rgba(196,149,58,0.6)));"><use href="#ic-bandeira"/></svg>'
+    + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
+    + '</div>'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:16px; color:var(--v-gold,#c4953a); '
+    + 'letter-spacing:3px; text-transform:uppercase; text-shadow:0 0 12px var(--v-gold-40,rgba(196,149,58,0.4));">'
+    + 'Ordem dos Aventureiros'
+    + '</div>'
+    + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); font-style:italic; margin-top:3px; letter-spacing:1px;">'
+    + 'Classificação global · Você está na posição <b style="color:' + TIER_COLORS[playerTier] + ';">#' + playerRank.toLocaleString('pt-BR') + '</b>'
+    + '</div>'
+    + '</div>'
+
+    // === EXPLICAÇÃO breve ===
+    + '<div style="font-size:11px; color:var(--v-text,#d4c8b0); line-height:1.5; margin-bottom:10px; padding:0 2px;">'
+    + 'Quanto <b style="color:var(--v-gold,#c4953a);">mais XP de Liga</b> acumular (missões, vitórias, conquistas), <b>mais próximo do 1º lugar</b>. Posições menores = aventureiros mais experientes.'
+    + '</div>'
+
+    // === ZONAS de ranking ===
+    + '<div style="font-size:10px; color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px;">⛁ Zonas da Ordem</div>'
+    + _zoneRow('Lendas Vivas', '#1-10',     'mithral',  playerTier === 'mithral')
+    + _zoneRow('Mestres',      '#11-100',   'platinum', playerTier === 'platinum')
+    + _zoneRow('Veteranos',    '#101-1K',   'gold',     playerTier === 'gold')
+    + _zoneRow('Aventureiros', '#1K-10K',   'silver',   playerTier === 'silver')
+    + _zoneRow('Iniciantes',   '#10K+',     'bronze',   playerTier === 'bronze')
+
+    // === LENDÁRIOS no topo ===
+    + '<div style="font-size:10px; color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; margin:12px 0 6px;">★ Lendas Vivas (Top 10)</div>'
+    + _legendaryCard('Vorhan, o Veterano', 'Lâmina do Norte', 'Derrotou um Lich em Brakenhall há 30 anos.')
+    + _legendaryCard('Tavira Lança-Justa', 'Reformadora da Guilda', 'Limpou o Forte dos Bandidos sozinha.')
+    + _legendaryCard('Silvana, a Bardisa', 'Voz das Ruínas Élficas', 'Cantou nas cortes élficas há 200 anos.')
+
+    // === COMO SUBIR ===
+    + '<div style="margin-top:12px; padding:10px; background:rgba(196,149,58,0.05); '
+    + 'border:1px solid var(--v-border,#4a3828); border-left:3px solid var(--v-gold,#c4953a); border-radius:5px;">'
+    + '<div style="font-size:10px; color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px;">⚔ Como Subir na Ordem</div>'
+    + _tipRow(1, '<b>Complete missões</b> da Guilda. Cada uma dá XP de Liga proporcional à dificuldade.')
+    + _tipRow(2, '<b>Vença batalhas</b> em arena e exploração — combate é o caminho mais rápido.')
+    + _tipRow(3, '<b>Domine cadeias de conquistas</b> (Algoz, Mestre, Indomável) — cada tier dá bônus de XP de Liga.')
+    + '</div>'
+
+    // === FOOTER cerimonial ===
+    + '<div style="margin:10px 0 -4px; padding:8px; text-align:center; font-size:10px; color:var(--v-text-dim,#a09484); font-style:italic; line-height:1.5;">'
+    + '"Converse com os Lendários nas missões para aprender suas histórias completas."'
+    + '</div>';
+
   _showInfoPopup({
     icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>',
     npc: 'Ordem dos Aventureiros',
     title: 'Posição na Ordem',
-    desc: '<i>O ranking da Ordem é uma classificação <b>global</b> entre todos os aventureiros de Valdoria.</i><br><br>'
-      + 'Quanto <b>maior seu XP de Liga</b> (acumulado completando missões, abates, conquistas e feitos), <b>menor</b> seu número de posição — ou seja, mais próximo do <b>1º lugar</b>.<br><br>'
-      + '<b style="color:var(--v-gold,#c4953a);">Aventureiros Lendários no topo:</b><br>'
-      + '<b>· Vorhan, o Veterano</b> — <i>Lâmina do Norte. Derrotou um Lich em Brakenhall há 30 anos.</i><br>'
-      + '<b>· Tavira Lança-Justa</b> — <i>Reformadora da Guilda. Limpou o Forte dos Bandidos sozinha.</i><br>'
-      + '<b>· Silvana, a Bardisa</b> — <i>Voz das Ruínas Élficas. Cantou nas cortes élficas há 200 anos.</i><br><br>'
-      + '<i>Converse com eles nas missões para aprender suas histórias completas.</i>',
+    desc: html,
     onConfirm: function(){}
   });
 }
