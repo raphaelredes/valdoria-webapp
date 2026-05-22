@@ -83,10 +83,44 @@
         actions.innerHTML = '<button class="enc-btn enc-btn-primary" style="padding:8px 18px;">Continuar →</button>';
         actions.style.opacity = '1';
         actions.querySelector('button').addEventListener('click', function() {
-          ov.classList.remove('active');
+          // Sessão #23 v8: Toast de Renome + continuação do diálogo se houver.
           if (typeof window.vToast === 'function') {
             var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
             window.vToast((deltaR>=0?'+':'')+deltaR+' Renome · '+facLabel, deltaR>=0?'gold':'warn');
+          }
+          // Próximo nó: success → opts.ch.success / fail → opts.ch.failure
+          // Senão: continueDialogue (legacy). Senão: close.
+          var nextNodeId = null;
+          if (opts.ch) {
+            if (success && opts.ch.success) nextNodeId = opts.ch.success;
+            else if (!success && opts.ch.failure) nextNodeId = opts.ch.failure;
+            else if (opts.ch.continueDialogue) nextNodeId = opts.ch.continueDialogue;
+          }
+          if (nextNodeId && opts.dialogues && opts.dialogues[nextNodeId]) {
+            // Render próximo nó PADRAO_ALDRIC
+            if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+              window.vEncounter.render(opts.dialogues[nextNodeId], { dialogues: opts.dialogues });
+            } else if (typeof window._renderEncounterPopup === 'function') {
+              window._renderEncounterPopup(opts.dialogues[nextNodeId]);
+            } else {
+              ov.classList.remove('active');
+            }
+          } else if (opts.ch && (opts.ch.resultNarration || opts.ch.resultText)) {
+            // Mostra narrativa de resultado (success/fail) como popup curto
+            var rNarration = success ? (opts.ch.resultNarration || '') : (opts.ch.resultNarrationFail || opts.ch.resultNarration || '');
+            var rText = success ? (opts.ch.resultText || '') : (opts.ch.resultTextFail || opts.ch.resultText || '');
+            ov.classList.remove('active');
+            if (typeof window._showInfoPopup === 'function') {
+              window._showInfoPopup({
+                icon: '',
+                npc: (opts.dialogue && opts.dialogue.npc && opts.dialogue.npc.name) || '',
+                title: success ? 'Sucesso' : 'Falha',
+                desc: (rNarration ? '<i style="color:var(--v-text-dim,#a09484);">' + rNarration + '</i><br><br>' : '') + rText,
+                onConfirm: function(){}
+              });
+            }
+          } else {
+            ov.classList.remove('active');
           }
         });
       }, 600);
@@ -242,18 +276,38 @@
     var cb = ch.cb || '';
     var ov = document.getElementById('encounter-overlay');
     if (cb === 'close') {
-      ov.classList.remove('active');
+      // Sessão #23 v8 (2026-05-22): user reportou "Talvez depois" não fechava
+      // diálogo - voltava ao botão ESCOLHER AÇÃO. Fix: forçar close completo
+      // do overlay + limpar conteúdo + remover qualquer choice sub-screen.
+      if (ov) {
+        ov.classList.remove('active');
+        ov.innerHTML = '';
+        ov.style.display = 'none';
+        setTimeout(function(){ ov.style.display = ''; }, 50);
+      }
+      // Limpa também qualquer sub-overlay flutuante
+      try {
+        var sub = document.querySelector('.enc-choices-overlay, .enc-choices');
+        if (sub && sub.parentNode) sub.parentNode.removeChild(sub);
+      } catch(_e){}
       return true;
     }
     if (cb.indexOf('dice:') === 0) {
       var parts = cb.split(':');
+      // Sessão #23 v8 (2026-05-22): user reportou que após Continuar do dice,
+      // nada acontece. Fix: passar ch + dialogues pra _diceCheckSvc poder
+      // chain pra continueDialogue OU resultText narrativo (PADRAO_ALDRIC).
       window._diceCheckSvc({
         ability: parts[1],
         dc: parseInt(parts[2], 10),
         mod: parseInt(parts[3].replace('+',''), 10) || 0,
         npc: dialogue.npc,
         label: ch.label,
-        faction: (window._SVC_CONFIG && window._SVC_CONFIG.faction)
+        faction: (window._SVC_CONFIG && window._SVC_CONFIG.faction),
+        // Continuação do diálogo:
+        ch: ch,
+        dialogue: dialogue,
+        dialogues: dialogues
       });
       return true;
     }

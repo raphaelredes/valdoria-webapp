@@ -16026,14 +16026,81 @@ var MARKET_GOSSIP_LOC = {
 };
 
 // Popup canonical de rumor (clicar num NPC ausente abre)
+// Sessão #23 v8 (2026-05-22): user pediu narrativa MISTERIOSA quando NPC ausente.
+// Em vez de popup "NA TAVERNA" direto, agora 4 estilos randômicos:
+//   1. Diálogo de NPC presente do mercado (com pista vaga ou certa)
+//   2. Bilhete/placa do próprio NPC (volta em X minutos / hora aproximada)
+//   3. Banca vazia com sinais de uso recente
+//   4. Nenhuma pista (ninguém viu)
+// Player decide se vai investigar pela cidade ou voltar depois.
 function _marketShowAbsentRumor(p, merchant, state){
+  var firstName = merchant.name.split(' ')[0];
   var loc = MARKET_GOSSIP_LOC[state.location] || MARKET_GOSSIP_LOC.unavailable;
+  var locLabel = loc.label.replace(/^Na /, '').replace(/^No /, '');  // "taverna", "templo", "praça"
+
+  // Mix narrativo: 4 estilos baseados em hash do dia + merchant id
+  var seed = (new Date().getDate() + merchant.name.length) % 100;
+  var style = seed < 30 ? 'witness' : (seed < 55 ? 'note' : (seed < 80 ? 'empty' : 'unknown'));
+  // Hora aproximada: 15min ou 30min ou 1h
+  var minutesAway = (seed % 3 === 0) ? 15 : ((seed % 3 === 1) ? 30 : 60);
+  // Confidence: 60% pista vaga, 40% certeza
+  var confident = seed % 5 < 2;
+
+  var npcCard = '';
+  var titleText = '';
+  if (style === 'witness') {
+    // Outro mercador/transeunte dá pista
+    var witnesses = [
+      'Um carregador empilhando caixas',
+      'Uma criança brincando perto da banca',
+      'Uma mulher tecendo num banquinho',
+      'Um padre passando com pergaminhos',
+      'Um guarda da ronda do mercado'
+    ];
+    var witness = witnesses[seed % witnesses.length];
+    titleText = 'Banca Vazia';
+    if (confident) {
+      npcCard = '<div style="margin:10px 0;padding:10px 12px;background:rgba(196,149,58,0.06);border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);border-radius:6px;">'
+        + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">' + witness + '</div>'
+        + '<div style="font-size:12px;color:var(--v-text,#d4c8b0);line-height:1.55;font-style:italic;">"' + firstName + '? Vi indo pra ' + locLabel + '. Não disse quanto demora — geralmente uma hora, mas a senhoria sabe como é..."</div>'
+        + '</div>';
+    } else {
+      npcCard = '<div style="margin:10px 0;padding:10px 12px;background:rgba(196,149,58,0.06);border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);border-radius:6px;">'
+        + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:11px;color:var(--v-gold,#c4953a);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">' + witness + '</div>'
+        + '<div style="font-size:12px;color:var(--v-text,#d4c8b0);line-height:1.55;font-style:italic;">"' + firstName + '? Ouvi dizer que tava indo pra ' + locLabel + '... ou era pra outro lugar, não sei. Pergunta lá."</div>'
+        + '</div>';
+    }
+  } else if (style === 'note') {
+    // Bilhete deixado pelo NPC
+    titleText = 'Bilhete na Banca';
+    npcCard = '<div style="margin:10px 0;padding:14px 16px;background:linear-gradient(180deg,rgba(180,150,100,0.10) 0%,rgba(120,90,50,0.18) 100%);border:1px solid #b8945a;border-left:3px solid #b8945a;border-radius:4px;transform:rotate(-0.8deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);">'
+      + '<div style="font-family:var(--v-font,MedievalSharp,serif);font-size:13px;color:#d4b884;line-height:1.6;font-style:italic;">"Saí por um momento.<br>Volto em <b>~' + minutesAway + ' minutos</b>.<br>— ' + firstName + '"</div>'
+      + '</div>';
+  } else if (style === 'empty') {
+    // Banca vazia sem pistas claras
+    titleText = 'Banca em Silêncio';
+    npcCard = '<div style="margin:10px 0;padding:10px 12px;background:rgba(60,50,40,0.4);border:1px solid var(--v-border,#4a3828);border-radius:6px;text-align:center;">'
+      + '<div style="font-size:12px;color:var(--v-text-dim,#a09484);line-height:1.55;font-style:italic;">A banca está fechada com um pano por cima dos produtos. Algumas xícaras vazias, ainda mornas, e um banco arrastado pro lado — sinais de pressa.</div>'
+      + '</div>';
+  } else {
+    // Ninguém sabe
+    titleText = 'Pista Perdida';
+    npcCard = '<div style="margin:10px 0;padding:10px 12px;background:rgba(60,50,40,0.4);border:1px solid var(--v-border,#4a3828);border-radius:6px;text-align:center;">'
+      + '<div style="font-size:12px;color:var(--v-text-dim,#a09484);line-height:1.55;font-style:italic;">Ninguém ao redor sabe dizer onde ' + firstName + ' foi. Os vizinhos de banca dão de ombros.</div>'
+      + '</div>';
+  }
+
   _showInfoPopup({
     icon: loc.icon,
-    npc: merchant.name,
-    title: loc.label,
-    desc: '<i>"' + state.reason + '"</i><br><br>'
-        + '<span style="opacity:.7">— ' + merchant.name.split(' ')[0] + ' não está atendendo no balcão hoje. Volte amanhã ou siga o rastro.</span>',
+    npc: merchant.name + ' — Ausente',
+    title: titleText,
+    desc: '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:12px;margin:6px 0 10px;line-height:1.55;">"' + (state.reason || 'Saiu por um motivo desconhecido.') + '"</div>'
+        + npcCard
+        + '<div style="margin-top:12px;font-size:11px;color:var(--v-text-dim,#a09484);text-align:center;line-height:1.5;">'
+        + (style === 'note' || (style === 'witness' && confident)
+            ? '<span style="color:#9fda7d;">✓</span> Você sabe por onde procurar. Talvez valha tentar.'
+            : '<span style="opacity:0.7;">Talvez seja melhor voltar mais tarde — ou perguntar a outros pelo caminho.</span>')
+        + '</div>',
     onConfirm: function(){}
   });
 }
@@ -52778,6 +52845,15 @@ function _showDialogHistoryPopup(){
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = '📜 Diálogos Recentes';
+  // Sessão #23 v8 (2026-05-22): user reportou Voltar -> tela branca.
+  // Fix: push 'dialog_history' no stack + restoreFn que reabre Settings.
+  if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'dialog_history') {
+    _popupStack.push('dialog_history');
+  }
+  if (!window._popupRestoreFns) window._popupRestoreFns = {};
+  window._popupRestoreFns['dialog_history'] = function(){
+    if (typeof _showSettingsPopup === 'function') _showSettingsPopup();
+  };
 
   // Filter state (persisted across re-render via window scope; reset on close)
   if (!window._dlgFilters) window._dlgFilters = { period: 'all', limit: 5 };

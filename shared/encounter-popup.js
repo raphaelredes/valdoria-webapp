@@ -473,6 +473,11 @@
       body.classList.remove('revealed');
       body.style.minHeight = '';
       var page = pages[idx];
+      // Sessão #23 v8 (2026-05-22): user reportou cabeçalho com nome NPC
+      // aparece durante narração (deveria só aparecer quando NPC fala).
+      // Fix: oculta header se página atual NÃO tem speech (só narration).
+      var hasSpeech = page.some(function(line){ return line.type === 'speech'; });
+      header.style.display = hasSpeech ? '' : 'none';
 
       var strophes = page.map(function(line) {
         var div = document.createElement('div');

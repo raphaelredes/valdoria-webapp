@@ -2189,22 +2189,49 @@ body.perf-lite html.app-frame::before {
 }
 
 /* ── Font-size scoped scaling (data-font-size on <body>) ───────────────────
-   2026-05-21: scale apenas em narrative text, sem afetar layout fixo.
-   Targets: descriptions, narrations, dialogue body, popup body texto,
-   tooltip text. NÃO afeta: buttons, badges, headers, status bars, icons. */
-body[data-font-size="small"]  { --v-font-scale: 0.9; }
-body[data-font-size="normal"] { --v-font-scale: 1.0; }
-body[data-font-size="large"]  { --v-font-scale: 1.1; }
+   2026-05-21: scale para todo texto narrativo, body, e UI principal.
+   Sessao #23 (2026-05-22): user reportou que tamanho de fonte nao mudava
+   nada — expandido scope pra cobrir cidade/exploracao/combate.
+   AFETA: body text, paragrafos, dialogos, descriptions, NPC dialogues,
+   service labels, ally rows, mission text, narrative.
+   NAO afeta: buttons, badges fixos, headers display (font-display),
+   icons SVG (em). */
+body[data-font-size="small"]  { --v-font-scale: 0.9; --v-font-body-scaled: 12.6px; }
+body[data-font-size="normal"] { --v-font-scale: 1.0; --v-font-body-scaled: 14px; }
+body[data-font-size="large"]  { --v-font-scale: 1.15; --v-font-body-scaled: 16.1px; }
+body[data-font-size="xlarge"] { --v-font-scale: 1.3;  --v-font-body-scaled: 18.2px; }
 
-/* Apply scale only to safe text containers (paragraph-like content) */
+/* Apply scale globalmente ao body (afeta todo texto que herda) */
+body[data-font-size] {
+  font-size: var(--v-font-body-scaled, 14px);
+}
+
+/* Apply scale em containers principais e narrativos */
+body[data-font-size] .v-popup-body,
 body[data-font-size] .v-popup-body p,
 body[data-font-size] .v-popup-body .v-narration,
 body[data-font-size] .v-popup-body .v-dialogue-text,
 body[data-font-size] .v-encounter-body,
 body[data-font-size] .v-encounter-text,
 body[data-font-size] .v-flavor,
+body[data-font-size] .screen-content,
 body[data-font-size] .screen-content > p,
-body[data-font-size] .description {
+body[data-font-size] .description,
+body[data-font-size] .desc,
+body[data-font-size] .narrative,
+body[data-font-size] .dialogue-text,
+body[data-font-size] .npc-greeting,
+body[data-font-size] .cenario,
+body[data-font-size] .cenario p,
+body[data-font-size] .row-npc-greeting,
+body[data-font-size] .services .svc-name,
+body[data-font-size] .ally-text,
+body[data-font-size] .quest-text,
+body[data-font-size] .mission-desc,
+body[data-font-size] #cpp-desc,
+body[data-font-size] #ndo-body,
+body[data-font-size] #csp-body p,
+body[data-font-size] #csp-body .desc {
   font-size: calc(var(--v-font-body, 14px) * var(--v-font-scale, 1));
   line-height: 1.6;
 }
