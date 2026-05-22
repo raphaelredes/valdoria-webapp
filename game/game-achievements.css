@@ -1,0 +1,317 @@
+/* ═══════════════════════════════════════════════════════════════
+   Conquistas — Hall of Fame Épico CSS
+   Companion de game-achievements.js (sessão #22)
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-ach-screen {
+  padding: 8px 0;
+  color: var(--v-text, #d4c8b0);
+}
+
+/* ── BANNER GERAL (main view) ──────────────────────────────────── */
+.v-ach-banner {
+  text-align: center;
+  padding: 16px 12px;
+  margin: 0 0 12px 0;
+  background: linear-gradient(180deg,
+    rgba(196,149,58,0.18) 0%,
+    rgba(196,149,58,0.06) 100%);
+  border: 1px solid rgba(196,149,58,0.4);
+  border-radius: var(--v-radius, 10px);
+  position: relative;
+}
+
+.v-ach-banner-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: clamp(20px, 5vw, 26px);
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 2px;
+  text-shadow: 0 0 14px rgba(196,149,58,0.4);
+}
+
+.v-ach-banner-sub {
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-text-dim, #a09484);
+  margin-top: 6px;
+}
+
+.v-ach-banner-sub b { color: var(--v-gold, #c4953a); font-weight: 700; }
+
+.v-ach-progress {
+  height: 8px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(196,149,58,0.25);
+}
+
+.v-ach-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--v-gold, #c4953a) 0%,
+    #ffd95b 50%,
+    var(--v-gold, #c4953a) 100%);
+  transition: width 0.4s ease-out;
+  box-shadow: 0 0 8px rgba(196,149,58,0.6);
+}
+
+/* ── GRID DE CATEGORIAS ────────────────────────────────────────── */
+.v-ach-cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.v-ach-cat-card {
+  background: rgba(58,40,30,0.4);
+  border: 1.5px solid var(--cat-accent, rgba(196,149,58,0.4));
+  border-radius: var(--v-radius, 10px);
+  padding: 12px 8px;
+  text-align: center;
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp', serif);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.v-ach-cat-card:active {
+  transform: scale(0.97);
+}
+
+.v-ach-cat-card:hover {
+  background: rgba(58,40,30,0.6);
+  border-color: var(--cat-accent, var(--v-gold, #c4953a));
+  box-shadow: 0 0 12px var(--cat-accent, rgba(196,149,58,0.3));
+}
+
+.v-ach-cat-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.v-ach-cat-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-gold, #c4953a);
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+
+.v-ach-cat-count {
+  font-size: var(--v-font-label, 12px);
+  color: var(--v-text-dim, #a09484);
+  margin-top: 4px;
+}
+
+.v-ach-cat-count b {
+  color: var(--cat-accent, var(--v-gold, #c4953a));
+  font-weight: 700;
+}
+
+.v-ach-cat-bar {
+  height: 4px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.v-ach-cat-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease-out;
+}
+
+.v-ach-cat-crown {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 18px;
+  text-shadow: 0 0 6px rgba(255,215,0,0.8);
+  filter: drop-shadow(0 0 4px rgba(255,215,0,0.6));
+}
+
+.v-ach-hint {
+  text-align: center;
+  font-size: var(--v-font-label, 12px);
+  color: var(--v-text-dim, #a09484);
+  padding: 4px 0;
+}
+
+/* ── CATEGORY VIEW: BANNER ─────────────────────────────────────── */
+.v-ach-cat-banner {
+  text-align: center;
+  padding: 12px;
+  margin: 0 0 12px 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--cat-accent) 25%, transparent) 0%,
+    rgba(0,0,0,0.2) 100%);
+  border: 1px solid var(--cat-accent, rgba(196,149,58,0.4));
+  border-radius: var(--v-radius, 10px);
+}
+
+.v-ach-cat-banner-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: clamp(18px, 5vw, 22px);
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1px;
+}
+
+.v-ach-cat-banner-sub {
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-text-dim, #a09484);
+  margin-top: 4px;
+}
+
+.v-ach-cat-banner-sub b {
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+}
+
+/* ── LISTA DE CONQUISTAS ──────────────────────────────────────── */
+.v-ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.v-ach-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(58,40,30,0.35);
+  border: 1.5px solid rgba(74,56,40,0.5);
+  border-radius: var(--v-radius, 10px);
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.v-ach-item.v-ach-unlocked {
+  border-color: var(--tier-color, var(--v-gold, #c4953a));
+  background: linear-gradient(135deg,
+    rgba(58,40,30,0.4) 0%,
+    color-mix(in srgb, var(--tier-color) 15%, transparent) 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tier-color) 30%, transparent);
+}
+
+.v-ach-item.v-ach-locked {
+  opacity: 0.55;
+}
+
+/* ── ART BOX (PNG ou emoji) ───────────────────────────────────── */
+.v-ach-art {
+  width: 72px;
+  height: 72px;
+  position: relative;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.3);
+  border: 1.5px solid var(--tier-color, rgba(196,149,58,0.4));
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.v-ach-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.v-ach-locked .v-ach-art img {
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.v-ach-emoji-fallback {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.v-ach-locked .v-ach-emoji-fallback {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.v-ach-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: rgba(0,0,0,0.55);
+  pointer-events: none;
+}
+
+.v-ach-tier-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 14px;
+  background: rgba(0,0,0,0.7);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tier-color, rgba(196,149,58,0.6));
+}
+
+/* ── BODY (text content) ──────────────────────────────────────── */
+.v-ach-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.v-ach-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: var(--v-font-body, 14px);
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 0.5px;
+}
+
+.v-ach-locked .v-ach-name {
+  color: var(--v-text-dim, #a09484);
+}
+
+.v-ach-desc {
+  font-size: var(--v-font-secondary, 13px);
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.4;
+}
+
+.v-ach-locked .v-ach-desc {
+  color: var(--v-text-dim, #a09484);
+}
+
+.v-ach-date {
+  font-size: var(--v-font-label, 12px);
+  color: #7dba5b;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.v-ach-locked-txt {
+  font-size: var(--v-font-label, 12px);
+  color: var(--v-text-dim, #a09484);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ── Mobile responsive (smartphone-only por regra) ────────────── */
+@media (max-width: 380px) {
+  .v-ach-art { width: 64px; height: 64px; }
+  .v-ach-cat-emoji { font-size: 24px; }
+  .v-ach-banner-title { font-size: 18px; }
+}
