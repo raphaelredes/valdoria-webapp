@@ -219,15 +219,53 @@ html{max-width:none!important;height:auto!important;overflow:auto!important;scro
 @keyframes apAuthFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes apAuthSlideIn{from{opacity:0;transform:translateY(20px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 
-/* === Telegram auth waiting panel (token+polling) === */
-.ap-auth-waiting{margin-top:12px;padding:14px 16px;background:linear-gradient(180deg,rgba(90,181,232,0.10),rgba(90,181,232,0.04));border:1px solid rgba(90,181,232,0.4);border-radius:var(--v-radius,10px);animation:apAuthFadeIn 200ms ease-out}
-.ap-auth-waiting-header{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--v-text,#d4c8b0);margin-bottom:8px}
-.ap-auth-waiting-info{font-size:12px;color:var(--v-text-dim,#a09484);line-height:1.5;margin-bottom:12px}
-.ap-auth-waiting-info b{color:#5ab5e8}
-.ap-auth-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(90,181,232,0.25);border-top-color:#5ab5e8;border-radius:50%;animation:apAuthSpin 0.9s linear infinite}
-.ap-auth-waiting-actions{display:flex;justify-content:flex-end}
-.ap-auth-cancel-btn{padding:6px 14px;background:transparent;border:1px solid var(--v-border,rgba(196,149,58,0.2));border-radius:var(--v-radius-pill,20px);color:var(--v-text-dim,#a09484);font-family:var(--v-font,'Marcellus',serif);font-size:12px;cursor:pointer;transition:all var(--v-transition-base,0.2s)}
-.ap-auth-cancel-btn:hover{border-color:#e05555;color:#e05555}
-.ap-auth-waiting-timeout{margin-top:10px;padding:10px;background:rgba(224,85,85,0.10);border:1px solid rgba(224,85,85,0.3);border-radius:8px;font-size:12px;color:var(--v-text,#d4c8b0)}
-.ap-auth-waiting-timeout b{color:#e05555}
+/* === Telegram auth waiting panel — v12 polish (token+polling) === */
+.ap-auth-waiting{position:relative;margin-top:14px;padding:24px 18px 18px;background:linear-gradient(180deg,rgba(90,181,232,0.12) 0%,rgba(90,181,232,0.06) 50%,rgba(36,30,24,0.4) 100%);border:1px solid rgba(90,181,232,0.4);border-radius:14px;box-shadow:0 4px 20px rgba(90,181,232,0.15),inset 0 1px 0 rgba(255,255,255,0.05);animation:apAuthSlideIn 280ms cubic-bezier(0.16,1,0.3,1);overflow:hidden}
+.ap-auth-waiting::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(90,181,232,0.15) 0%,transparent 50%);animation:apAuthGlow 4s ease-in-out infinite alternate;pointer-events:none}
+
+/* Animated paper plane icon with pulse rings */
+.ap-auth-waiting-icon-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:64px;height:64px;margin:0 auto 14px}
+.ap-auth-paper-plane{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;width:48px;height:48px;background:linear-gradient(180deg,#5ab5e8,#3a8bbe);border-radius:50%;color:#fff;box-shadow:0 4px 16px rgba(90,181,232,0.6),inset 0 2px 0 rgba(255,255,255,0.25);animation:apAuthPlaneFloat 2.4s ease-in-out infinite}
+.ap-auth-paper-plane svg{width:24px;height:24px;transform:translateX(-2px)}
+.ap-auth-pulse-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border:2px solid rgba(90,181,232,0.6);border-radius:50%;animation:apAuthPulseRing 1.8s ease-out infinite;pointer-events:none;z-index:1}
+.ap-auth-pulse-ring-2{animation-delay:0.6s}
+
+/* Title with animated dots */
+.ap-auth-waiting-title{position:relative;z-index:2;text-align:center;font-family:var(--v-font-display,'Cinzel',serif);font-size:16px;color:#7dc5f8;letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:18px;text-shadow:0 1px 8px rgba(90,181,232,0.4)}
+.ap-auth-dots{display:inline-block;width:18px;text-align:left}
+.ap-auth-dots span{display:inline-block;opacity:0.3;animation:apAuthDot 1.4s ease-in-out infinite}
+.ap-auth-dots span:nth-child(1){animation-delay:0s}
+.ap-auth-dots span:nth-child(2){animation-delay:0.2s}
+.ap-auth-dots span:nth-child(3){animation-delay:0.4s}
+
+/* Steps list with numbered badges */
+.ap-auth-waiting-steps{position:relative;z-index:2;list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:8px}
+.ap-auth-waiting-steps li{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:rgba(0,0,0,0.2);border:1px solid rgba(90,181,232,0.15);border-radius:8px;font-size:13px;color:var(--v-text,#d4c8b0);line-height:1.5}
+.ap-auth-step-num{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:linear-gradient(180deg,#5ab5e8,#3a8bbe);color:#fff;border-radius:50%;font-size:11px;font-weight:700;font-family:var(--v-font-display,'Cinzel',serif);box-shadow:0 2px 6px rgba(90,181,232,0.4);margin-top:1px}
+.ap-auth-waiting-steps b{color:#7dc5f8}
+.ap-auth-waiting-steps code{background:rgba(90,181,232,0.2);color:#7dc5f8;padding:1px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:11px;font-weight:600}
+.ap-auth-reopen{color:#5ab5e8;text-decoration:none;font-size:11px;font-style:italic;padding:0 4px;border-bottom:1px dashed rgba(90,181,232,0.4);transition:all var(--v-transition-base,0.2s)}
+.ap-auth-reopen:hover{color:#7dc5f8;border-color:#7dc5f8}
+.ap-auth-detect{color:#7dba5b;font-style:italic}
+
+/* Indeterminate progress bar */
+.ap-auth-waiting-progress{position:relative;height:3px;background:rgba(90,181,232,0.15);border-radius:2px;overflow:hidden;margin-bottom:14px}
+.ap-auth-waiting-progress-bar{position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,#5ab5e8 50%,transparent);animation:apAuthProgress 2.2s ease-in-out infinite}
+
+/* Cancel button */
+.ap-auth-waiting-actions{position:relative;z-index:2;display:flex;justify-content:center}
+.ap-auth-cancel-btn{padding:8px 22px;background:transparent;border:1px solid var(--v-border,rgba(196,149,58,0.25));border-radius:var(--v-radius-pill,20px);color:var(--v-text-dim,#a09484);font-family:var(--v-font,'Marcellus',serif);font-size:12px;letter-spacing:0.5px;cursor:pointer;transition:all var(--v-transition-base,0.2s)}
+.ap-auth-cancel-btn:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,0.08)}
+.ap-auth-cancel-btn:active{transform:translateY(1px)}
+
+/* Timeout warning */
+.ap-auth-waiting-timeout{position:relative;z-index:2;margin-top:12px;padding:12px;background:linear-gradient(180deg,rgba(224,85,85,0.12),rgba(224,85,85,0.05));border:1px solid rgba(224,85,85,0.35);border-radius:8px;font-size:12px;color:var(--v-text,#d4c8b0);text-align:center;animation:apAuthSlideIn 280ms cubic-bezier(0.16,1,0.3,1)}
+.ap-auth-waiting-timeout b{color:#e05555;display:block;margin-bottom:4px;font-family:var(--v-font-display,'Cinzel',serif);letter-spacing:0.5px;font-size:13px}
+
+/* Animations */
 @keyframes apAuthSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes apAuthGlow{from{opacity:0.5;transform:scale(0.8)}to{opacity:1;transform:scale(1.1)}}
+@keyframes apAuthPlaneFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-3px) rotate(-3deg)}50%{transform:translateY(0) rotate(0deg)}75%{transform:translateY(-2px) rotate(3deg)}}
+@keyframes apAuthPulseRing{0%{transform:translate(-50%,-50%) scale(1);opacity:0.8}100%{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
+@keyframes apAuthDot{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes apAuthProgress{0%{left:-40%}100%{left:100%}}

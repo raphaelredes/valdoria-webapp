@@ -59,6 +59,26 @@
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(identity)); } catch (_) {}
     }
 
+    // Telemetry beacon — apenas google/email (telegram conta server-side)
+    function _trackEvent(provider, event) {
+        if (provider === 'telegram' && event === 'linked') return;  // ja server-side
+        try {
+            var data = JSON.stringify({ provider: provider, event: event });
+            // Prefer sendBeacon (sobrevive a navegacao); fallback fetch
+            if (navigator.sendBeacon) {
+                var blob = new Blob([data], { type: 'application/json' });
+                navigator.sendBeacon('/api/auth/track', blob);
+            } else {
+                fetch('/api/auth/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: data,
+                    keepalive: true,
+                }).catch(function() {});
+            }
+        } catch (_) { /* fire-and-forget */ }
+    }
+
     function _load() {
         try {
             var s = localStorage.getItem(STORAGE_KEY);
@@ -190,19 +210,25 @@
         if (ui.waitingPanel) {
             try { ui.waitingPanel.remove(); } catch (_) {}
         }
+        var botLink = 'https://t.me/' + state.botUsername + '?start=auth_' + token;
         var wrap = document.createElement('div');
         wrap.className = 'ap-auth-waiting';
         wrap.innerHTML =
-            '<div class="ap-auth-waiting-header">' +
-            '<span class="ap-auth-spinner"></span>' +
-            '<b>Aguardando confirmacao no Telegram...</b>' +
+            '<div class="ap-auth-waiting-icon-wrap">' +
+            '<div class="ap-auth-paper-plane">' + ICON_TELEGRAM + '</div>' +
+            '<div class="ap-auth-pulse-ring"></div>' +
+            '<div class="ap-auth-pulse-ring ap-auth-pulse-ring-2"></div>' +
             '</div>' +
-            '<div class="ap-auth-waiting-info">' +
-            'Abrimos o bot numa nova aba. Toque em <b>Iniciar</b> ou <b>Start</b> ' +
-            'no bot e volte aqui &mdash; vamos detectar automaticamente.' +
-            '</div>' +
+            '<div class="ap-auth-waiting-title">Aguardando voce no Telegram<span class="ap-auth-dots"><span>.</span><span>.</span><span>.</span></span></div>' +
+            '<ol class="ap-auth-waiting-steps">' +
+            '<li><span class="ap-auth-step-num">1</span>O bot abriu numa nova aba ' +
+            '<a href="' + botLink + '" target="_blank" rel="noopener" class="ap-auth-reopen">(reabrir)</a></li>' +
+            '<li><span class="ap-auth-step-num">2</span>Toque em <b>Iniciar</b> ou envie <code>/start</code></li>' +
+            '<li><span class="ap-auth-step-num">3</span>Volte aqui &mdash; <span class="ap-auth-detect">vamos detectar automaticamente</span></li>' +
+            '</ol>' +
+            '<div class="ap-auth-waiting-progress"><div class="ap-auth-waiting-progress-bar"></div></div>' +
             '<div class="ap-auth-waiting-actions">' +
-            '<button type="button" class="ap-auth-cancel-btn">Cancelar</button>' +
+            '<button type="button" class="ap-auth-cancel-btn" title="Cancelar e voltar">Cancelar</button>' +
             '</div>';
         // Hide buttons, show waiting panel
         if (ui.btnsWrap) ui.btnsWrap.style.display = 'none';
@@ -217,6 +243,10 @@
         if (state.tgPollTimer) {
             clearInterval(state.tgPollTimer);
             state.tgPollTimer = null;
+        }
+        // Telemetry: track cancel if not already linked
+        if (state.tgAuthToken && !state.user) {
+            _trackEvent('telegram', 'cancelled');
         }
         state.tgAuthToken = null;
         if (ui.waitingPanel) {
@@ -234,6 +264,7 @@
             if (attempts > TG_POLL_MAX_ATTEMPTS) {
                 clearInterval(state.tgPollTimer);
                 state.tgPollTimer = null;
+                _trackEvent('telegram', 'timeout');
                 if (ui.waitingPanel) {
                     var hint = document.createElement('div');
                     hint.className = 'ap-auth-waiting-timeout';
@@ -309,6 +340,7 @@
                 '&prompt=select_account';
 
             console.info('[AUTH] Redirecting to Google OAuth (implicit flow)');
+            _trackEvent('google', 'started');
             // Flag para suprimir close beacon durante a transicao
             window.__valdoria_transitioning = true;
             window.location.href = url;
@@ -392,6 +424,7 @@
             };
             _save(identity);
             state.user = identity;
+            _trackEvent('google', 'linked');
             return true;
         } catch (e) {
             console.error('[AUTH] Google callback parse error:', e);
@@ -425,6 +458,9 @@
         btnCancel.addEventListener('click', close);
         bd.addEventListener('click', close);
 
+        // Track email modal opened
+        _trackEvent('email', 'started');
+
         btnOk.addEventListener('click', function() {
             var name = (modal.querySelector('#ap-em-name').value || '').trim();
             var email = (modal.querySelector('#ap-em-email').value || '').trim().toLowerCase();
@@ -439,6 +475,7 @@
             _save(identity);
             state.user = identity;
             _renderConnected(identity);
+            _trackEvent('email', 'linked');
             if (typeof state.onAuth === 'function') {
                 try { state.onAuth(_toLegacyUser(identity)); } catch (e) { console.warn('[AUTH] onAuth error:', e); }
             }
