@@ -9661,33 +9661,6 @@ function _discoverySpeakerIcon(speaker) {
   return 'ic-praca';  // default
 }
 
-// task #70 (2026-05-22): mapeia NPC recorrente -> PNG path quando existe.
-// Permite mostrar foto do Grom/Aldric/Tavira/etc nos dialogos de descoberta
-// da cidade, igual a taverna ja faz. Lightbox auto-wired via _wireEncPortraitLightbox.
-function _discoverySpeakerImg(speaker) {
-  var s = String(speaker || '').toLowerCase();
-  // NPCs com PNG dedicado em /shared/img/npcs/
-  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) {
-    return '/shared/img/npcs/taverneiro.png';
-  }
-  if (s.indexOf('padre aldric') >= 0) {
-    return '/shared/img/npcs/padre-aldric.png';
-  }
-  if (s.indexOf('sumo sacerdot') >= 0 || s.indexOf('sacerdotisa') >= 0) {
-    return '/shared/img/npcs/sacerdotisa-miriel.png';
-  }
-  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) {
-    return '/shared/img/npcs/estalajadeira.png';
-  }
-  if (s.indexOf('tavira') >= 0) {
-    return '/shared/img/npcs/mestra-tavira.png';
-  }
-  if (s.indexOf('lyana') >= 0 || s.indexOf('herbalista') >= 0) {
-    return '/shared/img/npcs/lyana-herbalista.png';
-  }
-  return null;  // sem PNG dedicado — fall-back pra heraldic SVG
-}
-
 // Sanitiza HTML mantendo apenas <i>/<em>/<b>/<strong> (mesma whitelist do
 // PADRAO_ALDRIC pra inline aside cinza italic)
 function _discoverySanitize(s) {
@@ -9756,17 +9729,13 @@ function _renderDiscoveryStage(){
   var stages = quest.stages;
 
   // NPC primário = speaker da primeira stage (registro inline)
-  // task #70 (2026-05-22): adiciona portraitImg PNG quando o speaker e NPC
-  // canonical (Grom, Aldric, etc.) — renderer ja prefere PNG sobre SVG.
   var primarySpeaker = stages[0].speaker || 'Eldoria';
   var primaryNpcKey = 'discovery_' + quest.id + '_' + primarySpeaker.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   if (!RECURRING_NPCS[primaryNpcKey]) {
-    var _primaryImg = _discoverySpeakerImg(primarySpeaker);
     RECURRING_NPCS[primaryNpcKey] = {
       name: primarySpeaker,
       desc: quest.name,
-      portrait: _discoverySpeakerIcon(primarySpeaker),
-      portraitImg: _primaryImg || null
+      portrait: _discoverySpeakerIcon(primarySpeaker)
     };
   }
 
@@ -9779,12 +9748,10 @@ function _renderDiscoveryStage(){
     if (spk !== primarySpeaker) {
       spkKey = 'discovery_' + quest.id + '_' + spk.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       if (!RECURRING_NPCS[spkKey]) {
-        var _stgImg = _discoverySpeakerImg(spk);
         RECURRING_NPCS[spkKey] = {
           name: spk,
           desc: quest.name,
-          portrait: _discoverySpeakerIcon(spk),
-          portraitImg: _stgImg || null
+          portrait: _discoverySpeakerIcon(spk)
         };
       }
     }
@@ -15392,22 +15359,36 @@ function _showTempleNpcDialogue(sid){
 //  - Services nv > player.level NÃO aparecem (já era pré-filtrado)
 function _buildTempleMockData(player){
   var debt = window.CITY_TEMPLE_DEBT || 0;
-  // services array (NPCs pelo level mínimo + cooldowns)
+  // Sessão #24 (2026-05-22): AAA revamp — mostra TODOS os 6 serviços (mesmo locked
+  // por level), envia título do serviço + nome do NPC + desc + tier separadamente
+  // pra renderer construir card rico ao estilo Liga/Conquistas.
+  function _templeTier(minLevel){
+    if (minLevel >= 10) return 'mithral';
+    if (minLevel >= 8)  return 'ouro';
+    if (minLevel >= 5)  return 'prata';
+    return 'bronze';
+  }
   var services = [];
   Object.keys(TEMPLE_NPCS_DB).forEach(function(sid){
     var s = TEMPLE_NPCS_DB[sid];
-    if (player.level < (s.min_level || 1)) return;  // skip se nv insuficiente
+    var minL = s.min_level || 1;
+    var locked = player.level < minL;
     var cooldownActive = false;
     if (sid === 'bless' && _isLongRestCooldownActive('CITY_TEMPLE_BLESS_AT_REST')) cooldownActive = true;
     services.push({
-      icon: s.icon,                       // já é SVG heráldico (serviceCard polymorphic)
-      label: s.npc,
-      desc: s.title,                      // título já limpo (sem emoji prefix)
+      icon: s.icon,                       // SVG heráldico inline (svc.icon innerHTML)
+      label: s.npc,                       // back-compat: NPC name (renderer agora usa .npc)
+      title: s.title,                     // título do serviço ("Curar Ferimentos")
+      npc: s.npc,                         // NPC executor ("Irmã Elara")
+      desc: s.desc,                       // efeito D&D ("Cura ferimentos via magia divina (1d8+3 HP).")
       cost: s.cost,
+      tier: _templeTier(minL),            // bronze/prata/ouro/mithral
+      min_level: minL,
+      locked: locked,
       cb: 'temple_dialogue_' + sid,
-      disabled: debt > 0 || cooldownActive,
+      disabled: debt > 0 || cooldownActive || locked,
       quest: false,
-      badge: cooldownActive ? '✓' : ''    // ✓ universal exception (status temporário)
+      badge: cooldownActive ? '✓' : ''
     });
   });
   // Downtime: cooldown 1x/long rest
@@ -15650,39 +15631,16 @@ function _buildInnMockData(player){
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
       cb: 'inn_npc_inn_martha'
     },
-    services: (function(){
+    services: [
       // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
       // X-6.5.51BN: badges PT-BR + coin icon canonical (não "V" texto cru, não "Quest" em inglês).
-      // Task #72 (2026-05-22): item da Adega muda label/cb conforme estado da quest:
-      //   - Não aceito  → 'Investigar adega' / cb='inn_cellar_quest' (abre diálogo)
-      //   - Em andamento → 'Adega · em andamento' / cb='quest_cellar_progress'
-      //   - Já completo → item removido
-      var arr = [
-        { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
-        { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
-        { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
-        { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
-        { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' }
-      ];
-      // Cellar quest state: check QUESTS_ACTIVE + completed list
-      var cellarActive = false, cellarDone = false;
-      try {
-        if (typeof QUESTS_ACTIVE !== 'undefined') {
-          cellarActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_cellar'; });
-        }
-        if (typeof _isQuestCompletedOrAbandoned === 'function') {
-          cellarDone = _isQuestCompletedOrAbandoned('cellar');
-        }
-      } catch(_e){}
-      if (cellarDone) {
-        // Quest concluída → não mostra mais (limpa o slot)
-      } else if (cellarActive) {
-        arr.push({ icon: _heralIco('ic-missões'), label: 'Adega · em andamento', badge: 'Concluir', cb: 'quest_cellar_progress' });
-      } else {
-        arr.push({ icon: _heralIco('ic-missões'), label: 'Investigar adega', badge: 'Missão', cb: 'inn_cellar_quest' });
-      }
-      return arr;
-    })()
+      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
+      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
+      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
+      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
+      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
+      { icon: _heralIco('ic-missões'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
+    ]
   };
 }
 
@@ -26551,11 +26509,10 @@ var CANON_MEALS_DB = {
   "pao_mel": {
     "name": "Pão com Mel",
     "emoji": "🍞",
-    "cost": 0,
+    "cost": 2,
     "hp": 1,
     "mp": 1,
-    "free_daily": true,
-    "desc": "Pão fresco da manhã com mel silvestre. Cortesia de Martha — 1× por descanso longo.",
+    "desc": "Pão fresco da manhã com mel silvestre. Simples e reconfortante.",
     "flavor_good": "O mel é doce e o pão é macio. Um pedaço de conforto na vida de aventureiro.",
     "flavor_great": "O mel tem notas florais incríveis. Você se sente mais confiante e cativante.",
     "flavor_bad": "O pão está levemente duro, mas o mel compensa. Quase.",
@@ -42856,11 +42813,7 @@ function _innShowDreamPopup(player, tier, allies){
     if (player.metadata.raise_dead_penalty <= 0) delete player.metadata.raise_dead_penalty;
   }
   // canonical: inn_execute.py L54 — reset meal cooldown
-  if (player.metadata) {
-    delete player.metadata.inn_meal_eaten;
-    // Task #73 (2026-05-22): reset cortesia refeição free_daily a cada descanso longo
-    delete player.metadata.inn_free_meal_used;
-  }
+  if (player.metadata) delete player.metadata.inn_meal_eaten;
 
   var className = (player.class || player.cls || 'Guerreiro');
   var classDreams = INN_CLASS_DREAMS[className];
@@ -42913,16 +42866,6 @@ function _innConsumeMeal(p, mealKey){
   }
   var meal = meals[mealKey];
   var cost = meal.cost || 0;
-  // Task #73 (2026-05-22): free_daily refeições limitadas a 1x por descanso longo.
-  // Flag em p.metadata.inn_free_meal_used resetada no _innRestLong via delete.
-  if (meal.free_daily) {
-    p.metadata = p.metadata || {};
-    if (p.metadata.inn_free_meal_used) {
-      if (typeof vToast === 'function') vToast('🍞 Você já comeu sua refeição cortesia. Outra opção apenas com descanso longo.', 'warn');
-      return;
-    }
-    p.metadata.inn_free_meal_used = true;
-  }
   if (cost > 0 && !_pay(p, cost)) return;
   var preGold = p.gold;
   var preHp = p.hp || 0;
@@ -45306,8 +45249,6 @@ var ACTION_HANDLERS = {
   'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Campos Verdes', '-5 afinidade com Capitã Helga'); },
   // X-6.5.51BP: CELLAR (Adega da Estalagem) — Martha
   'quest_open_cellar':          function(p){ navigateTo('quest_open_cellar'); },
-  // Task #72 (2026-05-22): atalho via menu da estalagem quando quest em andamento
-  'quest_cellar_progress':      function(p){ navigateTo('quest_open_cellar'); },
   'quest_cellar_locate':        function(p){ _questGotoMap('cellar', 'Investigar a Adega'); },
   'quest_cellar_details':       function(p){ vToast('📜 Investigar a Adega da Estalagem. Recompensa: 60 Valdoritas + 80 XP.'); },
   'quest_cellar_deliver':       function(p){ _deliverQuest('cellar', 60, 80, '🗝️ Martha aperta sua mão. +60 Valdoritas +80 XP. A adega está limpa — missão completa!'); },
@@ -49674,7 +49615,6 @@ var RECURRING_NPCS = {
   aldric: {
     name: 'Guarda Aldric',
     portrait: 'ic-paladino',
-    portraitImg: '/shared/img/npcs/padre-aldric.png',
     desc: 'Veterano dos portões. Olho atento, voz grave.'
   },
   silvana: {
@@ -49729,13 +49669,11 @@ var RECURRING_NPCS = {
   lyana: {
     name: 'Lyana, a Herbalista',
     portrait: 'ic-druida',
-    portraitImg: '/shared/img/npcs/lyana-herbalista.png',
     desc: 'Herbalista jovem, trança escura, cesto de raízes ao lado. Atende na praça pela manhã.'
   },
   tavira: {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
-    portraitImg: '/shared/img/npcs/mestra-tavira.png',
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
     legendary: true,
     title: 'Lança-Justa · Reformadora da Guilda',
@@ -49748,11 +49686,9 @@ var RECURRING_NPCS = {
     related_quests: ['quest_tavira_recruit', 'quest_tavira_traitor', 'quest_tavira_alliance']
   },
   // X-6.5.51BP (2026-05-15): Martha — Estalajadeira PADRAO_ALDRIC
-  // Task #70/#74 (2026-05-22): portraitImg para PNG + lightbox em todos os diálogos
   martha: {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
-    portraitImg: '/shared/img/npcs/estalajadeira.png',
     desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
@@ -52700,24 +52636,6 @@ function _renderEncounterPopup(enc, originalAction, player) {
     + '</div>';
   ov.innerHTML = html;
   document.body.appendChild(ov);
-
-  // task #70 (2026-05-22): wire lightbox no portrait quando ha PNG.
-  // PADRAO_TAVERNA: clicar no retrato abre lightbox em tela cheia (zoom).
-  // .enc-portrait e EXPLICITAMENTE skipped pelo delegation global em
-  // shared/lightbox.js (linha 260) — precisa handler aqui.
-  if (npc.portraitImg) {
-    var encPortraitEl = ov.querySelector('.enc-portrait');
-    if (encPortraitEl) {
-      encPortraitEl.style.cursor = 'zoom-in';
-      encPortraitEl.title = 'Toque para ampliar';
-      encPortraitEl.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (typeof window.showLightbox === 'function') {
-          window.showLightbox(npc.portraitImg, npc.name || '', npc.desc || '');
-        }
-      });
-    }
-  }
 
   var bodyEl = document.getElementById('enc-body');
   var actionsEl = document.getElementById('enc-actions');

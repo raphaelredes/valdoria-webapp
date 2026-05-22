@@ -373,48 +373,111 @@ function _tmpBuildRepBar(data) {
   return bar;
 }
 
-/* === Services canonical (.services + .svc PADRAO_TAVERNA) ================= */
+/* === Tier meta (AAA revamp sessão #24 — 2026-05-22) ===================== */
+var TEMPLE_TIER_META = {
+  'bronze':  { label: 'Comum',     emoji: '🥉', color: '#cd7f32' },
+  'prata':   { label: 'Veterano',  emoji: '🥈', color: '#c0c0c0' },
+  'ouro':    { label: 'Mestre',    emoji: '🥇', color: '#ffd700' },
+  'mithral': { label: 'Lendário',  emoji: '◈',  color: '#d4ecff' }
+};
+
+/* === Services canonical (.services + .svc PADRAO_TAVERNA) =================
+ * Sessão #24 (2026-05-22) AAA revamp: card rico com título do serviço +
+ * NPC + desc D&D + tier badge + locked state (pattern Liga/Conquistas).
+ * Back-compat: ainda usa .svc-name como fallback se svc.title ausente. */
 function _tmpBuildServices(services) {
   var grid = vCity.el('div', 'services');
   (services || []).forEach(function(svc) {
-    var card = vCity.el('div', 'svc');
+    var card = vCity.el('div', 'svc tmp-svc-rich');
     if (svc.disabled) card.classList.add('disabled');
+    if (svc.locked)   card.classList.add('tmp-svc-locked');
     card.setAttribute('data-svc', svc.cb || '');
 
-    var meta = TEMPLE_SVC_META[svc.cb] || {};
+    // Tier accent (CSS custom property)
+    var tier = svc.tier || 'bronze';
+    var tierMeta = TEMPLE_TIER_META[tier] || TEMPLE_TIER_META.bronze;
+    card.style.setProperty('--tier-color', tierMeta.color);
 
-    // Badge (top-right — quest indicator)
-    if (svc.badge) {
+    // Tier badge (top-right corner — sobrescreve svc-badge legacy se ambos)
+    if (!svc.badge) {
+      var tBadge = vCity.el('div', 'tmp-svc-tier');
+      tBadge.textContent = tierMeta.emoji;
+      tBadge.title = tierMeta.label;
+      card.appendChild(tBadge);
+    } else {
       var badge = vCity.el('div', 'svc-badge');
       badge.textContent = svc.badge;
       card.appendChild(badge);
     }
 
-    // Icon
+    var legacyMeta = TEMPLE_SVC_META[svc.cb] || {};
+
+    // Icon: prefere SVG inline do mock (svc.icon = innerHTML SVG markup do _heralIco)
     var ico = vCity.el('div', 'svc-ico');
-    if (meta.icon) {
+    if (svc.icon && typeof svc.icon === 'string' && svc.icon.indexOf('<svg') === 0) {
+      ico.innerHTML = svc.icon;
+    } else if (legacyMeta.icon) {
       var img = vCity.el('img');
-      img.src = meta.icon;
+      img.src = legacyMeta.icon;
       img.alt = '';
       img.loading = 'lazy';
       img.onerror = function(){ this.style.display = 'none'; };
       ico.appendChild(img);
     }
+    if (svc.locked) {
+      var lockOv = vCity.el('div', 'tmp-svc-lock');
+      lockOv.textContent = '🔒';
+      ico.appendChild(lockOv);
+    }
     card.appendChild(ico);
 
-    // Text block
+    // Text block — rich card AAA
     var txt = vCity.el('div', 'svc-text');
-    var name = vCity.el('div', 'svc-name');
-    name.textContent = svc.label || '';
-    txt.appendChild(name);
+
+    if (svc.title) {
+      // Título do serviço (primary, large)
+      var title = vCity.el('div', 'tmp-svc-title');
+      title.textContent = svc.title;
+      txt.appendChild(title);
+      // NPC executor (secondary, italic)
+      if (svc.npc) {
+        var npc = vCity.el('div', 'tmp-svc-npc');
+        npc.textContent = svc.npc;
+        txt.appendChild(npc);
+      }
+    } else {
+      // Back-compat: card simples (label = nome do NPC)
+      var name = vCity.el('div', 'svc-name');
+      name.textContent = svc.label || '';
+      txt.appendChild(name);
+    }
+
+    // Descrição D&D (efeito do serviço)
+    if (svc.desc && svc.title) {
+      var dEl = vCity.el('div', 'tmp-svc-desc');
+      dEl.textContent = svc.desc;
+      txt.appendChild(dEl);
+    }
+
+    // Cost / locked indicator
     var metaTxt = vCity.el('div', 'svc-meta');
-    var costText = svc.cost !== undefined ? (svc.cost === 0 ? 'Grátis' : String(svc.cost) + ' V') : '';
-    metaTxt.textContent = (meta.meta && costText) ? (costText + ' · ' + meta.meta) : (meta.meta || costText);
+    if (svc.locked) {
+      metaTxt.classList.add('tmp-svc-meta-locked');
+      metaTxt.textContent = '🔒 Requer Nv ' + (svc.min_level || 1);
+    } else {
+      var costText = svc.cost !== undefined
+        ? (svc.cost === 0 ? 'Grátis' : String(svc.cost) + ' V')
+        : '';
+      metaTxt.textContent = (legacyMeta.meta && costText)
+        ? (costText + ' · ' + legacyMeta.meta)
+        : (legacyMeta.meta || costText);
+    }
     txt.appendChild(metaTxt);
+
     card.appendChild(txt);
 
-    // Click → PADRAO_ALDRIC dialogue ou fallback vCity.act
-    if (svc.cb && !svc.disabled) {
+    // Click → PADRAO_ALDRIC dialogue (apenas se não-locked + não-disabled)
+    if (svc.cb && !svc.disabled && !svc.locked) {
       card.addEventListener('click', function(){
         var dialogueKey = TEMPLE_CB_TO_DIALOGUE[svc.cb] || svc.cb;
         var dialogue = SERVICE_DIALOGUES_TEMPLE[dialogueKey];

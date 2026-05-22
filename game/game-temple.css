@@ -14,3 +14,140 @@
   padding-left: var(--v-space-md, 8px);
   border-left: 2px solid var(--v-gold-dim, rgba(196, 149, 58, 0.2));
 }
+
+/* ============================================================================
+ * AAA Rich Service Cards — Sessão #24 (2026-05-22)
+ * ============================================================================
+ * Pattern Liga/Conquistas aplicado às .svc do Templo. Mostra:
+ *   título do serviço (primary) + NPC executor (secondary) + desc D&D (tertiary)
+ *   + tier badge (Comum/Veterano/Mestre/Lendário) + locked state.
+ * Aplica somente a .svc com .tmp-svc-rich pra não vazar pra outros estabelecimentos.
+ * ========================================================================== */
+
+.svc.tmp-svc-rich {
+  /* Card precisa de mais altura pra acomodar 3 linhas de texto + cost. */
+  align-items: flex-start;
+  padding: 10px 10px 9px 12px;
+  min-height: 80px;
+  /* Tier accent border subtle — usa --tier-color setado via JS */
+  border-color: color-mix(in srgb, var(--tier-color, var(--v-gold-35)) 35%, var(--v-gold-35));
+}
+
+.svc.tmp-svc-rich:hover {
+  border-color: var(--tier-color, #c4953a);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55),
+              0 0 12px color-mix(in srgb, var(--tier-color, #c4953a) 40%, transparent);
+}
+
+.svc.tmp-svc-rich .svc-ico {
+  /* Ícone um pouco maior pra dar peso visual aos PNGs/SVGs */
+  width: 38px;
+  height: 38px;
+  border-color: color-mix(in srgb, var(--tier-color, var(--v-gold-30)) 50%, var(--v-gold-30));
+  box-shadow: 0 0 5px color-mix(in srgb, var(--tier-color, #c4953a) 30%, transparent);
+  position: relative;
+}
+
+.svc.tmp-svc-rich:hover .svc-ico {
+  border-color: var(--tier-color, #c4953a);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--tier-color, #c4953a) 60%, transparent);
+}
+
+/* Hard SVG sizing — _heralIco devolve SVG com width/height 1em (~14px),
+ * mas no card queremos preencher o círculo de 38px. */
+.svc.tmp-svc-rich .svc-ico svg {
+  width: 26px !important;
+  height: 26px !important;
+  color: var(--tier-color, #c4953a);
+}
+
+.tmp-svc-title {
+  font-size: var(--v-font-base, 13px);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #f4d896;
+  line-height: 1.15;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tmp-svc-npc {
+  font-size: 10.5px;
+  font-style: italic;
+  color: #a59078;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tmp-svc-desc {
+  font-size: 10px;
+  color: #8a7560;
+  letter-spacing: 0.2px;
+  line-height: 1.35;
+  margin-top: 3px;
+  /* Permite 2 linhas pra desc D&D antes de truncar — clamp universal */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.svc.tmp-svc-rich .svc-meta {
+  /* Cost reposicionado embaixo da desc, com cor dourada (destaque) */
+  margin-top: 4px;
+  color: #c4953a;
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+}
+
+.svc.tmp-svc-rich .svc-meta.tmp-svc-meta-locked {
+  color: #7a6850;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Tier badge — top-right corner do card */
+.tmp-svc-tier {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 11px;
+  line-height: 1;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--tier-color, #c4953a) 70%, transparent));
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Locked state — grayscale + reduced opacity */
+.svc.tmp-svc-locked {
+  filter: grayscale(0.75);
+  opacity: 0.62;
+  cursor: default;
+}
+
+.svc.tmp-svc-locked:hover {
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(0.65);
+  opacity: 0.7;
+}
+
+/* Lock overlay sobre o ícone */
+.tmp-svc-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 10, 6, 0.55);
+  font-size: 16px;
+  border-radius: 50%;
+  pointer-events: none;
+}
