@@ -12046,7 +12046,17 @@ function _showLeaguePopup(p){
     + 'clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%); box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>'
 
     // Medalha principal (100px)
-    + '<svg class="vLg-medal-anim" viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2;"><use href="#' + currentTier.icon + '"/></svg>'
+    // 2026-05-22: medalha PNG épica (gerada via OpenAI low) + click-to-zoom via PADRAO_LIGHTBOX.
+    // Fallback SVG sprite caso PNG falhe (compatibility).
+    + '<img class="vLg-medal-anim vLg-medal-img" '
+    +    'src="/shared/img/medals/' + currentTier.id + '.png" '
+    +    'alt="Medalha ' + currentTier.name + '" '
+    +    'data-medal-name="' + currentTier.name + '" '
+    +    'data-medal-desc="Tier ' + currentTier.name + ' — ' + currentXp.toLocaleString('pt-BR') + ' XP de Liga" '
+    +    'style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" '
+    +    'onerror="this.style.display=\'none\';if(this.nextSibling){this.nextSibling.style.display=\'\'}" '
+    +    'onclick="if(window.showLightbox)window.showLightbox(this.src,this.dataset.medalName,this.dataset.medalDesc);">'
+    + '<svg class="vLg-medal-anim" viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2; display:none;"><use href="#' + currentTier.icon + '"/></svg>'
 
     // 6 partículas flutuantes ao redor (gradient bg, tier color)
     + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:5px; height:5px; border-radius:50%; background:' + tColor + '; --lg-px:18px; animation-delay:0s; box-shadow:0 0 8px ' + tColor + ';"></div>'
@@ -12162,7 +12172,19 @@ function _showLeaguePopup(p){
       + 'background:' + (unlocked ? 'radial-gradient(circle,' + t.color + '22,transparent 70%)' : 'transparent') + ';'
       + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
       + 'opacity:' + opacity + ';">'
-      + '<svg viewBox="0 0 120 120" style="width:100%; height:100%; color:' + t.color + ';'
+      // 2026-05-22: PNG medal canonical com click-to-zoom (PADRAO_LIGHTBOX)
+      + '<img class="vLg-path-medal-img" '
+      +    'src="/shared/img/medals/' + t.id + '.png" '
+      +    'alt="' + t.name + '" '
+      +    'data-medal-name="' + t.name + '" '
+      +    'data-medal-desc="Tier ' + t.name + ' — ' + t.minXp.toLocaleString('pt-BR') + ' a ' + t.maxXp.toLocaleString('pt-BR') + ' XP" '
+      +    'style="width:100%; height:100%; object-fit:contain;'
+      + (unlocked ? '' : ' filter:grayscale(0.7) brightness(0.7);')
+      + (current ? ' filter:drop-shadow(0 0 6px ' + t.color + ');' : '')
+      +    ' cursor:zoom-in;" '
+      +    'onerror="this.style.display=\'none\';if(this.nextSibling){this.nextSibling.style.display=\'\'}" '
+      +    'onclick="event.stopPropagation();if(window.showLightbox)window.showLightbox(this.src,this.dataset.medalName,this.dataset.medalDesc);">'
+      + '<svg viewBox="0 0 120 120" style="width:100%; height:100%; color:' + t.color + '; display:none;'
       + (current ? 'filter:drop-shadow(0 0 6px ' + t.color + ');' : '') + '"><use href="#' + t.icon + '"/></svg>'
       + '</div>'
       // Label nome
