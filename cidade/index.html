@@ -18000,7 +18000,48 @@ window._questDiaryState = window._questDiaryState || {
 };
 
 // Normaliza quest pra estrutura uniforme (Active/Available/History têm shapes diferentes)
+// 2026-05-21: spoiler gating — quests só ficam "available" no Diary depois que
+// o player as VIU (NPC giver knock, mural da guilda, rumor de NPC, etc).
+// Persistência localStorage 'valdoria_seen_quests' (JSON array de IDs).
+function _getSeenQuests(){
+  try {
+    var raw = localStorage.getItem('valdoria_seen_quests');
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch(_){ return new Set(); }
+}
+function _addSeenQuests(ids){
+  try {
+    var seen = _getSeenQuests();
+    var changed = false;
+    (ids || []).forEach(function(qid){
+      if (!seen.has(qid)) { seen.add(qid); changed = true; }
+    });
+    if (changed) localStorage.setItem('valdoria_seen_quests', JSON.stringify(Array.from(seen)));
+  } catch(_){}
+}
+// Triggers (chamar em handlers de NPCs/locais que dão quests):
+// _markQuestsAsSeen('guild') quando player entra na Guilda
+// _markQuestsAsSeen('inn_martha') quando player conversa com Martha
+// IMPORTANTE: NPC giver de cada quest está em GUILD_QUEST_DETAILS[id].npc
+window._markQuestsAsSeen = function(npcOrLocation){
+  // Inferir IDs visíveis baseado no contexto
+  // npcOrLocation: 'guild' = todas guild quests; 'inn_martha' = cellar; etc.
+  var idsToAdd = [];
+  if (npcOrLocation === 'guild') {
+    // Player visitou a Guilda → todas missões cuja lvlReq <= player.level + 2
+    (GUILD_QUESTS_AVAILABLE || []).forEach(function(q){
+      var lvl = parseInt((q.diff || '').replace(/\D/g, ''), 10) || 0;
+      var plvl = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 1;
+      if (lvl <= plvl + 2) idsToAdd.push(q.id);
+    });
+  } else if (npcOrLocation === 'inn_martha') {
+    idsToAdd.push('gq_cellar');  // cellar quest desbloqueia ao conversar com Martha
+  }
+  if (idsToAdd.length) _addSeenQuests(idsToAdd);
+};
+
 function _normalizeQuests(){
+  var seen = _getSeenQuests();
   var out = [];
   (QUESTS_ACTIVE || []).forEach(function(q){
     var ready = (q.progress || '').indexOf('✓') >= 0;
@@ -18015,6 +18056,8 @@ function _normalizeQuests(){
     });
   });
   (GUILD_QUESTS_AVAILABLE || []).forEach(function(q){
+    // 2026-05-21: SPOILER GATING — só mostra quests JÁ VISTAS pelo player.
+    if (!seen.has(q.id)) return;
     var lvl = parseInt((q.diff || '').replace(/\D/g, ''), 10) || 0;
     out.push({
       id: q.id, icon: q.icon, title: q.title, desc: q.desc || '',
@@ -40046,7 +40089,11 @@ function _registerDynamicHandlers(){
   // legacy. Override DEPOIS do registro dinâmico (que setou _showSharedNpcDialogue).
   // inn_cellar_quest agora entra direto no encounter da cellar (com choices
   // accept/decline ativando _acceptQuest('cellar')).
-  ACTION_HANDLERS['inn_npc_inn_martha'] = function(p){ _openMarthaDialogue(p, 'greeting'); };
+  ACTION_HANDLERS['inn_npc_inn_martha'] = function(p){
+    _openMarthaDialogue(p, 'greeting');
+    // 2026-05-21: spoiler gating — converse com Martha desbloqueia cellar quest no Diary
+    if (typeof window._markQuestsAsSeen === 'function') window._markQuestsAsSeen('inn_martha');
+  };
   ACTION_HANDLERS['inn_cellar_quest']   = function(p){ _openMarthaDialogue(p, 'cellar'); };
   // 2026-05-18: Mercadores fixos do Mercado migrados pra PADRAO_ALDRIC.
   // Override DEPOIS do registro dinâmico (que setou _showSharedNpcDialogue
@@ -41430,6 +41477,9 @@ function _renderCityPopup(key){
   if (key === 'guild' && typeof renderGuildHub === 'function') {
     if (titleEl) titleEl.textContent = 'Guilda dos Aventureiros';
     renderGuildHub(bodyEl, _buildGuildMockData(window.CITY_MOCK_PLAYER));
+    // 2026-05-21: Spoiler gating — player visitou Guilda → desbloqueia missões do
+    // mural visíveis no Quest Diary. Antes, todas missões apareciam direto (spoiler).
+    if (typeof window._markQuestsAsSeen === 'function') window._markQuestsAsSeen('guild');
     return;
   }
   if (key === 'workshop' && typeof renderWorkshopHub === 'function') {
