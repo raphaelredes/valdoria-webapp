@@ -13140,8 +13140,30 @@ function _showStreakPopup(p){
       + '</div>';
   });
   html += '</div>';
+  // === Link pra Conquista Indomável (sessão #23 — connect Sequência ↔ Conquistas) ===
+  html += '<div style="margin-top:var(--v-space-md,10px);padding:10px 12px;'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,30,18,0.3) 100%);'
+    + 'border:1px solid var(--v-gold-30,rgba(196,149,58,0.3));border-radius:var(--v-radius-sm,6px);'
+    + 'display:flex;align-items:center;gap:10px;cursor:pointer;" '
+    + 'id="streak-link-indomavel">'
+    + '<svg viewBox="0 0 120 120" style="width:32px;height:32px;color:#ff8a4a;flex-shrink:0;"><use href="#ic-ach-indomavel"/></svg>'
+    + '<div style="flex:1;min-width:0;">'
+    +   '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:12px;color:var(--v-gold,#c4953a);font-weight:700;">Conquista Indomável</div>'
+    +   '<div style="font-size:10px;color:var(--v-text-dim,#a09484);margin-top:2px;">Vitórias consecutivas viram cadeia épica · 5 tiers de progressão</div>'
+    + '</div>'
+    + '<span style="font-size:18px;color:var(--v-gold,#c4953a);">›</span>'
+    + '</div>';
   html += '</div>';
   bodyEl.innerHTML = html;
+  // Wire link → abre detail Indomavel
+  var linkEl = document.getElementById('streak-link-indomavel');
+  if (linkEl) {
+    linkEl.addEventListener('click', function(){
+      if (typeof _showAchievementDetailPopup === 'function') {
+        _showAchievementDetailPopup('indomavel', p || {});
+      }
+    });
+  }
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'streak') _popupStack.push('streak');
 }
@@ -14721,11 +14743,14 @@ var TAVERN_NPCS = [
 ];
 
 // TAVERN_DRINKS — brasão ic-cerveja canonical (4 bebidas, 1 brasão dedicado)
+// Sessão #23 (2026-05-22): preços rebalanceados (eram barato demais — 1-6V vs 75V do
+// desafio diário). Adicionado conSaveDC: chance D&D de embriaguez (CON save DC reduz
+// buff e adiciona debuff "Tonto" — 1 turno -1 ATK/Iniciativa).
 var TAVERN_DRINKS = [
-  { id: 'ale',   icon: _heralIco('ic-cerveja'), name: 'Cerveja Comum',     cost: 1, effect: '+1 HP', heal: 1, mp: 0 },
-  { id: 'cider', icon: _heralIco('ic-cerveja'), name: 'Sidra de Maçã',     cost: 2, effect: '+2 HP', heal: 2, mp: 0 },
-  { id: 'mead',  icon: _heralIco('ic-poção'),   name: 'Hidromel do Vale',  cost: 4, effect: '+2 MP', heal: 0, mp: 2 },
-  { id: 'stout', icon: _heralIco('ic-cerveja'), name: 'Stout Anã',         cost: 6, effect: '+3 HP / +1 MP', heal: 3, mp: 1 }
+  { id: 'ale',   icon: _heralIco('ic-cerveja'), name: 'Cerveja Comum',     cost: 3,  effect: '+1 HP',            heal: 1, mp: 0, conSaveDC: 8  },
+  { id: 'cider', icon: _heralIco('ic-cerveja'), name: 'Sidra de Maçã',     cost: 5,  effect: '+2 HP',            heal: 2, mp: 0, conSaveDC: 10 },
+  { id: 'mead',  icon: _heralIco('ic-poção'),   name: 'Hidromel do Vale',  cost: 10, effect: '+2 MP',            heal: 0, mp: 2, conSaveDC: 12 },
+  { id: 'stout', icon: _heralIco('ic-cerveja'), name: 'Stout Anã',         cost: 15, effect: '+3 HP / +1 MP',    heal: 3, mp: 1, conSaveDC: 14 }
 ];
 
 // TAVERN_GAMES — 8 jogos com brasões canonical (substitui 🎲🐉⚔️🏆🍺🃏)
@@ -25529,7 +25554,7 @@ var CANON_MEALS_DB = {
   "ensopado_javali": {
     "name": "Ensopado de Javali",
     "emoji": "🍲",
-    "cost": 1,
+    "cost": 5,
     "hp": 3,
     "mp": 0,
     "desc": "Caldo quente e nutritivo com pedaços generosos de javali.",
@@ -25556,7 +25581,7 @@ var CANON_MEALS_DB = {
   "torta_cogumelos": {
     "name": "Torta de Cogumelos",
     "emoji": "🥧",
-    "cost": 1,
+    "cost": 5,
     "hp": 2,
     "mp": 1,
     "desc": "Massa crocante recheada com cogumelos da floresta.",
@@ -25583,7 +25608,7 @@ var CANON_MEALS_DB = {
   "costela_defumada": {
     "name": "Costela Defumada",
     "emoji": "🍖",
-    "cost": 2,
+    "cost": 10,
     "hp": 5,
     "mp": 0,
     "desc": "Carne lentamente defumada com ervas aromáticas. Para os famintos.",
@@ -25610,7 +25635,7 @@ var CANON_MEALS_DB = {
   "pao_mel": {
     "name": "Pão com Mel",
     "emoji": "🍞",
-    "cost": 0,
+    "cost": 2,
     "hp": 1,
     "mp": 1,
     "desc": "Pão fresco da manhã com mel silvestre. Simples e reconfortante.",
@@ -25631,7 +25656,7 @@ var CANON_MEALS_DB = {
   "peixe_grelhado": {
     "name": "Peixe Grelhado",
     "emoji": "🐟",
-    "cost": 1,
+    "cost": 5,
     "hp": 2,
     "mp": 1,
     "desc": "Peixe fresco do rio, grelhado com limão e ervas finas.",
@@ -25658,7 +25683,7 @@ var CANON_MEALS_DB = {
   "caldo_carne": {
     "name": "Caldo de Carne",
     "emoji": "🥘",
-    "cost": 1,
+    "cost": 5,
     "hp": 4,
     "mp": 0,
     "desc": "Caldo grosso de ossos fervidos por horas. Aquece a alma.",
@@ -25685,7 +25710,7 @@ var CANON_MEALS_DB = {
   "queijo_frutas": {
     "name": "Queijo Curado c/ Frutas",
     "emoji": "🧀",
-    "cost": 1,
+    "cost": 5,
     "hp": 1,
     "mp": 2,
     "desc": "Queijo envelhecido servido com frutas secas e nozes.",
@@ -25712,7 +25737,7 @@ var CANON_MEALS_DB = {
   "frango_molho": {
     "name": "Frango ao Molho",
     "emoji": "🍗",
-    "cost": 2,
+    "cost": 10,
     "hp": 4,
     "mp": 1,
     "desc": "Coxa de frango assada em molho especial da casa. O prato mais caro.",
@@ -44109,7 +44134,45 @@ var ACTION_HANDLERS = {
   'heroes_titles':        function(p){ _heroesShowTitles(p); },
   // PORTÕES
   'gates_prep_open':      function(p){ _gatesShowPrep(p); },
-  'open_daily_challenge': function(p){ navigateTo('daily_challenge'); },
+  // Sessão #23 (2026-05-22): adicionado narrativa PADRAO_ALDRIC intro ao Desafio
+  // Diário — aventureiro ferido aparece UMA VEZ por dia falando do covil antes
+  // de desbloquear o hub. Storage: localStorage 'valdoria_daily_intro_seen_<DATE>'.
+  'open_daily_challenge': function(p){
+    var today = new Date().toLocaleDateString('pt-BR');
+    var introKey = 'valdoria_daily_intro_seen_' + today;
+    var seen = false;
+    try { seen = localStorage.getItem(introKey) === '1'; } catch(_) {}
+    if (!seen && window.vEncounter && typeof window.vEncounter.render === 'function') {
+      // Marca como visto antes de renderizar (idempotente)
+      try { localStorage.setItem(introKey, '1'); } catch(_) {}
+      // PADRAO_ALDRIC dialogue: aventureiro ferido voltou do covil
+      var dlg = {
+        npc: {
+          name: 'Aventureiro Ferido',
+          desc: 'Ranger · escapou do covil — barba suja, capa rasgada',
+          portrait: 'ic-patrulheiro'
+        },
+        script: [
+          { type: 'narration', text: 'Você cruza a praça quando percebe um movimento estranho perto da fonte. Um aventureiro — capa de couro rasgada, faixas ensanguentadas no braço esquerdo, expressão grave — está apoiado contra a borda de pedra. Reconhece teu brasão. Faz sinal pra te aproximares.' },
+          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Vens a tempo, irmão. <i>(aperta a faixa do braço, dentes cerrados de dor)</i> Voltei agora mesmo do covil ao norte da cidade. Quatro entramos. Eu sou o único que respira.' },
+          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Lobos cinzentos, três adultos. E o pior — uma loba alfa pelagem branca, olhos prateados. <i>(cuspe vermelho no chão)</i> Conhece a táctica deles, irmão? Cercam pelo flanco e atacam o líder primeiro. Eu fui o último a cair. Por isso ainda falo.' },
+          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Os fazendeiros do norte mandaram aviso pelo correio: ' + (window.DAILY_CHALLENGE && window.DAILY_CHALLENGE.bonus_high ? 'gado sumindo toda noite' : 'mais um sumindo a cada lua') + '. Antes do anoitecer alguém precisa descer naquele covil. <i>(força um sorriso amargo)</i> Eu já cumpri minha parte — ou tentei. Cabe a vós agora.' },
+          { type: 'narration', text: 'Ele aponta com o braço bom para uma trilha pisoteada saindo da cidade, ao norte. Pegadas de lobo ainda frescas marcam o chão. O sol está alto — restam ~14 horas até o anoitecer.' }
+        ],
+        choices: [
+          { id: 'accept',  label: '⚔️ "Aceito. Vou descer no covil agora."', cb: 'close' },
+          { id: 'details', label: '📜 "Conta mais sobre a loba alfa."',     cb: 'close' },
+          { id: 'later',   label: '↩ "Vou me preparar e volto."',             cb: 'close' }
+        ]
+      };
+      // Navega pra hub PRIMEIRO (background), depois renderiza encounter por cima.
+      // Quando user fecha dialogue, vê o hub do desafio diretamente.
+      navigateTo('daily_challenge');
+      setTimeout(function(){ window.vEncounter.render(dlg, {}); }, 60);
+      return;
+    }
+    navigateTo('daily_challenge');
+  },
   // MISSÕES (3 tabs)
   'quests_tab_active':    function(p){ _questsShowTab(p, 'active'); },
   'quests_tab_available': function(p){ _questsShowTab(p, 'available'); },
