@@ -155,6 +155,14 @@
       cta.textContent = 'Toque para Iniciar';
       root.appendChild(cta);
 
+      /* D&D 5e badge — 2026-05-21: usuário pediu informação na tela inicial
+         que o jogo é baseado em D&D 5e (única menção explícita; resto da UI
+         usa termos in-world). Mantém attribution legal e ajuda novos jogadores. */
+      var dndBadge = document.createElement('div');
+      dndBadge.className = 'title-dnd-badge';
+      dndBadge.textContent = 'Baseado no sistema D&D 5e';
+      root.appendChild(dndBadge);
+
       /* Flash overlay — two-layer (gold burst + white wash) */
       var flash = document.createElement('div');
       flash.className = 'title-flash';

@@ -11957,16 +11957,24 @@ var LEAGUE_TIERS = [
    - Posição mockup "X aventureiro da ordem"
    ========================================================================== */
 
-// Benefícios por tier (lore-friendly). canonical: pode vir de league_data.py futuramente.
+// 2026-05-21: Honestidade nos benefícios — antes haviam itens fake (ex.: "Acesso à
+// Guilda" sugeria gating, mas todos têm acesso). Agora cada tier dá títulos
+// honoríficos + reconhecimento + recompensas reais (gold semanal top 3).
+// Estes são RECONHECIMENTOS, não mecânicas — só o ranking semanal dá gold.
 var LEAGUE_BENEFITS = {
-  bronze:   ['Acesso à Guilda',   'Bandeira da Ordem',    'Insígnia de Bronze'],
-  silver:   ['10% desconto loja', 'Convite aos torneios', 'Capa prateada'],
-  gold:     ['Cavalaria dourada', 'Câmara da Ordem',      'Brasão personalizado'],
-  platinum: ['Acesso a contratos elite', 'Conselheiro real', 'Manto platina'],
-  mithral:  ['Vassalo do Trono',  'Lenda viva',           'Insígnia mithral']
+  bronze:   ['Insígnia de Bronze',   'Título: Iniciado',         'Reconhecimento da Ordem'],
+  silver:   ['Insígnia de Prata',    'Título: Aventureiro',      'Capa cerimonial prateada'],
+  gold:     ['Insígnia de Ouro',     'Título: Veterano',         'Brasão pessoal nos arquivos'],
+  platinum: ['Insígnia de Platina',  'Título: Mestre da Ordem',  'Conselho dos Anciões'],
+  mithral:  ['Insígnia de Mithral',  'Título: Lenda Viva',       'Imortalizado em pergaminhos']
 };
+// Recompensas REAIS (top 3 ranking semanal — top_rewards em weekly_leagues.py):
+// 1º lugar: 150 Valdoritas + título "Campeão da Liga"
+// 2º lugar: 100 Valdoritas + título "Vice-Campeão"
+// 3º lugar: 75 Valdoritas + título "Terceiro Colocado"
 
 // 2026-05-22 user feedback: explica o que significa "Posição na Ordem".
+// 2026-05-21: expandido com mini-lore dos 3 lendários (user pediu).
 function _showLeagueRankInfo(){
   if (typeof _showInfoPopup !== 'function') return;
   _showInfoPopup({
@@ -11975,7 +11983,11 @@ function _showLeagueRankInfo(){
     title: 'Posição na Ordem',
     desc: '<i>O ranking da Ordem é uma classificação <b>global</b> entre todos os aventureiros de Valdoria.</i><br><br>'
       + 'Quanto <b>maior seu XP de Liga</b> (acumulado completando missões, abates, conquistas e feitos), <b>menor</b> seu número de posição — ou seja, mais próximo do <b>1º lugar</b>.<br><br>'
-      + '<i>Aventureiros lendários como Vorhan, Tavira e Silvana ocupam o topo do ranking. Sua jornada determina onde você se firma na Ordem.</i>',
+      + '<b style="color:var(--v-gold,#c4953a);">Aventureiros Lendários no topo:</b><br>'
+      + '<b>· Vorhan, o Veterano</b> — <i>Lâmina do Norte. Derrotou um Lich em Brakenhall há 30 anos.</i><br>'
+      + '<b>· Tavira Lança-Justa</b> — <i>Reformadora da Guilda. Limpou o Forte dos Bandidos sozinha.</i><br>'
+      + '<b>· Silvana, a Bardisa</b> — <i>Voz das Ruínas Élficas. Cantou nas cortes élficas há 200 anos.</i><br><br>'
+      + '<i>Converse com eles nas missões para aprender suas histórias completas.</i>',
     onConfirm: function(){}
   });
 }
@@ -28788,18 +28800,18 @@ var CANON_ITEMS_DB = {
   // === RUNAS (canonical: src/game/economy/rune_data.py RUNE_ITEMS) ===
   // Adaptação inspirada -213 (magia rúnica opcional). 3 fragmentos = 1 runa aleatória do tier.
   // ─── Tier 1 (Level 3+) ──────────────────────────────────────
-  'Runa de Proteção':  {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_hit_taken', chance:0.10, effect:'reduce_damage', dice:'1d4'}, desc:'Inscrição rúnica protetora. Ao ser atingido, 10% de chance de reduzir o dano em 1d4. (Inspirado em Shield of Faith, SRD 5.1)'},
-  'Runa de Vigor':     {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_kill', chance:1.0, effect:'heal', dice:'1d4'}, desc:'Inscrição rúnica vital. Ao derrotar um inimigo, restaura 1d4 HP. (Inspirado em Vampiric Touch, SRD 5.1)'},
-  'Runa de Precisão':  {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'passive', chance:1.0, effect:'attack_bonus_low_hp', value:1, threshold:0.5}, desc:'Inscrição rúnica predatória. +1 em ataques contra alvos abaixo de 50% HP. (Inspirado em Favored Foe, SRD 5.1)'},
+  'Runa de Proteção':  {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_hit_taken', chance:0.10, effect:'reduce_damage', dice:'1d4'}, desc:'Inscrição rúnica protetora. Ao ser atingido, 10% de chance de reduzir o dano em 1d4.'},
+  'Runa de Vigor':     {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'on_kill', chance:1.0, effect:'heal', dice:'1d4'}, desc:'Inscrição rúnica vital. Ao derrotar um inimigo, restaura 1d4 HP.'},
+  'Runa de Precisão':  {e: _heralIco('ic-mochila'), v:100, r:'common',    t:['rune','magic','inscribable'], rune_tier:1, rune_effect:{trigger:'passive', chance:1.0, effect:'attack_bonus_low_hp', value:1, threshold:0.5}, desc:'Inscrição rúnica predatória. +1 em ataques contra alvos abaixo de 50% HP.'},
   // ─── Tier 2 (Level 5+) ──────────────────────────────────────
-  'Runa de Chamas':    {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.15, effect:'bonus_damage', dice:'1d6', damage_type:'fire'}, desc:'Inscrição rúnica flamejante. Ao acertar, 15% de chance de causar +1d6 de dano de fogo. (Inspirado em Flame Tongue, SRD 5.1)'},
-  'Runa de Gelo':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.10, effect:'slow_target', penalty:-2}, desc:'Inscrição rúnica gélida. Ao acertar, 10% de chance de aplicar -2 no próximo ataque do alvo. (Inspirado em Ray of Frost, SRD 5.1)'},
-  'Runa de Cura':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_victory', chance:1.0, effect:'heal', dice:'2d4'}, desc:'Inscrição rúnica restauradora. Ao vencer combate, restaura 2d4 HP. (Inspirado em Healing Word, SRD 5.1)'},
-  'Runa de Fortuna':   {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'passive', chance:1.0, effect:'loot_bonus', gold_bonus:0.05, drop_bonus:0.03}, desc:'Inscrição rúnica afortunada. +5% ouro de loot e +3% chance de drop de itens. (Adaptação)'},
+  'Runa de Chamas':    {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.15, effect:'bonus_damage', dice:'1d6', damage_type:'fire'}, desc:'Inscrição rúnica flamejante. Ao acertar, 15% de chance de causar +1d6 de dano de fogo.'},
+  'Runa de Gelo':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.10, effect:'slow_target', penalty:-2}, desc:'Inscrição rúnica gélida. Ao acertar, 10% de chance de aplicar -2 no próximo ataque do alvo.'},
+  'Runa de Cura':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_victory', chance:1.0, effect:'heal', dice:'2d4'}, desc:'Inscrição rúnica restauradora. Ao vencer combate, restaura 2d4 HP.'},
+  'Runa de Fortuna':   {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'passive', chance:1.0, effect:'loot_bonus', gold_bonus:0.05, drop_bonus:0.03}, desc:'Inscrição rúnica afortunada. +5% ouro de loot e +3% chance de drop de itens.'},
   // ─── Tier 3 (Level 7+, apenas bosses) ──────────────────────
-  'Runa de Trovão':    {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_crit', chance:1.0, effect:'bonus_damage', dice:'2d8', damage_type:'thunder'}, desc:'Inscrição rúnica trovejante. Em acerto crítico, causa +2d8 de dano de trovão. (Inspirado em Thunderous Smite, SRD 5.1)'},
-  'Runa de Absorção':  {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_hit_taken', chance:0.05, effect:'absorb_damage'}, desc:'Inscrição rúnica absorvente. Ao ser atingido, 5% de chance de absorver o dano como HP temporário. (Inspirado em Armor of Agathys, SRD 5.1)'},
-  'Runa de Devastação':{e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'passive', chance:1.0, effect:'damage_bonus_all', value:1}, desc:'Inscrição rúnica devastadora. +1 em todas as rolagens de dano. (Adaptação inspirada em Elemental Weapon, SRD 5.1)'},
+  'Runa de Trovão':    {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_crit', chance:1.0, effect:'bonus_damage', dice:'2d8', damage_type:'thunder'}, desc:'Inscrição rúnica trovejante. Em acerto crítico, causa +2d8 de dano de trovão.'},
+  'Runa de Absorção':  {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_hit_taken', chance:0.05, effect:'absorb_damage'}, desc:'Inscrição rúnica absorvente. Ao ser atingido, 5% de chance de absorver o dano como HP temporário.'},
+  'Runa de Devastação':{e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'passive', chance:1.0, effect:'damage_bonus_all', value:1}, desc:'Inscrição rúnica devastadora. +1 em todas as rolagens de dano.'},
 
   // === FRAGMENTOS RÚNICOS (canonical: rune_data.py FRAGMENT_ITEMS) ===
   // Loot dropável. 3 do mesmo tier = 1 runa aleatória daquele tier.
@@ -48367,11 +48379,21 @@ document.addEventListener('DOMContentLoaded', function(){
 // ═══════════════════════════════════════════════════════════════════
 
 // Roster de NPCs recorrentes (memória do mundo)
+// 2026-05-21: Aventureiros lendários ganharam back-story (user pediu).
+// Vorhan, Silvana e Tavira são os 3 nomes mencionados no tooltip "Posição na Ordem"
+// — antes não tinham lore. Agora têm história, feitos passados e conexão com missões.
 var RECURRING_NPCS = {
   vorhan: {
     name: 'Vorhan, o Veterano',
     portrait: 'ic-guerreiro',
-    desc: 'Aventureiro aposentado, barba grisalha, cicatriz no rosto, armadura desgastada.'
+    desc: 'Aventureiro aposentado, barba grisalha, cicatriz no rosto, armadura desgastada.',
+    legendary: true,
+    title: 'Lâmina do Norte · Mestre de Armas',
+    lore: 'Trinta anos atrás, Vorhan derrotou um Lich nas Cavernas de Brakenhall — '
+        + 'um feito que rendeu nome à campanha "Cerco de Brakenhall". Hoje treina '
+        + 'gladiadores na Arena de Eldoria. Diz que parou de aventurar quando perdeu '
+        + 'a esposa numa emboscada orc — mas ainda guarda a aliança no pescoço.',
+    related_quests: ['quest_aldric_siege', 'quest_grom_past']  // bounty_undead_purge tem refs
   },
   aldric: {
     name: 'Guarda Aldric',
@@ -48381,7 +48403,15 @@ var RECURRING_NPCS = {
   silvana: {
     name: 'Silvana, a Bardisa',
     portrait: 'ic-bardo',
-    desc: 'Bardisa elfa com harpa de cordas douradas. Sorriso enigmático.'
+    desc: 'Bardisa elfa com harpa de cordas douradas. Sorriso enigmático.',
+    legendary: true,
+    title: 'Voz das Ruínas Élficas · Memória Viva',
+    lore: 'Silvana viveu duzentos anos antes da Queda de Eldoria. Cantava nas cortes '
+        + 'élficas, viu impérios nascer e cair. Sua harpa de cordas douradas foi '
+        + 'forjada por um deus menor das canções. Dizem que ela pode despertar '
+        + 'memórias adormecidas em pedras — por isso aventureiros a procuram quando '
+        + 'encontram ruínas misteriosas.',
+    related_quests: ['quest_corvus_ruins', 'quest_corvus_expedition']
   },
   thessil: {
     name: 'Thessil, o Mercador',
@@ -48427,7 +48457,16 @@ var RECURRING_NPCS = {
   tavira: {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
-    desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.'
+    desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
+    legendary: true,
+    title: 'Lança-Justa · Reformadora da Guilda',
+    lore: 'Tavira foi uma aventureira de elite antes de assumir a Guilda. Liderou a '
+        + 'expedição que limpou o Forte dos Bandidos do Cicatriz — sozinha, no fim. '
+        + 'Aposentou-se quando o último companheiro de viagem caiu numa armadilha. '
+        + 'Hoje reformou a Guilda do zero: aboliu corrupção, padronizou bounties, '
+        + 'instituiu rotação justa de contratos. Quem trapaceia uma vez está fora '
+        + 'pra sempre — e ela nunca esquece um rosto.',
+    related_quests: ['quest_tavira_recruit', 'quest_tavira_traitor', 'quest_tavira_alliance']
   },
   // X-6.5.51BP (2026-05-15): Martha — Estalajadeira PADRAO_ALDRIC
   martha: {

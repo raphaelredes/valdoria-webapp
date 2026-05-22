@@ -214,7 +214,10 @@ function _renderStandingsView(el, data) {
   titleBox.appendChild(title);
   var subBox = document.createElement('div');
   subBox.className = 'v-league-standings-sub';
-  subBox.innerHTML = 'Posição: <b>' + (data.player_rank || '—') + '</b> / '
+  // 2026-05-21: defesa adicional contra rank negativo (mostrava "-6" no UI).
+  // Backend já clampou em max(1, ...) mas guard front-end por segurança.
+  var safeRank = (data.player_rank && data.player_rank > 0) ? data.player_rank : '—';
+  subBox.innerHTML = 'Posição: <b>' + safeRank + '</b> / '
                     + (data.total_players || 0) + ' jogadores';
   titleBox.appendChild(subBox);
   header.appendChild(titleBox);

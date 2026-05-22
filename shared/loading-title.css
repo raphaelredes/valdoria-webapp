@@ -662,3 +662,35 @@
   .title-screen.exit .title-divider-line,
   .title-screen.exit .title-rune { animation: none !important; }
 }
+
+/* ── D&D 5e badge (2026-05-21) ──────────────────────────────────
+   User pediu indicação na tela inicial de que jogo é baseado em D&D 5e.
+   Pequeno, discreto, abaixo do CTA. Aparece após CTA. */
+.title-dnd-badge {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--v-space-md, 8px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0;
+  text-align: center;
+  animation: titleDndBadgeEntrance 0.8s ease-out 1.6s both;
+}
+@keyframes titleDndBadgeEntrance {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 0.55; transform: translateY(0); }
+}
+
+/* Lite/medium mode: badge sem animação (opacidade direta) */
+.title-screen.title-lite .title-dnd-badge,
+.title-screen.title-medium .title-dnd-badge {
+  animation: none;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-dnd-badge { animation: none !important; opacity: 0.55 !important; }
+}
