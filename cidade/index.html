@@ -9209,44 +9209,83 @@ function _isCTA(btn) {
     }
     return true;
   };
-  // Sessão #23 v3: aguarda CITY READY antes de disparar splash. User reportou
-  // "tela vazia com volume" entre loading e splash. Fix: detecta quando loading
-  // overlay foi escondido (modo Telegram WebApp __introTitleSkip OU após
-  // __onIntroTap finalizar em modo browser).
+  // Sessão #23 v7: splash AGRESSIVO. User reportou tela vazia (só volume btn)
+  // entre loading e splash em Telegram Desktop. Root cause: gap entre
+  // ld.display='none' (line 5491) e _showFirstLaunchSplash() executar.
+  // Fix v7: dispara splash IMEDIATAMENTE em Telegram mode + retry resiliente
+  // se popup DOM não pronto (race).
   function _doFirstLaunchSplash(){
-    if (typeof window._showFirstLaunchSplash === 'function') {
-      window._showFirstLaunchSplash();
-    }
-  }
-  function _waitLoadingHidden(cb, maxAttempts){
-    maxAttempts = maxAttempts || 50;
-    var attempts = 0;
-    function check(){
-      attempts++;
-      var ld = document.getElementById('loading');
-      if (!ld || ld.style.display === 'none' || attempts >= maxAttempts) {
-        cb();
-        return;
-      }
-      setTimeout(check, 200);
-    }
-    check();
-  }
-  function _scheduleSplashWhenReady(){
-    // Caso 1: intro skipped (Telegram WebApp ou nointro) — aguarda loading hide
-    if (window.__introTitleSkip === true) {
-      _waitLoadingHidden(_doFirstLaunchSplash);
+    if (typeof window._showFirstLaunchSplash !== 'function') {
+      console.warn('[fLs] _showFirstLaunchSplash não existe ainda — retry em 100ms');
+      setTimeout(_doFirstLaunchSplash, 100);
       return;
     }
-    // Caso 2: intro ativa — hook __onIntroTap pra disparar APÓS 1.8s loading
+    // Já aceitou? Não fazer nada
+    var key = _privacyKey();
+    var raw = _pref(key, '');
+    var seen = false;
+    if (raw === '1') seen = true;
+    else if (raw && raw.charAt(0) === '{') {
+      try { var parsed = JSON.parse(raw); seen = parsed && parsed.accepted === true; } catch(_){}
+    }
+    if (seen) {
+      console.info('[fLs] já aceitou v' + window.PRIVACY_POLICY_VERSION + ' — skip');
+      return;
+    }
+    // Tenta abrir splash; se popup DOM não pronto, retry até MAX vezes
+    var attempts = 0, MAX = 30;
+    function tryOpen(){
+      attempts++;
+      var ov = document.getElementById('city-subscreen-popup');
+      var bodyEl = document.getElementById('csp-body');
+      if (!ov || !bodyEl) {
+        if (attempts >= MAX) {
+          console.error('[fLs] DOM nunca ficou pronto após ' + MAX + ' tentativas');
+          return;
+        }
+        setTimeout(tryOpen, 100);
+        return;
+      }
+      var opened = window._showFirstLaunchSplash();
+      if (opened) {
+        console.info('[fLs] splash aberto (tentativa ' + attempts + ')');
+      } else {
+        console.warn('[fLs] _showFirstLaunchSplash() retornou false (tentativa ' + attempts + ')');
+      }
+    }
+    tryOpen();
+  }
+
+  function _scheduleSplashWhenReady(){
+    // Caso 1: intro skipped (Telegram WebApp OU nointro=1) — abre IMEDIATO
+    //   __introTitleSkip=true significa que loading já foi escondido na linha 5491.
+    //   Não há razão pra esperar — abrir splash AGORA evita tela vazia c/ volume btn.
+    if (window.__introTitleSkip === true) {
+      console.info('[fLs] intro skipped — opening splash imediato');
+      _doFirstLaunchSplash();
+      return;
+    }
+    // Caso 2: intro ativa (browser standalone) — hook __onIntroTap
+    //   __onIntroTap tem setTimeout interno 1.8s pra esconder loading.
+    //   Adicionamos 200ms buffer pra garantir city renderizado.
     var origOnTap = window.__onIntroTap;
     window.__onIntroTap = function(){
       if (typeof origOnTap === 'function') origOnTap();
-      // __onIntroTap tem setTimeout interno 1.8s pra esconder loading.
-      // Adicionamos 200ms buffer pra garantir city renderizado.
       setTimeout(_doFirstLaunchSplash, 2000);
     };
+
+    // Belt-and-suspenders: se intro NÃO bloqueia (já tapped antes) E
+    // loading não está visível, força splash em 1s
+    setTimeout(function(){
+      if (window.__introBlocking) return;  // intro ainda esperando tap
+      var ld = document.getElementById('loading');
+      if (ld && ld.style.display !== 'none') return;  // loading ainda visível
+      console.info('[fLs] fallback timer — abrindo splash (intro skipped/done)');
+      _doFirstLaunchSplash();
+    }, 1500);
   }
+
+  // Dispara MAIS CEDO possível — não esperar DOMContentLoaded se já passou
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     _scheduleSplashWhenReady();
   } else {
