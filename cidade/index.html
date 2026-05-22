@@ -9661,6 +9661,33 @@ function _discoverySpeakerIcon(speaker) {
   return 'ic-praca';  // default
 }
 
+// task #70 (2026-05-22): mapeia NPC recorrente -> PNG path quando existe.
+// Permite mostrar foto do Grom/Aldric/Tavira/etc nos dialogos de descoberta
+// da cidade, igual a taverna ja faz. Lightbox auto-wired via _wireEncPortraitLightbox.
+function _discoverySpeakerImg(speaker) {
+  var s = String(speaker || '').toLowerCase();
+  // NPCs com PNG dedicado em /shared/img/npcs/
+  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) {
+    return '/shared/img/npcs/taverneiro.png';
+  }
+  if (s.indexOf('padre aldric') >= 0) {
+    return '/shared/img/npcs/padre-aldric.png';
+  }
+  if (s.indexOf('sumo sacerdot') >= 0 || s.indexOf('sacerdotisa') >= 0) {
+    return '/shared/img/npcs/sacerdotisa-miriel.png';
+  }
+  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) {
+    return '/shared/img/npcs/estalajadeira.png';
+  }
+  if (s.indexOf('tavira') >= 0) {
+    return '/shared/img/npcs/mestra-tavira.png';
+  }
+  if (s.indexOf('lyana') >= 0 || s.indexOf('herbalista') >= 0) {
+    return '/shared/img/npcs/lyana-herbalista.png';
+  }
+  return null;  // sem PNG dedicado — fall-back pra heraldic SVG
+}
+
 // Sanitiza HTML mantendo apenas <i>/<em>/<b>/<strong> (mesma whitelist do
 // PADRAO_ALDRIC pra inline aside cinza italic)
 function _discoverySanitize(s) {
@@ -9729,13 +9756,17 @@ function _renderDiscoveryStage(){
   var stages = quest.stages;
 
   // NPC primário = speaker da primeira stage (registro inline)
+  // task #70 (2026-05-22): adiciona portraitImg PNG quando o speaker e NPC
+  // canonical (Grom, Aldric, etc.) — renderer ja prefere PNG sobre SVG.
   var primarySpeaker = stages[0].speaker || 'Eldoria';
   var primaryNpcKey = 'discovery_' + quest.id + '_' + primarySpeaker.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   if (!RECURRING_NPCS[primaryNpcKey]) {
+    var _primaryImg = _discoverySpeakerImg(primarySpeaker);
     RECURRING_NPCS[primaryNpcKey] = {
       name: primarySpeaker,
       desc: quest.name,
-      portrait: _discoverySpeakerIcon(primarySpeaker)
+      portrait: _discoverySpeakerIcon(primarySpeaker),
+      portraitImg: _primaryImg || null
     };
   }
 
@@ -9748,10 +9779,12 @@ function _renderDiscoveryStage(){
     if (spk !== primarySpeaker) {
       spkKey = 'discovery_' + quest.id + '_' + spk.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       if (!RECURRING_NPCS[spkKey]) {
+        var _stgImg = _discoverySpeakerImg(spk);
         RECURRING_NPCS[spkKey] = {
           name: spk,
           desc: quest.name,
-          portrait: _discoverySpeakerIcon(spk)
+          portrait: _discoverySpeakerIcon(spk),
+          portraitImg: _stgImg || null
         };
       }
     }
@@ -52622,6 +52655,24 @@ function _renderEncounterPopup(enc, originalAction, player) {
     + '</div>';
   ov.innerHTML = html;
   document.body.appendChild(ov);
+
+  // task #70 (2026-05-22): wire lightbox no portrait quando ha PNG.
+  // PADRAO_TAVERNA: clicar no retrato abre lightbox em tela cheia (zoom).
+  // .enc-portrait e EXPLICITAMENTE skipped pelo delegation global em
+  // shared/lightbox.js (linha 260) — precisa handler aqui.
+  if (npc.portraitImg) {
+    var encPortraitEl = ov.querySelector('.enc-portrait');
+    if (encPortraitEl) {
+      encPortraitEl.style.cursor = 'zoom-in';
+      encPortraitEl.title = 'Toque para ampliar';
+      encPortraitEl.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (typeof window.showLightbox === 'function') {
+          window.showLightbox(npc.portraitImg, npc.name || '', npc.desc || '');
+        }
+      });
+    }
+  }
 
   var bodyEl = document.getElementById('enc-body');
   var actionsEl = document.getElementById('enc-actions');
