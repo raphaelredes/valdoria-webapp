@@ -18175,16 +18175,17 @@ function _buildArenaMockData(player){
 
 // canonical: heraldic-sprite.svg ic-* substitui emojis de pessoa per CLAUDE.md regra
 // Onde ic-* não existe (ferreiro/alquimista/mestre-guilda), mantém objeto-emoji (exceção da regra)
+// Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
-  { id: 'rel_martha',  icon: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', name: 'Martha',         role: 'Estalajadeira',     ref_id: 'inn_martha' },
-  { id: 'rel_grom',    icon: '<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',   name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom' },
-  { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',    name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric' },
-  { id: 'rel_aldwin',  icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',    name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin' },
-  { id: 'rel_elara',   icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',      name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara' },
-  { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-ach-forjador"/></svg>', name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne' },
-  { id: 'rel_mirena',  icon: '<svg class="v-heraldic"><use href="#ic-druida"/></svg>',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena' },
-  { id: 'rel_tavira',  icon: '<svg class="v-heraldic"><use href="#ic-paladino"/></svg>',  name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira' },
-  { id: 'rel_eirik',   icon: '<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',      name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik' }
+  { id: 'rel_martha',  icon: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.png' },
+  { id: 'rel_grom',    icon: '<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.png' },
+  { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',     name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
+  { id: 'rel_aldwin',  icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.png' },
+  { id: 'rel_elara',   icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',       name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.png' },
+  { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-ach-forjador"/></svg>',  name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: null },
+  { id: 'rel_mirena',  icon: '<svg class="v-heraldic"><use href="#ic-druida"/></svg>',        name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.png' },
+  { id: 'rel_tavira',  icon: '<svg class="v-heraldic"><use href="#ic-paladino"/></svg>',      name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.png' },
+  { id: 'rel_eirik',   icon: '<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.png' }
 ];
 
 // Tiers canonical wandering_npcs.py get_familiarity_tier
@@ -40966,17 +40967,38 @@ function _relationsShow(p, relId){
     .concat(typeof GATES_NPCS !== 'undefined' ? GATES_NPCS : []);
   var npcRef = allNpcs.find(function(n){ return n.id === r.ref_id; });
   var totalDialogs = npcRef && npcRef.talkOptions ? npcRef.talkOptions.length : 0;
+  // Sessão #26 (2026-05-22) P1 #77: AAA upgrade — prefere PNG portrait grande
+  // quando disponível, fallback ao SVG heráldico inline. Adiciona barra de afinidade
+  // visual gradiente gold + status colorido por tier.
+  var iconHtml = r.icon;
+  if (r.portraitImg) {
+    iconHtml = '<img src="' + r.portraitImg + '" alt="' + r.name + '" ' +
+               'style="width:96px;height:96px;border-radius:50%;object-fit:cover;' +
+               'border:2px solid var(--v-gold,#c4953a);' +
+               'box-shadow:0 0 14px rgba(196,149,58,0.45),0 4px 14px rgba(0,0,0,0.5);" ' +
+               'loading="lazy" ' +
+               'onerror="this.outerHTML=\'' + r.icon.replace(/'/g, "\\'") + '\'"/>';
+  }
+  var tierColor = tier.affinity >= 5 ? '#ffd700' :
+                  tier.affinity >= 4 ? '#c4953a' :
+                  tier.affinity >= 2 ? '#a09484' : '#7a6850';
+  var affPct = (tier.affinity / 5) * 100;
+  var affBar = '<div style="margin:8px 0 12px;background:rgba(0,0,0,0.4);height:6px;border-radius:3px;overflow:hidden;border:1px solid rgba(196,149,58,0.3);">' +
+               '<div style="width:' + affPct + '%;height:100%;background:linear-gradient(90deg,#8a5a18,' + tierColor + ');' +
+               'box-shadow:0 0 6px ' + tierColor + ';transition:width 0.3s ease;"></div></div>';
   _showInfoPopup({
-    icon: r.icon, npc: r.name, title: 'Vínculo: ' + r.name,
-    desc: '<b>' + r.name + '</b> (' + r.role + ')<br><br>' +
-          '<b>Afinidade:</b> ' + ('★'.repeat(tier.affinity)) + '☆'.repeat(5 - tier.affinity) + ' (' + tier.affinity + '/5)<br>' +
-          '<b>Tier:</b> ' + tier.name + ' — <i>' + tier.status + '</i><br>' +
-          '<b>Diálogos:</b> ' + interactions + (totalDialogs > 0 ? ' / ' + totalDialogs + ' descobertos' : '') + '<br><br>' +
+    icon: iconHtml, npc: r.name, title: 'Vínculo: ' + r.name,
+    desc: '<b style="color:' + tierColor + ';font-size:14px;letter-spacing:0.5px;">' + r.name + '</b> <span style="color:#a09484;">— ' + r.role + '</span><br>' +
+          '<div style="margin-top:8px;color:#a09484;font-size:12px;">Afinidade ' + tier.affinity + '/5</div>' + affBar +
+          '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">' +
+          '<span style="color:' + tierColor + ';font-weight:600;">' + tier.name + '</span>' +
+          '<span style="color:#a09484;font-style:italic;">' + tier.status + '</span></div>' +
+          '<div style="color:#a09484;font-size:12px;margin-bottom:10px;">Diálogos: <b style="color:#d4c8b0;">' + interactions + '</b>' + (totalDialogs > 0 ? ' / ' + totalDialogs + ' descobertos' : '') + '</div>' +
           (interactions === 0
-            ? '<i>Você ainda não conversou com ' + r.name + '. Visite a área correspondente e converse pra construir vínculo.</i>'
+            ? '<div style="padding:8px 10px;background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.4);border-radius:4px;font-style:italic;color:#a09484;font-size:12px;">Você ainda não conversou com ' + r.name + '. Visite a área correspondente e converse pra construir vínculo.</div>'
             : interactions >= 8
-              ? '<i>Vínculo no nível máximo. ' + r.name + ' confia plenamente em você.</i>'
-              : '<i>Próximo tier "' + nextTier.name + '" em ' + Math.max(0, [0,2,4,6,8][tier.affinity + 1] - interactions) + ' diálogos.</i>'),
+              ? '<div style="padding:8px 10px;background:rgba(196,149,58,0.12);border-left:2px solid ' + tierColor + ';border-radius:4px;font-style:italic;color:#f4d896;font-size:12px;">⭐ Vínculo no nível máximo. ' + r.name + ' confia plenamente em você.</div>'
+              : '<div style="padding:8px 10px;background:rgba(0,0,0,0.25);border-left:2px solid ' + tierColor + ';border-radius:4px;font-style:italic;color:#a09484;font-size:12px;">Próximo tier <b style="color:' + tierColor + ';">"' + nextTier.name + '"</b> em <b>' + Math.max(0, [0,2,4,6,8][tier.affinity + 1] - interactions) + '</b> diálogos.</div>'),
     // Sessão #26 (2026-05-22) P0 #75: popup informativo (read-only) — esconde Confirmar redundante
     singleButton: true,
     cancelLabel: 'Voltar'
