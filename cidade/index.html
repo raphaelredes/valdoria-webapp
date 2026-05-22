@@ -8983,7 +8983,14 @@ function _isCTA(btn) {
     var titleEl = document.getElementById('csp-title');
     var bodyEl = document.getElementById('csp-body');
     if (!ov || !bodyEl) return false;
-    if (titleEl) titleEl.textContent = 'Bem-vindo';
+    if (titleEl) titleEl.textContent = 'Política de Privacidade';
+    // Sessão #23 v3: ESCONDE botão Voltar (exceção LGPD — jogador só prossegue
+    // ao aceitar políticas). Salva display original pra restaurar no fechamento.
+    var backBtn = document.getElementById('csp-back-btn') || ov.querySelector('.csp-back-btn');
+    if (backBtn) {
+      backBtn.setAttribute('data-fLs-restore', backBtn.style.display || '');
+      backBtn.style.display = 'none';
+    }
 
     // Helper feature card — fontes maiores, descs resumidas (sessão #23 v2)
     function _fLsFeature(icon, name, desc){
@@ -9026,11 +9033,11 @@ function _isCTA(btn) {
       + '<span class="fLs-spark s2"></span>'
       + '<span class="fLs-spark s3"></span>'
 
-      // Divider top com runas (fonte maior)
+      // Divider top com runas (fonte maior) — "Primeira Visita" como label intro
       + '<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:8px;">'
       + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(90deg, transparent, var(--v-gold,#c4953a));"></span>'
       + '<span class="fLs-rune" style="color:var(--v-gold,#c4953a); font-size:12px;">◆</span>'
-      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:11px; color:var(--v-gold,#c4953a); letter-spacing:3px; text-transform:uppercase;">Bem-vindo</span>'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:11px; color:var(--v-gold,#c4953a); letter-spacing:3px; text-transform:uppercase;">Primeira Visita</span>'
       + '<span class="fLs-rune" style="color:var(--v-gold,#c4953a); font-size:12px;">◆</span>'
       + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
       + '</div>'
@@ -9123,11 +9130,14 @@ function _isCTA(btn) {
     ov.classList.add('active');
     if (typeof _popupStack !== 'undefined') _popupStack.push('first_launch');
 
-    // Wire button
+    // Wire button — restaura Voltar ao fechar (caso reabrir popup)
     var btn = document.getElementById('fLs-accept-btn');
     if (btn) {
       btn.addEventListener('click', function(){
         try { localStorage.setItem('valdoria_first_launch_seen', '1'); } catch(_) {}
+        // Restaura botão Voltar (foi escondido pelo splash)
+        var bb = document.getElementById('csp-back-btn') || (ov && ov.querySelector('.csp-back-btn'));
+        if (bb) bb.style.display = bb.getAttribute('data-fLs-restore') || '';
         if (typeof closeCityPopup === 'function') closeCityPopup();
         else if (typeof navigateBack === 'function') navigateBack();
         if (typeof vToast === 'function') vToast('✨ Boa aventura, aventureiro!');
@@ -9135,17 +9145,48 @@ function _isCTA(btn) {
     }
     return true;
   };
-  // Dispara automaticamente após 2s da page load (aguarda outras inits)
+  // Sessão #23 v3: aguarda CITY READY antes de disparar splash. User reportou
+  // "tela vazia com volume" entre loading e splash. Fix: detecta quando loading
+  // overlay foi escondido (modo Telegram WebApp __introTitleSkip OU após
+  // __onIntroTap finalizar em modo browser).
+  function _doFirstLaunchSplash(){
+    if (typeof window._showFirstLaunchSplash === 'function') {
+      window._showFirstLaunchSplash();
+    }
+  }
+  function _waitLoadingHidden(cb, maxAttempts){
+    maxAttempts = maxAttempts || 50;
+    var attempts = 0;
+    function check(){
+      attempts++;
+      var ld = document.getElementById('loading');
+      if (!ld || ld.style.display === 'none' || attempts >= maxAttempts) {
+        cb();
+        return;
+      }
+      setTimeout(check, 200);
+    }
+    check();
+  }
+  function _scheduleSplashWhenReady(){
+    // Caso 1: intro skipped (Telegram WebApp ou nointro) — aguarda loading hide
+    if (window.__introTitleSkip === true) {
+      _waitLoadingHidden(_doFirstLaunchSplash);
+      return;
+    }
+    // Caso 2: intro ativa — hook __onIntroTap pra disparar APÓS 1.8s loading
+    var origOnTap = window.__onIntroTap;
+    window.__onIntroTap = function(){
+      if (typeof origOnTap === 'function') origOnTap();
+      // __onIntroTap tem setTimeout interno 1.8s pra esconder loading.
+      // Adicionamos 200ms buffer pra garantir city renderizado.
+      setTimeout(_doFirstLaunchSplash, 2000);
+    };
+  }
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(function(){
-      if (typeof window._showFirstLaunchSplash === 'function') window._showFirstLaunchSplash();
-    }, 3000);
+    _scheduleSplashWhenReady();
   } else {
-    document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(function(){
-        if (typeof window._showFirstLaunchSplash === 'function') window._showFirstLaunchSplash();
-      }, 3000);
-    }, { once: true });
+    document.addEventListener('DOMContentLoaded', _scheduleSplashWhenReady, { once: true });
   }
 
   // Função global de popup (chamada pelo heartbeat OU manualmente via extras_feedback)
