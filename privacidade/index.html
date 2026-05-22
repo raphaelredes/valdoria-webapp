@@ -13,6 +13,28 @@
     <link rel="stylesheet" href="../shared/fonts.css">
     <link rel="stylesheet" href="../valdoria-design.css">
     <style>
+        /* ═══════════════════════════════════════════════════════════════
+           Página /privacidade/ — RESPONSIVA (mobile + tablet + desktop)
+
+           EXCEÇÃO LEGÍTIMA à regra "Smartphone-Only Layout" do projeto:
+           - Documento LEGAL público (não é WebApp do jogo)
+           - Compartilhamento via URL canonical (SEO, social)
+           - Acessibilidade: deve abrir bem em qualquer dispositivo
+           - Override do valdoria-design.css (que limita html a 430px)
+
+           Breakpoints (mobile-first):
+           - Base (≤599px): mobile, max-width 430px
+           - Tablet (≥600px): max-width 720px, fontes +10%
+           - Desktop (≥1024px): max-width 920px + grid 2-col em rights/data
+           ═══════════════════════════════════════════════════════════════ */
+
+        /* Override do html max-width global (smartphone-only não aplica aqui) */
+        html, body {
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow-x: hidden;
+        }
+
         body {
             background: var(--v-bg, #2a2420);
             color: var(--v-text, #d4c8b0);
@@ -22,6 +44,8 @@
             margin: 0;
             padding: 0;
         }
+
+        /* ── BASE / MOBILE (≤599px) ────────────────────────────────── */
         .priv-container {
             max-width: 430px;
             margin: 0 auto;
@@ -85,6 +109,13 @@
             font-size: 12px;
             font-weight: 700;
             font-family: var(--v-font-display, 'Cinzel', serif);
+        }
+        section h3 {
+            font-family: var(--v-font-display, 'Cinzel', serif);
+            color: var(--v-gold, #c4953a);
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin: 14px 0 6px;
         }
         section p {
             margin: 8px 0;
@@ -199,6 +230,115 @@
             font-size: 11px;
             color: var(--v-text-dim, #a09484);
             font-style: italic;
+        }
+
+        /* ── TABLET (≥600px) ────────────────────────────────────────── */
+        @media (min-width: 600px) {
+            .priv-container {
+                max-width: 720px;
+                padding: 32px 28px 56px;
+            }
+            body {
+                font-size: 15px;
+                line-height: 1.65;
+            }
+            .priv-header {
+                padding: 28px 0;
+                margin-bottom: 32px;
+            }
+            .priv-header h1 {
+                font-size: clamp(28px, 4vw, 36px);
+                letter-spacing: 4px;
+            }
+            .priv-header .priv-subtitle {
+                font-size: 14px;
+            }
+            section {
+                padding: 22px 24px;
+                margin: 32px 0;
+            }
+            section h2 {
+                font-size: 18px;
+            }
+            section h2 .priv-section-num {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+            section h3 {
+                font-size: 16px;
+            }
+            .priv-data-box {
+                font-size: 13px;
+                padding: 16px;
+                gap: 10px 16px;
+            }
+            .priv-data-key {
+                font-size: 12px;
+            }
+            .priv-no-collect {
+                font-size: 13px;
+                padding: 12px 16px;
+            }
+            .priv-right {
+                padding: 14px 16px;
+            }
+            .priv-right-name {
+                font-size: 13px;
+            }
+            .priv-right-desc {
+                font-size: 12px;
+            }
+            .priv-legal {
+                font-size: 12px;
+            }
+            .priv-cta {
+                font-size: 13px;
+                padding: 10px 24px;
+            }
+        }
+
+        /* ── DESKTOP (≥1024px) — 2-col grid em rights e data boxes ──── */
+        @media (min-width: 1024px) {
+            .priv-container {
+                max-width: 920px;
+                padding: 48px 40px 64px;
+            }
+            body {
+                font-size: 15.5px;
+            }
+            .priv-header h1 {
+                font-size: clamp(32px, 3.5vw, 42px);
+                letter-spacing: 5px;
+            }
+            section {
+                padding: 28px 32px;
+            }
+            section h2 {
+                font-size: 20px;
+            }
+            section h3 {
+                font-size: 17px;
+            }
+            /* Rights em 2 colunas no desktop (melhor leitura) */
+            .priv-rights-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            /* Data boxes mantêm 2 cols (key/val) — não mudar */
+            .priv-data-box {
+                padding: 18px 22px;
+                font-size: 14px;
+            }
+        }
+
+        /* Print stylesheet (impressão / PDF) */
+        @media print {
+            body { background: white; color: black; }
+            section { border: 1px solid #ccc; break-inside: avoid; }
+            a { color: #444; text-decoration: underline; }
+            .priv-cta { background: white !important; color: black !important; border: 1px solid black; }
+            section h2, .priv-data-key, .priv-right-name, .priv-version { color: #8a6420; }
         }
     </style>
 </head>
