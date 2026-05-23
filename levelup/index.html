@@ -941,6 +941,19 @@
                     drop-shadow(0 3px 8px rgba(0,0,0,0.6));
         }
 
+        /* 2026-05-23 (sessão #27): effect tag icon — PNG inline antes do texto do effect.
+           Bigger than skill-png-ico pra dar protagonismo na linha EFEITO. */
+        .effect-tag-ico {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+            filter: drop-shadow(0 0 6px rgba(196,149,58,0.45))
+                    drop-shadow(0 0 2px rgba(196,149,58,0.3));
+        }
+
         /* ════════════════════════════════════════════════════════════
            TALENTO — POPUP ÉPICO DE CONFIRMAÇÃO (sessão #26 v5)
            Hero PNG 140px + aura dourada + raios + entrada cinematic.
@@ -1782,6 +1795,90 @@
                    }).join('') + '</div></div>';
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // EFFECT TAG ICONS — sessão #27 (2026-05-23, user request)
+        // Mapeia o emoji-prefix do campo s.effect (data.js) para PNG heráldico
+        // AAA. Cada slug aponta para um PNG existente:
+        //   - 'el:<type>' → shared/img/combat/elements/<type>.png (14 elementos já
+        //                   gerados em gen_combat_elements_status.py)
+        //   - 'fx:<slug>' → shared/img/combat/effects/<slug>.png (18 novos PNGs
+        //                   gerados em gen_effect_tags.py — categorias semânticas
+        //                   sem equivalente em elements/)
+        // Emojis NÃO mapeados (raros, 1x cada): fallback pro próprio emoji.
+        // ═══════════════════════════════════════════════════════════════════
+        var EFFECT_TAG_MAP = {
+            // Elements (PNG já existe em combat/elements/)
+            '🔥':    'el:fire',
+            '❄️':   'el:cold',
+            '⚡':    'el:lightning',
+            '⚔️':   'el:slashing',
+            '🗡️':   'el:piercing',
+            '🏹':    'el:piercing',
+            '👊':    'el:bludgeoning',
+            '💀':    'el:necrotic',
+            '✨':    'el:magical',
+            '🌪️':   'el:thunder',
+            '🧪':    'el:acid',
+            // Effects custom (PNG em combat/effects/)
+            '🛡️':   'fx:defesa',
+            '💨':    'fx:velocidade',
+            '💚':    'fx:cura',
+            '💖':    'fx:cura',
+            '🙏':    'fx:cura',
+            '🌫️':   'fx:teleporte',
+            '🌿':    'fx:natureza',
+            '🍃':    'fx:natureza',
+            '🌵':    'fx:natureza',
+            '👻':    'fx:stealth',
+            '👤':    'fx:stealth',
+            '🎯':    'fx:mira',
+            '🧠':    'fx:mente',
+            '👀':    'fx:visao',
+            '👁️':   'fx:visao',
+            '🧘':    'fx:meditacao',
+            '🐙':    'fx:polvo',
+            '🦁':    'fx:besta',
+            '🐻':    'fx:besta',
+            '🐺':    'fx:besta',
+            '🦅':    'fx:besta',
+            '🌑':    'fx:lua',
+            '🌙':    'fx:lua',
+            '🎵':    'fx:musica',
+            '🎶':    'fx:musica',
+            '💢':    'fx:furia',
+            '😡':    'fx:furia',
+            '💥':    'fx:explosao',
+            '🌊':    'fx:onda',
+            '🚫':    'fx:bloquear'
+        };
+
+        function _effectTagIconHtml(slug) {
+            var parts = String(slug || '').split(':');
+            var kind = parts[0], name = parts[1];
+            var path;
+            if (kind === 'el')      path = '../shared/img/combat/elements/' + name + '.png';
+            else if (kind === 'fx') path = '../shared/img/combat/effects/'  + name + '.png';
+            else                    return '';
+            return '<img class="effect-tag-ico" src="' + path + '" alt="" loading="lazy" ' +
+                   'onerror="this.outerHTML=\'✨\'"/>';
+        }
+
+        // Detecta emoji-prefix em 'effect' e substitui por PNG icon.
+        // Suporta emojis 1-char ou 2-char (variation selector U+FE0F).
+        function _renderEffectWithIcon(effectText) {
+            if (!effectText) return '';
+            var s = String(effectText);
+            // Try 2-char emoji first (com variation selector)
+            var two = s.substring(0, 2);
+            var one = s.substring(0, 1);
+            var slug = null, prefixLen = 0;
+            if (EFFECT_TAG_MAP[two]) { slug = EFFECT_TAG_MAP[two]; prefixLen = 2; }
+            else if (EFFECT_TAG_MAP[one]) { slug = EFFECT_TAG_MAP[one]; prefixLen = 1; }
+            if (!slug) return s; // sem mapping, retorna texto original (com emoji)
+            var rest = s.substring(prefixLen).replace(/^\s+/, '');
+            return _effectTagIconHtml(slug) + ' ' + rest;
+        }
+
         (function init() {
             const params = new URLSearchParams(location.search);
             token = params.get('token') || '';
@@ -2468,10 +2565,12 @@
             html += '</div>';
 
             // Efeito mec\u00e2nico em bloco estruturado
+            // 2026-05-23 (user request sess\u00e3o #27): emoji-tag prefix do effect agora
+            // \u00e9 renderizado como PNG her\u00e1ldico AAA (em vez de emoji do sistema).
             if (s.effect) {
                 html += `<div class="feat-detail-block">
                     <div class="feat-detail-label">Efeito</div>
-                    <div class="feat-detail-value">\u2728 ${s.effect}</div>
+                    <div class="feat-detail-value">${_renderEffectWithIcon(s.effect)}</div>
                 </div>`;
             }
             // Descri\u00e7\u00e3o narrativa centralizada (mesmo estilo feat-hero-desc)
