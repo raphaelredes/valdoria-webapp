@@ -60,12 +60,12 @@ try {
 const raw = _isSpa ? (_spaP.p || '') : (params.get('p') || '');
 if (!raw) {
 console.error('[LEVELUP] Empty p param');
-showFatalError('Dados de evolução não encontrados. Feche e tente novamente.'); return;
+showFatalError('Dados do nível não encontrados. Feche e tente novamente.'); return;
 }
 P = JSON.parse(decodeBase64Utf8(raw));
 } catch (e) {
 console.error('[LEVELUP] Payload decode failed. raw length:', raw.length, 'isSpa:', _isSpa, 'spaP.p:', !!(_spaP&&_spaP.p), 'url.p:', !!(params.get('p')), 'error:', e.message);
-showFatalError('Erro ao carregar dados de evolução. Feche e tente novamente.', e); return;
+showFatalError('Erro ao carregar dados do nível. Feche e tente novamente.', e); return;
 }
 if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
 showFatalError('Dados do personagem incompletos'); return;
@@ -661,7 +661,7 @@ html += `<div class="review-row"><span class="review-label">\u26a1</span>
 }
 html += '</div>';
 }
-html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolução</div>';
+html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a subida de nível</div>';
 el.innerHTML = html;
 }
 function resetSubmitState() {
@@ -731,7 +731,7 @@ alert('Subida de nível confirmada!');
 }
 } else {
 resetSubmitState();
-showFatalError('Erro ao aplicar evolução: ' + (data.error || 'Desconhecido'));
+showFatalError('Erro ao aplicar nível: ' + (data.error || 'Desconhecido'));
 }
 }).catch(function(e) {
 resetSubmitState();

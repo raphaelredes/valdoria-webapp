@@ -1,7 +1,7 @@
 // LEVELUP Loading — delegates to vProcessing (processing overlay)
 if(window._loadDbgSetApp)_loadDbgSetApp('LEVELUP');
 (function(){
-var _defaultText = 'Preparando evolução...';
+var _defaultText = 'Preparando subida de nível...';
 var _ctrl = {
     show: function(isRetry) { if(window.vProcessing) vProcessing.show({text: isRetry ? 'Reconectando...' : _defaultText, contentCheck: '#luBackdrop'}); },
     hide: function(cb) { if(window.vProcessing) vProcessing.hide(); if(cb) setTimeout(cb, 250); },
