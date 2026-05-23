@@ -2132,7 +2132,7 @@
             if (P.needs_subclass) {
                 html += `<div class="pending-item">
             <div class="pending-icon">${_catIconHtml('subclasse')}</div>
-            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória no nível 3+</small></div>
+            <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória — varia por classe</small></div>
             <div class="pending-badge">1</div>
         </div>`;
             }
@@ -2158,6 +2158,16 @@
         // ═══════════════════════════════════════════════
         // SCREEN: SUBCLASS (compact cards)
         // ═══════════════════════════════════════════════
+        // 2026-05-23 (sessão #27): helper pra PNG heráldico de subclasse (gerado em
+        // gen_subclass_pngs.py — 25 PNGs em shared/img/levelup/subclasses/). Fallback
+        // pro diamond glyph se PNG faltar.
+        function _subclassIconHtml(scId, sz) {
+            if (!scId) return '◆';
+            var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
+            return '<img class="' + cls + '" src="../shared/img/levelup/subclasses/' + scId +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML='◆'"/>';
+        }
+
         function buildSubclass(el) {
             const subs = SUBCLASSES[P.hero_class] || {};
             const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
@@ -2175,7 +2185,7 @@
                     const isSel = sel.subclass === scId;
                     html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
                 <div class="choice-card-header">
-                    <div class="choice-card-icon">${_catIconHtml('subclasse')}</div>
+                    <div class="choice-card-icon">${_subclassIconHtml(scId)}</div>
                     <div class="choice-card-name">${sc.name}</div>
                     <div class="choice-card-check">${isSel ? '\u2713' : ''}</div>
                 </div>
@@ -2194,14 +2204,24 @@
             const sc = subs[scId];
             if (!sc) return;
 
-            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-            html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
-            html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
+            // Sessão #27: detail epic — hero PNG 140px + aura + raios + bloco
+            // features, mesmo padrão de openSkillDetail e openFeatDetail.
+            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">◀ Voltar</button>`;
+            html += `<div class="feat-hero">
+                <div class="feat-hero-glow"></div>
+                <div class="feat-hero-rays"></div>
+                <img class="feat-hero-img" src="../shared/img/levelup/subclasses/${scId}.png"
+                     alt="${sc.name}" onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
+                <div class="feat-hero-medal-fallback">🏰</div>
+            </div>`;
+            html += `<div class="feat-hero-name">${sc.name}</div>`;
+            html += `<div class="feat-hero-divider">⟡ Subclasse ⟡</div>`;
+            html += `<div class="feat-hero-desc">${sc.desc}</div>`;
 
             const feats = sc.features || {};
             const levels = Object.keys(feats).sort((a, b) => parseInt(a) - parseInt(b));
             if (levels.length > 0) {
-                html += '<div class="section-title">Habilidades por Nível</div>';
+                html += '<div class="feat-detail-block"><div class="feat-detail-label">Habilidades automáticas por nível</div><div class="feat-detail-value">';
                 for (const lv of levels) {
                     const f = feats[lv];
                     html += `<div class="sc-feature">
@@ -2210,12 +2230,13 @@
                 ${f.desc ? `<div class="sc-feature-desc">${f.desc}</div>` : ''}
             </div>`;
                 }
+                html += '</div></div>';
             }
 
             const isSel = sel.subclass === scId;
-            html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
+            html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'} feat-cta" style="width:100%;margin-top:16px"
         onclick="selectSubclass('${scId}'); closeSubScreen()">
-        ${isSel ? '\u2713 Selecionada' : `Selecionar ${sc.name}`}
+        ${isSel ? '↩ Remover Escolha' : `✓ Confirmar ${sc.name}`}
     </button>`;
 
             openSubScreen(html);
