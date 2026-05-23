@@ -96,6 +96,47 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
   window.addEventListener('unhandledrejection', function(e){ var r=e&&e.reason; sendLog('error', 'unhandled_rejection: '+(r&&(r.message||r)), {stack:r&&r.stack&&String(r.stack).slice(0,500)}); });
   sendLog('info', 'play_boot', {hostname:h, env:env, apiHost:apiHost, search:location.search});
 
+  // === ANTI-LOOP DEFENSE (universal — Telegram + browser) =================
+  // 2026-05-23 (Wilzen bug): /play/ pode entrar em loop infinito quando
+  // state.transition.url aponta pra uma URL que 301-redireciona DE VOLTA pra
+  // /play/ (caso histórico: /app.html?route=levelup → 301 → /play/).
+  // A defesa anterior (linhas 393-440) só funcionava no branch !initData
+  // (browser puro). Telegram users (com initData) NÃO eram protegidos.
+  //
+  // Esta defesa universal trackeia visitas a /play/ em sessionStorage. Se >= 4
+  // visitas em < 30s SEM completar transição, assume loop → escape pra
+  // /cidade/?_skiprestore=1 (bypassa state restore que causou o loop).
+  var _loopVisitKey = 'play_visits_log';
+  var _loopEscapeFlag = 'play_loop_escaped_at';
+  try {
+    var nowVisit = Date.now();
+    var visitsRaw = sessionStorage.getItem(_loopVisitKey) || '[]';
+    var visits = JSON.parse(visitsRaw);
+    if (!Array.isArray(visits)) visits = [];
+    // Keep only visits in last 30s
+    visits = visits.filter(function(t){ return (nowVisit - t) < 30000; });
+    visits.push(nowVisit);
+    sessionStorage.setItem(_loopVisitKey, JSON.stringify(visits));
+    if (visits.length >= 4) {
+      // 4+ visits in 30s = high confidence loop
+      var lastEscape = parseInt(sessionStorage.getItem(_loopEscapeFlag) || '0', 10);
+      // Don't escape again if we just escaped < 60s ago (avoid escape→loop→escape pattern)
+      if ((nowVisit - lastEscape) > 60000) {
+        sendLog('error', 'play_loop_detected_escape', {visits: visits.length, span_ms: nowVisit - visits[0]});
+        sessionStorage.setItem(_loopEscapeFlag, String(nowVisit));
+        sessionStorage.removeItem(_loopVisitKey);
+        var _escapeQs = new URLSearchParams(location.search);
+        _escapeQs.delete('route'); _escapeQs.delete('p');
+        _escapeQs.set('_skiprestore', '1');
+        _escapeQs.set('_loopescape', '1');
+        if (!_escapeQs.get('_cb')) _escapeQs.set('_cb', String(nowVisit));
+        try { window.__valdoria_transitioning = true; } catch(_e){}
+        window.location.replace('/cidade/?' + _escapeQs.toString());
+        return; // halt /play/ init — escape in progress
+      }
+    }
+  } catch(_eLoopGuard){}
+
   // === Loading controller (barra animada + cinematic exit) ================
   // Tips agnosticos ao destino — NUNCA dizer "cidade"/"exploracao"/"combate"
   // (player pode estar voltando pra qualquer um deles, e a /play/ nao deve

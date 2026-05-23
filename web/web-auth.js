@@ -530,8 +530,8 @@ function redirectToGame(charId, isNew, token) {
     var paramStr = params.toString();
     if (isNew && !charId) {
         // Fluxo de criação de personagem (sem state restore)
-        params.set('route', 'character_creator');
-        var url = '../app.html?' + params.toString();
+        // 2026-05-23 FIX (Wilzen loop): /app.html → 301 → /play/. Usar /character_creator/ direto.
+        var url = '../character_creator/?' + params.toString();
         console.info('[WEB-AUTH] redirect target=%s (new char flow)', url.split('?')[0]);
         window.location.href = url;
         return;
@@ -561,8 +561,9 @@ function redirectToGame(charId, isNew, token) {
             if (to === 'explore' || to === 'exploration') dest = '../exploracao/exploracao.html';
             else if (to === 'combat' || to === 'combat2') dest = '../combat2/combate.html';
             else if (to === 'levelup') dest = '../levelup/index.html';
-            else if (to === 'navigate') dest = '../app.html?route=navigate';
-            else if (to === 'inventory') dest = '../app.html?route=inventory';
+            // 2026-05-23 FIX (Wilzen loop): /app.html → 301 → /play/.
+            // Navigate/inventory popups quase sempre vêm com state.transition.url
+            // (server-built — check acima já trata). Fallback aqui é cidade.
             else dest = '../cidade/index.html';
         }
         var url = dest + (dest.indexOf('?') >= 0 ? '&' : '?') + paramStr;
