@@ -70,7 +70,270 @@
         .lu-sub-content { flex: 1; padding: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .lu-sub-back { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--v-gold, #c4953a); font-size: 14px; font-weight: 600; cursor: pointer; padding: 12px 10px 8px; -webkit-tap-highlight-color: transparent; }
 
-        /* ─── Level up banner ─── */
+        /* ─── Cinematic Level Up Banner — AAA (sessão #26 2026-05-22) ─── */
+        .lvl-cinema {
+            position: relative;
+            text-align: center;
+            padding: 18px 14px 14px;
+            margin: -10px -10px 14px;
+            background: radial-gradient(ellipse at center top, rgba(196,149,58,0.22) 0%, rgba(196,149,58,0.06) 35%, transparent 70%),
+                        linear-gradient(180deg, rgba(40,28,16,0.95) 0%, var(--v-bg-card, #2e2520) 100%);
+            border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+            overflow: hidden;
+            isolation: isolate;
+            min-height: 260px;
+        }
+
+        /* Class accent — overrides --lvl-accent for hero glow and aura colors */
+        .lvl-cinema[data-class="bardo"]       { --lvl-accent: #d061b5; --lvl-accent-rgb: 208,97,181; }
+        .lvl-cinema[data-class="mago"]        { --lvl-accent: #5b9dba; --lvl-accent-rgb: 91,157,186; }
+        .lvl-cinema[data-class="clerigo"]     { --lvl-accent: #f4d896; --lvl-accent-rgb: 244,216,150; }
+        .lvl-cinema[data-class="guerreiro"]   { --lvl-accent: #d05a3a; --lvl-accent-rgb: 208,90,58; }
+        .lvl-cinema[data-class="patrulheiro"] { --lvl-accent: #7dba5b; --lvl-accent-rgb: 125,186,91; }
+        .lvl-cinema[data-class="paladino"]    { --lvl-accent: #ffd560; --lvl-accent-rgb: 255,213,96; }
+        .lvl-cinema[data-class="barbaro"]     { --lvl-accent: #a04030; --lvl-accent-rgb: 160,64,48; }
+        .lvl-cinema[data-class="ladino"]      { --lvl-accent: #888888; --lvl-accent-rgb: 136,136,136; }
+        .lvl-cinema[data-class="feiticeiro"]  { --lvl-accent: #d04a4a; --lvl-accent-rgb: 208,74,74; }
+        .lvl-cinema[data-class="bruxo"]       { --lvl-accent: #a060d0; --lvl-accent-rgb: 160,96,208; }
+        .lvl-cinema[data-class="druida"]      { --lvl-accent: #5ba07d; --lvl-accent-rgb: 91,160,125; }
+        .lvl-cinema[data-class="monge"]       { --lvl-accent: #d4b86a; --lvl-accent-rgb: 212,184,106; }
+        .lvl-cinema { --lvl-accent: var(--v-gold, #c4953a); --lvl-accent-rgb: 196,149,58; }
+
+        /* Divine light rays from above (animated) */
+        .lvl-cinema-rays {
+            position: absolute;
+            inset: -20% -20% 30% -20%;
+            background: conic-gradient(from 180deg at 50% 0%,
+                transparent 0deg,
+                rgba(var(--lvl-accent-rgb), 0.12) 20deg,
+                transparent 40deg,
+                rgba(var(--lvl-accent-rgb), 0.08) 60deg,
+                transparent 80deg,
+                rgba(var(--lvl-accent-rgb), 0.15) 100deg,
+                transparent 120deg,
+                rgba(var(--lvl-accent-rgb), 0.06) 140deg,
+                transparent 180deg,
+                rgba(var(--lvl-accent-rgb), 0.12) 220deg,
+                transparent 260deg,
+                rgba(var(--lvl-accent-rgb), 0.08) 300deg,
+                transparent 360deg);
+            mask: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+            -webkit-mask: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+            opacity: 0.85;
+            animation: lvlRaysRotate 22s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes lvlRaysRotate { to { transform: rotate(360deg); } }
+
+        /* Ascending gold particles (CSS-only, 8 dots) */
+        .lvl-cinema-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .lvl-cinema-particles::before,
+        .lvl-cinema-particles::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 12% 90%, rgba(var(--lvl-accent-rgb), 0.9) 0px, transparent 1.5px),
+                radial-gradient(circle at 28% 92%, rgba(var(--lvl-accent-rgb), 0.7) 0px, transparent 1.2px),
+                radial-gradient(circle at 45% 88%, rgba(var(--lvl-accent-rgb), 0.95) 0px, transparent 2px),
+                radial-gradient(circle at 60% 94%, rgba(var(--lvl-accent-rgb), 0.6) 0px, transparent 1.3px),
+                radial-gradient(circle at 76% 89%, rgba(var(--lvl-accent-rgb), 0.85) 0px, transparent 1.8px),
+                radial-gradient(circle at 88% 93%, rgba(var(--lvl-accent-rgb), 0.7) 0px, transparent 1.4px);
+            animation: lvlParticlesUp 6s linear infinite;
+        }
+        .lvl-cinema-particles::after {
+            animation-delay: -3s;
+            opacity: 0.65;
+        }
+        @keyframes lvlParticlesUp {
+            from { transform: translateY(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            to   { transform: translateY(-260px); opacity: 0; }
+        }
+
+        /* Rune ring around portrait (rotating) */
+        .lvl-cinema-rune-ring {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 138px;
+            height: 138px;
+            border-radius: 50%;
+            border: 1px dashed rgba(var(--lvl-accent-rgb), 0.45);
+            box-shadow: 0 0 18px rgba(var(--lvl-accent-rgb), 0.18) inset, 0 0 24px rgba(var(--lvl-accent-rgb), 0.12);
+            animation: lvlRuneRotate 30s linear infinite;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .lvl-cinema-rune-ring::before,
+        .lvl-cinema-rune-ring::after {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 1px solid rgba(var(--lvl-accent-rgb), 0.18);
+        }
+        .lvl-cinema-rune-ring::after {
+            inset: -8px;
+            border: 1px solid rgba(var(--lvl-accent-rgb), 0.08);
+            animation: lvlRunePulse 3s ease-in-out infinite;
+        }
+        @keyframes lvlRuneRotate { to { transform: translateX(-50%) rotate(360deg); } }
+        @keyframes lvlRunePulse {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50%      { transform: scale(1.08); opacity: 0.85; }
+        }
+
+        /* Hero portrait (class PNG) — glowing aura, scale-pulse */
+        .lvl-cinema-portrait {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--lvl-accent);
+            box-shadow: 0 0 36px rgba(var(--lvl-accent-rgb), 0.55),
+                        0 0 18px rgba(var(--lvl-accent-rgb), 0.3) inset,
+                        0 6px 22px rgba(0,0,0,0.55);
+            z-index: 4;
+            background: rgba(20, 14, 10, 0.4);
+            animation: lvlPortraitPulse 2.4s ease-in-out infinite;
+        }
+        .lvl-cinema-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: drop-shadow(0 0 6px rgba(var(--lvl-accent-rgb), 0.6));
+        }
+        @keyframes lvlPortraitPulse {
+            0%, 100% { box-shadow: 0 0 28px rgba(var(--lvl-accent-rgb), 0.45),
+                                  0 0 14px rgba(var(--lvl-accent-rgb), 0.25) inset,
+                                  0 6px 22px rgba(0,0,0,0.55); }
+            50%      { box-shadow: 0 0 48px rgba(var(--lvl-accent-rgb), 0.75),
+                                  0 0 22px rgba(var(--lvl-accent-rgb), 0.45) inset,
+                                  0 6px 22px rgba(0,0,0,0.55); }
+        }
+
+        /* Tier medal badge (bronze/silver/gold/platinum/mithral) */
+        .lvl-cinema-medal {
+            position: absolute;
+            top: 100px;
+            left: calc(50% + 38px);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid var(--lvl-accent);
+            box-shadow: 0 0 14px rgba(var(--lvl-accent-rgb), 0.55), 0 3px 10px rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+            animation: lvlMedalDrop 800ms cubic-bezier(0.34, 1.56, 0.64, 1) 350ms backwards;
+        }
+        .lvl-cinema-medal img { width: 40px; height: 40px; object-fit: contain; }
+        @keyframes lvlMedalDrop {
+            0%   { transform: translateY(-100px) scale(0.5) rotate(-180deg); opacity: 0; }
+            70%  { transform: translateY(8px) scale(1.1) rotate(10deg); opacity: 1; }
+            100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Massive level number — reveal with scale burst */
+        .lvl-cinema-level {
+            position: relative;
+            font-family: 'Cinzel', serif;
+            font-size: clamp(56px, 16vw, 80px);
+            font-weight: 800;
+            color: var(--lvl-accent);
+            text-shadow: 0 0 28px rgba(var(--lvl-accent-rgb), 0.7),
+                         0 0 12px rgba(var(--lvl-accent-rgb), 0.9),
+                         0 4px 8px rgba(0, 0, 0, 0.8);
+            line-height: 1;
+            margin-top: 14px;
+            letter-spacing: 0.05em;
+            z-index: 6;
+            animation: lvlNumberReveal 900ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+        }
+        @keyframes lvlNumberReveal {
+            0%   { transform: scale(0.2) rotate(-15deg); opacity: 0; filter: blur(10px); }
+            60%  { transform: scale(1.15) rotate(0deg); opacity: 1; filter: blur(0); }
+            100% { transform: scale(1); }
+        }
+
+        .lvl-cinema-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--v-text);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8), 0 0 12px rgba(var(--lvl-accent-rgb), 0.4);
+            position: relative;
+            z-index: 6;
+            animation: lvlSubReveal 700ms ease 600ms backwards;
+        }
+        .lvl-cinema-title::before,
+        .lvl-cinema-title::after {
+            content: '◆';
+            color: var(--lvl-accent);
+            opacity: 0.7;
+            margin: 0 8px;
+            font-size: 10px;
+        }
+        @keyframes lvlSubReveal {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lvl-cinema-class {
+            font-size: 11px;
+            color: var(--v-text-dim);
+            margin-top: 4px;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 6;
+            animation: lvlSubReveal 700ms ease 750ms backwards;
+        }
+        .lvl-cinema-class b {
+            color: var(--lvl-accent);
+            font-style: normal;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(var(--lvl-accent-rgb), 0.4);
+        }
+
+        /* Performance-tier guards */
+        body.perf-lite .lvl-cinema-rays,
+        body.perf-lite .lvl-cinema-particles,
+        body.perf-lite .lvl-cinema-rune-ring::after {
+            display: none;
+        }
+        body.perf-lite .lvl-cinema-portrait {
+            animation: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .lvl-cinema-rays,
+            .lvl-cinema-particles::before,
+            .lvl-cinema-particles::after,
+            .lvl-cinema-rune-ring,
+            .lvl-cinema-rune-ring::after,
+            .lvl-cinema-portrait,
+            .lvl-cinema-level,
+            .lvl-cinema-title,
+            .lvl-cinema-class,
+            .lvl-cinema-medal { animation: none; }
+        }
+
+        /* ─── Legacy banner (kept for back-compat — may use in subscreens) ─── */
         .lvl-banner {
             text-align: center;
             padding: 12px 12px 8px;
@@ -1113,10 +1376,15 @@
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
             let html = `
         <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
-        <div class="lvl-banner">
-            <div class="lvl-banner-level">${P.level}</div>
-            <div class="lvl-banner-title">Novo Nível Alcançado!</div>
-            <div class="lvl-banner-class">${info.name} &mdash; ${P.name}</div>
+        <div class="lvl-cinema" data-class="${(P.hero_class||'').toString().toLowerCase()}" data-tier="${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}">
+            <div class="lvl-cinema-rays"></div>
+            <div class="lvl-cinema-particles"></div>
+            <div class="lvl-cinema-rune-ring"></div>
+            <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${(P.hero_class||'').toString().toLowerCase()}.png" alt="${info.name}" onerror="this.style.display='none'"/></div>
+            <div class="lvl-cinema-medal" title="${P.level >= 13 ? 'Mítico' : P.level >= 10 ? 'Lendário' : P.level >= 8 ? 'Mestre' : P.level >= 5 ? 'Veterano' : 'Iniciante'}"><img src="../shared/img/medals/${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}.png" alt="tier" onerror="this.style.display='none'"/></div>
+            <div class="lvl-cinema-level">${P.level}</div>
+            <div class="lvl-cinema-title">Novo Nível Alcançado</div>
+            <div class="lvl-cinema-class"><b>${info.name}</b> &mdash; ${P.name}</div>
             <div class="lvl-gains">
                 ${P.hp_gain ? `<div class="lvl-gain hp">\u2764\ufe0f +${P.hp_gain} HP</div>` : ''}
                 ${P.mp_gain ? `<div class="lvl-gain mp">\ud83d\udd37 +${P.mp_gain} ${info.resource}</div>` : ''}
