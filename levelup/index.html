@@ -1264,6 +1264,18 @@
         var cur = 0;
         var asiMode = 'asi';
 
+        // Mapa hero_class (EN enum) -> PNG slug (PT-BR). DECLARADO ACIMA do init()
+        // IIFE pra garantir que está disponível antes de buildSummary executar.
+        var HERO_CLASS_SLUG = {
+            'BARD': 'bardo', 'WIZARD': 'mago', 'MAGE': 'mago', 'CLERIC': 'clerigo',
+            'FIGHTER': 'guerreiro', 'RANGER': 'patrulheiro', 'PALADIN': 'paladino',
+            'BARBARIAN': 'barbaro', 'ROGUE': 'ladino', 'SORCERER': 'feiticeiro',
+            'WARLOCK': 'bruxo', 'DRUID': 'druida', 'MONK': 'monge'
+        };
+        function _heroSlug(hc) {
+            if (!hc) return 'guerreiro';
+            return HERO_CLASS_SLUG[String(hc).toUpperCase()] || String(hc).toLowerCase();
+        }
 
         (function init() {
             const params = new URLSearchParams(location.search);
@@ -1489,19 +1501,6 @@
         // ═══════════════════════════════════════════════
         // SCREEN: SUMMARY
         // ═══════════════════════════════════════════════
-        // Mapa hero_class (EN enum) -> PNG slug (PT-BR). VAR pra ser hoisted
-        // (const tem Temporal Dead Zone se acessado antes da linha).
-        var HERO_CLASS_SLUG = {
-            'BARD': 'bardo', 'WIZARD': 'mago', 'MAGE': 'mago', 'CLERIC': 'clerigo',
-            'FIGHTER': 'guerreiro', 'RANGER': 'patrulheiro', 'PALADIN': 'paladino',
-            'BARBARIAN': 'barbaro', 'ROGUE': 'ladino', 'SORCERER': 'feiticeiro',
-            'WARLOCK': 'bruxo', 'DRUID': 'druida', 'MONK': 'monge'
-        };
-        function _heroSlug(hc) {
-            if (!hc) return 'guerreiro';
-            return HERO_CLASS_SLUG[String(hc).toUpperCase()] || String(hc).toLowerCase();
-        }
-
         function buildSummary(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
             const _slug = _heroSlug(P.hero_class);
