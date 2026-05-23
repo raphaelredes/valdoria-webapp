@@ -899,6 +899,241 @@
                     drop-shadow(0 0 4px rgba(196,149,58,0.3))
                     drop-shadow(0 3px 8px rgba(0,0,0,0.6));
         }
+
+        /* ════════════════════════════════════════════════════════════
+           TALENTO — POPUP ÉPICO DE CONFIRMAÇÃO (sessão #26 v5)
+           Hero PNG 140px + aura dourada + raios + entrada cinematic.
+           ════════════════════════════════════════════════════════════ */
+        .feat-hero {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 12px 0 6px;
+            animation: featHeroEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .feat-hero-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 220px; height: 220px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(232,196,58,0.40) 0%,
+                rgba(232,196,58,0.18) 30%,
+                rgba(232,196,58,0.05) 60%,
+                transparent 80%);
+            filter: blur(8px);
+            animation: featHeroGlowPulse 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .feat-hero-rays {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 250px; height: 250px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: conic-gradient(from 0deg,
+                transparent 0deg, rgba(255,235,80,0.10) 12deg, transparent 24deg,
+                transparent 80deg, rgba(255,235,80,0.08) 92deg, transparent 104deg,
+                transparent 170deg, rgba(255,235,80,0.10) 182deg, transparent 194deg,
+                transparent 250deg, rgba(255,235,80,0.08) 262deg, transparent 274deg,
+                transparent 330deg, rgba(255,235,80,0.10) 342deg, transparent 354deg);
+            filter: blur(2px);
+            animation: featHeroRays 24s linear infinite;
+            pointer-events: none;
+        }
+        .feat-hero-img {
+            position: relative;
+            z-index: 2;
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 18px rgba(255,210,90,0.7))
+                    drop-shadow(0 0 6px rgba(255,244,208,0.5))
+                    drop-shadow(0 6px 14px rgba(0,0,0,0.65));
+            animation: featHeroFloat 5s ease-in-out infinite;
+        }
+        .feat-hero-medal-fallback {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 88px;
+            filter: drop-shadow(0 0 16px rgba(255,210,90,0.7));
+            display: none;
+            z-index: 2;
+        }
+        .feat-hero.no-png .feat-hero-medal-fallback { display: block; }
+        @keyframes featHeroEntrance {
+            0% { opacity: 0; transform: scale(0.4); }
+            60% { opacity: 1; transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes featHeroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes featHeroGlowPulse {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+        }
+        @keyframes featHeroRays {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        body.perf-lite .feat-hero-rays,
+        body.perf-lite .feat-hero-glow { animation: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .feat-hero, .feat-hero-img, .feat-hero-glow, .feat-hero-rays { animation: none; }
+        }
+
+        .feat-hero-name {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff4d0;
+            text-align: center;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 16px rgba(255,210,90,0.6),
+                         0 0 32px rgba(232,196,58,0.3);
+            margin: 8px 0 4px;
+            animation: featHeroEntrance 0.7s ease 0.15s both;
+        }
+        .feat-hero-divider {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            color: var(--v-gold, #c4953a);
+            text-align: center;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 14px;
+        }
+        .feat-hero-desc {
+            font-size: 14px;
+            color: var(--v-text, #d4c8b0);
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 16px;
+            font-style: italic;
+            padding: 0 6px;
+        }
+
+        .feat-detail-block {
+            background: linear-gradient(180deg,
+                rgba(196,149,58,0.06),
+                rgba(42,30,18,0.4));
+            border: 1px solid var(--v-border, #4a3828);
+            border-left: 3px solid var(--v-gold, #c4953a);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+        }
+        .feat-detail-block.feat-detail-warn {
+            border-left-color: #e45;
+            background: linear-gradient(180deg,
+                rgba(228,68,85,0.08),
+                rgba(42,30,18,0.4));
+        }
+        .feat-detail-block.feat-detail-cost {
+            border-left-color: #c44;
+            background: linear-gradient(180deg,
+                rgba(196,68,68,0.04),
+                rgba(42,30,18,0.4));
+        }
+        .feat-detail-label {
+            font-family: 'Cinzel', serif;
+            font-size: 10px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .feat-detail-value {
+            font-size: 13px;
+            color: var(--v-text, #d4c8b0);
+            line-height: 1.5;
+        }
+        .feat-stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(196,149,58,0.12);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 12px;
+            padding: 2px 8px;
+            margin: 0 2px;
+        }
+        .feat-stat-pill img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+        .feat-cta {
+            font-family: 'Cinzel', serif !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase !important;
+            padding: 14px !important;
+            box-shadow: 0 0 18px rgba(232,196,58,0.4),
+                        0 4px 10px rgba(0,0,0,0.5) !important;
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           SKILL TAG PILLS — Elementos + Status (sessão #26 v5)
+           Detectados automaticamente via _detectElements / _detectStatus
+           e mostrados em badges com PNG ao lado do skill detail.
+           ════════════════════════════════════════════════════════════ */
+        .skill-tag-row {
+            margin: 10px 0;
+            padding: 8px 12px;
+            background: rgba(196,149,58,0.04);
+            border-left: 2px solid rgba(196,149,58,0.4);
+            border-radius: 0 6px 6px 0;
+        }
+        .skill-tag-label {
+            font-family: 'Cinzel', serif;
+            font-size: 10px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .skill-tag-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .skill-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(196,149,58,0.12);
+            border: 1px solid var(--v-border, #4a3828);
+            border-radius: 12px;
+            padding: 3px 9px 3px 5px;
+            font-size: 12px;
+            color: var(--v-text, #d4c8b0);
+        }
+        .skill-tag-pill img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 3px rgba(232,196,58,0.4));
+        }
+        .skill-tag-pill.elem-pill {
+            background: rgba(228,68,85,0.10);
+            border-color: rgba(228,68,85,0.35);
+        }
+        .skill-tag-pill.stat-pill {
+            background: rgba(123,80,180,0.10);
+            border-color: rgba(123,80,180,0.35);
+        }
+        .skill-tag-name { font-weight: 500; }
         /* Context-specific PNG sizing (sessão #26 v3): pending categorias, asi atributos,
            choice-card feats, review icons. Antes era 28px fixo — fica pequeno em alguns
            contextos. Agora cada container tem seu tamanho ideal. */
@@ -1336,6 +1571,149 @@
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/levelup/categories/' + cat +
                    '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u25c6\'"/>';
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // Elementos (damage types) + Status effects — sessão #26 v5
+        // PNGs gerados em scripts/gen_combat_elements_status.py (~$1.88).
+        // Output: shared/img/combat/{elements,status}/<slug>.png
+        // ─────────────────────────────────────────────────────────
+        var ELEMENT_PT = {
+            'slashing': 'Cortante', 'piercing': 'Perfurante', 'bludgeoning': 'Concussão',
+            'fire': 'Fogo', 'cold': 'Frio', 'lightning': 'Raio', 'acid': 'Ácido',
+            'poison': 'Veneno', 'necrotic': 'Necrótico', 'radiant': 'Radiante',
+            'force': 'Força', 'psychic': 'Psíquico', 'thunder': 'Trovão', 'magical': 'Mágico'
+        };
+        var ELEMENT_EMOJI_FALLBACK = {
+            'slashing': '🗡️', 'piercing': '🏹', 'bludgeoning': '🔨',
+            'fire': '🔥', 'cold': '❄️', 'lightning': '⚡', 'acid': '🧪',
+            'poison': '🧪', 'necrotic': '💀', 'radiant': '✨',
+            'force': '✨', 'psychic': '🧠', 'thunder': '🔊', 'magical': '✨'
+        };
+        function _elementIconHtml(type, sz) {
+            if (!type || !ELEMENT_PT[type]) return '';
+            var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
+            var fallback = ELEMENT_EMOJI_FALLBACK[type] || '✨';
+            return '<img class="' + cls + '" src="../shared/img/combat/elements/' + type +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
+        }
+        // Status (PHB conditions + buffs + debuffs)
+        var STATUS_PT = {
+            'stunned': 'Atordoado', 'paralyzed': 'Paralisado', 'petrified': 'Petrificado',
+            'blinded': 'Cego', 'frightened': 'Amedrontado', 'poisoned': 'Envenenado',
+            'restrained': 'Preso', 'grappled': 'Agarrado', 'charmed': 'Enfeitiçado',
+            'prone': 'Derribado', 'invisible': 'Invisível', 'sleeping': 'Dormindo',
+            'surprised': 'Surpreso', 'unconscious': 'Inconsciente', 'deafened': 'Surdo',
+            'incapacitated': 'Incapacitado',
+            'blessed': 'Abençoado', 'inspired': 'Inspirado', 'regenerating': 'Regenerando',
+            'enraged': 'Enfurecido',
+            'marked': 'Marcado', 'hexed': 'Amaldiçoado', 'exposed': 'Exposto',
+            'mocked': 'Provocado', 'weakened': 'Enfraquecido', 'burning': 'Queimando',
+            'frozen': 'Congelado', 'cursed': 'Amaldiçoado', 'corroded': 'Corroído',
+            'slowed': 'Lentidão', 'pushed': 'Empurrado',
+            'stress_frightened': 'Apavorado', 'stress_angry': 'Irritado'
+        };
+        function _statusIconHtml(id, sz) {
+            if (!id || !STATUS_PT[id]) return '';
+            var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
+            return '<img class="' + cls + '" src="../shared/img/combat/status/' + id +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
+        }
+
+        // Heurística: detecta elementos no texto effect/tech (PT-BR + EN).
+        // Retorna lista de slugs únicos. Ex: 'fogo' / 'frio' / 'raio' / 'cortante'...
+        var _ELEMENT_KEYWORDS = [
+            ['fogo', 'fire'], ['fire', 'fire'], ['flame', 'fire'], ['chama', 'fire'], ['queim', 'fire'],
+            ['frio', 'cold'], ['cold', 'cold'], ['gelo', 'cold'], ['ice', 'cold'], ['congelan', 'cold'],
+            ['raio', 'lightning'], ['lightning', 'lightning'], ['relâmpago', 'lightning'], ['eletric', 'lightning'],
+            ['cortante', 'slashing'], ['slash', 'slashing'], ['corte', 'slashing'],
+            ['perfurant', 'piercing'], ['perfur', 'piercing'], ['flecha', 'piercing'], ['arrow', 'piercing'],
+            ['concussão', 'bludgeoning'], ['bludgeo', 'bludgeoning'], ['esmagamento', 'bludgeoning'], ['martelo', 'bludgeoning'],
+            ['ácido', 'acid'], ['acid', 'acid'],
+            ['veneno', 'poison'], ['poison', 'poison'], ['envenen', 'poison'],
+            ['necrótic', 'necrotic'], ['necrot', 'necrotic'], ['morte', 'necrotic'], ['death', 'necrotic'],
+            ['radiante', 'radiant'], ['radiant', 'radiant'], ['divin', 'radiant'], ['sagrad', 'radiant'],
+            ['força', 'force'], ['force', 'force'], ['arcano', 'force'],
+            ['psíquic', 'psychic'], ['psychic', 'psychic'], ['mental', 'psychic'],
+            ['trovão', 'thunder'], ['thunder', 'thunder'], ['som', 'thunder'], ['sonor', 'thunder'],
+            ['mágic', 'magical'], ['magic', 'magical']
+        ];
+        var _STATUS_KEYWORDS = [
+            ['atordoa', 'stunned'], ['stun', 'stunned'],
+            ['paralisa', 'paralyzed'], ['paralyze', 'paralyzed'],
+            ['petrifica', 'petrified'], ['petrify', 'petrified'],
+            ['cego', 'blinded'], ['cegueira', 'blinded'], ['blind', 'blinded'],
+            ['amedrontad', 'frightened'], ['fright', 'frightened'], ['medo', 'frightened'],
+            ['envenen', 'poisoned'], ['poison', 'poisoned'],
+            ['preso', 'restrained'], ['restrain', 'restrained'],
+            ['agarrad', 'grappled'], ['grapple', 'grappled'],
+            ['enfeitiçad', 'charmed'], ['charm', 'charmed'],
+            ['derribad', 'prone'], ['prone', 'prone'], ['caído', 'prone'],
+            ['invisível', 'invisible'], ['invisib', 'invisible'],
+            ['dormindo', 'sleeping'], ['sleep', 'sleeping'], ['sono', 'sleeping'],
+            ['surpres', 'surprised'], ['surprise', 'surprised'],
+            ['inconscient', 'unconscious'], ['unconscious', 'unconscious'],
+            ['surdo', 'deafened'], ['deafen', 'deafened'],
+            ['incapacita', 'incapacitated'], ['incapacit', 'incapacitated'],
+            ['abençoa', 'blessed'], ['bless', 'blessed'], ['bênção', 'blessed'],
+            ['inspirad', 'inspired'], ['inspir', 'inspired'],
+            ['regener', 'regenerating'],
+            ['enfurec', 'enraged'], ['fúria', 'enraged'], ['rage', 'enraged'],
+            ['marcad', 'marked'], ['mark', 'marked'],
+            ['amaldiço', 'cursed'], ['curse', 'cursed'], ['hex', 'hexed'],
+            ['exposto', 'exposed'], ['expose', 'exposed'],
+            ['provocad', 'mocked'], ['mock', 'mocked'], ['provocação', 'mocked'],
+            ['enfraquec', 'weakened'], ['weaken', 'weakened'],
+            ['queim', 'burning'], ['burning', 'burning'], ['em chamas', 'burning'],
+            ['congel', 'frozen'], ['frozen', 'frozen'],
+            ['corro', 'corroded'], ['corrode', 'corroded'],
+            ['lentid', 'slowed'], ['lentidão', 'slowed'], ['slow', 'slowed'],
+            ['empurra', 'pushed'], ['knockback', 'pushed']
+        ];
+        function _detectElements(text) {
+            if (!text) return [];
+            var found = [];
+            var seen = {};
+            var lower = String(text).toLowerCase();
+            for (var i = 0; i < _ELEMENT_KEYWORDS.length; i++) {
+                var kw = _ELEMENT_KEYWORDS[i];
+                if (lower.indexOf(kw[0]) >= 0 && !seen[kw[1]]) {
+                    found.push(kw[1]); seen[kw[1]] = true;
+                }
+            }
+            return found;
+        }
+        function _detectStatus(text) {
+            if (!text) return [];
+            var found = [];
+            var seen = {};
+            var lower = String(text).toLowerCase();
+            for (var i = 0; i < _STATUS_KEYWORDS.length; i++) {
+                var kw = _STATUS_KEYWORDS[i];
+                if (lower.indexOf(kw[0]) >= 0 && !seen[kw[1]]) {
+                    found.push(kw[1]); seen[kw[1]] = true;
+                }
+            }
+            return found;
+        }
+        // Renderiza badges inline (icone + nome) — usado em skill detail
+        function _renderElementBadges(text) {
+            var els = _detectElements(text);
+            if (!els.length) return '';
+            return '<div class="skill-tag-row"><div class="skill-tag-label">Elementos</div><div class="skill-tag-pills">' +
+                   els.map(function(e) {
+                       return '<span class="skill-tag-pill elem-pill">' + _elementIconHtml(e) +
+                              '<span class="skill-tag-name">' + ELEMENT_PT[e] + '</span></span>';
+                   }).join('') + '</div></div>';
+        }
+        function _renderStatusBadges(text) {
+            var sts = _detectStatus(text);
+            if (!sts.length) return '';
+            return '<div class="skill-tag-row"><div class="skill-tag-label">Status aplicado</div><div class="skill-tag-pills">' +
+                   sts.map(function(s) {
+                       return '<span class="skill-tag-pill stat-pill">' + _statusIconHtml(s) +
+                              '<span class="skill-tag-name">' + STATUS_PT[s] + '</span></span>';
+                   }).join('') + '</div></div>';
         }
 
         (function init() {
@@ -1810,29 +2188,68 @@
             return html;
         }
 
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        // Talento \u2014 POPUP \u00c9PICO de confirma\u00e7\u00e3o (sess\u00e3o #26 v5)
+        // User: 'mostrar o popup \u00e9pico de confirma\u00e7\u00e3o com descri\u00e7\u00e3o
+        // detalhada do talento e a imagem gerada grande'
+        // Layout: hero PNG ~140px com aura dourada -> nome ornado ->
+        // descri\u00e7\u00e3o -> blocos efeito/b\u00f4nus/req -> CTA confirmar grande.
+        // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
         function openFeatDetail(fid) {
             const f = FEATS[fid];
             if (!f) return;
-
+            const slug = _featSlug(f.name);
+            const pngSrc = '../shared/img/feats/' + slug + '.png';
+            const isSel = sel.feat === fid;
 
             let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-            html += `<div class="section-title">${_featIconHtml(_featSlug(f.name))} ${f.name}</div>`;
-            html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px;line-height:1.4">${f.desc}</div>`;
 
+            // HERO: imagem grande com aura dourada + animacao de entrada
+            html += `<div class="feat-hero">
+                <div class="feat-hero-glow"></div>
+                <div class="feat-hero-rays"></div>
+                <img class="feat-hero-img" src="${pngSrc}" alt="${f.name}"
+                     onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
+                <div class="feat-hero-medal-fallback">\ud83c\udf96\ufe0f</div>
+            </div>`;
+            html += `<div class="feat-hero-name">${f.name}</div>`;
+            html += `<div class="feat-hero-divider">\u27e1 Talento \u27e1</div>`;
+            html += `<div class="feat-hero-desc">${f.desc}</div>`;
+
+            // Blocos de detalhes estruturados
             if (f.effect) {
-                html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.3"><b>Efeito:</b> ${f.effect}</div>`;
+                html += `<div class="feat-detail-block">
+                    <div class="feat-detail-label">Efeito mecânico</div>
+                    <div class="feat-detail-value">${f.effect}</div>
+                </div>`;
             }
             if (f.stat_choice) {
-                html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px"><b>Bônus:</b> +${f.stat_amount || 1} em ${f.stat_choice.map(a => ATTR_PT[a]).join(' ou ')}</div>`;
+                const amt = f.stat_amount || 1;
+                const opts = f.stat_choice.map(a => `<span class="feat-stat-pill">${_attrIconHtml(a)} ${ATTR_PT[a]}</span>`).join(' ou ');
+                html += `<div class="feat-detail-block">
+                    <div class="feat-detail-label">Bônus de atributo</div>
+                    <div class="feat-detail-value">+${amt} em ${opts}</div>
+                </div>`;
             }
             if (f.req_spellcaster) {
-                html += `<div style="font-size:12px;color:#e45;margin-bottom:8px"><b>Requisito:</b> Classe conjuradora</div>`;
+                html += `<div class="feat-detail-block feat-detail-warn">
+                    <div class="feat-detail-label">Requisito</div>
+                    <div class="feat-detail-value">Classe conjuradora</div>
+                </div>`;
             }
+            html += `<div class="feat-detail-block feat-detail-cost">
+                <div class="feat-detail-label">Custo</div>
+                <div class="feat-detail-value">-2 pontos de atributo</div>
+            </div>`;
 
-            html += `<div style="font-size:11px;color:var(--v-text-dim);margin-top:4px">Custo: 2 pontos de atributo</div>`;
-
-            html += `<button class="v-btn v-btn-primary" style="width:100%;margin-top:16px"
-        onclick="selectFeat('${fid}'); closeSubScreen()">Selecionar ${f.name}</button>`;
+            // CTA confirmação grande (ou remover se já selecionado)
+            if (isSel) {
+                html += `<button class="v-btn v-btn-secondary feat-cta" style="width:100%;margin-top:18px"
+            onclick="selectFeat(''); closeSubScreen()">↩ Remover Talento</button>`;
+            } else {
+                html += `<button class="v-btn v-btn-primary feat-cta" style="width:100%;margin-top:18px"
+            onclick="selectFeat('${fid}'); closeSubScreen()">✓ Confirmar ${f.name}</button>`;
+            }
 
             openSubScreen(html);
         }
@@ -1968,6 +2385,11 @@
             if (s.effect) html += `<div style="font-size:13px;color:#d4c8b0;margin-bottom:8px">\u2728 ${s.effect}</div>`;
             if (s.desc) html += `<div style="font-size:12px;color:#a09484;margin-bottom:8px;line-height:1.5">${s.desc}</div>`;
             if (s.tech) html += `<div style="font-size:11px;color:#8a7560;font-style:italic;line-height:1.4;padding:8px 10px;background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.3);border-radius:0 4px 4px 0">${s.tech}</div>`;
+
+            // Sess\u00e3o #26 v5: badges de elementos + status detectados no texto da skill
+            const _combined = [s.effect || '', s.desc || '', s.tech || ''].join(' ');
+            html += _renderElementBadges(_combined);
+            html += _renderStatusBadges(_combined);
 
             const isSel = sel.skills.includes(sid);
             const needed = Math.min(P.pending_skills, available.length);
