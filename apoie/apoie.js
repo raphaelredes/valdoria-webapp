@@ -73,8 +73,9 @@ function updateSliderOrbPosition() {
     var pct = max > min ? (val - min) / (max - min) : 0;
     var trackWidth = slider.offsetWidth;
     if (!trackWidth) return;
-    // Thumb nativo tem 32px; centro do thumb fica em [16, trackWidth - 16].
-    var thumbHalf = 16;
+    // Sessao #26 v4: thumb nativo + orb container = 40px (casados).
+    // Centro do thumb fica em [20, trackWidth - 20].
+    var thumbHalf = 20;
     var orbX = pct * (trackWidth - 2 * thumbHalf) + thumbHalf;
     orb.style.left = orbX + 'px';
 }

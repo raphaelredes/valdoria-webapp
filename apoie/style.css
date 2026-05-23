@@ -83,18 +83,25 @@ body::after{display:none!important}.ap-nav{position:fixed;top:0;left:0;right:0;z
 .ap-amount-slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:14px}
 .ap-amount-slider-label{font-family:var(--v-font-display,'Cinzel',serif);font-size:11px;color:var(--v-gold,#c4953a);letter-spacing:2px;text-transform:uppercase}
 .ap-amount-slider-display{font-family:var(--v-font-display,'Cinzel',serif);font-size:24px;font-weight:700;color:#fff4d0;letter-spacing:2px;text-shadow:0 0 12px rgba(255,210,90,0.5);min-width:120px;text-align:right}
-.ap-amount-slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,rgba(196,149,58,0.15),rgba(196,149,58,0.35));border-radius:4px;outline:none;cursor:pointer;margin:8px 0}
-/* === Slider thumb INVISIVEL — visual real e o overlay Orb de Valdoria (DOM) === */
-/* WebKit: thumb 32px transparente; o orb DOM sobreposto e o visual */
-.ap-amount-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:32px;height:32px;border-radius:50%;background:transparent;border:none;box-shadow:none;cursor:grab;margin-top:-12px}
+.ap-amount-slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,rgba(196,149,58,0.15),rgba(196,149,58,0.35));border-radius:4px;outline:none;cursor:pointer;margin:8px 0;position:relative;z-index:2}
+/* === Slider thumb INVISIVEL — visual real e o overlay Orb de Valdoria (DOM).
+   Sessao #26 v4 (user request): orb DEVE ficar do tamanho da barra para ser
+   arrastada confortavelmente. Antes era 32px native + 48px orb container +
+   scale 0.30 (esfera visivel apenas ~24px). Agora native + orb container +
+   scale CASAM em 40px — esfera visivel = native thumb = touch area.
+   Track 8px * 5 = 40px (proporcao classica de slider thumb). === */
+.ap-amount-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:40px;height:40px;border-radius:50%;background:transparent;border:none;box-shadow:none;cursor:grab;margin-top:-16px}
 .ap-amount-slider::-webkit-slider-thumb:active{cursor:grabbing}
-.ap-amount-slider::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:transparent;border:none;cursor:grab}
+.ap-amount-slider::-moz-range-thumb{width:40px;height:40px;border-radius:50%;background:transparent;border:none;cursor:grab}
 .ap-amount-slider::-moz-range-thumb:active{cursor:grabbing}
 
 /* === Track wrapper + DOM Orb overlay (realistic v5 escalado) === */
 .ap-amount-slider-track{position:relative;width:100%}
-.ap-amount-slider-thumb-orb{position:absolute;top:50%;left:0;width:48px;height:48px;transform:translate(-50%,-50%);pointer-events:none;z-index:3;will-change:left;transition:left 0.05s linear}
-.ap-amount-slider-thumb-orb .ap-cenario-orb-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.30);transform-origin:center;margin:0;width:160px;height:100px}
+.ap-amount-slider-thumb-orb{position:absolute;top:50%;left:0;width:40px;height:40px;transform:translate(-50%,-50%);pointer-events:none;z-index:3;will-change:left}
+/* Scale 0.50: esfera 80px * 0.50 = 40px (CASA com container + native thumb) */
+.ap-amount-slider-thumb-orb .ap-cenario-orb-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.50);transform-origin:center;margin:0;width:160px;height:100px;animation:none !important}
+.ap-amount-slider-thumb-orb .ap-cenario-orb{animation:apOrbFloatSlider 6s ease-in-out infinite}
+@keyframes apOrbFloatSlider{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 /* Pulse halo quando arrasta */
 .ap-amount-slider:active~.ap-amount-slider-thumb-orb{filter:drop-shadow(0 0 12px rgba(255,210,90,0.6))}
 .ap-amount-slider-thumb-orb.ap-orb-pulse{animation:apOrbPulse 1.6s ease-in-out infinite}
