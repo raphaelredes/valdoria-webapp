@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-23T00:07:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-23T00:21:12Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -14334,32 +14334,46 @@ body.perf-lite .stub-popup-voice { animation: none; }
     + ' has_snap=' + (window.__EXPLORE_SNAP_B64 ? 'yes' : 'no')
     + ' has_delta=' + (window.__EXPLORE_DELTA_B64 ? 'yes' : 'no'));
 
-  // Sessão #26 (2026-05-22) USER REQUEST: Levelup é tela MAIS IMPORTANTE.
+  // Sessão #26 v3 (2026-05-22) USER REQUEST: Levelup é tela MAIS IMPORTANTE.
   // Quando player acessa exploracao com pending_asi/pending_skills, redireciona
-  // IMEDIATAMENTE pra cidade (que vai detectar via /api/game/state e mandar pro
-  // /levelup/). Isso garante que mesmo se player entrar direto via URL antigo,
-  // o levelup tem precedência sobre exploracao.
+  // IMEDIATAMENTE pra /levelup/. Isso garante que mesmo se player entrar direto
+  // via URL antigo, o levelup tem precedência sobre exploracao.
+  //
+  // OPTIMIZAÇÕES (revise):
+  //  - Skip check quando vindo da cidade (?from=cidade ou ?o=navigate com snap):
+  //    cidade já fez o check via state.transition. Re-fazer é redundante + latency.
+  //  - AbortController com 5s timeout: API lenta não bloqueia boot
+  //  - Loader visível: user vê "Detectando evolução..." antes do redirect
   if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE) {
-    (function _forceLevelupCheck(){
-      try {
-        fetch(window.__EXPLORE_API_BASE + '/api/game/state', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: window.__EXPLORE_USER_ID || 0 })
-        }).then(function(r){ if (!r.ok) throw new Error('state HTTP ' + r.status); return r.json(); })
-          .then(function(state){
-            if (state && state.transition && state.transition.to === 'levelup' && state.transition.url) {
-              console.warn('[EXPLORE] pending levelup detected — forcing redirect (user request: levelup is top priority)');
-              window.__valdoria_transitioning = true;
-              try { if (window._vTransitionLoader) window._vTransitionLoader.show('Você tem evolução pendente — abrindo...'); } catch(_){}
-              window.location.replace(state.transition.url);
-            }
-          }).catch(function(e){
-            console.warn('[EXPLORE] pending levelup check failed:', e);
-            // Não bloqueia exploração se check falhar — usuário pode estar offline ou API com problema
-          });
-      } catch(eL) { console.warn('[EXPLORE] levelup pre-check exception:', eL); }
-    })();
+    var _qsHint = new URLSearchParams(location.search);
+    var _fromCidade = (_qsHint.get('from') === 'cidade') || (_qsHint.get('o') === 'navigate' && !!_qsHint.get('snap'));
+    if (_fromCidade) {
+      console.info('[EXPLORE] levelup pre-check skipped — fresh from cidade (already checked)');
+    } else {
+      (function _forceLevelupCheck(){
+        try {
+          var _ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+          var _timeoutId = setTimeout(function(){ if (_ctrl) _ctrl.abort(); }, 5000);
+          fetch(window.__EXPLORE_API_BASE + '/api/game/state', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: window.__EXPLORE_USER_ID || 0 }),
+            signal: _ctrl ? _ctrl.signal : undefined
+          }).then(function(r){ clearTimeout(_timeoutId); if (!r.ok) throw new Error('state HTTP ' + r.status); return r.json(); })
+            .then(function(state){
+              if (state && state.transition && state.transition.to === 'levelup' && state.transition.url) {
+                console.warn('[EXPLORE] pending levelup detected — forcing redirect (user request: levelup is top priority)');
+                window.__valdoria_transitioning = true;
+                try { if (window._vTransitionLoader) window._vTransitionLoader.show('Evolução pendente — abrindo...'); } catch(_){}
+                window.location.replace(state.transition.url);
+              }
+            }).catch(function(e){
+              clearTimeout(_timeoutId);
+              console.warn('[EXPLORE] pending levelup check failed (non-blocking):', e && e.message);
+            });
+        } catch(eL) { console.warn('[EXPLORE] levelup pre-check exception:', eL); }
+      })();
+    }
   }
 })();
 

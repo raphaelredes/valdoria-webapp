@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-23T00:07:33Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-23T00:21:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12706,27 +12706,13 @@ if (window.__COMBAT_IS_REMOTE_SESSION) {
        é mais necessário. */
     window.__COMBAT_MODE = 'local';
 
-    /* Sessão #26 (2026-05-22) USER REQUEST: Levelup é tela MAIS IMPORTANTE.
-       Mesmo em combate, se player tem pending_asi/pending_skills, redireciona
-       imediatamente pra cidade (que via /api/game/state vai mandar pro /levelup/).
-       Protege user de combater sem ter feito as escolhas de evolução. */
-    (function _combatLevelupCheck(){
-        try {
-            var uid = parseInt(new URLSearchParams(location.search).get('uid'), 10) || 0;
-            fetch(window.__COMBAT_API_BASE + '/api/game/state', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + window.__COMBAT_TOKEN, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: uid })
-            }).then(function(r){ if (!r.ok) throw new Error('state HTTP ' + r.status); return r.json(); })
-              .then(function(state){
-                  if (state && state.transition && state.transition.to === 'levelup' && state.transition.url) {
-                      console.warn('[C-REM:LEVELUP] pending levelup detected — forcing redirect (user request: levelup is top priority)');
-                      window.__valdoria_transitioning = true;
-                      window.location.replace(state.transition.url);
-                  }
-              }).catch(function(e){ console.warn('[C-REM:LEVELUP] pre-check failed:', e); });
-        } catch(eL) { console.warn('[C-REM:LEVELUP] pre-check exception:', eL); }
-    })();
+    /* Sessão #26 v3 (2026-05-22) REVISE: Levelup check REMOVIDO de combate.
+       Mid-combat reload (F5) com pending levelup causaria perda de estado de
+       turno/iniciativa. Backend pode retornar transition.to=levelup mesmo
+       in-combat (has_pending_levelup é checado independente de combat state).
+       SAFER: combate sempre completa primeiro, cidade detecta levelup na volta.
+       Player request "levelup acima de tudo" continua atendido em cidade +
+       exploracao (boot checks) + /play/ entry point. */
 }
 
 /* [C-REM:LOG-RELAY] Inline log relay (port de shared/log-relay.js).
