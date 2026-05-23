@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-22T23:43:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-23T00:07:28Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -14333,6 +14333,34 @@ body.perf-lite .stub-popup-voice { animation: none; }
     + ' origin=' + window.__EXPLORE_ORIGIN
     + ' has_snap=' + (window.__EXPLORE_SNAP_B64 ? 'yes' : 'no')
     + ' has_delta=' + (window.__EXPLORE_DELTA_B64 ? 'yes' : 'no'));
+
+  // Sessão #26 (2026-05-22) USER REQUEST: Levelup é tela MAIS IMPORTANTE.
+  // Quando player acessa exploracao com pending_asi/pending_skills, redireciona
+  // IMEDIATAMENTE pra cidade (que vai detectar via /api/game/state e mandar pro
+  // /levelup/). Isso garante que mesmo se player entrar direto via URL antigo,
+  // o levelup tem precedência sobre exploracao.
+  if (window.__EXPLORE_MODE === 'remote' && window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE) {
+    (function _forceLevelupCheck(){
+      try {
+        fetch(window.__EXPLORE_API_BASE + '/api/game/state', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: window.__EXPLORE_USER_ID || 0 })
+        }).then(function(r){ if (!r.ok) throw new Error('state HTTP ' + r.status); return r.json(); })
+          .then(function(state){
+            if (state && state.transition && state.transition.to === 'levelup' && state.transition.url) {
+              console.warn('[EXPLORE] pending levelup detected — forcing redirect (user request: levelup is top priority)');
+              window.__valdoria_transitioning = true;
+              try { if (window._vTransitionLoader) window._vTransitionLoader.show('Você tem evolução pendente — abrindo...'); } catch(_){}
+              window.location.replace(state.transition.url);
+            }
+          }).catch(function(e){
+            console.warn('[EXPLORE] pending levelup check failed:', e);
+            // Não bloqueia exploração se check falhar — usuário pode estar offline ou API com problema
+          });
+      } catch(eL) { console.warn('[EXPLORE] levelup pre-check exception:', eL); }
+    })();
+  }
 })();
 
 // ---- LOG RELAY (remote only) ---------------------------------------------
@@ -38981,12 +39009,11 @@ function _xcartWireEvents() {
           ['token','uid','user_id','api','api_base','char','char_id','env'].forEach(function(k){
             var v = qs.get(k); if (v) nqs.set(k, v);
           });
-          // Sessão #26 (2026-05-22) BUG FIX: _skiprestore=1 previne /cidade/
-          // de fetchar /api/game/state e detectar stale last_screen_payload
-          // (ex: pending levelup de sessão anterior) que redirecionaria pro
-          // /play/?route=levelup em loop. Usuário clicou EXPLICITAMENTE em
-          // "Voltar pra Cidade" — quer ir pra cidade, não retomar fluxo pendente.
-          nqs.set('_skiprestore', '1');
+          // Sessão #26 v2 (2026-05-22) USER REQUEST: levelup é tela mais importante.
+          // Cidade SEMPRE detecta pending levelup via /api/game/state e redireciona
+          // pra /levelup/. NÃO usar _skiprestore aqui — user pediu que levelup tenha
+          // prioridade sobre qualquer outra tela. Se houver loop de stale URL, fix
+          // upstream é o backend regenerar URL fresh (já faz — token criado por call).
           var url = '/cidade/?' + nqs.toString();
           window.__valdoria_transitioning = true;
           if (window._vTransitionLoader) {

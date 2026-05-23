@@ -378,39 +378,65 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
         };
         var destPath = ROUTE_MAP[routeParam];
         if (destPath) {
-          /* Sessão #26 (2026-05-22) BUG FIX anti-loop:
-             User report: clica Voltar pra Cidade em cartografia exploracao,
-             aparece Toque para Iniciar e fica em loop. ROOT CAUSE: /cidade/
-             redireciona pra /play/?route=levelup baseado em stale
-             last_screen_payload, /play/ vai pra /levelup/, /levelup/ falha
-             auth com token stale (não tem sendData em browser), bounces
-             back pra /play/.
+          /* Sessão #26 v2 (2026-05-22) anti-loop:
+             USER REQUEST: levelup é a tela MAIS IMPORTANTE. Quando há pending,
+             player NÃO deve poder escapar. MAS se URL tem token stale (ex:
+             user refresh bookmark antigo /play/?route=levelup&token=expirado),
+             vai entrar em loop com /levelup/.
 
-             DEFENSE: detecta re-entry em /play/?route=X dentro de 30s da
-             última tentativa (sessionStorage flag). Se loop detectado, dropa
-             route + redireciona pra /cidade/?_skiprestore=1 (cidade pula
-             state restore + não re-dispara o redirect). */
+             DEFENSE inteligente:
+             - 1ª tentativa de route=levelup: tenta normal (pode funcionar com
+               token fresh do backend)
+             - Re-entry < 30s + < 3 strikes: REFRESH via cidade (cidade busca
+               fresh URL via /api/game/state que GERA novo token a cada call)
+             - 3+ strikes em < 30s: dá up, vai pra cidade com _skiprestore=1
+               (escape de emergência — backend está rejeitando todos tokens). */
           try {
             var loopKey = 'play_route_attempt_' + routeParam;
+            var strikesKey = 'play_route_strikes_' + routeParam;
             var lastTs = parseInt(sessionStorage.getItem(loopKey) || '0', 10);
+            var strikes = parseInt(sessionStorage.getItem(strikesKey) || '0', 10);
             var nowTs = Date.now();
             if (lastTs && (nowTs - lastTs) < 30000) {
-              sendLog('warn', 'route_loop_detected', { route: routeParam, gap_ms: nowTs - lastTs });
-              sessionStorage.removeItem(loopKey);
-              setTip('Restaurando sessão…');
-              setProgress(50, 'Recuperando da sessão anterior…');
+              strikes += 1;
+              sessionStorage.setItem(strikesKey, String(strikes));
+              sendLog('warn', 'route_loop_detected', { route: routeParam, gap_ms: nowTs - lastTs, strikes: strikes });
+
+              if (strikes >= 3) {
+                // 3+ strikes — give up, escape via _skiprestore (backend issue)
+                sendLog('error', 'route_loop_giveup_skiprestore', { route: routeParam, strikes: strikes });
+                sessionStorage.removeItem(loopKey);
+                sessionStorage.removeItem(strikesKey);
+                setTip('Restaurando sessão…');
+                setProgress(50, 'Recuperando da sessão anterior…');
+                setTimeout(function(){
+                  try { window.__valdoria_transitioning = true; } catch(_e){}
+                  _qs.delete('route');
+                  _qs.delete('p');
+                  _qs.set('_skiprestore', '1');
+                  if (!_qs.get('_cb')) _qs.set('_cb', String(Date.now()));
+                  window.location.replace('/cidade/?' + _qs.toString());
+                }, 500);
+                return;
+              }
+
+              // < 3 strikes — refresh via cidade (cidade vai buscar fresh URL)
+              sendLog('info', 'route_loop_refresh_via_cidade', { route: routeParam, strikes: strikes });
+              setTip('Atualizando sessão…');
+              setProgress(50, 'Buscando dados atualizados…');
               setTimeout(function(){
                 try { window.__valdoria_transitioning = true; } catch(_e){}
-                // Goto cidade with _skiprestore=1 to break loop
                 _qs.delete('route');
-                _qs.delete('p');
-                _qs.set('_skiprestore', '1');
+                _qs.delete('p');  // dropa payload stale, cidade vai pegar fresh
                 if (!_qs.get('_cb')) _qs.set('_cb', String(Date.now()));
+                // SEM _skiprestore — cidade DEVE buscar /api/game/state e
+                // redirecionar pra levelup com URL fresh (user request: levelup é prioridade).
                 window.location.replace('/cidade/?' + _qs.toString());
               }, 500);
               return;
             }
             sessionStorage.setItem(loopKey, String(nowTs));
+            sessionStorage.setItem(strikesKey, '1');
           } catch(_eLoop) {}
 
           setTip('Restaurando sessão…');
