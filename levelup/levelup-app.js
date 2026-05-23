@@ -154,7 +154,7 @@ function updateNavBtn() {
 var btn = document.getElementById('btnNext');
 var backBtn = document.getElementById('btnBack');
 if (cur === screens.length - 1) {
-btn.textContent = '⚔️ Confirmar Evolução';
+btn.textContent = '⚔️ Confirmar Subida';
 } else {
 btn.textContent = 'Continuar ▶';
 }
@@ -596,7 +596,7 @@ return null;
 function buildReview(el) {
 const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
 let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, não há como voltar.</div>`;
-html += `<div class="section-title">\ud83d\udcdc Resumo da Evolução</div>`;
+html += `<div class="section-title">\ud83d\udcdc Resumo da Subida de Nível</div>`;
 html += `<div class="review-section">
 <div class="review-section-title">\u2764\ufe0f Vitalidade</div>`;
 if (P.hp_gain) {
@@ -668,7 +668,7 @@ function resetSubmitState() {
 _submitted = false;
 var btn = document.getElementById('btnNext');
 btn.disabled = false;
-btn.textContent = '⚔️ Confirmar Evolução';
+btn.textContent = '⚔️ Confirmar Subida';
 document.getElementById('loadingOverlay').classList.remove('active');
 }
 var _submitted = false;
@@ -727,7 +727,7 @@ return;
 } else if (tg && tg.close) {
 window.__valdoria_transitioning=true;tg.close();
 } else {
-alert('Evolução confirmada!');
+alert('Subida de nível confirmada!');
 }
 } else {
 resetSubmitState();
@@ -750,7 +750,7 @@ if (document.visibilityState !== 'hidden') { resetSubmitState(); }
 if(window._dbg)console.debug('Level-up payload:', JSON.stringify(payload, null, 2));
 setTimeout(function() {
 resetSubmitState();
-alert('Evolução confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+alert('Subida de nível confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
 }, 800);
 }
 } catch (e) {

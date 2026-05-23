@@ -11,7 +11,7 @@
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420}</style>
     <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
-    <title>Evolução - Lendas de Valdória</title>
+    <title>Subiu de Nível — Lendas de Valdória</title>
     <link rel="stylesheet" href="../shared/fonts.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context -->
@@ -1096,6 +1096,15 @@
                         0 4px 10px rgba(0,0,0,0.5) !important;
         }
 
+        /* Sessão #26 v8: skill-meta-pills mesma estética do feat-hero */
+        .skill-meta-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 0 0 14px;
+        }
+
         /* ════════════════════════════════════════════════════════════
            SKILL TAG PILLS — Elementos + Status (sessão #26 v5)
            Detectados automaticamente via _detectElements / _detectStatus
@@ -1451,7 +1460,7 @@
     <!-- Submit loading (simple overlay, shown during apply) -->
     <div id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Confirmando evolução...</div>
+        <div class="loading-text">Confirmando subida de nível...</div>
     </div>
 
     <div class="lu-backdrop" id="luBackdrop" style="display:none">
@@ -1749,12 +1758,12 @@
                 const raw = params.get('p') || '';
                 if (!raw) {
                     console.error('[LEVELUP] Empty p param');
-                    showFatalError('Dados de evolução não encontrados. Feche e tente novamente.'); return;
+                    showFatalError('Dados do nível não encontrados. Feche e tente novamente.'); return;
                 }
                 P = JSON.parse(decodeBase64Utf8(raw));
             } catch (e) {
                 console.error('[LEVELUP] Payload decode failed. p length:', ((params.get('p')||'').length), 'error:', e.message);
-                showFatalError('Erro ao carregar dados de evolução. Feche e tente novamente.', e); return;
+                showFatalError('Erro ao carregar dados do nível. Feche e tente novamente.', e); return;
             }
             if (!P || !P.hero_class || !P.stats || typeof P.level !== 'number') {
                 showFatalError('Dados do personagem incompletos'); return;
@@ -1853,7 +1862,7 @@
             var btn = document.getElementById('btnNext');
             var backBtn = document.getElementById('btnBack');
             if (cur === screens.length - 1) {
-                btn.textContent = '⚔️ Confirmar Evolução';
+                btn.textContent = '⚔️ Confirmar Subida';
             } else {
                 btn.textContent = 'Continuar ▶';
             }
@@ -2383,14 +2392,27 @@
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
             const _slug = _skillSlug(s.name);
 
+            // Sess\u00e3o #26 v8 user request: 'fa\u00e7a a tela popup de habilidades
+            // ser t\u00e3o \u00e9pica quanto a tela de talentos'. Mesmo layout do
+            // openFeatDetail \u2014 hero PNG 140px + aura + raios + blocos.
             const dmg = calcDmgRange(s.effect);
-            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-            html += `<div style="display:flex;align-items:center;gap:12px;margin:8px 0 14px">
-                <div style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${_skillIconHtml(_slug).replace('skill-png-ico','skill-png-ico-lg')}</div>
-                <div class="section-title" style="margin:0">${s.name}</div>
-            </div>`;
+            const isSel = sel.skills.includes(sid);
+            const pngSrc = '../shared/img/combat/skills/' + _slug + '.png';
 
-            html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
+            let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
+
+            // HERO: PNG grande com aura dourada + raios cinematic
+            html += `<div class="feat-hero">
+                <div class="feat-hero-glow"></div>
+                <div class="feat-hero-rays"></div>
+                <img class="feat-hero-img" src="${pngSrc}" alt="${s.name}"
+                     onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
+                <div class="feat-hero-medal-fallback">\u26a1</div>
+            </div>`;
+            html += `<div class="feat-hero-name">${s.name}</div>`;
+            html += `<div class="feat-hero-divider">\u27e1 Habilidade \u27e1</div>`;
+
+            html += `<div class="skill-meta-pills">`;
             if (s.passive) {
                 html += '<span class="choice-card-badge badge-passive">Passiva</span>';
             } else {
@@ -2400,29 +2422,46 @@
             if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
             html += '</div>';
 
-            if (s.effect) html += `<div style="font-size:13px;color:#d4c8b0;margin-bottom:8px">\u2728 ${s.effect}</div>`;
-            if (s.desc) html += `<div style="font-size:12px;color:#a09484;margin-bottom:8px;line-height:1.5">${s.desc}</div>`;
-            if (s.tech) html += `<div style="font-size:11px;color:#8a7560;font-style:italic;line-height:1.4;padding:8px 10px;background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.3);border-radius:0 4px 4px 0">${s.tech}</div>`;
+            // Efeito mec\u00e2nico em bloco estruturado
+            if (s.effect) {
+                html += `<div class="feat-detail-block">
+                    <div class="feat-detail-label">Efeito</div>
+                    <div class="feat-detail-value">\u2728 ${s.effect}</div>
+                </div>`;
+            }
+            // Descri\u00e7\u00e3o narrativa centralizada (mesmo estilo feat-hero-desc)
+            if (s.desc) {
+                html += `<div class="feat-hero-desc">${s.desc}</div>`;
+            }
+            // Texto t\u00e9cnico D&D 5e em bloco diferenciado
+            if (s.tech) {
+                html += `<div class="feat-detail-block" style="background:rgba(0,0,0,0.30)">
+                    <div class="feat-detail-label">Regras D&D 5e</div>
+                    <div class="feat-detail-value" style="font-style:italic;color:#a09484">${s.tech}</div>
+                </div>`;
+            }
 
             // Sess\u00e3o #26 v5: badges de elementos + status detectados no texto da skill
             const _combined = [s.effect || '', s.desc || '', s.tech || ''].join(' ');
             html += _renderElementBadges(_combined);
             html += _renderStatusBadges(_combined);
 
-            const isSel = sel.skills.includes(sid);
+            // CTA grande no rodap\u00e9 (mesmo padr\u00e3o do feat-cta)
             const needed = Math.min(P.pending_skills, available.length);
             const atCapacity = !isSel && sel.skills.length >= needed;
-            html += `<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">`;
             if (atCapacity) {
-                html += `<div style="text-align:center;font-size:12px;color:#a08060;font-style:italic;padding:6px">J\u00e1 escolheu ${needed} habilidade${needed>1?'s':''}. Remova uma antes de pegar esta.</div>`;
-                html += `<button class="v-btn v-btn-secondary" style="width:100%" onclick="closeSubScreen()">Voltar</button>`;
+                html += `<div class="feat-detail-block feat-detail-warn" style="margin-top:18px">
+                    <div class="feat-detail-label">Capacidade atingida</div>
+                    <div class="feat-detail-value">J\u00e1 escolheu ${needed} habilidade${needed>1?'s':''}. Remova uma antes de pegar esta.</div>
+                </div>`;
+                html += `<button class="v-btn v-btn-secondary feat-cta" style="width:100%;margin-top:12px" onclick="closeSubScreen()">Voltar</button>`;
+            } else if (isSel) {
+                html += `<button class="v-btn v-btn-secondary feat-cta" style="width:100%;margin-top:18px"
+            onclick="toggleSkill('${sid}'); closeSubScreen()">\u21a9 Remover Habilidade</button>`;
             } else {
-                html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%"
-                    onclick="toggleSkill('${sid}'); closeSubScreen()">
-                    ${isSel ? '\u21a9 Remover Escolha' : '\u2713 Confirmar Esta Habilidade'}
-                </button>`;
+                html += `<button class="v-btn v-btn-primary feat-cta" style="width:100%;margin-top:18px"
+            onclick="toggleSkill('${sid}'); closeSubScreen()">\u2713 Confirmar ${s.name}</button>`;
             }
-            html += `</div>`;
 
             openSubScreen(html);
         }
@@ -2533,7 +2572,7 @@
                 html += '</div>';
             }
 
-            html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a evolução</div>';
+            html += '<div class="hint" style="margin-top:12px">Confirme suas escolhas para finalizar a subida de nível</div>';
             el.innerHTML = html;
         }
 
@@ -2544,7 +2583,7 @@
             _submitted = false;
             var btn = document.getElementById('btnNext');
             btn.disabled = false;
-            btn.textContent = '⚔️ Confirmar Evolução';
+            btn.textContent = '⚔️ Confirmar Subida';
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
@@ -2607,11 +2646,11 @@
                                 } else if (tg && tg.close) {
                                     tg.close();
                                 } else {
-                                    alert('Evolução confirmada!');
+                                    alert('Subida de nível confirmada!');
                                 }
                             } else {
                                 resetSubmitState();
-                                showFatalError('Erro ao aplicar evolução: ' + (data.error || 'Desconhecido'));
+                                showFatalError('Erro ao aplicar nível: ' + (data.error || 'Desconhecido'));
                             }
                         }).catch(function(e) {
                             resetSubmitState();
@@ -2631,7 +2670,7 @@
                     console.log('Level-up payload:', JSON.stringify(payload, null, 2));
                     setTimeout(function() {
                         resetSubmitState();
-                        alert('Evolução confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
+                        alert('Subida de nível confirmada! (modo teste)\n\n' + JSON.stringify(payload, null, 2));
                     }, 800);
                 }
             } catch (e) {
