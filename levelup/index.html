@@ -85,21 +85,22 @@
         }
 
         /* Class accent — overrides --lvl-accent for hero glow and aura colors */
-        .lvl-cinema[data-class="bardo"]       { --lvl-accent: #d061b5; --lvl-accent-rgb: 208,97,181; }
-        .lvl-cinema[data-class="mago"]        { --lvl-accent: #5b9dba; --lvl-accent-rgb: 91,157,186; }
-        .lvl-cinema[data-class="clerigo"]     { --lvl-accent: #f4d896; --lvl-accent-rgb: 244,216,150; }
-        .lvl-cinema[data-class="guerreiro"]   { --lvl-accent: #d05a3a; --lvl-accent-rgb: 208,90,58; }
-        .lvl-cinema[data-class="patrulheiro"] { --lvl-accent: #7dba5b; --lvl-accent-rgb: 125,186,91; }
-        .lvl-cinema[data-class="paladino"]    { --lvl-accent: #ffd560; --lvl-accent-rgb: 255,213,96; }
-        .lvl-cinema[data-class="barbaro"]     { --lvl-accent: #a04030; --lvl-accent-rgb: 160,64,48; }
-        .lvl-cinema[data-class="ladino"]      { --lvl-accent: #888888; --lvl-accent-rgb: 136,136,136; }
-        .lvl-cinema[data-class="feiticeiro"]  { --lvl-accent: #d04a4a; --lvl-accent-rgb: 208,74,74; }
-        .lvl-cinema[data-class="bruxo"]       { --lvl-accent: #a060d0; --lvl-accent-rgb: 160,96,208; }
-        .lvl-cinema[data-class="druida"]      { --lvl-accent: #5ba07d; --lvl-accent-rgb: 91,160,125; }
-        .lvl-cinema[data-class="monge"]       { --lvl-accent: #d4b86a; --lvl-accent-rgb: 212,184,106; }
+        /* Sessão #26 v2 (user req): cores menos claras — saturadas mas SEM lavar a tela */
+        .lvl-cinema[data-class="bardo"]       { --lvl-accent: #a04088; --lvl-accent-rgb: 160,64,136; }
+        .lvl-cinema[data-class="mago"]        { --lvl-accent: #3a7898; --lvl-accent-rgb: 58,120,152; }
+        .lvl-cinema[data-class="clerigo"]     { --lvl-accent: #c4953a; --lvl-accent-rgb: 196,149,58; }
+        .lvl-cinema[data-class="guerreiro"]   { --lvl-accent: #a04428; --lvl-accent-rgb: 160,68,40; }
+        .lvl-cinema[data-class="patrulheiro"] { --lvl-accent: #5a8a3a; --lvl-accent-rgb: 90,138,58; }
+        .lvl-cinema[data-class="paladino"]    { --lvl-accent: #c4953a; --lvl-accent-rgb: 196,149,58; }
+        .lvl-cinema[data-class="barbaro"]     { --lvl-accent: #8a3020; --lvl-accent-rgb: 138,48,32; }
+        .lvl-cinema[data-class="ladino"]      { --lvl-accent: #5a5a5a; --lvl-accent-rgb: 90,90,90; }
+        .lvl-cinema[data-class="feiticeiro"]  { --lvl-accent: #a03838; --lvl-accent-rgb: 160,56,56; }
+        .lvl-cinema[data-class="bruxo"]       { --lvl-accent: #6a3a90; --lvl-accent-rgb: 106,58,144; }
+        .lvl-cinema[data-class="druida"]      { --lvl-accent: #3a7858; --lvl-accent-rgb: 58,120,88; }
+        .lvl-cinema[data-class="monge"]       { --lvl-accent: #a08840; --lvl-accent-rgb: 160,136,64; }
         .lvl-cinema { --lvl-accent: var(--v-gold, #c4953a); --lvl-accent-rgb: 196,149,58; }
 
-        /* Backdrop aura burst PNG (OpenAI gpt-image-2 quality=low + rembg) — divine column light */
+        /* Backdrop aura burst PNG (sessão #26 v2: dimmed + soft-light blend pra não lavar) */
         .lvl-cinema-aura {
             position: absolute;
             left: 50%;
@@ -111,18 +112,18 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center top;
-            opacity: 0.42;
-            mix-blend-mode: screen;
+            opacity: 0.22;
+            mix-blend-mode: soft-light;
             z-index: 0;
             pointer-events: none;
             animation: lvlAuraBreath 4s ease-in-out infinite;
         }
         @keyframes lvlAuraBreath {
-            0%, 100% { opacity: 0.38; transform: translateX(-50%) scale(1); }
-            50%      { opacity: 0.55; transform: translateX(-50%) scale(1.05); }
+            0%, 100% { opacity: 0.18; transform: translateX(-50%) scale(1); }
+            50%      { opacity: 0.32; transform: translateX(-50%) scale(1.04); }
         }
 
-        /* Magic circle PNG behind portrait (rotating slowly) */
+        /* Magic circle PNG behind portrait (sessão #26 v2: opacity reduzida) */
         .lvl-cinema-magic-circle {
             position: absolute;
             top: 0px;
@@ -134,12 +135,12 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            opacity: 0.55;
-            mix-blend-mode: screen;
+            opacity: 0.28;
+            mix-blend-mode: soft-light;
             z-index: 2;
             pointer-events: none;
-            animation: lvlMagicCircleRotate 45s linear infinite;
-            filter: drop-shadow(0 0 12px rgba(var(--lvl-accent-rgb), 0.4));
+            animation: lvlMagicCircleRotate 60s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(var(--lvl-accent-rgb), 0.3));
         }
         @keyframes lvlMagicCircleRotate { to { transform: rotate(360deg); } }
 
@@ -237,70 +238,59 @@
             50%      { transform: scale(1.08); opacity: 0.85; }
         }
 
-        /* Hero portrait (class PNG) — glowing aura, scale-pulse */
+        /* Hero portrait (class PNG) — sem círculo, só drop-shadow + glow filter */
         .lvl-cinema-portrait {
             position: relative;
             width: 120px;
             height: 120px;
             margin: 0 auto;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid var(--lvl-accent);
-            box-shadow: 0 0 36px rgba(var(--lvl-accent-rgb), 0.55),
-                        0 0 18px rgba(var(--lvl-accent-rgb), 0.3) inset,
-                        0 6px 22px rgba(0,0,0,0.55);
             z-index: 4;
-            background: rgba(20, 14, 10, 0.4);
-            animation: lvlPortraitPulse 2.4s ease-in-out infinite;
+            animation: lvlPortraitPulse 3s ease-in-out infinite;
         }
         .lvl-cinema-portrait img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
-            filter: drop-shadow(0 0 6px rgba(var(--lvl-accent-rgb), 0.6));
+            filter: drop-shadow(0 0 14px rgba(var(--lvl-accent-rgb), 0.55))
+                    drop-shadow(0 0 6px rgba(var(--lvl-accent-rgb), 0.35))
+                    drop-shadow(0 4px 10px rgba(0,0,0,0.65));
         }
         @keyframes lvlPortraitPulse {
-            0%, 100% { box-shadow: 0 0 28px rgba(var(--lvl-accent-rgb), 0.45),
-                                  0 0 14px rgba(var(--lvl-accent-rgb), 0.25) inset,
-                                  0 6px 22px rgba(0,0,0,0.55); }
-            50%      { box-shadow: 0 0 48px rgba(var(--lvl-accent-rgb), 0.75),
-                                  0 0 22px rgba(var(--lvl-accent-rgb), 0.45) inset,
-                                  0 6px 22px rgba(0,0,0,0.55); }
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.03); }
         }
 
-        /* Tier medal badge (bronze/silver/gold/platinum/mithral) */
+        /* Tier medal — sem círculo borda, só PNG flutuante */
         .lvl-cinema-medal {
             position: absolute;
-            top: 100px;
-            left: calc(50% + 38px);
+            top: 110px;
+            left: calc(50% + 42px);
             width: 48px;
             height: 48px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            border: 2px solid var(--lvl-accent);
-            box-shadow: 0 0 14px rgba(var(--lvl-accent-rgb), 0.55), 0 3px 10px rgba(0,0,0,0.7);
             display: flex; align-items: center; justify-content: center;
             z-index: 5;
             animation: lvlMedalDrop 800ms cubic-bezier(0.34, 1.56, 0.64, 1) 350ms backwards;
+            filter: drop-shadow(0 0 10px rgba(var(--lvl-accent-rgb), 0.45))
+                    drop-shadow(0 3px 8px rgba(0,0,0,0.7));
         }
-        .lvl-cinema-medal img { width: 40px; height: 40px; object-fit: contain; }
+        .lvl-cinema-medal img { width: 100%; height: 100%; object-fit: contain; }
         @keyframes lvlMedalDrop {
             0%   { transform: translateY(-100px) scale(0.5) rotate(-180deg); opacity: 0; }
             70%  { transform: translateY(8px) scale(1.1) rotate(10deg); opacity: 1; }
             100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
         }
 
-        /* Massive level number — reveal with scale burst */
+        /* Massive level number (sessão #26 v2 — tom mais profundo, menos saturado) */
         .lvl-cinema-level {
             position: relative;
             font-family: 'Cinzel', serif;
             font-size: clamp(56px, 16vw, 80px);
             font-weight: 800;
-            color: var(--lvl-accent);
-            text-shadow: 0 0 28px rgba(var(--lvl-accent-rgb), 0.7),
-                         0 0 12px rgba(var(--lvl-accent-rgb), 0.9),
-                         0 4px 8px rgba(0, 0, 0, 0.8);
+            color: #d4c8b0;
+            text-shadow: 0 0 18px rgba(var(--lvl-accent-rgb), 0.45),
+                         0 0 8px rgba(var(--lvl-accent-rgb), 0.35),
+                         0 4px 10px rgba(0, 0, 0, 0.9);
             line-height: 1;
             margin-top: 14px;
             letter-spacing: 0.05em;
@@ -314,13 +304,13 @@
         }
 
         .lvl-cinema-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
-            color: var(--v-text);
+            color: var(--v-text-dim, #a09484);
             margin-top: 8px;
             text-transform: uppercase;
             letter-spacing: 3px;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.8), 0 0 12px rgba(var(--lvl-accent-rgb), 0.4);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.85);
             position: relative;
             z-index: 6;
             animation: lvlSubReveal 700ms ease 600ms backwards;
@@ -338,10 +328,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Sessão #26 (user request): fonte +50% no nome de classe + personagem */
         .lvl-cinema-class {
-            font-size: 11px;
-            color: var(--v-text-dim);
-            margin-top: 4px;
+            font-size: 17px;
+            color: var(--v-text, #d4c8b0);
+            margin-top: 6px;
             font-style: italic;
             letter-spacing: 0.5px;
             position: relative;
@@ -352,7 +343,10 @@
             color: var(--lvl-accent);
             font-style: normal;
             font-weight: 700;
-            text-shadow: 0 0 8px rgba(var(--lvl-accent-rgb), 0.4);
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(var(--lvl-accent-rgb), 0.5),
+                         0 2px 4px rgba(0,0,0,0.6);
         }
 
         /* Performance-tier guards */
@@ -884,6 +878,26 @@
         .skill-compact-icon {
             font-size: 16px;
             flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        /* PNG icon (sessão #26 v2: skills/feats PNG fallback emoji) */
+        .skill-png-ico {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 0 4px rgba(196,149,58,0.35));
+        }
+        .skill-png-ico-lg {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(196,149,58,0.5))
+                    drop-shadow(0 0 4px rgba(196,149,58,0.3))
+                    drop-shadow(0 3px 8px rgba(0,0,0,0.6));
         }
 
         .skill-compact-name {
@@ -1059,31 +1073,24 @@
             transition: transform var(--v-transition-fast);
         }
 
-        /* ─── DM narration bubble ─── */
+        /* ─── Narrative (sessão #26 v2 — estilo PADRAO_ALDRIC narration) ─── */
+        /* User pediu: remover 'MESTRE'. Substituído por narração pura sem speaker
+           label, gold border-left + bg sutil + italic igual narration de city/explore. */
         .dm-bubble {
             position: relative;
-            background: linear-gradient(165deg, rgba(196, 149, 58, 0.08) 0%, rgba(196, 149, 58, 0.02) 100%);
-            border-left: 3px solid var(--v-gold);
-            border-radius: 0 8px 8px 0;
-            padding: 10px 12px 10px 14px;
-            font-size: 12px;
-            color: var(--v-text);
+            background: linear-gradient(165deg, rgba(20,14,10,0.5) 0%, rgba(20,14,10,0.25) 100%);
+            border-left: 2px solid rgba(196,149,58,0.5);
+            border-radius: 0 6px 6px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #c8b896;
             font-style: italic;
-            margin-bottom: 10px;
-            line-height: 1.4;
+            line-height: 1.55;
+            margin-bottom: 12px;
+            letter-spacing: 0.2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
         }
-
-        .dm-bubble::before {
-            content: '\1F3B2 Mestre';
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--v-gold);
-            margin-bottom: 4px;
-            font-style: normal;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        /* ::before removido — sem label "MESTRE" (user request) */
 
         /* ─── Submit loading overlay (shown during apply) ─── */
         #loadingOverlay {
@@ -1275,6 +1282,25 @@
         function _heroSlug(hc) {
             if (!hc) return 'guerreiro';
             return HERO_CLASS_SLUG[String(hc).toUpperCase()] || String(hc).toLowerCase();
+        }
+
+        // Slugify (PT-BR sem acentos, kebab-case). Mesmo pattern usado no combat
+        // pra resolver skill PNG filename. Ex: 'Retomar Fôlego' -> 'retomar-folego'
+        function _skillSlug(name) {
+            if (!name) return '';
+            return String(name).normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+        function _skillIconHtml(slug) {
+            // Tenta carregar PNG do skills dir; onerror substitui por raio fallback
+            if (!slug) return '⚡';
+            return '<img class="skill-png-ico" src="../shared/img/combat/skills/' + slug +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u26a1\'"/>';
+        }
+        function _featIconHtml(slug) {
+            if (!slug) return '✨';
+            return '<img class="skill-png-ico" src="../shared/img/feats/' + slug +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
         }
 
         (function init() {
@@ -1505,7 +1531,7 @@
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
             const _slug = _heroSlug(P.hero_class);
             let html = `
-        <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
+        <div class="dm-bubble">Algo mudou em você. As batalhas, os caminhos percorridos, os companheiros encontrados — tudo se condensa neste momento. ${P.name} sente, no peito, uma corrente quente subir. <i>O próprio corpo parece reaprender o que sabia.</i></div>
         <div class="lvl-cinema" data-class="${_slug}" data-tier="${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}">
             <div class="lvl-cinema-aura"></div>
             <div class="lvl-cinema-magic-circle"></div>
@@ -1559,7 +1585,7 @@
             const subs = SUBCLASSES[P.hero_class] || {};
             const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
 
-            let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especializa\u00e7\u00e3o oferece poderes \u00fanicos...</div>
+            let html = `<div class="dm-bubble">A estrada se bifurca. Diante de voc\u00ea, tr\u00eas rumos. <i>Cada um pesa diferente nos ombros, e nenhum \u00e9 menor.</i> Escolha \u2014 n\u00e3o h\u00e1 volta depois.</div>
         <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
         <div class="hint">Escolha sua especializa\u00e7\u00e3o</div>
         <div id="subclassList">`;
@@ -1643,7 +1669,7 @@
             const availableFeats = getAvailableFeats();
             const hasFeats = Object.keys(availableFeats).length > 0 && totalPts >= 2;
 
-            let html = '<div class="dm-bubble">Distribua sua experiência adquirida para fortalecer seus atributos — ou escolha um talento especial.</div>';
+            let html = '<div class="dm-bubble">Há um peso novo no corpo, uma destreza nas mãos, uma clareza nos olhos. Distribua o que ganhou — <i>ou prefere algo mais raro, uma graça que poucos cultivam?</i></div>';
 
             if (hasFeats) {
                 html += `<div class="mode-toggle">
@@ -1854,19 +1880,22 @@
             const needed = Math.min(P.pending_skills, available.length);
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
 
-            let html = `<div class="dm-bubble">Novas técnicas de combate estão ao seu alcance. Escolha com sabedoria.</div>`;
+            let html = `<div class="dm-bubble">Treinos antigos voltam. Movimentos que você viu mestres fazerem, e que agora <i>seus próprios músculos lembram.</i> Escolha o que praticará daqui em diante.</div>`;
             html += `<div class="section-title">\u26a1 Habilidades</div>`;
             html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
 
+            // Sess\u00e3o #26 v2 (user request): ao clicar, abre detail+confirm direto.
+            // Removido toggle silencioso + bot\u00e3o (i) redundante. Comportamento agora:
+            // clica row \u2192 v\u00ea descri\u00e7\u00e3o completa + custo + dano \u2192 confirma na sub-screen.
             for (const s of available) {
                 const isSel = sel.skills.includes(s.id);
-                html += `<div class="skill-compact${isSel ? ' selected' : ''}" onclick="toggleSkill('${s.id}')">
+                const _slug = _skillSlug(s.name);
+                html += `<div class="skill-compact${isSel ? ' selected' : ''}" onclick="openSkillDetail('${s.id}')">
             <div class="skill-compact-check">${isSel ? '\u2713' : ''}</div>
-            <span class="skill-compact-icon">\u26a1</span>
+            <span class="skill-compact-icon">${_skillIconHtml(_slug)}</span>
             <span class="skill-compact-name">${s.name}</span>
             ${s.passive ? '<span class="choice-card-badge badge-passive">Passiva</span>' :
                         `<span class="choice-card-badge badge-cost">${s.cost} ${info.resource}</span>`}
-            <button class="info-btn" onclick="event.stopPropagation(); openSkillDetail('${s.id}')">i</button>
         </div>`;
             }
 
@@ -1882,10 +1911,14 @@
             const s = available.find(sk => sk.id === sid);
             if (!s) return;
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
+            const _slug = _skillSlug(s.name);
 
             const dmg = calcDmgRange(s.effect);
             let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-            html += `<div class="section-title">\u26a1 ${s.name}</div>`;
+            html += `<div style="display:flex;align-items:center;gap:12px;margin:8px 0 14px">
+                <div style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${_skillIconHtml(_slug).replace('skill-png-ico','skill-png-ico-lg')}</div>
+                <div class="section-title" style="margin:0">${s.name}</div>
+            </div>`;
 
             html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">`;
             if (s.passive) {
@@ -1897,15 +1930,24 @@
             if (dmg) html += `<span class="choice-card-badge" style="background:rgba(228,68,85,0.15);color:#e45">${dmg} dano</span>`;
             html += '</div>';
 
-            if (s.effect) html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px">\u2728 ${s.effect}</div>`;
-            if (s.desc) html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:8px;line-height:1.4">${s.desc}</div>`;
-            if (s.tech) html += `<div style="font-size:11px;color:var(--v-text-dim);font-style:italic;line-height:1.3">${s.tech}</div>`;
+            if (s.effect) html += `<div style="font-size:13px;color:#d4c8b0;margin-bottom:8px">\u2728 ${s.effect}</div>`;
+            if (s.desc) html += `<div style="font-size:12px;color:#a09484;margin-bottom:8px;line-height:1.5">${s.desc}</div>`;
+            if (s.tech) html += `<div style="font-size:11px;color:#8a7560;font-style:italic;line-height:1.4;padding:8px 10px;background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.3);border-radius:0 4px 4px 0">${s.tech}</div>`;
 
             const isSel = sel.skills.includes(sid);
-            html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
-        onclick="toggleSkill('${sid}'); closeSubScreen()">
-        ${isSel ? '\u2713 Selecionada' : 'Selecionar Habilidade'}
-    </button>`;
+            const needed = Math.min(P.pending_skills, available.length);
+            const atCapacity = !isSel && sel.skills.length >= needed;
+            html += `<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">`;
+            if (atCapacity) {
+                html += `<div style="text-align:center;font-size:12px;color:#a08060;font-style:italic;padding:6px">J\u00e1 escolheu ${needed} habilidade${needed>1?'s':''}. Remova uma antes de pegar esta.</div>`;
+                html += `<button class="v-btn v-btn-secondary" style="width:100%" onclick="closeSubScreen()">Voltar</button>`;
+            } else {
+                html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%"
+                    onclick="toggleSkill('${sid}'); closeSubScreen()">
+                    ${isSel ? '\u21a9 Remover Escolha' : '\u2713 Confirmar Esta Habilidade'}
+                </button>`;
+            }
+            html += `</div>`;
 
             openSubScreen(html);
         }
@@ -1943,7 +1985,7 @@
         // ═══════════════════════════════════════════════
         function buildReview(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
-            let html = `<div class="dm-bubble">Revise suas escolhas antes de confirmar. Uma vez feitas, n\u00e3o h\u00e1 como voltar.</div>`;
+            let html = `<div class="dm-bubble">Olhe o que escolheu. <i>O caminho fica registrado em quem voc\u00ea \u00e9, daqui em diante.</i> Confirma?</div>`;
             html += `<div class="section-title">\ud83d\udcdc Resumo da Evolu\u00e7\u00e3o</div>`;
 
             // HP/MP gains
