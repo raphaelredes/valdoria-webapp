@@ -794,6 +794,19 @@
             background: var(--v-gold);
             color: #1a1a1a;
         }
+        /* Sessão #26 v5: chevron sinaliza "clique para ver detalhes" */
+        .choice-card-chevron {
+            font-size: 18px;
+            color: var(--v-gold, #c4953a);
+            opacity: 0.6;
+            margin-left: 4px;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .choice-card:hover .choice-card-chevron,
+        .choice-card:active .choice-card-chevron {
+            opacity: 1;
+            transform: translateX(3px);
+        }
 
         /* ─── Detail link ─── */
         .detail-link {
@@ -2138,7 +2151,9 @@
 
             if (sel.feat) {
                 const f = FEATS[sel.feat];
-                html += `<div class="choice-card selected" onclick="selectFeat('')">
+                // Sess\u00e3o #26 v5: card selecionado clica pra reabrir popup \u00e9pico
+                // (revis\u00e3o da escolha + op\u00e7\u00e3o remover). Removeu toggle silencioso.
+                html += `<div class="choice-card selected" onclick="openFeatDetail('${sel.feat}')">
             <div class="choice-card-header">
                 <div class="choice-card-icon">${_featIconHtml(_featSlug(f.name))}</div>
                 <div class="choice-card-name">${f.name}</div>
@@ -2172,12 +2187,15 @@
                 } else {
                     html += '<div class="feat-scroll-list">';
                     for (const [fid, f] of featEntries) {
-                        html += `<div class="choice-card" onclick="selectFeat('${fid}')">
+                        // Sessão #26 v5: clicar no card abre o popup épico de
+                        // confirmação direto (não seleciona silenciosamente).
+                        // Botão (i) redundante removido — card inteiro é a CTA.
+                        html += `<div class="choice-card" onclick="openFeatDetail('${fid}')">
                     <div class="choice-card-header">
                         <div class="choice-card-icon">${_featIconHtml(_featSlug(f.name))}</div>
                         <div class="choice-card-name">${f.name}</div>
                         <div class="choice-card-badge badge-cost">-2 pts</div>
-                        <button class="info-btn" onclick="event.stopPropagation(); openFeatDetail('${fid}')">i</button>
+                        <div class="choice-card-chevron">▸</div>
                     </div>
                 </div>`;
                     }
