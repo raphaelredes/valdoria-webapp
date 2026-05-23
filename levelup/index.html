@@ -1489,9 +1489,9 @@
         // ═══════════════════════════════════════════════
         // SCREEN: SUMMARY
         // ═══════════════════════════════════════════════
-        // Mapa hero_class (EN enum) -> PNG slug (PT-BR) + data-class CSS attribute
-        // PNG files em /shared/img/combat/{slug}.png e mappings no .lvl-cinema CSS.
-        const HERO_CLASS_SLUG = {
+        // Mapa hero_class (EN enum) -> PNG slug (PT-BR). VAR pra ser hoisted
+        // (const tem Temporal Dead Zone se acessado antes da linha).
+        var HERO_CLASS_SLUG = {
             'BARD': 'bardo', 'WIZARD': 'mago', 'MAGE': 'mago', 'CLERIC': 'clerigo',
             'FIGHTER': 'guerreiro', 'RANGER': 'patrulheiro', 'PALADIN': 'paladino',
             'BARBARIAN': 'barbaro', 'ROGUE': 'ladino', 'SORCERER': 'feiticeiro',
