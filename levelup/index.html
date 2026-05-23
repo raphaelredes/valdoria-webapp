@@ -899,6 +899,14 @@
                     drop-shadow(0 0 4px rgba(196,149,58,0.3))
                     drop-shadow(0 3px 8px rgba(0,0,0,0.6));
         }
+        /* Context-specific PNG sizing (sessão #26 v3): pending categorias, asi atributos,
+           choice-card feats, review icons. Antes era 28px fixo — fica pequeno em alguns
+           contextos. Agora cada container tem seu tamanho ideal. */
+        .pending-icon .skill-png-ico { width: 30px; height: 30px; }
+        .asi-icon .skill-png-ico { width: 26px; height: 26px; }
+        .choice-card-icon .skill-png-ico { width: 26px; height: 26px; }
+        .section-title .skill-png-ico { width: 22px; height: 22px; display: inline-block; vertical-align: middle; }
+        .review-label .skill-png-ico { width: 18px; height: 18px; display: inline-block; vertical-align: middle; }
 
         .skill-compact-name {
             flex: 1;
@@ -1302,6 +1310,33 @@
             return '<img class="skill-png-ico" src="../shared/img/feats/' + slug +
                    '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
         }
+        // Talentos: nome PT-BR (data.js FEATS[].name) -> slug. Slugify igual a _skillSlug.
+        function _featSlug(name) {
+            if (!name) return '';
+            return String(name).normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+        // Atributos: chave EN (strength/dexterity/...) -> slug PT (forca/destreza/...)
+        // PNGs gerados em scripts/gen_levelup_attrs_cats.py (~$0.36 nos 6 attrs).
+        var ATTR_SLUG_MAP = {
+            'strength': 'forca', 'dexterity': 'destreza', 'constitution': 'constituicao',
+            'intelligence': 'inteligencia', 'wisdom': 'sabedoria', 'charisma': 'carisma'
+        };
+        function _attrIconHtml(attr, sz) {
+            var slug = ATTR_SLUG_MAP[attr];
+            if (!slug) return (window.ATTR_ICONS && ATTR_ICONS[attr]) || '◆';
+            var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
+            var fallback = (window.ATTR_ICONS && ATTR_ICONS[attr]) || '\\u25c6';
+            return '<img class="' + cls + '" src="../shared/img/levelup/attrs/' + slug +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
+        }
+        // Categorias (subclasse, atributos, habilidades): seção do hub e cards pendentes.
+        function _catIconHtml(cat, sz) {
+            if (!cat) return '◆';
+            var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
+            return '<img class="' + cls + '" src="../shared/img/levelup/categories/' + cat +
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u25c6\'"/>';
+        }
 
         (function init() {
             const params = new URLSearchParams(location.search);
@@ -1554,21 +1589,21 @@
 
             if (P.needs_subclass) {
                 html += `<div class="pending-item">
-            <div class="pending-icon">\ud83c\udff0</div>
+            <div class="pending-icon">${_catIconHtml('subclasse')}</div>
             <div class="pending-text"><b>Subclasse</b><small>Escolha obrigatória no nível 3+</small></div>
             <div class="pending-badge">1</div>
         </div>`;
             }
             if (P.pending_asi > 0) {
                 html += `<div class="pending-item">
-            <div class="pending-icon">\ud83d\udcaa</div>
+            <div class="pending-icon">${_catIconHtml('atributos')}</div>
             <div class="pending-text"><b>Pontos de Atributo</b><small>Distribua entre seus atributos</small></div>
             <div class="pending-badge">${P.pending_asi}</div>
         </div>`;
             }
             if (P.pending_skills > 0) {
                 html += `<div class="pending-item">
-            <div class="pending-icon">\u26a1</div>
+            <div class="pending-icon">${_catIconHtml('habilidades')}</div>
             <div class="pending-text"><b>Novas Habilidades</b><small>Escolha do pool da sua classe</small></div>
             <div class="pending-badge">${P.pending_skills}</div>
         </div>`;
@@ -1586,7 +1621,7 @@
             const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
 
             let html = `<div class="dm-bubble">A estrada se bifurca. Diante de voc\u00ea, tr\u00eas rumos. <i>Cada um pesa diferente nos ombros, e nenhum \u00e9 menor.</i> Escolha \u2014 n\u00e3o h\u00e1 volta depois.</div>
-        <div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
+        <div class="section-title">${_catIconHtml('subclasse')} Subclasse: ${info.name}</div>
         <div class="hint">Escolha sua especializa\u00e7\u00e3o</div>
         <div id="subclassList">`;
 
@@ -1598,7 +1633,7 @@
                     const isSel = sel.subclass === scId;
                     html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
                 <div class="choice-card-header">
-                    <div class="choice-card-icon">\ud83c\udff0</div>
+                    <div class="choice-card-icon">${_catIconHtml('subclasse')}</div>
                     <div class="choice-card-name">${sc.name}</div>
                     <div class="choice-card-check">${isSel ? '\u2713' : ''}</div>
                 </div>
@@ -1704,7 +1739,7 @@
                 const maxed = val >= 20;
 
                 html += `<div class="asi-card${maxed && boost === 0 ? ' maxed' : ''}">
-            <div class="asi-icon">${ATTR_ICONS[attr]}</div>
+            <div class="asi-icon">${_attrIconHtml(attr)}</div>
             <div class="asi-name">${ATTR_ABBR[attr]}</div>
             <div class="asi-value">${val}</div>
             <div class="asi-mod">(${fmtMod(val)})</div>
@@ -1727,7 +1762,7 @@
                 const f = FEATS[sel.feat];
                 html += `<div class="choice-card selected" onclick="selectFeat('')">
             <div class="choice-card-header">
-                <div class="choice-card-icon">\ud83c\udf96\ufe0f</div>
+                <div class="choice-card-icon">${_featIconHtml(_featSlug(f.name))}</div>
                 <div class="choice-card-name">${f.name}</div>
                 <div class="choice-card-badge badge-cost">-2 pts</div>
                 <div class="choice-card-check">\u2713</div>
@@ -1743,7 +1778,7 @@
                         const isSel = sel.featStat === attr;
                         html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectFeatStat('${attr}')">
                     <div class="choice-card-header">
-                        <div class="choice-card-icon">${ATTR_ICONS[attr]}</div>
+                        <div class="choice-card-icon">${_attrIconHtml(attr)}</div>
                         <div class="choice-card-name">${ATTR_PT[attr]} (${curVal} \u2192 ${curVal + amt})</div>
                         <div class="choice-card-check">${isSel ? '\u2713' : ''}</div>
                     </div>
@@ -1761,7 +1796,7 @@
                     for (const [fid, f] of featEntries) {
                         html += `<div class="choice-card" onclick="selectFeat('${fid}')">
                     <div class="choice-card-header">
-                        <div class="choice-card-icon">\ud83c\udf96\ufe0f</div>
+                        <div class="choice-card-icon">${_featIconHtml(_featSlug(f.name))}</div>
                         <div class="choice-card-name">${f.name}</div>
                         <div class="choice-card-badge badge-cost">-2 pts</div>
                         <button class="info-btn" onclick="event.stopPropagation(); openFeatDetail('${fid}')">i</button>
@@ -1781,7 +1816,7 @@
 
 
             let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-            html += `<div class="section-title">\ud83c\udf96\ufe0f ${f.name}</div>`;
+            html += `<div class="section-title">${_featIconHtml(_featSlug(f.name))} ${f.name}</div>`;
             html += `<div style="font-size:13px;color:var(--v-text);margin-bottom:8px;line-height:1.4">${f.desc}</div>`;
 
             if (f.effect) {
@@ -1881,7 +1916,7 @@
             const info = CLASS_INFO[P.hero_class] || { resource: 'MP' };
 
             let html = `<div class="dm-bubble">Treinos antigos voltam. Movimentos que você viu mestres fazerem, e que agora <i>seus próprios músculos lembram.</i> Escolha o que praticará daqui em diante.</div>`;
-            html += `<div class="section-title">\u26a1 Habilidades</div>`;
+            html += `<div class="section-title">${_catIconHtml('habilidades')} Habilidades</div>`;
             html += `<div class="asi-counter">Selecionadas: <b>${sel.skills.length}</b> / <b>${needed}</b></div>`;
 
             // Sess\u00e3o #26 v2 (user request): ao clicar, abre detail+confirm direto.
@@ -2005,7 +2040,7 @@
                 const subs = SUBCLASSES[P.hero_class] || {};
                 const sc = subs[sel.subclass];
                 html += `<div class="review-section">
-            <div class="review-section-title">\ud83c\udff0 Subclasse</div>
+            <div class="review-section-title">${_catIconHtml('subclasse')} Subclasse</div>
             <div class="review-row"><span class="review-label">Escolha:</span>
             <span class="review-value"><span class="changed">${sc ? sc.name : sel.subclass}</span> <span class="new-badge">Novo</span></span></div>
         </div>`;
@@ -2030,12 +2065,12 @@
             const asiEntries = Object.entries(sel.asi).filter(([_, v]) => v > 0);
             if (asiEntries.length > 0) {
                 html += `<div class="review-section">
-            <div class="review-section-title">\ud83d\udcaa Atributos</div>`;
+            <div class="review-section-title">${_catIconHtml('atributos')} Atributos</div>`;
                 for (const [attr, boost] of asiEntries) {
                     const before = P.stats[attr];
                     const after = before + boost;
                     html += `<div class="review-row">
-                <span class="review-label">${ATTR_ICONS[attr]} ${ATTR_PT[attr]}</span>
+                <span class="review-label">${_attrIconHtml(attr)} ${ATTR_PT[attr]}</span>
                 <span class="review-value">${before} <span class="arrow">\u2192</span> <span class="changed">${after}</span> (${fmtMod(after)})</span>
             </div>`;
                 }
@@ -2044,7 +2079,7 @@
 
             if (sel.skills.length > 0) {
                 html += `<div class="review-section">
-            <div class="review-section-title">\u26a1 Habilidades</div>`;
+            <div class="review-section-title">${_catIconHtml('habilidades')} Habilidades</div>`;
                 const pool = CLASS_SKILLS[P.hero_class] || {};
                 for (const sid of sel.skills) {
                     let sName = sid;
@@ -2052,7 +2087,7 @@
                         const found = skills.find(s => s.id === sid);
                         if (found) { sName = found.name; break; }
                     }
-                    html += `<div class="review-row"><span class="review-label">\u26a1</span>
+                    html += `<div class="review-row"><span class="review-label">${_skillIconHtml(_skillSlug(sName))}</span>
             <span class="review-value"><span class="changed">${sName}</span> <span class="new-badge">Novo</span></span></div>`;
                 }
                 html += '</div>';
