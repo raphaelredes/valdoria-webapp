@@ -1489,17 +1489,31 @@
         // ═══════════════════════════════════════════════
         // SCREEN: SUMMARY
         // ═══════════════════════════════════════════════
+        // Mapa hero_class (EN enum) -> PNG slug (PT-BR) + data-class CSS attribute
+        // PNG files em /shared/img/combat/{slug}.png e mappings no .lvl-cinema CSS.
+        const HERO_CLASS_SLUG = {
+            'BARD': 'bardo', 'WIZARD': 'mago', 'MAGE': 'mago', 'CLERIC': 'clerigo',
+            'FIGHTER': 'guerreiro', 'RANGER': 'patrulheiro', 'PALADIN': 'paladino',
+            'BARBARIAN': 'barbaro', 'ROGUE': 'ladino', 'SORCERER': 'feiticeiro',
+            'WARLOCK': 'bruxo', 'DRUID': 'druida', 'MONK': 'monge'
+        };
+        function _heroSlug(hc) {
+            if (!hc) return 'guerreiro';
+            return HERO_CLASS_SLUG[String(hc).toUpperCase()] || String(hc).toLowerCase();
+        }
+
         function buildSummary(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
+            const _slug = _heroSlug(P.hero_class);
             let html = `
         <div class="dm-bubble">${P.name}, a energia do seu crescimento se manifesta. Você sente o poder fluindo...</div>
-        <div class="lvl-cinema" data-class="${(P.hero_class||'').toString().toLowerCase()}" data-tier="${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}">
+        <div class="lvl-cinema" data-class="${_slug}" data-tier="${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}">
             <div class="lvl-cinema-aura"></div>
             <div class="lvl-cinema-magic-circle"></div>
             <div class="lvl-cinema-rays"></div>
             <div class="lvl-cinema-particles"></div>
             <div class="lvl-cinema-rune-ring"></div>
-            <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${(P.hero_class||'').toString().toLowerCase()}.png" alt="${info.name}" onerror="this.style.display='none'"/></div>
+            <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${_slug}.png" alt="${info.name}" onerror="this.style.display='none'"/></div>
             <div class="lvl-cinema-medal" title="${P.level >= 13 ? 'Mítico' : P.level >= 10 ? 'Lendário' : P.level >= 8 ? 'Mestre' : P.level >= 5 ? 'Veterano' : 'Iniciante'}"><img src="../shared/img/medals/${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}.png" alt="tier" onerror="this.style.display='none'"/></div>
             <div class="lvl-cinema-level">${P.level}</div>
             <div class="lvl-cinema-title">Novo Nível Alcançado</div>
