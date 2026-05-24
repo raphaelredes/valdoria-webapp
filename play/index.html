@@ -45,6 +45,11 @@ document.write('<script src="/shared/audio-manager.js?v=' + v + '"><\/script>');
    pra incluir em debug overlay). Padrao canonical do CLAUDE.md "WebApp Error Logging". */
 document.write('<script src="/shared/console-collector.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>');
+/* Sessao #29 v5 (2026-05-24): maintenance overlay carregado pra que
+   runAuthAndRedirect possa chamar window.vMaintenance.show() antes do
+   loading magic circle aparecer. User reportou: PROD em manutencao mas
+   player via tela de carregamento normal sem aviso. */
+document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
 </script>
 </head>
 <body>
@@ -378,7 +383,43 @@ document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>')
   // Stages SEMPRE agnosticos ao destino — o player pode estar voltando pra
   // cidade/exploracao/combate/levelup/prologo, e a /play/ NAO deve expor isso
   // antes da transicao (regra do user 2026-05-10).
+  /* Sessao #29 v5 (2026-05-24): proactive maintenance check ANTES do magic
+     circle. Se PROD/DEV em manutencao, mostra vMaintenance.show() imediato
+     sem nunca exibir loading bar. User pediu: 'logo depois do toque tem
+     que aparecer tela de manutencao, sem barra de carregamento'. */
+  function _checkMaintenanceFirst(then) {
+    var url = apiHost + '/api/game/health';
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var tid = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+    fetch(url, { method: 'GET', signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r) {
+        if (tid) clearTimeout(tid);
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function(data) {
+        if (data && data.maintenance && data.maintenance.active) {
+          sendLog('info', 'maintenance_active_on_boot', {info: JSON.stringify(data.maintenance).slice(0,200)});
+          if (window.vMaintenance && typeof window.vMaintenance.show === 'function') {
+            window.vMaintenance.show(data.maintenance);
+            return;  // halt — nao chama then()
+          }
+        }
+        then();
+      })
+      .catch(function(e) {
+        if (tid) clearTimeout(tid);
+        sendLog('warn', 'maintenance_check_failed', {error: String(e && e.message || e).slice(0, 200)});
+        // Falhou (timeout / network) — continua normalmente (defensivo)
+        then();
+      });
+  }
+
   function runAuthAndRedirect(){
+    _checkMaintenanceFirst(_runAuthAndRedirectActual);
+  }
+
+  function _runAuthAndRedirectActual(){
     _showMagicCircle();
     setProgress(15, 'Autenticando…');
 
