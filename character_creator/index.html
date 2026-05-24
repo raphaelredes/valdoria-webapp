@@ -3599,8 +3599,18 @@
 
             // Back button goes to Phase 1 (not grid)
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="buildRaceDetail('${key}')">← Voltar</button>`;
-            // Compact header for context
-            html += `<div class="detail-header" style="padding-bottom:8px"><div class="detail-icon" style="font-size:32px">${r.icon}</div><div class="detail-title" style="font-size:16px">${r.name}</div></div>`;
+            // Sessao #29 (2026-05-24) FIX: header da tela de sub-raça usava
+            // r.icon (emoji '🧪' pra Gnomo, '🐲' pra Dragonborn, etc.) em vez
+            // de RACE_HERALDIC_ICON (PNG real). Bug atingia 4 raças com sub-
+            // raça/variant: Gnome, Elf, Dwarf, Halfling, Human (variant),
+            // HalfElf (bônus), Dragonborn (ancestralidade). Fix: usa PNG
+            // quando disponivel, fallback pro emoji (mesma logica das outras
+            // funcoes buildRaceGrid/buildRaceDetail).
+            const heraldicSubrace = RACE_HERALDIC_ICON[key];
+            const subraceIconHtml = heraldicSubrace
+                ? `<div class="detail-icon detail-icon-heraldic" style="font-size:32px">${heraldicSubrace}</div>`
+                : `<div class="detail-icon" style="font-size:32px">${r.icon}</div>`;
+            html += `<div class="detail-header" style="padding-bottom:8px">${subraceIconHtml}<div class="detail-title" style="font-size:16px">${r.name}</div></div>`;
 
             // Selection content (reuse existing builders)
             if (r.halfelf) {
