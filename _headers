@@ -50,6 +50,14 @@
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
 
+# City location PNGs (Tier C — ETag-revalidated, allows regen)
+# 16 location icons rendered as 36x36 hub icons. May be regenerated when
+# resizes/quality changes are made; no-cache + ETag gives 304 (~200B) on
+# revisits when unchanged, full body when content changes.
+/shared/img/city/*
+  Cache-Control: no-cache
+  X-Content-Type-Options: nosniff
+
 # Manifest of generated items — MUST always be fresh (updates as batch runs).
 # More specific than /shared/img/items/* but same cache policy (concatenates).
 /shared/img/items/manifest.json
