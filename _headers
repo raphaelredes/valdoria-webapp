@@ -37,8 +37,72 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
-# Shared images (logo, valdorita coin)
-/shared/img/*
+# Shared images — explicit Tier A subdirs (Sessão #28, 2026-05-24).
+# IMPORTANTE: catch-all /shared/img/* foi REMOVIDO porque CF Pages NAO aplica
+# exceções mais específicas como /shared/img/items/* e /shared/img/city/* —
+# o catch-all sempre venceu, deixando items + city como immutable indevidamente.
+# Solução: listar cada subdir Tier A explicitamente; items e city ficam Tier C.
+/shared/img/valdorita.png
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/achievements/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/arena/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/banco/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/bank/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/combat/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/estalagem/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/feats/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/guilda/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/levelup/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/medals/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/mercado/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/merchants/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/npcs/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/oficina/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/runas/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/services/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/services-preview/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/taverna/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/templo/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/ui/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
@@ -59,7 +123,6 @@
   X-Content-Type-Options: nosniff
 
 # Manifest of generated items — MUST always be fresh (updates as batch runs).
-# More specific than /shared/img/items/* but same cache policy (concatenates).
 /shared/img/items/manifest.json
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
