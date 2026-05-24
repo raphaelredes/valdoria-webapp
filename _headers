@@ -106,25 +106,23 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
-# AI-generated item PNGs (Tier C — ETag-revalidated, allows regen)
-# 540 items at slug-named filenames. Files may be regenerated when quality
-# issues are found; no-cache lets revisits get the new version via ETag.
-# CF Pages auto-ETag → unchanged file returns 304 (~200B revalidation only).
+# AI-generated item PNGs (Tier C — ETag-revalidated, allows regen).
+# Sessão #28 (2026-05-24): CF Pages override bare `no-cache` em static
+# assets (PNGs/JS) com max-age=14400 default. Usar `no-cache, no-store,
+# must-revalidate` força a diretiva passar intacta. Verificado via curl.
 /shared/img/items/*
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
   X-Content-Type-Options: nosniff
 
-# City location PNGs (Tier C — ETag-revalidated, allows regen)
-# 16 location icons rendered as 36x36 hub icons. May be regenerated when
-# resizes/quality changes are made; no-cache + ETag gives 304 (~200B) on
-# revisits when unchanged, full body when content changes.
+# City location PNGs (Tier C — ETag-revalidated, allows regen).
+# Mesmo motivo do items/*: diretiva combinada pra CF Pages preservar.
 /shared/img/city/*
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
   X-Content-Type-Options: nosniff
 
 # Manifest of generated items — MUST always be fresh (updates as batch runs).
 /shared/img/items/manifest.json
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
   X-Content-Type-Options: nosniff
 
 # Character creator race portraits (9 PNGs ~3.77MB total)
