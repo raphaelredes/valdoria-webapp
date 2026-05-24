@@ -110,17 +110,13 @@ function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
 
-  /* Icon — suporta SVG heraldico, IMG (PNG canonical) ou emoji (textContent)
-     2026-05-21: adicionado suporte a <img> (MARKET_SVC_META + similares). */
+  /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
+     2026-05-18 BUG FIX: <img> tag (merchant portraits AAA) era escapado como
+     texto literal. Fix: detectar <svg OU <img — qualquer HTML marker. */
   var ico = el('div', 'vc-service-icon');
   var icoStr = svc.icon || '';
-  if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0) {
+  if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0 || icoStr.indexOf('<span') >= 0) {
     ico.innerHTML = icoStr;
-    /* Estiliza <img> pra caber no container */
-    var iconImg = ico.querySelector('img');
-    if (iconImg) {
-      iconImg.style.cssText = 'width:38px;height:38px;object-fit:contain;';
-    }
   } else {
     ico.textContent = icoStr;
   }
@@ -152,16 +148,19 @@ function serviceCard(svc) {
   /* Badge — 2026-05-11 (user request): auto-detect " V" trailing como
      valdoritas e substitui pelo icone .vi-coin (era textContent literal
      mostrando "V" letra). Aceita formats: "100 V", "10-50 V", "+5 V".
-     task #70 review (2026-05-20): suporta HTML inline (e.g. backend manda
-     "10 <span class=\"vi vi-coin sm\"></span>"). */
+     2026-05-18 BUG FIX: badges com SVG inline (reputation tiers Aliado/
+     Amigável/etc via _heralIco) eram renderizadas como texto literal
+     "<svg viewBox..." porque textContent escape HTML. Detecta < no início
+     ou ' <svg' interno e usa innerHTML (badges são canonical do código,
+     não user input — XSS safe). */
   if (svc.badge) {
     var bdg = el('span', 'vc-badge');
     var bs = String(svc.badge);
-    if (/<(span|b|i|em|strong|br)\b[^>]*>/.test(bs)) {
-      bdg.innerHTML = bs;
-    } else if (/\sV$/.test(bs)) {
+    if (/\sV$/.test(bs)) {
       bdg.textContent = bs.slice(0, -2) + ' ';
       bdg.appendChild(coin('sm'));
+    } else if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+      bdg.innerHTML = bs;
     } else {
       bdg.textContent = bs;
     }
@@ -275,7 +274,8 @@ function actionList(items) {
       if (item.icon) {
         var ico = el('span', 'vc-action-ico');
         var icoStr = item.icon;
-        if (icoStr.indexOf('<svg') >= 0) {
+        /* 2026-05-18: detectar <img> + <span> alem de <svg> (portrait AAA) */
+        if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0 || icoStr.indexOf('<span') >= 0) {
           ico.innerHTML = icoStr;
         } else {
           ico.textContent = icoStr;
@@ -293,7 +293,14 @@ function actionList(items) {
       }
       if (item.badge) {
         var bdg = el('span', 'vc-badge');
-        bdg.textContent = item.badge;
+        /* 2026-05-18 BUG FIX: same as vc-service-card — badges com SVG
+           inline precisam de innerHTML, não textContent. */
+        var bs = String(item.badge);
+        if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+          bdg.innerHTML = bs;
+        } else {
+          bdg.textContent = bs;
+        }
         btn.appendChild(bdg);
       }
       btn.addEventListener('click', function () { act(item.cb); });
@@ -316,7 +323,13 @@ function sectionLabel(text) {
 function badgeEl(text, type) {
   var b = el('span', 'vc-badge');
   if (type) b.classList.add('vc-badge--' + type);
-  b.textContent = text;
+  /* 2026-05-18 BUG FIX: badges with SVG markup need innerHTML to render. */
+  var bs = String(text);
+  if (bs.indexOf('<svg') >= 0 || bs.indexOf('<span') >= 0) {
+    b.innerHTML = bs;
+  } else {
+    b.textContent = bs;
+  }
   return b;
 }
 

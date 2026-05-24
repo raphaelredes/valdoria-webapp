@@ -90,6 +90,31 @@
   pointer-events: none;
 }
 .vc-service-icon { font-size: var(--v-font-icon, 20px); line-height: 1; } /* HARDCODED: icon size, no exact token */
+/* 2026-05-18 AAA: merchant portraits PNG (gpt-image-2 generated) */
+.vc-service-icon img.merchant-portrait {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--v-gold-40);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 8px var(--v-gold-15);
+  display: block;
+  margin: 0 auto;
+}
+/* 2026-05-18 BUG FIX: rumor list (NPCs ausentes) usa vc-action-ico — sem
+   CSS o portrait renderiza no tamanho natural (1024px) e estoura o card.
+   Aplica mesmo round 40x40 (menor pq lista lateral, nao destaque). */
+.vc-action-ico img.merchant-portrait {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--v-gold-30);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
 .vc-service-name {
   font-family: var(--v-font, 'Marcellus', serif);
   font-size: var(--v-font-sm, 12px);

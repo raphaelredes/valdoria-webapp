@@ -181,6 +181,18 @@
     }
 
     /* ========================================================
+     * CACHE BUST SUFFIX (Sessão #28, 2026-05-24)
+     * Append ?v=<bundle-hash> a URLs de assets que ANTES eram servidos
+     * com Cache-Control: immutable max-age=1y. Browsers com cache antigo
+     * não revalidam nunca — só uma URL diferente força fresh fetch.
+     * Fallback Date.now() se bundle hash não carregou.
+     * ======================================================== */
+    function _cbSuffix() {
+        var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+        return '?v=' + v;
+    }
+
+    /* ========================================================
      * SLUG NORMALIZATION (matches Python slugify + JS _vinvSlug)
      * ======================================================== */
     function _slugify(s) {
@@ -258,9 +270,10 @@
         if (SKILL_PNGS[skillSlug]) {
             return _basePath() + 'shared/img/combat/skills/' + skillSlug + '.png';
         }
-        // City: CITY_LOC_PNGS uses callback name (matches slug)
+        // City: CITY_LOC_PNGS uses callback name (matches slug).
+        // Sessão #28 (2026-05-24): ?v=<bundle-hash> cache bust — ver _cbSuffix.
         if (CITY_LOC_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/city/' + skillSlug + '.png';
+            return _basePath() + 'shared/img/city/' + skillSlug + '.png' + _cbSuffix();
         }
         // Combat (classes, boss, inimigo, invocations)
         if (COMBAT_PNGS[skillSlug]) {
@@ -290,7 +303,7 @@
     }
     function cityIconUrl(cb) {
         if (!cb || !CITY_LOC_PNGS[cb]) return null;
-        return _basePath() + 'shared/img/city/' + cb + '.png';
+        return _basePath() + 'shared/img/city/' + cb + '.png' + _cbSuffix();
     }
     function raceIconUrl(raceKey) {
         if (!raceKey) return null;

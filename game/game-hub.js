@@ -62,22 +62,22 @@ var _LOC_MAP = (function(){
         'guilda':           { ico: S('ic-paladino'), nm: 'Guilda' },
         'temple':           { ico: S('ic-templo'),   nm: 'Templo' },
         'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
-        'gates':            { ico: S('ic-portoes'),  nm: 'Portoes' },
-        'portoes':          { ico: S('ic-portoes'),  nm: 'Portoes' },
-        'square':           { ico: S('ic-praca'),    nm: 'Praca' },
-        'praca':            { ico: S('ic-praca'),    nm: 'Praca' },
+        'gates':            { ico: S('ic-portoes'),  nm: 'Portões' },
+        'portoes':          { ico: S('ic-portoes'),  nm: 'Portões' },
+        'square':           { ico: S('ic-praca'),    nm: 'Praça' },
+        'praca':            { ico: S('ic-praca'),    nm: 'Praça' },
         'bank':             { ico: S('ic-banco'),    nm: 'Banco' },
         'banco':            { ico: S('ic-banco'),    nm: 'Banco' },
-        'action_quests':    { ico: S('ic-missoes'),  nm: 'Missoes' },
-        'quests':           { ico: S('ic-missoes'),  nm: 'Missoes' },
+        'action_quests':    { ico: S('ic-missões'),  nm: 'Missões' },
+        'quests':           { ico: S('ic-missões'),  nm: 'Missões' },
         'daily_challenge':  { ico: S('ic-desafio'),  nm: 'Desafio' },
-        'action_codex':     { ico: S('ic-compendio'),nm: 'Compendio' },
-        'codex':            { ico: S('ic-compendio'),nm: 'Compendio' },
+        'action_codex':     { ico: S('ic-compendio'),nm: 'Compêndio' },
+        'codex':            { ico: S('ic-compendio'),nm: 'Compêndio' },
         'festival':         { ico: S('ic-festival'), nm: 'Festival' },
         'league_':          { ico: S('ic-desafio'),  nm: 'Liga' },
         'manage_':          { ico: S('ic-grupo'),    nm: 'Contas' },
         'open_workshop':    { ico: S('ic-oficina'),  nm: 'Oficina' },
-        'rel_':             { ico: S('ic-vinculos'), nm: 'Vinculos' },
+        'rel_':             { ico: S('ic-vínculos'), nm: 'Vínculos' },
         'rune_scribe':      { ico: S('ic-runas'),    nm: 'Runas' },
         'shadow_alley':     { ico: S('ic-portoes'),  nm: 'Beco' },
         'workshop_':        { ico: S('ic-oficina'),  nm: 'Oficina' },
@@ -457,7 +457,13 @@ function _cityLocIconHTML(cb, fallbackIco) {
         if (loc.indexOf('file://') === 0) {
             base = '../valdoria-webapp/shared/img/city/';
         }
-        return '<img class="hl-ico-img" src="' + base + cb + '.png" ' +
+        /* Sessão #28 (2026-05-24): ?v=<bundle-hash> força cache bust pra browsers
+           que tinham as PNGs com Cache-Control:immutable do header anterior.
+           Sem isso, browsers servem versão velha (1.5MB) por até 1 ano sem nem
+           consultar o servidor. Tier C (no-cache + ETag) só pega efeito em URLs
+           novas — daí o sufixo. Date.now() fallback se bundle hash falhar. */
+        var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+        return '<img class="hl-ico-img" src="' + base + cb + '.png?v=' + v + '" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'\'">';
     }

@@ -55286,7 +55286,13 @@ function _cityLocIconHTML(cb, fallbackIco) {
         if (loc.indexOf('file://') === 0) {
             base = '/shared/img/city/';
         }
-        return '<img class="hl-ico-img" src="' + base + cb + '.png" ' +
+        /* Sessão #28 (2026-05-24): ?v=<bundle-hash> força cache bust pra browsers
+           que tinham as PNGs com Cache-Control:immutable do header anterior.
+           Sem isso, browsers servem versão velha (1.5MB) por até 1 ano sem nem
+           consultar o servidor. Tier C (no-cache + ETag) só pega efeito em URLs
+           novas — daí o sufixo. Date.now() fallback se bundle hash falhar. */
+        var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+        return '<img class="hl-ico-img" src="' + base + cb + '.png?v=' + v + '" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'\'">';
     }
