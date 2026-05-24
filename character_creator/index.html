@@ -4539,15 +4539,28 @@
         // ═══════════════════════════════════════════════
         // FIGHTING STYLE — Sub-screen (Warrior)
         // ═══════════════════════════════════════════════
+        /* Sessao #29 v4: helper pra renderizar PNG do fighting style.
+           PNGs geradas via OpenAI low quality em /character_creator/icons/. */
+        function _fightingStyleIconHtml(fsId, sizePx) {
+            const fs = FIGHTING_STYLES[fsId] || {};
+            const emoji = fs.icon || '⚔️';
+            const sz = sizePx || 64;
+            const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + Math.floor(sz*0.7) + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
+            return '<img src="/character_creator/icons/' + fsId + '.png" alt="" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:block;margin:0 auto 6px;" ' +
+                   'loading="lazy" onerror="' + onErr + '">';
+        }
+
         function buildFightingStyleSelect() {
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFightingStyle()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">Escolha seu Estilo de Combate</div>`;
             html += `<div class="detail-subtitle">Guerreiro — escolha uma especialização marcial.</div></div>`;
             for (const [fsId, fs] of Object.entries(FIGHTING_STYLES)) {
                 const sel_class = sel.fightingStyle === fsId ? ' selected' : '';
-                html += `<div class="v-card${sel_class}" onclick="selectFightingStyle('${fsId}')">`;
-                html += `<div class="v-card-name">${fs.icon} ${fs.name}</div>`;
-                html += `<div class="v-card-desc">${fs.desc}</div>`;
+                html += `<div class="v-card${sel_class}" onclick="selectFightingStyle('${fsId}')" style="text-align:center;">`;
+                html += _fightingStyleIconHtml(fsId, 72);
+                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${fs.name}</div>`;
+                html += `<div class="v-card-desc" style="margin-top:4px;">${fs.desc}</div>`;
                 html += `</div>`;
             }
             document.getElementById('fstyleSelectContent').innerHTML = html;
