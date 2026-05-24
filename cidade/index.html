@@ -46309,64 +46309,100 @@ function _classLabelPT(c){
 // Cada template tem: script (1 narration + 1 speech in character) + choices (positive/
 // neutral/leave). Vocabulário e tom específicos da classe. {name} substitui pelo
 // nome do aliado em runtime via _showAllyDialogue.
+// Sessão #28 v3 (2026-05-24): templates revisados.
+// - Removidos "irmão/irmã" (gender bug: Clóvis masculino vinha com "irmã" no leave)
+// - "desc" usa forma neutra/default-masc (classe oficial D&D 5e) — gender-aware
+//   via (a) parenthetical em adjetivos que precisem
+// - 4ª choice é DICE CHECK (cb: 'dice:ability:dc:+mod') com narrativa de
+//   sucesso/falha. Ability D&D 5e por classe; CD 12-15 (mid-level).
 var ALLY_DIALOGUE_TEMPLATES = {
   clerigo: {
-    desc: 'Sacerdotisa · serva dos Quatro',
+    desc: 'Clérigo · cura corpo e alma',
     script: [
-      { type: 'narration', text: '{name} está sentado(a) sobre um banco de pedra na praça, um símbolo sagrado nas mãos, sussurrando uma prece. Ergue o olhar ao te ver — sorriso paciente.' },
-      { type: 'speech', text: 'Que os Quatro guiem nossos passos, irmão. <i>(beija o símbolo sagrado)</i> Há ferimentos que só a fé cura — e há feridas que só o tempo. Qual te preocupa hoje?' }
+      { type: 'narration', text: '{name} repousa o símbolo sagrado sobre o joelho, dedos pousados em prece silenciosa. Ergue os olhos ao perceber-te — calma de manhã antes da batalha.' },
+      { type: 'speech', text: 'Que os Quatro guiem nossos passos. <i>(beija o símbolo)</i> Tens algo a confessar antes da estrada? Ou simplesmente buscas companhia?' }
     ],
     choices: [
       { id: 'pray',  label: '🕯️ "Reza por nós antes do próximo combate."',  renown: 2 },
       { id: 'ask',   label: '📜 "Conta-me sobre tua devoção."',              renown: 1 },
-      { id: 'leave', label: '↩ "Continue tua prece, irmã."',                renown: 0 }
+      { id: 'boon',  label: '✨ "Pede aos Quatro um favor especial." [CD 14 Persuasão]',
+        cb: 'dice:cha:14:+2',
+        resultNarration: '{name} fecha os olhos. Luz dourada envolve teus dedos por um instante — bênção rara dos Quatro.',
+        resultText: 'Você se sente fortalecido(a). <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
+        resultNarrationFail: '{name} sorri triste. "A fé não se barganha. Os Quatro decidem quem merece."',
+        resultTextFail: 'A prece volta ao éter. Nenhuma graça concedida.' },
+      { id: 'leave', label: '↩ "Continua tua prece."',                       renown: 0 }
     ]
   },
   guerreiro: {
-    desc: 'Veterano · centenas de batalhas',
+    desc: 'Veterano · centenas de batalhas no corpo',
     script: [
-      { type: 'narration', text: '{name} está afiando a espada num banco de madeira, atento ao gume contra o sol. Não levanta o olhar — só assente brevemente reconhecendo tua presença.' },
-      { type: 'speech', text: 'A lâmina avisa antes de quebrar — basta escutar. <i>(passa o dedo pela base do gume)</i> Marcha sem pressa, irmão. Quem corre na guerra morre cedo.' }
+      { type: 'narration', text: '{name} passa a pedra de amolar pela lâmina, gume contra o sol. Não levanta o olhar — só assente, reconhecendo tua presença.' },
+      { type: 'speech', text: 'A lâmina avisa antes de quebrar — basta escutar. <i>(testa o fio com o polegar)</i> Marcha sem pressa. Quem corre na guerra morre cedo.' }
     ],
     choices: [
       { id: 'tactics', label: '⚔️ "Que tática usamos no próximo combate?"', renown: 2 },
       { id: 'story',   label: '🪨 "Conta uma batalha que te marcou."',       renown: 1 },
+      { id: 'spar',    label: '🛡️ "Sparring rápido pra aquecer." [CD 13 Atletismo]',
+        cb: 'dice:str:13:+3',
+        resultNarration: 'Vocês trocam golpes secos por dois minutos. {name} desarma-te no terceiro lance — sorri, devolve a arma.',
+        resultText: 'Aprendeu um truque novo. <b>Vantagem na primeira jogada de ataque</b> do próximo combate.',
+        resultNarrationFail: 'Você escorrega na lama. {name} agarra teu braço antes da queda — paciente, mas crítico(a).',
+        resultTextFail: 'Torção leve no pulso. <b>Desvantagem na primeira jogada</b> do próximo combate.' },
       { id: 'leave',   label: '↩ "Termine de afiar a lâmina."',              renown: 0 }
     ]
   },
   mago: {
-    desc: 'Estudioso · biblioteca ambulante',
+    desc: 'Mago · biblioteca ambulante',
     script: [
-      { type: 'narration', text: '{name} folheia um grimório encadernado em couro, dedos manchados de tinta. Um lápis preso atrás da orelha. Ergue o olhar dos pergaminhos com a paciência de quem foi interrompido muitas vezes.' },
-      { type: 'speech', text: 'Toda magia é traduzir o impossível em palavras. <i>(fecha o livro com gesto comedido)</i> Diz-me — preferes uma chama sob controle ou uma trovoada arriscada?' }
+      { type: 'narration', text: '{name} folheia um grimório encadernado em couro escuro, dedos manchados de tinta. Ergue o olhar com a paciência de quem foi interrompido(a) muitas vezes.' },
+      { type: 'speech', text: 'Toda magia é traduzir o impossível em palavras. <i>(fecha o livro com gesto comedido)</i> Diz-me — buscas chama controlada ou trovoada arriscada?' }
     ],
     choices: [
       { id: 'spell',  label: '✨ "Que magia preparaste pra hoje?"',           renown: 2 },
       { id: 'theory', label: '📚 "Explica-me a Trama Arcana."',               renown: 1 },
+      { id: 'scribe', label: '📜 "Escreve uma magia pra meu uso." [CD 15 Arcanismo]',
+        cb: 'dice:int:15:+3',
+        resultNarration: '{name} disseca uma página, anota fórmulas marginais e entrega-te o pergaminho ainda úmido de tinta.',
+        resultText: 'Recebeu <b>Pergaminho de Mísseis Mágicos</b> (uso único, próximo descanso).',
+        resultNarrationFail: '{name} morde o lábio. "A fórmula resiste. Ou tu não estás concentrado(a)."',
+        resultTextFail: 'A página queima sozinha após cinco segundos. Tinta perdida.' },
       { id: 'leave',  label: '↩ "Volta aos teus estudos."',                  renown: 0 }
     ]
   },
   ladino: {
     desc: 'Sombra · dedos rápidos, mente afiada',
     script: [
-      { type: 'narration', text: '{name} aparece silenciosamente ao teu lado — como se sempre estivera ali. Mãos enluvadas, olhar atento, e um sorriso que combina ironia com cumplicidade.' },
-      { type: 'speech', text: 'A cidade tem mais segredos do que ruas, irmão. <i>(verifica brevemente a multidão)</i> O truque é saber o que NÃO perguntar. Aprendi isso da pior forma.' }
+      { type: 'narration', text: '{name} aparece silenciosamente ao teu lado — como se sempre estivera ali. Mãos enluvadas, olhar atento, sorriso de ironia.' },
+      { type: 'speech', text: 'A cidade tem mais segredos do que ruas. <i>(verifica brevemente a multidão)</i> O truque é saber o que NÃO perguntar. Aprendi isso da pior forma.' }
     ],
     choices: [
-      { id: 'rumor',  label: '👂 "Ouviste algum rumor interessante?"',        renown: 2 },
-      { id: 'past',   label: '🗝️ "De onde vieste?"',                          renown: 0 },
-      { id: 'leave',  label: '↩ "Volta a observar a multidão."',             renown: 0 }
+      { id: 'rumor', label: '👂 "Ouviste algum rumor interessante?"',        renown: 2 },
+      { id: 'past',  label: '🗝️ "De onde vieste?"',                          renown: 0 },
+      { id: 'lift',  label: '💰 "Pega-me algo na multidão. Discreto(a)." [CD 14 Furtividade]',
+        cb: 'dice:dex:14:+4',
+        resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
+        resultText: 'Recebeu <b>+8 Valdoritas</b>. Ninguém percebeu.',
+        resultNarrationFail: 'Um grito atravessa a praça. {name} pisa atrás de ti, mão vazia, olhar tenso. "Apressei o coração demais."',
+        resultTextFail: 'Guardas olham nessa direção. <b>-2 Renome</b> nas próximas 24h.' },
+      { id: 'leave', label: '↩ "Volta a observar a multidão."',             renown: 0 }
     ]
   },
   patrulheiro: {
     desc: 'Trilheiro · conhece cada raiz do bosque',
     script: [
-      { type: 'narration', text: '{name} está agachado(a) inspecionando pegadas no chão de terra batida da praça. Um arco compacto ao ombro, faca curva no cinto. Levanta-se ao te ver — silencioso, atento.' },
-      { type: 'speech', text: 'A floresta sussurra antes de morder, irmão. <i>(aponta vagamente pro norte)</i> Vi rastros de lobos perto do portão na hora da aurora — três adultos, talvez quatro. Movem-se em padrão de caça.' }
+      { type: 'narration', text: '{name} agacha-se inspecionando pegadas no chão de terra batida da praça. Arco compacto ao ombro, faca curva no cinto. Levanta-se sem som ao te ver.' },
+      { type: 'speech', text: 'A floresta sussurra antes de morder. <i>(aponta vagamente pro norte)</i> Vi rastros de lobos perto do portão na aurora — três adultos, talvez quatro. Movem-se em padrão de caça.' }
     ],
     choices: [
       { id: 'track',  label: '🐺 "Pode rastrear esses lobos comigo?"',         renown: 2 },
       { id: 'nature', label: '🌲 "Fala-me da floresta do norte."',             renown: 1 },
+      { id: 'forage', label: '🌿 "Coleta ervas curativas pra mim." [CD 13 Sobrevivência]',
+        cb: 'dice:wis:13:+3',
+        resultNarration: '{name} some por dez minutos entre as ruelas da feira. Volta com três folhas amassadas e raízes secas.',
+        resultText: 'Recebeu <b>2× Erva Curativa</b> (cada uma cura 1d4+1 PV fora de combate).',
+        resultNarrationFail: '{name} volta com as mãos vazias e um machucado leve no antebraço. "A cidade não tem o que a floresta tem."',
+        resultTextFail: 'Tempo desperdiçado. <b>-1 hora</b> do próximo descanso longo.' },
       { id: 'leave',  label: '↩ "Continua a leitura dos rastros."',            renown: 0 }
     ]
   },
@@ -46374,84 +46410,126 @@ var ALLY_DIALOGUE_TEMPLATES = {
     desc: 'Juramento Sagrado · luz contra trevas',
     script: [
       { type: 'narration', text: '{name} ergue-se ao te ver, armadura impecável, símbolo sagrado no peito. Mão sobre o punho da espada — não em ameaça, mas em juramento renovado a cada amanhecer.' },
-      { type: 'speech', text: 'O juramento não se quebra mesmo quando a noite é mais funda, irmão. <i>(coloca punho sobre o coração)</i> Caminhamos juntos enquanto a luz nos guiar.' }
+      { type: 'speech', text: 'O juramento não se quebra mesmo quando a noite é mais funda. <i>(coloca punho sobre o coração)</i> Caminhamos juntos enquanto a luz nos guiar.' }
     ],
     choices: [
-      { id: 'bless', label: '✨ "Renova-me o juramento de combate."',         renown: 2 },
+      { id: 'bless', label: '✨ "Renova-me a fé antes do combate."',          renown: 2 },
       { id: 'oath',  label: '⚜️ "Conta-me como fizeste teu juramento."',      renown: 1 },
+      { id: 'imbue', label: '🛡️ "Imbui minha arma de luz sagrada." [CD 14 Religião]',
+        cb: 'dice:cha:14:+3',
+        resultNarration: '{name} coloca as mãos sobre tua arma. Uma luz dourada flui ao longo do gume — calma como sol de manhã.',
+        resultText: 'Sua arma recebe <b>+1d8 dano radiante</b> no próximo ataque acertado.',
+        resultNarrationFail: 'O símbolo sagrado treme. {name} retrai as mãos. "Os Deuses pedem mais do que palavras hoje."',
+        resultTextFail: 'A bênção falha. Nenhum efeito.' },
       { id: 'leave', label: '↩ "Que tua luz te guie."',                       renown: 0 }
     ]
   },
   bardo: {
-    desc: 'Contador de histórias · alaúde na mão',
+    desc: 'Contador(a) de histórias · alaúde na mão',
     script: [
-      { type: 'narration', text: '{name} dedilha o alaúde sob o telhado de uma barraca, voz baixa testando uma melodia. Sorri largamente ao te ver — recebido como público novo.' },
-      { type: 'speech', text: 'Toda guerra termina virando canção, irmão. <i>(toca um acorde alegre)</i> A nossa precisa só de uma estrofe boa pra ficar imortal. Tens preferência?' }
+      { type: 'narration', text: '{name} dedilha o alaúde sob o telhado de uma barraca, voz baixa testando uma melodia. Sorri largamente ao te ver — público novo recebido.' },
+      { type: 'speech', text: 'Toda guerra termina virando canção. <i>(toca um acorde alegre)</i> A nossa precisa só de uma estrofe boa pra ficar imortal. Tens preferência de tom?' }
     ],
     choices: [
-      { id: 'inspire', label: '🎵 "Toca-me Inspiração antes da batalha."',     renown: 2 },
-      { id: 'tale',    label: '📖 "Conta a melhor história da estrada."',      renown: 1 },
+      { id: 'inspire', label: '🎵 "Toca-me Inspiração antes da batalha."',    renown: 2 },
+      { id: 'tale',    label: '📖 "Conta a melhor história da estrada."',     renown: 1 },
+      { id: 'gossip',  label: '👂 "Sonda boatos da taverna pra mim." [CD 12 Persuasão]',
+        cb: 'dice:cha:12:+3',
+        resultNarration: '{name} desaparece pela porta da taverna. Volta meia-hora depois com sorriso enviesado e um nome em código.',
+        resultText: 'Aprendeu <b>localização secreta</b> de uma masmorra próxima. Marcada no mapa.',
+        resultNarrationFail: '{name} volta encharcado(a) de cerveja, sem dizer nada. Alguém o(a) reconheceu.',
+        resultTextFail: 'A taverna fechou pra ti hoje. <b>-5 Valdoritas</b> em multa de cerveja derramada.' },
       { id: 'leave',   label: '↩ "Continua a compor."',                       renown: 0 }
     ]
   },
   druida: {
-    desc: 'Voz da natureza · guardião do equilíbrio',
+    desc: 'Voz da natureza · guardião(a) do equilíbrio',
     script: [
-      { type: 'narration', text: '{name} alimenta um pardal com migalhas de pão na borda da fonte. O pequeno pássaro come da palma sem medo. Ergue o olhar ao te ver — verde como musgo úmido, atento.' },
-      { type: 'speech', text: 'Toda vida tem direito à floresta, irmão. <i>(o pardal voa)</i> Mesmo os lobos que atacam fazendeiros têm fome. A questão não é matar — é entender por que caçam.' }
+      { type: 'narration', text: '{name} alimenta um pardal com migalhas de pão na borda da fonte. O pequeno pássaro come da palma sem medo. Ergue o olhar ao te ver — verde como musgo úmido, atento(a).' },
+      { type: 'speech', text: 'Toda vida tem direito à floresta. <i>(o pardal voa)</i> Mesmo os lobos que atacam fazendeiros têm fome. A questão não é matar — é entender por que caçam.' }
     ],
     choices: [
-      { id: 'commune', label: '🌿 "Comunga com a natureza por nós."',          renown: 2 },
-      { id: 'animal',  label: '🦅 "Que forma animal prefere assumir?"',        renown: 1 },
+      { id: 'commune', label: '🌿 "Comunga com a natureza por nós."',         renown: 2 },
+      { id: 'animal',  label: '🦅 "Que forma animal preferes assumir?"',      renown: 1 },
+      { id: 'totem',   label: '🐺 "Pede um espírito animal pra me guiar." [CD 13 Natureza]',
+        cb: 'dice:wis:13:+3',
+        resultNarration: '{name} murmura uma canção antiga. Sentes algo invisível pousar no teu ombro — leve como pena, vigilante.',
+        resultText: 'Recebeu <b>Espírito Sentinela</b> (avisa de emboscadas no próximo descanso longo).',
+        resultNarrationFail: 'Os pássaros se afastam. {name} balança a cabeça. "Os espíritos não vêm a quem grita por eles."',
+        resultTextFail: 'Os animais da praça evitam-te pelas próximas horas. Sem efeito mecânico.' },
       { id: 'leave',   label: '↩ "Volta aos teus pequenos."',                  renown: 0 }
     ]
   },
   monge: {
     desc: 'Disciplina · corpo e mente em harmonia',
     script: [
-      { type: 'narration', text: '{name} está em postura de meditação no canto sombreado da praça — pernas cruzadas, mãos apoiadas nos joelhos, respiração lenta. Olhos se abrem devagar ao perceber-te.' },
-      { type: 'speech', text: 'O ki flui onde a mente permite, irmão. <i>(controla a respiração)</i> A tempestade lá fora começa aqui dentro. Está em paz hoje?' }
+      { type: 'narration', text: '{name} está em postura de meditação no canto sombreado da praça — pernas cruzadas, mãos sobre os joelhos, respiração lenta. Olhos abrem-se devagar ao te perceber.' },
+      { type: 'speech', text: 'O ki flui onde a mente permite. <i>(controla a respiração)</i> A tempestade lá fora começa aqui dentro. Estás em paz hoje?' }
     ],
     choices: [
-      { id: 'train', label: '👊 "Treina comigo antes da aventura."',          renown: 2 },
+      { id: 'train',  label: '👊 "Treina comigo antes da aventura."',         renown: 2 },
       { id: 'wisdom', label: '☯️ "Compartilha um ensinamento."',              renown: 1 },
+      { id: 'focus',  label: '🧘 "Ajuda-me a focar minha mente." [CD 13 Sabedoria]',
+        cb: 'dice:wis:13:+3',
+        resultNarration: '{name} pousa dois dedos no centro de tua testa. Por um instante todo som do mundo desaparece — clareza total.',
+        resultText: 'Recebeu <b>Vantagem em saves de Sabedoria</b> nas próximas 8 horas.',
+        resultNarrationFail: 'Tua mente vagueia pela praça. {name} suspira. "Não posso te focar de fora. O caminho é teu."',
+        resultTextFail: 'Saíste mais agitado(a) do que entraste. <b>-1 em saves de Sabedoria</b> por 1 hora.' },
       { id: 'leave',  label: '↩ "Continua a meditar."',                       renown: 0 }
     ]
   },
   barbaro: {
     desc: 'Fúria selvagem · sangue da tribo',
     script: [
-      { type: 'narration', text: '{name} está sentado(a) sobre uma pilha de barris improvisada, machado apoiado contra a perna, devorando um pedaço de carne seca. Olha-te com olhos que combinam tribo e tempestade.' },
-      { type: 'speech', text: 'Sangue precisa correr ou apodrece, irmão. <i>(cospe casca no chão)</i> Hoje vi guardas tremendo com um pardal. Diga-me onde está o inimigo que eu vou lá agora.' }
+      { type: 'narration', text: '{name} senta sobre uma pilha de barris improvisada, machado apoiado contra a perna, devorando carne seca. Olha-te com olhos que combinam tribo e tempestade.' },
+      { type: 'speech', text: 'Sangue precisa correr ou apodrece. <i>(cospe casca no chão)</i> Hoje vi guardas tremendo com um pardal. Diz-me onde está o inimigo que vou já.' }
     ],
     choices: [
       { id: 'rage',  label: '💢 "Solta a fúria contigo no próximo combate."', renown: 2 },
       { id: 'tribe', label: '🪓 "Fala-me da tua tribo."',                     renown: 1 },
-      { id: 'leave', label: '↩ "Termine a refeição."',                       renown: 0 }
+      { id: 'arm',   label: '💪 "Queda de braço. Quem ganha paga a cerveja." [CD 15 Atletismo]',
+        cb: 'dice:str:15:+3',
+        resultNarration: 'Quase trinta segundos de pulso firme. Tu vences no fim — {name} ri alto e bate na mesa.',
+        resultText: '{name} paga a cerveja. Recebeu <b>+5 Valdoritas</b> (taxa simbólica da vitória).',
+        resultNarrationFail: 'Teu braço bate na mesa em três segundos. {name} ri sem maldade — empurra a cerveja para ti.',
+        resultTextFail: 'Pagaste a cerveja. <b>-5 Valdoritas</b>. Pelo menos a cerveja estava boa.' },
+      { id: 'leave', label: '↩ "Termina a refeição."',                        renown: 0 }
     ]
   },
   feiticeiro: {
     desc: 'Sangue arcano · magia natural',
     script: [
-      { type: 'narration', text: '{name} faz pequenas faíscas brincarem entre os dedos enquanto observa transeuntes da praça. Curiosidade no rosto, magia leve no ar — sem esforço aparente.' },
-      { type: 'speech', text: 'A magia nasce comigo, irmão — não preciso de livros. <i>(uma faísca azul flutua brevemente)</i> Mas mesmo o fogo de dentro tem o seu humor. Hoje está... inquieto.' }
+      { type: 'narration', text: '{name} faz pequenas faíscas brincarem entre os dedos enquanto observa os transeuntes da praça. Curiosidade no rosto, magia leve no ar — sem esforço aparente.' },
+      { type: 'speech', text: 'A magia nasce comigo — não preciso de livros. <i>(uma faísca azul flutua brevemente)</i> Mas mesmo o fogo de dentro tem o seu humor. Hoje está... inquieto.' }
     ],
     choices: [
       { id: 'show',   label: '🔥 "Mostra-me um truque novo."',                 renown: 2 },
       { id: 'origin', label: '🩸 "De onde vem teu poder?"',                    renown: 0 },
+      { id: 'spark',  label: '⚡ "Empresta-me uma fagulha de poder." [CD 14 Carisma]',
+        cb: 'dice:cha:14:+3',
+        resultNarration: '{name} toca teu peito com a ponta do dedo. Uma faísca azul mergulha sob tua pele — quente, viva.',
+        resultText: 'Recebeu <b>+1d6 dano elemental</b> no próximo ataque acertado.',
+        resultNarrationFail: 'A faísca se apaga ao tocar-te. {name} ergue uma sobrancelha. "Tu não tens o fogo dentro. Hoje, ao menos."',
+        resultTextFail: 'A energia recuou. Nenhum efeito.' },
       { id: 'leave',  label: '↩ "Continua a brincar com fagulhas."',           renown: 0 }
     ]
   },
   bruxo: {
     desc: 'Pacto sombrio · ouvinte de vozes antigas',
     script: [
-      { type: 'narration', text: '{name} está encostado(a) numa parede de pedra, longe da multidão. Capuz baixo cobrindo metade do rosto. Pareces estar sendo observado(a) antes mesmo de teres notado a presença.' },
-      { type: 'speech', text: 'Há vozes que falam quando o silêncio é fundo o bastante, irmão. <i>(toca um amuleto sob a roupa)</i> O Patrono cobra preço — e o preço é sempre maior do que parece à primeira vista.' }
+      { type: 'narration', text: '{name} encosta-se numa parede de pedra, longe da multidão. Capuz baixo cobrindo metade do rosto. Pareces estar sendo observado(a) antes mesmo de teres notado a presença.' },
+      { type: 'speech', text: 'Há vozes que falam quando o silêncio é fundo o bastante. <i>(toca um amuleto sob a roupa)</i> O Patrono cobra preço — e o preço é sempre maior do que parece à primeira vista.' }
     ],
     choices: [
-      { id: 'pact',  label: '🌑 "Conta-me sobre teu Patrono."',                renown: 0 },
-      { id: 'gift',  label: '🔮 "Pede um favor sombrio pra próxima luta."',   renown: 2 },
-      { id: 'leave', label: '↩ "Volta às tuas sombras."',                     renown: 0 }
+      { id: 'pact',    label: '🌑 "Conta-me sobre teu Patrono."',              renown: 0 },
+      { id: 'gift',    label: '🔮 "Pede um favor sombrio pra próxima luta."', renown: 2 },
+      { id: 'whisper', label: '🌒 "Escuta o que o Patrono diz sobre mim." [CD 14 Intimidação]',
+        cb: 'dice:cha:14:+3',
+        resultNarration: '{name} fecha os olhos. Quando os abre, a pupila brilha por um instante. "Ele te conhece. Sabe teu nome verdadeiro."',
+        resultText: 'Recebeu <b>profecia obscura</b> — vantagem no próximo save contra magia.',
+        resultNarrationFail: '{name} abre os olhos depressa. "Ele não falou. Pior — viu-te e calou. Cuidado."',
+        resultTextFail: 'Sente um arrepio nas costas. <b>Desvantagem no primeiro save contra magia</b> do dia.' },
+      { id: 'leave',   label: '↩ "Volta às tuas sombras."',                    renown: 0 }
     ]
   }
 };
@@ -46495,6 +46573,10 @@ function _showAllyDialogue(idx){
   var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
     ? vAssets.classIconHTML(heraldicId, '100%')
     : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
+  /* Helper: aplica {name} → displayName em strings (label, narrações, etc.). */
+  function _personalize(s) {
+    return typeof s === 'string' ? s.replace(/\{name\}/g, displayName) : s;
+  }
   var dlg = {
     npc: {
       name: displayName,
@@ -46502,8 +46584,22 @@ function _showAllyDialogue(idx){
       portraitHTML: portraitHTML
     },
     script: personalizedScript,
+    /* Sessão #28 v3 (2026-05-24): choices podem ter:
+       - cb: 'dice:ability:dc:+mod' (dice check) → _diceCheckSvc lê resultNarration
+         + resultText (success) ou resultNarrationFail + resultTextFail (failure)
+       - cb: 'close' (default, leave/lore choices) — só fecha o encounter
+       - renown: N pra renownDelta cosmético no badge */
     choices: (tpl.choices || []).map(function(c){
-      return { id: c.id, label: (c.label || '').replace(/\{name\}/g, displayName), cb: 'close', renownDelta: c.renown };
+      return {
+        id: c.id,
+        label: _personalize(c.label),
+        cb: c.cb || 'close',
+        renownDelta: c.renown,
+        resultNarration: _personalize(c.resultNarration),
+        resultText: _personalize(c.resultText),
+        resultNarrationFail: _personalize(c.resultNarrationFail),
+        resultTextFail: _personalize(c.resultTextFail)
+      };
     })
   };
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
