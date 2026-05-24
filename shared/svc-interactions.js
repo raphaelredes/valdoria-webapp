@@ -276,19 +276,29 @@
     var cb = ch.cb || '';
     var ov = document.getElementById('encounter-overlay');
     if (cb === 'close') {
-      // Sessão #23 v8 (2026-05-22): user reportou "Talvez depois" não fechava
-      // diálogo - voltava ao botão ESCOLHER AÇÃO. Fix: forçar close completo
-      // do overlay + limpar conteúdo + remover qualquer choice sub-screen.
-      if (ov) {
+      // Sessão #23 v8 (2026-05-22): user reportou "Talvez depois" não fechava.
+      // Sessão #28 (2026-05-24): user reportou tela escurecida + nada acontece
+      // ao escolher choice em ally chat. Causa raiz: codigo legacy abaixo
+      // limpava classList/innerHTML/display MAS nunca chamava <dialog>.close(),
+      // entao o dialog nativo permanecia aberto com ::backdrop visivel +
+      // conteudo zerado = tela preta. Fix: usar vEncounter.close() canonical.
+      if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+        window.vEncounter.close();
+      } else if (ov) {
+        // Fallback legacy (caso vEncounter nao carregue): close + limpa
+        if (typeof ov.close === 'function' && ov.open) {
+          try { ov.close(); } catch(e){}
+        }
         ov.classList.remove('active');
         ov.innerHTML = '';
-        ov.style.display = 'none';
-        setTimeout(function(){ ov.style.display = ''; }, 50);
       }
-      // Limpa também qualquer sub-overlay flutuante
+      // Limpa também qualquer sub-overlay flutuante (choices)
       try {
-        var sub = document.querySelector('.enc-choices-overlay, .enc-choices');
-        if (sub && sub.parentNode) sub.parentNode.removeChild(sub);
+        var sub = document.querySelector('.enc-choices-overlay, .enc-choices, #enc-choices-overlay');
+        if (sub) {
+          if (typeof sub.close === 'function' && sub.open) { try { sub.close(); } catch(e){} }
+          sub.classList.remove('active', 'open', 'opening', 'closing');
+        }
       } catch(_e){}
       return true;
     }
