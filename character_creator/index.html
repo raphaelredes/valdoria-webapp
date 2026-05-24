@@ -3543,28 +3543,98 @@
             buildStatSlots();
         }
 
-        function rollAttributesNow() {
+        /* Sessao #29 v5 (2026-05-24): 3D dice animation pro 4d6 drop lowest.
+           CLAUDE.md MANDATORY RULE — todas rolagens visiveis usam dice-3d.js.
+           User pediu: 'dice rolling com frequencia alta — RPG de mesa'.
+           6 sets sequenciais ~18s total. Cada set: 4d6 anim -> mostra resultados
+           com menor riscado -> total destacado -> proxima.
+           Async/await pra sequencia limpa. */
+        async function rollAttributesNow() {
             haptic();
-            // 4d6 drop lowest, 6 vezes (D&D 5e PHB p.12)
+
+            // Overlay modal
+            const ov = document.createElement('div');
+            ov.id = '__attr-roll-overlay';
+            ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.97);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
+            ov.innerHTML =
+                '<div style="text-align:center;max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.95),rgba(26,21,16,0.95));border:1px solid rgba(196,149,58,0.5);border-radius:12px;padding:20px;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
+                    '<div style="font-size:10px;letter-spacing:3px;color:#c4953a;margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
+                    '<h2 style="font-size:18px;color:#e8c45a;margin:0 0 4px;letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
+                    '<div style="font-size:11px;color:#a09484;margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:#c4953a">1</b> de 6</div>' +
+                    '<div id="__atr-mount" style="width:220px;height:130px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"></div>' +
+                    '<div id="__atr-result" style="font-size:14px;color:#d4c8b0;min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
+                    '<div style="font-size:10px;letter-spacing:1.5px;color:#a09484;margin:14px 0 6px;">SEUS VALORES</div>' +
+                    '<div id="__atr-pool" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:36px;"></div>' +
+                '</div>';
+            document.body.appendChild(ov);
+
+            const mount = document.getElementById('__atr-mount');
+            const numEl = document.getElementById('__atr-num');
+            const resultEl = document.getElementById('__atr-result');
+            const poolEl = document.getElementById('__atr-pool');
+
             const results = [];
+
             for (let i = 0; i < 6; i++) {
-                const rolls = [];
-                for (let j = 0; j < 4; j++) {
-                    rolls.push(1 + Math.floor(Math.random() * 6));
+                numEl.textContent = (i + 1);
+                const rolls = [1, 2, 3, 4].map(() => 1 + Math.floor(Math.random() * 6));
+                const sorted = [...rolls].sort((a, b) => a - b);
+                const dropped = sorted[0];
+                const total = rolls.reduce((s, n) => s + n, 0) - dropped;
+
+                mount.innerHTML = '';
+                resultEl.innerHTML = '<i style="opacity:0.6;">rolando 4d6...</i>';
+
+                if (typeof window.Dice3D === 'function') {
+                    try {
+                        const dice = new window.Dice3D(mount, { size: 56, dieType: 'd6', duration: 1400 });
+                        const configs = rolls.map(v => ({ value: v }));
+                        await new Promise((resolve) => {
+                            try { dice.rollMultiple(configs, resolve); }
+                            catch (e) { console.warn('[ATTR_ROLL] rollMultiple fail:', e); resolve(); }
+                        });
+                    } catch (e) {
+                        console.warn('[ATTR_ROLL] Dice3D init fail:', e);
+                    }
+                } else {
+                    // Fallback sem 3D
+                    mount.innerHTML = '<div style="font-size:24px;color:#c4953a;">' + rolls.join(' ') + '</div>';
+                    await new Promise(r => setTimeout(r, 600));
                 }
-                rolls.sort((a, b) => a - b);
-                const dropped = rolls.shift(); // menor
-                const total = rolls.reduce((s, n) => s + n, 0);
+
+                // Mostra resultado com menor riscado
+                let droppedShown = false;
+                resultEl.innerHTML = rolls.map(r => {
+                    if (!droppedShown && r === dropped) {
+                        droppedShown = true;
+                        return '<span style="text-decoration:line-through;opacity:0.4;color:#a09484;">' + r + '</span>';
+                    }
+                    return '<b style="color:#e8c45a">' + r + '</b>';
+                }).join(' + ') + ' = <span style="font-size:20px;color:#e8c45a;font-weight:700;margin-left:6px;">' + total + '</span>';
+
+                // Adiciona chip ao pool visual
+                const chip = document.createElement('div');
+                chip.style.cssText = 'background:rgba(196,149,58,0.2);border:1px solid #c4953a;border-radius:6px;padding:5px 10px;font-size:14px;color:#e8c45a;font-weight:700;animation:atrChipIn 0.3s ease-out;';
+                chip.textContent = total;
+                poolEl.appendChild(chip);
+
                 results.push(total);
+
+                // Pausa antes da proxima
+                await new Promise(r => setTimeout(r, i < 5 ? 1000 : 1500));
             }
-            results.sort((a, b) => b - a); // descendente
+
+            // Cleanup e populate pool
+            results.sort((a, b) => b - a);
             _rolledPool = results;
             sel.statAssignment = {};
             selectedPoolValue = null;
+
+            ov.remove();
             buildStatSlots();
-            // Toast com os valores rolados
+
             if (typeof window.vToast === 'function') {
-                window.vToast('Rolados: ' + results.join(' · '), 'gold');
+                window.vToast('Atributos rolados: ' + results.join(' · '), 'gold');
             }
         }
 
