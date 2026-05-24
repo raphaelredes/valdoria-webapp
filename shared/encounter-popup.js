@@ -464,8 +464,11 @@
     /* Sessão #28 (2026-05-24): opts.closeable=true renderiza X close visivel.
        Permite sair a qualquer momento sem se comprometer a uma choice (player
        decide quando conversar). Usado pra ally chats (conversa amistosa).
-       Story events / forced encounters NAO devem passar closeable=true. */
+       Story events / forced encounters NAO devem passar closeable=true.
+       Classe `closeable` na card aciona padding-right no header pra o
+       .enc-page-indicator nao colidir com o X (CSS em encounter-popup.css). */
     if (opts.closeable) {
+      card.classList.add('closeable');
       var encClose = document.createElement('button');
       encClose.className = 'enc-card-close';
       encClose.type = 'button';

@@ -89,6 +89,13 @@
   transform: scale(0.94);
 }
 
+/* Quando o X close está presente, o page indicator no header DEVE recuar
+   pra não colidir com o circulo do botão (top:8 right:8, 30x30 = ocupa até
+   right:8+30+8=46px do edge direito). */
+.enc-card.closeable .enc-header {
+  padding-right: 46px;
+}
+
 /* Sessao #19 (2026-05-21): entrance animation pra abrir popup smooth.
    Antes: #encounter-overlay aparecia instantaneo (cut seco) via display:flex.
    Agora: backdrop fade-in 280ms + card slide-up+scale 380ms cubic-bezier. */
