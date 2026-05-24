@@ -44,11 +44,11 @@ function _buildHTML(info) {
         lines.push('<div class="v-maint-line v-maint-reason">' + _esc(info.reason) + '</div>');
     }
 
+    // 2026-05-24 sessão #29: orb is built imperatively via window.ValdoriaOrb.
+    // Placeholder div substituído pelo orb 3D realista após mount.
     return '<div id="v-maint-overlay" class="v-maint-overlay">' +
         '<div class="v-maint-card">' +
-            '<div class="v-maint-icon">' +
-                '<div class="v-maint-orb"><div class="v-maint-orb-core"></div></div>' +
-            '</div>' +
+            '<div class="v-maint-icon" id="v-maint-orb-mount"></div>' +
             '<h1 class="v-maint-title">Servidor em Manutencao</h1>' +
             '<div class="v-maint-subtitle">Lendas de Valdoria esta temporariamente indisponivel.</div>' +
             (lines.length ? '<div class="v-maint-info">' + lines.join('') + '</div>' : '') +
@@ -58,6 +58,42 @@ function _buildHTML(info) {
             '<button class="v-maint-retry" id="v-maint-retry">Tentar Novamente</button>' +
         '</div>' +
     '</div>';
+}
+
+/* Loads loading-title.css (canonical Orb of Valdoria styles) and injects
+   the realistic 3D animated orb into the maintenance icon container.
+   2026-05-24 sessão #29 — esfera amarela tosca radial-gradient REMOVIDA
+   per user request "apague definitivamente da pasta do projeto". */
+function _mountRealisticOrb() {
+    // 1. Ensure loading-title.css is loaded (idempotente)
+    if (!document.getElementById('v-maint-orb-css')) {
+        var link = document.createElement('link');
+        link.id = 'v-maint-orb-css';
+        link.rel = 'stylesheet';
+        link.href = '/shared/loading-title.css?v=' + (window.VBUNDLE_HASH || Date.now());
+        document.head.appendChild(link);
+    }
+
+    // 2. Inject orb into mount point (preferir API canonical ValdoriaOrb)
+    var mount = document.getElementById('v-maint-orb-mount');
+    if (!mount) return;
+
+    // Limpa orbs antigos (caso seja re-render de update info)
+    mount.innerHTML = '';
+
+    if (window.ValdoriaOrb && typeof window.ValdoriaOrb.buildElement === 'function') {
+        mount.appendChild(window.ValdoriaOrb.buildElement());
+    } else {
+        // Fallback: lazy-load loading-title.js e retry.
+        var s = document.createElement('script');
+        s.src = '/shared/loading-title.js?v=' + (window.VBUNDLE_HASH || Date.now());
+        s.onload = function() {
+            if (window.ValdoriaOrb && typeof window.ValdoriaOrb.buildElement === 'function') {
+                mount.appendChild(window.ValdoriaOrb.buildElement());
+            }
+        };
+        document.head.appendChild(s);
+    }
 }
 
 function _esc(s) {
@@ -86,28 +122,19 @@ function _injectStyles() {
         '  max-width: 420px; width: 100%; text-align: center;',
         '  padding: 32px 24px;',
         '}',
+        // 2026-05-24 sessão #29: .v-maint-icon agora é mount point pro orb 3D
+        // realista (window.ValdoriaOrb). Esfera amarela tosca radial-gradient
+        // REMOVIDA permanentemente do projeto. Container precisa de altura
+        // suficiente pro orb 3D (que usa width:100% do .title-orb-wrap canonical).
         '.v-maint-icon {',
-        '  width: 96px; height: 96px;',
+        '  width: 140px; height: 140px;',
         '  margin: 0 auto 24px;',
         '  position: relative;',
+        '  display: flex; align-items: center; justify-content: center;',
         '}',
-        '.v-maint-orb {',
-        '  position: absolute; inset: 0;',
-        '  border-radius: 50%;',
-        '  background: radial-gradient(circle at 35% 30%, #fff4d0 0%, #e8c45a 25%, #c4953a 55%, #8b6420 80%, #5a3e10 100%);',
-        '  box-shadow: 0 0 40px rgba(196,149,58,0.5), inset -10px -10px 20px rgba(90,62,16,0.6);',
-        '  animation: v-maint-pulse 3s ease-in-out infinite;',
-        '}',
-        '.v-maint-orb-core {',
-        '  position: absolute; top: 25%; left: 30%;',
-        '  width: 25%; height: 20%;',
-        '  background: rgba(255,244,208,0.7);',
-        '  border-radius: 50%;',
-        '  filter: blur(4px);',
-        '}',
-        '@keyframes v-maint-pulse {',
-        '  0%, 100% { box-shadow: 0 0 40px rgba(196,149,58,0.5), inset -10px -10px 20px rgba(90,62,16,0.6); }',
-        '  50% { box-shadow: 0 0 60px rgba(196,149,58,0.8), inset -10px -10px 20px rgba(90,62,16,0.4); }',
+        '.v-maint-icon .title-orb-wrap {',
+        '  position: relative; width: 100%; height: 100%;',
+        '  transform: scale(0.6); transform-origin: center;',
         '}',
         '.v-maint-title {',
         '  font-size: 24px; font-weight: 700;',
@@ -243,6 +270,10 @@ function show(info) {
     _el = wrap.firstChild;
     document.body.appendChild(_el);
 
+    // 2026-05-24 sessão #29: monta orb 3D realista (canonical Orb of Valdoria)
+    // no lugar da esfera amarela tosca antiga.
+    _mountRealisticOrb();
+
     // Wire retry — checks server status, hides if back online
     var retryBtn = document.getElementById('v-maint-retry');
     if (retryBtn) {
@@ -320,6 +351,8 @@ function _updateInfo(info) {
     var card = _el.querySelector('.v-maint-card');
     if (card) {
         card.innerHTML = _buildHTML(info).match(/<div class="v-maint-card">([\s\S]+)<\/div>\s*<\/div>/)[1];
+        // Re-mount orb (innerHTML replaced the mount point div)
+        _mountRealisticOrb();
         var btn = document.getElementById('v-maint-retry');
         if (btn) btn.addEventListener('click', _retry);
     }

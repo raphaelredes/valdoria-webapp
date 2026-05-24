@@ -12309,10 +12309,12 @@ function _showStatusPopup(memberIdx){
     + 'border:1.5px solid var(--v-gold-50,rgba(196,149,58,0.5));'
     + 'box-shadow:0 0 14px rgba(196,149,58,0.35);"></div>'
     // Avatar circular (50px dentro do ring 64px)
+    // 2026-05-24 sessão #29: removido radial-gradient amarelo tosco. Fundo
+    // sólido dark + ring gold + SVG da classe são suficientes pra identidade.
     + '<div class="ficha-avatar fEp-avatar-anim" style="position:absolute; inset:5px;'
-    + 'background:radial-gradient(circle at 30% 30%,#fff4d0 0%,#e8c45a 25%,#c4953a 55%,#5a3e10 100%);'
+    + 'background:linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));'
     + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
-    + 'border:1.5px solid var(--v-gold,#c4953a); color:#1a1410;">'
+    + 'border:1.5px solid var(--v-gold,#c4953a); color:var(--v-gold,#c4953a);">'
     + heroAvatarSvg
     + '</div>'
     // 4 ornamentos cardeais menores
@@ -12485,12 +12487,14 @@ function _showStatusPopup(memberIdx){
       var active = idx === memberIdx;
       var hid = _classToHeraldic(mm.cls);
       // Mini-avatar 18px compacto
+      // 2026-05-24 sessão #29: removido radial-gradient amarelo tosco.
+      // Mini-avatar usa fundo sólido dark + ring gold + SVG dourado.
       var avSvg = '<div style="width:18px; height:18px; border-radius:50%; flex-shrink:0;'
-        + 'background:radial-gradient(circle at 30% 30%,#fff4d0 0%,#e8c45a 30%,#c4953a 70%,#5a3e10 100%);'
+        + 'background:var(--v-bg-card,#2e2520);'
         + 'display:flex; align-items:center; justify-content:center;'
         + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.5)') + ';'
         + 'box-shadow:' + (active ? '0 0 6px rgba(196,149,58,0.6)' : 'none') + ';">'
-        + '<svg viewBox="0 0 120 120" style="width:11px; height:11px; color:#1a1410;"><use href="#' + hid + '"/></svg>'
+        + '<svg viewBox="0 0 120 120" style="width:11px; height:11px; color:var(--v-gold,#c4953a);"><use href="#' + hid + '"/></svg>'
         + '</div>';
       html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + idx + '" '
         + 'style="display:flex; align-items:center; gap:5px; padding:3px 8px 3px 4px;'
