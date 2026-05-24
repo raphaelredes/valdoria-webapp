@@ -111,6 +111,26 @@
             else if (!success && opts.ch.failure) nextNodeId = opts.ch.failure;
             else if (opts.ch.continueDialogue) nextNodeId = opts.ch.continueDialogue;
           }
+          /* Sessao #29 v3 (2026-05-24): Continuar do dice NAO fechava o <dialog>
+             nativo — classList.remove('active') so removia a classe legacy. O
+             native <dialog>.open ficava true + ::backdrop visivel + top-layer
+             bloqueando qualquer popup subsequente (_showInfoPopup invisivel
+             porque o backdrop do encounter cobria tudo). Fix: usar
+             vEncounter.close() canonical em todos os paths. Mesma raiz do bug
+             do choice-click anterior. */
+          function _closeEncounterCanon() {
+            try {
+              if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+                window.vEncounter.close();
+                return;
+              }
+            } catch(_e) {}
+            try {
+              if (typeof ov.close === 'function' && ov.open) ov.close();
+            } catch(_e) {}
+            ov.classList.remove('active');
+          }
+
           if (nextNodeId && opts.dialogues && opts.dialogues[nextNodeId]) {
             // Render próximo nó PADRAO_ALDRIC
             if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -118,13 +138,13 @@
             } else if (typeof window._renderEncounterPopup === 'function') {
               window._renderEncounterPopup(opts.dialogues[nextNodeId]);
             } else {
-              ov.classList.remove('active');
+              _closeEncounterCanon();
             }
           } else if (opts.ch && (opts.ch.resultNarration || opts.ch.resultText)) {
             // Mostra narrativa de resultado (success/fail) como popup curto
             var rNarration = success ? (opts.ch.resultNarration || '') : (opts.ch.resultNarrationFail || opts.ch.resultNarration || '');
             var rText = success ? (opts.ch.resultText || '') : (opts.ch.resultTextFail || opts.ch.resultText || '');
-            ov.classList.remove('active');
+            _closeEncounterCanon();
             if (typeof window._showInfoPopup === 'function') {
               window._showInfoPopup({
                 icon: '',
@@ -135,7 +155,7 @@
               });
             }
           } else {
-            ov.classList.remove('active');
+            _closeEncounterCanon();
           }
         });
       }, 600);
