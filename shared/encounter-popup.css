@@ -43,6 +43,7 @@
 }
 
 .enc-card {
+  position: relative;  /* Sessão #28 (2026-05-24): anchor para .enc-card-close */
   background: linear-gradient(180deg, #3a2e22, #2a2218);
   border: 1px solid var(--v-gold-60);
   border-radius: 12px;
@@ -53,6 +54,39 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--v-gold-20);
+}
+
+/* Sessão #28 (2026-05-24): close X visivel no canto sup-direito do encounter
+   card (apenas quando opts.closeable=true). Permite sair a qualquer momento. */
+.enc-card-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: rgba(28, 22, 16, 0.94);
+  border: 1px solid var(--v-gold-60, rgba(196, 149, 58, 0.6));
+  border-radius: 50%;
+  color: var(--v-gold, #c4953a);
+  font-size: 14px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+.enc-card-close:hover {
+  background: rgba(196, 149, 58, 0.22);
+  border-color: var(--v-gold-bright, #e8c45a);
+  color: var(--v-gold-bright, #e8c45a);
+  transform: scale(1.08);
+}
+.enc-card-close:active {
+  transform: scale(0.94);
 }
 
 /* Sessao #19 (2026-05-21): entrance animation pra abrir popup smooth.

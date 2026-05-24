@@ -2546,32 +2546,55 @@ LOG SINK (Fase 7):
       font-family: 'Cinzel', serif;
     }
     .cgp-card:hover { border-color: #c4953a; box-shadow: 0 0 12px rgba(196, 149, 58, 0.3); }
-    /* Sessão #23 (2026-05-22): chat button — abre popup in-card.
-       Sessão #28 (2026-05-24): movido pra bottom-left (era top:2 right:2 e
-       overlap com c-portrait/classe). Click → popup que ocupa ~95% do card. */
-    .cgp-chat-btn {
-      position: absolute;
-      bottom: 2px; left: 2px;
-      width: 18px; height: 18px;
-      padding: 0;
-      background: rgba(28, 22, 16, 0.92);
-      border: 1px solid rgba(196, 149, 58, 0.5);
-      border-radius: 50%;
-      color: #c4953a;
-      font-size: 9px;
-      line-height: 1;
-      display: grid;
-      place-items: center;
+    /* Sessão #28 v2 (2026-05-24): ally card "chat-only" mode.
+       Card de aliado vivo mostra só nome+classe+ícone classe + grande botão
+       "Conversar" no lugar dos stats (PV/Mana/XP/Gold removidos). Click no
+       botão abre fullscreen PADRAO_ALDRIC com X close. Click no header (nome/
+       classe) ainda abre Ficha pra checar stats quando precisar. */
+    .c-chat-zone {
+      flex: 1 1 auto;
+      width: 100%;
+      background: linear-gradient(180deg,
+        rgba(196, 149, 58, 0.06) 0%,
+        rgba(28, 22, 16, 0.65) 60%,
+        rgba(14, 11, 8, 0.85) 100%);
+      border: 0;
+      border-top: 1px solid rgba(196, 149, 58, 0.25);
       cursor: pointer;
-      z-index: 4;
-      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 4px;
+      color: var(--v-gold, #c4953a);
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      transition: background 0.18s ease, color 0.18s ease;
+      box-shadow: inset 0 1px 0 rgba(196, 149, 58, 0.12);
     }
-    .cgp-chat-btn:hover {
-      background: rgba(196, 149, 58, 0.2);
-      border-color: #c4953a;
-      transform: scale(1.12);
+    .c-chat-zone:hover {
+      background: linear-gradient(180deg,
+        rgba(196, 149, 58, 0.18) 0%,
+        rgba(28, 22, 16, 0.55) 60%,
+        rgba(14, 11, 8, 0.78) 100%);
+      color: var(--v-gold-bright, #e8c45a);
     }
-    .cgp-chat-btn:active { transform: scale(0.92); }
+    .c-chat-zone:active {
+      filter: brightness(0.92);
+    }
+    .c-chat-zone .c-chat-icon {
+      font-size: 24px;
+      line-height: 1;
+      filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.45));
+    }
+    .c-chat-zone .c-chat-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      opacity: 0.92;
+      line-height: 1;
+    }
 
     /* Sessão #28 (2026-05-24): in-card chat popup — substitui PADRAO_ALDRIC
        fullscreen pelo popup contido no card (user request). Cobre ~95% do
@@ -46542,74 +46565,39 @@ function _allyTplKey(cls){
   return ALIASES[k] || k;
 }
 
-// _showAllyDialogue(memberIdx) — Sessão #28 (2026-05-24): popup in-card (era fullscreen PADRAO_ALDRIC).
-// User request: "Pode colocar como um popup que ocupa quase todo o card."
-// Overlay absolute dentro do .cgp-card; fecha via X ou ao escolher uma resposta.
+// _showAllyDialogue(memberIdx) — Sessão #28 v2 (2026-05-24): fullscreen
+// PADRAO_ALDRIC (vEncounter.render) com closeable:true. User pode fechar a
+// qualquer momento via X (ou ESC) sem se comprometer a uma choice — quando
+// quiser conversar mais, clica de novo no card.
 function _showAllyDialogue(idx){
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
-  var card = document.querySelector('.cgp-card[data-member="' + idx + '"]');
-  if (!card) return;
-  // Evita duplicação se o user clicar duas vezes
-  var existing = card.querySelector('.cgp-chat-overlay');
-  if (existing) { existing.remove(); return; }
-
   var cls = _allyTplKey(m.cls);
   var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
   var displayName = (m.name || '').split(/\s+/)[0];
-  var safeName = _hubEsc(_titleCase(displayName));
-
-  // Primeira narration + primeira speech do template (personalizadas)
-  var narration = '', speech = '';
-  for (var s = 0; s < (tpl.script || []).length; s++) {
-    var line = tpl.script[s];
-    var txt = (line.text || '').replace(/\{name\}/g, displayName);
-    if (line.type === 'narration' && !narration) narration = txt;
-    if (line.type === 'speech' && !speech) speech = txt;
+  // Personaliza {name} no script
+  var personalizedScript = (tpl.script || []).map(function(line){
+    var copy = { type: line.type, text: (line.text || '').replace(/\{name\}/g, displayName) };
+    if (line.type === 'speech') copy.speaker = displayName;
+    return copy;
+  });
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var dlg = {
+    npc: {
+      name: displayName,
+      desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level,
+      portrait: heraldicId
+    },
+    script: personalizedScript,
+    choices: (tpl.choices || []).map(function(c){
+      return { id: c.id, label: (c.label || '').replace(/\{name\}/g, displayName), cb: 'close', renownDelta: c.renown };
+    })
+  };
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, { closeable: true });
+  } else if (typeof vToast === 'function') {
+    vToast('💬 ' + displayName + ': "' + (personalizedScript[1] || personalizedScript[0]).text + '"');
   }
-
-  // Escolhas (3) — render como botões
-  var choicesHtml = (tpl.choices || []).map(function(c, ci){
-    var label = (c.label || '').replace(/\{name\}/g, displayName);
-    return '<button class="cgp-chat-choice" data-choice="' + ci + '" type="button">' + label + '</button>';
-  }).join('');
-
-  // Constrói overlay
-  var overlay = document.createElement('div');
-  overlay.className = 'cgp-chat-overlay';
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-label', 'Conversar com ' + safeName);
-  overlay.innerHTML =
-    '<button class="cgp-chat-close" type="button" aria-label="Fechar">✕</button>' +
-    '<div class="cgp-chat-name">💬 ' + safeName + '</div>' +
-    (narration ? '<div class="cgp-chat-narration">' + narration + '</div>' : '') +
-    (speech ? '<div class="cgp-chat-speech">"' + speech + '"</div>' : '') +
-    '<div class="cgp-chat-choices">' + choicesHtml + '</div>';
-
-  // Stop propagation pra não disparar click do card (que abre Ficha)
-  overlay.addEventListener('click', function(ev){ ev.stopPropagation(); });
-
-  // Close button
-  overlay.querySelector('.cgp-chat-close').addEventListener('click', function(ev){
-    ev.stopPropagation();
-    overlay.remove();
-  });
-
-  // Choices — renown integration: chama window._addRenown se existir (mesmo
-  // contrato do PADRAO_ALDRIC anterior via renownDelta).
-  overlay.querySelectorAll('.cgp-chat-choice').forEach(function(btn){
-    btn.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var ci = parseInt(btn.getAttribute('data-choice'), 10);
-      var choice = (tpl.choices || [])[ci];
-      if (choice && choice.renown && typeof window._addRenown === 'function') {
-        try { window._addRenown(choice.renown); } catch(_) {}
-      }
-      overlay.remove();
-    });
-  });
-
-  card.appendChild(overlay);
 }
 window._showAllyDialogue = _showAllyDialogue;
 
@@ -46680,41 +46668,53 @@ function renderCityGroupPanel(){
     var goldStr = _fmtV(m.gold || 0);
 
     // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
-    // Sessão #23 (2026-05-22): chat-btn aparece em aliados (não player, não dead) — PADRAO_ALDRIC dialogue
-    var chatBtnHtml = (!m.isPlayer && !m.dead) ? '<button class="cgp-chat-btn" data-chat-idx="' + i + '" title="Conversar com ' + safeName + '" aria-label="Conversar">💬</button>' : '';
+    // Sessão #28 v2 (2026-05-24): aliado vivo = só nome + classe + ícone classe
+    // + grande botão "Conversar" (sem stats). Player e aliado morto seguem com
+    // stats normais. Click no botão → fullscreen PADRAO_ALDRIC c/ closeable.
+    var isLivingAlly = !m.isPlayer && !m.dead;
     html += '<div class="cgp-slot" data-slot="' + i + '">'
-      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + '" data-member="' + i + '">'
+      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + (isLivingAlly ? ' chat-only' : '') + '" data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
-      + chatBtnHtml
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-      + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>'
-      + '    <div class="c-stats">'
-      // Linha 1: PV (full width — CA removida)
-      + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
-      + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
-      + '        <span class="c-stat-label">PV</span>'
-      + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
-      + '      </div>';
-    // Linha 2: Recurso — so se mmp > 0
-    if (m.mpMax > 0) {
-      html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
-        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
-        + '        <span class="c-stat-label">' + safeResName + '</span>'
-        + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
+      + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
+    if (isLivingAlly) {
+      // Aliado vivo: chat zone grande ocupando area dos stats
+      html += '    <button class="c-chat-zone" data-chat-idx="' + i + '" type="button"'
+        + ' title="Conversar com ' + safeName + '"'
+        + ' aria-label="Conversar com ' + safeName + '">'
+        + '<span class="c-chat-icon">💬</span>'
+        + '<span class="c-chat-label">Conversar</span>'
+        + '</button>';
+    } else {
+      // Player ou aliado morto: stats normais
+      html += '    <div class="c-stats">'
+        // Linha 1: PV (full width — CA removida)
+        + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
+        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
+        + '        <span class="c-stat-label">PV</span>'
+        + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
         + '      </div>';
+      // Linha 2: Recurso — so se mmp > 0
+      if (m.mpMax > 0) {
+        html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
+          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
+          + '        <span class="c-stat-label">' + safeResName + '</span>'
+          + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
+          + '      </div>';
+      }
+      // Linha 3: XP (full width, val branco)
+      html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
+        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
+        + '        <span class="c-stat-label">XP</span>'
+        + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
+        + '      </div>'
+        // Linha 4: Valdoritas (full width, val branco maior)
+        + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
+        + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
+        + '      </div>'
+        + '    </div>';  // /c-stats
     }
-    // Linha 3: XP (full width, val branco)
-    html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
-      + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
-      + '        <span class="c-stat-label">XP</span>'
-      + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
-      + '      </div>'
-      // Linha 4: Valdoritas (full width, val branco maior)
-      + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
-      + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
-      + '      </div>'
-      + '    </div>'  // /c-stats
-      + '  </div>'  // /cgp-card
+    html += '  </div>'  // /cgp-card
       + '</div>';  // /cgp-slot
   }
   el.innerHTML = html;
@@ -46727,8 +46727,9 @@ function renderCityGroupPanel(){
       if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
     });
   });
-  // Sessão #23 (2026-05-22): chat button wire → _showAllyDialogue (stop propagation pra não abrir Ficha)
-  el.querySelectorAll('.cgp-chat-btn').forEach(function(btn){
+  // Sessão #28 v2 (2026-05-24): c-chat-zone (botão grande) wire → _showAllyDialogue
+  // fullscreen com closeable. stopPropagation pra não disparar click do card (Ficha).
+  el.querySelectorAll('.c-chat-zone').forEach(function(btn){
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
       var idx = parseInt(btn.getAttribute('data-chat-idx'), 10);

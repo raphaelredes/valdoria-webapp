@@ -461,6 +461,23 @@
     actions.style.display = 'none';
     card.appendChild(actions);
 
+    /* Sessão #28 (2026-05-24): opts.closeable=true renderiza X close visivel.
+       Permite sair a qualquer momento sem se comprometer a uma choice (player
+       decide quando conversar). Usado pra ally chats (conversa amistosa).
+       Story events / forced encounters NAO devem passar closeable=true. */
+    if (opts.closeable) {
+      var encClose = document.createElement('button');
+      encClose.className = 'enc-card-close';
+      encClose.type = 'button';
+      encClose.setAttribute('aria-label', 'Fechar conversa');
+      encClose.textContent = '✕';
+      encClose.addEventListener('click', function(e){
+        e.stopPropagation();
+        close();
+      });
+      card.appendChild(encClose);
+    }
+
     ov.appendChild(card);
     // task #69: use <dialog>.showModal() (top-layer, inert background, focus trap)
     _showOverlay(ov);
