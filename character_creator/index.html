@@ -1,4 +1,62 @@
 <!DOCTYPE html>
+<!--
+MAPA_IA — Character Creator AAA (5800+ linhas, sessão #29)
+Navegação rápida pra agentes IA. Atualize CADA mudança estrutural.
+
+[HEAD ~1-1050]
+   ~6   CSP, meta tags, theme-color
+   ~14  OG meta + description
+   ~91  audio-manager.js load (HEAD — única chamada, NÃO duplicar)
+   ~1043 cache-busting + outros shared/* scripts (action-guard, webapp-init,
+         log-relay, exit-confirm, session-heartbeat)
+
+[STYLE BLOCK ~1050-2270]
+   ~1100 CSS variables + design tokens
+   ~1500 Screen layout + headers + tabs
+   ~2000 Stat slots + buttons + popups
+
+[BODY + SCREEN MARKUP ~2270-2570]
+   ~2270 Stat method tabs HTML (3 botões: standard/roll/pointbuy)
+   ~2300 9 screens: welcome → race → subrace → class → background →
+         attribute method → distribution → fighting style → confirmation
+
+[SELECTION STATE + INIT ~2570-2700]
+   ~2573 init() IIFE — Telegram WebApp bootstrap + load player
+   ~2676 randomizeCharacter() — atalho random (DEV only)
+
+[CORE FLOW ~2700-3500]
+   ~3247 goScreen(idx) — navigation entre 9 telas
+   ~3409 validateCurrentScreen — bloqueia avanço se campos incompletos
+   ~3499 _attrIconHtml — PNG dos 6 atributos (icons/{strength|...}.png)
+
+[STAT GENERATION ~3500-3750]
+   ~3517 setStatMethod(method) — switch Standard/Roll/Point Buy
+         BUGFIX #29: pointbuy inicia sel.statAssignment = {..._pointbuyValues}
+   ~3560 rollAttributesNow() — async 3D dice 4d6 drop lowest (6 sets, ~18s)
+   ~3653 pointbuyAdjust(attr, delta) — +/- 8-15 com cap budget 27
+   ~3733 buildStatSlots — renderiza UI dos 6 slots
+
+[RACE/CLASS/BACKGROUND ~3900-5000]
+   ~3918 buildRaceGrid — 9 raças card grid
+   ~3936 buildRaceDetail — detail page com PNG
+   ~4000 buildRaceSelection — race+subrace picker (PNG via RACE_HERALDIC_ICON)
+   ~4425 _classIconHtml — PNG das 12 classes (combat/{class}.png)
+   ~4436 buildClassGrid — class card grid
+   ~4622 _fightingStyleIconHtml — PNG estilo combate (defesa/duelismo)
+   ~4687 _itemThumbHtml — PNG equipamentos starting pack
+
+[SUBMISSION ~5400-5800]
+   ~5471 submitCharacter — final fetch/sendData ao backend
+   ~5687 _showSubmitConfirmation — popup confirmação ANTES do envio
+         (req. user 2026-05-24: "remova DADOS ENVIADOS, mostre popup antes")
+   ~5731 _redirectToPrologueOrShowFallback — pós-criação
+
+Busca rápida:
+  grep "BUGFIX sessão #29"          → fixes aplicados na sessão atual
+  grep "PADRAO_ALDRIC"               → padrão diálogos canônico
+  grep "_attrIconHtml\|_classIconHtml" → resolvers PNG
+  grep "STAT_ATTRS\|POINTBUY_COSTS"  → constantes D&D 5e
+-->
 <html lang="pt-BR">
 
 <head>
@@ -1043,7 +1101,9 @@
     document.write('<script src="../shared/action-guard.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/webapp-init.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/log-relay.js?v=' + v + '"><\/script>');
-    document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    // BUGFIX sessão #29 (2026-05-24): audio-manager.js ja foi carregado linha 91
+    // no head. Carregar 2x causa double init AudioContext + reset track state
+    // (violando Music Continuity IMMUTABLE rule).
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     </script>
@@ -3539,6 +3599,12 @@
                 if (descEl) descEl.textContent = '27 pontos. Custo 8→0, 9→1, 10→2, 11→3, 12→4, 13→5, 14→7, 15→9.';
                 if (instrEl) instrEl.textContent = 'Use +/- pra ajustar. Atributos partem em 8.';
                 _pointbuyValues = { strength:8, dexterity:8, constitution:8, intelligence:8, wisdom:8, charisma:8 };
+                // BUGFIX sessão #29 (2026-05-24): sel.statAssignment precisa ser
+                // inicializado COM os valores 8 logo no setStatMethod. Sem isso,
+                // se o jogador entra em Point Buy e nunca toca +/-, validateCurrentScreen
+                // bloqueia (assignment vazio) E o server recebe stat_assignment: {}
+                // → fallback pra standard_array silencioso.
+                sel.statAssignment = { ..._pointbuyValues };
             }
             buildStatSlots();
         }
