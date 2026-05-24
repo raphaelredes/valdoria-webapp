@@ -82,6 +82,12 @@
           localStorage.setItem('valdoria_audio_resume', 'character_creation');
           localStorage.setItem('valdoria_audio_resume_ts', String(Date.now()));
         } catch(e){}
+        /* Sessao #29 v4 (2026-05-24): char_creator nao tem #footer-quick (audio
+           manager pattern de cidade.html). Sem forcar, audio-manager espera
+           3s entao injeta floating button — user reportou volume nao funciona.
+           Force floating button IMEDIATAMENTE pra garantir visivel + clicavel
+           desde o load (sem race condition do MutationObserver). */
+        window.__audioForceFloat = true;
         document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
         document.write('<link rel="stylesheet" href="../shared/audio-manager.css?v=' + v + '">');
         // USER REQUEST 2026-05-04: D20 3D real no onboarding slide 0
@@ -2164,11 +2170,47 @@
     })();
     </script>
 
-    <div class="v-header">
+    <div class="v-header" style="position:relative;">
+        <button id="screen-back-btn" class="screen-back-btn"
+                onclick="goScreen(Math.max(0, currentScreen - 1))"
+                aria-label="Voltar"
+                style="display:none;">←</button>
         <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
         <div class="v-progress-bar" id="progressBar"></div>
         <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
     </div>
+    <style>
+        /* Sessao #29 v4 (2026-05-24): botao back visivel no header pra navegacao
+           explicita entre telas — alternativa ao Telegram BackButton (que nao
+           aparece em browser desktop) e aos progress dots (menos descobriveis). */
+        .screen-back-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(28, 22, 16, 0.92);
+            border: 1px solid rgba(196, 149, 58, 0.5);
+            border-radius: 50%;
+            color: var(--v-gold, #c4953a);
+            font-size: 16px;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            z-index: 10;
+            line-height: 1;
+            padding: 0;
+            transition: transform 0.12s ease, background 0.12s ease;
+        }
+        .screen-back-btn:hover {
+            background: rgba(196, 149, 58, 0.22);
+            transform: scale(1.08);
+        }
+        .screen-back-btn:active {
+            transform: scale(0.94);
+        }
+    </style>
 
     <div class="screen-viewport" id="screenViewport">
         <div class="screen-track" id="screenTrack">
@@ -3236,8 +3278,33 @@
         }
 
         function updateBackButton() {
+            /* Sessao #29 v4 (2026-05-24): atualiza tanto Telegram BackButton
+               quanto o screen-back-btn header (visivel em browser desktop tambem). */
+            const headerBack = document.getElementById('screen-back-btn');
+            if (headerBack) {
+                /* Mostra so quando ha pra onde voltar (screen > 0 OU sub-screen aberta).
+                   Screen 0 sem sub: esconde porque so fecharia o WebApp. */
+                const hasOpenSub = !!document.querySelector('.sub-screen.active');
+                const showBack = hasOpenSub || currentScreen > 0;
+                headerBack.style.display = showBack ? 'grid' : 'none';
+                /* Click ja foi setado inline pra goScreen — mas precisa cobrir
+                   sub-screen tambem. Atualiza handler dinamicamente. */
+                headerBack.onclick = function() {
+                    const openSub = document.querySelector('.sub-screen.active');
+                    if (openSub) {
+                        /* Mesma logica do Telegram BackButton handler — race
+                           selection phase 2 volta pra phase 1, senao close. */
+                        if (openSub.id === 'sub-race-detail' && currentRaceDetailKey && isRaceSelectionPhase()) {
+                            buildRaceDetail(currentRaceDetailKey);
+                            return;
+                        }
+                        closeSubScreen(openSub.id);
+                        return;
+                    }
+                    if (currentScreen > 0) goScreen(currentScreen - 1);
+                };
+            }
             if (!tg || !tg.BackButton) return;
-            const hasOpenSub = document.querySelector('.sub-screen.active');
             tg.BackButton.show(); // Always visible — closes WebApp from screen 0
         }
 
