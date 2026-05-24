@@ -154,6 +154,18 @@ body.perf-lite #encounter-overlay.active .enc-card {
   object-fit: cover;
   object-position: center 30%;
 }
+/* Sessão #28 (2026-05-24): class icons (.v-asset-class via vAssets.classIconHTML)
+   e fallback SVG <use> devem caber INTEIROS no circulo, sem crop como portrait
+   foto real. Override de object-fit pra contain + remove object-position crop. */
+.enc-portrait img.v-asset-class,
+.enc-portrait svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 4px;
+  box-sizing: border-box;
+}
 .enc-meta { flex: 1; min-width: 0; }
 .enc-name {
   font-family: 'Georgia', serif;

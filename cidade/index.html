@@ -46487,11 +46487,19 @@ function _showAllyDialogue(idx){
     return copy;
   });
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  /* Sessão #28 v3 (2026-05-24): portraitHTML em vez de portrait (URL).
+     Render a PNG da classe (/shared/img/combat/clerigo.png etc.) via
+     vAssets.classIconHTML, com fallback SVG sprite quando vAssets falha
+     ou PNG inexistente. User: "use a imagem da classe deles ao invés de
+     uma foto de personagem". */
+  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '100%')
+    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
   var dlg = {
     npc: {
       name: displayName,
       desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level,
-      portrait: heraldicId
+      portraitHTML: portraitHTML
     },
     script: personalizedScript,
     choices: (tpl.choices || []).map(function(c){

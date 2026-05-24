@@ -408,6 +408,11 @@
     var header = document.createElement('div');
     header.className = 'enc-header';
     var npcPortrait = (dialogue.npc && dialogue.npc.portrait) || '';
+    /* Sessão #28 (2026-05-24): suporte a portraitHTML — HTML pronto (ex: SVG
+       sprite ou <img> de PNG de classe) em vez de URL pra <img src=...>.
+       Quando portraitHTML é passado, lightbox é desabilitado (faz sentido
+       só pra fotos reais de personagem). */
+    var npcPortraitHTML = (dialogue.npc && dialogue.npc.portraitHTML) || '';
     var npcName = (dialogue.npc && dialogue.npc.name) || '';
     var npcDesc = (dialogue.npc && dialogue.npc.desc) || '';
     // 2026-05-22 B3: affinity badge no header (NPC dialogue engine integration).
@@ -421,8 +426,9 @@
       }
     }
     header.innerHTML =
-      '<div class="enc-portrait" title="Clique pra ampliar">' +
-        (npcPortrait ? '<img src="' + npcPortrait + '" alt="">' : '') +
+      '<div class="enc-portrait"' + (npcPortrait ? ' title="Clique pra ampliar"' : '') + '>' +
+        (npcPortraitHTML ? npcPortraitHTML
+          : (npcPortrait ? '<img src="' + npcPortrait + '" alt="">' : '')) +
       '</div>' +
       '<div class="enc-meta">' +
         '<div class="enc-name">' + npcName + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +
@@ -431,13 +437,17 @@
       '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>';
     card.appendChild(header);
 
-    // Lightbox no portrait click (se window.showLightbox existir)
+    // Lightbox no portrait click — só quando há URL real (npcPortrait), não
+    // pra HTML customizado (ex: SVG/PNG de classe via portraitHTML).
     var portraitEl = header.querySelector('.enc-portrait');
-    if (portraitEl && typeof window.showLightbox === 'function') {
+    if (portraitEl && typeof window.showLightbox === 'function' && npcPortrait) {
       portraitEl.addEventListener('click', function(e){
         e.stopPropagation();
         window.showLightbox(npcPortrait, npcName, npcDesc);
       });
+    } else if (portraitEl && !npcPortrait) {
+      // Sem lightbox: cursor default (não sugere interação)
+      portraitEl.style.cursor = 'default';
     }
 
     // Body
