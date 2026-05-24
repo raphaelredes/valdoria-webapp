@@ -2268,8 +2268,21 @@
                     <div class="dm-bubble" id="dm-2"></div>
                     <div class="v-title-sm">Distribua seus Atributos <span class="help-tip"
                             onclick="showHelp('stats')">?</span></div>
-                    <div class="v-caption">Distribua os valores 15, 14, 13, 12, 10, 8 nos 6 atributos. Toque num valor,
-                        depois no atributo.</div>
+                    <!-- Sessao #29 v4: D&D 5e PHB p.12-13 lista 3 metodos canonicos.
+                         User pediu: 'siga as regras D&D'. Adicionado seletor de metodo. -->
+                    <div class="stat-method-selector" id="statMethodSelector">
+                        <div class="stat-method-label">Como quer gerar seus atributos?</div>
+                        <div class="stat-method-tabs">
+                            <button class="stat-method-tab active" data-method="standard"
+                                    onclick="setStatMethod('standard')">📋 Array Padrão</button>
+                            <button class="stat-method-tab" data-method="roll"
+                                    onclick="setStatMethod('roll')">🎲 Rolar 4d6</button>
+                            <button class="stat-method-tab" data-method="pointbuy"
+                                    onclick="setStatMethod('pointbuy')">⚖️ Point Buy</button>
+                        </div>
+                        <div class="stat-method-desc" id="statMethodDesc">15, 14, 13, 12, 10, 8 — distribuídos como preferir.</div>
+                    </div>
+                    <div class="v-caption" id="statInstruction">Toque num valor, depois no atributo.</div>
                     <div class="stat-pool" id="statPool"></div>
                     <div id="statSlots"></div>
                     <div class="stat-actions">
@@ -2280,6 +2293,80 @@
                         Confirmar Atributos</button>
                 </div>
             </div>
+            <style>
+                /* Sessao #29 v4: stat method selector D&D 5e canonical */
+                .stat-method-selector {
+                    margin: 12px 0;
+                    padding: 12px;
+                    background: rgba(196, 149, 58, 0.06);
+                    border: 1px solid rgba(196, 149, 58, 0.22);
+                    border-radius: 8px;
+                }
+                .stat-method-label {
+                    font-size: 11px;
+                    color: var(--v-gold, #c4953a);
+                    letter-spacing: 1.5px;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                    text-align: center;
+                }
+                .stat-method-tabs {
+                    display: flex;
+                    gap: 4px;
+                    margin-bottom: 8px;
+                }
+                .stat-method-tab {
+                    flex: 1;
+                    padding: 8px 4px;
+                    background: rgba(28, 22, 16, 0.65);
+                    border: 1px solid rgba(196, 149, 58, 0.3);
+                    border-radius: 6px;
+                    color: var(--v-text-dim, #a09484);
+                    font-family: 'Cinzel', serif;
+                    font-size: 10px;
+                    letter-spacing: 0.8px;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+                .stat-method-tab.active {
+                    background: linear-gradient(180deg, rgba(196,149,58,0.22), rgba(28,22,16,0.65));
+                    border-color: var(--v-gold, #c4953a);
+                    color: var(--v-gold-bright, #e8c45a);
+                }
+                .stat-method-tab:hover:not(.active) {
+                    border-color: rgba(196, 149, 58, 0.6);
+                    color: var(--v-text, #d4c8b0);
+                }
+                .stat-method-desc {
+                    font-size: 11px;
+                    color: var(--v-text-dim, #a09484);
+                    text-align: center;
+                    line-height: 1.4;
+                }
+                /* Pointbuy +/- buttons */
+                .pb-btn {
+                    background: rgba(196, 149, 58, 0.18);
+                    border: 1px solid rgba(196, 149, 58, 0.5);
+                    border-radius: 4px;
+                    color: var(--v-gold, #c4953a);
+                    font-family: 'Cinzel', serif;
+                    font-weight: 700;
+                    font-size: 14px;
+                    width: 28px;
+                    height: 28px;
+                    cursor: pointer;
+                    line-height: 1;
+                    padding: 0;
+                    transition: background 0.12s ease;
+                }
+                .pb-btn:hover {
+                    background: rgba(196, 149, 58, 0.32);
+                    color: var(--v-gold-bright, #e8c45a);
+                }
+                .pb-btn:active {
+                    transform: scale(0.92);
+                }
+            </style>
 
             <!-- ═══ SCREEN 3: BACKGROUND ═══ -->
             <div class="screen" id="screen-bg">
@@ -3403,8 +3490,103 @@
         // ═══════════════════════════════════════════════
         const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
         const STAT_ATTRS = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+        /* Sessao #29 v4: STAT_ICONS — emoji fallback. PNG geradas via OpenAI low
+           ficam em /character_creator/icons/{slug}.png (Sessao #29 batch).
+           _attrIconHtml usa PNG quando disponivel, fallback automatic em onerror. */
         const STAT_ICONS = { strength: '💪', dexterity: '🏃', constitution: '🛡️', intelligence: '📚', wisdom: '🙏', charisma: '✨' };
+        function _attrIconHtml(attrKey, sizePx) {
+            const emoji = STAT_ICONS[attrKey] || '⚔️';
+            const sz = sizePx || 24;
+            const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + sz + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
+            return '<img src="/character_creator/icons/' + attrKey + '.png" alt="" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:inline-block;vertical-align:middle;" ' +
+                   'loading="lazy" onerror="' + onErr + '">';
+        }
         let selectedPoolValue = null;
+
+        /* Sessao #29 v4: D&D 5e PHB p.12-13 — 3 metodos canonicos de geracao
+           de atributos. Default = standard array (manteve UX existente). */
+        let _statMethod = 'standard';  // 'standard' | 'roll' | 'pointbuy'
+        let _rolledPool = null;  // array de 6 valores quando method='roll'
+        let _pointbuyValues = null;  // {strength:8, dexterity:8, ...} quando method='pointbuy'
+
+        // D&D 5e PHB p.13 — Point Buy cost table
+        const POINTBUY_COSTS = {8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9};
+        const POINTBUY_BUDGET = 27;
+
+        function setStatMethod(method) {
+            haptic();
+            _statMethod = method;
+            sel.statAssignment = {};
+            selectedPoolValue = null;
+            _rolledPool = null;
+            _pointbuyValues = null;
+            // Atualiza UI tabs
+            document.querySelectorAll('.stat-method-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.method === method);
+            });
+            // Atualiza descricao
+            const descEl = document.getElementById('statMethodDesc');
+            const instrEl = document.getElementById('statInstruction');
+            if (method === 'standard') {
+                if (descEl) descEl.textContent = '15, 14, 13, 12, 10, 8 — distribuídos como preferir.';
+                if (instrEl) instrEl.textContent = 'Toque num valor, depois no atributo.';
+            } else if (method === 'roll') {
+                if (descEl) descEl.textContent = 'Role 4d6, descarte o menor. Repete 6× e distribua.';
+                if (instrEl) instrEl.textContent = 'Toque em "Rolar Atributos" pra gerar 6 valores.';
+                _rolledPool = []; // vai ser populado ao clicar Rolar
+            } else if (method === 'pointbuy') {
+                if (descEl) descEl.textContent = '27 pontos. Custo 8→0, 9→1, 10→2, 11→3, 12→4, 13→5, 14→7, 15→9.';
+                if (instrEl) instrEl.textContent = 'Use +/- pra ajustar. Atributos partem em 8.';
+                _pointbuyValues = { strength:8, dexterity:8, constitution:8, intelligence:8, wisdom:8, charisma:8 };
+            }
+            buildStatSlots();
+        }
+
+        function rollAttributesNow() {
+            haptic();
+            // 4d6 drop lowest, 6 vezes (D&D 5e PHB p.12)
+            const results = [];
+            for (let i = 0; i < 6; i++) {
+                const rolls = [];
+                for (let j = 0; j < 4; j++) {
+                    rolls.push(1 + Math.floor(Math.random() * 6));
+                }
+                rolls.sort((a, b) => a - b);
+                const dropped = rolls.shift(); // menor
+                const total = rolls.reduce((s, n) => s + n, 0);
+                results.push(total);
+            }
+            results.sort((a, b) => b - a); // descendente
+            _rolledPool = results;
+            sel.statAssignment = {};
+            selectedPoolValue = null;
+            buildStatSlots();
+            // Toast com os valores rolados
+            if (typeof window.vToast === 'function') {
+                window.vToast('Rolados: ' + results.join(' · '), 'gold');
+            }
+        }
+
+        function pointbuyTotalCost() {
+            if (!_pointbuyValues) return 0;
+            return STAT_ATTRS.reduce((s, a) => s + (POINTBUY_COSTS[_pointbuyValues[a]] || 0), 0);
+        }
+        function pointbuyAdjust(attr, delta) {
+            haptic();
+            if (!_pointbuyValues) return;
+            const cur = _pointbuyValues[attr];
+            const next = cur + delta;
+            if (next < 8 || next > 15) return;
+            // Check budget
+            const newVals = { ..._pointbuyValues, [attr]: next };
+            const newCost = STAT_ATTRS.reduce((s, a) => s + (POINTBUY_COSTS[newVals[a]] || 0), 0);
+            if (newCost > POINTBUY_BUDGET) return;
+            _pointbuyValues[attr] = next;
+            // Mantem sel.statAssignment sincronizado pra confirmRoll/save
+            sel.statAssignment = { ..._pointbuyValues };
+            buildStatSlots();
+        }
 
         function calcStatsFor(raceKey, subraceKey, classKey) {
             const cls = CLASSES[classKey];
@@ -3469,12 +3651,80 @@
             return bonuses;
         }
 
+        /* Sessao #29 v4: buildStatSlots agora roteia conforme _statMethod. */
         function buildStatSlots() {
             const raceBonuses = getRaceBonuses();
-            const usedValues = Object.values(sel.statAssignment);
-
-            // Build pool chips
             const poolEl = document.getElementById('statPool');
+            const slotsEl = document.getElementById('statSlots');
+
+            // Pool: depende do metodo
+            poolEl.innerHTML = '';
+            if (_statMethod === 'standard') {
+                _renderStandardPool(poolEl);
+            } else if (_statMethod === 'roll') {
+                _renderRollPool(poolEl);
+            } else if (_statMethod === 'pointbuy') {
+                _renderPointbuyHeader(poolEl);
+            }
+
+            // Slots dos 6 atributos
+            slotsEl.innerHTML = '';
+            STAT_ATTRS.forEach(a => {
+                let assigned = null;
+                let canEdit = true;
+                if (_statMethod === 'pointbuy' && _pointbuyValues) {
+                    assigned = _pointbuyValues[a];
+                    canEdit = false; // pointbuy edita via +/- buttons
+                } else {
+                    assigned = sel.statAssignment[a] || null;
+                }
+                const bonus = raceBonuses[a] || 0;
+                const total = assigned ? assigned + bonus : null;
+                const slot = document.createElement('div');
+                slot.className = 'stat-slot' + (assigned ? ' assigned' : '');
+                let inner = '<span style="display:inline-flex;align-items:center;">' + _attrIconHtml(a, 22) + '</span>';
+                inner += `<span class="stat-slot-name">${ATTR_ABBR[a]}</span>`;
+                inner += `<span class="stat-slot-value">${assigned || '—'}</span>`;
+                if (bonus > 0) inner += `<span class="stat-slot-bonus">+${bonus} raça</span>`;
+                if (total) {
+                    const m = mod(total);
+                    const sign = m >= 0 ? '+' : '';
+                    inner += `<span class="stat-slot-total">= ${total} <span style="font-size:11px;color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}">(${sign}${m})</span></span>`;
+                }
+                // Pointbuy: adiciona +/- inline
+                if (_statMethod === 'pointbuy') {
+                    inner += '<div class="pb-controls" style="display:inline-flex;gap:4px;margin-left:auto;">' +
+                             '<button class="pb-btn" onclick="pointbuyAdjust(\'' + a + '\', -1)">−</button>' +
+                             '<button class="pb-btn" onclick="pointbuyAdjust(\'' + a + '\', +1)">+</button>' +
+                             '</div>';
+                }
+                slot.innerHTML = inner;
+                if (canEdit && _statMethod !== 'pointbuy') {
+                    slot.onclick = () => {
+                        haptic();
+                        if (assigned) {
+                            delete sel.statAssignment[a];
+                            buildStatSlots();
+                        } else if (selectedPoolValue !== null) {
+                            sel.statAssignment[a] = selectedPoolValue;
+                            selectedPoolValue = null;
+                            buildStatSlots();
+                        }
+                    };
+                }
+                slotsEl.appendChild(slot);
+            });
+
+            // Confirm button: pra standard/roll precisa 6 assigned; pra pointbuy
+            // qualquer estado e valido (sempre tem valores 8+)
+            const valid = _statMethod === 'pointbuy'
+                ? !!_pointbuyValues
+                : Object.keys(sel.statAssignment).length === 6;
+            document.getElementById('statsConfirm').classList.toggle('hidden', !valid);
+        }
+
+        function _renderStandardPool(poolEl) {
+            const usedValues = Object.values(sel.statAssignment);
             poolEl.innerHTML = '<div style="font-size:12px;color:var(--v-text-dim);width:100%;margin-bottom:4px">Toque num valor, depois num atributo:</div>';
             STANDARD_ARRAY.forEach(v => {
                 const timesInArray = STANDARD_ARRAY.filter(x => x === v).length;
@@ -3492,45 +3742,49 @@
                 }
                 poolEl.appendChild(chip);
             });
+        }
 
-            // Build attribute slots
-            const slotsEl = document.getElementById('statSlots');
-            slotsEl.innerHTML = '';
-            STAT_ATTRS.forEach(a => {
-                const assigned = sel.statAssignment[a] || null;
-                const bonus = raceBonuses[a] || 0;
-                const total = assigned ? assigned + bonus : null;
-                const slot = document.createElement('div');
-                slot.className = 'stat-slot' + (assigned ? ' assigned' : '');
-                let inner = `<span style="font-size:18px">${STAT_ICONS[a]}</span>`;
-                inner += `<span class="stat-slot-name">${ATTR_ABBR[a]}</span>`;
-                inner += `<span class="stat-slot-value">${assigned || '—'}</span>`;
-                if (bonus > 0) inner += `<span class="stat-slot-bonus">+${bonus} raça</span>`;
-                if (total) {
-                    const m = mod(total);
-                    const sign = m >= 0 ? '+' : '';
-                    inner += `<span class="stat-slot-total">= ${total} <span style="font-size:11px;color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}">(${sign}${m})</span></span>`;
+        function _renderRollPool(poolEl) {
+            const usedValues = Object.values(sel.statAssignment);
+            if (!_rolledPool || _rolledPool.length === 0) {
+                // Ainda nao rolou — mostra botao
+                poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:14px;" onclick="rollAttributesNow()">🎲 Rolar Atributos (4d6 drop lowest)</button>';
+                return;
+            }
+            poolEl.innerHTML = '<div style="font-size:12px;color:var(--v-text-dim);width:100%;margin-bottom:4px">Seus valores rolados — distribua:</div>';
+            _rolledPool.forEach((v, i) => {
+                const timesInArray = _rolledPool.filter(x => x === v).length;
+                const timesUsed = usedValues.filter(x => x === v).length;
+                const isUsed = timesUsed >= timesInArray;
+                const chip = document.createElement('div');
+                chip.className = 'stat-pool-chip' + (isUsed ? ' used' : '') + (selectedPoolValue === v && !isUsed ? ' selected' : '');
+                chip.textContent = v;
+                if (!isUsed) {
+                    chip.onclick = () => { haptic(); selectedPoolValue = v; buildStatSlots(); };
                 }
-                slot.innerHTML = inner;
-                slot.onclick = () => {
-                    haptic();
-                    if (assigned) {
-                        // Remove assignment
-                        delete sel.statAssignment[a];
-                        buildStatSlots();
-                    } else if (selectedPoolValue !== null) {
-                        // Assign selected value
-                        sel.statAssignment[a] = selectedPoolValue;
-                        selectedPoolValue = null;
-                        buildStatSlots();
-                    }
-                };
-                slotsEl.appendChild(slot);
+                if (selectedPoolValue === v && !isUsed) {
+                    chip.style.borderColor = 'var(--v-gold)';
+                    chip.style.background = 'rgba(196,149,58,0.25)';
+                }
+                poolEl.appendChild(chip);
             });
+            // Reroll button (caso queira rejogar)
+            const reroll = document.createElement('button');
+            reroll.className = 'v-btn v-btn-secondary';
+            reroll.style.cssText = 'flex-basis:100%;margin-top:8px;padding:8px;font-size:11px;';
+            reroll.textContent = '🎲 Rolar Novamente';
+            reroll.onclick = rollAttributesNow;
+            poolEl.appendChild(reroll);
+        }
 
-            // Show/hide confirm button
-            const allAssigned = Object.keys(sel.statAssignment).length === 6;
-            document.getElementById('statsConfirm').classList.toggle('hidden', !allAssigned);
+        function _renderPointbuyHeader(poolEl) {
+            const cost = pointbuyTotalCost();
+            const remaining = POINTBUY_BUDGET - cost;
+            const color = remaining < 0 ? 'var(--v-danger,#d04848)' :
+                          remaining === 0 ? 'var(--v-success,#7ad06b)' : 'var(--v-gold,#c4953a)';
+            poolEl.innerHTML = '<div style="font-size:13px;width:100%;text-align:center;color:' + color + ';padding:8px;background:rgba(28,22,16,0.5);border-radius:6px;">' +
+                               '<b>Pontos: ' + cost + '/' + POINTBUY_BUDGET + '</b> · Restam: ' + remaining +
+                               '</div>';
         }
 
         function suggestStats() {
