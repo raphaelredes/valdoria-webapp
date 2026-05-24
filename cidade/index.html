@@ -25038,7 +25038,7 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
         }
       }
     ]
-  }
+  },
   /* X-6.5.51AV (2026-05-08): "Sussurros Arcanos" event REMOVED from this
      plaza pool. The canonical event already exists in SHADOW_EVENT_POOL
      (Beco Sombrio) at line ~13551 — id 'whispers' with isAldricEncounter:true
@@ -25046,6 +25046,39 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
      visits the Shadow Alley (tavern_blackmarket nav). User confirmed the
      event exists in the project — search initially missed it because
      'Sussurros Arcanos' was actually 'Sussurros' (rebranded in X-6.5.51AV). */
+  // Sessao #29 (2026-05-24) — 4 novos eventos interativos D&D 5e ──────
+  { "id": "bard_stuck_lute", "text": "Um bardo desconsolado tenta apresentar com um alaúde rachado. Crianças zombam.", "weight": 5,
+    "choices": [
+      { "id": "cheer", "label": "[CAR 12] Cantar com ele um verso popular", "stat": "charisma", "dc": 12, "success": { "text": "Verso entoado em harmonia. O bardo se ergue, transeuntes param, moedas caem na caixa.", "xp": 10, "gold": 2 }, "fail": { "text": "Sua voz desafina no agudo — o bardo agradece o gesto mas não recupera a multidão.", "xp": 2 } },
+      { "id": "fix_lute", "label": "[DES 13] Examinar a rachadura e estabilizar", "stat": "dexterity", "dc": 13, "success": { "text": "Uma tira de couro como abraçadeira improvisada. O som volta, abafado mas íntegro.", "xp": 12, "gold": 4 }, "fail": { "text": "A tira escorrega. O bardo aceita a tentativa com graça.", "xp": 2 } },
+      { "id": "donate_gold", "label": "Doar 3 Valdoritas", "stat": null, "dc": null, "success": { "text": "Três moedas e uma promessa de balada futura. O bardo faz reverência teatral.", "xp": 5, "gold": -3 } },
+      { "id": "ignore", "label": "Seguir adiante", "stat": null, "dc": null, "success": { "text": "Você segue. As zombarias continuam.", "xp": 0 } }
+    ]
+  },
+  { "id": "pickpocket_caught", "text": "Você sente uma mão na sua bolsa. Vira rápido — um garoto de 12 anos congela com a mão no fecho.", "weight": 4,
+    "choices": [
+      { "id": "persuade", "label": "[CAR 13] Olha nos meus olhos — tá dizendo a verdade?", "stat": "charisma", "dc": 13, "success": { "text": "Ele desmorona, chora calado. Você cede duas Valdoritas pra fome e o solta com aviso.", "xp": 14, "gold": 0 }, "fail": { "text": "Olhar frio, história ensaiada. Ele foge antes de você decidir o que fazer.", "xp": 3 } },
+      { "id": "detect_lie", "label": "[SAB 12] Observar postura, mãos, suor", "stat": "wisdom", "dc": 12, "success": { "text": "Calos profissionais, botas novas. Você o aperta, cobra reparação, ele paga e foge.", "xp": 10, "gold": 1 }, "fail": { "text": "Não dá pra ler. Você solta — ele desaparece.", "xp": 2 } },
+      { "id": "turn_in", "label": "Chamar a Guarda", "stat": null, "dc": null, "success": { "text": "A Guarda chega rápido. O batedor te encara sem ódio antes de ser levado.", "xp": 5, "gold": 0 } },
+      { "id": "let_go", "label": "Deixar ir sem palavras", "stat": null, "dc": null, "success": { "text": "Ele suma na multidão sem agradecer. Você não sabe se ensinou ou ajudou.", "xp": 2 } }
+    ]
+  },
+  { "id": "old_seer", "text": "Uma anciã de véu negro e olhos como pedra-lua estende a mão calejada. Diz ter te visto em sonho.", "weight": 4,
+    "choices": [
+      { "id": "pay_truth", "label": "Pagar 3 cobres pela leitura", "stat": null, "dc": null, "success": { "text": "Profecia críptica sobre uma letra que tu temes e a lua gorda. Você guarda as palavras.", "xp": 8, "gold": -1 } },
+      { "id": "analyze", "label": "[INT 13] Analisar — golpe ou verdade?", "stat": "intelligence", "dc": 13, "success": { "text": "Cegueira real, óleos raros no véu, vocabulário arcaico. Vidente legítima. Ela te dá uma moeda de bronze.", "xp": 12, "gold": 2 }, "fail": { "text": "Você não tira conclusão. Ela ri — sabe exatamente o que pensou.", "xp": 2 } },
+      { "id": "flatter", "label": "[CAR 11] Conta de graça — sou amigo dos antigos", "stat": "charisma", "dc": 11, "success": { "text": "Ela ri longamente e te dá uma pista sobre a estrada do oeste — protegida por algo mais velho que a Guarda.", "xp": 8 }, "fail": { "text": "Ela cospe perto do seu pé. Uma moeda some do seu bolso enquanto ela ergue a bengala.", "xp": 2, "gold": -1 } },
+      { "id": "leave", "label": "Recusar e seguir", "stat": null, "dc": null, "success": { "text": "Você balança a cabeça. Ela murmura algo em outra língua.", "xp": 0 } }
+    ]
+  },
+  { "id": "drunk_brawl", "text": "Dois homens robustos viram uma mesa de taverna em plena praça. Punhos, gritos sem sentido, mesa quebrada.", "weight": 5,
+    "choices": [
+      { "id": "separate", "label": "[FOR 13] Entrar entre eles e separar", "stat": "strength", "dc": 13, "success": { "text": "Você empurra com força. Os dois caem, riem, te oferecem cerveja. Três cobres pela paz.", "xp": 12, "gold": 3 }, "fail": { "text": "Cotovelo na têmpora. Soco de raspão. A Guarda separa os três.", "xp": 2, "hp": -3 } },
+      { "id": "reason", "label": "[CAR 14] ESPEREM — o irmão dele tá morto há 3 ANOS!", "stat": "charisma", "dc": 14, "success": { "text": "Chute certeiro. Os dois congelam, choram, se abraçam. A briga acabou.", "xp": 14, "gold": 0 }, "fail": { "text": "Sua voz se perde no caos. Eles continuam socando.", "xp": 2 } },
+      { "id": "deduce", "label": "[INT 12] Procurar o motivo real", "stat": "intelligence", "dc": 12, "success": { "text": "Mesmo brasão na corrente. Irmãos. Você grita o sobrenome — vergonha imediata, dois cobres na sua mão.", "xp": 10, "gold": 2 }, "fail": { "text": "Não bate nada. A briga continua.", "xp": 2 } },
+      { "id": "leave", "label": "Sair antes da Guarda chegar", "stat": null, "dc": null, "success": { "text": "Bêbados nunca lembram quem viu o quê.", "xp": 0 } }
+    ]
+  }
 ];
 
 // canonical: data/interaction_results*.py (animals + merchants + artists + citizens)
@@ -25656,14 +25689,16 @@ function _squareTryFireEntryEvent(p){
   var d = new Date();
   var todayKey = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
   if (window._plazaEntryFiredToday === todayKey) return;  // ja disparou hoje
-  // canonical: chance de evento ao entrar (~50%, weight calibrado)
-  if (Math.random() > 0.5) return;
+  // canonical (2026-05-24, sessao #29): chance bumpada de 50% → 75% per user request
+  // "dice rolling com frequência relativamente alta — tabletop RPG"
+  if (Math.random() > 0.75) return;
   window._plazaEntryFiredToday = todayKey;
 
-  // Decide tipo: 30% offer (interativo dialogue), 25% interactive (skill checks),
-  // 45% passive (atmosférico simples)
+  // Decide tipo (2026-05-24 rebalance — skill checks ganharam share):
+  // 25% offer (interativo dialogue), 50% interactive (skill checks D&D 5e),
+  // 25% passive (atmosférico simples — só quando não tem o que rolar)
   var roll = Math.random();
-  if (roll < 0.30 && PLAZA_OFFER_EVENTS.length > 0) {
+  if (roll < 0.25 && PLAZA_OFFER_EVENTS.length > 0) {
     var totalW = PLAZA_OFFER_EVENTS.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
     var rollW = Math.random() * totalW;
     var acc = 0;
@@ -25675,7 +25710,7 @@ function _squareTryFireEntryEvent(p){
     setTimeout(function(){ _squareShowOfferEvent(p, picked); }, 600);
     return;
   }
-  if (roll < 0.55 && CANON_PLAZA_ENTRY_INTERACTIVE.length > 0){
+  if (roll < 0.75 && CANON_PLAZA_ENTRY_INTERACTIVE.length > 0){
     // Pick weighted
     var totalW = CANON_PLAZA_ENTRY_INTERACTIVE.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
     var rollW = Math.random() * totalW;
@@ -26131,6 +26166,125 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
       { id: 'ignore', label: 'Ignorar', result: 'apply_now',
         effect: {},
         result_text: 'Você dá de ombros — gatos sempre se viram. <i>O mercador continua chamando por ajuda enquanto você segue.</i>' }
+    ]
+  },
+  // ── 5. BARDO ENROLADO C/ ALAÚDE — CAR/DES check (2026-05-24) ──────
+  bard_stuck_lute: {
+    npc_key: 'bardo_praca',
+    npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca' },
+    script: [
+      { type: 'narration', text: 'Um bardo jovem está sentado no chão da praça com um alaúde de tampo rachado. <i>Algumas crianças zombam, jogam migalhas. Ele tenta sorrir mas as bochechas tremem.</i>' },
+      { type: 'speech', speaker: 'bardo_praca', text: '— Apresentação de coroação amanhã. Sem alaúde, sem moeda, sem honra. <i>(ele engole)</i> Se voltar pra casa assim, meu pai vai mandar pra Guarda. "Sem futuro, vai aprender disciplina lá."' }
+    ],
+    choices: [
+      { id: 'cheer', label: '🎶 [CAR 12] (Cantar com ele um verso popular)',
+        result: 'skill_check', stat: 'charisma', dc: 12,
+        effect: { xp: 10, gold: 2 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você puxa um refrão de taberna conhecido. <i>O bardo arregala os olhos, te acompanha sem o alaúde, batendo na caixa rachada como tambor.</i> Os transeuntes param, jogam moedas. <b>"Aventureiro! Você me salvou — coletei o suficiente pra remendar o alaúde. Toma duas Valdoritas pelo verso."</b>',
+        result_text_fail: 'Você puxa o refrão mas sua voz desafina no agudo. <i>O bardo te olha grato — mas as crianças riem mais alto.</i> <b>"Tudo bem, foi gentil. Talvez amanhã eu canto sozinho mesmo."</b>' },
+      { id: 'fix_lute', label: '🛠️ [DES 13] (Examinar a rachadura — talvez dê pra estabilizar)',
+        result: 'skill_check', stat: 'dexterity', dc: 13,
+        effect: { xp: 12, gold: 4 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você analisa a rachadura — pega uma tira de couro do seu cinto e usa como abraçadeira improvisada. <i>O bardo testa as cordas. O som volta, levemente abafado mas íntegro.</i> <b>"Como aprendeu isso?! Toma quatro moedas e uma promessa: na coroação, vou citar o nome dele."</b>',
+        result_text_fail: 'Você tenta apertar o couro mas a tira escorrega — o alaúde range. <i>O bardo balança a cabeça.</i> <b>"Não foi por mal. Ferramenta de luthier eu não tenho mesmo."</b>' },
+      { id: 'donate_gold', label: '🪙 Doar 3 Valdoritas', result: 'apply_now',
+        effect: { gold: -3, xp: 5 },
+        result_text: 'Você coloca três moedas na caixa do alaúde. <i>O bardo se levanta, faz uma reverência teatral apesar do estado lamentável.</i> <b>"Que sua estrada seja de melodia, aventureiro. Quando eu for famoso na corte, vou cantar uma balada com seu nome."</b>' },
+      { id: 'ignore', label: 'Seguir adiante', result: 'apply_now',
+        effect: {},
+        result_text: 'Você baixa o olhar e segue. <i>As crianças continuam zombando do bardo enquanto ele tenta um acorde no alaúde quebrado.</i>' }
+    ]
+  },
+  // ── 6. LADRÃO DE COLHER — PERCEPÇÃO/PERSUASÃO (2026-05-24) ────────
+  pickpocket_caught: {
+    npc_key: 'batedor_carteira',
+    npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca' },
+    script: [
+      { type: 'narration', text: 'Você sente uma mão roçar a sua bolsa de moedas. <i>Vira rápido — um garoto de uns 12 anos congela com sua mão ainda no fecho.</i> Ao redor, ninguém viu.' },
+      { type: 'speech', speaker: 'batedor_carteira', text: '— P-por favor... <i>(a voz dele falha)</i> Minha irmã tá doente, não comemos há dois dias. Foi minha primeira vez, juro. Não me entrega pra Guarda — eles cortam mão de batedor.' }
+    ],
+    choices: [
+      { id: 'persuade', label: '🗣️ [CAR 13] "Tá dizendo a verdade? Olha nos meus olhos."',
+        result: 'skill_check', stat: 'charisma', dc: 13,
+        effect: { xp: 14, gold: 0 },
+        effect_fail: { xp: 3 },
+        result_text: 'Ele encara você um segundo, depois desmorona — chora sem fazer barulho. <i>Você sente que é verdade.</i> Tira duas Valdoritas e coloca na mão dele. <b>"Vai. Compra pão e remédio. Nunca mais bate carteira — entendeu? Se eu te ver de novo, te entrego eu mesmo."</b> Ele assente, foge correndo.',
+        result_text_fail: 'O garoto sustenta o olhar — frio. <i>Você sente que ele já fez isso muitas vezes. A história da irmã é ensaiada.</i> Mas antes de você reagir, ele se solta e desaparece na multidão.' },
+      { id: 'detect_lie', label: '👁️ [SAB 12] (Observar postura, mãos, suor)',
+        result: 'skill_check', stat: 'wisdom', dc: 12,
+        effect: { xp: 10, gold: 1 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você nota: dedos calejados nas duas mãos (não só uma), botas razoavelmente novas, gola da camisa limpa. <i>Profissional — não inexperiente.</i> Aperta o pulso dele. <b>"Não tem irmã doente nenhuma. Devolve duas Valdoritas extras pelo susto — e some."</b> Ele cospe, paga, foge.',
+        result_text_fail: 'Você o examina mas o garoto desvia o olhar com timing perfeito. <i>Não dá pra ler nada nele.</i> Solta o pulso. <b>"Vai. Se voltar, te entrego."</b> Ele foge.' },
+      { id: 'turn_in', label: '⚖️ Chamar a Guarda', result: 'apply_now',
+        effect: { xp: 5, gold: 0, renown_lawful: 1 },
+        result_text: 'Você grita pela Guarda. <i>Dois soldados surgem em segundos e arrastam o batedor pra fora da praça. Ele te encara antes de virar a esquina — sem ódio, só resignação.</i> O comandante Aldric vai saber: <b>"Mais um menor pegado. Bom trabalho, aventureiro. Vou anotar."</b>' },
+      { id: 'let_go', label: 'Deixar ir sem palavras', result: 'apply_now',
+        effect: { xp: 2 },
+        result_text: 'Você solta a mão dele. <i>O garoto te olha um segundo — sem agradecimento, só alívio — e some na multidão.</i> Você não sabe se ajudou alguém ou ensinou que rouba dá certo.' }
+    ]
+  },
+  // ── 7. VELHA OCULTISTA — INTELIGÊNCIA/CARISMA (2026-05-24) ────────
+  old_seer: {
+    npc_key: 'velha_oculto',
+    npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca' },
+    script: [
+      { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
+      { type: 'speech', speaker: 'velha_oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
+    ],
+    choices: [
+      { id: 'pay_truth', label: '🔮 Pagar 3 cobres pela leitura', result: 'apply_now',
+        effect: { gold: -1, xp: 8 },
+        result_text: 'Você paga. <i>Ela fecha os olhos e murmura.</i> <b>"O nome começa com a letra que tu temes. Ele virá quando a lua estiver gorda. Não confia no que te oferecem em troca de honra."</b> <i>Você não entende. Mas guarda as palavras na cabeça.</i>' },
+      { id: 'analyze', label: '🧠 [INT 13] (Analisar — golpe ou verdade?)',
+        result: 'skill_check', stat: 'intelligence', dc: 13,
+        effect: { xp: 12, gold: 2 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você nota: olhos opacos genuínos (cegueira), véu manchado de óleo de plantas raras, vocabulário arcaico. <i>Não é golpista — é vidente real, dessas que viviam em templos antes da reforma.</i> Você se ajoelha. <b>"Mestra — sem pagamento. Conta o que viu."</b> Ela sorri. <b>"Tu é dos antigos. Aqui — guarda esta moeda de bronze. Vai te servir num dia ruim."</b>',
+        result_text_fail: 'Você examina mas não tira conclusão clara. <i>Ela ri quieta, como se soubesse exatamente o que você pensou.</i> <b>"Pensa demais, aventureiro. Pensa demais. Volta quando souber escutar."</b>' },
+      { id: 'flatter', label: '👑 [CAR 11] "Conta de graça — sou amigo dos antigos."',
+        result: 'skill_check', stat: 'charisma', dc: 11,
+        effect: { xp: 8 },
+        effect_fail: { xp: 2, gold: -1 },
+        result_text: 'Ela ri longamente. <i>É o riso de uma criança dentro de um corpo velho.</i> <b>"Bom verbo. Os antigos te respeitam — vou te falar grátis: o caminho da estrada do oeste tá protegido por algo mais velho que a Guarda. Não toma sozinho."</b> <i>Uma pista de aventura cinza, mas valiosa.</i>',
+        result_text_fail: 'Ela aperta o tecido do véu e cospe no chão. <i>O cusparada cai a um palmo do seu pé.</i> <b>"Amigo dos antigos é quem paga. Some, mentiroso."</b> Uma moeda escorrega do seu bolso enquanto ela ergue a bengala — você não percebeu ela tirar.' },
+      { id: 'leave', label: 'Recusar e seguir', result: 'apply_now',
+        effect: {},
+        result_text: 'Você balança a cabeça e continua. <i>Ela não insiste — apenas dobra o véu e murmura algo que parece em outra língua.</i>' }
+    ]
+  },
+  // ── 8. DOIS BÊBADOS BRIGANDO — FOR/CAR/INT (2026-05-24) ───────────
+  drunk_brawl: {
+    npc_key: 'bebados_briga',
+    npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro' },
+    script: [
+      { type: 'narration', text: 'Dois homens robustos viram uma mesa de taverna no meio da praça. <i>Cervejas derramadas, punhos abertos, gritos que ninguém entende.</i> Uma multidão se afasta — a Guarda ainda não chegou.' },
+      { type: 'speech', speaker: 'bebados_briga', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }
+    ],
+    choices: [
+      { id: 'separate', label: '💪 [FOR 13] (Entrar entre eles e separar)',
+        result: 'skill_check', stat: 'strength', dc: 13,
+        effect: { xp: 12, gold: 3 },
+        effect_fail: { xp: 2, hp: -3 },
+        result_text: 'Você se planta entre os dois e empurra com força. <i>Os dois caem de costas. Ficam de boca aberta.</i> <b>"Calma — ou vou eu mesmo entregar vocês."</b> Eles se levantam ofegantes, se olham, riem. <b>"Foi mal, aventureiro. Aqui — toma uma rodada de cerveja. Três cobres pelo serviço de paz."</b>',
+        result_text_fail: 'Você entra entre os dois — mas leva um cotovelo na têmpora. <i>Cambaleia, perde o equilíbrio.</i> Um soco descontrolado de um dos bêbados te acerta de raspão. Dói. <i>A Guarda finalmente chega e separa os três.</i>' },
+      { id: 'reason', label: '🗣️ [CAR 14] "ESPEREM — o irmão dele tá morto há 3 ANOS!"',
+        result: 'skill_check', stat: 'charisma', dc: 14,
+        effect: { xp: 14, gold: 0 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você grita o nome do irmão morto. <i>Os dois congelam — o gordo da barba ruiva começa a chorar. O outro abaixa o punho.</i> <b>"Tu... tu sabia dele?"</b> Você não sabia — chutou. Mas funcionou. <i>Eles se abraçam, soluçando. A briga acabou.</i>',
+        result_text_fail: 'Você grita mas a voz se perde no caos. <i>Eles continuam socando.</i>' },
+      { id: 'deduce', label: '🧠 [INT 12] (Procurar o motivo real da briga)',
+        result: 'skill_check', stat: 'intelligence', dc: 12,
+        effect: { xp: 10, gold: 2 },
+        effect_fail: { xp: 2 },
+        result_text: 'Você nota: ambos têm o mesmo brasão na corrente. Mesma família. <i>Briga de irmãos.</i> Você dá um passo, grita o sobrenome. <b>"PARA, IRMÃO!"</b> Os dois congelam — vergonha imediata. Eles se abraçam, jogam dois cobres na sua mão. <b>"Não conta pra mãe, aventureiro."</b>',
+        result_text_fail: 'Você olha tentando ligar pontas — nada bate. <i>Os dois continuam brigando. A Guarda chega.</i>' },
+      { id: 'leave', label: 'Sair da praça antes da Guarda', result: 'apply_now',
+        effect: {},
+        result_text: 'Você se afasta. <i>Bêbados nunca lembram quem viu o quê.</i>' }
     ]
   }
 };
