@@ -4985,8 +4985,19 @@
         // SUBMIT
         // ═══════════════════════════════════════════════
         let _submitting = false;
+        /* Sessao #29 v4 (2026-05-24): popup de confirmacao antes do submit real.
+           User pediu: 'sempre perguntar em um popup se realmente quer iniciar a
+           aventura para ter uma segunda confirmacao'. Aceita o submit so apos
+           click no botao da confirmacao. */
+        let _confirmedSubmit = false;
         async function submitCharacter() {
             if (_submitting) return; // Guard against double-click
+
+            if (!_confirmedSubmit) {
+                _showSubmitConfirmation();
+                return;
+            }
+            _confirmedSubmit = false;  // reset pra proxima vez (defensivo)
 
             /* X-6.5.51AI: log inicial pra rastrear submissão server-side */
             try {
@@ -5122,11 +5133,10 @@
                            e fecha manualmente quando estiver pronto pra ver chat. */
                         console.warn('[CHAR_CREATOR] No redirect URL in response. Showing manual close UI.');
                         try { window.serverLog && window.serverLog('character_creator', 'warn', 'success_no_redirect', { result_keys: Object.keys(result) }); } catch (_) {}
-                        _showCreationSuccessUI(
-                            'Personagem criado!',
-                            'Sua aventura está pronta. Toque em "Voltar ao chat" para iniciar — o Mestre Aldric te aguarda nos portões de Valdória.',
-                            'success_no_redirect'
-                        );
+                        /* Sessao #29 v4 (2026-05-24): redireciona automaticamente
+                           pro prologo em vez de mostrar "Voltar ao chat".
+                           User pediu: criar personagem -> ir direto pra aventura. */
+                        _redirectToPrologueOrShowFallback();
                         return;
                     }
                     // Handle server-side validation errors (400 = creation failed)
@@ -5168,20 +5178,15 @@
                 if (tg && tg.sendData) {
                     try { window.serverLog && window.serverLog('character_creator', 'warn', 'fallback_senddata_invoked', {}); } catch (_) {}
                     tg.sendData(JSON.stringify(payload));
-                    _showCreationSuccessUI(
-                        'Dados enviados!',
-                        'Seu personagem foi enviado via Telegram. Toque em "Voltar ao chat" pra ver a mensagem do bot.',
-                        'fallback_senddata'
-                    );
+                    /* Sessao #29 v4 (2026-05-24): apos sendData (bot recebe payload),
+                       redireciona pro prologo automaticamente. NAO mostra mais a
+                       tela "Dados enviados / Voltar ao chat" que o user reportou. */
+                    _redirectToPrologueOrShowFallback();
                 } else {
                     /* Modo teste/dev — sem Telegram ambiente */
                     console.log('WebApp payload:', JSON.stringify(payload, null, 2));
                     try { window.serverLog && window.serverLog('character_creator', 'warn', 'no_tg_env', {}); } catch (_) {}
-                    _showCreationSuccessUI(
-                        'Personagem criado (modo teste)',
-                        'Tg.sendData indisponível — payload logado no console. Não em ambiente Telegram.',
-                        'no_tg_env'
-                    );
+                    _redirectToPrologueOrShowFallback();
                 }
             } catch (e) {
                 clearTimeout(_submitTimeout);
@@ -5197,10 +5202,98 @@
             }
         }
 
+        /* Sessao #29 v4 (2026-05-24): popup de confirmacao antes do submit.
+           Mostra resumo + 2 botoes (Iniciar Aventura / Voltar). User clicar
+           Iniciar Aventura seta _confirmedSubmit=true e chama submitCharacter
+           de novo, que agora passa do guard. */
+        function _showSubmitConfirmation() {
+            const summaryName = ((sel.name || '') + ' ' + (sel.surname || '')).trim() || 'Aventureiro(a)';
+            const raceLabel = (RACES[sel.race] && RACES[sel.race].name) || sel.race || '';
+            const classObj = (typeof CLASSES !== 'undefined' && CLASSES[sel.classKey]) || null;
+            const classLabel = (classObj && (classObj.name || classObj.label)) || sel.classKey || '';
+
+            try {
+                const overlay = document.createElement('div');
+                overlay.id = '__submit_confirm_overlay';
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,12,8,0.92);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
+                overlay.innerHTML =
+                    '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.97),rgba(26,21,16,0.97));border:1px solid rgba(196,149,58,0.6);border-radius:12px;padding:24px;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
+                        '<div style="font-size:11px;letter-spacing:3px;color:#c4953a;margin-bottom:8px;text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
+                        '<h2 style="font-size:20px;color:#e8c45a;margin:0 0 18px;letter-spacing:1.2px;font-weight:700;">' + summaryName + '</h2>' +
+                        '<div style="font-size:13px;color:#a09484;margin-bottom:18px;line-height:1.5;">' +
+                            raceLabel + ' · ' + classLabel +
+                        '</div>' +
+                        '<p style="font-size:13px;color:#d4c8b0;margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
+                        '<div style="display:flex;gap:10px;flex-direction:column;">' +
+                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
+                            '<button id="__confirm_no" style="background:transparent;color:#a09484;border:1px solid rgba(196,149,58,0.3);padding:12px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:12px;letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                document.getElementById('__confirm_yes').addEventListener('click', function() {
+                    overlay.remove();
+                    _confirmedSubmit = true;
+                    submitCharacter();
+                });
+                document.getElementById('__confirm_no').addEventListener('click', function() {
+                    overlay.remove();
+                });
+            } catch (e) {
+                console.error('[CHAR_CREATOR] confirm popup failed:', e);
+                /* Fallback: skipa o popup e segue */
+                _confirmedSubmit = true;
+                submitCharacter();
+            }
+        }
+
+        /* Sessao #29 v4 (2026-05-24): redireciona pro prologo apos submit.
+           Substitui o antigo _showCreationSuccessUI com "Voltar ao chat" que o
+           user reportou como problematico. Constroi URL do prologo usando os
+           auth params ja capturados (apiBase + token + userId). */
+        function _redirectToPrologueOrShowFallback() {
+            try {
+                window.serverLog && window.serverLog('character_creator', 'info', 'redirect_to_prologue_attempt',
+                    { has_token: !!token, has_api: !!apiBase, has_uid: !!userId });
+            } catch (_) {}
+
+            if (token && apiBase && userId) {
+                try {
+                    const prologueUrl = '/prologue/?token=' + encodeURIComponent(token) +
+                                        '&uid=' + encodeURIComponent(userId) +
+                                        '&api=' + encodeURIComponent(apiBase) +
+                                        '&_cb=' + Date.now();
+                    window.__valdoria_transitioning = true;
+                    console.log('[CHAR_CREATOR] redirecting to prologue:', prologueUrl);
+                    window.location.replace(prologueUrl);
+                    return;
+                } catch (e) {
+                    console.error('[CHAR_CREATOR] prologue redirect failed:', e);
+                    try { window.serverLog && window.serverLog('character_creator', 'error', 'prologue_redirect_failed', { error: String(e && e.message) }); } catch (_) {}
+                }
+            }
+            /* Fallback (sem auth params): mostra UI de loading transitória
+               em vez do antigo "Voltar ao chat". Tg.sendData ja foi chamado
+               se aplicavel, bot vai exibir mensagem normal. */
+            try {
+                const ov = document.createElement('div');
+                ov.id = '__redirect_loading_overlay';
+                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
+                ov.innerHTML =
+                    '<div style="max-width:360px;text-align:center;">' +
+                        '<div style="font-size:48px;margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
+                        '<h2 style="font-size:18px;color:#c4953a;margin:0 0 12px;letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
+                        '<p style="font-size:13px;line-height:1.6;margin:0;color:#a09484;">Seu personagem foi forjado. Aguarde a transição para Valdória.</p>' +
+                    '</div>';
+                document.body.appendChild(ov);
+            } catch (_) {}
+        }
+
         /* FIX 2026-05-07 v2: UI persistente pro player ler o estado e fechar manual.
            Substitui o tg.close() automático que estava deixando o player órfão.
            pathTag = 'success_no_redirect' | 'fallback_senddata' | 'no_tg_env'
-           pra eu identificar qual caminho caiu e debug remoto. */
+           pra eu identificar qual caminho caiu e debug remoto.
+           Sessao #29 v4: ainda referenciado em catch path do submit (erro), mas
+           os success paths (3 chamadas) foram migrados pra _redirectToPrologueOrShowFallback. */
         function _showCreationSuccessUI(title, body, pathTag) {
             try {
                 const overlay = document.createElement('div');
