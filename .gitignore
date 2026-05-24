@@ -17,3 +17,7 @@ node_modules/
 .bundle-manifest.json
 .wrangler/
 *.css.bak
+
+# Local PNG resize backups (never deploy — keeps originals safe locally)
+_original/
+_backup/
