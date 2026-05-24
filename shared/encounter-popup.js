@@ -699,6 +699,14 @@
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
     function _handleChoiceInternal(ch) {
       closeChoices(); /* fecha sub-overlay antes de dispatch */
+      /* Sessao #29 (2026-05-24): ally_source dispara backend apply-effect.
+         Pra non-dice (cb='close' ou empty): chama AGORA antes do close.
+         Pra dice (cb='dice:'): _diceCheckSvc chama apos resolver dado. */
+      var _cb = ch.cb || '';
+      if (ch.ally_source && (_cb === '' || _cb === 'close')
+          && typeof window._postAllyEffect === 'function') {
+        try { window._postAllyEffect(ch.ally_source, null); } catch(_e) {}
+      }
       if (typeof window._dispatchSvcChoice === 'function') {
         var handled = window._dispatchSvcChoice(ch, dialogue, opts.dialogues || {});
         if (handled) return;

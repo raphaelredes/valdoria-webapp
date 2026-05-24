@@ -78,6 +78,21 @@
       var deltaR = critSuccess ? +3 : success ? +1 : critFail ? -2 : -1;
       window._applyRenownDelta(faction, deltaR);
 
+      /* Sessao #29 (2026-05-24): se opts.ch.ally_source existe, dispara
+         POST /api/ally/apply-effect com o dice_result. Backend aplica
+         renown REAL + effect + item + gold conforme registry. Toast de
+         confirmacao em cima do existente "+1 Renome ·". */
+      if (opts.ch && opts.ch.ally_source && typeof window._postAllyEffect === 'function') {
+        try {
+          window._postAllyEffect(opts.ch.ally_source, {
+            success: success,
+            crit_success: critSuccess,
+            crit_failure: critFail,
+            total: total,
+          });
+        } catch(_e) { /* defensivo, nao bloqueia dice flow */ }
+      }
+
       setTimeout(function() {
         var actions = card.querySelector('#dice-actions');
         actions.innerHTML = '<button class="enc-btn enc-btn-primary" style="padding:8px 18px;">Continuar →</button>';
@@ -371,5 +386,82 @@
     return false;
   };
 
-  console.log('[svc-interactions] PADRAO loaded — _diceCheckSvc, _showOpinionReaction, _showPurchaseConfirm, _dispatchSvcChoice (+ FASE B cascade/memory/visit)');
+  /* ========================================================================
+   * Sessao #29 (2026-05-24): _postAllyEffect — POST /api/ally/apply-effect
+   * Chamado por dois caminhos:
+   *  1. encounter-popup.js _handleChoiceInternal (non-dice choices, cb='close')
+   *  2. _diceCheckSvc showResult (dice choices, apos resolver d20)
+   *
+   * Auth via window.__CITY_AUTH (token/api/uid) setado por cidade.html quando
+   * em REMOTE mode. Em LOCAL mode (file://) ou se auth ausente, no-op silencioso.
+   *
+   * Backend aplica renown/effect/item/gold via overworld_effects + give_item +
+   * modify_reputation. Frontend mostra toast de confirmacao.
+   * ====================================================================== */
+  window._postAllyEffect = function(ally_source, dice_result) {
+    var auth = window.__CITY_AUTH;
+    if (!auth || !auth.token || !auth.api || !auth.uid) {
+      console.debug('[ALLY] _postAllyEffect: no auth context — skip');
+      return Promise.resolve(null);
+    }
+    if (!ally_source || !ally_source.cls || !ally_source.choice_id) {
+      console.warn('[ALLY] _postAllyEffect: invalid ally_source', ally_source);
+      return Promise.resolve(null);
+    }
+    var body = {
+      user_id: auth.uid,
+      ally_class: ally_source.cls,
+      choice_id: ally_source.choice_id,
+      ally_name: ally_source.name || '',
+      dice_result: dice_result || null,
+    };
+    var url = auth.api + '/api/ally/apply-effect';
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var tid = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + auth.token,
+      },
+      body: JSON.stringify(body),
+      signal: ctrl ? ctrl.signal : undefined,
+    }).then(function(resp) {
+      if (tid) clearTimeout(tid);
+      if (!resp.ok) {
+        console.warn('[ALLY] apply-effect HTTP ' + resp.status);
+        return null;
+      }
+      return resp.json();
+    }).then(function(data) {
+      if (!data || !data.ok) return data;
+      var applied = data.applied || {};
+      // Toast composto com TODAS as aplicacoes em uma linha
+      if (typeof window.vToast === 'function') {
+        var parts = [];
+        if (applied.item_given) {
+          var emoji = applied.item_given.emoji || '🎁';
+          var qty = applied.item_given.qty || 1;
+          parts.push(emoji + ' ' + applied.item_given.name + (qty > 1 ? ' x' + qty : ''));
+        }
+        if (applied.gold_delta) {
+          parts.push((applied.gold_delta > 0 ? '+' : '') + applied.gold_delta + ' Valdoritas');
+        }
+        if (applied.effect && applied.effect.name) {
+          parts.push('✨ ' + applied.effect.name);
+        }
+        if (parts.length) {
+          var positive = (applied.gold_delta || 0) >= 0 && (applied.renown_delta || 0) >= 0;
+          window.vToast(parts.join(' · '), positive ? 'gold' : 'warn');
+        }
+      }
+      return data;
+    }).catch(function(err) {
+      if (tid) clearTimeout(tid);
+      console.warn('[ALLY] apply-effect error', err && err.message || err);
+      return null;
+    });
+  };
+
+  console.log('[svc-interactions] PADRAO loaded — _diceCheckSvc, _showOpinionReaction, _showPurchaseConfirm, _dispatchSvcChoice (+ FASE B cascade/memory/visit), _postAllyEffect (Sessao #29)');
 })();

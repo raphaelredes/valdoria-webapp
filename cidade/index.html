@@ -8313,6 +8313,19 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
 
+  /* Sessao #29 (2026-05-24): expor auth context global pra modulos shared
+     (svc-interactions.js _postAllyEffect, futuros endpoints). NAO armazena
+     em LOCAL mode (file://) — fica null/undefined. */
+  if (_token && _api && _uid) {
+    try {
+      window.__CITY_AUTH = {
+        token: _token,
+        api: String(_api).replace(/\/$/, ''),
+        uid: parseInt(_uid, 10),
+      };
+    } catch(_e) { /* defensivo */ }
+  }
+
   // === GUARD: production hostname requires REMOTE auth ========================
   // USER REQUEST 2026-05-10: bug recorrente onde player ve "Aventureiro Mago Elfo
   // Nv 5" em PROD. Causa: /play/ falhou auth -> gotoCidade fallback SEM token,
@@ -46598,7 +46611,14 @@ function _showAllyDialogue(idx){
         resultNarration: _personalize(c.resultNarration),
         resultText: _personalize(c.resultText),
         resultNarrationFail: _personalize(c.resultNarrationFail),
-        resultTextFail: _personalize(c.resultTextFail)
+        resultTextFail: _personalize(c.resultTextFail),
+        /* Sessao #29: ally_source permite que encounter-popup + _diceCheckSvc
+           chamem POST /api/ally/apply-effect com os params certos. */
+        ally_source: {
+          cls: cls,
+          choice_id: c.id,
+          name: displayName,
+        },
       };
     })
   };
