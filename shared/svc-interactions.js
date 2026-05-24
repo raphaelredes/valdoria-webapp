@@ -398,10 +398,29 @@
    * Backend aplica renown/effect/item/gold via overworld_effects + give_item +
    * modify_reputation. Frontend mostra toast de confirmacao.
    * ====================================================================== */
+  /* Fallback toast quando backend nao responde — mostra renown hint local.
+     Usado quando auth ausente (LOCAL mode) OU quando backend retorna erro.
+     So fire pra NON-DICE choices (dice ja tem proprio toast em showResult).
+     Sessao #29 v2 (2026-05-24). */
+  function _allyFallbackToast(ally_source, dice_result) {
+    if (dice_result) return;  // dice path tem toast proprio
+    if (typeof window.vToast !== 'function') return;
+    var hint = ally_source && ally_source.renown_hint;
+    if (typeof hint !== 'number' || hint === 0) {
+      // Sem renown hint ou 0 — toast generico de confirmacao
+      window.vToast('Conversa encerrada', 'info');
+      return;
+    }
+    var sign = hint > 0 ? '+' : '';
+    window.vToast(sign + hint + ' Renome · ' + (ally_source.name || 'Aliado'),
+                   hint >= 0 ? 'gold' : 'warn');
+  }
+
   window._postAllyEffect = function(ally_source, dice_result) {
     var auth = window.__CITY_AUTH;
     if (!auth || !auth.token || !auth.api || !auth.uid) {
-      console.debug('[ALLY] _postAllyEffect: no auth context — skip');
+      console.debug('[ALLY] _postAllyEffect: no auth context — using fallback toast');
+      _allyFallbackToast(ally_source, dice_result);
       return Promise.resolve(null);
     }
     if (!ally_source || !ally_source.cls || !ally_source.choice_id) {
@@ -429,7 +448,8 @@
     }).then(function(resp) {
       if (tid) clearTimeout(tid);
       if (!resp.ok) {
-        console.warn('[ALLY] apply-effect HTTP ' + resp.status);
+        console.warn('[ALLY] apply-effect HTTP ' + resp.status + ' — fallback toast');
+        _allyFallbackToast(ally_source, dice_result);
         return null;
       }
       return resp.json();
@@ -458,7 +478,8 @@
       return data;
     }).catch(function(err) {
       if (tid) clearTimeout(tid);
-      console.warn('[ALLY] apply-effect error', err && err.message || err);
+      console.warn('[ALLY] apply-effect error — fallback toast', err && err.message || err);
+      _allyFallbackToast(ally_source, dice_result);
       return null;
     });
   };

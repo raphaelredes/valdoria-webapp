@@ -46613,11 +46613,15 @@ function _showAllyDialogue(idx){
         resultNarrationFail: _personalize(c.resultNarrationFail),
         resultTextFail: _personalize(c.resultTextFail),
         /* Sessao #29: ally_source permite que encounter-popup + _diceCheckSvc
-           chamem POST /api/ally/apply-effect com os params certos. */
+           chamem POST /api/ally/apply-effect com os params certos.
+           renown_hint + label_hint sao usados pelo fallback toast quando
+           backend offline (ex: bot DEV nao reiniciado ainda). */
         ally_source: {
           cls: cls,
           choice_id: c.id,
           name: displayName,
+          renown_hint: c.renown || 0,
+          label_hint: (c.label || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
         },
       };
     })
