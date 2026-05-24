@@ -1860,7 +1860,7 @@
             else if (kind === 'fx') path = '../shared/img/combat/effects/'  + name + '.png';
             else                    return '';
             return '<img class="effect-tag-ico" src="' + path + '" alt="" loading="lazy" ' +
-                   'onerror="this.outerHTML=\'✨\'"/>';
+                   'onerror="this.outerHTML=&#x2728;"/>';
         }
 
         // Detecta emoji-prefix em 'effect' e substitui por PNG icon.
@@ -2165,7 +2165,7 @@
             if (!scId) return '◆';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/levelup/subclasses/' + scId +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML='◆'"/>';
+                   '.png" alt="" loading="lazy" onerror="this.outerHTML=&#9670;"/>';
         }
 
         function buildSubclass(el) {
