@@ -1921,6 +1921,20 @@
             // Hide initial loading with narrative delay
             document.getElementById('luBackdrop').style.display = '';
             if (window._lvlInitLoading) window._lvlInitLoading.hide();
+
+            // 2026-05-23 (user request sessão #27): tocar tema de levelup ao abrir
+            // a tela. Existem 8 variantes em shared/audio/levelup_theme_*.mp3 e o
+            // track está em NO_LOOP_TRACKS — toca uma vez, não loopa. Audio já está
+            // unlocked (player tocou em "Toque para Iniciar" no /play/), então
+            // play() funciona sem gesture extra. Crossfade automático se já tinha
+            // outra música tocando (ex: city/forest da última cena).
+            try {
+                if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+                    ValdoriaAudio.play('levelup');
+                }
+            } catch (e) {
+                console.warn('[LEVELUP] audio play failed:', e);
+            }
         })();
 
         function buildScreens() {
