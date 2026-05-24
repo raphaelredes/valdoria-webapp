@@ -601,7 +601,13 @@
         }
 
         /* DM Narration bubble */
+        /* Sessao #29 v4 (2026-05-24): dm-bubble com "🎲 Mestre" violava regra
+           "DM nunca fala como personagem" (CLAUDE.md). User pediu remover
+           qualquer MESTRE falando com jogador na criacao de personagem.
+           Hide via CSS preserva os divs em HTML (compat com buildDmBubbles
+           e qualquer outro caller) — basta o texto ficar invisivel. */
         .dm-bubble {
+            display: none !important;
             position: relative;
             background: linear-gradient(165deg, rgba(196, 149, 58, 0.08) 0%, rgba(196, 149, 58, 0.02) 100%);
             border-left: 3px solid var(--v-gold);
@@ -4067,6 +4073,34 @@
         // ═══════════════════════════════════════════════
         // CLASS — Grid + Detail sub-screen
         // ═══════════════════════════════════════════════
+        /* Sessao #29 v4 (2026-05-24): mapa class_key -> PNG existente em
+           /shared/img/combat/. User pediu: usar PNG real em vez de icon emoji.
+           Fallback pro emoji quando img falha (onerror). */
+        const CLASS_PNG_SLUG = {
+            class_warrior: 'guerreiro',
+            class_mage: 'mago',
+            class_rogue: 'ladino',
+            class_cleric: 'clerigo',
+            class_paladin: 'paladino',
+            class_ranger: 'patrulheiro',
+            class_barbarian: 'barbaro',
+            class_bard: 'bardo',
+            class_druid: 'druida',
+            class_monk: 'monge',
+            class_sorcerer: 'feiticeiro',
+            class_warlock: 'bruxo',
+        };
+        function _classIconHtml(key, sizePx) {
+            const slug = CLASS_PNG_SLUG[key];
+            const emoji = (CLASSES[key] && CLASSES[key].icon) || '⚔️';
+            if (!slug) return emoji;
+            const sz = sizePx || 48;
+            const onErr = "this.onerror=null;this.outerHTML='" + emoji.replace(/'/g, "\\'") + "';";
+            return '<img src="/shared/img/combat/' + slug + '.png" alt="" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;" ' +
+                   'loading="lazy" onerror="' + onErr + '">';
+        }
+
         function buildClassGrid() {
             const grid = document.getElementById('classGrid');
             grid.innerHTML = '';
@@ -4074,7 +4108,8 @@
                 const card = document.createElement('div');
                 const isConfirmed = sel.classKey === key;
                 card.className = 'v-card' + (isConfirmed ? ' selected' : '');
-                card.innerHTML = `<div class="v-card-icon">${c.icon}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div>`;
+                const iconHtml = _classIconHtml(key, 48);
+                card.innerHTML = `<div class="v-card-icon v-card-icon-png">${iconHtml}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div>`;
                 card.onclick = () => { haptic(); buildClassDetail(key); openSubScreen('sub-class-detail'); };
                 grid.appendChild(card);
             }
@@ -4089,7 +4124,8 @@
             const baseStats = { strength: c.stats[0], dexterity: c.stats[1], constitution: c.stats[2], intelligence: c.stats[3], wisdom: c.stats[4], charisma: c.stats[5] };
 
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-class-detail')">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-icon">${c.icon}</div><div class="detail-title">${c.name}</div><div class="detail-subtitle">${c.role}</div></div>`;
+            const detailIconHtml = _classIconHtml(key, 64);
+            html += `<div class="detail-header"><div class="detail-icon detail-icon-png">${detailIconHtml}</div><div class="detail-title">${c.name}</div><div class="detail-subtitle">${c.role}</div></div>`;
 
             // Synergy tip (race + class)
             if (sel.race) {
@@ -4292,6 +4328,27 @@
             openSubScreen('sub-equip-select');
         }
 
+        /* Sessao #29 v4 (2026-05-24): item -> PNG slug helper.
+           Normaliza nome (NFKD), strip accents, lowercase, hyphens.
+           User pediu: equipment selection mostrar PNG real do item em vez de
+           apenas texto. PNGs ja existem em /shared/img/items/<slug>.png. */
+        function _itemSlug(name) {
+            if (!name) return '';
+            let s = String(name).normalize('NFKD').replace(/[̀-ͯ]/g, '');
+            s = s.toLowerCase().trim();
+            s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            return s;
+        }
+        function _itemThumbHtml(itemName, sizePx) {
+            const slug = _itemSlug(itemName);
+            const sz = sizePx || 28;
+            if (!slug) return '';
+            /* Fallback: se PNG nao existir (onerror), some o thumb e fica so o texto */
+            return '<img src="/shared/img/items/' + slug + '.png" alt="" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;flex-shrink:0;border-radius:4px;background:rgba(0,0,0,0.2);" ' +
+                   'loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';">';
+        }
+
         function buildEquipmentSelect(classKey) {
             const pkgs = EQUIPMENT_PACKAGES[classKey];
             if (!pkgs) { finishClassScreen(); return; }
@@ -4304,7 +4361,16 @@
                 html += `<div class="v-card${sel_class}" onclick="selectEquipment('${pkgId}')">`;
                 html += `<div class="v-card-name">${pkg.icon} ${pkg.name}</div>`;
                 html += `<div class="v-card-desc">${pkg.desc}</div>`;
-                html += `<div class="v-card-bonus">${pkg.items.map(i => '• ' + i).join('<br>')}</div>`;
+                /* Sessao #29 v4: items com PNG thumb + nome (em vez de bullet only).
+                   Mantem flex-row pra thumb + texto alinhados. */
+                html += '<div class="v-card-bonus" style="display:flex;flex-direction:column;gap:4px;">';
+                pkg.items.forEach(itemName => {
+                    html += '<div style="display:flex;align-items:center;gap:6px;">' +
+                            _itemThumbHtml(itemName, 26) +
+                            '<span>' + itemName + '</span>' +
+                            '</div>';
+                });
+                html += '</div>';
                 html += `</div>`;
             }
             document.getElementById('equipSelectContent').innerHTML = html;
