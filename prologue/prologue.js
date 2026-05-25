@@ -333,6 +333,73 @@ function _sceneRoad() {
   };
 }
 
+/* Cena INJURED COMPANION: Sessao #37 v19 (2026-05-25) — apos o combate,
+   Thorne pede ajuda pro aprendiz Brenn que esta inconsciente no chao.
+   Choices dinamicos baseados em classe + inventario (vem do backend
+   em DATA.injured_companion.choices). */
+function _sceneInjuredCompanion() {
+  const ic = (DATA && DATA.injured_companion) || {};
+  const npc = ic.npc || { name: 'Ferreiro Ferido', desc: 'Tenta socorrer o aprendiz', portrait: '' };
+  const script = ic.script || [];
+  /* Map server choices → vEncounter choice shape */
+  const choices = (ic.choices || []).map(function(c){
+    return {
+      id: c.key,
+      label: c.label,
+      desc: c.desc || '',
+      cb: '__local_heal_companion:' + c.key,
+      dc: c.dc,
+      skill: c.skill,
+      cost: c.cost_label
+    };
+  });
+  return { npc: npc, script: script, choices: choices };
+}
+
+/* Cena INJURED COMPANION RESULT: mostra outcome narrativo apos a escolha
+   de cura. Header com nome do NPC vivo (Brenn) ou Thorne dependendo do
+   outcome. Choice unica avanca pra _sceneAftermath. */
+function _sceneInjuredCompanionResult(result) {
+  result = result || {};
+  /* Parse narrativa: split em paragrafos pra narration / speech */
+  const text = result.narrative || '';
+  const script = [];
+  const quoteRegex = /([""'']|<i>['"])(.+?)(['""'']|['"]<\/i>)/g;
+  let lastIdx = 0;
+  let match;
+  let foundAny = false;
+  while ((match = quoteRegex.exec(text)) !== null) {
+    foundAny = true;
+    const preText = text.slice(lastIdx, match.index).trim();
+    if (preText) script.push({ type: 'narration', text: preText });
+    /* Speaker: 'Brenn' nos outcomes de sucesso (acorda), senao Thorne */
+    const isBrennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion');
+    script.push({ type: 'speech', speaker: isBrennAwake && match[2].indexOf('Mestre') >= 0 ? 'Brenn, Aprendiz' : 'Thorne, o Ferreiro', text: match[2] });
+    lastIdx = match.index + match[0].length;
+  }
+  if (foundAny) {
+    const trailing = text.slice(lastIdx).trim();
+    if (trailing) script.push({ type: 'narration', text: trailing });
+  } else {
+    script.push({ type: 'narration', text: text });
+  }
+  /* Append XP gain como narration final (se houver) */
+  if (result.xp && result.xp > 0) {
+    script.push({ type: 'narration', text: '<b>+' + result.xp + ' XP</b> — ' + (result.title || 'Ação concluída') });
+  }
+  return {
+    npc: {
+      name: result.title || 'Resultado',
+      desc: 'Brenn — aprendiz de Thorne',
+      portrait: '/shared/img/npcs/thorne-armeiro.png'
+    },
+    script: script,
+    choices: [
+      { id: 'continuar', label: '▸ Seguir para Eldoria', cb: '__local_companion_result_done' }
+    ]
+  };
+}
+
 /* Cena AFTERMATH: o ferreiro (ainda sem nome) agradece por salvar seu filho.
    Sessao #33 (2026-05-25): user pediu coerencia narrativa — Thorne so deve ser
    nomeado APOS a apresentacao no texto ("Seu nome e Thorne Tempera-de-Aco").
@@ -447,6 +514,13 @@ function _dispatchPrologueChoice(ch) {
     onRoadChoice('fight');
   } else if (cb === '__local_road_distract') {
     onRoadChoice('distract');
+  } else if (cb.indexOf('__local_heal_companion:') === 0) {
+    /* Sessao #37 v19 — Brenn ferido, escolha de cura */
+    const key = cb.slice('__local_heal_companion:'.length);
+    onCompanionHealChoice(key);
+  } else if (cb === '__local_companion_result_done') {
+    /* Apos resultado da cura → segue pro aftermath canonical */
+    _renderScene(_sceneAftermath);
   } else if (cb === '__local_aftermath_done') {
     onAftermathDone();
   } else if (cb.indexOf('__local_gate:') === 0) {
@@ -454,6 +528,27 @@ function _dispatchPrologueChoice(ch) {
     onGateChoice(key);
   } else {
     console.warn('[PROLOGUE] Unknown choice cb:', cb);
+  }
+}
+
+/* Sessao #37 v19 (2026-05-25): handler de escolha de cura do Brenn.
+   Chama POST /api/prologue/heal_companion → render result scene. */
+var _brennChoiceMade = false;
+async function onCompanionHealChoice(key) {
+  if (_brennChoiceMade) return;
+  _brennChoiceMade = true;
+  try {
+    const result = await apiCall('/api/prologue/heal_companion', { choice: key });
+    if (!result || result.error) {
+      _brennChoiceMade = false; // permite tentar de novo
+      showError('Erro ao aplicar cura: ' + (result && result.error || 'desconhecido'));
+      return;
+    }
+    /* Render outcome scene → user clica "Seguir para Eldoria" → aftermath */
+    _renderScene(function() { return _sceneInjuredCompanionResult(result); });
+  } catch (e) {
+    _brennChoiceMade = false;
+    showError('Erro ao curar aprendiz.', e);
   }
 }
 
@@ -774,14 +869,28 @@ async function boot() {
     if (sc.distract_result) choices.distract = sc.distract_result;
 
     if (DATA.mode === 'aftermath') {
-      _renderScene(_sceneAftermath);
+      /* Sessao #37 v19 (2026-05-25): novo flow — injured companion FIRST
+         (se ainda nao foi feita a escolha), depois aftermath canonical. */
+      if (sc.brenn_choice) {
+        /* Ja escolheu — pula direto pra aftermath */
+        console.info('[PROLOGUE] resume: brenn ja curado (' + sc.brenn_choice + ') → aftermath');
+        _renderScene(_sceneAftermath);
+      } else {
+        console.info('[PROLOGUE] mode=aftermath → injured companion scene');
+        _renderScene(_sceneInjuredCompanion);
+      }
       return;
     }
 
     /* Resume logic — anti-cheat: NUNCA re-rola dice. */
     if (sc.distract_result && sc.distract_result.success && !sc.gate_choice) {
-      console.info('[PROLOGUE] resume: distract success → aftermath');
-      _renderScene(_sceneAftermath);
+      console.info('[PROLOGUE] resume: distract success → injured_companion');
+      /* Sessao #37 v19: distract success tambem ganha cena do Brenn */
+      if (sc.brenn_choice) {
+        _renderScene(_sceneAftermath);
+      } else {
+        _renderScene(_sceneInjuredCompanion);
+      }
       return;
     }
     if (sc.distract_result && sc.distract_result.success === false) {
