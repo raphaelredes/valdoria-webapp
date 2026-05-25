@@ -8553,6 +8553,44 @@ body.perf-lite .vc-action-btn { transition: none; }
         });
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
       }
+      // Sessao #37 (2026-05-25): hidrata QUESTS_ACTIVE com dados REAIS do char
+      // (web_auth.py:_get_characters agora envia `quests` array). Antes esses
+      // dados eram zerados pela limpeza de mocks (commit anterior) — agora
+      // populamos com quests autenticas do server. Cada char tem seu proprio
+      // log: switch de personagem refaz fetch e troca QUESTS_ACTIVE.
+      try {
+        if (Array.isArray(picked.quests) && Array.isArray(window.QUESTS_ACTIVE)) {
+          window.QUESTS_ACTIVE.length = 0;
+          picked.quests.forEach(function(q){
+            window.QUESTS_ACTIVE.push({
+              id: 'qa_' + (q.id || ''),
+              icon: (typeof _heralIco === 'function' ? _heralIco('ic-mochila') : '📜'),
+              title: q.title || 'Missão sem título',
+              desc: q.desc || '',
+              progress: q.progress || '0/' + (q.total_stages || 1),
+              reward: 0,
+              xp: 0,
+              npc: '',
+              ready: !!q.ready,
+              category: q.category || 'story',
+              current_stage: q.current_stage || 0,
+              total_stages: q.total_stages || 1
+            });
+          });
+          console.log('[CITY] QUESTS_ACTIVE hydrated from server:', window.QUESTS_ACTIVE.length, 'active');
+        }
+        // achievement_stats: armazena raw — mapeamento server → ACH_PROGRESS
+        // (algoz/cacador/etc.) fica pendente da unificação do schema (server
+        // tem flat list, client tem 14 cadeias × 5 tiers). Por enquanto deixa
+        // ACH_PROGRESS zerado (correto pra 0/70 em char novo).
+        if (picked.achievement_stats && typeof picked.achievement_stats === 'object') {
+          window._serverAchievementStats = picked.achievement_stats;
+          console.log('[CITY] achievement_stats from server:',
+            Object.keys(picked.achievement_stats).length, 'stats stored (pending chain mapping)');
+        }
+      } catch (e) {
+        console.warn('[CITY] quests_hydrate_failed:', e);
+      }
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
 
       // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
