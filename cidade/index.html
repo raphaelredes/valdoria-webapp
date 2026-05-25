@@ -15929,17 +15929,19 @@ function _buildTavernMockData(player){
     }),
     services: [
       // Replica canonical tavern.py L130-138 (TavernManager.get_menu)
+      // Sessao #37 v17 (2026-05-25): labels abreviadas pra caber em modo Maior:
+      // Exploradores→Aventura, Mesa de Jogos→Jogos, Mural de Avisos→Mural
       { icon: _heralIco('ic-dialogo'), label: 'Boatos',           cb: 'tavern_rumor_buy',     cost: 5 },
-      { icon: _heralIco('ic-cerveja'), label: 'Bebidas',           cb: 'tavern_drinks_open' },
-      { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',       cb: 'tavern_mercenaries_open' },
-      { icon: _heralIco('ic-grupo'), label: 'Exploradores',      cb: 'tavern_adventurers_open' },
-      { icon: _heralIco('ic-cartas'), label: 'Mesa de Jogos',     cb: 'tavern_games_open' },
-      { icon: _heralIco('ic-bardo'), label: 'Bardo',             cb: 'tavern_bard_open',
+      { icon: _heralIco('ic-cerveja'), label: 'Bebidas',          cb: 'tavern_drinks_open' },
+      { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',  cb: 'tavern_mercenaries_open' },
+      { icon: _heralIco('ic-grupo'), label: 'Aventura',           cb: 'tavern_adventurers_open' },
+      { icon: _heralIco('ic-cartas'), label: 'Jogos',             cb: 'tavern_games_open' },
+      { icon: _heralIco('ic-bardo'), label: 'Bardo',              cb: 'tavern_bard_open',
         badge: 'Inspiração 30%' },  // canonical TavernBardManager (tavern_bard.py)
-      { icon: _heralIco('ic-cerveja'), label: 'Socializar',        cb: 'tavern_carousing_open' },
-      { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
-      { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
-      { icon: _heralIco('ic-missões'), label: 'Mural de Avisos',   cb: 'tavern_bulletin_open' }
+      { icon: _heralIco('ic-cerveja'), label: 'Socializar',       cb: 'tavern_carousing_open' },
+      { icon: _heralIco('ic-stat-wis'), label: 'Informações',     cb: 'tavern_gather_open' },
+      { icon: _heralIco('ic-stat-attack'), label: 'Rinha',        cb: 'tavern_pitfight_open' },
+      { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' }
     ]
   };
 }
