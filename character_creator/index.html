@@ -1473,6 +1473,39 @@ Busca rápida:
     document.write('<script src="../shared/exit-confirm.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     </script>
+<script>
+    /* Sessao #37 (2026-05-25): boot font-size canonical igual cidade
+       (valdoria_font_size: small/normal/large). Aplica antes da renderizacao
+       pra evitar flash. */
+    (function _initFontSizeOnBoot(){
+      try {
+        var sz = localStorage.getItem('valdoria_font_size') || 'normal';
+        if (sz === 'xlarge') sz = 'large';  // collapse legacy 4th level
+        var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
+        var scale = scaleMap[sz] || '1.0';
+        document.documentElement.style.setProperty('--v-font-scale', scale);
+        var apply = function(){ document.body.setAttribute('data-font-size', sz); };
+        if (document.body) apply();
+        else document.addEventListener('DOMContentLoaded', apply, { once: true });
+      } catch(e) {}
+    })();
+    /* Sessao #37: font picker handler — usado pelo botao A- / A / A+
+       no header e na configuracao em qualquer tela. */
+    window.vSetFontSize = function(size){
+      if (!['small','normal','large'].includes(size)) return;
+      try {
+        localStorage.setItem('valdoria_font_size', size);
+        var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
+        document.documentElement.style.setProperty('--v-font-scale', scaleMap[size]);
+        document.body.setAttribute('data-font-size', size);
+        document.querySelectorAll('.v-font-picker button').forEach(function(b){
+          b.classList.toggle('is-active', b.getAttribute('data-size') === size);
+        });
+        if (typeof haptic === 'function') haptic('light');
+      } catch(e) {}
+    };
+    </script>
+    
 </head>
 
 <body>
@@ -2610,8 +2643,50 @@ Busca rápida:
         <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
         <div class="v-progress-bar" id="progressBar"></div>
         <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
+        <!-- Sessao #37 (2026-05-25): font picker canonical 3 niveis.
+             Mesmo design do settings popup da cidade. Persiste em
+             localStorage.valdoria_font_size. -->
+        <div class="v-font-picker" id="vFontPicker" style="position:absolute; top:6px; right:8px; width:96px;" role="group" aria-label="Tamanho da fonte">
+            <button data-size="small"  onclick="vSetFontSize('small')"  aria-label="Letra pequena" title="Pequena">A</button>
+            <button data-size="normal" onclick="vSetFontSize('normal')" aria-label="Letra normal" title="Normal">A</button>
+            <button data-size="large"  onclick="vSetFontSize('large')"  aria-label="Letra grande" title="Grande">A</button>
+        </div>
+        <script>
+        /* Marca botao ativo no boot */
+        (function(){
+          try {
+            var sz = localStorage.getItem('valdoria_font_size') || 'normal';
+            if (sz === 'xlarge') sz = 'large';
+            var pick = function(){
+              document.querySelectorAll('#vFontPicker button').forEach(function(b){
+                b.classList.toggle('is-active', b.getAttribute('data-size') === sz);
+              });
+            };
+            if (document.readyState !== 'loading') pick();
+            else document.addEventListener('DOMContentLoaded', pick, { once: true });
+          } catch(e) {}
+        })();
+        </script>
     </div>
     <style>
+
+        /* Sessao #37 (2026-05-25): spell card hover epico */
+        .v-spell-card {
+            background: linear-gradient(180deg, rgba(196,149,58,0.04) 0%, rgba(42,36,32,0.3) 100%);
+            border: 1px solid rgba(196,149,58,0.25);
+            border-radius: 10px;
+        }
+        .v-spell-card:hover {
+            background: linear-gradient(180deg, rgba(196,149,58,0.10) 0%, rgba(74,56,40,0.5) 100%);
+            border-color: rgba(196,149,58,0.55);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(196,149,58,0.20);
+        }
+        .v-spell-card.selected {
+            background: linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(74,56,40,0.4) 100%);
+            border-color: var(--v-gold, #c4953a);
+            box-shadow: 0 0 18px rgba(196,149,58,0.30), inset 0 0 12px rgba(196,149,58,0.08);
+        }
         /* Sessao #29 v4 (2026-05-24): botao back visivel no header pra navegacao
            explicita entre telas — alternativa ao Telegram BackButton (que nao
            aparece em browser desktop) e aos progress dots (menos descobriveis). */
@@ -2651,7 +2726,7 @@ Busca rápida:
             <div class="screen" id="screen-race">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-0"></div>
-                    <div class="v-title-sm">Escolha sua Raça <span class="help-tip" onclick="showHelp('race')">?</span>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Escolha sua Raça</span><span class="help-tip"  onclick="showHelp('race')">?<span class="v-step-line"></span></div>
                     </div>
                     <div class="v-caption">Cada raça possui bônus e traços únicos. Toque para ver detalhes.</div>
                     <button class="v-btn v-btn-random btn-block" onclick="randomizeCharacter()">🎲 Personagem Aleatório</button>
@@ -2666,8 +2741,8 @@ Busca rápida:
             <div class="screen" id="screen-class">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-1"></div>
-                    <div class="v-title-sm">Escolha sua Classe <span class="help-tip"
-                            onclick="showHelp('class')">?</span></div>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Escolha sua Classe</span><span class="help-tip" 
+                            onclick="showHelp('class')">?<span class="v-step-line"></span></div></div>
                     <div class="v-caption">Defina seu estilo de combate. Toque para ver detalhes.</div>
                     <!-- Sessao #29 (2026-05-24): filtros por papel D&D 5e -->
                     <div class="class-role-filters" id="classRoleFilters">
@@ -2721,8 +2796,8 @@ Busca rápida:
             <div class="screen" id="screen-stats">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-2"></div>
-                    <div class="v-title-sm">Distribua seus Atributos <span class="help-tip"
-                            onclick="showHelp('stats')">?</span></div>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Distribua seus Atributos</span><span class="help-tip" 
+                            onclick="showHelp('stats')">?<span class="v-step-line"></span></div></div>
                     <!-- Sessao #29 v4: D&D 5e PHB p.12-13 lista 3 metodos canonicos.
                          User pediu: 'siga as regras D&D'. Adicionado seletor de metodo. -->
                     <div class="stat-method-selector" id="statMethodSelector">
@@ -2827,8 +2902,8 @@ Busca rápida:
             <div class="screen" id="screen-bg">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-3"></div>
-                    <div class="v-title-sm">Escolha seu Antecedente <span class="help-tip"
-                            onclick="showHelp('background')">?</span></div>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Escolha seu Antecedente</span><span class="help-tip" 
+                            onclick="showHelp('background')">?<span class="v-step-line"></span></div></div>
                     <div class="v-caption">Seu passado define perícias e recursos iniciais. Toque para ver detalhes.
                     </div>
                     <div class="v-card-grid" id="bgGrid"></div>
@@ -2845,7 +2920,7 @@ Busca rápida:
             <div class="screen" id="screen-alignment">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-4"></div>
-                    <div class="v-title-sm">Alinhamento <span class="help-tip" onclick="showHelp('alignment')">?</span>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Alinhamento</span><span class="help-tip"  onclick="showHelp('alignment')">?<span class="v-step-line"></span></div>
                     </div>
                     <div class="v-caption">A bússola moral do seu personagem. Opcional — toque para escolher ou pule.
                     </div>
@@ -2861,8 +2936,8 @@ Busca rápida:
             <div class="screen" id="screen-skills">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-5"></div>
-                    <div class="v-title-sm">Perícias de Classe <span class="help-tip"
-                            onclick="showHelp('proficiency')">?</span></div>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Perícias de Classe</span><span class="help-tip" 
+                            onclick="showHelp('proficiency')">?<span class="v-step-line"></span></div></div>
                     <div class="v-caption" id="skillDesc">Escolha suas perícias.</div>
                     <div class="v-toggle-count" id="skillCount">0/2</div>
                     <div id="skillBgInfo"></div>
@@ -2876,8 +2951,8 @@ Busca rápida:
             <div class="screen" id="screen-tools">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-6"></div>
-                    <div class="v-title-sm">Ferramentas Artesanais <span class="help-tip"
-                            onclick="showHelp('tools')">?</span></div>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Ferramentas Artesanais</span><span class="help-tip" 
+                            onclick="showHelp('tools')">?<span class="v-step-line"></span></div></div>
                     <div class="v-caption" id="toolDesc">Escolha suas ferramentas.</div>
                     <div class="v-toggle-count" id="toolCount">0/1</div>
                     <div class="v-toggle-grid" id="toolGrid"></div>
@@ -2890,7 +2965,7 @@ Busca rápida:
             <div class="screen" id="screen-identity">
                 <div class="screen-content">
                     <div class="dm-bubble" id="dm-7"></div>
-                    <div class="v-title-sm">Identidade <span class="help-tip" onclick="showHelp('gender')">?</span>
+                    <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Identidade</span><span class="help-tip"  onclick="showHelp('gender')">?<span class="v-step-line"></span></div>
                     </div>
                     <div class="v-caption">Defina quem é seu personagem.</div>
 
@@ -5824,10 +5899,9 @@ Busca rápida:
         }
 
         function buildL1SkillSelect(data) {
-            // Sessao #37 (2026-05-25): D&D 5e spell picker com PNGs canonical
-            // (shared/img/combat/skills/*) + popup detail pattern (click no
-            // card abre overlay com info; selecao via botao no overlay).
-            // Reaproveita 201 PNGs ja existentes — nada novo gerado.
+            // Sessao #37 (2026-05-25): D&D 5e spell picker EPICO. Reusa
+            // .v-step-banner canonical (gem central + linhas douradas).
+            // Counter como medalha dourada. PNGs canonical (201 existentes).
             const quota = (typeof data.quota === 'number' && data.quota > 0) ? data.quota : 0;
             const options = Array.isArray(data.options) ? data.options : [];
             const useNew = quota > 0 && options.length > 0;
@@ -5837,34 +5911,72 @@ Busca rápida:
 
             if (useNew) {
                 const selCount = sel.selectedL1Skills.length;
-                html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha suas Magias Iniciais</div>`;
-                html += `<div class="detail-subtitle">D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} comeca conhecendo <b>${quota}</b> magia${quota > 1 ? 's' : ''}. Toque em uma magia pra ver detalhes:</div></div>`;
-                html += `<div class="asi-counter" style="margin:8px 0 12px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);color:var(--v-gold,#c4953a);">Selecionadas: <b>${selCount}</b> / <b>${quota}</b></div>`;
+                /* Banner epico canonical igual outras etapas */
+                html += `<div class="v-step-banner">`;
+                html += `<span class="v-step-line"></span>`;
+                html += `<span class="v-step-gem">\u2728</span>`;
+                html += `<span class="v-step-text">Magias Iniciais</span>`;
+                html += `<span class="v-step-line"></span>`;
+                html += `</div>`;
+                /* Subtitle narrativo */
+                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin:0 8px 14px; line-height:1.55; font-style:italic;">`;
+                html += `D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} comeca conhecendo <b style="color:var(--v-gold,#c4953a); font-style:normal;">${quota}</b> magia${quota > 1 ? 's' : ''}.`;
+                html += `<br>Toque em uma magia pra ver detalhes antes de escolher.`;
+                html += `</div>`;
+                /* Medalha contador dourado */
+                html += `<div style="text-align:center; margin:0 0 16px;">`;
+                html += `<div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(196,149,58,0.05) 100%); border:1px solid var(--v-gold,#c4953a); border-radius:18px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668);">`;
+                html += `<span>Selecionadas</span>`;
+                html += `<span style="font-family:var(--v-font-display,Cinzel,serif); font-weight:700; font-size:calc(15px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.4);">${selCount} / ${quota}</span>`;
+                html += `</div></div>`;
+                /* Cards epicos com hover */
                 for (const skill of options) {
                     const isSel = sel.selectedL1Skills.indexOf(skill.name) >= 0;
                     const selected = isSel ? ' selected' : '';
-                    const costText = skill.cost > 0 ? `${skill.cost} MP` : 'Truque';
+                    const costText = skill.cost > 0 ? `<b style="color:var(--v-gold,#c4953a);">${skill.cost}</b> MP` : '<b style="color:var(--v-gold-light,#dbb668);">Truque</b> \u00b7 sem custo';
                     const safeName = skill.name.replace(/'/g, "\\'");
                     const pngUrl = _spellPngUrl(skill.name);
-                    html += `<div class="v-card${selected}" onclick="openL1SkillDetail('${safeName}')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;">`;
-                    html += `<img src="${pngUrl}" alt="${skill.name}" style="width:48px;height:48px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(196,149,58,0.06);border:1px solid rgba(196,149,58,0.25);" loading="lazy" onerror="this.style.display='none'" />`;
-                    html += `<div style="flex:1;min-width:0;">`;
-                    html += `<div class="v-card-name" style="margin:0 0 2px;">${isSel ? '\u2713 ' : ''}${skill.name}</div>`;
-                    html += `<div class="v-card-desc" style="font-size:11px;color:var(--v-text-dim,#a09484);">${costText} \u2014 toque para detalhes</div>`;
+                    html += `<div class="v-card v-spell-card${selected}" onclick="openL1SkillDetail('${safeName}')" style="display:flex; align-items:center; gap:14px; padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:all 0.18s ease; position:relative;">`;
+                    /* PNG com halo dourado */
+                    html += `<div style="position:relative; flex-shrink:0;">`;
+                    if (isSel) {
+                        html += `<div style="position:absolute; inset:-3px; border:2px solid var(--v-gold,#c4953a); border-radius:10px; box-shadow:0 0 14px rgba(196,149,58,0.55); pointer-events:none;"></div>`;
+                    }
+                    html += `<img src="${pngUrl}" alt="${skill.name}" style="display:block; width:54px; height:54px; object-fit:contain; border-radius:8px; background:radial-gradient(circle, rgba(196,149,58,0.12) 0%, rgba(42,36,32,0.0) 70%); border:1px solid rgba(196,149,58,${isSel ? '0.6' : '0.25'});" loading="lazy" onerror="this.style.display='none'" />`;
+                    html += `</div>`;
+                    /* Texto */
+                    html += `<div style="flex:1; min-width:0;">`;
+                    html += `<div class="v-card-name" style="margin:0 0 4px; font-size:calc(14px * var(--v-font-scale, 1)); display:flex; align-items:center; gap:6px;">`;
+                    if (isSel) html += `<span style="color:var(--v-gold-light,#dbb668);">\u2713</span>`;
+                    html += `<span>${skill.name}</span>`;
+                    html += `</div>`;
+                    html += `<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); line-height:1.4;">`;
+                    html += `<span>${costText}</span>`;
+                    html += ` <span style="opacity:0.5;">\u00b7</span> `;
+                    html += `<span style="font-style:italic; opacity:0.85;">toque para detalhes</span>`;
                     html += `</div></div>`;
+                    /* Indicador "tap" */
+                    html += `<span style="flex-shrink:0; color:var(--v-gold-dim,#9a7530); font-size:18px; line-height:1;">\u203A</span>`;
+                    html += `</div>`;
                 }
+                /* Botao confirmar epico */
                 const isReady = selCount === quota;
                 const btnClass = isReady ? 'v-btn-primary' : 'v-btn-secondary';
                 const btnDisabled = isReady ? '' : 'disabled';
-                html += `<button class="v-btn ${btnClass}" style="width:100%;margin-top:16px" ${btnDisabled} onclick="confirmL1Skill()">`;
+                html += `<button class="v-btn ${btnClass}" style="width:100%; margin-top:16px; font-family:var(--v-font-display,Cinzel,serif); letter-spacing:2px;" ${btnDisabled} onclick="confirmL1Skill()">`;
                 html += isReady ? '\u2713 Confirmar Magias' : `Escolha mais ${quota - selCount}`;
                 html += `</button>`;
             } else {
                 // Legacy single-select fallback
                 const defaultSkill = data.default || '';
                 const choices = (data.skills || []).filter(s => !s.is_default);
-                html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha uma Habilidade</div>`;
-                html += `<div class="detail-subtitle">Sua classe come\u00e7a com <b>${(data.skills || []).find(s => s.is_default)?.name || 'habilidade padr\u00e3o'}</b>. Escolha mais uma:</div></div>`;
+                html += `<div class="v-step-banner">`;
+                html += `<span class="v-step-line"></span>`;
+                html += `<span class="v-step-gem">\u2728</span>`;
+                html += `<span class="v-step-text">Habilidade Inicial</span>`;
+                html += `<span class="v-step-line"></span>`;
+                html += `</div>`;
+                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin:0 8px 14px; font-style:italic;">Sua classe comeca com <b style="color:var(--v-gold,#c4953a); font-style:normal;">${(data.skills || []).find(s => s.is_default)?.name || 'habilidade padrao'}</b>. Escolha mais uma:</div>`;
                 for (const skill of choices) {
                     const selected = sel.selectedL1Skill === skill.id ? ' selected' : '';
                     const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : '';
@@ -5878,10 +5990,10 @@ Busca rápida:
             document.getElementById('l1skillSelectContent').innerHTML = html;
         }
 
-        // Sessao #37 (2026-05-25): popup info pattern (similar level-up
-        // openSkillDetail). Click no card abre overlay com PNG hero + desc
-        // expandida + botao toggle selecao. UX: ler antes de escolher.
         function openL1SkillDetail(skillName) {
+            /* Sessao #37 (2026-05-25): popup detail epico — banner + hero PNG
+               com 4 ornamentos cardinais (\u25C6) + radial glow + descricao
+               narrativa expandida. Mesmo pattern do level-up openSkillDetail. */
             haptic();
             const data = _l1SkillsCache[sel.classKey];
             if (!data) return;
@@ -5897,18 +6009,39 @@ Busca rápida:
             const safeName = skillName.replace(/'/g, "\\'");
 
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeL1SkillDetail()">\u2190 Voltar</button>`;
-            html += `<div style="text-align:center;padding:8px 12px;">`;
-            html += `<img src="${pngUrl}" alt="${skillName}" style="width:140px;height:140px;object-fit:contain;margin:8px auto 16px;display:block;border-radius:10px;background:radial-gradient(circle,rgba(196,149,58,0.18) 0%,rgba(42,36,32,0.0) 70%);box-shadow:0 4px 18px rgba(196,149,58,0.20);" loading="lazy" onerror="this.style.display='none'" />`;
-            html += `<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:22px;color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:6px;">${skillName}</div>`;
-            html += `<div style="display:inline-block;padding:4px 12px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.4);border-radius:14px;font-size:12px;color:var(--v-gold,#c4953a);margin-bottom:14px;">${costText}</div>`;
+            /* Banner epico identico outras telas */
+            html += `<div class="v-step-banner">`;
+            html += `<span class="v-step-line"></span>`;
+            html += `<span class="v-step-gem">\u25C6</span>`;
+            html += `<span class="v-step-text">${skillName}</span>`;
+            html += `<span class="v-step-line"></span>`;
+            html += `</div>`;
+            /* Hero PNG com 4 ornamentos cardinais + radial glow */
+            html += `<div style="position:relative; max-width:200px; margin:8px auto 18px; padding:14px;">`;
+            /* Ornamentos cardinais nos 4 cantos */
+            html += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; left:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; right:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            /* PNG centralizado */
+            html += `<img src="${pngUrl}" alt="${skillName}" style="display:block; width:160px; height:160px; object-fit:contain; margin:0 auto; border-radius:12px; background:radial-gradient(circle at center, rgba(196,149,58,0.22) 0%, rgba(42,36,32,0.0) 65%); box-shadow:0 6px 22px rgba(196,149,58,0.28);" loading="lazy" onerror="this.style.display='none'" />`;
+            html += `</div>`;
+            /* Badge custo MP epico */
+            html += `<div style="text-align:center; margin:0 0 16px;">`;
+            html += `<div style="display:inline-block; padding:6px 18px; background:linear-gradient(180deg, rgba(196,149,58,0.20) 0%, rgba(196,149,58,0.06) 100%); border:1px solid var(--v-gold,#c4953a); border-radius:20px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668); text-shadow:0 0 8px rgba(196,149,58,0.4);">`;
+            html += costText;
+            html += `</div></div>`;
+            /* Descricao em pergaminho */
             if (skill.desc) {
-                html += `<div style="font-size:13px;line-height:1.6;color:var(--v-text,#d4c8b0);margin:8px 16px 16px;text-align:left;">${skill.desc}</div>`;
+                html += `<div style="margin:0 12px 20px; padding:14px 16px; background:rgba(196,149,58,0.06); border-left:3px solid var(--v-gold,#c4953a); border-radius:6px; font-size:calc(13px * var(--v-font-scale, 1)); line-height:1.65; color:var(--v-text,#d4c8b0); font-family:var(--v-font, MedievalSharp, serif);">${skill.desc}</div>`;
             }
+            /* Botao selecionar epico */
             const btnClass = isSel ? 'v-btn-secondary' : (atQuota ? 'v-btn-secondary' : 'v-btn-primary');
             const btnDisabled = atQuota ? 'disabled' : '';
-            const btnText = isSel ? '\u2713 Selecionada \u2014 toque para remover' : (atQuota ? 'Quota atingida (' + quota + ')' : 'Selecionar Magia');
-            html += `<button class="v-btn ${btnClass}" style="width:90%;margin-top:8px" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
-            html += `</div>`;
+            const btnText = isSel ? '\u2713 Selecionada \u2014 toque para remover'
+                                  : (atQuota ? `Quota atingida (${quota}/${quota})`
+                                             : '\u2728 Selecionar Magia');
+            html += `<button class="v-btn ${btnClass}" style="width:90%; margin:0 5% 8px; font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
 
             document.getElementById('l1skillSelectContent').innerHTML = html;
         }

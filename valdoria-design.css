@@ -399,11 +399,116 @@
     text-shadow: 0 0 8px rgba(196, 149, 58, 0.2);
   }
   .v-title-sm {
-    font-size: 15px;
+    font-size: calc(15px * var(--v-font-scale, 1));
     font-weight: 600;
     color: var(--v-gold);
     margin-bottom: 4px;
     text-shadow: 0 0 6px rgba(196, 149, 58, 0.15);
+  }
+
+  /* Sessao #37 (2026-05-25): banner ornamentado canonical pra etapas de
+     fluxo (criacao personagem, level-up, prologo). Pattern do
+     cs-quest-banner da cidade — gem central + 2 linhas douradas.
+     Auto-escala via --v-font-scale. Usado em TODAS as telas pra
+     consistencia visual epica. */
+  .v-step-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: calc(12px * var(--v-font-scale, 1)) 16px;
+    margin: 6px 0 14px;
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: calc(14px * var(--v-font-scale, 1));
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--v-gold);
+    background: linear-gradient(180deg,
+      rgba(196, 149, 58, 0.14) 0%,
+      rgba(42, 36, 32, 0) 100%);
+    border-bottom: 1px solid rgba(196, 149, 58, 0.28);
+    border-top: 1px solid rgba(196, 149, 58, 0.28);
+    text-shadow: 0 0 8px rgba(196, 149, 58, 0.35);
+    position: relative;
+  }
+  .v-step-banner .v-step-line {
+    flex: 1;
+    height: 1px;
+    max-width: 90px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(196, 149, 58, 0.55) 50%,
+      transparent 100%);
+  }
+  .v-step-banner .v-step-gem {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--v-gold-light, #dbb668);
+    animation: vStepGemPulse 2.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .v-step-banner .v-step-text {
+    flex-shrink: 0;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @keyframes vStepGemPulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); text-shadow: 0 0 6px rgba(196, 149, 58, 0.4); }
+    50% { opacity: 1; transform: scale(1.18); text-shadow: 0 0 14px rgba(196, 149, 58, 0.85); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .v-step-banner .v-step-gem { animation: none; }
+  }
+  /* Compact variant pra telas com pouco espaco vertical */
+  @media (max-height: 640px) {
+    .v-step-banner {
+      padding: calc(8px * var(--v-font-scale, 1)) 12px;
+      font-size: calc(12px * var(--v-font-scale, 1));
+      letter-spacing: 3px;
+      margin: 4px 0 10px;
+    }
+    .v-step-banner .v-step-line { max-width: 60px; }
+  }
+
+  /* Sessao #37 (2026-05-25): font-size picker canonical (3 botoes A- / A
+     / A+) pra reusar em TODAS as telas que precisam de toggle de fonte.
+     Mesmo design do settings popup da cidade — flex 3 colunas iguais. */
+  .v-font-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 4px;
+    background: rgba(196, 149, 58, 0.05);
+    border: 1px solid var(--v-gold-15);
+    border-radius: 10px;
+  }
+  .v-font-picker button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--v-text-dim);
+    font-family: var(--v-font, MedievalSharp, serif);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 32px;
+    line-height: 1;
+  }
+  .v-font-picker button[data-size="small"]  { font-size: 11px; }
+  .v-font-picker button[data-size="normal"] { font-size: 14px; }
+  .v-font-picker button[data-size="large"]  { font-size: 17px; }
+  .v-font-picker button.is-active {
+    background: rgba(196, 149, 58, 0.18);
+    border-color: var(--v-gold);
+    color: var(--v-gold);
+    text-shadow: 0 0 6px rgba(196, 149, 58, 0.4);
+  }
+  .v-font-picker button:hover:not(.is-active) {
+    background: rgba(196, 149, 58, 0.08);
+    color: var(--v-text);
   }
   .v-subtitle {
     font-size: 13px;
@@ -2196,10 +2301,14 @@ body.perf-lite html.app-frame::before {
    service labels, ally rows, mission text, narrative.
    NAO afeta: buttons, badges fixos, headers display (font-display),
    icons SVG (em). */
+/* Sessao #37 (2026-05-25): user pediu canonical 3 niveis (pequena/normal/
+   maior). xlarge removido — apenas 3 botoes A- / A / A+ em TODAS as telas
+   pra evitar fragmentacao de design. */
 body[data-font-size="small"]  { --v-font-scale: 0.9; --v-font-body-scaled: 12.6px; }
 body[data-font-size="normal"] { --v-font-scale: 1.0; --v-font-body-scaled: 14px; }
 body[data-font-size="large"]  { --v-font-scale: 1.15; --v-font-body-scaled: 16.1px; }
-body[data-font-size="xlarge"] { --v-font-scale: 1.3;  --v-font-body-scaled: 18.2px; }
+/* xlarge: kept apenas como alias backward-compat — colapsa pra large */
+body[data-font-size="xlarge"] { --v-font-scale: 1.15; --v-font-body-scaled: 16.1px; }
 
 /* Apply scale globalmente ao body (afeta todo texto que herda) */
 body[data-font-size] {
