@@ -1489,8 +1489,11 @@ Busca rápida:
         else document.addEventListener('DOMContentLoaded', apply, { once: true });
       } catch(e) {}
     })();
-    /* Sessao #37: font picker handler — usado pelo botao A- / A / A+
-       no header e na configuracao em qualquer tela. */
+    /* Sessao #37 (REVISADO 2026-05-25): setter global de font-size.
+       Header picker removido — preferencia agora vem de #font-size-onboarding
+       (one-time, na primeira criacao de personagem) ou da Configuracao da
+       cidade. Esta funcao continua util como API programatica de teste e pra
+       sincronizar entre WebApps via mensagem (se algum dia precisar). */
     window.vSetFontSize = function(size){
       if (!['small','normal','large'].includes(size)) return;
       try {
@@ -1498,9 +1501,6 @@ Busca rápida:
         var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
         document.documentElement.style.setProperty('--v-font-scale', scaleMap[size]);
         document.body.setAttribute('data-font-size', size);
-        document.querySelectorAll('.v-font-picker button').forEach(function(b){
-          b.classList.toggle('is-active', b.getAttribute('data-size') === size);
-        });
         if (typeof haptic === 'function') haptic('light');
       } catch(e) {}
     };
@@ -2643,31 +2643,249 @@ Busca rápida:
         <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
         <div class="v-progress-bar" id="progressBar"></div>
         <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
-        <!-- Sessao #37 (2026-05-25): font picker canonical 3 niveis.
-             Mesmo design do settings popup da cidade. Persiste em
-             localStorage.valdoria_font_size. -->
-        <div class="v-font-picker" id="vFontPicker" style="position:absolute; top:6px; right:8px; width:96px;" role="group" aria-label="Tamanho da fonte">
-            <button data-size="small"  onclick="vSetFontSize('small')"  aria-label="Letra pequena" title="Pequena">A</button>
-            <button data-size="normal" onclick="vSetFontSize('normal')" aria-label="Letra normal" title="Normal">A</button>
-            <button data-size="large"  onclick="vSetFontSize('large')"  aria-label="Letra grande" title="Grande">A</button>
-        </div>
-        <script>
-        /* Marca botao ativo no boot */
-        (function(){
-          try {
-            var sz = localStorage.getItem('valdoria_font_size') || 'normal';
-            if (sz === 'xlarge') sz = 'large';
-            var pick = function(){
-              document.querySelectorAll('#vFontPicker button').forEach(function(b){
-                b.classList.toggle('is-active', b.getAttribute('data-size') === sz);
-              });
-            };
-            if (document.readyState !== 'loading') pick();
-            else document.addEventListener('DOMContentLoaded', pick, { once: true });
-          } catch(e) {}
-        })();
-        </script>
+        <!-- Sessao #37 (2026-05-25 — REVISADO): picker fixo do header REMOVIDO.
+             User pediu (literal): "ao inves da abordagem atual coloque uma tela
+             inicial da criacao do personagem em que ele escolhe o tamanho da
+             letra e esse tamanho e configurado para o perfil do jogador, assim
+             que ele criar o primeiro personagem ou escolher essa letra, ja fica
+             armazenado permanentemente. acho que sera melhor do que ter esse
+             controle aparecendo em todas as telas como um popup fixo".
+             Solucao: overlay #font-size-onboarding (abaixo) aparece APENAS na
+             primeira vez (se valdoria_font_size nao esta em localStorage).
+             Depois disso, preferencia persistente permanente — usuario muda
+             via Configuracoes na cidade quando quiser. -->
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         FONT SIZE ONBOARDING (one-time, first character creation)
+         Aparece SOMENTE se localStorage.valdoria_font_size nao esta setado.
+         Apos escolha: persiste permanentemente + dispara start do creator.
+         Pra mudar depois: Configuracoes da cidade (mesmo picker canonical).
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="font-size-onboarding" class="font-onboarding-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="font-onboarding-title">
+        <div class="font-onboarding-card">
+            <div class="font-onboarding-header">
+                <span class="font-onboarding-line"></span>
+                <span class="font-onboarding-gem">◆</span>
+                <h2 id="font-onboarding-title">Bem-vindo, Aventureiro</h2>
+                <span class="font-onboarding-gem">◆</span>
+                <span class="font-onboarding-line"></span>
+            </div>
+            <p class="font-onboarding-subtitle">
+                Antes de forjar seu personagem, escolha o tamanho de letra ideal para sua leitura.
+                <br><small>Você pode mudar depois nas <b>Configurações</b> da cidade.</small>
+            </p>
+            <div class="font-onboarding-options">
+                <button class="font-onboarding-option" data-size="small" onclick="_pickFontAndStart('small')">
+                    <span class="font-onboarding-label">Pequena</span>
+                    <span class="font-onboarding-sample" style="font-size: 12.6px;">A coragem forja lendas eternas.</span>
+                </button>
+                <button class="font-onboarding-option font-onboarding-recommended" data-size="normal" onclick="_pickFontAndStart('normal')">
+                    <span class="font-onboarding-label">Normal <span class="font-onboarding-pill">Recomendado</span></span>
+                    <span class="font-onboarding-sample" style="font-size: 14px;">A coragem forja lendas eternas.</span>
+                </button>
+                <button class="font-onboarding-option" data-size="large" onclick="_pickFontAndStart('large')">
+                    <span class="font-onboarding-label">Maior</span>
+                    <span class="font-onboarding-sample" style="font-size: 16.1px;">A coragem forja lendas eternas.</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+        .font-onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #2a2420 0%, #161210 95%);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fontOnboardingFadeIn 0.4s ease;
+        }
+        .font-onboarding-overlay[style*="flex"] { display: flex !important; }
+        @keyframes fontOnboardingFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .font-onboarding-card {
+            max-width: 380px;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(196,149,58,0.07) 0%, rgba(42,36,32,0.94) 100%);
+            border: 1px solid rgba(196,149,58,0.32);
+            border-radius: 16px;
+            padding: 26px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 0 24px rgba(196,149,58,0.05);
+        }
+        .font-onboarding-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .font-onboarding-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(196,149,58,0.6) 50%, transparent);
+            max-width: 28px;
+        }
+        .font-onboarding-gem {
+            color: var(--v-gold, #c4953a);
+            font-size: 11px;
+            text-shadow: 0 0 8px rgba(196,149,58,0.5);
+        }
+        .font-onboarding-header h2 {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            color: var(--v-gold, #c4953a);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+        .font-onboarding-subtitle {
+            text-align: center;
+            color: var(--v-text-dim, #a09484);
+            font-size: 13px;
+            line-height: 1.55;
+            margin: 0 0 20px;
+            font-family: 'Marcellus', 'Cinzel', serif;
+        }
+        .font-onboarding-subtitle small {
+            color: var(--v-text-dim, #a09484);
+            opacity: 0.75;
+            font-size: 11px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .font-onboarding-subtitle b {
+            color: var(--v-gold, #c4953a);
+            font-weight: 600;
+        }
+        .font-onboarding-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .font-onboarding-option {
+            background: linear-gradient(180deg, rgba(196,149,58,0.04) 0%, rgba(42,36,32,0.55) 100%);
+            border: 1px solid rgba(196,149,58,0.25);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: var(--v-text, #d4c8b0);
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+            text-align: left;
+            transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+            min-height: 60px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-onboarding-option:hover {
+            background: linear-gradient(180deg, rgba(196,149,58,0.11) 0%, rgba(74,56,40,0.65) 100%);
+            border-color: rgba(196,149,58,0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(196,149,58,0.2);
+        }
+        .font-onboarding-option:active {
+            transform: translateY(0);
+        }
+        .font-onboarding-recommended {
+            border-color: rgba(196,149,58,0.5);
+            box-shadow: inset 0 0 10px rgba(196,149,58,0.07);
+        }
+        .font-onboarding-label {
+            color: var(--v-gold, #c4953a);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .font-onboarding-pill {
+            background: rgba(196,149,58,0.18);
+            color: var(--v-gold, #c4953a);
+            border: 1px solid rgba(196,149,58,0.45);
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 9px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .font-onboarding-sample {
+            color: var(--v-text, #d4c8b0);
+            font-family: 'Marcellus', 'Cinzel', serif;
+            letter-spacing: 0.3px;
+            font-style: italic;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+        @media (max-height: 620px) {
+            .font-onboarding-card { padding: 18px 16px; }
+            .font-onboarding-header h2 { font-size: 13px; letter-spacing: 2px; }
+            .font-onboarding-subtitle { margin-bottom: 14px; font-size: 12px; }
+            .font-onboarding-option { padding: 10px 14px; min-height: 52px; }
+        }
+        @media (max-width: 340px) {
+            .font-onboarding-header h2 { font-size: 13px; letter-spacing: 1.5px; }
+            .font-onboarding-line { max-width: 18px; }
+        }
+    </style>
+    <script>
+        /* Sessao #37 (2026-05-25 REVISADO): one-time font-size onboarding.
+           Persiste em localStorage.valdoria_font_size — depois disso, usuario
+           muda via Configuracoes da cidade (NUNCA mais aparece este overlay). */
+        window._pickFontAndStart = function(size){
+            if (!['small','normal','large'].includes(size)) return;
+            try {
+                localStorage.setItem('valdoria_font_size', size);
+                var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
+                document.documentElement.style.setProperty('--v-font-scale', scaleMap[size]);
+                document.body.setAttribute('data-font-size', size);
+                if (typeof haptic === 'function') haptic('light');
+            } catch(e) {}
+            /* Sync best-effort com server (preferencia do perfil — usado por
+               outros WebApps se localStorage ausente). Falha silenciosa OK. */
+            try {
+                var qp = new URLSearchParams(location.search);
+                var token = qp.get('token');
+                var apiBase = qp.get('api_base') || qp.get('api');
+                if (token && apiBase && window.fetch) {
+                    fetch(apiBase + '/api/character/font-preference', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ font_size: size })
+                    }).catch(function(){});
+                }
+            } catch(e) {}
+            var ov = document.getElementById('font-size-onboarding');
+            if (ov) {
+                ov.style.transition = 'opacity 0.35s ease';
+                ov.style.opacity = '0';
+                setTimeout(function(){ ov.style.display = 'none'; }, 360);
+            }
+        };
+        (function _maybeShowFontOnboarding(){
+            try {
+                var stored = localStorage.getItem('valdoria_font_size');
+                if (stored && ['small','normal','large','xlarge'].indexOf(stored) >= 0) return;
+                var apply = function(){
+                    var ov = document.getElementById('font-size-onboarding');
+                    if (ov) ov.style.display = 'flex';
+                };
+                if (document.readyState !== 'loading') apply();
+                else document.addEventListener('DOMContentLoaded', apply, { once: true });
+            } catch(e) {}
+        })();
+    </script>
     <style>
 
         /* Sessao #37 (2026-05-25): spell card hover epico */
