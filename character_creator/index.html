@@ -187,6 +187,35 @@ Busca rápida:
       + '<\/script>');
     </script>
     <style>
+        /* BUGFIX sessão #29 (2026-05-24): SMARTPHONE-LOCK STRICT.
+           User reportou: "está sendo possível arrastar a tela como se o
+           tamanho total fosse maior, provavelmente para desktop, porém é
+           para o tamanho ser limitado ao tamanho da tela do dispositivo,
+           nunca do tamanho de tela do desktop".
+
+           Causa: valdoria-design.css body tem overflow-y:auto + max-height
+           min(100dvh, 960px). Em desktop, content excedia 960px (porque
+           .screen-viewport calc usava 100vh fallback = 1080px) → body
+           scrolava → user arrastava verticalmente. Fix em camadas:
+
+           1. body { overflow: hidden } — bloqueia QUALQUER scroll no body
+              (cada .screen tem overflow-y:auto pra scrollar internamente).
+           2. html/body sized via flex column — v-header content-height +
+              .screen-viewport flex:1 ocupa o resto.
+           3. .screen-viewport altura calculada com 100dvh cap (não 100vh)
+              + max-height: calc(100% - 60px) defensivo.
+
+           Defesa em profundidade: triple-locked. Mesmo se uma falhar, as
+           outras 2 bloqueiam o drag. NUNCA remover sem 3-segurança. */
+        html, body { overflow: hidden !important; }
+        body {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            max-height: min(100dvh, 960px) !important;
+        }
+        .v-header { flex-shrink: 0; }
+
         /* ─── Screen transition system ─── */
         /* USER REQUEST 2026-05-04: 100vw quebrava o smartphone-only layout
            (html max-width: 430px de valdoria-design.css). Usar 100% pra
@@ -194,7 +223,10 @@ Busca rápida:
         .screen-viewport {
             position: relative;
             width: 100%;
-            height: calc(var(--tg-viewport-height, 100vh) - 60px);
+            flex: 1 1 auto;
+            min-height: 0;
+            /* Fallback height pra navegadores antigos sem flex calc */
+            height: calc(min(var(--tg-viewport-height, 100dvh), 960px) - 60px);
             overflow: hidden;
         }
 
