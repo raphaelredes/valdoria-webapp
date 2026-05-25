@@ -11894,13 +11894,15 @@ function _showCharSwitchConfirm(picked){
 
 // 2026-05-21: aplicar font-size salvo no boot (antes do popup abrir).
 // Evita "flash" entre normal e pref do user.
-// Sessao #37 v8 (2026-05-25): REMOVIDO setProperty inline no html — CSS
-// body[data-font-size] em valdoria-design.css ja define --v-font-scale e
-// todos os tokens. Inline no html sobrescrevia conflitando (1.15 vs 1.30).
+// Sessao #37 v10 (2026-05-25): boot font-size com validacao whitelist.
+// Aceita SOMENTE small/normal/large. Valor invalido cai pra normal.
 (function _initFontSizeOnBoot(){
   try {
     var sz = localStorage.getItem('valdoria_font_size') || 'normal';
     if (sz === 'xlarge') sz = 'large';  // legacy collapse
+    if (['small','normal','large'].indexOf(sz) < 0) {
+      sz = 'normal';  // graceful fallback for invalid values
+    }
     if (document.body) document.body.setAttribute('data-font-size', sz);
     else {
       document.addEventListener('DOMContentLoaded', function(){

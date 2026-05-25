@@ -582,12 +582,22 @@ Busca rápida:
             margin-top: 8px;
         }
 
+        /* Sessao #37 v10 (2026-05-25): ROOT CAUSE de .v-btn-random nao escalar:
+           <button> tem UA stylesheet `font: -webkit-small-control` que congela
+           font-size como parte do "system font" — author font-size ignorado.
+           Fix: setar font-family explicitamente quebra o lock do system font.
+           Validacao Chrome MCP: DIV+SPAN com mesma classe escalam pra 19.5px,
+           BUTTON ficava em 15px. Setar font-family destrava. */
+        button {
+            font-family: var(--v-font, 'Cinzel', 'MedievalSharp', serif);
+        }
         .v-btn-random {
             background: linear-gradient(135deg, rgba(196, 149, 58, 0.2), rgba(160, 100, 30, 0.15));
             border: 1px dashed var(--v-gold);
             color: var(--v-gold);
             padding: 10px 14px;
             border-radius: var(--v-radius);
+            font-family: var(--v-font, 'Cinzel', 'MedievalSharp', serif);
             font-weight: 700;
             font-size: calc(15px * var(--v-font-scale, 1));
             margin-bottom: 8px;
@@ -1484,14 +1494,17 @@ Busca rápida:
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     </script>
 <script>
-    /* Sessao #37 v8 (2026-05-25): boot font-size — SO seta data-font-size.
-       CSS body[data-font-size] em valdoria-design.css ja define --v-font-scale
-       e todos os tokens. Setar inline no html sobrescrevia conflitando com
-       CSS (valor 1.15 vs canonical 1.30). REMOVIDO o setProperty. */
+    /* Sessao #37 v10 (2026-05-25): boot font-size com validacao whitelist.
+       Aceita SOMENTE small/normal/large. xlarge legacy colapsa pra large.
+       Valor invalido (typo, garbage, futuro size desconhecido) cai pra
+       'normal' silenciosamente — graceful degradation sem quebrar. */
     (function _initFontSizeOnBoot(){
       try {
         var sz = localStorage.getItem('valdoria_font_size') || 'normal';
         if (sz === 'xlarge') sz = 'large';  // collapse legacy 4th level
+        if (['small','normal','large'].indexOf(sz) < 0) {
+          sz = 'normal';  // graceful fallback for invalid values
+        }
         var apply = function(){ document.body.setAttribute('data-font-size', sz); };
         if (document.body) apply();
         else document.addEventListener('DOMContentLoaded', apply, { once: true });
