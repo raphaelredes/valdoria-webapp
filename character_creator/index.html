@@ -582,13 +582,15 @@ Busca rápida:
             margin-top: 8px;
         }
 
-        /* Sessao #37 v10 (2026-05-25): ROOT CAUSE de .v-btn-random nao escalar:
-           <button> tem UA stylesheet `font: -webkit-small-control` que congela
-           font-size como parte do "system font" — author font-size ignorado.
-           Fix: setar font-family explicitamente quebra o lock do system font.
-           Validacao Chrome MCP: DIV+SPAN com mesma classe escalam pra 19.5px,
-           BUTTON ficava em 15px. Setar font-family destrava. */
+        /* Sessao #37 v11 (2026-05-25): ROOT CAUSE FIXADO. <button> em Chrome
+           tem UA stylesheet `font: -webkit-small-control` que congela TUDO de
+           font (size + family + weight). Setar font-family sozinho NAO destrava.
+           Fix correto: `font: inherit` FIRST (reset shorthand pra parent values)
+           depois definir individuais. Validado Chrome MCP: button passou de
+           15px (system font lock) pra 19.5px (calc(15*1.30) corretamente).
+           Aplica pra TODOS buttons no creator. */
         button {
+            font: inherit;
             font-family: var(--v-font, 'Cinzel', 'MedievalSharp', serif);
         }
         .v-btn-random {
@@ -597,6 +599,7 @@ Busca rápida:
             color: var(--v-gold);
             padding: 10px 14px;
             border-radius: var(--v-radius);
+            font: inherit;
             font-family: var(--v-font, 'Cinzel', 'MedievalSharp', serif);
             font-weight: 700;
             font-size: calc(15px * var(--v-font-scale, 1));
