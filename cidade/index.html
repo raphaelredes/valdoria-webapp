@@ -11894,15 +11894,13 @@ function _showCharSwitchConfirm(picked){
 
 // 2026-05-21: aplicar font-size salvo no boot (antes do popup abrir).
 // Evita "flash" entre normal e pref do user.
-// Sessao #37 (2026-05-25): collapse legacy xlarge -> large + scale canonical 1.15
-// (consistente com creator onboarding + valdoria-design.css).
+// Sessao #37 v8 (2026-05-25): REMOVIDO setProperty inline no html — CSS
+// body[data-font-size] em valdoria-design.css ja define --v-font-scale e
+// todos os tokens. Inline no html sobrescrevia conflitando (1.15 vs 1.30).
 (function _initFontSizeOnBoot(){
   try {
     var sz = localStorage.getItem('valdoria_font_size') || 'normal';
     if (sz === 'xlarge') sz = 'large';  // legacy collapse
-    var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
-    var scale = scaleMap[sz] || '1.0';
-    document.documentElement.style.setProperty('--v-font-scale', scale);
     if (document.body) document.body.setAttribute('data-font-size', sz);
     else {
       document.addEventListener('DOMContentLoaded', function(){
@@ -12171,11 +12169,10 @@ function _showSettingsPopup(){
   bodyEl.querySelectorAll('button[data-font-size]').forEach(function(btn){
     btn.addEventListener('click', function(){
       var size = btn.getAttribute('data-font-size');
-      var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
-      var scale = scaleMap[size] || '1.0';
       _setPref('valdoria_font_size', size);
       document.body.setAttribute('data-font-size', size);
-      document.documentElement.style.setProperty('--v-font-scale', scale);
+      /* Sessao #37 v8: scale e tokens vem do CSS body[data-font-size]
+         em valdoria-design.css. NAO setar via JS (conflitava). */
       if (window.vHaptic) window.vHaptic('light');
       _showSettingsPopup();
     });

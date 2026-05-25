@@ -1484,16 +1484,14 @@ Busca rápida:
     document.write('<script src="../shared/session-heartbeat.js?v=' + v + '"><\/script>');
     </script>
 <script>
-    /* Sessao #37 (2026-05-25): boot font-size canonical igual cidade
-       (valdoria_font_size: small/normal/large). Aplica antes da renderizacao
-       pra evitar flash. */
+    /* Sessao #37 v8 (2026-05-25): boot font-size — SO seta data-font-size.
+       CSS body[data-font-size] em valdoria-design.css ja define --v-font-scale
+       e todos os tokens. Setar inline no html sobrescrevia conflitando com
+       CSS (valor 1.15 vs canonical 1.30). REMOVIDO o setProperty. */
     (function _initFontSizeOnBoot(){
       try {
         var sz = localStorage.getItem('valdoria_font_size') || 'normal';
         if (sz === 'xlarge') sz = 'large';  // collapse legacy 4th level
-        var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
-        var scale = scaleMap[sz] || '1.0';
-        document.documentElement.style.setProperty('--v-font-scale', scale);
         var apply = function(){ document.body.setAttribute('data-font-size', sz); };
         if (document.body) apply();
         else document.addEventListener('DOMContentLoaded', apply, { once: true });
@@ -1508,8 +1506,6 @@ Busca rápida:
       if (!['small','normal','large'].includes(size)) return;
       try {
         localStorage.setItem('valdoria_font_size', size);
-        var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
-        document.documentElement.style.setProperty('--v-font-scale', scaleMap[size]);
         document.body.setAttribute('data-font-size', size);
         if (typeof haptic === 'function') haptic('light');
       } catch(e) {}
@@ -2867,10 +2863,10 @@ Busca rápida:
             if (!['small','normal','large'].includes(size)) return;
             try {
                 localStorage.setItem('valdoria_font_size', size);
-                var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
-                document.documentElement.style.setProperty('--v-font-scale', scaleMap[size]);
                 document.body.setAttribute('data-font-size', size);
                 if (typeof haptic === 'function') haptic('light');
+                /* Sessao #37 v8: scale e tokens vem do CSS body[data-font-size]
+                   em valdoria-design.css. NAO setar via JS (conflitava). */
             } catch(e) {}
             /* Sync best-effort com server (preferencia do perfil — usado por
                outros WebApps se localStorage ausente). Falha silenciosa OK. */
