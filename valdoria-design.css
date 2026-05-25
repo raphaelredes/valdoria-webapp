@@ -2303,12 +2303,50 @@ body.perf-lite html.app-frame::before {
    icons SVG (em). */
 /* Sessao #37 (2026-05-25): user pediu canonical 3 niveis (pequena/normal/
    maior). xlarge removido — apenas 3 botoes A- / A / A+ em TODAS as telas
-   pra evitar fragmentacao de design. */
-body[data-font-size="small"]  { --v-font-scale: 0.9; --v-font-body-scaled: 12.6px; }
-body[data-font-size="normal"] { --v-font-scale: 1.0; --v-font-body-scaled: 14px; }
-body[data-font-size="large"]  { --v-font-scale: 1.15; --v-font-body-scaled: 16.1px; }
+   pra evitar fragmentacao de design.
+
+   Sessao #37 v4 (2026-05-25): user pediu — "as telas de criacao continuam
+   com as letras miudas, crie uma forma das letras serem responsivas a
+   este filtro de tamanho". Solucao: redefinir TODOS os tokens de tipografia
+   (--v-font-xs/sm/md/base/lg/2xl) dentro do scope body[data-font-size] pra
+   cascade automatico. Todo elemento que usa var(--v-font-base) etc. escala
+   automaticamente (creator, cidade, exploracao, combate, etc.). */
+body[data-font-size="small"]  {
+  --v-font-scale: 0.9;
+  --v-font-body-scaled: 12.6px;
+  --v-font-xs: 9px;      /* 10 * 0.9 */
+  --v-font-sm: 11px;     /* 12 * 0.9 */
+  --v-font-md: 11px;     /* 12 * 0.9 */
+  --v-font-base: 12px;   /* 13 * 0.9 */
+  --v-font-lg: 14px;     /* 15 * 0.9 */
+  --v-font-2xl: 16px;    /* 18 * 0.9 */
+}
+body[data-font-size="normal"] {
+  --v-font-scale: 1.0;
+  --v-font-body-scaled: 14px;
+  /* tokens default de :root (10/12/12/13/15/18) — sem override */
+}
+body[data-font-size="large"]  {
+  --v-font-scale: 1.15;
+  --v-font-body-scaled: 16.1px;
+  --v-font-xs: 12px;     /* 10 * 1.15 = 11.5 → 12 */
+  --v-font-sm: 14px;     /* 12 * 1.15 = 13.8 → 14 */
+  --v-font-md: 14px;
+  --v-font-base: 15px;   /* 13 * 1.15 = 14.95 → 15 */
+  --v-font-lg: 17px;     /* 15 * 1.15 = 17.25 → 17 */
+  --v-font-2xl: 21px;    /* 18 * 1.15 = 20.7 → 21 */
+}
 /* xlarge: kept apenas como alias backward-compat — colapsa pra large */
-body[data-font-size="xlarge"] { --v-font-scale: 1.15; --v-font-body-scaled: 16.1px; }
+body[data-font-size="xlarge"] {
+  --v-font-scale: 1.15;
+  --v-font-body-scaled: 16.1px;
+  --v-font-xs: 12px;
+  --v-font-sm: 14px;
+  --v-font-md: 14px;
+  --v-font-base: 15px;
+  --v-font-lg: 17px;
+  --v-font-2xl: 21px;
+}
 
 /* Apply scale globalmente ao body (afeta todo texto que herda) */
 body[data-font-size] {
