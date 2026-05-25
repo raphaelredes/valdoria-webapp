@@ -3042,6 +3042,16 @@ Busca rápida:
             buildBgGrid();
             buildAlignGrid();
             buildGenderGrid();
+
+            // Sessao #31 (2026-05-25): se ja tem rolls salvos da sessao anterior
+            // (ex.: voltou pro hall sem finalizar), auto-switch pro metodo 'roll'
+            // pra mostrar que os valores estao memorizados. setStatMethod cuida
+            // de tab active + desc text + buildStatSlots.
+            try {
+                if (_loadSavedRolls()) {
+                    setStatMethod('roll');
+                }
+            } catch (_) {}
             document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
             document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
             setupBackButton();
@@ -3961,6 +3971,31 @@ Busca rápida:
         const POINTBUY_COSTS = {8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9};
         const POINTBUY_BUDGET = 27;
 
+        /* Sessao #31 (2026-05-25): persistencia dos 4d6 em localStorage.
+           User pediu: rolls ficam memorizados, nao podem ser rolados de novo,
+           persistem mesmo se voltar pro hall e iniciar nova criacao. Limpa
+           somente apos creation FINALIZADA. uid-keyed pra isolar contas.
+           Anti-cheat: localStorage e sandboxed por dominio; dev/prod sao
+           dominios distintos entao isolamento env e automatico. */
+        function _rollsStorageKey() { return 'valdoria_char_rolls_' + (userId || 'anon'); }
+        function _loadSavedRolls() {
+            try {
+                var raw = localStorage.getItem(_rollsStorageKey());
+                if (!raw) return null;
+                var arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length === 6 && arr.every(function(n){ return typeof n === 'number' && n >= 3 && n <= 18; })) return arr;
+            } catch (e) { console.warn('[CHAR_CREATOR] loadSavedRolls failed:', e); }
+            return null;
+        }
+        function _saveRolls(arr) {
+            try { localStorage.setItem(_rollsStorageKey(), JSON.stringify(arr)); }
+            catch (e) { console.warn('[CHAR_CREATOR] saveRolls failed:', e); }
+        }
+        function _clearSavedRolls() {
+            try { localStorage.removeItem(_rollsStorageKey()); }
+            catch (e) { console.warn('[CHAR_CREATOR] clearSavedRolls failed:', e); }
+        }
+
         function setStatMethod(method) {
             haptic();
             _statMethod = method;
@@ -3980,8 +4015,16 @@ Busca rápida:
                 if (instrEl) instrEl.textContent = 'Toque num valor, depois no atributo.';
             } else if (method === 'roll') {
                 if (descEl) descEl.textContent = 'Role 4d6, descarte o menor. Repete 6× e distribua.';
-                if (instrEl) instrEl.textContent = 'Toque em "Rolar Atributos" pra gerar 6 valores.';
-                _rolledPool = []; // vai ser populado ao clicar Rolar
+                // Sessao #31: carrega rolls salvos se existem. User pediu pra rolagens
+                // ficarem memorizadas mesmo trocando metodo ou voltando ao hall.
+                var saved = _loadSavedRolls();
+                if (saved) {
+                    _rolledPool = saved;
+                    if (instrEl) instrEl.textContent = 'Distribua os valores rolados nos atributos.';
+                } else {
+                    _rolledPool = [];
+                    if (instrEl) instrEl.textContent = 'Toque em "Rolar Atributos" pra gerar 6 valores.';
+                }
             } else if (method === 'pointbuy') {
                 if (descEl) descEl.textContent = '27 pontos. Custo 8→0, 9→1, 10→2, 11→3, 12→4, 13→5, 14→7, 15→9.';
                 if (instrEl) instrEl.textContent = 'Use +/- pra ajustar. Atributos partem em 8.';
@@ -4004,6 +4047,16 @@ Busca rápida:
            Async/await pra sequencia limpa. */
         async function rollAttributesNow() {
             haptic();
+
+            // Sessao #31: guard contra reroll. Se ja tem 6 valores salvos,
+            // bloqueia nova rolagem. User pediu: rolls sao memorizados e
+            // nao podem ser rolados de novo.
+            if (_rolledPool && _rolledPool.length === 6) {
+                if (typeof window.vToast === 'function') {
+                    window.vToast('Rolagens ja feitas. Use os valores existentes.', 'gold');
+                }
+                return;
+            }
 
             // Overlay modal
             const ov = document.createElement('div');
@@ -4080,6 +4133,7 @@ Busca rápida:
             // Cleanup e populate pool
             results.sort((a, b) => b - a);
             _rolledPool = results;
+            _saveRolls(results); // Sessao #31: persiste em localStorage
             sel.statAssignment = {};
             selectedPoolValue = null;
 
@@ -4291,13 +4345,12 @@ Busca rápida:
                 }
                 poolEl.appendChild(chip);
             });
-            // Reroll button (caso queira rejogar)
-            const reroll = document.createElement('button');
-            reroll.className = 'v-btn v-btn-secondary';
-            reroll.style.cssText = 'flex-basis:100%;margin-top:8px;padding:8px;font-size:11px;';
-            reroll.textContent = '🎲 Rolar Novamente';
-            reroll.onclick = rollAttributesNow;
-            poolEl.appendChild(reroll);
+            // Sessao #31 (2026-05-25): user pediu pra rolagens nao poderem ser
+            // refeitas. Substitui "Rolar Novamente" por indicador de lock.
+            const locked = document.createElement('div');
+            locked.style.cssText = 'flex-basis:100%;margin-top:8px;padding:6px 10px;font-size:11px;text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
+            locked.innerHTML = '🔒 Rolagens salvas — nao podem ser refeitas';
+            poolEl.appendChild(locked);
         }
 
         function _renderPointbuyHeader(poolEl) {
@@ -4310,14 +4363,50 @@ Busca rápida:
                                '</div>';
         }
 
+        /* Sessao #31 (2026-05-25): suggestStats adaptativo aos 3 metodos D&D 5e.
+           Antes funcionava SO em standard array (atribuicao direta de cls.stats).
+           Agora: usa cls.stats COMO PRIORIDADE (valores maiores = atributos mais
+           importantes da classe/subclasse) e aplica os melhores valores disponiveis
+           do metodo corrente. Funciona pra Standard / Roll 4d6 / Point Buy. */
         function suggestStats() {
             haptic();
             const cls = CLASSES[sel.classKey];
             if (!cls) return;
-            sel.statAssignment = {
-                strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
-                intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
-            };
+
+            const ATTRS = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+
+            // Ordem de prioridade da classe — sort attrs por cls.stats desc.
+            // Empate desempata pela ordem original (mantem determinismo).
+            const priority = ATTRS.map((attr, i) => ({ attr: attr, classVal: cls.stats[i], idx: i }))
+                .sort((a, b) => (b.classVal - a.classVal) || (a.idx - b.idx));
+
+            if (_statMethod === 'standard') {
+                // Standard Array: assigna direto valores ordenados por cls.stats
+                // (mesmo comportamento antigo). cls.stats[i] ja codifica prioridade.
+                sel.statAssignment = {
+                    strength: cls.stats[0], dexterity: cls.stats[1], constitution: cls.stats[2],
+                    intelligence: cls.stats[3], wisdom: cls.stats[4], charisma: cls.stats[5]
+                };
+            } else if (_statMethod === 'roll') {
+                if (!_rolledPool || _rolledPool.length !== 6) {
+                    if (typeof window.vToast === 'function') {
+                        window.vToast('Role os dados primeiro!', 'warn');
+                    }
+                    return;
+                }
+                // Pool sorted desc — maior rolagem vai pra maior prioridade da classe.
+                const sortedRolls = _rolledPool.slice().sort((a, b) => b - a);
+                sel.statAssignment = {};
+                priority.forEach((p, i) => { sel.statAssignment[p.attr] = sortedRolls[i]; });
+            } else if (_statMethod === 'pointbuy') {
+                // 27 pontos otimos por prioridade: 15,14,13,12,10,8 = 9+7+5+4+2+0 = 27.
+                // Isso bate exatamente o Point Buy budget (PHB p.13).
+                const optimalValues = [15, 14, 13, 12, 10, 8];
+                _pointbuyValues = { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 };
+                priority.forEach((p, i) => { _pointbuyValues[p.attr] = optimalValues[i]; });
+                sel.statAssignment = Object.assign({}, _pointbuyValues);
+            }
+
             selectedPoolValue = null;
             buildStatSlots();
         }
@@ -6163,6 +6252,7 @@ Busca rápida:
                         if (result.redirect) {
                             console.log('[CHAR_CREATOR] Redirecting to game hub:', result.redirect);
                             try { window.serverLog && window.serverLog('character_creator', 'info', 'redirecting_to_game', { redirect: String(result.redirect).substring(0, 200) }); } catch (_) {}
+                            _clearSavedRolls(); // Sessao #31: limpa rolls salvos apos creation finalizada
                             window.__valdoria_transitioning = true;
                             try {
                                 window.location.replace(result.redirect);
@@ -6300,6 +6390,9 @@ Busca rápida:
                 window.serverLog && window.serverLog('character_creator', 'info', 'redirect_to_prologue_attempt',
                     { has_token: !!token, has_api: !!apiBase, has_uid: !!userId });
             } catch (_) {}
+
+            // Sessao #31: limpa rolls salvos apos creation finalizada (qualquer caminho).
+            _clearSavedRolls();
 
             if (token && apiBase && userId) {
                 try {
