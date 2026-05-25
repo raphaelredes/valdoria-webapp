@@ -300,7 +300,7 @@ Busca rápida:
         }
 
         .detail-subtitle {
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 4px;
         }
@@ -314,7 +314,7 @@ Busca rápida:
         }
 
         .detail-section-title {
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
             margin-bottom: 8px;
@@ -322,7 +322,7 @@ Busca rápida:
         }
 
         .detail-row {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text);
             margin-bottom: 4px;
             line-height: 1.4;
@@ -333,7 +333,7 @@ Busca rápida:
         }
 
         .detail-text {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text);
             line-height: 1.5;
         }
@@ -355,7 +355,7 @@ Busca rápida:
             border: 1px solid rgba(196, 149, 58, 0.35);
             border-radius: var(--v-radius);
             padding: 3px 10px;
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
             text-shadow: 0 0 6px rgba(196,149,58,0.25);
@@ -367,13 +367,13 @@ Busca rápida:
         }
 
         .trait-name {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
         }
 
         .trait-desc {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 2px;
             padding-left: 18px;
@@ -413,20 +413,20 @@ Busca rápida:
         }
 
         .detail-option-name {
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
         }
 
         .detail-option-desc {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 2px;
             line-height: 1.3;
         }
 
         .detail-option-bonus {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-gold);
             margin-top: 4px;
             font-weight: 600;
@@ -441,7 +441,7 @@ Busca rápida:
             margin-bottom: 6px;
             width: 100%;
             padding: 12px;
-            font-size: 15px;
+            font-size: calc(15px * var(--v-font-scale, 1));
             font-weight: 700;
         }
 
@@ -464,7 +464,7 @@ Busca rápida:
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
             color: var(--v-text);
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
         }
 
         /* Language picker — compact chips */
@@ -482,7 +482,7 @@ Busca rápida:
             padding: 6px 14px;
             cursor: pointer;
             transition: all var(--v-transition);
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
         }
@@ -498,7 +498,7 @@ Busca rápida:
         }
 
         .lang-selected-desc {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 6px;
             padding: 0 2px;
@@ -512,13 +512,13 @@ Busca rápida:
         }
 
         .v-toggle-attr {
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-gold);
             font-weight: 600;
         }
 
         .v-toggle-desc {
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 2px;
             line-height: 1.3;
@@ -537,7 +537,7 @@ Busca rápida:
         }
 
         .char-limit {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             text-align: right;
             margin-top: 4px;
@@ -589,7 +589,7 @@ Busca rápida:
             padding: 10px 14px;
             border-radius: var(--v-radius);
             font-weight: 700;
-            font-size: 15px;
+            font-size: calc(15px * var(--v-font-scale, 1));
             margin-bottom: 8px;
             letter-spacing: 0.5px;
             transition: all var(--v-transition);
@@ -621,7 +621,7 @@ Busca rápida:
 
         /* Utility */
         .section-label {
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             margin-top: 8px;
         }
 
@@ -670,7 +670,7 @@ Busca rápida:
         .equip-header-text { flex: 1; min-width: 0; }
         .equip-header-title {
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 16px;
+            font-size: calc(16px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-gold, #c4953a);
             letter-spacing: 1.5px;
@@ -678,14 +678,14 @@ Busca rápida:
             text-shadow: 0 0 8px rgba(196, 149, 58, 0.4);
         }
         .equip-header-subtitle {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             font-style: italic;
             margin-top: 2px;
         }
         .equip-hint {
             text-align: center;
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             letter-spacing: 0.5px;
             margin-bottom: 10px;
@@ -747,7 +747,7 @@ Busca rápida:
             border: 1px solid rgba(196, 149, 58, 0.4);
             color: var(--v-gold, #c4953a);
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -760,7 +760,7 @@ Busca rápida:
             box-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
         }
         .equip-card-check {
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-gold, #c4953a);
             font-weight: 700;
             letter-spacing: 0.5px;
@@ -769,7 +769,7 @@ Busca rápida:
             text-shadow: 0 0 6px rgba(196, 149, 58, 0.5);
         }
         .equip-card-cta {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             letter-spacing: 0.5px;
             opacity: 0.7;
@@ -777,7 +777,7 @@ Busca rápida:
         }
         .equip-card-name {
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 15px;
+            font-size: calc(15px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-gold, #c4953a);
             letter-spacing: 0.8px;
@@ -785,7 +785,7 @@ Busca rápida:
             margin-bottom: 4px;
         }
         .equip-card-desc {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text, #d4c8b0);
             line-height: 1.45;
             font-style: italic;
@@ -809,7 +809,7 @@ Busca rápida:
         }
         .equip-card-divider-gem {
             margin: 0 10px;
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             text-shadow: 0 0 6px rgba(196, 149, 58, 0.5);
         }
         .equip-card-items {
@@ -848,21 +848,21 @@ Busca rápida:
         .equip-item-name {
             flex: 1;
             min-width: 0;
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text, #d4c8b0);
             line-height: 1.3;
             font-weight: 500;
         }
         @media (max-height: 720px) {
             .equip-header { padding: 4px 4px 8px; margin-bottom: 8px; }
-            .equip-header-title { font-size: 14px; }
-            .equip-header-subtitle { font-size: 10px; }
+            .equip-header-title { font-size: calc(14px * var(--v-font-scale, 1)); }
+            .equip-header-subtitle { font-size: calc(10px * var(--v-font-scale, 1)); }
             .equip-card { padding: 10px; margin-bottom: 8px; }
-            .equip-card-name { font-size: 13px; }
-            .equip-card-desc { font-size: 11px; }
+            .equip-card-name { font-size: calc(13px * var(--v-font-scale, 1)); }
+            .equip-card-desc { font-size: calc(11px * var(--v-font-scale, 1)); }
             .equip-card-divider { margin: 8px 0 6px; }
             .equip-item-thumb { flex: 0 0 28px; width: 28px; height: 28px; }
-            .equip-item-name { font-size: 10px; }
+            .equip-item-name { font-size: calc(10px * var(--v-font-scale, 1)); }
         }
 
         /* ═══ SCREEN 1: CLASS — Role filters AAA (Sessao #29, 2026-05-24) ═══ */
@@ -884,7 +884,7 @@ Busca rápida:
             border-radius: 16px;
             color: var(--v-text-dim, #a09484);
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             font-weight: 600;
             letter-spacing: 0.5px;
             cursor: pointer;
@@ -906,7 +906,7 @@ Busca rápida:
         }
         .class-role-count {
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             text-align: center;
             letter-spacing: 1.2px;
@@ -952,7 +952,7 @@ Busca rápida:
         }
         #classGrid .v-card .v-card-name {
             font-family: var(--v-font-display, Cinzel, serif);
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-gold, #c4953a);
             letter-spacing: 1px;
@@ -962,7 +962,7 @@ Busca rápida:
         }
         #classGrid .v-card .v-card-desc {
             font-family: var(--v-font, serif);
-            font-size: 10px;
+            font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             text-align: center;
             line-height: 1.3;
@@ -975,11 +975,11 @@ Busca rápida:
             .class-role-filters { margin: 4px 0 2px; }
             .class-role-tab {
                 padding: 5px 9px;
-                font-size: 10px;
+                font-size: calc(10px * var(--v-font-scale, 1));
             }
-            .class-role-count { margin: 2px 0 4px; font-size: 9px; }
+            .class-role-count { margin: 2px 0 4px; font-size: calc(9px * var(--v-font-scale, 1)); }
             #classGrid .v-card { padding: 8px 6px 10px; }
-            #classGrid .v-card .v-card-name { font-size: 12px; }
+            #classGrid .v-card .v-card-name { font-size: calc(12px * var(--v-font-scale, 1)); }
         }
 
         /* Collapsible sections */
@@ -993,7 +993,7 @@ Busca rápida:
         }
 
         .toggle-arrow {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             transition: transform var(--v-transition);
             flex-shrink: 0;
@@ -1013,7 +1013,7 @@ Busca rápida:
         }
 
         .section-summary {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             font-weight: 400;
         }
@@ -1030,22 +1030,12 @@ Busca rápida:
            qualquer MESTRE falando com jogador na criacao de personagem.
            Hide via CSS preserva os divs em HTML (compat com buildDmBubbles
            e qualquer outro caller) — basta o texto ficar invisivel. */
-        /* Sessao #37 v7 (2026-05-25): user pediu "letras responsivas ao
-           filtro de tamanho". Como ha 100+ font-size hardcoded no inline
-           <style>, usar CSS zoom em containers principais (.screen e
-           .v-header) escala TUDO proporcionalmente sem refatoracao massiva.
-           Zoom funciona em Chromium/WebKit (Telegram WebView). Escalas
-           devem combinar com tokens: small 0.82, normal 1.0, large 1.30.
-           Onboarding overlay (position:fixed) NAO escala — fica neutro
-           pra escolha da preferencia. */
-        body[data-font-size="small"] .v-header,
-        body[data-font-size="small"] .screen-viewport {
-            zoom: 0.85;
-        }
-        body[data-font-size="large"] .v-header,
-        body[data-font-size="large"] .screen-viewport {
-            zoom: 1.18;
-        }
+        /* Sessao #37 v8 (2026-05-25): zoom REVERTIDO — causava overflow do
+           viewport. User pediu responsivo: telas devem caber no smartphone
+           e SO o texto escalar. Solucao: substituir hardcoded font-size: Npx
+           por calc(Npx * var(--v-font-scale, 1)) atraves de regex no <style>.
+           Aplicado via _session37_v8_scale_inline_fontsizes.py — layout
+           preservado (paddings/widths/grid em px nao escalam, so o texto). */
 
         /* Sessao #37 v6 (2026-05-25): font-size hardcoded substituido por
            tokens responsivos (var(--v-font-label) e var(--v-font-xs)) pra
@@ -1083,7 +1073,7 @@ Busca rápida:
             border: 1px solid rgba(196, 149, 58, 0.25);
             border-radius: var(--v-radius-sm);
             padding: 1px 7px;
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
             margin-right: 4px;
@@ -1097,13 +1087,13 @@ Busca rápida:
             border-radius: 0 var(--v-radius) var(--v-radius) 0;
             padding: 8px 10px;
             margin-bottom: 8px;
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             line-height: 1.5;
             color: var(--v-text);
         }
 
         .synergy-tip-title {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-success);
             margin-bottom: 4px;
@@ -1161,7 +1151,7 @@ Busca rápida:
         }
 
         .sheet-subtitle {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 4px;
         }
@@ -1182,7 +1172,7 @@ Busca rápida:
         }
 
         .combat-stat-label {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -1196,7 +1186,7 @@ Busca rápida:
         }
 
         .combat-stat-detail {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 1px;
         }
@@ -1217,7 +1207,7 @@ Busca rápida:
         }
 
         .attr-box-label {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             text-transform: uppercase;
         }
@@ -1229,7 +1219,7 @@ Busca rápida:
         }
 
         .attr-box-mod {
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 600;
             margin-top: -2px;
         }
@@ -1246,7 +1236,7 @@ Busca rápida:
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text);
             padding: 2px 0;
         }
@@ -1273,7 +1263,7 @@ Busca rápida:
         }
 
         .skill-attr-tag {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
         }
 
@@ -1287,7 +1277,7 @@ Busca rápida:
             border-radius: 50%;
             background: rgba(196, 149, 58, 0.15);
             color: var(--v-gold);
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 700;
             cursor: pointer;
             margin-left: 6px;
@@ -1331,18 +1321,18 @@ Busca rápida:
         }
 
         .align-icon {
-            font-size: 20px;
+            font-size: calc(20px * var(--v-font-scale, 1));
         }
 
         .align-name {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
             margin-top: 4px;
         }
 
         .align-desc {
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 2px;
             line-height: 1.3;
@@ -1371,14 +1361,14 @@ Busca rápida:
         }
 
         .stat-slot-name {
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
             min-width: 40px;
         }
 
         .stat-slot-value {
-            font-size: 18px;
+            font-size: calc(18px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-gold);
             min-width: 28px;
@@ -1386,13 +1376,13 @@ Busca rápida:
         }
 
         .stat-slot-bonus {
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             color: #50c878;
             margin-left: 4px;
         }
 
         .stat-slot-total {
-            font-size: 14px;
+            font-size: calc(14px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-text-bright);
             margin-left: auto;
@@ -1410,7 +1400,7 @@ Busca rápida:
             border: 1px solid rgba(196, 149, 58, 0.35);
             border-radius: var(--v-radius);
             padding: 6px 14px;
-            font-size: 15px;
+            font-size: calc(15px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-gold);
             cursor: pointer;
@@ -1982,7 +1972,7 @@ Busca rápida:
             position: absolute;
             top: 50%; left: 50%;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
-            font-size: 18px;
+            font-size: calc(18px * var(--v-font-scale, 1));
             color: rgba(106, 90, 78, 0.7); /* aged ash */
             text-shadow: 0 0 8px rgba(42, 26, 64, 0.6); /* twilight glow */
             transform-origin: center;
@@ -2262,7 +2252,7 @@ Busca rápida:
         .ob-rune {
             position: absolute;
             font-family: 'Noto Sans Runic', 'Cinzel', serif;
-            font-size: 28px;
+            font-size: calc(28px * var(--v-font-scale, 1));
             color: rgba(106, 90, 78, 0.45); /* aged ash */
             text-shadow: 0 0 10px rgba(58, 48, 40, 0.4); /* iron dark glow */
             pointer-events: none;
@@ -2751,13 +2741,13 @@ Busca rápida:
         }
         .font-onboarding-gem {
             color: var(--v-gold, #c4953a);
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             text-shadow: 0 0 8px rgba(196,149,58,0.5);
         }
         .font-onboarding-header h2 {
             margin: 0;
             font-family: 'Cinzel', serif;
-            font-size: 15px;
+            font-size: calc(15px * var(--v-font-scale, 1));
             color: var(--v-gold, #c4953a);
             letter-spacing: 2.5px;
             text-transform: uppercase;
@@ -2767,7 +2757,7 @@ Busca rápida:
         .font-onboarding-subtitle {
             text-align: center;
             color: var(--v-text-dim, #a09484);
-            font-size: 13px;
+            font-size: calc(13px * var(--v-font-scale, 1));
             line-height: 1.55;
             margin: 0 0 20px;
             font-family: 'Marcellus', 'Cinzel', serif;
@@ -2775,7 +2765,7 @@ Busca rápida:
         .font-onboarding-subtitle small {
             color: var(--v-text-dim, #a09484);
             opacity: 0.75;
-            font-size: 11px;
+            font-size: calc(11px * var(--v-font-scale, 1));
             display: inline-block;
             margin-top: 4px;
         }
@@ -2830,7 +2820,7 @@ Busca rápida:
         }
         .font-onboarding-label {
             color: var(--v-gold, #c4953a);
-            font-size: 12px;
+            font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -2844,7 +2834,7 @@ Busca rápida:
             border: 1px solid rgba(196,149,58,0.45);
             border-radius: 10px;
             padding: 2px 8px;
-            font-size: 9px;
+            font-size: calc(9px * var(--v-font-scale, 1));
             letter-spacing: 1px;
             font-weight: 600;
             text-transform: uppercase;
@@ -2860,12 +2850,12 @@ Busca rápida:
         }
         @media (max-height: 620px) {
             .font-onboarding-card { padding: 18px 16px; }
-            .font-onboarding-header h2 { font-size: 13px; letter-spacing: 2px; }
-            .font-onboarding-subtitle { margin-bottom: 14px; font-size: 12px; }
+            .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 2px; }
+            .font-onboarding-subtitle { margin-bottom: 14px; font-size: calc(12px * var(--v-font-scale, 1)); }
             .font-onboarding-option { padding: 10px 14px; min-height: 52px; }
         }
         @media (max-width: 340px) {
-            .font-onboarding-header h2 { font-size: 13px; letter-spacing: 1.5px; }
+            .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 1.5px; }
             .font-onboarding-line { max-width: 18px; }
         }
     </style>
@@ -2959,7 +2949,7 @@ Busca rápida:
             border: 1px solid rgba(196, 149, 58, 0.5);
             border-radius: 50%;
             color: var(--v-gold, #c4953a);
-            font-size: 16px;
+            font-size: calc(16px * var(--v-font-scale, 1));
             font-family: 'Cinzel', serif;
             cursor: pointer;
             display: grid;
@@ -3089,7 +3079,7 @@ Busca rápida:
                     border-radius: 8px;
                 }
                 .stat-method-label {
-                    font-size: 11px;
+                    font-size: calc(11px * var(--v-font-scale, 1));
                     color: var(--v-gold, #c4953a);
                     letter-spacing: 1.5px;
                     text-transform: uppercase;
@@ -3109,7 +3099,7 @@ Busca rápida:
                     border-radius: 6px;
                     color: var(--v-text-dim, #a09484);
                     font-family: 'Cinzel', serif;
-                    font-size: 10px;
+                    font-size: calc(10px * var(--v-font-scale, 1));
                     letter-spacing: 0.8px;
                     cursor: pointer;
                     transition: all 0.15s ease;
@@ -3124,7 +3114,7 @@ Busca rápida:
                     color: var(--v-text, #d4c8b0);
                 }
                 .stat-method-desc {
-                    font-size: 11px;
+                    font-size: calc(11px * var(--v-font-scale, 1));
                     color: var(--v-text-dim, #a09484);
                     text-align: center;
                     line-height: 1.4;
@@ -3137,7 +3127,7 @@ Busca rápida:
                     color: var(--v-gold, #c4953a);
                     font-family: 'Cinzel', serif;
                     font-weight: 700;
-                    font-size: 14px;
+                    font-size: calc(14px * var(--v-font-scale, 1));
                     width: 28px;
                     height: 28px;
                     cursor: pointer;
@@ -3976,10 +3966,10 @@ Busca rápida:
             var card = document.createElement('div');
             card.style.cssText = 'background:var(--v-bg-card,#2e2520);border:2px solid '+(isBanWarning?'#d77a4a':'#c4953a')+';border-radius:12px;max-width:340px;padding:24px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,0.6);';
             var t = document.createElement('div');
-            t.style.cssText = 'font-family:Cinzel,serif;font-weight:700;font-size:18px;letter-spacing:2px;text-transform:uppercase;color:'+(isBanWarning?'#d77a4a':'#c4953a')+';margin-bottom:14px;';
+            t.style.cssText = 'font-family:Cinzel,serif;font-weight:700;font-size:calc(18px * var(--v-font-scale, 1));letter-spacing:2px;text-transform:uppercase;color:'+(isBanWarning?'#d77a4a':'#c4953a')+';margin-bottom:14px;';
             t.textContent = title;
             var m = document.createElement('div');
-            m.style.cssText = 'font-size:14px;color:#d4c8b0;line-height:1.5;margin-bottom:18px;';
+            m.style.cssText = 'font-size:calc(14px * var(--v-font-scale, 1));color:#d4c8b0;line-height:1.5;margin-bottom:18px;';
             m.innerHTML = message;
             var btn = document.createElement('button');
             btn.className = 'v-btn v-btn-primary';
@@ -4429,12 +4419,12 @@ Busca rápida:
             ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.97);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
             ov.innerHTML =
                 '<div style="text-align:center;max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.95),rgba(26,21,16,0.95));border:1px solid rgba(196,149,58,0.5);border-radius:12px;padding:20px;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
-                    '<div style="font-size:10px;letter-spacing:3px;color:#c4953a;margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
-                    '<h2 style="font-size:18px;color:#e8c45a;margin:0 0 4px;letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
-                    '<div style="font-size:11px;color:#a09484;margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:#c4953a">1</b> de 6</div>' +
+                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:3px;color:#c4953a;margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
+                    '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#e8c45a;margin:0 0 4px;letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
+                    '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:#a09484;margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:#c4953a">1</b> de 6</div>' +
                     '<div id="__atr-mount" style="width:260px;height:260px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"></div>' +
-                    '<div id="__atr-result" style="font-size:14px;color:#d4c8b0;min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
-                    '<div style="font-size:10px;letter-spacing:1.5px;color:#a09484;margin:14px 0 6px;">SEUS VALORES</div>' +
+                    '<div id="__atr-result" style="font-size:calc(14px * var(--v-font-scale, 1));color:#d4c8b0;min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
+                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:1.5px;color:#a09484;margin:14px 0 6px;">SEUS VALORES</div>' +
                     '<div id="__atr-pool" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:36px;"></div>' +
                 '</div>';
             document.body.appendChild(ov);
@@ -4469,7 +4459,7 @@ Busca rápida:
                     }
                 } else {
                     // Fallback sem 3D
-                    mount.innerHTML = '<div style="font-size:24px;color:#c4953a;">' + rolls.join(' ') + '</div>';
+                    mount.innerHTML = '<div style="font-size:calc(24px * var(--v-font-scale, 1));color:#c4953a;">' + rolls.join(' ') + '</div>';
                     await new Promise(r => setTimeout(r, 600));
                 }
 
@@ -4481,11 +4471,11 @@ Busca rápida:
                         return '<span style="text-decoration:line-through;opacity:0.4;color:#a09484;">' + r + '</span>';
                     }
                     return '<b style="color:#e8c45a">' + r + '</b>';
-                }).join(' + ') + ' = <span style="font-size:20px;color:#e8c45a;font-weight:700;margin-left:6px;">' + total + '</span>';
+                }).join(' + ') + ' = <span style="font-size:calc(20px * var(--v-font-scale, 1));color:#e8c45a;font-weight:700;margin-left:6px;">' + total + '</span>';
 
                 // Adiciona chip ao pool visual
                 const chip = document.createElement('div');
-                chip.style.cssText = 'background:rgba(196,149,58,0.2);border:1px solid #c4953a;border-radius:6px;padding:5px 10px;font-size:14px;color:#e8c45a;font-weight:700;animation:atrChipIn 0.3s ease-out;';
+                chip.style.cssText = 'background:rgba(196,149,58,0.2);border:1px solid #c4953a;border-radius:6px;padding:5px 10px;font-size:calc(14px * var(--v-font-scale, 1));color:#e8c45a;font-weight:700;animation:atrChipIn 0.3s ease-out;';
                 chip.textContent = total;
                 poolEl.appendChild(chip);
 
@@ -4632,7 +4622,7 @@ Busca rápida:
                 if (total) {
                     const m = mod(total);
                     const sign = m >= 0 ? '+' : '';
-                    inner += `<span class="stat-slot-total">= ${total} <span style="font-size:11px;color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}">(${sign}${m})</span></span>`;
+                    inner += `<span class="stat-slot-total">= ${total} <span style="font-size:calc(11px * var(--v-font-scale, 1));color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}">(${sign}${m})</span></span>`;
                 }
                 // Pointbuy: adiciona +/- inline
                 if (_statMethod === 'pointbuy') {
@@ -4668,7 +4658,7 @@ Busca rápida:
 
         function _renderStandardPool(poolEl) {
             const usedValues = Object.values(sel.statAssignment);
-            poolEl.innerHTML = '<div style="font-size:12px;color:var(--v-text-dim);width:100%;margin-bottom:4px">Toque num valor, depois num atributo:</div>';
+            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom:4px">Toque num valor, depois num atributo:</div>';
             STANDARD_ARRAY.forEach(v => {
                 const timesInArray = STANDARD_ARRAY.filter(x => x === v).length;
                 const timesUsed = usedValues.filter(x => x === v).length;
@@ -4691,10 +4681,10 @@ Busca rápida:
             const usedValues = Object.values(sel.statAssignment);
             if (!_rolledPool || _rolledPool.length === 0) {
                 // Ainda nao rolou — mostra botao
-                poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:14px;" onclick="rollAttributesNow()">🎲 Rolar Atributos (4d6 drop lowest)</button>';
+                poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:calc(14px * var(--v-font-scale, 1));" onclick="rollAttributesNow()">🎲 Rolar Atributos (4d6 drop lowest)</button>';
                 return;
             }
-            poolEl.innerHTML = '<div style="font-size:12px;color:var(--v-text-dim);width:100%;margin-bottom:4px">Seus valores rolados — distribua:</div>';
+            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom:4px">Seus valores rolados — distribua:</div>';
             _rolledPool.forEach((v, i) => {
                 const timesInArray = _rolledPool.filter(x => x === v).length;
                 const timesUsed = usedValues.filter(x => x === v).length;
@@ -4714,7 +4704,7 @@ Busca rápida:
             // Sessao #31 (2026-05-25): user pediu pra rolagens nao poderem ser
             // refeitas. Substitui "Rolar Novamente" por indicador de lock.
             const locked = document.createElement('div');
-            locked.style.cssText = 'flex-basis:100%;margin-top:8px;padding:6px 10px;font-size:11px;text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
+            locked.style.cssText = 'flex-basis:100%;margin-top:8px;padding:6px 10px;font-size:calc(11px * var(--v-font-scale, 1));text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
             locked.innerHTML = '🔒 Rolagens salvas — nao podem ser refeitas';
             poolEl.appendChild(locked);
         }
@@ -4724,7 +4714,7 @@ Busca rápida:
             const remaining = POINTBUY_BUDGET - cost;
             const color = remaining < 0 ? 'var(--v-danger,#d04848)' :
                           remaining === 0 ? 'var(--v-success,#7ad06b)' : 'var(--v-gold,#c4953a)';
-            poolEl.innerHTML = '<div style="font-size:13px;width:100%;text-align:center;color:' + color + ';padding:8px;background:rgba(28,22,16,0.5);border-radius:6px;">' +
+            poolEl.innerHTML = '<div style="font-size:calc(13px * var(--v-font-scale, 1));width:100%;text-align:center;color:' + color + ';padding:8px;background:rgba(28,22,16,0.5);border-radius:6px;">' +
                                '<b>Pontos: ' + cost + '/' + POINTBUY_BUDGET + '</b> · Restam: ' + remaining +
                                '</div>';
         }
@@ -5568,7 +5558,7 @@ Busca rápida:
                     const baseV = baseStats[a];
                     const raceBonus = v - baseV;
                     const pct = Math.min(100, (v / 20) * 100);
-                    html += `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span style="color:var(--v-text-dim)">${ATTR_PT[a]}</span><span><b style="color:var(--v-text-bright)">${v}</b> <span style="color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}; font-size:11px">(${sign}${m})</span>${raceBonus > 0 ? ` <span style="color:var(--v-gold);font-size:10px">+${raceBonus} raça</span>` : ''}</span></div>`;
+                    html += `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:calc(12px * var(--v-font-scale, 1));margin-bottom:2px"><span style="color:var(--v-text-dim)">${ATTR_PT[a]}</span><span><b style="color:var(--v-text-bright)">${v}</b> <span style="color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}; font-size:11px">(${sign}${m})</span>${raceBonus > 0 ? ` <span style="color:var(--v-gold);font-size:10px">+${raceBonus} raça</span>` : ''}</span></div>`;
                     html += `<div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div></div>`;
                 });
                 html += `</div></div>`;
@@ -5743,7 +5733,7 @@ Busca rápida:
                 const sel_class = sel.fightingStyle === fsId ? ' selected' : '';
                 html += `<div class="v-card${sel_class}" onclick="selectFightingStyle('${fsId}')" style="text-align:center;">`;
                 html += _fightingStyleIconHtml(fsId, 72);
-                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${fs.name}</div>`;
+                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${fs.name}</div>`;
                 html += `<div class="v-card-desc" style="margin-top:4px;">${fs.desc}</div>`;
                 html += `</div>`;
             }
@@ -5785,8 +5775,8 @@ Busca rápida:
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
                 const selCls = sel.favoredEnemy === feId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
-                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${fe.icon}</div>`;
-                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${fe.name}</div>`;
+                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${fe.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${fe.name}</div>`;
                 html += `<div class="v-card-desc" style="margin-top:4px;">${fe.desc}</div>`;
                 html += `</div>`;
             }
@@ -5820,8 +5810,8 @@ Busca rápida:
             for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
                 const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center;">`;
-                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${ft.icon}</div>`;
-                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${ft.name}</div>`;
+                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${ft.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${ft.name}</div>`;
                 html += `<div class="v-card-desc" style="margin-top:4px;">${ft.desc}</div>`;
                 html += `</div>`;
             }
@@ -5859,8 +5849,8 @@ Busca rápida:
             for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
                 const selCls = sel.draconicAncestry === daId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectDraconicAncestry('${daId}')" style="text-align:center;">`;
-                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${da.icon}</div>`;
-                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${da.name}</div>`;
+                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${da.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${da.name}</div>`;
                 html += `<div class="v-card-desc" style="margin-top:4px;">${da.desc}</div>`;
                 html += `</div>`;
             }
@@ -6208,7 +6198,7 @@ Busca rápida:
                     html += `<span style="font-style:italic; opacity:0.85;">toque para detalhes</span>`;
                     html += `</div></div>`;
                     /* Indicador "tap" */
-                    html += `<span style="flex-shrink:0; color:var(--v-gold-dim,#9a7530); font-size:18px; line-height:1;">\u203A</span>`;
+                    html += `<span style="flex-shrink:0; color:var(--v-gold-dim,#9a7530); font-size:calc(18px * var(--v-font-scale, 1)); line-height:1;">\u203A</span>`;
                     html += `</div>`;
                 }
                 /* Botao confirmar epico */
@@ -6271,10 +6261,10 @@ Busca rápida:
             /* Hero PNG com 4 ornamentos cardinais + radial glow */
             html += `<div style="position:relative; max-width:200px; margin:8px auto 18px; padding:14px;">`;
             /* Ornamentos cardinais nos 4 cantos */
-            html += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
-            html += `<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
-            html += `<span style="position:absolute; left:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
-            html += `<span style="position:absolute; right:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:11px; text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; left:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
+            html += `<span style="position:absolute; right:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
             /* PNG centralizado */
             html += `<img src="${pngUrl}" alt="${skillName}" style="display:block; width:160px; height:160px; object-fit:contain; margin:0 auto; border-radius:12px; background:radial-gradient(circle at center, rgba(196,149,58,0.22) 0%, rgba(42,36,32,0.0) 65%); box-shadow:0 6px 22px rgba(196,149,58,0.28);" loading="lazy" onerror="this.style.display='none'" />`;
             html += `</div>`;
@@ -6373,7 +6363,7 @@ Busca rápida:
                 const isConfirmed = sel.bg === key;
                 const skillNames = bg.skills.map(s => SKILL_PT[s]).join(', ');
                 card.className = 'v-card' + (isConfirmed ? ' selected' : '');
-                card.innerHTML = `<div class="v-card-name">${bg.name} <span style="font-size:10px;color:var(--v-gold);font-weight:400">+${bg.gold}g</span></div><div class="v-card-bonus" style="font-size:10px">${skillNames}</div>`;
+                card.innerHTML = `<div class="v-card-name">${bg.name} <span style="font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold);font-weight:400">+${bg.gold}g</span></div><div class="v-card-bonus" style="font-size:10px">${skillNames}</div>`;
                 card.onclick = () => { haptic(); buildBgDetail(key); openSubScreen('sub-bg-detail'); };
                 grid.appendChild(card);
             }
@@ -6410,7 +6400,7 @@ Busca rápida:
                         const tool = ARTISAN_TOOLS[t];
                         const desc = TOOL_DESC[t] || '';
                         html += `<div class="detail-row"><b>${tool ? tool.icon + ' ' + tool.name : t}</b></div>`;
-                        if (desc) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:10px;padding-left:18px">${desc}</div>`;
+                        if (desc) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:calc(10px * var(--v-font-scale, 1));padding-left:18px">${desc}</div>`;
                     });
                 }
                 if (bg.toolChoice) {
@@ -6813,8 +6803,8 @@ Busca rápida:
             html += `<div class="sheet-header" style="padding:4px 0 8px">`;
             if (sel._wasRandom) {
                 html += `<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:4px">`;
-                html += `<input class="v-input" id="summaryName" value="${sel.name}" maxlength="15" placeholder="Nome" style="flex:1;text-align:center;font-size:16px;padding:6px 8px">`;
-                html += `<input class="v-input" id="summarySurname" value="${sel.surname}" maxlength="15" placeholder="Sobrenome" style="flex:1;text-align:center;font-size:16px;padding:6px 8px">`;
+                html += `<input class="v-input" id="summaryName" value="${sel.name}" maxlength="15" placeholder="Nome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding:6px 8px">`;
+                html += `<input class="v-input" id="summarySurname" value="${sel.surname}" maxlength="15" placeholder="Sobrenome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding:6px 8px">`;
                 html += `</div>`;
             } else {
                 html += `<div class="sheet-name" style="font-size:20px">${fullName}</div>`;
@@ -6963,12 +6953,12 @@ Busca rápida:
                 cls.equip.forEach(e => { equipBody += `<div class="detail-row">• ${e}</div>`; });
             }
             if (sel.toolProfs.length > 0) {
-                equipBody += `<div style="margin-top:6px;font-size:11px;color:var(--v-text-dim)"><b>🔧 Ferramentas:</b></div>`;
+                equipBody += `<div style="margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim)"><b>🔧 Ferramentas:</b></div>`;
                 sel.toolProfs.forEach(t => {
                     equipBody += `<div class="detail-row">• ${ARTISAN_TOOLS[t]?.icon || ''} ${ARTISAN_TOOLS[t]?.name || t}</div>`;
                 });
             }
-            equipBody += `<div style="margin-top:6px;font-size:11px;color:var(--v-text-dim)"><b>Armaduras:</b> ${cls.armor.map(a => ARMOR_PT[a]).join(', ') || 'Nenhuma'}</div>`;
+            equipBody += `<div style="margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim)"><b>Armaduras:</b> ${cls.armor.map(a => ARMOR_PT[a]).join(', ') || 'Nenhuma'}</div>`;
             equipBody += `<div class="detail-row"><b>Armas:</b> ${cls.weapons.map(w => WEAPON_PT[w]).join(', ')}</div>`;
             const langList = race.langs.map(l => {
                 if (l === '+1 à escolha' && sel.languages.length > 0) return sel.languages[0];
@@ -6987,7 +6977,7 @@ Busca rápida:
             }
 
             // Confirm button in sticky footer (always visible at bottom)
-            html += `<div class="summary-footer"><button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin:0;font-size:16px;padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button></div>`;
+            html += `<div class="summary-footer"><button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin:0;font-size:calc(16px * var(--v-font-scale, 1));padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button></div>`;
 
             document.getElementById('summaryContent').innerHTML = html;
 
@@ -7246,15 +7236,15 @@ Busca rápida:
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,12,8,0.92);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
                 overlay.innerHTML =
                     '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.97),rgba(26,21,16,0.97));border:1px solid rgba(196,149,58,0.6);border-radius:12px;padding:24px;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
-                        '<div style="font-size:11px;letter-spacing:3px;color:#c4953a;margin-bottom:8px;text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
-                        '<h2 style="font-size:20px;color:#e8c45a;margin:0 0 18px;letter-spacing:1.2px;font-weight:700;">' + summaryName + '</h2>' +
-                        '<div style="font-size:13px;color:#a09484;margin-bottom:18px;line-height:1.5;">' +
+                        '<div style="font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:3px;color:#c4953a;margin-bottom:8px;text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
+                        '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:#e8c45a;margin:0 0 18px;letter-spacing:1.2px;font-weight:700;">' + summaryName + '</h2>' +
+                        '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:#a09484;margin-bottom:18px;line-height:1.5;">' +
                             raceLabel + ' · ' + classLabel +
                         '</div>' +
-                        '<p style="font-size:13px;color:#d4c8b0;margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
+                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));color:#d4c8b0;margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
                         '<div style="display:flex;gap:10px;flex-direction:column;">' +
-                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
-                            '<button id="__confirm_no" style="background:transparent;color:#a09484;border:1px solid rgba(196,149,58,0.3);padding:12px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:12px;letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
+                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
+                            '<button id="__confirm_no" style="background:transparent;color:#a09484;border:1px solid rgba(196,149,58,0.3);padding:12px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
                         '</div>' +
                     '</div>';
                 document.body.appendChild(overlay);
@@ -7311,9 +7301,9 @@ Busca rápida:
                 ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 ov.innerHTML =
                     '<div style="max-width:360px;text-align:center;">' +
-                        '<div style="font-size:48px;margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
-                        '<h2 style="font-size:18px;color:#c4953a;margin:0 0 12px;letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
-                        '<p style="font-size:13px;line-height:1.6;margin:0;color:#a09484;">Seu personagem foi forjado. Aguarde a transição para Valdória.</p>' +
+                        '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
+                        '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#c4953a;margin:0 0 12px;letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
+                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:#a09484;">Seu personagem foi forjado. Aguarde a transição para Valdória.</p>' +
                     '</div>';
                 document.body.appendChild(ov);
             } catch (_) {}
@@ -7332,11 +7322,11 @@ Busca rápida:
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 overlay.innerHTML =
                     '<div style="max-width:420px;text-align:center;">' +
-                    '<div style="font-size:48px;margin-bottom:16px;">⚔️</div>' +
-                    '<h2 style="font-size:20px;color:#c4953a;margin:0 0 12px;letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
-                    '<p style="font-size:14px;line-height:1.6;margin:0 0 20px;color:#a09484;">' + body + '</p>' +
-                    '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius:10px;font-family:Cinzel,serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +
-                    '<div style="margin-top:18px;font-size:10px;color:#5a5044;letter-spacing:1px;">debug: ' + pathTag + '</div>' +
+                    '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom:16px;">⚔️</div>' +
+                    '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:#c4953a;margin:0 0 12px;letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
+                    '<p style="font-size:calc(14px * var(--v-font-scale, 1));line-height:1.6;margin:0 0 20px;color:#a09484;">' + body + '</p>' +
+                    '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius:10px;font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +
+                    '<div style="margin-top:18px;font-size:calc(10px * var(--v-font-scale, 1));color:#5a5044;letter-spacing:1px;">debug: ' + pathTag + '</div>' +
                     '</div>';
                 document.body.appendChild(overlay);
                 const btn = document.getElementById('__creation_close_btn');
