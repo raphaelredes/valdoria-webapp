@@ -15196,37 +15196,37 @@ window._fmtV = _fmtV;  // expor globalmente
 var TEMPLE_NPCS_DB = {
   'heal': {
     npc: 'Irmã Elara',           npc_id: 'npc_temple_elara',
-    title: 'Curar Ferimentos',   icon: _heralIco('ic-cura'),
+    title: 'Curar',              icon: _heralIco('ic-cura'),
     cost: 30,                    min_level: 1,
     desc: 'Cura ferimentos via magia divina (1d8+3 HP).'
   },
   'cure_poison': {
     npc: 'Padre Aldric',         npc_id: 'npc_temple_aldric',
-    title: 'Purificar Veneno',   icon: _heralIco('ic-poção'),
+    title: 'Purificar',          icon: _heralIco('ic-poção'),
     cost: 40,                    min_level: 1,
     desc: 'Remove venenos e doenças do corpo.'
   },
   'bless': {
     npc: 'Acólito Theron',       npc_id: 'npc_temple_theron',
-    title: 'Benção da Clareza',  icon: _heralIco('ic-stat-spelldc'),
+    title: 'Clareza',            icon: _heralIco('ic-stat-spelldc'),
     cost: 25,                    min_level: 1,
     desc: 'Conc. 1 min. +1d4 em ataques e saves.'
   },
   'remove_curse': {
     npc: 'Sacerdotisa Miriel',   npc_id: 'npc_temple_miriel',
-    title: 'Remover Maldição',   icon: _heralIco('ic-runas'),
+    title: 'Maldição',           icon: _heralIco('ic-runas'),
     cost: 90,                    min_level: 5,
     desc: 'Liberta corpo e alma de maldições arcanas.'
   },
   'greater_restoration': {
     npc: 'Sumo-Sacerdote Varek', npc_id: 'npc_temple_varek',
-    title: 'Restauração Maior',  icon: _heralIco('ic-stat-cha'),
+    title: 'Restaurar',          icon: _heralIco('ic-stat-cha'),
     cost: 450,                   min_level: 8,
     desc: 'Remove 1 condição: exaustão, petrificação, maldição, encantamento ou veneno.'
   },
   'raise_dead': {
     npc: 'Oráculo Orenthia',     npc_id: 'npc_temple_orenthia',
-    title: 'Reviver os Caídos',  icon: _heralIco('ic-esqueleto'),
+    title: 'Reviver',            icon: _heralIco('ic-esqueleto'),
     cost: 1000,                  min_level: 10,
     desc: 'Ressuscita aliado caído com 1 HP. -4 em d20 por 4 long rests.'
   }
@@ -44022,12 +44022,12 @@ var SUBSCREEN_DATA = {
     header: '✨ Serviços de Cura',
     flavor: 'Cada serviço requer um sacerdote disponível. Custos refletem doação à fé.',
     buttons: [
-      [_heralIco('ic-templo'), 'Curar Ferimentos', '30 <span class="vi vi-coin sm"></span> — 1d8+3 HP', 'temple_heal'],
-      [_heralIco('ic-templo'), 'Purificar Veneno', '40 <span class="vi vi-coin sm"></span> — remove veneno', 'temple_cure_poison'],
-      [_heralIco('ic-templo'), 'Bênção da Clareza', '25 <span class="vi vi-coin sm"></span> — +1d4 ataques', 'temple_bless'],
-      [_heralIco('ic-templo'), 'Remover Maldição', '90 <span class="vi vi-coin sm"></span> — nv 5+', 'temple_remove_curse'],
-      [_heralIco('ic-templo'), 'Restauração Maior', '450 <span class="vi vi-coin sm"></span> — nv 8+', 'temple_restoration'],
-      [_heralIco('ic-templo'), 'Reviver os Caídos', '1000 <span class="vi vi-coin sm"></span> — nv 10+', 'temple_raise_dead']
+      [_heralIco('ic-templo'), 'Curar', '30 <span class="vi vi-coin sm"></span> — 1d8+3 HP', 'temple_heal'],
+      [_heralIco('ic-templo'), 'Purificar', '40 <span class="vi vi-coin sm"></span> — remove veneno', 'temple_cure_poison'],
+      [_heralIco('ic-templo'), 'Clareza', '25 <span class="vi vi-coin sm"></span> — +1d4 ataques', 'temple_bless'],
+      [_heralIco('ic-templo'), 'Maldição', '90 <span class="vi vi-coin sm"></span> — nv 5+', 'temple_remove_curse'],
+      [_heralIco('ic-templo'), 'Restaurar', '450 <span class="vi vi-coin sm"></span> — nv 8+', 'temple_restoration'],
+      [_heralIco('ic-templo'), 'Reviver', '1000 <span class="vi vi-coin sm"></span> — nv 10+', 'temple_raise_dead']
     ]
   },
   'temple_npcs': {
