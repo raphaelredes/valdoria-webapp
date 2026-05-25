@@ -53258,11 +53258,17 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '.enc-portrait{width:48px;height:48px;flex-shrink:0;border-radius:50%;'
       + '  background:rgba(196,149,58,0.18);border:1px solid rgba(196,149,58,0.55);'
       + '  display:flex;align-items:center;justify-content:center;color:#c4953a;'
-      + '  overflow:hidden}'
+      + '  overflow:hidden;transition:transform 0.15s ease,box-shadow 0.15s ease}'
       + '.enc-portrait svg{width:32px;height:32px}'
       // 2026-05-18: support portraitImg (AI-generated PNG portraits — merchants,
       // bank teller, future NPCs com AAA art). Imagem preenche o circle inteiro.
       + '.enc-portrait img{width:100%;height:100%;object-fit:cover;border-radius:50%}'
+      // Sessao #37 v18 (2026-05-25): cursor pointer + hover quando portrait clickavel
+      // (PADRAO_ALDRIC: NPC image lightbox parity com vEncounter shared canonical).
+      + '.enc-portrait.enc-portrait-clickable{cursor:pointer}'
+      + '.enc-portrait.enc-portrait-clickable:hover{transform:scale(1.08);'
+      + '  box-shadow:0 0 12px rgba(196,149,58,0.55),inset 0 0 8px rgba(196,149,58,0.3)}'
+      + '.enc-portrait.enc-portrait-clickable:active{transform:scale(0.96)}'
       + '.enc-meta{flex:1;min-width:0}'
       + '.enc-name{font-family:Cinzel,serif;color:#c4953a;font-size:calc(15px * var(--v-font-scale, 1));font-weight:700;'
       + '  letter-spacing:1px;margin:0 0 2px;text-shadow:0 0 8px rgba(196,149,58,0.3)}'
@@ -53419,6 +53425,39 @@ function _renderEncounterPopup(enc, originalAction, player) {
   var _choicesShown = false;
   // Render token pra cancelar setTimeout pendentes ao trocar página rápido
   var _renderToken = 0;
+
+  // ──────────────────────────────────────────────────────────────────
+  // PADRAO_ALDRIC — Lightbox no portrait click (sessao #37 v18, 2026-05-25)
+  // Paridade com vEncounter shared canonical (shared/encounter-popup.js:451-473).
+  // User pediu auditoria: "todos os dialogos precisam poder aumentar a imagem do
+  // NPC quando existir um pra ele". Legacy nao tinha esse handler, agora tem.
+  // Funciona pra: CHANCE_ENCOUNTERS, PLAZA_*, CITY_DISCOVERY_QUESTS, Aldric/shadow.
+  // ──────────────────────────────────────────────────────────────────
+  (function _wireEncounterPortraitLightbox(){
+    var portraitEl = ov.querySelector('.enc-portrait');
+    if (!portraitEl) return;
+    var portraitSrc = npc.portraitImg || '';
+    if (!portraitSrc) return; // sem imagem PNG = sem lightbox (so heraldic SVG)
+    portraitEl.classList.add('enc-portrait-clickable');
+    portraitEl.setAttribute('title', 'Clique para ampliar');
+    portraitEl.setAttribute('role', 'button');
+    portraitEl.setAttribute('aria-label', 'Ampliar retrato de ' + (npc.name || 'NPC'));
+    var _onPortraitTap = function(e){
+      if (e) {
+        if (e.stopPropagation) e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        if (e.preventDefault) e.preventDefault();
+      }
+      if (typeof window.showLightbox === 'function') {
+        window.showLightbox(portraitSrc, npc.name || '', npc.desc || '');
+      } else {
+        console.warn('[ENC legacy] showLightbox unavailable - lightbox.js missing?');
+      }
+    };
+    // click + pointerup (touch fallback p/ Telegram WebView)
+    portraitEl.addEventListener('click', _onPortraitTap);
+    portraitEl.addEventListener('pointerup', _onPortraitTap);
+  })();
 
   // Calcula duração de revelação proporcional ao tamanho do texto.
   // 2026-05-22: char-by-char typewriter real (PADRAO_ALDRIC canonical, era clip-path
