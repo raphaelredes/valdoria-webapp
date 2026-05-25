@@ -5789,24 +5789,77 @@ Busca rápida:
         }
 
         function buildL1SkillSelect(data) {
-            const defaultSkill = data.default || '';
-            // Filter out the default skill — it's auto-granted
-            const choices = data.skills.filter(s => !s.is_default);
+            // Sessao #37 (2026-05-25): D&D 5e spell picker. API retorna
+            // `quota` + `options` (canonical combat2). Player escolhe N
+            // de M magias. Counter visivel no topo. Fallback legacy
+            // single-select se backend antigo (sem quota/options).
+            const quota = (typeof data.quota === 'number' && data.quota > 0) ? data.quota : 0;
+            const options = Array.isArray(data.options) ? data.options : [];
+            const useNew = quota > 0 && options.length > 0;
+            if (!Array.isArray(sel.selectedL1Skills)) sel.selectedL1Skills = [];
 
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelL1Skill()">\u2190 Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha uma Habilidade</div>`;
-            html += `<div class="detail-subtitle">Sua classe começa com <b>${data.skills.find(s => s.is_default)?.name || 'habilidade padrão'}</b>. Escolha mais uma:</div></div>`;
 
-            for (const skill of choices) {
-                const selected = sel.selectedL1Skill === skill.id ? ' selected' : '';
-                const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : '';
-                html += `<div class="v-card${selected}" onclick="selectL1Skill('${skill.id}')">`;
-                html += `<div class="v-card-name">${skill.effect || ''} ${skill.name}</div>`;
-                html += `<div class="v-card-desc">${skill.description}${costText}</div>`;
-                html += `</div>`;
+            if (useNew) {
+                const selCount = sel.selectedL1Skills.length;
+                html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha suas Magias Iniciais</div>`;
+                html += `<div class="detail-subtitle">D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} come\u00e7a conhecendo <b>${quota}</b> magia${quota > 1 ? 's' : ''}. Selecione abaixo:</div></div>`;
+                html += `<div class="asi-counter" style="margin:8px 0 12px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);color:var(--v-gold,#c4953a);">Selecionadas: <b>${selCount}</b> / <b>${quota}</b></div>`;
+                for (const skill of options) {
+                    const isSel = sel.selectedL1Skills.indexOf(skill.name) >= 0;
+                    const selected = isSel ? ' selected' : '';
+                    const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : ' \u2022 Truque';
+                    const ico = skill.ico || '\u2728';
+                    const safeName = skill.name.replace(/'/g, "\\'");
+                    html += `<div class="v-card${selected}" onclick="toggleL1Skill('${safeName}')">`;
+                    html += `<div class="v-card-name">${isSel ? '\u2713 ' : ''}${ico} ${skill.name}</div>`;
+                    html += `<div class="v-card-desc">${skill.desc || ''}${costText}</div>`;
+                    html += `</div>`;
+                }
+                const isReady = selCount === quota;
+                const btnClass = isReady ? 'v-btn-primary' : 'v-btn-secondary';
+                const btnDisabled = isReady ? '' : 'disabled';
+                html += `<button class="v-btn ${btnClass}" style="width:100%;margin-top:16px" ${btnDisabled} onclick="confirmL1Skill()">`;
+                html += isReady ? '\u2713 Confirmar Magias' : `Escolha mais ${quota - selCount}`;
+                html += `</button>`;
+            } else {
+                // Legacy single-select fallback
+                const defaultSkill = data.default || '';
+                const choices = (data.skills || []).filter(s => !s.is_default);
+                html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha uma Habilidade</div>`;
+                html += `<div class="detail-subtitle">Sua classe come\u00e7a com <b>${(data.skills || []).find(s => s.is_default)?.name || 'habilidade padr\u00e3o'}</b>. Escolha mais uma:</div></div>`;
+                for (const skill of choices) {
+                    const selected = sel.selectedL1Skill === skill.id ? ' selected' : '';
+                    const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : '';
+                    html += `<div class="v-card${selected}" onclick="selectL1Skill('${skill.id}')">`;
+                    html += `<div class="v-card-name">${skill.effect || ''} ${skill.name}</div>`;
+                    html += `<div class="v-card-desc">${skill.description}${costText}</div>`;
+                    html += `</div>`;
+                }
             }
 
             document.getElementById('l1skillSelectContent').innerHTML = html;
+        }
+
+        function toggleL1Skill(skillName) {
+            // Sessao #37 (2026-05-25): multi-select toggle pra spell picker.
+            haptic();
+            if (!Array.isArray(sel.selectedL1Skills)) sel.selectedL1Skills = [];
+            const data = _l1SkillsCache[sel.classKey];
+            const quota = (data && typeof data.quota === 'number') ? data.quota : 0;
+            const idx = sel.selectedL1Skills.indexOf(skillName);
+            if (idx >= 0) {
+                sel.selectedL1Skills.splice(idx, 1);
+            } else {
+                if (sel.selectedL1Skills.length >= quota) {
+                    if (typeof showToast === 'function') {
+                        showToast('Voce so pode escolher ' + quota + ' magia' + (quota > 1 ? 's' : '') + '.');
+                    }
+                    return;
+                }
+                sel.selectedL1Skills.push(skillName);
+            }
+            if (data) buildL1SkillSelect(data);
         }
 
         function selectL1Skill(skillId) {
@@ -5818,7 +5871,16 @@ Busca rápida:
         }
 
         function confirmL1Skill() {
-            if (!sel.selectedL1Skill) return;
+            // Sessao #37 (2026-05-25): aceita ambos modos (legacy/new).
+            const data = _l1SkillsCache[sel.classKey];
+            const quota = (data && typeof data.quota === 'number') ? data.quota : 0;
+            const options = (data && Array.isArray(data.options)) ? data.options : [];
+            const useNew = quota > 0 && options.length > 0;
+            if (useNew) {
+                if (!Array.isArray(sel.selectedL1Skills) || sel.selectedL1Skills.length !== quota) return;
+            } else {
+                if (!sel.selectedL1Skill) return;
+            }
             closeSubScreen('sub-l1skill-select');
             finishClassScreen();
         }
@@ -5826,8 +5888,8 @@ Busca rápida:
         function cancelL1Skill() {
             haptic();
             sel.selectedL1Skill = '';
+            sel.selectedL1Skills = [];
             closeSubScreen('sub-l1skill-select');
-            // Go back to equipment
             sel.equipmentChoice = 'A';
             showEquipmentSelect();
         }
@@ -6567,6 +6629,7 @@ Busca rápida:
                 variant_skill: sel.variantSkill || '',
                 variant_feat: sel.variantFeat || '',
                 selected_l1_skill: sel.selectedL1Skill || '',
+                selected_l1_skills: Array.isArray(sel.selectedL1Skills) ? sel.selectedL1Skills : [],
                 /* Sessao #34 (2026-05-25) — D&D 5e canonical L1 choices */
                 favored_enemy: sel.favoredEnemy || '',
                 favored_terrain: sel.favoredTerrain || '',

@@ -8579,14 +8579,49 @@ body.perf-lite .vc-action-btn { transition: none; }
           });
           console.log('[CITY] QUESTS_ACTIVE hydrated from server:', window.QUESTS_ACTIVE.length, 'active');
         }
-        // achievement_stats: armazena raw — mapeamento server → ACH_PROGRESS
-        // (algoz/cacador/etc.) fica pendente da unificação do schema (server
-        // tem flat list, client tem 14 cadeias × 5 tiers). Por enquanto deixa
-        // ACH_PROGRESS zerado (correto pra 0/70 em char novo).
+        // Sessao #37 (2026-05-25): schema unification achievements server↔
+        // client. Server envia stats flat (combat_victories, win_streak,
+        // total_gold_earned, etc.). Client tem 14 chains progressivas
+        // (algoz/cacador/cofreiro/...). Mapeamento canonical baseado em
+        // achievements_data.py — cada chain consome um stat especifico.
+        // ACH_PROGRESS popula com valores reais → progress bars corretos.
         if (picked.achievement_stats && typeof picked.achievement_stats === 'object') {
           window._serverAchievementStats = picked.achievement_stats;
-          console.log('[CITY] achievement_stats from server:',
-            Object.keys(picked.achievement_stats).length, 'stats stored (pending chain mapping)');
+          var serverStats = picked.achievement_stats;
+          // Mapping chain_id → stat_name (canonical achievements_data.py)
+          var CHAIN_TO_STAT = {
+            'algoz':         'combat_victories',
+            'cacador':       'combat_victories',
+            'indomavel':     'best_win_streak',
+            'cofreiro':      'total_gold_earned',
+            'mestre':        'level',
+            'aventureiro':   'quests_completed',
+            'andarilho':     'locations_visited',
+            'cartografo':    'locations_visited',
+            'colecionador':  'unique_items',
+            'forjador':      'items_crafted',
+            'erudito':       'npcs_met',
+            'devoto':        'temple_visits',
+            'diplomata':     'max_affinity',
+            'sobrevivente':  'clutch_victories'
+          };
+          if (typeof window.ACH_PROGRESS === 'object' && window.ACH_PROGRESS !== null) {
+            // Player.level eh enviado em picked.level (HUD)
+            var lvlForMestre = parseInt(picked.level || 1, 10);
+            Object.keys(window.ACH_PROGRESS).forEach(function(chainId){
+              var statName = CHAIN_TO_STAT[chainId];
+              if (!statName) { window.ACH_PROGRESS[chainId] = 0; return; }
+              if (statName === 'level') {
+                window.ACH_PROGRESS[chainId] = lvlForMestre;
+              } else {
+                var val = serverStats[statName];
+                window.ACH_PROGRESS[chainId] = (typeof val === 'number' && val >= 0) ? val : 0;
+              }
+            });
+            console.log('[CITY] ACH_PROGRESS hydrated from server stats:',
+              Object.keys(window.ACH_PROGRESS).filter(function(k){ return window.ACH_PROGRESS[k] > 0; }).length,
+              'chains with progress > 0');
+          }
         }
       } catch (e) {
         console.warn('[CITY] quests_hydrate_failed:', e);
