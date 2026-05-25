@@ -8441,6 +8441,22 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (state.hud.level != null)  p.level = state.hud.level;
         if (state.hud.name)           p.name = state.hud.name;
       }
+      // Sessão #37 (2026-05-25): REMOTE mode NÃO recebe quests/achievements
+      // do servidor ainda — então os mocks (QUESTS_ACTIVE com 2 quests fake,
+      // ACH_PROGRESS com 20/70 unlock fake) vazavam pra todo player real,
+      // mostrando missões inexistentes ("Caçar 3 lobos cinzentos", "Falar
+      // com Lyana") e conquistas idênticas entre personagens diferentes.
+      // Bug fix: zerar mocks em REMOTE mode até server enviar dados reais.
+      // Mocks ficam APENAS pra modo LOCAL (file://) usado em DEV.
+      // ach_unlocked passa a ser computed do ACH_PROGRESS dinamicamente
+      // (ver progress_strip.ach_unlocked acima) — zerar ACH_PROGRESS faz o
+      // contador exibir 0/70 automaticamente.
+      try {
+        if (Array.isArray(window.QUESTS_ACTIVE)) window.QUESTS_ACTIVE.length = 0;
+        if (window.ACH_PROGRESS && typeof window.ACH_PROGRESS === 'object') {
+          Object.keys(window.ACH_PROGRESS).forEach(function(k){ window.ACH_PROGRESS[k] = 0; });
+        }
+      } catch (e) { console.warn('[CITY] clear_mocks_failed:', e); }
       // Continue to fetch character list for Hall popup
       return fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
         method: 'GET',
@@ -10174,7 +10190,21 @@ function buildMockHubScreen(player){
       // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithral)
       league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
       // ach_unlocked/ach_total computados dinamicamente — sistema progressivo (14 cadeias × 5 tiers = 70)
-      ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
+      // Sessão #37 (2026-05-25): bug fix — antes era hardcoded `ach_unlocked: 20`,
+      // mostrando "20/70 conquistas" pra todo player real (mesmo um char recém
+      // criado). Agora computa do ACH_PROGRESS (zerado em REMOTE mode até server
+      // enviar dados reais, então mostra 0/70 em char novo).
+      ach_unlocked: (function(){
+        if (typeof ACHIEVEMENT_CHAINS === 'undefined' || typeof ACH_PROGRESS === 'undefined') return 0;
+        var total = 0;
+        ACHIEVEMENT_CHAINS.forEach(function(chain){
+          var prog = ACH_PROGRESS[chain.id] || 0;
+          chain.tiers.forEach(function(t){ if (prog >= t.goal) total++; });
+        });
+        return total;
+      })(),
+      ach_total: 70,
+      ach_cb: 'ach_main'
     },
     player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
     daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' }
@@ -46183,9 +46213,18 @@ function renderSubScreen(el, key){
     var cb = b && b[3];
     if (!cb) return true;
     // Filtro 1: quest_open_<id> some se já completada/abandonada
+    // OU se quest não está em QUESTS_ACTIVE (sessão #37 2026-05-25: bug fix —
+    // player novo via 2 quests mock ("lobos cinzentos" e "Falar com Lyana")
+    // mesmo sem ter aceitado nenhuma. Agora exige que a quest esteja na lista
+    // ativa do player pra aparecer no popup "Missões Ativas").
     if (cb.indexOf('quest_open_') === 0) {
       var qid1 = cb.substring('quest_open_'.length);
-      return !_isQuestCompletedOrAbandoned(qid1);
+      if (_isQuestCompletedOrAbandoned(qid1)) return false;
+      if (typeof QUESTS_ACTIVE !== 'undefined') {
+        var inActive1 = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid1; });
+        if (!inActive1) return false;
+      }
+      return true;
     }
     // X-6.5.51AV (2026-05-11) Filtro 2: accept_q_<id> some se já em ACTIVE
     // ou já completada/abandonada (depois de ter aceito + entregue).
