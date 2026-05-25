@@ -1,1212 +1,2424 @@
-/**
- * inventory-screen.css — Mochila canonical compartilhada entre simuladores.
- *
- * MAPA_IA — Navegação rápida:
- *   ~30    Design tokens (raridades, espaçamento)
- *   ~100   .vinv-overlay (modal container)
- *   ~140   .vinv-header (título + carteira)
- *   ~200   .vinv-tabs (4 categorias sem "Todos")
- *   ~280   .vinv-filter (sort + search trigger)
- *   ~340   .vinv-search (input + filter pills)
- *   ~420   .vinv-grid + .vinv-cell (item card + raridades)
- *   ~620   .vinv-badge.* (stack, equip, quest)
- *   ~700   .vinv-footer (encumbrance + nav buttons)
- *   ~780   .vinv-detail-* (modal de item)
- *   ~950   .vinv-loadout (slot view 3x3)
- *   ~1070  .vinv-empty + helpers
- *
- * REGRAS:
- *  - Prefixo `vinv-*` para evitar colisão com `.inv-*` existente em cidade.html
- *  - Reusa tokens `--v-*` do design system Valdoria (valdoria-design.css)
- *  - Ícones de items SEMPRE via `<use href="#ic-it-*">` (sprite canônico)
- *  - Ícones de UI usam prefixo `vui-*` (back/close/check/search/sort/filter)
- *
- * Doc: docs/sistemas/heraldic-items-icons-index.md (519 IDs `ic-it-*`)
- * Regra CLAUDE.md: "Items Existentes — NUNCA recriar SVG novo (2026-05-14)"
- */
-
-/* ================================================================
-   1. DESIGN TOKENS (raridades + spacing)
-   ================================================================ */
-.vinv-overlay {
-  /* Raridades D&D 5e */
-  --vinv-r-common: #8a8580;
-  --vinv-r-uncommon: #4a8a3a;
-  --vinv-r-rare: #3a6aa0;
-  --vinv-r-epic: #8a3aa0;
-  --vinv-r-legendary: #c4953a;
-  --vinv-r-quest: #c47030;
-
-  /* Fallbacks pra tokens Valdoria caso o design system não esteja carregado */
-  --vinv-bg-mid: var(--v-bg-mid, #2a2420);
-  --vinv-bg-card: var(--v-bg-card, #2e2520);
-  --vinv-bg-raised: var(--v-bg-raised, #332a22);
-  --vinv-border: var(--v-border, #4a3828);
-  --vinv-border-soft: var(--v-border-soft, rgba(74, 56, 40, 0.55));
-  --vinv-text: var(--v-text, #d4c8b0);
-  --vinv-text-dim: var(--v-text-dim, #a09484);
-  --vinv-text-bright: var(--v-text-bright, #f0e4cc);
-  --vinv-text-muted: var(--v-text-muted, #6a5e50);
-  --vinv-gold: var(--v-gold, #c4953a);
-  --vinv-gold-bright: var(--v-gold-bright, #e8c45a);
-  --vinv-gold-glow: var(--v-gold-40);
-  --vinv-font: var(--v-font, 'MedievalSharp', 'Cinzel', 'Georgia', serif);
-  --vinv-font-display: var(--v-font-display, 'Cinzel', 'Georgia', serif);
-}
-
-/* ================================================================
-   2. OVERLAY (modal container)
-   ================================================================ */
-.vinv-overlay {
-  /* 2026-05-17: overlay confinado ao frame do simulador via mount no
-     #frame/#app (ver inventory-screen.js _vinvHost) com classe
-     .vinv-overlay--contained. Quando contained, usa position:absolute
-     inset:0 dentro do host. Quando NOT contained (webapp / body mount),
-     usa position:fixed centralizado no viewport (legacy fallback). */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* Simulator (file://): --sim-frame-w=480px (cap smartphone canonical).
-     WebApp deploy: var indefinida, fallback=430px (valdoria-design.css
-     IMUTÁVEL html max-width). */
-  width: var(--sim-frame-w, min(100vw, 430px));
-  height: var(--sim-frame-h, 100dvh);
-  background: rgba(8, 5, 3, 0.7);
-  backdrop-filter: blur(2px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9000;
-  /* Padding mínimo — painel ocupa ≥ 95% interno (regra: ≥90%) */
-  padding: 8px;
-  font-family: var(--vinv-font);
-  color: var(--vinv-text);
-}
-.vinv-overlay.active { display: flex; }
-
-/* 2026-05-17: Overlay CONTAINED (mounted inside #frame/#app simulator host).
-   Position:absolute + inset:0 = ocupa 100% do host (que JÁ está sized via
-   --sim-frame-w/h). Evita position:fixed escapar pro viewport do browser
-   em monitores wide. Host marca-se com .vinv-host (position:relative se não
-   tinha) pra estabelecer containing block. */
-.vinv-host { position: relative; }
-.vinv-overlay.vinv-overlay--contained {
-  position: absolute !important;
-  inset: 0 !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  transform: none !important;
-}
-
-.vinv-panel {
-  /* 2026-05-15: ocupa todo o frame menos padding (≥95% efetivo).
-     Antes: max-width 430px + max-height 720px deixavam o painel pequeno
-     em telas que poderiam comportar mais conteúdo. */
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  max-height: 100%;
-  background: var(--vinv-bg-mid);
-  border: 1px solid var(--vinv-gold);
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.7),
-    0 0 40px var(--v-gold-25);
-  position: relative;
-  /* 2026-05-14: container query base — grid se adapta ao TAMANHO DO PAINEL
-     (não viewport). Necessário porque painel tem max-width fixo: viewport
-     desktop não significa painel largo. */
-  container-type: inline-size;
-}
-
-/* Quando embedded num popup existente (sem overlay próprio) */
-.vinv-embedded {
-  width: 100%;
-  height: 100%;
-  background: var(--vinv-bg-mid);
-  display: flex;
-  flex-direction: column;
-  font-family: var(--vinv-font);
-  color: var(--vinv-text);
-}
-
-/* ================================================================
-   3. HEADER (title + wallet)
-   ================================================================ */
-.vinv-header {
-  padding: 18px 14px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(180deg, rgba(74, 56, 40, 0.4) 0%, transparent 100%);
-  border-bottom: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-}
-.vinv-header-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-2xl);
-  color: var(--vinv-gold);
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-shadow: 0 0 14px var(--vinv-gold-glow);
-}
-.vinv-header-title svg {
-  width: 22px;
-  height: 22px;
-  color: var(--vinv-gold);
-}
-.vinv-wallet {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 5px 10px 5px 6px;
-  border-radius: 16px;
-  border: 1px solid var(--v-gold-40);
-  font-size: var(--v-font-base);
-  color: var(--vinv-gold);
-  font-weight: 600;
-  font-family: var(--vinv-font-display);
-}
-.vinv-coin {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 32%, #fff4d0 0%, #e8c45a 30%, #c4953a 55%, #8b6420 90%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-sm);
-  font-weight: 900;
-  color: #5a3e10;
-  box-shadow: 0 0 6px var(--v-gold-50), inset 0 -2px 4px rgba(90, 62, 16, 0.4);
-}
-.vinv-coin.mini { width: 11px; height: 11px; font-size: 7px; }
-
-/* ================================================================
-   4. TABS (4 categorias sem "Todos")
-   Quando nenhuma ativa → mostra TUDO (filter é filter, não tab)
-   ================================================================ */
-.vinv-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 8px 8px 6px;
-  border-bottom: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.vinv-tabs::-webkit-scrollbar { display: none; }
-
-.vinv-tab {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 6px 6px;
-  font-size: var(--v-font-sm);
-  color: var(--vinv-text-dim);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  white-space: nowrap;
-  font-family: inherit;
-  letter-spacing: 0.3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-}
-.vinv-tab-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-.vinv-tab .vinv-tcount {
-  display: inline-block;
-  background: rgba(160, 148, 132, 0.15);
-  border-radius: 8px;
-  padding: 0 5px;
-  font-size: var(--v-font-xs);
-  color: var(--vinv-text-dim);
-  font-weight: 600;
-  min-width: 16px;
-  text-align: center;
-  flex: 0 0 auto;
-}
-.vinv-tab.active {
-  color: var(--vinv-gold);
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.18), var(--v-gold-06));
-  border-color: rgba(196, 149, 58, 0.45);
-  box-shadow: 0 0 10px var(--v-gold-20);
-}
-.vinv-tab.active .vinv-tcount {
-  background: var(--v-gold-25);
-  color: var(--vinv-gold);
-}
-
-/* ================================================================
-   5. FILTER BAR (sort + search trigger)
-   ================================================================ */
-.vinv-filter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 14px;
-  background: rgba(0, 0, 0, 0.18);
-  font-size: var(--v-font-sm);
-  color: var(--vinv-text-dim);
-  border-bottom: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-}
-.vinv-filter-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.vinv-sort, .vinv-search-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 2px 4px;
-  background: transparent;
-  border: none;
-  color: var(--vinv-text-dim);
-  font-family: inherit;
-  font-size: inherit;
-}
-.vinv-sort svg, .vinv-search-toggle svg {
-  width: 12px;
-  height: 12px;
-  color: var(--vinv-text-dim);
-}
-.vinv-sort:hover, .vinv-search-toggle:hover { color: var(--vinv-gold); }
-
-/* ================================================================
-   6. SEARCH BAR (input + filter pills)
-   ================================================================ */
-.vinv-search-bar {
-  padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-  display: none;
-}
-.vinv-search-bar.active { display: block; }
-.vinv-search-input {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--vinv-border);
-  border-radius: 14px;
-  padding: 6px 12px 6px 10px;
-  color: var(--vinv-text);
-  font-family: var(--vinv-font);
-  font-size: var(--v-font-base);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.vinv-search-input svg {
-  width: 13px;
-  height: 13px;
-  color: var(--vinv-text-dim);
-  flex: 0 0 13px;
-}
-.vinv-search-input input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: var(--vinv-text);
-  font-family: inherit;
-  font-size: inherit;
-  outline: none;
-  padding: 0;
-}
-.vinv-filter-pills {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-.vinv-fpill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: var(--v-gold-15);
-  border: 1px solid rgba(196, 149, 58, 0.45);
-  color: var(--vinv-gold);
-  font-size: var(--v-font-xs);
-  padding: 2px 7px 2px 8px;
-  border-radius: 10px;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-}
-.vinv-fpill .vinv-x { font-size: var(--v-font-sm); opacity: 0.7; margin-left: 1px; }
-
-/* ================================================================
-   7. GRID (item cards)
-   ================================================================ */
-.vinv-grid {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 10px;
-  display: grid;
-  /* 2 cols default (mobile-first — regra do user 2026-05-14: 3 cols ficava
-     espremido em Telegram Desktop ~430px). Container queries baseiam
-     responsividade no tamanho REAL do painel, não viewport. */
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  align-content: start;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vinv-border) transparent;
-}
-/* Container queries — usam .vinv-panel (container-type: inline-size) */
-@container (min-width: 540px) {
-  .vinv-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-}
-@container (min-width: 760px) {
-  .vinv-grid { grid-template-columns: repeat(4, 1fr); }
-}
-/* Fallback pra browsers sem container queries (Safari < 16, etc.):
-   mantém 2 cols sempre (não regredir pra cells espremidas). */
-.vinv-grid::-webkit-scrollbar { width: 4px; }
-.vinv-grid::-webkit-scrollbar-thumb { background: var(--vinv-border); border-radius: 2px; }
-
-.vinv-section-header {
-  grid-column: 1 / -1;
-  padding: 6px 4px 4px;
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-xs);
-  color: var(--vinv-gold);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.vinv-section-header::before,
-.vinv-section-header::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--vinv-border-soft), transparent);
-}
-
-/* ================================================================
-   8. ITEM CELL
-   ================================================================ */
-.vinv-cell {
-  background: linear-gradient(180deg, var(--vinv-bg-card) 0%, #28201b 100%);
-  border: 1px solid var(--vinv-border);
-  border-radius: 11px;
-  padding: 6px 4px 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  position: relative;
-  min-height: 108px;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  cursor: pointer;
-}
-.vinv-cell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 11px;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04), transparent 70%);
-}
-.vinv-cell:hover {
-  transform: translateY(-1px);
-  border-color: var(--vinv-gold);
-}
-.vinv-cell.r-common { border-color: var(--vinv-r-common); }
-.vinv-cell.r-uncommon {
-  border-color: var(--vinv-r-uncommon);
-  box-shadow: 0 0 8px rgba(74, 138, 58, 0.25), inset 0 0 12px rgba(74, 138, 58, 0.05);
-}
-.vinv-cell.r-rare {
-  border-color: var(--vinv-r-rare);
-  box-shadow: 0 0 10px rgba(58, 106, 160, 0.32), inset 0 0 14px rgba(58, 106, 160, 0.08);
-}
-.vinv-cell.r-epic {
-  border-color: var(--vinv-r-epic);
-  box-shadow: 0 0 12px rgba(138, 58, 160, 0.38), inset 0 0 14px rgba(138, 58, 160, 0.1);
-}
-.vinv-cell.r-legendary {
-  border-color: var(--vinv-r-legendary);
-  box-shadow: 0 0 16px var(--v-gold-50), inset 0 0 14px var(--v-gold-12);
-  background: linear-gradient(180deg, #3a2a1a 0%, #28201b 100%);
-}
-.vinv-cell.r-quest {
-  border-color: var(--vinv-r-quest);
-  background:
-    repeating-linear-gradient(45deg,
-      var(--vinv-bg-card),
-      var(--vinv-bg-card) 6px,
-      #322820 6px,
-      #322820 7px);
-  box-shadow: 0 0 8px rgba(196, 112, 48, 0.3);
-}
-
-.vinv-cell.empty {
-  border-style: dashed;
-  border-color: rgba(74, 56, 40, 0.4);
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow: none;
-  cursor: default;
-}
-.vinv-cell.empty::before { display: none; }
-
-.vinv-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.vinv-icon svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
-}
-.vinv-name {
-  font-size: 10.5px;
-  color: var(--vinv-text);
-  text-align: center;
-  font-family: var(--vinv-font-display);
-  line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-  letter-spacing: 0.3px;
-  padding: 0 2px;
-}
-.vinv-meta {
-  font-size: 9.5px;
-  color: var(--vinv-text-dim);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-top: 1px;
-}
-.vinv-meta .vinv-die {
-  background: var(--v-gold-15);
-  color: var(--vinv-gold);
-  border-radius: 4px;
-  padding: 0 4px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-.vinv-meta .vinv-ac {
-  color: var(--vinv-r-rare);
-  font-weight: 600;
-}
-
-/* ================================================================
-   9. BADGES (stack, equip, quest, fav)
-   ================================================================ */
-.vinv-badge {
-  position: absolute;
-  top: 3px;
-  font-size: 9.5px;
-  font-weight: 700;
-  font-family: var(--vinv-font-display);
-  line-height: 1;
-  padding: 2px 5px;
-  border-radius: 8px;
-  z-index: 2;
-  letter-spacing: 0.3px;
-}
-.vinv-badge.stack {
-  right: 3px;
-  background: rgba(0, 0, 0, 0.78);
-  color: var(--vinv-gold);
-  border: 1px solid var(--v-gold-70);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-.vinv-badge.equip {
-  left: 3px;
-  background: linear-gradient(180deg, #e8c45a, #c4953a);
-  color: #1a1510;
-  border: 1px solid #8b6420;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-.vinv-badge.equip svg { width: 11px; height: 11px; color: #1a1510; stroke-width: 3; }
-.vinv-badge.quest {
-  left: 3px;
-  background: rgba(196, 112, 48, 0.2);
-  color: var(--vinv-r-quest);
-  border: 1px solid var(--vinv-r-quest);
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-.vinv-badge.quest svg { width: 9px; height: 9px; }
-.vinv-badge.fav {
-  right: 24px;
-  background: transparent;
-  color: var(--vinv-gold);
-  border: none;
-  padding: 0;
-  font-size: var(--v-font-base);
-  text-shadow: 0 0 6px rgba(196, 149, 58, 0.8);
-}
-
-/* ================================================================
-   10. FOOTER (encumbrance + nav)
-   ================================================================ */
-.vinv-footer {
-  padding: 10px 14px 12px;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
-  border-top: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-}
-.vinv-encumbrance {
-  margin-bottom: 10px;
-}
-.vinv-enc-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 10.5px;
-  color: var(--vinv-text-dim);
-  margin-bottom: 4px;
-  font-family: var(--vinv-font-display);
-  letter-spacing: 1px;
-}
-.vinv-enc-row .vinv-val { color: var(--vinv-text); }
-.vinv-enc-bar {
-  height: 7px;
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--vinv-border-soft);
-  position: relative;
-}
-.vinv-enc-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #c4953a, #e8c45a);
-  border-radius: 3px;
-  box-shadow: 0 0 8px var(--v-gold-40);
-  transition: width 0.4s;
-}
-.vinv-enc-fill.warn { background: linear-gradient(90deg, #c0712a, #e09030); }
-.vinv-enc-fill.over { background: linear-gradient(90deg, #a52828, #cc3838); }
-
-.vinv-nav {
-  display: flex;
-  gap: 6px;
-}
-.vinv-btn {
-  flex: 1;
-  padding: 9px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--vinv-border);
-  background: linear-gradient(180deg, var(--vinv-bg-raised), #261e18);
-  color: var(--vinv-text);
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-md);
-  letter-spacing: 1px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-.vinv-btn svg { width: 13px; height: 13px; }
-.vinv-btn.primary {
-  background: linear-gradient(180deg, var(--v-gold-30), var(--v-gold-10));
-  border-color: var(--vinv-gold);
-  color: var(--vinv-gold);
-  box-shadow: 0 0 8px var(--v-gold-20);
-}
-.vinv-btn.danger {
-  color: #cc6060;
-  border-color: rgba(165, 40, 40, 0.5);
-}
-.vinv-btn[disabled] {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Bulk action bar (Vender Lixo + Fundir Gemas — opcional via config) */
-.vinv-action-bar {
-  display: flex;
-  gap: 6px;
-  padding: 6px 10px;
-  background: rgba(0, 0, 0, 0.18);
-  border-bottom: 1px solid var(--vinv-border-soft);
-  flex: 0 0 auto;
-}
-.vinv-action-btn {
-  flex: 1;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--v-gold-50);
-  background: var(--v-gold-10);
-  color: var(--vinv-gold);
-  font-family: var(--vinv-font);
-  font-size: var(--v-font-sm);
-  cursor: pointer;
-  letter-spacing: 0.5px;
-}
-.vinv-action-btn:hover {
-  background: var(--v-gold-20);
-}
-
-/* ================================================================
-   11. DETAIL MODAL (item detail overlay)
-   ================================================================ */
-.vinv-detail-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 5, 3, 0.82);
-  backdrop-filter: blur(3px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 20;
-}
-.vinv-detail-overlay.active { display: flex; }
-
-.vinv-detail-card {
-  background: linear-gradient(180deg, #3a2c20 0%, #2a2018 100%);
-  border: 2px solid var(--vinv-gold);
-  border-radius: 18px;
-  width: 100%;
-  max-height: 90%;
-  display: flex;
-  flex-direction: column;
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.6),
-    0 0 40px var(--v-gold-40);
-  overflow: hidden;
-  position: relative;
-}
-.vinv-detail-card::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1px solid var(--v-gold-25);
-  border-radius: 14px;
-  pointer-events: none;
-}
-.vinv-detail-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--vinv-border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--vinv-text-dim);
-  cursor: pointer;
-  z-index: 2;
-}
-.vinv-detail-close svg { width: 13px; height: 13px; }
-
-.vinv-detail-header {
-  padding: 22px 16px 14px;
-  text-align: center;
-  border-bottom: 1px solid var(--vinv-border-soft);
-}
-.vinv-detail-portrait {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 50% 50%, var(--v-gold-25) 0%, transparent 70%);
-  border-radius: 50%;
-  position: relative;
-}
-.vinv-detail-portrait::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px solid var(--v-gold-40);
-}
-.vinv-detail-portrait svg {
-  width: 80px;
-  height: 80px;
-  filter: drop-shadow(0 0 10px var(--v-gold-50));
-}
-.vinv-detail-name {
-  font-family: var(--vinv-font-display);
-  font-size: 19px;
-  color: var(--vinv-gold);
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
-  text-shadow: 0 0 15px var(--vinv-gold-glow);
-}
-.vinv-detail-rarity {
-  font-family: var(--vinv-font-display);
-  font-size: 10.5px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.vinv-detail-rarity::before, .vinv-detail-rarity::after { content: '◆'; font-size: 8px; opacity: 0.6; }
-.vinv-detail-rarity.legendary { color: var(--vinv-r-legendary); }
-.vinv-detail-rarity.epic { color: var(--vinv-r-epic); }
-.vinv-detail-rarity.rare { color: var(--vinv-r-rare); }
-.vinv-detail-rarity.uncommon { color: var(--vinv-r-uncommon); }
-.vinv-detail-rarity.common { color: var(--vinv-r-common); }
-
-.vinv-detail-stats {
-  padding: 12px 14px;
-  background: rgba(0, 0, 0, 0.22);
-  border-bottom: 1px solid var(--vinv-border-soft);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px 14px;
-}
-.vinv-detail-stat {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
-  align-items: center;
-}
-.vinv-detail-stat .vinv-lbl {
-  color: var(--vinv-text-dim);
-  font-family: var(--vinv-font-display);
-  letter-spacing: 0.5px;
-}
-.vinv-detail-stat .vinv-val {
-  color: var(--vinv-text-bright);
-  font-weight: 600;
-}
-.vinv-detail-stat .vinv-val.gold {
-  color: var(--vinv-gold);
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.vinv-detail-desc {
-  padding: 14px 16px;
-  font-size: var(--v-font-md);
-  color: var(--vinv-text);
-  line-height: 1.55;
-  font-style: italic;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  position: relative;
-}
-.vinv-detail-desc::before {
-  content: '"';
-  position: absolute;
-  top: 0;
-  left: 6px;
-  font-family: var(--vinv-font-display);
-  font-size: 40px;
-  color: var(--vinv-gold);
-  opacity: 0.3;
-  line-height: 1;
-}
-.vinv-detail-desc-text { padding-left: 12px; }
-
-.vinv-detail-tags {
-  padding: 0 16px 8px;
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-.vinv-dtag {
-  font-size: 9.5px;
-  color: var(--vinv-text-dim);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--vinv-border-soft);
-  padding: 2px 7px;
-  border-radius: 10px;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-
-.vinv-detail-actions {
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  border-top: 1px solid var(--vinv-border-soft);
-  background: rgba(0, 0, 0, 0.22);
-}
-.vinv-detail-actions .vinv-btn {
-  padding: 8px;
-  font-size: 11.5px;
-}
-
-/* ================================================================
-   12. LOADOUT (slot view 3×3 — opcional via tab 'equip')
-   ================================================================ */
-.vinv-loadout {
-  flex: 1;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  overflow-y: auto;
-}
-.vinv-loadout-avatar {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px 12px;
-  padding: 0 6px;
-  justify-items: center;
-}
-.vinv-slot {
-  width: 78px;
-  height: 78px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
-  border: 2px dashed rgba(74, 56, 40, 0.6);
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  gap: 3px;
-  cursor: pointer;
-}
-.vinv-slot.filled {
-  border-style: solid;
-  background: linear-gradient(180deg, var(--vinv-bg-card), #28201b);
-}
-.vinv-slot.filled.r-uncommon { border-color: var(--vinv-r-uncommon); box-shadow: 0 0 8px rgba(74, 138, 58, 0.25); }
-.vinv-slot.filled.r-rare { border-color: var(--vinv-r-rare); box-shadow: 0 0 10px rgba(58, 106, 160, 0.3); }
-.vinv-slot.filled.r-epic { border-color: var(--vinv-r-epic); box-shadow: 0 0 10px rgba(138, 58, 160, 0.32); }
-.vinv-slot.filled.r-legendary {
-  border-color: var(--vinv-r-legendary);
-  box-shadow: 0 0 14px var(--v-gold-50);
-}
-.vinv-slot.filled.r-quest {
-  border-color: var(--vinv-r-quest);
-  box-shadow: 0 0 10px rgba(196, 112, 48, 0.4);
-}
-.vinv-slot-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.vinv-slot-icon svg { width: 100%; height: 100%; }
-.vinv-slot.empty .vinv-slot-empty-glyph {
-  color: var(--vinv-border-strong, #5e4632);
-  font-size: 22px;
-  font-family: var(--vinv-font-display);
-  opacity: 0.6;
-}
-.vinv-slot-label {
-  position: absolute;
-  bottom: -18px;
-  font-size: 9.5px;
-  color: var(--vinv-text-dim);
-  white-space: nowrap;
-  font-family: var(--vinv-font-display);
-  letter-spacing: 0.6px;
-}
-.vinv-slot.filled .vinv-slot-label { color: var(--vinv-text); }
-.vinv-slot.filled.r-legendary .vinv-slot-label,
-.vinv-slot.filled.r-quest .vinv-slot-label { color: var(--vinv-gold); }
-
-.vinv-loadout-stats {
-  margin-top: 12px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--vinv-border-soft);
-  border-radius: 12px;
-  padding: 12px 14px;
-}
-.vinv-loadout-stats-title {
-  font-family: var(--vinv-font-display);
-  font-size: 10.5px;
-  color: var(--vinv-gold);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.vinv-loadout-stats-title::before, .vinv-loadout-stats-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--vinv-border-soft);
-}
-.vinv-loadout-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px 10px;
-}
-.vinv-lstat { display: flex; justify-content: space-between; font-size: var(--v-font-sm); }
-.vinv-lstat .vinv-l { color: var(--vinv-text-dim); font-family: var(--vinv-font-display); letter-spacing: 0.4px; }
-.vinv-lstat .vinv-v { color: var(--vinv-text-bright); font-weight: 600; }
-.vinv-lstat .vinv-v.bonus { color: var(--vinv-r-uncommon); }
-
-/* ================================================================
-   13b. SCROLL ARROW custom — sticky bottom do panel (não do grid).
-        Direção dinâmica: ▼ no meio (anima bounce, hint não-clickable),
-        ▲ no fim (clickable, scroll-to-top suave — timeline pattern).
-        Regra user 2026-05-14: arrow "acompanha o scrolling até não ter
-        como fazer mais, e quando chegar no final mostra seta pra cima".
-   ================================================================ */
-.vinv-scroll-arrow {
-  position: absolute;
-  bottom: 78px;  /* acima do footer (~58px) com folga */
-  left: 50%;
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(180deg, rgba(15, 12, 8, 0.9), rgba(28, 20, 12, 0.96));
-  border: 1px solid var(--v-gold-60);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--vinv-gold);
-  z-index: 10;
-  opacity: 0.92;
-  transform: translateX(-50%);
-  transition: opacity 0.25s ease, background 0.2s ease;
-  pointer-events: auto;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), 0 0 14px var(--v-gold-30);
-}
-.vinv-scroll-arrow.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-.vinv-scroll-arrow svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-  transition: transform 0.3s ease;
-}
-/* ▲ no fim do scroll: flip via SVG transform */
-.vinv-scroll-arrow.up svg {
-  transform: rotate(180deg);
-}
-.vinv-scroll-arrow:hover {
-  opacity: 1;
-  background: linear-gradient(180deg, var(--v-gold-25), rgba(28, 20, 12, 0.96));
-}
-/* Bounce animation só na direção descendente (indica "mais conteúdo abaixo") */
-@keyframes vinvScrollArrowBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%      { transform: translateX(-50%) translateY(4px); }
-}
-.vinv-scroll-arrow.down {
-  animation: vinvScrollArrowBounce 1.6s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .vinv-scroll-arrow { animation: none !important; }
-}
-
-/* ================================================================
-   13. EMPTY STATE
-   ================================================================ */
-.vinv-empty {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--vinv-text-muted);
-  font-style: italic;
-  font-size: var(--v-font-md);
-}
-
-/* ================================================================
-   14. HIDE-FILTERS — esconde tabs/filter/search/action quando
-   activeTab !== 'items' (equip ou allies). Mostra só: header + body
-   + footer (regra do user 2026-05-14).
-
-   Classes legadas .equip-mode e .allies-mode mantidas pra back compat
-   de CSS customizado nos simuladores.
-   ================================================================ */
-.vinv-panel.hide-filters .vinv-tabs,
-.vinv-panel.hide-filters .vinv-filter,
-.vinv-panel.hide-filters .vinv-search-bar,
-.vinv-panel.hide-filters .vinv-action-bar,
-.vinv-panel.equip-mode .vinv-tabs,
-.vinv-panel.equip-mode .vinv-filter,
-.vinv-panel.equip-mode .vinv-search-bar,
-.vinv-panel.equip-mode .vinv-action-bar,
-.vinv-panel.allies-mode .vinv-tabs,
-.vinv-panel.allies-mode .vinv-filter,
-.vinv-panel.allies-mode .vinv-search-bar,
-.vinv-panel.allies-mode .vinv-action-bar {
-  display: none !important;
-}
-.vinv-slot.filled { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
-.vinv-slot.filled:hover { transform: translateY(-2px) scale(1.03); }
-.vinv-slot.empty { cursor: pointer; transition: border-color 0.15s; }
-.vinv-slot.empty:hover {
-  border-color: var(--vinv-gold);
-  border-style: solid;
-}
-
-/* ================================================================
-   15. COMBAT COST BADGE (D&D 5e — PHB p.139/p.144/p.190)
-   ================================================================ */
-.vinv-cost-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: var(--v-font-xs);
-  font-family: var(--vinv-font-display);
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  vertical-align: middle;
-  cursor: help;
-}
-.vinv-cost-badge.free {
-  background: rgba(74, 138, 58, 0.2);
-  color: var(--vinv-r-uncommon);
-  border: 1px solid var(--vinv-r-uncommon);
-}
-.vinv-cost-badge.action {
-  background: var(--v-gold-20);
-  color: var(--vinv-gold);
-  border: 1px solid var(--vinv-gold);
-}
-.vinv-cost-badge.blocked {
-  background: rgba(204, 96, 96, 0.2);
-  color: #cc6060;
-  border: 1px solid #cc6060;
-}
-
-/* ================================================================
-   16. SWAP LIST (alternativas pro mesmo slot no detail modal)
-   ================================================================ */
-.vinv-swap-list {
-  padding: 12px 14px;
-  border-top: 1px solid var(--vinv-border-soft);
-  background: rgba(0, 0, 0, 0.18);
-  flex: 0 0 auto;
-  max-height: 220px;
-  overflow-y: auto;
-}
-.vinv-swap-title {
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-sm);
-  color: var(--vinv-gold);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.vinv-swap-empty {
-  font-size: var(--v-font-sm);
-  color: var(--vinv-text-muted);
-  font-style: italic;
-  padding: 4px 0;
-}
-.vinv-swap-tip {
-  font-size: 10.5px;
-  color: #cc6060;
-  font-style: italic;
-  padding: 4px 0 6px;
-  line-height: 1.4;
-}
-.vinv-swap-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  background: var(--vinv-bg-card);
-  border: 1px solid var(--vinv-border);
-  border-radius: 8px;
-  margin-bottom: 4px;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
-}
-.vinv-swap-row:hover {
-  border-color: var(--vinv-gold);
-  transform: translateX(2px);
-}
-.vinv-swap-row.r-uncommon { border-color: var(--vinv-r-uncommon); }
-.vinv-swap-row.r-rare { border-color: var(--vinv-r-rare); }
-.vinv-swap-row.r-epic { border-color: var(--vinv-r-epic); }
-.vinv-swap-row.r-legendary { border-color: var(--vinv-r-legendary); }
-.vinv-swap-row.blocked {
-  opacity: 0.45;
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-.vinv-swap-row.blocked:hover {
-  border-color: var(--vinv-border);
-  transform: none;
-}
-.vinv-swap-row svg {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
-}
-.vinv-swap-info {
-  flex: 1;
-  min-width: 0;
-}
-.vinv-swap-name {
-  font-family: var(--vinv-font-display);
-  font-size: var(--v-font-md);
-  color: var(--vinv-text);
-  letter-spacing: 0.3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.vinv-swap-meta {
-  font-size: var(--v-font-xs);
-  color: var(--vinv-text-dim);
-  margin-top: 2px;
-}
-.vinv-swap-meta .vinv-die {
-  background: var(--v-gold-15);
-  color: var(--vinv-gold);
-  border-radius: 4px;
-  padding: 0 4px;
-  font-size: 9px;
-  font-weight: 700;
-}
-.vinv-swap-meta .vinv-ac { color: var(--vinv-r-rare); font-weight: 600; }
+/**
+
+ * inventory-screen.css — Mochila canonical compartilhada entre simuladores.
+
+ *
+
+ * MAPA_IA — Navegação rápida:
+
+ *   ~30    Design tokens (raridades, espaçamento)
+
+ *   ~100   .vinv-overlay (modal container)
+
+ *   ~140   .vinv-header (título + carteira)
+
+ *   ~200   .vinv-tabs (4 categorias sem "Todos")
+
+ *   ~280   .vinv-filter (sort + search trigger)
+
+ *   ~340   .vinv-search (input + filter pills)
+
+ *   ~420   .vinv-grid + .vinv-cell (item card + raridades)
+
+ *   ~620   .vinv-badge.* (stack, equip, quest)
+
+ *   ~700   .vinv-footer (encumbrance + nav buttons)
+
+ *   ~780   .vinv-detail-* (modal de item)
+
+ *   ~950   .vinv-loadout (slot view 3x3)
+
+ *   ~1070  .vinv-empty + helpers
+
+ *
+
+ * REGRAS:
+
+ *  - Prefixo `vinv-*` para evitar colisão com `.inv-*` existente em cidade.html
+
+ *  - Reusa tokens `--v-*` do design system Valdoria (valdoria-design.css)
+
+ *  - Ícones de items SEMPRE via `<use href="#ic-it-*">` (sprite canônico)
+
+ *  - Ícones de UI usam prefixo `vui-*` (back/close/check/search/sort/filter)
+
+ *
+
+ * Doc: docs/sistemas/heraldic-items-icons-index.md (519 IDs `ic-it-*`)
+
+ * Regra CLAUDE.md: "Items Existentes — NUNCA recriar SVG novo (2026-05-14)"
+
+ */
+
+
+
+/* ================================================================
+
+   1. DESIGN TOKENS (raridades + spacing)
+
+   ================================================================ */
+
+.vinv-overlay {
+
+  /* Raridades D&D 5e */
+
+  --vinv-r-common: #8a8580;
+
+  --vinv-r-uncommon: #4a8a3a;
+
+  --vinv-r-rare: #3a6aa0;
+
+  --vinv-r-epic: #8a3aa0;
+
+  --vinv-r-legendary: #c4953a;
+
+  --vinv-r-quest: #c47030;
+
+
+
+  /* Fallbacks pra tokens Valdoria caso o design system não esteja carregado */
+
+  --vinv-bg-mid: var(--v-bg-mid, #2a2420);
+
+  --vinv-bg-card: var(--v-bg-card, #2e2520);
+
+  --vinv-bg-raised: var(--v-bg-raised, #332a22);
+
+  --vinv-border: var(--v-border, #4a3828);
+
+  --vinv-border-soft: var(--v-border-soft, rgba(74, 56, 40, 0.55));
+
+  --vinv-text: var(--v-text, #d4c8b0);
+
+  --vinv-text-dim: var(--v-text-dim, #a09484);
+
+  --vinv-text-bright: var(--v-text-bright, #f0e4cc);
+
+  --vinv-text-muted: var(--v-text-muted, #6a5e50);
+
+  --vinv-gold: var(--v-gold, #c4953a);
+
+  --vinv-gold-bright: var(--v-gold-bright, #e8c45a);
+
+  --vinv-gold-glow: var(--v-gold-40);
+
+  --vinv-font: var(--v-font, 'MedievalSharp', 'Cinzel', 'Georgia', serif);
+
+  --vinv-font-display: var(--v-font-display, 'Cinzel', 'Georgia', serif);
+
+}
+
+
+
+/* ================================================================
+
+   2. OVERLAY (modal container)
+
+   ================================================================ */
+
+.vinv-overlay {
+
+  /* 2026-05-17: overlay confinado ao frame do simulador via mount no
+
+     #frame/#app (ver inventory-screen.js _vinvHost) com classe
+
+     .vinv-overlay--contained. Quando contained, usa position:absolute
+
+     inset:0 dentro do host. Quando NOT contained (webapp / body mount),
+
+     usa position:fixed centralizado no viewport (legacy fallback). */
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  /* Simulator (file://): --sim-frame-w=480px (cap smartphone canonical).
+
+     WebApp deploy: var indefinida, fallback=430px (valdoria-design.css
+
+     IMUTÁVEL html max-width). */
+
+  width: var(--sim-frame-w, min(100vw, 430px));
+
+  height: var(--sim-frame-h, 100dvh);
+
+  background: rgba(8, 5, 3, 0.7);
+
+  backdrop-filter: blur(2px);
+
+  display: none;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 9000;
+
+  /* Padding mínimo — painel ocupa ≥ 95% interno (regra: ≥90%) */
+
+  padding: 8px;
+
+  font-family: var(--vinv-font);
+
+  color: var(--vinv-text);
+
+}
+
+.vinv-overlay.active { display: flex; }
+
+
+
+/* 2026-05-17: Overlay CONTAINED (mounted inside #frame/#app simulator host).
+
+   Position:absolute + inset:0 = ocupa 100% do host (que JÁ está sized via
+
+   --sim-frame-w/h). Evita position:fixed escapar pro viewport do browser
+
+   em monitores wide. Host marca-se com .vinv-host (position:relative se não
+
+   tinha) pra estabelecer containing block. */
+
+.vinv-host { position: relative; }
+
+.vinv-overlay.vinv-overlay--contained {
+
+  position: absolute !important;
+
+  inset: 0 !important;
+
+  top: 0 !important;
+
+  left: 0 !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  max-height: 100% !important;
+
+  transform: none !important;
+
+}
+
+
+
+.vinv-panel {
+
+  /* 2026-05-15: ocupa todo o frame menos padding (≥95% efetivo).
+
+     Antes: max-width 430px + max-height 720px deixavam o painel pequeno
+
+     em telas que poderiam comportar mais conteúdo. */
+
+  width: 100%;
+
+  max-width: 100%;
+
+  height: 100%;
+
+  max-height: 100%;
+
+  background: var(--vinv-bg-mid);
+
+  border: 1px solid var(--vinv-gold);
+
+  border-radius: 14px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+  box-shadow:
+
+    0 30px 80px rgba(0, 0, 0, 0.7),
+
+    0 0 40px var(--v-gold-25);
+
+  position: relative;
+
+  /* 2026-05-14: container query base — grid se adapta ao TAMANHO DO PAINEL
+
+     (não viewport). Necessário porque painel tem max-width fixo: viewport
+
+     desktop não significa painel largo. */
+
+  container-type: inline-size;
+
+}
+
+
+
+/* Quando embedded num popup existente (sem overlay próprio) */
+
+.vinv-embedded {
+
+  width: 100%;
+
+  height: 100%;
+
+  background: var(--vinv-bg-mid);
+
+  display: flex;
+
+  flex-direction: column;
+
+  font-family: var(--vinv-font);
+
+  color: var(--vinv-text);
+
+}
+
+
+
+/* ================================================================
+
+   3. HEADER (title + wallet)
+
+   ================================================================ */
+
+.vinv-header {
+
+  padding: 18px 14px 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  background: linear-gradient(180deg, rgba(74, 56, 40, 0.4) 0%, transparent 100%);
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+}
+
+.vinv-header-title {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-2xl);
+
+  color: var(--vinv-gold);
+
+  font-weight: 700;
+
+  letter-spacing: 3px;
+
+  text-shadow: 0 0 14px var(--vinv-gold-glow);
+
+}
+
+.vinv-header-title svg {
+
+  width: 22px;
+
+  height: 22px;
+
+  color: var(--vinv-gold);
+
+}
+
+.vinv-wallet {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  padding: 5px 10px 5px 6px;
+
+  border-radius: 16px;
+
+  border: 1px solid var(--v-gold-40);
+
+  font-size: var(--v-font-base);
+
+  color: var(--vinv-gold);
+
+  font-weight: 600;
+
+  font-family: var(--vinv-font-display);
+
+}
+
+.vinv-coin {
+
+  width: 18px;
+
+  height: 18px;
+
+  border-radius: 50%;
+
+  background:
+
+    radial-gradient(circle at 32% 32%, #fff4d0 0%, #e8c45a 30%, #c4953a 55%, #8b6420 90%);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-sm);
+
+  font-weight: 900;
+
+  color: #5a3e10;
+
+  box-shadow: 0 0 6px var(--v-gold-50), inset 0 -2px 4px rgba(90, 62, 16, 0.4);
+
+}
+
+.vinv-coin.mini { width: 11px; height: 11px; font-size: calc(7px * var(--v-font-scale, 1)); }
+
+
+
+/* ================================================================
+
+   4. TABS (4 categorias sem "Todos")
+
+   Quando nenhuma ativa → mostra TUDO (filter é filter, não tab)
+
+   ================================================================ */
+
+.vinv-tabs {
+
+  display: flex;
+
+  gap: 4px;
+
+  padding: 8px 8px 6px;
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+
+}
+
+.vinv-tabs::-webkit-scrollbar { display: none; }
+
+
+
+.vinv-tab {
+
+  flex: 1 1 0;
+
+  min-width: 0;
+
+  padding: 6px 6px;
+
+  font-size: var(--v-font-sm);
+
+  color: var(--vinv-text-dim);
+
+  background: transparent;
+
+  border: 1px solid transparent;
+
+  border-radius: 14px;
+
+  white-space: nowrap;
+
+  font-family: inherit;
+
+  letter-spacing: 0.3px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  cursor: pointer;
+
+}
+
+.vinv-tab-label {
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  min-width: 0;
+
+}
+
+.vinv-tab .vinv-tcount {
+
+  display: inline-block;
+
+  background: rgba(160, 148, 132, 0.15);
+
+  border-radius: 8px;
+
+  padding: 0 5px;
+
+  font-size: var(--v-font-xs);
+
+  color: var(--vinv-text-dim);
+
+  font-weight: 600;
+
+  min-width: 16px;
+
+  text-align: center;
+
+  flex: 0 0 auto;
+
+}
+
+.vinv-tab.active {
+
+  color: var(--vinv-gold);
+
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.18), var(--v-gold-06));
+
+  border-color: rgba(196, 149, 58, 0.45);
+
+  box-shadow: 0 0 10px var(--v-gold-20);
+
+}
+
+.vinv-tab.active .vinv-tcount {
+
+  background: var(--v-gold-25);
+
+  color: var(--vinv-gold);
+
+}
+
+
+
+/* ================================================================
+
+   5. FILTER BAR (sort + search trigger)
+
+   ================================================================ */
+
+.vinv-filter {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 6px 14px;
+
+  background: rgba(0, 0, 0, 0.18);
+
+  font-size: var(--v-font-sm);
+
+  color: var(--vinv-text-dim);
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+}
+
+.vinv-filter-left {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+}
+
+.vinv-sort, .vinv-search-toggle {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  cursor: pointer;
+
+  padding: 2px 4px;
+
+  background: transparent;
+
+  border: none;
+
+  color: var(--vinv-text-dim);
+
+  font-family: inherit;
+
+  font-size: inherit;
+
+}
+
+.vinv-sort svg, .vinv-search-toggle svg {
+
+  width: 12px;
+
+  height: 12px;
+
+  color: var(--vinv-text-dim);
+
+}
+
+.vinv-sort:hover, .vinv-search-toggle:hover { color: var(--vinv-gold); }
+
+
+
+/* ================================================================
+
+   6. SEARCH BAR (input + filter pills)
+
+   ================================================================ */
+
+.vinv-search-bar {
+
+  padding: 8px 14px;
+
+  background: rgba(0, 0, 0, 0.3);
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+  display: none;
+
+}
+
+.vinv-search-bar.active { display: block; }
+
+.vinv-search-input {
+
+  width: 100%;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  border: 1px solid var(--vinv-border);
+
+  border-radius: 14px;
+
+  padding: 6px 12px 6px 10px;
+
+  color: var(--vinv-text);
+
+  font-family: var(--vinv-font);
+
+  font-size: var(--v-font-base);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+}
+
+.vinv-search-input svg {
+
+  width: 13px;
+
+  height: 13px;
+
+  color: var(--vinv-text-dim);
+
+  flex: 0 0 13px;
+
+}
+
+.vinv-search-input input {
+
+  flex: 1;
+
+  background: transparent;
+
+  border: none;
+
+  color: var(--vinv-text);
+
+  font-family: inherit;
+
+  font-size: inherit;
+
+  outline: none;
+
+  padding: 0;
+
+}
+
+.vinv-filter-pills {
+
+  display: flex;
+
+  gap: 4px;
+
+  margin-top: 8px;
+
+  flex-wrap: wrap;
+
+}
+
+.vinv-fpill {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 3px;
+
+  background: var(--v-gold-15);
+
+  border: 1px solid rgba(196, 149, 58, 0.45);
+
+  color: var(--vinv-gold);
+
+  font-size: var(--v-font-xs);
+
+  padding: 2px 7px 2px 8px;
+
+  border-radius: 10px;
+
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+}
+
+.vinv-fpill .vinv-x { font-size: var(--v-font-sm); opacity: 0.7; margin-left: 1px; }
+
+
+
+/* ================================================================
+
+   7. GRID (item cards)
+
+   ================================================================ */
+
+.vinv-grid {
+
+  flex: 1 1 auto;
+
+  overflow-y: auto;
+
+  padding: 10px;
+
+  display: grid;
+
+  /* 2 cols default (mobile-first — regra do user 2026-05-14: 3 cols ficava
+
+     espremido em Telegram Desktop ~430px). Container queries baseiam
+
+     responsividade no tamanho REAL do painel, não viewport. */
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 8px;
+
+  align-content: start;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: var(--vinv-border) transparent;
+
+}
+
+/* Container queries — usam .vinv-panel (container-type: inline-size) */
+
+@container (min-width: 540px) {
+
+  .vinv-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+
+}
+
+@container (min-width: 760px) {
+
+  .vinv-grid { grid-template-columns: repeat(4, 1fr); }
+
+}
+
+/* Fallback pra browsers sem container queries (Safari < 16, etc.):
+
+   mantém 2 cols sempre (não regredir pra cells espremidas). */
+
+.vinv-grid::-webkit-scrollbar { width: 4px; }
+
+.vinv-grid::-webkit-scrollbar-thumb { background: var(--vinv-border); border-radius: 2px; }
+
+
+
+.vinv-section-header {
+
+  grid-column: 1 / -1;
+
+  padding: 6px 4px 4px;
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-xs);
+
+  color: var(--vinv-gold);
+
+  letter-spacing: 2.5px;
+
+  text-transform: uppercase;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+}
+
+.vinv-section-header::before,
+
+.vinv-section-header::after {
+
+  content: '';
+
+  flex: 1;
+
+  height: 1px;
+
+  background: linear-gradient(90deg, transparent, var(--vinv-border-soft), transparent);
+
+}
+
+
+
+/* ================================================================
+
+   8. ITEM CELL
+
+   ================================================================ */
+
+.vinv-cell {
+
+  background: linear-gradient(180deg, var(--vinv-bg-card) 0%, #28201b 100%);
+
+  border: 1px solid var(--vinv-border);
+
+  border-radius: 11px;
+
+  padding: 6px 4px 5px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 3px;
+
+  position: relative;
+
+  min-height: 108px;
+
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+  cursor: pointer;
+
+}
+
+.vinv-cell::before {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 11px;
+
+  pointer-events: none;
+
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04), transparent 70%);
+
+}
+
+.vinv-cell:hover {
+
+  transform: translateY(-1px);
+
+  border-color: var(--vinv-gold);
+
+}
+
+.vinv-cell.r-common { border-color: var(--vinv-r-common); }
+
+.vinv-cell.r-uncommon {
+
+  border-color: var(--vinv-r-uncommon);
+
+  box-shadow: 0 0 8px rgba(74, 138, 58, 0.25), inset 0 0 12px rgba(74, 138, 58, 0.05);
+
+}
+
+.vinv-cell.r-rare {
+
+  border-color: var(--vinv-r-rare);
+
+  box-shadow: 0 0 10px rgba(58, 106, 160, 0.32), inset 0 0 14px rgba(58, 106, 160, 0.08);
+
+}
+
+.vinv-cell.r-epic {
+
+  border-color: var(--vinv-r-epic);
+
+  box-shadow: 0 0 12px rgba(138, 58, 160, 0.38), inset 0 0 14px rgba(138, 58, 160, 0.1);
+
+}
+
+.vinv-cell.r-legendary {
+
+  border-color: var(--vinv-r-legendary);
+
+  box-shadow: 0 0 16px var(--v-gold-50), inset 0 0 14px var(--v-gold-12);
+
+  background: linear-gradient(180deg, #3a2a1a 0%, #28201b 100%);
+
+}
+
+.vinv-cell.r-quest {
+
+  border-color: var(--vinv-r-quest);
+
+  background:
+
+    repeating-linear-gradient(45deg,
+
+      var(--vinv-bg-card),
+
+      var(--vinv-bg-card) 6px,
+
+      #322820 6px,
+
+      #322820 7px);
+
+  box-shadow: 0 0 8px rgba(196, 112, 48, 0.3);
+
+}
+
+
+
+.vinv-cell.empty {
+
+  border-style: dashed;
+
+  border-color: rgba(74, 56, 40, 0.4);
+
+  background: rgba(0, 0, 0, 0.2);
+
+  box-shadow: none;
+
+  cursor: default;
+
+}
+
+.vinv-cell.empty::before { display: none; }
+
+
+
+.vinv-icon {
+
+  width: 48px;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+}
+
+.vinv-icon svg {
+
+  width: 100%;
+
+  height: 100%;
+
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+
+}
+
+.vinv-name {
+
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-text);
+
+  text-align: center;
+
+  font-family: var(--vinv-font-display);
+
+  line-height: 1.15;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  max-width: 100%;
+
+  letter-spacing: 0.3px;
+
+  padding: 0 2px;
+
+}
+
+.vinv-meta {
+
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-text-dim);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 2px;
+
+  margin-top: 1px;
+
+}
+
+.vinv-meta .vinv-die {
+
+  background: var(--v-gold-15);
+
+  color: var(--vinv-gold);
+
+  border-radius: 4px;
+
+  padding: 0 4px;
+
+  font-size: calc(9px * var(--v-font-scale, 1));
+
+  font-weight: 700;
+
+  letter-spacing: 0.3px;
+
+}
+
+.vinv-meta .vinv-ac {
+
+  color: var(--vinv-r-rare);
+
+  font-weight: 600;
+
+}
+
+
+
+/* ================================================================
+
+   9. BADGES (stack, equip, quest, fav)
+
+   ================================================================ */
+
+.vinv-badge {
+
+  position: absolute;
+
+  top: 3px;
+
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+
+  font-weight: 700;
+
+  font-family: var(--vinv-font-display);
+
+  line-height: 1;
+
+  padding: 2px 5px;
+
+  border-radius: 8px;
+
+  z-index: 2;
+
+  letter-spacing: 0.3px;
+
+}
+
+.vinv-badge.stack {
+
+  right: 3px;
+
+  background: rgba(0, 0, 0, 0.78);
+
+  color: var(--vinv-gold);
+
+  border: 1px solid var(--v-gold-70);
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+
+}
+
+.vinv-badge.equip {
+
+  left: 3px;
+
+  background: linear-gradient(180deg, #e8c45a, #c4953a);
+
+  color: #1a1510;
+
+  border: 1px solid #8b6420;
+
+  width: 16px;
+
+  height: 16px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+}
+
+.vinv-badge.equip svg { width: 11px; height: 11px; color: #1a1510; stroke-width: 3; }
+
+.vinv-badge.quest {
+
+  left: 3px;
+
+  background: rgba(196, 112, 48, 0.2);
+
+  color: var(--vinv-r-quest);
+
+  border: 1px solid var(--vinv-r-quest);
+
+  width: 16px;
+
+  height: 16px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+}
+
+.vinv-badge.quest svg { width: 9px; height: 9px; }
+
+.vinv-badge.fav {
+
+  right: 24px;
+
+  background: transparent;
+
+  color: var(--vinv-gold);
+
+  border: none;
+
+  padding: 0;
+
+  font-size: var(--v-font-base);
+
+  text-shadow: 0 0 6px rgba(196, 149, 58, 0.8);
+
+}
+
+
+
+/* ================================================================
+
+   10. FOOTER (encumbrance + nav)
+
+   ================================================================ */
+
+.vinv-footer {
+
+  padding: 10px 14px 12px;
+
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+
+  border-top: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+}
+
+.vinv-encumbrance {
+
+  margin-bottom: 10px;
+
+}
+
+.vinv-enc-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-text-dim);
+
+  margin-bottom: 4px;
+
+  font-family: var(--vinv-font-display);
+
+  letter-spacing: 1px;
+
+}
+
+.vinv-enc-row .vinv-val { color: var(--vinv-text); }
+
+.vinv-enc-bar {
+
+  height: 7px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  border-radius: 4px;
+
+  overflow: hidden;
+
+  border: 1px solid var(--vinv-border-soft);
+
+  position: relative;
+
+}
+
+.vinv-enc-fill {
+
+  height: 100%;
+
+  background: linear-gradient(90deg, #c4953a, #e8c45a);
+
+  border-radius: 3px;
+
+  box-shadow: 0 0 8px var(--v-gold-40);
+
+  transition: width 0.4s;
+
+}
+
+.vinv-enc-fill.warn { background: linear-gradient(90deg, #c0712a, #e09030); }
+
+.vinv-enc-fill.over { background: linear-gradient(90deg, #a52828, #cc3838); }
+
+
+
+.vinv-nav {
+
+  display: flex;
+
+  gap: 6px;
+
+}
+
+.vinv-btn {
+
+  flex: 1;
+
+  padding: 9px 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--vinv-border);
+
+  background: linear-gradient(180deg, var(--vinv-bg-raised), #261e18);
+
+  color: var(--vinv-text);
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-md);
+
+  letter-spacing: 1px;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+}
+
+.vinv-btn svg { width: 13px; height: 13px; }
+
+.vinv-btn.primary {
+
+  background: linear-gradient(180deg, var(--v-gold-30), var(--v-gold-10));
+
+  border-color: var(--vinv-gold);
+
+  color: var(--vinv-gold);
+
+  box-shadow: 0 0 8px var(--v-gold-20);
+
+}
+
+.vinv-btn.danger {
+
+  color: #cc6060;
+
+  border-color: rgba(165, 40, 40, 0.5);
+
+}
+
+.vinv-btn[disabled] {
+
+  opacity: 0.4;
+
+  cursor: not-allowed;
+
+}
+
+
+
+/* Bulk action bar (Vender Lixo + Fundir Gemas — opcional via config) */
+
+.vinv-action-bar {
+
+  display: flex;
+
+  gap: 6px;
+
+  padding: 6px 10px;
+
+  background: rgba(0, 0, 0, 0.18);
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  flex: 0 0 auto;
+
+}
+
+.vinv-action-btn {
+
+  flex: 1;
+
+  padding: 6px 8px;
+
+  border-radius: 8px;
+
+  border: 1px solid var(--v-gold-50);
+
+  background: var(--v-gold-10);
+
+  color: var(--vinv-gold);
+
+  font-family: var(--vinv-font);
+
+  font-size: var(--v-font-sm);
+
+  cursor: pointer;
+
+  letter-spacing: 0.5px;
+
+}
+
+.vinv-action-btn:hover {
+
+  background: var(--v-gold-20);
+
+}
+
+
+
+/* ================================================================
+
+   11. DETAIL MODAL (item detail overlay)
+
+   ================================================================ */
+
+.vinv-detail-overlay {
+
+  position: absolute;
+
+  inset: 0;
+
+  background: rgba(8, 5, 3, 0.82);
+
+  backdrop-filter: blur(3px);
+
+  display: none;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  z-index: 20;
+
+}
+
+.vinv-detail-overlay.active { display: flex; }
+
+
+
+.vinv-detail-card {
+
+  background: linear-gradient(180deg, #3a2c20 0%, #2a2018 100%);
+
+  border: 2px solid var(--vinv-gold);
+
+  border-radius: 18px;
+
+  width: 100%;
+
+  max-height: 90%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  box-shadow:
+
+    0 20px 50px rgba(0, 0, 0, 0.6),
+
+    0 0 40px var(--v-gold-40);
+
+  overflow: hidden;
+
+  position: relative;
+
+}
+
+.vinv-detail-card::before {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 4px;
+
+  border: 1px solid var(--v-gold-25);
+
+  border-radius: 14px;
+
+  pointer-events: none;
+
+}
+
+.vinv-detail-close {
+
+  position: absolute;
+
+  top: 10px;
+
+  right: 10px;
+
+  width: 28px;
+
+  height: 28px;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  border: 1px solid var(--vinv-border);
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: var(--vinv-text-dim);
+
+  cursor: pointer;
+
+  z-index: 2;
+
+}
+
+.vinv-detail-close svg { width: 13px; height: 13px; }
+
+
+
+.vinv-detail-header {
+
+  padding: 22px 16px 14px;
+
+  text-align: center;
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+}
+
+.vinv-detail-portrait {
+
+  width: 96px;
+
+  height: 96px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: radial-gradient(circle at 50% 50%, var(--v-gold-25) 0%, transparent 70%);
+
+  border-radius: 50%;
+
+  position: relative;
+
+}
+
+.vinv-detail-portrait::after {
+
+  content: '';
+
+  position: absolute;
+
+  inset: -6px;
+
+  border-radius: 50%;
+
+  border: 1px solid var(--v-gold-40);
+
+}
+
+.vinv-detail-portrait svg {
+
+  width: 80px;
+
+  height: 80px;
+
+  filter: drop-shadow(0 0 10px var(--v-gold-50));
+
+}
+
+.vinv-detail-name {
+
+  font-family: var(--vinv-font-display);
+
+  font-size: calc(19px * var(--v-font-scale, 1));
+
+  color: var(--vinv-gold);
+
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+
+  margin-bottom: 4px;
+
+  text-shadow: 0 0 15px var(--vinv-gold-glow);
+
+}
+
+.vinv-detail-rarity {
+
+  font-family: var(--vinv-font-display);
+
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+
+  letter-spacing: 3px;
+
+  text-transform: uppercase;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+}
+
+.vinv-detail-rarity::before, .vinv-detail-rarity::after { content: '◆'; font-size: calc(8px * var(--v-font-scale, 1)); opacity: 0.6; }
+
+.vinv-detail-rarity.legendary { color: var(--vinv-r-legendary); }
+
+.vinv-detail-rarity.epic { color: var(--vinv-r-epic); }
+
+.vinv-detail-rarity.rare { color: var(--vinv-r-rare); }
+
+.vinv-detail-rarity.uncommon { color: var(--vinv-r-uncommon); }
+
+.vinv-detail-rarity.common { color: var(--vinv-r-common); }
+
+
+
+.vinv-detail-stats {
+
+  padding: 12px 14px;
+
+  background: rgba(0, 0, 0, 0.22);
+
+  border-bottom: 1px solid var(--vinv-border-soft);
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 5px 14px;
+
+}
+
+.vinv-detail-stat {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+
+  align-items: center;
+
+}
+
+.vinv-detail-stat .vinv-lbl {
+
+  color: var(--vinv-text-dim);
+
+  font-family: var(--vinv-font-display);
+
+  letter-spacing: 0.5px;
+
+}
+
+.vinv-detail-stat .vinv-val {
+
+  color: var(--vinv-text-bright);
+
+  font-weight: 600;
+
+}
+
+.vinv-detail-stat .vinv-val.gold {
+
+  color: var(--vinv-gold);
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 3px;
+
+}
+
+
+
+.vinv-detail-desc {
+
+  padding: 14px 16px;
+
+  font-size: var(--v-font-md);
+
+  color: var(--vinv-text);
+
+  line-height: 1.55;
+
+  font-style: italic;
+
+  flex: 1 1 auto;
+
+  overflow-y: auto;
+
+  position: relative;
+
+}
+
+.vinv-detail-desc::before {
+
+  content: '"';
+
+  position: absolute;
+
+  top: 0;
+
+  left: 6px;
+
+  font-family: var(--vinv-font-display);
+
+  font-size: calc(40px * var(--v-font-scale, 1));
+
+  color: var(--vinv-gold);
+
+  opacity: 0.3;
+
+  line-height: 1;
+
+}
+
+.vinv-detail-desc-text { padding-left: 12px; }
+
+
+
+.vinv-detail-tags {
+
+  padding: 0 16px 8px;
+
+  display: flex;
+
+  gap: 5px;
+
+  flex-wrap: wrap;
+
+}
+
+.vinv-dtag {
+
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-text-dim);
+
+  background: rgba(0, 0, 0, 0.3);
+
+  border: 1px solid var(--vinv-border-soft);
+
+  padding: 2px 7px;
+
+  border-radius: 10px;
+
+  letter-spacing: 0.4px;
+
+  text-transform: uppercase;
+
+}
+
+
+
+.vinv-detail-actions {
+
+  padding: 10px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 6px;
+
+  border-top: 1px solid var(--vinv-border-soft);
+
+  background: rgba(0, 0, 0, 0.22);
+
+}
+
+.vinv-detail-actions .vinv-btn {
+
+  padding: 8px;
+
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+
+}
+
+
+
+/* ================================================================
+
+   12. LOADOUT (slot view 3×3 — opcional via tab 'equip')
+
+   ================================================================ */
+
+.vinv-loadout {
+
+  flex: 1;
+
+  padding: 18px 16px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+
+  overflow-y: auto;
+
+}
+
+.vinv-loadout-avatar {
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr 1fr;
+
+  gap: 14px 12px;
+
+  padding: 0 6px;
+
+  justify-items: center;
+
+}
+
+.vinv-slot {
+
+  width: 78px;
+
+  height: 78px;
+
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+
+  border: 2px dashed rgba(74, 56, 40, 0.6);
+
+  border-radius: 14px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  position: relative;
+
+  gap: 3px;
+
+  cursor: pointer;
+
+}
+
+.vinv-slot.filled {
+
+  border-style: solid;
+
+  background: linear-gradient(180deg, var(--vinv-bg-card), #28201b);
+
+}
+
+.vinv-slot.filled.r-uncommon { border-color: var(--vinv-r-uncommon); box-shadow: 0 0 8px rgba(74, 138, 58, 0.25); }
+
+.vinv-slot.filled.r-rare { border-color: var(--vinv-r-rare); box-shadow: 0 0 10px rgba(58, 106, 160, 0.3); }
+
+.vinv-slot.filled.r-epic { border-color: var(--vinv-r-epic); box-shadow: 0 0 10px rgba(138, 58, 160, 0.32); }
+
+.vinv-slot.filled.r-legendary {
+
+  border-color: var(--vinv-r-legendary);
+
+  box-shadow: 0 0 14px var(--v-gold-50);
+
+}
+
+.vinv-slot.filled.r-quest {
+
+  border-color: var(--vinv-r-quest);
+
+  box-shadow: 0 0 10px rgba(196, 112, 48, 0.4);
+
+}
+
+.vinv-slot-icon {
+
+  width: 48px;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+}
+
+.vinv-slot-icon svg { width: 100%; height: 100%; }
+
+.vinv-slot.empty .vinv-slot-empty-glyph {
+
+  color: var(--vinv-border-strong, #5e4632);
+
+  font-size: calc(22px * var(--v-font-scale, 1));
+
+  font-family: var(--vinv-font-display);
+
+  opacity: 0.6;
+
+}
+
+.vinv-slot-label {
+
+  position: absolute;
+
+  bottom: -18px;
+
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-text-dim);
+
+  white-space: nowrap;
+
+  font-family: var(--vinv-font-display);
+
+  letter-spacing: 0.6px;
+
+}
+
+.vinv-slot.filled .vinv-slot-label { color: var(--vinv-text); }
+
+.vinv-slot.filled.r-legendary .vinv-slot-label,
+
+.vinv-slot.filled.r-quest .vinv-slot-label { color: var(--vinv-gold); }
+
+
+
+.vinv-loadout-stats {
+
+  margin-top: 12px;
+
+  background: rgba(0, 0, 0, 0.25);
+
+  border: 1px solid var(--vinv-border-soft);
+
+  border-radius: 12px;
+
+  padding: 12px 14px;
+
+}
+
+.vinv-loadout-stats-title {
+
+  font-family: var(--vinv-font-display);
+
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+
+  color: var(--vinv-gold);
+
+  letter-spacing: 2.5px;
+
+  text-transform: uppercase;
+
+  text-align: center;
+
+  margin-bottom: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+}
+
+.vinv-loadout-stats-title::before, .vinv-loadout-stats-title::after {
+
+  content: '';
+
+  flex: 1;
+
+  height: 1px;
+
+  background: var(--vinv-border-soft);
+
+}
+
+.vinv-loadout-stats-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 6px 10px;
+
+}
+
+.vinv-lstat { display: flex; justify-content: space-between; font-size: var(--v-font-sm); }
+
+.vinv-lstat .vinv-l { color: var(--vinv-text-dim); font-family: var(--vinv-font-display); letter-spacing: 0.4px; }
+
+.vinv-lstat .vinv-v { color: var(--vinv-text-bright); font-weight: 600; }
+
+.vinv-lstat .vinv-v.bonus { color: var(--vinv-r-uncommon); }
+
+
+
+/* ================================================================
+
+   13b. SCROLL ARROW custom — sticky bottom do panel (não do grid).
+
+        Direção dinâmica: ▼ no meio (anima bounce, hint não-clickable),
+
+        ▲ no fim (clickable, scroll-to-top suave — timeline pattern).
+
+        Regra user 2026-05-14: arrow "acompanha o scrolling até não ter
+
+        como fazer mais, e quando chegar no final mostra seta pra cima".
+
+   ================================================================ */
+
+.vinv-scroll-arrow {
+
+  position: absolute;
+
+  bottom: 78px;  /* acima do footer (~58px) com folga */
+
+  left: 50%;
+
+  width: 34px;
+
+  height: 34px;
+
+  background: linear-gradient(180deg, rgba(15, 12, 8, 0.9), rgba(28, 20, 12, 0.96));
+
+  border: 1px solid var(--v-gold-60);
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: var(--vinv-gold);
+
+  z-index: 10;
+
+  opacity: 0.92;
+
+  transform: translateX(-50%);
+
+  transition: opacity 0.25s ease, background 0.2s ease;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), 0 0 14px var(--v-gold-30);
+
+}
+
+.vinv-scroll-arrow.hidden {
+
+  opacity: 0;
+
+  pointer-events: none;
+
+}
+
+.vinv-scroll-arrow svg {
+
+  width: 16px;
+
+  height: 16px;
+
+  display: block;
+
+  transition: transform 0.3s ease;
+
+}
+
+/* ▲ no fim do scroll: flip via SVG transform */
+
+.vinv-scroll-arrow.up svg {
+
+  transform: rotate(180deg);
+
+}
+
+.vinv-scroll-arrow:hover {
+
+  opacity: 1;
+
+  background: linear-gradient(180deg, var(--v-gold-25), rgba(28, 20, 12, 0.96));
+
+}
+
+/* Bounce animation só na direção descendente (indica "mais conteúdo abaixo") */
+
+@keyframes vinvScrollArrowBounce {
+
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+
+  50%      { transform: translateX(-50%) translateY(4px); }
+
+}
+
+.vinv-scroll-arrow.down {
+
+  animation: vinvScrollArrowBounce 1.6s ease-in-out infinite;
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .vinv-scroll-arrow { animation: none !important; }
+
+}
+
+
+
+/* ================================================================
+
+   13. EMPTY STATE
+
+   ================================================================ */
+
+.vinv-empty {
+
+  grid-column: 1 / -1;
+
+  text-align: center;
+
+  padding: 32px 16px;
+
+  color: var(--vinv-text-muted);
+
+  font-style: italic;
+
+  font-size: var(--v-font-md);
+
+}
+
+
+
+/* ================================================================
+
+   14. HIDE-FILTERS — esconde tabs/filter/search/action quando
+
+   activeTab !== 'items' (equip ou allies). Mostra só: header + body
+
+   + footer (regra do user 2026-05-14).
+
+
+
+   Classes legadas .equip-mode e .allies-mode mantidas pra back compat
+
+   de CSS customizado nos simuladores.
+
+   ================================================================ */
+
+.vinv-panel.hide-filters .vinv-tabs,
+
+.vinv-panel.hide-filters .vinv-filter,
+
+.vinv-panel.hide-filters .vinv-search-bar,
+
+.vinv-panel.hide-filters .vinv-action-bar,
+
+.vinv-panel.equip-mode .vinv-tabs,
+
+.vinv-panel.equip-mode .vinv-filter,
+
+.vinv-panel.equip-mode .vinv-search-bar,
+
+.vinv-panel.equip-mode .vinv-action-bar,
+
+.vinv-panel.allies-mode .vinv-tabs,
+
+.vinv-panel.allies-mode .vinv-filter,
+
+.vinv-panel.allies-mode .vinv-search-bar,
+
+.vinv-panel.allies-mode .vinv-action-bar {
+
+  display: none !important;
+
+}
+
+.vinv-slot.filled { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+
+.vinv-slot.filled:hover { transform: translateY(-2px) scale(1.03); }
+
+.vinv-slot.empty { cursor: pointer; transition: border-color 0.15s; }
+
+.vinv-slot.empty:hover {
+
+  border-color: var(--vinv-gold);
+
+  border-style: solid;
+
+}
+
+
+
+/* ================================================================
+
+   15. COMBAT COST BADGE (D&D 5e — PHB p.139/p.144/p.190)
+
+   ================================================================ */
+
+.vinv-cost-badge {
+
+  display: inline-block;
+
+  padding: 2px 8px;
+
+  border-radius: 10px;
+
+  font-size: var(--v-font-xs);
+
+  font-family: var(--vinv-font-display);
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+
+  vertical-align: middle;
+
+  cursor: help;
+
+}
+
+.vinv-cost-badge.free {
+
+  background: rgba(74, 138, 58, 0.2);
+
+  color: var(--vinv-r-uncommon);
+
+  border: 1px solid var(--vinv-r-uncommon);
+
+}
+
+.vinv-cost-badge.action {
+
+  background: var(--v-gold-20);
+
+  color: var(--vinv-gold);
+
+  border: 1px solid var(--vinv-gold);
+
+}
+
+.vinv-cost-badge.blocked {
+
+  background: rgba(204, 96, 96, 0.2);
+
+  color: #cc6060;
+
+  border: 1px solid #cc6060;
+
+}
+
+
+
+/* ================================================================
+
+   16. SWAP LIST (alternativas pro mesmo slot no detail modal)
+
+   ================================================================ */
+
+.vinv-swap-list {
+
+  padding: 12px 14px;
+
+  border-top: 1px solid var(--vinv-border-soft);
+
+  background: rgba(0, 0, 0, 0.18);
+
+  flex: 0 0 auto;
+
+  max-height: 220px;
+
+  overflow-y: auto;
+
+}
+
+.vinv-swap-title {
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-sm);
+
+  color: var(--vinv-gold);
+
+  letter-spacing: 1.5px;
+
+  text-transform: uppercase;
+
+  margin-bottom: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+}
+
+.vinv-swap-empty {
+
+  font-size: var(--v-font-sm);
+
+  color: var(--vinv-text-muted);
+
+  font-style: italic;
+
+  padding: 4px 0;
+
+}
+
+.vinv-swap-tip {
+
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+
+  color: #cc6060;
+
+  font-style: italic;
+
+  padding: 4px 0 6px;
+
+  line-height: 1.4;
+
+}
+
+.vinv-swap-row {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 6px 8px;
+
+  background: var(--vinv-bg-card);
+
+  border: 1px solid var(--vinv-border);
+
+  border-radius: 8px;
+
+  margin-bottom: 4px;
+
+  cursor: pointer;
+
+  transition: border-color 0.15s, transform 0.1s;
+
+}
+
+.vinv-swap-row:hover {
+
+  border-color: var(--vinv-gold);
+
+  transform: translateX(2px);
+
+}
+
+.vinv-swap-row.r-uncommon { border-color: var(--vinv-r-uncommon); }
+
+.vinv-swap-row.r-rare { border-color: var(--vinv-r-rare); }
+
+.vinv-swap-row.r-epic { border-color: var(--vinv-r-epic); }
+
+.vinv-swap-row.r-legendary { border-color: var(--vinv-r-legendary); }
+
+.vinv-swap-row.blocked {
+
+  opacity: 0.45;
+
+  cursor: not-allowed;
+
+  filter: grayscale(0.5);
+
+}
+
+.vinv-swap-row.blocked:hover {
+
+  border-color: var(--vinv-border);
+
+  transform: none;
+
+}
+
+.vinv-swap-row svg {
+
+  width: 36px;
+
+  height: 36px;
+
+  flex: 0 0 36px;
+
+}
+
+.vinv-swap-info {
+
+  flex: 1;
+
+  min-width: 0;
+
+}
+
+.vinv-swap-name {
+
+  font-family: var(--vinv-font-display);
+
+  font-size: var(--v-font-md);
+
+  color: var(--vinv-text);
+
+  letter-spacing: 0.3px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+.vinv-swap-meta {
+
+  font-size: var(--v-font-xs);
+
+  color: var(--vinv-text-dim);
+
+  margin-top: 2px;
+
+}
+
+.vinv-swap-meta .vinv-die {
+
+  background: var(--v-gold-15);
+
+  color: var(--vinv-gold);
+
+  border-radius: 4px;
+
+  padding: 0 4px;
+
+  font-size: calc(9px * var(--v-font-scale, 1));
+
+  font-weight: 700;
+
+}
+
+.vinv-swap-meta .vinv-ac { color: var(--vinv-r-rare); font-weight: 600; }
+

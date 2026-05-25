@@ -69,7 +69,7 @@
   border: 1px solid var(--v-gold-60, rgba(196, 149, 58, 0.6));
   border-radius: 50%;
   color: var(--v-gold, #c4953a);
-  font-size: 14px;
+  font-size: calc(14px * var(--v-font-scale, 1));
   font-family: var(--v-font-display, 'Cinzel'), serif;
   line-height: 1;
   cursor: pointer;
@@ -216,7 +216,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
      "muito pequenas e confusas". Bump de 14px (--v-font-body) -> 15px + line-height
      1.55 -> 1.65 melhora legibilidade em smartphone. Mesma classe usada em
      cidade.html PADRAO_ALDRIC e prologue.html — padronizacao global. */
-  font-size: 15px;
+  font-size: calc(15px * var(--v-font-scale, 1));
   line-height: 1.65;
   color: #d4c8b0;
 }
@@ -268,7 +268,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
   font-family: 'Georgia', serif;
   display: block;
   /* Sessao #32: bump speaker label 12px -> 13px (mesma logica do .enc-line) */
-  font-size: 13px;
+  font-size: calc(13px * var(--v-font-scale, 1));
   letter-spacing: 1.2px;
   margin-bottom: 5px;
   text-transform: uppercase;
@@ -711,7 +711,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
 }
 .enc-cho-row:hover .enc-cho-row-label { color: #fff4d0; }
 .enc-cho-row-desc {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--v-font-scale, 1));
   font-style: italic;
   color: #a09484;
   line-height: 1.4;
@@ -729,7 +729,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
   border-radius: 6px;
   color: #c4953a;
   font-family: 'Cinzel', 'Georgia', serif;
-  font-size: 10.5px;
+  font-size: calc(10.5px * var(--v-font-scale, 1));
   font-weight: 700;
   letter-spacing: 0.6px;
   white-space: nowrap;
