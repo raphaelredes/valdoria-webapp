@@ -4014,7 +4014,7 @@ Busca rápida:
                     '<div style="font-size:10px;letter-spacing:3px;color:#c4953a;margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
                     '<h2 style="font-size:18px;color:#e8c45a;margin:0 0 4px;letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
                     '<div style="font-size:11px;color:#a09484;margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:#c4953a">1</b> de 6</div>' +
-                    '<div id="__atr-mount" style="width:220px;height:130px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"></div>' +
+                    '<div id="__atr-mount" style="width:260px;height:260px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"></div>' +
                     '<div id="__atr-result" style="font-size:14px;color:#d4c8b0;min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
                     '<div style="font-size:10px;letter-spacing:1.5px;color:#a09484;margin:14px 0 6px;">SEUS VALORES</div>' +
                     '<div id="__atr-pool" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:36px;"></div>' +
@@ -4040,7 +4040,7 @@ Busca rápida:
 
                 if (typeof window.Dice3D === 'function') {
                     try {
-                        const dice = new window.Dice3D(mount, { size: 56, dieType: 'd6', duration: 1400 });
+                        const dice = new window.Dice3D(mount, { size: 260, dieType: 'd6', duration: 1400 });
                         const configs = rolls.map(v => ({ value: v }));
                         await new Promise((resolve) => {
                             try { dice.rollMultiple(configs, resolve); }
@@ -5211,7 +5211,14 @@ Busca rápida:
            apenas texto. PNGs ja existem em /shared/img/items/<slug>.png. */
         function _itemSlug(name) {
             if (!name) return '';
-            let s = String(name).normalize('NFKD').replace(/[̀-ͯ]/g, '');
+            let s = String(name);
+            // BUGFIX sessão #29 (2026-05-24): EQUIPMENT_PACKAGES tem itens com
+            // parenthetical de stats: "Espada de Treino (1d8)", "Cota de Malha (6 CA)".
+            // PNGs no inventário canônico /shared/img/items/ usam slug LIMPO:
+            // espada-de-treino.png, cota-de-malha.png. Strip () antes de slugify
+            // garante 21/21 items com PNG (antes era 1/21).
+            s = s.replace(/\s*\([^)]*\)\s*/g, ' ');
+            s = s.normalize('NFKD').replace(/[̀-ͯ]/g, '');
             s = s.toLowerCase().trim();
             s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
             return s;
@@ -5268,14 +5275,24 @@ Busca rápida:
                 html += `</div>`;
                 html += `</div>`;
             });
+            // BUGFIX sessão #29 (2026-05-24): user pediu "ao escolher uma das
+            // opções o jogador deve confirmar, não deve já sair confirmando
+            // e passar para próxima tela". Adicionado botão explícito embaixo.
+            // Disabled até user selecionar um pacote (sel.equipmentChoice = null).
+            var hasChoice = !!sel.equipmentChoice;
+            html += `<button id="equipConfirmBtn" class="v-btn v-btn-primary confirm-btn"
+                onclick="confirmEquipment()" ${hasChoice ? '' : 'disabled'}>`
+                + (hasChoice ? `⚔️ Confirmar ${sel.equipmentChoice === 'A' ? 'Pacote A' : 'Pacote B'}` : '⬆️ Escolha um pacote acima')
+                + `</button>`;
             document.getElementById('equipSelectContent').innerHTML = html;
         }
 
         function selectEquipment(pkgId) {
             haptic();
             sel.equipmentChoice = pkgId;
+            // BUGFIX sessão #29: NÃO auto-confirma. Apenas marca o pacote
+            // selecionado visualmente (re-render mostra ✓ Escolhido + ativa botão).
             buildEquipmentSelect(sel.classKey);
-            setTimeout(() => confirmEquipment(), 250);
         }
 
         function confirmEquipment() {
