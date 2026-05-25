@@ -4820,8 +4820,11 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         /* Sessao #29 v4 (2026-05-24): mapa class_key -> PNG existente em
            /shared/img/combat/. User pediu: usar PNG real em vez de icon emoji.
-           Fallback pro emoji quando img falha (onerror). */
-        const CLASS_PNG_SLUG = {
+           Fallback pro emoji quando img falha (onerror).
+           BUGFIX (2026-05-24): var em vez de const — TDZ blocava buildClassGrid
+           durante init() (declaração linha ~4824 vs init linha ~3009 — init roda
+           ANTES). Era a causa REAL da tela Classe aparecer vazia. */
+        var CLASS_PNG_SLUG = {
             class_warrior: 'guerreiro',
             class_mage: 'mago',
             class_rogue: 'ladino',
