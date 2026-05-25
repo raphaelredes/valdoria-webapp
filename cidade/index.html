@@ -4920,7 +4920,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       background: transparent;
       color: var(--v-text-dim, #a09484);
       font-family: var(--v-font, 'Marcellus', serif);
-      font-size: var(--v-font-sm, 12px);
+      /* Sessao #37 v18 (2026-05-25): --v-font-xs (10→13px large) em vez de
+         --v-font-sm (12→16px) — em LARGE "Comércio" + bold ficava muito
+         largo pra caber em 1/4 do viewport. Ainda legivel + sem truncar. */
+      font-size: var(--v-font-xs, 11px);
       cursor: pointer;
       white-space: nowrap;
       overflow: hidden;
