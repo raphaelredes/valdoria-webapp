@@ -2702,6 +2702,19 @@ Busca rápida:
                 <div class="sub-screen" id="sub-l1skill-select">
                     <div class="screen-content" id="l1skillSelectContent"></div>
                 </div>
+                <!-- Sessao #34 (2026-05-25): D&D 5e canonical L1 choices -->
+                <div class="sub-screen" id="sub-favored-enemy">
+                    <div class="screen-content" id="favoredEnemyContent"></div>
+                </div>
+                <div class="sub-screen" id="sub-favored-terrain">
+                    <div class="screen-content" id="favoredTerrainContent"></div>
+                </div>
+                <div class="sub-screen" id="sub-draconic-ancestry">
+                    <div class="screen-content" id="draconicAncestryContent"></div>
+                </div>
+                <div class="sub-screen" id="sub-rogue-expertise">
+                    <div class="screen-content" id="rogueExpertiseContent"></div>
+                </div>
             </div>
 
             <!-- ═══ SCREEN 2: STATS ═══ -->
@@ -2937,7 +2950,12 @@ Busca rápida:
         const SCREEN_NAMES = ['Raça', 'Classe', 'Atributos', 'Antecedente', 'Alinhamento', 'Perícias', 'Ferramentas', 'Identidade', 'Resumo Final'];
         let currentScreen = 0;
         let isTransitioning = false;
-        let sel = { race: null, subrace: '', classKey: null, subclass: '', fightingStyle: '', equipmentChoice: 'A', selectedL1Skill: '', bg: null, personalityTrait: '', ideal: '', bond: '', flaw: '', alignment: '', skillProfs: [], toolProfs: [], gender: null, name: '', surname: '', languages: [], statAssignment: {} };
+        /* Sessao #34 (2026-05-25): D&D 5e canonical L1 choices adicionadas:
+             favoredEnemy   — Ranger PHB p.91 (9 tipos)
+             favoredTerrain — Ranger PHB p.91 (8 terrenos)
+             rogueExpertise — Rogue PHB p.96 (2 skills com double prof)
+             draconicAncestry — Sorcerer PHB p.103 (10 cores de dragao) */
+        let sel = { race: null, subrace: '', classKey: null, subclass: '', fightingStyle: '', equipmentChoice: 'A', selectedL1Skill: '', bg: null, personalityTrait: '', ideal: '', bond: '', flaw: '', alignment: '', skillProfs: [], toolProfs: [], gender: null, name: '', surname: '', languages: [], statAssignment: {}, favoredEnemy: '', favoredTerrain: '', rogueExpertise: [], draconicAncestry: '' };
         let _l1SkillsCache = {}; // Cache API responses per class
         let pendingSubrace = '';
         let pendingLanguage = null;
@@ -3889,6 +3907,20 @@ Busca rápida:
                 const available = cls.skills.opts.filter(s => !bgSkills.includes(s));
                 const needed = Math.min(cls.skills.count, available.length);
                 if (sel.skillProfs.length !== needed) return `Selecione ${needed} perícia(s).`;
+                // Sessao #34 (2026-05-25): Rogue Expertise gate (PHB p.96 L1)
+                // Antes de avancar pra screen 6, ladino deve escolher 2 skills
+                // pra ganhar Especializacao (double prof bonus).
+                if (sel.classKey === 'class_rogue' &&
+                    (!Array.isArray(sel.rogueExpertise) || sel.rogueExpertise.length !== 2)) {
+                    // Abre overlay e bloqueia avanco
+                    setTimeout(() => {
+                        if (typeof buildRogueExpertiseSelect === 'function') {
+                            buildRogueExpertiseSelect();
+                            openSubScreen('sub-rogue-expertise');
+                        }
+                    }, 80);
+                    return 'Ladino: escolha 2 perícias com Especialização (PHB p.96).';
+                }
             }
             if (currentScreen === 6) {
                 const tc = getToolChoiceCount();
@@ -5223,20 +5255,52 @@ Busca rápida:
             sel.equipmentChoice = 'A';
             sel.selectedL1Skill = '';
             sel.skillProfs = [];
+            // Sessao #34 (2026-05-25): reset D&D 5e L1 choices ao trocar de classe
+            sel.favoredEnemy = '';
+            sel.favoredTerrain = '';
+            sel.rogueExpertise = [];
+            sel.draconicAncestry = '';
             closeSubScreen('sub-class-detail');
-            // L1 Subclass (Cleric/Sorcerer/Warlock — D&D 5e PHB)
-            if (L1_SUBCLASS_CLASSES.includes(classKey)) {
+            _routeAfterClassChoice();
+        }
+
+        /* Sessao #34: roteia escolhas L1 D&D 5e em sequencia depois da classe.
+           Chain: subclasse -> fighting style -> favored enemy/terrain ->
+           draconic ancestry -> equipamento. Permite voltar com cancel sem
+           perder estado intermediario. */
+        function _routeAfterClassChoice() {
+            const classKey = sel.classKey;
+            // 1. Subclasse L1 (Cleric/Sorcerer/Warlock — D&D 5e PHB)
+            if (L1_SUBCLASS_CLASSES.includes(classKey) && !sel.subclass) {
                 buildSubclassSelect(classKey);
                 openSubScreen('sub-subclass-select');
                 return;
             }
-            // Fighting Style (Warrior — D&D 5e PHB p.72)
-            if (classKey === 'class_warrior') {
+            // 2. Fighting Style (Warrior L1 — PHB p.72)
+            if (classKey === 'class_warrior' && !sel.fightingStyle) {
                 buildFightingStyleSelect();
                 openSubScreen('sub-fstyle-select');
                 return;
             }
-            // Equipment choice (all classes)
+            // 3. Ranger Favored Enemy (PHB p.91, L1)
+            if (classKey === 'class_ranger' && !sel.favoredEnemy) {
+                buildFavoredEnemySelect();
+                openSubScreen('sub-favored-enemy');
+                return;
+            }
+            // 4. Ranger Favored Terrain (PHB p.91, L1)
+            if (classKey === 'class_ranger' && !sel.favoredTerrain) {
+                buildFavoredTerrainSelect();
+                openSubScreen('sub-favored-terrain');
+                return;
+            }
+            // 5. Sorcerer Draconic Bloodline ancestry color (PHB p.103, L1)
+            if (classKey === 'class_sorcerer' && sel.subclass === 'draconic' && !sel.draconicAncestry) {
+                buildDraconicAncestrySelect();
+                openSubScreen('sub-draconic-ancestry');
+                return;
+            }
+            // 6. Equipment choice (all classes)
             showEquipmentSelect();
         }
 
@@ -5272,7 +5336,8 @@ Busca rápida:
         function confirmSubclass() {
             if (!sel.subclass) return;
             closeSubScreen('sub-subclass-select');
-            showEquipmentSelect();
+            // Sessao #34: continua o roteamento de escolhas L1 (Sorcerer Draconic, etc.)
+            _routeAfterClassChoice();
         }
 
         function cancelSubclass() {
@@ -5323,7 +5388,8 @@ Busca rápida:
         function confirmFightingStyle() {
             if (!sel.fightingStyle) return;
             closeSubScreen('sub-fstyle-select');
-            showEquipmentSelect();
+            // Sessao #34: continua o roteamento (Warrior nao tem outras choices L1)
+            _routeAfterClassChoice();
         }
 
         function cancelFightingStyle() {
@@ -5332,6 +5398,185 @@ Busca rápida:
             sel.fightingStyle = '';
             closeSubScreen('sub-fstyle-select');
             buildClassGrid();
+        }
+
+        // ═══════════════════════════════════════════════
+        // Sessao #34 — D&D 5e L1 CHOICES (Ranger / Sorcerer / Rogue)
+        // ═══════════════════════════════════════════════
+
+        /* Ranger Favored Enemy (PHB p.91, L1). 9 tipos canonicos. */
+        function buildFavoredEnemySelect() {
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
+            html += `<div class="detail-header"><div class="detail-title">🏹 Inimigo Favorito</div>`;
+            html += `<div class="detail-subtitle">Patrulheiro — escolha 1 tipo de criatura que você caça. Ganha vantagem em rastreamento e +2 dano contra eles.</div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px">Vantagem em Sabedoria (Sobrevivência) ao rastrear, +2 dano em ataques.</div>`;
+            for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
+                const selCls = sel.favoredEnemy === feId ? ' selected' : '';
+                html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
+                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${fe.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${fe.name}</div>`;
+                html += `<div class="v-card-desc" style="margin-top:4px;">${fe.desc}</div>`;
+                html += `</div>`;
+            }
+            document.getElementById('favoredEnemyContent').innerHTML = html;
+        }
+        function selectFavoredEnemy(feId) {
+            haptic();
+            sel.favoredEnemy = feId;
+            buildFavoredEnemySelect();
+            setTimeout(() => confirmFavoredEnemy(), 250);
+        }
+        function confirmFavoredEnemy() {
+            if (!sel.favoredEnemy) return;
+            closeSubScreen('sub-favored-enemy');
+            _routeAfterClassChoice();
+        }
+        function cancelFavoredEnemy() {
+            haptic();
+            sel.classKey = null;
+            sel.favoredEnemy = '';
+            closeSubScreen('sub-favored-enemy');
+            buildClassGrid();
+        }
+
+        /* Ranger Favored Terrain (PHB p.91, L1). 8 biomas canonicos. */
+        function buildFavoredTerrainSelect() {
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredTerrain()">← Voltar</button>`;
+            html += `<div class="detail-header"><div class="detail-title">🗺️ Terreno Favorito</div>`;
+            html += `<div class="detail-subtitle">Patrulheiro — escolha 1 bioma onde você é mestre. Ganha bônus de exploração e rastreamento.</div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px">Não se perde no terreno, mantém alerta ao viajar, ração dura 2× tempo.</div>`;
+            for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
+                const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
+                html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center;">`;
+                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${ft.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${ft.name}</div>`;
+                html += `<div class="v-card-desc" style="margin-top:4px;">${ft.desc}</div>`;
+                html += `</div>`;
+            }
+            document.getElementById('favoredTerrainContent').innerHTML = html;
+        }
+        function selectFavoredTerrain(ftId) {
+            haptic();
+            sel.favoredTerrain = ftId;
+            buildFavoredTerrainSelect();
+            setTimeout(() => confirmFavoredTerrain(), 250);
+        }
+        function confirmFavoredTerrain() {
+            if (!sel.favoredTerrain) return;
+            closeSubScreen('sub-favored-terrain');
+            _routeAfterClassChoice();
+        }
+        function cancelFavoredTerrain() {
+            haptic();
+            sel.favoredTerrain = '';
+            closeSubScreen('sub-favored-terrain');
+            // Volta pra escolha de inimigo favorito
+            buildFavoredEnemySelect();
+            openSubScreen('sub-favored-enemy');
+        }
+
+        /* Sorcerer Draconic Bloodline ancestry color (PHB p.103, L1).
+           10 cores: 5 cromaticos (red/blue/white/black/green) + 5 metalicos
+           (gold/silver/bronze/copper/brass). Determina tipo de dano do sopro
+           (breath weapon analog) e resistencia elemental. */
+        function buildDraconicAncestrySelect() {
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelDraconicAncestry()">← Voltar</button>`;
+            html += `<div class="detail-header"><div class="detail-title">🐉 Linhagem Dracônica</div>`;
+            html += `<div class="detail-subtitle">Feiticeiro — escolha a cor do dragão ancestral. Define seu tipo de dano e resistência elemental.</div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px">5 dragões cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
+            for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
+                const selCls = sel.draconicAncestry === daId ? ' selected' : '';
+                html += `<div class="v-card${selCls}" onclick="selectDraconicAncestry('${daId}')" style="text-align:center;">`;
+                html += `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${da.icon}</div>`;
+                html += `<div class="v-card-name" style="font-size:14px;letter-spacing:1px;">${da.name}</div>`;
+                html += `<div class="v-card-desc" style="margin-top:4px;">${da.desc}</div>`;
+                html += `</div>`;
+            }
+            document.getElementById('draconicAncestryContent').innerHTML = html;
+        }
+        function selectDraconicAncestry(daId) {
+            haptic();
+            sel.draconicAncestry = daId;
+            buildDraconicAncestrySelect();
+            setTimeout(() => confirmDraconicAncestry(), 250);
+        }
+        function confirmDraconicAncestry() {
+            if (!sel.draconicAncestry) return;
+            closeSubScreen('sub-draconic-ancestry');
+            _routeAfterClassChoice();
+        }
+        function cancelDraconicAncestry() {
+            haptic();
+            sel.draconicAncestry = '';
+            closeSubScreen('sub-draconic-ancestry');
+            buildSubclassSelect(sel.classKey);
+            openSubScreen('sub-subclass-select');
+        }
+
+        /* Rogue Expertise (PHB p.96, L1). Escolhe 2 das skills proficient pra
+           ganhar especializacao (double prof bonus). Aberta APOS skill selection
+           (screen 5). Validacao: ao menos 2 skills ja escolhidas. */
+        function buildRogueExpertiseSelect() {
+            const allSkills = [...(sel.skillProfs || [])];
+            // BG skills tambem contam como proficient (Rogue pode expertise neles)
+            const bg = BACKGROUNDS[sel.bg];
+            if (bg && Array.isArray(bg.skills)) {
+                bg.skills.forEach(s => { if (!allSkills.includes(s)) allSkills.push(s); });
+            }
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelRogueExpertise()">← Voltar</button>`;
+            html += `<div class="detail-header"><div class="detail-title">🎯 Especialização (Expertise)</div>`;
+            html += `<div class="detail-subtitle">Ladino — escolha 2 perícias para dobrar o bônus de proficiência. (PHB p.96)</div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px"><b>${(sel.rogueExpertise||[]).length}/2</b> selecionadas. Toque para alternar.</div>`;
+            html += `<div class="lang-grid">`;
+            allSkills.forEach(sk => {
+                const isSelected = (sel.rogueExpertise || []).includes(sk);
+                const label = SKILL_PT[sk] || sk;
+                const attr = SKILL_ATTR[sk] || '';
+                const attrShort = attr ? ATTR_PT[attr] || '' : '';
+                html += `<div class="lang-option${isSelected ? ' selected' : ''}" onclick="toggleRogueExpertise('${sk}')">${label}${attrShort ? ' <span style="opacity:0.6;font-size:11px">('+attrShort+')</span>' : ''}</div>`;
+            });
+            html += `</div>`;
+            const ok = (sel.rogueExpertise || []).length === 2;
+            html += `<button class="v-btn v-btn-primary confirm-btn" id="rogueExpertiseConfirmBtn" ${ok ? '' : 'disabled'} onclick="confirmRogueExpertise()">${ok ? '✓ CONFIRMAR ESPECIALIZAÇÃO' : '⬆️ Escolha 2 perícias'}</button>`;
+            document.getElementById('rogueExpertiseContent').innerHTML = html;
+        }
+        function toggleRogueExpertise(skill) {
+            haptic();
+            if (!Array.isArray(sel.rogueExpertise)) sel.rogueExpertise = [];
+            const idx = sel.rogueExpertise.indexOf(skill);
+            if (idx >= 0) {
+                sel.rogueExpertise.splice(idx, 1);
+            } else {
+                if (sel.rogueExpertise.length >= 2) {
+                    if (typeof window.vToast === 'function') {
+                        window.vToast('Apenas 2 perícias podem ter Especialização (L1).', 'warn');
+                    }
+                    return;
+                }
+                sel.rogueExpertise.push(skill);
+            }
+            buildRogueExpertiseSelect();
+        }
+        function confirmRogueExpertise() {
+            if (!Array.isArray(sel.rogueExpertise) || sel.rogueExpertise.length !== 2) return;
+            closeSubScreen('sub-rogue-expertise');
+            // Continua o fluxo (vai pra screen 6 ou onde estiver)
+        }
+        function cancelRogueExpertise() {
+            haptic();
+            sel.rogueExpertise = [];
+            closeSubScreen('sub-rogue-expertise');
+        }
+        /* Trigger pro Rogue Expertise — abrir AO entrar na screen 5 (skill
+           selection) APOS o player escolher as skills. Hook em confirmSkills/
+           validateCurrentScreen. */
+        function maybeShowRogueExpertise() {
+            if (sel.classKey !== 'class_rogue') return false;
+            if (!Array.isArray(sel.skillProfs) || sel.skillProfs.length < 2) return false;
+            if (Array.isArray(sel.rogueExpertise) && sel.rogueExpertise.length === 2) return false;
+            buildRogueExpertiseSelect();
+            openSubScreen('sub-rogue-expertise');
+            return true;
         }
 
         // ═══════════════════════════════════════════════
@@ -6075,6 +6320,23 @@ Busca rápida:
                 const fs = FIGHTING_STYLES[sel.fightingStyle];
                 combatBody += `<div class="trait-item"><div class="trait-name">${fs.icon} Estilo: ${fs.name}</div><div class="trait-desc">${fs.desc}</div></div>`;
             }
+            /* Sessao #34 (2026-05-25) — D&D 5e L1 choices no summary */
+            if (sel.favoredEnemy && typeof RANGER_FAVORED_ENEMIES !== 'undefined' && RANGER_FAVORED_ENEMIES[sel.favoredEnemy]) {
+                const fe = RANGER_FAVORED_ENEMIES[sel.favoredEnemy];
+                combatBody += `<div class="trait-item"><div class="trait-name">${fe.icon} Inimigo Favorito: ${fe.name}</div><div class="trait-desc">${fe.desc}</div></div>`;
+            }
+            if (sel.favoredTerrain && typeof RANGER_FAVORED_TERRAINS !== 'undefined' && RANGER_FAVORED_TERRAINS[sel.favoredTerrain]) {
+                const ft = RANGER_FAVORED_TERRAINS[sel.favoredTerrain];
+                combatBody += `<div class="trait-item"><div class="trait-name">${ft.icon} Terreno Favorito: ${ft.name}</div><div class="trait-desc">${ft.desc}</div></div>`;
+            }
+            if (Array.isArray(sel.rogueExpertise) && sel.rogueExpertise.length === 2) {
+                const skillNames = sel.rogueExpertise.map(s => SKILL_PT[s] || s).join(', ');
+                combatBody += `<div class="trait-item"><div class="trait-name">🎯 Especialização: ${skillNames}</div><div class="trait-desc">Dobra o bônus de proficiência nessas perícias (PHB p.96).</div></div>`;
+            }
+            if (sel.draconicAncestry && typeof SORCERER_DRACONIC_ANCESTRY !== 'undefined' && SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry]) {
+                const da = SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry];
+                combatBody += `<div class="trait-item"><div class="trait-name">${da.icon} Dragão Ancestral: ${da.name}</div><div class="trait-desc">${da.desc}</div></div>`;
+            }
             if (lv1 && lv1.spells.length > 0) {
                 lv1.spells.forEach(sp => {
                     combatBody += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
@@ -6254,7 +6516,12 @@ Busca rápida:
                 variant_bonuses: sel.variantBonuses || [],
                 variant_skill: sel.variantSkill || '',
                 variant_feat: sel.variantFeat || '',
-                selected_l1_skill: sel.selectedL1Skill || ''
+                selected_l1_skill: sel.selectedL1Skill || '',
+                /* Sessao #34 (2026-05-25) — D&D 5e canonical L1 choices */
+                favored_enemy: sel.favoredEnemy || '',
+                favored_terrain: sel.favoredTerrain || '',
+                rogue_expertise: Array.isArray(sel.rogueExpertise) ? sel.rogueExpertise : [],
+                draconic_ancestry: sel.draconicAncestry || ''
             };
 
             // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
