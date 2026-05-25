@@ -9987,14 +9987,32 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.png';
   if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.png';
   if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.png';
+  if (s.indexOf('miriel') >= 0)  return '/shared/img/npcs/sacerdotisa-miriel.png';
   if (s.indexOf('corvus') >= 0)  return '/shared/img/npcs/corvus-livreiro.png';
+  if (s.indexOf('garlen') >= 0 || s.indexOf('cartograf') >= 0) return '/shared/img/npcs/garlen-cartografo.png';
+  if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.png';
+  if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.png';
+  if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.png';
+  if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.png';
+  if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.png';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.png';
+  // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
+  if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.png';
+  if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.png';
+  if (s.indexOf('guarda') >= 0 && s.indexOf('cidade') >= 0) return '/shared/img/npcs/plaza/guarda_barricada.png';
+  if (s.indexOf('bardo') >= 0 && s.indexOf('itinerante') >= 0) return '/shared/img/npcs/plaza/bardo_praca.png';
+  if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.png';
+  if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.png';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
   if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.png';
   if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.png';
   if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.png';
   if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.png';
   if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.png';
+  if (s.indexOf('ferreir') >= 0) return '/shared/img/npcs/ferreiro.png';
+  if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.png';
+  // Sumo Sacerdote / sacerdot — usa padre-aldric como fallback genérico de clero
+  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.png';
   return null;
 }
 
@@ -50375,6 +50393,7 @@ var RECURRING_NPCS = {
   vorhan: {
     name: 'Vorhan, o Veterano',
     portrait: 'ic-guerreiro',
+    portraitImg: '/shared/img/npcs/mestre-vorhan.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Aventureiro aposentado, barba grisalha, cicatriz no rosto, armadura desgastada.',
     legendary: true,
     title: 'Lâmina do Norte · Mestre de Armas',
@@ -50387,6 +50406,7 @@ var RECURRING_NPCS = {
   aldric: {
     name: 'Guarda Aldric',
     portrait: 'ic-paladino',
+    portraitImg: '/shared/img/npcs/padre-aldric.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Veterano dos portões. Olho atento, voz grave.'
   },
   silvana: {
@@ -50405,6 +50425,7 @@ var RECURRING_NPCS = {
   thessil: {
     name: 'Thessil, o Mercador',
     portrait: 'ic-ladino',
+    portraitImg: '/shared/img/npcs/mestre-thessil.png',  // Sessao #37 v18 (2026-05-25)
     desc: 'Mercador baixo de chapéu largo. Sempre com novidades das caravanas.'
   },
   miriana: {
@@ -50415,6 +50436,7 @@ var RECURRING_NPCS = {
   garrick: {
     name: 'Garrick, o Caçador',
     portrait: 'ic-patrulheiro',
+    portraitImg: '/shared/img/npcs/mestre-garrick.png',  // Sessao #37 v18 (2026-05-25)
     desc: 'Patrulheiro humano, capa de pele, arco às costas.'
   },
   // 2026-05-12 NPCs das missões da Guilda (PADRAO_ALDRIC consistency)
@@ -50441,11 +50463,13 @@ var RECURRING_NPCS = {
   lyana: {
     name: 'Lyana, a Herbalista',
     portrait: 'ic-druida',
+    portraitImg: '/shared/img/npcs/lyana-herbalista.png',  // Sessao #37 v18 (2026-05-25)
     desc: 'Herbalista jovem, trança escura, cesto de raízes ao lado. Atende na praça pela manhã.'
   },
   tavira: {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
+    portraitImg: '/shared/img/npcs/mestra-tavira.png',  // Sessao #37 v18 (2026-05-25)
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
     legendary: true,
     title: 'Lança-Justa · Reformadora da Guilda',
@@ -50461,6 +50485,7 @@ var RECURRING_NPCS = {
   martha: {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
+    portraitImg: '/shared/img/npcs/estalajadeira.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
