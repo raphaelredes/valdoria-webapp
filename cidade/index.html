@@ -8265,7 +8265,10 @@ body.perf-lite .vc-action-btn { transition: none; }
     // NPCs/items. Imagem: ampulheta dourada quebrada + areia derramada +
     // runas dispersas + pergaminho selo vermelho rompido (Diablo IV style).
     // Background atmosferico fica no CSS, nao no PNG.
-    var imgUrl = '/shared/img/ui/session-expired.png';
+    // Cache-bust via bundle hash — PNG vive em Tier A immutable; query
+    // string ?v= força browsers cacheados pegarem nova versao quando o
+    // arquivo for substituido (regenerado via gen_session_expired_png.py).
+    var imgUrl = '/shared/img/ui/session-expired.png?v=' + (window.VBUNDLE_HASH || '1');
     var html = (
       '<style>' +
       '  @keyframes vSEFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }' +
