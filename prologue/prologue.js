@@ -333,7 +333,12 @@ function _sceneRoad() {
   };
 }
 
-/* Cena AFTERMATH: Thorne, o ferreiro, agradece por salvar seu filho. */
+/* Cena AFTERMATH: o ferreiro (ainda sem nome) agradece por salvar seu filho.
+   Sessao #33 (2026-05-25): user pediu coerencia narrativa — Thorne so deve ser
+   nomeado APOS a apresentacao no texto ("Seu nome e Thorne Tempera-de-Aco").
+   Speaker das falas antes desse ponto = "Ferreiro Ferido" (anonimo); apos =
+   "Thorne, o Ferreiro". NPC header da scene fica como "O Ferreiro" inicialmente
+   pois a apresentacao formal acontece DURANTE a cena. */
 function _sceneAftermath() {
   const text = DATA.aftermath_text || '';
   /* Parse aspas → cada quote vira speech bubble; resto vira narration. */
@@ -342,11 +347,20 @@ function _sceneAftermath() {
   let lastIdx = 0;
   let match;
   let foundAny = false;
+  /* Sessao #33: marker = posicao no texto onde Thorne se apresenta. Speeches
+     ANTES desse offset usam speaker anonimo; depois, nome revelado. */
+  const NAME_REVEAL_MARKER = 'Seu nome é';
+  const nameRevealIdx = text.indexOf(NAME_REVEAL_MARKER);
+  const anonSpeaker = 'Ferreiro Ferido';
+  const namedSpeaker = 'Thorne, o Ferreiro';
   while ((match = quoteRegex.exec(text)) !== null) {
     foundAny = true;
     const preText = text.slice(lastIdx, match.index).trim();
     if (preText) script.push({ type: 'narration', text: preText });
-    script.push({ type: 'speech', speaker: 'Thorne, o Ferreiro', text: match[2] });
+    /* Speech speaker depende da posicao no texto */
+    const speakerHere = (nameRevealIdx >= 0 && match.index > nameRevealIdx)
+      ? namedSpeaker : anonSpeaker;
+    script.push({ type: 'speech', speaker: speakerHere, text: match[2] });
     lastIdx = match.index + match[0].length;
   }
   if (foundAny) {
@@ -357,7 +371,10 @@ function _sceneAftermath() {
   }
   return {
     npc: {
-      name: 'Thorne, o Ferreiro',
+      /* Header da cena mostra nome revelado — afinal o player vai aprender
+         o nome durante a cena (narration "Seu nome e Thorne..."). Manter o
+         nome no header acompanha a revelacao narrativa. */
+      name: namedSpeaker,
       desc: 'Salvo dos lobos, agradecido',
       portrait: '../shared/img/npcs/thorne-armeiro.png'
     },

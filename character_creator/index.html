@@ -4673,37 +4673,55 @@ Busca rápida:
             btn.textContent = `✓ CONFIRMAR DRACONATO ${sr.name.toUpperCase()}`;
         }
 
+        /* Sessao #33 (2026-05-25): half-elf bonus picker tambem migrado pra
+           chips no design do jogo (era native <select>). Pattern: toggleHalfElfBonus
+           multi-select max 2 attrs (ja exclui charisma — vem fixo +2). */
+        let halfElfBonuses = [];
         function buildHalfElfDetailSection(raceKey) {
             const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom'];
-            let opts = '<option value="">Escolha...</option>';
-            attrs.forEach(a => { opts += `<option value="${a}">${ATTR_PT[a]}</option>`; });
-
+            halfElfBonuses = []; // reset
             let html = `<div class="detail-section"><div class="detail-section-title">🎲 Bônus de Atributo (+1 cada)</div>`;
-            html += `<div class="v-caption" style="margin-bottom:4px">Meio-Elfos escolhem 2 atributos diferentes para receber +1 (além do +2 Carisma).</div>`;
-            html += `<div class="detail-selects"><select id="heBonus1" onchange="updateHalfElfDetail('${raceKey}')">${opts}</select>`;
-            html += `<select id="heBonus2" onchange="updateHalfElfDetail('${raceKey}')">${opts}</select></div>`;
+            html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos escolhem 2 atributos diferentes para receber +1 (além do +2 Carisma).</div>`;
+            html += `<div class="lang-grid" id="heBonusOptions">`;
+            attrs.forEach(a => {
+                html += `<div class="lang-option" data-attr="${a}" onclick="toggleHalfElfBonus('${a}', '${raceKey}', this)">${ATTR_PT[a]}</div>`;
+            });
+            html += `</div>`;
             html += `<div class="v-error-msg" id="halfelfError"></div></div>`;
             html += buildLanguagePicker(raceKey);
             html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmHalfElf('${raceKey}')">✓ CONFIRMAR MEIO-ELFO</button>`;
             return html;
         }
 
+        function toggleHalfElfBonus(attr, raceKey, el) {
+            haptic();
+            const idx = halfElfBonuses.indexOf(attr);
+            if (idx >= 0) {
+                halfElfBonuses.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (halfElfBonuses.length >= 2) {
+                    if (typeof window.vToast === 'function') {
+                        window.vToast('Apenas 2 atributos podem receber bônus.', 'warn');
+                    }
+                    return;
+                }
+                halfElfBonuses.push(attr);
+                el.classList.add('selected');
+            }
+            updateHalfElfDetail(raceKey);
+        }
+
         function updateHalfElfDetail(raceKey) {
-            const b1 = document.getElementById('heBonus1').value;
-            const b2 = document.getElementById('heBonus2').value;
-            // Disable selected options in opposite dropdown
-            document.querySelectorAll('#heBonus1 option, #heBonus2 option').forEach(o => o.disabled = false);
-            if (b1) document.querySelector(`#heBonus2 option[value="${b1}"]`)?.setAttribute('disabled', '');
-            if (b2) document.querySelector(`#heBonus1 option[value="${b2}"]`)?.setAttribute('disabled', '');
-            // Enable confirm if both selected, different, AND language chosen
+            // Enable confirm if 2 attrs picked AND language chosen
             const langOk = !raceNeedsLangChoice('HalfElf', '') || !!pendingLanguage;
             const btn = document.getElementById('raceConfirmBtn');
-            btn.disabled = !(b1 && b2 && b1 !== b2 && langOk);
+            if (btn) btn.disabled = !(halfElfBonuses.length === 2 && langOk);
         }
 
         function confirmHalfElf(raceKey) {
-            const b1 = document.getElementById('heBonus1').value;
-            const b2 = document.getElementById('heBonus2').value;
+            const b1 = halfElfBonuses[0] || '';
+            const b2 = halfElfBonuses[1] || '';
             if (!b1 || !b2) {
                 const el = document.getElementById('halfelfError');
                 const msg = 'Selecione os 2 atributos.';
@@ -4739,19 +4757,23 @@ Busca rápida:
             html += `<div class="v-caption" style="margin-bottom:8px">Escolha entre o Humano padrão (+1 em tudo) ou o Variante (mais especializado).</div>`;
             html += `<div class="detail-option-grid" id="humanTypeOptions">`;
             html += `<div class="detail-option" onclick="selectHumanType(false,this)"><div class="detail-option-name">Humano Padrão</div><div class="detail-option-desc">+1 em todos os 6 atributos</div></div>`;
-            html += `<div class="detail-option" onclick="selectHumanType(true,this)"><div class="detail-option-name">Humano Variante</div><div class="detail-option-desc">+1 em 2 atributos + 1 perícia + 1 feat</div></div>`;
+            html += `<div class="detail-option" onclick="selectHumanType(true,this)"><div class="detail-option-name">Humano Variante</div><div class="detail-option-desc">+1 em 2 atributos + 1 perícia + 1 talento</div></div>`;
             html += `</div></div>`;
 
             // Variant selections (hidden until variant chosen)
             html += `<div id="variantSelections" class="hidden">`;
 
-            // 2 attribute bonuses
+            /* Sessao #33 (2026-05-25): user pediu — substituir <select> nativo
+               (popup do celular) por chips clicaveis no design do jogo.
+               Multi-select max 2, mesmo padrao do skill/lang picker. */
             const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-            let opts = '<option value="">Escolha...</option>';
-            attrs.forEach(a => { opts += `<option value="${a}">${ATTR_PT[a]}</option>`; });
             html += `<div class="detail-section"><div class="detail-section-title">📊 Bônus +1 em 2 Atributos</div>`;
-            html += `<div class="detail-selects"><select id="vhBonus1" onchange="updateVariantHuman()">${opts}</select>`;
-            html += `<select id="vhBonus2" onchange="updateVariantHuman()">${opts}</select></div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:6px">Escolha 2 atributos diferentes.</div>`;
+            html += `<div class="lang-grid" id="vhBonusOptions">`;
+            attrs.forEach(a => {
+                html += `<div class="lang-option" data-attr="${a}" onclick="toggleVariantBonus('${a}',this)">${ATTR_PT[a]}</div>`;
+            });
+            html += `</div></div>`;
 
             // 1 skill proficiency (any of 18) — collapsible
             html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📋 Perícia Extra <span class="section-summary" id="vhSkillStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
@@ -4764,8 +4786,8 @@ Busca rápida:
             });
             html += `</div></div></div>`;
 
-            // 1 feat — collapsible
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🌟 Feat <span class="section-summary" id="vhFeatStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+            // 1 talento — collapsible (Sessao #33: "Feat" -> "Talento" canonical PT-BR D&D 5e)
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🌟 Talento <span class="section-summary" id="vhFeatStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
             html += `<div class="section-body">`;
             html += `<div class="detail-option-grid single-col" id="vhFeatOptions">`;
             for (const [fid, f] of Object.entries(CREATION_FEATS)) {
@@ -4801,14 +4823,36 @@ Busca rápida:
             updateVariantConfirm();
         }
 
+        /* Sessao #33 (2026-05-25): substituiu native <select> por toggle de
+           chips com max 2 selecionados. Mesma pattern do skill/lang picker. */
+        function toggleVariantBonus(attr, el) {
+            haptic();
+            const idx = variantBonuses.indexOf(attr);
+            if (idx >= 0) {
+                // Ja selecionado — remove
+                variantBonuses.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (variantBonuses.length >= 2) {
+                    // Limite atingido — feedback visual
+                    if (typeof window.vToast === 'function') {
+                        window.vToast('Apenas 2 atributos podem receber bônus.', 'warn');
+                    }
+                    return;
+                }
+                variantBonuses.push(attr);
+                el.classList.add('selected');
+            }
+            updateVariantConfirm();
+        }
+        /* Backward compat shim: updateVariantHuman ainda referenciado pelo
+           server-randomize path. Re-sincroniza chips com variantBonuses[]. */
         function updateVariantHuman() {
-            const b1 = document.getElementById('vhBonus1')?.value || '';
-            const b2 = document.getElementById('vhBonus2')?.value || '';
-            // Disable selected in opposite dropdown
-            document.querySelectorAll('#vhBonus1 option, #vhBonus2 option').forEach(o => o.disabled = false);
-            if (b1) document.querySelector(`#vhBonus2 option[value="${b1}"]`)?.setAttribute('disabled', '');
-            if (b2) document.querySelector(`#vhBonus1 option[value="${b2}"]`)?.setAttribute('disabled', '');
-            variantBonuses = [b1, b2].filter(Boolean);
+            document.querySelectorAll('#vhBonusOptions .lang-option').forEach(el => {
+                const a = el.getAttribute('data-attr');
+                if (a && variantBonuses.indexOf(a) >= 0) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
             updateVariantConfirm();
         }
 
@@ -4913,11 +4957,9 @@ Busca rápida:
             // Enable the confirm button
             const btn = document.getElementById('raceConfirmBtn');
             if (btn) btn.disabled = false;
-            // For Half-Elf, also check bonus selections
-            if (document.getElementById('heBonus1')) {
-                const b1 = document.getElementById('heBonus1').value;
-                const b2 = document.getElementById('heBonus2').value;
-                if (btn) btn.disabled = !(b1 && b2 && b1 !== b2);
+            // For Half-Elf, also check bonus selections (Sessao #33: chips now)
+            if (document.getElementById('heBonusOptions')) {
+                if (btn) btn.disabled = !(halfElfBonuses && halfElfBonuses.length === 2);
             }
         }
 

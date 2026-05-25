@@ -439,12 +439,34 @@
 
     // Lightbox no portrait click — só quando há URL real (npcPortrait), não
     // pra HTML customizado (ex: SVG/PNG de classe via portraitHTML).
+    /* Sessao #33 (2026-05-25): user reportou que click NAO funcionava no
+       prologo apesar de lightbox.js carregado. Causa raiz provavel: render()
+       avaliava `typeof window.showLightbox === 'function'` no momento da
+       criacao do listener, mas window.showLightbox podia ainda nao ter sido
+       definido (race com defer/document.write order). Fix: SEMPRE attach
+       listener se npcPortrait existir; check showLightbox AT CLICK TIME.
+       Bonus: pointerdown listener pra capture touch antes de outros listeners.
+       Tambem adiciona stopImmediatePropagation pra garantir que body click
+       (skip-typewriter) nao intercepta. */
     var portraitEl = header.querySelector('.enc-portrait');
-    if (portraitEl && typeof window.showLightbox === 'function' && npcPortrait) {
-      portraitEl.addEventListener('click', function(e){
-        e.stopPropagation();
-        window.showLightbox(npcPortrait, npcName, npcDesc);
-      });
+    if (portraitEl && npcPortrait) {
+      var _onPortraitTap = function(e){
+        if (e) {
+          if (e.stopPropagation) e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          if (e.preventDefault) e.preventDefault();
+        }
+        if (typeof window.showLightbox === 'function') {
+          window.showLightbox(npcPortrait, npcName, npcDesc);
+        } else {
+          console.warn('[ENC] showLightbox unavailable — lightbox.js missing?');
+        }
+      };
+      portraitEl.addEventListener('click', _onPortraitTap);
+      // Touch fallback (alguns Telegram WebViews engolem click apos touch
+      // sem chamar dispatchEvent). pointerup cobre touch + mouse + pen.
+      portraitEl.addEventListener('pointerup', _onPortraitTap);
+      portraitEl.style.cursor = 'pointer';
     } else if (portraitEl && !npcPortrait) {
       // Sem lightbox: cursor default (não sugere interação)
       portraitEl.style.cursor = 'default';

@@ -10787,7 +10787,31 @@ function _doDeleteChar(charId, charName){
     return r.json();
   }).then(function(data){
     if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-    // Update local mock with server-returned active list
+    /* Sessao #33 (2026-05-25): BUG FIX user reportou — ao apagar char ATIVO
+       enquanto na cidade, a tela continua mostrando o char deletado. Server
+       ja atualizou active_char_id pro proximo, mas o webapp local nao reload.
+       Fix: detecta se o char deletado era o ativo (window._charId), e nesse
+       caso redireciona pra /play/?skipTitle=1 — o /play/ resolve via initData
+       e carrega o NOVO active_char_id automaticamente. */
+    var deletedWasActive = (window._charId && (window._charId === charId));
+    if (deletedWasActive) {
+      vToast('🗑 ' + _titleCase(charName) + ' arquivado. Trocando personagem...');
+      window.__valdoria_transitioning = true;
+      var _base = location.origin;
+      var _qs = new URLSearchParams(location.search);
+      // Preserva token/api/uid (sessao continua valida) e adiciona skipTitle=1
+      var _params = new URLSearchParams();
+      if (_qs.get('token')) _params.set('token', _qs.get('token'));
+      if (_qs.get('api')) _params.set('api', _qs.get('api'));
+      if (_qs.get('uid')) _params.set('uid', _qs.get('uid'));
+      _params.set('skipTitle', '1');
+      _params.set('_cb', Date.now());
+      setTimeout(function(){
+        location.replace(_base + '/play/?' + _params.toString());
+      }, 600);
+      return;
+    }
+    // Char nao-ativo deletado: apenas atualiza popup
     if (data && data.characters){
       window._mockCharacters = data.characters.map(function(c){
         return {
