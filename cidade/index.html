@@ -19515,11 +19515,14 @@ function _renderQuestDiary(bodyEl){
      - Empty state ilustrado (scroll + flavor lore)
      - Hover lift effect em cards
   ============================================================================= */
+  // Sessao #37 v16 (2026-05-25): labels abreviadas pra caber em modo Maior.
+  // Antes: "Disponíveis" (11ch) e "Concluídas" (10ch) truncavam pra "DISPONÍVEI..." e "CONCLUÍDA..."
+  // Agora: "Novas" (5ch) e "Feitas" (6ch) — semantica preservada, PT-BR natural.
   var TABS = [
-    { id: 'ready',      label: 'Prontas',      icon: '✓', count: counts.ready,     color: '#7cdb7c' },
-    { id: 'active',     label: 'Ativas',       icon: '⚔', count: counts.active,    color: '#c4953a' },
-    { id: 'available',  label: 'Disponíveis',  icon: '◈', count: counts.available, color: '#9b8e7c' },
-    { id: 'history',    label: 'Concluídas',   icon: '✦', count: counts.history,   color: '#7d705e' }
+    { id: 'ready',      label: 'Prontas',  icon: '✓', count: counts.ready,     color: '#7cdb7c' },
+    { id: 'active',     label: 'Ativas',   icon: '⚔', count: counts.active,    color: '#c4953a' },
+    { id: 'available',  label: 'Novas',    icon: '◈', count: counts.available, color: '#9b8e7c' },
+    { id: 'history',    label: 'Feitas',   icon: '✦', count: counts.history,   color: '#7d705e' }
   ];
 
   // CSS keyframes (style tag — mesmo pattern Liga/Ficha)
