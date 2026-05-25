@@ -5808,11 +5808,26 @@ Busca rápida:
             finishClassScreen();
         }
 
+        // Sessao #37 (2026-05-25): helper slugify pra mapear nome PT-BR -> filename
+        // PNG. Mesma logica do shared/asset-resolver.js _slugify (nao carregamos
+        // asset-resolver no creator pra evitar bundle bloat — inline simples).
+        function _spellSlug(name) {
+            return String(name || '')
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove acentos
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        function _spellPngUrl(name) {
+            var slug = _spellSlug(name);
+            return '/shared/img/combat/skills/' + slug + '.png';
+        }
+
         function buildL1SkillSelect(data) {
-            // Sessao #37 (2026-05-25): D&D 5e spell picker. API retorna
-            // `quota` + `options` (canonical combat2). Player escolhe N
-            // de M magias. Counter visivel no topo. Fallback legacy
-            // single-select se backend antigo (sem quota/options).
+            // Sessao #37 (2026-05-25): D&D 5e spell picker com PNGs canonical
+            // (shared/img/combat/skills/*) + popup detail pattern (click no
+            // card abre overlay com info; selecao via botao no overlay).
+            // Reaproveita 201 PNGs ja existentes — nada novo gerado.
             const quota = (typeof data.quota === 'number' && data.quota > 0) ? data.quota : 0;
             const options = Array.isArray(data.options) ? data.options : [];
             const useNew = quota > 0 && options.length > 0;
@@ -5823,18 +5838,20 @@ Busca rápida:
             if (useNew) {
                 const selCount = sel.selectedL1Skills.length;
                 html += `<div class="detail-header"><div class="detail-title">\u2728 Escolha suas Magias Iniciais</div>`;
-                html += `<div class="detail-subtitle">D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} come\u00e7a conhecendo <b>${quota}</b> magia${quota > 1 ? 's' : ''}. Selecione abaixo:</div></div>`;
+                html += `<div class="detail-subtitle">D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} comeca conhecendo <b>${quota}</b> magia${quota > 1 ? 's' : ''}. Toque em uma magia pra ver detalhes:</div></div>`;
                 html += `<div class="asi-counter" style="margin:8px 0 12px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);color:var(--v-gold,#c4953a);">Selecionadas: <b>${selCount}</b> / <b>${quota}</b></div>`;
                 for (const skill of options) {
                     const isSel = sel.selectedL1Skills.indexOf(skill.name) >= 0;
                     const selected = isSel ? ' selected' : '';
-                    const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : ' \u2022 Truque';
-                    const ico = skill.ico || '\u2728';
+                    const costText = skill.cost > 0 ? `${skill.cost} MP` : 'Truque';
                     const safeName = skill.name.replace(/'/g, "\\'");
-                    html += `<div class="v-card${selected}" onclick="toggleL1Skill('${safeName}')">`;
-                    html += `<div class="v-card-name">${isSel ? '\u2713 ' : ''}${ico} ${skill.name}</div>`;
-                    html += `<div class="v-card-desc">${skill.desc || ''}${costText}</div>`;
-                    html += `</div>`;
+                    const pngUrl = _spellPngUrl(skill.name);
+                    html += `<div class="v-card${selected}" onclick="openL1SkillDetail('${safeName}')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;">`;
+                    html += `<img src="${pngUrl}" alt="${skill.name}" style="width:48px;height:48px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(196,149,58,0.06);border:1px solid rgba(196,149,58,0.25);" loading="lazy" onerror="this.style.display='none'" />`;
+                    html += `<div style="flex:1;min-width:0;">`;
+                    html += `<div class="v-card-name" style="margin:0 0 2px;">${isSel ? '\u2713 ' : ''}${skill.name}</div>`;
+                    html += `<div class="v-card-desc" style="font-size:11px;color:var(--v-text-dim,#a09484);">${costText} \u2014 toque para detalhes</div>`;
+                    html += `</div></div>`;
                 }
                 const isReady = selCount === quota;
                 const btnClass = isReady ? 'v-btn-primary' : 'v-btn-secondary';
@@ -5859,6 +5876,47 @@ Busca rápida:
             }
 
             document.getElementById('l1skillSelectContent').innerHTML = html;
+        }
+
+        // Sessao #37 (2026-05-25): popup info pattern (similar level-up
+        // openSkillDetail). Click no card abre overlay com PNG hero + desc
+        // expandida + botao toggle selecao. UX: ler antes de escolher.
+        function openL1SkillDetail(skillName) {
+            haptic();
+            const data = _l1SkillsCache[sel.classKey];
+            if (!data) return;
+            const options = Array.isArray(data.options) ? data.options : [];
+            const skill = options.find(function(s) { return s.name === skillName; });
+            if (!skill) return;
+            if (!Array.isArray(sel.selectedL1Skills)) sel.selectedL1Skills = [];
+            const isSel = sel.selectedL1Skills.indexOf(skillName) >= 0;
+            const quota = (typeof data.quota === 'number') ? data.quota : 0;
+            const atQuota = !isSel && sel.selectedL1Skills.length >= quota;
+            const pngUrl = _spellPngUrl(skillName);
+            const costText = skill.cost > 0 ? `${skill.cost} MP` : 'Truque (sem custo de mana)';
+            const safeName = skillName.replace(/'/g, "\\'");
+
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeL1SkillDetail()">\u2190 Voltar</button>`;
+            html += `<div style="text-align:center;padding:8px 12px;">`;
+            html += `<img src="${pngUrl}" alt="${skillName}" style="width:140px;height:140px;object-fit:contain;margin:8px auto 16px;display:block;border-radius:10px;background:radial-gradient(circle,rgba(196,149,58,0.18) 0%,rgba(42,36,32,0.0) 70%);box-shadow:0 4px 18px rgba(196,149,58,0.20);" loading="lazy" onerror="this.style.display='none'" />`;
+            html += `<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:22px;color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:6px;">${skillName}</div>`;
+            html += `<div style="display:inline-block;padding:4px 12px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.4);border-radius:14px;font-size:12px;color:var(--v-gold,#c4953a);margin-bottom:14px;">${costText}</div>`;
+            if (skill.desc) {
+                html += `<div style="font-size:13px;line-height:1.6;color:var(--v-text,#d4c8b0);margin:8px 16px 16px;text-align:left;">${skill.desc}</div>`;
+            }
+            const btnClass = isSel ? 'v-btn-secondary' : (atQuota ? 'v-btn-secondary' : 'v-btn-primary');
+            const btnDisabled = atQuota ? 'disabled' : '';
+            const btnText = isSel ? '\u2713 Selecionada \u2014 toque para remover' : (atQuota ? 'Quota atingida (' + quota + ')' : 'Selecionar Magia');
+            html += `<button class="v-btn ${btnClass}" style="width:90%;margin-top:8px" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
+            html += `</div>`;
+
+            document.getElementById('l1skillSelectContent').innerHTML = html;
+        }
+
+        function closeL1SkillDetail() {
+            haptic();
+            const data = _l1SkillsCache[sel.classKey];
+            if (data) buildL1SkillSelect(data);
         }
 
         function toggleL1Skill(skillName) {
