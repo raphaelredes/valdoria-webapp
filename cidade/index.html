@@ -46657,6 +46657,13 @@ var TIME_MONTHS = [
   'Glacimir',   // mês 11 — glacies (latim: gelo) — geada profunda
   'Nyctevar'    // mês 12 — nyx (grego: noite) — recolhimento, fim do ano
 ];
+// Sessao #37 v13 (2026-05-25): abreviacoes 3-letras pro topbar — em modo
+// "Maior" a temperatura sumia porque o topbar nao cabia. Nome completo
+// fica no tooltip (title attr). Pattern Jan/Fev/Mar — usuario reconhece.
+var TIME_MONTHS_SHORT = [
+  'Cae', 'Vex', 'Ver', 'Lyr', 'Sol', 'Pyr',
+  'Mes', 'Rus', 'Thr', 'Cor', 'Gla', 'Nyc'
+];
 var TIME_PERIOD_BOUNDS = [[5,8,'dawn'],[8,17,'day'],[17,20,'dusk']];  // night = default
 var TIME_PERIOD_EMOJI = { dawn: '🌅', day: '☀️', dusk: '🌇', night: '🌙' };
 var TIME_PERIOD_LABEL = { dawn: 'Amanhecer', day: 'Dia', dusk: 'Entardecer', night: 'Noite' };
@@ -46708,6 +46715,10 @@ function renderCityTopBar(){
   var plabel = TIME_PERIOD_LABEL[period];
   var w = _getGameWeather(t.dayOfYear);
   var monthName = TIME_MONTHS[t.month];
+  // Sessao #37 v13 (2026-05-25): user reportou temperatura sumindo no topo
+  // em modo "Maior". Fix: usar abreviacao 3 letras (Jan/Fev/Mar-style)
+  // pra caber. Nome completo no tooltip + " · Ano N" removido (so ano).
+  var monthShort = (typeof TIME_MONTHS_SHORT !== 'undefined' && TIME_MONTHS_SHORT[t.month]) || monthName.substring(0,3);
   var hh = (t.hour < 10 ? '0' : '') + t.hour;
   var mm = (t.minute < 10 ? '0' : '') + t.minute;
   el.innerHTML = ''
@@ -46716,8 +46727,8 @@ function renderCityTopBar(){
     + '</div>'
     + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
     + '  <span class="ctb-item ctb-time">' + pemoji + ' ' + hh + ':' + mm + '</span>'
-    // X-6.5.51BU: nome do mês completo + ano (era substring(0,4) que cortava "Meioano"→"Meio")
-    + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthName + ' · ' + t.year + '</span>'
+    // Sessao #37 v13: monthShort (3 letras) + ano abreviado pra caber em "Maior"
+    + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthShort + ' · ' + t.year + '</span>'
     + '  <span class="ctb-item ctb-weather">' + w.icon + ' ' + w.temp + '°</span>'
     + '</div>';
 }
