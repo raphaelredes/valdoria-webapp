@@ -4821,33 +4821,45 @@ Busca rápida:
         /* Sessao #29 v4 (2026-05-24): mapa class_key -> PNG existente em
            /shared/img/combat/. User pediu: usar PNG real em vez de icon emoji.
            Fallback pro emoji quando img falha (onerror).
-           BUGFIX (2026-05-24): var em vez de const — TDZ blocava buildClassGrid
-           durante init() (declaração linha ~4824 vs init linha ~3009 — init roda
-           ANTES). Era a causa REAL da tela Classe aparecer vazia. */
-        var CLASS_PNG_SLUG = {
-            class_warrior: 'guerreiro',
-            class_mage: 'mago',
-            class_rogue: 'ladino',
-            class_cleric: 'clerigo',
-            class_paladin: 'paladino',
-            class_ranger: 'patrulheiro',
-            class_barbarian: 'barbaro',
-            class_bard: 'bardo',
-            class_druid: 'druida',
-            class_monk: 'monge',
-            class_sorcerer: 'feiticeiro',
-            class_warlock: 'bruxo',
-        };
+           BUGFIX (2026-05-24): mapa agora INLINE dentro de _classIconHtml — declaração
+           anterior em script-block scope (linha ~4824) ficava undefined durante init()
+           (que roda linha 3009). Mapa inline evita o problema completamente: a função
+           é hoisted (function declaration), e o objeto literal é criado a cada chamada
+           — sempre vinculado corretamente. Era a causa REAL da tela Classe vazia. */
         function _classIconHtml(key, sizePx) {
-            const slug = CLASS_PNG_SLUG[key];
-            const emoji = (CLASSES[key] && CLASSES[key].icon) || '⚔️';
+            // Mapa inline pra evitar TDZ/hoisting issues com declaração externa.
+            // (Reciado a cada chamada — neg ligível pra 12 classes total.)
+            var MAP = {
+                class_warrior: 'guerreiro',
+                class_mage: 'mago',
+                class_rogue: 'ladino',
+                class_cleric: 'clerigo',
+                class_paladin: 'paladino',
+                class_ranger: 'patrulheiro',
+                class_barbarian: 'barbaro',
+                class_bard: 'bardo',
+                class_druid: 'druida',
+                class_monk: 'monge',
+                class_sorcerer: 'feiticeiro',
+                class_warlock: 'bruxo'
+            };
+            var slug = MAP[key];
+            var emoji = (typeof CLASSES !== 'undefined' && CLASSES[key] && CLASSES[key].icon) || '⚔️';
             if (!slug) return emoji;
-            const sz = sizePx || 48;
-            const onErr = "this.onerror=null;this.outerHTML='" + emoji.replace(/'/g, "\\'") + "';";
+            var sz = sizePx || 48;
+            var onErr = "this.onerror=null;this.outerHTML='" + emoji.replace(/'/g, "\\'") + "';";
             return '<img src="/shared/img/combat/' + slug + '.png" alt="" ' +
                    'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;" ' +
                    'loading="lazy" onerror="' + onErr + '">';
         }
+        // Expor MAP pra outros lugares (buildClassDetail usa indiretamente via _classIconHtml).
+        // CLASS_PNG_SLUG preservado pra compat com codigo legado fora desta funcao.
+        var CLASS_PNG_SLUG = {
+            class_warrior: 'guerreiro', class_mage: 'mago', class_rogue: 'ladino',
+            class_cleric: 'clerigo', class_paladin: 'paladino', class_ranger: 'patrulheiro',
+            class_barbarian: 'barbaro', class_bard: 'bardo', class_druid: 'druida',
+            class_monk: 'monge', class_sorcerer: 'feiticeiro', class_warlock: 'bruxo'
+        };
 
         // Sessao #29 (2026-05-24): mapa de classes por papel D&D 5e.
         // Cada classe pode aparecer em multiplos filtros (Paladino = Tanque + Curador).
