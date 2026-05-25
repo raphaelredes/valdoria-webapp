@@ -10284,22 +10284,31 @@ function buildMockHubScreen(player){
   // 2026-05-11 (AAA quest review): quest_tracker DINÂMICO baseado em QUESTS_ACTIVE
   // (antes era hardcoded 2 quests). Mapeia QUESTS_ACTIVE → tracker format:
   // - title, stage (parse '2/5' or 0 if '✓'), total, ready (✓ no progress), cb
+  //
+  // Sessão #37 (2026-05-25): USER REQUEST — filtrar pra mostrar SOMENTE missões
+  // prontas (✓) na tela principal. Missões em progresso (ex: "2/5") agora ficam
+  // visíveis APENAS dentro da opção "Missões" (_questsShowTab). Motivação UX:
+  // tela principal limpa, jogador só vê o que precisa ação imediata (entregar).
   function _buildQuestTrackerFromActive(){
     if (typeof QUESTS_ACTIVE === 'undefined') return [];
-    return QUESTS_ACTIVE.map(function(q){
-      var progress = q.progress || '';
-      var ready = progress.indexOf('✓') >= 0;
-      var stage = 0, total = 1;
-      var m = progress.match(/(\d+)\s*\/\s*(\d+)/);
-      if (m) { stage = parseInt(m[1], 10); total = parseInt(m[2], 10); }
-      else if (ready) { stage = 1; total = 1; }
-      var qid = (q.id || '').replace(/^qa_/, '');
-      return {
-        title: q.title || 'Missão sem título',
-        stage: stage, total: total, ready: ready,
-        cb: 'quest_open_' + qid
-      };
-    });
+    return QUESTS_ACTIVE
+      .filter(function(q){
+        // Só "prontas pra entregar" (✓ no progress). Resto vai pro popup Missões.
+        return (q.progress || '').indexOf('✓') >= 0;
+      })
+      .map(function(q){
+        var progress = q.progress || '';
+        var ready = true;  // post-filter, sempre true
+        var stage = 1, total = 1;
+        var m = progress.match(/(\d+)\s*\/\s*(\d+)/);
+        if (m) { stage = parseInt(m[1], 10); total = parseInt(m[2], 10); }
+        var qid = (q.id || '').replace(/^qa_/, '');
+        return {
+          title: q.title || 'Missão sem título',
+          stage: stage, total: total, ready: ready,
+          cb: 'quest_open_' + qid
+        };
+      });
   }
 
   return {
