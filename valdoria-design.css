@@ -2311,15 +2311,18 @@ body.perf-lite html.app-frame::before {
    (--v-font-xs/sm/md/base/lg/2xl) dentro do scope body[data-font-size] pra
    cascade automatico. Todo elemento que usa var(--v-font-base) etc. escala
    automaticamente (creator, cidade, exploracao, combate, etc.). */
+/* Sessao #37 v5 (2026-05-25): user pediu "letras miudas" no Maior. Bumpado
+   pra small=0.82 e large=1.30 — diferenca visualmente perceptivel entre
+   os 3 niveis (era 0.9 / 1.0 / 1.15 — sutil demais). */
 body[data-font-size="small"]  {
-  --v-font-scale: 0.9;
-  --v-font-body-scaled: 12.6px;
-  --v-font-xs: 9px;      /* 10 * 0.9 */
-  --v-font-sm: 11px;     /* 12 * 0.9 */
-  --v-font-md: 11px;     /* 12 * 0.9 */
-  --v-font-base: 12px;   /* 13 * 0.9 */
-  --v-font-lg: 14px;     /* 15 * 0.9 */
-  --v-font-2xl: 16px;    /* 18 * 0.9 */
+  --v-font-scale: 0.82;
+  --v-font-body-scaled: 11.5px;
+  --v-font-xs: 9px;      /* 10 * 0.82 = 8.2 → 9 */
+  --v-font-sm: 10px;     /* 12 * 0.82 = 9.84 → 10 */
+  --v-font-md: 10px;
+  --v-font-base: 11px;   /* 13 * 0.82 = 10.66 → 11 */
+  --v-font-lg: 13px;     /* 15 * 0.82 = 12.3 → 13 */
+  --v-font-2xl: 15px;    /* 18 * 0.82 = 14.76 → 15 */
 }
 body[data-font-size="normal"] {
   --v-font-scale: 1.0;
@@ -2327,25 +2330,25 @@ body[data-font-size="normal"] {
   /* tokens default de :root (10/12/12/13/15/18) — sem override */
 }
 body[data-font-size="large"]  {
-  --v-font-scale: 1.15;
-  --v-font-body-scaled: 16.1px;
-  --v-font-xs: 12px;     /* 10 * 1.15 = 11.5 → 12 */
-  --v-font-sm: 14px;     /* 12 * 1.15 = 13.8 → 14 */
-  --v-font-md: 14px;
-  --v-font-base: 15px;   /* 13 * 1.15 = 14.95 → 15 */
-  --v-font-lg: 17px;     /* 15 * 1.15 = 17.25 → 17 */
-  --v-font-2xl: 21px;    /* 18 * 1.15 = 20.7 → 21 */
+  --v-font-scale: 1.30;
+  --v-font-body-scaled: 18.2px;
+  --v-font-xs: 13px;     /* 10 * 1.3 = 13 */
+  --v-font-sm: 16px;     /* 12 * 1.3 = 15.6 → 16 */
+  --v-font-md: 16px;
+  --v-font-base: 17px;   /* 13 * 1.3 = 16.9 → 17 */
+  --v-font-lg: 20px;     /* 15 * 1.3 = 19.5 → 20 */
+  --v-font-2xl: 24px;    /* 18 * 1.3 = 23.4 → 24 */
 }
 /* xlarge: kept apenas como alias backward-compat — colapsa pra large */
 body[data-font-size="xlarge"] {
-  --v-font-scale: 1.15;
-  --v-font-body-scaled: 16.1px;
-  --v-font-xs: 12px;
-  --v-font-sm: 14px;
-  --v-font-md: 14px;
-  --v-font-base: 15px;
-  --v-font-lg: 17px;
-  --v-font-2xl: 21px;
+  --v-font-scale: 1.30;
+  --v-font-body-scaled: 18.2px;
+  --v-font-xs: 13px;
+  --v-font-sm: 16px;
+  --v-font-md: 16px;
+  --v-font-base: 17px;
+  --v-font-lg: 20px;
+  --v-font-2xl: 24px;
 }
 
 /* Apply scale globalmente ao body (afeta todo texto que herda) */
