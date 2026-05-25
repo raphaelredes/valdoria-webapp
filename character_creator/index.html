@@ -2798,6 +2798,16 @@ Busca rápida:
             border-color: rgba(196,149,58,0.5);
             box-shadow: inset 0 0 10px rgba(196,149,58,0.07);
         }
+        /* Sessao #37 v3: indica visualmente o tamanho atual (se ja escolhido antes) */
+        .font-onboarding-option.font-onboarding-current {
+            border-color: var(--v-gold, #c4953a);
+            box-shadow: 0 0 12px rgba(196,149,58,0.25), inset 0 0 14px rgba(196,149,58,0.08);
+        }
+        .font-onboarding-option.font-onboarding-current .font-onboarding-label::before {
+            content: '◆ ';
+            color: var(--v-gold, #c4953a);
+            text-shadow: 0 0 6px rgba(196,149,58,0.5);
+        }
         .font-onboarding-label {
             color: var(--v-gold, #c4953a);
             font-size: 12px;
@@ -2873,13 +2883,24 @@ Busca rápida:
                 setTimeout(function(){ ov.style.display = 'none'; }, 360);
             }
         };
-        (function _maybeShowFontOnboarding(){
+        /* Sessao #37 v3 (2026-05-25): user pediu — overlay aparece SEMPRE
+           ao entrar no creator, antes da tela de Raca, sobrepondo TODAS as
+           etapas com z-index 9999. Pre-seleciona o size atual (se houver)
+           pra dar feedback visual do estado. Apos click: salva + dismissa
+           + creator segue normalmente. */
+        (function _showFontOnboardingAlways(){
             try {
-                var stored = localStorage.getItem('valdoria_font_size');
-                if (stored && ['small','normal','large','xlarge'].indexOf(stored) >= 0) return;
                 var apply = function(){
                     var ov = document.getElementById('font-size-onboarding');
-                    if (ov) ov.style.display = 'flex';
+                    if (!ov) return;
+                    ov.style.display = 'flex';
+                    // Marca botao atual como ativo (feedback visual da preferencia armazenada)
+                    var stored = localStorage.getItem('valdoria_font_size');
+                    if (stored === 'xlarge') stored = 'large';
+                    if (stored && ['small','normal','large'].indexOf(stored) >= 0) {
+                        var btn = ov.querySelector('.font-onboarding-option[data-size="' + stored + '"]');
+                        if (btn) btn.classList.add('font-onboarding-current');
+                    }
                 };
                 if (document.readyState !== 'loading') apply();
                 else document.addEventListener('DOMContentLoaded', apply, { once: true });
@@ -4450,8 +4471,9 @@ Busca rápida:
 
                 results.push(total);
 
-                // Pausa antes da proxima
-                await new Promise(r => setTimeout(r, i < 5 ? 1000 : 1500));
+                // Pausa antes da proxima. Sessao #37 (2026-05-25): user pediu fechar
+                // popup 1 segundo apos ULTIMA rolagem (era 1500ms — agora 1000ms).
+                await new Promise(r => setTimeout(r, 1000));
             }
 
             // Cleanup e populate pool
@@ -4464,9 +4486,9 @@ Busca rápida:
             ov.remove();
             buildStatSlots();
 
-            if (typeof window.vToast === 'function') {
-                window.vToast('Atributos rolados: ' + results.join(' · '), 'gold');
-            }
+            // Sessao #37 (2026-05-25): toast removido. User pediu: "na rolagem
+            // de atributos nao mostre notificacao em popup na parte inferior
+            // da tela". Os valores ja aparecem no statPool da tela.
         }
 
         function pointbuyTotalCost() {
