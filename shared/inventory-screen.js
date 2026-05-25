@@ -172,11 +172,14 @@
   //  `displayOrder` controla ordem das tabs visualmente —
   //  mantém UX Armas/Armaduras/Consumíveis/Tesouros que o user aprovou.
   // ============================================================
+  // Sessao #37 v13 (2026-05-25): labels abreviadas pra caber em modo Maior.
+  // Antes: 'Armaduras', 'Consumíveis' truncavam pra 'Arma...', 'Consu...'.
+  // Agora: 'Defesa', 'Poções' (semantica preservada, mais curto).
   var CATEGORIES = [
-    { id: 'weapons',     label: 'Armas',       displayOrder: 1, match: ['weapon', 'simple_weapon', 'martial_weapon'] },
-    { id: 'armor',       label: 'Armaduras',   displayOrder: 2, match: ['armor', 'shield', 'light_armor', 'medium_armor', 'heavy_armor', 'clothing'] },
-    { id: 'treasures',   label: 'Tesouros',    displayOrder: 4, match: ['valuable', 'gem', 'accessory', 'magic', 'paper', 'key', 'map', 'quest'] },
-    { id: 'consumables', label: 'Consumíveis', displayOrder: 3, match: ['consumable', 'potion', 'food', 'forage', 'survival', 'tool'] },
+    { id: 'weapons',     label: 'Armas',    displayOrder: 1, match: ['weapon', 'simple_weapon', 'martial_weapon'] },
+    { id: 'armor',       label: 'Defesa',   displayOrder: 2, match: ['armor', 'shield', 'light_armor', 'medium_armor', 'heavy_armor', 'clothing'] },
+    { id: 'treasures',   label: 'Tesouros', displayOrder: 4, match: ['valuable', 'gem', 'accessory', 'magic', 'paper', 'key', 'map', 'quest'] },
+    { id: 'consumables', label: 'Poções',   displayOrder: 3, match: ['consumable', 'potion', 'food', 'forage', 'survival', 'tool'] },
   ];
 
   /** Retorna ARRAY na ordem visual (Armas, Armaduras, Consumíveis, Tesouros) */
