@@ -2955,7 +2955,8 @@ Busca rápida:
              favoredTerrain — Ranger PHB p.91 (8 terrenos)
              rogueExpertise — Rogue PHB p.96 (2 skills com double prof)
              draconicAncestry — Sorcerer PHB p.103 (10 cores de dragao) */
-        let sel = { race: null, subrace: '', classKey: null, subclass: '', fightingStyle: '', equipmentChoice: 'A', selectedL1Skill: '', bg: null, personalityTrait: '', ideal: '', bond: '', flaw: '', alignment: '', skillProfs: [], toolProfs: [], gender: null, name: '', surname: '', languages: [], statAssignment: {}, favoredEnemy: '', favoredTerrain: '', rogueExpertise: [], draconicAncestry: '' };
+        /* Sessao #35 (2026-05-25): halfElfSkills — Skill Versatility PHB p.39. */
+        let sel = { race: null, subrace: '', classKey: null, subclass: '', fightingStyle: '', equipmentChoice: 'A', selectedL1Skill: '', bg: null, personalityTrait: '', ideal: '', bond: '', flaw: '', alignment: '', skillProfs: [], toolProfs: [], gender: null, name: '', surname: '', languages: [], statAssignment: {}, favoredEnemy: '', favoredTerrain: '', rogueExpertise: [], draconicAncestry: '', halfElfSkills: [] };
         let _l1SkillsCache = {}; // Cache API responses per class
         let pendingSubrace = '';
         let pendingLanguage = null;
@@ -4709,20 +4710,53 @@ Busca rápida:
            chips no design do jogo (era native <select>). Pattern: toggleHalfElfBonus
            multi-select max 2 attrs (ja exclui charisma — vem fixo +2). */
         let halfElfBonuses = [];
+        /* Sessao #35 (2026-05-25): Half-Elf Skill Versatility — PHB p.39:
+           "You gain proficiency in two skills of your choice." Picker
+           multi-select max 2 perícias entre as 18 D&D 5e. */
+        let halfElfSkills = [];
+
         function buildHalfElfDetailSection(raceKey) {
             const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom'];
-            halfElfBonuses = []; // reset
+            halfElfBonuses = []; halfElfSkills = []; // reset
             let html = `<div class="detail-section"><div class="detail-section-title">🎲 Bônus de Atributo (+1 cada)</div>`;
             html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos escolhem 2 atributos diferentes para receber +1 (além do +2 Carisma).</div>`;
             html += `<div class="lang-grid" id="heBonusOptions">`;
             attrs.forEach(a => {
                 html += `<div class="lang-option" data-attr="${a}" onclick="toggleHalfElfBonus('${a}', '${raceKey}', this)">${ATTR_PT[a]}</div>`;
             });
+            html += `</div></div>`;
+            // Sessao #35: Skill Versatility — 2 perícias livres (PHB p.39)
+            html += `<div class="detail-section"><div class="detail-section-title">🎓 Versatilidade (Skill Versatility)</div>`;
+            html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos ganham proficiência em <b>2 perícias à escolha</b> (PHB p.39).</div>`;
+            html += `<div class="lang-grid" id="heSkillOptions">`;
+            const allSkills = Object.keys(SKILL_PT);
+            allSkills.forEach(sk => {
+                html += `<div class="lang-option" data-skill="${sk}" onclick="toggleHalfElfSkill('${sk}', '${raceKey}', this)">${SKILL_PT[sk]}</div>`;
+            });
             html += `</div>`;
             html += `<div class="v-error-msg" id="halfelfError"></div></div>`;
             html += buildLanguagePicker(raceKey);
             html += `<button class="v-btn v-btn-primary confirm-btn" id="raceConfirmBtn" disabled onclick="confirmHalfElf('${raceKey}')">✓ CONFIRMAR MEIO-ELFO</button>`;
             return html;
+        }
+
+        function toggleHalfElfSkill(skill, raceKey, el) {
+            haptic();
+            const idx = halfElfSkills.indexOf(skill);
+            if (idx >= 0) {
+                halfElfSkills.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (halfElfSkills.length >= 2) {
+                    if (typeof window.vToast === 'function') {
+                        window.vToast('Apenas 2 perícias podem ser escolhidas (Versatilidade).', 'warn');
+                    }
+                    return;
+                }
+                halfElfSkills.push(skill);
+                el.classList.add('selected');
+            }
+            updateHalfElfDetail(raceKey);
         }
 
         function toggleHalfElfBonus(attr, raceKey, el) {
@@ -4745,10 +4779,10 @@ Busca rápida:
         }
 
         function updateHalfElfDetail(raceKey) {
-            // Enable confirm if 2 attrs picked AND language chosen
+            // Sessao #35: enable confirm if 2 attrs + 2 skills + language picked
             const langOk = !raceNeedsLangChoice('HalfElf', '') || !!pendingLanguage;
             const btn = document.getElementById('raceConfirmBtn');
-            if (btn) btn.disabled = !(halfElfBonuses.length === 2 && langOk);
+            if (btn) btn.disabled = !(halfElfBonuses.length === 2 && halfElfSkills.length === 2 && langOk);
         }
 
         function confirmHalfElf(raceKey) {
@@ -4770,9 +4804,20 @@ Busca rápida:
                 setTimeout(() => { el.style.display = 'none'; }, d);
                 return;
             }
+            // Sessao #35: Skill Versatility — 2 pericias obrigatorias
+            if (halfElfSkills.length !== 2) {
+                const el = document.getElementById('halfelfError');
+                const msg = 'Selecione 2 perícias (Versatilidade).';
+                el.textContent = msg; el.style.display = 'block';
+                const d = typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast-warn') : 2500;
+                setTimeout(() => { el.style.display = 'none'; }, d);
+                return;
+            }
             if (raceNeedsLangChoice(raceKey, '') && pendingLanguage) {
                 sel.languages = [pendingLanguage];
             }
+            // Persiste skills no state pra submitCharacter mandar pro backend
+            sel.halfElfSkills = halfElfSkills.slice();
             confirmRace(raceKey, b1 + '_' + b2);
         }
 
@@ -6337,6 +6382,11 @@ Busca rápida:
                 const da = SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry];
                 combatBody += `<div class="trait-item"><div class="trait-name">${da.icon} Dragão Ancestral: ${da.name}</div><div class="trait-desc">${da.desc}</div></div>`;
             }
+            // Sessao #35 (2026-05-25): Half-Elf Skill Versatility no summary
+            if (Array.isArray(sel.halfElfSkills) && sel.halfElfSkills.length === 2) {
+                const skillNames = sel.halfElfSkills.map(s => SKILL_PT[s] || s).join(', ');
+                combatBody += `<div class="trait-item"><div class="trait-name">🎓 Versatilidade Meio-Elfo: ${skillNames}</div><div class="trait-desc">Proficiência em 2 perícias livres (PHB p.39).</div></div>`;
+            }
             if (lv1 && lv1.spells.length > 0) {
                 lv1.spells.forEach(sp => {
                     combatBody += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
@@ -6521,7 +6571,9 @@ Busca rápida:
                 favored_enemy: sel.favoredEnemy || '',
                 favored_terrain: sel.favoredTerrain || '',
                 rogue_expertise: Array.isArray(sel.rogueExpertise) ? sel.rogueExpertise : [],
-                draconic_ancestry: sel.draconicAncestry || ''
+                draconic_ancestry: sel.draconicAncestry || '',
+                /* Sessao #35 (2026-05-25) — Half-Elf Skill Versatility PHB p.39 */
+                halfelf_skills: Array.isArray(sel.halfElfSkills) ? sel.halfElfSkills : []
             };
 
             // Primary: fetch() to API endpoint (reliable from InlineKeyboardButton Mini Apps)
