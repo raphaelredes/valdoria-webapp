@@ -1030,6 +1030,26 @@ Busca rápida:
            qualquer MESTRE falando com jogador na criacao de personagem.
            Hide via CSS preserva os divs em HTML (compat com buildDmBubbles
            e qualquer outro caller) — basta o texto ficar invisivel. */
+        /* Sessao #37 v7 (2026-05-25): user pediu "letras responsivas ao
+           filtro de tamanho". Como ha 100+ font-size hardcoded no inline
+           <style>, usar CSS zoom em containers principais (.screen e
+           .v-header) escala TUDO proporcionalmente sem refatoracao massiva.
+           Zoom funciona em Chromium/WebKit (Telegram WebView). Escalas
+           devem combinar com tokens: small 0.82, normal 1.0, large 1.30.
+           Onboarding overlay (position:fixed) NAO escala — fica neutro
+           pra escolha da preferencia. */
+        body[data-font-size="small"] .v-header,
+        body[data-font-size="small"] .screen-viewport {
+            zoom: 0.85;
+        }
+        body[data-font-size="large"] .v-header,
+        body[data-font-size="large"] .screen-viewport {
+            zoom: 1.18;
+        }
+
+        /* Sessao #37 v6 (2026-05-25): font-size hardcoded substituido por
+           tokens responsivos (var(--v-font-label) e var(--v-font-xs)) pra
+           escalar com body[data-font-size] (small/normal/large). */
         .dm-bubble {
             display: none !important;
             position: relative;
@@ -1038,7 +1058,7 @@ Busca rápida:
             border-radius: 0 var(--v-radius) var(--v-radius) 0;
             padding: 8px 12px 8px 14px;
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: var(--v-font-label, 12px);
             line-height: 1.5;
             color: var(--v-text);
             font-style: italic;
@@ -1047,7 +1067,7 @@ Busca rápida:
         .dm-bubble::before {
             content: '🎲 Mestre';
             display: block;
-            font-size: 10px;
+            font-size: var(--v-font-xs, 10px);
             font-weight: 700;
             color: var(--v-gold);
             font-style: normal;
