@@ -3311,6 +3311,11 @@ Busca rápida:
             isTransitioning = true;
             setTimeout(() => { isTransitioning = false; }, 350);
 
+            // BUGFIX sessão #29 (2026-05-24): tela Classe (idx=1) aparecia vazia
+            // em alguns casos — possível race entre init() e DOM measurement.
+            // Reconstruir o grid sempre que o jogador entra ou volta pra essa tela
+            // garante 12 cards renderizados, sem depender do init().
+            if (idx === 1) buildClassGrid();
             if (idx === 2) buildStatSlots();
             if (idx === 4) buildAlignGrid();
             if (idx === 5) {
@@ -4493,15 +4498,39 @@ Busca rápida:
 
         function buildClassGrid() {
             const grid = document.getElementById('classGrid');
+            if (!grid) {
+                console.error('[CHAR_CREATOR] buildClassGrid: #classGrid não encontrado no DOM');
+                return;
+            }
+            if (typeof CLASSES === 'undefined' || !CLASSES) {
+                console.error('[CHAR_CREATOR] buildClassGrid: CLASSES undefined — data.js falhou?');
+                return;
+            }
+            const entries = Object.entries(CLASSES);
+            if (entries.length === 0) {
+                console.error('[CHAR_CREATOR] buildClassGrid: CLASSES vazio (0 entries)');
+                return;
+            }
             grid.innerHTML = '';
-            for (const [key, c] of Object.entries(CLASSES)) {
-                const card = document.createElement('div');
-                const isConfirmed = sel.classKey === key;
-                card.className = 'v-card' + (isConfirmed ? ' selected' : '');
-                const iconHtml = _classIconHtml(key, 48);
-                card.innerHTML = `<div class="v-card-icon v-card-icon-png">${iconHtml}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div>`;
-                card.onclick = () => { haptic(); buildClassDetail(key); openSubScreen('sub-class-detail'); };
-                grid.appendChild(card);
+            let rendered = 0;
+            for (const [key, c] of entries) {
+                try {
+                    const card = document.createElement('div');
+                    const isConfirmed = sel.classKey === key;
+                    card.className = 'v-card' + (isConfirmed ? ' selected' : '');
+                    const iconHtml = _classIconHtml(key, 48);
+                    card.innerHTML = `<div class="v-card-icon v-card-icon-png">${iconHtml}</div><div class="v-card-name">${c.name}</div><div class="v-card-desc">${c.role}</div>`;
+                    card.onclick = () => { haptic(); buildClassDetail(key); openSubScreen('sub-class-detail'); };
+                    grid.appendChild(card);
+                    rendered++;
+                } catch (err) {
+                    console.error('[CHAR_CREATOR] buildClassGrid: erro renderizando classe ' + key, err);
+                }
+            }
+            if (rendered === 0) {
+                console.error('[CHAR_CREATOR] buildClassGrid: 0 cards renderizados de ' + entries.length + ' entradas');
+            } else if (window._dbg) {
+                console.log('[CHAR_CREATOR] buildClassGrid: ' + rendered + '/' + entries.length + ' cards renderizados');
             }
         }
 
