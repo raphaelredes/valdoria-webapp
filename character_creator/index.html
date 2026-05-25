@@ -4849,26 +4849,29 @@ Busca rápida:
         // Sessao #29 (2026-05-24): mapa de classes por papel D&D 5e.
         // Cada classe pode aparecer em multiplos filtros (Paladino = Tanque + Curador).
         // Match feito por substring no campo role do CLASSES dict.
-        const _CLASS_ROLE_KEYWORDS = {
+        // FIX TDZ (2026-05-24): usar `var` em vez de `let/const` — declarações
+        // ficam visíveis dentro do mesmo <script> mesmo durante init() que roda
+        // ANTES desta linha (var é hoisted, let/const tem TDZ).
+        var _CLASS_ROLE_KEYWORDS = {
             tank: ['tanque'],
             dps: ['dps'],
             healer: ['curador', 'cura'],
             support: ['suporte'],
             caster: ['caster', 'arcano', 'magico']
         };
-        let _classRoleFilter = 'all';
+        var _classRoleFilter = 'all';
 
         function _classMatchesRole(c, roleFilter) {
             if (roleFilter === 'all') return true;
-            const role = (c.role || '').toLowerCase();
-            const keywords = _CLASS_ROLE_KEYWORDS[roleFilter] || [];
-            return keywords.some(kw => role.includes(kw));
+            var role = (c.role || '').toLowerCase();
+            var keywords = _CLASS_ROLE_KEYWORDS[roleFilter] || [];
+            return keywords.some(function(kw){ return role.indexOf(kw) >= 0; });
         }
 
         function setClassRoleFilter(role) {
             haptic();
             _classRoleFilter = role;
-            document.querySelectorAll('.class-role-tab').forEach(t => {
+            document.querySelectorAll('.class-role-tab').forEach(function(t){
                 t.classList.toggle('active', t.dataset.role === role);
             });
             buildClassGrid();
@@ -4892,8 +4895,11 @@ Busca rápida:
             grid.innerHTML = '';
             let rendered = 0;
             let filtered = 0;
+            // FIX TDZ: _classRoleFilter pode ser undefined se buildClassGrid roda
+            // durante init() (antes da declaração var executar). Default 'all'.
+            var _curFilter = _classRoleFilter || 'all';
             for (const [key, c] of entries) {
-                if (!_classMatchesRole(c, _classRoleFilter)) {
+                if (!_classMatchesRole(c, _curFilter)) {
                     filtered++;
                     continue;
                 }
@@ -4913,7 +4919,7 @@ Busca rápida:
             // Update counter
             const counter = document.getElementById('classRoleCount');
             if (counter) {
-                if (_classRoleFilter === 'all') {
+                if (_curFilter === 'all') {
                     counter.textContent = rendered + ' classes disponíveis';
                 } else {
                     counter.textContent = rendered + ' classe' + (rendered === 1 ? '' : 's') + ' nesse papel';
@@ -4922,7 +4928,7 @@ Busca rápida:
             if (rendered === 0 && filtered === 0) {
                 console.error('[CHAR_CREATOR] buildClassGrid: 0 cards renderizados de ' + entries.length + ' entradas');
             } else if (window._dbg) {
-                console.log('[CHAR_CREATOR] buildClassGrid: ' + rendered + '/' + entries.length + ' cards (filter=' + _classRoleFilter + ')');
+                console.log('[CHAR_CREATOR] buildClassGrid: ' + rendered + '/' + entries.length + ' cards (filter=' + _curFilter + ')');
             }
         }
 
