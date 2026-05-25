@@ -8627,9 +8627,22 @@ body.perf-lite .vc-action-btn { transition: none; }
         // (algoz/cacador/cofreiro/...). Mapeamento canonical baseado em
         // achievements_data.py — cada chain consome um stat especifico.
         // ACH_PROGRESS popula com valores reais → progress bars corretos.
+        //
+        // BUG fix sessao #37: BRONZE/ABATES/SEQUENCIA estavam hardcoded
+        // (league_xp:1240, kills:23, streak:3 em buildHubData) — mostravam
+        // dados antigos pra char novo. Agora derivam de
+        // achievement_stats + league metadata do server.
+        var serverStats = (picked && picked.achievement_stats) || {};
+        // Stash em window pra buildHubData consumir
+        window._serverPlayerStats = {
+          kills: serverStats.combat_victories || 0,
+          streak: serverStats.win_streak || 0,
+          best_streak: serverStats.best_win_streak || 0,
+          league_xp: (picked && picked.league_xp) || serverStats.weekly_xp || 0,
+          league_tier: (picked && picked.league_tier) || 'bronze',
+        };
         if (picked.achievement_stats && typeof picked.achievement_stats === 'object') {
           window._serverAchievementStats = picked.achievement_stats;
-          var serverStats = picked.achievement_stats;
           // Mapping chain_id → stat_name (canonical achievements_data.py)
           var CHAIN_TO_STAT = {
             'algoz':         'combat_victories',
@@ -10301,9 +10314,16 @@ function buildMockHubScreen(player){
     // Os cards de membros já são exibidos no #city-group-panel (HUD topo) — não precisa duplicar.
     allies: [],
     quest_tracker: { quests: _buildQuestTrackerFromActive() },
-    progress_strip: {
-      // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithral)
-      league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
+    progress_strip: (function(){
+      // Sessao #37 (2026-05-25): hidrata BRONZE/league_xp do servidor.
+      // Antes hardcoded league_xp:1240 — char novo via 1240 falso.
+      var sps = window._serverPlayerStats || {};
+      var lxp = (typeof sps.league_xp === 'number') ? sps.league_xp : 0;
+      var tier = sps.league_tier || 'bronze';
+      var tierLabels = { bronze: ['Bronze', '#cd7f32'], silver: ['Prata', '#c0c0c0'], gold: ['Ouro', '#ffd700'], platinum: ['Platina', '#7cb4db'], mithral: ['Mithral', '#a8e6f0'] };
+      var tl = tierLabels[tier] || tierLabels.bronze;
+      return {
+      league_icon: 'ic-liga-' + tier, league_xp: lxp, league_name: tl[0], league_color: tl[1], league_cb: 'league_main',
       // ach_unlocked/ach_total computados dinamicamente — sistema progressivo (14 cadeias × 5 tiers = 70)
       // Sessão #37 (2026-05-25): bug fix — antes era hardcoded `ach_unlocked: 20`,
       // mostrando "20/70 conquistas" pra todo player real (mesmo um char recém
@@ -10320,8 +10340,18 @@ function buildMockHubScreen(player){
       })(),
       ach_total: 70,
       ach_cb: 'ach_main'
-    },
-    player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
+    };
+    })(),
+    player_stats: (function(){
+      // Sessao #37 (2026-05-25): hidrata ABATES/SEQUENCIA do server. Antes
+      // hardcoded kills:23, streak:3 — char novo via 23 abates falsos.
+      var sps = window._serverPlayerStats || {};
+      return {
+        kills: (typeof sps.kills === 'number') ? sps.kills : 0,
+        streak: (typeof sps.streak === 'number') ? sps.streak : 0,
+        kills_cb: 'kills_log', streak_cb: 'streak_log'
+      };
+    })(),
     daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' }
     /* dm_tip REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
   };
