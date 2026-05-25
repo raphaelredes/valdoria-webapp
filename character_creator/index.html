@@ -5750,13 +5750,27 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         // L1 SKILL SELECTION — Sub-screen (casters)
         // ═══════════════════════════════════════════════
+        // Sessao #37 (2026-05-25): mapping cliente (class_mage) → server (Mage)
+        // API /api/character/l1-skills?class=X espera HeroClass enum value
+        // ("Mage", "Sorcerer", "Bard", etc.), NAO o sel.classKey legacy
+        // (class_mage, class_sorcerer). Sem mapping, API retorna invalid_class.
+        var _CLIENT_CLASS_TO_SERVER = {
+            'class_warrior': 'Warrior', 'class_mage': 'Mage', 'class_rogue': 'Rogue',
+            'class_cleric': 'Cleric', 'class_paladin': 'Paladin', 'class_ranger': 'Ranger',
+            'class_barbarian': 'Barbarian', 'class_bard': 'Bard', 'class_druid': 'Druid',
+            'class_monk': 'Monk', 'class_sorcerer': 'Sorcerer', 'class_warlock': 'Warlock'
+        };
+
         async function checkAndShowL1Skills() {
             if (!sel.classKey || !apiBase) { finishClassScreen(); return; }
 
-            // Use cache if available
+            // Use cache if available — Sessao #37: aceita tanto novo (options)
+            // quanto legacy (skills) pra back-compat
             if (_l1SkillsCache[sel.classKey]) {
                 const data = _l1SkillsCache[sel.classKey];
-                if (data.skills && data.skills.length > 0) {
+                var hasNew = data && Array.isArray(data.options) && data.options.length > 0;
+                var hasLegacy = data && Array.isArray(data.skills) && data.skills.length > 0;
+                if (hasNew || hasLegacy) {
                     buildL1SkillSelect(data);
                     openSubScreen('sub-l1skill-select');
                     return;
@@ -5765,11 +5779,14 @@ Busca rápida:
                 return;
             }
 
-            // Fetch from API
+            // Fetch from API — Sessao #37: usa server class format (Mage,
+            // Sorcerer, etc) via _CLIENT_CLASS_TO_SERVER mapping. Antes
+            // enviava sel.classKey raw ('class_mage') que retornava 400.
             try {
                 const _ac1 = new AbortController();
                 const _tid1 = setTimeout(() => _ac1.abort(), 10000);
-                const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${sel.classKey}`, {
+                const serverClass = _CLIENT_CLASS_TO_SERVER[sel.classKey] || sel.classKey;
+                const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${encodeURIComponent(serverClass)}`, {
                     headers: {}, signal: _ac1.signal,
                 });
                 clearTimeout(_tid1);
@@ -5777,7 +5794,10 @@ Busca rápida:
                 const data = await resp.json();
                 _l1SkillsCache[sel.classKey] = data;
 
-                if (data.skills && data.skills.length > 0) {
+                // Aceita tanto novo formato (quota+options) quanto legacy (skills)
+                var hasNew2 = Array.isArray(data.options) && data.options.length > 0;
+                var hasLegacy2 = Array.isArray(data.skills) && data.skills.length > 0;
+                if (hasNew2 || hasLegacy2) {
                     buildL1SkillSelect(data);
                     openSubScreen('sub-l1skill-select');
                     return;
