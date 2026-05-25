@@ -728,6 +728,16 @@ var CHAR_CLASSES = [
               kind: 'summon_combatant_passive',
               spawnInBattle: true,
               spawnPosition: 'rear_ally',
+              /* Sessao #32 (2026-05-25) — User reportou: paladino comecando com
+                 montaria parecia estranho. CORRETO em D&D 5e: Find Steed e uma
+                 spell de 2o nivel (PHB p.240). Paladino so ganha spellcasting
+                 no nivel 2; 2nd-level slots no nivel 3. Antes do level 5 (Extra
+                 Attack milestone) ainda e cedo demais — montaria seria poderosa
+                 demais pra um paladino iniciante. Gate em minLevel:5 = paladino
+                 ja domina sua spellcasting e bondou com sua montaria (canonical
+                 narrativa D&D). spawnPassivesForClass em combate.html ja respeita
+                 passive.minLevel (gating identico ao Bardo Magical Secrets L10). */
+              minLevel: 5,
               /* C1 (escolha autor) — PHB-fiel: ritual de 10 min fora-de-combate
                  (PHB p.240). Setup-frontend ganha checkbox "Já invocou montaria?". */
               preCombatRitual: true,

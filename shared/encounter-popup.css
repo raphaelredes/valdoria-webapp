@@ -212,8 +212,12 @@ body.perf-lite #encounter-overlay.active .enc-card {
 }
 
 .enc-line {
-  font-size: var(--v-font-body);
-  line-height: 1.55;
+  /* Sessao #32 (2026-05-25): user pediu fontes maiores em dialogos do prologo
+     "muito pequenas e confusas". Bump de 14px (--v-font-body) -> 15px + line-height
+     1.55 -> 1.65 melhora legibilidade em smartphone. Mesma classe usada em
+     cidade.html PADRAO_ALDRIC e prologue.html — padronizacao global. */
+  font-size: 15px;
+  line-height: 1.65;
   color: #d4c8b0;
 }
 /* 2026-05-20: visibility:hidden default REMOVIDO. Legacy renderer em
@@ -263,7 +267,8 @@ body.perf-lite #encounter-overlay.active .enc-card {
   font-weight: 800;
   font-family: 'Georgia', serif;
   display: block;
-  font-size: var(--v-font-md);
+  /* Sessao #32: bump speaker label 12px -> 13px (mesma logica do .enc-line) */
+  font-size: 13px;
   letter-spacing: 1.2px;
   margin-bottom: 5px;
   text-transform: uppercase;

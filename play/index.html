@@ -675,7 +675,19 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     title.show();
     sendLog('info', 'title_shown');
   }
-  _showTitleScreen();
+  /* Sessao #32 (2026-05-25): user reportou que apos prologo, /play/ mostra
+     "Toque para Iniciar" como se fosse boot do zero. Pula title screen quando
+     o param skipTitle=1 esta presente — usado pelo prologue/complete redirect.
+     SO bypassa pra POST-prologue (onde audio ja foi destravado pelo gesto
+     anterior do user no prologo). Boot inicial do Telegram /start ainda mostra
+     title pra destravar autoplay. */
+  var _qsSkip = new URLSearchParams(location.search);
+  if (_qsSkip.get('skipTitle') === '1') {
+    sendLog('info', 'title_skipped_via_param');
+    runAuthAndRedirect();
+  } else {
+    _showTitleScreen();
+  }
 })();
 </script>
 <noscript>

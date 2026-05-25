@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-23T00:21:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-25T03:56:04Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -872,8 +872,8 @@ html body .va-backdrop {
       botão primary alto (com tag "Ação Padrão") + secundário tracejado. */
 #intro-choice-popup {
     background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    /* PERF #32: disabled blur */ /* backdrop-filter: blur(2px); */
+    /* -webkit-backdrop-filter: blur(2px); */
 }
 #intro-choice-popup .iop-card {
     /* Overriding default iop-card — Opção 3 palette */
@@ -5371,8 +5371,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     justify-content: center;
     padding: 10px;
     background: radial-gradient(ellipse at center, rgba(30,18,10,0.62) 0%, rgba(8,6,4,0.96) 85%);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    /* PERF #32: disabled blur */ /* backdrop-filter: blur(4px); */
+    /* -webkit-backdrop-filter: blur(4px); */
     animation: udcFadeIn .25s ease;
 }
 .lp-help-card {
@@ -5600,8 +5600,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     justify-content: center;
     padding: 12px;
     background: radial-gradient(ellipse at center, rgba(30,18,10,0.75) 0%, rgba(8,6,4,0.95) 85%);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* PERF #32: disabled blur */ /* backdrop-filter: blur(3px); */
+    /* -webkit-backdrop-filter: blur(3px); */
     animation: udcFadeIn 0.22s ease;
     border-radius: 14px;
 }
@@ -5995,8 +5995,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     position: sticky;
     top: 46px;
     background: rgba(30,22,14,0.95);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    /* PERF #32: disabled blur */ /* backdrop-filter: blur(3px); */
+    /* -webkit-backdrop-filter: blur(3px); */
     z-index: 2;
 }
 .lp-filter-dot {
@@ -8983,7 +8983,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     background: rgba(196,149,58,0.5);
     border-radius: 3px;
 }
-@keyframes resOverlayIn { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(2px); } }
+@keyframes resOverlayIn { from { opacity: 0; /* PERF #32: disabled blur */ /* backdrop-filter: blur(0); */ } to { opacity: 1; /* PERF #32: disabled blur */ /* backdrop-filter: blur(2px); */ } }
 .res-title {
     /* X-6.5.49: reduzido de 44px (era enorme em Telegram Desktop) pra 36px
        — clamp permite ainda menor em viewports muito baixos. */

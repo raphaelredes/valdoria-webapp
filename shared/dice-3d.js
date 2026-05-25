@@ -841,6 +841,24 @@ var Dice3D = (function () {
 
     Dice3DInstance.prototype._animate = function (time) {
         if (this._disposed) return;
+        var isActive = this._fusionActive || this._rolling || this._showingResult;
+        /* Sessao #32 (2026-05-25): perf fix — antes RAF rodava infinitamente
+           mesmo com dado parado, gastando ~60fps WebGL render por dado idle.
+           Em combate com 4-6 dados visiveis, isso queimava ~360fps de GPU sem
+           visivel beneficio. Agora: RAF para quando idle e so reativa em roll()
+           via _resumeAnim(). Idle die fica parado em vez de rotacionar lento
+           (trade-off aceitavel pra perf, especialmente em mid-tier phones). */
+        if (!isActive) {
+            if (!this._idleRendered && this._dieMesh) {
+                this._resultGlow.color.setHex(0xd4af37);
+                this._orbitLight.intensity = 0;
+                this._resultGlow.intensity = 0;
+                this._renderer.render(this._scene, this._camera);
+                this._idleRendered = true;
+            }
+            this._animFrame = null;
+            return;
+        }
         this._animFrame = requestAnimationFrame(this._animate);
         if (this._fusionActive) {
             this._updateFusion(time);
@@ -888,15 +906,17 @@ var Dice3D = (function () {
                     this._multiMeshes[i].scale.setScalar(this._multiStates[i].baseScale * ms);
                 }
             }
-        } else if (this._dieMesh) {
-            this._resultGlow.color.setHex(0xd4af37);
-            this._idleTime += 0.012;
-            this._dieMesh.rotation.y += 0.003;
-            this._dieMesh.rotation.x += 0.001;
-            this._orbitLight.intensity = 0;
-            this._resultGlow.intensity = 0;
         }
         this._renderer.render(this._scene, this._camera);
+    };
+
+    /* Sessao #32 (2026-05-25): helper pra reativar RAF apos sair do idle.
+       Chamado por roll() / rollMultiple() / fusionTo(). */
+    Dice3DInstance.prototype._resumeAnim = function () {
+        this._idleRendered = false;
+        if (!this._animFrame && !this._disposed) {
+            this._animFrame = requestAnimationFrame(this._animate);
+        }
     };
 
     Dice3DInstance.prototype._updateRoll = function (time) {
@@ -1119,6 +1139,7 @@ var Dice3D = (function () {
         this._rollDuration = this._rollMs;
         this._rollStart = performance.now();
         this._rolling = true;
+        this._resumeAnim(); /* Sessao #32: reactivate RAF on roll */
         this._rollCallback = function () {
             self._pendingEpicShake = false;
             self._epicResult = isCrit ? 'crit' : (isFail ? 'fail' : null);
@@ -1166,6 +1187,7 @@ var Dice3D = (function () {
         Dice3DInstance._playRollSfx();
         this._showingResult = false;
         this._rolling = true;
+        this._resumeAnim(); /* Sessao #32: reactivate RAF on rollMultiple */
         this._multiMode = true;
         this._multiLanded = 0;
         this._multiCallback = onDone;
@@ -1323,6 +1345,7 @@ var Dice3D = (function () {
         }
         this._showingResult = false;
         this._fusionActive = true;
+        this._resumeAnim(); /* Sessao #32: reactivate RAF on fusion */
         this._fusionStart = performance.now();
         this._fusionDuration = 500;
         this._fusionCallback = onDone;
