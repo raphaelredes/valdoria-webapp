@@ -760,14 +760,73 @@ function checkExistingSession() {
             showAuthLoading(true);
             _devReauth(devToken).then(function(succeeded) {
                 if (!succeeded) {
-                    console.info('[WEB-AUTH] _devReauth failed — falling back to WEB_TOKEN_KEY flow');
-                    _tryWebTokenSession();
+                    console.info('[WEB-AUTH] _devReauth failed — falling back to v_*_session / WEB_TOKEN_KEY flow');
+                    if (!_tryVStarSession()) _tryWebTokenSession();
                 }
             });
             return;
         }
     }
+    // Sessao #37 (2026-05-25): Chrome MCP + Chrome padrao tem v_dev_session
+    // (escrita pelas game pages — cidade/exploracao/combat) com token+uid+
+    // apiBase validos. auth-gate.js JA detecta isso em outras pages MAS
+    // skip /web/ — fazia user reportar 5+ vezes "/web/ aparece mesmo ja
+    // autenticado, JA CANSEI". Fix: web-auth.js agora detecta v_*_session
+    // ANTES do WEB_TOKEN_KEY flow + auto-redirect pra /cidade/.
+    if (_tryVStarSession()) return;
     _tryWebTokenSession();
+}
+
+/* Sessao #37 (2026-05-25): detecta sessao v_dev_session / v_prod_session
+   (canonical das game pages). Se valida (token+uid+apiBase, age < 30d),
+   auto-redirect pra /cidade/ sem prompt — mesmo pattern do auth-gate.js
+   mas executado de DENTRO de /web/ (auth-gate skip esse path).
+   Retorna true se redirecionou; false se nao havia sessao valida. */
+function _tryVStarSession() {
+    try {
+        var host = String(location.hostname || '').toLowerCase();
+        var envPrefix = host === 'dev.lendasdevaldoria.com.br' ? 'v_dev_session' : 'v_prod_session';
+        var rawSession = localStorage.getItem(envPrefix);
+        if (!rawSession) {
+            console.info('[WEB-AUTH] _tryVStarSession: nenhuma %s no localStorage', envPrefix);
+            return false;
+        }
+        var sess = JSON.parse(rawSession);
+        var ageMs = Date.now() - (sess.ts || 0);
+        var maxAgeMs = 30 * 24 * 60 * 60 * 1000;
+        if (!sess.token || !sess.uid || !sess.apiBase) {
+            console.info('[WEB-AUTH] _tryVStarSession: %s incompleta (token/uid/apiBase)', envPrefix);
+            return false;
+        }
+        if (ageMs >= maxAgeMs) {
+            console.info('[WEB-AUTH] _tryVStarSession: %s expirada (%dd)', envPrefix, Math.floor(ageMs / 86400000));
+            return false;
+        }
+        // Sessao valida — migra pras keys WEB_* + redirect pra /cidade/.
+        // Migra ANTES do redirect pra que se cidade.html falhar e voltar pra /web/,
+        // checkExistingSession encontre as WEB_* keys e nao caia em loop.
+        try {
+            localStorage.setItem(WEB_TOKEN_KEY, sess.token);
+            localStorage.setItem(WEB_USER_KEY, String(sess.uid));
+            localStorage.setItem(WEB_API_KEY, sess.apiBase);
+        } catch (e) {
+            console.warn('[WEB-AUTH] _tryVStarSession: localStorage.setItem failed', e);
+        }
+        var url = '/cidade/?token=' + encodeURIComponent(sess.token)
+            + '&api=' + encodeURIComponent(sess.apiBase)
+            + '&uid=' + encodeURIComponent(String(sess.uid))
+            + '&env=' + encodeURIComponent(sess.env || (host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod'))
+            + (sess.charId ? '&char=' + encodeURIComponent(sess.charId) : '')
+            + '&_cb=' + Date.now();
+        console.info('[WEB-AUTH] _tryVStarSession: sessao valida detectada (uid=%s, age=%dh) — redirect pra /cidade/',
+            sess.uid, Math.floor(ageMs / 3600000));
+        try { window.__valdoria_transitioning = true; } catch (_) {}
+        location.replace(url);
+        return true;
+    } catch (e) {
+        console.warn('[WEB-AUTH] _tryVStarSession: erro', e);
+        return false;
+    }
 }
 
 function _tryWebTokenSession() {
