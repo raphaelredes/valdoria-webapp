@@ -9338,7 +9338,10 @@ function _isCTA(btn) {
     document.addEventListener('DOMContentLoaded', _scheduleSplashWhenReady, { once: true });
   }
 
-  // Função global de popup (chamada pelo heartbeat OU manualmente via extras_feedback)
+  // Função global de popup épico de avaliação (sessão #29, 2026-05-24).
+  // User pediu: épico + campo texto opcional + sugestões + envio backend.
+  // Anterior: só localStorage (ratings NUNCA chegavam no servidor — perdidos).
+  // Agora: POST /api/game/action cb=fb_survey_submit (ou fb_survey_no se vazio).
   window._showRatingPromptPopup = function(){
     if (typeof window._showInfoPopup !== 'function') return;
     var stored = _pref('valdoria_last_rating', null);
@@ -9346,37 +9349,152 @@ function _isCTA(btn) {
       // Já avaliou antes — não re-prompt
       return;
     }
+    var EPIC_HTML = ''
+      + '<div style="text-align:center;padding:8px 0 4px;">'
+      +   '<div style="font-family:Cinzel,serif;letter-spacing:2px;color:var(--v-gold,#c4953a);font-size:11px;text-transform:uppercase;margin-bottom:6px;opacity:0.85;">— Pergaminho do Mestre Aldric —</div>'
+      +   '<p style="font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.55;font-size:13px;margin:0 0 14px;padding:0 4px;">'
+      +     '"Aventureiro&hellip; passamos juntos <b style=\'color:var(--v-gold,#c4953a);\'>cinco horas</b> nesta jornada. <i>(pousa a pena sobre o pergaminho gasto)</i><br><br>'
+      +     'Tua história foi tecida ao lado de Valdória. Que tua voz ecoe agora — para que aqueles que vierem depois encontrem caminhos mais belos. Tua palavra esculpe o reino."'
+      +   '</p>'
+      + '</div>'
+      // Estrelas — escolha rápida
+      + '<div style="text-align:center;font-size:11px;color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;">Tua nota</div>'
+      + '<div style="display:flex;gap:8px;justify-content:center;padding:4px 0 14px;" id="rating-stars-auto">'
+      + [1,2,3,4,5].map(function(n){
+          return '<button type="button" class="rating-star" data-rating="' + n + '" '
+               + 'style="background:linear-gradient(180deg,var(--v-bg-card,#2e2520),var(--v-bg,#2a2420));'
+               + 'border:1px solid var(--v-border,#4a3828);border-radius:50%;width:46px;height:46px;'
+               + 'cursor:pointer;color:var(--v-text-dim,#5a4838);font-size:22px;transition:all 0.2s ease;'
+               + 'box-shadow:0 2px 6px rgba(0,0,0,0.3);">★</button>';
+        }).join('')
+      + '</div>'
+      + '<div id="rating-label" style="text-align:center;font-size:12px;color:var(--v-gold,#c4953a);font-family:Cinzel,serif;letter-spacing:0.8px;min-height:18px;margin-bottom:14px;font-style:italic;opacity:0;transition:opacity 0.3s ease;">&nbsp;</div>'
+      // Campo de texto opcional
+      + '<div style="margin-bottom:10px;">'
+      +   '<label style="display:block;font-size:11px;color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;font-family:Cinzel,serif;">Tuas palavras <span style="opacity:0.6;text-transform:none;">(opcional)</span></label>'
+      +   '<textarea id="rating-text" placeholder="Conta o que sentiste durante a jornada&hellip;" '
+      +     'maxlength="500" rows="3" '
+      +     'style="width:100%;box-sizing:border-box;background:var(--v-bg,#2a2420);border:1px solid var(--v-border,#4a3828);'
+      +     'border-radius:6px;padding:10px 12px;color:var(--v-text,#d4c8b0);'
+      +     'font-family:Cinzel,serif;font-size:13px;line-height:1.5;'
+      +     'resize:none;outline:none;transition:border-color 0.2s ease;"></textarea>'
+      +   '<div style="font-size:10px;color:var(--v-text-dim,#a09484);text-align:right;margin-top:2px;"><span id="rating-text-count">0</span>/500</div>'
+      + '</div>'
+      // Campo sugestões
+      + '<div style="margin-bottom:8px;">'
+      +   '<label style="display:block;font-size:11px;color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;font-family:Cinzel,serif;">Sugestão para o reino <span style="opacity:0.6;text-transform:none;">(opcional)</span></label>'
+      +   '<textarea id="rating-suggest" placeholder="O que gostarias de ver em Valdória?" '
+      +     'maxlength="500" rows="2" '
+      +     'style="width:100%;box-sizing:border-box;background:var(--v-bg,#2a2420);border:1px solid var(--v-border,#4a3828);'
+      +     'border-radius:6px;padding:10px 12px;color:var(--v-text,#d4c8b0);'
+      +     'font-family:Cinzel,serif;font-size:13px;line-height:1.5;'
+      +     'resize:none;outline:none;transition:border-color 0.2s ease;"></textarea>'
+      +   '<div style="font-size:10px;color:var(--v-text-dim,#a09484);text-align:right;margin-top:2px;"><span id="rating-suggest-count">0</span>/500</div>'
+      + '</div>';
     window._showInfoPopup({
       icon: _heralIco('ic-stat-cha', null, '32px'),
       npc: '✨ Aldric',
-      title: 'Cinco horas pela aventura!',
-      desc: '<p style="text-align:center; font-style:italic; color:var(--v-text-dim,#a09484); margin-bottom:10px;">"Já vimos juntos cinco horas de aventura, irmão. <i>(pousa o terço sobre a mesa)</i> Que tal compartilhar tua experiência? Tua palavra ajuda o Templo a guiar os próximos."</p>'
-          + '<div style="display:flex; gap:6px; justify-content:center; padding:10px 0;" id="rating-stars-auto">'
-          + [1,2,3,4,5].map(function(n){
-              return '<button class="rating-star" data-rating="' + n + '" '
-                   + 'style="background:none; border:1px solid var(--v-border,#4a3828); '
-                   + 'border-radius:50%; width:42px; height:42px; cursor:pointer; '
-                   + 'color:var(--v-gold,#c4953a); font-size:20px;">★</button>';
-            }).join('')
-          + '</div>'
-          + '<i style="color:var(--v-text-dim,#a09484); font-size:11px; display:block; text-align:center;">5★ = "Adoro!" · 1★ = "Tem o que melhorar"</i>',
-      onConfirm: function(){ /* fecha popup naturalmente */ }
+      title: 'Cinco horas pela aventura',
+      desc: EPIC_HTML,
+      confirmLabel: 'Enviar avaliação',
+      onConfirm: function(){
+        return window._submitRatingPopup && window._submitRatingPopup();
+      }
     });
-    // Wire estrelas (mesmo pattern do extras_feedback)
+    // Wire UI interactions (após mount)
     setTimeout(function(){
-      document.querySelectorAll('#rating-stars-auto .rating-star').forEach(function(b){
-        b.addEventListener('click', function(){
-          var r = b.getAttribute('data-rating');
-          try { localStorage.setItem('valdoria_last_rating', r); } catch(_) {}
-          if (typeof vToast === 'function') vToast('Avaliação registrada: ' + r + '★ — obrigado!');
-          if (typeof closeCityPopup === 'function') {
-            setTimeout(function(){
-              var top = (window._popupStack || [])[((window._popupStack || []).length - 1)];
-              if (top && top.indexOf('info_') === 0 && typeof navigateBack === 'function') navigateBack();
-            }, 600);
+      var STAR_LABELS = {
+        1: 'Tenho críticas',
+        2: 'Pode melhorar',
+        3: 'Está bom',
+        4: 'Estou gostando',
+        5: 'Adoro Valdória'
+      };
+      var _selectedRating = 0;
+      var stars = document.querySelectorAll('#rating-stars-auto .rating-star');
+      var label = document.getElementById('rating-label');
+      function paintStars(upTo){
+        stars.forEach(function(s){
+          var n = parseInt(s.getAttribute('data-rating'), 10);
+          if (n <= upTo) {
+            s.style.color = 'var(--v-gold,#c4953a)';
+            s.style.borderColor = 'var(--v-gold,#c4953a)';
+            s.style.boxShadow = '0 0 12px rgba(196,149,58,0.5),0 2px 6px rgba(0,0,0,0.3)';
+            s.style.transform = 'scale(1.05)';
+          } else {
+            s.style.color = 'var(--v-text-dim,#5a4838)';
+            s.style.borderColor = 'var(--v-border,#4a3828)';
+            s.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+            s.style.transform = 'scale(1)';
           }
         });
+      }
+      stars.forEach(function(b){
+        var rating = parseInt(b.getAttribute('data-rating'), 10);
+        b.addEventListener('mouseenter', function(){ if (!_selectedRating) paintStars(rating); });
+        b.addEventListener('mouseleave', function(){ if (!_selectedRating) paintStars(0); });
+        b.addEventListener('click', function(){
+          _selectedRating = rating;
+          paintStars(rating);
+          if (label) {
+            label.textContent = STAR_LABELS[rating] || '';
+            label.style.opacity = '1';
+          }
+          if (typeof vHaptic === 'function') vHaptic('light');
+        });
       });
+      // Char counters
+      ['text', 'suggest'].forEach(function(kind){
+        var ta = document.getElementById('rating-' + kind);
+        var c = document.getElementById('rating-' + kind + '-count');
+        if (ta && c) {
+          ta.addEventListener('input', function(){ c.textContent = ta.value.length; });
+          ta.addEventListener('focus', function(){ ta.style.borderColor = 'var(--v-gold,#c4953a)'; });
+          ta.addEventListener('blur', function(){ ta.style.borderColor = 'var(--v-border,#4a3828)'; });
+        }
+      });
+      // Submit handler — POST /api/game/action cb=fb_survey_submit (ou fb_survey_no)
+      window._submitRatingPopup = function(){
+        var rating = _selectedRating;
+        var txt = (document.getElementById('rating-text') || {}).value || '';
+        var sug = (document.getElementById('rating-suggest') || {}).value || '';
+        txt = txt.trim().slice(0, 500);
+        sug = sug.trim().slice(0, 500);
+        if (!rating) {
+          if (typeof vToast === 'function') vToast('Toque numa estrela primeiro — tua nota guia o caminho.');
+          return false; // não fecha
+        }
+        // Marca como visto (não re-prompt)
+        try {
+          localStorage.setItem('valdoria_last_rating', rating);
+          localStorage.setItem('valdoria_rating_prompt_seen', '1');
+        } catch(_) {}
+        // POST backend — opcional, falha silenciosa se servidor offline
+        var hasContent = txt.length > 0 || sug.length > 0;
+        var cb = hasContent ? 'fb_survey_submit' : 'fb_survey_no';
+        var body = { rating: rating };
+        if (hasContent) {
+          body.survey = {};
+          if (txt) body.survey.q_free_text = txt;
+          if (sug) body.survey.q_suggestion = sug;
+        }
+        try {
+          var apiBase = window._VALDORIA_API_BASE || window._API_BASE || '';
+          var token = (typeof _readToken === 'function' && _readToken()) ||
+                      (window.CITY_AUTH && window.CITY_AUTH.token) || '';
+          if (apiBase && token) {
+            fetch(apiBase + '/api/game/action', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Valdoria-Token': token },
+              body: JSON.stringify({ callback: cb, body: body })
+            }).catch(function(e){ console.warn('[FB] submit failed:', e); });
+          }
+        } catch (e) { console.warn('[FB] submit error:', e); }
+        if (typeof vToast === 'function') {
+          vToast(rating >= 4 ? '✨ Obrigado pela jornada! Tua voz inspira.' : '✨ Obrigado pelo feedback — vou levar a sério.');
+        }
+        return true; // fecha popup
+      };
     }, 100);
   };
 })();
@@ -26061,7 +26179,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 1. CRIANÇA + MAÇÃS (sem skill check, social) ──────────────────
   child_apples_help: {
     npc_key: 'crianca_pomar',
-    npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca' },
+    npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.png' },
     script: [
       { type: 'narration', text: 'Uma garota de oito anos tropeça no calçamento e a cesta de vime escapa das mãos dela. Maçãs vermelhas rolam em todas as direções pela praça.' },
       { type: 'speech', speaker: 'crianca_pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> A senhora vai me bater de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
@@ -26091,7 +26209,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 2. MENDIGO PEDINDO MOEDAS (sem skill check, gold transaction) ──
   beggar_plea: {
     npc_key: 'mendigo_praca',
-    npc_data: { name: 'Mendigo da Praça', desc: 'Homem magro de barba grisalha e mãos trêmulas', portrait: 'ic-praca' },
+    npc_data: { name: 'Mendigo da Praça', desc: 'Homem magro de barba grisalha e mãos trêmulas', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/mendigo_praca.png' },
     script: [
       { type: 'narration', text: 'Um homem magro de barba grisalha emerge da multidão e estende as mãos esqueléticas pra você. As roupas dele têm remendo sobre remendo.' },
       { type: 'speech', speaker: 'mendigo_praca', text: '— Aventureiro... só uma moeda. <i>(a voz é trêmula, ele tenta sorrir mas tosse)</i> Faz três dias que não como nada. Qualquer coisa serve. Pão velho, casca de queijo... qualquer coisa.' }
@@ -26121,7 +26239,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 3. GUARDA + BARRICADA (FOR DC 10 — Atletismo) ─────────────────
   guard_barricade: {
     npc_key: 'guarda_barricada',
-    npc_data: { name: 'Guarda da Cidade', desc: 'Soldado de meia-idade com barba grisalha e armadura suada', portrait: 'ic-cavaleiro' },
+    npc_data: { name: 'Guarda da Cidade', desc: 'Soldado de meia-idade com barba grisalha e armadura suada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/guarda_barricada.png' },
     script: [
       { type: 'narration', text: 'Um guarda de meia-idade está empurrando uma barricada de madeira pesada que bloqueia a entrada de uma rua lateral. Ele se vira e te avista, ofegando.' },
       { type: 'speech', speaker: 'guarda_barricada', text: '— Ei, aventureiro! <i>(ele limpa o suor da testa com a manga)</i> Tem um par de braços de sobra? Essa praga não move sozinha — e o mercado abre em meia hora.' }
@@ -26148,7 +26266,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 4. GATO PRESO NO TELHADO (DES DC 8 — Acrobacia) ───────────────
   lost_cat: {
     npc_key: 'dono_gato',
-    npc_data: { name: 'Mercador da Feira', desc: 'Homem desesperado apontando pro telhado', portrait: 'ic-mercado' },
+    npc_data: { name: 'Mercador da Feira', desc: 'Homem desesperado apontando pro telhado', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/plaza/dono_gato.png' },
     script: [
       { type: 'narration', text: 'Um homem aponta agitado pro alto de uma barraca de feira coberta. No telhado de palha, um gato malhado mia desesperadamente, com uma das patas presa entre as fibras.' },
       { type: 'speech', speaker: 'dono_gato', text: '— O Mestre Bigodes! <i>(o homem quase chora)</i> Ele subiu atrás de um pombo e agora não desce de jeito nenhum! Já é a terceira vez essa semana — mas dessa vez tá mesmo preso!' }
@@ -26175,7 +26293,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 5. BARDO ENROLADO C/ ALAÚDE — CAR/DES check (2026-05-24) ──────
   bard_stuck_lute: {
     npc_key: 'bardo_praca',
-    npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca', portraitImg: '/shared/img/combat/bardo.png' },
+    npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/bardo_praca.png' },
     script: [
       { type: 'narration', text: 'Um bardo jovem está sentado no chão da praça com um alaúde de tampo rachado. <i>Algumas crianças zombam, jogam migalhas. Ele tenta sorrir mas as bochechas tremem.</i>' },
       { type: 'speech', speaker: 'bardo_praca', text: '— Apresentação de coroação amanhã. Sem alaúde, sem moeda, sem honra. <i>(ele engole)</i> Se voltar pra casa assim, meu pai vai mandar pra Guarda. "Sem futuro, vai aprender disciplina lá."' }
@@ -26204,7 +26322,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 6. LADRÃO DE COLHER — PERCEPÇÃO/PERSUASÃO (2026-05-24) ────────
   pickpocket_caught: {
     npc_key: 'batedor_carteira',
-    npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca', portraitImg: '/shared/img/combat/ladino.png' },
+    npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/batedor_carteira.png' },
     script: [
       { type: 'narration', text: 'Você sente uma mão roçar a sua bolsa de moedas. <i>Vira rápido — um garoto de uns 12 anos congela com sua mão ainda no fecho.</i> Ao redor, ninguém viu.' },
       { type: 'speech', speaker: 'batedor_carteira', text: '— P-por favor... <i>(a voz dele falha)</i> Minha irmã tá doente, não comemos há dois dias. Foi minha primeira vez, juro. Não me entrega pra Guarda — eles cortam mão de batedor.' }
@@ -26233,7 +26351,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 7. VELHA OCULTISTA — INTELIGÊNCIA/CARISMA (2026-05-24) ────────
   old_seer: {
     npc_key: 'velha_oculto',
-    npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/combat/feiticeiro.png' },
+    npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.png' },
     script: [
       { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
       { type: 'speech', speaker: 'velha_oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
@@ -26262,7 +26380,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 8. DOIS BÊBADOS BRIGANDO — FOR/CAR/INT (2026-05-24) ───────────
   drunk_brawl: {
     npc_key: 'bebados_briga',
-    npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/combat/guerreiro.png' },
+    npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/bebados_briga.png' },
     script: [
       { type: 'narration', text: 'Dois homens robustos viram uma mesa de taverna no meio da praça. <i>Cervejas derramadas, punhos abertos, gritos que ninguém entende.</i> Uma multidão se afasta — a Guarda ainda não chegou.' },
       { type: 'speech', speaker: 'bebados_briga', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }
