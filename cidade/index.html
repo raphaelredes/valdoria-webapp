@@ -11885,10 +11885,13 @@ function _showCharSwitchConfirm(picked){
 
 // 2026-05-21: aplicar font-size salvo no boot (antes do popup abrir).
 // Evita "flash" entre normal e pref do user.
+// Sessao #37 (2026-05-25): collapse legacy xlarge -> large + scale canonical 1.15
+// (consistente com creator onboarding + valdoria-design.css).
 (function _initFontSizeOnBoot(){
   try {
     var sz = localStorage.getItem('valdoria_font_size') || 'normal';
-    var scaleMap = { small: '0.9', normal: '1.0', large: '1.1' };
+    if (sz === 'xlarge') sz = 'large';  // legacy collapse
+    var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
     var scale = scaleMap[sz] || '1.0';
     document.documentElement.style.setProperty('--v-font-scale', scale);
     if (document.body) document.body.setAttribute('data-font-size', sz);
@@ -12036,10 +12039,12 @@ function _showSettingsPopup(){
   // SEÇÃO 4: Tamanho de Fonte (ic-fonte — letra A serif)
   // 2026-05-21: User pediu REMOVER picker de família de fonte (fonte fixa Cinzel/MedievalSharp).
   // Em vez disso: oferecer tamanho A- / A / A+ (sem quebrar layout — só body text scale ±10%).
+  /* Sessao #37 (2026-05-25): scale canonical = 1.15 (era 1.1 — fixado pra
+     consistencia com creator onboarding e valdoria-design.css body[data-font-size="large"]). */
   var FONT_SIZES = [
     { id: 'small',  label: 'A',  scale: '0.9',  font: '12px' },
     { id: 'normal', label: 'A',  scale: '1.0',  font: '14px' },
-    { id: 'large',  label: 'A',  scale: '1.1',  font: '16px' }
+    { id: 'large',  label: 'A',  scale: '1.15', font: '16px' }
   ];
   html += _sectionHeader('ic-fonte', 'Tamanho da Fonte');
   html += '<div class="font-size-picker" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--v-space-sm, 6px);">';
@@ -12152,10 +12157,12 @@ function _showSettingsPopup(){
   // === WIRE FONT SIZE PICKER ===
   // 2026-05-21: User pediu substituir picker de família (Marcellus/Cinzel/IMFell/etc) por
   // picker de TAMANHO (small/normal/large). Aplica via CSS var --v-font-scale no body.
+  // Sessao #37 (2026-05-25): scale canonical = 1.15 (consistente com creator onboarding +
+  // valdoria-design.css body[data-font-size="large"]). Era 1.1 — bug fixado.
   bodyEl.querySelectorAll('button[data-font-size]').forEach(function(btn){
     btn.addEventListener('click', function(){
       var size = btn.getAttribute('data-font-size');
-      var scaleMap = { small: '0.9', normal: '1.0', large: '1.1' };
+      var scaleMap = { small: '0.9', normal: '1.0', large: '1.15' };
       var scale = scaleMap[size] || '1.0';
       _setPref('valdoria_font_size', size);
       document.body.setAttribute('data-font-size', size);
