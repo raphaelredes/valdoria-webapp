@@ -4357,12 +4357,19 @@ body.perf-lite .vc-action-btn { transition: none; }
       color: var(--v-text-dim, #a09484);
       padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
       font-family: var(--v-font-display, 'Cinzel', serif);
-      font-size: var(--v-font-sm, 12px);
+      /* Sessao #37 v13: usa --v-font-xs (10px normal, 13px large) em vez
+         de --v-font-sm (12->16px) — tabs com 7 itens nao cabem se font for
+         maior. Labels ja abreviados (Defesa/Poções/Anéis) tambem ajudam. */
+      font-size: var(--v-font-xs, 11px);
       font-weight: 600;
       cursor: pointer;
       letter-spacing: 0.04em;
       transition: color 0.15s, border-color 0.15s;
       min-height: 36px;
+      min-width: 0; /* allow flex shrink */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .inv-tab:hover { color: var(--v-text, #d4c8b0); }
     .inv-tab.active {
@@ -30645,13 +30652,16 @@ function _shopGetFilters(npcId){
   });
   // Filtros visíveis (apenas os com count > 0)
   var allFilters = [
+    // Sessao #37 v13 (2026-05-25): labels abreviadas pra caber em modo Maior.
+    // Antes: 'Armaduras', 'Consumíveis', 'Acessórios' truncavam (Arma..., Consu..., Acess...).
+    // Agora: emojis isolam funcao + label curto descritivo.
     { id:'all',        label:'Todos',         count:counts.all       },
     { id:'weapon',     label:'⚔️ Armas',      count:counts.weapon    },
-    { id:'armor',      label:'🛡️ Armaduras',  count:counts.armor     },
-    { id:'consumable', label:'🧪 Consumíveis',count:counts.consumable},
+    { id:'armor',      label:'🛡️ Defesa',     count:counts.armor     },
+    { id:'consumable', label:'🧪 Poções',     count:counts.consumable},
     { id:'gem',        label:'💎 Gemas',      count:counts.gem       },
     { id:'map',        label:'🗺️ Mapas',      count:counts.map       },
-    { id:'accessory',  label:'💍 Acessórios', count:counts.accessory },
+    { id:'accessory',  label:'💍 Anéis',      count:counts.accessory },
     { id:'tool',       label:'⛺ Equip',      count:counts.tool      }
   ];
   return allFilters.filter(function(f){ return f.id === 'all' || f.count > 0; });
