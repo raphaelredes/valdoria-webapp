@@ -3047,11 +3047,17 @@ Busca rápida:
             // (ex.: voltou pro hall sem finalizar), auto-switch pro metodo 'roll'
             // pra mostrar que os valores estao memorizados. setStatMethod cuida
             // de tab active + desc text + buildStatSlots.
-            try {
-                if (_loadSavedRolls()) {
-                    setStatMethod('roll');
-                }
-            } catch (_) {}
+            // setTimeout(0) defere ate apos o script terminar de executar, pra
+            // evitar TDZ — `let _statMethod` (~linha 3956) ainda nao foi avaliado
+            // quando esta IIFE init roda. Sem o defer, setStatMethod tenta
+            // escrever em _statMethod e crash silenciosamente no catch.
+            setTimeout(function () {
+                try {
+                    if (_loadSavedRolls()) {
+                        setStatMethod('roll');
+                    }
+                } catch (e) { console.warn('[CHAR_CREATOR] auto-load rolls failed:', e); }
+            }, 0);
             document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
             document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
             setupBackButton();
