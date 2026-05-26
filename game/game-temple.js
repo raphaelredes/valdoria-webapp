@@ -540,7 +540,7 @@ function renderTempleHub(container, data) {
     payBtn.appendChild(labelSpan);
     if (pd.disabled) {
       var warn = vCity.el('span', 'tmp-pay-warn');
-      warn.textContent = ' — Ouro insuficiente';
+      warn.textContent = ' — Valdoritas insuficientes';
       payBtn.appendChild(warn);
     }
     (function(cb, disabled) {
