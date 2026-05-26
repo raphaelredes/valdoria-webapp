@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T19:35:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T20:45:02Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -22185,6 +22185,12 @@ function _isIdle() {
   var now = performance.now();
   if (now < _animActiveUntil) return false;          // animação rolando
   if (now - _lastInputAt < IDLE_AFTER_MS) return false;  // input recente
+  // Sessão #38 (2026-05-26) Fase 3.5: idle pause REATIVADO com guard de weather.
+  // V8 revert foi necessário porque storm/rain pareciam "travados" em idle (rain
+  // particles dependem do anim time). Agora: storm ('t') e rain ('r') NUNCA vão
+  // pra idle — só clear ('s') e fog ('f'). Clouds desses estados driftam a 6.6fps,
+  // imperceptível pro player. Resultado: CPU 100% → ~10% em idle clear/fog.
+  if (typeof S !== 'undefined' && S && (S.weather === 't' || S.weather === 'r')) return false;
   return true;
 }
 function scheduleRender() {
@@ -22199,10 +22205,16 @@ function scheduleRender() {
   }
   _rafScheduled = true;
   _rafLastScheduled = now;
-  // V8 USER REVERT: idle_pause REMOVIDO definitivamente. User reportou que
-  // travava chuva durante tempestade (rain particles dependiam do anim time).
-  // Render sempre full-rate via rAF — CPU 100% é aceitável.
-  requestAnimationFrame(renderFrame);
+  // Sessão #38 (2026-05-26) Fase 3.5: idle_pause REATIVADO com weather guard.
+  // _isIdle() agora bloqueia idle quando S.weather === 't'|'r' (storm/rain).
+  // Para clear/fog: setTimeout(150ms) → 6.6fps idle, JS thread DORME entre frames.
+  // CPU em idle clear/fog: 100% → ~10% (V4 original target).
+  // Storm/rain mantêm rAF full-rate — sem regressão do V8 incident.
+  if (_isIdle()) {
+    setTimeout(function() { renderFrame(performance.now()); }, IDLE_TICK_MS);
+  } else {
+    requestAnimationFrame(renderFrame);
+  }
 }
 // Watchdog: a cada 2s verifica se frame avançou; se não, re-agenda
 setInterval(function() {
@@ -31575,16 +31587,21 @@ function buildFogMask() {
   // sensação épica de estar perdido dentro da mata densa.
   const inMata = _isPlayerOnMata();
   if (shouldLogM) LOG('FOG', 'buildFogMask mask=' + w + 'x' + h + ' player=(' + pCol + ',' + pRow + ') vision=' + vision + ' intensity=' + intensity.toFixed(2) + (inMata ? ' MATA_ISOLATION' : ''));
+  // Sessão #38 Fase 4.5 perf P0: hexDist movido pra dentro de branches que precisam.
+  // Antes: hexDist (sin/cos via cube coords) computado pra TODOS ROWS×COLS=2400 cells.
+  // Agora: só pra inMata + state==='visible' (~15-20 cells típico). hexDist cai de
+  // 2400/frame pra <30/frame em mapas típicos. Em Android 2GB, ~24ms → ~1ms por frame.
+  const dimAlpha = Math.min(255, Math.round(228 * intensity));
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const key = fogKey(c, r);
       const state = S.fogState[key];
-      const dist = hexDist(c, r, pCol, pRow);
       let alpha;
       // Mata isolation: dist=0 visível, todo resto fogged total. Com luz
       // (tocha/light/dancing_lights), revela hexes adjacentes até `vision`
       // hexes — máximo 2 (USER RULE 2026-04-27).
       if (inMata) {
+        const dist = hexDist(c, r, pCol, pRow);
         if (dist === 0) alpha = 0;
         else if (vision >= 1 && dist === 1) alpha = 60;    // adjacente quase visível com luz
         else if (vision >= 2 && dist === 2) alpha = 160;   // d=2 fortemente atenuado
@@ -31594,6 +31611,7 @@ function buildFogMask() {
         continue;
       }
       if (state === 'visible') {
+        const dist = hexDist(c, r, pCol, pRow);
         if (dist === 0) alpha = 0;
         else if (vision === 0) {
           // ESCURIDÃO ABSOLUTA (caverna sem luz): só o próprio hex é visível
@@ -31621,7 +31639,7 @@ function buildFogMask() {
           else alpha = 255;
         }
         alpha = Math.min(255, alpha);
-      } else if (state === 'dim') alpha = Math.min(255, Math.round(228 * intensity));
+      } else if (state === 'dim') alpha = dimAlpha;  /* pre-computed acima */
       else alpha = 255;
 
       const idx = ((r + MASK_PADDING) * w + (c + MASK_PADDING)) * 4;
