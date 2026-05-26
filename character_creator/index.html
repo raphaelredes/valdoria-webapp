@@ -3017,6 +3017,14 @@ Busca rápida:
                 <div class="sub-screen" id="sub-race-detail">
                     <div class="screen-content" id="raceDetailContent"></div>
                 </div>
+                <!-- Sessao #38 (2026-05-25): user pediu sub-raca em popup separado
+                     (tela toda) em vez de compartilhar conteudo do sub-race-detail.
+                     Antes: buildRaceSelection() substituia HTML do raceDetailContent.
+                     Depois: buildRaceSelection() renderiza em subraceSelectContent e
+                     abre sub-subrace-select (full-overlay, slide-in). -->
+                <div class="sub-screen" id="sub-subrace-select">
+                    <div class="screen-content" id="subraceSelectContent"></div>
+                </div>
             </div>
 
             <!-- ═══ SCREEN 1: CLASS ═══ -->
@@ -4186,13 +4194,15 @@ Busca rápida:
         function setupBackButton() {
             if (!tg || !tg.BackButton) return;
             tg.BackButton.onClick(() => {
+                // Sessao #38: sub-subrace-select tem prioridade sobre sub-race-detail
+                // (popup full-overlay aberto em cima do race detail).
+                const subraceSelect = document.getElementById('sub-subrace-select');
+                if (subraceSelect && subraceSelect.classList.contains('active')) {
+                    closeSubScreen('sub-subrace-select');
+                    return;
+                }
                 const openSub = document.querySelector('.sub-screen.active');
                 if (openSub) {
-                    // If in race selection Phase 2, go back to Phase 1 instead of closing
-                    if (openSub.id === 'sub-race-detail' && currentRaceDetailKey && isRaceSelectionPhase()) {
-                        buildRaceDetail(currentRaceDetailKey);
-                        return;
-                    }
                     closeSubScreen(openSub.id);
                     return;
                 }
@@ -4215,14 +4225,16 @@ Busca rápida:
                 /* Click ja foi setado inline pra goScreen — mas precisa cobrir
                    sub-screen tambem. Atualiza handler dinamicamente. */
                 headerBack.onclick = function() {
+                    /* Sessao #38: sub-subrace-select tem prioridade (popup full-overlay
+                       em cima do sub-race-detail). Antes a logica era checar se o
+                       race-detail estava em "phase 2" (conteudo substituido). */
+                    const subraceSelect = document.getElementById('sub-subrace-select');
+                    if (subraceSelect && subraceSelect.classList.contains('active')) {
+                        closeSubScreen('sub-subrace-select');
+                        return;
+                    }
                     const openSub = document.querySelector('.sub-screen.active');
                     if (openSub) {
-                        /* Mesma logica do Telegram BackButton handler — race
-                           selection phase 2 volta pra phase 1, senao close. */
-                        if (openSub.id === 'sub-race-detail' && currentRaceDetailKey && isRaceSelectionPhase()) {
-                            buildRaceDetail(currentRaceDetailKey);
-                            return;
-                        }
                         closeSubScreen(openSub.id);
                         return;
                     }
@@ -4921,13 +4933,18 @@ Busca rápida:
         }
 
         // Phase 2 — Selection UI (sub-race, ancestry, bonuses, or human type)
+        // Sessao #38 (2026-05-25): user pediu — "o ideal e ser um popup que
+        // ocupa a tela toda, para escolher sub raca". Antes a sub-raca
+        // substituia HTML do raceDetailContent (mesmo sub-screen). Agora abre
+        // sub-subrace-select dedicado: race detail continua em sub-race-detail,
+        // sub-raca em sub-subrace-select. 2 sub-screens distintos.
         function buildRaceSelection(key) {
             haptic();
             currentRaceDetailKey = key;
             const r = RACES[key];
 
-            // Back button goes to Phase 1 (not grid)
-            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="buildRaceDetail('${key}')">← Voltar</button>`;
+            // Back button: fecha sub-subrace-select e volta para sub-race-detail
+            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubraceSelect()">← Voltar</button>`;
             // Sessao #29 (2026-05-24) FIX: header da tela de sub-raça usava
             // r.icon (emoji '🧪' pra Gnomo, '🐲' pra Dragonborn, etc.) em vez
             // de RACE_HERALDIC_ICON (PNG real). Bug atingia 4 raças com sub-
@@ -4952,17 +4969,24 @@ Busca rápida:
                 html += buildSubraceDetailSection(key, r);
             }
 
-            document.getElementById('raceDetailContent').innerHTML = html;
-            const sub = document.getElementById('sub-race-detail');
+            document.getElementById('subraceSelectContent').innerHTML = html;
+            // Abre o sub-screen dedicado (full overlay sobre sub-race-detail)
+            openSubScreen('sub-subrace-select');
+            const sub = document.getElementById('sub-subrace-select');
             if (sub) sub.scrollTop = 0;
         }
 
+        // Fecha o popup de sub-raca e volta pro sub-race-detail
+        function closeSubraceSelect() {
+            haptic();
+            closeSubScreen('sub-subrace-select');
+        }
+
         // Detect if race sub-screen is showing Phase 2 (for BackButton handling)
+        // Sessao #38: agora basta detectar se sub-subrace-select esta active.
         function isRaceSelectionPhase() {
-            const backBtn = document.querySelector('#sub-race-detail .sub-back');
-            if (!backBtn) return false;
-            const onclick = backBtn.getAttribute('onclick') || '';
-            return onclick.includes('buildRaceDetail');
+            const sub = document.getElementById('sub-subrace-select');
+            return !!(sub && sub.classList.contains('active'));
         }
 
         function buildSubraceDetailSection(raceKey, race) {
@@ -5407,6 +5431,10 @@ Busca rápida:
             sel.subrace = subraceKey;
             pendingLanguage = null;
             currentRaceDetailKey = '';
+            // Sessao #38: fecha ambos os sub-screens (sub-subrace-select pode
+            // estar empilhado sobre sub-race-detail se user veio pelo popup
+            // de sub-raca). Ordem: fecha o topo primeiro, depois o fundo.
+            closeSubScreen('sub-subrace-select');
             closeSubScreen('sub-race-detail');
             buildRaceGrid();
             setTimeout(() => goScreen(1), 200);
