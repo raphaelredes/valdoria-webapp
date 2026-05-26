@@ -214,6 +214,26 @@ Busca rápida:
             height: 100% !important;
             max-height: min(100dvh, 960px) !important;
         }
+        /* SMARTPHONE-LOCK STRICT (Sessao #38, 2026-05-25): user reportou
+           "a tela de criar personagem esta sem limite de largura". CLAUDE.md
+           "Smartphone-Only Layout — MANDATORY RULE (IMMUTABLE)" exige max
+           430px. valdoria-design.css usa min(100vw, 480px) + remove cap em
+           touch devices via @media (hover:none) + html.app-frame { max-width:
+           100vw }. Em tablets/foldables (touch + tela larga) o creator
+           esticava sem limite. Fix: forca cap 430px em TODO touch device
+           (incluindo o caso app-frame). Desktop nao-touch mantem frame 412px
+           dourado intacto (handled by design.css). */
+        @media (hover: none) and (pointer: coarse) {
+            html, html.app-frame {
+                max-width: 430px !important;
+                margin: 0 auto !important;
+            }
+            html.app-frame body {
+                max-width: 430px !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+            }
+        }
         .v-header { flex-shrink: 0; }
 
         /* ─── Screen transition system ─── */
