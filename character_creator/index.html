@@ -5074,15 +5074,20 @@ Busca rápida:
         }
 
         function buildAncestryDetailSection(raceKey, race) {
+            // Sessao #38: cada card agora mostra PNG do dragao + texto.
+            const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<div class="detail-section"><div class="detail-section-title">🐉 Ancestralidade Dracônica</div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Escolha o tipo de dragão ancestral. Define o elemento do sopro e resistência.</div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px">Toque em um dragão para ver detalhes e confirmar.</div>`;
             html += `<div class="detail-option-grid" id="ancestryOptions">`;
             for (const [sk, sr] of Object.entries(race.subraces)) {
                 const info = ANCESTRY_DETAILS[sk];
-                html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)">`;
-                html += `<div class="detail-option-name">${sr.name}</div>`;
-                html += `<div class="detail-option-desc">${info.element} | ${info.shape}</div>`;
-                html += `<div class="detail-option-bonus">Salv.: ${info.save} | Res.: ${info.element}</div>`;
+                html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)" style="text-align:center; padding:8px 6px;">`;
+                html += `<img src="/shared/img/character_creator/dragon-${sk}.png?v=${_v}" alt="${sr.name}" `
+                    + `style="display:block; width:72px; height:72px; object-fit:contain; margin:0 auto 4px; `
+                    + `background:radial-gradient(circle at center, rgba(196,149,58,0.18) 0%, transparent 65%); `
+                    + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
+                html += `<div class="detail-option-name" style="font-size:calc(12px * var(--v-font-scale, 1));">${sr.name}</div>`;
+                html += `<div class="detail-option-desc" style="font-size:calc(10px * var(--v-font-scale, 1));">${info.element} | ${info.shape}</div>`;
                 html += `</div>`;
             }
             html += `</div></div>`;
@@ -5952,16 +5957,19 @@ Busca rápida:
 
         /* Ranger Favored Enemy (PHB p.91, L1). 9 tipos canonicos. */
         function buildFavoredEnemySelect() {
+            // Sessao #38: cada card agora mostra PNG do inimigo gerado via OpenAI low.
+            const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🏹 Inimigo Favorito</div>`;
-            html += `<div class="detail-subtitle">Patrulheiro — escolha 1 tipo de criatura que você caça. Ganha vantagem em rastreamento e +2 dano contra eles.</div></div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Vantagem em Sabedoria (Sobrevivência) ao rastrear, +2 dano em ataques.</div>`;
+            html += `<div class="detail-subtitle">Patrulheiro — toque em um inimigo para ver detalhes e confirmar.</div></div>`;
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
                 const selCls = sel.favoredEnemy === feId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
-                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${fe.icon}</div>`;
+                html += `<img src="/shared/img/character_creator/ranger-enemy-${feId}.png?v=${_v}" alt="${fe.name}" `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
+                    + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${fe.name}</div>`;
-                html += `<div class="v-card-desc" style="margin-top:4px;">${fe.desc}</div>`;
                 html += `</div>`;
             }
             document.getElementById('favoredEnemyContent').innerHTML = html;
@@ -6006,16 +6014,19 @@ Busca rápida:
 
         /* Ranger Favored Terrain (PHB p.91, L1). 8 biomas canonicos. */
         function buildFavoredTerrainSelect() {
+            // Sessao #38: cada card agora mostra PNG do terreno gerado via OpenAI low.
+            const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredTerrain()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🗺️ Terreno Favorito</div>`;
-            html += `<div class="detail-subtitle">Patrulheiro — escolha 1 bioma onde você é mestre. Ganha bônus de exploração e rastreamento.</div></div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Não se perde no terreno, mantém alerta ao viajar, ração dura 2× tempo.</div>`;
+            html += `<div class="detail-subtitle">Patrulheiro — toque em um terreno para ver detalhes e confirmar.</div></div>`;
             for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
                 const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center;">`;
-                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${ft.icon}</div>`;
+                html += `<img src="/shared/img/character_creator/ranger-terrain-${ftId}.png?v=${_v}" alt="${ft.name}" `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
+                    + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${ft.name}</div>`;
-                html += `<div class="v-card-desc" style="margin-top:4px;">${ft.desc}</div>`;
                 html += `</div>`;
             }
             document.getElementById('favoredTerrainContent').innerHTML = html;
@@ -6065,18 +6076,22 @@ Busca rápida:
         /* Sorcerer Draconic Bloodline ancestry color (PHB p.103, L1).
            10 cores: 5 cromaticos (red/blue/white/black/green) + 5 metalicos
            (gold/silver/bronze/copper/brass). Determina tipo de dano do sopro
-           (breath weapon analog) e resistencia elemental. */
+           (breath weapon analog) e resistencia elemental.
+           Sessao #38: cards agora com PNG do dragao (compartilhado com Dragonborn). */
         function buildDraconicAncestrySelect() {
+            const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelDraconicAncestry()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🐉 Linhagem Dracônica</div>`;
-            html += `<div class="detail-subtitle">Feiticeiro — escolha a cor do dragão ancestral. Define seu tipo de dano e resistência elemental.</div></div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">5 dragões cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
+            html += `<div class="detail-subtitle">Feiticeiro — toque em uma cor para ver detalhes e confirmar.</div></div>`;
+            html += `<div class="v-caption" style="margin-bottom:8px">5 cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
             for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
                 const selCls = sel.draconicAncestry === daId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectDraconicAncestry('${daId}')" style="text-align:center;">`;
-                html += `<div style="font-size:calc(36px * var(--v-font-scale, 1));line-height:1;margin-bottom:4px;">${da.icon}</div>`;
+                html += `<img src="/shared/img/character_creator/dragon-${daId}.png?v=${_v}" alt="${da.name}" `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
+                    + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${da.name}</div>`;
-                html += `<div class="v-card-desc" style="margin-top:4px;">${da.desc}</div>`;
                 html += `</div>`;
             }
             document.getElementById('draconicAncestryContent').innerHTML = html;
