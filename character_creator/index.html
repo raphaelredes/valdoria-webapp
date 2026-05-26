@@ -4203,15 +4203,52 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         function setupBackButton() {
             if (!tg || !tg.BackButton) return;
-            // Sessao #38 (2026-05-25): user pediu popup IN-GAME (nao o nativo
-            // do Telegram). Substituiu tg.showConfirm por overlay customizado
-            // estilizado no design do jogo. Fica visivel sobre tudo (z-index
-            // muito alto).
+            // Sessao #38 (2026-05-26): user pediu — "o botao voltar do celular
+            // nao deve abrir o popup de pergunta se quer sair, deve fazer a
+            // funcao voltar dentro do jogo apenas, voltando para a tela
+            // anterior, ou seja, ativando a opcao voltar na tela atual ou
+            // fechando a janela popup atual do jogo".
+            //
+            // Comportamento:
+            // 1. Se ha popup customizado (creator-close-overlay) → fecha o popup
+            // 2. Se ha sub-screen aberto (incluindo sub-creator-detail empilhado) →
+            //    fecha o TOPMOST (mais recente / ultimo em DOM order)
+            // 3. Se na tela 1+ → recua pra tela anterior (goScreen-1)
+            // 4. Na tela 0 → nao fecha WebApp (so navegacao interna)
+            //
+            // Tambem dismisses canonical ValdoriaExitConfirm que pode aparecer
+            // por causa do listener de exit-confirm.js (carregado em paralelo).
             tg.BackButton.onClick(() => {
-                _showCloseConfirmOverlay();
+                // Esconde canonical overlay caso exit-confirm.js tenha tentado mostrar
+                if (window.ValdoriaExitConfirm && typeof window.ValdoriaExitConfirm.hide === 'function') {
+                    try { window.ValdoriaExitConfirm.hide(); } catch (e) {}
+                }
+                var canonicalOv = document.getElementById('v-exit-overlay');
+                if (canonicalOv) canonicalOv.style.display = 'none';
+
+                // Caso 1: popup customizado aberto → fecha
+                var closeOv = document.getElementById('creator-close-overlay');
+                if (closeOv) { closeOv.remove(); return; }
+
+                // Caso 2: ha sub-screen ativo → fecha o TOPMOST (ultimo em DOM order)
+                var activeSubs = document.querySelectorAll('.sub-screen.active');
+                if (activeSubs.length > 0) {
+                    var topmost = activeSubs[activeSubs.length - 1];
+                    closeSubScreen(topmost.id);
+                    return;
+                }
+
+                // Caso 3: tela > 0 → recua
+                if (typeof currentScreen !== 'undefined' && currentScreen > 0) {
+                    if (typeof goScreen === 'function') goScreen(currentScreen - 1);
+                    return;
+                }
+                // Caso 4: tela 0 sem sub-screen — no-op (nao fecha WebApp acidentalmente)
             });
         }
 
+        // Sessao #38: mantido por compat — agora unused (back nao mostra popup).
+        // Mantido pra caso outro codigo chame.
         function _showCloseConfirmOverlay() {
             // Overlay full-screen com card centralizado no design do jogo
             // (sem usar APIs nativas do Telegram). Idempotente.
@@ -6050,11 +6087,13 @@ Busca rápida:
 
         /* Ranger Favored Enemy (PHB p.91, L1). 9 tipos canonicos. */
         function buildFavoredEnemySelect() {
-            // Sessao #38: cada card agora mostra PNG do inimigo gerado via OpenAI low.
+            // Sessao #38: cada card mostra PNG do inimigo gerado via OpenAI low.
+            // Grid 2-col (user pediu — antes era 1 por linha).
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🏹 Inimigo Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um inimigo para ver detalhes e confirmar.</div></div>`;
+            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
                 const selCls = sel.favoredEnemy === feId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
@@ -6062,9 +6101,10 @@ Busca rápida:
                     + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
-                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${fe.name}</div>`;
+                html += `<div class="v-card-name" style="font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:0.5px;">${fe.name}</div>`;
                 html += `</div>`;
             }
+            html += `</div>`;
             document.getElementById('favoredEnemyContent').innerHTML = html;
         }
         function selectFavoredEnemy(feId) {
@@ -6107,21 +6147,26 @@ Busca rápida:
 
         /* Ranger Favored Terrain (PHB p.91, L1). 8 biomas canonicos. */
         function buildFavoredTerrainSelect() {
-            // Sessao #38: cada card agora mostra PNG do terreno gerado via OpenAI low.
+            // Sessao #38: PNG do terreno gerado via OpenAI low.
+            // User pediu: nao remover fundo (paisagens ficam melhor com background)
+            // + 2 colunas no grid.
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredTerrain()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🗺️ Terreno Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um terreno para ver detalhes e confirmar.</div></div>`;
+            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
             for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
                 const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
-                html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center;">`;
+                html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center; padding:6px 4px;">`;
+                // object-fit:cover para mostrar paisagem como vinheta (com fundo intacto)
                 html += `<img src="/shared/img/character_creator/ranger-terrain-${ftId}.png?v=${_v}" alt="${ft.name}" `
-                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
-                    + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
-                    + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
-                html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${ft.name}</div>`;
+                    + `style="display:block; width:100%; aspect-ratio:1/1; max-width:120px; object-fit:cover; margin:0 auto 4px; `
+                    + `border-radius:8px; border:1px solid var(--v-border, #4a3828);" `
+                    + `loading="lazy" onerror="this.style.opacity='0.3'" />`;
+                html += `<div class="v-card-name" style="font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:0.5px;">${ft.name}</div>`;
                 html += `</div>`;
             }
+            html += `</div>`;
             document.getElementById('favoredTerrainContent').innerHTML = html;
         }
         function selectFavoredTerrain(ftId) {
