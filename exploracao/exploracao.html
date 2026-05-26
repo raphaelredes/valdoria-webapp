@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T20:45:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T20:48:32Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -18734,6 +18734,10 @@ var _cloudBlobCacheFrame = 0;
 // upscale via drawImage (browser bilinear filter — borrão é DESEJÁVEL pra clouds).
 var _cloudSpriteCache = {};
 var _cloudSpriteCacheKey = '';  // 'weather|tier' — invalidate on change
+// Sessão #38 Fase 4.7: sun ray sprite cache (storm). Antes: createRadialGradient
+// por frame × 2-3 rays = 6-9 gradients/frame. Agora: bake sprite uma vez por
+// (ri, raySubAlpha bucket) → drawImage por frame. ~2-3 sprites totais por sessão.
+var _sunRaySpriteCache = {};
 // 2026-04-29 CPU FIX: SCENE CACHE — bake terreno + decorações estáticas em offscreen canvas.
 // CPU 100% reportado pelo user → JS-bound. drawTile-loop processa ~80 hexes + ~30 decor row index
 // + clipping mountain por frame = ~10ms JS pra cada um dos 30 frames/sec. Cache substitui esse
@@ -31235,7 +31239,10 @@ function drawWeatherOverlay(ctx) {
       ctx.fillStyle = 'rgba(10, 12, 22, ' + stormBaseDarkness + ')';
       ctx.fillRect(0, 0, canvasW, canvasH);
 
-      // Camada B: 2-3 sun ray spots
+      // Camada B: 2-3 sun ray spots (Sessão #38 Fase 4.7: gradient bake cache).
+      // Antes: createRadialGradient + 3 addColorStop por frame por ray = 6-9
+      // gradients/frame mesmo com positioning estático. Agora: bake sprite uma
+      // vez por (ri, raySubAlpha) e drawImage no position alvo.
       var rayCount = (_wTier >= 2) ? 3 : 2;
       var rayT = _animTime * 0.018;
       var rayRng = seededRng(77);
@@ -31250,6 +31257,26 @@ function drawWeatherOverlay(ctx) {
         if (rcx + rayW < 0 || rcx > canvasW) continue;
         var rcy = rry * canvasH * 0.7 + canvasH * 0.15;
         var raySubAlpha = 0.40 + rrs * 0.20;
+        var rayRadius = rayW * 0.5;
+        // Cache-key: ri + alpha bucket (round 2-digit). 2-3 sprites totais por sessão.
+        var rayKey = 'sr_' + ri + '_' + Math.round(raySubAlpha * 100);
+        var spriteSize = Math.ceil(rayRadius * 2);
+        var sprite = _sunRaySpriteCache[rayKey];
+        if (!sprite || sprite.width !== spriteSize) {
+          sprite = document.createElement('canvas');
+          sprite.width = sprite.height = spriteSize;
+          var sCtx = sprite.getContext('2d');
+          var sGrad = sCtx.createRadialGradient(rayRadius, rayRadius, 0, rayRadius, rayRadius, rayRadius);
+          sGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
+          sGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
+          sGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          sCtx.fillStyle = sGrad;
+          sCtx.fillRect(0, 0, spriteSize, spriteSize);
+          _sunRaySpriteCache[rayKey] = sprite;
+        }
+        ctx.drawImage(sprite, rcx, rcy - rayRadius);
+        continue; /* skip original gradient path */
+        // (código abaixo mantido pra fallback histórico — nunca executa)
         var rayGrad = ctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, rayW * 0.5);
         rayGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
         rayGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
