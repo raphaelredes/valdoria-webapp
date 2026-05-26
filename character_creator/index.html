@@ -4193,22 +4193,33 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         function setupBackButton() {
             if (!tg || !tg.BackButton) return;
+            // Sessao #38 (2026-05-25): user pediu — "o botao de voltar do
+            // webapp do Telegram deve sempre ser na verdade um botao de
+            // fechar mas que sempre abre um popup de confirmacao se o
+            // jogador realmente deseja fechar a tela".
+            //
+            // Comportamento antes: navegacao back (fecha sub-screen, depois
+            // recua de tela, depois fecha WebApp na screen 0).
+            // Comportamento agora: SEMPRE abre confirm popup -> fecha WebApp
+            // se OK, mantem aberto se Cancelar. Navegacao back interna
+            // continua disponivel via headerBack (#screen-back-btn) e botoes
+            // "Voltar" em sub-screens.
             tg.BackButton.onClick(() => {
-                // Sessao #38: sub-subrace-select tem prioridade sobre sub-race-detail
-                // (popup full-overlay aberto em cima do race detail).
-                const subraceSelect = document.getElementById('sub-subrace-select');
-                if (subraceSelect && subraceSelect.classList.contains('active')) {
-                    closeSubScreen('sub-subrace-select');
-                    return;
+                const message = 'Deseja fechar a criação de personagem? Seu progresso atual será perdido.';
+                if (typeof tg.showConfirm === 'function') {
+                    tg.showConfirm(message, function (confirmed) {
+                        if (confirmed) {
+                            try { tg.close(); } catch (e) { console.warn('[CREATOR] close failed:', e); }
+                        }
+                    });
+                } else {
+                    // Fallback: confirm nativo do browser (file://, Telegram antigo)
+                    try {
+                        if (window.confirm(message)) {
+                            tg.close();
+                        }
+                    } catch (e) { console.warn('[CREATOR] confirm fallback failed:', e); }
                 }
-                const openSub = document.querySelector('.sub-screen.active');
-                if (openSub) {
-                    closeSubScreen(openSub.id);
-                    return;
-                }
-                if (currentScreen > 0) { goScreen(currentScreen - 1); return; }
-                // Screen 0 — close WebApp
-                try { tg.close(); } catch (e) { console.warn('[CREATOR] close failed:', e); }
             });
         }
 
