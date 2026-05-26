@@ -2763,7 +2763,9 @@ Busca rápida:
             color: var(--v-gold, #c4953a);
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.2;
+            text-align: center;
             font-weight: 700;
         }
         .font-onboarding-subtitle {
@@ -6095,10 +6097,16 @@ Busca rápida:
 
             // Use cache if available — Sessao #37: aceita tanto novo (options)
             // quanto legacy (skills) pra back-compat
+            // Sessao #38 (2026-05-25): legacy path FILTRA is_default antes de
+            // checar — Warrior tem skills=[{id:'second_wind', is_default:true}]
+            // e abria sub-tela vazia. Sem choosable real, pula direto.
             if (_l1SkillsCache[sel.classKey]) {
                 const data = _l1SkillsCache[sel.classKey];
                 var hasNew = data && Array.isArray(data.options) && data.options.length > 0;
-                var hasLegacy = data && Array.isArray(data.skills) && data.skills.length > 0;
+                var legacyChoosable = (data && Array.isArray(data.skills))
+                    ? data.skills.filter(function (s) { return !s.is_default; })
+                    : [];
+                var hasLegacy = legacyChoosable.length > 0;
                 if (hasNew || hasLegacy) {
                     buildL1SkillSelect(data);
                     openSubScreen('sub-l1skill-select');
@@ -6124,8 +6132,12 @@ Busca rápida:
                 _l1SkillsCache[sel.classKey] = data;
 
                 // Aceita tanto novo formato (quota+options) quanto legacy (skills)
+                // Sessao #38: legacy filtra is_default — Warrior nao abre tela vazia
                 var hasNew2 = Array.isArray(data.options) && data.options.length > 0;
-                var hasLegacy2 = Array.isArray(data.skills) && data.skills.length > 0;
+                var legacyChoosable2 = Array.isArray(data.skills)
+                    ? data.skills.filter(function (s) { return !s.is_default; })
+                    : [];
+                var hasLegacy2 = legacyChoosable2.length > 0;
                 if (hasNew2 || hasLegacy2) {
                     buildL1SkillSelect(data);
                     openSubScreen('sub-l1skill-select');
