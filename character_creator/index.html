@@ -4243,8 +4243,33 @@ Busca rápida:
                     if (typeof goScreen === 'function') goScreen(currentScreen - 1);
                     return;
                 }
-                // Caso 4: tela 0 sem sub-screen — no-op (nao fecha WebApp acidentalmente)
+                // Caso 4: tela 0 sem sub-screen → volta pro Hall (cidade).
+                // User pediu (sessao #38, 2026-05-26): "permita sair da tela de
+                // criacao do personagem, podendo voltar ao hall de personagens".
+                _exitCreatorToHall();
             });
+        }
+
+        function _exitCreatorToHall() {
+            // Volta pra cidade preservando params essenciais (token, api, uid, env).
+            // O Hall (popup de personagens) abrira automaticamente quando cidade
+            // detectar que o user veio da criacao via ?showHall=1.
+            window.__valdoria_transitioning = true;
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var newParams = new URLSearchParams();
+                ['token','api','api_base','uid','user_id','env'].forEach(function(k){
+                    var v = params.get(k);
+                    if (v) newParams.set(k, v);
+                });
+                newParams.set('showHall', '1');
+                // file:// ou sem params essenciais: tenta /cidade/ direto
+                var qs = newParams.toString();
+                window.location.href = '/cidade/' + (qs ? ('?' + qs) : '');
+            } catch (e) {
+                console.warn('[CREATOR] exit to hall failed:', e);
+                try { window.location.href = '/cidade/'; } catch (_) {}
+            }
         }
 
         // Sessao #38: mantido por compat — agora unused (back nao mostra popup).
@@ -5168,7 +5193,7 @@ Busca rápida:
             for (const [sk, sr] of Object.entries(race.subraces)) {
                 const info = ANCESTRY_DETAILS[sk];
                 html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)" style="text-align:center; padding:8px 6px;">`;
-                html += `<img src="/shared/img/character_creator/dragon-${sk}.png?v=${_v}" alt="${sr.name}" `
+                html += `<img src="/shared/img/character_creator/dragon-${sk}.webp?v=${_v}" alt="${sr.name}" `
                     + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.18) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
@@ -5195,7 +5220,7 @@ Busca rápida:
             _showCreatorDetailPopup({
                 parentScreen: 'race',
                 title: sr.name,
-                imgUrl: '/shared/img/character_creator/dragon-' + subraceKey + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                imgUrl: '/shared/img/character_creator/dragon-' + subraceKey + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: sr.description,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Draconato PHB p.32-35)</b><br>'
@@ -6097,7 +6122,7 @@ Busca rápida:
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
                 const selCls = sel.favoredEnemy === feId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
-                html += `<img src="/shared/img/character_creator/ranger-enemy-${feId}.png?v=${_v}" alt="${fe.name}" `
+                html += `<img src="/shared/img/character_creator/ranger-enemy-${feId}.webp?v=${_v}" alt="${fe.name}" `
                     + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
@@ -6114,7 +6139,7 @@ Busca rápida:
             _showCreatorDetailPopup({
                 parentScreen: 'class',
                 title: fe.name,
-                imgUrl: '/shared/img/character_creator/ranger-enemy-' + feId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                imgUrl: '/shared/img/character_creator/ranger-enemy-' + feId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: fe.desc,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">🏹 Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
@@ -6159,7 +6184,7 @@ Busca rápida:
                 const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center; padding:6px 4px;">`;
                 // object-fit:cover para mostrar paisagem como vinheta (com fundo intacto)
-                html += `<img src="/shared/img/character_creator/ranger-terrain-${ftId}.png?v=${_v}" alt="${ft.name}" `
+                html += `<img src="/shared/img/character_creator/ranger-terrain-${ftId}.webp?v=${_v}" alt="${ft.name}" `
                     + `style="display:block; width:100%; aspect-ratio:1/1; max-width:120px; object-fit:cover; margin:0 auto 4px; `
                     + `border-radius:8px; border:1px solid var(--v-border, #4a3828);" `
                     + `loading="lazy" onerror="this.style.opacity='0.3'" />`;
@@ -6176,7 +6201,7 @@ Busca rápida:
             _showCreatorDetailPopup({
                 parentScreen: 'class',
                 title: ft.name,
-                imgUrl: '/shared/img/character_creator/ranger-terrain-' + ftId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                imgUrl: '/shared/img/character_creator/ranger-terrain-' + ftId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: ft.desc,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">🗺️ Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
@@ -6225,7 +6250,7 @@ Busca rápida:
             for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
                 const selCls = sel.draconicAncestry === daId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectDraconicAncestry('${daId}')" style="text-align:center;">`;
-                html += `<img src="/shared/img/character_creator/dragon-${daId}.png?v=${_v}" alt="${da.name}" `
+                html += `<img src="/shared/img/character_creator/dragon-${daId}.webp?v=${_v}" alt="${da.name}" `
                     + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
@@ -6243,7 +6268,7 @@ Busca rápida:
             _showCreatorDetailPopup({
                 parentScreen: 'class',
                 title: 'Linhagem ' + da.name,
-                imgUrl: '/shared/img/character_creator/dragon-' + daId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                imgUrl: '/shared/img/character_creator/dragon-' + daId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: da.desc,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Feiticeiro Linhagem Dracônica PHB p.103)</b><br>'

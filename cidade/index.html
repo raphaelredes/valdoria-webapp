@@ -50519,6 +50519,31 @@ document.addEventListener('DOMContentLoaded', function(){
       _toggleLogPanel();
     }
   });
+  // Auto-open Hall of Characters when returning from char creator via BackButton
+  // (User request 2026-05-26: "permita sair da tela de criação do personagem,
+  //  podendo voltar ao hall de personagens"). Creator chama _exitCreatorToHall()
+  // que navega para /cidade/?showHall=1 — aqui detectamos e abrimos o popup.
+  try {
+    var _hallParams = new URLSearchParams(window.location.search);
+    if (_hallParams.get('showHall') === '1') {
+      setTimeout(function(){
+        try {
+          if (typeof _showCharactersPopup === 'function') {
+            _showCharactersPopup();
+          }
+        } catch (e) {
+          console.warn('[CIDADE] auto-open hall failed:', e);
+        }
+        // Clean URL so reload doesn't re-trigger
+        try {
+          _hallParams.delete('showHall');
+          var _newQs = _hallParams.toString();
+          var _newUrl = window.location.pathname + (_newQs ? ('?' + _newQs) : '');
+          window.history.replaceState({}, '', _newUrl);
+        } catch (e) {}
+      }, 800);
+    }
+  } catch (e) {}
   _logCity('cidade.html ready');
 });
 
