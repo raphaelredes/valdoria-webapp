@@ -8695,14 +8695,10 @@ body.perf-lite .vc-action-btn { transition: none; }
 
       // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
       // (em REMOTE não usa mock fixo Brunhilda/Lyana — usa apenas chars reais do user).
+      // Sessao #38 (2026-05-26) bug fix: usa window._classToHeraldic canonical
+      // que normaliza acentos ("Bárbaro" -> ic-barbaro). Antes mapa local nao
+      // cobria nomes acentuados -> icone errado.
       var pickedId = picked.id || picked.char_id;
-      var clsToHeraldic = {
-        mago:'ic-mago', guerreiro:'ic-guerreiro', sacerdote:'ic-clerigo',
-        sacerdotisa:'ic-clerigo', clerigo:'ic-clerigo', ladino:'ic-ladino',
-        patrulheiro:'ic-patrulheiro', paladino:'ic-paladino', bardo:'ic-bardo',
-        druida:'ic-druida', monge:'ic-monge', barbaro:'ic-barbaro',
-        feiticeiro:'ic-feiticeiro', bruxo:'ic-bruxo'
-      };
       window._mockCharacters = chars.map(function(c){
         var cid = c.id || c.char_id;
         var clsKey = String(c.class_name || '').toLowerCase().split(' ')[0];
@@ -8712,7 +8708,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           cls: clsKey,
           race: String(c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: clsToHeraldic[clsKey] || 'ic-guerreiro',
+          icon: window._classToHeraldic(c.class_name),
           active: cid === pickedId
         };
       });
@@ -10503,6 +10499,37 @@ function _titleCase(str){
     function(_, sep, c){ return sep + c.toUpperCase(); });
 }
 
+// Canonical mapping classe -> heraldic icon ID. Normaliza acentos pra cobrir
+// nomes do backend ("Bárbaro", "Clérigo"). Sessao #38 (2026-05-26) bug fix:
+// antes "Bárbaro" virava "bárbaro" e o lookup falhava -> fallback ic-guerreiro
+// (icone errado). Tambem unifica os 5 lugares que mapeavam class->icon de
+// formas inconsistentes (alguns concatenavam 'ic-' + clsKey direto).
+window._classToHeraldic = function(clsName){
+  if (!clsName) return 'ic-guerreiro';
+  // Normaliza: lowercase + strip diacriticos (NFD remove acentos) + primeiro token
+  var k = String(clsName).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')    // strip combining diacritics
+    .split(' ')[0]                                       // first word
+    .replace(/[^a-z]/g, '');                             // strip remaining non-letters
+  var MAP = {
+    mago:        'ic-mago',
+    guerreiro:   'ic-guerreiro',
+    sacerdote:   'ic-clerigo',
+    sacerdotisa: 'ic-clerigo',
+    clerigo:     'ic-clerigo',
+    ladino:      'ic-ladino',
+    patrulheiro: 'ic-patrulheiro',
+    paladino:    'ic-paladino',
+    bardo:       'ic-bardo',
+    druida:      'ic-druida',
+    monge:       'ic-monge',
+    barbaro:     'ic-barbaro',
+    feiticeiro:  'ic-feiticeiro',
+    bruxo:       'ic-bruxo'
+  };
+  return MAP[k] || 'ic-guerreiro';
+};
+
 // === HALL DE PERSONAGENS — replica fiel valdoria-webapp/web/index.html #screen-chars ===
 // Estrutura idêntica: mini-orb + título "Selecione seu Personagem" + lista de
 // .wa-char-card (icon + info + check radio) + botão Jogar + botão Sair.
@@ -10533,25 +10560,11 @@ function _showCharactersPopup(){
   } catch(e){ console.warn('[CITY] hall audio:', e); }
 
   // Helper: classe → ID heráldico canonical (regra No NPC Emotes)
+  // Sessao #38 (2026-05-26): delega pro window._classToHeraldic global que
+  // normaliza acentos. Antes este mapa local nao tratava "Bárbaro"/"Clérigo"
+  // -> caia no fallback ic-guerreiro (icone errado).
   function _hallClassToHeraldic(cls){
-    var k = (cls || '').toLowerCase().split(' ')[0];
-    var MAP = {
-      mago:        'ic-mago',
-      guerreiro:   'ic-guerreiro',
-      sacerdotisa: 'ic-clerigo',
-      sacerdote:   'ic-clerigo',
-      clerigo:     'ic-clerigo',
-      ladino:      'ic-ladino',
-      patrulheiro: 'ic-patrulheiro',
-      paladino:    'ic-paladino',
-      bardo:       'ic-bardo',
-      druida:      'ic-druida',
-      monge:       'ic-monge',
-      barbaro:     'ic-barbaro',
-      feiticeiro:  'ic-feiticeiro',
-      bruxo:       'ic-bruxo'
-    };
-    return MAP[k] || 'ic-guerreiro';
+    return window._classToHeraldic(cls);
   }
 
   // X-6.5.51AM (2026-05-08) BUG FIX: em REMOTE mode (token+api+uid no URL),
@@ -11072,7 +11085,7 @@ function _doDeleteChar(charId, charName){
           cls: (c.class_name || '').toLowerCase(),
           race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          icon: window._classToHeraldic(c.class_name),
           active: false  // none auto-activated; user must select Jogar
         };
       });
@@ -11133,7 +11146,7 @@ function _loadHallArchivedChars(){
        - expired: chip cinza "Não recuperável" (lvl 1 + > 15d) */
     var html = '';
     chars.forEach(function(c){
-      var iconId = 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]);
+      var iconId = window._classToHeraldic(c.class_name);
       var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
       var rk = c.restore_kind || 'one_click';
       var dpl = c.days_passed || 0;
@@ -11352,7 +11365,7 @@ function _doRestoreChar(charId, charName){
           id: c.id || c.char_id, name: c.name,
           cls: (c.class_name || '').toLowerCase(), race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          icon: window._classToHeraldic(c.class_name),
           active: false
         };
       });
