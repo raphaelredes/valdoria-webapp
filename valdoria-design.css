@@ -104,6 +104,7 @@
     --v-transition-fast: 0.15s ease;
     --v-transition-base: 0.3s ease;
     --v-transition-slow: 0.5s;
+    --v-transition-progress: 1.2s ease-out;
     --v-bg-overlay: var(--v-border-12);
     --v-border-dim: var(--v-border-15);
     --v-bar-bg: rgba(0, 0, 0, 0.3);
