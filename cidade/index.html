@@ -10966,14 +10966,13 @@ function _showCharactersPopup(){
 }
 
 // X-6.5.51AR (2026-05-08) — Confirm popup pra APAGAR personagem (com janela de
-// recuperação de 15 dias). User pediu: "ao invés de arquivar informe que será
-// apagado mas poderá ser restaurado facilmente se o jogador quiser, num prazo
-// máximo, veja qual prazo existe no esqueleto do hall de personagens".
-// Skeleton (character_ui_manage.py:52): _RESTORE_DAYS=15 (1-clique),
-// _RETENTION_DAYS=180 (max via ticket).
+// recuperação). Sessao #38 (2026-05-25): janela 1-clique expandida de 15 → 30
+// dias por request do user.
+// Skeleton (character_ui_manage.py:52 + web_auth.py:_get_deleted_characters):
+//   _RESTORE_DAYS = 30 (1-clique), _RETENTION_DAYS = 180 (max via ticket).
 function _showDeleteCharConfirm(charId, charName){
   if (typeof _showInfoPopup !== 'function'){
-    if (!confirm('Apagar ' + charName + '? (recuperável em até 15 dias)')) return;
+    if (!confirm('Apagar ' + charName + '? (recuperável em até 30 dias)')) return;
     _doDeleteChar(charId, charName);
     return;
   }
@@ -10986,18 +10985,18 @@ function _showDeleteCharConfirm(charId, charName){
       + _titleCase(charName) + '</p>'
       + '<div style="background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.25); '
       + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 15 dias</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 30 dias</p>'
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'Por <b>15 dias</b>, você poderá restaurar este personagem com 1 clique '
+      + 'Por <b>30 dias</b>, você poderá restaurar este personagem com 1 clique '
       + 'na secção <em>Personagens Apagados</em> abaixo.'
       + '</p>'
       + '</div>'
       + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
       + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">📩 Após 15 dias — via ticket</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">📩 Após 30 dias — via ticket (sem garantia)</p>'
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'Entre 15 e 180 dias, restauração apenas via ticket de suporte (apenas '
-      + 'personagens nível 2+).'
+      + 'Entre 30 e 180 dias, restauração apenas via ticket de suporte (apenas '
+      + 'personagens nível 2+). <b>Restauração não é garantida.</b>'
       + '</p>'
       + '</div>'
       + '<p style="margin: 0; font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-faint, #8a7a68); '
@@ -11138,7 +11137,8 @@ function _loadHallArchivedChars(){
       var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
       var rk = c.restore_kind || 'one_click';
       var dpl = c.days_passed || 0;
-      var drOC = c.days_remaining_one_click != null ? c.days_remaining_one_click : 15;
+      // Sessao #38 (2026-05-25): fallback 15 → 30 (janela 1-clique expandida).
+      var drOC = c.days_remaining_one_click != null ? c.days_remaining_one_click : 30;
       var drTk = c.days_remaining_ticket != null ? c.days_remaining_ticket : 180;
       // Status badge text + color
       var statusBadge = '';
@@ -11210,22 +11210,119 @@ function _loadHallArchivedChars(){
         _doRestoreChar(btn.getAttribute('data-arch-id'), btn.getAttribute('data-arch-name') || '?');
       });
     });
-    // Wire ticket buttons (>15 days, lvl 2+)
+    // Wire ticket buttons (>30 days, lvl 2+)
     listEl.querySelectorAll('.hall-arch-ticket').forEach(function(btn){
       btn.addEventListener('click', function(ev){
         ev.stopPropagation();
         var nm = btn.getAttribute('data-arch-name') || 'este personagem';
-        if (typeof vToast === 'function') {
-          vToast('📩 Tickets de suporte em breve. Use /ticket no bot Telegram.', 4000);
-        } else {
-          alert('Tickets de suporte: use /ticket no bot Telegram para restaurar ' + nm + '.');
-        }
+        _showRecoveryTicketInfo(nm);
       });
     });
+
+    // Sessao #38 (2026-05-25): user pediu — "caso exista personagem excluido
+    // a mais de 30 dias, apareca um botao de abertura de ticket no FINAL da
+    // lista dos personagens para recuperar, para solicitar recuperar um
+    // personagem antigo, informando que nao e garantido que seja restaurado".
+    // Conta personagens elegiveis pra ticket (restore_kind === 'ticket').
+    var ticketChars = chars.filter(function(c){ return c.restore_kind === 'ticket'; });
+    if (ticketChars.length > 0) {
+      _renderConsolidatedTicketButton(ticketChars);
+    }
   }).catch(function(err){
     console.warn('[CITY] deleted-characters fetch failed:', err);
     var section = document.getElementById('hall-archived-section');
     if (section) section.style.display = 'none';
+  });
+}
+
+// Sessao #38 (2026-05-25): user pediu — botao consolidado de ticket no FINAL
+// da lista quando houver personagens deletados ha mais de 30 dias (elegiveis
+// pra ticket). Mostra info popup explicando que restauracao NAO e garantida.
+
+function _renderConsolidatedTicketButton(ticketChars){
+  /* Insere botao "Recuperar Personagem Antigo" apos o botao Sair (#hall-btn-logout).
+     Idempotente: remove versao previa antes de adicionar. */
+  var existing = document.getElementById('hall-btn-old-recovery');
+  if (existing) existing.remove();
+  var logoutBtn = document.querySelector('.hall-btn-logout');
+  if (!logoutBtn) return;
+  var btn = document.createElement('button');
+  btn.id = 'hall-btn-old-recovery';
+  btn.className = 'hall-btn-old-recovery';
+  btn.style.cssText = 'display:block; width: 100%; margin-top: var(--v-space-md, 8px); '
+    + 'padding: var(--v-space-md, 8px) var(--v-space-xl, 16px); '
+    + 'background: linear-gradient(180deg, rgba(208,128,112,0.12), rgba(208,128,112,0.04)); '
+    + 'border: 1px dashed #d08070; '
+    + 'border-radius: var(--v-radius, 10px); '
+    + 'font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-base, 13px); '
+    + 'color: #d08070; cursor: pointer; min-height: 44px; text-align: center;';
+  btn.innerHTML = '📩 Recuperar Personagem Antigo'
+    + ' <span style="font-size: calc(10px * var(--v-font-scale, 1)); opacity: 0.75; font-style: italic;">'
+    + '(via ticket — sem garantia)'
+    + '</span>';
+  btn.addEventListener('click', function(){
+    _showRecoveryTicketInfo(null, ticketChars);
+  });
+  logoutBtn.parentNode.insertBefore(btn, logoutBtn.nextSibling);
+}
+
+function _showRecoveryTicketInfo(charName, ticketChars){
+  /* Popup de info explicando o processo de ticket. Mostra a lista de
+     personagens elegiveis (se passados via 2o argumento) ou o nome
+     especifico (se aberto pelo botao per-char). */
+  if (typeof _showInfoPopup !== 'function') {
+    var fallback = 'Para recuperar personagens deletados ha mais de 30 dias, '
+      + 'envie /ticket no bot Telegram com o nome do personagem. '
+      + 'Restauracao NAO e garantida.';
+    vToast(fallback, 'warn');
+    return;
+  }
+  var listHtml = '';
+  if (ticketChars && ticketChars.length) {
+    listHtml = '<div style="background: rgba(58,48,40,0.4); border: 1px solid var(--v-border, #4a3828); '
+      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
+      + '<p style="margin: 0 0 6px; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-gold-light, #dbb668); font-weight: 700;">Personagens elegíveis:</p>';
+    ticketChars.forEach(function(c){
+      var nm = _titleCase(c.name || '?');
+      var lv = c.level || 1;
+      var cls = _titleCase(c.class_name || '');
+      var dpl = c.days_passed || 0;
+      listHtml += '<p style="margin: 4px 0 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0);">'
+        + '<b>' + nm + '</b> — Nv ' + lv + (cls ? ' ' + cls : '') + ' · há ' + dpl + ' dias'
+        + '</p>';
+    });
+    listHtml += '</div>';
+  } else if (charName) {
+    listHtml = '<p style="margin: 0 0 10px; color: var(--v-text-bright, #e8dcc8); font-weight: 700; font-size: calc(15px * var(--v-font-scale, 1));">'
+      + _titleCase(charName) + '</p>';
+  }
+  _showInfoPopup({
+    icon: '📩',
+    title: 'Recuperar Personagem Antigo',
+    npc: 'Hall de Personagens',
+    desc: '<div style="text-align:left;">'
+      + listHtml
+      + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
+      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">⚠️ Restauração não garantida</p>'
+      + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
+      + 'Personagens deletados há mais de <b>30 dias</b> só podem ser restaurados via ticket de suporte. '
+      + 'A restauração depende da disponibilidade dos backups e <b>não é garantida</b>.'
+      + '</p>'
+      + '</div>'
+      + '<div style="background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.25); '
+      + 'border-radius: 6px; padding: 10px 12px;">'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">📋 Como solicitar</p>'
+      + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); line-height: 1.5;">'
+      + '1. Volte ao bot Telegram<br>'
+      + '2. Envie o comando <code style="background:rgba(196,149,58,0.15); padding:1px 6px; border-radius:3px;">/ticket</code><br>'
+      + '3. Informe o nome do personagem e detalhes<br>'
+      + '4. Aguarde resposta do suporte'
+      + '</p>'
+      + '</div></div>',
+    confirmLabel: 'Entendi',
+    cancelLabel: null,
+    onConfirm: function(){ /* só fecha popup */ }
   });
 }
 
