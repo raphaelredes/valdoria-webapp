@@ -452,12 +452,25 @@ function _sceneAftermath() {
   };
 }
 
-/* Cena GATE: interação com guarda no portão da cidade. N options dinâmicas. */
+/* Cena GATE: interação com guarda no portão da cidade. N options dinâmicas.
+   Sessão #38 bug fix: texto era envolvido em 1 strophe gigante (~800 chars,
+   5+ parágrafos separados por \n\n) → _groupScriptIntoPages criava 1 página
+   só → choices empurradas pra fora da viewport, user "não conseguia continuar".
+   Fix: split por \n\n em N strophes individuais → pagination canonical (até
+   2 strophes/página) → múltiplas páginas com "Continuar →" até choices. */
 function _sceneGate() {
   const inter = DATA.interaction || {};
   const title = inter.title || 'Portões de Valdória';
   const text = inter.text || 'Você chega aos portões. O guarda barra sua passagem.';
   const options = inter.options || [];
+
+  /* Split por parágrafos vazios (\n\n+). Cada parágrafo vira 1 strophe pra
+     pagination respeitar PADRAO_ALDRIC. Fallback: se texto sem \n\n, fica 1. */
+  const paragraphs = String(text).split(/\n\n+/).map(function(p){ return p.trim(); }).filter(function(p){ return p.length > 0; });
+  const script = paragraphs.length > 0
+    ? paragraphs.map(function(p){ return { type: 'narration', text: p }; })
+    : [{ type: 'narration', text: text }];
+
   const choices = options.map(function(o) {
     return {
       id: o.key,
@@ -474,9 +487,7 @@ function _sceneGate() {
       desc: 'Os portões de Valdória',
       portrait: ''
     },
-    script: [
-      { type: 'narration', text: text }
-    ],
+    script: script,
     choices: choices
   };
 }
