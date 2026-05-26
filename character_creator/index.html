@@ -4214,8 +4214,19 @@ Busca rápida:
 
         function _showCloseConfirmOverlay() {
             // Overlay full-screen com card centralizado no design do jogo
-            // (canonical .v-popup-overlay style, sem usar APIs nativas do Telegram).
-            // Idempotente: remove versao previa.
+            // (sem usar APIs nativas do Telegram). Idempotente.
+            //
+            // Sessao #38: shared/exit-confirm.js (carregado em todos webapps)
+            // tambem registra um BackButton.onClick que mostra canonical overlay
+            // "Encerrar Aventura?". Como Telegram.WebApp.onClick adiciona listeners
+            // (nao substitui), AMBOS handlers disparariam. Esconde a canonical
+            // imediatamente pra mostrar SO a nossa, customizada pro creator.
+            if (window.ValdoriaExitConfirm && typeof window.ValdoriaExitConfirm.hide === 'function') {
+                try { window.ValdoriaExitConfirm.hide(); } catch (e) {}
+            }
+            var canonicalOv = document.getElementById('v-exit-overlay');
+            if (canonicalOv) canonicalOv.style.display = 'none';
+
             var existing = document.getElementById('creator-close-overlay');
             if (existing) existing.remove();
 
@@ -5904,6 +5915,33 @@ Busca rápida:
             // Sessao #38: abre popup com mecânicas detalhadas em vez de auto-confirmar.
             const fs = FIGHTING_STYLES[fsId];
             if (!fs) return;
+            // Mecanicas canonical D&D 5e PHB p.72/86/91 — texto explicito por estilo.
+            const _MECHANICS = {
+                'fighting_style_defense':
+                    '• <b>+1 Classe de Armadura (CA)</b> enquanto vestir armadura<br>'
+                    + '• Aplica continuamente — sem ativacao<br>'
+                    + '• Empilha com escudo e magicas defensivas',
+                'fighting_style_dueling':
+                    '• <b>+2 dano</b> em armas corpo a corpo de uma mao<br>'
+                    + '• <b>Condicao:</b> sem segurar arma na outra mao (escudo OK)<br>'
+                    + '• Ideal pra rapieira, espada longa, machado de batalha',
+                'fighting_style_archery':
+                    '• <b>+2 bonus de ataque</b> com armas a distancia<br>'
+                    + '• Inclui arco curto/longo, besta leve/pesada, dardos<br>'
+                    + '• Nao afeta ataques corpo-a-corpo com armas de arremesso',
+                'fighting_style_great_weapon':
+                    '• Em armas <b>pesadas de duas maos</b>, re-rolar 1s e 2s nos dados de dano<br>'
+                    + '• Aplica uma vez por ataque (mesmo em criticos)<br>'
+                    + '• Ideal pra montante, machado grande, maza de duas maos',
+                'fighting_style_protection':
+                    '• <b>Reacao:</b> imponha <b>desvantagem</b> no ataque contra criatura adjacente<br>'
+                    + '• Requer estar segurando escudo<br>'
+                    + '• Gasta sua reacao (1 por rodada)',
+                'fighting_style_two_weapon':
+                    '• Adiciona <b>modificador de atributo</b> ao dano da off-hand<br>'
+                    + '• Sem esse estilo, off-hand nao soma mod (so o dado base)<br>'
+                    + '• Funciona com armas leves: adaga, espada curta, machado de mao',
+            };
             _showCreatorDetailPopup({
                 parentScreen: 'class',
                 title: fs.name,
@@ -5911,7 +5949,7 @@ Busca rápida:
                 subtitle: fs.desc,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">⚔️ Mecânicas D&amp;D 5e (Fighting Style PHB p.72/86/91)</b><br>'
-                    + (fs.mechanics || fs.desc || ''),
+                    + (_MECHANICS[fsId] || fs.desc || ''),
                 onConfirm: function(){
                     sel.fightingStyle = fsId;
                     closeSubScreen('sub-creator-detail-class');
