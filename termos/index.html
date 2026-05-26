@@ -855,5 +855,12 @@
             </div>
         </footer>
     </div>
+    <script>
+        var v = Date.now();
+        document.write('<script src="../shared/console-collector.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/error-reporter.js?v=' + v + '"><\/script>');
+        document.write('<script src="../shared/audio-manager.js?v=' + v + '"><\/script>');
+    </script>
+    <script>if(typeof ValdoriaErrors!=="undefined")ValdoriaErrors.init("TERMOS")</script>
 </body>
 </html>

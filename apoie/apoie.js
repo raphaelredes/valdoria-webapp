@@ -7,6 +7,9 @@
 const WORKER_URL = '';  // same-origin (apoie.lendasdevaldoria.com.br)
 const BOT_USERNAME = 'LendasDeValdoriaBOT';
 
+// UI feedback durations (per CLAUDE.md Human Reading Time)
+const COPY_FEEDBACK_MS = 2000;  // duracao do toast "Copiado!" — confirmacao visual
+
 let selectedAmount = 0;
 let telegramUser = null;
 
@@ -316,7 +319,7 @@ function showCopied(btn) {
     if (!btn) return;
     btn.textContent = '✓ Copiado!';
     btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = '📋 Copiar Código PIX'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(function() { btn.textContent = '📋 Copiar Código PIX'; btn.classList.remove('copied'); }, COPY_FEEDBACK_MS);
 }
 
 // === Goals + Stats + Donors ===
