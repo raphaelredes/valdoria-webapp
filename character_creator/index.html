@@ -4203,33 +4203,71 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         function setupBackButton() {
             if (!tg || !tg.BackButton) return;
-            // Sessao #38 (2026-05-25): user pediu — "o botao de voltar do
-            // webapp do Telegram deve sempre ser na verdade um botao de
-            // fechar mas que sempre abre um popup de confirmacao se o
-            // jogador realmente deseja fechar a tela".
-            //
-            // Comportamento antes: navegacao back (fecha sub-screen, depois
-            // recua de tela, depois fecha WebApp na screen 0).
-            // Comportamento agora: SEMPRE abre confirm popup -> fecha WebApp
-            // se OK, mantem aberto se Cancelar. Navegacao back interna
-            // continua disponivel via headerBack (#screen-back-btn) e botoes
-            // "Voltar" em sub-screens.
+            // Sessao #38 (2026-05-25): user pediu popup IN-GAME (nao o nativo
+            // do Telegram). Substituiu tg.showConfirm por overlay customizado
+            // estilizado no design do jogo. Fica visivel sobre tudo (z-index
+            // muito alto).
             tg.BackButton.onClick(() => {
-                const message = 'Deseja fechar a criação de personagem? Seu progresso atual será perdido.';
-                if (typeof tg.showConfirm === 'function') {
-                    tg.showConfirm(message, function (confirmed) {
-                        if (confirmed) {
-                            try { tg.close(); } catch (e) { console.warn('[CREATOR] close failed:', e); }
-                        }
-                    });
-                } else {
-                    // Fallback: confirm nativo do browser (file://, Telegram antigo)
-                    try {
-                        if (window.confirm(message)) {
-                            tg.close();
-                        }
-                    } catch (e) { console.warn('[CREATOR] confirm fallback failed:', e); }
+                _showCloseConfirmOverlay();
+            });
+        }
+
+        function _showCloseConfirmOverlay() {
+            // Overlay full-screen com card centralizado no design do jogo
+            // (canonical .v-popup-overlay style, sem usar APIs nativas do Telegram).
+            // Idempotente: remove versao previa.
+            var existing = document.getElementById('creator-close-overlay');
+            if (existing) existing.remove();
+
+            var ov = document.createElement('div');
+            ov.id = 'creator-close-overlay';
+            ov.style.cssText = 'position:fixed; inset:0; z-index:99999; '
+                + 'background:rgba(0,0,0,0.78); display:flex; align-items:center; '
+                + 'justify-content:center; padding:20px; '
+                + 'animation:vFadeIn 0.2s ease-out;';
+            ov.innerHTML =
+                '<style>@keyframes vFadeIn{from{opacity:0}to{opacity:1}}'
+                + '@keyframes vScaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}</style>'
+                + '<div style="background:var(--v-bg-card,#2e2520); border:1px solid var(--v-gold-dim,#9a7530); '
+                + 'border-radius:12px; padding:24px; max-width:320px; width:100%; '
+                + 'box-shadow:0 12px 36px rgba(0,0,0,0.8), 0 0 24px rgba(196,149,58,0.2); '
+                + 'animation:vScaleIn 0.25s ease-out; text-align:center;">'
+                + '<div style="font-size:calc(36px * var(--v-font-scale, 1)); margin-bottom:8px;">⚔️</div>'
+                + '<div style="font-family:var(--v-font-display,Cinzel,serif); '
+                + 'font-size:calc(16px * var(--v-font-scale, 1)); font-weight:700; '
+                + 'color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; '
+                + 'margin-bottom:14px;">Fechar Criação?</div>'
+                + '<div style="font-size:calc(13px * var(--v-font-scale, 1)); '
+                + 'color:var(--v-text,#d4c8b0); line-height:1.55; margin-bottom:18px;">'
+                + 'Seu progresso atual <b>será perdido</b>. Deseja realmente fechar a criação de personagem?'
+                + '</div>'
+                + '<div style="display:flex; gap:10px; justify-content:center;">'
+                + '<button id="creator-close-cancel" style="flex:1; min-height:42px; '
+                + 'background:transparent; border:1px solid var(--v-border,#4a3828); '
+                + 'border-radius:8px; color:var(--v-text-dim,#a09484); cursor:pointer; '
+                + 'font-family:var(--v-font,MedievalSharp,serif); '
+                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding:8px 14px;">Continuar Criando</button>'
+                + '<button id="creator-close-confirm" style="flex:1; min-height:42px; '
+                + 'background:linear-gradient(180deg, #d08070, #a04040); '
+                + 'border:1px solid #d08070; border-radius:8px; color:#fff; cursor:pointer; '
+                + 'font-family:var(--v-font-display,Cinzel,serif); font-weight:700; letter-spacing:0.5px; '
+                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding:8px 14px;">Fechar</button>'
+                + '</div></div>';
+            document.body.appendChild(ov);
+            document.getElementById('creator-close-cancel').onclick = function(){
+                if (typeof haptic === 'function') haptic();
+                ov.remove();
+            };
+            document.getElementById('creator-close-confirm').onclick = function(){
+                if (typeof haptic === 'function') haptic();
+                try { tg.close(); } catch (e) {
+                    console.warn('[CREATOR] close failed:', e);
+                    ov.remove();
                 }
+            };
+            // Fecha ao clicar fora do card (na area escura)
+            ov.addEventListener('click', function(e){
+                if (e.target === ov) ov.remove();
             });
         }
 
@@ -5083,11 +5121,10 @@ Busca rápida:
                 const info = ANCESTRY_DETAILS[sk];
                 html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)" style="text-align:center; padding:8px 6px;">`;
                 html += `<img src="/shared/img/character_creator/dragon-${sk}.png?v=${_v}" alt="${sr.name}" `
-                    + `style="display:block; width:72px; height:72px; object-fit:contain; margin:0 auto 4px; `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.18) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
-                html += `<div class="detail-option-name" style="font-size:calc(12px * var(--v-font-scale, 1));">${sr.name}</div>`;
-                html += `<div class="detail-option-desc" style="font-size:calc(10px * var(--v-font-scale, 1));">${info.element} | ${info.shape}</div>`;
+                html += `<div class="detail-option-name" style="font-size:calc(13px * var(--v-font-scale, 1));">${sr.name}</div>`;
                 html += `</div>`;
             }
             html += `</div></div>`;
@@ -5848,25 +5885,43 @@ Busca rápida:
         }
 
         function buildFightingStyleSelect() {
+            // Sessao #38: cards mostram apenas imagem + nome. Descricao detalhada
+            // no popup ao clicar (igual ancestralidade/inimigo/terreno).
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFightingStyle()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">Escolha seu Estilo de Combate</div>`;
-            html += `<div class="detail-subtitle">Guerreiro — escolha uma especialização marcial.</div></div>`;
+            html += `<div class="detail-header"><div class="detail-title">Estilo de Combate</div>`;
+            html += `<div class="detail-subtitle">Toque em um estilo para ver detalhes e confirmar.</div></div>`;
             for (const [fsId, fs] of Object.entries(FIGHTING_STYLES)) {
                 const sel_class = sel.fightingStyle === fsId ? ' selected' : '';
                 html += `<div class="v-card${sel_class}" onclick="selectFightingStyle('${fsId}')" style="text-align:center;">`;
-                html += _fightingStyleIconHtml(fsId, 72);
+                html += _fightingStyleIconHtml(fsId, 80);
                 html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${fs.name}</div>`;
-                html += `<div class="v-card-desc" style="margin-top:4px;">${fs.desc}</div>`;
                 html += `</div>`;
             }
             document.getElementById('fstyleSelectContent').innerHTML = html;
         }
 
         function selectFightingStyle(fsId) {
-            haptic();
-            sel.fightingStyle = fsId;
-            buildFightingStyleSelect();
-            setTimeout(() => confirmFightingStyle(), 250);
+            // Sessao #38: abre popup com mecânicas detalhadas em vez de auto-confirmar.
+            const fs = FIGHTING_STYLES[fsId];
+            if (!fs) return;
+            _showCreatorDetailPopup({
+                parentScreen: 'class',
+                title: fs.name,
+                imgUrl: '/character_creator/icons/' + fsId + '.png',
+                subtitle: fs.desc,
+                mechanicsHtml:
+                    '<b style="color:var(--v-gold,#c4953a);">⚔️ Mecânicas D&amp;D 5e (Fighting Style PHB p.72/86/91)</b><br>'
+                    + (fs.mechanics || fs.desc || ''),
+                onConfirm: function(){
+                    sel.fightingStyle = fsId;
+                    closeSubScreen('sub-creator-detail-class');
+                    closeSubScreen('sub-fstyle-select');
+                    _routeAfterClassChoice();
+                },
+                onCancel: function(){
+                    closeSubScreen('sub-creator-detail-class');
+                }
+            });
         }
 
         function confirmFightingStyle() {
