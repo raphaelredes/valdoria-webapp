@@ -3025,6 +3025,12 @@ Busca rápida:
                 <div class="sub-screen" id="sub-subrace-select">
                     <div class="screen-content" id="subraceSelectContent"></div>
                 </div>
+                <!-- Sessao #38: popup generico de detalhe com imagem + confirm
+                     (Dragonborn ancestry, Ranger favored enemy/terrain,
+                     Sorcerer draconic bloodline). Empilha acima de outros sub-screens. -->
+                <div class="sub-screen" id="sub-creator-detail">
+                    <div class="screen-content" id="creatorDetailContent"></div>
+                </div>
             </div>
 
             <!-- ═══ SCREEN 1: CLASS ═══ -->
@@ -3075,6 +3081,10 @@ Busca rápida:
                 </div>
                 <div class="sub-screen" id="sub-draconic-ancestry">
                     <div class="screen-content" id="draconicAncestryContent"></div>
+                </div>
+                <!-- Sessao #38: detalhe-popup empilha sobre sub-favored-enemy/terrain/draconic. -->
+                <div class="sub-screen" id="sub-creator-detail-class">
+                    <div class="screen-content" id="creatorDetailClassContent"></div>
                 </div>
                 <div class="sub-screen" id="sub-rogue-expertise">
                     <div class="screen-content" id="rogueExpertiseContent"></div>
@@ -5081,12 +5091,46 @@ Busca rápida:
         }
 
         function selectAncestryOption(raceKey, subraceKey, el) {
-            haptic();
+            // Sessao #38: ao clicar, abre popup com imagem do dragao + mechanics +
+            // confirmar. Antes apenas marcava selecionado e habilitava o botao no rodape.
+            const sr = RACES[raceKey].subraces[subraceKey];
+            const info = (typeof ANCESTRY_DETAILS !== 'undefined') ? (ANCESTRY_DETAILS[subraceKey] || {}) : {};
+            if (!sr) return;
+            const dmgPT = { fire: 'fogo', cold: 'gelo', lightning: 'relâmpago', acid: 'ácido', poison: 'veneno' };
+            const dmgName = dmgPT[sr.damage_type] || sr.damage_type || 'fogo';
+            const savePT = { dexterity: 'Destreza', constitution: 'Constituição' };
+            const saveName = savePT[sr.breath_save] || sr.breath_save || 'Destreza';
+            const shapePT = { cone: 'cone de 4,5m', line: 'linha de 1,5×9m' };
+            const shapeName = shapePT[sr.breath_shape] || sr.breath_shape;
+            _showCreatorDetailPopup({
+                parentScreen: 'race',
+                title: sr.name,
+                imgUrl: '/shared/img/character_creator/dragon-' + subraceKey + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                subtitle: sr.description,
+                mechanicsHtml:
+                    '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Draconato PHB p.32-35)</b><br>'
+                    + '• <b>Tipo de dano:</b> ' + dmgName + '<br>'
+                    + '• <b>Formato do sopro:</b> ' + shapeName + '<br>'
+                    + '• <b>Salvaguarda:</b> ' + saveName + ' (alvos)<br>'
+                    + '• <b>Resistência:</b> dano de ' + dmgName + '<br>'
+                    + '• <b>Sopro Dracônico:</b> 2d6 (nv 1-5), 3d6 (6-10), 4d6 (11-15), 5d6 (16+)<br>'
+                    + '• <b>Bônus de atributo:</b> +2 Força, +1 Carisma',
+                onConfirm: function(){
+                    pendingSubrace = subraceKey;
+                    closeSubScreen('sub-creator-detail');
+                    // Auto-confirma a raca (Dragonborn nao precisa de mais escolhas apos ancestralidade)
+                    confirmRace(raceKey, subraceKey);
+                },
+                onCancel: function(){
+                    closeSubScreen('sub-creator-detail');
+                }
+            });
+            // Mantem comportamento legado tambem (marca selecionado + habilita btn rodape)
+            // caso o user prefira clicar Voltar e usar o botao "✓ CONFIRMAR ANCESTRALIDADE"
             pendingSubrace = subraceKey;
             document.querySelectorAll('#ancestryOptions .detail-option').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
 
-            const sr = RACES[raceKey].subraces[subraceKey];
             const btn = document.getElementById('raceConfirmBtn');
             btn.disabled = false;
             btn.textContent = `✓ CONFIRMAR DRACONATO ${sr.name.toUpperCase()}`;
@@ -5839,6 +5883,73 @@ Busca rápida:
         // Sessao #34 — D&D 5e L1 CHOICES (Ranger / Sorcerer / Rogue)
         // ═══════════════════════════════════════════════
 
+        /* ═══════════════════════════════════════════════
+           SHARED detail popup helper (Sessao #38)
+           User pediu: ao clicar em ancestralidade/enemy/terrain, abrir popup
+           com imagem grande + descricao + botoes confirmar/voltar (em vez
+           de auto-selecionar).
+           ═══════════════════════════════════════════════ */
+        function _showCreatorDetailPopup(opts) {
+            // opts: {parentScreen, title, imgUrl, subtitle, mechanicsHtml, onConfirm, onCancel}
+            haptic();
+            var parentScreen = opts.parentScreen || 'class';
+            var subScreenId = parentScreen === 'race' ? 'sub-creator-detail' : 'sub-creator-detail-class';
+            var contentId = parentScreen === 'race' ? 'creatorDetailContent' : 'creatorDetailClassContent';
+
+            // Esc para Cancel callback global
+            window._creatorDetailCancel = opts.onCancel || function(){ closeSubScreen(subScreenId); };
+            window._creatorDetailConfirm = opts.onConfirm || function(){};
+            window._creatorDetailSubId = subScreenId;
+
+            var html = '';
+            // Botao voltar
+            html += '<button class="v-btn v-btn-secondary v-btn-pill sub-back" '
+                + 'onclick="(_creatorDetailCancel||function(){})()">← Voltar</button>';
+            // Banner canonical com gem + linhas douradas
+            html += '<div class="v-step-banner">';
+            html += '<span class="v-step-line"></span>';
+            html += '<span class="v-step-gem">◆</span>';
+            html += '<span class="v-step-text">' + (opts.title || '') + '</span>';
+            html += '<span class="v-step-line"></span>';
+            html += '</div>';
+            // Hero imagem com glow + 4 ornamentos
+            if (opts.imgUrl) {
+                html += '<div style="position:relative; max-width:200px; margin:8px auto 18px; padding:14px;">';
+                html += '<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
+                html += '<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
+                html += '<span style="position:absolute; left:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
+                html += '<span style="position:absolute; right:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
+                html += '<img src="' + opts.imgUrl + '" alt="' + (opts.title || '').replace(/"/g, '&quot;')
+                    + '" style="display:block; width:170px; height:170px; object-fit:contain; margin:0 auto; '
+                    + 'border-radius:12px; background:radial-gradient(circle at center, rgba(196,149,58,0.22) 0%, rgba(42,36,32,0.0) 65%); '
+                    + 'box-shadow:0 6px 22px rgba(196,149,58,0.28);" loading="lazy" '
+                    + 'onerror="this.style.display=\'none\'" />';
+                html += '</div>';
+            }
+            // Subtitle / lore
+            if (opts.subtitle) {
+                html += '<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); '
+                    + 'color:var(--v-text-dim,#a09484); margin:0 12px 14px; line-height:1.55; font-style:italic;">'
+                    + opts.subtitle + '</div>';
+            }
+            // Mechanics info bloco
+            if (opts.mechanicsHtml) {
+                html += '<div style="margin:0 12px 18px; padding:12px 14px; '
+                    + 'background:rgba(196,149,58,0.06); border-left:3px solid var(--v-gold,#c4953a); '
+                    + 'border-radius:6px; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.6;">'
+                    + opts.mechanicsHtml + '</div>';
+            }
+            // Botao confirmar epico
+            html += '<button class="v-btn v-btn-primary" style="width:90%; margin:8px 5% 12px; '
+                + 'font-family:var(--v-font-display,Cinzel,serif); letter-spacing:2px;" '
+                + 'onclick="(_creatorDetailConfirm||function(){})()">✓ Confirmar Escolha</button>';
+
+            document.getElementById(contentId).innerHTML = html;
+            openSubScreen(subScreenId);
+            var sub = document.getElementById(subScreenId);
+            if (sub) sub.scrollTop = 0;
+        }
+
         /* Ranger Favored Enemy (PHB p.91, L1). 9 tipos canonicos. */
         function buildFavoredEnemySelect() {
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
@@ -5856,10 +5967,29 @@ Busca rápida:
             document.getElementById('favoredEnemyContent').innerHTML = html;
         }
         function selectFavoredEnemy(feId) {
-            haptic();
-            sel.favoredEnemy = feId;
-            buildFavoredEnemySelect();
-            setTimeout(() => confirmFavoredEnemy(), 250);
+            // Sessao #38: abre popup com imagem + mechanics + confirmar (em vez de auto-confirmar).
+            const fe = RANGER_FAVORED_ENEMIES[feId];
+            if (!fe) return;
+            _showCreatorDetailPopup({
+                parentScreen: 'class',
+                title: fe.name,
+                imgUrl: '/shared/img/character_creator/ranger-enemy-' + feId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                subtitle: fe.desc,
+                mechanicsHtml:
+                    '<b style="color:var(--v-gold,#c4953a);">🏹 Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
+                    + '• <b>Vantagem</b> em Sabedoria (Sobrevivência) ao rastrear este tipo<br>'
+                    + '• <b>+2 dano</b> em ataques de arma contra este tipo<br>'
+                    + '• Lembra detalhes úteis sobre ' + fe.name.toLowerCase() + ' que você já enfrentou',
+                onConfirm: function(){
+                    sel.favoredEnemy = feId;
+                    closeSubScreen('sub-creator-detail-class');
+                    closeSubScreen('sub-favored-enemy');
+                    _routeAfterClassChoice();
+                },
+                onCancel: function(){
+                    closeSubScreen('sub-creator-detail-class');
+                }
+            });
         }
         function confirmFavoredEnemy() {
             if (!sel.favoredEnemy) return;
@@ -5891,10 +6021,32 @@ Busca rápida:
             document.getElementById('favoredTerrainContent').innerHTML = html;
         }
         function selectFavoredTerrain(ftId) {
-            haptic();
-            sel.favoredTerrain = ftId;
-            buildFavoredTerrainSelect();
-            setTimeout(() => confirmFavoredTerrain(), 250);
+            // Sessao #38: popup com imagem + mechanics + confirmar.
+            const ft = RANGER_FAVORED_TERRAINS[ftId];
+            if (!ft) return;
+            _showCreatorDetailPopup({
+                parentScreen: 'class',
+                title: ft.name,
+                imgUrl: '/shared/img/character_creator/ranger-terrain-' + ftId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                subtitle: ft.desc,
+                mechanicsHtml:
+                    '<b style="color:var(--v-gold,#c4953a);">🗺️ Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
+                    + '• <b>Não se perde</b> ao viajar neste terreno (exceto magia/manobras)<br>'
+                    + '• <b>Alerta</b> durante viagem mesmo participando de outra atividade<br>'
+                    + '• Movendo-se sozinho, pode mover-se em <b>silêncio em ritmo normal</b><br>'
+                    + '• <b>+2 INT (Natureza)</b> e <b>+2 SAB (Sobrevivência)</b> neste terreno<br>'
+                    + '• Forragear rende <b>2× alimento</b><br>'
+                    + '• Rastros mostram quantas, quão grandes, criaturas há',
+                onConfirm: function(){
+                    sel.favoredTerrain = ftId;
+                    closeSubScreen('sub-creator-detail-class');
+                    closeSubScreen('sub-favored-terrain');
+                    _routeAfterClassChoice();
+                },
+                onCancel: function(){
+                    closeSubScreen('sub-creator-detail-class');
+                }
+            });
         }
         function confirmFavoredTerrain() {
             if (!sel.favoredTerrain) return;
@@ -5930,10 +6082,33 @@ Busca rápida:
             document.getElementById('draconicAncestryContent').innerHTML = html;
         }
         function selectDraconicAncestry(daId) {
-            haptic();
-            sel.draconicAncestry = daId;
-            buildDraconicAncestrySelect();
-            setTimeout(() => confirmDraconicAncestry(), 250);
+            // Sessao #38: popup com imagem (compartilhada com Dragonborn) + mechanics.
+            const da = SORCERER_DRACONIC_ANCESTRY[daId];
+            if (!da) return;
+            const dmgPT = { fire: 'fogo', cold: 'gelo', lightning: 'relâmpago', acid: 'ácido', poison: 'veneno' };
+            const dmgName = dmgPT[da.damage] || da.damage || 'fogo';
+            _showCreatorDetailPopup({
+                parentScreen: 'class',
+                title: 'Linhagem ' + da.name,
+                imgUrl: '/shared/img/character_creator/dragon-' + daId + '.png?v=' + (window.VBUNDLE_HASH || Date.now()),
+                subtitle: da.desc,
+                mechanicsHtml:
+                    '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Feiticeiro Linhagem Dracônica PHB p.103)</b><br>'
+                    + '• <b>Tipo de dano:</b> ' + dmgName + '<br>'
+                    + '• <b>Resistência a ' + dmgName + '</b> (nível 1)<br>'
+                    + '• <b>+1 HP por nível</b> (Resiliência Dracônica)<br>'
+                    + '• <b>Asas dracônicas</b> (nível 14): velocidade de voo 18m<br>'
+                    + '• <b>Presença Dracônica</b> (nível 18): cone 18m, intimidação ou encantamento',
+                onConfirm: function(){
+                    sel.draconicAncestry = daId;
+                    closeSubScreen('sub-creator-detail-class');
+                    closeSubScreen('sub-draconic-ancestry');
+                    _routeAfterClassChoice();
+                },
+                onCancel: function(){
+                    closeSubScreen('sub-creator-detail-class');
+                }
+            });
         }
         function confirmDraconicAncestry() {
             if (!sel.draconicAncestry) return;
