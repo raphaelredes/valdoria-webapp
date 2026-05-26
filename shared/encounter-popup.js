@@ -169,7 +169,11 @@
   }
 
   /* Typewriter RPG clássico — char-by-char com pausa em <i>/</i>.
-     Velocidade ~28ms/char (~36 chars/s). */
+     Velocidade ~28ms/char (~36 chars/s).
+     Sessão #38 perf P0 (Fase 2.5): O(n²) → O(n) via textNode.appendData()
+     em vez de element.innerHTML = html. Antes, cada char reparseava todo
+     o HTML acumulado (~200 chars × 200 ops = 40k operações em Android 2GB).
+     Agora: appendChild de text nodes + stack DOM pra tags inline. */
   function _typewriter(element, text, charMs, onDone) {
     var tokens = [];
     var i = 0;
@@ -187,11 +191,60 @@
       i++;
     }
     var idx = 0;
-    var html = '';
     var timer = null;
     var done = false;
     element.classList.add('typing');
+    element.innerHTML = '';  /* limpa — vamos construir via DOM nodes */
     var ASIDE_PAUSE_MS = 500;
+    /* Stack-based DOM construction. Topo = elemento onde appendamos texto.
+       Para <i>/<em> abertas, push child no stack; close → pop. */
+    var stack = [element];
+    var currentText = null;  /* texto onde acumulamos chars via appendData */
+
+    function _decodeEntity(s) {
+      var tmp = document.createElement('span');
+      tmp.innerHTML = s;
+      return tmp.textContent;
+    }
+    function _processToken(tok, immediate) {
+      var top = stack[stack.length - 1];
+      if (tok.type === 'tag') {
+        var t = tok.content;
+        var closeM = /^<\s*\/\s*(\w+)\s*>$/i.exec(t);
+        if (closeM) {
+          if (stack.length > 1) stack.pop();
+          currentText = null;
+          return /^(i|em)$/i.test(closeM[1]);  /* needsPause */
+        }
+        var openM = /^<\s*(\w+)([^>]*?)\s*\/?>$/i.exec(t);
+        if (openM) {
+          var el = document.createElement(openM[1]);
+          var attrStr = openM[2];
+          if (attrStr) {
+            var attrRE = /(\w+)\s*=\s*"([^"]*)"/g, am;
+            while ((am = attrRE.exec(attrStr)) !== null) el.setAttribute(am[1], am[2]);
+          }
+          top.appendChild(el);
+          /* Self-closing (br, hr, etc.) não entra no stack */
+          if (!/^(br|hr|img|input)$/i.test(openM[1])) stack.push(el);
+          currentText = null;
+          return /^(i|em)$/i.test(openM[1]);  /* needsPause */
+        }
+        /* Desconhecido — texto literal */
+        top.appendChild(document.createTextNode(t));
+        currentText = null;
+        return false;
+      }
+      var ch = tok.content;
+      if (tok.type === 'entity') ch = _decodeEntity(ch);
+      if (currentText && currentText.parentNode === top) {
+        currentText.appendData(ch);
+      } else {
+        currentText = document.createTextNode(ch);
+        top.appendChild(currentText);
+      }
+      return false;
+    }
     function step() {
       if (idx >= tokens.length) {
         done = true;
@@ -200,10 +253,9 @@
         return;
       }
       var tok = tokens[idx++];
-      html += tok.content;
-      element.innerHTML = html;
+      var needsPause = _processToken(tok, false);
       if (tok.type === 'tag') {
-        if (/^<\s*(i|em)\s*[^>]*>$/i.test(tok.content) || /^<\s*\/\s*(i|em)\s*>$/i.test(tok.content)) {
+        if (needsPause) {
           timer = setTimeout(step, ASIDE_PAUSE_MS);
           return;
         }
@@ -219,8 +271,7 @@
         if (done) return;
         if (timer) clearTimeout(timer);
         timer = null;
-        while (idx < tokens.length) html += tokens[idx++].content;
-        element.innerHTML = html;
+        while (idx < tokens.length) _processToken(tokens[idx++], true);
         element.classList.remove('typing');
         done = true;
         if (onDone) onDone();

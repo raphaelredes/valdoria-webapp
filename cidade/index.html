@@ -51864,6 +51864,13 @@ function _playCityWalkAnimation(opts, onComplete) {
     if (typeof onComplete === 'function') onComplete();
     return;
   }
+  // Sessão #38 perf P0 (Fase 2.11): skip parallax em tier 'lite'.
+  // Loop tem 12+ createLinearGradient/createRadialGradient por frame.
+  // Em Android 2GB entregava 10-15fps. Lite mostra fade curto (800ms).
+  if (window._valdoriaPerformanceTier === 'lite') {
+    if (typeof onComplete === 'function') setTimeout(onComplete, 800);
+    return;
+  }
 
   var DURATION = 5500;
   var TITLE = opts.title || 'Para a Praça Central';
