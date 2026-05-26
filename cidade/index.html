@@ -47184,6 +47184,28 @@ function renderCityGroupPanel(){
   var el = document.getElementById('city-group-panel');
   if (!el) return;
   var p = window.CITY_MOCK_PLAYER;
+  // Sessao #38 (2026-05-25): user reportou — "durante o carregamento da
+  // tela da cidade acaba aparecendo o card azul de aventureiro que deve
+  // ser o fallback... remova o card, deixe sem nenhum no fallback, é
+  // melhor que mostrar algum e depois ser trocado".
+  //
+  // Detecta REMOTE mode sem server data ainda (carregamento).
+  // _serverPlayerStats e setado quando /api/game/state retorna.
+  // Em LOCAL mode (file://, sem token+api+uid), CITY_MOCK_PLAYER e canonical.
+  // Em REMOTE mode antes do server: ZERA o painel inteiro (sem placeholders),
+  // melhor que mostrar card fake "Aventureiro Mago Elfo" azul.
+  var _isRemoteLoading = (function(){
+    try {
+      var pp = new URLSearchParams(window.location.search);
+      var hasRemoteUrl = !!(pp.get('token') && pp.get('api') && pp.get('uid'));
+      var serverReady = !!window._serverPlayerStats;
+      return hasRemoteUrl && !serverReady;
+    } catch(e){ return false; }
+  })();
+  if (_isRemoteLoading) {
+    el.innerHTML = '';
+    return;
+  }
   // Slot 0 sempre é o player (sincronizado com CITY_MOCK_PLAYER)
   // USER REPORT 2026-05-14 #2 — propaga TODOS os campos REAIS do DB
   // (stats/ac/atk/dc/prof/hd/pending*) pro slot 0 da party.
