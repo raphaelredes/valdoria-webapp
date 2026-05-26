@@ -1617,7 +1617,7 @@
             // Tenta carregar PNG do skills dir; onerror substitui por raio fallback
             if (!slug) return '⚡';
             return '<img class="skill-png-ico" src="../shared/img/combat/skills/' + slug +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u26a1\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u26a1\'"/>';
         }
         function _featIconHtml(slug) {
             if (!slug) return '✨';
@@ -2581,7 +2581,7 @@
             // openFeatDetail \u2014 hero PNG 140px + aura + raios + blocos.
             const dmg = calcDmgRange(s.effect);
             const isSel = sel.skills.includes(sid);
-            const pngSrc = '../shared/img/combat/skills/' + _slug + '.png';
+            const pngSrc = '../shared/img/combat/skills/' + _slug + '.webp';
 
             let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
 

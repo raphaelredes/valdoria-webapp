@@ -452,12 +452,25 @@ function _sceneAftermath() {
   };
 }
 
-/* Cena GATE: interação com guarda no portão da cidade. N options dinâmicas. */
+/* Cena GATE: interação com guarda no portão da cidade. N options dinâmicas.
+   Sessão #38 (2026-05-26): server pre-pagineia o texto em script[] estruturado
+   (Server-side processing priority — MEMORY P0). Cliente apenas usa inter.script
+   direto. Fallback pra inter.text preservado pra backwards compat. */
 function _sceneGate() {
   const inter = DATA.interaction || {};
   const title = inter.title || 'Portões de Valdória';
-  const text = inter.text || 'Você chega aos portões. O guarda barra sua passagem.';
   const options = inter.options || [];
+
+  /* Prefer pre-paginated script from server (Python _split_narration_paragraphs).
+     Fallback: legacy single-text payload (versões antigas do server). */
+  let script;
+  if (Array.isArray(inter.script) && inter.script.length > 0) {
+    script = inter.script;
+  } else {
+    const text = inter.text || 'Você chega aos portões. O guarda barra sua passagem.';
+    script = [{ type: 'narration', text: text }];
+  }
+
   const choices = options.map(function(o) {
     return {
       id: o.key,
@@ -474,9 +487,7 @@ function _sceneGate() {
       desc: 'Os portões de Valdória',
       portrait: ''
     },
-    script: [
-      { type: 'narration', text: text }
-    ],
+    script: script,
     choices: choices
   };
 }

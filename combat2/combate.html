@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-25T03:56:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-26T21:14:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -513,6 +513,26 @@ html.sim-combat-root #app {
    Acessibilidade aqui significa "combate É o foco do jogador, então DEVE ser
    visível". Decorative animations idle pulses podem ser reduzidas separadamente. */
 (function(){
+    /* Sessão #38 (2026-05-26) perf P0: spoof APENAS em tier 'full' (flagship).
+       Lite/medium respeitam prefers-reduced-motion honestamente — a11y + battery-saver
+       em Android low-end. Detection inline porque loading-guard.js carrega DEPOIS. */
+    var __spoofTier;
+    try {
+        var __pref = localStorage.getItem('valdoria_loading_lite');
+        if (__pref === '1') __spoofTier = 'lite';
+        else if (__pref === '0') __spoofTier = 'full';
+        else {
+            var __cores = navigator.hardwareConcurrency || 8;
+            var __mem = navigator.deviceMemory || 8;
+            if (__cores <= 2 || __mem <= 2 || (__cores <= 4 && __mem <= 4)) __spoofTier = 'lite';
+            else if (__cores <= 8 && __mem <= 8) __spoofTier = 'medium';
+            else __spoofTier = 'full';
+        }
+    } catch(_) { __spoofTier = 'full'; }
+    if (__spoofTier !== 'full') {
+        try { console.info('[SIM:FULL-MOTION] tier=' + __spoofTier + ' — respeitando prefers-reduced-motion (a11y)'); } catch(_){}
+        return;
+    }
     /* 1) Override matchMedia ANTES de qualquer outro script ler. Mantém comportamento
           original pra todas outras queries (color-scheme, hover, etc). */
     if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -569,6 +589,10 @@ window.SERVER_LOG_AREA = 'combate';
    Pattern canonical do cidade.html — necessário pra sync_combate passar
    no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
+/* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
+document.write('<script src="' + BASE + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/listener-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/scheduler.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;
@@ -16168,7 +16192,7 @@ function _skillIconHTML(sk) {
             if (loc.indexOf('file://') === 0) {
                 base = '../shared/img/combat/skills/';
             }
-            return '<img class="skill-ico-img" src="' + base + slug + '.png" ' +
+            return '<img class="skill-ico-img" src="' + base + slug + '.webp" ' +
                    'alt="" loading="lazy" ' +
                    "onerror=\"this.onerror=null;this.replaceWith(document.createTextNode('" + (sk.ico || '?').replace(/'/g, "\\'") + "'));\">";
         }
@@ -16201,7 +16225,7 @@ function _combatPortraitHTML(iconId, u, utype) {
                 if (loc.indexOf('file://') === 0) {
                     base = '../shared/img/combat/enemies/';
                 }
-                return '<img class="c-portrait-img" src="' + base + enemySlug + '.png" ' +
+                return '<img class="c-portrait-img" src="' + base + enemySlug + '.webp" ' +
                        'alt="" loading="lazy" ' +
                        'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>\'">';
             }

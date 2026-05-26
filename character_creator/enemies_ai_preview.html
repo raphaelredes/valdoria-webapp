@@ -263,7 +263,7 @@
     }
 
     function renderCard(e) {
-      var src = BASE + e.slug + '.png' + bust();
+      var src = BASE + e.slug + '.webp' + bust();
       var isBoss = e.tags.indexOf('boss') >= 0;
       var tagsHtml = e.tags.map(function (t) {
         return '<span class="tag ' + tagClass(t) + '">' + t + '</span>';

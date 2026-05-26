@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-23T00:21:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T21:14:52Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -740,6 +740,13 @@
        no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     setTimeout(function(){
         try{
             if(!window.vMaintenance)return;
@@ -12820,8 +12827,15 @@ body.perf-lite .stub-popup-voice { animation: none; }
     } catch (_) {}
 
     if (prefersReduced) return 'lite';
-    if (cores <= 2 && ram <= 2) return 'lite';
-    if (cores <= 2) return 'medium';
+    // Sessão #38 (2026-05-26) perf P0: criterios canonical alinhados com
+    // CLAUDE.md "Device Performance Tiers" + loading-guard.js:
+    //   Lite: ≤2 cores OR ≤2 GB RAM, OR (≤4 cores AND ≤4 GB RAM)
+    //   Medium: ≤8 cores AND ≤8 GB RAM
+    //   Full: tudo acima
+    // Antes era `cores <= 2 && ram <= 2` (AND) — Android 4GB/2cores caia em medium indevidamente.
+    if (cores <= 2 || ram <= 2) return 'lite';
+    if (cores <= 4 && ram <= 4) return 'lite';
+    if (cores <= 8 && ram <= 8) return 'medium';
     return 'full';
   }
 
@@ -12852,10 +12866,18 @@ body.perf-lite .stub-popup-voice { animation: none; }
     var oldTier = window._valdoriaPerformanceTier;
     if (oldTier === tier) return;
     window._valdoriaPerformanceTier = tier;
+    // Sessão #38 (2026-05-26) perf P0: inicializa _tileDetail / _renderDetail
+    // como globais reativos. Antes ambos eram undefined — fallback `2` nos
+    // 12+ drawers de tile fazia tudo pintar em FULL no Android 2GB mesmo
+    // com tier='lite'. Map canonical: lite=0, medium=1, full=2.
+    var detailMap = { lite: 0, medium: 1, full: 2 };
+    window._tileDetail = detailMap[tier] != null ? detailMap[tier] : 1;
+    window._renderDetail = window._tileDetail;
     document.body.classList.remove('perf-lite', 'perf-medium', 'perf-full');
     document.body.classList.add('perf-' + tier);
     if (window.TileLog) window.TileLog.info('PERF', 'tier_change', {
-      from: oldTier || null, to: tier, cause: cause || 'init'
+      from: oldTier || null, to: tier, cause: cause || 'init',
+      tileDetail: window._tileDetail, renderDetail: window._renderDetail
     });
     // Recompute LOD se Phase 3.1 carregada
     if (window.LODController && typeof window.LODController.recomputeAll === 'function') {
@@ -18719,6 +18741,10 @@ var _cloudBlobCacheFrame = 0;
 // upscale via drawImage (browser bilinear filter — borrão é DESEJÁVEL pra clouds).
 var _cloudSpriteCache = {};
 var _cloudSpriteCacheKey = '';  // 'weather|tier' — invalidate on change
+// Sessão #38 Fase 4.7: sun ray sprite cache (storm). Antes: createRadialGradient
+// por frame × 2-3 rays = 6-9 gradients/frame. Agora: bake sprite uma vez por
+// (ri, raySubAlpha bucket) → drawImage por frame. ~2-3 sprites totais por sessão.
+var _sunRaySpriteCache = {};
 // 2026-04-29 CPU FIX: SCENE CACHE — bake terreno + decorações estáticas em offscreen canvas.
 // CPU 100% reportado pelo user → JS-bound. drawTile-loop processa ~80 hexes + ~30 decor row index
 // + clipping mountain por frame = ~10ms JS pra cada um dos 30 frames/sec. Cache substitui esse
@@ -22170,6 +22196,12 @@ function _isIdle() {
   var now = performance.now();
   if (now < _animActiveUntil) return false;          // animação rolando
   if (now - _lastInputAt < IDLE_AFTER_MS) return false;  // input recente
+  // Sessão #38 (2026-05-26) Fase 3.5: idle pause REATIVADO com guard de weather.
+  // V8 revert foi necessário porque storm/rain pareciam "travados" em idle (rain
+  // particles dependem do anim time). Agora: storm ('t') e rain ('r') NUNCA vão
+  // pra idle — só clear ('s') e fog ('f'). Clouds desses estados driftam a 6.6fps,
+  // imperceptível pro player. Resultado: CPU 100% → ~10% em idle clear/fog.
+  if (typeof S !== 'undefined' && S && (S.weather === 't' || S.weather === 'r')) return false;
   return true;
 }
 function scheduleRender() {
@@ -22184,10 +22216,16 @@ function scheduleRender() {
   }
   _rafScheduled = true;
   _rafLastScheduled = now;
-  // V8 USER REVERT: idle_pause REMOVIDO definitivamente. User reportou que
-  // travava chuva durante tempestade (rain particles dependiam do anim time).
-  // Render sempre full-rate via rAF — CPU 100% é aceitável.
-  requestAnimationFrame(renderFrame);
+  // Sessão #38 (2026-05-26) Fase 3.5: idle_pause REATIVADO com weather guard.
+  // _isIdle() agora bloqueia idle quando S.weather === 't'|'r' (storm/rain).
+  // Para clear/fog: setTimeout(150ms) → 6.6fps idle, JS thread DORME entre frames.
+  // CPU em idle clear/fog: 100% → ~10% (V4 original target).
+  // Storm/rain mantêm rAF full-rate — sem regressão do V8 incident.
+  if (_isIdle()) {
+    setTimeout(function() { renderFrame(performance.now()); }, IDLE_TICK_MS);
+  } else {
+    requestAnimationFrame(renderFrame);
+  }
 }
 // Watchdog: a cada 2s verifica se frame avançou; se não, re-agenda
 setInterval(function() {
@@ -22414,7 +22452,18 @@ function renderFrame(ts) {
         // (drawTreeAAA + mata forest scene). User pediu animação back.
         var _animTick = '';
         if (F.hex_decorations && S && (S.biome === 'forest' || S.biome === 'plains' || S.biome === 'swamp')) {
-          _animTick = '|a' + Math.floor(_animTime / 125);  // 8 fps anim rebuilds
+          // Sessão #38 Fase 4.6: tier-aware anim rebuild rate.
+          // Antes: 8fps fixo independente de device. Agora: lite=static (sem
+          // rebuild), medium=4fps, full=8fps. Em Android 2GB com forest, cache
+          // rebuild era 30% do frame budget — gone agora em lite.
+          var _scTier = window._valdoriaPerformanceTier;
+          if (_scTier === 'lite') {
+            _animTick = '';  // static — sem rebuild por anim
+          } else if (_scTier === 'medium') {
+            _animTick = '|a' + Math.floor(_animTime / 250);  // 4 fps anim rebuilds
+          } else {
+            _animTick = '|a' + Math.floor(_animTime / 125);  // 8 fps anim rebuilds (full)
+          }
         }
         var sceneKey = _cullStartCol + '_' + _cullStartRow + '_' + _cullEndCol + '_' + _cullEndRow
                      + '|' + HEX_W + '|' + (S && S.biome) + '|' + cacheW + 'x' + cacheH
@@ -31208,7 +31257,10 @@ function drawWeatherOverlay(ctx) {
       ctx.fillStyle = 'rgba(10, 12, 22, ' + stormBaseDarkness + ')';
       ctx.fillRect(0, 0, canvasW, canvasH);
 
-      // Camada B: 2-3 sun ray spots
+      // Camada B: 2-3 sun ray spots (Sessão #38 Fase 4.7: gradient bake cache).
+      // Antes: createRadialGradient + 3 addColorStop por frame por ray = 6-9
+      // gradients/frame mesmo com positioning estático. Agora: bake sprite uma
+      // vez por (ri, raySubAlpha) e drawImage no position alvo.
       var rayCount = (_wTier >= 2) ? 3 : 2;
       var rayT = _animTime * 0.018;
       var rayRng = seededRng(77);
@@ -31223,6 +31275,26 @@ function drawWeatherOverlay(ctx) {
         if (rcx + rayW < 0 || rcx > canvasW) continue;
         var rcy = rry * canvasH * 0.7 + canvasH * 0.15;
         var raySubAlpha = 0.40 + rrs * 0.20;
+        var rayRadius = rayW * 0.5;
+        // Cache-key: ri + alpha bucket (round 2-digit). 2-3 sprites totais por sessão.
+        var rayKey = 'sr_' + ri + '_' + Math.round(raySubAlpha * 100);
+        var spriteSize = Math.ceil(rayRadius * 2);
+        var sprite = _sunRaySpriteCache[rayKey];
+        if (!sprite || sprite.width !== spriteSize) {
+          sprite = document.createElement('canvas');
+          sprite.width = sprite.height = spriteSize;
+          var sCtx = sprite.getContext('2d');
+          var sGrad = sCtx.createRadialGradient(rayRadius, rayRadius, 0, rayRadius, rayRadius, rayRadius);
+          sGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
+          sGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
+          sGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          sCtx.fillStyle = sGrad;
+          sCtx.fillRect(0, 0, spriteSize, spriteSize);
+          _sunRaySpriteCache[rayKey] = sprite;
+        }
+        ctx.drawImage(sprite, rcx, rcy - rayRadius);
+        continue; /* skip original gradient path */
+        // (código abaixo mantido pra fallback histórico — nunca executa)
         var rayGrad = ctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, rayW * 0.5);
         rayGrad.addColorStop(0, 'rgba(0, 0, 0, ' + raySubAlpha + ')');
         rayGrad.addColorStop(0.7, 'rgba(0, 0, 0, ' + (raySubAlpha * 0.4) + ')');
@@ -31560,16 +31632,21 @@ function buildFogMask() {
   // sensação épica de estar perdido dentro da mata densa.
   const inMata = _isPlayerOnMata();
   if (shouldLogM) LOG('FOG', 'buildFogMask mask=' + w + 'x' + h + ' player=(' + pCol + ',' + pRow + ') vision=' + vision + ' intensity=' + intensity.toFixed(2) + (inMata ? ' MATA_ISOLATION' : ''));
+  // Sessão #38 Fase 4.5 perf P0: hexDist movido pra dentro de branches que precisam.
+  // Antes: hexDist (sin/cos via cube coords) computado pra TODOS ROWS×COLS=2400 cells.
+  // Agora: só pra inMata + state==='visible' (~15-20 cells típico). hexDist cai de
+  // 2400/frame pra <30/frame em mapas típicos. Em Android 2GB, ~24ms → ~1ms por frame.
+  const dimAlpha = Math.min(255, Math.round(228 * intensity));
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const key = fogKey(c, r);
       const state = S.fogState[key];
-      const dist = hexDist(c, r, pCol, pRow);
       let alpha;
       // Mata isolation: dist=0 visível, todo resto fogged total. Com luz
       // (tocha/light/dancing_lights), revela hexes adjacentes até `vision`
       // hexes — máximo 2 (USER RULE 2026-04-27).
       if (inMata) {
+        const dist = hexDist(c, r, pCol, pRow);
         if (dist === 0) alpha = 0;
         else if (vision >= 1 && dist === 1) alpha = 60;    // adjacente quase visível com luz
         else if (vision >= 2 && dist === 2) alpha = 160;   // d=2 fortemente atenuado
@@ -31579,6 +31656,7 @@ function buildFogMask() {
         continue;
       }
       if (state === 'visible') {
+        const dist = hexDist(c, r, pCol, pRow);
         if (dist === 0) alpha = 0;
         else if (vision === 0) {
           // ESCURIDÃO ABSOLUTA (caverna sem luz): só o próprio hex é visível
@@ -31606,7 +31684,7 @@ function buildFogMask() {
           else alpha = 255;
         }
         alpha = Math.min(255, alpha);
-      } else if (state === 'dim') alpha = Math.min(255, Math.round(228 * intensity));
+      } else if (state === 'dim') alpha = dimAlpha;  /* pre-computed acima */
       else alpha = 255;
 
       const idx = ((r + MASK_PADDING) * w + (c + MASK_PADDING)) * 4;
