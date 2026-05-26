@@ -677,8 +677,18 @@
             tg.ready(); tg.expand(); tg.setHeaderColor(_vBg); tg.setBackgroundColor(_vBg);
             if (tg.BackButton) {
                 tg.BackButton.show();
+                // Sessao #38: Telegram BackButton = fechar com confirmacao.
                 tg.BackButton.onClick(() => {
-                    try { tg.close(); } catch (e) { console.warn('[DICE] tg.close:', e); }
+                    const msg = 'Deseja fechar o rolador de dados?';
+                    if (typeof tg.showConfirm === 'function') {
+                        tg.showConfirm(msg, function (confirmed) {
+                            if (confirmed) {
+                                try { tg.close(); } catch (e) { console.warn('[DICE] tg.close:', e); }
+                            }
+                        });
+                    } else {
+                        try { if (window.confirm(msg)) tg.close(); } catch (e) { console.warn('[DICE] confirm:', e); }
+                    }
                 });
             }
         }

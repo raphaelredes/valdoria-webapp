@@ -178,9 +178,16 @@ document.getElementById('luFooter').style.display = '';
 }
 if (tg && tg.BackButton) {
 tg.BackButton.onClick(function() {
+// Sessao #38: Telegram BackButton = fechar com confirmacao.
+// Sub-screen interna: fecha so o overlay sem confirmar.
 var sub = document.getElementById('luSub');
-if (sub.classList.contains('active')) { closeSubScreen(); return; }
-goBack();
+if (sub && sub.classList.contains('active')) { closeSubScreen(); return; }
+var _msg = 'Deseja fechar a tela de evolução?';
+if (typeof tg.showConfirm === 'function') {
+tg.showConfirm(_msg, function (c) { if (c) { try { goBack(); } catch (e) { try { tg.close(); } catch (_) {} } } });
+} else {
+try { if (window.confirm(_msg)) goBack(); } catch (e) {}
+}
 });
 }
 if(typeof vEscapeKey!=='undefined'){vEscapeKey.register(function(){var sub=document.getElementById('luSub');return sub&&sub.classList.contains('active');},function(){closeSubScreen();});}

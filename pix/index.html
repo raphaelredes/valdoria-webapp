@@ -269,7 +269,15 @@
                 tg.setBackgroundColor(_vBg);
                 if (tg.BackButton) {
                     tg.BackButton.show();
-                    tg.BackButton.onClick(() => { closePage(); });
+                    // Sessao #38: Telegram BackButton = fechar com confirmacao.
+                    tg.BackButton.onClick(() => {
+                        var _msg = 'Deseja fechar a tela de apoio?';
+                        if (typeof tg.showConfirm === 'function') {
+                            tg.showConfirm(_msg, function (c) { if (c) closePage(); });
+                        } else {
+                            try { if (window.confirm(_msg)) closePage(); } catch (e) {}
+                        }
+                    });
                 }
             }
 

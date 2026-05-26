@@ -2049,10 +2049,17 @@
         // TELEGRAM BACK BUTTON
         // ═══════════════════════════════════════════════
         if (tg && tg.BackButton) {
+            // Sessao #38: Telegram BackButton = fechar com confirmacao.
+            // Sub-screen interna: fecha so o overlay sem confirmar.
             tg.BackButton.onClick(function() {
                 var sub = document.getElementById('luSub');
-                if (sub.classList.contains('active')) { closeSubScreen(); return; }
-                goBack();
+                if (sub && sub.classList.contains('active')) { closeSubScreen(); return; }
+                var _msg = 'Deseja fechar a tela de evolução?';
+                if (typeof tg.showConfirm === 'function') {
+                    tg.showConfirm(_msg, function (c) { if (c) { try { goBack(); } catch (e) { try { tg.close(); } catch (_) {} } } });
+                } else {
+                    try { if (window.confirm(_msg)) goBack(); } catch (e) {}
+                }
             });
         }
 
