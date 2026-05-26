@@ -32,6 +32,29 @@
     if (window.__SIM_FULL_MOTION_INSTALLED) return;
     window.__SIM_FULL_MOTION_INSTALLED = true;
 
+    /* Sessão #38 (2026-05-26) perf P0: spoof APENAS em tier 'full' (flagship).
+       Lite/medium respeitam prefers-reduced-motion honestamente — a11y (usuários
+       com vestibular issues, fotossensibilidade) + battery-saver-mode em Android
+       low-end (que automaticamente ativa reduce-motion). Detection inline
+       porque este script carrega ANTES de loading-guard.js no <head>. */
+    var __spoofTier;
+    try {
+        var __pref = localStorage.getItem('valdoria_loading_lite');
+        if (__pref === '1') __spoofTier = 'lite';
+        else if (__pref === '0') __spoofTier = 'full';
+        else {
+            var __cores = navigator.hardwareConcurrency || 8;
+            var __mem = navigator.deviceMemory || 8;
+            if (__cores <= 2 || __mem <= 2 || (__cores <= 4 && __mem <= 4)) __spoofTier = 'lite';
+            else if (__cores <= 8 && __mem <= 8) __spoofTier = 'medium';
+            else __spoofTier = 'full';
+        }
+    } catch (_) { __spoofTier = 'full'; }
+    if (__spoofTier !== 'full') {
+        try { console.info('[SIM:FULL-MOTION] tier=' + __spoofTier + ' — respeitando prefers-reduced-motion (a11y)'); } catch (_) {}
+        return;
+    }
+
     /* === 1) matchMedia spoof ============================================ */
     if (typeof window.matchMedia === 'function') {
         try {

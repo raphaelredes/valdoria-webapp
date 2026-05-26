@@ -1712,6 +1712,19 @@ body.perf-lite .arena-challenger-card::before {
     display: none;
 }
 
+/* Sessão #38 perf P0: medium-tier guards — reduz box-shadow stacks e animation duration.
+   Antes não havia cobertura medium; só lite (animations: none) ou full (animations full).
+   Devices intermediários (4-8 cores, 4-8 GB RAM) agora têm meio-termo. */
+body.perf-medium .arena-challenger-card,
+body.perf-medium .arena-record-tablet,
+body.perf-medium .arena-reward-scroll {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.perf-medium .arena-challenger-card {
+    animation-duration: 0.25s;
+}
+
 body.perf-lite .arena-tier-medallion {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }

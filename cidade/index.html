@@ -555,12 +555,8 @@ LOG SINK (Fase 7):
 -->
 <html lang="pt-BR">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<!-- Sessão #38 (2026-05-26) perf P0: removidas 6 meta http-equiv Cache-Control/Pragma/Expires duplicadas.
+     Anulavam ETag/304 do _headers Tier C, forçando 3MB redownload por revisita. HTTP headers controlam cache. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#2a2420">
@@ -5507,7 +5503,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   <!-- 2026-05-13 BUGBOT FIX (PR #90 LOW): extraido pra
        valdoria-webapp/shared/transition-loader.js — eliminou ~60 linhas
        duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
-  <script>document.write('<script src="/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+  <script>document.write('<script src="/shared/transition-loader.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');</script>
   <script>
   /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
@@ -7920,16 +7916,16 @@ body.perf-lite .vc-action-btn { transition: none; }
     // === Canonical loading/title libs (USER REQUEST 2026-05-04) ===
     // ValdoriaTitleScreen (esfera bonita AAA com nebula + raios) +
     // ValdoriaLoadingController (carregamento AAA com particulas/runas/anel ardente)
-    document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + Date.now() + '">');
-    document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + Date.now() + '">');
-    document.write('<link rel="stylesheet" href="/shared/loading-reactive.css?v=' + Date.now() + '">');
-    document.write('<script src="/shared/loading-title.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/loading-template.js?v=' + Date.now() + '"><\/script>');
+    document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<link rel="stylesheet" href="/shared/loading-reactive.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<script src="/shared/loading-title.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/loading-template.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* 2026-05-18 preflight fix (check_loading_animation_speed): cidade tem
        magic-circle (loading-template + loading-title) MAS faltava o guard.
        loading-guard.js valida + corrige velocidades de animacao dos aneis
        (.mc-outer >=25s, .mc-mid >=15s, .mc-inner >=20s) em runtime. */
-    document.write('<script src="/shared/loading-guard.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/loading-guard.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* task #86 (2026-05-20) — CRITICAL fix: DISABLE FOUC safety da loading-guard.js
        PRA CIDADE. User reportou tela escura após F5 reload na cidade.
        ROOT CAUSE: loading-guard.js linha 35 tem setTimeout 10s que FORCE
@@ -7966,23 +7962,23 @@ body.perf-lite .vc-action-btn { transition: none; }
             '});' +
         '}' +
     '<\/script>');
-    document.write('<script src="/shared/loading-controller.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/loading-reactive.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/loading-controller.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/loading-reactive.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* Clock skew guard — detecta relógio errado no device (causa NET::ERR_CERT_DATE_INVALID).
        Mostra overlay medieval com instruções de correção. (USER REQUEST 2026-05-04) */
-    document.write('<script src="/shared/clock-skew-guard.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/clock-skew-guard.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* 2026-05-18 preflight fix (check_webapp_error_reporter_import + console_collector_loaded):
        console-collector.js DEVE carregar ANTES de error-reporter.js (collector captura
        console.* pra incluir em debug overlay). error-reporter.js captura JS errors +
        unhandled rejections + envia via beacon pra debug remoto. Padrao canonical do
        CLAUDE.md "WebApp Error Logging — MANDATORY". */
-    document.write('<script src="/shared/console-collector.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/error-reporter.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/console-collector.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/error-reporter.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
-    document.write('<script src="/explore/explore-travel.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/explore/explore-travel.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.
     // NUNCA recriar/duplicar — sempre usar este. Suporta tier poor/modest/wealthy.
-    document.write('<script src="/game/inn-animation.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/game/inn-animation.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // ValdoriaAudio canonical — gerencia todos os sons do projeto (TRACKS dict).
     // Dice3D._playRollSfx() usa ValdoriaAudio.playSFX('sfx_dice_roll') automaticamente
     // quando carregado (escolhe entre sfx_dice_roll.mp3 e sfx_dice_roll_2.mp3 random).
@@ -7993,11 +7989,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     // não embedded no footer-quick (Mochila/Ficha/Grupo). audio-manager.js checa
     // window.__audioForceFloat antes de tentar embed.
     window.__audioForceFloat = true;
-    document.write('<script src="/shared/audio-manager.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/audio-manager.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* X-6.5.51AW (2026-05-08): heraldic items sprite (519 ícones) + name->icon
        2026-05-19: sprite REMOVIDO. heraldic-items.js v2 retorna <img> PNG
        direto, sem precisar do sprite SVG. items-resolver.js já carregado. */
-    document.write('<script src="/shared/heraldic-items.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/heraldic-items.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     /* X-6.5.51AR (2026-05-08): SOLUÇÃO DEFINITIVA — re-parenta .va-float +
        .va-popup + .va-backdrop pra dentro de #app (que tem position:relative
        + overflow:hidden + dims 384x694). audio-manager.js cria os 3 elementos
@@ -8017,64 +8013,64 @@ body.perf-lite .vc-action-btn { transition: none; }
     '})();<\/script>');
     // THREE.js + dice-3d.js — dados 3D canonical (replica combate.html).
     // Usado em _showServiceResultPopup pra rolar dado quando service tem dice.
-    document.write('<script src="/shared/three.min.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/dice-3d.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/three.min.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/dice-3d.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === NPC Living System libraries (sessão #13, Task #19, 2026-05-19) ============
     //  - npc-relations-data.js: NPC_IDS (18 slugs) + NPC_RELATIONS matrix + NPC_EVENTS_TIMELINE
     //  - npc-living-system.js: memory + cascade + mood + dispatcher (window._npcMarkVisit/etc.)
     //  - svc-interactions.js: _diceCheckSvc + _showOpinionReaction + _showPurchaseConfirm +
     //                          _dispatchSvcChoice (reconhece cb cascade:/memory:/visit:)
     // Doc canonical: memory/reference_npc_living_system.md
-    document.write('<script src="/shared/npc-relations-data.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/npc-living-system.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/svc-interactions.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/npc-relations-data.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/npc-living-system.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/svc-interactions.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === PADRAO_ALDRIC dialogue engine (Task #23 centralização, 2026-05-19) ====
     // Extraído de simuladores/banco-cofre-final.html — agora reusável por TODOS
     // os renderers de estabelecimento (cada um carrega seu SERVICE_DIALOGUES e
     // chama vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_X }).
     // Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
-    document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + Date.now() + '">');
-    document.write('<script src="/shared/encounter-popup.js?v=' + Date.now() + '"><\/script>');
+    document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<script src="/shared/encounter-popup.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // 2026-05-22: NPC dialogue engine foundation (skeleton — wiring NPC-a-NPC pendente).
     // npc-affinity: store centralizado em player.metadata.npc_affinity + reputation + memory.
     // dialogue-engine: loader JSON + evalConditions + skill check + impact apply.
     // Doc canonical: docs/sistemas/npc-dialogue-engine.md
-    document.write('<script src="/shared/npc-affinity.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/shared/dialogue-engine.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/npc-affinity.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/dialogue-engine.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === PADRAO_LIGHTBOX (task #55, 2026-05-20) — clicar nas imagens de NPCs
     // pra ver maior. Engine carrega aqui pra estar disponivel pro encounter-popup
     // (PADRAO_ALDRIC, ja wireada) E delegation global pra .npc-portrait
     // (PADRAO_TAVERNA NPC cards). Doc: shared/lightbox.js MAPA_IA.
-    document.write('<script src="/shared/lightbox.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="/shared/lightbox.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === PADRAO_TAVERNA canonical CSS (Task #23 final, 2026-05-19) =============
     // User mandato: "todas as telas da cidade DEVEM ficar no PADRAO_TAVERNA".
     // Classes canonical: .cenario, .row-npc, .rep-bar, .services, .svc, etc.
     // Doc: memory/feedback_centralize_in_canonical_webapps.md
-    document.write('<link rel="stylesheet" href="/shared/padrao-taverna.css?v=' + Date.now() + '">');
+    document.write('<link rel="stylesheet" href="/shared/padrao-taverna.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
     // === City Areas JS canonical (renderers reusados do bot DEV) ===
     // Cada renderer expõe window.render<Area>Hub(container, data). Mock builders
     // em cidade.html geram a estrutura `data` igual à do serializer.py do backend.
-    document.write('<script src="/game/game-temple.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-bank.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-square.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-tavern.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-inn.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-market-hub.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-guild.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-workshop.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-rune-scribe.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-festival.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-arena.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-gates.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-codex.js?v=' + Date.now() + '"><\/script>');
-    document.write('<script src="/game/game-achievements.js?v=' + Date.now() + '"><\/script>');
-    document.write('<link rel="stylesheet" href="/game/game-achievements.css?v=' + Date.now() + '">');
-    document.write('<script src="/game/game-league.js?v=' + Date.now() + '"><\/script>');
-    document.write('<link rel="stylesheet" href="/game/game-league.css?v=' + Date.now() + '">');
+    document.write('<script src="/game/game-temple.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-bank.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-square.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-tavern.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-inn.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-market-hub.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-guild.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-workshop.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-rune-scribe.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-festival.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-arena.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-gates.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-codex.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-achievements.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<link rel="stylesheet" href="/game/game-achievements.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<script src="/game/game-league.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<link rel="stylesheet" href="/game/game-league.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
     // cartografia-shared.js (Fase 7.3 — 2026-04-30): SINGLE SOURCE pra
     // funções de drawing + data. Mesmo código carregado por exploracao.html
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
-    document.write('<script src="./cartografia-shared.js?v=' + Date.now() + '"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
   </script>
   <script>
   /* Bridge: aliases pra usar CartShared no namespace local da cidade.
@@ -10426,7 +10422,7 @@ function renderFooter(){
     +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.png" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
     + '</button>'
     + '<button class="fb-btn" data-action="status">'
-    +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.png" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
     + '</button>'
     + '<button class="fb-btn" data-action="characters">'
     +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.png" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
@@ -14026,11 +14022,11 @@ function _showAchievementDetailPopup(chainId, p){
 // canonical: bestiary stats — kills por tipo de inimigo
 // Sessão #23 (2026-05-22): PNGs canonical do combat (preferidos), SVG icon como fallback
 var KILLS_BY_TYPE = [
-  { type: 'Lobo Cinzento',  icon: 'ic-lobo',      png: '/shared/img/combat/enemies/lobo.png',           kills: 8, cr: '1/4' },
-  { type: 'Goblin',          icon: 'ic-goblin',    png: '/shared/img/combat/enemies/goblin.png',         kills: 6, cr: '1/4' },
-  { type: 'Esqueleto',       icon: 'ic-esqueleto', png: '/shared/img/combat/enemies/esqueleto.png',      kills: 4, cr: '1/4' },
-  { type: 'Aranha Gigante',  icon: 'ic-aranha',    png: '/shared/img/combat/enemies/aranha-gigante.png', kills: 3, cr: '1' },
-  { type: 'Orc Guerreiro',   icon: 'ic-orc',       png: '/shared/img/combat/enemies/orc-guerreiro.png',  kills: 2, cr: '1' }
+  { type: 'Lobo Cinzento',  icon: 'ic-lobo',      png: '/shared/img/combat/enemies/lobo.webp',           kills: 8, cr: '1/4' },
+  { type: 'Goblin',          icon: 'ic-goblin',    png: '/shared/img/combat/enemies/goblin.webp',         kills: 6, cr: '1/4' },
+  { type: 'Esqueleto',       icon: 'ic-esqueleto', png: '/shared/img/combat/enemies/esqueleto.webp',      kills: 4, cr: '1/4' },
+  { type: 'Aranha Gigante',  icon: 'ic-aranha',    png: '/shared/img/combat/enemies/aranha-gigante.webp', kills: 3, cr: '1' },
+  { type: 'Orc Guerreiro',   icon: 'ic-orc',       png: '/shared/img/combat/enemies/orc-guerreiro.webp',  kills: 2, cr: '1' }
 ];
 
 function _showKillsPopup(p){

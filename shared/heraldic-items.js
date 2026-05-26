@@ -2,7 +2,7 @@
  * HeraldicItems - API helper que retorna <img> PNG ao inves de SVG sprite.
  *
  * 2026-05-19: REWRITE. Antes carregava heraldic-items-sprite.js (1.4MB) e
- * retornava `<svg><use href="#ic-it-X">`. Agora retorna `<img src=".../X.png">`
+ * retornava `<svg><use href="#ic-it-X">`. Agora retorna `<img src=".../X.webp">` (Sessão #38)
  * direto, usando items-resolver.js (vItems) pra checar disponibilidade.
  *
  * USAGE:
@@ -13,8 +13,8 @@
  *   }
  *
  * Mapeamento name -> slug PNG:
- *   _slug("Adaga")        -> "adaga"            -> /shared/img/items/adaga.png
- *   _slug("Pocao de Cura") -> "pocao-de-cura"    -> /shared/img/items/pocao-de-cura.png
+ *   _slug("Adaga")        -> "adaga"            -> /shared/img/items/adaga.webp
+ *   _slug("Pocao de Cura") -> "pocao-de-cura"    -> /shared/img/items/pocao-de-cura.webp
  *
  * Se vItems nao estiver carregado, retorna "" (caller faz fallback emoji).
  */
@@ -90,7 +90,7 @@
                 window.vItems._state.loaded && !window.vItems.has(slug)) {
                 return "";
             }
-            return '<img src="' + ITEMS_PATH + slug + '.png" ' +
+            return '<img src="' + ITEMS_PATH + slug + '.webp" ' +
                 'style="width:' + sz + ';height:' + sz +
                 ';display:inline-block;vertical-align:middle;object-fit:contain" ' +
                 'onerror="this.style.display=\'none\'" loading="lazy">';

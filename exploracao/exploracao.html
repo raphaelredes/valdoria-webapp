@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-23T00:21:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T19:35:40Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -12820,8 +12820,15 @@ body.perf-lite .stub-popup-voice { animation: none; }
     } catch (_) {}
 
     if (prefersReduced) return 'lite';
-    if (cores <= 2 && ram <= 2) return 'lite';
-    if (cores <= 2) return 'medium';
+    // Sessão #38 (2026-05-26) perf P0: criterios canonical alinhados com
+    // CLAUDE.md "Device Performance Tiers" + loading-guard.js:
+    //   Lite: ≤2 cores OR ≤2 GB RAM, OR (≤4 cores AND ≤4 GB RAM)
+    //   Medium: ≤8 cores AND ≤8 GB RAM
+    //   Full: tudo acima
+    // Antes era `cores <= 2 && ram <= 2` (AND) — Android 4GB/2cores caia em medium indevidamente.
+    if (cores <= 2 || ram <= 2) return 'lite';
+    if (cores <= 4 && ram <= 4) return 'lite';
+    if (cores <= 8 && ram <= 8) return 'medium';
     return 'full';
   }
 
@@ -12852,10 +12859,18 @@ body.perf-lite .stub-popup-voice { animation: none; }
     var oldTier = window._valdoriaPerformanceTier;
     if (oldTier === tier) return;
     window._valdoriaPerformanceTier = tier;
+    // Sessão #38 (2026-05-26) perf P0: inicializa _tileDetail / _renderDetail
+    // como globais reativos. Antes ambos eram undefined — fallback `2` nos
+    // 12+ drawers de tile fazia tudo pintar em FULL no Android 2GB mesmo
+    // com tier='lite'. Map canonical: lite=0, medium=1, full=2.
+    var detailMap = { lite: 0, medium: 1, full: 2 };
+    window._tileDetail = detailMap[tier] != null ? detailMap[tier] : 1;
+    window._renderDetail = window._tileDetail;
     document.body.classList.remove('perf-lite', 'perf-medium', 'perf-full');
     document.body.classList.add('perf-' + tier);
     if (window.TileLog) window.TileLog.info('PERF', 'tier_change', {
-      from: oldTier || null, to: tier, cause: cause || 'init'
+      from: oldTier || null, to: tier, cause: cause || 'init',
+      tileDetail: window._tileDetail, renderDetail: window._renderDetail
     });
     // Recompute LOD se Phase 3.1 carregada
     if (window.LODController && typeof window.LODController.recomputeAll === 'function') {

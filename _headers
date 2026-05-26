@@ -108,16 +108,20 @@
 
 # AI-generated item PNGs (Tier C — ETag-revalidated, allows regen).
 # Sessão #28 (2026-05-24): CF Pages override bare `no-cache` em static
-# assets (PNGs/JS) com max-age=14400 default. Usar `no-cache, no-store,
-# must-revalidate` força a diretiva passar intacta. Verificado via curl.
+# assets com max-age=14400 default. Usar `no-cache, must-revalidate`
+# (sem `no-store`) força a diretiva passar mas permite ETag/304 — 99%
+# economia em revisita (304 ~200B vs full body) preservando workflow
+# de regen (mudança de content hash invalida cache).
+# Sessão #38 (2026-05-26): removido `no-store` (audit perf P0). Era
+# o ofensor #1 de bytes em revisita do inventário (660MB redownload).
 /shared/img/items/*
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
 
 # City location PNGs (Tier C — ETag-revalidated, allows regen).
-# Mesmo motivo do items/*: diretiva combinada pra CF Pages preservar.
+# Mesmo padrão do items/* (Sessão #38): ETag/304 permite revisita barata.
 /shared/img/city/*
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
 
 # Manifest of generated items — MUST always be fresh (updates as batch runs).

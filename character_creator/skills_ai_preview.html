@@ -246,7 +246,7 @@
     function bust() { return '?v=' + Date.now(); }
 
     function renderCard(s) {
-      var src = BASE + s.slug + '.png' + bust();
+      var src = BASE + s.slug + '.webp' + bust();
       var meta = (s.kind || '?') + (s.dmg ? ' · ' + s.dmg : '');
       var classes = s.classes.join(', ');
       return '<div class="skill-card kind-' + (s.kind || 'unknown') +

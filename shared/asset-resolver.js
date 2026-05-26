@@ -268,7 +268,7 @@
         // Skills: SKILL_PNGS uses raw slug (no prefix difference)
         var skillSlug = rest.replace(/_/g, '-');
         if (SKILL_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/combat/skills/' + skillSlug + '.png';
+            return _basePath() + 'shared/img/combat/skills/' + skillSlug + '.webp';
         }
         // City: CITY_LOC_PNGS uses callback name (matches slug).
         // Sessão #28 (2026-05-24): ?v=<bundle-hash> cache bust — ver _cbSuffix.
@@ -293,13 +293,13 @@
         if (!enemyName) return null;
         var slug = _slugify(enemyName);
         if (!ENEMY_PNGS[slug]) return null;
-        return _basePath() + 'shared/img/combat/enemies/' + slug + '.png';
+        return _basePath() + 'shared/img/combat/enemies/' + slug + '.webp';
     }
     function skillIconUrl(skillName) {
         if (!skillName) return null;
         var slug = _slugify(skillName);
         if (!SKILL_PNGS[slug]) return null;
-        return _basePath() + 'shared/img/combat/skills/' + slug + '.png';
+        return _basePath() + 'shared/img/combat/skills/' + slug + '.webp';
     }
     function cityIconUrl(cb) {
         if (!cb || !CITY_LOC_PNGS[cb]) return null;
