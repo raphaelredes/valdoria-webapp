@@ -1460,6 +1460,17 @@ var Dice3D = (function () {
         this._dieMesh = null;
         this._fusionMesh = null;
         try {
+            // Sessão #38 (2026-05-26) Fase 3.1: WEBGL_lose_context.loseContext()
+            // ANTES de renderer.dispose() pra forçar GC do WebGL context.
+            // Chrome cap = 16 contexts; sem loseContext, contextos vazavam após
+            // ~12 rolagens (combate intenso) → canvas em branco silencioso.
+            if (this._renderer && this._renderer.getContext) {
+                var gl = this._renderer.getContext();
+                if (gl) {
+                    var ext = gl.getExtension('WEBGL_lose_context');
+                    if (ext && ext.loseContext) ext.loseContext();
+                }
+            }
             this._renderer.dispose();
         } catch (_rd) { /* ignore */ }
         if (this._renderer && this._renderer.domElement && this._renderer.domElement.parentNode) {

@@ -8003,6 +8003,12 @@ body.perf-lite .vc-action-btn { transition: none; }
        CLAUDE.md "WebApp Error Logging — MANDATORY". */
     document.write('<script src="/shared/console-collector.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/error-reporter.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    /* Sessão #38 (2026-05-26): vOverlay + vListen + vScheduler canonical
+       (CLAUDE.md "SPA Cleanup via vOverlay" + auditoria perf Fase 3.3/3.4).
+       Disponibilizam window.{vOverlay,vListen,vScheduler} globalmente. */
+    document.write('<script src="/shared/overlay-registry.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/listener-registry.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/scheduler.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.

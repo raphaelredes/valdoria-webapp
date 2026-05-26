@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-26T19:35:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-26T21:14:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -589,6 +589,10 @@ window.SERVER_LOG_AREA = 'combate';
    Pattern canonical do cidade.html — necessário pra sync_combate passar
    no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
+/* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
+document.write('<script src="' + BASE + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/listener-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/scheduler.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;

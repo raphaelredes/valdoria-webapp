@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T20:48:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T21:14:52Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -740,6 +740,13 @@
        no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     setTimeout(function(){
         try{
             if(!window.vMaintenance)return;
@@ -22445,7 +22452,18 @@ function renderFrame(ts) {
         // (drawTreeAAA + mata forest scene). User pediu animação back.
         var _animTick = '';
         if (F.hex_decorations && S && (S.biome === 'forest' || S.biome === 'plains' || S.biome === 'swamp')) {
-          _animTick = '|a' + Math.floor(_animTime / 125);  // 8 fps anim rebuilds
+          // Sessão #38 Fase 4.6: tier-aware anim rebuild rate.
+          // Antes: 8fps fixo independente de device. Agora: lite=static (sem
+          // rebuild), medium=4fps, full=8fps. Em Android 2GB com forest, cache
+          // rebuild era 30% do frame budget — gone agora em lite.
+          var _scTier = window._valdoriaPerformanceTier;
+          if (_scTier === 'lite') {
+            _animTick = '';  // static — sem rebuild por anim
+          } else if (_scTier === 'medium') {
+            _animTick = '|a' + Math.floor(_animTime / 250);  // 4 fps anim rebuilds
+          } else {
+            _animTick = '|a' + Math.floor(_animTime / 125);  // 8 fps anim rebuilds (full)
+          }
         }
         var sceneKey = _cullStartCol + '_' + _cullStartRow + '_' + _cullEndCol + '_' + _cullEndRow
                      + '|' + HEX_W + '|' + (S && S.biome) + '|' + cacheW + 'x' + cacheH

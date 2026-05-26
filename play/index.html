@@ -45,6 +45,10 @@ document.write('<script src="/shared/audio-manager.js?v=' + v + '"><\/script>');
    pra incluir em debug overlay). Padrao canonical do CLAUDE.md "WebApp Error Logging". */
 document.write('<script src="/shared/console-collector.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/error-reporter.js?v=' + v + '"><\/script>');
+/* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
+document.write('<script src="/shared/overlay-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="/shared/listener-registry.js?v=' + v + '"><\/script>');
+document.write('<script src="/shared/scheduler.js?v=' + v + '"><\/script>');
 /* Sessao #29 v5 (2026-05-24): maintenance overlay carregado pra que
    runAuthAndRedirect possa chamar window.vMaintenance.show() antes do
    loading magic circle aparecer. User reportou: PROD em manutencao mas
