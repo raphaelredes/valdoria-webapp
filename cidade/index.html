@@ -10827,6 +10827,31 @@ function _showCharactersPopup(){
   });
   var createBtn = bodyEl.querySelector('.hall-btn-create');
   if (createBtn) createBtn.addEventListener('click', async function(){
+    /* Sessao #38 (2026-05-25): user reportou "quando clico em Criar Novo
+       Personagem está demorando um pouco para carregar". Otimizacao:
+         1. Mostra transition loader IMEDIATAMENTE (full-screen, persistente)
+            em vez de toast efemero que desaparece em 2s deixando um gap visual.
+         2. Pre-carrega character_creator/index.html em background (link prefetch)
+            paralelo ao handshake — reduz tempo de navegacao quando o redirect dispara.
+         3. Disable do botao pra evitar double-click. */
+    if (createBtn._creating) return;
+    createBtn._creating = true;
+    createBtn.style.opacity = '0.5';
+    createBtn.style.pointerEvents = 'none';
+    /* Loading screen persistente — fica visivel ate character_creator
+       assumir com seu proprio loading. Evita gap entre cidade e creator. */
+    if (window._vTransitionLoader && typeof window._vTransitionLoader.show === 'function') {
+      try { window._vTransitionLoader.show('Forjando novo personagem…'); } catch (e) {}
+    }
+    /* Prefetch hint pro browser comecar a baixar o creator em paralelo */
+    try {
+      var pre = document.createElement('link');
+      pre.rel = 'prefetch';
+      pre.href = '/character_creator/index.html';
+      pre.as = 'document';
+      document.head.appendChild(pre);
+    } catch (_e){}
+
     var params = new URLSearchParams(window.location.search);
     var token = params.get('token');
     var api = params.get('api');
@@ -10838,7 +10863,11 @@ function _showCharactersPopup(){
       return;
     }
     if (!token || !api){
-      vToast('Sessão não encontrada. Faça login novamente.');
+      if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
+      vToast('Sessão não encontrada. Faça login novamente.', 'err');
+      createBtn._creating = false;
+      createBtn.style.opacity = '';
+      createBtn.style.pointerEvents = '';
       return;
     }
     /* X-6.5.51AK (2026-05-08) — handshake pra obter creation_token novo.
@@ -10849,7 +10878,6 @@ function _showCharactersPopup(){
     var creationToken = token;  // fallback se handshake falhar
     var charId = '';
     try {
-      vToast('🎭 Preparando criação...');
       var apiTrim = api.replace(/\/$/, '');
       var resp = await fetch(apiTrim + '/api/character/new_session', {
         method: 'POST',
@@ -10865,16 +10893,28 @@ function _showCharactersPopup(){
           creationToken = data.token;
           charId = data.char_id || '';
         } else {
-          vToast('⚠️ Sessão inválida. Faça login no bot.');
+          if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
+          vToast('⚠️ Sessão inválida. Faça login no bot.', 'err');
+          createBtn._creating = false;
+          createBtn.style.opacity = '';
+          createBtn.style.pointerEvents = '';
           return;
         }
       } else {
-        vToast('⚠️ Erro de sessão (' + resp.status + ').');
+        if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
+        vToast('⚠️ Erro de sessão (' + resp.status + ').', 'err');
+        createBtn._creating = false;
+        createBtn.style.opacity = '';
+        createBtn.style.pointerEvents = '';
         return;
       }
     } catch (e) {
       console.warn('[CITY] new_session handshake failed:', e);
-      vToast('⚠️ Erro de conexão.');
+      if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(_e){}
+      vToast('⚠️ Erro de conexão.', 'err');
+      createBtn._creating = false;
+      createBtn.style.opacity = '';
+      createBtn.style.pointerEvents = '';
       return;
     }
     var newParams = new URLSearchParams();
@@ -10886,6 +10926,7 @@ function _showCharactersPopup(){
     if (env) newParams.set('env', env);
     newParams.set('new', '1');
     window.__valdoria_transitioning = true;
+    /* Loader continua visivel ate character_creator assumir — nao hide aqui. */
     window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');

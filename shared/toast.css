@@ -1,2 +1,155 @@
-/* Centro estável: left 50% + translateX(-50%) — evita salto horizontal quando width muda após o texto entrar */
-.v-toast{position:fixed;left:50%;bottom:calc(var(--bottom-panel-h,100px) + 12px);transform:translateX(-50%);max-width:380px;width:max-content;min-width:0;margin:0;padding:var(--v-space-md-lg) var(--v-space-xl);border-radius:var(--v-radius-pill,20px);font-size:var(--v-font-base,13px);font-family:var(--v-font,'Marcellus',serif);text-align:center;z-index:var(--v-z-dropdown,200);pointer-events:none;animation:vToastIn 0.3s ease-out;box-shadow:var(--v-shadow-md,0 2px 8px rgba(0,0,0,0.3))}.v-toast-ok{background:var(--v-bg-raised,#332a22);border:1px solid var(--v-gold-dim,#9a7530);color:var(--v-text,#d4c8b0)}.v-toast-warn{background:var(--v-warning,#f39c12);color:#fff}.v-toast-err{background:var(--v-danger,#e74c3c);color:#fff;box-shadow:0 4px 16px rgba(231,76,60,0.4)}.v-toast-info{background:var(--v-success,#4caf50);color:#fff;box-shadow:0 4px 16px rgba(76,175,80,0.4)}.v-toast.v-toast-hiding{animation:vToastOut 0.3s ease-in forwards}@keyframes vToastIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes vToastOut{to{opacity:0;transform:translate(-50%,20px)}}body.perf-lite .v-toast{animation-duration:0.15s}@media (prefers-reduced-motion:reduce){.v-toast,.v-toast.v-toast-hiding{animation:none;transform:translateX(-50%)}}.v-toast-elevated{z-index:calc(var(--v-z-loading, 1000) + 5)}
+/* Sessao #38 (2026-05-25): toast canonical — centro da tela, fundo opaco,
+   barra de progresso esvaziando, duracao via calcReadTime (2-5s).
+
+   Layout:
+     #v-shared-toast (container)
+       └ .v-toast-msg (texto principal, padding generoso)
+       └ .v-toast-bar (track 4px)
+           └ .v-toast-bar-fill (esvazia de 100% → 0%) */
+
+.v-toast {
+    position: fixed;
+    /* Centro da tela (horizontal + vertical) */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    /* Smartphone-Only Layout: cap 92% pra evitar overflow em telas pequenas */
+    max-width: 360px;
+    min-width: 200px;
+    width: max-content;
+
+    /* Fundo opaco — sem transparencia (user request) */
+    background: var(--v-bg-card, #2e2520);
+    border: 1px solid var(--v-gold-dim, #9a7530);
+    border-radius: var(--v-radius, 10px);
+
+    /* Sombra forte pra destacar do fundo */
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(196, 149, 58, 0.15),
+        0 0 24px rgba(196, 149, 58, 0.18);
+
+    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'Marcellus', serif);
+    font-size: calc(14px * var(--v-font-scale, 1));
+    text-align: center;
+
+    z-index: var(--v-z-loading, 1000);
+    pointer-events: none;
+
+    animation: vToastIn 0.25s ease-out;
+    overflow: hidden;
+}
+
+/* Texto da mensagem — padding generoso, line-height legivel */
+.v-toast-msg {
+    padding: 18px 24px 14px;
+    line-height: 1.5;
+}
+
+/* Track da barra (fundo) — 4px de altura, full width */
+.v-toast-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--v-bg-deep, #1a1510);
+    border-top: 1px solid var(--v-border-30, rgba(74, 56, 40, 0.3));
+}
+
+/* Fill da barra — esvazia de 100% → 0% via JS rAF */
+.v-toast-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--v-gold-light, #dbb668), var(--v-gold, #c4953a));
+    box-shadow: 0 0 8px var(--v-gold-30, rgba(196, 149, 58, 0.4));
+    will-change: width;
+}
+
+/* Variantes — info/ok/warn/err mudam apenas a cor da barra + accent border */
+.v-toast-ok {
+    border-color: var(--v-gold-dim, #9a7530);
+}
+.v-toast-ok .v-toast-bar-fill {
+    background: linear-gradient(90deg, var(--v-gold-light, #dbb668), var(--v-gold, #c4953a));
+}
+
+.v-toast-warn {
+    border-color: var(--v-warning, #f39c12);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(243, 156, 18, 0.4),
+        0 0 24px rgba(243, 156, 18, 0.3);
+}
+.v-toast-warn .v-toast-bar-fill {
+    background: linear-gradient(90deg, #ffc456, var(--v-warning, #f39c12));
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.5);
+}
+
+.v-toast-err {
+    border-color: var(--v-danger, #e74c3c);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(231, 76, 60, 0.5),
+        0 0 24px rgba(231, 76, 60, 0.35);
+}
+.v-toast-err .v-toast-bar-fill {
+    background: linear-gradient(90deg, #ff7766, var(--v-danger, #e74c3c));
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+}
+
+.v-toast-info {
+    border-color: var(--v-success, #4caf50);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(76, 175, 80, 0.4),
+        0 0 24px rgba(76, 175, 80, 0.3);
+}
+.v-toast-info .v-toast-bar-fill {
+    background: linear-gradient(90deg, #7adf7e, var(--v-success, #4caf50));
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+/* Saida — fade-out + scale-down sutil */
+.v-toast.v-toast-hiding {
+    animation: vToastOut 0.3s ease-in forwards;
+}
+
+@keyframes vToastIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes vToastOut {
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.96);
+    }
+}
+
+/* Perf-lite: animacao mais curta */
+body.perf-lite .v-toast {
+    animation-duration: 0.12s;
+}
+
+/* Reduced motion: sem animacao */
+@media (prefers-reduced-motion: reduce) {
+    .v-toast,
+    .v-toast.v-toast-hiding {
+        animation: none;
+        transform: translate(-50%, -50%);
+    }
+    .v-toast-bar-fill {
+        transition: none !important;
+    }
+}
+
+/* Elevated quando ha popup overlay aberto — fica em cima */
+.v-toast-elevated {
+    z-index: calc(var(--v-z-loading, 1000) + 5);
+}
