@@ -4942,6 +4942,35 @@ body.perf-lite .vc-action-btn { transition: none; }
     .city-sector-tab:active { transform: scale(0.95); }
     .city-sector-tab .cst-ico { font-size: var(--v-font-base, 14px); }
 
+    /* Sessão #38 (2026-05-26) bug fix — empty-state quando sector sem locations.
+       Antes: tabs + grid sumiam → dead-end. Agora: tabs continuam + info card explica. */
+    .city-sector-empty {
+      display: flex;
+      align-items: center;
+      gap: var(--v-space-sm, 8px);
+      padding: var(--v-space-md, 12px) var(--v-space-lg, 16px);
+      margin: var(--v-space-sm, 6px) var(--v-space-md, 12px);
+      background: var(--v-bg-raised, #332a22);
+      border: 1px solid var(--v-border, #4a3828);
+      border-radius: var(--v-radius, 10px);
+      color: var(--v-text-dim, #a09484);
+      font-family: var(--v-font, 'Marcellus', serif);
+      font-size: var(--v-font-sm, 13px);
+      line-height: 1.5;
+    }
+    .city-sector-empty .cse-ico {
+      font-size: var(--v-font-lg, 18px);
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+    .city-sector-empty .cse-msg {
+      flex: 1;
+    }
+    .city-sector-empty .cse-msg b {
+      color: var(--v-gold, #c4953a);
+      font-weight: 600;
+    }
+
     /* Badge "NOVO!" + sparkle de descoberta em locais newly_available */
     .hub-loc--new::after {
       content: 'NOVO!';
@@ -10205,11 +10234,27 @@ window._cityCheckDiscovery = function(action){
 
 // === Sector tab bar render =================================================
 // Inserido APÓS renderHubScreen rodar — entre o divider (◆) e o location grid.
+// Sessão #38 (2026-05-26) bug fix: quando sector está vazio (e.g. Alzan lv1
+// em Combate, todos locReq≥3), renderHubScreen NÃO cria .hub-loc-grid
+// (game-hub.js:256 `if (locCount > 0)`). Antes: tabs sumiam → jogador
+// ficava preso no sector vazio sem navegação. Agora: usa fallback insertion
+// (.hub-div) E renderiza empty-state info quando sector tem 0 locations.
 function _renderSectorTabs(rootEl){
   var existing = rootEl.querySelector('.city-sector-tabs');
   if (existing) existing.remove();
-  var locGrid = rootEl.querySelector('.hub-loc-grid');
-  if (!locGrid) return;
+  var existingEmpty = rootEl.querySelector('.city-sector-empty');
+  if (existingEmpty) existingEmpty.remove();
+
+  // Encontra insertion point — preferência: hub-loc-grid; fallback: hub-div (◆).
+  var anchor = rootEl.querySelector('.hub-loc-grid');
+  var insertBefore = anchor;
+  if (!anchor) {
+    anchor = rootEl.querySelector('.hub-div');
+    if (anchor) {
+      insertBefore = anchor.nextSibling;
+    }
+  }
+
   var tabs = document.createElement('div');
   tabs.className = 'city-sector-tabs';
   CITY_SECTOR_ORDER.forEach(function(sid){
@@ -10225,7 +10270,30 @@ function _renderSectorTabs(rootEl){
     });
     tabs.appendChild(btn);
   });
-  locGrid.parentNode.insertBefore(tabs, locGrid);
+  if (anchor && anchor.parentNode) {
+    anchor.parentNode.insertBefore(tabs, insertBefore);
+  } else {
+    rootEl.appendChild(tabs);
+  }
+
+  // Empty-state: sector ativo sem locations → mostra info com nível requerido.
+  var currentSec = window._currentSector;
+  if (currentSec && typeof _getVisibleLocationsForSector === 'function') {
+    var visible = _getVisibleLocationsForSector(currentSec);
+    if (visible.length === 0) {
+      var minReq = 999;
+      for (var k in CITY_LOCATIONS) {
+        var loc = CITY_LOCATIONS[k];
+        if (loc.sector === currentSec && (loc.levelReq || 1) < minReq) minReq = loc.levelReq || 1;
+      }
+      var empty = document.createElement('div');
+      empty.className = 'city-sector-empty';
+      empty.innerHTML = '<span class="cse-ico">🔒</span>' +
+        '<span class="cse-msg">Locais de <b>' + CITY_SECTORS[currentSec].label +
+        '</b> requerem nível ' + (minReq < 999 ? minReq : '?') + '+ para serem desbloqueados.</span>';
+      tabs.parentNode.insertBefore(empty, tabs.nextSibling);
+    }
+  }
 }
 
 // Aplica sparkle/badge nas células de locais newly_available / in_progress.
