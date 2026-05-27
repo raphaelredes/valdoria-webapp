@@ -2179,14 +2179,16 @@
         // ═══════════════════════════════════════════════
         // SCREEN: SUBCLASS (compact cards)
         // ═══════════════════════════════════════════════
-        // 2026-05-23 (sessão #27): helper pra PNG heráldico de subclasse (gerado em
-        // gen_subclass_pngs.py — 25 PNGs em shared/img/levelup/subclasses/). Fallback
-        // pro diamond glyph se PNG faltar.
+        // 2026-05-23 (sessão #27): helper pra imagem heráldica de subclasse (gerada em
+        // gen_subclass_pngs.py — 35 WebP em shared/img/levelup/subclasses/).
+        // Sessao #42 (2026-05-27): migrado de .png pra .webp (padrao canonical
+        // sessao #38 — _image_optim.save_optimized kind='subject'). Fallback
+        // pro diamond glyph se imagem faltar.
         function _subclassIconHtml(scId, sz) {
             if (!scId) return '◆';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/levelup/subclasses/' + scId +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=&#9670;"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=&#9670;"/>';
         }
 
         function buildSubclass(el) {
@@ -2231,7 +2233,7 @@
             html += `<div class="feat-hero">
                 <div class="feat-hero-glow"></div>
                 <div class="feat-hero-rays"></div>
-                <img class="feat-hero-img" src="../shared/img/levelup/subclasses/${scId}.png"
+                <img class="feat-hero-img" src="../shared/img/levelup/subclasses/${scId}.webp"
                      alt="${sc.name}" onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
                 <div class="feat-hero-medal-fallback">🏰</div>
             </div>`;
