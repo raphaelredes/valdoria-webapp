@@ -12904,7 +12904,7 @@ function _showLeagueRankInfo(){
     + 'border-bottom:1px solid var(--v-gold-40,rgba(196,149,58,0.4)); text-align:center;">'
     + '<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:4px;">'
     + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(90deg, transparent, var(--v-gold,#c4953a));"></span>'
-    + '<svg viewBox="0 0 120 120" style="width:32px; height:32px; color:var(--v-gold,#c4953a); filter:drop-shadow(0 0 8px var(--v-gold-60,rgba(196,149,58,0.6)));"><use href="#ic-bandeira"/></svg>'
+    + '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:32px; height:32px; object-fit:contain; filter:drop-shadow(0 0 8px var(--v-gold-60,rgba(196,149,58,0.6)));">'
     + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
     + '</div>'
     + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(16px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); '
@@ -12950,7 +12950,7 @@ function _showLeagueRankInfo(){
     + '</div>';
 
   _showInfoPopup({
-    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>',
+    icon: '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:36px;height:36px;object-fit:contain;">',
     npc: 'Ordem dos Aventureiros',
     title: 'Posição na Ordem',
     desc: html,
@@ -13221,7 +13221,7 @@ function _showLeaguePopup(p){
     + ' onmouseout="this.style.background=\'rgba(196,149,58,0.04)\';this.style.borderColor=\'rgba(196,149,58,0.15)\';"'
     + ' onclick="if(typeof _showLeagueRankInfo===\'function\')_showLeagueRankInfo();">'
     + '<span style="color:var(--v-text-dim,#a09484); display:inline-flex; align-items:center; gap:6px;">'
-    + '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:var(--v-gold,#c4953a);"><use href="#ic-bandeira"/></svg>'
+    + '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:14px; height:14px; object-fit:contain; vertical-align:middle;">'
     + 'Posição na Ordem <span style="opacity:0.5;font-size:calc(13px * var(--v-font-scale, 1));">ⓘ</span>'
     + '</span>'
     + '<span style="font-family:var(--v-font-display,Cinzel,serif); color:var(--v-gold,#c4953a); font-weight:700;">'
@@ -13446,7 +13446,7 @@ function _showAchievementsPopup(p){
     + '<div style="display:flex; align-items:center; gap: 12px;">'
     // Brasão central
     + '<div style="position:relative; min-width: 60px; height: 60px; display:grid; place-items:center;">'
-    +   '<svg class="vAch-crown" viewBox="0 0 120 120" style="width: 60px; height: 60px; color: #ffd700;"><use href="#ic-trofeu"/></svg>'
+    +   '<img class="vAch-crown" src="/shared/img/achievements/trofeu.png" alt="" style="width: 60px; height: 60px; object-fit:contain;">'
     +   (masteredChains > 0 ? '<div style="position:absolute; top:-4px; right:-6px; background:linear-gradient(180deg,#ffd700,#c87a4a); color:#3a2a08; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); font-weight:700; padding:2px 6px; border-radius:10px; border:1px solid rgba(0,0,0,0.5); box-shadow:0 2px 4px rgba(0,0,0,0.6);">★' + masteredChains + '</div>' : '')
     + '</div>'
     // Stats column
@@ -15719,7 +15719,7 @@ var TAVERN_NPCS = [
   {
     id: 'tav_grom',
     name: 'Grom Barba-Cinza',
-    role: '<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg> Taverneiro',
+    role: '<img src="/shared/img/npcs/taverneiro.png" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
     desc: 'Anão robusto com barba grisalha trançada, esfrega canecas com pano sujo.',
     greetings: [
       '<i>Grom larga uma caneca no balcão.</i> "O que vai ser hoje, aventureiro?"',
@@ -15792,8 +15792,8 @@ function _buildTavernMockData(player){
     type: 'hub',
     flavor: '<i>' + flavorText + '</i>',
     npcs: npcs.map(function(n){
-      // canonical: ic-aldeao para NPCs sem ícone específico (per heraldic-icons rule)
-      return { icon: '<svg class="v-heraldic"><use href="#ic-aldeao"/></svg>', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
+      // Sessão #44 (2026-05-27): PNG fallback (regra "no SVG in city"). aldeao.png pra NPCs sem ícone específico.
+      return { icon: '<img src="/shared/img/npcs/aldeao.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
     }),
     services: [
       // Replica canonical tavern.py L130-138 (TavernManager.get_menu)
@@ -15908,7 +15908,7 @@ function _buildInnMockData(player){
     type: 'hub',
     flavor: greeting,
     npc: {
-      icon: '<svg viewBox="0 0 120 120"><use href="#ic-estalajadeira"/></svg>',
+      icon: '<img src="/shared/img/npcs/estalajadeira.png" alt="" style="width:48px;height:48px;object-fit:contain;">',
       name: 'Martha',
       role: 'Estalajadeira',
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
@@ -18430,19 +18430,19 @@ function _buildArenaMockData(player){
 // Cada RELATIONS_NPC mapeia pra um NPC já definido em outra área (TAVERN_NPCS,
 // MARKET_MERCHANTS, etc.) — afinidade vem do _npcDialoguesUsed[npcId].length.
 
-// canonical: heraldic-sprite.svg ic-* substitui emojis de pessoa per CLAUDE.md regra
-// Onde ic-* não existe (ferreiro/alquimista/mestre-guilda), mantém objeto-emoji (exceção da regra)
+// Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icon mirrors portraitImg.
+// rel_thorne ganhou portraitImg dedicado (thorne-armeiro.png existe em shared/img/npcs/).
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
-  { id: 'rel_martha',  icon: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.png' },
-  { id: 'rel_grom',    icon: '<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.png' },
-  { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',     name: 'Guarda Aldric', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
-  { id: 'rel_aldwin',  icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.png' },
-  { id: 'rel_elara',   icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',       name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.png' },
-  { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-ach-forjador"/></svg>',  name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: null },
-  { id: 'rel_mirena',  icon: '<svg class="v-heraldic"><use href="#ic-druida"/></svg>',        name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.png' },
-  { id: 'rel_tavira',  icon: '<svg class="v-heraldic"><use href="#ic-paladino"/></svg>',      name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.png' },
-  { id: 'rel_eirik',   icon: '<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.png' }
+  { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.png' },
+  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/taverneiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.png' },
+  { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/padre-aldric.png" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
+  { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.png' },
+  { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.png' },
+  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.png' },
+  { id: 'rel_mirena',  icon: '<img src="/shared/img/npcs/alquimista.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.png' },
+  { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.png' },
+  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.png' }
 ];
 
 // Tiers canonical wandering_npcs.py get_familiarity_tier
@@ -18920,7 +18920,7 @@ function _shadowShowEvent(p){
 var SHADOW_NPCS = [{
   id: 'npc_blackmarket_shadow',  // canonical VULTO_NPC_ID
   name: 'O Vulto',
-  role: '<svg class="v-heraldic"><use href="#ic-bruxo"/></svg> Comerciante Sombrio',
+  role: '<img src="/shared/img/combat/bruxo.png" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Comerciante Sombrio',
   desc: 'Figura encapuzada nas sombras. Capuz baixo, rosto invisível. Apenas dois olhos frios te avaliam em silêncio.',
   greetings: [
     // canonical: VULTO_VISIT_GREETINGS['first'] (3 entries)
@@ -18959,13 +18959,13 @@ var SHADOW_NPCS = [{
 // (PERSONALITY_POOL: cautious/jovial/stoic/scholarly/mercantile/devout/adventurous/mysterious).
 // Pool refresh diário; SCHEDULE_ARCHETYPES define rotação por período do dia.
 // Diário do player guarda os encontrados (mock representa um dia típico).
-// canonical: ic-* mapeado por archetype (heraldic-icons rule)
-// adventurous→patrulheiro, scholarly→escriba, mercantile→banqueiro, mysterious→bruxo
+// canonical: PNG por archetype (regra "no SVG in city" — sessão #44 2026-05-27)
+// adventurous→combat/patrulheiro, scholarly→npcs/escriba, mercantile→npcs/banqueiro, mysterious→combat/bruxo
 var TRAVELERS_KNOWN = [
-  { id: 'wnp_thessan', icon: '<svg class="v-heraldic"><use href="#ic-patrulheiro"/></svg>', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
-  { id: 'wnp_orana',   icon: '<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',     name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
-  { id: 'wnp_borek',   icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',   name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
-  { id: 'wnp_silvia',  icon: '<svg class="v-heraldic"><use href="#ic-bruxo"/></svg>',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
+  { id: 'wnp_thessan', icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
+  { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/escriba.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
+  { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/banqueiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
+  { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
 ];
 
 function _buildTravelersMockData(player){
@@ -36215,11 +36215,12 @@ function _tavernShowMercenaries(p){
   // server_npc_manager.get_available_sync('mercenary') gera 3 mercenários dinamicamente
   // canonical: tavern_mercenaries.py + npc_data_types.py MERCENARY_FIRST_NAMES + MERCENARY_TITLES
   // 4 roles canonical: Mercenário/Guarda/Batedor/Curandeiro
+  // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
-    { icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-paladino"/></svg>',    name: 'Lyra a Devotada',      role: 'Guarda (Paladino nv 3)',      cls: 'Paladino',    cost: 100, duration: 4 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-patrulheiro"/></svg>', name: 'Sylas Olho-de-Falcão', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',     name: 'Elara Manto-Rubro',    role: 'Curandeira (Clériga nv 3)',   cls: 'Clérigo',     cost: 120, duration: 4 }
+    { icon: '<img src="/shared/img/combat/guerreiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/paladino.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Lyra a Devotada',      role: 'Guarda (Paladino nv 3)',      cls: 'Paladino',    cost: 100, duration: 4 },
+    { icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Sylas Olho-de-Falcão', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/clerigo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Elara Manto-Rubro',    role: 'Curandeira (Clériga nv 3)',   cls: 'Clérigo',     cost: 120, duration: 4 }
   ];
   var items = pool.map(function(m){
     return { icon: m.icon, label: m.name + ' — ' + m.role, badge: m.cost + ' V', _m: m };
@@ -36256,12 +36257,13 @@ function _tavernShowMercenaries(p){
 
 function _tavernShowAdventurers(p){
   // canonical: tavern_adventurers.py + EXPLORER_CLASS_MAP (5 roles canonical)
+  // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
-    { icon: '<svg class="v-heraldic"><use href="#ic-ladino"/></svg>',      name: 'Mira Sombra-Prateada',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-mago"/></svg>',        name: 'Galren Marca-da-Guerra', role: 'Pesquisador Arcano (Mago nv 3)',     cls: 'Mago',        cost: 110, duration: 4 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',   name: 'Brondak o Quebra-Ossos', role: 'Auxiliar de Campo (Guerreiro nv 5)', cls: 'Guerreiro',   cost: 95,  duration: 5 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-patrulheiro"/></svg>', name: 'Nyriel Passo-Sombrio',   role: 'Rastreadora (Patrulheira nv 4)',     cls: 'Patrulheiro', cost: 85,  duration: 5 },
-    { icon: '<svg class="v-heraldic"><use href="#ic-bardo"/></svg>',       name: 'Korvan Tempestade',      role: 'Cartógrafo (Bardo nv 3)',            cls: 'Bardo',       cost: 100, duration: 4 }
+    { icon: '<img src="/shared/img/combat/ladino.png" alt="" style="width:38px;height:38px;object-fit:contain;">',      name: 'Mira Sombra-Prateada',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
+    { icon: '<img src="/shared/img/combat/mago.png" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Galren Marca-da-Guerra', role: 'Pesquisador Arcano (Mago nv 3)',     cls: 'Mago',        cost: 110, duration: 4 },
+    { icon: '<img src="/shared/img/combat/guerreiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Brondak o Quebra-Ossos', role: 'Auxiliar de Campo (Guerreiro nv 5)', cls: 'Guerreiro',   cost: 95,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Nyriel Passo-Sombrio',   role: 'Rastreadora (Patrulheira nv 4)',     cls: 'Patrulheiro', cost: 85,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/bardo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Korvan Tempestade',      role: 'Cartógrafo (Bardo nv 3)',            cls: 'Bardo',       cost: 100, duration: 4 }
   ];
   var items = pool.map(function(a){
     return { icon: a.icon, label: a.name + ' — ' + a.role, badge: a.cost + ' V', _a: a };
