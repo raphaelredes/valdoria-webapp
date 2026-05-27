@@ -18,6 +18,11 @@
     /* Centro da tela (horizontal + vertical) */
     left: 50%;
     top: 50%;
+    /* CRITICO: anular bottom/right do legacy .v-toast (valdoria-design.css:875
+       define bottom:90px que, somado com top:50% em position:fixed, estica o
+       elemento ate ~360px de altura. Sessao #42 root cause). */
+    bottom: auto;
+    right: auto;
     transform: translate(-50%, -50%);
 
     /* Sizing real-ao-conteudo: fit-content adapta ao texto;
