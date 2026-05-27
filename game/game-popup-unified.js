@@ -347,6 +347,16 @@ function _buildPopupBody(data) {
         }
     }
 
+    // Daily Challenge AAA renderer (refatorado 2026-05-27)
+    if (data.daily_challenge && typeof renderDailyChallenge === 'function') {
+        try {
+            renderDailyChallenge(el, data.daily_challenge);
+            return el;
+        } catch (e) {
+            console.error('[POPUP] renderDailyChallenge error:', e);
+        }
+    }
+
     // Image banner (if present)
     if (data.image_url) {
         var img = document.createElement('img');
@@ -451,6 +461,175 @@ function _buildPopupActions(data) {
 
     return html;
 }
+
+/**
+ * Quest Detail Renderer \u2014 adicionado 2026-05-27.
+ * User request: "ao clicar em uma missao sempre seja mostrado um popup com mais
+ * detalhes da missao, do que foi feito e o que falta fazer". Apenas texto (sem imagens).
+ *
+ * Input data (de build_quest_detail_data em quests_serializer.py:193):
+ *   { id, title, desc, cat, diff, status, pct, stage, total, xp, gold, items,
+ *     objectives:[{text,state}], hint, npc?, npc_icon?, chain?,
+ *     can_abandon, can_turnin, turnin_cb, abandon_cb }
+ */
+window.renderQuestDetail = function (el, qd) {
+    if (!el || !qd) return;
+
+    var statusColor = {
+        ready: '#7cdb7c', active: '#c4953a', completed: '#7d705e', failed: '#c4534a'
+    }[qd.status] || 'var(--v-text)';
+
+    var catLabel = {
+        story: 'Principal', daily: 'Di\u00e1ria', side: 'Secund\u00e1ria'
+    }[qd.cat] || qd.cat || '';
+
+    var html = '<div class="qdt-root" style="display:flex;flex-direction:column;gap:10px;padding:4px;">';
+
+    // HEADER
+    html += '<div class="qdt-header" style="text-align:center;padding-bottom:8px;'
+        + 'border-bottom:1px solid var(--v-border, #4a3828);">'
+        + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(15px * var(--v-font-scale, 1));'
+        + 'color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+        + 'text-shadow:0 0 8px rgba(196,149,58,0.35);line-height:1.2;">'
+        + qd.title + '</div>'
+        + '<div style="margin-top:4px;font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);'
+        + 'letter-spacing:0.8px;">'
+        + qd.diff + ' ' + catLabel + (qd.chain ? ' \u00b7 Parte ' + qd.chain.part + '/' + qd.chain.total : '')
+        + '</div></div>';
+
+    // DESCRICAO
+    if (qd.desc) {
+        html += '<div class="qdt-desc" style="font-size:calc(12px * var(--v-font-scale, 1));'
+            + 'color:var(--v-text,#d4c8b0);line-height:1.5;font-style:italic;'
+            + 'padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:4px;'
+            + 'border-left:2px solid var(--v-gold-30, rgba(196,149,58,0.3));">'
+            + qd.desc + '</div>';
+    }
+
+    // NPC
+    if (qd.npc) {
+        html += '<div class="qdt-npc" style="font-size:calc(11px * var(--v-font-scale, 1));'
+            + 'color:var(--v-text-dim,#a09484);text-align:center;">'
+            + '<span style="opacity:0.7;">Miss\u00e3o dada por </span>'
+            + '<b style="color:var(--v-gold,#c4953a);font-style:italic;">' + qd.npc + '</b>'
+            + '</div>';
+    }
+
+    // OBJETIVOS
+    if (qd.objectives && qd.objectives.length > 0) {
+        html += '<div class="qdt-section" style="margin-top:4px;">'
+            + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));'
+            + 'color:var(--v-gold,#c4953a);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;'
+            + 'padding-bottom:3px;border-bottom:1px solid var(--v-gold-20, rgba(196,149,58,0.2));">'
+            + 'Etapas da Miss\u00e3o</div>';
+
+        for (var i = 0; i < qd.objectives.length; i++) {
+            var obj = qd.objectives[i];
+            var icon, color, weight, opacity;
+            if (obj.state === 'done') {
+                icon = '\u2713'; color = '#7cdb7c'; weight = '400'; opacity = '0.7';
+            } else if (obj.state === 'current') {
+                icon = '\u25b8'; color = 'var(--v-gold-light,#dbb668)'; weight = '600'; opacity = '1';
+            } else {
+                icon = '\u25cb'; color = 'var(--v-text-dim,#a09484)'; weight = '400'; opacity = '0.55';
+            }
+            html += '<div class="qdt-obj" style="display:flex;gap:8px;padding:5px 8px;margin-bottom:3px;'
+                + 'background:' + (obj.state === 'current' ? 'rgba(196,149,58,0.10)' : 'transparent') + ';'
+                + 'border-left:2px solid ' + (obj.state === 'current' ? color : 'transparent') + ';'
+                + 'border-radius:0 3px 3px 0;opacity:' + opacity + ';">'
+                + '<span style="flex-shrink:0;color:' + color + ';font-weight:700;width:14px;">' + icon + '</span>'
+                + '<span style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);'
+                + 'line-height:1.4;font-weight:' + weight + ';">' + obj.text + '</span>'
+                + '</div>';
+        }
+        html += '</div>';
+    }
+
+    // PROGRESSO
+    if (qd.total > 0) {
+        var pct = qd.pct || 0;
+        html += '<div class="qdt-progress" style="margin-top:2px;">'
+            + '<div style="display:flex;justify-content:space-between;font-size:calc(10px * var(--v-font-scale, 1));'
+            + 'color:var(--v-text-dim,#a09484);margin-bottom:3px;letter-spacing:0.6px;text-transform:uppercase;">'
+            + '<span>Progresso</span>'
+            + '<span style="color:var(--v-gold,#c4953a);font-weight:700;">' + qd.stage + ' / ' + qd.total + '</span>'
+            + '</div>'
+            + '<div style="position:relative;height:6px;background:rgba(0,0,0,0.5);'
+            + 'border-radius:3px;overflow:hidden;border:1px solid var(--v-border,#4a3828);">'
+            + '<div style="height:100%;width:' + pct + '%;'
+            + 'background:linear-gradient(90deg,#9a7530,#c4953a,#e8c45a);'
+            + 'box-shadow:0 0 6px #c4953a;transition:width 0.5s ease;"></div>'
+            + '</div></div>';
+    }
+
+    // HINT
+    if (qd.hint) {
+        html += '<div class="qdt-hint" style="font-size:calc(11px * var(--v-font-scale, 1));'
+            + 'color:var(--v-gold-dim,#8f7338);text-align:center;font-style:italic;'
+            + 'padding:6px 10px;border-top:1px dotted var(--v-gold-20, rgba(196,149,58,0.2));'
+            + 'border-bottom:1px dotted var(--v-gold-20, rgba(196,149,58,0.2));">'
+            + '\ud83d\udcd6 ' + qd.hint + '</div>';
+    }
+
+    // RECOMPENSAS
+    var hasRewards = (qd.xp > 0) || (qd.gold > 0) || (qd.items && qd.items.length > 0);
+    if (hasRewards) {
+        html += '<div class="qdt-rewards" style="margin-top:2px;">'
+            + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));'
+            + 'color:var(--v-gold,#c4953a);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;'
+            + 'padding-bottom:3px;border-bottom:1px solid var(--v-gold-20, rgba(196,149,58,0.2));">'
+            + 'Recompensas</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+
+        if (qd.xp > 0) {
+            html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;'
+                + 'background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.30);'
+                + 'border-radius:12px;color:var(--v-gold,#c4953a);font-weight:700;'
+                + 'font-size:calc(11px * var(--v-font-scale, 1));">'
+                + '\u2726 ' + qd.xp + ' XP</span>';
+        }
+        if (qd.gold > 0) {
+            html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;'
+                + 'background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.30);'
+                + 'border-radius:12px;color:var(--v-gold,#c4953a);font-weight:700;'
+                + 'font-size:calc(11px * var(--v-font-scale, 1));">'
+                + qd.gold + ' <span class="vi vi-coin sm"></span></span>';
+        }
+        if (qd.items && qd.items.length > 0) {
+            for (var k = 0; k < qd.items.length; k++) {
+                html += '<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;'
+                    + 'background:rgba(124,180,219,0.10);border:1px solid rgba(124,180,219,0.30);'
+                    + 'border-radius:12px;color:#7cb4db;font-weight:600;'
+                    + 'font-size:calc(11px * var(--v-font-scale, 1));">'
+                    + '\ud83c\udf81 ' + qd.items[k] + '</span>';
+            }
+        }
+        html += '</div></div>';
+    }
+
+    // STATUS
+    var statusLabel = {
+        ready: '\u25c6 Pronta para entregar', active: '\u2694 Em progresso',
+        completed: '\u2713 Conclu\u00edda', failed: '\u2717 Falhou'
+    }[qd.status] || qd.status;
+    html += '<div class="qdt-status" style="text-align:center;padding:6px;'
+        + 'font-size:calc(11px * var(--v-font-scale, 1));color:' + statusColor + ';'
+        + 'font-weight:600;letter-spacing:0.6px;">' + statusLabel + '</div>';
+
+    // BOTOES
+    if (qd.can_turnin && qd.turnin_cb) {
+        html += '<button class="v-popup-btn" data-action="' + qd.turnin_cb + '" '
+            + 'style="background:linear-gradient(180deg,#3a6e3a,#2a4e2a);border-color:#7cdb7c;color:#fff;font-weight:700;">'
+            + '\ud83d\udcdc Entregar Miss\u00e3o</button>';
+    }
+    if (qd.can_abandon && qd.abandon_cb) {
+        html += '<button class="v-popup-btn v-popup-btn--cancel" data-action="' + qd.abandon_cb + '">'
+            + '\u274c Abandonar Miss\u00e3o</button>';
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+};
 
 function _handlePopupAction(action) {
     // Navigation: go back in popup stack
