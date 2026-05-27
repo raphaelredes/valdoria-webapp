@@ -142,15 +142,28 @@
 
         var bars = 24;
         var bw = w / bars - 1;
-        for (var i = 0; i < bars; i++) {
-            var v = arr[Math.floor(i * arr.length / bars)] / 255;
-            var bh = Math.max(2, v * h);
-            // Gradient gold
-            var grad = ctx.createLinearGradient(0, h, 0, h - bh);
-            grad.addColorStop(0, '#c4953a');
-            grad.addColorStop(1, '#ffd27a');
-            ctx.fillStyle = grad;
-            ctx.fillRect(i * (bw + 1), h - bh, bw, bh);
+        // Performance tier guard (lite=0, medium=1, full=2)
+        var _renderDetail = (window._valdoriaPerformanceTier === 'lite') ? 0
+                          : (window._valdoriaPerformanceTier === 'medium') ? 1 : 2;
+        if (_renderDetail >= 1) {
+            // Gradient gold (full/medium tier) — visualizer com glow vertical
+            for (var i = 0; i < bars; i++) {
+                var v = arr[Math.floor(i * arr.length / bars)] / 255;
+                var bh = Math.max(2, v * h);
+                var grad = ctx.createLinearGradient(0, h, 0, h - bh);
+                grad.addColorStop(0, '#c4953a');
+                grad.addColorStop(1, '#ffd27a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(i * (bw + 1), h - bh, bw, bh);
+            }
+        } else {
+            // Lite fallback: flat gold (24x cheaper, sem createLinearGradient per frame)
+            ctx.fillStyle = '#c4953a';
+            for (var i = 0; i < bars; i++) {
+                var v = arr[Math.floor(i * arr.length / bars)] / 255;
+                var bh = Math.max(2, v * h);
+                ctx.fillRect(i * (bw + 1), h - bh, bw, bh);
+            }
         }
         state.rafId = requestAnimationFrame(_drawVisualizer);
     }

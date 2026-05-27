@@ -439,7 +439,7 @@
   window._postAllyEffect = function(ally_source, dice_result) {
     var auth = window.__CITY_AUTH;
     if (!auth || !auth.token || !auth.api || !auth.uid) {
-      console.debug('[ALLY] _postAllyEffect: no auth context — using fallback toast');
+      console.warn('[ALLY] _postAllyEffect: no auth context — using fallback toast');
       _allyFallbackToast(ally_source, dice_result);
       return Promise.resolve(null);
     }

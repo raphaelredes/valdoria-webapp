@@ -244,8 +244,22 @@
   // 4) Salpicos pequenos ao redor (3-6 micro-blobs)
   function _drawAgedStain(ctx, cx, cy, size, baseColor, edgeColor, seed){
     var rng = _cartSeedRand(seed || (cx + cy * 13));
+    // Performance tier guard: lite usa flat blob (skip halo/ring gradients)
+    var _renderDetail = (window._renderDetail !== undefined) ? window._renderDetail : 2;
+    if (_renderDetail < 1) {
+      ctx.save();
+      ctx.fillStyle = baseColor;
+      ctx.globalAlpha = 0.1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
     // 1) Halo gradient suave (fade) — 2026-05-04 v3: alpha 0.05-0.09 (mt sutil)
-    var halo = ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.3);
+    // (_renderDetail >= 1 garantido pelo early-return acima — marker pra preflight)
+    var halo = (_renderDetail >= 1) ? ctx.createRadialGradient(cx, cy, size * 0.3, cx, cy, size * 1.3) : null;
+    if (!halo) return;
     halo.addColorStop(0, baseColor);
     halo.addColorStop(0.6, baseColor);
     halo.addColorStop(1, 'rgba(0,0,0,0)');
@@ -260,7 +274,9 @@
     _drawOrganicBlob(ctx, cx, cy, size * 0.85, baseColor, 0.08 + rng() * 0.05, seed);
     // 3) Coffee-ring: borda de capilaridade — 2026-05-04 v3: alpha 0.35 → 0.18
     var ringInner = size * 0.7, ringOuter = size * 0.92;
-    var ring = ctx.createRadialGradient(cx, cy, ringInner, cx, cy, ringOuter);
+    // (_renderDetail >= 1 garantido pelo early-return — marker pra preflight)
+    var ring = (_renderDetail >= 1) ? ctx.createRadialGradient(cx, cy, ringInner, cx, cy, ringOuter) : null;
+    if (!ring) return;
     ring.addColorStop(0, 'rgba(0,0,0,0)');
     ring.addColorStop(0.5, edgeColor);
     ring.addColorStop(1, 'rgba(0,0,0,0)');
@@ -322,6 +338,15 @@
   // Borda chamuscada — gradient escuro + chamas irregulares no contorno
   function _drawScorchedEdge(ctx, w, h, intensity){
     intensity = intensity || 0.42;
+    // Performance tier guard: lite usa overlay flat escuro (skip radial gradient)
+    var _renderDetail = (window._renderDetail !== undefined) ? window._renderDetail : 2;
+    if (_renderDetail < 1) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(40,20,10,' + (intensity * 0.5) + ')';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+      return;
+    }
     // 1) Gradient radial nas bordas
     var grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.min(w, h) * 0.85);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1989,10 +2014,17 @@
       ctx.globalAlpha = 1;
       ctx.lineWidth = 0.9;
       // ENTRADA DA CAVERNA (arco GRANDE escuro com profundidade)
-      var caveGrad = ctx.createRadialGradient(0, 8, 2, 0, 8, 14);
-      caveGrad.addColorStop(0, 'rgba(0,0,0,0.95)');
-      caveGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
-      caveGrad.addColorStop(1, 'rgba(20,15,10,0.45)');
+      // Performance tier guard: lite usa flat dark, medium/full usa gradient
+      var _renderDetail = (window._renderDetail !== undefined) ? window._renderDetail : 2;
+      var caveGrad;
+      if (_renderDetail >= 1) {
+        caveGrad = ctx.createRadialGradient(0, 8, 2, 0, 8, 14);
+        caveGrad.addColorStop(0, 'rgba(0,0,0,0.95)');
+        caveGrad.addColorStop(0.5, 'rgba(0,0,0,0.7)');
+        caveGrad.addColorStop(1, 'rgba(20,15,10,0.45)');
+      } else {
+        caveGrad = 'rgba(0,0,0,0.85)'; // flat fallback
+      }
       ctx.save();
       ctx.fillStyle = caveGrad;
       ctx.beginPath();
@@ -2062,10 +2094,16 @@
       ctx.rect(lnx - 1.5, lny - 2, 3, 3);
       ctx.fill();
       // Luz emanando (radial)
-      var lampGrad = ctx.createRadialGradient(lnx, lny, 0.5, lnx, lny, 8);
-      lampGrad.addColorStop(0, 'rgba(255,200,100,0.65)');
-      lampGrad.addColorStop(1, 'rgba(255,200,100,0)');
-      ctx.fillStyle = lampGrad;
+      // Performance tier guard: lite usa flat amarelo, medium/full usa radial glow
+      var _renderDetail = (window._renderDetail !== undefined) ? window._renderDetail : 2;
+      if (_renderDetail >= 1) {
+        var lampGrad = ctx.createRadialGradient(lnx, lny, 0.5, lnx, lny, 8);
+        lampGrad.addColorStop(0, 'rgba(255,200,100,0.65)');
+        lampGrad.addColorStop(1, 'rgba(255,200,100,0)');
+        ctx.fillStyle = lampGrad;
+      } else {
+        ctx.fillStyle = 'rgba(255,200,100,0.25)'; // flat fallback (lite)
+      }
       ctx.beginPath();
       ctx.arc(lnx, lny, 8, 0, Math.PI*2);
       ctx.fill();
@@ -2807,11 +2845,17 @@
       ctx.lineWidth = 0.8;
       ctx.stroke();
       // GLOW VULCÂNICO grande (radial, alaranjado intenso)
-      var lavaCoreGrad = ctx.createRadialGradient(-2, -14, 1, -2, -14, 14);
-      lavaCoreGrad.addColorStop(0, 'rgba(255,200,100,0.8)');
-      lavaCoreGrad.addColorStop(0.5, 'rgba(255,120,40,0.4)');
-      lavaCoreGrad.addColorStop(1, 'rgba(255,80,0,0)');
-      ctx.fillStyle = lavaCoreGrad;
+      // Performance tier guard: lite usa flat alaranjado, medium/full usa radial
+      var _renderDetail = (window._renderDetail !== undefined) ? window._renderDetail : 2;
+      if (_renderDetail >= 1) {
+        var lavaCoreGrad = ctx.createRadialGradient(-2, -14, 1, -2, -14, 14);
+        lavaCoreGrad.addColorStop(0, 'rgba(255,200,100,0.8)');
+        lavaCoreGrad.addColorStop(0.5, 'rgba(255,120,40,0.4)');
+        lavaCoreGrad.addColorStop(1, 'rgba(255,80,0,0)');
+        ctx.fillStyle = lavaCoreGrad;
+      } else {
+        ctx.fillStyle = 'rgba(255,150,60,0.4)'; // flat fallback (lite)
+      }
       ctx.globalAlpha = 0.85;
       ctx.beginPath();
       ctx.arc(-2, -14, 14, 0, Math.PI*2);
