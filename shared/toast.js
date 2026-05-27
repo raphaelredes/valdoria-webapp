@@ -53,6 +53,15 @@
 
         var el = _ensureEl();
         el.className = 'v-toast v-toast-' + type;
+
+        // Sessao #42: tipografia adaptativa — textos curtos (<=3 palavras)
+        // ganham Cinzel display (peso narrativo); longos seguem Marcellus body.
+        var cleanForCount = (text || '').replace(/<[^>]*>/g, '').trim();
+        var wordCount = cleanForCount ? cleanForCount.split(/\s+/).filter(Boolean).length : 0;
+        if (wordCount > 0 && wordCount <= 3) {
+            el.classList.add('v-toast-short');
+        }
+
         var msgEl = el.querySelector('.v-toast-msg');
         var barFill = el.querySelector('.v-toast-bar-fill');
         if (msgEl) msgEl.innerHTML = text;
