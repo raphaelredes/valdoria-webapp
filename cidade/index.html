@@ -140,7 +140,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     grep "PLAZA_PASSIVE_DIALOGUES"     → passive plaza events enriquecidos (13)
     grep "PLAZA_INTERACTIVE_DIALOGUES" → interactive plaza events com skill check (4)
     grep "CORVUS_MAPS"                 → reveals do Cartógrafo (mapa novo desbloqueado)
-    grep "ALDRIC_FIRST_MAP"            → encounter inicial do Capitão Aldric
+    grep "ALDRIC_FIRST_MAP"            → encounter inicial do Guarda Aldric
 
   Doc canonical: docs/sistemas/dialogue-pattern-aldric.md
   Índice agente IA: docs/sistemas/INDEX_AGENTE_IA.md (PADRAO_ALDRIC)
@@ -555,7 +555,10 @@ LOG SINK (Fase 7):
 -->
 <html lang="pt-BR">
 <head>
-<!-- Sessão #38 (2026-05-26) perf P0: removidas 6 meta http-equiv Cache-Control/Pragma/Expires duplicadas.
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Sessão #38 (2026-05-26) perf P0: removidas meta http-equiv Cache-Control/Pragma/Expires.
      Anulavam ETag/304 do _headers Tier C, forçando 3MB redownload por revisita. HTTP headers controlam cache. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -4353,19 +4356,12 @@ body.perf-lite .vc-action-btn { transition: none; }
       color: var(--v-text-dim, #a09484);
       padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
       font-family: var(--v-font-display, 'Cinzel', serif);
-      /* Sessao #37 v13: usa --v-font-xs (10px normal, 13px large) em vez
-         de --v-font-sm (12->16px) — tabs com 7 itens nao cabem se font for
-         maior. Labels ja abreviados (Defesa/Poções/Anéis) tambem ajudam. */
-      font-size: var(--v-font-xs, 11px);
+      font-size: var(--v-font-sm, 12px);
       font-weight: 600;
       cursor: pointer;
       letter-spacing: 0.04em;
       transition: color 0.15s, border-color 0.15s;
       min-height: 36px;
-      min-width: 0; /* allow flex shrink */
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
     .inv-tab:hover { color: var(--v-text, #d4c8b0); }
     .inv-tab.active {
@@ -4916,10 +4912,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       background: transparent;
       color: var(--v-text-dim, #a09484);
       font-family: var(--v-font, 'Marcellus', serif);
-      /* Sessao #37 v18 (2026-05-25): --v-font-xs (10→13px large) em vez de
-         --v-font-sm (12→16px) — em LARGE "Comércio" + bold ficava muito
-         largo pra caber em 1/4 do viewport. Ainda legivel + sem truncar. */
-      font-size: var(--v-font-xs, 11px);
+      font-size: var(--v-font-sm, 12px);
       cursor: pointer;
       white-space: nowrap;
       overflow: hidden;
@@ -5200,7 +5193,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       align-items: stretch;
       justify-content: stretch;
       padding: 0;
-      backdrop-filter: blur(3px);
+      /* Sessão #38 perf P0: backdrop-filter removido (GPU stalls em mobile/Adreno). */
+      background: rgba(15, 12, 8, 0.92);
     }
     #journey-overlay.show { display: flex; }
     .journey-card {
@@ -8003,12 +7997,6 @@ body.perf-lite .vc-action-btn { transition: none; }
        CLAUDE.md "WebApp Error Logging — MANDATORY". */
     document.write('<script src="/shared/console-collector.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/error-reporter.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
-    /* Sessão #38 (2026-05-26): vOverlay + vListen + vScheduler canonical
-       (CLAUDE.md "SPA Cleanup via vOverlay" + auditoria perf Fase 3.3/3.4).
-       Disponibilizam window.{vOverlay,vListen,vScheduler} globalmente. */
-    document.write('<script src="/shared/overlay-registry.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
-    document.write('<script src="/shared/listener-registry.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
-    document.write('<script src="/shared/scheduler.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // explore-travel.js (anim AAA com silhueta encapuzada, 4.5s, paralax, clima)
     document.write('<script src="/explore/explore-travel.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // inn-animation.js — playInnAnimation(data, onDone) canonical do bot DEV.
@@ -8098,6 +8086,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<script src="/game/game-arena.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/game/game-gates.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/game/game-codex.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/game/game-daily-challenge.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/game/game-achievements.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<link rel="stylesheet" href="/game/game-achievements.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
     document.write('<script src="/game/game-league.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
@@ -8301,56 +8290,14 @@ body.perf-lite .vc-action-btn { transition: none; }
   // via DOMContentLoaded.
   function _showSessionErrorOverlay(reason, detail){
     _cityLog('critical', 'session_error_overlay_shown', {reason: reason, detail: detail || null});
-    // Sessao #37 (2026-05-25): tela epica com PNG transparent OpenAI low.
-    // User corrigiu — pipeline default = transparent PNG (rembg) igual
-    // NPCs/items. Imagem: ampulheta dourada quebrada + areia derramada +
-    // runas dispersas + pergaminho selo vermelho rompido (Diablo IV style).
-    // Background atmosferico fica no CSS, nao no PNG.
-    // Cache-bust via bundle hash — PNG vive em Tier A immutable; query
-    // string ?v= força browsers cacheados pegarem nova versao quando o
-    // arquivo for substituido (regenerado via gen_session_expired_png.py).
-    var imgUrl = '/shared/img/ui/session-expired.png?v=' + (window.VBUNDLE_HASH || '1');
     var html = (
-      '<style>' +
-      '  @keyframes vSEFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }' +
-      '  @keyframes vSEHeroFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }' +
-      '  @keyframes vSEHeroGlow { 0%, 100% { filter: drop-shadow(0 8px 24px rgba(0,0,0,0.7)) drop-shadow(0 0 18px rgba(196,149,58,0.25)); } 50% { filter: drop-shadow(0 12px 28px rgba(0,0,0,0.7)) drop-shadow(0 0 32px rgba(196,149,58,0.55)); } }' +
-      '  @keyframes vSEGlowPulse { 0%, 100% { text-shadow: 0 0 18px rgba(196,149,58,0.45), 0 0 36px rgba(196,149,58,0.18); } 50% { text-shadow: 0 0 28px rgba(196,149,58,0.75), 0 0 56px rgba(196,149,58,0.35); } }' +
-      '  @keyframes vSERunePulse { 0%, 100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }' +
-      '  @keyframes vSERay { 0% { opacity: 0; transform: rotate(-12deg) scaleY(0.6); } 50% { opacity: 0.35; } 100% { opacity: 0; transform: rotate(8deg) scaleY(1.2); } }' +
-      '  .vSE-bg { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 35%, #2c2014 0%, #18110a 55%, #08060a 100%); z-index: 99999; overflow: hidden; font-family: Cinzel, serif; color: #d4c8b0; }' +
-      '  .vSE-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 0%, transparent 45%, rgba(0,0,0,0.8) 100%); pointer-events: none; }' +
-      '  .vSE-ray { position: absolute; top: -10%; left: 50%; width: 2px; height: 70%; transform-origin: top center; background: linear-gradient(180deg, rgba(255,210,120,0.55) 0%, rgba(196,149,58,0.18) 60%, transparent 100%); filter: blur(8px); animation: vSERay 7s ease-in-out infinite; pointer-events: none; }' +
-      '  .vSE-content { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 24px; text-align: center; animation: vSEFadeIn 0.7s ease-out; }' +
-      '  .vSE-hero-wrap { position: relative; margin-bottom: 22px; }' +
-      '  .vSE-hero-halo { position: absolute; inset: -18%; background: radial-gradient(circle at center, rgba(196,149,58,0.28) 0%, rgba(196,149,58,0.08) 35%, transparent 65%); filter: blur(14px); pointer-events: none; }' +
-      '  .vSE-hero { display: block; width: 100%; max-width: 280px; height: auto; position: relative; animation: vSEHeroFloat 6s ease-in-out infinite, vSEHeroGlow 4.5s ease-in-out infinite; }' +
-      '  .vSE-brand { font-size: calc(26px * var(--v-font-scale, 1)); font-weight: 700; letter-spacing: 7px; color: #c4953a; margin-bottom: 6px; animation: vSEGlowPulse 3.2s ease-in-out infinite; }' +
-      '  .vSE-divider { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 14px; opacity: 0.85; }' +
-      '  .vSE-divider-line { width: 46px; height: 1px; background: linear-gradient(90deg, transparent, #c4953a 30%, #ffd97a 50%, #c4953a 70%, transparent); }' +
-      '  .vSE-divider-gem { font-size: calc(12px * var(--v-font-scale, 1)); color: #c4953a; animation: vSERunePulse 2.6s ease-in-out infinite; }' +
-      '  .vSE-title { font-size: calc(14px * var(--v-font-scale, 1)); color: #c4953a; letter-spacing: 5px; margin-bottom: 22px; text-transform: uppercase; }' +
-      '  .vSE-msg { font-size: calc(14px * var(--v-font-scale, 1)); line-height: 1.7; max-width: 360px; margin-bottom: 18px; color: #d4c8b0; font-style: italic; }' +
-      '  .vSE-hint { font-size: calc(12px * var(--v-font-scale, 1)); line-height: 1.6; color: #a09484; max-width: 340px; }' +
-      '  .vSE-hint b { color: #c4953a; font-weight: 700; letter-spacing: 0.5px; }' +
-      '  .vSE-detail { font-size: calc(10px * var(--v-font-scale, 1)); color: #6a5a4e; margin-top: 18px; font-family: monospace; max-width: 340px; word-break: break-word; opacity: 0.7; }' +
-      '  @media (max-height: 640px) { .vSE-hero { max-width: 180px; } .vSE-hero-wrap { margin-bottom: 14px; } .vSE-brand { font-size: calc(20px * var(--v-font-scale, 1)); letter-spacing: 5px; } .vSE-title { font-size: calc(12px * var(--v-font-scale, 1)); margin-bottom: 14px; } .vSE-msg { font-size: calc(13px * var(--v-font-scale, 1)); margin-bottom: 12px; } }' +
-      '  @media (prefers-reduced-motion: reduce) { .vSE-hero, .vSE-brand, .vSE-divider-gem, .vSE-ray { animation: none !important; } }' +
-      '</style>' +
-      '<div id="city-session-error" class="vSE-bg">' +
-        '<div class="vSE-ray"></div>' +
-        '<div class="vSE-vignette"></div>' +
-        '<div class="vSE-content">' +
-          '<div class="vSE-hero-wrap">' +
-            '<div class="vSE-hero-halo"></div>' +
-            '<img class="vSE-hero" src="' + imgUrl + '" alt="Ampulheta quebrada — sessao expirada" />' +
-          '</div>' +
-          '<div class="vSE-brand">VALDORIA</div>' +
-          '<div class="vSE-divider"><span class="vSE-divider-line"></span><span class="vSE-divider-gem">&#9670;</span><span class="vSE-divider-line"></span></div>' +
-          '<div class="vSE-title">Sessao Expirada</div>' +
-          '<div class="vSE-msg">' + (reason || 'A magia que sustentava sua jornada se desfez. O tempo do seu vinculo com Valdoria chegou ao fim.') + '</div>' +
-          '<div class="vSE-hint">Abra o jogo novamente pelo bot do Telegram &mdash; clique em <b>Jogar</b> ou envie <b>/start</b>.</div>' +
-          (detail ? '<div class="vSE-detail">' + detail + '</div>' : '') +
+      '<div id="city-session-error" style="position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;">' +
+        '<div style="max-width:340px">' +
+        '<div style="font-size:calc(28px * var(--v-font-scale, 1));font-weight:700;letter-spacing:5px;color:#c4953a;text-shadow:0 0 25px rgba(196,149,58,0.5);margin-bottom:8px">VALDORIA</div>' +
+        '<div style="font-size:calc(14px * var(--v-font-scale, 1));color:#c4953a;margin-bottom:20px;letter-spacing:3px">SESSÃO EXPIRADA</div>' +
+        '<div style="font-size:calc(14px * var(--v-font-scale, 1));line-height:1.6;margin-bottom:20px">' + (reason || 'Nao foi possivel carregar seu personagem.') + '</div>' +
+        '<div style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.5;color:#a09484;margin-bottom:24px">Abra o jogo novamente pelo bot do Telegram (botao Jogar ou /start).</div>' +
+        (detail ? '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:#6a5a4e;margin-top:16px;font-family:monospace">' + detail + '</div>' : '') +
         '</div>' +
       '</div>'
     );
@@ -8524,22 +8471,6 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (state.hud.level != null)  p.level = state.hud.level;
         if (state.hud.name)           p.name = state.hud.name;
       }
-      // Sessão #37 (2026-05-25): REMOTE mode NÃO recebe quests/achievements
-      // do servidor ainda — então os mocks (QUESTS_ACTIVE com 2 quests fake,
-      // ACH_PROGRESS com 20/70 unlock fake) vazavam pra todo player real,
-      // mostrando missões inexistentes ("Caçar 3 lobos cinzentos", "Falar
-      // com Lyana") e conquistas idênticas entre personagens diferentes.
-      // Bug fix: zerar mocks em REMOTE mode até server enviar dados reais.
-      // Mocks ficam APENAS pra modo LOCAL (file://) usado em DEV.
-      // ach_unlocked passa a ser computed do ACH_PROGRESS dinamicamente
-      // (ver progress_strip.ach_unlocked acima) — zerar ACH_PROGRESS faz o
-      // contador exibir 0/70 automaticamente.
-      try {
-        if (Array.isArray(window.QUESTS_ACTIVE)) window.QUESTS_ACTIVE.length = 0;
-        if (window.ACH_PROGRESS && typeof window.ACH_PROGRESS === 'object') {
-          Object.keys(window.ACH_PROGRESS).forEach(function(k){ window.ACH_PROGRESS[k] = 0; });
-        }
-      } catch (e) { console.warn('[CITY] clear_mocks_failed:', e); }
       // Continue to fetch character list for Hall popup
       return fetch(_api.replace(/\/$/,'') + '/api/auth/characters', {
         method: 'GET',
@@ -8636,100 +8567,18 @@ body.perf-lite .vc-action-btn { transition: none; }
         });
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
       }
-      // Sessao #37 (2026-05-25): hidrata QUESTS_ACTIVE com dados REAIS do char
-      // (web_auth.py:_get_characters agora envia `quests` array). Antes esses
-      // dados eram zerados pela limpeza de mocks (commit anterior) — agora
-      // populamos com quests autenticas do server. Cada char tem seu proprio
-      // log: switch de personagem refaz fetch e troca QUESTS_ACTIVE.
-      try {
-        if (Array.isArray(picked.quests) && Array.isArray(window.QUESTS_ACTIVE)) {
-          window.QUESTS_ACTIVE.length = 0;
-          picked.quests.forEach(function(q){
-            window.QUESTS_ACTIVE.push({
-              id: 'qa_' + (q.id || ''),
-              icon: (typeof _heralIco === 'function' ? _heralIco('ic-mochila') : '📜'),
-              title: q.title || 'Missão sem título',
-              desc: q.desc || '',
-              progress: q.progress || '0/' + (q.total_stages || 1),
-              reward: 0,
-              xp: 0,
-              npc: '',
-              ready: !!q.ready,
-              category: q.category || 'story',
-              current_stage: q.current_stage || 0,
-              total_stages: q.total_stages || 1
-            });
-          });
-          console.log('[CITY] QUESTS_ACTIVE hydrated from server:', window.QUESTS_ACTIVE.length, 'active');
-        }
-        // Sessao #37 (2026-05-25): schema unification achievements server↔
-        // client. Server envia stats flat (combat_victories, win_streak,
-        // total_gold_earned, etc.). Client tem 14 chains progressivas
-        // (algoz/cacador/cofreiro/...). Mapeamento canonical baseado em
-        // achievements_data.py — cada chain consome um stat especifico.
-        // ACH_PROGRESS popula com valores reais → progress bars corretos.
-        //
-        // BUG fix sessao #37: BRONZE/ABATES/SEQUENCIA estavam hardcoded
-        // (league_xp:1240, kills:23, streak:3 em buildHubData) — mostravam
-        // dados antigos pra char novo. Agora derivam de
-        // achievement_stats + league metadata do server.
-        var serverStats = (picked && picked.achievement_stats) || {};
-        // Stash em window pra buildHubData consumir
-        window._serverPlayerStats = {
-          kills: serverStats.combat_victories || 0,
-          streak: serverStats.win_streak || 0,
-          best_streak: serverStats.best_win_streak || 0,
-          league_xp: (picked && picked.league_xp) || serverStats.weekly_xp || 0,
-          league_tier: (picked && picked.league_tier) || 'bronze',
-        };
-        if (picked.achievement_stats && typeof picked.achievement_stats === 'object') {
-          window._serverAchievementStats = picked.achievement_stats;
-          // Mapping chain_id → stat_name (canonical achievements_data.py)
-          var CHAIN_TO_STAT = {
-            'algoz':         'combat_victories',
-            'cacador':       'combat_victories',
-            'indomavel':     'best_win_streak',
-            'cofreiro':      'total_gold_earned',
-            'mestre':        'level',
-            'aventureiro':   'quests_completed',
-            'andarilho':     'locations_visited',
-            'cartografo':    'locations_visited',
-            'colecionador':  'unique_items',
-            'forjador':      'items_crafted',
-            'erudito':       'npcs_met',
-            'devoto':        'temple_visits',
-            'diplomata':     'max_affinity',
-            'sobrevivente':  'clutch_victories'
-          };
-          if (typeof window.ACH_PROGRESS === 'object' && window.ACH_PROGRESS !== null) {
-            // Player.level eh enviado em picked.level (HUD)
-            var lvlForMestre = parseInt(picked.level || 1, 10);
-            Object.keys(window.ACH_PROGRESS).forEach(function(chainId){
-              var statName = CHAIN_TO_STAT[chainId];
-              if (!statName) { window.ACH_PROGRESS[chainId] = 0; return; }
-              if (statName === 'level') {
-                window.ACH_PROGRESS[chainId] = lvlForMestre;
-              } else {
-                var val = serverStats[statName];
-                window.ACH_PROGRESS[chainId] = (typeof val === 'number' && val >= 0) ? val : 0;
-              }
-            });
-            console.log('[CITY] ACH_PROGRESS hydrated from server stats:',
-              Object.keys(window.ACH_PROGRESS).filter(function(k){ return window.ACH_PROGRESS[k] > 0; }).length,
-              'chains with progress > 0');
-          }
-        }
-      } catch (e) {
-        console.warn('[CITY] quests_hydrate_failed:', e);
-      }
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
 
       // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
       // (em REMOTE não usa mock fixo Brunhilda/Lyana — usa apenas chars reais do user).
-      // Sessao #38 (2026-05-26) bug fix: usa window._classToHeraldic canonical
-      // que normaliza acentos ("Bárbaro" -> ic-barbaro). Antes mapa local nao
-      // cobria nomes acentuados -> icone errado.
       var pickedId = picked.id || picked.char_id;
+      var clsToHeraldic = {
+        mago:'ic-mago', guerreiro:'ic-guerreiro', sacerdote:'ic-clerigo',
+        sacerdotisa:'ic-clerigo', clerigo:'ic-clerigo', ladino:'ic-ladino',
+        patrulheiro:'ic-patrulheiro', paladino:'ic-paladino', bardo:'ic-bardo',
+        druida:'ic-druida', monge:'ic-monge', barbaro:'ic-barbaro',
+        feiticeiro:'ic-feiticeiro', bruxo:'ic-bruxo'
+      };
       window._mockCharacters = chars.map(function(c){
         var cid = c.id || c.char_id;
         var clsKey = String(c.class_name || '').toLowerCase().split(' ')[0];
@@ -8739,7 +8588,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           cls: clsKey,
           race: String(c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: window._classToHeraldic(c.class_name),
+          icon: clsToHeraldic[clsKey] || 'ic-guerreiro',
           active: cid === pickedId
         };
       });
@@ -9380,7 +9229,7 @@ function _isCTA(btn) {
     footer.className = 'fLs-footer';
     // Sessão #23 v2: botão LGPD-padrão (web standard "Aceitar e continuar") +
     // texto explicativo curto acima — convenção GDPR/LGPD reconhecida.
-    footer.style.cssText = 'position:sticky; bottom:0; margin:10px -12px -12px; padding:12px 14px; background:linear-gradient(180deg, rgba(42,36,32,0.92), rgba(74,56,40,0.97)); border-top:1px solid var(--v-gold-30,rgba(196,149,58,0.3)); text-align:center; backdrop-filter:blur(2px);';
+    footer.style.cssText = 'position:sticky; bottom:0; margin:10px -12px -12px; padding:12px 14px; background:linear-gradient(180deg, rgba(42,36,32,0.94), rgba(74,56,40,0.97)); border-top:1px solid var(--v-gold-30,rgba(196,149,58,0.3)); text-align:center;';
     footer.innerHTML =
       '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-bottom:8px; line-height:1.4;">'
       + 'Ao continuar, você <b style="color:var(--v-text,#d4c8b0);">aceita</b> nossa política de privacidade.'
@@ -9519,10 +9368,7 @@ function _isCTA(btn) {
     document.addEventListener('DOMContentLoaded', _scheduleSplashWhenReady, { once: true });
   }
 
-  // Função global de popup épico de avaliação (sessão #29, 2026-05-24).
-  // User pediu: épico + campo texto opcional + sugestões + envio backend.
-  // Anterior: só localStorage (ratings NUNCA chegavam no servidor — perdidos).
-  // Agora: POST /api/game/action cb=fb_survey_submit (ou fb_survey_no se vazio).
+  // Função global de popup (chamada pelo heartbeat OU manualmente via extras_feedback)
   window._showRatingPromptPopup = function(){
     if (typeof window._showInfoPopup !== 'function') return;
     var stored = _pref('valdoria_last_rating', null);
@@ -9538,7 +9384,6 @@ function _isCTA(btn) {
       +     'Tua história foi tecida ao lado de Valdória. Que tua voz ecoe agora — para que aqueles que vierem depois encontrem caminhos mais belos. Tua palavra esculpe o reino."'
       +   '</p>'
       + '</div>'
-      // Estrelas — escolha rápida
       + '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;">Tua nota</div>'
       + '<div style="display:flex;gap:8px;justify-content:center;padding:4px 0 14px;" id="rating-stars-auto">'
       + [1,2,3,4,5].map(function(n){
@@ -9550,7 +9395,6 @@ function _isCTA(btn) {
         }).join('')
       + '</div>'
       + '<div id="rating-label" style="text-align:center;font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-family:Cinzel,serif;letter-spacing:0.8px;min-height:18px;margin-bottom:14px;font-style:italic;opacity:0;transition:opacity 0.3s ease;">&nbsp;</div>'
-      // Campo de texto opcional
       + '<div style="margin-bottom:10px;">'
       +   '<label style="display:block;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;font-family:Cinzel,serif;">Tuas palavras <span style="opacity:0.6;text-transform:none;">(opcional)</span></label>'
       +   '<textarea id="rating-text" placeholder="Conta o que sentiste durante a jornada&hellip;" '
@@ -9561,7 +9405,6 @@ function _isCTA(btn) {
       +     'resize:none;outline:none;transition:border-color 0.2s ease;"></textarea>'
       +   '<div style="font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);text-align:right;margin-top:2px;"><span id="rating-text-count">0</span>/500</div>'
       + '</div>'
-      // Campo sugestões
       + '<div style="margin-bottom:8px;">'
       +   '<label style="display:block;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;font-family:Cinzel,serif;">Sugestão para o reino <span style="opacity:0.6;text-transform:none;">(opcional)</span></label>'
       +   '<textarea id="rating-suggest" placeholder="O que gostarias de ver em Valdória?" '
@@ -9582,7 +9425,6 @@ function _isCTA(btn) {
         return window._submitRatingPopup && window._submitRatingPopup();
       }
     });
-    // Wire UI interactions (após mount)
     setTimeout(function(){
       var STAR_LABELS = {
         1: 'Tenho críticas',
@@ -9624,7 +9466,6 @@ function _isCTA(btn) {
           if (typeof vHaptic === 'function') vHaptic('light');
         });
       });
-      // Char counters
       ['text', 'suggest'].forEach(function(kind){
         var ta = document.getElementById('rating-' + kind);
         var c = document.getElementById('rating-' + kind + '-count');
@@ -9634,7 +9475,6 @@ function _isCTA(btn) {
           ta.addEventListener('blur', function(){ ta.style.borderColor = 'var(--v-border,#4a3828)'; });
         }
       });
-      // Submit handler — POST /api/game/action cb=fb_survey_submit (ou fb_survey_no)
       window._submitRatingPopup = function(){
         var rating = _selectedRating;
         var txt = (document.getElementById('rating-text') || {}).value || '';
@@ -9643,14 +9483,12 @@ function _isCTA(btn) {
         sug = sug.trim().slice(0, 500);
         if (!rating) {
           if (typeof vToast === 'function') vToast('Toque numa estrela primeiro — tua nota guia o caminho.');
-          return false; // não fecha
+          return false;
         }
-        // Marca como visto (não re-prompt)
         try {
           localStorage.setItem('valdoria_last_rating', rating);
           localStorage.setItem('valdoria_rating_prompt_seen', '1');
         } catch(_) {}
-        // POST backend — opcional, falha silenciosa se servidor offline
         var hasContent = txt.length > 0 || sug.length > 0;
         var cb = hasContent ? 'fb_survey_submit' : 'fb_survey_no';
         var body = { rating: rating };
@@ -9674,7 +9512,7 @@ function _isCTA(btn) {
         if (typeof vToast === 'function') {
           vToast(rating >= 4 ? '✨ Obrigado pela jornada! Tua voz inspira.' : '✨ Obrigado pelo feedback — vou levar a sério.');
         }
-        return true; // fecha popup
+        return true;
       };
     }, 100);
   };
@@ -9833,7 +9671,7 @@ var CITY_DISCOVERY_QUESTS = {
       text:'Um cartaz desbotado pregado na taverna: "TORNEIO REAL DE VALDORIA — Glória, ouro e o respeito da capital aguardam quem ousar pisar na Arena. Procure Tharos, mestre de armas."',
       choices:[{ label:'Procurar Tharos.', next:'s2' }] },
     { id:'s2', speaker:'Tharos, mestre de armas',
-      text:'Outro hopeful, hein? A Arena não é cinema, garoto. Mas você passou da porta — então já sabe o que quer. Aceito sua inscrição.',
+      text:'Outro aspirante, hein? A Arena não é teatro de feira, garoto. Mas você passou da porta — então já sabe o que quer. Aceito sua inscrição.',
       choices:[{ label:'Estou pronto.', next:'unlock' }] }
   ]},
   q_disc_desafio: { id:'q_disc_desafio', name:'Boletim do Conselho', targetCb:'daily_challenge', stages:[
@@ -9893,10 +9731,10 @@ var CITY_DISCOVERY_QUESTS = {
       choices:[{ label:'Vou à Guilda.', next:'unlock' }] }
   ]},
   q_disc_gates: { id:'q_disc_gates', name:'A Estrada Aberta', targetCb:'gates', stages:[
-    { id:'s1', speaker:'Sentinela do portão',
+    { id:'s1', speaker:'Joran, sentinela',
       text:'Para, forasteiro. Vais sair de Valdoria, é? Os portões abrem ao amanhecer, fecham antes do crepúsculo. Antes de pisar a estrada, fala com o Capitão Drennar — ele anota teu nome, teu destino, e os perigos da semana.',
       choices:[{ label:'Onde encontro o Capitão?', next:'s2' }] },
-    { id:'s2', speaker:'Sentinela do portão',
+    { id:'s2', speaker:'Joran, sentinela',
       text:'Na guarita ao lado do portão norte. Sentado num banco de carvalho, lista nas mãos. Diz a ele o rumo — Floresta, Pântano, Estradas — e ele te informa o que esperar. Sem isso, sai por tua conta e risco.',
       choices:[{ label:'Vou falar com o Capitão.', next:'unlock' }] }
   ]}
@@ -10241,10 +10079,10 @@ window._cityCheckDiscovery = function(action){
 // === Sector tab bar render =================================================
 // Inserido APÓS renderHubScreen rodar — entre o divider (◆) e o location grid.
 // Sessão #38 (2026-05-26) bug fix: quando sector está vazio (e.g. Alzan lv1
-// em Combate, todos locReq≥3), renderHubScreen NÃO cria .hub-loc-grid
-// (game-hub.js:256 `if (locCount > 0)`). Antes: tabs sumiam → jogador
-// ficava preso no sector vazio sem navegação. Agora: usa fallback insertion
-// (.hub-div) E renderiza empty-state info quando sector tem 0 locations.
+// em Combate, todos locReq≥3), renderHubScreen NÃO cria .hub-loc-grid (linha
+// 256 `if (locCount > 0)`). Antes: tabs sumiam → jogador ficava preso no
+// sector vazio sem navegação. Agora: usa fallback insertion (.hub-div) E
+// renderiza empty-state info quando sector tem 0 locations visíveis.
 function _renderSectorTabs(rootEl){
   var existing = rootEl.querySelector('.city-sector-tabs');
   if (existing) existing.remove();
@@ -10252,12 +10090,13 @@ function _renderSectorTabs(rootEl){
   if (existingEmpty) existingEmpty.remove();
 
   // Encontra insertion point — preferência: hub-loc-grid; fallback: hub-div (◆).
+  // Em último caso, append no final do rootEl.
   var anchor = rootEl.querySelector('.hub-loc-grid');
-  var insertBefore = anchor;
+  var insertBefore = anchor; /* insertBefore element OU null pra append */
   if (!anchor) {
-    anchor = rootEl.querySelector('.hub-div');
+    anchor = rootEl.querySelector('.hub-div'); /* divider ◆ — sempre presente */
     if (anchor) {
-      insertBefore = anchor.nextSibling;
+      insertBefore = anchor.nextSibling; /* insertar APÓS divider */
     }
   }
 
@@ -10283,6 +10122,7 @@ function _renderSectorTabs(rootEl){
   }
 
   // Empty-state: sector ativo sem locations → mostra info com nível requerido.
+  // Sem isso, jogador vê tabs mas tela "vazia" sem explicação.
   var currentSec = window._currentSector;
   if (currentSec && typeof _getVisibleLocationsForSector === 'function') {
     var visible = _getVisibleLocationsForSector(currentSec);
@@ -10378,7 +10218,6 @@ function buildMockHubScreen(player){
   // 2026-05-11 (AAA quest review): quest_tracker DINÂMICO baseado em QUESTS_ACTIVE
   // (antes era hardcoded 2 quests). Mapeia QUESTS_ACTIVE → tracker format:
   // - title, stage (parse '2/5' or 0 if '✓'), total, ready (✓ no progress), cb
-  //
   // Sessão #37 (2026-05-25): USER REQUEST — filtrar pra mostrar SOMENTE missões
   // prontas (✓) na tela principal. Missões em progresso (ex: "2/5") agora ficam
   // visíveis APENAS dentro da opção "Missões" (_questsShowTab). Motivação UX:
@@ -10417,44 +10256,13 @@ function buildMockHubScreen(player){
     // Os cards de membros já são exibidos no #city-group-panel (HUD topo) — não precisa duplicar.
     allies: [],
     quest_tracker: { quests: _buildQuestTrackerFromActive() },
-    progress_strip: (function(){
-      // Sessao #37 (2026-05-25): hidrata BRONZE/league_xp do servidor.
-      // Antes hardcoded league_xp:1240 — char novo via 1240 falso.
-      var sps = window._serverPlayerStats || {};
-      var lxp = (typeof sps.league_xp === 'number') ? sps.league_xp : 0;
-      var tier = sps.league_tier || 'bronze';
-      var tierLabels = { bronze: ['Bronze', '#cd7f32'], silver: ['Prata', '#c0c0c0'], gold: ['Ouro', '#ffd700'], platinum: ['Platina', '#7cb4db'], mithral: ['Mithral', '#a8e6f0'] };
-      var tl = tierLabels[tier] || tierLabels.bronze;
-      return {
-      league_icon: 'ic-liga-' + tier, league_xp: lxp, league_name: tl[0], league_color: tl[1], league_cb: 'league_main',
+    progress_strip: {
+      // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithral)
+      league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
       // ach_unlocked/ach_total computados dinamicamente — sistema progressivo (14 cadeias × 5 tiers = 70)
-      // Sessão #37 (2026-05-25): bug fix — antes era hardcoded `ach_unlocked: 20`,
-      // mostrando "20/70 conquistas" pra todo player real (mesmo um char recém
-      // criado). Agora computa do ACH_PROGRESS (zerado em REMOTE mode até server
-      // enviar dados reais, então mostra 0/70 em char novo).
-      ach_unlocked: (function(){
-        if (typeof ACHIEVEMENT_CHAINS === 'undefined' || typeof ACH_PROGRESS === 'undefined') return 0;
-        var total = 0;
-        ACHIEVEMENT_CHAINS.forEach(function(chain){
-          var prog = ACH_PROGRESS[chain.id] || 0;
-          chain.tiers.forEach(function(t){ if (prog >= t.goal) total++; });
-        });
-        return total;
-      })(),
-      ach_total: 70,
-      ach_cb: 'ach_main'
-    };
-    })(),
-    player_stats: (function(){
-      // Sessao #37 (2026-05-25): hidrata ABATES/SEQUENCIA do server. Antes
-      // hardcoded kills:23, streak:3 — char novo via 23 abates falsos.
-      var sps = window._serverPlayerStats || {};
-      return {
-        kills: (typeof sps.kills === 'number') ? sps.kills : 0,
-        streak: (typeof sps.streak === 'number') ? sps.streak : 0,
-        kills_cb: 'kills_log', streak_cb: 'streak_log'
-      };
-    })(),
+      ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
+    },
+    player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
     daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' }
     /* dm_tip REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
   };
@@ -10569,37 +10377,6 @@ function _titleCase(str){
     function(_, sep, c){ return sep + c.toUpperCase(); });
 }
 
-// Canonical mapping classe -> heraldic icon ID. Normaliza acentos pra cobrir
-// nomes do backend ("Bárbaro", "Clérigo"). Sessao #38 (2026-05-26) bug fix:
-// antes "Bárbaro" virava "bárbaro" e o lookup falhava -> fallback ic-guerreiro
-// (icone errado). Tambem unifica os 5 lugares que mapeavam class->icon de
-// formas inconsistentes (alguns concatenavam 'ic-' + clsKey direto).
-window._classToHeraldic = function(clsName){
-  if (!clsName) return 'ic-guerreiro';
-  // Normaliza: lowercase + strip diacriticos (NFD remove acentos) + primeiro token
-  var k = String(clsName).toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')    // strip combining diacritics
-    .split(' ')[0]                                       // first word
-    .replace(/[^a-z]/g, '');                             // strip remaining non-letters
-  var MAP = {
-    mago:        'ic-mago',
-    guerreiro:   'ic-guerreiro',
-    sacerdote:   'ic-clerigo',
-    sacerdotisa: 'ic-clerigo',
-    clerigo:     'ic-clerigo',
-    ladino:      'ic-ladino',
-    patrulheiro: 'ic-patrulheiro',
-    paladino:    'ic-paladino',
-    bardo:       'ic-bardo',
-    druida:      'ic-druida',
-    monge:       'ic-monge',
-    barbaro:     'ic-barbaro',
-    feiticeiro:  'ic-feiticeiro',
-    bruxo:       'ic-bruxo'
-  };
-  return MAP[k] || 'ic-guerreiro';
-};
-
 // === HALL DE PERSONAGENS — replica fiel valdoria-webapp/web/index.html #screen-chars ===
 // Estrutura idêntica: mini-orb + título "Selecione seu Personagem" + lista de
 // .wa-char-card (icon + info + check radio) + botão Jogar + botão Sair.
@@ -10630,11 +10407,25 @@ function _showCharactersPopup(){
   } catch(e){ console.warn('[CITY] hall audio:', e); }
 
   // Helper: classe → ID heráldico canonical (regra No NPC Emotes)
-  // Sessao #38 (2026-05-26): delega pro window._classToHeraldic global que
-  // normaliza acentos. Antes este mapa local nao tratava "Bárbaro"/"Clérigo"
-  // -> caia no fallback ic-guerreiro (icone errado).
   function _hallClassToHeraldic(cls){
-    return window._classToHeraldic(cls);
+    var k = (cls || '').toLowerCase().split(' ')[0];
+    var MAP = {
+      mago:        'ic-mago',
+      guerreiro:   'ic-guerreiro',
+      sacerdotisa: 'ic-clerigo',
+      sacerdote:   'ic-clerigo',
+      clerigo:     'ic-clerigo',
+      ladino:      'ic-ladino',
+      patrulheiro: 'ic-patrulheiro',
+      paladino:    'ic-paladino',
+      bardo:       'ic-bardo',
+      druida:      'ic-druida',
+      monge:       'ic-monge',
+      barbaro:     'ic-barbaro',
+      feiticeiro:  'ic-feiticeiro',
+      bruxo:       'ic-bruxo'
+    };
+    return MAP[k] || 'ic-guerreiro';
   }
 
   // X-6.5.51AM (2026-05-08) BUG FIX: em REMOTE mode (token+api+uid no URL),
@@ -10910,31 +10701,6 @@ function _showCharactersPopup(){
   });
   var createBtn = bodyEl.querySelector('.hall-btn-create');
   if (createBtn) createBtn.addEventListener('click', async function(){
-    /* Sessao #38 (2026-05-25): user reportou "quando clico em Criar Novo
-       Personagem está demorando um pouco para carregar". Otimizacao:
-         1. Mostra transition loader IMEDIATAMENTE (full-screen, persistente)
-            em vez de toast efemero que desaparece em 2s deixando um gap visual.
-         2. Pre-carrega character_creator/index.html em background (link prefetch)
-            paralelo ao handshake — reduz tempo de navegacao quando o redirect dispara.
-         3. Disable do botao pra evitar double-click. */
-    if (createBtn._creating) return;
-    createBtn._creating = true;
-    createBtn.style.opacity = '0.5';
-    createBtn.style.pointerEvents = 'none';
-    /* Loading screen persistente — fica visivel ate character_creator
-       assumir com seu proprio loading. Evita gap entre cidade e creator. */
-    if (window._vTransitionLoader && typeof window._vTransitionLoader.show === 'function') {
-      try { window._vTransitionLoader.show('Forjando novo personagem…'); } catch (e) {}
-    }
-    /* Prefetch hint pro browser comecar a baixar o creator em paralelo */
-    try {
-      var pre = document.createElement('link');
-      pre.rel = 'prefetch';
-      pre.href = '/character_creator/index.html';
-      pre.as = 'document';
-      document.head.appendChild(pre);
-    } catch (_e){}
-
     var params = new URLSearchParams(window.location.search);
     var token = params.get('token');
     var api = params.get('api');
@@ -10946,11 +10712,7 @@ function _showCharactersPopup(){
       return;
     }
     if (!token || !api){
-      if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
-      vToast('Sessão não encontrada. Faça login novamente.', 'err');
-      createBtn._creating = false;
-      createBtn.style.opacity = '';
-      createBtn.style.pointerEvents = '';
+      vToast('Sessão não encontrada. Faça login novamente.');
       return;
     }
     /* X-6.5.51AK (2026-05-08) — handshake pra obter creation_token novo.
@@ -10961,6 +10723,7 @@ function _showCharactersPopup(){
     var creationToken = token;  // fallback se handshake falhar
     var charId = '';
     try {
+      vToast('🎭 Preparando criação...');
       var apiTrim = api.replace(/\/$/, '');
       var resp = await fetch(apiTrim + '/api/character/new_session', {
         method: 'POST',
@@ -10976,28 +10739,16 @@ function _showCharactersPopup(){
           creationToken = data.token;
           charId = data.char_id || '';
         } else {
-          if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
-          vToast('⚠️ Sessão inválida. Faça login no bot.', 'err');
-          createBtn._creating = false;
-          createBtn.style.opacity = '';
-          createBtn.style.pointerEvents = '';
+          vToast('⚠️ Sessão inválida. Faça login no bot.');
           return;
         }
       } else {
-        if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(e){}
-        vToast('⚠️ Erro de sessão (' + resp.status + ').', 'err');
-        createBtn._creating = false;
-        createBtn.style.opacity = '';
-        createBtn.style.pointerEvents = '';
+        vToast('⚠️ Erro de sessão (' + resp.status + ').');
         return;
       }
     } catch (e) {
       console.warn('[CITY] new_session handshake failed:', e);
-      if (window._vTransitionLoader) try { window._vTransitionLoader.hide(); } catch(_e){}
-      vToast('⚠️ Erro de conexão.', 'err');
-      createBtn._creating = false;
-      createBtn.style.opacity = '';
-      createBtn.style.pointerEvents = '';
+      vToast('⚠️ Erro de conexão.');
       return;
     }
     var newParams = new URLSearchParams();
@@ -11009,7 +10760,6 @@ function _showCharactersPopup(){
     if (env) newParams.set('env', env);
     newParams.set('new', '1');
     window.__valdoria_transitioning = true;
-    /* Loader continua visivel ate character_creator assumir — nao hide aqui. */
     window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');
@@ -11049,13 +10799,14 @@ function _showCharactersPopup(){
 }
 
 // X-6.5.51AR (2026-05-08) — Confirm popup pra APAGAR personagem (com janela de
-// recuperação). Sessao #38 (2026-05-25): janela 1-clique expandida de 15 → 30
-// dias por request do user.
-// Skeleton (character_ui_manage.py:52 + web_auth.py:_get_deleted_characters):
-//   _RESTORE_DAYS = 30 (1-clique), _RETENTION_DAYS = 180 (max via ticket).
+// recuperação de 15 dias). User pediu: "ao invés de arquivar informe que será
+// apagado mas poderá ser restaurado facilmente se o jogador quiser, num prazo
+// máximo, veja qual prazo existe no esqueleto do hall de personagens".
+// Skeleton (character_ui_manage.py:52): _RESTORE_DAYS=15 (1-clique),
+// _RETENTION_DAYS=180 (max via ticket).
 function _showDeleteCharConfirm(charId, charName){
   if (typeof _showInfoPopup !== 'function'){
-    if (!confirm('Apagar ' + charName + '? (recuperável em até 30 dias)')) return;
+    if (!confirm('Apagar ' + charName + '? (recuperável em até 15 dias)')) return;
     _doDeleteChar(charId, charName);
     return;
   }
@@ -11068,18 +10819,18 @@ function _showDeleteCharConfirm(charId, charName){
       + _titleCase(charName) + '</p>'
       + '<div style="background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.25); '
       + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 30 dias</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 15 dias</p>'
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'Por <b>30 dias</b>, você poderá restaurar este personagem com 1 clique '
+      + 'Por <b>15 dias</b>, você poderá restaurar este personagem com 1 clique '
       + 'na secção <em>Personagens Apagados</em> abaixo.'
       + '</p>'
       + '</div>'
       + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
       + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">📩 Após 30 dias — via ticket (sem garantia)</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">📩 Após 15 dias — via ticket</p>'
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'Entre 30 e 180 dias, restauração apenas via ticket de suporte (apenas '
-      + 'personagens nível 2+). <b>Restauração não é garantida.</b>'
+      + 'Entre 15 e 180 dias, restauração apenas via ticket de suporte (apenas '
+      + 'personagens nível 2+).'
       + '</p>'
       + '</div>'
       + '<p style="margin: 0; font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-faint, #8a7a68); '
@@ -11122,31 +10873,7 @@ function _doDeleteChar(charId, charName){
     return r.json();
   }).then(function(data){
     if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-    /* Sessao #33 (2026-05-25): BUG FIX user reportou — ao apagar char ATIVO
-       enquanto na cidade, a tela continua mostrando o char deletado. Server
-       ja atualizou active_char_id pro proximo, mas o webapp local nao reload.
-       Fix: detecta se o char deletado era o ativo (window._charId), e nesse
-       caso redireciona pra /play/?skipTitle=1 — o /play/ resolve via initData
-       e carrega o NOVO active_char_id automaticamente. */
-    var deletedWasActive = (window._charId && (window._charId === charId));
-    if (deletedWasActive) {
-      vToast('🗑 ' + _titleCase(charName) + ' arquivado. Trocando personagem...');
-      window.__valdoria_transitioning = true;
-      var _base = location.origin;
-      var _qs = new URLSearchParams(location.search);
-      // Preserva token/api/uid (sessao continua valida) e adiciona skipTitle=1
-      var _params = new URLSearchParams();
-      if (_qs.get('token')) _params.set('token', _qs.get('token'));
-      if (_qs.get('api')) _params.set('api', _qs.get('api'));
-      if (_qs.get('uid')) _params.set('uid', _qs.get('uid'));
-      _params.set('skipTitle', '1');
-      _params.set('_cb', Date.now());
-      setTimeout(function(){
-        location.replace(_base + '/play/?' + _params.toString());
-      }, 600);
-      return;
-    }
-    // Char nao-ativo deletado: apenas atualiza popup
+    // Update local mock with server-returned active list
     if (data && data.characters){
       window._mockCharacters = data.characters.map(function(c){
         return {
@@ -11155,7 +10882,7 @@ function _doDeleteChar(charId, charName){
           cls: (c.class_name || '').toLowerCase(),
           race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: window._classToHeraldic(c.class_name),
+          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
           active: false  // none auto-activated; user must select Jogar
         };
       });
@@ -11216,12 +10943,11 @@ function _loadHallArchivedChars(){
        - expired: chip cinza "Não recuperável" (lvl 1 + > 15d) */
     var html = '';
     chars.forEach(function(c){
-      var iconId = window._classToHeraldic(c.class_name);
+      var iconId = 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]);
       var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
       var rk = c.restore_kind || 'one_click';
       var dpl = c.days_passed || 0;
-      // Sessao #38 (2026-05-25): fallback 15 → 30 (janela 1-clique expandida).
-      var drOC = c.days_remaining_one_click != null ? c.days_remaining_one_click : 30;
+      var drOC = c.days_remaining_one_click != null ? c.days_remaining_one_click : 15;
       var drTk = c.days_remaining_ticket != null ? c.days_remaining_ticket : 180;
       // Status badge text + color
       var statusBadge = '';
@@ -11293,119 +11019,22 @@ function _loadHallArchivedChars(){
         _doRestoreChar(btn.getAttribute('data-arch-id'), btn.getAttribute('data-arch-name') || '?');
       });
     });
-    // Wire ticket buttons (>30 days, lvl 2+)
+    // Wire ticket buttons (>15 days, lvl 2+)
     listEl.querySelectorAll('.hall-arch-ticket').forEach(function(btn){
       btn.addEventListener('click', function(ev){
         ev.stopPropagation();
         var nm = btn.getAttribute('data-arch-name') || 'este personagem';
-        _showRecoveryTicketInfo(nm);
+        if (typeof vToast === 'function') {
+          vToast('📩 Tickets de suporte em breve. Use /ticket no bot Telegram.', 4000);
+        } else {
+          alert('Tickets de suporte: use /ticket no bot Telegram para restaurar ' + nm + '.');
+        }
       });
     });
-
-    // Sessao #38 (2026-05-25): user pediu — "caso exista personagem excluido
-    // a mais de 30 dias, apareca um botao de abertura de ticket no FINAL da
-    // lista dos personagens para recuperar, para solicitar recuperar um
-    // personagem antigo, informando que nao e garantido que seja restaurado".
-    // Conta personagens elegiveis pra ticket (restore_kind === 'ticket').
-    var ticketChars = chars.filter(function(c){ return c.restore_kind === 'ticket'; });
-    if (ticketChars.length > 0) {
-      _renderConsolidatedTicketButton(ticketChars);
-    }
   }).catch(function(err){
     console.warn('[CITY] deleted-characters fetch failed:', err);
     var section = document.getElementById('hall-archived-section');
     if (section) section.style.display = 'none';
-  });
-}
-
-// Sessao #38 (2026-05-25): user pediu — botao consolidado de ticket no FINAL
-// da lista quando houver personagens deletados ha mais de 30 dias (elegiveis
-// pra ticket). Mostra info popup explicando que restauracao NAO e garantida.
-
-function _renderConsolidatedTicketButton(ticketChars){
-  /* Insere botao "Recuperar Personagem Antigo" apos o botao Sair (#hall-btn-logout).
-     Idempotente: remove versao previa antes de adicionar. */
-  var existing = document.getElementById('hall-btn-old-recovery');
-  if (existing) existing.remove();
-  var logoutBtn = document.querySelector('.hall-btn-logout');
-  if (!logoutBtn) return;
-  var btn = document.createElement('button');
-  btn.id = 'hall-btn-old-recovery';
-  btn.className = 'hall-btn-old-recovery';
-  btn.style.cssText = 'display:block; width: 100%; margin-top: var(--v-space-md, 8px); '
-    + 'padding: var(--v-space-md, 8px) var(--v-space-xl, 16px); '
-    + 'background: linear-gradient(180deg, rgba(208,128,112,0.12), rgba(208,128,112,0.04)); '
-    + 'border: 1px dashed #d08070; '
-    + 'border-radius: var(--v-radius, 10px); '
-    + 'font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-base, 13px); '
-    + 'color: #d08070; cursor: pointer; min-height: 44px; text-align: center;';
-  btn.innerHTML = '📩 Recuperar Personagem Antigo'
-    + ' <span style="font-size: calc(10px * var(--v-font-scale, 1)); opacity: 0.75; font-style: italic;">'
-    + '(via ticket — sem garantia)'
-    + '</span>';
-  btn.addEventListener('click', function(){
-    _showRecoveryTicketInfo(null, ticketChars);
-  });
-  logoutBtn.parentNode.insertBefore(btn, logoutBtn.nextSibling);
-}
-
-function _showRecoveryTicketInfo(charName, ticketChars){
-  /* Popup de info explicando o processo de ticket. Mostra a lista de
-     personagens elegiveis (se passados via 2o argumento) ou o nome
-     especifico (se aberto pelo botao per-char). */
-  if (typeof _showInfoPopup !== 'function') {
-    var fallback = 'Para recuperar personagens deletados ha mais de 30 dias, '
-      + 'envie /ticket no bot Telegram com o nome do personagem. '
-      + 'Restauracao NAO e garantida.';
-    vToast(fallback, 'warn');
-    return;
-  }
-  var listHtml = '';
-  if (ticketChars && ticketChars.length) {
-    listHtml = '<div style="background: rgba(58,48,40,0.4); border: 1px solid var(--v-border, #4a3828); '
-      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-gold-light, #dbb668); font-weight: 700;">Personagens elegíveis:</p>';
-    ticketChars.forEach(function(c){
-      var nm = _titleCase(c.name || '?');
-      var lv = c.level || 1;
-      var cls = _titleCase(c.class_name || '');
-      var dpl = c.days_passed || 0;
-      listHtml += '<p style="margin: 4px 0 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0);">'
-        + '<b>' + nm + '</b> — Nv ' + lv + (cls ? ' ' + cls : '') + ' · há ' + dpl + ' dias'
-        + '</p>';
-    });
-    listHtml += '</div>';
-  } else if (charName) {
-    listHtml = '<p style="margin: 0 0 10px; color: var(--v-text-bright, #e8dcc8); font-weight: 700; font-size: calc(15px * var(--v-font-scale, 1));">'
-      + _titleCase(charName) + '</p>';
-  }
-  _showInfoPopup({
-    icon: '📩',
-    title: 'Recuperar Personagem Antigo',
-    npc: 'Hall de Personagens',
-    desc: '<div style="text-align:left;">'
-      + listHtml
-      + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
-      + 'border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">⚠️ Restauração não garantida</p>'
-      + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
-      + 'Personagens deletados há mais de <b>30 dias</b> só podem ser restaurados via ticket de suporte. '
-      + 'A restauração depende da disponibilidade dos backups e <b>não é garantida</b>.'
-      + '</p>'
-      + '</div>'
-      + '<div style="background: rgba(196,149,58,0.08); border: 1px solid rgba(196,149,58,0.25); '
-      + 'border-radius: 6px; padding: 10px 12px;">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">📋 Como solicitar</p>'
-      + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); line-height: 1.5;">'
-      + '1. Volte ao bot Telegram<br>'
-      + '2. Envie o comando <code style="background:rgba(196,149,58,0.15); padding:1px 6px; border-radius:3px;">/ticket</code><br>'
-      + '3. Informe o nome do personagem e detalhes<br>'
-      + '4. Aguarde resposta do suporte'
-      + '</p>'
-      + '</div></div>',
-    confirmLabel: 'Entendi',
-    cancelLabel: null,
-    onConfirm: function(){ /* só fecha popup */ }
   });
 }
 
@@ -11435,7 +11064,7 @@ function _doRestoreChar(charId, charName){
           id: c.id || c.char_id, name: c.name,
           cls: (c.class_name || '').toLowerCase(), race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: window._classToHeraldic(c.class_name),
+          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
           active: false
         };
       });
@@ -12143,15 +11772,14 @@ function _showCharSwitchConfirm(picked){
 
 // 2026-05-21: aplicar font-size salvo no boot (antes do popup abrir).
 // Evita "flash" entre normal e pref do user.
-// Sessao #37 v10 (2026-05-25): boot font-size com validacao whitelist.
-// Aceita SOMENTE small/normal/large. Valor invalido cai pra normal.
+// Sessao #37 (2026-05-25): collapse legacy xlarge -> large + scale canonical 1.15
+// (consistente com creator onboarding + valdoria-design.css).
 (function _initFontSizeOnBoot(){
   try {
     var sz = localStorage.getItem('valdoria_font_size') || 'normal';
     if (sz === 'xlarge') sz = 'large';  // legacy collapse
-    if (['small','normal','large'].indexOf(sz) < 0) {
-      sz = 'normal';  // graceful fallback for invalid values
-    }
+    /* Sessao #37 v10 (2026-05-25): validacao whitelist — invalid -> normal */
+    if (['small','normal','large'].indexOf(sz) < 0) sz = 'normal';
     if (document.body) document.body.setAttribute('data-font-size', sz);
     else {
       document.addEventListener('DOMContentLoaded', function(){
@@ -12297,12 +11925,10 @@ function _showSettingsPopup(){
   // SEÇÃO 4: Tamanho de Fonte (ic-fonte — letra A serif)
   // 2026-05-21: User pediu REMOVER picker de família de fonte (fonte fixa Cinzel/MedievalSharp).
   // Em vez disso: oferecer tamanho A- / A / A+ (sem quebrar layout — só body text scale ±10%).
-  /* Sessao #37 (2026-05-25): scale canonical = 1.15 (era 1.1 — fixado pra
-     consistencia com creator onboarding e valdoria-design.css body[data-font-size="large"]). */
   var FONT_SIZES = [
     { id: 'small',  label: 'A',  scale: '0.9',  font: '12px' },
     { id: 'normal', label: 'A',  scale: '1.0',  font: '14px' },
-    { id: 'large',  label: 'A',  scale: '1.15', font: '16px' }
+    { id: 'large',  label: 'A',  scale: '1.1',  font: '16px' }
   ];
   html += _sectionHeader('ic-fonte', 'Tamanho da Fonte');
   html += '<div class="font-size-picker" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--v-space-sm, 6px);">';
@@ -12422,8 +12048,8 @@ function _showSettingsPopup(){
       var size = btn.getAttribute('data-font-size');
       _setPref('valdoria_font_size', size);
       document.body.setAttribute('data-font-size', size);
-      /* Sessao #37 v8: scale e tokens vem do CSS body[data-font-size]
-         em valdoria-design.css. NAO setar via JS (conflitava). */
+      /* Sessao #37 v8: scale + tokens via CSS body[data-font-size] em
+         valdoria-design.css. NAO setar via JS. */
       if (window.vHaptic) window.vHaptic('light');
       _showSettingsPopup();
     });
@@ -14590,8 +14216,8 @@ function _showDailyLoginPopup(info){
   var ov = document.createElement('div');
   ov.id = 'daily-login-overlay';
   ov.style.cssText = 'position:absolute; inset:0; z-index:10500; '
-    + 'background:radial-gradient(ellipse at 50% 30%, rgba(255,180,80,0.20) 0%, rgba(20,12,6,0.92) 60%, rgba(8,5,3,0.96) 100%); '
-    + 'backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); '
+    + 'background:radial-gradient(ellipse at 50% 30%, rgba(255,180,80,0.20) 0%, rgba(20,12,6,0.96) 60%, rgba(8,5,3,0.98) 100%); '
+    /* Sessão #38 perf P0: backdrop-filter removido (GPU stalls em mobile). Opacidade aumentada para compensar. */
     + 'display:flex; align-items:center; justify-content:center; '
     + 'animation:vDailyFadeIn 0.6s ease-out;';
 
@@ -15621,7 +15247,7 @@ var INN_REST_FLAVORS = [
   'O cheiro de pão fresco paira no ar acolhedor da estalagem.',
   'Vozes abafadas de viajantes contando histórias chegam do salão principal.',
   'Uma vela derrete lentamente no parapeito da janela, projetando sombras dançantes.',
-  'O gato gordo do Grifo ronrona aos seus pés, indiferente ao mundo.',
+  'O gato gordo da Pena-Dourada ronrona aos seus pés, indiferente ao mundo.',
   'Gotas de chuva batem suavemente no telhado de madeira do Grifo.',
   'O ranger da tábua do chão denuncia Martha verificando os quartos silenciosamente.',
   'Um bardo afina seu instrumento no canto, prometendo melodias para a noite.',
@@ -15630,7 +15256,7 @@ var INN_REST_FLAVORS = [
 ];
 var INN_AMBIENT = [
   'A lareira crepita baixinho.',
-  'O familiar aroma do Grifo te recebe.',
+  'O familiar aroma da Pena-Dourada te recebe.',
   'Martha acena brevemente ao te ver entrar.'
 ];
 var INN_LONG_REST_COOLDOWN_MESSAGES = [
@@ -16171,18 +15797,18 @@ function _buildTavernMockData(player){
     }),
     services: [
       // Replica canonical tavern.py L130-138 (TavernManager.get_menu)
-      // Sessao #37 v17 (2026-05-25): labels abreviadas pra caber em modo Maior:
-      // Exploradores→Aventura, Mesa de Jogos→Jogos, Mural de Avisos→Mural
       { icon: _heralIco('ic-dialogo'), label: 'Boatos',           cb: 'tavern_rumor_buy',     cost: 5 },
-      { icon: _heralIco('ic-cerveja'), label: 'Bebidas',          cb: 'tavern_drinks_open' },
+      { icon: _heralIco('ic-cerveja'), label: 'Bebidas',           cb: 'tavern_drinks_open' },
+      // Sessao #37 v17: labels abreviadas (Exploradores→Aventura, Mesa de Jogos→Jogos)
       { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',  cb: 'tavern_mercenaries_open' },
       { icon: _heralIco('ic-grupo'), label: 'Aventura',           cb: 'tavern_adventurers_open' },
       { icon: _heralIco('ic-cartas'), label: 'Jogos',             cb: 'tavern_games_open' },
-      { icon: _heralIco('ic-bardo'), label: 'Bardo',              cb: 'tavern_bard_open',
+      { icon: _heralIco('ic-bardo'), label: 'Bardo',             cb: 'tavern_bard_open',
         badge: 'Inspiração 30%' },  // canonical TavernBardManager (tavern_bard.py)
-      { icon: _heralIco('ic-cerveja'), label: 'Socializar',       cb: 'tavern_carousing_open' },
-      { icon: _heralIco('ic-stat-wis'), label: 'Informações',     cb: 'tavern_gather_open' },
-      { icon: _heralIco('ic-stat-attack'), label: 'Rinha',        cb: 'tavern_pitfight_open' },
+      { icon: _heralIco('ic-cerveja'), label: 'Socializar',        cb: 'tavern_carousing_open' },
+      { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
+      { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
+      // Sessao #37 v17: Mural de Avisos→Mural
       { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' }
     ]
   };
@@ -16475,7 +16101,7 @@ function _renderInnHubAAA(container, data) {
     +   '<div class="inn-smoke"></div>'
     // Título centralizado
     +   '<div class="inn-title">ESTALAGEM</div>'
-    +   '<div class="inn-sub">◆ do Grifo Dourado ◆</div>'
+    +   '<div class="inn-sub">◆ do Pena-Dourada ◆</div>'
     +   '<div class="inn-meta">lareira acesa · luar nas janelas</div>'
     + '</div>';
 
@@ -18259,9 +17885,10 @@ function _buildMarketMockData(player){
     item_count: (window._bankItems || []).length,
     flavor: atmosphere,
     merchants: presentMerchants,
+    // 2026-05-27: SVG _heralIco substituído por PNG (regra "no SVG in city").
     extras: [
-      { icon: _heralIco('ic-bolsa'), label: 'Vender Itens', cb: 'market_sell_open' },
-      { icon: _heralIco('ic-runas'), label: 'Escriba Rúnico', cb: 'market_rune_redirect',
+      { icon: '<img src="../shared/img/services/svc-vender.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
+      { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
         badge: 'Eirik' }
     ],
     wandering_npcs: wandering
@@ -18809,7 +18436,7 @@ function _buildArenaMockData(player){
 var RELATIONS_NPCS = [
   { id: 'rel_martha',  icon: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.png' },
   { id: 'rel_grom',    icon: '<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.png' },
-  { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',     name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
+  { id: 'rel_aldric',  icon: '<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',     name: 'Guarda Aldric', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
   { id: 'rel_aldwin',  icon: '<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.png' },
   { id: 'rel_elara',   icon: '<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',       name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.png' },
   { id: 'rel_thorne',  icon: '<svg class="v-heraldic"><use href="#ic-ach-forjador"/></svg>',  name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: null },
@@ -19457,7 +19084,7 @@ var INN_NPCS = [{
   id: 'inn_martha',
   name: 'Martha',
   role: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg> Estalajadeira',
-  desc: 'Estalajadeira do Grifo Dourado. Tem o hábito de tratar todo mundo como filho — desde que pague a conta. Quando reconhece um veterano, abre o melhor barril sem cobrar.',
+  desc: 'Estalajadeira do Pena-Dourada. Tem o hábito de tratar todo mundo como filho — desde que pague a conta. Quando reconhece um veterano, abre o melhor barril sem cobrar.',
   greetings: [
     '<i>Martha sai de trás do balcão e te abraça como se fosse parente.</i> "Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."',
     '<i>Martha ergue uma sobrancelha enquanto seca um copo.</i> "De volta? Dorme aí, mas avisa se for sair na madrugada. Não gosto de portas abertas à noite."',
@@ -19759,10 +19386,8 @@ function _renderQuestDiary(bodyEl){
      - Empty state ilustrado (scroll + flavor lore)
      - Hover lift effect em cards
   ============================================================================= */
-  // Sessao #37 v16 (2026-05-25): labels abreviadas pra caber em modo Maior.
-  // Antes: "Disponíveis" (11ch) e "Concluídas" (10ch) truncavam pra "DISPONÍVEI..." e "CONCLUÍDA..."
-  // Agora: "Novas" (5ch) e "Feitas" (6ch) — semantica preservada, PT-BR natural.
   var TABS = [
+    // Sessao #37 v16: labels abreviadas (Disponíveis→Novas, Concluídas→Feitas)
     { id: 'ready',      label: 'Prontas',  icon: '✓', count: counts.ready,     color: '#7cdb7c' },
     { id: 'active',     label: 'Ativas',   icon: '⚔', count: counts.active,    color: '#c4953a' },
     { id: 'available',  label: 'Novas',    icon: '◈', count: counts.available, color: '#9b8e7c' },
@@ -19917,15 +19542,7 @@ function _renderQuestDiary(bodyEl){
         + 'animation-delay:' + (qIdx * 0.04) + 's;'
         + '">';
 
-      // Ícone com moldura ornate
-      html += '<div class="qd-icon" '
-        + 'style="flex-shrink:0;width:38px;height:38px;'
-        + 'display:flex;align-items:center;justify-content:center;'
-        + 'background:radial-gradient(circle,' + (q.status === 'ready' ? 'rgba(124,219,124,0.20)' : 'rgba(196,149,58,0.18)') + ' 0%,rgba(42,36,32,0.6) 100%);'
-        + 'border:1px solid ' + borderColor + ';border-radius:6px;'
-        + 'box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);">'
-        + (q.icon || '<svg viewBox="0 0 120 120" style="width:22px;height:22px;color:var(--v-gold,#c4953a);"><use href="#ic-dialogo"/></svg>')
-        + '</div>';
+      // 2026-05-27: SVG icon removido (regra "no SVG in city" + "tela de missões só texto")
 
       // Info column
       html += '<div class="qd-info" style="flex:1;min-width:0;">';
@@ -19942,11 +19559,21 @@ function _renderQuestDiary(bodyEl){
         + 'style="font-size:calc(11px * var(--v-font-scale, 1));color:' + statusColor + ';line-height:1.3;font-weight:500;">'
         + statusLabel
         + '</div>';
-      // Description
+      // Description (resumo da missão)
       if (q.desc) {
         html += '<div class="qd-desc" '
           + 'style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-top:2px;line-height:1.35;font-style:italic;">'
           + q.desc
+          + '</div>';
+      }
+      // 2026-05-27: Mostrar OBJETIVO ATUAL (bug VIAJANTES NA ESTRADA sem objetivo)
+      if (q.obj && q.status !== 'history') {
+        html += '<div class="qd-obj" '
+          + 'style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#dbb668);margin-top:4px;line-height:1.35;'
+          + 'padding:4px 7px;background:rgba(0,0,0,0.25);border-left:2px solid var(--v-gold,#c4953a);'
+          + 'border-radius:0 3px 3px 0;">'
+          + '<span style="opacity:0.8;font-size:0.85em;letter-spacing:0.5px;text-transform:uppercase;">🎯 Objetivo: </span>'
+          + q.obj
           + '</div>';
       }
       // NPC name destaque
@@ -20053,8 +19680,8 @@ var DAILY_CHALLENGE = {
   enemies: ['3 Lobos Cinzentos', 'Lobo Alfa Sombra Branca'],
   reward_gold: 75,
   reward_xp: 150,
-  bonus_high: 'HP > 75% no fim → +50% XP/loot',
-  bonus_mid: 'HP > 50% no fim → +25% XP/loot'
+  bonus_high: 'HP > 75% no fim → +50% XP/espólio',
+  bonus_mid: 'HP > 50% no fim → +25% XP/espólio'
 };
 
 function _buildDailyChallengeMockData(player){
@@ -20103,7 +19730,7 @@ var BANK_ALDWIN_DEPOSIT = [
 var BANK_ALDWIN_WITHDRAW = [
   'Aldwin suspira levemente ao abrir o cofre. "Gaste com sabedoria, {name}."',
   'O banqueiro conta as moedas duas vezes antes de entregá-las. "Tudo em ordem."',
-  '"Precisando de fundos para a aventura?" — Aldwin entrega o ouro com um aceno. "Boa sorte."',
+  '"Precisando de fundos para a aventura?" — Aldwin entrega as Valdoritas com um aceno seco. "Boa sorte."',
   'Aldwin retira as moedas com precisão cirúrgica. "Contado e conferido, {name}."',
   '"Cuide bem desse ouro." — O banqueiro empurra a bolsa pela mesa com cuidado.',
   'Aldwin fecha o cofre e entrega o recibo. "Que esse investimento valha a pena."'
@@ -20907,7 +20534,7 @@ var SQUARE_NPCS = [
     icon: _heralIco('ic-aldeao'),      // velho Tom — morador
     name: 'Velho Tom',
     role: 'Morador de Rua',            // 🏚️ removido
-    desc: 'Um senhor de idade sentado em um papelão, observando tudo.',
+    desc: 'Um senhor de idade sentado num pano sobre uma caixa virada, observando tudo.',
     greetings: [
       '<i>O velho ergue os olhos cansados.</i> "Outro forasteiro? Tenho histórias se você tiver tempo."'
     ],
@@ -25719,7 +25346,7 @@ var CANON_INTERACTION_RESULTS = {
     "listen": [
       "Você se senta num barril próximo e escuta.\n\n🎵 <i>\"...e o cavaleiro beijou a lâmina antes da última carga, pois sabia que a espada era mais fiel que qualquer amante...\"</i>\n\nA balada arranca suspiros de duas comerciantes e faz um guarda enxugar o olho.",
       "Você para no meio do caminho, atraído pela melodia.\n\n🎵 <i>\"...e a serpente da montanha desceu sobre Valdória, mas a pastora não correu — ela cantou...\"</i>\n\nAs cordas do alaúde tremem numa nota grave e o silêncio da plateia diz tudo.",
-      "Você se encosta na fonte e deixa a música tomar conta.\n\n🎵 <i>\"...três moedas de ouro pelo beijo da bruxa, três moedas de prata pela verdade nua...\"</i>\n\nA canção picaresca faz crianças rirem sem entender e adultos rirem demais."
+      "Você se encosta na fonte e deixa a música tomar conta.\n\n🎵 <i>\"...três Valdoritas pelo beijo da bruxa, três moedas de prata pela verdade nua...\"</i>\n\nA canção picaresca faz crianças rirem sem entender e adultos rirem demais."
     ],
     "tip": [
       "Você lança uma moeda de ouro no chapéu gasto.\n\n🎵 <i>\"Ah! Um mecenas! Essa próxima é dedicada a você, nobre alma!\"</i>\n\nTaviel faz uma reverência exagerada e começa uma balada sobre um aventureiro generoso.",
@@ -25794,7 +25421,7 @@ var CANON_INTERACTION_RESULTS = {
   },
   "fortune_teller": {
     "predict": [
-      "Você coloca cinco moedas de ouro sobre o veludo púrpura.\n\n🔮 <i>\"Vejo... uma encruzilhada. Dois caminhos. Um leva à glória, o outro ao esquecimento. Ambos passam por fogo.\"</i>\n\nA névoa na esfera gira mais rápido e Zora fecha os olhos, como se doesse.",
+      "Você coloca cinco Valdoritas sobre o veludo púrpura.\n\n🔮 <i>\"Vejo... uma encruzilhada. Dois caminhos. Um leva à glória, o outro ao esquecimento. Ambos passam por fogo.\"</i>\n\nA névoa na esfera gira mais rápido e Zora fecha os olhos, como se doesse.",
       "Você paga e estende as mãos sobre a bola de cristal.\n\n🔮 <i>\"Interessante... alguém te observa de longe. Não é inimigo, não é amigo. É algo mais antigo que qualquer um dos dois.\"</i>\n\nAs velas de cera negra crepitam todas ao mesmo tempo.",
       "Você entrega as moedas e espera, tenso.\n\n🔮 <i>\"Seu passado carrega peso, mas seu futuro carrega asas. A pergunta é se vai soltar o peso antes de tentar voar.\"</i>\n\nZora abre os olhos — por um instante, suas íris parecem brancas como leite."
     ],
@@ -28810,7 +28437,7 @@ var CANON_FESTIVAL_FULL = {
     "arm_wrestling": {
       "name": "Braco de Ferro",
       "icon": "💪",
-      "desc": "Um orc apósentado administra a mesa de braço-de-ferro. \"Cinco moedas de ouro e um braço firme — e tudo que preciso!\"",
+      "desc": "Um orc apósentado administra a mesa de braço-de-ferro. \"Cinco Valdoritas e um braço firme — e tudo que preciso!\"",
       "cost": 5,
       "check": {
         "stat": "strength",
@@ -29998,7 +29625,7 @@ var CANON_BANK_DIALOGUE = {
   "aldwin_withdraw": [
     "Aldwin suspira levemente ao abrir o cofre. \"Gaste com sabedoria, {name}.\"",
     "O banqueiro conta as moedas duas vezes antes de entregá-las. \"Tudo em ordem.\"",
-    "\"Precisando de fundos para a aventura?\" — Aldwin entrega o ouro com um aceno. \"Boa sorte.\"",
+    "\"Precisando de fundos para a aventura?\" — Aldwin entrega as Valdoritas com um aceno seco. \"Boa sorte.\"",
     "Aldwin retira as moedas com precisão cirúrgica. \"Contado e conferido, {name}.\"",
     "\"Cuide bem desse ouro.\" — O banqueiro empurra a bolsa pela mesa com cuidado.",
     "Aldwin fecha o cofre e entrega o recibo. \"Que esse investimento valha a pena.\""
@@ -30546,8 +30173,8 @@ var CANON_ITEMS_DB = {
   'Manto Élfico':      {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'cloak', desc:'Vantagem em Furtividade ao se esconder.'},
   'Amuleto de Saúde':  {e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['accessory','magic','attunement'], s:'necklace', desc:'Imune a condição doente.'},
   // === MONSTER DROPS (canonical loot) ===
-  'Pelo de Texugo':       {e: _heralIco('ic-lobo'), v:3,   r:'common', t:['monster_part','material'],       desc:'Material loot.'},
-  'Chifre de Alce':       {e: _heralIco('ic-trofeu'), v:8,   r:'common', t:['monster_part','bone','trophy'],  desc:'Troféu loot.'},
+  'Pelo de Texugo':       {e: _heralIco('ic-lobo'), v:3,   r:'common', t:['monster_part','material'],       desc:'Material coletado.'},
+  'Chifre de Alce':       {e: _heralIco('ic-trofeu'), v:8,   r:'common', t:['monster_part','bone','trophy'],  desc:'Troféu de caça.'},
   'Galho Animado':        {e: _heralIco('ic-druida'), v:5,   r:'uncommon',t:['monster_part','wood','magic'], desc:'Material mágico raro.'},
   'Presa de Worg':        {e: _heralIco('ic-trofeu'), v:12,  r:'common', t:['monster_part','bone'],           desc:'Loot.'},
   'Folha da Dríade':      {e: _heralIco('ic-druida'), v:30,  r:'uncommon',t:['monster_part','magic','alchemy'], desc:'Ingrediente alquímico raro.'},
@@ -30573,7 +30200,7 @@ var CANON_ITEMS_DB = {
   'Runa de Chamas':    {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.15, effect:'bonus_damage', dice:'1d6', damage_type:'fire'}, desc:'Inscrição rúnica flamejante. Ao acertar, 15% de chance de causar +1d6 de dano de fogo.'},
   'Runa de Gelo':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_hit', chance:0.10, effect:'slow_target', penalty:-2}, desc:'Inscrição rúnica gélida. Ao acertar, 10% de chance de aplicar -2 no próximo ataque do alvo.'},
   'Runa de Cura':      {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'on_victory', chance:1.0, effect:'heal', dice:'2d4'}, desc:'Inscrição rúnica restauradora. Ao vencer combate, restaura 2d4 HP.'},
-  'Runa de Fortuna':   {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'passive', chance:1.0, effect:'loot_bonus', gold_bonus:0.05, drop_bonus:0.03}, desc:'Inscrição rúnica afortunada. +5% ouro de loot e +3% chance de drop de itens.'},
+  'Runa de Fortuna':   {e: _heralIco('ic-mochila'), v:300, r:'uncommon',  t:['rune','magic','inscribable'], rune_tier:2, rune_effect:{trigger:'passive', chance:1.0, effect:'loot_bonus', gold_bonus:0.05, drop_bonus:0.03}, desc:'Inscrição rúnica afortunada. +5% Valdoritas de espólio e +3% chance de drop de itens.'},
   // ─── Tier 3 (Level 7+, apenas bosses) ──────────────────────
   'Runa de Trovão':    {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_crit', chance:1.0, effect:'bonus_damage', dice:'2d8', damage_type:'thunder'}, desc:'Inscrição rúnica trovejante. Em acerto crítico, causa +2d8 de dano de trovão.'},
   'Runa de Absorção':  {e: _heralIco('ic-mochila'), v:800, r:'rare',      t:['rune','magic','inscribable'], rune_tier:3, rune_effect:{trigger:'on_hit_taken', chance:0.05, effect:'absorb_damage'}, desc:'Inscrição rúnica absorvente. Ao ser atingido, 5% de chance de absorver o dano como HP temporário.'},
@@ -30898,10 +30525,8 @@ function _shopGetFilters(npcId){
     if (tags.indexOf('tool') !== -1 || tags.indexOf('camping') !== -1) counts.tool++;
   });
   // Filtros visíveis (apenas os com count > 0)
+  // Sessao #37 v13: labels abreviadas pra caber em modo Maior
   var allFilters = [
-    // Sessao #37 v13 (2026-05-25): labels abreviadas pra caber em modo Maior.
-    // Antes: 'Armaduras', 'Consumíveis', 'Acessórios' truncavam (Arma..., Consu..., Acess...).
-    // Agora: emojis isolam funcao + label curto descritivo.
     { id:'all',        label:'Todos',         count:counts.all       },
     { id:'weapon',     label:'⚔️ Armas',      count:counts.weapon    },
     { id:'armor',      label:'🛡️ Defesa',     count:counts.armor     },
@@ -43283,7 +42908,7 @@ function _renderCityPopup(key){
   // 2026-05-20 task #37: Estalagem migrada para PADRAO_TAVERNA canonical (game-inn.js).
   // Prefere renderInnHub (novo, separado), fallback pra _renderInnHubAAA inline (legacy).
   if (key === 'inn') {
-    if (titleEl) titleEl.textContent = 'Estalagem Grifo Dourado';
+    if (titleEl) titleEl.textContent = 'Estalagem Pena-Dourada';
     if (typeof renderInnHub === 'function') {
       renderInnHub(bodyEl, _buildInnMockData(window.CITY_MOCK_PLAYER));
       return;
@@ -43579,7 +43204,7 @@ function _confirmGroupRestHpFull(room){
   }
   _showInfoPopup({
     icon: _heralIco('ic-sono'),
-    npc: 'Martha — Estalagem Grifo Dourado',
+    npc: 'Martha — Estalagem Pena-Dourada',
     title: 'Grupo já descansado?',
     desc: '<div style="text-align:left;line-height:1.5;">'
         + '<p style="margin:0 0 10px;color:var(--v-text,#d4c8b0);">'
@@ -43968,7 +43593,7 @@ var SUBSCREEN_DATA = {
   },
   'inn': {
     // Replica canonical inn.py L113-152 (InnManager.get_menu services)
-    header: '🛏️ Estalagem Grifo Dourado',
+    header: '🛏️ Estalagem Pena-Dourada',
     flavor: 'Martha, a estalajadeira, sorri ao te ver. Quartos cheiram a lavanda. Refeições caseiras esperam no salão.',
     npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-estalajadeira"/></svg> Martha — "Que bom que voltou! O que precisa hoje?"',
     buttons: [
@@ -46151,9 +45776,9 @@ var ACTION_HANDLERS = {
   'daily_player_2':         function(p){ vToast('🥈 Aelthar42 — 2º. 10 turnos / 88% HP / 3:12min.'); },
   'daily_player_3':         function(p){ vToast('🥉 Bornak77 — 3º. 12 turnos / 80% HP / 4:01min.'); },
   'daily_player_self':      function(p){ vToast('Você — Pendente. Inicie o desafio pra entrar no leaderboard!'); },
-  'daily_reward_high':      function(p){ vToast('💎 HP > 75% no fim — +50% XP/loot. 225 XP + 113 Valdoritas base.'); },
-  'daily_reward_mid':       function(p){ vToast('🟡 HP > 50% no fim — +25% XP/loot. 188 XP + 94 Valdoritas base.'); },
-  'daily_reward_low':       function(p){ vToast('🟢 HP qualquer — base XP/loot. 150 XP + 75 Valdoritas.'); },
+  'daily_reward_high':      function(p){ vToast('💎 HP > 75% no fim — +50% XP/espólio. 225 XP + 113 Valdoritas base.'); },
+  'daily_reward_mid':       function(p){ vToast('🟡 HP > 50% no fim — +25% XP/espólio. 188 XP + 94 Valdoritas base.'); },
+  'daily_reward_low':       function(p){ vToast('🟢 HP qualquer — base XP/espólio. 150 XP + 75 Valdoritas.'); },
 
   // Workshop
   'craft_main_hand':        function(p){ vToast('🗡️ Inscreve runa em arma principal. Requer fragmento + 25 Valdoritas.'); },
@@ -46356,7 +45981,7 @@ var QUEST_MAP = {
   defend:      { biomeKey: 'green_fields',    name: 'Campos Verdes' },
   // X-6.5.51BP: missão da adega — in-city (porão da Estalagem em Portões de Valdoria)
   cellar:      { biomeKey: 'plains',          name: 'Portões de Valdoria', inCity: true,
-                 cityHint: 'A adega fica no porão da Estalagem do Grifo Dourado — dentro da cidade.' }
+                 cityHint: 'A adega fica no porão da Estalagem do Pena-Dourada — dentro da cidade.' }
 };
 
 function _questMapEntry(questId){
@@ -46630,18 +46255,9 @@ function renderSubScreen(el, key){
     var cb = b && b[3];
     if (!cb) return true;
     // Filtro 1: quest_open_<id> some se já completada/abandonada
-    // OU se quest não está em QUESTS_ACTIVE (sessão #37 2026-05-25: bug fix —
-    // player novo via 2 quests mock ("lobos cinzentos" e "Falar com Lyana")
-    // mesmo sem ter aceitado nenhuma. Agora exige que a quest esteja na lista
-    // ativa do player pra aparecer no popup "Missões Ativas").
     if (cb.indexOf('quest_open_') === 0) {
       var qid1 = cb.substring('quest_open_'.length);
-      if (_isQuestCompletedOrAbandoned(qid1)) return false;
-      if (typeof QUESTS_ACTIVE !== 'undefined') {
-        var inActive1 = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid1; });
-        if (!inActive1) return false;
-      }
-      return true;
+      return !_isQuestCompletedOrAbandoned(qid1);
     }
     // X-6.5.51AV (2026-05-11) Filtro 2: accept_q_<id> some se já em ACTIVE
     // ou já completada/abandonada (depois de ter aceito + entregue).
@@ -46914,9 +46530,7 @@ var TIME_MONTHS = [
   'Glacimir',   // mês 11 — glacies (latim: gelo) — geada profunda
   'Nyctevar'    // mês 12 — nyx (grego: noite) — recolhimento, fim do ano
 ];
-// Sessao #37 v13 (2026-05-25): abreviacoes 3-letras pro topbar — em modo
-// "Maior" a temperatura sumia porque o topbar nao cabia. Nome completo
-// fica no tooltip (title attr). Pattern Jan/Fev/Mar — usuario reconhece.
+// Sessao #37 v13: abreviacoes 3-letras pro topbar caber em modo Maior
 var TIME_MONTHS_SHORT = [
   'Cae', 'Vex', 'Ver', 'Lyr', 'Sol', 'Pyr',
   'Mes', 'Rus', 'Thr', 'Cor', 'Gla', 'Nyc'
@@ -46972,9 +46586,7 @@ function renderCityTopBar(){
   var plabel = TIME_PERIOD_LABEL[period];
   var w = _getGameWeather(t.dayOfYear);
   var monthName = TIME_MONTHS[t.month];
-  // Sessao #37 v13 (2026-05-25): user reportou temperatura sumindo no topo
-  // em modo "Maior". Fix: usar abreviacao 3 letras (Jan/Fev/Mar-style)
-  // pra caber. Nome completo no tooltip + " · Ano N" removido (so ano).
+  // Sessao #37 v13: mes abreviado pra topbar caber em modo Maior
   var monthShort = (typeof TIME_MONTHS_SHORT !== 'undefined' && TIME_MONTHS_SHORT[t.month]) || monthName.substring(0,3);
   var hh = (t.hour < 10 ? '0' : '') + t.hour;
   var mm = (t.minute < 10 ? '0' : '') + t.minute;
@@ -46984,7 +46596,7 @@ function renderCityTopBar(){
     + '</div>'
     + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
     + '  <span class="ctb-item ctb-time">' + pemoji + ' ' + hh + ':' + mm + '</span>'
-    // Sessao #37 v13: monthShort (3 letras) + ano abreviado pra caber em "Maior"
+    // Sessao #37 v13: monthShort + ano abreviado pra caber em "Maior"
     + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthShort + ' · ' + t.year + '</span>'
     + '  <span class="ctb-item ctb-weather">' + w.icon + ' ' + w.temp + '°</span>'
     + '</div>';
@@ -47405,28 +47017,6 @@ function renderCityGroupPanel(){
   var el = document.getElementById('city-group-panel');
   if (!el) return;
   var p = window.CITY_MOCK_PLAYER;
-  // Sessao #38 (2026-05-25): user reportou — "durante o carregamento da
-  // tela da cidade acaba aparecendo o card azul de aventureiro que deve
-  // ser o fallback... remova o card, deixe sem nenhum no fallback, é
-  // melhor que mostrar algum e depois ser trocado".
-  //
-  // Detecta REMOTE mode sem server data ainda (carregamento).
-  // _serverPlayerStats e setado quando /api/game/state retorna.
-  // Em LOCAL mode (file://, sem token+api+uid), CITY_MOCK_PLAYER e canonical.
-  // Em REMOTE mode antes do server: ZERA o painel inteiro (sem placeholders),
-  // melhor que mostrar card fake "Aventureiro Mago Elfo" azul.
-  var _isRemoteLoading = (function(){
-    try {
-      var pp = new URLSearchParams(window.location.search);
-      var hasRemoteUrl = !!(pp.get('token') && pp.get('api') && pp.get('uid'));
-      var serverReady = !!window._serverPlayerStats;
-      return hasRemoteUrl && !serverReady;
-    } catch(e){ return false; }
-  })();
-  if (_isRemoteLoading) {
-    el.innerHTML = '';
-    return;
-  }
   // Slot 0 sempre é o player (sincronizado com CITY_MOCK_PLAYER)
   // USER REPORT 2026-05-14 #2 — propaga TODOS os campos REAIS do DB
   // (stats/ac/atk/dc/prof/hd/pending*) pro slot 0 da party.
@@ -49548,6 +49138,18 @@ function _drawQuestFocusHalo(ctx, biome, w, h, questTitle){
   if (!biome) return;
   var cx = biome.x * w;
   var cy = biome.y * h;
+  // Sessão #38 perf P0: gate por tier. Lite usa círculo dourado opaco sem pulse/gradient
+  // (gradient + sin/pulse a 120ms eram caros em Android 2GB sem benefício visual).
+  if (window._valdoriaPerformanceTier === 'lite') {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 44, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.85)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
   // Pulse 0..1 baseado em time
   var t = (performance.now ? performance.now() : Date.now()) / 600;
   var pulse = 0.5 + 0.5 * Math.sin(t);
@@ -50602,31 +50204,6 @@ document.addEventListener('DOMContentLoaded', function(){
       _toggleLogPanel();
     }
   });
-  // Auto-open Hall of Characters when returning from char creator via BackButton
-  // (User request 2026-05-26: "permita sair da tela de criação do personagem,
-  //  podendo voltar ao hall de personagens"). Creator chama _exitCreatorToHall()
-  // que navega para /cidade/?showHall=1 — aqui detectamos e abrimos o popup.
-  try {
-    var _hallParams = new URLSearchParams(window.location.search);
-    if (_hallParams.get('showHall') === '1') {
-      setTimeout(function(){
-        try {
-          if (typeof _showCharactersPopup === 'function') {
-            _showCharactersPopup();
-          }
-        } catch (e) {
-          console.warn('[CIDADE] auto-open hall failed:', e);
-        }
-        // Clean URL so reload doesn't re-trigger
-        try {
-          _hallParams.delete('showHall');
-          var _newQs = _hallParams.toString();
-          var _newUrl = window.location.pathname + (_newQs ? ('?' + _newQs) : '');
-          window.history.replaceState({}, '', _newUrl);
-        } catch (e) {}
-      }, 800);
-    }
-  } catch (e) {}
   _logCity('cidade.html ready');
 });
 
@@ -50754,7 +50331,7 @@ var RECURRING_NPCS = {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
     portraitImg: '/shared/img/npcs/estalajadeira.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
-    desc: 'Estalajadeira do Grifo Dourado. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
+    desc: 'Estalajadeira do Pena-Dourada. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
   // Usa portraitImg (PNG AI-generated gpt-image-2) em vez de heraldic SVG —
@@ -51314,7 +50891,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 // Mapa de defaults por NPC (name/desc/portrait/icon fallback)
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/aldric.png',  icon: 'ic-paladino' },
-  martha:      { name: 'Martha',              desc: 'Estalajadeira do Grifo Dourado',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
+  martha:      { name: 'Martha',              desc: 'Estalajadeira do Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Eldoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Eldoria',                portrait: '/shared/img/merchants/thorne.png',   icon: 'ic-guerreiro' },
@@ -51870,9 +51447,11 @@ function _playCityWalkAnimation(opts, onComplete) {
     if (typeof onComplete === 'function') onComplete();
     return;
   }
-  // Sessão #38 perf P0 (Fase 2.11): skip parallax em tier 'lite'.
-  // Loop tem 12+ createLinearGradient/createRadialGradient por frame.
-  // Em Android 2GB entregava 10-15fps. Lite mostra fade curto (800ms).
+  // Sessão #38 perf P0 (Fase 2.11): skip parallax inteiro em tier 'lite'.
+  // Loop tem 12+ createLinearGradient/createRadialGradient por frame (zero
+  // tier check antes). Em Android 2GB entregava 10-15fps. Agora lite mostra
+  // só um fade dourado curto (800ms) + onComplete — preserva ritmo de UX
+  // sem queimar CPU/GPU. Medium e full mantêm a animação cinematográfica.
   if (window._valdoriaPerformanceTier === 'lite') {
     if (typeof onComplete === 'function') setTimeout(onComplete, 800);
     return;
@@ -54327,7 +53906,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (typeof _playCityWalkAnimation === 'function') {
       _playCityWalkAnimation({
         title: fromAldric ? 'Para a Praça Central' : 'Eldoria',
-        subtitle: fromAldric ? 'Seguindo o conselho do Capitão Aldric' : 'Ao crepúsculo'
+        subtitle: fromAldric ? 'Seguindo o conselho do Guarda Aldric' : 'Ao crepúsculo'
       }, function(){
         // Após anim: navega pra square (continua city hub) + abre diálogo Corvus
         if (typeof navigateTo === 'function') navigateTo('square');
