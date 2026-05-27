@@ -295,6 +295,14 @@ Busca rápida:
             transform: translateX(0);
         }
 
+        /* Sessao #42 (2026-05-27): sub-rogue-expertise foi MOVIDO no HTML
+           (de dentro screen-class pra fora do screenViewport). Aqui sobrescreve
+           o transform default do .sub-screen.active pra centralizar
+           horizontalmente E slide vertical em vez de horizontal. */
+        #sub-rogue-expertise.active {
+            transform: translateX(-50%) translateY(0) !important;
+        }
+
         .sub-screen .screen-content {
             padding-top: 8px;
             padding-bottom: 16px;
@@ -3086,9 +3094,13 @@ Busca rápida:
                 <div class="sub-screen" id="sub-creator-detail-class">
                     <div class="screen-content" id="creatorDetailClassContent"></div>
                 </div>
-                <div class="sub-screen" id="sub-rogue-expertise">
-                    <div class="screen-content" id="rogueExpertiseContent"></div>
-                </div>
+                <!-- Sessao #42 (2026-05-27): sub-rogue-expertise MOVIDO daqui pra
+                     fora de screenViewport (apos </div></div> da linha ~3322).
+                     Motivo: era triggered no screen 5 (skills) mas estava no HTML
+                     dentro de screen-class (slide 3). Position:absolute relativo
+                     a screen-class fazia overlay aparecer em x=-867px (fora
+                     viewport). position:fixed nao funciona porque screen-track
+                     tem transform que cria stacking context. Solucao: mover HTML. -->
             </div>
 
             <!-- ═══ SCREEN 2: STATS ═══ -->
@@ -3299,6 +3311,17 @@ Busca rápida:
             </div>
 
         </div>
+    </div>
+
+    <!-- Sessao #42 (2026-05-27): sub-rogue-expertise MOVIDO pra cá (fora dos
+         screens). Antes estava dentro de screen-class (~linha 3109) mas era
+         triggered no screen 5 (skills). screen-track usa transform pra slide
+         horizontal entre screens, então position:absolute/fixed dentro dele
+         posicionava o overlay 867px à esquerda da viewport (fora da tela).
+         Aqui está em nível body, fora de qualquer stacking context com
+         transform — overlay aparece corretamente sobre toda viewport. -->
+    <div class="sub-screen" id="sub-rogue-expertise" style="position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(100%);max-width:430px;width:100%;height:100dvh;z-index:1000;">
+        <div class="screen-content" id="rogueExpertiseContent"></div>
     </div>
 
     <!-- Help popup (vPopup standard component) -->
