@@ -5934,22 +5934,39 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         // L1 SUBCLASS — Sub-screen (Cleric/Sorcerer/Warlock)
         // ═══════════════════════════════════════════════
+        // PADRAO_SUBCLASSE (sessao #45, 2026-05-27) — grid 2-col + modal vPopup
+        // detalhe. Usa shared/subclass-card.{css,js} (vSubclass.renderGrid()).
+        // Antes: lista vertical com .v-card + descricao+l1 inline.
         function buildSubclassSelect(classKey) {
             const subs = SUBCLASS_DATA[classKey];
             if (!subs) return;
             const cls = CLASSES[classKey];
-            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelSubclass()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">Escolha sua Subclasse</div>`;
-            html += `<div class="detail-subtitle">${cls.name} — escolha uma especialização de nível 1.</div></div>`;
-            for (const [scId, sc] of Object.entries(subs)) {
-                const sel_class = sel.subclass === scId ? ' selected' : '';
-                html += `<div class="v-card${sel_class}" onclick="selectSubclass('${scId}')">`;
-                html += `<div class="v-card-name">${sc.icon} ${sc.name}</div>`;
-                html += `<div class="v-card-desc">${sc.desc}</div>`;
-                html += `<div class="v-card-bonus">Nv.1: ${sc.l1.name} — ${sc.l1.desc}</div>`;
-                html += `</div>`;
-            }
-            document.getElementById('subclassSelectContent').innerHTML = html;
+            const root = document.getElementById('subclassSelectContent');
+            let header = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelSubclass()">← Voltar</button>`;
+            header += `<div class="detail-header"><div class="detail-title">Escolha sua Subclasse</div>`;
+            header += `<div class="detail-subtitle">${cls.name} — toque pra ver detalhes.</div></div>`;
+            header += `<div id="subclassGridMount"></div>`;
+            root.innerHTML = header;
+            const items = Object.entries(subs).map(([scId, sc]) => ({
+                id: scId,
+                name: sc.name,
+                selected: sel.subclass === scId
+            }));
+            vSubclass.renderGrid(document.getElementById('subclassGridMount'), items, {
+                onClick: function (scId) {
+                    const sc = subs[scId];
+                    const features = [];
+                    if (sc.l1) features.push({ level: 1, name: sc.l1.name, desc: sc.l1.desc });
+                    vSubclass.openDetail({
+                        id: scId,
+                        name: sc.name,
+                        desc: sc.desc,
+                        features: features,
+                        confirmLabel: 'Escolher ' + sc.name,
+                        onConfirm: function (id) { selectSubclass(id); }
+                    });
+                }
+            });
         }
 
         function selectSubclass(scId) {
