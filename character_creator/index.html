@@ -4405,16 +4405,21 @@ Busca rápida:
                 // Sessao #34 (2026-05-25): Rogue Expertise gate (PHB p.96 L1)
                 // Antes de avancar pra screen 6, ladino deve escolher 2 skills
                 // pra ganhar Especializacao (double prof bonus).
+                //
+                // Sessao #42 (2026-05-27): UX FIX — antes mostrava toast vermelho
+                // "Ladino: escolha 2 perícias com Especialização" E tentava abrir
+                // overlay via setTimeout(80ms). Toast aparecia sozinho e overlay
+                // nao abria (ou abria atras), user via mensagem mas sem UI clara
+                // pra interagir. Bug reportado: tela mostra "4/4" + toast vermelho
+                // mas trava sem opcao visivel. Agora: abre overlay DIRETAMENTE +
+                // marker __SILENT_BLOCK__ pra suprimir toast (overlay e a UI).
                 if (sel.classKey === 'class_rogue' &&
                     (!Array.isArray(sel.rogueExpertise) || sel.rogueExpertise.length !== 2)) {
-                    // Abre overlay e bloqueia avanco
-                    setTimeout(() => {
-                        if (typeof buildRogueExpertiseSelect === 'function') {
-                            buildRogueExpertiseSelect();
-                            openSubScreen('sub-rogue-expertise');
-                        }
-                    }, 80);
-                    return 'Ladino: escolha 2 perícias com Especialização (PHB p.96).';
+                    if (typeof buildRogueExpertiseSelect === 'function') {
+                        buildRogueExpertiseSelect();
+                        openSubScreen('sub-rogue-expertise');
+                    }
+                    return '__SILENT_BLOCK__';
                 }
             }
             if (currentScreen === 6) {
@@ -4432,6 +4437,9 @@ Busca rápida:
         }
 
         function _showValidation(msg) {
+            // Sessao #42 (2026-05-27): marker silent suprime toast quando
+            // overlay/UI clara ja eh exibida (ex: rogue expertise overlay).
+            if (msg === '__SILENT_BLOCK__') return;
             console.warn('[CHAR_CREATOR]', msg);
             const dur = typeof calcReadTime === 'function'
                 ? calcReadTime(msg, 'toast-warn') : 3000;
@@ -6348,7 +6356,15 @@ Busca rápida:
         function confirmRogueExpertise() {
             if (!Array.isArray(sel.rogueExpertise) || sel.rogueExpertise.length !== 2) return;
             closeSubScreen('sub-rogue-expertise');
-            // Continua o fluxo (vai pra screen 6 ou onde estiver)
+            // Sessao #42 (2026-05-27): auto-avanca pra proxima tela apos confirmar
+            // Especializacao. Antes user precisava clicar "Avancar" novamente apos
+            // fechar overlay — fricao desnecessaria + confuso porque 4/4 ja estava
+            // marcado mas overlay ainda travava avanco silenciosamente.
+            setTimeout(() => {
+                if (currentScreen === 5 && typeof goScreen === 'function') {
+                    goScreen(6);
+                }
+            }, 120);
         }
         function cancelRogueExpertise() {
             haptic();
