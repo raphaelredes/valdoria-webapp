@@ -49,7 +49,17 @@
   border-radius: 12px;
   width: 100%;
   max-width: 410px;
-  max-height: 92vh;
+  /* Sessao #42 (2026-05-27): dvh > vh em mobile (Telegram WebView address bar
+     muda 100vh dinamicamente, dvh respeita isso). 95dvh em vez de 92vh garante
+     mais espaço útil em desktop Telegram (~600px viewport). */
+  max-height: 95dvh;
+  /* Garante que conteudo nao caia fora do card mesmo em viewports apertados.
+     Bug raiz da sessao #42: com fonte grande + texto longo, body forçava
+     min-height: 465px+, somava-se com header/nav/actions e empurrava buttons
+     PRA FORA do card (overflow: hidden cortava). Agora min-height: 0 + body
+     flex permite encolher e ativar scroll interno; nav/actions ficam sempre
+     visíveis com flex-shrink: 0. */
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -202,13 +212,26 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-body {
   position: relative;
   padding: 14px 16px 22px;
-  flex: 1;
+  /* Sessao #42 (2026-05-27): flex:1 1 0 + min-height:0 permite encolher quando
+     card chega no max-height (95dvh). Sem min-height:0, flex item nao encolhe
+     abaixo do seu min-content e estoura layout (bug raiz). max-height removido:
+     era 320px arbitrario que conflitava com style.minHeight dinamico do JS. */
+  flex: 1 1 0;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
-  min-height: 150px;
-  max-height: 320px;
+  /* Indicação visual de scroll quando texto excede body */
+  scrollbar-width: thin;
+  scrollbar-color: var(--v-gold-30) transparent;
+}
+.enc-body::-webkit-scrollbar {
+  width: 4px;
+}
+.enc-body::-webkit-scrollbar-thumb {
+  background: var(--v-gold-30);
+  border-radius: 2px;
 }
 
 .enc-line {
@@ -294,13 +317,28 @@ body.perf-lite #encounter-overlay.active .enc-card {
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-.enc-body.revealed ~ .enc-nav {
+  /* Sessao #42 (2026-05-27): SEMPRE visivel. Antes opacity:0 ate body.revealed
+     causava bug critico em viewport pequeno + fonte grande — botao Continuar
+     ficava INVISIVEL e dentro do overflow:hidden, deixando user travado sem
+     opcao. Agora botao visivel desde o inicio; click DURANTE typewriter
+     funciona como "pular animacao" (handler ja faz isso via _skipTypewriters
+     em encounter-popup.js). Visual hint sutil pra mostrar que typewriter ta
+     rolando: opacity reduzida no botao Continuar enquanto nao revealed. */
   opacity: 1;
   pointer-events: auto;
+  transition: opacity 0.35s ease;
+}
+/* Estado durante typewriter (body sem .revealed): hint visual sutil no botao
+   "Continuar" pra indicar que primeiro click pula animacao, segundo avanca */
+.enc-body:not(.revealed) ~ .enc-nav .enc-nav-btn-next {
+  opacity: 0.65;
+}
+.enc-body:not(.revealed) ~ .enc-nav .enc-nav-btn-next::after {
+  content: ' (pular)';
+  font-size: 0.85em;
+  opacity: 0.8;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 .enc-nav-btn {
   padding: 7px 13px;

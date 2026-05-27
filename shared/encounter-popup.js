@@ -606,7 +606,17 @@
         }).join('');
       });
       var measuredHeight = body.scrollHeight;
-      body.style.minHeight = measuredHeight + 'px';
+      /* Sessao #42 (2026-05-27): clamp minHeight ao espaço disponivel no
+         viewport pra evitar overflow:hidden do card cortar nav+actions.
+         Reserva ~200px pra header (~50px) + nav (~50px) + actions (~100px).
+         Se texto + fonte grande mediria 465px e viewport tem 600px (Telegram
+         desktop), antes body forçava 465px e nav/actions saíam pra fora.
+         Agora cap em (vh - reserved); se texto excede, body fica scrollavel
+         (overflow-y:auto ja existe) mas nav/actions ficam VISIVEIS. */
+      var VIEWPORT_RESERVED = 200;
+      var maxAllowed = Math.max(150, window.innerHeight - VIEWPORT_RESERVED);
+      var clampedMinH = Math.min(measuredHeight, maxAllowed);
+      body.style.minHeight = clampedMinH + 'px';
       strophes.forEach(function(s) {
         s.container.innerHTML = '';
         s.container.classList.remove('typing-started');
@@ -632,6 +642,18 @@
         if (state.stropheIdx >= state.strophes.length) {
           state.skipped = true;
           body.classList.add('revealed');
+          /* Sessao #42 (2026-05-27): apos typewriter natural completar,
+             atualiza nextBtn (mesma logica do _instantReveal). Em ultima pagina,
+             actions assume o lugar (renderActions abaixo); em intermediaria,
+             nextBtn vira "Continuar ▸" sem hint "(pular)" do CSS. */
+          var nextBtnNat = document.getElementById('enc-next');
+          if (nextBtnNat) {
+            if (state.isLastPage) {
+              nextBtnNat.style.visibility = 'hidden';
+            } else {
+              nextBtnNat.textContent = 'Continuar ▸';
+            }
+          }
           // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
           // terminar (natural ou skip). Na última página, renderActions só agora.
           if (state.isLastPage) renderActions();
@@ -665,30 +687,38 @@
       var pageInd = document.getElementById('enc-page-ind');
       if (pageInd) pageInd.textContent = (idx + 1) + ' / ' + pages.length;
       var prevBtn = document.getElementById('enc-prev');
-      if (prevBtn) prevBtn.disabled = idx === 0;
-      var nextBtn = document.getElementById('enc-next');
-      if (nextBtn) {
-        if (idx === pages.length - 1) {
-          /* task #53 (2026-05-20) — user pediu: remover "Escolher ↓" duplicado
-             da nav-row. O botao "⚔ ESCOLHER ACAO" no actions panel ja serve
-             a mesma funcao (e mais claro/AAA). Esconde next btn na ultima pagina.
-             Mantém prev btn pra back navigation.
-
-             task #55 (2026-05-20) — actions NÃO renderiza aqui na entrada do
-             page; só APÓS typewriter completar (natural ou via _instantReveal).
-             Garante UX: user lê dialogue antes de ver opções. */
-          nextBtn.style.visibility = 'hidden';
-          actions.style.display = 'none'; // garante que começa escondido
-        } else {
-          nextBtn.style.visibility = 'visible';
-          nextBtn.textContent = 'Continuar →';
-          actions.style.display = 'none';
-        }
+      if (prevBtn) {
+        prevBtn.disabled = idx === 0;
+        /* Sessao #42 (2026-05-27): esconde "Anterior" se 1 pagina (nao tem
+           pra onde voltar). Tambem esconde durante typewriter da pagina 1
+           pra UI ficar limpa. */
+        prevBtn.style.visibility = (idx === 0) ? 'hidden' : 'visible';
       }
-      // Hide entire nav row if only 1 page (no point in showing "← Anterior" alone)
+      var nextBtn = document.getElementById('enc-next');
+      var isLastPage = idx === pages.length - 1;
+      if (nextBtn) {
+        /* Sessao #42 (2026-05-27): "Pular ▸" SEMPRE visivel durante typewriter,
+           inclusive na ultima pagina. Bug raiz: antes na ultima pagina ou em
+           dialogo de 1 pagina, nav era hidden + actions display:none durante
+           typewriter -> user em viewport pequeno + fonte grande ficava SEM
+           NENHUM BOTAO visivel, travado.
+
+           Agora:
+           - Durante typewriter (qualquer pagina): "Pular ▸" visivel
+           - Apos typewriter completar:
+             * Pagina intermediaria -> "Continuar ▸"
+             * Ultima pagina -> nextBtn hidden (actions aparecem com choices) */
+        nextBtn.style.visibility = 'visible';
+        nextBtn.textContent = isLastPage ? 'Pular ▸' : 'Continuar ▸';
+        nextBtn.removeAttribute('disabled');
+        actions.style.display = 'none'; // sempre começa escondido
+      }
+      /* Sessao #42 (2026-05-27): NUNCA esconder nav inteira. Antes, em dialogo
+         de 1 pagina, navRow ficava display:none -> user sem botoes durante
+         typewriter. Agora nav sempre visivel; conteudo se adapta. */
       var navRow = card.querySelector('.enc-nav');
       if (navRow) {
-        navRow.style.display = (pages.length === 1) ? 'none' : '';
+        navRow.style.display = '';
       }
     }
 
@@ -716,6 +746,19 @@
         st.sentenceIdx = 0;
       }
       body.classList.add('revealed');
+      /* Sessao #42 (2026-05-27): apos pular typewriter, atualiza nextBtn:
+         - Ultima pagina -> hidden (actions choices aparece em renderActions)
+         - Pagina intermediaria -> "Continuar ▸" (sem mais hint "(pular)"
+           pois CSS :not(.revealed) deixou de matchar quando .revealed foi
+           adicionada). */
+      var nextBtn = document.getElementById('enc-next');
+      if (nextBtn) {
+        if (st.isLastPage) {
+          nextBtn.style.visibility = 'hidden';
+        } else {
+          nextBtn.textContent = 'Continuar ▸';
+        }
+      }
       // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
       // terminar. Em click-to-skip também precisa mostrar actions.
       if (st.isLastPage) renderActions();
@@ -817,6 +860,16 @@
       if (currentPage > 0) { currentPage--; renderPage(currentPage); }
     };
     if (nextBtn) nextBtn.onclick = function() {
+      /* Sessao #42 (2026-05-27): UX visual-novel — primeiro click PULA typewriter
+         se ainda rodando, segundo click avanca. Antes: click avancava direto sem
+         dar chance de ver texto, OU travava sem pular em viewport pequeno + fonte
+         grande quando nav original (opacity:0) ficava invisivel. Agora nav
+         sempre visivel + skip-then-advance funciona consistente. */
+      var st = _currentRenderState;
+      if (st && !st.skipped && !body.classList.contains('revealed')) {
+        _instantReveal();
+        return;
+      }
       if (currentPage < pages.length - 1) { currentPage++; renderPage(currentPage); }
     };
 
