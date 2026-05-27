@@ -286,56 +286,45 @@ el.innerHTML = html;
 function buildSubclass(el) {
 const subs = SUBCLASSES[P.hero_class] || {};
 const info = CLASS_INFO[P.hero_class] || { name: 'Classe' };
-let html = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especialização oferece poderes únicos...</div>
-<div class="section-title">\ud83c\udff0 Subclasse: ${info.name}</div>
-<div class="hint">Escolha sua especialização</div>
-<div id="subclassList">`;
+el.innerHTML = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cada especialização oferece poderes únicos...</div>
+<div class="section-title">🏰 Subclasse: ${info.name}</div>
+<div class="hint">Escolha sua especialização — toque pra ver detalhes</div>
+<div id="subclassList"></div>`;
+const mount = document.getElementById('subclassList');
 const subEntries = Object.entries(subs);
 if (subEntries.length === 0) {
-html += '<div class="empty-msg">Subclasses nao disponíveis para este nível.</div>';
-} else {
-for (const [scId, sc] of subEntries) {
-const isSel = sel.subclass === scId;
-html += `<div class="choice-card${isSel ? ' selected' : ''}" onclick="selectSubclass('${scId}')">
-<div class="choice-card-header">
-<div class="choice-card-icon">\ud83c\udff0</div>
-<div class="choice-card-name">${sc.name}</div>
-<div class="choice-card-check">${isSel ? '\u2713' : ''}</div>
-</div>
-<div class="choice-card-desc">${sc.desc}</div>
-<div class="detail-link" onclick="event.stopPropagation(); openSubclassDetail('${scId}')">Ver habilidades \u25b8</div>
-</div>`;
+mount.innerHTML = '<div class="empty-msg">Subclasses não disponíveis para este nível.</div>';
+return;
 }
-}
-html += '</div>';
-el.innerHTML = html;
+const items = subEntries.map(([scId, sc]) => ({
+id: scId,
+name: sc.name,
+selected: sel.subclass === scId
+}));
+vSubclass.renderGrid(mount, items, {
+onClick: function (scId) { openSubclassDetail(scId); }
+});
 }
 function openSubclassDetail(scId) {
 const subs = SUBCLASSES[P.hero_class] || {};
 const sc = subs[scId];
 if (!sc) return;
-let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;
-html += `<div class="section-title">\ud83c\udff0 ${sc.name}</div>`;
-html += `<div style="font-size:12px;color:var(--v-text-dim);margin-bottom:12px;line-height:1.4">${sc.desc}</div>`;
 const feats = sc.features || {};
-const levels = Object.keys(feats).sort((a, b) => parseInt(a,10) - parseInt(b,10));
-if (levels.length > 0) {
-html += '<div class="section-title">Habilidades por Nível</div>';
-for (const lv of levels) {
-const f = feats[lv];
-html += `<div class="sc-feature">
-<div class="sc-feature-level">Nível ${lv}</div>
-<div class="sc-feature-name">${f.name}</div>
-${f.desc ? `<div class="sc-feature-desc">${f.desc}</div>` : ''}
-</div>`;
-}
-}
+const levels = Object.keys(feats).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+const features = levels.map(lv => ({
+level: parseInt(lv, 10),
+name: feats[lv].name,
+desc: feats[lv].desc || ''
+}));
 const isSel = sel.subclass === scId;
-html += `<button class="v-btn ${isSel ? 'v-btn-secondary' : 'v-btn-primary'}" style="width:100%;margin-top:16px"
-onclick="selectSubclass('${scId}'); closeSubScreen()">
-${isSel ? '\u2713 Selecionada' : `Selecionar ${sc.name}`}
-</button>`;
-openSubScreen(html);
+vSubclass.openDetail({
+id: scId,
+name: sc.name,
+desc: sc.desc,
+features: features,
+confirmLabel: isSel ? '✓ Selecionada' : 'Selecionar ' + sc.name,
+onConfirm: function (id) { selectSubclass(id); }
+});
 }
 function selectSubclass(scId) {
 haptic('light');
