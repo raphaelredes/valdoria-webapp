@@ -606,15 +606,24 @@
         }).join('');
       });
       var measuredHeight = body.scrollHeight;
-      /* Sessao #42 (2026-05-27): clamp minHeight ao espaço disponivel no
-         viewport pra evitar overflow:hidden do card cortar nav+actions.
-         Reserva ~200px pra header (~50px) + nav (~50px) + actions (~100px).
-         Se texto + fonte grande mediria 465px e viewport tem 600px (Telegram
-         desktop), antes body forçava 465px e nav/actions saíam pra fora.
-         Agora cap em (vh - reserved); se texto excede, body fica scrollavel
-         (overflow-y:auto ja existe) mas nav/actions ficam VISIVEIS. */
-      var VIEWPORT_RESERVED = 200;
-      var maxAllowed = Math.max(150, window.innerHeight - VIEWPORT_RESERVED);
+      /* Sessao #42 (2026-05-27): clamp minHeight DINAMICO baseado no que esta
+         REALMENTE ocupando viewport. Bug raiz: clamp fixo (200px) assumia
+         header ~50px + nav ~50px + actions ~100px. Mas em fonte 1.4x-1.6x,
+         header wrap pra 2-3 linhas (~120-150px), nome NPC longo + desc.
+         Reserva fixa era insuficiente -> nav era cortada por overflow:hidden.
+
+         Medida dinamica: header.offsetHeight + nav.offsetHeight + reserva
+         actions (100px choices em ultima pagina). Tolerance extra 40px pra
+         padding/border. Resultado: body shrink quando texto excede,
+         overflow-y:auto ativa scroll interno, nav+actions FICAM VISIVEIS. */
+      var headerH = header ? header.offsetHeight : 60;
+      var navOuterH = card.querySelector('.enc-nav')?.offsetHeight || 50;
+      var ACTIONS_RESERVED = 100;
+      var PADDING_TOLERANCE = 40;
+      var maxAllowed = Math.max(
+        120,
+        window.innerHeight - headerH - navOuterH - ACTIONS_RESERVED - PADDING_TOLERANCE
+      );
       var clampedMinH = Math.min(measuredHeight, maxAllowed);
       body.style.minHeight = clampedMinH + 'px';
       strophes.forEach(function(s) {
