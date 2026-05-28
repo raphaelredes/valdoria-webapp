@@ -31,6 +31,55 @@ var _active = false;
 var _el = null;
 var _retryTimer = null;
 
+/* Sessão #50 (2026-05-28): Cross-env guard. Auto-detect expected env from
+   hostname para impedir que PROD's maintenance flag mostre overlay em DEV
+   (e vice-versa) — bug reportado pelo user: "apareceu em manutenção mas
+   não está, estou testando no DEV... deve ser devidamente separado PROD
+   de DEV".
+
+   Hostname é fonte de verdade — nunca confia em query params (Telegram
+   WebView cache pode vazar URLs antigas).
+
+   Override permitido: entry HTML pode setar window.__VALDORIA_EXPECTED_ENV
+   ANTES desse script carregar pra forçar valor específico. */
+(function _initExpectedEnv() {
+    try {
+        if (window.__VALDORIA_EXPECTED_ENV) return;  // já setado pelo HTML
+        var _h = (location.hostname || '').toLowerCase();
+        if (_h === 'dev.lendasdevaldoria.com.br') {
+            window.__VALDORIA_EXPECTED_ENV = 'dev';
+            window.__VALDORIA_EXPECTED_API_HOST = 'api.lendasdevaldoria.com.br';
+        } else if (_h === 'jogo.lendasdevaldoria.com.br' || _h === 'www.jogo.lendasdevaldoria.com.br') {
+            window.__VALDORIA_EXPECTED_ENV = 'prod';
+            window.__VALDORIA_EXPECTED_API_HOST = 'prod.lendasdevaldoria.com.br';
+        }
+        // Outros hostnames (file://, prod.lendasdevaldoria direto, local) — sem expectation
+    } catch (_e) { /* hostname indispo */ }
+})();
+
+/* Retorna true se data/response indicam env diferente do esperado pelo cliente.
+   Defense-in-depth contra cross-env contamination da maintenance overlay. */
+function _isCrossEnvData(data, response) {
+    // Check 1: data.env field (mais confiável — backend stamp)
+    var expEnv = window.__VALDORIA_EXPECTED_ENV || '';
+    if (expEnv && data && data.env && data.env !== expEnv) {
+        return { cross: true, reason: 'env_mismatch', expected: expEnv, got: data.env };
+    }
+    // Check 2: response.url host (fallback se data não tem env)
+    if (response) {
+        var expHost = window.__VALDORIA_EXPECTED_API_HOST || '';
+        if (expHost) {
+            try {
+                var u = new URL(response.url || '');
+                if (u.host && u.host !== expHost) {
+                    return { cross: true, reason: 'host_mismatch', expected: expHost, got: u.host };
+                }
+            } catch (_e) { /* URL parse failed — be permissive */ }
+        }
+    }
+    return { cross: false };
+}
+
 function _buildHTML(info) {
     info = info || {};
     var lines = [];
@@ -259,6 +308,15 @@ function show(info) {
         _updateInfo(info);
         return;
     }
+    // Sessão #50 diagnostic: log SEMPRE que overlay ativar — ajuda a
+    // rastrear cross-env bugs futuros (qual call chain triggered).
+    try {
+        var _stack = (new Error('maintenance_show_trigger')).stack || '';
+        console.warn('[MAINT] vMaintenance.show() ATIVADO info=' + JSON.stringify(info||{}).slice(0,200)
+            + ' expected_env=' + (window.__VALDORIA_EXPECTED_ENV||'?')
+            + ' hostname=' + (location.hostname||'?')
+            + ' stack=' + _stack.split('\n').slice(1,4).join(' | ').slice(0,300));
+    } catch (_e) { /* logging falhou — silent */ }
     _active = true;
     _injectStyles();
     _cancelOngoing();
@@ -384,11 +442,53 @@ function checkResponse(data) {
     if (!data || typeof data !== 'object') return false;
     var m = data.maintenance;
     if (m === true || (m && m.active === true)) {
+        // Sessão #50: cross-env guard usa data.env
+        var _crossCheck = _isCrossEnvData(data, null);
+        if (_crossCheck.cross) {
+            try {
+                console.warn('[MAINT] checkResponse IGNORADO — cross-env reason=' + _crossCheck.reason
+                    + ' expected=' + _crossCheck.expected + ' got=' + _crossCheck.got);
+            } catch (_e) {}
+            return false;
+        }
         var info = (typeof m === 'object') ? m : {};
         show(info);
         return true;
     }
     return false;
+}
+
+/**
+ * Sessão #50 (2026-05-28): Versão completa de checkResponse para usar nos
+ * proactive guards dos entry HTMLs. Verifica cross-env via data + response,
+ * trigger overlay APENAS se env/host bate com o esperado.
+ *
+ * Chamar assim no proactive guard:
+ *     fetch(apiBase + '/api/game/health').then(function(r){
+ *         var resp = r; return r.json().then(function(data){
+ *             window.vMaintenance.checkAndShow(data, resp);
+ *         });
+ *     });
+ *
+ * Retorna true se overlay foi ativado, false se ignorado (cross-env ou no flag).
+ */
+function checkAndShow(data, response) {
+    if (!data || typeof data !== 'object') return false;
+    var m = data.maintenance;
+    if (!(m === true || (m && m.active === true))) return false;
+
+    var _crossCheck = _isCrossEnvData(data, response);
+    if (_crossCheck.cross) {
+        try {
+            console.warn('[MAINT] checkAndShow IGNORADO — cross-env reason=' + _crossCheck.reason
+                + ' expected=' + _crossCheck.expected + ' got=' + _crossCheck.got
+                + ' url=' + (response && response.url || '?'));
+        } catch (_e) {}
+        return false;
+    }
+    var info = (typeof m === 'object') ? m : {};
+    show(info);
+    return true;
 }
 
 /**
@@ -409,6 +509,8 @@ window.vMaintenance = {
     isActive: isActive,
     checkResponse: checkResponse,
     checkStatus: checkStatus,
+    // Sessão #50: novo helper com cross-env guard p/ proactive guards dos HTMLs
+    checkAndShow: checkAndShow,
 };
 
 // Auto-bootstrap: monkey-patch fetch to detect maintenance globally.
@@ -431,6 +533,16 @@ window.vMaintenance = {
             if (response.status === 503) {
                 return response.clone().json().then(function(data) {
                     if (data && data.maintenance && data.maintenance.active) {
+                        // Sessão #50: cross-env guard
+                        var _cc = _isCrossEnvData(data, response);
+                        if (_cc.cross) {
+                            try {
+                                console.warn('[MAINT] auto-patch 503 IGNORADO — cross-env reason=' + _cc.reason
+                                    + ' expected=' + _cc.expected + ' got=' + _cc.got
+                                    + ' url=' + (response.url || '?'));
+                            } catch (_e) {}
+                            return response;
+                        }
                         show(data.maintenance);
                     }
                     return response;
@@ -441,6 +553,16 @@ window.vMaintenance = {
             if (response.ok) {
                 return response.clone().json().then(function(data) {
                     if (data && data.maintenance && (data.maintenance === true || data.maintenance.active)) {
+                        // Sessão #50: cross-env guard
+                        var _cc = _isCrossEnvData(data, response);
+                        if (_cc.cross) {
+                            try {
+                                console.warn('[MAINT] auto-patch 200 IGNORADO — cross-env reason=' + _cc.reason
+                                    + ' expected=' + _cc.expected + ' got=' + _cc.got
+                                    + ' url=' + (response.url || '?'));
+                            } catch (_e) {}
+                            return response;
+                        }
                         var info = (typeof data.maintenance === 'object') ? data.maintenance : {};
                         show(info);
                     }

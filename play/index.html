@@ -405,18 +405,36 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     var url = apiHost + '/api/game/health';
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var tid = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+    // Sessão #50 (2026-05-28): captura response p/ passar pro cross-env guard
+    // do vMaintenance.checkAndShow. Sem isso, proactive guard pulava o env
+    // check e mostrava overlay errado (bug user 2026-05-28: maintenance
+    // overlay aparecia no DEV mesmo com DEV server retornando active=false).
+    var _respCache = null;
     fetch(url, { method: 'GET', signal: ctrl ? ctrl.signal : undefined })
       .then(function(r) {
         if (tid) clearTimeout(tid);
+        _respCache = r;
         if (!r.ok) return null;
         return r.json();
       })
       .then(function(data) {
         if (data && data.maintenance && data.maintenance.active) {
-          sendLog('info', 'maintenance_active_on_boot', {info: JSON.stringify(data.maintenance).slice(0,200)});
-          if (window.vMaintenance && typeof window.vMaintenance.show === 'function') {
+          // checkAndShow internamente valida data.env vs window.__VALDORIA_EXPECTED_ENV
+          // E response.url host vs __VALDORIA_EXPECTED_API_HOST. Se cross-env,
+          // NÃO mostra overlay e loga warn — segue boot normal.
+          if (window.vMaintenance && typeof window.vMaintenance.checkAndShow === 'function') {
+            var _shown = window.vMaintenance.checkAndShow(data, _respCache);
+            if (_shown) {
+              sendLog('info', 'maintenance_active_on_boot', {info: JSON.stringify(data.maintenance).slice(0,200), env: data.env || '?'});
+              return;  // halt — não chama then()
+            } else {
+              // Cross-env detectado — loga e segue boot (vai cair no init-session retry)
+              sendLog('warn', 'maintenance_cross_env_blocked', {data_env: data.env || '?', expected: window.__VALDORIA_EXPECTED_ENV || '?', url: _respCache && _respCache.url || '?'});
+            }
+          } else if (window.vMaintenance && typeof window.vMaintenance.show === 'function') {
+            // Fallback (legacy): se checkAndShow não existir, mostra direto
             window.vMaintenance.show(data.maintenance);
-            return;  // halt — nao chama then()
+            return;
           }
         }
         then();

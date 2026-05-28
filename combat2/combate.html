@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-28T00:23:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-28T03:13:03Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -602,12 +602,20 @@ setTimeout(function(){
         window._VALDORIA_API_BASE=apiBase;
         var ctrl=new AbortController();
         var tid=setTimeout(function(){ctrl.abort();},5000);
+        // Sessão #50 (2026-05-28): cross-env guard via checkAndShow.
+        var _respCacheCB=null;
         fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
-            .then(function(r){clearTimeout(tid);return r.json();})
+            .then(function(r){clearTimeout(tid);_respCacheCB=r;return r.json();})
             .then(function(data){
                 if(data&&data.maintenance&&data.maintenance.active){
-                    console.warn('[MAINT] combate proactive guard detected maintenance');
-                    window.vMaintenance.show(data.maintenance);
+                    if(typeof window.vMaintenance.checkAndShow==='function'){
+                        var _shown=window.vMaintenance.checkAndShow(data,_respCacheCB);
+                        if(_shown)console.warn('[MAINT] combate proactive guard SHOWED env='+(data.env||'?'));
+                        else console.warn('[MAINT] combate proactive guard BLOCKED cross-env env='+(data.env||'?')+' expected='+(window.__VALDORIA_EXPECTED_ENV||'?'));
+                    } else {
+                        console.warn('[MAINT] combate proactive guard detected maintenance (legacy show)');
+                        window.vMaintenance.show(data.maintenance);
+                    }
                 }
             })
             .catch(function(){clearTimeout(tid);});

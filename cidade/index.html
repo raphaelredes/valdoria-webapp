@@ -638,12 +638,22 @@ LOG SINK (Fase 7):
             window._VALDORIA_API_BASE=apiBase;
             var ctrl=new AbortController();
             var tid=setTimeout(function(){ctrl.abort();},5000);
+            // Sessão #50 (2026-05-28): cross-env guard via checkAndShow.
+            // Antes chamava show() direto → mostrava maintenance overlay mesmo
+            // se response viesse de outro env (PROD response em DEV).
+            var _respCache=null;
             fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
-                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(r){clearTimeout(tid);_respCache=r;return r.json();})
                 .then(function(data){
                     if(data&&data.maintenance&&data.maintenance.active){
-                        console.warn('[MAINT] cidade proactive guard detected maintenance');
-                        window.vMaintenance.show(data.maintenance);
+                        if(typeof window.vMaintenance.checkAndShow==='function'){
+                            var _shown=window.vMaintenance.checkAndShow(data,_respCache);
+                            if(_shown)console.warn('[MAINT] cidade proactive guard SHOWED env='+(data.env||'?'));
+                            else console.warn('[MAINT] cidade proactive guard BLOCKED cross-env env='+(data.env||'?')+' expected='+(window.__VALDORIA_EXPECTED_ENV||'?'));
+                        } else {
+                            console.warn('[MAINT] cidade proactive guard detected maintenance (legacy show)');
+                            window.vMaintenance.show(data.maintenance);
+                        }
                     }
                 })
                 .catch(function(){clearTimeout(tid);});

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-26T21:14:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-28T03:13:05Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -756,12 +756,20 @@
             window._VALDORIA_API_BASE=apiBase;
             var ctrl=new AbortController();
             var tid=setTimeout(function(){ctrl.abort();},5000);
+            // Sessão #50 (2026-05-28): cross-env guard via checkAndShow.
+            var _respCacheEX=null;
             fetch(apiBase+'/api/game/health',{cache:'no-store',signal:ctrl.signal})
-                .then(function(r){clearTimeout(tid);return r.json();})
+                .then(function(r){clearTimeout(tid);_respCacheEX=r;return r.json();})
                 .then(function(data){
                     if(data&&data.maintenance&&data.maintenance.active){
-                        console.warn('[MAINT] exploracao proactive guard detected maintenance');
-                        window.vMaintenance.show(data.maintenance);
+                        if(typeof window.vMaintenance.checkAndShow==='function'){
+                            var _shown=window.vMaintenance.checkAndShow(data,_respCacheEX);
+                            if(_shown)console.warn('[MAINT] exploracao proactive guard SHOWED env='+(data.env||'?'));
+                            else console.warn('[MAINT] exploracao proactive guard BLOCKED cross-env env='+(data.env||'?')+' expected='+(window.__VALDORIA_EXPECTED_ENV||'?'));
+                        } else {
+                            console.warn('[MAINT] exploracao proactive guard detected maintenance (legacy show)');
+                            window.vMaintenance.show(data.maintenance);
+                        }
                     }
                 })
                 .catch(function(){clearTimeout(tid);});
