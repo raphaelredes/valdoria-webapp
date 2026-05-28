@@ -228,7 +228,8 @@
         var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
         if (!ACHIEVEMENT_PNGS[slug]) return null;
         // trofeu lives at root (not ach-*); everything else under achievements/
-        return _basePath() + 'shared/img/achievements/' + slug + '.png';
+        // Sessão #56 (2026-05-28): .png → .webp (mesma fix de items/cidade)
+        return _basePath() + 'shared/img/achievements/' + slug + '.webp';
     }
     function itemIconUrl(iconIdOrSlug, itemName) {
         // Items use ic-it-* prefix. Try vItems manifest lookup with multiple
@@ -247,7 +248,12 @@
         }
         for (var i = 0; i < candidates.length; i++) {
             if (window.vItems.has(candidates[i])) {
-                return _basePath() + 'shared/img/items/' + candidates[i] + '.png';
+                // Sessão #56 (2026-05-28): FIX P0 items inventory — extensão é
+                // .webp (kind='subject' via save_optimized, alpha preservado),
+                // NÃO .png. User reportou: "várias imagens de itens da mochila
+                // não estão sendo carregadas". Same root cause as city PNGs
+                // (Task #38) — código pulou a migração WebP.
+                return _basePath() + 'shared/img/items/' + candidates[i] + '.webp';
             }
         }
         return null;
@@ -272,16 +278,21 @@
         }
         // City: CITY_LOC_PNGS uses callback name (matches slug).
         // Sessão #28 (2026-05-24): ?v=<bundle-hash> cache bust — ver _cbSuffix.
+        // Sessão #56 (2026-05-28): FIX P0 — extensão é .webp (kind='scenery'
+        // via save_optimized), NÃO .png. Arquivos foram convertidos pra WebP
+        // (regra "Imagens leves WebP via _image_optim canonical") mas o
+        // resolver continuou apontando pra .png — 404 silencioso.
         if (CITY_LOC_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/city/' + skillSlug + '.png' + _cbSuffix();
+            return _basePath() + 'shared/img/city/' + skillSlug + '.webp' + _cbSuffix();
         }
         // Combat (classes, boss, inimigo, invocations)
         if (COMBAT_PNGS[skillSlug]) {
             return _basePath() + 'shared/img/combat/' + skillSlug + '.png';
         }
         // NPCs
+        // Sessão #56 (2026-05-28): .png → .webp (mesma fix)
         if (NPC_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/npcs/' + skillSlug + '.png';
+            return _basePath() + 'shared/img/npcs/' + skillSlug + '.webp';
         }
         // UI (mochila, tochas, stats, race indicators)
         if (UI_PNGS[skillSlug]) {
@@ -303,14 +314,16 @@
     }
     function cityIconUrl(cb) {
         if (!cb || !CITY_LOC_PNGS[cb]) return null;
-        return _basePath() + 'shared/img/city/' + cb + '.png' + _cbSuffix();
+        // Sessão #56 (2026-05-28): .png → .webp fix (mesma causa do bug acima)
+        return _basePath() + 'shared/img/city/' + cb + '.webp' + _cbSuffix();
     }
     function raceIconUrl(raceKey) {
         if (!raceKey) return null;
         var opt = RACE_OFFICIAL_OPT[raceKey];
         if (!opt) return null;
         var suffix = opt === 1 ? '' : '_opt' + opt;
-        return _basePath() + 'character_creator/races/' + raceKey + suffix + '.png';
+        // Sessão #56 (2026-05-28): .png → .webp (mesma fix)
+        return _basePath() + 'character_creator/races/' + raceKey + suffix + '.webp';
     }
 
     /* ========================================================

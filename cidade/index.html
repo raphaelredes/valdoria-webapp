@@ -25,7 +25,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     'gates'        → renderGatesHub (Fase 9.9) — Aldric + Preparar Viagem
     'codex'        → renderCodexScreen (Fase 9.9) — 5 categorias 32 entries
     'quests'       → renderSquareHub adapted (Fase 9.9) — 3 tabs
-    'daily_challenge' → renderSquareHub adapted (Fase 9.9) — Covil dos Lobos
+    'daily_challenge' → renderSquareHub adapted — caça/coleta rotativo (Sessão #56)
     'trade_board'     → renderSquareHub (Fase 9.13) — P2P trade canonical (city_hub_locations.py:132)
     'shadow_alley'    → renderSquareHub (Fase 9.13) — Beco Sombrio + Vulto NPC (tavern_black_market.py)
     'travelers'       → renderSquareHub (Fase 9.13) — Diário de Viajantes (wandering_npcs_journal.py)
@@ -10307,7 +10307,18 @@ function buildMockHubScreen(player){
       ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
     },
     player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
-    daily_challenge_badge: { completed: false, dungeon_name: 'Covil dos Lobos' }
+    // Sessão #56 (Demand A): badge label dinâmico — não mais "Covil dos Lobos"
+    // (masmorra). Agora reflete o desafio do dia (caça/coleta).
+    daily_challenge_badge: (function(){
+      try {
+        var ch = (typeof _dailyChallengeForToday === 'function') ? _dailyChallengeForToday() : null;
+        if (ch) {
+          var label = (ch.kind === 'hunt' ? 'Abater ' : 'Coletar ') + ch.count + 'x ' + ch.target;
+          return { completed: !!window._dailyChallengeDone, dungeon_name: label };
+        }
+      } catch(_e){}
+      return { completed: false, dungeon_name: 'Desafio do Dia' };
+    })()
     /* dm_tip REMOVIDO 2026-05-08 (X-6.5.51AQ) — recurso eliminado */
   };
 }
@@ -11951,51 +11962,15 @@ function _showSettingsPopup(){
   }
 
   // === BUILD ===
+  // Sessão #56 (2026-05-28) — Demand F + I: reordenação canonical.
+  // ORDEM NOVA: (1) Tamanho da Fonte topo absoluto, (2) Som, (3) Jogo (Vibração),
+  // (4) Extras. Notificações REMOVIDAS (Demand I) — não tinham efeito real
+  // no bot Telegram (apenas localStorage flags sem uso server-side).
   var html = '<div class="settings-hub" style="padding: var(--v-space-md, 8px);">';
 
-  // SEÇÃO 1: Jogo — apenas Vibração (timers/combat/nav/imersivo removidos 2026-05-04)
-  html += _sectionHeader('ic-stat-attack', 'Jogo');
-  html += _toggleRow('ic-sino', 'Vibração',
-    s.haptic ? 'Ativado — feedback tátil em ações' : 'Desativado',
-    s.haptic, 'valdoria_haptic');
-
-  // SEÇÃO 2: Notificações — Geral é o MASTER toggle (no topo).
-  // Quando OFF: oculta as 4 sub-categorias (cascade desativa tudo).
-  // Quando ON: exibe e cada uma pode ser controlada individualmente.
-  html += _sectionHeader('ic-sino', 'Notificações');
-  html += _toggleRow('ic-mensagem', 'Geral',
-    s.notif_general ? 'Master ON — sub-categorias ativas' : 'Master OFF — todas silenciadas',
-    s.notif_general, 'valdoria_notif_general');
-  if (s.notif_general) {
-    // Sub-categorias só aparecem quando Geral=ON (cascade)
-    html += _toggleRow('ic-missões', 'Missões Diárias',
-      s.notif_daily_quests ? 'Ativado' : 'Desativado',
-      s.notif_daily_quests, 'valdoria_notif_daily_quests');
-    html += _toggleRow('ic-festival', 'Festivais',
-      s.notif_festivals ? 'Ativado' : 'Desativado',
-      s.notif_festivals, 'valdoria_notif_festivals');
-    html += _toggleRow('ic-bolsa', 'Leilão',
-      s.notif_auction ? 'Ativado' : 'Desativado',
-      s.notif_auction, 'valdoria_notif_auction');
-    html += _toggleRow('ic-ach-diplomata', 'Trocas',
-      s.notif_trade ? 'Ativado' : 'Desativado',
-      s.notif_trade, 'valdoria_notif_trade');
-  }
-
-  // SEÇÃO 3: Som (ic-som — alto-falante canonical)
-  html += _sectionHeader('ic-som', 'Som');
-  html += _toggleRow('ic-musica', 'Música',
-    s.music_muted ? 'Desativada' : 'Ativada',
-    !s.music_muted, 'audio_music_muted');
-  html += _sliderRow('ic-som', 'Volume Música', s.music_vol, 'audio_music_vol');
-  html += _toggleRow('ic-som', 'Efeitos Sonoros',
-    s.sfx_muted ? 'Desativados' : 'Ativados',
-    !s.sfx_muted, 'audio_sfx_muted');
-  html += _sliderRow('ic-som', 'Volume Efeitos', s.sfx_vol, 'audio_sfx_vol');
-
-  // SEÇÃO 4: Tamanho de Fonte (ic-fonte — letra A serif)
-  // 2026-05-21: User pediu REMOVER picker de família de fonte (fonte fixa Cinzel/MedievalSharp).
-  // Em vez disso: oferecer tamanho A- / A / A+ (sem quebrar layout — só body text scale ±10%).
+  // SEÇÃO 1: Tamanho de Fonte — TOPO ABSOLUTO (Demand F)
+  // User pediu fonte no topo pra que possa ajustar ANTES de ler outras opções.
+  // 2026-05-21: 'A-' / 'A' / 'A+' (sem família — fonte fixa Cinzel/MedievalSharp).
   var FONT_SIZES = [
     { id: 'small',  label: 'A',  scale: '0.9',  font: '12px' },
     { id: 'normal', label: 'A',  scale: '1.0',  font: '14px' },
@@ -12016,6 +11991,32 @@ function _showSettingsPopup(){
       + '</button>';
   });
   html += '</div>';
+
+  // SEÇÃO 2: Som (logo abaixo da fonte — Demand F)
+  html += _sectionHeader('ic-som', 'Som');
+  html += _toggleRow('ic-musica', 'Música',
+    s.music_muted ? 'Desativada' : 'Ativada',
+    !s.music_muted, 'audio_music_muted');
+  html += _sliderRow('ic-som', 'Volume Música', s.music_vol, 'audio_music_vol');
+  html += _toggleRow('ic-som', 'Efeitos Sonoros',
+    s.sfx_muted ? 'Desativados' : 'Ativados',
+    !s.sfx_muted, 'audio_sfx_muted');
+  html += _sliderRow('ic-som', 'Volume Efeitos', s.sfx_vol, 'audio_sfx_vol');
+
+  // SEÇÃO 3: Jogo — apenas Vibração (Telegram HapticFeedback API).
+  // Sessão #56: verificado que vibração funciona — vHaptic respeita
+  // localStorage valdoria_haptic em haptic.js _enabled() (todos os
+  // helpers tap/medium/heavy/success/etc viram no-op quando OFF).
+  // Telegram.WebApp.HapticFeedback disponível em tg version 6.1+.
+  html += _sectionHeader('ic-stat-attack', 'Jogo');
+  html += _toggleRow('ic-sino', 'Vibração',
+    s.haptic ? 'Ativada — feedback tátil em ações' : 'Desativada',
+    s.haptic, 'valdoria_haptic');
+
+  // Sessão #56 (Demand I): SEÇÃO "Notificações" REMOVIDA. As 5 toggles
+  // (Geral/Missões Diárias/Festivais/Leilão/Trocas) gravavam localStorage
+  // mas o bot Telegram não usava as flags pra suprimir push real. Sem
+  // efeito = ruído visual. Mantém-se a Vibração que SIM funciona.
 
   // SEÇÃO 5: Extras (ic-mensagem — envelope canonical)
   /* X-6.5.51BL (2026-05-11): adicionado "Diálogos Recentes" — acesso aos
@@ -12163,10 +12164,16 @@ function _showSettingsPopup(){
         var _reward = referredCount * 50;
 
         _showInfoPopup({
-          // Hero PNG no lugar do ícone — sem texto código (ic-*)
+          // Sessão #56 (2026-05-28) — Demand G: compactação viewport. Antes
+          // o popup com hero PNG 96px + tagline + código 28px + recompensas
+          // padding 12px + status block estourava viewport Telegram desktop.
+          // Reduções: PNG 96→56px, código 28→20px font, paddings cortados
+          // pela metade, lore tagline compactada em 1 linha, recompensas
+          // inline em vez de bloco completo. Mantém shimmer/glow animations
+          // mas com footprint vertical 40% menor.
           icon: '<img src="' + _pngPath + '" alt="" '
-              + 'style="width:96px;height:96px;object-fit:contain;'
-              + 'filter:drop-shadow(0 0 14px rgba(255,210,90,0.45)) drop-shadow(0 4px 18px rgba(0,0,0,0.5));'
+              + 'style="width:56px;height:56px;object-fit:contain;'
+              + 'filter:drop-shadow(0 0 10px rgba(255,210,90,0.45)) drop-shadow(0 3px 12px rgba(0,0,0,0.5));'
               + 'animation:refScrollFloat 4s ease-in-out infinite;" '
               + 'onerror="this.style.display=\'none\'"/>',
           npc: 'Pergaminho de Convite',
@@ -12176,75 +12183,69 @@ function _showSettingsPopup(){
               '<style>'
               + '@keyframes refScrollFloat{0%,100%{transform:translateY(0) rotate(-0.5deg);}50%{transform:translateY(-3px) rotate(0.5deg);}}'
               + '@keyframes refCodeShimmer{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}'
-              + '@keyframes refCodePulse{0%,100%{box-shadow:0 0 18px rgba(255,210,90,0.35), inset 0 0 12px rgba(196,149,58,0.18);}50%{box-shadow:0 0 28px rgba(255,210,90,0.55), inset 0 0 18px rgba(196,149,58,0.28);}}'
+              + '@keyframes refCodePulse{0%,100%{box-shadow:0 0 14px rgba(255,210,90,0.30), inset 0 0 8px rgba(196,149,58,0.16);}50%{box-shadow:0 0 22px rgba(255,210,90,0.50), inset 0 0 14px rgba(196,149,58,0.26);}}'
               + '@keyframes refCopySpark{0%{opacity:0;transform:scale(0.6);}30%{opacity:1;transform:scale(1.05);}100%{opacity:0;transform:scale(1.2);}}'
-              + '@keyframes refSparkRise{0%{opacity:0;transform:translate(0,0) scale(0.6);}25%{opacity:1;}100%{opacity:0;transform:translate(var(--sx,0),-28px) scale(0.3);}}'
-              + '.ref-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:radial-gradient(circle,#ffd27a,#c4953a 70%,transparent);pointer-events:none;animation:refSparkRise 2.6s ease-out infinite;}'
-              + '.ref-progress-fill{transition:width 0.8s ease-out;}'
-              + 'body.perf-lite .ref-spark,body.perf-lite #refCodeBox,body.perf-lite #refCodeBox *{animation:none !important;}'
-              + '@media (prefers-reduced-motion:reduce){.ref-spark,#refCodeBox,#refCodeBox *{animation:none !important;}}'
+              + 'body.perf-lite #refCodeBox,body.perf-lite #refCodeBox *{animation:none !important;}'
+              + '@media (prefers-reduced-motion:reduce){#refCodeBox,#refCodeBox *{animation:none !important;}}'
               + '</style>'
 
-              // === LORE TAGLINE ===
-              + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(12px * var(--v-font-scale, 1));margin:6px 0 14px;line-height:1.55;">'
-              + '"Selo lacrado, palavra dada. Convide um aliado e que sua jornada seja recompensada."'
+              // === LORE TAGLINE (compacta — 1 frase só) ===
+              + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(11px * var(--v-font-scale, 1));margin:2px 0 8px;line-height:1.4;">'
+              + '"Convide um aliado, que tua jornada seja recompensada."'
               + '</div>'
 
-              // === CÓDIGO HERO (glow + shimmer) ===
-              + '<div style="position:relative;text-align:center;margin:0 0 10px;">'
-              + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;opacity:0.8;">◆ Seu Código ◆</div>'
+              // === CÓDIGO HERO compactado (font 20px, padding 8/14) ===
+              + '<div style="position:relative;text-align:center;margin:0 0 6px;">'
+              + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;opacity:0.8;">◆ Seu Código ◆</div>'
               + '  <div id="refCodeBox" title="Toque para copiar"'
-              + '    style="position:relative;display:inline-block;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(28px * var(--v-font-scale, 1));font-weight:700;color:#fff4d0;letter-spacing:6px;'
-              + '    padding:16px 28px;'
+              + '    style="position:relative;display:inline-block;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(20px * var(--v-font-scale, 1));font-weight:700;color:#fff4d0;letter-spacing:4px;'
+              + '    padding:8px 14px;'
               + '    background:linear-gradient(120deg, rgba(196,149,58,0.18) 0%, rgba(255,210,90,0.32) 50%, rgba(196,149,58,0.18) 100%);'
               + '    background-size:300% 300%;'
-              + '    border:1.5px solid var(--v-gold,#c4953a);border-radius:8px;cursor:pointer;'
-              + '    text-shadow:0 0 12px rgba(255,210,90,0.7), 0 2px 4px rgba(0,0,0,0.6);'
+              + '    border:1.5px solid var(--v-gold,#c4953a);border-radius:6px;cursor:pointer;'
+              + '    text-shadow:0 0 8px rgba(255,210,90,0.7), 0 1px 3px rgba(0,0,0,0.6);'
               + '    animation:refCodeShimmer 4s ease-in-out infinite, refCodePulse 3s ease-in-out infinite;">'
-              + '    <span class="ref-spark" style="left:14%;bottom:18%;--sx:-6px;animation-delay:0s;"></span>'
-              + '    <span class="ref-spark" style="left:50%;bottom:22%;--sx:0;animation-delay:0.9s;"></span>'
-              + '    <span class="ref-spark" style="left:84%;bottom:14%;--sx:6px;animation-delay:1.8s;"></span>'
               + '    <span id="refCodeText">' + myCode + '</span>'
-              + '    <span id="refCopyHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--v-font,MedievalSharp,serif);font-size:calc(14px * var(--v-font-scale, 1));font-weight:400;letter-spacing:2px;color:#9fda7d;background:rgba(28,22,16,0.92);border-radius:6px;opacity:0;pointer-events:none;animation:none;">✓ Código Copiado</span>'
+              + '    <span id="refCopyHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--v-font,MedievalSharp,serif);font-size:calc(12px * var(--v-font-scale, 1));font-weight:400;letter-spacing:2px;color:#9fda7d;background:rgba(28,22,16,0.92);border-radius:5px;opacity:0;pointer-events:none;animation:none;">✓ Copiado</span>'
               + '  </div>'
-              + '  <div style="font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-top:6px;opacity:0.7;">Toque o código acima para copiar</div>'
+              + '  <div style="font-size:calc(9px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-top:3px;opacity:0.7;">Toque para copiar</div>'
               + '</div>'
 
-              // === RECOMPENSAS (progresso visual) ===
-              + '<div style="margin:14px 0 0;padding:12px 14px;background:linear-gradient(180deg, rgba(196,149,58,0.06) 0%, rgba(42,30,18,0.5) 100%);border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);border-radius:6px;">'
-              + '  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-              + '    <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:1.2px;text-transform:uppercase;">Recompensas</div>'
-              + '    <div style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);">' + referredCount + '/' + _rewardGoal + ' aventureiros</div>'
+              // === RECOMPENSAS compactado (padding 7/9, inline display) ===
+              + '<div style="margin:8px 0 0;padding:7px 9px;background:linear-gradient(180deg, rgba(196,149,58,0.06) 0%, rgba(42,30,18,0.5) 100%);border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);border-radius:5px;">'
+              + '  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">'
+              + '    <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:1px;text-transform:uppercase;">Recompensas</div>'
+              + '    <div style="font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);">' + referredCount + '/' + _rewardGoal + '</div>'
               + '  </div>'
-              + '  <div style="position:relative;height:8px;background:rgba(28,22,16,0.7);border:1px solid var(--v-border,#4a3828);border-radius:4px;overflow:hidden;">'
-              + '    <div class="ref-progress-fill" style="height:100%;width:' + _progress + '%;background:linear-gradient(90deg, #8a6420 0%, #c4953a 50%, #ffd27a 100%);box-shadow:0 0 8px rgba(255,210,90,0.55);"></div>'
+              + '  <div style="position:relative;height:6px;background:rgba(28,22,16,0.7);border:1px solid var(--v-border,#4a3828);border-radius:3px;overflow:hidden;">'
+              + '    <div style="height:100%;width:' + _progress + '%;background:linear-gradient(90deg, #8a6420, #c4953a, #ffd27a);box-shadow:0 0 6px rgba(255,210,90,0.55);transition:width 0.8s ease-out;"></div>'
               + '  </div>'
-              + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:calc(12px * var(--v-font-scale, 1));">'
-              + '    <div style="color:var(--v-text,#d4c8b0);">Ganho até agora:</div>'
-              + '    <div style="display:flex;align-items:center;gap:4px;">'
-              + '      <b style="color:var(--v-gold,#c4953a);font-size:calc(14px * var(--v-font-scale, 1));">' + _reward + '</b>'
+              + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));">'
+              + '    <span style="color:var(--v-text,#d4c8b0);">Ganhou:</span>'
+              + '    <span style="display:inline-flex;align-items:center;gap:3px;">'
+              + '      <b style="color:var(--v-gold,#c4953a);font-size:calc(13px * var(--v-font-scale, 1));">' + _reward + '</b>'
               + '      <span class="vi vi-coin sm"></span>'
-              + '      <span style="color:var(--v-text-dim,#a09484);font-size:calc(11px * var(--v-font-scale, 1));margin-left:4px;">+ bônus XP</span>'
-              + '    </div>'
+              + '      <span style="color:var(--v-text-dim,#a09484);font-size:calc(10px * var(--v-font-scale, 1));margin-left:3px;">+ XP</span>'
+              + '    </span>'
               + '  </div>'
               + (referredCount >= _rewardGoal
-                ? '  <div style="margin-top:8px;padding:6px 8px;background:rgba(125,186,91,0.10);border:1px solid #7dba5b88;border-radius:4px;font-size:calc(11px * var(--v-font-scale, 1));color:#9fda7d;text-align:center;">✦ Marco lendário alcançado! Bônus épico desbloqueado.</div>'
-                : '  <div style="margin-top:6px;font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;text-align:center;opacity:0.85;">Faltam <b style="color:var(--v-gold,#c4953a);">' + (_rewardGoal - referredCount) + '</b> aventureiros para o bônus lendário.</div>')
+                ? '  <div style="margin-top:5px;padding:4px 6px;background:rgba(125,186,91,0.10);border:1px solid #7dba5b88;border-radius:3px;font-size:calc(10px * var(--v-font-scale, 1));color:#9fda7d;text-align:center;">✦ Marco lendário!</div>'
+                : '  <div style="margin-top:4px;font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;text-align:center;opacity:0.85;">Faltam <b style="color:var(--v-gold,#c4953a);">' + (_rewardGoal - referredCount) + '</b> para o bônus.</div>')
               + '</div>'
 
-              // === STATUS / FRIEND CODE INPUT ===
+              // === STATUS / FRIEND CODE INPUT — Sessão #56 compactado ===
               + (referrer
-                 ? '<div style="margin-top:12px;padding:10px;background:rgba(125,186,91,0.06);border:1px solid #7dba5b66;border-radius:6px;text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;">'
-                   + '<span style="color:#9fda7d;">✓</span> Você foi indicado por <b style="color:var(--v-gold,#c4953a);font-style:normal;letter-spacing:2px;">' + referrer + '</b>'
+                 ? '<div style="margin-top:8px;padding:6px 8px;background:rgba(125,186,91,0.06);border:1px solid #7dba5b66;border-radius:5px;text-align:center;font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;">'
+                   + '<span style="color:#9fda7d;">✓</span> Indicado por <b style="color:var(--v-gold,#c4953a);font-style:normal;letter-spacing:2px;">' + referrer + '</b>'
                    + '</div>'
-                 : '<div style="margin-top:12px;padding:12px;background:linear-gradient(180deg, rgba(42,30,18,0.55) 0%, rgba(28,22,16,0.7) 100%);border:1px solid var(--v-border,#4a3828);border-radius:6px;">'
-                   + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;text-align:center;">Tem um código de outro aventureiro?</div>'
+                 : '<div style="margin-top:8px;padding:7px 9px;background:linear-gradient(180deg, rgba(42,30,18,0.55) 0%, rgba(28,22,16,0.7) 100%);border:1px solid var(--v-border,#4a3828);border-radius:5px;">'
+                   + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center;">Tem um código?</div>'
                    + '  <input id="referral-input" type="text" placeholder="VALD123" maxlength="7" autocomplete="off" '
-                   + '         style="width:100%;padding:10px 12px;background:rgba(28,22,16,0.92);border:1px solid var(--v-gold,#c4953a);border-radius:5px;color:#fff4d0;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(18px * var(--v-font-scale, 1));letter-spacing:4px;text-align:center;text-transform:uppercase;box-sizing:border-box;outline:none;transition:box-shadow 0.2s;"'
-                   + '         onfocus="this.style.boxShadow=\'0 0 12px rgba(255,210,90,0.45)\'"'
+                   + '         style="width:100%;padding:6px 8px;background:rgba(28,22,16,0.92);border:1px solid var(--v-gold,#c4953a);border-radius:4px;color:#fff4d0;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:3px;text-align:center;text-transform:uppercase;box-sizing:border-box;outline:none;transition:box-shadow 0.2s;"'
+                   + '         onfocus="this.style.boxShadow=\'0 0 10px rgba(255,210,90,0.45)\'"'
                    + '         onblur="this.style.boxShadow=\'none\'">'
                    + '  <button id="referral-apply"'
-                   + '          style="margin-top:8px;width:100%;padding:10px;background:linear-gradient(180deg, var(--v-gold,#c4953a), #8a6420);border:1px solid var(--v-gold,#c4953a);border-radius:5px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 2px 8px var(--v-gold-40,rgba(196,149,58,0.4));">'
+                   + '          style="margin-top:5px;width:100%;padding:6px;background:linear-gradient(180deg, var(--v-gold,#c4953a), #8a6420);border:1px solid var(--v-gold,#c4953a);border-radius:4px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(12px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;letter-spacing:1.3px;text-transform:uppercase;box-shadow:0 2px 6px var(--v-gold-40,rgba(196,149,58,0.4));">'
                    + '✦ Aplicar Selo'
                    + '</button>'
                    + '</div>'),
@@ -12320,36 +12321,89 @@ function _showSettingsPopup(){
           onConfirm: function(){ vToast('Obrigado por considerar!'); }
         });
       } else if (cb === 'extras_feedback') {
+        // Sessão #56 (2026-05-28) — Demand H: redesign estético medieval.
+        // Antes: estrelas em círculos pequenos sem hover/cascade fill.
+        // Agora: banner ornamental + estrelas grandes 36px com cascade fill
+        // (hover N estrelas → preenche 1..N), feedback label por nota,
+        // animação shimmer no border ao confirmar, tipografia consistente.
+        var _prevRating = _getPref('valdoria_last_rating', null);
+        var _ratingLabels = {
+          1: '"Tem muito o que melhorar"',
+          2: '"Razoável"',
+          3: '"Bom"',
+          4: '"Muito bom"',
+          5: '"Adoro!"'
+        };
         _showInfoPopup({
-          icon: _heralIco('ic-stat-cha', null, '32px'), npc: 'Avaliar o Jogo',
+          icon: _heralIco('ic-stat-cha', null, '32px'),
+          npc: 'Avaliar o Jogo',
           title: 'Sua opinião importa',
-          desc: 'Que nota você daria pra Lendas de Valdoria hoje?<br><br>'
-              + '<div style="display:flex; gap:6px; justify-content:center; padding:10px 0;" id="rating-stars">'
+          desc: '<style>'
+              + '@keyframes ratShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,210,90,0.4));}50%{filter:drop-shadow(0 0 12px rgba(255,210,90,0.8));}}'
+              + '@keyframes ratPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}'
+              + '.rating-star{background:none;border:none;cursor:pointer;color:rgba(196,149,58,0.35);font-size:calc(36px * var(--v-font-scale, 1));line-height:1;padding:2px 4px;transition:color 0.18s ease,transform 0.18s ease;}'
+              + '.rating-star:hover,.rating-star.filled{color:#ffd27a;text-shadow:0 0 10px rgba(255,210,90,0.65),0 2px 4px rgba(0,0,0,0.6);}'
+              + '.rating-star.confirmed{animation:ratShimmer 1.6s ease-in-out infinite;}'
+              + 'body.perf-lite .rating-star.confirmed{animation:none;}'
+              + '@media (prefers-reduced-motion:reduce){.rating-star.confirmed{animation:none;}}'
+              + '</style>'
+              + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(12px * var(--v-font-scale, 1));margin:4px 0 10px;line-height:1.5;">'
+              + '"Que tua voz ressoe nas salas do mestre da forja, viajante."'
+              + '</div>'
+              + (_prevRating
+                ? '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);margin-bottom:6px;">Última nota: ' + '★'.repeat(parseInt(_prevRating,10)) + '</div>'
+                : '')
+              + '<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:0.85;">Qual a tua nota?</div>'
+              + '<div id="rating-stars" style="display:flex; gap:2px; justify-content:center; padding:6px 0 4px;">'
               + [1,2,3,4,5].map(function(n){
-                  return '<button class="rating-star" data-rating="' + n + '" '
-                       + 'style="background:none; border:1px solid var(--v-border,#4a3828); '
-                       + 'border-radius:50%; width:42px; height:42px; cursor:pointer; '
-                       + 'color:var(--v-gold,#c4953a); font-size:calc(20px * var(--v-font-scale, 1));">★</button>';
+                  return '<button class="rating-star" data-rating="' + n + '" aria-label="' + n + ' estrelas">★</button>';
                 }).join('')
               + '</div>'
-              + '<i style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1));">5 = "Adoro!" · 1 = "Tem o que melhorar"</i>',
+              + '<div id="rating-label" style="text-align:center;min-height:22px;font-family:var(--v-font,MedievalSharp,serif);font-style:italic;color:var(--v-text,#d4c8b0);font-size:calc(13px * var(--v-font-scale, 1));line-height:1.4;margin-top:4px;">Toque uma estrela acima.</div>',
           onConfirm: function(){
             var stored = _getPref('valdoria_last_rating', null);
             if (stored) vToast('Última nota: ' + stored + '★');
             else vToast('Sem nota ainda. Toque em uma estrela.');
           }
         });
-        // Wire stars
+        // Sessão #56: cascade fill (hover N → preenche 1..N) + click anima
         setTimeout(function(){
-          document.querySelectorAll('.rating-star').forEach(function(b){
+          var stars = document.querySelectorAll('.rating-star');
+          var labelEl = document.getElementById('rating-label');
+          function _setFill(n, cls){
+            stars.forEach(function(b, i){
+              if (i < n) b.classList.add(cls);
+              else b.classList.remove(cls);
+            });
+          }
+          stars.forEach(function(b, i){
+            b.addEventListener('mouseenter', function(){
+              _setFill(i+1, 'filled');
+              if (labelEl) labelEl.textContent = _ratingLabels[i+1];
+            });
+            b.addEventListener('mouseleave', function(){
+              _setFill(0, 'filled');
+              // Restore confirmed state se já clicou
+              var confirmed = b.parentElement.querySelectorAll('.rating-star.confirmed').length;
+              if (confirmed > 0) _setFill(confirmed, 'filled');
+              if (labelEl) labelEl.textContent = confirmed > 0 ? _ratingLabels[confirmed] : 'Toque uma estrela acima.';
+            });
             b.addEventListener('click', function(){
-              var r = b.getAttribute('data-rating');
+              var r = parseInt(b.getAttribute('data-rating'), 10);
               _setPref('valdoria_last_rating', r);
-              vToast('Avaliação registrada: ' + r + '★ — obrigado!');
-              if (typeof closeCityPopup === 'function') {
-                var top = _popupStack[_popupStack.length - 1];
-                if (top && top.indexOf('info_') === 0) navigateBack();
-              }
+              stars.forEach(function(bb, j){
+                bb.classList.toggle('confirmed', j < r);
+                bb.classList.toggle('filled', j < r);
+              });
+              if (labelEl) labelEl.textContent = _ratingLabels[r];
+              if (window.vHaptic) window.vHaptic('success');
+              vToast('✦ Avaliação registrada: ' + r + '★ — obrigado!');
+              setTimeout(function(){
+                if (typeof closeCityPopup === 'function') {
+                  var top = _popupStack[_popupStack.length - 1];
+                  if (top && top.indexOf('info_') === 0) navigateBack();
+                }
+              }, 800);
             });
           });
         }, 100);
@@ -12441,7 +12495,8 @@ function _showStatusPopup(memberIdx){
   var m = _getFichaMember(memberIdx);
   if (!m) { vToast('❌ Membro não encontrado.'); return; }
 
-  if (titleEl) titleEl.textContent = 'Ficha';
+  // Sessão #56 (2026-05-28) — Demand D: header "Ficha" → "Ficha do Aventureiro"
+  if (titleEl) titleEl.textContent = 'Ficha do Aventureiro';
   var stats = m.stats;
   function _mod(s){ var v = Math.floor((s - 10) / 2); return v; }
   function _modStr(s){ var v = _mod(s); return (v >= 0 ? '+' : '') + v; }
@@ -12558,20 +12613,9 @@ function _showStatusPopup(memberIdx){
     + 'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.08) 0%,transparent 55%),'
     + 'radial-gradient(ellipse at 50% 100%,rgba(196,149,58,0.04) 0%,transparent 70%);"></div>';
 
-  // === BANNER HEADER + HERO PORTRAIT — v6 compactado pra Telegram desktop ===
-  // Banner ◆ Ficha do Aventureiro ◆ — mais slim
-  html += '<div style="position:relative; z-index:1; padding: 4px 10px 3px; text-align:center;'
-    + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0) 100%);'
-    + 'border-bottom:1px solid rgba(196,149,58,0.16);">'
-    + '<div style="display:flex; align-items:center; justify-content:center; gap:6px;'
-    + 'font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9px * var(--v-font-scale, 1));'
-    + 'color:var(--v-gold,#c4953a); letter-spacing:2.5px; text-transform:uppercase;">'
-    + '<span style="flex:0 0 22px; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55));"></span>'
-    + '<span class="fEp-rune">◆</span>'
-    + '<span>Ficha do Aventureiro</span>'
-    + '<span class="fEp-rune">◆</span>'
-    + '<span style="flex:0 0 22px; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.55),transparent);"></span>'
-    + '</div></div>';
+  // Sessão #56 (2026-05-28) — Demand D: banner "◆ Ficha do Aventureiro ◆"
+  // REMOVIDO. O title bar do popup (#csp-title) já diz "Ficha do Aventureiro"
+  // — duplicar acima do portrait era ruído visual (user feedback).
 
   // Hero portrait compactado: avatar 64px container (50px inside) + nome 17px
   html += '<div class="ficha-portrait" style="position:relative; z-index:1; padding: 9px 10px 7px;'
@@ -12651,7 +12695,26 @@ function _showStatusPopup(memberIdx){
   }
 
   html += _barEpic('ic-stat-hp', '#c63d3d', 'Vida', m.hp, m.hpMax, hpPct, 'linear-gradient(90deg,#9a2828,#c63d3d,#f06060)', hpCritical);
-  if (m.mpMax > 0) html += _barEpic('ic-stat-mp', '#5a9eff', 'Mana', m.mp, m.mpMax, mpPct, 'linear-gradient(90deg,#2c5cb0,#3d72c6,#6090f0)', false);
+  // Sessão #56 (2026-05-28) — Demand C: FIX recurso por classe na ficha.
+  // Antes: hardcoded 'Mana' pra TODOS. Bárbaro Alzan via "22 Mana" sendo
+  // que o card mostrava "22 Fúria" (correto). Ladino → ENERGIA, Monge → KI,
+  // Guerreiro → VIGOR, Bárbaro → FÚRIA, casters → MANA. Cor e gradiente
+  // também ajustados por recurso pra coerência visual.
+  if (m.mpMax > 0) {
+    var _resInfo = (typeof _resForClass === 'function') ? _resForClass(m.cls) : { name: 'Mana', cls: 'mp' };
+    var _resName = _resInfo.name || 'Mana';
+    // Recurso-specific color: mp=azul, fury=vermelho, energy=verde-âmbar,
+    // vigor=âmbar, ki=branco-azulado
+    var _resColor, _resGrad;
+    switch (_resInfo.cls) {
+      case 'fury':   _resColor = '#e85040'; _resGrad = 'linear-gradient(90deg,#8a2820,#c63d35,#f06045)'; break;
+      case 'energy': _resColor = '#c4af3a'; _resGrad = 'linear-gradient(90deg,#7a6820,#c4af3a,#e8d260)'; break;
+      case 'vigor':  _resColor = '#c4953a'; _resGrad = 'linear-gradient(90deg,#7a5a20,#c4953a,#e8c45a)'; break;
+      case 'ki':     _resColor = '#9adfe8'; _resGrad = 'linear-gradient(90deg,#3a8590,#6cb5c0,#a0e5f0)'; break;
+      default:       _resColor = '#5a9eff'; _resGrad = 'linear-gradient(90deg,#2c5cb0,#3d72c6,#6090f0)';
+    }
+    html += _barEpic('ic-stat-mp', _resColor, _resName, m.mp, m.mpMax, mpPct, _resGrad, false);
+  }
   if (m.xpNext) html += _barEpic('ic-stat-cha', 'var(--v-gold,#c4953a)', 'Experiência', m.xp || 0, m.xpNext, xpPct, 'linear-gradient(90deg,#9a7530,#c4953a,#e8c45a)', false);
 
   // Bolsa + Exaustão linha tight
@@ -12675,38 +12738,59 @@ function _showStatusPopup(memberIdx){
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Atributos D&D 5e'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
-  html += '<div class="ficha-stats-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px;">';
+  // Sessão #56 (2026-05-28) — Demand E: ATTR PNGs OpenAI ao lado do número
+  // PNGs canonical em /shared/img/levelup/attrs/{forca,destreza,constituicao,
+  // inteligencia,sabedoria,carisma}.png. Antes só SVG sprite ic-stat-*.
+  // Layout 2-col em vez de 3-col pra acomodar PNG 32px + número grande
+  // (especialmente em font-scale=1.5/2x).
+  html += '<div class="ficha-stats-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:5px;">';
+  function _attrPngBase(){
+    var loc = (typeof location !== 'undefined') ? location.href : '';
+    if (loc.indexOf('file://') === 0) return '/shared/img/levelup/attrs/';
+    return '/shared/img/levelup/attrs/';
+  }
   var STATS_DATA = [
-    { key: 'str', label: 'FOR', icon: 'ic-stat-str' },
-    { key: 'dex', label: 'DES', icon: 'ic-stat-dex' },
-    { key: 'con', label: 'CON', icon: 'ic-stat-con' },
-    { key: 'int', label: 'INT', icon: 'ic-stat-int' },
-    { key: 'wis', label: 'SAB', icon: 'ic-stat-wis' },
-    { key: 'cha', label: 'CAR', icon: 'ic-stat-cha' }
+    { key: 'str', label: 'FOR', icon: 'ic-stat-str', png: 'forca.png' },
+    { key: 'dex', label: 'DES', icon: 'ic-stat-dex', png: 'destreza.png' },
+    { key: 'con', label: 'CON', icon: 'ic-stat-con', png: 'constituicao.png' },
+    { key: 'int', label: 'INT', icon: 'ic-stat-int', png: 'inteligencia.png' },
+    { key: 'wis', label: 'SAB', icon: 'ic-stat-wis', png: 'sabedoria.png' },
+    { key: 'cha', label: 'CAR', icon: 'ic-stat-cha', png: 'carisma.png' }
   ];
+  var _attrBase = _attrPngBase();
+  var _attrV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
   STATS_DATA.forEach(function(s){
     var val = stats[s.key];
     var modVal = _mod(val);
     var modGlow = modVal > 0 ? '0 0 5px rgba(124,219,124,0.7)' : (modVal < 0 ? '0 0 5px rgba(224,124,124,0.6)' : '0 0 3px rgba(160,148,132,0.4)');
     var modColor = modVal > 0 ? '#7cdb7c' : (modVal < 0 ? '#e07c7c' : 'var(--v-text-dim,#a09484)');
     var iconCol = HERALDIC_COLORS[s.icon] || '#8a7a6a';
+    // PNG 36px + fallback ic-stat-* SVG (onerror)
+    var pngImg = '<img src="' + _attrBase + s.png + '?v=' + _attrV + '" alt="' + s.label + '" '
+      + 'style="width:36px;height:36px;flex-shrink:0;object-fit:contain;border-radius:6px;'
+      + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
+      + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:32px;height:32px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + s.icon + '&quot;/></svg>\'">';
     html += '<div class="ficha-stat-stone" style="position:relative;'
       + 'background:linear-gradient(165deg,rgba(80,62,40,0.45) 0%,rgba(42,34,24,0.85) 100%);'
-      + 'border:1px solid var(--v-border,#4a3828); border-radius:5px;'
-      + 'padding:3px 3px 3px; text-align:center; line-height:1.05;'
+      + 'border:1px solid var(--v-border,#4a3828); border-radius:6px;'
+      + 'padding:5px 7px; line-height:1.1;'
+      + 'display:flex; align-items:center; gap:7px;'
       + 'box-shadow:inset 0 1px 0 rgba(196,149,58,0.18),inset 0 -1px 2px rgba(0,0,0,0.3),0 1px 1px rgba(0,0,0,0.3);">'
-      + '<div style="font-size:calc(9px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); letter-spacing:0.3px;'
-      + 'display:inline-flex; align-items:center; gap:2px; justify-content:center;">'
-      + '<svg viewBox="0 0 120 120" style="width:10px;height:10px;color:' + iconCol + ';"><use href="#' + s.icon + '"/></svg>'
+      + pngImg
+      // Bloco texto: label + número + mod, alinhado à esquerda
+      + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:0;">'
+      + '<div style="font-size:calc(9px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); letter-spacing:0.3px;">'
       + s.label + '</div>'
-      // Número v6: 18px (carved depth)
-      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(18px * var(--v-font-scale, 1)); font-weight:700;'
-      + 'color:var(--v-gold,#c4953a); line-height:1; margin-top:1px;'
+      + '<div style="display:flex; align-items:baseline; gap:5px;">'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(20px * var(--v-font-scale, 1)); font-weight:700;'
+      + 'color:var(--v-gold,#c4953a); line-height:1;'
       + 'text-shadow:0 1px 0 rgba(0,0,0,0.6),0 0 6px rgba(196,149,58,0.35);">'
-      + val + '</div>'
-      + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:' + modColor + '; font-weight:600; line-height:1; margin-top:1px;'
+      + val + '</span>'
+      + '<span style="font-size:calc(11px * var(--v-font-scale, 1)); color:' + modColor + '; font-weight:600; line-height:1;'
       + 'text-shadow:' + modGlow + ';">'
-      + (modVal >= 0 ? '+' : '') + modVal + '</div>'
+      + (modVal >= 0 ? '+' : '') + modVal + '</span>'
+      + '</div>'
+      + '</div>'
       + '</div>';
   });
   html += '</div></div>';
@@ -19753,35 +19837,78 @@ function _renderQuestDiary(bodyEl){
 }
 
 // ============================================================================
-// === DESAFIO DIÁRIO — Covil dos Lobos =======================================
+// === DESAFIO DIÁRIO — Caça/Coleta (NÃO masmorra) =============================
 // ============================================================================
-// Reusa SUBSCREEN_DATA['daily_challenge'] legacy: Iniciar / Tabela / Recompensas.
-// Implementação simples com popup confirm + result.
-var DAILY_CHALLENGE = {
-  title: 'Covil dos Lobos',
-  flavor: 'Hoje, lobos cinzentos atacam fazendeiros do norte. Quem ousará detê-los antes do anoitecer?',
-  seed: 'VLD-2026-05-02',
-  tier: 'Bronze · ND 1',
-  enemies: ['3 Lobos Cinzentos', 'Lobo Alfa Sombra Branca'],
-  reward_gold: 75,
-  reward_xp: 150,
-  bonus_high: 'HP > 75% no fim → +50% XP/espólio',
-  bonus_mid: 'HP > 50% no fim → +25% XP/espólio'
-};
+// Sessão #56 (2026-05-28) — Demand A: redesign canonical.
+// User pediu: NÃO masmorra. Foco no jogo básico (criação, exploração, combate,
+// mercado, contratar aliados, missões, diálogos PADRAO_ALDRIC). Daily challenge
+// agora é "MATAR X inimigos específicos" OU "COLETAR Y itens específicos",
+// rotativo por dia (seed via Date YYYYMMDD). Masmorras virão NO FUTURO como
+// desafios semanais/raids — não agora.
+var DAILY_CHALLENGE_POOL = [
+  // Pool HUNT (caça inimigos específicos) — alinhado com bestiário existente
+  { kind: 'hunt',   target: 'Lobos Cinzentos',     count: 3, biome: 'Floresta dos Sussurros',
+    icon: 'ic-lobo',   reward_gold: 60, reward_xp: 120,
+    desc: 'Fazendeiros do norte mal dormem. Lobos cinzentos descem da floresta toda noite.' },
+  { kind: 'hunt',   target: 'Goblins',              count: 5, biome: 'Ninho de Goblins',
+    icon: 'ic-goblin', reward_gold: 75, reward_xp: 140,
+    desc: 'Goblins armaram ninho ao norte. A Guarda pede sua intervenção.' },
+  { kind: 'hunt',   target: 'Esqueletos',           count: 4, biome: 'Cripta Antiga',
+    icon: 'ic-esqueleto', reward_gold: 90, reward_xp: 160,
+    desc: 'Mortos-vivos despertaram na cripta velha. Devolva-os ao silêncio.' },
+  { kind: 'hunt',   target: 'Bandidos',             count: 4, biome: 'Estrada do Comércio',
+    icon: 'ic-bandido', reward_gold: 100, reward_xp: 180,
+    desc: 'Bandidos assaltam mercadores na estrada. Capitã Helga oferece recompensa.' },
+  { kind: 'hunt',   target: 'Aranhas Gigantes',     count: 3, biome: 'Floresta dos Sussurros',
+    icon: 'ic-aranha', reward_gold: 80, reward_xp: 150,
+    desc: 'Teias gigantes bloqueiam a trilha do mercador. Limpe o caminho.' },
+  // Pool GATHER (coleta itens específicos)
+  { kind: 'gather', target: 'Raízes-da-Noite',     count: 5, biome: 'Floresta dos Sussurros',
+    icon: 'ic-druida', reward_gold: 50, reward_xp: 100,
+    desc: 'Mestra Sylvi precisa de raízes para um novo lote de poções.' },
+  { kind: 'gather', target: 'Pelo de Lobo',         count: 4, biome: 'Floresta dos Sussurros',
+    icon: 'ic-lobo',  reward_gold: 55, reward_xp: 110,
+    desc: 'Garrick, o curtidor, quer peles para vestes de inverno.' },
+  { kind: 'gather', target: 'Cogumelos Brilhantes', count: 6, biome: 'Cavernas Úmidas',
+    icon: 'ic-druida', reward_gold: 65, reward_xp: 120,
+    desc: 'Alquimista Velithra paga bem por cogumelos das cavernas.' },
+  { kind: 'gather', target: 'Gemas Brutas',         count: 2, biome: 'Vila Mineira',
+    icon: 'ic-ach-colecionador', reward_gold: 120, reward_xp: 180,
+    desc: 'Mestre Joalheiro precisa de gemas brutas pra cortar. Pagamento generoso.' },
+  { kind: 'gather', target: 'Ervas Curativas',     count: 8, biome: 'Campos Verdes',
+    icon: 'ic-druida', reward_gold: 70, reward_xp: 130,
+    desc: 'Templo de Pelor distribui poções aos enfermos. Ajude na coleta.' }
+];
+
+function _dailyChallengeForToday(){
+  // Seed determinístico: YYYYMMDD vira índice no pool (rotação diária).
+  var d = new Date();
+  var dayStr = d.getFullYear() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+  var seed = parseInt(dayStr, 10);
+  var idx = seed % DAILY_CHALLENGE_POOL.length;
+  var ch = DAILY_CHALLENGE_POOL[idx];
+  return Object.assign({ seed: 'VLD-' + dayStr, _idx: idx }, ch);
+}
 
 function _buildDailyChallengeMockData(player){
-  // Renderiza como hub — services list (Iniciar/Tabela/Recompensas)
+  var ch = _dailyChallengeForToday();
   var doneToday = !!window._dailyChallengeDone;
+  var kindLabel = ch.kind === 'hunt' ? 'CAÇA' : 'COLETA';
+  var verb = ch.kind === 'hunt' ? 'Abater' : 'Reunir';
+  var ctaIcon = ch.kind === 'hunt' ? 'ic-stat-attack' : 'ic-mochila';
+  var ctaLabel = ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta';
   return {
     type: 'hub',
-    flavor: '🐺 <b>' + DAILY_CHALLENGE.title + '</b><br>' +
-            '<i>' + DAILY_CHALLENGE.flavor + '</i><br><br>' +
-            '⏰ Restam ~14h · Seed <code>' + DAILY_CHALLENGE.seed + '</code> · Mesma masmorra pra todos.',
-    rep_label: '🎯 Tier ' + DAILY_CHALLENGE.tier,
+    flavor: '<svg viewBox="0 0 120 120" style="width:18px;height:18px;color:var(--v-gold);vertical-align:middle;"><use href="#' + ch.icon + '"/></svg> '
+          + '<b>Desafio do Dia · ' + kindLabel + '</b><br>'
+          + '<i>' + ch.desc + '</i><br><br>'
+          + '🎯 ' + verb + ' <b>' + ch.count + 'x ' + ch.target + '</b> em <b>' + ch.biome + '</b><br>'
+          + '⏰ Reseta à meia-noite · Seed <code>' + ch.seed + '</code>',
+    rep_label: '🏆 +' + ch.reward_gold + ' Valdoritas · +' + ch.reward_xp + ' XP',
     services: [
-      { icon: _heralIco('ic-stat-attack'),  label: 'Iniciar Desafio',   cb: 'daily_start_combat',
+      { icon: _heralIco(ctaIcon), label: ctaLabel, cb: 'daily_start_combat',
         disabled: doneToday, badge: doneToday ? '✓ Hoje' : '' },
-      { icon: _heralIco('ic-trofeu'),       label: 'Tabela do Dia',     cb: 'daily_show_board' },
+      { icon: _heralIco('ic-cartografia'), label: 'Ver no Mapa', cb: 'daily_show_map' },
       { icon: _heralIco('ic-ach-colecionador'), label: 'Ver Recompensas', cb: 'daily_show_rewards' }
     ]
   };
@@ -37216,7 +37343,9 @@ function _showInventoryPopup(){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.innerHTML = _heralIco('ic-mochila', null, '20px') + ' Mochila';  // 2026-05-06: heraldic em vez de emoji
+  // Sessão #56 (2026-05-28) — Demand J: removido ícone heráldico de mochila
+  // do título — redundante (título "Mochila" já é auto-explicativo).
+  if (titleEl) titleEl.textContent = 'Mochila';
   _renderInventoryPopup();
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'inventory') {
@@ -47474,7 +47603,7 @@ SUBSCREEN_DATA['city_more'] = {
     [_heralIco('ic-mochila'), 'Portões', 'Sair pra aventura', 'nav:gates'],
     [_heralIco('ic-missões'), 'Quadro de Missões', 'Ativas, disponíveis, histórico', 'nav:quests'],
     [_heralIco('ic-compendio'), 'Compêndio', 'Bestiário, locais, itens', 'nav:codex'],
-    [_heralIco('ic-mochila'), 'Desafio Diário', 'Covil dos Lobos hoje', 'nav:daily_challenge'],
+    [_heralIco('ic-stat-attack'), 'Desafio Diário', 'Caça/coleta do dia (rotativo)', 'nav:daily_challenge'],
     [_heralIco('ic-oficina'), 'Oficina', 'Crafting + gather', 'nav:workshop'],
     [_heralIco('ic-mochila'), 'Escriba Rúnico', 'Forjar runas', 'nav:runes'],
     [_heralIco('ic-festival'), 'Festival da Colheita', '3 minigames', 'nav:festival'],
@@ -55964,9 +56093,14 @@ function _cityLocIconHTML(cb, fallbackIco) {
            que tinham as PNGs com Cache-Control:immutable do header anterior.
            Sem isso, browsers servem versão velha (1.5MB) por até 1 ano sem nem
            consultar o servidor. Tier C (no-cache + ETag) só pega efeito em URLs
-           novas — daí o sufixo. Date.now() fallback se bundle hash falhar. */
+           novas — daí o sufixo. Date.now() fallback se bundle hash falhar.
+           Sessão #56 (2026-05-28): FIX P0 cidade images — formato dos arquivos
+           é .webp (gerado via OpenAI + Pillow + save_optimized kind='scenery'),
+           NÃO .png. Antes o <img src="...tavern.png"> 404ava + onerror sumia o
+           elemento. User reportou: "imagens taverna/missões/mercado/templo não
+           aparecem". Fix: src usa .webp matching o filesystem. */
         var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
-        return '<img class="hl-ico-img" src="' + base + cb + '.png?v=' + v + '" ' +
+        return '<img class="hl-ico-img" src="' + base + cb + '.webp?v=' + v + '" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'\'">';
     }
