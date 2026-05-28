@@ -47540,12 +47540,11 @@ function renderCityTopBar(){
   var weatherSlug = TOPBAR_WEATHER_PNG[weatherKey];
   var periodIcon = _ctbIconHTML(periodSlug, pemoji);
   var weatherIcon = _ctbIconHTML(weatherSlug, w.icon);
-  // Sessão #62 revisão: 🏙️ ao lado de VALDORIA NÃO é "ícone de área da cidade"
-  // (user demand E removeu só ícones de LOCAIS/áreas, não a marca da cidade).
-  // Restaurado.
+  // Sessão #62 revisão 2: 🏙️ REMOVIDO ao lado de VALDORIA — user confirmou
+  // "é um ícone sem sentido". Só o nome dourado VALDORIA permanece.
   el.innerHTML = ''
     + '<div class="ctb-icons">'
-    + '  <span class="ctb-item"><span class="ctb-city">🏙️</span><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
+    + '  <span class="ctb-item"><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
     + '</div>'
     + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
     + '  <span class="ctb-item ctb-time">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
