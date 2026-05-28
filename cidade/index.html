@@ -10955,7 +10955,23 @@ function _doDeleteChar(charId, charName){
     return r.json();
   }).then(function(data){
     if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-    // Update local mock with server-returned active list
+    // Sessão #58 (2026-05-28) — FIX P0 char switch bug:
+    // User reportou: "Estava jogando com Alzan, apaguei, selecionei Wilzen,
+    // cliquei Continuar Jogando, mas cidade continuou mostrando Alzan".
+    //
+    // Root cause: o código abaixo marcava _mockCharacters[0].active = true
+    // ao popular a lista após delete. _onPlayCharacter() short-circuita
+    // quando picked.active === true (linha 11721) — só fecha o popup, NÃO
+    // chama /api/auth/select-character. Resultado: sessão server ainda
+    // aponta pra Alzan (apagado) + CITY_MOCK_PLAYER ainda tem Alzan data
+    // + card cidade renderiza Alzan stale.
+    //
+    // Fix 1: TODOS os chars recebem active=false. User SEMPRE precisa
+    //        clicar Jogar pra disparar o switch flow proper.
+    // Fix 2: Se o char DELETADO era o ativo (charId === current ?char param),
+    //        auto-disparar /api/auth/select-character pro PRIMEIRO restante,
+    //        seguido de redirect com novo token. Sem isso o user fica num
+    //        estado zumbi (sessão aponta pra char deletado).
     if (data && data.characters){
       window._mockCharacters = data.characters.map(function(c){
         return {
@@ -10965,16 +10981,55 @@ function _doDeleteChar(charId, charName){
           race: (c.race || '').toLowerCase(),
           level: c.level || 1,
           icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
-          active: false  // none auto-activated; user must select Jogar
+          active: false  // ALL false. User precisa selecionar via UI (Fix #1).
         };
       });
-      // mark first as active fallback (server can override later)
-      if (window._mockCharacters.length){
-        window._mockCharacters[0].active = true;
-        window._hallSelectedId = window._mockCharacters[0].id;
-      } else {
-        window._hallSelectedId = null;
+      // Sessão #58 (Fix #2): se char deletado era o ativo da sessão atual
+      // (URL ?char=<charId>), auto-troca pro primeiro restante. Isso evita
+      // o estado zumbi onde session aponta pra char apagado.
+      var _curParams = new URLSearchParams(window.location.search);
+      var _curCharInSession = _curParams.get('char');
+      var _deletedWasActive = (charId === _curCharInSession);
+      var _firstRemaining = window._mockCharacters[0];
+      if (_deletedWasActive && _firstRemaining && token && api){
+        console.log('[CITY] active char deleted — auto-switching to', _firstRemaining.id);
+        if (typeof vProcessing !== 'undefined' && vProcessing.show){
+          vProcessing.show({ text: 'Trocando para ' + _firstRemaining.name + '...' });
+        }
+        fetch(api.replace(/\/$/,'') + '/api/auth/select-character', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ char_id: _firstRemaining.id })
+        }).then(function(r){
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        }).then(function(switchData){
+          if (switchData.error) throw new Error(switchData.error);
+          // Limpa params do char antigo + seta novo char/token (mesmo padrão
+          // de _showCharSwitchConfirm X-6.5.51AP)
+          var newParams = new URLSearchParams(window.location.search);
+          ['name','cls','race','level','hp','hpMax','mp','mpMax','gold','xp','exh','xpNext','_cb'].forEach(function(k){
+            newParams.delete(k);
+          });
+          newParams.set('token', switchData.token || token);
+          newParams.set('char', _firstRemaining.id);
+          newParams.set('_cb', String(Date.now()));
+          window.__valdoria_transitioning = true;
+          window.location.replace(window.location.pathname + '?' + newParams.toString());
+        }).catch(function(err){
+          if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+          // Auto-switch falhou — usuário precisa selecionar manualmente.
+          // Mostra Hall (com nenhum char marcado active) + toast explicativo.
+          vToast('⚠️ Selecione um personagem pra continuar.');
+          console.warn('[CITY] auto-switch after delete failed:', err);
+          window._hallSelectedId = _firstRemaining ? _firstRemaining.id : null;
+          _showCharactersPopup();
+        });
+        return;  // skip toast + re-render abaixo — redirect já foi disparado
       }
+      // Delete normal (char não-ativo apagado): seleciona primeiro pra UX, mas
+      // active continua false em todos.
+      window._hallSelectedId = _firstRemaining ? _firstRemaining.id : null;
     }
     vToast('🗑 ' + _titleCase(charName) + ' arquivado.');
     _showCharactersPopup();  // re-render (mostra na lista de arquivados)
@@ -11720,10 +11775,28 @@ function _onPlayCharacter(){
   var picked = chars.find(function(c){ return c.id === selectedId; });
   if (!picked) return;
 
-  // Se já é o ativo: apenas fecha e volta ao hub (continuar jogando)
-  if (picked.active){
+  // Sessão #58 (2026-05-28) — Defense-in-depth pro char switch bug.
+  // Mesmo que picked.active seja true (flag local), verifica se o char
+  // selecionado realmente corresponde ao char da sessão atual (URL
+  // ?char param). Se diferir, força flow de switch — evita o caso onde
+  // delete handler ou outro código tenha marcado active=true sem o
+  // backend ter trocado a sessão (zumbi state).
+  var _curParams = new URLSearchParams(window.location.search);
+  var _curCharInSession = _curParams.get('char');
+  var _matchesSession = !_curCharInSession || (picked.id === _curCharInSession);
+
+  // Se já é o ativo E o session matches: apenas fecha (continuar jogando real)
+  if (picked.active && _matchesSession){
     if (typeof closeCityPopup === 'function') closeCityPopup(true);
     return;
+  }
+
+  // Mismatch: flag local diz "ativo" mas session aponta pra outro char.
+  // Força o switch flow proper (chama /api/auth/select-character).
+  if (picked.active && !_matchesSession){
+    console.warn('[CITY] picked.active=true mas session ?char='
+                 + _curCharInSession + ' ≠ picked.id=' + picked.id
+                 + ' — forçando switch flow');
   }
 
   // Confirm dedicado pra troca (sem _showConfirmPurchase)
