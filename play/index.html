@@ -185,7 +185,11 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     pctEl: null,
     barEl: null,
     lastStageIdx: -1,
-    burstAt: { 25: false, 50: false, 75: false, 100: false }
+    burstAt: { 25: false, 50: false, 75: false, 100: false },
+    // Sessão #49 (2026-05-27): true durante retry loop após server offline.
+    // Cap o ticker em 90% pra não fingir "100% pronto" quando ainda está
+    // reconectando. Limpo apenas no success path.
+    errored: false
   };
   // Estágios (label) por faixa de progresso — agnósticos ao destino.
   var _epicStages = [
@@ -258,7 +262,13 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       var minProgress = Math.min(1, elapsed / _epicState.minMs);
       var softTimeout = elapsed >= _epicState.softCapMs;  // após 9s, libera mesmo sem data
       var targetPct;
-      if (_epicState.dataReady || softTimeout){
+      if (_epicState.errored){
+        // Sessão #49 (2026-05-27): durante retry loop ou erro definitivo,
+        // cap em 90% pra deixar claro que ainda está reconectando. Sem isso
+        // o ticker chegava a 100% após softCapMs e parecia que o jogo travou
+        // (bug reportado: "tela de carregamento continua em 100% e não carrega").
+        targetPct = Math.min(_epicState.currentPct || 90, 90);
+      } else if (_epicState.dataReady || softTimeout){
         // Data pronta OU softTimeout: pode ir até 100%, mas respeitando easing
         // Curva: começa easeOutCubic até 90% pelo minMs, depois ramp suave 90→100
         var t = Math.min(1, elapsed / _epicState.minMs);
@@ -560,9 +570,55 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       return;
     }
 
-    setProgress(30, 'Autenticando…');
-    setTip('Conectando aos ventos de Valdória…');
-    sendLog('info', 'init_session_request', {host: apiHost});
+    // Sessão #49 (2026-05-27): delega pra _attemptTelegramAuthFlow que tem
+    // retry automático a cada 3s em caso de network/5xx (server offline).
+    // User reportou que /play/ travava em 100% sem auto-recovery quando
+    // o servidor caía no boot — precisava fechar+reabrir o WebApp.
+    _attemptTelegramAuthFlow(initData);
+  }
+
+  // === Telegram auth flow with retry =====================================
+  // Sessão #49 (2026-05-27): tenta init-session + state em loop a cada 3s
+  // enquanto o erro for retryable (network/5xx/timeout). Maintenance overlay
+  // (vMaintenance) tem prioridade — se ativar, retry aborta e o usuário
+  // vê a tela de manutenção com seu próprio poll (30s).
+  //
+  // User pediu (case real): "verificação a cada 3 segundos para tentar
+  // conectar novamente, identificar sozinho que o servidor passou de sem
+  // resposta para com resposta, sem precisar fechar e reabrir o aplicativo".
+  var _retryAttempt = 0;
+  var _retryTimer = null;
+
+  function _isRetryableAuthError(err){
+    var msg = (err && err.message) || String(err);
+    // Erros definitivos — usuário precisa reabrir via bot p/ initData fresco
+    if (msg.indexOf('Cross-env') >= 0) return false;
+    if (msg.indexOf('auth invalida') >= 0) return false;
+    // HTTP 4xx (401/403/404) — auth permanentemente quebrada nesse client
+    if (/HTTP 4\d\d/.test(msg)) return false;
+    // Maintenance: deixa o vMaintenance overlay tratar (já tem poll próprio)
+    if (msg === 'maintenance_active') return false;
+    // Resto (HTTP 5xx, network TypeError, timeout, abort) — retry vale
+    return true;
+  }
+
+  function _attemptTelegramAuthFlow(initData){
+    // Se vMaintenance já está ativo, aborta retry — o overlay de manutenção
+    // tem seu próprio poll (30s) + botão "Tentar Novamente" com reload.
+    if (window.vMaintenance && window.vMaintenance.isActive && window.vMaintenance.isActive()){
+      sendLog('info', 'auth_aborted_maintenance_active_pre');
+      return;
+    }
+
+    if (_retryAttempt === 0){
+      setProgress(30, 'Autenticando…');
+      setTip('Conectando aos ventos de Valdória…');
+    } else {
+      // Em retry: bar capada em 90% via _epicState.errored, label muda
+      setStage('Reconectando ao servidor…');
+      setTip('Tentativa ' + (_retryAttempt + 1) + ' — verificando servidor…');
+    }
+    sendLog('info', 'init_session_request', {host: apiHost, attempt: _retryAttempt});
 
     fetch(apiHost + '/api/game/init-session', {
       method: 'POST',
@@ -572,7 +628,7 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       credentials: 'omit'
     })
     .then(function(r){
-      sendLog('info', 'init_session_response', {status: r.status, ok: r.ok});
+      sendLog('info', 'init_session_response', {status: r.status, ok: r.ok, attempt: _retryAttempt});
       if (!r.ok) throw new Error('init-session HTTP ' + r.status);
       setProgress(50, 'Autenticando…');
       return r.json();
@@ -602,6 +658,14 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
         return r.json();
       })
       .then(function(state){
+        // SUCCESS: limpa retry state + errored flag → ticker progride a 100%
+        if (_retryAttempt > 0){
+          sendLog('info', 'auth_retry_succeeded', {attempts: _retryAttempt});
+        }
+        _retryAttempt = 0;
+        if (_retryTimer){ clearTimeout(_retryTimer); _retryTimer = null; }
+        _epicState.errored = false;
+
         var qs = new URLSearchParams();
         qs.set('token', auth.token);
         qs.set('api', apiBase);
@@ -643,21 +707,39 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     })
     .catch(function(err){
       var msg = (err && err.message) || String(err);
-      sendLog('error', 'auto_load_failed: ' + msg, {stack: err && err.stack && String(err.stack).slice(0, 500)});
-      setStage('Falha ao restaurar');
-      setTip(msg);
-      /* 2026-05-21 USER FIX: NUNCA fazer fallback para /web/ ou gotoCidade quando
-         estamos em contexto Telegram (initData presente). Se init-session falhou,
-         o jogador NÃO deve ver tela de login com opção Google — deve ver mensagem
-         clara para fechar+reabrir pelo bot. */
-      var _isTg = !!initData;
-      if (_isTg) {
-        setStage('Sessão expirou');
-        setTip('Feche este WebApp e abra novamente pelo /start do bot.');
-        return;  /* Trava aqui — bot vai reabrir o WebApp com initData fresco */
+      sendLog('error', 'auth_attempt_failed: ' + msg, {attempt: _retryAttempt, stack: err && err.stack && String(err.stack).slice(0, 500)});
+
+      // Se vMaintenance ativou durante esta tentativa (resposta 503 com flag),
+      // aborta retry — o overlay de manutenção é a tela final dele.
+      if (window.vMaintenance && window.vMaintenance.isActive && window.vMaintenance.isActive()){
+        sendLog('info', 'auth_aborted_maintenance_active_post');
+        _epicState.errored = false;
+        return;
       }
-      /* Browser puro sem Telegram — pode tentar cidade via cookie session */
-      setTimeout(gotoCidade, 1800);
+
+      // Retryable (network/5xx/timeout): agenda nova tentativa em 3s.
+      // Bar capada em 90% via errored flag. Loop continua INDEFINIDAMENTE até
+      // o server responder OU usuário fechar o WebApp.
+      if (_isRetryableAuthError(err)){
+        _retryAttempt += 1;
+        _epicState.errored = true;
+        setStage('Reconectando ao servidor…');
+        setTip('Sem resposta — nova tentativa em 3s (tentativa ' + _retryAttempt + ')');
+        sendLog('info', 'auth_retry_scheduled', {attempt: _retryAttempt, delay_ms: 3000, msg: msg.slice(0, 200)});
+        if (_retryTimer) clearTimeout(_retryTimer);
+        _retryTimer = setTimeout(function(){
+          _retryTimer = null;
+          _attemptTelegramAuthFlow(initData);
+        }, 3000);
+        return;
+      }
+
+      // Não-retryable (auth invalida/Cross-env/HTTP 4xx): erro definitivo
+      // → orienta usuário a reabrir via bot pra pegar initData fresco.
+      sendLog('error', 'auth_non_retryable: ' + msg);
+      _epicState.errored = true;
+      setStage('Sessão expirou');
+      setTip('Feche este WebApp e abra novamente pelo /start do bot.');
     });
   }
 
