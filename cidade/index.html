@@ -9847,20 +9847,20 @@ function _discoverySpeakerIcon(speaker) {
 function _discoverySpeakerPortrait(speaker) {
   var s = String(speaker || '').toLowerCase();
   // Personagens nominais (PNGs dedicados)
-  if (s.indexOf('aldric') >= 0 && s.indexOf('padre') >= 0) return '/shared/img/npcs/padre-aldric.png';
-  if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.png';
-  if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.png';
-  if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.png';
-  if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.png';
-  if (s.indexOf('miriel') >= 0)  return '/shared/img/npcs/sacerdotisa-miriel.png';
-  if (s.indexOf('corvus') >= 0)  return '/shared/img/npcs/corvus-livreiro.png';
-  if (s.indexOf('garlen') >= 0 || s.indexOf('cartograf') >= 0) return '/shared/img/npcs/garlen-cartografo.png';
-  if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.png';
-  if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.png';
-  if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.png';
-  if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.png';
-  if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.png';
-  if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.png';
+  if (s.indexOf('aldric') >= 0 && s.indexOf('padre') >= 0) return '/shared/img/npcs/padre-aldric.webp';
+  if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.webp';
+  if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.webp';
+  if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.webp';
+  if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.webp';
+  if (s.indexOf('miriel') >= 0)  return '/shared/img/npcs/sacerdotisa-miriel.webp';
+  if (s.indexOf('corvus') >= 0)  return '/shared/img/npcs/corvus-livreiro.webp';
+  if (s.indexOf('garlen') >= 0 || s.indexOf('cartograf') >= 0) return '/shared/img/npcs/garlen-cartografo.webp';
+  if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.webp';
+  if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
+  if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.webp';
+  if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.webp';
+  if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
+  if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
   if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.png';
   if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.png';
@@ -9869,15 +9869,15 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.png';
   if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.png';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
-  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.png';
-  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.png';
-  if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.png';
-  if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.png';
-  if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.png';
-  if (s.indexOf('ferreir') >= 0) return '/shared/img/npcs/ferreiro.png';
-  if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.png';
+  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.webp';
+  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
+  if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.webp';
+  if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.webp';
+  if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.webp';
+  if (s.indexOf('ferreir') >= 0) return '/shared/img/npcs/ferreiro.webp';
+  if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.webp';
   // Sumo Sacerdote / sacerdot — usa padre-aldric como fallback genérico de clero
-  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.png';
+  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.webp';
   return null;
 }
 
@@ -10307,7 +10307,7 @@ function renderFooter(){
     +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
     + '</button>'
     + '<button class="fb-btn" data-action="characters">'
-    +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.png" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
     +   '<span class="fb-ico">❓</span>'
@@ -12904,7 +12904,7 @@ function _showLeagueRankInfo(){
     + 'border-bottom:1px solid var(--v-gold-40,rgba(196,149,58,0.4)); text-align:center;">'
     + '<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:4px;">'
     + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(90deg, transparent, var(--v-gold,#c4953a));"></span>'
-    + '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:32px; height:32px; object-fit:contain; filter:drop-shadow(0 0 8px var(--v-gold-60,rgba(196,149,58,0.6)));">'
+    + '<img src="/shared/img/achievements/ach-aventureiro.webp" alt="" style="width:32px; height:32px; object-fit:contain; filter:drop-shadow(0 0 8px var(--v-gold-60,rgba(196,149,58,0.6)));">'
     + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
     + '</div>'
     + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(16px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); '
@@ -12950,7 +12950,7 @@ function _showLeagueRankInfo(){
     + '</div>';
 
   _showInfoPopup({
-    icon: '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:36px;height:36px;object-fit:contain;">',
+    icon: '<img src="/shared/img/achievements/ach-aventureiro.webp" alt="" style="width:36px;height:36px;object-fit:contain;">',
     npc: 'Ordem dos Aventureiros',
     title: 'Posição na Ordem',
     desc: html,
@@ -13221,7 +13221,7 @@ function _showLeaguePopup(p){
     + ' onmouseout="this.style.background=\'rgba(196,149,58,0.04)\';this.style.borderColor=\'rgba(196,149,58,0.15)\';"'
     + ' onclick="if(typeof _showLeagueRankInfo===\'function\')_showLeagueRankInfo();">'
     + '<span style="color:var(--v-text-dim,#a09484); display:inline-flex; align-items:center; gap:6px;">'
-    + '<img src="/shared/img/achievements/ach-aventureiro.png" alt="" style="width:14px; height:14px; object-fit:contain; vertical-align:middle;">'
+    + '<img src="/shared/img/achievements/ach-aventureiro.webp" alt="" style="width:14px; height:14px; object-fit:contain; vertical-align:middle;">'
     + 'Posição na Ordem <span style="opacity:0.5;font-size:calc(13px * var(--v-font-scale, 1));">ⓘ</span>'
     + '</span>'
     + '<span style="font-family:var(--v-font-display,Cinzel,serif); color:var(--v-gold,#c4953a); font-weight:700;">'
@@ -13446,7 +13446,7 @@ function _showAchievementsPopup(p){
     + '<div style="display:flex; align-items:center; gap: 12px;">'
     // Brasão central
     + '<div style="position:relative; min-width: 60px; height: 60px; display:grid; place-items:center;">'
-    +   '<img class="vAch-crown" src="/shared/img/achievements/trofeu.png" alt="" style="width: 60px; height: 60px; object-fit:contain;">'
+    +   '<img class="vAch-crown" src="/shared/img/achievements/trofeu.webp" alt="" style="width: 60px; height: 60px; object-fit:contain;">'
     +   (masteredChains > 0 ? '<div style="position:absolute; top:-4px; right:-6px; background:linear-gradient(180deg,#ffd700,#c87a4a); color:#3a2a08; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); font-weight:700; padding:2px 6px; border-radius:10px; border:1px solid rgba(0,0,0,0.5); box-shadow:0 2px 4px rgba(0,0,0,0.6);">★' + masteredChains + '</div>' : '')
     + '</div>'
     // Stats column
@@ -15720,7 +15720,7 @@ var TAVERN_NPCS = [
   {
     id: 'tav_grom',
     name: 'Grom Barba-Cinza',
-    role: '<img src="/shared/img/npcs/taverneiro.png" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
+    role: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
     desc: 'Anão robusto com barba grisalha trançada, esfrega canecas com pano sujo.',
     greetings: [
       '<i>Grom larga uma caneca no balcão.</i> "O que vai ser hoje, aventureiro?"',
@@ -15793,8 +15793,8 @@ function _buildTavernMockData(player){
     type: 'hub',
     flavor: '<i>' + flavorText + '</i>',
     npcs: npcs.map(function(n){
-      // Sessão #44 (2026-05-27): PNG fallback (regra "no SVG in city"). aldeao.png pra NPCs sem ícone específico.
-      return { icon: '<img src="/shared/img/npcs/aldeao.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
+      // Sessão #44 (2026-05-27): PNG fallback (regra "no SVG in city"). aldeao.webp pra NPCs sem ícone específico.
+      return { icon: '<img src="/shared/img/npcs/aldeao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
     }),
     services: [
       // Replica canonical tavern.py L130-138 (TavernManager.get_menu)
@@ -15909,7 +15909,7 @@ function _buildInnMockData(player){
     type: 'hub',
     flavor: greeting,
     npc: {
-      icon: '<img src="/shared/img/npcs/estalajadeira.png" alt="" style="width:48px;height:48px;object-fit:contain;">',
+      icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:48px;height:48px;object-fit:contain;">',
       name: 'Martha',
       role: 'Estalajadeira',
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
@@ -18432,18 +18432,18 @@ function _buildArenaMockData(player){
 // MARKET_MERCHANTS, etc.) — afinidade vem do _npcDialoguesUsed[npcId].length.
 
 // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icon mirrors portraitImg.
-// rel_thorne ganhou portraitImg dedicado (thorne-armeiro.png existe em shared/img/npcs/).
+// rel_thorne ganhou portraitImg dedicado (thorne-armeiro.webp existe em shared/img/npcs/).
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
-  { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.png' },
-  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/taverneiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.png' },
-  { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/padre-aldric.png" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.png' },
-  { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.png' },
-  { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.png' },
-  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.png' },
-  { id: 'rel_mirena',  icon: '<img src="/shared/img/npcs/alquimista.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.png' },
-  { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.png' },
-  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.png' }
+  { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
+  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.webp' },
+  { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/padre-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Aldric Veterano', role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.webp' },
+  { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
+  { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
+  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
+  { id: 'rel_mirena',  icon: '<img src="/shared/img/npcs/alquimista.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.webp' },
+  { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
+  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' }
 ];
 
 // Tiers canonical wandering_npcs.py get_familiarity_tier
@@ -18964,8 +18964,8 @@ var SHADOW_NPCS = [{
 // adventurous→combat/patrulheiro, scholarly→npcs/escriba, mercantile→npcs/banqueiro, mysterious→combat/bruxo
 var TRAVELERS_KNOWN = [
   { id: 'wnp_thessan', icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
-  { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/escriba.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
-  { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/banqueiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
+  { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
+  { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
   { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
 ];
 
@@ -45514,7 +45514,7 @@ var ACTION_HANDLERS = {
         npc: {
           name: 'Caçador Ferido',
           desc: 'Patrulheiro · escapou do covil — barba suja, capa rasgada',
-          portrait: '../shared/img/npcs/aventureiro-ferido.png'
+          portrait: '../shared/img/npcs/aventureiro-ferido.webp'
         },
         script: [
           { type: 'narration', text: 'Você cruza a praça quando percebe um movimento estranho perto da fonte. Um aventureiro — capa de couro rasgada, faixas ensanguentadas no braço esquerdo, expressão grave — está apoiado contra a borda de pedra. Reconhece teu brasão. Faz sinal pra te aproximares.' },
@@ -45584,7 +45584,7 @@ var ACTION_HANDLERS = {
   /* 2026-05-20: upgrade PADRAO_ALDRIC — antes era _deliverQuest direto (toast
      simples). Agora abre encounter completo: Lyana recebe carta com typewriter,
      emoções por estrofe, e só completa quest após clicar "Entregar". PNG canonical
-     lyana-herbalista.png gerada via scripts/_gen_inn_lyana_pngs.py. */
+     lyana-herbalista.webp gerada via scripts/_gen_inn_lyana_pngs.py. */
   'quest_lyana_deliver': function(p){
     if (typeof window.vEncounter !== 'object' || !window.vEncounter.render) {
       _deliverQuest('lyana', 20, 40, '💬 Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
@@ -45594,7 +45594,7 @@ var ACTION_HANDLERS = {
       npc: {
         name: 'Lyana, a Herbalista',
         desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
-        portrait: '/shared/img/npcs/lyana-herbalista.png'
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
       },
       script: [
         { type: 'narration', text: 'A Praça respira no fim da tarde — comerciantes recolhem bancas, sinos do templo soam graves. Lyana está agachada perto da fonte, separando raízes de mandrágora num pano azul claro. Cabelos castanhos soltos pelas costas, vestido de linho verde-musgo, mãos manchadas de seiva. Ao te ver aproximar, ela ergue o rosto — olhos verdes inquietos, sobrancelhas franzidas pela expectativa de três luas.' },
@@ -50241,7 +50241,7 @@ var RECURRING_NPCS = {
   vorhan: {
     name: 'Vorhan, o Veterano',
     portrait: 'ic-guerreiro',
-    portraitImg: '/shared/img/npcs/mestre-vorhan.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
+    portraitImg: '/shared/img/npcs/mestre-vorhan.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Aventureiro aposentado, barba grisalha, cicatriz no rosto, armadura desgastada.',
     legendary: true,
     title: 'Lâmina do Norte · Mestre de Armas',
@@ -50254,7 +50254,7 @@ var RECURRING_NPCS = {
   aldric: {
     name: 'Guarda Aldric',
     portrait: 'ic-paladino',
-    portraitImg: '/shared/img/npcs/padre-aldric.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
+    portraitImg: '/shared/img/npcs/padre-aldric.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Veterano dos portões. Olho atento, voz grave.'
   },
   silvana: {
@@ -50273,7 +50273,7 @@ var RECURRING_NPCS = {
   thessil: {
     name: 'Thessil, o Mercador',
     portrait: 'ic-ladino',
-    portraitImg: '/shared/img/npcs/mestre-thessil.png',  // Sessao #37 v18 (2026-05-25)
+    portraitImg: '/shared/img/npcs/mestre-thessil.webp',  // Sessao #37 v18 (2026-05-25)
     desc: 'Mercador baixo de chapéu largo. Sempre com novidades das caravanas.'
   },
   miriana: {
@@ -50284,7 +50284,7 @@ var RECURRING_NPCS = {
   garrick: {
     name: 'Garrick, o Caçador',
     portrait: 'ic-patrulheiro',
-    portraitImg: '/shared/img/npcs/mestre-garrick.png',  // Sessao #37 v18 (2026-05-25)
+    portraitImg: '/shared/img/npcs/mestre-garrick.webp',  // Sessao #37 v18 (2026-05-25)
     desc: 'Patrulheiro humano, capa de pele, arco às costas.'
   },
   // 2026-05-12 NPCs das missões da Guilda (PADRAO_ALDRIC consistency)
@@ -50311,13 +50311,13 @@ var RECURRING_NPCS = {
   lyana: {
     name: 'Lyana, a Herbalista',
     portrait: 'ic-druida',
-    portraitImg: '/shared/img/npcs/lyana-herbalista.png',  // Sessao #37 v18 (2026-05-25)
+    portraitImg: '/shared/img/npcs/lyana-herbalista.webp',  // Sessao #37 v18 (2026-05-25)
     desc: 'Herbalista jovem, trança escura, cesto de raízes ao lado. Atende na praça pela manhã.'
   },
   tavira: {
     name: 'Tavira, a Mestra',
     portrait: 'ic-paladino',
-    portraitImg: '/shared/img/npcs/mestra-tavira.png',  // Sessao #37 v18 (2026-05-25)
+    portraitImg: '/shared/img/npcs/mestra-tavira.webp',  // Sessao #37 v18 (2026-05-25)
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
     legendary: true,
     title: 'Lança-Justa · Reformadora da Guilda',
@@ -50333,7 +50333,7 @@ var RECURRING_NPCS = {
   martha: {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
-    portraitImg: '/shared/img/npcs/estalajadeira.png',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
+    portraitImg: '/shared/img/npcs/estalajadeira.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Estalajadeira do Pena-Dourada. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.

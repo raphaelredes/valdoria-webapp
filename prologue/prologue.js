@@ -391,7 +391,7 @@ function _sceneInjuredCompanionResult(result) {
     npc: {
       name: result.title || 'Resultado',
       desc: 'Brenn — aprendiz de Thorne',
-      portrait: '/shared/img/npcs/thorne-armeiro.png'
+      portrait: '/shared/img/npcs/thorne-armeiro.webp'
     },
     script: script,
     choices: [
@@ -443,7 +443,7 @@ function _sceneAftermath() {
          nome no header acompanha a revelacao narrativa. */
       name: namedSpeaker,
       desc: 'Salvo dos lobos, agradecido',
-      portrait: '../shared/img/npcs/thorne-armeiro.png'
+      portrait: '../shared/img/npcs/thorne-armeiro.webp'
     },
     script: script,
     choices: [

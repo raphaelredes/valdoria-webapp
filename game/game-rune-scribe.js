@@ -35,7 +35,7 @@ var THESSIL_DIALOGUE = {
   npc: {
     name: 'Mestre Thessil',
     desc: 'Escriba Rúnico · trinta e dois anos decifrando glifos antigos',
-    portrait: '../shared/img/npcs/mestre-thessil.png'
+    portrait: '../shared/img/npcs/mestre-thessil.webp'
   },
   script: [
     { type: 'narration', text: 'A câmara de Thessil é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Thessil ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
@@ -103,7 +103,7 @@ function renderRuneScribe(container, data) {
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _rnsEl('img');
-  img.src = '../shared/img/npcs/mestre-thessil.png';
+  img.src = '../shared/img/npcs/mestre-thessil.webp';
   img.alt = 'Mestre Thessil';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

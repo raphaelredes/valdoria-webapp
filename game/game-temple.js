@@ -55,7 +55,7 @@ var ALDRIC_DIALOGUE = {
   npc: {
     name: 'Padre Aldric',
     desc: 'Sumo Sacerdote · trinta anos servindo o Templo dos Quatro',
-    portrait: '../shared/img/npcs/padre-aldric.png'
+    portrait: '../shared/img/npcs/padre-aldric.webp'
   },
   script: [
     { type: 'narration', text: 'O salão do Templo de Eldoria respira em paz solene. Vitrais redondos onde sol e lua se entrelaçam projetam discos de luz dourada e prateada sobre o mármore antigo. Diante do altar principal, Padre Aldric — vestes de linho branco bordadas em fio de ouro, barba grisalha, terço de contas de âmbar nas mãos — ergue os olhos da oração em silêncio. Ele te reconhece. Sorri.' },
@@ -78,7 +78,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Irmã Elara',
       desc: 'Sacerdotisa · curandeira sênior do Templo',
-      portrait: '../shared/img/npcs/irma-elara.png'
+      portrait: '../shared/img/npcs/irma-elara.webp'
     },
     script: [
       { type: 'narration', text: 'Irmã Elara vem ao teu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos quentes te observam com a paciência maternal de quem cura há décadas.' },
@@ -117,7 +117,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Acólito Theron',
       desc: 'Iniciado · três meses servindo o Templo',
-      portrait: '../shared/img/npcs/acolito-theron.png'
+      portrait: '../shared/img/npcs/acolito-theron.webp'
     },
     script: [
       { type: 'narration', text: 'Theron tem dezesseis anos, talvez dezessete — magro, espinhento, vestido com manto branco de iniciado que ainda lhe fica largo nos ombros. Quando você se aproxima, ele endireita-se nervoso, força um sorriso forçado, e tenta parecer mais experiente do que é.' },
@@ -139,7 +139,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Sacerdotisa Miriel',
       desc: 'Sacerdotisa · especialista em maldições e magia profunda',
-      portrait: '../shared/img/npcs/sacerdotisa-miriel.png'
+      portrait: '../shared/img/npcs/sacerdotisa-miriel.webp'
     },
     script: [
       { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos teus olhos.' },
@@ -158,7 +158,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Sumo-Sacerdote Varek',
       desc: 'Sumo-Sacerdote · quarenta anos servindo os Quatro',
-      portrait: '../shared/img/npcs/padre-aldric.png'
+      portrait: '../shared/img/npcs/padre-aldric.webp'
     },
     script: [
       { type: 'narration', text: 'Sumo-Sacerdote Varek aparece raramente no salão público — sua presença significa que algo grave foi pedido. Ele se aproxima do altar trazendo um cetro de prata e ônix. As vestes púrpura debruadas em fio de platina arrastam-se solenes contra o mármore.' },
@@ -176,7 +176,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Oráculo Orenthia',
       desc: 'Oráculo · vidente dos Quatro, comunica-se com o Plano dos Mortos',
-      portrait: '../shared/img/npcs/sacerdotisa-miriel.png'
+      portrait: '../shared/img/npcs/sacerdotisa-miriel.webp'
     },
     script: [
       { type: 'narration', text: 'Oráculo Orenthia espera-te na cripta sob o Templo. Velas de cera negra ardem em silêncio. Ela traz uma máscara de prata sem olhos — apenas duas fendas verticais por onde algo brilha. Seu vestido é de linho cinzento, sem ornamentos. Ela não fala alto — sua voz parece vir de longe.' },
@@ -212,7 +212,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Acólito Theron',
       desc: 'Iniciado · responsável por receber oferendas hoje',
-      portrait: '../shared/img/npcs/acolito-theron.png'
+      portrait: '../shared/img/npcs/acolito-theron.webp'
     },
     script: [
       { type: 'narration', text: 'Theron quase pula de empolgação quando você abre a bolsa. Ele segura um cesto de oferendas com as duas mãos, equilibrando-se pra que as moedas caiam direito. Os olhos brilham. Atrás dele, Irmã Elara sorri discretamente — é a primeira doação grande que Theron recebe sozinho.' },
@@ -311,7 +311,7 @@ function _tmpBuildNpcRow(data) {
   // Portrait
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/padre-aldric.png';
+  img.src = '../shared/img/npcs/padre-aldric.webp';
   img.alt = 'Padre Aldric';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

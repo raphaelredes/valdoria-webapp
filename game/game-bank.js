@@ -55,7 +55,7 @@ var ALDWIN_DIALOGUE = {
   npc: {
     name: 'Aldwin de Tholram',
     desc: 'Banqueiro · vinte e dois anos atrás do balcão de mármore do Cofre Real',
-    portrait: '../shared/img/npcs/banqueiro.png'
+    portrait: '../shared/img/npcs/banqueiro.webp'
   },
   script: [
     { type: 'narration', text: 'O salão principal do Banco de Eldoria respira em silêncio. Lustres de ferro forjado sustentam velas de cera virgem que pingam lentas sobre bandejas de bronze. Atrás de um balcão de mogno escuro, Aldwin — vestes de veludo azul-marinho debruadas a fio de ouro, monóculo pendurado no peito, dedos finos manchados de tinta sépia — ergue os olhos do livro de tarja com a precisão de quem soma fortunas há vinte e dois anos.' },
@@ -351,7 +351,7 @@ function _bnkBuildNpcRow(data) {
   // Portrait
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/banqueiro.png';
+  img.src = '../shared/img/npcs/banqueiro.webp';
   img.alt = 'Aldwin de Tholram';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

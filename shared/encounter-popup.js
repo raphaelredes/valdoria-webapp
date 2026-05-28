@@ -24,7 +24,7 @@
  *   var SERVICE_DIALOGUES_BANK = {
  *     deposit: {
  *       npc: { name: 'Aldwin de Tholram', desc: 'Banqueiro · Casa de Tholram',
- *              portrait: '../shared/img/npcs/banqueiro.png' },
+ *              portrait: '../shared/img/npcs/banqueiro.webp' },
  *       script: [ { type:'narration', text:'...' }, { type:'speech', speaker:'Aldwin', text:'...' } ],
  *       choices: [ { id:'pay', label:'Pagar', cb:'pay-confirm', renownDelta: +1 } ]
  *     }

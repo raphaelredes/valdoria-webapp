@@ -72,7 +72,7 @@ var MARTHA_DIALOGUE = {
   npc: {
     name: 'Martha',
     desc: 'Estalajadeira · vinte e oito anos atrás do balcão do Grifo Dourado',
-    portrait: '../shared/img/npcs/estalajadeira.png'
+    portrait: '../shared/img/npcs/estalajadeira.webp'
   },
   script: [
     { type: 'narration', text: 'A Estalagem do Grifo Dourado respira em calma. Lareira de pedra crepita ao fundo, lançando luz alaranjada sobre tapetes vermelhos. Martha está atrás do balcão de carvalho — vestido de linho azul-marinho, avental branco impecável, cabelo grisalho preso em coque. Ela ergue os olhos do livro de hóspedes e sorri maternal.' },
@@ -226,7 +226,7 @@ function renderInnHub(container, data) {
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _innEl('img');
-  img.src = '../shared/img/npcs/estalajadeira.png';
+  img.src = '../shared/img/npcs/estalajadeira.webp';
   img.alt = 'Martha';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

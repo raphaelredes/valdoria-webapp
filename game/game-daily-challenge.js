@@ -28,7 +28,7 @@ window.renderDailyChallenge = function (el, dc) {
         + 'border-radius:8px;border:1px solid ' + themeColor + ';'
         + 'box-shadow:0 0 16px rgba(196,149,58,0.25),inset 0 0 30px rgba(0,0,0,0.5);">'
         + '<img src="../shared/img/city/daily_challenge.webp" '
-        + 'onerror="this.onerror=null;this.src=\'../shared/img/city/daily_challenge.png\';" '
+        + 'onerror="this.onerror=null;this.src=\'../shared/img/city/daily_challenge.webp\';" '
         + 'alt="" style="width:100%;height:100%;object-fit:cover;opacity:0.55;">'
         + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;'
         + 'background:linear-gradient(180deg,rgba(42,36,32,0.4) 0%,rgba(42,36,32,0.85) 100%);text-align:center;">'

@@ -70,7 +70,7 @@ if (!window._SVC_CONFIG_MARKET) {
    ajustado pra indicar que dialogue é narrativo (acessar via hub cards). */
 var MERCHANT_NPCS_MARKET = {
   thorne: {
-    npc: { name: 'Thorne', desc: 'Armeiro · vende lâminas há trinta e cinco anos', portrait: '../shared/img/npcs/thorne-armeiro.png' },
+    npc: { name: 'Thorne', desc: 'Armeiro · vende lâminas há trinta e cinco anos', portrait: '../shared/img/npcs/thorne-armeiro.webp' },
     quote: '"Aço carbono de Eldoria. Sem desconto."',
     cb: 'market_interact_menu_blacksmith',
     script: [
@@ -83,7 +83,7 @@ var MERCHANT_NPCS_MARKET = {
     ]
   },
   mirena: {
-    npc: { name: 'Mirena', desc: 'Armadureira · alfaiata de couro e malha por vinte anos', portrait: '../shared/img/npcs/mirena-armadureira.png' },
+    npc: { name: 'Mirena', desc: 'Armadureira · alfaiata de couro e malha por vinte anos', portrait: '../shared/img/npcs/mirena-armadureira.webp' },
     quote: '"Sob medida, sai pelo dobro. Mas dura o triplo."',
     cb: 'market_interact_menu_alchemist',
     script: [
@@ -96,7 +96,7 @@ var MERCHANT_NPCS_MARKET = {
     ]
   },
   velithra: {
-    npc: { name: 'Velithra', desc: 'Alquimista · três gerações de alquímia', portrait: '../shared/img/npcs/velithra-alquimista.png' },
+    npc: { name: 'Velithra', desc: 'Alquimista · três gerações de alquímia', portrait: '../shared/img/npcs/velithra-alquimista.webp' },
     quote: '"Esta… só tu sabes pra que serve."',
     cb: 'market_interact_menu_jeweler',
     script: [
@@ -109,7 +109,7 @@ var MERCHANT_NPCS_MARKET = {
     ]
   },
   corvus: {
-    npc: { name: 'Corvus', desc: 'Livreiro · colecionador de tomos por trinta anos', portrait: '../shared/img/npcs/corvus-livreiro.png' },
+    npc: { name: 'Corvus', desc: 'Livreiro · colecionador de tomos por trinta anos', portrait: '../shared/img/npcs/corvus-livreiro.webp' },
     quote: '"Tenho dois grimórios menores, se Vossa Senhoria for mago."',
     cb: 'market_interact_menu_cartographer',
     script: [
@@ -122,7 +122,7 @@ var MERCHANT_NPCS_MARKET = {
     ]
   },
   bjorn: {
-    npc: { name: 'Bjorn', desc: 'Mantimentos · padeiro e açougueiro do bairro Norte', portrait: '../shared/img/npcs/bjorn-comerciante.png' },
+    npc: { name: 'Bjorn', desc: 'Mantimentos · padeiro e açougueiro do bairro Norte', portrait: '../shared/img/npcs/bjorn-comerciante.webp' },
     quote: '"Prova primeiro — se não gostar, não vendo."',
     cb: 'market_interact_menu_tentmaker',
     script: [
@@ -135,7 +135,7 @@ var MERCHANT_NPCS_MARKET = {
     ]
   },
   garlen: {
-    npc: { name: 'Garlen', desc: 'Cartógrafo · mapeou do Vale às Montanhas do Norte', portrait: '../shared/img/npcs/garlen-cartografo.png' },
+    npc: { name: 'Garlen', desc: 'Cartógrafo · mapeou do Vale às Montanhas do Norte', portrait: '../shared/img/npcs/garlen-cartografo.webp' },
     quote: '"Masmorra Antiga (com armadilhas marcadas), cento e vinte."',
     cb: 'market_interact_menu_cartographer',
     script: [

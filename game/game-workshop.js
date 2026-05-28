@@ -35,7 +35,7 @@ var GARRICK_DIALOGUE = {
   npc: {
     name: 'Mestre Garrick',
     desc: 'Ferreiro · quarenta e quatro anos golpeando bigorna',
-    portrait: '../shared/img/npcs/mestre-garrick.png'
+    portrait: '../shared/img/npcs/mestre-garrick.webp'
   },
   script: [
     { type: 'narration', text: 'A oficina respira em fumaça e brasa. O forno central ruge — uma boca de ferro forjado com chamas alaranjadas dançando atrás de grade de aço. Ao lado, a bigorna principal: chumbo maciço, marcada por décadas de golpes, lustrosa onde o metal a beijou cem mil vezes.' },
@@ -104,7 +104,7 @@ function renderWorkshopHub(container, data) {
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _wksEl('img');
-  img.src = '../shared/img/npcs/mestre-garrick.png';
+  img.src = '../shared/img/npcs/mestre-garrick.webp';
   img.alt = 'Mestre Garrick';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

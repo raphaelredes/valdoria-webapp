@@ -24,10 +24,10 @@ var ARENA_SVC_META = {
   'arena_solo':        { icon: '<img src="../shared/img/services/svc-combate-solo.png" alt="">' },
   'arena_team':        { icon: '<img src="../shared/img/services/svc-combate-equipe.png" alt="">' },
   'arena_tournament':  { icon: '<img src="../shared/img/services/svc-torneio.png" alt="">' },
-  'arena_training':    { icon: '<img src="../shared/img/services/svc-treino-arena.png" alt="">' },
-  'arena_train':       { icon: '<img src="../shared/img/services/svc-treino-arena.png" alt="">' },
-  'arena_ranking':     { icon: '<img src="../shared/img/services/svc-ranking-arena.png" alt="">' },
-  'arena_daily_board': { icon: '<img src="../shared/img/services/svc-ranking-arena.png" alt="">' },
+  'arena_training':    { icon: '<img src="../shared/img/services/svc-treino-arena.webp" alt="">' },
+  'arena_train':       { icon: '<img src="../shared/img/services/svc-treino-arena.webp" alt="">' },
+  'arena_ranking':     { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
+  'arena_daily_board': { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
   'arena_rules':       { icon: '<img src="../shared/img/services/svc-informacoes.png" alt="">' }
 };
 window._ARENA_SVC_META = ARENA_SVC_META;
@@ -57,7 +57,7 @@ var VORHAN_DIALOGUE = {
   npc: {
     name: 'Mestre Vorhan',
     desc: 'Mestre de Armas \u00B7 vinte anos no coliseu',
-    portrait: '../shared/img/npcs/mestre-vorhan.png'
+    portrait: '../shared/img/npcs/mestre-vorhan.webp'
   },
   script: [
     { type: 'narration', text: 'Vorhan \u00E9 colossal \u2014 dois metros, cicatrizes desenhando mapas em seu rosto, armadura de couro batido suja do sangue de mil combates. Atr\u00E1s dele, o coliseu zumbe com a multid\u00E3o. Ele te mede com o olhar de quem j\u00E1 viu mil aventureiros prometer e n\u00E3o cumprir.' },
@@ -155,7 +155,7 @@ function _renderArenaMain(el, d) {
     var npcRow = _div('row-npc');
     var portraitWrap = _div('npc-portrait');
     var npcImg = document.createElement('img');
-    npcImg.src = '../shared/img/npcs/mestre-vorhan.png';
+    npcImg.src = '../shared/img/npcs/mestre-vorhan.webp';
     npcImg.alt = 'Mestre Vorhan';
     npcImg.loading = 'lazy';
     npcImg.onerror = function(){ this.style.display = 'none'; };

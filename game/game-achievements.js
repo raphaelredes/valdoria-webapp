@@ -22,7 +22,7 @@
 (function() {
 
 var PNG_BASE = '/shared/img/achievements/';
-var FALLBACK_PNG = 'trofeu.png';
+var FALLBACK_PNG = 'trofeu.webp';
 
 var TIER_META = {
   'bronze': { label: 'Bronze',  color: '#cd7f32', emoji: '🥉' },

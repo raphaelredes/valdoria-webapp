@@ -55,7 +55,7 @@ var GROM_DIALOGUE = {
   npc: {
     name: 'Grom Barba-Cinza',
     desc: 'Taverneiro · trinta e seis anos no balcão d\'O Javali Negro',
-    portrait: '../shared/img/npcs/taverneiro.png'
+    portrait: '../shared/img/npcs/taverneiro.webp'
   },
   script: [
     { type: 'narration', text: 'O carvalho polido do balcão reflete as chamas dos candelabros pendurados. Atrás dele, Grom — corpulento, barba ruiva trançada com um anel de prata, avental de couro marcado pelo brasão da cervejaria — ergue os olhos do livro de tarja e sorri largo ao reconhecer você.' },
@@ -402,7 +402,7 @@ function _tavBuildNpcRow(data) {
   // Portrait
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/taverneiro.png';
+  img.src = '../shared/img/npcs/taverneiro.webp';
   img.alt = 'Grom Barba-Cinza';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

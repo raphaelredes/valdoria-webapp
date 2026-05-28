@@ -87,7 +87,7 @@ var TAVIRA_DIALOGUE = {
   npc: {
     name: 'Mestra Tavira',
     desc: 'Guardiã da Guilda · dezoito anos liderando o Salão dos Aventureiros',
-    portrait: '../shared/img/npcs/mestra-tavira.png'
+    portrait: '../shared/img/npcs/mestra-tavira.webp'
   },
   script: [
     { type: 'narration', text: 'O Salão dos Aventureiros respira lenta. Tochas de óleo pendem das vigas, iluminando o brasão da Guilda — espada cruzada com pena — entalhado no mármore atrás do balcão. Tavira ergue os olhos do registro, reconhece você, sorri de canto.' },
@@ -141,7 +141,7 @@ function renderGuildHub(container, data) {
   var npcRow = _gldEl('div', 'row-npc');
   var portraitWrap = _gldEl('div', 'npc-portrait');
   var img = _gldEl('img');
-  img.src = '../shared/img/npcs/mestra-tavira.png';
+  img.src = '../shared/img/npcs/mestra-tavira.webp';
   img.alt = 'Mestra Tavira';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
