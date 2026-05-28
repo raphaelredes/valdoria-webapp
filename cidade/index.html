@@ -14783,7 +14783,11 @@ function _playAudioForScreen(screen){
   // A música atual (qualquer que seja — city no hub, ou outra trilha que o
   // jogador esteja ouvindo) PRESERVA. Cartografia é uma sobrecamada visual,
   // não um "novo cenário" musical.
-  if (screen === 'cartografia') return;
+  // Sessão #59 (2026-05-28): daily_challenge também NÃO troca música — agora
+  // é renderizado como popup (épico card sobre o hub) e não como sub-tela
+  // separada. User pediu: "não toque outra música continue tocando a música
+  // que tava tocando na tela da cidade".
+  if (screen === 'cartografia' || screen === 'daily_challenge') return;
   var trackKey = SCREEN_AUDIO_MAP[screen] || 'city';
   try { ValdoriaAudio.play(trackKey); } catch(e){ console.warn('[CITY-AUDIO]', e); }
 }
@@ -41103,60 +41107,221 @@ function _questsShowTab(p, tab){
   });
 }
 
-// --- DESAFIO DIÁRIO ---
+// --- DESAFIO DIÁRIO (Sessão #59 — redesign épico popup) ---
+// User pediu: épico + popup (não tela separada) + mesma música cidade.
+// _showDailyChallengeEpicPopup substitui o renderSquareHub anterior. Reusa
+// confirm-purchase-overlay (mid-size centered) via _showInfoPopup com HTML
+// rico no `desc`. Buttons custom wired após render (Iniciar + Mapa + Voltar).
+// _dailyStartCombat / _dailyShowRewards atualizados pra usar DAILY_CHALLENGE_POOL
+// (caça/coleta rotativo Sessão #56) — _dailyShowBoard removido (sem
+// tabela do dia agora; pode voltar como sistema social future).
+
+function _showDailyChallengeEpicPopup(p){
+  if (typeof _dailyChallengeForToday !== 'function') {
+    vToast('⚠️ Desafio Diário indisponível.');
+    return;
+  }
+  var ch = _dailyChallengeForToday();
+  var doneToday = !!window._dailyChallengeDone;
+  var verb = ch.kind === 'hunt' ? 'Abater' : 'Reunir';
+  var kindLabel = ch.kind === 'hunt' ? 'CAÇA' : 'COLETA';
+  var ctaIcon = ch.kind === 'hunt' ? 'ic-stat-attack' : 'ic-mochila';
+  var ctaLabel = ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta';
+
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:54px;height:54px;color:var(--v-gold,#c4953a);'
+        + 'filter:drop-shadow(0 0 12px rgba(255,210,90,0.5)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));'
+        + 'animation:dcHeroPulse 3.4s ease-in-out infinite;"><use href="#' + ch.icon + '"/></svg>',
+    npc: 'Desafio do Dia',
+    title: ch.target,
+    desc: '<style>'
+        + '@keyframes dcHeroPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 12px rgba(255,210,90,0.5)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));}50%{transform:scale(1.04);filter:drop-shadow(0 0 18px rgba(255,210,90,0.75)) drop-shadow(0 4px 14px rgba(0,0,0,0.55));}}'
+        + '@keyframes dcRunePulse{0%,100%{opacity:0.6;text-shadow:0 0 4px rgba(196,149,58,0.5);}50%{opacity:1;text-shadow:0 0 10px rgba(255,210,90,0.85);}}'
+        + '@keyframes dcGoldShine{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}'
+        + '@keyframes dcCtaGlow{0%,100%{box-shadow:0 2px 8px rgba(196,149,58,0.4),inset 0 1px 0 rgba(255,255,255,0.12);}50%{box-shadow:0 2px 18px rgba(255,210,90,0.65),inset 0 1px 0 rgba(255,255,255,0.18);}}'
+        + '.dc-rune{display:inline-block;color:var(--v-gold,#c4953a);animation:dcRunePulse 2.6s ease-in-out infinite;}'
+        + 'body.perf-lite .dc-rune,body.perf-lite #dcCta,body.perf-lite #dcCta::before{animation:none !important;}'
+        + '@media (prefers-reduced-motion:reduce){.dc-rune,#dcCta,#dcCta::before{animation:none !important;}}'
+        + '</style>'
+
+        // === BANNER topo: "◆ DESAFIO DO DIA · CAÇA ◆" ===
+        + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 12px;'
+        + 'font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));'
+        + 'color:var(--v-gold,#c4953a);letter-spacing:2.5px;text-transform:uppercase;">'
+        + '<span style="flex:0 0 24px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.6));"></span>'
+        + '<span class="dc-rune">◆</span>'
+        + '<span>Desafio do Dia · ' + kindLabel + '</span>'
+        + '<span class="dc-rune">◆</span>'
+        + '<span style="flex:0 0 24px;height:1px;background:linear-gradient(90deg,rgba(196,149,58,0.6),transparent);"></span>'
+        + '</div>'
+
+        // === FLAVOR LORE ===
+        + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);'
+        + 'font-size:calc(12px * var(--v-font-scale, 1));margin:0 8px 10px;line-height:1.5;">'
+        + '"' + ch.desc + '"'
+        + '</div>'
+
+        // === ALVO BOX (target + biome highlighted) ===
+        + '<div style="margin:8px 0 0;padding:10px 12px;'
+        + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,30,18,0.55) 100%);'
+        + 'border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);'
+        + 'border-radius:5px;">'
+        + '  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;'
+        + '  font-family:var(--v-font,MedievalSharp,serif);font-size:calc(15px * var(--v-font-scale, 1));'
+        + '  color:#e8dcc8;">'
+        + '    <span style="display:inline-flex;align-items:center;gap:6px;">'
+        + '      <span class="dc-rune">🎯</span>'
+        + '      <b>' + verb + '</b>'
+        + '    </span>'
+        + '    <span style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(20px * var(--v-font-scale, 1));'
+        + '    font-weight:700;color:var(--v-gold,#c4953a);text-shadow:0 0 8px rgba(255,210,90,0.45);">'
+        + '      ' + ch.count + 'x'
+        + '    </span>'
+        + '  </div>'
+        + '  <div style="margin-top:5px;font-size:calc(11px * var(--v-font-scale, 1));'
+        + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap:4px;">'
+        + '    📍 <span>' + ch.biome + '</span>'
+        + '  </div>'
+        + '  <div style="margin-top:3px;font-size:calc(10px * var(--v-font-scale, 1));'
+        + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap:4px;opacity:0.85;">'
+        + '    ⏰ <span>Reseta à meia-noite · Seed <code style="font-size:0.95em;">' + ch.seed + '</code></span>'
+        + '  </div>'
+        + '</div>'
+
+        // === RECOMPENSAS BOX ===
+        + '<div style="margin:8px 0 0;padding:9px 12px;'
+        + 'background:linear-gradient(180deg,rgba(255,210,90,0.10) 0%,rgba(42,30,18,0.55) 100%);'
+        + 'border:1px solid rgba(196,149,58,0.4);border-radius:5px;">'
+        + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));'
+        + '  color:var(--v-gold,#c4953a);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;'
+        + '  text-align:center;">'
+        + '    <span class="dc-rune">◆</span> Recompensas <span class="dc-rune">◆</span>'
+        + '  </div>'
+        + '  <div style="display:flex;justify-content:center;gap:18px;align-items:center;'
+        + '  font-size:calc(13px * var(--v-font-scale, 1));">'
+        + '    <span style="display:inline-flex;align-items:center;gap:4px;">'
+        + '      <b style="color:var(--v-gold,#c4953a);font-size:calc(15px * var(--v-font-scale, 1));'
+        + '      text-shadow:0 0 8px rgba(255,210,90,0.45);">+' + ch.reward_gold + '</b>'
+        + '      <span class="vi vi-coin sm"></span>'
+        + '    </span>'
+        + '    <span style="color:var(--v-text-dim,#a09484);">·</span>'
+        + '    <span style="display:inline-flex;align-items:center;gap:4px;">'
+        + '      <b style="color:#9adfa3;font-size:calc(15px * var(--v-font-scale, 1));'
+        + '      text-shadow:0 0 8px rgba(154,223,163,0.45);">+' + ch.reward_xp + '</b>'
+        + '      <span style="color:#9adfa3;font-size:calc(11px * var(--v-font-scale, 1));">XP</span>'
+        + '    </span>'
+        + '  </div>'
+        + '</div>'
+
+        // === ACTION BUTTONS (2 custom + Voltar via popup nativo) ===
+        + '<div style="display:flex;gap:6px;margin-top:12px;">'
+        + '  <button id="dcCta"' + (doneToday ? ' disabled' : '') + ' style="flex:2;padding:10px 12px;'
+        + '  background:' + (doneToday ? 'rgba(74,56,40,0.45)' : 'linear-gradient(180deg,#c4953a,#8a6420)') + ';'
+        + '  border:1px solid ' + (doneToday ? 'var(--v-border,#4a3828)' : 'var(--v-gold,#c4953a)') + ';'
+        + '  border-radius:5px;color:' + (doneToday ? 'var(--v-text-dim,#a09484)' : '#1a1410') + ';'
+        + '  font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));'
+        + '  font-weight:700;letter-spacing:1.2px;text-transform:uppercase;'
+        + '  cursor:' + (doneToday ? 'not-allowed' : 'pointer') + ';'
+        + (doneToday ? '' : 'animation:dcCtaGlow 3s ease-in-out infinite;')
+        + '  display:inline-flex;align-items:center;justify-content:center;gap:6px;">'
+        + '    <svg viewBox="0 0 120 120" style="width:16px;height:16px;color:inherit;"><use href="#' + ctaIcon + '"/></svg>'
+        + '    <span>' + (doneToday ? '✓ Concluído Hoje' : ctaLabel) + '</span>'
+        + '  </button>'
+        + '  <button id="dcMap" style="flex:1;padding:10px 12px;'
+        + '  background:rgba(124,180,219,0.10);border:1px solid rgba(124,180,219,0.45);'
+        + '  border-radius:5px;color:#7cb4db;'
+        + '  font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));'
+        + '  font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;'
+        + '  display:inline-flex;align-items:center;justify-content:center;gap:5px;">'
+        + '    🗺️ <span>Mapa</span>'
+        + '  </button>'
+        + '</div>',
+    singleButton: true,
+    cancelLabel: 'Voltar',
+    onCancel: function(){ /* fecha popup */ }
+  });
+
+  // Wire CTA + Mapa buttons após popup renderizar
+  setTimeout(function(){
+    var ctaBtn = document.getElementById('dcCta');
+    var mapBtn = document.getElementById('dcMap');
+    if (ctaBtn && !doneToday) {
+      ctaBtn.addEventListener('click', function(){
+        // Fecha popup atual + dispara combat handler
+        var ov = document.getElementById('confirm-purchase-overlay');
+        if (ov) ov.classList.remove('active');
+        setTimeout(function(){ _dailyStartCombat(p); }, 200);
+      });
+    }
+    if (mapBtn) {
+      mapBtn.addEventListener('click', function(){
+        var ov = document.getElementById('confirm-purchase-overlay');
+        if (ov) ov.classList.remove('active');
+        setTimeout(function(){
+          if (typeof navigateTo === 'function') navigateTo('cartografia');
+        }, 200);
+      });
+    }
+  }, 100);
+}
+
 function _dailyStartCombat(p){
   if (window._dailyChallengeDone) {
     vToast('✓ Desafio já completado hoje.');
     return;
   }
+  if (typeof _dailyChallengeForToday !== 'function') return;
+  var ch = _dailyChallengeForToday();
+  var verb = ch.kind === 'hunt' ? 'derrotou' : 'reuniu';
+  var verbFail = ch.kind === 'hunt' ? 'derrotar' : 'reunir';
   _showInfoPopup({
-    icon: _heralIco('ic-stat-attack'), npc: 'Desafio Diário',
-    title: DAILY_CHALLENGE.title,
-    desc: '<i>' + DAILY_CHALLENGE.flavor + '</i><br><br>' +
-          '<b>Tier:</b> ' + DAILY_CHALLENGE.tier + '<br>' +
-          '<b>Inimigos:</b> ' + DAILY_CHALLENGE.enemies.join(', ') + '<br>' +
-          '<b>Recompensa base:</b> ' + DAILY_CHALLENGE.reward_gold + ' V + ' + DAILY_CHALLENGE.reward_xp + ' XP<br>' +
-          '<b>Sem custo de entrada</b>',
+    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#' + ch.icon + '"/></svg>',
+    npc: 'Desafio do Dia',
+    title: 'Confirmar: ' + ch.target,
+    desc: '<i>' + ch.desc + '</i><br><br>'
+        + '<b>Alvo:</b> ' + (ch.kind === 'hunt' ? 'Abater' : 'Reunir') + ' ' + ch.count + 'x ' + ch.target + '<br>'
+        + '<b>Local:</b> ' + ch.biome + '<br>'
+        + '<b>Recompensa:</b> ' + ch.reward_gold + ' Valdoritas + ' + ch.reward_xp + ' XP<br>'
+        + '<b>Sem custo de entrada</b>',
     onConfirm: function(){
-      // Mock combat — 60% vitória
-      var win = Math.random() < 0.6;
+      // Mock combat — 65% sucesso (caça/coleta menos punitivo que masmorra antiga)
+      var win = Math.random() < 0.65;
       var preGold = p.gold;
-      var preXp = p.xp || 0;
       var preHp = p.hp || 0;
       window._dailyChallengeDone = true;
       if (win) {
-        // HP-based bonus (mock: 50% chance high, 30% mid, 20% no bonus)
+        // Bônus: 40% high (+50%), 35% mid (+25%), 25% no bonus
         var bonus = Math.random();
-        var multiplier = bonus < 0.5 ? 1.5 : (bonus < 0.8 ? 1.25 : 1);
-        var goldGain = Math.floor(DAILY_CHALLENGE.reward_gold * multiplier);
-        var xpGain = Math.floor(DAILY_CHALLENGE.reward_xp * multiplier);
+        var multiplier = bonus < 0.4 ? 1.5 : (bonus < 0.75 ? 1.25 : 1);
+        var goldGain = Math.floor(ch.reward_gold * multiplier);
+        var xpGain = Math.floor(ch.reward_xp * multiplier);
         p.gold += goldGain;
         _gainXp(p, xpGain);
         refreshHud();
         var bonusLabel = multiplier === 1.5 ? '+50% (HP > 75%)' : (multiplier === 1.25 ? '+25% (HP > 50%)' : 'sem bônus');
         _showServiceResultPopup({
-          icon: _heralIco('ic-bolsa'), npc: 'Desafio Diário',
-          narrative: '<b>VITÓRIA!</b><br><i>Você derrotou todos os lobos. Os fazendeiros agradecem.</i><br><br>' +
-                     '<b>Bônus de HP:</b> ' + bonusLabel + '<br>' +
-                     '<b>Recompensa:</b> ' + goldGain + ' V + ' + xpGain + ' XP',
+          icon: _heralIco('ic-bolsa'), npc: 'Desafio do Dia',
+          narrative: '<b>SUCESSO!</b><br><i>Você ' + verb + ' o necessário. A cidade agradece.</i><br><br>'
+                   + '<b>Bônus por HP:</b> ' + bonusLabel + '<br>'
+                   + '<b>Recompensa:</b> ' + goldGain + ' Valdoritas + ' + xpGain + ' XP',
           deltas: [
             { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
             _lastXpDelta(p)
           ],
-          onContinue: function(){ navigateBack(); }
+          onContinue: function(){ /* fecha pra hub */ }
         });
       } else {
-        var dmg = 8 + Math.floor(Math.random() * 12);
+        var dmg = (ch.kind === 'hunt' ? 8 : 4) + Math.floor(Math.random() * 8);
         p.hp = Math.max(1, preHp - dmg);
         refreshHud();
         _showServiceResultPopup({
-          icon: _heralIco('ic-mochila'), npc: 'Desafio Diário',
-          narrative: '<b>DERROTA</b><br><i>Os lobos foram demais. Você foge ferido.</i><br><br>' +
-                     '<b>-' + dmg + ' HP</b> · Sem recompensa hoje.',
+          icon: _heralIco('ic-mochila'), npc: 'Desafio do Dia',
+          narrative: '<b>FRACASSO</b><br><i>Não conseguiste ' + verbFail + ' tudo a tempo. Volta amanhã.</i><br><br>'
+                   + '<b>-' + dmg + ' HP</b> · Sem recompensa hoje.',
           deltas: [
             { type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || preHp, bar: false }
           ],
-          onContinue: function(){ navigateBack(); }
+          onContinue: function(){ /* fecha pra hub */ }
         });
       }
     }
@@ -41164,30 +41329,23 @@ function _dailyStartCombat(p){
 }
 
 function _dailyShowBoard(p){
-  _showInfoPopup({
-    icon: _heralIco('ic-mochila'), npc: 'Tabela do Dia',
-    title: 'Top 10 do Desafio',
-    desc: '🥇 1º Korval Punho-do-Norte (nv 18, 4:23min)<br>' +
-          '🥈 2º Aelin Vento-Sul (nv 17, 5:12min)<br>' +
-          '🥉 3º Brakthar Ferro (nv 16, 5:45min)<br>' +
-          '4º Sigrun Mata-Dragões (nv 15, 6:01min)<br>' +
-          '5º Vex Sombra-Veloz (nv 14, 6:33min)<br>' +
-          '...<br>' +
-          '<b>Sua posição:</b> #' + (window._dailyChallengeDone ? '47' : '—') + ' / 142',
-    onConfirm: function(){ /* info */ }
-  });
+  // Sessão #59: removido — sem tabela do dia (era flavor pra Covil dos Lobos
+  // mock). Sistema social/leaderboard pode voltar como feature futura.
+  vToast('Em breve: tabela social.');
 }
 
 function _dailyShowRewards(p){
+  if (typeof _dailyChallengeForToday !== 'function') return;
+  var ch = _dailyChallengeForToday();
   _showInfoPopup({
     icon: _heralIco('ic-ach-colecionador'), npc: 'Recompensas',
-    title: DAILY_CHALLENGE.title + ' — Recompensas',
-    desc: '<b>Vitória base:</b> ' + DAILY_CHALLENGE.reward_gold + ' Valdoritas + ' + DAILY_CHALLENGE.reward_xp + ' XP<br><br>' +
-          '<b>Bônus por HP:</b><br>' +
-          '💎 ' + DAILY_CHALLENGE.bonus_high + '<br>' +
-          '🟡 ' + DAILY_CHALLENGE.bonus_mid + '<br>' +
-          '🟢 HP qualquer → recompensa base<br><br>' +
-          '<i>Conserve HP para maximizar ganhos.</i>',
+    title: ch.target + ' — Recompensas',
+    desc: '<b>Sucesso base:</b> ' + ch.reward_gold + ' Valdoritas + ' + ch.reward_xp + ' XP<br><br>'
+        + '<b>Bônus por HP ao fim:</b><br>'
+        + '💎 HP > 75% → +50% recompensa<br>'
+        + '🟡 HP > 50% → +25% recompensa<br>'
+        + '🟢 HP qualquer → recompensa base<br><br>'
+        + '<i>Conserve HP para maximizar ganhos.</i>',
     onConfirm: function(){ /* info */ }
   });
 }
@@ -43336,9 +43494,19 @@ function _renderCityPopup(key){
     _renderQuestDiary(bodyEl);
     return;
   }
-  if (key === 'daily_challenge' && typeof renderSquareHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Desafio Diário';
-    renderSquareHub(bodyEl, _buildDailyChallengeMockData(window.CITY_MOCK_PLAYER));
+  // Sessão #59 (2026-05-28): daily_challenge agora abre via popup épico
+  // (_showDailyChallengeEpicPopup) — NÃO mais como sub-tela renderSquareHub.
+  // Se algum código antigo cair aqui (não devia, ACTION_HANDLERS pega antes),
+  // redireciona pro popup pra preservar a UX desejada.
+  if (key === 'daily_challenge') {
+    // Garante fechar o sub-screen popup antes de abrir o info popup
+    var _csp = document.getElementById('city-subscreen-popup');
+    if (_csp) _csp.classList.remove('active');
+    setTimeout(function(){
+      if (typeof _showDailyChallengeEpicPopup === 'function') {
+        _showDailyChallengeEpicPopup(window.CITY_MOCK_PLAYER);
+      }
+    }, 50);
     return;
   }
   if (key === 'trade_board' && typeof renderSquareHub === 'function') {
@@ -45823,46 +45991,22 @@ var ACTION_HANDLERS = {
   'heroes_titles':        function(p){ _heroesShowTitles(p); },
   // PORTÕES
   'gates_prep_open':      function(p){ _gatesShowPrep(p); },
-  // Sessão #23 (2026-05-22): adicionado narrativa PADRAO_ALDRIC intro ao Desafio
-  // Diário — aventureiro ferido aparece UMA VEZ por dia falando do covil antes
-  // de desbloquear o hub. Storage: localStorage 'valdoria_daily_intro_seen_<DATE>'.
-  'open_daily_challenge': function(p){
-    var today = new Date().toLocaleDateString('pt-BR');
-    var introKey = 'valdoria_daily_intro_seen_' + today;
-    var seen = false;
-    try { seen = localStorage.getItem(introKey) === '1'; } catch(_) {}
-    if (!seen && window.vEncounter && typeof window.vEncounter.render === 'function') {
-      // Marca como visto antes de renderizar (idempotente)
-      try { localStorage.setItem(introKey, '1'); } catch(_) {}
-      // PADRAO_ALDRIC dialogue: aventureiro ferido voltou do covil
-      // Sessão #23 (2026-05-22): PNG gerado via OpenAI quality=low ($0.04)
-      var dlg = {
-        npc: {
-          name: 'Caçador Ferido',
-          desc: 'Patrulheiro · escapou do covil — barba suja, capa rasgada',
-          portrait: '../shared/img/npcs/aventureiro-ferido.webp'
-        },
-        script: [
-          { type: 'narration', text: 'Você cruza a praça quando percebe um movimento estranho perto da fonte. Um aventureiro — capa de couro rasgada, faixas ensanguentadas no braço esquerdo, expressão grave — está apoiado contra a borda de pedra. Reconhece teu brasão. Faz sinal pra te aproximares.' },
-          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Vens a tempo, irmão. <i>(aperta a faixa do braço, dentes cerrados de dor)</i> Voltei agora mesmo do covil ao norte da cidade. Quatro entramos. Eu sou o único que respira.' },
-          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Lobos cinzentos, três adultos. E o pior — uma loba alfa pelagem branca, olhos prateados. <i>(cuspe vermelho no chão)</i> Conhece a táctica deles, irmão? Cercam pelo flanco e atacam o líder primeiro. Eu fui o último a cair. Por isso ainda falo.' },
-          { type: 'speech', speaker: 'Aventureiro Ferido', text: 'Os fazendeiros do norte mandaram aviso pelo correio: ' + (window.DAILY_CHALLENGE && window.DAILY_CHALLENGE.bonus_high ? 'gado sumindo toda noite' : 'mais um sumindo a cada lua') + '. Antes do anoitecer alguém precisa descer naquele covil. <i>(força um sorriso amargo)</i> Eu já cumpri minha parte — ou tentei. Cabe a vós agora.' },
-          { type: 'narration', text: 'Ele aponta com o braço bom para uma trilha pisoteada saindo da cidade, ao norte. Pegadas de lobo ainda frescas marcam o chão. O sol está alto — restam ~14 horas até o anoitecer.' }
-        ],
-        choices: [
-          { id: 'accept',  label: '⚔️ "Aceito. Vou descer no covil agora."', cb: 'close' },
-          { id: 'details', label: '📜 "Conta mais sobre a loba alfa."',     cb: 'close' },
-          { id: 'later',   label: '↩ "Vou me preparar e volto."',             cb: 'close' }
-        ]
-      };
-      // Navega pra hub PRIMEIRO (background), depois renderiza encounter por cima.
-      // Quando user fecha dialogue, vê o hub do desafio diretamente.
-      navigateTo('daily_challenge');
-      setTimeout(function(){ window.vEncounter.render(dlg, {}); }, 60);
-      return;
-    }
-    navigateTo('daily_challenge');
-  },
+  // Sessão #59 (2026-05-28) — redesign POPUP épico. User pediu:
+  //   1) "Melhore de maneira épica tela desafio diário"
+  //   2) "Faça com que essa tela não toque outra música — continue tocando
+  //      a música que tava tocando na tela da cidade"
+  //   3) "Mostre essa tela como um pop-up e não como uma tela separada"
+  // Antes: navigateTo('daily_challenge') → renderSquareHub (sub-tela inteira).
+  // Agora: _showDailyChallengeEpicPopup(p) abre overlay médio sobre o hub.
+  // Narrativa Caçador Ferido (Sessão #23) removida — fazia referência a
+  // "covil dos lobos" que NÃO EXISTE MAIS (Sessão #56 removeu masmorra).
+  // 3 cbs distintos roteam pro mesmo popup (cobrir todas entradas):
+  //   - open_daily_challenge: handler clássico (open_daily_challenge cb)
+  //   - daily_challenge: cb do CITY_LOCATIONS card
+  //   - daily_challenge_main: alias antigo
+  'open_daily_challenge': function(p){ _showDailyChallengeEpicPopup(p); },
+  'daily_challenge':      function(p){ _showDailyChallengeEpicPopup(p); },
+  'daily_challenge_main': function(p){ _showDailyChallengeEpicPopup(p); },
   // MISSÕES (3 tabs)
   'quests_tab_active':    function(p){ _questsShowTab(p, 'active'); },
   'quests_tab_available': function(p){ _questsShowTab(p, 'available'); },
