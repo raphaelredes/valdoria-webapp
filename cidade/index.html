@@ -10635,7 +10635,11 @@ function _showCharactersPopup(){
       + '<div class="hall-char-meta" '
       + 'style="font-size: var(--v-font-base, 13px); color: var(--v-text-dim, #a09484); '
       + 'margin-top: var(--v-space-xs, 2px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
-      + 'Nível ' + c.level + ' · ' + _titleCase(c.race) + ' ' + _titleCase(c.cls)
+      // Sessão #52 (2026-05-28): _classLabelPT mapeia 'clerigo' (normalizado
+      // sem acento) → 'Clérigo' (canonical PT-BR com acento). Sem isso
+      // mostraria "Clerigo" sem acento após o normalize do clsKey.
+      + 'Nível ' + c.level + ' · ' + _titleCase(c.race) + ' '
+      + (typeof _classLabelPT === 'function' ? _classLabelPT(c.cls) : _titleCase(c.cls))
       + '</div>'
       + '</div>'
 
