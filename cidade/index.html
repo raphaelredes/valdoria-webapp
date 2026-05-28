@@ -5571,8 +5571,30 @@ body.perf-lite .vc-action-btn { transition: none; }
          redundante. O placeholder dark (#1a1510) ja esta visivel — conteudo
          renderiza por cima dele direto. Sem "Buscando o caminho…" travado.
          (Removido: __vTransitionLoaderShownAtBoot + _vTransitionLoader.show) */
+      /* Sessão #62 (2026-05-28) — FIX tela branca com botão volume após loading.
+         User reportou: "abrir Web app do Telegram no desktop logo depois que
+         finalizou o carregamento, apareceu uma tela em branco com o botão de
+         volume". Root cause: o loading era escondido IMEDIATAMENTE quando
+         isTG=true, mas DOMContentLoaded ainda não tinha rodado, então o body
+         estava vazio. audio-manager.js tentava embedar va-btn em footer-quick
+         (que ainda não existia) e caía pro fallback va-float. User via:
+         placeholder dark + va-float flutuante = tela "em branco com volume".
+         Fix: NÃO esconde loading imediatamente. Marca flag pra DOMContentLoaded
+         esconder DEPOIS de renderCurrentScreen+renderFooter terem rodado. */
       var ld = document.getElementById('loading');
-      if (ld) ld.style.display = 'none';
+      if (ld) {
+        // Não esconde aqui. Marca flag pra hide pós-bootstrap.
+        window.__pendingHideTGLoading = true;
+        // Sanity timeout — se DOMContentLoaded demora >3s (improvável), força hide.
+        setTimeout(function(){
+          if (window.__pendingHideTGLoading) {
+            console.warn('[INTRO] TG loading sanity timeout 3s — force hiding');
+            var ld2 = document.getElementById('loading');
+            if (ld2) ld2.style.display = 'none';
+            window.__pendingHideTGLoading = false;
+          }
+        }, 3000);
+      }
       return;
     }
     var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts') || '0', 10);
@@ -10374,10 +10396,27 @@ function buildMockHubScreen(player){
 // Estrutura: footer-quick (Mochila/Ficha/Grupo) + footer-nav (Voltar/Help/Config)
 // Toggle imersivo (·) recolhe o panel inteiro, mostrando #footer-restore como pill.
 /* USER REQUEST 2026-05-04: menu DEFAULT = recolhido. Player vê só pill
-   "· Menu" embaixo, abre quando precisar. Aplica body.footer-collapsed
-   imediatamente pra evitar flash do panel expandido. */
-var _footerCollapsed = true;
-try { document.body.classList.add('footer-collapsed'); } catch (_) { /* DOM not ready */ }
+   "· Menu" embaixo, abre quando precisar. */
+/* Sessão #62 (2026-05-28) — INVERSÃO: user pediu novamente:
+   "menu que aparece na cidade apareça expandido. Só vai aparecer recolhido
+    se o jogador fizer isso. Assim como o volume tem persistência entre
+    sessões, o menu de recolher e expandir também deve ter."
+   Default = EXPANDIDO. Persistência via localStorage 'valdoria_footer_collapsed'.
+   Default visual aplicado imediatamente pra evitar flash quando state stale.
+   Sub-rule: char-prefixed key (regra Per-Character Session Isolation). */
+var _footerCollapsed = (function(){
+  try {
+    var charId = (new URLSearchParams(location.search)).get('char') || 'default';
+    // Try char-specific first, fallback global
+    var v = localStorage.getItem('valdoria_footer_collapsed_' + charId);
+    if (v === null) v = localStorage.getItem('valdoria_footer_collapsed');
+    return v === '1';  // default false (expanded) — user pediu
+  } catch (_) { return false; }
+})();
+try {
+  if (_footerCollapsed) document.body.classList.add('footer-collapsed');
+  else document.body.classList.remove('footer-collapsed');
+} catch (_) { /* DOM not ready */ }
 function renderFooter(){
   var quickEl = document.getElementById('footer-quick');
   var navEl   = document.getElementById('footer-nav');
@@ -10452,6 +10491,16 @@ function renderFooter(){
 function _toggleFooter(){
   _footerCollapsed = !_footerCollapsed;
   document.body.classList.toggle('footer-collapsed', _footerCollapsed);
+  // Sessão #62 (2026-05-28): persistência char-prefixed igual ao volume.
+  // User pediu: "Assim como o volume tem persistência entre sessões, o
+  // menu de recolher e expandir também deve ter."
+  try {
+    var charId = (new URLSearchParams(location.search)).get('char') || 'default';
+    var val = _footerCollapsed ? '1' : '0';
+    localStorage.setItem('valdoria_footer_collapsed_' + charId, val);
+    // Mantém global compat tb (fallback pra char-less)
+    localStorage.setItem('valdoria_footer_collapsed', val);
+  } catch(_e){ /* localStorage cheio — não fatal */ }
   _logCity('footer ' + (_footerCollapsed ? 'collapsed' : 'expanded'));
 }
 // Handlers das ações do footer
@@ -13605,7 +13654,7 @@ function _showLeaguePopup(p){
     + '"Por feitos lendários, glória e ouro, ergue-se o nome do aventureiro entre as estrelas."'
     + '</div>'
     + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-top:4px; letter-spacing:1px;">'
-    + '— Crônica de Valdoria, Cap. III'
+    + '— Provérbio antigo dos aventureiros'
     + '</div>'
     + '</div>';
 
@@ -47391,6 +47440,49 @@ function _getGameWeather(dayOfYear){
   return { icon: '⛈️', desc: 'Tempestade', temp: temp - 5 };
 }
 
+// Sessão #62 (2026-05-28): Map de período → slug WebP (gerado via
+// _gen_topbar_time_weather.py). Fallback emoji se imagem não carregar.
+// Period emojis canonical: madrugada=🌑 manhã=🌤 meio-dia=☀️ tarde=🌅
+//                         crepúsculo=🌆 noite=🌙
+// Weather emojis canonical: ensolarado=☀️ nublado=⛅ chuva=🌧️
+//                          tempestade=⛈️ neve=🌨️ névoa=🌫️
+var TOPBAR_PERIOD_PNG = {
+  'madrugada':   'period-dawn',
+  'manha':       'period-morning',
+  'manhã':       'period-morning',
+  'meio-dia':    'period-noon',
+  'tarde':       'period-afternoon',
+  'crepusculo':  'period-dusk',
+  'crepúsculo':  'period-dusk',
+  'anoitecer':   'period-dusk',
+  'noite':       'period-night',
+};
+var TOPBAR_WEATHER_PNG = {
+  'ensolarado':  'weather-sunny',
+  'limpo':       'weather-sunny',
+  'nublado':     'weather-cloudy',
+  'chuva':       'weather-rain',
+  'chuvoso':     'weather-rain',
+  'tempestade':  'weather-storm',
+  'neve':        'weather-snow',
+  'nevoa':       'weather-fog',
+  'névoa':       'weather-fog',
+  'bruma':       'weather-fog',
+};
+function _ctbIconHTML(slug, fallbackEmoji){
+  if (!slug) return fallbackEmoji || '';
+  var loc = (typeof location !== 'undefined') ? location.href : '';
+  var base = (loc.indexOf('file://') === 0)
+    ? '/shared/img/ui/topbar/'
+    : '/shared/img/ui/topbar/';
+  var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+  var emojiEsc = (fallbackEmoji || '').replace(/'/g, "&apos;");
+  return '<img class="ctb-ico-img" src="' + base + slug + '.webp?v=' + v + '" '
+       + 'style="width:14px;height:14px;vertical-align:middle;display:inline-block;object-fit:contain;" '
+       + 'onerror="this.outerHTML=\'' + emojiEsc + '\'" '
+       + 'alt="">';
+}
+
 function renderCityTopBar(){
   var el = document.getElementById('city-top-bar');
   if (!el) return;
@@ -47404,15 +47496,21 @@ function renderCityTopBar(){
   var monthShort = (typeof TIME_MONTHS_SHORT !== 'undefined' && TIME_MONTHS_SHORT[t.month]) || monthName.substring(0,3);
   var hh = (t.hour < 10 ? '0' : '') + t.hour;
   var mm = (t.minute < 10 ? '0' : '') + t.minute;
+  // Sessão #62: tenta WebP gerada via OpenAI, emoji fallback via onerror
+  var periodSlug = TOPBAR_PERIOD_PNG[(period || '').toLowerCase()];
+  var weatherKey = (w.desc || '').toLowerCase().split(/\s+/)[0];  // primeira palavra ("ensolarado", "chuva", etc)
+  var weatherSlug = TOPBAR_WEATHER_PNG[weatherKey];
+  var periodIcon = _ctbIconHTML(periodSlug, pemoji);
+  var weatherIcon = _ctbIconHTML(weatherSlug, w.icon);
   el.innerHTML = ''
     + '<div class="ctb-icons">'
-    + '  <span class="ctb-item"><span class="ctb-city">🏙️</span><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
+    + '  <span class="ctb-item"><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
     + '</div>'
     + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
-    + '  <span class="ctb-item ctb-time">' + pemoji + ' ' + hh + ':' + mm + '</span>'
+    + '  <span class="ctb-item ctb-time">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
     // Sessao #37 v13: monthShort + ano abreviado pra caber em "Maior"
     + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthShort + ' · ' + t.year + '</span>'
-    + '  <span class="ctb-item ctb-weather">' + w.icon + ' ' + w.temp + '°</span>'
+    + '  <span class="ctb-item ctb-weather">' + weatherIcon + ' ' + w.temp + '°</span>'
     + '</div>';
 }
 
@@ -50971,6 +51069,20 @@ document.addEventListener('DOMContentLoaded', function(){
   _wireSubScreenContentOnce();  // listener delegado pra sub-screens (uma vez)
   _wireExitModalOnce();  // listener delegado pro modal exit (uma vez — robusto)
   renderFooter();
+  // Sessão #62 (2026-05-28) — FIX tela branca pós-loading no Telegram WebApp.
+  // Quando isTG, o early intro script não escondeu o loading (marcou flag
+  // __pendingHideTGLoading). Agora que renderCurrentScreen+renderFooter
+  // rodaram (content + footer já existem no DOM), escondemos o loading.
+  // Isso evita a janela onde o user via "placeholder dark + va-float".
+  if (window.__pendingHideTGLoading) {
+    window.__pendingHideTGLoading = false;
+    var _ldTG = document.getElementById('loading');
+    if (_ldTG) {
+      _ldTG.style.display = 'none';
+      _ldTG.style.opacity = '0';
+      _ldTG.classList.add('hidden');  // task #86: previne FOUC safety re-show
+    }
+  }
   // === Música ambiente da cidade (canonical: ValdoriaAudio) ===
   // FIX 2026-05-04: força track da cidade ignorando resume de outras WebApps.
   // Ao entrar na cidade, sempre toca 'city' (ou track da tela atual).
@@ -56618,15 +56730,12 @@ function _buildLocCell(ico, name, btn) {
        (evita "tudo gold" — cada local tem sua cor heráldica natural). */
     if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
-    /* Icon: PNG (AI-generated 2026-05-16) > SVG heraldic (canonical) > emoji fallback */
-    var icoEl = _hubDiv('hl-ico');
-    var pngHtml = _cityLocIconHTML(btn && btn.cb, ico);
-    if (pngHtml.indexOf('<img') === 0 || pngHtml.indexOf('<svg') === 0) {
-        icoEl.innerHTML = pngHtml;
-    } else {
-        icoEl.textContent = pngHtml;
-    }
-    cell.appendChild(icoEl);
+    /* Sessão #62 (2026-05-28) — User pediu: "Remova os ícones que estão ao
+       lado esquerdo de cada palavra que representa os locais da cidade as
+       áreas da cidade na verdade."
+       Antes: cell tinha <div class="hl-ico"> com PNG/SVG do brasão do local
+       AO LADO ESQUERDO do nome. Agora: só o nome. Cor temática por data-cb
+       continua aplicada via CSS (.hub-loc[data-cb=...]). */
 
     /* Label */
     var nmEl = _hubDiv('hl-nm');
