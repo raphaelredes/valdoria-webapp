@@ -89,7 +89,7 @@
 }
 
 .v-subclass-feature {
-    background: rgba(196, 149, 58, 0.06);
+    background: var(--v-gold-06, rgba(196, 149, 58, 0.06));
     border-left: 2px solid var(--v-gold, #c4953a);
     border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
     padding: var(--v-space-sm, 6px) var(--v-space-md, 8px);
