@@ -7656,14 +7656,56 @@ Busca rápida:
                         clearTimeout(_submitTimeout);
                         const errData = await resp.json().catch(() => ({}));
                         const errMsg = errData.message || 'Erro na criação. Verifique os dados.';
-                        console.error('[CHAR_CREATOR] Creation failed:', errMsg);
-                        try { window.serverLog && window.serverLog('character_creator', 'error', 'creation_400', { error: errMsg, body: JSON.stringify(errData).substring(0, 500) }); } catch (_) {}
+                        const errCode = errData.error || 'creation_failed';
+                        console.error('[CHAR_CREATOR] Creation failed:', errCode, errMsg);
+                        try { window.serverLog && window.serverLog('character_creator', 'error', 'creation_400', { error_code: errCode, error: errMsg, body: JSON.stringify(errData).substring(0, 500) }); } catch (_) {}
                         _submitting = false;
                         if (_confirmBtn) {
                             _confirmBtn.disabled = false;
                             _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
                             _confirmBtn.style.opacity = '';
                             _confirmBtn.style.pointerEvents = '';
+                        }
+                        // Sessão #51 (2026-05-28): popup específico pra limite 5 chars.
+                        // User pediu: "crie uma tela popup para informar que o máximo são 5".
+                        // vPopup é canonical (shared/popup.js) — usa overlay existente
+                        // `#v-popup-overlay` (linha ~3330). API: header/body/actions+onAction.
+                        if (errCode === 'char_limit_reached' && window.vPopup && typeof window.vPopup.show === 'function') {
+                            var lim = errData.limit || 5;
+                            var cur = errData.current || lim;
+                            window.vPopup.show({
+                                header: '<h2 style="margin:0;color:var(--v-gold,#c4953a);font-family:var(--v-font-display,Cinzel,serif);letter-spacing:2px;text-align:center;">Limite de Personagens</h2>',
+                                body: ''
+                                    + '<div style="text-align:center;font-family:var(--v-font,MedievalSharp,serif);line-height:1.6;color:var(--v-text,#d4c8b0);padding:8px 4px;">'
+                                    + '  <div style="font-size:56px;margin:8px 0 16px;color:var(--v-gold,#c4953a);text-shadow:0 0 20px rgba(196,149,58,0.4);">⚔</div>'
+                                    + '  <p style="margin:0 0 14px;font-size:15px;"><strong style="color:var(--v-gold,#c4953a);">Você já tem ' + cur + ' aventureiros ativos.</strong></p>'
+                                    + '  <p style="margin:0 0 14px;font-size:14px;">O máximo permitido é <strong>' + lim + ' personagens</strong> por conta.</p>'
+                                    + '  <p style="margin:8px 0 0;color:var(--v-text-dim,#a09484);font-size:13px;font-style:italic;">'
+                                    + '    Apague um aventureiro existente no <em>Hall</em> antes de forjar outro.'
+                                    + '  </p>'
+                                    + '</div>',
+                                actions: [
+                                    { label: '◆ Voltar ao Hall', action: 'goto_hall', cls: 'v-popup-btn v-popup-btn--primary' }
+                                ],
+                                onAction: function(action){
+                                    if (action === 'goto_hall'){
+                                        try { window.__valdoria_transitioning = true; } catch(_e){}
+                                        var qs = new URLSearchParams(location.search);
+                                        var token = qs.get('token') || '';
+                                        var api = qs.get('api') || qs.get('api_base') || '';
+                                        var uid = qs.get('uid') || qs.get('user_id') || '';
+                                        var env = qs.get('env') || 'dev';
+                                        var url = '/cidade/?token=' + encodeURIComponent(token)
+                                            + '&api=' + encodeURIComponent(api)
+                                            + '&uid=' + uid + '&env=' + env + '&_cb=' + Date.now();
+                                        window.location.replace(url);
+                                        return true; // handled (não chamar doAction global)
+                                    }
+                                    return false;
+                                },
+                                closeOnOutside: false
+                            });
+                            return;
                         }
                         _showValidation(errMsg);
                         return;
