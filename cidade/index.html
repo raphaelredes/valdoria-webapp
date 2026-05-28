@@ -628,6 +628,18 @@ LOG SINK (Fase 7):
        ele, prologue.js doFight + combat.js transitions + creator-app.js apply +
        session-heartbeat.js jogam ReferenceError silencioso. NÃO REMOVER. */
     document.write('<script src="/shared/spa-nav-compat.js?v=' + __vEarly + '"><\/script>');
+    /* Sessão #60 (2026-05-28): Single-device session lock pra cidade.
+       User reportou: tinha jogo aberto no Telegram desktop, abriu no
+       celular tb — ambos funcionaram simultaneamente. Bug: cidade NÃO
+       carregava session-heartbeat.js (combat/prologue/levelup SIM, mas
+       a cidade — onde o player passa a maior parte do tempo — não).
+       Sem heartbeat → server não sabe que outro device chegou → sem
+       displacement → ambos ficam vivos. Fix: carregar device-id.js +
+       session-heartbeat.js aqui (mesma posição usada em prologue/index).
+       SessionHeartbeat.init é chamado mais abaixo após /api/auth/characters
+       success (quando temos token+api+uid validados). */
+    document.write('<script src="/shared/device-id.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script src="/shared/session-heartbeat.js?v=' + __vEarly + '"><\/script>');
     /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
     setTimeout(function(){
         try{
@@ -8689,6 +8701,28 @@ body.perf-lite .vc-action-btn { transition: none; }
       // #city-group-panel. refreshHud() abaixo dispara renderCityGroupPanel
       // que agora respeita _cityRealPlayerReady e revela o painel.
       window._cityRealPlayerReady = true;
+      // Sessão #60 (2026-05-28): Single-device session lock pra cidade.
+      // Dispara heartbeat poll a cada 3s (ativo) / 10s (background) que
+      // detecta displacement (outro device tomou a sessão). Quando o user
+      // abre o jogo em outro dispositivo, o backend bump version e o
+      // device antigo recebe status:'displaced' → overlay "Sessão
+      // transferida" com botão Retomar Aqui. Padrão Genshin/HSR.
+      // Stop é automático em pagehide via shared/exit-confirm.js.
+      // Bug histórico: cidade NÃO carregava heartbeat (combat/prologue/
+      // levelup sim, cidade não) — daí 2 devices ficavam vivos.
+      if (window.SessionHeartbeat && typeof SessionHeartbeat.init === 'function') {
+        try {
+          SessionHeartbeat.init({
+            apiBase: _api.replace(/\/$/, ''),
+            token: _token,
+            uid: parseInt(_uid, 10) || _uid,
+            interval: 3000
+          });
+          console.info('[CITY] SessionHeartbeat started (single-device lock)');
+        } catch (_heartbeatErr) {
+          console.warn('[CITY] SessionHeartbeat.init failed:', _heartbeatErr);
+        }
+      }
       // Re-render se hub ja foi montado
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
@@ -8761,6 +8795,19 @@ body.perf-lite .vc-action-btn { transition: none; }
         _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level, cls: p.cls, race: p.race});
         // Sessão #55 (2026-05-28): fallback aplicou char real — libera fade-in.
         window._cityRealPlayerReady = true;
+        // Sessão #60 (2026-05-28): mesma fix do single-device lock também no
+        // fallback path (state failed mas /api/auth/characters succeed).
+        if (window.SessionHeartbeat && typeof SessionHeartbeat.init === 'function') {
+          try {
+            SessionHeartbeat.init({
+              apiBase: _api.replace(/\/$/, ''),
+              token: _token,
+              uid: parseInt(_uid, 10) || _uid,
+              interval: 3000
+            });
+            console.info('[CITY] SessionHeartbeat started (fallback path)');
+          } catch (_e2) { console.warn('[CITY] SessionHeartbeat fallback init failed:', _e2); }
+        }
         // FIX v3: forcar re-render apos fallback (antes o hub ficava com mock)
         if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_re){} }
         if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
