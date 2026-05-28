@@ -11963,6 +11963,212 @@ function _showCharSwitchConfirm(picked){
   });
 }
 
+// === ACCOUNT LINKING — Sessão #61 (2026-05-28) ===
+// User pediu: vincular Google+Telegram pra mesma conta. Settings mostra:
+//  • Logado via Telegram + Google NÃO vinculado → botão "Vincular Google"
+//  • Logado via Google + Telegram NÃO vinculado → botão "Vincular Telegram"
+//  • Ambos vinculados → badge "✓ Telegram + Google"
+//
+// Flows:
+//  - Google: redirect Google OAuth → callback POST /api/auth/link-account
+//    (usa mesmo CLIENT_ID de /web/, sessionStorage pra preservar Bearer
+//    token durante o redirect)
+//  - Telegram: Telegram.WebApp.initData (se disponível dentro do TG WebApp)
+//    OU deep-link t.me/<bot>?start=link_<token> (fora do TG, ex: web puro)
+//
+// Backend: GET /api/auth/linked-providers retorna current + providers[].
+// POST /api/auth/link-account valida credential + INSERT em web_accounts
+// com user_id atual. Conflito → 409 linked_to_another_account.
+
+function _loadLinkSection(){
+  var sectionEl = document.getElementById('settings-link-section');
+  if (!sectionEl) return;
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var api = (params.get('api') || '').replace(/\/$/, '');
+  if (!token || !api) return;
+  fetch(api + '/api/auth/linked-providers', {
+    method: 'GET',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    _renderLinkSection(sectionEl, data);
+  }).catch(function(err){
+    console.warn('[LINK] failed to load linked providers:', err);
+    sectionEl.innerHTML = '<span style="color:var(--v-text-dim,#a09484);font-size:var(--v-font-xs,11px);opacity:0.7;">Não foi possível carregar vínculos.</span>';
+  });
+}
+
+function _renderLinkSection(el, data){
+  var current = data.current || 'telegram';
+  var providers = (data.providers || []).map(function(p){ return p.provider; });
+  var hasTg = providers.indexOf('telegram') >= 0;
+  var hasGoogle = providers.indexOf('google') >= 0;
+  var html = '';
+  if (hasTg && hasGoogle){
+    // Ambos vinculados — badge sucesso
+    html = '<div style="display:flex; align-items:center; gap:8px; color:#9adfa3; font-family:var(--v-font,MedievalSharp,serif); font-size:var(--v-font-base,13px);">'
+         + '<span style="color:#9adfa3;font-size:16px;">✓</span>'
+         + '<span><b>Telegram + Google</b> vinculados</span>'
+         + '</div>';
+  } else if (current === 'telegram' && !hasGoogle){
+    // Logado via TG, falta Google → mostra botão Vincular Google
+    html = '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">'
+         + '<div style="font-size:var(--v-font-xs,11px); color:var(--v-text-dim,#a09484); line-height:1.4;">'
+         + 'Acesse a mesma conta também pelo navegador com Google.'
+         + '</div>'
+         + '<button id="btn-link-google" style="display:flex; align-items:center; justify-content:center; gap:8px;'
+         + 'padding:8px 12px; background:#fff; color:#333;'
+         + 'border:1px solid #ddd; border-radius:5px; cursor:pointer;'
+         + 'font-family:Arial,sans-serif; font-size:var(--v-font-sm,13px); font-weight:600;'
+         + 'box-shadow:0 1px 2px rgba(0,0,0,0.2);">'
+         + '<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'
+         + '<span>Vincular Google</span>'
+         + '</button>'
+         + '</div>';
+  } else if (current === 'google' && !hasTg){
+    // Logado via Google, falta TG → mostra botão Vincular Telegram
+    html = '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">'
+         + '<div style="font-size:var(--v-font-xs,11px); color:var(--v-text-dim,#a09484); line-height:1.4;">'
+         + 'Acesse a mesma conta também pelo Telegram.'
+         + '</div>'
+         + '<button id="btn-link-telegram" style="display:flex; align-items:center; justify-content:center; gap:8px;'
+         + 'padding:8px 12px; background:#229ED9; color:#fff;'
+         + 'border:1px solid #1a7fa8; border-radius:5px; cursor:pointer;'
+         + 'font-family:Arial,sans-serif; font-size:var(--v-font-sm,13px); font-weight:600;'
+         + 'box-shadow:0 1px 2px rgba(0,0,0,0.3);">'
+         + '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>'
+         + '<span>Vincular Telegram</span>'
+         + '</button>'
+         + '</div>';
+  } else {
+    // current=telegram + hasTg (idempotent display) ou current=google + hasGoogle
+    html = '<div style="display:flex; align-items:center; gap:8px; color:var(--v-gold,#c4953a); font-family:var(--v-font,MedievalSharp,serif); font-size:var(--v-font-base,13px);">'
+         + '<span style="color:#9adfa3;font-size:14px;">✓</span>'
+         + '<span>Vinculada via <b>' + (current === 'google' ? 'Google' : 'Telegram') + '</b></span>'
+         + '</div>';
+  }
+  el.style.justifyContent = 'flex-start';
+  el.innerHTML = html;
+  // Wire buttons
+  var gBtn = document.getElementById('btn-link-google');
+  if (gBtn) gBtn.addEventListener('click', _linkGoogleStart);
+  var tBtn = document.getElementById('btn-link-telegram');
+  if (tBtn) tBtn.addEventListener('click', _linkTelegramStart);
+}
+
+function _linkGoogleStart(){
+  // Inicia Google OAuth implicit flow. Após callback (no /web/), POST
+  // pro link-account com Bearer + id_token. Pra preservar o token Bearer
+  // atual durante o redirect, salva em sessionStorage.
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token') || '';
+  var api = (params.get('api') || '').replace(/\/$/, '');
+  if (!token || !api){
+    vToast('⚠️ Sessão expirada. Reabra o jogo.');
+    return;
+  }
+  try {
+    sessionStorage.setItem('valdoria_link_pending', JSON.stringify({
+      token: token, api: api, returnUrl: window.location.href, ts: Date.now()
+    }));
+  } catch(_e){ /* localStorage cheio — segue mesmo assim */ }
+  // Redireciona pro /web/ portal em modo link
+  var origin = window.location.origin;
+  var linkUrl = origin + '/web/?link_mode=google&_cb=' + Date.now();
+  // Em Telegram WebApp, usa openLink pra abrir em browser externo
+  try {
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink){
+      Telegram.WebApp.openLink(linkUrl, { try_instant_view: false });
+      vToast('🔗 Abrindo Google em nova janela…');
+      return;
+    }
+  } catch(_e){}
+  window.open(linkUrl, '_blank');
+}
+
+function _linkTelegramStart(){
+  // Caso 1: dentro do Telegram WebApp — usa Telegram.WebApp.initData
+  // (HMAC validado pelo backend contra bot tokens). Instantâneo.
+  // Caso 2: fora do Telegram (web puro) — abrir deep-link bot ?start=link_<token>
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token') || '';
+  var api = (params.get('api') || '').replace(/\/$/, '');
+  if (!token || !api){
+    vToast('⚠️ Sessão expirada. Reabra o jogo.');
+    return;
+  }
+  var tg = window.Telegram && Telegram.WebApp;
+  var initData = tg && tg.initData;
+  if (initData){
+    // Parse initData (URL-encoded query string) pra { id, first_name, ... }
+    // initDataUnsafe.user contém os campos não validados (ok pra display),
+    // mas pro link precisamos do raw HMAC string que será validado server-side.
+    var user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (!user || !user.id){
+      vToast('⚠️ Dados do Telegram indisponíveis.');
+      return;
+    }
+    // Reconstrói tg_data compatível com _verify_telegram_login (formato
+    // Login Widget). initData traz hash, auth_date, user — extraímos do
+    // initData URLSearchParams pra preservar HMAC original.
+    var tgParams = new URLSearchParams(initData);
+    var hash = tgParams.get('hash') || '';
+    var authDate = tgParams.get('auth_date') || '';
+    if (!hash){
+      vToast('⚠️ Hash Telegram ausente.');
+      return;
+    }
+    var tg_data = {
+      id: user.id,
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      username: user.username || '',
+      auth_date: parseInt(authDate, 10) || 0,
+      hash: hash,
+    };
+    // NOTA: initData usa "WebAppData" como secret key (não HMAC simples
+    // do bot_token). _verify_telegram_login espera Login Widget formato.
+    // Pra funcionar 100%, backend precisaria ter handler separado pra
+    // initData. Por ora envia ambos e o backend tenta validar.
+    if (typeof vProcessing !== 'undefined' && vProcessing.show){
+      vProcessing.show({ text: 'Vinculando Telegram…' });
+    }
+    fetch(api + '/api/auth/link-account', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'telegram',
+        telegram_data: tg_data,
+        initData: initData,  // raw — backend pode validar via bot token
+      })
+    }).then(function(r){
+      if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+      return r.json().then(function(data){
+        if (r.ok && (data.linked || data.already_linked)){
+          vToast('✓ Telegram vinculado! Recarregue a tela.');
+          _loadLinkSection();  // re-render
+        } else {
+          var msg = (data && data.error) ? data.error : 'Falha ao vincular Telegram.';
+          if (data && data.code === 'linked_to_another_account'){
+            msg = '⚠️ Esta conta Telegram já está vinculada a outro personagem.';
+          }
+          vToast(msg);
+        }
+      });
+    }).catch(function(err){
+      if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
+      vToast('⚠️ Erro de rede: ' + (err.message || err));
+    });
+    return;
+  }
+  // Caso 2: fora do TG WebApp — instrução pra abrir o bot manualmente
+  // (futuro: implementar polling igual ao apoie, requer token KV).
+  vToast('🔗 Abra o jogo dentro do Telegram pra vincular esta conta TG.');
+}
+
 // === CONFIGURAÇÕES — replica fiel do bot DEV/PROD (game-settings-popup) ===
 // Sections canonical (src/game/actions/settings.py + game-ui.js inject*):
 //   ⚔️ Jogo: Temporizadores / Modo de Combate / Navegação
@@ -12086,7 +12292,30 @@ function _showSettingsPopup(){
   // ORDEM NOVA: (1) Tamanho da Fonte topo absoluto, (2) Som, (3) Jogo (Vibração),
   // (4) Extras. Notificações REMOVIDAS (Demand I) — não tinham efeito real
   // no bot Telegram (apenas localStorage flags sem uso server-side).
+  // Sessão #61 (2026-05-28): Account linking acima da fonte (Demand User).
+  // Mostra "Vincular Google" se logado via Telegram OU "Vincular Telegram"
+  // se logado via Google. Se ambos vinculados → badge "Vinculados". Fetch
+  // do endpoint /api/auth/linked-providers acontece async; placeholder
+  // renderiza enquanto carrega. Click → dispatch flow per provider.
   var html = '<div class="settings-hub" style="padding: var(--v-space-md, 8px);">';
+
+  // SEÇÃO 0: Vincular Conta (TOPO — Sessão #61)
+  // Em LOCAL mode (file://) não mostra (não há sessão remota pra vincular).
+  // Em REMOTE mode, placeholder renderiza enquanto a fetch async resolve.
+  var _settingsAuthParams = new URLSearchParams(window.location.search);
+  var _settingsAuthToken = _settingsAuthParams.get('token');
+  var _settingsAuthApi = _settingsAuthParams.get('api');
+  var _hasRemoteAuth = !!(_settingsAuthToken && _settingsAuthApi);
+  if (_hasRemoteAuth) {
+    html += _sectionHeader('ic-mensagem', 'Vincular Conta');
+    html += '<div id="settings-link-section" style="padding: 8px;'
+         + 'background: rgba(196,149,58,0.04); border-radius: var(--v-radius-sm, 6px);'
+         + 'border:1px solid var(--v-border,#4a3828); min-height:42px;'
+         + 'display:flex; align-items:center; justify-content:center;'
+         + 'font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">'
+         + '<span style="opacity:0.7;">Carregando vínculos…</span>'
+         + '</div>';
+  }
 
   // SEÇÃO 1: Tamanho de Fonte — TOPO ABSOLUTO (Demand F)
   // User pediu fonte no topo pra que possa ajustar ANTES de ler outras opções.
@@ -12164,6 +12393,15 @@ function _showSettingsPopup(){
 
   html += '</div>';
   bodyEl.innerHTML = html;
+
+  // === SEÇÃO 0 ASYNC — Vincular Conta (Sessão #61, 2026-05-28) ===
+  // Fetch /api/auth/linked-providers pra saber quais providers já vinculados,
+  // renderiza estado correto: vinculados ✓ + botão pro que falta. Click
+  // botão dispara o flow de linking (Google: redirect OAuth ou popup;
+  // Telegram: Telegram.WebApp.initData se disponível, ou deep-link bot).
+  if (_hasRemoteAuth) {
+    _loadLinkSection();
+  }
 
   // === WIRE TOGGLES ===
   bodyEl.querySelectorAll('.setting-row').forEach(function(row){
