@@ -17317,7 +17317,7 @@ const EVENTS_POOL = {
                 choices: [
                   { label: 'Pedir o desvio mais seguro (Sabedoria)', skill: 'wis', dc: 12,
                     desc: 'Verdadeiro valor: rota que evita patrulhas E bandidos.',
-                    ok: '{Ele} desenha uma trilha no chão com a ponta da bota — passa por cabana abandonada, cruza riacho raso, sai na estrada principal depois do desvio perigoso. "Use isso e você me deve uma cerveja em Eldoria."',
+                    ok: '{Ele} desenha uma trilha no chão com a ponta da bota — passa por cabana abandonada, cruza riacho raso, sai na estrada principal depois do desvio perigoso. "Use isso e você me deve uma cerveja em Valdoria."',
                     okGold: [0, 0], okXp: [12, 18],
                     fail: '{Ele} desenha a trilha mas você não memoriza direito — perdeu detalhe importante sobre o riacho. A informação vai te servir só parcialmente.', failExh: 1 },
                   { label: 'Pedir notícia de Valdoria (Persuasão)', skill: 'cha', dc: 11,
@@ -17749,7 +17749,7 @@ const EVENTS_POOL = {
                     okXp: [14, 20], okFlag: 'region_intel',
                     fail: '{Ele} fica confuso — não conhece bem a região. "Sou de longe, viajante. Desculpe." Sem info útil.' },
                   { label: 'Pedir um favor pra cobrar depois', flavor: 'Aliança vale mais que moeda no longo prazo.',
-                    ok: '{Ele} aceita solene: "Quando precisar, me procure em Eldoria. Sou homem de palavra." Aliança formada.',
+                    ok: '{Ele} aceita solene: "Quando precisar, me procure em Valdoria. Sou homem de palavra." Aliança formada.',
                     okFlag: 'npc_owes_favor', okXp: [12, 16] }
                 ]
               },
@@ -17857,7 +17857,7 @@ const EVENTS_POOL = {
                 body: 'O caçador se ergue com dificuldade, abraça você de gratidão. "Salvou minha vida. Pega a recompensa, é justa."',
                 choices: [
                   { label: 'Aceitar a recompensa', flavor: 'Bolsa de couro com moedas. Direto e simples.',
-                    ok: 'Você guarda 25 moedas. Ele anota seu nome num caderno gasto: "Te devo. Procure-me em Eldoria — sou Caçador Krell."',
+                    ok: 'Você guarda 25 moedas. Ele anota seu nome num caderno gasto: "Te devo. Procure-me em Valdoria — sou Caçador Krell."',
                     okGold: [20, 30], okFlag: 'hunter_krell_owes', okXp: [10, 14] },
                   { label: 'Recusar e ajudá-lo a voltar (Sabedoria)', skill: 'wis', dc: 11,
                     desc: 'Apoiar o ombro, caminhar com ele até estrada principal — gratidão maior.',
@@ -33154,7 +33154,7 @@ var QUEST_HOOKS = window.QUEST_HOOKS || [
   //   id: 'merchant_lendro_quest',
   //   trigger_flag: 'merchant_lendro_intro',
   //   title: 'Procurando Lendro',
-  //   description: 'Lendro mencionou um comprador especial em Eldoria. "Diga que Lendro mandou."',
+  //   description: 'Lendro mencionou um comprador especial em Valdoria. "Diga que Lendro mandou."',
   //   goal: { type: 'reach_map', map: 'eldoria_market' },
   //   reward: { gold: 30, xp: 50, flag: 'lendro_merchant_unlocked' }
   // }

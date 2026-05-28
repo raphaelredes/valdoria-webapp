@@ -262,9 +262,9 @@ function showGateResult(outcomeText, effectText, callback) {
 
 /* Cena PREFACE: boas-vindas inicial (mostrada se DATA.show_preface). */
 function _scenePreface() {
-  const text = DATA.preface_text || 'Boas vindas a Eldoria!';
+  const text = DATA.preface_text || 'Boas vindas a Valdoria!';
   return {
-    npc: { name: 'Boas-Vindas a Eldoria', desc: 'O início da sua jornada', portrait: '' },
+    npc: { name: 'Boas-Vindas a Valdoria', desc: 'O início da sua jornada', portrait: '' },
     script: [
       { type: 'narration', text: text }
     ],
@@ -395,7 +395,7 @@ function _sceneInjuredCompanionResult(result) {
     },
     script: script,
     choices: [
-      { id: 'continuar', label: '▸ Seguir para Eldoria', cb: '__local_companion_result_done' }
+      { id: 'continuar', label: '▸ Seguir para Valdoria', cb: '__local_companion_result_done' }
     ]
   };
 }
@@ -555,7 +555,7 @@ async function onCompanionHealChoice(key) {
       showError('Erro ao aplicar cura: ' + (result && result.error || 'desconhecido'));
       return;
     }
-    /* Render outcome scene → user clica "Seguir para Eldoria" → aftermath */
+    /* Render outcome scene → user clica "Seguir para Valdoria" → aftermath */
     _renderScene(function() { return _sceneInjuredCompanionResult(result); });
   } catch (e) {
     _brennChoiceMade = false;

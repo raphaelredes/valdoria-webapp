@@ -1,5 +1,5 @@
 /* ============================================================================
- * game-market-hub.js — Mercado de Eldoria (PADRAO_TAVERNA multi-NPC canonical)
+ * game-market-hub.js — Mercado de Valdoria (PADRAO_TAVERNA multi-NPC canonical)
  * ============================================================================
  *
  * Task #32 sessão #14 (2026-05-20) — REFATORADO p/ usar PADRAO_TAVERNA canonical.
@@ -17,7 +17,7 @@
  *   ~340  _mktBuildRepBar(data) — D&D 5e Renome
  *   ~370  renderMarketHub(container, data) — entry point
  *
- * Source: simuladores/mercado-eldoria-final.html (1815L)
+ * Source: simuladores/mercado-Valdoria-final.html (1815L)
  * ============================================================================ */
 
 'use strict';
@@ -44,7 +44,7 @@ var MARKET_SVC_META = {
 if (!window._SVC_CONFIG_MARKET) {
   window._SVC_CONFIG_MARKET = {
     faction: 'market',
-    factionLabel: 'Mercado de Eldoria',
+    factionLabel: 'Mercado de Valdoria',
     reactions: {
       very_negative: 'Os mercadores se entreolham, e logo o boato corre pelas barracas. <i>(silêncio constrangedor)</i> "Vossa Senhoria perdeu crédito aqui hoje."',
       negative: 'O mercador balança a cabeça desaprovando. <i>(continua o trabalho sem te olhar)</i> "Cada um com seus modos. Mas o preço fica o mesmo."',
@@ -71,7 +71,7 @@ if (!window._SVC_CONFIG_MARKET) {
 var MERCHANT_NPCS_MARKET = {
   thorne: {
     npc: { name: 'Thorne', desc: 'Armeiro · vende lâminas há trinta e cinco anos', portrait: '../shared/img/npcs/thorne-armeiro.webp' },
-    quote: '"Aço carbono de Eldoria. Sem desconto."',
+    quote: '"Aço carbono de Valdoria. Sem desconto."',
     cb: 'market_interact_menu_blacksmith',
     script: [
       { type: 'narration', text: 'A barraca de Thorne é uma parede de aço polido — espadas suspensas em pregos longos, adagas em fileira sobre veludo vermelho, machados de duas mãos pendurados das vigas. O cheiro é de óleo de armas e suor honesto.' },
@@ -165,14 +165,14 @@ function _mktBuildCenario(data) {
 
   var crest = vCity.el('img', 'cenario-brasao');
   crest.src = '../shared/img/mercado/mercado-crest.png';
-  crest.alt = 'Brasão do Mercado de Eldoria';
+  crest.alt = 'Brasão do Mercado de Valdoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(crest);
 
   var titulo = vCity.el('div', 'cenario-titulo');
   var nameEl = vCity.el('div', 'name');
-  nameEl.textContent = 'Mercado de Eldoria';
+  nameEl.textContent = 'Mercado de Valdoria';
   titulo.appendChild(nameEl);
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Praça Central · Seis Mercadores Fiéis';

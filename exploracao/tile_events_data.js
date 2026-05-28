@@ -883,7 +883,7 @@ window.TILE_EVENTS_DB['sentinel_post.dormant'] = {
               label: 'Espremer-se pela fenda (Acrobacia)',
               skill: 'acrobatics', dc: 13,
               outcome_ok: {
-                flavor: 'Você se contorce de lado e desliza pela fenda — frio e estreito. Dentro, o posto guarda uma mochila esquecida: alguém pretendia voltar mas não conseguiu. Há rações, um pequeno bolso de moedas e um diário com letras tremidas: "se eu não voltar até a lua nova, levem isto a Eldoria. Eles SABEM."',
+                flavor: 'Você se contorce de lado e desliza pela fenda — frio e estreito. Dentro, o posto guarda uma mochila esquecida: alguém pretendia voltar mas não conseguiu. Há rações, um pequeno bolso de moedas e um diário com letras tremidas: "se eu não voltar até a lua nova, levem isto a Valdoria. Eles SABEM."',
                 ops: [
                   { op: 'gold', delta: 18 },
                   { op: 'item', id: 'rations' },

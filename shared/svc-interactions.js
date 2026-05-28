@@ -40,6 +40,56 @@
    * Dice check com PADRAO_DICE3D — anima d20, calcula vs DC, aplica Renown delta.
    * @param {Object} opts { ability, dc, mod, npc, label, faction }
    */
+  // Sessão #55 (2026-05-28): mapping EN→PT-BR canonical + auto-compute
+  // modificador real baseado em stats + proficiency. Bug pré-fix: cb hardcoded
+  // 'dice:investigation:13:+0' mostrava "Teste de investigation modificador +0"
+  // ignorando ability mod + skill proficiency PHB.
+  var _ABILITY_LABEL_PT = {
+    str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma',
+    strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
+    intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma',
+    // D&D 5e Skills (PHB p.174) — todas PT-BR canonical
+    athletics: 'Atletismo', acrobatics: 'Acrobacia', sleight: 'Prestidigitação',
+    stealth: 'Furtividade', arcana: 'Arcanismo', history: 'História',
+    investigation: 'Investigação', nature: 'Natureza', religion: 'Religião',
+    animal_handling: 'Lidar com Animais', insight: 'Intuição', medicine: 'Medicina',
+    perception: 'Percepção', survival: 'Sobrevivência', deception: 'Enganação',
+    intimidation: 'Intimidação', performance: 'Atuação', persuasion: 'Persuasão'
+  };
+  var _SKILL_TO_ABILITY = {
+    athletics: 'strength',
+    acrobatics: 'dexterity', sleight: 'dexterity', stealth: 'dexterity',
+    arcana: 'intelligence', history: 'intelligence', investigation: 'intelligence',
+    nature: 'intelligence', religion: 'intelligence',
+    animal_handling: 'wisdom', insight: 'wisdom', medicine: 'wisdom',
+    perception: 'wisdom', survival: 'wisdom',
+    deception: 'charisma', intimidation: 'charisma', performance: 'charisma',
+    persuasion: 'charisma'
+  };
+  function _abilityLabelPT(key){ return _ABILITY_LABEL_PT[(key||'').toLowerCase()] || 'Atributo'; }
+  function _computeRealMod(opts){
+    // Se cb veio com mod hardcoded > 0, respeita (override manual).
+    if (opts.mod && opts.mod !== 0) return opts.mod;
+    // Tenta calcular do player real.
+    var p = window.CITY_MOCK_PLAYER || {};
+    var stats = p.stats || {};
+    var ability = (opts.ability||'').toLowerCase();
+    var abilityStat = _SKILL_TO_ABILITY[ability] || ability;
+    var statShort = { strength:'str', dexterity:'dex', constitution:'con',
+                      intelligence:'int', wisdom:'wis', charisma:'cha' }[abilityStat] || abilityStat;
+    var score = stats[statShort] || stats[abilityStat] || 10;
+    var abilityMod = Math.floor((score - 10) / 2);
+    // Proficiency se player tem prof em skill (acquired_skills + skill_proficiencies)
+    var prof = 0;
+    try {
+      var profSkills = (p.skill_proficiencies || []).concat(p.acquired_skills || []);
+      if (profSkills.indexOf(ability) >= 0) {
+        var profBonus = Math.floor(((p.level || 1) - 1) / 4) + 2;
+        prof = profBonus;
+      }
+    } catch(_e){}
+    return abilityMod + prof;
+  }
   window._diceCheckSvc = function(opts) {
     var ov = document.getElementById('encounter-overlay');
     ov.innerHTML = '';
@@ -48,9 +98,13 @@
     card.style.maxWidth = '420px';
     card.style.padding = '24px';
     card.style.textAlign = 'center';
+    // Sessão #55: label PT-BR + mod real (PHB ability mod + proficiency)
+    var displayLabel = _abilityLabelPT(opts.ability);
+    var realMod = _computeRealMod(opts);
+    opts.mod = realMod;  // propaga pro resto da função usar
     card.innerHTML =
-      '<div style="font-size:11px;letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;">Teste de ' + (opts.ability||'Atributo') + '</div>'
-      + '<div style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">Classe de Dificuldade ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (opts.mod>=0?'+':'') + opts.mod + '</div>'
+      '<div style="font-size:11px;letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;">Teste de ' + displayLabel + '</div>'
+      + '<div style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">Classe de Dificuldade ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (realMod>=0?'+':'') + realMod + '</div>'
       + '<div id="dice-mount" style="width:160px;height:160px;margin:0 auto 12px;"></div>'
       + '<div id="dice-result" style="min-height:48px;font-size:15px;color:#f4d896;letter-spacing:1px;line-height:1.6;"></div>'
       + '<div id="dice-actions" style="display:flex;gap:10px;justify-content:center;margin-top:14px;opacity:0;transition:opacity 0.4s;"></div>';
@@ -317,6 +371,19 @@
       // limpava classList/innerHTML/display MAS nunca chamava <dialog>.close(),
       // entao o dialog nativo permanecia aberto com ::backdrop visivel +
       // conteudo zerado = tela preta. Fix: usar vEncounter.close() canonical.
+      // Sessão #55 (2026-05-28): FIX Bug P0 Lyana quest delivery loop.
+      // dialogue.onClose hook não era honored — o caller pre-registrava o
+      // callback (ex: LYANA_SUB[id].onClose = function(){ _deliverQuest(...) })
+      // mas o _dispatchSvcChoice fechava sem invocar, deixando a quest na
+      // QUESTS_ACTIVE pra sempre + reward nunca aplicada. Fix: invoca
+      // dialogue.onClose ANTES do close pra rewards/state mutations rodarem.
+      try {
+        if (dialogue && typeof dialogue.onClose === 'function') {
+          dialogue.onClose();
+        }
+      } catch (_eOnClose) {
+        console.warn('[SVC] dialogue.onClose threw', _eOnClose);
+      }
       if (window.vEncounter && typeof window.vEncounter.close === 'function') {
         window.vEncounter.close();
       } else if (ov) {

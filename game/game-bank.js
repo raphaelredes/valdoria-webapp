@@ -58,7 +58,7 @@ var ALDWIN_DIALOGUE = {
     portrait: '../shared/img/npcs/banqueiro.webp'
   },
   script: [
-    { type: 'narration', text: 'O salão principal do Banco de Eldoria respira em silêncio. Lustres de ferro forjado sustentam velas de cera virgem que pingam lentas sobre bandejas de bronze. Atrás de um balcão de mogno escuro, Aldwin — vestes de veludo azul-marinho debruadas a fio de ouro, monóculo pendurado no peito, dedos finos manchados de tinta sépia — ergue os olhos do livro de tarja com a precisão de quem soma fortunas há vinte e dois anos.' },
+    { type: 'narration', text: 'O salão principal do Banco de Valdoria respira em silêncio. Lustres de ferro forjado sustentam velas de cera virgem que pingam lentas sobre bandejas de bronze. Atrás de um balcão de mogno escuro, Aldwin — vestes de veludo azul-marinho debruadas a fio de ouro, monóculo pendurado no peito, dedos finos manchados de tinta sépia — ergue os olhos do livro de tarja com a precisão de quem soma fortunas há vinte e dois anos.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Bem-vindo. <i>(fecha o livro com um clique de fivela de prata)</i> Sente-se, por favor. O cofre está aberto até a oitava hora, e a Casa de Tholram honra todo selo que entra por aquela porta.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O Cofre Real opera pelo padrão Tholram. <i>(passa o monóculo pelos números do livro)</i> Cem peças de cobre fazem dez de prata; dez de prata, uma de ouro; cem de ouro, uma de platina. <i>(sorri com cortesia medida)</i> Os números são velhos. As pessoas, não.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O que traz Vossa Senhoria à Casa de Tholram? <i>(entrelaça os dedos sobre o balcão)</i> Depósito, retirada, ou negócio de maior peso? Tudo passa por aqui — só uma coisa nunca sai: a discrição.' }
@@ -213,7 +213,7 @@ var SERVICE_DIALOGUES_BANK = {
   insurance: {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'Aldwin desenrola um pergaminho oficial selado com a marca do Conde de Eldoria. É um Seguro de Aventureiros — documento legal que garante compensação aos herdeiros, ou ressurreição patrocinada, caso o portador morra em missão.' },
+      { type: 'narration', text: 'Aldwin desenrola um pergaminho oficial selado com a marca do Conde de Valdoria. É um Seguro de Aventureiros — documento legal que garante compensação aos herdeiros, ou ressurreição patrocinada, caso o portador morra em missão.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O Seguro de Aventureiros não é luxo — é sabedoria. <i>(toca o lacre real)</i> Cinquenta Valdoritas mensais. Em caso de morte verificada, a Casa contrata Revivify no Templo (até 300V em diamante), e o que sobra é entregue ao herdeiro nomeado. Carta selada pelo próprio Conde.' }
     ],
     choices: [
@@ -230,7 +230,7 @@ var SERVICE_DIALOGUES_BANK = {
   estate: {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'Aldwin pousa o livro de tarja, abre uma gaveta lateral, retira um mapa enrolado com fita carmesim. Desenrola-o sobre o balcão de mármore — Eldoria e seus arredores, marcados em tinta sépia, com pequenos selos vermelhos indicando propriedades disponíveis.' },
+      { type: 'narration', text: 'Aldwin pousa o livro de tarja, abre uma gaveta lateral, retira um mapa enrolado com fita carmesim. Desenrola-o sobre o balcão de mármore — Valdoria e seus arredores, marcados em tinta sépia, com pequenos selos vermelhos indicando propriedades disponíveis.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Comprar terreno é investir em pedra que dura mais que a memória. <i>(aponta quatro regiões marcadas)</i> Casa modesta na cidade baixa, mil Valdoritas. Quinta nas margens, cinco mil. Torre fortificada, quinze mil — leva cem dias. Stronghold completo no Quarteirão dos Cravos, cinquenta mil, quatrocentos dias.' }
     ],
     choices: [
@@ -324,7 +324,7 @@ function _bnkBuildCenario(data) {
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
   crest.src = '../shared/img/banco/banco-crest.png';
-  crest.alt = 'Brasão do Banco de Eldoria';
+  crest.alt = 'Brasão do Banco de Valdoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(crest);
@@ -332,7 +332,7 @@ function _bnkBuildCenario(data) {
   // Título
   var titulo = vCity.el('div', 'cenario-titulo');
   var nameEl = vCity.el('div', 'name');
-  nameEl.textContent = 'Banco de Eldoria';
+  nameEl.textContent = 'Banco de Valdoria';
   titulo.appendChild(nameEl);
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Casa de Tholram · Cofre Real';

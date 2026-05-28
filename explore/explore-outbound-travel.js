@@ -176,7 +176,7 @@ function _showDepartureScreen() {
     diceEl.classList.remove('active');
     checkEl.innerHTML = '';
     actionsEl.innerHTML = '';
-    titleEl.textContent = 'Partindo de Eldoria';
+    titleEl.textContent = 'Partindo de Valdoria';
     subtitleEl.textContent = j.totalSteps + ' etapas até ' + j.dungeonName;
     iconEl.textContent = '';
     _renderReturnHP(hpEl);

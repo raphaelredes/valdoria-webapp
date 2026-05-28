@@ -195,7 +195,7 @@ var SERVICE_DIALOGUES_TAVERN = {
   gossip_deep: {
     npc: GROM_DIALOGUE.npc,
     script: [
-      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Discrição, antes. <i>(limpa caneca devagar, voz baixa)</i> Eles têm sotaque de Vale-do-Norte mas usam moeda de Eldoria pré-Cisma. <i>(estala dedos)</i> Velho demais pra ser troca normal. E nunca pediram comida — só vinho e mesa no canto.' },
+      { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Discrição, antes. <i>(limpa caneca devagar, voz baixa)</i> Eles têm sotaque de Vale-do-Norte mas usam moeda de Valdoria pré-Cisma. <i>(estala dedos)</i> Velho demais pra ser troca normal. E nunca pediram comida — só vinho e mesa no canto.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Se quer mais que isso, vai precisar olhar com cuidado próprio. <i>(devolve caneca à prateleira)</i> Não me envolvo no que não me cabe.' }
     ],
     choices: [
@@ -213,7 +213,7 @@ var SERVICE_DIALOGUES_TAVERN = {
        inspiration die. Tip 1V/5V escala chance. */
     npc: GROM_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'No canto da taverna, sobre um tablado modesto, uma jovem de cabelos cor-de-fogo afina o alaúde. Ela usa um broche de prata em forma de pena — símbolo do Conservatório de Eldoria. Suas mãos têm calos diferentes de quem trabalha o metal: marcas de cordas, mistura de violão e harpa.' },
+      { type: 'narration', text: 'No canto da taverna, sobre um tablado modesto, uma jovem de cabelos cor-de-fogo afina o alaúde. Ela usa um broche de prata em forma de pena — símbolo do Conservatório de Valdoria. Suas mãos têm calos diferentes de quem trabalha o metal: marcas de cordas, mistura de violão e harpa.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Lyra Cantarriba. <i>(passa o pano pela caneca)</i> Estudou no Conservatório, voltou ano passado quando o avô caiu doente. Toca pra pagar o quarto. Sabe Inspirar — coisa de bardo de verdade, não dessas balada de cantar Birthday Happy.' },
       { type: 'speech', speaker: 'Grom Barba-Cinza', text: 'Dá uma gorjeta, ela canta pra ti. <i>(ergue dois dedos)</i> Cinco moedas e ela <i>foca</i> em ti — Inspiração Bardica vira teu próximo teste. <b>+1d6 no próximo teste.</b>' }
     ],

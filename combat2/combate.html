@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-28T03:13:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-28T21:34:03Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -21643,11 +21643,26 @@ function _vinvCombatAdaptBagItem(bagItem, idx) {
 }
 /** 2026-05-14: lê loadout sincronizado pela cidade via localStorage.
  *  Permite tab 'equip' em combate COM inCombat:true → cost badges D&D 5e
- *  aparecem (Grátis/1 Ação/Impossível por slot). Read-only — sem swap. */
+ *  aparecem (Grátis/1 Ação/Impossível por slot). Read-only — sem swap.
+ *  Sessão #55 (2026-05-28): keys per-char (anti-leak entre chars). */
+function _combatCharIdSafe(){
+    try {
+        var qs = new URLSearchParams(location.search);
+        return qs.get('char') || qs.get('char_id') || 'default';
+    } catch(_e){ return 'default'; }
+}
+function _combatLocalStorageWithFallback(baseKey){
+    try {
+        var keyed = baseKey + '_' + _combatCharIdSafe();
+        var rawKeyed = localStorage.getItem(keyed);
+        if (rawKeyed) return rawKeyed;
+        return localStorage.getItem(baseKey);  // fallback legacy
+    } catch(_e){ return null; }
+}
 function _vinvCombatReadLoadout() {
     var loadout = {};
     try {
-        var raw = localStorage.getItem('valdoria_shared_equipped_v1');
+        var raw = _combatLocalStorageWithFallback('valdoria_shared_equipped_v1');
         if (!raw) return loadout;
         var equipped = JSON.parse(raw);
         var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
@@ -21671,7 +21686,8 @@ function _vinvCombatReadLoadout() {
 }
 function _vinvCombatReadStats() {
     try {
-        var raw = localStorage.getItem('valdoria_shared_stats_v1');
+        // Sessão #55: per-char key com fallback legacy.
+        var raw = _combatLocalStorageWithFallback('valdoria_shared_stats_v1');
         if (!raw) return {};
         var s = JSON.parse(raw);
         return {

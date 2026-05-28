@@ -504,7 +504,7 @@ CARTOGRAFIA AAA — 5 PHASES (doc canonical: docs/sistemas/cidade-cartografia-aa
 
   Cinematic Walk + Corvus Greeting (Phase 6.6.x AAA — 2026-05-05)
     _playCityWalkAnimation(opts, onComplete) (~36895)
-      Anim 4500ms cidade Eldoria ao crepúsculo: torres distantes,
+      Anim 4500ms cidade Valdoria ao crepúsculo: torres distantes,
       casas com janelas iluminadas, lanternas pulsantes, lua crescente,
       smoke chaminés, vagalumes drift, silhueta encapuzada caminhando.
       Reusa #travel-overlay/#travel-canvas + skip btn.
@@ -7793,7 +7793,11 @@ body.perf-lite .vc-action-btn { transition: none; }
   </defs></svg>
   <div id="app">
     <div id="city-top-bar"></div>
-    <div id="city-group-panel"></div>
+    <!-- Sessão #55 (2026-05-28): #city-group-panel inicia invisible pra evitar
+         flash do mock "Aventureiro Mago Elfo Nv 5" em REMOTE mode. Fade-in
+         disparado pelo renderCityGroupPanel após state real do API chegar.
+         LOCAL mode (sem token na URL) força visible imediato via JS no boot. -->
+    <div id="city-group-panel" style="opacity:0;visibility:hidden;transition:opacity 0.25s ease-out;"></div>
     <button id="city-exit-btn"></button>
     <div id="content"></div>
     <div id="city-hotbar-bottom"></div>
@@ -8248,6 +8252,12 @@ body.perf-lite .vc-action-btn { transition: none; }
   window.CITY_MOCK_PLAYER = Object.assign({}, defaults, override);
   console.log('[CITY] mock player (initial):', window.CITY_MOCK_PLAYER);
 
+  // Sessão #55 (2026-05-28): flag pra controlar fade-in do #city-group-panel.
+  // false = painel fica invisible (evita flash do placeholder Aventureiro/mago/elfo).
+  // Setada true em LOCAL mode logo abaixo (sem token na URL) e em REMOTE mode
+  // após `picked` real ser aplicado ao CITY_MOCK_PLAYER.
+  window._cityRealPlayerReady = false;
+
   // === SERVER-SIDE LOGGING via sendBeacon (USER REQUEST 2026-05-10) ===========
   // Bug recorrente: player ve "Aventureiro Mago Elfo Nv 5" em PROD em vez de seu
   // personagem real. Sem logs, impossivel diagnosticar QUAL passo falhou.
@@ -8675,6 +8685,10 @@ body.perf-lite .vc-action-btn { transition: none; }
           }
         }
       }
+      // Sessão #55 (2026-05-28): state real aplicado — libera fade-in do
+      // #city-group-panel. refreshHud() abaixo dispara renderCityGroupPanel
+      // que agora respeita _cityRealPlayerReady e revela o painel.
+      window._cityRealPlayerReady = true;
       // Re-render se hub ja foi montado
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
@@ -8745,6 +8759,8 @@ body.perf-lite .vc-action-btn { transition: none; }
         }
         console.log('[CITY] fallback char loaded:', p.name);
         _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level, cls: p.cls, race: p.race});
+        // Sessão #55 (2026-05-28): fallback aplicou char real — libera fade-in.
+        window._cityRealPlayerReady = true;
         // FIX v3: forcar re-render apos fallback (antes o hub ficava com mock)
         if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_re){} }
         if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
@@ -8759,6 +8775,12 @@ body.perf-lite .vc-action-btn { transition: none; }
         }
       });
     });
+  } else {
+    // Sessão #55 (2026-05-28): LOCAL mode (file:// ou DEV sem token) usa o mock
+    // defaults+override imediatamente. Marca flag pra _city-group-panel fade-in
+    // disparar no primeiro renderCityGroupPanel (DOMContentLoaded). Em REMOTE
+    // mode a flag é setada apenas após /api/auth/characters aplicar `picked`.
+    window._cityRealPlayerReady = true;
   }
 
   // canonical: market_npcs_data.py REPUTATION_TIERS — reputação por mercador.
@@ -9973,7 +9995,7 @@ function _renderDiscoveryStage(){
 
   // NPC primário = speaker da primeira stage (registro inline)
   // Sessão #26 (2026-05-22) P0 #71: prefere PNG portraitImg quando disponível
-  var primarySpeaker = stages[0].speaker || 'Eldoria';
+  var primarySpeaker = stages[0].speaker || 'Valdoria';
   var primaryNpcKey = 'discovery_' + quest.id + '_' + primarySpeaker.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   if (!RECURRING_NPCS[primaryNpcKey]) {
     var primaryPng = _discoverySpeakerPortrait(primarySpeaker);
@@ -10268,11 +10290,10 @@ function buildMockHubScreen(player){
   }
 
   return {
-    suggested_action: (readyCount > 0
-      ? { text: '✦ Há missões prontas pra entregar! Visite a Praça pra concluí-las.', cb: 'action_quests' }
-      : (activeCount > 0
-        ? { text: 'Tens ' + activeCount + ' missão' + (activeCount > 1 ? 'ões' : '') + ' ativa' + (activeCount > 1 ? 's' : '') + '. Verifica o Diário.', cb: 'action_quests' }
-        : { text: 'Visite a Guilda dos Aventureiros pra aceitar novas missões.', cb: 'guild' })),
+    // Sessão #55 (2026-05-28): faixa "Há missões prontas pra entregar"
+    // removida — user pediu pra economizar espaço em letra grande (estourava
+    // o container). Sub-tela "Missões" e diário continuam com listagem completa.
+    suggested_action: null,
     buttons: rows,
     notifications: [],
     // Allies vazio: renderHubScreen pula a section "Grupo" quando lista é vazia.
@@ -11150,7 +11171,7 @@ var TUTORIAL_STORAGE_KEY = 'valdoria_first_city_tutorial_seen_' + (window._charI
 var TUTORIAL_STEPS = [
   {
     selector: null,  // welcome screen (no spotlight)
-    title: '🏰 Bem-vindo a Eldoria',
+    title: '🏰 Bem-vindo a Valdoria',
     description: 'Esta é a sua cidade base. Aqui você descansa, prepara aventuras, e vive entre aventuras. '
                 + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
   },
@@ -11262,7 +11283,7 @@ function _maybeShowFirstTimeTutorial(){
   } catch(e){ /* localStorage indisponível — segue mesmo assim */ }
   /* 2026-05-21 BUG FIX: se overlay JÁ existe (tutorial em progresso), NÃO
      reinicia. Antes: tab-switch (step 6 Mercado) chamava renderCurrentScreen
-     que re-invocava esta função e voltava pro step 0 "Bem-vindo a Eldoria". */
+     que re-invocava esta função e voltava pro step 0 "Bem-vindo a Valdoria". */
   if (document.getElementById('first-tut-overlay')) return;
   /* Defer if popup already open (eg encounter, audio, etc) */
   var anyPopup = document.querySelector('.city-popup-overlay.active, #city-subscreen-popup.active');
@@ -13142,7 +13163,7 @@ function _showLeaguePopup(p){
     + '"Por feitos lendários, glória e ouro, ergue-se o nome do aventureiro entre as estrelas."'
     + '</div>'
     + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-top:4px; letter-spacing:1px;">'
-    + '— Crônica de Eldoria, Cap. III'
+    + '— Crônica de Valdoria, Cap. III'
     + '</div>'
     + '</div>';
 
@@ -15384,7 +15405,7 @@ var INN_CLASS_DREAMS = {
 var INN_GENERIC_DREAMS = [
   'Você corre por campos de trigo dourados sob um sol que nunca se põe...',
   'Uma figura encapuzada sussurra segredos em um idioma que seus ossos entendem...',
-  'Você voa sobre Eldoria. As luzes da cidade piscam como estrelas caídas...',
+  'Você voa sobre Valdoria. As luzes da cidade piscam como estrelas caídas...',
   'Um banquete farto surge em um castelo feito de nuvens. A música nunca para...',
   'Você segura um artefato que pulsa no ritmo do mundo. Tudo faz sentido aqui...',
   'Lembrou-se de um rosto. O nome escapa entre as sombras, mas o calor permanece...'
@@ -16785,12 +16806,12 @@ var MARKET_TRANSIENT_POOL = [
         "fullDesc": "Pergaminho de Magia (3º Nível). Lança Bola de Fogo: 8d6 dano de fogo em esfera de 6m. Teste de Resistência DES CD 15 para metade."
       }
     ],
-    "greeting": "Os astros me guiaram até Eldoria. E pelo brilho da sua aura, creio que guiaram você até mim. Vejamos o que tenho para oferecer.",
+    "greeting": "Os astros me guiaram até Valdoria. E pelo brilho da sua aura, creio que guiaram você até mim. Vejamos o que tenho para oferecer.",
     "chat": [
       "Os astros se alinham de um jeito curioso esta noite. Já vi esse padrão antes — sempre precede grandes mudanças.",
       "Passei trinta anos estudando as constelações sobre o Drakenspire. Cada estrela conta uma história, se você souber ouvir.",
       "Minha magia vem da observação, não dos livros. Os acadêmicos me chamam de charlatão — até precisarem de uma previsão.",
-      "Cuidado com as encruzilhadas ao sul de Eldoria. As linhas de energia lá são instáveis. Já vi feitiços ricochetearem."
+      "Cuidado com as encruzilhadas ao sul de Valdoria. As linhas de energia lá são instáveis. Já vi feitiços ricochetearem."
     ]
   },
   {
@@ -16809,7 +16830,7 @@ var MARKET_TRANSIENT_POOL = [
     ],
     "greeting": "Vejo fortuna... e perigo no seu caminho. Os dois andam de mãos dadas, sempre. Mas posso ajudar a inclinar a balança.",
     "chat": [
-      "As cartas me mostraram algo estranho hoje — uma sombra sobre Eldoria que cresce a cada lua nova.",
+      "As cartas me mostraram algo estranho hoje — uma sombra sobre Valdoria que cresce a cada lua nova.",
       "Não confunda vidência com adivinhação. Eu não invento o futuro — apenas leio os sinais que já estão lá.",
       "Minha avó lia as estrelas, minha mãe lia as folhas de chá. Eu prefiro cristais. Cada geração encontra seu método.",
       "Já previ três terremotos e duas invasões. Ninguém acreditou nas duas primeiras vezes. Na terceira, já tinham aprendido."
@@ -16873,8 +16894,8 @@ var MARKET_TRANSIENT_POOL = [
     ],
     "greeting": "Tenho mercadorias de terras distantes! De Thal'varen trouxe fumaça engarrafada, e das planícies do sul, pó que cega. Tudo útil, tudo testado.",
     "chat": [
-      "A estrada entre Eldoria e Thal'varen está cada vez mais perigosa. Bandidos nos desfiladeiros, lobos nas planícies. Bons tempos para quem vende bombas de fumaça.",
-      "Já visitei dezessete cidades este ano. Eldoria ainda é minha parada favorita — o povo é honesto e a cerveja é barata.",
+      "A estrada entre Valdoria e Thal'varen está cada vez mais perigosa. Bandidos nos desfiladeiros, lobos nas planícies. Bons tempos para quem vende bombas de fumaça.",
+      "Já visitei dezessete cidades este ano. Valdoria ainda é minha parada favorita — o povo é honesto e a cerveja é barata.",
       "Minha carroça tem fundo falso. Não para contrabando — para guardar meu almoço longe dos ratos."
     ]
   },
@@ -16999,7 +17020,7 @@ var MARKET_TRANSIENT_POOL = [
     ],
     "greeting": "Colhido sob lua cheia, quando a seiva sobe e a energia da terra pulsa mais forte. Não é superstição — é ciência druídica. Quer provar a diferença?",
     "chat": [
-      "A floresta ao redor de Eldoria está mudando. As árvores sussurram coisas que não sussurravam há um ano. Algo as perturba.",
+      "A floresta ao redor de Valdoria está mudando. As árvores sussurram coisas que não sussurravam há um ano. Algo as perturba.",
       "Druidas não dominam a natureza — dialogam com ela. E ultimamente, a natureza tem muito a dizer.",
       "Meu círculo druídico se reúne a cada lua nova na clareira ao sul. Não é segredo, mas poucos têm coragem de ir."
     ]
@@ -17149,7 +17170,7 @@ var MARKET_TRANSIENT_POOL = [
     "chat": [
       "Em Khardum, aprendemos a forjar antes de aprender a andar. Literalmente — meu pai me pôs na frente de uma bigorna aos dois anos.",
       "O ferro das montanhas tem uma qualidade que o ferro das planícies não tem. É mais teimoso. Como os anões que o forjam.",
-      "Saudades de casa, mas Eldoria tem algo que Khardum não tem — árvores. E sol. E cervejas que não congelam na caneca."
+      "Saudades de casa, mas Valdoria tem algo que Khardum não tem — árvores. E sol. E cervejas que não congelam na caneca."
     ]
   },
   {
@@ -17319,7 +17340,7 @@ var MARKET_TRANSIENT_POOL = [
       "Não pergunte de onde vêm minhas mercadorias. Pergunte se funcionam. A resposta é sempre sim.",
       "Já fui 'mercador legítimo' por um mês inteiro. Quase morri de tédio.",
       "O segredo do comércio discreto? Nunca carregar mais do que cabe nos bolsos. E ter muitos bolsos.",
-      "Os guardas de Eldoria são eficientes, mas previsíveis. Patrulham a cada dez minutos, sempre pela mesma rota. Conveniente."
+      "Os guardas de Valdoria são eficientes, mas previsíveis. Patrulham a cada dez minutos, sempre pela mesma rota. Conveniente."
     ]
   },
   {
@@ -17338,7 +17359,7 @@ var MARKET_TRANSIENT_POOL = [
     ],
     "greeting": "Cuidado onde pisa — e não encoste naquela alavanca! A última vez que alguém encostou, bem... é por isso que falta um pedaço do meu chapéu.",
     "chat": [
-      "Sabe o que falta em Eldoria? Um elevador mecânico para a muralha. Já tenho o projeto — só falta alguém corajoso para testar.",
+      "Sabe o que falta em Valdoria? Um elevador mecânico para a muralha. Já tenho o projeto — só falta alguém corajoso para testar.",
       "Minha última invenção quase funcionou perfeitamente. O 'quase' custou metade da minha sobrancelha esquerda.",
       "Engrenagens são como pessoas: funcionam melhor quando bem lubrificadas. No caso das pessoas, cerveja serve."
     ]
@@ -17401,7 +17422,7 @@ var MARKET_TRANSIENT_POOL = [
     ],
     "greeting": "Toda boa aventura merece uma trilha sonora! E toda boa trilha merece um instrumento digno. Olhe só o que eu trouxe.",
     "chat": [
-      "Já compus quarenta e três baladas sobre aventureiros de Eldoria. A maioria deles morreu de formas terríveis, mas as músicas são lindas.",
+      "Já compus quarenta e três baladas sobre aventureiros de Valdoria. A maioria deles morreu de formas terríveis, mas as músicas são lindas.",
       "O melhor público que já tive foi um grupo de goblins. Não entenderam a letra, mas dançaram a noite toda.",
       "Minha canção favorita é 'O Cavaleiro Sem Cavalo'. É sobre um paladino que vendia o cavalo para comprar uma espada melhor. Baseada em fatos reais."
     ]
@@ -17465,7 +17486,7 @@ var MARKET_TRANSIENT_POOL = [
     "greeting": "Quinze anos catalogando grimórios, e cada página ainda me surpreende. Este aqui, por exemplo — a tinta muda de cor quando a lua está cheia.",
     "chat": [
       "Tenho livros que ninguém mais tem. Não porque são raros — porque ninguém mais quer. 'A Culinária Orc em 300 Receitas', por exemplo.",
-      "O conhecimento é a arma mais perigosa que existe. E eu sou o maior traficante de armas de Eldoria. Mas não conte a ninguém.",
+      "O conhecimento é a arma mais perigosa que existe. E eu sou o maior traficante de armas de Valdoria. Mas não conte a ninguém.",
       "Já li tanto que às vezes confundo memórias reais com histórias de livros. Ainda não sei se aquele dragão era real ou fictício."
     ]
   },
@@ -18814,7 +18835,7 @@ var SHADOW_EVENT_POOL = [
       { type: 'narration', text: 'Você se espreme atrás de barris empilhados. <b>Duas figuras encapuzadas</b> conversam baixo atrás de uma cortina rasgada — não te viram. As vozes carregam um peso ritualístico, palavras escolhidas com cuidado.' },
       { type: 'speech', speaker: 'shadow_whisperer', text: '— A forja abandonada guarda mais do que ferrugem. <i>(uma pausa carregada)</i> Os irmãos antigos deixaram <b>algo</b> lá quando partiram. Algo que pulsa no escuro.' },
       { type: 'speech', speaker: 'shadow_whisperer', text: '— Quem mexe sem saber, paga. <i>(o tom é grave)</i> Mas quem sabe — quem REALMENTE sabe — sai de lá com o que vale dez anos de ouro de mercador.' },
-      { type: 'narration', text: 'Você prende a respiração. Eles podem te pegar a qualquer momento. Mas o que ouviu vale ouro de outra forma — informação é poder no submundo de Eldoria.' }
+      { type: 'narration', text: 'Você prende a respiração. Eles podem te pegar a qualquer momento. Mas o que ouviu vale ouro de outra forma — informação é poder no submundo de Valdoria.' }
     ],
     choices: [
       { id: 'observe_carefully', label: '👁️ Memorizar (Percepção · SAB)', stat: 'wisdom', dc: 13,
@@ -19022,7 +19043,7 @@ var TRAVELERS_KNOWN = [
 function _buildTravelersMockData(player){
   return {
     type: 'hub',
-    flavor: '<i>Diário pessoal de couro gasto. Você anota nele os viajantes que encontra em Eldoria — onde estavam, o que faziam, no que pareciam viver. Hoje o livro tem ' + TRAVELERS_KNOWN.length + ' entradas ativas.</i>',
+    flavor: '<i>Diário pessoal de couro gasto. Você anota nele os viajantes que encontra em Valdoria — onde estavam, o que faziam, no que pareciam viver. Hoje o livro tem ' + TRAVELERS_KNOWN.length + ' entradas ativas.</i>',
     rep_label: '📓 ' + TRAVELERS_KNOWN.length + ' viajantes circulando hoje · Pool renova ao amanhecer',
     services: TRAVELERS_KNOWN.map(function(t){
       return {
@@ -19220,7 +19241,7 @@ var CODEX_DATA = {
     { name: 'Dragonete',        icon: _heralIco('ic-boss'),       category: 'bestiary', meta: 'Raro · CR 7',    unlocked: false, rarity: 'rare' },        // reuso ic-boss (criatura especial)
     { name: 'Lich',             icon: _heralIco('ic-esqueleto'),  category: 'bestiary', meta: 'Mítico · CR 21', unlocked: false, rarity: 'legendary' },   // reuso ic-esqueleto (caveira)
     // Locais (8/24)
-    { name: 'Eldoria',                  icon: _heralIco('ic-portoes'),       category: 'locations', meta: 'Cidade Capital',    unlocked: true,  rarity: 'common' },
+    { name: 'Valdoria',                  icon: _heralIco('ic-portoes'),       category: 'locations', meta: 'Cidade Capital',    unlocked: true,  rarity: 'common' },
     { name: 'Floresta do Sussurro',     icon: _heralIco('ic-druida'),        category: 'locations', meta: 'Bioma · Mid-tier',  unlocked: true,  rarity: 'uncommon' }, // ic-druida (folha+staff)
     { name: 'Caverna do Cristal',       icon: _heralIco('ic-ach-colecionador'), category: 'locations', meta: 'Masmorra · Profunda',unlocked: true,  rarity: 'rare' },     // gemas
     { name: 'Pântano dos Mortos',       icon: _heralIco('ic-bruxo'),         category: 'locations', meta: 'Bioma · High-tier', unlocked: false, rarity: 'rare' },          // sombrio
@@ -19272,9 +19293,22 @@ function _buildCodexMockData(player){
 // ============================================================================
 // Reusa GUILD_QUESTS_AVAILABLE pra "Disponíveis". Mock pra ativas/concluídas.
 // QUESTS_ACTIVE / QUESTS_HISTORY — brasões heráldicos canonical
+// Sessão #55 (2026-05-28) — Demand B Lyana revision:
+//   acceptedAt = timestamp epoch ms (quando a missão foi aceita)
+//   whatHappened = resumo curto do gancho narrativo (1-2 linhas, no máximo)
+//   whatToDo = próxima ação concreta exigida do jogador (1 linha)
+// _acceptQuest preenche acceptedAt = Date.now() ao mover de Disponíveis pra
+// Ativas. Mocks pré-existentes (Wolves, Lyana) usam offsets passados pra
+// simular missões adquiridas dias atrás.
 var QUESTS_ACTIVE = [
-  { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha na Floresta dos Sussurros.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira' },
-  { id: 'qa_lyana',  icon: _heralIco('ic-dialogo'), title: 'Falar com Lyana na Praça', desc: 'Entregar carta da mãe dela.',       progress: '✓ pronta', reward: 20, xp: 40, npc: 'Mãe de Lyana' }
+  { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha na Floresta dos Sussurros.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira',
+    acceptedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,  // há 2 dias
+    whatHappened: 'Tavira (Mestra da Guilda) contratou na Praça. Fazendeiros do norte mal dormem há semanas — lobos cinzentos descem da Floresta dos Sussurros toda noite.',
+    whatToDo: 'Abater mais 1 lobo cinzento na Floresta dos Sussurros (2/3 mortes registradas) e reportar a Tavira.' },
+  { id: 'qa_lyana',  icon: _heralIco('ic-dialogo'), title: 'Falar com Lyana na Praça', desc: 'Entregar carta da mãe dela.',       progress: '✓ pronta', reward: 20, xp: 40, npc: 'Mãe de Lyana',
+    acceptedAt: Date.now() - 3 * 24 * 60 * 60 * 1000,  // há 3 dias
+    whatHappened: 'A mãe de Lyana te abordou nos Portões com um pergaminho selado. Lyana espera notícias da irmã há três luas — a velha senhora não pôde fazer a viagem.',
+    whatToDo: 'Entregar o pergaminho selado em mãos a Lyana, na Praça Central. NÃO abrir nem ler — apenas entregar.' }
 ];
 var QUESTS_HISTORY = [
   { id: 'qh_pacote', icon: _heralIco('ic-mochila'), title: 'Entregar pacote ao Mercador', date: '2026-04-30', reward: 15, xp: 30 },
@@ -19833,7 +19867,7 @@ var BANK_ALDWIN_COLLECT = [
 var BANK_ALDWIN_INSURE = [
   'Aldwin sela o contrato com cera dourada. "Seus bens estão protegidos, {name}."',
   '"Sábia decisão." — Aldwin guarda o pergaminho no cofre. "Aventureiros prudentes dormem tranquilos."',
-  'O banqueiro estampa o selo do banco no contrato. "Protegido por Eldoria."'
+  'O banqueiro estampa o selo do banco no contrato. "Protegido por Valdoria."'
 ];
 var BANK_ALDWIN_PROMPT_DEPOSIT = [
   'Aldwin prepara a pena e aguarda...',
@@ -19882,7 +19916,7 @@ var BANK_TIPS_ACTIVE_LOAN = [
 ];
 var BANK_TUTORIAL_TEXT = (
   '🔒 <b>Dica do Aventureiro:</b><br><br>' +
-  'Você acumulou riquezas consideráveis! Sabia que o <b>Banco de Eldoria</b> oferece cofres seguros?<br><br>' +
+  'Você acumulou riquezas consideráveis! Sabia que o <b>Banco de Valdoria</b> oferece cofres seguros?<br><br>' +
   '<span class="vi vi-coin sm"></span> <b>Depósito de Valdoritas:</b> Sem taxa — guarda integral do valor.<br>' +
   '<span class="vi vi-coin sm"></span> <b>Saque:</b> Taxa de 2% sobre o valor sacado.<br>' +
   '📦 <b>Guarda de Itens:</b> Seus pertences ficam protegidos mesmo se você cair em combate.<br><br>' +
@@ -19981,7 +20015,7 @@ var BANK_PROPERTIES = [
     name: 'Mansão da Praça Nobre',
     cost: 250000,
     desc: 'Residência de nobreza próxima à praça central. Mármore importado, jardins amuralhados, sete quartos.',
-    benefits: '+40 slots no cofre · +100 Valdoritas/dia · título "Senhor de Eldoria"',
+    benefits: '+40 slots no cofre · +100 Valdoritas/dia · título "Senhor de Valdoria"',
     flavor: 'Aldwin levanta os olhos do livro lentamente. <i>"Você... pode pagar isso?"</i> — pausa — <i>"A Mansão Velthorne aguarda há séculos pelo aventureiro certo."</i>'
   }
 ];
@@ -20591,7 +20625,7 @@ var SQUARE_NPCS = [
     ],
     talkOptions: [
       { id: 'donate', q: 'Doar 1 Valdorita',  a: '"Que os deuses lhe abençoem, viajante. Compra um pão pra mim hoje."', cost: 1 },
-      { id: 'talk',   q: 'Conversar',         a: '"Setenta anos em Eldoria. Vi o cerco dos goblins, o incêndio do mercado, e três prefeitos. Nada me espanta mais."' }
+      { id: 'talk',   q: 'Conversar',         a: '"Setenta anos em Valdoria. Vi o cerco dos goblins, o incêndio do mercado, e três prefeitos. Nada me espanta mais."' }
     ]
   },
   {
@@ -20637,7 +20671,7 @@ var SQUARE_NPCS = [
 // Avisos do quadro — brasões heráldicos canonical
 var SQUARE_BULLETIN = [
   { icon: _heralIco('ic-lobo'),     title: 'Caçador de Lobos',       desc: 'Caçar 3 lobos cinzentos no caminho norte. Recompensa: 50 Valdoritas + 80 XP.',         diff: 'nv 1-3' },
-  { icon: _heralIco('ic-grupo'),    title: 'Escolta de Caravana',    desc: 'Acompanhar caravana de Eldoria a Brakenhall. Recompensa: 120 Valdoritas + 100 XP.',    diff: 'nv 3-5' },
+  { icon: _heralIco('ic-grupo'),    title: 'Escolta de Caravana',    desc: 'Acompanhar caravana de Valdoria a Brakenhall. Recompensa: 120 Valdoritas + 100 XP.',    diff: 'nv 3-5' },
   { icon: _heralIco('ic-druida'),   title: 'Coletor de Ervas',       desc: 'Coletar 5 raízes-de-prata na Floresta do Sussurro. Recompensa: 30 Valdoritas + 40 XP.', diff: 'nv 1-3' },
   { icon: _heralIco('ic-orc'),      title: 'Caça ao Líder Bandido',  desc: 'Eliminar Korval Mata-de-Pedra, líder bandido. Recompensa: 250 Valdoritas + 200 XP.',  diff: 'nv 6+' }
 ];
@@ -21236,7 +21270,7 @@ var CANON_BULLETIN_ANNOUNCEMENTS = [
   "Porte de armas apenas para aventureiros registrados.",
   "Feira de artesaos na proxima lua cheia.",
   "Toque de recolher as 22h. Aventureiros isentos.",
-  "Novas taxas de juros no Banco de Eldoria.",
+  "Novas taxas de juros no Banco de Valdoria.",
   "Registro de familiares mágicos na Guilda dos Magos.",
   "Festival da Colheita se aproxima! Voluntários procurados.",
   "Proibida venda de poções não licenciadas na praça.",
@@ -23715,7 +23749,7 @@ var CANON_UNIQUE_NPCS = {
       "intro": [
         "\"A tempestade de areia levou tudo. A caravana, a água... a fé.\"",
         "\"Andei em círculos por dias. As dunas sussurravam meu nome.\"",
-        "\"Eldoria é um milagre. Ou talvez um teste final.\""
+        "\"Valdoria é um milagre. Ou talvez um teste final.\""
       ],
       "resume": "\"A sede ainda não passou... mas acho que é sede da alma, não do corpo.\"",
       "finish": "\"Vou buscar o templo. Preciso agradecer... ou questionar. Fique com esta bênção.\""
@@ -26090,7 +26124,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   old_lady: {
     npc_key: 'velha_praca',
-    npc_data: { name: 'Anciã de Eldoria', desc: 'Mulher idosa de cabelos brancos', portrait: 'ic-praca' },
+    npc_data: { name: 'Anciã de Valdoria', desc: 'Mulher idosa de cabelos brancos', portrait: 'ic-praca' },
     script: [
       { type: 'narration', text: 'Uma senhora idosa de cabelos brancos te aborda com mãos trêmulas mas olhar firme.' },
       { type: 'speech', speaker: 'velha_praca', text: '— Obrigada, aventureiro. <i>(ela aperta sua mão)</i> Pessoas como você fazem essa cidade ainda valer a pena.' }
@@ -26231,7 +26265,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   rain_shelter: {
     npc_key: 'morador_eldoria',
-    npc_data: { name: 'Morador de Eldoria', desc: 'Vizinho oferecendo abrigo', portrait: 'ic-praca' },
+    npc_data: { name: 'Morador de Valdoria', desc: 'Vizinho oferecendo abrigo', portrait: 'ic-praca' },
     script: [
       { type: 'narration', text: 'Começa uma chuva fina. Moradores oferecem abrigo sob seus toldos.' },
       { type: 'speech', speaker: 'morador_eldoria', text: '— Vem, aventureiro. <i>(o homem ergue o toldo)</i> Não custa nada e seca rápido.' }
@@ -27187,7 +27221,7 @@ var CANON_INVESTMENT_TIERS = [
     "id": "expedicao_comercial",
     "name": "Expedição Comercial",
     "emoji": "⛵",
-    "desc": "Invista em uma expedição mercantil além das fronteiras de Eldoria.",
+    "desc": "Invista em uma expedição mercantil além das fronteiras de Valdoria.",
     "min_amount": 500,
     "lock_turns": 120,
     "rate": 0.3,
@@ -28322,7 +28356,7 @@ var CANON_FESTIVAL_FULL = {
     "forge": {
       "name": "Semana da Forja",
       "icon": "🔨",
-      "hub_text": "As bigornas cantam e o ferro brilha! Eldoria celebra a arte dos ferreiros.",
+      "hub_text": "As bigornas cantam e o ferro brilha! Valdoria celebra a arte dos ferreiros.",
       "intro": "O Distrito dos Ferreiros foi transformado em um espetaculo de fogo e metal. Forjadores de toda a regiao exibem suas melhores criações, e o som ritmico dos martelos ecoa como uma canção ancestral.",
       "real_start": [
         3,
@@ -28404,7 +28438,7 @@ var CANON_FESTIVAL_FULL = {
     "harvest": {
       "name": "Festival da Colheita",
       "icon": "🌾",
-      "hub_text": "Fartura e alegria! Eldoria celebra a abundancia da estação.",
+      "hub_text": "Fartura e alegria! Valdoria celebra a abundancia da estação.",
       "intro": "A praça central transborda com barracas de frutas, pães e carnes assadas. Músicos tocam animadamente enquanto crianças correm entre as mesas. O aroma de sidra quente e especiarias impregna o ar.",
       "real_start": [
         9,
@@ -28445,7 +28479,7 @@ var CANON_FESTIVAL_FULL = {
     "lanterns": {
       "name": "Festival das Lanternas",
       "icon": "🏮",
-      "hub_text": "Lanternas coloridas iluminam as ruas! Eldoria desafia o inverno com luz.",
+      "hub_text": "Lanternas coloridas iluminam as ruas! Valdoria desafia o inverno com luz.",
       "intro": "Milhares de lanternas de papel penduram das vigas, pontes e postes. A neve cai suavemente sobre ruas iluminadas por cores quentes. Contadores de historias reúnem multidoes ao redor de fogueiras.",
       "real_start": [
         12,
@@ -29333,7 +29367,7 @@ var CANON_MARKET_GREETS = {
       "Velithra sorri com elegância. \"Ouvi sobre sua façanha. Aventureiros merecem jóias à altura.\""
     ],
     "tentmaker": [
-      "Bjorn ergue a caneca imaginária. \"O aventureiro de Eldoria! Deixa eu te dar um desconto, campeão!\"",
+      "Bjorn ergue a caneca imaginária. \"O aventureiro de Valdoria! Deixa eu te dar um desconto, campeão!\"",
       "O seleiro te recebe de braços abertos. \"A lenda em pessoa! Vou contar aos netos que te vendi equipamento.\""
     ]
   },
@@ -29346,7 +29380,7 @@ var CANON_MARKET_GREETS = {
     },
     "quest_complete:quest_thorne_forge": {
       "alchemist": "\"Então Thorne finalmente tem uma forja de verdade. Espero que agora pare de reclamar dos preços do carvão.\"",
-      "cartographer": "\"A nova forja de Thorne é impressionante. Eldoria precisa de bons artesãos.\""
+      "cartographer": "\"A nova forja de Thorne é impressionante. Valdoria precisa de bons artesãos.\""
     },
     "level_up:5": {
       "blacksmith": "Thorne te examina. \"Você cresceu, aventureiro. Posso ver nos seus olhos — já não é mais um novato.\"",
@@ -29512,7 +29546,7 @@ var CANON_MARKET_GREETS = {
       "blacksmith": "Thorne bate o martelo com orgulho. \"Esta forja existe por sua causa. Melhores preços para você, sempre.\""
     },
     "helped_thorne_road": {
-      "blacksmith": "Thorne acena ao te ver. \"Aquele dia na estrada... Nunca esqueci. Bom te ver em Eldoria.\""
+      "blacksmith": "Thorne acena ao te ver. \"Aquele dia na estrada... Nunca esqueci. Bom te ver em Valdoria.\""
     },
     "temple_debt_paid": {
       "alchemist": "Mirena sorri com alívio. \"Alma limpa, corpo curado. É bom ter clientes honestos.\""
@@ -29928,7 +29962,7 @@ var CANON_INN_REST_FRAMES = {
     "<i>Espuma perfumada, vapor aromático.\nCada cicatriz parece mais leve na água.\nO mundo lá fora deixa de existir por um instante.</i>"
   ],
   "wealthy_night_narrations": [
-    "<i>A noite sobre Eldoria é cristalina.\nEstrelas pulsam com energia arcana.\nHá algo mágico no ar esta noite.</i>",
+    "<i>A noite sobre Valdoria é cristalina.\nEstrelas pulsam com energia arcana.\nHá algo mágico no ar esta noite.</i>",
     "<i>Da varanda da suíte, o céu é infinito.\nConstelações se desenham com nitidez rara.\nA brisa noturna carrega sussurros antigos.</i>",
     "<i>Lençóis de seda, travesseiros de pluma.\nA lareira crepita em um ritmo hipnótico.\nO luxo imperial abraça seu descanso.</i>"
   ],
@@ -29939,7 +29973,7 @@ var CANON_INN_REST_FRAMES = {
   ],
   "wealthy_dawn_narrations": [
     "<i>A luz do amanhecer banha o quarto em ouro.\nCafé quente, frutas frescas e pão de mel\nesperam sobre a mesa de carvalho.</i>",
-    "<i>O sol nasce como uma coroa sobre Eldoria.\nUma bandeja de prata com desjejum real\naparece silenciosamente à sua porta.</i>",
+    "<i>O sol nasce como uma coroa sobre Valdoria.\nUma bandeja de prata com desjejum real\naparece silenciosamente à sua porta.</i>",
     "<i>Cortinas de veludo se abrem sozinhas.\nA cidade desperta lá embaixo, dourada.\nO aroma de canela e mel invade o quarto.</i>"
   ],
   "poor_settle_template": "<b>{name}</b> se deita entre os fardos...",
@@ -31231,11 +31265,11 @@ function _bankShowPropertyMenu(p){
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = '🏰 Imóveis em Eldoria';
+  if (titleEl) titleEl.textContent = '🏰 Imóveis em Valdoria';
   var owned = (window._bankProperties || []).map(function(prop){ return prop.id; });
   var html = '<div class="city-subscreen">'
     + '<p class="subscreen-flavor">'
-    + 'Aldwin pega um livro de couro grosso. <i>"Imóveis em Eldoria. Cofre escritura sua propriedade '
+    + 'Aldwin pega um livro de couro grosso. <i>"Imóveis em Valdoria. Cofre escritura sua propriedade '
     + 'com selo da Coroa — herança e direito sucessório garantidos."</i>'
     + '</p>'
     + '<div class="bnk-prop-list">';
@@ -31294,7 +31328,7 @@ function _bankConfirmPropertyPurchase(p, prop){
         icon: prop.icon, npc: 'Aldwin — Banqueiro',
         narrative: '<i>Aldwin estampa o selo da Coroa no documento. A pena risca o pergaminho com solenidade.</i><br><br>'
                  + '<b>' + prop.name + '</b> agora pertence a você.<br>'
-                 + '<i>"Bem-vindo à classe proprietária de Eldoria. Use com sabedoria."</i>',
+                 + '<i>"Bem-vindo à classe proprietária de Valdoria. Use com sabedoria."</i>',
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
         ],
@@ -35887,7 +35921,7 @@ var WNPC_TRAIL_COMPANION_DEPART_LINES = [
 var HELP_TEXTS_CITY = {
     'temple': '\\n🛐 <b>TEMPLO - GUIA RÁPIDO</b>\\n\\nO Templo oferece serviços divinos:\\n\\n<b>🩹 Curar Ferimentos (30 Valdoritas)</b>\\n• Restaura HP usando magia sagrada\\n• Usa dado 2d8+2 (média 11 HP, máx 18 HP)\\n• Mais eficiente que poções para grandes danos\\n\\n<b>🧪 Purificar Veneno (40 Valdoritas)</b>\\n• Remove venenos e doenças (Lesser Restoration)\\n• Essencial após combates com criaturas venenosas\\n\\n<b>✨ Benção da Clareza (25 Valdoritas)</b>\\n• Restaura +5 MP\\n• Útil para usuários de magia\\n\\n💡 <i>Dica</i>: NPCs do templo mudam diariamente e cada um oferece diálogos únicos. Converse com eles!\\n',
 
-    'tavern': '\\n🍺 <b>TAVERNA - GUIA RÁPIDO</b>\\n\\nO centro social de Eldoria:\\n\\n<b>🗣️ Boatos (5 Valdoritas)</b>\\n• Grom compartilha dicas sobre inimigos\\n• Cada rumor dá +2 Dano contra um tipo de criatura\\n• O bônus dura até o próximo descanso longo\\n\\n<b>🍺 Bebidas</b>\\n• Restauram HP e/ou MP levemente\\n• Variantes Envelhecida/Safra Especial custam mais, mas têm efeito maior\\n\\n<b>⚔️ Mercenários</b>\\n• Contrate guerreiros como companheiros permanentes\\n• Eles lutam ao seu lado em combate\\n\\n<b>⚜️ Exploradores</b>\\n• Aventureiros disponíveis para contratação\\n• Cada um tem classe e habilidades próprias\\n\\n<b>🎲 Mesa de Jogos</b>\\n• Aposte 10 ou 50 Valdoritas nos dados (D20 vs oponente)\\n• Vitória = dobro do valor apostado!\\n• Derrota pode provocar uma briga de bar...\\n\\n💡 <i>Dica</i>: Mercadores do Mercado que estão de folga podem ser encontrados bebendo aqui!\\n',
+    'tavern': '\\n🍺 <b>TAVERNA - GUIA RÁPIDO</b>\\n\\nO centro social de Valdoria:\\n\\n<b>🗣️ Boatos (5 Valdoritas)</b>\\n• Grom compartilha dicas sobre inimigos\\n• Cada rumor dá +2 Dano contra um tipo de criatura\\n• O bônus dura até o próximo descanso longo\\n\\n<b>🍺 Bebidas</b>\\n• Restauram HP e/ou MP levemente\\n• Variantes Envelhecida/Safra Especial custam mais, mas têm efeito maior\\n\\n<b>⚔️ Mercenários</b>\\n• Contrate guerreiros como companheiros permanentes\\n• Eles lutam ao seu lado em combate\\n\\n<b>⚜️ Exploradores</b>\\n• Aventureiros disponíveis para contratação\\n• Cada um tem classe e habilidades próprias\\n\\n<b>🎲 Mesa de Jogos</b>\\n• Aposte 10 ou 50 Valdoritas nos dados (D20 vs oponente)\\n• Vitória = dobro do valor apostado!\\n• Derrota pode provocar uma briga de bar...\\n\\n💡 <i>Dica</i>: Mercadores do Mercado que estão de folga podem ser encontrados bebendo aqui!\\n',
 
     'inn': '\\n🏨 <b>ESTALAGEM - GUIA RÁPIDO</b>\\n\\nO local para descansar e recuperar energias (Long Rest):\\n\\n<b>🐴 Estábulo (Grátis)</b>\\n• Restaura HP (com chance de sono interrompido)\\n• +1 MP apenas\\n• Risco de penalidade temporária ou roubo por ratos\\n• Recupera 50% dos Dados de Vida (Hit Dice)\\n\\n<b>🛏️ Quarto Comum (base 3 Valdoritas)</b>\\n• Restaura HP e MP completos\\n• Recupera 50% dos Dados de Vida\\n• Reduz 1 nível de exaustão\\n\\n<b>👑 Suíte Real (base 10 Valdoritas)</b>\\n• Restaura HP, MP e Dados de Vida completos\\n• Concede <b>Inspirado</b> (vantagem no próximo teste)\\n• Reduz 1 nível de exaustão\\n\\n<b>👥 Grupo na Estalagem</b>\\n• Preço sobe +50% por aliado no grupo\\n• Aliados são curados junto com você\\n\\n💡 <i>Dica</i>: Apenas a Suíte garante recuperação total + Inspiração para grandes aventuras!\\n',
 
@@ -35899,7 +35933,7 @@ var HELP_TEXTS_CITY = {
 
     'market': '\\n🏪 <b>MERCADO - GUIA RÁPIDO</b>\\n\\nOnde o comércio acontece:\\n\\n<b>⚔️ Comprar Equipamentos</b>\\n• <b>Ferreiro</b>: Armas e Armaduras pesadas\\n• <b>Alquimista</b>: Poções e Ingredientes\\n• <b>Místico</b>: Itens mágicos e pergaminhos\\n• <b>Viajantes</b>: Itens raros e exóticos (Rotação periódica)\\n\\n<b>⚖️ Vender Itens</b>\\n• Mercadores só compram o que lhes interessa\\n• O Ferreiro compra metais, o Alquimista compra ervas, etc.\\n• Preço de venda é geralmente 50% do valor base (ou menos)\\n\\n<b>🗣️ Negociação e Fofoca</b>\\n• Pergunte aos mercadores sobre seus colegas ausentes\\n• Use perícias de Carisma para tentar descontos (arriscado!)\\n\\n💡 <i>Dica</i>: Itens equipados não aparecem na lista de venda para evitar acidentes.\\n',
 
-    'city_main': '\\n🏘️ <b>CIDADE DE ELDORIA - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>🏕️ Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>🏨 Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>🏪 Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>🍺 Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>🛡️ Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>🏛️ Banco</b>: Guardar Ouro e Itens\\n<b>⛲ Praça</b>: NPCs, Cartógrafo e Social\\n<b>⛪ Templo</b>: Cura, Purificação e Bênçãos\\n<b>🏰 Portões</b>: Guardas e Arredores da Cidade\\n\\n💡 <i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada NPC pode ter informações valiosas!\\n',
+    'city_main': '\\n🏘️ <b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>🏕️ Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>🏨 Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>🏪 Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>🍺 Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>🛡️ Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>🏛️ Banco</b>: Guardar Ouro e Itens\\n<b>⛲ Praça</b>: NPCs, Cartógrafo e Social\\n<b>⛪ Templo</b>: Cura, Purificação e Bênçãos\\n<b>🏰 Portões</b>: Guardas e Arredores da Cidade\\n\\n💡 <i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada NPC pode ter informações valiosas!\\n',
 };
 
 var HELP_TEXTS_SYSTEMS = {
@@ -36855,11 +36889,33 @@ function _invGetFilterCounts(){
 // exploracao.html e combate.html — permite tab 'equip' read-only nesses
 // simuladores sem refactor do state local.
 // ===================================================================
-var SHARED_EQUIPPED_KEY = 'valdoria_shared_equipped_v1';
-var SHARED_STATS_KEY    = 'valdoria_shared_stats_v1';
+// Sessão #55 (2026-05-28): keys agora prefixadas com char_id pra evitar
+// inventory leak entre chars do mesmo user (bug audit Hroddin Mago L1
+// mostrava 51 items do Bardo Ryaiael Lv10). Cada char tem sua própria
+// entrada localStorage; switch de char NÃO contamina mais o inventory.
+// Keys legacy (sem _<cid>) mantidas pra compat com saves antigos.
+var SHARED_EQUIPPED_KEY_BASE = 'valdoria_shared_equipped_v1';
+var SHARED_STATS_KEY_BASE    = 'valdoria_shared_stats_v1';
+function _getCharIdSafe() {
+  try {
+    var cid = window._charId;
+    if (cid && cid !== 'default') return cid;
+    var qs = new URLSearchParams(location.search);
+    return qs.get('char') || qs.get('char_id') || 'default';
+  } catch(_e) { return 'default'; }
+}
+function _sharedKeyForChar(base) {
+  return base + '_' + _getCharIdSafe();
+}
+// Backward-compat exports (pra outros simulators que ainda usam strings literais)
+var SHARED_EQUIPPED_KEY = _sharedKeyForChar(SHARED_EQUIPPED_KEY_BASE);
+var SHARED_STATS_KEY    = _sharedKeyForChar(SHARED_STATS_KEY_BASE);
 function _syncEquippedToLocalStorage() {
   try {
-    localStorage.setItem(SHARED_EQUIPPED_KEY, JSON.stringify(window.MOCK_PLAYER_EQUIPPED || {}));
+    // Re-compute keys cada chamada — caso char_id tenha mudado (Hall switch)
+    var eqKey = _sharedKeyForChar(SHARED_EQUIPPED_KEY_BASE);
+    var stKey = _sharedKeyForChar(SHARED_STATS_KEY_BASE);
+    localStorage.setItem(eqKey, JSON.stringify(window.MOCK_PLAYER_EQUIPPED || {}));
     if (window.CITY_MOCK_PLAYER) {
       var p = window.CITY_MOCK_PLAYER;
       var stats = {
@@ -36868,7 +36924,7 @@ function _syncEquippedToLocalStorage() {
         hp: p.hp, max_hp: p.max_hp,
         mp: p.mp, max_mp: p.max_mp,
       };
-      localStorage.setItem(SHARED_STATS_KEY, JSON.stringify(stats));
+      localStorage.setItem(stKey, JSON.stringify(stats));
     }
   } catch (_) { /* localStorage off / cota cheia */ }
 }
@@ -39391,7 +39447,7 @@ function _itemBonusActive(player, itemName){
 // SETTLEMENT — Tamanho da Cidade afeta disponibilidade de Items Mágicos
 // =============================================================================
 // X-6.5.51CI (2026-05-18). DMG Table 6-13: tamanho da povoação limita
-// raridade dos items mágicos vendidos. Eldoria = "Cidade Pequena" (5k-12k hab).
+// raridade dos items mágicos vendidos. Valdoria = "Cidade Pequena" (5k-12k hab).
 //
 // Cidade Pequena disponibilidade:
 //   • common:    sempre (sem limite)
@@ -39401,7 +39457,7 @@ function _itemBonusActive(player, itemName){
 //   • legendary: indisponível (apenas via missão épica)
 
 var SETTLEMENT_INFO = {
-  name: 'Eldoria',
+  name: 'Valdoria',
   size: 'small_city',       // small_village/large_village/town/small_city/large_city/metropolis
   size_label: 'Cidade Pequena',
   population: 8500,
@@ -39530,7 +39586,7 @@ function _marketAtmosphereLine(){
     day:   [
       '<i>O mercado fervilha — pregões cruzam o ar, moedas batem em balcões, mercadores bradam ofertas.</i>',
       '<i>Movimento intenso. Vendedores ajeitam mostruários, clientes se acotovelam entre as bancadas.</i>',
-      '<i>Sol forte sobre Eldoria. Sob toldos coloridos, os comerciantes negociam em meia dúzia de sotaques.</i>'
+      '<i>Sol forte sobre Valdoria. Sob toldos coloridos, os comerciantes negociam em meia dúzia de sotaques.</i>'
     ],
     dusk:  [
       '<i>O sol desce vermelho. Lampiões se acendem um a um. Mercadores fecham os mais frágeis primeiro.</i>',
@@ -41688,7 +41744,7 @@ var BANK_INVESTMENT_TIERS = [
   { id: 'emprestimo_mercantil', icon: _heralIco('ic-escriba'), name: 'Empréstimo Mercantil', min: 200, lock: 60,  rate: 0.15, min_lvl: 3, risk: 'Médio',
     desc: 'Financie comerciantes locais em troca de uma parcela dos lucros.' },
   { id: 'expedicao_comercial',  icon: '⛵', name: 'Expedição Comercial',  min: 500, lock: 120, rate: 0.30, min_lvl: 5, risk: 'Alto',
-    desc: 'Invista em uma expedição mercantil além das fronteiras de Eldoria.' }
+    desc: 'Invista em uma expedição mercantil além das fronteiras de Valdoria.' }
 ];
 
 function _bankShowInvestments(p){
@@ -42850,6 +42906,24 @@ function closeCityPopup(silent){
   var popup = document.getElementById('city-subscreen-popup');
   if (popup) popup.classList.remove('active');
   _popupStack = [];
+  // Sessão #55 (2026-05-28) — CRITICAL FIX: PARTIR PARA AVENTURA travado
+  // por popup leftover da Mochila/Item detail. Click PARTIR abria popup
+  // Poção de Cura ao invés de cartografia. Root cause: vPopup overlay
+  // (#v-popup-overlay) e vOverlay registry NÃO eram limpos antes do
+  // navigateTo('cartografia'). Fix: dismissa TODOS os overlays do
+  // vOverlay registry + vPopup principal.
+  try {
+    // vOverlay clear (overlay-registry.js shared) — item popups, lightbox, etc.
+    if (typeof window.vOverlay !== 'undefined' && typeof window.vOverlay.clear === 'function') {
+      window.vOverlay.clear();
+    }
+    // vPopup canonical (popup.js shared) — main popup overlay (#v-popup-overlay)
+    if (typeof window.vPopup !== 'undefined' && typeof window.vPopup.hide === 'function') {
+      while (window.vPopup.isOpen && window.vPopup.isOpen()) {
+        window.vPopup.hide();
+      }
+    }
+  } catch(_eOverlay) { /* non-fatal */ }
   // task #56 (2026-05-20) — CRITICAL FIX: user reportou Voltar da Taverna
   // trava tela em branco. Root cause: encounter-overlay (z=9500) ou
   // choice-overlay (z=9700) ficavam ATIVOS sobre city popup quando user
@@ -42913,7 +42987,7 @@ function _renderCityPopup(key){
     return;
   }
   if (key === 'bank' && typeof renderBankHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Banco de Eldoria';
+    if (titleEl) titleEl.textContent = 'Banco de Valdoria';
     renderBankHub(bodyEl, _buildBankMockData(window.CITY_MOCK_PLAYER));
     // canonical: bank_dialogue.py — BANK_TUTORIAL_TEXT mostrado uma única vez
     // quando jogador chega no banco com >100 Valdoritas pela primeira vez.
@@ -42972,7 +43046,7 @@ function _renderCityPopup(key){
     }
   }
   if (key === 'market' && typeof renderMarketHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Mercado de Eldoria';
+    if (titleEl) titleEl.textContent = 'Mercado de Valdoria';
     renderMarketHub(bodyEl, _buildMarketMockData(window.CITY_MOCK_PLAYER));
     return;
   }
@@ -43004,7 +43078,7 @@ function _renderCityPopup(key){
     // que o sim não constrói. Usar SEMPRE renderSquareHub (multi-tier list)
     // que matcha _buildArenaMockData (services list).
     if (typeof renderSquareHub === 'function') {
-      if (titleEl) titleEl.textContent = 'Arena de Eldoria';
+      if (titleEl) titleEl.textContent = 'Arena de Valdoria';
       var arenaData = _buildArenaMockData(window.CITY_MOCK_PLAYER);
       arenaData.flavor = arenaData.flavor || 'Arena.';
       renderSquareHub(bodyEl, {
@@ -45653,8 +45727,14 @@ var ACTION_HANDLERS = {
         { type: 'speech', speaker: 'Lyana', text: '<i>(dobra o pergaminho e aperta contra o peito)</i> Ele está vivo. <b>Vivo.</b> Mas escreveu sobre as runas de novo — aquelas que sangram na lua nova. Pediu o cristal... <i>(pausa, respira fundo)</i> Tu não imaginas o peso que tiraste das minhas costas hoje, aventureiro. Aceita o que tenho — não é muito, mas é de coração.' }
       ],
       choices: [
-        { id: 'accept', label: '🤝 "Aceito. Que teu pai retorne em paz."', cb: 'lyana-confirm-deliver' },
-        { id: 'modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."', cb: 'lyana-confirm-deliver-modest' },
+        // Sessão #55 (2026-05-28) — FIX Bug P0 Quest delivery loop Lyana:
+        //   _dispatchSvcChoice (svc-interactions.js:451) e _handleChoiceInternal
+        //   (encounter-popup.js:841) buscam ch.id (NÃO cb) em opts.dialogues.
+        //   Antes: id='accept'/cb='lyana-confirm-deliver' → lookup falhava em
+        //   opts.dialogues['accept'] → fall-through pra vCity.act → close sem
+        //   aplicar reward. Fix: id passa a ser igual à key de LYANA_SUB.
+        { id: 'lyana-confirm-deliver',        label: '🤝 "Aceito. Que teu pai retorne em paz."' },
+        { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."' },
         { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', cb: 'dice:investigation:13:+0' }
       ]
     };
@@ -46272,13 +46352,21 @@ function _acceptQuest(qid){
     return;
   }
   // Adicionar a QUESTS_ACTIVE
+  // Sessão #55 (2026-05-28) — Demand B: acceptedAt + whatHappened + whatToDo
+  // GUILD_QUEST_DETAILS pode trazer whatHappened/whatToDo pré-escritos;
+  // se não, geramos fallbacks razoáveis a partir do desc/title/npc.
   if (typeof QUESTS_ACTIVE !== 'undefined') {
+    var _wh = d.whatHappened || (d.npc ? (d.npc + ' te ofereceu este contrato na Guilda dos Aventureiros.') : 'Missão aceita na Guilda dos Aventureiros.');
+    var _wt = d.whatToDo || (d.desc || 'Cumprir o objetivo e retornar pra entregar.');
     QUESTS_ACTIVE.push({
       id: 'qa_' + qid, icon: d.icon,
       title: d.title, desc: d.desc || '',
       progress: d.progress || '0/1',
       reward: d.reward || 0, xp: d.xp || 0,
-      npc: d.npc || ''
+      npc: d.npc || '',
+      acceptedAt: Date.now(),
+      whatHappened: _wh,
+      whatToDo: _wt
     });
   }
   // Remover de GUILD_QUESTS_AVAILABLE
@@ -46362,6 +46450,14 @@ function renderSubScreen(el, key){
       + '.cs-quest-flavor b{color:var(--v-gold,#c4953a);font-style:normal;text-shadow:0 0 6px rgba(196,149,58,0.35);}'
       /* NPC info card (selo do contratante) */
       + '.cs-quest-npc{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);text-align:center;letter-spacing:1.2px;padding:10px 8px 4px;border-top:1px dashed rgba(196,149,58,0.4);margin-top:6px;line-height:1.7;}'
+      /* Sessão #55 (2026-05-28) — Demand B Lyana revision:
+         meta = "Adquirida há N dias · contratada por X" (timestamp)
+         summary = bloco "O QUE ACONTECEU / O QUE PRECISA FAZER" (resumo curto) */
+      + '.cs-quest-meta{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:#a09484;text-align:center;letter-spacing:0.8px;padding:6px 8px 2px;line-height:1.5;}'
+      + '.cs-quest-meta b{color:var(--v-gold,#c4953a);}'
+      + '.cs-quest-summary{margin:10px 4px 0;padding:8px 10px;background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(30,20,12,0) 100%);border-left:2px solid rgba(196,149,58,0.45);border-radius:0 6px 6px 0;}'
+      + '.cs-quest-summary-label{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));font-weight:700;letter-spacing:2px;color:var(--v-gold,#c4953a);margin-bottom:4px;text-transform:uppercase;}'
+      + '.cs-quest-summary-text{font-family:var(--v-font,MedievalSharp,serif);font-size:calc(13px * var(--v-font-scale, 1));line-height:1.55;color:#e8dcc8;}'
       /* Botões épicos com entrance stagger */
       + '.city-subscreen--quest .subscreen-buttons{display:flex;flex-direction:column;gap:6px;}'
       + '.city-subscreen--quest .subscreen-btn{position:relative;background:linear-gradient(180deg,rgba(74,56,40,0.50) 0%,rgba(42,30,18,0.65) 100%);border:1px solid rgba(196,149,58,0.35);border-radius:8px;padding:12px 14px;transition:transform 0.18s ease,border-color 0.18s ease,background 0.18s ease,box-shadow 0.18s ease;animation:csQuestEnter 0.32s cubic-bezier(0.34,1.56,0.64,1) both;}'
@@ -46400,6 +46496,40 @@ function renderSubScreen(el, key){
       + '</div>';
     html += '<div class="cs-quest-cenario">';
     if (d.flavor) html += '<div class="cs-quest-flavor">' + d.flavor + '</div>';
+    // Sessão #55 (2026-05-28) — Demand B Lyana revision:
+    //   acquireMeta = "Adquirida há N dias com NPC X" (timestamp formatado)
+    //   resumo blocks = What happened / What to do (curto, dentro do popup)
+    // Lookup pelo id do quest (extrai de 'quest_open_<qid>' → 'qa_<qid>').
+    var _qid = key.substring('quest_open_'.length);
+    var _qa = (typeof QUESTS_ACTIVE !== 'undefined')
+      ? QUESTS_ACTIVE.find(function(qq){ return qq && qq.id === 'qa_' + _qid; })
+      : null;
+    if (_qa) {
+      // Adquirida há X (relativo)
+      if (_qa.acceptedAt) {
+        var _elapsed = Date.now() - _qa.acceptedAt;
+        var _days = Math.floor(_elapsed / (24 * 60 * 60 * 1000));
+        var _hours = Math.floor(_elapsed / (60 * 60 * 1000));
+        var _when = (_days >= 1)
+          ? ('há ' + _days + ' dia' + (_days > 1 ? 's' : ''))
+          : (_hours >= 1 ? ('há ' + _hours + 'h') : 'há minutos');
+        var _whoFrom = _qa.npc ? (' · contratada por <b>' + _qa.npc + '</b>') : '';
+        html += '<div class="cs-quest-meta">📜 Adquirida ' + _when + _whoFrom + '</div>';
+      }
+      // O que aconteceu + o que precisa fazer (resumo curto, dentro da tela)
+      if (_qa.whatHappened) {
+        html += '<div class="cs-quest-summary">'
+             + '<div class="cs-quest-summary-label">O QUE ACONTECEU</div>'
+             + '<div class="cs-quest-summary-text">' + _qa.whatHappened + '</div>'
+             + '</div>';
+      }
+      if (_qa.whatToDo) {
+        html += '<div class="cs-quest-summary">'
+             + '<div class="cs-quest-summary-label">O QUE PRECISA FAZER</div>'
+             + '<div class="cs-quest-summary-text">' + _qa.whatToDo + '</div>'
+             + '</div>';
+      }
+    }
     if (d.npcInfo) html += '<div class="cs-quest-npc">' + d.npcInfo + '</div>';
     html += '</div>';
   } else {
@@ -47201,6 +47331,17 @@ function renderCityGroupPanel(){
       if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx);
     });
   });
+  // Sessão #55 (2026-05-28): fade-in após render com state real
+  // Evita flash do placeholder "Aventureiro Mago Elfo Nv 5" antes do
+  // CITY_MOCK_PLAYER carregar do API (REMOTE mode). Painel inicia
+  // invisible no HTML (style="opacity:0;visibility:hidden") e revela
+  // aqui somente quando _cityRealPlayerReady === true.
+  // LOCAL mode: flag setada imediatamente após CITY_MOCK_PLAYER init.
+  // REMOTE mode: flag setada após /api/auth/characters aplicar `picked` real.
+  if (window._cityRealPlayerReady === true) {
+    el.style.visibility = 'visible';
+    el.style.opacity = '1';
+  }
 }
 
 // --- Botão Viajar (abre Preparar Viagem → modal com 2 opções) ---
@@ -47329,7 +47470,7 @@ SUBSCREEN_DATA['city_more'] = {
     [_heralIco('ic-templo'), 'Templo dos Deuses', '6 sacerdotes', 'nav:temple'],
     [_heralIco('ic-stat-attack'), 'Arena de Combate', '5 tiers, 20 oponentes', 'nav:arena'],
     [_heralIco('ic-mochila'), 'Praça Central', 'NPCs + eventos', 'nav:square'],
-    [_heralIco('ic-mochila'), 'Banco de Eldoria', 'Cofre, invest, empréstimo', 'nav:bank'],
+    [_heralIco('ic-mochila'), 'Banco de Valdoria', 'Cofre, invest, empréstimo', 'nav:bank'],
     [_heralIco('ic-mochila'), 'Portões', 'Sair pra aventura', 'nav:gates'],
     [_heralIco('ic-missões'), 'Quadro de Missões', 'Ativas, disponíveis, histórico', 'nav:quests'],
     [_heralIco('ic-compendio'), 'Compêndio', 'Bestiário, locais, itens', 'nav:codex'],
@@ -48190,7 +48331,7 @@ var CITY_JOURNEY_HAZARDS_EXTRA = {
           fNarr: '' },
         { i: '🔍', t: 'Ler a inscrição completa', stat: 'int', dc: 14,
           desc: 'Decifrar o nome apagado pelos séculos.',
-          sNarr: 'Você arranha o musgo cuidadosamente. <b>Mara, a Curandeira de Eldoria — 1247-1289</b>. Lendária. Você sente que a história dela merece ser contada quando voltar à cidade.',
+          sNarr: 'Você arranha o musgo cuidadosamente. <b>Mara, a Curandeira de Valdoria — 1247-1289</b>. Lendária. Você sente que a história dela merece ser contada quando voltar à cidade.',
           fNarr: 'Você arranha demais e quebra um pedaço da pedra. Constrangido, deixa-a quebrada e segue.', dmg: 1 } ] }
   ],
 
@@ -48488,12 +48629,12 @@ var CITY_STAT_NAMES_PT = {
 var CITY_JOURNEY_DEPARTURES = {
   forest: [
     [
-      { type: 'narration', text: 'Os portões de Eldoria fecham-se atrás de vocês com um eco grave de ferro. À frente, a estrada serpenteia rumo à <b>linha verde</b> da floresta — antiga, viva, paciente.' },
+      { type: 'narration', text: 'Os portões de Valdoria fecham-se atrás de vocês com um eco grave de ferro. À frente, a estrada serpenteia rumo à <b>linha verde</b> da floresta — antiga, viva, paciente.' },
       { type: 'narration', text: 'Cheira a chuva no solo úmido, mesmo sem chuva caindo. O ar adoça nos pulmões; as copas distantes parecem respirar lentamente.' },
       { type: 'narration', text: 'O caminho não promete velocidade — promete <i>encontros</i>. Vocês ajustam as mochilas, conferem armas, e seguem.' }
     ],
     [
-      { type: 'narration', text: 'A última muralha de Eldoria desbota nas suas costas. Você sente o peso do conforto urbano se afastar a cada passo.' },
+      { type: 'narration', text: 'A última muralha de Valdoria desbota nas suas costas. Você sente o peso do conforto urbano se afastar a cada passo.' },
       { type: 'narration', text: 'A trilha cruza um campo aberto e mergulha num <i>corredor de carvalhos</i>. A luz muda — dourada para verde-musgo. O silêncio muda também: não é vazio, é <b>atenção</b>.' },
       { type: 'narration', text: 'Algo na floresta sabe que vocês chegaram. Algo sempre sabe.' }
     ],
@@ -48527,14 +48668,14 @@ var CITY_JOURNEY_DEPARTURES = {
       { type: 'narration', text: 'A neblina não dissipa — só muda de altura. <b>Pântano</b>, dizem os antigos, <i>é a terra que se recusa a escolher entre água e terra</i>. Vocês entram.' }
     ],
     [
-      { type: 'narration', text: 'Os portões de Eldoria sumiram dentro de uma neblina baixa que não devia existir nessa hora. Pântano começa cedo aqui, vocês percebem.' },
+      { type: 'narration', text: 'Os portões de Valdoria sumiram dentro de uma neblina baixa que não devia existir nessa hora. Pântano começa cedo aqui, vocês percebem.' },
       { type: 'narration', text: 'Sapos calam quando vocês passam. Voltam a coaxar três metros depois. <i>Um sistema de aviso natural</i> — funcionando contra vocês.' },
       { type: 'narration', text: 'A trilha some e reaparece entre raízes. Quem chega vivo aqui caminha devagar e ouve mais que olha.' }
     ]
   ],
   mountain: [
     [
-      { type: 'narration', text: 'A estrada inclina antes que vocês esperem. Em meia hora, Eldoria é um ponto distante de luz amarela ao pé do vale.' },
+      { type: 'narration', text: 'A estrada inclina antes que vocês esperem. Em meia hora, Valdoria é um ponto distante de luz amarela ao pé do vale.' },
       { type: 'narration', text: 'O ar fica fino. Cada respiração custa um pouco mais. As primeiras rochas das <b>Montanhas</b> assomam à frente como dentes velhos de um mundo antigo.' },
       { type: 'narration', text: 'Águias circulam alto. Elas <i>já sabem</i> antes de vocês — sempre sabem.' }
     ],
@@ -48632,7 +48773,7 @@ function _showCityJourneyDeparture() {
   var j = _cityJourney;
   if (!j) return;
   var subEl = document.getElementById('journey-subtitle');
-  if (subEl) subEl.textContent = 'Saída de Eldoria · Rumo desconhecido';
+  if (subEl) subEl.textContent = 'Saída de Valdoria · Rumo desconhecido';
   // Progress bar inicial (0%)
   var pEl = document.getElementById('journey-progress');
   if (pEl) {
@@ -50297,7 +50438,7 @@ var RECURRING_NPCS = {
     title: 'Lâmina do Norte · Mestre de Armas',
     lore: 'Trinta anos atrás, Vorhan derrotou um Lich nas Cavernas de Brakenhall — '
         + 'um feito que rendeu nome à campanha "Cerco de Brakenhall". Hoje treina '
-        + 'gladiadores na Arena de Eldoria. Diz que parou de aventurar quando perdeu '
+        + 'gladiadores na Arena de Valdoria. Diz que parou de aventurar quando perdeu '
         + 'a esposa numa emboscada orc — mas ainda guarda a aliança no pescoço.',
     related_quests: ['quest_aldric_siege', 'quest_grom_past']  // bounty_undead_purge tem refs
   },
@@ -50313,7 +50454,7 @@ var RECURRING_NPCS = {
     desc: 'Bardisa elfa com harpa de cordas douradas. Sorriso enigmático.',
     legendary: true,
     title: 'Voz das Ruínas Élficas · Memória Viva',
-    lore: 'Silvana viveu duzentos anos antes da Queda de Eldoria. Cantava nas cortes '
+    lore: 'Silvana viveu duzentos anos antes da Queda de Valdoria. Cantava nas cortes '
         + 'élficas, viu impérios nascer e cair. Sua harpa de cordas douradas foi '
         + 'forjada por um deus menor das canções. Dizem que ela pode despertar '
         + 'memórias adormecidas em pedras — por isso aventureiros a procuram quando '
@@ -50946,8 +51087,8 @@ var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/aldric.png',  icon: 'ic-paladino' },
   martha:      { name: 'Martha',              desc: 'Estalajadeira do Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
-  elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Eldoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
-  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Eldoria',                portrait: '/shared/img/merchants/thorne.png',   icon: 'ic-guerreiro' },
+  elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
+  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.png',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.png',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.png', icon: 'ic-mago' },
   corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.png',   icon: 'ic-ladino' },
@@ -51145,7 +51286,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'wisdom', dc: 12,
-          npc_label: 'Portões de Eldoria',
+          npc_label: 'Portões de Valdoria',
           icon: _heralIco('ic-paladino'),
           effect: { xp: 12 },
           effect_fail: { xp: 2 },
@@ -51158,7 +51299,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'charisma', dc: 13,
-          npc_label: 'Portões de Eldoria',
+          npc_label: 'Portões de Valdoria',
           icon: _heralIco('ic-paladino'),
           effect: { xp: 15, gold: 10 },
           effect_fail: { xp: 3 },
@@ -51216,7 +51357,7 @@ var CHANCE_ENCOUNTERS = [
           icon: _heralIco('ic-bardo'),
           effect: { xp: 14 },
           effect_fail: { xp: 2 },
-          result_text: 'Silvana para os dedos sobre as cordas. <i>Os olhos dela brilham — não tinha esperado de você.</i> <b>"Pré-imperial sim. A balada vem de Karthal — capital queimada antes da fundação de Eldoria. Estudiosa Maeve tá catalogando essas ruínas na Academia. Procura ela se quiser saber mais — diz que foi eu que indiquei."</b>',
+          result_text: 'Silvana para os dedos sobre as cordas. <i>Os olhos dela brilham — não tinha esperado de você.</i> <b>"Pré-imperial sim. A balada vem de Karthal — capital queimada antes da fundação de Valdoria. Estudiosa Maeve tá catalogando essas ruínas na Academia. Procura ela se quiser saber mais — diz que foi eu que indiquei."</b>',
           result_text_fail: 'Silvana acha graça. <i>Ela toca uma nota irônica.</i> <b>"Bem... toda canção é antiga pra quem não conhece. É uma balada da estrada. Se ela tem séculos ou se nasceu semana passada — só os deuses sabem. Toma um gole, descansa a cabeça."</b>'
         }
       }
@@ -51253,7 +51394,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'wisdom', dc: 13,
-          npc_label: 'Mercado de Eldoria',
+          npc_label: 'Mercado de Valdoria',
           icon: _heralIco('ic-ladino'),
           effect: { xp: 12, gold: 6 },
           effect_fail: { xp: 2 },
@@ -51266,7 +51407,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'charisma', dc: 14,
-          npc_label: 'Mercado de Eldoria',
+          npc_label: 'Mercado de Valdoria',
           icon: _heralIco('ic-ladino'),
           effect: { xp: 16, gold: 12 },
           effect_fail: { xp: 3 },
@@ -51413,7 +51554,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'wisdom', dc: 13,
-          npc_label: 'Portões de Eldoria',
+          npc_label: 'Portões de Valdoria',
           icon: _heralIco('ic-patrulheiro'),
           effect: { xp: 14, gold: 0 },
           effect_fail: { xp: 3 },
@@ -51426,7 +51567,7 @@ var CHANCE_ENCOUNTERS = [
         result: 'plaza_interactive',
         _interactiveData: {
           stat: 'dexterity', dc: 12,
-          npc_label: 'Portões de Eldoria',
+          npc_label: 'Portões de Valdoria',
           icon: _heralIco('ic-patrulheiro'),
           effect: { xp: 13, gold: 7 },
           effect_fail: { xp: 2 },
@@ -51479,7 +51620,7 @@ function _tryChanceEncounter(action, player) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// ANIMAÇÃO DE VIAGEM PELA CIDADE — Eldoria ao crepúsculo (Phase 6.6.x)
+// ANIMAÇÃO DE VIAGEM PELA CIDADE — Valdoria ao crepúsculo (Phase 6.6.x)
 // ═══════════════════════════════════════════════════════════════════
 // Reusa overlay+canvas existentes (#travel-overlay/#travel-canvas) MAS
 // renderiza cenário próprio (não reusa explore-travel.js que é pra
@@ -51487,7 +51628,7 @@ function _tryChanceEncounter(action, player) {
 // pulsantes, lua, silhueta encapuzada caminhando.
 //
 // Usado quando jogador escolhe "📜 Visitar Corvus agora" no encounter
-// do Aldric → vê o personagem atravessando Eldoria até a Praça Central
+// do Aldric → vê o personagem atravessando Valdoria até a Praça Central
 // antes de chegar no Cartógrafo.
 // Phase 6.6.x v6 (2026-05-05): NÃO mais usa playTravelAnimation. User
 // reportou que tombstones silhouette parecia cemitério, não cidade. Agora
@@ -53958,7 +54099,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
 
     if (typeof _playCityWalkAnimation === 'function') {
       _playCityWalkAnimation({
-        title: fromAldric ? 'Para a Praça Central' : 'Eldoria',
+        title: fromAldric ? 'Para a Praça Central' : 'Valdoria',
         subtitle: fromAldric ? 'Seguindo o conselho do Guarda Aldric' : 'Ao crepúsculo'
       }, function(){
         // Após anim: navega pra square (continua city hub) + abre diálogo Corvus

@@ -18,7 +18,7 @@
  *   - old_friend   : amizade longa, history compartilhada
  *   - mentor       : ensinou/treinou o outro
  *   - rival        : competição amigável ou hostil
- *   - sibling      : irmãos consanguíneos (raro em Eldoria)
+ *   - sibling      : irmãos consanguíneos (raro em Valdoria)
  *   - creditor     : um deve dinheiro/favor ao outro
  *   - peer         : mesma profissão, colegas
  *   - secret       : segredo compartilhado (player descobre via cascata)
@@ -405,7 +405,7 @@
 
     {
       id: 'market_fair',
-      name: 'Feira de Eldoria',
+      name: 'Feira de Valdoria',
       frequency: 'monthly',
       duration_days: 2,
       affected_npcs: ['thorne', 'mirena', 'velithra', 'corvus', 'bjorn', 'garlen'],

@@ -49,7 +49,7 @@ _syncUI();}
 function getVolume(){return _volume;}
 function playBiome(biome){
 /* Map de bioma D&D 5e -> track. 'plains' = wilderness (forest amb), NÃO city.
-   Hubs urbanos (Eldoria/Korthag/Valkrest) chamam play('city') diretamente
+   Hubs urbanos (Valdoria/Korthag/Valkrest) chamam play('city') diretamente
    pelo caller — não passam por playBiome. Bug 2026-04-24: jogador parou
    em Acampamento Orc (biome=plains) e ouviu música de cidade. */
 const biomeMap={'plains':'forest','forest':'forest','swamp':'swamp','mountain':'mountain','cave':'dungeon','desert':'desert','snow':'snow','volcanic':'dungeon','ocean':'ocean','coastal':'ocean','ruins':'ancient_ruins','underground':'dungeon','graveyard':'mystery',};const track=biomeMap[biome]||'forest';play(track);}

@@ -38,7 +38,7 @@ var _ARENA_MEDALS = {1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49'};
 if (!window._SVC_CONFIG_ARENA) {
   window._SVC_CONFIG_ARENA = {
     faction: 'arena',
-    factionLabel: 'Arena de Eldoria',
+    factionLabel: 'Arena de Valdoria',
     reactions: {
       very_negative: 'Vorhan cospe no ch\u00E3o. <i>(volta-se para a multid\u00E3o)</i> "Pr\u00F3ximo!"',
       negative: 'Vorhan aperta os olhos, descrente. <i>(co\u00E7a a cicatriz no queixo)</i> "Trouxa."',
@@ -143,7 +143,7 @@ function _renderArenaMain(el, d) {
     cenarioEl.appendChild(crest);
     var heroTitulo = _div('cenario-titulo');
     var heroName = _div('name');
-    heroName.textContent = 'Arena de Eldoria';
+    heroName.textContent = 'Arena de Valdoria';
     heroTitulo.appendChild(heroName);
     var heroSub = _div('sub');
     heroSub.textContent = 'Coliseu Real · Tier ' + ((tier.name || 'Ferro').toUpperCase());

@@ -129,7 +129,7 @@ function renderGuildHub(container, data) {
   cenarioEl.appendChild(crest);
   var titulo = _gldEl('div', 'cenario-titulo');
   titulo.appendChild(_gldEl('div', 'name', 'Guilda dos Aventureiros'));
-  titulo.appendChild(_gldEl('div', 'sub', 'Salão de Mestra Tavira · Coração de Eldoria'));
+  titulo.appendChild(_gldEl('div', 'sub', 'Salão de Mestra Tavira · Coração de Valdoria'));
   cenarioEl.appendChild(titulo);
   root.appendChild(cenarioEl);
 

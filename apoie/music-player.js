@@ -2,7 +2,7 @@
  * Sessao #23 v9 (2026-05-22): redesign AAA pedido pelo user.
  *
  * Features:
- *  - Track list (Tema Eldoria, Combate, Floresta, etc)
+ *  - Track list (Tema Valdoria, Combate, Floresta, etc)
  *  - Audio visualizer real (Web Audio API + Canvas)
  *  - Track name display + progress + duracao
  *  - Volume slider + mute toggle
@@ -26,7 +26,7 @@
     var BASE = 'https://jogo.lendasdevaldoria.com.br/shared/audio/';
     var TRACKS = [
         {name: 'Tema da Cidade — Dia',  file: 'city_day.mp3'},
-        {name: 'Eldoria ao Anoitecer',  file: 'city_day_3.mp3'},
+        {name: 'Valdoria ao Anoitecer',  file: 'city_day_3.mp3'},
         {name: 'Tema da Taverna',       file: 'tavern_ambient.mp3'},
         {name: 'Taverna ao Calor',      file: 'tavern_ambient_3.mp3'},
         {name: 'Floresta Explora',      file: 'forest_explore.mp3'},

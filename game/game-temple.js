@@ -58,7 +58,7 @@ var ALDRIC_DIALOGUE = {
     portrait: '../shared/img/npcs/padre-aldric.webp'
   },
   script: [
-    { type: 'narration', text: 'O salão do Templo de Eldoria respira em paz solene. Vitrais redondos onde sol e lua se entrelaçam projetam discos de luz dourada e prateada sobre o mármore antigo. Diante do altar principal, Padre Aldric — vestes de linho branco bordadas em fio de ouro, barba grisalha, terço de contas de âmbar nas mãos — ergue os olhos da oração em silêncio. Ele te reconhece. Sorri.' },
+    { type: 'narration', text: 'O salão do Templo de Valdoria respira em paz solene. Vitrais redondos onde sol e lua se entrelaçam projetam discos de luz dourada e prateada sobre o mármore antigo. Diante do altar principal, Padre Aldric — vestes de linho branco bordadas em fio de ouro, barba grisalha, terço de contas de âmbar nas mãos — ergue os olhos da oração em silêncio. Ele te reconhece. Sorri.' },
     { type: 'speech', speaker: 'Padre Aldric', text: 'Bem-vindo ao Santuário dos Quatro, irmão. <i>(fecha o terço com gesto reverente)</i> Que os deuses te guiem em tua jornada. O Templo está aberto a todos — sejam eles peregrinos, doentes, ou apenas almas em busca de paz.' },
     { type: 'speech', speaker: 'Padre Aldric', text: 'O Santuário oferece quatro grandes dons. <i>(estende a mão indicando os altares)</i> Cura para o corpo, bênçãos para a jornada, oração para o espírito, e — quando a hora chegar — confissão para a alma. Cada um tem seu preço; nenhum tem seu valor verdadeiro em moedas.' },
     { type: 'speech', speaker: 'Padre Aldric', text: 'O que te traz hoje ao Templo, irmão? <i>(entrelaça as mãos sobre o terço)</i> Conta-me — e que os Quatro nos ouçam.' }
@@ -297,7 +297,7 @@ function _tmpBuildCenario(data) {
   nameEl.textContent = 'Templo dos Quatro';
   titulo.appendChild(nameEl);
   var subEl = vCity.el('div', 'sub');
-  subEl.textContent = 'Santuário de Eldoria · Casa dos Deuses';
+  subEl.textContent = 'Santuário de Valdoria · Casa dos Deuses';
   titulo.appendChild(subEl);
   cenarioEl.appendChild(titulo);
 
