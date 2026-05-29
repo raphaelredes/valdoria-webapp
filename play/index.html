@@ -33,6 +33,10 @@ document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + v +
 document.write('<link rel="stylesheet" href="/shared/fonts.css?v=' + v + '">');
 document.write('<script src="/shared/loading-title.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-template.js?v=' + v + '"><\/script>');
+/* REFACTOR-1 Phase 1 (Sessao #65, 2026-05-29): vAuthTokenStore helper.
+   Persists Bearer token in localStorage so destination WebApps can read
+   it without ?token= in URL. See docs/sistemas/refactor-1-plan.md. */
+document.write('<script src="/shared/auth-token-store.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-guard.js?v=' + v + '"><\/script>');
 document.write('<script src="/shared/loading-controller.js?v=' + v + '"><\/script>');
 /* 2026-05-18 BUG FIX (preflight check_webapp_audio_manager): /play/ era o unico
@@ -656,6 +660,28 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       if (!auth || !auth.token || !auth.user_id) throw new Error('auth invalida');
       if (auth.env && auth.env !== env) throw new Error('Cross-env: host=' + env + ' server=' + auth.env);
       var apiBase = (auth.api || apiHost).replace(/\/+$/, '');
+
+      // REFACTOR-1 Phase 1 (Sessao #65): persist Bearer token in localStorage
+      // via vAuthTokenStore so destination WebApps can read it without
+      // ?token= in URL. Token STILL flows via URL below (line ~688) for
+      // backward compat — Phase 2 swaps WebApps to vAuthTokenStore.getToken().
+      // Doc: docs/sistemas/refactor-1-plan.md
+      try {
+        if (window.vAuthTokenStore && auth.token) {
+          window.vAuthTokenStore.setToken(auth.token, {
+            user_id: auth.user_id,
+            char_id: auth.char_id || '',
+            env: auth.env || env,
+            scope: 'game',
+            api_base: apiBase,
+          });
+          sendLog('info', 'play_token_stored', {env: auth.env || env, uid: auth.user_id});
+        } else {
+          sendLog('warn', 'play_token_store_unavailable', {has_helper: !!window.vAuthTokenStore});
+        }
+      } catch (eStore) {
+        sendLog('warn', 'play_token_store_failed', {err: String(eStore).slice(0, 200)});
+      }
 
       setProgress(65, 'Restaurando jornada…');
       setTip('Buscando seu personagem…');
