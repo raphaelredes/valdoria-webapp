@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-29T03:18:15Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-29T16:32:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -600,6 +600,11 @@ document.write('<script src="' + BASE + '/shared/scheduler.js?v=' + v + '"><\/sc
    abaixo quando token + api + uid estiverem definidos. */
 document.write('<script src="' + BASE + '/shared/device-id.js?v=' + v + '"><\/script>');
 document.write('<script src="' + BASE + '/shared/session-heartbeat.js?v=' + v + '"><\/script>');
+/* REFACTOR-1 Phase 2: vAuthTokenStore — read by the __COMBAT_TOKEN getter
+   below (localStorage game token, falls back to ?token=). Loads here so it is
+   defined before the getter runs. Backend _resolve_combat_auth accepts the
+   game token and resolves the combat session server-side. */
+document.write('<script src="' + BASE + '/shared/auth-token-store.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;
@@ -12630,6 +12635,16 @@ window.__COMBAT_API_BASE = (function () {
     try { return new URLSearchParams(location.search).get('api') || ''; } catch (e) { return ''; }
 })();
 window.__COMBAT_TOKEN = (function () {
+    // REFACTOR-1 Phase 2: prefer the game token from localStorage
+    // (vAuthTokenStore); fall back to ?token= for backward compat. The backend
+    // (_resolve_combat_auth) accepts the game token and resolves the combat
+    // session server-side, so the combat token need not be in the URL.
+    try {
+        if (window.vAuthTokenStore && window.vAuthTokenStore.getToken) {
+            var _t = window.vAuthTokenStore.getToken();
+            if (_t) return _t;
+        }
+    } catch (e) { /* fall through to URL token */ }
     try { return new URLSearchParams(location.search).get('token') || ''; } catch (e) { return ''; }
 })();
 window.__COMBAT_USER_ID = (function () {
