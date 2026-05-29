@@ -62,6 +62,12 @@ var _userId = 0;
 var _characters = [];
 var _selectedCharId = '';
 var _isDevLogin = false;
+// AUTH-1 (Sessao #64): link_mode quando a tela /web/ foi aberta como
+// callback de "Vincular Google" a partir das Configuracoes. Quando setado,
+// o id_token vai pro endpoint /api/auth/link-account (com Bearer da sessao
+// existente em sessionStorage) em vez do /api/auth/login normal.
+var _linkMode = '';  // '', 'google'
+var _linkPending = null;  // { token, api, returnUrl, ts }
 
 /* ----- API Base Discovery ----- */
 
@@ -190,12 +196,97 @@ function _checkGoogleOAuthReturn() {
             var idToken = params.get('id_token');
             if (!idToken) continue;
             _clearOAuthHash(c.win);
+            // AUTH-1 (Sessao #64): link_mode='google' route id_token to
+            // /api/auth/link-account com Bearer da sessao existente, em vez
+            // de /api/auth/login (que cria nova sessao).
+            if (_linkMode === 'google') {
+                _onGoogleAuthLink({ credential: idToken });
+                return;
+            }
             window.onGoogleAuth({ credential: idToken });
             return;
         } catch (e) {
             console.error('[WEB-AUTH] Failed to parse Google OAuth result:', e);
             showAuthError('Erro ao processar resposta do Google.');
         }
+    }
+}
+
+/* AUTH-1 (Sessao #64): Vincular Google callback handler.
+ * Recebe id_token do Google OAuth implicit flow, retira o Bearer token da
+ * sessao salva em sessionStorage.valdoria_link_pending, POST /api/auth/
+ * link-account, mostra mensagem e tenta voltar pro game. */
+async function _onGoogleAuthLink(response) {
+    console.info('[WEB-AUTH] AUTH-1 link callback received credential');
+    if (!_linkPending || !_linkPending.token || !_linkPending.api) {
+        console.error('[WEB-AUTH] AUTH-1 link_pending missing');
+        showAuthError('Sessão de vinculação expirada. Volte ao jogo e tente novamente.');
+        return;
+    }
+    var credential = response && response.credential;
+    if (!credential) {
+        showAuthError('Token Google ausente.');
+        return;
+    }
+    showAuthLoading(true);
+    hideAuthError();
+    try {
+        var resp = await fetch(_linkPending.api + '/api/auth/link-account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + _linkPending.token
+            },
+            body: JSON.stringify({
+                provider: 'google',
+                credential: credential
+            })
+        });
+        var data = {};
+        try { data = await resp.json(); } catch (_e) { /* noqa: preflight */ }
+        if (resp.status === 409 && data && data.code === 'linked_to_another_account') {
+            // AUTH-3 (futuro): UI de merge. Por ora, mensagem clara.
+            showAuthError('Esta conta Google já está vinculada a outro personagem. Suporte: AUTH-3 pendente.');
+            return;
+        }
+        if (resp.ok && (data.linked || data.already_linked)) {
+            // Limpa pending; mostra sucesso; tenta voltar pro game.
+            try { sessionStorage.removeItem('valdoria_link_pending'); } catch (_) { /* noqa: preflight */ }
+            var msg = data.already_linked ? 'Conta Google já vinculada.' : 'Conta Google vinculada com sucesso!';
+            // Substitui a tela de login por uma mensagem de sucesso.
+            try {
+                var box = document.getElementById('screen-login');
+                if (box) {
+                    box.innerHTML = '<div class="wa-link-success" style="text-align:center;padding:24px;color:#d4c8b0;font-family:Cinzel,serif;">'
+                        + '<div style="font-size:48px;margin-bottom:16px">✓</div>'
+                        + '<div style="font-size:18px;margin-bottom:24px">' + msg + '</div>'
+                        + '<div style="font-size:13px;opacity:0.7;margin-bottom:16px">Você pode fechar esta janela.</div>'
+                        + '<button id="btn-link-back" class="wa-btn" style="margin-top:8px">Voltar ao jogo</button>'
+                        + '</div>';
+                    var btn = document.getElementById('btn-link-back');
+                    if (btn) {
+                        btn.onclick = function() {
+                            var ret = (_linkPending && _linkPending.returnUrl) || '';
+                            if (ret) {
+                                window.__valdoria_transitioning = true;
+                                window.location.replace(ret);
+                            } else {
+                                try { window.close(); } catch (_) { /* noqa: preflight */ }
+                            }
+                        };
+                    }
+                }
+            } catch (_e) { /* noqa: preflight */ }
+            return;
+        }
+        // Other failures
+        var errMsg = (data && (data.error || data.message)) || 'Falha ao vincular Google.';
+        showAuthError(errMsg);
+    } catch (e) {
+        console.error('[WEB-AUTH] AUTH-1 link error:', e);
+        showAuthError(_friendlyError(e));
+    } finally {
+        showAuthLoading(false);
     }
 }
 
@@ -1069,6 +1160,50 @@ async function _tryTelegramInitAuth() {
 
 async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
+
+    /* AUTH-1 (Sessao #64): Detecta link_mode=google OU pending sessionStorage.
+     * Fluxo:
+     *   1. cidade.html grava sessionStorage.valdoria_link_pending + openLink('/web/?link_mode=google')
+     *   2. _initWebAuth ve link_mode → seta _linkMode + dispara Google OAuth
+     *   3. Google redirect_uri = '/web/' (sem query) → URL volta sem link_mode
+     *   4. _initWebAuth re-roda → ve pending no sessionStorage → re-seta _linkMode
+     *   5. Hash #id_token=... presente → _checkGoogleOAuthReturn → _onGoogleAuthLink
+     *   6. POST /api/auth/link-account → sucesso → limpa sessionStorage + UI sucesso */
+    try {
+        var _qsLink = new URLSearchParams(window.location.search);
+        var _lmQS = _qsLink.get('link_mode') || '';
+        // Sempre tenta carregar pending; se valido (token + api + ttl < 10min)
+        // assume link_mode='google' mesmo se URL nao tem link_mode (apos Google redirect).
+        try {
+            var raw = sessionStorage.getItem('valdoria_link_pending');
+            if (raw) {
+                var parsed = JSON.parse(raw);
+                var ageMs = Date.now() - (parsed && parsed.ts || 0);
+                if (parsed && parsed.token && parsed.api && ageMs < 10 * 60 * 1000) {
+                    _linkPending = parsed;
+                }
+            }
+        } catch (_) { /* noqa: preflight */ }
+        // Decide se estamos em link_mode:
+        var _hasIdTokenHash = String(window.location.hash || '').indexOf('id_token=') !== -1;
+        if (_lmQS === 'google' || (_linkPending && _hasIdTokenHash)) {
+            _linkMode = 'google';
+            console.info('[WEB-AUTH] AUTH-1 link_mode=google detected (qs=%s pending=%s hash=%s)',
+                _lmQS, !!_linkPending, _hasIdTokenHash);
+            if (!_linkPending) {
+                showAuthError('Sessão de vinculação expirada. Volte ao jogo e tente novamente.');
+                return;
+            }
+            if (_hasIdTokenHash) {
+                _checkGoogleOAuthReturn();
+                return;
+            }
+            // Primeiro passo: dispara Google OAuth. Redirect volta SEM link_mode
+            // mas sessionStorage mantem pending, e re-init detecta via pending+hash.
+            window.onGoogleClick();
+            return;
+        }
+    } catch (e) { console.error('[WEB-AUTH] AUTH-1 init error:', e); }
 
     /* 2026-05-04 USER FIX: visible env badge on auth screen — prevents user
      * from being silently logged into the wrong env (recurring complaint
