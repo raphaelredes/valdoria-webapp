@@ -24,7 +24,7 @@
 .v-ach-banner-title {
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-weight: 700;
-  font-size: clamp(var(--v-font-2xl, 18px), 5vw, 26px);
+  font-size: calc(clamp(var(--v-font-2xl, 18px), 5vw, 26px) * var(--v-font-scale, 1));
   color: var(--v-gold, #c4953a);
   letter-spacing: 2px;
   text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4));
@@ -89,7 +89,7 @@
 }
 
 .v-ach-cat-emoji {
-  font-size: 28px;
+  font-size: calc(28px * var(--v-font-scale, 1));
   line-height: 1;
 }
 
@@ -156,7 +156,7 @@
 
 .v-ach-cat-banner-title {
   font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: clamp(18px, 5vw, 22px);
+  font-size: calc(clamp(18px, 5vw, 22px) * var(--v-font-scale, 1));
   color: var(--v-gold, #c4953a);
   letter-spacing: 1px;
 }
@@ -229,7 +229,7 @@
 }
 
 .v-ach-emoji-fallback {
-  font-size: 36px;
+  font-size: calc(36px * var(--v-font-scale, 1));
   line-height: 1;
 }
 
@@ -244,7 +244,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: calc(24px * var(--v-font-scale, 1));
   background: rgba(0,0,0,0.55);
   pointer-events: none;
 }
@@ -312,6 +312,6 @@
 /* ── Mobile responsive (smartphone-only por regra) ────────────── */
 @media (max-width: 380px) {
   .v-ach-art { width: 64px; height: 64px; }
-  .v-ach-cat-emoji { font-size: 24px; }
+  .v-ach-cat-emoji { font-size: calc(24px * var(--v-font-scale, 1)); }
   .v-ach-banner-title { font-size: var(--v-font-2xl); }
 }

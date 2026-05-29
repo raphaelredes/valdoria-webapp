@@ -147,10 +147,10 @@ function renderWorkshopHub(container, data) {
     empty.style.cssText = 'text-align:center;padding:24px 12px;color:#a09484;';
     empty.appendChild(_wksEl('div', 'wks-empty-icon', '🔨'));
     var emptyTitle = _wksEl('div', 'wks-empty-title', 'Sem Proficiências');
-    emptyTitle.style.cssText = 'font-family:Cinzel,serif;font-size:14px;color:#c4953a;margin:8px 0;';
+    emptyTitle.style.cssText = 'font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));color:#c4953a;margin:8px 0;';
     empty.appendChild(emptyTitle);
     var emptyDesc = _wksEl('div', 'wks-empty-desc', 'Você não possui proficiência em nenhuma ferramenta artesanal. Proficiências podem ser obtidas através de Classe, Antecedente, ou Raça.');
-    emptyDesc.style.cssText = 'font-size:12px;line-height:1.5;font-style:italic;';
+    emptyDesc.style.cssText = 'font-size:calc(12px * var(--v-font-scale, 1));line-height:1.5;font-style:italic;';
     empty.appendChild(emptyDesc);
     body.appendChild(empty);
     root.appendChild(body);
@@ -161,7 +161,7 @@ function renderWorkshopHub(container, data) {
   /* === 2d. Stats summary === */
   var stats = data.stats || {};
   var statsRow = vCity.el('div', 'wks-stats');
-  statsRow.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:12px;color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
+  statsRow.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
   statsRow.appendChild(_wksEl('span', '', '📜 ' + (stats.recipes_total || 0) + ' receitas'));
   statsRow.appendChild(_wksEl('span', '', '✅ ' + (stats.craftable || 0) + ' prontas'));
   statsRow.appendChild(_wksEl('span', '', '📦 ' + (stats.materials || 0) + ' mat.'));
@@ -181,7 +181,7 @@ function renderWorkshopHub(container, data) {
     card.setAttribute('data-svc', t.cb || '');
     var ico = vCity.el('div', 'svc-ico');
     ico.innerHTML = t.emoji || '🔧';
-    ico.style.cssText = 'font-size:20px;';
+    ico.style.cssText = 'font-size:calc(20px * var(--v-font-scale, 1));';
     card.appendChild(ico);
     var txt = vCity.el('div', 'svc-text');
     txt.appendChild(_wksEl('div', 'svc-name', t.name));
@@ -208,7 +208,7 @@ function renderWorkshopHub(container, data) {
     for (var q = 0; q < data.quick_actions.length; q++) {
       var qa = data.quick_actions[q];
       var qBtn = vCity.el('button', 'v-popup-btn');
-      qBtn.style.cssText = 'flex:1;font-size:11px;padding:6px 8px;';
+      qBtn.style.cssText = 'flex:1;font-size:calc(11px * var(--v-font-scale, 1));padding:6px 8px;';
       qBtn.innerHTML = qa.icon + ' ' + qa.label;
       qBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(qa.cb));
       qRow.appendChild(qBtn);

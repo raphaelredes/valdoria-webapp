@@ -190,14 +190,14 @@ function renderGuildHub(container, data) {
   /* === 2c. Fallen ally warning === */
   if (data.fallen_count > 0) {
     var fallenBox = _gldEl('div', 'gld-fallen-warn');
-    fallenBox.style.cssText = 'padding:8px 12px;background:rgba(180,40,40,0.15);border-left:3px solid #b42828;border-radius:4px;color:#e8b08c;font-size:12px;';
+    fallenBox.style.cssText = 'padding:8px 12px;background:rgba(180,40,40,0.15);border-left:3px solid #b42828;border-radius:4px;color:#e8b08c;font-size:calc(12px * var(--v-font-scale, 1));';
     fallenBox.textContent = '⚠ ' + data.fallen_count + ' aliado(s) caído(s) em teu grupo';
     body.appendChild(fallenBox);
   }
 
   /* === 2d. Status info (party / gold / rotation) === */
   var stats = _gldEl('div', 'gld-stats');
-  stats.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:12px;color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
+  stats.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
   stats.appendChild(_gldEl('span', '', '👥 Grupo: ' + (data.party_count || 0) + '/' + (data.party_max || 3)));
   var goldSpan = _gldEl('span', '');
   goldSpan.textContent = '🪙 ' + (data.gold || 0) + ' V';
@@ -231,7 +231,7 @@ function renderGuildHub(container, data) {
       } else {
         ico.textContent = icoStr;
       }
-      ico.style.cssText = 'font-size:20px;';
+      ico.style.cssText = 'font-size:calc(20px * var(--v-font-scale, 1));';
       card.appendChild(ico);
 
       var txt = _gldEl('div', 'svc-text');
@@ -258,7 +258,7 @@ function renderGuildHub(container, data) {
   /* === 2g. Recruit info (extras) === */
   if (data.recruit_available && data.recruit_available > 0) {
     var rec = _gldEl('div', 'gld-recruit-info');
-    rec.style.cssText = 'text-align:center;padding:6px;color:#c4953a;font-size:11px;font-style:italic;';
+    rec.style.cssText = 'text-align:center;padding:6px;color:#c4953a;font-size:calc(11px * var(--v-font-scale, 1));font-style:italic;';
     rec.textContent = '⚔ ' + data.recruit_available + ' aventureiro(s) disponível(eis) hoje';
     body.appendChild(rec);
   }
