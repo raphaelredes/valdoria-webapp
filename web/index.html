@@ -15,7 +15,11 @@
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../shared/fonts.css">
     <!-- Tiered Cache (see docs/sistemas/cache-strategy.md) -->
-    <script src="../bundle-version.js"></script>
+    <!-- ?_=Date.now() forces a fresh bundle-version.js (the version oracle): CF
+         Pages serves it max-age=14400 and iOS Telegram WebView ignores no-cache,
+         so a static load would give a stale VBUNDLE_HASH for up to 4h → stale
+         web-auth.js (REFACTOR-1 token persistence). Matches /play/. (review 2026-05-29) -->
+    <script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
     <script>
         // Tiered Cache: stable bundle hash for Bucket B asset query strings
         var v = (window.VBUNDLE_HASH || Date.now());
