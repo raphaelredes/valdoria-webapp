@@ -10575,6 +10575,56 @@ function _titleCase(str){
 // State da seleção (mock)
 window._hallSelectedId = null;
 
+// Helper TOP-LEVEL: classe (PT-BR display, ex "Clérigo") -> ID heráldico canonical
+// (regra No NPC Emotes + Canonical Keys PT-BR: backend manda acento, frontend
+// normaliza antes de montar o ID). DEVE ser top-level (não nested em
+// _showCharactersPopup) para que _doDeleteChar / _doRestoreChar /
+// _loadHallArchivedChars compartilhem a MESMA normalização de acentos.
+//   Sessão #52 (2026-05-28): Delohen (Clérigo) mostrava guerreiro pq cls="clérigo"
+//   (com acento) não batia com MAP key "clerigo".
+//   Sessão (2026-05-29): delete/restore/archived re-render ressuscitaram o bug
+//   com 'ic-'+class_name.toLowerCase() (= 'ic-clérigo', símbolo SVG inexistente
+//   → ícone some). Fix: hoistar este helper e reusá-lo nos 3 re-renders.
+function _hallClassToHeraldic(cls){
+  if (!cls) return 'ic-guerreiro';
+  var k = String(cls).toLowerCase()
+    .replace(/[áàâã]/g, 'a')
+    .replace(/é/g, 'e')
+    .replace(/í/g, 'i')
+    .replace(/[óô]/g, 'o')
+    .replace(/ú/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .split(/\s+/)[0];  // primeiro token (cls pode vir como "Anão Clérigo")
+  var ALIASES = {
+    cleric: 'clerigo', clerica: 'clerigo', cleriga: 'clerigo',
+    sacerdote: 'sacerdotisa',
+    feiticeira: 'feiticeiro',
+    paladina:   'paladino',
+    druidesa:   'druida',
+    monja:      'monge',
+    bruxa:      'bruxo',
+    barbara:    'barbaro',
+    ladra:      'ladino'
+  };
+  if (ALIASES[k]) k = ALIASES[k];
+  var MAP = {
+    mago:        'ic-mago',
+    guerreiro:   'ic-guerreiro',
+    sacerdotisa: 'ic-clerigo',
+    clerigo:     'ic-clerigo',
+    ladino:      'ic-ladino',
+    patrulheiro: 'ic-patrulheiro',
+    paladino:    'ic-paladino',
+    bardo:       'ic-bardo',
+    druida:      'ic-druida',
+    monge:       'ic-monge',
+    barbaro:     'ic-barbaro',
+    feiticeiro:  'ic-feiticeiro',
+    bruxo:       'ic-bruxo'
+  };
+  return MAP[k] || 'ic-guerreiro';
+}
+
 function _showCharactersPopup(){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -10595,50 +10645,10 @@ function _showCharactersPopup(){
     }
   } catch(e){ console.warn('[CITY] hall audio:', e); }
 
-  // Helper: classe → ID heráldico canonical (regra No NPC Emotes)
-  // Sessão #52 (2026-05-28): BUG FIX — Delohen (Clérigo) mostrava guerreiro
-  // no Hall porque `cls="clérigo"` (com acento) não batia com MAP key
-  // `clerigo` (sem acento) → fallback ic-guerreiro. Fix: strip acentos +
-  // pegar PRIMEIRO TOKEN (não último — race-first input format defensive).
-  function _hallClassToHeraldic(cls){
-    if (!cls) return 'ic-guerreiro';
-    var k = String(cls).toLowerCase()
-      .replace(/[áàâã]/g, 'a')
-      .replace(/é/g, 'e')
-      .replace(/í/g, 'i')
-      .replace(/[óô]/g, 'o')
-      .replace(/ú/g, 'u')
-      .replace(/[ç]/g, 'c')
-      .split(/\s+/)[0];  // primeiro token (cls pode vir como "Anão Clérigo")
-    var ALIASES = {
-      cleric: 'clerigo', clerica: 'clerigo', cleriga: 'clerigo',
-      sacerdote: 'sacerdotisa',
-      feiticeira: 'feiticeiro',
-      paladina:   'paladino',
-      druidesa:   'druida',
-      monja:      'monge',
-      bruxa:      'bruxo',
-      barbara:    'barbaro',
-      ladra:      'ladino'
-    };
-    if (ALIASES[k]) k = ALIASES[k];
-    var MAP = {
-      mago:        'ic-mago',
-      guerreiro:   'ic-guerreiro',
-      sacerdotisa: 'ic-clerigo',
-      clerigo:     'ic-clerigo',
-      ladino:      'ic-ladino',
-      patrulheiro: 'ic-patrulheiro',
-      paladino:    'ic-paladino',
-      bardo:       'ic-bardo',
-      druida:      'ic-druida',
-      monge:       'ic-monge',
-      barbaro:     'ic-barbaro',
-      feiticeiro:  'ic-feiticeiro',
-      bruxo:       'ic-bruxo'
-    };
-    return MAP[k] || 'ic-guerreiro';
-  }
+  // _hallClassToHeraldic foi HOISTADO para top-level (logo acima de
+  // _showCharactersPopup) para que _doDeleteChar / _doRestoreChar /
+  // _loadHallArchivedChars usem a MESMA normalização de acentos. NÃO
+  // redefinir aqui (DRY + regra Canonical Keys PT-BR).
 
   // X-6.5.51AM (2026-05-08) BUG FIX: em REMOTE mode (token+api+uid no URL),
   // NUNCA usar mock chars Brunhilda/Lyana — eles confundiam o user que via
@@ -11114,7 +11124,7 @@ function _doDeleteChar(charId, charName){
           cls: (c.class_name || '').toLowerCase(),
           race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          icon: _hallClassToHeraldic(c.class_name),  // accent-safe (Clérigo→ic-clerigo)
           active: false  // ALL false. User precisa selecionar via UI (Fix #1).
         };
       });
@@ -11214,7 +11224,7 @@ function _loadHallArchivedChars(){
        - expired: chip cinza "Não recuperável" (lvl 1 + > 15d) */
     var html = '';
     chars.forEach(function(c){
-      var iconId = 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]);
+      var iconId = _hallClassToHeraldic(c.class_name);  // accent-safe (Clérigo→ic-clerigo)
       var iconColor = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[iconId]) || '#8a7a6a';
       var rk = c.restore_kind || 'one_click';
       var dpl = c.days_passed || 0;
@@ -11335,7 +11345,7 @@ function _doRestoreChar(charId, charName){
           id: c.id || c.char_id, name: c.name,
           cls: (c.class_name || '').toLowerCase(), race: (c.race || '').toLowerCase(),
           level: c.level || 1,
-          icon: 'ic-' + ((c.class_name || 'guerreiro').toLowerCase().split(' ')[0]),
+          icon: _hallClassToHeraldic(c.class_name),  // accent-safe (Clérigo→ic-clerigo)
           active: false
         };
       });
