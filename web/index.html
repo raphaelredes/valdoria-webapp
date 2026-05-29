@@ -183,6 +183,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="../shared/env-utils.js"></script>
     <script src="../shared/telegram-compat.js"></script>
+    <!-- REFACTOR-1 Phase 2 (Part C prereq): load vAuthTokenStore BEFORE web-auth.js so
+         the cookie/Google auth paths can persist the Bearer token. Destination WebApps
+         (combat2/exploracao) then read it via getToken() without ?token= in the URL.
+         Synchronous document.write guarantees load order (the async _loadScript below
+         does NOT). Doc: docs/sistemas/refactor-1-plan.md -->
+    <script>document.write('<script src="../shared/auth-token-store.js?v=' + v + '"><\/script>');</script>
     <script>
     var _loadScript = function(src) {
         var s = document.createElement('script');

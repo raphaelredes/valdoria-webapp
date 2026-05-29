@@ -476,6 +476,22 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       var _qs = new URLSearchParams(window.location.search);
       var hasUrlToken = _qs.get('token');
       if (hasUrlToken) {
+        /* REFACTOR-1 Phase 2 (Part C prereq): persist URL token to vAuthTokenStore so
+           destination WebApps read it via getToken() without ?token=. ADDITIVE — the
+           token still flows via the URL on every redirect below. vAuthTokenStore is
+           loaded near the top of <head> (line ~39). Doc: docs/sistemas/refactor-1-plan.md */
+        try {
+          if (window.vAuthTokenStore) {
+            window.vAuthTokenStore.setToken(hasUrlToken, {
+              user_id: _qs.get('uid') || _qs.get('user_id') || '',
+              char_id: _qs.get('char') || _qs.get('char_id') || '',
+              env: _qs.get('env') || (location.hostname.indexOf('dev') >= 0 ? 'dev' : 'prod'),
+              scope: 'game',
+              api_base: _qs.get('api') || _qs.get('api_base') || apiHost,
+            });
+            sendLog('info', 'play_token_stored_urlpath', { env: _qs.get('env') || '' });
+          }
+        } catch (eStore) { sendLog('warn', 'play_token_store_urlpath_failed', { err: String(eStore).slice(0, 120) }); }
         /* 2026-05-20 fix: honrar param `route` se presente (char_creator manda
            /play/?route=prologue&token=X após confirmar). Antes caía em gotoCidade
            sem preservar token → /cidade/ sem auth → /web/. Agora redireciona
