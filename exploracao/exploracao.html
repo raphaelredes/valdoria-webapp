@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-28T03:13:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-29T00:50:56Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -15046,6 +15046,32 @@ window.__buildRewardsDelta = function() {
 // Helper: POST /api/webapp/transition (fim de sessão — completed/dead/interrupted)
 // Em LOCAL: no-op, retorna null.
 // Retorna a resposta do servidor (com url) ou null se falhou.
+//
+// Sessão #63 (2026-05-28) BUG-1 + BUG-10 fix: Idempotency-Key consistente
+// entre fetch e pagehide beacon. Antes:
+//   - fetch sem X-Idempotency-Key → idem_check no servidor não detectava dup
+//   - pagehide beacon sendBeacon não suporta headers customizados (header gap)
+//   - _sent=false após fetch fail permitia janela de double-send
+// Fix: gera key UMA VEZ por sessão de exploração (window.__exploreRewards._idemKey),
+// envia em X-Idempotency-Key no fetch E como campo `_idem_key` no payload do
+// beacon. Backend agora extrai do header OU do payload (precisa de fix
+// correspondente em api_middleware.py).
+function __getOrCreateIdemKey(){
+  if (!window.__exploreRewards) window.__exploreRewards = {};
+  if (window.__exploreRewards._idemKey) return window.__exploreRewards._idemKey;
+  var key = '';
+  try {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      key = window.crypto.randomUUID();
+    }
+  } catch(_e){}
+  if (!key) {
+    // Fallback: timestamp + random (suficiente p/ idem em janela de minutos)
+    key = 'exp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  window.__exploreRewards._idemKey = key;
+  return key;
+}
 window.__postExploracaoTransition = async function(status) {
   if (window.__EXPLORE_MODE !== 'remote') return null;
   if (window.__exploreRewards._sent) {
@@ -15053,19 +15079,22 @@ window.__postExploracaoTransition = async function(status) {
     return null;
   }
   window.__exploreRewards._sent = true;
+  var idemKey = __getOrCreateIdemKey();
   var t0 = Date.now();
   try {
     var resp = await fetch(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN
+        'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN,
+        'X-Idempotency-Key': idemKey  // Sessão #63: BUG-1 fix
       },
       body: JSON.stringify({
         from: 'exploracao',
         to: 'game',
         user_id: window.__EXPLORE_USER_ID,
         token: window.__EXPLORE_TOKEN,
+        _idem_key: idemKey,  // Sessão #63: fallback p/ beacon que pode chegar depois
         payload: {
           status: status,
           rewards: window.__buildRewardsDelta()
@@ -15081,7 +15110,13 @@ window.__postExploracaoTransition = async function(status) {
   } catch (e) {
     var ms = Date.now() - t0;
     console.error('[E-REM:HTTP] transition_failed status=' + status + ' ms=' + ms, e);
-    window.__exploreRewards._sent = false;  // permite retry via beacon
+    // Sessão #63 BUG-10 fix: NÃO resetamos _sent=false aqui mais. Antes
+    // resetar permitia janela de duplo envio (pagehide pode disparar entre
+    // o fail do fetch e a retry). Com idempotency key consistente, mesmo
+    // se o servidor receber a beacon DEPOIS, o idem_check vai pular.
+    // Mantemos _sent=true pra _suprimir_ a beacon (mais eficiente que
+    // confiar 100% no idem_check), mas se a beacon ainda passar, server
+    // detecta dup.
     return null;
   }
 };
@@ -15100,11 +15135,14 @@ window.addEventListener('pagehide', function(ev) {
     || (delta.quests_completed && delta.quests_completed.length));
   if (!hasReward) return;
   try {
+    var idemKey = __getOrCreateIdemKey();  // Sessão #63: mesma key que fetch
     var body = JSON.stringify({
       from: 'exploracao',
       to: 'game',
       user_id: window.__EXPLORE_USER_ID,
       token: window.__EXPLORE_TOKEN,
+      _idem_key: idemKey,  // Sessão #63: backend precisa extrair do payload
+                            // (sendBeacon não suporta headers customizados)
       payload: {
         status: 'interrupted',
         rewards: delta
@@ -34040,11 +34078,29 @@ function _vinvExpAdaptItem(item) {
 }
 /** 2026-05-14: lê MOCK_PLAYER_EQUIPPED sincronizado pela cidade via
  *  localStorage 'valdoria_shared_equipped_v1'. Permite tab equip read-only
- *  em exploração (sem onItemSwap → swap list bloqueada automaticamente). */
+ *  em exploração (sem onItemSwap → swap list bloqueada automaticamente).
+ *  Sessão #55 (2026-05-28): keys prefixadas com char_id (anti-leak entre
+ *  chars do mesmo user). Fallback pra legacy key sem prefix pra compat. */
+function _expCharIdSafe(){
+  try {
+    var qs = new URLSearchParams(location.search);
+    return qs.get('char') || qs.get('char_id') || 'default';
+  } catch(_e){ return 'default'; }
+}
+function _expLocalStorageWithFallback(baseKey){
+  try {
+    // Tenta key per-char primeiro (canonical desde sessão #55)
+    var keyed = baseKey + '_' + _expCharIdSafe();
+    var rawKeyed = localStorage.getItem(keyed);
+    if (rawKeyed) return rawKeyed;
+    // Fallback legacy (sem _<cid>) pra saves antigos
+    return localStorage.getItem(baseKey);
+  } catch(_e){ return null; }
+}
 function _vinvExpReadLoadout(allItems) {
   var loadout = {};
   try {
-    var raw = localStorage.getItem('valdoria_shared_equipped_v1');
+    var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
     if (!raw) return loadout;
     var equipped = JSON.parse(raw);  // {slot: itemName}
     var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
@@ -34076,7 +34132,8 @@ function _vinvExpReadLoadout(allItems) {
 }
 function _vinvExpReadStats() {
   try {
-    var raw = localStorage.getItem('valdoria_shared_stats_v1');
+    // Sessão #55: per-char key com fallback legacy.
+    var raw = _expLocalStorageWithFallback('valdoria_shared_stats_v1');
     if (!raw) return {};
     var s = JSON.parse(raw);
     return {
