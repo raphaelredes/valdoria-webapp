@@ -608,6 +608,21 @@ function redirectToGame(charId, isNew, token) {
     }
     if (isNew) params.set('new', '1');
 
+    /* REFACTOR-1 Phase 2 (Part C prereq): persist the Bearer token in vAuthTokenStore
+       so destination WebApps (combat2/exploracao) read it via getToken() without
+       ?token= in the URL. ADDITIVE — the token still flows via `params` below for
+       backward compat; this just mirrors what the initData /play/ path already does.
+       Guarded + try/catch so a store failure never blocks the redirect/login.
+       Doc: docs/sistemas/refactor-1-plan.md */
+    try {
+        if (window.vAuthTokenStore && t) {
+            window.vAuthTokenStore.setToken(t, {
+                user_id: _userId, char_id: charId || '', env: _envId,
+                scope: 'game', api_base: _apiBase,
+            });
+        }
+    } catch (eStore) { console.warn('[WEB-AUTH] vAuthTokenStore.setToken failed', eStore); }
+
     /* BUG (2026-04-11): nodevpanel iframe carry-over */
     var _currentParams = new URLSearchParams(window.location.search);
     if (_currentParams.get('nodevpanel') === '1') {
@@ -903,6 +918,18 @@ function _tryVStarSession() {
         } catch (e) {
             console.warn('[WEB-AUTH] _tryVStarSession: localStorage.setItem failed', e);
         }
+        /* REFACTOR-1 Phase 2 (Part C prereq): persist Bearer token in vAuthTokenStore
+           so destination WebApps read it via getToken() without ?token=. ADDITIVE —
+           token still flows via the URL below. Doc: docs/sistemas/refactor-1-plan.md */
+        try {
+            if (window.vAuthTokenStore && sess.token) {
+                window.vAuthTokenStore.setToken(sess.token, {
+                    user_id: sess.uid, char_id: sess.charId || '',
+                    env: sess.env || (host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod'),
+                    scope: 'game', api_base: sess.apiBase,
+                });
+            }
+        } catch (eStore) { console.warn('[WEB-AUTH] _tryVStarSession vAuthTokenStore.setToken failed', eStore); }
         var url = '/cidade/?token=' + encodeURIComponent(sess.token)
             + '&api=' + encodeURIComponent(sess.apiBase)
             + '&uid=' + encodeURIComponent(String(sess.uid))
