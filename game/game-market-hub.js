@@ -311,14 +311,14 @@ function renderMarketHub(container, data) {
   /* Flavor */
   if (data.flavor) {
     var flavor = vCity.el('div', 'mkt-flavor');
-    flavor.style.cssText = 'font-style:italic;font-size:12px;color:#a09484;padding:6px 10px;border-left:2px solid rgba(196,149,58,0.3);background:rgba(0,0,0,0.18);border-radius:4px';
+    flavor.style.cssText = 'font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:6px 10px;border-left:2px solid rgba(196,149,58,0.3);background:rgba(0,0,0,0.18);border-radius:4px';
     flavor.innerHTML = data.flavor;
     body.appendChild(flavor);
   }
 
   /* Gold + items badge */
   var stats = vCity.el('div', 'mkt-stats');
-  stats.style.cssText = 'display:flex;justify-content:center;gap:14px;padding:4px 0;font-size:12px;color:#a09484;';
+  stats.style.cssText = 'display:flex;justify-content:center;gap:14px;padding:4px 0;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;';
   var goldSpan = vCity.el('span', '');
   goldSpan.textContent = String(data.gold || 0) + ' ';
   if (typeof vCity.coin === 'function') goldSpan.appendChild(vCity.coin('sm'));
@@ -399,7 +399,7 @@ function renderMarketHub(container, data) {
       body.appendChild(auLbl);
       /* Render ausentes desabilitados visualmente (opacity, no-click) */
       var auWrap = vCity.el('div', 'market-absent-list');
-      auWrap.style.cssText = 'opacity:0.5;pointer-events:none;font-size:11px;padding:0 12px;';
+      auWrap.style.cssText = 'opacity:0.5;pointer-events:none;font-size:calc(11px * var(--v-font-scale, 1));padding:0 12px;';
       for (var ai = 0; ai < ausentes.length; ai++) {
         var aN = ausentes[ai];
         var aRow = vCity.el('div', 'market-absent-row');

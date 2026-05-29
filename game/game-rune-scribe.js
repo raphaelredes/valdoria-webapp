@@ -142,7 +142,7 @@ function renderRuneScribe(container, data) {
 
   /* === 2c. Recipe info === */
   var recipe = _rnsEl('div', 'rns-recipe', '📜 Receita: 3 fragmentos do mesmo tier = 1 runa aleatória');
-  recipe.style.cssText = 'text-align:center;font-style:italic;font-size:12px;color:#a09484;padding:6px 8px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
+  recipe.style.cssText = 'text-align:center;font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:6px 8px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
   body.appendChild(recipe);
 
   if (data.type === 'craft_menu') {
@@ -164,7 +164,7 @@ function renderRuneScribe(container, data) {
         hdr.style.cssText = 'display:flex;align-items:center;gap:8px;';
         var emoji = _rnsEl('span', '');
         emoji.innerHTML = t.frag_emoji;
-        emoji.style.cssText = 'font-size:18px;';
+        emoji.style.cssText = 'font-size:calc(18px * var(--v-font-scale, 1));';
         hdr.appendChild(emoji);
         var name = _rnsEl('span', 'svc-name', t.frag_name);
         name.style.flex = '1';
@@ -184,7 +184,7 @@ function renderRuneScribe(container, data) {
         progBar.appendChild(progFill);
         progWrap.appendChild(progBar);
         var progText = _rnsEl('span', '', t.count + '/' + t.cost);
-        progText.style.cssText = 'font-size:11px;color:#a09484;min-width:40px;text-align:right;';
+        progText.style.cssText = 'font-size:calc(11px * var(--v-font-scale, 1));color:#a09484;min-width:40px;text-align:right;';
         progWrap.appendChild(progText);
         card.appendChild(progWrap);
 
@@ -216,7 +216,7 @@ function renderRuneScribe(container, data) {
       for (var a = 0; a < data.actions.length; a++) {
         var act = data.actions[a];
         var aBtn = vCity.el('button', 'v-popup-btn');
-        aBtn.style.cssText = 'flex:1;font-size:11px;padding:6px 8px;';
+        aBtn.style.cssText = 'flex:1;font-size:calc(11px * var(--v-font-scale, 1));padding:6px 8px;';
         aBtn.innerHTML = act.icon + ' ' + act.label;
         aBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(act.cb));
         qRow.appendChild(aBtn);

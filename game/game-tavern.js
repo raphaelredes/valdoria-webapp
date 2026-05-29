@@ -548,7 +548,7 @@ function renderTavernHub(container, data) {
   /* 2c. Flavor text (atmosfera) */
   if (data.flavor) {
     var flavor = vCity.el('div', 'tav-flavor');
-    flavor.style.cssText = 'font-style:italic;font-size:12px;color:#a09484;padding:6px 10px;border-left:2px solid rgba(196,149,58,0.3);background:rgba(0,0,0,0.18);border-radius:4px';
+    flavor.style.cssText = 'font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:6px 10px;border-left:2px solid rgba(196,149,58,0.3);background:rgba(0,0,0,0.18);border-radius:4px';
     flavor.textContent = vCity.stripTags(data.flavor);
     body.appendChild(flavor);
   }

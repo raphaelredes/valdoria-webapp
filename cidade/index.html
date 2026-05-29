@@ -4186,7 +4186,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       box-shadow: 0 0 4px var(--v-gold-30, rgba(196,149,58,0.6));
     }
     .inv-card-emoji {
-      font-size: clamp(20px, 5vw, 28px);
+      font-size: calc(clamp(20px, 5vw, 28px) * var(--v-font-scale, 1));
       text-align: center;
       line-height: 1;
       margin-bottom: 2px;
@@ -9320,7 +9320,7 @@ function _isCTA(btn) {
       + '</div>'
 
       // Título principal — fontes maiores (era 17-22 → 22-28)
-      + '<div class="fLs-title-anim" style="font-family:var(--v-font-display,Cinzel,serif); font-size:clamp(22px, 6vw, 28px);'
+      + '<div class="fLs-title-anim" style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(clamp(22px, 6vw, 28px) * var(--v-font-scale, 1));'
       + 'color:var(--v-gold,#c4953a); letter-spacing:4px; text-transform:uppercase;'
       + 'text-shadow:0 0 14px var(--v-gold-50,rgba(196,149,58,0.5)), 0 0 28px var(--v-gold-25,rgba(196,149,58,0.25)), 0 2px 4px rgba(0,0,0,0.6);'
       + 'margin-bottom:6px;">'
@@ -14455,13 +14455,13 @@ function _showKillsPopup(p){
     +   '</div>'
     + '</div>'
     /* Counter (animated 0→total via JS) */
-    + '<div id="vKl-counter" style="font-family: var(--v-font-display, Cinzel, serif); font-size: clamp(38px,9.5vw,52px); '
+    + '<div id="vKl-counter" style="font-family: var(--v-font-display, Cinzel, serif); font-size: calc(clamp(38px,9.5vw,52px) * var(--v-font-scale, 1)); '
     + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6); margin-top:6px;">0</div>'
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: clamp(11px,2.8vw,13px); color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(clamp(11px,2.8vw,13px) * var(--v-font-scale, 1)); color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top:4px;">'
     + 'Inimigos Abatidos'
     + '</div>'
     + (top && top.kills > 0
-      ? '<div style="font-size: clamp(10px,2.6vw,12px); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 8px; line-height:1.4;">'
+      ? '<div style="font-size: calc(clamp(10px,2.6vw,12px) * var(--v-font-scale, 1)); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: 8px; line-height:1.4;">'
         + '<span style="color:#c4953a;">⚔</span> Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> <span style="color:var(--v-text-dim,#a09484);">·</span> <b style="color:#ffd700">' + top.kills + '</b>'
       + '</div>'
       : '')
@@ -31241,12 +31241,12 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-torch{position:absolute;width:14px;height:18px;font-size:calc(14px * var(--v-font-scale, 1));line-height:1;animation:sqrTorchFlicker 1.8s ease-in-out infinite;}'
     + '.sqr-torch.tl{top:4px;left:6px;}'
     + '.sqr-torch.tr{top:4px;right:6px;}'
-    + '.sqr-fountain{display:flex;justify-content:center;margin:4px 0 6px;font-size:clamp(40px,9vw,52px);line-height:1;color:' + theme.primary + ';text-shadow:0 0 12px ' + theme.glow + ';animation:sqrFountainSway 3.6s ease-in-out infinite;}'
-    + '.sqr-title{text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:clamp(15px,3.8vw,17px);font-weight:700;letter-spacing:3px;color:' + theme.primary + ';text-shadow:0 0 10px ' + theme.glow + ';margin:2px 0 4px;text-transform:uppercase;}'
-    + '.sqr-flavor{text-align:center;font-size:clamp(11px,2.8vw,12px);line-height:1.5;color:#d4c8b0;font-style:italic;margin:6px 6px 0;}'
+    + '.sqr-fountain{display:flex;justify-content:center;margin:4px 0 6px;font-size:calc(clamp(40px,9vw,52px) * var(--v-font-scale, 1));line-height:1;color:' + theme.primary + ';text-shadow:0 0 12px ' + theme.glow + ';animation:sqrFountainSway 3.6s ease-in-out infinite;}'
+    + '.sqr-title{text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(15px,3.8vw,17px) * var(--v-font-scale, 1));font-weight:700;letter-spacing:3px;color:' + theme.primary + ';text-shadow:0 0 10px ' + theme.glow + ';margin:2px 0 4px;text-transform:uppercase;}'
+    + '.sqr-flavor{text-align:center;font-size:calc(clamp(11px,2.8vw,12px) * var(--v-font-scale, 1));line-height:1.5;color:#d4c8b0;font-style:italic;margin:6px 6px 0;}'
     /* Reputation/buff banners */
     + '.sqr-banner-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}'
-    + '.sqr-rep-banner,.sqr-buff-banner{flex:1;min-width:0;padding:8px 10px;border-radius:var(--v-radius-sm,6px);border:1px solid;font-size:clamp(10px,2.5vw,11px);text-align:center;letter-spacing:1px;font-family:var(--v-font-display,Cinzel,serif);}'
+    + '.sqr-rep-banner,.sqr-buff-banner{flex:1;min-width:0;padding:8px 10px;border-radius:var(--v-radius-sm,6px);border:1px solid;font-size:calc(clamp(10px,2.5vw,11px) * var(--v-font-scale, 1));text-align:center;letter-spacing:1px;font-family:var(--v-font-display,Cinzel,serif);}'
     + '.sqr-rep-banner{background:rgba(196,149,58,0.10);border-color:rgba(196,149,58,0.45);color:var(--v-gold,#c4953a);}'
     + '.sqr-buff-banner{background:rgba(255,215,0,0.10);border-color:rgba(255,215,0,0.55);color:#ffd700;animation:sqrBuffPulse 2.8s ease-in-out infinite;}'
     /* Service grid 2-col */
@@ -31254,7 +31254,7 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px 10px;background:linear-gradient(180deg,rgba(74,56,40,0.32) 0%,rgba(42,30,18,0.20) 100%);border:1px solid rgba(196,149,58,0.30);border-radius:var(--v-radius-sm,6px);cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease,background 0.15s ease;text-align:center;animation:sqrCardSlide 0.4s ease-out backwards;}'
     + '.sqr-card:hover{transform:translateY(-2px);border-color:var(--v-gold,#c4953a);background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.40) 100%);}'
     + '.sqr-card-icon{width:32px;height:32px;color:var(--v-gold,#c4953a);}'
-    + '.sqr-card-label{font-family:var(--v-font-display,Cinzel,serif);font-size:clamp(11px,2.6vw,12px);font-weight:600;color:#e8dcc8;line-height:1.3;text-align:center;letter-spacing:0.5px;}'
+    + '.sqr-card-label{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(11px,2.6vw,12px) * var(--v-font-scale, 1));font-weight:600;color:#e8dcc8;line-height:1.3;text-align:center;letter-spacing:0.5px;}'
     + '.sqr-card-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:linear-gradient(180deg,#c4953a,#9a7530);border:1px solid rgba(0,0,0,0.4);color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));font-weight:700;display:grid;place-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.4);}'
     + '.sqr-card-badge.novo{background:linear-gradient(180deg,#ff8a4a,#c43020);color:#fff;border-color:rgba(0,0,0,0.5);text-shadow:0 1px 0 rgba(0,0,0,0.3);min-width:38px;font-size:calc(9px * var(--v-font-scale, 1));letter-spacing:0.5px;}'
     + '.sqr-card-badge.done{background:linear-gradient(180deg,#7cdb7c,#3a8a3a);color:#fff;}'
