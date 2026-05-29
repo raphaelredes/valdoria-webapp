@@ -21,3 +21,9 @@ node_modules/
 # Local PNG resize backups (never deploy — keeps originals safe locally)
 _original/
 _backup/
+
+# Runtime/test artifacts que vazam pra cá quando um script roda com CWD errado
+# (logs do bot, faulthandler, cache do hypothesis). NUNCA pertencem ao webapp.
+.hypothesis/
+data/
+logs/
