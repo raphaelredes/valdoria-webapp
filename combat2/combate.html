@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-28T21:34:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-29T03:18:15Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -593,6 +593,13 @@ document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v 
 document.write('<script src="' + BASE + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
 document.write('<script src="' + BASE + '/shared/listener-registry.js?v=' + v + '"><\/script>');
 document.write('<script src="' + BASE + '/shared/scheduler.js?v=' + v + '"><\/script>');
+/* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra combate.
+   Padrão IMMUTABLE — cidade/explore/levelup já carregam. Sem ele, 2 devices
+   simultaneos durante combate não disparam displacement, permitindo state
+   corruption (turno duplicado, rewards aplicadas em ambos). Init mais
+   abaixo quando token + api + uid estiverem definidos. */
+document.write('<script src="' + BASE + '/shared/device-id.js?v=' + v + '"><\/script>');
+document.write('<script src="' + BASE + '/shared/session-heartbeat.js?v=' + v + '"><\/script>');
 setTimeout(function(){
     try{
         if(!window.vMaintenance)return;
@@ -12662,6 +12669,31 @@ window.__COMBAT_PLAYER_LVL = (function () {
    de pick(CHAR_NAMES) random. */
 window.__COMBAT_PLAYER_NAME = (function () {
     try { return new URLSearchParams(location.search).get('pName') || ''; } catch (e) { return ''; }
+})();
+
+/* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra combate.
+   Inicia heartbeat a cada 3s (ativo) / 10s (background). Detecta displacement
+   quando outro device autentica → este recebe status:'displaced' + overlay
+   medieval "Sessão transferida". Padrão IMMUTABLE — cidade/explore/levelup
+   já tinham. Só roda em REMOTE (com api+token+uid). */
+(function _initCombatHeartbeat() {
+    if (window.__COMBAT_MODE !== 'remote') return;
+    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN || !window.__COMBAT_USER_ID) return;
+    if (!window.SessionHeartbeat || typeof window.SessionHeartbeat.init !== 'function') {
+        console.warn('[CB-HEARTBEAT] SessionHeartbeat not loaded — single-device lock unavailable');
+        return;
+    }
+    try {
+        window.SessionHeartbeat.init({
+            apiBase: window.__COMBAT_API_BASE.replace(/\/$/, ''),
+            token: window.__COMBAT_TOKEN,
+            uid: window.__COMBAT_USER_ID,
+            interval: 3000
+        });
+        console.info('[CB-HEARTBEAT] SessionHeartbeat started (single-device lock)');
+    } catch (_e) {
+        console.warn('[CB-HEARTBEAT] init failed:', _e);
+    }
 })();
 /* Phase 4 dungeons AAA (2026-04-26): godmode=1 URL param — DEV/QA one-shot kill.
    Patcha state.order apos buildCombat: enemies hp/mhp = 1, player hp/mhp = 9999.

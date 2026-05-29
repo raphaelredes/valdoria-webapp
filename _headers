@@ -225,37 +225,55 @@
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
 
+# Sessão #63 (2026-05-28) BUG-3 mitigation: Referrer-Policy: no-referrer.
+# Mitigação prática pra "tokens em URL query string". Tokens das WebApps
+# (cidade/combat2/exploracao/levelup) aparecem como ?token=XXX na URL —
+# refactor completo pra /play/ entry point é multi-sessão (BUG-3 backlog).
+# Mitigação imediata: no-referrer impede que browser envie Referer header
+# (contendo token) ao carregar sub-recursos externos (imagens CDN, fonts,
+# beacons analytics). Sem isso, qualquer recurso externo carregado pela
+# página recebia o token no Referer. Combinado com TTL 30min e Cloudflare
+# logs admin-only, reduz dramaticamente a janela de exposição.
+# Spec: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 /play/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /cidade/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /combat2/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /exploracao/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /character_creator/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /levelup/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /prologue/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /web/
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
 
 /pix/
   Cache-Control: no-cache

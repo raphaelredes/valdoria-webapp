@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-29T00:50:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-29T03:18:15Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -747,6 +747,16 @@
     document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra
+       exploracao. Padrão IMMUTABLE — combat/cidade/levelup já carregam
+       o heartbeat. Sem ele, 2 devices simultaneos durante exploração
+       não disparavam displacement, permitindo state corruption.
+       SessionHeartbeat.init é chamado mais abaixo quando _EXPLORE_TOKEN +
+       _EXPLORE_API_BASE + _EXPLORE_USER_ID estiverem definidos. */
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     setTimeout(function(){
         try{
             if(!window.vMaintenance)return;
@@ -14363,6 +14373,28 @@ body.perf-lite .stub-popup-voice { animation: none; }
     + ' origin=' + window.__EXPLORE_ORIGIN
     + ' has_snap=' + (window.__EXPLORE_SNAP_B64 ? 'yes' : 'no')
     + ' has_delta=' + (window.__EXPLORE_DELTA_B64 ? 'yes' : 'no'));
+
+  // Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra explore.
+  // Inicia heartbeat a cada 3s (ativo) / 10s (background). Detecta displacement
+  // quando outro device autentica → este recebe status:'displaced' + overlay
+  // medieval "Sessão transferida". Padrão CLAUDE.md "Single-Device Session
+  // Lock" IMMUTABLE. Aplicado a combat/cidade/levelup antes — explore era
+  // a peça faltante (audit BUG-7).
+  if (window.__EXPLORE_MODE === 'remote'
+      && window.SessionHeartbeat
+      && typeof window.SessionHeartbeat.init === 'function') {
+    try {
+      window.SessionHeartbeat.init({
+        apiBase: window.__EXPLORE_API_BASE.replace(/\/$/, ''),
+        token: window.__EXPLORE_TOKEN,
+        uid: window.__EXPLORE_USER_ID,
+        interval: 3000
+      });
+      console.info('[E-REM:HEARTBEAT] SessionHeartbeat started (single-device lock)');
+    } catch (_heartbeatErr) {
+      console.warn('[E-REM:HEARTBEAT] SessionHeartbeat.init failed:', _heartbeatErr);
+    }
+  }
 
   // Sessão #26 v3 (2026-05-22) USER REQUEST: Levelup é tela MAIS IMPORTANTE.
   // Quando player acessa exploracao com pending_asi/pending_skills, redireciona
