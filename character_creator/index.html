@@ -3686,11 +3686,15 @@ Busca rápida:
                 }
             }
 
-            // 6. Equipment choice
-            if (serverSpec && (serverSpec.equipment_choice === 'A' || serverSpec.equipment_choice === 'B')) {
+            // 6. Equipment choice — Sessão #64 (DND-B2): Warrior tem A/B/C
+            // (Defense / Great Weapon / Two-Weapon), classes têm 2-3 options
+            var _equipValid = ['A', 'B', 'C'];
+            if (serverSpec && _equipValid.indexOf(serverSpec.equipment_choice) >= 0) {
                 sel.equipmentChoice = serverSpec.equipment_choice;
             } else {
-                sel.equipmentChoice = Math.random() > 0.5 ? 'A' : 'B';
+                // Warrior tem 3 opções; outras classes só A/B. Backend valida.
+                var _equipPool = (sel.classKey === 'class_warrior') ? ['A', 'B', 'C'] : ['A', 'B'];
+                sel.equipmentChoice = _equipPool[Math.floor(Math.random() * _equipPool.length)];
             }
 
             // 7. Stats — server retorna Standard Array por class priority
