@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T16:16:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T18:56:08Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18226,8 +18226,11 @@ function mountBattlefieldPanZoom() {
         var vpW = vp.clientWidth || 430;
         /* Sessão #66: STAGE_W acompanha --v-font-scale (células escalam no CSS).
            Sem isso o fit usava 652px fixo e o tabuleiro cortava em letra grande.
-           Lê de html OU body (fallback 1) — degradação suave se não achar a var. */
-        var _fs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--v-font-scale'));
+           Lê do PRÓPRIO stage: ele herda o --v-font-scale efetivo (1.30 em letra
+           grande), exatamente como as .cell filhas. body[data-font-size] seta a var
+           no <body>, e o <html> fica 1.0 — ler de documentElement pegava 1.0 errado
+           (o tabuleiro cortava). Fallback body → 1 se a var não existir. */
+        var _fs = parseFloat(getComputedStyle(stage).getPropertyValue('--v-font-scale'));
         if (!(_fs > 0)) _fs = parseFloat(getComputedStyle(document.body).getPropertyValue('--v-font-scale'));
         if (!(_fs > 0)) _fs = 1;
         var stageW = 4 * (160 * _fs) + 12;
