@@ -510,7 +510,7 @@
 
   function buildImg(slug, altText) {
     var img = new Image();
-    img.src = pngBase + slug + '.png';
+    img.src = pngBase + slug + '.webp';
     img.alt = altText || slug;
     img.style.width = '100%';
     img.style.height = '100%';
@@ -609,12 +609,12 @@
       // Try female variant if player is female
       var gender = (typeof window !== 'undefined' && window.vPlayerGender) || 'M';
       if (gender === 'F' && hasManifestSlug(slug + '-f')) {
-        return '<img src="' + pngBase + slug + '-f.png" alt="' + alt +
+        return '<img src="' + pngBase + slug + '-f.webp" alt="' + alt +
                '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '-f">';
       }
       // Fallback to default (masculine) version
       if (hasManifestSlug(slug)) {
-        return '<img src="' + pngBase + slug + '.png" alt="' + alt +
+        return '<img src="' + pngBase + slug + '.webp" alt="' + alt +
                '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '">';
       }
     }

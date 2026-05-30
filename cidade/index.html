@@ -763,6 +763,14 @@ LOG SINK (Fase 7):
     /* 2026-05-16: city location PNG icons (AI-generated). Mesmo tamanho do SVG. */
     .hub-loc .hl-ico img.hl-ico-img { width: 36px; height: 36px; object-fit: contain;
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
+    /* Sessão #63 (2026-05-30): imagem do local EM DESTAQUE no topo do card.
+       User pediu as ilustrações .webp geradas visíveis (não o iconezinho lateral
+       da #56). Thumbnail ocupa a largura do card; nome (.hl-nm) fica embaixo. */
+    .hub-loc .hl-thumb { width: 100%; height: 48px; border-radius: var(--v-radius-sm, 6px);
+        overflow: hidden; display: flex; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.22); margin-bottom: 2px; }
+    .hub-loc .hl-thumb img.hl-ico-img { width: 100%; height: 100%; object-fit: cover;
+        display: block; filter: none; }
     /* .fb-btn .fb-heraldic — sem color override; cor vem inline do _heralB() via HERALDIC_COLORS */
 
     /* === Cores temáticas por local (heraldic palette diversa) === */
@@ -8614,6 +8622,33 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.xp_next != null) p.xpNext = picked.xp_next;
       if (picked.xp_prev != null) p.xpPrev = picked.xp_prev;
       if (picked.exhaustion != null) p.exh = picked.exhaustion;
+      // Sessão #63 (2026-05-30): liga/conquistas/abates/sequência REAIS do char
+      // (backend /api/auth/characters). Substituem o mock hardcoded do
+      // buildMockHubScreen (1240 XP liga, 20/70 conquistas, 23 abates, 3 streak)
+      // que vazava pra TODO personagem real, inclusive nível 1 recém-criado.
+      if (picked.league_xp != null)    p.league_xp = picked.league_xp;
+      if (picked.league_tier)          p.league_tier = picked.league_tier;
+      if (picked.ach_unlocked != null) p.ach_unlocked = picked.ach_unlocked;
+      if (picked.ach_total != null)    p.ach_total = picked.ach_total;
+      if (picked.kills != null)        p.kills = picked.kills;
+      if (picked.win_streak != null)   p.win_streak = picked.win_streak;
+      // Sessão #63 (2026-05-30): equipamento REAL do char → MOCK_PLAYER_EQUIPPED
+      // (aba "Equipados" da mochila). Antes o equip era mock fixo (Espada Longa,
+      // Cota de Malha) e a aba aparecia vazia, pois _vinvBuildLoadout cruzava com
+      // o inventário mock e os nomes não batiam. Agora reflete o char real.
+      if (picked.equipment && typeof picked.equipment === 'object' && window.MOCK_PLAYER_EQUIPPED){
+        try {
+          var _eqReal = picked.equipment;
+          // Zera slots do mock que não vieram do backend (remove itens fantasma)
+          Object.keys(window.MOCK_PLAYER_EQUIPPED).forEach(function(_slot){
+            window.MOCK_PLAYER_EQUIPPED[_slot] = (_eqReal[_slot] != null) ? _eqReal[_slot] : null;
+          });
+          // Aplica slots reais (inclui slots não presentes no mock default)
+          Object.keys(_eqReal).forEach(function(_slot){
+            window.MOCK_PLAYER_EQUIPPED[_slot] = _eqReal[_slot];
+          });
+        } catch(_eqe){ console.warn('[CITY] equip hydrate failed:', _eqe); }
+      }
       // USER REPORT 2026-05-14 #2 — Ficha + HUD usam dados REAIS do DB em vez
       // de hardcoded por classe (_genFichaStats). Stats vêm direto, AC/Atk/DC
       // vêm computados server-side via Player.get_armor_class/get_attack_bonus/
@@ -10407,13 +10442,33 @@ function buildMockHubScreen(player){
     // Os cards de membros já são exibidos no #city-group-panel (HUD topo) — não precisa duplicar.
     allies: [],
     quest_tracker: { quests: _buildQuestTrackerFromActive() },
-    progress_strip: {
-      // league_icon: ID heráldico (ic-liga-bronze/prata/ouro/platina/mithral)
-      league_icon: 'ic-liga-bronze', league_xp: 1240, league_name: 'Bronze', league_color: '#cd7f32', league_cb: 'league_main',
-      // ach_unlocked/ach_total computados dinamicamente — sistema progressivo (14 cadeias × 5 tiers = 70)
-      ach_unlocked: 20,  ach_total: 70,   ach_cb: 'ach_main'
+    // Sessão #63 (2026-05-30): progress strip DERIVA do player real (hidratado
+    // do backend em /api/auth/characters). Antes era mock fixo (1240 XP liga,
+    // 20/70 conquistas) que vazava pra todo personagem. Personagem novo nv1 =
+    // Bronze 0 XP, 0 conquistas; abates/sequência só aparecem se > 0.
+    progress_strip: (function(){
+      var _LIGA = {
+        bronze:   { icon: 'ic-liga-bronze',  name: 'Bronze',   color: '#cd7f32' },
+        prata:    { icon: 'ic-liga-prata',   name: 'Prata',    color: '#c0c0c0' },
+        ouro:     { icon: 'ic-liga-ouro',    name: 'Ouro',     color: '#e8c45a' },
+        platina:  { icon: 'ic-liga-platina', name: 'Platina',  color: '#7cc4d4' },
+        lendaria: { icon: 'ic-liga-mithral', name: 'Lendária', color: '#b088d8' }
+      };
+      var _t = _LIGA[(player && player.league_tier) || 'bronze'] || _LIGA.bronze;
+      return {
+        league_icon: _t.icon,
+        league_xp: (player && player.league_xp != null) ? player.league_xp : 0,
+        league_name: _t.name, league_color: _t.color, league_cb: 'league_main',
+        ach_unlocked: (player && player.ach_unlocked != null) ? player.ach_unlocked : 0,
+        ach_total: (player && player.ach_total != null) ? player.ach_total : 0,
+        ach_cb: 'ach_main'
+      };
+    })(),
+    player_stats: {
+      kills: (player && player.kills != null) ? player.kills : 0,
+      streak: (player && player.win_streak != null) ? player.win_streak : 0,
+      kills_cb: 'kills_log', streak_cb: 'streak_log'
     },
-    player_stats: { kills: 23, streak: 3, kills_cb: 'kills_log', streak_cb: 'streak_log' },
     // Sessão #56 (Demand A): badge label dinâmico — não mais "Covil dos Lobos"
     // (masmorra). Agora reflete o desafio do dia (caça/coleta).
     daily_challenge_badge: (function(){
@@ -12174,7 +12229,13 @@ function _linkGoogleStart(){
   } catch(_e){ /* localStorage cheio — segue mesmo assim */ }
   // Redireciona pro /web/ portal em modo link
   var origin = window.location.origin;
-  var linkUrl = origin + '/web/?link_mode=google&_cb=' + Date.now();
+  // Sessão #63 (2026-05-30): passa token+api na URL. openLink abre browser
+  // EXTERNO (sessionStorage do WebView não propaga); /web/ lê esses params como
+  // fallback e grava no próprio sessionStorage pra sobreviver ao redirect Google.
+  var linkUrl = origin + '/web/?link_mode=google'
+              + '&token=' + encodeURIComponent(token)
+              + '&api=' + encodeURIComponent(api)
+              + '&_cb=' + Date.now();
   // Em Telegram WebApp, usa openLink pra abrir em browser externo
   try {
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink){
@@ -13574,7 +13635,10 @@ function _showLeaguePopup(p){
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Liga dos Aventureiros';
-  var currentXp = 1240;  // mock — em PROD vem de player.metadata.league_xp
+  // Sessão #63 (2026-05-30): XP de liga REAL do player (era mock 1240) — bate
+  // com o card do hub (buildMockHubScreen). Personagem novo nv1 = 0.
+  var currentXp = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_xp != null)
+    ? window.CITY_MOCK_PLAYER.league_xp : 0;
   var currentTier = LEAGUE_TIERS[0];
   for (var i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
     if (currentXp >= LEAGUE_TIERS[i].minXp) { currentTier = LEAGUE_TIERS[i]; break; }
@@ -20362,7 +20426,7 @@ function _buildDailyChallengeMockData(player){
           + '<b>Desafio do Dia · ' + kindLabel + '</b><br>'
           + '<i>' + ch.desc + '</i><br><br>'
           + '🎯 ' + verb + ' <b>' + ch.count + 'x ' + ch.target + '</b> em <b>' + ch.biome + '</b><br>'
-          + '⏰ Reseta à meia-noite · Seed <code>' + ch.seed + '</code>',
+          + '⏰ Reseta à meia-noite',
     rep_label: '🏆 +' + ch.reward_gold + ' Valdoritas · +' + ch.reward_xp + ' XP',
     services: [
       { icon: _heralIco(ctaIcon), label: ctaLabel, cb: 'daily_start_combat',
@@ -37692,12 +37756,20 @@ function _vinvAdaptItem(invEntry) {
   };
 }
 function _vinvBuildLoadout() {
+  // Sessão #63 (2026-05-30): lê DIRETO de MOCK_PLAYER_EQUIPPED (slot→nome),
+  // hidratado com o equipamento REAL do char no bootstrap. Antes cruzava com
+  // MOCK_PLAYER_INVENTORY e retornava VAZIO quando o item equipado não estava
+  // na lista de inventário — a aba "Equipados" aparecia sem nenhum item.
   var loadout = {};
-  (MOCK_PLAYER_INVENTORY || []).forEach(function (entry) {
-    if (entry.q <= 0) return;
-    if (!_isItemEquipped(entry.n)) return;
-    var adapted = _vinvAdaptItem(entry);
-    if (adapted.slot) loadout[adapted.slot] = adapted;
+  var eq = (typeof _getCurrentEquipped === 'function')
+    ? _getCurrentEquipped() : (window.MOCK_PLAYER_EQUIPPED || {});
+  Object.keys(eq || {}).forEach(function (slot) {
+    var name = eq[slot];
+    if (!name) return;
+    var adapted = _vinvAdaptItem({ n: name, q: 1 });
+    // slot do ITEM (via ITEMS_DB) tem prioridade; senão a key do equip dict.
+    var key = adapted.slot || _vinvSlotMap(slot) || slot;
+    if (key) loadout[key] = adapted;
   });
   return loadout;
 }
@@ -38415,7 +38487,7 @@ function _wireEquipTabEvents(bodyEl){
 function _renderAlliesTabHtml(){
   var allies = _getActiveAllies();
   if (allies.length === 0){
-    return '<div class="inv-empty">— Nenhum aliado no grupo. Recrute na Guilda ou Taverna. —</div>';
+    return '<div class="vinv-empty inv-empty">— Nenhum aliado no grupo. Recrute na Guilda ou Taverna. —</div>';
   }
   var html = '<div class="ally-list">';
   allies.forEach(function(a){
@@ -41566,7 +41638,7 @@ function _showDailyChallengeEpicPopup(p){
         + '  </div>'
         + '  <div style="margin-top:3px;font-size:calc(10px * var(--v-font-scale, 1));'
         + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap:4px;opacity:0.85;">'
-        + '    ⏰ <span>Reseta à meia-noite · Seed <code style="font-size:0.95em;">' + ch.seed + '</code></span>'
+        + '    ⏰ <span>Reseta à meia-noite</span>'
         + '  </div>'
         + '</div>'
 
@@ -41659,12 +41731,10 @@ function _dailyStartCombat(p){
   _showInfoPopup({
     icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#' + ch.icon + '"/></svg>',
     npc: 'Desafio do Dia',
-    title: 'Confirmar: ' + ch.target,
-    desc: '<i>' + ch.desc + '</i><br><br>'
-        + '<b>Alvo:</b> ' + (ch.kind === 'hunt' ? 'Abater' : 'Reunir') + ' ' + ch.count + 'x ' + ch.target + '<br>'
-        + '<b>Local:</b> ' + ch.biome + '<br>'
-        + '<b>Recompensa:</b> ' + ch.reward_gold + ' Valdoritas + ' + ch.reward_xp + ' XP<br>'
-        + '<b>Sem custo de entrada</b>',
+    title: ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta',
+    desc: '<div style="text-align:center;color:var(--v-text-dim,#a09484);'
+        + 'font-size:calc(13px * var(--v-font-scale,1));line-height:1.5;">Deseja iniciar agora?</div>',
+    confirmLabel: 'Sim',
     onConfirm: function(){
       // Mock combat — 65% sucesso (caça/coleta menos punitivo que masmorra antiga)
       var win = Math.random() < 0.65;
@@ -56780,12 +56850,19 @@ function _buildLocCell(ico, name, btn) {
        (evita "tudo gold" — cada local tem sua cor heráldica natural). */
     if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
-    /* Sessão #62 (2026-05-28) — User pediu: "Remova os ícones que estão ao
-       lado esquerdo de cada palavra que representa os locais da cidade as
-       áreas da cidade na verdade."
-       Antes: cell tinha <div class="hl-ico"> com PNG/SVG do brasão do local
-       AO LADO ESQUERDO do nome. Agora: só o nome. Cor temática por data-cb
-       continua aplicada via CSS (.hub-loc[data-cb=...]). */
+    /* Sessão #63 (2026-05-30) — User pediu as IMAGENS geradas dos locais de
+       volta, EM DESTAQUE no topo do card. Histórico: #56 mostrava como
+       iconezinho 36px lateral; #62 removeu (user achou "ícone ao lado do nome"
+       poluído); agora user quer as ilustrações .webp visíveis como thumbnail
+       proeminente. _cityLocIconHTML retorna <img .webp> p/ locais em
+       CITY_LOC_PNG_AVAILABLE; layout via .hl-thumb (CSS no <style> inline).
+       Só adiciona se há imagem real (.webp) — fallback SVG/vazio = só nome. */
+    var thumbHtml = (typeof _cityLocIconHTML === 'function') ? _cityLocIconHTML(btn && btn.cb, ico) : '';
+    if (thumbHtml && thumbHtml.indexOf('<img') === 0) {
+        var thumb = _hubDiv('hl-thumb');
+        thumb.innerHTML = thumbHtml;
+        cell.appendChild(thumb);
+    }
 
     /* Label */
     var nmEl = _hubDiv('hl-nm');

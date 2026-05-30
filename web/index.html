@@ -9,6 +9,15 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <style>html{background:#2a2420;opacity:1!important}</style>
+    <!-- Sessão #63 (2026-05-30): link_mode=google (vincular conta vindo do jogo)
+         pula a tela de escolha "Telegram ou Google" e mostra só "Vinculando…"
+         enquanto redireciona pro OAuth do Google. Evita o flash da tela genérica
+         que confundia o user (ele só quer VINCULAR Google, não escolher login). -->
+    <script>(function(){try{if(new URLSearchParams(location.search).get('link_mode')==='google'){document.documentElement.classList.add('wa-link-google');}}catch(_e){}})();</script>
+    <style>
+      html.wa-link-google #screen-login{display:none!important;}
+      html.wa-link-google #wa-link-overlay{display:flex!important;}
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
@@ -46,6 +55,14 @@
         <div class="wa-ember"></div>
         <div class="wa-ember"></div>
         <div class="wa-ember"></div>
+    </div>
+
+    <!-- Sessão #63 (2026-05-30): overlay de vinculação Google (visível só quando
+         link_mode=google, via classe .wa-link-google no <html>). -->
+    <div id="wa-link-overlay" style="display:none;position:fixed;inset:0;z-index:50;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#2a2420;color:var(--v-text,#d4c8b0);font-family:var(--v-font,'MedievalSharp',serif);text-align:center;padding:24px;">
+      <div class="wa-spinner"></div>
+      <div style="font-size:16px;">Vinculando sua conta Google…</div>
+      <div style="font-size:12px;color:var(--v-text-dim,#a09484);max-width:280px;line-height:1.5;">Você será levado à tela de login do Google. Após autorizar, volte ao jogo.</div>
     </div>
 
     <!-- Login Screen -->

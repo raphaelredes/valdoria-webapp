@@ -1210,6 +1210,19 @@ async function _initWebAuth() {
                     _linkPending = parsed;
                 }
             }
+            // Sessao #63 (2026-05-30): fallback — token/api via query string.
+            // openLink abre browser EXTERNO (sessionStorage do WebView do
+            // Telegram NAO propaga pro browser); o jogo passa token+api na URL
+            // do /web/. Grava no sessionStorage DESTE browser pra sobreviver ao
+            // redirect de volta do Google (que volta sem query, so com #id_token).
+            if (!_linkPending) {
+                var _qTok = _qsLink.get('token') || '';
+                var _qApi = (_qsLink.get('api') || '').replace(/\/$/, '');
+                if (_qTok && _qApi) {
+                    _linkPending = { token: _qTok, api: _qApi, returnUrl: window.location.href, ts: Date.now() };
+                    try { sessionStorage.setItem('valdoria_link_pending', JSON.stringify(_linkPending)); } catch (_e2) { /* noqa: preflight */ }
+                }
+            }
         } catch (_) { /* noqa: preflight */ }
         // Decide se estamos em link_mode:
         var _hasIdTokenHash = String(window.location.hash || '').indexOf('id_token=') !== -1;

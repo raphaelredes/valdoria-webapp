@@ -460,7 +460,7 @@
     var gold = (cfg.player.gold || 0).toLocaleString('pt-BR');
     el.innerHTML = ''
       + '<div class="vinv-header-title">'
-      +   _uiIcon('backpack', 22) + '<span>' + _esc(cfg.title) + '</span>'
+      +   '<span>' + _esc(cfg.title) + '</span>'
       + '</div>'
       + '<div class="vinv-wallet">'
       +   '<span class="vinv-coin">V</span><span>' + gold + '</span>'
