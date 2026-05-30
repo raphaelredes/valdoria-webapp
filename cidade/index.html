@@ -9764,21 +9764,21 @@ function _isCTA(btn) {
   function _env(){
     try { return new URLSearchParams(window.location.search).get('env') || ''; } catch(_) { return ''; }
   }
-  function _post(path, payload, useBearer){
+  function _post(path, payload){
     var a = _auth();
     if (!a) return Promise.reject(new Error('vCityServer: sem auth (LOCAL mode)'));
-    var headers = { 'Content-Type': 'application/json' };
-    if (useBearer) { headers['Authorization'] = 'Bearer ' + a.token; }
-    else { headers['X-Valdoria-Token'] = a.token; headers['Authorization'] = 'Bearer ' + a.token; }
+    // SÓ Authorization: Bearer — o CORS allow-headers do servidor NÃO inclui
+    // X-Valdoria-Token; enviá-lo faz o preflight do browser bloquear a request.
+    var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + a.token };
     return fetch(a.api + path, { method: 'POST', headers: headers, body: JSON.stringify(payload) })
-      .then(function(r){ if (!r.ok) throw new Error('vCityServer ' + path + ' HTTP ' + r.status); return r.json(); });
+      .then(function(r){ return r.json().catch(function(){ return { ok: false, error: 'http_' + r.status }; }); });
   }
   window.vCityServer = {
     isRemote: function(){ return !!_auth(); },
     auth: _auth,
     getState: function(){
       var a = _auth();
-      return _post('/api/game/state', { user_id: a ? a.uid : null }, true)
+      return _post('/api/game/state', { user_id: a ? a.uid : null })
         .catch(function(e){ console.error('[CITY] vCityServer.getState failed', e); throw e; });
     },
     cityAction: function(intent, payload){
@@ -9786,7 +9786,7 @@ function _isCTA(btn) {
       var body = { user_id: a ? a.uid : null, intent: intent };
       if (payload) { for (var k in payload) { if (Object.prototype.hasOwnProperty.call(payload, k)) body[k] = payload[k]; } }
       var env = _env(); if (env) body.env = env;
-      return _post('/api/city/action', body, false)
+      return _post('/api/city/action', body)
         .catch(function(e){ console.error('[CITY] vCityServer.cityAction(' + intent + ') failed', e); throw e; });
     },
     quest: {
