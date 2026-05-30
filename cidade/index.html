@@ -9848,8 +9848,15 @@ function _isCTA(btn) {
           && window._tryChanceEncounter(action, window.CITY_MOCK_PLAYER)) {
         return; // Encontro disparou — popup vai chamar doAction(action) ao continuar
       }
-      // FASE 1 server-driven: aceitar missão do board do servidor (vCityServer.quest.accept)
+      // FASE 1 server-driven: board accept + complete/abandon + detalhe (vCityServer.quest.*)
       if (action.indexOf('srvaccept_') === 0) { _srvAcceptQuest(action.slice(10)); return; }
+      if (action.indexOf('srvcomplete_') === 0) { _srvCompleteQuest(action.slice(12)); return; }
+      if (action.indexOf('srvabandon_') === 0) { _srvAbandonQuest(action.slice(11)); return; }
+      if (action.indexOf('quest_open_') === 0) {
+        var _qoid = action.slice(11);
+        var _sqd = (typeof QUESTS_ACTIVE!=='undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===_qoid;})[0] : null;
+        if (_sqd) { _srvQuestDetail(_qoid); return; }  // quest do servidor → detalhe dinâmico
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -20124,17 +20131,30 @@ window._markQuestsAsSeen = function(npcOrLocation){
 // (de quest.board) substitui GUILD_QUESTS_AVAILABLE quando carregado; fallback
 // pro catálogo hardcoded em LOCAL mode / se o fetch falhar.
 function _applyServerQuests(q){
-  if (!q || !Array.isArray(q.active) || typeof QUESTS_ACTIVE === 'undefined') return;
-  QUESTS_ACTIVE.length = 0;
-  q.active.forEach(function(sq){
-    if (!sq || !sq.id) return;
-    QUESTS_ACTIVE.push({
-      id: 'qa_' + sq.id, serverId: sq.id, title: sq.title || sq.id, desc: sq.desc || '',
-      icon: '', progress: sq.progress || (sq.ready ? '✓ pronta' : ''),
-      reward: sq.reward || 0, xp: sq.xp || 0, npc: '', acceptedAt: 0,
-      whatHappened: sq.desc || '', whatToDo: sq.desc || ''
+  if (!q || typeof QUESTS_ACTIVE === 'undefined') return;
+  if (Array.isArray(q.active)) {
+    QUESTS_ACTIVE.length = 0;
+    q.active.forEach(function(sq){
+      if (!sq || !sq.id) return;
+      QUESTS_ACTIVE.push({
+        id: 'qa_' + sq.id, serverId: sq.id, title: sq.title || sq.id, desc: sq.desc || '',
+        icon: '', progress: sq.progress || (sq.ready ? '✓ pronta' : ''),
+        reward: sq.reward || 0, xp: sq.xp || 0, npc: '', acceptedAt: 0,
+        whatHappened: sq.desc || '', whatToDo: sq.desc || ''
+      });
     });
-  });
+  }
+  // Servidor é autoridade do histórico também: completed → QUESTS_HISTORY.
+  if (Array.isArray(q.completed) && typeof QUESTS_HISTORY !== 'undefined') {
+    QUESTS_HISTORY.length = 0;
+    q.completed.forEach(function(sq){
+      if (!sq || !sq.id) return;
+      QUESTS_HISTORY.push({
+        id: 'qh_' + sq.id, title: sq.title || sq.id, icon: '',
+        date: '', reward: sq.reward || 0, xp: sq.xp || 0
+      });
+    });
+  }
 }
 function _refreshServerBoard(){
   if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
@@ -20162,6 +20182,68 @@ function _srvAcceptQuest(serverId){
     console.error('[CITY] srvaccept failed', e);
     if (typeof vToast==='function') vToast('Erro ao aceitar missão');
   });
+}
+function _srvCompleteQuest(serverId){
+  if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
+  if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Entregando missão...' });
+  window.vCityServer.quest.complete(serverId).then(function(r){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    if (r && r.ok){
+      _applyServerQuests(r.quests);
+      var rw = r.rewards || {};
+      // aplica gold/xp ao HUD local (display); servidor já persistiu
+      try { var p = window.CITY_MOCK_PLAYER; if (p){ if (rw.gold) p.gold = (p.gold||0) + rw.gold; if (rw.xp) p.xp = (p.xp||0) + rw.xp; } if (typeof refreshHud==='function') refreshHud(); } catch(_){}
+      if (typeof vToast==='function') vToast('✓ Missão completa! +' + (rw.gold||0) + ' Valdoritas +' + (rw.xp||0) + ' XP');
+      if (typeof closeCityPopup==='function') closeCityPopup(true);
+      _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
+    } else if (typeof vToast==='function') {
+      vToast((r && r.error) || 'Não foi possível entregar a missão');
+    }
+  }).catch(function(e){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    console.error('[CITY] srvcomplete failed', e);
+    if (typeof vToast==='function') vToast('Erro ao entregar missão');
+  });
+}
+function _srvAbandonQuest(serverId){
+  if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
+  if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Abandonando missão...' });
+  window.vCityServer.quest.abandon(serverId).then(function(r){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    if (r && r.ok){
+      _applyServerQuests(r.quests);
+      if (typeof vToast==='function') vToast('Missão abandonada.');
+      if (typeof closeCityPopup==='function') closeCityPopup(true);
+      _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
+    } else if (typeof vToast==='function') {
+      vToast((r && r.error) || 'Não foi possível abandonar a missão');
+    }
+  }).catch(function(e){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    console.error('[CITY] srvabandon failed', e);
+    if (typeof vToast==='function') vToast('Erro ao abandonar missão');
+  });
+}
+// Detalhe de quest do SERVIDOR: injeta uma sub-tela dinâmica em SUBSCREEN_DATA
+// (reusa o render de openCityPopup) com Entregar (se pronta) + Abandonar.
+function _srvQuestDetail(serverId){
+  var sq = (typeof QUESTS_ACTIVE!=='undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===serverId;})[0] : null;
+  if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
+  var ready = (sq.progress||'').indexOf('✓') >= 0;
+  var icoMis = (typeof _heralIco==='function') ? _heralIco('ic-missões') : '';
+  var coin = '<span class="vi vi-coin sm"></span>';
+  var btns = [];
+  if (ready) btns.push([icoMis, 'Entregar missão', 'completar', 'srvcomplete_' + serverId]);
+  btns.push([icoMis, 'Abandonar missão', 'desistir', 'srvabandon_' + serverId]);
+  if (typeof SUBSCREEN_DATA !== 'undefined') {
+    SUBSCREEN_DATA['quest_open_' + serverId] = {
+      header: '📜 Missão: ' + (sq.title || serverId),
+      flavor: '<i>' + (sq.desc || '') + '</i>',
+      npcInfo: (sq.progress ? '📋 ' + sq.progress + ' · ' : '') + '💰 ' + (sq.reward||0) + ' ' + coin + ' + ' + (sq.xp||0) + ' XP',
+      buttons: btns
+    };
+    navigateTo('quest_open_' + serverId);
+  }
 }
 
 function _normalizeQuests(){
