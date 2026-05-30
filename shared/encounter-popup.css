@@ -54,12 +54,18 @@
      mais espaço útil em desktop Telegram (~600px viewport). */
   max-height: 95dvh;
   /* Garante que conteudo nao caia fora do card mesmo em viewports apertados.
-     Bug raiz da sessao #42: com fonte grande + texto longo, body forçava
+     Bug raiz da sessao #42: com fonte grande + texto longo, o .enc-BODY forçava
      min-height: 465px+, somava-se com header/nav/actions e empurrava buttons
-     PRA FORA do card (overflow: hidden cortava). Agora min-height: 0 + body
-     flex permite encolher e ativar scroll interno; nav/actions ficam sempre
-     visíveis com flex-shrink: 0. */
-  min-height: 0;
+     PRA FORA do card (overflow: hidden cortava). Fix permanente: .enc-body
+     mantém min-height: 0 + overflow-y: auto; nav/actions ficam flex-shrink: 0.
+     Sessao #67 (2026-05-30): min-height responsivo NO CARD (nao no body). Em
+     fonte grande o dialogo ficava minusculo e centralizado ("a tela inteira
+     para preencher, a tela ficou minuscula" — queixa do user). Piso 330px @fs1
+     / 429px @fs1.3, SEMPRE capado em 95dvh via min() pra nunca exceder o
+     max-height (senao em viewport curto o card sairia da tela). Seguro vs bug
+     #42: o piso e no card; o body continua encolhendo+scrollando, entao os
+     botoes nunca saem. Conteudo curto: body (flex:1) preenche o piso. */
+  min-height: min(95dvh, calc(330px * var(--v-font-scale, 1)));
   overflow: hidden;
   display: flex;
   flex-direction: column;

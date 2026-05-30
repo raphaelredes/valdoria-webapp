@@ -54198,11 +54198,14 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
       + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
       + '  width:100%;max-width:min(100vw - 16px, 480px);'
-      // Sessão #64 (2026-05-30): min-height ESCALA com --v-font-scale — em letra
-      // grande o card ocupa mais da tela (era height:auto = card minúsculo c/
-      // scroll, "ir na contra-mão da responsividade"). Cresce até o viewport.
-      + '  height:auto;min-height:min(calc(100dvh - 16px), calc(330px * var(--v-font-scale, 1)));'
-      + '  max-height:calc(100dvh - 16px);overflow:hidden;'
+      // Sessão #67 (2026-05-30): min-height ESCALA com --v-font-scale, capado em
+      // 95dvh via min() — PAR com shared/encounter-popup.css (.enc-card canonical
+      // vive lá e VENCE o cascade; este inline é fallback de preview standalone).
+      // Antes divergiam (inline 100dvh-16 vs shared 95dvh + min-height:0) → meu
+      // fix #64 ficava morto. Em fonte grande o card ocupa mais tela; body mantém
+      // min-height:0 + overflow-y:auto → botões nunca saem (bug sessão #42).
+      + '  height:auto;min-height:min(95dvh, calc(330px * var(--v-font-scale, 1)));'
+      + '  max-height:95dvh;overflow:hidden;'
       + '  display:flex;flex-direction:column;'
       + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
       + '.enc-header{display:flex;gap:12px;padding:14px 16px;'
