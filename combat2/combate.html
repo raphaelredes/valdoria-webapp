@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T15:50:20Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T16:16:01Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1995,17 +1995,22 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
    !important supera repeat(4, 1fr) do combat-grid.css externo. */
 .battlefield { --cell-arena-h: 150px !important; }
 .battlefield .bf-row {
-  grid-template-columns: repeat(4, 160px) !important;
+  /* Sessão #66: colunas escalam com --v-font-scale (par com .cell + fitAll JS) */
+  grid-template-columns: repeat(4, calc(160px * var(--v-font-scale, 1))) !important;
   width: auto !important;
   justify-content: center !important;
 }
 .bf-row .cell {
-  width: 160px !important;
-  min-width: 160px !important;
-  max-width: 160px !important;
-  min-height: 150px !important;
-  height: 150px !important;
-  max-height: 150px !important;
+  /* Sessão #66 (2026-05-30): célula escala com --v-font-scale — em letra grande
+     texto/retrato cabem sem apertar. O fitAll (JS) recalcula STAGE_W com o mesmo
+     fator, mantendo o tabuleiro ajustado à tela via o pan/zoom existente.
+     Para fonte normal (fs=1) o tamanho é idêntico ao anterior (160x150). */
+  width: calc(160px * var(--v-font-scale, 1)) !important;
+  min-width: calc(160px * var(--v-font-scale, 1)) !important;
+  max-width: calc(160px * var(--v-font-scale, 1)) !important;
+  min-height: calc(150px * var(--v-font-scale, 1)) !important;
+  height: calc(150px * var(--v-font-scale, 1)) !important;
+  max-height: calc(150px * var(--v-font-scale, 1)) !important;
   justify-content: flex-start;
   box-sizing: border-box;
 }
@@ -2169,7 +2174,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .cell.v8-card .c-portrait {
   position: absolute;
   top: 6px; right: 8px;
-  width: 34px; height: 34px;
+  width: calc(34px * var(--v-font-scale, 1)); height: calc(34px * var(--v-font-scale, 1));
   margin: 0;
   background: transparent;
   border: 0;
@@ -18199,7 +18204,7 @@ function mountBattlefieldPanZoom() {
     var stage = document.querySelector('[data-bf-pan-stage]');
     if (!vp || !stage) return;
 
-    var STAGE_W = 4 * 160 + 12;  /* 4 cols × 160px + gap */
+    /* STAGE_W calculado dinamicamente em fitAll (escala com --v-font-scale) — Sessão #66 */
     var MIN_ZOOM = 0.4;
     var MAX_ZOOM = 2.0;
     var currentZoom = 1;
@@ -18219,7 +18224,14 @@ function mountBattlefieldPanZoom() {
     };
     var fitAll = function () {
         var vpW = vp.clientWidth || 430;
-        var z = Math.min(1, (vpW - 4) / STAGE_W);
+        /* Sessão #66: STAGE_W acompanha --v-font-scale (células escalam no CSS).
+           Sem isso o fit usava 652px fixo e o tabuleiro cortava em letra grande.
+           Lê de html OU body (fallback 1) — degradação suave se não achar a var. */
+        var _fs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--v-font-scale'));
+        if (!(_fs > 0)) _fs = parseFloat(getComputedStyle(document.body).getPropertyValue('--v-font-scale'));
+        if (!(_fs > 0)) _fs = 1;
+        var stageW = 4 * (160 * _fs) + 12;
+        var z = Math.min(1, (vpW - 4) / stageW);
         z = Math.max(MIN_ZOOM, z);
         var occ = countOccupied();
         if (occ > 0 && occ <= FOCUSED_THRESHOLD) {
