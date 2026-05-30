@@ -9930,13 +9930,35 @@ var CITY_DISCOVERY_QUESTS = {
       text:'Ao norte da arena, prédio com o brasão da águia bordado em vermelho. Bate três vezes na porta lateral. Não tenta impressioná-la com bravata: Tavira cheira mentira a três pedras de distância.',
       choices:[{ label:'Vou à Guilda.', next:'unlock' }] }
   ]},
-  q_disc_gates: { id:'q_disc_gates', name:'A Estrada Aberta', targetCb:'gates', stages:[
+  q_disc_gates: { id:'q_disc_gates', name:'A Estrada Aberta', targetCb:'gates',
+    // Sessao #68 (2026-05-30): a missao "Falar com Lyana" agora e ADQUIRIDA aqui.
+    // A Ancia (mae de Lyana) intercepta o personagem nos Portoes e confia o
+    // pergaminho selado. Antes a quest aparecia pre-aceita em QUESTS_ACTIVE sem
+    // nenhum contexto de aquisicao (queixa do user). grantsQuest e concedida ao
+    // completar a descoberta (unlock) — ver _advanceDiscoveryStage. iconId resolve
+    // via _heralIco no momento da concessao (runtime), evitando ordem de hoisting.
+    grantsQuest: {
+      id:'qa_lyana', iconId:'ic-dialogo', title:'Falar com Lyana na Praça',
+      desc:'Entregar o pergaminho selado da mãe dela.', progress:'✓ pronta',
+      reward:20, xp:40, npc:'Mãe de Lyana',
+      whatHappened:'Uma anciã te interceptou nos Portões, antes da estrada. Lyana — a filha dela, que canta junto à fonte da Praça — espera notícias da irmã há três luas. A velha senhora já não tem pernas pra viagem e confiou o pergaminho selado a você.',
+      whatToDo:'Entregar o pergaminho selado em mãos a Lyana, na Praça Central. NÃO abrir nem ler — apenas entregar.' },
+    stages:[
     { id:'s1', speaker:'Joran, sentinela',
       text:'Para, forasteiro. Vais sair de Valdoria, é? Os portões abrem ao amanhecer, fecham antes do crepúsculo. Antes de pisar a estrada, fala com o Capitão Drennar — ele anota teu nome, teu destino, e os perigos da semana.',
       choices:[{ label:'Onde encontro o Capitão?', next:'s2' }] },
     { id:'s2', speaker:'Joran, sentinela',
       text:'Na guarita ao lado do portão norte. Sentado num banco de carvalho, lista nas mãos. Diz a ele o rumo — Floresta, Pântano, Estradas — e ele te informa o que esperar. Sem isso, sai por tua conta e risco.',
-      choices:[{ label:'Vou falar com o Capitão.', next:'unlock' }] }
+      choices:[{ label:'Sigo para a estrada.', next:'s3' }] },
+    { id:'s3', speaker:'Você',
+      text:'Você se volta para a estrada quando dedos finos prendem tua manga. Uma anciã — o xale úmido do sereno, um pergaminho selado tremendo entre os nós dos dedos.',
+      choices:[{ label:'Quem é a senhora?', next:'s4' }] },
+    { id:'s4', speaker:'Anciã',
+      text:'Perdão, viajante. Tu vais pra estrada — vejo na poeira das tuas botas. Minha filha, Lyana, é quem canta junto à fonte da Praça. Há três luas que não chega palavra da irmã dela... e minhas pernas já não fazem a viagem.',
+      choices:[{ label:'O que a senhora precisa?', next:'s5' }] },
+    { id:'s5', speaker:'Anciã',
+      text:'Leva esta carta a ela, em mãos. Não abre, não conta a ninguém — só entrega. É tudo que esta velha te pede.',
+      choices:[{ label:'Aceito — levo a carta a Lyana.', next:'unlock' }] }
   ]}
 };
 
@@ -10119,6 +10141,24 @@ function _advanceDiscoveryStage(nextStageId){
     var locKey = _findLocByCb(quest.targetCb);
     var locLabel = (locKey && CITY_LOCATIONS[locKey]) ? CITY_LOCATIONS[locKey].label : quest.targetCb;
     if (typeof vToast === 'function') vToast('✨ ' + locLabel + ' liberado!');
+    // Sessao #68: descoberta pode CONCEDER uma missao ao completar (data-driven
+    // via quest.grantsQuest). Usado pelos Portoes -> a Ancia confia o pergaminho
+    // de Lyana. Idempotente (nao duplica se ja ativa). Como a descoberta e
+    // one-time (completed_locations), so concede uma vez. iconId -> _heralIco aqui
+    // (runtime), evitando depender da ordem de definicao do _heralIco.
+    if (quest.grantsQuest && typeof QUESTS_ACTIVE !== 'undefined') {
+      var _gq = quest.grantsQuest;
+      var _already = QUESTS_ACTIVE.some(function(q){ return q && q.id === _gq.id; });
+      if (!_already) {
+        var _granted = {};
+        for (var _k in _gq) { if (_k !== 'iconId') _granted[_k] = _gq[_k]; }
+        _granted.icon = (typeof _heralIco === 'function') ? _heralIco(_gq.iconId || 'ic-dialogo') : '';
+        _granted.acceptedAt = Date.now();
+        QUESTS_ACTIVE.push(_granted);
+        if (typeof vToast === 'function') vToast('📜 Nova missão: ' + _gq.title);
+        _logCity('quest granted via discovery: ' + _gq.id);
+      }
+    }
     _logCity('discovery complete: ' + quest.id);
     if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
     return;
@@ -14162,24 +14202,18 @@ function _showAchievementsPopup(p){
     var stateCls = st.mastered ? 'medal-mastered' : (st.done > 0 ? 'medal-progressing' : 'medal-starter');
     var ribbonText = st.mastered ? '★' : st.active.label;
 
-    // Cores do medal-bg por estado (matte, sem brilho exagerado)
-    var medalColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#3a342e');
-    var iconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
-    /* X-6.5.51BF (2026-05-11): user request — remover sombra do icone central
-       da medalha. Antes: filter drop-shadow no .med-circle aplicava halo no
-       icone heraldico tambem (visualmente terrivel). Agora: filter SO no
-       medal-bg SVG (o disco metalico), icone central fica plano e crisp. */
-    var bgGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 3px rgba(255,180,60,0.45));' : '';
+    // Sessao #68 (2026-05-30): user pediu remover a medalha dourada de fundo das
+    // imagens de Conquistas — fica so o icone heraldico. O icone ADOTA a cor antes
+    // usada no disco (gold/orange-gold/dim) pra ficar visivel no fundo escuro do
+    // card (antes era marrom escuro #1f1304 contando com o disco dourado atras).
+    var iconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
+    var iconGlow = st.mastered ? 'filter: drop-shadow(0 0 4px rgba(255,180,60,0.5));' : '';
 
     html += '<div class="ach-medal ' + stateCls + '" data-chain="' + c.id + '" '
       + 'style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; cursor: pointer; position: relative; border-radius: 6px; transition: transform 0.15s ease;">'
-      // Medalha circular: medal-bg (textura) + icone heráldico em camadas
+      // Sessao #68: sem medal-bg — so o icone heraldico (maior, ocupa o espaco do disco)
       + '<div class="med-circle" style="position: relative; width: 54px; height: 54px; display: grid; place-items: center;">'
-      // X-6.5.51BF: filter SO no disco da medalha, nao no icone central
-      + '<svg viewBox="0 0 100 100" style="grid-area: 1/1; width: 100%; height: 100%; color: ' + medalColor + '; ' + bgGlowFilter + '">'
-      + '<use href="#medal-bg"/>'
-      + '</svg>'
-      + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 30px; height: 30px; color: ' + iconColor + '; pointer-events: none;">'
+      + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 40px; height: 40px; color: ' + iconColor + '; ' + iconGlow + ' pointer-events: none;">'
       + '<use href="#' + c.icon + '"/>'
       + '</svg>'
       + '</div>'
@@ -14251,9 +14285,9 @@ function _showAchievementDetailPopup(chainId, p){
   var html = '<div class="ach-detail" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; gap: var(--v-space-sm, 6px); height: 100%;">';
 
   // === MEDALHA GRANDE PRINCIPAL ===
-  // Cores compartilhadas com a grid (matte gold, sem brilho exagerado)
-  var heroMedalColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#3a342e');
-  var cenarioIconColor  = st.done > 0 ? '#1f1304' : '#4a4338';
+  // Sessao #68 (2026-05-30): sem medal-bg (par com a grid) — o icone heraldico
+  // adota a cor gold/orange-gold/dim pra ficar visivel sem o disco dourado atras.
+  var heroIconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
   var heroGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.55));' : '';
 
   // Compute reward totals (USER REQUEST 2026-05-22: clareza do que está em jogo)
@@ -14265,13 +14299,10 @@ function _showAchievementDetailPopup(chainId, p){
     + 'background: linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(42,36,32,0.95) 100%); '
     + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
     + 'border-radius: var(--v-radius, 10px); position: relative;">'
-    // Medalha grande: medal-bg (textura) + icone heráldico em camadas
+    // Sessao #68: sem medal-bg — so o icone heraldico grande (ocupa o espaco do disco)
     + '<div style="position: relative; width: 84px; height: 84px; '
     + 'display: grid; place-items: center; ' + heroGlowFilter + '">'
-    + '<svg viewBox="0 0 100 100" style="grid-area: 1/1; width: 100%; height: 100%; color: ' + heroMedalColor + ';">'
-    + '<use href="#medal-bg"/>'
-    + '</svg>'
-    + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 50px; height: 50px; color: ' + cenarioIconColor + '; pointer-events: none;">'
+    + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 64px; height: 64px; color: ' + heroIconColor + '; pointer-events: none;">'
     + '<use href="#' + chain.icon + '"/>'
     + '</svg>'
     + '</div>'
@@ -19924,11 +19955,11 @@ var QUESTS_ACTIVE = [
   { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha na Floresta dos Sussurros.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira',
     acceptedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,  // há 2 dias
     whatHappened: 'Tavira (Mestra da Guilda) contratou na Praça. Fazendeiros do norte mal dormem há semanas — lobos cinzentos descem da Floresta dos Sussurros toda noite.',
-    whatToDo: 'Abater mais 1 lobo cinzento na Floresta dos Sussurros (2/3 mortes registradas) e reportar a Tavira.' },
-  { id: 'qa_lyana',  icon: _heralIco('ic-dialogo'), title: 'Falar com Lyana na Praça', desc: 'Entregar carta da mãe dela.',       progress: '✓ pronta', reward: 20, xp: 40, npc: 'Mãe de Lyana',
-    acceptedAt: Date.now() - 3 * 24 * 60 * 60 * 1000,  // há 3 dias
-    whatHappened: 'A mãe de Lyana te abordou nos Portões com um pergaminho selado. Lyana espera notícias da irmã há três luas — a velha senhora não pôde fazer a viagem.',
-    whatToDo: 'Entregar o pergaminho selado em mãos a Lyana, na Praça Central. NÃO abrir nem ler — apenas entregar.' }
+    whatToDo: 'Abater mais 1 lobo cinzento na Floresta dos Sussurros (2/3 mortes registradas) e reportar a Tavira.' }
+  // Sessao #68 (2026-05-30): qa_lyana REMOVIDA daqui. Antes aparecia pre-aceita
+  // sem contexto (queixa do user). Agora e concedida ao completar a descoberta
+  // dos Portoes (CITY_DISCOVERY_QUESTS.q_disc_gates.grantsQuest), quando a Ancia
+  // entrega o pergaminho — aquisicao real e narrativamente fundamentada.
 ];
 var QUESTS_HISTORY = [
   { id: 'qh_pacote', icon: _heralIco('ic-mochila'), title: 'Entregar pacote ao Mercador', date: '2026-04-30', reward: 15, xp: 30 },
@@ -45034,8 +45065,10 @@ var SUBSCREEN_DATA = {
     header: '📋 Missões Ativas (2)',
     flavor: 'Em progresso. Volta pra entregar quando completas.',
     buttons: [
-      [_heralIco('ic-missões'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves'],
-      [_heralIco('ic-missões'), 'Falar com Lyana', '✅ pronta — 20 <span class="vi vi-coin sm"></span> + 40 XP', 'quest_open_lyana']
+      [_heralIco('ic-missões'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves']
+      // Sessao #68 (2026-05-30): "Falar com Lyana" removida desta lista estatica
+      // legada — a quest agora e adquirida nos Portoes (q_disc_gates.grantsQuest)
+      // e renderizada pelo quest_diary dinamico (QUESTS_ACTIVE). Sem pre-seed.
     ]
   },
   'quests_available': {
