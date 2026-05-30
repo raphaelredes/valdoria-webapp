@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-29T16:32:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T15:50:20Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6073,12 +6073,12 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .lp-item:active:not(.disabled) { transform: scale(.98); }
 .lp-item.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.7); }
 .lp-item.disabled:hover { transform: none; border-color: var(--v-border, #4a3828); background: rgba(15,12,8,.5); }
-.lp-item-ico { font-size: calc(22px * var(--v-font-scale, 1)); flex-shrink: 0; width: 28px; text-align: center; }
+.lp-item-ico { font-size: calc(22px * var(--v-font-scale, 1)); flex-shrink: 0; width: calc(28px * var(--v-font-scale, 1)); text-align: center; }
 /* 2026-05-16: skill PNGs (AI-generated). Renderiza no mesmo box do emoji. */
-.lp-item-ico img.skill-ico-img { width: 28px; height: 28px; object-fit: contain;
+.lp-item-ico img.skill-ico-img { width: calc(28px * var(--v-font-scale, 1)); height: calc(28px * var(--v-font-scale, 1)); object-fit: contain;
     display: inline-block; vertical-align: middle;
     filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.5)); }
-.udc-sk-ico img.skill-ico-img { width: 14px; height: 14px; object-fit: contain;
+.udc-sk-ico img.skill-ico-img { width: calc(14px * var(--v-font-scale, 1)); height: calc(14px * var(--v-font-scale, 1)); object-fit: contain;
     display: inline-block; vertical-align: middle;
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5)); }
 .lp-item-body { flex: 1; min-width: 0; }
@@ -9061,7 +9061,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 /* X-6.5.49: font 15->13, max-width 320->300, line-height 1.55->1.45 — economiza pixels em viewport baixo */
 .res-narr { color: var(--v-text-dim, #a09484); font-style: italic; font-size: calc(13px * var(--v-font-scale, 1)); max-width: 300px; line-height: 1.45; animation: resFadeIn .6s ease .4s both; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 @keyframes resFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.res-log { max-width: 360px; width: 100%; max-height: 180px; overflow-y: auto; padding: 12px 16px; background: rgba(15,12,8,.6); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); text-align: left; line-height: 1.5; animation: resFadeIn .6s ease .6s both; }
+.res-log { max-width: 360px; width: 100%; max-height: min(calc(180px * var(--v-font-scale, 1)), 42vh); overflow-y: auto; padding: 12px 16px; background: rgba(15,12,8,.6); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); text-align: left; line-height: 1.5; animation: resFadeIn .6s ease .6s both; }
 .res-log div { padding: 2px 0; }
 /* action-bar fixo (não encolhe, não estica) — deixa res-log-full crescer livremente. */
 .resolution .action-bar { flex: 0 0 auto; background: transparent; border: none; padding: 0; margin-top: var(--v-space-sm, 6px); animation: resFadeIn .6s ease 1.6s both; }

@@ -148,8 +148,10 @@ body.perf-lite #encounter-overlay.active .enc-card {
   flex-shrink: 0;
 }
 .enc-portrait {
-  width: 44px;
-  height: 44px;
+  /* Sessão #65 (2026-05-30): retrato escala com --v-font-scale — em letra
+     grande o nome do NPC cresce mas o retrato ficava 44px (desproporcional). */
+  width: calc(44px * var(--v-font-scale, 1));
+  height: calc(44px * var(--v-font-scale, 1));
   flex-shrink: 0;
   border-radius: 50%;
   background: rgba(196, 149, 58, 0.18);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-29T16:32:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-30T15:50:20Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -1554,12 +1554,13 @@ html.sim-prod #frame { margin: 0 auto !important; }
   position: absolute;
   top: 6px;
   right: 8px;
-  width: 28px;
-  height: 28px;
+  /* Sessão #65: botão fechar escala com --v-font-scale (era 28px/18px fixo) */
+  width: calc(28px * var(--v-font-scale, 1));
+  height: calc(28px * var(--v-font-scale, 1));
   background: transparent;
   border: 1px solid rgba(196, 149, 58, 0.35);
   color: var(--v-gold, #c4953a);
-  font: 700 18px ui-monospace, monospace;
+  font: 700 calc(18px * var(--v-font-scale, 1)) ui-monospace, monospace;
   border-radius: 50%;
   cursor: pointer;
   line-height: 1;
@@ -1645,7 +1646,7 @@ html.sim-prod #frame { margin: 0 auto !important; }
   background: rgba(15, 12, 8, 0.7);
   border: 1px solid rgba(196, 149, 58, 0.4);
   color: var(--v-text, #d4c8b0);
-  font: 600 12px 'Cinzel', serif;
+  font: 600 calc(12px * var(--v-font-scale, 1)) 'Cinzel', serif;
   letter-spacing: 0.6px;
   padding: 9px 12px;
   border-radius: 5px;

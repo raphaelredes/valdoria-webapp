@@ -134,10 +134,10 @@
         +   'rgba(15,12,8,0.55) 0%,#1f1810 100%);'
         +   'border:1.5px solid rgba(196,149,58,0.7);border-top:none;'
         +   'border-radius:0 0 14px 14px;text-align:center;flex-shrink:0}'
-        + '.v-lb-name{font-family:"Cinzel","Georgia",serif;font-size:17px;'
+        + '.v-lb-name{font-family:"Cinzel","Georgia",serif;font-size:calc(17px * var(--v-font-scale, 1));'
         +   'font-weight:700;color:#c4953a;letter-spacing:2px;text-transform:uppercase;'
         +   'text-shadow:0 0 10px rgba(196,149,58,0.4);margin-bottom:4px;line-height:1.2}'
-        + '.v-lb-desc{font-family:"Georgia",serif;font-size:12px;font-style:italic;'
+        + '.v-lb-desc{font-family:"Georgia",serif;font-size:calc(12px * var(--v-font-scale, 1));font-style:italic;'
         +   'color:#a09484;letter-spacing:0.4px;line-height:1.5}'
         // Decorative scrollwork corners
         + '.v-lb-img-wrap::before,.v-lb-img-wrap::after{content:"";position:absolute;'
