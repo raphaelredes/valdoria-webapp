@@ -8687,6 +8687,28 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.max_hit_dice != null)     p.hdMax = picked.max_hit_dice;
       if (picked.pending_skills != null)   p.pendingSkills = picked.pending_skills;
       if (picked.pending_asi != null)      p.pendingAsi = picked.pending_asi;
+      // FASE 1 server-driven (docs/sistemas/server-driven-state-migration.md):
+      // popula QUESTS_ACTIVE com as quests REAIS do servidor (picked.quests) em
+      // vez do array mock vazio. Completa a intenção da sessão #37 (web_auth já
+      // devolve quests[]) e faz o estado de quest PERSISTIR entre reload — fecha
+      // a classe de bug Lyana/#68#69 (grant que sumia no refresh).
+      try {
+        if (Array.isArray(picked.quests) && typeof QUESTS_ACTIVE !== 'undefined') {
+          QUESTS_ACTIVE.length = 0;
+          for (var _sqi = 0; _sqi < picked.quests.length; _sqi++) {
+            var _sq = picked.quests[_sqi];
+            if (!_sq || !_sq.id) continue;
+            QUESTS_ACTIVE.push({
+              id: 'qa_' + _sq.id, serverId: _sq.id,
+              title: _sq.title || _sq.id, desc: _sq.desc || '', icon: '',
+              progress: _sq.progress || (_sq.ready ? '✓ pronta' : ''),
+              reward: _sq.reward || 0, xp: _sq.xp || 0, npc: '', acceptedAt: 0,
+              whatHappened: _sq.desc || '', whatToDo: _sq.desc || ''
+            });
+          }
+          _logCity('server quests hydrated: ' + QUESTS_ACTIVE.length);
+        }
+      } catch(_sqhe){ console.warn('[CITY] hydrate server quests failed', _sqhe); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9718,6 +9740,66 @@ function _isCTA(btn) {
   };
 })();
 
+// ============================================================================
+// vCityServer — canal ÚNICO de I/O server-driven da cidade (FASE 0)
+// Migração de estado: docs/sistemas/server-driven-state-migration.md
+// Toda MUTAÇÃO de estado de jogo da cidade (quests, etc.) passa por aqui:
+//   vCityServer.cityAction(intent, payload) → POST /api/city/action
+//       → servidor processa (QuestManager) + persiste → devolve estado novo.
+//   vCityServer.getState()                  → POST /api/game/state (estado do char).
+// Auth reusa window.__CITY_AUTH {token, api, uid} (setado no boot, ~L8459).
+// LOCAL mode (file://, sem auth) → isRemote()=false; chamadas rejeitam suave.
+// ============================================================================
+(function setupCityServer(){
+  function _auth(){
+    var a = window.__CITY_AUTH;
+    if (a && a.token && a.api && a.uid) return a;
+    try {
+      var p = new URLSearchParams(window.location.search);
+      var t = p.get('token'), api = p.get('api'), uid = p.get('uid');
+      if (t && api && uid) return { token: t, api: String(api).replace(/\/$/, ''), uid: parseInt(uid, 10) };
+    } catch(_) {}
+    return null;
+  }
+  function _env(){
+    try { return new URLSearchParams(window.location.search).get('env') || ''; } catch(_) { return ''; }
+  }
+  function _post(path, payload, useBearer){
+    var a = _auth();
+    if (!a) return Promise.reject(new Error('vCityServer: sem auth (LOCAL mode)'));
+    var headers = { 'Content-Type': 'application/json' };
+    if (useBearer) { headers['Authorization'] = 'Bearer ' + a.token; }
+    else { headers['X-Valdoria-Token'] = a.token; headers['Authorization'] = 'Bearer ' + a.token; }
+    return fetch(a.api + path, { method: 'POST', headers: headers, body: JSON.stringify(payload) })
+      .then(function(r){ if (!r.ok) throw new Error('vCityServer ' + path + ' HTTP ' + r.status); return r.json(); });
+  }
+  window.vCityServer = {
+    isRemote: function(){ return !!_auth(); },
+    auth: _auth,
+    getState: function(){
+      var a = _auth();
+      return _post('/api/game/state', { user_id: a ? a.uid : null }, true)
+        .catch(function(e){ console.error('[CITY] vCityServer.getState failed', e); throw e; });
+    },
+    cityAction: function(intent, payload){
+      var a = _auth();
+      var body = { user_id: a ? a.uid : null, intent: intent };
+      if (payload) { for (var k in payload) { if (Object.prototype.hasOwnProperty.call(payload, k)) body[k] = payload[k]; } }
+      var env = _env(); if (env) body.env = env;
+      return _post('/api/city/action', body, false)
+        .catch(function(e){ console.error('[CITY] vCityServer.cityAction(' + intent + ') failed', e); throw e; });
+    },
+    quest: {
+      accept:   function(id){ return window.vCityServer.cityAction('quest.accept',   { quest_id: id }); },
+      complete: function(id){ return window.vCityServer.cityAction('quest.complete', { quest_id: id }); },
+      abandon:  function(id){ return window.vCityServer.cityAction('quest.abandon',  { quest_id: id }); },
+      grant:    function(id){ return window.vCityServer.cityAction('quest.grant',    { quest_id: id }); },
+      board:    function(){   return window.vCityServer.cityAction('quest.board',    {}); },
+      state:    function(){   return window.vCityServer.cityAction('quest.state',    {}); }
+    }
+  };
+})();
+
 (function setupMocks(){
   // haptic legacy → delega pra vHaptic (respeita Settings)
   if (typeof window.haptic === 'undefined') { window.haptic = function(kind){ if (window.vHaptic) window.vHaptic(kind); }; }
@@ -9734,6 +9816,8 @@ function _isCTA(btn) {
       'bank': 'bank', 'banco': 'bank',
       'gates': 'gates', 'portoes': 'gates',
       'action_quests': 'quests', 'quests': 'quests', 'quest_open_1': 'quests', 'quest_open_2': 'quests',
+      'quest_open_': 'quests',
+
       'action_codex': 'codex', 'codex': 'codex',
       'daily_challenge': 'daily_challenge', 'daily_challenge_main': 'daily_challenge',
       'open_workshop': 'workshop',
@@ -9938,7 +10022,7 @@ var CITY_DISCOVERY_QUESTS = {
     // completar a descoberta (unlock) — ver _advanceDiscoveryStage. iconId resolve
     // via _heralIco no momento da concessao (runtime), evitando ordem de hoisting.
     grantsQuest: {
-      id:'qa_lyana', iconId:'ic-dialogo', title:'Falar com Lyana na Praça',
+      id:'qa_lyana', serverId:'quest_lyana_scroll', iconId:'ic-dialogo', title:'Falar com Lyana na Praça',
       desc:'Entregar o pergaminho selado da mãe dela.', progress:'✓ pronta',
       reward:20, xp:40, npc:'Mãe de Lyana',
       whatHappened:'Uma anciã te interceptou nos Portões, antes da estrada. Lyana — a filha dela, que canta junto à fonte da Praça — espera notícias da irmã há três luas. A velha senhora já não tem pernas pra viagem e confiou o pergaminho selado a você.',
@@ -10155,6 +10239,14 @@ function _advanceDiscoveryStage(nextStageId){
         _granted.icon = (typeof _heralIco === 'function') ? _heralIco(_gq.iconId || 'ic-dialogo') : '';
         _granted.acceptedAt = Date.now();
         QUESTS_ACTIVE.push(_granted);
+        // FASE 1 server-driven: PERSISTE o grant no servidor (QuestManager) pra
+        // sobreviver ao reload (fecha #68/#69). O push acima é só display imediato;
+        // no reload, o boot re-hidrata QUESTS_ACTIVE de picked.quests (server).
+        if (_gq.serverId && window.vCityServer && window.vCityServer.isRemote()) {
+          window.vCityServer.quest.grant(_gq.serverId).catch(function(_ge){
+            console.warn('[CITY] quest.grant persist failed:', _ge);
+          });
+        }
         if (typeof vToast === 'function') vToast('📜 Nova missão: ' + _gq.title);
         _logCity('quest granted via discovery: ' + _gq.id);
       }
