@@ -8709,6 +8709,9 @@ body.perf-lite .vc-action-btn { transition: none; }
           _logCity('server quests hydrated: ' + QUESTS_ACTIVE.length);
         }
       } catch(_sqhe){ console.warn('[CITY] hydrate server quests failed', _sqhe); }
+      // FASE 1 server-driven: carrega o board CANÔNICO do servidor (quest.board)
+      // pra a aba "Disponíveis" do diário renderizar quests reais (não hardcoded).
+      try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9845,6 +9848,8 @@ function _isCTA(btn) {
           && window._tryChanceEncounter(action, window.CITY_MOCK_PLAYER)) {
         return; // Encontro disparou — popup vai chamar doAction(action) ao continuar
       }
+      // FASE 1 server-driven: aceitar missão do board do servidor (vCityServer.quest.accept)
+      if (action.indexOf('srvaccept_') === 0) { _srvAcceptQuest(action.slice(10)); return; }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -20114,6 +20119,51 @@ window._markQuestsAsSeen = function(npcOrLocation){
   if (idsToAdd.length) _addSeenQuests(idsToAdd);
 };
 
+// === FASE 1 server-driven: board + accept via servidor (vCityServer.quest.*) ===
+// docs/sistemas/server-driven-state-migration.md §10. Aditivo: SERVER_QUEST_BOARD
+// (de quest.board) substitui GUILD_QUESTS_AVAILABLE quando carregado; fallback
+// pro catálogo hardcoded em LOCAL mode / se o fetch falhar.
+function _applyServerQuests(q){
+  if (!q || !Array.isArray(q.active) || typeof QUESTS_ACTIVE === 'undefined') return;
+  QUESTS_ACTIVE.length = 0;
+  q.active.forEach(function(sq){
+    if (!sq || !sq.id) return;
+    QUESTS_ACTIVE.push({
+      id: 'qa_' + sq.id, serverId: sq.id, title: sq.title || sq.id, desc: sq.desc || '',
+      icon: '', progress: sq.progress || (sq.ready ? '✓ pronta' : ''),
+      reward: sq.reward || 0, xp: sq.xp || 0, npc: '', acceptedAt: 0,
+      whatHappened: sq.desc || '', whatToDo: sq.desc || ''
+    });
+  });
+}
+function _refreshServerBoard(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.quest.board().then(function(r){
+    if (r && r.ok && Array.isArray(r.board)){
+      window.SERVER_QUEST_BOARD = r.board;
+      window.SERVER_QUEST_BOARD_LOADED = true;
+    }
+  }).catch(function(e){ console.warn('[CITY] board refresh failed', e); });
+}
+function _srvAcceptQuest(serverId){
+  if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
+  if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
+  window.vCityServer.quest.accept(serverId).then(function(r){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    if (r && r.ok){
+      _applyServerQuests(r.quests);
+      if (typeof vToast==='function') vToast(r.toast || '📜 Missão aceita!');
+      _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
+    } else if (typeof vToast==='function') {
+      vToast((r && r.error) || 'Não foi possível aceitar a missão');
+    }
+  }).catch(function(e){
+    if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+    console.error('[CITY] srvaccept failed', e);
+    if (typeof vToast==='function') vToast('Erro ao aceitar missão');
+  });
+}
+
 function _normalizeQuests(){
   var seen = _getSeenQuests();
   var out = [];
@@ -20129,24 +20179,33 @@ function _normalizeQuests(){
       cb: 'quest_open_' + (q.id || '').replace(/^qa_/, '')
     });
   });
-  (GUILD_QUESTS_AVAILABLE || []).forEach(function(q){
-    // 2026-05-21: SPOILER GATING — só mostra quests JÁ VISTAS pelo player.
-    if (!seen.has(q.id)) return;
-    var lvl = parseInt((q.diff || '').replace(/\D/g, ''), 10) || 0;
-    out.push({
-      id: q.id, icon: q.icon, title: q.title, desc: q.desc || '',
-      status: 'available',
-      progress: '',
-      reward: q.reward || 0, xp: q.xp || 0,
-      npc: '', date: '',
-      level: lvl,
-      // X-6.5.51AV (2026-05-11): convenção cb 'accept_q_<id>' (handler em ~37891).
-      // Antes era 'quest_accept_<id>' sem handler — clique no Quest Diary
-      // não fazia nada. Agora bate com handler accept_q_* que delega ao
-      // _acceptQuest (move AVAILABLE → ACTIVE com check de nível).
-      cb: 'accept_q_' + (q.id || '').replace(/^gq_/, '')
+  if (window.SERVER_QUEST_BOARD_LOADED) {
+    // FASE 1 server-driven: board CANÔNICO vem do servidor (quest.board, já
+    // filtrado por can_accept — sem spoiler gating client). cb srvaccept_<serverId>.
+    (window.SERVER_QUEST_BOARD || []).forEach(function(q){
+      out.push({
+        id: 'gqs_' + q.id, icon: '', title: q.title || q.id, desc: q.desc || '',
+        status: 'available', progress: '',
+        reward: q.reward || 0, xp: q.xp || 0,
+        npc: '', date: '', level: q.min_level || 0,
+        cb: 'srvaccept_' + q.id
+      });
     });
-  });
+  } else {
+    (GUILD_QUESTS_AVAILABLE || []).forEach(function(q){
+      // 2026-05-21: SPOILER GATING — só mostra quests JÁ VISTAS pelo player.
+      if (!seen.has(q.id)) return;
+      var lvl = parseInt((q.diff || '').replace(/\D/g, ''), 10) || 0;
+      out.push({
+        id: q.id, icon: q.icon, title: q.title, desc: q.desc || '',
+        status: 'available', progress: '',
+        reward: q.reward || 0, xp: q.xp || 0,
+        npc: '', date: '', level: lvl,
+        // cb 'accept_q_<id>' (handler ~37891) → _acceptQuest (client-mock fallback).
+        cb: 'accept_q_' + (q.id || '').replace(/^gq_/, '')
+      });
+    });
+  }
   (QUESTS_HISTORY || []).forEach(function(q){
     out.push({
       id: q.id, icon: q.icon, title: q.title, desc: '',
