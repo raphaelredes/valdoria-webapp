@@ -19951,21 +19951,19 @@ function _buildCodexMockData(player){
 // _acceptQuest preenche acceptedAt = Date.now() ao mover de Disponíveis pra
 // Ativas. Mocks pré-existentes (Wolves, Lyana) usam offsets passados pra
 // simular missões adquiridas dias atrás.
-var QUESTS_ACTIVE = [
-  { id: 'qa_wolves', icon: _heralIco('ic-lobo'),    title: 'Caçar 3 lobos cinzentos', desc: 'Eliminar matilha na Floresta dos Sussurros.', progress: '2/3',     reward: 50, xp: 80, npc: 'Tavira',
-    acceptedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,  // há 2 dias
-    whatHappened: 'Tavira (Mestra da Guilda) contratou na Praça. Fazendeiros do norte mal dormem há semanas — lobos cinzentos descem da Floresta dos Sussurros toda noite.',
-    whatToDo: 'Abater mais 1 lobo cinzento na Floresta dos Sussurros (2/3 mortes registradas) e reportar a Tavira.' }
-  // Sessao #68 (2026-05-30): qa_lyana REMOVIDA daqui. Antes aparecia pre-aceita
-  // sem contexto (queixa do user). Agora e concedida ao completar a descoberta
-  // dos Portoes (CITY_DISCOVERY_QUESTS.q_disc_gates.grantsQuest), quando a Ancia
-  // entrega o pergaminho — aquisicao real e narrativamente fundamentada.
-];
-var QUESTS_HISTORY = [
-  { id: 'qh_pacote', icon: _heralIco('ic-mochila'), title: 'Entregar pacote ao Mercador', date: '2026-04-30', reward: 15, xp: 30 },
-  { id: 'qh_goblins',icon: _heralIco('ic-goblin'),  title: 'Caçar 3 goblins',             date: '2026-04-28', reward: 25, xp: 40 },
-  { id: 'qh_herbs',  icon: _heralIco('ic-druida'),  title: 'Coletar ervas raras',         date: '2026-04-26', reward: 15, xp: 25 }
-];
+// Sessao #69 (2026-05-30): QUESTS_ACTIVE e QUESTS_HISTORY iniciam VAZIOS. Antes
+// vinham pre-seeded com missoes que o jogador NUNCA aceitou/concluiu (qa_wolves
+// com progresso falso "2/3 ha 2 dias"; historico com 3 "concluidas" de datas
+// falsas) — exatamente o problema "sem contexto pra existir" da Lyana (#68).
+// Missoes ativas agora vem SO de aquisicao real:
+//   - aceitar no quadro da Guilda (GUILD_QUESTS_AVAILABLE -> _acceptQuest: 0/N, acceptedAt=now)
+//   - encontro de descoberta (ex: Lyana via Portoes, q_disc_gates.grantsQuest)
+// E o historico popula de verdade conforme o jogador conclui (_completeQuest).
+// qa_wolves removida (nao re-aterrada): redundante com o "Desafio do Dia: Abater
+// 3x Lobos Cinzentos". O quest_diary ja tem empty-states guiados ("Aceite
+// contratos na Guilda para comecar" / "Sua cronica ainda comeca a ser escrita").
+var QUESTS_ACTIVE = [];
+var QUESTS_HISTORY = [];
 
 // === DIÁRIO DE MISSÕES — tela única com filtros inteligentes ===
 // Substitui as 3 sub-telas (Ativas/Disponíveis/Concluídas) por:
@@ -45062,13 +45060,15 @@ var SUBSCREEN_DATA = {
 
   // ========== SUB-SUB-SCREENS — QUESTS ==========
   'quests_active': {
-    header: '📋 Missões Ativas (2)',
+    header: '📋 Missões Ativas',
     flavor: 'Em progresso. Volta pra entregar quando completas.',
     buttons: [
-      [_heralIco('ic-missões'), 'Caçar 3 lobos cinzentos', '2/3 mortes — 50 <span class="vi vi-coin sm"></span> + 80 XP', 'quest_open_wolves']
-      // Sessao #68 (2026-05-30): "Falar com Lyana" removida desta lista estatica
-      // legada — a quest agora e adquirida nos Portoes (q_disc_gates.grantsQuest)
-      // e renderizada pelo quest_diary dinamico (QUESTS_ACTIVE). Sem pre-seed.
+      // Sessao #69 (2026-05-30): lista estatica legada ESVAZIADA (qa_wolves + Lyana
+      // removidas — eram pre-seed sem contexto). Missoes ativas agora vem so de
+      // aquisicao real (quadro da Guilda / descoberta) e sao renderizadas pelo
+      // quest_diary dinamico (QUESTS_ACTIVE). Esta tela legada (renderSubScreen
+      // 'quests_active') cai no empty-state com buttons=[]; o header recebe a
+      // contagem real injetada dinamicamente (~47258).
     ]
   },
   'quests_available': {
