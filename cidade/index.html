@@ -766,10 +766,15 @@ LOG SINK (Fase 7):
     /* Sessão #63 (2026-05-30): imagem do local EM DESTAQUE no topo do card.
        User pediu as ilustrações .webp geradas visíveis (não o iconezinho lateral
        da #56). Thumbnail ocupa a largura do card; nome (.hl-nm) fica embaixo. */
-    .hub-loc .hl-thumb { width: 100%; height: 48px; border-radius: var(--v-radius-sm, 6px);
+    /* Sessão #64 (2026-05-30): altura ESCALA com --v-font-scale (era 48px fixo →
+       imagem desproporcional/pequena em letra grande). object-fit:contain (era
+       cover) mostra a ilustração INTEIRA sem cortar (user reportou "imagens
+       cortadas com letra grande"). */
+    .hub-loc .hl-thumb { width: 100%; height: calc(54px * var(--v-font-scale, 1));
+        border-radius: var(--v-radius-sm, 6px);
         overflow: hidden; display: flex; align-items: center; justify-content: center;
         background: rgba(0,0,0,0.22); margin-bottom: 2px; }
-    .hub-loc .hl-thumb img.hl-ico-img { width: 100%; height: 100%; object-fit: cover;
+    .hub-loc .hl-thumb img.hl-ico-img { width: 100%; height: 100%; object-fit: contain;
         display: block; filter: none; }
     /* .fb-btn .fb-heraldic — sem color override; cor vem inline do _heralB() via HERALDIC_COLORS */
 
@@ -1866,6 +1871,13 @@ LOG SINK (Fase 7):
     .cpp-card {
       width: 100%;
       max-width: 360px;
+      /* Sessão #64 (2026-05-30): max-height + scroll interno — sem isso o popup
+         (ex: Desafio do Dia) ESTOURAVA a tela em letra grande (conteúdo escala
+         com --v-font-scale mas o card não tinha limite/scroll). Regra "Popup
+         DEVE Ocupar Máximo de Espaço". */
+      max-height: 92vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 22px 20px;
       background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
       border: 1.5px solid #c4953a;
@@ -54185,7 +54197,11 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
       + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
       + '  width:100%;max-width:min(100vw - 16px, 480px);'
-      + '  height:auto;max-height:calc(100dvh - 16px);overflow:hidden;'
+      // Sessão #64 (2026-05-30): min-height ESCALA com --v-font-scale — em letra
+      // grande o card ocupa mais da tela (era height:auto = card minúsculo c/
+      // scroll, "ir na contra-mão da responsividade"). Cresce até o viewport.
+      + '  height:auto;min-height:min(calc(100dvh - 16px), calc(330px * var(--v-font-scale, 1)));'
+      + '  max-height:calc(100dvh - 16px);overflow:hidden;'
       + '  display:flex;flex-direction:column;'
       + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
       + '.enc-header{display:flex;gap:12px;padding:14px 16px;'
@@ -56751,7 +56767,8 @@ function renderHubScreen(el, screen) {
             if (typeof haptic === 'function') haptic('light');
             if (typeof doAction === 'function') doAction('daily_challenge_main');
         });
-        dcEl.textContent = '\uD83D\uDC3A Desafio: ' + dcb.dungeon_name;
+        /* Sess\u00E3o #64 (2026-05-30): sem emoji de lobo \u2014 user pediu s\u00F3 texto. */
+        dcEl.textContent = 'Desafio: ' + dcb.dungeon_name;
         frag.appendChild(dcEl);
     }
 
