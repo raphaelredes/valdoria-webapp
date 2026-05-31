@@ -8829,6 +8829,10 @@ body.perf-lite .vc-action-btn { transition: none; }
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
       }
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
+      // Sessão #66: restaura flags de "primeira vez visto" (Aldric, Vorhan, etc.)
+      // do localStorage por char — impede os diálogos de 1º encontro de REPETIREM
+      // a cada reload. (função hoisted, definida mais abaixo.)
+      try { if (typeof _hydrateEncNpcs === 'function') _hydrateEncNpcs(p); } catch(_he){}
 
       // USER REQUEST 2026-05-04: também popular _mockCharacters p/ Hall de Personagens
       // (em REMOTE não usa mock fixo Brunhilda/Lyana — usa apenas chars reais do user).
@@ -55266,9 +55270,41 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
   }
 }
 
+// Sessão #66: persiste/hidrata _encountered_npcs (flags "primeira vez visto":
+// aldric_map_warning, vorhan_first, etc.) em localStorage por char. Sem isto as
+// flags só viviam em memória → o diálogo do Guarda Aldric (e outros 1ºs
+// encontros) REPETIA a cada reload da cidade. É flag de UI (visto-uma-vez),
+// localStorage permitido (não é estado de jogo).
+function _encNpcsKey(player){
+  var env = (window.ENV_ID || window.__VALDORIA_ENV || 'dev');
+  var cid = (player && (player.id || player.char_id))
+            || (window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.id || window.CITY_MOCK_PLAYER.char_id))
+            || 'anon';
+  return 'valdoria_enc_npcs_' + env + '_' + cid;
+}
+function _persistEncNpcs(player){
+  try {
+    var p = player || window.CITY_MOCK_PLAYER;
+    if (!p || !p._encountered_npcs) return;
+    localStorage.setItem(_encNpcsKey(p), JSON.stringify(p._encountered_npcs));
+  } catch(_e){ /* localStorage indisponível — não-crítico */ }
+}
+function _hydrateEncNpcs(player){
+  try {
+    var p = player || window.CITY_MOCK_PLAYER;
+    if (!p) return;
+    var raw = localStorage.getItem(_encNpcsKey(p));
+    if (raw) {
+      var saved = JSON.parse(raw);
+      p._encountered_npcs = Object.assign({}, saved, p._encountered_npcs || {});
+    }
+  } catch(_e){ /* parse falhou — ignora */ }
+}
+
 function _onEncounterChoice(enc, choice, originalAction, player) {
   if (typeof enc.onDone === 'function') {
     try { enc.onDone(player); } catch(e){ console.warn('encounter onDone:', e); }
+    try { _persistEncNpcs(player); } catch(_pe){}
   }
   var ov = document.getElementById('encounter-overlay');
   if (ov) {
