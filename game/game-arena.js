@@ -128,7 +128,7 @@ function _renderArenaMain(el, d) {
     var cenarioEl = _div('cenario');
     var bg = document.createElement('img');
     bg.className = 'cenario-bg';
-    bg.src = '../shared/img/arena/arena-banner.png';
+    bg.src = '../shared/img/arena/arena-banner.webp';
     bg.loading = 'lazy';
     bg.onerror = function(){ this.style.display = 'none'; };
     cenarioEl.appendChild(bg);
@@ -136,7 +136,7 @@ function _renderArenaMain(el, d) {
     cenarioEl.appendChild(_div('candle-glow r'));
     var crest = document.createElement('img');
     crest.className = 'cenario-brasao';
-    crest.src = '../shared/img/arena/arena-crest.png';
+    crest.src = '../shared/img/arena/arena-crest.webp';
     crest.alt = 'Brasão da Arena';
     crest.loading = 'lazy';
     crest.onerror = function(){ this.style.display = 'none'; };

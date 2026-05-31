@@ -200,14 +200,14 @@ function renderInnHub(container, data) {
   /* === 1. Cenario canonical === */
   var cenarioEl = vCity.el('div', 'cenario');
   var bg = _innEl('img', 'cenario-bg');
-  bg.src = '../shared/img/estalagem/estalagem-banner.png';
+  bg.src = '../shared/img/estalagem/estalagem-banner.webp';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(bg);
   cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
   cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _innEl('img', 'cenario-brasao');
-  crest.src = '../shared/img/estalagem/estalagem-crest.png';
+  crest.src = '../shared/img/estalagem/estalagem-crest.webp';
   crest.alt = 'Brasão do Grifo Dourado';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

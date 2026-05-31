@@ -77,14 +77,14 @@ function renderRuneScribe(container, data) {
   /* === 1. Cenario canonical === */
   var cenarioEl = vCity.el('div', 'cenario');
   var bg = _rnsEl('img', 'cenario-bg');
-  bg.src = '../shared/img/runas/runas-banner.png';
+  bg.src = '../shared/img/runas/runas-banner.webp';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(bg);
   cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
   cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _rnsEl('img', 'cenario-brasao');
-  crest.src = '../shared/img/runas/runas-crest.png';
+  crest.src = '../shared/img/runas/runas-crest.webp';
   crest.alt = 'Brasão do Escriba';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

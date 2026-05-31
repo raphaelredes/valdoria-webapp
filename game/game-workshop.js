@@ -78,14 +78,14 @@ function renderWorkshopHub(container, data) {
   /* === 1. Cenario canonical === */
   var cenarioEl = vCity.el('div', 'cenario');
   var bg = _wksEl('img', 'cenario-bg');
-  bg.src = '../shared/img/oficina/oficina-banner.png';
+  bg.src = '../shared/img/oficina/oficina-banner.webp';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(bg);
   cenarioEl.appendChild(vCity.el('div', 'candle-glow l'));
   cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = _wksEl('img', 'cenario-brasao');
-  crest.src = '../shared/img/oficina/oficina-crest.png';
+  crest.src = '../shared/img/oficina/oficina-crest.webp';
   crest.alt = 'Brasão da Oficina';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

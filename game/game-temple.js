@@ -273,7 +273,7 @@ function _tmpBuildCenario(data) {
 
   // Banner background
   var bg = vCity.el('img', 'cenario-bg');
-  bg.src = '../shared/img/templo/templo-banner.png';
+  bg.src = '../shared/img/templo/templo-banner.webp';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -285,7 +285,7 @@ function _tmpBuildCenario(data) {
 
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
-  crest.src = '../shared/img/templo/templo-crest.png';
+  crest.src = '../shared/img/templo/templo-crest.webp';
   crest.alt = 'Brasão do Templo dos Quatro';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

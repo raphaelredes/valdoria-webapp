@@ -154,7 +154,7 @@ function _mktBuildCenario(data) {
   var cenarioEl = vCity.el('div', 'cenario');
 
   var bg = vCity.el('img', 'cenario-bg');
-  bg.src = '../shared/img/mercado/mercado-banner.png';
+  bg.src = '../shared/img/mercado/mercado-banner.webp';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -164,7 +164,7 @@ function _mktBuildCenario(data) {
   cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
 
   var crest = vCity.el('img', 'cenario-brasao');
-  crest.src = '../shared/img/mercado/mercado-crest.png';
+  crest.src = '../shared/img/mercado/mercado-crest.webp';
   crest.alt = 'Brasão do Mercado de Valdoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

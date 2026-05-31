@@ -10213,12 +10213,12 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
-  if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.png';
-  if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.png';
-  if (s.indexOf('guarda') >= 0 && s.indexOf('cidade') >= 0) return '/shared/img/npcs/plaza/guarda_barricada.png';
-  if (s.indexOf('bardo') >= 0 && s.indexOf('itinerante') >= 0) return '/shared/img/npcs/plaza/bardo_praca.png';
-  if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.png';
-  if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.png';
+  if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.webp';
+  if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.webp';
+  if (s.indexOf('guarda') >= 0 && s.indexOf('cidade') >= 0) return '/shared/img/npcs/plaza/guarda_barricada.webp';
+  if (s.indexOf('bardo') >= 0 && s.indexOf('itinerante') >= 0) return '/shared/img/npcs/plaza/bardo_praca.webp';
+  if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.webp';
+  if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.webp';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
   if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.webp';
   if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
@@ -13917,7 +13917,7 @@ function _showLeaguePopup(p){
 
     // Medalha PNG principal (100px) — centro-centro
     + '<img class="vLg-medal-anim vLg-medal-img" '
-    +    'src="/shared/img/medals/' + currentTier.id + '.png" '
+    +    'src="/shared/img/medals/' + currentTier.id + '.webp" '
     +    'alt="Medalha ' + currentTier.name + '" '
     +    'data-medal-name="' + currentTier.name + '" '
     +    'data-medal-desc="Tier ' + currentTier.name + ' — ' + currentXp.toLocaleString('pt-BR') + ' XP de Liga" '
@@ -14039,7 +14039,7 @@ function _showLeaguePopup(p){
       + 'opacity:' + opacity + ';">'
       // 2026-05-22: PNG medal canonical com click-to-zoom (PADRAO_LIGHTBOX)
       + '<img class="vLg-path-medal-img" '
-      +    'src="/shared/img/medals/' + t.id + '.png" '
+      +    'src="/shared/img/medals/' + t.id + '.webp" '
       +    'alt="' + t.name + '" '
       +    'data-medal-name="' + t.name + '" '
       +    'data-medal-desc="Tier ' + t.name + ' — ' + t.minXp.toLocaleString('pt-BR') + ' a ' + t.maxXp.toLocaleString('pt-BR') + ' XP" '
@@ -27426,7 +27426,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 1. CRIANÇA + MAÇÃS (sem skill check, social) ──────────────────
   child_apples_help: {
     npc_key: 'crianca_pomar',
-    npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.png' },
+    npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.webp' },
     script: [
       { type: 'narration', text: 'Uma garota de oito anos tropeça no calçamento e a cesta de vime escapa das mãos dela. Maçãs vermelhas rolam em todas as direções pela praça.' },
       { type: 'speech', speaker: 'crianca_pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> A senhora vai me bater de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
@@ -27456,7 +27456,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 2. MENDIGO PEDINDO MOEDAS (sem skill check, gold transaction) ──
   beggar_plea: {
     npc_key: 'mendigo_praca',
-    npc_data: { name: 'Mendigo da Praça', desc: 'Homem magro de barba grisalha e mãos trêmulas', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/mendigo_praca.png' },
+    npc_data: { name: 'Mendigo da Praça', desc: 'Homem magro de barba grisalha e mãos trêmulas', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/mendigo_praca.webp' },
     script: [
       { type: 'narration', text: 'Um homem magro de barba grisalha emerge da multidão e estende as mãos esqueléticas pra você. As roupas dele têm remendo sobre remendo.' },
       { type: 'speech', speaker: 'mendigo_praca', text: '— Aventureiro... só uma moeda. <i>(a voz é trêmula, ele tenta sorrir mas tosse)</i> Faz três dias que não como nada. Qualquer coisa serve. Pão velho, casca de queijo... qualquer coisa.' }
@@ -27486,7 +27486,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 3. GUARDA + BARRICADA (FOR DC 10 — Atletismo) ─────────────────
   guard_barricade: {
     npc_key: 'guarda_barricada',
-    npc_data: { name: 'Guarda da Cidade', desc: 'Soldado de meia-idade com barba grisalha e armadura suada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/guarda_barricada.png' },
+    npc_data: { name: 'Guarda da Cidade', desc: 'Soldado de meia-idade com barba grisalha e armadura suada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/guarda_barricada.webp' },
     script: [
       { type: 'narration', text: 'Um guarda de meia-idade está empurrando uma barricada de madeira pesada que bloqueia a entrada de uma rua lateral. Ele se vira e te avista, ofegando.' },
       { type: 'speech', speaker: 'guarda_barricada', text: '— Ei, aventureiro! <i>(ele limpa o suor da testa com a manga)</i> Tem um par de braços de sobra? Essa praga não move sozinha — e o mercado abre em meia hora.' }
@@ -27513,7 +27513,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 4. GATO PRESO NO TELHADO (DES DC 8 — Acrobacia) ───────────────
   lost_cat: {
     npc_key: 'dono_gato',
-    npc_data: { name: 'Mercador da Feira', desc: 'Homem desesperado apontando pro telhado', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/plaza/dono_gato.png' },
+    npc_data: { name: 'Mercador da Feira', desc: 'Homem desesperado apontando pro telhado', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/plaza/dono_gato.webp' },
     script: [
       { type: 'narration', text: 'Um homem aponta agitado pro alto de uma barraca de feira coberta. No telhado de palha, um gato malhado mia desesperadamente, com uma das patas presa entre as fibras.' },
       { type: 'speech', speaker: 'dono_gato', text: '— O Mestre Bigodes! <i>(o homem quase chora)</i> Ele subiu atrás de um pombo e agora não desce de jeito nenhum! Já é a terceira vez essa semana — mas dessa vez tá mesmo preso!' }
@@ -27540,7 +27540,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 5. BARDO ENROLADO C/ ALAÚDE — CAR/DES check (2026-05-24) ──────
   bard_stuck_lute: {
     npc_key: 'bardo_praca',
-    npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/bardo_praca.png' },
+    npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/bardo_praca.webp' },
     script: [
       { type: 'narration', text: 'Um bardo jovem está sentado no chão da praça com um alaúde de tampo rachado. <i>Algumas crianças zombam, jogam migalhas. Ele tenta sorrir mas as bochechas tremem.</i>' },
       { type: 'speech', speaker: 'bardo_praca', text: '— Apresentação de coroação amanhã. Sem alaúde, sem moeda, sem honra. <i>(ele engole)</i> Se voltar pra casa assim, meu pai vai mandar pra Guarda. "Sem futuro, vai aprender disciplina lá."' }
@@ -27569,7 +27569,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 6. LADRÃO DE COLHER — PERCEPÇÃO/PERSUASÃO (2026-05-24) ────────
   pickpocket_caught: {
     npc_key: 'batedor_carteira',
-    npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/batedor_carteira.png' },
+    npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/batedor_carteira.webp' },
     script: [
       { type: 'narration', text: 'Você sente uma mão roçar a sua bolsa de moedas. <i>Vira rápido — um garoto de uns 12 anos congela com sua mão ainda no fecho.</i> Ao redor, ninguém viu.' },
       { type: 'speech', speaker: 'batedor_carteira', text: '— P-por favor... <i>(a voz dele falha)</i> Minha irmã tá doente, não comemos há dois dias. Foi minha primeira vez, juro. Não me entrega pra Guarda — eles cortam mão de batedor.' }
@@ -27598,7 +27598,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 7. VELHA OCULTISTA — INTELIGÊNCIA/CARISMA (2026-05-24) ────────
   old_seer: {
     npc_key: 'velha_oculto',
-    npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.png' },
+    npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.webp' },
     script: [
       { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
       { type: 'speech', speaker: 'velha_oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
@@ -27627,7 +27627,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
   // ── 8. DOIS BÊBADOS BRIGANDO — FOR/CAR/INT (2026-05-24) ───────────
   drunk_brawl: {
     npc_key: 'bebados_briga',
-    npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/bebados_briga.png' },
+    npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/bebados_briga.webp' },
     script: [
       { type: 'narration', text: 'Dois homens robustos viram uma mesa de taverna no meio da praça. <i>Cervejas derramadas, punhos abertos, gritos que ninguém entende.</i> Uma multidão se afasta — a Guarda ainda não chegou.' },
       { type: 'speech', speaker: 'bebados_briga', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }

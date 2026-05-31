@@ -20,11 +20,11 @@
 
 var MEDAL_BASE = '/shared/img/medals/';
 var MEDAL_BY_TIER = {
-  'bronze':   'bronze.png',
-  'prata':    'silver.png',
-  'ouro':     'gold.png',
-  'platina':  'platinum.png',
-  'lendaria': 'mithral.png'
+  'bronze':   'bronze.webp',
+  'prata':    'silver.webp',
+  'ouro':     'gold.webp',
+  'platina':  'platinum.webp',
+  'lendaria': 'mithral.webp'
 };
 
 var TIER_META = {
@@ -74,7 +74,7 @@ function _renderMainView(el, data) {
   medalBox.style.cursor = 'zoom-in';
 
   var medalImg = document.createElement('img');
-  medalImg.src = MEDAL_BASE + (MEDAL_BY_TIER[data.tier] || 'bronze.png');
+  medalImg.src = MEDAL_BASE + (MEDAL_BY_TIER[data.tier] || 'bronze.webp');
   medalImg.alt = data.tier_name;
   medalImg.className = 'v-league-medal-img';
   medalImg.addEventListener('error', function() {
@@ -168,7 +168,7 @@ function _buildTierPath(currentTier) {
     else node.classList.add('v-league-path-future');
 
     var medalSmall = document.createElement('img');
-    medalSmall.src = MEDAL_BASE + (MEDAL_BY_TIER[tierId] || 'bronze.png');
+    medalSmall.src = MEDAL_BASE + (MEDAL_BY_TIER[tierId] || 'bronze.webp');
     medalSmall.alt = meta.label;
     medalSmall.className = 'v-league-path-medal';
     node.appendChild(medalSmall);
@@ -202,7 +202,7 @@ function _renderStandingsView(el, data) {
   header.style.setProperty('--tier-color', tierMeta.color);
 
   var medalSm = document.createElement('img');
-  medalSm.src = MEDAL_BASE + (MEDAL_BY_TIER[data.tier] || 'bronze.png');
+  medalSm.src = MEDAL_BASE + (MEDAL_BY_TIER[data.tier] || 'bronze.webp');
   medalSm.alt = data.tier_name;
   medalSm.className = 'v-league-standings-medal';
   header.appendChild(medalSm);

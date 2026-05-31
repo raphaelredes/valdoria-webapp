@@ -311,7 +311,7 @@ function _bnkBuildCenario(data) {
 
   // Banner background (PNG canonical do mockup — /banco/ não /bank/)
   var bg = vCity.el('img', 'cenario-bg');
-  bg.src = '../shared/img/banco/banco-banner.png';
+  bg.src = '../shared/img/banco/banco-banner.webp';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -323,7 +323,7 @@ function _bnkBuildCenario(data) {
 
   // Brasão (crest)
   var crest = vCity.el('img', 'cenario-brasao');
-  crest.src = '../shared/img/banco/banco-crest.png';
+  crest.src = '../shared/img/banco/banco-crest.webp';
   crest.alt = 'Brasão do Banco de Valdoria';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };

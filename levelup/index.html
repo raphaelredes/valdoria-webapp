@@ -136,7 +136,7 @@
             transform: translateX(-50%);
             width: 360px;
             height: 360px;
-            background-image: url('../shared/img/levelup/aura-burst.png');
+            background-image: url('../shared/img/levelup/aura-burst.webp');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center top;
@@ -159,7 +159,7 @@
             width: 200px;
             height: 200px;
             margin-left: -100px;
-            background-image: url('../shared/img/levelup/magic-circle.png');
+            background-image: url('../shared/img/levelup/magic-circle.webp');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -2139,7 +2139,7 @@
             <div class="lvl-cinema-particles"></div>
             <div class="lvl-cinema-rune-ring"></div>
             <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${_slug}.png" alt="${info.name}" onerror="this.style.display='none'"/></div>
-            <div class="lvl-cinema-medal" title="${P.level >= 13 ? 'Mítico' : P.level >= 10 ? 'Lendário' : P.level >= 8 ? 'Mestre' : P.level >= 5 ? 'Veterano' : 'Iniciante'}"><img src="../shared/img/medals/${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}.png" alt="tier" onerror="this.style.display='none'"/></div>
+            <div class="lvl-cinema-medal" title="${P.level >= 13 ? 'Mítico' : P.level >= 10 ? 'Lendário' : P.level >= 8 ? 'Mestre' : P.level >= 5 ? 'Veterano' : 'Iniciante'}"><img src="../shared/img/medals/${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}.webp" alt="tier" onerror="this.style.display='none'"/></div>
             <div class="lvl-cinema-level">${P.level}</div>
             <div class="lvl-cinema-title">Novo Nível Alcançado</div>
             <div class="lvl-cinema-class"><b>${info.name}</b> &mdash; ${P.name}</div>
@@ -2388,7 +2388,7 @@
             const f = FEATS[fid];
             if (!f) return;
             const slug = _featSlug(f.name);
-            const pngSrc = '../shared/img/feats/' + slug + '.png';
+            const pngSrc = '../shared/img/feats/' + slug + '.webp';
             const isSel = sel.feat === fid;
 
             let html = `<button class="lu-sub-back" onclick="closeSubScreen()">\u25c0 Voltar</button>`;

@@ -114,7 +114,7 @@ function renderGuildHub(container, data) {
   /* === 1. Cenario canonical === */
   var cenarioEl = _gldEl('div', 'cenario');
   var bg = _gldEl('img', 'cenario-bg');
-  bg.src = '../shared/img/guilda/guilda-banner.png';
+  bg.src = '../shared/img/guilda/guilda-banner.webp';
   bg.alt = '';
   bg.loading = 'lazy';
   bg.onerror = function(){ this.style.display = 'none'; };
@@ -122,7 +122,7 @@ function renderGuildHub(container, data) {
   cenarioEl.appendChild(_gldEl('div', 'candle-glow l'));
   cenarioEl.appendChild(_gldEl('div', 'candle-glow r'));
   var crest = _gldEl('img', 'cenario-brasao');
-  crest.src = '../shared/img/guilda/guilda-crest.png';
+  crest.src = '../shared/img/guilda/guilda-crest.webp';
   crest.alt = 'Brasão da Guilda';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
