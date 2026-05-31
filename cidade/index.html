@@ -8662,6 +8662,9 @@ body.perf-lite .vc-action-btn { transition: none; }
           });
         } catch(_eqe){ console.warn('[CITY] equip hydrate failed:', _eqe); }
       }
+      // FASE 6: libera persistência de equip ao servidor SÓ após hidratar (senão
+      // o boot sync dispararia equip.set({}) antes do fetch e apagaria o equip).
+      window._cityEquipReady = true;
       // USER REPORT 2026-05-14 #2 — Ficha + HUD usam dados REAIS do DB em vez
       // de hardcoded por classe (_genFichaStats). Stats vêm direto, AC/Atk/DC
       // vêm computados server-side via Player.get_armor_class/get_attack_bonus/
@@ -8715,6 +8718,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       try { _refreshDailyState(); } catch(_dse){ console.warn('[CITY] daily state fetch failed', _dse); }
       try { _refreshDiscoveryState(); } catch(_dce){ console.warn('[CITY] discovery state fetch failed', _dce); }
       try { _refreshNpcState(); } catch(_npe){ console.warn('[CITY] npc state fetch failed', _npe); }
+      try { _refreshAchProgress(); } catch(_ape){ console.warn('[CITY] ach progress fetch failed', _ape); }
+      try { _refreshCityFlags(); } catch(_cfe){ console.warn('[CITY] city flags fetch failed', _cfe); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9817,6 +9822,20 @@ function _isCTA(btn) {
     npc: {
       state: function(){ return window.vCityServer.cityAction('npc.state', {}); },
       sync:  function(obj){ return window.vCityServer.cityAction('npc.sync', obj || {}); }
+    },
+    equip: {  // FASE 6 — persiste Player.equipment (anti-cheat server-side)
+      set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); }
+    },
+    service: {  // FASE 6 — gold/xp delta-based (servidor é autoridade)
+      gold: function(delta, id){ return window.vCityServer.cityAction('service.gold', { delta: delta, service_id: id || '' }); },
+      xp:   function(amount, id){ return window.vCityServer.cityAction('service.xp', { amount: amount, service_id: id || '' }); }
+    },
+    flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
+      set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
+      state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
+    },
+    ach: {  // FASE 5 — progresso de conquistas por chain (read-only, best-effort)
+      progress: function(){ return window.vCityServer.cityAction('ach.progress', {}); }
     }
   };
 })();
@@ -20262,6 +20281,28 @@ function _refreshNpcState(){
     }
   }).catch(function(e){ console.warn('[CITY] npc state failed', e); });
 }
+// FASE 5 server-driven: progresso REAL de conquistas por chain (8 chains com
+// stat no backend). As 6 sem stat (cacador/cartografo/forjador/erudito/diplomata/
+// sobrevivente) mantêm o valor mock — divergência de catálogo documentada (§12).
+function _refreshAchProgress(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.ach.progress().then(function(r){
+    if (r && r.ok && r.ach_progress && typeof ACH_PROGRESS !== 'undefined'){
+      for (var k in r.ach_progress){ ACH_PROGRESS[k] = r.ach_progress[k]; }  // sobrescreve mock com real
+    }
+  }).catch(function(e){ console.warn('[CITY] ach progress failed', e); });
+}
+// FASE 7 server-driven: achata metadata['city_flags'] do servidor → p.metadata.<flag>
+// (convenção existente: o código lê p.metadata.town_lia_helped).
+function _refreshCityFlags(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.flag.state().then(function(r){
+    if (r && r.ok && r.flags && window.CITY_MOCK_PLAYER){
+      var p = window.CITY_MOCK_PLAYER; p.metadata = p.metadata || {};
+      for (var k in r.flags){ p.metadata[k] = r.flags[k]; }
+    }
+  }).catch(function(e){ console.warn('[CITY] city flags failed', e); });
+}
 function _srvAcceptQuest(serverId){
   if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
   if (window._srvQuestBusy) return;  // guard anti-double-fire (double-tap)
@@ -21332,6 +21373,12 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     if (npc.id === 'square_child' && opt.id === 'help'){
       p.metadata = p.metadata || {};
       p.metadata.town_lia_helped = true;
+      // FASE 7: persiste flag narrativa no servidor (sobrevive reload/troca de device)
+      try {
+        if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+          window.vCityServer.flag.set('town_lia_helped', true);
+        }
+      } catch (_) {}
     }
     // canonical: opt._grantsXp (intro de UNIQUE NPC) ou opt._isUniqueFinish (rewards)
     var preXp = p.xp || 0;
@@ -37975,6 +38022,14 @@ function _syncEquippedToLocalStorage() {
       localStorage.setItem(stKey, JSON.stringify(stats));
     }
   } catch (_) { /* localStorage off / cota cheia */ }
+  // FASE 6: persiste equipamento no servidor (autoridade) quando remoto.
+  // Ponto único de equip/unequip — server valida posse + deriva AC.
+  // GUARD _cityEquipReady: evita wipe (boot sync antes da hidratação async).
+  try {
+    if (window._cityEquipReady && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      window.vCityServer.equip.set(window.MOCK_PLAYER_EQUIPPED || {});
+    }
+  } catch (_) {}
 }
 // Sync inicial no boot
 if (typeof document !== 'undefined') {
@@ -47174,6 +47229,13 @@ function _pay(p, cost){
   if (p.gold < cost) { vToast('💰 Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
   p.gold -= cost;
   refreshHud();
+  // FASE 6: persiste o gasto no servidor (delta — autoridade). Ponto único de
+  // gasto de serviços da cidade (taverna/templo/oficina). Boot re-hidrata gold.
+  try {
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      window.vCityServer.service.gold(-Math.abs(cost), 'city_pay');
+    }
+  } catch (_) {}
   return true;
 }
 function _heal(p, hpAmt, mpAmt){
@@ -47192,6 +47254,13 @@ function _gainXp(p, amt){
   if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast('🎉 LEVEL UP! Agora nv ' + p.level); }
   p._lastXpGain = { gain: amt, preXp: preXp, preLevel: preLevel, preXpNext: preXpNext, leveledUp: (p.level || 1) > preLevel };
   refreshHud();
+  // FASE 6: persiste o XP no servidor (delta — autoridade aplica level-up canônico).
+  // Display local é otimista; boot re-hidrata xp/level do servidor.
+  try {
+    if (amt > 0 && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      window.vCityServer.service.xp(amt, 'city_xp');
+    }
+  } catch (_) {}
 }
 /* FIX 2026-05-07: helper canonical pra deltas de XP em _showServiceResultPopup.
    Lê info salva por _gainXp em p._lastXpGain. SEMPRE chamar APÓS _gainXp() — caso
