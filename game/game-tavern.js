@@ -347,16 +347,16 @@ var TAVERN_SVC_META = {
   /* 2026-05-20: keys MATCH actual svc.cb values em renderTavernHub (verified via Chrome MCP).
      Keys antigas (tavern_drink_menu, tavern_rumor, etc) eram mismatch — meta.icon undefined,
      img nunca era criado, svc-ico ficava vazio (sem PNG). */
-  'tavern_drinks_open':        { icon: '../shared/img/services/svc-bebidas.png',      meta: 'Recupera HP/MP' },
-  'tavern_rumor_buy':          { icon: '../shared/img/services/svc-rumores.png',      meta: '5 V · pistas' },
-  'tavern_mercenaries_open':   { icon: '../shared/img/services/svc-mercenarios.png',  meta: 'Contratar por dia' },
-  'tavern_adventurers_open':   { icon: '../shared/img/services/svc-exploradores.png', meta: 'Especialistas de campo' },
-  'tavern_games_open':         { icon: '../shared/img/services/svc-dados.png',        meta: 'Apostar nos dados' },
-  'tavern_carousing_open':     { icon: '../shared/img/services/svc-socializar.png',   meta: 'Fazer contatos' },
-  'tavern_gather_open':        { icon: '../shared/img/services/svc-informacoes.png',  meta: 'Investigar boatos' },
-  'tavern_pitfight_open':      { icon: '../shared/img/services/svc-rinha.png',        meta: 'Combate de aposta' },
-  'tavern_bulletin_open':      { icon: '../shared/img/services/svc-mural.png',        meta: 'Tarefas locais' },
-  'tavern_bard_open':          { icon: '../shared/img/services/svc-bardo.png',        meta: 'Inspiração: +1d6' }
+  'tavern_drinks_open':        { icon: '../shared/img/services/svc-bebidas.webp',      meta: 'Recupera HP/MP' },
+  'tavern_rumor_buy':          { icon: '../shared/img/services/svc-rumores.webp',      meta: '5 V · pistas' },
+  'tavern_mercenaries_open':   { icon: '../shared/img/services/svc-mercenarios.webp',  meta: 'Contratar por dia' },
+  'tavern_adventurers_open':   { icon: '../shared/img/services/svc-exploradores.webp', meta: 'Especialistas de campo' },
+  'tavern_games_open':         { icon: '../shared/img/services/svc-dados.webp',        meta: 'Apostar nos dados' },
+  'tavern_carousing_open':     { icon: '../shared/img/services/svc-socializar.webp',   meta: 'Fazer contatos' },
+  'tavern_gather_open':        { icon: '../shared/img/services/svc-informacoes.webp',  meta: 'Investigar boatos' },
+  'tavern_pitfight_open':      { icon: '../shared/img/services/svc-rinha.webp',        meta: 'Combate de aposta' },
+  'tavern_bulletin_open':      { icon: '../shared/img/services/svc-mural.webp',        meta: 'Tarefas locais' },
+  'tavern_bard_open':          { icon: '../shared/img/services/svc-bardo.webp',        meta: 'Inspiração: +1d6' }
 };
 
 /* === Cenário canonical ============================================== */

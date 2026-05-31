@@ -29,16 +29,16 @@
    Cobre extras canônicos enviados por src/game/city/market_ui.py:213-219:
    - market_sell_menu / market_gossip_general / rune_scribe_menu */
 var MARKET_SVC_META = {
-  'market_sell_menu':      { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
-  'market_gossip_general': { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
-  'rune_scribe_menu':      { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' },
+  'market_sell_menu':      { icon: '<img src="../shared/img/services/svc-vender.webp" alt="">' },
+  'market_gossip_general': { icon: '<img src="../shared/img/services/svc-rumores.webp" alt="">' },
+  'rune_scribe_menu':      { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="">' },
   /* Aliases pra robustez */
-  'market_sell':           { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
-  'sell':                  { icon: '<img src="../shared/img/services/svc-vender.png" alt="">' },
-  'market_gossip':         { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
-  'rumores':               { icon: '<img src="../shared/img/services/svc-rumores.png" alt="">' },
-  'rune_scribe':           { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' },
-  'escriba':               { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="">' }
+  'market_sell':           { icon: '<img src="../shared/img/services/svc-vender.webp" alt="">' },
+  'sell':                  { icon: '<img src="../shared/img/services/svc-vender.webp" alt="">' },
+  'market_gossip':         { icon: '<img src="../shared/img/services/svc-rumores.webp" alt="">' },
+  'rumores':               { icon: '<img src="../shared/img/services/svc-rumores.webp" alt="">' },
+  'rune_scribe':           { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="">' },
+  'escriba':               { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="">' }
 };
 
 if (!window._SVC_CONFIG_MARKET) {

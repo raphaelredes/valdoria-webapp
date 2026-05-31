@@ -259,12 +259,12 @@ var TEMPLE_CB_TO_DIALOGUE = {
 var TEMPLE_SVC_META = {
   // Sessão #23 (2026-05-22): refs PHB removidas (regra "D&D refs sweep player-visible").
   // Meta agora descreve o serviço em PT-BR pra clareza ao jogador.
-  'temple_interact_menu_npc_temple_elara':    { icon: '../shared/img/services/svc-cura.png',         meta: 'Cura ferimentos divinos' },
-  'temple_interact_menu_npc_temple_aldric':   { icon: '../shared/img/services/svc-pocoes.png',       meta: 'Purifica veneno e doenças' },
-  'temple_interact_menu_npc_temple_theron':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'Bênção arcana de combate' },
-  'temple_interact_menu_npc_temple_miriel':   { icon: '../shared/img/services/svc-bencao.png',       meta: 'Liberta de maldições' },
-  'temple_interact_menu_npc_temple_varek':    { icon: '../shared/img/services/svc-bencao.png',       meta: 'Remove condições graves' },
-  'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.png',  meta: 'Reviver dos caídos' }
+  'temple_interact_menu_npc_temple_elara':    { icon: '../shared/img/services/svc-cura.webp',         meta: 'Cura ferimentos divinos' },
+  'temple_interact_menu_npc_temple_aldric':   { icon: '../shared/img/services/svc-pocoes.webp',       meta: 'Purifica veneno e doenças' },
+  'temple_interact_menu_npc_temple_theron':   { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Bênção arcana de combate' },
+  'temple_interact_menu_npc_temple_miriel':   { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Liberta de maldições' },
+  'temple_interact_menu_npc_temple_varek':    { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Remove condições graves' },
+  'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.webp',  meta: 'Reviver dos caídos' }
 };
 
 /* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) === */

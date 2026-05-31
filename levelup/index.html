@@ -1624,7 +1624,7 @@
         function _featIconHtml(slug) {
             if (!slug) return '✨';
             return '<img class="skill-png-ico" src="../shared/img/feats/' + slug +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
         }
         // Talentos: nome PT-BR (data.js FEATS[].name) -> slug. Slugify igual a _skillSlug.
         function _featSlug(name) {
@@ -1644,14 +1644,14 @@
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             var fallback = (window.ATTR_ICONS && ATTR_ICONS[attr]) || '\\u25c6';
             return '<img class="' + cls + '" src="../shared/img/levelup/attrs/' + slug +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
         }
         // Categorias (subclasse, atributos, habilidades): seção do hub e cards pendentes.
         function _catIconHtml(cat, sz) {
             if (!cat) return '◆';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/levelup/categories/' + cat +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u25c6\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u25c6\'"/>';
         }
 
         // ─────────────────────────────────────────────────────────
@@ -1676,7 +1676,7 @@
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             var fallback = ELEMENT_EMOJI_FALLBACK[type] || '✨';
             return '<img class="' + cls + '" src="../shared/img/combat/elements/' + type +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
         }
         // Status (PHB conditions + buffs + debuffs)
         var STATUS_PT = {
@@ -1698,7 +1698,7 @@
             if (!id || !STATUS_PT[id]) return '';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/combat/status/' + id +
-                   '.png" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
         }
 
         // Heurística: detecta elementos no texto effect/tech (PT-BR + EN).
@@ -1858,8 +1858,8 @@
             var parts = String(slug || '').split(':');
             var kind = parts[0], name = parts[1];
             var path;
-            if (kind === 'el')      path = '../shared/img/combat/elements/' + name + '.png';
-            else if (kind === 'fx') path = '../shared/img/combat/effects/'  + name + '.png';
+            if (kind === 'el')      path = '../shared/img/combat/elements/' + name + '.webp';
+            else if (kind === 'fx') path = '../shared/img/combat/effects/'  + name + '.webp';
             else                    return '';
             return '<img class="effect-tag-ico" src="' + path + '" alt="" loading="lazy" ' +
                    'onerror="this.outerHTML=&#x2728;"/>';
@@ -2138,7 +2138,7 @@
             <div class="lvl-cinema-rays"></div>
             <div class="lvl-cinema-particles"></div>
             <div class="lvl-cinema-rune-ring"></div>
-            <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${_slug}.png" alt="${info.name}" onerror="this.style.display='none'"/></div>
+            <div class="lvl-cinema-portrait"><img src="../shared/img/combat/${_slug}.webp" alt="${info.name}" onerror="this.style.display='none'"/></div>
             <div class="lvl-cinema-medal" title="${P.level >= 13 ? 'Mítico' : P.level >= 10 ? 'Lendário' : P.level >= 8 ? 'Mestre' : P.level >= 5 ? 'Veterano' : 'Iniciante'}"><img src="../shared/img/medals/${P.level >= 13 ? 'mithral' : P.level >= 10 ? 'platinum' : P.level >= 8 ? 'gold' : P.level >= 5 ? 'silver' : 'bronze'}.webp" alt="tier" onerror="this.style.display='none'"/></div>
             <div class="lvl-cinema-level">${P.level}</div>
             <div class="lvl-cinema-title">Novo Nível Alcançado</div>

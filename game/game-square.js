@@ -5,18 +5,18 @@
    PNGs em valdoria-webapp/shared/img/services/ — 4 gerados via OpenAI
    _gen_misc_services_pngs.py (low quality, $0.04 cada). */
 var SQUARE_SVC_META = {
-  'square_bulletin_open':   { icon: '<img src="../shared/img/services/svc-mural.png" alt="">' },
-  'square_bulletin_claim':  { icon: '<img src="../shared/img/services/svc-missoes.png" alt="">' },
-  'square_bulletin_help':   { icon: '<img src="../shared/img/services/svc-informacoes.png" alt="">' },
-  'square_mural':           { icon: '<img src="../shared/img/services/svc-mural.png" alt="">' },
-  'square_gamble_open':     { icon: '<img src="../shared/img/services/svc-apostas.png" alt="">' },
-  'square_gamble':          { icon: '<img src="../shared/img/services/svc-apostas.png" alt="">' },
-  'square_vendor_open':     { icon: '<img src="../shared/img/services/svc-vendor-ambulante.png" alt="">' },
-  'square_vendor':          { icon: '<img src="../shared/img/services/svc-vendor-ambulante.png" alt="">' },
-  'square_explore':         { icon: '<img src="../shared/img/services/svc-explorar.png" alt="">' },
-  'square_investigate':     { icon: '<img src="../shared/img/services/svc-investigar.png" alt="">' },
-  'square_work_menu':       { icon: '<img src="../shared/img/services/svc-trabalho.png" alt="">' },
-  'square_work':            { icon: '<img src="../shared/img/services/svc-trabalho.png" alt="">' }
+  'square_bulletin_open':   { icon: '<img src="../shared/img/services/svc-mural.webp" alt="">' },
+  'square_bulletin_claim':  { icon: '<img src="../shared/img/services/svc-missoes.webp" alt="">' },
+  'square_bulletin_help':   { icon: '<img src="../shared/img/services/svc-informacoes.webp" alt="">' },
+  'square_mural':           { icon: '<img src="../shared/img/services/svc-mural.webp" alt="">' },
+  'square_gamble_open':     { icon: '<img src="../shared/img/services/svc-apostas.webp" alt="">' },
+  'square_gamble':          { icon: '<img src="../shared/img/services/svc-apostas.webp" alt="">' },
+  'square_vendor_open':     { icon: '<img src="../shared/img/services/svc-vendor-ambulante.webp" alt="">' },
+  'square_vendor':          { icon: '<img src="../shared/img/services/svc-vendor-ambulante.webp" alt="">' },
+  'square_explore':         { icon: '<img src="../shared/img/services/svc-explorar.webp" alt="">' },
+  'square_investigate':     { icon: '<img src="../shared/img/services/svc-investigar.webp" alt="">' },
+  'square_work_menu':       { icon: '<img src="../shared/img/services/svc-trabalho.webp" alt="">' },
+  'square_work':            { icon: '<img src="../shared/img/services/svc-trabalho.webp" alt="">' }
 };
 window._SQUARE_SVC_META = SQUARE_SVC_META;
 

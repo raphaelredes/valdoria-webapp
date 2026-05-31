@@ -5680,7 +5680,7 @@ Busca rápida:
             if (!slug) return emoji;
             var sz = sizePx || 48;
             var onErr = "this.onerror=null;this.outerHTML='" + emoji.replace(/'/g, "\\'") + "';";
-            return '<img src="/shared/img/combat/' + slug + '.png" alt="" ' +
+            return '<img src="/shared/img/combat/' + slug + '.webp" alt="" ' +
                    'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;" ' +
                    'loading="lazy" onerror="' + onErr + '">';
         }

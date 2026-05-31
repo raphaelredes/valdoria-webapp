@@ -25,28 +25,28 @@
    que substituía PNG da estalagem por PNGs genéricos (sono/mochila/grupo). */
 var INN_SVC_META = {
   // === Menu principal Estalagem (cb reais backend) ===
-  'nav:inn_rest':           { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
-  'nav:inn_meals':          { icon: '<img src="../shared/img/services/svc-comer.png" alt="">' },
-  'inn_short_rest':         { icon: '<img src="../shared/img/services/svc-descanso-curto.png" alt="">' },
-  'inn_relaxation':         { icon: '<img src="../shared/img/services/svc-relaxar.png" alt="">' },
-  'inn_allies':             { icon: '<img src="../shared/img/services/svc-aliados.png" alt="">' },
-  'inn_cellar_quest':       { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
+  'nav:inn_rest':           { icon: '<img src="../shared/img/services/svc-dormir-comum.webp" alt="">' },
+  'nav:inn_meals':          { icon: '<img src="../shared/img/services/svc-comer.webp" alt="">' },
+  'inn_short_rest':         { icon: '<img src="../shared/img/services/svc-descanso-curto.webp" alt="">' },
+  'inn_relaxation':         { icon: '<img src="../shared/img/services/svc-relaxar.webp" alt="">' },
+  'inn_allies':             { icon: '<img src="../shared/img/services/svc-aliados.webp" alt="">' },
+  'inn_cellar_quest':       { icon: '<img src="../shared/img/services/svc-investigar-adega.webp" alt="">' },
   /* legacy/sub-menu cb names (caso backend mude) */
-  'inn_room_menu':          { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
-  'inn_meal_menu':          { icon: '<img src="../shared/img/services/svc-comer.png" alt="">' },
-  'inn_relaxation_menu':    { icon: '<img src="../shared/img/services/svc-relaxar.png" alt="">' },
-  'inn_allies_menu':        { icon: '<img src="../shared/img/services/svc-aliados.png" alt="">' },
-  'inn_cellar_menu':        { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
-  'inn_investigate_cellar': { icon: '<img src="../shared/img/services/svc-investigar-adega.png" alt="">' },
+  'inn_room_menu':          { icon: '<img src="../shared/img/services/svc-dormir-comum.webp" alt="">' },
+  'inn_meal_menu':          { icon: '<img src="../shared/img/services/svc-comer.webp" alt="">' },
+  'inn_relaxation_menu':    { icon: '<img src="../shared/img/services/svc-relaxar.webp" alt="">' },
+  'inn_allies_menu':        { icon: '<img src="../shared/img/services/svc-aliados.webp" alt="">' },
+  'inn_cellar_menu':        { icon: '<img src="../shared/img/services/svc-investigar-adega.webp" alt="">' },
+  'inn_investigate_cellar': { icon: '<img src="../shared/img/services/svc-investigar-adega.webp" alt="">' },
   // === Tipos de quarto (sub-menu Quartos/Descanso) ===
-  'inn_room_stable':        { icon: '<img src="../shared/img/services/svc-estabulo.png" alt="">' },
-  'inn_room_common':        { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
-  'inn_room_modest':        { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
-  'inn_room_wealthy':       { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
-  'inn_room_royal':         { icon: '<img src="../shared/img/services/svc-dormir-real.png" alt="">' },
-  'inn_sleep_common':       { icon: '<img src="../shared/img/services/svc-dormir-comum.png" alt="">' },
-  'inn_sleep_private':      { icon: '<img src="../shared/img/services/svc-dormir-confortavel.png" alt="">' },
-  'inn_sleep_royal':        { icon: '<img src="../shared/img/services/svc-dormir-real.png" alt="">' }
+  'inn_room_stable':        { icon: '<img src="../shared/img/services/svc-estabulo.webp" alt="">' },
+  'inn_room_common':        { icon: '<img src="../shared/img/services/svc-dormir-comum.webp" alt="">' },
+  'inn_room_modest':        { icon: '<img src="../shared/img/services/svc-dormir-confortavel.webp" alt="">' },
+  'inn_room_wealthy':       { icon: '<img src="../shared/img/services/svc-dormir-confortavel.webp" alt="">' },
+  'inn_room_royal':         { icon: '<img src="../shared/img/services/svc-dormir-real.webp" alt="">' },
+  'inn_sleep_common':       { icon: '<img src="../shared/img/services/svc-dormir-comum.webp" alt="">' },
+  'inn_sleep_private':      { icon: '<img src="../shared/img/services/svc-dormir-confortavel.webp" alt="">' },
+  'inn_sleep_royal':        { icon: '<img src="../shared/img/services/svc-dormir-real.webp" alt="">' }
 };
 
 

@@ -18,21 +18,21 @@
 /* 2026-05-21 — GUILD_SVC_META map cb -> PNG canonical.
    Cobre cb da Guilda enviados pelo backend (src/game/system/guild/*.py). */
 var GUILD_SVC_META = {
-  'guild_quest_board':    { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
-  'guild_quests':         { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
-  'guild_contracts':      { icon: '<img src="../shared/img/services/svc-contratos.png" alt="">' },
-  'guild_recruit_menu':   { icon: '<img src="../shared/img/services/svc-inscrever-guilda.png" alt="">' },
-  'guild_recruit':        { icon: '<img src="../shared/img/services/svc-inscrever-guilda.png" alt="">' },
-  'guild_party_menu':     { icon: '<img src="../shared/img/services/svc-mercenarios.png" alt="">' },
-  'guild_party':          { icon: '<img src="../shared/img/services/svc-mercenarios.png" alt="">' },
-  'guild_bounty_tavira':  { icon: '<img src="../shared/img/services/svc-missoes.png" alt="">' },
-  'guild_research_menu':  { icon: '<img src="../shared/img/services/svc-livros.png" alt="">' },
-  'guild_research':       { icon: '<img src="../shared/img/services/svc-livros.png" alt="">' },
-  'guild_training_menu':  { icon: '<img src="../shared/img/services/svc-treino.png" alt="">' },
-  'guild_training':       { icon: '<img src="../shared/img/services/svc-treino.png" alt="">' },
-  'guild_veteran':        { icon: '<img src="../shared/img/services/svc-mentoria.png" alt="">' },
-  'guild_mentor':         { icon: '<img src="../shared/img/services/svc-mentoria.png" alt="">' },
-  'guild_ranking':        { icon: '<img src="../shared/img/services/svc-ranking-guilda.png" alt="">' }
+  'guild_quest_board':    { icon: '<img src="../shared/img/services/svc-contratos.webp" alt="">' },
+  'guild_quests':         { icon: '<img src="../shared/img/services/svc-contratos.webp" alt="">' },
+  'guild_contracts':      { icon: '<img src="../shared/img/services/svc-contratos.webp" alt="">' },
+  'guild_recruit_menu':   { icon: '<img src="../shared/img/services/svc-inscrever-guilda.webp" alt="">' },
+  'guild_recruit':        { icon: '<img src="../shared/img/services/svc-inscrever-guilda.webp" alt="">' },
+  'guild_party_menu':     { icon: '<img src="../shared/img/services/svc-mercenarios.webp" alt="">' },
+  'guild_party':          { icon: '<img src="../shared/img/services/svc-mercenarios.webp" alt="">' },
+  'guild_bounty_tavira':  { icon: '<img src="../shared/img/services/svc-missoes.webp" alt="">' },
+  'guild_research_menu':  { icon: '<img src="../shared/img/services/svc-livros.webp" alt="">' },
+  'guild_research':       { icon: '<img src="../shared/img/services/svc-livros.webp" alt="">' },
+  'guild_training_menu':  { icon: '<img src="../shared/img/services/svc-treino.webp" alt="">' },
+  'guild_training':       { icon: '<img src="../shared/img/services/svc-treino.webp" alt="">' },
+  'guild_veteran':        { icon: '<img src="../shared/img/services/svc-mentoria.webp" alt="">' },
+  'guild_mentor':         { icon: '<img src="../shared/img/services/svc-mentoria.webp" alt="">' },
+  'guild_ranking':        { icon: '<img src="../shared/img/services/svc-ranking-guilda.webp" alt="">' }
 };
 window._GUILD_SVC_META = GUILD_SVC_META;
 

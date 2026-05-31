@@ -209,19 +209,19 @@
         if (!iconIdOrSlug) return null;
         var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
         if (!COMBAT_PNGS[slug]) return null;
-        return _basePath() + 'shared/img/combat/' + slug + '.png';
+        return _basePath() + 'shared/img/combat/' + slug + '.webp';
     }
     function npcIconUrl(iconIdOrSlug) {
         if (!iconIdOrSlug) return null;
         var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
         if (!NPC_PNGS[slug]) return null;
-        return _basePath() + 'shared/img/npcs/' + slug + '.png';
+        return _basePath() + 'shared/img/npcs/' + slug + '.webp';
     }
     function uiIconUrl(iconIdOrSlug) {
         if (!iconIdOrSlug) return null;
         var slug = String(iconIdOrSlug).replace(/^ic-/, '').replace(/_/g, '-');
         if (!UI_PNGS[slug]) return null;
-        return _basePath() + 'shared/img/ui/' + slug + '.png';
+        return _basePath() + 'shared/img/ui/' + slug + '.webp';
     }
     function achievementIconUrl(iconIdOrSlug) {
         if (!iconIdOrSlug) return null;
@@ -287,7 +287,7 @@
         }
         // Combat (classes, boss, inimigo, invocations)
         if (COMBAT_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/combat/' + skillSlug + '.png';
+            return _basePath() + 'shared/img/combat/' + skillSlug + '.webp';
         }
         // NPCs
         // Sessão #56 (2026-05-28): .png → .webp (mesma fix)
@@ -296,7 +296,7 @@
         }
         // UI (mochila, tochas, stats, race indicators)
         if (UI_PNGS[skillSlug]) {
-            return _basePath() + 'shared/img/ui/' + skillSlug + '.png';
+            return _basePath() + 'shared/img/ui/' + skillSlug + '.webp';
         }
         return null;
     }

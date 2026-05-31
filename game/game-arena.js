@@ -19,16 +19,16 @@
 /* 2026-05-21 \u2014 ARENA_SVC_META map cb -> PNG path canonical.
    Cobre cb Arena enviados pelo backend + aliases. */
 var ARENA_SVC_META = {
-  'arena_challenge':   { icon: '<img src="../shared/img/services/svc-duelo.png" alt="">' },
-  'arena_duel':        { icon: '<img src="../shared/img/services/svc-duelo.png" alt="">' },
-  'arena_solo':        { icon: '<img src="../shared/img/services/svc-combate-solo.png" alt="">' },
-  'arena_team':        { icon: '<img src="../shared/img/services/svc-combate-equipe.png" alt="">' },
-  'arena_tournament':  { icon: '<img src="../shared/img/services/svc-torneio.png" alt="">' },
+  'arena_challenge':   { icon: '<img src="../shared/img/services/svc-duelo.webp" alt="">' },
+  'arena_duel':        { icon: '<img src="../shared/img/services/svc-duelo.webp" alt="">' },
+  'arena_solo':        { icon: '<img src="../shared/img/services/svc-combate-solo.webp" alt="">' },
+  'arena_team':        { icon: '<img src="../shared/img/services/svc-combate-equipe.webp" alt="">' },
+  'arena_tournament':  { icon: '<img src="../shared/img/services/svc-torneio.webp" alt="">' },
   'arena_training':    { icon: '<img src="../shared/img/services/svc-treino-arena.webp" alt="">' },
   'arena_train':       { icon: '<img src="../shared/img/services/svc-treino-arena.webp" alt="">' },
   'arena_ranking':     { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
   'arena_daily_board': { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
-  'arena_rules':       { icon: '<img src="../shared/img/services/svc-informacoes.png" alt="">' }
+  'arena_rules':       { icon: '<img src="../shared/img/services/svc-informacoes.webp" alt="">' }
 };
 window._ARENA_SVC_META = ARENA_SVC_META;
 

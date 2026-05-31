@@ -293,14 +293,14 @@ var BANK_CB_TO_DIALOGUE = {
 
 /* === Svc icon + meta canonical (PADRAO_TAVERNA — mockup banco-cofre-final) === */
 var BANK_SVC_META = {
-  'bank_deposit_menu':       { icon: '../shared/img/services/svc-depositar.png',  meta: 'Cofre Real' },
-  'bank_withdraw_menu':      { icon: '../shared/img/services/svc-retirar.png',    meta: '2% taxa' },
-  'bank_deposit_item_menu':  { icon: '../shared/img/services/svc-guardar.png',    meta: '5V/semana' },
-  'bank_withdraw_item_menu': { icon: '../shared/img/services/svc-recuperar.png',  meta: 'Chave + selo' },
-  'bank_insurance_menu':     { icon: '../shared/img/services/svc-seguro.png',     meta: 'Carta selada' },
-  'bank_invest_menu':        { icon: '../shared/img/services/svc-investir.png',   meta: 'Juros mensais', badge: '5%' },
-  'bank_loans_menu':         { icon: '../shared/img/services/svc-emprestimo.png', meta: '10% ao mês' },
-  'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.png',    meta: '' }
+  'bank_deposit_menu':       { icon: '../shared/img/services/svc-depositar.webp',  meta: 'Cofre Real' },
+  'bank_withdraw_menu':      { icon: '../shared/img/services/svc-retirar.webp',    meta: '2% taxa' },
+  'bank_deposit_item_menu':  { icon: '../shared/img/services/svc-guardar.webp',    meta: '5V/semana' },
+  'bank_withdraw_item_menu': { icon: '../shared/img/services/svc-recuperar.webp',  meta: 'Chave + selo' },
+  'bank_insurance_menu':     { icon: '../shared/img/services/svc-seguro.webp',     meta: 'Carta selada' },
+  'bank_invest_menu':        { icon: '../shared/img/services/svc-investir.webp',   meta: 'Juros mensais', badge: '5%' },
+  'bank_loans_menu':         { icon: '../shared/img/services/svc-emprestimo.webp', meta: '10% ao mês' },
+  'bank_property_menu':      { icon: '../shared/img/services/svc-terreno.webp',    meta: '' }
 };
 
 /* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) ===

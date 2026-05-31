@@ -9395,7 +9395,7 @@ function _isCTA(btn) {
 
       // PNG do livro — 88x88 (era 80 → ligeiramente maior)
       + '<div style="position:relative; width:88px; height:88px; margin:0 auto 10px;">'
-      + '<img class="fLs-icon-anim" src="../shared/img/ui/splash-welcome.png" alt="Livro de Aventuras"'
+      + '<img class="fLs-icon-anim" src="../shared/img/ui/splash-welcome.webp" alt="Livro de Aventuras"'
       + ' style="width:100%; height:100%; object-fit:contain;"'
       + ' onerror="this.style.opacity=\'0.5\';">'
       + '</div>'
@@ -10733,7 +10733,7 @@ function renderFooter(){
   // Mockup canonical usa <img class="fb-ico-img" src="..."> em vez de SVG inline.
   quickEl.innerHTML = ''
     + '<button class="fb-btn" data-action="inventory">'
-    +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.png" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
     + '</button>'
     + '<button class="fb-btn" data-action="status">'
     +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
@@ -12872,7 +12872,7 @@ function _showSettingsPopup(){
         try { referredCount = parseInt(localStorage.getItem('valdoria_referred_count') || '0', 10) || 0; } catch(_) {}
         // PNG path — usa absolute em prod (Cloudflare Pages), relative em DEV file://
         var _isWebApp = location.protocol.indexOf('http') === 0;
-        var _pngPath = _isWebApp ? '/shared/img/ui/referral-invite.png' : '/shared/img/ui/referral-invite.png';
+        var _pngPath = _isWebApp ? '/shared/img/ui/referral-invite.webp' : '/shared/img/ui/referral-invite.webp';
         var _rewardGoal = 5;  // milestone visual: 5 amigos = bonus épico
         var _progress = Math.min(100, Math.round((referredCount / _rewardGoal) * 100));
         var _reward = referredCount * 50;
@@ -17321,7 +17321,7 @@ var MERCHANT_NAME_MAP = {
 };
 function _merchantPortrait(id){
   var fullName = MERCHANT_NAME_MAP[id] || id;
-  return '<img src="/shared/img/merchants/' + id + '.png" alt="' + fullName +
+  return '<img src="/shared/img/merchants/' + id + '.webp" alt="' + fullName +
     '" class="merchant-portrait vlb-zoomable" loading="lazy" ' +
     'data-lb-caption="' + fullName.replace(/"/g, '&quot;') + '" title="Toque para ampliar" />';
 }
@@ -18780,8 +18780,8 @@ function _buildMarketMockData(player){
     merchants: presentMerchants,
     // 2026-05-27: SVG _heralIco substituído por PNG (regra "no SVG in city").
     extras: [
-      { icon: '<img src="../shared/img/services/svc-vender.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
-      { icon: '<img src="../shared/img/services/svc-decifrar.png" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
+      { icon: '<img src="../shared/img/services/svc-vender.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
+      { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
         badge: 'Eirik' }
     ],
     wandering_npcs: wandering
@@ -19821,7 +19821,7 @@ function _shadowShowEvent(p){
 var SHADOW_NPCS = [{
   id: 'npc_blackmarket_shadow',  // canonical VULTO_NPC_ID
   name: 'O Vulto',
-  role: '<img src="/shared/img/combat/bruxo.png" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Comerciante Sombrio',
+  role: '<img src="/shared/img/combat/bruxo.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Comerciante Sombrio',
   desc: 'Figura encapuzada nas sombras. Capuz baixo, rosto invisível. Apenas dois olhos frios te avaliam em silêncio.',
   greetings: [
     // canonical: VULTO_VISIT_GREETINGS['first'] (3 entries)
@@ -19863,10 +19863,10 @@ var SHADOW_NPCS = [{
 // canonical: PNG por archetype (regra "no SVG in city" — sessão #44 2026-05-27)
 // adventurous→combat/patrulheiro, scholarly→npcs/escriba, mercantile→npcs/banqueiro, mysterious→combat/bruxo
 var TRAVELERS_KNOWN = [
-  { id: 'wnp_thessan', icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
+  { id: 'wnp_thessan', icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
   { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
   { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
-  { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
+  { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
 ];
 
 function _buildTravelersMockData(player){
@@ -37373,10 +37373,10 @@ function _tavernShowMercenaries(p){
   // 4 roles canonical: Mercenário/Guarda/Batedor/Curandeiro
   // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
-    { icon: '<img src="/shared/img/combat/guerreiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
-    { icon: '<img src="/shared/img/combat/paladino.png" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Lyra a Devotada',      role: 'Guarda (Paladino nv 3)',      cls: 'Paladino',    cost: 100, duration: 4 },
-    { icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Sylas Olho-de-Falcão', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
-    { icon: '<img src="/shared/img/combat/clerigo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Elara Manto-Rubro',    role: 'Curandeira (Clériga nv 3)',   cls: 'Clérigo',     cost: 120, duration: 4 }
+    { icon: '<img src="/shared/img/combat/guerreiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/paladino.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Lyra a Devotada',      role: 'Guarda (Paladino nv 3)',      cls: 'Paladino',    cost: 100, duration: 4 },
+    { icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Sylas Olho-de-Falcão', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/clerigo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Elara Manto-Rubro',    role: 'Curandeira (Clériga nv 3)',   cls: 'Clérigo',     cost: 120, duration: 4 }
   ];
   var items = pool.map(function(m){
     return { icon: m.icon, label: m.name + ' — ' + m.role, badge: m.cost + ' V', _m: m };
@@ -37415,11 +37415,11 @@ function _tavernShowAdventurers(p){
   // canonical: tavern_adventurers.py + EXPLORER_CLASS_MAP (5 roles canonical)
   // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
-    { icon: '<img src="/shared/img/combat/ladino.png" alt="" style="width:38px;height:38px;object-fit:contain;">',      name: 'Mira Sombra-Prateada',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
-    { icon: '<img src="/shared/img/combat/mago.png" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Galren Marca-da-Guerra', role: 'Pesquisador Arcano (Mago nv 3)',     cls: 'Mago',        cost: 110, duration: 4 },
-    { icon: '<img src="/shared/img/combat/guerreiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Brondak o Quebra-Ossos', role: 'Auxiliar de Campo (Guerreiro nv 5)', cls: 'Guerreiro',   cost: 95,  duration: 5 },
-    { icon: '<img src="/shared/img/combat/patrulheiro.png" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Nyriel Passo-Sombrio',   role: 'Rastreadora (Patrulheira nv 4)',     cls: 'Patrulheiro', cost: 85,  duration: 5 },
-    { icon: '<img src="/shared/img/combat/bardo.png" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Korvan Tempestade',      role: 'Cartógrafo (Bardo nv 3)',            cls: 'Bardo',       cost: 100, duration: 4 }
+    { icon: '<img src="/shared/img/combat/ladino.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',      name: 'Mira Sombra-Prateada',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
+    { icon: '<img src="/shared/img/combat/mago.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Galren Marca-da-Guerra', role: 'Pesquisador Arcano (Mago nv 3)',     cls: 'Mago',        cost: 110, duration: 4 },
+    { icon: '<img src="/shared/img/combat/guerreiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Brondak o Quebra-Ossos', role: 'Auxiliar de Campo (Guerreiro nv 5)', cls: 'Guerreiro',   cost: 95,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Nyriel Passo-Sombrio',   role: 'Rastreadora (Patrulheira nv 4)',     cls: 'Patrulheiro', cost: 85,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/bardo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Korvan Tempestade',      role: 'Cartógrafo (Bardo nv 3)',            cls: 'Bardo',       cost: 100, duration: 4 }
   ];
   var items = pool.map(function(a){
     return { icon: a.icon, label: a.name + ' — ' + a.role, badge: a.cost + ' V', _a: a };
@@ -48479,7 +48479,7 @@ function _showAllyDialogue(idx){
   });
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
   /* Sessão #28 v3 (2026-05-24): portraitHTML em vez de portrait (URL).
-     Render a PNG da classe (/shared/img/combat/clerigo.png etc.) via
+     Render a PNG da classe (/shared/img/combat/clerigo.webp etc.) via
      vAssets.classIconHTML, com fallback SVG sprite quando vAssets falha
      ou PNG inexistente. User: "use a imagem da classe deles ao invés de
      uma foto de personagem". */
@@ -51884,27 +51884,27 @@ var RECURRING_NPCS = {
   // identidade visual AAA. Fonte canonical das stats em MARKET_MERCHANTS.
   mer_thorne: {
     name: 'Thorne Forja-de-Ferro',
-    portraitImg: '/shared/img/merchants/thorne.png',
+    portraitImg: '/shared/img/merchants/thorne.webp',
     desc: 'Anão musculoso, avental queimado, martelo sempre na mão. Quarenta anos forjando aço — sabe ler o vento na lâmina.'
   },
   mer_mirena: {
     name: 'Mirena Folha-Verde',
-    portraitImg: '/shared/img/merchants/mirena.png',
+    portraitImg: '/shared/img/merchants/mirena.webp',
     desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço. Aprendeu alquimia da Bruxa Veldrina — e sobreviveu pra contar.'
   },
   mer_velithra: {
     name: 'Velithra Olho-de-Cristal',
-    portraitImg: '/shared/img/merchants/velithra.png',
+    portraitImg: '/shared/img/merchants/velithra.webp',
     desc: 'Elfa de meia-idade, dedos cobertos de anéis, voz suave como vento em pinheiros. Diz que gemas escolhem quem as porta.'
   },
   mer_corvus: {
     name: 'Corvus Mapa-Escuro',
-    portraitImg: '/shared/img/merchants/corvus.png',
+    portraitImg: '/shared/img/merchants/corvus.webp',
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta. Vê estradas onde outros veem mato — e cobra caro pela visão.'
   },
   mer_bjorn: {
     name: 'Bjorn, o Seleiro',
-    portraitImg: '/shared/img/merchants/bjorn.png',
+    portraitImg: '/shared/img/merchants/bjorn.webp',
     desc: 'Artesão das terras altas. Costura suas próprias botas, tece suas próprias cordas, e responde a quem ousa duvidar com um sorriso de pelo.'
   },
   // 2026-05-19: Garlen estava faltando em RECURRING_NPCS — _openMerchantDialogue
@@ -51912,7 +51912,7 @@ var RECURRING_NPCS = {
   // (PNG AI-generated v3 sem balança).
   mer_garlen: {
     name: 'Garlen Pesa-Justo',
-    portraitImg: '/shared/img/merchants/garlen.png',
+    portraitImg: '/shared/img/merchants/garlen.webp',
     desc: 'Cambista veterano, pesa cada moeda com precisão de joalheiro. Conhece o valor real de qualquer trade good — sal, especiarias, ferro bruto. Lida com cofre e câmbio honesto.'
   }
 };
@@ -52514,11 +52514,11 @@ var _NPC_DEFAULTS = {
   martha:      { name: 'Martha',              desc: 'Estalajadeira do Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
-  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.png',   icon: 'ic-guerreiro' },
-  mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.png',   icon: 'ic-druida' },
-  velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.png', icon: 'ic-mago' },
-  corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.png',   icon: 'ic-ladino' },
-  bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Mestre selador e coureiro',          portrait: '/shared/img/merchants/bjorn.png',    icon: 'ic-patrulheiro' },
+  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
+  mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
+  velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
+  corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
+  bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Mestre selador e coureiro',          portrait: '/shared/img/merchants/bjorn.webp',    icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/npcs/alchemist.png',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
   npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '/shared/img/npcs/lyra.png',         icon: 'ic-druida' },
