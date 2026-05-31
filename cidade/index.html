@@ -5697,17 +5697,23 @@ body.perf-lite .vc-action-btn { transition: none; }
       loadingEl.style.background = '#1a1510';
     }
 
-    /* Step 3: Esconde loading após 1.8s + refresha conteúdo */
+    /* Step 3: renderiza o conteúdo ANTES de esconder o loading (user 2026-05-31).
+       Antes escondia primeiro → gap "tela escura + botão de volume" entre o hide
+       e o render. Agora: pinta o hub → esconde o loading → tela do personagem
+       aparece direto. */
     setTimeout(function() {
-      if (loadingEl) loadingEl.style.display = 'none';
       try {
         if (typeof refreshHud === 'function') refreshHud();
         if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
-        /* X-6.5.51BH (2026-05-15): trigger Dádiva Diária (daily login reward).
-           Verifica localStorage['valdoria_daily'] vs hoje. Se for novo dia,
-           mostra popup AAA com recompensa progressiva (7-day cycle). */
-        if (typeof _maybeShowDailyLogin === 'function') _maybeShowDailyLogin();
       } catch(e){ console.warn('[INTRO] content refresh failed:', e); }
+      // Conteúdo pronto → esconde o loading (revela a tela direto, sem gap).
+      if (loadingEl) loadingEl.style.display = 'none';
+      /* X-6.5.51BH (2026-05-15): trigger Dádiva Diária (daily login reward).
+         Verifica localStorage['valdoria_daily'] vs hoje. Se for novo dia,
+         mostra popup AAA com recompensa progressiva (7-day cycle). */
+      try {
+        if (typeof _maybeShowDailyLogin === 'function') _maybeShowDailyLogin();
+      } catch(e){ console.warn('[INTRO] daily login failed:', e); }
     }, 1800);
   };
 
@@ -5738,52 +5744,67 @@ body.perf-lite .vc-action-btn { transition: none; }
     // Também adiciona classe 'hidden' como belt-and-suspenders (loading-guard
     // já skipa quando .hidden está presente).
 
-    // Pass 1: force-hide imediato se nao tem intro ativa + sem content
-    function forceHideIfStuck() {
+    /* FIX (user 2026-05-31): "tela em branco com botão de volume logo após o
+       carregamento com porcentagem". Root cause: o loading era escondido assim
+       que o OVERLAY de loading estava vazio (placeholder do path resume/play),
+       SEM checar se o conteúdo do jogo (#app) já tinha renderizado. Resultado:
+       loading some → #app ainda vazio → tela escura + botão de volume flutuante
+       (va-float injetado pelo audio-manager antes do footer existir).
+       Fix: esconder o loading SÓ quando #app tem conteúdo (tela do personagem
+       pronta). Ao sumir, a tela do jogador já aparece direto, sem tela
+       intermediária. Fallback de 5s força o hide se o render falhar (não trava
+       o jogador num loading eterno). Substitui forceHideIfStuck (que escondia
+       cedo demais por checar o overlay vazio em vez do #app). */
+    function _cityGameReady() {
+      var app = document.getElementById('app');
+      return !!(app && app.children.length > 0 && app.textContent.trim() !== '');
+    }
+    function _cityIntroBlocking() {
+      return window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
+    }
+    function _cityHideLoading(reason) {
       var ld = document.getElementById('loading');
-      if (!ld) return false;
+      if (!ld) return;
       var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
-      if (cs.display === 'none') {
-        // task #86: garante classe 'hidden' pra loading-guard FOUC safety skipar
-        ld.classList.add('hidden');
-        return false; // ja escondido
-      }
-      var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
-      var emptyContent = !ld.innerHTML || ld.innerHTML.trim() === '';
-      // FORCE-HIDE incondicional se:
-      // - intro nao bloqueia E
-      // - (loading vazio = nao foi populado por __onIntroTap) OU (passou 2s desde load)
-      if (!introBlocking && emptyContent) {
-        console.warn('[INTRO] force-hide loading: empty + no intro active');
+      if (cs.display !== 'none') {
         ld.style.display = 'none';
         ld.style.opacity = '0';
         ld.style.visibility = 'hidden';
-        ld.classList.add('hidden'); // task #86: previne FOUC safety re-show
-        return true;
+        console.info('[INTRO] loading hidden —', reason);
       }
-      return false;
+      ld.classList.add('hidden'); // task #86: previne FOUC safety re-show
     }
-    // Try immediately
-    if (forceHideIfStuck()) return;
-    // Then 800ms (catches version-check force-reload state)
-    setTimeout(function(){ if (forceHideIfStuck()) return;
-      // Then 2s (catches slow setup)
-      setTimeout(function(){
-        var ld = document.getElementById('loading');
-        if (!ld) return;
-        var cs = ld.ownerDocument.defaultView.getComputedStyle(ld);
-        if (cs.display !== 'none' && cs.visibility !== 'hidden'){
-          var introBlocking = window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
-          if (!introBlocking){
-            console.warn('[INTRO] safety hide loading overlay (stuck post-reload, 2s)');
-            ld.style.display = 'none';
-            ld.style.opacity = '0';
-            ld.style.visibility = 'hidden';
-            ld.classList.add('hidden'); // task #86: previne FOUC safety re-show
-          }
+    var _cityLoadingDone = false;
+    function _cityTryHideWhenReady() {
+      if (_cityLoadingDone) return true;
+      if (_cityIntroBlocking()) return false;   // título/intro ativo — não esconder ainda
+      if (!_cityGameReady()) return false;       // conteúdo do jogo ainda não pronto — espera
+      _cityLoadingDone = true;
+      _cityHideLoading('game-ready');
+      return true;
+    }
+    if (!_cityTryHideWhenReady()) {
+      // Observa #app: esconde no instante em que o hub renderizar (sem gap visível).
+      var _appEl = document.getElementById('app');
+      var _cityMo = null;
+      if (_appEl && typeof MutationObserver !== 'undefined') {
+        _cityMo = new MutationObserver(function(){ if (_cityTryHideWhenReady() && _cityMo) { _cityMo.disconnect(); _cityMo = null; } });
+        _cityMo.observe(_appEl, { childList: true, subtree: true });
+      }
+      // Poll de respaldo + force-hide final em ~5s (evita loading eterno se o render falhar).
+      var _cityPolls = 0;
+      var _cityPi = setInterval(function(){
+        _cityPolls++;
+        if (_cityTryHideWhenReady()) { if (_cityMo) { _cityMo.disconnect(); _cityMo = null; } clearInterval(_cityPi); return; }
+        if (_cityPolls >= 25 && !_cityIntroBlocking()) {  // ~5s (200ms × 25)
+          _cityLoadingDone = true;
+          if (_cityMo) { _cityMo.disconnect(); _cityMo = null; }
+          clearInterval(_cityPi);
+          console.warn('[INTRO] loading force-hide após 5s (#app não renderizou — evita travar)');
+          _cityHideLoading('force-5s-fallback');
         }
-      }, 1200);
-    }, 800);
+      }, 200);
+    }
   });
   </script>
   <!-- ====================================================================

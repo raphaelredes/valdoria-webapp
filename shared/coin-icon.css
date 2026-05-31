@@ -20,7 +20,7 @@
   /* Default 16px (was 14) — moeda com detalhes celtas precisa de espaco */
   width: 16px;
   height: 16px;
-  background-image: url('/shared/img/valdorita.png');
+  background-image: url('/shared/img/valdorita.webp');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
