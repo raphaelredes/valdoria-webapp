@@ -370,46 +370,18 @@ function renderMarketHub(container, data) {
     body.appendChild(vCity.serviceGrid(extrasWithPng));
   }
 
-  /* 2026-05-21 USER FIX: separar "Ausente hoje" do bloco Viajantes.
-     Antes: lista única misturava NPCs presentes (clicáveis) + ausentes
-     (não-clicáveis) — user reportou "não mostre os mercadores ausentes
-     no mesmo local dos viajantes". Agora: split em 2 listas, presentes
-     em "🚶 Viajantes" (clicáveis), ausentes opcionalmente em
-     "⌛ Ausentes hoje" dimmed visualmente. */
+  /* 2026-05-31 USER FIX: removida a seção "⌛ Ausentes hoje".
+     Histórico: 2026-05-21 separou ausentes dos viajantes em 2 listas; agora o
+     dono pediu remover de vez — "Ausentes hoje" era percebido pelo jogador como
+     estranho. Mercadores fixos ausentes não viram mais card (filtrados em
+     _buildMarketMockData); quem quer saber deles pergunta a um mercador presente
+     (tópico de diálogo "Viu os outros mercadores?"). wandering_npcs agora só
+     traz o mercador de passagem do dia → renderizado como "🚶 Viajantes". */
   if (data.wandering_npcs && data.wandering_npcs.length) {
-    var presentes = [], ausentes = [];
-    for (var wi = 0; wi < data.wandering_npcs.length; wi++) {
-      var npc = data.wandering_npcs[wi];
-      var lbl = String(npc.label || npc.text || npc.name || '');
-      var sub = String(npc.sub || npc.desc || npc.subtitle || '');
-      var combined = (lbl + ' ' + sub).toLowerCase();
-      var isAbsent = /ausente|aus[êe]ncia|fora hoje|n[ãa]o est[áa]/.test(combined) || !!npc.absent;
-      if (isAbsent) ausentes.push(npc); else presentes.push(npc);
-    }
-    if (presentes.length) {
-      var wnLbl = vCity.el('div', 'pt-section-label');
-      wnLbl.textContent = '🚶 Viajantes';
-      body.appendChild(wnLbl);
-      body.appendChild(vCity.actionList(presentes));
-    }
-    if (ausentes.length) {
-      var auLbl = vCity.el('div', 'pt-section-label');
-      auLbl.textContent = '⌛ Ausentes hoje';
-      auLbl.style.cssText = 'opacity:0.6;margin-top:14px;';
-      body.appendChild(auLbl);
-      /* Render ausentes desabilitados visualmente (opacity, no-click) */
-      var auWrap = vCity.el('div', 'market-absent-list');
-      auWrap.style.cssText = 'opacity:0.5;pointer-events:none;font-size:calc(11px * var(--v-font-scale, 1));padding:0 12px;';
-      for (var ai = 0; ai < ausentes.length; ai++) {
-        var aN = ausentes[ai];
-        var aRow = vCity.el('div', 'market-absent-row');
-        aRow.style.cssText = 'padding:6px 8px;color:#a09484;font-style:italic;';
-        aRow.textContent = '· ' + (aN.label || aN.text || aN.name || '?');
-        if (aN.sub || aN.desc) aRow.textContent += ' — ' + (aN.sub || aN.desc);
-        auWrap.appendChild(aRow);
-      }
-      body.appendChild(auWrap);
-    }
+    var wnLbl = vCity.el('div', 'pt-section-label');
+    wnLbl.textContent = '🚶 Viajantes';
+    body.appendChild(wnLbl);
+    body.appendChild(vCity.actionList(data.wandering_npcs));
   }
 
   root.appendChild(body);

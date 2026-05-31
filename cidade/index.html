@@ -18506,10 +18506,12 @@ window._marketTransientChatIdx = window._marketTransientChatIdx || {};
 function _marketShowTransient(p, npc){
   // Sessão #23 v8 (2026-05-22): user pediu VIAJANTES PADRAO_ALDRIC + PNGs
   // zoomable. Migrado de popup simples pra vEncounter.render quando disponível.
-  // PNGs já existem em /shared/img/npcs/{npc.id}.png (38 NPCs cobertos).
-  var npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.png';
+  // Imagens em /shared/img/npcs/{npc.id}.webp (migradas pra WebP em 2026-05-27).
+  // Bug CEDWYN (misc1): o path ainda apontava .png → 404 → diálogo sem retrato.
+  // Todos os transientes (misc1-5, craft1-4, exotic1-3, animal1-2, ...) são .webp.
+  var npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
   var _isWebApp = location.protocol.indexOf('http') === 0;
-  if (_isWebApp) npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.png';
+  if (_isWebApp) npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
 
   // Se vEncounter disponível, usar PADRAO_ALDRIC (header + portrait + zoom)
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -18721,9 +18723,8 @@ function _buildMarketMockData(player){
   }
   // canonical: rotação diária TRANSIENT_POOL — 1 NPC ambulante visível por dia
   var transient = (typeof _marketGetDailyTransient === 'function') ? _marketGetDailyTransient() : null;
-  // canonical: market.py L104-113 — get_available_fixed_merchants (filtra ausentes)
-  // + market_ui.py — mercador ausente vira card de rumor com loc icon.
-  var rumorEntries = [];
+  // canonical: market.py L104-113 — get_available_fixed_merchants (filtra ausentes).
+  // Mercadores ausentes NÃO viram card (removida a lista "Ausentes hoje", 2026-05-31).
   var presentMerchants = MARKET_MERCHANTS.map(function(m){
     var state = (typeof _marketGetNpcState === 'function')
       ? _marketGetNpcState(m.id, player)
@@ -18746,18 +18747,15 @@ function _buildMarketMockData(player){
         badge: repBadge
       };
     }
-    // Ausente — produz card no array de rumores (badge mostra icon de location)
-    var loc = MARKET_GOSSIP_LOC[state.location] || MARKET_GOSSIP_LOC.unavailable;
-    rumorEntries.push({
-      icon: m.icon,
-      label: m.name + ' <span style="opacity:.7">— ' + loc.label + '</span>',
-      cb: 'market_absent_' + m.id,
-      badge: loc.icon
-    });
+    // Ausente — NÃO vira card no mercado (decisão do dono 2026-05-31: a lista
+    // "Ausentes hoje" confundia o jogador). O mercador ausente simplesmente não
+    // aparece; quem quer saber dele PERGUNTA a um mercador presente (tópico
+    // "Viu os outros mercadores?" → _marketAbsentColleagues + gossip).
     return null;
   }).filter(function(x){ return x; });
 
-  // wandering_npcs[] junta: ambulante do dia + cards de mercadores ausentes
+  // wandering_npcs[] = só o ambulante do dia (mercador de passagem). Mercadores
+  // fixos ausentes NÃO entram aqui (sem mais lista "Ausentes hoje").
   var wandering = [];
   if (transient){
     wandering.push({
@@ -18766,7 +18764,6 @@ function _buildMarketMockData(player){
       cb: 'transient_view_' + transient.id
     });
   }
-  rumorEntries.forEach(function(r){ wandering.push(r); });
 
   // X-6.5.51CB (2026-05-18): atmosfera AAA — flavor line do periodo do dia.
   // Cada entrada no mercado tem uma linha de ambientação que muda com a hora.
@@ -42877,21 +42874,10 @@ function _registerDynamicHandlers(){
       })(npc);
     });
   }
-  // canonical: GOSSIP_DATA — handler pra cada mercador fixo quando estiver ausente.
-  // O state real é resolvido em runtime (mesmo seed do dia em _marketGetNpcState).
-  MARKET_MERCHANTS.forEach(function(m){
-    ACTION_HANDLERS['market_absent_' + m.id] = (function(merchant){
-      return function(p){
-        var state = _marketGetNpcState(merchant.id, p);
-        if (state.available){
-          // Recovered (ex: virou turno/dia): redireciona pro shop normal
-          if (ACTION_HANDLERS['market_npc_' + merchant.id]) ACTION_HANDLERS['market_npc_' + merchant.id](p);
-          return;
-        }
-        _marketShowAbsentRumor(p, merchant, state);
-      };
-    })(m);
-  });
+  // (Removido 2026-05-31) Handlers 'market_absent_<id>': a lista visual "Ausentes
+  // hoje" foi removida — mercador ausente não vira mais card clicável. A info de
+  // colegas ausentes agora vem por diálogo dos mercadores presentes
+  // (_marketShowColleagueGossip via tópico "Viu os outros mercadores?").
   // Mural dos Aventureiros rankings
   Object.keys(MURAL_RANKINGS).forEach(function(k){
     ACTION_HANDLERS['heroes_rank_' + k] = (function(key){
@@ -52311,6 +52297,58 @@ var MARKET_MERCHANT_ENCOUNTERS = {
   }
 };
 
+// Mercadores fixos AUSENTES hoje (exceto o próprio merchant), com onde foram.
+// Reusa _marketGetNpcState (mesmo seed do dia) — fonte de verdade do present/absent.
+// Substitui a antiga lista visual "Ausentes hoje": agora a info vem por diálogo.
+function _marketAbsentColleagues(merchant, player){
+  var out = [];
+  if (typeof MARKET_MERCHANTS === 'undefined' || !merchant) return out;
+  MARKET_MERCHANTS.forEach(function(m){
+    if (m.id === merchant.id) return;  // mercador não fala de si mesmo
+    var st = (typeof _marketGetNpcState === 'function') ? _marketGetNpcState(m.id, player) : { available: true };
+    if (st.available) return;
+    var loc = (typeof MARKET_GOSSIP_LOC !== 'undefined')
+      ? (MARKET_GOSSIP_LOC[st.location] || MARKET_GOSSIP_LOC.unavailable)
+      : { label: 'Ausente hoje' };
+    out.push({ firstName: m.name.split(' ')[0], role: m.role, locLabel: loc.label });
+  });
+  return out;
+}
+
+// Encounter dinâmico: o mercador presente conta quais colegas estão fora hoje e
+// pra onde foram (reusa o gossip de _marketGetNpcState). Render via PADRAO_ALDRIC
+// (_renderEncounterPopup) com choices "Outra pergunta"/"Voltar ao Mercado".
+function _marketShowColleagueGossip(p, merchant){
+  var absent = _marketAbsentColleagues(merchant, p);
+  var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
+  var npcKey = 'mer_' + bjornFix;
+  var script = [];
+  if (!absent.length){
+    script.push({ type: 'speech', speaker: npcKey, text: '"Hoje? Todos no posto, pelo que vi. Banca cheia — é raro."' });
+  } else {
+    script.push({ type: 'narration', text: '<i>Você pergunta se viu os outros mercadores hoje.</i>' });
+    absent.forEach(function(c){
+      var lc = (c.locLabel || '').toLowerCase();
+      var where = (lc.indexOf('ausente') >= 0)
+        ? 'não deu as caras hoje — ninguém sabe ao certo'
+        : ('está ' + lc);  // "está na taverna" / "está no templo" / "está na praça"
+      script.push({ type: 'speech', speaker: npcKey,
+        text: '"' + c.firstName + ', o(a) ' + (c.role || '').toLowerCase() + '? ' + where.charAt(0).toUpperCase() + where.slice(1) + '."' });
+    });
+    script.push({ type: 'narration', text: '<i>Se precisar falar com eles, talvez valha procurar pela cidade — ou voltar mais tarde.</i>' });
+  }
+  var enc = {
+    id: 'mer_' + bjornFix + '_colleagues',
+    npc: npcKey,
+    script: script,
+    choices: [
+      { id: 'more',  label: '◆ Outra pergunta',       result: 'goto_dialog', _encounterRef: 'mer_' + bjornFix + '_greeting' },
+      { id: 'close', label: '← Voltar ao Mercado',     result: 'merchant_close' }
+    ]
+  };
+  if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(enc, 'market_npc_' + merchant.id, p);
+}
+
 function _openMerchantDialogue(p, merchantId, topicKey){
   // Encontra o merchant em MARKET_MERCHANTS pra ler talkOptions/role/desc
   var merchant = (typeof MARKET_MERCHANTS !== 'undefined')
@@ -52323,6 +52361,14 @@ function _openMerchantDialogue(p, merchantId, topicKey){
   var npcKey = 'mer_' + merchant.id;
   // Fallback se merchant é tentmaker (npc key = mer_bjorn, merchant id = tentmaker)
   if (merchant.id === 'tentmaker') npcKey = 'mer_bjorn';
+
+  // Tópico dinâmico "colleagues": o mercador presente comenta os colegas fixos
+  // ausentes hoje (substitui a antiga lista visual "Ausentes hoje"). Conteúdo é
+  // resolvido em runtime (não vive no registry estático MARKET_MERCHANT_ENCOUNTERS).
+  if (topicKey === 'colleagues'){
+    _marketShowColleagueGossip(p, merchant);
+    return;
+  }
 
   // Greeting (default) → encounter dinâmico
   if (!topicKey || topicKey === 'greeting'){
@@ -52402,6 +52448,20 @@ function _merchantBuildTopicChoices(merchant){
       _encounterRef: 'mer_' + bjornFix + '_' + opt.id  // key em MARKET_MERCHANT_ENCOUNTERS após prefix
     });
   });
+  // Tópico dinâmico "Viu os outros mercadores?" — só aparece se há mercador fixo
+  // AUSENTE hoje. Substitui a antiga lista "Ausentes hoje": o jogador descobre os
+  // ausentes perguntando a quem está presente (mais imersivo). Sem _npcIsUsed
+  // (info do dia — pode reperguntar, como 'browse').
+  var _absentColleagues = (typeof _marketAbsentColleagues === 'function')
+    ? _marketAbsentColleagues(merchant, window.CITY_MOCK_PLAYER) : [];
+  if (_absentColleagues.length){
+    choices.push({
+      id: 'colleagues',
+      label: '◆ "Viu os outros mercadores hoje?"',
+      result: 'goto_dialog',
+      _encounterRef: 'mer_' + bjornFix + '_colleagues'
+    });
+  }
   // Sempre mostra "voltar ao mercado"
   choices.push({ id: 'close', label: '← Voltar ao Mercado', result: 'merchant_close' });
   return choices;
