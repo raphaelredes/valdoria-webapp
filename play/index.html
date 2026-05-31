@@ -318,13 +318,17 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
   }
   function _doRedirectInner(url){
     var ctrl = _ensureController();
-    var go = function(){
-      window.__valdoria_transitioning = true;
-      window.location.replace(url);
-    };
     if (ctrl && ctrl.setProgress) ctrl.setProgress(100, 'Pronto…');
-    if (ctrl && ctrl.hide) ctrl.hide(go);
-    else setTimeout(go, 350);
+    /* 2026-05-31 fix (blank pós-loading): NÃO fazer o cinematic fade-out
+       (ctrl.hide) antes de navegar. O fade apagava o magic-circle e deixava a
+       tela ESCURA/VAZIA durante o DOWNLOAD da página destino (cidade ~810KB),
+       que no celular / logo após deploy levava vários segundos. Mantendo o
+       loading 100% "Pronto…" pintado, o browser o exibe até o destino fazer o
+       1º paint; a tela destino (cidade/explore/combate) mostra o PRÓPRIO loader
+       no boot → loading CONTÍNUO sem blank. /play/ é destruída pelo replace,
+       então não precisa de cleanup/hide. */
+    window.__valdoria_transitioning = true;
+    window.location.replace(url);
   }
   function _doRedirect(url){
     _markDataReady(url);

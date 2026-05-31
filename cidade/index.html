@@ -5642,17 +5642,55 @@ body.perf-lite .vc-action-btn { transition: none; }
          esconder DEPOIS de renderCurrentScreen+renderFooter terem rodado. */
       var ld = document.getElementById('loading');
       if (ld) {
-        // Não esconde aqui. Marca flag pra hide pós-bootstrap.
+        /* 2026-05-31 fix (blank pós-loading): em vez de deixar o #loading
+           display:none (placeholder ESCURO VAZIO) durante o boot, MOSTRA um
+           cover de loading com a esfera dourada pulsando. Antes o jogador via
+           tela preta sem nada por vários segundos (download+parse+boot da
+           cidade ~810KB, pior no celular / logo após deploy). loading.css e
+           ValdoriaLoadingHTML só carregam mais abaixo (~linha 8068), então este
+           cover é 100% self-contained (inline styles + @keyframes injetado) —
+           não depende de CSS externo. Escondido no DOMContentLoaded (~linha
+           51704, via __pendingHideTGLoading) DEPOIS de renderCurrentScreen +
+           renderFooter → entrega a tela já pintada, sem gap. Com o /play/ agora
+           mantendo o magic-circle durante a navegação (play _doRedirectInner),
+           o resultado é um loading CONTÍNUO /play/ → /cidade/, sem blank. */
+        if (!document.getElementById('city-boot-loader-css')) {
+          var _cbcss = document.createElement('style');
+          _cbcss.id = 'city-boot-loader-css';
+          _cbcss.textContent = '@keyframes cityBootPulse{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.09);opacity:1}}';
+          (document.head || document.documentElement).appendChild(_cbcss);
+        }
+        ld.innerHTML =
+          '<div style="position:absolute;inset:0;display:flex;flex-direction:column;'
+          + 'align-items:center;justify-content:center;gap:20px">'
+          + '<div style="width:74px;height:74px;border-radius:50%;'
+          + 'background:radial-gradient(circle at 38% 32%,#fff4d0,#e8c45a 34%,#c4953a 60%,#8b6420 82%,#5a3e10);'
+          + 'box-shadow:0 0 34px rgba(196,149,58,.5),inset 0 0 14px rgba(255,244,208,.35);'
+          + 'animation:cityBootPulse 1.4s ease-in-out infinite"></div>'
+          + '<div style="font-family:Cinzel,serif;color:#c4953a;font-size:14px;'
+          + 'letter-spacing:2px;opacity:.9">Entrando em Valdória…</div>'
+          + '</div>';
+        // loading.css ainda nao carregou aqui → garante cover full-screen inline.
+        ld.style.position = 'fixed';
+        ld.style.inset = '0';
+        ld.style.zIndex = '99999';
+        ld.style.display = 'flex';
+        ld.style.alignItems = 'center';
+        ld.style.justifyContent = 'center';
+        ld.style.background = '#1a1510';
+        // Hide real acontece no DOMContentLoaded apos render (__pendingHideTGLoading).
         window.__pendingHideTGLoading = true;
-        // Sanity timeout — se DOMContentLoaded demora >3s (improvável), força hide.
+        // Sanity backstop — SO se o DCL nunca disparar (parse hang). 12s (era 3s,
+        // que podia disparar ANTES do DCL em parse lento de 2.9MB no celular,
+        // re-expondo o blank). DCL normal esconde muito antes.
         setTimeout(function(){
           if (window.__pendingHideTGLoading) {
-            console.warn('[INTRO] TG loading sanity timeout 3s — force hiding');
+            console.warn('[INTRO] TG loading sanity timeout 12s — force hiding');
             var ld2 = document.getElementById('loading');
-            if (ld2) ld2.style.display = 'none';
+            if (ld2) { ld2.style.display = 'none'; ld2.classList.add('hidden'); }
             window.__pendingHideTGLoading = false;
           }
-        }, 3000);
+        }, 12000);
       }
       return;
     }
