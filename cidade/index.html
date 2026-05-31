@@ -55087,26 +55087,30 @@ function _renderEncounterPopup(enc, originalAction, player) {
   var _pageStartedAt = 0;
 
   function _encForceCompleteReveal() {
-    // 2026-05-22: skip cancela todos os typewriter timers + completa innerHTML.
+    // 2026-05-31 fix: skip agora revela a PAGINA INTEIRA de uma vez. Antes so
+    // completava as .enc-line ja no DOM — estrofes pendentes (renderizadas via
+    // setTimeout de overlap em _renderPage) continuavam animando depois do skip.
+    // Agora cancela typewriters E os setTimeout de render pendentes (via
+    // _renderToken++), depois re-renderiza TODAS as estrofes da pagina atual
+    // instantaneo com texto completo + .enc-tw-done.
     _clearTypewriterTimers();
-    // Forca todas as .enc-line atuais a completarem a animacao + typewriter
-    var lines = bodyEl.querySelectorAll('.enc-line');
-    lines.forEach(function(l){
-      // Legacy clip-path completion (caso ainda use sem .enc-tw)
-      l.style.animation = 'none';
-      l.style.clipPath = 'inset(0 0 0 0)';
-      l.style.webkitClipPath = 'inset(0 0 0 0)';
-      l.style.opacity = '1';
-      // 2026-05-22: typewriter completion — set full text se ainda incompleto
-      if (l.classList.contains('enc-tw')) {
-        var full = l.getAttribute('data-fulltext');
-        if (full) l.innerHTML = full;
-        l.classList.remove('enc-typing');
-        // 2026-05-21: também marca .enc-tw-done para preservar speaker name
-        l.classList.add('enc-tw-done');
+    _renderToken++; // invalida setTimeout(_renderLine) pendentes do overlap
+    var page = pages[currentPage] || [];
+    bodyEl.innerHTML = '';
+    page.forEach(function(line){
+      var div = document.createElement('div');
+      var safe = _sanitizeDialogueHTML(line.text || '');
+      if (line.type === 'speech') {
+        var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
+        div.className = 'enc-line enc-speech enc-tw enc-tw-done';
+        if (spkr) div.setAttribute('data-speaker', spkr.name);
+      } else {
+        div.className = 'enc-line enc-narration enc-tw enc-tw-done';
       }
+      div.innerHTML = safe;
+      bodyEl.appendChild(div);
     });
-    return lines.length > 0;
+    return page.length > 0;
   }
 
   function _renderPage(idx) {
@@ -55193,15 +55197,19 @@ function _renderEncounterPopup(enc, originalAction, player) {
   ov.addEventListener('click', function(ev){
     // Ignora cliques em botoes (delegate normal)
     if (ev.target.closest('button')) return;
-    var elapsed = Date.now() - _pageStartedAt;
-    var maxRevealDur = 0;
-    bodyEl.querySelectorAll('.enc-line').forEach(function(l){
-      var d = parseInt(getComputedStyle(l).getPropertyValue('--reveal-dur') || '0', 10);
-      if (d > maxRevealDur) maxRevealDur = d;
-    });
-    var stillRevealing = elapsed < (maxRevealDur + 200);
+    // 2026-05-31 fix: "ainda revelando?" deriva do estado REAL do typewriter
+    // (estrofes .enc-tw-done < estrofes da pagina), NAO do --reveal-dur — que
+    // ficou morto desde a migracao clip-path -> JS typewriter (2026-05-22):
+    // .enc-line.enc-tw nunca recebe --reveal-dur, getComputedStyle retorna ''
+    // -> parseInt 0 -> stillRevealing so com elapsed<200ms -> qualquer clique
+    // depois disso AVANCAVA a pagina inteira em vez de revelar (bug reportado:
+    // "pula todo o dialogo em vez de pular so a animacao").
+    // Agora: 1o clique revela a pagina atual; 2o clique avanca.
+    var pageLines = (pages[currentPage] || []).length;
+    var doneLines = bodyEl.querySelectorAll('.enc-line.enc-tw-done').length;
+    var stillRevealing = doneLines < pageLines;
     if (stillRevealing) {
-      // Completa todas as linhas instantaneo
+      // Pula SO a animacao: revela a pagina atual inteira instantaneo
       _encForceCompleteReveal();
       // Se ja era ultima pagina, libera choices imediato
       if (currentPage === pages.length - 1 && !_choicesShown) {
@@ -55210,7 +55218,7 @@ function _renderEncounterPopup(enc, originalAction, player) {
         _renderEncounterChoices(enc, originalAction, player, actionsEl);
       }
     } else {
-      // Ja revelou tudo, avanca
+      // Pagina ja revelada — avanca para a proxima
       if (currentPage < pages.length - 1) {
         currentPage++;
         _renderPage(currentPage);
@@ -55222,14 +55230,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
   ov._encKeyHandler = function(ev){
     if (ev.key === 'ArrowRight' || ev.key === ' ' || ev.key === 'Enter') {
       ev.preventDefault();
-      // Mesmo comportamento do click: skip OR advance
-      var elapsed = Date.now() - _pageStartedAt;
-      var maxRevealDur = 0;
-      bodyEl.querySelectorAll('.enc-line').forEach(function(l){
-        var d = parseInt(getComputedStyle(l).getPropertyValue('--reveal-dur') || '0', 10);
-        if (d > maxRevealDur) maxRevealDur = d;
-      });
-      if (elapsed < (maxRevealDur + 200)) {
+      // 2026-05-31 fix: mesma deteccao baseada em estado do click handler acima
+      // (--reveal-dur esta morto pos-migracao typewriter). 1a tecla revela a
+      // pagina, 2a avanca.
+      var pageLines = (pages[currentPage] || []).length;
+      var doneLines = bodyEl.querySelectorAll('.enc-line.enc-tw-done').length;
+      if (doneLines < pageLines) {
         _encForceCompleteReveal();
         if (currentPage === pages.length - 1 && !_choicesShown) {
           if (_encChoicesReadyTimer) { clearTimeout(_encChoicesReadyTimer); _encChoicesReadyTimer = null; }
