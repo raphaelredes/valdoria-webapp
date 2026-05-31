@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-30T15:50:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-31T22:05:20Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -35034,7 +35034,11 @@ function openEventModal() {
   const alignKey = S.player.alignment;
   const allies = S.allies || [];
 
-  ev.choices.forEach((ch, idx) => {
+  // Sessão #65 (encounter fix): combat_forced events (emboscadas) NÃO têm
+  // `choices` — antes `ev.choices.forEach` crashava (undefined) e o FSM ficava
+  // preso em 'event', ZERANDO todas as próximas chances de encontro (user andou
+  // um mapa inteiro sem combate). Guard `|| []` + botão "Enfrentar!" logo abaixo.
+  (ev.choices || []).forEach((ch, idx) => {
     // V2.6: filtro unificado — classe, background, alignment, ally-class
     if (!classCanTakeChoice(ch, clsKey, bgKey, alignKey, allies)) return;
 
@@ -35129,8 +35133,60 @@ function openEventModal() {
     choicesEl.appendChild(btn);
   });
 
+  // Sessão #65: combat_forced (emboscada sem fuga) — nenhum choice foi renderizado.
+  // Mostra a narrativa da emboscada (já renderizada acima) + botão único de engajar.
+  if (!choicesEl.children.length && (ev.combat || ev.type === 'combat_forced')) {
+    const _fcBtn = document.createElement('button');
+    _fcBtn.className = 'event-choice';
+    const _fcLbl = document.createElement('span');
+    _fcLbl.className = 'choice-label';
+    _fcLbl.textContent = '⚔ Enfrentar!';
+    _fcBtn.appendChild(_fcLbl);
+    _fcBtn.addEventListener('click', () => _engageForcedCombat(ev));
+    choicesEl.appendChild(_fcBtn);
+  }
+
   dmNarrate({ text: '— ' + ev._pickedTitle + ' —', type: 'event' });
   modal.classList.add('visible');
+}
+
+// Sessão #65: engaja o combate de um combat_forced event (emboscada). Fecha o
+// modal e LIBERA o FSM (S.ph='idle') — sem isso o explorer ficava preso em
+// 'event' e nenhum encontro futuro disparava (bug "andei o mapa sem combate").
+function _engageForcedCombat(ev) {
+  const c = (ev && ev.combat) || {};
+  let enemyId = c.enemy_id || c.enemyId;
+  if (!enemyId && typeof _pickRandomEnemyForBiome === 'function') {
+    enemyId = _pickRandomEnemyForBiome();
+  }
+  try {
+    const modal = document.getElementById('event-modal');
+    if (modal) modal.classList.remove('visible');
+  } catch (_) {}
+  S.event = null;
+  if (typeof _setPhase === 'function') _setPhase('idle', 'forced_combat_engaged');
+  else S.ph = 'idle';
+  S._stepsSinceLastCombat = 0;
+  function _go() {
+    triggerCombatScreen({
+      enemyId: enemyId || 'goblin',
+      surprise: !!c.surprise,
+      context: { source: 'forced', event_id: ev && ev.id, biome: S.biome },
+      onLose: () => { if (typeof triggerDefeat === 'function') triggerDefeat('Morto em uma emboscada.'); }
+    });
+  }
+  // Sessão #65: em REMOTE, LIMPA o pending_event no servidor ANTES de redirecionar
+  // pro combate. Sem isto o servidor nunca rola novos encontros (pending travado) e
+  // o jogador anda o mapa inteiro sem mais combate. Aguarda o ack pra não perder o
+  // POST no unload da página (triggerCombatScreen redireciona).
+  if (_remoteAuthoritative && window.ExploracaoAPI && typeof window.ExploracaoAPI.eventChoice === 'function') {
+    Promise.resolve(window.ExploracaoAPI.eventChoice(0)).then(_go).catch(function (e) {
+      if (typeof LOGW === 'function') LOGW('API', 'forced_combat_ack err=' + (e && e.message));
+      _go();
+    });
+  } else {
+    _go();
+  }
 }
 
 function skillLabelOf(s) {

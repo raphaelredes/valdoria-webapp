@@ -32558,7 +32558,7 @@ function _aaaListSubScreen(opts){
     + '.aaa-sub-cenario::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.7;}'
     + '.aaa-sub-cenario::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,' + th.primary + ',transparent);opacity:0.4;}'
     + '.aaa-sub-icon{width:36px;height:36px;margin:0 auto 4px;display:grid;place-items:center;color:' + th.primary + ';filter:drop-shadow(0 0 6px ' + th.glow + ');}'
-    + '.aaa-sub-icon svg{width:100%;height:100%;}'
+    + '.aaa-sub-icon svg,.aaa-sub-icon img{width:100%;height:100%;object-fit:contain;border-radius:6px;}'
     + '.aaa-sub-title{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(16px * var(--v-font-scale, 1));font-weight:700;letter-spacing:3px;color:#ffd8a0;'
     +   'text-shadow:0 0 10px ' + th.glow + ',0 1px 2px rgba(0,0,0,0.6);text-transform:uppercase;}'
     + '.aaa-sub-orn{font-size:calc(10px * var(--v-font-scale, 1));color:' + th.primary + ';letter-spacing:2px;opacity:0.7;margin-top:2px;}'
@@ -32591,6 +32591,7 @@ function _aaaListSubScreen(opts){
     + '.aaa-sub-item[disabled]:hover{border-color:rgba(196,149,58,0.30);background:linear-gradient(180deg,rgba(74,56,40,0.28),rgba(42,30,18,0.55));box-shadow:none;}'
     + '.aaa-sub-iico{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;color:' + th.primary + ';}'
     + '.aaa-sub-iico svg{width:30px;height:30px;}'
+    + '.aaa-sub-iico img{width:30px;height:30px;object-fit:cover;border-radius:6px;}'
     + '.aaa-sub-itxt{flex:1;min-width:0;}'
     + '.aaa-sub-ilbl{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));font-weight:600;color:var(--v-text-bright,#e8dcc8);letter-spacing:0.4px;'
     +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
@@ -44260,23 +44261,26 @@ function _renderInnMealsPopup(bodyEl, d){
 // Reescrito pra usar _aaaListSubScreen com tema 'inn'. 3 quartos + descanso curto.
 // Cada item: icon + label + desc + badge (custo). Click → _innSleep com aliados se houver.
 function _renderInnRestPopup(bodyEl, d){
-  function _innIco(id, size){
-    var color = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS[id]) || '#8a7a6a';
+  // Sessão #65 (2026-05-31): imagens de quarto agora são WebP gerados via OpenAI
+  // (regra NUNCA SVG · SEMPRE PNG/WebP). Reusa os WebP canônicos já existentes em
+  // /shared/img/services/. O sync rewrite troca / -> / em prod.
+  function _innImg(src, size){
     var s = size || 36;
-    return '<svg viewBox="0 0 120 120" style="width:' + s + 'px;height:' + s + 'px;color:' + color + ';"><use href="#' + id + '"/></svg>';
+    return '<img src="/shared/img/services/' + src + '" alt="" '
+      + 'style="width:' + s + 'px;height:' + s + 'px;object-fit:cover;border-radius:6px;">';
   }
   // X-6.5.51BN (2026-05-15): badges com <span class="vi vi-coin sm"></span>
   // canonical (substitui "V" texto cru). PT-BR padrão do projeto.
   var rooms = [
-    { _room: 'stable', icon: _innIco('ic-cavalo'),    label: 'Estábulo',       desc: 'Palha dura, mas seguro',       badge: 'Grátis' },
-    { _room: 'common', icon: _innIco('ic-estalagem'), label: 'Quarto Comum',   desc: 'Cama macia, padrão',           badge: '3 <span class="vi vi-coin sm"></span>' },
-    { _room: 'royal',  icon: _innIco('ic-coroa'),     label: 'Suíte Real',     desc: 'Descanso luxuoso',             badge: '10 <span class="vi vi-coin sm"></span>' },
-    { _room: 'short',  icon: _innIco('ic-sono'),      label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis' }
+    { _room: 'stable', icon: _innImg('svc-estabulo.webp'),       label: 'Estábulo',       desc: 'Palha dura, mas seguro',       badge: 'Grátis' },
+    { _room: 'common', icon: _innImg('svc-dormir-comum.webp'),   label: 'Quarto Comum',   desc: 'Cama macia, padrão',           badge: '3 <span class="vi vi-coin sm"></span>' },
+    { _room: 'royal',  icon: _innImg('svc-dormir-real.webp'),    label: 'Suíte Real',     desc: 'Descanso luxuoso',             badge: '10 <span class="vi vi-coin sm"></span>' },
+    { _room: 'short',  icon: _innImg('svc-descanso-curto.webp'), label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis' }
   ];
   _aaaListSubScreen({
     theme: 'inn',
     stackKey: 'inn_rest',
-    icon: _innIco('ic-estalagem', 36),
+    icon: _innImg('svc-estabulo.webp', 36),
     title: 'QUARTOS · ESTALAGEM',
     subtitle: 'descanso longo & curto',
     flavor: d.flavor || 'Martha aponta a escada com o queixo. <i>"Escolha onde dormir."</i>',
