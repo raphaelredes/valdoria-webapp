@@ -18568,7 +18568,6 @@ function _marketTransientIcon(npc){
 // canonical: TRANSIENT_POOL NPC popup — saudação + chat (linhas ambientes) + items
 // Replica fluxo do bot DEV (market.py L155-200): NPC ambulante mostra greeting,
 // abre inventário com items canonical, cada item com confirm popup → _pay → result.
-window._marketTransientChatIdx = window._marketTransientChatIdx || {};
 function _marketShowTransient(p, npc){
   // Sessão #23 v8 (2026-05-22): user pediu VIAJANTES PADRAO_ALDRIC + PNGs
   // zoomable. Migrado de popup simples pra vEncounter.render quando disponível.
@@ -18597,9 +18596,6 @@ function _marketShowTransient(p, npc){
         cb: 'transient-buy:' + npc.id + ':' + it.key
       });
     });
-    if (chat.length > 1) {
-      dialogueChoices.push({ id: 'next_chat', label: '💬 Trocar de assunto', cb: 'transient-next-chat:' + npc.id });
-    }
     dialogueChoices.push({ id: 'leave', label: '↩ "Outra hora."', cb: 'close' });
 
     var dialogue = {
@@ -18643,11 +18639,6 @@ function _marketShowTransient(p, npc){
               });
             }
           });
-          return;
-        }
-        if (cb.indexOf('transient-next-chat:') === 0) {
-          window._marketTransientChatIdx[npc.id] = ((window._marketTransientChatIdx[npc.id] || 0) + 1) % (npc.chat || []).length;
-          _marketShowTransient(p, npc);
           return;
         }
         // 'close' / default — fecha overlay
@@ -18700,13 +18691,6 @@ function _marketShowTransient(p, npc){
       + '<span class="sb-info">' + it.value + ' <span class="vi vi-coin sm"></span></span>'
       + '</button>';
   });
-  // Botão "Trocar de assunto" pra cycle no chat
-  if (chat.length > 1){
-    html += '<button class="subscreen-btn bnk-item-btn" data-action="next-chat" style="margin-top:8px">'
-      + '<span class="sb-icon">💬</span>'
-      + '<span class="sb-text">Trocar de assunto</span>'
-      + '</button>';
-  }
   html += '</div>'
     + '<div class="subscreen-back-row"><button class="subscreen-back" data-cb="__back">← Voltar</button></div>'
     + '</div>';
@@ -18746,14 +18730,6 @@ function _marketShowTransient(p, npc){
       });
     });
   });
-  // Cycle chat
-  var nextBtn = bodyEl.querySelector('[data-action="next-chat"]');
-  if (nextBtn){
-    nextBtn.addEventListener('click', function(){
-      window._marketTransientChatIdx[npc.id] = ((window._marketTransientChatIdx[npc.id] || 0) + 1) % (npc.chat || []).length;
-      _marketShowTransient(p, npc);
-    });
-  }
   bodyEl.querySelector('[data-cb="__back"]').addEventListener('click', navigateBack);
   ov.classList.add('active');
 
