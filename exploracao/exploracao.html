@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-31T22:05:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-31T23:21:50Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -32346,6 +32346,19 @@ function shakeBlockedDir(btn) {
   setTimeout(() => btn.classList.remove('shake'), 300);
 }
 
+// Sessão #66 (reload fix): mantém ?col/?row na URL sincronizado com a posição
+// atual. Assim, ao recarregar a página (F5), o boot REMOTE restaura de onde o
+// player parou em vez de voltar ao spawn. history.replaceState NÃO recarrega.
+function _syncExploreUrlPos(col, row) {
+  try {
+    if (window.__EXPLORE_MODE !== 'remote') return;
+    var u = new URL(location.href);
+    u.searchParams.set('col', String(col));
+    u.searchParams.set('row', String(row));
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch (_) { /* replaceState pode falhar em sandbox — não-crítico */ }
+}
+
 function onMoveEnd(col, row) {
   const p = S.player;
   LOG('MOVE', 'onMoveEnd from=(' + p.col + ',' + p.row + ') to=(' + col + ',' + row + ') steps=' + S.steps + ' tile=' + tileAt(col, row));
@@ -32358,6 +32371,7 @@ function onMoveEnd(col, row) {
   while (p.footprintHistory.length > 12) p.footprintHistory.shift();
   p.col = col;
   p.row = row;
+  _syncExploreUrlPos(col, row);  // Sessão #66: F5 continua de onde parou
   S.steps += 1;
   S.visited.add(fogKey(col, row));
   revealFogAt(col, row, getVisionRange());
@@ -35179,7 +35193,16 @@ function _engageForcedCombat(ev) {
   // pro combate. Sem isto o servidor nunca rola novos encontros (pending travado) e
   // o jogador anda o mapa inteiro sem mais combate. Aguarda o ack pra não perder o
   // POST no unload da página (triggerCombatScreen redireciona).
-  if (_remoteAuthoritative && window.ExploracaoAPI && typeof window.ExploracaoAPI.eventChoice === 'function') {
+  // Sessão #66 BUGFIX: `_remoteAuthoritative` era var LOCAL de onMoveEnd → aqui
+  // (função global) dava ReferenceError, abortando ANTES do eventChoice/combat —
+  // a FSM já tinha sido liberada acima, então o player andava sem combate e o
+  // pending_event ficava travado (logs: move skip_event_roll_pending_exists ×N,
+  // zero forced_combat_ack). Agora calcula o modo REMOTE inline (igual onMoveEnd).
+  var _isRemote = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI
+    && typeof window.ExploracaoAPI.hasToken === 'function'
+    && window.ExploracaoAPI.hasToken());
+  if (_isRemote && typeof window.ExploracaoAPI.eventChoice === 'function') {
     Promise.resolve(window.ExploracaoAPI.eventChoice(0)).then(_go).catch(function (e) {
       if (typeof LOGW === 'function') LOGW('API', 'forced_combat_ack err=' + (e && e.message));
       _go();
@@ -41194,6 +41217,14 @@ function boot() {
           _initBody.cols = S.cols || 0;
           _initBody.rows = S.rows || 0;
         }
+        // Sessão #66 (reload fix): envia a posição ATUAL do player (restaurada da
+        // URL no boot REMOTE) pro server iniciar a sessão do motor NO MESMO hex —
+        // senão o server fica no spawn e rejeita o 1º /move (não-adjacente),
+        // dessincronizando posição/encontros. Server valida bounds.
+        if (S.player && typeof S.player.col === 'number' && typeof S.player.row === 'number') {
+          _initBody.restore_col = S.player.col;
+          _initBody.restore_row = S.player.row;
+        }
         window.ExploracaoAPI.init(_initBody).then(function(res) {
           if (res && res.token) {
             LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8)
@@ -42370,6 +42401,23 @@ document.addEventListener('DOMContentLoaded', () => {
       + ' map_id_url=' + (window.__EXPLORE_MAP_ID || '(none)'));
     console.info('[E-REM:BOOT] remote mode — direct boot map=' + setupChoices.map
       + ' region=' + setupChoices.region + ' bg=' + setupChoices.background + ' align=' + setupChoices.alignment);
+    // Sessão #66 (reload fix — GRAVE): o bloco LOCAL acima parseava ?col/?row
+    // (posição salva) mas o REMOTE pulava → ao recarregar a página, initState()
+    // usava map.spawnCol e o personagem VOLTAVA AO INÍCIO. Agora REMOTE também
+    // restaura a posição da URL (resume traz ?col/?row do checkpoint; e cada
+    // /move atualiza a URL via _syncExploreUrlPos, então F5 mantém onde parou).
+    try {
+      var _qsR = new URLSearchParams(location.search);
+      var _rCol = _qsR.get('col'), _rRow = _qsR.get('row');
+      if (_rCol !== null && _rRow !== null) {
+        var _rC = parseInt(_rCol, 10), _rR = parseInt(_rRow, 10);
+        if (!isNaN(_rC) && !isNaN(_rR) && _rC >= 0 && _rR >= 0) {
+          window.__LD_SPAWN_COL = _rC;
+          window.__LD_SPAWN_ROW = _rR;
+          LOG('BOOT', 'REMOTE spawn restore col=' + _rC + ' row=' + _rR);
+        }
+      }
+    } catch (_eRC) { try { LOGW('BOOT', 'remote col/row parse failed: ' + (_eRC && _eRC.message)); } catch (_) {} }
     boot();
     // X-6.5.51AB (2026-04-26): MutationObserver auto-attacha seta animada de
     // scroll hint em popups com overflow vertical. CSS .v-scroll-hint-arrow
