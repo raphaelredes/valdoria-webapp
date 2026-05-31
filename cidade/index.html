@@ -8728,6 +8728,28 @@ body.perf-lite .vc-action-btn { transition: none; }
           });
         } catch(_eqe){ console.warn('[CITY] equip hydrate failed:', _eqe); }
       }
+      // Sessão #64 (2026-05-31): inventário REAL do char → MOCK_PLAYER_INVENTORY
+      // (mochila). Antes a mochila renderizava os 21 itens MOCK fixos (Poção de
+      // Cura Maior, Botas do Lobo Selvagem, Elmo do Protetor Ancestral...) pra
+      // TODO char — incl. nível 1 recém-criado. User reportou: "Alven nível 1
+      // bárbaro, abro mochila e aparecem itens que eu nem tenho". picked.inventory
+      // = [{name, count}] (web_auth _serialize_inventory). Re-sincroniza pra
+      // localStorage compartilhada (exploracao.html também passa a ver o real).
+      if (Array.isArray(picked.inventory) && typeof MOCK_PLAYER_INVENTORY !== 'undefined') {
+        try {
+          MOCK_PLAYER_INVENTORY.length = 0;
+          picked.inventory.forEach(function(_it){
+            if (!_it || !_it.name) return;
+            MOCK_PLAYER_INVENTORY.push({
+              n: _it.name, q: _it.count || 1,
+              get icon(){ var d=(typeof getItemData==='function')?getItemData(this.n):null; return (d&&d.e)||'📦'; },
+              get value(){ var d=(typeof getItemData==='function')?getItemData(this.n):null; return (d&&d.v)||0; },
+              get name(){ return this.n; }
+            });
+          });
+          if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
+        } catch(_inve){ console.warn('[CITY] inventory hydrate failed:', _inve); }
+      }
       // FASE 6: libera persistência de equip ao servidor SÓ após hidratar (senão
       // o boot sync dispararia equip.set({}) antes do fetch e apagaria o equip).
       window._cityEquipReady = true;
@@ -18565,6 +18587,28 @@ function _marketTransientIcon(npc){
   return MARKET_TRANSIENT_ROLE_ICON[npc.role] || '<svg class="v-heraldic"><use href="#ic-aldeao"/></svg>';
 }
 
+// 2026-05-31: retrato real do viajante (mesma fonte do diálogo —
+// /shared/img/npcs/<id>.webp). Quando o webp não existe (a maioria dos
+// transients não tem foto dedicada), o onerror remove o <img> e o ícone
+// heráldico do role aparece atrás. Corrige a imagem errada na lista de
+// Viajantes (ex: Ysmara=misc2 mostrava ícone heráldico genérico, não a foto).
+function _transientNpcPortrait(npc){
+  var base = (location.protocol.indexOf('http') === 0)
+    ? '/shared/img/npcs/' : '/shared/img/npcs/';
+  return base + (npc.id || 'aldeao') + '.webp';
+}
+
+// Ícone do viajante na lista do mercado: retrato real por cima do heráldico
+// (fallback). Se o webp existe → mostra a foto; senão → ícone heráldico do role.
+function _transientListIcon(npc){
+  return '<span style="position:relative;display:inline-block;width:38px;height:38px;vertical-align:middle">'
+    + '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
+    + _marketTransientIcon(npc) + '</span>'
+    + '<img src="' + _transientNpcPortrait(npc) + '" alt="" '
+    + 'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px" '
+    + 'onerror="this.remove()"></span>';
+}
+
 // canonical: TRANSIENT_POOL NPC popup — saudação + chat (linhas ambientes) + items
 // Replica fluxo do bot DEV (market.py L155-200): NPC ambulante mostra greeting,
 // abre inventário com items canonical, cada item com confirm popup → _pay → result.
@@ -18801,7 +18845,7 @@ function _buildMarketMockData(player){
   var wandering = [];
   if (transient){
     wandering.push({
-      icon: _marketTransientIcon(transient),
+      icon: _transientListIcon(transient),
       label: transient.name + ' <span style="opacity:.7">— ' + transient.role + '</span>',
       cb: 'transient_view_' + transient.id
     });
