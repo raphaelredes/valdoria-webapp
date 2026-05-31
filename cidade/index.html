@@ -8713,6 +8713,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // pra a aba "Disponíveis" do diário renderizar quests reais (não hardcoded).
       try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
       try { _refreshDailyState(); } catch(_dse){ console.warn('[CITY] daily state fetch failed', _dse); }
+      try { _refreshDiscoveryState(); } catch(_dce){ console.warn('[CITY] discovery state fetch failed', _dce); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9804,6 +9805,13 @@ function _isCTA(btn) {
     daily: {
       state: function(){ return window.vCityServer.cityAction('daily.state', {}); },
       claim: function(){ return window.vCityServer.cityAction('daily.claim', {}); }
+    },
+    discovery: {
+      state:    function(){ return window.vCityServer.cityAction('discovery.state', {}); },
+      seen:     function(cb){ return window.vCityServer.cityAction('discovery.seen', { location_cb: cb }); },
+      start:    function(qid, stage){ return window.vCityServer.cityAction('discovery.start', { quest_id: qid, stage_id: stage || '' }); },
+      advance:  function(stage){ return window.vCityServer.cityAction('discovery.advance', { stage_id: stage || '' }); },
+      complete: function(qid, targetCb){ return window.vCityServer.cityAction('discovery.complete', { quest_id: qid, target_cb: targetCb || '' }); }
     }
   };
 })();
@@ -10217,6 +10225,10 @@ function _startDiscoveryQuest(locKey){
   var p = _ensureCityState();
   if (p.discovered_locations.indexOf(loc.cb) < 0) p.discovered_locations.push(loc.cb);
   p.active_discovery = { questId:quest.id, stageId:quest.stages[0].id };
+  // FASE 3 server-driven: persiste o início da descoberta (sobrevive ao reload).
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    window.vCityServer.discovery.start(quest.id, quest.stages[0].id).catch(function(_e){ console.warn('[CITY] discovery.start persist', _e); });
+  }
   _logCity('discovery start: ' + quest.id);
   _renderDiscoveryStage();
   return true;
@@ -10234,6 +10246,10 @@ function _advanceDiscoveryStage(nextStageId){
     var idx = p.discovered_locations.indexOf(quest.targetCb);
     if (idx >= 0) p.discovered_locations.splice(idx, 1);
     p.active_discovery = null;
+    // FASE 3 server-driven: persiste a conclusão da descoberta (local liberado).
+    if (window.vCityServer && window.vCityServer.isRemote()) {
+      window.vCityServer.discovery.complete(quest.id, quest.targetCb).catch(function(_e){ console.warn('[CITY] discovery.complete persist', _e); });
+    }
     _closeDiscoveryPopup();
     var locKey = _findLocByCb(quest.targetCb);
     var locLabel = (locKey && CITY_LOCATIONS[locKey]) ? CITY_LOCATIONS[locKey].label : quest.targetCb;
@@ -20206,6 +20222,22 @@ function _refreshDailyState(){
   return window.vCityServer.daily.state().then(function(r){
     if (r && r.ok && r.daily){ window.CITY_DAILY_STATE = r.daily; }
   }).catch(function(e){ console.warn('[CITY] daily state failed', e); });
+}
+// FASE 3 server-driven: estado de descoberta (discovered/completed/active) do servidor.
+function _refreshDiscoveryState(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.discovery.state().then(function(r){
+    if (r && r.ok && r.discovery){
+      var d = r.discovery, p = window.CITY_MOCK_PLAYER;
+      if (p){
+        if (Array.isArray(d.seen_locations)) p.seen_locations = d.seen_locations.slice();
+        p.discovered_locations = (d.discovered_locations || []).slice();
+        p.completed_locations = (d.completed_locations || []).slice();
+        p.active_discovery = d.active_discovery || null;
+        p._discoveryHydrated = true;
+      }
+    }
+  }).catch(function(e){ console.warn('[CITY] discovery state failed', e); });
 }
 function _srvAcceptQuest(serverId){
   if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
