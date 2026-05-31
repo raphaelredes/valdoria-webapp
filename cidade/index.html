@@ -18971,7 +18971,8 @@ function _buildGuildMockData(player){
       { icon: _heralIco('ic-missões'), label: 'Quadro de missões',
         desc: 'Contratos ativos da Guilda',
         cb: 'guild_quests_open',
-        badge: GUILD_QUESTS_AVAILABLE.length + '' },
+        badge: ((window.SERVER_QUEST_BOARD_LOADED && Array.isArray(window.SERVER_QUEST_BOARD))
+                  ? window.SERVER_QUEST_BOARD.length : GUILD_QUESTS_AVAILABLE.length) + '' },
       { icon: _heralIco('ic-paladino'), label: 'Tavira — Recompensas',
         desc: 'Contratos de caça ativos',
         cb: 'guild_rewards_open' },
@@ -20401,7 +20402,6 @@ function _srvQuestDetail(serverId){
 }
 
 function _normalizeQuests(){
-  var seen = _getSeenQuests();
   var out = [];
   (QUESTS_ACTIVE || []).forEach(function(q){
     var ready = (q.progress || '').indexOf('✓') >= 0;
@@ -20417,33 +20417,12 @@ function _normalizeQuests(){
       cb: q.serverId ? ('quest_open_srv_' + q.serverId) : ('quest_open_' + (q.id || '').replace(/^qa_/, ''))
     });
   });
-  if (window.SERVER_QUEST_BOARD_LOADED) {
-    // FASE 1 server-driven: board CANÔNICO vem do servidor (quest.board, já
-    // filtrado por can_accept — sem spoiler gating client). cb srvaccept_<serverId>.
-    (window.SERVER_QUEST_BOARD || []).forEach(function(q){
-      out.push({
-        id: 'gqs_' + q.id, icon: '', title: q.title || q.id, desc: q.desc || '',
-        status: 'available', progress: '',
-        reward: q.reward || 0, xp: q.xp || 0,
-        npc: '', date: '', level: q.min_level || 0,
-        cb: 'srvaccept_' + q.id
-      });
-    });
-  } else {
-    (GUILD_QUESTS_AVAILABLE || []).forEach(function(q){
-      // 2026-05-21: SPOILER GATING — só mostra quests JÁ VISTAS pelo player.
-      if (!seen.has(q.id)) return;
-      var lvl = parseInt((q.diff || '').replace(/\D/g, ''), 10) || 0;
-      out.push({
-        id: q.id, icon: q.icon, title: q.title, desc: q.desc || '',
-        status: 'available', progress: '',
-        reward: q.reward || 0, xp: q.xp || 0,
-        npc: '', date: '', level: lvl,
-        // cb 'accept_q_<id>' (handler ~37891) → _acceptQuest (client-mock fallback).
-        cb: 'accept_q_' + (q.id || '').replace(/^gq_/, '')
-      });
-    });
-  }
+  // A cidade NÃO é ponto de aquisição de missões (decisão do dono, 2026-05-30):
+  // o menu "Missões" da cidade serve só para VER/acompanhar/abandonar. Obter
+  // novos contratos vive APENAS no Quadro da Guilda (_guildShowQuests →
+  // SERVER_QUEST_BOARD) ou via diálogo/descoberta narrativa. Por isso o board
+  // (status:'available') foi removido daqui — antes tocar numa "Nova" aceitava
+  // na hora, sem contexto, gerando missões que o jogador "não pegou".
   (QUESTS_HISTORY || []).forEach(function(q){
     out.push({
       id: q.id, icon: q.icon, title: q.title, desc: '',
@@ -20509,11 +20488,11 @@ function _renderQuestDiary(bodyEl){
      - Empty state ilustrado (scroll + flavor lore)
      - Hover lift effect em cards
   ============================================================================= */
+  // Sem aba "Novas" (aquisição): a cidade só mostra o que o jogador JÁ tem
+  // (Prontas/Ativas/Feitas). Novos contratos só na Guilda ou via narrativa.
   var TABS = [
-    // Sessao #37 v16: labels abreviadas (Disponíveis→Novas, Concluídas→Feitas)
     { id: 'ready',      label: 'Prontas',  icon: '✓', count: counts.ready,     color: '#7cdb7c' },
     { id: 'active',     label: 'Ativas',   icon: '⚔', count: counts.active,    color: '#c4953a' },
-    { id: 'available',  label: 'Novas',    icon: '◈', count: counts.available, color: '#9b8e7c' },
     { id: 'history',    label: 'Feitas',   icon: '✦', count: counts.history,   color: '#7d705e' }
   ];
 
@@ -40889,28 +40868,81 @@ function _marketRepDelta(npcKey, delta){
 
 // --- GUILDA ---
 function _guildShowQuests(p){
-  var items = GUILD_QUESTS_AVAILABLE.map(function(q){
-    return { icon: q.icon, label: q.title, badge: q.reward + 'V + ' + q.xp + 'XP · ' + q.diff, _q: q };
-  });
-  _squareShowListPopup({
-    stackKey: 'guild_quests', icon: _heralIco('ic-missões'), title: 'Missões Disponíveis',
-    flavor: '<i>Tavira aponta o quadro. "Escolha uma. Falha conta na sua reputação."</i>',
-    items: items,
-    onPick: function(item){
-      var q = item._q;
-      _showInfoPopup({
-        icon: q.icon, npc: 'Tavira', title: 'Aceitar: ' + q.title,
-        desc: '<b>Recompensa:</b> ' + q.reward + ' Valdoritas + ' + q.xp + ' XP<br><b>Dificuldade:</b> ' + q.diff,
-            onConfirm: function(){
-          _showServiceResultPopup({
-            icon: q.icon, npc: 'Tavira',
-            narrative: '<b>' + q.title + '</b> registrada no diário.<br><i>"Boa sorte. Volte vivo."</i>',
-            deltas: [], onContinue: function(){ navigateBack(); }
-          });
-        }
-      });
-    }
-  });
+  // QUADRO DA GUILDA = único ponto de aquisição server-driven (decisão do dono
+  // 2026-05-30). Usa SERVER_QUEST_BOARD (quest.board do servidor, já filtrado por
+  // can_accept). Tocar abre o edital com CONTEXTO (descrição) + recompensas;
+  // aceitar persiste de verdade via quest.accept. Antes esta tela era um MOCK
+  // (GUILD_QUESTS_AVAILABLE hardcoded + popup fake sem persistência). Fallback
+  // ao catálogo local só em LOCAL mode (file://, dev tool sem servidor).
+  var remote = !!(window.vCityServer && window.vCityServer.isRemote());
+  var coin = '<span class="vi vi-coin sm"></span>';
+
+  function _render(){
+    var board = remote ? (window.SERVER_QUEST_BOARD || []) : (GUILD_QUESTS_AVAILABLE || []);
+    var items = board.map(function(q){
+      var rw = q.reward || 0, xp = q.xp || 0;
+      var diff = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
+      return {
+        icon: q.icon || _heralIco('ic-missões'),
+        label: q.title || q.id,
+        badge: rw + 'V + ' + xp + 'XP · ' + diff,
+        _q: q
+      };
+    });
+    _squareShowListPopup({
+      stackKey: 'guild_quests', icon: _heralIco('ic-missões'), title: 'Quadro de Missões',
+      flavor: items.length
+        ? '<i>Tavira aponta o quadro coberto de editais selados. "Escolha um contrato. Falha conta na sua reputação."</i>'
+        : '<i>Tavira dá de ombros. "Nenhum contrato novo no quadro por ora. Volte mais tarde, aventureiro."</i>',
+      items: items,
+      onPick: function(item){
+        var q = item._q;
+        var rw = q.reward || 0, xp = q.xp || 0;
+        var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
+        _showInfoPopup({
+          icon: q.icon || _heralIco('ic-missões'), npc: 'Tavira', title: 'Aceitar: ' + (q.title || q.id),
+          desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
+            + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+          onConfirm: function(){
+            if (!remote) {
+              // LOCAL mode (file://): fallback mock client-side (dev tool).
+              if (typeof _acceptQuest === 'function') _acceptQuest(q.id);
+              navigateBack();
+              return;
+            }
+            if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
+            window.vCityServer.quest.accept(q.id).then(function(r){
+              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+              if (r && r.ok) {
+                if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);  // hidrata QUESTS_ACTIVE
+                if (Array.isArray(window.SERVER_QUEST_BOARD)) {
+                  window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
+                }
+                _showServiceResultPopup({
+                  icon: q.icon || _heralIco('ic-missões'), npc: 'Tavira',
+                  narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volte vivo."</i>',
+                  deltas: [], onContinue: function(){ navigateBack(); }
+                });
+              } else if (typeof vToast === 'function') {
+                vToast((r && r.error) || 'Não foi possível aceitar a missão');
+              }
+            }).catch(function(e){
+              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+              console.error('[CITY] guild quest accept failed', e);
+              if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
+  if (remote && typeof _refreshServerBoard === 'function') {
+    _refreshServerBoard().then(_render).catch(_render);
+  } else {
+    _render();
+  }
 }
 
 function _guildShowRewards(p){
