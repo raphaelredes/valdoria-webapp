@@ -34339,261 +34339,8 @@ var WNPC_DIALOGUES = {
 // canonical: market_npc_greetings.py — saudações reativas
 // _WOUNDED_GREETINGS quando HP<40%; _EQUIPMENT_GREETINGS por raridade do equipamento
 
-// canonical: wandering_npcs_gifts_data.py — sistema de presentes (5 dicts)
-var WNPC_GIFT_PREFERENCES = {
-    "scholarly": ["scroll", "book", "arcane", "potion", "wand"],
-    "mercantile": ["gem", "jewelry", "ring", "valuable", "gold_item"],
-    "adventurous": ["weapon", "map", "compass", "rope", "tool"],
-    "devout": ["holy", "blessed", "divine", "healing", "symbol"],
-    "cautious": ["armor", "shield", "potion", "antidote", "trap"],
-    "jovial": ["food", "drink", "instrument", "toy", "consumable"],
-    "stoic": ["weapon", "armor", "whetstone", "tool", "martial"],
-    "mysterious": ["arcane", "rune", "crystal", "dark", "rare"],
-};
-
-var WNPC_GIFT_ANTIPATHIES = {
-    "devout": ["dark", "poison", "undead", "necromancy", "cursed"],
-    "scholarly": ["junk", "simple_weapon", "crude"],
-    "stoic": ["toy", "instrument", "jewelry", "trinket"],
-    "mysterious": ["holy", "blessed", "divine", "loud"],
-    "cautious": ["cursed", "dark", "poison", "reckless"],
-    "jovial": ["dark", "undead", "bone", "poison"],
-    "mercantile": ["junk", "bone", "monster_part"],
-    "adventurous": ["boring", "paper"],
-};
-
-var WNPC_GIFT_REACTIONS = {
-    "cautious": {
-        "loved": [
-            "Eu... não sei o que dizer. Isso é perfeito para mim.",
-            "Você realmente me conhece. Obrigado de coração, {player_name}.",
-        ],
-        "liked": [
-            "Isso é... muito generoso. Obrigado, {player_name}.",
-            "Não esperava tanta gentileza.",
-        ],
-        "neutral": [
-            "Hmm... obrigado. Útil.",
-            "Aceito. Agradeço.",
-        ],
-        "disliked": [
-            "...isso? Hmm. Obrigado, eu acho.",
-            "Achei que me conhecesse um pouco melhor.",
-        ],
-        "hated": [
-            "Isso me ofende. Não quero isso perto de mim.",
-            "...você está tentando me insultar?",
-        ],
-    },
-    "jovial": {
-        "loved": [
-            "MINHA NOSSA! Isso é PERFEITO! Você me conhece tão bem!",
-            "EU NÃO ACREDITO! Melhor presente de TODOS os tempos!",
-        ],
-        "liked": [
-            "UAU! Você é demais, {player_name}!",
-            "Isso é incrível! Muito obrigado!",
-        ],
-        "neutral": [
-            "Ah, valeu! Sempre pensei em ter um desses!",
-            "Legal! Adoro presentes!",
-        ],
-        "disliked": [
-            "Ah... é... legal. Valeu, eu acho?",
-            "Hmm, não era bem o que eu esperava, mas tudo bem!",
-        ],
-        "hated": [
-            "Eca! Tira isso de perto de mim!",
-            "Que... que horror. Por que me dar ISSO?",
-        ],
-    },
-    "stoic": {
-        "loved": [
-            "...isso é extraordinário. Meu respeito eterno.",
-            "Nunca recebi algo tão adequado. Você me entende, {player_name}.",
-        ],
-        "liked": [
-            "Bom presente. Respeito.",
-            "Aprecio o gesto, {player_name}.",
-        ],
-        "neutral": [
-            "...obrigado.",
-            "Aceito. Grato.",
-        ],
-        "disliked": [
-            "...hmm.",
-            "Não preciso disso. Mas aceito.",
-        ],
-        "hated": [
-            "Leve isso embora.",
-            "...isso é indigno.",
-        ],
-    },
-    "scholarly": {
-        "loved": [
-            "Fascinante! Um achado acadêmico inestimável!",
-            "Meu amigo, você acaba de revolucionar minha pesquisa!",
-        ],
-        "liked": [
-            "Fascinante! Isso vai enriquecer minha pesquisa!",
-            "Excelente aquisição! Muito grato!",
-        ],
-        "neutral": [
-            "Curioso! Vou estudar isso.",
-            "Hmm, interessante. Obrigado!",
-        ],
-        "disliked": [
-            "Isso é... pouco sofisticado para meu campo de estudo.",
-            "Hmm. Obrigado, mas isso não me é muito útil.",
-        ],
-        "hated": [
-            "Isso é primitivo e ofensivo ao intelecto.",
-            "Recuso. Não tenho interesse nesse tipo de coisa.",
-        ],
-    },
-    "mercantile": {
-        "loved": [
-            "Incrível! Nem eu teria negociado algo assim!",
-            "Meu melhor parceiro! Isso vale uma fortuna, {player_name}!",
-        ],
-        "liked": [
-            "Belo presente! Você sabe investir em amizades!",
-            "Isso tem bom valor! Obrigado!",
-        ],
-        "neutral": [
-            "Aceito! Todo item tem valor.",
-            "Obrigado. Nada se desperdiça.",
-        ],
-        "disliked": [
-            "Hmm... isso não vale quase nada no mercado.",
-            "Obrigado, mas entre nós... podia ser melhor.",
-        ],
-        "hated": [
-            "Isso é lixo. Literalmente sem valor.",
-            "Está me insultando com essa porcaria?",
-        ],
-    },
-    "devout": {
-        "loved": [
-            "Isso é... uma dádiva divina. Os deuses te abençoem!",
-            "Nunca recebi algo tão sagrado. Os céus te recompensarão, {player_name}.",
-        ],
-        "liked": [
-            "Os deuses sorriem para sua generosidade.",
-            "Uma oferenda digna. Obrigado, {player_name}.",
-        ],
-        "neutral": [
-            "Que a bênção retorne a você.",
-            "Aceito com gratidão e fé.",
-        ],
-        "disliked": [
-            "Hmm... os deuses valorizam a intenção, não o presente.",
-            "Obrigado, mas... isso não é muito sagrado.",
-        ],
-        "hated": [
-            "BLASFÊMIA! Tire essa profanação da minha frente!",
-            "Isso é uma afronta aos deuses! Nunca mais me traga algo assim!",
-        ],
-    },
-    "adventurous": {
-        "loved": [
-            "Com isso eu posso explorar QUALQUER lugar! OBRIGADO!",
-            "Presente PERFEITO para um explorador! Você me conhece, {player_name}!",
-        ],
-        "liked": [
-            "Isso vai me ajudar MUITO na próxima expedição!",
-            "Incrível! Você sabe o que um viajante precisa!",
-        ],
-        "neutral": [
-            "Legal! Vai ser útil na estrada!",
-            "Valeu! Sempre preciso de mais suprimentos!",
-        ],
-        "disliked": [
-            "Hmm... isso não vai me ajudar muito na estrada.",
-            "Obrigado, mas não é muito prático pra viagem.",
-        ],
-        "hated": [
-            "Pra que eu quero isso? Não tem utilidade nenhuma!",
-            "Isso só vai pesar na mochila. Não, obrigado.",
-        ],
-    },
-    "mysterious": {
-        "loved": [
-            "Isso pulsa com energia antiga. Poucos entenderiam seu valor.",
-            "Notável. Você percebe o que outros não percebem, {player_name}.",
-        ],
-        "liked": [
-            "Isso tem poder. Percebo.",
-            "Não esperava... obrigado, {player_name}.",
-        ],
-        "neutral": [
-            "Hmm. Aceito.",
-            "Interessante... obrigado.",
-        ],
-        "disliked": [
-            "Isso é... mundano demais para meu gosto.",
-            "Hmm. Esperava algo mais... significativo.",
-        ],
-        "hated": [
-            "Essa energia me repele. Não.",
-            "...isso é o oposto do que eu sou.",
-        ],
-    },
-};
-
-var WNPC_GIFT_REJECTION_LINES = {
-    "angry": {
-        "cautious": ["Não quero nada de você agora.", "Guarde isso. Não estou de humor."],
-        "jovial": ["Olha... agora não, tá? Estou irritado.", "Não, obrigado. Preciso esfriar a cabeça."],
-        "stoic": ["Não.", "Leve embora. Agora não."],
-        "scholarly": ["Minha paciência está no limite. Guarde isso.", "Não estou receptivo a presentes no momento."],
-        "mercantile": ["Não quero seus presentes agora. Negociações suspensas.", "Guarde. Nossos negócios estão pausados."],
-        "devout": ["Os deuses me testam... e você também. Não aceito.", "Minha fé exige que eu recuse. Não agora."],
-        "adventurous": ["Não tô a fim. Sério.", "Guarda isso. Preciso de espaço."],
-        "mysterious": ["...não. A energia está errada.", "Recuso. Os ventos não favorecem."],
-    },
-    "distrust": {
-        "cautious": ["Não aceito presentes de quem não confio.", "...não, obrigado. Prefiro manter distância."],
-        "jovial": ["Desculpa, mas... não te conheço bem o bastante pra isso.", "Hmm... melhor não. Nada pessoal!"],
-        "stoic": ["Não confio. Guarde.", "Presentes de desconhecidos... não."],
-        "scholarly": ["Prefiro não aceitar. Ainda não confio em suas intenções.", "A prudência acadêmica me impede."],
-        "mercantile": ["Presentes grátis me deixam desconfiado.", "Nada é de graça. O que você quer em troca?"],
-        "devout": ["Meu coração ainda não está aberto a você.", "Preciso de mais tempo para confiar."],
-        "adventurous": ["Eh... melhor não. Ainda não sei se posso confiar.", "Na estrada aprendi a ser cauteloso com presentes."],
-        "mysterious": ["Não aceito de quem não conheço as intenções.", "...seus motivos me são opacos."],
-    },
-    "cooldown": {
-        "cautious": ["Já me deu algo hoje. Não preciso de mais.", "Guarde para outra ocasião."],
-        "jovial": ["Ei, já ganhei presente hoje! Guarda pro próximo encontro!", "Calma, calma! Uma coisa de cada vez!"],
-        "stoic": ["Um por dia é suficiente.", "Já aceitei hoje. Chega."],
-        "scholarly": ["Um presente por dia é adequado. Não exagere.", "Já recebi algo hoje. Obrigado pela intenção."],
-        "mercantile": ["Muitos presentes diluem o valor de cada um.", "Já fechamos negócio hoje. Amanhã, talvez."],
-        "devout": ["A generosidade em excesso pode ser vaidade.", "Já recebi sua oferta hoje. Os deuses viram."],
-        "adventurous": ["Já ganhei hoje! Guarda pra próxima aventura!", "Um por dia, parceiro! Senão a mochila não aguenta!"],
-        "mysterious": ["O ciclo de hoje já se completou.", "...amanhã. As estrelas precisam girar."],
-    },
-    "insulting": {
-        "cautious": ["...isso? Para mim? Achei que me conhecesse melhor.", "Hmm. Esperava mais de você."],
-        "jovial": ["Ah... é... legal? Não é exatamente o que eu gostaria...", "Puxa, pensei que a gente se conhecia melhor!"],
-        "stoic": ["...isso é indigno da nossa amizade.", "Esperava mais respeito."],
-        "scholarly": ["Isso é... desapontante, vindo de alguém que me conhece.", "Um presente tão medíocre para alguém que te considera amigo?"],
-        "mercantile": ["Isso não vale nem a intenção. Esperava melhor.", "Amizade tem valor. Esse presente... não tem."],
-        "devout": ["Os deuses valorizam a intenção, mas... essa intenção é vazia.", "Esperava que nossa amizade merecesse mais."],
-        "adventurous": ["Hmm... isso não é lá muito útil pra nenhum de nós.", "Amigo, esse presente tá meio... fraco."],
-        "mysterious": ["...isso revela mais sobre você do que gostaria.", "Decepcionante. Pensei que me entendia."],
-    },
-};
-
-var WNPC_RECIPROCITY_ITEMS = {
-    "scholarly": ["Pergaminho de Identificar", "Poção de Cura Menor"],
-    "mercantile": ["Poção de Cura Menor", "Tocha"],
-    "adventurous": ["Corda de Cânhamo", "Poção de Cura Menor"],
-    "devout": ["Poção de Cura Menor", "Água Benta"],
-    "cautious": ["Poção de Cura Menor", "Kit de Cura"],
-    "jovial": ["Ração de Viagem", "Poção de Cura Menor"],
-    "stoic": ["Poção de Cura Menor", "Pedra de Amolar"],
-    "mysterious": ["Poção de Cura Menor", "Tocha"],
-};
+// (2026-05-31) Dicts WNPC_GIFT_* removidos junto com a feature de
+// presentes de viajante (dialogos antigos, a pedido do user). NAO reintroduzir.
 
 
 // canonical: wandering_npcs_arcs_*.py — Story Arcs (8 archetypes × 2 arcs × 12 chapters = 192 capítulos)
@@ -42610,11 +42357,11 @@ function _travelersView(p, traveler){
       + (tier === 'friend' ? ' <span style="color:#7fb070">✓ ativo</span>' : ' <span style="color:#a09484">— precisa ser amigo</span>')
     : '';
 
-  // Menu de ações com 3 opções (info / conversar arc / dar presente)
+  // Menu de ações: info / conversar arc. (2026-05-31: "Dar presente" removido —
+  // feature de presentes com diálogos antigos descontinuada, a pedido do user.)
   var items = [
     { icon: _heralIco('ic-mochila'), label: 'Ver detalhes',      _action: 'info' },
-    { icon: _heralIco('ic-mochila'), label: 'Conversar (arc)',   _action: 'arc' },
-    { icon: _heralIco('ic-mochila'), label: 'Dar presente',       _action: 'gift' }
+    { icon: _heralIco('ic-mochila'), label: 'Conversar (arc)',   _action: 'arc' }
   ];
   _squareShowListPopup({
     stackKey: 'traveler_view_' + traveler.id, icon: traveler.icon, title: traveler.name,
@@ -42636,8 +42383,6 @@ function _travelersView(p, traveler){
         });
       } else if (item._action === 'arc'){
         _travelerArcView(p, traveler);
-      } else if (item._action === 'gift'){
-        _travelerGiftSelect(p, traveler);
       }
     }
   });
@@ -42682,90 +42427,11 @@ function _travelerArcView(p, traveler){
   });
 }
 
-// Gift selection — usa MOCK_PLAYER_INVENTORY + WNPC_GIFT_PREFERENCES/ANTIPATHIES
-// Mock tags pra cada item da bolsa (simulador — não tem tag real)
-var WNPC_GIFT_ITEM_TAGS = {
-  'sword_elven':       ['weapon', 'martial'],
-  'potion_heal':       ['potion', 'healing', 'consumable'],
-  'gem_turquoise':     ['gem', 'jewelry', 'valuable'],
-  'scroll_ancient':    ['scroll', 'arcane', 'rare']
-};
-
-function _travelerGiftSelect(p, traveler){
-  if (!MOCK_PLAYER_INVENTORY || !MOCK_PLAYER_INVENTORY.length){
-    vToast('🎁 Bolsa vazia — sem itens pra dar de presente.');
-    return;
-  }
-  var items = MOCK_PLAYER_INVENTORY.map(function(it){
-    var tags = WNPC_GIFT_ITEM_TAGS[it.id] || [];
-    return { icon: it.icon, label: it.name, badge: it.value + ' V', _item: it, _tags: tags };
-  });
-  _squareShowListPopup({
-    stackKey: 'traveler_gift_' + traveler.id, icon: _heralIco('ic-mochila'), title: 'Dar presente — ' + traveler.name,
-    flavor: '<i>Escolha um item para dar de presente. ' + traveler.name + ' pode amar, gostar, ser indiferente, ou se ofender.</i>',
-    items: items,
-    onPick: function(item){ _travelerGiftApply(p, traveler, item._item, item._tags); }
-  });
-}
-
-function _travelerGiftApply(p, traveler, item, tags){
-  // canonical: wandering_npcs_gifts — match tags vs prefs/antipathies → tier
-  var prefs = WNPC_GIFT_PREFERENCES[traveler.archetype] || [];
-  var antipathies = WNPC_GIFT_ANTIPATHIES[traveler.archetype] || [];
-  var loved = false, liked = false, hated = false, disliked = false;
-  tags.forEach(function(t){
-    if (prefs.indexOf(t) >= 0) liked = true;
-    if (antipathies.indexOf(t) >= 0) hated = true;
-  });
-  // Match completo (>=2 tags preferidas) → loved
-  var matchPrefs = tags.filter(function(t){ return prefs.indexOf(t) >= 0; }).length;
-  if (matchPrefs >= 2) loved = true;
-  if (matchPrefs === 0 && tags.filter(function(t){ return antipathies.indexOf(t) >= 0; }).length > 0) {
-    disliked = true;
-    if (tags.filter(function(t){ return antipathies.indexOf(t) >= 0; }).length >= 2) hated = true;
-  }
-  var tier = hated ? 'hated' : (loved ? 'loved' : (liked ? 'liked' : (disliked ? 'disliked' : 'neutral')));
-  var reactions = (WNPC_GIFT_REACTIONS[traveler.archetype] || {})[tier] || [];
-  var reaction = reactions.length
-    ? reactions[Math.floor(Math.random() * reactions.length)].replace(/\{player_name\}/g, p.name || 'Aventureiro')
-    : 'O viajante aceita o presente em silêncio.';
-  // Reciprocidade (apenas se loved/liked)
-  var reciprocityLine = '';
-  if (tier === 'loved' || tier === 'liked'){
-    var recip = WNPC_RECIPROCITY_ITEMS[traveler.archetype] || [];
-    if (recip.length){
-      var recipItem = recip[Math.floor(Math.random() * recip.length)];
-      reciprocityLine = '<br><br>🎁 <b>' + traveler.name + ' te dá um presente em troca:</b> ' + recipItem;
-    }
-  }
-  // Affinity boost por tier
-  var affGain = { loved: 5, liked: 3, neutral: 1, disliked: 0, hated: -3 }[tier] || 0;
-  // Mock: incrementa interactions count
-  // task #80 (2026-05-20): triggera persistência via _npcMarkUsed.
-  if (affGain > 0){
-    if (typeof _npcMarkUsed === 'function') {
-      for (var i = 0; i < affGain; i++) {
-        _npcMarkUsed('wnp_' + traveler.id, '_gift_' + Date.now() + '_' + i);
-      }
-    } else {
-      window._npcDialoguesUsed = window._npcDialoguesUsed || {};
-      window._npcDialoguesUsed['wnp_' + traveler.id] = window._npcDialoguesUsed['wnp_' + traveler.id] || [];
-      for (var j = 0; j < affGain; j++) {
-        window._npcDialoguesUsed['wnp_' + traveler.id].push('_gift_' + Date.now() + '_' + j);
-      }
-    }
-  }
-  var TIER_ICONS = { loved: '💖', liked: '😊', neutral: '😐', disliked: '😕', hated: '😠' };
-  _showInfoPopup({
-    icon: TIER_ICONS[tier] || '🎁', npc: traveler.name,
-    title: 'Reação: ' + tier.toUpperCase(),
-    desc: '<i>Você entrega <b>' + item.name + '</b>.</i><br><br>' +
-          '<b>' + traveler.name + ':</b> "' + reaction.replace(/^"|"$/g, '') + '"' +
-          reciprocityLine +
-          (affGain !== 0 ? '<br><br><b>Afinidade:</b> ' + (affGain > 0 ? '+' : '') + affGain : ''),
-    onConfirm: function(){}
-  });
-}
+// (2026-05-31) Feature de "Dar presente" a viajantes REMOVIDA a pedido do user —
+// diálogos de reação muito antigos, fora do projeto atual. Removidos:
+// _travelerGiftSelect, _travelerGiftApply, WNPC_GIFT_ITEM_TAGS e os dicts
+// WNPC_GIFT_* (preferences/antipathies/reactions/rejection/reciprocity).
+// NÃO reintroduzir presentes de viajante aqui.
 
 // --- MURAL DOS AVENTUREIROS ---
 // canonical: mapa class → ic-* (heraldic-icons rule)
