@@ -8714,6 +8714,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
       try { _refreshDailyState(); } catch(_dse){ console.warn('[CITY] daily state fetch failed', _dse); }
       try { _refreshDiscoveryState(); } catch(_dce){ console.warn('[CITY] discovery state fetch failed', _dce); }
+      try { _refreshNpcState(); } catch(_npe){ console.warn('[CITY] npc state fetch failed', _npe); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9812,6 +9813,10 @@ function _isCTA(btn) {
       start:    function(qid, stage){ return window.vCityServer.cityAction('discovery.start', { quest_id: qid, stage_id: stage || '' }); },
       advance:  function(stage){ return window.vCityServer.cityAction('discovery.advance', { stage_id: stage || '' }); },
       complete: function(qid, targetCb){ return window.vCityServer.cityAction('discovery.complete', { quest_id: qid, target_cb: targetCb || '' }); }
+    },
+    npc: {
+      state: function(){ return window.vCityServer.cityAction('npc.state', {}); },
+      sync:  function(obj){ return window.vCityServer.cityAction('npc.sync', obj || {}); }
     }
   };
 })();
@@ -20239,6 +20244,24 @@ function _refreshDiscoveryState(){
     }
   }).catch(function(e){ console.warn('[CITY] discovery state failed', e); });
 }
+// FASE 4 server-driven: tracking de NPC (diálogos-usados + finished) do servidor.
+// Merge com o existente (localStorage LOCAL + servidor REMOTE → união).
+function _refreshNpcState(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.npc.state().then(function(r){
+    if (r && r.ok && r.city_npc){
+      var c = r.city_npc;
+      window._npcDialoguesUsed = window._npcDialoguesUsed || {};
+      window._uniqueNpcsFinished = window._uniqueNpcsFinished || {};
+      if (c.dialogues_used && typeof c.dialogues_used === 'object'){
+        for (var k in c.dialogues_used){ if (Array.isArray(c.dialogues_used[k])) window._npcDialoguesUsed[k] = c.dialogues_used[k]; }
+      }
+      if (c.finished && typeof c.finished === 'object'){
+        for (var f in c.finished){ if (c.finished[f] === true) window._uniqueNpcsFinished[f] = true; }
+      }
+    }
+  }).catch(function(e){ console.warn('[CITY] npc state failed', e); });
+}
 function _srvAcceptQuest(serverId){
   if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
   if (window._srvQuestBusy) return;  // guard anti-double-fire (double-tap)
@@ -21091,6 +21114,10 @@ window._persistNpcTalkoptsUsed = function(){
       var key = 'valdoria_npc_talkopts_used_' + (window._charId || 'default');
       localStorage.setItem(key, JSON.stringify(window._npcDialoguesUsed));
     } catch(_){}
+    // FASE 4 server-driven: persiste no servidor (per-character, cross-device).
+    if (window.vCityServer && window.vCityServer.isRemote()) {
+      window.vCityServer.npc.sync({ dialogues_used: window._npcDialoguesUsed }).catch(function(_e){ console.warn('[CITY] npc dialogues sync', _e); });
+    }
   }, 200);
 };
 
@@ -32616,6 +32643,10 @@ window._persistUniqueFinished = function(){
     var key = 'valdoria_unique_npcs_finished_' + (window._charId || 'default');
     localStorage.setItem(key, JSON.stringify(window._uniqueNpcsFinished));
   } catch(_){}
+  // FASE 4 server-driven: persiste no servidor (per-character, cross-device).
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    window.vCityServer.npc.sync({ finished: window._uniqueNpcsFinished }).catch(function(_e){ console.warn('[CITY] npc finished sync', _e); });
+  }
 };
 // Hidrata visit counts pra UNIQUE NPCs (task #80, 2026-05-20)
 window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
