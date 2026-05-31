@@ -8712,6 +8712,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // FASE 1 server-driven: carrega o board CANÔNICO do servidor (quest.board)
       // pra a aba "Disponíveis" do diário renderizar quests reais (não hardcoded).
       try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
+      try { _refreshDailyState(); } catch(_dse){ console.warn('[CITY] daily state fetch failed', _dse); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
          descobertos via cartografia (Vila Mineira/Korthag, Valkrest, etc.)
@@ -9799,6 +9800,10 @@ function _isCTA(btn) {
       grant:    function(id){ return window.vCityServer.cityAction('quest.grant',    { quest_id: id }); },
       board:    function(){   return window.vCityServer.cityAction('quest.board',    {}); },
       state:    function(){   return window.vCityServer.cityAction('quest.state',    {}); }
+    },
+    daily: {
+      state: function(){ return window.vCityServer.cityAction('daily.state', {}); },
+      claim: function(){ return window.vCityServer.cityAction('daily.claim', {}); }
     }
   };
 })();
@@ -14981,6 +14986,28 @@ function _todayIso(){
 }
 function _checkDailyLogin(){
   // Retorna { reward, streak } se houver dádiva disponível, null se já coletou.
+  // FASE 2 server-driven: em REMOTE, recompensa/streak vêm do servidor (per-character,
+  // metadata['daily_login']). O servidor é AUTORIDADE da recompensa (o multiplier do
+  // backend difere do antigo client p/ streak alto — usar sempre o do servidor).
+  if (window.CITY_DAILY_STATE) {
+    var ds = window.CITY_DAILY_STATE;
+    if (!ds.has_reward || !ds.reward) return null;  // já coletou hoje
+    var sr = ds.reward, itemObj = null;
+    if (sr.items && sr.items.length) {
+      var it0 = sr.items[0], icon0 = null;
+      for (var _di = 0; _di < DAILY_REWARDS.length; _di++) {
+        var _dr = DAILY_REWARDS[_di];
+        if (_dr.item && _dr.item.name === it0.name) { icon0 = _dr.item.icon; break; }
+      }
+      itemObj = { name: it0.name, qty: it0.qty || 1, icon: icon0 };
+    }
+    return {
+      streak: sr.streak, max_streak: ds.max_streak || sr.streak, day_in_cycle: sr.day_in_cycle,
+      reward: { day: sr.day_in_cycle, gold: sr.gold, xp: sr.xp, item: itemObj },
+      multiplier: sr.multiplier || 1, final_gold: sr.gold, final_xp: sr.xp  // servidor já aplicou o multiplier
+    };
+  }
+  // LOCAL fallback (file://, sem servidor): lógica localStorage.
   var today = _todayIso();
   var data = _dailyLoginData();
   if (data.last_date === today && data.claimed_today) return null;
@@ -15194,12 +15221,18 @@ function _showDailyLoginPopup(info){
     // X-6.5.51BK (bugbot fix): removida var data = _dailyLoginData() dead
     // store. Os valores que importam (streak, max_streak) já vêm do closure
     // `info` (computado por _checkDailyLogin antes do popup abrir).
-    _saveDailyLogin({
-      last_date: _todayIso(),
-      streak: info.streak,
-      max_streak: info.max_streak,
-      claimed_today: true
-    });
+    // FASE 2 server-driven: claim no servidor (persiste per-character); LOCAL → localStorage.
+    if (window.vCityServer && window.vCityServer.isRemote()) {
+      window.vCityServer.daily.claim().catch(function(e){ console.warn('[CITY] daily claim failed', e); });
+      if (window.CITY_DAILY_STATE) window.CITY_DAILY_STATE.has_reward = false;
+    } else {
+      _saveDailyLogin({
+        last_date: _todayIso(),
+        streak: info.streak,
+        max_streak: info.max_streak,
+        claimed_today: true
+      });
+    }
     // Aplica reward (mock player local)
     if (window.CITY_MOCK_PLAYER) {
       window.CITY_MOCK_PLAYER.gold = (window.CITY_MOCK_PLAYER.gold || 0) + info.final_gold;
@@ -20166,6 +20199,13 @@ function _refreshServerBoard(){
       window.SERVER_QUEST_BOARD_LOADED = true;
     }
   }).catch(function(e){ console.warn('[CITY] board refresh failed', e); });
+}
+// FASE 2 server-driven: estado do daily login (per-character) vem do servidor.
+function _refreshDailyState(){
+  if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.daily.state().then(function(r){
+    if (r && r.ok && r.daily){ window.CITY_DAILY_STATE = r.daily; }
+  }).catch(function(e){ console.warn('[CITY] daily state failed', e); });
 }
 function _srvAcceptQuest(serverId){
   if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
