@@ -18756,7 +18756,14 @@ var GUILD_NPCS = [
   }
 ];
 
-// GUILD_QUESTS_AVAILABLE — 7 missões com brasões heráldicos canonical
+// GUILD_QUESTS_AVAILABLE — catálogo de board hardcoded.
+// ⚠️ LOCAL-ONLY FALLBACK (FASE 1 server-driven, decisão sessão #78): em produção
+// este catálogo NUNCA é alcançado — `_normalizeQuests` usa `window.SERVER_QUEST_BOARD`
+// (de `vCityServer.quest.board()`) quando `SERVER_QUEST_BOARD_LOADED` é true (sempre,
+// em REMOTE mode). Mantido apenas como fallback do LOCAL mode (file://, sem servidor)
+// como dev tool. Os handlers `accept_q_*`/`quest_*_deliver`/`quest_*_abandon` +
+// `SUBSCREEN_DATA['quest_open_<base>']` seguem a mesma regra (LOCAL-only). Doc:
+// docs/sistemas/server-driven-state-migration.md §10.
 var GUILD_QUESTS_AVAILABLE = [
   { id: 'gq_goblins',  icon: _heralIco('ic-goblin'),       title: 'Caçar 3 goblins',         reward: 25,  xp: 40,  diff: 'nv 1' },
   { id: 'gq_herbs',    icon: _heralIco('ic-druida'),       title: 'Coletar ervas raras',     reward: 15,  xp: 25,  diff: 'nv 1' },
