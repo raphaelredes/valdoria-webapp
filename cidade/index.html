@@ -5654,19 +5654,26 @@ body.perf-lite .vc-action-btn { transition: none; }
            renderFooter → entrega a tela já pintada, sem gap. Com o /play/ agora
            mantendo o magic-circle durante a navegação (play _doRedirectInner),
            o resultado é um loading CONTÍNUO /play/ → /cidade/, sem blank. */
+        /* 2026-05-31: indicador de loading = ANEL fino girando (outline), NUNCA
+           uma esfera/bola amarela PREENCHIDA. User baniu a esfera amarela como
+           elemento de loading/UI ("nunca mais use ela de novo") — ver
+           memory/feedback_never_flat_yellow_sphere_ui.md. Anel dourado (sem
+           fill, centro transparente) é o mesmo motivo do vProcessing
+           (anel de runas girando), não tem nada de esfera. NÃO reintroduzir
+           radial-gradient preenchido aqui. */
         if (!document.getElementById('city-boot-loader-css')) {
           var _cbcss = document.createElement('style');
           _cbcss.id = 'city-boot-loader-css';
-          _cbcss.textContent = '@keyframes cityBootPulse{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.09);opacity:1}}';
+          _cbcss.textContent = '@keyframes cityBootSpin{to{transform:rotate(360deg)}}';
           (document.head || document.documentElement).appendChild(_cbcss);
         }
         ld.innerHTML =
           '<div style="position:absolute;inset:0;display:flex;flex-direction:column;'
           + 'align-items:center;justify-content:center;gap:20px">'
-          + '<div style="width:74px;height:74px;border-radius:50%;'
-          + 'background:radial-gradient(circle at 38% 32%,#fff4d0,#e8c45a 34%,#c4953a 60%,#8b6420 82%,#5a3e10);'
-          + 'box-shadow:0 0 34px rgba(196,149,58,.5),inset 0 0 14px rgba(255,244,208,.35);'
-          + 'animation:cityBootPulse 1.4s ease-in-out infinite"></div>'
+          + '<div style="width:52px;height:52px;border-radius:50%;background:transparent;'
+          + 'border:3px solid rgba(196,149,58,.20);border-top-color:#c4953a;'
+          + 'box-shadow:0 0 14px rgba(196,149,58,.18);'
+          + 'animation:cityBootSpin .85s linear infinite"></div>'
           + '<div style="font-family:Cinzel,serif;color:#c4953a;font-size:14px;'
           + 'letter-spacing:2px;opacity:.9">Entrando em Valdória…</div>'
           + '</div>';
