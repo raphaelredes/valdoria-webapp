@@ -563,13 +563,10 @@ function renderTavernHub(container, data) {
     body.appendChild(_tavBuildServices(data.services));
   }
 
-  /* 2f. Wandering NPCs (extra cards — wandering adventurers, etc.) */
-  if (data.npcs && data.npcs.length) {
-    var npcLbl = vCity.el('div', 'pt-section-label');
-    npcLbl.textContent = '🚶 Presentes nesta hora';
-    body.appendChild(npcLbl);
-    body.appendChild(vCity.actionList(data.npcs));
-  }
+  /* 2f. Sessão #66 (2026-05-31): seção "🚶 Presentes nesta hora" (wandering NPCs
+     em data.npcs) REMOVIDA permanentemente a pedido do user — continha falas e
+     informações antigas do sistema de presentes/wandering já descontinuado, e o
+     card abria diálogo quebrado (HTML cru no banner). NÃO reintroduzir. */
 
   root.appendChild(body);
   container.appendChild(root);
