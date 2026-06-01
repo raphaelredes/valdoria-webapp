@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:05:48Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:23:57Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2014,6 +2014,14 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   justify-content: flex-start;
   box-sizing: border-box;
 }
+/* Sessão #67 (2026-06-01): fileira de RETAGUARDA vazia colapsa (height 0) pra
+   liberar espaço vertical → o auto-fit do pan/zoom escala os cards MAIORES em
+   qualquer tela. DOM preservado: as cells continuam no DOM (índices intactos
+   p/ targeting/animações), só somem visualmente. Specificity alta (.battlefield
+   .bf-row.bf-row--collapsed .cell) pra vencer o !important de 150px acima. */
+.bf-row--collapsed { height: 0 !important; min-height: 0 !important; max-height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+.row-label.bf-row--collapsed { display: none !important; }
+.battlefield .bf-row.bf-row--collapsed .cell { height: 0 !important; min-height: 0 !important; max-height: 0 !important; padding: 0 !important; margin: 0 !important; border-width: 0 !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 .cell.occupied { cursor: pointer; position: relative; overflow: visible; }
 
 /* ===========================================================================
@@ -16120,8 +16128,19 @@ function buildBattlefield(s) {
     html += '<div class="battlefield' + bfExtra + '">';
     for (var row = 0; row < 4; row++) {
         var zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
-        html += '<div class="row-label' + zoneClass + '">' + escHtml(ROW_LABELS[row]) + '</div>';
-        html += '<div class="bf-row">';
+        /* Sessão #67 (2026-06-01): colapsa a fileira de RETAGUARDA (row 0 inimiga /
+           row 3 aliada) quando vazia, pra recuperar espaço vertical → o auto-fit
+           do pan/zoom escala os cards MAIORES em qualquer tela. 1v1/1v2/2v2
+           deixavam 2 das 4 fileiras vazias ocupando 150px cada, forçando um fit
+           minúsculo. Só backline: é estrutural (enemies preenchem a frente
+           primeiro; player/aliados vão pra frente) e fica vazia o combate todo —
+           então não há reflow ao morrer unidade na frente. DOM preservado (cells
+           continuam no DOM, índices intactos) — some só visualmente via CSS. */
+        var isBackRow = (row === 0 || row === 3);
+        var rowVacant = isBackRow && !grid[row].some(function (c) { return c !== null; });
+        var collapseCls = rowVacant ? ' bf-row--collapsed' : '';
+        html += '<div class="row-label' + zoneClass + collapseCls + '">' + escHtml(ROW_LABELS[row]) + '</div>';
+        html += '<div class="bf-row' + collapseCls + '">';
         for (var col = 0; col < 4; col++) {
             html += buildCell(grid[row][col], activeId);
         }
