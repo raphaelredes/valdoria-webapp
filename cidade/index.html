@@ -5546,6 +5546,21 @@ body.perf-lite .vc-action-btn { transition: none; }
       border-color: #fbd770;
     }
     .journey-btn.danger { border-color: #c44438; color: #ffcccc; }
+    /* Sessão #66 — "Pular animação" PADRAO_ALDRIC: secundário, tracejado, discreto. */
+    .journey-btn.skip {
+      border: 1px dashed rgba(160, 148, 132, 0.55);
+      background: transparent;
+      color: #a09484;
+      min-width: 0;
+      padding: 7px 14px;
+      opacity: 0.9;
+    }
+    .journey-btn.skip:hover {
+      border-color: #c4953a;
+      color: #d4c8b0;
+      background: rgba(60, 48, 32, 0.5);
+      transform: none;
+    }
     .journey-btn-icon { font-size: calc(16px * var(--v-font-scale, 1)); flex-shrink: 0; }
     .journey-btn-text { flex: 1; }
     .journey-btn-desc {
@@ -49873,6 +49888,16 @@ function startCityJourney(biome, displayName, finalUrl) {
   };
   document.getElementById('journey-title').textContent = 'Rumo a ' + displayName;
   document.getElementById('journey-overlay').classList.add('show');
+  // Sessão #66 — PADRAO_ALDRIC tap-to-skip: tocar na área de narração completa o
+  // reveal na hora (igual ao encounter canônico). Bind uma vez por overlay.
+  var _jBody = document.querySelector('#journey-overlay .journey-body');
+  if (_jBody && !_jBody._skipBound) {
+    _jBody._skipBound = true;
+    _jBody.addEventListener('click', function(ev) {
+      if (ev.target.closest('button, a')) return;  // não intercepta botões
+      _journeySkipReveal();
+    });
+  }
   // 2026-05-06 v11.3: música do bioma quando journey começa (user pediu:
   // "quando começar journey-overlay já comece a tocar a música tema do
   // mapa de exploracao que foi escolhido"). playBiome() faz crossfade
@@ -49929,11 +49954,11 @@ function _showCityJourneyDeparture() {
     cumulativeDelay += Math.round(dur * 0.55);
   });
   var totalReveal = cumulativeDelay + 250;
-  // Botão "Partir →" após reveal completar
-  setTimeout(function() {
+  // Botão "Partir →" após reveal completar (pulável via _journeyScheduleAfterReveal)
+  _journeyScheduleAfterReveal(totalReveal, function() {
     _addCityJourneyBtn(footEl, '⚔️', 'Partir', 'Começar a jornada rumo a ' + j.displayName, '',
       function() { _showCityJourneyStep(); });
-  }, totalReveal);
+  });
 }
 
 function _showCityJourneyStep() {
@@ -49951,6 +49976,52 @@ function _journeyRevealDur(text) {
   var chars = (text || '').length;
   var dur = chars * 14 + 600;
   return Math.max(900, Math.min(4000, dur));
+}
+
+// Sessão #66 — PADRAO_ALDRIC skip na viagem (user: "ter como pular a animação").
+// A ação pós-reveal (Continuar/escolhas/Partir) é agendada de forma CANCELÁVEL.
+// O jogador pula a animação tocando na narração OU no botão "Pular animação"
+// (mesmo tap-to-skip do encounter canônico). Sem isto cada etapa forçava esperar
+// o wipe completar. _journeyScheduleAfterReveal substitui os setTimeout diretos.
+function _journeyScheduleAfterReveal(delayMs, fn) {
+  var j = _cityJourney;
+  if (!j) { setTimeout(fn, delayMs); return; }
+  if (j._revealTimer) clearTimeout(j._revealTimer);
+  j._afterReveal = fn;
+  j._revealDone = false;
+  // Botão "Pular animação" no rodapé DURANTE o reveal (removido quando a ação roda).
+  var footEl = document.getElementById('journey-footer');
+  if (footEl) _addCityJourneyBtn(footEl, '⟩', 'Pular animação', '', 'skip',
+    function(ev){ if (ev) ev.stopPropagation(); _journeySkipReveal(); });
+  j._revealTimer = setTimeout(_journeyRunAfterReveal, delayMs);
+}
+function _journeyRunAfterReveal() {
+  var j = _cityJourney;
+  if (!j || j._revealDone) return;
+  j._revealDone = true;
+  if (j._revealTimer) { clearTimeout(j._revealTimer); j._revealTimer = null; }
+  var fn = j._afterReveal; j._afterReveal = null;
+  var footEl = document.getElementById('journey-footer');
+  if (footEl) footEl.innerHTML = '';  // remove o botão "Pular" antes da ação real
+  if (typeof fn === 'function') { try { fn(); } catch(_e){} }
+}
+// Completa o reveal na hora (inline styles → sem flicker em renders seguintes,
+// que criam elementos novos) e roda a ação pós-reveal.
+function _journeySkipReveal() {
+  var j = _cityJourney;
+  if (!j || j._revealDone || !j._afterReveal) return false;
+  var narrEl = document.getElementById('journey-narration');
+  if (narrEl) {
+    var lines = narrEl.querySelectorAll('.jn-dm, .jn-speech');
+    for (var i = 0; i < lines.length; i++) {
+      lines[i].style.animation = 'none';
+      lines[i].style.clipPath = 'inset(0 0 0 0)';
+      lines[i].style.webkitClipPath = 'inset(0 0 0 0)';
+      lines[i].style.opacity = '1';
+    }
+  }
+  _journeyRunAfterReveal();
+  return true;
 }
 
 // Helper: renderiza linha do script com reveal anim e delay sequencial.
@@ -50118,9 +50189,9 @@ function _renderCityJourneyStep() {
       }, _journeyRevealDur(hazard.narr) * 0.4);
     }
 
-    // Choices renderizam após pequeno delay (espera revelação completar)
+    // Choices renderizam após o reveal (pulável via _journeyScheduleAfterReveal)
     var totalReveal = cumulativeDelay + 200;
-    setTimeout(function() {
+    _journeyScheduleAfterReveal(totalReveal, function() {
       hazard.choices.forEach(function(ch) {
         var hint = ch.stat
           ? (CITY_STAT_NAMES_PT[ch.stat] || ch.stat.toUpperCase()) + ' DC ' + ch.dc
@@ -50128,7 +50199,7 @@ function _renderCityJourneyStep() {
         _addCityJourneyBtn(footEl, ch.i, ch.t, ch.desc || hint, '',
           function() { _resolveCityJourneyHazard(hazard, ch); });
       });
-    }, totalReveal);
+    });
   } else {
     // SAFE narration: mesmo padrão de anti-repetição persistente
     var safePool = CITY_JOURNEY_SAFE[j.biome] || CITY_JOURNEY_SAFE.forest;
@@ -50145,7 +50216,7 @@ function _renderCityJourneyStep() {
     _markJourneySafeUsed(j.biome, txt);  // persiste no localStorage
     narrEl.innerHTML = '<div class="journey-step-badge safe">✓ Caminho seguro</div>';
     var dur = _journeyAppendScriptLine(narrEl, { type: 'narration', text: txt }, 0);
-    setTimeout(function() { _cityJourneyContinueBtn(); }, dur + 100);
+    _journeyScheduleAfterReveal(dur + 100, function() { _cityJourneyContinueBtn(); });
   }
 }
 
@@ -50258,7 +50329,7 @@ function _resolveCityJourneyHazard(hazard, choice) {
       }
     }
     var nextDelay = _journeyRevealDur(narrative) + 400;
-    setTimeout(function() {
+    _journeyScheduleAfterReveal(nextDelay, function() {
       if (p && p.hp <= 0) {
         _addCityJourneyBtn(footEl, '💀', 'Você sucumbiu...', 'A jornada terminou aqui', 'danger',
           function() {
@@ -50270,7 +50341,7 @@ function _resolveCityJourneyHazard(hazard, choice) {
         return;
       }
       _cityJourneyContinueBtn();
-    }, nextDelay);
+    });
   };
 
   // SEMPRE Dice3D quando há check (user pediu: "ao ter opções que precisam
