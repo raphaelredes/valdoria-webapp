@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:37:31Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:47:41Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12797,6 +12797,22 @@ if (window.__COMBAT_IS_REMOTE_SESSION) {
        SAFER: combate sempre completa primeiro, cidade detecta levelup na volta.
        Player request "levelup acima de tudo" continua atendido em cidade +
        exploracao (boot checks) + /play/ entry point. */
+} else if (window.__COMBAT_MODE === 'remote') {
+    /* Sessão #67 ROOT CAUSE (2026-06-01): __COMBAT_MODE foi setado 'remote' por
+       window.Telegram.WebApp.initData (linha ~12631), MAS __COMBAT_API_BASE está
+       vazio — o combate da EXPLORAÇÃO roda dentro do Telegram WebView (tem
+       initData) e redireciona pra /combat2/ SEM passar ?api=. Como IS_REMOTE_SESSION
+       é false (token sem api base), o override LOCAL acima foi PULADO e o MODE
+       ficou 'remote'. Resultado: cada __combatRemoteAction faz
+       fetch('' + '/api/combat2') → bate no host do WebApp (Cloudflare Pages),
+       não no bot → 404 → throw → "Começar Rolagens"/"Pular Todas" não avançam e
+       o popup COMBATE INICIADO loopa. Chrome puro (sem initData) nunca reproduzia
+       (ficava 'local'). Sem api base NÃO existe sessão remota pra falar — força
+       engine LOCAL pra consumir o sessionStorage setup (idêntico ao file://). */
+    console.warn('[C-REM:PIVOT] __COMBAT_MODE=remote SEM api base'
+        + ' (Telegram initData + redirect da exploração sem ?api=) — forçando LOCAL.'
+        + ' Combate client-side consome sessionStorage setup.');
+    window.__COMBAT_MODE = 'local';
 }
 
 /* [C-REM:LOG-RELAY] Inline log relay (port de shared/log-relay.js).
