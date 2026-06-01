@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:37:10Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:59:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9152,8 +9152,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .rr-loot-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: 6px; animation: rrLootIn .5s cubic-bezier(.34,1.56,.64,1) 1.2s both; }
 .rr-loot-row.gold { border-color: rgba(196,149,58,.4); }
 @keyframes rrLootIn { 0% { transform: translateX(-20px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-.rr-ico { font-size: calc(22px * var(--v-font-scale, 1)); flex-shrink: 0; width: 26px; text-align: center; filter: drop-shadow(0 0 6px rgba(196,149,58,.3)); display: flex; align-items: center; justify-content: center; }
+.rr-ico { font-size: calc(22px * var(--v-font-scale, 1)); flex-shrink: 0; width: 26px; height: 26px; text-align: center; filter: drop-shadow(0 0 6px rgba(196,149,58,.3)); display: flex; align-items: center; justify-content: center; }
 .rr-ico .vi.vi-coin { flex-shrink: 0; }
+/* Sessão #67: PNG de item na tela de vitória — preenche o slot de 26px,
+   redimensionado (object-fit:contain) pra ficar pequeno e caber, igual à moeda. */
+.rr-ico img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .rr-name { flex: 1; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); letter-spacing: .5px; text-align: left; }
 .rr-qty { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); letter-spacing: 1.5px; padding: 3px 8px; background: rgba(15,12,8,.6); border: 1px solid rgba(196,149,58,.3); border-radius: 12px; }
 .rr-qty.rare-comum { color: var(--v-text-dim, #a09484); border-color: var(--v-border, #4a3828); font-size: var(--v-font-sm, 12px); text-transform: uppercase; }
@@ -13326,6 +13329,27 @@ function tryConsumeCombatSetup() {
         return null;
     }
 }
+/* Sessão #67 (2026-06-01): link de TESTE direto pra ver a responsividade do
+   tabuleiro com N inimigos, sem a página de setup. ?enemies=N (alias ?ec=N),
+   1..SIM_MAX_ENEMIES(8). Opcionais: &allies=N, &diff=easy|normal|hard. Só LOCAL
+   (REMOTE sai antes via __COMBAT_IS_REMOTE_SESSION). Ex.: combate?enemies=6 */
+function trySetupFromUrl() {
+    try {
+        var qs = new URLSearchParams(location.search);
+        var ec = parseInt(qs.get('enemies') || qs.get('ec'), 10);
+        if (!ec || ec < 1) return null;
+        var ac = parseInt(qs.get('allies') || qs.get('ac'), 10);
+        var diff = qs.get('diff');
+        return {
+            v: 1,
+            enemyCount: Math.min(SIM_MAX_ENEMIES, ec),
+            allyCount: (ac && ac > 0) ? Math.min(SIM_PARTY_MAX_ALLIES, ac) : 0,
+            fillMode: 'all',
+            enemyDifficulty: (['easy', 'normal', 'hard'].indexOf(diff) >= 0) ? diff : 'normal',
+            player: { random: true }
+        };
+    } catch (e) { return null; }
+}
 
 function getClassDefByName(clsName) {
     for (var ci = 0; ci < CHAR_CLASSES.length; ci++) {
@@ -16365,6 +16389,29 @@ function _slugifyCombat(name) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 }
+/* Sessão #67 (2026-06-01): ícone de item na tela de VITÓRIA usa o PNG real do
+   manifest (resolvido por nome → slug), redimensionado pelo .rr-ico (26px),
+   igual à moeda Valdorita. Antes mostrava só it.ico (emoji) ao lado do nome.
+   Tenta o slug direto + uma variante sem conectivos PT-BR (de/da/do/das/dos/e)
+   pra casar com o manifest ("Poção de Cura" → pocao-de-cura → pocao-cura).
+   Fallback pro emoji it.ico se não houver PNG ou o manifest ainda não carregou
+   (vItems.has() retorna false). Estritamente melhor que o emoji-only anterior. */
+function _combatItemIconHTML(it) {
+    var fallback = (it && it.ico) ? String(it.ico) : '';
+    try {
+        if (!window.vItems || typeof vItems.iconHTML !== 'function' || !it || !it.n) return fallback;
+        var base = _slugifyCombat(it.n);
+        if (!base) return fallback;
+        var candidates = [base];
+        var stripped = base.replace(/-(de|da|do|das|dos|e)-/g, '-').replace(/-(de|da|do|das|dos|e)$/, '');
+        if (stripped && stripped !== base) candidates.push(stripped);
+        for (var i = 0; i < candidates.length; i++) {
+            var slug = (typeof vItems.resolveSlug === 'function') ? vItems.resolveSlug(candidates[i]) : candidates[i];
+            if (slug && vItems.has(slug)) return vItems.iconHTML(slug, it.n);
+        }
+    } catch (e) { /* cai no fallback emoji */ }
+    return fallback;
+}
 function _combatPortraitHTML(iconId, u, utype) {
     /* Per-enemy PNG check (priority over generic tag-based PNG).
        2026-05-17 FIX: enemies podem ter NOME FANTASIA via ENEMY_NAME_POOLS
@@ -18557,7 +18604,7 @@ function render(s) {
             html += '<div class="rr-loot-row gold"><span class="rr-ico"><span class="vi vi-coin sm" aria-hidden="true"></span></span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
             /* Itens */
             r.items.forEach(function (it, i) {
-                html += '<div class="rr-loot-row" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + it.ico + '</span><span class="rr-name">' + escHtml(it.n) + '</span><span class="rr-qty rare-' + it.rare + '">' + it.rare + '</span></div>';
+                html += '<div class="rr-loot-row" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + _combatItemIconHTML(it) + '</span><span class="rr-name">' + escHtml(it.n) + '</span><span class="rr-qty rare-' + it.rare + '">' + it.rare + '</span></div>';
             });
             if (!r.items.length) {
                 html += '<div class="rr-loot-empty">Nenhum item caiu desta vez.</div>';
@@ -28334,7 +28381,7 @@ function startSimAfterDiceBoot() {
         startCombatRemoteCanonical();
         return;
     }
-    var setup = tryConsumeCombatSetup();
+    var setup = tryConsumeCombatSetup() || trySetupFromUrl();
     resetSimDiceSkipForNewCombat();
     /* Sessão #67: boot resiliente. Se newCombatFromSetup lança (setup da exploração
        malformado), antes o boot quebrava → estado parcial → popup em loop. Agora loga
