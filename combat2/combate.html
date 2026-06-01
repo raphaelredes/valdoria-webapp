@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T16:17:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T16:29:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19928,18 +19928,36 @@ function onBtnClick(ev) {
             var resumeRaw = localStorage.getItem('valdoria_explore_resume');
             if (resumeRaw) {
                 var resume = JSON.parse(resumeRaw);
-                if (resume && resume.mapId) {
+                if (resume) {
                     var rqs = new URLSearchParams();
-                    rqs.set('ld_map', resume.mapId);
-                    if (resume.playerCol != null) rqs.set('ld_spawn_col', resume.playerCol);
-                    if (resume.playerRow != null) rqs.set('ld_spawn_row', resume.playerRow);
+                    if (resume.mapId) {
+                        rqs.set('ld_map', resume.mapId);
+                        if (resume.playerCol != null) rqs.set('ld_spawn_col', resume.playerCol);
+                        if (resume.playerRow != null) rqs.set('ld_spawn_row', resume.playerRow);
+                    }
                     /* Preserva godmode + lvl ao voltar pra exploracao — proximo combate
                        puxado a partir desse boot herda os mesmos overrides. */
                     if (window.__COMBAT_GODMODE) rqs.set('ld_godmode', '1');
                     var lvlBack = parseInt(window.__COMBAT_PLAYER_LVL || '0', 10);
                     if (lvlBack && lvlBack !== 3) rqs.set('ld_lvl', lvlBack);
-                    resumeParams = '?' + rqs.toString();
-                    console.info('[BACK-EXPLORE] resume params: ' + resumeParams);
+                    /* Sessão #67 (2026-06-01): restaura AUTH (token/api/uid/char/env)
+                       gravado por exploracao.triggerCombatScreen no valdoria_explore_resume.
+                       O redirect exploração→combate NÃO passa esses params (combate da
+                       exploração é client-side), então sem restaurá-los aqui a exploração
+                       recarrega sem auth e o retorno exploração→cidade dá "sessão
+                       expirada" (missing: token, api, uid). */
+                    if (resume.auth) {
+                        if (resume.auth.token) rqs.set('token', resume.auth.token);
+                        if (resume.auth.api) rqs.set('api', resume.auth.api);
+                        if (resume.auth.uid) rqs.set('uid', resume.auth.uid);
+                        if (resume.auth.char) rqs.set('char', resume.auth.char);
+                        if (resume.auth.env) rqs.set('env', resume.auth.env);
+                    }
+                    var _rqsStr = rqs.toString();
+                    if (_rqsStr) {
+                        resumeParams = '?' + _rqsStr;
+                        console.info('[BACK-EXPLORE] resume params: ' + resumeParams);
+                    }
                 }
             }
         } catch (eRes) {

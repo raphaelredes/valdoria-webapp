@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T02:02:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T16:29:53Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -34765,10 +34765,25 @@ function triggerCombatScreen(cfg) {
     pName:     p.name || 'Aventureiro'
   });
   if (godmode) params.set('godmode', '1');
-  // Salva estado do explorer pra restaurar quando combate.html retornar
+  // Salva estado do explorer pra restaurar quando combate.html retornar.
+  // Sessão #67 (2026-06-01): inclui AUTH (token/api/uid/char/env). O redirect
+  // pro combate da exploração NÃO passa token/api/uid (combate é client-side —
+  // passá-los ligaria o modo REMOTE sem sessão de combate no server). Sem
+  // carregar a auth aqui, o back-to-exploration do combate volta pra exploração
+  // SEM token/api/uid → exploração recarrega não-autenticada → o retorno
+  // exploração→cidade fica sem auth → cidade mostra "sessão expirada"
+  // (missing: token, api, uid). combate.html lê este `auth` no back-to-exploration.
   try {
+    var _augQs = new URLSearchParams(location.search);
     localStorage.setItem('valdoria_explore_resume', JSON.stringify({
       ts: Date.now(), mapId: S.mapId, playerCol: p.col, playerRow: p.row,
+      auth: {
+        token: window.__EXPLORE_TOKEN || _augQs.get('token') || '',
+        api: window.__EXPLORE_API_BASE || _augQs.get('api') || '',
+        uid: window.__EXPLORE_USER_ID || parseInt(_augQs.get('uid'), 10) || 0,
+        char: _augQs.get('char') || _augQs.get('char_id') || '',
+        env: _augQs.get('env') || ''
+      },
       combatContext: { enemyId: cfg.enemyId, surprise: !!cfg.surprise,
                        lookup_name: cfg.lookup_name || null,
                        isBoss: cfg.enemyId === 'brakthar' || (cfg.lookup_name === 'Brakthar') }
