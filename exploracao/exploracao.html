@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T17:37:36Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T18:41:26Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -34172,8 +34172,21 @@ function _vinvExpCategoryToTags(cat) {
     'misc':  ['tool'],
   })[cat] || [];
 }
+// Sessão #67: normalização defensiva do nome. Loot malformado (dict {n,ico,rare}
+// do _LOOT_POOL que virou string "{'n':'X',...}" no inventário, ou objeto com .n
+// em vez de .name) NUNCA deve renderizar como objeto cru. Extrai o nome real.
+function _vinvExpNormalizeName(item) {
+  var nm = (typeof item === 'string') ? item
+         : (item && typeof item === 'object') ? (item.name || item.n || item.id || '') : '';
+  nm = String(nm || '');
+  if (nm.indexOf("'n'") >= 0 || nm.indexOf('"n"') >= 0) {
+    var m = nm.match(/['"]n['"]\s*:\s*['"]([^'"]+)['"]/);
+    if (m) return m[1];
+  }
+  return nm;
+}
 function _vinvExpAdaptItem(item) {
-  var name = item.name || item.id || '';
+  var name = _vinvExpNormalizeName(item);
   var qty  = item.quantity || 0;
   var cat  = _exploracaoItemCategory(item);
   var tags = item.tags || _vinvExpCategoryToTags(cat);
