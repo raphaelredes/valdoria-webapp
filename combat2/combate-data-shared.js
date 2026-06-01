@@ -714,7 +714,11 @@ var CHAR_CLASSES = [
             afterAttackEnemyDebuff: { id: 'hold_person_paralyzed', turns: 3, n: 'Paralisado', ico: '🔒', skipTurn: true, critMelee: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Paralisado (PHB App.A — Imobilizar Pessoa)' } }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '🕯', dmgMod: 2, attr: 'STR',
-      res: { type: 'vigor', name: 'Vigor', ico: '💪', max: 5 },
+      /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
+         gastam ESPAÇOS DE MAGIA (= "Mana" na abstração do jogo), não "Vigor".
+         Alinha com a autoridade (src/game/classes/paladin.py → resource_name
+         "Mana"). Sessão #67: D&D é regra, corrigir sempre. */
+      res: { type: 'mp', name: 'Mana', ico: '✨', max: 5 },
       /* V1.5 (2026-04-19, c) — Find Steed (PHB p.240): invoca montaria celestial
          (Warhorse default). Stat block PHB Monster Manual p.337: HP 19, CA 11,
          atk +6, 2d6+4 bludgeoning hooves.
@@ -873,9 +877,14 @@ var CHAR_CLASSES = [
             buffSim: { id: 'golpe_irado', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Irado', condRule: 'PHB p.289 — próximo ataque +1d6 psíquico (escala +1d6/slot acima 1º) + TR SAB ou amedrontado.', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'irado_frightened', turns: 2, n: 'Amedrontado', ico: '😱', atkDisadvantage: true, skipBonus: true, dndCondition: 'Amedrontado (Wrathful Smite — desvantagem + perde BA)' } } }
       ] },
     { cls: 'Bárbaro', hp: [30, 44], ac: [14, 16], atk: [5, 7], die: 12, dex: [14, 16], ico: '⛏', dmgMod: 3, attr: 'STR',
-      res: { type: 'vigor', name: 'Vigor', ico: '💪', max: 6 },
+      /* D&D 5e PHB p.48: o recurso do Bárbaro é FÚRIA (Rage), nunca "Vigor".
+         max acompanha os usos de Fúria por nível (2→6, via _classResMaxByLevel).
+         Cada Fúria consome 1 uso (cost:1 abaixo), então um Bárbaro nv2 entra em
+         fúria 2× — fiel ao PHB. Sessão #67: user reforçou "é regra seguir tudo
+         do D&D, corrija sempre". */
+      res: { type: 'furia', name: 'Fúria', ico: '🔥', max: 6 },
       skills: [
-        { n: 'Fúria', ico: '🔥', cost: 2, kind: 'buff', bonus: true,
+        { n: 'Fúria', ico: '🔥', cost: 1, kind: 'buff', bonus: true,
             desc: 'Ação bônus: entra em fúria — +2 dano + resistência 50% B/P/S + vantagem STR + impede magias (PHB p.48).',
             helpDnd5e: 'Fúria (PHB p.48 — Bárbaro): **AÇÃO BÔNUS** para entrar em fúria.\n+2/+3/+4 dano por nível em ataques corpo a corpo com Força; RESISTÊNCIA a concussão, perfuração e corte com armas (metade do dano); VANTAGEM em testes e TRs de Força; NÃO PODE conjurar magias ou manter concentração em magia.\nDuração: até 1 minuto; termina ao ficar inconsciente, ou no fim do turno se não atacou ou sofreu dano desde o último turno.\nV1.7 (2026-04-21) alinhamento PHB: era `kind:buff` sem flag `bonus` — consumia AÇÃO principal. Agora `bonus:true` libera ação pra atacar no mesmo turno (RAW).\nV1.7 Sprint-4 (2026-04-21 closeout): adicionados `strCheckAdvantage:true` (vantagem TR/check FOR) + `noCastWhileRaging:true` (bloqueia skills `healSpell`/com custo MP) em `buffSim` — PHB-fiel completa.',
             /* V1.7 Sprint-17 (2026-04-21 QA PHB p.48) — Fúria dura 1 min = 10 rodadas
@@ -928,7 +937,11 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Frenesi / Frenzy (PHB p.49 — Caminho do Berserker nível 3): durante Fúria, um ataque extra como ação bônus a cada turno. Ao fim da Fúria, exaustão (1 nível).\nNeste fluxo: requer Fúria ativa (sem isso, usa-se Ataque Brutal normal); dano 1d12 + STR.\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.49): corrigido `minLevel: 2 → 3` (PHB RAW — subclass Berserker é nv 3, não nv 2).' }
       ] },
     { cls: 'Patrulheiro', hp: [24, 34], ac: [14, 16], atk: [4, 6], die: 8, dex: [16, 18], ico: '🏹', dmgMod: 3, attr: 'DEX',
-      res: { type: 'energia', name: 'Energia', ico: '⚡', max: 6 },
+      /* D&D 5e PHB p.89: Patrulheiro é meio-conjurador — Marca do Caçador e
+         magias gastam ESPAÇOS DE MAGIA (= "Mana"), não "Energia". Alinha com a
+         autoridade (src/game/classes/ranger.py herda resource_name "Mana").
+         Sessão #67: D&D é regra, corrigir sempre. */
+      res: { type: 'mp', name: 'Mana', ico: '✨', max: 6 },
       /* H1 (escolha autor 2026-04-19) — PHB-fiel sistema de subclasses:
          Patrulheiro escolhe Conclave no nível 3 (Beast Master, Hunter, Gloom Stalker,
          Horizon Walker, Monster Slayer, Fey Wanderer, Swarmkeeper, Drakewarden).
@@ -1384,7 +1397,12 @@ var CHAR_CLASSES = [
        - Heraldic icon ic-bruxo NÃO EXISTE em heraldic-icons.js; usa ic-feiticeiro
          como fallback visual (arcana próxima). */
     { cls: 'Bruxo', hp: [20, 26], ac: [12, 14], atk: [3, 5], die: 6, dex: [14, 16], ico: '👁', dmgMod: 0, attr: 'CHA',
-      res: { type: 'mp', name: 'Mana', ico: '✨', max: 6 },
+      /* D&D 5e PHB p.105: Bruxo usa MAGIA DE PACTO (Pact Magic) — poucos espaços
+         que recarregam em descanso curto. Nome "Pacto" (não "Mana"), alinhado à
+         autoridade (src/game/classes/warlock.py → resource_name "Pacto"). Tipo
+         'mp' mantém abreviação MP/cor de conjurador (Pact Magic = espaços de
+         magia). Sessão #67: D&D é regra, corrigir sempre. */
+      res: { type: 'mp', name: 'Pacto', ico: '✨', max: 6 },
       skills: [
         /* V1.7 Sprint-17 Ronda 19 (2026-04-21 QA PHB p.244) — Eldritch Blast RAW:
            beams separados (1 atk vs 2 nv 5, 3 nv 11, 4 nv 17) via multiRayAttack
