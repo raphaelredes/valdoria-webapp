@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T19:18:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T21:37:23Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -31788,7 +31788,12 @@ function buildFogMask() {
   // Antes: hexDist (sin/cos via cube coords) computado pra TODOS ROWS×COLS=2400 cells.
   // Agora: só pra inMata + state==='visible' (~15-20 cells típico). hexDist cai de
   // 2400/frame pra <30/frame em mapas típicos. Em Android 2GB, ~24ms → ~1ms por frame.
-  const dimAlpha = Math.min(255, Math.round(228 * intensity));
+  // Sessão #67 (2026-06-01): memória de hexes JÁ explorados ('dim') era
+  // 228*intensity (~70% escuro) → conforme o jogador anda, a trilha explorada
+  // ficava quase preta e o mapa inteiro dava sensação de "tudo escuro / fog
+  // ocupando a tela toda" (bug reportado). Agora ~40% escuro: a memória do que
+  // já foi explorado fica CLARAMENTE visível; só o NÃO-explorado é escuro mesmo.
+  const dimAlpha = Math.min(255, Math.round(130 * intensity));
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const key = fogKey(c, r);
@@ -31828,11 +31833,14 @@ function buildFogMask() {
           else if (dist === 3) alpha = Math.round(190 * intensity);
           else alpha = 255;
         } else {
-          // LUZ MÁGICA FORTE (vision 4+): vê amplamente
-          if (dist === 1) alpha = Math.round(15 * intensity);
-          else if (dist === 2) alpha = Math.round(60 * intensity);
-          else if (dist === 3) alpha = Math.round(140 * intensity);
-          else if (dist <= vision) alpha = Math.round(200 * intensity);
+          // LUZ MÁGICA FORTE / DIA LIMPO (vision 4+): vê amplamente.
+          // Sessão #67: falloff suavizado — antes dist 3-4 (140/200 *intensity)
+          // ficavam quase pretos, então a borda da visão ativa já era escura e
+          // contribuía pro "tela toda escura". Agora a borda é mais generosa.
+          if (dist === 1) alpha = Math.round(12 * intensity);
+          else if (dist === 2) alpha = Math.round(48 * intensity);
+          else if (dist === 3) alpha = Math.round(100 * intensity);
+          else if (dist <= vision) alpha = Math.round(150 * intensity);
           else alpha = 255;
         }
         alpha = Math.min(255, alpha);
@@ -37056,6 +37064,15 @@ function openQuestJournal(opts) {
   // mesmo search, mesmos cards. Só "Ativas" e "Concluídas" (não temos
   // disponíveis nem pra recrutar na exploração).
   _renderExploreQuestDiary(list);
+
+  // Sessão #67 (2026-06-01): MOSTRA o overlay. O refactor de 2026-05-12 (pra
+  // _renderExploreQuestDiary) perdeu o `ov.classList.add('visible')` que o
+  // _legacyOpenQuestJournal_DEPRECATED tinha (~L37416) → clicar no minimapa
+  // renderizava o conteúdo mas a tela de Missões NUNCA aparecia (bug reportado).
+  // É um OVERLAY: closeQuestJournal só remove 'visible', então sair volta pra
+  // EXPLORAÇÃO, nunca pra cidade. Dados de S.activeQuests/completedQuests —
+  // por-personagem (vêm do servidor em REMOTE), paridade com a tela da cidade.
+  if (ov) ov.classList.add('visible');
 }
 
 // Helper: normaliza S.activeQuests + completedQuests pro shape canonical
