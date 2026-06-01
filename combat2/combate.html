@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T16:29:51Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T17:37:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19931,9 +19931,15 @@ function onBtnClick(ev) {
                 if (resume) {
                     var rqs = new URLSearchParams();
                     if (resume.mapId) {
+                        /* Sessão #67: LOCAL boot lê ld_map/ld_spawn_*; REMOTE boot lê
+                           map_id + col/row (nomes DIFERENTES — exploracao.html ~42460/
+                           42497). Sem os nomes REMOTE, o retorno do combate caía no
+                           mapa default 'city_gates' spawn (0,14) e o player "teleportava
+                           pro outro lado". Seta os DOIS pra os dois paths restaurarem. */
                         rqs.set('ld_map', resume.mapId);
-                        if (resume.playerCol != null) rqs.set('ld_spawn_col', resume.playerCol);
-                        if (resume.playerRow != null) rqs.set('ld_spawn_row', resume.playerRow);
+                        rqs.set('map_id', resume.mapId);
+                        if (resume.playerCol != null) { rqs.set('ld_spawn_col', resume.playerCol); rqs.set('col', resume.playerCol); }
+                        if (resume.playerRow != null) { rqs.set('ld_spawn_row', resume.playerRow); rqs.set('row', resume.playerRow); }
                     }
                     /* Preserva godmode + lvl ao voltar pra exploracao — proximo combate
                        puxado a partir desse boot herda os mesmos overrides. */

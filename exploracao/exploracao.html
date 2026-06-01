@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T16:54:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T17:37:36Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -5710,6 +5710,16 @@ body.remote-mode #debug-hud { display: none !important; }
   align-items: flex-end;
   gap: 5px;
   padding: 0;
+  /* Sessão #67 (user fix): a bounding box do painel (mesmo nas areas vazias e
+     com o minimapa recolhido) bloqueava cliques nos botoes de acao/movimento do
+     lado direito. pointer-events:none deixa os espacos vazios passarem o clique;
+     so os controles reais (zoom, minimap, toggle) reativam pointer-events. */
+  pointer-events: none;
+}
+#right-panel #zoom-controls,
+#right-panel #minimap-wrap,
+#right-panel #btn-minimap-toggle {
+  pointer-events: auto;
 }
 /* X-6.5.14/15/20: minimap-block tem o minimap-content + botão toggle
    absolutamente posicionado à esquerda dele. Antes era flex-row, mas
