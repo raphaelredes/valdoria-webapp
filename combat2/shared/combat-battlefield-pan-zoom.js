@@ -78,10 +78,17 @@
             var fitX = (vw - 16) / sw;
             var fitY = (vh - 16) / sh;
             var fit = Math.min(fitX, fitY, 1);
-            /* Combate com poucos inimigos → boost zoom pra focar. */
+            /* Combate com poucos inimigos → boost zoom pra focar.
+               Sessão #67 (2026-06-01): o boost NUNCA pode passar do que cabe no
+               viewport. Antes, fit*1.6 estourava fitY em telas baixas (Telegram
+               Desktop ~600-700px) → o tabuleiro ficava mais alto que o viewport,
+               a fileira ALIADA (rodapé) caía na borda inferior e o overflow:scroll
+               cortava o card do personagem "pela metade" (bug reportado). O maior
+               scale que cabe sem cortar é min(fitX, fitY); cap o boost nisso. Em
+               telas altas (mobile retrato, alvo primário) ainda dá zoom-in. */
             var occCount = _countOccupiedCells();
             if (occCount > 0 && occCount <= FOCUSED_THRESHOLD) {
-                fit = Math.min(fit * FOCUSED_ZOOM_BOOST, MAX);
+                fit = Math.min(fit * FOCUSED_ZOOM_BOOST, MAX, fitX, fitY);
             }
             if (fit < MIN) fit = MIN;
             scale = fit;
