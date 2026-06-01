@@ -261,10 +261,36 @@
     if (!ch) return;
     var backendCb = ch.backend_cb;
     if (!backendCb) return; // sem backend_cb declarado, apenas UX
-    if (typeof window.vCity !== 'object' || typeof window.vCity.act !== 'function') return;
-    try {
-      window.vCity.act(backendCb);
-    } catch(_) { /* non-fatal: simulator/chrome-mcp sem backend */ }
+    /* Sessão #66 FIX (NPC compras/vendas/dados "não faziam nada"): em REMOTE,
+       aplica o EFEITO do serviço via process_callback no servidor
+       (vCityServer.svcCallback → /api/city/action intent=svc.callback) e refresca
+       o HUD com gold/hp/mp retornados — SEM navegar. ANTES: vCity.act(backendCb)
+       → doAction(backendCb) → match de prefixo ganancioso ('tavern_buy_drink_ale'
+       começa com 'tavern') → openCityPopup('tavern') → FECHAVA o resultado do
+       encounter + nunca cobrava nem aplicava o efeito. Diagnóstico ao vivo
+       (sessão #66) confirmou o close via openCityPopup. */
+    if (window.vCityServer && typeof window.vCityServer.isRemote === 'function'
+        && window.vCityServer.isRemote()
+        && typeof window.vCityServer.svcCallback === 'function') {
+      window.vCityServer.svcCallback(backendCb).then(function(r){
+        if (r && r.ok && window.CITY_MOCK_PLAYER) {
+          var p = window.CITY_MOCK_PLAYER;
+          if (typeof r.gold === 'number') p.gold = r.gold;
+          if (typeof r.hp === 'number') p.hp = r.hp;
+          if (typeof r.mp === 'number') p.mp = r.mp;
+          if (typeof r.max_hp === 'number') { p.hpMax = r.max_hp; p.maxHp = r.max_hp; }
+          if (typeof r.max_mp === 'number') { p.mpMax = r.max_mp; p.maxMp = r.max_mp; }
+        }
+        if (typeof window.refreshHud === 'function') { try { window.refreshHud(); } catch(_e){} }
+      }).catch(function(e){ console.warn('[SVC] svcCallback failed', e); });
+      return; // NÃO cai no vCity.act (navegação) — efeito tratado server-side
+    }
+    /* LOCAL/simulator (file://): path legado — no-op OU client handler do sim. */
+    if (typeof window.vCity === 'object' && typeof window.vCity.act === 'function') {
+      try {
+        window.vCity.act(backendCb);
+      } catch(_) { /* non-fatal: simulator/chrome-mcp sem backend */ }
+    }
   }
 
   window._showOpinionReaction = function(npc, optionLabel, renownDelta, ch) {

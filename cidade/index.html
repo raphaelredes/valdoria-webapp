@@ -9892,6 +9892,11 @@ function _isCTA(btn) {
       return _post('/api/city/action', body)
         .catch(function(e){ console.error('[CITY] vCityServer.cityAction(' + intent + ') failed', e); throw e; });
     },
+    /* Sessão #66 FIX (NPC compras/vendas/dados): aplica o EFEITO de um backend_cb
+       de serviço (ex: 'tavern_buy_drink_ale') via process_callback server-side.
+       Substitui o vCity.act(backend_cb) → doAction (navegação) que fechava o
+       resultado do encounter + nunca cobrava/aplicava nada. Retorna gold/hp/mp. */
+    svcCallback: function(cb){ return window.vCityServer.cityAction('svc.callback', { cb: cb }); },
     quest: {
       accept:   function(id){ return window.vCityServer.cityAction('quest.accept',   { quest_id: id }); },
       complete: function(id){ return window.vCityServer.cityAction('quest.complete', { quest_id: id }); },
