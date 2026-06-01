@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T16:29:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T16:54:59Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -10591,7 +10591,43 @@ window.__onIntroTap = function() {
             choiceId: choice.id, hex: rt.hexId
           });
           if (bodyEl) bodyEl.classList.remove('stub-popup-outcome-ok', 'stub-popup-outcome-fail');
+          // Sessão #67 (regra #0 servidor autoridade): o StubEventLayer só fazia
+          // _close() — o combate do evento (failCombat/okCombat → dungeon_combat)
+          // NUNCA disparava (bug do user "Finalizar não faz nada e volta pra
+          // exploração"). Detecta o outcome de combate e despacha triggerCombatScreen
+          // (espelha o closeEventModal legacy ~36022). Fallback p/ schema raw.
+          var _evCombat = null;
+          try {
+            var _dc = outcome && outcome.dungeon_combat;
+            if (_dc && _dc.enemy) {
+              _evCombat = { enemyId: _dc.enemy, surprise: !!_dc.surprise,
+                lookup_name: _dc.lookup_name || null,
+                preCombatEffects: Array.isArray(_dc.preCombatEffects) ? _dc.preCombatEffects : [] };
+            } else {
+              var _raw = rollResult.success ? choice.okCombat : choice.failCombat;
+              if (_raw) {
+                var _enemy;
+                if (typeof _raw === 'string') _enemy = _raw;
+                else if (_raw && typeof _raw === 'object' && _raw.enemy) _enemy = _raw.enemy;
+                else {
+                  var _cr = rt && rt.creature;
+                  _enemy = (_cr && typeof CREATURE_TO_ENEMY !== 'undefined' && CREATURE_TO_ENEMY[_cr])
+                    || (typeof _fallbackEnemyForBiome === 'function' && _fallbackEnemyForBiome(window.S && window.S.biome))
+                    || 'goblin';
+                }
+                _evCombat = { enemyId: _enemy,
+                  surprise: (_raw && typeof _raw === 'object') ? !!_raw.surprise : false,
+                  lookup_name: null, preCombatEffects: [] };
+              }
+            }
+          } catch (_eCmb) { _evCombat = null; }
           _close();
+          if (_evCombat && typeof window.triggerCombatScreen === 'function') {
+            if (window.TileLog) window.TileLog.info('STUB-EVT', 'finalize_combat_dispatch', {
+              enemy: _evCombat.enemyId, surprise: _evCombat.surprise, hex: rt.hexId
+            });
+            setTimeout(function () { window.triggerCombatScreen(_evCombat); }, 200);
+          }
         });
         container.appendChild(finalBtn);
       }
@@ -41268,6 +41304,39 @@ function boot() {
                 if (typeof _ss.xp === 'number' && S.player.xp !== undefined) {
                   S.player.xp = _ss.xp;
                 }
+                // Sessão #67 SERVER-AUTHORITATIVE IDENTITY (regra #0): aplica
+                // classe/nome/raça/nível/abilities do DB. Sem isto, quando o snap
+                // da URL falta (ex: retorno do combate), o player ficava como o
+                // MOCK random do initState (bug "FENWICK Clérigo nv1" num Bárbaro
+                // real) mesmo o servidor tendo a identidade real. Servidor é a
+                // autoridade — o cliente APLICA, nunca fabrica.
+                if (_ss.char_class) {
+                  var _ckId = String(_ss.char_class).toLowerCase()
+                    .normalize('NFD').replace(/[̀-ͯ]/g, '');
+                  var _Cid = (typeof CLASSES !== 'undefined' && CLASSES[_ckId]) || null;
+                  if (_Cid) {
+                    S.player.cls_key = _ckId; S.player.cls = _Cid.name;
+                    S.player.ico = _Cid.letter; S.player.color = _Cid.color;
+                  }
+                }
+                if (_ss.name) S.player.name = _ss.name;
+                if (_ss.race) S.player.race = _ss.race;
+                if (typeof _ss.level === 'number' && _ss.level > 0) {
+                  S.player.level = _ss.level; S.player.lvl = _ss.level;
+                }
+                if (_ss.abilities && typeof _ss.abilities === 'object') {
+                  // server envia MODS D&D 5e já calculados ((score-10)/2)
+                  S.player.mods = {
+                    str: _ss.abilities.str | 0, dex: _ss.abilities.dex | 0,
+                    con: _ss.abilities.con | 0, int: _ss.abilities.int | 0,
+                    wis: _ss.abilities.wis | 0, cha: _ss.abilities.cha | 0
+                  };
+                }
+                if (_ss.background) S.player.background = _ss.background;
+                if (_ss.alignment) S.player.alignment = _ss.alignment;
+                // Identidade pode ter mudado → refresca HUD/render sempre.
+                try { if (typeof updateHud === 'function') updateHud(); } catch (_eHudId) {}
+                try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_eRenId) {}
                 if (res.stale_corrected || res.source === 'db') {
                   // Reload visual: atualiza HUD imediatamente. Sem flash, sem
                   // tela de loading — só o valor certo substitui o errado.
