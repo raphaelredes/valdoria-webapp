@@ -50353,45 +50353,83 @@ function _resolveCityJourneyHazard(hazard, choice) {
     // Sessão #66: o dado da viagem agora rola num POPUP SEPARADO (overlay fixo via
     // vOverlay, z-index acima da jornada) em vez de embutido no card — não se mistura
     // mais com a narrativa. Botão "Pular" (regra 3D Dice System: 500ms + double-fire).
-    if (typeof Dice3D === 'function' && typeof vOverlay !== 'undefined' && vOverlay.add) {
+    // Sessão #67 (FIX user "não mostra rolagem de dados" + "popup com timer"):
+    // NÃO depende mais de vOverlay (que NÃO é carregado no cidade.html standalone —
+    // era a causa do dado nunca aparecer; caía direto no texto). Anexa o overlay
+    // direto no body + remove manualmente. Após o d20 pousar, mostra o resultado
+    // (✓/✗) e AUTO-FECHA via timer visível (~2.2s); "Pular" fecha antes.
+    if (typeof Dice3D === 'function') {
       var _jdInstance = null;
       var _jdDone = false;
+      var _jdAutoTimer = null;
       var _jdOv = document.createElement('div');
       _jdOv.className = 'journey-dice-overlay';
       _jdOv.style.cssText = 'position:fixed;inset:0;z-index:var(--v-z-loading,9700);display:flex;'
         + 'flex-direction:column;align-items:center;justify-content:center;gap:14px;'
-        + 'background:rgba(10,8,5,0.80)';
+        + 'background:rgba(10,8,5,0.82)';
       var _jdBox = document.createElement('div');
       _jdBox.style.cssText = 'width:170px;height:170px;position:relative';
       _jdOv.appendChild(_jdBox);
+      var _jdResult = document.createElement('div');
+      _jdResult.style.cssText = 'min-height:22px;font-family:Cinzel,serif;font-weight:700;'
+        + 'font-size:calc(16px * var(--v-font-scale,1));letter-spacing:1px;opacity:0;'
+        + 'transition:opacity 0.3s;text-align:center';
+      _jdOv.appendChild(_jdResult);
       var _jdSkip = document.createElement('button');
       _jdSkip.className = 'v-skip-btn';
       _jdSkip.textContent = '⟩ Pular';
       _jdSkip.style.opacity = '0';
       _jdSkip.style.pointerEvents = 'none';
       _jdOv.appendChild(_jdSkip);
-      var _jdFinish = function(){
-        if (_jdDone) return; _jdDone = true;
+      var _jdTimerBar = document.createElement('div');
+      _jdTimerBar.style.cssText = 'width:140px;height:3px;border-radius:2px;'
+        + 'background:rgba(196,149,58,0.25);overflow:hidden;opacity:0;transition:opacity 0.3s';
+      var _jdTimerFill = document.createElement('div');
+      _jdTimerFill.style.cssText = 'height:100%;width:100%;background:#c4953a;transform-origin:left';
+      _jdTimerBar.appendChild(_jdTimerFill);
+      _jdOv.appendChild(_jdTimerBar);
+      var _jdRemove = function(){
+        if (_jdAutoTimer) { clearTimeout(_jdAutoTimer); _jdAutoTimer = null; }
         if (_jdInstance && typeof _jdInstance.dispose === 'function') {
           try { _jdInstance.dispose(); } catch(_d){}
         }
-        try { vOverlay.remove(_jdOv); } catch(_r){}
+        if (_jdOv.parentNode) _jdOv.parentNode.removeChild(_jdOv);
+      };
+      var _jdFinish = function(){
+        if (_jdDone) return; _jdDone = true;
+        _jdRemove();
         resolveAfterDice();
       };
-      vOverlay.add(_jdOv);
+      // Pós-pouso: mostra resultado + timer visível de auto-fecho.
+      var _jdLanded = false;
+      var _jdOnLanded = function(){
+        if (_jdLanded || _jdDone) return; _jdLanded = true;
+        _jdResult.innerHTML = (success ? '✓ Sucesso' : '✗ Falha')
+          + ' <span style="color:#a09484;font-weight:400;font-size:0.8em">· ' + total + ' vs CD ' + choice.dc + '</span>';
+        _jdResult.style.color = success ? '#7ad06b' : '#d85848';
+        _jdResult.style.opacity = '1';
+        var _AUTO_MS = 2200;
+        _jdTimerBar.style.opacity = '1';
+        _jdTimerFill.style.transition = 'transform ' + _AUTO_MS + 'ms linear';
+        requestAnimationFrame(function(){ _jdTimerFill.style.transform = 'scaleX(0)'; });
+        _jdAutoTimer = setTimeout(_jdFinish, _AUTO_MS);
+      };
+      document.body.appendChild(_jdOv);
       setTimeout(function(){ _jdSkip.style.opacity = '1'; _jdSkip.style.pointerEvents = 'auto'; }, 500);
       _jdSkip.addEventListener('click', _jdFinish);
       try {
         _jdInstance = new Dice3D(_jdBox, { size: 140, dieType: 'd20', duration: 1300 });
-        _jdInstance.roll(d20, function(){ setTimeout(_jdFinish, 450); });
+        _jdInstance.roll(d20, function(){ _jdOnLanded(); });
+        // Safety: se o roll não completar (RAF throttled no WebView), mostra o
+        // resultado + timer mesmo assim — nunca trava o popup.
+        setTimeout(function(){ if (!_jdDone && !_jdLanded) _jdOnLanded(); }, 5000);
         return;
       } catch (e) {
         _logCity('Dice3D constructor failed: ' + e.message);
-        if (_jdInstance && _jdInstance.dispose) { try { _jdInstance.dispose(); } catch(_d){} }
-        try { vOverlay.remove(_jdOv); } catch(_r){}
+        _jdRemove();
       }
     } else {
-      _logCity('WARN: Dice3D/vOverlay não carregado, resolvendo sem anim');
+      _logCity('WARN: Dice3D não carregado, resolvendo sem anim');
     }
   }
   resolveAfterDice();
