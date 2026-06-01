@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T18:41:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T19:18:46Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -18822,7 +18822,12 @@ var sessionEventHistory = [];
     // OPTIONAL VISUAL
     hex_decorations: false,
     hex_coords: false,
-    fog_of_war: false,
+    // Sessão #67 (2026-06-01): fog_of_war é GAMEPLAY CORE (CLAUDE.md SUPREME RULE
+    // "Low-Res Upscale Fog of War" + "Exploração Interativa D&D"). Estava em false
+    // por causa do A/B FPS-test ("tudo OFF exceto core") de uma sessão antiga e
+    // NUNCA foi religado → render pulava todo o bloco de fog (renderFrame não
+    // alcançava drawFogComposite) → mapa inteiro visível, sem névoa. Default ON.
+    fog_of_war: true,
     player_aura: false,
     day_night_tint: false,
     weather_overlay: false,
@@ -18835,10 +18840,14 @@ var sessionEventHistory = [];
   // User que tinha config customizada precisa toggle de novo (raro).
   var saved = {};
   try {
-    var raw = localStorage.getItem('valdoria_explore_features_v7');
+    // Sessão #67: bump _v7 → _v8 pra re-aplicar defaults (limpa saves antigos
+    // que tinham fog_of_war:false travado). Painel é dev-only, real users não têm
+    // config salva — bump garante que TODOS pegam o novo default (fog ON).
+    var raw = localStorage.getItem('valdoria_explore_features_v8');
     if (raw) saved = JSON.parse(raw);
-    // Migração: limpa key antiga se existe
+    // Migração: limpa keys antigas se existem
     try { localStorage.removeItem('valdoria_explore_features'); } catch (_) {}
+    try { localStorage.removeItem('valdoria_explore_features_v7'); } catch (_) {}
   } catch (_) {}
   var merged = {};
   for (var k in DEFAULTS) merged[k] = (saved.hasOwnProperty(k)) ? !!saved[k] : DEFAULTS[k];
@@ -18847,7 +18856,7 @@ var sessionEventHistory = [];
 })();
 function _setFeature(key, val) {
   window._FEATURES[key] = !!val;
-  try { localStorage.setItem('valdoria_explore_features_v7', JSON.stringify(window._FEATURES)); } catch (_) {}
+  try { localStorage.setItem('valdoria_explore_features_v8', JSON.stringify(window._FEATURES)); } catch (_) {}
 }
 window._setFeature = _setFeature;
 
@@ -31756,8 +31765,11 @@ function drawSimpleFog(ctx) {
 // drawSimpleFog (V6) ainda existe mas não é mais usado pelo pipeline.
 function buildFogMask() {
   const shouldLogM = _frameCount % 120 === 1;
-  if (!maskCanvas || !maskCtx) { LOGW('FOG', 'maskCanvas/Ctx missing'); return; }
-  if (!S || !S.player) { LOGW('FOG', 'S.player missing in buildFogMask'); return; }
+  // Sessão #67: retorna false quando NÃO consegue construir (estado não pronto).
+  // drawFogComposite só limpa _fogMaskDirty se construiu de fato — senão o mask
+  // ficava vazio travado e o fog sumia (mapa todo visível).
+  if (!maskCanvas || !maskCtx) { LOGW('FOG', 'maskCanvas/Ctx missing'); return false; }
+  if (!S || !S.player) { LOGW('FOG', 'S.player missing in buildFogMask'); return false; }
   const w = maskCanvas.width, h = maskCanvas.height;
   const img = maskCtx.createImageData(w, h);
   const data = img.data;
@@ -31855,6 +31867,7 @@ function buildFogMask() {
     }
   }
   maskCtx.putImageData(img, 0, 0);
+  return true;
 }
 
 // 2026-04-29 V8.1 PERF: drawFogComposite agora COMPLETAMENTE skip-on-clean.
@@ -31888,9 +31901,12 @@ function drawFogComposite() {
   fogCtx.save();
   try {
     // V3.0 PERF: só rebuilda mask se dirty (player moveu, biome mudou, etc.)
+    // Sessão #67: só limpa o dirty se buildFogMask REALMENTE construiu. Antes,
+    // se ele saísse cedo (maskCanvas/S.player não prontos numa frame), o dirty
+    // era limpo mesmo assim → mask vazio travado → fog sumia (mapa todo visível
+    // após mover). Agora retry na próxima frame até construir de fato.
     if (_fogMaskDirty) {
-      buildFogMask();
-      _fogMaskDirty = false;
+      if (buildFogMask() !== false) _fogMaskDirty = false;
     }
     // Reset global state expl\u00edcito (defensiva contra estado suj\u00e3o de outros draws)
     fogCtx.globalCompositeOperation = 'source-over';
