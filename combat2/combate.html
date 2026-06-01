@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:47:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T14:42:02Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18292,9 +18292,16 @@ function mountBattlefieldPanZoom() {
         });
     });
 
-    /* === Desktop: Ctrl+wheel zoom === */
+    /* === Desktop: roda do mouse = zoom (sem precisar de Ctrl) ===
+       Sessão #67 (2026-06-01): user reportou que a roda do mouse rolava a arena
+       (scroll nativo do overflow do viewport) em vez de dar zoom. O aria-label
+       da arena promete "roda do mouse para zoom" e o pan-zoom canonical
+       (shared/combat-battlefield-pan-zoom.js) sempre tratou roda = zoom direto.
+       O gate `if (!e.ctrlKey && !e.metaKey) return` exigia Ctrl/Cmd e, sem ele,
+       a roda saía SEM preventDefault → o browser rolava o container. Removido o
+       gate: qualquer roda dá zoom; pan continua via arrastar. Ctrl/Cmd ainda
+       zoom (mesmo caminho). */
     var onWheel = function (e) {
-        if (!e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         var delta = e.deltaY < 0 ? 0.1 : -0.1;
         applyZoom(currentZoom + delta);

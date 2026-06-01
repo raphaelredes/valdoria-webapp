@@ -155,6 +155,20 @@
           return window.vItems.iconHTML(candidates[i], altText || candidates[i]);
         }
       }
+      // 3.5) Fallback por palavra-chave do NOME → ic-it-base-* → PNG (sessão #67).
+      //      O sprite SVG foi removido (2026-05-19); itens sem PNG direto (ex:
+      //      "Pergaminho de Bênção", "Pão Élfico") ficavam em branco. _fallbackIconByName
+      //      mapeia o nome pro base mais próximo (scroll/bread/etc) e resolveSlug
+      //      (BASE_TO_SLUG) o converte num slug real do manifest (pergaminho-antigo,
+      //      racoes-de-7-dias, ...). Reusa PNG existente — nunca cria asset novo.
+      var _nameBase = _fallbackIconByName(altText);  // 'ic-it-base-scroll' | ''
+      if (_nameBase && typeof window.vItems.resolveSlug === 'function') {
+        var _baseSlug = _nameBase.replace(/^ic-it-/, '');         // 'base-scroll'
+        var _pngSlug = window.vItems.resolveSlug(_baseSlug);      // 'pergaminho-antigo'
+        if (_pngSlug && window.vItems.has(_pngSlug)) {
+          return window.vItems.iconHTML(_pngSlug, altText || _pngSlug);
+        }
+      }
     }
 
     // 4) Final fallback: SVG sprite com iconId original

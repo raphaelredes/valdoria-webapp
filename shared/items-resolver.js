@@ -633,6 +633,11 @@
     resolve: resolve,
     has: hasManifestSlug,
     iconHTML: iconHTML,
+    /* 2026-06-01 (sessão #67): expõe resolveSlug pra que consumidores
+       (inventory-screen.js _iconSrc) resolvam `base-*` IDs do design system
+       ao slug real do manifest. Sem isto, um item sem PNG direto cai no SVG
+       sprite (removido 2026-05-19) → ícone em branco. */
+    resolveSlug: resolveSlug,
     preloadManifest: loadManifest,
     _state: manifestState, // for debugging
   };
