@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T02:02:11Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T02:40:05Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -25018,13 +25018,14 @@ function showDice(value, cb, actor, context, opts) {
     ov.style.zIndex = '101000';
     mountInGameFrame(ov); // regra: overlays dentro do frame #app
 
-    var d, closed = false, started = false, lockTimer = null;
+    var d, closed = false, started = false, lockTimer = null, _safetyTimer = null;
     /* V1.7 (2026-04-21, QA) — Dual dice state: dA/dB são instances quando
        isDualDice, d fica null nesse modo. */
     var dA = null, dB = null;
     function close() {
         if (closed) return; closed = true;
         if (lockTimer) clearInterval(lockTimer);
+        if (_safetyTimer) { clearTimeout(_safetyTimer); _safetyTimer = null; }
         try { d && d.dispose(); } catch (e) {}
         try { dA && dA.dispose(); } catch (e) {}
         try { dB && dB.dispose(); } catch (e) {}
@@ -25035,6 +25036,18 @@ function showDice(value, cb, actor, context, opts) {
     /* Expose para skip externo (ex: pular rolagens de iniciativa) */
     _activeDiceClose = close;
     continueBtn.addEventListener('click', close);
+    /* Sessão #66 (FIX combate travado em "Rolando Iniciativa..."): SAFETY TIMEOUT.
+       Se a rolagem NÃO completar — Dice3D não renderizou o canvas, requestAnimation-
+       Frame não disparou, WebGL falhou, device lento, callback do roll perdido — o
+       dado resolve assim mesmo. Sem isto o combate travava pra SEMPRE: cb() nunca era
+       chamado → o `await new Promise(...)` em animInit pendurava infinitamente e nem
+       "Começar Rolagens" nem "Pular Todas" avançavam. */
+    _safetyTimer = setTimeout(function () {
+        if (!closed) {
+            console.warn('[SIM] dice SAFETY TIMEOUT — auto-resolvendo (roll nao completou)');
+            close();
+        }
+    }, duration + (manualPlayerDice ? 15000 : 5000));
 
     function _applyPostResultAndContinue() {
         /* Result label: enriquecido se houver postResult, simples senao */
@@ -25066,6 +25079,16 @@ function showDice(value, cb, actor, context, opts) {
         /* Sempre mostra Continuar — jogador controla pacing (player ou NPC) */
         continueBtn.style.display = '';
         if (skipChainBtn && manualPlayerDice) skipChainBtn.style.display = 'block';
+        /* Sessão #66 (FIX combate travado): iniciativa AVANÇA SOZINHA — era a
+           intenção original (ver comentário no topo de showDice: "todos rolam em
+           sequencia automatica"). Sem auto-advance, o jogador precisava clicar
+           "Continuar" a CADA d20 de iniciativa; se o botão ficasse fora da
+           viewport no smartphone, o combate parecia travado em "Rolando
+           Iniciativa...". O botão Continuar continua visível p/ quem quiser
+           acelerar antes do timer. */
+        if (initiativeSequence && !closed) {
+            setTimeout(function () { if (!closed) close(); }, 1300);
+        }
     }
 
     function startRoll() {
@@ -25176,10 +25199,24 @@ function showDice(value, cb, actor, context, opts) {
             }
         } catch (e) { console.warn('[SIM] Dice3D falhou', e); close(); }
     }
+    /* Sessão #66 (FIX combate travado): mountDice3d roda UMA vez via dois caminhos.
+       O double-requestAnimationFrame garante layout pronto antes de montar o Dice3D,
+       MAS no Telegram WebView (Android/iOS) a aba pode ter RAF throttled/pausado —
+       aí mountDice3d NUNCA rodava → canvas nunca criado → callback do roll nunca
+       disparava → o `await showDice(...)` em animInit pendurava pra sempre e nem
+       "Começar Rolagens" nem "Pular Todas" destravavam. Fallback via setTimeout
+       garante o mount mesmo com RAF throttled. Guard `_mounted` evita montar 2×. */
+    var _mounted = false;
+    function _doMount() {
+        if (_mounted || closed) return;
+        _mounted = true;
+        mountDice3d();
+    }
     if (window.requestAnimationFrame) {
-        requestAnimationFrame(function () { requestAnimationFrame(mountDice3d); });
+        requestAnimationFrame(function () { requestAnimationFrame(_doMount); });
+        setTimeout(_doMount, 180);
     } else {
-        setTimeout(mountDice3d, 0);
+        setTimeout(_doMount, 0);
     }
 }
 
@@ -25875,8 +25912,18 @@ function openUnitDetail(uid) {
 
 /* Rola d20 3D para cada combatente da iniciativa, um por vez. */
 async function animInit(preSkip) {
-    disposeCtaDice3d();
     var s = currentState;
+    if (!s) return;
+    /* Sessão #66 (FIX combate travado): guard de re-entrância. Sem isto, clicar
+       "Começar Rolagens" várias vezes (porque "não acontecia nada" enquanto um
+       dado pendurava) disparava múltiplos loops animInit concorrentes — cada um
+       sobrescrevendo `_activeDiceClose` e a fila → estado corrompido. Um loop de
+       iniciativa não-skip por vez; preSkip (Pular Todas) sempre pode entrar. */
+    if (s.ph !== 'intro' && !preSkip) {
+        if (window.__COMBAT_ANIMINIT_RUNNING) return;
+    }
+    if (!preSkip) window.__COMBAT_ANIMINIT_RUNNING = true;
+    disposeCtaDice3d();
     s.ph = 'init';
     if (!preSkip) _skipInit = false;
     render(s);
@@ -25912,6 +25959,8 @@ async function animInit(preSkip) {
     });
     s.ph = 'init_done';
     render(s);
+    /* Sessão #66: libera o guard de re-entrância — iniciativa terminou. */
+    window.__COMBAT_ANIMINIT_RUNNING = false;
     /* Só o popup de ordem final (“Combate começa pelo topo” + Começar Combate) — sem popup intermédio de resumo */
     showInitiativeOrderPopup();
 }
