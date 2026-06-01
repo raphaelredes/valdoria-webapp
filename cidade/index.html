@@ -50039,6 +50039,34 @@ function _renderCityJourneyStep() {
     // Badge no topo
     narrEl.innerHTML = '<div class="journey-step-badge hazard">⚠ ' + hazard.title + '</div>';
 
+    // Sessão #66 (PADRAO_ALDRIC): cabeçalho do NPC (medalhão + nome + descrição)
+    // acima da fala — antes o NPC falava sem identidade visual (só texto). Agora
+    // segue o padrão dos encounters (.enc-header). Medalhão com inicial heráldica.
+    if (hazard.npc && hazard.npc.name) {
+      var _jnNm = String(hazard.npc.name);
+      var _jnIni = (_jnNm.replace(/[^A-Za-zÀ-ÿ]/g, '').charAt(0) || '?').toUpperCase();
+      var _jnHdr = document.createElement('div');
+      _jnHdr.className = 'jn-npc-header';
+      _jnHdr.style.cssText = 'display:flex;gap:11px;align-items:center;padding:9px 4px 9px;'
+        + 'margin:2px 0 6px;border-bottom:1px solid rgba(196,149,58,0.25)';
+      _jnHdr.innerHTML =
+        '<span style="width:44px;height:44px;flex:0 0 44px;border-radius:50%;'
+        + 'background:rgba(196,149,58,0.18);border:1px solid rgba(196,149,58,0.55);'
+        + 'display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;'
+        + 'font-weight:700;font-size:20px;color:#c4953a;'
+        + 'box-shadow:0 0 12px rgba(196,149,58,0.18)">' + _jnIni + '</span>'
+        + '<span style="display:flex;flex-direction:column;gap:2px;min-width:0">'
+        + '<span style="font-family:Cinzel,serif;font-weight:700;'
+        + 'font-size:calc(15px * var(--v-font-scale,1));color:#ffd8a0;letter-spacing:0.5px;'
+        + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _jnNm + '</span>'
+        + (hazard.npc.desc
+            ? '<span style="font-size:calc(11px * var(--v-font-scale,1));color:#a09484;'
+              + 'font-style:italic;line-height:1.35">' + hazard.npc.desc + '</span>'
+            : '')
+        + '</span>';
+      narrEl.appendChild(_jnHdr);
+    }
+
     // Render script[] linhas com reveal sequencial
     var cumulativeDelay = 0;
     if (hazard.script && hazard.script.length) {
@@ -50222,32 +50250,48 @@ function _resolveCityJourneyHazard(hazard, choice) {
   //   instance.roll(faceValue, callback);
   // (NÃO Dice3D.roll(canvas, opts, cb) — Dice3D é CONSTRUCTOR não static)
   if (hasCheck) {
-    if (typeof Dice3D === 'function' && diceEl) {
-      diceEl.classList.add('active');
-      diceEl.innerHTML = '';  // lib injeta canvas próprio dentro do container
-      var instance = null;
+    // Sessão #66: o dado da viagem agora rola num POPUP SEPARADO (overlay fixo via
+    // vOverlay, z-index acima da jornada) em vez de embutido no card — não se mistura
+    // mais com a narrativa. Botão "Pular" (regra 3D Dice System: 500ms + double-fire).
+    if (typeof Dice3D === 'function' && typeof vOverlay !== 'undefined' && vOverlay.add) {
+      var _jdInstance = null;
+      var _jdDone = false;
+      var _jdOv = document.createElement('div');
+      _jdOv.className = 'journey-dice-overlay';
+      _jdOv.style.cssText = 'position:fixed;inset:0;z-index:var(--v-z-loading,9700);display:flex;'
+        + 'flex-direction:column;align-items:center;justify-content:center;gap:14px;'
+        + 'background:rgba(10,8,5,0.80)';
+      var _jdBox = document.createElement('div');
+      _jdBox.style.cssText = 'width:170px;height:170px;position:relative';
+      _jdOv.appendChild(_jdBox);
+      var _jdSkip = document.createElement('button');
+      _jdSkip.className = 'v-skip-btn';
+      _jdSkip.textContent = '⟩ Pular';
+      _jdSkip.style.opacity = '0';
+      _jdSkip.style.pointerEvents = 'none';
+      _jdOv.appendChild(_jdSkip);
+      var _jdFinish = function(){
+        if (_jdDone) return; _jdDone = true;
+        if (_jdInstance && typeof _jdInstance.dispose === 'function') {
+          try { _jdInstance.dispose(); } catch(_d){}
+        }
+        try { vOverlay.remove(_jdOv); } catch(_r){}
+        resolveAfterDice();
+      };
+      vOverlay.add(_jdOv);
+      setTimeout(function(){ _jdSkip.style.opacity = '1'; _jdSkip.style.pointerEvents = 'auto'; }, 500);
+      _jdSkip.addEventListener('click', _jdFinish);
       try {
-        instance = new Dice3D(diceEl, { size: 140, dieType: 'd20', duration: 1300 });
-        instance.roll(d20, function(){
-          setTimeout(function(){
-            resolveAfterDice();
-            // Hold dice na tela enquanto narrativa aparece
-            setTimeout(function(){
-              if (instance && typeof instance.dispose === 'function') {
-                try { instance.dispose(); } catch(_d){}
-              }
-              if (diceEl) { diceEl.classList.remove('active'); diceEl.innerHTML = ''; }
-            }, 1500);
-          }, 350);
-        });
+        _jdInstance = new Dice3D(_jdBox, { size: 140, dieType: 'd20', duration: 1300 });
+        _jdInstance.roll(d20, function(){ setTimeout(_jdFinish, 450); });
         return;
       } catch (e) {
         _logCity('Dice3D constructor failed: ' + e.message);
-        if (instance && instance.dispose) { try { instance.dispose(); } catch(_d){} }
-        if (diceEl) { diceEl.classList.remove('active'); diceEl.innerHTML = ''; }
+        if (_jdInstance && _jdInstance.dispose) { try { _jdInstance.dispose(); } catch(_d){} }
+        try { vOverlay.remove(_jdOv); } catch(_r){}
       }
     } else {
-      _logCity('WARN: Dice3D não carregado (typeof=' + (typeof Dice3D) + '), resolvendo sem anim');
+      _logCity('WARN: Dice3D/vOverlay não carregado, resolvendo sem anim');
     }
   }
   resolveAfterDice();
