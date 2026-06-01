@@ -10254,6 +10254,17 @@ function _markLocationSeen(cb){
     var key = 'valdoria_seen_locations_' + (window._charId || 'default');
     localStorage.setItem(key, JSON.stringify(p.seen_locations));
   } catch(_){}
+  // Sessão #66 (FIX badge reaparece): PERSISTE o "visto" no SERVIDOR (autoridade).
+  // Sem isto o servidor mantinha seen_locations=[] e _refreshDiscoveryState
+  // SOBRESCREVIA o estado hidratado do localStorage com [] a cada reload → o badge
+  // "NOVO!" + sparkle + toast "Você descobriu X!" re-disparavam toda vez que a
+  // cidade abria. localStorage não bastava porque (a) o server clobberava e
+  // (b) window._charId vinha 'default' (vazava entre personagens). Server-Only State.
+  if (window.vCityServer && window.vCityServer.isRemote
+      && window.vCityServer.isRemote()
+      && window.vCityServer.discovery && window.vCityServer.discovery.seen) {
+    window.vCityServer.discovery.seen(cb).catch(function(_e){ console.warn('[CITY] discovery.seen persist', _e); });
+  }
   return true;
 }
 
@@ -10646,10 +10657,12 @@ function _applyDiscoveryAnimations(rootEl){
         cell.classList.add('discovering');      // Sparkle animation
         _markLocationSeen(matched.cb);          // Registra (proximas renders NAO mostram "NOVO!")
         if (typeof vToast === 'function') vToast('✨ Você descobriu ' + matched.label + '!');
-      } else {
-        // Ja foi visto, mostra apenas o estado "in_progress" sutil (sem badge gritando)
-        cell.classList.add('hub-loc--inprogress');
       }
+      // Sessão #66 (FIX badge reaparece): local JÁ VISTO + descoberta NÃO iniciada
+      // → SEM badge. Antes adicionava hub-loc--inprogress (📜), que ficava nagando
+      // pra sempre em Estalagem/Vínculos mesmo o jogador já tendo visto o diálogo
+      // no nível 2 (queixa do user). O 📜 agora só aparece em descoberta ATIVA
+      // (in_progress = começou mas não finalizou) — não em "disponível mas visto".
     } else if (st === 'in_progress'){
       cell.classList.add('hub-loc--inprogress');
     }
@@ -20342,7 +20355,18 @@ function _refreshDiscoveryState(){
     if (r && r.ok && r.discovery){
       var d = r.discovery, p = window.CITY_MOCK_PLAYER;
       if (p){
-        if (Array.isArray(d.seen_locations)) p.seen_locations = d.seen_locations.slice();
+        // Sessão #66 (FIX badge reaparece): MERGE de seen (união server +
+        // localStorage/cliente) em vez de SOBRESCREVER. Antes
+        // `p.seen_locations = d.seen_locations.slice()` clobberava o estado já
+        // hidratado do localStorage com o array (frequentemente vazio) do server,
+        // fazendo o badge "NOVO!" reaparecer. Agora une os dois — nunca perde um
+        // "visto" (e com _markLocationSeen agora persistindo no server, ambos
+        // convergem). _ensureCityState garante seen_locations array antes daqui.
+        _ensureCityState();
+        var srvSeen = Array.isArray(d.seen_locations) ? d.seen_locations : [];
+        var merged = (p.seen_locations || []).slice();
+        srvSeen.forEach(function(cb){ if (merged.indexOf(cb) < 0) merged.push(cb); });
+        p.seen_locations = merged;
         p.discovered_locations = (d.discovered_locations || []).slice();
         p.completed_locations = (d.completed_locations || []).slice();
         p.active_discovery = d.active_discovery || null;
