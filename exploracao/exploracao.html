@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T21:37:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T22:29:34Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -3854,6 +3854,13 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 .pm-row-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
 .pm-row-fill.hp { background: linear-gradient(90deg, #c44638, #e87050); }
 .pm-row-fill.mp { background: linear-gradient(90deg, #3a68b0, #5a9cd8); }
+/* Sessão #67 (2026-06-01): cores de recurso por classe no card do grupo (par
+   com o HUD do topo). Sem isto, recurso != MANA (ex.: Fúria do Bárbaro) ficava
+   com a barra sem cor. */
+.pm-row-fill.fury   { background: linear-gradient(90deg, #a83232, #d85a5a); }
+.pm-row-fill.energy { background: linear-gradient(90deg, #b88a2a, #f0c060); }
+.pm-row-fill.ki     { background: linear-gradient(90deg, #6a7a8a, #b0c0d0); }
+.pm-row-fill.vigor  { background: linear-gradient(90deg, #8b3a2a, #c06a50); }
 .pm-row-val {
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: calc(9px * var(--v-font-scale, 1));
@@ -31612,11 +31619,16 @@ function getVisionRange() {
   // mas não muito longe do hexagono da mata, máximo 2 hexagonos, mesmo
   // durante o dia com tempo limpo". Se em mata + tocha/luz: vision 2.
   if (_isPlayerOnMata()) {
+    // Sessão #67 (2026-06-01): mata estava "mal configurada" — sem luz a visão
+    // era 0 (só o hex atual) e o fog era PRETO PURO 100% → dentro da mata a tela
+    // ficava TODA preta (bug reportado com print). Agora base 2 (enxerga ~2 hexes
+    // ao redor pra navegar) e luz amplia pra 3. A mata continua mais fechada que
+    // campo aberto (vision 4) — mantém a densidade da floresta sem cegar.
     var _src = S.lightSource;
-    if (_src === 'torch') return 1;            // tocha simples: adjacentes
-    if (_src === 'light' || _src === 'dancing_lights') return 2;  // magia
-    if (_src === 'daylight') return 2;         // luz divina
-    return 0;  // sem luz: só hex atual
+    if (_src === 'torch') return 3;            // tocha: amplia o entorno
+    if (_src === 'light' || _src === 'dancing_lights') return 3;  // magia
+    if (_src === 'daylight') return 3;         // luz divina
+    return 2;  // sem luz: ainda enxerga 2 hexes (não cega o jogador)
   }
   const phase = S.dayPhase || 'day';
   const biome = S.biome || 'forest';
@@ -31804,9 +31816,13 @@ function buildFogMask() {
       // hexes — máximo 2 (USER RULE 2026-04-27).
       if (inMata) {
         const dist = hexDist(c, r, pCol, pRow);
+        // Sessão #67: falloff da mata suavizado (antes 60/160 + fog preto puro =
+        // tela toda preta). Agora os hexes ao redor (até a `vision` da mata)
+        // ficam navegáveis, com atenuação crescente.
         if (dist === 0) alpha = 0;
-        else if (vision >= 1 && dist === 1) alpha = 60;    // adjacente quase visível com luz
-        else if (vision >= 2 && dist === 2) alpha = 160;   // d=2 fortemente atenuado
+        else if (vision >= 1 && dist === 1) alpha = 40;
+        else if (vision >= 2 && dist === 2) alpha = 110;
+        else if (vision >= 3 && dist === 3) alpha = 185;
         else alpha = 255;
         const idx0 = ((r + MASK_PADDING) * w + (c + MASK_PADDING)) * 4;
         data[idx0] = 0; data[idx0 + 1] = 0; data[idx0 + 2] = 0; data[idx0 + 3] = alpha;
@@ -31920,12 +31936,13 @@ function drawFogComposite() {
     fogCtx.globalCompositeOperation = 'source-over';
     fogCtx.globalAlpha = 1;
     fogCtx.clearRect(0, 0, canvasW, canvasH);
-    // Sessão #66 (fog Mata fix): em MATA, upscale NEAREST-NEIGHBOR (sem suavização
-    // bilinear). O bilinear espalhava a borda 0→255 do hex do player sobre os hexes
-    // VIZINHOS, deixando-os semi-visíveis. Nearest = blocos sólidos por hex → os
-    // vizinhos ficam 100% cobertos (regra "tudo preto fora da mata").
+    // Sessão #67 (2026-06-01): bilinear LIGADO também na mata. Antes era nearest
+    // (blocos sólidos) pra impedir o hex do player de "vazar" pros vizinhos
+    // quando a mata era isolamento absoluto. Agora a mata NÃO é mais absoluta
+    // (os 2-3 hexes ao redor são visíveis de propósito), então o smoothing é
+    // desejado — transição suave, consistente com o resto do mapa.
     var _inMataFog = (typeof _isPlayerOnMata === 'function' && _isPlayerOnMata());
-    fogCtx.imageSmoothingEnabled = !_inMataFog;
+    fogCtx.imageSmoothingEnabled = true;
     fogCtx.imageSmoothingQuality = 'high';
 
     const gridLeft = MAP_OFFSET_X - HEX_W * 0.5;
@@ -31940,11 +31957,12 @@ function drawFogComposite() {
     fogCtx.drawImage(maskCanvas, 0, 0, maskCanvas.width, maskCanvas.height,
       gridLeft - padX, gridTop - padY, gridW + padX * 2, gridH + padY * 2);
 
-    // 2026-04-27 USER RULE: "faça com que os hexagonos que não sejam da
-    // mata fiquem literalmente pretos, fog 100% até que o personagem saia
-    // da mata". Em mata, FOG_COLOR = preto puro 100% opaco em vez do
-    // fog padrão 92%. Cobre tudo fora do hex atual.
-    var _matFogColor = _inMataFog ? 'rgba(0,0,0,1)' : FOG_COLOR;
+    // Sessão #67 (2026-06-01): mata NÃO é mais PRETO PURO 100% (regra antiga de
+    // 2026-04-27 deixava a tela toda preta dentro da mata — reportado com print).
+    // Agora marrom-escuro 95%: ainda mais fechado/denso que o fog normal (0.92),
+    // mas o jogador enxerga os hexes ao redor e navega. Combina com a vision 2-3
+    // da mata e o falloff suavizado.
+    var _matFogColor = _inMataFog ? 'rgba(14,11,8,0.95)' : FOG_COLOR;
     fogCtx.globalCompositeOperation = 'source-in';
     fogCtx.fillStyle = _matFogColor;
     fogCtx.fillRect(0, 0, canvasW, canvasH);
@@ -37856,7 +37874,13 @@ function _partyMemberCard(m) {
     bars.appendChild(_partyBarRow('VIDA', 'hp', m.hp, m.mhp));
   }
   if (m.mp !== null && m.mmp > 0) {
-    bars.appendChild(_partyBarRow('MANA', 'mp', m.mp, m.mmp));
+    // Sessão #67 (2026-06-01): label + cor do recurso vêm da CLASSE (resName),
+    // não 'MANA'/'mp' hardcoded. Bárbaro mostrava "MANA" (azul) no grupo em vez
+    // de "FÚRIA" (vermelho). Mesma lógica do updateHud (CLASSES[cls_key].resName).
+    var _pmCdef = (typeof CLASSES !== 'undefined' && m.cls_key) ? CLASSES[m.cls_key] : null;
+    var _pmRes = (_pmCdef && _pmCdef.resName) ? _pmCdef.resName : 'MANA';
+    var _pmKind = ({ 'MANA': 'mp', 'FÚRIA': 'fury', 'FURIA': 'fury', 'ENERGIA': 'energy', 'KI': 'ki', 'VIGOR': 'vigor' })[_pmRes] || 'mp';
+    bars.appendChild(_partyBarRow(_pmRes, _pmKind, m.mp, m.mmp));
   }
   card.appendChild(bars);
   return card;
