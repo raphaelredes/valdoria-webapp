@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T22:29:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T22:50:47Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -14982,6 +14982,32 @@ window.__applyExploreSnap = function(S, snap) {
   // Inventory (sobrescreve — snap tem o estado autoritativo do perfil)
   if (Array.isArray(snap.inv)) {
     S.inventory = snap.inv.map(function(it) { return { id: it.i, count: it.q }; });
+    // Sessão #67 (2026-06-01): SINCRONIZA o inventário AUTORITATIVO do servidor
+    // (snap.inv) com a SHARED localStorage que a MOCHILA lê (_readSharedInventory).
+    // Sem isto, após um combate (o servidor adicionou o loot ao DB — confirmado no
+    // bot.log: "items+=1"), a mochila mostrava a SHARED STALE (pré-combate, sem a
+    // adaga). Bug reportado: "venci, achei uma adaga, mas não apareceu na mochila".
+    // SUPREME RULE #0 (servidor é autoridade): o snap manda na mochila. Preserva
+    // metadata (icon/value) dos itens já existentes por nome; itens NOVOS (loot)
+    // entram com default — o _vinvExpAdaptItem resolve o PNG pelo nome. Guard
+    // `length` evita zerar a mochila se o snap vier vazio.
+    try {
+      var _prevShared = [];
+      try { var _rsh = localStorage.getItem(SHARED_INVENTORY_KEY); if (_rsh) _prevShared = JSON.parse(_rsh) || []; } catch (_e1) {}
+      var _metaByName = {};
+      if (Array.isArray(_prevShared)) _prevShared.forEach(function(x) { if (x && x.name) _metaByName[x.name] = x; });
+      var _sharedSync = snap.inv.map(function(it) {
+        var _nm = String(it.i || '');
+        var _meta = _metaByName[_nm] || {};
+        return {
+          name: _nm,
+          quantity: (typeof it.q === 'number') ? it.q : 1,
+          icon: it.ico || _meta.icon || '📦',
+          value: (typeof it.v === 'number') ? it.v : ((typeof _meta.value === 'number') ? _meta.value : 0)
+        };
+      }).filter(function(x) { return x.name; });
+      if (_sharedSync.length) localStorage.setItem(SHARED_INVENTORY_KEY, JSON.stringify(_sharedSync));
+    } catch (_eSync) {}
   }
   // Quests ativas (substitui — snap tem autoritativo)
   // 2026-05-12: preserva title/desc/npc/location/reward/xp/progress/target_map
@@ -31624,11 +31650,14 @@ function getVisionRange() {
     // ficava TODA preta (bug reportado com print). Agora base 2 (enxerga ~2 hexes
     // ao redor pra navegar) e luz amplia pra 3. A mata continua mais fechada que
     // campo aberto (vision 4) — mantém a densidade da floresta sem cegar.
+    // Sessão #67 (refino, user): a mata mostra SÓ 1 hex adjacente ("não mais que
+    // 1"). Sem luz = 1 (player + anel adjacente). Luz dá um leve bônus (2), mas o
+    // padrão denso da floresta é 1.
     var _src = S.lightSource;
-    if (_src === 'torch') return 3;            // tocha: amplia o entorno
-    if (_src === 'light' || _src === 'dancing_lights') return 3;  // magia
-    if (_src === 'daylight') return 3;         // luz divina
-    return 2;  // sem luz: ainda enxerga 2 hexes (não cega o jogador)
+    if (_src === 'torch') return 2;            // tocha: leve bônus
+    if (_src === 'light' || _src === 'dancing_lights') return 2;  // magia
+    if (_src === 'daylight') return 2;         // luz divina
+    return 1;  // sem luz: só o anel adjacente (1 hex)
   }
   const phase = S.dayPhase || 'day';
   const biome = S.biome || 'forest';
@@ -31828,9 +31857,17 @@ function buildFogMask() {
         data[idx0] = 0; data[idx0 + 1] = 0; data[idx0 + 2] = 0; data[idx0 + 3] = alpha;
         continue;
       }
-      if (state === 'visible') {
+      // Sessão #67 (2026-06-01): a VISÃO ATUAL (dist <= vision) SEMPRE renderiza,
+      // INDEPENDENTE do fogState. Antes só state==='visible' (setado por
+      // revealFogAt no move) renderizava — se o fogState vinha VAZIO do servidor
+      // (REMOTE/mobile após combate, antes do 1o move), TODOS os hexes caíam em
+      // alpha=255 → tela TODA PRETA (bug reportado no celular). Bounding box
+      // restringe o hexDist ao entorno do player (preserva a perf).
+      const _bbVis = (Math.abs(c - pCol) <= vision + 1 && Math.abs(r - pRow) <= vision + 1);
+      if (state === 'visible' || _bbVis) {
         const dist = hexDist(c, r, pCol, pRow);
-        if (dist === 0) alpha = 0;
+        if (dist > vision) alpha = (state === 'dim' || state === 'visible') ? dimAlpha : 255;
+        else if (dist === 0) alpha = 0;
         else if (vision === 0) {
           // ESCURIDÃO ABSOLUTA (caverna sem luz): só o próprio hex é visível
           alpha = 255;
