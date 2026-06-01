@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:59:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T21:15:19Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15750,14 +15750,21 @@ function checkEnd(s) {
    XP = soma(8 + sugLvl*4) por inimigo derrotado
    Gold = rng baseado em nível sugerido somado
    Itens = chance de drop por inimigo, do pool de loot */
+/* Sessão #67 (2026-06-01): nomes alinhados ao manifest de PNGs pra a tela de
+   vitória mostrar a IMAGEM do item (não só emoji). Os nomes antigos ("Adaga
+   Afiada", "Anel de Vigor", "Esmeralda Bruta") eram específicos demais e não
+   casavam com os slugs reais ("adaga", "anel-de-resistencia", "esmeralda") →
+   caíam no emoji. "Poção de Mana" não tem PNG → trocada por "Raiz de Mana"
+   (mesma temática de recurso, tem arte). ico fica como fallback se o manifest
+   não carregar. Mantém este pool sincronizado com _LOOT_POOL (combat2_endstate.py). */
 var LOOT_POOL = [
-    { n: 'Poção de Cura',    ico: '🧪', rare: 'comum' },
-    { n: 'Poção de Mana',    ico: '💠', rare: 'comum' },
-    { n: 'Pão Élfico',       ico: '🍞', rare: 'comum' },
-    { n: 'Adaga Afiada',     ico: '🗡', rare: 'incomum' },
-    { n: 'Pergaminho Arcano',ico: '📜', rare: 'incomum' },
-    { n: 'Anel de Vigor',    ico: '💍', rare: 'raro' },
-    { n: 'Esmeralda Bruta',  ico: '💎', rare: 'raro' },
+    { n: 'Poção de Cura',       ico: '🧪', rare: 'comum' },
+    { n: 'Raiz de Mana',        ico: '🌿', rare: 'comum' },
+    { n: 'Pão Fresco',          ico: '🍞', rare: 'comum' },
+    { n: 'Adaga',               ico: '🗡', rare: 'incomum' },
+    { n: 'Pergaminho Mágico',   ico: '📜', rare: 'incomum' },
+    { n: 'Anel de Resistência', ico: '💍', rare: 'raro' },
+    { n: 'Esmeralda',           ico: '💎', rare: 'raro' },
 ];
 function computeRewards(s) {
     var p = s.order[s.p_idx];
