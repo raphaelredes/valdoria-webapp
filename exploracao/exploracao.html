@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-31T23:21:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T02:02:13Z - do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
 
@@ -31850,7 +31850,12 @@ function drawFogComposite() {
     fogCtx.globalCompositeOperation = 'source-over';
     fogCtx.globalAlpha = 1;
     fogCtx.clearRect(0, 0, canvasW, canvasH);
-    fogCtx.imageSmoothingEnabled = true;
+    // Sessão #66 (fog Mata fix): em MATA, upscale NEAREST-NEIGHBOR (sem suavização
+    // bilinear). O bilinear espalhava a borda 0→255 do hex do player sobre os hexes
+    // VIZINHOS, deixando-os semi-visíveis. Nearest = blocos sólidos por hex → os
+    // vizinhos ficam 100% cobertos (regra "tudo preto fora da mata").
+    var _inMataFog = (typeof _isPlayerOnMata === 'function' && _isPlayerOnMata());
+    fogCtx.imageSmoothingEnabled = !_inMataFog;
     fogCtx.imageSmoothingQuality = 'high';
 
     const gridLeft = MAP_OFFSET_X - HEX_W * 0.5;
@@ -31869,8 +31874,7 @@ function drawFogComposite() {
     // mata fiquem literalmente pretos, fog 100% até que o personagem saia
     // da mata". Em mata, FOG_COLOR = preto puro 100% opaco em vez do
     // fog padrão 92%. Cobre tudo fora do hex atual.
-    var _matFogColor = (typeof _isPlayerOnMata === 'function' && _isPlayerOnMata())
-      ? 'rgba(0,0,0,1)' : FOG_COLOR;
+    var _matFogColor = _inMataFog ? 'rgba(0,0,0,1)' : FOG_COLOR;
     fogCtx.globalCompositeOperation = 'source-in';
     fogCtx.fillStyle = _matFogColor;
     fogCtx.fillRect(0, 0, canvasW, canvasH);

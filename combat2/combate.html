@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-05-30T18:56:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T02:02:11Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13601,6 +13601,12 @@ function _gatherCheckpointSnapshot(state) {
     });
     return {
         turn: state.turn | 0,
+        // Sessão #66: salva FASE + turno-ativo + round pra o resume restaurar o
+        // combate em andamento. Sem isto o reload voltava pra ph='intro' e a tela
+        // "Combate Iniciado" entrava em loop (Começar Rolagens/Pular não saíam).
+        ph: state.ph || 'active',
+        active_idx: state.active_idx | 0,
+        rn: state.rn | 0,
         allies: allies,
         enemies: enemies,
         action_used: !!(state.actionUsed || state.action_used),
@@ -13612,6 +13618,9 @@ function _gatherCheckpointSnapshot(state) {
 function sendBattleCheckpoint(state) {
     if (!window.__COMBAT_IS_REMOTE_SESSION) return;
     if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) return;
+    // Sessão #66: só persiste checkpoint de combate ATIVO. Salvar durante a fase
+    // 'intro' fazia o resume restaurar ph='intro' → loop na tela "Combate Iniciado".
+    if (state && state.ph !== 'active') return;
     var snap = _gatherCheckpointSnapshot(state);
     if (!snap) return;
     try {
@@ -13636,6 +13645,17 @@ function applyBattleCheckpoint(state, cp) {
         if (Array.isArray(match.conditions)) c.conditions = match.conditions.slice();
     });
     if (typeof cp.turn === 'number') state.turn = cp.turn;
+    // Sessão #66: restaura FASE/turno-ativo/round — sem isto o resume ficava em
+    // ph='intro' e a tela "Combate Iniciado" entrava em loop ao recarregar.
+    if (cp.ph) state.ph = cp.ph;
+    if (typeof cp.active_idx === 'number') state.active_idx = cp.active_idx;
+    if (typeof cp.rn === 'number') state.rn = cp.rn;
+    // Defensivo: um checkpoint mid-fight NUNCA deve restaurar pro intro. Se a fase
+    // veio ausente/intro mas já houve turno, força 'active' no turno do jogador.
+    if (state.ph === 'intro' && ((cp.turn | 0) > 0 || (cp.rn | 0) > 0)) {
+        state.ph = 'active';
+        if (typeof state.p_idx === 'number') state.active_idx = state.p_idx;
+    }
     state.actionUsed = !!cp.action_used;
     state.bonusUsed = !!cp.bonus_used;
     state.reactionUsed = !!cp.reaction_used;
