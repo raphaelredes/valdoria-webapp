@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T02:40:05Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:12:55Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19565,6 +19565,34 @@ async function __combatLeaveRemoteToOrigin() {
     }
 }
 
+/* Sessão #67 (FIX combate travado no loop do popup "Combate Iniciado"): o path
+   LOCAL chamava animInit() SEM try/catch (o path REMOTE já envolvia). Se animInit
+   lança (sync) ou rejeita (async) — estado de setup da exploração malformado, dado
+   throttled, etc. — o erro era ENGOLIDO silenciosamente: ph nunca saía de 'intro',
+   o popup re-renderizava e os botões "não faziam nada". _safeAnimInit captura o
+   erro, loga ([SIM:NEXT-ERROR] → relay → bot.log) e mostra overlay de erro em vez
+   de loop silencioso. Libera o guard de re-entrância pra não travar retries. */
+function _safeAnimInit(preSkip) {
+    try {
+        var _p = animInit(preSkip);
+        if (_p && typeof _p.catch === 'function') {
+            _p.catch(function (e) { _animInitFailed(e, 'reject'); });
+        }
+    } catch (e) {
+        _animInitFailed(e, 'throw');
+    }
+}
+function _animInitFailed(e, how) {
+    var msg = (e && e.message) || String(e);
+    var stk = ((e && e.stack) || '').split('\n').slice(1, 4).join(' << ');
+    console.error('[SIM:NEXT-ERROR] animInit ' + how + ' (LOCAL): ' + msg + ' | ' + stk);
+    window.__COMBAT_ANIMINIT_RUNNING = false;  // libera guard pra retry
+    if (typeof __combatShowErrorOverlay === 'function') {
+        __combatShowErrorOverlay('Algo deu errado nas rolagens',
+            'Não foi possível iniciar o combate. Reabra o combate para tentar de novo.');
+    }
+}
+
 function onBtnClick(ev) {
     var b = ev.currentTarget;
     var act = b.dataset.act;
@@ -19927,7 +19955,7 @@ function onBtnClick(ev) {
         void __combatLeaveRemoteToOrigin();
         return;
     }
-    if (act === 'next') { animInit(); return; }
+    if (act === 'next') { _safeAnimInit(); return; }
     if (act === 'skip-init') {
         document.body.classList.add('sim-paused-bg');
         confirmSimDiceSkip('Pular todas as rolagens (iniciativa e dados de aliados/inimigos durante o combate)? Suas próprias rolagens continuam sendo mostradas.').then(function (ok) {
@@ -19936,7 +19964,7 @@ function onBtnClick(ev) {
             _skipInit = true;
             _simSkipNonPlayerDice = true;
             if (_activeDiceClose) _activeDiceClose();
-            else animInit(true);
+            else _safeAnimInit(true);
         });
         return;
     }
@@ -26057,6 +26085,19 @@ function closeInitiativeOrderPopup() {
  */
 function showIntroChoicePopup() {
     if (document.getElementById('intro-choice-popup')) return;
+    /* Sessão #67 — diagnóstico do loop reportado pelo user ("fica repetindo a
+       animação de aparecer esse popup"). Se este popup é re-criado várias vezes,
+       render() está sendo chamado em loop com ph='intro' (ph oscilando ou re-boot).
+       O contador + ph vão pra bot.log via relay — revela a causa do loop no retry
+       do user. >3 criações em uma sessão de combate = loop confirmado. */
+    window.__INTRO_POPUP_COUNT = (window.__INTRO_POPUP_COUNT || 0) + 1;
+    if (window.__INTRO_POPUP_COUNT > 3) {
+        console.warn('[SIM:INTRO-LOOP] intro popup re-criado '
+            + window.__INTRO_POPUP_COUNT + 'x — provável render loop. ph='
+            + ((typeof currentState !== 'undefined' && currentState && currentState.ph) || '?')
+            + ' mode=' + (window.__COMBAT_MODE || '?')
+            + ' remote=' + !!window.__COMBAT_IS_REMOTE_SESSION);
+    }
     var ov = document.createElement('div');
     ov.id = 'intro-choice-popup';
     ov.className = 'iop-overlay iop-overlay--batch';
@@ -28180,7 +28221,18 @@ function startSimAfterDiceBoot() {
     }
     var setup = tryConsumeCombatSetup();
     resetSimDiceSkipForNewCombat();
-    currentState = setup ? newCombatFromSetup(setup) : newCombat();
+    /* Sessão #67: boot resiliente. Se newCombatFromSetup lança (setup da exploração
+       malformado), antes o boot quebrava → estado parcial → popup em loop. Agora loga
+       ([SIM:BOOT-ERROR] → bot.log) + cai num combate válido em vez de tela travada. */
+    try {
+        currentState = setup ? newCombatFromSetup(setup) : newCombat();
+    } catch (eBoot) {
+        console.error('[SIM:BOOT-ERROR] newCombatFromSetup threw: '
+            + ((eBoot && eBoot.message) || eBoot)
+            + ' | ' + ((eBoot && eBoot.stack) || '').split('\n').slice(1, 4).join(' << ')
+            + ' | setupKeys=' + (setup ? Object.keys(setup).join(',') : 'none'));
+        currentState = newCombat();
+    }
     if (window.__COMBAT_GODMODE) applyGodmodePatch(currentState);
     render(currentState);
     /* Sub-projeto #1 (2026-04-26) — Pre-combat banner se waves carregadas
