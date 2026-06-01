@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:12:55Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T13:37:31Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19587,9 +19587,12 @@ function _animInitFailed(e, how) {
     var stk = ((e && e.stack) || '').split('\n').slice(1, 4).join(' << ');
     console.error('[SIM:NEXT-ERROR] animInit ' + how + ' (LOCAL): ' + msg + ' | ' + stk);
     window.__COMBAT_ANIMINIT_RUNNING = false;  // libera guard pra retry
+    /* Sessão #67: o combate da exploração é client-side e NÃO relaya logs pro
+       bot.log (sem token). Como não consigo reproduzir no desktop, mostro o ERRO
+       REAL na tela pra o user printar — é a única forma de capturar a causa. */
     if (typeof __combatShowErrorOverlay === 'function') {
-        __combatShowErrorOverlay('Algo deu errado nas rolagens',
-            'Não foi possível iniciar o combate. Reabra o combate para tentar de novo.');
+        __combatShowErrorOverlay('Diagnóstico do combate (sessão #67)',
+            'Erro ao iniciar as rolagens: ' + msg + ' — tire um PRINT desta tela e me mande que eu corrijo a causa exata.');
     }
 }
 
@@ -26097,6 +26100,23 @@ function showIntroChoicePopup() {
             + ((typeof currentState !== 'undefined' && currentState && currentState.ph) || '?')
             + ' mode=' + (window.__COMBAT_MODE || '?')
             + ' remote=' + !!window.__COMBAT_IS_REMOTE_SESSION);
+    }
+    if (window.__INTRO_POPUP_COUNT > 5) {
+        /* Sessão #67: BREAK do loop reportado pelo user ("fica repetindo a animação
+           de aparecer esse popup"). Para de re-criar o popup + mostra diagnóstico
+           on-screen (ph/mode/count) pra o user printar — o combate client-side NÃO
+           relaya pro bot.log, então é a única forma de capturar a causa do loop. */
+        console.error('[SIM:INTRO-LOOP] BREAK em ' + window.__INTRO_POPUP_COUNT + 'x');
+        if (typeof __combatShowErrorOverlay === 'function') {
+            __combatShowErrorOverlay('Diagnóstico do combate (sessão #67)',
+                'Loop detectado no boot do combate (popup re-criado '
+                + window.__INTRO_POPUP_COUNT + 'x · ph='
+                + ((typeof currentState !== 'undefined' && currentState && currentState.ph) || '?')
+                + ' · mode=' + (window.__COMBAT_MODE || '?')
+                + ' · remote=' + !!window.__COMBAT_IS_REMOTE_SESSION
+                + '). Tire um PRINT desta tela e me mande que eu corrijo a causa exata.');
+        }
+        return;  // para de re-criar o popup (quebra o loop)
     }
     var ov = document.createElement('div');
     ov.id = 'intro-choice-popup';
