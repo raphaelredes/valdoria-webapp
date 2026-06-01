@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:23:57Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T20:37:10Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2022,6 +2022,13 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .bf-row--collapsed { height: 0 !important; min-height: 0 !important; max-height: 0 !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
 .row-label.bf-row--collapsed { display: none !important; }
 .battlefield .bf-row.bf-row--collapsed .cell { height: 0 !important; min-height: 0 !important; max-height: 0 !important; padding: 0 !important; margin: 0 !important; border-width: 0 !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+/* Sessão #67 (2026-06-01): colapso de COLUNA — cells VAZIAS são dimensionadas
+   pela trilha do grid (width:auto) em vez do 160px fixo. Em coluna colapsada
+   (trilha 0px, via grid-template inline) somem; em coluna ocupada (trilha 160px)
+   viram slot normal. Sem isso a cell vazia ficaria 160px e estouraria a trilha
+   0px. NÃO afeta .occupied (mantém 160px). Specificity (.battlefield .bf-row
+   .cell:not(.occupied) = 4 classes) vence o !important de 160px acima. */
+.battlefield .bf-row .cell:not(.occupied) { width: auto !important; min-width: 0 !important; max-width: none !important; overflow: hidden !important; }
 .cell.occupied { cursor: pointer; position: relative; overflow: visible; }
 
 /* ===========================================================================
@@ -16125,6 +16132,28 @@ function buildBattlefield(s) {
     } else if (_selectingTarget && ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem)) {
         bfExtra = ' picker-heal';
     }
+    /* Sessão #67 (2026-06-01): colapso de COLUNA vazia (par com o colapso de
+       fileira). occupiedCols = colunas com >=1 unidade em qualquer fileira. As
+       colunas totalmente vazias viram trilha de 0px no grid-template → o
+       tabuleiro se compacta à largura REAL do combate. Um 1v1 usa 1 coluna
+       (cards grandes) em vez de 4 (cards minúsculos espremidos num viewport de
+       celular). Largura (4 col x 160px = ~758px) era o gargalo real em telas
+       <=440px, não a altura. Template idêntico entre fileiras = alinhamento
+       mantido. Cells vazias usam width:auto (CSS) → 0px na coluna colapsada,
+       slot de 160px na coluna ocupada. Fallback p/ grid cheio se nada ocupado. */
+    var occupiedCols = [false, false, false, false];
+    for (var orow = 0; orow < 4; orow++) {
+        for (var ocol = 0; ocol < 4; ocol++) {
+            if (grid[orow][ocol] !== null) occupiedCols[ocol] = true;
+        }
+    }
+    if (!occupiedCols[0] && !occupiedCols[1] && !occupiedCols[2] && !occupiedCols[3]) {
+        occupiedCols = [true, true, true, true];
+    }
+    var _bfCellW = 'calc(160px * var(--v-font-scale, 1))';
+    var _bfColTemplate = occupiedCols.map(function (o) { return o ? _bfCellW : '0px'; }).join(' ');
+    var _bfRowStyle = ' style="grid-template-columns: ' + _bfColTemplate + ' !important"';
+
     html += '<div class="battlefield' + bfExtra + '">';
     for (var row = 0; row < 4; row++) {
         var zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
@@ -16140,7 +16169,7 @@ function buildBattlefield(s) {
         var rowVacant = isBackRow && !grid[row].some(function (c) { return c !== null; });
         var collapseCls = rowVacant ? ' bf-row--collapsed' : '';
         html += '<div class="row-label' + zoneClass + collapseCls + '">' + escHtml(ROW_LABELS[row]) + '</div>';
-        html += '<div class="bf-row' + collapseCls + '">';
+        html += '<div class="bf-row' + collapseCls + '"' + _bfRowStyle + '>';
         for (var col = 0; col < 4; col++) {
             html += buildCell(grid[row][col], activeId);
         }
