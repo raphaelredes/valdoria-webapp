@@ -37763,14 +37763,29 @@ var JOURNEY_SAFE = {
 };
 var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
 
+// #21 (sessão #70): nº de etapas = distância Manhattan do jogador até o ponto
+// de entrada do mapa (spawn). Quanto mais longe vagou, mais longa a viagem de
+// volta. ≤6 hex → 3 · 7-14 → 4 · ≥15 → 5 (mesmo range 3-5 do random antigo).
+function _stepsForDistance() {
+  var p = S && S.player;
+  if (!p || typeof p.col !== 'number') return 3;
+  var md = S && S.mapDef;
+  var tc = (md && typeof md.spawnCol === 'number') ? md.spawnCol : Math.floor((COLS || 20) / 2);
+  var tr = (md && typeof md.spawnRow === 'number') ? md.spawnRow : Math.floor((ROWS || 24) / 2);
+  var dist = Math.abs(p.col - tc) + Math.abs(p.row - tr);
+  if (dist <= 6) return 3;
+  if (dist <= 14) return 4;
+  return 5;
+}
+
 function startJourneyToMap(targetMapId, targetMap, options) {
   // 2026-05-05 v11: opções pra suportar "first arrival from cidade".
   // Antes só era usado pra map-to-map travel WITHIN exploracao.
   // Agora também é a tela canônica pra travel cidade→exploracao
   // (substituiu pt-overlay deletada em cidade.html).
   options = options || {};
-  // Inicia jornada com 3-5 etapas dependendo da distancia/bioma
-  const totalSteps = 3 + Math.floor(Math.random() * 3);
+  // #21: etapas pela distância vagada (options.steps faz override explícito).
+  const totalSteps = (typeof options.steps === 'number') ? options.steps : _stepsForDistance();
   _journey = {
     targetMapId: targetMapId,
     targetMap: targetMap,
@@ -37780,7 +37795,10 @@ function startJourneyToMap(targetMapId, targetMap, options) {
     riskChance: 55,  // 55% de chance de hazard por etapa
     // Quando vem de cidade, mapa já foi booted → não re-boot ao chegar
     skipReboot: !!options.skipReboot,
-    titlePrefix: options.titlePrefix || 'Rumo a '
+    titlePrefix: options.titlePrefix || 'Rumo a ',
+    // #21: callback ao chegar (ex.: retorno à cidade) + flag de retorno à cidade
+    onArrive: (typeof options.onArrive === 'function') ? options.onArrive : null,
+    isCityReturn: !!options.isCityReturn
   };
   document.getElementById('journey-title').textContent = _journey.titlePrefix + targetMap.name;
   document.getElementById('journey-overlay').classList.add('show');
@@ -37989,6 +38007,9 @@ function _journeyContinueBtn() {
   } else {
     _addJourneyBtn(footEl, '✦', 'Chegar ao destino', 'Você avista as fronteiras de ' + j.targetMap.name, 'gold', function() { _journeyArrive(); });
   }
+  // #21: acampar durante a jornada (descanso curto/longo D&D 5e). Reusa o
+  // camp-screen; ao sair retoma a jornada exatamente onde parou.
+  _addJourneyBtn(footEl, '🏕️', 'Acampar', 'Descansar antes de seguir', '', function() { _journeyCamp(); });
 }
 
 function _addJourneyBtn(container, icon, title, desc, cls, onClick) {
@@ -38006,9 +38027,12 @@ function _addJourneyBtn(container, icon, title, desc, cls, onClick) {
 function _journeyArrive() {
   const j = _journey;
   if (!j) return;
+  const onArrive = j.onArrive;        // #21: captura antes de _closeJourney() nular
   const skipReboot = j.skipReboot;
   const targetName = j.targetMap.name;
   _closeJourney();
+  // #21: chegada à cidade (ou outro destino com callback) → roda o retorno real
+  if (onArrive) { onArrive(); return; }
   if (skipReboot) {
     // First arrival from cidade — mapa já booted, só anuncia chegada
     if (typeof dmNarrate === 'function') {
@@ -38027,6 +38051,68 @@ function _journeyArrive() {
 function _closeJourney() {
   document.getElementById('journey-overlay').classList.remove('show');
   _journey = null;
+}
+
+// #21 (sessão #70): retorno à cidade VIA jornada "Rumo a Valdoria". Mais longa
+// quanto mais longe o jogador vagou (etapas por distância) + opção de acampar.
+// Ao chegar aos Portões de Valdoria, dispara o retorno REAL (_returnToCityNow).
+function startReturnToCity() {
+  if (_journey) return;  // já em jornada — não relança
+  var biome = (S && S.mapDef && S.mapDef.biome) ? S.mapDef.biome
+            : ((S && S.biome) ? S.biome : 'plains');
+  startJourneyToMap('city_gates',
+    { name: 'Valdoria', biome: biome },
+    { titlePrefix: 'Rumo a ', isCityReturn: true, onArrive: _returnToCityNow });
+}
+
+// #21: fluxo real de retorno (callback de chegada da jornada). Reproduz o
+// mecanismo já testado dos botões de cidade: finish() aplica HP/loot/flags da
+// sessão ao Player + redirect /cidade/. file:// (LOCAL) usa caminho relativo.
+function _returnToCityNow() {
+  window.__valdoria_transitioning = true;  // anti close-beacon do error-reporter
+  if (window._vTransitionLoader) {
+    try { window._vTransitionLoader.show('Voltando para a cidade...'); } catch (_) {}
+  }
+  function _doRedirect() {
+    try {
+      if (location.protocol === 'file:') {
+        window.location.replace('./cidade.html?back=exploration');
+        return;
+      }
+      var qs = new URLSearchParams(location.search);
+      var nqs = new URLSearchParams();
+      ['token', 'uid', 'user_id', 'api', 'api_base', 'char', 'char_id', 'env'].forEach(function (k) {
+        var v = qs.get(k); if (v) nqs.set(k, v);
+      });
+      nqs.set('back', 'exploration');
+      nqs.set('nointro', '1');
+      window.location.replace('/cidade/?' + nqs.toString());
+    } catch (eR) {
+      console.error('[RETURN-CITY] redirect failed:', eR);
+    }
+  }
+  try {
+    if (typeof ExploracaoAPI !== 'undefined' && ExploracaoAPI && ExploracaoAPI.finish
+        && ExploracaoAPI.hasToken && ExploracaoAPI.hasToken()) {
+      ExploracaoAPI.finish().then(_doRedirect).catch(_doRedirect);
+      setTimeout(_doRedirect, 2000);  // failsafe se finish() travar
+    } else {
+      _doRedirect();
+    }
+  } catch (eF) {
+    console.warn('[RETURN-CITY] finish exception, redirecting anyway:', eF);
+    _doRedirect();
+  }
+}
+
+// #21: acampar durante a jornada. Esconde a jornada (preserva _journey + o
+// footer atual com os botões) e a retoma quando o camp fecha (closeCampOverlay).
+function _journeyCamp() {
+  if (!_journey) return;
+  _journey._resumeAfterCamp = true;
+  var ov = document.getElementById('journey-overlay');
+  if (ov) ov.classList.remove('show');
+  if (typeof openCampOverlay === 'function') openCampOverlay();
 }
 
 // ============================================================================
@@ -38277,6 +38363,13 @@ function closeCampOverlay() {
   const ov = document.getElementById('camp-screen');
   if (ov) ov.classList.remove('active');
   try { if (window.CampFire) window.CampFire.destroy(); } catch (_) {}
+  // #21: se o camp foi aberto durante a jornada de volta, retoma a jornada
+  // (footer/narração permanecem intactos — só re-exibe o overlay).
+  if (_journey && _journey._resumeAfterCamp) {
+    _journey._resumeAfterCamp = false;
+    var jov = document.getElementById('journey-overlay');
+    if (jov) jov.classList.add('show');
+  }
 }
 
 // Helper: dN roll
@@ -39698,49 +39791,15 @@ function _xcartWireEvents() {
   var cityBtn = document.getElementById('xcart-city-btn');
   if (cityBtn) {
     cityBtn.onclick = function(){
-      cityBtn.disabled = true;
-      cityBtn.textContent = '🏰 Voltando para a cidade...';
       try { closeCartography(); } catch(_) {}
-      function _doRedirect() {
-        try {
-          // Preserva params essenciais pra cidade reconhecer player
-          var qs = new URLSearchParams(location.search);
-          var nqs = new URLSearchParams();
-          ['token','uid','user_id','api','api_base','char','char_id','env'].forEach(function(k){
-            var v = qs.get(k); if (v) nqs.set(k, v);
-          });
-          // Sessão #26 v2 (2026-05-22) USER REQUEST: levelup é tela mais importante.
-          // Cidade SEMPRE detecta pending levelup via /api/game/state e redireciona
-          // pra /levelup/. NÃO usar _skiprestore aqui — user pediu que levelup tenha
-          // prioridade sobre qualquer outra tela. Se houver loop de stale URL, fix
-          // upstream é o backend regenerar URL fresh (já faz — token criado por call).
-          var url = '/cidade/?' + nqs.toString();
-          window.__valdoria_transitioning = true;
-          if (window._vTransitionLoader) {
-            try { window._vTransitionLoader.show('Voltando para a cidade...'); } catch(_) {}
-          }
-          setTimeout(function(){ window.location.href = url; }, 50);
-        } catch(eR) {
-          console.error('[CART-CITY] redirect failed:', eR);
-          alert('Não foi possível voltar para a cidade. Recarregue a página.');
-        }
-      }
-      // Tenta finish API se disponivel; nao bloqueia redirect se falhar
-      try {
-        if (typeof ExploracaoAPI !== 'undefined' && ExploracaoAPI.finish && ExploracaoAPI.hasToken && ExploracaoAPI.hasToken()) {
-          ExploracaoAPI.finish().then(function(r){
-            console.info('[CART-CITY] finish ok:', r && r.applied);
-            _doRedirect();
-          }).catch(function(e){
-            console.warn('[CART-CITY] finish failed, redirecting anyway:', e);
-            _doRedirect();
-          });
-        } else {
-          _doRedirect();
-        }
-      } catch(eF) {
-        console.warn('[CART-CITY] finish exception, redirecting anyway:', eF);
-        _doRedirect();
+      // #21 (sessão #70): volta à cidade via jornada "Rumo a Valdoria" (mais
+      // longa quanto mais longe vagou + opção de acampar). Ao chegar aos
+      // Portões, a própria jornada dispara _returnToCityNow (finish + redirect,
+      // aplica HP/loot da sessão). Fallback direto se a jornada indisponível.
+      if (typeof startReturnToCity === 'function') {
+        startReturnToCity();
+      } else if (typeof _returnToCityNow === 'function') {
+        _returnToCityNow();
       }
     };
   }
@@ -44731,65 +44790,14 @@ function _openCartographyWithPrompt(){
       var action = btn.dataset.cbp;
       prompt.classList.remove('active');
       if (action === 'yes') {
-        /* USER REPORT 2026-05-17: botão "Voltar pra Cidade" não navegava em
-           prod (dev.lendasdevaldoria.com.br). 2 problemas:
-           1) URL relativa ./cidade.html só funciona em file:// — em prod
-              resolve pra /exploracao/cidade.html que dá 404 silencioso.
-           2) Mesmo navegando pra /cidade/, o server redirecionava DE VOLTA
-              pra /exploracao/ porque player.metadata.in_explore_webapp
-              ainda estava true (server-only state). Solução completa
-              requer CHAMAR /api/exploracao/finish que limpa flags +
-              destroi session.
-
-           Fix v2: file:// usa relativa (simulator testing), HTTPS chama
-           finish() ANTES de redirecionar pra /cidade/ — backend
-           (exploracao/http.py handle_finish) já limpa
-           in_explore_webapp/explore_payload/etc da metadata + destroi
-           session + persiste loot/xp/gold ganhos.
-
-           Defesa em profundidade: redirect acontece mesmo se finish
-           falhar (try/catch), pra não deixar player preso. Server cleanup
-           será aplicado na próxima reabertura. */
-        if (location.protocol === 'file:') {
-          window.location.href = './cidade.html?back=exploration';
-        } else {
-          var qs = new URLSearchParams(location.search);
-          var preserved = ['token', 'uid', 'user_id', 'api', 'api_base', 'char', 'char_id', 'env'];
-          var newParams = new URLSearchParams();
-          preserved.forEach(function(k){
-            var v = qs.get(k);
-            if (v) newParams.set(k, v);
-          });
-          newParams.set('back', 'exploration');
-          newParams.set('nointro', '1');
-          var redirectUrl = '/cidade/?' + newParams.toString();
-
-          /* Tenta finish() pra limpar metadata.in_explore_webapp +
-             destruir session no server. Sem isso, server redireciona de
-             volta pra /exploracao/ no /api/game/state. */
-          var _doRedirect = function() {
-            window.location.replace(redirectUrl);
-          };
-          if (window.ExploracaoAPI && typeof window.ExploracaoAPI.finish === 'function') {
-            console.info('[VOLTAR_CIDADE] chamando ExploracaoAPI.finish() antes do redirect');
-            try {
-              window.ExploracaoAPI.finish().then(function(res){
-                console.info('[VOLTAR_CIDADE] finish ok, redirecting', res && res.ok);
-                _doRedirect();
-              }).catch(function(err){
-                console.warn('[VOLTAR_CIDADE] finish failed mas redirecting mesmo assim', err);
-                _doRedirect();
-              });
-              /* Failsafe: força redirect em 2s mesmo se finish() trava */
-              setTimeout(_doRedirect, 2000);
-            } catch (e) {
-              console.error('[VOLTAR_CIDADE] finish throw, redirect direto', e);
-              _doRedirect();
-            }
-          } else {
-            console.warn('[VOLTAR_CIDADE] ExploracaoAPI.finish ausente, redirect direto');
-            _doRedirect();
-          }
+        // #21 (sessão #70): retorno à cidade via jornada "Rumo a Valdoria"
+        // (mais longa quanto mais longe vagou + opção de acampar). Ao chegar
+        // aos Portões, a própria jornada dispara _returnToCityNow (finish +
+        // redirect — limpa flags/in_explore_webapp + aplica loot/HP/gold).
+        if (typeof startReturnToCity === 'function') {
+          startReturnToCity();
+        } else if (typeof _returnToCityNow === 'function') {
+          _returnToCityNow();
         }
       } else {
         if (typeof openCartography === 'function') openCartography();
