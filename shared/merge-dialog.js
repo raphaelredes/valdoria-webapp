@@ -92,8 +92,17 @@
             var btn = _el('button', 'display:block;width:100%;margin:var(--v-space-sm,8px) 0;text-align:left;'
                 + 'white-space:normal;padding:var(--v-space-md,10px);background:var(--v-bg-raised,#332a22);'
                 + 'border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);'
-                + 'color:var(--v-text,#d4c8b0);cursor:pointer;font-family:inherit',
-                '<b>' + opt.label + '</b><br><span style="opacity:.8;font-size:.85em">' + opt.result + '</span>');
+                + 'color:var(--v-text,#d4c8b0);cursor:pointer;font-family:inherit');
+            // textContent (NÃO innerHTML) — defesa contra XSS caso label/result um dia
+            // carregue dado controlado pelo jogador (ex: nome de personagem). Review F6.
+            var bold = document.createElement('b');
+            bold.textContent = opt.label || '';
+            var span = document.createElement('span');
+            span.style.cssText = 'opacity:.8;font-size:.85em';
+            span.textContent = opt.result || '';
+            btn.appendChild(bold);
+            btn.appendChild(document.createElement('br'));
+            btn.appendChild(span);
             btn.addEventListener('click', function () { _exec(cfg, opt.id, overlay); });
             card.appendChild(btn);
         });
