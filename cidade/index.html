@@ -27881,7 +27881,9 @@ function _squareShowEntryInteractive(p, ev){
 
 // PADRAO_ALDRIC: resolve interactive choice — skill check d20 vs DC ou
 // effect direto. Mostra _showServiceResultPopup com narrative + dice + deltas.
-function _resolveInteractiveChoice(player, choice) {
+// #10 (sessão #70): LOCAL (file://) — roll client-side (dev tool). Em REMOTE o
+// servidor é a autoridade (_resolveInteractiveChoiceREMOTE). SUPREME RULE #0.
+function _resolveInteractiveChoiceLOCAL(player, choice) {
   var STAT_TO_ABBR = { strength: 'FOR', dexterity: 'DES', constitution: 'CON',
                         intelligence: 'INT', wisdom: 'SAB', charisma: 'CAR' };
   var success = true;
@@ -27950,6 +27952,89 @@ function _resolveInteractiveChoice(player, choice) {
     dice: diceData,
     onContinue: function(){}
   });
+}
+
+// #10: REMOTE — o servidor rola o d20 + aplica gold/xp/hp/reputação e persiste
+// (SUPREME RULE #0). O cliente sincroniza o estado autoritativo, anima o d20
+// (valor do servidor) e mostra o texto success/fail do dataset client-side.
+function _resolveInteractiveChoiceREMOTE(player, choice) {
+  var STAT_TO_ABBR = { strength: 'FOR', dexterity: 'DES', constitution: 'CON',
+                        intelligence: 'INT', wisdom: 'SAB', charisma: 'CAR' };
+  var preGold = player.gold || 0, preXp = player.xp || 0;
+  var preLevel = player.level || 1, preXpNext = player.xpNext || 100;
+  var preHp = player.hp || 0, hpMax = player.hpMax || 28;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
+  window.vCityServer.cityAction('social.check', {
+    encounter_id: choice._encounter_id || '',
+    choice_id: choice._choice_id || choice.id || '',
+    stat: choice.stat || '',
+    dc: choice.dc || 0,
+    npc_id: choice.npc_id || '',
+    effect: choice.effect || {},
+    effect_fail: choice.effect_fail || {}
+  }).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    // Sincroniza o estado autoritativo do servidor (sempre que vier).
+    if (res && typeof res.gold === 'number') player.gold = res.gold;
+    if (res && typeof res.xp === 'number') player.xp = res.xp;
+    if (res && typeof res.level === 'number') player.level = res.level;
+    if (res && typeof res.hp === 'number') player.hp = res.hp;
+    if (typeof refreshHud === 'function') refreshHud();
+    if (!res || !res.ok) {
+      vToast((res && res.error === 'already_used') ? 'Você já resolveu isso.' : 'Não foi possível resolver agora.', 'warn');
+      return;
+    }
+    var hasCheck = !!(choice.stat && choice.dc);
+    var success = !!res.success;
+    var rolledLine = '', diceData = null;
+    if (hasCheck && typeof res.d20 === 'number') {
+      var abbr = STAT_TO_ABBR[choice.stat] || String(choice.stat).toUpperCase();
+      var mod = res.modifier || 0;
+      rolledLine = '🎲 ' + abbr + ': ' + res.d20 + (mod >= 0 ? '+' : '') + mod + ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (success ? '✅ Sucesso' : '❌ Falha') + '<br><br>';
+      diceData = { formula: '1d20' + (mod >= 0 ? '+' : '') + mod + ' vs DC ' + res.dc, sides: 20, value: res.d20, total: res.total };
+    }
+    var narrative = success ? (choice.result_text || '') : (choice.result_text_fail || choice.result_text || '');
+    var deltas = [], rewards = [];
+    var goldDelta = (typeof res.gold_delta === 'number') ? res.gold_delta : (player.gold - preGold);
+    if (goldDelta) {
+      deltas.push({ type: 'gold', label: 'Bolsa', from: preGold, to: player.gold, max: Math.max(preGold, player.gold, 1), bar: false });
+      if (goldDelta > 0) rewards.push({ type: 'gold', amount: goldDelta, label: 'Valdoritas' });
+    }
+    var xpDelta = (typeof res.xp_delta === 'number') ? res.xp_delta : 0;
+    if (xpDelta) {
+      if ((player.level || 1) > preLevel) {
+        deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXpNext, max: preXpNext, bar: false, _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+      } else {
+        deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXp + xpDelta, max: preXpNext, bar: false });
+      }
+      if (xpDelta > 0) rewards.push({ type: 'xp', amount: xpDelta, label: 'Experiência' });
+    }
+    if (typeof res.hp === 'number' && res.hp !== preHp) {
+      deltas.push({ type: 'hp', label: 'HP', from: preHp, to: res.hp, max: hpMax, bar: true });
+    }
+    _showServiceResultPopup({
+      icon: choice.icon || _heralIco('ic-praca'),
+      npc: choice.npc_label || 'Praça Central',
+      narrative: rolledLine + narrative,
+      deltas: deltas,
+      rewards: rewards.length > 0 ? rewards : null,
+      dice: diceData,
+      onContinue: function(){}
+    });
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] social.check failed', e);
+    vToast('Erro ao resolver teste.', 'warn');
+  });
+}
+
+// Dispatcher: REMOTE (servidor é autoridade) vs LOCAL (file:// dev tool).
+function _resolveInteractiveChoice(player, choice) {
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+    _resolveInteractiveChoiceREMOTE(player, choice);
+  } else {
+    _resolveInteractiveChoiceLOCAL(player, choice);
+  }
 }
 window._resolveInteractiveChoice = _resolveInteractiveChoice;
 
@@ -55736,6 +55821,8 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // result_text_fail? }. Resolver d20 vs DC + delta popup canonical.
     var interactiveData = choice._interactiveData;
     if (interactiveData && typeof _resolveInteractiveChoice === 'function') {
+      interactiveData._encounter_id = (enc && enc.id) || '';  // #10: anti-replay server-side
+      interactiveData._choice_id = (choice && choice.id) || '';
       _resolveInteractiveChoice(player, interactiveData);
     }
   } else if (choice.result === 'shadow_aldric') {
@@ -55744,6 +55831,8 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
        Reusa _resolveInteractiveChoice canonical. */
     var shadowData = choice._interactiveData;
     if (shadowData && typeof _resolveInteractiveChoice === 'function') {
+      shadowData._encounter_id = (enc && enc.id) || '';  // #10: anti-replay server-side
+      shadowData._choice_id = (choice && choice.id) || '';
       _resolveInteractiveChoice(player, shadowData);
     }
   } else if (choice.result === 'discovery_unlock') {
