@@ -43310,26 +43310,29 @@ function _showServiceResultPopup(opts){
         // Clamp à face do dado pra evitar rolagens inválidas
         if (rollFace > sides) rollFace = ((rollFace - 1) % sides) + 1;
         if (rollFace < 1)     rollFace = 1;
+        // PADRAO_DADOS: reveal idempotente + safety timeout. Se o callback do
+        // Dice3D NÃO disparar (aba em background com requestAnimationFrame
+        // throttled, WebGL lento, device fraco), o "Continuar →" aparece mesmo
+        // assim — o jogador NUNCA fica preso na fase 1 do dado.
+        var _diceRevealed = false;
+        function _srpRevealDice(){
+          if (_diceRevealed) return; _diceRevealed = true;
+          try { document.getElementById('srp-dice-formula').textContent = opts.dice.formula; } catch(_e){}
+          try { document.getElementById('srp-dice-total').textContent = opts.dice.total; } catch(_e){}
+          if (diceEl) diceEl.style.display = '';
+          _srpRevealNarrative();
+        }
+        setTimeout(_srpRevealDice, 4000);  // safety: nunca deixa o jogador preso
         setTimeout(function(){
           try {
             instance.roll(rollFace, function(){
-              // Após rolar, mostra label fórmula+total fixo abaixo
-              setTimeout(function(){
-                document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
-                document.getElementById('srp-dice-total').textContent   = opts.dice.total;
-                diceEl.style.display = '';
-                // 2026-05-22: revela narrativa SÓ AGORA que dado terminou
-                _srpRevealNarrative();
-              }, 400);
+              // Após rolar, mostra label fórmula+total fixo abaixo + libera Continuar
+              setTimeout(_srpRevealDice, 400);
             });
           } catch(eR){
             console.warn('[SRP] Dice3D roll failed:', eR);
-            // Fallback CSS pill
             dice3dEl.style.display = 'none';
-            document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
-            document.getElementById('srp-dice-total').textContent   = opts.dice.total;
-            diceEl.style.display = '';
-            _srpRevealNarrative();
+            _srpRevealDice();
           }
         }, 350);
       } catch(eC){
