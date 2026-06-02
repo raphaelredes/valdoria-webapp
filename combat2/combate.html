@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T04:28:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T10:12:16Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1010,6 +1010,59 @@ html body .va-backdrop {
     padding: 0 8px;
     color: var(--v-gold, #c4953a);
     font-size: calc(14px * var(--v-font-scale, 1));
+}
+/* #17 (sessão #70): narrativa do evento em typewriter, acima dos CTAs.
+   Narração 3ª pessoa (sem DM-as-speaker); herda fonte do card pra legibilidade. */
+#intro-choice-popup .c2-intro-narrative {
+    margin: 2px auto 16px !important;
+    max-width: 94% !important;
+    text-align: center !important;
+    color: var(--v-text, #d4c8b0) !important;
+    font-size: calc(14.5px * var(--v-font-scale, 1)) !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.2px !important;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    min-height: 1.6em !important;
+}
+#intro-choice-popup .c2-intro-narrative i,
+#intro-choice-popup .c2-intro-narrative em {
+    color: var(--v-gold-soft, #e8c45a) !important;
+    font-style: italic !important;
+}
+#intro-choice-popup .c2-intro-narrative.typing::after {
+    content: '▌';
+    color: var(--v-gold, #c4953a);
+    margin-left: 2px;
+    animation: c2NarrCaret 0.9s steps(1) infinite;
+}
+@keyframes c2NarrCaret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+/* Dica "toque para revelar" enquanto digita (aparece só após 500ms) */
+#intro-choice-popup .c2-intro-skip-hint {
+    text-align: center !important;
+    color: var(--v-text-dim, #a09484) !important;
+    font-size: calc(10px * var(--v-font-scale, 1)) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin: 0 0 10px !important;
+    animation: c2HintPulse 1.8s ease-in-out infinite;
+}
+@keyframes c2HintPulse { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.78; } }
+/* CTAs ocultos até a narração terminar (sem layout shift: ocupam espaço) */
+#intro-choice-popup .iop-start-wrap.c2-cta-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(8px);
+}
+#intro-choice-popup .iop-start-wrap.c2-cta-reveal {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    #intro-choice-popup .c2-intro-narrative.typing::after,
+    #intro-choice-popup .c2-intro-skip-hint { animation: none !important; }
+    #intro-choice-popup .iop-start-wrap.c2-cta-reveal { transition: none !important; }
 }
 /* Container dos CTAs */
 #intro-choice-popup .iop-start-wrap {
@@ -13869,6 +13922,9 @@ function newCombatFromSetup(cfg) {
         if (c.summonKind) c.summonedBy = p_idx;
     });
     var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest', _fromSetup: true,
+             /* #17 (sessao #70): narrativa do evento (ex: "Tres orcs saltam...")
+                vinda do setup.narrative -> exibida via typewriter na intro do combate. */
+             narrative: cfg.narrative || '',
              /* V1 Invocações Phase 1 — dict[caster_idx -> list[attached_summon]] */
              attachedSummons: {},
              /* Phase 5b polish v3 — flag global do encontro pra UI mostrar
@@ -26272,6 +26328,49 @@ function closeInitiativeOrderPopup() {
  * Callback: buttons têm data-act="next" e data-act="skip-init" — bindActions
  * (chamada por render) anexa onBtnClick automaticamente.
  */
+/* #17 (sessão #70): typewriter inline pra narrativa de intro do combate.
+   Baseado em _typewriter de encounter-popup.js (NÃO carregado no combate),
+   simplificado: narração pura 3ª pessoa (sem choices/NPC). Tags HTML (<i>/<b>)
+   são inseridas instantâneas; só caracteres de texto são digitados (~28ms/char,
+   Human Reading Time). Retorna uma função skip() que completa imediatamente. */
+function _combatTypewriter(el, text, charMs, onDone) {
+    if (!el) { if (typeof onDone === 'function') onDone(); return function () {}; }
+    charMs = charMs || 28;
+    text = String(text == null ? '' : text);
+    /* Tokeniza: tags HTML inteiras vs caracteres de texto. */
+    var tokens = [], i = 0;
+    while (i < text.length) {
+        var c = text.charAt(i);
+        if (c === '<') {
+            var end = text.indexOf('>', i);
+            if (end > 0) { tokens.push(text.substring(i, end + 1)); i = end + 1; continue; }
+        }
+        tokens.push(c); i++;
+    }
+    var built = '', idx = 0, done = false, timer = null;
+    el.classList.add('typing');
+    el.innerHTML = '';
+    function finish() {
+        if (done) return;
+        done = true;
+        if (timer) { clearTimeout(timer); timer = null; }
+        el.innerHTML = text;  /* garante HTML completo */
+        el.classList.remove('typing');
+        if (typeof onDone === 'function') onDone();
+    }
+    function step() {
+        if (done) return;
+        if (idx >= tokens.length) { finish(); return; }
+        var tok = tokens[idx++];
+        built += tok;
+        el.innerHTML = built;
+        var delay = (tok.length > 1) ? 0 : charMs;  /* tags = instantâneo */
+        timer = setTimeout(step, delay);
+    }
+    step();
+    return finish;
+}
+
 function showIntroChoicePopup() {
     if (document.getElementById('intro-choice-popup')) return;
     /* Sessão #67 — diagnóstico do loop reportado pelo user ("fica repetindo a
@@ -26337,6 +26436,29 @@ function showIntroChoicePopup() {
         '</div>'
     ];
     setHTML(card, parts.join(''));
+    /* #17 (sessão #70): injeta a narrativa do evento ANTES dos CTAs via DOM (pós
+       setHTML — evita reescrever o array literal). currentState.narrative vem do
+       servidor (setup.narrative → newCombatFromSetup). Narração 3ª pessoa pura;
+       combates sem narrativa mantêm o fluxo clássico (CTAs já visíveis). */
+    var _introNarr = '';
+    try {
+        _introNarr = (currentState && currentState.narrative)
+            ? String(currentState.narrative).trim() : '';
+    } catch (_eN) { _introNarr = ''; }
+    var _hasNarr = _introNarr.length > 0;
+    var _ctasEl = card.querySelector('.iop-start-wrap');
+    var _narrEl = null, _hintEl = null;
+    if (_hasNarr && _ctasEl) {
+        _narrEl = document.createElement('div');
+        _narrEl.className = 'c2-intro-narrative';
+        _hintEl = document.createElement('div');
+        _hintEl.className = 'c2-intro-skip-hint';
+        _hintEl.style.display = 'none';
+        _hintEl.textContent = 'toque para continuar';
+        _ctasEl.parentNode.insertBefore(_narrEl, _ctasEl);
+        _ctasEl.parentNode.insertBefore(_hintEl, _ctasEl);
+        _ctasEl.classList.add('c2-cta-hidden');  /* oculta CTAs até a narração terminar */
+    }
     ov.appendChild(card);
     mountInGameFrame(ov);
     /* bindActions já rodou ANTES desta chamada (render → bindActions → popup).
@@ -26350,6 +26472,33 @@ function showIntroChoicePopup() {
             ctaMount._d3d = window.Dice3D.createDiceForDom(ctaMount, { dieType: 'd20' });
         }
     } catch (_eD) { /* sem dice3d — OK, botão funciona sem animação */ }
+    /* #17: dispara o typewriter da narrativa; CTAs revelam ao terminar (ou skip
+       por tap após 500ms). Variáveis _introNarr/_narrEl/_hintEl/_ctasEl vêm do
+       bloco acima (escopo de função). */
+    if (_hasNarr && _narrEl) {
+        var _narrRevealed = false;
+        var _skipFn = null;
+        var _revealCtas = function () {
+            if (_narrRevealed) return;
+            _narrRevealed = true;
+            if (_hintEl) _hintEl.style.display = 'none';
+            if (_ctasEl) { _ctasEl.classList.remove('c2-cta-hidden'); _ctasEl.classList.add('c2-cta-reveal'); }
+        };
+        _skipFn = _combatTypewriter(_narrEl, _introNarr, 28, _revealCtas);
+        /* Skip habilitado só após 500ms (double-fire guard: o tap que abriu o
+           combate não deve pular a narração instantaneamente). */
+        var _skipArmed = false;
+        setTimeout(function () {
+            _skipArmed = true;
+            if (_hintEl && !_narrRevealed) _hintEl.style.display = '';
+        }, 500);
+        card.addEventListener('click', function (e) {
+            if (_narrRevealed || !_skipArmed) return;
+            if (e.target && e.target.closest && e.target.closest('.iop-start-wrap')) return;  /* CTAs seguem fluxo normal */
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (typeof _skipFn === 'function') _skipFn(); else _revealCtas();
+        });
+    }
 }
 
 function closeIntroChoicePopup() {

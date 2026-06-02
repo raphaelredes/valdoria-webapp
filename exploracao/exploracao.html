@@ -10633,7 +10633,9 @@ window.__onIntroTap = function() {
             if (_dc && _dc.enemy) {
               _evCombat = { enemyId: _dc.enemy, surprise: !!_dc.surprise,
                 lookup_name: _dc.lookup_name || null,
-                preCombatEffects: Array.isArray(_dc.preCombatEffects) ? _dc.preCombatEffects : [] };
+                preCombatEffects: Array.isArray(_dc.preCombatEffects) ? _dc.preCombatEffects : [],
+                /* #17 (sessao #70): narrativa do evento -> intro typewriter do combate */
+                narrative: _dc.narrative || (outcome && (outcome.flavor || outcome.text)) || '' };
             } else {
               var _raw = rollResult.success ? choice.okCombat : choice.failCombat;
               if (_raw) {
@@ -10648,7 +10650,9 @@ window.__onIntroTap = function() {
                 }
                 _evCombat = { enemyId: _enemy,
                   surprise: (_raw && typeof _raw === 'object') ? !!_raw.surprise : false,
-                  lookup_name: null, preCombatEffects: [] };
+                  lookup_name: null, preCombatEffects: [],
+                  /* #17 (sessao #70): narrativa do evento -> intro typewriter do combate */
+                  narrative: (outcome && (outcome.flavor || outcome.text)) || '' };
               }
             }
           } catch (_eCmb) { _evCombat = null; }
@@ -35072,6 +35076,11 @@ function triggerCombatScreen(cfg) {
         // vulnerabilidade a frio + resistência a fogo enquanto wetTurns > 0.
         wetTurns_exact: (typeof p.wet === 'number' && p.wet > 0) ? p.wet : 0
       },
+      // #17 (sessao #70): narrativa do evento -> intro typewriter do combate
+      // (caminho LOCAL/sessionStorage). Texto vem do cfg.narrative (no REMOTE
+      // originou no servidor via outcome.text). Vazio = combate cai no fluxo
+      // classico (CTAs imediatos, sem bloco de narrativa).
+      narrative: (cfg.narrative != null ? String(cfg.narrative) : ''),
       enemies: [simEnemy].concat(reinforcements)
     }));
     LOG('COMBAT', 'SIM setup written enemy=' + cfg.enemyId
@@ -36043,7 +36052,9 @@ function applyChoiceOutcome(choice, success, total, dc) {
       // skill check pre-combate (boss_ac_debuff, fury_drained, burst_disabled,
       // first_attack_adv, boss_enraged) ate combate.html newCombatFromSetup.
       preCombatEffects: Array.isArray(outcome.dungeon_combat.preCombatEffects)
-        ? outcome.dungeon_combat.preCombatEffects : []
+        ? outcome.dungeon_combat.preCombatEffects : [],
+      // #17 (sessao #70): narrativa do evento -> intro typewriter do combate
+      narrative: outcome.dungeon_combat.narrative || outcome.flavor || outcome.text || ''
     };
     LOG('DUNGEON', 'pending combat queued enemy=' + S._pendingCombat.enemy
       + ' surprise=' + S._pendingCombat.surprise
