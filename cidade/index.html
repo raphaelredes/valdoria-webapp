@@ -16310,7 +16310,7 @@ var INN_REST_FLAVORS = [
   'Vozes abafadas de viajantes contando histórias chegam do salão principal.',
   'Uma vela derrete lentamente no parapeito da janela, projetando sombras dançantes.',
   'O gato gordo da Pena-Dourada ronrona aos seus pés, indiferente ao mundo.',
-  'Gotas de chuva batem suavemente no telhado de madeira do Grifo.',
+  'Gotas de chuva batem suavemente no telhado de madeira da Pena-Dourada.',
   'O ranger da tábua do chão denuncia Martha verificando os quartos silenciosamente.',
   'Um bardo afina seu instrumento no canto, prometendo melodias para a noite.',
   'O aroma de canela e especiarias vem da cozinha, onde o cozinheiro prepara o jantar.',
@@ -17163,7 +17163,7 @@ function _renderInnHubAAA(container, data) {
     +   '<div class="inn-smoke"></div>'
     // Título centralizado
     +   '<div class="inn-title">ESTALAGEM</div>'
-    +   '<div class="inn-sub">◆ do Pena-Dourada ◆</div>'
+    +   '<div class="inn-sub">◆ da Pena-Dourada ◆</div>'
     +   '<div class="inn-meta">lareira acesa · luar nas janelas</div>'
     + '</div>';
 
@@ -17200,7 +17200,7 @@ function _renderInnHubAAA(container, data) {
   if (data.services && data.services.length) {
     var sSec = document.createElement('div');
     sSec.className = 'tav-section';
-    sSec.innerHTML = '<div class="inn-sec-title"><span style="color:#e8c45a;">◈</span> Serviços do Grifo</div>';
+    sSec.innerHTML = '<div class="inn-sec-title"><span style="color:#e8c45a;">◈</span> Serviços da Pena-Dourada</div>';
     var grid = document.createElement('div');
     grid.className = 'inn-svc-grid';
     data.services.forEach(function (s) {
@@ -20149,7 +20149,7 @@ var INN_NPCS = [{
   id: 'inn_martha',
   name: 'Martha',
   role: '<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg> Estalajadeira',
-  desc: 'Estalajadeira do Pena-Dourada. Tem o hábito de tratar todo mundo como filho — desde que pague a conta. Quando reconhece um veterano, abre o melhor barril sem cobrar.',
+  desc: 'Estalajadeira da Pena-Dourada. Tem o hábito de tratar todo mundo como filho — desde que pague a conta. Quando reconhece um veterano, abre o melhor barril sem cobrar.',
   greetings: [
     '<i>Martha sai de trás do balcão e te abraça como se fosse parente.</i> "Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."',
     '<i>Martha ergue uma sobrancelha enquanto seca um copo.</i> "De volta? Dorme aí, mas avisa se for sair na madrugada. Não gosto de portas abertas à noite."',
@@ -31366,7 +31366,7 @@ var CANON_INN_REST_FRAMES = {
   "wealthy_dream_wakeup": "Você desperta com clareza sobrenatural.",
   "wealthy_dream_inspired": "✨ <b>Inspirado</b>: uma força além do comum.",
   "wealthy_dawn_template": "<b>{name}</b> está pronto para desafiar deuses.",
-  "result_inn_name": "🏨 <b>ESTALAGEM DO GRIFO</b>",
+  "result_inn_name": "<b>ESTALAGEM DA PENA-DOURADA</b>",
   "result_cost_template": "💰 Custo: <b>{cost}</b> Valdoritas"
 };
 
@@ -47436,7 +47436,7 @@ var QUEST_MAP = {
   defend:      { biomeKey: 'green_fields',    name: 'Campos Verdes' },
   // X-6.5.51BP: missão da adega — in-city (porão da Estalagem em Portões de Valdoria)
   cellar:      { biomeKey: 'plains',          name: 'Portões de Valdoria', inCity: true,
-                 cityHint: 'A adega fica no porão da Estalagem do Pena-Dourada — dentro da cidade.' }
+                 cityHint: 'A adega fica no porão da Estalagem da Pena-Dourada — dentro da cidade.' }
 };
 
 function _questMapEntry(questId){
@@ -52096,7 +52096,7 @@ var RECURRING_NPCS = {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
     portraitImg: '/shared/img/npcs/estalajadeira.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
-    desc: 'Estalajadeira do Pena-Dourada. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
+    desc: 'Estalajadeira da Pena-Dourada. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
   // Usa portraitImg (PNG AI-generated gpt-image-2) em vez de heraldic SVG —
@@ -52923,7 +52923,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 // Mapa de defaults por NPC (name/desc/portrait/icon fallback)
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/aldric.png',  icon: 'ic-paladino' },
-  martha:      { name: 'Martha',              desc: 'Estalajadeira do Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
+  martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
